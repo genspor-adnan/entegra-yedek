@@ -311,11 +311,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     <Modal
       baslik={r.stokAdi || 'Kalem'}
       dar
+      // BÜYÜTME DÜĞMESİ YOK (kullanıcı 24.10.2026: "fiyat sorma ekranından max kaldır"):
+      //   küçük miktar / fiyat penceresi - tam ekrana açmanın anlamı yok.
+      buyutmeYok
       onKapat={onKapat}
       alt={
         <>
           <button className="d onay" onClick={kaydet}>💾 Tamam (Enter)</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >

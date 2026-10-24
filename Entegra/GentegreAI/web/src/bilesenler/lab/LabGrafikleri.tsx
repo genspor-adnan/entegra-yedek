@@ -128,7 +128,7 @@ export function LabGrafikleri({ satirId, baslik, onKapat }: {
   return (
     <Modal baslik={`〰️ ${cev('Grafik sonuçlar')}${baslik ? ' · ' + baslik : ''}`}
            onKapat={onKapat}
-           alt={<button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>}>
+           alt={<button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       {aksiyonVar('lab.grafik.yukle') && (

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { CariIcmal as Veri, CariIcmalSatiri } from '../../api/uclar/cariIcmal';
 import { para, paraYaz } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
+import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -70,9 +71,16 @@ export function CariIcmali() {
   // HBYS: yalnız tedarikçiler (sunucu kapsamı sabitler) - kapsam düğmeleri ve müşteri kutuları çizilmez.
   const yalnizTed = !!veri?.sadeceTedarikci;
   const baslik = yalnizTed ? 'Tedarikçi İcmali' : 'Cari İcmali';
-  const buYol = () => `/cari-icmali?${arama.toString()}`;
   const ekstreAc = (c: CariIcmalSatiri) => git(`/ekstre?tur=cari&id=${c.id}`);
-  const kartAc = (id: number) => git(`/cari/${id}?geri=${encodeURIComponent(buYol())}`);
+  // KART KENDİ SEKMESİNDE (kullanıcı 24.10.2026: "cari bazında müşteriye tıklayınca kartı modal açıyor,
+  //   sekme olarak açsın"): `?geri=` kartı eski modal desenine düşürüyordu - kaldırıldı. Yalnız
+  //   tedarikçi olan cari (HBYS'de hepsi) Tedarikçi kartında açılır.
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const kartAc = (id: number) => {
+    const s = veri?.carilar.find(x => x.id === id);
+    const yol = `${yalnizTed || (s && s.tedarikci && !s.musteri) ? '/tedarikci' : '/cari'}/${id}`;
+    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
+  };
   const kutu = (baslik: string, deg: string, alt: string, sinif = '') => (
     <div className={'hi-kutu ' + sinif}><div className="bas">{baslik}</div><div className="deg">{deg}</div><div className="alt">{alt}</div></div>
   );

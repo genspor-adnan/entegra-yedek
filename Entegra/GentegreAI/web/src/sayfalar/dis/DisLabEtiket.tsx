@@ -86,7 +86,7 @@ export function DisLabEtiket() {
           {e.etiketBasim > 0 ? ` · daha önce ${e.etiketBasim} kez basıldı` : ''}
         </span>
         <span style={{ marginLeft: 'auto' }} />
-        <button className="d" onClick={() => git(-1)}>{cev('✖ Kapat')}</button>
+        <button className="d" onClick={() => git(-1)}>✖ {cev('Kapat')}</button>
       </div>
 
       <div className="etiketler">

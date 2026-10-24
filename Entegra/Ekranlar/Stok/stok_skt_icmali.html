@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKT / Lot İcmali — Mockup (Gentegre AI · Stok · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">⏳ SKT / Lot İcmali — 24.10.2026 · ufuk 180 gün
+    <span class="sp">Gentegre AI · Stok › İcmal · Tüm depolar · Selin YILMAZ</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> SKT / Lot İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🗑</span> İmha Fişi Hazırla (seçili lotlar)</div>
+    <div class="btn"><span>↩</span> Tedarikçiye İade (seçili)</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📦</span> Stok Değer İcmali</div>
+    <div class="btn"><span>⚖</span> Sayım Fark İcmali</div>
+  </div>
+
+  <!-- SERIT: referans tarih + ufuk; FEFO onerisi ufka gore -->
+  <div class="serit">
+    <div class="sel">📅 Referans: <b>24.10.2026</b> ▾</div>
+    <div class="seg"><span>30 gün</span><span>90 gün</span><span class="on">180 gün</span><span>1 yıl</span></div>
+    <div class="sel">🏬 Depo: <b>Tümü (2)</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <label class="chk"><input type="checkbox" checked> Kalanı sıfır lotları gizle</label>
+    <label class="chk"><input type="checkbox"> SKT'si boş lotlar</label>
+    <span class="sp"></span>
+    <span class="rz kir">SKT geçmiş: 9 lot · 41 adet</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu teh"><div class="bas">SKT Geçmiş</div><div class="deg">18.740 ₺</div><div class="alt">9 lot · 41 adet · imha / iade</div></div>
+    <div class="kutu teh"><div class="bas">≤ 30 Gün</div><div class="deg">36.200 ₺</div><div class="alt">6 lot · 28 adet</div></div>
+    <div class="kutu uy"><div class="bas">31 – 90 Gün</div><div class="deg">94.850 ₺</div><div class="alt">14 lot · 77 adet</div></div>
+    <div class="kutu uy"><div class="bas">91 – 180 Gün</div><div class="deg">121.400 ₺</div><div class="alt">22 lot · 102 adet</div></div>
+    <div class="kutu iyi"><div class="bas">180+ Gün</div><div class="deg">2.723.900 ₺</div><div class="alt">2.890 lot</div></div>
+    <div class="kutu"><div class="bas">Lotlu Değer</div><div class="deg">2.995.090 ₺</div><div class="alt">255 kalem · 2.951 lot</div></div>
+    <div class="kutu teh"><div class="bas">Eksi Lot</div><div class="deg">10</div><div class="alt">lotu girilmeden çıkış · −219 adet</div></div>
+    <div class="kutu uy"><div class="bas">Lotsuz Bakiye</div><div class="deg">20</div><div class="alt">kalem · lot toplamı tutmuyor</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="takvim">SKT Takvimi</div>
+    <div class="sekme" data-s="lot">Lot Bazında <span class="rz kir">51</span></div>
+    <div class="sekme" data-s="stok">Stok Bazında</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">30</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SKT TAKVIMI ============ -->
+  <div class="pnl" data-s="takvim">
+    <div class="grp">
+      <h4>Aylık SKT dağılımı <span class="mini">ay = son kullanma ayı · çubuk = tutar · aya tıkla: o ayın lotları</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Ay</th><th class="sag">Lot</th><th class="sag">Miktar</th><th class="sag">Tutar</th><th style="width:300px">Dağılım</th><th>En büyük</th></tr></thead>
+        <tbody>
+          <tr><td class="kir"><b>Geçmiş</b></td><td class="sag">9</td><td class="sag">41</td><td class="sag kir">18.740</td><td><div class="cubuk"><i style="width:14%;background:#c0413d"></i></div></td><td>SUPR3 · lot 230118 · 12 adet</td></tr>
+          <tr><td>Kasım 2026</td><td class="sag">6</td><td class="sag">28</td><td class="sag kir">36.200</td><td><div class="cubuk"><i style="width:27%;background:#d9783a"></i></div></td><td>K-IMP-AD3510 · 241105 · 8 adet</td></tr>
+          <tr><td>Aralık 2026</td><td class="sag">5</td><td class="sag">31</td><td class="sag">41.300</td><td><div class="cubuk"><i style="width:31%;background:#e0a33a"></i></div></td><td>HDR-D5 · 241212 · 14 adet</td></tr>
+          <tr><td>Ocak 2027</td><td class="sag">9</td><td class="sag">46</td><td class="sag">53.550</td><td><div class="cubuk"><i style="width:40%;background:#e0a33a"></i></div></td><td>UNQ-4110 · 250103 · 11 adet</td></tr>
+          <tr><td>Şubat 2027</td><td class="sag">7</td><td class="sag">38</td><td class="sag">44.100</td><td><div class="cubuk"><i style="width:33%"></i></div></td><td>K-IMP-AD4008 · 250214 · 9 adet</td></tr>
+          <tr><td>Mart 2027</td><td class="sag">8</td><td class="sag">41</td><td class="sag">48.200</td><td><div class="cubuk"><i style="width:36%"></i></div></td><td>ADSUP4010 · 250311 · 10 adet</td></tr>
+          <tr><td>Nisan 2027</td><td class="sag">7</td><td class="sag">23</td><td class="sag">29.100</td><td><div class="cubuk"><i style="width:22%"></i></div></td><td>LCK3/4 · 250402 · 6 adet</td></tr>
+          <tr><td class="sonuk">Nisan 2027 sonrası</td><td class="sag">2.890</td><td class="sag">—</td><td class="sag">2.723.900</td><td class="sonuk">ufkun dışında</td><td></td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">2.941</td><td></td><td class="sag">2.995.090</td><td colspan="2"></td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Tutar = lot kalanı × stokun ortalama maliyeti (lot bazında maliyet tutulmuyor). SKT'si boş lotlar takvime girmez, "Dikkat"te listelenir.</div>
+    </div>
+  </div>
+
+  <!-- ============ LOT BAZINDA ============ -->
+  <div class="pnl" data-s="lot">
+    <div class="grp">
+      <h4>Ufuk içindeki lotlar (SKT'ye göre) <span class="mini">seçili lotlar için İmha Fişi (Çıkış · İmha) ya da tedarikçiye iade hazırlanır</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th style="width:26px"><input type="checkbox"></th><th>Stok</th><th>Lot No</th><th>Üretim</th><th>SKT</th><th class="orta">Kalan Gün</th><th>Depo</th>
+          <th class="sag">Kalan</th><th class="sag">Tutar</th><th>Son çıkış (bu stoktan)</th><th>Öneri</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" checked></td><td>SUPR3 · SUPRAMİD-3.0</td><td>230118</td><td>01.2023</td><td class="kir">01.2026</td><td class="orta"><span class="rz kir">−276</span></td><td>ALT</td><td class="sag">12</td><td class="sag">1.152,00</td><td>12.04.2026</td><td><span class="rz kir">İmha</span></td></tr>
+          <tr><td><input type="checkbox" checked></td><td>K-IMP-AD3508 · ALPHADENT 3.5X8</td><td>230904</td><td>09.2023</td><td class="kir">09.2026</td><td class="orta"><span class="rz kir">−54</span></td><td>Anadepo</td><td class="sag">3</td><td class="sag">5.550,00</td><td>21.10.2026</td><td><span class="rz kir">İade / İmha</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>K-IMP-AD3510 · ALPHADENT 3.5X10</td><td>241105</td><td>11.2024</td><td>11.2026</td><td class="orta"><span class="rz kir">18</span></td><td>Anadepo</td><td class="sag">8</td><td class="sag">14.800,00</td><td>22.10.2026</td><td><span class="rz sari">Önce bunu çıkar (FEFO)</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>HDR-D5 · HADRON DÜZ 5MM ABUTMENT</td><td>241212</td><td>12.2024</td><td>12.2026</td><td class="orta"><span class="rz sari">48</span></td><td>ALT</td><td class="sag">14</td><td class="sag">5.390,00</td><td>11.10.2026</td><td><span class="rz sari">Önce bunu çıkar (FEFO)</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>UNQ-4110 · UNIQ-OSS 4.1X10</td><td>250103</td><td>01.2025</td><td>01.2027</td><td class="orta"><span class="rz sari">71</span></td><td>Anadepo</td><td class="sag">11</td><td class="sag">13.200,00</td><td>18.10.2026</td><td><span class="rz">Takipte</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>LCK3/4 · ALPHADENT LOCATOR 4 MM</td><td>250402</td><td>04.2025</td><td>04.2027</td><td class="orta"><span class="rz">160</span></td><td>Anadepo</td><td class="sag">6</td><td class="sag">2.940,00</td><td>02.09.2026</td><td><span class="rz sari">Satış hızı yetmez</span></td></tr>
+          <tr><td colspan="11" class="sonuk">… 45 lot daha</td></tr>
+        </tbody></table></div>
+      <div class="ipucu"><b>Satış hızı yetmez:</b> son 90 günün çıkış hızıyla lot SKT'ye kadar bitmiyor (kalan &gt; günlük çıkış × kalan gün). <b>FEFO:</b> aynı stokun daha geç SKT'li lotundan çıkış yapılmış ama bu lot duruyor.</div>
+    </div>
+  </div>
+
+  <!-- ============ STOK BAZINDA ============ -->
+  <div class="pnl" data-s="stok">
+    <div class="grp">
+      <h4>Stok bazında lot dağılımı <span class="mini">satıra tıkla: lotlar</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Stok</th><th>İzleme</th><th class="sag">Lot</th><th class="sag">Toplam</th><th>En yakın SKT</th><th class="sag">≤ 90 gün</th><th class="sag">Geçmiş</th><th class="sag">Lotsuz bakiye</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="k1"><td><span class="ok-ic">▸</span>K-IMP-AD3510 · ALPHADENT 3.5X10</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="sag">6</td><td class="sag">41</td><td class="kir">11.2026</td><td class="sag kir">8</td><td class="sag">—</td><td class="sag">—</td></tr>
+          <tr class="det" data-p="k1" hidden><td colspan="8">241105 (11.2026) 8 · 250311 (03.2027) 10 · 250620 (06.2027) 9 · 251002 (10.2027) 6 · 260115 (01.2028) 4 · 260402 (04.2028) 4</td></tr>
+          <tr><td>LCK3/4 · ALPHADENT LOCATOR 4 MM</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="sag">20</td><td class="sag">20</td><td>08.2031</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td></tr>
+          <tr><td>UNQ-DA · UNIQ-OSS DİJİTAL ANALOG</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="sag">3</td><td class="sag">668</td><td>06.2034</td><td class="sag">—</td><td class="sag">—</td><td class="sag kir">200</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ============ DIKKAT ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="iki">
+      <div class="grp"><h4>⛔ Eksi lot <span class="mini">lotu girilmeden çıkış · sayımda düzelir</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th>Lot</th><th>SKT</th><th class="sag">Kalan</th></tr></thead>
+        <tbody>
+          <tr><td>UNQ-DA</td><td>251115</td><td>11.2035</td><td class="sag kir">−81</td></tr>
+          <tr><td>POF3511QNP</td><td>260410929</td><td>04.2031</td><td class="sag kir">−48</td></tr>
+          <tr><td>UNQ-MUA</td><td>240429</td><td>04.2034</td><td class="sag kir">−38</td></tr>
+          <tr><td colspan="4" class="sonuk">… 7 lot daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>🏷 Lotsuz bakiye <span class="mini">stok bakiyesi − lot toplamı ≠ 0</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th class="sag">Stok</th><th class="sag">Lot toplamı</th><th class="sag">Lotsuz</th></tr></thead>
+        <tbody>
+          <tr><td>UNQ-DA</td><td class="sag">668</td><td class="sag">468</td><td class="sag kir">200</td></tr>
+          <tr><td>UNQ-MUA</td><td class="sag">215</td><td class="sag">15</td><td class="sag kir">200</td></tr>
+          <tr><td>ADSUP4510</td><td class="sag">51</td><td class="sag">91</td><td class="sag kir">−40</td></tr>
+          <tr><td colspan="4" class="sonuk">… 17 kalem daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>❔ SKT'si boş lotlar <span class="mini">izleme türü SKT istiyor</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th>Lot</th><th class="sag">Kalan</th><th>Giriş</th></tr></thead>
+        <tbody>
+          <tr><td>AD42675</td><td>ad01</td><td class="sag">1</td><td>Web · giriş fişi</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>📉 Satış hızı yetmeyecek lotlar <span class="mini">SKT'ye kadar bitmez · kampanya / iade</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok · Lot</th><th>SKT</th><th class="sag">Kalan</th><th class="sag">90 gün çıkış</th><th class="sag">Tahmini artan</th></tr></thead>
+        <tbody>
+          <tr><td>LCK3/4 · 250402</td><td>04.2027</td><td class="sag">6</td><td class="sag">2</td><td class="sag kir">~2</td></tr>
+          <tr><td>HDR-D5 · 241212</td><td>12.2026</td><td class="sag">14</td><td class="sag">9</td><td class="sag kir">~9</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 24.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>SON KULLANMA TARİHİ (SKT) / LOT İCMALİ</h1>
+        <div class="bilgi"><span>Referans: 24.10.2026 · ufuk 180 gün</span><span>Depo: Tümü (2)</span>
+          <span>Lotlu kalem: 255 · lot 2.951</span><span>Değer: ortalama maliyet</span></div>
+        <table>
+          <thead><tr><th>Stok</th><th>Lot</th><th>SKT</th><th>Gün</th><th>Depo</th><th>Kalan</th><th>Tutar</th></tr></thead>
+          <tbody>
+            <tr><td colspan="7"><b>SKT GEÇMİŞ</b></td></tr>
+            <tr><td>SUPR3 SUPRAMİD-3.0</td><td>230118</td><td>01.2026</td><td>−276</td><td>ALT</td><td>12</td><td>1.152,00</td></tr>
+            <tr><td>ALPHADENT 3.5X8</td><td>230904</td><td>09.2026</td><td>−54</td><td>Anadepo</td><td>3</td><td>5.550,00</td></tr>
+            <tr><td colspan="7"><b>30 GÜN İÇİNDE</b></td></tr>
+            <tr><td>ALPHADENT 3.5X10</td><td>241105</td><td>11.2026</td><td>18</td><td>Anadepo</td><td>8</td><td>14.800,00</td></tr>
+            <tr><td colspan="7" style="color:#8a98a8">… 48 lot daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>SKT geçmiş</span><span>18.740,00</span></div>
+          <div><span>30 gün içinde</span><span>36.200,00</span></div>
+          <div><span>31 – 180 gün</span><span>216.250,00</span></div>
+          <div class="b"><span>RİSKLİ DEĞER</span><span>271.190,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Depo Sorumlusu<br>Ad Soyad · İmza</div></div>
+        <div class="dip">Gentegre AI · SKT / Lot İcmali · lot kalanı lot defterinden (stok_lot_durum) · tutar stokun ortalama maliyetiyle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>2.951 lot</span><span>255 lotlu kalem</span><span>Ufuk 180 gün</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>SKT / Lot İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Hangi lotların miadı geçti / geçmek üzere, değeri ne, ne yapmalı?" Medikal ve gıda ERP'sinde haftalık iş.</li>
+    <li><b>Kaynak:</b> lot kalanı <code>stok_lot_durum</code> (1172 ile aktarımda da kurulur), SKT / üretim <code>stok_seri_lot</code>. Lot bazında maliyet yok — tutar stokun ortalama maliyetiyle.</li>
+    <li><b>Öneriler sunucuda:</b> SKT geçmiş → İmha / İade; FEFO ihlali (daha geç SKT'li lottan çıkılmış) → "önce bunu çıkar"; son 90 gün çıkış hızı lotu bitirmiyor → "satış hızı yetmez".</li>
+    <li><b>Eylem:</b> seçili lotlar için Çıkış Fişi (tip <b>İmha</b>) ya da tedarikçiye iade irsaliyesi taslağı — lotlar ve miktarlar dolu açılır, kullanıcı kaydeder.</li>
+    <li><b>Dikkat:</b> eksi lot, lotsuz bakiye, SKT'si boş lot — kaynağı veri hatası; sayım ya da düzeltme fişiyle kapanır.</li>
+  </ul>
+  <b>Açık sorular:</b>
+  <ul>
+    <li>Ufuk varsayılanı stok kartındaki raf ömrüne göre mi (ör. raf ömrünün %20'si), sabit 180 gün mü?</li>
+    <li>SKT yaklaşan lotlar için bildirim (her pazartesi depo sorumlusuna) istenir mi?</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

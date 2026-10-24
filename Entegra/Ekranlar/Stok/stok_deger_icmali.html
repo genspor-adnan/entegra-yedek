@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Değer İcmali — Mockup (Gentegre AI · Stok · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📦 Stok Değer İcmali — 24.10.2026 itibarıyla
+    <span class="sp">Gentegre AI · Stok › İcmal · Tüm depolar · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Stok Değer İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🧮</span> Stok Sayımı Başlat (seçili depo)</div>
+    <div class="sp"></div>
+    <div class="btn"><span>⏳</span> SKT / Lot İcmali</div>
+    <div class="btn"><span>⚖</span> Sayım Fark İcmali</div>
+    <div class="btn"><span>📦</span> Stok Listesi</div>
+  </div>
+
+  <!-- SERIT: tarih itibariyla (gecmis tarih = hareketlerden geri sarilir), depo, kategori, degerleme -->
+  <div class="serit">
+    <div class="sel">📅 Tarih itibarıyla: <b>24.10.2026</b> <span class="rz">Bugün</span> ▾</div>
+    <div class="sel">🏬 Depo: <b>Tümü (2)</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Ortalama maliyet</span><span>Son alış</span><span>Satış fiyatı</span></div>
+    <label class="chk"><input type="checkbox" checked> Bakiyesi sıfır olanları gizle</label>
+    <label class="chk"><input type="checkbox"> Pasif stoklar dahil</label>
+    <span class="sp"></span>
+    <span class="rz kir">Eksi bakiyeli: 6 kalem</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Stok Değeri</div><div class="deg">4.218.640 ₺</div><div class="alt">ortalama maliyetle · KDV hariç</div></div>
+    <div class="kutu"><div class="bas">Kalem</div><div class="deg">612</div><div class="alt">bakiyesi olan / 1.065 aktif stok</div></div>
+    <div class="kutu"><div class="bas">Miktar</div><div class="deg">56.539</div><div class="alt">ana birimde (karışık birim)</div></div>
+    <div class="kutu"><div class="bas">Lotlu Kalem</div><div class="deg">255</div><div class="alt">değerin %71'i · 2.951 lot</div></div>
+    <div class="kutu uy"><div class="bas">Hareketsiz (180+ gün)</div><div class="deg">612.300 ₺</div><div class="alt">94 kalem · değerin %14,5'i</div></div>
+    <div class="kutu teh"><div class="bas">Maliyeti Tanımsız</div><div class="deg">148</div><div class="alt">kalem · değere 0 ile girdi</div></div>
+    <div class="kutu teh"><div class="bas">Eksi Bakiye</div><div class="deg">6</div><div class="alt">kalem · −84 adet</div></div>
+    <div class="kutu"><div class="bas">Önceki Ay Sonu</div><div class="deg">3.992.100 ₺</div><div class="alt">+226.540 ₺ (+%5,7)</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="stok">Stok Bazında <span class="rz">612</span></div>
+    <div class="sekme" data-s="kat">Kategori × Depo</div>
+    <div class="sekme" data-s="yas">Stok Yaşı</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">14</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ STOK BAZINDA ============ -->
+  <div class="pnl" data-s="stok">
+    <div class="grp">
+      <h4>Stok Değer Listesi <span class="mini">satıra tıkla: depo (ve lot) kırılımı · çift tık: stok kartı · tutara göre sıralı</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Kod</th><th>Stok Adı</th><th>Kategori</th><th>Birim</th><th>İzleme</th>
+          <th class="sag">Miktar</th><th class="sag">Birim Maliyet</th><th class="sag">Tutar</th><th style="width:110px">Pay</th>
+          <th>Son Giriş</th><th>Son Çıkış</th><th class="orta">Hareketsiz</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="s1"><td><span class="ok-ic">▸</span>UNQ-DA</td><td><span class="lnk">UNIQ-OSS DİJİTAL ANALOG</span></td><td>K030.05 ANALOG_UNIQ-OSS</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">668</td><td class="sag">412,50</td><td class="sag"><b>275.550,00</b></td><td><div class="cubuk"><i style="width:65%"></i></div></td>
+            <td>18.10.2026</td><td>22.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr class="det" data-p="s1" hidden><td colspan="12">Anadepo 668 · lotlar: 251115 (SKT 11.2035) −81 ⚠ · 240612 (06.2034) 349 · 250820 (08.2035) 200 · <span class="kir">lotsuz bakiye 200</span> — lot toplamı stok bakiyesini tutmuyor (Delphi'den)</td></tr>
+          <tr class="ac" data-d="s2"><td><span class="ok-ic">▸</span>K-IMP-AD4011</td><td><span class="lnk">ALPHADENT ACTIVE 4.0X11 İMPLANT</span></td><td>K010.01 İMPLANT_ALPHADENT</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">112</td><td class="sag">1.850,00</td><td class="sag"><b>207.200,00</b></td><td><div class="cubuk"><i style="width:49%"></i></div></td>
+            <td>21.10.2026</td><td>23.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr class="det" data-p="s2" hidden><td colspan="12">Anadepo 98 · ALT 14 &nbsp;·&nbsp; 7 lot, en yakın SKT 03.2028</td></tr>
+          <tr><td>UNQ-MUA</td><td><span class="lnk">UNIQ-OSS MULTIUNIT ANALOG</span></td><td>K030.05 ANALOG_UNIQ-OSS</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">215</td><td class="sag">640,00</td><td class="sag">137.600,00</td><td><div class="cubuk"><i style="width:33%"></i></div></td>
+            <td>02.09.2026</td><td>20.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr><td>HDR-D5</td><td><span class="lnk">HADRON DÜZ 5MM ABUTMENT</span></td><td>K015.03 ABUTMENT_HADRON</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">205</td><td class="sag">385,00</td><td class="sag">78.925,00</td><td><div class="cubuk"><i style="width:19%"></i></div></td>
+            <td>14.05.2026</td><td>11.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr><td>SUPR3</td><td><span class="lnk">SUPRAMİD-3.0</span></td><td>K065 SÜTUR</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">142</td><td class="sag">96,00</td><td class="sag">13.632,00</td><td><div class="cubuk"><i style="width:3%"></i></div></td>
+            <td>03.03.2026</td><td>12.04.2026</td><td class="orta"><span class="rz sari">195 gün</span></td></tr>
+          <tr><td>CI</td><td><span class="lnk">ALFADENT SİMAN</span></td><td>K090 DİĞER</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">10</td><td class="sag sonuk">0,00</td><td class="sag sonuk">0,00</td><td><div class="cubuk"><i style="width:0"></i></div></td>
+            <td>11.02.2025</td><td>02.07.2025</td><td class="orta"><span class="rz kir">479 gün</span></td></tr>
+          <tr><td>POF3511QNP</td><td><span class="lnk">SMII UV 3511 POİNT İMPLANT</span></td><td>K010.04 İMPLANT_POİNT</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag">12</td><td class="sag">1.420,00</td><td class="sag">17.040,00</td><td><div class="cubuk"><i style="width:4%"></i></div></td>
+            <td>08.10.2026</td><td>22.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr><td>HDR-152X</td><td><span class="lnk">HADRON AÇILI 15X2MM ABUTMENT</span></td><td>K015.03 ABUTMENT_HADRON</td><td>Adet</td><td><span class="rz mavi">Lot No + SKT</span></td>
+            <td class="sag kir">−4</td><td class="sag">410,00</td><td class="sag kir">−1.640,00</td><td><div class="cubuk"><i style="width:0"></i></div></td>
+            <td>05.08.2026</td><td>16.10.2026</td><td class="orta sonuk">—</td></tr>
+          <tr><td colspan="12" class="sonuk">… 604 kalem daha</td></tr>
+          <tr class="toplam"><td colspan="5">Toplam (612 kalem)</td><td class="sag">56.539</td><td></td><td class="sag">4.218.640,00</td><td colspan="4"></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ipucu">Tutar = miktar × birim maliyet. Ortalama maliyet giriş belgelerinin ağırlıklı ortalaması (<code>fn_uretim_stok_maliyeti</code> ile aynı kaynak); maliyeti olmayan kalem 0 ile toplanır ve "Dikkat"te listelenir — değer düşük görünür, gizlenmez.</div>
+    </div>
+  </div>
+
+  <!-- ============ KATEGORI x DEPO ============ -->
+  <div class="pnl" data-s="kat">
+    <div class="grp">
+      <h4>Kategori × Depo <span class="mini">hücre = tutar (₺) · koyuluk değere göre · hücreye tıkla: o depo/kategorinin stokları</span></h4>
+      <div class="dg"><table class="isi">
+        <thead><tr><th>Kategori</th><th class="sag">Anadepo</th><th class="sag">ALT</th><th class="sag">Toplam</th><th class="sag">Kalem</th><th class="sag">Pay</th></tr></thead>
+        <tbody>
+          <tr class="grs"><td colspan="6">K010 İMPLANT</td></tr>
+          <tr><td>&nbsp;&nbsp;K010.01 İMPLANT_ALPHADENT</td><td class="h h4">1.184.300</td><td class="h h2">212.600</td><td class="sag"><b>1.396.900</b></td><td class="sag">45</td><td class="sag">%33,1</td></tr>
+          <tr><td>&nbsp;&nbsp;K010.04 İMPLANT_POİNT</td><td class="h h3">486.200</td><td class="h h1">18.400</td><td class="sag"><b>504.600</b></td><td class="sag">22</td><td class="sag">%12,0</td></tr>
+          <tr><td>&nbsp;&nbsp;K010.05 İMPLANT_UNIQ-OSS</td><td class="h h2">302.900</td><td class="h h1">—</td><td class="sag"><b>302.900</b></td><td class="sag">57</td><td class="sag">%7,2</td></tr>
+          <tr class="grs"><td colspan="6">K015 ABUTMENT</td></tr>
+          <tr><td>&nbsp;&nbsp;K015.03 ABUTMENT_HADRON</td><td class="h h2">241.800</td><td class="h h2">88.100</td><td class="sag"><b>329.900</b></td><td class="sag">41</td><td class="sag">%7,8</td></tr>
+          <tr class="grs"><td colspan="6">K030 ANALOG</td></tr>
+          <tr><td>&nbsp;&nbsp;K030.05 ANALOG_UNIQ-OSS</td><td class="h h3">413.150</td><td class="h h1">—</td><td class="sag"><b>413.150</b></td><td class="sag">12</td><td class="sag">%9,8</td></tr>
+          <tr><td>K080 SARF</td><td class="h h1">96.400</td><td class="h h1">31.200</td><td class="sag"><b>127.600</b></td><td class="sag">111</td><td class="sag">%3,0</td></tr>
+          <tr><td>K090 DİĞER</td><td class="h h1">64.900</td><td class="h h1">2.100</td><td class="sag"><b>67.000</b></td><td class="sag">158</td><td class="sag">%1,6</td></tr>
+          <tr><td class="sonuk">… 18 kategori daha</td><td colspan="5"></td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">3.802.140</td><td class="sag">416.500</td><td class="sag">4.218.640</td><td class="sag">612</td><td class="sag">%100</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Alt kategori üst kategorisinin altında; üst kategorinin kendi stokları ayrı satırda. Kategorisiz stok "(kategorisiz)" satırına düşer.</div>
+    </div>
+  </div>
+
+  <!-- ============ STOK YASI ============ -->
+  <div class="pnl" data-s="yas">
+    <div class="iki">
+      <div class="grp"><h4>Son çıkıştan bu yana (hareketsizlik) <span class="mini">tutar · kalem</span></h4><div class="dg"><table>
+        <thead><tr><th>Dilim</th><th class="sag">Tutar</th><th class="sag">Kalem</th><th style="width:140px">Pay</th></tr></thead>
+        <tbody>
+          <tr><td>0 – 30 gün</td><td class="sag">2.984.200</td><td class="sag">286</td><td><div class="cubuk"><i style="width:71%"></i></div></td></tr>
+          <tr><td>31 – 90 gün</td><td class="sag">402.640</td><td class="sag">131</td><td><div class="cubuk"><i style="width:10%"></i></div></td></tr>
+          <tr><td>91 – 180 gün</td><td class="sag">219.500</td><td class="sag">101</td><td><div class="cubuk"><i style="width:5%"></i></div></td></tr>
+          <tr><td class="kir">180+ gün</td><td class="sag kir">612.300</td><td class="sag">94</td><td><div class="cubuk"><i style="width:15%;background:#c0413d"></i></div></td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">4.218.640</td><td class="sag">612</td><td></td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Devir hızı (son 12 ay) <span class="mini">satılan maliyet / ortalama stok</span></h4><div class="dg"><table>
+        <thead><tr><th>Kategori</th><th class="sag">Devir</th><th class="sag">Gün karşılığı</th></tr></thead>
+        <tbody>
+          <tr><td>K080 SARF</td><td class="sag ok-y">9,4</td><td class="sag">39 gün</td></tr>
+          <tr><td>K010.01 İMPLANT_ALPHADENT</td><td class="sag">4,1</td><td class="sag">89 gün</td></tr>
+          <tr><td>K015.03 ABUTMENT_HADRON</td><td class="sag">2,6</td><td class="sag">140 gün</td></tr>
+          <tr><td>K030.05 ANALOG_UNIQ-OSS</td><td class="sag kir">0,8</td><td class="sag kir">456 gün</td></tr>
+        </tbody></table></div>
+        <div class="ipucu">Gün karşılığı = 365 / devir: mevcut stok bu hızla kaç günde biter.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ DIKKAT ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="iki">
+      <div class="grp"><h4>⛔ Eksi bakiye <span class="mini">depoda olmayan mal çıkmış</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th>Depo</th><th class="sag">Bakiye</th><th>Son çıkış</th></tr></thead>
+        <tbody>
+          <tr><td>HDR-152X · HADRON AÇILI 15X2MM</td><td>Anadepo</td><td class="sag kir">−4</td><td>16.10.2026 · Satış Fat.</td></tr>
+          <tr><td>HDR-MU172 · MULTIUNIT 17X2MM</td><td>Anadepo</td><td class="sag kir">−10</td><td>09.10.2026 · Satış İrs.</td></tr>
+          <tr><td>HDR-TBS3 · TİBASE HEX 3MM</td><td>Anadepo</td><td class="sag kir">−10</td><td>02.10.2026 · Satış İrs.</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>⚠ Maliyeti tanımsız <span class="mini">değere 0 girdi · alış belgesi yok</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th class="sag">Miktar</th><th>İlk giriş</th></tr></thead>
+        <tbody>
+          <tr><td>CI · ALFADENT SİMAN</td><td class="sag">10</td><td>Devir (aktarım)</td></tr>
+          <tr><td>ADP3822 · ALPHADENT 3.85X22 ACTIVE BİO PLUS</td><td class="sag">3</td><td>Devir (aktarım)</td></tr>
+          <tr><td colspan="3" class="sonuk">… 146 kalem daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>🏷 Lot toplamı stok bakiyesini tutmuyor <span class="mini">sayımda "lotsuz bakiye" satırı çıkar</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th class="sag">Stok bakiyesi</th><th class="sag">Lot toplamı</th><th class="sag">Fark</th></tr></thead>
+        <tbody>
+          <tr><td>UNQ-DA</td><td class="sag">668</td><td class="sag">468</td><td class="sag kir">200</td></tr>
+          <tr><td>UNQ-MUA</td><td class="sag">215</td><td class="sag">15</td><td class="sag kir">200</td></tr>
+          <tr><td>ADSUP3511</td><td class="sag">20</td><td class="sag">50</td><td class="sag kir">−30</td></tr>
+          <tr><td colspan="4" class="sonuk">… 17 kalem daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>💤 En değerli hareketsiz kalemler (180+ gün)</h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th class="sag">Tutar</th><th>Son çıkış</th></tr></thead>
+        <tbody>
+          <tr><td>K-AND-SET · ANDROID CERRAHİ SET</td><td class="sag">84.000</td><td class="kir">11.01.2026 · 286 gün</td></tr>
+          <tr><td>SUPR3 · SUPRAMİD-3.0</td><td class="sag">13.632</td><td class="kir">12.04.2026 · 195 gün</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 24.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>STOK DEĞER İCMALİ</h1>
+        <div class="bilgi"><span>Tarih itibarıyla: 24.10.2026</span><span>Değerleme: Ortalama maliyet</span>
+          <span>Depo: Tümü (2)</span><span>Kalem: 612 · Miktar 56.539</span></div>
+        <table>
+          <thead><tr><th>Kategori</th><th>Anadepo</th><th>ALT</th><th>Toplam</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td>K010.01 İMPLANT_ALPHADENT</td><td>1.184.300</td><td>212.600</td><td>1.396.900</td><td>%33,1</td></tr>
+            <tr><td>K010.04 İMPLANT_POİNT</td><td>486.200</td><td>18.400</td><td>504.600</td><td>%12,0</td></tr>
+            <tr><td>K030.05 ANALOG_UNIQ-OSS</td><td>413.150</td><td>—</td><td>413.150</td><td>%9,8</td></tr>
+            <tr><td>K015.03 ABUTMENT_HADRON</td><td>241.800</td><td>88.100</td><td>329.900</td><td>%7,8</td></tr>
+            <tr><td colspan="5" style="color:#8a98a8">… 21 kategori daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Anadepo</span><span>3.802.140,00</span></div>
+          <div><span>ALT</span><span>416.500,00</span></div>
+          <div><span>Hareketsiz (180+ gün)</span><span>612.300,00</span></div>
+          <div class="b"><span>STOK DEĞERİ</span><span>4.218.640,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Mali İşler / Yönetim<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Stok Değer İcmali · miktar stok bakiyesinden, birim maliyet giriş belgelerinin ağırlıklı ortalamasından · KDV hariç</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>612 kalem</span><span>2 depo</span><span>Değerleme: ortalama maliyet</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Stok Değer İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Depoda ne kadarlık mal var, nerede, ne kadar süredir duruyor?" Dönem sonu (ay / yıl) kapanışı ve yönetim raporu.</li>
+    <li><b>Tarih itibarıyla:</b> bugün = <code>stok_durum</code>. Geçmiş tarih seçilirse bakiye o tarihten sonraki hareketler geri sarılarak bulunur (belge satırları + stok fişleri); aktarımla gelen devir bakiyesi tohumdur.</li>
+    <li><b>Değerleme:</b> ortalama maliyet (varsayılan, üretim maliyetiyle aynı fonksiyon) · son alış fiyatı · satış fiyatı (potansiyel ciro). Seçim A4'e de yazılır.</li>
+    <li><b>Lotlu stok:</b> satır açılınca depo ve lot kırılımı; lot toplamı stok bakiyesini tutmuyorsa satır işaretlenir (Dikkat).</li>
+    <li><b>Dikkat:</b> eksi bakiye, maliyeti tanımsız, lot/stok uyuşmazlığı, en değerli hareketsizler — hepsi sayım ya da düzeltme fişiyle kapanır; "Stok Sayımı Başlat" seçili depo için açar.</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü (Baskı Önizleme / Yazdır / Gönder PDF-Word-Excel-HTML).</li>
+  </ul>
+  <b>Açık sorular:</b>
+  <ul>
+    <li>Dövizli alışlarda maliyet: belge kuru mu, bugünün kuru mu? Önerim: belge kuru (ortalama maliyetle tutarlı).</li>
+    <li>Konsinye / emanet stok değere girsin mi? Önerim: ayrı satır, toplama girmez.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

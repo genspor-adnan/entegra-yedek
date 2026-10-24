@@ -96,7 +96,7 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
                        onClick={() => void kapat()}>
                  {calisiyor ? '⏳ Kapatılıyor…' : '🔒 Dönemi Kapat'}
                </button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

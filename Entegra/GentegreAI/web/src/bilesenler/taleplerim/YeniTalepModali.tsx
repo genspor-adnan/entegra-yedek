@@ -176,7 +176,7 @@ ${c('Talep taslak olarak kaydedildi; Taleplerim ekranından düzeltip gönderebi
       )}
       <button type="button" className="d bir" disabled={mesgul} onClick={() => void kaydet(true)}>📨 {c('Gönder')}</button>
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
     </>
   );
 

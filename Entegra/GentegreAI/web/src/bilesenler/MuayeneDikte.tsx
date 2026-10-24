@@ -291,7 +291,7 @@ export function MuayeneDikte({ hedefler, degerOku, onYaz, onKapat }: {
                ✓ {c('Karta aktar')}{degisenler.length ? ` (${degisenler.length})` : ''}
              </button>
              <button type="button" className="d" onClick={() => { durdur(); onKapat() }}>
-               {c('Kapat')}
+               ✖ {c('Kapat')}
              </button>
            </>}>
       <div className="muayene-dikte">

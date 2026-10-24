@@ -40,6 +40,9 @@ const MedulaMutabakat = tembel(() => import('./sayfalar/medula/MedulaMutabakat')
 const AktarimDurumu = tembel(() => import('./sayfalar/aktarim/AktarimDurumu'), 'AktarimDurumu');
 const AlacakYaslandirma = tembel(() => import('./sayfalar/yaslandirma/AlacakYaslandirma'), 'AlacakYaslandirma');
 const CariIcmali = tembel(() => import('./sayfalar/cariIcmal/CariIcmali'), 'CariIcmali');
+const StokDegerIcmali = tembel(() => import('./sayfalar/stokIcmal/StokDegerIcmali'), 'StokDegerIcmali');
+const StokSktIcmali = tembel(() => import('./sayfalar/stokIcmal/StokSktIcmali'), 'StokSktIcmali');
+const StokSayimFarkIcmali = tembel(() => import('./sayfalar/stokIcmal/StokSayimFarkIcmali'), 'StokSayimFarkIcmali');
 const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
 const DevirYonlendir = tembel(() => import('./sayfalar/devir/Devir'), 'DevirYonlendir');
 const Ekstre = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'Ekstre');
@@ -109,6 +112,7 @@ const Duyurular = tembel(() => import('./sayfalar/Duyurular'), 'Duyurular');
 const IzinTalepKarti = tembel(() => import('./sayfalar/ik/IzinTalepKarti'), 'IzinTalepKarti');
 const AvansKarti = tembel(() => import('./sayfalar/ik/AvansKarti'), 'AvansKarti');
 const MasrafKarti = tembel(() => import('./sayfalar/ik/MasrafKarti'), 'MasrafKarti');
+const StokSayimKartiSayfa = tembel(() => import('./sayfalar/stokSayim/StokSayimKarti'), 'StokSayimKartiSayfa');
 const BelgeTalepKarti = tembel(() => import('./sayfalar/ik/BelgeTalepKarti'), 'BelgeTalepKarti');
 const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
 const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
@@ -288,6 +292,9 @@ function Yollar() {
         {yetki('finans.alacak_yaslandirma') && <Route path="/alacak-yaslandirma" element={<AlacakYaslandirma />} />}
         {/* CARİ İCMALİ (1154): müşteri + tedarikçi bakiye, yaşlandırma, mutabakat mektubu. */}
         {yetki('finans.cari_icmali') && <Route path="/cari-icmali" element={<CariIcmali />} />}
+        {yetki('stok.deger_icmali') && <Route path="/stok-deger-icmali" element={<StokDegerIcmali />} />}
+        {yetki('stok.skt_icmali') && <Route path="/stok-skt-icmali" element={<StokSktIcmali />} />}
+        {yetki('stok.sayim_fark_icmali') && <Route path="/stok-sayim-fark-icmali" element={<StokSayimFarkIcmali />} />}
         {/* CARİ DEVİR GİRİŞİ (1156): toplu açılış bakiyesi (Excel'den yapıştır). */}
         {/* DEVİR GİRİŞİ - TEK EKRAN (1160): cari + kasa / banka / POS / kredi; eski /cari-devir yönlenir. */}
         {yetki('finans.devir') && <Route path="/devir" element={<Devir />} />}
@@ -444,6 +451,7 @@ function Yollar() {
           const rotalar: { rota: string; kart: React.ReactNode }[] = [
             { rota: 'recete', kart: <ReceteKartiSayfa listeYolu="/recete" /> },
             { rota: 'medula-recete', kart: <ReceteKartiSayfa listeYolu="/medula-recete" /> },
+            { rota: 'stok-sayim', kart: <StokSayimKartiSayfa /> },
             { rota: 'hasta-alerji', kart: <AlerjiKartiSayfa /> },
             { rota: 'hasta-kronik', kart: <KronikTaniKartiSayfa /> },
             { rota: 'hasta-ilac', kart: <IlacKaydiKartiSayfa /> },

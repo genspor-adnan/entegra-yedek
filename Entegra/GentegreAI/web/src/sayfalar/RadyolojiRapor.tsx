@@ -254,7 +254,7 @@ export function RadyolojiRapor() {
                   onClick={() => git(`/radyoloji/cikti/${Number(rapor?.id)}`)}>
             🖨 Çıktı
           </button>
-          <button className="d" onClick={() => git('/radyoloji')}>Kapat</button>
+          <button className="d" onClick={() => git('/radyoloji')}>✖ Kapat</button>
         </div>
       </div>
 
@@ -480,7 +480,7 @@ export function RadyolojiRapor() {
                    await yukle();
                    mesaj('Konsültasyon istendi.');
                  })}>Gönder</button>
-                 <button className="d" onClick={() => setKonsModal(false)}>Kapat</button>
+                 <button className="d" onClick={() => setKonsModal(false)}>✖ Kapat</button>
                </>}>
           <div className="alan-izgara tek-sutun">
             <label className="alan">
@@ -503,7 +503,7 @@ export function RadyolojiRapor() {
                    await yukle();
                    mesaj('Görüş kaydedildi.');
                  })}>Kaydet</button>
-                 <button className="d" onClick={() => setGorusYaz(null)}>Kapat</button>
+                 <button className="d" onClick={() => setGorusYaz(null)}>✖ Kapat</button>
                </>}>
           <div className="alan-izgara tek-sutun">
             <label className="alan">
@@ -523,7 +523,7 @@ export function RadyolojiRapor() {
         <Modal baslik="Kritik Bulgu Bildirimi" onKapat={() => setKritikModal(false)}
                alt={<>
                  <button className="d bir" onClick={() => void kritikKaydet()}>Kaydet</button>
-                 <button className="d" onClick={() => setKritikModal(false)}>Kapat</button>
+                 <button className="d" onClick={() => setKritikModal(false)}>✖ Kapat</button>
                </>}>
           <div className="alan-izgara tek-sutun">
             <label className="alan"><span className="etiket">Bulgu</span>

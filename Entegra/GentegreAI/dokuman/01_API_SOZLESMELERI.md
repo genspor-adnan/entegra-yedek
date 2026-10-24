@@ -1546,6 +1546,59 @@ ve `disKaynak: "Delphi"`; aktarılan kaynağa yazan aksiyon ve e-Belge pasif.
 
 ---
 
+## 9.20 Stok sayımı (1169)
+
+Sade sürüm: sayılan miktar + fark + "Farkları Fişle ve Kapat". Yetki `stok.sayim`
+(liste `stok.sayim.liste`, kaynak `stok-sayim`). Sayım şubeye bağlıdır; şube dışı = 404.
+
+```http
+POST   /api/stok-sayim                 // { depoId, kapsam: 0 tüm | 1 kategori | 2 seçili, kategoriId?, aciklama? } → { id, kalem }  (Ekle)
+GET    /api/stok-sayim/{id}            // → { baslik{…, durum 0 açık | 1 kapandı, girisBelgeId/No, cikisBelgeId/No}, satirlar[{id, stokId, stokKodu, stokAdi, birim, seriLotId, lot, skt, sistem, sayilan|null, birimMaliyet}] }
+PUT    /api/stok-sayim/{id}            // { aciklama }  (Değiştir, yalnız açık)
+PUT    /api/stok-sayim/satir/{satirId} // { sayilan: sayı | null }  null = sayılmadı
+POST   /api/stok-sayim/{id}/okut       // { kod? | stokId?, miktar=1 } → { lotSec:false, satirId, sayilan, eklendi } | { lotSec:true, satirIdleri[] }
+DELETE /api/stok-sayim/{id}            // (Sil, yalnız açık)
+POST   /api/stok-sayim/{id}/kapat      // → { girisBelgeId?, cikisBelgeId?, fazlaKalem, eksikKalem, uyarilar[] }
+```
+
+- **Sistem** = açılış anındaki bakiye; **fark** = sayılan − sistem, yalnız sayılan satırda.
+- **Okut:** `kod` önce birim barkodu (miktar × çarpan), sonra stok kodu. Listede yoksa
+  izlemsiz stok satırı eklenir (sistem = şimdiki depo bakiyesi); izlemli stokun bu depoda
+  kalanı olan lotları (+ lotsuz bakiye) eklenir ve `lotSec` döner (25.10.2026; lotu yoksa 422).
+  Lotlu stokun birden çok satırı varsa miktar yazılmaz, `lotSec` döner.
+- **Kapat** tek işlem: fazlalar Giriş Fişi (tür 3, tipi 2), eksikler Çıkış Fişi (tür 4,
+  tipi 5), tarih = sayım tarihi, `kaynak_tur` 1620 / `kaynak_id` sayım; lot satırları
+  lotuyla. `belge.stok.giris` / `belge.stok.cikis` Ekle yetkisi ayrıca aranır (403).
+  Lotsuz satırda fark → 422. Fark yoksa fiş kesilmez, sayım yine kapanır.
+
+## 9.21 Stok icmalleri (1173)
+
+Üç salt okur ekran; ekran kodları `stok.deger_icmali`, `stok.skt_icmali`,
+`stok.sayim_fark_icmali` (hakları `stok.liste`'den kopyalandı). Depo süzgeci
+kullanıcının şubeleriyle sınırlı. Rakamlar sunucuda.
+
+```http
+GET /api/stok-icmal/deger?tarih&depo&kategori&yontem=ort|son|satis&pasif
+    // → { ozet, stoklar[{…, miktar, birimMaliyet, tutar, depolar[], lotlar[], hareketsizGun}], katDepo[], yas[], devir[], dikkat{eksi, maliyetsiz, lotUyumsuz, hareketsiz} }
+GET /api/stok-icmal/skt?tarih&ufuk=30|90|180|365&depo&kategori
+    // → { ozet{gecmis, gun30, gun90, gun180, ufukOtesi, …}, takvim, lotlar[{…, kalanGun, oneri}], stoklar[], dikkat{eksi, lotsuz, sktsiz, hiz} }
+GET /api/stok-icmal/sayim-fark?bas&bit&depo&kategori&acik=0|1
+    // → { ozet{dogruluk, fazla, eksik, net, tekrar, …}, sayimlar[], kalemler[{durum: tekrar|lot|tek}], kirilim{kategori, depo, sayan}, dikkat }
+```
+
+- **Tarih itibarıyla** bakiye = `stok_durum.kalan` − o tarihten sonraki hareketler
+  (`v_stok_hareket`: kesin belge, `kasa_islem_turu.stok_etkiler`, `stok_durum_degis = 1`,
+  yön `fn_belge_cikis_mi`, transfer iki satır). Lot kırılımı yalnız bugün için.
+- **Birim maliyet:** `ort` giriş belgelerinin ağırlıklı ortalaması (`fn_uretim_stok_maliyeti`),
+  `son` son alış (yoksa ortalama), `satis` kart satış fiyatı. **Hareketsiz** = son hareketten
+  (giriş / çıkış) bu yana 180+ gün ya da hiç hareket yok.
+- **SKT öneri:** `imha` (SKT geçmiş) · `fefo` (aynı stok-depoda daha geç SKT'li lottan son
+  90 günde çıkış var) · `hiz` (son 90 gün çıkış hızıyla SKT'ye kadar bitmez) · `takip`.
+  Tutar = lot kalanı × stokun ortalama maliyeti.
+- **Sayım fark:** tutar = fark × satırın sayım anındaki birim maliyeti; doğruluk = sayılan
+  satırlardan farksız olanların oranı; `tekrar` = 2+ sayımda eksik, `lot` = stok tutuyor,
+  lotlar ters.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

@@ -122,7 +122,7 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
           </button>
           <span className="ayrac" />
           <span className="kapt">Toplam: {para.format(toplam)}</span>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >

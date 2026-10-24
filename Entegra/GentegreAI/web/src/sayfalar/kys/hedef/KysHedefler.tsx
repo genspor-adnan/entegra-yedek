@@ -192,7 +192,7 @@ function DegerGir({ satirlar, ay, onKapat }: {
     <Modal baslik={`${c('Değer Gir')} — ${ay.uzun}`} dar onKapat={() => onKapat(false)}
       alt={<>
         <button className="d bir" disabled={yaziliyor} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
-        <button className="d" onClick={() => onKapat(false)}>{c('Kapat')}</button>
+        <button className="d" onClick={() => onKapat(false)}>✖ {c('Kapat')}</button>
       </>}>
       <table className="fm-tablo">
         <thead><tr><th>{c('Hedef')}</th><th style={{ width: 90 }}>{c('Hedef değer')}</th><th style={{ width: 110 }}>{ay.uzun}</th></tr></thead>

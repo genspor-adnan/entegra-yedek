@@ -233,7 +233,7 @@ export function DisIconFormu({ hastaId, hastaAdi }: { hastaId: number; hastaAdi:
         <div className="ds-icon-rapor">
           <div className="cikti-arac">
             <button className="d bir" onClick={() => window.print()}>🖨 {cev('Yazdır')}</button>
-            <button className="d" onClick={() => setRapor(null)}>{cev('✖ Kapat')}</button>
+            <button className="d" onClick={() => setRapor(null)}>✖ {cev('Kapat')}</button>
           </div>
           <h3>{cev('Ortodonti ICON Skor Raporu')}</h3>
           <div className="ds-icon-rapor-ust">

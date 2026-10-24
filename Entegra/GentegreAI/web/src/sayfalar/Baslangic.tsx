@@ -5,6 +5,7 @@ import type { BaslangicKutucugu, GostergePaneliOzet } from '../api/uclar/gosterg
 import { gostergeDegeri } from '../bilesenler/GostergeIcerik';
 import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { useSubeLogo } from '../bilesenler/subeLogo';
 import { MenuIkon, GRUP_IKON, GRUP_IKON_CEV, menuSatirlariKur } from './kabuk/menuAgaci';
 import { SURUM_ETIKET } from '../surum';
 import { useTaleplerim } from '../bilesenler/taleplerim/taleplerimBaglami';
@@ -51,6 +52,20 @@ const BUYUK_IKON_SINIRI = 10;
 export function Baslangic() {
   const git = useNavigate();
   const { kullanici, yetki } = useOturum();
+  // ALT SATIR 3. SIRA (kullanıcı 24.10.2026): 3. SATIR: Profil / Şube Adı.
+  const aktifSube = kullanici?.subeler.find(s => s.id === kullanici?.subeId);
+  const oturumYeri = [kullanici?.kurumTipiAdi, aktifSube?.ad].filter(Boolean).join(' / ');
+  // KÖŞE LOGOLARI (kullanıcı 24.10.2026): sol üst bizim (Gentegre), sağ üst şube logosu.
+  const subeLogo = useSubeLogo(aktifSube?.logoDokumanId);
+  const logolar = (
+    <>
+      <img className="bsl-logo bsl-logo-sol" src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="Gentegre" />
+      {/* MAVİ LOGO (kullanıcı 24.10.2026: "arka zemin şeffaf olsun logo mavi olsun"): logo maske
+          olur, rengi tema vurgusu - beyaz / şeffaf logo açık sayfada da görünür. */}
+      {subeLogo && <span className="bsl-logo bsl-logo-sag" role="img" aria-label={aktifSube?.ad ?? ''}
+                         style={{ '--logo': `url("${subeLogo}")` } as React.CSSProperties} />}
+    </>
+  );
   const [paneller, setPaneller] = useState<GostergePaneliOzet[] | null>(null);
   const [rolKutucuklari, setRolKutucuklari] = useState<BaslangicKutucugu[] | null>(null);
   const [bekleyen, setBekleyen] = useState<Awaited<ReturnType<typeof api.baslangicBekleyen>> | null>(null);
@@ -230,7 +245,7 @@ export function Baslangic() {
            onKapat={() => setBildirimDetay(null)}
            alt={<><span className="ck-bosluk" />
              <button type="button" className="d" onClick={() => { setBildirimDetay(null); git('/taleplerim?sekme=gelen') }}>{c('Tümünü aç')} →</button>
-             <button type="button" className="d" onClick={() => setBildirimDetay(null)}>{c('Kapat')}</button></>}>
+             <button type="button" className="d" onClick={() => setBildirimDetay(null)}>✖ {c('Kapat')}</button></>}>
       <ul className="tl-son tl-gelen bsl-bil-liste">
         {detayGrup.ogeler.map(o => {
           const kapatAc = () => { setBildirimDetay(null); if (o.tip === 'iskonto') iskontoKararAc(o.t); else git(`/taleplerim?sekme=gelen&sec=${o.anahtar}`) };
@@ -292,6 +307,7 @@ export function Baslangic() {
   if (sade) {
     return (
       <div className="sahne bsl-sade">
+        {logolar}
         <div className="bsl-sade-ic">
           <h1>{selam()}, {kullanici?.ad ?? ''}</h1>
           <div className="bsl-sade-alt">
@@ -300,6 +316,7 @@ export function Baslangic() {
             {' · '}{c('Açmak istediğiniz ekranı yazın; açtıklarınız üstte sekme olarak kalır.')}
             {' · '}<span className="bsl-surum" title={c('Uygulama sürümü')}>{c('Sürüm')} {SURUM_ETIKET}</span>
           </div>
+          {oturumYeri && <div className="bsl-sade-alt bsl-oturum">{oturumYeri}</div>}
           <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
             🔍 <span>{c('Ne açmak istiyorsunuz?')}</span><kbd>Ctrl K</kbd>
             {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}
@@ -323,6 +340,7 @@ export function Baslangic() {
       {/* Kaydırılan alan (sahne) TAM GENİŞLİK - çubuk en sağda; ortalama içteki sütunda (kullanıcı
           17.10.2026: "scroll en sağda olsun", "ortada duruyor"). */}
       <div className="sahne bsl">
+       {logolar}
        <div className="bsl-orta">
         <h1 className="bsl-selam">{selam()}, {kullanici?.ad ?? ''}</h1>
         <div className="bsl-sade-alt">
@@ -330,6 +348,7 @@ export function Baslangic() {
           {kullanici?.rolAdi ? ` · ${kullanici.rolAdi}` : ''}
           {' · '}<span className="bsl-surum" title={c('Uygulama sürümü')}>{c('Sürüm')} {SURUM_ETIKET}</span>
         </div>
+        {oturumYeri && <div className="bsl-sade-alt bsl-oturum">{oturumYeri}</div>}
         <button type="button" className="bsl-ara" onClick={() => window.dispatchEvent(new Event(PALET_AC_OLAYI))}>
           🔍 <span>{c('Ne açmak istiyorsunuz? (ekran, hasta, gösterge paneli…)')}</span><kbd>Ctrl K</kbd>
           {sesliGirisVar() && <span className="bsl-ara-mik" role="button" title={c('Sesle ara')}

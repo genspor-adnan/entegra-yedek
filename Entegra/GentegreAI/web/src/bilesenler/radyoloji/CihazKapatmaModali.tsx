@@ -64,7 +64,7 @@ export function CihazKapatmaModali({ cihazId, cihazAdi, baslangic, bitis,
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '🔒 Kapatmayı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

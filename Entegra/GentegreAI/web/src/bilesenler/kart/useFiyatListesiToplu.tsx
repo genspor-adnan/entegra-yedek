@@ -198,7 +198,7 @@ export function useFiyatListesiToplu(p: FiyatListesiTopluGirdisi) {
               onClick={() => dogrula('tumu')}>
         Tüm listeye uygula
       </button>
-      <button type="button" className="d kapat-dugmesi" onClick={kapat}>{c('Kapat')}</button>
+      <button type="button" className="d kapat-dugmesi" onClick={kapat}>✖ {c('Kapat')}</button>
     </>
     );
   };

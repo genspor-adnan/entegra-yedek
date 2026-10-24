@@ -1067,7 +1067,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       {icerikAlani && icerikAcikSatir && (
         <Modal
           baslik={icerikBaslik ?? 'İçerik'}
-          alt={<button className="d kapat-dugmesi" onClick={() => setIcerikAcikSatir(null)}>{cev('Kapat')}</button>}
+          alt={<button className="d kapat-dugmesi" onClick={() => setIcerikAcikSatir(null)}>✖ {cev('Kapat')}</button>}
           onKapat={() => setIcerikAcikSatir(null)}
         >
           <div style={{ padding: 12 }}>

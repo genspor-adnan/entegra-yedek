@@ -89,7 +89,7 @@ export function NakilModali({ yatisId, onKapat, onTamam }: {
                <>
                  <button className="d onay" disabled={kaydediyor || !yatak}
                          onClick={() => void kaydet()}>✔ Nakli Uygula</button>
-                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+                 <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
                </>
              }>
         {hata && <div className="hata-kutusu">{hata}</div>}

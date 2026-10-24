@@ -195,7 +195,7 @@ function PaketSatirPenceresi({ satir, birimler, dovizler, onKaydet, onKapat }: {
         <>
           <button className="d ana" disabled={!gecerli}
                   onClick={() => onKaydet(taslak)}>Tamam</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >

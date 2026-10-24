@@ -74,7 +74,7 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
       alt={<>
         <button className="d bir" disabled={mesgul || secili.size === 0}
           onClick={() => void ucretle()}>✓ Seçilenleri Ücrete Ekle ({secili.size})</button>
-        <button className="d" onClick={onKapat}>Kapat</button>
+        <button className="d" onClick={onKapat}>✖ Kapat</button>
       </>}>
       <div style={{ display: 'flex', gap: 12, padding: '4px 2px', fontSize: 12, color: '#667' }}>
         <span>Hekimin istediği tetkikler. Hasta vazgeçtiyse işareti kaldır; yalnız seçilenler

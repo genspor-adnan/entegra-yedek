@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sayım Kartı — Mockup V2 (sade)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) - kasa_karti_ver3 ile aynı belirteçler */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .gorunum-sec{max-width:1480px;margin:0 auto 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .gorunum-sec b{color:var(--navy);margin-right:6px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;display:none}
+  .win.on{display:block}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.kir{border-color:#c0413d;color:#b3261e}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .btn.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .arti{color:var(--ok);font-weight:bold} .eksi{color:var(--kir);font-weight:bold} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+
+  .hizli{display:flex;gap:4px;padding:6px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .ara{border:1px solid var(--line);border-radius:3px;padding:5px 8px;font:inherit;min-width:220px}
+
+  /* GRID */
+  table.g{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.g th{background:var(--head);color:#3a5573;font-weight:bold;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);border-right:1px solid var(--line2);white-space:nowrap;position:sticky;top:0}
+  table.g td{padding:5px 8px;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);white-space:nowrap}
+  table.g tr:hover td{background:#f4f8fd}
+  table.g tr.sec td{background:var(--sel)}
+  table.g tr.fark td{background:#fff8f0}
+  table.g tr.sayilmadi td{color:var(--muted)}
+  table.g td.giris{background:#fffde8;padding:2px 4px}
+  table.g td.giris input{width:74px;border:1px solid #b9c7d6;border-radius:3px;padding:3px 6px;font:inherit;text-align:right}
+  table.g tfoot td{background:var(--head);font-weight:bold}
+  .grid-kap{max-height:520px;overflow:auto}
+
+  /* OZET SERIDI */
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .ozet > div:last-child{border-right:none}
+  .ozet span{display:block;font-size:10.5px;color:var(--muted)}
+  .ozet b{font-size:15px}
+  .ozet small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+  .bar{height:7px;border-radius:4px;background:#e7edf4;overflow:hidden;margin:5px 0 2px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+
+  /* KIMLIK BASLIGI */
+  .bas{display:flex;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line2)}
+  .avatar{width:52px;height:52px;border-radius:10px;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+  .kim .ad{font-size:17px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .kim .alt{color:var(--muted);font-size:11.5px;margin-top:3px}
+  .kim .alt b{color:var(--ink);font-weight:normal}
+  .bas .islem{margin-left:auto;display:flex;gap:6px;align-items:center}
+
+  /* ADIMLAR */
+  .adimlar{display:flex;padding:10px 14px;gap:0;border-bottom:1px solid var(--line2);background:#fff}
+  .adim{flex:1;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11.5px;position:relative}
+  .adim i{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;background:#fff;flex:none}
+  .adim::after{content:"";flex:1;height:2px;background:var(--line2);margin:0 10px}
+  .adim:last-child::after{display:none}
+  .adim.bitti{color:var(--ok)} .adim.bitti i{border-color:#3f9a5e;background:#3f9a5e;color:#fff}
+  .adim.simdi{color:var(--navy);font-weight:bold} .adim.simdi i{border-color:var(--accent);color:var(--accent)}
+
+  /* GOVDE */
+  .govde{display:grid;grid-template-columns:1fr 320px;min-height:560px}
+  .ana{min-width:0;border-right:1px solid var(--line)}
+  .yan{padding:12px;background:#fafbfd}
+  .grp{border:1px solid var(--line2);border-radius:5px;margin-bottom:12px;background:#fff}
+  .grp > h4{margin:0;padding:7px 10px;font-size:11.5px;color:#3a5573;background:linear-gradient(#f7f9fc,#eef3f8);border-bottom:1px solid var(--line2);border-radius:5px 5px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .ic{padding:10px}
+  .satir{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line2)}
+  .satir:last-child{border-bottom:none}
+  .not{font-size:11px;color:var(--muted);line-height:1.45}
+  .uyari{background:#fdf6e3;border:1px solid #f2ddbf;color:#8a6218;border-radius:4px;padding:7px 10px;font-size:11.5px;margin:10px 12px}
+  .bilgi{background:#eef4fc;border:1px solid #cfe0f5;color:#24508a;border-radius:4px;padding:7px 10px;font-size:11.5px;margin:10px 12px}
+
+  /* OKUT KUTUSU */
+  .okut{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line2);background:#f7fbff}
+  .okut .giris{flex:1;display:flex;align-items:center;gap:8px;border:2px solid var(--accent);border-radius:6px;background:#fff;padding:7px 10px;font-size:14px}
+  .okut .giris span{color:var(--muted)}
+  .okut .son{font-size:11.5px;color:var(--muted);min-width:330px}
+  .okut .son b{color:var(--ok)}
+  .filtre{display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+
+  /* FORM */
+  .alanlar{display:grid;grid-template-columns:130px 1fr 130px 1fr;gap:7px 10px;align-items:center;padding:12px}
+  .alanlar label{color:var(--muted);text-align:right}
+  .alanlar .k{border:1px solid var(--line);border-radius:3px;padding:5px 8px;background:#fff}
+  .alanlar .k.z{border-left:3px solid #d0473d}
+  .secenek{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--line2);border-radius:5px;margin-bottom:6px;background:#fff}
+  .secenek.on{border-color:#9cc4ee;background:#f4f8fd}
+  .secenek b{display:block;color:var(--navy)}
+  .secenek small{color:var(--muted)}
+
+  /* FIS ONIZLEME */
+  .fisler{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+  .fis{border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+  .fis h5{margin:0;padding:8px 10px;font-size:12.5px;display:flex;gap:8px;align-items:center}
+  .fis.g h5{background:#e2f3e8;color:#2e7d46}
+  .fis.c h5{background:#fbe9e7;color:#b3261e}
+
+  /* EL TERMINALI */
+  .el-kap{display:flex;gap:30px;padding:24px;justify-content:center;background:#e9eef4;flex-wrap:wrap}
+  .tel{width:330px;border:10px solid #1f2d3a;border-radius:28px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(20,40,70,.25)}
+  .tel .t-ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:10px 12px;font-size:13px}
+  .tel .t-ust small{display:block;opacity:.75;font-size:10.5px}
+  .tel .t-ic{padding:12px;min-height:520px}
+  .tel .t-okut{border:2px dashed var(--accent);border-radius:10px;padding:14px;text-align:center;color:var(--accent);font-size:13px;margin-bottom:12px}
+  .tel .t-urun{border:1px solid var(--line2);border-radius:8px;padding:10px;margin-bottom:10px}
+  .tel .t-urun b{color:var(--navy);font-size:13.5px}
+  .tel .t-adet{display:flex;align-items:center;gap:8px;margin:10px 0}
+  .tel .t-adet span{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(var(--btnfrom),var(--btnto))}
+  .tel .t-adet input{flex:1;height:44px;font-size:22px;text-align:center;border:2px solid var(--accent);border-radius:8px}
+  .tel .t-btn{display:block;width:100%;padding:12px;border-radius:8px;border:0;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold;font-size:14px}
+  .tel .t-liste div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .aciklama{max-width:360px;font-size:12px;line-height:1.55;color:var(--ink)}
+  .aciklama h3{color:var(--navy);margin-top:0}
+  .aciklama li{margin-bottom:6px}
+
+  .kural{max-width:1480px;margin:12px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.55}
+  .kural h3{margin:0 0 6px;color:var(--navy);font-size:13px}
+  .win{display:block}
+</style>
+</head>
+<body>
+
+<div class="win on">
+  <div class="ust">🧮 Sayım Kartı <span class="yol">Stok › Stok Sayımları › SYM-2026-014</span><span class="sag"><span>universe medikal</span><span>Merkez Depo</span></span></div>
+  <div class="sekmeler"><span>🏠</span><a href="stok_sayim_ver2.html" style="text-decoration:none"><span>Stok Sayımları</span></a><span class="on">SYM-2026-014</span></div>
+
+  <div class="bas">
+    <div class="avatar">🧮</div>
+    <div class="kim">
+      <div class="ad">SYM-2026-014 <span class="rz mavi">● Açık</span></div>
+      <div class="alt">Merkez Depo · Tüm depo · Sayım tarihi <b>24.10.2026 18:00</b></div>
+    </div>
+    <div class="islem">
+      <span class="btn">🖨 Sayım Listesi Yazdır</span><span class="btn">⬆ Excel'den Al</span>
+      <span class="btn primary">💾 Kaydet</span><span class="btn">✖ Kapat</span>
+    </div>
+  </div>
+
+  <div class="alanlar" style="border-bottom:1px solid var(--line2)">
+    <label>Depo</label><div class="k z">Merkez Depo ▾</div>
+    <label>Sayım Tarihi</label><div class="k z">24.10.2026 18:00</div>
+    <label>Kapsam</label><div class="k">Tüm depo ▾ <span class="sonuk">(Tüm depo · Kategori · Seçili stoklar)</span></div>
+    <label>Açıklama</label><div class="k">Ekim sonu sayımı</div>
+  </div>
+
+  <div class="ozet" style="grid-template-columns:repeat(4,1fr)">
+    <div><span>Sayılan</span><b>724 / 1.065</b><div class="bar"><i style="width:68%"></i></div><small>kalan 341 kalem</small></div>
+    <div><span>Fark yok</span><b class="arti">693</b><small>sistemle aynı</small></div>
+    <div><span>Fazla</span><b class="arti">9 kalem · +4.820,00 ₺</b><small>Sayım Fazlası giriş fişine</small></div>
+    <div><span>Eksik</span><b class="eksi">22 kalem · -12.365,40 ₺</b><small>Sayım Eksiği çıkış fişine</small></div>
+  </div>
+
+  <div class="okut">
+    <div class="giris">▦ <span>Barkod okut ya da stok kodu / adı yaz…</span><span class="sp"></span><kbd>Enter</kbd></div>
+    <div class="son">Son: <b>✔ Enjektör 5 ml (24A118)</b> · 12 → 13</div>
+  </div>
+  <div class="filtre">
+    <span class="btn on">Tümü 1.412</span><span class="btn">Sayılmadı 341</span><span class="btn">Fark var 31</span>
+    <span class="sepv"></span><span class="btn">Kategori ▾</span>
+    <span class="sp"></span><input class="ara" placeholder="🔍 Stok ara…">
+  </div>
+  <div class="grid-kap">
+  <table class="g">
+    <thead><tr><th>Stok Kodu</th><th>Stok Adı</th><th>Birim</th><th>Lot</th><th>SKT</th><th class="sag">Sistem</th><th class="sag">Sayılan</th><th class="sag">Fark</th><th class="sag">Birim Maliyet</th><th class="sag">Fark ₺</th></tr></thead>
+    <tbody id="kalemler"></tbody>
+    <tfoot><tr><td colspan="5">1.412 satır · 724 sayıldı</td><td class="sag">48.210</td><td class="sag">47.896</td><td class="sag eksi">-314</td><td></td><td class="sag eksi">-7.545,40</td></tr></tfoot>
+  </table>
+  </div>
+
+  <div class="fisler">
+    <div class="fis g"><h5>⬆ Giriş Fişi · tip Sayım Fazlası <span class="sp"></span><span class="rz ok">9 kalem · +4.820,00 ₺</span></h5>
+      <div class="not" style="padding:8px 10px">Tarih = sayım tarihi · açıklama "SYM-2026-014 sayım farkı" · lot bazında.</div></div>
+    <div class="fis c"><h5>⬇ Çıkış Fişi · tip Sayım Eksiği <span class="sp"></span><span class="rz kir">22 kalem · -12.365,40 ₺</span></h5>
+      <div class="not" style="padding:8px 10px">Sayılan lottan düşer · maliyet ortalama maliyetten.</div></div>
+  </div>
+  <div class="uyari">341 kalem sayılmadı. Sayılmayan kaleme <b>dokunulmaz</b> (fark yazılmaz). Rafta hiç olmayan kalemi sıfırlamak için sayılan hücresine 0 yazın.</div>
+  <div style="padding:0 12px 14px;display:flex;gap:6px;justify-content:flex-end">
+    <span class="btn">💾 Kaydet (sayıma sonra devam)</span>
+    <span class="btn ok">✔ Farkları Fişle ve Kapat</span>
+  </div>
+</div>
+
+<div class="kural">
+  <h3>Kurallar</h3>
+  <b>Sistem</b> = sayım tarihindeki stok (o andan sonra kesilen fiş farkı bozmaz). <b>Fark</b> = Sayılan − Sistem, yalnız sayılan satırda.
+  Okutma aynı satırın sayılanını 1 artırır; hücreye yazılan miktar yerine geçer. Listede olmayan stok okutulursa satır eklenir (sistem 0 → fazla).
+  "Farkları Fişle ve Kapat": en fazla iki fiş keser (fark yoksa hiç), sayımı kapatır, stok kartlarının son sayım tarihini yazar; fişler normal Giriş / Çıkış fişi listelerinde de görünür.
+</div>
+
+<script>
+  const k = [
+    ['STK-0101','Enjektör 5 ml','Adet','24A118','11.2027',12,13,1.6],
+    ['STK-0102','Enjektör 10 ml','Adet','25B210','02.2028',300,300,1.9],
+    ['STK-0110','İğne 21G','Adet','25B001','06.2029',200,200,.8],
+    ['STK-0145','Alkollü Ped','Kutu','—','—',40,36,22],
+    ['STK-0412','Steril Gazlı Bez 10x10','Paket','25C007','03.2028',240,200,4.25],
+    ['STK-0415','Steril Gazlı Bez 5x5','Paket','25C010','03.2028',120,160,2.5],
+    ['STK-0501','Serum Seti','Adet','25A512','01.2029',150,null,9.5],
+    ['STK-0502','IV Kanül 20G','Adet','25A600','05.2028',400,null,6],
+    ['STK-0533','Üç Yollu Musluk','Adet','24L120','12.2027',75,75,3.2],
+    ['STK-0731','Sütür 3/0 Vicryl','Kutu','24H902','09.2027',36,34,92.5],
+    ['STK-0802','Oksijen Maskesi','Adet','—','—',60,61,11],
+    ['STK-0910','Hasta Bezi L','Paket','—','—',25,null,180],
+  ];
+  const tl = n => n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('kalemler').innerHTML = k.map(([kod, ad, bir, lot, skt, sis, say, m]) => {
+    const fark = say == null ? null : say - sis;
+    const renk = fark > 0 ? 'arti' : fark < 0 ? 'eksi' : 'sonuk';
+    return `<tr class="${say == null ? 'sayilmadi' : fark ? 'fark' : ''}"><td>${kod}</td><td>${ad}</td><td>${bir}</td><td>${lot}</td><td>${skt}</td>
+      <td class="sag">${sis}</td><td class="giris sag"><input value="${say ?? ''}" placeholder="—"></td>
+      <td class="sag ${renk}">${fark == null ? '' : (fark > 0 ? '+' : '') + fark}</td><td class="sag">${tl(m)}</td>
+      <td class="sag ${renk}">${fark ? tl(fark * m) : ''}</td></tr>`;
+  }).join('');
+</script>
+</body>
+</html>

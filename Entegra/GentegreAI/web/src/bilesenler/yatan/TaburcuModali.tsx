@@ -213,7 +213,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
                    <button className="d" disabled={kaydediyor}
                            onClick={() => void epikrizKaydet()}>💾 Epikrizi Kaydet</button>
                  )}
-                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+                 <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
                </>
              }>
         {hata && <div className="hata-kutusu">{hata}</div>}

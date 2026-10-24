@@ -254,7 +254,7 @@ export function ServisCizelge() {
               <button className="d" onClick={() => git('/servis-is-emri')}>
                 🗂️ İş emri listesi
               </button>
-              <button className="d" onClick={() => setSecili(null)}>{cev('Kapat')}</button>
+              <button className="d" onClick={() => setSecili(null)}>✖ {cev('Kapat')}</button>
             </div>
           </div>
         </div>

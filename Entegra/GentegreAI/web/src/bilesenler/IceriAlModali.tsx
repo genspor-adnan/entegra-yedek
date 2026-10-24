@@ -69,7 +69,7 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
   return (
     <Modal baslik={`Excel'den İçeri Al — ${baslik}`} onKapat={onKapat}
       alt={<>
-        <button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>
+        <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         <button className="d bir" disabled={!dosya || calisiyor}
                 onClick={() => { void gonder() }}>
           {calisiyor ? 'Alınıyor…' : 'İçeri Al'}

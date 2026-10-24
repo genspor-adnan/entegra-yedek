@@ -105,7 +105,7 @@ export function ArizaBildirModali({ onKapat }: { onKapat(): void }) {
     <>
       <button type="button" className="d bir" disabled={mesgul} onClick={() => void gonder()}>📨 {c('Gönder')}</button>
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
     </>
   );
 

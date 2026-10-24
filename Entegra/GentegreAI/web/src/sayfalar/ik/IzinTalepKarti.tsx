@@ -275,7 +275,7 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
       {kayitId && yazar && <button type="button" className="d" onClick={kopyala}>⧉ {c('Kopyala')}</button>}
       {kayitId && yazar && ro.durum <= 2 && <button type="button" className="d tl-tehlike" disabled={mesgul} onClick={() => void iptalEt()}>✖ {c('İptal et')}</button>}
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={kapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={kapat}>✖ {c('Kapat')}</button>
     </>
   );
 

@@ -68,7 +68,7 @@ export function AsiUygulaModali({ hastaId, hastaAdi, belgeId, onKapat }: {
            alt={<>
              <button type="button" className="b" onClick={() => void uygula()}
                      disabled={!asiId}>{cev('Uygula')}</button>
-             <button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>
+             <button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
 

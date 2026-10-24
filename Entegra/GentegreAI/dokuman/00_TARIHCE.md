@@ -25,6 +25,69 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — Stok icmalleri: Stok Değer, SKT / Lot, Sayım Fark (1173) + UNIVERSE uçtan uca test
+
+Kullanıcı: *"bir erp de başka hangi icmaller olabilir?"* → *"stok değer, SKT ve sayım fark icmalleri için mockup yap"* (`Ekranlar/Stok/stok_deger_icmali.html`, `stok_skt_icmali.html`, `stok_sayim_fark_icmali.html`; İcmal dizinine "Stok icmalleri" bölümü) → *"web'e uygula; soruların cevabını bilmiyorum, genel uygulanan sistem ne ise"* → *"bitince universe için tüm ekranları uçtan uca test et, test verilerini silme"*.
+
+- **1173:** `v_stok_hareket` — stok bakiyesini değiştiren belge satırları (BelgeDeposu.StokDurumGuncelleAsync kuralı: kesin belge, `kasa_islem_turu.stok_etkiler`, `stok_durum_degis = 1`, yön `fn_belge_cikis_mi`, transfer iki satır). UNIVERSE'te 825 stok-depodan 823'ünde hareket toplamı stok bakiyesini tutuyor. Ekran kodları `stok.deger_icmali` / `stok.skt_icmali` / `stok.sayim_fark_icmali` (yalnız Gör; hakları `stok.liste`'den), asistan rehberi satırları.
+- **API** `StokIcmalUclari` (`/api/stok-icmal/deger|skt|sayim-fark`, sözleşme §9.21). Açık soruların "genel sistem" cevapları: değerleme ağırlıklı ortalama maliyet (son alış / satış fiyatı seçilebilir, KDV hariç, belge tutarı TL); tarih itibarıyla bakiye hareketlerin geri sarılmasıyla; hareketsiz = son hareketten 180+ gün; SKT ufku 180 gün (30 / 90 / 1 yıl seçilir), FEFO + son 90 gün çıkış hızı önerisi; sayım farkı sayım anı maliyetiyle (fişlerle aynı), "yüksek tutarlı fark" eşik yerine ilk 10; sayan bazında kırılım var. SKT ucu FEFO sorgusu düzeltilerek 5-6 sn → 0,4 sn.
+- **Web:** Stok & Hizmet › Stok Değer İcmali / SKT / Lot İcmali / Sayım Fark İcmali (`sayfalar/stokIcmal/`), icmallerin tasarım dili ve çıktı menüsü (A4 önizleme / yazdır / PDF-Word-Excel-HTML).
+- **Bulunan hata (sayım):** "Seçili stoklar" sayımında lotlu stok okutulunca "kalanı olan lotu yok" (422) dönüyordu — okut izlemli stok için lot satırı üretmiyordu. Artık depodaki lotları (+ lotsuz bakiye) ekleyip lot seçimi döner; kart yeni satırları tazeler. Tek lotta "birden çok lot var" metni düzeltildi.
+- **UNIVERSE uçtan uca (test verisi KALDI):** test stoku `E2E-STOK-11562` (#1067, Lot No + SKT) ve cari #512; giriş fişi #10282 (2 lot, 15 adet), çıkış fişi #10283 (L2'den 3), transfer #10284 (L1'den 4, Anadepo → ALT; teslim eden / alan zorunlu ve farklı kişi kuralları doğrulandı), SYM-2026-0003 (ALT, okut → lot → sayılan 3 → kapat → Ç 000020, kapanan sayım değişmiyor), SYM-2026-0004 arayüzden açık bırakıldı. Lot bakiyeleri her adımda doğru; üç icmal test verisini doğru gösteriyor (değer 11 adet × 100 = 1.100, dün = yok, L2 SKT 20 gün "satış hızı yetmez", sayım farkı −100). Kartlar / fişler / sayım arayüzde hatasız açılıyor. Bütün menü duman testi (`npm run duman`, 5176) ayrıca koşturuldu.
+- Testler: API 775/775, web 964/964.
+
+---
+
+## 24.10.2026 — Stok Sayımı, sade sürüm (1169) + stok fişi yön hatası
+
+Kullanıcı: *"stok sayım için mockup tasarla"* → *"ben delphi erp de giriş/çıkış fişleri (sayım türü) ekleyerek düzeltme yapıyordum"* → *"sade sürüme küçült"* → *"ver 2 yap"* → *"v2'yi web'e uygula"*. Mockup `Ekranlar/Stok/stok_sayim_ver2.html` + `stok_sayim_karti_ver2.html` (tam sürüm `stok_sayim.html` / `stok_sayim_karti.html` ileriki iş için duruyor; stok mockup'ları `Ekranlar/Stok/`'a taşındı).
+
+- **Model (1169):** `stok_sayim` (depo, sayım tarihi = açılış anı, kapsam tüm depo / kategori alt ağacıyla / seçili stoklar, açık / kapandı, kesilen giriş ve çıkış fişi) + `stok_sayim_satir` (stok, lot, sistem, sayılan — NULL = sayılmadı, birim maliyet `fn_uretim_stok_maliyeti`). `fn_stok_sayim_satir_uret`: izlemsiz stok depo bakiyesi (0 olanlar dahil), izlemli stok kalanı olan her lot + depo bakiyesi lot toplamını tutmuyorsa "lotsuz" satır. Aynı depoda tek açık sayım; kapanan sayımın satırı değişmez (tetik). Yetki `stok.sayim` / `stok.sayim.liste`; log 1620 / 1621.
+- **Kapanış tek işlemde:** farklar MEVCUT fişlerle — Giriş Fişi (3) tipi 2 Sayım Fazlası, Çıkış Fişi (4) tipi 5 Sayım Eksiği; tarih sayım tarihi, kaynak sayım; fişin kendi yetkisi (`belge.stok.giris/cikis`) ayrıca aranır. `BelgeDeposu.KaydetAsync`'e çağıranın işlemini alan yüklem eklendi (fiş kesilip sayım açık kalırsa ikinci "Kapat" farkı iki kez fişlerdi). Depo kartının `son_sayim_tarihi` yazılır. Lotsuz satırda fark varsa kapanış durur (lotsuz fiş kesilemez).
+- **Ekran:** Stok & Hizmet › Stok Sayımları (çipler Açık / Kapanan, fazla / eksik tutar, fişler) → sayım kartı kendi sekmesinde: barkod / stok kodu okutma (birim barkodunda çarpanla; lotlu stokta birden çok lot varsa artırmaz, lot satırlarını süzer), Stok Ekle, sayılan hücresi (Enter alt satır), Tümü / Sayılmadı / Fark var, fiş önizlemesi, Farkları Fişle ve Kapat, açık sayımı Sil.
+- **BULUNAN HATA (yayındaki kodda):** `BelgeTuru.CikisMi(tur, tipi)` her türde `tipi = 2`'yi iade sayıyordu — giriş fişi tipi 2 (Sayım Fazlası) stok_durum'dan DÜŞÜYOR, çıkış fişi tipi 2 (İmha) stoğa EKLİYORDU (lot defteri doğru yöndeydi, iki bakiye ayrışıyordu). Stok fişleri iadesiz türlere alındı (`BelgeYonuTestleri`). Yerel DB'lerde etkilenen kayıt yok; sunucu kurulumlarında elle kesilmiş tip 2 giriş/çıkış fişi varsa bakiyeleri bozuktur — kontrol edilmeli.
+- **Açık kalan (bulundu, düzeltilmedi):** belge silme (`fn_belge_sil`) stok bakiyesini geri ALMIYOR — çağırdığı `fn_stok_durum_geri_al` hiç yok (217 notu "stoklu belgenin silinmesi zaten engelli" diyor ama `fn_belge_silinebilir` giriş/çıkış fişini engellemiyor).
+- **Yapılmayan:** kör sayım, 2. sayım, ekip / raf ataması, el terminali, yönetici onayı (tam sürüm mockup'ında); Excel'den alma; geçmiş tarihli kesit; lotlu stokta yeni lot bulunması (Giriş Fişi ile girilir).
+- **Kullanımdan sonra (aynı gün):** Farkları Fişle ve Kapat üst banda; Sayım Listesi düğmesi icmallerin çıktı menüsü (Baskı Önizleme / Yazdır / Gönder PDF-Word-Excel-HTML, A4 `SayimA4`, ekran süzgeciyle); sayılan kutusunda Enter / Tab / ↑↓ satır geçişi; Sistem hücresine tık = sayılan; okutulan satır vurgulanır ve görünür alana kayar; kısa ekranda tablo büzülmez (en az 320 px). Stok Ara: izleme rozeti tek satır, ok tuşu satırı işaretler (Shift+ok aralık, Enter işaretlileri ekler). Çarşaf Liste denendi, kullanıcı istemedi — kaldırıldı.
+
+---
+
+## 24.10.2026 — Aktarımdan önce hedef PG boşaltılır (1170)
+
+Kullanıcı (UNIVERSE geçişinden sonra): *"erp den aktarım yapıyorsak eski stok ve hizmet kalemleri silinmelidir"* → *"kural olarak da ekle.. önce tüm data (DB) boşalsın sonra aktarım olsun"* → *"hedef PG boşalsın yani kaynak değil"*.
+
+- Boş kurulum göç tohumlarıyla gelir (HBYS lab testleri / panelleri + referans aralıkları, demo hekimler HEK-* / DH-*, döküman klasörleri, standart hesap planı); Delphi aktarımında bunlar Stok / Hizmet Ara'da "eski kalem" olarak kalıyordu.
+- `fn_aktarim_oncesi_bosalt(p_uygula)`: aktarımın yazdığı tablolar (`aktarim_kaynak` kolonu olanlar) + FK ile bağlı satırlar. `false` rapor, `true` siler (tek işlem). Admin (oturum açan kullanıcı) ve şube / rol / yetki / kurum / ayar / kod listeleri / aktarım defteri korunur — silme bunlara uzanırsa hiçbir şey silinmez. Aktarım başlamışsa reddeder. Kurulumun varsayılan deposu boşaltılmaz (tetik korur, aktarım onu Delphi deposuyla eşleyip devralır). `kur.ps1 -SadeceSema -Urun erp -AktarimIcin` kurulum sonunda kendisi çalıştırır; rehber `19` §5b-3. Boş ERP kurulumunda denendi: 307 tohum satırı silindi (hizmet 18, lab zinciri, demo hekim 25, hesap planı 65 + muhasebe eşleştirme 37, döküman klasörü 4), admin / şube / depo / 1.017 rol-yetki kaldı; ikinci çalıştırma 0; aktarılmış satır varken reddetti.
+- UNIVERSE'te demo hekimler de elle silindi (25 taraf + çalışma şablonu 13, yedekli); aktarım dışı tek taraf ADMIN.
+- Stok sayım kartına **Kaydet (sonra devam)**: açık hücreyi ve bekleyen kayıtları bitirip kartı kapatır, sayım açık kalır. Sayım kalemlerinde **İzleme** sütunu; izlemli stok tek ana satır (lot toplamları), İzleme sütunundaki ▸ ile lot satırları açılır (lot no + SKT stok adı hücresinde), Lot / SKT sütunları kalktı; ana satırda sisteme tık bütün lotları doldurur.
+- **Kategori (1171):** Delphi KATEGORI hiç aktarılmıyordu — `029` BILIM kategorilerini sabit yazıyor, `stok.kategori` Delphi kimliğini ham taşıyor; UNIVERSE stokları yanlış ada (BILIM / HBYS tohumu) düşüyordu, 105 DİĞER (158 stok) yoktu. `fn_aktar_ek_kategori` (aynı kimlik, üst koddan; tohum silinir) `fn_aktar_ek`'in ilk adımı, `aktar_ek.ps1` KATEGORI'yi çeker; 1170 boşaltması kategori ağacını da kapsar. UNIVERSE elle düzeltildi (yedekli), 1171 aynı sonucu verdi. Uçtan uca: `kur.ps1 -SadeceSema -Urun erp -AktarimIcin` → 96 kategori + bütün tohumlar boşaldı, admin / depo / rol-yetki kaldı.
+- **Lot defteri (UNIVERSE):** aktarım `stok_izleme`'yi yazmış (4.257) ama `stok_lot_durum`'u hiç kurmamış (3 web satırı) — sayımda izlemli stokların hepsi "lotsuz" geliyordu. Hareketlerden 118 kuralıyla yeniden kuruldu (yedekli): 2.951 lot bakiyesi, 10'u eksi (Delphi'de lotsuz giriş / lotu girilmeden çıkış); 539 stok-depodan 519'u stok bakiyesini tutuyor, kalan 20'nin farkı sayımda "lotsuz bakiye" satırında. SYM-2026-0002'nin sayılmamış izlemli stokları (sonra CI da) lot lot yenilendi (sayılan girilmiş satırlara dokunulmadı; sistem = yenileme anı). Tutmayan stoklarda fark Delphi'nin kendisinde (ör. ADSUP3511 STOKDURUM 20, lot hareketi toplamı 50; hareket sayıları web ile birebir) - yeniden aktarım değiştirmez.
+- **Lot defteri kuralı (1172):** `fn_stok_lot_durum_kur()` defteri hareketlerden baştan kurar (hareketi olmayan web satırı korunur) - `fn_aktar_ek`'in son adımı; sürekli aktarım için `stok_izleme`'ye deyim tetikleri (yalnız `gentegre.aktarim = 1`, dokunulan stok-depo çiftleri yeniden hesaplanır - aktarım fonksiyonlarına dokunulmadı). `fn_belge_cikis_mi` stok fişlerini iadesiz sayar (C# `BelgeTuru` eşi). UNIVERSE'te geri alınan işlemle denendi: tetik 1 → +7 → −3 → silme doğru; tam kurulum elle kurulan defterle birebir (md5).
+- **ERP'de hizmet listesi:** HUV Kodu, LOINC, Özel / TTB-HUV / SUT fiyatı, Lab, Diş, Modalite, Radyoloji kolonları `UrunModu: Hbys` (arama ipucu kolonlardan üretildiği için oradan da çıktı). Giriş / çıkış fişi, transfer, talepte kalem araması yalnız stok; web'de `tipi = 2` iadesiz türlerde iade sayılmıyor (`iadeTipiMi`, giriş fişi tipi 2'de "iade edilecek kalemler" açılıyordu). Lot / seri penceresinde satır başına ✓ (gerekene tamamla, odak Tamam'a); kalem penceresinde büyütme düğmesi yok.
+- UNIVERSE (aktarım bitmiş, web'de veri giriliyor) bu fonksiyonla boşaltılmaz: oradaki 18 lab hizmeti ve bağlı tohumlar elle silindi (yedek CSV alındı); stoklar zaten hepsi aktarımdan.
+
+---
+
+## 24.10.2026 — Yerel UNIVERSE ERP kurulumu (MSSQL UNIVERSE'ten kalıcı geçiş)
+
+Kullanıcı: *"localhost'ta yeni bir adres açıp mssql'deki Universe DB'yi ERP olarak buraya taşı"* + *"veri girişleri buradan web'den olacak"*.
+
+- Yol FETA'nınki (dokuman/19 §5b): MSSQL UNIVERSE'e Update_SQL_208/209/216 + Change Tracking; `kur.ps1 -SadeceSema -Urun erp -Db UNIVERSE`; kurum tipi ERP; bütün yıllar; ajan `--tek-tur` + `aktar_ek.ps1`; `--mutabakat` eşit (FATBASLIK 10.276, stok 1.065, cari bakiye 224 / 224; REHBER 2 kayıt kural gereği atlanır). Sonra ajan pasif, `stg` boş, MSSQL'de izleme kapatıldı — veri girişi web'den.
+- Adres: web `http://localhost:5176`, API `http://localhost:5186` (yayımlanmış kopya `%LOCALAPPDATA%\GentegreYerel\universe`, `baslat.ps1`).
+- `kur.ps1`: büyük harfli veritabanı adı tırnaksız oluşturuluyordu (PG küçüğe indiriyor, sonraki adım bulamıyordu) — ad tırnaklı.
+
+---
+
+## 24.10.2026 — Sunucu yayını (1163'e kadar) ve Delphi pilotu → BILIM
+
+Kullanıcı: *"tüm profillere yayınla"* + *"feta ve delphi sunucuya da yayınla"* + *"bilim datası aktardığımız delphi sunucu adını bilim diye değiştir"*.
+
+- Yayından önce 11 DB'nin `pg_dump` yedeği alındı (`~/yedek/*_20261024_*.dump`, `pg_restore -l` ile okundu).
+- 9 profil (hastane, tipmerkezi, diş, lab, osgb, göz, ftr, görüntüleme, muayene): 1135 → 1163, her birinde 28 göç. Delphi pilotu 1151 → 1163 (13), FETA 1153 → 1163 (12). Hepsi sağlık kontrolünden geçti.
+- **Delphi pilotu → bilim:** kurulum `bilim` (`/bilim/`, DB `gentegre_erp_delphi` → `BILIM`, konteyner `gentegre-api-erp-delphi` → `gentegre-api-bilim`, klasör `~/gentegre-bilim`, port 5182 aynı). Eski `/gentegreai/delphi/api/` aynı porta gitmeye devam eder (Delphi'deki aktarım ajanının adresi değişmez); eski web adresi `/bilim/`'e 301. nginx adımı `yayin/bilim-hazirla.sh` (sudo, kullanıcı çalıştırır).
+
+---
+
 ## 24.10.2026 — Tedarikçi Listesi / Kartı V3 (1162)
 
 Kullanıcı: *"tedarikçi listesi ve kartı için de V3 mockup yap"* → *"v3 tedarikçi listesi ve kartı mockup'larını koda dök"* (mockup `Ekranlar/tedarikci_listesi_ver3.html` + `tedarikci_karti_ver3.html`).

@@ -72,7 +72,7 @@ function DuyuruOkuModali({ id, onKapat }: { id: number; onKapat(): void }) {
     <>
       {okunabilir && <button type="button" className="d tl-ok" onClick={() => void okudum()}>✔ {c('Okudum')}</button>}
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
     </>
   );
   return (

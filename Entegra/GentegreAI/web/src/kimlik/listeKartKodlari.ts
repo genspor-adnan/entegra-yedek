@@ -149,6 +149,7 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'cek_senet.liste': 'cek_senet',
   'cek_senet.senet.liste': 'cek_senet.senet',
   'stok.liste': 'stok',
+  'stok.sayim.liste': 'stok.sayim',
   'hizmet.liste': 'hizmet',
   'uretim.urun_agaci.liste': 'uretim.urun_agaci',
   'uretim.liste': 'uretim',

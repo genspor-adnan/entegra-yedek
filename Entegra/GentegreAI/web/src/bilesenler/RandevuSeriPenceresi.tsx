@@ -126,7 +126,7 @@ export function RandevuSeriPenceresi({ baslik, kaynak, ilkTarih, saat: ilkSaat, 
              <button type="button" className="d bir" disabled={mesgul || !kontrollu || uygun === 0}
                      title={!kontrollu ? c('Önce kontrol edin.') : undefined}
                      onClick={() => void gonder(true, satirlar)}>💾 {c('Kaydet')}{kontrollu ? ` (${uygun})` : ''}</button>
-             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 620 }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', fontSize: 12, fontWeight: 600 }}>

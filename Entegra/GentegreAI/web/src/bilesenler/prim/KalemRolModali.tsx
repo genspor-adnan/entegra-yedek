@@ -100,7 +100,7 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
                  {kaydediyor ? '⏳ Kaydediliyor…' : '💾 Rolleri Kaydet'}
                </button>
                <button className="d" onClick={ekle}>＋ Satır</button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

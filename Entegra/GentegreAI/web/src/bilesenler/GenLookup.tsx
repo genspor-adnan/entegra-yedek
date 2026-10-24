@@ -138,7 +138,7 @@ export function GenLookup({
               </button>
               <span style={{ flex: 1 }} />
               <button type="button" className="d kapat-dugmesi"
-                      onClick={() => setAcik(false)}>{c('Kapat')}</button>
+                      onClick={() => setAcik(false)}>✖ {c('Kapat')}</button>
             </div>
 
             <div className="cipler" style={{ margin: 0 }}>

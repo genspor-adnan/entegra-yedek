@@ -4,7 +4,8 @@
 #  Cekirdek ERP (cari/stok/belge/kasa) ajanla surekli aktarilir. Bu betik Delphi
 #  KAPANIRKEN bir kez calisir ve geri kalanlari tasir: kullanicilar + personel +
 #  ilgili kisiler, gorevler + aktiviteler + yorumlar, dokumanlar + ekler (IMAJ) +
-#  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas.
+#  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas,
+#  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir).
 #
 #  1) goc_al.ps1 ile MSSQL -> stg (Delphi DB ve depo DB'si)
 #  2) IMAJ icerigi: BELGE ZLib ise acilir (Delphi KutugeYaz); ICDIS=1 ise dosya
@@ -54,7 +55,7 @@ function Psql([string]$sql) {
 }
 
 Adim ("Delphi tablolari: " + $MssqlDb)
-GocAl $MssqlDb @("KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN","PERS_HAREKET",
+GocAl $MssqlDb @("KATEGORI","KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN","PERS_HAREKET",
                  "GOREVLER","GOREVKULLANICI","GOREVYORUM","AKTIVITELER","AKTIVITENOTLAR","ANIMSAT",
                  "DOKUMAN","DOKUMANKLASOR","CEKLER","CEKHAREKET","TEKLIF","TEKLIFDETAY",
                  "HESAPPLANI","DEMIRBAS")

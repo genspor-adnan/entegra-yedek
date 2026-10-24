@@ -175,7 +175,7 @@ const BOLGELER = [
       { k:'cari', ad:'Cari Listesi', url:'../cari_liste_ekrani.html', a:'müşteri tedarikçi' },
       { k:'satis', ad:'Satış Faturaları', url:'../fatura_satis_listesi.html', a:'fatura' } ] } ] },
   { ad:'Tedarik & Teknik', renk:'#8a6d3b', gruplar:[
-    { ad:'Stok', i:'📦', ekranlar:[ { k:'stok', ad:'Stok Listesi', url:'../stok_listesi.html', a:'malzeme ilaç depo' } ] } ] },
+    { ad:'Stok', i:'📦', ekranlar:[ { k:'stok', ad:'Stok Listesi', url:'../Stok/stok_listesi.html', a:'malzeme ilaç depo' } ] } ] },
 ];
 const EKRANLAR = BOLGELER.flatMap(b => b.gruplar.flatMap(g => g.ekranlar.map(e => ({ ...e, i:g.i ?? '▫', yol:g.ad }))));
 const ISLEMLER = [

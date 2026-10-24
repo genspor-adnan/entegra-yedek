@@ -257,7 +257,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                      💵 Tahsilat Al ({paraYaz(hastaTahsil)})
                    </button>
                  )}
-                 <button className="d" onClick={onKapat}>Kapat</button>
+                 <button className="d" onClick={onKapat}>✖ Kapat</button>
                </>
              ) : (
                <>
@@ -277,7 +277,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                      💵 Tahsilat Al ve Kabul Et
                    </button>
                  )}
-                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+                 <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
                </>
              )
            }>

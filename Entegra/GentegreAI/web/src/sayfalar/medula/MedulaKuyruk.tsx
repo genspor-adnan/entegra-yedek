@@ -96,7 +96,7 @@ export function MedulaKuyruk() {
                 <button className="d" onClick={() => { const el = document.getElementById('md-iptal-id') as HTMLInputElement; const id = Number(el?.value); if (id) void iptal(id); }}>✖ İptal et</button>
               </div>
             )}
-            {govde && <div className="md-grp" style={{ margin: 8 }}><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>{c('Kapat')}</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
+            {govde && <div className="md-grp" style={{ margin: 8 }}><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>✖ {c('Kapat')}</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
           </div>
         )}
 

@@ -82,7 +82,7 @@ export function OlcumGrafigi({ muayeneId, secim, onKapat }: {
   return (
     <Modal baslik={veri ? `📈 ${veri.ad}${veri.birim ? ` · ${veri.birim}` : ''}` : c('Ölçüm geçmişi')} enUst buyutmeYok
            onKapat={onKapat}
-           alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
+           alt={<button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>}>
       <div className="olcum-ust">
         <span className="not">
           {veri && `${tum.length} ${c('ölçüm')}`}

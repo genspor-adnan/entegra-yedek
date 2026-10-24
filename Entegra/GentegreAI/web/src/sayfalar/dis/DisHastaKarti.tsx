@@ -301,7 +301,7 @@ export function DisHastaKarti() {
           <EnabizButonu tur="erisim" hastaId={hastaId} />
           <button className="d" onClick={() => git(`/hasta/${hastaId}?geri=${geriParam}`)}>↗ Genel Hasta Kartı</button>
           <button className="d" onClick={() => void yukle()} title={cev('Yenile')}>⟳</button>
-          <button className="d ds-sp" onClick={kapat}>{cev('✖ Kapat')}</button>
+          <button className="d ds-sp" onClick={kapat}>✖ {cev('Kapat')}</button>
         </div>
 
       <div className="ds-sahne">

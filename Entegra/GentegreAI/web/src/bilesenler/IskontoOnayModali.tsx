@@ -65,7 +65,7 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
            alt={
              <>
                <button type="button" className="d" disabled={calisiyor}
-                       onClick={onKapat}>{cev('Kapat')}</button>
+                       onClick={onKapat}>✖ {cev('Kapat')}</button>
                <button type="button" className="d teh" disabled={calisiyor}
                        onClick={() => void karar(false)}>{cev('✖ Reddet')}</button>
                <button type="button" className="d bir" disabled={calisiyor}

@@ -12,6 +12,8 @@
 #  Kullanim: powershell -ExecutionPolicy Bypass -File .\kur.ps1
 #            .\kur.ps1 -SadeceSema      (MSSQL'den veri cekmeden - GUNCEL semanin
 #                                        tamami, bos kurulum tohumuyla)
+#            .\kur.ps1 -SadeceSema -Urun erp -AktarimIcin -Db <DB>
+#                                       (Delphi aktarimi oncesi: tohumlar bosaltilir)
 #
 #  GOC UYGULAMA KURALLARI db\araclar\goc_uygula.ps1'dedir (denetim 28.09.2026
 #  #9/#10): dosya + defter tek islem, eszamanli kuruluma karsi kilit, bos
@@ -38,7 +40,11 @@ param(
   [int]$Yil            = 2026,       # belge/hareket gocu icin yil filtresi (0 = tum yillar)
   # -SadeceSema (bos kurulum) icin urun: 'erp' ise HBYS'e ozgu dis veri gocleri
   #   (SKRS katalogu) kurulum/bos/erp/yerine'deki karsiliklariyla gecer.
-  [string]$Urun        = ""
+  [string]$Urun        = "",
+  # -SadeceSema ile: Delphi'den AKTARIM icin kurulum (dokuman 19 bolum 5b, 1170). Kurulum bitince
+  #   hedef PG bosaltilir (gocun tohumlari: lab hizmetleri, demo hekimler, hesap plani...);
+  #   admin, sube, rol / yetki korunur. Aktarim (ajan) bundan SONRA calisir.
+  [switch]$AktarimIcin
 )
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -113,7 +119,8 @@ if (-not $var) {
   #   PG 14'e geri donulurse bu komut hata verir; o durumda kolon bazli
   #   COLLATE "tr-TR-x-icu" gerekir (bkz. 001_sema_rehber.sql yorumu).
   Adim "Olusturuluyor (UTF8 + ICU tr-TR)"
-  PsqlKomut ("CREATE DATABASE " + $Db + " TEMPLATE template0 ENCODING 'UTF8'" +
+  # Ad TIRNAKLI: buyuk harfli ad (FETA, UNIVERSE) tirnaksiz kucuge iner, sonraki adim bulamaz.
+  PsqlKomut ("CREATE DATABASE `"" + $Db + "`" TEMPLATE template0 ENCODING 'UTF8'" +
              " LOCALE_PROVIDER icu ICU_LOCALE 'tr-TR' LOCALE 'en_US.utf8'") "postgres" | Out-Null
 }
 
@@ -172,6 +179,10 @@ if ($SadeceSema) {
   #   Onceden bu secenek 020'de duruyordu - 027 ve sonrasi HIC kurulmuyordu.
   Adim "SadeceSema: guncel sema, MSSQL aktarimi olmadan"
   Goc ($Sema1 + $Goc + $Kimlik + $Kalan) -Bos
+  if ($AktarimIcin) {
+    Adim "Aktarim icin hedef bosaltiliyor (fn_aktarim_oncesi_bosalt)"
+    PsqlKomut "select tablo || ': ' || satir from public.fn_aktarim_oncesi_bosalt(true)" $Db | ForEach-Object { "  " + $_ }
+  }
   Adim ("Goc defteri: " + (PsqlKomut "select count(*) from public.goc_gecmisi" $Db) + " dosya kayitli")
   Write-Host ""
   Write-Host ("Bitti. Veritabani: " + $Db + " (sema, bos kurulum)") -ForegroundColor Green

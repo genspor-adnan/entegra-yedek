@@ -94,7 +94,7 @@ export function KysEgitimKarti() {
             <div className="ds-arac ds-kart-arac">
               {yazar && <button className="d onay" onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>}
               {silebilir && <button className="d teh" onClick={() => void sil()}>🗑 {c('Sil')}</button>}
-              <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+              <button className="d ds-sp" onClick={kapat}>✖ {c('Kapat')}</button>
             </div>
             <div className="ds-hdr" style={{ padding: '6px 10px' }}>
               <div style={{ gridColumn: 'span 2' }}><label>{c('Eğitim adı')} *</label>

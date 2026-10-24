@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Sayım — Mockup</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css) - kasa_karti_ver3 ile aynı belirteçler */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .gorunum-sec{max-width:1480px;margin:0 auto 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .gorunum-sec b{color:var(--navy);margin-right:6px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;display:none}
+  .win.on{display:block}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.kir{border-color:#c0413d;color:#b3261e}
+  .btn.mini{padding:2px 8px;font-size:10.5px}
+  .btn.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .arti{color:var(--ok);font-weight:bold} .eksi{color:var(--kir);font-weight:bold} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+
+  .hizli{display:flex;gap:4px;padding:6px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .ara{border:1px solid var(--line);border-radius:3px;padding:5px 8px;font:inherit;min-width:220px}
+
+  /* GRID */
+  table.g{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.g th{background:var(--head);color:#3a5573;font-weight:bold;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);border-right:1px solid var(--line2);white-space:nowrap;position:sticky;top:0}
+  table.g td{padding:5px 8px;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);white-space:nowrap}
+  table.g tr:hover td{background:#f4f8fd}
+  table.g tr.sec td{background:var(--sel)}
+  table.g tr.fark td{background:#fff8f0}
+  table.g tr.sayilmadi td{color:var(--muted)}
+  table.g td.giris{background:#fffde8;padding:2px 4px}
+  table.g td.giris input{width:74px;border:1px solid #b9c7d6;border-radius:3px;padding:3px 6px;font:inherit;text-align:right}
+  table.g tfoot td{background:var(--head);font-weight:bold}
+  .grid-kap{max-height:520px;overflow:auto}
+
+  /* OZET SERIDI */
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .ozet > div:last-child{border-right:none}
+  .ozet span{display:block;font-size:10.5px;color:var(--muted)}
+  .ozet b{font-size:15px}
+  .ozet small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+  .bar{height:7px;border-radius:4px;background:#e7edf4;overflow:hidden;margin:5px 0 2px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+
+  /* KIMLIK BASLIGI */
+  .bas{display:flex;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line2)}
+  .avatar{width:52px;height:52px;border-radius:10px;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+  .kim .ad{font-size:17px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .kim .alt{color:var(--muted);font-size:11.5px;margin-top:3px}
+  .kim .alt b{color:var(--ink);font-weight:normal}
+  .bas .islem{margin-left:auto;display:flex;gap:6px;align-items:center}
+
+  /* ADIMLAR */
+  .adimlar{display:flex;padding:10px 14px;gap:0;border-bottom:1px solid var(--line2);background:#fff}
+  .adim{flex:1;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11.5px;position:relative}
+  .adim i{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;background:#fff;flex:none}
+  .adim::after{content:"";flex:1;height:2px;background:var(--line2);margin:0 10px}
+  .adim:last-child::after{display:none}
+  .adim.bitti{color:var(--ok)} .adim.bitti i{border-color:#3f9a5e;background:#3f9a5e;color:#fff}
+  .adim.simdi{color:var(--navy);font-weight:bold} .adim.simdi i{border-color:var(--accent);color:var(--accent)}
+
+  /* GOVDE */
+  .govde{display:grid;grid-template-columns:1fr 320px;min-height:560px}
+  .ana{min-width:0;border-right:1px solid var(--line)}
+  .yan{padding:12px;background:#fafbfd}
+  .grp{border:1px solid var(--line2);border-radius:5px;margin-bottom:12px;background:#fff}
+  .grp > h4{margin:0;padding:7px 10px;font-size:11.5px;color:#3a5573;background:linear-gradient(#f7f9fc,#eef3f8);border-bottom:1px solid var(--line2);border-radius:5px 5px 0 0;display:flex;align-items:center;gap:8px}
+  .grp .ic{padding:10px}
+  .satir{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line2)}
+  .satir:last-child{border-bottom:none}
+  .not{font-size:11px;color:var(--muted);line-height:1.45}
+  .uyari{background:#fdf6e3;border:1px solid #f2ddbf;color:#8a6218;border-radius:4px;padding:7px 10px;font-size:11.5px;margin:10px 12px}
+  .bilgi{background:#eef4fc;border:1px solid #cfe0f5;color:#24508a;border-radius:4px;padding:7px 10px;font-size:11.5px;margin:10px 12px}
+
+  /* OKUT KUTUSU */
+  .okut{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line2);background:#f7fbff}
+  .okut .giris{flex:1;display:flex;align-items:center;gap:8px;border:2px solid var(--accent);border-radius:6px;background:#fff;padding:7px 10px;font-size:14px}
+  .okut .giris span{color:var(--muted)}
+  .okut .son{font-size:11.5px;color:var(--muted);min-width:330px}
+  .okut .son b{color:var(--ok)}
+  .filtre{display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+
+  /* FORM */
+  .alanlar{display:grid;grid-template-columns:130px 1fr 130px 1fr;gap:7px 10px;align-items:center;padding:12px}
+  .alanlar label{color:var(--muted);text-align:right}
+  .alanlar .k{border:1px solid var(--line);border-radius:3px;padding:5px 8px;background:#fff}
+  .alanlar .k.z{border-left:3px solid #d0473d}
+  .secenek{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--line2);border-radius:5px;margin-bottom:6px;background:#fff}
+  .secenek.on{border-color:#9cc4ee;background:#f4f8fd}
+  .secenek b{display:block;color:var(--navy)}
+  .secenek small{color:var(--muted)}
+
+  /* FIS ONIZLEME */
+  .fisler{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+  .fis{border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+  .fis h5{margin:0;padding:8px 10px;font-size:12.5px;display:flex;gap:8px;align-items:center}
+  .fis.g h5{background:#e2f3e8;color:#2e7d46}
+  .fis.c h5{background:#fbe9e7;color:#b3261e}
+
+  /* EL TERMINALI */
+  .el-kap{display:flex;gap:30px;padding:24px;justify-content:center;background:#e9eef4;flex-wrap:wrap}
+  .tel{width:330px;border:10px solid #1f2d3a;border-radius:28px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(20,40,70,.25)}
+  .tel .t-ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:10px 12px;font-size:13px}
+  .tel .t-ust small{display:block;opacity:.75;font-size:10.5px}
+  .tel .t-ic{padding:12px;min-height:520px}
+  .tel .t-okut{border:2px dashed var(--accent);border-radius:10px;padding:14px;text-align:center;color:var(--accent);font-size:13px;margin-bottom:12px}
+  .tel .t-urun{border:1px solid var(--line2);border-radius:8px;padding:10px;margin-bottom:10px}
+  .tel .t-urun b{color:var(--navy);font-size:13.5px}
+  .tel .t-adet{display:flex;align-items:center;gap:8px;margin:10px 0}
+  .tel .t-adet span{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(var(--btnfrom),var(--btnto))}
+  .tel .t-adet input{flex:1;height:44px;font-size:22px;text-align:center;border:2px solid var(--accent);border-radius:8px}
+  .tel .t-btn{display:block;width:100%;padding:12px;border-radius:8px;border:0;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold;font-size:14px}
+  .tel .t-liste div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .aciklama{max-width:360px;font-size:12px;line-height:1.55;color:var(--ink)}
+  .aciklama h3{color:var(--navy);margin-top:0}
+  .aciklama li{margin-bottom:6px}
+
+  .kural{max-width:1480px;margin:12px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.55}
+  .kural h3{margin:0 0 6px;color:var(--navy);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="gorunum-sec">
+  <b>Stok Sayım · mockup</b>
+  <span class="btn on" data-g="liste">1 · Sayım Listesi</span>
+  <span class="btn" data-g="yeni">2 · Yeni Sayım</span>
+  <span class="btn" data-g="kart">3 · Sayım Kartı (sayılıyor)</span>
+  <span class="btn" data-g="fark">4 · Farklar &amp; Kapat</span>
+  <span class="btn" data-g="el">5 · El Terminali</span>
+  <a class="btn" href="stok_sayim_karti.html" style="text-decoration:none">🧮 Sayım Kartı (tam) →</a>
+  <a class="btn" href="stok_sayim_ver2.html" style="text-decoration:none">V2 (sade) →</a>
+</div>
+
+<!-- ============================================================ 1 LISTE -->
+<div class="win on" id="g-liste">
+  <div class="ust">📋 Stok Sayımları <span class="yol">Stok › Sayım</span><span class="sag"><span>universe medikal</span><span>Merkez Depo</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>Stok Listesi</span><span class="on">Stok Sayımları</span></div>
+  <div class="hizli">
+    <span class="btn primary">＋ Yeni Sayım</span>
+    <span class="sepv"></span>
+    <input class="ara" placeholder="🔍 Sayım no, depo, açıklama…">
+    <span class="btn on">Açık (3)</span><span class="btn">Kapanan</span><span class="btn">Tümü</span>
+    <span class="sepv"></span>
+    <span class="btn">Depo: Tümü ▾</span><span class="btn">Dönem: 2026 ▾</span>
+    <span class="sp"></span>
+    <span class="btn">⬇ Excel</span><span class="btn">🖨 Yazdır</span><span class="btn">✖ Kapat</span>
+  </div>
+  <div class="grid-kap">
+  <table class="g">
+    <thead><tr><th>Sayım No</th><th>Tarih</th><th>Depo</th><th>Kapsam</th><th>Tür</th><th>Durum</th><th class="sag">Kalem</th><th>İlerleme</th><th class="sag">Fark Kalemi</th><th class="sag">Fazla ₺</th><th class="sag">Eksik ₺</th><th>Sorumlu</th></tr></thead>
+    <tbody>
+      <tr class="sec"><td><b>SYM-2026-014</b></td><td>24.10.2026</td><td>Merkez Depo</td><td>Tüm depo</td><td><span class="rz mor">Kör sayım</span></td><td><span class="rz mavi">● Sayılıyor</span></td><td class="sag">1.065</td><td><div class="bar" style="width:120px"><i style="width:68%"></i></div><small class="sonuk">724 / 1.065</small></td><td class="sag">31</td><td class="sag arti">4.820,00</td><td class="sag eksi">12.365,40</td><td>Ayşe K.</td></tr>
+      <tr><td><b>SYM-2026-013</b></td><td>22.10.2026</td><td>Ameliyathane Deposu</td><td>Kategori: Sarf</td><td><span class="rz">Açık sayım</span></td><td><span class="rz sari">● Fark onayı bekliyor</span></td><td class="sag">212</td><td><div class="bar" style="width:120px"><i style="width:100%"></i></div><small class="sonuk">212 / 212</small></td><td class="sag">9</td><td class="sag arti">310,00</td><td class="sag eksi">2.140,75</td><td>Mehmet T.</td></tr>
+      <tr><td><b>SYM-2026-012</b></td><td>20.10.2026</td><td>Merkez Depo</td><td>Raf: A-01…A-12</td><td><span class="rz">Dönemsel (ABC: A)</span></td><td><span class="rz">● Hazırlık</span></td><td class="sag">88</td><td><div class="bar" style="width:120px"><i style="width:0"></i></div><small class="sonuk">0 / 88</small></td><td class="sag sonuk">-</td><td class="sag sonuk">-</td><td class="sag sonuk">-</td><td>Ayşe K.</td></tr>
+      <tr><td>SYM-2026-011</td><td>30.09.2026</td><td>Merkez Depo</td><td>Tüm depo</td><td><span class="rz">Açık sayım</span></td><td><span class="rz ok">✔ Kapandı</span></td><td class="sag">1.058</td><td><div class="bar" style="width:120px"><i style="width:100%"></i></div><small class="sonuk">1.058 / 1.058</small></td><td class="sag">22</td><td class="sag arti">2.105,00</td><td class="sag eksi">7.880,10</td><td>Ayşe K.</td></tr>
+      <tr><td>SYM-2026-010</td><td>30.06.2026</td><td>Merkez Depo</td><td>Tüm depo</td><td><span class="rz">Açık sayım</span></td><td><span class="rz ok">✔ Kapandı</span></td><td class="sag">1.031</td><td><div class="bar" style="width:120px"><i style="width:100%"></i></div><small class="sonuk">1.031 / 1.031</small></td><td class="sag">17</td><td class="sag arti">980,00</td><td class="sag eksi">4.410,00</td><td>Mehmet T.</td></tr>
+      <tr><td>SYM-2026-009</td><td>12.06.2026</td><td>Eczane</td><td>Kontrollü ilaçlar</td><td><span class="rz kir">Kontrollü</span></td><td><span class="rz">✖ İptal</span></td><td class="sag">46</td><td><div class="bar" style="width:120px"><i style="width:30%"></i></div><small class="sonuk">14 / 46</small></td><td class="sag sonuk">-</td><td class="sag sonuk">-</td><td class="sag sonuk">-</td><td>Dr. Selin A.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="bilgi">Çift tık sayım kartını <b>kendi sekmesinde</b> açar (kart sekmesi deseni). Açık sayım varken aynı depoda ikinci tam sayım başlatılamaz; kapsamlar (kategori / raf) çakışmıyorsa olur.</div>
+</div>
+
+<!-- ============================================================ 2 YENI -->
+<div class="win" id="g-yeni">
+  <div class="ust">📋 Yeni Stok Sayımı <span class="yol">Stok › Sayım › Yeni</span><span class="sag"><span>universe medikal</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>Stok Sayımları</span><span class="on">Yeni Sayım</span></div>
+  <div class="adimlar">
+    <div class="adim simdi"><i>1</i>Hazırla</div><div class="adim"><i>2</i>Say</div><div class="adim"><i>3</i>Farklar</div><div class="adim"><i>4</i>Kapat</div>
+  </div>
+  <div class="govde">
+    <div class="ana">
+      <div class="grp" style="margin:12px">
+        <h4>Sayım Bilgileri</h4>
+        <div class="alanlar">
+          <label>Sayım No</label><div class="k sonuk">SYM-2026-015 (kayıtta atanır)</div>
+          <label>Sayım Tarihi</label><div class="k z">24.10.2026 18:00</div>
+          <label>Depo</label><div class="k z">Merkez Depo ▾</div>
+          <label>Sorumlu</label><div class="k">Ayşe Kaya ▾</div>
+          <label>Açıklama</label><div class="k" style="grid-column:span 3">2026 Ekim ayı sonu tam sayım</div>
+        </div>
+      </div>
+      <div class="grp" style="margin:12px">
+        <h4>Kapsam</h4>
+        <div class="ic">
+          <div class="secenek on"><input type="radio" checked><div><b>Tüm depo</b><small>Depoda kartı olan bütün stoklar (1.065 kalem) - stoğu 0 olanlar dahil.</small></div></div>
+          <div class="secenek"><input type="radio"><div><b>Kategori</b><small>Seçilen kategori ağacı dalı (ör. Sarf › Enjektör).</small></div></div>
+          <div class="secenek"><input type="radio"><div><b>Raf / lokasyon</b><small>Raf aralığı - dönemsel (cycle) sayım için.</small></div></div>
+          <div class="secenek"><input type="radio"><div><b>ABC sınıfı</b><small>A sınıfı (cironun %80'i) her ay, B üç ayda, C yılda bir.</small></div></div>
+          <div class="secenek"><input type="radio"><div><b>Seçili stoklar</b><small>Listeden elle ya da Excel'den.</small></div></div>
+        </div>
+      </div>
+      <div class="grp" style="margin:12px">
+        <h4>Sayım Kuralları</h4>
+        <div class="ic">
+          <div class="secenek on"><input type="checkbox" checked><div><b>Kör sayım</b><small>Sayan kişi sistem miktarını görmez - "sistemde 12 yazıyor" etkisi olmaz. Farkı yalnız sorumlu görür.</small></div></div>
+          <div class="secenek on"><input type="checkbox" checked><div><b>Lot / SKT bazında say</b><small>Lot izlenen stoklarda her lot ayrı satır. SKT geçmiş lot kırmızı.</small></div></div>
+          <div class="secenek"><input type="checkbox"><div><b>Çift sayım (2. sayım zorunlu)</b><small>Farkı %5'ten büyük kalem ikinci kişiye otomatik yeniden sayıma gider.</small></div></div>
+          <div class="secenek on"><input type="checkbox" checked><div><b>Sayım anı stok kesiti</b><small>Sistem miktarı sayım tarihindeki kesitten alınır; sayım sürerken yapılan giriş/çıkış farkı bozmaz (sonradan hareket uyarısı).</small></div></div>
+          <div class="secenek"><input type="checkbox"><div><b>Depo hareketlerini kilitle</b><small>Sayım kapanana kadar bu depoya fiş kesilemez.</small></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="yan">
+      <div class="grp"><h4>Kapsam Özeti</h4><div class="ic">
+        <div class="satir"><span>Kalem</span><b>1.065</b></div>
+        <div class="satir"><span>Lot satırı</span><b>1.412</b></div>
+        <div class="satir"><span>Stoğu 0 olan</span><b>143</b></div>
+        <div class="satir"><span>Sistem değeri</span><b>1.284.560,20 ₺</b></div>
+        <div class="satir"><span>Son sayım</span><b>30.09.2026</b></div>
+      </div></div>
+      <div class="grp"><h4>Sayım Ekibi</h4><div class="ic">
+        <div class="satir"><span>Ayşe Kaya</span><span class="rz mavi">Sorumlu</span></div>
+        <div class="satir"><span>Ali Demir</span><span class="rz">Sayan · Raf A-F</span></div>
+        <div class="satir"><span>Zeynep Ak</span><span class="rz">Sayan · Raf G-M</span></div>
+        <div style="margin-top:6px"><span class="btn mini">＋ Kişi ekle</span></div>
+      </div></div>
+      <div class="not">Kaydedince sayım <b>Hazırlık</b> durumunda açılır, sayım listesi (kalemler) kesitle birlikte üretilir. "Sayımı Başlat" sayanların ekranına / el terminaline düşürür.</div>
+      <div style="margin-top:12px;display:flex;gap:6px"><span class="btn primary">💾 Kaydet</span><span class="btn ok">▶ Kaydet ve Başlat</span><span class="btn">🖨 Sayım Listesi Yazdır</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 3 KART -->
+<div class="win" id="g-kart">
+  <div class="ust">📋 SYM-2026-014 <span class="yol">Stok › Sayım › Kart</span><span class="sag"><span>universe medikal</span><span>Merkez Depo</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>Stok Sayımları</span><span class="on">SYM-2026-014</span></div>
+  <div class="bas">
+    <div class="avatar">📋</div>
+    <div class="kim">
+      <div class="ad">SYM-2026-014 <span class="rz mavi">● Sayılıyor</span><span class="rz mor">Kör sayım</span><span class="rz">Lot bazında</span></div>
+      <div class="alt">Merkez Depo · Tüm depo · Kesit <b>24.10.2026 18:00</b> · Sorumlu <b>Ayşe Kaya</b> · 3 sayan</div>
+    </div>
+    <div class="islem">
+      <span class="btn">⏸ Duraklat</span><span class="btn">🖨 Sayım Listesi</span><span class="btn">⬆ Excel'den Al</span>
+      <span class="btn primary">➜ Farklara Geç</span><span class="btn">✖ Kapat</span>
+    </div>
+  </div>
+  <div class="adimlar">
+    <div class="adim bitti"><i>✓</i>Hazırla</div><div class="adim simdi"><i>2</i>Say</div><div class="adim"><i>3</i>Farklar</div><div class="adim"><i>4</i>Kapat</div>
+  </div>
+  <div class="ozet">
+    <div><span>İlerleme</span><b>724 / 1.065</b><div class="bar"><i style="width:68%"></i></div><small>%68 · kalan 341 kalem</small></div>
+    <div><span>Eşit</span><b class="arti">693</b><small>sistemle aynı</small></div>
+    <div><span>Fazla</span><b class="arti">9</b><small>+4.820,00 ₺</small></div>
+    <div><span>Eksik</span><b class="eksi">22</b><small>-12.365,40 ₺</small></div>
+    <div><span>Yeniden sayım</span><b style="color:var(--uyari)">5</b><small>fark &gt; %5</small></div>
+    <div><span>Kesit sonrası hareket</span><b style="color:var(--uyari)">3</b><small>sayılan kalemde</small></div>
+  </div>
+  <div class="govde">
+    <div class="ana">
+      <div class="okut">
+        <div class="giris">▦ <span>Barkod / karekod okut ya da stok kodu yaz…</span><span class="sp"></span><kbd>Enter</kbd></div>
+        <span class="btn">Miktar: <b>×1</b> ▾</span>
+        <div class="son">Son okutulan: <b>✔ Enjektör 5 ml (LOT 24A118)</b> · 12 → 13 adet · Ali D. · 18:42</div>
+      </div>
+      <div class="filtre">
+        <span class="btn on">Tümü 1.412</span><span class="btn">Sayılmadı 341</span><span class="btn">Fark var 31</span><span class="btn">Yeniden sayım 5</span><span class="btn">SKT geçmiş 4</span>
+        <span class="sepv"></span><span class="btn">Raf: Tümü ▾</span><span class="btn">Sayan: Tümü ▾</span>
+        <span class="sp"></span><input class="ara" placeholder="🔍 Stok ara…"><span class="btn mini">☰ Kolonlar</span>
+      </div>
+      <div class="grid-kap">
+      <table class="g">
+        <thead><tr><th>Raf</th><th>Stok Kodu</th><th>Stok Adı</th><th>Birim</th><th>Lot</th><th>SKT</th><th class="sag">Sistem</th><th class="sag">Sayılan</th><th class="sag">Fark</th><th class="sag">Fark ₺</th><th>Sayan</th><th>Durum</th></tr></thead>
+        <tbody id="kalemler"></tbody>
+        <tfoot><tr><td colspan="6">1.412 satır · 724 kalem sayıldı</td><td class="sag">48.210</td><td class="sag">47.896</td><td class="sag eksi">-314</td><td class="sag eksi">-7.545,40</td><td colspan="2"></td></tr></tfoot>
+      </table>
+      </div>
+      <div class="bilgi">Sayılan hücresine yazıp <b>Enter</b> bir alt satıra geçer; okutma aynı satırın sayılanını artırır. Kör sayımda <b>Sistem / Fark</b> kolonları yalnız sorumluya görünür - sayan kullanıcı için sunucu bu kolonları hiç döndürmez.</div>
+    </div>
+    <div class="yan">
+      <div class="grp"><h4>Seçili Satır</h4><div class="ic">
+        <div style="font-weight:bold;color:var(--navy);font-size:13px">Steril Gazlı Bez 10x10</div>
+        <div class="not">STK-0412 · Raf B-04 · LOT 25C007 · SKT 03.2028</div>
+        <div class="satir" style="margin-top:6px"><span>Sistem (kesit)</span><b>240</b></div>
+        <div class="satir"><span>1. sayım · Ali D.</span><b>198</b></div>
+        <div class="satir"><span>2. sayım · Zeynep A.</span><b>200</b></div>
+        <div class="satir"><span>Fark</span><b class="eksi">-40 (-%16,7)</b></div>
+        <div class="satir"><span>Kesit sonrası çıkış</span><b>0</b></div>
+        <div class="satir"><span>Birim maliyet</span><b>4,25 ₺</b></div>
+        <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap"><span class="btn mini">↻ Yeniden saydır</span><span class="btn mini">📜 Hareketler</span><span class="btn mini">💬 Not</span></div>
+      </div></div>
+      <div class="grp"><h4>Sayanlar</h4><div class="ic">
+        <div class="satir"><span>Ali Demir · A-F</span><b>412</b></div>
+        <div class="satir"><span>Zeynep Ak · G-M</span><b>287</b></div>
+        <div class="satir"><span>Ayşe Kaya</span><b>25</b></div>
+      </div></div>
+      <div class="grp"><h4>⚠ Dikkat</h4><div class="ic not">
+        <div>• 3 sayılan kalemde kesitten sonra hareket var - fark hesabında düzeltildi.</div>
+        <div>• 4 lotun SKT'si geçmiş - kapatırken imhaya önerilecek.</div>
+        <div>• 2 okutulan barkod sistemde yok - <a href="#">tanımsız ürünler (2)</a>.</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 4 FARK -->
+<div class="win" id="g-fark">
+  <div class="ust">📋 SYM-2026-013 · Farklar <span class="yol">Stok › Sayım › Kart</span><span class="sag"><span>universe medikal</span><span>Ameliyathane Deposu</span></span></div>
+  <div class="sekmeler"><span>🏠</span><span>Stok Sayımları</span><span class="on">SYM-2026-013</span></div>
+  <div class="bas">
+    <div class="avatar">📋</div>
+    <div class="kim">
+      <div class="ad">SYM-2026-013 <span class="rz sari">● Fark onayı bekliyor</span></div>
+      <div class="alt">Ameliyathane Deposu · Kategori: Sarf · 212 / 212 kalem sayıldı · Sorumlu <b>Mehmet Tunç</b></div>
+    </div>
+    <div class="islem"><span class="btn">← Saymaya Dön</span><span class="btn">🖨 Fark Raporu</span><span class="btn">✖ Kapat</span></div>
+  </div>
+  <div class="adimlar">
+    <div class="adim bitti"><i>✓</i>Hazırla</div><div class="adim bitti"><i>✓</i>Say</div><div class="adim simdi"><i>3</i>Farklar</div><div class="adim"><i>4</i>Kapat</div>
+  </div>
+  <div class="ozet">
+    <div><span>Fark kalemi</span><b>9</b><small>212 kalemden</small></div>
+    <div><span>Fazla</span><b class="arti">3 · +310,00 ₺</b><small>Sayım Fazlası fişi</small></div>
+    <div><span>Eksik</span><b class="eksi">6 · -2.140,75 ₺</b><small>Sayım Eksiği fişi</small></div>
+    <div><span>Net</span><b class="eksi">-1.830,75 ₺</b><small>sistem değerinin %0,9'u</small></div>
+    <div><span>Onaylanan</span><b>7 / 9</b><small>2 karar bekliyor</small></div>
+    <div><span>Yetki sınırı</span><b>5.000 ₺</b><small>üstü yönetici onayı</small></div>
+  </div>
+  <div class="filtre">
+    <span class="btn on">Fark var 9</span><span class="btn">Fazla 3</span><span class="btn">Eksik 6</span><span class="btn">Karar bekliyor 2</span>
+    <span class="sp"></span><span class="btn mini">✔ Hepsini onayla</span>
+  </div>
+  <div class="grid-kap">
+  <table class="g">
+    <thead><tr><th></th><th>Stok Kodu</th><th>Stok Adı</th><th>Lot</th><th class="sag">Sistem</th><th class="sag">Sayılan</th><th class="sag">Fark</th><th class="sag">Birim Maliyet</th><th class="sag">Fark ₺</th><th>Sebep</th><th>Karar</th></tr></thead>
+    <tbody>
+      <tr><td><input type="checkbox" checked></td><td>STK-0412</td><td>Steril Gazlı Bez 10x10</td><td>25C007</td><td class="sag">240</td><td class="sag">200</td><td class="sag eksi">-40</td><td class="sag">4,25</td><td class="sag eksi">-170,00</td><td>Kayıt dışı kullanım ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0088</td><td>Cerrahi Eldiven No:7.5</td><td>24K311</td><td class="sag">500</td><td class="sag">450</td><td class="sag eksi">-50</td><td class="sag">6,80</td><td class="sag eksi">-340,00</td><td>Sarf girilmemiş ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr class="fark"><td><input type="checkbox"></td><td>STK-1203</td><td>Trokar 12 mm</td><td>25A044</td><td class="sag">14</td><td class="sag">11</td><td class="sag eksi">-3</td><td class="sag">385,25</td><td class="sag eksi">-1.155,75</td><td>— seçin ▾</td><td><span class="rz sari">Karar bekliyor</span> <span class="btn mini">↻ Yeniden say</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0731</td><td>Sütür 3/0 Vicryl</td><td>24H902</td><td class="sag">36</td><td class="sag">34</td><td class="sag eksi">-2</td><td class="sag">92,50</td><td class="sag eksi">-185,00</td><td>Fire / hasar ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0102</td><td>Enjektör 10 ml</td><td>25B210</td><td class="sag">300</td><td class="sag">290</td><td class="sag eksi">-10</td><td class="sag">1,90</td><td class="sag eksi">-19,00</td><td>Sayım hatası (önceki) ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr class="fark"><td><input type="checkbox"></td><td>STK-0950</td><td>Koter Ucu</td><td>—</td><td class="sag">8</td><td class="sag">7</td><td class="sag eksi">-1</td><td class="sag">271,00</td><td class="sag eksi">-271,00</td><td>— seçin ▾</td><td><span class="rz sari">Karar bekliyor</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0415</td><td>Steril Gazlı Bez 5x5</td><td>25C010</td><td class="sag">120</td><td class="sag">160</td><td class="sag arti">+40</td><td class="sag">2,50</td><td class="sag arti">+100,00</td><td>Giriş eksik kaydedilmiş ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0330</td><td>Bistüri No:11</td><td>24F055</td><td class="sag">90</td><td class="sag">100</td><td class="sag arti">+10</td><td class="sag">3,00</td><td class="sag arti">+30,00</td><td>Sayım hatası (önceki) ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>STK-0675</td><td>Drape Seti</td><td>25D101</td><td class="sag">20</td><td class="sag">24</td><td class="sag arti">+4</td><td class="sag">45,00</td><td class="sag arti">+180,00</td><td>İade girilmemiş ▾</td><td><span class="rz ok">✔ Onay</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="fisler">
+    <div class="fis g"><h5>⬆ Sayım Fazlası — Stok Giriş Fişi <span class="sp"></span><span class="rz ok">3 kalem · +310,00 ₺</span></h5>
+      <div class="ic not" style="padding:8px 10px">Fiş türü <b>Sayım Fazlası</b> (karşı tarafsız depo hareketi), tarih = kesit tarihi, açıklama "SYM-2026-013 sayım farkı". Maliyet: son alış / ortalama maliyet (opsiyon). Muhasebe (öneri): 153 / 679 diğer olağandışı gelir.</div></div>
+    <div class="fis c"><h5>⬇ Sayım Eksiği — Stok Çıkış Fişi <span class="sp"></span><span class="rz kir">6 kalem · -2.140,75 ₺</span></h5>
+      <div class="ic not" style="padding:8px 10px">Fiş türü <b>Sayım Eksiği</b>, lot bazında düşer (FEFO değil, sayılan lot). Muhasebe (öneri): 689 diğer olağandışı gider / 153. KDV: eksik kalem için KDV düzeltmesi opsiyonda.</div></div>
+  </div>
+  <div class="uyari">2 kalem karar bekliyor. Net fark 1.830,75 ₺ yetki sınırının (5.000 ₺) altında - sorumlu kapatabilir. Sınır üstünde "Kapat" yöneticiye onay talebi açar (Taleplerim).</div>
+  <div style="padding:0 12px 14px;display:flex;gap:6px;justify-content:flex-end">
+    <span class="btn">💾 Kaydet</span><span class="btn kir">✖ Sayımı İptal Et</span>
+    <span class="btn ok">✔ Farkları Fişle ve Sayımı Kapat</span>
+  </div>
+</div>
+
+<!-- ============================================================ 5 EL TERMINALI -->
+<div class="win" id="g-el">
+  <div class="ust">📱 El Terminali / Telefon <span class="yol">Sayan kullanıcı görünümü (mobil web)</span></div>
+  <div class="el-kap">
+    <div class="tel">
+      <div class="t-ust">SYM-2026-014 · Merkez Depo<small>Ali Demir · Raf A-F · 412 / 590</small></div>
+      <div class="t-ic">
+        <div class="t-okut">▦ Kamerayla okut<br><small>ya da el terminali tetiği</small></div>
+        <div class="t-urun">
+          <b>Enjektör 5 ml</b><br><span class="sonuk">STK-0101 · Raf A-03</span><br>
+          <span class="rz mavi" style="margin-top:4px">LOT 24A118 · SKT 11.2027</span>
+          <div class="t-adet"><span>−</span><input value="13"><span>＋</span></div>
+          <div class="sonuk" style="font-size:11px">Kör sayım: sistem miktarı gösterilmez.</div>
+        </div>
+        <button class="t-btn">✔ Kaydet, sonrakine geç</button>
+        <div style="margin:12px 0 6px;font-weight:bold;color:var(--navy)">Son saydıklarım</div>
+        <div class="t-liste">
+          <div><span>Enjektör 5 ml · 24A118</span><b>13</b></div>
+          <div><span>Enjektör 2 ml · 24A090</span><b>40</b></div>
+          <div><span>İğne 21G · 25B001</span><b>200</b></div>
+          <div><span>Alkollü Ped</span><b>36</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="aciklama">
+      <h3>Sayan kişinin ekranı</h3>
+      <ul>
+        <li><b>Tek iş:</b> okut, miktar yaz, kaydet. Menü, liste, fark yok.</li>
+        <li><b>Kör sayım:</b> sistem miktarı sunucudan gelmez; fark sorumlunun ekranında.</li>
+        <li><b>Lot:</b> karekod (GS1) okununca lot ve SKT kendiliğinden dolar; düz barkodda lot seçtirilir.</li>
+        <li><b>Raf ataması:</b> sayan yalnız kendi raflarını görür; başkasının rafındaki ürünü okutursa uyarı.</li>
+        <li><b>Çevrimdışı:</b> bağlantı koparsa sayımlar cihazda birikir, gelince gönderilir.</li>
+        <li><b>Aynı ürün iki kez:</b> ikinci okutma <i>üstüne ekler</i> (ya da opsiyonla "değiştir") - hangisi olduğu ekranda yazar.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="kural">
+  <h3>Akış ve kurallar (özet)</h3>
+  <b>Durumlar:</b> Hazırlık → Sayılıyor → Fark onayı → Kapandı (ya da İptal). Kapanan sayım değişmez; düzeltme yeni sayımla.
+  &nbsp;·&nbsp; <b>Kesit:</b> sistem miktarı sayım tarihindeki stok; kesit sonrası hareketler fark hesabından düşülür, kullanıcıya gösterilir.
+  &nbsp;·&nbsp; <b>Sonuç:</b> farklar mevcut fiş türleriyle fişlenir - <i>Sayım Fazlası</i> (giriş) ve <i>Sayım Eksiği</i> (çıkış), yeni hareket türü yok; stok kartının <i>son sayım tarihi</i> güncellenir.
+  &nbsp;·&nbsp; <b>Yetki:</b> sayan (yalnız miktar), sorumlu (fark görür, karar verir), yönetici (sınır üstü onay). Fark kararları ve fişleme ISLEMLOG'a.
+</div>
+
+<script>
+  document.querySelectorAll('.gorunum-sec .btn[data-g]').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.gorunum-sec .btn[data-g]').forEach(x => x.classList.toggle('on', x === b));
+    document.querySelectorAll('.win').forEach(w => w.classList.toggle('on', w.id === 'g-' + b.dataset.g));
+  });
+  const k = [
+    ['A-01','STK-0101','Enjektör 5 ml','Adet','24A118','11.2027',12,13,'Ali D.'],
+    ['A-01','STK-0102','Enjektör 10 ml','Adet','25B210','02.2028',300,300,'Ali D.'],
+    ['A-02','STK-0110','İğne 21G','Adet','25B001','06.2029',200,200,'Ali D.'],
+    ['A-03','STK-0145','Alkollü Ped','Kutu','—','—',40,36,'Ali D.'],
+    ['B-04','STK-0412','Steril Gazlı Bez 10x10','Paket','25C007','03.2028',240,200,'Ali D. / Zeynep A.','r'],
+    ['B-04','STK-0415','Steril Gazlı Bez 5x5','Paket','25C010','03.2028',120,160,'Ali D.'],
+    ['B-06','STK-0420','Flaster 5 cm','Rulo','24J300','08.2026',18,18,'Ali D.','skt'],
+    ['C-01','STK-0501','Serum Seti','Adet','25A512','01.2029',150,null,''],
+    ['C-01','STK-0502','IV Kanül 20G','Adet','25A600','05.2028',400,null,''],
+    ['C-02','STK-0533','Üç Yollu Musluk','Adet','24L120','12.2027',75,75,'Zeynep A.'],
+    ['G-03','STK-0731','Sütür 3/0 Vicryl','Kutu','24H902','09.2027',36,34,'Zeynep A.'],
+    ['G-05','STK-0802','Oksijen Maskesi','Adet','—','—',60,61,'Zeynep A.'],
+    ['H-01','STK-0910','Hasta Bezi L','Paket','—','—',25,null,''],
+  ];
+  const tl = n => n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fiyat = { 'STK-0101':1.6,'STK-0102':1.9,'STK-0110':.8,'STK-0145':22,'STK-0412':4.25,'STK-0415':2.5,'STK-0420':14,'STK-0501':9.5,'STK-0502':6,'STK-0533':3.2,'STK-0731':92.5,'STK-0802':11,'STK-0910':180 };
+  document.getElementById('kalemler').innerHTML = k.map((r, i) => {
+    const [raf, kod, ad, bir, lot, skt, sis, say, kim, isaret] = r;
+    const fark = say == null ? null : say - sis;
+    const cls = say == null ? 'sayilmadi' : (fark ? 'fark' : '') + (i === 4 ? ' sec' : '');
+    const d = say == null ? '<span class="rz">Sayılmadı</span>'
+            : isaret === 'r' ? '<span class="rz sari">↻ 2. sayım</span>'
+            : fark ? `<span class="rz ${fark > 0 ? 'ok' : 'kir'}">${fark > 0 ? 'Fazla' : 'Eksik'}</span>` : '<span class="rz ok">✔ Eşit</span>';
+    const sktH = isaret === 'skt' ? `<span class="eksi">${skt} ⚠</span>` : skt;
+    return `<tr class="${cls}"><td>${raf}</td><td>${kod}</td><td>${ad}</td><td>${bir}</td><td>${lot}</td><td>${sktH}</td>
+      <td class="sag">${sis}</td><td class="giris sag"><input value="${say ?? ''}" placeholder="—"></td>
+      <td class="sag ${fark > 0 ? 'arti' : fark < 0 ? 'eksi' : 'sonuk'}">${fark == null ? '' : (fark > 0 ? '+' : '') + fark}</td>
+      <td class="sag ${fark > 0 ? 'arti' : fark < 0 ? 'eksi' : 'sonuk'}">${fark ? tl(fark * fiyat[kod]) : ''}</td>
+      <td>${kim}</td><td>${d}</td></tr>`;
+  }).join('');
+</script>
+</body>
+</html>

@@ -119,6 +119,20 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
+    /// CAGIRANIN TRANSACTION'INDA kaydet (1169 stok sayimi): sayim kapanisi iki fisi ve
+    /// kendi durumunu TEK islemde yazar - fis kesilip sayim kapanmazsa ikinci denemede
+    /// farklar iki kez fislenirdi.
+    /// </summary>
+    public Task<(int Id, List<string> Uyarilar)> KaydetAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        IDictionary<string, object?> belge,
+        List<Dictionary<string, JsonElement>> satirlar,
+        BelgeSecenekleri secenekler,
+        YazmaBaglami baglam,
+        CancellationToken iptal = default)
+        => KaydetIcAsync(baglanti, islem, belge, satirlar, secenekler, baglam, iptal);
+
+    /// <summary>
     /// BELGE DUZENLEME (135) - kayitli belgeyi yeniden yazar.
     ///
     /// Kesin belge numara tuketmis, stok dusmus ve cari islenmis olur; duzenleme

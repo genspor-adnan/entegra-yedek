@@ -64,7 +64,7 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
             {calisiyor ? 'Kaydediliyor…' : '📅 Terminleri Kaydet'}
           </button>
           <span className="ayrac" />
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >

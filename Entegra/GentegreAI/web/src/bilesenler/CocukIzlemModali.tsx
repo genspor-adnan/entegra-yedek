@@ -75,7 +75,7 @@ export function CocukIzlemModali({ hastaId, cocukAdi, belgeId, onKapat }: {
              <button type="button" className="b" onClick={() => void kaydet()}>
                {cev('Kaydet')} ({sonraki}. {cev('izlem')})
              </button>
-             <button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>
+             <button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
 

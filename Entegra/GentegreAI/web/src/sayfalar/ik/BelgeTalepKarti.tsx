@@ -224,7 +224,7 @@ function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
       {kayitId && yazar && ro.durum === 4 && d.teslimSekli === 2 && <button type="button" className="d" disabled={mesgul} onClick={() => void epostaGonder()}>✉ {c('E-posta ile gönder')}</button>}
       {kayitId && yazar && (ro.durum === 1 || ro.durum === 2 || ro.durum === 4) && <button type="button" className="d tl-tehlike" disabled={mesgul} onClick={() => void reddet()}>✕ {c('Reddet')}</button>}
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={kapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={kapat}>✖ {c('Kapat')}</button>
     </>
   );
 

@@ -781,7 +781,8 @@ public static partial class KaynakKatalogu
         var kolonlar = p.Kolonlar
             .Select(k => k.Ad switch
             {
-                "kod"    => k with { Baslik = "Dosya No" },
+                // DOSYA NO %20 GENİŞ (kullanıcı 24.10.2026): personelin Sicil No'su 78 px.
+                "kod"    => k with { Baslik = "Dosya No", Genislik = 94 },
                 "cepTel" => k with { Baslik = "Telefon" },
                 _ when personelAlanlari.Contains(k.Ad) => k with { Varsayilan = false },
                 _ => k
@@ -799,10 +800,20 @@ public static partial class KaynakKatalogu
         var ek = new List<KolonTanimi>
         {
             tckn,
+            // YAŞ / CİNSİYET TEK KOLON (kullanıcı 24.10.2026: "yaş ve cinsiyet kolonlarını birleştir,
+            //   başlık Yaş/Cins. olsun, 53 E gibi listelensin"). Ayrı Yaş / Cinsiyet kolonları kolon
+            //   seçicide durur (kayıtlı görünümler bozulmasın) ama varsayılan görünmez. Sıra yaşa göre.
+            new("yasCins",
+                "concat_ws(' ', case when th.dogum_tarihi is null then null "
+                + "else extract(year from age(current_date, th.dogum_tarihi))::int::text end, "
+                + "case th.cinsiyet when 1 then 'E' when 2 then 'K' end)",
+                                   "metin", "Yaş/Cins.", Hizalama: "orta", Genislik: 70,
+                                   Filtrelenebilir: false,
+                                   SiraSql: "(current_date - th.dogum_tarihi)"),
             new("cinsiyetAdi",
                 "case th.cinsiyet when 1 then 'Erkek' when 2 then 'Kadın' else '' end",
                                    "metin", "Cinsiyet", Hizalama: "orta", Genislik: 90,
-                                   Filtrelenebilir: false),
+                                   Varsayilan: false, Filtrelenebilir: false),
             new("cinsiyet",  "th.cinsiyet",  "sayi",  "Cinsiyet (ham)", Varsayilan: false),
             // Yas dogum tarihinden HESAPLANIR: sabit bir "yas" kolonu tutmak her
             //   dogum gununde bayatlar.
@@ -810,7 +821,7 @@ public static partial class KaynakKatalogu
                 "case when th.dogum_tarihi is null then null "
                 + "else extract(year from age(current_date, th.dogum_tarihi))::int end",
                                    "sayi",  "Yaş", Hizalama: "sag", Genislik: 60,
-                                   Filtrelenebilir: false),
+                                   Varsayilan: false, Filtrelenebilir: false),
             new("dogumTarihi", "th.dogum_tarihi", "tarih", "Doğum Tarihi",
                 Hizalama: "orta", Varsayilan: false),
             telefon,
@@ -890,6 +901,17 @@ public static partial class KaynakKatalogu
         };
         var unvanSonu = kolonlar.FindIndex(k => k.Ad == "unvan") + 1;
         kolonlar.InsertRange(unvanSonu, ek);
+
+        // SONRAKİ RANDEVU, DURUM'UN SOLUNDA (kullanıcı 24.10.2026): hastanın şu andan sonraki en
+        //   yakın PLANLI randevusu (durum 1 - 1119: 1 planlandı / 2 geldi / 3 gelmedi / 4 iptal /
+        //   5 ertelendi). ix_randevu_hasta (hasta_id, baslangic) indeksini kullanır.
+        kolonlar.Insert(kolonlar.FindIndex(k => k.Ad == "durum"),
+            new("sonrakiRandevu",
+                "(select min(r.baslangic) from public.randevu r "
+                + " where r.hasta_id = t.id and r.durum = 1 and r.baslangic >= now())",
+                                   "tarih", "Sonraki Randevu", Hizalama: "orta",
+                                   Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
+                                   Filtrelenebilir: false));
 
         // HASTA LİSTESİNDEN KALKANLAR (kullanıcı 16.10.2026: "İlçe, İl, Bugün, Kıdem, Kalan İzin, Talep,
         //   Eksik Bilgi, Yönetici, Telefon, E-posta"). Personel durum kolonları (963, v_personel_durum)

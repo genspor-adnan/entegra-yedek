@@ -114,7 +114,11 @@ public static class BelgeTuru
     /// transfer (20), talep (105). Bunlarda mal hareketi yok ya da karsi
     /// taraf yok; `tipi = 2` iade degil, ture ozel bir isarettir.
     /// </summary>
-    private static readonly HashSet<int> IadesizTurler = new() { 9, 18, 19, 20, 105 };
+    /// STOK FISLERI (3 giris / 4 cikis) DA IADESIZ (24.10.2026, sayim gelistirmesinde bulundu):
+    /// fiste tipi fisin SEBEBIDIR (101) - giris fisi tipi 2 "Sayim Fazlasi", cikis fisi tipi 2
+    /// "Imha". Kume disindayken bu ikisi iade sayiliyor, stok_durum TERS yone yaziliyordu
+    /// (sayim fazlasi stoktan dusuyor, imha stoga ekliyordu); lot defteri ise dogru yondeydi.
+    private static readonly HashSet<int> IadesizTurler = new() { 9, 18, 19, 20, 105, 3, 4 };
 
     public static bool TransferMi(int tur) => tur == Transfer;
 

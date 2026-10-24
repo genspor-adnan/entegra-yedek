@@ -1,4 +1,4 @@
-﻿namespace Gentegre.Cekirdek.Katalog;
+namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Stok, depo ve stok belgesi listeleri.
@@ -330,6 +330,50 @@ public static partial class KaynakKatalogu
             }.Concat(StokBelgesiKuyrukKolonlari()).ToArray());
     }
 
+    // ---------------------------------------------------------- stok sayimi ----
+    // 1169 (sade surum): sayim basligi + satir ozetleri. Fark tutari = (sayilan - sistem)
+    //   x birim maliyet, yalniz SAYILAN satirda. Fisler kapanista kesilen Giris
+    //   (Sayim Fazlasi) / Cikis (Sayim Eksigi) fisleridir.
+    private static KaynakTanimi StokSayim()
+    {
+        const string ozet = "(select count(*) as kalem, count(ss.sayilan) as sayilan, " +
+            "coalesce(sum(greatest(ss.sayilan - ss.sistem, 0) * ss.birim_maliyet), 0) as fazla, " +
+            "coalesce(sum(greatest(ss.sistem - ss.sayilan, 0) * ss.birim_maliyet), 0) as eksik " +
+            "from public.stok_sayim_satir ss where ss.sayim_id = y.id)";
+        return new KaynakTanimi(
+            Ad: "stok-sayim",
+            YetkiKodu: "stok.sayim.liste",
+            Kaynak: $"""
+                public.stok_sayim y
+                left join public.depo d on d.id = y.depo_id
+                left join public.kategori k on k.id = y.kategori_id
+                left join public.belge gb on gb.id = y.giris_belge_id
+                left join public.belge cb on cb.id = y.cikis_belge_id
+                cross join lateral {ozet} o
+                """,
+            SubeKolonu: "y.sube_id",
+            VarsayilanSirala: "y.sayim_tarihi desc, y.id desc",
+            Kolonlar: new KolonTanimi[]
+            {
+                new("id",          "y.id",           "sayi",  "Id", Varsayilan: false),
+                new("sayimNo",     "y.sayim_no",     "metin", "Sayım No", Genislik: 120),
+                new("sayimTarihi", "y.sayim_tarihi", "tarih", "Sayım Tarihi", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
+                new("depo",        "coalesce(d.ad, '')", "metin", "Depo", Genislik: 170),
+                new("kapsamAdi",   "case y.kapsam when 0 then 'Tüm depo' when 1 then 'Kategori: ' || coalesce(k.ad, '') else 'Seçili stoklar' end",
+                                                     "metin", "Kapsam", Genislik: 170),
+                new("aciklama",    "y.aciklama",     "metin", "Açıklama", Genislik: 220),
+                new("durumAdi",    "case y.durum when 0 then 'Açık' else 'Kapandı' end", "metin", "Durum", Hizalama: "orta"),
+                // Ham kod cip filtreleri icin gizli durur.
+                new("durum",       "y.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
+                new("kalem",       "o.kalem",        "sayi",  "Kalem", Hizalama: "sag"),
+                new("sayilan",     "o.sayilan",      "sayi",  "Sayılan", Hizalama: "sag"),
+                new("fazlaTutar",  "o.fazla",        "para",  "Fazla ₺", Hizalama: "sag", Bicim: "#,##0.00"),
+                new("eksikTutar",  "o.eksik",        "para",  "Eksik ₺", Hizalama: "sag", Bicim: "#,##0.00"),
+                new("fisler",      "concat_ws(' · ', nullif(gb.belge_no, ''), nullif(cb.belge_no, ''))",
+                                                     "metin", "Fişler", Genislik: 200),
+            });
+    }
+
     // --------------------------------------------------------------- gorev ----
     // Gorev / hatirlatma / takvim (108). Liste katmani kod cozmez: tur, durum ve
     //   oncelik SQL'de metne cevrilir, ham kodlar cip filtreleri icin gizli kalir.
@@ -392,13 +436,13 @@ public static partial class KaynakKatalogu
                 + "        or exists (select 1 from public.lab_panel p "
                 + "                    where p.hizmet_id = h.id and p.durum = 0) "
                 + "      then 1 else 0 end",
-                                     "sayi",  "Lab",        Varsayilan: false),
+                                     "sayi",  "Lab",        Varsayilan: false, UrunModu: UrunModlari.Hbys),
             // DIS ISLEMI MI (19.09.2026, kod isi - goc yok): `labVarMi` ile ayni
             //   gerekce - dis tedavi
             //   plani satiri JENERIK HIZMET penceresinden seciliyor; suzgec
             //   olmadan butun SUT katalogu aciliyor ve secilen hizmetin cogu
             //   dis islemi DEGIL. Kolon gizli, yalniz suzmek icin.
-            new("disIslem", "coalesce(h.dis_islem, 0)", "sayi", "Diş", Varsayilan: false),
+            new("disIslem", "coalesce(h.dis_islem, 0)", "sayi", "Diş", Varsayilan: false, UrunModu: UrunModlari.Hbys),
             new("kod",     "h.kod",      "metin", "Kod"),
             // KISA AD (549, kullanici: "ad'in soluna Kisa Ad ekle, aramada
             //   oncelik ona olsun"): katalog SKRS'den kuruldugu icin `ad`
@@ -424,7 +468,7 @@ public static partial class KaynakKatalogu
             //   engelliyor; istem ekranlari listeyi bununla suzer.
             new("modalite", "coalesce(h.modalite, 0)", "kod", "Modalite",
                                             Hizalama: "orta", Genislik: 110,
-                                            Varsayilan: false),
+                                            Varsayilan: false, UrunModu: UrunModlari.Hbys),
             // KDV ve BIRIM listede GORUNMEZ (kullanici): hizmet listesinde
             //   kategori/kod/ad okunuyor, oran ve birim kartin ve kalem
             //   penceresinin isi. Kolonlar kaldirilmadi - arama/kalem
@@ -469,8 +513,10 @@ public static partial class KaynakKatalogu
             //   sayiyi iki kere gosterirdi. HUV kodu ayri kalir - TTB
             //   tarifesinin kodu SUT kodundan farklidir ve ozel sigorta
             //   faturasi ona bakar.
-            new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110),
-            new("loinc",   "h.loinc",    "metin", "LOINC",      Genislik: 110),
+            // ERP MODUNDA GORUNMEZ (kullanici 24.10.2026): HUV kodu, LOINC ve uc tarife fiyati HBYS'e ozgu;
+            //   Lab / Dis / Modalite / Radyoloji kolonlari da (UrunModlari.Hbys).
+            new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110, UrunModu: UrunModlari.Hbys),
+            new("loinc",   "h.loinc",    "metin", "LOINC",      Genislik: 110, UrunModu: UrunModlari.Hbys),
             // UC TARIFE FIYATI (499, kullanici: "ozel(ucretli) fiyati, TTB
             //   (HUV fiyati), SUT Fiyati icin hizmet listesi"). Tetkik
             //   katalogda BIR kez durur (497); hangi kurum tipinin hangi
@@ -479,13 +525,13 @@ public static partial class KaynakKatalogu
             //   id'leri kurulumdan kuruluma degisir.
             new("ozelFiyat", TarifeFiyati(1), "para", "Özel (Ücretli)",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
-                Filtrelenebilir: false, Genislik: 130),
+                Filtrelenebilir: false, Genislik: 130, UrunModu: UrunModlari.Hbys),
             new("huvFiyat",  TarifeFiyati(2), "para", "TTB / HUV",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
-                Filtrelenebilir: false, Genislik: 120),
+                Filtrelenebilir: false, Genislik: 120, UrunModu: UrunModlari.Hbys),
             new("sutFiyat",  TarifeFiyati(3), "para", "SUT",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
-                Filtrelenebilir: false, Genislik: 110),
+                Filtrelenebilir: false, Genislik: 110, UrunModu: UrunModlari.Hbys),
             // PANEL MI: icerigi olan hizmet (496). Panelin kendi satiri da
             //   satilabilir bir kalemdir - katalogda tetkikten ayirt etmenin
             //   tek yolu icerik sayisi.
@@ -495,7 +541,7 @@ public static partial class KaynakKatalogu
             new("paket", "h.paket", "mantik", "Paket/Panel", Hizalama: "orta",
                 Genislik: 90, Varsayilan: false),
             new("radyoloji", "h.radyoloji", "mantik", "Radyoloji", Hizalama: "orta",
-                Genislik: 90, Varsayilan: false),
+                Genislik: 90, Varsayilan: false, UrunModu: UrunModlari.Hbys),
             // 0 yerine BOS: katalogun %95'i tekil tetkik; her satirda "0"
             //   gormek gurultu, dolu hucre ise "bu satir bir paket" demek.
             new("icerikSayisi",

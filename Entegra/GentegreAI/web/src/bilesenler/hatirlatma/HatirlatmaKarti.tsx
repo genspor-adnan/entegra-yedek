@@ -317,7 +317,7 @@ export function HatirlatmaKarti({ istek, onKapat }: { istek: HatirlatmaAcIstegi;
         </span>}
         {id && <button type="button" className="d" onClick={kopyala}>⧉ Kopyala</button>}
         {id && benim && <button type="button" className="d" onClick={() => void sil()}>🗑 Sil</button>}
-        <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }} onClick={onKapat}>Kapat</button>
+        <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ Kapat</button>
       </>}
       ustSerit={(
         <div className="hk-serit">

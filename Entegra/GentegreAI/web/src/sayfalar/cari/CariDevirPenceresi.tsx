@@ -22,7 +22,7 @@ export function DevirPenceresi({ tur, id, onKapat, onKaydedildi }: {
            alt={<>
              <span ref={setYer} style={{ display: 'contents' }} />
              <span style={{ marginLeft: 'auto' }} />
-             <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+             <button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       <style>{'.cd-pencere { width:min(1100px, 96vw); }'}</style>
       <DevirFormu tur={tur} id={id} onKapat={onKapat} onKaydedildi={onKaydedildi} onYuklendi={setV} dugmeYeri={yer} />

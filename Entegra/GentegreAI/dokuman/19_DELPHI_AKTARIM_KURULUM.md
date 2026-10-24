@@ -23,6 +23,8 @@ Delphi ERP asıl sistemdir; web aktarılan veriyi gösterir, değiştirmez.
 
 Yayın profili `yayinla.ps1 -Kurulum delphi` (DB `gentegre_erp_delphi`, API 5182, ürün ERP).
 
+> **24.10.2026:** pilot BILIM verisiyle dolduğu için adı **bilim** oldu: `yayinla.ps1 -Kurulum bilim`, adres `/bilim/`, DB `BILIM`, konteyner `gentegre-api-bilim`, klasör `~/gentegre-bilim`, API yine 5182. Eski `/gentegreai/delphi/` web adresi `/bilim/`'e yönlenir; eski `/gentegreai/delphi/api/` aynı API'ye gider, ajanın `ApiAdres` ayarı değişmeden çalışır (yeni kurulumda `.../bilim/`). nginx adımı `yayin/bilim-hazirla.sh` (sudo). Aşağıdaki ilk kurulum adımları tarihçedir.
+
 ```bash
 scp GentegreAI/yayin/nginx-delphi.conf GentegreAI/yayin/delphi-pilot-hazirla.sh gentegre@46.36.201.170:/tmp/
 ssh gentegre@46.36.201.170 "sed -i 's/
@@ -116,9 +118,20 @@ ekler (IMAJ, ZLib açılır, diskteki `.OBJ` okunur) + e-Belge geçmişi (GENDEP
 
 1. Delphi'ye giriş kapatılır, son yedek alınır (FETA: geliştirme makinesinde geri yüklendi).
 2. MSSQL: `Update_SQL_216` + `mssql_hazirla.sql` (salt okur rol, CT).
-3. Yerel PG'de boş kurulum: `kur.ps1 -SadeceSema -Urun erp -Db <DB>`; `aktarim_ayar.hareket_baslangic`
-   = `1900-01-01` (bütün yıllar); `fn_aktarim_ajan_ekle(...)` → ajan `--tek-tur` (tam yükleme).
+3. Yerel PG'de boş kurulum: `kur.ps1 -SadeceSema -Urun erp -Db <DB>`.
+   **Aktarımdan ÖNCE hedef PG boşaltılır (kural, 1170):** boş kurulum göç tohumlarıyla gelir
+   (HBYS lab testleri / panelleri, demo hekimler, döküman klasörleri, standart hesap planı);
+   kalırsa Delphi kayıtlarıyla yan yana "eski kalem" olarak görünür. Kurulumu
+   `kur.ps1 -SadeceSema -Urun erp -AktarimIcin -Db <DB>` ile yapın (sonunda kendisi boşaltır) ya da
+   elle: rapor `select * from fn_aktarim_oncesi_bosalt(false)` → sil `select * from fn_aktarim_oncesi_bosalt(true)`.
+   Yalnız hedef PG'ye dokunur (MSSQL kaynak değişmez); admin kullanıcı, şube / rol / yetki /
+   ayar / kod listeleri korunur; aktarım başlamışsa reddeder.
+   Sonra `aktarim_ayar.hareket_baslangic` = `1900-01-01` (bütün yıllar);
+   `fn_aktarim_ajan_ekle(...)` → ajan `--tek-tur` (tam yükleme).
 4. `aktar_ek.ps1 -Db <DB> -MssqlDb <Delphi DB> [-DepoDb <..._GENDEPO>] [-DokumanKlasoru <GenDokuman>]`.
+   İlk adımı stok kategorileri (Delphi KATEGORI, aynı kimlikle - 1171), son adımı **lot defteri**
+   (`stok_lot_durum`, lot hareketlerinden - 1172). Ajan lot hareketi yazdıkça defter tetikle güncellenir;
+   aktarımla kurulmuş eski bir DB'de defter boşsa: `select public.fn_stok_lot_durum_kur()`.
 5. Ajan `--mutabakat`: kayıt sayıları eşit, cari bakiye farkları açıklanmış olmalı (bkz. aşağı).
 6. `stg` şeması boşaltılır (Delphi ham verisi — geri çözülebilir parolalar dahil), veritabanı
    dökülür, sunucuda `yayin/feta-hazirla.sh` geri yükler + nginx; sonra `yayinla.ps1 -Kurulum <ad>`.

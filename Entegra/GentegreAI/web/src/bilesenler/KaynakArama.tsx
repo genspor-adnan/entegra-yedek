@@ -257,7 +257,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                </button>
              )}
              {/* Kapat sağa yaslı (kullanıcı 16.10.2026). */}
-             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       <div className="kaynak-arama">
         {ustSecimler && <div className="kaynak-arama-secim">{ustSecimler}</div>}

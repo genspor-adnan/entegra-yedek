@@ -271,7 +271,7 @@ export function BelgeAracCubugu({
       `zorla = true` demek olur ve kaydedilmemis degisiklik uyarisi HIC
       cikmadan kart kapanirdi (kullanici: "değişiklik yaptım kapat deyince
       uyarı gelmedi"). */}
-  <button className="d kapat-dugmesi" onClick={() => kapat()}>{c('✖ Kapat')}</button>
+  <button className="d kapat-dugmesi" onClick={() => kapat()}>✖ {c('Kapat')}</button>
 
   {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan
       alindi - irsaliyedeki IADE kutusuyla ayni yeri kullanir. Faturanin cinsi

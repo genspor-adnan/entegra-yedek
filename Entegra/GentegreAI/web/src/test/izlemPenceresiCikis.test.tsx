@@ -74,6 +74,29 @@ describe('Ürt. Tarihi + SKT sutunlari (kullanici 24.10.2026)', () => {
   });
 });
 
+describe('✓ gerekene tamamla (kullanici 24.10.2026)', () => {
+  const satirKutusu = (lot: string) => [...document.body.querySelectorAll('tbody tr')]
+    .find(r => (r.querySelector('input') as HTMLInputElement)?.value === lot)!;
+  it('giriste satir miktari kalan kadar artar, odak Tamam\'a gecer', () => {
+    const lot = (ad: string, miktar: string): IzlemSatiri =>
+      ({ lotNo: ad, seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar });
+    render(<IzlemPenceresi stokAdi="X" stokId={null} depoId={1} izleme={2} miktar={10}
+                           satirlar={[lot('L1', '3'), lot('L2', '2')]} cikis={false} onKapat={() => {}} onKaydet={() => {}} />);
+    const satir = satirKutusu('L2');
+    fireEvent.click(satir.querySelector('.izl-tamamla button')!);
+    expect((satir.querySelector('input.hiza-sag') as HTMLInputElement).value).toBe('7');
+    expect((document.activeElement?.textContent ?? '')).toMatch(/Tamam/);
+  });
+  it('cikista lotun kalanini asmaz', async () => {
+    render(<IzlemPenceresi stokAdi="X" stokId={1} depoId={1} izleme={2} miktar={4} satirlar={[]}
+                           cikis onKapat={() => {}} onKaydet={() => {}} />);
+    await waitFor(() => expect(screen.getByDisplayValue('A')).toBeTruthy());
+    const satir = satirKutusu('A');
+    fireEvent.click(satir.querySelector('.izl-tamamla button')!);
+    expect((satir.querySelector('input.hiza-sag') as HTMLInputElement).value).toBe('2');
+  });
+});
+
 describe('cikista miktar azaltilip yeniden artirilinca (kullanici 24.10.2026)', () => {
   it('oturumda birakilan kayitli lotlar yeniden secilebilir', async () => {
     const { api } = await import('../api/istemci');

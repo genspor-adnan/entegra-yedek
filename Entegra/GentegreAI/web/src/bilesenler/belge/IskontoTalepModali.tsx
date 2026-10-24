@@ -145,7 +145,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                {/* KAPAT SAGA YANASIK: eylem dugmeleriyle arasi acilir ki
                    yanlislikla tiklanmasin. */}
                <button type="button" className="d" style={{ marginLeft: 'auto' }}
-                       disabled={calisiyor} onClick={onKapat}>{c('Kapat')}</button>
+                       disabled={calisiyor} onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       <div className="isk-talep">

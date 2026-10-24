@@ -244,7 +244,9 @@ export function Kabuk() {
     // Sekme ikonu listenin ikonu (kullanıcı 23.10.2026).
     for (const l of LISTELER) if (kartSekmesiVar(l)) m[kartSekmeYolu(l)] ??= { ad: yeniSekmeBasligi(l), ikon: l.ic };
     // Özel kartlardan sekmede açılanlar (reçete, 15.10.2026) - "yeni" yolu yok, palete girmez.
-    for (const [yol, ad] of Object.entries(OZEL_KART_SEKME_YOLLARI)) m[yol] ??= { ad, ikon: '📝' };
+    //   İkon yine listenin ikonu (stok sayımı 🧮); listesi bulunamazsa 📝.
+    for (const [yol, ad] of Object.entries(OZEL_KART_SEKME_YOLLARI))
+      m[yol] ??= { ad, ikon: LISTELER.find(l => l.kartYolu === yol)?.ic ?? '📝' };
     return m;
   }, []);
   const sekme = useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBasliklar: panelBasliklari, kartSekmeleri });

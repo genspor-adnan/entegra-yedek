@@ -57,7 +57,7 @@ export function RandevuErtelePenceresi({ randevu: r, onKapat, onErtelendi }: {
     <Modal baslik={`⏭ ${c('Randevu Ertele')}`} enUst buyutmeYok onKapat={onKapat}
            alt={<>
              <button type="button" className="d bir" disabled={mesgul} onClick={() => void kaydet()}>⏭ {c('Ertele')}</button>
-             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 520 }}>
         <div className="not" style={{ margin: 0 }}>

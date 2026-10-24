@@ -42,7 +42,11 @@ public sealed record KolonTanimi(
     /// AYAR KAPISI (1121): verilirse alan yalniz bu ayar ACIKSA metaya girer (fn_ayar_kapilari -
     /// referans degeri, yoksa kurum tipi varsayilani). Kapaliysa urun modu gibi HIC gonderilmez.
     /// </summary>
-    string? AyarKapisi = null
+    string? AyarKapisi = null,
+    // SIRALAMA IFADESI (24.10.2026): gosterilen deger metin ama sirasi sayi olan kolon
+    //   (hasta "Yas/Cins." = "53 E" - metin sirasi "100 E"yi "53 E"nin onune koyardi).
+    //   null ise Sql ile siralanir.
+    string? SiraSql = null
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;
@@ -547,6 +551,7 @@ public static partial class KaynakKatalogu
         Ekle(SatinalmaButce());
         Ekle(StokFisi(3));
         Ekle(StokFisi(4));
+        Ekle(StokSayim());
         // BANKO (985) ve oturum gecmisi (987)
         Ekle(Banko());
         Ekle(BankoOturum());

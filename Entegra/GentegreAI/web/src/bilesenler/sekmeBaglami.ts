@@ -28,3 +28,10 @@ export const EkranSekmesiBaglami = createContext<{
 
 /** Bir listenin kayıtları değişti (başka sekmeden): liste tazelenir. detail = kaynak. */
 export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';
+
+/**
+ * SEKME BAŞLIĞINDA AD (kullanıcı 24.10.2026: "müşteri, tedarikçi, hasta, başvuru, kurum, dış doktor,
+ * kişi vb. sekme kartı açıldığında başlığa ünvanı / ad soyadından ilk 2 kelimeyi yaz"): uzun ünvan
+ * sekmeyi kesiyordu. Yalnız ad / ünvan kısaltılır; belge no, kod gibi başlıklar olduğu gibi kalır.
+ */
+export const sekmeAdi = (ad: string) => ad.trim().split(/\s+/).filter(Boolean).slice(0, 2).join(' ');

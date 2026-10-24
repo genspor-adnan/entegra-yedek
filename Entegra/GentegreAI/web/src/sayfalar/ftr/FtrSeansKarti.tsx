@@ -105,7 +105,7 @@ export function FtrSeansKarti() {
         <button className="d" onClick={() => git(`/hasta/${s.hasta_id}?geri=${encodeURIComponent(konum.pathname)}`)}>{c('↗ Hasta Kartı')}</button>
         {yazar && <button className="d" onClick={() => void guncelle({ imza: true })} disabled={s.imza === 1}>✍ {s.imza === 1 ? 'İmzalandı' : 'Hasta İmzası'}</button>}
         <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
-        <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+        <button className="d ds-sp" onClick={kapat}>✖ {c('Kapat')}</button>
       </div>
       <div className="ds-hdr ds-hdr5" style={{ padding: '4px 10px 8px' }}>
         <div><label>Hasta</label><div className="ds-inp big">{s.hasta_adi}</div></div>

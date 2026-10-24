@@ -1262,7 +1262,7 @@ Yine de yeni kayıt eklensin mi?`);
   if (yukleniyor)
     return (
       <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok || sayfaKipi} sayfa={sayfaKipi}
-        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>} onKapat={onKapat}>
         <div className="yukleniyor-satir">{c('Yukleniyor…')}</div>
       </Modal>
     );
@@ -1270,7 +1270,7 @@ Yine de yeni kayıt eklensin mi?`);
   if (!meta)
     return (
       <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)} buyutmeYok={buyutmeYok || sayfaKipi} sayfa={sayfaKipi}
-        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -1685,7 +1685,7 @@ Yine de yeni kayıt eklensin mi?`);
           })()}
           {kartAracGrubu(aracBaglami)}
           {kapatSolu && <span className="kapat-solu">{kapatSolu}</span>}
-          <button className="d kapat-dugmesi" onClick={kapatIstendi}>{c('Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={kapatIstendi}>✖ {c('Kapat')}</button>
           {kartSagAraclari(aracBaglami)}
         </>
       }

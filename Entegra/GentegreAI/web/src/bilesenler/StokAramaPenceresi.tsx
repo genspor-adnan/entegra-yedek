@@ -474,9 +474,28 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     } finally { setTopluEkleniyor(false) }
   };
 
+  // OK TUŞUYLA DOLAŞIRKEN SEÇİLİ SATIR GÖRÜNÜR KALIR: liste kendi içinde kayıyor,
+  //   imleç görünen alanın dışına çıkınca nerede olduğu görünmüyordu.
+  useEffect(() => {
+    document.querySelector('.stok-arama tr.secili')?.scrollIntoView?.({ block: 'nearest' });
+  }, [secili]);
+
   const tus = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(i => Math.min(i + 1, satirlar.length - 1)) }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(i => Math.max(i - 1, 0)) }
+    // OK TUŞU SATIRI İŞARETLER (kullanıcı 24.10.2026: "gezerken bulunduğum satır check
+    //   olsun"): düz tık gibi tekli seçim; Shift+ok çapadan aralık seçer.
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (satirlar.length === 0) return;
+      const i = e.key === 'ArrowDown' ? Math.min(secili + 1, satirlar.length - 1) : Math.max(secili - 1, 0);
+      setSecili(i);
+      if (e.shiftKey) {
+        const [a, b] = capa <= i ? [capa, i] : [i, capa];
+        setIsaretli(new Map(satirlar.slice(a, b + 1).map(x => [isaretAnahtari(x), x])));
+      } else {
+        setCapa(i);
+        setIsaretli(new Map([[isaretAnahtari(satirlar[i]), satirlar[i]]]));
+      }
+    }
     else if (e.key === 'Enter' && satirlar[secili]) {
       e.preventDefault();
       // Basili tutulan Enter'in TEKRARI secim sayilmaz.
@@ -488,6 +507,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       //   kisayolu ve `preventDefault` her ortamda onu yutmuyordu
       //   (kullanici: "kısayolu shift+enter yap"). Shift+Enter ayni elin
       //   ayni tusu - hiz kaybi yok.
+      // Birden çok satır işaretliyse (Shift+ok / Ctrl tık) Enter "Seçilenleri Ekle"dir.
+      if (!e.shiftKey && isaretli.size > 1) { void isaretlileriEkle(); return }
       void sec(satirlar[secili], !e.shiftKey);
     }
   };
@@ -546,7 +567,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
             )}
           </span>
           )}
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >
@@ -636,7 +657,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     ikisi yan yana okunur; izleme (karekod/seri) ayri bir
                     konudur, sona duser. */}
                 <th className="hiza-sag" style={{ width: 40 }}>KDV</th>
-                <th style={{ width: 55 }} className="hiza-orta">{c('İzleme')}</th>
+                {/* "Lot No + SKT" KIRILMADAN TEK SATIR (kullanıcı 24.10.2026) - 55 px rozeti iki satıra bölüyordu. */}
+                <th style={{ width: 95 }} className="hiza-orta">{c('İzleme')}</th>
               </tr>
             </thead>
             <tbody>
@@ -650,12 +672,13 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                        fiyat için "Miktar Ekle (Shift+Enter)" düğmesi kalır.
                        Shift+tık metin seçmesin diye mousedown engellenir. */
                     onMouseDown={e => { if (e.shiftKey) e.preventDefault() }}
-                    onClick={e => satirTikla(e, i, r)}
+                    /* Tık odağı arama kutusuna geri verir: ok / Enter klavyeyle sürsün (kullanıcı 24.10.2026). */
+                    onClick={e => { satirTikla(e, i, r); kutu.current?.focus({ preventScroll: true }) }}
                     onDoubleClick={() => void sec(r, true)}>
                   <td className="hiza-orta">
                     <input type="checkbox" checked={isaretli.has(isaretAnahtari(r))}
                       onClick={e => e.stopPropagation()}
-                      onChange={() => { setSecili(i); setCapa(i); isaretDegistir(r) }} />
+                      onChange={() => { setSecili(i); setCapa(i); isaretDegistir(r); kutu.current?.focus({ preventScroll: true }) }} />
                   </td>
                   {/* TUR YALNIZ IKON (kullanici): uc satir tipini ayirmak icin
                       rozet metni gereksiz genislik yiyordu. Ad yine erisilebilir
@@ -698,7 +721,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     {r.tip === 'hizmet' ? <span className="sonuk">—</span>
                       : String(r.izlemeAdi ?? 'Yok') === 'Yok'
                         ? <span className="sonuk">Yok</span>
-                        : <span className="rozet bilgi">{String(r.izlemeAdi)}</span>}
+                        : <span className="rozet bilgi" style={{ whiteSpace: 'nowrap' }}>{String(r.izlemeAdi)}</span>}
                   </td>
                 </tr>
               ))}

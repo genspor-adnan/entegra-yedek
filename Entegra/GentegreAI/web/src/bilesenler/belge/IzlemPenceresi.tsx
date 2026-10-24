@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
@@ -160,6 +160,8 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
     return () => { iptal = true };
   }, [cikis, stokId, depoId]);
 
+  /** Satırdaki ✓ (gerekene tamamla) odağı buraya verir - Enter / tık ile kapanır. */
+  const tamamRef = useRef<HTMLButtonElement>(null);
   const toplam = liste.reduce((t, z) => t + sayi(z.miktar), 0);
   const fark = Math.round((miktar - toplam) * 10000) / 10000;
   /** SKT'si gecmis lot sayisi - girisi ENGELLEMEZ, uyarir. */
@@ -223,7 +225,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       onKapat={onKapat}
       alt={
         <>
-          <button className="d onay" onClick={kaydet}>💾 Tamam</button>
+          <button ref={tamamRef} className="d onay" onClick={kaydet}>💾 Tamam</button>
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
           {/* RAF OMRU UST BANTTA ETIKET (kullanici 24.10.2026: "label olarak gelsin, tıklarsam modal olarak
@@ -248,7 +250,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
               <span key={ad}><span className="sonuk">{ad}</span>{' '}
                 <b className={sinif || undefined} style={{ fontSize: 16 }}>{deger.toLocaleString('tr-TR')}</b></span>))}
           </span>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >
@@ -302,6 +304,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                 {tarihVar && <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>}
                 {/* Giriste DURUM (girişte 0), cikista o lottan KALAN gosterilir. */}
                 <th>{cikis ? 'Kalan' : 'Durum'}</th>
+                <th style={{ width: 30 }} />
                 <th className="hiza-sag">Miktar</th>
                 <th />
               </tr>
@@ -328,6 +331,18 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                     ? <td className="hiza-sag">{(z.kalan ?? 0).toLocaleString('tr-TR')}</td>
                     /* Giriste tek durum var; kod listesi genisleyince combo olur. */
                     : <td><input value="Girişte" readOnly disabled /></td>}
+                  {/* ✓ = GEREKENE TAMAMLA (kullanıcı 24.10.2026): satırın miktarı kalan (gereken - girilen)
+                      kadar artar - çıkışta lotun kalanını aşmaz; odak Tamam'a geçer, Enter ile kapanır. */}
+                  <td className="izl-tamamla">
+                    <button type="button" className="mini" title={c('Miktarı gerekene tamamla')}
+                            disabled={fark === 0 || (fark < 0 && sayi(z.miktar) === 0)}
+                            onClick={() => {
+                              const hedef = Math.max(0, Math.round((sayi(z.miktar) + fark) * 10000) / 10000);
+                              const yeni = cikis ? Math.min(hedef, z.kalan ?? 0) : hedef;
+                              degis(i, 'miktar', yeni > 0 ? String(yeni) : '');
+                              tamamRef.current?.focus();
+                            }}>✓</button>
+                  </td>
                   <td><input className="hiza-sag" value={z.miktar}
                              onChange={e => degis(i, 'miktar', e.target.value.replace(/-/g, ''))} /></td>
                   <td>
@@ -344,7 +359,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={2 + (seriVar ? 1 : 0) + (tarihVar ? 2 : 0)}>
+                <td colSpan={3 + (seriVar ? 1 : 0) + (tarihVar ? 2 : 0)}>
                   {/* SKT gecmisse ENGEL DEGIL UYARI: mal fiilen gelmis olabilir
                       (iade, imha oncesi giris) - karar kullanicinin. */}
                   {gecmisSkt > 0 && (

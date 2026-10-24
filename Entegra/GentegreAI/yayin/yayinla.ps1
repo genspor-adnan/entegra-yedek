@@ -40,7 +40,7 @@ param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
-    [ValidateSet('hepsi','hbys','erp','delphi','feta','profiller',
+    [ValidateSet('hepsi','hbys','erp','bilim','feta','profiller',
                  'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
@@ -68,14 +68,17 @@ $KURULUMLAR = @(
         Yol = '/gentegreai/'; Kok = 'gentegre-erp';
         Db = 'gentegre_erp'; Kap = 'gentegre-api-erp'; Port = 5181; Urun = 'erp'
     },
-    # DELPHI AKTARIMI PILOTU (14.10.2026, kullanici: "yeni bos kurulum"): bos ERP
-    #   veritabani, veri Delphi'den aktarim ajaniyla gelir (dokuman/19). Sunucu
-    #   hazirligi bir kez: yayin\delphi-pilot-hazirla.sh (DB + nginx, sudo).
+    # BILIM (24.10.2026, kullanici: "bilim datasi aktardigimiz delphi sunucu adini
+    #   bilim diye degistir"): eski DELPHI AKTARIMI PILOTU (14.10.2026; /gentegreai/delphi/,
+    #   db gentegre_erp_delphi, konteyner gentegre-api-erp-delphi). Veri Delphi BILIM'den
+    #   aktarim ajaniyla geldi (dokuman/19). Yeniden adlandirma bir kez: yayin\bilim-hazirla.sh
+    #   (nginx, sudo) - eski /gentegreai/delphi/ web adresi /bilim/'e yonlenir, eski
+    #   /gentegreai/delphi/api/ ajan icin ayni porta (5182) gitmeye devam eder.
     #   'hepsi' bu kurulumu da yayinlar.
     [ordered]@{
-        Ad = 'delphi'; Etiket = 'Gentegre AI (ERP - Delphi aktarimi pilotu)';
-        Yol = '/gentegreai/delphi/'; Kok = 'gentegre-erp-delphi';
-        Db = 'gentegre_erp_delphi'; Kap = 'gentegre-api-erp-delphi'; Port = 5182; Urun = 'erp'
+        Ad = 'bilim'; Etiket = 'BILIM (ERP - Delphi aktarimi)';
+        Yol = '/bilim/'; Kok = 'gentegre-bilim';
+        Db = 'BILIM'; Kap = 'gentegre-api-bilim'; Port = 5182; Urun = 'erp'
     },
     # FETA (22.10.2026, kullanici: "46.36.201.170/feta ya son erp yi kur ... musteri artik
     #   delphi yerine bu adresten devam edecek, DB adi FETA"): Delphi FETA + FETA_GENDEPO

@@ -115,7 +115,7 @@ export function LabRaporCikti() {
             Tüm sonuçlar onaylanmadı — bu çıktı TASLAKTIR
           </span>
         )}
-        <button className="d" onClick={() => git(-1)}>{c('✖ Kapat')}</button>
+        <button className="d" onClick={() => git(-1)}>✖ {c('Kapat')}</button>
       </div>
 
       <div className="cikti-sayfa">

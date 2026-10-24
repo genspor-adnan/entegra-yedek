@@ -177,7 +177,7 @@ export function DisSeansKarti() {
         <button className="d" onClick={() => git(`/dis-lab-isemri?hastaId=${s.hastaId}&geri=${encodeURIComponent(konum.pathname)}`)}>🧪 Lab İşleri</button>
         <span className="rozet gri" title={c('Seans süresi')}>⏱ {sayac}</span>
         <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
-        <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+        <button className="d ds-sp" onClick={kapat}>✖ {c('Kapat')}</button>
       </div>
       <div className="ds-hdr" style={{ padding: '8px 10px' }}>
         <div><label>Hasta</label><div className="ds-inp big">{s.hasta}{s.alerji && s.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>)}</div></div>
@@ -241,7 +241,7 @@ export function DisSeansKarti() {
                     <input autoFocus placeholder={c('İşlem ara…')} value={hizmetAra.q} onChange={e => void hizmetAraYap(e.target.value)} style={{ minWidth: 240 }} />
                     <label className="sonuk">Diş <input value={hizmetAra.disNo} onChange={e => setHizmetAra(a => ({ ...a, disNo: e.target.value }))} style={{ width: 50 }} /></label>
                     <label className="sonuk">{c('Yüzey')}<input value={hizmetAra.yz} onChange={e => setHizmetAra(a => ({ ...a, yz: e.target.value }))} style={{ width: 60 }} /></label>
-                    <button className="d" onClick={() => setHizmetAra(a => ({ ...a, acik: false }))}>Kapat</button></div>
+                    <button className="d" onClick={() => setHizmetAra(a => ({ ...a, acik: false }))}>✖ Kapat</button></div>
                   <div className="ds-dg" style={{ maxHeight: 200, overflowY: 'auto' }}><table>
                     <thead><tr><th>Kod</th><th>İşlem</th><th className="sag">Fiyat</th><th /></tr></thead>
                     <tbody>{hizmetAra.sonuc.map(x => <tr key={x.id}><td className="sonuk">{x.kod}</td><td>{x.ad}</td><td className="sag">{para.format(x.fiyat)}</td>

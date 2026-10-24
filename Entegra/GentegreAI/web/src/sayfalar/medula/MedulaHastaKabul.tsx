@@ -222,7 +222,7 @@ export function MedulaHastaKabul() {
         {sekme === 'gunluk' && (
           <>
             <div className="md-grp"><div className="md-gb">{c('Bu hastanın Medula günlüğü')}</div><Gunluk satirlar={gunluk} govdeAc={govdeAc} /></div>
-            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>{c('Kapat')}</button></span></div>
+            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>✖ {c('Kapat')}</button></span></div>
               <pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
           </>
         )}

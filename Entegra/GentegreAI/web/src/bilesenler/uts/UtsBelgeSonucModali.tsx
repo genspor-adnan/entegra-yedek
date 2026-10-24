@@ -16,7 +16,7 @@ export function UtsBelgeSonucModali({ sonuc, onKapat }: {
     <Modal baslik={`ÜTS Bildirimi — ${sonuc.belgeNo}`} onKapat={onKapat}
       alt={
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>{c('Kapat')}</button>
+                onClick={onKapat}>✖ {c('Kapat')}</button>
       }>
       <div style={{ padding: 10 }}>
         <div className="bilgi-kutusu">

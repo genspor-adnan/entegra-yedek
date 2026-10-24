@@ -73,7 +73,7 @@ export function EnabizMesajModali({ hastaId, hastaAdi, belgeId, onKapat }: {
              <button type="button" className="d bir" onClick={() => void gonder()}>
                {cev('Gönder')}
              </button>
-             <button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>
+             <button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
 

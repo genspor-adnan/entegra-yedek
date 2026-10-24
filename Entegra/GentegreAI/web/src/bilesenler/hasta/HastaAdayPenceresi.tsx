@@ -63,7 +63,7 @@ export function HastaAdayPenceresi({ aranan = '', onKapat, onKaydedildi }: {
     <Modal baslik={`🧑 ${c('Yeni Hasta (Aday)')}`} dar enUst buyutmeYok onKapat={onKapat}
            alt={<>
              <button type="button" className="d bir" disabled={mesgul} onClick={() => void kaydet()}>💾 {c('Kaydet ve Seç')}</button>
-             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>{c('Kapat')}</button>
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       <form onSubmit={e => { e.preventDefault(); void kaydet() }}
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, minWidth: 380 }}>

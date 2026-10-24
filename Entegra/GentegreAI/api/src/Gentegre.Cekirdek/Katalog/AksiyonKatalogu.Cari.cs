@@ -189,6 +189,9 @@ public static partial class AksiyonKatalogu
                 AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
         };
 
+        // STOK SAYIMI (1169): Yeni / Düzenle - kart ozel (sayim karti). Sil kartta (yalniz acik sayim).
+        s["stok-sayim-liste"] = Crud("stok-sayim", "stok-sayim", "stok.sayim", ekleAdi: "＋ Yeni Sayım", sil: false);
+
         // Banka tanimlari (db/109).
         s["banka-liste"] = Crud("banka", "banka", "hesap.tanim.banka_tanim", silHedef: null);
 

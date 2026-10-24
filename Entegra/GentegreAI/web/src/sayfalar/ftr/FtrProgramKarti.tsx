@@ -143,7 +143,7 @@ export function FtrProgramKarti() {
         <button className="d" onClick={() => git(`/hasta/${p.hasta_id}?geri=${encodeURIComponent(geriBurasi)}`)}>{c('↗ Hasta Kartı')}</button>
         {yazar && yetki('ftr.program.sonlandir') && <button className="d teh" onClick={() => void sonlandir()}>✖ {p.yapilan_seans >= p.seans_sayisi ? 'Kürü Bitir' : 'Programı Sonlandır'}</button>}
         <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
-        <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+        <button className="d ds-sp" onClick={kapat}>✖ {c('Kapat')}</button>
       </div>
       <div className="ds-adim">{adimlar.map(([ad, gecti, simdi]) => <span key={ad} className={simdi ? 'on' : gecti ? 'ok' : ''}>{ad}</span>)}</div>
       <div className="ds-hdr ds-hdr5" style={{ padding: '4px 10px 8px' }}>
@@ -182,7 +182,7 @@ export function FtrProgramKarti() {
                 <label className="sonuk">Cihaz <input value={ara.cihaz} onChange={e => setAra(a => ({ ...a, cihaz: e.target.value }))} style={{ width: 80 }} placeholder="US-2" /></label>
                 <label className="sonuk">{c('Serbest ad')}<input value={ara.ad} onChange={e => setAra(a => ({ ...a, ad: e.target.value }))} style={{ width: 140 }} placeholder="Hotpack" /></label>
                 <button className="d onay" disabled={!ara.ad} onClick={() => void uygulamaEkle(null, ara.ad)}>{c('Ekle (serbest)')}</button>
-                <button className="d" onClick={() => setAra(a => ({ ...a, acik: false }))}>Kapat</button></div>
+                <button className="d" onClick={() => setAra(a => ({ ...a, acik: false }))}>✖ Kapat</button></div>
               <div className="ds-dg" style={{ maxHeight: 200, overflowY: 'auto' }}><table>
                 <thead><tr><th>SUT</th><th>Uygulama</th><th /></tr></thead>
                 <tbody>{ara.sonuc.map(x => <tr key={x.id}><td className="sonuk">{x.sutKodu}</td><td>{x.ad}</td><td><button className="d onay" onClick={() => void uygulamaEkle(x.id)}>{c('Ekle')}</button></td></tr>)}

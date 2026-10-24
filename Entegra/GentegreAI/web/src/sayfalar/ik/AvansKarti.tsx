@@ -229,7 +229,7 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
       {kayitId && <button type="button" className="d" onClick={yazdir}>🖨 {c('Avans formu')}</button>}
       {kayitId && yazar && ro.durum < 4 && ro.durum !== 3 && <button type="button" className="d tl-tehlike" disabled={mesgul} onClick={() => void iptalEt()}>✖ {c('İptal et')}</button>}
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={kapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={kapat}>✖ {c('Kapat')}</button>
     </>
   );
 

@@ -187,6 +187,39 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     menuSira: 60,
   },
   {
+    // STOK SAYIMI (1169, sade sürüm - mockup Ekranlar/Stok/stok_sayim_karti_ver2.html).
+    //   Kart ÖZEL (okutma + sayılan grid'i); farklar Giriş (Sayım Fazlası) / Çıkış
+    //   (Sayım Eksiği) fişleriyle kapanır - Delphi'deki elle düzeltmenin otomatik hali.
+    kaynak: 'stok-sayim', rota: 'stok-sayim', baslik: 'Stok Sayımları', yol: 'Stok › Stok Sayımları',
+    kartYolu: '/stok-sayim', kartBaslik: 'Sayım', ozelKart: true,
+    aksiyonEkrani: 'stok-sayim-liste',
+    toplam: ['fazlaTutar', 'eksikTutar'],
+    cipler: [
+      { ad: 'Açık',    filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Kapanan', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Stok & Hizmet', menuAd: 'Stok Sayımları', ic: '🧮', yetkiKodu: 'stok.sayim.liste',
+    menuSira: 65,
+  },
+  {
+    // STOK İCMALLERİ (1173, mockup Ekranlar/Stok/stok_*_icmali.html): stok değeri, SKT / lot,
+    //   sayım farkı - özel sayfa, rakamlar StokIcmalUclari'ndan.
+    kaynak: 'stok-deger-icmali', rota: 'stok-deger-icmali', ozelSayfa: true,
+    baslik: 'Stok Değer İcmali', yol: 'Stok & Hizmet › Stok Değer İcmali',
+    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Stok Değer İcmali', ic: '@icmal', yetkiKodu: 'stok.deger_icmali',
+  },
+  {
+    kaynak: 'stok-skt-icmali', rota: 'stok-skt-icmali', ozelSayfa: true,
+    baslik: 'SKT / Lot İcmali', yol: 'Stok & Hizmet › SKT / Lot İcmali',
+    menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'SKT / Lot İcmali', ic: '@icmal', yetkiKodu: 'stok.skt_icmali',
+  },
+  {
+    kaynak: 'stok-sayim-fark-icmali', rota: 'stok-sayim-fark-icmali', ozelSayfa: true,
+    baslik: 'Sayım Fark İcmali', yol: 'Stok & Hizmet › Sayım Fark İcmali',
+    menuGrup: 'Stok & Hizmet', menuSira: 68, menuAd: 'Sayım Fark İcmali', ic: '@icmal', yetkiKodu: 'stok.sayim_fark_icmali',
+  },
+  {
     // URUN AGACLARI (BOM / recete) - 429.
     //   Ayni kod birden cok SURUMLE listelenir: eski surum silinmez, pasiflesir
     //   (acik emirler kendi surumunde yasar). Bu yuzden varsayilan sirama

@@ -1227,7 +1227,9 @@ input.skt-gecmis {
 /* Ürün logosu müşteri logosu kadar (44 px, kullanıcı 16 Ekim 2026). */
 .giris-marka img { width: 44px; height: 44px; flex: none; background: #fff; border-radius: 8px; padding: 4px }
 .giris-kurum { position: relative; z-index: 1; margin-top: 26px; display: flex; align-items: center; gap: 10px }
-.giris-kurum img { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; padding: 3px; flex: none }
+/* LOGO ZEMİNİ ŞEFFAF (kullanıcı 24.10.2026): şerit koyu, beyaz / şeffaf kurum logosu doğrudan görünür;
+   geniş logo 44x44 kareye sıkışıyordu - yükseklik sabit, genişlik logoyla. */
+.giris-kurum img { height: 44px; width: auto; max-width: 150px; object-fit: contain; background: none; flex: none }
 .giris-kurum-ic { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .16); border: 2px solid rgba(255, 255, 255, .35);
                   display: grid; place-items: center; font-size: 18px; flex: none }
 .giris-kurum b { font-size: 13.5px; line-height: 1.3 }
@@ -1578,7 +1580,7 @@ input.skt-gecmis {
 /* Sube markasi (ust serit, combo yerine): urun markasiyla ayni gorunum */
 .sube-marka-kap { position: relative; flex: 1; display: flex; justify-content: center; min-width: 0 }
 .sube-marka { font-size: 13px; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.sube-marka .lg img { height: 26px; max-width: 80px; object-fit: contain; background: #fff; border-radius: 3px; padding: 1px }
+.sube-marka .lg img { height: 26px; max-width: 96px; object-fit: contain; background: none }
 .sube-marka .sube-harf { display: inline-flex; width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,.18); align-items: center; justify-content: center; font-size: 13px }
 .sube-marka .sube-ok { font-size: 10px; opacity: .8; margin-left: 2px }
 .sube-menu { min-width: 200px; left: 50%; right: auto; transform: translateX(-50%) }
@@ -6532,6 +6534,12 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-sade-ic { max-width: 760px; margin: 0 auto }
 .bsl-sade-ic h1 { font-size: 20px; color: var(--baslik, #14315a); margin: 0 0 4px }
 .bsl-sade-alt { color: var(--soluk); margin-bottom: 22px }
+.bsl-oturum { margin-top: -18px; font-weight: 600 }
+.sahne.bsl, .sahne.bsl-sade { position: relative }
+.bsl-logo { position: absolute; top: 14px; height: 44px; max-width: 160px; object-fit: contain; pointer-events: none }
+.bsl-logo-sol { left: 20px }
+.bsl-logo-sag { right: 20px; width: 160px; height: 44px; background: var(--vurgu);
+  -webkit-mask: var(--logo) right center / contain no-repeat; mask: var(--logo) right center / contain no-repeat }
 .bsl-sade-ic .bsl-ara { margin-bottom: 8px }
 .bsl-kartlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px }
 .bsl-kart { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--yuz); border: 1px solid var(--cizgi);
@@ -8629,3 +8637,85 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mk-zaman small { display: block; color: var(--soluk); font-size: 10.5px }
 .mk-finans { display: flex; flex-direction: column; gap: 4px }
 @media (max-width: 1100px) { .mk-ozet { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+
+/* ============================================================================
+   STOK SAYIM KARTI (1169, mockup Ekranlar/Stok/stok_sayim_karti_ver2.html).
+   Onek "ss-": tema.css'teki kisa sinif adlariyla (.d = dugme) cakismasin.
+   ============================================================================ */
+.ss { display: flex; flex-direction: column; gap: 0; padding: 0; background: var(--yuz) }
+.ss-bas { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--cizgi2) }
+.ss-avatar { width: 52px; height: 52px; border-radius: 10px; background: linear-gradient(#4d8fd6, var(--vurgu)); color: #fff;
+             font-size: 22px; display: flex; align-items: center; justify-content: center; flex: none }
+.ss-ad { font-size: 17px; font-weight: 700; color: var(--yazi2); display: flex; align-items: center; gap: 8px }
+.ss-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
+.ss-alt b { color: var(--yazi); font-weight: 400 }
+.ss-islem { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.ss-alanlar { display: grid; grid-template-columns: 110px 1fr 110px 1fr; gap: 7px 10px; align-items: center;
+              padding: 12px 14px; border-bottom: 1px solid var(--cizgi2) }
+.ss-alanlar > label { color: var(--soluk); text-align: right }
+.ss-alanlar input, .ss-alanlar select, .ss-k { border: 1px solid var(--cizgi); border-radius: 3px; padding: 5px 8px;
+                                               background: var(--yuz); color: var(--yazi); font: inherit; min-height: 28px }
+.ss-alanlar .zorunlu { border-left: 3px solid var(--hata) }
+.ss-kapsam { display: flex; gap: 14px; flex-wrap: wrap }
+.ss-kapsam label { display: flex; gap: 4px; align-items: center; cursor: pointer }
+.ss-not { color: var(--soluk); font-size: 11.5px; padding: 6px 14px }
+.ss-ozet { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--cizgi); background: var(--yuz2) }
+.ss-ozet > div { padding: 8px 12px; border-right: 1px solid var(--cizgi2) }
+.ss-ozet > div:last-child { border-right: none }
+.ss-ozet span { display: block; font-size: 10.5px; color: var(--soluk) }
+.ss-ozet b { font-size: 15px }
+.ss-ozet small { display: block; font-size: 10px; color: var(--soluk); margin-top: 1px }
+.ss-bar { height: 7px; border-radius: 4px; background: var(--satiralt); overflow: hidden; margin: 5px 0 2px }
+.ss-bar i { display: block; height: 100%; background: linear-gradient(90deg, #4d8fd6, var(--vurgu)) }
+.ss .arti { color: var(--ok); font-weight: 700 }
+.ss .eksi { color: var(--hata); font-weight: 700 }
+.ss .soluk { color: var(--soluk) }
+.ss-okut { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap }
+.ss-okut-giris { flex: 1; min-width: 260px; display: flex; align-items: center; gap: 8px; border: 2px solid var(--vurgu);
+                 border-radius: 6px; background: var(--yuz); padding: 5px 10px; font-size: 14px }
+.ss-okut-giris input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--yazi); font: inherit }
+.ss-son { font-size: 11.5px; color: var(--ok); min-width: 220px }
+.ss-filtre { display: flex; gap: 4px; padding: 6px 14px; border-bottom: 1px solid var(--cizgi2); align-items: center; flex-wrap: wrap }
+.ss-bosluk { flex: 1 }
+.ss-ara { border: 1px solid var(--cizgi); border-radius: 3px; padding: 5px 8px; min-width: 220px; background: var(--yuz); color: var(--yazi); font: inherit }
+/* TABLO BÜZÜLMEZ (kullanıcı 24.10.2026: "hiç sayım satırı yok"): kart dikey flex; kısa ekranda
+   tablo kutusu büzülüp yalnız başlık + toplam kalıyordu. Bölümler küçülmez, tablo kalan yeri
+   doldurur ama 320 px'in altına inmez - sığmazsa sahne kayar. */
+.ss > * { flex-shrink: 0 }
+.ss-grid { overflow: auto; flex: 1 0 320px; min-height: 320px }
+.ss-grid table { width: 100%; border-collapse: collapse; font-size: 11.5px }
+.ss-grid th { background: linear-gradient(var(--serit1), var(--serit2)); color: var(--yazi2); text-align: left; padding: 6px 8px;
+              border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2); white-space: nowrap; position: sticky; top: 0; z-index: 1 }
+.ss-grid td { padding: 4px 8px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); white-space: nowrap }
+.ss-grid .sag { text-align: right }
+.ss-grid tr:hover td { background: var(--satirust) }
+.ss-grid tr.farkli td { background: var(--uyarizem) }
+.ss-grid tr.sayilmadi td { color: var(--soluk) }
+.ss-grid td.ss-giris { padding: 2px 4px; background: var(--degisikzem) }
+.ss-grid td.ss-giris input { width: 84px; border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 6px; text-align: right;
+                             font: inherit; background: var(--yuz); color: var(--yazi) }
+.ss-grid tfoot td { background: var(--toplamzem); font-weight: 700; position: sticky; bottom: 0 }
+.ss-fisler { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 14px }
+.ss-fis { border: 1px solid var(--cizgi2); border-radius: 6px; overflow: hidden }
+.ss-fis h5 { margin: 0; padding: 8px 10px; font-size: 12.5px; display: flex; gap: 8px; align-items: center; justify-content: space-between }
+.ss-fis.g h5 { background: var(--okzem); color: var(--ok) }
+.ss-fis.c h5 { background: var(--hatazem); color: var(--hata) }
+.ss-fis small, .ss-fis a { display: block; padding: 8px 10px; font-size: 11px; color: var(--soluk) }
+.ss-fis a { color: var(--vurgu) }
+.ss-uyari { background: var(--uyarizem); border: 1px solid var(--uyarikenar); color: var(--uyari); border-radius: 4px;
+            padding: 7px 10px; font-size: 11.5px; margin: 0 14px 10px }
+.ss-dugmeler { display: flex; gap: 6px; justify-content: flex-end; padding: 0 14px 14px }
+@media (max-width: 900px) {
+  .ss-alanlar { grid-template-columns: 90px 1fr }
+  .ss-ozet, .ss-fisler { grid-template-columns: 1fr 1fr }
+}
+/* İzlemli stok: ana satır + açılan lot satırları (belge satırındaki izlem gridi gibi). */
+.ss-grid tr.ss-ana td { font-weight: 600 }
+.ss-grid tr.ss-lot td { background: var(--serit1); font-size: 11px }
+.ss-grid tr.ss-lot td.ss-lot-ok { color: var(--soluk); text-align: right; padding-right: 2px }
+.ss-grid .ss-ac { border: 0; background: none; padding: 0; cursor: pointer; color: var(--vurgu); font: inherit; font-weight: 600 }
+.ss-grid td.ss-sistem { cursor: pointer; text-decoration: underline dotted var(--soluk); text-underline-offset: 3px }
+.ss-grid td.ss-sistem:hover { color: var(--vurgu) }
+/* Son okutulan / eklenen satır vurgulu (kullanıcı satırı listede bulamıyordu). */
+.ss-grid tr.ss-son-satir td { background: var(--uyarizem); box-shadow: inset 0 1px 0 var(--uyarikenar), inset 0 -1px 0 var(--uyarikenar) }
+/* Yazdırma: Sayım Listesi A4'ü (SayimA4, CiktiMenusu) - ekran basılmaz. */

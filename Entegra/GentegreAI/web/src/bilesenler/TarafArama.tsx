@@ -462,7 +462,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           </button>
           {/* Kapat SAGA yaslanir (kullanici): kart modallerindeki duzenin ayni. */}
           <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                  onClick={onKapat}>Kapat</button>
+                  onClick={onKapat}>✖ Kapat</button>
         </div>
 
         {/* Arama kutusu ve Liste/Son/Sik dugmeleri LISTE EKRANLARIYLA ayni

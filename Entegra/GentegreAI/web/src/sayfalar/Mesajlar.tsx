@@ -689,7 +689,7 @@ function YeniSohbet({ tip, onKapat, onAcildi }: {
             });
             await onAcildi(y.id);
           })}>Aç</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{cev('Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
         </>
       }>
       {tip === 'grup' && (
@@ -751,7 +751,7 @@ function KayitIlistir({ onKapat, onIlistir }: {
             if (!id) { bilgiMesaji('Kayıt numarası girin.'); return }
             void onIlistir(modul, id, ozet.trim());
           }}>{cev('İliştir')}</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{cev('Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
         </>
       }>
       <div className="alan-izgara tek-sutun">

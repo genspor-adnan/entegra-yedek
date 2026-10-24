@@ -61,7 +61,7 @@ export function HastaKayitPenceresi({ baslik, hastaId, hastaAdi, muayeneId, bolu
   return (
     <>
       <Modal baslik={baslik} buyutmeYok onKapat={onKapat}
-             alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
+             alt={<button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>}>
         {bolumler.map(b => {
           const s = secili[b.kaynak] ?? null;
           return (

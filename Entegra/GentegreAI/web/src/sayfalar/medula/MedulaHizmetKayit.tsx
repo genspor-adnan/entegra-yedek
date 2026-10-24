@@ -164,7 +164,7 @@ export function MedulaHizmetKayit() {
         {sekme === 'gunluk' && (
           <>
             <div className="md-grp"><div className="md-gb">{c('Bu başvurunun Medula günlüğü')}</div><Gunluk satirlar={v.gunluk} govdeAc={govdeAc} /></div>
-            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>{c('Kapat')}</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
+            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>✖ {c('Kapat')}</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
           </>
         )}
       </div>

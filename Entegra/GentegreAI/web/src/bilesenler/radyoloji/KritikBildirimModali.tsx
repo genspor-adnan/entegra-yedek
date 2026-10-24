@@ -75,7 +75,7 @@ export function KritikBildirimModali({ istemId, accessionNo, hasta, tetkik, bulg
                        title={teyit ? 'Bildirimi kaydet ve takibi kapat'
                                     : 'Kapatmak için teyit alınmış olmalı'}
                        onClick={() => void kaydet(true)}>✔ Kaydet ve Kapat</button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

@@ -80,7 +80,7 @@ export function Devir() {
         <button type="button" className={gor === 'toplu' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'toplu' ? '' : 'toplu' })}>📋 {c('Toplu Giriş')}</button>
         <button type="button" className={gor === 'acilis' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'acilis' ? '' : 'acilis' })}>⇄ {c('Açılış Bakiyeleri')}</button>
         {/* Standart desen: Kaydet solda, Kapat sağda (sekmeyi kapatır). */}
-        <button type="button" onClick={sekmeyiKapat}>{c('Kapat')}</button>
+        <button type="button" onClick={sekmeyiKapat}>✖ {c('Kapat')}</button>
       </div>
 
       {gor === 'tek' && (

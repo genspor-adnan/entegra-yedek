@@ -109,7 +109,7 @@ export function PlanlamaModali({ talepId, talepNo, hastaAdi, islem, tahminiSure,
                  {kaydediyor ? '⏳ Planlanıyor…'
                    : zorlama ? '⚠ Yine de Planla' : '📅 Planla'}
                </button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

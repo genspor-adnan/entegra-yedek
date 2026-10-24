@@ -136,7 +136,7 @@ export function AktarimDurumu() {
             </p>
             {ham && (
               <div className="ak-ham">
-                <div className="ak-ham-bas">Hata #{ham.id} - adımın pakette gelen kısmı <button onClick={() => setHam(null)}>Kapat</button></div>
+                <div className="ak-ham-bas">Hata #{ham.id} - adımın pakette gelen kısmı <button onClick={() => setHam(null)}>✖ Kapat</button></div>
                 <pre>{ham.metin}</pre>
               </div>
             )}

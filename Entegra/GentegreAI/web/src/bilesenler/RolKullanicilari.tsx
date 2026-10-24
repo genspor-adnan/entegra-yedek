@@ -156,7 +156,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
               {islemde ? 'Ekleniyor…' : `Ekle${adaySecim.size > 0 ? ` (${adaySecim.size})` : ''}`}
             </button>
             <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                    onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>{c('Kapat')}</button>
+                    onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>✖ {c('Kapat')}</button>
           </>}>
           <div style={{ padding: 10 }}>
             {/* Listelerdeki oval arama kutusu. */}

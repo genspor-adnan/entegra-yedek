@@ -330,6 +330,9 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           //   "Alınan" isaretli stoklar listelenir. Transfer/talep gibi
           //   yonsuz belgelerde suzme yok.
           yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
+          // GİRİŞ / ÇIKIŞ FİŞİ, TRANSFER, TALEPTE YALNIZ STOK (kullanıcı 24.10.2026): depo
+          //   hareketidir - hizmetin bakiyesi yok, "Stok / Hizmet Ara" değil "Stok Ara".
+          yalnizStok={stokFisiMi || depoBelgesi}
           // FIYAT SUTUNU BELGENIN LISTESINDEN (495): aramada gorunen rakam
           //   ile kalem penceresinde cikan rakam ayni olsun.
           fiyatListesiId={fiyatListesiId}

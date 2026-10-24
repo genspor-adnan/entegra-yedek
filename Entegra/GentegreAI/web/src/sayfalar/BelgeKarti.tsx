@@ -1,12 +1,12 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { EkranSekmesiBaglami } from '../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
-         TAHAKKUK_TURLERI }
+         TAHAKKUK_TURLERI, iadeTipiMi }
   from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -260,8 +260,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   /** IADE mi - kalem secimi "onceki alinanlar"dan yapilir (132/133). */
   // IADE yalniz iadesi OLAN turlerde anlamli (301): siparis/basvuru turunde
   //   (19) iade yok - orada tipi baska bir sey anlatir. Sunucu ayni karari
-  //   BelgeTuru.CikisMi(tur, tipi) icinde veriyor.
-  const iadeMi = faturaTipi === 2 && tur !== 19;
+  //   BelgeTuru.CikisMi(tur, tipi) icinde veriyor. Stok fisi (3/4) de iadesiz:
+  //   tipi orada fisin sebebi (giris 2 = Sayim Fazlasi) - iadeTipiMi.
+  const iadeMi = iadeTipiMi(tur, faturaTipi);
   /** Rapor dovizi yerel disindaysa BELGE TARIHININ kuru cekilir; kullanici
    *  elle degistirebilir (kur pazarlikli olabiliyor). */
   const kurElleRef = useRef(false);
@@ -1275,7 +1276,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     return () => ekranSekmesi.kapatmaIsleyicisi(null);
   }, [sayfa, ekranSekmesi]);
   const sekmeBasligi = [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',
-                        String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || ''].filter(Boolean).join(' · ');
+                        sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')].filter(Boolean).join(' · ');
   useEffect(() => {
     if (sayfa && ekranSekmesi && kayitliId && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
   }, [sayfa, ekranSekmesi, kayitliId, sekmeBasligi]);   // eslint-disable-line react-hooks/exhaustive-deps
@@ -1306,7 +1307,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   if (!ekleyebilir && !mevcutBelge)
     return (
       <Modal baslik="Belge" onKapat={() => void kapat()} sayfa={sayfa}
-             alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>{c('Kapat')}</button>}>
+             alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>✖ {c('Kapat')}</button>}>
         <div className="hata-kutusu">{c('Belge ekleme yetkiniz yok.')}</div>
       </Modal>
     );

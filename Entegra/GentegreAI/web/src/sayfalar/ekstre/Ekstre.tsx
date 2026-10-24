@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { Ekstre as Veri, EkstreHesapSecimi, EkstreParasi, EkstreSatiri, EkstreTuru } from '../../api/uclar/ekstre';
@@ -119,6 +120,7 @@ export function Ekstre() {
   );
   const gunFarki = (t: string | null | undefined) => (t ? Math.round((Date.now() - new Date(t).getTime()) / 864e5) : null);
 
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const turler = veri?.turler ?? [];
   const gorunumler: [Gorunum, string][] = [['liste', '☰ Liste'], ...(cari ? [['detay', '🧾 Detay'] as [Gorunum, string]] : []), ['aylik', '📆 Aylık']];
 
@@ -144,6 +146,9 @@ export function Ekstre() {
         <CiktiMenusu etiket={cari ? 'Cari Ekstre' : 'Hesap Ekstresi'} dosyaAdi={`Ekstre ${h?.ad ?? ''} ${bas} ${bit}`.trim()} devre={!veri || !h}>
           {veri && h && <EkstreA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
         </CiktiMenusu>
+        {/* KAPAT (kullanıcı 24.10.2026: "ekstre sekmeye kapat butonu ekle"): kartlardaki gibi en sağda;
+            ekranın kendi sekmesini kapatır (sekme yoksa başlangıca döner). */}
+        <button type="button" onClick={() => ekranSekmesi ? ekranSekmesi.kapat() : git('/panel')}>✖ {c('Kapat')}</button>
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}

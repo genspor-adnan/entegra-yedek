@@ -453,7 +453,7 @@ public sealed partial class SorguUretici
             var kolon = _kaynak.Kolon(s.Alan);
             if (kolon is null || !kolon.Siralanabilir) continue;
             var yon = s.Yon.Equals("desc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
-            parcalar.Add($"{kolon.Sql} {yon}");
+            parcalar.Add($"{kolon.SiraSql ?? kolon.Sql} {yon}");
         }
         return parcalar.Count == 0 ? _kaynak.VarsayilanSirala : string.Join(", ", parcalar);
     }

@@ -78,7 +78,7 @@ export function KontrolListesiModali({ ameliyatId, ameliyatNo, onKapat, onTamam 
                        onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '💾 Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

@@ -74,7 +74,7 @@ export function MuayeneRaporModal({ muayeneId, ilkTur, onKapat, onKaydedildi, ra
         <button className="d bir" disabled={mesgul} onClick={() => void kaydet()}>
           💾 Kaydet (Taslak)</button>
         {/* "Kapat" sağa yaslı (kullanıcı 15.10.2026) - diğer kartlardaki gibi. */}
-        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>Kapat</button>
+        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ Kapat</button>
       </>}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '2px' }}>
         <div>

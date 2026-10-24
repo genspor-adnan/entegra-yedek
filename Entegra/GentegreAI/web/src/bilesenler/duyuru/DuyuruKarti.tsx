@@ -123,7 +123,7 @@ export function DuyuruKarti({ id, onKapat, onKaydet }: { id?: number; onKapat():
       {durum === 0 && <button type="button" className="d" disabled={mesgul} onClick={() => void kaydet('taslak')}>💾 {c('Taslak')}</button>}
       {id && durum === 0 && <button type="button" className="d tl-tehlike" onClick={() => void sil()}>🗑 {c('Sil')}</button>}
       <span className="ck-bosluk" />
-      <button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>
+      <button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
     </>
   );
 

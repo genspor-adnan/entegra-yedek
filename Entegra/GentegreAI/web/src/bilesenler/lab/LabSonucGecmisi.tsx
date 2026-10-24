@@ -46,7 +46,7 @@ export function LabSonucGecmisi({ satirId, baslik, onKapat }: {
   return (
     <Modal baslik={`📈 ${cev('Önceki sonuçlar ve tekrarlar')}${baslik ? ' · ' + baslik : ''}`}
            onKapat={onKapat}
-           alt={<button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>}>
+           alt={<button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {!veri ? <div className="sonuk">{cev('Yükleniyor…')}</div> : (
         <>

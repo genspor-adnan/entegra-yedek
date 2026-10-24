@@ -193,7 +193,7 @@ export function SonucGirisModali({ istemId, onKapat, onKaydedildi }: {
       alt={
         <>
           {hata && <span className="alan-hata">{hata}</span>}
-          <button className="d" onClick={onKapat}>{c('Kapat')}</button>
+          <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
           <button className="d bir" disabled={kaydediyor || yukleniyor}
                   onClick={() => void kaydet()}>
             {kaydediyor ? 'Kaydediliyor…' : '💾 Kaydet'}

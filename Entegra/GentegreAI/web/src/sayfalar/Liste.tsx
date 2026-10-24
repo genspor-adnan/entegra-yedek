@@ -1540,7 +1540,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         baslik={`e-Belge Mesaj Geçmişi — ${eBelgeMesajlari.belgeNo}`}
         onKapat={() => setEBelgeMesajlari(null)}
         alt={<button className="d kapat-dugmesi"
-                     onClick={() => setEBelgeMesajlari(null)}>{c('Kapat')}</button>}
+                     onClick={() => setEBelgeMesajlari(null)}>✖ {c('Kapat')}</button>}
       >
         <div className="kagrup">
           {eBelgeMesajlari.satirlar.length === 0 ? (

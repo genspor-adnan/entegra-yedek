@@ -402,12 +402,13 @@ export function GirisPenceresi({ baslik, children, ust }: { baslik: string; chil
             <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
             <span>{baslik}</span>
           </div>
+          {/* LOGO VARSA YALNIZ LOGO (kullanıcı 24.10.2026: "loginde profil ve firma adına gerek yok");
+              logo yüklenmemiş kurumda kurum adı logonun yerini tutar. */}
           {(kurum.ad || kurum.logo) && (
             <div className="giris-kurum">
               {kurum.logo
-                ? <img src={`${TABAN}/api/kimlik/marka/logo`} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                : <span className="giris-kurum-ic">🏥</span>}
-              <b>{kurum.ad}</b>
+                ? <img src={`${TABAN}/api/kimlik/marka/logo`} alt={kurum.ad} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                : <><span className="giris-kurum-ic">🏥</span><b>{kurum.ad}</b></>}
             </div>
           )}
           <div className="giris-slogan">

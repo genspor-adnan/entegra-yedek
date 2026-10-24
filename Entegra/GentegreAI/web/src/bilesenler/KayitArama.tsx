@@ -19,7 +19,7 @@ export function KayitArama({ acik, baslik, kaynak, sabitFiltre, onSec, onKapat }
   if (!acik) return null;
   return (
     <Modal baslik={c(baslik)} onKapat={onKapat} enUst
-           alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>}>
+           alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>}>
       <GenGrid kaynak={kaynak} gomulu seritGizli boyut={25} sabitFiltre={sabitFiltre}
                onSatirAc={r => { onKapat(); onSec(Number(r.id)) }} />
     </Modal>

@@ -120,7 +120,7 @@ export function GebeIzlemModali({ hastaId, hastaAdi, belgeId, onKapat }: {
   return (
     <Modal baslik={`🤰 ${cev('Gebelik İzlemi')}${hastaAdi ? ' · ' + hastaAdi : ''}`}
            onKapat={onKapat}
-           alt={<button type="button" className="d" onClick={onKapat}>{cev('Kapat')}</button>}>
+           alt={<button type="button" className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       {!acik && (

@@ -345,7 +345,7 @@ function TutanakModali({ no, onKapat }: { no: string; onKapat(): void }) {
     <Modal baslik={`Zimmet Tutanağı ${no}`} onKapat={onKapat} buyutmeYok
            alt={<>
              <button className="birincil" disabled={!t} onClick={() => window.print()}>🖨️ Yazdır</button>
-             <button onClick={onKapat}>Kapat</button>
+             <button onClick={onKapat}>✖ Kapat</button>
            </>}>
       <style>{stil}</style>
       {hata && <div className="hata-kutusu">{hata}</div>}

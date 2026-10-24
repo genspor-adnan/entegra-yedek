@@ -127,7 +127,7 @@ export function FaturaStokModali({ ameliyatId, ameliyatNo, onKapat, onTamam }: {
                      : `🏷 ÜTS Bildir (${o?.utsBekleyen})`}
                  </button>
                )}
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

@@ -80,6 +80,15 @@ const FATURA_TURLERI    = new Set([11, 12, 15, 16]);
 export const TAHAKKUK_TURLERI = new Set([13, 17]);
 const KONSINYE_TURLERI  = new Set([109, 119]);
 const STOK_FISI_TURLERI = new Set([3, 4]);
+/**
+ * IADESİ OLMAYAN TÜRLER - sunucudaki `BelgeTuru.IadesizTurler`'in aynısı: sipariş (9),
+ * başvuru (19), teklif (18), transfer (20), talep (105) ve STOK FİŞLERİ (3 / 4). Bunlarda
+ * `tipi = 2` iade değildir: stok fişinde fişin sebebi (giriş "Sayım Fazlası", çıkış "İmha").
+ * Kullanıcı 24.10.2026: tipi 2 giriş fişine satır eklerken "iade edilecek kalemler" açıldı.
+ */
+const IADESIZ_TURLER = new Set([9, 18, 19, 20, 105, 3, 4]);
+/** `tipi = 2` bu türde iade mi. */
+export const iadeTipiMi = (tur: number, tipi: number) => tipi === 2 && !IADESIZ_TURLER.has(tur);
 
 /**
  * URETIM BELGELERI (429): 121 sarf cikisi · 122 uretim girisi · 123 fire.

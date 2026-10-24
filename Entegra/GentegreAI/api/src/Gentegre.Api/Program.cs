@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Gentegre.Cekirdek;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -369,6 +369,7 @@ uygulama.IzinUclariniEkle();
 // AVANS MODULU (753): talep, onay, odeme (kasa) ve mahsup plani.
 uygulama.AvansUclariniEkle();
 uygulama.MasrafBeyaniUclariniEkle();
+uygulama.StokSayimUclariniEkle();
 uygulama.BelgeTalebiUclariniEkle();
 // TALEPLERIM: kisinin kendi talepleri (izin/avans/masraf/belge/ariza/malzeme).
 uygulama.TaleplerimUclariniEkle();
@@ -377,6 +378,8 @@ uygulama.PersonelListeUclariniEkle();
 uygulama.CariListeUclariniEkle();
 // CARI ICMALI (1154): musteri + tedarikci bakiye, yaslandirma, kirilim.
 uygulama.CariIcmalUclariniEkle();
+// STOK ICMALLERI (1173): stok deger, SKT / lot, sayim fark.
+uygulama.StokIcmalUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
 uygulama.DevirUclariniEkle();
 // KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.

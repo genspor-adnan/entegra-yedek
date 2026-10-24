@@ -380,7 +380,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, marginLeft: 8 }}>
           <input type="checkbox" checked={acil} onChange={e => setAcil(e.target.checked)} /> Acil
         </label>
-        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>Kapat</button>
+        <button className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ Kapat</button>
       </>}>
       <div style={{ display: 'flex', gap: 10, minHeight: 430 }}>
         {/* SOL: sekme + kategoriler */}

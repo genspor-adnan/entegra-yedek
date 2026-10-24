@@ -411,7 +411,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
                <button className="d onay" disabled={yaziyor || !metin.trim()}
                        onClick={() => void yaz()}>✔ Onayla ve alana yaz</button>
                <button className="d kapat-dugmesi"
-                       onClick={() => { dur(); onKapat() }}>{cev('✖ Kapat')}</button>
+                       onClick={() => { dur(); onKapat() }}>✖ {cev('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

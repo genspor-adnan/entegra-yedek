@@ -265,7 +265,7 @@ export function DisPlanKarti() {
         <button className="d" onClick={() => git(`/dis-hasta/${p.hastaId}`, { state: { geri: geriBurasi, ustGeri: geri } })}>🦷 Hasta Kartı (odontogram)</button>
         {yazar && <button className="d teh" onClick={() => void iptal()}>✖ Planı İptal Et</button>}
         <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
-        <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+        <button className="d ds-sp" onClick={kapat}>✖ {c('Kapat')}</button>
       </div>
 
       <div className="ds-adim">
@@ -331,7 +331,7 @@ export function DisPlanKarti() {
                 <label className="sonuk">{c('Faz')}<input value={islemAra.faz} onChange={e => setIslemAra(a => ({ ...a, faz: e.target.value }))} style={{ width: 36 }} /></label>
                 <label className="sonuk">{c('İnd.')}<input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 60 }} /></label>
                 <label className="sonuk">Seans <input value={islemAra.seans} onChange={e => setIslemAra(a => ({ ...a, seans: e.target.value }))} style={{ width: 36 }} placeholder="std" /></label>
-                <button className="d" onClick={() => setIslemAra(a => ({ ...a, acik: false }))}>Kapat</button></div>
+                <button className="d" onClick={() => setIslemAra(a => ({ ...a, acik: false }))}>✖ Kapat</button></div>
               <div className="ds-dg" style={{ maxHeight: 220, overflowY: 'auto' }}><table>
                 <thead><tr><th>Kod</th><th>İşlem</th><th className="orta">Seans</th><th className="orta">{c('Lab')}</th><th className="sag">Fiyat</th><th /></tr></thead>
                 <tbody>{islemAra.sonuc.map(x => <tr key={x.id}><td className="sonuk">{x.kod}</td><td>{x.ad}</td><td className="orta">{x.standartSeans}</td><td className="orta">{x.labGerekir ? '🧪' : ''}</td><td className="sag">{para.format(x.fiyat)}</td>

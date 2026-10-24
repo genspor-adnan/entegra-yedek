@@ -78,7 +78,7 @@ export function MuayeneOzetiModal({ muayeneId, onKapat }: { muayeneId: number; o
         <button className="d bir" onClick={() => void yenidenDerle()}>🔄 Yeniden Derle</button>
         <button className="d" onClick={() => void kopyala()}>📋 Kopyala</button>
         <button className="d onay" disabled={mesgul} onClick={() => void kaydet()}>💾 Kaydet</button>
-        <button className="d" onClick={onKapat}>Kapat</button>
+        <button className="d" onClick={onKapat}>✖ Kapat</button>
       </>}>
       {yukleniyor ? <div style={{ padding: 16, color: '#889' }}>Yükleniyor…</div> : (
       <div className="ozet-gvd">

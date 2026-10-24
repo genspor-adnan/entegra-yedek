@@ -56,14 +56,19 @@ if (Test-Path $Grid) { Copy-Item $Grid (Join-Path $Gecici "gengrid.js") -Force }
 # gentegre_data.js icinde gecen ekran dosyalarini bul ve kopyala.
 # Boylece yalniz uygulamanin gercekten actigi ekranlar yayinlanir.
 $VeriMetni = [System.IO.File]::ReadAllText($Veri)
-$Ekranlar  = [regex]::Matches($VeriMetni, "[A-Za-z0-9_\-]+\.html") |
+# Alt klasordeki ekran (Stok/stok_sayim.html) klasoruyle birlikte kopyalanir.
+$Ekranlar  = [regex]::Matches($VeriMetni, "[A-Za-z0-9_\-/]+\.html") |
              ForEach-Object { $_.Value } | Sort-Object -Unique
 $Kopya = 0
 $Eksik = @()
 foreach ($e in $Ekranlar) {
   if ($e -eq "index.html" -or $e -eq "gentegre_v4_web.html") { continue }
   $Yol = Join-Path $Kaynak $e
-  if (Test-Path $Yol) { Copy-Item $Yol (Join-Path $Gecici $e) -Force; $Kopya++ }
+  if (Test-Path $Yol) {
+    $Hedef = Join-Path $Gecici $e
+    New-Item -ItemType Directory -Force (Split-Path -Parent $Hedef) | Out-Null
+    Copy-Item $Yol $Hedef -Force; $Kopya++
+  }
   else { $Eksik += $e }
 }
 Adim ("Ekran dosyasi: " + $Kopya + " adet kopyalandi")
@@ -75,7 +80,7 @@ if ($Eksik.Count -gt 0) {
 if (Test-Path $Paket) { Remove-Item $Paket -Force }
 & tar -czf $Paket -C $Gecici .
 if ($LASTEXITCODE -ne 0) { Kotu "paket olusturulamadi."; Read-Host "Enter"; exit 1 }
-$DosyaSayisi = (Get-ChildItem $Gecici -File).Count
+$DosyaSayisi = (Get-ChildItem $Gecici -File -Recurse).Count
 Remove-Item $Gecici -Recurse -Force
 
 $Boyut = "{0:N1} MB" -f ((Get-Item $Paket).Length / 1MB)

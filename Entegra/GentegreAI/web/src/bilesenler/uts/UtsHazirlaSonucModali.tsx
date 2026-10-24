@@ -26,7 +26,7 @@ export function UtsHazirlaSonucModali({ sonuc, onKapat }: {
   return (
     <Modal baslik="ÜTS Verme Bildirimi — Hazırlama Sonucu" onKapat={onKapat}
       alt={<button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                   onClick={onKapat}>{c('Kapat')}</button>}>
+                   onClick={onKapat}>✖ {c('Kapat')}</button>}>
       <div style={{ padding: 10 }}>
         <div className={sonuc.olusan > 0 ? 'bilgi-kutusu' : 'hata-kutusu'}>
           {sonuc.mesaj}

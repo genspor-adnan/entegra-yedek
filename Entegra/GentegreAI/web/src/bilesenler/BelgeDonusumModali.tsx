@@ -275,7 +275,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   onClick={() => void donustur()}>
             {calisiyor ? 'Dönüştürülüyor…' : sonuc ? '⇢ Kalanı Dönüştür' : '⇢ Dönüştür'}
           </button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
     >

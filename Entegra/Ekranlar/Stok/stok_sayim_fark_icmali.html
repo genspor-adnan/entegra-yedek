@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sayım Fark İcmali — Mockup (Gentegre AI · Stok · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">⚖ Sayım Fark İcmali — 01.01.2026 – 24.10.2026
+    <span class="sp">Gentegre AI · Stok › İcmal · Tüm depolar · Selin YILMAZ</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Sayım Fark İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🧮</span> Yeni Sayım</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📦</span> Stok Değer İcmali</div>
+    <div class="btn"><span>⏳</span> SKT / Lot İcmali</div>
+    <div class="btn"><span>📋</span> Stok Sayımları</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>01.01.2026 – 24.10.2026</b> <span class="rz">Bu yıl</span> ▾</div>
+    <div class="sel">🏬 Depo: <b>Tümü (2)</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Kapanan sayımlar</span><span>Açıklar dahil</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">Tekrar eden eksik: 7 kalem</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu"><div class="bas">Sayım</div><div class="deg">6</div><div class="alt">5 kapandı · 1 açık</div></div>
+    <div class="kutu"><div class="bas">Sayılan Kalem</div><div class="deg">3.412</div><div class="alt">satır (lot dahil)</div></div>
+    <div class="kutu iyi"><div class="bas">Doğruluk</div><div class="deg">%96,8</div><div class="alt">sistemle aynı çıkan satır</div></div>
+    <div class="kutu iyi"><div class="bas">Sayım Fazlası</div><div class="deg">+18.420 ₺</div><div class="alt">41 kalem · giriş fişi</div></div>
+    <div class="kutu teh"><div class="bas">Sayım Eksiği</div><div class="deg">−52.960 ₺</div><div class="alt">68 kalem · çıkış fişi</div></div>
+    <div class="kutu mor"><div class="bas">Net Fark</div><div class="deg">−34.540 ₺</div><div class="alt">stok değerinin %0,8'i</div></div>
+    <div class="kutu uy"><div class="bas">Tekrar Eden</div><div class="deg">7</div><div class="alt">kalem 2+ sayımda eksik</div></div>
+    <div class="kutu uy"><div class="bas">Lotsuz Fark</div><div class="deg">3</div><div class="alt">satır · fişlenemedi</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="sayim">Sayım Bazında <span class="rz">6</span></div>
+    <div class="sekme" data-s="kalem">Kalem Bazında <span class="rz">109</span></div>
+    <div class="sekme" data-s="kir">Kırılımlar</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">12</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ SAYIM BAZINDA ============ -->
+  <div class="pnl" data-s="sayim">
+    <div class="grp">
+      <h4>Sayımlar <span class="mini">satıra tıkla: fark kalemleri · çift tık: sayım kartı · fiş no: fişi aç</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Sayım No</th><th>Tarih</th><th>Depo</th><th>Kapsam</th><th class="orta">Durum</th>
+          <th class="sag">Satır</th><th class="sag">Sayılan</th><th class="sag">Fark Var</th><th class="sag">Fazla ₺</th><th class="sag">Eksik ₺</th><th class="sag">Net ₺</th><th>Fişler</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="y1"><td><span class="ok-ic">▸</span><span class="lnk">SYM-2026-0002</span></td><td>24.10.2026</td><td>Anadepo</td><td>Tüm depo</td><td class="orta"><span class="rz mavi">Açık</span></td>
+            <td class="sag">2.774</td><td class="sag">63</td><td class="sag">3</td><td class="sag ok-y">+0,00</td><td class="sag kir">−350,00</td><td class="sag kir">−350,00</td><td class="sonuk">—</td></tr>
+          <tr class="det" data-p="y1" hidden><td colspan="12">ADBONE05 lot 230324 −1 · CI lot 352199209 −1 · MAD2 −1 &nbsp;—&nbsp; açık sayım: rakamlar anlık, fiş kesilmedi</td></tr>
+          <tr><td><span class="lnk">SYM-2026-0001</span></td><td>30.09.2026</td><td>Anadepo</td><td>Kategori: K010 İMPLANT</td><td class="orta"><span class="rz ok">Kapandı</span></td>
+            <td class="sag">612</td><td class="sag">612</td><td class="sag">24</td><td class="sag ok-y">+7.400,00</td><td class="sag kir">−21.300,00</td><td class="sag kir">−13.900,00</td><td><span class="lnk">G 000041</span> · <span class="lnk">Ç 000057</span></td></tr>
+          <tr><td><span class="lnk">SYM-2026-0000</span></td><td>30.06.2026</td><td>ALT</td><td>Tüm depo</td><td class="orta"><span class="rz ok">Kapandı</span></td>
+            <td class="sag">418</td><td class="sag">418</td><td class="sag">31</td><td class="sag ok-y">+4.920,00</td><td class="sag kir">−12.880,00</td><td class="sag kir">−7.960,00</td><td><span class="lnk">G 000022</span> · <span class="lnk">Ç 000031</span></td></tr>
+          <tr><td colspan="12" class="sonuk">… 3 sayım daha</td></tr>
+          <tr class="toplam"><td colspan="5">Toplam (6 sayım)</td><td class="sag">5.104</td><td class="sag">3.412</td><td class="sag">109</td><td class="sag">+18.420,00</td><td class="sag">−52.960,00</td><td class="sag">−34.540,00</td><td></td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Tutar = fark × satırın sayım anındaki birim maliyeti (sayım satırında saklı) — kapanan sayımın rakamı sonradan değişmez, kesilen fişlerle aynıdır.</div>
+    </div>
+  </div>
+
+  <!-- ============ KALEM BAZINDA ============ -->
+  <div class="pnl" data-s="kalem">
+    <div class="grp">
+      <h4>Fark çıkan kalemler <span class="mini">dönemdeki bütün sayımlar · net tutara göre</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Stok</th><th>Kategori</th><th>İzleme</th><th class="orta">Sayım</th><th class="orta">Fark Çıkan</th><th class="sag">Toplam Fark</th><th class="sag">Net ₺</th><th>Son fark</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td>K-IMP-AD4011 · ALPHADENT 4.0X11</td><td>K010.01</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="orta">3</td><td class="orta"><b>3</b></td><td class="sag kir">−5</td><td class="sag kir">−9.250,00</td><td>30.09.2026 · −2</td><td><span class="rz kir">Tekrar eden eksik</span></td></tr>
+          <tr><td>HDR-D5 · HADRON DÜZ 5MM</td><td>K015.03</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="orta">2</td><td class="orta"><b>2</b></td><td class="sag kir">−4</td><td class="sag kir">−1.540,00</td><td>30.06.2026 · −3</td><td><span class="rz kir">Tekrar eden eksik</span></td></tr>
+          <tr><td>K080-ELD · ELDİVEN NİTRİL M</td><td>K080 SARF</td><td><span class="rz">—</span></td><td class="orta">4</td><td class="orta">1</td><td class="sag ok-y">+12</td><td class="sag ok-y">+1.320,00</td><td>30.06.2026 · +12</td><td><span class="rz ok">Tek sefer</span></td></tr>
+          <tr><td>UNQ-4110 · UNIQ-OSS 4.1X10</td><td>K010.05</td><td><span class="rz mavi">Lot No + SKT</span></td><td class="orta">2</td><td class="orta">2</td><td class="sag">0</td><td class="sag">0,00</td><td>30.09.2026 · lot değişimi</td><td><span class="rz sari">Lot karışıklığı</span></td></tr>
+          <tr><td colspan="9" class="sonuk">… 105 kalem daha</td></tr>
+        </tbody></table></div>
+      <div class="ipucu"><b>Lot karışıklığı:</b> stok toplamı tutuyor ama bir lotta fazla, diğerinde eksik — mal doğru, lot seçimi yanlış yapılmış (eğitim / okutma sorunu).</div>
+    </div>
+  </div>
+
+  <!-- ============ KIRILIMLAR ============ -->
+  <div class="pnl" data-s="kir">
+    <div class="iki">
+      <div class="grp"><h4>Kategori bazında</h4><div class="dg"><table>
+        <thead><tr><th>Kategori</th><th class="sag">Sayılan</th><th class="sag">Fark kalem</th><th class="sag">Net ₺</th><th class="sag">Doğruluk</th></tr></thead>
+        <tbody>
+          <tr><td>K010.01 İMPLANT_ALPHADENT</td><td class="sag">318</td><td class="sag">14</td><td class="sag kir">−18.500</td><td class="sag">%95,6</td></tr>
+          <tr><td>K015.03 ABUTMENT_HADRON</td><td class="sag">204</td><td class="sag">11</td><td class="sag kir">−4.230</td><td class="sag">%94,6</td></tr>
+          <tr><td>K080 SARF</td><td class="sag">540</td><td class="sag">22</td><td class="sag ok-y">+2.910</td><td class="sag">%95,9</td></tr>
+          <tr><td>K090 DİĞER</td><td class="sag">880</td><td class="sag">9</td><td class="sag kir">−610</td><td class="sag ok-y">%99,0</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Depo bazında</h4><div class="dg"><table>
+        <thead><tr><th>Depo</th><th class="orta">Sayım</th><th class="sag">Fazla ₺</th><th class="sag">Eksik ₺</th><th class="sag">Net ₺</th><th>Son sayım</th></tr></thead>
+        <tbody>
+          <tr><td>Anadepo</td><td class="orta">4</td><td class="sag ok-y">+13.500</td><td class="sag kir">−40.080</td><td class="sag kir">−26.580</td><td>24.10.2026</td></tr>
+          <tr><td>ALT</td><td class="orta">2</td><td class="sag ok-y">+4.920</td><td class="sag kir">−12.880</td><td class="sag kir">−7.960</td><td>30.06.2026 · <span class="kir">116 gün</span></td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Sayan bazında <span class="mini">satırı sayan kullanıcı</span></h4><div class="dg"><table>
+        <thead><tr><th>Sayan</th><th class="sag">Satır</th><th class="sag">Fark çıkan</th><th class="sag">Sonraki sayımda düzelen</th></tr></thead>
+        <tbody>
+          <tr><td>Mehmet A. (depo)</td><td class="sag">2.140</td><td class="sag">61</td><td class="sag">9</td></tr>
+          <tr><td>Zeynep K.</td><td class="sag">1.272</td><td class="sag">48</td><td class="sag kir">17</td></tr>
+        </tbody></table></div>
+        <div class="ipucu">"Sonraki sayımda düzelen" çoksa fark gerçek değil, sayım hatasıdır.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ DIKKAT ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="iki">
+      <div class="grp"><h4>🔁 Tekrar eden eksikler <span class="mini">2+ sayımda eksik · kayıp / kaçak / kayıtsız çıkış</span></h4><div class="dg"><table>
+        <thead><tr><th>Stok</th><th class="orta">Eksik çıkan</th><th class="sag">Toplam</th><th class="sag">Net ₺</th></tr></thead>
+        <tbody>
+          <tr><td>K-IMP-AD4011</td><td class="orta">3 / 3</td><td class="sag kir">−5</td><td class="sag kir">−9.250</td></tr>
+          <tr><td>HDR-D5</td><td class="orta">2 / 2</td><td class="sag kir">−4</td><td class="sag kir">−1.540</td></tr>
+          <tr><td colspan="4" class="sonuk">… 5 kalem daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>💰 Yüksek tutarlı farklar <span class="mini">satır başına 5.000 ₺ üstü</span></h4><div class="dg"><table>
+        <thead><tr><th>Sayım</th><th>Stok · Lot</th><th class="sag">Fark</th><th class="sag">₺</th></tr></thead>
+        <tbody>
+          <tr><td>SYM-2026-0001</td><td>K-IMP-AD4011 · 250608</td><td class="sag kir">−2</td><td class="sag kir">−3.700</td></tr>
+          <tr><td>SYM-2026-0001</td><td>POF4013QNP · 260212</td><td class="sag kir">−4</td><td class="sag kir">−5.680</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>🏷 Lotsuz bakiyede fark <span class="mini">fişlenemez · lot bilgisi düzeltilmeli</span></h4><div class="dg"><table>
+        <thead><tr><th>Sayım</th><th>Stok</th><th class="sag">Sistem</th><th class="sag">Sayılan</th></tr></thead>
+        <tbody>
+          <tr><td>SYM-2026-0002</td><td>UNQ-DA</td><td class="sag">200</td><td class="sag">200</td></tr>
+          <tr><td colspan="4" class="sonuk">sisteme eşitlendi · fark yok</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>⏰ Uzun süredir sayılmayan depolar / kategoriler</h4><div class="dg"><table>
+        <thead><tr><th>Depo · Kategori</th><th>Son sayım</th><th class="sag">Değer</th></tr></thead>
+        <tbody>
+          <tr><td>ALT · tüm depo</td><td class="kir">30.06.2026 · 116 gün</td><td class="sag">416.500</td></tr>
+          <tr><td>Anadepo · K030 ANALOG</td><td class="kir">hiç sayılmadı</td><td class="sag">413.150</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 24.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>SAYIM FARK İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.01.2026 – 24.10.2026</span><span>Depo: Tümü (2)</span>
+          <span>Sayım: 6 (5 kapandı)</span><span>Doğruluk: %96,8</span></div>
+        <table>
+          <thead><tr><th>Sayım</th><th>Tarih</th><th>Depo</th><th>Fark kalem</th><th>Fazla</th><th>Eksik</th><th>Net</th><th>Fişler</th></tr></thead>
+          <tbody>
+            <tr><td>SYM-2026-0002</td><td>24.10.2026</td><td>Anadepo</td><td>3</td><td>0,00</td><td>−350,00</td><td>−350,00</td><td>(açık)</td></tr>
+            <tr><td>SYM-2026-0001</td><td>30.09.2026</td><td>Anadepo</td><td>24</td><td>7.400,00</td><td>−21.300,00</td><td>−13.900,00</td><td>G41 · Ç57</td></tr>
+            <tr><td>SYM-2026-0000</td><td>30.06.2026</td><td>ALT</td><td>31</td><td>4.920,00</td><td>−12.880,00</td><td>−7.960,00</td><td>G22 · Ç31</td></tr>
+            <tr><td colspan="8" style="color:#8a98a8">… 3 sayım daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Sayım fazlası</span><span>18.420,00</span></div>
+          <div><span>Sayım eksiği</span><span>−52.960,00</span></div>
+          <div><span>Tekrar eden eksik (7 kalem)</span><span>−14.300,00</span></div>
+          <div class="b"><span>NET SAYIM FARKI</span><span>−34.540,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Depo Sorumlusu<br>Ad Soyad · İmza</div><div>Mali İşler / Yönetim<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Sayım Fark İcmali · fark ve tutar sayım satırından (sayım anı maliyeti) · kapanan sayımlar fişleriyle aynı</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>6 sayım</span><span>109 fark kalemi</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Sayım Fark İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Sayımlar ne kadar fark çıkardı, hangi kalemler sürekli eksik, hangi depo uzun süredir sayılmadı?" Kayıp / kaçak takibi ve dönem kapanışı.</li>
+    <li><b>Kaynak:</b> <code>stok_sayim</code> + <code>stok_sayim_satir</code> (1169). Tutar = fark × satırdaki birim maliyet; kapanan sayım fişleriyle (Giriş · Sayım Fazlası, Çıkış · Sayım Eksiği) birebir. Açık sayım varsayılan olarak dışarıda (şeritten dahil edilir).</li>
+    <li><b>Doğruluk:</b> sayılan satırlardan sistemle aynı çıkanların oranı (sayılmayan satır hesaba girmez).</li>
+    <li><b>Analizler sunucuda:</b> tekrar eden eksik (aynı kalem 2+ sayımda eksik), lot karışıklığı (stok tutuyor, lotlar ters), sonraki sayımda düzelen (sayım hatası), uzun süredir sayılmayan depo / kategori (<code>depo.son_sayim_tarihi</code>).</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü; A4 yönetim / denetim için.</li>
+  </ul>
+  <b>Açık sorular:</b>
+  <ul>
+    <li>"Yüksek tutarlı fark" eşiği sabit (5.000 ₺) mı, kurum ayarı mı?</li>
+    <li>Sayan bazında kırılım istenir mi (personel değerlendirmesine dönüşebilir)?</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

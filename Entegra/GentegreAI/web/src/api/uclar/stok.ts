@@ -6,6 +6,26 @@ import { istek, gonder, dosyaYukle, dosyaIndir } from '../cekirdek';
 
 /** Stok durumu, hareket, paket icerigi ve ana sayfa. */
 export const stokUclari = {
+  // ------------------------------------------------ stok sayimi (1169) ----
+  /** Sayım aç: satırlar açılış anındaki bakiyeden üretilir (kapsam 2 boş açılır). */
+  stokSayimAc: (g: { depoId: number; kapsam: number; kategoriId?: number | null; aciklama?: string }) =>
+    gonder<{ id: number; kalem: number }>('/api/stok-sayim', g),
+  stokSayim: (id: number) => istek<StokSayimYaniti>(`/api/stok-sayim/${id}`),
+  stokSayimAciklama: (id: number, aciklama: string) =>
+    istek<{ id: number }>(`/api/stok-sayim/${id}`, { method: 'PUT', body: JSON.stringify({ aciklama }) }),
+  /** null = "sayılmadı"ya döner (fark yazılmaz). */
+  stokSayimSayilan: (satirId: number, sayilan: number | null) =>
+    istek<{ satirId: number; sayilan: number | null }>(`/api/stok-sayim/satir/${satirId}`,
+      { method: 'PUT', body: JSON.stringify({ sayilan }) }),
+  /** Barkod / stok kodu ya da stok id okutma; lotlu stokta birden çok satır varsa lotSec döner. */
+  stokSayimOkut: (id: number, g: { kod?: string; stokId?: number; miktar?: number }) =>
+    gonder<StokSayimOkutYaniti>(`/api/stok-sayim/${id}/okut`, g),
+  stokSayimSil: (id: number) => istek<{ id: number }>(`/api/stok-sayim/${id}`, { method: 'DELETE' }),
+  /** Farkları fişle (Giriş: Sayım Fazlası · Çıkış: Sayım Eksiği) ve sayımı kapat. */
+  stokSayimKapat: (id: number) =>
+    gonder<{ id: number; girisBelgeId: number | null; cikisBelgeId: number | null;
+             fazlaKalem: number; eksikKalem: number; uyarilar: string[] }>(`/api/stok-sayim/${id}/kapat`, {}),
+
   // ------------------------------------------ stok karti: Stok Durumu ----
   /** Depo bazli miktar/rezerve/kullanilabilir + KPI seridi (salt okunur). */
   stokDurum: (stokId: number) =>
@@ -140,3 +160,22 @@ export const stokUclari = {
   panel: () => istek<PanelYaniti>('/api/panel'),
 
 };
+
+// ---------------------------------------------------------- stok sayimi ----
+export interface StokSayimBaslik {
+  id: number; sayimNo: string; subeId: number; depoId: number; depoAdi: string;
+  sayimTarihi: string; kapsam: number; kategoriId: number | null; kategoriAdi: string;
+  aciklama: string; durum: number; kapanisTarihi: string | null;
+  girisBelgeId: number | null; girisBelgeNo: string; cikisBelgeId: number | null; cikisBelgeNo: string;
+}
+export interface StokSayimSatiri {
+  id: number; stokId: number; stokKodu: string; stokAdi: string; birim: string;
+  /** Stokun izleme türü adı ("Lot No + SKT"...); izlemsizde boş. */
+  izlemeAdi: string;
+  seriLotId: number | null; lot: string; skt: string | null;
+  sistem: number; sayilan: number | null; birimMaliyet: number; kategori: number;
+}
+export interface StokSayimYaniti { baslik: StokSayimBaslik; satirlar: StokSayimSatiri[] }
+export type StokSayimOkutYaniti =
+  | { lotSec: true; satirIdleri: number[]; stokAdi: string; miktar: number }
+  | { lotSec: false; satirId: number; stokAdi: string; sayilan: number; miktar: number; eklendi: boolean };

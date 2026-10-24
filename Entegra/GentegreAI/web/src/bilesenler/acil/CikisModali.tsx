@@ -106,7 +106,7 @@ export function CikisModali({ basvuruId, protokolNo, hastaAdi, onKapat, onTamam 
                        onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '🚪 Çıkışı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>{cev('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>✖ {cev('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

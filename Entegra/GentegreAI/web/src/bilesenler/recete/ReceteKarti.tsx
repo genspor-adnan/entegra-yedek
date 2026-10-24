@@ -136,7 +136,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
                   : <div className="yukleniyor-satir">{c('Yükleniyor…')}</div>;
     return (
       <Modal baslik={c('Reçete')} buyutmeYok onKapat={onKapat} sayfa={sayfa}
-             alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
+             alt={<button type="button" className="d" onClick={onKapat}>✖ {c('Kapat')}</button>}>
         {hata ? <div className="hata-kutusu">{hata}</div> : <div className="yukleniyor-satir">{c('Yükleniyor…')}</div>}
       </Modal>
     );

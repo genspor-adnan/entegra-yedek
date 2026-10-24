@@ -387,7 +387,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const dugmeler = (
           <>
             {modalMi
-              ? <button className="d kapat-dugmesi" onClick={onKapat}>{cev('✖ Kapat')}</button>
+              ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
               : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
                   Listeye Dön
                 </button>}

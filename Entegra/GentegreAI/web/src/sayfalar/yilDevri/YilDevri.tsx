@@ -199,7 +199,7 @@ export function YilDevri() {
             {calisiyor ? c('Çalışıyor…') : `✔ ${c(ADIMLAR[aktif - 1].ad)} — ${c('adımı yürüt')}`}</button>
         )}
         <button className="d" disabled={aktif >= 5} onClick={() => setAktif(a => a + 1)}>{c('Sonraki adım')} ▶</button>
-        <button className="d" onClick={() => git(-1)}>{c('Kapat')}</button>
+        <button className="d" onClick={() => git(-1)}>✖ {c('Kapat')}</button>
       </div>
     </div>
   );

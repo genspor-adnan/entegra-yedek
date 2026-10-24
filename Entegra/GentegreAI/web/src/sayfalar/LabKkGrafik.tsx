@@ -110,7 +110,7 @@ export function LabKkGrafik() {
           <span className={`rozet ${gecerli ? 'olumlu' : 'hata'}`}>
             {gecerli ? 'KK geçerli — oto-onay açık' : 'KK RET — oto-onay kapalı'}
           </span>
-          <button className="d" onClick={() => git(-1)}>{c('✖ Kapat')}</button>
+          <button className="d" onClick={() => git(-1)}>✖ {c('Kapat')}</button>
         </div>
       </div>
 

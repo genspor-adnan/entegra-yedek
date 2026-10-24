@@ -106,7 +106,7 @@ export function KodListesiModali({ kod, baslik, ustDeger, onKapat }: {
           {kaydediyor ? 'Kaydediliyor…' : '💾 Kaydet'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat} disabled={kaydediyor}>{c('✕ Kapat')}</button>
+                onClick={onKapat} disabled={kaydediyor}>✖ {c('Kapat')}</button>
       </>}
     >
       <div className="kagrup">

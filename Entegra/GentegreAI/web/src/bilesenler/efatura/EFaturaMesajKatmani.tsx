@@ -31,7 +31,7 @@ export function EFaturaMesajKatmani() {
   const detay = secili != null ? satirlar?.[secili] : null;
   return (
     <Modal baslik={`e-Fatura Mesaj Geçmişi — ${acik.baslik}`} onKapat={kapat} enUst
-           alt={<button className="d kapat-dugmesi" onClick={kapat}>Kapat</button>}>
+           alt={<button className="d kapat-dugmesi" onClick={kapat}>✖ Kapat</button>}>
       <div className="kagrup">
         {hata && <div className="hata-kutusu">{hata}</div>}
         {satirlar && satirlar.length === 0 && <div className="not" style={{ padding: 10 }}>Bu belge için henüz e-Fatura işlemi yapılmamış.</div>}

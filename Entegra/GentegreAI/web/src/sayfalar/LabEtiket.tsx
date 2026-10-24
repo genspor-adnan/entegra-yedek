@@ -113,7 +113,7 @@ export function LabEtiket() {
           {veri.etiketler.length} tüp · {basilacak.length} etiket
         </span>
         <span style={{ marginLeft: 'auto' }} />
-        <button className="d" onClick={() => git(-1)}>{cev('✖ Kapat')}</button>
+        <button className="d" onClick={() => git(-1)}>✖ {cev('Kapat')}</button>
       </div>
 
       {/* HASTA HAZIRLIĞI etikete basılmaz (yer yok) ama bankoda görünür:

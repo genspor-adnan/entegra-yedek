@@ -244,7 +244,7 @@ export function CalismaSablonKarti({ id, ilkHekim, ilkDepartman, onKapat }: {
           )}
           {yazar && kayitId !== null && <button type="button" className="d teh" onClick={() => void sil()}>🗑 {c('Sil')}</button>}
           <span className="ck-bosluk" />
-          <button type="button" className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>
+          <button type="button" className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
       </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {yukleniyor ? <div className="yukleniyor-satir">{c('Yükleniyor…')}</div> : (
