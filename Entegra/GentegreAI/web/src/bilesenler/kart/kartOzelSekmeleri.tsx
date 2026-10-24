@@ -9,6 +9,7 @@ import { KontrolListesi } from '../radyoloji/KontrolListesi';
 import { RolYetkiMatrisi } from '../RolYetkiMatrisi';
 import { TekKayit } from '../TekKayit';
 import { CariSatisRiskSekmesi } from './CariSatisRiskSekmesi';
+import { HastaMali, HastaOnamlari, HastaRandevulari } from '../../sayfalar/hasta/HastaKartSekmeleri';
 
 /**
  * KARTA ÖZEL SEKME GÖVDELERİ (refaktör 23.10.2026, GenForm'dan ayrıldı).
@@ -149,6 +150,12 @@ const OZEL_YER_TUTUCULAR: Record<string, Record<string, (b: OzelSekmeBaglami) =>
 /** kaynak -> özel sekme anahtarı -> gövde (sunucunun `ozel:` sekmeleri, ekrana bağlı olanlar). */
 const OZEL_SEKMELER: Record<string, Record<string, (b: OzelSekmeBaglami) => ReactNode>> = {
   rol: { 'ozel:yetkiler': b => <RolYetkiMatrisi rolId={b.id as number} saltOkunur={b.salt} /> },
+  // Hasta kartı (mockup hasta_karti_v5): sekme yalnız kayıtlı hastada eklenir (kartSekmeleri).
+  hasta: {
+    'ozel:randevular': b => <HastaRandevulari hastaId={b.id as number} />,
+    'ozel:mali': b => <HastaMali hastaId={b.id as number} />,
+    'ozel:onamlar': b => <HastaOnamlari hastaId={b.id as number} />,
+  },
 };
 
 /** Bu kaynağın bu detayı kendi gövdesiyle mi çiziliyor (generic grid çizilmez). */

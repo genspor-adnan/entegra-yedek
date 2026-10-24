@@ -245,6 +245,11 @@ export function sekmeleriKur(secenek: {
   //   basvuruyu acar. Yeni kayitta hasta id'si yok, hic cizilmez.
   if (kaynak === 'hasta' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:basvurular', baslik: 'Başvurular' });
+    // Mockup hasta_karti_v5 (kullanıcı 24.10.2026): Belgeler / Belge Durumu yerine Randevular · Mali ·
+    //   Onam & Belgeler - Başvurular'ın sağında, salt okunur (sayfalar/hasta/HastaKartSekmeleri).
+    s.push({ tur: 'ozel', anahtar: 'ozel:randevular', baslik: 'Randevular' });
+    s.push({ tur: 'ozel', anahtar: 'ozel:mali', baslik: 'Mali' });
+    s.push({ tur: 'ozel', anahtar: 'ozel:onamlar', baslik: 'Onam & Belgeler' });
   }
   (yerTutucuSekmeler ?? []).forEach(baslik => {
     if (dokumanliKart && !yeniMi && baslik === 'Yorum / Medya') {
