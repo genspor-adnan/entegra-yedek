@@ -55,7 +55,9 @@ const STIL = `
 .hkb-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
 .hkb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
 .hkb-alt .hkb-goz { cursor: pointer; margin-left: 3px; opacity: .7 }
-.hkb-rz { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap }
+.hkb-govde { flex: 1; min-width: 0 }
+.hkb-ust { display: flex; align-items: center; gap: 10px }
+.hkb-rz { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end }
 .hkb-rz .rozet.buyuk { font-weight: bold; font-size: 11.5px }
 .mk-ozet b > span { font-size: inherit; overflow: visible }
 .mk-ozet b > span:not(.ml-borc) { color: inherit }
@@ -89,17 +91,10 @@ export function HastaKartBandi({ id, deger, git }: {
       <style>{STIL}</style>
       <div className="hkb">
         <span className="hkb-foto"><Avatar ad={ad} buyuk soluk={!aktif} />{kose && <small>{kose}</small>}</span>
-        <div>
+        <div className="hkb-govde">
+          {/* Rozetler ad satırında, sağa yaslı (kullanıcı 24.10.2026). */}
+          <div className="hkb-ust">
           <div className="hkb-ad">{ad || '—'}</div>
-          <div className="hkb-alt">
-            {c('Dosya')} <b>{String(deger.kod ?? '') || '—'}</b>
-            {tc && <> · TC <b>{tcAcik ? tc : maskele(tc)}</b>
-              <span className="hkb-goz" title={c(tcAcik ? 'Gizle' : 'Göster')} onClick={() => setTcAcik(x => !x)}>👁</span></>}
-            {o?.dogumTarihi && <> · {c('Doğum')} <b>{tarih(o.dogumTarihi)}</b>{y !== null ? ` (${y} y)` : ''}</>}
-            {o?.kanGrubu && <> · {c('Kan')} <b>{o.kanGrubu}</b></>}
-            {o?.kayitTarihi && <> · {c('Kayıt')} <b>{yildan(new Date(o.kayitTarihi).getFullYear())}</b> {c('beri')}</>}
-            {o && <> · <b>{sayi.format(o.basvuruSayisi)}</b> {c('başvuru')}</>}
-          </div>
           <div className="hkb-rz">
             <span className={`rozet ${aktif ? 'ok' : 'gri'}`}>● {c(aktif ? 'Aktif' : 'Pasif')}</span>
             {o?.kurum && <span className="rozet mavi">{o.kurum}</span>}
@@ -111,6 +106,16 @@ export function HastaKartBandi({ id, deger, git }: {
                 💊 {ilacKisa(o.ilaclar[0] ?? '')}{o.ilacSayisi > 1 ? ` +${o.ilacSayisi - 1}` : ''}</span>)}
             {o?.kronikler.map(k => <span key={k} className="rozet mor" title={k}>{kisalt(k)}</span>)}
             {o?.vefat === 1 && <span className="rozet gri">✝ {c('Vefat')}</span>}
+          </div>
+          </div>
+          <div className="hkb-alt">
+            {c('Dosya')} <b>{String(deger.kod ?? '') || '—'}</b>
+            {tc && <> · TC <b>{tcAcik ? tc : maskele(tc)}</b>
+              <span className="hkb-goz" title={c(tcAcik ? 'Gizle' : 'Göster')} onClick={() => setTcAcik(x => !x)}>👁</span></>}
+            {o?.dogumTarihi && <> · {c('Doğum')} <b>{tarih(o.dogumTarihi)}</b>{y !== null ? ` (${y} y)` : ''}</>}
+            {o?.kanGrubu && <> · {c('Kan')} <b>{o.kanGrubu}</b></>}
+            {o?.kayitTarihi && <> · {c('Kayıt')} <b>{yildan(new Date(o.kayitTarihi).getFullYear())}</b> {c('beri')}</>}
+            {o && <> · <b>{sayi.format(o.basvuruSayisi)}</b> {c('başvuru')}</>}
           </div>
         </div>
       </div>

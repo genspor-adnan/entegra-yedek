@@ -40,6 +40,8 @@ interface Props {
   kimlikSutunGenisligi?: string;
   /** Yeni kayıtta henüz yok; kart kaydedilmeden dosya yüklenemez. */
   kaynakId?: number;
+  /** Hasta (24.10.2026): Doğum Tarihi + Cinsiyet Genel'in üstündeki Kimlik satırında - burada çizilmez. */
+  dogumCinsiyetGizli?: boolean;
 }
 
 /**
@@ -60,6 +62,7 @@ export function PersonelKimlikOzet({
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, isBilgiEk, ozetGizli,
   subeAlan, sube, onSubeDegis,
   vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false, vknoSagEk,
+  dogumCinsiyetGizli = false,
 }: Props) {
   const yerler = useYerler(true);
   const [resimUrl, setResimUrl] = useState<string | null>(null);
@@ -119,6 +122,16 @@ export function PersonelKimlikOzet({
   //   geldi (kullanici) - pasaportla ayni soruyu tamamliyor.
   const yabanciTurAlan = alan('yabanciHastaTuru');
   const mahremiyetAlan = alan('mahremiyetNotu');
+  const medeniHalKutu = medeniHalAlan && (
+    <label className="alan tip-kod">
+      <span className="etiket">{c('Medeni Hal')}</span>
+      <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
+        onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
+        <option value="">-</option>
+        {medeniHalAlan.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
+      </select>
+    </label>
+  );
 
 
   return (
@@ -160,7 +173,7 @@ export function PersonelKimlikOzet({
               </div>
             )}
             <div className="adres-satir">
-              <label className="alan tip-tarih">
+              {!dogumCinsiyetGizli && <label className="alan tip-tarih">
                 {/* ZORUNLULUK KATALOGTAN (480): etiketin yildizi elle
                     yazilirsa katalog degistiginde ekran yalan soyler. */}
                 <span className="etiket">
@@ -173,16 +186,17 @@ export function PersonelKimlikOzet({
                 <input type="date" style={{ width: KISA_KUTU }}
                   value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
-              </label>
+              </label>}
               <label className="alan tip-metin">
                 <span className="etiket">{c('Doğum Yeri')}</span>
                 <input value={String(satir.dogumYeri ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ dogumYeri: e.target.value })} />
               </label>
+              {dogumCinsiyetGizli && medeniHalKutu}
             </div>
             {/* SIRA (kullanici): Cinsiyet · Medeni Hal / Meslek · Kan Grubu /
                 Uyruk. Ikili satirlar - ucuncu alan satiri sikistiriyordu. */}
-            <div className="adres-satir">
+            {!dogumCinsiyetGizli && <div className="adres-satir">
               <label className="alan tip-kod">
                 <span className="etiket">
                   {c('Cinsiyet')}{cinsiyetAlan?.zorunlu && ' *'}
@@ -194,17 +208,8 @@ export function PersonelKimlikOzet({
                   {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                 </select>
               </label>
-              {medeniHalAlan && (
-                <label className="alan tip-kod">
-                  <span className="etiket">{c('Medeni Hal')}</span>
-                  <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
-                    onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
-                    <option value="">-</option>
-                    {medeniHalAlan.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
-                  </select>
-                </label>
-              )}
-            </div>
+              {medeniHalKutu}
+            </div>}
             <div className="adres-satir">
               {meslekAlan && (
                 <label className="alan tip-kod">

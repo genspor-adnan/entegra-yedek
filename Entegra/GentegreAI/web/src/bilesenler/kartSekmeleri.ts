@@ -159,8 +159,11 @@ export function sekmeleriKur(secenek: {
     if (ki >= 0 && ge >= 0) {
       const kimlik = s[ki] as Extract<SekmeTanimi, { tur: 'grup' }>;
       const genel = s[ge] as Extract<SekmeTanimi, { tur: 'grup' }>;
-      const sira = ['vkno', 'ad', 'soyad', 'kod', 'durum'];
-      const k = [...kimlik.alanlar].sort((x, y) => (sira.indexOf(x.ad) + 99) % 99 - (sira.indexOf(y.ad) + 99) % 99);
+      // Dosya No kutuda yok (bantta ve başlıkta görünür, otomatik verilir; kullanıcı 24.10.2026) - yerine
+      // özlükteki Doğum Tarihi + Cinsiyet kutuya girer (KartGrupSekmesi çizer, Durum'dan önce).
+      const sira = ['vkno', 'ad', 'soyad', 'durum'];
+      const k = kimlik.alanlar.filter(a => a.ad !== 'kod')
+        .sort((x, y) => (sira.indexOf(x.ad) + 99) % 99 - (sira.indexOf(y.ad) + 99) % 99);
       s[ge] = { ...genel, alanlar: [...k.map(a => ({ ...a, altGrup: a.altGrup ?? KIMLIK_GRUP })), ...genel.alanlar] };
       s.splice(ki, 1);
     }

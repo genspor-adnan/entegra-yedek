@@ -72,7 +72,9 @@ const adsiz = (gruplanmis.find(([b]) => !b)?.[1] ?? []).filter(a => !gizli.has(a
 // Cari'ya ozel: Iletisim + Notlar ayni (sol) sutunda ust-alt, Tanımlama sagda.
 const iletisim = adli.find(([b]) => b === 'İletişim');
 const notlar = adli.find(([b]) => b === 'Notlar');
-const digerAdli = adli.filter(([b]) => b !== 'İletişim' && b !== 'Notlar');
+// Hasta 'Kimlik' satırı adliBlok'un başında ayrıca çizilir - burada kalırsa İletişim'in solunda
+//   2px'e ezilmiş boş bir kutu olarak görünüyordu (kullanıcı: "iletişim çerçevesi solunda boşluk var").
+const digerAdli = adli.filter(([b]) => b !== 'İletişim' && b !== 'Notlar' && !(kaynak === 'hasta' && b === 'Kimlik'));
 const adresDetay = meta.detaylar.find(d => d.ad === 'adresler');
 const acilDetay = meta.detaylar.find(d => d.ad === 'acilKisiler');
 const iletisimAlanAdlari = new Set(['telefon', 'cepTel', 'eposta', 'epostaWeb']);
@@ -166,16 +168,40 @@ const adliBlok = (
         PersonelKimlikOzet/TekAdres gibi ozel bilesenler AltGrup'a bagli DEGIL, asagida
         bu blogun icinde render ediliyor (bug: "genel sekmesinde sadece 2 alan var" -
         adli.length===0 oldugu icin butun kasira hic acilmiyordu). */}
-    {/* HASTA KARTI v5 (kullanıcı 24.10.2026): eski etiketli kimlik şeridinin alanları (Kimlik No · Ad ·
-        Soyad · Dosya No · Durum) Genel'in başında tek satır "Kimlik" kutusu - kartSekmeleri buraya taşır. */}
+    {/* HASTA KARTI v5 (kullanıcı 24.10.2026): eski etiketli kimlik şeridinin alanları Genel'in başında
+        tek satır, ÇERÇEVESİZ (kullanıcı: "kimlik çerçevesini de kaldır") - kartSekmeleri buraya taşır: Kimlik No · Ad · Soyad · Doğum Tarihi ·
+        Cinsiyet · Durum. Doğum / cinsiyet kart alanı değil, özlük satırı (Kimlik Bilgileri'nde yok). */}
     {kaynak === 'hasta' && aktif.baslik === 'Genel' && (() => {
       const k = adli.find(([b]) => b === 'Kimlik')?.[1];
-      return k && k.length > 0 ? (
-        <div className="kagrup" style={{ margin: '0 0 10px' }}>
-          <h6>Kimlik</h6>
-          <div className="alan-izgara" style={{ display: 'grid', gridTemplateColumns: `repeat(${k.length}, minmax(0, 1fr))`, gap: '8px 12px' }}>
-            {renderAlanListesi(k)}</div>
-        </div>) : null;
+      if (!k || k.length === 0) return null;
+      const oz = meta.detaylar.find(d => d.ad === 'ozluk');
+      const ozD = oz ? detaylar[oz.ad] ?? bosDetay() : null;
+      const satir = ozD?.guncel[0] ?? {};
+      const ozYaz = (x: Record<string, unknown>) => oz && ozD && setDetaylar(t => ({ ...t,
+        [oz.ad]: { ...ozD, guncel: [{ ...satir, ...x }, ...ozD.guncel.slice(1)] } }));
+      const oa = (ad: string) => oz?.alanlar.find(a => a.ad === ad);
+      const cins = oa('cinsiyet');
+      const durumsuz = k.filter(a => a.ad !== 'durum');
+      return (
+        <div style={{ margin: '0 0 10px', padding: '2px 4px' }}>
+          <div className="alan-izgara" style={{ display: 'grid', gridTemplateColumns: `repeat(${k.length + (oz ? 2 : 0)}, minmax(0, 1fr))`, gap: '8px 12px' }}>
+            {renderAlanListesi(durumsuz)}
+            {oz && <>
+              <label className="alan tip-tarih">
+                <span className="etiket">{c('Doğum Tarihi')}{oa('dogumTarihi')?.zorunlu && ' *'}</span>
+                <input type="date" value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={salt}
+                  onChange={e => ozYaz({ dogumTarihi: e.target.value })} />
+              </label>
+              <label className="alan tip-kod">
+                <span className="etiket">{c('Cinsiyet')}{cins?.zorunlu && ' *'}</span>
+                <select value={String(satir.cinsiyet ?? '')} disabled={salt}
+                  onChange={e => ozYaz({ cinsiyet: e.target.value })}>
+                  <option value="">-</option>
+                  {cins?.kodlar && Object.entries(cins.kodlar).map(([kd, v]) => <option key={kd} value={kd}>{c(v, 'kod')}</option>)}
+                </select>
+              </label></>}
+            {renderAlanListesi(k.filter(a => a.ad === 'durum'))}</div>
+        </div>);
     })()}
     {(adli.length > 0 || personelGibiKart) && (
       <div className="kasira">
@@ -348,6 +374,7 @@ const adliBlok = (
               ozlukDurum={detaylar[ozlukDetay.ad] ?? bosDetay()}
               saltOkunur={salt}
               onOzlukDegis={yeni => setDetaylar(t => ({ ...t, [ozlukDetay.ad]: yeni }))}
+              dogumCinsiyetGizli={kaynak === 'hasta'}
               kaynakId={yeniMi ? undefined : (id as number)}
               isBilgiEk={(() => {
                 // ANA ROL + YAN ROL (794, kullanici: "personelde İş Bilgileri
