@@ -325,9 +325,9 @@ export function KartKimlikSeridi({
                             + (kaynak === 'goz-muayene' ? ' kaid-gozm' : '')
                             // MÜŞTERİ / TEDARİKÇİ (kullanıcı 23.10.2026: "müşteri kartında kod %50 küçült").
                             + (kaynak === 'cari' ? ' kaid-cari' : '')
-                            // BANKA HESABI (kullanıcı 23.10.2026) ve KASA (24.10.2026): kod / para birimi / durum
-                            //   yarım, Ad geniş; tür gizli (arka planda B / K).
-                            + (kaynak === 'hesap' && (deger.tur === 'B' || deger.tur === 'K') ? ' kaid-banka' : '')
+                            // HESAP KARTLARI - banka (kullanıcı 23.10.2026), kasa / POS / kredi / kredi kartı (24.10.2026):
+                            //   kod / para birimi / durum yarım, Ad geniş; Hesap Türü gizli (listenin varsayılanı).
+                            + (kaynak === 'hesap' ? ' kaid-hesap' : '')
                             // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
                             //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
                             //   serit 4x2 duzenli bir izgara. Otomatik akista

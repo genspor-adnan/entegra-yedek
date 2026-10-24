@@ -7802,9 +7802,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* MÜŞTERİ / TEDARİKÇİ KARTI (kullanıcı 23.10.2026): Kod öteki alanların yarısı - Kod · Ünvan · Temsilci · Durum. */
 .alan-izgara.kaid-cari { display: grid; grid-template-columns: minmax(0, .5fr) repeat(3, minmax(0, 1fr)); gap: 8px 12px }
 @media (max-width: 900px) { .alan-izgara.kaid-cari { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
-/* BANKA HESABI (1157) ve KASA (24.10.2026) KARTI şeridi: Kod · Ad · Para Birimi · Durum - kod, para, durum yarım. */
-.alan-izgara.kaid-banka { display: grid; grid-template-columns: minmax(0, .5fr) minmax(0, 1.5fr) minmax(0, .5fr) minmax(0, .5fr); gap: 8px 12px }
-@media (max-width: 900px) { .alan-izgara.kaid-banka { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+/* HESAP KARTLARI şeridi (banka 1157; kasa / POS / kredi / kredi kartı 24.10.2026): Kod · Ad · Para Birimi · Durum - kod, para, durum yarım. */
+.alan-izgara.kaid-hesap { display: grid; grid-template-columns: minmax(0, .5fr) minmax(0, 1.5fr) minmax(0, .5fr) minmax(0, .5fr); gap: 8px 12px }
+@media (max-width: 900px) { .alan-izgara.kaid-hesap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
 
 /* =====================================================================
    RADYOLOJİ CİHAZ LİSTESİ + KARTI (967). rc- öneki.

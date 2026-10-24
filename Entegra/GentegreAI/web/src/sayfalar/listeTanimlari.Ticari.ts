@@ -700,7 +700,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'Kredi Listesi', yol: 'Banka › Kredi Listesi',
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
-    gizliKartAlanlari: ['acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
+    // Hesap Türü sorulmaz, arka planda Kredi (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
+    yeniKayitVarsayilanlari: { tur: 'R' },
+    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 35, menuAd: 'Kredi Listesi', ic: '🏛️', yetkiKodu: 'hesap.tanim.kredi.liste',
@@ -710,7 +712,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'POS Hesabı Listesi', yol: 'Banka › POS',
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
-    gizliKartAlanlari: ['acilisBakiye', 'acilisTarihi'],   // 1160
+    // Hesap Türü sorulmaz, arka planda POS (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
+    yeniKayitVarsayilanlari: { tur: 'P' },
+    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
@@ -720,7 +724,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ekstre: { kaynak: 'hesap-ekstre', alan: 'hesapId', baslik: 'Hesap Ekstresi',
               tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'Kredi Kartı Listesi', yol: 'Banka › Kredi Kartlari',
     gizliKartSekmeleri: ['Banka Bağlantısı', 'Limitler & Kurallar', 'Sayım / Gün Sonu'],   // 1157 / 1161: yalnız Banka / Kasa kartında
-    gizliKartAlanlari: ['acilisBakiye', 'acilisTarihi'],   // 1160
+    // Hesap Türü sorulmaz, arka planda Kredi Kartı (kullanıcı 24.10.2026) - banka / kasa kartıyla aynı desen.
+    yeniKayitVarsayilanlari: { tur: 'V' },
+    gizliKartAlanlari: ['tur', 'acilisBakiye', 'acilisTarihi'],   // 1160: açılış = devir hareketi
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap.tanim.kredi_karti.liste',
