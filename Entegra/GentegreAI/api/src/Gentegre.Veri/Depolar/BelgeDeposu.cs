@@ -385,6 +385,10 @@ public sealed partial class BelgeDeposu
         var cariZorunlu = await CariZorunluMuAsync(baglanti, islem, tur, iptal);
         if (tarafId <= 0 && cariZorunlu)
             throw GentegreHatasi.Dogrulama("Cari secilmeli.", new AlanHatasi("tarafId", "Zorunlu."));
+        // CARISIZ BELGEDE taraf_id = NULL (kullanici 24.10.2026, UNIVERSE: giris fisi "fk_belge_taraf"):
+        //   istemci cari yokken 0 gonderiyor. "0" yer tutucu taraf yalniz bazi kurulumlarda var (Delphi'den
+        //   aktarilan UNIVERSE'te yok, oradaki eski fislerde de NULL) - 0 yazmak yabanci anahtari kiriyordu.
+        if (tarafId <= 0 && belge.ContainsKey("tarafId")) belge["tarafId"] = null;
         // SIPARIS/BASVURU (19) SATIRSIZ acilabilir: kayit kabulde once basvuru
         //   acilir (hasta gelir, protokol verilir), hizmetler muayene sirasinda
         //   eklenir. Diger turlerde bos belge anlamsizdir - stok/cari etkisi
