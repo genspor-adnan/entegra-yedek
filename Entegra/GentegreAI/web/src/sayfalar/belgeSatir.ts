@@ -34,6 +34,8 @@ export interface SatirDagilimi {
 }
 
 export interface SatirDurumu {
+  /** GECICI (kaydedilmez): kalem penceresi LOT EKRANIYLA acilsin - lot gridinde cift tik (24.10.2026). */
+  lotEkrani?: boolean;
   anahtar: number;
   /** 1 stok · 2 hizmet · 3 masraf (belge_satir.tur). */
   satirTur: number;
@@ -323,6 +325,9 @@ export function yanittanSatirlar(
     //   hangi lottan kac adet girdigini gormeli.
     izleme: Number(r.izleme ?? 0),
     izlemler: ((r.izlemler ?? []) as Record<string, unknown>[]).map(z => ({
+      // seriLotId: cikista sunucu lotu bununla bulur. `kalan` BILEREK yok - kayitli
+      //   secimin kalani lot penceresinde depodaki stoktan + bu belgenin dusumunden kurulur.
+      ...(Number(z.seriLotId) > 0 ? { seriLotId: Number(z.seriLotId) } : {}),
       lotNo: String(z.lotNo ?? ''),
       seriNo: String(z.seriNo ?? ''),
       uretimTarihi: String(z.uretimTarihi ?? '').slice(0, 10),

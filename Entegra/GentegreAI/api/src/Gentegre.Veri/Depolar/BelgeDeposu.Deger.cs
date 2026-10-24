@@ -244,6 +244,10 @@ public sealed partial class BelgeDeposu
                    s.doviz_tutari as "dovizTutari", s.doviz_kuru as "dovizKuru",
                    s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
                    s.izleme_kodu as "izlemeKodu",
+                   -- STOK IZLEMESI (kullanici 24.10.2026 "irsaliyede lot değiştiremedim, hiçbir ekran yok"):
+                   --   kayitli satirda gelmiyordu; kalem penceresi satiri lotsuz saniyor, Lot / Seri kutusu
+                   --   da lot ekrani da acilmiyordu. Yeni kalemde arama satirindan geliyor - ayni kaynak.
+                   coalesce(st.izleme, 0) as "izleme",
                    -- Kart satiri KOD ve AD gosterir; id'yi ekranda kimse okuyamaz.
                    --   Satir hizmet ya da masraf olabilir: kod/ad hangisi doluysa
                    --   ondan gelir (hizmet satirinda stok bos, kart bos gorunuyordu).
@@ -349,7 +353,10 @@ public sealed partial class BelgeDeposu
         // Kalemin LOT dagilimi: kart acilinca kullanici hangi lottan kac adet
         //   girdigini geri gormeli (114). Izlemsiz belgede sorgu bos doner.
         await using (var komut = new NpgsqlCommand("""
-            select i.belge_satir_id as "satirId", i.lot_no as "lotNo", i.seri_no as "seriNo",
+            -- seriLotId: CIKIS belgesi duzenlenirken sunucu lotu bununla bulur (LottanDusAsync,
+            --   0 = "lot secimi gecersiz"); okumada eksikti, kayitli irsaliye hic kaydedilemiyordu.
+            select i.belge_satir_id as "satirId", i.seri_lot_id as "seriLotId",
+                   i.lot_no as "lotNo", i.seri_no as "seriNo",
                    i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
                    i.durum, i.adet as "miktar", i.kalan
               from public.v_belge_satir_izlem i

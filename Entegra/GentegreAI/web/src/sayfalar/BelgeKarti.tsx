@@ -936,6 +936,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
     cariId: cari?.id ?? null, odeyenKurumId, fiyatListesiId, kampanyaId,
     basvuruBilgi, alisMi: bilgi.alis, sifirFiyatSor: !depoBelgesi && !stokFisiMi,
+    izlemliBelge: bilgi.girisIzlemi || bilgi.cikisIzlemi,
   });
 
   /*

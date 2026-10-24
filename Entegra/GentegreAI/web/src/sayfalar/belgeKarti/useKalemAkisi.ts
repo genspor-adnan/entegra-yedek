@@ -22,6 +22,7 @@ export function useKalemAkisi({
   satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
   yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
   cariId, odeyenKurumId, fiyatListesiId, kampanyaId, basvuruBilgi, alisMi, sifirFiyatSor = false,
+  izlemliBelge = false,
 }: {
   satirlar: SatirDurumu[];
   setSatirlar: (f: (s: SatirDurumu[]) => SatirDurumu[]) => void;
@@ -40,6 +41,8 @@ export function useKalemAkisi({
   alisMi: boolean;
   /** Fiyatin anlamli oldugu belge (depo transferi / stok fisi DISI): sifir fiyatli kalem hizli eklenmez. */
   sifirFiyatSor?: boolean;
+  /** Belge lot/seri toplar ya da seçtirir (giriş / çıkış izlemi): izlemli stok hızlı eklenmez. */
+  izlemliBelge?: boolean;
 }) {
   /**
    * STOK / HİZMET SEÇİLDİ (arama penceresinden): kalem penceresini açar.
@@ -124,7 +127,10 @@ export function useKalemAkisi({
     // FIYATI SIFIR UCRET HIZLI EKLENMEZ (kullanici 12.10.2026: "ücret sıfırsa fiyat
     //   ekranı açılsın"; 12.10.2026 satis faturasina da): Enter ile secilen kalemin fiyati yoksa kalem
     //   (fiyat) penceresi acilir; orada da 0 ile kaydedilirse onay sorulur.
-    if (hizli && !(sifirFiyatSor && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return true }
+    // LOTLU / SERILI STOK HIZLI EKLENMEZ (kullanici 24.10.2026: "giriş fişinde lotlu ürün girdim lot ekranı
+    //   açılmadı"): Enter kalemi lotsuz gride dusuruyordu. Kalem penceresi acilir; Kaydet lot ekranini acar.
+    const lotGerekli = izlemliBelge && yeni.satirTur === 1 && yeni.izleme > 0;
+    if (hizli && !lotGerekli && !(sifirFiyatSor && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return true }
     setKalem(yeni);
     return false;
   };

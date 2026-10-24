@@ -82,7 +82,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   onKapat(): void;
   onKaydet(r: SatirDurumu): void;
 }) {
-  const [r, setR] = useState<SatirDurumu>(satir);
+  // `lotEkrani` gecici bayrak - satira yazilmaz, yalniz lot ekraninin ilk acilisini belirler.
+  const [r, setR] = useState<SatirDurumu>(() => { const { lotEkrani: _, ...x } = satir; return x });
   /**
    * KDV GIRIS MODU (kullanici): fiyat kutusuna BRUT mu MATRAH mi yaziliyor.
    * Varsayilan FIYAT LISTESINDEN gelir (`satir.kdvDahil` - fiyat cozulurken
@@ -138,7 +139,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   });
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
-  const [izlemAcik, setIzlemAcik] = useState(false);
+  const [izlemAcik, setIzlemAcik] = useState(!!satir.lotEkrani && satir.izleme > 0);
   /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
   const kurElle = useRef(false);
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */

@@ -101,17 +101,33 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       .then(lotlar => {
         if (iptal) return;
         setListe(eski => {
-          if (eski.length > 0) return eski;          // kalem yeniden acildi
-          return lotlar.map(l => ({
-            seriLotId: l.seriLotId,
-            kalan: l.kalan,
-            lotNo: l.lotNo,
-            seriNo: l.seriNo,
-            uretimTarihi: (l.uretimTarihi ?? '').slice(0, 10),
-            sonKullanmaTarihi: (l.sonKullanmaTarihi ?? '').slice(0, 10),
-            durum: 0,
-            miktar: '',
-          }));
+          // Bu oturumda listeden secilmis (kalan'i dolu) - kalem yeniden acildi, secim aynen kalir.
+          if (eski.length > 0 && eski.every(z => z.kalan !== undefined)) return eski;
+          // KAYITLI BELGEDEN GELEN SECIM (kullanici 24.10.2026: "satış irs de lotno değiştiremedim"):
+          //   eskiden yalniz secili lotlar listeleniyor, kalanlari bos geldigi icin "Tamam" her
+          //   seferinde "lotunda kaldi" diyordu. Artik depodaki lotlar + secili lotlar birlikte;
+          //   secili lotun kalanina BU BELGENIN dustugu miktar eklenir - duzenlemede sunucu
+          //   once eski dusumu geri alir, o miktar yeniden secilebilir.
+          const anahtar = (z: { seriLotId?: number; lotNo: string; seriNo: string }) =>
+            z.seriLotId ? `#${z.seriLotId}` : `${z.lotNo}|${z.seriNo}`;
+          const secili = new Map(eski.map(z => [anahtar(z), z]));
+          const birlesik: IzlemSatiri[] = lotlar.map(l => {
+            const s = secili.get(anahtar(l)) ?? secili.get(`${l.lotNo}|${l.seriNo}`);
+            if (s) secili.delete(anahtar(s));
+            return {
+              seriLotId: l.seriLotId,
+              kalan: l.kalan + (s ? sayi(s.miktar) : 0),
+              lotNo: l.lotNo,
+              seriNo: l.seriNo,
+              uretimTarihi: (l.uretimTarihi ?? '').slice(0, 10),
+              sonKullanmaTarihi: (l.sonKullanmaTarihi ?? '').slice(0, 10),
+              durum: 0,
+              miktar: s ? s.miktar : '',
+            };
+          });
+          // Depoda kalani SIFIR olan secili lotlar (tamami bu belgeyle cikmis) listede yok - basa eklenir.
+          const tukenmis = [...secili.values()].map(z => ({ ...z, kalan: sayi(z.miktar) }));
+          return [...tukenmis, ...birlesik];
         });
       })
       .catch(h => setHata(hataMetni(h)))

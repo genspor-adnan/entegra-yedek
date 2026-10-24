@@ -468,6 +468,20 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
         const lotlar = r.izlemler ?? [];
+        /** Kalem penceresini acar; `lot` = dogrudan lot ekraniyla (lot gridinde cift tik). */
+        const duzenle = (k: typeof r, lot = false) => {
+          if (kilitli) {
+            void mesaj('Kesin belge satırı düzenlenemez - önce belgeyi '
+                     + 'İptal edip yeniden kesin.');
+            return;
+          }
+          if (k.iskontoKilit) {
+            void mesaj('İskontosu onaya gönderilmiş/onaylanmış satır '
+                     + 'değiştirilemez - iskonto talebini geri çekin.');
+            return;
+          }
+          setKalem(lot ? { ...k, lotEkrani: true } : k);
+        };
         // IZLEM (lot/seri) satirlari VARSAYILAN KAPALI (kullanici): kalem
         //   listesi kisa kalsin, isteyen okla acsin.
         const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
@@ -490,19 +504,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                  satırında da çift tıklayınca fiyat / miktar ekranı açıp
                  güncellenebilmeli"). Acilmadigi iki durumda SEBEP soyleniyor:
                  eskiden tiklama sessizce yutuluyor ve ekran bozuk saniliyordu. */
-              onDoubleClick={() => {
-                if (kilitli) {
-                  void mesaj('Kesin belge satırı düzenlenemez - önce belgeyi '
-                           + 'İptal edip yeniden kesin.');
-                  return;
-                }
-                if (r.iskontoKilit) {
-                  void mesaj('İskontosu onaya gönderilmiş/onaylanmış satır '
-                           + 'değiştirilemez - iskonto talebini geri çekin.');
-                  return;
-                }
-                setKalem(r);
-              }}>
+              onDoubleClick={() => duzenle(r)}>
             <td className="hiza-orta">
               {/* Onay kutusu TEK satiri ekler/cikarir - satir tiklamasi
                   (duz tik = yalniz o satir) tetiklenmesin. */}
@@ -742,9 +744,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                       <th className="hiza-sag">Miktar</th>
                     </tr>
                   </thead>
+                  {/* LOT SATIRINA CIFT TIK = LOT EKRANI (kullanici 24.10.2026). */}
                   <tbody>
                     {lotlar.map((z, li) => (
-                      <tr key={z.seriLotId ?? li}>
+                      <tr key={z.seriLotId ?? li} className="tiklanir" title={c('Lotları değiştirmek için çift tıklayın')}
+                          onDoubleClick={() => duzenle(r, true)}>
                         <td><code>{z.lotNo || '—'}</code></td>
                         <td>{z.seriNo || '—'}</td>
                         <td>{z.uretimTarihi ? z.uretimTarihi.split('-').reverse().join('.') : '—'}</td>
