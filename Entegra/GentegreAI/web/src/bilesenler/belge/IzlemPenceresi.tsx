@@ -56,6 +56,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   const [rafBirim, setRafBirim] = useState(0);
   const [rafSurum, setRafSurum] = useState<string | undefined>();
   const [rafTaslak, setRafTaslak] = useState({ sure: '', birim: '2' });
+  const [rafDuzenle, setRafDuzenle] = useState(false);
   const [rafNot, setRafNot] = useState<string | null>(null);
 
   useEffect(() => {
@@ -182,9 +183,13 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       return yeni;
     }));
 
-  const satirEkle = () =>
+  /** Lot Ekle'den sonra imlec yeni satirin Lot No kutusuna (kullanici 24.10.2026). */
+  const [odakSatir, setOdakSatir] = useState<number | null>(null);
+  const satirEkle = () => {
     // Yeni satir KALAN miktarla acilir - kullanici hesap yapmasin.
+    setOdakSatir(liste.length);
     setListe(l => [...l, bosIzlem(fark > 0 ? String(fark) : '')]);
+  };
 
   const satirSil = (i: number) =>
     setListe(l => (l.length === 1 ? [bosIzlem(String(miktar))] : l.filter((_, x) => x !== i)));
@@ -221,22 +226,16 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
           <button className="d onay" onClick={kaydet}>💾 Tamam</button>
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
-          {/* RAF OMRU UST BANTTA (kullanici 24.10.2026): ÜRT girilince SKT, SKT girilince ÜRT bu sureden. */}
+          {/* RAF OMRU UST BANTTA ETIKET (kullanici 24.10.2026: "label olarak gelsin, tıklarsam modal olarak
+              edit gireyim"): ÜRT girilince SKT, SKT girilince ÜRT bu sureden. */}
           {!cikis && tarihVar && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8 }}
-                  title={c('Üretim tarihi girilince SKT, SKT girilince üretim tarihi bu süreden hesaplanır; stok kartına yazılır.')}>
-              <span className="sonuk">{c('Raf ömrü')}</span>
-              <input className="hiza-sag" style={{ width: 48 }} value={rafTaslak.sure} placeholder="—"
-                     onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))}
-                     onBlur={() => void rafKaydet()}
-                     onKeyDown={e => { if (e.key === 'Enter') void rafKaydet() }} />
-              <select value={rafTaslak.birim}
-                      onChange={e => { const t = { ...rafTaslak, birim: e.target.value }; setRafTaslak(t); void rafKaydet(t) }}>
-                <option value="1">{c('Gün')}</option>
-                <option value="2">{c('Ay')}</option>
-                <option value="3">{c('Yıl')}</option>
-              </select>
-            </span>
+            <button type="button" className="d" style={{ marginLeft: 8 }}
+                    title={c('Üretim tarihi girilince SKT, SKT girilince üretim tarihi bu süreden hesaplanır. Değiştirmek için tıklayın.')}
+                    onClick={() => { setRafTaslak({ sure: rafSure > 0 ? String(rafSure) : '', birim: rafBirim > 0 ? String(rafBirim) : '2' });
+                                     setRafDuzenle(true) }}>
+              <span className="sonuk">{c('Raf ömrü')}:</span>{' '}
+              <b>{rafSure > 0 && rafBirim > 0 ? `${rafSure} ${c(RAF_BIRIM[rafBirim as 1 | 2 | 3])}` : c('tanımsız')}</b>
+            </button>
           )}
           {/* TOPLAM OZETI UST BANTTA, TAMAM ILE KAPAT ARASINDA ORTADA (kullanici 24.10.2026): gereken (kalem
               miktari) · girilen (lot toplami) · kalan - uzun listede alttaki "Dağıtılmayan miktar" gorunmuyordu. */}
@@ -256,6 +255,27 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         {yukleniyor && <div className="yukleniyor">{c('Lotlar yükleniyor…')}</div>}
+        {rafDuzenle && (
+          <Modal baslik={c('Raf Ömrü')} onKapat={() => setRafDuzenle(false)} buyutmeYok dar
+                 alt={<>
+                   <button className="d onay" onClick={() => { void rafKaydet(); setRafDuzenle(false) }}>💾 {c('Kaydet')}</button>
+                   <span style={{ marginLeft: 'auto' }} />
+                   <button className="d kapat-dugmesi" onClick={() => setRafDuzenle(false)}>✖ {c('Kapat')}</button>
+                 </>}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', padding: 4 }}>
+              <input className="hiza-sag" style={{ width: 70 }} autoFocus value={rafTaslak.sure} placeholder={c('Süre')}
+                     onChange={e => setRafTaslak(t => ({ ...t, sure: e.target.value.replace(/[^0-9]/g, '') }))}
+                     onKeyDown={e => { if (e.key === 'Enter') { void rafKaydet(); setRafDuzenle(false) } }} />
+              <select value={rafTaslak.birim} onChange={e => setRafTaslak(t => ({ ...t, birim: e.target.value }))}>
+                <option value="1">{c('Gün')}</option>
+                <option value="2">{c('Ay')}</option>
+                <option value="3">{c('Yıl')}</option>
+              </select>
+            </div>
+            <div className="not" style={{ padding: '6px 4px 0' }}>
+              {c('Üretim tarihi girilince SKT, SKT girilince üretim tarihi bu süreden hesaplanır; stok kartına yazılır.')}</div>
+          </Modal>
+        )}
 
         {rafNot && <div className="bilgi-kutusu">{rafNot}</div>}
         {cikis && !yukleniyor && liste.length === 0 && (
@@ -282,6 +302,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                 <tr key={z.seriLotId ?? i}>
                   {/* CIKISTA lot bilgisi stoktan gelir - yalniz miktar girilir. */}
                   <td><input value={z.lotNo} autoFocus={!cikis && i === 0} readOnly={cikis} disabled={cikis}
+                             ref={el => { if (el && i === odakSatir) { el.focus(); setOdakSatir(null) } }}
                              onChange={e => degis(i, 'lotNo', e.target.value)} /></td>
                   {seriVar && <td><input value={z.seriNo} readOnly={cikis} disabled={cikis}
                              onChange={e => degis(i, 'seriNo', e.target.value)} /></td>}
