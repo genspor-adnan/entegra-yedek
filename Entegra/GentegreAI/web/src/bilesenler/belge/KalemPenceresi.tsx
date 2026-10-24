@@ -139,7 +139,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   });
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
-  const [izlemAcik, setIzlemAcik] = useState(!!satir.lotEkrani && satir.izleme > 0);
+  const [izlemAcik, setIzlemAcik] = useState(false);
+  // LOT EKRANIYLA ACILIS (lot gridinde cift tik): ilk cizimde degil BIR SONRA - ikisi ayni anda acilinca
+  //   ic pencere (lot) body'ye ONCE eklenip kalem penceresinin ALTINDA kaliyordu (kullanici 24.10.2026:
+  //   "lot ekranı açıldı, ama üstünde fiyat ekranı da açıldı").
+  useEffect(() => { if (satir.lotEkrani && satir.izleme > 0) setIzlemAcik(true) }, []); // eslint-disable-line react-hooks/exhaustive-deps
   /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
   const kurElle = useRef(false);
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */

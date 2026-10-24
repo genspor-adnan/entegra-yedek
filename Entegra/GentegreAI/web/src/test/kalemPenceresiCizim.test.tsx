@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { KalemPenceresi } from '../bilesenler/belge/KalemPenceresi';
 import { bosSatir } from '../sayfalar/belgeSatir';
 
@@ -27,6 +27,7 @@ import { bosSatir } from '../sayfalar/belgeSatir';
 vi.mock('../api/istemci', () => ({
   api: {
     liste: vi.fn().mockResolvedValue({ satirlar: [], toplamKayit: 0 }),
+    stokLotlari: vi.fn().mockResolvedValue([]),
     dovizKur: vi.fn().mockResolvedValue({ kur: 1 }),
   },
 }));
@@ -70,5 +71,21 @@ describe('kalem penceresi', () => {
     //   goruyordu.
     expect(document.body.textContent).toContain('Normal Poliklinik Muayenesi');
     expect(document.body.querySelectorAll('input').length).toBeGreaterThan(0);
+  });
+});
+
+describe('lot gridinden acilis (kullanici 24.10.2026)', () => {
+  it('lot ekrani kalem penceresinin USTUNDE acilir', async () => {
+    cizdir({ cikisIzlemi: true, cikisDepoId: 1,
+             satir: { ...bosSatir(1), stokId: 5, stokAdi: 'Lotlu Stok', izleme: 5, adet: '2',
+                      birimFiyat: '10', kdv: '10', lotEkrani: true,
+                      izlemler: [{ seriLotId: 3, lotNo: 'A', seriNo: '', uretimTarihi: '', sonKullanmaTarihi: '', durum: 0, miktar: '2' }] } });
+    // Ayni z-index'te ust olan, body'de SONRA gelendir.
+    const perdeler = await waitFor(() => {
+      const p = [...document.body.querySelectorAll('.kaperde')];
+      if (p.length < 2) throw new Error('lot ekrani acilmadi');
+      return p;
+    });
+    expect(perdeler[perdeler.length - 1].textContent).toContain('Lot Seçimi');
   });
 });
