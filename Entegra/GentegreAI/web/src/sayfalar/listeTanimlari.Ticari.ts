@@ -575,7 +575,10 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi', yeniSekme: true }, baslik: 'Kasa Listesi', yol: 'Kasa › Kasa Hesaplari',
     gizliKartSekmeleri: ['Banka Bağlantısı'],   // 1157: yalnız Banka Hesabı kartında (Limitler / Sayım / Yetkiler 1161 burada)
     // Açılış alanları kartta yok (1160): açılış bakiyesi hesabın devir hareketi (💼 Devir / Açılış).
-    gizliKartAlanlari: ['bankaId', 'bankaSubeId', 'hesapNo', 'iban', 'acilisBakiye', 'acilisTarihi'],   // kasa banka bilgisi taşımaz
+    // Hesap Türü sorulmaz, arka planda Kasa; "POS / Kart" kutusu yok (kullanıcı 24.10.2026) - banka kartıyla aynı desen.
+    yeniKayitVarsayilanlari: { tur: 'K' },
+    gizliKartAlanlari: ['tur', 'bankaId', 'bankaSubeId', 'hesapNo', 'iban', 'acilisBakiye', 'acilisTarihi',   // kasa banka bilgisi taşımaz
+                        'komisyonOrani', 'komisyonMasrafId', 'komisyonZamani', 'valorGun', 'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
     menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesabı Listesi', ic: '💵', yetkiKodu: 'hesap.tanim.liste',
