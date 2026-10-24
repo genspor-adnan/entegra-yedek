@@ -384,7 +384,7 @@ export function Kabuk() {
           <span className="sube-marka-kap" onMouseDown={e => e.stopPropagation()}>
             <div className={`marka sube-marka${cokSube ? ' marka-bag' : ''}`}
                  role={cokSube ? 'button' : undefined} tabIndex={cokSube ? 0 : undefined}
-                 title={cokSube ? c('Çalışılan şube - değiştirmek için tıklayın') : c('Çalışılan şube')}
+                 title={`${c(aktifSube.ad, 'kod')} - ${cokSube ? c('çalışılan şube, değiştirmek için tıklayın') : c('çalışılan şube')}`}
                  onClick={() => cokSube && setSubeMenusu(v => !v)}
                  onKeyDown={e => { if (cokSube && e.key === 'Enter') setSubeMenusu(v => !v) }}>
               <span className="lg">
@@ -393,8 +393,9 @@ export function Kabuk() {
                   : <span className="sube-harf">{aktifSube.ad.trim().charAt(0).toLocaleUpperCase('tr')}</span>}
               </span>
               {/* Sube adi EKRANDA cevrilir (855); faturaya giden ad sunucuda
-                  Turkce kalir. */}
-              {c(aktifSube.ad, 'kod')}{cokSube && <span className="sube-ok">▾</span>}
+                  Turkce kalir. LOGO VARSA AD YAZILMAZ (kullanici 24.10.2026: "şubenin sadece
+                  logosu yeterli, sağında isme gerek yok") - ad ipucunda; logosuz subede ad kalir. */}
+              {!subeLogo && c(aktifSube.ad, 'kod')}{cokSube && <span className="sube-ok">▾</span>}
             </div>
             {subeMenusu && (
               <span className="dil-menu sube-menu">
