@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banka Mutabakat İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏦 Banka Mutabakat İcmali — 25.10.2026 itibarıyla
+    <span class="sp">Gentegre AI · Finans › İcmaller · Tüm şubeler · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Mutabakat ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔄</span> Bankadan Çek (tümü)</div>
+    <div class="btn"><span>✓</span> Seçilenleri İşle</div>
+    <div class="btn"><span>🔗</span> Eşleştir…</div>
+    <div class="btn"><span>✍</span> Banka bakiyesi gir (API'siz hesap)</div>
+    <div class="btn ok"><span>🔒</span> Mutabakatı Onayla</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🔄</span> Banka Hareketleri</div>
+    <div class="btn"><span>📄</span> Hesap Ekstresi</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Mutabakat günü: <b>24.10.2026 (dün, gün sonu)</b> ▾</div>
+    <div class="sel">🏦 Hesap: <b>Tüm banka hesapları (6)</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">📆 Tarih esası: <b>İşlem tarihi</b> ▾</div>
+    <label class="chk"><input type="checkbox" checked> Kredi kartı / POS hesapları dahil</label>
+    <span class="sp"></span>
+    <span class="rz ok">Son çekim: 25.10 09:00 · 4 hesap API</span>
+    <span class="rz sari">2 hesap API'siz · bakiye elle</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Banka Bakiyesi</div><div class="deg">1.311.160 ₺</div><div class="alt">6 hesap · TL karşılığı</div></div>
+    <div class="kutu "><div class="bas">Sistem Bakiyesi</div><div class="deg">1.242.570 ₺</div><div class="alt">kasa işlemlerinden</div></div>
+    <div class="kutu teh"><div class="bas">Fark</div><div class="deg">+68.590 ₺</div><div class="alt">3 hesapta · banka fazla</div></div>
+    <div class="kutu uy"><div class="bas">İşlenmemiş Banka Hareketi</div><div class="deg">14</div><div class="alt">+38.940 ₺ net · 9 öneri hazır</div></div>
+    <div class="kutu uy"><div class="bas">Sistemde Var, Bankada Yok</div><div class="deg">5</div><div class="alt">−29.650 ₺ · yolda / talimat</div></div>
+    <div class="kutu iyi"><div class="bas">Açıklanan Fark</div><div class="deg">+68.590 ₺</div><div class="alt">%100 · açıklanmayan 0</div></div>
+    <div class="kutu "><div class="bas">Son Onaylı Mutabakat</div><div class="deg">23.10.2026</div><div class="alt">Selin Y. · 6 / 6 hesap</div></div>
+    <div class="kutu uy"><div class="bas">Valör Bekleyen</div><div class="deg">22.600 ₺</div><div class="alt">POS blokeli · 3 gün</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="hsp">Hesaplar</div>
+    <div class="sekme" data-s="tbl">Mutabakat Tablosu</div>
+    <div class="sekme" data-s="isl">İşlenmemiş (banka var, sistem yok) <span class="rz sari">14</span></div>
+    <div class="sekme" data-s="yol">Sistemde var, bankada yok <span class="rz sari">5</span></div>
+    <div class="sekme" data-s="gun">Günlük Bakiye</div>
+    <div class="sekme" data-s="gec">Mutabakat Geçmişi</div>
+    <div class="sekme" data-s="onz">🖨 Mutabakat Tutanağı (A4)</div>
+  </div>
+  <!-- ============ HSP ============ -->
+  <div class="pnl" data-s="hsp">
+    <div class="grp"><h4>Banka hesapları — banka bakiyesi / sistem bakiyesi <span class="mini">satıra tıkla: o hesabın mutabakat tablosu</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Hesap</th><th>Kaynak</th><th class="sag">Banka bakiyesi</th><th>Bakiye zamanı</th><th class="sag">Sistem bakiyesi</th><th class="sag">Fark</th><th class="sag">İşlenmemiş</th><th class="sag">Yolda</th><th class="sag">Açıklanmayan</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">Garanti BBVA TL</span></td><td><span class="rz mavi">API</span></td><td class="sag">842.310,40</td><td>25.10 09:00</td><td class="sag">808.710,40</td><td class="sag kir">+33.600,00</td><td class="sag">6 · +12.400</td><td class="sag">2 · −21.200</td><td class="sag">0,00</td><td><span class="rz ok">açıklandı</span></td></tr>
+    <tr><td><span class="lnk">İş Bankası TL</span></td><td><span class="rz mavi">API</span></td><td class="sag">311.420,00</td><td>25.10 09:00</td><td class="sag">311.420,00</td><td class="sag">0,00</td><td class="sag">—</td><td class="sag">—</td><td class="sag">0,00</td><td><span class="rz ok">tutuyor</span></td></tr>
+    <tr><td><span class="lnk">Garanti BBVA EUR</span> <span class="rz mavi">€</span></td><td><span class="rz mavi">API</span></td><td class="sag">€ 2.140,00</td><td>25.10 09:00</td><td class="sag">€ 2.140,00</td><td class="sag">0,00</td><td class="sag">—</td><td class="sag">—</td><td class="sag">0,00</td><td><span class="rz ok">tutuyor</span></td></tr>
+    <tr><td><span class="lnk">Ziraat TL</span></td><td><span class="rz">elle</span></td><td class="sag">48.300,00</td><td>24.10 18:10 · Selin Y.</td><td class="sag">39.850,00</td><td class="sag kir">+8.450,00</td><td class="sag">—</td><td class="sag">3 · −8.450</td><td class="sag">0,00</td><td><span class="rz ok">açıklandı</span></td></tr>
+    <tr><td><span class="lnk">Şirket kartı ****4412</span></td><td><span class="rz">elle</span></td><td class="sag">−12.870,00</td><td>24.10 · ekstre</td><td class="sag">−12.870,00</td><td class="sag">0,00</td><td class="sag">—</td><td class="sag">—</td><td class="sag">0,00</td><td><span class="rz ok">tutuyor</span></td></tr>
+    <tr><td><span class="lnk">Garanti POS</span></td><td><span class="rz mavi">API</span></td><td class="sag">42.000,00</td><td>25.10 09:00</td><td class="sag">15.460,00</td><td class="sag kir">+26.540,00</td><td class="sag">8 · +26.540</td><td class="sag">—</td><td class="sag">0,00</td><td><span class="rz sari">açıklandı · valör bekleyen 22.600</span></td></tr>
+    <tr class="toplam"><td>Toplam (TL karşılığı)</td><td></td><td class="sag">1.311.160</td><td></td><td class="sag">1.242.570</td><td class="sag">+68.590</td><td class="sag">14 · +38.940</td><td class="sag">5 · −29.650</td><td class="sag">0</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Banka bakiyesi API'li hesapta son çekimin bakiyesi (hesap.banka_bakiye), API'siz hesapta elle girilen gün sonu bakiyesi (kim / ne zaman loglu). Sistem bakiyesi kesin kasa işlemlerinden, mutabakat gününün sonu itibarıyla.</div></div>
+  </div>
+  <!-- ============ TBL ============ -->
+  <div class="pnl" data-s="tbl">
+    <div class="grp"><h4>Mutabakat tablosu — Garanti BBVA TL, 24.10.2026 gün sonu</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kalem</th><th class="sag">Tutar</th><th class="sag">Adet</th><th>Açıklama</th></tr></thead>
+  <tbody>
+    <tr><td><b>Banka bakiyesi</b></td><td class="sag"><b>842.310,40</b></td><td class="sag"></td><td>API · 25.10 09:00 (24.10 gün sonu hareketi dahil)</td></tr>
+    <tr><td>− Sistemde var, bankaya düşmemiş çıkış</td><td class="sag">−21.200,00</td><td class="sag">2</td><td>verilen çek (vadesi 26.10), ileri tarihli talimat</td></tr>
+    <tr><td>+ Sistemde var, bankaya düşmemiş giriş</td><td class="sag">0,00</td><td class="sag">0</td><td></td></tr>
+    <tr><td><b>= Düzeltilmiş banka bakiyesi</b></td><td class="sag"><b>821.110,40</b></td><td class="sag"></td><td></td></tr>
+    <tr><td><b>Sistem bakiyesi</b></td><td class="sag"><b>808.710,40</b></td><td class="sag"></td><td>kesin kasa işlemleri</td></tr>
+    <tr><td>+ Bankada var, sistemde işlenmemiş giriş</td><td class="sag">+17.250,00</td><td class="sag">3</td><td>gelen EFT (2 öneri hazır), faiz</td></tr>
+    <tr><td>− Bankada var, sistemde işlenmemiş çıkış</td><td class="sag">−4.850,00</td><td class="sag">3</td><td>hesap işletim ücreti, BSMV, EFT masrafı</td></tr>
+    <tr><td><b>= Düzeltilmiş sistem bakiyesi</b></td><td class="sag"><b>821.110,40</b></td><td class="sag"></td><td>işlenmemişler işlenince sistem bakiyesi budur</td></tr>
+    <tr><td><b>Açıklanmayan fark</b></td><td class="sag yesil"><b>0,00</b></td><td class="sag"></td><td><span class="rz ok">mutabık</span></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Klasik banka mutabakatı: banka bakiyesi ↔ defter bakiyesi; fark yalnız iki listeyle açıklanır (bankada olup sistemde olmayan, sistemde olup bankada olmayan). Açıklanmayan fark ≠ 0 ise "Mutabakatı Onayla" pasif.</div></div>
+  </div>
+  <!-- ============ ISL ============ -->
+  <div class="pnl" data-s="isl">
+    <div class="grp"><h4>İşlenmemiş banka hareketleri (Banka Hareketleri ekranıyla aynı kayıtlar)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Tarih</th><th>Hesap</th><th>Açıklama</th><th>Karşı taraf</th><th class="sag">Tutar</th><th>Öneri</th><th class="orta">Güven</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>24.10.2026</td><td>Garanti TL</td><td>EFT DENTA KLİNİK FT 2026-0941</td><td>Denta Klinik · TR..4410</td><td class="sag">+12.100,00</td><td>Tahsilat → DENTA KLİNİK (açık fatura 2026-0941)</td><td class="orta">%96</td><td><span class="btn mini">✓ İşle</span></td></tr>
+    <tr><td>24.10.2026</td><td>Garanti TL</td><td>HESAP İŞLETİM ÜCRETİ</td><td>Garanti BBVA</td><td class="sag">−1.850,00</td><td>Masraf → 770.07.002 Banka masrafı</td><td class="orta">%90</td><td><span class="btn mini">✓ İşle</span></td></tr>
+    <tr><td>24.10.2026</td><td>Garanti POS</td><td>POS 24.10 GÜN SONU</td><td>—</td><td class="sag">+26.540,00</td><td>POS tahsilatı (valör 27.10)</td><td class="orta">%88</td><td><span class="btn mini">✓ İşle</span></td></tr>
+    <tr><td>23.10.2026</td><td>Garanti TL</td><td>EFT AHMET YILMAZ</td><td>TR..9921 (kayıtlı değil)</td><td class="sag uy">+5.000,00</td><td><span class="rz sari">seçim bekliyor</span></td><td class="orta">—</td><td><span class="btn mini">Cari seç…</span></td></tr>
+    <tr><td colspan="8" class="sonuk">… 10 hareket daha</td></tr>
+    <tr class="toplam"><td>Toplam (14)</td><td></td><td></td><td></td><td class="sag">+38.940,00</td><td></td><td class="orta"></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">İşleme Banka Hareketleri ekranının aynı uçlarıyla (öneri → kasa işlemi); burada toplu işle ve mutabakat etkisi görünür.</div></div>
+  </div>
+  <!-- ============ YOL ============ -->
+  <div class="pnl" data-s="yol">
+    <div class="grp"><h4>Sistemde var, bankaya düşmemiş (yolda)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kayıt</th><th>Tarih</th><th>Hesap</th><th>Tür</th><th>Karşı taraf</th><th class="sag">Tutar</th><th class="sag">Gün</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">KSA-2026-1212</span></td><td>22.10.2026</td><td>Garanti TL</td><td>Verilen çek</td><td>Yıldız Gayrimenkul</td><td class="sag">−15.000,00</td><td class="sag">3</td><td><span class="rz">vadesi 26.10 · normal</span></td></tr>
+    <tr><td><span class="lnk">KSA-2026-1214</span></td><td>24.10.2026</td><td>Garanti TL</td><td>Havale talimatı (ileri tarihli)</td><td>Ak Müşavirlik</td><td class="sag">−6.200,00</td><td class="sag">1</td><td><span class="rz">normal</span></td></tr>
+    <tr><td><span class="lnk">KSA-2026-1188</span></td><td>17.10.2026</td><td>Ziraat TL</td><td>EFT çıkışı</td><td>Aras Kargo</td><td class="sag kir">−8.450,00</td><td class="sag">8</td><td><span class="rz kir">8 gündür bankada yok — kontrol</span></td></tr>
+    <tr><td colspan="8" class="sonuk">… 2 kayıt daha</td></tr>
+    <tr class="toplam"><td>Toplam (5)</td><td></td><td></td><td></td><td></td><td class="sag">−29.650,00</td><td class="sag"></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kesin kasa işlemi var, eşleşen banka hareketi yok. Eşik: 3 iş günü (çekte vade + 1 gün) — aşan kırmızı: kayıt yanlış hesaba girmiş ya da işlem yapılmamış olabilir.</div></div>
+  </div>
+  <!-- ============ GUN ============ -->
+  <div class="pnl" data-s="gun">
+    <div class="grp"><h4>Günlük bakiye — Garanti BBVA TL (son 10 gün)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Gün</th><th class="sag">Banka (gün sonu)</th><th class="sag">Sistem (gün sonu)</th><th class="sag">Fark</th><th>Mutabakat</th></tr></thead>
+  <tbody>
+    <tr><td>15.10.2026</td><td class="sag">711.200,00</td><td class="sag">711.200,00</td><td class="sag">0,00</td><td><span class="rz ok">onaylı</span></td></tr>
+    <tr><td>…</td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td></td></tr>
+    <tr><td>23.10.2026</td><td class="sag">801.140,40</td><td class="sag">801.140,40</td><td class="sag">0,00</td><td><span class="rz ok">onaylı · Selin Y.</span></td></tr>
+    <tr><td>24.10.2026</td><td class="sag">842.310,40</td><td class="sag">808.710,40</td><td class="sag kir">+33.600,00</td><td><span class="rz sari">açıklandı, onay bekliyor</span></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Banka gün sonu bakiyesi API'nin hareket bakiyesinden (banka_hareket.bakiye, günün son hareketi); hareketsiz gün önceki günün bakiyesiyle.</div></div>
+  </div>
+  <!-- ============ GEC ============ -->
+  <div class="pnl" data-s="gec">
+    <div class="grp"><h4>Mutabakat geçmişi</h4>
+<div class="dg"><table>
+  <thead><tr><th>Gün</th><th>Hesap</th><th class="sag">Banka</th><th class="sag">Sistem</th><th class="sag">Açıklanmayan</th><th>Onaylayan</th><th>Not</th></tr></thead>
+  <tbody>
+    <tr><td>23.10.2026</td><td>6 / 6 hesap</td><td class="sag">1.262.400</td><td class="sag">1.262.400</td><td class="sag">0,00</td><td>Selin YILMAZ · 24.10 08:40</td><td></td></tr>
+    <tr><td>22.10.2026</td><td>6 / 6 hesap</td><td class="sag">1.198.700</td><td class="sag">1.198.700</td><td class="sag">0,00</td><td>Selin YILMAZ · 23.10 08:55</td><td></td></tr>
+    <tr><td>30.09.2026</td><td>6 / 6 hesap (ay sonu)</td><td class="sag">1.044.200</td><td class="sag">1.044.200</td><td class="sag">0,00</td><td>Genel Müdür · 01.10 10:12</td><td>ay sonu tutanağı imzalı</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Onay o günün bakiyelerini ve açıklama listelerini dondurur; sonradan o güne geriye dönük kasa işlemi girilirse onay "bozuldu" rozetiyle düşer ve yeniden onay ister.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>BANKA MUTABAKAT TUTANAĞI</h1>
+        <div class="bilgi"><span>Mutabakat günü: 24.10.2026 (gün sonu)</span><span>Hesap: Garanti BBVA TL · TR12 0006 2000 …</span><span>Banka bakiyesi kaynağı: API (25.10 09:00)</span><span>Hazırlayan: Selin YILMAZ</span></div>
+        <table>
+          <thead><tr><th>Kalem</th><th>Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>Banka bakiyesi</td><td>842.310,40</td></tr>
+            <tr><td>− Sistemde var, bankaya düşmemiş (2)</td><td>−21.200,00</td></tr>
+            <tr><td>Düzeltilmiş banka bakiyesi</td><td>821.110,40</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Sistem bakiyesi</span><span>808.710,40</span></div><div><span>+ Bankada var, işlenmemiş (6, net)</span><span>+12.400,00</span></div><div><span>Düzeltilmiş sistem bakiyesi</span><span>821.110,40</span></div><div class="b"><span>AÇIKLANMAYAN FARK</span><span>0,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Mali İşler Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Banka Mutabakat Tutanağı · açıklama listeleri ekte</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>6 banka / kart / POS hesabı</span><span>14 işlenmemiş</span><span>5 yolda</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Banka Mutabakat İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Bankadaki para ile sistemdeki para tutuyor mu; tutmuyorsa farkın her kuruşu neden?" Muhasebe, her sabah (gün sonu) ve ay sonu.</li>
+    <li><b>Kaynak:</b> banka bakiyesi Banka Hareketleri entegrasyonundan (API'li hesapta son çekimin bakiyesi, API'siz hesapta elle girilen gün sonu bakiyesi); sistem bakiyesi kesin kasa işlemlerinden; işlenmemiş = <code>banka_hareket</code> durumu bekliyor / öneri hazır / seçim bekliyor; yolda = eşleşen banka hareketi olmayan kesin kasa işlemi.</li>
+    <li><b>Eylemler:</b> Bankadan Çek, Seçilenleri İşle (Banka Hareketleri'nin uçları), Eşleştir (banka hareketi ↔ var olan kasa işlemi — çifte kayıt açmadan), Banka bakiyesi gir (API'siz), Mutabakatı Onayla (açıklanmayan fark 0 iken; o günü dondurur).</li>
+    <li><b>Kredi kartı ve POS:</b> kart hesabında ekstre bakiyesi; POS'ta valör bekleyen (blokeli) tutar ayrı satır — fark sayılmaz.</li>
+    <li><b>Çıktı:</b> Mutabakat Tutanağı (A4) hesap başına; ay sonu tutanağı imzalı arşivlenir (doküman).</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Mutabakat günü varsayılanı ne olsun — dün mü, ay sonu mu?<span class="oneri"><b>Öneri:</b> Varsayılan dünün gün sonu (günlük kontrol); şeritte "Ay sonu" hızlı seçimi. Onay her gün için ayrı tutulur.</span></li>
+    <li>Tarih esası işlem tarihi mi, valör mü?<span class="oneri"><b>Öneri:</b> İşlem tarihi (bankanın ekstresi böyle); valörü sonraki hareket (POS) ayrı satırda "valör bekleyen" — fark sayılmaz.</span></li>
+    <li>API'siz hesapta banka bakiyesi nasıl girilsin?<span class="oneri"><b>Öneri:</b> Gün sonu bakiyesi elle (tutar + tarih + not, loglu); ekstre dosyası (MT940 / Excel) içe aktarma gelince oradan. Girilmemiş günde hesap "bakiye girilmedi" rozetiyle, onay pasif.</span></li>
+    <li>Onaylanmış güne geriye dönük kayıt girilirse?<span class="oneri"><b>Öneri:</b> Kayıt engellenmesin (muhasebe dönem kapanışı ayrı kural); o günün onayı "bozuldu" olur, icmalde kırmızı rozet ve yeniden onay ister.</span></li>
+    <li>"Eşleştir" var olan kasa işlemini banka hareketine bağlarken tutar farkı olursa?<span class="oneri"><b>Öneri:</b> Kuruş toleransı (ayar, varsayılan 0) dışında eşleştirme yok; fark banka masrafıysa ayrı masraf işlemi önerilir.</span></li>
+    <li>Kimler onaylayabilsin?<span class="oneri"><b>Öneri:</b> Ayrı aksiyon yetkisi "banka.mutabakat_onay"; hazırlayan ile onaylayan aynı kişi olabilir mi ayarla (varsayılan olabilir, ay sonunda dört göz önerilir).</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

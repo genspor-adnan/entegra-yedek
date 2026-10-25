@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masraf İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧾 Masraf İcmali — 01.01.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Finans › İcmaller · Tüm şubeler · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Masraf İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📄</span> Seçili belgeyi aç</div>
+    <div class="btn"><span>🏷</span> Masraf kartı</div>
+    <div class="btn"><span>✎</span> Masraf kalemi ata…</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🗓️</span> Planlı Giderler</div>
+    <div class="btn"><span>📊</span> Nakit Akış İcmali</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>01.01.2026 – 25.10.2026</b> <span class="rz">Bu yıl</span> ▾</div>
+    <div class="sel">⇄ Karşılaştır: <b>Geçen yıl aynı dönem</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">🎯 Masraf merkezi: <b>Tümü</b> ▾</div>
+    <div class="sel">🗂 Kalem: <b>Tümü (ağaç)</b> ▾</div>
+    <div class="sel">🧮 Tutar: <b>KDV hariç</b> ▾</div>
+    <label class="chk"><input type="checkbox" checked> Planlı giderle kıyasla</label>
+    <label class="chk"><input type="checkbox"> Taslaklar dahil</label>
+    <span class="sp"></span>
+    <span class="rz sari">Masraf kalemi atanmamış gider: 23 satır · 41.860 ₺</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Toplam Gider</div><div class="deg">3.912.400 ₺</div><div class="alt">KDV hariç · 10 ay</div></div>
+    <div class="kutu teh"><div class="bas">Geçen Yıl Aynı Dönem</div><div class="deg">+%21,4</div><div class="alt">3.222.800 ₺</div></div>
+    <div class="kutu "><div class="bas">Aylık Ortalama</div><div class="deg">391.240 ₺</div><div class="alt">son 3 ay 418.700</div></div>
+    <div class="kutu "><div class="bas">Planlı Gider (aynı dönem)</div><div class="deg">3.540.000 ₺</div><div class="alt">11 tanım · kalemi tanımlı gider</div></div>
+    <div class="kutu uy"><div class="bas">Plan − Gerçek</div><div class="deg">+121.000 ₺</div><div class="alt">+%3,4 · elektrik, kargo</div></div>
+    <div class="kutu "><div class="bas">En Büyük Kalem</div><div class="deg">Personel</div><div class="alt">%46,2 · 1.807.400 ₺</div></div>
+    <div class="kutu "><div class="bas">Gider / Ciro</div><div class="deg">%18,9</div><div class="alt">ciro 20,7 M ₺ (net satış)</div></div>
+    <div class="kutu uy"><div class="bas">Atanmamış</div><div class="deg">23 satır</div><div class="alt">41.860 ₺ · "Diğer"e düştü</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="klm">Kalem (ağaç)</div>
+    <div class="sekme" data-s="mm">Masraf Merkezi</div>
+    <div class="sekme" data-s="trd">Aylık Trend</div>
+    <div class="sekme" data-s="pln">Plan − Gerçek <span class="rz sari">4</span></div>
+    <div class="sekme" data-s="ted">Tedarikçi</div>
+    <div class="sekme" data-s="det">Belge Detayı</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">7</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ KLM ============ -->
+  <div class="pnl" data-s="klm">
+    <div class="grp"><h4>Masraf kalemleri — üst kalem › alt kalem <span class="mini">satıra tıkla: alt kalem / belge detayı · ▾ açık, ▸ kapalı</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Kalem</th><th>Kod</th><th class="sag">Bu dönem</th><th class="sag">Geçen yıl</th><th class="sag">Fark</th><th class="sag">Pay</th><th class="sag">Aylık ort.</th><th></th></tr></thead>
+  <tbody>
+    <tr><td><b>▾ Personel giderleri</b></td><td>770.03</td><td class="sag"><b>1.807.400</b></td><td class="sag">1.512.000</td><td class="sag kir">+%19,5</td><td class="sag">%46,2</td><td class="sag">180.740</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;Ücret ve maaşlar</td><td>770.03.001</td><td class="sag">1.421.000</td><td class="sag">1.188.000</td><td class="sag">+%19,6</td><td class="sag">%36,3</td><td class="sag">142.100</td><td><div class="cubuk"><i style="width:79%"></i></div></td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;SGK işveren payı</td><td>770.03.002</td><td class="sag">328.400</td><td class="sag">275.600</td><td class="sag">+%19,2</td><td class="sag">%8,4</td><td class="sag">32.840</td><td><div class="cubuk"><i style="width:18%"></i></div></td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;Yemek kartı</td><td>770.03.004</td><td class="sag">58.000</td><td class="sag">48.400</td><td class="sag">+%19,8</td><td class="sag">%1,5</td><td class="sag">5.800</td><td><div class="cubuk"><i style="width:3%"></i></div></td></tr>
+    <tr><td><b>▾ Kira ve aidat</b></td><td>770.01</td><td class="sag"><b>1.098.800</b></td><td class="sag">843.000</td><td class="sag kir">+%30,3</td><td class="sag">%28,1</td><td class="sag">109.880</td><td><div class="cubuk"><i style="width:61%"></i></div></td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;Depo kirası</td><td>770.01.003</td><td class="sag">1.020.000</td><td class="sag">756.000</td><td class="sag">+%34,9</td><td class="sag">%26,1</td><td class="sag">102.000</td><td><div class="cubuk"><i style="width:56%"></i></div></td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;OSB aidatı</td><td>770.01.006</td><td class="sag">78.800</td><td class="sag">87.000</td><td class="sag yesil">−%9,4</td><td class="sag">%2,0</td><td class="sag">7.880</td><td><div class="cubuk"><i style="width:4%"></i></div></td></tr>
+    <tr><td><b>▾ Enerji ve su</b></td><td>770.02</td><td class="sag"><b>176.300</b></td><td class="sag">139.900</td><td class="sag">+%26,0</td><td class="sag">%4,5</td><td class="sag">17.630</td><td><div class="cubuk"><i style="width:10%"></i></div></td></tr>
+    <tr><td><b>▸ Lojistik / kargo</b></td><td>760.02</td><td class="sag"><b>214.600</b></td><td class="sag">151.200</td><td class="sag kir">+%41,9 ⚠</td><td class="sag">%5,5</td><td class="sag">21.460</td><td><div class="cubuk"><i style="width:12%"></i></div></td></tr>
+    <tr><td><b>▸ Hizmet alımları (müşavir, yazılım, bakım)</b></td><td>770.05</td><td class="sag"><b>246.900</b></td><td class="sag">231.700</td><td class="sag">+%6,6</td><td class="sag">%6,3</td><td class="sag">24.690</td><td><div class="cubuk"><i style="width:14%"></i></div></td></tr>
+    <tr><td><b>▸ Araç giderleri</b></td><td>770.06</td><td class="sag"><b>152.700</b></td><td class="sag">139.300</td><td class="sag">+%9,6</td><td class="sag">%3,9</td><td class="sag">15.270</td><td><div class="cubuk"><i style="width:8%"></i></div></td></tr>
+    <tr><td><b>▸ Diğer (kalem atanmamış)</b></td><td>—</td><td class="sag uy"><b>41.860</b></td><td class="sag">18.900</td><td class="sag">+%121</td><td class="sag">%1,1</td><td class="sag">4.186</td><td><div class="cubuk"><i style="width:2%"></i></div></td></tr>
+    <tr><td colspan="8" class="sonuk">… 6 üst kalem daha (pazarlama, sigorta, banka masrafı, kırtasiye, temsil, vergi-harç)</td></tr>
+    <tr class="toplam"><td>Toplam</td><td></td><td class="sag">3.912.400</td><td class="sag">3.222.800</td><td class="sag">+%21,4</td><td class="sag">%100</td><td class="sag">391.240</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kaynak: kesin alış faturası / fişi satırlarının masraf kalemi (hizmet / masraf satırı) + kasa / banka tediyesinin masraf bacağı + personel masraf beyanı (v_masraf_ekstre ile aynı küme). Aynı gider iki yoldan gelmez: faturası olan ödemenin kendisi gider sayılmaz (fatura sayılır).</div></div>
+  </div>
+  <!-- ============ MM ============ -->
+  <div class="pnl" data-s="mm">
+    <div class="grp"><h4>Masraf merkezi × üst kalem</h4>
+<div class="dg"><table>
+  <thead><tr><th>Masraf merkezi</th><th class="sag">Personel</th><th class="sag">Kira</th><th class="sag">Enerji</th><th class="sag">Lojistik</th><th class="sag">Hizmet</th><th class="sag">Araç</th><th class="sag">Diğer</th><th class="sag">Toplam</th><th class="sag">Pay</th></tr></thead>
+  <tbody>
+    <tr><td><b>Depo</b></td><td class="sag">412.000</td><td class="sag">1.020.000</td><td class="sag">118.900</td><td class="sag">214.600</td><td class="sag">38.400</td><td class="sag">—</td><td class="sag">9.100</td><td class="sag"><b>1.813.000</b></td><td class="sag">%46,3</td></tr>
+    <tr><td><b>Satış</b></td><td class="sag">968.300</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">22.100</td><td class="sag">152.700</td><td class="sag">61.400</td><td class="sag"><b>1.204.500</b></td><td class="sag">%30,8</td></tr>
+    <tr><td><b>Yönetim</b></td><td class="sag">427.100</td><td class="sag">78.800</td><td class="sag">57.400</td><td class="sag">—</td><td class="sag">186.400</td><td class="sag">—</td><td class="sag">41.860</td><td class="sag"><b>791.560</b></td><td class="sag">%20,2</td></tr>
+    <tr><td class="uy"><b>(merkez atanmamış)</b></td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">103.340</td><td class="sag"><b>103.340</b></td><td class="sag">%2,6</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">1.807.400</td><td class="sag">1.098.800</td><td class="sag">176.300</td><td class="sag">214.600</td><td class="sag">246.900</td><td class="sag">152.700</td><td class="sag">215.700</td><td class="sag">3.912.400</td><td class="sag">%100</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Masraf merkezi belge satırından; yoksa belgenin başlığından; o da yoksa "(merkez atanmamış)" — tahmin edilip dağıtılmaz.</div></div>
+  </div>
+  <!-- ============ TRD ============ -->
+  <div class="pnl" data-s="trd">
+    <div class="grp"><h4>Aylık gider — bu yıl ve geçen yıl</h4>
+<div class="dg"><table>
+  <thead><tr><th>Ay</th><th class="sag">Bu yıl</th><th class="sag">Geçen yıl</th><th class="sag">Fark</th><th class="sag">Plan</th><th class="sag">Plan − gerçek</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>Ocak 2026</td><td class="sag">371.200</td><td class="sag">298.400</td><td class="sag">+%24,4</td><td class="sag">362.000</td><td class="sag">+9.200</td><td><div class="cubuk"><i style="width:84%"></i></div></td></tr>
+    <tr><td>Şubat 2026</td><td class="sag">362.900</td><td class="sag">301.700</td><td class="sag">+%20,3</td><td class="sag">362.000</td><td class="sag">+900</td><td><div class="cubuk"><i style="width:82%"></i></div></td></tr>
+    <tr><td>…</td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td></td></tr>
+    <tr><td>Eylül 2026</td><td class="sag">421.300</td><td class="sag">336.800</td><td class="sag">+%25,1</td><td class="sag">404.300</td><td class="sag kir">+17.000</td><td><div class="cubuk"><i style="width:95%"></i></div></td></tr>
+    <tr><td><b>Ekim 2026 (25'i)</b></td><td class="sag"><b>402.600</b></td><td class="sag">341.200</td><td class="sag">+%18,0</td><td class="sag">388.400</td><td class="sag">+14.200</td><td><div class="cubuk"><i style="width:91%"></i></div></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Ay içindeki gider belge tarihine göre. İçinde bulunulan ay yarım; plan da ayın 25'ine kadar olan dönemlerden.</div></div>
+  </div>
+  <!-- ============ PLN ============ -->
+  <div class="pnl" data-s="pln">
+    <div class="grp"><h4>Planlı gider − gerçekleşen (Planlı Giderler ile eşleşen dönemler)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Planlı gider</th><th>Kalem</th><th class="sag">Plan</th><th class="sag">Gerçek</th><th class="sag">Fark</th><th class="sag">Fark %</th><th class="orta">Dönem</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">Depo kirası</span></td><td>770.01.003</td><td class="sag">1.020.000</td><td class="sag">1.020.000</td><td class="sag">0</td><td class="sag">%0</td><td class="orta">10 / 10</td><td><span class="rz ok">planında</span></td></tr>
+    <tr><td><span class="lnk">Elektrik</span></td><td>770.02.001</td><td class="sag">142.000</td><td class="sag">168.400</td><td class="sag kir">+26.400</td><td class="sag kir">+%18,6</td><td class="orta">10 / 10</td><td><span class="rz sari">tahmin düşük · ort. güncellenir</span></td></tr>
+    <tr><td><span class="lnk">Kargo anlaşması</span></td><td>760.02.001</td><td class="sag">150.000</td><td class="sag">214.600</td><td class="sag kir">+64.600</td><td class="sag kir">+%43,1</td><td class="orta">10 / 10</td><td><span class="rz kir">plan dışı artış</span></td></tr>
+    <tr><td><span class="lnk">Muhasebe bürosu</span></td><td>770.05.001</td><td class="sag">150.000</td><td class="sag">135.000</td><td class="sag yesil">−15.000</td><td class="sag">−%10,0</td><td class="orta">9 / 10</td><td><span class="rz sari">1 dönem ödenmedi</span></td></tr>
+    <tr><td colspan="8" class="sonuk">… 7 tanım daha</td></tr>
+    <tr class="toplam"><td>Toplam (11 tanım)</td><td></td><td class="sag">3.540.000</td><td class="sag">3.661.000</td><td class="sag">+121.000</td><td class="sag">+%3,4</td><td class="orta"></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Plan = Planlı Giderler'in dönem planı (dondurulmuş); gerçek = aynı masraf kalemindeki gider. Tanımı olmayan kalemler bu tabloda yok, Kalem sekmesinde var.</div></div>
+  </div>
+  <!-- ============ TED ============ -->
+  <div class="pnl" data-s="ted">
+    <div class="grp"><h4>Tedarikçiye göre gider (ilk 10)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Tedarikçi</th><th>Ana kalem</th><th class="sag">Gider</th><th class="sag">Belge</th><th class="sag">Geçen yıl</th><th class="sag">Fark</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">Yıldız Gayrimenkul A.Ş.</span></td><td>Depo kirası</td><td class="sag">1.020.000</td><td class="sag">10</td><td class="sag">756.000</td><td class="sag">+%34,9</td></tr>
+    <tr><td><span class="lnk">Aras Kargo</span></td><td>Kargo</td><td class="sag">186.200</td><td class="sag">214</td><td class="sag">128.900</td><td class="sag kir">+%44,5</td></tr>
+    <tr><td><span class="lnk">CK Boğaziçi Elektrik</span></td><td>Elektrik</td><td class="sag">168.400</td><td class="sag">10</td><td class="sag">131.200</td><td class="sag">+%28,4</td></tr>
+    <tr><td><span class="lnk">Ak Müşavirlik</span></td><td>Muhasebe</td><td class="sag">135.000</td><td class="sag">9</td><td class="sag">120.000</td><td class="sag">+%12,5</td></tr>
+    <tr><td colspan="6" class="sonuk">… 6 tedarikçi daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Personel, SGK, vergi gibi carisiz giderler bu tabloda yok (Kalem sekmesinde).</div></div>
+  </div>
+  <!-- ============ DET ============ -->
+  <div class="pnl" data-s="det">
+    <div class="grp"><h4>Belge detayı — Lojistik / kargo (760.02)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Tarih</th><th>Belge</th><th>Kaynak</th><th>Tedarikçi</th><th>Açıklama</th><th>Merkez</th><th class="sag">KDV hariç</th><th class="sag">KDV</th></tr></thead>
+  <tbody>
+    <tr><td>24.10.2026</td><td><span class="lnk">ARS2026…4412</span></td><td>Alış faturası</td><td>Aras Kargo</td><td>Ekim 3. hafta gönderi</td><td>Depo</td><td class="sag">18.420,00</td><td class="sag">3.684,00</td></tr>
+    <tr><td>21.10.2026</td><td><span class="lnk">KSA-2026-1201</span></td><td>Kasa ödeme</td><td>—</td><td>Kurye (nakit)</td><td>Satış</td><td class="sag">850,00</td><td class="sag">0,00</td></tr>
+    <tr><td>17.10.2026</td><td><span class="lnk">ARS2026…4380</span></td><td>Alış faturası</td><td>Aras Kargo</td><td>Ekim 2. hafta gönderi</td><td>Depo</td><td class="sag">17.960,00</td><td class="sag">3.592,00</td></tr>
+    <tr><td colspan="8" class="sonuk">… 211 satır daha</td></tr>
+    <tr class="toplam"><td>Toplam (214 satır)</td><td></td><td></td><td></td><td></td><td></td><td class="sag">214.600,00</td><td class="sag">41.880,00</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kalem ya da merkez sekmesinde bir satıra tıklayınca buraya süzülür; belgeye çift tık.</div></div>
+  </div>
+  <!-- ============ DIK ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="grp"><h4>Dikkat</h4>
+<div class="dg"><table>
+  <thead><tr><th>Tür</th><th>Belge / kayıt</th><th>Tarih</th><th>Açıklama</th><th>Öneri</th></tr></thead>
+  <tbody>
+    <tr><td><span class="rz sari">Kalem atanmamış</span></td><td>23 satır</td><td>—</td><td>Hizmet / masraf satırında masraf kalemi yok → "Diğer"e düştü (41.860 ₺)</td><td>"Masraf kalemi ata…" (toplu)</td></tr>
+    <tr><td><span class="rz kir">Olağan dışı artış</span></td><td>Kargo 760.02</td><td>Eylül–Ekim</td><td>Son 3 ay ortalaması önceki 6 ayın %38 üstünde</td><td>Anlaşma / fatura kontrolü</td></tr>
+    <tr><td><span class="rz kir">Mükerrer şüphesi</span></td><td>TTK2026…118 / TTK2026…119</td><td>12.10.2026</td><td>Aynı tedarikçi, aynı tutar (2.890,00), aynı gün</td><td>Belgeleri karşılaştır</td></tr>
+    <tr><td><span class="rz sari">KDV oranı farklı</span></td><td>OSB aidatı</td><td>01.10.2026</td><td>Önceki dönemler %20, bu dönem %0</td><td>Faturayı kontrol et</td></tr>
+    <tr><td><span class="rz">Planda yok</span></td><td>Temsil ağırlama 770.08</td><td>—</td><td>Yılda 48.200 ₺, planlı gider tanımı yok</td><td>Planlı gider tanımla?</td></tr>
+    <tr><td colspan="5" class="sonuk">… 2 uyarı daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Eşikler: olağan dışı artış = son 3 ay ortalaması önceki 6 ayın %25 üstü; mükerrer = aynı cari + tutar ± 1 gün.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>MASRAF İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.01.2026 – 25.10.2026</span><span>KDV hariç</span><span>Karşılaştırma: geçen yıl aynı dönem</span><span>Tüm şubeler</span></div>
+        <table>
+          <thead><tr><th>Kalem</th><th>Bu dönem</th><th>Geçen yıl</th><th>Fark</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td>Personel giderleri</td><td>1.807.400</td><td>1.512.000</td><td>+%19,5</td><td>%46,2</td></tr>
+            <tr><td>Kira ve aidat</td><td>1.098.800</td><td>843.000</td><td>+%30,3</td><td>%28,1</td></tr>
+            <tr><td>Hizmet alımları</td><td>246.900</td><td>231.700</td><td>+%6,6</td><td>%6,3</td></tr>
+            <tr><td colspan="5" style="color:#8a98a8">… 9 kalem daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Toplam gider</span><span>3.912.400,00</span></div><div><span>Planlı gider (tanımlı kalemler)</span><span>3.540.000,00</span></div><div><span>Plan − gerçek</span><span>+121.000,00</span></div><div class="b"><span>GİDER / CİRO</span><span>%18,9</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Genel Müdür<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Masraf İcmali · KDV hariç · kalem atanmamış 41.860 ₺ "Diğer" satırında</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>1.284 gider satırı</span><span>68 masraf kalemi</span><span>3 masraf merkezi</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Masraf İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Paramız nereye gidiyor, geçen yıla ve plana göre nerede artıyor, hangi merkez ne harcıyor?" Yönetim, muhasebe, bütçe.</li>
+    <li><b>Kaynak:</b> kesin alış belgesi satırlarının masraf kalemi (hizmet / masraf satırı; stoklu mal alımı gider değildir — stoğa girer) + kasa / banka tediyesinin masraf bacağı + personel masraf beyanı. <code>v_masraf_ekstre</code> ile aynı küme; ekran ikinci bir kural yazmaz. Faturası olan ödeme bir kez (fatura) sayılır.</li>
+    <li><b>Kalem ağacı:</b> masraf kartının üst kalemi (<code>masraf.ust_id</code>); muhasebe hesabı (<code>muh_kodu</code>) gösterilir ama gruplama kalem ağacına göre.</li>
+    <li><b>Plan − gerçek:</b> Planlı Giderler'in dönem planlarıyla aynı masraf kalemindeki gerçek gider; planlı gideri olmayan kalem yalnız Kalem sekmesinde.</li>
+    <li><b>Eylem:</b> "Masraf kalemi ata…" — kalem atanmamış satırları toplu atar (belge Değiştir yetkisi, loglu).</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü (Baskı Önizleme / Yazdır / Gönder PDF-Word-Excel-HTML).</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Personel maaşı (bordro yok) gidere nasıl girsin?<span class="oneri"><b>Öneri:</b> Maaş ödemesi tediyenin masraf bacağıyla girer (bugün olduğu gibi). Bordro modülü gelince tahakkuk esaslı (bordro dönemi) olsun; o zamana kadar ödeme tarihine göre ve rozetle "ödeme esaslı".</span></li>
+    <li>Gider KDV hariç mi, KDV dahil mi gösterilsin?<span class="oneri"><b>Öneri:</b> Varsayılan KDV hariç (gider budur; indirilecek KDV gider değil); şeritte "KDV dahil" seçeneği nakit bakışı için.</span></li>
+    <li>Amortisman gider sayılsın mı?<span class="oneri"><b>Öneri:</b> Demirbaş modülünün dönem amortismanı ayrı bir "Amortisman" üst kalemi olarak eklensin, varsayılan dahil; nakit çıkışı olmadığı rozetle belirtilsin.</span></li>
+    <li>Stoklu mal alımı (ticari mal) hiç girmesin mi?<span class="oneri"><b>Öneri:</b> Girmesin (stoğa girer, satılınca SMM olur — Kârlılık İcmali). Sarf malzemesi (stok tipi sarf) ise tüketildiğinde gider: depo çıkış fişinin maliyeti "Sarf" kalemine.</span></li>
+    <li>Mükerrer / olağan dışı artış eşikleri sabit mi?<span class="oneri"><b>Öneri:</b> Ayarlanabilir (Genel Ayarlar › İcmal Eşikleri): artış %25, mükerrer ± 1 gün.</span></li>
+    <li>"Masraf kalemi ata" kapanmış döneme dokunabilsin mi?<span class="oneri"><b>Öneri:</b> Hayır; kapanmış dönemde (muhasebe dönem kapanışı) yalnız görüntüler, atama düğmesi pasif ve gerekçesi yazılı.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>
