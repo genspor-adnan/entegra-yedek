@@ -161,7 +161,7 @@ public static partial class KartKatalogu
                 new("id",           "id",            "sayi",    Yazilabilir: false),
                 // Satış Koşulları kutusu (1152).
                 // İSKONTO ORANI ve PARA BİRİMİ kaldırıldı (kullanıcı 25.10.2026): cariye özel iskonto kampanyayla
-                //   verilir ("iskontoyu kampanya ile yaparız"). Kolonlar (iskonto_orani, doviz_cinsi) yerinde, okuyan yok.
+                //   verilir ("iskontoyu kampanya ile yaparız"). Kolonlar 1183'te düşürüldü.
                 new("vadeGun",      "vade_gun",      "sayi",    Baslik: "Vade (gün)"),
                 // ÖDEME ŞEKLİ KALDIRILDI (kullanıcı 25.10.2026, kolon 1181'de düşürüldü).
                 new("sevkSekli",    "sevk_sekli",    "kod",     Baslik: "Sevk Şekli", SabitKodlar: new Dictionary<string, string>
