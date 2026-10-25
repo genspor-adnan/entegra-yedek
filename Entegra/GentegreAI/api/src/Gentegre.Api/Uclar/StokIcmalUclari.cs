@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -29,7 +29,7 @@ namespace Gentegre.Api.Uclar;
 ///
 /// Rakamlar sunucuda; ekran hesap yapmaz. Depo süzgeci kullanıcının şubeleriyle sınırlı.
 /// </summary>
-public static class StokIcmalUclari
+public static partial class StokIcmalUclari
 {
     private const string KodDeger = "stok.deger_icmali";
     private const string KodSkt = "stok.skt_icmali";
@@ -136,6 +136,7 @@ public static class StokIcmalUclari
     public static void StokIcmalUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/stok-icmal").WithTags("Stok İcmalleri").RequireAuthorization();
+        EkUclariEkle(grup);   // hareket · ölü stok · kritik stok (1174)
 
         // ================================================================ DEĞER ===
         grup.MapGet("/deger", async (DateTime? tarih, int? depo, int? kategori, string? yontem, int? pasif,

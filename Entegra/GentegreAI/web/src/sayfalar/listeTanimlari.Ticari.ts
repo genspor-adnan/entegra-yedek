@@ -499,7 +499,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   payı kavramı).
     kaynak: 'alacak-yaslandirma', rota: 'alacak-yaslandirma', ozelSayfa: true,
     baslik: 'Alacak Yaşlandırma', yol: 'Finans › Alacak Yaşlandırma', urunModu: 2,
-    menuGrup: 'Finans', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '@icmal', yetkiKodu: 'finans.alacak_yaslandirma',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 72, menuAd: 'Alacak Yaşlandırma', ic: '@icmal', yetkiKodu: 'finans.alacak_yaslandirma',
   },
   {
     // CARİ İCMALİ (1154, mockup İcmal/cari_icmali.html): müşteri ve tedarikçi bakiyeleri
@@ -508,7 +508,41 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   cari hesapları HBYS'de de var.
     kaynak: 'cari-icmali', rota: 'cari-icmali', ozelSayfa: true,
     baslik: 'Cari İcmali', yol: 'Finans › Cari İcmali',
-    menuGrup: 'Finans', menuSira: 71, menuAd: 'Cari İcmali', ic: '@icmal', yetkiKodu: 'finans.cari_icmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71, menuAd: 'Cari İcmali', ic: '@icmal', yetkiKodu: 'finans.cari_icmali',
+  },
+  {
+    // TAHSİLAT / ÖDEME, ÇEK / SENET, NAKİT AKIŞ (VADE) İCMALLERİ (1175, mockup Ekranlar/İcmal/tahsilat_odeme_icmali.html,
+    //   cek_senet_icmali.html, nakit_akis_icmali.html) - rakamlar FinansIcmalUclari'ndan.
+    kaynak: 'tahsilat-odeme-icmali', rota: 'tahsilat-odeme-icmali', ozelSayfa: true,
+    baslik: 'Tahsilat / Ödeme İcmali', yol: 'Finans › İcmaller › Tahsilat / Ödeme İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.1, menuAd: 'Tahsilat / Ödeme İcmali', ic: '@icmal', yetkiKodu: 'finans.tahsilat_odeme_icmali',
+  },
+  {
+    kaynak: 'cek-senet-icmali', rota: 'cek-senet-icmali', ozelSayfa: true,
+    baslik: 'Çek / Senet İcmali', yol: 'Finans › İcmaller › Çek / Senet İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.2, menuAd: 'Çek / Senet İcmali', ic: '@icmal', yetkiKodu: 'finans.cek_senet_icmali',
+  },
+  {
+    kaynak: 'nakit-akis-icmali', rota: 'nakit-akis-icmali', ozelSayfa: true,
+    baslik: 'Nakit Akış (Vade) İcmali', yol: 'Finans › İcmaller › Nakit Akış (Vade) İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.3, menuAd: 'Nakit Akış (Vade) İcmali', ic: '@icmal', yetkiKodu: 'finans.nakit_akis_icmali',
+  },
+  {
+    // SATIŞ / ALIŞ / İRSALİYE-FATURA EŞLEŞME İCMALLERİ (1175, mockup Ekranlar/İcmal/satis_icmali.html, alis_icmali.html,
+    //   irsaliye_fatura_eslesme_icmali.html). ERP: Satış ve Alış grupları HBYS'de yok.
+    kaynak: 'satis-icmali', rota: 'satis-icmali', ozelSayfa: true, urunModu: 1,
+    baslik: 'Satış İcmali', yol: 'Satış › İcmaller › Satış İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'Satış İcmali', ic: '@icmal', yetkiKodu: 'satis.icmali',
+  },
+  {
+    kaynak: 'irsaliye-fatura-eslesme', rota: 'irsaliye-fatura-eslesme', ozelSayfa: true, urunModu: 1,
+    baslik: 'İrsaliye-Fatura Eşleşme İcmali', yol: 'Satış › İcmaller › İrsaliye-Fatura Eşleşme İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 81, menuAd: 'İrsaliye-Fatura Eşleşme', ic: '@icmal', yetkiKodu: 'irsaliye_fatura_eslesme',
+  },
+  {
+    kaynak: 'alis-icmali', rota: 'alis-icmali', ozelSayfa: true, urunModu: 1,
+    baslik: 'Alış İcmali', yol: 'Alış › İcmaller › Alış İcmali',
+    menuGrup: 'Alış', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'Alış İcmali', ic: '@icmal', yetkiKodu: 'alis.icmali',
   },
   {
     // CARİ DEVİR GİRİŞİ (1156, mockup cari_devir_girisi.html): sisteme geçişte çok carinin
@@ -527,7 +561,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   başvuru başına ciro - düşülen sarf / ilaç, hizmet ve bölüm kârlılığı.
     kaynak: 'maliyet-icmali', rota: 'maliyet-icmali', ozelSayfa: true,
     baslik: 'Hasta Başı Maliyet', yol: 'Finans › Hasta Başı Maliyet', urunModu: 2,
-    menuGrup: 'Finans', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '@icmal', yetkiKodu: 'maliyet.hasta_basi',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 73, menuAd: 'Hasta Başı Maliyet', ic: '@icmal', yetkiKodu: 'maliyet.hasta_basi',
   },
   {
     // FATURA / e-BELGE İCMALİ (1035, mockup İcmal/fatura_ebelge_icmali.html): e-belgeler türe /
@@ -535,14 +569,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   ERP ve HBYS'de (fatura iki üründe de kesilir).
     kaynak: 'efatura-icmal', rota: 'efatura-icmal', ozelSayfa: true,
     baslik: 'Fatura / e-Belge İcmali', yol: 'Finans › Fatura / e-Belge İcmali',
-    menuGrup: 'Finans', menuSira: 74, menuAd: 'Fatura / e-Belge İcmali', ic: '@icmal', yetkiKodu: 'efatura.icmal',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 74, menuAd: 'Fatura / e-Belge İcmali', ic: '@icmal', yetkiKodu: 'efatura.icmal',
   },
   {
     // KASA / GÜN SONU MUTABAKATI (1030, mockup İcmal/kasa_gun_sonu_mutabakati.html): kasalar,
     //   POS, banka; beklenen / sayılan / fark, fark açıklaması, Günü Kapat (kasa kilidi).
     kaynak: 'kasa-gun-sonu', rota: 'kasa-gun-sonu', ozelSayfa: true,
     baslik: 'Kasa / Gün Sonu Mutabakatı', yol: 'Finans › Kasa / Gün Sonu', urunModu: 2,
-    menuGrup: 'Finans', menuSira: 70, menuAd: 'Kasa / Gün Sonu', ic: '@icmal', yetkiKodu: 'kasa.gun_sonu',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 70, menuAd: 'Kasa / Gün Sonu', ic: '@icmal', yetkiKodu: 'kasa.gun_sonu',
   },
   {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"

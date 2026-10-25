@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Api.Servisler.Yardim;
 using Gentegre.Cekirdek.Yetki;
@@ -301,6 +301,70 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
             Assert.Equal(d.Surum, d2.Surum);
         }
         finally { Directory.Delete(klasor, true); }
+    }
+
+    [Fact]
+    public void Ekranin_ne_yapilir_bolumu_YALNIZ_kendi_ekraninda_doner()
+    {
+        // 1174: "Bu ekranda neler yapabilirsiniz" bölümü başka ekranda (ya da ekran tanınmadan)
+        //   sorulan "bu ekranda ne yapabilirim" sorusuna başlığı birebir uyduğu için dönüyordu -
+        //   kullanıcı lab icmalinde Cari İcmali'nin maddelerini görüyordu.
+        var klasor = Path.Combine(Path.GetTempPath(), "gentegre-yardim-test-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(klasor);
+        try
+        {
+            File.WriteAllText(Path.Combine(klasor, "icmal-a.md"), """
+                ---
+                id: icmal-a
+                baslik: A İcmali
+                ekran: hasta
+                rota: /hasta
+                ---
+                ## Amaç
+                A icmali bakiyeleri gösterir.
+                ## Bu ekranda neler yapabilirsiniz
+                - **Dönem seçmek** — tarihleri değiştirin.
+                - **Çıktı almak** — menüden önizleme.
+                """);
+            var dizin = new YardimDizini(klasor, NullLogger<YardimDizini>.Instance);
+            var baglam = Baglam(null, "hasta", "stok");
+            var kendi = EkranBaglamiCozucu.Coz(HastaEkrani, new IstemciBaglami("/hasta"), "/hasta", null, baglam, 2, "tr");
+            var baska = EkranBaglamiCozucu.Coz(
+                new EkranBaglamiCozucu.EkranSatiri("stok", "/stok", "Stoklar", "Stok › Stoklar", "Stok", "", "stok", "stok-liste", "/stok", 0),
+                new IstemciBaglami("/stok"), "/stok", null, baglam, 2, "tr");
+
+            Assert.Contains(dizin.Ara("bu ekranda ne yapabilirim", kendi, baglam, 2, "tr"),
+                            v => YardimDizini.NeYapilirParcasiMi(v.Parca));
+            Assert.DoesNotContain(dizin.Ara("bu ekranda ne yapabilirim", baska, baglam, 2, "tr"),
+                                  v => YardimDizini.NeYapilirParcasiMi(v.Parca));
+            Assert.DoesNotContain(dizin.Ara("bu ekranda ne yapabilirim", null, baglam, 2, "tr"),
+                                  v => YardimDizini.NeYapilirParcasiMi(v.Parca));
+        }
+        finally { Directory.Delete(klasor, true); }
+    }
+
+    [Fact]
+    public void Icmal_yardim_belgeleri_ekrana_bagli_ve_ne_yapilir_listesi_tasir()
+    {
+        // 1174: her icmal ekranının belgesi ekran + rota taşır ve "ne yapabilirim" cevabının
+        //   maddeleri (en az 5) "## Bu ekranda neler yapabilirsiniz" bölümündedir.
+        var kok = new DirectoryInfo(AppContext.BaseDirectory);
+        while (kok is not null && !Directory.Exists(Path.Combine(kok.FullName, "dokuman", "yardim"))) kok = kok.Parent;
+        Assert.NotNull(kok);
+        var dosyalar = Directory.GetFiles(Path.Combine(kok!.FullName, "dokuman", "yardim"), "icmal-*.md");
+        Assert.True(dosyalar.Length >= 30, $"icmal belgesi {dosyalar.Length}");
+        foreach (var d in dosyalar)
+        {
+            var b = YardimDizini.Ayristir(Path.GetFileName(d), File.ReadAllText(d));
+            Assert.NotNull(b);
+            Assert.False(string.IsNullOrEmpty(b!.Ekran), d + ": ekran yok");
+            Assert.StartsWith("/", b.Rota);
+            Assert.False(string.IsNullOrEmpty(b.Yetki), d + ": yetki yok");
+            var p = b.Parcalar.FirstOrDefault(YardimDizini.NeYapilirParcasiMi);
+            Assert.True(p is not null, d + ": 'Bu ekranda neler yapabilirsiniz' bölümü yok");
+            Assert.True(p!.Metin.Split('\n').Count(x => x.TrimStart().StartsWith("- ")) >= 5, d + ": en az 5 madde");
+            Assert.NotEmpty(b.OrnekSorular);
+        }
     }
 
     [Fact]

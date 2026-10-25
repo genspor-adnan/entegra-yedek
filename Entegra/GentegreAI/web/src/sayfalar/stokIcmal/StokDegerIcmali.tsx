@@ -65,7 +65,7 @@ export function StokDegerIcmali() {
     <div className="hi">
       <style>{hastaIcmalStili + kurumIcmalStili + STOK_ICMAL_STILI}</style>
       <div className="sayfabas">
-        <div className="basrow"><h1>Stok Değer İcmali</h1><span className="yol">Stok &amp; Hizmet › Stok Değer İcmali</span></div>
+        <div className="basrow"><h1>Stok Değer İcmali</h1><span className="yol">Stok &amp; Hizmet › İcmaller › Stok Değer İcmali</span></div>
       </div>
 
       <div className="hi-arac">

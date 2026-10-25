@@ -79,7 +79,7 @@ import { onayUclari } from './uclar/onay';
 import { izinUclari } from './uclar/izin';
 import { cariKartUclari, cariListeUclari } from './uclar/cariListe';
 import { cariIcmalUclari } from './uclar/cariIcmal';
-import { stokIcmalUclari } from './uclar/stokIcmal';
+import { stokIcmalUclari, stokIcmalUclari2 } from './uclar/stokIcmal';
 import { devirUclari } from './uclar/devir';
 import { kasaListeUclari } from './uclar/kasaListe';
 import { ekstreUclari } from './uclar/ekstre';
@@ -121,6 +121,7 @@ export const api = {
   ...cariKartUclari,
   ...cariIcmalUclari,
   ...stokIcmalUclari,
+  ...stokIcmalUclari2,
   ...devirUclari,
   ...kasaListeUclari,
   ...ekstreUclari,

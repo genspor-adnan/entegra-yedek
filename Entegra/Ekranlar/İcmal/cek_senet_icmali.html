@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çek / Senet İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧾 Çek / Senet İcmali — 25.10.2026 itibarıyla
+    <span class="sp">Gentegre AI · Finans › İcmaller · Tüm şubeler · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Çek / Senet İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🏦</span> Seçilenleri bankaya tahsile ver…</div>
+    <div class="btn"><span>↪</span> Seçilenleri ciro et…</div>
+    <div class="sp"></div>
+    <div class="btn"><span>💳</span> Tahsilat / Ödeme</div>
+    <div class="btn"><span>📈</span> Nakit Akış (Vade)</div>
+    <div class="btn"><span>📋</span> Çek / Senet Listesi</div>
+  </div>
+
+  <div class="serit">
+    <div class="seg"><span class="on">Alınan (müşteri)</span><span>Verilen (kendi)</span><span>İkisi</span></div>
+    <div class="seg"><span class="on">Çek + Senet</span><span>Çek</span><span>Senet</span></div>
+    <div class="sel">📅 Vade: <b>Tümü</b> ▾</div>
+    <div class="sel">🏦 Banka: <b>Tümü</b> ▾</div>
+    <div class="sel">💱 Para birimi: <b>TL karşılığı</b> ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">Vadesi geçmiş portföyde: 3</span>
+    <span class="rz kir">Karşılıksız: 1</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Portföyde</div><div class="deg">1.186.400 ₺</div><div class="alt">41 evrak · ort. vade 47 gün</div></div>
+    <div class="kutu"><div class="bas">Bankada Tahsilde</div><div class="deg">320.000 ₺</div><div class="alt">9 çek · Halkbank 6 · Garanti 3</div></div>
+    <div class="kutu"><div class="bas">Teminatta</div><div class="deg">150.000 ₺</div><div class="alt">2 çek · kredi teminatı</div></div>
+    <div class="kutu"><div class="bas">Ciro Edilen (vadesi gelmemiş)</div><div class="deg">240.000 ₺</div><div class="alt">6 çek · rücu riski</div></div>
+    <div class="kutu uy"><div class="bas">30 Gün İçinde Vadeli</div><div class="deg">412.600 ₺</div><div class="alt">14 evrak</div></div>
+    <div class="kutu teh"><div class="bas">Vadesi Geçmiş</div><div class="deg">58.300 ₺</div><div class="alt">3 evrak hâlâ portföyde</div></div>
+    <div class="kutu teh"><div class="bas">Karşılıksız / Protestolu</div><div class="deg">40.000 ₺</div><div class="alt">1 çek · 1 senet</div></div>
+    <div class="kutu"><div class="bas">Verilen (ödenecek)</div><div class="deg">480.000 ₺</div><div class="alt">12 kendi çekimiz · 60 gün içinde 6</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="port">Portföy <span class="rz">41</span></div>
+    <div class="sekme" data-s="durum">Durum Akışı</div>
+    <div class="sekme" data-s="vade">Vade Takvimi</div>
+    <div class="sekme" data-s="kesi">Keşideci / Banka</div>
+    <div class="sekme" data-s="ver">Verilen Çekler <span class="rz">12</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ PORTFOY ============ -->
+  <div class="pnl" data-s="port">
+    <div class="grp">
+      <h4>Alınan çek / senet — elde ve bankada <span class="mini">kutucukla seç → tahsile ver / ciro · satıra tıkla: evrak geçmişi · çift tık: evrak kartı · vadeye göre</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th style="width:24px"><input type="checkbox"></th><th>Tür</th><th>Seri No</th><th>Keşideci</th><th>Alındığı cari</th><th>Banka / Şube</th><th>Vade</th>
+          <th class="orta">Kalan Gün</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox"></td><td>Çek</td><td>HLK-0044781</td><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td>AĞIZ DİŞ MERKEZİ</td><td>Halkbank · Kadıköy</td>
+            <td class="kir">10.10.2026</td><td class="orta"><span class="rz kir">15 gün geçti</span></td><td class="sag">28.300</td><td><span class="rz kir">portföyde · vadesi geçti</span></td></tr>
+          <tr class="ac" data-d="e1"><td><input type="checkbox" checked></td><td><span class="ok-ic">▸</span>Çek</td><td>GRN-0912204</td><td>DR. MEHMET ÖZ (müşterinin müşterisi)</td><td>DENTA KLİNİK</td><td>Garanti · Ataşehir</td>
+            <td>02.11.2026</td><td class="orta"><span class="rz sari">8 gün</span></td><td class="sag"><b>45.000</b></td><td><span class="rz">portföyde</span></td></tr>
+          <tr class="det" data-p="e1" hidden><td colspan="10">14.10.2026 DENTA KLİNİK'ten alındı (tahsilat T-2026-1182) · ciro zinciri: DR. MEHMET ÖZ → DENTA KLİNİK → bize &nbsp;·&nbsp; risk: keşideci 3. kişi</td></tr>
+          <tr><td><input type="checkbox" checked></td><td>Çek</td><td>HLK-0045102</td><td>DENTA KLİNİK LTD. ŞTİ.</td><td>DENTA KLİNİK</td><td>Halkbank · Kadıköy</td>
+            <td>14.12.2026</td><td class="orta">50 gün</td><td class="sag"><b>60.000</b></td><td><span class="rz">portföyde</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>Çek</td><td>ZRT-1180043</td><td>GÜLÜMSE AĞIZ</td><td>GÜLÜMSE AĞIZ</td><td>Ziraat · Üsküdar</td>
+            <td>30.10.2026</td><td class="orta"><span class="rz sari">5 gün</span></td><td class="sag">32.000</td><td><span class="rz mavi">bankada tahsilde · Halkbank</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>Senet</td><td>SNT-2026-014</td><td>ESTETİK DİŞ ATÖLYESİ</td><td>ESTETİK DİŞ ATÖLYESİ</td><td>—</td>
+            <td class="kir">01.10.2026</td><td class="orta"><span class="rz kir">24 gün geçti</span></td><td class="sag">20.000</td><td><span class="rz kir">protestolu · avukatta</span></td></tr>
+          <tr><td colspan="10" class="sonuk">… 36 evrak daha</td></tr>
+          <tr class="toplam"><td colspan="8">Toplam (41 evrak) · seçili 2 · 105.000</td><td class="sag">1.506.400</td><td></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ipucu">Durum evrakın son hareketinden (51 tahsil, 52 ciro, 53 senet tahsil, 54 bozdurma; bankaya tahsile ve teminata verme; karşılıksız / protesto). "Tahsile ver" ve "Ciro et" mevcut çek / senet işlem akışını açar — kayıt kullanıcıda.</div>
+    </div>
+  </div>
+
+  <!-- ============ DURUM AKISI ============ -->
+  <div class="pnl" data-s="durum">
+    <div class="iki">
+      <div class="grp"><h4>Durumlara göre (bugün) <span class="mini">alınan evraklar</span></h4><div class="dg"><table>
+        <thead><tr><th>Durum</th><th class="sag">Evrak</th><th class="sag">Tutar</th><th style="width:140px"></th></tr></thead>
+        <tbody>
+          <tr><td>Portföyde</td><td class="sag">30</td><td class="sag">866.400</td><td><div class="cubuk"><i style="width:57%"></i></div></td></tr>
+          <tr><td>Bankada tahsilde</td><td class="sag">9</td><td class="sag">320.000</td><td><div class="cubuk"><i style="width:21%"></i></div></td></tr>
+          <tr><td>Teminatta</td><td class="sag">2</td><td class="sag">150.000</td><td><div class="cubuk"><i style="width:10%"></i></div></td></tr>
+          <tr><td>Ciro edildi (vadesi gelmemiş)</td><td class="sag">6</td><td class="sag">240.000</td><td><div class="cubuk"><i style="width:16%"></i></div></td></tr>
+          <tr><td class="kir">Karşılıksız / protestolu</td><td class="sag">2</td><td class="sag kir">40.000</td><td><div class="cubuk"><i style="width:3%;background:#c0413d"></i></div></td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Dönem içi hareketler (bu ay)</h4><div class="dg"><table>
+        <thead><tr><th>Hareket</th><th class="sag">Evrak</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>Alındı (tahsilat)</td><td class="sag">26</td><td class="sag">326.300</td></tr>
+          <tr><td>Tahsil edildi (hesaba geçti)</td><td class="sag">18</td><td class="sag">402.100</td></tr>
+          <tr><td>Ciro edildi (tedarikçiye)</td><td class="sag">4</td><td class="sag">160.000</td></tr>
+          <tr><td>Bankaya tahsile verildi</td><td class="sag">7</td><td class="sag">248.000</td></tr>
+          <tr><td>İade / karşılıksız döndü</td><td class="sag">1</td><td class="sag kir">20.000</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ VADE TAKVIMI ============ -->
+  <div class="pnl" data-s="vade">
+    <div class="grp">
+      <h4>Vade takvimi <span class="mini">alınan (giriş) ve verilen (çıkış) evrak · hafta / ay</span></h4>
+      <div class="dg"><table class="isi">
+        <thead><tr><th>Dönem</th><th class="sag">Alınan</th><th class="sag">Evrak</th><th class="sag">Verilen</th><th class="sag">Evrak</th><th class="sag">Net</th></tr></thead>
+        <tbody>
+          <tr><td class="kir">Vadesi geçmiş</td><td class="h h1">58.300</td><td class="sag">3</td><td class="h">—</td><td class="sag">0</td><td class="sag">+58.300</td></tr>
+          <tr><td>26.10 – 01.11</td><td class="h h2">92.000</td><td class="sag">4</td><td class="h h2">80.000</td><td class="sag">2</td><td class="sag">+12.000</td></tr>
+          <tr><td>02.11 – 08.11</td><td class="h h3">145.000</td><td class="sag">5</td><td class="h">—</td><td class="sag">0</td><td class="sag">+145.000</td></tr>
+          <tr><td>09.11 – 30.11</td><td class="h h3">175.600</td><td class="sag">5</td><td class="h h3">160.000</td><td class="sag">3</td><td class="sag">+15.600</td></tr>
+          <tr><td>Aralık 2026</td><td class="h h4">384.000</td><td class="sag">11</td><td class="h h2">120.000</td><td class="sag">3</td><td class="sag">+264.000</td></tr>
+          <tr><td>Ocak 2027 ve sonrası</td><td class="h h3">331.500</td><td class="sag">13</td><td class="h h2">120.000</td><td class="sag">4</td><td class="sag">+211.500</td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">1.186.400</td><td class="sag">41</td><td class="sag">480.000</td><td class="sag">12</td><td class="sag">+706.400</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Alınan = portföy + bankada tahsilde (ciro edilen ve teminattaki hariç). Nakit Akış (Vade) İcmali bu takvimi fatura vadeleriyle birleştirir.</div>
+    </div>
+  </div>
+
+  <!-- ============ KESIDECI / BANKA ============ -->
+  <div class="pnl" data-s="kesi">
+    <div class="iki">
+      <div class="grp"><h4>Keşideci yoğunlaşması <span class="mini">tek keşidecideki risk</span></h4><div class="dg"><table>
+        <thead><tr><th>Keşideci</th><th class="sag">Evrak</th><th class="sag">Tutar</th><th class="sag">Pay</th><th class="sag">Karşılıksız geçmişi</th></tr></thead>
+        <tbody>
+          <tr><td>DENTA KLİNİK LTD. ŞTİ.</td><td class="sag">9</td><td class="sag">312.000</td><td class="sag uy">%26,3</td><td class="sag sonuk">0</td></tr>
+          <tr><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td class="sag">6</td><td class="sag">188.300</td><td class="sag">%15,9</td><td class="sag kir">1 (2025)</td></tr>
+          <tr><td>DR. MEHMET ÖZ (3. kişi)</td><td class="sag">1</td><td class="sag">45.000</td><td class="sag">%3,8</td><td class="sag sonuk">bilinmiyor</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>Banka bazında</h4><div class="dg"><table>
+        <thead><tr><th>Muhatap banka</th><th class="sag">Evrak</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>Halkbank</td><td class="sag">14</td><td class="sag">452.000</td></tr>
+          <tr><td>Garanti BBVA</td><td class="sag">10</td><td class="sag">368.400</td></tr>
+          <tr><td>Ziraat</td><td class="sag">8</td><td class="sag">210.000</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ VERILEN ============ -->
+  <div class="pnl" data-s="ver">
+    <div class="grp">
+      <h4>Verilen (kendi) çek / senetlerimiz <span class="mini">ödeme günü hesapta karşılık olmalı · vadeye göre</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Tür</th><th>Seri No</th><th>Verildiği cari</th><th>Banka hesabı</th><th>Vade</th><th class="orta">Kalan Gün</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td>Çek</td><td>HLK-K-000331</td><td>ALPHA BİO TEC TÜRKİYE</td><td>Halkbank TL</td><td>30.10.2026</td><td class="orta"><span class="rz sari">5 gün</span></td><td class="sag">80.000</td><td><span class="rz">ödenecek</span></td></tr>
+          <tr><td>Çek</td><td>HLK-K-000334</td><td>HADRON MEDİKAL</td><td>Halkbank TL</td><td>15.11.2026</td><td class="orta">21 gün</td><td class="sag">60.000</td><td><span class="rz">ödenecek</span></td></tr>
+          <tr><td colspan="8" class="sonuk">… 10 evrak daha</td></tr>
+          <tr class="toplam"><td colspan="6">Toplam (12 evrak)</td><td class="sag">480.000</td><td></td></tr>
+        </tbody></table></div>
+      <div class="ipucu">30 gün içinde ödenecek 140.000 ₺ · Halkbank TL bugünkü bakiye 212.400 ₺ — yeterli. Hesap bakiyesi vadedeki tutarı karşılamıyorsa satır kırmızı.</div>
+    </div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>ÇEK / SENET İCMALİ (PORTFÖY)</h1>
+        <div class="bilgi"><span>Tarih itibarıyla: 25.10.2026</span><span>Alınan · çek + senet</span>
+          <span>41 evrak · ort. vade 47 gün</span><span>Vadesi geçmiş: 3 evrak</span></div>
+        <table>
+          <thead><tr><th>Seri No</th><th>Keşideci</th><th>Banka</th><th>Vade</th><th>Tutar</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>HLK-0044781</td><td>AĞIZ DİŞ MERKEZİ</td><td>Halkbank</td><td>10.10.2026</td><td>28.300</td><td>vadesi geçti</td></tr>
+            <tr><td>GRN-0912204</td><td>DR. MEHMET ÖZ</td><td>Garanti</td><td>02.11.2026</td><td>45.000</td><td>portföyde</td></tr>
+            <tr><td>HLK-0045102</td><td>DENTA KLİNİK</td><td>Halkbank</td><td>14.12.2026</td><td>60.000</td><td>portföyde</td></tr>
+            <tr><td colspan="6" style="color:#8a98a8">… 38 evrak daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Portföyde</span><span>866.400,00</span></div>
+          <div><span>Bankada tahsilde</span><span>320.000,00</span></div>
+          <div><span>Teminatta</span><span>150.000,00</span></div>
+          <div class="b"><span>TOPLAM ALINAN</span><span>1.336.400,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Mali İşler<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Çek / Senet İcmali · durum evrakın son hareketinden · dövizli evrak bugünkü kurla TL</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>41 alınan · 12 verilen evrak</span><span>Ort. vade 47 gün</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Çek / Senet İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Elimizde ne kadarlık çek / senet var, nerede (portföy, banka, teminat, ciro), ne zaman paraya dönüyor, hangisi riskli; kendi verdiğimiz çeklere hesapta karşılık var mı?"</li>
+    <li><b>Kaynak:</b> çek / senet kartları ve hareketleri (23, 24 alındı; 33, 34 verildi; 51–55 tahsil, ciro, bozdurma, ödendi). Durum her evrakın son hareketidir; Çek / Senet Listesi ile aynı kural.</li>
+    <li><b>Risk:</b> vadesi geçip hâlâ portföyde duran, karşılıksız / protestolu, 3. kişi keşideci, tek keşidecide yoğunlaşma, ciro edilmiş ama vadesi gelmemiş (rücu riski).</li>
+    <li><b>Verilen çekler:</b> vade günündeki banka hesabı bakiyesiyle karşılaştırılır — karşılıksız çek yazmamak için.</li>
+    <li><b>İşlemler:</b> "Bankaya tahsile ver" ve "Ciro et" mevcut çek / senet işlem akışını açar; icmal kayıt yazmaz.</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü; A4 portföy listesi (banka teslim bordrosu yerine geçmez).</li>
+  </ul>
+  <b>Kararlar (25.10.2026):</b>
+  <ul>
+    <li><b>Dövizli evrak</b> portföy değeri bugünkü kurla ("elimdeki evrak bugün kaç TL eder"); alındığı günün kuru ve kur farkı satır ayrıntısında.</li>
+    <li><b>Karşılıksız çek takibi</b> bu ekranda yalnız durum rozetidir ("protestolu · avukatta"); takip notu, hatırlatma ve söz için ayrı takip ekranı (Hasta Borç Takibi deseni).</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

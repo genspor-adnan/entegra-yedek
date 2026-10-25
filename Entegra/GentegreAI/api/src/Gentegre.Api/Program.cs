@@ -380,6 +380,10 @@ uygulama.CariListeUclariniEkle();
 uygulama.CariIcmalUclariniEkle();
 // STOK ICMALLERI (1173): stok deger, SKT / lot, sayim fark.
 uygulama.StokIcmalUclariniEkle();
+// SATIŞ / ALIŞ / İRSALİYE-FATURA EŞLEŞME / TAHSİLAT-ÖDEME / ÇEK-SENET / NAKİT AKIŞ İCMALLERİ (1175).
+uygulama.TicariIcmalUclariniEkle();
+uygulama.EslesmeIcmalUclariniEkle();
+uygulama.FinansIcmalUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
 uygulama.DevirUclariniEkle();
 // KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.

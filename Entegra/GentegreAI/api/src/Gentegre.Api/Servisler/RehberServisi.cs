@@ -900,6 +900,33 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
 
         var adimlar = new List<Adim>();
         var no = 0;
+        var atiflar = new List<KaynakAtfi>();
+        var belgeler = dizin?.Belgeler.Where(b => YardimDizini.EkranUyar(b, ekran)
+                                                 && (b.Yetki.Length == 0 || baglam.Yetkiler.Var(b.Yetki, Islem.Gor)))
+                                       .Take(2).ToList() ?? [];
+
+        // EKRANIN KENDİ "NE YAPILIR" LİSTESİ (1174, kullanıcı 25.10.2026: icmallerde
+        //   "bu ekranda ne yapabilirim" denince ekranın neler yaptığı gelsin): belgede
+        //   "## Bu ekranda neler yapabilirsiniz" bölümü varsa maddeleri cevabın
+        //   adımlarıdır; belgenin özeti cevap cümlesine eklenir. Bölümü olmayan
+        //   ekran eskisi gibi konu / belge özeti listesiyle cevaplanır.
+        var ekranOzeti = "";
+        var neYapilir = belgeler.Select(b => (Belge: b, Parca: b.Parcalar.FirstOrDefault(YardimDizini.NeYapilirParcasiMi)))
+                                .FirstOrDefault(x => x.Parca is not null);
+        if (neYapilir.Parca is not null)
+        {
+            ekranOzeti = neYapilir.Belge.Ozet;
+            foreach (var satir in neYapilir.Parca.Metin.Split('\n'))
+            {
+                var s = satir.Trim();
+                if (!s.StartsWith("- ", StringComparison.Ordinal) && !s.StartsWith("* ", StringComparison.Ordinal)) continue;
+                if (no >= 12) break;
+                adimlar.Add(new Adim(++no, s[2..].Trim(), null, null));
+            }
+            atiflar.Add(new KaynakAtfi(neYapilir.Belge.Id, neYapilir.Belge.Baslik, neYapilir.Belge.Id));
+            belgeler.Remove(neYapilir.Belge);
+        }
+
         foreach (var k in konular)
         {
             no++;
@@ -907,10 +934,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
                                      + " — adımları görmek için bunu sorun.", null, null));
         }
 
-        var atiflar = new List<KaynakAtfi>();
-        var belgeler = dizin?.Belgeler.Where(b => YardimDizini.EkranUyar(b, ekran)
-                                                 && (b.Yetki.Length == 0 || baglam.Yetkiler.Var(b.Yetki, Islem.Gor)))
-                                       .Take(2).ToList() ?? [];
         foreach (var b in belgeler)
         {
             no++;
@@ -923,13 +946,16 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
 
         var cevap = "**" + yol + "** ekranındasınız"
                   + (ekran.Sekme is { Length: > 0 } ? $" (sekme: {ekran.Sekme})" : "") + "."
+                  + (ekranOzeti.Length > 0 ? " " + ekranOzeti.TrimEnd('.') + "." : "")
                   + (ekran.Sekmeler.Count > 0 && ekran.KayitId is > 0
                      ? " Kartın sekmeleri: " + string.Join(" · ", ekran.Sekmeler) + "."
                      : "")
                   + (aksiyonlar.Count > 0
                      ? " Burada size açık olan işlemler: "
                        + string.Join(" · ", aksiyonlar.Select(a => a.Ad)) + "."
-                     : " Bu ekranda size açık bir işlem düğmesi görünmüyor.");
+                     : neYapilir.Parca is not null ? ""
+                     : " Bu ekranda size açık bir işlem düğmesi görünmüyor.")
+                  + (neYapilir.Parca is not null ? " Bu ekranda yapabilecekleriniz:" : "");
 
         await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "ekran:" + kaynak, 0.8m, istek, ekran,
                        kronometre, iptal, kaynaklar: string.Join(",", atiflar.Select(a => a.Id)));

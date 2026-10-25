@@ -340,10 +340,15 @@ public sealed partial class BelgeDeposu
               from (select s.stok_id,
                            coalesce(s.cikis_depo_id, s.giris_depo_id,
                                     b.cikis_depo_id, b.giris_depo_id) as depo_id,
-                           sum(s.miktar) as miktar
+                           sum(case when coalesce(s.miktar, 0) <> 0 then s.miktar
+                                    else coalesce(s.adet, 0) end) as miktar   -- yazanla aynı: miktar 0 ise adet
                       from public.belge_satir s
                       join public.belge b on b.id = s.belge_id
                      where s.belge_id = @p0 and s.stok_id is not null
+                       -- YAZANLA AYNI SÜZGEÇ (StokDurumGuncelleAsync): stok_durum_degis = 0 satır
+                       --   (irsaliyeden türeyen / Bağla ile bağlanan fatura satırı) stoğa hiç
+                       --   yazılmadı; geri alınırsa düzenlemede stok fazla çıkar (25.10.2026).
+                       and s.tur = 1 and s.stok_durum_degis = 1
                      group by 1, 2) k
              where d.stok_id = k.stok_id and d.depo_id = k.depo_id
             """, islem,

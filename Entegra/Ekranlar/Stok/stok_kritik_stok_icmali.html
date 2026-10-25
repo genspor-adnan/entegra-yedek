@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kritik Stok İcmali — Mockup (Gentegre AI · Stok · İcmaller)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🚨 Kritik Stok İcmali — 24.10.2026 14:20
+    <span class="sp">Gentegre AI · Stok › İcmaller · Anadepo · Mert AKSOY (Satınalma)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Kritik Stok İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🛒</span> Seçilenlerden Satınalma Talebi</div>
+    <div class="btn"><span>🔄</span> Seçilenleri transferle karşıla…</div>
+    <div class="btn"><span>🎯</span> Min / Max önerisini uygula…</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📦</span> Stok Değer İcmali</div>
+    <div class="btn"><span>💤</span> Ölü Stok / Devir Hızı</div>
+  </div>
+
+  <!-- SERIT: depo, kategori, tuketim donemi (gunluk ortalama), tedarik suresi, durum suzgeci -->
+  <div class="serit">
+    <div class="sel">🏬 Depo: <b>Anadepo</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="sel">📈 Tüketim ortalaması: <b>Son 90 gün</b> ▾</div>
+    <div class="sel">🚚 Varsayılan tedarik süresi: <b>7 gün</b> ▾</div>
+    <div class="sel">🏷 Stok tipi: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Kritik altı</span><span>Tükenmek üzere</span><span>Tümü</span></div>
+    <label class="chk"><input type="checkbox" checked> Açık talebi olanları da göster</label>
+    <span class="sp"></span>
+    <span class="rz">Otomatik talep: <b>kapalı</b> (satinalma.kritik_stok_aktif)</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu teh"><div class="bas">Kritik Altı</div><div class="deg">23</div><div class="alt">kalem · mevcut + yolda &lt; min</div></div>
+    <div class="kutu teh"><div class="bas">Stokta Yok</div><div class="deg">6</div><div class="alt">kalem · son 90 günde çıkışı var</div></div>
+    <div class="kutu uy"><div class="bas">7 Günde Biter</div><div class="deg">14</div><div class="alt">kalem · tedarik süresinden kısa</div></div>
+    <div class="kutu"><div class="bas">Yolda</div><div class="deg">9</div><div class="alt">kalem · açık talep / sipariş</div></div>
+    <div class="kutu mor"><div class="bas">Önerilen Sipariş</div><div class="deg">186.400 ₺</div><div class="alt">23 kalem · son alış fiyatıyla</div></div>
+    <div class="kutu uy"><div class="bas">Min Tanımsız</div><div class="deg">1.066</div><div class="alt">kalemin tamamı · 58'i A sınıfı</div></div>
+    <div class="kutu"><div class="bas">Max Üstü</div><div class="deg">12</div><div class="alt">kalem · fazla 141.200 ₺</div></div>
+    <div class="kutu iyi"><div class="bas">Diğer Depoda Var</div><div class="deg">5</div><div class="alt">kritik kalem transferle karşılanır</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="krt">Kritik Altı <span class="rz kir">23</span></div>
+    <div class="sekme" data-s="tuk">Tükenme Takvimi</div>
+    <div class="sekme" data-s="oneri">Min / Max Önerisi <span class="rz sari">1.066</span></div>
+    <div class="sekme" data-s="fazla">Max Üstü <span class="rz">12</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ KRITIK ALTI ============ -->
+  <div class="pnl" data-s="krt">
+    <div class="grp">
+      <h4>Kritik seviyenin altındakiler — Anadepo <span class="mini">kutucukla seç → talep / transfer · "Sipariş" hücresi düzenlenebilir · tükenme gününe göre sıralı</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th style="width:24px"><input type="checkbox" checked></th><th>Kod</th><th>Stok Adı</th><th>Birim</th>
+          <th class="sag">Mevcut</th><th class="sag">Yolda</th><th class="sag">Min</th><th class="sag">Max</th><th class="sag">Günlük</th><th class="orta">Yeter</th>
+          <th class="sag">Sipariş</th><th class="sag">Tutar</th><th>Tedarikçi (son alış)</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" checked></td><td>K080-ELD</td><td><span class="lnk">ELDİVEN NİTRİL M (KUTU)</span></td><td>Kutu</td>
+            <td class="sag kir"><b>0</b></td><td class="sag sonuk">—</td><td class="sag">40</td><td class="sag">200</td><td class="sag">6,1</td><td class="orta"><span class="rz kir">bitti</span></td>
+            <td class="sag"><b style="border-bottom:1px dashed #2f6db3">200</b></td><td class="sag">7.400,00</td><td>MEDİSAN · 18.09.2026 · 37,00</td><td><span class="rz kir">Talep yok</span></td></tr>
+          <tr><td><input type="checkbox" checked></td><td>HDR-152X</td><td><span class="lnk">HADRON AÇILI 15X2MM ABUTMENT</span></td><td>Adet</td>
+            <td class="sag kir"><b>−4</b></td><td class="sag">10</td><td class="sag">10</td><td class="sag">30</td><td class="sag">0,4</td><td class="orta"><span class="rz kir">bitti</span></td>
+            <td class="sag"><b style="border-bottom:1px dashed #2f6db3">24</b></td><td class="sag">9.840,00</td><td>HADRON MEDİKAL · 05.08.2026 · 410,00</td><td><span class="rz sari">Talep TLP-0041 · onayda</span></td></tr>
+          <tr><td><input type="checkbox" checked></td><td>K-IMP-AD3510</td><td><span class="lnk">ALPHADENT ACTIVE 3.5X10 İMPLANT</span></td><td>Adet</td>
+            <td class="sag">6</td><td class="sag sonuk">—</td><td class="sag">20</td><td class="sag">80</td><td class="sag">1,3</td><td class="orta"><span class="rz kir">5 gün</span></td>
+            <td class="sag"><b style="border-bottom:1px dashed #2f6db3">74</b></td><td class="sag">136.900,00</td><td>ALPHA BİO TEC · 06.10.2026 · 1.850,00</td><td><span class="rz ok">ALT'ta 18 var</span></td></tr>
+          <tr><td><input type="checkbox" checked></td><td>K080-GZB</td><td><span class="lnk">GAZLI BEZ STERİL 10X10</span></td><td>Paket</td>
+            <td class="sag">35</td><td class="sag sonuk">—</td><td class="sag">50</td><td class="sag sonuk">—</td><td class="sag">4,8</td><td class="orta"><span class="rz sari">7 gün</span></td>
+            <td class="sag"><b style="border-bottom:1px dashed #2f6db3">65</b></td><td class="sag">1.950,00</td><td>MEDİSAN · 02.10.2026 · 30,00</td><td><span class="rz kir">Talep yok</span> <span class="sonuk">max yok: min × 2</span></td></tr>
+          <tr><td><input type="checkbox"></td><td>SUPR4</td><td><span class="lnk">SUPRAMİD-4.0</span></td><td>Adet</td>
+            <td class="sag">8</td><td class="sag">40</td><td class="sag">20</td><td class="sag">60</td><td class="sag">0,6</td><td class="orta">13 gün</td>
+            <td class="sag sonuk">0</td><td class="sag sonuk">—</td><td>ETHİCON · 12.07.2026 · 96,00</td><td><span class="rz mavi">Sipariş SAS-0112 · yolda</span></td></tr>
+          <tr><td colspan="14" class="sonuk">… 18 kalem daha</td></tr>
+          <tr class="toplam"><td colspan="11">Seçili 4 kalem · önerilen sipariş</td><td class="sag">156.090,00</td><td colspan="2"></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ipucu">Kritik = mevcut + yolda &lt; min (<code>stok_durum.min_stok</code>, boşsa <code>stok.min_stok</code>). Sipariş = max − mevcut − yolda (max yoksa min × 2, <code>fn_kritik_stok_talep</code> ile aynı kural); birim ambalaj katına yuvarlanır. Yeter = (mevcut + yolda) / günlük tüketim. Talep butonu depo başına tek satınalma talebi açar — otomatik talebin yaptığının elle tetiklenmiş hali.</div>
+    </div>
+  </div>
+
+  <!-- ============ TUKENME TAKVIMI ============ -->
+  <div class="pnl" data-s="tuk">
+    <div class="grp">
+      <h4>Tükenme takvimi — önümüzdeki 30 gün <span class="mini">bu tüketim hızıyla stoğun bittiği gün · ▲ = tedarik süresi içinde (şimdi sipariş verilmezse boşluk olur)</span></h4>
+      <div class="dg"><table class="isi">
+        <thead><tr><th>Hafta</th><th class="sag">Biten kalem</th><th>Kalemler</th><th class="sag">Tedarik süresi içinde</th></tr></thead>
+        <tbody>
+          <tr><td>Bugün (stok yok)</td><td class="h h4">6</td><td>K080-ELD, HDR-152X, HDR-MU172, HDR-TBS3, K080-MSK, K065-VC3</td><td class="sag kir">6 ▲</td></tr>
+          <tr><td>25 – 31.10</td><td class="h h3">8</td><td>K-IMP-AD3510 (5 g), K080-GZB (7 g), ADP3822 (3 g), …</td><td class="sag kir">8 ▲</td></tr>
+          <tr><td>01 – 07.11</td><td class="h h2">5</td><td>SUPR4 (13 g · yolda 40), K010-POI11, …</td><td class="sag sonuk">—</td></tr>
+          <tr><td>08 – 23.11</td><td class="h h1">4</td><td>UNQ-HEX4, HDR-D4, …</td><td class="sag sonuk">—</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Stok kartında tedarik süresi tanımlıysa o kullanılır, yoksa şeritteki varsayılan (7 gün).</div>
+    </div>
+  </div>
+
+  <!-- ============ MIN / MAX ONERISI ============ -->
+  <div class="pnl" data-s="oneri">
+    <div class="grp">
+      <h4>Tüketimden önerilen min / max — Anadepo <span class="mini">şu an hiçbir stokta min tanımlı değil · seç → "Min / Max önerisini uygula" · hücre düzenlenebilir</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th style="width:24px"><input type="checkbox"></th><th>Kod</th><th>Stok Adı</th><th>ABC</th><th class="sag">Günlük (90 g)</th><th class="sag">Dalgalanma</th><th class="sag">Tedarik</th>
+          <th class="sag">Şimdiki Min</th><th class="sag">Önerilen Min</th><th class="sag">Şimdiki Max</th><th class="sag">Önerilen Max</th><th class="sag">Mevcut</th></tr></thead>
+        <tbody>
+          <tr><td><input type="checkbox" checked></td><td>K080-ELD</td><td>ELDİVEN NİTRİL M (KUTU)</td><td><span class="rz ok">A</span></td><td class="sag">6,1</td><td class="sag">±1,8</td><td class="sag">7 g</td>
+            <td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">55</b></td><td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">240</b></td><td class="sag kir">0</td></tr>
+          <tr><td><input type="checkbox" checked></td><td>K-IMP-AD4011</td><td>ALPHADENT ACTIVE 4.0X11</td><td><span class="rz ok">A</span></td><td class="sag">1,2</td><td class="sag">±0,9</td><td class="sag">10 g</td>
+            <td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">16</b></td><td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">60</b></td><td class="sag">98</td></tr>
+          <tr><td><input type="checkbox" checked></td><td>HDR-D5</td><td>HADRON DÜZ 5MM ABUTMENT</td><td><span class="rz mavi">B</span></td><td class="sag">0,4</td><td class="sag">±0,5</td><td class="sag">7 g</td>
+            <td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">5</b></td><td class="sag sonuk">—</td><td class="sag"><b style="border-bottom:1px dashed #2f6db3">20</b></td><td class="sag">205</td></tr>
+          <tr><td><input type="checkbox"></td><td>SUPR3</td><td>SUPRAMİD-3.0</td><td><span class="rz">C</span></td><td class="sag">0,05</td><td class="sag sonuk">—</td><td class="sag">7 g</td>
+            <td class="sag sonuk">—</td><td class="sag sonuk">0</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag">142</td></tr>
+          <tr><td colspan="12" class="sonuk">… 1.062 kalem daha (son 90 günde çıkışı olmayan 776 kaleme öneri üretilmez)</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Önerilen min = günlük × tedarik süresi + emniyet stoku (dalgalanma × 1,65 × √tedarik, %95 hizmet düzeyi). Önerilen max = min + 30 günlük tüketim. Uygula, seçili satırların <code>stok_durum.min_stok / max_stok</code> değerini (depo bazında) yazar; kart genelindeki <code>stok.min_stok</code>'a dokunmaz. Değişiklik loglanır.</div>
+    </div>
+  </div>
+
+  <!-- ============ MAX USTU ============ -->
+  <div class="pnl" data-s="fazla">
+    <div class="grp"><h4>Max seviyesinin üstündekiler <span class="mini">fazla = mevcut − max · fazla tutara göre sıralı</span></h4><div class="dg"><table>
+      <thead><tr><th>Kod</th><th>Stok Adı</th><th class="sag">Mevcut</th><th class="sag">Max</th><th class="sag">Fazla</th><th class="sag">Fazla Tutar</th><th class="sag">Fazla kaç günlük</th><th>Öneri</th></tr></thead>
+      <tbody>
+        <tr><td>UNQ-DA</td><td>UNIQ-OSS DİJİTAL ANALOG</td><td class="sag">668</td><td class="sag">200</td><td class="sag kir">468</td><td class="sag">193.050,00</td><td class="sag">283 gün</td><td><span class="rz ok">ALT'a transfer</span></td></tr>
+        <tr><td>HDR-D5</td><td>HADRON DÜZ 5MM ABUTMENT</td><td class="sag">205</td><td class="sag">60</td><td class="sag kir">145</td><td class="sag">55.825,00</td><td class="sag">362 gün</td><td><span class="rz sari">Alımı durdur</span></td></tr>
+        <tr><td colspan="8" class="sonuk">… 10 kalem daha</td></tr>
+      </tbody></table></div>
+      <div class="ipucu">Açık talebi olan max üstü kalem kırmızı işaretlenir: talep onaylanırsa fazla büyür.</div></div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 24.10.2026 14:20<br>Düzenleyen: Mert AKSOY</div></div>
+        <h1>KRİTİK STOK İCMALİ</h1>
+        <div class="bilgi"><span>Depo: Anadepo</span><span>Tüketim: son 90 gün ortalaması</span>
+          <span>Kritik altı: 23 kalem · stokta yok 6</span><span>Varsayılan tedarik: 7 gün</span></div>
+        <table>
+          <thead><tr><th>Kod</th><th>Stok</th><th>Mevcut</th><th>Yolda</th><th>Min</th><th>Yeter</th><th>Sipariş</th><th>Tedarikçi</th></tr></thead>
+          <tbody>
+            <tr><td>K080-ELD</td><td>ELDİVEN NİTRİL M</td><td>0</td><td>—</td><td>40</td><td>bitti</td><td>200</td><td>MEDİSAN</td></tr>
+            <tr><td>HDR-152X</td><td>HADRON AÇILI 15X2MM</td><td>−4</td><td>10</td><td>10</td><td>bitti</td><td>24</td><td>HADRON MEDİKAL</td></tr>
+            <tr><td>K-IMP-AD3510</td><td>ALPHADENT 3.5X10</td><td>6</td><td>—</td><td>20</td><td>5 gün</td><td>74</td><td>ALPHA BİO TEC</td></tr>
+            <tr><td>K080-GZB</td><td>GAZLI BEZ 10X10</td><td>35</td><td>—</td><td>50</td><td>7 gün</td><td>65</td><td>MEDİSAN</td></tr>
+            <tr><td colspan="8" style="color:#8a98a8">… 19 kalem daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Kritik altı kalem</span><span>23</span></div>
+          <div><span>Yolda (açık talep / sipariş)</span><span>9</span></div>
+          <div class="b"><span>ÖNERİLEN SİPARİŞ</span><span>186.400,00 ₺</span></div>
+        </div>
+        <div class="imza"><div>Depo Sorumlusu<br>Ad Soyad · İmza</div><div>Satınalma<br>Onay · İmza</div></div>
+        <div class="dip">Gentegre AI · Kritik Stok İcmali · min/max depo bazında (yoksa kart geneli) · sipariş tutarı son alış fiyatıyla, KDV hariç</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>23 kritik · 6 stokta yok</span><span>Depo: Anadepo</span><span>Tüketim: son 90 gün</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Kritik Stok İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Neyi bugün sipariş etmeliyim, ne kadar? Hangisi zaten yolda, hangisi başka depoda var?" Satınalma ve depo sorumlusunun günlük ekranı.</li>
+    <li><b>Seviye kaynağı:</b> depo bazında <code>stok_durum.min_stok / max_stok</code> (099), boşsa kart genelindeki <code>stok.min_stok</code>. Sipariş miktarı kuralı otomatik talep (<code>fn_kritik_stok_talep</code>, 732) ile aynı — ekran ve zamanlı iş farklı miktar önermez.</li>
+    <li><b>Yolda:</b> açık satınalma talebi / siparişin henüz girmemiş miktarı; kritik hesabına eklenir ki aynı mal iki kez istenmesin.</li>
+    <li><b>Min tanımsız:</b> UNIVERSE'te hiçbir stokta min yok — ekran boş görünmesin diye ilk açılışta "Min / Max Önerisi" sekmesine yönlendirir; öneri tüketim + tedarik süresinden, uygula yalnız seçili satırlara ve depo bazında yazar (stok kartında düzenleme hakkı gerekir).</li>
+    <li><b>Transferle karşıla:</b> başka depoda (max üstü ya da yavaş dönen) aynı stok varsa transfer fişi taslak açılır — satınalmadan önce.</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü (Baskı Önizleme / Yazdır / Gönder PDF-Word-Excel-HTML); A4 satınalmaya imzalı istek listesi olarak verilebilir.</li>
+  </ul>
+  <b>Kararlar (25.10.2026):</b>
+  <ul>
+    <li><b>Tedarik süresi:</b> şimdilik ekrandan tek değer (varsayılan 7 gün). Sonraki adım: stok × tedarikçi bazında, son alış tedarikçisinin geçmiş teslim süresinden; yoksa ekrandaki değer.</li>
+    <li><b>SKT'si 30 gün içinde dolan (ya da geçmiş) lot</b> eldekinden düşülür ve "SKT ≤ 30 g" sütununda ayrı görünür — satılamayacak mal kritik hesabında stok sayılmaz.</li>
+    <li><b>Stok tipi süzgeci</b> şeritte (Ticari Mal, Hammadde, Mamul, Demo…, "tipi tanımsız") — demirbaş / demo kalemler dışarıda bırakılabilir.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

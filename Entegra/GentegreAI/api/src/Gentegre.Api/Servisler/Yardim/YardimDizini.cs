@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
@@ -262,6 +262,10 @@ public sealed class YardimDizini
                     else if (p.Jetonlar.Any(x => x.StartsWith(j, StringComparison.Ordinal))) puan += 1;
                 }
                 if (OrnekParcasiMi(p)) { ornekBonus = Math.Max(ornekBonus, puan); continue; }
+                // "BU EKRANDA NELER YAPABİLİRSİNİZ" (1174) YALNIZ KENDİ EKRANINDA cevaptır:
+                //   başka ekranda (ya da ekran tanınmadan) "bu ekranda ne yapabilirim"
+                //   sorusu başlığa birebir uyup yanlış ekranın maddelerini getiriyordu.
+                if (NeYapilirParcasiMi(p) && (ekran is not { Bulundu: true } || !EkranUyar(b, ekran))) continue;
                 if (MetaParcasiMi(p)) continue;   // "Kaynaklar", "Doğrulama durumu": belge künyesi, cevap değil
                 puanlar.Add((p, puan));
             }
@@ -296,6 +300,10 @@ public sealed class YardimDizini
         var b = RehberMetin.Sadelestir(p.Baslik);
         return b.StartsWith("kaynaklar", StringComparison.Ordinal) || b.StartsWith("dogrulama", StringComparison.Ordinal);
     }
+
+    /// <summary>Ekranın kendi "ne yapılır" listesi (RehberServisi bağlamsal cevabı bunu madde madde verir).</summary>
+    public static bool NeYapilirParcasiMi(Parca p)
+        => RehberMetin.Sadelestir(p.Baslik).StartsWith("bu ekranda ne", StringComparison.Ordinal);
 
     private static bool OrnekParcasiMi(Parca p)
         => RehberMetin.Sadelestir(p.Baslik).Contains("ornek soru", StringComparison.Ordinal);

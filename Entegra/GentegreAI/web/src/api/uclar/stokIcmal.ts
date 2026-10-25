@@ -1,4 +1,4 @@
-import { istek } from '../cekirdek';
+import { gonder, istek } from '../cekirdek';
 
 /** Stok icmalleri (StokIcmalUclari, 1173). Rakamlar sunucuda hesaplanır. */
 type Secenek = { id: number; ad: string };
@@ -105,4 +105,96 @@ export const stokIcmalUclari = {
   stokDegerIcmali: (q: URLSearchParams) => istek<StokDegerIcmali>(`/api/stok-icmal/deger?${q}`),
   stokSktIcmali: (q: URLSearchParams) => istek<SktIcmali>(`/api/stok-icmal/skt?${q}`),
   stokSayimFarkIcmali: (q: URLSearchParams) => istek<SayimFarkIcmali>(`/api/stok-icmal/sayim-fark?${q}`),
+};
+
+// ------------------------------------------------- ikinci üçlü (1174) --
+type SecimListeleri = { kategoriler: Secenek[]; depoListesi: Secenek[] };
+
+export type HareketKolonu = { yon: 'giris' | 'cikis'; anahtar: string; ad: string };
+export type HareketStokSatiri = {
+  id: number; kod: string; ad: string; kategori: string; birim: string; devir: number;
+  giris: Record<string, number>; cikis: Record<string, number>; girisToplam: number; cikisToplam: number;
+  transferGiren: number; transferCikan: number; kalan: number; hareket: number; eksiyeDustu: boolean;
+  depolar: { depoId: number; depo: string; devir: number; giris: number; cikis: number; transfer: number; kalan: number }[];
+};
+export type StokHareketIcmali = {
+  bas: string; bit: string; birim: 'miktar' | 'tutar'; depo: number;
+  ozet: {
+    devir: number; kalan: number; giris: number; cikis: number; transfer: number; sayimNet: number; sayimFazla: number;
+    sayimEksik: number; kalem: number; bakiyeliKalem: number; belge: number; eksiyeDusen: number; gun: number;
+    /** Yalnız tutarda: kalan − (devir + giriş − çıkış ± transfer); girişler belge fiyatıyla, devir / kalan ortalama maliyetle. */
+    degerlemeFarki?: number;
+  };
+  kolonlar: HareketKolonu[]; stoklar: HareketStokSatiri[];
+  donemTuru: 'hafta' | 'ay'; donemler: string[];
+  turDonem: { yon: 'giris' | 'cikis'; anahtar: string; ad: string; hucreler: number[]; toplam: number; belge: number }[];
+  transferDonem: number[];
+  depoAkis: { depoId: number; depo: string; devir: number; giris: number; cikis: number; transfer: number; kalan: number }[];
+  transferMatrisi: { cikisId: number; cikis: string; girisId: number; giris: string; miktar: number; fis: number }[];
+  ekstre: null | {
+    stok: { id: number; kod: string; ad: string } | null; devir: number; giren: number; cikan: number; kalan: number; sinirli: boolean;
+    hareketler: { tarih: string; belgeId: number; tur: number; belge: string; belgeNo: string; cari: string; aciklama: string;
+      depo: string; giren: number; cikan: number; bakiye: number; lot: string }[];
+  };
+  secim: SecimListeleri;
+};
+
+export type OluStokSatiri = {
+  id: number; kod: string; ad: string; kategori: string; birim: string; miktar: number; birimMaliyet: number; tutar: number;
+  sonGiris: string | null; sonCikis: string | null; gun: number | null; hicCikmadi: boolean; enYakinSkt: string | null;
+  depolar: { depoId: number; depo: string; miktar: number }[];
+  oneri: 'skt' | 'transfer' | 'iade' | 'sayim' | 'kampanya'; oneriNot: string; abc: 'A' | 'B' | 'C';
+  tedarikci: string; sonAlisTarihi: string | null; transferDepoId: number | null;
+};
+export type OluStokIcmali = {
+  tarih: string; esik: number; hareket: 'cikis' | 'her'; depo: number;
+  ozet: {
+    deger: number; oluDeger: number; oluKalem: number; oluOran: number; devir: number; devirGun: number | null;
+    hicCikmayan: number; hicCikmayanDeger: number; yavasKalem: number; yavasDeger: number;
+    oluSktYakin: number; oluSktYakinDeger: number; aKalem: number; kalem: number;
+    buDonemDusen: number; buDonemCikan: number; oncekiOran: number;
+  };
+  oluler: OluStokSatiri[];
+  devir: { id: number; kod: string; ad: string; kategori: string; miktar: number; tutar: number; ortalamaStok: number;
+    cikan12: number; devir: number; devirGun: number | null; sinif: 'hizli' | 'normal' | 'yavas' | 'olu'; abc: 'A' | 'B' | 'C' }[];
+  matris: { abc: 'A' | 'B' | 'C'; hucreler: { sinif: string; kalem: number; tutar: number }[] }[];
+  pareto: { abc: string; kalem: number; kalemOran: number; cikisOran: number }[];
+  trend: { tarih: string; olu: number; kalem: number; deger: number; oran: number }[];
+  secim: SecimListeleri;
+};
+
+export type KritikSatiri = {
+  stokId: number; kod: string; ad: string; kategori: string; birim: string; depoId: number; depo: string;
+  eldeki: number; yolda: number; min: number | null; max: number | null; gunluk: number; yeter: number | null;
+  kritik: boolean; yok: boolean; tukeniyor: boolean; siparis: number; fiyat: number; tutar: number;
+  /** SKT'si 30 gün içinde dolan (ya da geçmiş) lot miktarı - eldekinden düşülmüştür. */
+  sktYakin: number;
+  tedarikci: string; sonAlisTarihi: string | null; talep: string; siparisNo: string; minTanimsiz: boolean;
+  baskaDepo: string; baskaDepoId: number | null; baskaFazla: number;
+};
+export type KritikStokIcmali = {
+  depo: number; gun: number; tedarik: number; tip: number; tipler: Secenek[];
+  ozet: {
+    kritik: number; yok: number; tukeniyor: number; yolda: number; siparisTutar: number; siparisKalem: number;
+    minTanimsiz: number; satir: number; minTanimsizA: number; maxUstu: number; maxUstuTutar: number; baskaDepoda: number;
+    otomatikTalep: boolean; hedefKat: number; cikissiz: number; sktYakinKalem: number; sktYakinMiktar: number;
+  };
+  kritikler: KritikSatiri[];
+  takvim: { ad: string; kalem: number; tedarikIcinde: number; ornekler: { kod: string; ad: string; depo: string; yeter: number | null; yolda: number }[] }[];
+  oneriler: { stokId: number; kod: string; ad: string; depoId: number; depo: string; abc: 'A' | 'B' | 'C'; gunluk: number; sigma: number;
+    tedarik: number; min: number | null; max: number | null; kartMin: number | null; oneriMin: number; oneriMax: number; eldeki: number }[];
+  maxUstu: { stokId: number; kod: string; ad: string; depoId: number; depo: string; eldeki: number; max: number; fazla: number;
+    tutar: number; fazlaGun: number | null; oneri: 'transfer' | 'durdur'; oneriDepo: string; acikTalep: boolean }[];
+  secim: SecimListeleri;
+  yetkiler: { talep: boolean; limit: boolean };
+};
+
+export const stokIcmalUclari2 = {
+  stokHareketIcmali: (q: URLSearchParams) => istek<StokHareketIcmali>(`/api/stok-icmal/hareket?${q}`),
+  oluStokIcmali: (q: URLSearchParams) => istek<OluStokIcmali>(`/api/stok-icmal/olu?${q}`),
+  kritikStokIcmali: (q: URLSearchParams) => istek<KritikStokIcmali>(`/api/stok-icmal/kritik?${q}`),
+  kritikTalepAc: (depoId: number, satirlar: { stokId: number; miktar: number }[], aciklama?: string) =>
+    gonder<{ id: number; talepNo: string; kalem: number; atlanan: number }>('/api/stok-icmal/kritik/talep', { depoId, satirlar, aciklama }),
+  kritikLimitYaz: (depoId: number, satirlar: { stokId: number; min: number | null; max: number | null }[]) =>
+    gonder<{ yazilan: number }>('/api/stok-icmal/kritik/limit', { depoId, satirlar }),
 };

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alış İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛒 Alış İcmali — 01.01.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Alış › İcmaller · Tüm şubeler · Mert AKSOY (Satınalma)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Alış İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📄</span> Seçili tedarikçinin ekstresi</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🛍️</span> Satış İcmali</div>
+    <div class="btn"><span>🔗</span> İrsaliye-Fatura Eşleşme</div>
+    <div class="btn"><span>🚨</span> Kritik Stok</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>01.01.2026 – 25.10.2026</b> <span class="rz">Bu yıl</span> ▾</div>
+    <div class="sel">⇄ Karşılaştır: <b>Geçen yılın aynı dönemi</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="seg"><span>Stok</span><span>Hizmet</span><span class="on">İkisi</span></div>
+    <div class="sel">💱 Para birimi: <b>TL karşılığı</b> ▾</div>
+    <div class="seg"><span class="on">KDV hariç</span><span>KDV dahil</span></div>
+    <label class="chk"><input type="checkbox" checked> İadeleri düş</label>
+    <span class="sp"></span>
+    <span class="rz sari">Faturası gelmemiş irsaliye: 6</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Net Alış</div><div class="deg">9.418.700 ₺</div><div class="alt">KDV hariç · iade düşülmüş</div></div>
+    <div class="kutu"><div class="bas">Geçen Yıl Aynı Dönem</div><div class="deg">+%9,2</div><div class="alt">8.625.000 ₺</div></div>
+    <div class="kutu"><div class="bas">Belge</div><div class="deg">412</div><div class="alt">fatura 388 · fiş 24</div></div>
+    <div class="kutu"><div class="bas">Tedarikçi</div><div class="deg">23</div><div class="alt">ilk 3 tedarikçi alışın %71'i</div></div>
+    <div class="kutu iyi"><div class="bas">Alış İadesi</div><div class="deg">−138.400 ₺</div><div class="alt">14 belge</div></div>
+    <div class="kutu uy"><div class="bas">Fiyat Artışı</div><div class="deg">+%6,8</div><div class="alt">aynı kalemde yılbaşına göre (ağırlıklı)</div></div>
+    <div class="kutu"><div class="bas">Ort. Teslim Süresi</div><div class="deg">5,4 gün</div><div class="alt">sipariş → giriş · 118 sipariş</div></div>
+    <div class="kutu teh"><div class="bas">Vadesi Gelen Borç</div><div class="deg">612.000 ₺</div><div class="alt">30 gün içinde ödenecek</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ted">Tedarikçi Bazında <span class="rz">23</span></div>
+    <div class="sekme" data-s="stok">Ürün Bazında</div>
+    <div class="sekme" data-s="fiyat">Fiyat Gelişimi</div>
+    <div class="sekme" data-s="donem">Ay Trendi</div>
+    <div class="sekme" data-s="dik">Dikkat <span class="rz kir">7</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+
+  <!-- ============ TEDARIKCI ============ -->
+  <div class="pnl" data-s="ted">
+    <div class="grp">
+      <h4>Tedarikçi bazında alış <span class="mini">satıra tıkla: kategori dağılımı · çift tık: cari ekstresi · net alışa göre sıralı</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Tedarikçi</th><th class="sag">Belge</th><th class="sag">Brüt</th><th class="sag">İskonto</th><th class="sag">İade</th><th class="sag">Net Alış</th>
+          <th class="sag">Geçen Yıl</th><th class="orta">Değişim</th><th class="sag">Pay</th><th class="sag">Teslim (gün)</th><th class="sag">Açık Borç</th><th style="width:100px"></th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="t1"><td><span class="ok-ic">▸</span><span class="lnk">ALPHA BİO TEC TÜRKİYE</span> <span class="rz mavi">€ 38.400</span></td><td class="sag">96</td><td class="sag">4.402.000</td><td class="sag">−220.100</td>
+            <td class="sag">−61.300</td><td class="sag"><b>4.120.600</b></td><td class="sag">3.740.000</td><td class="orta"><span class="rz sari">+%10,2</span></td>
+            <td class="sag">%43,7</td><td class="sag">4,1</td><td class="sag">402.000</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+          <tr class="det" data-p="t1" hidden><td colspan="12">K010.01 İMPLANT_ALPHADENT 3.212.000 · K015.01 ABUTMENT 641.300 · K030 ANALOG 267.300 &nbsp;·&nbsp; son alış 06.10.2026 · ödeme vadesi 60 gün</td></tr>
+          <tr><td><span class="lnk">HADRON MEDİKAL</span></td><td class="sag">71</td><td class="sag">1.688.000</td><td class="sag">−42.000</td>
+            <td class="sag">−18.600</td><td class="sag"><b>1.627.400</b></td><td class="sag">1.702.300</td><td class="orta"><span class="rz ok">−%4,4</span></td>
+            <td class="sag">%17,3</td><td class="sag">6,8</td><td class="sag">118.000</td><td><div class="cubuk"><i style="width:39%"></i></div></td></tr>
+          <tr><td><span class="lnk">UNIQ-OSS MEDİKAL</span></td><td class="sag">44</td><td class="sag">982.000</td><td class="sag">−9.800</td>
+            <td class="sag sonuk">—</td><td class="sag"><b>972.200</b></td><td class="sag">640.000</td><td class="orta"><span class="rz kir">+%51,9</span></td>
+            <td class="sag">%10,3</td><td class="sag kir">12,3</td><td class="sag">92.000</td><td><div class="cubuk"><i style="width:24%"></i></div></td></tr>
+          <tr><td><span class="lnk">MEDİSAN SAĞLIK</span></td><td class="sag">58</td><td class="sag">214.900</td><td class="sag sonuk">—</td>
+            <td class="sag sonuk">—</td><td class="sag"><b>214.900</b></td><td class="sag">198.200</td><td class="orta"><span class="rz">+%8,4</span></td>
+            <td class="sag">%2,3</td><td class="sag">2,0</td><td class="sag sonuk">0</td><td><div class="cubuk"><i style="width:5%"></i></div></td></tr>
+          <tr><td colspan="12" class="sonuk">… 19 tedarikçi daha</td></tr>
+          <tr class="toplam"><td>Toplam (23 tedarikçi)</td><td class="sag">412</td><td class="sag">9.802.000</td><td class="sag">−244.900</td><td class="sag">−138.400</td>
+            <td class="sag">9.418.700</td><td class="sag">8.625.000</td><td class="orta">+%9,2</td><td class="sag">%100</td><td class="sag">5,4</td><td class="sag">612.000</td><td></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ipucu">Net alış = brüt − iskonto − iade (KDV hariç, belge dip toplamından). Teslim süresi = alış siparişinin tarihi → mal kabul / giriş irsaliyesinin tarihi (siparişli alımlarda). Açık borç cari bakiyeden.</div>
+    </div>
+    <div class="grp">
+      <h4>Para birimi <span class="mini">TL karşılığı belge kuruyla · kur farkı yalnız açık (ödenmemiş) borç için</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Para birimi</th><th class="sag">Belge</th><th class="sag">Döviz tutarı</th><th class="sag">Ort. alış kuru</th><th class="sag">TL karşılığı</th><th class="sag">Pay</th>
+          <th class="sag">Açık borç (döviz)</th><th class="sag">Bugünkü kur</th><th class="sag">Açığın bugünkü değeri</th><th class="sag">Kur farkı</th></tr></thead>
+        <tbody>
+          <tr><td>TL</td><td class="sag">371</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag">8.022.300</td><td class="sag">%85,2</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td></tr>
+          <tr><td>EUR</td><td class="sag">41</td><td class="sag">€ 38.400</td><td class="sag">36,36</td><td class="sag">1.396.400</td><td class="sag">%14,8</td><td class="sag">€ 10.840</td><td class="sag">37,10</td><td class="sag">402.164</td><td class="sag kir">+8.022</td></tr>
+          <tr class="toplam"><td>Toplam</td><td class="sag">412</td><td></td><td></td><td class="sag">9.418.700</td><td class="sag">%100</td><td></td><td></td><td class="sag">402.164</td><td class="sag kir">+8.022</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Borçta kur artışı aleyhimizedir (kırmızı). Şeritte tek döviz seçilirse sekmeler o dövizin cinsinden gösterir. Fiyat Gelişimi dövizli kalemde döviz fiyatını karşılaştırır (kur etkisi fiyat artışı sayılmaz).</div>
+    </div>
+  </div>
+
+  <!-- ============ URUN ============ -->
+  <div class="pnl" data-s="stok">
+    <div class="grp">
+      <h4>Ürün bazında alış <span class="mini">satıra tıkla: tedarikçi dağılımı (birden çok tedarikçiden alınan kalemlerde fiyat karşılaştırması)</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Kod</th><th>Ürün</th><th class="sag">Miktar</th><th class="sag">Net Alış</th><th class="sag">Ort. Fiyat</th><th class="sag">En Düşük</th><th class="sag">En Yüksek</th>
+          <th class="sag">Son Fiyat</th><th class="sag">Tedarikçi</th><th class="sag">Satılan</th><th class="sag">Stokta</th></tr></thead>
+        <tbody>
+          <tr class="ac" data-d="u1"><td><span class="ok-ic">▸</span>K-IMP-AD4011</td><td><span class="lnk">ALPHADENT ACTIVE 4.0X11 İMPLANT</span></td><td class="sag">1.420</td><td class="sag"><b>2.627.000</b></td>
+            <td class="sag">1.850,00</td><td class="sag">1.720,00</td><td class="sag">1.950,00</td><td class="sag">1.850,00</td><td class="sag">1</td><td class="sag">1.304</td><td class="sag">112</td></tr>
+          <tr class="det" data-p="u1" hidden><td colspan="11">ALPHA BİO TEC: 1.420 adet · ort. 1.850,00 · Ocak 1.720 → Ekim 1.850 (+%7,6)</td></tr>
+          <tr class="ac" data-d="u2"><td><span class="ok-ic">▸</span>K080-ELD</td><td><span class="lnk">ELDİVEN NİTRİL M (KUTU)</span></td><td class="sag">2.400</td><td class="sag"><b>86.400</b></td>
+            <td class="sag">36,00</td><td class="sag">31,00</td><td class="sag">41,00</td><td class="sag">37,00</td><td class="sag">3</td><td class="sag">2.210</td><td class="sag kir">0</td></tr>
+          <tr class="det" data-p="u2" hidden><td colspan="11">MEDİSAN 1.600 · ort. 34,20 &nbsp;·&nbsp; ECZA DEPOSU X 600 · ort. 39,50 (+%15,5) &nbsp;·&nbsp; BEYAZ MEDİKAL 200 · ort. 41,00 (+%19,9)</td></tr>
+          <tr><td colspan="11" class="sonuk">… 186 kalem daha</td></tr>
+        </tbody>
+      </table></div>
+      <div class="ipucu">Satılan / Stokta: aynı dönemde satılan miktar ve bugünkü bakiye — alınan malın ne kadarının döndüğünü gösterir. Birden çok tedarikçiden alınan kalemde en ucuz tedarikçi satırda koyu.</div>
+    </div>
+  </div>
+
+  <!-- ============ FIYAT ============ -->
+  <div class="pnl" data-s="fiyat">
+    <div class="grp">
+      <h4>Alış fiyatı gelişimi <span class="mini">aynı kalemin dönem başı ve son alış fiyatı · artışa göre sıralı · dönemde en az 2 alışı olan kalemler</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Kod</th><th>Ürün</th><th>Tedarikçi</th><th class="sag">İlk Fiyat</th><th>İlk Tarih</th><th class="sag">Son Fiyat</th><th>Son Tarih</th><th class="sag">Değişim</th><th class="sag">Etki (₺)</th></tr></thead>
+        <tbody>
+          <tr><td>UNQ-HEX4</td><td>UNIQ-OSS HEX 4MM</td><td>UNIQ-OSS MEDİKAL</td><td class="sag">410,00</td><td>12.01.2026</td><td class="sag">520,00</td><td>02.10.2026</td><td class="sag kir">+%26,8</td><td class="sag kir">+34.100</td></tr>
+          <tr><td>K-IMP-AD4011</td><td>ALPHADENT ACTIVE 4.0X11</td><td>ALPHA BİO TEC</td><td class="sag">1.720,00</td><td>08.01.2026</td><td class="sag">1.850,00</td><td>06.10.2026</td><td class="sag kir">+%7,6</td><td class="sag kir">+184.600</td></tr>
+          <tr><td>HDR-D5</td><td>HADRON DÜZ 5MM ABUTMENT</td><td>HADRON MEDİKAL</td><td class="sag">395,00</td><td>15.01.2026</td><td class="sag">385,00</td><td>14.05.2026</td><td class="sag ok-y">−%2,5</td><td class="sag ok-y">−2.300</td></tr>
+          <tr class="toplam"><td colspan="7">Ağırlıklı ortalama fiyat değişimi (alış tutarıyla)</td><td class="sag">+%6,8</td><td class="sag">+601.400</td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Etki = (son fiyat − ilk fiyat) × dönemde ilk alıştan sonra alınan miktar: fiyat artışının döneme maliyeti. Dövizli kalemde ilk / son fiyat döviz cinsinden karşılaştırılır, etki belge kurlarıyla TL.</div>
+    </div>
+  </div>
+
+  <!-- ============ TREND ============ -->
+  <div class="pnl" data-s="donem">
+    <div class="grp">
+      <h4>Aylık alış <span class="mini">alış · satış (maliyetle) · stok değişimi</span></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Ay</th><th class="sag">Net Alış</th><th class="sag">Geçen Yıl</th><th class="sag">Satılan Malın Maliyeti</th><th class="sag">Fark (stoğa giden)</th><th style="width:200px"></th></tr></thead>
+        <tbody>
+          <tr><td>Ocak 2026</td><td class="sag">1.012.400</td><td class="sag">902.000</td><td class="sag">944.100</td><td class="sag">+68.300</td><td><div class="cubuk"><i style="width:84%"></i></div></td></tr>
+          <tr><td>…</td><td colspan="5" class="sonuk">8 ay</td></tr>
+          <tr><td>Eylül 2026</td><td class="sag">1.204.800</td><td class="sag">1.090.400</td><td class="sag">1.386.700</td><td class="sag ok-y">−181.900</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+          <tr><td><b>Ekim 2026 (25'i)</b></td><td class="sag">848.200</td><td class="sag">801.900</td><td class="sag">1.229.400</td><td class="sag ok-y">−381.200</td><td><div class="cubuk"><i style="width:70%"></i></div></td></tr>
+        </tbody></table></div>
+      <div class="ipucu">Fark eksi = satılan, alınandan fazla (stok eriyor); artı = stok büyüyor. Stok Hareket İcmali ile aynı hareket kaynağı.</div>
+    </div>
+  </div>
+
+  <!-- ============ DIKKAT ============ -->
+  <div class="pnl" data-s="dik">
+    <div class="iki">
+      <div class="grp"><h4>⚠ Sözleşme / liste fiyatının üstünde alış</h4><div class="dg"><table>
+        <thead><tr><th>Belge</th><th>Tedarikçi</th><th>Ürün</th><th class="sag">Fiyat</th><th class="sag">Sözleşme</th></tr></thead>
+        <tbody>
+          <tr><td>ALP2026-1188</td><td>ALPHA BİO TEC</td><td>ALPHADENT 3.5X10</td><td class="sag kir">1.950,00</td><td class="sag">1.850,00</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>🔁 Aynı kalem, daha ucuz tedarikçi var <span class="mini">son 90 gün</span></h4><div class="dg"><table>
+        <thead><tr><th>Ürün</th><th>Alınan</th><th class="sag">Fiyat</th><th>Ucuz olan</th><th class="sag">Fiyat</th></tr></thead>
+        <tbody>
+          <tr><td>ELDİVEN NİTRİL M</td><td>BEYAZ MEDİKAL</td><td class="sag kir">41,00</td><td>MEDİSAN</td><td class="sag ok-y">34,20</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>🧾 Faturası gelmemiş alış irsaliyeleri <span class="mini">ayrıntı: İrsaliye-Fatura Eşleşme İcmali</span></h4><div class="dg"><table>
+        <thead><tr><th>İrsaliye</th><th>Tedarikçi</th><th>Tarih</th><th class="sag">Tutar</th><th class="orta">Gün</th></tr></thead>
+        <tbody>
+          <tr><td>HDR-IRS-0412</td><td>HADRON MEDİKAL</td><td>18.09.2026</td><td class="sag">41.200</td><td class="orta"><span class="rz kir">37</span></td></tr>
+          <tr><td colspan="5" class="sonuk">… 5 irsaliye daha</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>⏱ Geciken siparişler <span class="mini">termin geçti, mal gelmedi</span></h4><div class="dg"><table>
+        <thead><tr><th>Sipariş</th><th>Tedarikçi</th><th>Termin</th><th class="sag">Açık miktar</th></tr></thead>
+        <tbody>
+          <tr><td>SAS-0112</td><td>ETHİCON</td><td>20.10.2026</td><td class="sag">40</td></tr>
+        </tbody></table></div></div>
+      <div class="grp"><h4>📥 Gelen e-Fatura kutusunda bekleyen <span class="mini">henüz kaydedilmedi · alışa sayılmadı</span></h4><div class="dg"><table>
+        <thead><tr><th>Tedarikçi</th><th>Fatura No</th><th>Tarih</th><th class="sag">Tutar</th><th class="orta">Bekleyen</th></tr></thead>
+        <tbody>
+          <tr><td>UNIQ-OSS MEDİKAL</td><td>UOM2026000881</td><td>17.10.2026</td><td class="sag">64.200</td><td class="orta"><span class="rz kir">8 gün</span></td></tr>
+          <tr><td>MEDİSAN SAĞLIK</td><td>MDS2026004410</td><td>23.10.2026</td><td class="sag">7.400</td><td class="orta"><span class="rz">2 gün</span></td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ============ ONIZLEME ============ -->
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Mert AKSOY</div></div>
+        <h1>ALIŞ İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.01.2026 – 25.10.2026</span><span>KDV hariç · iadeler düşülmüş</span>
+          <span>Şube: Tümü</span><span>412 belge · 23 tedarikçi</span></div>
+        <table>
+          <thead><tr><th>Tedarikçi</th><th>Belge</th><th>Net Alış</th><th>Geçen Yıl</th><th>Pay</th></tr></thead>
+          <tbody>
+            <tr><td>ALPHA BİO TEC TÜRKİYE</td><td>96</td><td>4.120.600</td><td>3.740.000</td><td>%43,7</td></tr>
+            <tr><td>HADRON MEDİKAL</td><td>71</td><td>1.627.400</td><td>1.702.300</td><td>%17,3</td></tr>
+            <tr><td>UNIQ-OSS MEDİKAL</td><td>44</td><td>972.200</td><td>640.000</td><td>%10,3</td></tr>
+            <tr><td colspan="5" style="color:#8a98a8">… 20 tedarikçi daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top">
+          <div><span>Brüt alış</span><span>9.802.000,00</span></div>
+          <div><span>İskonto</span><span>−244.900,00</span></div>
+          <div><span>İade</span><span>−138.400,00</span></div>
+          <div class="b"><span>NET ALIŞ</span><span>9.418.700,00 ₺</span></div>
+          <div><span style="font-size:8px;color:#6b7a8b">bunun € 38.400'ü dövizli · ort. kur 36,36</span><span></span></div>
+        </div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Satınalma Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Alış İcmali · tutarlar belge dip toplamlarından · KDV hariç</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>412 belge</span><span>23 tedarikçi</span><span>Karşılaştırma: geçen yıl aynı dönem</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Alış İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Kimden ne aldık, ne kadar ödedik, fiyatlar nasıl değişti, hangi tedarikçi geç getiriyor, nerede pahalı alıyoruz?" Satınalma ve muhasebe.</li>
+    <li><b>Kaynak:</b> kesin alış faturası / fişi (türler 11, 12; gelen konsinye ayrı) + alış iadeleri. Tutar belge dip toplamından; irsaliyeden türeyen fatura bir kez sayılır.</li>
+    <li><b>Fiyat gelişimi:</b> aynı kalem + aynı tedarikçi, dönemin ilk ve son alış birim fiyatı; etki = artışın döneme maliyeti. Ağırlıklı ortalama değişim özet kutusunda.</li>
+    <li><b>Teslim süresi:</b> alış siparişi (tür 9) → mal kabul / alış irsaliyesi tarihi; siparişsiz alım hesaba girmez.</li>
+    <li><b>Dikkat:</b> sözleşme fiyatı üstü alış (satınalma sözleşmesi varsa), daha ucuz tedarikçi, faturası gelmemiş irsaliye, geciken sipariş.</li>
+    <li><b>Hizmet alımları (karar 25.10.2026):</b> icmale girer (kira, bakım, danışmanlık…); şeritte "Stok / Hizmet / İkisi" seçimi, varsayılan ikisi. Hizmet satırında fiyat gelişimi ve teslim süresi aynı kuralla, Satılan / Stokta sütunu boş.</li>
+    <li><b>Dövizli alış (karar 25.10.2026):</b> Satış İcmali ile aynı kural — rakamlar TL, belge kuruyla; dövizli tedarikçide döviz rozeti; Para birimi tablosunda döviz tutarı, ortalama kur, TL karşılığı ve yalnız açık borç için bugünkü kurla değer / kur farkı; şeritte tek döviz seçimi; A4'te döviz özeti. Fiyat gelişimi dövizli kalemde döviz fiyatından ölçülür.</li>
+    <li><b>Çıktı:</b> icmallerin ortak menüsü.</li>
+  </ul>
+  <b>Kararlar (25.10.2026):</b>
+  <ul>
+    <li><b>Gelen e-Fatura kutusunda bekleyen</b> (henüz kaydedilmemiş) faturalar alışa sayılmaz — cari ve stok etkisi yok, sayılsa icmal muhasebeyle tutmazdı. Dikkat sekmesinde ayrı liste: tedarikçi, tutar, kaç gündür beklediği.</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

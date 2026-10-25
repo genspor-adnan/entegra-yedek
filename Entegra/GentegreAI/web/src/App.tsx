@@ -43,6 +43,15 @@ const CariIcmali = tembel(() => import('./sayfalar/cariIcmal/CariIcmali'), 'Cari
 const StokDegerIcmali = tembel(() => import('./sayfalar/stokIcmal/StokDegerIcmali'), 'StokDegerIcmali');
 const StokSktIcmali = tembel(() => import('./sayfalar/stokIcmal/StokSktIcmali'), 'StokSktIcmali');
 const StokSayimFarkIcmali = tembel(() => import('./sayfalar/stokIcmal/StokSayimFarkIcmali'), 'StokSayimFarkIcmali');
+const StokHareketIcmali = tembel(() => import('./sayfalar/stokIcmal/StokHareketIcmali'), 'StokHareketIcmali');
+const StokOluStokIcmali = tembel(() => import('./sayfalar/stokIcmal/StokOluStokIcmali'), 'StokOluStokIcmali');
+const StokKritikStokIcmali = tembel(() => import('./sayfalar/stokIcmal/StokKritikStokIcmali'), 'StokKritikStokIcmali');
+const SatisIcmali = tembel(() => import('./sayfalar/ticariIcmal/SatisIcmali'), 'SatisIcmali');
+const AlisIcmali = tembel(() => import('./sayfalar/ticariIcmal/AlisIcmali'), 'AlisIcmali');
+const IrsaliyeFaturaEslesme = tembel(() => import('./sayfalar/eslesmeIcmal/IrsaliyeFaturaEslesme'), 'IrsaliyeFaturaEslesme');
+const TahsilatOdemeIcmali = tembel(() => import('./sayfalar/finansIcmal/TahsilatOdemeIcmali'), 'TahsilatOdemeIcmali');
+const CekSenetIcmali = tembel(() => import('./sayfalar/finansIcmal/CekSenetIcmali'), 'CekSenetIcmali');
+const NakitAkisIcmali = tembel(() => import('./sayfalar/finansIcmal/NakitAkisIcmali'), 'NakitAkisIcmali');
 const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
 const DevirYonlendir = tembel(() => import('./sayfalar/devir/Devir'), 'DevirYonlendir');
 const Ekstre = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'Ekstre');
@@ -295,6 +304,15 @@ function Yollar() {
         {yetki('stok.deger_icmali') && <Route path="/stok-deger-icmali" element={<StokDegerIcmali />} />}
         {yetki('stok.skt_icmali') && <Route path="/stok-skt-icmali" element={<StokSktIcmali />} />}
         {yetki('stok.sayim_fark_icmali') && <Route path="/stok-sayim-fark-icmali" element={<StokSayimFarkIcmali />} />}
+        {yetki('stok.hareket_icmali') && <Route path="/stok-hareket-icmali" element={<StokHareketIcmali />} />}
+        {yetki('stok.olu_stok_icmali') && <Route path="/stok-olu-stok-icmali" element={<StokOluStokIcmali />} />}
+        {yetki('stok.kritik_stok_icmali') && <Route path="/stok-kritik-stok-icmali" element={<StokKritikStokIcmali />} />}
+        {yetki('satis.icmali') && <Route path="/satis-icmali" element={<SatisIcmali />} />}
+        {yetki('alis.icmali') && <Route path="/alis-icmali" element={<AlisIcmali />} />}
+        {yetki('irsaliye_fatura_eslesme') && <Route path="/irsaliye-fatura-eslesme" element={<IrsaliyeFaturaEslesme />} />}
+        {yetki('finans.tahsilat_odeme_icmali') && <Route path="/tahsilat-odeme-icmali" element={<TahsilatOdemeIcmali />} />}
+        {yetki('finans.cek_senet_icmali') && <Route path="/cek-senet-icmali" element={<CekSenetIcmali />} />}
+        {yetki('finans.nakit_akis_icmali') && <Route path="/nakit-akis-icmali" element={<NakitAkisIcmali />} />}
         {/* CARİ DEVİR GİRİŞİ (1156): toplu açılış bakiyesi (Excel'den yapıştır). */}
         {/* DEVİR GİRİŞİ - TEK EKRAN (1160): cari + kasa / banka / POS / kredi; eski /cari-devir yönlenir. */}
         {yetki('finans.devir') && <Route path="/devir" element={<Devir />} />}

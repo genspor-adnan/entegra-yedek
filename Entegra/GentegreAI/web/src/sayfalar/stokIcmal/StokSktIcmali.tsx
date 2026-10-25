@@ -67,7 +67,7 @@ export function StokSktIcmali() {
     <div className="hi">
       <style>{hastaIcmalStili + kurumIcmalStili + STOK_ICMAL_STILI}</style>
       <div className="sayfabas">
-        <div className="basrow"><h1>SKT / Lot İcmali</h1><span className="yol">Stok &amp; Hizmet › SKT / Lot İcmali</span></div>
+        <div className="basrow"><h1>SKT / Lot İcmali</h1><span className="yol">Stok &amp; Hizmet › İcmaller › SKT / Lot İcmali</span></div>
       </div>
 
       <div className="hi-arac">

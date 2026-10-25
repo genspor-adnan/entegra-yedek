@@ -205,7 +205,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
   {
     // STOK İCMALLERİ (1173, mockup Ekranlar/Stok/stok_*_icmali.html): stok değeri, SKT / lot,
     //   sayım farkı - özel sayfa, rakamlar StokIcmalUclari'ndan. Menüde Stok & Hizmet › İcmaller
-    //   alt başlığı, Dökümler'den (80) hemen önce (75-77).
+    //   alt başlığı, Dökümler'den (80) hemen önce (75-79.5).
     kaynak: 'stok-deger-icmali', rota: 'stok-deger-icmali', ozelSayfa: true,
     baslik: 'Stok Değer İcmali', yol: 'Stok & Hizmet › İcmaller › Stok Değer İcmali',
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 75, menuAd: 'Stok Değer İcmali', ic: '@icmal', yetkiKodu: 'stok.deger_icmali',
@@ -219,6 +219,23 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'stok-sayim-fark-icmali', rota: 'stok-sayim-fark-icmali', ozelSayfa: true,
     baslik: 'Sayım Fark İcmali', yol: 'Stok & Hizmet › İcmaller › Sayım Fark İcmali',
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 77, menuAd: 'Sayım Fark İcmali', ic: '@icmal', yetkiKodu: 'stok.sayim_fark_icmali',
+  },
+  {
+    // İKİNCİ ÜÇLÜ (1174, mockup Ekranlar/Stok/stok_hareket_icmali.html, stok_olu_stok_icmali.html,
+    //   stok_kritik_stok_icmali.html) - rakamlar StokIcmalUclari.Ek'ten.
+    kaynak: 'stok-hareket-icmali', rota: 'stok-hareket-icmali', ozelSayfa: true,
+    baslik: 'Stok Hareket İcmali', yol: 'Stok & Hizmet › İcmaller › Stok Hareket İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 78, menuAd: 'Stok Hareket İcmali', ic: '@icmal', yetkiKodu: 'stok.hareket_icmali',
+  },
+  {
+    kaynak: 'stok-olu-stok-icmali', rota: 'stok-olu-stok-icmali', ozelSayfa: true,
+    baslik: 'Ölü Stok / Devir Hızı İcmali', yol: 'Stok & Hizmet › İcmaller › Ölü Stok / Devir Hızı İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 79, menuAd: 'Ölü Stok / Devir Hızı İcmali', ic: '@icmal', yetkiKodu: 'stok.olu_stok_icmali',
+  },
+  {
+    kaynak: 'stok-kritik-stok-icmali', rota: 'stok-kritik-stok-icmali', ozelSayfa: true,
+    baslik: 'Kritik Stok İcmali', yol: 'Stok & Hizmet › İcmaller › Kritik Stok İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 79.5, menuAd: 'Kritik Stok İcmali', ic: '@icmal', yetkiKodu: 'stok.kritik_stok_icmali',
   },
   {
     // URUN AGACLARI (BOM / recete) - 429.

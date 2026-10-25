@@ -1599,6 +1599,37 @@ GET /api/stok-icmal/sayim-fark?bas&bit&depo&kategori&acik=0|1
   satırlardan farksız olanların oranı; `tekrar` = 2+ sayımda eksik, `lot` = stok tutuyor,
   lotlar ters.
 
+## 9.22 İcmaller (2) — stok, ticari, finans (1174 · 1175)
+
+Hepsi yalnız ekran koduyla **Gör** ister, şube süzgeci sunucuda, rakamlar sunucuda.
+
+```
+GET  /api/stok-icmal/hareket?bas&bit&depo&kategori&stokId&tutar=0|1     stok.hareket_icmali
+GET  /api/stok-icmal/olu?tarih&esik=90|180|365&hareket=cikis|her&depo&kategori   stok.olu_stok_icmali
+GET  /api/stok-icmal/kritik?depo&kategori&gun=30|60|90|180&tedarik&tip   stok.kritik_stok_icmali
+POST /api/stok-icmal/kritik/talep  {depoId, satirlar:[{stokId, miktar}], aciklama}   + satinalma.talep Ekle
+POST /api/stok-icmal/kritik/limit  {depoId, satirlar:[{stokId, min, max}]}           + stok Değiştir
+GET  /api/ticari-icmal/satis?bas&bit&karsi=gy|od&sube&temsilci&para&kdv&iade&taslak  satis.icmali
+GET  /api/ticari-icmal/alis?…&kategori&kalem=stok|hizmet|hepsi                        alis.icmali
+GET  /api/eslesme-icmal?yon=satis|alis|ikisi&bas&bit&cari&sube&esik=7&tam            irsaliye_fatura_eslesme
+POST /api/eslesme-icmal/bagla  {faturaId, satirlar:[{faturaSatirId, irsaliyeSatirId}], onay}  + belge Değiştir
+GET  /api/finans-icmal/tahsilat-odeme?bas&bit&yon&sube&kisi&para&virman               finans.tahsilat_odeme_icmali
+GET  /api/finans-icmal/cek-senet?tur&para&banka&vade&bas&bit                          finans.cek_senet_icmali
+GET  /api/finans-icmal/nakit-akis?ufuk&periyot&hesaplar&sube&ilkHafta&planli&gecikme&oran&karsiliksiz&ertele  finans.nakit_akis_icmali
+```
+
+- **Kritik talep:** depo başına TASLAK `satinalma_talep` (kaynak 2, kaynak_tur 918); açık talebi
+  (durum 0/1/2/4) olan stok atlanır, yanıt `atlanan`. **Limit:** `StokDurumDeposu.LimitYazAsync`
+  (stok kartı Stok Durumu ile aynı, loglu).
+- **Hareket tutar:** giriş belge satır tutarıyla (alış / giriş fişi / sayım fazlası / üretim girişi),
+  çıkış / iade / transfer ve devir / kalan ortalama maliyetle; `ozet.degerlemeFarki`.
+- **Kritik eldeki** = kalan − rezerve − SKT'si 30 gün içinde dolan lot (`sktYakin`).
+- **Bağla:** tek işlemde fatura satırı `kaynak_tur = 30, kaynak_id = irsaliye satırı,
+  stok_durum_degis = 0`, faturanın stok etkisi geri alınır; lot / seri izlemli satır 422.
+  Kapanmış dönemde `onay=false` → 422 `IS_KURALI`, `engel.kod = "KAPANMIS_DONEM"`.
+- **Satış / alış** tutarı belge dip toplamından; satırsız aktarılan tahakkuk (17 / 13) icmale girmez,
+  `aktarimTahakkuk {belge, tutar}` bilgi olarak döner.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).
