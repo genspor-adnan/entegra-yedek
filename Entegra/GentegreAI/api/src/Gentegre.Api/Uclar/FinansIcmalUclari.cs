@@ -828,8 +828,12 @@ public static partial class FinansIcmalUclari
             """, null, [bugun, subeler, s0], o => new { kisi = o.GetInt32(0), tutar = o.GetDecimal(1) }, iptal);
 
         // ------------------------------------------------------------------- kurlar --
+        // PLANLI GİDER (1177): tanımların eşleşmemiş dönemleri - dönem hesabı PlanliGiderMotoru'ndan (tek kaynak).
+        var (planliGider, planliGiderTanim) = await Gentegre.Api.Servisler.PlanliGiderMotoru.AkisKalemleriAsync(
+            b, subeler, s0, bugun, son, iptal);
+
         var dovizler = acik.Select(x => x.Doviz).Concat(planlar.Select(x => x.doviz)).Concat(cekler.Select(x => x.doviz))
-            .Concat(taksitler.Select(x => x.doviz)).Concat(hesapListesi.Select(x => x.doviz)).Where(x => x != yerel).Distinct().ToArray();
+            .Concat(taksitler.Select(x => x.doviz)).Concat(planliGider.Select(x => x.Doviz)).Concat(hesapListesi.Select(x => x.doviz)).Where(x => x != yerel).Distinct().ToArray();
         var kurlar = dovizler.Length == 0 ? new Dictionary<string, decimal?>()
             : (await b.ListeAsync("""
                 select x.c, public.fn_doviz_kur_getir(x.c, @p1::date, 2::smallint) from unnest(@p0::text[]) as x(c)
@@ -948,6 +952,12 @@ public static partial class FinansIcmalUclari
                 kalemler.Add(new NakitKalem("cikis", "planli", "Planlı: kredi kartı ekstresi", 0, v.ad, "Kart borcu", 0, 0, vade,
                     v.doviz, t, Tl(v.doviz, t, v.bakiye != 0 ? v.yerelBakiye / v.bakiye : 1), false, "ertelenemez", "", null, v.banka, false));
             }
+            // PLANLI GİDER (1177): "Planlı: {ad}"; gecikmiş (geçmiş, eşleşmemiş) Etkin'de ilk haftaya düşer;
+            //   kredi kartıyla ödenen kalemin günü motor tarafından kartın ekstre son ödeme gününe alınmıştır.
+            foreach (var g in planliGider)
+                kalemler.Add(new NakitKalem("cikis", "planli", "Planlı: " + g.Ad, g.TarafId, g.Taraf,
+                    g.Donem + (g.Tahmini ? " · tahmini" : ""), 0, 0, g.Vade, g.Doviz, g.Tutar, Tl(g.Doviz, g.Tutar, 1), g.Gecmis,
+                    g.Esneklik, "", null, g.Hesap, false));
             // MAAŞ: bordro modülü yok - aktif personelin kartındaki aylık net maaş toplamı, her ayın son günü.
             if (maas is { tutar: > 0 })
                 for (var ay = new DateTime(bugun.Year, bugun.Month, 1); ay <= son; ay = ay.AddMonths(1))
@@ -978,7 +988,12 @@ public static partial class FinansIcmalUclari
             gider = "Ödeme planları", kaynak = "ödeme planı (71)",
             durum = !s.Planli ? "kapali" : planlar.Any(x => x.tur == 71) ? "akista" : "tanimsiz",
         });
-        tanimlar.Add(new { gider = "Kira, vergi, SGK, abonelik", kaynak = "—", durum = "tanimsiz" });
+        tanimlar.Add(new
+        {
+            gider = "Kira, vergi, SGK, abonelik",
+            kaynak = planliGiderTanim > 0 ? $"planlı gider tanımları ({planliGiderTanim} aktif tanım)" : "planlı gider tanımı",
+            durum = !s.Planli ? "kapali" : planliGiderTanim > 0 ? "akista" : "tanimsiz",
+        });
 
         // ---------------------------------------------------------------- dönemler --
         var dilimler = new List<(DateTime Bas, DateTime Bit)>();

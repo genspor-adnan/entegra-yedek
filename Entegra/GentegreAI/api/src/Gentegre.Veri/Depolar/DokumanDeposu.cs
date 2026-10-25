@@ -58,11 +58,13 @@ public sealed class DokumanDeposu
         //   "kys-egitim" (1065): kalite eğitimi katılım listesi / sertifika.
         //   "personel-belge" (1136): özlük belgesinin taraması - kaynak_id
         //   personel_belge satırı (belge takibi "dosya yok" buna bakar).
+        //   "planli-gider" (1177): planlı gider kartının Belgeler sekmesi (sözleşme,
+        //   artış bildirimi) - kaynak_id planli_gider tanımı.
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
               "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge",
               "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
-              "kys-egitim", "personel-belge" };
+              "kys-egitim", "personel-belge", "planli-gider" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

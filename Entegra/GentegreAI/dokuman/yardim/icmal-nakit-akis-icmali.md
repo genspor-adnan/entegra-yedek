@@ -60,7 +60,7 @@ dogrulama: insan-dogrulama-bekliyor
 A4: başlangıç, ufuk, periyot, hesaplar, seçili senaryo, bugünkü nakit; hafta / ay başına açılış, giriş, çıkış, kapanış; beklenen giriş / çıkış, en düşük bakiye, ufuk sonu bakiyesi ve imza alanları.
 
 ## Dikkat edilecekler
-- Kira, vergi, SGK, abonelik gibi tekrarlayan giderlerin tanım ekranı henüz yok; "Planlı gider tanımı" tablosunda "tanım yok" uyarısıyla görünür ve akışa girmez.
+- Kira, vergi, SGK, abonelik gibi tekrarlayan giderler **Finans › Planlı Giderler** ekranında tanımlanır; eşleşmemiş dönemleri "Planlı: {ad}" çıkışı olarak akışa girer (gecikmiş olan ilk haftaya, kartla ödenen kartın son ödeme gününe). Hiç tanım yoksa "Planlı gider tanımı" tablosunda "tanım yok" uyarısı görünür.
 - Kredi kartı borcunun tamamı bir sonraki son ödeme gününe yazılır (ekstre kesimi ayrımı yoktur).
 - Yeni satış varsayımı (henüz faturalanmamış satış) bu sürümde yoktur.
 - Hesap seçimi yalnız açılışı değiştirir; kalemlerin hangi hesaptan ödeneceği çoğunlukla belli değildir.

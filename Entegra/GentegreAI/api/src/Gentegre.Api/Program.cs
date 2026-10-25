@@ -74,6 +74,8 @@ if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.Hatirl
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.BankaHareketServisi>();
 kurucu.Services.AddHttpClient("banka");
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Uclar.BankaCekmeIscisi>();
+// PLANLI GİDER (1177): saatte bir dondurma + otomatik eşleşme + sorumlu hatırlatmaları.
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.PlanliGiderIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
@@ -391,6 +393,8 @@ uygulama.SatinalmaIcmalUclariniEkle();
 uygulama.KdvIcmalUclariniEkle();
 uygulama.ServisIcmalUclariniEkle();
 uygulama.UretimIcmalUclariniEkle();
+// PLANLI GİDER (1177): tekrarlayan gider tanımı, dönemler, eşleştirme, taslak ödeme.
+uygulama.PlanliGiderUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
 uygulama.DevirUclariniEkle();
 // KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.

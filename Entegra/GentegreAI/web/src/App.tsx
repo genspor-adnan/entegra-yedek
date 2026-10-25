@@ -58,6 +58,8 @@ const SatinalmaIcmali = tembel(() => import('./sayfalar/satinalmaIcmal/Satinalma
 const KdvIcmali = tembel(() => import('./sayfalar/kdvIcmal/KdvIcmali'), 'KdvIcmali');
 const TeknikServisIcmali = tembel(() => import('./sayfalar/servisIcmal/TeknikServisIcmali'), 'TeknikServisIcmali');
 const UretimIcmali = tembel(() => import('./sayfalar/uretimIcmal/UretimIcmali'), 'UretimIcmali');
+const PlanliGiderListesi = tembel(() => import('./sayfalar/planliGider/PlanliGiderListesi'), 'PlanliGiderListesi');
+const PlanliGiderKarti = tembel(() => import('./sayfalar/planliGider/PlanliGiderKarti'), 'PlanliGiderKarti');
 const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
 const DevirYonlendir = tembel(() => import('./sayfalar/devir/Devir'), 'DevirYonlendir');
 const Ekstre = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'Ekstre');
@@ -326,6 +328,9 @@ function Yollar() {
         {yetki('muhasebe.kdv_icmali') && <Route path="/kdv-icmali" element={<KdvIcmali />} />}
         {yetki('servis.icmali') && <Route path="/teknik-servis-icmali" element={<TeknikServisIcmali />} />}
         {yetki('uretim.icmali') && <Route path="/uretim-icmali" element={<UretimIcmali />} />}
+        {/* PLANLI GİDERLER (1177): liste + kendi sekmesinde kart (/planli-gider/yeni | /planli-gider/:id). */}
+        {yetki('finans.planli_gider') && <Route path="/planli-gider" element={<PlanliGiderListesi />} />}
+        {yetki('finans.planli_gider') && <Route path="/planli-gider/:id" element={<PlanliGiderKarti />} />}
         {/* CARİ DEVİR GİRİŞİ (1156): toplu açılış bakiyesi (Excel'den yapıştır). */}
         {/* DEVİR GİRİŞİ - TEK EKRAN (1160): cari + kasa / banka / POS / kredi; eski /cari-devir yönlenir. */}
         {yetki('finans.devir') && <Route path="/devir" element={<Devir />} />}

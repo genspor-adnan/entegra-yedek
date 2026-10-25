@@ -73,6 +73,8 @@ public static partial class AksiyonKatalogu
 
         s["taraf-cihaz-liste"] = [.. Crud("taraf-cihaz", "servis", "servis.cihaz")];
         s["servis-ariza-kodu-liste"] = [.. Crud("servis-ariza-kodu", "servis", "servis.ariza_kodu", yazdir: false)];
+        // PLANLI GİDER KATEGORİLERİ (1177): kartın öntanımları.
+        s["planli-gider-kategori-liste"] = [.. Crud("planli-gider-kategori", "finans", "finans.planli_gider_kategori", yazdir: false)];
 
         //  ARIZA / TALEP (hizmet masası, 911): EKİP LİSTESİ. Serbest CRUD
         //  YOK - talep self-servis açılır (ayrı ekran), ekip yalnız AKIŞI

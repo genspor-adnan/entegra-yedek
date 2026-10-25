@@ -242,6 +242,8 @@ public static class DokumanUclari
         // EĞİTİM BELGELERİ (1065): katılım listesi, sertifika - kaynak_id
         //   eğitim grubunun kimliği (v_kalite_egitim.id).
         "kys-egitim" => "kys-egitim",
+        // PLANLI GİDER BELGELERİ (1177): kira sözleşmesi, artış bildirimi... kaynak_id planlı gider tanımı.
+        "planliGider" => "planli-gider",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -300,6 +302,7 @@ public static class DokumanUclari
         "kys-kalibrasyon" => "kys.kalibrasyon",
         "kys-egitim" => "kys.egitim",
         "servisZiyaret" => "servis",
+        "planliGider" => "finans.planli_gider",
         _ => kartAdi
     };
 

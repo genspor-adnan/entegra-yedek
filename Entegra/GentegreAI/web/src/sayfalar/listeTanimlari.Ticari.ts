@@ -494,6 +494,28 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuSira: 70, menuAd: 'Vade / Plan Listesi', ic: '📅', yetkiKodu: 'kasa.finans.vade',
   },
   {
+    // PLANLI GİDERLER (1177, mockup Ekranlar/ERP/planli_gider.html + planli_gider_karti.html): kira,
+    //   enerji, abonelik, vergi / SGK gibi tekrarlayan giderlerin tanımı; dönemler takvimden türetilir,
+    //   gerçekleşme ödeme / fatura eşleşmesiyle. Nakit Akış İcmali'nin "Planlı" çıkışlarının kaynağı.
+    // kartYolu yalnız Kabuk'un kart sekmesi ikonu için (kart özel sayfa: PlanliGiderKarti).
+    kaynak: 'planli-gider', rota: 'planli-gider', ozelSayfa: true, kartYolu: '/planli-gider',
+    baslik: 'Planlı Giderler', yol: 'Finans › Planlı Giderler',
+    menuGrup: 'Finans', menuSira: 70.5, menuAd: 'Planlı Giderler', ic: '🗓️', yetkiKodu: 'finans.planli_gider',
+  },
+  {
+    // PLANLI GİDER KATEGORİLERİ (1177): kategori seçilince kartın BOŞ alanlarını dolduran öntanımlar.
+    kaynak: 'planli-gider-kategori', rota: 'planli-gider-kategori',
+    baslik: 'Planlı Gider Kategorileri', yol: 'Finans › Ayarlar › Planlı Gider Kategorileri',
+    kartYolu: '/planli-gider-kategori', kartBaslik: 'Planlı Gider Kategorisi',
+    aksiyonEkrani: 'planli-gider-kategori-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Finans', menuAltGrup: 'Ayarlar', menuSira: 92, menuAd: 'Planlı Gider Kategorileri', ic: '🏷️',
+    yetkiKodu: 'finans.planli_gider_kategori',
+  },
+  {
     // ALACAK YAŞLANDIRMA (1019, mockup İcmal/alacak_yaslandirma.html): hasta
     //   ve kurum açık bakiyeleri gün dilimlerinde. Yalnız HBYS (hasta / kurum
     //   payı kavramı).

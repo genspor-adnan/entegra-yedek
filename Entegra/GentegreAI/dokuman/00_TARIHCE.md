@@ -25,6 +25,19 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — Planlı Giderler (1177)
+
+Kullanıcı: *"planlı gider için mockup yap"* → *"planlı gider kartı mockup yap"* → açık sorular *"onayla, hepsini işle"* → *"ödenecek cari serbest edit olmasın, tedarikçi listesinden seçeyim"* → *"önce mockup ları kodla"*. Mockup: `Ekranlar/ERP/planli_gider.html`, `planli_gider_karti.html`.
+
+- **Model (1177):** `planli_gider` (tanım = kural), `planli_gider_artis` (geçerlilik tarihli oran / yeni tutar), `planli_gider_donem` (YALNIZ istisna — atlandı, bu dönemin tutarı —, gerçekleşme eşleşmesi ve tarihi geçen dönemin dondurulmuş planı; dönemler takvimden türetilir), `planli_gider_kategori` (8 kategori + öntanım). Kodlar `finans.planli_gider` ve `finans.planli_gider_kategori` (hakları `kasa.finans`'tan bütün işlemleriyle). Log tabloları 1720-1723 (1390'lar Patoloji'nin).
+- **Sunucu:** `PlanliGiderHesap` (Çekirdek, DB'siz: vade, kısa ayda 29-31, haftalık, tatil / hafta sonu kaydırması `v_resmi_tatil`, artış, elle > dondurulmuş > tür kuralı, nakit = KDV hariç × (1 + KDV) − stopaj; 13 birim testi), `PlanliGiderMotoru` (dondurma, eşleştirme adayları — kesin tediye / alış faturası / işlenmemiş banka hareketi, ± gün / ± %, tek aday otomatik —, hatırlatma, Nakit Akış kalemleri), `PlanliGiderIscisi` (saatlik). "Ödeme Oluştur" taslak tediye açar (31 nakit / 32 havale / 35 kredi kartı); kayıt kendiliğinden oluşmaz. Ödenecek yer yalnız tedarikçi (`taraf.tedarikci = 1`), zorunlu; Vergi / SGK'da boş olabilir. Nakit Akış İcmali "Planlı: {ad}" çıkışlarını buradan alır (gecikmiş ilk haftaya, kartla ödenen kartın son ödeme gününe); "tanım yok" uyarısı kalktı.
+- **Web:** Finans › Planlı Giderler (liste + 12 aylık takvim) ve kendi sekmesinde kart (7 sekme: Genel · Tutar · Takvim · Ödeme & Eşleştirme · Dönemler · Belgeler · Geçmiş), Finans › Ayarlar › Planlı Gider Kategorileri. Kategori seçimi yalnız boş alanları doldurur.
+- **Bulunan hata (düzeltildi, sürüm öncesi):** yeni kartta Tutar / Takvim sekmesi sayfayı düşürüyordu — sunucu null alanları göndermiyor (yeni kayıtta `ozet` yok); istemci yanıtı tamamlıyor (`kartiTamamla`). Menü "bir kod bir ekran" testi kategori ekranının ortak kodunu yakaladı → ayrı kod.
+- **Test:** API 805/805, web 977/977, duman Finans temiz (Planlı Giderler + Kategoriler + Nakit Akış), tarayıcıda liste / takvim / yeni kart 7 sekme + tedarikçi seçimi hatasız. Yazma uçları dev DB'de (gentegre_ai) elle denendi, test kayıtları silindi; UNIVERSE'e kayıt yazılmadı.
+- **Yapılmayan / sadeleştirilen:** Geçmiş sekmesi alan bazlı ISLEMLOG yerine sunucunun zaman çizgisi; hesaplanan KDV, KDV İcmali hesabını çağırmıyor (son ayın saklı satış − alış KDV'si); liste sağ tık menüsü, kartta ◀ ▶ ve yazdır yok; "yuvarlama" alanı şemada yok; carisiz giderde "Cari Ekstre" masraf kartını açar (masraf hareket dökümü ekranı yok).
+
+---
+
 ## 25.10.2026 — ERP süreç icmalleri (1176): sipariş, kârlılık, satınalma süreç, KDV, teknik servis, üretim
 
 Kullanıcı: mockup'ların açık soruları için *"onayla, hepsini işle"* → *"önce mockup ları kodla sonra sıradaki adımları uygula"*.

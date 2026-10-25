@@ -1679,6 +1679,75 @@ POST /api/uretim-icmal/talep  {depoId, satirlar:[{stokId, miktar, emirId?}], aci
 - **Bütçe düzeltmesi (1176):** `v_butce_durum` 724'ten beri `durum <> 0` ile süzüyordu (kesin = 0);
   artık kesin fatura / sipariş sayılır.
 
+## 9.24 Planlı gider (1177)
+
+Tekrarlayan gider TANIMI (kural) + takvimden TÜRETİLEN dönemler. `planli_gider_donem` yalnız istisna
+(atlandı, elle tutar), gerçekleşme (eşleşme) ve dondurulmuş plan saklar. Ekran kodu `finans.planli_gider`
+(Gör / Ekle / Değiştir / Sil); "Ödeme Oluştur" ayrıca `kasa_islem` Ekle. Tarihler `yyyy-MM-dd`, tutarlar sayı;
+alan adları iki tarafta aynı. Dönem hesabı TEK yerde: `Gentegre.Cekirdek.Katalog.PlanliGiderHesap` (liste, kart,
+takvim, Nakit Akış İcmali, dondurma ve eşleştirme aynı kodu çağırır; motor `Servisler/PlanliGiderMotoru`).
+
+```
+GET    /api/planli-gider?durum=aktif|pasif|tumu&cip=buay|gecikmis|degisken|hesaplanan|dovizli|bitiyor&kategori&hesap&ara
+GET    /api/planli-gider/takvim?ay=12&gorunum=kategori|hesap
+GET    /api/planli-gider/kategoriler
+GET    /api/planli-gider/{id}                        (0 = yeni kayıt varsayılanları)
+POST   /api/planli-gider                         {kart, artislar[]}                 → {id}
+PUT    /api/planli-gider/{id}                    {kart (surum), artislar[]}         → {id, surum}   409 + güncel
+DELETE /api/planli-gider/{id}                                                        (eşleşmiş dönem varsa 422: pasife alın)
+POST   /api/planli-gider/{id}/kopyala                                                → {id}
+POST   /api/planli-gider/{id}/donem/{vade}/atla           {aciklama}
+POST   /api/planli-gider/{id}/donem/{vade}/tutar          {tutar, aciklama}           (null tutar = elle tutarı kaldır)
+POST   /api/planli-gider/{id}/donem/{vade}/geri-al                                   (atla / elle tutarı kaldırır)
+GET    /api/planli-gider/{id}/donem/{vade}/oneriler       → [{tur, id, no, tarih, taraf, masraf, tutar, neden, secilebilir, engel}]
+POST   /api/planli-gider/{id}/donem/{vade}/esles          {tur: kasa|fatura|banka, kayitId}
+POST   /api/planli-gider/{id}/donem/{vade}/eslesme-kaldir
+POST   /api/planli-gider/{id}/odeme                       {vade?}                      → {kasaIslemId, mesaj}
+POST   /api/planli-gider/eslestir                                                    → {eslesen, donduruldu}
+```
+
+- **Kodlar:** `tutarTur` 1 sabit · 2 son N dönem ort. · 3 geçen yıl aynı ay · 4 hesaplanan (`hesapKaynak`
+  'kdv' | 'sgk') · 5 elle; `periyot` 1 haftalık · 2 aylık · 3 3 aylık · 4 6 aylık · 5 yıllık · 6 tek sefer;
+  `tatilKural` 1 önceki · 2 sonraki iş günü · 0 kaydırma; `odemeYontem` 1 havale · 2 otomatik talimat ·
+  3 kredi kartı · 4 nakit · 5 vergi tahsilatı; artış `tur` 1 oran (%) · 2 yeni tutar (KDV hariç).
+  Dönem `durum` (yanıtta metin): `odendi` · `gec` · `erken` · `planli` · `bugun` · `gecikti` · `atlandi` ·
+  `faturalandi` · `beklemede` (işlenmemiş banka hareketiyle eşleşti); `gun` durumun gün farkı (mutlak).
+- **Yanıtlar:** liste `{ozet, satirlar, toplam, secim, yetkiler}`; takvim `{aylar:[{ay, toplam, sabit, tahmini,
+  hesaplanan, kirilim}], kolonlar}`; kart `{kart, surum, artislar, ozet, donemler, onizleme, kategoriler, uyarilar,
+  zaman, yetkiler}`. `kart` GET alanlarına ek salt okunur adlar: `taraf`, `masraf`, `masrafMerkezi`, `sorumlu`,
+  `odemeHesap`, `sube`, `ekleyenAd` (yazmada yok sayılır; bilinmeyen alan 400). `tutar` = dönemin NAKİT ÇIKIŞI
+  (KDV dahil − stopaj) tanım dövizinde, `tutarTl` bugünkü kurla. Kart `donemler` başlangıçtan bitişe
+  (süresizse bugün + 24 ay), eskiden yeniye.
+- **Ödenecek yer** (karar 25.10.2026): `tarafId` yalnız tedarikçi (`taraf.tedarikci = 1`), zorunlu; tek istisna
+  kategori `vergi_sgk`. Aksi `400 DOGRULAMA`, alan `tarafId`.
+- **Dönem tarihi:** periyot + `odemeGunu` (29-31 kısa ayda son gün; haftalıkta 1 Pzt - 7 Paz) → hafta sonu ve
+  `v_resmi_tatil` (aktif, tam gün; genel ya da tanımın şubesi) kaydırması. `vade` kaydırılmamış gündür (dönem kimliği).
+- **Tutar:** tür kuralı → artışlar (geçerlilik ≤ vade) → `elle_tutar` (nakit) kazanır. Nakit = KDV hariç ×
+  (1 + KDV) − KDV hariç × stopaj. Ortalama / geçen yıl / SGK eşleşmiş dönemlerin gerçekleşen tutarından;
+  yoksa tanım tutarı. KDV: son kesin dönemin (geçen ay) saklı satış KDV'si − alış KDV'si (iadeler ters, eksi = 0).
+- **Dondurma:** tarihi geçmiş ya da eşleşmiş dönemin plan_tarihi / plan_tutar'ı o günkü hesapla yazılır;
+  PUT tanımı değiştirmeden ÖNCE dondurur.
+- **Eşleştirme:** kesin tediye (31-36), kesin alış faturası (11, iade değil; brüt ile karşılaştırılır) ve
+  ödeme hesabındaki işlenmemiş banka çıkışı; aynı cari / masraf (varsa; ikisi de yoksa ödeme hesabı),
+  plan tarihi ± `eslesGun`, tutar ± `eslesYuzde`. Başka döneme eşleşmiş kayıt seçilemez (`engel`). Tek aday +
+  `eslesOtomatik` → otomatik (loglu). Öneri dışı kayıt `esles` ile elle seçilebilir (tür / durum / şube /
+  döviz yine denetlenir). Banka hareketi işlenince eşleşme o kasa işlemine taşınır; eşleşen kayıt iptal
+  edilirse eşleşme kalkar. İşçi (`PlanliGiderIscisi`) saatte bir aynı işi yapar.
+- **Ödeme Oluştur:** taslak tediye (KasaDeposu; tür 32, nakitte 31, kredi kartında 35), cari + masraf + tutar +
+  hesap + açıklama şablonu (`{ay} {yil} {ad}`); carisiz tanımda bacaklar masraf borç / hesap alacak.
+  `vade` verilmezse ilk gecikmiş, yoksa sıradaki açık dönem.
+- **Nakit Akış İcmali:** aktif tanımların bugünden ufka eşleşmemiş, atlanmamış dönemleri "Planlı: {ad}"
+  çıkışı (`planli` kolonu); gecikmiş (tanım açıldıktan sonra planlanmış, geçmiş, eşleşmemiş) ilk haftaya;
+  kredi kartı yönteminde kartın `son_odeme_gunu`'ne. "Kira, vergi, SGK, abonelik" tanım satırı tanım varsa `akista`.
+- **Hatırlatma:** `hatirlatmaGun` > 0 ise plan tarihinden o kadar gün önce sorumluya bir kez, gecikince 5 gün
+  her gün bir (bildirim kuyruğu, kaynak_tur 1722); bitişe 90 gün kala bir kez (kaynak_tur 1720). 08:00-20:00.
+- **Log:** islem_log tablo id'leri `planli_gider` **1720**, `planli_gider_artis` **1721**, `planli_gider_donem`
+  **1722**, kategori kartı **1723** (taslaktaki 1390-1393 Patoloji'nindi). Alan bazlı değişiklik, eşleşme ayrı
+  satır, silme DELETE'ten önce tam satır + `__detaylar`.
+- **Doküman:** ortak doküman deposu, kart adı `planliGider` → kaynak `planli-gider` (yetki + tanımın şubesi).
+- **Kategori:** katalog kaynağı `planli-gider-kategori` / kart `planliGiderKategori` (aksiyon ekranı
+  `planli-gider-kategori-liste`).
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

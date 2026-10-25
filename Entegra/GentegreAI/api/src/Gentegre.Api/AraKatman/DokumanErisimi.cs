@@ -166,6 +166,23 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
             return;
         }
 
+        // PLANLI GİDER BELGELERİ (1177): `finans.planli_gider` + tanımın şubesi kullanıcının
+        //   şubelerinden biri (uçlarla aynı kural; yazma yalnız tanımın kendi şubesinde).
+        if (kaynak == "planli-gider")
+        {
+            var sube = await veri.TekDegerAsync<int?>(
+                "select sube_id from public.planli_gider where id = @p0", [(int)kaynakId], iptal);
+            if (sube is null || baglam.Subeler.All(s => s.Id != sube)
+                || !baglam.Yetkiler.Var("finans.planli_gider", islem == Islem.Gor ? Islem.Gor : Islem.Degistir))
+                throw GentegreHatasi.Bulunamadi(yok);
+            if (islem != Islem.Gor)
+            {
+                if (sube != baglam.SubeId) throw GentegreHatasi.Bulunamadi(yok);
+                baglam.YazmaIste();
+            }
+            return;
+        }
+
         if (kaynak == "lab-sonuc")
         {
             // Yetkisizlik de 404: 403 dönmek, kimliğin bir LAB dokümanı olduğunu söylerdi.
