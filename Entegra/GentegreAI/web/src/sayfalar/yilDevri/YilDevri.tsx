@@ -87,7 +87,7 @@ export function YilDevri() {
       <style>{YD_STILI}</style>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>{c('Yıl Sonu Devri')}</h1>
+          <h1>↪️ {c('Yıl Sonu Devri')}</h1>
           <span className="yol">{c('Muhasebe › Yıl Sonu Devri')}</span>
         </div>
       </div>

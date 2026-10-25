@@ -411,7 +411,7 @@ function HesapAraclari({ hesapId, tur }: { hesapId: number; tur: string }) {
               onClick={() => git(`/ekstre?tur=hesap&id=${hesapId}`)}>📄 {c('Ekstre')}</button>
       {/* DEVİR / AÇILIŞ (1160): karttaki açılış bakiyesi alanı yerine hesabın devir hareketi. */}
       {oturumYetki('finans.devir', 'gor') && (
-        <button className="d" type="button" title={c('Açılış bakiyesi (devir hareketi)')} onClick={() => setDevir(true)}>💼 {c('Devir / Açılış')}</button>)}
+        <button className="d" type="button" title={c('Açılış bakiyesi (devir hareketi)')} onClick={() => setDevir(true)}>↪️ {c('Devir / Açılış')}</button>)}
       {devir && <DevirPenceresi tur="hesap" id={hesapId} onKapat={() => setDevir(false)} onKaydedildi={() => setDevir(false)} />}
     </>
   );

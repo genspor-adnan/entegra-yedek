@@ -212,7 +212,7 @@ export function CariDevirSorusu({ id, onDegisti }: { id: number; onDegisti(): vo
   const kapat = () => { const y = new URLSearchParams(arama); y.delete('devirSor'); setArama(y, { replace: true }) };
   return (
     <div className="mk-soru">
-      <span className="mk-soru-ic">💼</span>
+      <span className="mk-soru-ic">↪️</span>
       <div><b>{c('Bu carinin açılış bakiyesi var mı?')}</b>
         <span>{c('Firma bizimle daha önce çalışıyorduysa (eski programda ya da elle tutulan hesapta) devreden borç / alacağını şimdi girin — ekstre, vadesi geçen, risk ve cari icmali bu tutardan başlar.')}</span></div>
       <button type="button" className="d bir" onClick={() => setAcik(true)}>＋ {c('Devir Bakiyesi Gir')}</button>
@@ -246,7 +246,7 @@ export function CariFinansal({ id, tazele, onDegisti }: { id: number; tazele: nu
         {/* DEVİR / AÇILIŞ BAKİYESİ (cari_devir_girisi.html): kartta kalıcı giriş yeri. */}
         {yetki('finans.devir', 'gor') && (
           <button type="button" className="d mini" style={{ marginLeft: 'auto' }} onClick={() => setDevir(true)}>
-            💼 {c('Devir / Açılış Bakiyesi')}</button>
+            ↪️ {c('Devir / Açılış Bakiyesi')}</button>
         )}</h6>
         <table className="detay-tablo">
           <thead><tr><th>{c('Para birimi')}</th><th className="hiza-sag">{c('Borç')}</th><th className="hiza-sag">{c('Alacak')}</th>

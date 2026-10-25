@@ -429,7 +429,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
         //   tek satır "etiket: değer" hapları, sağda durum ve son işlem.
         <div className="bo-mserit">
           {oturum.vardiya && <div className="sel">🕗 Vardiya: <b>{oturum.vardiya}</b></div>}
-          <div className="sel">💼 Devir: <b>{para(oturum.devirTutar)} ₺</b></div>
+          <div className="sel">↪️ Devir: <b>{para(oturum.devirTutar)} ₺</b></div>
           {oturum.acilisFark !== 0 && (
             <div className="sel">⚠ Açılış farkı: <b className="bo-kir">{para(oturum.acilisFark)} ₺</b></div>
           )}

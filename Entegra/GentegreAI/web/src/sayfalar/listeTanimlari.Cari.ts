@@ -296,7 +296,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   sihirbaz - ön kontrol, değerleme, kapanış, yeni yıl, açılış & kilit.
     kaynak: 'yil-devri', rota: 'yil-devri', ozelSayfa: true,
     baslik: 'Yıl Sonu Devri', yol: 'Muhasebe › Yıl Sonu Devri',
-    menuGrup: 'Muhasebe', menuSira: 90, menuAd: 'Yıl Sonu Devri', ic: '🗓️', yetkiKodu: 'muhasebe.yil_devri',
+    menuGrup: 'Muhasebe', menuSira: 90, menuAd: 'Yıl Sonu Devri', ic: '↪️', yetkiKodu: 'muhasebe.yil_devri',
   },
   {
     kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırı Listesi', yol: 'Yonetim › Fis Satirlari',

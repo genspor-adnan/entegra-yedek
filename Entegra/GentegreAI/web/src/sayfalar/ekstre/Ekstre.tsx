@@ -139,7 +139,7 @@ export function Ekstre() {
         <button type="button" disabled={!secili} title={secili ? 'Seçili satırın belgesi / kasa işlemi' : 'Önce bir satır seçin'}
                 onClick={() => kayitAc(secili)}>📂 {c('Belge / İşlem Aç')}</button>
         {h && yetki('finans.devir', 'gor') && (
-          <button type="button" onClick={() => setDevirAcik(true)}>💼 {c('Devir / Açılış')}</button>)}
+          <button type="button" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
         {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}
         {gercekTur === 'kasa' && yetki('kasa.gun_sonu', 'gor') && <button type="button" onClick={() => git('/kasa-gun-sonu')}>🧮 {c('Gün Sonu')}</button>}
         {gercekTur === 'banka' && yetki('banka.hareket', 'gor') && <button type="button" onClick={() => git(`/banka-hareket${h ? `?hesapId=${h.id}` : ''}`)}>🔗 {c('Banka Hareketleri')}</button>}

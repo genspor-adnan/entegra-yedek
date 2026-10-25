@@ -20,7 +20,7 @@ import { DevirFormu, TUR_AD, tarihOku } from './DevirFormu';
  *  · Tek Hesap   DevirFormu - türe özgü giriş, kontroller, kaydet / kaldır
  *  · Toplu       Excel'den yapıştır (ilk sütun tür), sunucu denetler, hazır satırlar yazılır
  *  · Açılış Bak. karttaki eski hesap.acilis_bakiye değerleri → tür 2 devir satırına çevir
- * Kartlardaki "💼 Devir / Açılış" aynı formu pencerede açar (DevirPenceresi).
+ * Kartlardaki "↪️ Devir / Açılış" aynı formu pencerede açar (DevirPenceresi).
  */
 type Gorunum = 'tek' | 'toplu' | 'acilis';
 const TUR_IKON: Record<DevirTuru, string> = { cari: '👥', kasa: '💵', banka: '🏦', pos: '💳', kredi: '📑', kredikarti: '💳' };
@@ -68,7 +68,7 @@ export function Devir() {
     <div className="hi dv">
       <style>{icmalStili + DEVIR_STILI}</style>
       <div className="sayfabas">
-        <div className="basrow"><h1>💼 {c('Devir Girişi')} — {gor === 'toplu' ? c('Toplu') : gor === 'acilis' ? c('Mevcut açılış bakiyeleri') : baslik}</h1>
+        <div className="basrow"><h1>↪️ {c('Devir Girişi')} — {gor === 'toplu' ? c('Toplu') : gor === 'acilis' ? c('Mevcut açılış bakiyeleri') : baslik}</h1>
           <span className="yol">Finans › {c('Devir Girişi')}</span></div>
       </div>
 
