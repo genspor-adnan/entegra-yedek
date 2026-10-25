@@ -23,7 +23,7 @@ import { DevirFormu, TUR_AD, tarihOku } from './DevirFormu';
  * Kartlardaki "↪️ Devir / Açılış" aynı formu pencerede açar (DevirPenceresi).
  */
 type Gorunum = 'tek' | 'toplu' | 'acilis';
-const TUR_IKON: Record<DevirTuru, string> = { cari: '👥', kasa: '💵', banka: '🏦', pos: '💳', kredi: '📑', kredikarti: '💳' };
+const TUR_IKON: Record<DevirTuru, string> = { cari: '💼', kasa: '💵', banka: '🏦', pos: '💳', kredi: '📑', kredikarti: '💳' };
 const KART_YOLU: Record<DevirTuru, string> = { cari: '/cari', kasa: '/kasa-hesap', banka: '/banka-hesap', pos: '/pos-hesap', kredi: '/kredi-hesap', kredikarti: '/kredi-karti' };
 
 /** Eski /cari-devir yolu. */
