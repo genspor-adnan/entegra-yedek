@@ -4,6 +4,7 @@
  * cizer. Kabuk.tsx'ten cikarildi (kullanici: "refaktor"): 800 satirlik kabuk
  * icinde menu kurulumu, bolge/alan mantigi ve ust serit ayni dosyadaydi.
  */
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
@@ -97,6 +98,9 @@ export function MenuIkon({ ic }: { ic: string }) {
   // '@icmal' (kullanıcı 10.10.2026: icmallerde ortak ikon): dönem özeti =
   //   köşesi kıvrık belge + üstünde artan çubuklar. Bütün icmal ekranları bunu
   //   kullanır; menüde icmal oldukları tek bakışta anlaşılsın.
+  // '@ekstre' (kullanıcı 25.10.2026: "ekstre ikonu sigma yap"): mavi kare üstünde Σ (EkstreIkon).
+  if (ic === '@ekstre')
+    return <span className="ic ic-hilal" aria-hidden="true"><EkstreIkon /></span>;
   if (ic === '@icmal')
     return (
       <span className="ic ic-hilal" aria-hidden="true">

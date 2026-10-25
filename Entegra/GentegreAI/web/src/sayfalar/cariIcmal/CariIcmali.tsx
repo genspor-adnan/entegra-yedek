@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
@@ -109,7 +110,7 @@ export function CariIcmali() {
             : `Mektup: bakiyesi olan ${mektupSatirlari.length} cari (satır seçerek daraltın)`}</span>
         <span className="sp" />
         <button onClick={() => git(yalnizTed ? '/tedarikci' : '/cari')}>{yalnizTed ? '🚚 Tedarikçi Listesi' : '👥 Müşteri Listesi'}</button>
-        <button onClick={() => git('/ekstre?tur=cari')}>📄 Ekstre</button>
+        <button onClick={() => git('/ekstre?tur=cari')}><EkstreIkon /> Ekstre</button>
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}

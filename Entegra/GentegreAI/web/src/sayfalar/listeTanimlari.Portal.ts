@@ -33,6 +33,6 @@ export const PORTAL_LISTELERI: ListeGirdisi[] = [
     //   (başvuru faturasının açıklaması hasta adı taşıyabiliyor).
     kaynak: 'kurum-ekstre', rota: 'kurum-ekstre', baslik: 'Cari Ekstrem',
     yol: 'Portal › Cari Ekstre',
-    menuAd: 'Cari Ekstrem', ic: '📑', menuSira: 62, yetkiKodu: 'portal.mali',
+    menuAd: 'Cari Ekstrem', ic: '@ekstre', menuSira: 62, yetkiKodu: 'portal.mali',
   },
 ];

@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
@@ -102,7 +103,7 @@ export function KasaOnizleme({ satir, yenile, tazele, git, gitKart }: {
         {yetki('kasa_islem', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'odeme' })}>💸 {c('Ödeme')}</button>}
         {yetki('kasa_islem', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'yatir' })}>🏦 {c('Yatır')}</button>}
         {yetki('kasa.gun_sonu', 'gor') && <button type="button" className="d" onClick={() => git('/kasa-gun-sonu')}>🧮 {c('Sayım')}</button>}
-        {yetki('finans.ekstre', 'gor') && <button type="button" className="d" onClick={() => git(`/ekstre?tur=kasa&id=${id}`)}>📄 {c('Ekstre')}</button>}
+        {yetki('finans.ekstre', 'gor') && <button type="button" className="d" onClick={() => git(`/ekstre?tur=kasa&id=${id}`)}><EkstreIkon /> {c('Ekstre')}</button>}
         <button type="button" className="d bir" onClick={() => gitKart(`/kasa-hesap/${id}`)}>{c('Kartı Aç')} ↗</button>
       </div>
       <div className="katab ks-sekme">

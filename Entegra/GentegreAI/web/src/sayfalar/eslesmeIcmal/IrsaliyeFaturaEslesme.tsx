@@ -207,7 +207,7 @@ export function IrsaliyeFaturaEslesme() {
         <div className="sel">📅 İrsaliye tarihi:
           <input type="date" value={bas} max={bit} onChange={e => e.target.value && degistir({ bas: e.target.value })} /> –
           <input type="date" value={bit} min={bas} onChange={e => e.target.value && degistir({ bit: e.target.value })} /></div>
-        <div className="sel">👥 Cari:
+        <div className="sel">💼 Cari:
           <select value={cari} onChange={e => degistir({ cari: e.target.value })}>
             <option value={0}>Tümü</option>
             {(veri?.secim.cariler ?? []).map(c => <option key={c.id} value={c.id}>{c.ad}</option>)}

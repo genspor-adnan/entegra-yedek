@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
@@ -28,12 +29,12 @@ import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
  * yürüyen bakiye. Ortak: hesap seçici, dönem, Liste / Aylık görünümü, çift tık → hareketi
  * üreten belge / kasa işlemi, A4 çıktı. Türe göre: cari'de Borç / Alacak ve B / A, vade sütunu,
  * Detay görünümü (belge kalemleri), Devir / Açılış penceresi; hesaplarda Giriş / Çıkış ve
- * karşı cari sütunu. Liste ve kartlardaki "📄 Ekstre" bu ekranı hesapla açar; sekme anahtarı
+ * karşı cari sütunu. Liste ve kartlardaki "Σ Ekstre" bu ekranı hesapla açar; sekme anahtarı
  * yol olduğu için açık Ekstre sekmesi yeniden kullanılır (yeni sekme açılmaz).
  */
 type Gorunum = 'liste' | 'detay' | 'aylik';
 
-const TUR_AD: Record<EkstreTuru, string> = { cari: '👥 Cari', kasa: '💵 Kasa', banka: '🏦 Banka', pos: '📟 POS', kredi: '📑 Kredi', kredikarti: '💳 Kredi Kartı' };
+const TUR_AD: Record<EkstreTuru, string> = { cari: '💼 Cari', kasa: '💵 Kasa', banka: '🏦 Banka', pos: '📟 POS', kredi: '📑 Kredi', kredikarti: '💳 Kredi Kartı' };
 const KART_YOLU: Record<EkstreTuru, string> = { cari: '/cari', kasa: '/kasa-hesap', banka: '/banka-hesap', pos: '/pos-hesap', kredi: '/kredi-hesap', kredikarti: '/kredi-karti' };
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 const v_adet = (v: Veri) => v.ozet.adet;
@@ -128,7 +129,7 @@ export function Ekstre() {
     <div className="hi ek">
       <style>{icmalStili + EKSTRE_STILI}</style>
       <div className="sayfabas">
-        <div className="basrow"><h1>📄 {c('Ekstre')} — {baslik}</h1><span className="yol">Finans › {c('Ekstre')}</span></div>
+        <div className="basrow"><h1><EkstreIkon boyut={20} /> {c('Ekstre')} — {baslik}</h1><span className="yol">Finans › {c('Ekstre')}</span></div>
       </div>
 
       {/* ARAÇ ÇUBUĞU (kullanıcı: "print combo'yu en sağa al", "diğer butonları da print soluna al"):

@@ -904,7 +904,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kalır: sekmesiz yerinde-ekstre modu ve eski bağlantılar.
     kaynak: 'hesap-ekstre', rota: 'hesap-ekstre', ozelSayfa: true, menuGizli: true, baslik: 'Hesap Ekstresi', yol: 'Finans › Ekstre',
     urlFiltreAlani: 'hesapId', toplam: ['giris', 'cikis', 'yerelBorc', 'yerelAlacak'],
-    menuAd: 'Hesap Ekstresi', ic: '📈', yetkiKodu: 'hesap.tanim.ekstre',
+    menuAd: 'Hesap Ekstresi', ic: '@ekstre', yetkiKodu: 'hesap.tanim.ekstre',
   },
   {
     // EKSTRE - TEK EKRAN (1158, mockup ekstre_tek_ekran.html; kullanıcı: "menüde cari ekstre
@@ -917,7 +917,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'cari-ekstre', rota: 'cari-ekstre', ozelSayfa: true, baslik: 'Ekstre', yol: 'Finans › Ekstre',
     urlFiltreAlani: 'tarafId', toplam: ['borc', 'alacak', 'yerelBorc', 'yerelAlacak'],
     tarihAlani: 'islemTarihi', tarihVarsayilan: 'yilbasindanBugune', aksiyonEkrani: 'cari-ekstre-liste',
-    menuYol: '/ekstre', menuGrup: 'Finans', menuSira: 74, menuAd: 'Ekstre', ic: '📄', yetkiKodu: 'finans.ekstre',
+    menuYol: '/ekstre', menuGrup: 'Finans', menuSira: 74, menuAd: 'Ekstre', ic: '@ekstre', yetkiKodu: 'finans.ekstre',
   },
   {
     kaynak: 'masraf', baslik: 'Masraf Listesi', yol: 'Stok › Masraf Listesi', cipler: DURUM_CIPLERI,

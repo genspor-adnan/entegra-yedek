@@ -89,7 +89,7 @@ interface Props {
   /** Acilista secili gelecek satirin id'si (ör. ekstreden listeye donunce
       ayni hesap yine secili kalsin). */
   seciliBaslangicId?: number | null;
-  /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
+  /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ Σ Ekstre"). */
   cipSonu?: React.ReactNode;
   /** Baslik satirinin SAG USTUNDE, aksiyon dugmelerinin sagina (ör. cikti menusu - icmal deseni). */
   basSag?: React.ReactNode;

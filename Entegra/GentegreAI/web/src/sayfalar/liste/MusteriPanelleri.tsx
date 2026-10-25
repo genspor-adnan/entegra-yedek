@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { MusteriGostergesi as Gosterge, TedarikciGostergesi as TedGosterge } from '../../api/uclar/cariListe';
@@ -136,7 +137,7 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
           ? <button type="button" className="d" onClick={() => setAcik({ tur: 'odeme' })}>💸 {c('Ödeme')}</button>
           : <button type="button" className="d" onClick={() => setAcik({ tur: 'tahsilat' })}>💰 {c('Tahsilat')}</button>)}
         {ekstreYetkisi && <button type="button" className="d"
-                onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>📄 {c('Ekstre')}</button>}
+                onClick={() => git(`/ekstre?tur=cari&id=${id}`)}><EkstreIkon /> {c('Ekstre')}</button>}
         <button type="button" className="d bir" onClick={kart}>{c('Kartı Aç')} ↗</button>
       </div>
 

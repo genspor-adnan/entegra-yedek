@@ -14,7 +14,7 @@ import { stil as icmalStili } from '../hasta/icmal/icmalStil';
  * KASA › CARİ EKSTRE ARAÇLARI (kullanıcı 23.10.2026: "ekstre için sağ üst deseni olarak belge aç butonu
  * ve yazdır/önizle/kaydet olan icmaldeki butonu ekle", "cari ekstreye tarih aralığı filtre ekle").
  *
- * Hasta / müşteri / tedarikçi listelerinin ve cari kartının "📄 Ekstre"si bu listeyi açar
+ * Hasta / müşteri / tedarikçi listelerinin ve cari kartının "Σ Ekstre"si bu listeyi açar
  * (`/cari-ekstre?tarafId=..&ad=..`) - ekstre tek ekranda. Burada:
  *  · `cariEkstreHedefi`: satırı ÜRETEN kayıt (önce kasa işlemi, yoksa belge) - çift tık ve "📄 Belge Aç".
  *  · `CariEkstreCiktisi`: icmal ekranlarının çıktı menüsü (Baskı Önizleme / Yazdır / PDF · Word · Excel ·
@@ -102,7 +102,7 @@ function CariEkstreDetay({ tarafId, bas, bit, onAc }: {
     return () => { iptal = true };
   }, [veri]);
 
-  if (!tarafId) return <div className="not" style={{ padding: 20 }}>Detay için bir cari seçin (listeden "📄 Ekstre").</div>;
+  if (!tarafId) return <div className="not" style={{ padding: 20 }}>Detay için bir cari seçin (listeden "Σ Ekstre").</div>;
   if (!veri) return <div className="not" style={{ padding: 20 }}>Yükleniyor…</div>;
   const p = (n: number) => para.format(n);
   return (

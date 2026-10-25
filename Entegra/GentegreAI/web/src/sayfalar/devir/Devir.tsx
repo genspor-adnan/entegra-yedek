@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
@@ -75,7 +76,7 @@ export function Devir() {
       <div className="hi-arac">
         <span ref={setDugmeYeri} style={{ display: 'contents' }} />
         <span className="sp" />
-        {h && yetki('finans.ekstre', 'gor') && <button type="button" onClick={() => git(`/ekstre?tur=${gercekTur}&id=${h.id}`)}>📄 {c('Ekstre')}</button>}
+        {h && yetki('finans.ekstre', 'gor') && <button type="button" onClick={() => git(`/ekstre?tur=${gercekTur}&id=${h.id}`)}><EkstreIkon /> {c('Ekstre')}</button>}
         {h && <button type="button" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
         <button type="button" className={gor === 'toplu' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'toplu' ? '' : 'toplu' })}>📋 {c('Toplu Giriş')}</button>
         <button type="button" className={gor === 'acilis' ? 'hi-ana' : ''} onClick={() => degistir({ gor: gor === 'acilis' ? '' : 'acilis' })}>⇄ {c('Açılış Bakiyeleri')}</button>

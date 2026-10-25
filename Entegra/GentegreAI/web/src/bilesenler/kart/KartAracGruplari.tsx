@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../EkstreIkon';
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
@@ -408,7 +409,7 @@ function HesapAraclari({ hesapId, tur }: { hesapId: number; tur: string }) {
   return (
     <>
       <button className="d" type="button" title={c('Ekstre ekranında bu hesabın hareketleri')}
-              onClick={() => git(`/ekstre?tur=hesap&id=${hesapId}`)}>📄 {c('Ekstre')}</button>
+              onClick={() => git(`/ekstre?tur=hesap&id=${hesapId}`)}><EkstreIkon /> {c('Ekstre')}</button>
       {/* DEVİR / AÇILIŞ (1160): karttaki açılış bakiyesi alanı yerine hesabın devir hareketi. */}
       {oturumYetki('finans.devir', 'gor') && (
         <button className="d" type="button" title={c('Açılış bakiyesi (devir hareketi)')} onClick={() => setDevir(true)}>↪️ {c('Devir / Açılış')}</button>)}
@@ -428,7 +429,7 @@ function CariEkstreDugmesi({ tarafId, ad }: { tarafId: number; ad: string }) {
   if (!oturumYetki('mali_hareket', 'gor')) return null;
   return (
     <button className="d" type="button" title={`${c('Ekstre ekranında bu carinin hareketleri')} - ${ad}`}
-            onClick={() => git(`/ekstre?tur=cari&id=${tarafId}`)}>📄 {c('Ekstre')}</button>
+            onClick={() => git(`/ekstre?tur=cari&id=${tarafId}`)}><EkstreIkon /> {c('Ekstre')}</button>
   );
 }
 

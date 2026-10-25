@@ -174,7 +174,7 @@ export interface ListeTanimi {
       (Fiyat Listeleri HBYS'de Kurumlar & Sigorta, ERP'de Satış). Alt grup ERP'de
       düşer - hedef grubun kendi kırılımı yok. */
   erpMenuGrup?: string;
-  /** Cip seridine "📄 Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
+  /** Cip seridine "Σ Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
       ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
   ekstre?: {
     kaynak: string; alan: string; baslik: string; tarihAlani?: string;

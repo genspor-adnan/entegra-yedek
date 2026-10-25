@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hataMetni } from '../../api/sozlesme';
@@ -105,7 +106,7 @@ export function MusteriRiskIcmali() {
         <CiktiMenusu etiket="Risk İcmali" dosyaAdi={`Müşteri Risk İcmali ${veri?.tarih?.slice(0, 10) ?? ''}`} devre={!veri}>{a4}</CiktiMenusu>
         <span className="sepv" />
         <button disabled={!secili} onClick={() => secili && cariKarti(secili.id)} title={secili?.ad ?? 'Bir müşteri seçin'}>👤 Cari kartı</button>
-        <button disabled={!secili} onClick={() => secili && ekstreAc(secili.id)}>📄 Ekstre</button>
+        <button disabled={!secili} onClick={() => secili && ekstreAc(secili.id)}><EkstreIkon /> Ekstre</button>
         {yetkili && <>
           <button disabled={!secili} onClick={() => secili && setPencere({ tur: 'limit', m: secili })}>✎ Limit güncelle…</button>
           <button disabled={!secili} onClick={() => secili && setPencere({ tur: 'bloke', m: secili })}>

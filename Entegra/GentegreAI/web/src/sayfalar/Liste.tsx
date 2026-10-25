@@ -1,3 +1,4 @@
+import { EkstreIkon } from '../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../bilesenler/sekmeBaglami';
@@ -1283,7 +1284,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             else setEkstre(hesap);
           }}
         >
-          📄 Ekstre
+          <EkstreIkon /> Ekstre
         </button>
       )}
       // RANDEVU (251, kullanici: "arama editi sagina takvim butonu, basinca

@@ -68,13 +68,13 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci'],
     toplam: ['bakiye', 'vadesiGecen'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
-    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    //   "Σ Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
               tarihAlani: 'islemTarihi', yeniSekme: true },
     sabitFiltre: { alan: 'musteri', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: true, tedarikci: false },
     // Mockup'ta (cari_karti.html) var ama backend'i henuz yok - "yakinda" gorunur.
-    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
+    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
     yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
@@ -110,12 +110,12 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci', 'vadesiGecen', 'riskYuzde', 'sonSatisGun', 'ciroEgri'],
     toplam: ['bakiye', 'vadesiGecenOdeme', 'odenecek30'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
-    //   "📄 Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
+    //   "Σ Ekstre", secili carinin hareketleri, cipe basinca liste geri gelir.
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Cari Ekstre',
               tarihAlani: 'islemTarihi', yeniSekme: true },
     sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
-    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "📄 Ekstre" Kasa › Cari Ekstre'yi açar.
+    // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
     yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
