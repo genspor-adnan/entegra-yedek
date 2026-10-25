@@ -6,7 +6,7 @@
 #  ilgili kisiler, gorevler + aktiviteler + yorumlar, dokumanlar + ekler (IMAJ) +
 #  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas,
 #  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir), GENINI kod
-#  listeleri (1180 - fn_aktar_kod_listesi; eklemeli).
+#  listeleri (1180 - fn_aktar_kod_listesi; eklemeli), cari kisi bolum / gorev listeleri (1182).
 #
 #  1) goc_al.ps1 ile MSSQL -> stg (Delphi DB ve depo DB'si)
 #  2) IMAJ icerigi: BELGE ZLib ise acilir (Delphi KutugeYaz); ICDIS=1 ise dosya
@@ -149,5 +149,8 @@ $sonuc | ForEach-Object { Write-Host $_ }
 #   sinif / bolge / ilk temas, stok marka / grup ...). Eklemeli: var olan liste ve degerlere dokunmaz.
 Adim "public.fn_aktar_kod_listesi()"
 Psql "select public.fn_aktar_kod_listesi()" | ForEach-Object { Write-Host $_ }
+# KISI BOLUM / GOREV (1182): GENINI -2206/-2251 -> departman, -2205 -> personel_gorev (ada gore eklemeli).
+Adim "public.fn_aktar_kisi_listeleri()"
+Psql "select public.fn_aktar_kisi_listeleri()" | ForEach-Object { Write-Host $_ }
 Write-Host ""
 Write-Host "Bitti." -ForegroundColor Green

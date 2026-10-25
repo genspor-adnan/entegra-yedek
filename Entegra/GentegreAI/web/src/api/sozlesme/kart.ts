@@ -31,10 +31,12 @@ export interface KisiKaydi {
   gorev?: string | null;
   departman?: number | null;
   bagli: boolean;
+  /** Listeden seçilen görevin adı (taraf.gorev_id, 1182) - salt okunur; yoksa serbest `gorev`. */
+  gorevAdi?: string | null;
 }
 
 /** Kisi YAZMA istegi = kaydin sunucunun urettigi alanlari cikarilmis hali. */
-export type KisiIstegi = Omit<KisiKaydi, 'id' | 'bagli' | 'aktif'> & { aktif?: boolean };
+export type KisiIstegi = Omit<KisiKaydi, 'id' | 'bagli' | 'aktif' | 'gorevAdi'> & { aktif?: boolean };
 
 export interface YetkiSatiri {
   yetkiId: number;

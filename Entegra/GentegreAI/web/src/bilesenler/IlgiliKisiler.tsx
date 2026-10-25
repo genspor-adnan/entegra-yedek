@@ -133,7 +133,7 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
             >
               <td>{k.unvan}</td>
               <td>{k.departman != null ? (departmanlar[String(k.departman)] ?? k.departman) : ''}</td>
-              <td>{k.gorev ?? ''}</td>
+              <td>{k.gorevAdi ?? k.gorev ?? ''}</td>
               <td>{telefonBicimle(k.telefon)}</td>
               <td>{k.eposta ?? ''}</td>
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>

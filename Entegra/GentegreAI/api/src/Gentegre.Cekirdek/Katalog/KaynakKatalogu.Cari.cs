@@ -202,7 +202,9 @@ public static partial class KaynakKatalogu
             new("bagliCari",    "(select public.fn_taraf_ad(c.unvan, c.ad, c.soyad)::varchar(120) as unvan from public.taraf c where c.id = t.bag_id)",
                                                     "metin", "Cari (Firma)", Genislik: 180),
             new("departman",    "t.departman",     "kod",   "Bölüm"),
-            new("gorev",        "t.gorev",         "metin", "Gorev"),
+            // Listeden seçilen görev (gorev_id, 1182) önce, yoksa serbest metin.
+            new("gorev",        "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), nullif(t.gorev, ''))::varchar(100)",
+                                "metin", "Görev"),
             new("cepTel",       "t.cep_tel",       "metin", "Cep Telefonu"),
             new("telefon",      "t.telefon",       "metin", "Telefon",       Varsayilan: false),
             new("eposta",       "t.eposta",        "metin", "E-posta"),

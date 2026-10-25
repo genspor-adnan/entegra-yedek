@@ -11,6 +11,8 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 - **Kod listeleri (1180):** kullanıcı *"tanımlamadaki kategori, ilk temas gibi combo'ların içi boş"*. Aktarım için kurulan DB (`kur.ps1 -SadeceSema`) 013_goc_faz1'i atlıyordu. `fn_aktar_kod_listesi()` stg.genini'den eklemeli taşır (var olan liste / değer ezilmez, Delphi DIL -1 = web dil 0); `aktar_ek.ps1` GENINI'yi çekip çağırır. UNIVERSE: 210 liste, 2357 değer.
 - **İlgili Kişiler:** kartta Genel'den ayrı sekmeye, Adres / Fatura'nın arkasına (Aday ekranında Genel'de kalır). Müşteri / Tedarikçi listesinde Unvan'dan sonra `ilgiliKisi` sütunu (aktif kişiler, virgüllü); metin sütunu olduğu için arama kutusu kişi adında da arar.
+- **İlgili kişi telefonu:** grid "Telefon" = cep varsa cep, yoksa telefon (kullanıcı: "hangisi varsa o gelsin, cep öncelikli"); düzenleme gösterilen kolona yazar.
+- **Kişi Bölüm / Görev (1182):** Delphi GENINI -2206/-2251 → `departman`, -2205 → `personel_gorev` (ada göre eklemeli, `fn_aktar_kisi_listeleri`, aktar_ek.ps1). UNIVERSE: 15 bölüm, 55 görev. Kişi kartında Görev listeden (`gorev_id`), serbest metin "Unvan (serbest)".
 - **Kampanya** Adres / Fatura'dan Satış & Risk › Satış Koşulları'na. **Ödeme Şekli** kaldırıldı, `taraf_musteri.odeme_sekli` düşürüldü (1181; üç DB'de dolu satır yoktu, olsaydı yedeklenirdi).
 
 ## 23.10.2026 — Banka hareketleri: Garanti BBVA API, öneri, işleme (1157)

@@ -271,7 +271,11 @@ public static partial class KartKatalogu
             new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Kisi Kodu", Grup: "Kimlik"),
             new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan", Grup: "Kimlik"),
             new("departman", "departman",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
-            new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Gorev", Grup: "Kimlik"),
+            // GÖREV LİSTEDEN (kullanıcı 25.10.2026: "bölüm ve görev listesinin de migrate olması gerekir"): Delphi
+            //   cari kişi görevi bir listeydi (GENINI -2205, 1182 ile personel_gorev'e taşındı). Serbest metin
+            //   personel kartındaki gibi "Unvan (serbest)" olarak kalır - eski kayıtların yazısı kaybolmasın.
+            new("gorevId",   "gorev_id",   "kod",   KodTablosu: "public.v_gorev_lookup", Baslik: "Görev", Grup: "Kimlik"),
+            new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Unvan (serbest)", Grup: "Kimlik"),
             // "Is Bilgileri" kutu basligi IPTAL edildi (kullanici) - Bagli Cari/Rol/Durum
             //   AltGrup'suz (adsiz) duz alan olarak kaliyor, idstrip'in hemen altinda.
             new("bagId",     "bag_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Bagli Cari"),

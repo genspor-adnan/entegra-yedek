@@ -8,7 +8,7 @@ namespace Gentegre.Veri.Depolar;
 /// bu cariye HALEN bagli mi (false ise gecmiste bagliydi, "Ayrıldı" - taraf_gecmis'ten).
 /// </summary>
 public sealed record KisiKaydi(long Id, string Unvan, string? Telefon, string? Eposta, bool Aktif,
-    string? Gorev, short? Departman, bool Bagli);
+    string? Gorev, short? Departman, bool Bagli, string? GorevAdi = null);
 
 /// <summary>
 /// Cari kartındaki "İlgili Kişiler" — ayrı bir tablo DEĞİL, semadaki tasarıma uyularak
@@ -43,11 +43,17 @@ public sealed class KisiDeposu
         NpgsqlConnection baglanti, NpgsqlTransaction? islem, long tarafId, CancellationToken iptal)
     {
         await using var komut = baglanti.Komut("""
-            select id, unvan, telefon, eposta, durum, gorev, departman, true as bagli
+            -- CEP ÖNCELİKLİ (kullanıcı 25.10.2026, kart 485: "hangisi varsa o gelsin, cep öncelikli" - Delphi'den
+            --   gelen kişinin numarası cep_tel'de, gridde telefon boş görünüyordu). Düzenleme gösterilen kolona yazar.
+            select id, unvan, coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
+                   eposta, durum, gorev, departman, true as bagli,
+                   (select g.ad from public.personel_gorev g where g.id = taraf.gorev_id) as gorev_adi
               from public.taraf
              where bag_id = @p0 and kisi = 1
             union all
-            select id, unvan, telefon, eposta, durum, gorev, departman, false as bagli
+            select id, unvan, coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
+                   eposta, durum, gorev, departman, false as bagli,
+                   (select g.ad from public.personel_gorev g where g.id = t.gorev_id) as gorev_adi
               from public.taraf t
              where kisi = 1
                and (bag_id is null or bag_id <> @p0)
@@ -68,7 +74,8 @@ public sealed class KisiDeposu
                 okuyucu.GetInt16(4) == 1,
                 okuyucu.IsDBNull(5) ? null : okuyucu.GetString(5),
                 okuyucu.IsDBNull(6) ? null : okuyucu.GetInt16(6),
-                okuyucu.GetBoolean(7)));
+                okuyucu.GetBoolean(7),
+                okuyucu.IsDBNull(8) ? null : okuyucu.GetString(8)));
         return sonuc;
     }
 
@@ -189,8 +196,9 @@ public sealed class KisiDeposu
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
         Dictionary<string, object?> eski;
+        string? yeniCep = null;
         await using (var kontrol = new NpgsqlCommand(
-            "select unvan, telefon, eposta, durum, gorev, departman from public.taraf " +
+            "select unvan, telefon, eposta, durum, gorev, departman, cep_tel from public.taraf " +
             "where id = @p0 and bag_id = @p1 and kisi = 1", baglanti, islem))
         {
             kontrol.Parameters.AddWithValue("p0", kisiId);
@@ -207,11 +215,20 @@ public sealed class KisiDeposu
                 ["gorev"] = okuyucu.IsDBNull(4) ? null : okuyucu.GetString(4),
                 ["departman"] = okuyucu.IsDBNull(5) ? null : okuyucu.GetInt16(5),
             };
+            // Grid "Telefon" = cep_tel (varsa) yoksa telefon. Cep varken gelen değer CEP'e yazılır, telefon korunur.
+            var cep = okuyucu.IsDBNull(6) ? null : okuyucu.GetString(6);
+            if (!string.IsNullOrWhiteSpace(cep))
+            {
+                eski["cepTel"] = cep;
+                yeniCep = telefon;
+                telefon = eski["telefon"] as string;
+            }
         }
 
         await using (var komut = new NpgsqlCommand("""
             update public.taraf set unvan = @p0, telefon = @p1, eposta = @p2, durum = @p3,
-                   gorev = @p4, departman = @p5, degistiren = @p6
+                   gorev = @p4, departman = @p5, degistiren = @p6,
+                   cep_tel = case when @p9 then @p10 else cep_tel end
             where id = @p7 and bag_id = @p8 and kisi = 1
             """, baglanti, islem))
         {
@@ -224,6 +241,8 @@ public sealed class KisiDeposu
             komut.Parameters.AddWithValue("p6", baglam.KullaniciId);
             komut.Parameters.AddWithValue("p7", kisiId);
             komut.Parameters.AddWithValue("p8", tarafId);
+            komut.Parameters.AddWithValue("p9", eski.ContainsKey("cepTel"));
+            komut.Parameters.Add(new NpgsqlParameter("p10", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)yeniCep ?? DBNull.Value });
             await komut.ExecuteNonQueryAsync(iptal);
         }
 
@@ -232,6 +251,7 @@ public sealed class KisiDeposu
             ["unvan"] = unvan, ["telefon"] = telefon, ["eposta"] = eposta,
             ["durum"] = (short)(aktif ? 1 : 0), ["gorev"] = gorev, ["departman"] = departman,
         };
+        if (eski.ContainsKey("cepTel")) yeni["cepTel"] = yeniCep;
         var fark = LogDeposu.Fark(eski, yeni);
         if (fark is not null)
             await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, KartTabloId.Cari, kisiId,
