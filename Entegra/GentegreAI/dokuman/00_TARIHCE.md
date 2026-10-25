@@ -25,6 +25,16 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — Ctrl+K: VKN ile müşteri / tedarikçi kartı (izibiz) · aynı VKN ile ikinci kart yok
+
+Kullanıcı: *"ctrl k arama prompt'a şu tür komut yazarsam izibiz'den bilgi alıp oluştur.. örnek: 3850065757 müş (veya müşteri) / ted (tedarikçi) kart veya kartı aç veya oluştur"* · *"o vkno ile kart varsa uyarı verecek ve kartı açacak"* · *"aynı vkno ile kart açılamaz"*.
+
+- **Palet** (`cariKomutu.ts`): 10 haneli VKN / 11 haneli TCKN + rol (müş / müşteri, ted / tedarikçi; ilk 3 harf) + isteğe bağlı kart / kartı / aç / oluştur / yeni, sıra serbest. Kayıtlıysa (pasif dahil) "Kayıtlar"da kart; rolü yoksa sahip olduğu rolün ekranında açılır ve "kartta rolü işaretleyin" denir. Kayıtlı değilse "izibiz'den bilgi al, yeni … kartı oluştur": Enter → `gib-bilgi` (yeniden kayıt kontrolü + `EBelgeSorgu.MukellefSorgulaAsync`) → kartın normal yeni kayıt ucu (unvan, VKN, vergi dairesi, rol, e-Fatura bayrağı, posta kutusu, fatura adresi) → kart açılır. Entegratör bilgi veremezse kart VKN dolu açılır.
+- **Aynı VKN kuralı** (`CariVknUclari.VknMukerrerKuraliAsync`, kart ekle / güncelle): müşteri / tedarikçi / aday rolünde aynı numaralı başka cari varsa (pasif dahil) kayıt reddedilir; firma hem müşteri hem tedarikçiyse tek kartta iki rol. UNIVERSE'te mükerrer VKN yok (454 VKN'li cari tekil).
+- **Test:** API 834/834, web birim testleri (`cariKomutu.test.ts`); dev DB'de izibiz ile gerçek oluşturma (FETA BİLGİSAYAR, adres + vergi dairesi dolu), ikinci kayıt 400, test carisi silindi; UNIVERSE'te palet görüntüsü (Enter'a basılmadı, kayıt yazılmadı).
+
+---
+
 ## 25.10.2026 — Masraf, Müşteri Risk / Limit ve Banka Mutabakat icmalleri (1178)
 
 Kullanıcı: *"başka hangi icmaller olabilir?"* → *"Masraf, müşteri risk ve banka mutabakat icmalleri için mockup yap"* → açık sorular *"onayla, hepsini işle"* → *"önce mockup ları kodla"*. Mockup: `Ekranlar/İcmal/masraf_icmali.html`, `musteri_risk_icmali.html`, `banka_mutabakat_icmali.html`.

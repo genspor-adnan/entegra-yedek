@@ -24,7 +24,9 @@ describe('yeniKartVarsayilanlari', () => {
     expect(yeniKartVarsayilanlari(tanim('personel'), 'yeni', q('cepTel=%2B90%20555%20444%2033%2022')))
       .toEqual({ cepTel: '+90 555 444 33 22' });
     expect(yeniKartVarsayilanlari(tanim('hasta'), 5, q('vkno=12345678901'))).toBeUndefined();
-    expect(yeniKartVarsayilanlari(tanim('cari'), 'yeni', q('vkno=12345678901'))).toBeUndefined();
+    // CARİ (25.10.2026): Ctrl+K "VKN + müşteri / tedarikçi" - entegratör bilgi veremezse yeni cari kartı VKN dolu.
+    expect(yeniKartVarsayilanlari(tanim('cari'), 'yeni', q('vkno=3850065757'))).toEqual({ vkno: '3850065757' });
+    expect(yeniKartVarsayilanlari(tanim('cari'), 7, q('vkno=3850065757'))).toBeUndefined();
   });
 
   it('konsültasyon / sevk önce sorulan hastayla açılır', () => {

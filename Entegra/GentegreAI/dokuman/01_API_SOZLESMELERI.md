@@ -1785,6 +1785,21 @@ POST /api/banka-mutabakat/onay   {gun, hesapIdler[]}                            
   kalıcı durum 2 yazan uçlarda. Eşleştir var olan kesin kasa işlemine bağlar (yeni işlem yok), tolerans
   `banka.mutabakat_tolerans_kurus` (0). Log: 1730 teminat, 1741 gün bakiyesi, 1742 onay, 1743 eşleştirme.
 
+## 9.26 VKN ile cari kartı (Ctrl+K) ve aynı VKN kuralı
+
+```
+GET /api/hizli-bul/cari?vkn=10|11 hane          cari Gör   → {vkn, kayitlar[{id, ad, kod, musteri, tedarikci, durum}]}
+GET /api/kart/cari/gib-bilgi?vkn=                cari Ekle  → {vkn, kayitlar[], gib{bulundu, mukellef, durum, unvan, vergiDairesi,
+                                                                il, ilce, adres, alias, irsaliyeAlias, eirsaliye} | null, gibHata?}
+```
+
+- Kayıtlı cari varsa (pasif dahil) `gib-bilgi` entegratörü SORMAZ; web oluşturmaz, uyarıp kartı açar.
+- Entegratör iş hatası (hesap yok vb.) `gibHata` ile döner (200); web kartı VKN dolu açar.
+- Kart, kartın normal `POST /api/kart/cari` ucuyla oluşturulur (alanlar + `adresler` detayı, tür 1 Fatura, varsayılan).
+- **Aynı VKN kuralı:** `POST/PUT /api/kart/cari` - müşteri / tedarikçi / aday rolünde aynı 10 / 11 haneli numaralı başka cari
+  varsa (pasif dahil) 400 `DOGRULAMA` (alan `vkno`). Tek haneden oluşan yer tutucu numaralar (0000000000, 11111111111)
+  sayılmaz; güncellemede yalnız numara değişiyorsa bakılır.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

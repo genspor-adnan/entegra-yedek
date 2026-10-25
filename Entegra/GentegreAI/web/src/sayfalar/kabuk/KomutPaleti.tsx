@@ -7,6 +7,8 @@ import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 import { telefonBicimle } from '../../bilesenler/bicim';
 import { mesaj } from '../../bilesenler/mesaj';
+import { cariKartGovdesi, cariKartYolu, cariNiyetCoz, rolAdi, type CariRol } from './cariKomutu';
+import { paletSadelestir } from './paletMetin';
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -29,17 +31,8 @@ import { mesaj } from '../../bilesenler/mesaj';
  * "kısa yoldan ulaşabileyim" isteğinin karşılığı iki tuş (Ctrl+K, Enter).
  */
 
-/** Türkçe duyarsız arama metni: "İstem" yazan "istem"i bulsun. */
-const TR_HARF = 'çğıöşüâîû';
-const ASCII_HARF = 'cgiosuaiu';
-export function paletSadelestir(metin: string) {
-  let sonuc = '';
-  for (const h of metin.toLocaleLowerCase('tr')) {
-    const i = TR_HARF.indexOf(h);
-    sonuc += i >= 0 ? ASCII_HARF[i] : h;
-  }
-  return sonuc;
-}
+// Türkçe duyarsız arama metni ayrı modülde (cariKomutu da kullanır; döngüsel import olmasın).
+export { paletSadelestir } from './paletMetin';
 
 export interface PaletEkrani { yol: string; ad: string; grup: string;
   /** İŞLEM (ekran değil, bir iş başlatır: "＋ Yeni Hasta Kartı"): "İşlemler" bölümünde durur. */
@@ -185,7 +178,9 @@ type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
   | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string;
       /** Kayıtlı hastaya YENİ BAŞVURU: açık başvurusu varsa o açılır (Liste.basvuruAc ile aynı kural). */
-      basvuruTaraf?: { id: number; ad: string } }
+      basvuruTaraf?: { id: number; ad: string };
+      /** VKN + rol (cariKomutu): Enter entegratörden bilgi alıp kartı OLUŞTURUR (kayıtlıysa uyarıp açar). */
+      cariOlustur?: { vkn: string; rol: CariRol } }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
@@ -253,7 +248,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   const [cumleKaydi, setCumleKaydi] = useState<Oge[]>([]);
   useEffect(() => {
     // Numara + niyet ('11111111110 yeni hasta') cümle komutu değil - kimlik niyeti karşılar.
-    const cz = acik && !kimlikNiyetCoz(arama) ? cumleCoz(arama) : null;
+    const cz = acik && !kimlikNiyetCoz(arama) && !cariNiyetCoz(arama) ? cumleCoz(arama) : null;
     if (!cz) { setCumleKaydi([]); return }
     let iptal = false;
     const zaman = window.setTimeout(() => {
@@ -276,6 +271,47 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
                grup: '', kod: '', aktif: false }]
           : []);
       });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar]);
+
+  /**
+   * VKN + MÜŞTERİ / TEDARİKÇİ (cariKomutu): "3850065757 müş kart aç", "3850065757 ted oluştur". Kayıtlıysa
+   * (pasif dahil) kartı açılır - aynı VKN ile ikinci kart AÇILMAZ (sunucu da reddeder). Kayıtlı değilse
+   * "İşlemler"de oluşturma satırı: Enter entegratörden (izibiz) unvan / vergi dairesi / adres / e-Fatura posta
+   * kutusunu alır ve kartı kaydedip açar.
+   */
+  const [cariOgeleri, setCariOgeleri] = useState<Oge[]>([]);
+  useEffect(() => {
+    const cn = acik ? cariNiyetCoz(arama) : null;
+    if (!cn) { setCariOgeleri([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      api.hizliBulCari(cn.vkn).then(y => {
+        if (iptal) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        const yol = cariKartYolu(cn.rol);
+        if (!menude.has(yol)) { setCariOgeleri([]); return }
+        const kayitlar = y.kayitlar ?? [];
+        if (kayitlar.length) {
+          setCariOgeleri(kayitlar.map<Oge>(k => {
+            // Rol yoksa kartı SAHİP OLDUĞU rolün ekranında açılır; kartta istenen rol işaretlenir (tek kayıt).
+            const rolVar = cn.rol === 'musteri' ? k.musteri : k.tedarikci;
+            const acYol = rolVar || !menude.has(cariKartYolu(cn.rol === 'musteri' ? 'tedarikci' : 'musteri'))
+              ? `${yol}/${k.id}` : `${cariKartYolu(cn.rol === 'musteri' ? 'tedarikci' : 'musteri')}/${k.id}`;
+            return { bolum: 'Kayıtlar', tur: 'ekran', anahtar: `cv${k.id}`, ikon: cn.rol === 'musteri' ? '👥' : '🤝',
+                     ad: `${k.ad} — ${c('kayıtlı')} ${c(rolAdi(cn.rol))} ${c('kartı')}`,
+                     grup: `VKN ${cn.vkn}${k.kod ? ` · ${k.kod}` : ''}${k.durum !== 1 ? ` · ${c('pasif')}` : ''}`
+                           + (rolVar ? '' : ` · ${c(rolAdi(cn.rol))} ${c('değil - kartta rolü işaretleyin')}`),
+                     yol: acYol };
+          }));
+          return;
+        }
+        setCariOgeleri([{ bolum: 'İşlemler', tur: 'ekran', anahtar: 'cv-yeni', islem: true,
+          ikon: cn.rol === 'musteri' ? '👥' : '🤝',
+          ad: `${c("izibiz'den bilgi al, yeni")} ${c(rolAdi(cn.rol))} ${c('kartı oluştur')} — VKN ${cn.vkn}`,
+          grup: c('kayıtlı cari yok'), yol: `${yol}/yeni?vkno=${cn.vkn}`, cariOlustur: cn }]);
+      }).catch(() => { if (!iptal) setCariOgeleri([]) });
     }, 250);
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
@@ -375,10 +411,10 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
     // KİMLİK NİYETİ ÖNCE (Enter onu çalıştırır); aynı hastayı numara araması da bulduysa ikinci kez çizilmez.
     const kimlikYollari = new Set(kimlikOgeleri.map(o => o.tur === 'ekran' ? o.yol : ''));
-    return [...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
+    return [...cariOgeleri, ...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
             ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
-  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, ekranSayac]);
+  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, cariOgeleri, ekranSayac]);
 
   if (!acik) return null;
 
@@ -398,6 +434,34 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         if (acikId) { mesaj(c('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.')); git(`/basvuru/${acikId}`) }
         else git(o.yol);
       }, () => git(o.yol));
+      return;
+    }
+    if (o.tur === 'ekran' && o.cariOlustur) {
+      const { vkn, rol } = o.cariOlustur;
+      const yol = cariKartYolu(rol);
+      onKapat();
+      api.cariGibBilgi(vkn).then(async y => {
+        // KAYITLI (bu arada eklenmiş olabilir): oluşturulmaz - uyarı + kart.
+        const k = (y.kayitlar ?? [])[0];
+        if (k) {
+          mesaj(`${c('Bu VKN ile kayıtlı cari var')}: ${k.ad}${k.durum !== 1 ? ` (${c('pasif')})` : ''}. ${c('Yeni kart açılmadı, kayıtlı kart açıldı.')}`);
+          git(`${yol}/${k.id}`); return;
+        }
+        if (!y.gib?.bulundu) {
+          // Entegratör hesabı yok / yanıt boş: kart VKN dolu açılır, kullanıcı tamamlar.
+          mesaj(`${y.gibHata ?? c("izibiz'de bu VKN için firma bilgisi bulunamadı.")} ${c('Kart VKN dolu açıldı; bilgileri girip kaydedin.')}`);
+          git(`${yol}/yeni?vkno=${vkn}`); return;
+        }
+        const yeni = await api.kartEkle('cari', cariKartGovdesi(vkn, rol, y.gib));
+        const id = Number((yeni.kart as Record<string, unknown>).id);
+        mesaj(`${y.gib.unvan}: ${c(rolAdi(rol))} ${c('kartı izibiz bilgileriyle oluşturuldu')}`
+              + `${y.gib.mukellef ? ` · ${c('e-Fatura mükellefi')}` : ` · ${c('e-Arşiv')}`}.`);
+        git(`${yol}/${id}`);
+      }).catch((h: unknown) => {
+        // Sunucu kuralı (aynı VKN) ya da doğrulama: mesajı gösterilir, kart VKN dolu açılır.
+        mesaj((h as Error)?.message || c('Kart oluşturulamadı.'));
+        git(`${yol}/yeni?vkno=${vkn}`);
+      });
       return;
     }
     if (o.tur === 'ekran') { git(o.yol); onKapat(); return }

@@ -59,6 +59,12 @@ export const kimlikUclari = {
   hizliBulKimlik: (q: string) => istek<{ tur: '' | 'tc' | 'tel'; deger: string;
     hastalar: { id: number; ad: string; bilgi: string }[]; personeller: { id: number; ad: string; bilgi: string }[] }>(
     `/api/hizli-bul/kimlik?q=${encodeURIComponent(q)}`),
+  /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (25.10.2026): o VKN / TCKN ile kayıtlı cariler (pasif dahil). */
+  hizliBulCari: (vkn: string) => istek<{ vkn: string; kayitlar?: CariVknKaydi[] }>(
+    `/api/hizli-bul/cari?vkn=${encodeURIComponent(vkn)}`),
+  /** Kart oluşturmadan önce: kayıtlı cari (varsa oluşturulmaz) + entegratörden (izibiz) firma bilgisi. */
+  cariGibBilgi: (vkn: string) => istek<{ vkn: string; kayitlar?: CariVknKaydi[]; gib?: CariGibBilgisi | null; gibHata?: string }>(
+    `/api/kart/cari/gib-bilgi?vkn=${encodeURIComponent(vkn)}`),
   hizliBul: (q: string) => istek<{ sonuclar: { tur: string; id: number; altId: number; ad: string; bilgi: string }[] }>(
     `/api/hizli-bul?q=${encodeURIComponent(q)}`),
 
@@ -150,4 +156,10 @@ export interface AcikOturum {
 /** Kullanici Ayarlari > Guvenlik (669): giris denemesi. */
 export interface GirisDenemesi {
   tarih: string; basarili: boolean; sebep: string; ip: string; istemci: string;
+}
+
+export interface CariVknKaydi { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; durum: number }
+export interface CariGibBilgisi {
+  bulundu: boolean; mukellef: boolean; durum: string; unvan: string; vergiDairesi: string;
+  il: string; ilce: string; adres: string; alias: string; irsaliyeAlias: string; eirsaliye: boolean;
 }

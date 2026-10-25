@@ -155,6 +155,8 @@ public static class KartUclari
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
             // HASTA (kullanıcı kuralı): aynı kimlik numaralı hasta varsa yeni kayıt açılmaz.
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
+            // CARİ (kullanıcı 25.10.2026): aynı VKN ile ikinci cari kartı açılmaz.
+            await CariVknUclari.VknMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
             // MUAYENE ŞABLONU (929): doktor yalnız KENDİ şablonunu açar.
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, null, iptal);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
@@ -244,6 +246,7 @@ public static class KartUclari
             //   kısıtın dışına da çıkarılamaz (tedarikçi işareti kapatılamaz).
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, degerler, id, Islem.Degistir, iptal);
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
+            await CariVknUclari.VknMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, id, iptal);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,

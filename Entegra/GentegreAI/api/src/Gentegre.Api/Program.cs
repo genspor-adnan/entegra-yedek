@@ -397,6 +397,8 @@ uygulama.UretimIcmalUclariniEkle();
 uygulama.MasrafIcmalUclariniEkle();
 uygulama.MusteriRiskIcmalUclariniEkle();
 uygulama.BankaMutabakatUclariniEkle();
+// CTRL+K VKN + MÜŞTERİ / TEDARİKÇİ KARTI: kayıtlı cari + izibiz bilgisi (25.10.2026).
+uygulama.CariVknUclariniEkle();
 // PLANLI GİDER (1177): tekrarlayan gider tanımı, dönemler, eşleştirme, taslak ödeme.
 uygulama.PlanliGiderUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.

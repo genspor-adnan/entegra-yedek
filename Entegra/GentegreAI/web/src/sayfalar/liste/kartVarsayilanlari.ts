@@ -32,6 +32,10 @@ export function yeniKartVarsayilanlari(tanim: ListeTanimi, kartId: number | 'yen
   // CTRL+K "TC / telefon + yeni hasta / personel" (22.10.2026): kayıtlı değilse yeni kart numara dolu.
   if ((k === 'hasta' || k === 'personel') && kartId === 'yeni' && (g('vkno') || g('cepTel')))
     return { ...t, ...varsa('vkno', 'vkno', 'metin'), ...varsa('cepTel', 'cepTel', 'metin') };
+  // CTRL+K "VKN + müşteri / tedarikçi" (25.10.2026): entegratör bilgi veremezse yeni cari kartı VKN dolu açılır
+  //   (rol bayrağı listenin kendi varsayılanından: Müşteri Listesi müşteri, Tedarikçi Listesi tedarikçi).
+  if (k === 'cari' && kartId === 'yeni' && g('vkno'))
+    return { ...t, ...varsa('vkno', 'vkno', 'metin') };
   // Önce sorulan hasta (ListeKarti'nin hasta araması) kartın hastasıdır.
   if (HASTA_ILE_YENI.has(k) && kartId === 'yeni' && g('tarafId'))
     return { ...t, tarafId: sayi('tarafId') };
