@@ -78,6 +78,12 @@ public static partial class KaynakKatalogu
             //   genisleyip unvani sikistiriyordu.
             new("kod",          "t.kod",           "metin", "Kod", Genislik: 110),
             new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan"),
+            // İLGİLİ KİŞİ (kullanıcı 25.10.2026: "müşteri ve tedarikçi listelerinde default ilgili kişi Unvan'dan sonra
+            //   sütun gelsin, aramada o kişi adından da aranabilsin"): carinin AKTİF ilgili kişileri (taraf kisi = 1,
+            //   bag_id = cari). Metin kolonu olduğu için listenin arama kutusu bunda da arar (gridSorgu.aramaKosulu).
+            new("ilgiliKisi",   "coalesce((select string_agg(public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120), ', ' order by k.id) " +
+                                "from public.taraf k where k.bag_id = t.id and k.kisi = 1 and coalesce(k.durum, 1) = 1), '')",
+                                "metin", "İlgili Kişi", Genislik: 180),
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
             // TCKN listede MASKELI (kullanici): ilk 3 + son 2 acik. 10 haneli
             //   VKN dokunulmadan kalir; ham deger gizli kolonda (arama icin).

@@ -17,7 +17,7 @@ import { TekKayit } from '../TekKayit';
  *    neden zorunlu, loglu). RİSK KALEMLERİ dökümü satış belgesi limit kontrolüyle AYNI hesaptan
  *    (GET /api/musteri-risk-icmal/taraf/{id}): toplam ve limit durumu sunucuda, burada yalnız gösterilir.
  */
-const SATIS = ['iskontoOrani', 'vadeGun', 'odemeSekli', 'dovizCinsi', 'sevkSekli', 'kdvDurumu', 'tevkifat'];
+const SATIS = ['iskontoOrani', 'vadeGun', 'dovizCinsi', 'sevkSekli', 'kdvDurumu', 'tevkifat'];
 const RISK = ['riskLimit', 'riskLimitDoviz', 'riskGrubu', 'sevkBlokesi', 'sevkBlokesiNeden', 'teminatOzeti'];
 const DURUM: Record<MusteriRiskOzeti['durum'], [string, string]> = {
   tanimsiz: ['gri', 'Tanımsız'], kurYok: ['uyari', 'Kur yok'], asim: ['hata', 'Aşıldı'], yaklasiyor: ['uyari', 'Yaklaşıyor'], uygun: ['ok', 'Uygun'],
@@ -54,7 +54,7 @@ export function CariSatisRiskSekmesi({ id, yeniMi, detay, durum, salt, onDegis, 
       <div className="kagrup">
         <h6>{c('Satış Koşulları')}</h6>
         <div className="alan-izgara cari-sr-k2">
-          {anaAlanlar?.(tedarikci ? ['satisFiyatListesiId', 'alisFiyatListesiId'] : ['satisFiyatListesiId'])}
+          {anaAlanlar?.(tedarikci ? ['satisFiyatListesiId', 'alisFiyatListesiId', 'kampanyaId'] : ['satisFiyatListesiId', 'kampanyaId'])}
           <TekKayit {...ortak} alanSirasi={SATIS} />
         </div>
       </div>

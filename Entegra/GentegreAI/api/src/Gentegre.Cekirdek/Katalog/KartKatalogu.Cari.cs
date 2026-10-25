@@ -88,7 +88,9 @@ public static partial class KartKatalogu
             //   bunu ezer (fn_taraf_kampanya).
             new("kampanyaId", "kampanya_id", "kod",
                 KodTablosu: "public.v_kampanya_lookup",
-                Baslik: "Kampanya", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
+                // SATIŞ KOŞULLARI'NDA (kullanıcı 25.10.2026: "kartta kampanya combo'yu satış koşulları altına al") -
+                //   Satış & Risk sekmesinde fiyat listesinin yanında (CariSatisRiskSekmesi).
+                Baslik: "Kampanya", Grup: "Satış Koşulları"),
             // MÜŞTERİ RİSKİ (1178, karar R1): limit (null = TANIMSIZ, limitsiz değil) kendi dövizinde, risk grubu,
             //   sevk blokesi ve geçerli teminatların özeti. KARTTA SALT OKUNUR: kart alan bazında aksiyon yetkisi
             //   (cari.risk_limit) tanımıyor - değişiklik Müşteri Risk / Limit İcmali'nden (neden zorunlu, loglu).
@@ -160,8 +162,7 @@ public static partial class KartKatalogu
                 // Satış Koşulları kutusu (1152).
                 new("iskontoOrani", "iskonto_orani", "ondalik", Baslik: "İskonto Oranı %"),
                 new("vadeGun",      "vade_gun",      "sayi",    Baslik: "Vade (gün)"),
-                new("odemeSekli",   "odeme_sekli",   "kod",     Baslik: "Ödeme Şekli", SabitKodlar: new Dictionary<string, string>
-                    { ["1"] = "Nakit", ["2"] = "Havale / EFT", ["3"] = "Çek", ["4"] = "Senet", ["5"] = "Kredi kartı", ["6"] = "Çek / Havale" }),
+                // ÖDEME ŞEKLİ KALDIRILDI (kullanıcı 25.10.2026, kolon 1181'de düşürüldü).
                 new("dovizCinsi",   "doviz_cinsi",   "kod",     Baslik: "Para Birimi", SabitKodlar: DovizKodlari),
                 new("sevkSekli",    "sevk_sekli",    "kod",     Baslik: "Sevk Şekli", SabitKodlar: new Dictionary<string, string>
                     { ["1"] = "Kendi aracımız", ["2"] = "Kargo", ["3"] = "Ambar / nakliye", ["4"] = "Müşteri teslim alır" }),

@@ -7,6 +7,12 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 25.10.2026 — Cari: GENINI kod listeleri, İlgili Kişiler sekmesi / sütunu, Kampanya, Ödeme Şekli (1180, 1181)
+
+- **Kod listeleri (1180):** kullanıcı *"tanımlamadaki kategori, ilk temas gibi combo'ların içi boş"*. Aktarım için kurulan DB (`kur.ps1 -SadeceSema`) 013_goc_faz1'i atlıyordu. `fn_aktar_kod_listesi()` stg.genini'den eklemeli taşır (var olan liste / değer ezilmez, Delphi DIL -1 = web dil 0); `aktar_ek.ps1` GENINI'yi çekip çağırır. UNIVERSE: 210 liste, 2357 değer.
+- **İlgili Kişiler:** kartta Genel'den ayrı sekmeye, Adres / Fatura'nın arkasına (Aday ekranında Genel'de kalır). Müşteri / Tedarikçi listesinde Unvan'dan sonra `ilgiliKisi` sütunu (aktif kişiler, virgüllü); metin sütunu olduğu için arama kutusu kişi adında da arar.
+- **Kampanya** Adres / Fatura'dan Satış & Risk › Satış Koşulları'na. **Ödeme Şekli** kaldırıldı, `taraf_musteri.odeme_sekli` düşürüldü (1181; üç DB'de dolu satır yoktu, olsaydı yedeklenirdi).
+
 ## 23.10.2026 — Banka hareketleri: Garanti BBVA API, öneri, işleme (1157)
 
 Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekranlar/ERP/banka_hareketleri.html` → *"mockup'a göre yap"* → liste / kart 3 tur karşılaştırma → *"garanti entegrasyonu yap örnek"*.

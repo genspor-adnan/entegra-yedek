@@ -63,7 +63,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Para kolonlari ERP'nin sorusuna gore (mockup): bakiye (B/A, doviz alti),
     //   vadesi gecen, risk limiti kullanimi, son satistan bu yana gun, 12 ay
     //   egri. Iletisim kolonlari onizleme panelinde - kolon seciciden acilir.
-    kolonSirasi: ['kod', 'unvan', 'il', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
+    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
                   'sonSatisGun', 'ciroEgri', 'efatura', 'durum'],
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci'],
     toplam: ['bakiye', 'vadesiGecen'],
@@ -104,7 +104,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
         { alan: 'durum', op: 'esit', deger: 1 }, { alan: 'sonAlisGun', op: 'buyukEsit', deger: 90 }] } },
       { ad: 'Dövizli', filtre: { alan: 'dovizli', op: 'esit', deger: 1 } },
     ],
-    kolonSirasi: ['kod', 'unvan', 'il', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
+    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
                   'sonAlisGun', 'alisEgri', 'onayDurumu', 'efatura', 'durum'],
     kolonBasliklari: { temsilci: 'Satınalmacı', bakiye: 'Bakiye (A = borcumuz)' },
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci', 'vadesiGecen', 'riskYuzde', 'sonSatisGun', 'ciroEgri'],
