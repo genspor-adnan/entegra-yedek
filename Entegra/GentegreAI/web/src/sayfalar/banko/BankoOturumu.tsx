@@ -435,7 +435,7 @@ export function BankoOturumu({ gomulu, acilisBanko, oturumId, onKapat }: {
           )}
           <div className="sel">💵 Nakit tahsilat: <b>+{para(oturum.nakitTahsilat)} ₺</b></div>
           <div className="sel">↩ Nakit iade: <b>−{para(oturum.nakitIade)} ₺</b></div>
-          <div className="sel">💳 POS: <b>{para(oturum.posTutar)} ₺</b></div>
+          <div className="sel">📟 POS: <b>{para(oturum.posTutar)} ₺</b></div>
           <div className="sel">🧾 İşlem: <b>{oturum.islemAdet}</b></div>
           <span className={'bo-rz ' + (oturum.durum === 2 ? 'sari' : oturum.durum === 3 ? 'mavi' : 'ok')}>
             {oturum.durum === 2 ? 'Vardiya açık · teslim edilmedi'
@@ -861,7 +861,7 @@ function PosPaneli({ poslar, giris, setGiris, kaydet, atanmamis, islemler }: {
           : <span className="bo-rz ok">POS farkı yok</span>}
       </div>
       <div className="bo-dugmeler">
-        <button onClick={kaydet}>💳 POS Gün Sonunu Kaydet</button>
+        <button onClick={kaydet}>📟 POS Gün Sonunu Kaydet</button>
       </div>
     </>
   );

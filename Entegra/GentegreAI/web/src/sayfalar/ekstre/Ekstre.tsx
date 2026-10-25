@@ -33,7 +33,7 @@ import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
  */
 type Gorunum = 'liste' | 'detay' | 'aylik';
 
-const TUR_AD: Record<EkstreTuru, string> = { cari: '👥 Cari', kasa: '💵 Kasa', banka: '🏦 Banka', pos: '💳 POS', kredi: '📑 Kredi', kredikarti: '💳 Kredi Kartı' };
+const TUR_AD: Record<EkstreTuru, string> = { cari: '👥 Cari', kasa: '💵 Kasa', banka: '🏦 Banka', pos: '📟 POS', kredi: '📑 Kredi', kredikarti: '💳 Kredi Kartı' };
 const KART_YOLU: Record<EkstreTuru, string> = { cari: '/cari', kasa: '/kasa-hesap', banka: '/banka-hesap', pos: '/pos-hesap', kredi: '/kredi-hesap', kredikarti: '/kredi-karti' };
 const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 const v_adet = (v: Veri) => v.ozet.adet;

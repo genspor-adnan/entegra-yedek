@@ -834,7 +834,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
                         'hesapKesimGunu', 'sonOdemeGunu', 'limitTutar'],
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS Listesi', ic: '💳', yetkiKodu: 'hesap.tanim.pos.liste',
+    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS Listesi', ic: '📟', yetkiKodu: 'hesap.tanim.pos.liste',
   },
   {
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,

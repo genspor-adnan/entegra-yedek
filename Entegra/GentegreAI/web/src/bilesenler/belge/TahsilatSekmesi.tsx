@@ -296,7 +296,7 @@ return (
               title={'POS hesabı seç ve satır ekle'
                      + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => void kapidan(() => hesapSecAc?.('P'))}>
-        💳 POS
+        📟 POS
       </button>
       {/* SEYREK ARACLAR MENUDE (kullanici: "sağında ... şeklinde 3 nokta
           buton olsun basınca alta doğru menüde Banka/Çek/Senet"): kayit
@@ -368,7 +368,7 @@ return (
               <button type="button" className="mi"
                       onClick={() => { setAvansMenu(false); void avansAlGuvenli(22) }}>🏦 Banka</button>
               <button type="button" className="mi"
-                      onClick={() => { setAvansMenu(false); void avansAlGuvenli(25) }}>💳 POS</button>
+                      onClick={() => { setAvansMenu(false); void avansAlGuvenli(25) }}>📟 POS</button>
             </div>
           )}
         </span>
@@ -422,7 +422,7 @@ return (
               <button type="button" className="mi"
                       onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('nakit')) }}>💵 Nakit</button>
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('pos')) }}>💳 POS</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('pos')) }}>📟 POS</button>
               <button type="button" className="mi"
                       onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('banka')) }}>🏦 Banka</button>
               <button type="button" className="mi"

@@ -61,7 +61,7 @@ export function PosSecModali({ onSec, onKapat, onOturumYok }: {
       <div className="psm" onClick={e => e.stopPropagation()}>
         <style>{stil}</style>
         <div className="psm-bas">
-          💳 POS Seç
+          📟 POS Seç
           <button type="button" className="psm-kapat" onClick={onKapat}>✖</button>
         </div>
         {hata && <div className="psm-ic gp-hata">{hata}</div>}

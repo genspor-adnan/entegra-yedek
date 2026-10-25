@@ -89,7 +89,7 @@ export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'kasa.tahsilat.yeni': [
     { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.22', ad: '🏦 Banka' },
-    { kod: 'kasa.yeni.25', ad: '💳 POS' },
+    { kod: 'kasa.yeni.25', ad: '📟 POS' },
     // Cek/senet ayri turlerdir (23/24) ve portfoyde ayri izlenir; belge
     //   kartinin Tahsilat sekmesinde de ayni iki dugme var.
     { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
@@ -100,7 +100,7 @@ export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'avans.yeni': [
     { kod: 'avans.yeni.21', ad: '💵 Nakit' },
     { kod: 'avans.yeni.22', ad: '🏦 Banka' },
-    { kod: 'avans.yeni.25', ad: '💳 POS' },
+    { kod: 'avans.yeni.25', ad: '📟 POS' },
   ],
   'kasa.odeme.yeni': [
     { kod: 'kasa.yeni.31', ad: '💵 Nakit' },

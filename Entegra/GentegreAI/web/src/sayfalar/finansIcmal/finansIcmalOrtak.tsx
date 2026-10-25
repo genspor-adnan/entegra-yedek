@@ -14,7 +14,7 @@ export const isaretli = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + tl(M
 
 /** Ödeme aracı ikonu (sunucu anahtarından - yalnız görünüm). */
 export const ARAC_IKON: Record<string, string> = {
-  havale: '🏦', pos: '💳', kart: '💳', cek: '🧾', senet: '📜', ciro: '↪', nakit: '💵', kupon: '🎟', diger: '•',
+  havale: '🏦', pos: '📟', kart: '💳', cek: '🧾', senet: '📜', ciro: '↪', nakit: '💵', kupon: '🎟', diger: '•',
 };
 
 /** Hesap türü ikonu. */
