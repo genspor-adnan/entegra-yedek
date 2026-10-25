@@ -70,6 +70,9 @@ public static partial class KartKatalogu
             new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
             new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
             new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
+            // E-POSTA GİTMESİN (1184, kullanıcı 25.10.2026): e-Arşiv faturada e-posta sorulmaz, izibiz'e KAĞIT gider.
+            new("earsivEpostaYok", "earsiv_eposta_yok", "mantik", Baslik: "E-Posta gitmesin", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari",
+                Ipucu: "İşaretliyse e-Arşiv faturada e-posta adresi sorulmaz; belge izibiz'e KAĞIT gönderim şekliyle gider."),
             // FIYAT LISTESI (204). IKI AYRI ALAN: bir cari hem musteri hem
             //   tedarikci olabiliyor; tek alan olsaydi ayni cariye satarken de
             //   alirken de ayni liste uygulanirdi. Bos ise yonun VARSAYILAN

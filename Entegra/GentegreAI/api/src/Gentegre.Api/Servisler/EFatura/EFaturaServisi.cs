@@ -124,11 +124,12 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         {
         var taraf = await b.TekAsync("""
             select coalesce(efatura, 0) efatura, coalesce(alias_eposta, '') alias, efatura_sorgu_tarihi,
-                   coalesce(eposta, '') eposta
+                   coalesce(eposta, '') eposta, coalesce(earsiv_eposta_yok, 0) eposta_yok
               from public.taraf where id = @p0
-            """, null, [v.TarafId], o => new Tuple<int, string, DateTime?, string>(
-                o.Sayi("efatura"), o.Metin("alias").Trim(), o.Tarih("efatura_sorgu_tarihi"), o.Metin("eposta").Trim()), iptal)
-            ?? new Tuple<int, string, DateTime?, string>(0, "", null, "");
+            """, null, [v.TarafId], o => new Tuple<int, string, DateTime?, string, bool>(
+                o.Sayi("efatura"), o.Metin("alias").Trim(), o.Tarih("efatura_sorgu_tarihi"), o.Metin("eposta").Trim(),
+                o.Sayi("eposta_yok") == 1), iptal)
+            ?? new Tuple<int, string, DateTime?, string, bool>(0, "", null, "", false);
 
         if (v.Senaryo == 3)
         {
@@ -167,7 +168,10 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         }
 
         // e-ARŞİV: alıcı e-postası (Delphi MailOnayAl). Boş = kâğıt belge.
-        if (eTur == EFaturaKodlari.TurEArsiv)
+        // CARİDE "E-Posta gitmesin" (1184): soru yok, alıcı e-postası boş -> gönderim şekli KAGIT.
+        if (eTur == EFaturaKodlari.TurEArsiv && taraf.Item5)
+            alias = "";
+        else if (eTur == EFaturaKodlari.TurEArsiv)
         {
             if (istek.Eposta is null)
                 return new HazirlaSonucu("eposta",
