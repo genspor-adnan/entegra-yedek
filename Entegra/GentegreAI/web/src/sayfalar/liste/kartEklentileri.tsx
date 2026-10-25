@@ -13,6 +13,7 @@ import { AcilYatakAraclari, AcilYatakBaslik, AcilYatakDonanimSekmesi, AcilYatakD
 import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSekmesi, BelgeTuruHatirlatmaSekmesi,
          BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
+import { IlgiliKisiler } from '../../bilesenler/IlgiliKisiler';
 import { CariBelgeler, CariCrm, CariDevirSorusu, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi } from '../konsultasyon/KonsultasyonKarti';
@@ -106,6 +107,11 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
     yanPanel: b => kayitli(b.kartId)
       ? <CariYanPanel id={b.kartId} tazele={b.tazeleKayit} git={b.git} gitKart={b.git} /> : undefined,
     ekSekmeler: b => kayitli(b.kartId) ? [
+      // İLGİLİ KİŞİLER SEKME (kullanıcı 25.10.2026: "ilgili kişiler bölümünü sekme olarak adres / fatura
+      //   sekmesinden sonraya al"). Adres sekmesi gizli ekranda (Aday) Genel'de adresin yanında kalır.
+      ...(b.tanim.gizliKartSekmeleri?.includes('Adres / Fatura Bilgisi') ? [] : [
+        { anahtar: 'ozel:cari-kisi', baslik: 'İlgili Kişiler',
+          ciz: () => <IlgiliKisiler tarafId={b.kartId as number} saltOkunur={!b.yetki('cari', 'degistir')} /> }]),
       { anahtar: 'ozel:cari-finans', baslik: 'Finansal', ciz: () => <CariFinansal id={b.kartId as number} tazele={b.tazeleKayit} onDegisti={b.kartiTazele} /> },
       { anahtar: 'ozel:cari-belge', baslik: 'Belgeler', ciz: () => <CariBelgeler id={b.kartId as number} /> },
       { anahtar: 'ozel:cari-crm', baslik: 'CRM', ciz: () => <CariCrm id={b.kartId as number} gitKart={b.git} /> },

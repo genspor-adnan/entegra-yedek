@@ -48,7 +48,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html sırası; Finansal / Belgeler / CRM kart eklentisinin sekmeleri.
   cari: {
-    sekmeSirasi: ['Genel', 'Adres / Fatura Bilgisi', 'Satış & Risk', 'Satınalma Koşulları', 'Finansal', 'Belgeler', 'CRM',
+    sekmeSirasi: ['Genel', 'Adres / Fatura Bilgisi', 'İlgili Kişiler', 'Satış & Risk', 'Satınalma Koşulları', 'Finansal', 'Belgeler', 'CRM',
                   'Banka / IBAN', 'Resim / Doküman', 'Ek Alanlar'],
   },
   // ------------------------------------------ banka hesabı (1157) ----

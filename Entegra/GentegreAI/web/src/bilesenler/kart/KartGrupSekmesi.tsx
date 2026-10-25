@@ -735,10 +735,8 @@ return (
       && gizliSekmeler?.includes('Adres / Fatura Bilgisi') && (
       <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
     )}
-    {kaynak === 'cari' && aktif.baslik === 'Genel' && !yeniMi
-      && !gizliSekmeler?.includes('Adres / Fatura Bilgisi') && (
-      <IlgiliKisiler tarafId={id as number} saltOkunur={salt} />
-    )}
+    {/* KAYITLI CARİDE İLGİLİ KİŞİLER ARTIK AYRI SEKME (kartEklentileri 'ozel:cari-kisi', Adres / Fatura'dan
+        sonra - kullanıcı 25.10.2026); Genel'de yalnız Aday ekranında (yukarıda) ve yeni kayıt notu (aşağıda). */}
     {/* YENI kartta kisi eklenemez (henuz taraf id'si yok) ama kutu
         GORUNUR: eskiden hic cizilmedigi icin kullanici "kisi gridi yok"
         saniyordu. Kaydedince ayni yerde gercek grid acilir. */}

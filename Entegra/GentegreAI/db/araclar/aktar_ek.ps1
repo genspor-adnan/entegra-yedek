@@ -5,7 +5,8 @@
 #  KAPANIRKEN bir kez calisir ve geri kalanlari tasir: kullanicilar + personel +
 #  ilgili kisiler, gorevler + aktiviteler + yorumlar, dokumanlar + ekler (IMAJ) +
 #  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas,
-#  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir).
+#  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir), GENINI kod
+#  listeleri (1180 - fn_aktar_kod_listesi; eklemeli).
 #
 #  1) goc_al.ps1 ile MSSQL -> stg (Delphi DB ve depo DB'si)
 #  2) IMAJ icerigi: BELGE ZLib ise acilir (Delphi KutugeYaz); ICDIS=1 ise dosya
@@ -58,7 +59,7 @@ Adim ("Delphi tablolari: " + $MssqlDb)
 GocAl $MssqlDb @("KATEGORI","KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN","PERS_HAREKET",
                  "GOREVLER","GOREVKULLANICI","GOREVYORUM","AKTIVITELER","AKTIVITENOTLAR","ANIMSAT",
                  "DOKUMAN","DOKUMANKLASOR","CEKLER","CEKHAREKET","TEKLIF","TEKLIFDETAY",
-                 "HESAPPLANI","DEMIRBAS")
+                 "HESAPPLANI","DEMIRBAS","GENINI")
 
 Adim ("Depo tablolari: " + $DepoDb)
 GocAl $DepoDb @("EBELGE","EBELGEMESAJ")
@@ -143,5 +144,10 @@ Write-Host ("  " + $n + " ek; diskten " + $disk + ", zlib acilan " + $acilan + "
 Adim "public.fn_aktar_ek()"
 $sonuc = Psql "select jsonb_pretty(public.fn_aktar_ek())"
 $sonuc | ForEach-Object { Write-Host $_ }
+
+# KOD LISTELERI (1180): GENINI cok satirli bolumleri -> kod_liste / kod_deger (cari kategori / sektor /
+#   sinif / bolge / ilk temas, stok marka / grup ...). Eklemeli: var olan liste ve degerlere dokunmaz.
+Adim "public.fn_aktar_kod_listesi()"
+Psql "select public.fn_aktar_kod_listesi()" | ForEach-Object { Write-Host $_ }
 Write-Host ""
 Write-Host "Bitti." -ForegroundColor Green
