@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { onay } from '../bilesenler/mesaj';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -8,6 +9,7 @@ import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
 import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
 import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 import { c } from '../dil/ceviri';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../bilesenler/sekmeBaglami';
 
 // Depolar SAYFADA DEGIL, subenin KARTINDA (kullanici): depo subeye ait, hangi
 //   subenin deposu oldugu ancak kartin icinde belli oluyor.
@@ -38,10 +40,13 @@ const EBELGE_ALT = [
     kartin "Kimlik" sekmesinde - serit karti TANIMLAR, doldurmaz. */
 const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
 
+/** LISTE_TAZELE_OLAYI ayrıntısı: şube kartı kaydedilince liste tazelenir. */
+const SUBE_KAYNAGI = 'sube';
+
 /**
  * FIRMA / SUBELER (Yonetim › Firma / Şubeler) — mockup: Ekranlar/firma_bilgileri.html
  *
- * EKRAN = SUBE LISTESI, kart MODAL olarak acilir (kullanici): firma bilgisi
+ * EKRAN = SUBE LISTESI, kart KENDİ SEKMESİNDE acilir (25.10.2026; once modaldi): firma bilgisi
  * sayfaya gomulu dururken hangi kaydin duzenlendigi belirsizdi ve tek subeli
  * kurulumda bile sekme degistirmek gerekiyordu. Simdi liste tek gorunum,
  * "+ Yeni Şube" ve satirdaki "Düzenle" ayni karti acar.
@@ -55,13 +60,17 @@ const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
  */
 export function FirmaBilgileri() {
   const [subeler, setSubeler] = useState<ListeSatiri[]>([]);
-  /** Karti acan kayit: sayi = duzenle, 'yeni' = ekle, null = kart kapali. */
-  const [kart, setKart] = useState<number | 'yeni' | null>(null);
+  // KART KENDİ SEKMESİNDE (kullanıcı 25.10.2026: "firma şubeler listesinde kart aç deyince sekmede açılsın"):
+  //   /sube/:id (SubeKarti) - projenin kart sekmesi deseni; kaydedince liste LISTE_TAZELE_OLAYI ile tazelenir.
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const git = useNavigate();
+  const setKart = (id: number | 'yeni') => {
+    const yol = `/sube/${id}`;
+    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
+  };
   // Listede secili sube (228): satira tiklayinca isaretlenir; ust ikonlar
   //   (duzenle/sil) secili satiri kullanir.
   const [seciliSube, setSeciliSube] = useState<number | null>(null);
-  /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
-  const [ebelgeAlt, setEbelgeAlt] = useState<string>('genel');
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -81,18 +90,14 @@ export function FirmaBilgileri() {
   }, []);
 
   useEffect(() => { void yukle(); }, [yukle]);
+  useEffect(() => {
+    const dinle = (e: Event) => { if ((e as CustomEvent).detail === SUBE_KAYNAGI) void yukle() };
+    window.addEventListener(LISTE_TAZELE_OLAYI, dinle);
+    return () => window.removeEventListener(LISTE_TAZELE_OLAYI, dinle);
+  }, [yukle]);
 
   const eksikSube = subeler.filter(s => String(s.ebelgeHazir ?? '') !== 'Tamam').length;
 
-  /**
-   * Kartin "e-Belge" sekmesine ALT SEKME cubugu takar (kullanici): Genel /
-   * Seri Bilgileri / XSLT / tur ayarlari. Genel kartin kendi alanlaridir
-   * (gonderici, mukellef hesabi, test ortami, mukellefiyet); digerleri
-   * Ayarlar ekranindan tasinan bolumler.
-   *
-   * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
-   * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
-   */
   /** Secili subeyi siler - sunucu engelleri (belge/kullanici bagi) mesajla doner. */
   const subeSil = async (id: number) => {
     const ad = String(subeler.find(x => Number(x.id) === id)?.ad ?? id);
@@ -108,36 +113,6 @@ export function FirmaBilgileri() {
     }
   };
 
-  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode,
-                         deger: Record<string, unknown>) => {
-    if (sekmeBasligi !== 'e-Belge') return icerik;
-    // Mukellefiyet bayragi kartin GUNCEL degerinden okunur: kutu isaretlenince
-    //   sekme kaydetmeyi beklemeden gorunur.
-    const gorunur = EBELGE_ALT.filter(
-      b => !('mukellefAlani' in b) || Boolean(deger[b.mukellefAlani]));
-    // Acik sekme gizlendiyse Genel'e don - yoksa bos icerik kalirdi.
-    const acik = gorunur.some(b => b.anahtar === ebelgeAlt) ? ebelgeAlt : 'genel';
-    return (
-      <>
-        {/* Alt bolumler BUTON gorunumunde (kullanici) - sekme cizgisi ana
-            sekmelerle karisiyordu. */}
-        <div style={{ display: 'flex', gap: 6, margin: '-6px 0 8px' }}>
-          {gorunur.map(b => (
-            <button key={b.anahtar} type="button"
-                    className={`d${b.anahtar === acik ? ' bir' : ''}`}
-                    onClick={() => setEbelgeAlt(b.anahtar)}>
-              {b.baslik}
-            </button>
-          ))}
-        </div>
-        {acik === 'genel' && icerik}
-        {acik === 'seri' && <SeriKurallari />}
-        {acik === 'xslt' && <XsltSablonlari />}
-        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(acik as EBelgeTuru)
-          && <TurAyarlari tur={acik as EBelgeTuru} />}
-      </>
-    );
-  };
 
   return (
     <>
@@ -223,16 +198,76 @@ export function FirmaBilgileri() {
         </div>
       )}
 
-      {/* Baslik verilince GenForm kendini modal icinde cizer. Ayni kart hem
-          "+ Yeni Şube" hem "Düzenle" icin - iki ayri akis tutulmaz. */}
-      {kart !== null && (
-        <GenForm kaynak="sube" id={kart}
-                 baslik={kart === 'yeni' ? 'Yeni Şube' : 'Firma / Şube'}
-                 seritAlanlari={SERIT_ALANLARI}
-                 sekmeSarmalayici={ebelgeSekmesi}
-                 onKapat={() => { setKart(null); setEbelgeAlt('genel'); }}
-                 onKaydedildi={() => { setKart(null); setEbelgeAlt('genel'); void yukle(); }} />
-      )}
     </>
+  );
+}
+
+/**
+ * ŞUBE KARTI - KENDİ EKRAN SEKMESİNDE (/sube/:id, kullanıcı 25.10.2026). Projenin kart sekmesi deseni:
+ * çerçevesiz (sayfaKipi), sekme başlığı şubenin adı / "Yeni Şube"; Kaydet ve Kapat sekmeyi kapatır, sekme ×
+ * kayıtsız değişikliği sorar (GenForm sayfa kipi). Kaydedince Firma / Şubeler listesi tazelenir.
+ */
+export function SubeKarti() {
+  const { id: ham } = useParams();
+  const id: number | 'yeni' = ham === 'yeni' ? 'yeni' : Number(ham);
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const git = useNavigate();
+  /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
+  const [ebelgeAlt, setEbelgeAlt] = useState<string>('genel');
+  /** Sekme başlığı = şubenin kısa adı (yüklenince); yeni kayıtta "Yeni Şube". */
+  const [ad, setAd] = useState('');
+  useEffect(() => {
+    ekranSekmesi?.baslik(id === 'yeni' ? 'Yeni Şube' : ad ? sekmeAdi(ad) : 'Şube Kartı', `/sube/${ham}`);
+  }, [ekranSekmesi, id, ham, ad]);
+  const kapat = () => { if (ekranSekmesi) ekranSekmesi.kapat(); else git('/sube') };
+
+  /**
+   * Kartin "e-Belge" sekmesine ALT SEKME cubugu takar (kullanici): Genel /
+   * Seri Bilgileri / XSLT / tur ayarlari. Genel kartin kendi alanlaridir
+   * (gonderici, mukellef hesabi, test ortami, mukellefiyet); digerleri
+   * Ayarlar ekranindan tasinan bolumler.
+   *
+   * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
+   * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
+   */
+  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode,
+                         deger: Record<string, unknown>) => {
+    if (sekmeBasligi !== 'e-Belge') return icerik;
+    // Mukellefiyet bayragi kartin GUNCEL degerinden okunur: kutu isaretlenince
+    //   sekme kaydetmeyi beklemeden gorunur.
+    const gorunur = EBELGE_ALT.filter(
+      b => !('mukellefAlani' in b) || Boolean(deger[b.mukellefAlani]));
+    // Acik sekme gizlendiyse Genel'e don - yoksa bos icerik kalirdi.
+    const acik = gorunur.some(b => b.anahtar === ebelgeAlt) ? ebelgeAlt : 'genel';
+    return (
+      <>
+        {/* Alt bolumler BUTON gorunumunde (kullanici) - sekme cizgisi ana
+            sekmelerle karisiyordu. */}
+        <div style={{ display: 'flex', gap: 6, margin: '-6px 0 8px' }}>
+          {gorunur.map(b => (
+            <button key={b.anahtar} type="button"
+                    className={`d${b.anahtar === acik ? ' bir' : ''}`}
+                    onClick={() => setEbelgeAlt(b.anahtar)}>
+              {b.baslik}
+            </button>
+          ))}
+        </div>
+        {acik === 'genel' && icerik}
+        {acik === 'seri' && <SeriKurallari />}
+        {acik === 'xslt' && <XsltSablonlari />}
+        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(acik as EBelgeTuru)
+          && <TurAyarlari tur={acik as EBelgeTuru} />}
+      </>
+    );
+  };
+
+  return (
+    <GenForm key={String(id)} kaynak="sube" id={id} sayfaKipi
+             baslik={id === 'yeni' ? 'Yeni Şube' : 'Firma / Şube'}
+             seritAlanlari={SERIT_ALANLARI}
+             sekmeSarmalayici={ebelgeSekmesi}
+             onYuklendi={d => setAd(String(d.ad || d.unvan || ''))}
+             onKapat={kapat}
+             onKaydedildi={() => { window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: SUBE_KAYNAGI })); kapat() }} />
   );
 }

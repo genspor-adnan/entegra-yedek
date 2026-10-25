@@ -35,7 +35,9 @@ export function EBelgeDipnotlari({ alanlar, deger, saltOkunur, onDegis }: {
             <span className="etiket">{c(a.baslik)}</span>
             <span>
               <button type="button" className="d" onClick={() => ac(a)}>✎ {c(dolu ? 'Düzenle…' : 'Gir…')}</button>
-              {' '}<span className={`rozet ${dolu ? 'ok' : 'gri'}`}>{c(dolu ? 'cariye özel' : 'genel dipnot')}</span>
+              {/* Genel dipnot kartta anılmaz (kullanıcı 25.10.2026: "müş kartından genel dipnotu kaldır") - o şube
+                  ayarlarındadır; burada yalnız doluysa "cariye özel" rozeti. */}
+              {dolu && <>{' '}<span className="rozet ok">{c('cariye özel')}</span></>}
             </span>
           </label>
         );
@@ -54,7 +56,7 @@ export function EBelgeDipnotlari({ alanlar, deger, saltOkunur, onDegis }: {
                }>
           <div style={{ padding: 12, display: 'grid', gap: 8 }}>
             <div className="not">
-              {c('Doluysa bu cariye kesilen belgede genel dipnotun yerine kullanılır; boşsa genel dipnot (Ayarlar › e-Belge › Sabit notlar). Vergi notları (istisna / tevkifat) her durumda eklenir. Kartı Kaydet ile saklayın.')}
+              {c('Bu cariye kesilen belgenin dipnotu. Vergi notları (istisna / tevkifat) her durumda eklenir. Kartı Kaydet ile saklayın.')}
             </div>
             <textarea rows={10} value={metin} maxLength={acik.enFazlaUzunluk ?? 1000} disabled={!yaz} autoFocus
                       onChange={e => setMetin(e.target.value)} style={{ width: '100%', resize: 'vertical' }} />
