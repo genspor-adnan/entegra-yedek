@@ -119,6 +119,15 @@ public static class DevirUclari
         var baglam = await cozucu.CozAsync(ctx, iptal);
         baglam.YetkiIste(Kod, Islem.Gor);
         if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak();
+        // HESAP SEÇİLMEDEN (id 0): ekran yalnız yetkili TÜR listesini ister (Devir.tsx tür seçici). Hesap okunmaya
+        //   çalışılırsa 404 dönüyor, istemci listeyi boş sanıp yalnız "Cari"yi gösteriyordu (kullanıcı 25.10.2026:
+        //   "Devir Girişi'ni jenerik yapmıştın, şu an sadece cari görünüyor").
+        if (id == 0)
+            return Results.Ok(new
+            {
+                tur, turler = Turler.Where(x => baglam.Yetkiler.Var(x.yetki, Islem.Gor)).Select(x => x.tur).ToArray(),
+                hesap = (object?)null, satirlar = Array.Empty<object>(),
+            });
         await using var b = await veri.AcAsync(iptal);
         var t = await TurCozAsync(b, tur, id, iptal);
         baglam.YetkiIste(t.yetki, Islem.Gor);
