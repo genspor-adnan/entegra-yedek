@@ -8,6 +8,10 @@ export const kimlikUclari = {
   giris: (kod: string, parola: string, subeId?: number) =>
     gonder<GirisYaniti>('/api/kimlik/giris', { kod, parola, subeId }),
 
+  /** ORTAK GİRİŞ PANELİ (1190): panelin verdiği tek kullanımlık kodu (60 sn) oturuma çevirir. */
+  girisKoduKullan: (kod: string) =>
+    gonder<GirisYaniti>('/api/kimlik/giris-kodu/kullan', { kod }),
+
   cikis: async () => {
     const refresh = oturum.refresh;
     if (refresh) { try { await gonder('/api/kimlik/cikis', { refreshToken: refresh }) } catch { /* yoksay */ } }

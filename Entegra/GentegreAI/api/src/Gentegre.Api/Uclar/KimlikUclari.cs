@@ -17,6 +17,34 @@ public static class KimlikUclari
             GirisIstegi istek, KimlikServisi servis, HttpContext ctx, CancellationToken iptal)
             => Results.Ok(await servis.GirisAsync(istek, Ip(ctx), Istemci(ctx), iptal)));
 
+        // ORTAK GİRİŞ PANELİ (1190, panel.gentegreai.com): panel girişi bu uca iletir; normal giriş yapılır ama
+        //   token PANELE VERİLMEZ - 60 sn geçerli tek kullanımlık kod döner. Panel kullanıcıyı firmanın kendi
+        //   adresine <adres>?giris=<kod> ile gönderir, firma ekranı kodu /giris-kodu/kullan ile oturuma çevirir.
+        //   Hatalar normal girişle aynı (yanlış parola / kilit / askı) - panel ayrıca genel mesaj gösterir.
+        grup.MapPost("/giris-kodu", [AllowAnonymous] async (
+            GirisIstegi istek, KimlikServisi servis, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var yanit = await servis.GirisAsync(istek, Ip(ctx), Istemci(ctx), iptal);
+            var kod = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))
+                             .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+            await veri.CalistirAsync("delete from public.giris_kodu where son_an < now()", null, iptal);
+            await veri.CalistirAsync("""
+                insert into public.giris_kodu (kod_ozet, yanit, son_an, ip) values (@p0, @p1::jsonb, now() + interval '60 seconds', @p2)
+                """, [KodOzet(kod), System.Text.Json.JsonSerializer.Serialize(yanit, System.Text.Json.JsonSerializerOptions.Web), Ip(ctx)], iptal);
+            return Results.Ok(new { kod });
+        });
+
+        grup.MapPost("/giris-kodu/kullan", [AllowAnonymous] async (
+            GirisKoduIstegi istek, VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            // Tek kullanım: SİLEREK okunur (aynı kod ikinci kez ya da 60 sn sonra 401).
+            var json = string.IsNullOrWhiteSpace(istek.Kod) ? null : await veri.TekDegerAsync<string>("""
+                delete from public.giris_kodu where kod_ozet = @p0 and son_an >= now() returning yanit::text
+                """, [KodOzet(istek.Kod.Trim())], iptal);
+            if (json is null) throw GentegreHatasi.Yetkisiz("Giris kodu gecersiz ya da suresi dolmus; yeniden giris yapin.");
+            return Results.Text(json, "application/json");
+        });
+
         grup.MapPost("/yenile", [AllowAnonymous] async (
             YenileIstegi istek, KimlikServisi servis, HttpContext ctx, CancellationToken iptal)
             => Results.Ok(await servis.YenileAsync(istek.RefreshToken, Ip(ctx), Istemci(ctx), iptal)));
@@ -326,6 +354,11 @@ public static class KimlikUclari
 
     // Giris/yenileme baglam COZULMEDEN once calisir (henuz kimlik yok) -
     //   IP'yi merkezi cozucuden dogrudan alir.
+    public sealed record GirisKoduIstegi(string Kod);
+
+    private static string KodOzet(string kod) => Convert.ToHexString(
+        System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(kod))).ToLowerInvariant();
+
     private static string Ip(HttpContext ctx) => BaglamCozucu.IpCoz(ctx);
 
     private static string Istemci(HttpContext ctx)

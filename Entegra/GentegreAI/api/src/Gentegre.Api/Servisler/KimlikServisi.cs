@@ -37,6 +37,10 @@ public sealed class KimlikServisi
     public const string RolYokMesaji =
         "Hesabiniza rol atanmamis - sisteme giris icin yoneticinizden rol isteyin.";
 
+    /// <summary>Askıya alınmış kurulum (1190, ayar genel.hesap_askida = 1).</summary>
+    public const string AskidaMesaji =
+        "Hesabınız askıda. Lütfen bizimle iletişime geçin.";
+
     public async Task<GirisYaniti> GirisAsync(GirisIstegi istek, string ip, string istemci,
                                               CancellationToken iptal = default)
     {
@@ -100,6 +104,14 @@ public sealed class KimlikServisi
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "rol_yok", iptal);
             throw GentegreHatasi.Yetkisiz(RolYokMesaji);
+        }
+
+        // HESAP ASKIDA (1190, ortak giriş paneli kararı 26.10.2026): kurulum askıya alınmışsa (sözleşme bitti)
+        //   DOĞRU parola girene "askıda" denir; yanlış parolaya genel hata (yukarıda) - bilgi sızmaz.
+        if (await AyarAsync("genel.hesap_askida", 0, iptal) == 1)
+        {
+            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "askida", iptal);
+            throw GentegreHatasi.Yasak(AskidaMesaji, "HESAP_ASKIDA");
         }
 
         await _kullanicilar.GirisBasariliAsync(kullanici.TarafId, ip, iptal);
@@ -208,6 +220,13 @@ public sealed class KimlikServisi
             await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "rol_yok", iptal);
             await islem.CommitAsync(iptal);
             throw GentegreHatasi.Yetkisiz(RolYokMesaji);
+        }
+        // Askıya alınan kurulumda açık oturum da yenilenemez (1190).
+        if (await AyarAsync("genel.hesap_askida", 0, iptal) == 1)
+        {
+            await OturumDeposu.AileIptalAsync(baglanti, islem, oturum.AileId, "askida", iptal);
+            await islem.CommitAsync(iptal);
+            throw GentegreHatasi.Yasak(AskidaMesaji, "HESAP_ASKIDA");
         }
 
         // Kilit altinda satir acik olmali; degilse (beklenmeyen) yeni dal ACILMAZ.

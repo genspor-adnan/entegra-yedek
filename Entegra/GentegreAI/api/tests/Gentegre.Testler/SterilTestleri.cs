@@ -69,7 +69,8 @@ public sealed class SterilTestleri(VeritabaniOlgusu olgu) : IClassFixture<Verita
         var dun = await DonguAsync(b, t, cihaz, 1, "now() - interval '1 day'", 8);
         await IndikatorAsync(b, t, dun, 1, 1);
         Assert.Equal(0, await Bd());                                     // dünkü test bugünü kurtarmaz
-        var bugun = await DonguAsync(b, t, cihaz, 2, "now() - interval '1 hour'", 8);
+        // "now() - 1 saat" gece 00:00-01:00 arası DÜNE düşüyordu (test o saatte kırılıyordu) - bir dakika önce.
+        var bugun = await DonguAsync(b, t, cihaz, 2, "now() - interval '1 minute'", 8);
         await IndikatorAsync(b, t, bugun, 1, 2);
         Assert.Equal(0, await Bd());                                     // bugün KALDI
         await IndikatorAsync(b, t, bugun, 1, 1);

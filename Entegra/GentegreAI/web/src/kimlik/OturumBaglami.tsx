@@ -71,6 +71,16 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
   const [oturumHatasi, setOturumHatasi] = useState<string | null>(null);
 
   const benYukle = useCallback(async () => {
+    // ORTAK GİRİŞ PANELİ (1190): panel girişten sonra buraya ?giris=<tek kullanımlık kod> ile gönderir. Kod
+    //   oturuma çevrilir ve ADRES ÇUBUĞUNDAN HEMEN SİLİNİR (geçmişte / paylaşılan bağlantıda kalmasın). Geçersiz /
+    //   süresi dolmuş kodda normal giriş ekranı açılır.
+    const adres = new URL(window.location.href);
+    const panelKodu = adres.searchParams.get('giris');
+    if (panelKodu) {
+      adres.searchParams.delete('giris');
+      window.history.replaceState(window.history.state, '', adres.pathname + adres.search + adres.hash);
+      try { oturum.yaz(await api.girisKoduKullan(panelKodu)) } catch { /* kod geçersiz: giriş ekranı */ }
+    }
     if (!oturum.access) { setBen(null); setOturumHatasi(null); setYukleniyor(false); return }
     // Sube hatasinda bir kez, saklanan sube OLMADAN tekrar denenir - dongu yok.
     for (let deneme = 0; deneme < 2; deneme++) {

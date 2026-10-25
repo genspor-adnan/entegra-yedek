@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (630 ad, 160 tanesi birden cok dosyada)
+## Fonksiyonlar (630 ad, 161 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -24,7 +24,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_ek_dokuman` | `1146_aktarim_ek_dokuman.sql` | — |
 | `fn_aktar_ek_ebelge` | `1146_aktarim_ek_dokuman.sql` | — |
 | `fn_aktar_ek_gorev` | `1145_aktarim_ek_gorev.sql` | — |
-| `fn_aktar_ek_hesap_plani` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
+| `fn_aktar_ek_hesap_plani` | `1189_aktarim_hesap_plani_mukerrer.sql` | 1148_aktarim_ek_teklif_hesap_demirbas.sql |
 | `fn_aktar_ek_kategori` | `1171_aktarim_ek_kategori.sql` | — |
 | `fn_aktar_ek_kisi` | `1144_aktarim_ek_kisi.sql` | — |
 | `fn_aktar_ek_lot_durum` | `1172_aktarim_lot_defteri.sql` | — |
