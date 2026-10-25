@@ -161,6 +161,11 @@
   .mini12{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:54px;margin-top:4px}
   .mini12 i{display:block;background:#8fb3de;border-radius:2px 2px 0 0}
   .mini12 i.y{background:#2f6db3}
+  .acilir{border:1px solid #9cc4ee;border-radius:0 0 4px 4px;border-top:none;background:#fff;box-shadow:0 6px 14px rgba(20,40,70,.12)}
+  .acilir div{padding:5px 8px;border-bottom:1px solid var(--line2);font-size:11.5px;cursor:pointer}
+  .acilir div small{display:block;color:var(--muted);font-size:10.5px}
+  .acilir div.on{background:var(--sel)}
+  .acilir div.yeni{color:var(--accent);font-weight:bold}
   .mini12l{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;font-size:9px;color:var(--muted);text-align:center}
 </style>
 </head>
@@ -174,7 +179,7 @@
     <div class="avatar" style="background:linear-gradient(#6a8fc2,#3d6597)">🏬<small>Kira</small></div>
     <div class="kim">
       <div class="ad">Depo kirası <span class="kalem">✎</span></div>
-      <div class="alt">Kategori <b>Kira</b> · Cari <b>Yıldız Gayrimenkul A.Ş.</b> · Masraf <b>770.01.003 Depo kirası</b> · Masraf merkezi <b>Depo</b> · Şube <b>Merkez</b> · Ödeme <b>Garanti BBVA TL · havale</b></div>
+      <div class="alt">Kategori <b>Kira</b> · Ödenecek yer <b>Yıldız Gayrimenkul A.Ş.</b> · Masraf <b>770.01.003 Depo kirası</b> · Masraf merkezi <b>Depo</b> · Şube <b>Merkez</b> · Ödeme <b>Garanti BBVA TL · havale</b></div>
       <div class="rzlar">
         <span class="rz ok">● Aktif</span>
         <span class="rz">Sabit tutar</span>
@@ -234,7 +239,7 @@
           <div class="fld g2"><label class="req">Ad</label><div class="inp">Depo kirası</div></div>
           <div class="fld"><label class="req">Kategori</label><div class="inp combo">Kira</div></div>
           <div class="fld"><label>Durum</label><div class="radyo"><span class="on">Aktif</span><span>Pasif</span></div></div>
-          <div class="fld g2"><label>Cari (tedarikçi)</label><div class="inp combo">Yıldız Gayrimenkul A.Ş. <span class="ek">Kart ›</span></div></div>
+          <div class="fld g2"><label class="req">Ödenecek yer (tedarikçi)</label><div class="inp">🔍 <b>Yıldız Gayrimenkul A.Ş.</b> <span class="sonuk">· VKN 9870012345 · Kadıköy</span><span class="ek">Kart ›</span><span class="ek" style="margin-left:6px">✕</span></div></div>
           <div class="fld g2"><label class="req">Masraf kalemi</label><div class="inp combo">770.01.003 · Depo kirası <span class="ek">Kart ›</span></div></div>
           <div class="fld"><label>Masraf merkezi</label><div class="inp combo">Depo</div></div>
           <div class="fld"><label>Şube</label><div class="inp ro">Merkez</div></div>
@@ -242,6 +247,24 @@
           <div class="fld"><label>Referans no</label><div class="inp">Sözleşme 2025/014</div></div>
           <div class="fld g4"><label>Açıklama</label><div class="inp uzun">Depo kira sözleşmesi 01.01.2025, 3 yıl. Artış her Ocak sözleşmedeki oranla (2026: ek protokolle 85.000, 2027: %30). Stopaj yok (kiraya veren şirket, KDV'li fatura keser).</div></div>
         </div></div></div>
+        <div class="grp"><h4>Ödenecek yer seçimi <span class="sp sonuk">yazınca açılan liste — yalnız tedarikçiler</span></h4><div class="ic">
+          <div class="iki">
+            <div>
+              <div class="inp">🔍 elek<span class="sonuk" style="margin-left:auto">en az 2 harf · ad, VKN, şehir</span></div>
+              <div class="acilir">
+                <div class="on"><b>CK Boğaziçi Elektrik Perakende Satış A.Ş.</b><small>VKN 2110567421 · İstanbul · abone 4410…</small></div>
+                <div><b>Enerjisa İstanbul Anadolu Yakası Elektrik</b><small>VKN 3250098710 · İstanbul</small></div>
+                <div><b>Elektrik Malzeme Ltd. Şti.</b><small>VKN 1230045678 · tedarikçi · son alış 12.10.2026</small></div>
+                <div class="yeni">＋ Yeni tedarikçi "elek…" — tedarikçi kartı yeni sekmede açılır, kaydedince burada seçili gelir</div>
+              </div>
+            </div>
+            <div class="ipucu" style="margin-top:0">
+              <b>Serbest metin yazılamaz:</b> ödenecek yer (elektrik kurumu, su idaresi, doğalgaz şirketi, kira ödenen kişi / şirket, sigorta, müşavir…) <b>tedarikçi listesinden</b> seçilir; listede yalnız tedarikçi rolündeki cariler çıkar. Yoksa "＋ Yeni tedarikçi".<br><br>
+              Neden: eşleştirme (ödeme / fatura aynı cariye mi), Cari Ekstre, karşı IBAN ve nakit akışın "kime" sütunu cari kaydından gelir — serbest yazılan ad bunların hiçbirine bağlanmaz.<br><br>
+              Zorunlu; yalnız <b>Vergi / SGK</b> kategorisinde boş bırakılabilir (vergi dairesi / SGK cari olarak açılmamışsa).
+            </div>
+          </div>
+        </div></div>
         <div class="grp"><h4>Kategori öntanımları <span class="sp sonuk">kategori seçilince doldurulur, değiştirilebilir</span></h4><div class="ic">
           <div class="dg"><table>
             <thead><tr><th>Kategori</th><th>Masraf kalemi</th><th>Tutar türü</th><th>Tatil</th><th>Hatırlatma</th></tr></thead>
@@ -336,7 +359,7 @@
           </div></div>
           <div class="grp"><h4>Gerçekleşme eşleştirmesi</h4><div class="ic"><div class="f k2">
             <div class="fld"><label>Eşleşecek masraf</label><div class="inp ro">770.01.003 Depo kirası</div></div>
-            <div class="fld"><label>Eşleşecek cari</label><div class="inp ro">Yıldız Gayrimenkul A.Ş.</div></div>
+            <div class="fld"><label>Eşleşecek cari</label><div class="inp ro">Yıldız Gayrimenkul A.Ş. (ödenecek yer)</div></div>
             <div class="fld"><label>Tarih toleransı</label><div class="inp combo">± 7 gün</div></div>
             <div class="fld"><label>Tutar toleransı</label><div class="inp combo">± %5</div></div>
             <div class="fld g2"><label>Kaynaklar</label><div class="radyo"><span class="on">Kasa / banka ödemesi</span><span class="on">Alış faturası</span><span class="on">Banka hareketi (işlenmemiş)</span></div></div>
@@ -441,6 +464,7 @@
     <li><b>Ödeme &amp; Eşleştirme:</b> ödeme şablonu (hesap, yöntem, karşı IBAN carinin, açıklama şablonu) + eşleştirme kuralı (masraf + cari, ± gün, ± %, kaynaklar, tek aday otomatik). Otomatik eşleşme loglu ve dönem satırından geri alınabilir.</li>
     <li><b>Dönemler:</b> takvimden türetilen satırlar; saklanan yalnız istisna (atla, dönem tutarı, eşleşme) ve kapanmış dönemin o günkü planı.</li>
     <li><b>Yetki:</b> kart <code>finans.planli_gider</code> (Gör / Ekle / Değiştir / Sil); "Ödeme Oluştur" ayrıca kasa işlemi Ekle; log ISLEMLOG kuralıyla (alan bazlı, eşleşmeler ayrı satır).</li>
+    <li><b>Ödenecek yer (karar 25.10.2026, kullanıcı):</b> serbest metin değil — <b>tedarikçi listesinden</b> seçilir (yalnız tedarikçi rolündeki cariler; elektrik kurumu, su idaresi, kira ödenen yer). Listede yoksa "＋ Yeni tedarikçi" (tedarikçi kartı yeni sekmede, kaydedince seçili gelir). Zorunlu; yalnız Vergi / SGK kategorisinde boş bırakılabilir.</li>
     <li><b>Kategori seçilince öntanım (masraf kalemi, tutar türü, tatil, hatırlatma) doldurulsun mu? (karar 25.10.2026):</b> Evet, yalnız boş alanlara; kullanıcı değiştirdiyse ezilmesin. Kategoriler kod listesi (Kira, Enerji, Abonelik, Vergi / SGK, Sigorta, Hizmet, Aidat, Diğer), kurum ekleyebilir.</li>
     <li><b>Bir tanımın tutarı / takvimi değişince geçmiş dönemler ne olsun? (karar 25.10.2026):</b> Geçmiş (tarihi geçmiş ya da eşleşmiş) dönem o günkü planıyla dondurulur; değişiklik yalnız bugünden sonraki dönemlere uygulanır. Böylece "plan − gerçek" geçmişi bozulmaz.</li>
     <li><b>Sözleşme bitince tanım ne olsun? (karar 25.10.2026):</b> Bitiş tarihinden sonra kendiliğinden pasif (akışta görünmez); bitişten 90 gün önce sorumluya yenileme hatırlatması. Yenileme = kartı kopyala (yeni dönem, yeni tutar).</li>

@@ -212,7 +212,7 @@
             <div class="fld gen"><label>Ad *</label><div class="inp">Depo kirası</div></div>
             <div class="fld"><label>Kategori</label><div class="inp combo">Kira</div></div>
             <div class="fld"><label>Masraf kalemi</label><div class="inp combo">770.01.003 · Depo kirası</div></div>
-            <div class="fld"><label>Cari (tedarikçi)</label><div class="inp combo">Yıldız Gayrimenkul A.Ş.</div></div>
+            <div class="fld"><label>Ödenecek yer (tedarikçi) *</label><div class="inp">🔍 Yıldız Gayrimenkul A.Ş. <span class="sonuk">· tedarikçi listesinden</span></div></div>
             <div class="fld"><label>Masraf merkezi</label><div class="inp combo">Depo</div></div>
             <div class="fld"><label>Şube</label><div class="inp ro">Merkez</div></div>
             <div class="fld"><label>Durum</label><div class="radyo"><span class="on">Aktif</span><span>Pasif</span></div></div>
@@ -345,6 +345,7 @@
     <li><b>Ne çözer:</b> Nakit Akış (Vade) İcmali bugün kira, vergi, abonelik, aidat gibi faturası önceden gelmeyen tekrarlayan giderleri bilmiyor ("planlı gider tanımı yok · akışta görünmüyor" uyarısı). Bu ekran o beklentiyi tanımlar; icmalin "Planlı" çıkışları buradan gelir.</li>
     <li><b>Tanım + dönem:</b> tanım (kim, ne, ne kadar, hangi takvimle, hangi hesaptan) değişmez kural; her dönem (ör. Kasım kirası) takvimden <b>türetilir</b>, yalnız istisnası saklanır (atlandı, bu dönem farklı tutar, eşleşen kayıt). 3 yıllık kira için 36 satır üretilip saklanmaz.</li>
     <li><b>Tutar türleri:</b> sabit · son N dönem gerçekleşen ortalaması · geçen yıl aynı ay (mevsimsel enerji) · hesaplanan (KDV = KDV İcmali ödenecek, SGK = son 3 ödeme ortalaması) · elle her dönem (muhtasar). Elle girilen dönem tutarı her zaman önceliklidir. Tahminle gelen kısım listede ve icmalde "tahmini" rozetiyle ayrılır.</li>
+    <li><b>Ödenecek yer (karar 25.10.2026, kullanıcı):</b> serbest yazılmaz, tedarikçi listesinden seçilir (elektrik kurumu, su idaresi, kira ödenen yer…); yoksa "＋ Yeni tedarikçi". Zorunlu, yalnız Vergi / SGK'da boş olabilir. Ayrıntı: <code>planli_gider_karti.html</code>.</li>
     <li><b>Gerçekleşme:</b> kesin kasa / banka ödemesi ya da alış faturası, aynı masraf kalemi + cari ile plan tarihinin ± 7 gününde ve tutarın ± %5'inde ise dönemle eşleşmesi <b>önerilir</b>; tek aday varsa otomatik, birden fazlaysa kullanıcı seçer. Eşleşen dönem nakit akıştan düşer (para çıkmıştır). Alış faturası gelirse dönem "faturalandı" olur ve akışa faturanın vadesiyle girer — iki kez sayılmaz.</li>
     <li><b>Gecikme:</b> plan tarihi geçmiş, eşleşmemiş dönem "gecikti"; Nakit Akış İcmali'nde ilk haftaya taşınır (icmalin gecikme senaryosu ile aynı kural).</li>
     <li><b>Kartla ödenen gider:</b> nakit çıkışı kartın ekstre son ödeme gününde; planlı gider o ekstrenin tahmini kalemine eklenir.</li>
