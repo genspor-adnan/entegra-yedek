@@ -13,7 +13,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
-| `fn_aktar_belge` | `1142_aktarim_cari_doviz.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql |
+| `fn_aktar_belge` | `1188_aktarim_tahakkuk_aciklama.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql, 1142_aktarim_cari_doviz.sql |
 | `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
