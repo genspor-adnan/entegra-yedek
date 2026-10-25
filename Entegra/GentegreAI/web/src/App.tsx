@@ -58,6 +58,9 @@ const SatinalmaIcmali = tembel(() => import('./sayfalar/satinalmaIcmal/Satinalma
 const KdvIcmali = tembel(() => import('./sayfalar/kdvIcmal/KdvIcmali'), 'KdvIcmali');
 const TeknikServisIcmali = tembel(() => import('./sayfalar/servisIcmal/TeknikServisIcmali'), 'TeknikServisIcmali');
 const UretimIcmali = tembel(() => import('./sayfalar/uretimIcmal/UretimIcmali'), 'UretimIcmali');
+const MasrafIcmali = tembel(() => import('./sayfalar/finansIcmal/MasrafIcmali'), 'MasrafIcmali');
+const MusteriRiskIcmali = tembel(() => import('./sayfalar/finansIcmal/MusteriRiskIcmali'), 'MusteriRiskIcmali');
+const BankaMutabakatIcmali = tembel(() => import('./sayfalar/finansIcmal/BankaMutabakatIcmali'), 'BankaMutabakatIcmali');
 const PlanliGiderListesi = tembel(() => import('./sayfalar/planliGider/PlanliGiderListesi'), 'PlanliGiderListesi');
 const PlanliGiderKarti = tembel(() => import('./sayfalar/planliGider/PlanliGiderKarti'), 'PlanliGiderKarti');
 const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
@@ -328,6 +331,10 @@ function Yollar() {
         {yetki('muhasebe.kdv_icmali') && <Route path="/kdv-icmali" element={<KdvIcmali />} />}
         {yetki('servis.icmali') && <Route path="/teknik-servis-icmali" element={<TeknikServisIcmali />} />}
         {yetki('uretim.icmali') && <Route path="/uretim-icmali" element={<UretimIcmali />} />}
+        {/* MASRAF / MÜŞTERİ RİSK / BANKA MUTABAKAT İCMALLERİ (1178). */}
+        {yetki('finans.masraf_icmali') && <Route path="/masraf-icmali" element={<MasrafIcmali />} />}
+        {yetki('finans.musteri_risk_icmali') && <Route path="/musteri-risk-icmali" element={<MusteriRiskIcmali />} />}
+        {yetki('finans.banka_mutabakat') && <Route path="/banka-mutabakat" element={<BankaMutabakatIcmali />} />}
         {/* PLANLI GİDERLER (1177): liste + kendi sekmesinde kart (/planli-gider/yeni | /planli-gider/:id). */}
         {yetki('finans.planli_gider') && <Route path="/planli-gider" element={<PlanliGiderListesi />} />}
         {yetki('finans.planli_gider') && <Route path="/planli-gider/:id" element={<PlanliGiderKarti />} />}

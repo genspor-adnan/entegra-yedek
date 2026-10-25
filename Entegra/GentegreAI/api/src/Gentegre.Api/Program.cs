@@ -393,6 +393,10 @@ uygulama.SatinalmaIcmalUclariniEkle();
 uygulama.KdvIcmalUclariniEkle();
 uygulama.ServisIcmalUclariniEkle();
 uygulama.UretimIcmalUclariniEkle();
+// MASRAF / MÜŞTERİ RİSK-LİMİT / BANKA MUTABAKAT İCMALLERİ (1178).
+uygulama.MasrafIcmalUclariniEkle();
+uygulama.MusteriRiskIcmalUclariniEkle();
+uygulama.BankaMutabakatUclariniEkle();
 // PLANLI GİDER (1177): tekrarlayan gider tanımı, dönemler, eşleştirme, taslak ödeme.
 uygulama.PlanliGiderUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.

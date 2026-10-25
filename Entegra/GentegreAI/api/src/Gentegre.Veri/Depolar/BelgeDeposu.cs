@@ -639,6 +639,15 @@ public sealed partial class BelgeDeposu
             }
         }
 
+        // ------------------------------------------- 7a) RISK LIMITI / SEVK BLOKESI (1178) ----
+        // Yalniz POST / PUT /api/belge'nin doldurdugu bayrakla (ic akislar null birakir). Belge
+        //   YAZILDIKTAN sonra ayni transaction'da: risk yeni belgeyi de sayar. "engelle" kipinde
+        //   istisna firlar ve her sey geri alinir; "uyar" kipinde yanita uyari eklenir.
+        if (!secenekler.Taslak && secenekler.LimitAsimYetkisi is { } limitAsimYetkisi
+            && await MusteriRiskDeposu.BelgeKontrolAsync(baglanti, islem, tarafId, tur, Sayi(belge, "tipi"),
+                   limitAsimYetkisi, Saat.BugunDilim(baglam.ZamanDilimi), iptal) is { } riskUyarisi)
+            uyarilar.Add(riskUyarisi);
+
         // --------------------------------------------------------- 7b) MUHASEBE FISI ----
         // Kesin belge muhasebeye de girer (190). Taslak fislenmez: numarasi ve
         //   kesinligi yok. SUBE AYARI (192) belirler: entegrasyon kapaliysa ya da

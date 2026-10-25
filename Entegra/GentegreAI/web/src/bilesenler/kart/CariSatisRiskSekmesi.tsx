@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { api } from '../../api/istemci';
-import type { CariKartOzeti } from '../../api/uclar/cariListe';
+import { musteriRiskIcmalUclari, type MusteriRiskOzeti } from '../../api/uclar/musteriRiskIcmal';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
 import { para } from '../bicim';
@@ -13,14 +12,16 @@ import { TekKayit } from '../TekKayit';
  *
  *  · SATIŞ KOŞULLARI - fiyat listeleri (cari kartının KENDİ alanları, `anaAlanlar`) + taraf_musteri
  *    uzantısındaki iskonto / vade / ödeme / para birimi / sevk / KDV / tevkifat (1152).
- *  · RİSK / LİMİT - limit, aşımda davranış, teminat, risk durumu ve RİSK KALEMLERİ dökümü
- *    (cari bakiye, açık sipariş, portföydeki müşteri çeki, faturalanmamış irsaliye - kart özeti).
- *
- * Kalemler ve tutarlar sunucudan (GET /api/cari/{id}/kart-ozet); burada yalnız toplanıp limitle
- * karşılaştırılır.
+ *  · RİSK / LİMİT (1178) - cari kartının kendi alanları: risk limiti (null = tanımsız) + dövizi, risk grubu,
+ *    sevk blokesi, teminat özeti - KARTTA SALT OKUNUR, Müşteri Risk / Limit İcmali'nden değişir (cari.risk_limit,
+ *    neden zorunlu, loglu). RİSK KALEMLERİ dökümü satış belgesi limit kontrolüyle AYNI hesaptan
+ *    (GET /api/musteri-risk-icmal/taraf/{id}): toplam ve limit durumu sunucuda, burada yalnız gösterilir.
  */
 const SATIS = ['iskontoOrani', 'vadeGun', 'odemeSekli', 'dovizCinsi', 'sevkSekli', 'kdvDurumu', 'tevkifat'];
-const RISK = ['riskLimiti', 'riskAsim', 'teminat'];
+const RISK = ['riskLimit', 'riskLimitDoviz', 'riskGrubu', 'sevkBlokesi', 'sevkBlokesiNeden', 'teminatOzeti'];
+const DURUM: Record<MusteriRiskOzeti['durum'], [string, string]> = {
+  tanimsiz: ['gri', 'Tanımsız'], kurYok: ['uyari', 'Kur yok'], asim: ['hata', 'Aşıldı'], yaklasiyor: ['uyari', 'Yaklaşıyor'], uygun: ['ok', 'Uygun'],
+};
 
 export function CariSatisRiskSekmesi({ id, yeniMi, detay, durum, salt, onDegis, anaAlanlar, tedarikci }: {
   id: number | 'yeni'; yeniMi: boolean; detay: KartDetayMeta; durum: DetayDurumu; salt: boolean;
@@ -30,28 +31,21 @@ export function CariSatisRiskSekmesi({ id, yeniMi, detay, durum, salt, onDegis, 
   /** Tedarikçiyse alış fiyat listesi de. */
   tedarikci: boolean;
 }) {
-  const [ozet, setOzet] = useState<CariKartOzeti['ozet'] | null>(null);
-  // Limit kutuda değişince tablo yeniden hesaplanır - kalemler sunucudan bir kez.
+  const [ozet, setOzet] = useState<MusteriRiskOzeti | null>(null);
   useEffect(() => {
     if (yeniMi || typeof id !== 'number') return;
     let iptal = false;
-    api.cariKartOzet(id).then(v => { if (!iptal) setOzet(v.ozet) }, () => { if (!iptal) setOzet(null) });
+    musteriRiskIcmalUclari.musteriRiskOzeti(id).then(v => { if (!iptal) setOzet(v) }, () => { if (!iptal) setOzet(null) });
     return () => { iptal = true };
   }, [id, yeniMi]);
 
-  const kayit = (durum.guncel[0] ?? {}) as Record<string, unknown>;
-  const limit = Number(kayit.riskLimiti ?? 0) || 0;
   const kalemler: [string, number][] = ozet ? [
-    [c('Cari bakiye (borç)'), Math.max(Number(ozet.bakiye) || 0, 0)],
-    [c('Açık sipariş (sevk edilmemiş)'), Number(ozet.acikSiparis) || 0],
-    [c('Portföydeki müşteri çeki'), Number(ozet.cekTutar) || 0],
-    [c('İrsaliyeli, faturalanmamış'), Number(ozet.irsaliyeAcik) || 0],
+    [c('Cari bakiye'), ozet.bakiye],
+    [c('Açık sipariş (sevk edilmemiş)'), ozet.siparis],
+    [c('Portföydeki müşteri çeki'), ozet.cek],
+    [c('İrsaliyeli, faturalanmamış'), ozet.irsaliye],
   ] : [];
-  const toplam = kalemler.reduce((t, [, v]) => t + v, 0);
-  const yuzde = limit > 0 ? Math.round(toplam * 100 / limit) : null;
-  const rozet = limit <= 0 ? ['gri', c('Limitsiz')]
-    : yuzde! > 100 ? ['hata', c('Aşıldı')]
-    : yuzde! >= 80 ? ['uyari', c('Yaklaşıyor')] : ['ok', c('Uygun')];
+  const rozet = ozet ? DURUM[ozet.durum] : ['gri', '…'];
   const tl = (n: number) => `₺ ${para.format(n)}`;
   const ortak = { meta: detay, durum, saltOkunur: salt || detay.saltOkunur, onDegis, cerceveSiz: true } as const;
 
@@ -67,10 +61,10 @@ export function CariSatisRiskSekmesi({ id, yeniMi, detay, durum, salt, onDegis, 
       <div className="kagrup">
         <h6>{c('Risk / Limit')}</h6>
         <div className="alan-izgara cari-sr-k2">
-          <TekKayit {...ortak} alanSirasi={RISK} />
+          {anaAlanlar?.(RISK)}
           <label className="alan tip-metin">
             <span className="etiket">{c('Risk Durumu')}</span>
-            <span><span className={`rozet ${rozet[0]}`}>{rozet[1]}</span></span>
+            <span><span className={`rozet ${rozet[0]}`}>{c(rozet[1])}</span></span>
           </label>
         </div>
         {yeniMi ? (
@@ -85,13 +79,14 @@ export function CariSatisRiskSekmesi({ id, yeniMi, detay, durum, salt, onDegis, 
               </tbody>
               {ozet && (
                 <tfoot><tr><td>{c('Toplam risk / limit')}</td>
-                  <td className={`s${yuzde !== null && yuzde > 100 ? ' borc' : ''}`}>
-                    {tl(toplam)} / {limit > 0 ? `${para.format(limit)} · %${yuzde}` : c('limitsiz')}
+                  <td className={`s${ozet.durum === 'asim' ? ' borc' : ''}`}>
+                    {tl(ozet.toplam)} / {ozet.limit == null ? c('tanımsız')
+                      : `${para.format(ozet.limit)}${ozet.limitDoviz !== 'TL' ? ' ' + ozet.limitDoviz : ''}${ozet.kullanim != null ? ` · %${ozet.kullanim}` : ''}`}
                   </td></tr></tfoot>
               )}
             </table>
             <div className="not">
-              {c('Risk limiti 0 ise limitsiz. Toplam dört kalemi sayar; özet şeritteki risk yüzdesi yalnız cari bakiyeyi sayar.')}
+              {c("Limit boşsa TANIMSIZ (limitsiz değil). Toplam dört kalemi bugünkü kurla sayar; irsaliye ve sipariş KDV hariç. Limit, teminat ve sevk blokesi Müşteri Risk / Limit İcmali'nden değiştirilir.")}
             </div>
           </div>
         )}

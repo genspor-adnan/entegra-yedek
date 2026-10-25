@@ -1748,6 +1748,43 @@ POST   /api/planli-gider/eslestir                                               
 - **Kategori:** katalog kaynağı `planli-gider-kategori` / kart `planliGiderKategori` (aksiyon ekranı
   `planli-gider-kategori-liste`).
 
+## 9.25 Masraf / müşteri risk-limit / banka mutabakat icmalleri (1178)
+
+```
+GET  /api/masraf-icmal?bas&bit&karsi=gy|od&sube&merkez(0|-1|id)&kalem(0|-1 atanmamış|-2 amortisman|id)
+                      &kdv=0|1&plan=0|1&taslak=0|1&amortisman=0|1                                  finans.masraf_icmali
+GET  /api/masraf-icmal/detay?…aynı süzgeçler…&ust&alt&dmerkez&tedarikci   (en çok 2000 satır; toplam hepsinden)
+POST /api/masraf-icmal/ata  {masrafId, satirlar:[{kaynak:'belge'|'kasa', id}]}   + belge Değiştir (kasa: + kasa_islem Değiştir)
+
+GET  /api/musteri-risk-icmal?sube&temsilci&grup&cek=0&siparis=0&tanimsiz=1                         finans.musteri_risk_icmali
+GET  /api/musteri-risk-icmal/taraf/{id}                                         cari Gör ya da icmal kodu
+POST /api/musteri-risk-icmal/limit  {tarafId, limit|null, doviz, riskGrubu?, neden, surum?}     aksiyon cari.risk_limit
+POST /api/musteri-risk-icmal/bloke  {tarafId, bloke, neden}                                     aksiyon cari.risk_limit
+GET|POST /api/musteri-risk-icmal/teminat · PUT|DELETE /api/musteri-risk-icmal/teminat/{id}      aksiyon cari.risk_limit
+
+GET  /api/banka-mutabakat?gun=yyyy-MM-dd&hesap&sube&kart=0                                        finans.banka_mutabakat
+GET  /api/banka-mutabakat/gunluk?hesapId&gun&n=7..31 · GET /esles-aday?hareketId
+POST /api/banka-mutabakat/esles  {hareketId, kasaIslemId}                       + banka.hareket Değiştir
+POST /api/banka-mutabakat/bakiye {hesapId, gun, bakiye, kaynak 1|2, aciklama, surum?}  + banka.hareket Değiştir
+POST /api/banka-mutabakat/onay   {gun, hesapIdler[]}                            aksiyon banka.mutabakat_onay
+```
+
+- **Masraf:** küme = kesin alış belgesinin stoksuz satırları (11 / 12 / 8, satır payı belge matrahından) + kasa
+  bacağı (`v_masraf_ekstre` + kalemsiz bacaklar `v_mali_hareket_ek`) + onaylı personel masraf beyanı + dönem amortismanı
+  (`v_demirbas_amortisman`, sanal üst kalem −2, "nakit çıkışı yok"). Plan Planlı Giderler motorundan. Eşikler
+  `masraf.artis_esik_yuzde` (25), `masraf.mukerrer_gun` (1). Ata kapanmış dönemde 422 `KAPANMIS_DONEM`, loglu.
+- **Risk:** açık bakiye (`v_cari_ekstre`) + portföy çek / senet (yön 1, durum 10/30/40, vadesi gelmemiş) + faturasız
+  irsaliye (14 / 119) + açık sipariş (`v_belge_acik_satir` − kapanış); dövizli kalem bugünkü kurla. Limit
+  `taraf.risk_limit` (null = TANIMSIZ) kendi dövizinde; teminat `taraf_teminat`. Skor A–D (40/30/20/10), yalnız bilgi.
+  **Belge kontrolü:** satış siparişi / irsaliye / fatura POST-PUT'ta (iade, taslak, başvuru hariç) sevk blokesi ya da
+  limit aşımı → `satis.limit_davranis` UYAR: `uyarilar[]`; ENGELLE: 422 `IS_KURALI` (aksiyon `satis.limit_asim` geçer).
+  Müşteri Listesi / Cari İcmali / Ekstre / Devir de `taraf.risk_limit` okur (eski `taraf_musteri.risk_limiti` gizli).
+- **Banka mutabakat:** düzeltilmiş banka = banka + Σ yolda; düzeltilmiş sistem = sistem + Σ işlenmemiş; açıklanmayan = fark.
+  Banka bakiyesi API'li hesapta günün son hareket bakiyesi (çekim eksikse onay yok), API'sizde `hesap_gun_bakiye`.
+  Onay açıklanmayan 0,00 iken; `banka.mutabakat_dort_goz` = 1 → onaylayan ≠ hazırlayan. Bozuldu GET'te canlı gösterilir,
+  kalıcı durum 2 yazan uçlarda. Eşleştir var olan kesin kasa işlemine bağlar (yeni işlem yok), tolerans
+  `banka.mutabakat_tolerans_kurus` (0). Log: 1730 teminat, 1741 gün bakiyesi, 1742 onay, 1743 eşleştirme.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

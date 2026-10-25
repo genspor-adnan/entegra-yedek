@@ -126,11 +126,11 @@ public static partial class KaynakKatalogu
                                                     "mantik", "Dövizli", Hizalama: "orta", Varsayilan: false),
             new("vadesiGecen",  "coalesce(o.vadesi_gecen, 0)", "para", "Vadesi Geçen", Hizalama: "sag",
                                                     Bicim: "#,##0.00", Varsayilan: false),
-            new("riskLimiti",   "coalesce(tm.risk_limiti, 0)", "para", "Risk Limiti", Hizalama: "sag",
+            new("riskLimiti",   "coalesce(t.risk_limit, 0)", "para", "Risk Limiti", Hizalama: "sag",
                                                     Bicim: "#,##0.00", Varsayilan: false),
             // Limit kullanimi %: borc bakiyesi / risk limiti. Limit 0 = limitsiz (bos).
-            new("riskYuzde",    "case when coalesce(tm.risk_limiti, 0) > 0 " +
-                                "     then round(greatest(coalesce(o.bakiye, 0), 0) * 100 / tm.risk_limiti) end",
+            new("riskYuzde",    "case when coalesce(t.risk_limit, 0) > 0 " +
+                                "     then round(greatest(coalesce(o.bakiye, 0), 0) * 100 / t.risk_limit) end",
                                                     "sayi", "Risk Limiti %", Bicim: "risk:riskLimiti",
                                                     Genislik: 120, Varsayilan: false),
             // Son satistan bu yana gecen gun (satis faturasi / fisi / tahakkuku).

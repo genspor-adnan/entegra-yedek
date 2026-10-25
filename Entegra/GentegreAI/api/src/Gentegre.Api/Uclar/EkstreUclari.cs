@@ -138,7 +138,7 @@ public static class EkstreUclari
                     if (baglam.Kapsam.Count > 0 && !baglam.Kapsam.Contains(hesapId)) throw GentegreHatasi.Bulunamadi("Cari bulunamadı.");
                     hesap = await b.TekAsync("""
                         select t.id, coalesce(t.kod, ''), coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''),
-                               t.musteri, t.tedarikci, t.durum, coalesce(tm.vade_gun, 0)::int, coalesce(tm.risk_limiti, 0)::numeric,
+                               t.musteri, t.tedarikci, t.durum, coalesce(tm.vade_gun, 0)::int, coalesce(t.risk_limit, 0)::numeric,
                                coalesce(o.vadesi_gecen, 0)::numeric, coalesce(o.bakiye, 0)::numeric, o.son_tahsilat, o.son_satis
                           from public.taraf t
                           left join public.taraf_musteri tm on tm.id = t.id

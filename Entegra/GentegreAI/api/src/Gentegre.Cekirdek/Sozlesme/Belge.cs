@@ -16,6 +16,14 @@ public sealed class BelgeSecenekleri
     /// <summary>Taslakta belge NUMARASI TUKETILMEZ - numara yalnizca kesinlestirmede alinir.</summary>
     public bool Taslak { get; set; }
     public bool StokKontrolu { get; set; } = true;
+
+    /// <summary>
+    /// RİSK LİMİTİ / SEVK BLOKESİ KONTROLÜ (1178) - SUNUCU doldurur, istemciden OKUNMAZ (JsonIgnore).
+    /// null = kontrol yok (iç akışlar: dönüşüm, sayım, aktarım); false / true = POST / PUT /api/belge
+    /// kontrol eder, true = kullanıcının `satis.limit_asim` aksiyonu var ("engelle" kipinde uyarıyla geçer).
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool? LimitAsimYetkisi { get; set; }
 }
 
 public sealed class BelgeYaniti

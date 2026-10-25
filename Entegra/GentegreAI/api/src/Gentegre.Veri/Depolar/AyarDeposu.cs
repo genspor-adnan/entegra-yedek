@@ -67,6 +67,11 @@ public sealed class AyarDeposu
         "satinalma.hedef_gun_kabul", "satinalma.hedef_gun_odeme",
         "servis.tekrar_ariza_gun",
         "uretim.sapma_maliyet_yuzde", "uretim.sapma_sarf_yuzde", "uretim.fire_hedef_kat",
+        // MASRAF / RİSK / BANKA MUTABAKAT (1178, kararlar 25.10.2026): boş = varsayılan (artış %25,
+        //   mükerrer ±1 gün, limit davranışı "uyar", eşleştirme toleransı 0 kuruş, dört göz kapalı).
+        //   satis.limit_davranis METİN: 'uyar' | 'engelle'.
+        "masraf.artis_esik_yuzde", "masraf.mukerrer_gun", "satis.limit_davranis",
+        "banka.mutabakat_tolerans_kurus", "banka.mutabakat_dort_goz",
         // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
         //   depodan dusmek iki birimin sayimini da bozar.
         "eczane.depo", "demirbas.parca_depo",
@@ -177,6 +182,7 @@ public sealed class AyarDeposu
         ["esmm.uretim_url"] = 250,
         ["esmm.test_url"] = 250,
         ["esmm.sabit_notlar"] = 1000,
+        ["satis.limit_davranis"] = 10,
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>

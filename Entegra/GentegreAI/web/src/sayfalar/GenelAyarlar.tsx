@@ -161,6 +161,11 @@ export function GenelAyarlar() {
                 {alan('uretim.sapma_maliyet_yuzde', 'Üretim: maliyet sapması eşiği, ± % (boş = 5)')}
                 {alan('uretim.sapma_sarf_yuzde', 'Üretim: sarf farkı eşiği, ± % (boş = 5)')}
                 {alan('uretim.fire_hedef_kat', 'Üretim: fire eşiği, ürün ağacı hedefinin katı (boş = 1,5)')}
+                {alan('masraf.artis_esik_yuzde', 'Masraf: olağan dışı artış eşiği, son 3 ay / önceki 6 ay, % (boş = 25)')}
+                {alan('masraf.mukerrer_gun', 'Masraf: mükerrer şüphesi, aynı cari + tutar ± gün (boş = 1)')}
+                {alan('satis.limit_davranis', 'Satış: risk limiti aşımında belge — "uyar" ya da "engelle" (boş = uyar)')}
+                {alan('banka.mutabakat_tolerans_kurus', 'Banka mutabakat: eşleştirme toleransı, kuruş (boş = 0)')}
+                {alan('banka.mutabakat_dort_goz', 'Banka mutabakat: onaylayan hazırlayandan farklı olmalı', { tip: 'mantik' })}
               </div>
             </div>
 

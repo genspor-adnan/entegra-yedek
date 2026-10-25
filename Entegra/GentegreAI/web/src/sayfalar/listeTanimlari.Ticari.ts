@@ -550,6 +550,23 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.3, menuAd: 'Nakit Akış (Vade) İcmali', ic: '@icmal', yetkiKodu: 'finans.nakit_akis_icmali',
   },
   {
+    // MASRAF / MÜŞTERİ RİSK-LİMİT / BANKA MUTABAKAT İCMALLERİ (1178, mockup Ekranlar/İcmal/masraf_icmali.html,
+    //   musteri_risk_icmali.html, banka_mutabakat_icmali.html).
+    kaynak: 'masraf-icmali', rota: 'masraf-icmali', ozelSayfa: true,
+    baslik: 'Masraf İcmali', yol: 'Finans › İcmaller › Masraf İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.4, menuAd: 'Masraf İcmali', ic: '@icmal', yetkiKodu: 'finans.masraf_icmali',
+  },
+  {
+    kaynak: 'musteri-risk-icmali', rota: 'musteri-risk-icmali', ozelSayfa: true,
+    baslik: 'Müşteri Risk / Limit İcmali', yol: 'Finans › İcmaller › Müşteri Risk / Limit İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 72.1, menuAd: 'Müşteri Risk / Limit İcmali', ic: '@icmal', yetkiKodu: 'finans.musteri_risk_icmali',
+  },
+  {
+    kaynak: 'banka-mutabakat', rota: 'banka-mutabakat', ozelSayfa: true,
+    baslik: 'Banka Mutabakat İcmali', yol: 'Finans › İcmaller › Banka Mutabakat İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.5, menuAd: 'Banka Mutabakat İcmali', ic: '@icmal', yetkiKodu: 'finans.banka_mutabakat',
+  },
+  {
     // SATIŞ / ALIŞ / İRSALİYE-FATURA EŞLEŞME İCMALLERİ (1175, mockup Ekranlar/İcmal/satis_icmali.html, alis_icmali.html,
     //   irsaliye_fatura_eslesme_icmali.html). ERP: Satış ve Alış grupları HBYS'de yok.
     kaynak: 'satis-icmali', rota: 'satis-icmali', ozelSayfa: true, urunModu: 1,

@@ -371,5 +371,50 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
         return kasaId;
     }
 
+    // ============================================================ eşleştir ====
+    public sealed record EslesmeSonucu(int HesapId, decimal BankaTutar, decimal KasaTutar, string IslemNo);
+
+    /// <summary>
+    /// EŞLEŞTİR (1178, Banka Mutabakat İcmali): hareketi VAR OLAN kesin kasa işlemine bağlar - yeni kasa
+    /// işlemi YAZILMAZ (çifte kayıt olmasın). İşlemin bu hesaptaki bacağının işaretli tutarı (borç − alacak)
+    /// hareketin tutarına <paramref name="tolerans"/> içinde eşit olmalı (karar 25.10.2026: tolerans dışında
+    /// eşleştirme yok; fark banka masrafıysa ayrı masraf işlemi). Bacak başka bir hareketle eşleşmişse
+    /// reddedilir. Kasa işlemi iptal edilince 1157 tetiği hareketi yine bekleyene döndürür.
+    /// </summary>
+    public async Task<EslesmeSonucu> EslestirAsync(long hareketId, int kasaIslemId, decimal tolerans, int kullanici,
+                                                    CancellationToken iptal)
+    {
+        await using var b = await veri.AcAsync(iptal);
+        await using var tx = await b.BeginTransactionAsync(iptal);
+        var h = await b.TekAsync("""
+            select h.hesap_id, h.tutar, h.durum from public.banka_hareket h where h.id = @p0 for update
+            """, tx, [hareketId], o => new { Hesap = o.GetInt32(0), Tutar = o.GetDecimal(1), Durum = o.GetInt16(2) }, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Hareket bulunamadı.");
+        if (h.Durum == 2) throw GentegreHatasi.IsKurali("Bu hareket zaten işlendi.");
+        if (h.Durum == 3) throw GentegreHatasi.IsKurali("Yoksayılan hareket eşleştirilemez - önce geri alın.");
+        var bacak = await b.TekAsync("""
+            select coalesce(sum(m.borc - m.alacak), 0), count(*)::int, coalesce(max(m.islem_no), '')
+              from public.v_mali_hareket_ek m
+             where m.kasa_islem_id = @p0 and m.hesap_id = @p1 and m.hesap_ekstre = 1 and m.islem_durum = 2
+            """, tx, [kasaIslemId, h.Hesap], o => new { Tutar = o.GetDecimal(0), Adet = o.GetInt32(1), No = o.GetString(2) }, iptal);
+        if (bacak is null || bacak.Adet == 0)
+            throw GentegreHatasi.IsKurali("Kasa işleminin bu hesapta kesin bir hareketi yok.");
+        var fark = Math.Abs(bacak.Tutar - h.Tutar);
+        if (fark > Math.Max(0, tolerans))
+            throw GentegreHatasi.IsKurali(
+                $"Tutar tutmuyor (banka {h.Tutar:N2}, kasa işlemi {bacak.Tutar:N2}, fark {fark:N2}). Fark banka masrafıysa ayrı masraf işlemi girin.");
+        var bagli = await b.TekDegerAsync<long?>("""
+            select id from public.banka_hareket where hesap_id = @p0 and kasa_islem_id = @p1 and durum = 2 and id <> @p2 limit 1
+            """, tx, [h.Hesap, kasaIslemId, hareketId], iptal);
+        if (bagli is not null) throw GentegreHatasi.IsKurali($"Bu kasa işlemi başka bir banka hareketiyle (#{bagli}) eşleşmiş.");
+        await b.CalistirAsync("""
+            update public.banka_hareket set durum = 2, kasa_islem_id = @p1, isleyen = @p2, isleme_zamani = now(),
+                   oneri = coalesce(oneri, '{}'::jsonb) || jsonb_build_object('islenen', 'esles')
+             where id = @p0
+            """, tx, [hareketId, kasaIslemId, kullanici], iptal);
+        await tx.CommitAsync(iptal);
+        return new EslesmeSonucu(h.Hesap, h.Tutar, bacak.Tutar, bacak.No);
+    }
+
     private static string Kisa(string? s, int n) => s is null ? "" : s.Length <= n ? s : s[..n];
 }

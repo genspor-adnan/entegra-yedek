@@ -25,6 +25,19 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — Masraf, Müşteri Risk / Limit ve Banka Mutabakat icmalleri (1178)
+
+Kullanıcı: *"başka hangi icmaller olabilir?"* → *"Masraf, müşteri risk ve banka mutabakat icmalleri için mockup yap"* → açık sorular *"onayla, hepsini işle"* → *"önce mockup ları kodla"*. Mockup: `Ekranlar/İcmal/masraf_icmali.html`, `musteri_risk_icmali.html`, `banka_mutabakat_icmali.html`.
+
+- **1178:** ekran kodları `finans.masraf_icmali` (← masraf), `finans.musteri_risk_icmali` (← finans.cari_icmali), `finans.banka_mutabakat` (← banka.hareket), aksiyonlar `banka.mutabakat_onay`, `cari.risk_limit`, `satis.limit_asim` (kaynak kodda Değiştir'i olan role); `taraf.risk_limit` (+ döviz, null = tanımsız), sevk blokesi (bayrak / neden / kim / ne zaman), `risk_grubu`, `taraf_teminat`; `hesap_gun_bakiye` (API'siz hesabın elle gün sonu bakiyesi), `banka_mutabakat` (gün + hesap onayı, dondurulmuş detay). Genel Ayarlar › İcmal Eşikleri'ne 5 ayar.
+- **Masraf İcmali** (`MasrafIcmalUclari`): kalem ağacı, masraf merkezi matrisi, aylık trend / geçen yıl / plan, Planlı Giderler ile plan − gerçek, tedarikçi, belge detayı, Dikkat (kalem atanmamış, olağan dışı artış, mükerrer, KDV oranı farklı, planda yok); "Masraf kalemi ata" toplu, kapanmış dönemde yok. `v_masraf_ekstre` yalnız kasa bacağını tuttuğu için alış belgesinin stoksuz satırları ayrıca alınır; amortisman sanal kalem. UNIVERSE'te gider verisi yok (ekran boş hâliyle denendi).
+- **Müşteri Risk / Limit İcmali** (`MusteriRiskDeposu` tek risk sorgusu + `MusteriRiskKurali`): risk = açık bakiye + portföy çek + faturasız irsaliye + açık sipariş, her bileşen kendi icmalinin kuralıyla; limit / bloke / teminat uçları (gerekçe zorunlu, alan bazlı log). **Satış belgesi kontrolü:** sipariş / irsaliye / fatura kaydında (iade, taslak hariç) bloke ya da limit aşımı → ayar "uyar" belge yanıtında uyarı (belge kartı zaten gösteriyor), "engelle" 422 (yetkisi olan geçer). Cari kartında yeni alanlar salt okunur (değişiklik icmalden); eski `taraf_musteri.risk_limiti` gizlendi ve Müşteri Listesi / Cari İcmali / Ekstre / Devir yeni alana taşındı (iki DB'de de eski alanda değer yoktu).
+- **Banka Mutabakat İcmali** (`BankaMutabakatUclari`, `BankaHareketServisi.EslestirAsync` eklendi): hesap bazında banka ↔ sistem bakiyesi, mutabakat tablosu, işlenmemiş / yolda listeleri, günlük bakiye, geçmiş, A4 tutanak; elle bakiye (API'siz), onay (açıklanmayan 0, dört göz ayarı), eşleştir (var olan kasa işlemine, yeni kayıt yok).
+- **Test:** API 834/834, web 977/977, duman Finans + Cari & CRM + Satış temiz, kullanıcı testi 3/3 (her sekme, asistan 12 madde). Limit / bloke uçları dev DB'de denendi, müşteri eski hâline döndürüldü (log satırları duruyor).
+- **Yapılmayan:** cariye hatırlatma (ileti şablonu yok); "engelle" kipinde onay akışı yok (yalnız `satis.limit_asim`); limit aşan belgeyi düzenlemek (riski düşürse de) engelle kipinde engellenir; sarf malzemesi gideri (stok tipinde "sarf" yok); MT940 / Excel ekstre içe aktarma; iş günü hesabında resmi tatil; Delphi kaynaklı kurulumda aktarılmış cariye limit yazmak için salt okunur beyaz listesine risk kolonları eklenmeli. Eksik zorunlu sorgu parametresi bazı uçlarda 400 yerine 500 dönüyor (ör. `/api/ekstre` `tur` olmadan) — eski, ayrı iş.
+
+---
+
 ## 25.10.2026 — Planlı Giderler (1177)
 
 Kullanıcı: *"planlı gider için mockup yap"* → *"planlı gider kartı mockup yap"* → açık sorular *"onayla, hepsini işle"* → *"ödenecek cari serbest edit olmasın, tedarikçi listesinden seçeyim"* → *"önce mockup ları kodla"*. Mockup: `Ekranlar/ERP/planli_gider.html`, `planli_gider_karti.html`.

@@ -89,6 +89,24 @@ public static partial class KartKatalogu
             new("kampanyaId", "kampanya_id", "kod",
                 KodTablosu: "public.v_kampanya_lookup",
                 Baslik: "Kampanya", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fiyatlandırma"),
+            // MÜŞTERİ RİSKİ (1178, karar R1): limit (null = TANIMSIZ, limitsiz değil) kendi dövizinde, risk grubu,
+            //   sevk blokesi ve geçerli teminatların özeti. KARTTA SALT OKUNUR: kart alan bazında aksiyon yetkisi
+            //   (cari.risk_limit) tanımıyor - değişiklik Müşteri Risk / Limit İcmali'nden (neden zorunlu, loglu).
+            //   "Satış Koşulları" grubunda: Satış & Risk sekmesinin Risk / Limit kutusu çizer (CariSatisRiskSekmesi).
+            new("riskLimit",        "risk_limit",         "para",   Yazilabilir: false, Baslik: "Risk Limiti", Grup: "Satış Koşulları",
+                Ipucu: "Boş = tanımsız. Müşteri Risk / Limit İcmali'nden değiştirilir."),
+            new("riskLimitDoviz",   "risk_limit_doviz",   "kod",    Yazilabilir: false, SabitKodlar: DovizKodlari, Baslik: "Limit Dövizi",
+                Grup: "Satış Koşulları"),
+            new("riskGrubu",        "risk_grubu",         "metin",  Yazilabilir: false, EnFazlaUzunluk: 60, Baslik: "Risk Grubu",
+                Grup: "Satış Koşulları"),
+            new("sevkBlokesi",      "sevk_blokesi",       "mantik", Yazilabilir: false, Baslik: "Sevk Blokesi", Grup: "Satış Koşulları"),
+            new("sevkBlokesiNeden", "sevk_blokesi_neden", "metin",  Yazilabilir: false, Baslik: "Bloke Nedeni", Grup: "Satış Koşulları"),
+            new("teminatOzeti",
+                "(select coalesce(string_agg(case tt.tur when 1 then 'Teminat mektubu' when 2 then 'İpotek' when 3 then 'Çek / senet' "
+                + "when 4 then 'Nakit' else 'Diğer' end || ' ' || replace(to_char(tt.tutar, 'FM999,999,999,990'), ',', '.') || ' ' || tt.doviz, ' · ' "
+                + "order by tt.tutar desc), '') from public.taraf_teminat tt where tt.taraf_id = taraf.id "
+                + "and (tt.baslangic is null or tt.baslangic <= current_date) and (tt.bitis is null or tt.bitis >= current_date))",
+                "metin", Yazilabilir: false, Baslik: "Teminat", Grup: "Satış Koşulları"),
             // "Iletisim"/"Siniflandirma"/"Diger" SEKME DEGIL - mockup'ta Genel'in alt-kutulari
             //   (Kart Bilgileri / İletişim / Notlar). Grup kaldirildi, AltGrup ile Genel'e katlandi.
             new("telefon",     "telefon",      "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",        AltGrup: "İletişim"),
@@ -152,11 +170,13 @@ public static partial class KartKatalogu
                 new("tevkifat",     "tevkifat",      "kod",     Baslik: "Tevkifat", SabitKodlar: new Dictionary<string, string>
                     { ["0"] = "Yok", ["2"] = "2/10", ["3"] = "3/10", ["4"] = "4/10", ["5"] = "5/10",
                       ["7"] = "7/10", ["9"] = "9/10", ["10"] = "Tam" }),
-                // Risk / Limit kutusu.
-                new("riskLimiti",   "risk_limiti",   "para",    Baslik: "Risk Limiti"),   // 0 = limitsiz (sekmenin notu)
-                new("riskAsim",     "risk_asim",     "kod",     Baslik: "Aşımda", SabitKodlar: new Dictionary<string, string>
+                // Risk / Limit kutusu - ESKİ alanlar (1152). 1178'de yerini taraf.risk_limit (+ dövizi), taraf_teminat ve
+                //   genel `satis.limit_davranis` ayarı aldı: kartta GİZLİ (iki "Risk Limiti" görünmesin). Kolon yerinde;
+                //   Müşteri Listesi / Cari İcmali / Ekstre / Devir de 1178'de taraf.risk_limit'e taşındı (o listeler limiti dövizine bakmadan TL bakiyeyle kıyaslar; dövizli limitte doğrusu Müşteri Risk İcmali'nde).
+                new("riskLimiti",   "risk_limiti",   "para",    Baslik: "Risk Limiti (eski)", Gizli: true),
+                new("riskAsim",     "risk_asim",     "kod",     Baslik: "Aşımda (eski)", Gizli: true, SabitKodlar: new Dictionary<string, string>
                     { ["1"] = "Yalnız uyar", ["2"] = "Sevkiyat onaya düşer", ["3"] = "Satış engellenir" }),
-                new("teminat",      "teminat",       "metin",   EnFazlaUzunluk: 200, Baslik: "Teminat")
+                new("teminat",      "teminat",       "metin",   EnFazlaUzunluk: 200, Baslik: "Teminat (eski)", Gizli: true)
             }, SubeKolonu: null, Baslik: "Satış & Risk", LogTabloId: 1385, TekSatir: true),
             // SATINALMA KOŞULLARI (1162 / 1163, mockup tedarikci_karti_ver3.html): taraf_tedarikci (017) 1:1 - müşterideki
             //   Satış & Risk'in karşılığı. Vade günü alış belgelerinin vadesini (v_cari_ozet vadesi geçen ödeme,

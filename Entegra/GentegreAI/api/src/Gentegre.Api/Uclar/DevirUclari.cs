@@ -428,7 +428,7 @@ public static class DevirUclari
             select t.id, coalesce(t.kod, '') as kod,
                    coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as ad,
                    case when t.musteri = 1 and t.tedarikci = 1 then 'Müşteri · Tedarikçi' when t.tedarikci = 1 then 'Tedarikçi' else 'Müşteri' end as "altBilgi",
-                   t.musteri, t.tedarikci, coalesce(tm.vade_gun, 0)::int as "vadeGun", coalesce(tm.risk_limiti, 0)::numeric as "riskLimiti",
+                   t.musteri, t.tedarikci, coalesce(tm.vade_gun, 0)::int as "vadeGun", coalesce(t.risk_limit, 0)::numeric as "riskLimiti",
                    public.fn_yerel_para()::text as doviz
               from public.taraf t
               left join public.taraf_musteri tm on tm.id = t.id

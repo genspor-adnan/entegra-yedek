@@ -39,8 +39,8 @@ public static class CariListeUclari
                        coalesce(sum(o.bakiye) filter (where o.bakiye > 0.005), 0)                as alacak,
                        count(*) filter (where o.vadesi_gecen > 0.005)                            as vadeli,
                        coalesce(sum(o.vadesi_gecen), 0)                                          as "vadesiGecen",
-                       count(*) filter (where tm.risk_limiti > 0
-                                          and round(greatest(o.bakiye, 0) * 100 / tm.risk_limiti) > 100) as "limitAsan",
+                       count(*) filter (where t.risk_limit > 0
+                                          and round(greatest(o.bakiye, 0) * 100 / t.risk_limit) > 100) as "limitAsan",
                        count(*) filter (where t.durum = 1
                                           and o.son_satis < now() - interval '90 days')         as uyuyan,
                        coalesce(sum(o.ciro_12ay) filter (where t.durum = 1
@@ -106,9 +106,9 @@ public static class CariListeUclari
 
             var ozet = await b.TekAsync("""
                 select t.id, coalesce(o.bakiye, 0) as bakiye, coalesce(o.vadesi_gecen, 0) as "vadesiGecen",
-                       coalesce(tm.risk_limiti, 0) as "riskLimiti", coalesce(tm.vade_gun, 0) as "vadeGun",
-                       case when coalesce(tm.risk_limiti, 0) > 0
-                            then round(greatest(coalesce(o.bakiye, 0), 0) * 100 / tm.risk_limiti) end as "riskYuzde",
+                       coalesce(t.risk_limit, 0) as "riskLimiti", coalesce(tm.vade_gun, 0) as "vadeGun",
+                       case when coalesce(t.risk_limit, 0) > 0
+                            then round(greatest(coalesce(o.bakiye, 0), 0) * 100 / t.risk_limit) end as "riskYuzde",
                        coalesce(o.ciro_bu_yil, 0) as "ciroBuYil", coalesce(o.ciro_gecen_yil, 0) as "ciroGecenYil",
                        coalesce(o.ciro_12ay, 0) as "ciro12Ay", coalesce(o.ciro_egri, '') as "ciroEgri",
                        o.son_satis as "sonSatis", o.son_tahsilat as "sonTahsilat", t.durum,

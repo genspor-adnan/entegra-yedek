@@ -31,13 +31,14 @@ public static class CariIcmalUclari
     private const string Alis = "11, 12, 13";
 
     /// <summary>Ortak küme: carinin seçimi (tr), hareketler (h), FIFO açık kalemler (acik).
-    ///   @p0 bas · @p1 bit (dahil) · @p2 kapsam 0/1/2 · @p3 temsilci · @p4 kayıt kapsamı · @p5 pasif dahil.</summary>
-    private const string Kume = $"""
+    ///   @p0 bas · @p1 bit (dahil) · @p2 kapsam 0/1/2 · @p3 temsilci · @p4 kayıt kapsamı · @p5 pasif dahil.
+    ///   Müşteri Risk İcmali (1178) ödeme davranışını AYNI kapama kuralıyla bundan türetir.</summary>
+    internal const string Kume = $"""
         with tr as materialized (
             select t.id, t.musteri, t.tedarikci, t.durum, t.temsilci, t.kategori,
                    coalesce(t.kod, '') as kod,
                    coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as ad,
-                   coalesce(tm.vade_gun, 0) as vade_gun, coalesce(tm.risk_limiti, 0) as risk_limiti
+                   coalesce(tm.vade_gun, 0) as vade_gun, coalesce(t.risk_limit, 0) as risk_limiti
               from public.taraf t
               left join public.taraf_musteri tm on tm.id = t.id
              where (t.musteri = 1 or t.tedarikci = 1) and t.personel = 0
@@ -147,7 +148,7 @@ public static class CariIcmalUclari
          limit 50
         """;
 
-    private sealed record Cari(int Id, string Kod, string Ad, bool Musteri, bool Tedarikci, short Durum,
+    internal sealed record Cari(int Id, string Kod, string Ad, bool Musteri, bool Tedarikci, short Durum,
         int TemsilciId, string Temsilci, string Kategori, string Il,
         decimal Devir, decimal DonemBorc, decimal DonemAlacak, decimal Bakiye,
         decimal Satis, decimal Alis, decimal Tahsilat, decimal Odeme,
@@ -157,6 +158,24 @@ public static class CariIcmalUclari
         public decimal VadesiGecen => D30 + D60 + D90 + D90p;
         public decimal? RiskYuzde => RiskLimiti > 0 ? Math.Round(Math.Max(Bakiye, 0) * 100 / RiskLimiti) : null;
     }
+
+    /// <summary>Cari satırları (CariSorgusu) - parametreler <see cref="Kume"/> ile aynı. Müşteri Risk İcmali (1178)
+    ///   açık bakiye / yaşlandırma / temsilci için aynı satırları okur, ikinci sorgu yazmaz.</summary>
+    internal static Task<List<Cari>> CarilarAsync(Npgsql.NpgsqlConnection b, object?[] p, CancellationToken iptal)
+        => b.ListeAsync(CariSorgusu, null, p, o =>
+            {
+                var musteri = o.GetInt16(3) == 1; var tedarikci = o.GetInt16(4) == 1;
+                var bakiye = o.GetDecimal(13);
+                var grupAd = musteri && !tedarikci ? "musteri" : !musteri && tedarikci ? "tedarikci"
+                           : bakiye > 0.005m ? "musteri" : "tedarikci";
+                return new Cari(o.GetInt32(0), o.GetString(1), o.GetString(2), musteri, tedarikci, o.GetInt16(5),
+                    o.GetInt32(6), o.GetString(7), o.GetString(8), o.GetString(9),
+                    o.GetDecimal(10), o.GetDecimal(11), o.GetDecimal(12), bakiye,
+                    o.GetDecimal(14), o.GetDecimal(15), o.GetDecimal(16), o.GetDecimal(17),
+                    o.GetDecimal(18), o.GetDecimal(19), o.GetDecimal(20), o.GetDecimal(21), o.GetDecimal(22), o.GetInt32(23),
+                    o.IsDBNull(24) ? null : o.GetDateTime(24), o.IsDBNull(25) ? null : o.GetDateTime(25),
+                    o.GetDecimal(26), o.GetString(27), grupAd);
+            }, iptal);
 
     public static void CariIcmalUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -180,21 +199,7 @@ public static class CariIcmalUclari
             var kapsamKod = sadeceTedarikci ? 2 : kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 };
             object?[] p = [baslangic, bitis, kapsamKod, temsilci ?? 0, baglam.Kapsam.ToArray(), pasif ?? 0];
 
-            var carilar = await b.ListeAsync(CariSorgusu, null, p, o =>
-            {
-                var musteri = o.GetInt16(3) == 1; var tedarikci = o.GetInt16(4) == 1;
-                var bakiye = o.GetDecimal(13);
-                var grupAd = musteri && !tedarikci ? "musteri" : !musteri && tedarikci ? "tedarikci"
-                           : bakiye > 0.005m ? "musteri" : "tedarikci";
-                return new Cari(o.GetInt32(0), o.GetString(1), o.GetString(2), musteri, tedarikci, o.GetInt16(5),
-                    o.GetInt32(6), o.GetString(7), o.GetString(8), o.GetString(9),
-                    o.GetDecimal(10), o.GetDecimal(11), o.GetDecimal(12), bakiye,
-                    o.GetDecimal(14), o.GetDecimal(15), o.GetDecimal(16), o.GetDecimal(17),
-                    o.GetDecimal(18), o.GetDecimal(19), o.GetDecimal(20), o.GetDecimal(21), o.GetDecimal(22), o.GetInt32(23),
-                    o.IsDBNull(24) ? null : o.GetDateTime(24), o.IsDBNull(25) ? null : o.GetDateTime(25),
-                    o.GetDecimal(26), o.GetString(27), grupAd);
-            }, iptal);
-
+            var carilar = await CarilarAsync(b, p, iptal);
             var nakitHam = await b.ListeAsync(NakitSorgusu, null, p,
                 o => (hafta: o.GetInt32(0), tahsilat: o.GetDecimal(1), odeme: o.GetDecimal(2)), iptal);
             var paralar = await b.ListeAsync(ParaSorgusu, null, p, o => new

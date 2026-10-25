@@ -13,6 +13,14 @@ namespace Gentegre.Api.Uclar;
 
 public static class BelgeUclari
 {
+    /// <summary>
+    /// RİSK LİMİTİ / SEVK BLOKESİ (1178): elle kaydedilen satış belgesi (POST / PUT) kontrol edilir -
+    /// karar BelgeDeposu'nda, belgenin transaction'ında (MusteriRiskDeposu.BelgeKontrolAsync). Bayrak
+    /// istemciden gelmez (JsonIgnore); `satis.limit_asim` aksiyonu "engelle" kipinde uyarıyla geçirir.
+    /// </summary>
+    private static void LimitKontroluIste(IstekBaglami baglam, BelgeYazmaIstegi istek)
+        => (istek.Secenekler ??= new()).LimitAsimYetkisi = baglam.Yetkiler.AksiyonVar("satis.limit_asim");
+
     public static void BelgeUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/belge").WithTags("Belge").RequireAuthorization();
@@ -30,6 +38,7 @@ public static class BelgeUclari
             BelgeTarihiSaatle(belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
+            LimitKontroluIste(baglam, istek);
 
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
                 baglam.Yazma, iptal);
@@ -268,6 +277,7 @@ public static class BelgeUclari
             await BelgeYazmaIsteAsync(baglam, veri, id, belge, Islem.Degistir, iptal);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
+            LimitKontroluIste(baglam, istek);
 
             var (belgeId, uyarilar) = await depo.GuncelleAsync(id, belge, satirlar,
                 istek.Secenekler, baglam.Yazma,
