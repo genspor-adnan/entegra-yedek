@@ -635,7 +635,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   "Devir Girişi", yolu /devir (menuYol); eski /cari-devir yönlenir.
     kaynak: 'cari-devir', rota: 'cari-devir', ozelSayfa: true,
     baslik: 'Devir Girişi', yol: 'Finans › Devir Girişi',
-    menuYol: '/devir', menuGrup: 'Finans', menuSira: 74, menuAd: 'Devir Girişi', ic: '💼', yetkiKodu: 'finans.devir',
+    menuYol: '/devir', menuGrup: 'Finans', menuSira: 74, menuAd: 'Devir Girişi', ic: '↪️', yetkiKodu: 'finans.devir',
   },
   {
     // HASTA BAŞI MALİYET (1024, mockup İcmal/hasta_basi_maliyet_icmali.html):

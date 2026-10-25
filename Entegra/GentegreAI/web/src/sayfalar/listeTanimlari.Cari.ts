@@ -84,7 +84,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
-    menuGrup: 'Cari & CRM', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari.liste',
+    menuGrup: 'Cari & CRM', menuAd: 'Müşteri Listesi', ic: '💼', yetkiKodu: 'cari.liste',
     menuSira: 10,
   },
   {
