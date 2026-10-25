@@ -6,7 +6,8 @@
 #  ilgili kisiler, gorevler + aktiviteler + yorumlar, dokumanlar + ekler (IMAJ) +
 #  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas,
 #  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir), GENINI kod
-#  listeleri (1180 - fn_aktar_kod_listesi; eklemeli), cari kisi bolum / gorev listeleri (1182).
+#  listeleri (1180 - fn_aktar_kod_listesi; eklemeli), cari kisi bolum / gorev listeleri (1182), e-Belge alias
+#  ayarlari (REHBERALIAS, 1185).
 #
 #  1) goc_al.ps1 ile MSSQL -> stg (Delphi DB ve depo DB'si)
 #  2) IMAJ icerigi: BELGE ZLib ise acilir (Delphi KutugeYaz); ICDIS=1 ise dosya
@@ -59,7 +60,7 @@ Adim ("Delphi tablolari: " + $MssqlDb)
 GocAl $MssqlDb @("KATEGORI","KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN","PERS_HAREKET",
                  "GOREVLER","GOREVKULLANICI","GOREVYORUM","AKTIVITELER","AKTIVITENOTLAR","ANIMSAT",
                  "DOKUMAN","DOKUMANKLASOR","CEKLER","CEKHAREKET","TEKLIF","TEKLIFDETAY",
-                 "HESAPPLANI","DEMIRBAS","GENINI")
+                 "HESAPPLANI","DEMIRBAS","GENINI","REHBERALIAS")
 
 Adim ("Depo tablolari: " + $DepoDb)
 GocAl $DepoDb @("EBELGE","EBELGEMESAJ")
@@ -152,5 +153,8 @@ Psql "select public.fn_aktar_kod_listesi()" | ForEach-Object { Write-Host $_ }
 # KISI BOLUM / GOREV (1182): GENINI -2206/-2251 -> departman, -2205 -> personel_gorev (ada gore eklemeli).
 Adim "public.fn_aktar_kisi_listeleri()"
 Psql "select public.fn_aktar_kisi_listeleri()" | ForEach-Object { Write-Host $_ }
+# E-BELGE AYARLARI (1185): REHBERALIAS 151/150/141 -> taraf efatura / alias / e-arsiv e-posta / e-irsaliye.
+Adim "public.fn_aktar_ebelge_alias()"
+Psql "select public.fn_aktar_ebelge_alias()" | ForEach-Object { Write-Host $_ }
 Write-Host ""
 Write-Host "Bitti." -ForegroundColor Green
