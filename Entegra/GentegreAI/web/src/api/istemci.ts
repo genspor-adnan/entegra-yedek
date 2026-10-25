@@ -80,6 +80,12 @@ import { izinUclari } from './uclar/izin';
 import { cariKartUclari, cariListeUclari } from './uclar/cariListe';
 import { cariIcmalUclari } from './uclar/cariIcmal';
 import { stokIcmalUclari, stokIcmalUclari2 } from './uclar/stokIcmal';
+import { siparisIcmalUclari } from './uclar/siparisIcmal';
+import { karlilikIcmalUclari } from './uclar/karlilikIcmal';
+import { satinalmaIcmalUclari } from './uclar/satinalmaIcmal';
+import { kdvIcmalUclari } from './uclar/kdvIcmal';
+import { servisIcmalUclari } from './uclar/servisIcmal';
+import { uretimIcmalUclari } from './uclar/uretimIcmal';
 import { devirUclari } from './uclar/devir';
 import { kasaListeUclari } from './uclar/kasaListe';
 import { ekstreUclari } from './uclar/ekstre';
@@ -122,6 +128,12 @@ export const api = {
   ...cariIcmalUclari,
   ...stokIcmalUclari,
   ...stokIcmalUclari2,
+  ...siparisIcmalUclari,
+  ...karlilikIcmalUclari,
+  ...satinalmaIcmalUclari,
+  ...kdvIcmalUclari,
+  ...servisIcmalUclari,
+  ...uretimIcmalUclari,
   ...devirUclari,
   ...kasaListeUclari,
   ...ekstreUclari,

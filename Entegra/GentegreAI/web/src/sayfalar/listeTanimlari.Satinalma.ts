@@ -173,4 +173,11 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Satınalma', menuAd: 'Bütçe', ic: '💰',
     yetkiKodu: 'satinalma.butce.liste', menuSira: 60,
   },
+  {
+    // SATINALMA SÜREÇ İCMALİ (1176, mockup Ekranlar/İcmal/satinalma_icmali.html): talepten ödemeye huni,
+    //   bekleyenler / onaycı, tedarikçi karnesi, fiyat analizi, bütçe, kritik stoktan gelen.
+    kaynak: 'satinalma-icmali', rota: 'satinalma-icmali', ozelSayfa: true,
+    baslik: 'Satınalma Süreç İcmali', yol: 'Satınalma › İcmaller › Satınalma Süreç İcmali',
+    menuGrup: 'Satınalma', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'Satınalma Süreç İcmali', ic: '@icmal', yetkiKodu: 'satinalma.icmali',
+  },
 ];

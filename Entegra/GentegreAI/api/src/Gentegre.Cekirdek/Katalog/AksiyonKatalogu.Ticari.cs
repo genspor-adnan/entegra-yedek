@@ -72,6 +72,7 @@ public static partial class AksiyonKatalogu
                  KayitGerekir: true, Sira: 15, Bicim: "bir")];
 
         s["taraf-cihaz-liste"] = [.. Crud("taraf-cihaz", "servis", "servis.cihaz")];
+        s["servis-ariza-kodu-liste"] = [.. Crud("servis-ariza-kodu", "servis", "servis.ariza_kodu", yazdir: false)];
 
         //  ARIZA / TALEP (hizmet masası, 911): EKİP LİSTESİ. Serbest CRUD
         //  YOK - talep self-servis açılır (ayrı ekran), ekip yalnız AKIŞI

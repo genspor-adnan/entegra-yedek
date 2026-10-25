@@ -545,6 +545,24 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Alış', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'Alış İcmali', ic: '@icmal', yetkiKodu: 'alis.icmali',
   },
   {
+    // SİPARİŞ / KÂRLILIK İCMALLERİ (1176, mockup Ekranlar/İcmal/siparis_icmali.html, karlilik_icmali.html).
+    //   Sipariş icmalinin Alış yönü aynı ekranda (şeritte Satış / Alış).
+    kaynak: 'siparis-icmali', rota: 'siparis-icmali', ozelSayfa: true, urunModu: 1,
+    baslik: 'Sipariş İcmali', yol: 'Satış › İcmaller › Sipariş İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 82, menuAd: 'Sipariş İcmali', ic: '@icmal', yetkiKodu: 'siparis.icmali',
+  },
+  {
+    kaynak: 'karlilik-icmali', rota: 'karlilik-icmali', ozelSayfa: true, urunModu: 1,
+    baslik: 'Kârlılık İcmali', yol: 'Satış › İcmaller › Kârlılık İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 83, menuAd: 'Kârlılık İcmali', ic: '@icmal', yetkiKodu: 'satis.karlilik_icmali',
+  },
+  {
+    // KDV İCMALİ (1176, mockup Ekranlar/İcmal/kdv_icmali.html): beyan öncesi kontrol, beyanname değil.
+    kaynak: 'kdv-icmali', rota: 'kdv-icmali', ozelSayfa: true,
+    baslik: 'KDV İcmali', yol: 'Muhasebe › İcmaller › KDV İcmali',
+    menuGrup: 'Muhasebe', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'KDV İcmali', ic: '@icmal', yetkiKodu: 'muhasebe.kdv_icmali',
+  },
+  {
     // CARİ DEVİR GİRİŞİ (1156, mockup cari_devir_girisi.html): sisteme geçişte çok carinin
     //   açılış bakiyesi - Excel'den yapıştır, sunucu denetler, hazır satırlar yazılır. Tek cari
     //   için kartın Finansal sekmesi / yeni kart sorusu (CariDevirPenceresi).

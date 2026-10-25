@@ -479,6 +479,8 @@ public sealed partial class KartDeposu
             // Onay vekaleti (741): hangi akisla sinirli. Kullanici secimi
             //   zaten listede (v_kullanici_lookup).
             "public.v_onay_akis_lookup",
+            // TEKNİK SERVİS (1176): iş emrinin arıza kodu (id, ad, aktif kolonları tablonun kendisinde).
+            "public.servis_ariza_kodu",
         };
 
     private static string KodTablosuDogrula(string tablo)

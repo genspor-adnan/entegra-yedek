@@ -52,6 +52,12 @@ const IrsaliyeFaturaEslesme = tembel(() => import('./sayfalar/eslesmeIcmal/Irsal
 const TahsilatOdemeIcmali = tembel(() => import('./sayfalar/finansIcmal/TahsilatOdemeIcmali'), 'TahsilatOdemeIcmali');
 const CekSenetIcmali = tembel(() => import('./sayfalar/finansIcmal/CekSenetIcmali'), 'CekSenetIcmali');
 const NakitAkisIcmali = tembel(() => import('./sayfalar/finansIcmal/NakitAkisIcmali'), 'NakitAkisIcmali');
+const SiparisIcmali = tembel(() => import('./sayfalar/ticariIcmal/SiparisIcmali'), 'SiparisIcmali');
+const KarlilikIcmali = tembel(() => import('./sayfalar/ticariIcmal/KarlilikIcmali'), 'KarlilikIcmali');
+const SatinalmaIcmali = tembel(() => import('./sayfalar/satinalmaIcmal/SatinalmaIcmali'), 'SatinalmaIcmali');
+const KdvIcmali = tembel(() => import('./sayfalar/kdvIcmal/KdvIcmali'), 'KdvIcmali');
+const TeknikServisIcmali = tembel(() => import('./sayfalar/servisIcmal/TeknikServisIcmali'), 'TeknikServisIcmali');
+const UretimIcmali = tembel(() => import('./sayfalar/uretimIcmal/UretimIcmali'), 'UretimIcmali');
 const Devir = tembel(() => import('./sayfalar/devir/Devir'), 'Devir');
 const DevirYonlendir = tembel(() => import('./sayfalar/devir/Devir'), 'DevirYonlendir');
 const Ekstre = tembel(() => import('./sayfalar/ekstre/Ekstre'), 'Ekstre');
@@ -313,6 +319,13 @@ function Yollar() {
         {yetki('finans.tahsilat_odeme_icmali') && <Route path="/tahsilat-odeme-icmali" element={<TahsilatOdemeIcmali />} />}
         {yetki('finans.cek_senet_icmali') && <Route path="/cek-senet-icmali" element={<CekSenetIcmali />} />}
         {yetki('finans.nakit_akis_icmali') && <Route path="/nakit-akis-icmali" element={<NakitAkisIcmali />} />}
+        {/* ERP SÜREÇ İCMALLERİ (1176): sipariş, kârlılık, satınalma süreç, KDV, teknik servis, üretim. */}
+        {yetki('siparis.icmali') && <Route path="/siparis-icmali" element={<SiparisIcmali />} />}
+        {yetki('satis.karlilik_icmali') && <Route path="/karlilik-icmali" element={<KarlilikIcmali />} />}
+        {yetki('satinalma.icmali') && <Route path="/satinalma-icmali" element={<SatinalmaIcmali />} />}
+        {yetki('muhasebe.kdv_icmali') && <Route path="/kdv-icmali" element={<KdvIcmali />} />}
+        {yetki('servis.icmali') && <Route path="/teknik-servis-icmali" element={<TeknikServisIcmali />} />}
+        {yetki('uretim.icmali') && <Route path="/uretim-icmali" element={<UretimIcmali />} />}
         {/* CARİ DEVİR GİRİŞİ (1156): toplu açılış bakiyesi (Excel'den yapıştır). */}
         {/* DEVİR GİRİŞİ - TEK EKRAN (1160): cari + kasa / banka / POS / kredi; eski /cari-devir yönlenir. */}
         {yetki('finans.devir') && <Route path="/devir" element={<Devir />} />}

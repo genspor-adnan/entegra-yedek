@@ -294,4 +294,12 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezi Listesi', menuSira: 90,
     ic: '⚙️', yetkiKodu: 'uretim.is_merkezi.liste',
   },
+  {
+    // ÜRETİM İCMALİ (1176, mockup Ekranlar/İcmal/uretim_icmali.html).
+    kaynak: 'uretim-icmali', rota: 'uretim-icmali', ozelSayfa: true,
+    baslik: 'Üretim İcmali', yol: 'Üretim › İcmaller › Üretim İcmali',
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAltGrup: 'İcmaller', menuAd: 'Üretim İcmali', menuSira: 80,
+    ic: '@icmal', yetkiKodu: 'uretim.icmali',
+  },
 ];

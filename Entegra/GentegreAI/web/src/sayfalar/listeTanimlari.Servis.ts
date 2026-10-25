@@ -130,4 +130,26 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Teknik Servis', menuAd: 'Sözleşme Listesi', ic: '📑',
     yetkiKodu: 'servis.sozlesme', modul: 'servis', menuSira: 60,
   },
+  {
+    // ARIZA KODLARI (1176, karar 25.10.2026): iş emrinin isteğe bağlı arıza sınıfı;
+    //   Teknik Servis İcmali arızaları koda göre gruplar.
+    kaynak: 'servis-ariza-kodu', rota: 'servis-ariza-kodu',
+    baslik: 'Arıza Kodları',
+    yol: 'Teknik Servis › Ayarlar › Arıza Kodları',
+    kartYolu: '/servis-ariza-kodu', kartBaslik: 'Arıza Kodu',
+    aksiyonEkrani: 'servis-ariza-kodu-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Teknik Servis', menuAltGrup: 'Ayarlar', menuAd: 'Arıza Kodları', ic: '🏷️',
+    yetkiKodu: 'servis.ariza_kodu', modul: 'servis', menuSira: 90,
+  },
+  {
+    // TEKNİK SERVİS İCMALİ (1176, mockup Ekranlar/İcmal/teknik_servis_icmali.html).
+    kaynak: 'teknik-servis-icmali', rota: 'teknik-servis-icmali', ozelSayfa: true,
+    baslik: 'Teknik Servis İcmali', yol: 'Teknik Servis › İcmaller › Teknik Servis İcmali',
+    menuGrup: 'Teknik Servis', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'Teknik Servis İcmali', ic: '@icmal',
+    yetkiKodu: 'servis.icmali', modul: 'servis',
+  },
 ];

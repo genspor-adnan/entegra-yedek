@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// TEKNİK SERVİS KARTLARI (773).
@@ -107,6 +107,14 @@ public static partial class KartKatalogu
             new("iscilikSaat", "iscilik_saat", "sayi", Baslik: "İşçilik (sa)",
                 Grup: "Sonuç"),
             new("tutar", "tutar", "para", Baslik: "Tutar", Grup: "Sonuç"),
+            // MEMNUNİYET (1176, isteğe bağlı 1-5): Teknik Servis İcmali'nde
+            //   teknisyen ortalaması. Boş = puan verilmedi (ortalamaya girmez).
+            new("memnuniyetPuan", "memnuniyet_puan", "kod", Baslik: "Müşteri memnuniyeti",
+                Grup: "Sonuç", SabitKodlar: new Dictionary<string, string>
+                {
+                    ["1"] = "1 · Çok kötü", ["2"] = "2 · Kötü", ["3"] = "3 · Orta",
+                    ["4"] = "4 · İyi", ["5"] = "5 · Çok iyi",
+                }),
         },
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
@@ -233,4 +241,34 @@ public static partial class KartKatalogu
         {
             ["durum"] = 1, ["kapsam"] = 1, ["sla_saat"] = 24, ["periyot_ay"] = 0,
         });
+
+    // ------------------------------------------------------ arıza kodu ----
+    // ARIZA KODU (1176, karar 25.10.2026): iş emrinde isteğe bağlı sınıflandırma;
+    //   Teknik Servis İcmali arızaları koda göre gruplar (kodsuz eski kayıtlar
+    //   arıza metninden). Marka / model boşsa bütün markalar / modeller içindir.
+    private static KartTanimi ServisArizaKodu() => new(
+        Ad: "servisArizaKodu",
+        YetkiKodu: "servis.ariza_kodu",
+        Tablo: "public.servis_ariza_kodu",
+        LogTabloId: 1388,
+        SubeKolonu: null,
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.demirbas_is_emri", "ariza_kodu_id",
+                "Bu arıza kodu bir iş emrinde kullanılıyor; silmek yerine pasif yapın."),
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30,
+                Baslik: "Kod", Grup: "Arıza Kodu"),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 150,
+                Baslik: "Arıza", Grup: "Arıza Kodu"),
+            new("marka", "marka", "metin", EnFazlaUzunluk: 60,
+                Baslik: "Marka (boş = hepsi)", Grup: "Kapsam"),
+            new("model", "model", "metin", EnFazlaUzunluk: 60,
+                Baslik: "Model (boş = hepsi)", Grup: "Kapsam"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kapsam"),
+        },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = 1 });
 }

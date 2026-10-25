@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planlı Giderler</title>
+<style>
+  /* Gentegre AI ekran dili (banka_hareketleri.html ile aynı değişkenler) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1520px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .ust .yol{opacity:.75;font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:14px;font-size:11px;opacity:.9}
+  .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekmeler span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px;cursor:pointer}
+  .sekmeler span.on{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;color:var(--ink)}
+  .btn:hover{border-color:#9cc4ee}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.mini{padding:2px 7px;font-size:10.5px}
+  .sp{margin-left:auto}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .borc{color:var(--kir)} .alacak{color:var(--ok)} .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+  .gorunum{display:none} .gorunum.on{display:block}
+
+  .arac{display:flex;gap:6px;align-items:center;padding:8px 12px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .alan{display:flex;flex-direction:column;gap:2px}
+  .alan label{font-size:10.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;padding:4px 8px;background:#fff;min-width:120px;min-height:24px}
+  .inp.combo::after{content:"▾";float:right;color:var(--muted);margin-left:8px}
+  .inp.ro{background:#f6f8fb;color:#4d5d6e}
+
+  .ozet{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-bottom:1px solid var(--line);background:#fbfcfe}
+  .ozet > div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .ozet > div:last-child{border-right:none}
+  .ozet .b{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .ozet .d{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .ozet .x{font-size:10.5px;color:var(--muted)}
+
+  .govde{display:grid;grid-template-columns:minmax(0,1fr) 360px}
+  .liste{min-width:0;border-right:1px solid var(--line)}
+  .cipler{display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#fff;color:var(--muted);cursor:pointer}
+  .cip.on{background:#4a5d73;color:#fff;border-color:#4a5d73}
+  table{width:100%;border-collapse:collapse}
+  .dg th{background:var(--head);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px;color:#4d5d6e;white-space:nowrap}
+  .dg td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+  .dg tr:hover td{background:#f6f9fd}
+  .dg tr.sec td{background:var(--sel)}
+  .dg tr.pasif td{color:#9aa6b3}
+  .dg td small{display:block;color:var(--muted)}
+  .dg tfoot td{background:var(--head);font-weight:bold;border-top:1px solid var(--line)}
+  .alt-satir{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:var(--head);color:var(--muted);font-size:11px}
+
+  .yan{padding:10px 12px;background:#fbfcfe}
+  .yan h5{margin:10px 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .yan h5:first-child{margin-top:2px}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px;margin-bottom:8px;line-height:1.55}
+  .kutu .sat{display:flex;justify-content:space-between;gap:10px}
+  .kutu .sat span{color:var(--muted)}
+  .kutu .sat b{font-weight:normal;text-align:right}
+
+  /* ay şeridi (12 ay) */
+  .aylar{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px;align-items:end;height:96px;padding:4px 2px 0}
+  .aylar div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;color:var(--muted)}
+  .aylar i{display:block;width:100%;background:#8fb3de;border-radius:2px 2px 0 0}
+  .aylar i.d{background:#d9b25f}
+  .aylar i.g{background:#b9c4d0}
+
+  .ic{padding:12px 14px}
+  .iki{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+  .grp{border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden;background:#fff}
+  .grp h4{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);font-size:12px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .grp .gi{padding:10px}
+  .f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+  .f .fld{display:flex;flex-direction:column;gap:2px}
+  .f .fld label{font-size:10.5px;color:var(--muted)}
+  .f .gen{grid-column:1 / -1}
+  .ipucu{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .bilgi-serit{border:1px solid #cfe0f5;background:#eef4fc;color:#24508a;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .uyari-serit{border:1px solid #f2ddbf;background:#fdf6e3;color:#6d4c12;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+  .radyo{display:flex;gap:6px;flex-wrap:wrap}
+  .radyo span{border:1px solid var(--line);border-radius:3px;padding:3px 9px;background:#fff;cursor:pointer}
+  .radyo span.on{border-color:#2f6db3;background:#eef4fc;color:#2f6db3;font-weight:bold}
+  .kartbas{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:#fbfcfe}
+  .kartbas b{font-size:14px;color:var(--navy)}
+
+  .notlar{max-width:1520px;margin:0 auto 14px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 16px;line-height:1.6}
+  .notlar h2{font-size:14px;color:var(--navy);margin:0 0 6px}
+  .notlar li{margin-bottom:4px}
+  .soru{max-width:1520px;margin:0 auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  code{background:#f1f4f8;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="ust">🗓️ <b>Planlı Giderler</b> <span class="yol">Finans › Planlı Giderler</span>
+    <span class="sag"><span>Şube: Merkez</span><span>universe medikal</span><span>25.10.2026</span></span></div>
+
+  <div class="sekmeler" id="gor">
+    <span class="on" data-g="liste">📋 Liste</span>
+    <span data-g="kart">📝 Kart — Depo Kirası</span>
+    <span data-g="donem">📅 Dönemler — Depo Kirası</span>
+    <span data-g="takvim">📆 Takvim (12 ay)</span>
+  </div>
+
+  <!-- ============================================================ LİSTE -->
+  <div class="gorunum on" id="g-liste">
+    <div class="arac">
+      <button class="btn primary">＋ Yeni Planlı Gider</button>
+      <button class="btn">📝 Aç</button>
+      <button class="btn">⧉ Kopyala</button>
+      <span class="sepv"></span>
+      <button class="btn">💳 Ödeme Oluştur</button>
+      <button class="btn">🔗 Eşleştir</button>
+      <span class="sepv"></span>
+      <button class="btn">📊 Nakit Akış İcmali</button>
+      <span class="sp"></span>
+      <div class="alan"><label>Ödeme hesabı</label><div class="inp combo">Tümü</div></div>
+      <div class="alan"><label>Kategori</label><div class="inp combo">Tümü</div></div>
+      <div class="alan"><label>Ara</label><div class="inp" style="min-width:180px">kira, elektrik, SGK…</div></div>
+    </div>
+
+    <div class="ozet">
+      <div><div class="b">Aylık planlı gider</div><div class="d">485.202 ₺</div><div class="x">11 aktif tanım · yıllık / 3 aylık aya bölünmüş</div></div>
+      <div><div class="b">Önümüzdeki 30 gün</div><div class="d">512.380 ₺</div><div class="x">14 dönem · en büyüğü SGK 182.400</div></div>
+      <div><div class="b">Gecikmiş</div><div class="d borc">17.090 ₺</div><div class="x">2 dönem · ödeme eşleşmedi</div></div>
+      <div><div class="b">Tahmini (değişken)</div><div class="d">%67</div><div class="x">tutarı tahminle gelen kısım</div></div>
+      <div><div class="b">Bu ay gerçekleşen</div><div class="d">%71</div><div class="x">346.210 / 485.202 · 7 / 11 ödendi</div></div>
+      <div><div class="b">Plan − gerçek (6 ay)</div><div class="d">+%3,8</div><div class="x">gerçek plandan yüksek · elektrik</div></div>
+    </div>
+
+    <div class="govde">
+      <div class="liste">
+        <div class="cipler">
+          <span class="cip on">Aktif</span><span class="cip">Bu ay</span><span class="cip">Gecikmiş (2)</span>
+          <span class="cip">Değişken tutarlı</span><span class="cip">Hesaplanan (KDV / SGK)</span><span class="cip">Dövizli</span>
+          <span class="cip">Bitiyor (90 gün)</span><span class="cip">Pasif</span><span class="cip">Tümü</span>
+        </div>
+        <table class="dg">
+          <thead><tr><th>Gider</th><th>Kategori</th><th>Periyot · gün</th><th class="sag">Tutar</th><th>Tutar türü</th><th>Ödeme</th><th>Sonraki</th><th>Bu dönem</th></tr></thead>
+          <tbody>
+            <tr class="sec"><td><b>Depo kirası</b><small>Yıldız Gayrimenkul A.Ş. · masraf 770.01.003</small></td><td>Kira</td><td>Aylık · ayın 5'i</td><td class="sag">102.000,00<small>85.000 + KDV %20</small></td><td><span class="rz">Sabit</span> <span class="rz mavi">Ocak'ta +%30</span></td><td>Garanti TL · havale</td><td>05.11.2026</td><td><span class="rz ok">Ödendi 05.10</span></td></tr>
+            <tr><td><b>Elektrik</b><small>CK Boğaziçi · abone 4410…</small></td><td>Enerji</td><td>Aylık · ayın 20'si</td><td class="sag">14.200,00<small>son 3 ay ort.</small></td><td><span class="rz sari">Son 3 dönem ort.</span></td><td>Garanti TL · otomatik talimat</td><td>20.11.2026</td><td><span class="rz mor">Faturalandı</span><small>Alış fatura CKB2026… vade 20.10</small></td></tr>
+            <tr><td><b>Su + doğalgaz</b><small>İSKİ / İGDAŞ</small></td><td>Enerji</td><td>Aylık · ayın 25'i</td><td class="sag">3.150,00<small>geçen yıl aynı ay</small></td><td><span class="rz sari">Geçen yıl aynı ay</span></td><td>Garanti TL · otomatik talimat</td><td>25.10.2026</td><td><span class="rz">Bugün</span></td></tr>
+            <tr><td><b>İnternet + telefon</b><small>Türk Telekom</small></td><td>Abonelik</td><td>Aylık · ayın 12'si</td><td class="sag">2.890,00</td><td><span class="rz">Sabit</span></td><td>Şirket kartı ****4412</td><td>12.11.2026</td><td><span class="rz ok">Ödendi 12.10</span><small>kart ekstresinde</small></td></tr>
+            <tr><td><b>SGK primi</b><small>Ekim tahakkuku</small></td><td>Vergi / SGK</td><td>Aylık · ay sonu</td><td class="sag">182.400,00<small>son 3 ödeme ort.</small></td><td><span class="rz mavi">Hesaplanan</span></td><td>Garanti TL · havale</td><td>30.11.2026</td><td><span class="rz">Bekliyor 31.10</span></td></tr>
+            <tr><td><b>KDV ödemesi</b><small>Eylül beyanı</small></td><td>Vergi / SGK</td><td>Aylık · ayın 28'i</td><td class="sag">120.592,00<small>KDV İcmali · ödenecek</small></td><td><span class="rz mavi">KDV İcmali'nden</span></td><td>Garanti TL · vergi tahsilatı</td><td>28.10.2026</td><td><span class="rz">Bekliyor 28.10</span></td></tr>
+            <tr><td><b>Muhtasar (stopaj)</b><small>kira + ücret stopajı</small></td><td>Vergi / SGK</td><td>Aylık · ayın 26'sı</td><td class="sag">31.840,00</td><td><span class="rz">Elle (her dönem)</span></td><td>Garanti TL · vergi tahsilatı</td><td>26.10.2026</td><td><span class="rz">Bekliyor 26.10</span></td></tr>
+            <tr><td><b>Muhasebe bürosu</b><small>Ak Müşavirlik</small></td><td>Hizmet</td><td>Aylık · ayın 10'u</td><td class="sag">15.000,00<small>12.500 + KDV</small></td><td><span class="rz">Sabit</span></td><td>Garanti TL · havale</td><td>10.11.2026</td><td><span class="rz kir">Gecikti 15 gün</span></td></tr>
+            <tr><td><b>Araç kasko</b><small>Anadolu Sigorta · 34 GNT 07</small></td><td>Sigorta</td><td>Aylık · ayın 15'i · <b>5 / 9</b></td><td class="sag">6.750,00</td><td><span class="rz">Sabit</span> <span class="rz">4 taksit kaldı</span></td><td>Şirket kartı ****4412</td><td>15.11.2026</td><td><span class="rz ok">Ödendi 15.10</span></td></tr>
+            <tr><td><b>OSB aidatı</b><small>Dudullu OSB</small></td><td>Aidat</td><td>3 aylık · 1 Oca / Nis / Tem / Eki</td><td class="sag">7.800,00<small>aya düşen 2.600</small></td><td><span class="rz">Sabit</span></td><td>Garanti TL · havale</td><td>01.01.2027</td><td><span class="rz kir">Gecikti 24 gün</span><small>2.090 kısmi ödendi</small></td></tr>
+            <tr><td><b>Yazılım lisansı</b><small>CAD / tasarım · yıllık</small></td><td>Abonelik</td><td>Yıllık · 15 Ocak</td><td class="sag">€ 1.200,00<small>≈ 45.360 ₺ bugünkü kur</small></td><td><span class="rz">Sabit</span> <span class="rz mor">€</span></td><td>Garanti EUR · havale</td><td>15.01.2027</td><td><span class="sonuk">—</span></td></tr>
+            <tr class="pasif"><td><b>Depo-2 kirası</b><small>bitti 30.06.2026</small></td><td>Kira</td><td>Aylık · ayın 5'i</td><td class="sag">40.000,00</td><td><span class="rz">Sabit</span></td><td>Garanti TL</td><td>—</td><td><span class="rz">Pasif</span></td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">11 aktif · 1 pasif</td><td class="sag">485.202,00 / ay</td><td colspan="4">TL karşılığı · yıllık / 3 aylık tanımlar aya bölünmüş · dövizli bugünkü kurla</td></tr></tfoot>
+        </table>
+        <div class="alt-satir">Satıra çift tık = kart · sağ tık: Ödeme Oluştur / Eşleştir / Bu dönemi atla / Kopyala / Pasife al<span class="sp"></span>Hesap sunucuda · ekran toplamaz</div>
+      </div>
+
+      <div class="yan">
+        <h5>Depo kirası — önizleme</h5>
+        <div class="kutu">
+          <div class="sat"><span>Cari</span><b>Yıldız Gayrimenkul A.Ş.</b></div>
+          <div class="sat"><span>Masraf kalemi</span><b>770.01.003 Depo kirası</b></div>
+          <div class="sat"><span>Tutar</span><b>85.000,00 + KDV %20 = 102.000,00</b></div>
+          <div class="sat"><span>Takvim</span><b>Her ayın 5'i · tatilse sonraki iş günü</b></div>
+          <div class="sat"><span>Geçerlilik</span><b>01.01.2025 – 31.12.2027</b></div>
+          <div class="sat"><span>Artış</span><b>Her Ocak · %30 (elle, sözleşme)</b></div>
+          <div class="sat"><span>Ödeme</span><b>Garanti TL · havale · 3 gün önce hatırlat</b></div>
+        </div>
+        <h5>Son 6 dönem</h5>
+        <div class="kutu">
+          <div class="sat"><span>Mayıs</span><b><span class="rz ok">Ödendi 05.05</span> 102.000</b></div>
+          <div class="sat"><span>Haziran</span><b><span class="rz ok">Ödendi 05.06</span> 102.000</b></div>
+          <div class="sat"><span>Temmuz</span><b><span class="rz sari">Geç ödendi 08.07 · +3 gün</span> 102.000</b></div>
+          <div class="sat"><span>Ağustos</span><b><span class="rz ok">Ödendi 05.08</span> 102.000</b></div>
+          <div class="sat"><span>Eylül</span><b><span class="rz ok">Ödendi 04.09</span> 102.000</b></div>
+          <div class="sat"><span>Ekim</span><b><span class="rz ok">Ödendi 05.10</span> 102.000</b></div>
+        </div>
+        <h5>Nakit akışa etkisi</h5>
+        <div class="kutu">Önümüzdeki 12 ay: <b>1.249.500 ₺</b> (Ocak'tan itibaren 132.600 / ay).<br>
+          <span class="sonuk">Nakit Akış İcmali'nde "Planlı: Depo kirası" satırı, her ayın 5'inde çıkış.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ KART -->
+  <div class="gorunum" id="g-kart">
+    <div class="kartbas"><b>Depo kirası</b><a href="planli_gider_karti.html" style="font-size:11px">ayrıntılı kart mockup'ı ›</a><span class="rz ok">Aktif</span><span class="rz">Sabit tutar</span><span class="rz mavi">Ocak'ta +%30</span>
+      <span class="sp"></span><button class="btn">💳 Ödeme Oluştur</button><button class="btn">⧉ Kopyala</button><button class="btn">⏸ Pasife Al</button><button class="btn ok">✓ Kaydet</button></div>
+    <div class="ic">
+      <div class="iki">
+        <div>
+          <div class="grp"><h4>Gider</h4><div class="gi"><div class="f">
+            <div class="fld gen"><label>Ad *</label><div class="inp">Depo kirası</div></div>
+            <div class="fld"><label>Kategori</label><div class="inp combo">Kira</div></div>
+            <div class="fld"><label>Masraf kalemi</label><div class="inp combo">770.01.003 · Depo kirası</div></div>
+            <div class="fld"><label>Cari (tedarikçi)</label><div class="inp combo">Yıldız Gayrimenkul A.Ş.</div></div>
+            <div class="fld"><label>Masraf merkezi</label><div class="inp combo">Depo</div></div>
+            <div class="fld"><label>Şube</label><div class="inp ro">Merkez</div></div>
+            <div class="fld"><label>Durum</label><div class="radyo"><span class="on">Aktif</span><span>Pasif</span></div></div>
+            <div class="fld gen"><label>Açıklama</label><div class="inp">Kira sözleşmesi 01.01.2025, 3 yıl; artış her Ocak sözleşmedeki oranla.</div></div>
+          </div></div></div>
+
+          <div class="grp"><h4>Tutar</h4><div class="gi">
+            <div class="radyo" style="margin-bottom:8px"><span class="on">Sabit</span><span>Son N dönem ortalaması</span><span>Geçen yıl aynı ay</span><span>Hesaplanan (KDV / SGK)</span><span>Elle (her dönem)</span></div>
+            <div class="f">
+              <div class="fld"><label>Tutar (KDV hariç)</label><div class="inp sag">85.000,00</div></div>
+              <div class="fld"><label>KDV</label><div class="inp combo">%20 → 17.000,00</div></div>
+              <div class="fld"><label>Para birimi</label><div class="inp combo">TL</div></div>
+              <div class="fld"><label>Nakit çıkışı (KDV dahil)</label><div class="inp ro sag">102.000,00</div></div>
+              <div class="fld"><label>Artış</label><div class="inp combo">Yıllık · Ocak · %30</div></div>
+              <div class="fld"><label>Yuvarlama</label><div class="inp combo">Yok</div></div>
+            </div>
+            <div class="ipucu">"Son N dönem ortalaması" eşleşen gerçek ödemelerden hesaplanır (masraf kalemi + cari); geçmiş yoksa yukarıdaki tutar kullanılır.
+              "Hesaplanan": KDV ödemesi KDV İcmali'nin <i>ödenecek</i>'inden, SGK son 3 ödemenin ortalamasından gelir — elle girilen dönem tutarı her zaman önceliklidir.</div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="grp"><h4>Takvim</h4><div class="gi"><div class="f">
+            <div class="fld"><label>Periyot</label><div class="radyo"><span>Haftalık</span><span class="on">Aylık</span><span>3 aylık</span><span>6 aylık</span><span>Yıllık</span><span>Tek sefer</span></div></div>
+            <div class="fld"><label>Ödeme günü</label><div class="inp combo">Ayın 5'i</div></div>
+            <div class="fld"><label>Tatile denk gelirse</label><div class="radyo"><span>Önceki iş günü</span><span class="on">Sonraki iş günü</span><span>Kaydırma</span></div></div>
+            <div class="fld"><label>Başlangıç</label><div class="inp">01.01.2025</div></div>
+            <div class="fld"><label>Bitiş</label><div class="radyo"><span>Süresiz</span><span class="on">Tarihte: 31.12.2027</span><span>N dönem sonra</span></div></div>
+            <div class="fld"><label>Hatırlatma</label><div class="inp combo">3 gün önce · Finans rolü</div></div>
+          </div>
+          <div class="ipucu">Tatil takvimi Resmi Tatiller tanımından (749). Ayın 29-31'i seçilirse kısa ayda ayın son günü.</div>
+          </div></div>
+
+          <div class="grp"><h4>Ödeme</h4><div class="gi"><div class="f">
+            <div class="fld"><label>Ödeme hesabı</label><div class="inp combo">Garanti BBVA TL · TR12 0006 …</div></div>
+            <div class="fld"><label>Yöntem</label><div class="inp combo">Havale / EFT</div></div>
+            <div class="fld gen"><label>Eşleştirme</label><div class="inp ro">Masraf kalemi 770.01.003 + cari Yıldız Gayrimenkul · plan tarihi ± 7 gün · tutar ± %5</div></div>
+          </div>
+          <div class="uyari-serit" style="margin:10px 0 0">Kartla ödenen gider (ör. internet) nakit akışında <b>kart ekstresinin son ödeme gününde</b> görünür: planlı gider o kartın ekstre kalemine eklenir, ayrıca çıkış yazılmaz — iki kez sayılmaz.</div>
+          </div></div>
+
+          <div class="bilgi-serit">Bu tanım hiçbir kayıt <b>kendiliğinden</b> oluşturmaz. "Ödeme Oluştur" taslak kasa / banka işlemi açar (cari, masraf, tutar, açıklama dolu); kesinleştiren kullanıcıdır. Kesin ödeme gelince dönem otomatik eşleşir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ DÖNEMLER -->
+  <div class="gorunum" id="g-donem">
+    <div class="arac">
+      <button class="btn">🔗 Eşleştir…</button>
+      <button class="btn">⏭ Bu dönemi atla</button>
+      <button class="btn">✎ Yalnız bu dönem tutarı</button>
+      <button class="btn">💳 Ödeme Oluştur</button>
+      <span class="sp"></span>
+      <div class="alan"><label>Aralık</label><div class="inp combo">Son 6 + gelecek 6 dönem</div></div>
+    </div>
+    <table class="dg">
+      <thead><tr><th>Dönem</th><th>Plan tarihi</th><th class="sag">Plan</th><th class="sag">Gerçek</th><th class="sag">Fark</th><th>Ödeme tarihi</th><th>Eşleşen kayıt</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Mayıs 2026</td><td>05.05.2026</td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>05.05.2026</td><td>Banka EFT · KSA-2026-0512</td><td><span class="rz ok">Ödendi</span></td></tr>
+        <tr><td>Haziran 2026</td><td>05.06.2026</td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>05.06.2026</td><td>Banka EFT · KSA-2026-0644</td><td><span class="rz ok">Ödendi</span></td></tr>
+        <tr><td>Temmuz 2026</td><td>06.07.2026 <small>5'i pazar</small></td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>08.07.2026</td><td>Banka EFT · KSA-2026-0781</td><td><span class="rz sari">Geç · +2 gün</span></td></tr>
+        <tr><td>Ağustos 2026</td><td>05.08.2026</td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>05.08.2026</td><td>Banka EFT · KSA-2026-0903</td><td><span class="rz ok">Ödendi</span></td></tr>
+        <tr><td>Eylül 2026</td><td>07.09.2026 <small>5'i cumartesi</small></td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>04.09.2026</td><td>Banka EFT · KSA-2026-1017</td><td><span class="rz ok">Ödendi · erken</span></td></tr>
+        <tr><td>Ekim 2026</td><td>05.10.2026</td><td class="sag">102.000,00</td><td class="sag">102.000,00</td><td class="sag sonuk">0,00</td><td>05.10.2026</td><td>Banka EFT · KSA-2026-1140</td><td><span class="rz ok">Ödendi</span></td></tr>
+        <tr class="sec"><td><b>Kasım 2026</b></td><td>05.11.2026</td><td class="sag">102.000,00</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td>—</td><td class="sonuk">—</td><td><span class="rz mavi">Planlı · 11 gün</span></td></tr>
+        <tr><td>Aralık 2026</td><td>07.12.2026 <small>5'i cumartesi</small></td><td class="sag">102.000,00</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td>—</td><td class="sonuk">—</td><td><span class="rz mavi">Planlı</span></td></tr>
+        <tr><td>Ocak 2027</td><td>05.01.2027</td><td class="sag">132.600,00 <small>+%30 artış</small></td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td>—</td><td class="sonuk">—</td><td><span class="rz mavi">Planlı</span></td></tr>
+        <tr><td>Şubat 2027</td><td>05.02.2027</td><td class="sag">132.600,00</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td>—</td><td class="sonuk">—</td><td><span class="rz mavi">Planlı</span></td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="2">Son 6 dönem</td><td class="sag">612.000,00</td><td class="sag">612.000,00</td><td class="sag">0,00</td><td colspan="3">6 / 6 ödendi · ort. gecikme 0,3 gün</td></tr></tfoot>
+    </table>
+    <div class="ic">
+      <div class="grp"><h4>🔗 Eşleştirme önerisi — Muhasebe bürosu · Ekim 2026 <span class="rz kir">Gecikti 15 gün</span></h4><div class="gi">
+        <table class="dg">
+          <thead><tr><th></th><th>Kayıt</th><th>Tarih</th><th>Cari</th><th>Masraf</th><th class="sag">Tutar</th><th>Neden önerildi</th></tr></thead>
+          <tbody>
+            <tr><td><input type="radio" checked></td><td>Banka hareketi · bekliyor</td><td>22.10.2026</td><td>Ak Müşavirlik</td><td>—</td><td class="sag">15.000,00</td><td>Karşı IBAN carinin · tutar birebir · 12 gün sonra</td></tr>
+            <tr><td><input type="radio"></td><td>Kasa ödeme KSA-2026-1188</td><td>01.10.2026</td><td>Ak Müşavirlik</td><td>770.05.001</td><td class="sag">15.000,00</td><td>Eylül dönemiyle zaten eşleşmiş — seçilemez</td></tr>
+          </tbody>
+        </table>
+        <div class="ipucu">Banka hareketi henüz işlenmemişse eşleşme "Banka Hareketleri" ekranında işlenince kesinleşir; o zamana kadar dönem <i>beklemede</i> sayılır ve nakit akışa çıkış olarak yazılmaz (banka bakiyesinde zaten düşmüştür).</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ TAKVİM -->
+  <div class="gorunum" id="g-takvim">
+    <div class="arac">
+      <div class="alan"><label>Görünüm</label><div class="radyo"><span class="on">Aylık toplam</span><span>Kategori</span><span>Ödeme hesabı</span></div></div>
+      <span class="sp"></span><button class="btn">📊 Nakit Akış İcmali'nde aç</button>
+    </div>
+    <div class="ic">
+      <div class="grp"><h4>Önümüzdeki 12 ay <span class="rz">mavi sabit · sarı tahmini · gri hesaplanan</span></h4><div class="gi">
+        <div class="aylar">
+          <div><i style="height:62px"></i><i class="d" style="height:9px"></i>Kas</div>
+          <div><i style="height:62px"></i><i class="d" style="height:11px"></i>Ara</div>
+          <div><i style="height:80px"></i><i class="d" style="height:12px"></i>Oca</div>
+          <div><i style="height:70px"></i><i class="d" style="height:12px"></i>Şub</div>
+          <div><i style="height:70px"></i><i class="d" style="height:10px"></i>Mar</div>
+          <div><i style="height:75px"></i><i class="d" style="height:7px"></i>Nis</div>
+          <div><i style="height:70px"></i><i class="d" style="height:6px"></i>May</div>
+          <div><i style="height:70px"></i><i class="d" style="height:8px"></i>Haz</div>
+          <div><i style="height:75px"></i><i class="d" style="height:10px"></i>Tem</div>
+          <div><i style="height:70px"></i><i class="d" style="height:10px"></i>Ağu</div>
+          <div><i style="height:70px"></i><i class="d" style="height:8px"></i>Eyl</div>
+          <div><i style="height:75px"></i><i class="d" style="height:8px"></i>Eki</div>
+        </div>
+      </div></div>
+      <table class="dg">
+        <thead><tr><th>Ay</th><th class="sag">Kira</th><th class="sag">Enerji</th><th class="sag">Abonelik</th><th class="sag">Vergi / SGK</th><th class="sag">Hizmet</th><th class="sag">Sigorta</th><th class="sag">Aidat</th><th class="sag">Toplam</th><th class="sag">Tahmini payı</th></tr></thead>
+        <tbody>
+          <tr><td>Kasım 2026</td><td class="sag">102.000</td><td class="sag">17.350</td><td class="sag">2.890</td><td class="sag">334.832</td><td class="sag">15.000</td><td class="sag">6.750</td><td class="sag">—</td><td class="sag"><b>478.822</b></td><td class="sag">%70</td></tr>
+          <tr><td>Aralık 2026</td><td class="sag">102.000</td><td class="sag">19.800</td><td class="sag">2.890</td><td class="sag">334.832</td><td class="sag">15.000</td><td class="sag">6.750</td><td class="sag">—</td><td class="sag"><b>481.272</b></td><td class="sag">%70</td></tr>
+          <tr><td>Ocak 2027</td><td class="sag">132.600</td><td class="sag">21.400</td><td class="sag">48.250 <small>€ lisans</small></td><td class="sag">334.832</td><td class="sag">15.000</td><td class="sag">6.750</td><td class="sag">7.800</td><td class="sag"><b>566.632</b></td><td class="sag">%63</td></tr>
+          <tr><td>Şubat 2027</td><td class="sag">132.600</td><td class="sag">20.900</td><td class="sag">2.890</td><td class="sag">334.832</td><td class="sag">15.000</td><td class="sag">6.750</td><td class="sag">—</td><td class="sag"><b>512.972</b></td><td class="sag">%69</td></tr>
+        </tbody>
+      </table>
+      <div class="ipucu">Kasko 9. taksitten sonra (Şubat) biter; yazılım lisansı yalnız Ocak'ta. Vergi / SGK'nın KDV kısmı KDV İcmali'nin son dönem ödenecek'i — gelecek aylarda aynı tutarla tekrar edilir (tahmini).</div>
+    </div>
+  </div>
+
+  <div class="alt-satir">Planlı gider kayıt değildir: kasa / banka hareketi ya da fatura oluşturmaz, yalnız beklentiyi tutar · Nakit Akış İcmali'nin "Planlı" satırlarının kaynağı</div>
+</div>
+
+<div class="notlar">
+  <h2>Planlı Giderler — tasarım notları</h2>
+  <ul>
+    <li><b>Ne çözer:</b> Nakit Akış (Vade) İcmali bugün kira, vergi, abonelik, aidat gibi faturası önceden gelmeyen tekrarlayan giderleri bilmiyor ("planlı gider tanımı yok · akışta görünmüyor" uyarısı). Bu ekran o beklentiyi tanımlar; icmalin "Planlı" çıkışları buradan gelir.</li>
+    <li><b>Tanım + dönem:</b> tanım (kim, ne, ne kadar, hangi takvimle, hangi hesaptan) değişmez kural; her dönem (ör. Kasım kirası) takvimden <b>türetilir</b>, yalnız istisnası saklanır (atlandı, bu dönem farklı tutar, eşleşen kayıt). 3 yıllık kira için 36 satır üretilip saklanmaz.</li>
+    <li><b>Tutar türleri:</b> sabit · son N dönem gerçekleşen ortalaması · geçen yıl aynı ay (mevsimsel enerji) · hesaplanan (KDV = KDV İcmali ödenecek, SGK = son 3 ödeme ortalaması) · elle her dönem (muhtasar). Elle girilen dönem tutarı her zaman önceliklidir. Tahminle gelen kısım listede ve icmalde "tahmini" rozetiyle ayrılır.</li>
+    <li><b>Gerçekleşme:</b> kesin kasa / banka ödemesi ya da alış faturası, aynı masraf kalemi + cari ile plan tarihinin ± 7 gününde ve tutarın ± %5'inde ise dönemle eşleşmesi <b>önerilir</b>; tek aday varsa otomatik, birden fazlaysa kullanıcı seçer. Eşleşen dönem nakit akıştan düşer (para çıkmıştır). Alış faturası gelirse dönem "faturalandı" olur ve akışa faturanın vadesiyle girer — iki kez sayılmaz.</li>
+    <li><b>Gecikme:</b> plan tarihi geçmiş, eşleşmemiş dönem "gecikti"; Nakit Akış İcmali'nde ilk haftaya taşınır (icmalin gecikme senaryosu ile aynı kural).</li>
+    <li><b>Kartla ödenen gider:</b> nakit çıkışı kartın ekstre son ödeme gününde; planlı gider o ekstrenin tahmini kalemine eklenir.</li>
+    <li><b>Kendiliğinden kayıt yok:</b> "Ödeme Oluştur" taslak kasa / banka işlemi açar (Kasa İşlemi kartının tahsilat / tediye şablonu, cari + masraf + açıklama dolu); kesinleştiren insan. Hatırlatma (n gün önce, rol) bildirim kuyruğundan.</li>
+    <li><b>Döviz:</b> tutar tanımın para biriminde; akışta TL karşılığı bugünkü kurla, döviz pozisyonu tablosunda kendi dövizinde.</li>
+    <li><b>Çıktı:</b> listelerin ortak menüsü (Excel / PDF); Takvim sekmesi 12 aylık bütçe tablosu olarak basılır.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Değişken tutarlı giderde (elektrik, doğalgaz) tahmin nasıl yapılsın?<span class="oneri"><b>Öneri:</b> Varsayılan son 3 dönemin gerçekleşen ortalaması; mevsimsel kalemde "geçen yıl aynı ay" seçilebilsin. Hiç gerçekleşen yoksa tanımdaki tutar. Tahmin olduğu her yerde rozetle belli olsun.</span></li>
+    <li>Ödeme günü tatile / hafta sonuna denk gelirse?<span class="oneri"><b>Öneri:</b> Tanımda seçilsin, varsayılan "sonraki iş günü" (vergi / SGK'da mevzuat da böyle); tatiller Resmi Tatiller tanımından.</span></li>
+    <li>Ödeme günü gelince kayıt otomatik oluşsun mu?<span class="oneri"><b>Öneri:</b> Hayır. Para çıkışı insan onayı ister; "Ödeme Oluştur" taslak açar, hatırlatma n gün önce gider. Otomatik talimatlı (elektrik) kalemde de kayıt banka hareketi gelince (Banka Hareketleri ekranından) oluşur.</span></li>
+    <li>Gerçekleşme eşleşmesi otomatik mi, elle mi?<span class="oneri"><b>Öneri:</b> Aynı masraf kalemi + cari, ± 7 gün, ± %5 içinde TEK aday varsa otomatik eşleşsin (loglu, geri alınabilir); birden fazla aday ya da tutar farkı büyükse öneri olarak kalsın, kullanıcı seçsin.</span></li>
+    <li>Faturası gelen gider (elektrik faturası alış faturası olarak girildi) nakit akışta nasıl sayılsın?<span class="oneri"><b>Öneri:</b> Fatura dönemle eşleşince dönem "faturalandı" olur; akışa faturanın vadesiyle girer, planlı tahmin düşer (çifte sayım yok). Fatura tutarı "son N dönem ortalaması"na da girer.</span></li>
+    <li>KDV ve SGK gibi hesaplanan kalemler nereden gelsin?<span class="oneri"><b>Öneri:</b> KDV = KDV İcmali'nin son kesin dönem "ödenecek"i, sonraki aylara aynı tutar (tahmini); SGK = son 3 ödemenin ortalaması (bordro modülü gelince bordro toplamı). Kullanıcı o dönemin tutarını elle yazarsa elle yazılan geçerli.</span></li>
+    <li>Yetki kodu ne olsun?<span class="oneri"><b>Öneri:</b> Yeni ekran kodu <code>finans.planli_gider</code>; hakları Nakit Akış İcmali'nin kaynağı <code>kasa.finans</code>'tan kopyalansın (Gör + Ekle / Değiştir / Sil — tanım finans verisidir). "Ödeme Oluştur" ayrıca kasa işlemi Ekle yetkisi ister.</span></li>
+    <li>Artış (kira, abonelik zammı) nasıl tanımlansın?<span class="oneri"><b>Öneri:</b> Yıllık sabit oran ve ayı (ör. Ocak %30) ya da tarihten itibaren yeni tutar; TÜFE'ye otomatik bağlama yok (veri kaynağı yok) — oran açıklandığında elle girilir.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('#gor span'));
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');
+    [].forEach.call(document.querySelectorAll('.gorunum'),function(g){g.classList.toggle('on',g.id==='g-'+t.dataset.g);});
+  });});
+  [].forEach.call(document.querySelectorAll('.radyo'),function(r){
+    [].forEach.call(r.children,function(s){s.addEventListener('click',function(){
+      [].forEach.call(r.children,function(x){x.classList.remove('on');});s.classList.add('on');});});});
+})();
+</script>
+</body>
+</html>

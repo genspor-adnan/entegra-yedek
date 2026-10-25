@@ -470,6 +470,7 @@ public static partial class KaynakKatalogu
         Ekle(ServisEmanet());
         Ekle(TarafCihaz());
         Ekle(ServisSozlesme());
+        Ekle(ServisArizaKodu());   // 1176
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

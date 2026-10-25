@@ -54,6 +54,8 @@ export interface ZiyaretDetayi {
   yolKm: number; arac: string; mesaiDisi: number;
   yapilan: string; sonuc: number; sonucMetni: string;
   imzaAlindi: number; imzaNotu: string;
+  /** 1-5; 0 = verilmedi (1176). */
+  memnuniyetPuan: number;
   iscilikSaat: number; tutar: number;
   isEmriNo: string; sahiplik: number; kapsamTur: number;
   arizaMetni: string; toplamTutar: number;
@@ -110,6 +112,8 @@ export const servisUclari = {
     yapilan: string; sonuc?: number; sonucMetni?: string;
     yolKm?: number; iscilikSaat?: number; tutar?: number;
     imzaAlindi: boolean; imzaNotu?: string; mesaiDisi?: boolean;
+    /** Müşteri memnuniyeti 1-5, isteğe bağlı (1176). */
+    memnuniyetPuan?: number;
   }) => gonder<{ durum: number; toplamTutar: number; mesaj: string }>(
       `/api/servis/ziyaret/${ziyaretId}/kapat`, g),
 

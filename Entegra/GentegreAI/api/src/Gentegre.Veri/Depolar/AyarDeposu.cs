@@ -57,6 +57,16 @@ public sealed class AyarDeposu
         //   baslatmak olurdu.
         "satinalma.kritik_stok_aktif", "satinalma.kritik_hedef_kat",
         "satinalma.kritik_departman", "satinalma.kritik_isteyen",
+        // ERP SÜREÇ İCMALLERİ (1176, kararlar 25.10.2026). Hepsi BOŞ BIRAKILABİLİR:
+        //   icmal ucu kendi varsayılanını kullanır (hedef marj 15, Ba/Bs 5.000,
+        //   tekrar arıza 30 gün, sapma %5 / %5, fire hedefin 1,5 katı); aşama
+        //   hedef süresi boşsa ekran hedef sütununu boş bırakır. `Varsayilan`
+        //   sözlüğüne konmadı: fire katı ondalıklı, hedef sürelerin varsayılanı "yok".
+        "satis.hedef_marj", "muhasebe.babs_sinir",
+        "satinalma.hedef_gun_onay", "satinalma.hedef_gun_teklif", "satinalma.hedef_gun_siparis",
+        "satinalma.hedef_gun_kabul", "satinalma.hedef_gun_odeme",
+        "servis.tekrar_ariza_gun",
+        "uretim.sapma_maliyet_yuzde", "uretim.sapma_sarf_yuzde", "uretim.fire_hedef_kat",
         // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
         //   depodan dusmek iki birimin sayimini da bozar.
         "eczane.depo", "demirbas.parca_depo",

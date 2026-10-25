@@ -25,6 +25,19 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — ERP süreç icmalleri (1176): sipariş, kârlılık, satınalma süreç, KDV, teknik servis, üretim
+
+Kullanıcı: mockup'ların açık soruları için *"onayla, hepsini işle"* → *"önce mockup ları kodla sonra sıradaki adımları uygula"*.
+
+- **1176:** 6 ekran kodu (hakları ilgili listeden kopya, yalnız Gör: `siparis.icmali` ← satış siparişi, `satis.karlilik_icmali` ← satış faturası, `satinalma.icmali` ← talep listesi, `muhasebe.kdv_icmali` ← muhasebe fişi, `servis.icmali` ← iş emri, `uretim.icmali` ← üretim emri listesi) + asistan kataloğu. Kararlardan gelen yapılar: `servis_ariza_kodu` + `demirbas_is_emri.ariza_kodu_id` (Teknik Servis › Ayarlar › Arıza Kodları, kod `servis.ariza_kodu`), `servis_ziyaret.memnuniyet_puan` (ziyaret kapanışında 1-5, isteğe bağlı), `kdv_devreden` (muhasebe yoksa elle devreden), `satinalma_hatirlatma` (onaycıya günde bir, ikincisi üst basamağa), `siparis_satir_kapanis` + `v_belge_acik_satir` (kalanı kapatılan satır açık sayılmaz). Genel Ayarlar › İcmal Eşikleri (11 ayar, boş = varsayılan).
+- **Uçlar** (`SiparisIcmalUclari`, `KarlilikIcmalUclari`, `SatinalmaIcmalUclari`, `KdvIcmalUclari`, `ServisIcmalUclari`, `UretimIcmalUclari`; sözleşme §9.23): kararlar mockup notlarında. Öne çıkanlar — kârlılıkta maliyet satış anındaki ağırlıklı ortalama (saklı satır maliyeti yok; o güne kadarki girişlerden), maliyetsiz satır rozetli; KDV'de mükellef = şube VKN'si, devreden 190'dan ya da elle; satınalmada tasarruf ortalama teklife göre, tek teklifli ayrı; teknik serviste ciro = kapsam 1 + 3; üretimde KPI yalnız ana emirler, fasondaki emir canlı maliyetsiz.
+- **Bulunan hata (düzeltildi):** `v_butce_durum` (724) harcanan / taahhüdü `durum <> 0` ile süzüyordu — belge.durum 0 = kesin; kesin fatura / sipariş bütçeye hiç yazılmıyor, taslak yazılıyordu. Talep onayındaki bütçe kontrolü de bu görünümü okur.
+- **Test:** API 777/777 (atlanan yok), web 964/964, duman 38 grup temiz (6 icmal + Arıza Kodları + Genel Ayarlar dahil), kullanıcı senaryosu 6/6 (her sekme + "Bu ekranda ne yapabilirim?" 10-12 madde). UNIVERSE'te satınalma / servis / üretim verisi yok — o ekranlar boş hâliyle denendi; satışlar aktarılmış tahakkuk (17) olduğundan kârlılık yalnız 1 faturayı görür.
+- **Yapılmayan / açık:** sipariş "termin hatırlatması" (cariye şablonlu e-posta altyapısı yok); arıza kodu cihazın marka / modeline göre süzülmüyor (KodTablosu başka alana göre süzemez); servis iş emrinden fatura ucu yok (Faturalanmamış sekmesi iş emrine götürür); üretim kapanışı fason tutarını `uretim_maliyet`'e yazmıyor (icmal belgeden ekliyor); Kârlılık Ciro × Marj eşikleri (25 / 35) sabit.
+- **Mockup:** Planlı Giderler (`Ekranlar/ERP/planli_gider.html` liste / dönemler / takvim, `planli_gider_karti.html` kart) — Nakit Akış İcmali'nin "planlı gider tanımı yok" boşluğu; açık sorular onay bekliyor.
+
+---
+
 ## 25.10.2026 — Duman + kullanıcı testi (UNIVERSE), ERP süreç icmalleri mockup'ları
 
 Kullanıcı: *"duman testi ve kullanıcı testleri yap.. bitince diğer erp mockupları da tasarla"*.

@@ -87,6 +87,9 @@ public static class TeknikServisUclari
         public bool ImzaAlindi { get; set; }
         public string? ImzaNotu { get; set; }
         public bool MesaiDisi { get; set; }
+        /// <summary>Müşteri memnuniyeti 1-5, isteğe bağlı (1176, karar 25.10.2026) -
+        ///   Teknik Servis İcmali teknisyen tablosunda ortalaması.</summary>
+        public short? MemnuniyetPuan { get; set; }
     }
 
     public sealed class EmanetIstegi
@@ -361,6 +364,9 @@ public static class TeknikServisUclari
                 throw GentegreHatasi.Dogrulama("İmza ya da gerekçe gerekli.",
                     new AlanHatasi("imzaNotu",
                         "Müşteri imzası alınamadıysa sebebi yazılmalı."));
+            if (istek.MemnuniyetPuan is < 1 or > 5)
+                throw GentegreHatasi.Dogrulama("Memnuniyet puanı 1 ile 5 arasında olmalı.",
+                    new AlanHatasi("memnuniyetPuan", "1-5"));
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -393,13 +399,14 @@ public static class TeknikServisUclari
                        tutar = coalesce(@p6, tutar),
                        imza_alindi = @p7, imza_notu = @p8, mesai_disi = @p9,
                        varis = coalesce(varis, now()),
+                       memnuniyet_puan = @p11::smallint,
                        degistiren = @p10, degistirme_tarihi = now()
                  where id = @p0
                 """, islem,
                 [id, istek.Yapilan, sonuc, istek.SonucMetni ?? "", istek.YolKm,
                  istek.IscilikSaat, istek.Tutar, istek.ImzaAlindi ? 1 : 0,
                  istek.ImzaNotu ?? "", istek.MesaiDisi ? 1 : 0,
-                 baglam.KullaniciId], iptal);
+                 baglam.KullaniciId, istek.MemnuniyetPuan], iptal);
 
             // ÇAĞRI ZİYARETİN SONUCUNU İZLER: çözüldüyse kapanır, parça
             //   bekliyorsa o duruma geçer. Çözülemeyen ziyaret çağrıyı AÇIK
@@ -422,7 +429,7 @@ public static class TeknikServisUclari
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogZiyaret,
                 (int)id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { sonuc, imza = istek.ImzaAlindi, istek.YolKm }, iptal: iptal);
+                new { sonuc, imza = istek.ImzaAlindi, istek.YolKm, istek.MemnuniyetPuan }, iptal: iptal);
 
             await islem.CommitAsync(iptal);
 
@@ -946,6 +953,7 @@ public static class TeknikServisUclari
             select z.id, z.is_emri_id, z.sira, z.varis, z.ayrilis, z.plan_zamani,
                    z.yol_km, z.arac, z.mesai_disi, z.yapilan, z.sonuc,
                    z.sonuc_metni, z.imza_alindi, z.imza_notu, z.iscilik_saat,
+                   coalesce(z.memnuniyet_puan, 0) as memnuniyet_puan,
                    z.tutar,
                    e.is_emri_no, e.sahiplik, e.kapsam_tur, e.ariza_metni,
                    e.toplam_tutar,
@@ -990,6 +998,7 @@ public static class TeknikServisUclari
                 sonucMetni = o.Metin("sonuc_metni"),
                 imzaAlindi = o.Sayi("imza_alindi"),
                 imzaNotu = o.Metin("imza_notu"),
+                memnuniyetPuan = o.Sayi("memnuniyet_puan"),
                 iscilikSaat = o.GetDecimal(o.GetOrdinal("iscilik_saat")),
                 tutar = o.GetDecimal(o.GetOrdinal("tutar")),
                 isEmriNo = o.Metin("is_emri_no"),

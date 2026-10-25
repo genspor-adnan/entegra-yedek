@@ -1630,6 +1630,55 @@ GET  /api/finans-icmal/nakit-akis?ufuk&periyot&hesaplar&sube&ilkHafta&planli&gec
 - **Satış / alış** tutarı belge dip toplamından; satırsız aktarılan tahakkuk (17 / 13) icmale girmez,
   `aktarimTahakkuk {belge, tutar}` bilgi olarak döner.
 
+## 9.23 ERP süreç icmalleri — sipariş, kârlılık, satınalma, KDV, teknik servis, üretim (1176)
+
+Hepsi ekran koduyla **Gör** ister (haklar ilgili listenin kodundan kopyalanır), şube süzgeci ve rakamlar
+sunucuda. Eşikler `referans` ayarlarından (Genel Ayarlar › İcmal Eşikleri; boş = uç varsayılanı).
+
+```
+GET  /api/siparis-icmal?yon=satis|alis&bas&bit&durum=acikkismi|acik|kismi|kapali|iptal|tumu&termin=gecen|hafta|ay|yok
+                       &sube&depo&temsilci&kategori&para&konsinye=0|1                               siparis.icmali
+POST /api/siparis-icmal/kapat  {satirlar:[{satirId, kalan}], neden}           + sipariş türünde belge Değiştir
+GET  /api/karlilik-icmal?bas&bit&karsi=od|gy&sube&temsilci&kategori&para&iade&hizmet
+                        &maliyetsiz=dahil|haric&maliyet=satis|bugun                                 satis.karlilik_icmali
+GET  /api/satinalma-icmal?bas&bit&sube&departman&kategori&tedarikci&butce&kaynak                     satinalma.icmali
+POST /api/satinalma-icmal/hatirlat  {belgeTur:'talep', belgeId}                + satinalma.talep Gör
+GET  /api/kdv-icmal?donem=yyyy-MM&vkn&sube&ebelge=hepsi|efatura|earsiv|kagit&tur=tumu|fatura|fis&taslak=0|1
+                                                                                                    muhasebe.kdv_icmali
+GET  /api/kdv-icmal/devreden?vkn&donem                                                              muhasebe.kdv_icmali
+PUT  /api/kdv-icmal/devreden  {vkn, donem, tutar, aciklama, surum}             + muhasebe_fis Değiştir
+GET  /api/servis-icmal?bas&bit&sube&teknisyen&musteri&marka&model&kapsam=0..4&sahiplik=1|2|3          servis.icmali
+GET  /api/uretim-icmal?bas&bit&durum=planli|uretimde|kismi|tamam|hepsi&tur&sube&depo&isMerkezi&mamul  uretim.icmali
+POST /api/uretim-icmal/talep  {depoId, satirlar:[{stokId, miktar, emirId?}], aciklama}   + satinalma.talep Ekle
+```
+
+- **Sipariş:** açıklık Açık Satır Listesi kuralı (`v_belge_acik_satir`); teslim = siparişten türeyen
+  (kaynak_tur 30) KESİN irsaliye / fatura satırı. Zamanında = son kesin sevk ≤ termin; terminsiz satır
+  gecikme sayılmaz. **Kalanı kapat** sipariş belgesini değiştirmez: `siparis_satir_kapanis` + islem_log
+  (neden zorunlu); kapanan satır `v_belge_acik_satir`'dan düşer. `kalan` güncel değerden farklıysa 409.
+  Konsinye (119 / 109) yalnız `konsinye=1` ile, açık tutara / OTIF'e katılmaz.
+- **Kârlılık:** maliyet SATIŞ ANINDAKİ ağırlıklı ortalama (o güne kadarki girişler; giriş yoksa kart alış
+  fiyatı; ikisi de yoksa "maliyetsiz"). `maliyet=bugun` yalnız bilgi, A4 hep satış anı. Maliyetsiz
+  satır `maliyetsiz=haric` değilse kâra yazılır, rozetlidir. İade, iade edilen satışın maliyetiyle
+  eksi (`iade_belge_id` / kaynak_tur 30). Hedef marj `satis.hedef_marj` (boş = 15).
+- **Satınalma:** dönem talep tarihi; aşamalar talepten izlenir. Hedef süre `satinalma.hedef_gun_*`
+  (boş = hedef yok). Tasarruf ortalama teklife göre + son alışa göre fark; tek teklifli sipariş ayrı.
+  **Hatırlat:** belge başına günde bir (422 `engel.kod = "GUNDE_BIR"`); aynı onaycıya ikinci gün
+  hatırlatmada bir sonraki onay basamağına da bilgi (`satinalma_hatirlatma.ust_bilgi = 1`).
+- **KDV:** mükellef = şube VKN'si; tutarlar belgenin saklı KDV / matrahı (satır hesabı yok). Dönem
+  belge tarihi; kapanmış aya düşen alış Uyarılar'da. Devreden muhasebedeki 190 bakiyesinden, muhasebe
+  kullanılmıyorsa `kdv_devreden` (elle, loglu; muhasebe kullanılıyorsa PUT 422). Taslaklar yalnız
+  `taslak=1` ile ayrı blokta, ödenecek KDV'ye girmez. Ba/Bs sınırı `muhasebe.babs_sinir` (boş = 5.000).
+- **Teknik servis:** ciro = ücretli + üretici garantisi (kapsam 1, 3); sözleşme ve kendi garantimiz
+  (2, 4) "servis maliyeti". Tekrar arıza `servis.tekrar_ariza_gun` (boş = 30) içinde aynı
+  `taraf_cihaz`'ın yeni çağrısı. Arıza `ariza_kodu_id`'ye göre, kodsuz kayıt arıza metninden gruplanır.
+  Memnuniyet ziyaret kapanışında (`POST /api/servis/ziyaret/{id}/kapat` → `memnuniyetPuan` 1-5).
+- **Üretim:** KPI yalnız ana emirler; alt emirler girintili ayrı satır. Fasondaki emir canlı maliyet
+  göstermez (fason giriş belgesi gelince). GÜG iş merkezi saat ücretinin içinde. Eşikler
+  `uretim.sapma_maliyet_yuzde` (5), `uretim.sapma_sarf_yuzde` (5), `uretim.fire_hedef_kat` (1,5).
+- **Bütçe düzeltmesi (1176):** `v_butce_durum` 724'ten beri `durum <> 0` ile süzüyordu (kesin = 0);
+  artık kesin fatura / sipariş sayılır.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

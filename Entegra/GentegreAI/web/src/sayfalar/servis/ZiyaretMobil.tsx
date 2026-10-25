@@ -51,6 +51,8 @@ export function ZiyaretMobil() {
   const [mesaiDisi, setMesaiDisi] = useState(false);
   const [imza, setImza] = useState(true);
   const [imzaNotu, setImzaNotu] = useState('');
+  /** Müşteri memnuniyeti 1-5, isteğe bağlı (1176); 0 = verilmedi. */
+  const [puan, setPuan] = useState(0);
   /** Çizilen imza (PNG); kapanışta doküman olarak yüklenir. */
   const [imzaBlob, setImzaBlob] = useState<Blob | null>(null);
   /** Kayıtlı imzanın görsel adresi - kapanmış ziyarette okunur. */
@@ -87,6 +89,7 @@ export function ZiyaretMobil() {
         //   kayıtlı değer okunur; orada bayrak gerçeği söyler.
         setImza(y.ziyaret.sonuc === 0 ? true : y.ziyaret.imzaAlindi === 1);
         setImzaNotu(y.ziyaret.imzaNotu);
+        setPuan(y.ziyaret.memnuniyetPuan ?? 0);
         // KAPANMIŞ ZİYARETTE İMZA GÖRSELİ OKUNUR: ekran aynı zamanda kanıt
         //   ekranıdır - "o gün kim imzaladı" sorusu burada cevaplanır.
         const d = await api.dokumanlar('servisZiyaret', Number(id));
@@ -166,6 +169,7 @@ export function ZiyaretMobil() {
       yapilan, sonuc, sonucMetni: sonucMetni || undefined,
       yolKm: sayi(yolKm), iscilikSaat: sayi(iscilikSaat), tutar: sayi(tutar),
       mesaiDisi, imzaAlindi: imza, imzaNotu: imza ? undefined : imzaNotu,
+      memnuniyetPuan: puan || undefined,
     });
     mesaj(`${y.mesaj}\n\nİş emri toplamı: ${y.toplamTutar} ₺`);
     git('/servis-cizelge');
@@ -388,6 +392,19 @@ export function ZiyaretMobil() {
                    onChange={e => setImzaNotu(e.target.value)} />
           </label>
         )}
+        {/* MEMNUNİYET İSTEĞE BAĞLI (1176): imza ekranında müşteri kendisi seçer;
+            boş bırakılabilir - zorunlu puan, rastgele "5" demektir. Aynı düğmeye
+            ikinci dokunuş seçimi kaldırır. */}
+        <div className="zm-alan">
+          <span>{c('Müşteri memnuniyeti (isteğe bağlı)')}</span>
+          <div className="zm-secim">
+            {[1, 2, 3, 4, 5].map(p => (
+              <button key={p} type="button" disabled={kapali}
+                      className={`zm-sec${puan === p ? ' on' : ''}`}
+                      onClick={() => setPuan(puan === p ? 0 : p)}>{p}</button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {!kapali && (

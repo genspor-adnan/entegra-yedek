@@ -144,6 +144,26 @@ export function GenelAyarlar() {
               </div>
             </div>
 
+            {/* İCMAL EŞİKLERİ (1176, kararlar 25.10.2026): icmaller rakamı sunucuda
+                hesaplar; buradaki değerler yalnız rozet / renk eşiğidir. Boş = parantezdeki
+                varsayılan. Aşama hedefi boşsa Satınalma Süreç İcmali hedef sütununu boş bırakır. */}
+            <div className="kagrup">
+              <h6>İcmal Eşikleri</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('satis.hedef_marj', 'Kârlılık: hedef marj, % — altı sarı rozet (boş = 15)')}
+                {alan('muhasebe.babs_sinir', 'KDV: Ba / Bs bildirim sınırı, TL (boş = 5.000)')}
+                {alan('satinalma.hedef_gun_onay', 'Satınalma: talep onayı hedef süresi, gün (boş = hedef yok)')}
+                {alan('satinalma.hedef_gun_teklif', 'Satınalma: teklif hedef süresi, gün (boş = hedef yok)')}
+                {alan('satinalma.hedef_gun_siparis', 'Satınalma: siparişe dönüş hedef süresi, gün (boş = hedef yok)')}
+                {alan('satinalma.hedef_gun_kabul', 'Satınalma: mal kabul hedef süresi, gün (boş = hedef yok)')}
+                {alan('satinalma.hedef_gun_odeme', 'Satınalma: ödeme hedef süresi, gün (boş = hedef yok)')}
+                {alan('servis.tekrar_ariza_gun', 'Teknik servis: tekrar arıza sayılan süre, gün (boş = 30)')}
+                {alan('uretim.sapma_maliyet_yuzde', 'Üretim: maliyet sapması eşiği, ± % (boş = 5)')}
+                {alan('uretim.sapma_sarf_yuzde', 'Üretim: sarf farkı eşiği, ± % (boş = 5)')}
+                {alan('uretim.fire_hedef_kat', 'Üretim: fire eşiği, ürün ağacı hedefinin katı (boş = 1,5)')}
+              </div>
+            </div>
+
             {/* DEPOLAR (729): eczanenin ve teknik servisin kendi deposu vardır;
                 genel depodan düşmek iki birimin sayımını da bozar. Boşsa uç
                 kurumun varsayılan deposuna düşer. */}

@@ -636,7 +636,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (358 ad, 159 tanesi birden cok dosyada)
+## Gorunumler (358 ad, 160 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -665,14 +665,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_banko_oturum_pos_atanmamis` | `990_banko_pos_gun_sonu.sql` | — |
 | `v_banko_oturum_tur_ozeti` | `989_banko_odeme_turu_ozeti.sql` | — |
 | `v_basvuru_hekim` | `940_personel_unvan_yalniz_onek.sql` | 578_basvuru_hekim_kaynagi.sql, 583_basvuru_hekim_arama.sql, 718_hekim_calisma_plani.sql |
-| `v_belge_acik_satir` | `471_dagilim_kapanma_tahsil.sql` | 082_belge_donusum.sql, 290_acik_satir_pay.sql, 293_acik_satir_kalem_adi.sql, 352_donusum_tutar_bazli.sql |
+| `v_belge_acik_satir` | `1176_erp_surec_icmalleri.sql` | 082_belge_donusum.sql, 290_acik_satir_pay.sql, 293_acik_satir_kalem_adi.sql, 352_donusum_tutar_bazli.sql, 471_dagilim_kapanma_tahsil.sql |
 | `v_belge_donusum` | `086_belge_donusum_kurallar.sql` | — |
 | `v_belge_satir_izlem` | `115_izlem_depo.sql` | 114_belge_izlem.sql |
 | `v_belge_satir_tahsilat` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `v_belge_sevkiyat` | `177_belge_sevkiyat.sql` | — |
 | `v_belge_tahsilat` | `782_avans_tahsilat_turu.sql` | 781_belge_tahsilat_avans_kullanimi.sql |
 | `v_belge_yazi_sablonu` | `768_belge_talep_yazisi.sql` | — |
-| `v_butce_durum` | `724_satinalma.sql` | — |
+| `v_butce_durum` | `1176_erp_surec_icmalleri.sql` | 724_satinalma.sql |
 | `v_bzbh_bildirim` | `940_personel_unvan_yalniz_onek.sql` | 882_bzbh_bildirim.sql |
 | `v_cagri` | `940_personel_unvan_yalniz_onek.sql` | 839_cagri_merkezi.sql |
 | `v_cagri_agent` | `839_cagri_merkezi.sql` | — |

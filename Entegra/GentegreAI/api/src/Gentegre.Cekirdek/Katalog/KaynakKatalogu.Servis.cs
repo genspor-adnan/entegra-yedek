@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// TEKNİK SERVİS LİSTELERİ (773) — çağrı · iş emri · ziyaret · emanet ·
@@ -286,5 +286,26 @@ public static partial class KaynakKatalogu
                 Kodlar: new Dictionary<string, string>
                     { ["1"] = "Yürürlükte", ["0"] = "Pasif" }),
             new("tarafId", "s.taraf_id", "sayi", "Müşteri Id", Varsayilan: false)
+        ]);
+
+    // ------------------------------------------------------ arıza kodu ----
+    // ARIZA KODLARI (1176): iş emrinin isteğe bağlı arıza sınıfı - Teknik Servis
+    //   İcmali'nde "Cihaz / Model" arızaları bu koda göre gruplanır.
+    private static KaynakTanimi ServisArizaKodu() => new(
+        Ad: "servis-ariza-kodu",
+        YetkiKodu: "servis.ariza_kodu",
+        Kaynak: "public.servis_ariza_kodu a",
+        SubeKolonu: null,
+        VarsayilanSirala: "a.marka, a.model, a.kod",
+        Kolonlar:
+        [
+            new("id", "a.id", "sayi", "Id", Varsayilan: false),
+            new("kod", "a.kod", "metin", "Kod", Genislik: 110),
+            new("ad", "a.ad", "metin", "Arıza", Genislik: 260),
+            new("marka", "a.marka", "metin", "Marka", Genislik: 140),
+            new("model", "a.model", "metin", "Model", Genislik: 140),
+            new("kullanim", "(select count(*) from public.demirbas_is_emri e where e.ariza_kodu_id = a.id)",
+                "sayi", "İş Emri", Hizalama: "sag", Genislik: 90, Filtrelenebilir: false),
+            new("aktif", "a.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 80),
         ]);
 }

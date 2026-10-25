@@ -384,6 +384,13 @@ uygulama.StokIcmalUclariniEkle();
 uygulama.TicariIcmalUclariniEkle();
 uygulama.EslesmeIcmalUclariniEkle();
 uygulama.FinansIcmalUclariniEkle();
+// ERP SÜREÇ İCMALLERİ (1176): sipariş, kârlılık, satınalma süreç, KDV, teknik servis, üretim.
+uygulama.SiparisIcmalUclariniEkle();
+uygulama.KarlilikIcmalUclariniEkle();
+uygulama.SatinalmaIcmalUclariniEkle();
+uygulama.KdvIcmalUclariniEkle();
+uygulama.ServisIcmalUclariniEkle();
+uygulama.UretimIcmalUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
 uygulama.DevirUclariniEkle();
 // KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.

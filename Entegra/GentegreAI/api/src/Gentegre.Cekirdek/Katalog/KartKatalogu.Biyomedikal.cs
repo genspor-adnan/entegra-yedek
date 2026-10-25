@@ -137,6 +137,10 @@ public static partial class KartKatalogu
                 KodTablosu: "public.v_personel_lookup"),
             new("arizaMetni", "ariza_metni", "metin", Baslik: "Arıza / Talep",
                 Grup: "Bildirim"),
+            // ARIZA KODU (1176, isteğe bağlı): Teknik Servis İcmali arızayı koddan
+            //   gruplar; kodsuz (eski) kayıt arıza metninden gruplanmaya devam eder.
+            new("arizaKoduId", "ariza_kodu_id", "sayi", Baslik: "Arıza Kodu",
+                Grup: "Bildirim", KodTablosu: "public.servis_ariza_kodu"),
             // İLK MÜDAHALE ve TAMAMLANMA: yanıt süresi ve duruş süresi bu iki
             //   damgadan hesaplanır - ayrı "süre" alanı tutulmaz, yoksa
             //   damgayla çelişir.
