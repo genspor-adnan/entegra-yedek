@@ -309,20 +309,15 @@
     <li><b>Kaynak:</b> kesin satış / alış faturaları, fişler ve iadeleri; KDV satır satır (BelgeHesap), toplam fn_belge_diptoplam. Tevkifat ve muafiyet kodu satırdan. Dövizli belgede TL karşılığı belge kuruyla (faturanın yasal TL tutarı).</li>
     <li><b>Mükellef:</b> şube VKN'sine göre; aynı VKN'li şubeler birleşir, farklı VKN ayrı icmaldir.</li>
     <li><b>Uyarılar:</b> GİB'e gitmemiş / reddedilmiş e-Belge, KDV'siz ve kodsuz satır, stok kartı oranıyla uyuşmayan satır, dönem dışı tarih, bağsız iade, Ba/Bs için eksik vergi numarası.</li>
+    <li><b>Mükellef kırılımı şube mi, VKN mi? (karar 25.10.2026):</b> VKN — KDV beyanı vergi numarasına verilir; aynı VKN'li şubeler tek icmalde, şube kırılımı ayrı sekmede değil şeritte filtre olarak.</li>
+    <li><b>Devreden KDV nereden gelsin? (karar 25.10.2026):</b> Önceki ayın bu icmaldeki sonucundan otomatik değil — muhasebedeki 190 bakiyesinden; muhasebe kullanılmıyorsa elle girilen "devreden" alanı (dönem başına bir değer, loglanır).</li>
+    <li><b>Fatura tarihi önceki ay, kayıt bu ay olan alış faturası hangi döneme yazılsın? (karar 25.10.2026):</b> Belge tarihine (fatura tarihi) göre; ancak kapanmış (beyanı verilmiş) aya düşüyorsa Uyarılar'da "dönemi kapanmış, bu aya indirilecek" diye işaretlensin.</li>
+    <li><b>Taslak belgeler gösterilsin mi? (karar 25.10.2026):</b> Varsayılan hayır; "Taslaklar dahil (ön izleme)" işaretlenince ayrı renkle ve toplamın altında ayrı satırda — ödenecek KDV'ye eklenmeden.</li>
+    <li><b>Gider makbuzları / serbest meslek makbuzu (stopaj) kapsam içinde mi? (karar 25.10.2026):</b> Bu sürümde yalnız KDV; stopaj (muhtasar) için ayrı bir icmal önerilir.</li>
+    <li><b>Ba/Bs sınırı sabit 5.000 TL mi? (karar 25.10.2026):</b> Ayarlanabilir parametre (Genel Ayarlar › Muhasebe); mevzuat değişince kod değişmeden güncellensin.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Mükellef kırılımı şube mi, VKN mi?<span class="oneri"><b>Öneri:</b> VKN — KDV beyanı vergi numarasına verilir; aynı VKN'li şubeler tek icmalde, şube kırılımı ayrı sekmede değil şeritte filtre olarak.</span></li>
-    <li>Devreden KDV nereden gelsin?<span class="oneri"><b>Öneri:</b> Önceki ayın bu icmaldeki sonucundan otomatik değil — muhasebedeki 190 bakiyesinden; muhasebe kullanılmıyorsa elle girilen "devreden" alanı (dönem başına bir değer, loglanır).</span></li>
-    <li>Fatura tarihi önceki ay, kayıt bu ay olan alış faturası hangi döneme yazılsın?<span class="oneri"><b>Öneri:</b> Belge tarihine (fatura tarihi) göre; ancak kapanmış (beyanı verilmiş) aya düşüyorsa Uyarılar'da "dönemi kapanmış, bu aya indirilecek" diye işaretlensin.</span></li>
-    <li>Taslak belgeler gösterilsin mi?<span class="oneri"><b>Öneri:</b> Varsayılan hayır; "Taslaklar dahil (ön izleme)" işaretlenince ayrı renkle ve toplamın altında ayrı satırda — ödenecek KDV'ye eklenmeden.</span></li>
-    <li>Gider makbuzları / serbest meslek makbuzu (stopaj) kapsam içinde mi?<span class="oneri"><b>Öneri:</b> Bu sürümde yalnız KDV; stopaj (muhtasar) için ayrı bir icmal önerilir.</span></li>
-    <li>Ba/Bs sınırı sabit 5.000 TL mi?<span class="oneri"><b>Öneri:</b> Ayarlanabilir parametre (Genel Ayarlar › Muhasebe); mevzuat değişince kod değişmeden güncellensin.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){

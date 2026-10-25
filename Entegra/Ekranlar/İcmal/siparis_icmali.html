@@ -309,20 +309,15 @@
     <li><b>Kaynak:</b> kesin sipariş belgeleri (satış siparişi, alış siparişi tür 9) ve satırları; teslim miktarı siparişten türeyen kesin irsaliye / fatura satırlarından (belge dönüşüm izi). Açık Satır Listesi ile aynı açıklık kuralı — ekran ikinci bir kural yazmaz.</li>
     <li><b>Eylemler (yetkiye bağlı):</b> irsaliyeye dönüştür (mevcut belge dönüşümü; belge.satis.irsaliye Ekle), kalanı kapat (neden zorunlu, loglanır), termin hatırlatması (cari e-postasına; ileti şablonu), satınalma talebi aç.</li>
     <li><b>Temsilci ve döviz:</b> önceki icmallerdeki karar — temsilci belgeden; tutarlar TL sipariş kuruyla, dövizli satırda rozet, Kırılımlar › Para birimi, A4'te döviz özeti.</li>
+    <li><b>Kısmi teslimde "zamanında" hangi teslime göre ölçülsün — ilk sevk mi, son sevk mi? (karar 25.10.2026):</b> Son sevk (satır tamamlandığı gün). İlk sevk "ort. teslim süresi"nde ayrıca gösterilir; müşterinin gördüğü gecikme son parçanın gecikmesidir.</li>
+    <li><b>Termini olmayan satır gecikme sayılsın mı? (karar 25.10.2026):</b> Hayır; "termini yazılmamış" diye ayrı satırda dursun ve Dikkat rozetiyle sipariş girişinde termin zorunluluğu önerilsin (Satış Belgeleri ayarı).</li>
+    <li><b>"Kalanı kapat" yetkisi hangi koda bağlansın? (karar 25.10.2026):</b> Sipariş belgesinin Değiştir yetkisi (belge.satis.siparis / belge.alis_siparis) + neden zorunlu; kapanış satırın teslim edilmiş kısmını değiştirmez.</li>
+    <li><b>Stok karşılamada rezerve (başka siparişe ayrılmış) stok düşülsün mü? (karar 25.10.2026):</b> Evet; sistemde rezervasyon varsa düşülür, yoksa termin sırasına göre açık siparişler eldeki stoğu sırayla tüketir (ilk termin ilk alır) ve eksik buna göre hesaplanır.</li>
+    <li><b>Konsinye (109/119) siparişler bu icmale girsin mi? (karar 25.10.2026):</b> Ayrı rozetle girsin, varsayılan filtrede hariç; konsinye çıkış satış değildir, teslim performansına katılmaz.</li>
+    <li><b>Alış yönünde tedarikçi gecikmesi Satınalma tedarikçi skoruna da yazılsın mı? (karar 25.10.2026):</b> Evet, aynı olay kaynağından (satınalma skor olayları) okunur; icmal skoru yeniden hesaplamaz, yalnız gösterir.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Kısmi teslimde "zamanında" hangi teslime göre ölçülsün — ilk sevk mi, son sevk mi?<span class="oneri"><b>Öneri:</b> Son sevk (satır tamamlandığı gün). İlk sevk "ort. teslim süresi"nde ayrıca gösterilir; müşterinin gördüğü gecikme son parçanın gecikmesidir.</span></li>
-    <li>Termini olmayan satır gecikme sayılsın mı?<span class="oneri"><b>Öneri:</b> Hayır; "termini yazılmamış" diye ayrı satırda dursun ve Dikkat rozetiyle sipariş girişinde termin zorunluluğu önerilsin (Satış Belgeleri ayarı).</span></li>
-    <li>"Kalanı kapat" yetkisi hangi koda bağlansın?<span class="oneri"><b>Öneri:</b> Sipariş belgesinin Değiştir yetkisi (belge.satis.siparis / belge.alis_siparis) + neden zorunlu; kapanış satırın teslim edilmiş kısmını değiştirmez.</span></li>
-    <li>Stok karşılamada rezerve (başka siparişe ayrılmış) stok düşülsün mü?<span class="oneri"><b>Öneri:</b> Evet; sistemde rezervasyon varsa düşülür, yoksa termin sırasına göre açık siparişler eldeki stoğu sırayla tüketir (ilk termin ilk alır) ve eksik buna göre hesaplanır.</span></li>
-    <li>Konsinye (109/119) siparişler bu icmale girsin mi?<span class="oneri"><b>Öneri:</b> Ayrı rozetle girsin, varsayılan filtrede hariç; konsinye çıkış satış değildir, teslim performansına katılmaz.</span></li>
-    <li>Alış yönünde tedarikçi gecikmesi Satınalma tedarikçi skoruna da yazılsın mı?<span class="oneri"><b>Öneri:</b> Evet, aynı olay kaynağından (satınalma skor olayları) okunur; icmal skoru yeniden hesaplamaz, yalnız gösterir.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){

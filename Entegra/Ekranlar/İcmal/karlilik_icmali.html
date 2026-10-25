@@ -305,19 +305,14 @@
     <li><b>Maliyet:</b> satırın stoktan çıktığı anda kaydedilen ortalama maliyet (Stok Hareket İcmali ile aynı kaynak). Sonradan gelen alış maliyeti geçmiş satışın kârını değiştirmez.</li>
     <li><b>Brüt kâr:</b> genel gider, kargo, prim dağıtılmaz; A4'te dipnotla belirtilir.</li>
     <li><b>Aktarım:</b> Delphi'den satırsız tahakkuk olarak gelen faturalar ürün ve maliyet taşımadığı için icmale girmez; şeritte adet ve tutarıyla rozet olarak durur (Satış İcmali ile aynı).</li>
+    <li><b>Maliyet satış anındaki ortalama mı, bugünkü ortalama mı olsun? (karar 25.10.2026):</b> Satış anı (varsayılan, tek doğru geçmiş). Şeritte "Bugünkü maliyetle" seçeneği yalnız fiyat kararı için bilgi olarak sunulsun; A4 hep satış anıyla basılsın.</li>
+    <li><b>Maliyetsiz satırlar kâra %100 mü yazılsın, hariç mi tutulsun? (karar 25.10.2026):</b> Varsayılan kâra yazılsın ama KPI'da ve satırda "maliyetsiz" rozeti dursun; kutu işaretlenince toplamdan çıksın. Sessizce sıfır maliyet saymak kârı şişirir — rozet şart.</li>
+    <li><b>Hizmet satırları için maliyet girilebilsin mi (ör. eğitim hizmetinin personel maliyeti)? (karar 25.10.2026):</b> Şimdilik hayır (maliyet 0, ayrı satırda "hizmet"); ileride hizmet kartına "standart maliyet" alanı eklenebilir.</li>
+    <li><b>İadede maliyet nasıl düşülsün? (karar 25.10.2026):</b> İade satırı, iade edilen satışın maliyetiyle (bağlı belge varsa onun satır maliyeti, yoksa iade anındaki ortalama) eksi yazılsın; iade edilen kâr da düşer.</li>
+    <li><b>Zararlı satış eşiği yalnız "maliyet altı" mı, yoksa hedef marjın altı da mı? (karar 25.10.2026):</b> İki seviye: maliyet altı = kırmızı (Zararlı Satışlar sekmesi); hedef marjın altı (varsayılan %15, ayarlanabilir) = sarı rozet, ayrı sekme açılmasın.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Maliyet satış anındaki ortalama mı, bugünkü ortalama mı olsun?<span class="oneri"><b>Öneri:</b> Satış anı (varsayılan, tek doğru geçmiş). Şeritte "Bugünkü maliyetle" seçeneği yalnız fiyat kararı için bilgi olarak sunulsun; A4 hep satış anıyla basılsın.</span></li>
-    <li>Maliyetsiz satırlar kâra %100 mü yazılsın, hariç mi tutulsun?<span class="oneri"><b>Öneri:</b> Varsayılan kâra yazılsın ama KPI'da ve satırda "maliyetsiz" rozeti dursun; kutu işaretlenince toplamdan çıksın. Sessizce sıfır maliyet saymak kârı şişirir — rozet şart.</span></li>
-    <li>Hizmet satırları için maliyet girilebilsin mi (ör. eğitim hizmetinin personel maliyeti)?<span class="oneri"><b>Öneri:</b> Şimdilik hayır (maliyet 0, ayrı satırda "hizmet"); ileride hizmet kartına "standart maliyet" alanı eklenebilir.</span></li>
-    <li>İadede maliyet nasıl düşülsün?<span class="oneri"><b>Öneri:</b> İade satırı, iade edilen satışın maliyetiyle (bağlı belge varsa onun satır maliyeti, yoksa iade anındaki ortalama) eksi yazılsın; iade edilen kâr da düşer.</span></li>
-    <li>Zararlı satış eşiği yalnız "maliyet altı" mı, yoksa hedef marjın altı da mı?<span class="oneri"><b>Öneri:</b> İki seviye: maliyet altı = kırmızı (Zararlı Satışlar sekmesi); hedef marjın altı (varsayılan %15, ayarlanabilir) = sarı rozet, ayrı sekme açılmasın.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){

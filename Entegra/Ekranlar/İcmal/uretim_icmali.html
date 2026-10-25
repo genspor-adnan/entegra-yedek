@@ -271,19 +271,14 @@
     <li><b>Kaynak (429):</b> uretim_emri / _satir / uretim_operasyon / uretim_zaman / uretim_maliyet. Ağaç emre kopyalanır; hesap emrin kendi satırlarından yapılır.</li>
     <li><b>Maliyet:</b> kapanan emirde donmuş kapanış kaydı, açık emirde canlı toplam; plan maliyet emir açılırken ağaçtan donar — sapma sabit plana karşı ölçülür.</li>
     <li><b>Eylemler:</b> emre git, eksik hammadde için satınalma talebi (yetkiye bağlı), Excel, A4. Emir başlatma / sarf / bildirim bu ekrandan yapılmaz.</li>
+    <li><b>Sapma eşiği (kırmızı) kaç olsun? (karar 25.10.2026):</b> Maliyet sapması ±%5, sarf farkı ±%5, fire ağaç hedefinin 1,5 katı; Üretim ayarlarında değiştirilebilir.</li>
+    <li><b>Genel üretim gideri (GÜG) nasıl dağıtılsın? (karar 25.10.2026):</b> Bu sürümde iş merkezi saat ücretine dahil (işçilik saatiyle birlikte); ayrı GÜG dağıtımı sonraki iş — tanımlı değilse sütun 0 ve rozet.</li>
+    <li><b>Fason emirde maliyet ne zaman kesinleşsin? (karar 25.10.2026):</b> Fason giriş irsaliyesi / faturası geldiğinde (fason_giris_belge_id); fasondaki emir "fasonda" rozetiyle canlı maliyet göstermesin.</li>
+    <li><b>Alt emirler ana emrin içinde mi, ayrı satır mı sayılsın? (karar 25.10.2026):</b> Ayrı satır, ana emrin altında girintili; KPI'larda yalnız ana emirler sayılsın (yarı mamul iki kez sayılmasın).</li>
+    <li><b>Malzeme ihtiyacında rezerve stok başka emre ayrılmışsa ne olsun? (karar 25.10.2026):</b> Kendi rezervi düşülmeden sayılır, başka emrin rezervi eldekinden düşülür; ilk gereken tarihe göre sırayla dağıtılır.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Sapma eşiği (kırmızı) kaç olsun?<span class="oneri"><b>Öneri:</b> Maliyet sapması ±%5, sarf farkı ±%5, fire ağaç hedefinin 1,5 katı; Üretim ayarlarında değiştirilebilir.</span></li>
-    <li>Genel üretim gideri (GÜG) nasıl dağıtılsın?<span class="oneri"><b>Öneri:</b> Bu sürümde iş merkezi saat ücretine dahil (işçilik saatiyle birlikte); ayrı GÜG dağıtımı sonraki iş — tanımlı değilse sütun 0 ve rozet.</span></li>
-    <li>Fason emirde maliyet ne zaman kesinleşsin?<span class="oneri"><b>Öneri:</b> Fason giriş irsaliyesi / faturası geldiğinde (fason_giris_belge_id); fasondaki emir "fasonda" rozetiyle canlı maliyet göstermesin.</span></li>
-    <li>Alt emirler ana emrin içinde mi, ayrı satır mı sayılsın?<span class="oneri"><b>Öneri:</b> Ayrı satır, ana emrin altında girintili; KPI'larda yalnız ana emirler sayılsın (yarı mamul iki kez sayılmasın).</span></li>
-    <li>Malzeme ihtiyacında rezerve stok başka emre ayrılmışsa ne olsun?<span class="oneri"><b>Öneri:</b> Kendi rezervi düşülmeden sayılır, başka emrin rezervi eldekinden düşülür; ilk gereken tarihe göre sırayla dağıtılır.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){
