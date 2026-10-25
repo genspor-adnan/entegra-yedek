@@ -2,6 +2,7 @@ import { GenDetayTablo, bosDetay, type DetayDurumu } from '../GenDetayTablo';
 import { c } from '../../dil/ceviri';
 import { DokumanGalerisi } from '../DokumanGalerisi';
 import { IlgiliKisiler } from '../IlgiliKisiler';
+import { EBelgeDipnotlari } from './EBelgeDipnotlari';
 import { TekAdres } from '../TekAdres';
 import { TekKayit } from '../TekKayit';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
@@ -282,7 +283,10 @@ const adliBlok = (
             : [];
           const ciftliAlanlar = ciftler.map(cift =>
             cift.map(ad => alanlar.find(a => a.ad === ad)).filter(a => a !== undefined));
-          const digerAlanlar = alanlar.filter(a => !ciftliAlanlar.flat().includes(a));
+          // CARİYE ÖZEL DİPNOT (1187): düz alan değil - düğme + modal (EBelgeDipnotlari).
+          const dipnotAlanlari = kaynak === 'cari' && altBaslik === 'e-Belge Ayarlari'
+            ? alanlar.filter(a => a.ad === 'efaturaDipnot' || a.ad === 'eirsaliyeDipnot') : [];
+          const digerAlanlar = alanlar.filter(a => !ciftliAlanlar.flat().includes(a) && !dipnotAlanlari.includes(a));
           const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Adres / Fatura Bilgisi' && altBaslik === 'Fatura / Vergi Kimligi'
             ? meta.alanlar.find(a => a.ad === 'vkno')
             : undefined;
@@ -298,6 +302,8 @@ const adliBlok = (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
                 ))}
                 {renderAlanListesi(digerAlanlar)}
+                <EBelgeDipnotlari alanlar={dipnotAlanlari} deger={deger} saltOkunur={salt}
+                                  onDegis={(ad, metin) => setDeger(d => ({ ...d, [ad]: metin }))} />
                 {hastaVergiNoAlan && (
                   <label className="alan tip-metin">
                     <span className="etiket">Vergi No{hastaVergiNoAlan.zorunlu && <b className="zorunlu"> *</b>}</span>

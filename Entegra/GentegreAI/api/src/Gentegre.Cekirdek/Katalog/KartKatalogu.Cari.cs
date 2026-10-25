@@ -76,6 +76,12 @@ public static partial class KartKatalogu
             // SON KONTROL (kullanıcı 25.10.2026): son GİB alias sorgusu. e-Fatura alıcısında 30 günden eskiyse, e-Arşiv
             //   alıcısında HER hazırlamada yeniden sorgulanır ve güncellenir (EFaturaServisi.HazirlaAsync "taze"); kart /
             //   Ctrl+K GİB sorgusu da yazar. Elle değişmez.
+            // CARİYE ÖZEL DİPNOT (1187): doluysa e-Belge hazırlamada genel sabit notların yerine. Kartta modalla girilir
+            //   (KartGrupSekmesi > EBelgeDipnotlari).
+            new("efaturaDipnot",   "efatura_dipnot",   "metin", EnFazlaUzunluk: 1000, Baslik: "e-Fatura Dipnotu",
+                Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
+            new("eirsaliyeDipnot", "eirsaliye_dipnot", "metin", EnFazlaUzunluk: 1000, Baslik: "e-İrsaliye Dipnotu",
+                Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
             new("efaturaSorguTarihi", "efatura_sorgu_tarihi", "zaman", Yazilabilir: false, Baslik: "Son Kontrol",
                 Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari",
                 Ipucu: "Son GİB alias sorgusu. e-Fatura alıcısında 30 günü geçince, e-Arşiv alıcısında her faturada yeniden sorgulanır."),

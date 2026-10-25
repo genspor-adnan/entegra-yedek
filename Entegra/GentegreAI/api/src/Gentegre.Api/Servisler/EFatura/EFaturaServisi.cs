@@ -640,8 +640,16 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     /// </summary>
     private static async Task<List<string>> NotlarAsync(NpgsqlConnection b, EFaturaVerisi v, CancellationToken iptal)
     {
-        var sablon = await b.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", null,
-                                                    [v.Irsaliye ? "eirsaliye.sabit_notlar" : v.Arsiv ? "earsiv.sabit_notlar" : "efatura.sabit_notlar"], iptal) ?? "{ACIKLAMA}";
+        // CARİYE ÖZEL DİPNOT (1187): dolu ise türün genel şablonunun yerine (fatura dipnotu e-Fatura + e-Arşiv,
+        //   irsaliye dipnotu e-İrsaliye); aynı yer tutucular. Vergi notları aşağıda yine eklenir.
+        var cariDipnot = v.TarafId > 0
+            ? await b.TekDegerAsync<string>(
+                v.Irsaliye ? "select eirsaliye_dipnot from public.taraf where id = @p0" : "select efatura_dipnot from public.taraf where id = @p0",
+                null, [v.TarafId], iptal)
+            : null;
+        var sablon = !string.IsNullOrWhiteSpace(cariDipnot) ? cariDipnot
+            : await b.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", null,
+                                             [v.Irsaliye ? "eirsaliye.sabit_notlar" : v.Arsiv ? "earsiv.sabit_notlar" : "efatura.sabit_notlar"], iptal) ?? "{ACIKLAMA}";
         var alanlar = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["ACIKLAMA"] = v.Aciklama, ["ACIKLAMA2"] = "", ["BELGENO"] = v.EBelgeNo,
