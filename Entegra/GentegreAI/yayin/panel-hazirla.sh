@@ -4,31 +4,45 @@
 #      scp yayin/nginx-gentegreai.conf yayin/panel-hazirla.sh gentegre@46.36.201.170:/tmp/
 #      scp panel/index.html gentegre@46.36.201.170:/tmp/panel-index.html
 #      ssh -t gentegre@46.36.201.170 "sudo bash /tmp/panel-hazirla.sh"             # 1) nginx + panel (HTTP)
-#      ssh -t gentegre@46.36.201.170 "sudo bash /tmp/panel-hazirla.sh sertifika"   # 2) DNS çözülünce HTTPS
+#      scp gentegreai-origin.pem gentegreai-origin.key gentegre@46.36.201.170:/tmp/
+#      ssh -t gentegre@46.36.201.170 "sudo bash /tmp/panel-hazirla.sh cloudflare"  # 2) HTTPS (Cloudflare Origin)
 #
 #  1) /etc/nginx/sites-available/gentegreai (+ sites-enabled bağı); ~/gentegre-panel/index.html.
 #     nginx -t düşerse eski hal geri yüklenir. IP üzerindeki mevcut site (gentegre-mockup) DEĞİŞMEZ.
-#  2) sertifika: certbot yoksa kurulur; panel + kayıtlı firma alt alan adları için Let's Encrypt (otomatik
-#     yenilenir), http -> https yönlendirmesi. Önce DNS: *.gentegreai.com A 46.36.201.170.
+#  2) cloudflare: DNS Cloudflare'de (gentegreai.com + * , turuncu bulut); Cloudflare Origin sertifikası 443'e,
+#     joker (*.gentegreai.com) ve 15 yıl - yeni müşteri için sertifika / DNS işi yok.
 # ============================================================================
 set -euo pipefail
 SITE=/etc/nginx/sites-available/gentegreai
 BAG=/etc/nginx/sites-enabled/gentegreai
 PARCA=/tmp/nginx-gentegreai.conf
 PANEL=/home/gentegre/gentegre-panel
-ALANLAR="panel feta zone medx"   # alt alan adlari; kok (gentegreai.com) ve www ayrica
 
-if [ "${1:-}" = "sertifika" ]; then
-    for a in $ALANLAR; do
-        getent hosts "$a.gentegreai.com" >/dev/null || { echo "DNS yok: $a.gentegreai.com (once *.gentegreai.com A kaydi)" >&2; exit 1; }
-    done
-    command -v certbot >/dev/null || { apt-get update -q && apt-get install -y -q certbot python3-certbot-nginx; }
-    for a in gentegreai.com www.gentegreai.com; do
-        getent hosts "$a" >/dev/null || { echo "DNS yok: $a (kok icin ayri A kaydi: @ -> 46.36.201.170)" >&2; exit 1; }
-    done
-    ARG="-d gentegreai.com -d www.gentegreai.com"; for a in $ALANLAR; do ARG="$ARG -d $a.gentegreai.com"; done
-    certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect $ARG
-    echo "TAMAM: HTTPS hazir - https://gentegreai.com"
+if [ "${1:-}" = "cloudflare" ]; then
+    # HTTPS - Cloudflare Origin sertifikası (gentegreai.com + *.gentegreai.com, 15 yıl; yenileme yok). Cloudflare
+    #   panelinden alınan sertifika ve anahtar önce /tmp'ye: gentegreai-origin.pem, gentegreai-origin.key
+    [ -f /tmp/gentegreai-origin.pem ] && [ -f /tmp/gentegreai-origin.key ] || {
+        echo "sertifika yok: /tmp/gentegreai-origin.pem + /tmp/gentegreai-origin.key (Cloudflare > SSL/TLS > Origin Server)" >&2; exit 1; }
+    grep -q "BEGIN CERTIFICATE" /tmp/gentegreai-origin.pem || { echo "pem bozuk" >&2; exit 1; }
+    grep -q "PRIVATE KEY" /tmp/gentegreai-origin.key || { echo "anahtar bozuk" >&2; exit 1; }
+    mkdir -p /etc/ssl/gentegreai
+    install -m 644 /tmp/gentegreai-origin.pem /etc/ssl/gentegreai/origin.pem
+    install -m 600 /tmp/gentegreai-origin.key /etc/ssl/gentegreai/origin.key
+    shred -u /tmp/gentegreai-origin.key 2>/dev/null || rm -f /tmp/gentegreai-origin.key
+    cat > /etc/nginx/gentegreai-ssl.conf <<'SSL'
+listen 443 ssl http2;
+ssl_certificate     /etc/ssl/gentegreai/origin.pem;
+ssl_certificate_key /etc/ssl/gentegreai/origin.key;
+ssl_protocols       TLSv1.2 TLSv1.3;
+SSL
+    if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then ufw allow 443/tcp; fi
+    if nginx -t; then
+        systemctl reload nginx
+        echo "TAMAM: 443 acik (Cloudflare Origin). Cloudflare'de SSL/TLS modu: Full (strict); 'Always Use HTTPS' acik."
+    else
+        rm -f /etc/nginx/gentegreai-ssl.conf; nginx -t >/dev/null 2>&1 && systemctl reload nginx || true
+        echo "HATA: nginx dogrulamasi dustu - 443 eklenmedi" >&2; exit 1
+    fi
     exit 0
 fi
 
@@ -47,7 +61,7 @@ cp "$PARCA" "$SITE"
 ln -sf "$SITE" "$BAG"
 if nginx -t; then
     systemctl reload nginx
-    echo "TAMAM: panel ve gentegreai.com bloklari yuklendi (HTTP). DNS gelince: sudo bash /tmp/panel-hazirla.sh sertifika"
+    echo "TAMAM: panel ve gentegreai.com bloklari yuklendi (HTTP). HTTPS: sudo bash /tmp/panel-hazirla.sh cloudflare"
 else
     if [ -n "$YEDEK" ]; then cp "$YEDEK" "$SITE"; else rm -f "$SITE" "$BAG"; fi
     nginx -t >/dev/null 2>&1 && systemctl reload nginx || true
