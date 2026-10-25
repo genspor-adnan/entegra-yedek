@@ -451,8 +451,7 @@ public static class KarlilikIcmalUclari
     /// <summary>Hedef marj (Genel Ayarlar `satis.hedef_marj`, yüzde); boş / okunamazsa %15.</summary>
     private static async Task<decimal> HedefMarjAsync(NpgsqlConnection b, CancellationToken iptal)
     {
-        var ayar = (await AyarDeposu.MetinAsync(b, null, "satis.hedef_marj", "", iptal)).Trim().Replace(',', '.').TrimStart('%');
-        return decimal.TryParse(ayar, NumberStyles.Number, CultureInfo.InvariantCulture, out var h) && h >= 0 && h <= 100
+        return await AyarDeposu.OndalikAsync(b, null, "satis.hedef_marj", iptal) is decimal h && h >= 0 && h <= 100
             ? h : VarsayilanHedefMarj;
     }
 

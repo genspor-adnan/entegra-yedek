@@ -82,21 +82,6 @@ public static class EslesmeIcmalUclari
     private static bool Konsinye(int tur) => tur is 109 or 119;
     private static string Yon(int tur) => tur is 14 or 119 or 15 ? "satis" : "alis";
 
-    /// <summary>
-    /// AÇIK DÖNEMİN İLK GÜNÜ. Genel Ayarlar'da `muhasebe.donem_kapanis_tarihi` (yyyy-MM-dd ya da
-    /// dd.MM.yyyy; o gün dahil kapalı) varsa ondan sonraki gün; yoksa içinde bulunulan ayın ilk
-    /// günü - ay sonu kapanışı: önceki aylar kapanmış sayılır (mockup "Ay sonu kapanışı").
-    /// </summary>
-    private static async Task<DateTime> AcikDonemBasiAsync(NpgsqlConnection b, NpgsqlTransaction? tx,
-        DateTime bugun, CancellationToken iptal)
-    {
-        var ayar = (await AyarDeposu.MetinAsync(b, tx, "muhasebe.donem_kapanis_tarihi", "", iptal)).Trim();
-        if (ayar.Length > 0 && DateTime.TryParseExact(ayar, ["yyyy-MM-dd", "dd.MM.yyyy", "yyyy-MM-ddTHH:mm:ss"],
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out var kapanis))
-            return kapanis.Date.AddDays(1);
-        return new DateTime(bugun.Year, bugun.Month, 1);
-    }
-
     private static string DonemAdi(DateTime gun) => gun.ToString("yyyy-MM", CultureInfo.InvariantCulture);
 
     /// <summary>e-İrsaliye yanıt durumu: kabul · red · sure · bekliyor · gonderildi · hazir · kagit.</summary>
@@ -141,7 +126,7 @@ public static class EslesmeIcmalUclari
             var fatTurleri = y switch { "alis" => new[] { 11 }, "ikisi" => new[] { 15, 11 }, _ => new[] { 15 } };
 
             await using var b = await veri.AcAsync(iptal);
-            var acikDonemBasi = await AcikDonemBasiAsync(b, null, bugun, iptal);
+            var acikDonemBasi = await MuhasebeDonemi.AcikDonemBasiAsync(b, null, bugun, iptal);
 
             // ------------------------------------------- irsaliye satırları + hedefleri --
             var ham = await b.ListeAsync("""
@@ -538,7 +523,7 @@ public static class EslesmeIcmalUclari
             }
 
             // ------------------------------------------------ 4) kapanmış dönem --
-            var acikDonemBasi = await AcikDonemBasiAsync(b, tx, bugun, iptal);
+            var acikDonemBasi = await MuhasebeDonemi.AcikDonemBasiAsync(b, tx, bugun, iptal);
             var tarihler = new List<(string No, DateTime Gun)> { (fatura.No, Saat.Gun(fatura.Tarih)) };
             tarihler.AddRange(ciftler.Select(c => irsSatirlar[c.IrsaliyeSatirId]).DistinctBy(x => x.BelgeId)
                 .Select(x => (x.No, Saat.Gun(x.Tarih))));

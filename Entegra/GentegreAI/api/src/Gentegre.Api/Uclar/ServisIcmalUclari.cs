@@ -316,9 +316,8 @@ public static class ServisIcmalUclari
             else if (sahiplik == 3) sah = 0;
             else sah = await b.TekDegerAsync<int>("select public.fn_urun_modu(@p0)::int", null, [baglam.SubeId ?? 0], iptal) == 2 ? 1 : 2;
 
-            var tekrarAyar = (await AyarDeposu.MetinAsync(b, null, "servis.tekrar_ariza_gun", "", iptal)).Trim();
-            var tekrarGun = int.TryParse(tekrarAyar, NumberStyles.Integer, CultureInfo.InvariantCulture, out var tg) && tg > 0
-                ? Math.Min(tg, 365) : 30;
+            var tekrarGun = await AyarDeposu.OndalikAsync(b, null, "servis.tekrar_ariza_gun", iptal) is decimal tg && tg >= 1
+                ? (int)Math.Min(Math.Floor(tg), 365) : 30;
 
             // ------------------------------------------------------------- okuma --
             var hamCagri = await b.ListeAsync(CagriSorgusu, null, [baslangic, bitis, subeler, s0, cariKapsam, sah], o => new Cagri(

@@ -8,10 +8,7 @@ import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
-import {
-  ayAdi, DegisimRozeti, DovizRozetleri, EkranA4, eksi, FaturasizKutusu, kisa, ParaTablosuGorunumu, sayi, simge,
-  tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde,
-} from './ticariIcmalOrtak';
+import { ayAdi, ayBasi, DegisimRozeti, DovizRozetleri, EkranA4, eksi, FaturasizKutusu, hazirDonem, kisa, ParaTablosuGorunumu, sayi, simge, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from './ticariIcmalOrtak';
 
 /**
  * SATIŞ İCMALİ `/satis-icmali` - mockup Ekranlar/İcmal/satis_icmali.html (kararlar 25.10.2026).
@@ -21,15 +18,7 @@ import {
  * ekstresi · ada tıkla: cari kartı.
  */
 type Sekme = 'cari' | 'stok' | 'donem' | 'kir' | 'dik' | 'onz';
-const ayBasi = () => bugunYerel().slice(0, 8) + '01';
 
-function hazirDonem(k: 'buay' | 'gecenay' | 'buyil'): [string, string] {
-  const b = new Date();
-  const s = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  if (k === 'buyil') return [`${b.getFullYear()}-01-01`, bugunYerel()];
-  if (k === 'gecenay') return [s(new Date(b.getFullYear(), b.getMonth() - 1, 1)), s(new Date(b.getFullYear(), b.getMonth(), 0))];
-  return [ayBasi(), bugunYerel()];
-}
 
 export function SatisIcmali() {
   const { arama, degistir } = useSuzgec();
@@ -104,7 +93,7 @@ export function SatisIcmali() {
         <div className="sel">📅 Dönem:
           <input type="date" value={bas} max={bit} onChange={e => e.target.value && degistir({ bas: e.target.value })} />
           –<input type="date" value={bit} onChange={e => e.target.value && degistir({ bit: e.target.value })} />
-          <select value="" onChange={e => { if (!e.target.value) return; const [b1, b2] = hazirDonem(e.target.value as 'buay'); degistir({ bas: b1, bit: b2 }) }}>
+          <select value="" onChange={e => { if (!e.target.value) return; const [b1, b2] = hazirDonem(e.target.value); degistir({ bas: b1, bit: b2 }) }}>
             <option value="">hazır…</option><option value="buay">Bu ay</option><option value="gecenay">Geçen ay</option><option value="buyil">Bu yıl</option>
           </select></div>
         <div className="sel">⇄ Karşılaştır:

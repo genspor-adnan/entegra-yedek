@@ -9,7 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
-import { EkranA4, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
+import { ayBasi, EkranA4, hazirDonem, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 
 /**
@@ -20,19 +20,11 @@ import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
  * ciro = ücretli + üretici garantisi, sözleşme / kendi garantimiz / iç iş servis maliyetidir.
  */
 type Sekme = 'ozt' | 'tek' | 'cih' | 'sla' | 'prc' | 'emn' | 'soz' | 'ftr' | 'onz';
-const ayBasi = () => bugunYerel().slice(0, 8) + '01';
 const saat = (n: number | null | undefined) => (n == null ? '—' : `${n.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} saat`);
 const KAPSAMLAR: [number, string][] = [[0, 'Tüm kapsam'], [1, 'Ücretli'], [2, 'Sözleşme'], [3, 'Üretici garantisi'], [4, 'Kendi garantimiz']];
 const SAHIPLIK: [number, string, string][] = [[2, 'Dış (müşteri)', '2'], [1, 'İç (demirbaş)', '1'], [0, 'İkisi', '3']];
 const SLA_ROZET: Record<string, [string, string]> = { uygun: ['ok', 'uygun'], sinirda: ['sari', 'sınırda'], ihlal: ['kir', 'ihlal'] };
 
-function hazirDonem(k: 'buay' | 'gecenay' | 'buyil'): [string, string] {
-  const b = new Date();
-  const s = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  if (k === 'buyil') return [`${b.getFullYear()}-01-01`, bugunYerel()];
-  if (k === 'gecenay') return [s(new Date(b.getFullYear(), b.getMonth() - 1, 1)), s(new Date(b.getFullYear(), b.getMonth(), 0))];
-  return [ayBasi(), bugunYerel()];
-}
 
 /** Kart ve liste gezintisi (kart sekmesi deseni: kendi sekmesinde). */
 function useServisGezinti() {
@@ -113,7 +105,7 @@ export function TeknikServisIcmali() {
         <div className="sel">📅 Çağrı açılışı:
           <input type="date" value={bas} max={bit} onChange={e => e.target.value && degistir({ bas: e.target.value })} />
           –<input type="date" value={bit} onChange={e => e.target.value && degistir({ bit: e.target.value })} />
-          <select value="" onChange={e => { if (!e.target.value) return; const [b1, b2] = hazirDonem(e.target.value as 'buay'); degistir({ bas: b1, bit: b2 }) }}>
+          <select value="" onChange={e => { if (!e.target.value) return; const [b1, b2] = hazirDonem(e.target.value); degistir({ bas: b1, bit: b2 }) }}>
             <option value="">hazır…</option><option value="buay">Bu ay</option><option value="gecenay">Geçen ay</option><option value="buyil">Bu yıl</option>
           </select></div>
         <div className="sel">🏢 Şube:

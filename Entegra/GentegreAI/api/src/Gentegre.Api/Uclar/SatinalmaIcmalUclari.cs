@@ -127,39 +127,7 @@ public static class SatinalmaIcmalUclari
     /// <summary>Aşama hedef süresi (gün). Boş / geçersiz / sıfır = hedef yok (karar 25.10.2026).</summary>
     private static async Task<decimal?> HedefAsync(NpgsqlConnection b, string anahtar, CancellationToken iptal)
     {
-        var m = (await AyarDeposu.MetinAsync(b, null, anahtar, "", iptal)).Trim().Replace(',', '.');
-        return decimal.TryParse(m, NumberStyles.Number, CultureInfo.InvariantCulture, out var d) && d > 0 ? d : null;
-    }
-
-    /// <summary>
-    /// Basamağın sahipleri - OnayBildirimi.AlicilarAsync ile BİREBİR (atanan + aktif vekil; rol basamağında
-    /// karar ucuyla aynı aksiyon kodunu taşıyan aktif kullanıcılar, ek roller dahil). Aksiyon eşlemesi
-    /// OnayBildirimi.AksiyonKodu'ndan - kural tek yerde. O metot internal açılınca bu kopya kaldırılmalı.
-    /// </summary>
-    private static async Task<List<int>> AlicilarAsync(NpgsqlConnection b, NpgsqlTransaction? tx, string akisKod,
-        int rol, int atananId, CancellationToken iptal)
-    {
-        if (atananId > 0)
-        {
-            var liste = new List<int> { atananId };
-            liste.AddRange(await b.ListeAsync("""
-                select k.devralan_id from public.onay_vekalet k
-                 where k.devreden_id = @p0 and k.aktif = 1
-                   and current_date between k.baslangic and k.bitis
-                """, tx, [atananId], o => o.GetInt32(0), iptal));
-            return liste.Distinct().ToList();
-        }
-        var aksiyon = Servisler.OnayBildirimi.AksiyonKodu(akisKod, (short)rol);
-        if (aksiyon.Length == 0) return [];
-        return await b.ListeAsync("""
-            select distinct k.id
-              from public.taraf_kullanici k
-              join public.rol_yetki ry
-                on ry.rol_id = k.rol_id
-                or ry.rol_id in (select kr.rol_id from public.kullanici_rol kr where kr.kullanici_id = k.id)
-              join public.yetki y on y.id = ry.yetki_id
-             where k.aktif = 1 and y.tur = 1 and y.kod = @p0 and coalesce(ry.gor, 0) = 1
-            """, tx, [aksiyon], o => o.GetInt32(0), iptal);
+        return await AyarDeposu.OndalikAsync(b, null, anahtar, iptal) is decimal d && d > 0 ? d : null;
     }
 
     private sealed record Kisi(int Id, string Ad, string Eposta, string Cep);
@@ -857,7 +825,10 @@ public static class SatinalmaIcmalUclari
                     + (bugunku.kim.Length > 0 ? $", {bugunku.kim}" : "") + "). Aynı belge için günde bir hatırlatma gönderilir.",
                     new { kod = "GUNDE_BIR" });
 
-            var alicilar = await AlicilarAsync(b, tx, bk.akis, bk.rol, bk.atanan, iptal);
+            // Basamağın sahipleri: OnayBildirimi ile AYNI kural (atanan + aktif vekil; rol basamağında aksiyon yetkisi).
+            Task<List<int>> Alicilar(string akis, int rol, int atanan)
+                => Servisler.OnayBildirimi.AlicilarAsync(b, tx, akis, (short)rol, atanan > 0 ? atanan : null, iptal);
+            var alicilar = await Alicilar(bk.akis, bk.rol, bk.atanan);
             if (alicilar.Count == 0)
                 throw GentegreHatasi.IsKurali($"\"{bk.ad}\" basamağının onaycısı bulunamadı (atanan kişi ya da rol yetkisi olan aktif kullanıcı yok).");
 
@@ -881,7 +852,7 @@ public static class SatinalmaIcmalUclari
                     }, iptal)
                 : null;
             var ustAlicilar = ustAdim is null ? []
-                : (await AlicilarAsync(b, tx, bk.akis, ustAdim.rol, ustAdim.atanan, iptal)).Where(x => !alicilar.Contains(x)).ToList();
+                : (await Alicilar(bk.akis, ustAdim.rol, ustAdim.atanan)).Where(x => !alicilar.Contains(x)).ToList();
 
             var kisiler = await KisilerAsync(b, tx, alicilar, iptal);
             var ustKisiler = await KisilerAsync(b, tx, ustAlicilar, iptal);

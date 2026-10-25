@@ -71,7 +71,7 @@ public sealed class OnayBildirimi
 
         if (a is null) return 0;   // bekleyen basamak yok - zincir bitmiş
 
-        var aliciIdler = await AlicilarAsync(baglanti, a["akisKod"] as string ?? "",
+        var aliciIdler = await AlicilarAsync(baglanti, null, a["akisKod"] as string ?? "",
             Convert.ToInt16(a["rol"] ?? (short)0), a["atananId"] as int?, iptal);
 
         var degiskenler = new Dictionary<string, string>
@@ -197,7 +197,7 @@ public sealed class OnayBildirimi
         var yazilan = 0;
         foreach (var g in gecikenler)
         {
-            var aliciIdler = await AlicilarAsync(baglanti, g["akisKod"] as string ?? "",
+            var aliciIdler = await AlicilarAsync(baglanti, null, g["akisKod"] as string ?? "",
                 Convert.ToInt16(g["rol"] ?? (short)0), g["atananId"] as int?, iptal);
 
             yazilan += await YazAsync(baglanti, aliciIdler, "onay.hatirlatma", new Dictionary<string, string>
@@ -302,10 +302,11 @@ public sealed class OnayBildirimi
     /// Basamağın sahipleri. Rol basamağında "o aksiyon yetkisi olan aktif
     /// kullanıcılar" - yetkiyi ikinci kez tanımlamamak için karar ucuyla AYNI
     /// aksiyon kodundan gidiyoruz; başka bir liste tutsaydık yetki
-    /// değiştiğinde bildirim eski kişiye gitmeye devam ederdi.
+    /// değiştiğinde bildirim eski kişiye gitmeye devam ederdi. Satınalma Süreç
+    /// İcmali'nin "onaycıya hatırlat"ı da bunu çağırır (kopya yok).
     /// </summary>
-    private static async Task<List<int>> AlicilarAsync(
-        NpgsqlConnection baglanti, string akisKod, short rol, int? atananId,
+    internal static async Task<List<int>> AlicilarAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem, string akisKod, short rol, int? atananId,
         CancellationToken iptal)
     {
         if (atananId is not null)
@@ -316,7 +317,7 @@ public sealed class OnayBildirimi
                 select k.devralan_id from public.onay_vekalet k
                  where k.devreden_id = @p0 and k.aktif = 1
                    and current_date between k.baslangic and k.bitis
-                """, null, [atananId.Value], o => o.GetInt32(0), iptal));
+                """, islem, [atananId.Value], o => o.GetInt32(0), iptal));
             return liste.Distinct().ToList();
         }
 
@@ -338,7 +339,7 @@ public sealed class OnayBildirimi
               join public.yetki y on y.id = ry.yetki_id
              where k.aktif = 1 and y.tur = 1 and y.kod = @p0
                and coalesce(ry.gor, 0) = 1
-            """, null, [aksiyon], o => o.GetInt32(0), iptal);
+            """, islem, [aksiyon], o => o.GetInt32(0), iptal);
     }
 
     /// <summary>Karar ucundakiyle AYNI eşleme (tek kaynak olmalı).</summary>

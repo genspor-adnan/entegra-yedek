@@ -292,20 +292,6 @@ public static class KdvIcmalUclari
         return (R(hesaplanan), R(satisTevkif), R(satisIade), R(indirilecek), R(alisIade), R(kdv2), R(sonuc));
     }
 
-    /// <summary>
-    /// AÇIK DÖNEMİN İLK GÜNÜ (EslesmeIcmalUclari ile aynı kural): `muhasebe.donem_kapanis_tarihi`
-    /// (o gün dahil kapalı) varsa ertesi gün; yoksa içinde bulunulan ayın ilk günü.
-    /// </summary>
-    private static async Task<DateTime> AcikDonemBasiAsync(NpgsqlConnection b, NpgsqlTransaction? tx, DateTime bugun,
-        CancellationToken iptal)
-    {
-        var ayar = (await AyarDeposu.MetinAsync(b, tx, "muhasebe.donem_kapanis_tarihi", "", iptal)).Trim();
-        if (ayar.Length > 0 && DateTime.TryParseExact(ayar, ["yyyy-MM-dd", "dd.MM.yyyy", "yyyy-MM-ddTHH:mm:ss"],
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out var kapanis))
-            return kapanis.Date.AddDays(1);
-        return new DateTime(bugun.Year, bugun.Month, 1);
-    }
-
     /// <summary>muhasebe_donem.kilitli = 1 olan aylar ('yyyy-MM').</summary>
     private static async Task<HashSet<string>> KilitliAylarAsync(NpgsqlConnection b, int[] subeler, CancellationToken iptal)
     {
@@ -442,7 +428,7 @@ public static class KdvIcmalUclari
             var yerel = await b.TekDegerAsync<string>("select public.fn_doviz_iso(public.fn_yerel_para())::varchar(6)", null, null, iptal) ?? "TL";
 
             // ------------------------------------------------ dönem kapanışı --
-            var acikDonemBasi = await AcikDonemBasiAsync(b, null, bugun, iptal);
+            var acikDonemBasi = await MuhasebeDonemi.AcikDonemBasiAsync(b, null, bugun, iptal);
             var kilitli = await KilitliAylarAsync(b, mukSubeler, iptal);
             bool AyKapali(DateTime ay)
             {
@@ -504,8 +490,7 @@ public static class KdvIcmalUclari
             }).ToList();
 
             // --------------------------------------------------------- Ba/Bs --
-            var sinirMetin = (await AyarDeposu.MetinAsync(b, null, "muhasebe.babs_sinir", "", iptal)).Trim().Replace(',', '.');
-            var sinir = decimal.TryParse(sinirMetin, NumberStyles.Number, CultureInfo.InvariantCulture, out var sn) && sn > 0 ? sn : 5000m;
+            var sinir = await AyarDeposu.OndalikAsync(b, null, "muhasebe.babs_sinir", iptal) is decimal sn && sn > 0 ? sn : 5000m;
             static string VknDurum(string v) => v.Length == 0 ? "eksik" : v.Length is 10 or 11 ? "tamam" : "hatali";
             var babs = kesin.Where(x => x.Fatura).GroupBy(x => (form: x.Giden ? "Bs" : "Ba", x.TarafId, x.Vkn))
                 .Select(g => new
@@ -826,7 +811,7 @@ public static class KdvIcmalUclari
             if (eski is { } e0 && surum.Length > 0 && surum != e0.surum)
                 throw GentegreHatasi.Cakisma(DevredenSatiri(eski));
 
-            var acikDonemBasi = await AcikDonemBasiAsync(b, tx, bugun, iptal);
+            var acikDonemBasi = await MuhasebeDonemi.AcikDonemBasiAsync(b, tx, bugun, iptal);
             var kapali = bas.AddMonths(1) <= acikDonemBasi;
             if (eski is null)
             {

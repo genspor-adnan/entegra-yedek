@@ -4,12 +4,31 @@ import type { FaturasizIrsaliye, ParaTablosu } from '../../api/uclar/ticariIcmal
 import { para } from '../../bilesenler/bicim';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { Kutucuk } from '../stokIcmal/stokIcmalOrtak';
+import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 
 /**
  * SATIŞ / ALIŞ İCMALİNİN ORTAĞI - görünüm yardımcıları. Rakamlar sunucudan
  * (TicariIcmalUclari); bu dosya yalnız biçimler ve gezinir, hesap yapmaz.
  */
 export const tl = (n: number) => para.format(n);
+
+/** Dönem başları ŞUBE gününe göre (bugunYerel) - tarayıcı saati değil. */
+export const ayBasi = () => bugunYerel().slice(0, 8) + '01';
+export const yilBasi = () => `${bugunYerel().slice(0, 4)}-01-01`;
+const gunMetni = (yil: number, ay: number, gun: number) => new Date(Date.UTC(yil, ay - 1, gun)).toISOString().slice(0, 10);
+
+/** Şeritteki "Hazır dönem" seçimi: buay · gecenay · son3 · buyil · gecenyil → [bas, bit]. İcmallerin ortağı. */
+export function hazirDonem(k: string): [string, string] {
+  const bugun = bugunYerel();
+  const y = Number(bugun.slice(0, 4)), m = Number(bugun.slice(5, 7));
+  switch (k) {
+    case 'gecenay': return [gunMetni(y, m - 1, 1), gunMetni(y, m, 0)];
+    case 'son3': return [gunMetni(y, m - 2, 1), bugun];
+    case 'buyil': return [yilBasi(), bugun];
+    case 'gecenyil': return [`${y - 1}-01-01`, `${y - 1}-12-31`];
+    default: return [ayBasi(), bugun];
+  }
+}
 export const sayi = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleString('tr-TR', { maximumFractionDigits: 3 }));
 export const kur = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }));
 export const tarihT = (t: string | null | undefined) => (t ? new Date(t).toLocaleDateString('tr-TR') : '—');

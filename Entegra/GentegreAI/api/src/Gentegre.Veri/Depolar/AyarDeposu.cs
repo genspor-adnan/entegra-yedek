@@ -390,4 +390,32 @@ public sealed class AyarDeposu
         return await komut.ExecuteScalarAsync(iptal) is string metin && metin.Length > 0
             ? metin : varsayilan;
     }
+
+    /// <summary>
+    /// Ondalık ayar okur (icmal eşikleri, 1176): boş / okunamazsa null - varsayılanı çağıran verir.
+    /// Ekrandaki etiketler Türkçe yazar ("1,5", "5.000", "%15"); hepsi burada çözülür ki bir uç
+    /// "1,5"i sessizce varsayılana düşürmesin. Bkz. <see cref="OndalikCoz"/>.
+    /// </summary>
+    public static async Task<decimal?> OndalikAsync(NpgsqlConnection baglanti, NpgsqlTransaction? islem,
+        string anahtar, CancellationToken iptal = default)
+        => OndalikCoz(await MetinAsync(baglanti, islem, anahtar, "", iptal));
+
+    /// <summary>
+    /// "15", "%15", "1,5", "1.5", "5.000", "5.000,50", "5,000.50" → sayı. Hem nokta hem virgül varsa
+    /// SONDAKİ ondalık ayırıcıdır; yalnız nokta ve 3'lü gruplar ("5.000", "1.250.000") binliktir.
+    /// </summary>
+    public static decimal? OndalikCoz(string? metin)
+    {
+        var m = (metin ?? "").Replace("%", "").Replace(" ", "").Trim();
+        if (m.Length == 0) return null;
+        int nokta = m.LastIndexOf('.'), virgul = m.LastIndexOf(',');
+        if (nokta >= 0 && virgul >= 0)
+            m = nokta > virgul ? m.Replace(",", "") : m.Replace(".", "").Replace(',', '.');
+        else if (virgul >= 0)
+            m = m.Replace(',', '.');
+        else if (System.Text.RegularExpressions.Regex.IsMatch(m, @"^-?\d{1,3}(\.\d{3})+$"))
+            m = m.Replace(".", "");
+        return decimal.TryParse(m, System.Globalization.NumberStyles.Number,
+            System.Globalization.CultureInfo.InvariantCulture, out var d) ? d : null;
+    }
 }

@@ -42,10 +42,6 @@ public static class UretimIcmalUclari
 {
     private const string Kod = "uretim.icmali";
 
-    /// <summary>islem_log.tablo_id — satinalma_talep / satır (KartKatalogu.Satinalma ile aynı).</summary>
-    private const int LogTalep = 1241;
-    private const int LogTalepSatir = 1242;
-
     /// <summary>satinalma_talep.kaynak: 9 diğer (üretim için ayrı kod yok - 724); kaynak_tur 60 üretim emri.</summary>
     private const short TalepKaynakDiger = 9;
 
@@ -62,12 +58,9 @@ public static class UretimIcmalUclari
     private static string DurumAdi(int d) => d >= 0 && d < DurumAdlari.Length ? DurumAdlari[d] : "?";
     private static string TurAdi(int t) => t switch { 1 => "siparişe", 3 => "fason", 4 => "alt emir", _ => "stoğa" };
 
-    /// <summary>Ayardaki ondalık eşik: invariant ("1.5"); boş / bozuk / sıfır ve altı → varsayılan.</summary>
+    /// <summary>Ayardaki ondalık eşik ("1,5" / "1.5" - AyarDeposu.OndalikCoz); boş / bozuk / sıfır ve altı → varsayılan.</summary>
     private static async Task<decimal> AyarSayiAsync(NpgsqlConnection b, string anahtar, decimal varsayilan, CancellationToken iptal)
-    {
-        var m = (await AyarDeposu.MetinAsync(b, null, anahtar, "", iptal)).Trim();
-        return decimal.TryParse(m, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) && d > 0 ? d : varsayilan;
-    }
+        => await AyarDeposu.OndalikAsync(b, null, anahtar, iptal) is decimal d && d > 0 ? d : varsayilan;
 
     private static int SubeCoz(IstekBaglami baglam, int? sube)
     {
@@ -634,18 +627,11 @@ public static class UretimIcmalUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
             baglam.YetkiIste("satinalma.talep", Islem.Ekle);
-            var satirlar = (istek.Satirlar ?? []).Where(x => x.StokId > 0 && x.Miktar > 0)
-                .GroupBy(x => x.StokId).Select(g => g.Last()).ToList();
-            if (satirlar.Count == 0) throw GentegreHatasi.Dogrulama("Talep edilecek kalem seçilmedi.");
-            if (satirlar.Count > 500) throw GentegreHatasi.Dogrulama("Tek talepte en çok 500 kalem.");
+            var satirlar = TaslakTalep.Suz(istek.Satirlar, x => x.StokId, x => x.Miktar);
 
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
-            var depo = await b.TekAsync("select d.id, coalesce(d.ad, ''), d.sube_id from public.depo d where d.id = @p0",
-                islem, [istek.DepoId], o => new { id = o.GetInt32(0), ad = o.GetString(1), sube = o.IsDBNull(2) ? (int?)null : o.GetInt32(2) }, iptal);
-            if (depo is null || depo.sube is { } ds && !baglam.Subeler.Any(s => s.Id == ds))
-                throw GentegreHatasi.Bulunamadi("Depo bulunamadı.");
-            var subeId = depo.sube ?? baglam.SubeId ?? throw GentegreHatasi.IsKurali("Çalışılan şube seçilmeli.");
+            var (subeId, depoAd) = await TaslakTalep.DepoAsync(b, islem, baglam, istek.DepoId, iptal);
 
             // Kaynak emir(ler): kullanıcının şubelerinde, açık olmalı.
             var emirIdleri = satirlar.Where(x => x.EmirId is > 0).Select(x => x.EmirId!.Value).Distinct().ToArray();
@@ -655,78 +641,26 @@ public static class UretimIcmalUclari
                    and (e.sube_id = 0 or e.sube_id = any(@p1::int[]))
                 """, islem, [emirIdleri, baglam.Subeler.Select(s => s.Id).ToArray()], o => (id: o.GetInt32(0), no: o.GetString(1)), iptal);
             if (emirler.Count != emirIdleri.Length) throw GentegreHatasi.Bulunamadi("Üretim emri bulunamadı ya da açık değil.");
-
-            var acik = (await b.ListeAsync("""
-                select distinct ts.stok_id from public.satinalma_talep_satir ts join public.satinalma_talep t on t.id = ts.talep_id
-                 where t.durum in (0, 1, 2, 4) and t.sube_id = @p0 and ts.stok_id = any(@p1::int[])
-                """, islem, [subeId, satirlar.Select(x => x.StokId).ToArray()], o => o.GetInt32(0), iptal)).ToHashSet();
-            var yazilacak = satirlar.Where(x => !acik.Contains(x.StokId)).ToList();
-            if (yazilacak.Count == 0)
-                throw GentegreHatasi.IsKurali("Seçilen kalemlerin hepsinin açık satınalma talebi var.");
-
-            var bilgi = await b.ListeAsync("""
-                select s.id, coalesce(nullif(s.ad, ''), s.kod, ''),
-                       coalesce((select kd.ad from public.kod_deger kd join public.kod_liste kl on kl.id = kd.liste_id
-                                  where kl.kod = 'stok.ana_birim' and kd.deger = s.ana_birim and kd.dil = 0), '')
-                  from public.stok s where s.id = any(@p0::int[])
-                """, islem, [yazilacak.Select(x => x.StokId).ToArray()], o => (id: o.GetInt32(0), ad: o.GetString(1), birim: o.GetString(2)), iptal);
-            // Son alış fiyatı (Kritik Stok talebiyle aynı kaynak: iade olmayan kesin alış belgesi).
-            var fiyatlar = (await b.ListeAsync("""
-                select x.id, sa.fiyat
-                  from unnest(@p0::int[]) as x(id)
-                  join lateral (
-                        select round(bs.tutar / bs.miktar, 4) as fiyat
-                          from public.belge_satir bs join public.belge b on b.id = bs.belge_id
-                         where bs.stok_id = x.id and bs.miktar > 0 and bs.tutar > 0 and b.durum = 0
-                           and b.tur in (10, 11, 12, 109) and coalesce(b.tipi, 0) <> 2
-                         order by b.belge_tarihi desc, b.id desc limit 1) sa on true
-                """, islem, [yazilacak.Select(x => x.StokId).ToArray()], o => (id: o.GetInt32(0), fiyat: o.GetDecimal(1)), iptal))
-                .ToDictionary(x => x.id, x => x.fiyat);
-            decimal Fiyat(int id) => fiyatlar.TryGetValue(id, out var f) ? f : 0;
-            var tahmini = Math.Round(yazilacak.Sum(x => x.Miktar * Fiyat(x.StokId)), 2);
-            var ilkEmir = yazilacak.Select(x => x.EmirId).FirstOrDefault(x => x is > 0);
+            string EmirNo(int? id) => emirler.FirstOrDefault(e => e.id == id).no ?? "";
+            var ilkEmir = satirlar.Select(x => x.EmirId).FirstOrDefault(x => x is > 0);
             var emirNolari = string.Join(", ", emirler.Select(x => x.no).Where(x => x.Length > 0).Take(10));
 
-            var talepId = await b.TekDegerAsync<long>("""
-                insert into public.satinalma_talep
-                    (sube_id, tarih, kaynak, kaynak_tur, kaynak_id, isteyen_id, departman_id, oncelik, gerekce, hesap_notu,
-                     tahmini_tutar, durum, ekleyen)
-                values (@p0, current_date, @p1, @p2, @p3, null, null, 2, @p4, @p5, @p6, 0, @p7)
-                returning id
-                """, islem,
-                [subeId, TalepKaynakDiger, (short)BelgeTuru.KaynakTurUretimEmri, ilkEmir is > 0 ? (long?)ilkEmir.Value : null,
-                 "Üretim eksik hammadde · " + depo.ad,
-                 ((istek.Aciklama ?? "").Trim().Length > 0 ? istek.Aciklama!.Trim() + " · " : "")
-                 + "Üretim İcmali'nden " + yazilacak.Count + " kalem"
-                 + (emirNolari.Length > 0 ? " · emir: " + emirNolari : "") + " (miktar: eksik = kalan ihtiyaç − eldeki − yoldaki).",
-                 tahmini, baglam.KullaniciId], iptal);
-
-            short sira = 0;
-            foreach (var x in yazilacak)
-            {
-                var bi = bilgi.FirstOrDefault(z => z.id == x.StokId);
-                var satirId = await b.TekDegerAsync<long>("""
-                    insert into public.satinalma_talep_satir (talep_id, sira, stok_id, ad, miktar, birim, son_alis_fiyat, tahmini_tutar, aciklama, ekleyen)
-                    values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9) returning id
-                    """, islem,
-                    [talepId, ++sira, x.StokId, bi.ad ?? "", x.Miktar, bi.birim ?? "", Fiyat(x.StokId),
-                     Math.Round(x.Miktar * Fiyat(x.StokId), 2),
-                     (emirler.FirstOrDefault(e => e.id == x.EmirId).no is { Length: > 0 } en ? "emir " + en : "")
-                     + (Fiyat(x.StokId) == 0 ? (x.EmirId is > 0 ? " · " : "") + "son alış fiyatı yok" : ""),
-                     baglam.KullaniciId], iptal);
-                await log.YazAsync(b, islem, LogIslemi.Ekle, LogTalepSatir, satirId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                    new { x.StokId, x.Miktar, x.EmirId }, LogTalep, talepId, stokId: x.StokId, iptal: iptal);
-            }
-            await log.YazAsync(b, islem, LogIslemi.Ekle, LogTalep, talepId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { kaynak = "uretim-icmali", istek.DepoId, kalem = yazilacak.Count, tahmini, emirler = emirIdleri }, iptal: iptal);
+            var sonuc = await TaslakTalep.AcAsync(b, islem, log, baglam, subeId, depoAd, istek.DepoId,
+                satirlar.Select(x => new TaslakTalep.Kalem(x.StokId, x.Miktar,
+                    EmirNo(x.EmirId) is { Length: > 0 } en ? "emir " + en : "",
+                    new { x.StokId, x.Miktar, x.EmirId })).ToList(),
+                new TaslakTalep.Tanim(Kaynak: TalepKaynakDiger, KaynakTur: (short)BelgeTuru.KaynakTurUretimEmri,
+                    KaynakId: ilkEmir is > 0 ? ilkEmir.Value : null, DepartmanId: null,
+                    GerekceOnEki: "Üretim eksik hammadde", Icmal: "Üretim İcmali",
+                    MiktarNotu: "miktar: eksik = kalan ihtiyaç − eldeki − yoldaki",
+                    NotEki: emirNolari.Length > 0 ? " · emir: " + emirNolari : "",
+                    LogKaynak: "uretim-icmali", LogEk: new { emirler = emirIdleri }),
+                istek.Aciklama, iptal);
             await islem.CommitAsync(iptal);
-
-            var talepNo = await b.TekDegerAsync<string>("select coalesce(talep_no, '') from public.satinalma_talep where id = @p0",
-                null, [talepId], iptal);
             return Results.Ok(new
             {
-                id = talepId, talepNo, kalem = yazilacak.Count, atlanan = satirlar.Count - yazilacak.Count,
-                atlananlar = satirlar.Where(x => acik.Contains(x.StokId)).Select(x => x.StokId).ToList(), izlemeNo = baglam.IzlemeNo,
+                id = sonuc.Id, talepNo = sonuc.TalepNo, kalem = sonuc.Kalem, atlanan = sonuc.Atlananlar.Count,
+                atlananlar = sonuc.Atlananlar, izlemeNo = baglam.IzlemeNo,
             });
         });
     }

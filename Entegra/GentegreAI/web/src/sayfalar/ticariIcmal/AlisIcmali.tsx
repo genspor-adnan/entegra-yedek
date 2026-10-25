@@ -8,10 +8,7 @@ import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
-import {
-  ayAdi, DegisimRozeti, DovizRozetleri, EkranA4, eksi, FaturasizKutusu, kisa, ParaTablosuGorunumu, sayi, simge,
-  tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde,
-} from './ticariIcmalOrtak';
+import { ayAdi, DegisimRozeti, DovizRozetleri, EkranA4, eksi, FaturasizKutusu, hazirDonem, kisa, ParaTablosuGorunumu, sayi, simge, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yilBasi, yuzde } from './ticariIcmalOrtak';
 
 /**
  * ALIŞ İCMALİ `/alis-icmali` - mockup Ekranlar/İcmal/alis_icmali.html (kararlar 25.10.2026).
@@ -21,16 +18,7 @@ import {
  * kutusunda bekleyen (kaydedilmemiş) fatura alışa sayılmaz, Dikkat'te listelenir.
  */
 type Sekme = 'ted' | 'stok' | 'fiyat' | 'donem' | 'dik' | 'onz';
-const yilBasi = () => `${bugunYerel().slice(0, 4)}-01-01`;
 
-function hazirDonem(k: string): [string, string] {
-  const b = new Date();
-  const s = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  if (k === 'buay') return [bugunYerel().slice(0, 8) + '01', bugunYerel()];
-  if (k === 'gecenay') return [s(new Date(b.getFullYear(), b.getMonth() - 1, 1)), s(new Date(b.getFullYear(), b.getMonth(), 0))];
-  if (k === 'gecenyil') return [`${b.getFullYear() - 1}-01-01`, `${b.getFullYear() - 1}-12-31`];
-  return [yilBasi(), bugunYerel()];
-}
 
 export function AlisIcmali() {
   const { arama, degistir } = useSuzgec();

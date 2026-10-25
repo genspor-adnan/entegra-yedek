@@ -11,7 +11,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
-import { EkranA4, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
+import { ayBasi, EkranA4, hazirDonem, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 
 /**
@@ -22,17 +22,7 @@ import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
  * ekranı); buradan yalnız belgeye gidilir ve onaycıya hatırlatılır (günde bir).
  */
 type Sekme = 'hun' | 'bek' | 'ted' | 'fiy' | 'but' | 'krt' | 'onz';
-const ayBasi = () => bugunYerel().slice(0, 8) + '01';
-const yilBasi = () => `${bugunYerel().slice(0, 4)}-01-01`;
 
-function hazirDonem(k: string): [string, string] {
-  const b = new Date();
-  const s = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  if (k === 'gecenay') return [s(new Date(b.getFullYear(), b.getMonth() - 1, 1)), s(new Date(b.getFullYear(), b.getMonth(), 0))];
-  if (k === 'buyil') return [yilBasi(), bugunYerel()];
-  if (k === 'gecenyil') return [`${b.getFullYear() - 1}-01-01`, `${b.getFullYear() - 1}-12-31`];
-  return [ayBasi(), bugunYerel()];
-}
 
 const KAYNAKLAR: [number, string][] = [[0, 'Hepsi'], [1, 'Birim talebi'], [2, 'Kritik stok'], [3, 'Arıza'], [5, 'Yatırım']];
 /** Huni satırı → Bekleyenler sekmesindeki aşama süzgeci (aşama adının başı). */
