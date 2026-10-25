@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LISTELER } from '../sayfalar/Liste';
 import { GRUP_SIRA_HBYS } from '../sayfalar/kabuk/menuGrupSirasi';
-import { GRUP_IKON, GRUP_IKON_CEV } from '../sayfalar/kabuk/menuAgaci';
+import { GRUP_IKON, GRUP_IKON_CEV, grupla, menuSatirlariKur } from '../sayfalar/kabuk/menuAgaci';
 
 /**
  * MENÜ DÜZENİ (plan: dokuman/11_MENU_DUZENI_PLANI.md · mockup
@@ -119,5 +119,22 @@ describe('menü düzeni', () => {
   it('menü sırasında grup tekrarı yok', () => {
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup sırada iki kez').toEqual([]);
+  });
+
+  it('modül sonu: İcmaller · Dökümler · Ayarlar (varsa) bu sırayla en sonda', () => {
+    // Kullanıcı 25.10.2026: "her modül menüsünde varsa sıralama İcmaller - Dökümler - Ayarlar
+    //   olsun, Ayarlar her zaman o modülün sonuncu menüsü olsun". Yeni bir öğe menuSira'sıyla
+    //   bu üçün arasına / arkasına düşerse burada yakalanır.
+    for (const urun of [1, 2]) {
+      const satirlar = menuSatirlariKur(LISTELER, () => true, urun, undefined);
+      for (const sat of satirlar) {
+        if (sat.tur !== 'grup') continue;
+        const ust = grupla(sat.alt, m => m.altGrup)
+          .map(a => a.tur === 'grup' ? a.ad : a.m.kaynak === 'dokumler' ? 'Dökümler' : '·');
+        const son = ust.filter(x => x === 'İcmaller' || x === 'Dökümler' || x === 'Ayarlar');
+        expect(ust.slice(ust.length - son.length), `${sat.ad} (ürün ${urun}): ${ust.join(' / ')}`).toEqual(son);
+        expect(son, `${sat.ad}: sıra`).toEqual(['İcmaller', 'Dökümler', 'Ayarlar'].filter(x => (son as string[]).includes(x)));
+      }
+    }
   });
 });

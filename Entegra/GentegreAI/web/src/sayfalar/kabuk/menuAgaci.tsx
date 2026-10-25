@@ -406,10 +406,27 @@ export function menuSatirlariKur(
   //   Satis...) tanim sirasindan gelir, menuSira onu kaydirmamali.
   satirlar.forEach(sat => {
     if (sat.tur !== 'grup') return;
-    sat.alt = sat.alt
+    sat.alt = grupSonuSirasi(sat.alt
       .map((m, i) => ({ m, i }))
       .sort((a, b) => (a.m.sira ?? 900 + a.i) - (b.m.sira ?? 900 + b.i) || a.i - b.i)
-      .map(x => x.m);
+      .map(x => x.m));
   });
   return satirlar;
+}
+
+/**
+ * MODÜLÜN SONU HEP AYNI (kullanıcı 25.10.2026: "her modül menüsünde varsa sıralama
+ * İcmaller - Dökümler - Ayarlar olsun, Ayarlar her zaman modülün son menüsü"): grubun
+ * öğeleri menuSira'ya göre dizildikten sonra bu üçü - varsa - sona, bu sırayla alınır;
+ * aradaki öteki alt gruplar (Biyokimya, Sterilizasyon, ÜTS…) ve düz öğeler yerinde kalır.
+ * Alt başlık menüde İLK öğesinin yerinde çizildiği için (grupla) öğelerin sırası yeter.
+ * Dökümler grubun süzgeçli bağlantısıdır (kaynak 'dokumler'); adlar çevrilmiş haliyle.
+ */
+export function grupSonuSirasi(alt: MenuOgesi[]): MenuOgesi[] {
+  const icmaller = cm('İcmaller'), ayarlar = cm('Ayarlar');
+  const yer = (m: MenuOgesi) =>
+    m.altGrup === ayarlar ? 3 : m.kaynak === 'dokumler' && !m.altGrup ? 2 : m.altGrup === icmaller ? 1 : 0;
+  return alt.map((m, i) => ({ m, i }))
+    .sort((a, b) => yer(a.m) - yer(b.m) || a.i - b.i)
+    .map(x => x.m);
 }
