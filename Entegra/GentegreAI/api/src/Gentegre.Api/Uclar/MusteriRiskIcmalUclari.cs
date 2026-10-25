@@ -65,7 +65,7 @@ public static class MusteriRiskIcmalUclari
     /// Satış borçları (15, 16, 17). Ölçüye giren kalem: kapanmış ya da vadesi geçmiş açık (açık kalanın gecikmesi
     /// bugüne kadar). @p0–@p5 <see cref="CariIcmalUclari.Kume"/> · @p6 12 ay öncesi.
     /// </summary>
-    private const string OdemeSorgusu = CariIcmalUclari.Kume + """
+    internal const string OdemeSorgusu = CariIcmalUclari.Kume + """
         ,
         bk as (
             select h.taraf_id, h.id, h.tur, h.islem_tarihi::date as tarih, h.vade::date as vade,
@@ -107,7 +107,7 @@ public static class MusteriRiskIcmalUclari
 
     /// <summary>Karşılıksız / protestolu müşteri evrakı (Çek / Senet İcmali kuralı: durum 60 ya da 134 hareketi):
     ///   müşteri başına toplam ve son 12 ay. @p0 taraflar · @p1 bugün · @p2 şubeler.</summary>
-    private const string KarsiliksizSorgusu = """
+    internal const string KarsiliksizSorgusu = """
         select c.taraf_id, count(*)::int, (count(*) filter (where coalesce(ks.t, c.vade) >= @p1::date - 365))::int,
                max(extract(year from coalesce(ks.t, c.vade)))::int
           from public.cek_senet c

@@ -562,6 +562,12 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 72.1, menuAd: 'Müşteri Risk / Limit İcmali', ic: '@icmal', yetkiKodu: 'finans.musteri_risk_icmali',
   },
   {
+    // DÖVİZ POZİSYONU / KUR FARKI İCMALİ (1186, mockup Ekranlar/İcmal/doviz_pozisyon_icmali.html).
+    kaynak: 'doviz-pozisyon', rota: 'doviz-pozisyon', ozelSayfa: true,
+    baslik: 'Döviz Pozisyonu / Kur Farkı İcmali', yol: 'Finans › İcmaller › Döviz Pozisyonu / Kur Farkı İcmali',
+    menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 72.2, menuAd: 'Döviz Pozisyonu / Kur Farkı İcmali', ic: '@icmal', yetkiKodu: 'finans.doviz_pozisyon',
+  },
+  {
     kaynak: 'banka-mutabakat', rota: 'banka-mutabakat', ozelSayfa: true,
     baslik: 'Banka Mutabakat İcmali', yol: 'Finans › İcmaller › Banka Mutabakat İcmali',
     menuGrup: 'Finans', menuAltGrup: 'İcmaller', menuSira: 71.5, menuAd: 'Banka Mutabakat İcmali', ic: '@icmal', yetkiKodu: 'finans.banka_mutabakat',
@@ -600,6 +606,24 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kdv-icmali', rota: 'kdv-icmali', ozelSayfa: true,
     baslik: 'KDV İcmali', yol: 'Muhasebe › İcmaller › KDV İcmali',
     menuGrup: 'Muhasebe', menuAltGrup: 'İcmaller', menuSira: 80, menuAd: 'KDV İcmali', ic: '@icmal', yetkiKodu: 'muhasebe.kdv_icmali',
+  },
+  {
+    // Ba / Bs İCMALİ (1186, mockup Ekranlar/İcmal/ba_bs_icmali.html) - kural KDV İcmali ile ortak.
+    kaynak: 'babs-icmali', rota: 'babs-icmali', ozelSayfa: true,
+    baslik: 'Ba / Bs İcmali', yol: 'Muhasebe › İcmaller › Ba / Bs İcmali',
+    menuGrup: 'Muhasebe', menuAltGrup: 'İcmaller', menuSira: 81, menuAd: 'Ba / Bs İcmali', ic: '@icmal', yetkiKodu: 'muhasebe.babs_icmali',
+  },
+  {
+    // TEKLİF / FIRSAT DÖNÜŞÜM İCMALİ (1186, mockup Ekranlar/İcmal/teklif_donusum_icmali.html).
+    kaynak: 'teklif-icmali', rota: 'teklif-icmali', ozelSayfa: true, urunModu: 1,
+    baslik: 'Teklif / Fırsat Dönüşüm İcmali', yol: 'Satış › İcmaller › Teklif / Fırsat Dönüşüm İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 84, menuAd: 'Teklif / Fırsat Dönüşüm İcmali', ic: '@icmal', yetkiKodu: 'satis.teklif_icmali',
+  },
+  {
+    // TEMSİLCİ PERFORMANS İCMALİ (1186, mockup Ekranlar/İcmal/temsilci_performans_icmali.html) - temsilci faturadan.
+    kaynak: 'temsilci-performans', rota: 'temsilci-performans', ozelSayfa: true, urunModu: 1,
+    baslik: 'Temsilci Performans İcmali', yol: 'Satış › İcmaller › Temsilci Performans İcmali',
+    menuGrup: 'Satış', menuAltGrup: 'İcmaller', menuSira: 85, menuAd: 'Temsilci Performans İcmali', ic: '@icmal', yetkiKodu: 'satis.temsilci_performans',
   },
   {
     // CARİ DEVİR GİRİŞİ (1156, mockup cari_devir_girisi.html): sisteme geçişte çok carinin

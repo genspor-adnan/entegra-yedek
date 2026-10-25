@@ -76,6 +76,8 @@ kurucu.Services.AddHttpClient("banka");
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Uclar.BankaCekmeIscisi>();
 // PLANLI GİDER (1177): saatte bir dondurma + otomatik eşleşme + sorumlu hatırlatmaları.
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.PlanliGiderIscisi>();
+// SÜRESİ DOLAN TEKLİF (1186, karar 25.10.2026): geçerliliği dolan teklif kendiliğinden "kaybedildi · süre doldu".
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeklifSureIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
@@ -401,6 +403,10 @@ uygulama.BankaMutabakatUclariniEkle();
 uygulama.CariVknUclariniEkle();
 // PLANLI GİDER (1177): tekrarlayan gider tanımı, dönemler, eşleştirme, taslak ödeme.
 uygulama.PlanliGiderUclariniEkle();
+uygulama.TeklifIcmalUclariniEkle();
+uygulama.BabsIcmalUclariniEkle();
+uygulama.DovizPozisyonUclariniEkle();
+uygulama.TemsilciPerformansUclariniEkle();
 // DEVIR / ACILIS BAKIYESI - TEK UC (1160): cari + kasa / banka / POS / kredi; eski /api/cari/{id}/devir takma ad.
 uygulama.DevirUclariniEkle();
 // KASA LISTESI / KARTI V3 (1161): gosterge seridi + kart ozeti / sayim gecmisi.

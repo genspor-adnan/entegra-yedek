@@ -455,6 +455,40 @@ public static class KarlilikIcmalUclari
             ? h : VarsayilanHedefMarj;
     }
 
+    // ================================================= TEMSİLCİ PERFORMANS (1186) ===
+
+    /// <summary>
+    /// Belge başına kâr - BU icmalin kuralıyla (dip toplam satır payına, satış anı maliyeti, iade iade edilen satışın
+    /// maliyetiyle). Temsilci Performans İcmali ciro / brüt kâr / tahsil edileni buradan okur, ikinci hesap yazmaz.
+    /// Tutarlar TL, KDV hariç; iade satırında Net / Maliyet düşülecek tutarın MUTLAK değeridir. Tahsil: belgenin KDV
+    /// dahil tutarından FIFO'da açık kalmayan kısım (temsilci sekmesindeki "tahsil edilen" ile aynı).
+    /// </summary>
+    public sealed record BelgeKari(int BelgeId, DateTime Tarih, int TarafId, string Cari, int SaticiId, string Satici,
+        bool Iade, decimal Brut, decimal Isk, decimal Net, decimal Maliyet, decimal Tahsil);
+
+    public static async Task<List<BelgeKari>> BelgeKarlariAsync(NpgsqlConnection b, DateTime bas, DateTime bit, int[] subeler,
+        int sube, int[] kapsam, CancellationToken iptal)
+    {
+        var kip = await KipCozAsync(b, 1, null, iptal);
+        var belgeler = await BelgelerAsync(b, bas, bit, subeler, sube, kapsam, iptal);
+        if (belgeler.Count == 0) return [];
+        var satirlar = await SatirlarAsync(b, belgeler.Select(x => x.Id), 0, 0, iptal);
+        var defter = await MaliyetDefteri.OkuAsync(b, satirlar.Select(x => x.StokId), iptal);
+        var kalemler = Kalemler(belgeler, satirlar, (s, g) => defter.Ani(s, g), kip, false);
+        var taraflar = belgeler.Select(x => x.TarafId).Where(x => x > 0).Distinct().ToArray();
+        var acik = taraflar.Length == 0 ? new Dictionary<int, decimal>()
+            : (await b.ListeAsync(AcikSorgusu, null, [taraflar], o => (belge: o.GetInt32(0), t: o.GetDecimal(1)), iptal))
+                .GroupBy(x => x.belge).ToDictionary(g => g.Key, g => g.Sum(x => x.t));
+        return kalemler.GroupBy(k => k.B.Id).Select(g =>
+        {
+            var x = g.First().B;
+            var t = Topla(g);
+            return new BelgeKari(x.Id, x.Tarih, x.TarafId, x.Cari, x.SaticiId, x.Satici, x.Iade,
+                R(t.Brut), R(t.Isk), R(x.Iade ? t.Iade : t.Net(false)), R(x.Iade ? t.IadeMal : t.Mal),
+                x.Iade ? 0 : R(Math.Max(0, x.Genel - acik.GetValueOrDefault(x.Id))));
+        }).ToList();
+    }
+
     public static void KarlilikIcmalUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/karlilik-icmal").WithTags("Kârlılık İcmali").RequireAuthorization();

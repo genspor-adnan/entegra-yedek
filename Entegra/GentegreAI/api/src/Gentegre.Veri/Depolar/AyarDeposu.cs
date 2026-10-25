@@ -72,6 +72,9 @@ public sealed class AyarDeposu
         //   satis.limit_davranis METİN: 'uyar' | 'engelle'.
         "masraf.artis_esik_yuzde", "masraf.mukerrer_gun", "satis.limit_davranis",
         "banka.mutabakat_tolerans_kurus", "banka.mutabakat_dort_goz",
+        // TEKLİF / DÖVİZ İCMALLERİ (1186, kararlar 25.10.2026): boş = varsayılan (süresi dolan teklif kendiliğinden
+        //   kayba düşer = açık; değerleme kuru TCMB döviz alış). finans.degerleme_kuru METİN: 'alis' | 'efektif' | 'satis'.
+        "teklif.otomatik_kayip", "finans.degerleme_kuru",
         // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
         //   depodan dusmek iki birimin sayimini da bozar.
         "eczane.depo", "demirbas.parca_depo",
@@ -183,6 +186,7 @@ public sealed class AyarDeposu
         ["esmm.test_url"] = 250,
         ["esmm.sabit_notlar"] = 1000,
         ["satis.limit_davranis"] = 10,
+        ["finans.degerleme_kuru"] = 10,
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>

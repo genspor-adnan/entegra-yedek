@@ -72,7 +72,7 @@ public static class KdvIcmalUclari
 
     private static readonly int[] SatisTurleri = [15, 16];
     private static readonly int[] AlisTurleri = [11, 12];
-    private static readonly int[] Turler = [15, 16, 11, 12];
+    internal static readonly int[] Turler = [15, 16, 11, 12];
     private const int TipiIade = 2;
     private const int TipiTevkifat = 22;
 
@@ -80,7 +80,8 @@ public static class KdvIcmalUclari
 
     // ================================================================ kayıtlar ===
 
-    private sealed record Bel(int Id, int Tur, int Tipi, string No, DateTime Tarih, int TarafId, string Taraf, string Vkn,
+    /// <summary>Belge kümesinin satırı - Ba / Bs İcmali (BabsIcmalUclari) de aynı okumayı kullanır.</summary>
+    internal sealed record Bel(int Id, int Tur, int Tipi, string No, DateTime Tarih, int TarafId, string Taraf, string Vkn,
         int SubeId, decimal Matrah, decimal Kdv, int Durum, int EDurum, int ESonuc, int Senaryo, int BasTevkifat,
         int BasIstisna, int IadeBelgeId, string IadeBelgeNo, string Yanit, bool Gelen, bool Fisli, string Para, decimal Kur)
     {
@@ -101,7 +102,7 @@ public static class KdvIcmalUclari
     private sealed record Kalem(Bel B, Sat? S, int Oran, decimal Matrah, decimal Kdv, decimal Tevkif, string TevKod,
         decimal TevOran, int IstisnaKod);
 
-    private sealed record Mukellef(string Anahtar, string Vkn, string Unvan, List<(int Id, string Ad, bool EBelge)> Subeler);
+    internal sealed record Mukellef(string Anahtar, string Vkn, string Unvan, List<(int Id, string Ad, bool EBelge)> Subeler);
 
     /// <summary>Uyarılar sekmesinin satırı. Seviye: kir (beyandan önce düzelt) · sari (kontrol et) · mavi (bilgi).</summary>
     public sealed record UyariSatiri(string Tur, string Seviye, int? BelgeId, string No, DateTime? Tarih, int TarafId,
@@ -109,7 +110,7 @@ public static class KdvIcmalUclari
 
     private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
-    private static string Rakam(string? s) => new((s ?? "").Where(char.IsDigit).ToArray());
+    internal static string Rakam(string? s) => new((s ?? "").Where(char.IsDigit).ToArray());
     private static string Ay(DateTime d) => d.ToString("yyyy-MM", CultureInfo.InvariantCulture);
 
     private static readonly CultureInfo Tr = CultureInfo.GetCultureInfo("tr-TR");
@@ -179,6 +180,31 @@ public static class KdvIcmalUclari
         """;
 
     // ============================================================= yardımcılar ===
+
+    /// <summary>Dönemin belge kümesi (taslaklar dahil). KDV İcmali ve Ba / Bs İcmali ortak okuması.</summary>
+    internal static Task<List<Bel>> BelgeleriOkuAsync(NpgsqlConnection b, int[] turler, DateTime bas, DateTime bit,
+        int[] subeler, int subesiz, int[] kapsam, CancellationToken iptal)
+        => b.ListeAsync(BelgeSorgusu, null, [turler, bas, bit, subeler, subesiz, kapsam], o => new Bel(
+                o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetString(3), o.GetDateTime(4), o.GetInt32(5), o.GetString(6),
+                Rakam(o.GetString(7)), o.GetInt32(8), o.GetDecimal(9), o.GetDecimal(10), o.GetInt32(11), o.GetInt32(12),
+                o.GetInt32(13), o.GetInt32(14), o.GetInt32(15), o.GetInt32(16), o.GetInt32(17), o.GetString(18), o.GetString(19),
+                o.GetBoolean(20), o.GetBoolean(21), o.GetString(22), o.GetDecimal(23)), iptal);
+
+    // ---------------------------------------------------- Ba / Bs KURALI (ortak) --
+    // KDV İcmali'nin Ba / Bs listesi ve Ba / Bs İcmali AYNI kuralı kullanır (ikinci hesap yok):
+    //   yalnız kesin FATURA (15 / 11); Bs = satış + alış iadesi (düzenlediğimiz), Ba = alış + satış iadesi;
+    //   tutar KDV hariç saklı matrah; sınır Genel Ayarlar muhasebe.babs_sinir (boşsa 5.000 TL).
+
+    /// <summary>Belge Ba / Bs'ye girer mi (kesin fatura).</summary>
+    internal static bool BabsBelgesi(Bel x) => !x.Taslak && x.Fatura;
+
+    /// <summary>Belgenin formu: düzenlediğimiz (satış / alış iadesi) "Bs", aldığımız "Ba".</summary>
+    internal static string BabsFormu(Bel x) => x.Giden ? "Bs" : "Ba";
+
+    internal static async Task<decimal> BabsSiniriAsync(NpgsqlConnection b, CancellationToken iptal)
+        => await AyarDeposu.OndalikAsync(b, null, "muhasebe.babs_sinir", iptal) is decimal sn && sn > 0 ? sn : 5000m;
+
+    internal static string VknDurum(string v) => v.Length == 0 ? "eksik" : v.Length is 10 or 11 ? "tamam" : "hatali";
 
     /// <summary>Toplamı ağırlıklara göre kuruşla dağıtır; artık en büyük ağırlığa. Ağırlık toplamı
     ///   sıfırsa toplamın tamamı yedek satıra.</summary>
@@ -303,7 +329,7 @@ public static class KdvIcmalUclari
     }
 
     /// <summary>Kullanıcının şubeleri VKN'ye göre gruplanmış (aynı VKN = tek mükellef).</summary>
-    private static async Task<List<Mukellef>> MukelleflerAsync(NpgsqlConnection b, NpgsqlTransaction? tx,
+    internal static async Task<List<Mukellef>> MukelleflerAsync(NpgsqlConnection b, NpgsqlTransaction? tx,
         IstekBaglami baglam, CancellationToken iptal)
     {
         var idler = baglam.Subeler.Select(s => s.Id).Distinct().ToArray();
@@ -334,7 +360,7 @@ public static class KdvIcmalUclari
                    and (h.kod in ('190', '191', '391') or h.kod like '190.%' or h.kod like '191.%' or h.kod like '391.%'))
             """, tx, [bit, subeler, subesiz], iptal);
 
-    private static (DateTime bas, DateTime bit, string ad) DonemCoz(string? donem, DateTime bugun)
+    internal static (DateTime bas, DateTime bit, string ad) DonemCoz(string? donem, DateTime bugun)
     {
         var d = (donem ?? "").Trim();
         if (d.Length == 0) return (new DateTime(bugun.Year, bugun.Month, 1), new DateTime(bugun.Year, bugun.Month, 1).AddMonths(1).AddDays(-1), Ay(bugun));
@@ -398,11 +424,7 @@ public static class KdvIcmalUclari
             var mukSubesiz = mukellefler.Count == 1 ? 1 : 0;
 
             // ------------------------------------------------------- belgeler --
-            var ham = await b.ListeAsync(BelgeSorgusu, null, [Turler, bas, bit, subeler, subesiz, kapsam], o => new Bel(
-                o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetString(3), o.GetDateTime(4), o.GetInt32(5), o.GetString(6),
-                Rakam(o.GetString(7)), o.GetInt32(8), o.GetDecimal(9), o.GetDecimal(10), o.GetInt32(11), o.GetInt32(12),
-                o.GetInt32(13), o.GetInt32(14), o.GetInt32(15), o.GetInt32(16), o.GetInt32(17), o.GetString(18), o.GetString(19),
-                o.GetBoolean(20), o.GetBoolean(21), o.GetString(22), o.GetDecimal(23)), iptal);
+            var ham = await BelgeleriOkuAsync(b, Turler, bas, bit, subeler, subesiz, kapsam, iptal);
             bool Uyar(Bel x) => (eb == "hepsi" || x.ETur == eb) && (bt == "tumu" || (bt == "fatura") == x.Fatura);
             var kesin = ham.Where(x => !x.Taslak && Uyar(x)).ToList();
             var taslaklar = ham.Where(x => x.Taslak && Uyar(x)).ToList();
@@ -490,9 +512,8 @@ public static class KdvIcmalUclari
             }).ToList();
 
             // --------------------------------------------------------- Ba/Bs --
-            var sinir = await AyarDeposu.OndalikAsync(b, null, "muhasebe.babs_sinir", iptal) is decimal sn && sn > 0 ? sn : 5000m;
-            static string VknDurum(string v) => v.Length == 0 ? "eksik" : v.Length is 10 or 11 ? "tamam" : "hatali";
-            var babs = kesin.Where(x => x.Fatura).GroupBy(x => (form: x.Giden ? "Bs" : "Ba", x.TarafId, x.Vkn))
+            var sinir = await BabsSiniriAsync(b, iptal);
+            var babs = kesin.Where(BabsBelgesi).GroupBy(x => (form: BabsFormu(x), x.TarafId, x.Vkn))
                 .Select(g => new
                 {
                     g.Key.form, g.Key.TarafId, taraf = g.First().Taraf, vkn = g.Key.Vkn, belge = g.Count(),

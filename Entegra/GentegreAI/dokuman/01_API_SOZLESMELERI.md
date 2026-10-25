@@ -1800,6 +1800,30 @@ GET /api/kart/cari/gib-bilgi?vkn=                cari Ekle  → {vkn, kayitlar[]
   varsa (pasif dahil) 400 `DOGRULAMA` (alan `vkno`). Tek haneden oluşan yer tutucu numaralar (0000000000, 11111111111)
   sayılmaz; güncellemede yalnız numara değişiyorsa bakılır.
 
+## 9.27 Teklif dönüşüm / temsilci performans / Ba-Bs / döviz pozisyonu icmalleri (1186)
+
+```
+GET  /api/teklif-icmal?bas&bit&sube&temsilci           satis.teklif_icmali     özet, huni, teklifler, temsilci, müşteri, kategori, kayıp, takip
+POST /api/teklif-icmal/kayip                           satis.teklif_kayip      {belgeId, neden(≠9), rakip?, rakipFiyat?} → teklif_durum 4
+GET  /api/temsilci-performans?kip=ay|ceyrek|yil&tarih&sube&iade   satis.temsilci_performans
+GET  /api/temsilci-performans/hedef?ay=                satis.temsilci_performans
+PUT  /api/temsilci-performans/hedef                    satis.temsilci_hedef    temsilci × ay × ölçüt (1 ciro · 2 brüt kâr · 3 tahsilat · 4 yeni müşteri)
+GET  /api/babs-icmal?donem&mukellef                    muhasebe.babs_icmali    Ba, Bs, eşik altı, uyarılar, mutabakat, KDV kıyası
+GET  /api/babs-icmal/belgeler · /disa-aktar (.xlsx)    muhasebe.babs_icmali
+POST /api/babs-icmal/mutabakat · PUT …/mutabakat/{id}  muhasebe.babs_mutabakat gönder (bildirim kuyruğu) / yanıt 0 · 1 mutabık · 2 fark
+GET  /api/doviz-pozisyon?tarih&donem&kur&sube&siparis&cek   finans.doviz_pozisyon
+POST /api/doviz-pozisyon/kur-farki · DELETE …/{id}     finans.kur_farki        kesildi (belge no) / gerek yok işareti
+```
+
+- **Teklif kaybı (karar 25.10.2026):** geçerlilik (belge_tarihi + vade_gun) dolan, hiç satırı siparişe dönmemiş teklif
+  `TeklifSureIscisi` ile `teklif_durum 4`, neden 9 "Süre doldu", kullanıcı 0 (loglu). Kısmen dönen kayba düşmez.
+  Ayar `teklif.otomatik_kayip` (boş = açık, 0 = kapalı).
+- **Temsilci faturadan (karar 25.10.2026):** `belge.satici_id`; boşsa "(temsilcisiz)", prime / hedefe girmez. Ciro / kâr
+  Kârlılık İcmali kuralı, tahsilat / skor Müşteri Risk kuralı.
+- **Ba / Bs:** KDV İcmali ile aynı kural (ortak yardımcı); aynı VKN tek satır, nihai tüketici ve yurt dışı hariç.
+  e-Beyanname XML'i ve gider pusulası / SMM henüz yok (Excel dökümü).
+- **Döviz:** değerleme kuru `finans.degerleme_kuru` (boş = TCMB alış); kur farkı faturası OTOMATİK kesilmez, önerilir.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

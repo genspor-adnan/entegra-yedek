@@ -7,6 +7,18 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 25.10.2026 — Teklif / Temsilci / Ba-Bs / Döviz icmalleri (1186), cariye özel e-Belge dipnotu (1187)
+
+Kullanıcı: *"erp için başka icmal var mı"* → *"ilk dördü için mockup yap"* → kararlar (*"süresi geçen teklif kendiliğinden kayba çevrilsin, temsilci faturadan alınsın"*) → *"önce mockup'ları kodla"*. Kalan açık sorularda mockup önerileri uygulandı.
+
+- **1186:** 4 ekran + 4 aksiyon yetki kodu; teklif kayıp alanları + `teklif.kayip_nedeni` kod listesi; `temsilci_hedef`, `babs_mutabakat`, `kur_farki_takip`; asistan kataloğu. Ayarlar `teklif.otomatik_kayip`, `finans.degerleme_kuru`.
+- **Teklif / Fırsat Dönüşüm İcmali** (`/teklif-icmali`) + `TeklifSureIscisi` (süresi dolan teklif gece "kaybedildi · süre doldu").
+- **Temsilci Performans İcmali** (`/temsilci-performans`), hedef tanımı; Kârlılık / Müşteri Risk kuralları yeniden kullanıldı.
+- **Ba / Bs İcmali** (`/babs-icmali`): KDV İcmali'nin Ba/Bs kuralı ortak yardımcıya çıkarıldı; mutabakat gönder / yanıt, Excel. Eksik: e-Beyanname XML, gider pusulası / SMM, yanıt bağlantısı.
+- **Döviz Pozisyonu / Kur Farkı İcmali** (`/doviz-pozisyon`): pozisyon, değerleme, gerçekleşen kur farkı (FIFO), kur farkı faturası işareti, vade, duyarlılık.
+- **Cariye özel dipnot (1187):** müşteri kartı e-Belge Ayarları'nda e-Fatura / e-İrsaliye dipnotu (modal); doluysa e-Belge hazırlamada genel sabit notların yerine (aynı yer tutucular), vergi notları yine eklenir.
+- UNIVERSE notu: Delphi satışları tahakkuk (tur 17, matrah 0) ve irsaliye olarak aktarıldığı ve `satici_id` hep 0 olduğu için Ba/Bs ve temsilci ekranları bu veride neredeyse boş gelir (KDV / Kârlılık icmalleriyle aynı kural).
+
 ## 25.10.2026 — Cari: GENINI kod listeleri, İlgili Kişiler sekmesi / sütunu, Kampanya, Ödeme Şekli (1180, 1181)
 
 - **Kod listeleri (1180):** kullanıcı *"tanımlamadaki kategori, ilk temas gibi combo'ların içi boş"*. Aktarım için kurulan DB (`kur.ps1 -SadeceSema`) 013_goc_faz1'i atlıyordu. `fn_aktar_kod_listesi()` stg.genini'den eklemeli taşır (var olan liste / değer ezilmez, Delphi DIL -1 = web dil 0); `aktar_ek.ps1` GENINI'yi çekip çağırır. UNIVERSE: 210 liste, 2357 değer.
