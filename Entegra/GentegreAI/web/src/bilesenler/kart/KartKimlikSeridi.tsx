@@ -46,9 +46,16 @@ export interface KartKimlikSeridiOzellikleri {
  * yani ayni girdi bilesenleri ve ayni `alanDegistir` ile ciziliyor.
  */
 export function KartKimlikSeridi({
-  kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari, renderAlanListesi,
+  kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
   seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk,
 }: KartKimlikSeridiOzellikleri) {
+  // CARİ ETİKETLERİ (kullanıcı 25.10.2026: "kod rename Müşteri Kodu ve Unvan rename Müşteri Ünvanı"): aynı 'cari'
+  //   kartı Müşteri ve Tedarikçi listesinden açılır - etiket hangi ekrandan açıldıysa o rolle.
+  const kimlikAlanlari = kaynak !== 'cari' ? kimlikAlanlariHam : (() => {
+    const rol = window.location.pathname.includes('/tedarikci') ? c('Tedarikçi') : c('Müşteri');
+    return kimlikAlanlariHam.map(a => a.ad === 'kod' ? { ...a, baslik: `${rol} ${c('Kodu')}` }
+      : a.ad === 'unvan' ? { ...a, baslik: `${rol} ${c('Ünvanı')}` } : a);
+  })();
         const kimlikSeridi = (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve

@@ -604,6 +604,9 @@ export function ListeKarti({
         //   başlayan bölümü kaldır").
         sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'randevu' || tanim.kaynak === 'rol'
                         || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
+        // CARİ (müşteri / tedarikçi) kartında başlık satırı yok, "X Kartı #id" araç satırında Ekstre'nin
+        //   sağında (kullanıcı 25.10.2026).
+        baslikAracta={tanim.kaynak === 'cari'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.

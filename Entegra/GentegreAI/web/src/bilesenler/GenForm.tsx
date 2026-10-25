@@ -241,6 +241,12 @@ interface Props {
   tekSayfaGizli?(baslik: string): boolean;
   /** Sayfa kipinde kartın başlık satırı ("X Kartı — Yeni") çizilmez - sekme başlığı yeter. */
   sayfaBaslikYok?: boolean;
+  /**
+   * BAŞLIK ARAÇ SATIRINDA (kullanıcı 25.10.2026, müşteri kartı: "sekmeler ile kaydet butonu arasındaki alanı kaldır..
+   * Ekstre butonu sağına Müşteri Kartı ve ID taşı"): sayfa kipinde başlık satırı çizilmez; "X Kartı #id" ve başlık
+   * rozetleri araç satırında kartın kendi düğmelerinin (kartAracGrubu) hemen sağında durur. Sürüm ipucuna taşınır.
+   */
+  baslikAracta?: boolean;
   /** Dikey gezintinin ALTINA ek maddeler (sekmesiz muayene: Kendime Not, Epikriz);
       `git` başlığı verilen sekmeye/bölüme götürür. */
   gezintiEk?(git: (baslik: string) => void): React.ReactNode;
@@ -337,7 +343,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
@@ -1488,13 +1494,28 @@ Yine de yeni kayıt eklensin mi?`);
     cariyeBagla: () => setCariyeBaglaAcik(true),
   };
 
+  /** Başlığın yanındaki rozetler - başlık satırında ya da (baslikAracta) araç satırında. */
+  const baslikRozetleri = (
+    <>
+      {baslikRozet}
+      {/* KAYNAĞA ÖZEL BAŞLIK ROZETİ (kart/kartBasligi): hasta dosya no, personel durumu / görev /
+          kıdem / belge, doküman sürümü. */}
+      {kartBaslikRozeti({ kaynak, id, yeniMi, deger, meta, detaylar })}
+      {baslikEk?.(deger)}
+      {disKaynak
+        ? <span className="rozet mor" title={c("Bu kayıt Delphi ERP'de tutulur ve oradan aktarılır.")}>⇄ {c("Delphi'den gelir")}</span>
+        : salt && <span className="rozet uyari">salt okunur</span>}
+    </>
+  );
+  const kartBasligi = `${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`;
+
   return (
     <Modal
-      baslik={`${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`}
+      baslik={kartBasligi}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
       buyutmeYok={buyutmeYok || sayfaKipi}
       sayfa={sayfaKipi}
-      baslikYok={sayfaBaslikYok}
+      baslikYok={sayfaBaslikYok || (sayfaKipi && baslikAracta)}
         // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
         //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
         //   sinifi tek basina her kartin "durum" alanini etkilerdi.
@@ -1518,15 +1539,8 @@ Yine de yeni kayıt eklensin mi?`);
         altSerit={dikeyGezinti && altSerit ? altSerit(sekmeyeGitBaslik) : undefined}
       ustBilgi={
         <>
-          {baslikRozet}
-          {/* KAYNAĞA ÖZEL BAŞLIK ROZETİ (kart/kartBasligi): hasta dosya no, personel durumu / görev /
-              kıdem / belge, doküman sürümü. */}
-          {kartBaslikRozeti({ kaynak, id, yeniMi, deger, meta, detaylar })}
+          {baslikRozetleri}
           {surum && !surumGizli && <span className="rozet gri">surum {surum}</span>}
-          {baslikEk?.(deger)}
-          {disKaynak
-            ? <span className="rozet mor" title={c("Bu kayıt Delphi ERP'de tutulur ve oradan aktarılır.")}>⇄ {c("Delphi'den gelir")}</span>
-            : salt && <span className="rozet uyari">salt okunur</span>}
         </>
       }
       ustSerit={sekmeMaks && sekmeler.length > 1 ? undefined : (
@@ -1684,6 +1698,11 @@ Yine de yeni kayıt eklensin mi?`);
             return <KartHatirlat kaynak={rota} id={Number(id)} ad={ad.slice(0, 200)} />;
           })()}
           {kartAracGrubu(aracBaglami)}
+          {sayfaKipi && baslikAracta && (
+            <span className="kart-ara-baslik" title={surum ? `${c('sürüm')} ${surum}` : undefined}>
+              <b>{kartBasligi}</b>{baslikRozetleri}
+            </span>
+          )}
           {kapatSolu && <span className="kapat-solu">{kapatSolu}</span>}
           <button className="d kapat-dugmesi" onClick={kapatIstendi}>✖ {c('Kapat')}</button>
           {kartSagAraclari(aracBaglami)}
