@@ -288,20 +288,15 @@
     <li><b>Skor:</b> son 12 ayın ödeme davranışından A–D; yalnız bilgi — blokeyi skor değil limit / vade kuralı önerir.</li>
     <li><b>Eylemler (yetkiye bağlı, loglu):</b> limit güncelle, sevk blokesi koy / kaldır (neden zorunlu), hatırlatma gönder (ileti şablonu).</li>
     <li><b>Çıktı:</b> icmallerin ortak menüsü.</li>
+    <li><b>Risk limiti ve teminat nerede tutulsun? (karar 25.10.2026):</b> Cari kartına yeni alanlar: risk limiti (TL ya da döviz), teminat listesi (tür: mektup / ipotek / çek / nakit, tutar, bitiş tarihi), sevk blokesi (bayrak + neden + kim / ne zaman). Limiti tanımsız müşteri "limitsiz" değil "tanımsız" sayılsın ve rozetle görünsün.</li>
+    <li><b>Açık sipariş riske dahil olsun mu? (karar 25.10.2026):</b> Varsayılan dahil (sevk edilince zaten riske dönüşür); şeritte kapatılabilir.</li>
+    <li><b>Limit aşımında satış belgesi ne yapsın? (karar 25.10.2026):</b> Ayar: "uyar" (varsayılan) ya da "engelle". Engelde yetkili onayı (onay akışı) ile geçilebilsin. Kontrol sipariş, irsaliye ve faturada; tahsilatta yok.</li>
+    <li><b>Dövizli müşteri riski hangi kurla? (karar 25.10.2026):</b> Bugünkü kurla TL karşılığı (risk bugünün parasıdır); limit dövizli tanımlıysa kendi dövizinde karşılaştırılsın.</li>
+    <li><b>Skor yöntemi sabit mi? (karar 25.10.2026):</b> İlk sürümde sabit ağırlıklar (zamanında % 40, gecikme 30, karşılıksız 20, limit kullanımı 10); ileride ayarlanabilir. Skor yalnız bilgi, kendi başına bloke koymaz.</li>
+    <li><b>Grup şirketleri (aynı patron, farklı cari) tek risk mi? (karar 25.10.2026):</b> İlk sürümde hayır; cari kartına "risk grubu" alanı eklenirse şeritteki "Risk grubu" süzgeci grup toplamı gösterir.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Risk limiti ve teminat nerede tutulsun?<span class="oneri"><b>Öneri:</b> Cari kartına yeni alanlar: risk limiti (TL ya da döviz), teminat listesi (tür: mektup / ipotek / çek / nakit, tutar, bitiş tarihi), sevk blokesi (bayrak + neden + kim / ne zaman). Limiti tanımsız müşteri "limitsiz" değil "tanımsız" sayılsın ve rozetle görünsün.</span></li>
-    <li>Açık sipariş riske dahil olsun mu?<span class="oneri"><b>Öneri:</b> Varsayılan dahil (sevk edilince zaten riske dönüşür); şeritte kapatılabilir.</span></li>
-    <li>Limit aşımında satış belgesi ne yapsın?<span class="oneri"><b>Öneri:</b> Ayar: "uyar" (varsayılan) ya da "engelle". Engelde yetkili onayı (onay akışı) ile geçilebilsin. Kontrol sipariş, irsaliye ve faturada; tahsilatta yok.</span></li>
-    <li>Dövizli müşteri riski hangi kurla?<span class="oneri"><b>Öneri:</b> Bugünkü kurla TL karşılığı (risk bugünün parasıdır); limit dövizli tanımlıysa kendi dövizinde karşılaştırılsın.</span></li>
-    <li>Skor yöntemi sabit mi?<span class="oneri"><b>Öneri:</b> İlk sürümde sabit ağırlıklar (zamanında % 40, gecikme 30, karşılıksız 20, limit kullanımı 10); ileride ayarlanabilir. Skor yalnız bilgi, kendi başına bloke koymaz.</span></li>
-    <li>Grup şirketleri (aynı patron, farklı cari) tek risk mi?<span class="oneri"><b>Öneri:</b> İlk sürümde hayır; cari kartına "risk grubu" alanı eklenirse şeritteki "Risk grubu" süzgeci grup toplamı gösterir.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){

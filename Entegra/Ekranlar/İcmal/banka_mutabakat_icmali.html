@@ -278,20 +278,15 @@
     <li><b>Eylemler:</b> Bankadan Çek, Seçilenleri İşle (Banka Hareketleri'nin uçları), Eşleştir (banka hareketi ↔ var olan kasa işlemi — çifte kayıt açmadan), Banka bakiyesi gir (API'siz), Mutabakatı Onayla (açıklanmayan fark 0 iken; o günü dondurur).</li>
     <li><b>Kredi kartı ve POS:</b> kart hesabında ekstre bakiyesi; POS'ta valör bekleyen (blokeli) tutar ayrı satır — fark sayılmaz.</li>
     <li><b>Çıktı:</b> Mutabakat Tutanağı (A4) hesap başına; ay sonu tutanağı imzalı arşivlenir (doküman).</li>
+    <li><b>Mutabakat günü varsayılanı ne olsun — dün mü, ay sonu mu? (karar 25.10.2026):</b> Varsayılan dünün gün sonu (günlük kontrol); şeritte "Ay sonu" hızlı seçimi. Onay her gün için ayrı tutulur.</li>
+    <li><b>Tarih esası işlem tarihi mi, valör mü? (karar 25.10.2026):</b> İşlem tarihi (bankanın ekstresi böyle); valörü sonraki hareket (POS) ayrı satırda "valör bekleyen" — fark sayılmaz.</li>
+    <li><b>API'siz hesapta banka bakiyesi nasıl girilsin? (karar 25.10.2026):</b> Gün sonu bakiyesi elle (tutar + tarih + not, loglu); ekstre dosyası (MT940 / Excel) içe aktarma gelince oradan. Girilmemiş günde hesap "bakiye girilmedi" rozetiyle, onay pasif.</li>
+    <li><b>Onaylanmış güne geriye dönük kayıt girilirse? (karar 25.10.2026):</b> Kayıt engellenmesin (muhasebe dönem kapanışı ayrı kural); o günün onayı "bozuldu" olur, icmalde kırmızı rozet ve yeniden onay ister.</li>
+    <li><b>"Eşleştir" var olan kasa işlemini banka hareketine bağlarken tutar farkı olursa? (karar 25.10.2026):</b> Kuruş toleransı (ayar, varsayılan 0) dışında eşleştirme yok; fark banka masrafıysa ayrı masraf işlemi önerilir.</li>
+    <li><b>Kimler onaylayabilsin? (karar 25.10.2026):</b> Ayrı aksiyon yetkisi "banka.mutabakat_onay"; hazırlayan ile onaylayan aynı kişi olabilir mi ayarla (varsayılan olabilir, ay sonunda dört göz önerilir).</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Mutabakat günü varsayılanı ne olsun — dün mü, ay sonu mu?<span class="oneri"><b>Öneri:</b> Varsayılan dünün gün sonu (günlük kontrol); şeritte "Ay sonu" hızlı seçimi. Onay her gün için ayrı tutulur.</span></li>
-    <li>Tarih esası işlem tarihi mi, valör mü?<span class="oneri"><b>Öneri:</b> İşlem tarihi (bankanın ekstresi böyle); valörü sonraki hareket (POS) ayrı satırda "valör bekleyen" — fark sayılmaz.</span></li>
-    <li>API'siz hesapta banka bakiyesi nasıl girilsin?<span class="oneri"><b>Öneri:</b> Gün sonu bakiyesi elle (tutar + tarih + not, loglu); ekstre dosyası (MT940 / Excel) içe aktarma gelince oradan. Girilmemiş günde hesap "bakiye girilmedi" rozetiyle, onay pasif.</span></li>
-    <li>Onaylanmış güne geriye dönük kayıt girilirse?<span class="oneri"><b>Öneri:</b> Kayıt engellenmesin (muhasebe dönem kapanışı ayrı kural); o günün onayı "bozuldu" olur, icmalde kırmızı rozet ve yeniden onay ister.</span></li>
-    <li>"Eşleştir" var olan kasa işlemini banka hareketine bağlarken tutar farkı olursa?<span class="oneri"><b>Öneri:</b> Kuruş toleransı (ayar, varsayılan 0) dışında eşleştirme yok; fark banka masrafıysa ayrı masraf işlemi önerilir.</span></li>
-    <li>Kimler onaylayabilsin?<span class="oneri"><b>Öneri:</b> Ayrı aksiyon yetkisi "banka.mutabakat_onay"; hazırlayan ile onaylayan aynı kişi olabilir mi ayarla (varsayılan olabilir, ay sonunda dört göz önerilir).</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){
