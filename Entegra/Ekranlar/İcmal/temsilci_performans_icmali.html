@@ -136,7 +136,7 @@
     <label class="chk"><input type="checkbox" checked> İadeler düşülsün</label>
     <label class="chk"><input type="checkbox" checked> Tahsilat performansı dahil</label>
     <span class="sp"></span>
-    <span class="rz sari">Temsilcisi atanmamış müşteri ciroya: 1.240.000 ₺</span>
+    <span class="rz sari">Temsilcisiz fatura cirosu: 1.240.000 ₺</span>
   </div>
   <div class="ozet">
     <div class="kutu mor"><div class="bas">Toplam Ciro</div><div class="deg">3.184.000 ₺</div><div class="alt">hedef 3.600.000 · %88</div></div>
@@ -160,7 +160,7 @@
   </div>
   <!-- ============ OZT ============ -->
   <div class="pnl" data-s="ozt">
-    <div class="grp"><h4>Temsilci bazında özet <span class="mini">temsilci = faturanın temsilcisi, boşsa carinin temsilcisi · satıra tıkla: müşteriler</span></h4>
+    <div class="grp"><h4>Temsilci bazında özet <span class="mini">temsilci = faturanın temsilcisi · satıra tıkla: müşteriler</span></h4>
 <div class="dg"><table>
   <thead><tr><th>Temsilci</th><th class="sag">Ciro</th><th class="sag">Brüt kâr</th><th class="sag">Marj</th><th class="sag">Tahsilat</th><th class="sag">Vadesi geçen</th><th class="sag">Aktif müşteri</th><th class="sag">Yeni</th><th class="sag">Ort. iskonto</th><th class="">Hedef</th></tr></thead>
   <tbody>
@@ -277,7 +277,7 @@
   <b>Temsilci Performans İcmali — tasarım notları</b>
   <ul>
     <li><b>Ne sorar:</b> "Hangi temsilci hedefinde, kim kârlı satıyor, kimin müşterisi ödemiyor, prim ne çıkıyor?" Satış müdürü ve yönetim — ay sonu.</li>
-    <li><b>Temsilci ataması:</b> faturanın kendi temsilcisi; boşsa carinin temsilcisi (cari kartı Temsilci). Temsilcisiz ciro ayrı satır, prime girmez.</li>
+    <li><b>Temsilci ataması (karar 25.10.2026):</b> faturadan alınır — faturadaki temsilci (satışı kim yaptıysa). Cari başka temsilciye geçse de eski faturalar eski temsilcide kalır. Faturada temsilci boşsa "temsilcisiz" satırına düşer, prime girmez; yeni faturada temsilci carinin temsilcisiyle önden doldurulur ve değiştirilebilir.</li>
     <li><b>Ölçütler başka icmallerden aynı kuralla:</b> ciro / kâr Kârlılık İcmali, tahsilat ve vade Müşteri Risk İcmali, teklif Teklif Dönüşüm İcmali, aktivite CRM — ikinci hesap yok.</li>
     <li><b>Hedef:</b> Prim Planı'ndaki hedef satırları; planı olmayan için "Hedef tanımla…" (temsilci × ay × ölçüt).</li>
     <li><b>Prim:</b> Prim Planı motoru hesaplar, icmal gösterir; "taslak → onaylandı" geçişi yetkili kullanıcıda, loglu.</li>
@@ -287,7 +287,6 @@
 <div class="soru">
   <b class="bas">Açık sorular (önerilerimle)</b>
   <ol>
-    <li><b>Temsilci faturadan mı, cariden mi?</b><span class="oneri">Öneri: Faturadaki temsilci esas (satışı kim yaptıysa); boşsa carinin temsilcisi. Cari başka temsilciye geçerse eski faturalar eski temsilcide kalır.</span></li>
     <li><b>Hedefler nerede tutulsun?</b><span class="oneri">Öneri: Prim Planı varsa onun hedef satırları; yoksa yeni "temsilci_hedef" (temsilci, dönem, ölçüt: ciro / kâr / tahsilat / yeni müşteri, hedef). Tek kaynak: Prim Planı hedefi varsa o geçerli.</span></li>
     <li><b>Prim matrahı ciro mu, tahsil edilen kâr mı?</b><span class="oneri">Öneri: Plan bazında seçilsin (Prim Planı zaten matrah seçeneği taşıyor); varsayılan "tahsil edilen kâr" — tahsil edilmeyen satışa prim ödenmesin.</span></li>
     <li><b>Temsilci kendi satırını mı görsün, herkesi mi?</b><span class="oneri">Öneri: Yetki: "satis.temsilci_performans" herkesi görür; yetkisi olmayan temsilci yalnız kendi satırını (ve kendi müşterilerini) görür.</span></li>
