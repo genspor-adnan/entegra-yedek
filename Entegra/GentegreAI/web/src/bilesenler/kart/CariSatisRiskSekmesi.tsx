@@ -11,13 +11,13 @@ import { TekKayit } from '../TekKayit';
  * "kartta satış & risk sekmesini karşılaştır ve mockup gibi yap"). İki kutu yan yana:
  *
  *  · SATIŞ KOŞULLARI - fiyat listeleri (cari kartının KENDİ alanları, `anaAlanlar`) + taraf_musteri
- *    uzantısındaki iskonto / vade / ödeme / para birimi / sevk / KDV / tevkifat (1152).
+ *    uzantısındaki vade / sevk / KDV / tevkifat (1152; iskonto ve para birimi 25.10.2026'da kalktı - iskonto kampanyayla).
  *  · RİSK / LİMİT (1178) - cari kartının kendi alanları: risk limiti (null = tanımsız) + dövizi, risk grubu,
  *    sevk blokesi, teminat özeti - KARTTA SALT OKUNUR, Müşteri Risk / Limit İcmali'nden değişir (cari.risk_limit,
  *    neden zorunlu, loglu). RİSK KALEMLERİ dökümü satış belgesi limit kontrolüyle AYNI hesaptan
  *    (GET /api/musteri-risk-icmal/taraf/{id}): toplam ve limit durumu sunucuda, burada yalnız gösterilir.
  */
-const SATIS = ['iskontoOrani', 'vadeGun', 'dovizCinsi', 'sevkSekli', 'kdvDurumu', 'tevkifat'];
+const SATIS = ['vadeGun', 'sevkSekli', 'kdvDurumu', 'tevkifat'];
 const RISK = ['riskLimit', 'riskLimitDoviz', 'riskGrubu', 'sevkBlokesi', 'sevkBlokesiNeden', 'teminatOzeti'];
 const DURUM: Record<MusteriRiskOzeti['durum'], [string, string]> = {
   tanimsiz: ['gri', 'Tanımsız'], kurYok: ['uyari', 'Kur yok'], asim: ['hata', 'Aşıldı'], yaklasiyor: ['uyari', 'Yaklaşıyor'], uygun: ['ok', 'Uygun'],

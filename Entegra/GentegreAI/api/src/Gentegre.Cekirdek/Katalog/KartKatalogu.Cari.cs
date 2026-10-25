@@ -160,10 +160,10 @@ public static partial class KartKatalogu
             {
                 new("id",           "id",            "sayi",    Yazilabilir: false),
                 // Satış Koşulları kutusu (1152).
-                new("iskontoOrani", "iskonto_orani", "ondalik", Baslik: "İskonto Oranı %"),
+                // İSKONTO ORANI ve PARA BİRİMİ kaldırıldı (kullanıcı 25.10.2026): cariye özel iskonto kampanyayla
+                //   verilir ("iskontoyu kampanya ile yaparız"). Kolonlar (iskonto_orani, doviz_cinsi) yerinde, okuyan yok.
                 new("vadeGun",      "vade_gun",      "sayi",    Baslik: "Vade (gün)"),
                 // ÖDEME ŞEKLİ KALDIRILDI (kullanıcı 25.10.2026, kolon 1181'de düşürüldü).
-                new("dovizCinsi",   "doviz_cinsi",   "kod",     Baslik: "Para Birimi", SabitKodlar: DovizKodlari),
                 new("sevkSekli",    "sevk_sekli",    "kod",     Baslik: "Sevk Şekli", SabitKodlar: new Dictionary<string, string>
                     { ["1"] = "Kendi aracımız", ["2"] = "Kargo", ["3"] = "Ambar / nakliye", ["4"] = "Müşteri teslim alır" }),
                 new("kdvDurumu",    "kdv_durumu",    "kod",     Baslik: "KDV Durumu", SabitKodlar: new Dictionary<string, string>
