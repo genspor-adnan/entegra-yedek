@@ -258,18 +258,12 @@
     <li><b>Hatırlama:</b> yalnız firma adı (ve isteğe bağlı kullanıcı adı) bu tarayıcıda saklanır; şifre asla.</li>
     <li><b>İki adımlı doğrulama / ilk parola / şube seçimi:</b> firmanın kendi giriş akışında kalır (Giriş Ekranı v2); panel bunları tekrarlamaz, kod ile açılan firma ekranı gerekirse sorar.</li>
     <li><b>Önkoşul:</b> alan adı + HTTPS. Düz http üzerinden şifre gönderilmez; panel http'den açılırsa https'e yönlendirir.</li>
+      <li><b>Hangi alan adı? (elde: gentegre.com, gentegreai.com)? (karar 26.10.2026):</b> <b>gentegreai.com</b> (ürünün adı) - panel <code>panel.gentegreai.com</code>, her müşteri kendi alt alan adı (<code>zone.</code>, <code>medx.</code>, <code>feta.</code>, <code>bilim.</code>); gentegre.com kurumsal tanıtım için kalır. DNS'te <code>*.gentegreai.com</code> → 46.36.201.170 tek joker kayıt; sertifika Let's Encrypt joker (ücretsiz, otomatik yenilenir).</li>
+    <li><b>Müşteri "firma adı" mı yazar, "firma kodu" mu? (karar 26.10.2026):</b> kısa firma kodu (zone, medx) - kurulum adıyla aynı. Ünvan yazmak uzun ve yazım farkına açık.</li>
+    <li><b>Kurulum listesi kimde? (karar 26.10.2026):</b> GenProfil'de "Kurulumlar" ekranı (kod, ünvan, adres, aktif / pasif). Yeni müşteri açılınca oraya bir satır; panel yalnız oradan okur.</li>
+    <li><b>Pasif (sözleşmesi bitmiş) firma ne görür? (karar 26.10.2026):</b> doğru kullanıcı / şifre girildikten SONRA "Hesabınız askıda, lütfen bizimle iletişime geçin" - yanlış girişte genel hata (bilgi sızmasın).</li>
+    <li><b>Eski adresler (/zone/, /medx/) kalsın mı? (karar 26.10.2026):</b> geçiş süresince alt alan adına kalıcı yönlendirme (301); sonra kaldırılır.</li>
   </ul>
-</div>
-
-<div class="soru">
-  <b class="bas">Açık sorular (önerilerimle)</b>
-  <ol>
-    <li><b>Hangi alan adı? (elde: gentegre.com, gentegreai.com)</b><span class="oneri">Öneri: <b>gentegreai.com</b> (ürünün adı) - panel <code>panel.gentegreai.com</code>, her müşteri kendi alt alan adı (<code>zone.</code>, <code>medx.</code>, <code>feta.</code>, <code>bilim.</code>); gentegre.com kurumsal tanıtım için kalır. DNS'te <code>*.gentegreai.com</code> → 46.36.201.170 tek joker kayıt; sertifika Let's Encrypt joker (ücretsiz, otomatik yenilenir).</span></li>
-    <li><b>Müşteri "firma adı" mı yazar, "firma kodu" mu?</b><span class="oneri">Öneri: kısa firma kodu (zone, medx) - kurulum adıyla aynı. Ünvan yazmak uzun ve yazım farkına açık.</span></li>
-    <li><b>Kurulum listesi kimde?</b><span class="oneri">Öneri: GenProfil'de "Kurulumlar" ekranı (kod, ünvan, adres, aktif / pasif). Yeni müşteri açılınca oraya bir satır; panel yalnız oradan okur.</span></li>
-    <li><b>Pasif (sözleşmesi bitmiş) firma ne görür?</b><span class="oneri">Öneri: doğru kullanıcı / şifre girildikten SONRA "Hesabınız askıda, lütfen bizimle iletişime geçin" - yanlış girişte genel hata (bilgi sızmasın).</span></li>
-    <li><b>Eski adresler (/zone/, /medx/) kalsın mı?</b><span class="oneri">Öneri: geçiş süresince alt alan adına kalıcı yönlendirme (301); sonra kaldırılır.</span></li>
-  </ol>
 </div>
 
 <script>
