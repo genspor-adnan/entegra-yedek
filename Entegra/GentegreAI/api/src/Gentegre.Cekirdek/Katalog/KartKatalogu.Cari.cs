@@ -73,6 +73,12 @@ public static partial class KartKatalogu
             // E-POSTA GİTMESİN (1184, kullanıcı 25.10.2026): e-Arşiv faturada e-posta sorulmaz, izibiz'e KAĞIT gider.
             new("earsivEpostaYok", "earsiv_eposta_yok", "mantik", Baslik: "E-Posta gitmesin", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari",
                 Ipucu: "İşaretliyse e-Arşiv faturada e-posta adresi sorulmaz; belge izibiz'e KAĞIT gönderim şekliyle gider."),
+            // SON KONTROL (kullanıcı 25.10.2026): son GİB alias sorgusu. e-Fatura alıcısında 30 günden eskiyse, e-Arşiv
+            //   alıcısında HER hazırlamada yeniden sorgulanır ve güncellenir (EFaturaServisi.HazirlaAsync "taze"); kart /
+            //   Ctrl+K GİB sorgusu da yazar. Elle değişmez.
+            new("efaturaSorguTarihi", "efatura_sorgu_tarihi", "zaman", Yazilabilir: false, Baslik: "Son Kontrol",
+                Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari",
+                Ipucu: "Son GİB alias sorgusu. e-Fatura alıcısında 30 günü geçince, e-Arşiv alıcısında her faturada yeniden sorgulanır."),
             // FIYAT LISTESI (204). IKI AYRI ALAN: bir cari hem musteri hem
             //   tedarikci olabiliyor; tek alan olsaydi ayni cariye satarken de
             //   alirken de ayni liste uygulanirdi. Bos ise yonun VARSAYILAN
