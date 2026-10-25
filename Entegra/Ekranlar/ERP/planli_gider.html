@@ -351,22 +351,17 @@
     <li><b>Kendiliğinden kayıt yok:</b> "Ödeme Oluştur" taslak kasa / banka işlemi açar (Kasa İşlemi kartının tahsilat / tediye şablonu, cari + masraf + açıklama dolu); kesinleştiren insan. Hatırlatma (n gün önce, rol) bildirim kuyruğundan.</li>
     <li><b>Döviz:</b> tutar tanımın para biriminde; akışta TL karşılığı bugünkü kurla, döviz pozisyonu tablosunda kendi dövizinde.</li>
     <li><b>Çıktı:</b> listelerin ortak menüsü (Excel / PDF); Takvim sekmesi 12 aylık bütçe tablosu olarak basılır.</li>
+    <li><b>Değişken tutarlı giderde (elektrik, doğalgaz) tahmin nasıl yapılsın? (karar 25.10.2026):</b> Varsayılan son 3 dönemin gerçekleşen ortalaması; mevsimsel kalemde "geçen yıl aynı ay" seçilebilsin. Hiç gerçekleşen yoksa tanımdaki tutar. Tahmin olduğu her yerde rozetle belli olsun.</li>
+    <li><b>Ödeme günü tatile / hafta sonuna denk gelirse? (karar 25.10.2026):</b> Tanımda seçilsin, varsayılan "sonraki iş günü" (vergi / SGK'da mevzuat da böyle); tatiller Resmi Tatiller tanımından.</li>
+    <li><b>Ödeme günü gelince kayıt otomatik oluşsun mu? (karar 25.10.2026):</b> Hayır. Para çıkışı insan onayı ister; "Ödeme Oluştur" taslak açar, hatırlatma n gün önce gider. Otomatik talimatlı (elektrik) kalemde de kayıt banka hareketi gelince (Banka Hareketleri ekranından) oluşur.</li>
+    <li><b>Gerçekleşme eşleşmesi otomatik mi, elle mi? (karar 25.10.2026):</b> Aynı masraf kalemi + cari, ± 7 gün, ± %5 içinde TEK aday varsa otomatik eşleşsin (loglu, geri alınabilir); birden fazla aday ya da tutar farkı büyükse öneri olarak kalsın, kullanıcı seçsin.</li>
+    <li><b>Faturası gelen gider (elektrik faturası alış faturası olarak girildi) nakit akışta nasıl sayılsın? (karar 25.10.2026):</b> Fatura dönemle eşleşince dönem "faturalandı" olur; akışa faturanın vadesiyle girer, planlı tahmin düşer (çifte sayım yok). Fatura tutarı "son N dönem ortalaması"na da girer.</li>
+    <li><b>KDV ve SGK gibi hesaplanan kalemler nereden gelsin? (karar 25.10.2026):</b> KDV = KDV İcmali'nin son kesin dönem "ödenecek"i, sonraki aylara aynı tutar (tahmini); SGK = son 3 ödemenin ortalaması (bordro modülü gelince bordro toplamı). Kullanıcı o dönemin tutarını elle yazarsa elle yazılan geçerli.</li>
+    <li><b>Yetki kodu ne olsun? (karar 25.10.2026):</b> Yeni ekran kodu <code>finans.planli_gider</code>; hakları Nakit Akış İcmali'nin kaynağı <code>kasa.finans</code>'tan kopyalansın (Gör + Ekle / Değiştir / Sil — tanım finans verisidir). "Ödeme Oluştur" ayrıca kasa işlemi Ekle yetkisi ister.</li>
+    <li><b>Artış (kira, abonelik zammı) nasıl tanımlansın? (karar 25.10.2026):</b> Yıllık sabit oran ve ayı (ör. Ocak %30) ya da tarihten itibaren yeni tutar; TÜFE'ye otomatik bağlama yok (veri kaynağı yok) — oran açıklandığında elle girilir.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Değişken tutarlı giderde (elektrik, doğalgaz) tahmin nasıl yapılsın?<span class="oneri"><b>Öneri:</b> Varsayılan son 3 dönemin gerçekleşen ortalaması; mevsimsel kalemde "geçen yıl aynı ay" seçilebilsin. Hiç gerçekleşen yoksa tanımdaki tutar. Tahmin olduğu her yerde rozetle belli olsun.</span></li>
-    <li>Ödeme günü tatile / hafta sonuna denk gelirse?<span class="oneri"><b>Öneri:</b> Tanımda seçilsin, varsayılan "sonraki iş günü" (vergi / SGK'da mevzuat da böyle); tatiller Resmi Tatiller tanımından.</span></li>
-    <li>Ödeme günü gelince kayıt otomatik oluşsun mu?<span class="oneri"><b>Öneri:</b> Hayır. Para çıkışı insan onayı ister; "Ödeme Oluştur" taslak açar, hatırlatma n gün önce gider. Otomatik talimatlı (elektrik) kalemde de kayıt banka hareketi gelince (Banka Hareketleri ekranından) oluşur.</span></li>
-    <li>Gerçekleşme eşleşmesi otomatik mi, elle mi?<span class="oneri"><b>Öneri:</b> Aynı masraf kalemi + cari, ± 7 gün, ± %5 içinde TEK aday varsa otomatik eşleşsin (loglu, geri alınabilir); birden fazla aday ya da tutar farkı büyükse öneri olarak kalsın, kullanıcı seçsin.</span></li>
-    <li>Faturası gelen gider (elektrik faturası alış faturası olarak girildi) nakit akışta nasıl sayılsın?<span class="oneri"><b>Öneri:</b> Fatura dönemle eşleşince dönem "faturalandı" olur; akışa faturanın vadesiyle girer, planlı tahmin düşer (çifte sayım yok). Fatura tutarı "son N dönem ortalaması"na da girer.</span></li>
-    <li>KDV ve SGK gibi hesaplanan kalemler nereden gelsin?<span class="oneri"><b>Öneri:</b> KDV = KDV İcmali'nin son kesin dönem "ödenecek"i, sonraki aylara aynı tutar (tahmini); SGK = son 3 ödemenin ortalaması (bordro modülü gelince bordro toplamı). Kullanıcı o dönemin tutarını elle yazarsa elle yazılan geçerli.</span></li>
-    <li>Yetki kodu ne olsun?<span class="oneri"><b>Öneri:</b> Yeni ekran kodu <code>finans.planli_gider</code>; hakları Nakit Akış İcmali'nin kaynağı <code>kasa.finans</code>'tan kopyalansın (Gör + Ekle / Değiştir / Sil — tanım finans verisidir). "Ödeme Oluştur" ayrıca kasa işlemi Ekle yetkisi ister.</span></li>
-    <li>Artış (kira, abonelik zammı) nasıl tanımlansın?<span class="oneri"><b>Öneri:</b> Yıllık sabit oran ve ayı (ör. Ocak %30) ya da tarihten itibaren yeni tutar; TÜFE'ye otomatik bağlama yok (veri kaynağı yok) — oran açıklandığında elle girilir.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){

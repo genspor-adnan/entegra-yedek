@@ -441,19 +441,14 @@
     <li><b>Ödeme &amp; Eşleştirme:</b> ödeme şablonu (hesap, yöntem, karşı IBAN carinin, açıklama şablonu) + eşleştirme kuralı (masraf + cari, ± gün, ± %, kaynaklar, tek aday otomatik). Otomatik eşleşme loglu ve dönem satırından geri alınabilir.</li>
     <li><b>Dönemler:</b> takvimden türetilen satırlar; saklanan yalnız istisna (atla, dönem tutarı, eşleşme) ve kapanmış dönemin o günkü planı.</li>
     <li><b>Yetki:</b> kart <code>finans.planli_gider</code> (Gör / Ekle / Değiştir / Sil); "Ödeme Oluştur" ayrıca kasa işlemi Ekle; log ISLEMLOG kuralıyla (alan bazlı, eşleşmeler ayrı satır).</li>
+    <li><b>Kategori seçilince öntanım (masraf kalemi, tutar türü, tatil, hatırlatma) doldurulsun mu? (karar 25.10.2026):</b> Evet, yalnız boş alanlara; kullanıcı değiştirdiyse ezilmesin. Kategoriler kod listesi (Kira, Enerji, Abonelik, Vergi / SGK, Sigorta, Hizmet, Aidat, Diğer), kurum ekleyebilir.</li>
+    <li><b>Bir tanımın tutarı / takvimi değişince geçmiş dönemler ne olsun? (karar 25.10.2026):</b> Geçmiş (tarihi geçmiş ya da eşleşmiş) dönem o günkü planıyla dondurulur; değişiklik yalnız bugünden sonraki dönemlere uygulanır. Böylece "plan − gerçek" geçmişi bozulmaz.</li>
+    <li><b>Sözleşme bitince tanım ne olsun? (karar 25.10.2026):</b> Bitiş tarihinden sonra kendiliğinden pasif (akışta görünmez); bitişten 90 gün önce sorumluya yenileme hatırlatması. Yenileme = kartı kopyala (yeni dönem, yeni tutar).</li>
+    <li><b>Belgeler sekmesi ortak doküman deposunu mu kullansın? (karar 25.10.2026):</b> Evet — diğer kartlarla aynı doküman bileşeni (yükle / tara / önizle); ayrı depo yok.</li>
+    <li><b>Kartta "Cari Ekstre" düğmesi carisi olmayan giderde (ör. SGK) ne yapsın? (karar 25.10.2026):</b> Carisiz tanımda gizlensin; yerine masraf kaleminin hareket dökümü açılsın.</li>
   </ul>
 </div>
 
-<div class="soru">
-  <b class="bas2">❓ Kart için açık sorular (25.10.2026) — onayınızı bekliyor</b>
-  <ol>
-    <li>Kategori seçilince öntanım (masraf kalemi, tutar türü, tatil, hatırlatma) doldurulsun mu?<span class="oneri"><b>Öneri:</b> Evet, yalnız boş alanlara; kullanıcı değiştirdiyse ezilmesin. Kategoriler kod listesi (Kira, Enerji, Abonelik, Vergi / SGK, Sigorta, Hizmet, Aidat, Diğer), kurum ekleyebilir.</span></li>
-    <li>Bir tanımın tutarı / takvimi değişince geçmiş dönemler ne olsun?<span class="oneri"><b>Öneri:</b> Geçmiş (tarihi geçmiş ya da eşleşmiş) dönem o günkü planıyla dondurulur; değişiklik yalnız bugünden sonraki dönemlere uygulanır. Böylece "plan − gerçek" geçmişi bozulmaz.</span></li>
-    <li>Sözleşme bitince tanım ne olsun?<span class="oneri"><b>Öneri:</b> Bitiş tarihinden sonra kendiliğinden pasif (akışta görünmez); bitişten 90 gün önce sorumluya yenileme hatırlatması. Yenileme = kartı kopyala (yeni dönem, yeni tutar).</span></li>
-    <li>Belgeler sekmesi ortak doküman deposunu mu kullansın?<span class="oneri"><b>Öneri:</b> Evet — diğer kartlarla aynı doküman bileşeni (yükle / tara / önizle); ayrı depo yok.</span></li>
-    <li>Kartta "Cari Ekstre" düğmesi carisi olmayan giderde (ör. SGK) ne yapsın?<span class="oneri"><b>Öneri:</b> Carisiz tanımda gizlensin; yerine masraf kaleminin hareket dökümü açılsın.</span></li>
-  </ol>
-</div>
 
 <script>
 (function(){
