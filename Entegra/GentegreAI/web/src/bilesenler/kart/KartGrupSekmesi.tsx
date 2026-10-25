@@ -275,6 +275,10 @@ const adliBlok = (
           // Temsilci/Özel Kod.
           const ciftler = kaynak === 'cari' && altBaslik === 'Tanımlama'
             ? [['kategori', 'ilkTemas'], ['sektor', 'altSektor'], ['sinif', 'bolge'], ['temsilci', 'ozelKod']]
+            // e-BELGE AYARLARI İKİ SATIR (kullanıcı 25.10.2026): e-Fatura mükellefi | Son Kontrol,
+            //   E-Posta gitmesin | Alias / e-Posta.
+            : kaynak === 'cari' && altBaslik === 'e-Belge Ayarlari'
+            ? [['efatura', 'efaturaSorguTarihi'], ['earsivEpostaYok', 'aliasEposta']]
             : [];
           const ciftliAlanlar = ciftler.map(cift =>
             cift.map(ad => alanlar.find(a => a.ad === ad)).filter(a => a !== undefined));
