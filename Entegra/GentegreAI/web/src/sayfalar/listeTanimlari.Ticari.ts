@@ -753,8 +753,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   //     bankolarının günü tek ekranda - vezne sorumlusunun gün sonu özeti.
   {
     kaynak: 'vezne-icmali', rota: 'vezne-icmali', ozelSayfa: true,
-    baslik: 'Vezne İcmali', yol: 'Kayıt Kabul › Vezne İcmali',
-    menuGrup: 'Kayıt Kabul', menuSira: 25, menuAd: 'Vezne İcmali', ic: '@icmal',
+    baslik: 'Vezne İcmali', yol: 'Kayıt Kabul › İcmaller › Vezne İcmali',
+    menuGrup: 'Kayıt Kabul', menuAltGrup: 'İcmaller', menuSira: 25, menuAd: 'Vezne İcmali', ic: '@icmal',
     yetkiKodu: 'banko.vezne_icmal',
   },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak

@@ -30,7 +30,7 @@ dogrulama: insan-dogrulama-bekliyor
 - **Diğer ekranlara geçmek** — 📋 Banko Oturumları ve ✅ Banko Onayları düğmeleri.
 
 ## Ekrana giriş
-- Sol menü **Kayıt Kabul › Vezne İcmali** (`/vezne-icmali`).
+- Sol menü **Kayıt Kabul › İcmaller › Vezne İcmali** (`/vezne-icmali`).
 - Kasa / Gün Sonu Mutabakatı ekranındaki "🏦 Vezne İcmali" düğmesi (o günle açılır).
 - `banko.vezne_icmal` görme yetkisi gerekir.
 

@@ -82,7 +82,7 @@ export function VezneIcmal() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Vezne İcmali</h1>
-          <span className="yol">Kayıt Kabul › Vezne İcmali</span>
+          <span className="yol">Kayıt Kabul › İcmaller › Vezne İcmali</span>
         </div>
       </div>
 

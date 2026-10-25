@@ -26,7 +26,7 @@ public static partial class EkranKodlari
         ("ameliyathane.plan.cizelge", "ameliyathane.plan"),     // Ameliyathane › Masa Çizelgesi
         ("ariza.ekip", "ariza"),                                // Teknik Servis › Arıza Ekipleri
         ("demirbas.zimmet", "demirbas"),                        // Sabit Varlıklar › Zimmet / Hareketler (1007)
-        ("banko.vezne_icmal", "banko_onay"),                    // Kayıt Kabul › Vezne İcmali (1016)
+        ("banko.vezne_icmal", "banko_onay"),                    // Kayıt Kabul › İcmaller › Vezne İcmali (1016)
         ("medula.mutabakat", "medula.fatura"),                  // Medula › Mutabakat İcmali (1017)
         ("finans.alacak_yaslandirma", "kasa.finans"),           // Finans › Alacak Yaşlandırma (1019)
         ("hasta.borc_takip", "banko_onay"),                     // Kayıt Kabul › Hasta Borç Takibi (1020)
