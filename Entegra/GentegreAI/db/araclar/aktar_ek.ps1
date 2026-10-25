@@ -63,7 +63,17 @@ GocAl $MssqlDb @("KATEGORI","KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN"
                  "HESAPPLANI","DEMIRBAS","GENINI","REHBERALIAS")
 
 Adim ("Depo tablolari: " + $DepoDb)
-GocAl $DepoDb @("EBELGE","EBELGEMESAJ")
+# ESKI SURUM DELPHI (25.10.2026, ZONE / MEDX): GENDEPO veritabani hic kurulmamis olabilir - e-Belge
+#   gecmisi yok demektir; adim atlanir, stg kopyalari bosaltilir (onceki aktarimin artigi kalmasin).
+$mcn = New-Object System.Data.SqlClient.SqlConnection(
+  "Server=$MssqlServer;Database=master;User Id=$MssqlUser;Password=$MssqlPass;TrustServerCertificate=True")
+$mcn.Open(); $mk = $mcn.CreateCommand(); $mk.CommandText = "SELECT COUNT(*) FROM sys.databases WHERE name = @d"
+[void]$mk.Parameters.AddWithValue("@d", $DepoDb); $depoVar = [int]$mk.ExecuteScalar() -gt 0; $mcn.Close()
+if ($depoVar) { GocAl $DepoDb @("EBELGE","EBELGEMESAJ") }
+else {
+  Write-Host ("  ATLANDI: " + $DepoDb + " yok (e-Belge gecmisi tasinmaz)") -ForegroundColor Yellow
+  Psql "truncate stg.ebelge, stg.ebelgemesaj" | Out-Null
+}
 
 # ------------------------------------------------------------------ IMAJ ----
 Adim "IMAJ (ekler) + icerik"

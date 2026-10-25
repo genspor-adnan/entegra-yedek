@@ -52,7 +52,10 @@ function PgKomut([string]$Sql) {
                  -v ($klasor + ":/sql") postgres:18 `
                  psql -h $PgHost -p $PgPort -U $Kul -d $Db -tA -v ON_ERROR_STOP=1 -f ("/sql/" + $ad)
   }
+  $kod = $LASTEXITCODE
   Remove-Item $tmp -Force
+  # psql hatasi (or. 0x00, tasan deger) SESSIZ GECMESIN (25.10.2026, ZONE): cagiran (aktar_ek) cikis koduyla durur.
+  if ($kod -ne 0) { throw ("psql hatasi (" + $kod + "): " + $Sql.Substring(0, [Math]::Min(120, $Sql.Length))) }
   return $cikti
 }
 
@@ -64,11 +67,14 @@ function CsvAlan([object]$v) {
   if ($v -is [bool])     { if ($v) { return "1" } else { return "0" } }      # bit -> smallint
   if ($v -is [byte[]])   { return '"\x' + ([System.BitConverter]::ToString($v).Replace('-','')) + '"' }  # bytea hex
   if ($v -is [datetime]) { return $v.ToString('yyyy-MM-dd HH:mm:ss') }
+  # MSSQL money UC DEGERI (+-922337203685477.58) Delphi'de bozuk yer tutucu (ZONE TEKLIF.DOVIZKUR): NULL gecer.
+  if ($v -is [decimal] -and [Math]::Abs($v) -ge 922337203685477) { return "" }
   if ($v -is [decimal] -or $v -is [double] -or $v -is [single]) {
     return ([string]$v).Replace(',', '.')
   }
   if ($v -is [int] -or $v -is [long] -or $v -is [byte] -or $v -is [int16]) { return [string]$v }
-  $s = [string]$v
+  # 0x00 (Delphi RTF yorumlarinda sahte sonlandirici) PG text'e girmez: "invalid byte sequence 0x00" - atilir.
+  $s = ([string]$v).Replace([string][char]0, '')
   if ($s.Contains('"') -or $s.Contains(',') -or $s.Contains("`n") -or $s.Contains("`r")) {
     return '"' + $s.Replace('"', '""') + '"'
   }
@@ -94,8 +100,21 @@ foreach ($t in $Tablolar) {
   $r = $c.ExecuteReader()
   while ($r.Read()) { $n = $r.GetString(0); $cmap[$n.ToLowerInvariant()] = $n }
   $r.Close()
+  # ESKI SURUM DELPHI (25.10.2026, ZONE / MEDX): tablo kaynakta hic yoksa (or. REHBERALIAS 214 oncesi)
+  #   atlanir; stg kopyasi BOSALTILIR ki onceki bir aktarimin artigi yeni veritabanina karismasin.
+  if ($cmap.Count -eq 0) {
+    PgKomut ("truncate " + $Sema + "." + $alt) | Out-Null
+    Write-Host ("ATLANDI (MSSQL'de yok, stg bosaltildi): dbo." + $t) -ForegroundColor Yellow; continue
+  }
 
   $kullan   = @($cols | Where-Object { $cmap.ContainsKey($_) })
+  # HEDEF UZUNLUK (25.10.2026, ZONE TEKLIFDETAY.ACIKLAMA > 1000): stg varchar(n) kolonuna sigmayan metin kirpilir
+  #   ("value too long" ile tablo hic gelmiyordu). Asil hedef zaten left(.., n) ile yazar.
+  $uzunluk = @{}
+  foreach ($satir in (PgKomut ("select column_name || '=' || coalesce(character_maximum_length, 0) from information_schema.columns where table_schema='" + $Sema + "' and table_name='" + $alt + "'"))) {
+    $p = ([string]$satir).Split('='); if ($p.Count -eq 2) { $uzunluk[$p[0]] = [int]$p[1] }
+  }
+  $sinirlar = @($kullan | ForEach-Object { if ($uzunluk.ContainsKey($_)) { $uzunluk[$_] } else { 0 } })
   $msSelect = ($kullan | ForEach-Object { "[" + $cmap[$_] + "]" }) -join ', '
 
   Adim ($t + " -> " + $Sema + "." + $alt)
@@ -122,7 +141,9 @@ foreach ($t in $Tablolar) {
     [void]$sb.Clear()
     for ($i = 0; $i -lt $rd.FieldCount; $i++) {
       if ($i -gt 0) { [void]$sb.Append(',') }
-      [void]$sb.Append((CsvAlan $rd.GetValue($i)))
+      $deger = $rd.GetValue($i)
+      if ($deger -is [string] -and $sinirlar[$i] -gt 0 -and $deger.Length -gt $sinirlar[$i]) { $deger = $deger.Substring(0, $sinirlar[$i]) }
+      [void]$sb.Append((CsvAlan $deger))
     }
     $sw.WriteLine($sb.ToString())
     $n++

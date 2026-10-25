@@ -449,7 +449,7 @@ public static partial class KaynakKatalogu
             //   resmi ve uzun; gunluk dilde kullanilan ad bu kolondur.
             //   Resmi adin YERINE GECMEZ - fatura/rapor/e-Nabiz yine `ad`.
             new("kisaAd",  "h.kisa_ad",  "metin", "Kısa Ad",    Genislik: 160),
-            new("ad",      "h.ad",       "metin", "Hizmet Adi"),
+            new("ad",      "h.ad",       "metin", "Hizmet Adı"),
             // Eski `grubu` kolonu hic kullanilmamis (hepsi 0) - yerine 269'da
             //   eklenen kategori gosteriliyor.
             // KATEGORI YOLU (350/351, kullanici: "hizmet listesine de yansit"):

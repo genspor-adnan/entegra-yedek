@@ -40,7 +40,7 @@ param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
-    [ValidateSet('hepsi','hbys','erp','bilim','feta','profiller',
+    [ValidateSet('hepsi','hbys','erp','bilim','feta','zone','medx','profiller',
                  'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
@@ -88,6 +88,19 @@ $KURULUMLAR = @(
         Ad = 'feta'; Etiket = 'FETA (ERP)';
         Yol = '/feta/'; Kok = 'gentegre-feta';
         Db = 'FETA'; Kap = 'gentegre-api-feta'; Port = 5183; Urun = 'erp'
+    }
+    # ZONE ve MEDX (25.10.2026, kullanici: "mssql'de zone ve medx db'leri var.. onlar icin de sunucuda DB olusturup
+    #   migrate yap" - "bunlar 2 ayri musteri", "onlar kullanacak"): FETA ile ayni kalici gecis (dokuman/19 5b);
+    #   veri yerelde aktarilip dogrulandi, sunucuya dump ile gelir (yayin/zone-hazirla.sh, medx-hazirla.sh).
+    [ordered]@{
+        Ad = 'zone'; Etiket = 'ZONE (ERP)';
+        Yol = '/zone/'; Kok = 'gentegre-zone';
+        Db = 'ZONE'; Kap = 'gentegre-api-zone'; Port = 5184; Urun = 'erp'
+    }
+    [ordered]@{
+        Ad = 'medx'; Etiket = 'MEDX (ERP)';
+        Yol = '/medx/'; Kok = 'gentegre-medx';
+        Db = 'MEDX'; Kap = 'gentegre-api-medx'; Port = 5185; Urun = 'erp'
     }
 )
 

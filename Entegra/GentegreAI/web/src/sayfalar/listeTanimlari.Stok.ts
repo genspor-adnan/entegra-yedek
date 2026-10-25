@@ -41,8 +41,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kategoriSuzgeci: 2,
     // Kategori KOD'un SOLUNDA (kullanici): listede once "hangi grup", sonra
     //   kod ve ad okunuyor.
-    // Kisa Ad, Ad'in SOLUNDA (549, kullanici).
-    kolonSirasi: ['kategoriAdi', 'kod', 'kisaAd', 'ad', 'durum'],
+    // Hizmet Adı ÖNCE, Kısa Ad SAĞINDA (kullanıcı 25.10.2026: "kısa ad ve Hizmet Adı yer değiştir"; 549'da tersiydi).
+    kolonSirasi: ['kategoriAdi', 'kod', 'ad', 'kisaAd', 'durum'],
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet.liste',
     menuSira: 20,
   },
