@@ -204,20 +204,21 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
   },
   {
     // STOK İCMALLERİ (1173, mockup Ekranlar/Stok/stok_*_icmali.html): stok değeri, SKT / lot,
-    //   sayım farkı - özel sayfa, rakamlar StokIcmalUclari'ndan.
+    //   sayım farkı - özel sayfa, rakamlar StokIcmalUclari'ndan. Menüde Stok & Hizmet › İcmaller
+    //   alt başlığı, Dökümler'den (80) hemen önce (75-77).
     kaynak: 'stok-deger-icmali', rota: 'stok-deger-icmali', ozelSayfa: true,
-    baslik: 'Stok Değer İcmali', yol: 'Stok & Hizmet › Stok Değer İcmali',
-    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Stok Değer İcmali', ic: '@icmal', yetkiKodu: 'stok.deger_icmali',
+    baslik: 'Stok Değer İcmali', yol: 'Stok & Hizmet › İcmaller › Stok Değer İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 75, menuAd: 'Stok Değer İcmali', ic: '@icmal', yetkiKodu: 'stok.deger_icmali',
   },
   {
     kaynak: 'stok-skt-icmali', rota: 'stok-skt-icmali', ozelSayfa: true,
-    baslik: 'SKT / Lot İcmali', yol: 'Stok & Hizmet › SKT / Lot İcmali',
-    menuGrup: 'Stok & Hizmet', menuSira: 67, menuAd: 'SKT / Lot İcmali', ic: '@icmal', yetkiKodu: 'stok.skt_icmali',
+    baslik: 'SKT / Lot İcmali', yol: 'Stok & Hizmet › İcmaller › SKT / Lot İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 76, menuAd: 'SKT / Lot İcmali', ic: '@icmal', yetkiKodu: 'stok.skt_icmali',
   },
   {
     kaynak: 'stok-sayim-fark-icmali', rota: 'stok-sayim-fark-icmali', ozelSayfa: true,
-    baslik: 'Sayım Fark İcmali', yol: 'Stok & Hizmet › Sayım Fark İcmali',
-    menuGrup: 'Stok & Hizmet', menuSira: 68, menuAd: 'Sayım Fark İcmali', ic: '@icmal', yetkiKodu: 'stok.sayim_fark_icmali',
+    baslik: 'Sayım Fark İcmali', yol: 'Stok & Hizmet › İcmaller › Sayım Fark İcmali',
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'İcmaller', menuSira: 77, menuAd: 'Sayım Fark İcmali', ic: '@icmal', yetkiKodu: 'stok.sayim_fark_icmali',
   },
   {
     // URUN AGACLARI (BOM / recete) - 429.
