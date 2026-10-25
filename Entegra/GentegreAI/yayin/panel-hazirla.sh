@@ -16,14 +16,17 @@ SITE=/etc/nginx/sites-available/gentegreai
 BAG=/etc/nginx/sites-enabled/gentegreai
 PARCA=/tmp/nginx-gentegreai.conf
 PANEL=/home/gentegre/gentegre-panel
-ALANLAR="panel feta zone medx"
+ALANLAR="panel feta zone medx"   # alt alan adlari; kok (gentegreai.com) ve www ayrica
 
 if [ "${1:-}" = "sertifika" ]; then
     for a in $ALANLAR; do
         getent hosts "$a.gentegreai.com" >/dev/null || { echo "DNS yok: $a.gentegreai.com (once *.gentegreai.com A kaydi)" >&2; exit 1; }
     done
     command -v certbot >/dev/null || { apt-get update -q && apt-get install -y -q certbot python3-certbot-nginx; }
-    ARG=""; for a in $ALANLAR; do ARG="$ARG -d $a.gentegreai.com"; done
+    for a in gentegreai.com www.gentegreai.com; do
+        getent hosts "$a" >/dev/null || { echo "DNS yok: $a (kok icin ayri A kaydi: @ -> 46.36.201.170)" >&2; exit 1; }
+    done
+    ARG="-d gentegreai.com -d www.gentegreai.com"; for a in $ALANLAR; do ARG="$ARG -d $a.gentegreai.com"; done
     certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect $ARG
     echo "TAMAM: HTTPS hazir - https://panel.gentegreai.com"
     exit 0
