@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ba / Bs (Cari Mutabakat) İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧮 Ba / Bs (Cari Mutabakat) İcmali — Eylül 2026 dönemi
+    <span class="sp">Gentegre AI · Muhasebe › İcmaller · Tüm şubeler · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Ba / Bs İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📤</span> e-Beyanname dosyası (XML)</div>
+    <div class="btn"><span>✉</span> Mutabakat mektubu gönder</div>
+    <div class="btn"><span>📒</span> Cari ekstresi</div>
+    <div class="btn"><span>🧾</span> Belgeler</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🧮</span> KDV İcmali</div>
+    <div class="btn"><span>📒</span> Cari İcmali</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Eylül 2026</b> ▾</div>
+    <div class="sel">🏢 Şube / mükellef: <b>UNIVERSE MEDİKAL (tüm şubeler)</b> ▾</div>
+    <div class="seg"><span class="on">Ba + Bs</span><span>Form Ba</span><span>Form Bs</span></div>
+    <div class="sel">💰 Eşik: <b>5.000 ₺ (KDV hariç)</b> ▾</div>
+    <label class="chk"><input type="checkbox"> Eşik altı yakınları göster</label>
+    <label class="chk"><input type="checkbox" checked> Gider pusulası / SMM dahil</label>
+    <span class="sp"></span>
+    <span class="rz sari">Bildirim son günü: 31.10.2026</span>
+    <span class="rz kir">VKN eksik: 3 cari</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Form Ba (alış)</div><div class="deg">42 satıcı</div><div class="alt">3.912.400 ₺ · 318 belge</div></div>
+    <div class="kutu mor"><div class="bas">Form Bs (satış)</div><div class="deg">57 alıcı</div><div class="alt">5.104.800 ₺ · 611 belge</div></div>
+    <div class="kutu "><div class="bas">Eşik Altı</div><div class="deg">96 cari</div><div class="alt">toplam 214.600 ₺ · bildirime girmez</div></div>
+    <div class="kutu teh"><div class="bas">VKN / TCKN Eksik</div><div class="deg">3</div><div class="alt">bildirime girmez — düzeltin</div></div>
+    <div class="kutu uy"><div class="bas">Mutabakat Bekleyen</div><div class="deg">18</div><div class="alt">mektup gönderildi, yanıt yok</div></div>
+    <div class="kutu iyi"><div class="bas">Mutabık</div><div class="deg">71</div><div class="alt">yanıt geldi, tutar aynı</div></div>
+    <div class="kutu teh"><div class="bas">Fark Bildiren</div><div class="deg">4</div><div class="alt">cari farklı tutar bildirdi</div></div>
+    <div class="kutu "><div class="bas">Yurt Dışı (hariç)</div><div class="deg">6</div><div class="alt">Ba / Bs dışı · ayrı liste</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ba">Form Ba</div>
+    <div class="sekme" data-s="bs">Form Bs</div>
+    <div class="sekme" data-s="esk">Eşik Altı</div>
+    <div class="sekme" data-s="uyr">Uyarılar <span class="rz kir">6</span></div>
+    <div class="sekme" data-s="mut">Mutabakat <span class="rz sari">18</span></div>
+    <div class="sekme" data-s="kdv">KDV İcmali ile Kıyas</div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ BA ============ -->
+  <div class="pnl" data-s="ba">
+    <div class="grp"><h4>Form Ba — mal ve hizmet alımları <span class="mini">cari bazında, dönemde 5.000 ₺ ve üstü · satıra tıkla: belgeler</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Sıra</th><th>Unvan</th><th>VKN / TCKN</th><th>Ülke</th><th class="sag">Belge sayısı</th><th class="sag">Tutar (KDV hariç)</th><th>Mutabakat</th></tr></thead>
+  <tbody>
+    <tr><td class="">1</td><td class="">DENTSPLY SIRONA TÜRKİYE</td><td class="">2930412233</td><td class="">TR</td><td class="sag">38</td><td class="sag">1.284.600</td><td class=""><span class="rz ok">mutabık</span></td></tr>
+    <tr><td class="">2</td><td class="">MEGA DENTAL MALZEME A.Ş.</td><td class="">6120044781</td><td class="">TR</td><td class="sag">61</td><td class="sag">612.900</td><td class=""><span class="rz sari">bekliyor</span></td></tr>
+    <tr><td class="">3</td><td class="">İSTANBUL ELEKTRİK (CK BOĞAZİÇİ)</td><td class="">0570088126</td><td class="">TR</td><td class="sag">1</td><td class="sag">18.400</td><td class=""><span class="rz ">gönderilmedi</span></td></tr>
+    <tr><td class="">4</td><td class="">MERKEZ KİRA — Ahmet YURT</td><td class="">1234567xxxx</td><td class="">TR</td><td class="sag">1</td><td class="sag">42.000</td><td class=""><span class="rz mavi">SMM / gider pusulası</span></td></tr>
+    <tr><td colspan="7" class="sonuk">… 38 satıcı daha</td></tr>
+    <tr class="toplam"><td class="">Toplam (42)</td><td class=""></td><td class=""></td><td class=""></td><td class="sag">318</td><td class="sag">3.912.400</td><td class=""></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Belge sayısı: fatura + gider pusulası + serbest meslek makbuzu (şerit); iade faturası tutardan düşülür, sayıya girmez. Tutar KDV hariç, dövizli belge belge tarihindeki kurla.</div></div>
+  </div>
+  <!-- ============ BS ============ -->
+  <div class="pnl" data-s="bs">
+    <div class="grp"><h4>Form Bs — mal ve hizmet satışları <span class="mini">cari bazında, dönemde 5.000 ₺ ve üstü</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Sıra</th><th>Unvan</th><th>VKN / TCKN</th><th>Ülke</th><th class="sag">Belge sayısı</th><th class="sag">Tutar (KDV hariç)</th><th>Mutabakat</th></tr></thead>
+  <tbody>
+    <tr><td class="">1</td><td class="">DENTA KLİNİK LTD. ŞTİ.</td><td class="">2921358535</td><td class="">TR</td><td class="sag">24</td><td class="sag">684.200</td><td class=""><span class="rz ok">mutabık</span></td></tr>
+    <tr><td class="">2</td><td class="">AĞIZ DİŞ MERKEZİ A.Ş.</td><td class="">0451120338</td><td class="">TR</td><td class="sag">17</td><td class="sag">521.300</td><td class=""><span class="rz kir">fark: 12.400</span></td></tr>
+    <tr><td class="">3</td><td class="">GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td class="">4110239987</td><td class="">TR</td><td class="sag">9</td><td class="sag">212.800</td><td class=""><span class="rz sari">bekliyor</span></td></tr>
+    <tr><td class="">4</td><td class="">DR. AYŞE KARA (şahıs)</td><td class="">2345678xxxx</td><td class="">TR</td><td class="sag">3</td><td class="sag">18.900</td><td class=""><span class="rz ok">mutabık</span></td></tr>
+    <tr><td colspan="7" class="sonuk">… 53 alıcı daha</td></tr>
+    <tr class="toplam"><td class="">Toplam (57)</td><td class=""></td><td class=""></td><td class=""></td><td class="sag">611</td><td class="sag">5.104.800</td><td class=""></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">e-Arşiv / perakende satışta alıcı VKN / TCKN girilmişse cari bazında toplanır; "11111111111" (nihai tüketici) Bs'ye girmez.</div></div>
+  </div>
+  <!-- ============ ESK ============ -->
+  <div class="pnl" data-s="esk">
+    <div class="grp"><h4>Eşik altında kalan cariler <span class="mini">bildirime girmez · eşiğe yakın olanlar üstte</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Unvan</th><th>Form</th><th class="sag">Belge</th><th class="sag">Tutar</th><th class="sag">Eşiğe kalan</th><th>Not</th></tr></thead>
+  <tbody>
+    <tr><td class="">DENTOKAT</td><td class="">Bs</td><td class="sag">2</td><td class="sag">4.880</td><td class="sag">120</td><td class=""><span class="rz sari">eşiğe çok yakın</span></td></tr>
+    <tr><td class="">KARGO A.Ş.</td><td class="">Ba</td><td class="sag">6</td><td class="sag">4.610</td><td class="sag">390</td><td class=""><span class="rz sari">eşiğe çok yakın</span></td></tr>
+    <tr><td class="">MESUT PARLAK</td><td class="">Bs</td><td class="sag">1</td><td class="sag">1.200</td><td class="sag">3.800</td><td class=""></td></tr>
+    <tr><td colspan="6" class="sonuk">… 93 cari daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Eşiğe %10 yakın olanlar sarı: dönem sonuna doğru kesilecek bir fatura cariyi bildirime sokar — önceden mutabakat istemek isteyebilirsiniz.</div></div>
+  </div>
+  <!-- ============ UYR ============ -->
+  <div class="pnl" data-s="uyr">
+    <div class="grp"><h4>Bildirimi bozacak kayıtlar <span class="mini">düzeltilmeden dosya üretilir ama bu satırlar dışarıda kalır</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Cari</th><th>Form</th><th class="sag">Tutar</th><th>Sorun</th><th>Düzeltme</th></tr></thead>
+  <tbody>
+    <tr><td class="">YENİ KLİNİK DİŞ</td><td class="">Bs</td><td class="sag">28.400</td><td class=""><span class="rz kir">VKN / TCKN boş</span></td><td class=""><span class="lnk">Cari kartı › Vergi / Kimlik No</span></td></tr>
+    <tr><td class="">ÖZEL DENT (şube)</td><td class="">Bs</td><td class="sag">14.200</td><td class=""><span class="rz kir">VKN 9 hane</span></td><td class=""><span class="lnk">Cari kartı</span></td></tr>
+    <tr><td class="">ANKARA DEPO KİRA</td><td class="">Ba</td><td class="sag">36.000</td><td class=""><span class="rz kir">VKN / TCKN boş</span></td><td class=""><span class="lnk">Cari kartı</span></td></tr>
+    <tr><td class="">MEGA DENTAL / MEGA DENTAL MALZ.</td><td class="">Ba</td><td class="sag">612.900</td><td class=""><span class="rz sari">aynı VKN iki cari</span></td><td class="">tek satırda toplanır (bilgi)</td></tr>
+    <tr><td class="">DENTSPLY GmbH</td><td class="">Ba</td><td class="sag">410.000</td><td class=""><span class="rz mavi">yurt dışı</span></td><td class="">Ba / Bs dışı (gümrük beyannamesi)</td></tr>
+    <tr><td class="">FATURA 2026-0912 (iptal)</td><td class="">Bs</td><td class="sag">9.800</td><td class=""><span class="rz sari">dönem kapandıktan sonra iptal</span></td><td class=""><span class="lnk">Belge</span></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Aynı VKN'li cariler bildirimde tek satıra toplanır (GİB VKN bazında ister).</div></div>
+  </div>
+  <!-- ============ MUT ============ -->
+  <div class="pnl" data-s="mut">
+    <div class="grp"><h4>Cari mutabakat (Ba / Bs teyidi) <span class="mini">mutabakat mektubu e-posta ile · yanıt bağlantıdan ya da elle</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Cari</th><th>Form</th><th class="sag">Bizim tutar</th><th class="sag">Belge</th><th>Gönderim</th><th>Yanıt</th><th class="sag">Carinin tutarı</th><th class="sag">Fark</th></tr></thead>
+  <tbody>
+    <tr><td class="">AĞIZ DİŞ MERKEZİ A.Ş.</td><td class="">Bs</td><td class="sag">521.300</td><td class="sag">17</td><td class="">05.10 · e-posta</td><td class="">09.10 · fark</td><td class="sag">508.900</td><td class="sag"><span class="kir">12.400</span></td></tr>
+    <tr><td class="">MEGA DENTAL MALZEME A.Ş.</td><td class="">Ba</td><td class="sag">612.900</td><td class="sag">61</td><td class="">05.10 · e-posta</td><td class=""><span class="rz sari">yanıt yok · 20 gün</span></td><td class="sag">—</td><td class="sag">—</td></tr>
+    <tr><td class="">DENTA KLİNİK LTD. ŞTİ.</td><td class="">Bs</td><td class="sag">684.200</td><td class="sag">24</td><td class="">05.10 · e-posta</td><td class="">06.10 · mutabık</td><td class="sag">684.200</td><td class="sag">0</td></tr>
+    <tr><td colspan="8" class="sonuk">… 86 cari daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Mektup Cari İcmali'nin mutabakat mektubu şablonunu kullanır (Ba / Bs metni); fark bildirene belge listesi ekli ikinci mektup gönderilebilir.</div></div>
+  </div>
+  <!-- ============ KDV ============ -->
+  <div class="pnl" data-s="kdv">
+    <div class="grp"><h4>KDV İcmali ile kıyas <span class="mini">aynı dönemin matrahı · fark açıklanmalı</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Kalem</th><th class="sag">Ba / Bs</th><th class="sag">KDV İcmali matrahı</th><th class="sag">Fark</th><th>Açıklama</th></tr></thead>
+  <tbody>
+    <tr><td class="">Alış (Ba + eşik altı + yurt dışı)</td><td class="sag">4.537.000</td><td class="sag">4.537.000</td><td class="sag">0</td><td class=""><span class="rz ok">tutarlı</span></td></tr>
+    <tr><td class="">Satış (Bs + eşik altı + nihai tüketici)</td><td class="sag">5.512.300</td><td class="sag">5.524.700</td><td class="sag"><span class="kir">−12.400</span></td><td class="">dönem sonrası düzenlenen iade (01.10) — KDV İcmali'nde Eylül'de</td></tr>
+    <tr><td class="">İstisna / tevkifatlı satış</td><td class="sag">184.000</td><td class="sag">184.000</td><td class="sag">0</td><td class=""><span class="rz ok">tutarlı</span></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Ba / Bs toplamı + eşik altı + kapsam dışı = KDV beyanındaki matrah olmalı; fark satırı belgeye iner.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>FORM Bs — MAL VE HİZMET SATIŞLARI BİLDİRİMİ (ÖN İZLEME)</h1>
+        <div class="bilgi"><span>Dönem: Eylül 2026</span><span>Mükellef: UNIVERSE MEDİKAL · VKN 8870412255</span><span>Eşik: 5.000 ₺ (KDV hariç)</span><span>57 alıcı · 611 belge</span></div>
+        <table>
+          <thead><tr><th>Unvan</th><th>VKN / TCKN</th><th>Ülke</th><th>Belge</th><th>Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>DENTA KLİNİK LTD. ŞTİ.</td><td>2921358535</td><td>TR</td><td>24</td><td>684.200</td></tr>
+            <tr><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td>0451120338</td><td>TR</td><td>17</td><td>521.300</td></tr>
+            <tr><td>GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td>4110239987</td><td>TR</td><td>9</td><td>212.800</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Form Ba toplamı</span><span>3.912.400,00</span></div><div><span>Belge sayısı (Bs)</span><span>611</span></div><div class="b"><span>FORM Bs TOPLAMI</span><span>5.104.800,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Genel Müdür<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Ba / Bs İcmali · 3 cari VKN eksik olduğu için dışarıda · son gün 31.10.2026</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>42 Ba · 57 Bs</span><span>89 mutabakat mektubu</span><span>Dönem: Eylül 2026</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Ba / Bs (Cari Mutabakat) İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Bu ay Ba / Bs'ye kimler giriyor, tutarlar doğru mu, cari bizimle aynı tutarı mı bildirecek?" Muhasebe — her ayın son gününe kadar.</li>
+    <li><b>Kural (VUK 396):</b> bir kişi / kurumdan dönemde KDV hariç 5.000 ₺ ve üstü alım (Ba) ya da satış (Bs); belge sayısı ve KDV hariç tutar, VKN / TCKN bazında. Eşik bir ayar (mevzuat değişirse).</li>
+    <li><b>Kaynak:</b> alış / satış faturaları (iade düşülür), şeritte açık ise gider pusulası ve serbest meslek makbuzu. Dövizli belge belge tarihindeki kurla. Aynı VKN'li cariler birleşir.</li>
+    <li><b>Dosya:</b> e-Beyanname'ye yüklenecek Ba / Bs XML'i üretilir; GİB'e doğrudan gönderim yok (e-Beyanname kullanıcı yükler).</li>
+    <li><b>Mutabakat:</b> Cari İcmali'nin mutabakat mektubu altyapısı; yanıt (mutabık / fark) cari bazında saklanır ve sonraki dönemlerde görünür.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">Açık sorular (önerilerimle)</b>
+  <ol>
+    <li><b>Gider pusulası ve serbest meslek makbuzu nereden gelsin?</b><span class="oneri">Öneri: Bugün ayrı belge türü yoksa alış faturasında "belge türü" (fatura / gider pusulası / SMM) alanı; Ba'ya hepsi girer, şeritte açılıp kapatılabilir.</span></li>
+    <li><b>e-Beyanname XML üretelim mi, yalnız liste mi?</b><span class="oneri">Öneri: XML üretelim (GİB şeması); yükleme kullanıcıda. Üretim sırasında VKN eksik satırlar uyarıyla dışarıda kalır.</span></li>
+    <li><b>Mutabakat yanıtı nasıl alınsın?</b><span class="oneri">Öneri: Mektupta tek kullanımlık bağlantı (Mutabık / Fark var + tutar); bağlantı açık sayfası form motorundaki açık sayfa deseniyle. Yanıt gelmezse elle işaretlenebilir.</span></li>
+    <li><b>Dönem kilidi olsun mu?</b><span class="oneri">Öneri: Ba / Bs dosyası üretilen dönemde belge değişirse (iptal, tarih, tutar) icmal uyarı rozeti göstersin; kilit Muhasebe Dönemi kilidiyle (mevcut) — ayrı kilit yok.</span></li>
+  </ol>
+</div>
+
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

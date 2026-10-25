@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teklif / Fırsat Dönüşüm İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🎯 Teklif / Fırsat Dönüşüm İcmali — 01.01.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Satış › İcmaller · Tüm şubeler · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Dönüşüm İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📝</span> Teklif kartı</div>
+    <div class="btn"><span>🧲</span> Fırsat kartı</div>
+    <div class="btn"><span>🛒</span> Siparişe dönüştür</div>
+    <div class="btn"><span>📞</span> Takip görevi ver</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📈</span> Satış İcmali</div>
+    <div class="btn"><span>👔</span> Temsilci Performans</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Bu yıl</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">👤 Temsilci: <b>Tümü</b> ▾</div>
+    <div class="sel">🏷 Müşteri grubu: <b>Tümü</b> ▾</div>
+    <div class="sel">📦 Kategori: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Tutar</span><span>Adet</span></div>
+    <label class="chk"><input type="checkbox" checked> Revizyonları tek teklif say</label>
+    <span class="sp"></span>
+    <span class="rz sari">Süresi geçen, cevapsız teklif: 14</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Verilen Teklif</div><div class="deg">412</div><div class="alt">18.640.000 ₺</div></div>
+    <div class="kutu iyi"><div class="bas">Siparişe Dönen</div><div class="deg">%37,1</div><div class="alt">tutarca · 159 teklif · 6.912.000 ₺</div></div>
+    <div class="kutu teh"><div class="bas">Kaybedilen</div><div class="deg">%27,4</div><div class="alt">113 teklif · 5.104.000 ₺</div></div>
+    <div class="kutu "><div class="bas">Bekleyen</div><div class="deg">140</div><div class="alt">6.624.000 ₺</div></div>
+    <div class="kutu "><div class="bas">Ort. Dönüş Süresi</div><div class="deg">11 gün</div><div class="alt">tekliften siparişe</div></div>
+    <div class="kutu uy"><div class="bas">Ort. Teklif İskontosu</div><div class="deg">%8,4</div><div class="alt">kazanılanda %6,1</div></div>
+    <div class="kutu "><div class="bas">Açık Fırsat Hunisi</div><div class="deg">9.380.000 ₺</div><div class="alt">ağırlıklı 3.210.000 ₺</div></div>
+    <div class="kutu teh"><div class="bas">Süresi Geçen</div><div class="deg">14</div><div class="alt">612.000 ₺ cevapsız</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="hun">Huni</div>
+    <div class="sekme" data-s="tek">Teklifler</div>
+    <div class="sekme" data-s="tem">Temsilci</div>
+    <div class="sekme" data-s="mus">Müşteri</div>
+    <div class="sekme" data-s="urn">Ürün / Kategori</div>
+    <div class="sekme" data-s="kay">Kayıp Nedeni <span class="rz kir">113</span></div>
+    <div class="sekme" data-s="tak">Takip Bekleyen <span class="rz sari">14</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ HUN ============ -->
+  <div class="pnl" data-s="hun">
+    <div class="grp"><h4>Fırsat → teklif → sipariş hunisi <span class="mini">aşama geçişi fırsat ve teklif durumlarından</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Aşama</th><th class="sag">Adet</th><th class="sag">Tutar</th><th class="">Önceki aşamadan geçiş</th><th class="sag">Ort. bekleme</th></tr></thead>
+  <tbody>
+    <tr><td class="">Fırsat açıldı</td><td class="sag">286</td><td class="sag">14.920.000</td><td class="">—</td><td class="sag">—</td></tr>
+    <tr><td class="">Teklif verildi</td><td class="sag">412</td><td class="sag">18.640.000</td><td class=""><div class="cubuk"><i style="width:72%"></i></div> %72</td><td class="sag">4 gün</td></tr>
+    <tr><td class="">Müzakere / revizyon</td><td class="sag">188</td><td class="sag">9.210.000</td><td class=""><div class="cubuk"><i style="width:46%"></i></div> %46</td><td class="sag">6 gün</td></tr>
+    <tr><td class="">Siparişe döndü</td><td class="sag">159</td><td class="sag">6.912.000</td><td class=""><div class="cubuk"><i style="width:39%;background:#2e7d46"></i></div> %39</td><td class="sag">11 gün</td></tr>
+    <tr><td class="">Faturalandı</td><td class="sag">151</td><td class="sag">6.704.000</td><td class=""><div class="cubuk"><i style="width:95%;background:#2e7d46"></i></div> %95</td><td class="sag">5 gün</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Fırsatsız doğrudan verilen teklif (126 adet) huniye "Teklif verildi" aşamasından girer; geçiş oranı tutar üzerinden. Siparişe dönüş: teklif satırından sipariş satırına bağ (belge dönüşüm izi).</div></div>
+  </div>
+  <!-- ============ TEK ============ -->
+  <div class="pnl" data-s="tek">
+    <div class="grp"><h4>Teklif listesi <span class="mini">durum teklif ↔ sipariş bağından · satıra tıkla: revizyonlar</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Teklif</th><th>Tarih</th><th>Müşteri</th><th>Temsilci</th><th class="sag">Tutar</th><th class="sag">İskonto</th><th>Geçerlilik</th><th>Durum</th><th class="sag">Sipariş</th></tr></thead>
+  <tbody>
+    <tr><td class=""><span class="lnk">TKL-2026-0412</span></td><td class="">24.10.2026</td><td class="">DENTA KLİNİK LTD. ŞTİ.</td><td class="">Mert AKSOY</td><td class="sag">184.000</td><td class="sag">%7,5</td><td class="">08.11.2026</td><td class=""><span class="rz mavi">bekliyor</span></td><td class="sag">—</td></tr>
+    <tr><td class=""><span class="lnk">TKL-2026-0398</span></td><td class="">15.10.2026</td><td class="">AĞIZ DİŞ MERKEZİ A.Ş.</td><td class="">Mert AKSOY</td><td class="sag">96.400</td><td class="sag">%5,0</td><td class="">30.10.2026</td><td class=""><span class="rz ok">siparişe döndü</span></td><td class="sag">96.400</td></tr>
+    <tr><td class=""><span class="lnk">TKL-2026-0377</span> <span class="rz mor">rev. 3</span></td><td class="">02.10.2026</td><td class="">GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td class="">Ece DEMİR</td><td class="sag">212.800</td><td class="sag">%14,0</td><td class="">17.10.2026</td><td class=""><span class="rz kir">kaybedildi · fiyat</span></td><td class="sag">—</td></tr>
+    <tr><td class=""><span class="lnk">TKL-2026-0351</span></td><td class="">22.09.2026</td><td class="">DENTOKAT</td><td class="">Ece DEMİR</td><td class="sag">48.900</td><td class="sag">%3,0</td><td class="">07.10.2026</td><td class=""><span class="rz sari">süresi geçti</span></td><td class="sag">—</td></tr>
+    <tr><td class=""><span class="lnk">TKL-2026-0344</span></td><td class="">19.09.2026</td><td class="">ŞAH GROUP</td><td class="">Mert AKSOY</td><td class="sag">131.500</td><td class="sag">%9,0</td><td class="">04.10.2026</td><td class=""><span class="rz ok">kısmen döndü</span></td><td class="sag">74.200</td></tr>
+    <tr><td colspan="9" class="sonuk">… 407 teklif daha</td></tr>
+    <tr class="toplam"><td class="">Toplam (412)</td><td class=""></td><td class=""></td><td class=""></td><td class="sag">18.640.000</td><td class="sag">%8,4</td><td class=""></td><td class=""></td><td class="sag">6.912.000</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kısmen dönen teklif: satırların bir kısmı siparişe girdi — dönen tutar sipariş sütununda, oran tutar üzerinden. Revizyonlar tek teklif sayılır (şerit), kartta revizyon geçmişi.</div></div>
+  </div>
+  <!-- ============ TEM ============ -->
+  <div class="pnl" data-s="tem">
+    <div class="grp"><h4>Temsilci bazında dönüşüm <span class="mini">Temsilci Performans İcmali ile aynı temsilci ataması</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Temsilci</th><th class="sag">Teklif</th><th class="sag">Tutar</th><th class="sag">Dönen</th><th class="">Dönüşüm</th><th class="sag">Kayıp</th><th class="sag">Ort. iskonto</th><th class="sag">Ort. süre</th><th class="sag">Bekleyen</th></tr></thead>
+  <tbody>
+    <tr><td class="">Mert AKSOY</td><td class="sag">168</td><td class="sag">8.420.000</td><td class="sag">3.704.000</td><td class=""><div class="cubuk"><i style="width:44%;background:#2e7d46"></i></div> %44</td><td class="sag">2.010.000</td><td class="sag">%7,2</td><td class="sag">9 gün</td><td class="sag">2.706.000</td></tr>
+    <tr><td class="">Ece DEMİR</td><td class="sag">141</td><td class="sag">6.180.000</td><td class="sag">1.978.000</td><td class=""><div class="cubuk"><i style="width:32%"></i></div> %32</td><td class="sag">2.184.000</td><td class="sag">%10,6</td><td class="sag">14 gün</td><td class="sag">2.018.000</td></tr>
+    <tr><td class="">Burak ŞEN</td><td class="sag">103</td><td class="sag">4.040.000</td><td class="sag">1.230.000</td><td class=""><div class="cubuk"><i style="width:30%"></i></div> %30</td><td class="sag">910.000</td><td class="sag">%7,9</td><td class="sag">12 gün</td><td class="sag">1.900.000</td></tr>
+    <tr class="toplam"><td class="">Toplam</td><td class="sag">412</td><td class="sag">18.640.000</td><td class="sag">6.912.000</td><td class="">%37,1</td><td class="sag">5.104.000</td><td class="sag">%8,4</td><td class="sag">11 gün</td><td class="sag">6.624.000</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Yüksek iskonto + düşük dönüşüm aynı satırda kırmızıya döner (iskonto dönüşüm getirmiyor).</div></div>
+  </div>
+  <!-- ============ MUS ============ -->
+  <div class="pnl" data-s="mus">
+    <div class="grp"><h4>Müşteri bazında <span class="mini">çok teklif alıp az sipariş veren müşteriler üstte</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Müşteri</th><th class="sag">Teklif</th><th class="sag">Tutar</th><th class="sag">Dönen</th><th class="">Dönüşüm</th><th class="">Son teklif</th><th class="">Son sipariş</th></tr></thead>
+  <tbody>
+    <tr><td class="">GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td class="sag">22</td><td class="sag">1.284.000</td><td class="sag">212.000</td><td class=""><div class="cubuk"><i style="width:17%;background:#c0413d"></i></div> %17</td><td class="">02.10.2026</td><td class="">14.06.2026</td></tr>
+    <tr><td class="">DENTOKAT</td><td class="sag">14</td><td class="sag">412.000</td><td class="sag">96.000</td><td class=""><div class="cubuk"><i style="width:23%;background:#c0413d"></i></div> %23</td><td class="">22.09.2026</td><td class="">30.08.2026</td></tr>
+    <tr><td class="">DENTA KLİNİK LTD. ŞTİ.</td><td class="sag">31</td><td class="sag">2.140.000</td><td class="sag">1.380.000</td><td class=""><div class="cubuk"><i style="width:64%;background:#2e7d46"></i></div> %64</td><td class="">24.10.2026</td><td class="">18.10.2026</td></tr>
+    <tr><td colspan="7" class="sonuk">… 118 müşteri daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Teklif sayısı 5 ve üstü, dönüşümü %25 altı müşteri kırmızı — fiyat karşılaştırması için teklif topluyor olabilir.</div></div>
+  </div>
+  <!-- ============ URN ============ -->
+  <div class="pnl" data-s="urn">
+    <div class="grp"><h4>Ürün / kategori bazında <span class="mini">teklif satırlarından</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Kategori</th><th class="sag">Teklif satırı</th><th class="sag">Teklif tutarı</th><th class="sag">Dönen</th><th class="">Dönüşüm</th><th class="sag">Ort. iskonto</th><th class="sag">Liste fiyatına göre</th></tr></thead>
+  <tbody>
+    <tr><td class="">İmplant sistemleri</td><td class="sag">611</td><td class="sag">7.420.000</td><td class="sag">3.110.000</td><td class=""><div class="cubuk"><i style="width:42%;background:#2e7d46"></i></div> %42</td><td class="sag">%6,8</td><td class="sag">−%4,1</td></tr>
+    <tr><td class="">Dental ünit / cihaz</td><td class="sag">84</td><td class="sag">5.960.000</td><td class="sag">1.420.000</td><td class=""><div class="cubuk"><i style="width:24%"></i></div> %24</td><td class="sag">%11,2</td><td class="sag">−%9,8</td></tr>
+    <tr><td class="">Sarf / dolgu</td><td class="sag">1.204</td><td class="sag">3.180.000</td><td class="sag">1.690.000</td><td class=""><div class="cubuk"><i style="width:53%;background:#2e7d46"></i></div> %53</td><td class="sag">%4,0</td><td class="sag">−%2,2</td></tr>
+    <tr><td colspan="7" class="sonuk">… 9 kategori daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Liste fiyatına göre: teklif birim fiyatının carinin fiyat listesindeki fiyata oranı.</div></div>
+  </div>
+  <!-- ============ KAY ============ -->
+  <div class="pnl" data-s="kay">
+    <div class="grp"><h4>Kayıp nedenleri <span class="mini">teklif kaybedildi işaretlenirken neden zorunlu</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Neden</th><th class="sag">Teklif</th><th class="sag">Tutar</th><th class="">Pay</th><th>Rakip (girildiyse)</th><th class="sag">Ort. fiyat farkı</th></tr></thead>
+  <tbody>
+    <tr><td class="">Fiyat yüksek</td><td class="sag">48</td><td class="sag">2.380.000</td><td class=""><div class="cubuk"><i style="width:47%"></i></div> %47</td><td class="">Dentsply bayii (19), Yerel bayi (11)</td><td class="sag">%9,4</td></tr>
+    <tr><td class="">Teslim süresi</td><td class="sag">21</td><td class="sag">980.000</td><td class=""><div class="cubuk"><i style="width:19%"></i></div> %19</td><td class="">—</td><td class="sag">—</td></tr>
+    <tr><td class="">Müşteri vazgeçti / bütçe yok</td><td class="sag">24</td><td class="sag">1.020.000</td><td class=""><div class="cubuk"><i style="width:20%"></i></div> %20</td><td class="">—</td><td class="sag">—</td></tr>
+    <tr><td class="">Ürün / marka tercihi</td><td class="sag">13</td><td class="sag">512.000</td><td class=""><div class="cubuk"><i style="width:10%"></i></div> %10</td><td class="">Straumann (8)</td><td class="sag">—</td></tr>
+    <tr><td class="">Cevap yok (süre doldu, kayba çevrildi)</td><td class="sag">7</td><td class="sag">212.000</td><td class=""><div class="cubuk"><i style="width:4%"></i></div> %4</td><td class="">—</td><td class="sag">—</td></tr>
+    <tr class="toplam"><td class="">Toplam</td><td class="sag">113</td><td class="sag">5.104.000</td><td class=""></td><td class=""></td><td class="sag"></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Neden listesi kod listesi (ayarlanabilir); rakip ve rakip fiyatı isteğe bağlı.</div></div>
+  </div>
+  <!-- ============ TAK ============ -->
+  <div class="pnl" data-s="tak">
+    <div class="grp"><h4>Takip bekleyen teklifler <span class="mini">geçerlilik bitti ya da 7 gündür hareket yok</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Teklif</th><th>Müşteri</th><th>Temsilci</th><th class="sag">Tutar</th><th>Geçerlilik</th><th class="sag">Son temas</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td class="">TKL-2026-0351</td><td class="">DENTOKAT</td><td class="">Ece DEMİR</td><td class="sag">48.900</td><td class="">07.10.2026</td><td class="sag">18 gün</td><td class=""><span class="rz kir">süresi geçti</span></td></tr>
+    <tr><td class="">TKL-2026-0389</td><td class="">MESUT PARLAK</td><td class="">Burak ŞEN</td><td class="sag">22.400</td><td class="">28.10.2026</td><td class="sag">9 gün</td><td class=""><span class="rz sari">3 gün kaldı</span></td></tr>
+    <tr><td class="">TKL-2026-0367</td><td class="">ŞAH GROUP</td><td class="">Mert AKSOY</td><td class="sag">64.000</td><td class="">26.10.2026</td><td class="sag">12 gün</td><td class=""><span class="rz sari">yarın bitiyor</span></td></tr>
+    <tr><td colspan="7" class="sonuk">… 11 teklif daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">"Takip görevi ver" temsilciye görev açar (Görevler); "kaybedildi" işaretlemek neden ister. Süresi geçmiş teklif kendiliğinden kayba çevrilmez.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>TEKLİF / FIRSAT DÖNÜŞÜM İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.01 – 25.10.2026</span><span>Tüm şubeler · tüm temsilciler</span><span>Revizyonlar tek teklif</span><span>Tutar: KDV hariç, TL karşılığı</span></div>
+        <table>
+          <thead><tr><th>Temsilci</th><th>Teklif</th><th>Tutar</th><th>Dönen</th><th>Dönüşüm</th></tr></thead>
+          <tbody>
+            <tr><td>Mert AKSOY</td><td>168</td><td>8.420.000</td><td>3.704.000</td><td>%44</td></tr>
+            <tr><td>Ece DEMİR</td><td>141</td><td>6.180.000</td><td>1.978.000</td><td>%32</td></tr>
+            <tr><td>Burak ŞEN</td><td>103</td><td>4.040.000</td><td>1.230.000</td><td>%30</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Verilen</span><span>18.640.000,00</span></div><div><span>Kaybedilen</span><span>5.104.000,00</span></div><div><span>Bekleyen</span><span>6.624.000,00</span></div><div class="b"><span>SİPARİŞE DÖNEN</span><span>6.912.000,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Genel Müdür<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Teklif / Fırsat Dönüşüm İcmali · 14 teklif takip bekliyor</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>412 teklif</span><span>286 fırsat</span><span>Dönem: 01.01 – 25.10.2026</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Teklif / Fırsat Dönüşüm İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Verdiğimiz tekliflerin ne kadarı satışa dönüyor, nerede kaybediyoruz, hangi teklif takip bekliyor?" Satış müdürü ve temsilciler — haftalık satış toplantısı.</li>
+    <li><b>Dönüşüm:</b> teklif satırı → sipariş satırı bağından (belge dönüşüm izi); tutar KDV hariç, dövizli teklif teklif tarihindeki kurla. Kısmen dönen teklif dönen tutar kadar sayılır.</li>
+    <li><b>Huni:</b> satış fırsatı (CRM) aşamaları + teklif durumları tek hunide; fırsatsız teklif huniye teklif aşamasından girer.</li>
+    <li><b>Kayıp nedeni:</b> teklif "kaybedildi" yapılırken neden (kod listesi) zorunlu, rakip ve rakip fiyatı isteğe bağlı — bugün teklifte bu alanlar yok (açık soru).</li>
+    <li><b>Eylemler:</b> siparişe dönüştür (mevcut dönüşüm), takip görevi ver (Görevler), kaybedildi işaretle.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">Açık sorular (önerilerimle)</b>
+  <ol>
+    <li><b>Teklif durumu ve kayıp nedeni nerede tutulsun?</b><span class="oneri">Öneri: Teklif başlığına durum (bekliyor / kazanıldı / kısmen / kaybedildi / süresi geçti), kayıp nedeni (kod listesi "teklif.kayip_nedeni"), rakip ve rakip fiyatı. Kazanıldı / kısmen sipariş bağından kendiliğinden hesaplanır, elle seçilmez.</span></li>
+    <li><b>Süresi geçen teklif kendiliğinden "kaybedildi" olsun mu?</b><span class="oneri">Öneri: Hayır; "süresi geçti" ayrı durum olarak kalsın, takip listesinde görünsün. 30 gün daha hareketsizse ayara bağlı olarak kayba çevrilebilir (varsayılan kapalı).</span></li>
+    <li><b>Revizyonlar nasıl sayılsın?</b><span class="oneri">Öneri: Aynı teklifin revizyonları tek teklif (son revizyonun tutarı); şeritte "revizyonları ayrı say" seçeneği.</span></li>
+    <li><b>Dövizli teklifin TL karşılığı hangi kurla?</b><span class="oneri">Öneri: Teklif tarihindeki kurla (karşılaştırma dönem içinde tutarlı kalsın); dönen tutar sipariş tarihindeki kurla.</span></li>
+  </ol>
+</div>
+
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>
