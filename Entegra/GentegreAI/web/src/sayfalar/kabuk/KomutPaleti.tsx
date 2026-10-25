@@ -7,7 +7,8 @@ import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 import { telefonBicimle } from '../../bilesenler/bicim';
 import { mesaj } from '../../bilesenler/mesaj';
-import { cariKartGovdesi, cariKartYolu, cariNiyetCoz, rolAdi, type CariRol } from './cariKomutu';
+import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, ISLEM_SIRASI, rolAdi,
+         type CariRol, type SeciliCari } from './cariKomutu';
 import { paletSadelestir } from './paletMetin';
 
 /**
@@ -174,13 +175,15 @@ export function kimlikNiyetCoz(metin: string): { rakam: string; tur: 'tc' | 'tel
 
 /** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
-type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Ekranlar' | 'İşlemler';
+type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Cariler' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
   | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string;
       /** Kayıtlı hastaya YENİ BAŞVURU: açık başvurusu varsa o açılır (Liste.basvuruAc ile aynı kural). */
       basvuruTaraf?: { id: number; ad: string };
       /** VKN + rol (cariKomutu): Enter entegratörden bilgi alıp kartı OLUŞTURUR (kayıtlıysa uyarıp açar). */
-      cariOlustur?: { vkn: string; rol: CariRol } }
+      cariOlustur?: { vkn: string; rol: CariRol };
+      /** Ad araması sonucu cari: Enter SEÇER (gezinmez) - ardından komut yazılır (sipariş / fatura / irsaliye…). */
+      cariSec?: SeciliCari }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
@@ -200,6 +203,8 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     return () => window.removeEventListener(PALET_SESLI_OLAYI, sesli);
   }, [onAc, sesBaslat]);
   const kutu = useRef<HTMLInputElement>(null);
+  /** SEÇİLİ CARİ (ad araması -> Enter): kutunun solunda çip; yazılan metin artık o carinin KOMUTU. */
+  const [seciliCari, setSeciliCari] = useState<SeciliCari | null>(null);
   const ekranKomutlari = usePaletKomutlari();
 
   useEffect(() => {
@@ -218,7 +223,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
   // Her açılışta temiz başla: önceki aramanın sonucu ekranda kalırsa kullanıcı
   //   onu yeni sorgunun cevabı sanıyor.
-  useEffect(() => { if (acik) { setArama(''); setSecili(0) } }, [acik]);
+  useEffect(() => { if (acik) { setArama(''); setSecili(0); setSeciliCari(null) } }, [acik]);
 
   const ekranlar = useMemo(() => [...paletEkranlari(satirlar), ...(ekEkranlar ?? [])], [satirlar, ekEkranlar]);
 
@@ -316,6 +321,31 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
 
+  /**
+   * AD İLE CARİ (kullanıcı 25.10.2026: "'ahmet' yazarsam içinde ahmet geçen müşteri ve tedarikçi listesi getir (max 3),
+   * birini seçeyim ve komut vereyim"). Rakamsız en az 3 harf; cümle komutu değilse. Enter cariyi seçer; ardından
+   * "sip al", "fat kes", "irs", "kart", "ekstre" (cariKomutu.cariIslemCoz).
+   */
+  const [cariAdOgeleri, setCariAdOgeleri] = useState<Oge[]>([]);
+  useEffect(() => {
+    const q = arama.trim();
+    if (!acik || seciliCari || q.length < 3 || /\d/.test(q) || cumleCoz(q)) { setCariAdOgeleri([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      api.hizliBulCariAd(q).then(y => {
+        if (iptal) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        if (!menude.has('/cari') && !menude.has('/tedarikci')) { setCariAdOgeleri([]); return }
+        setCariAdOgeleri((y.cariler ?? []).map<Oge>(k => ({
+          bolum: 'Cariler', tur: 'ekran', anahtar: `ca${k.id}`, ikon: k.musteri ? '👥' : '🤝', ad: k.ad,
+          grup: [k.musteri && k.tedarikci ? c('Müşteri / Tedarikçi') : k.musteri ? c('Müşteri') : c('Tedarikçi'), k.kod, k.il]
+                .filter(Boolean).join(' · ') + ` · ${c('seçip komut yazın: sip al, fat kes, irs…')}`,
+          yol: `${k.musteri ? '/cari' : '/tedarikci'}/${k.id}`, cariSec: k })));
+      }).catch(() => { if (!iptal) setCariAdOgeleri([]) });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar, seciliCari]);
+
   const [kimlikOgeleri, setKimlikOgeleri] = useState<Oge[]>([]);
   useEffect(() => {
     const kz = acik ? kimlikNiyetCoz(arama) : null;
@@ -362,6 +392,20 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   const gorunen = useMemo<Oge[]>(() => {
     const q = arama.trim();
     const komutlar = ekranKomutlari?.komutlar ?? [];
+
+    // SEÇİLİ CARİ: yalnız o carinin işlemleri; yazılan metin komut (boşsa hepsi).
+    if (seciliCari) {
+      const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+      const coz = cariIslemCoz(q);
+      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem] : ISLEM_SIRASI;
+      const yon = coz === 'yok' ? null : coz.yon;
+      const l = islemler.map(i => cariIslemHedefi(seciliCari, i, yon)).filter(h => menude.has(h.liste));
+      return l.length
+        ? l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
+                             grup: seciliCari.kod, yol: h.yol, islem: true, ikon: h.ikon }))
+        : [{ bolum: 'İşlemler', tur: 'komut', anahtar: 'ci-yok', grup: '', kod: '', aktif: false,
+             ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
+    }
 
     if (q === '') {
       // BOŞ ARAMA = kısa yol listesi: favoriler, sonra son kullanılanlar,
@@ -411,10 +455,16 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     //   Bölüm sırası: Ekranlar, sonra İşlemler (eşleşen iş + komut).
     // KİMLİK NİYETİ ÖNCE (Enter onu çalıştırır); aynı hastayı numara araması da bulduysa ikinci kez çizilmez.
     const kimlikYollari = new Set(kimlikOgeleri.map(o => o.tur === 'ekran' ? o.yol : ''));
+    // CARİLER: bir ekran adı yazılanla BAŞLIYORSA ekranlar önce ("kasa" yazan Kasa ekranını bekler), değilse cariler.
+    const sadeQ = paletSadelestir(q);
+    const ekranBasi = ekranlar.some(e => paletSadelestir(e.ad).startsWith(sadeQ));
     return [...cariOgeleri, ...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
+            ...(ekranBasi ? [] : cariAdOgeleri),
             ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
+            ...(ekranBasi ? cariAdOgeleri : []),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
-  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, cariOgeleri, ekranSayac]);
+  }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, cariOgeleri, cariAdOgeleri,
+      seciliCari, ekranSayac]);
 
   if (!acik) return null;
 
@@ -434,6 +484,10 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         if (acikId) { mesaj(c('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.')); git(`/basvuru/${acikId}`) }
         else git(o.yol);
       }, () => git(o.yol));
+      return;
+    }
+    if (o.tur === 'ekran' && o.cariSec) {
+      setSeciliCari(o.cariSec); setArama(''); setSecili(0); kutu.current?.focus();
       return;
     }
     if (o.tur === 'ekran' && o.cariOlustur) {
@@ -477,14 +531,24 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         if (e.key === 'ArrowDown') { e.preventDefault(); setSecili(s => Math.min(s + 1, gorunen.length - 1)) }
         else if (e.key === 'ArrowUp') { e.preventDefault(); setSecili(s => Math.max(s - 1, 0)) }
         else if (e.key === 'Enter' && gorunen[secili]) { e.preventDefault(); sec(gorunen[secili]) }
+        else if (e.key === 'Backspace' && seciliCari && arama === '') { e.preventDefault(); setSeciliCari(null) }
       }}>
         <div className="palet-arama">
-          <div className="palet-kutu">
+          <div className={`palet-kutu${seciliCari ? ' cipli' : ''}`}>
+          {/* SEÇİLİ CARİ ÇİPİ: ✕ ya da boş kutuda ⌫ seçimi kaldırır. */}
+          {seciliCari && (
+            <span className="palet-cip" title={seciliCari.kod}>
+              {seciliCari.musteri ? '👥' : '🤝'} {seciliCari.ad}
+              <button type="button" onClick={() => { setSeciliCari(null); kutu.current?.focus() }} title={c('Seçimi kaldır')}>✕</button>
+            </span>
+          )}
           <input
             ref={kutu}
             autoFocus
             className="arama"
-            placeholder={ses.dinliyor ? c('Dinliyorum… söyleyin') : c('Ekran, komut ya da numara ara (dosya / TC / protokol)… (Ctrl+K)')}
+            placeholder={ses.dinliyor ? c('Dinliyorum… söyleyin')
+              : seciliCari ? c('Komut: sip al · fat kes · irs · kart · ekstre (boş = hepsi)')
+              : c('Ekran, komut, cari adı ya da numara ara (dosya / TC / VKN)… (Ctrl+K)')}
             value={arama}
             onChange={e => { setArama(e.target.value); setSecili(0) }}
           />

@@ -62,6 +62,9 @@ export const kimlikUclari = {
   /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (25.10.2026): o VKN / TCKN ile kayıtlı cariler (pasif dahil). */
   hizliBulCari: (vkn: string) => istek<{ vkn: string; kayitlar?: CariVknKaydi[] }>(
     `/api/hizli-bul/cari?vkn=${encodeURIComponent(vkn)}`),
+  /** Ctrl+K ad ile cari (25.10.2026): içinde geçen aktif müşteri / tedarikçi, en çok 3. */
+  hizliBulCariAd: (q: string) => istek<{ cariler?: { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; il: string }[] }>(
+    `/api/hizli-bul/cari-ad?q=${encodeURIComponent(q)}`),
   /** Kart oluşturmadan önce: kayıtlı cari (varsa oluşturulmaz) + entegratörden (izibiz) firma bilgisi. */
   cariGibBilgi: (vkn: string) => istek<{ vkn: string; kayitlar?: CariVknKaydi[]; gib?: CariGibBilgisi | null; gibHata?: string }>(
     `/api/kart/cari/gib-bilgi?vkn=${encodeURIComponent(vkn)}`),

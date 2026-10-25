@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cariKartGovdesi, cariNiyetCoz } from '../sayfalar/kabuk/cariKomutu';
+import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz } from '../sayfalar/kabuk/cariKomutu';
 import { cumleCoz, kimlikNiyetCoz } from '../sayfalar/kabuk/KomutPaleti';
 
 /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (kullanıcı 25.10.2026). */
@@ -33,5 +33,32 @@ describe('cari komutu', () => {
     expect(g.kart).toMatchObject({ unvan: 'ÖRNEK A.Ş.', vkno: '3850065757', vd: 'Kadıköy', musteri: false, tedarikci: true,
                                    efatura: true, aliasEposta: 'urn:mail:defaultpk@ornek.com' });
     expect(g.detaylar.adresler.eklenen[0]).toMatchObject({ tur: 1, il: 'İSTANBUL', varsayilan: true });
+  });
+
+  it('seçili carinin komutu: kullanıcının örnekleri', () => {
+    for (const m of ['sip', 'sipariş', 'sip al', 'sipariş al', 'satış siparişi', 'sat sip', 'satış sip al'])
+      expect(cariIslemCoz(m), m).toMatchObject({ islem: 'siparis' });
+    for (const m of ['fat', 'fatura', 'fat kes', 'fatura kes', 'satış faturası'])
+      expect(cariIslemCoz(m), m).toMatchObject({ islem: 'fatura' });
+    for (const m of ['irs', 'irsaliye', 'sat irs', 'satış irsaliye aç', 'irs oluştur', 'irsaliye oluş'])
+      expect(cariIslemCoz(m), m).toMatchObject({ islem: 'irsaliye' });
+    expect(cariIslemCoz('')).toEqual({ islem: null, yon: null });
+    expect(cariIslemCoz('satış sip')).toEqual({ islem: 'siparis', yon: 'satis' });
+    expect(cariIslemCoz('alış fat')).toEqual({ islem: 'fatura', yon: 'alis' });
+    expect(cariIslemCoz('kartı aç')).toMatchObject({ islem: 'kart' });
+    expect(cariIslemCoz('ekstre')).toMatchObject({ islem: 'ekstre' });
+    expect(cariIslemCoz('maaş')).toBe('yok');
+  });
+
+  it('hedef: müşteride satış, yalnız tedarikçide alış; cari seçili açılır', () => {
+    const m = { id: 7, ad: 'AHMET YILMAZ', kod: '120.01', musteri: true, tedarikci: false };
+    expect(cariIslemHedefi(m, 'siparis', null).yol).toBe('/siparis/yeni?tarafId=7&tarafUnvan=AHMET%20YILMAZ');
+    expect(cariIslemHedefi(m, 'fatura', null).yol).toBe('/belge/yeni?tur=15&tarafId=7&tarafUnvan=AHMET%20YILMAZ');
+    expect(cariIslemHedefi(m, 'irsaliye', null).liste).toBe('/satis-irsaliye');
+    const t = { ...m, musteri: false, tedarikci: true };
+    expect(cariIslemHedefi(t, 'fatura', null).liste).toBe('/alis-fatura');
+    expect(cariIslemHedefi(t, 'fatura', 'satis').liste).toBe('/belge');
+    expect(cariIslemHedefi(t, 'kart', null).yol).toBe('/tedarikci/7');
+    expect(cariIslemHedefi(m, 'ekstre', null).yol).toBe('/ekstre?tur=cari&id=7');
   });
 });

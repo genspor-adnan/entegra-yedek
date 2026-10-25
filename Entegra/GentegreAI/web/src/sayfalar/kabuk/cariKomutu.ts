@@ -53,3 +53,60 @@ export function cariKartGovdesi(vkn: string, rol: CariRol, g: CariGibBilgisi): K
     } : {}),
   } as unknown as KartYazmaIstegi;
 }
+
+/**
+ * CARİ SEÇİLDİKTEN SONRAKİ KOMUT (kullanıcı 25.10.2026: "'ahmet' yazarsam içinde ahmet geçen müşteri ve tedarikçi
+ * listesi getir (max 3), birini seçeyim ve komut vereyim.. sipariş (veya sip) al (veya satış / sat siparişi / sip)
+ * dediğimde satış sip kartı aç.. fat (fatura) kes dediğimde satış faturası kartı aç.. sat / satış irs / irsaliye
+ * aç / oluş / oluştur veya boş"). Fiiller (al, kes, aç, oluş(tur), yeni, ver) isteğe bağlı. Yön: "sat / satış" satış,
+ * "alış" alış; yazılmazsa carinin rolünden (müşteriyse satış, yalnız tedarikçiyse alış).
+ */
+export type CariIslem = 'siparis' | 'fatura' | 'irsaliye' | 'kart' | 'ekstre';
+export type CariYon = 'satis' | 'alis';
+export interface SeciliCari { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; il?: string }
+
+const ISLEM_SOZ: [string, CariIslem][] = [
+  ['sip', 'siparis'], ['siparis', 'siparis'], ['fat', 'fatura'], ['fatura', 'fatura'],
+  ['irs', 'irsaliye'], ['irsaliye', 'irsaliye'], ['kart', 'kart'], ['karti', 'kart'], ['eks', 'ekstre'], ['ekstre', 'ekstre'],
+];
+const FIIL = new Set(['al', 'kes', 'ac', 'olus', 'olustur', 'yeni', 'ver', 'gir', 'yap']);
+
+/** "sip al" -> siparis; "sat fat kes" -> fatura/satis; "" -> null (hepsi listelenir). Tanınmayan sözcük -> 'yok'. */
+export function cariIslemCoz(metin: string): { islem: CariIslem | null; yon: CariYon | null } | 'yok' {
+  const kel = paletSadelestir(metin).split(/\s+/).map(k => k.replace(/[^a-z]/g, '')).filter(Boolean);
+  let islem: CariIslem | null = null; let yon: CariYon | null = null;
+  for (const k of kel) {
+    if (k === 'sat' || k === 'satis' || k === 'satiş') { yon = 'satis'; continue }
+    if (k === 'alis' || k === 'alim') { yon = 'alis'; continue }
+    if (FIIL.has(k)) continue;
+    // Önek: "siparisi", "faturası", "irsaliyesi", "kartı" - ilk 3 harf yeter.
+    const bul = k.length >= 3 ? ISLEM_SOZ.find(([s]) => k.startsWith(s) || s.startsWith(k)) : undefined;
+    if (bul) { if (!islem || islem === 'kart') islem = bul[1]; continue }
+    return 'yok';
+  }
+  return { islem, yon };
+}
+
+export const ISLEM_SIRASI: CariIslem[] = ['siparis', 'fatura', 'irsaliye', 'kart', 'ekstre'];
+const BELGE_ROTA: Record<CariYon, Record<'siparis' | 'fatura' | 'irsaliye', string>> = {
+  // Satış Faturası Listesi menüde '/belge' (yeni fatura '/belge/yeni?tur=15', BelgeYeniRota).
+  satis: { siparis: '/siparis', fatura: '/belge', irsaliye: '/satis-irsaliye' },
+  alis: { siparis: '/alis-siparis', fatura: '/alis-fatura', irsaliye: '/alis-irsaliye' },
+};
+const ISLEM_ADI: Record<CariIslem, string> = { siparis: 'siparişi', fatura: 'faturası', irsaliye: 'irsaliyesi', kart: '', ekstre: '' };
+
+/** İşlemin ekranı (liste rotası - menüde yoksa yetki yok) ve gidilecek yol. */
+export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: CariYon | null):
+  { ad: string; liste: string; yol: string; ikon: string } {
+  const yon: CariYon = yonIstenen ?? (c.musteri || !c.tedarikci ? 'satis' : 'alis');
+  if (islem === 'kart') {
+    const liste = c.musteri ? '/cari' : '/tedarikci';
+    return { ad: `${c.musteri ? 'Müşteri' : 'Tedarikçi'} kartı`, liste, yol: `${liste}/${c.id}`, ikon: c.musteri ? '👥' : '🤝' };
+  }
+  if (islem === 'ekstre')
+    return { ad: 'Cari ekstresi', liste: '/ekstre', yol: `/ekstre?tur=cari&id=${c.id}`, ikon: '📄' };
+  const liste = BELGE_ROTA[yon][islem];
+  return { ad: `Yeni ${yon === 'satis' ? 'satış' : 'alış'} ${ISLEM_ADI[islem]}`, liste,
+           yol: `${liste}/yeni?${liste === '/belge' ? 'tur=15&' : ''}tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,
+           ikon: islem === 'siparis' ? '📋' : islem === 'fatura' ? '🧾' : '🚚' };
+}

@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { EkranSekmesiBaglami } from './bilesenler/sekmeBaglami';
 import { ReceteKartiSayfa, OzelKartRota, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { OZEL_KART_SEKME_YOLLARI } from './sayfalar/ozelKartSekmeleri';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { kartKodu } from './kimlik/listeKartKodlari';
@@ -717,5 +717,8 @@ function BilinmeyenYol({ hedef }: { hedef: string }) {
 /** /belge/yeni (Satış Faturası "Yeni"): kart sekmesindeyse çerçevesiz, Kapat sekmeyi kapatır. */
 function BelgeYeniRota() {
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  return ekranSekmesi ? <BelgeKarti sayfa onKapat={() => ekranSekmesi.kapat()} /> : <BelgeKarti />;
+  // CARİ ÖN DOLGUSU (Ctrl+K "cari seç -> fat kes", 25.10.2026): ?tarafId=&tarafUnvan= ile cari seçili açılır.
+  const [sorgu] = useSearchParams();
+  const taraf = { tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined };
+  return ekranSekmesi ? <BelgeKarti sayfa {...taraf} onKapat={() => ekranSekmesi.kapat()} /> : <BelgeKarti {...taraf} />;
 }

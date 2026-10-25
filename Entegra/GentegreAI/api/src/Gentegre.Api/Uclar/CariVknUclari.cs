@@ -82,6 +82,40 @@ public static class CariVknUclari
 
     public static void CariVknUclariniEkle(this IEndpointRouteBuilder yol)
     {
+        // CTRL+K AD İLE CARİ (kullanıcı 25.10.2026: "prompt'a 'ahmet' yazarsam içinde ahmet geçen müşteri ve
+        //   tedarikçi listesi getir (max 3), birini seçeyim ve komut vereyim - sipariş al, fatura kes, irsaliye").
+        //   Her kelime ünvan / ad / soyad / kod içinde (fn_ara_metin: Türkçe harf duyarsız, liste aramasıyla aynı).
+        //   Yalnız AKTİF müşteri / tedarikçi; başı eşleşen önce, sonra en son hareket gören.
+        yol.MapGet("/api/hizli-bul/cari-ad", async (string? q, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("cari", Islem.Gor);
+            var kelimeler = (q ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(k => k.Length >= 2).Take(4).ToList();
+            if (kelimeler.Count == 0 || kelimeler.Sum(k => k.Length) < 3)
+                return Results.Ok(new { cariler = Array.Empty<object>() });
+            var kosul = string.Join(" and ", kelimeler.Select((_, i) =>
+                $"public.fn_ara_metin(coalesce(t.unvan, '') || ' ' || coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '') || ' ' || coalesce(t.kod, '')) like '%' || public.fn_ara_metin(@p{i + 1}) || '%'"));
+            var kapsam = baglam.Kapsam.Count > 0 ? baglam.Kapsam.ToArray() : [];
+            var l = await veri.ListeAsync($$"""
+                select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(160), ''), coalesce(t.kod, ''),
+                       t.musteri = 1, t.tedarikci = 1,
+                       coalesce((select a.il from public.taraf_adres a where a.taraf_id = t.id order by a.varsayilan desc, a.id limit 1), '')
+                  from public.taraf t
+                 where (t.musteri = 1 or t.tedarikci = 1) and coalesce(t.durum, 1) = 1
+                   and (cardinality(@p0::int[]) = 0 or t.id = any(@p0::int[]))
+                   and {{kosul}}
+                 order by (public.fn_ara_metin(coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(160), ''))
+                             like public.fn_ara_metin(@p1) || '%') desc,
+                          (select max(h.islem_tarihi) from public.mali_hareket h where h.taraf_id = t.id) desc nulls last, t.id desc
+                 limit 3
+                """, [kapsam, .. kelimeler.Cast<object?>()],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1), kod = o.GetString(2), musteri = o.GetBoolean(3),
+                           tedarikci = o.GetBoolean(4), il = o.GetString(5) }, iptal);
+            return Results.Ok(new { cariler = l });
+        }).RequireAuthorization().WithTags("Hızlı bul");
+
         yol.MapGet("/api/hizli-bul/cari", async (string? vkn, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
