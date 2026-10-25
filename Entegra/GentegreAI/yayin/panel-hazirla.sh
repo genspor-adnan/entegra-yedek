@@ -28,7 +28,7 @@ if [ "${1:-}" = "sertifika" ]; then
     done
     ARG="-d gentegreai.com -d www.gentegreai.com"; for a in $ALANLAR; do ARG="$ARG -d $a.gentegreai.com"; done
     certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email --redirect $ARG
-    echo "TAMAM: HTTPS hazir - https://panel.gentegreai.com"
+    echo "TAMAM: HTTPS hazir - https://gentegreai.com"
     exit 0
 fi
 

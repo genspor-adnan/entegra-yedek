@@ -142,7 +142,7 @@
 <body>
 <!--
   ORTAK GİRİŞ PANELİ (1190, mockup Ekranlar/Ayarlar/ortak_giris_paneli.html, kararlar 26.10.2026).
-  panel.gentegreai.com (kod alt alan adından bağımsız) - tek statik sayfa, kendi sunucu kodu YOK:
+  gentegreai.com (kök alan adı; www / panel. buraya yönlenir) - tek statik sayfa, kendi sunucu kodu YOK:
    · firma kodu -> nginx /f/<kod>/api/ (yalnız kayıtlı kodlar; bilinmeyen kod da 401 "hatalı" - liste sızmaz)
    · POST /f/<kod>/api/kimlik/giris-kodu -> firmanın KENDİ API'si girişi doğrular, 60 sn tek kullanımlık kod verir
    · yönlendirme: https://<kod>.gentegreai.com/<kod>/?giris=<kod>  (firma ekranı kodu oturuma çevirir)
@@ -203,12 +203,14 @@
     var tr = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'c', 'Ğ': 'g', 'Ö': 'o', 'Ş': 's', 'Ü': 'u' };
     return String(k || '').trim().replace(/[çğıİöşüÇĞÖŞÜ]/g, function (c) { return tr[c] }).toLowerCase().replace(/[^a-z0-9-]/g, '');
   }
-  // Firma adresi: <bu sayfanın alt alanı>.<alan> -> <kod>.<alan>/<kod>/ (panel.gentegreai.com -> zone.gentegreai.com/zone/);
-  //   alt alan adının adı fark etmez. IP / localhost'ta aynı sunucu /<kod>/.
+  // Firma adresi: gentegreai.com -> zone.gentegreai.com/zone/ (alt alan adında açılırsa da aynı alan).
+  //   IP / localhost'ta aynı sunucu /<kod>/.
   function adres(kod) {
     var h = location.hostname, p = h.split('.');
-    if (p.length >= 3 && !/^[0-9.]+$/.test(h)) return location.protocol + '//' + kod + '.' + p.slice(1).join('.') + '/' + kod + '/';
-    return location.origin + '/' + kod + '/';
+    if (/^[0-9.]+$/.test(h) || p.length < 2 || h === 'localhost') return location.origin + '/' + kod + '/';
+    // kök alan adında (gentegreai.com) önüne, alt alan adında (panel.gentegreai.com) yerine firma kodu
+    var alan = p.length >= 3 ? p.slice(1).join('.') : h;
+    return location.protocol + '//' + kod + '.' + alan + '/' + kod + '/';
   }
   function oku(a) { try { return localStorage.getItem(a) || '' } catch (e) { return '' } }
   function yaz(a, v) { try { if (v) localStorage.setItem(a, v); else localStorage.removeItem(a) } catch (e) { /* kapalı */ } }
