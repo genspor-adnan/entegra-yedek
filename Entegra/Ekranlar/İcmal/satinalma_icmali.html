@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma Süreç İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧾 Satınalma Süreç İcmali — 01.10.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Satınalma › İcmaller · Tüm şubeler · Kerem ÖZ (Satınalma)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Satınalma İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📄</span> Seçili belgeyi aç</div>
+    <div class="btn"><span>🔔</span> Onaycıya hatırlat</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🛒</span> Alış İcmali</div>
+    <div class="btn"><span>📋</span> Sipariş İcmali (alış)</div>
+    <div class="btn"><span>⚠</span> Kritik Stok İcmali</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Talep tarihi: <b>01.10.2026 – 25.10.2026</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">🏬 Talep eden bölüm: <b>Tümü</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="sel">🤝 Tedarikçi: <b>Tümü</b> ▾</div>
+    <div class="sel">💰 Bütçe kalemi: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Hepsi</span><span>Birim talebi</span><span>Kritik stok</span><span>Arıza</span><span>Yatırım</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">5 günden uzun onay bekleyen: 7</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Talep</div><div class="deg">64</div><div class="alt">tahmini 812.400 ₺ · 9 kritik stoktan</div></div>
+    <div class="kutu uy"><div class="bas">Açık Talep</div><div class="deg">21</div><div class="alt">onayda 9 · teklifte 8 · onaylı 4</div></div>
+    <div class="kutu "><div class="bas">Talep → Sipariş</div><div class="deg">6,2 gün</div><div class="alt">medyan 4 gün · hedef 5</div></div>
+    <div class="kutu "><div class="bas">Sipariş → Mal Kabul</div><div class="deg">4,8 gün</div><div class="alt">termin uyumu %86</div></div>
+    <div class="kutu "><div class="bas">Teklif / Talep</div><div class="deg">2,7</div><div class="alt">tek teklifle sipariş 6</div></div>
+    <div class="kutu iyi"><div class="bas">Tasarruf</div><div class="deg">38.920 ₺</div><div class="alt">en yüksek teklife göre · %5,8</div></div>
+    <div class="kutu teh"><div class="bas">Fatura Uyuşmazlığı</div><div class="deg">4</div><div class="alt">ödeme durduruldu 2 · 6.240 ₺ fark</div></div>
+    <div class="kutu mor"><div class="bas">Bütçe Kullanımı</div><div class="deg">%71</div><div class="alt">gerçekleşen + taahhüt / yıllık</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="hun">Süreç Hunisi</div>
+    <div class="sekme" data-s="bek">Bekleyenler <span class="rz kir">21</span></div>
+    <div class="sekme" data-s="ted">Tedarikçi Karnesi</div>
+    <div class="sekme" data-s="fiy">Fiyat Analizi</div>
+    <div class="sekme" data-s="but">Bütçe</div>
+    <div class="sekme" data-s="krt">Kritik Stoktan Gelen <span class="rz">9</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ HUN ============ -->
+  <div class="pnl" data-s="hun">
+    <div class="grp"><h4>Talepten ödemeye süreç hunisi <span class="mini">satıra tıkla: o aşamadaki belgeler</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Aşama</th><th class="sag">Adet</th><th class="sag">Tutar</th><th class="sag">Bu aşamada bekleyen</th><th class="sag">Ort. bekleme</th><th class="sag">Hedef</th><th>Akış</th></tr></thead>
+  <tbody>
+    <tr><td>1 · Talep açıldı</td><td class="sag">64</td><td class="sag">812.400</td><td class="sag">3 taslak</td><td class="sag">—</td><td class="sag">—</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+    <tr><td>2 · Onay</td><td class="sag">61</td><td class="sag">795.100</td><td class="sag kir">9</td><td class="sag">2,9 gün</td><td class="sag">2 gün</td><td><div class="cubuk"><i style="width:95%"></i></div></td></tr>
+    <tr><td>3 · Teklif</td><td class="sag">46</td><td class="sag">701.900</td><td class="sag">8</td><td class="sag">3,1 gün</td><td class="sag">3 gün</td><td><div class="cubuk"><i style="width:86%"></i></div></td></tr>
+    <tr><td>4 · Sipariş</td><td class="sag">43</td><td class="sag">668.700</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td><div class="cubuk"><i style="width:82%"></i></div></td></tr>
+    <tr><td>5 · Mal kabul</td><td class="sag">37</td><td class="sag">571.300</td><td class="sag">6 sipariş</td><td class="sag">4,8 gün</td><td class="sag">termin</td><td><div class="cubuk"><i style="width:70%"></i></div></td></tr>
+    <tr><td>6 · Fatura kontrolü</td><td class="sag">33</td><td class="sag">548.100</td><td class="sag kir">4 uyuşmaz</td><td class="sag">1,2 gün</td><td class="sag">2 gün</td><td><div class="cubuk"><i style="width:67%"></i></div></td></tr>
+    <tr><td>7 · Ödemeye onay</td><td class="sag">29</td><td class="sag">503.600</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td><div class="cubuk"><i style="width:62%"></i></div></td></tr>
+    <tr><td><span class="sonuk">Reddedilen / iptal</span></td><td class="sag">4</td><td class="sag">24.300</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Aşamalar satinalma_talep.durum (0 taslak · 1 onayda · 2 onaylandı · 4 teklifte · 5 siparişe dönüştü), alış siparişi, satinalma_kabul ve satinalma_fatura_kontrol kayıtlarından. Teklif aşaması atlanan (doğrudan siparişe dönen) talepler 3. satırda sayılmaz.</div></div>
+  </div>
+  <!-- ============ BEK ============ -->
+  <div class="pnl" data-s="bek">
+    <div class="grp"><h4>Aşamasında bekleyen belgeler</h4>
+<div class="dg"><table>
+  <thead><tr><th>Belge</th><th>Aşama</th><th>Talep eden</th><th>Konu</th><th class="sag">Tutar</th><th>Kimde</th><th class="orta">Bekliyor</th><th class="orta">Öncelik</th><th></th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">ST-2026/000188</span></td><td>Onay (2. basamak)</td><td>Ameliyathane</td><td>Cerrahi set yenileme</td><td class="sag">64.800</td><td>Dr. Levent KAYA (Başhekim Yrd.)</td><td class="orta"><span class="rz kir">8 gün</span></td><td class="orta"><span class="rz kir">acil</span></td><td><span class="lnk">Hatırlat</span></td></tr>
+    <tr><td><span class="lnk">ST-2026/000193</span></td><td>Onay</td><td>Laboratuvar</td><td>Kit ve sarf</td><td class="sag">21.400</td><td>Ayşe ER (Lab Sorumlusu)</td><td class="orta"><span class="rz kir">6 gün</span></td><td class="orta">normal</td><td><span class="lnk">Hatırlat</span></td></tr>
+    <tr><td><span class="lnk">ST-2026/000201</span></td><td>Teklif</td><td>Teknik</td><td>Klima bakım</td><td class="sag">18.000</td><td>3 firmadan 1 yanıt</td><td class="orta"><span class="rz sari">4 gün</span></td><td class="orta">normal</td><td><span class="lnk">Teklife git</span></td></tr>
+    <tr><td><span class="lnk">ASP2026000044</span></td><td>Mal kabul</td><td>Depo</td><td>İmplant siparişi</td><td class="sag">96.000</td><td>TEKNO MEDİKAL A.Ş. (termin 20.10)</td><td class="orta"><span class="rz kir">5 gün gecikme</span></td><td class="orta">yüksek</td><td><span class="lnk">Siparişe git</span></td></tr>
+    <tr><td><span class="lnk">AF2026000312</span></td><td>Fatura kontrolü</td><td>Depo</td><td>Fiyat farkı 2.140 ₺</td><td class="sag">42.140</td><td>Kerem ÖZ</td><td class="orta"><span class="rz sari">2 gün</span></td><td class="orta">normal</td><td><span class="lnk">Kontrole git</span></td></tr>
+    <tr><td colspan="9" class="sonuk">… 16 belge daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">"Kimde": onay zincirindeki bekleyen basamağın kişisi (satinalma_onay), teklifte yanıt vermeyen firma sayısı, mal kabulde tedarikçi. "Hatırlat" onaycıya uygulama içi bildirim gönderir (e-posta ayara bağlı); kaç kez hatırlatıldığı satırda görünür.</div></div>
+  </div>
+  <!-- ============ TED ============ -->
+  <div class="pnl" data-s="ted">
+    <div class="grp"><h4>Tedarikçi karnesi <span class="mini">skor hesaplanır, girilmez (724) · satıra tıkla: olaylar</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Tedarikçi</th><th class="sag">Sipariş</th><th class="sag">Tutar</th><th class="sag">Zamanında</th><th class="sag">Ort. gecikme</th><th class="sag">Eksik / fazla</th><th class="sag">Kalite ret</th><th class="sag">Fiyat sapması</th><th class="sag">Fatura farkı</th><th class="orta">Skor</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">TEKNO MEDİKAL A.Ş.</span></td><td class="sag">12</td><td class="sag">298.400</td><td class="sag">%83</td><td class="sag">2,4 gün</td><td class="sag">1</td><td class="sag">0</td><td class="sag">+%1,2</td><td class="sag">1</td><td class="orta"><span class="rz ok">86</span></td></tr>
+    <tr><td><span class="lnk">ANADOLU DENTAL LTD.</span></td><td class="sag">9</td><td class="sag">141.900</td><td class="sag">%100</td><td class="sag">0</td><td class="sag">0</td><td class="sag">0</td><td class="sag">−%0,8</td><td class="sag">0</td><td class="orta"><span class="rz ok">97</span></td></tr>
+    <tr><td><span class="lnk">MAVİ SARF MALZ.</span></td><td class="sag">7</td><td class="sag">48.300</td><td class="sag">%57</td><td class="sag">5,1 gün</td><td class="sag">3</td><td class="sag">1</td><td class="sag">+%6,4</td><td class="sag">2</td><td class="orta"><span class="rz kir">58</span></td></tr>
+    <tr><td><span class="lnk">ÖZGÜR TEKNİK SERVİS</span></td><td class="sag">3</td><td class="sag">22.000</td><td class="sag">%67</td><td class="sag">1,0 gün</td><td class="sag">0</td><td class="sag">0</td><td class="sag">—</td><td class="sag">1</td><td class="orta"><span class="rz sari">74</span></td></tr>
+    <tr><td colspan="10" class="sonuk">… 11 tedarikçi daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Skor tedarikçi olaylarından türer (gecikme, eksik/fazla teslim, kalite reddi, fatura farkı); icmal yeniden hesaplamaz, Tedarikçi Listesi'ndeki skorun dönem kırılımını gösterir. Fiyat sapması: sipariş birim fiyatının son 3 alışın ortalamasına göre farkı.</div></div>
+  </div>
+  <!-- ============ FIY ============ -->
+  <div class="pnl" data-s="fiy">
+    <div class="grp"><h4>Fiyat analizi — son 3 alış</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kod</th><th>Ürün</th><th>Tedarikçi</th><th class="sag">3. önceki</th><th class="sag">2. önceki</th><th class="sag">Son alış</th><th class="sag">Değişim</th><th class="sag">Bu dönem miktar</th><th class="sag">Etkisi</th></tr></thead>
+  <tbody>
+    <tr><td>K-IMP-AD4011</td><td>ALPHADENT ACTIVE 4.0X11</td><td>TEKNO MEDİKAL</td><td class="sag">1.720,00</td><td class="sag">1.790,00</td><td class="sag">1.850,00</td><td class="sag kir">+%7,6</td><td class="sag">150</td><td class="sag kir">+19.500</td></tr>
+    <tr><td>SUPR4</td><td>SUPRAMİD-4.0</td><td>MAVİ SARF</td><td class="sag">82,00</td><td class="sag">90,00</td><td class="sag">96,00</td><td class="sag kir">+%17,1</td><td class="sag">200</td><td class="sag kir">+2.800</td></tr>
+    <tr><td>UNQ-DA</td><td>UNIQ-OSS DİJİTAL ANALOG</td><td>ANADOLU DENTAL</td><td class="sag">420,00</td><td class="sag">415,00</td><td class="sag">412,50</td><td class="sag ok-y">−%1,8</td><td class="sag">120</td><td class="sag ok-y">−900</td></tr>
+    <tr><td colspan="9" class="sonuk">… 64 kalem daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Değişim son alışın 3. önceki alışa göre farkı; etkisi = (son − 3. önceki) × bu dönem miktar. %10 üstü artış kırmızı; satış fiyatı aynı kaldıysa Kârlılık İcmali'nde "maliyet arttı, fiyat eski" uyarısına bağlanır.</div></div>
+  </div>
+  <!-- ============ BUT ============ -->
+  <div class="pnl" data-s="but">
+    <div class="grp"><h4>Bütçe — 2026</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kalem</th><th class="sag">Yıllık plan</th><th class="sag">Gerçekleşen (fatura)</th><th class="sag">Taahhüt (açık sipariş)</th><th class="sag">Onaylı talep</th><th class="sag">Kalan</th><th class="sag">Kullanım</th><th>Aşım davranışı</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>BK-01 Tıbbi sarf</td><td class="sag">2.400.000</td><td class="sag">1.512.300</td><td class="sag">96.000</td><td class="sag">21.400</td><td class="sag">770.300</td><td class="sag">%68</td><td>ek onay</td><td><div class="cubuk"><i style="width:68%"></i></div></td></tr>
+    <tr><td>BK-02 İmplant</td><td class="sag">3.000.000</td><td class="sag">2.288.000</td><td class="sag">134.000</td><td class="sag">0</td><td class="sag">578.000</td><td class="sag">%81</td><td>ek onay</td><td><div class="cubuk"><i style="width:81%"></i></div></td></tr>
+    <tr><td>BK-05 Bakım onarım</td><td class="sag">300.000</td><td class="sag">268.900</td><td class="sag">18.000</td><td class="sag">0</td><td class="sag kir">13.100</td><td class="sag kir">%96</td><td>uyar</td><td><div class="cubuk"><i style="width:96%;background:#b3261e"></i></div></td></tr>
+    <tr><td>BK-09 Yatırım</td><td class="sag">1.200.000</td><td class="sag">410.000</td><td class="sag">0</td><td class="sag">64.800</td><td class="sag">725.200</td><td class="sag">%40</td><td>engeller</td><td><div class="cubuk"><i style="width:40%"></i></div></td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">6.900.000</td><td class="sag">4.479.200</td><td class="sag">248.000</td><td class="sag">86.200</td><td class="sag">2.086.600</td><td class="sag">%70</td><td></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Taahhüt de harcamadır (724): açık sipariş henüz faturalanmadı ama parası bağlandı, kalan onu düşer. Onaylı talep bilgi amaçlı ayrı sütunda; kalandan düşülmez (siparişe dönmeyebilir).</div></div>
+  </div>
+  <!-- ============ KRT ============ -->
+  <div class="pnl" data-s="krt">
+    <div class="grp"><h4>Kritik stoktan otomatik / elle açılan talepler</h4>
+<div class="dg"><table>
+  <thead><tr><th>Talep</th><th>Tarih</th><th>Kaynak</th><th>Ürün</th><th class="sag">Talep miktarı</th><th>Durum</th><th class="sag">Talep → sipariş</th><th>Tedarikçi</th></tr></thead>
+  <tbody>
+    <tr><td>ST-2026/000176</td><td>03.10</td><td>Kritik Stok İcmali (elle)</td><td>HADRON DÜZ 5MM ABUTMENT</td><td class="sag">40</td><td><span class="rz ok">siparişe dönüştü</span></td><td class="sag">2 gün</td><td>TEKNO MEDİKAL</td></tr>
+    <tr><td>ST-2026/000181</td><td>07.10</td><td>Kritik stok (otomatik)</td><td>SUPRAMİD-4.0</td><td class="sag">200</td><td><span class="rz ok">siparişe dönüştü</span></td><td class="sag">3 gün</td><td>MAVİ SARF</td></tr>
+    <tr><td>ST-2026/000199</td><td>21.10</td><td>Kritik stok (otomatik)</td><td>HADRON TİBASE 3MM</td><td class="sag">30</td><td><span class="rz sari">onayda</span></td><td class="sag"><span class="sonuk">—</span></td><td></td></tr>
+    <tr><td colspan="8" class="sonuk">… 6 talep daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">kaynak 2 (kritik stok) talepleri; elle açılanlar Kritik Stok İcmali'nin "Talep aç" eyleminden (kaynak_tur 918). Otomatik talebin SKT düşümü henüz uygulanmıyor — bilinen açık iş.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>SATINALMA SÜREÇ İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.10.2026 – 25.10.2026</span><span>Şube: Tümü</span><span>64 talep · 43 sipariş</span><span>Bütçe yılı: 2026</span></div>
+        <table>
+          <thead><tr><th>Aşama</th><th>Adet</th><th>Tutar</th><th>Bekleyen</th><th>Ort. bekleme</th></tr></thead>
+          <tbody>
+            <tr><td>Onay</td><td>61</td><td>795.100</td><td>9</td><td>2,9 gün</td></tr>
+            <tr><td>Teklif</td><td>46</td><td>701.900</td><td>8</td><td>3,1 gün</td></tr>
+            <tr><td>Mal kabul</td><td>37</td><td>571.300</td><td>6</td><td>4,8 gün</td></tr>
+            <tr><td>Fatura kontrolü</td><td>33</td><td>548.100</td><td>4</td><td>1,2 gün</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Talep (tahmini)</span><span>812.400,00</span></div><div><span>Siparişe dönen</span><span>668.700,00</span></div><div><span>Teklif tasarrufu</span><span>38.920,00</span></div><div class="b"><span>ÖDEMEYE ONAYLANAN</span><span>503.600,00 ₺</span></div></div>
+        <div class="imza"><div>Satınalma Sorumlusu<br>Ad Soyad · İmza</div><div>Mali İşler Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Satınalma Süreç İcmali · tutarlar KDV hariç · bütçe kullanımı taahhüt dahil</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>64 talep</span><span>43 sipariş</span><span>15 tedarikçi</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Satınalma Süreç İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Talepler nerede tıkanıyor, kim bekletiyor, hangi tedarikçi güvenilir, fiyatlar ne kadar arttı, bütçenin ne kadarı kaldı?" Satınalma sorumlusu, mali işler, yönetim.</li>
+    <li><b>Alış İcmali'nden farkı:</b> Alış İcmali gerçekleşen alışı (fatura) anlatır; bu ekran SÜRECİ — talepten ödemeye her aşamanın süresi ve bekleyeni.</li>
+    <li><b>Kaynak:</b> satinalma_talep / _onay / _teklif / _kabul / _fatura_kontrol + alış siparişi (tür 9). Tedarikçi skoru olaylardan türer, icmal yeniden hesaplamaz.</li>
+    <li><b>Eylemler:</b> belgeye git, onaycıya hatırlat (bildirim; satinalma.talep Gör yeterli, hatırlatma loglanır). Onay / ret bu ekrandan verilmez — Onay ekranındadır.</li>
+    <li><b>Bütçe:</b> taahhüt (açık sipariş) kalanı düşer; onaylı talep bilgi amaçlı.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Süre hedefleri (onay 2 gün, teklif 3 gün) nereden gelsin?<span class="oneri"><b>Öneri:</b> Satınalma ayarlarına "aşama hedef süresi" alanı eklensin; yoksa ekran hedef sütununu boş bırakıp yalnız ortalamayı göstersin.</span></li>
+    <li>Tasarruf neye göre ölçülsün — en yüksek teklif mi, ortalama teklif mi, son alış fiyatı mı?<span class="oneri"><b>Öneri:</b> Ortalama teklife göre (en yüksek teklif tasarrufu şişirir); ikinci sütunda "son alışa göre" fark. Tek teklifle verilen siparişler tasarrufa katılmasın, ayrıca sayılsın.</span></li>
+    <li>Hizmet alımları (bakım, danışmanlık) bu icmale girsin mi?<span class="oneri"><b>Öneri:</b> Evet — Alış İcmali kararıyla aynı: hizmet alımları girer, "Ürün / hizmet" rozetiyle ayrılır.</span></li>
+    <li>Talep satırı birden çok siparişe bölünürse aşama süresi hangisine göre?<span class="oneri"><b>Öneri:</b> İlk siparişe göre (talep sahibinin beklediği ilk adım); bölünme satırda rozetle görünsün.</span></li>
+    <li>"Onaycıya hatırlat" günde kaç kez kullanılabilsin?<span class="oneri"><b>Öneri:</b> Aynı belge için günde bir; ikinci hatırlatma bir üst basamağa bilgi olarak da gitsin (eskalasyon).</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

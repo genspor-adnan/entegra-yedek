@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏭 Üretim İcmali — 01.10.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Üretim › İcmaller · Merkez · Tolga ER (Üretim Planlama)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Üretim İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🏭</span> Seçili emri aç</div>
+    <div class="btn"><span>📝</span> Eksik hammadde için talep aç</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🌳</span> Ürün Ağacı Listesi</div>
+    <div class="btn"><span>⚙</span> İş Merkezi Listesi</div>
+    <div class="btn"><span>⚠</span> Kritik Stok İcmali</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 <b>Plan başlangıcı</b>: 01.10.2026 – 25.10.2026 ▾</div>
+    <div class="sel">🏢 Şube / depo: <b>Merkez · Üretim</b> ▾</div>
+    <div class="sel">⚙ İş merkezi: <b>Tümü</b> ▾</div>
+    <div class="sel">📦 Mamul: <b>Tümü</b> ▾</div>
+    <div class="seg"><span>Planlandı</span><span>Üretimde</span><span>Kısmi</span><span>Tamamlandı</span><span class="on">Hepsi</span></div>
+    <div class="seg"><span class="on">Tüm türler</span><span>Siparişe</span><span>Stoğa</span><span>Fason</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">Termini geçen emir: 4</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Emir</div><div class="deg">47</div><div class="alt">siparişe 19 · stoğa 24 · fason 4</div></div>
+    <div class="kutu uy"><div class="bas">Açık Emir</div><div class="deg">16</div><div class="alt">üretimde 9 · kısmi 3 · planlı 4</div></div>
+    <div class="kutu iyi"><div class="bas">Plan / Gerçekleşen</div><div class="deg">%93,8</div><div class="alt">12.400 planlı · 11.632 üretildi</div></div>
+    <div class="kutu teh"><div class="bas">Fire</div><div class="deg">%2,6</div><div class="alt">304 adet · 18.240 ₺</div></div>
+    <div class="kutu "><div class="bas">Maliyet Sapması</div><div class="deg">+%4,1</div><div class="alt">gerçek birim plan üstü · 31 kapanan emir</div></div>
+    <div class="kutu "><div class="bas">Doluluk</div><div class="deg">%78</div><div class="alt">iş merkezlerinin plan saati / kapasite</div></div>
+    <div class="kutu teh"><div class="bas">Termini Geçen</div><div class="deg">4 emir</div><div class="alt">en eski 6 gün</div></div>
+    <div class="kutu uy"><div class="bas">Eksik Hammadde</div><div class="deg">7 kalem</div><div class="alt">açık emirler için</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="emr">Emirler <span class="rz">47</span></div>
+    <div class="sekme" data-s="srf">Sarf</div>
+    <div class="sekme" data-s="fir">Fire</div>
+    <div class="sekme" data-s="mal">Maliyet</div>
+    <div class="sekme" data-s="yuk">İş Merkezi Yükü</div>
+    <div class="sekme" data-s="iht">Malzeme İhtiyacı <span class="rz kir">7</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ EMR ============ -->
+  <div class="pnl" data-s="emr">
+    <div class="grp"><h4>Üretim emirleri <span class="mini">satıra tıkla: emri aç · alt emirler ana emrin altında</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Emir</th><th>Tür</th><th>Mamul</th><th class="sag">Plan</th><th class="sag">Üretilen</th><th class="sag">Fire</th><th class="sag">Kalan</th><th>Plan başl.</th><th>Termin</th><th class="orta">Gecikme</th><th>Durum</th><th>Kaynak</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">UE-2026/000142</span></td><td>siparişe</td><td>İMPLANT CERRAHİ KİT (12'li)</td><td class="sag">200</td><td class="sag">120</td><td class="sag">4</td><td class="sag"><b>76</b></td><td>06.10</td><td>20.10</td><td class="orta"><span class="rz kir">5 gün</span></td><td><span class="rz sari">kısmi tamamlandı</span></td><td>USP2026000118</td></tr>
+    <tr><td><span class="lnk">UE-2026/000147</span></td><td>stoğa</td><td>STERİL GAZLI SET</td><td class="sag">2.000</td><td class="sag">2.000</td><td class="sag">38</td><td class="sag">0</td><td>09.10</td><td>16.10</td><td class="orta"><span class="sonuk">—</span></td><td><span class="rz ok">tamamlandı</span></td><td></td></tr>
+    <tr><td><span class="lnk">UE-2026/000151</span></td><td>fason</td><td>ABUTMENT FREZE (fason işleme)</td><td class="sag">300</td><td class="sag">0</td><td class="sag">0</td><td class="sag"><b>300</b></td><td>14.10</td><td>28.10</td><td class="orta"><span class="rz ok">3 gün var</span></td><td><span class="rz mavi">üretimde · fasonda</span></td><td></td></tr>
+    <tr><td><span class="lnk">UE-2026/000155</span></td><td>stoğa</td><td>CERRAHİ ÖRTÜ 120×150</td><td class="sag">1.500</td><td class="sag">640</td><td class="sag">22</td><td class="sag"><b>838</b></td><td>18.10</td><td>24.10</td><td class="orta"><span class="rz kir">1 gün</span></td><td><span class="rz">üretimde</span></td><td></td></tr>
+    <tr><td><span class="lnk">UE-2026/000160</span></td><td>alt emir</td><td>KİT TEPSİSİ (yarı mamul)</td><td class="sag">200</td><td class="sag">0</td><td class="sag">0</td><td class="sag"><b>200</b></td><td>27.10</td><td>30.10</td><td class="orta"><span class="sonuk">—</span></td><td><span class="rz">planlandı</span></td><td>UE-2026/000142</td></tr>
+    <tr><td colspan="12" class="sonuk">… 42 emir daha</td></tr>
+    <tr class="toplam"><td>Toplam (47 emir)</td><td></td><td></td><td class="sag">12.400</td><td class="sag">11.632</td><td class="sag">304</td><td class="sag">1.464</td><td></td><td></td><td class="orta"></td><td></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Durum sırası (429): 1 planlandı · 2 onaylandı · 3 malzeme hazır · 4 üretimde · 5 kısmi tamamlandı · 6 tamamlandı · 7 kapatıldı. Kalan = plan − üretilen − fire. Siparişe üretimde kaynak satış siparişi satırı, alt emirde ana emir.</div></div>
+  </div>
+  <!-- ============ SRF ============ -->
+  <div class="pnl" data-s="srf">
+    <div class="grp"><h4>Sarf — ağaca göre beklenen ile gerçek tüketim</h4>
+<div class="dg"><table>
+  <thead><tr><th>Bileşen</th><th>Emir</th><th class="sag">Birim ihtiyaç</th><th class="sag">Ağaç fire %</th><th class="sag">Gerekli</th><th class="sag">Sarf edilen</th><th class="sag">Fark</th><th class="sag">Fark %</th><th class="sag">Fark tutarı</th><th>Satır durumu</th></tr></thead>
+  <tbody>
+    <tr><td>TİTANYUM ÇUBUK Ø4</td><td>UE-2026/000142</td><td class="sag">0,12 m</td><td class="sag">%3</td><td class="sag">24,7 m</td><td class="sag">27,1 m</td><td class="sag kir">+2,4 m</td><td class="sag kir">+%9,7</td><td class="sag kir">+1.920</td><td>kısmi sarf</td></tr>
+    <tr><td>STERİL POŞET 30×40</td><td>UE-2026/000147</td><td class="sag">1</td><td class="sag">%1</td><td class="sag">2.020</td><td class="sag">2.034</td><td class="sag">+14</td><td class="sag">+%0,7</td><td class="sag">+70</td><td>sarf edildi</td></tr>
+    <tr><td>NONWOVEN KUMAŞ 60 gr</td><td>UE-2026/000155</td><td class="sag">1,9 m²</td><td class="sag">%4</td><td class="sag">2.964 m²</td><td class="sag">1.290 m²</td><td class="sag"><span class="sonuk">sürüyor</span></td><td class="sag">—</td><td class="sag">—</td><td>kısmi sarf</td></tr>
+    <tr><td colspan="10" class="sonuk">… 58 satır daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Gerekli = birim ihtiyaç × plan × (1 + fire %) emir açılırken ağaçtan donar; ağaç sonradan değişse emir bozulmaz. Fark = sarf − (gerekli × üretilen / plan) — kısmi emirde orantılı karşılaştırılır.</div></div>
+  </div>
+  <!-- ============ FIR ============ -->
+  <div class="pnl" data-s="fir">
+    <div class="grp"><h4>Fire</h4>
+<div class="dg"><table>
+  <thead><tr><th>Mamul</th><th class="sag">Üretilen</th><th class="sag">Fire</th><th class="sag">Fire %</th><th class="sag">Ağaç hedefi</th><th class="sag">Fire tutarı</th><th>En sık neden</th><th>Fire deposu</th></tr></thead>
+  <tbody>
+    <tr><td>İMPLANT CERRAHİ KİT</td><td class="sag">120</td><td class="sag">4</td><td class="sag">%3,2</td><td class="sag">%2,0</td><td class="sag kir">2.880</td><td>KK ret · eksik parça</td><td>FİRE</td></tr>
+    <tr><td>STERİL GAZLI SET</td><td class="sag">2.000</td><td class="sag">38</td><td class="sag">%1,9</td><td class="sag">%2,0</td><td class="sag">1.140</td><td>paket yırtığı</td><td>FİRE</td></tr>
+    <tr><td>CERRAHİ ÖRTÜ 120×150</td><td class="sag">640</td><td class="sag">22</td><td class="sag kir">%3,4</td><td class="sag">%2,5</td><td class="sag">1.760</td><td>dikiş hatası</td><td>FİRE</td></tr>
+    <tr><td colspan="8" class="sonuk">… 9 mamul daha</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">11.632</td><td class="sag">304</td><td class="sag">%2,6</td><td class="sag"></td><td class="sag">18.240</td><td></td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Fire = emrin fire_adet'i (fire deposuna giriş); tutarı kapanıştaki birim maliyetle (uretim_maliyet.fire). Neden, operasyonun ret açıklamasından / KK kaydından.</div></div>
+  </div>
+  <!-- ============ MAL ============ -->
+  <div class="pnl" data-s="mal">
+    <div class="grp"><h4>Maliyet — plan ile gerçekleşen</h4>
+<div class="dg"><table>
+  <thead><tr><th>Emir</th><th>Mamul</th><th class="sag">Üretilen</th><th class="sag">Malzeme</th><th class="sag">İşçilik</th><th class="sag">GÜG</th><th class="sag">Fason</th><th class="sag">Toplam</th><th class="sag">Birim</th><th class="sag">Plan birim</th><th class="sag">Sapma</th><th>Kapanış</th></tr></thead>
+  <tbody>
+    <tr><td>UE-2026/000147</td><td>STERİL GAZLI SET</td><td class="sag">2.000</td><td class="sag">38.400</td><td class="sag">9.600</td><td class="sag">2.400</td><td class="sag">0</td><td class="sag">50.400</td><td class="sag">25,20</td><td class="sag">24,60</td><td class="sag">+%2,4</td><td><span class="rz ok">17.10</span></td></tr>
+    <tr><td>UE-2026/000139</td><td>CERRAHİ ÖRTÜ 120×150</td><td class="sag">1.200</td><td class="sag">61.200</td><td class="sag">14.400</td><td class="sag">3.600</td><td class="sag">0</td><td class="sag">79.200</td><td class="sag">66,00</td><td class="sag">61,50</td><td class="sag kir">+%7,3</td><td><span class="rz ok">12.10</span></td></tr>
+    <tr><td>UE-2026/000133</td><td>ABUTMENT FREZE</td><td class="sag">250</td><td class="sag">18.700</td><td class="sag">0</td><td class="sag">0</td><td class="sag">12.500</td><td class="sag">31.200</td><td class="sag">124,80</td><td class="sag">128,00</td><td class="sag ok-y">−%2,5</td><td><span class="rz ok">08.10</span></td></tr>
+    <tr><td>UE-2026/000142</td><td>İMPLANT CERRAHİ KİT</td><td class="sag">120</td><td class="sag">96.400</td><td class="sag">7.200</td><td class="sag">—</td><td class="sag">0</td><td class="sag">103.600</td><td class="sag"><span class="sonuk">canlı</span></td><td class="sag">842,00</td><td class="sag">—</td><td><span class="rz sari">açık</span></td></tr>
+    <tr><td colspan="12" class="sonuk">… 27 kapanan emir daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kapanan emirde rakamlar uretim_maliyet kapanış kaydından (tarihli, donmuş); açık emirde canlı toplam (emrin gercek_* alanları). İşçilik = uretim_zaman saat × ücret (elle tutar girilmez). GÜG dağıtımı ayara bağlı; tanımlı değilse 0 ve rozetli.</div></div>
+  </div>
+  <!-- ============ YUK ============ -->
+  <div class="pnl" data-s="yuk">
+    <div class="grp"><h4>İş merkezi yükü — haftalık plan saati / kapasite <span class="mini">hücreye tıkla: o haftanın operasyonları</span></h4>
+<div class="dg"><table class="isi">
+  <thead><tr><th>İş merkezi</th><th class="sag">Kapasite / hafta</th><th class="orta">20.10 – 26.10</th><th class="orta">27.10 – 02.11</th><th class="orta">03.11 – 09.11</th><th class="orta">10.11 – 16.11</th><th class="sag">Duruş (bu ay)</th></tr></thead>
+  <tbody>
+    <tr><td>KESİM</td><td class="sag">80 saat</td><td class="h h3">%84</td><td class="h h4">%102 ⚠</td><td class="h h2">%61</td><td class="h h1">%22</td><td class="sag">6,5 saat</td></tr>
+    <tr><td>DİKİŞ</td><td class="sag">120 saat</td><td class="h h3">%79</td><td class="h h3">%88</td><td class="h h2">%54</td><td class="h h1">%30</td><td class="sag">2,0 saat</td></tr>
+    <tr><td>PAKETLEME</td><td class="sag">80 saat</td><td class="h h2">%66</td><td class="h h3">%72</td><td class="h h2">%48</td><td class="h h1">%15</td><td class="sag">0</td></tr>
+    <tr><td>STERİLİZASYON</td><td class="sag">60 saat</td><td class="h h4">%96</td><td class="h h3">%90</td><td class="h h2">%58</td><td class="h h1">%20</td><td class="sag kir">11,0 saat</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Plan saati = açık operasyonların kalan plan saati, plan başlangıcına göre haftaya yayılır. Kapasite iş merkezi kartından. Duruş = uretim_zaman tür 2. %100 üstü kırmızı.</div></div>
+  </div>
+  <!-- ============ IHT ============ -->
+  <div class="pnl" data-s="iht">
+    <div class="grp"><h4>⚠ Açık emirler için malzeme ihtiyacı</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kod</th><th>Bileşen</th><th class="sag">Kalan ihtiyaç</th><th class="sag">Rezerve</th><th class="sag">Eldeki (sarf deposu)</th><th class="sag">Yoldaki</th><th class="sag">Eksik</th><th>İlk gereken</th><th>Emirler</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>HM-TI4</td><td>TİTANYUM ÇUBUK Ø4</td><td class="sag">9,8 m</td><td class="sag">0</td><td class="sag">3,2 m</td><td class="sag">0</td><td class="sag kir"><b>6,6 m</b></td><td>27.10.2026</td><td>UE-142, UE-160</td><td><span class="lnk">Talep aç</span></td></tr>
+    <tr><td>HM-NW60</td><td>NONWOVEN KUMAŞ 60 gr</td><td class="sag">1.674 m²</td><td class="sag">400</td><td class="sag">1.020 m²</td><td class="sag">500 m²</td><td class="sag kir"><b>154 m²</b></td><td>28.10.2026</td><td>UE-155</td><td><span class="lnk">Talep aç</span></td></tr>
+    <tr><td>HM-PST3040</td><td>STERİL POŞET 30×40</td><td class="sag">1.200</td><td class="sag">0</td><td class="sag">4.800</td><td class="sag">0</td><td class="sag ok-y">0</td><td>—</td><td>UE-158</td><td><span class="rz ok">yeterli</span></td></tr>
+    <tr><td colspan="10" class="sonuk">… 5 eksik kalem daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kalan ihtiyaç = gerekli − sarf edilen (açık emir satırları); eldeki SKT'si geçmiş lot hariç; yoldaki = açık alış siparişi. "Talep aç" Kritik Stok İcmali'ndeki gibi taslak satınalma talebi (kaynak: üretim emri) — satinalma.talep Ekle yetkisi.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>ÜRETİM İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.10.2026 – 25.10.2026</span><span>Şube: Merkez · Üretim deposu</span><span>47 emir · 12 mamul</span><span>Plan / gerçek: %93,8</span></div>
+        <table>
+          <thead><tr><th>Mamul</th><th>Plan</th><th>Üretilen</th><th>Fire %</th><th>Birim maliyet</th><th>Sapma</th></tr></thead>
+          <tbody>
+            <tr><td>STERİL GAZLI SET</td><td>2.000</td><td>2.000</td><td>%1,9</td><td>25,20</td><td>+%2,4</td></tr>
+            <tr><td>CERRAHİ ÖRTÜ 120×150</td><td>2.700</td><td>1.840</td><td>%3,4</td><td>66,00</td><td>+%7,3</td></tr>
+            <tr><td>ABUTMENT FREZE</td><td>550</td><td>250</td><td>%0,0</td><td>124,80</td><td>−%2,5</td></tr>
+            <tr><td colspan="6" style="color:#8a98a8">… 9 mamul daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Malzeme</span><span>612.300,00</span></div><div><span>İşçilik</span><span>118.400,00</span></div><div><span>Fason</span><span>24.900,00</span></div><div><span>Fire (malzemenin içinde)</span><span>18.240,00</span></div><div class="b"><span>ÜRETİM MALİYETİ</span><span>755.600,00 ₺</span></div></div>
+        <div class="imza"><div>Üretim Planlama<br>Ad Soyad · İmza</div><div>Fabrika Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Üretim İcmali · kapanan emirler kapanış kaydından, açık emirler canlı toplam</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>47 emir</span><span>16 açık</span><span>4 iş merkezi</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Üretim İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Planı tutturuyor muyuz, fire ve sarf sapması nerede, birim maliyet plandan ne kadar saptı, önümüzdeki haftalarda hangi iş merkezi dolu, hangi hammadde eksik?" Üretim planlama, fabrika müdürü, maliyet muhasebesi.</li>
+    <li><b>Kaynak (429):</b> uretim_emri / _satir / uretim_operasyon / uretim_zaman / uretim_maliyet. Ağaç emre kopyalanır; hesap emrin kendi satırlarından yapılır.</li>
+    <li><b>Maliyet:</b> kapanan emirde donmuş kapanış kaydı, açık emirde canlı toplam; plan maliyet emir açılırken ağaçtan donar — sapma sabit plana karşı ölçülür.</li>
+    <li><b>Eylemler:</b> emre git, eksik hammadde için satınalma talebi (yetkiye bağlı), Excel, A4. Emir başlatma / sarf / bildirim bu ekrandan yapılmaz.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Sapma eşiği (kırmızı) kaç olsun?<span class="oneri"><b>Öneri:</b> Maliyet sapması ±%5, sarf farkı ±%5, fire ağaç hedefinin 1,5 katı; Üretim ayarlarında değiştirilebilir.</span></li>
+    <li>Genel üretim gideri (GÜG) nasıl dağıtılsın?<span class="oneri"><b>Öneri:</b> Bu sürümde iş merkezi saat ücretine dahil (işçilik saatiyle birlikte); ayrı GÜG dağıtımı sonraki iş — tanımlı değilse sütun 0 ve rozet.</span></li>
+    <li>Fason emirde maliyet ne zaman kesinleşsin?<span class="oneri"><b>Öneri:</b> Fason giriş irsaliyesi / faturası geldiğinde (fason_giris_belge_id); fasondaki emir "fasonda" rozetiyle canlı maliyet göstermesin.</span></li>
+    <li>Alt emirler ana emrin içinde mi, ayrı satır mı sayılsın?<span class="oneri"><b>Öneri:</b> Ayrı satır, ana emrin altında girintili; KPI'larda yalnız ana emirler sayılsın (yarı mamul iki kez sayılmasın).</span></li>
+    <li>Malzeme ihtiyacında rezerve stok başka emre ayrılmışsa ne olsun?<span class="oneri"><b>Öneri:</b> Kendi rezervi düşülmeden sayılır, başka emrin rezervi eldekinden düşülür; ilk gereken tarihe göre sırayla dağıtılır.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

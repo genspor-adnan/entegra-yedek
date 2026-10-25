@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sipariş İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Sipariş İcmali — 01.10.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Satış › İcmaller · Tüm şubeler · Selin YILMAZ (Satış Destek)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Sipariş İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🚚</span> Seçili satırları irsaliyeye dönüştür</div>
+    <div class="btn"><span>✂</span> Kalanı kapat…</div>
+    <div class="btn"><span>✉</span> Cariye termin hatırlatması</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📑</span> Açık Satır Listesi</div>
+    <div class="btn"><span>🛍️</span> Satış İcmali</div>
+    <div class="btn"><span>⚠</span> Kritik Stok İcmali</div>
+  </div>
+
+  <div class="serit">
+    <div class="seg"><span class="on">Satış siparişleri</span><span>Alış siparişleri</span></div>
+    <div class="sel">📅 <b>Sipariş tarihi</b>: 01.10.2026 – 25.10.2026 ▾</div>
+    <div class="sel">⏰ Termin: <b>Tümü</b> ▾</div>
+    <div class="sel">🏢 Şube / depo: <b>Tümü</b> ▾</div>
+    <div class="sel">👤 Temsilci: <b>Tümü</b> ▾</div>
+    <div class="sel">🗂 Kategori: <b>Tümü</b> ▾</div>
+    <div class="seg"><span>Açık</span><span>Kısmi</span><span>Kapalı</span><span class="on">Açık + kısmi</span><span>İptal</span></div>
+    <div class="sel">💱 Para birimi: <b>TL karşılığı</b> ▾</div>
+    <span class="sp"></span>
+    <span class="rz kir">Termini geçen: 23 satır</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu mor"><div class="bas">Açık Sipariş Tutarı</div><div class="deg">684.250 ₺</div><div class="alt">KDV hariç · 58 sipariş · kalan miktar × fiyat</div></div>
+    <div class="kutu "><div class="bas">Açık Satır</div><div class="deg">142</div><div class="alt">kısmi teslim 31</div></div>
+    <div class="kutu teh"><div class="bas">Termini Geçen</div><div class="deg">23 satır</div><div class="alt">96.400 ₺ · en eski 19 gün</div></div>
+    <div class="kutu iyi"><div class="bas">Zamanında + Tam (OTIF)</div><div class="deg">%82,4</div><div class="alt">kapanan 211 satırdan · geçen ay %78,0</div></div>
+    <div class="kutu "><div class="bas">Ort. Teslim Süresi</div><div class="deg">3,6 gün</div><div class="alt">sipariş → ilk irsaliye</div></div>
+    <div class="kutu "><div class="bas">Dönüşüm</div><div class="deg">%91,2</div><div class="alt">siparişten irsaliyeye geçen miktar</div></div>
+    <div class="kutu uy"><div class="bas">Karşılanamayan</div><div class="deg">17 kalem</div><div class="alt">eldeki + yoldaki stok yetmiyor</div></div>
+    <div class="kutu "><div class="bas">İptal Edilen Kalan</div><div class="deg">−21.300 ₺</div><div class="alt">9 satır · neden yazılı</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ozt">Özet</div>
+    <div class="sekme" data-s="acik">Açık Satırlar <span class="rz">142</span></div>
+    <div class="sekme" data-s="trm">Termin Takvimi</div>
+    <div class="sekme" data-s="per">Teslim Performansı</div>
+    <div class="sekme" data-s="krs">Stok Karşılama <span class="rz kir">17</span></div>
+    <div class="sekme" data-s="trd">Trend</div>
+    <div class="sekme" data-s="kir">Kırılımlar</div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ OZT ============ -->
+  <div class="pnl" data-s="ozt">
+    <div class="grp"><h4>Müşteri bazında açık siparişler <span class="mini">satıra tıkla: açık satırları · çift tık: cari ekstresi · kalan tutara göre sıralı</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Müşteri</th><th>Temsilci</th><th class="sag">Sipariş</th><th class="sag">Açık satır</th><th class="sag">Sipariş tutarı</th><th class="sag">Teslim edilen</th><th class="sag">Kalan tutar</th><th class="sag">Termini geçen</th><th class="orta">OTIF</th><th>Pay</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">DENTA KLİNİK LTD. ŞTİ.</span></td><td>Mert AKSOY</td><td class="sag">9</td><td class="sag">24</td><td class="sag">212.400</td><td class="sag">96.100</td><td class="sag"><b>116.300</b></td><td class="sag kir">18.900</td><td class="orta"><span class="rz ok">%88</span></td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+    <tr><td><span class="lnk">AĞIZ DİŞ MERKEZİ A.Ş.</span> <span class="rz mavi">€ 1.850</span></td><td>Mert AKSOY</td><td class="sag">6</td><td class="sag">17</td><td class="sag">148.900</td><td class="sag">61.200</td><td class="sag"><b>87.700</b></td><td class="sag sonuk">—</td><td class="orta"><span class="rz ok">%94</span></td><td><div class="cubuk"><i style="width:75%"></i></div></td></tr>
+    <tr><td><span class="lnk">GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</span></td><td>Ece DEMİR</td><td class="sag">4</td><td class="sag">11</td><td class="sag">64.300</td><td class="sag">12.000</td><td class="sag"><b>52.300</b></td><td class="sag kir">31.200</td><td class="orta"><span class="rz kir">%61</span></td><td><div class="cubuk"><i style="width:45%"></i></div></td></tr>
+    <tr><td><span class="lnk">DR. AYŞE KARA DİŞ POLİKLİNİĞİ</span></td><td>Ece DEMİR</td><td class="sag">3</td><td class="sag">6</td><td class="sag">41.000</td><td class="sag">20.500</td><td class="sag"><b>20.500</b></td><td class="sag sonuk">—</td><td class="orta"><span class="rz ok">%100</span></td><td><div class="cubuk"><i style="width:18%"></i></div></td></tr>
+    <tr><td colspan="10" class="sonuk">… 41 müşteri daha</td></tr>
+    <tr class="toplam"><td>Toplam (45 müşteri)</td><td></td><td class="sag">58</td><td class="sag">142</td><td class="sag">1.402.800</td><td class="sag">718.550</td><td class="sag">684.250</td><td class="sag">96.400</td><td class="orta">%82,4</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kalan tutar = kalan miktar × satırın net birim fiyatı (iskontolar düşülmüş, KDV hariç). Siparişin dip toplamı yeniden hesaplanmaz; satırın kendi net tutarı kalan oranıyla bölüştürülür.</div></div>
+  </div>
+  <!-- ============ ACIK ============ -->
+  <div class="pnl" data-s="acik">
+    <div class="grp"><h4>Açık ve kısmi teslim edilmiş satırlar <span class="mini">☐ seç: aynı müşterinin satırları tek irsaliyeye · satıra tıkla: siparişi aç</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>☐</th><th>Sipariş</th><th>Tarih</th><th>Müşteri</th><th>Ürün</th><th class="sag">Sipariş</th><th class="sag">Teslim</th><th class="sag">Kalan</th><th class="sag">Kalan tutar</th><th>Termin</th><th class="orta">Gecikme</th><th class="orta">Stok</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td>☐</td><td>USP2026000118</td><td>06.10</td><td>GÜLÜMSE AĞIZ</td><td>ALPHADENT ACTIVE 4.0X11 İMPLANT</td><td class="sag">20</td><td class="sag">8</td><td class="sag"><b>12</b></td><td class="sag">30.480</td><td>07.10.2026</td><td class="orta"><span class="rz kir">18 gün</span></td><td class="orta"><span class="rz ok">var 46</span></td><td><span class="rz sari">kısmi</span></td></tr>
+    <tr><td>☐</td><td>USP2026000121</td><td>08.10</td><td>DENTA KLİNİK</td><td>HADRON DÜZ 5MM ABUTMENT</td><td class="sag">30</td><td class="sag">0</td><td class="sag"><b>30</b></td><td class="sag">16.800</td><td>15.10.2026</td><td class="orta"><span class="rz kir">10 gün</span></td><td class="orta"><span class="rz kir">eksik 12</span></td><td><span class="rz">açık</span></td></tr>
+    <tr><td>☐</td><td>USP2026000127</td><td>12.10</td><td>AĞIZ DİŞ MERKEZİ</td><td>UNIQ-OSS DİJİTAL ANALOG <span class="rz mavi">€</span></td><td class="sag">40</td><td class="sag">25</td><td class="sag"><b>15</b></td><td class="sag">10.350</td><td>28.10.2026</td><td class="orta"><span class="rz ok">3 gün var</span></td><td class="orta"><span class="rz ok">var 112</span></td><td><span class="rz sari">kısmi</span></td></tr>
+    <tr><td>☐</td><td>USP2026000133</td><td>19.10</td><td>DR. AYŞE KARA</td><td>CERRAHİ EĞİTİM HİZMETİ</td><td class="sag">1</td><td class="sag">0</td><td class="sag"><b>1</b></td><td class="sag">8.000</td><td>05.11.2026</td><td class="orta"><span class="sonuk">—</span></td><td class="orta"><span class="sonuk">hizmet</span></td><td><span class="rz">açık</span></td></tr>
+    <tr><td>☐</td><td>USP2026000140</td><td>22.10</td><td>DENTA KLİNİK</td><td>SUPRAMİD-4.0 SÜTUR</td><td class="sag">100</td><td class="sag">0</td><td class="sag"><b>100</b></td><td class="sag">14.000</td><td><span class="sonuk">(yok)</span></td><td class="orta"><span class="sonuk">—</span></td><td class="orta"><span class="rz sari">yolda 60</span></td><td><span class="rz">açık</span></td></tr>
+    <tr><td colspan="13" class="sonuk">… 137 satır daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Teslim = siparişten türeyen kesin irsaliye / faturaların miktarı (belge dönüşüm izi). Taslak irsaliye teslim sayılmaz. "Kalanı kapat" kalan miktarı iptal eder, neden ister ve satırı kapalıya alır; sipariş belgesi değişmez, kapanış ayrı kayıt olarak loglanır.</div></div>
+  </div>
+  <!-- ============ TRM ============ -->
+  <div class="pnl" data-s="trm">
+    <div class="grp"><h4>Termin takvimi — önümüzdeki 4 hafta <span class="mini">satıra tıkla: o haftanın satırları</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Hafta</th><th class="sag">Satır</th><th class="sag">Miktar</th><th class="sag">Tutar</th><th class="sag">Stokta hazır</th><th class="sag">Eksik</th><th>Yük</th></tr></thead>
+  <tbody>
+    <tr><td class="kir"><b>Geçmiş (termini geçen)</b></td><td class="sag">23</td><td class="sag">410</td><td class="sag kir">96.400</td><td class="sag">15</td><td class="sag kir">8</td><td><div class="cubuk"><i style="width:44%;background:#b3261e"></i></div></td></tr>
+    <tr><td>27.10 – 02.11</td><td class="sag">38</td><td class="sag">920</td><td class="sag">198.600</td><td class="sag">33</td><td class="sag">5</td><td><div class="cubuk"><i style="width:90%"></i></div></td></tr>
+    <tr><td>03.11 – 09.11</td><td class="sag">29</td><td class="sag">610</td><td class="sag">142.000</td><td class="sag">27</td><td class="sag">2</td><td><div class="cubuk"><i style="width:66%"></i></div></td></tr>
+    <tr><td>10.11 – 16.11</td><td class="sag">14</td><td class="sag">280</td><td class="sag">61.900</td><td class="sag">14</td><td class="sag">0</td><td><div class="cubuk"><i style="width:30%"></i></div></td></tr>
+    <tr><td>17.11 – 23.11</td><td class="sag">9</td><td class="sag">150</td><td class="sag">38.150</td><td class="sag">9</td><td class="sag">0</td><td><div class="cubuk"><i style="width:18%"></i></div></td></tr>
+    <tr><td><span class="sonuk">Termini yazılmamış</span></td><td class="sag">29</td><td class="sag">1.040</td><td class="sag">147.200</td><td class="sag">22</td><td class="sag">7</td><td><div class="cubuk"><i style="width:68%"></i></div></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Termin = satırın teslim tarihi; satırda yoksa belgenin termin tarihi; ikisi de yoksa "termini yazılmamış" (gecikme hesabına girmez).</div></div>
+  </div>
+  <!-- ============ PER ============ -->
+  <div class="pnl" data-s="per">
+    <div class="grp"><h4>Teslim performansı — kapanan satırlar (müşteri) <span class="mini">Alış yönünde aynı tablo tedarikçi karnesidir</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Müşteri</th><th class="sag">Kapanan satır</th><th class="sag">Zamanında</th><th class="sag">Geç</th><th class="sag">Eksik kapanan</th><th class="orta">OTIF</th><th class="sag">Ort. gecikme</th><th class="sag">Ort. teslim süresi</th></tr></thead>
+  <tbody>
+    <tr><td>DENTA KLİNİK LTD. ŞTİ.</td><td class="sag">48</td><td class="sag">43</td><td class="sag">3</td><td class="sag">2</td><td class="orta"><span class="rz ok">%89,6</span></td><td class="sag">2,0 gün</td><td class="sag">3,1 gün</td></tr>
+    <tr><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td class="sag">36</td><td class="sag">34</td><td class="sag">2</td><td class="sag">0</td><td class="orta"><span class="rz ok">%94,4</span></td><td class="sag">1,5 gün</td><td class="sag">2,8 gün</td></tr>
+    <tr><td>GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td class="sag">23</td><td class="sag">13</td><td class="sag">7</td><td class="sag">3</td><td class="orta"><span class="rz kir">%56,5</span></td><td class="sag">6,4 gün</td><td class="sag">7,9 gün</td></tr>
+    <tr><td colspan="8" class="sonuk">… 39 müşteri daha</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">211</td><td class="sag">174</td><td class="sag">28</td><td class="sag">9</td><td class="orta">%82,4</td><td class="sag">3,2 gün</td><td class="sag">3,6 gün</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Zamanında = son teslim termin gününde ya da önce. OTIF (zamanında ve tam) = zamanında VE kalan sıfır kapandı. "Kalanı kapat" ile kapanan satır eksik sayılır.</div></div>
+  </div>
+  <!-- ============ KRS ============ -->
+  <div class="pnl" data-s="krs">
+    <div class="grp"><h4>⚠ Açık satış siparişini karşılayamayan stoklar <span class="mini">eldeki: sipariş deposundaki kullanılabilir stok · yoldaki: açık alış siparişi</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Kod</th><th>Ürün</th><th class="sag">Açık sipariş</th><th class="sag">Eldeki</th><th class="sag">Rezerve</th><th class="sag">Yoldaki (alış sip.)</th><th class="sag">Eksik</th><th>İlk termin</th><th>Öneri</th></tr></thead>
+  <tbody>
+    <tr><td>HDR-D5</td><td>HADRON DÜZ 5MM ABUTMENT</td><td class="sag">48</td><td class="sag">18</td><td class="sag">0</td><td class="sag">0</td><td class="sag kir"><b>30</b></td><td>15.10.2026 <span class="rz kir">geçti</span></td><td><span class="lnk">Satınalma talebi aç</span></td></tr>
+    <tr><td>K-IMP-AD3510</td><td>ALPHADENT ACTIVE 3.5X10</td><td class="sag">62</td><td class="sag">40</td><td class="sag">0</td><td class="sag">30</td><td class="sag ok-y"><b>0</b></td><td>28.10.2026</td><td><span class="rz sari">yoldakiyle yetiyor</span></td></tr>
+    <tr><td>HDR-TB3</td><td>HADRON TİBASE 3MM</td><td class="sag">25</td><td class="sag">6</td><td class="sag">0</td><td class="sag">10</td><td class="sag kir"><b>9</b></td><td>03.11.2026</td><td><span class="lnk">Satınalma talebi aç</span></td></tr>
+    <tr><td colspan="9" class="sonuk">… 14 kalem daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Karşılama = eldeki (SKT'si geçmiş lot hariç) + yoldaki − açık satış siparişi. "Satınalma talebi aç" Kritik Stok İcmali'ndeki gibi taslak talep oluşturur (satinalma.talep Ekle yetkisi).</div></div>
+  </div>
+  <!-- ============ TRD ============ -->
+  <div class="pnl" data-s="trd">
+    <div class="grp"><h4>Aylık sipariş ve sevk — son 12 ay</h4>
+<div class="dg"><table>
+  <thead><tr><th>Ay</th><th class="sag">Sipariş tutarı</th><th class="sag">Sevk edilen</th><th class="sag">Ay sonu açık</th><th class="orta">OTIF</th><th class="sag">Ort. teslim</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>Kasım 2025</td><td class="sag">1.204.000</td><td class="sag">1.142.300</td><td class="sag">512.000</td><td class="orta">%79,1</td><td class="sag">4,2 gün</td><td><div class="cubuk"><i style="width:62%"></i></div></td></tr>
+    <tr><td>Aralık 2025</td><td class="sag">1.940.600</td><td class="sag">1.861.000</td><td class="sag">590.700</td><td class="orta">%76,4</td><td class="sag">4,8 gün</td><td><div class="cubuk"><i style="width:100%"></i></div></td></tr>
+    <tr><td>…</td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td class="orta"></td><td class="sag"></td><td></td></tr>
+    <tr><td>Eylül 2026</td><td class="sag">1.612.300</td><td class="sag">1.598.000</td><td class="sag">611.900</td><td class="orta">%78,0</td><td class="sag">3,9 gün</td><td><div class="cubuk"><i style="width:83%"></i></div></td></tr>
+    <tr><td><b>Ekim 2026 (25'i)</b></td><td class="sag"><b>1.402.800</b></td><td class="sag">718.550</td><td class="sag">684.250</td><td class="orta">%82,4</td><td class="sag">3,6 gün</td><td><div class="cubuk"><i style="width:72%"></i></div></td></tr>
+  </tbody></table></div></div>
+  </div>
+  <!-- ============ KIR ============ -->
+  <div class="pnl" data-s="kir">
+    <div class="iki">
+    <div class="grp"><h4>Temsilci</h4>
+<div class="dg"><table>
+  <thead><tr><th>Temsilci</th><th class="sag">Açık tutar</th><th class="sag">Termini geçen</th><th class="orta">OTIF</th></tr></thead>
+  <tbody>
+    <tr><td>Mert AKSOY</td><td class="sag">398.400</td><td class="sag">18.900</td><td class="orta">%90,1</td></tr>
+    <tr><td>Ece DEMİR</td><td class="sag">241.050</td><td class="sag">77.500</td><td class="orta">%71,8</td></tr>
+    <tr><td><span class="sonuk">(temsilcisiz)</span></td><td class="sag">44.800</td><td class="sag">0</td><td class="orta">%88,0</td></tr>
+  </tbody></table></div></div>
+    <div class="grp"><h4>Kategori</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kategori</th><th class="sag">Açık tutar</th><th class="sag">Eksik kalem</th></tr></thead>
+  <tbody>
+    <tr><td>K010 İMPLANT</td><td class="sag">402.300</td><td class="sag">6</td></tr>
+    <tr><td>K015 ABUTMENT</td><td class="sag">161.400</td><td class="sag">9</td></tr>
+    <tr><td>K065 SÜTUR</td><td class="sag">42.000</td><td class="sag">1</td></tr>
+    <tr><td>(hizmet)</td><td class="sag">24.000</td><td class="sag">—</td></tr>
+  </tbody></table></div></div>
+    <div class="grp" style="grid-column:1 / -1"><h4>Para birimi <span class="mini">TL karşılığı sipariş kuruyla</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Para birimi</th><th class="sag">Sipariş</th><th class="sag">Açık (döviz)</th><th class="sag">Sipariş kuru</th><th class="sag">Açık TL</th><th class="sag">Bugünkü kurla</th></tr></thead>
+  <tbody>
+    <tr><td>TL</td><td class="sag">52</td><td class="sag">—</td><td class="sag">—</td><td class="sag">632.400</td><td class="sag">—</td></tr>
+    <tr><td>EUR</td><td class="sag">5</td><td class="sag">€ 1.850</td><td class="sag">36,80</td><td class="sag">68.080</td><td class="sag">68.635</td></tr>
+    <tr><td>USD</td><td class="sag">1</td><td class="sag">$ 0</td><td class="sag">33,40</td><td class="sag">0</td><td class="sag">—</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Açık sipariş tutarı sipariş kuruyla; bugünkü kurla değer bilgi amaçlı (faturada o günün kuru uygulanır).</div></div>
+    </div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>SİPARİŞ İCMALİ — AÇIK SATIŞ SİPARİŞLERİ</h1>
+        <div class="bilgi"><span>Dönem: 01.10.2026 – 25.10.2026</span><span>Durum: açık + kısmi</span><span>Şube: Tümü · Temsilci: Tümü</span><span>58 sipariş · 142 satır</span></div>
+        <table>
+          <thead><tr><th>Müşteri</th><th>Açık satır</th><th>Kalan tutar</th><th>Termini geçen</th><th>OTIF</th></tr></thead>
+          <tbody>
+            <tr><td>DENTA KLİNİK LTD. ŞTİ.</td><td>24</td><td>116.300</td><td>18.900</td><td>%88</td></tr>
+            <tr><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td>17</td><td>87.700</td><td>—</td><td>%94</td></tr>
+            <tr><td>GÜLÜMSE AĞIZ VE DİŞ SAĞLIĞI</td><td>11</td><td>52.300</td><td>31.200</td><td>%61</td></tr>
+            <tr><td colspan="5" style="color:#8a98a8">… 42 müşteri daha</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Sipariş tutarı</span><span>1.402.800,00</span></div><div><span>Teslim edilen</span><span>−718.550,00</span></div><div><span>Termini geçen</span><span>96.400,00</span></div><div class="b"><span>AÇIK SİPARİŞ</span><span>684.250,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Satış Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Sipariş İcmali · KDV hariç · bunun € 1.850'si (sipariş kuru 36,80) dövizli</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>58 sipariş</span><span>142 açık satır</span><span>Yön: satış</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Sipariş İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Kime ne söz verdik, ne kadarını teslim ettik, neyi geciktiriyoruz, elimizdeki stok yetecek mi?" Satış destek, depo ve satınalma sabah toplantısı.</li>
+    <li><b>İki yön tek ekran:</b> şeritte Satış / Alış. Alış yönünde müşteri yerine tedarikçi, "Teslim performansı" tedarikçi karnesi, "Stok karşılama" yerine "Gelecek mal" (açık alış siparişlerinin termin takvimi) gelir.</li>
+    <li><b>Kaynak:</b> kesin sipariş belgeleri (satış siparişi, alış siparişi tür 9) ve satırları; teslim miktarı siparişten türeyen kesin irsaliye / fatura satırlarından (belge dönüşüm izi). Açık Satır Listesi ile aynı açıklık kuralı — ekran ikinci bir kural yazmaz.</li>
+    <li><b>Eylemler (yetkiye bağlı):</b> irsaliyeye dönüştür (mevcut belge dönüşümü; belge.satis.irsaliye Ekle), kalanı kapat (neden zorunlu, loglanır), termin hatırlatması (cari e-postasına; ileti şablonu), satınalma talebi aç.</li>
+    <li><b>Temsilci ve döviz:</b> önceki icmallerdeki karar — temsilci belgeden; tutarlar TL sipariş kuruyla, dövizli satırda rozet, Kırılımlar › Para birimi, A4'te döviz özeti.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Kısmi teslimde "zamanında" hangi teslime göre ölçülsün — ilk sevk mi, son sevk mi?<span class="oneri"><b>Öneri:</b> Son sevk (satır tamamlandığı gün). İlk sevk "ort. teslim süresi"nde ayrıca gösterilir; müşterinin gördüğü gecikme son parçanın gecikmesidir.</span></li>
+    <li>Termini olmayan satır gecikme sayılsın mı?<span class="oneri"><b>Öneri:</b> Hayır; "termini yazılmamış" diye ayrı satırda dursun ve Dikkat rozetiyle sipariş girişinde termin zorunluluğu önerilsin (Satış Belgeleri ayarı).</span></li>
+    <li>"Kalanı kapat" yetkisi hangi koda bağlansın?<span class="oneri"><b>Öneri:</b> Sipariş belgesinin Değiştir yetkisi (belge.satis.siparis / belge.alis_siparis) + neden zorunlu; kapanış satırın teslim edilmiş kısmını değiştirmez.</span></li>
+    <li>Stok karşılamada rezerve (başka siparişe ayrılmış) stok düşülsün mü?<span class="oneri"><b>Öneri:</b> Evet; sistemde rezervasyon varsa düşülür, yoksa termin sırasına göre açık siparişler eldeki stoğu sırayla tüketir (ilk termin ilk alır) ve eksik buna göre hesaplanır.</span></li>
+    <li>Konsinye (109/119) siparişler bu icmale girsin mi?<span class="oneri"><b>Öneri:</b> Ayrı rozetle girsin, varsayılan filtrede hariç; konsinye çıkış satış değildir, teslim performansına katılmaz.</span></li>
+    <li>Alış yönünde tedarikçi gecikmesi Satınalma tedarikçi skoruna da yazılsın mı?<span class="oneri"><b>Öneri:</b> Evet, aynı olay kaynağından (satınalma skor olayları) okunur; icmal skoru yeniden hesaplamaz, yalnız gösterir.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

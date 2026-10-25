@@ -237,7 +237,8 @@ function StokSayimKarti({ sayimId, onKapat }: { sayimId: number; onKapat(): void
   const bekleyen = useRef(new Set<Promise<unknown>>());
   const izle = <T,>(p: Promise<T>) => {
     bekleyen.current.add(p);
-    void p.finally(() => bekleyen.current.delete(p));
+    // finally() zinciri p reddedilince yakalanmamış hata olurdu; hata p'den çağırana gider.
+    p.finally(() => bekleyen.current.delete(p)).catch(() => {});
     return p;
   };
 

@@ -25,6 +25,16 @@ Kullanıcı: *"garanti bankası'ndan hesap hareketlerini çek"* → mockup `Ekra
 
 ---
 
+## 25.10.2026 — Duman + kullanıcı testi (UNIVERSE), ERP süreç icmalleri mockup'ları
+
+Kullanıcı: *"duman testi ve kullanıcı testleri yap.. bitince diğer erp mockupları da tasarla"*.
+
+- **Duman (UNIVERSE, 5176):** bellek kısıtı (≈1,5 GB boş) yüzünden menü grubu başına ayrı süreç, tek sekme. 38 grubun 37'si ilk koşuda temiz; Finans › Kasa Hesabı Listesi'nde JS hatası "Kasa bulunamadı." — liste açılınca önizleme paneli seçili kasa yokken `/api/kasa/0/ozet` istiyordu (404), ve istek önbelleğindeki `void p.finally(...)` zinciri ret olunca **yakalanmamış söz hatası** üretiyordu (çağıran hatayı yakalasa bile `finally()`'nin döndürdüğü yeni söz dinlenmiyordu). Düzeltme: id 0 iken istek yok; `finally(...).catch(() => {})`. Aynı gizli desen `CariKartParcalari` (cari özet) ve `StokSayimKarti` (sayım kaydı) içinde de vardı, düzeltildi. Finans yeniden: 26 ekran 0 hata.
+- **Kullanıcı senaryosu:** 12 icmal ekranı (stok 6, satış / alış / eşleşme 3, finans 3) gerçek tarayıcıda — her sekme tıklandı, "Yapay Zekâya Sor › Bu ekranda ne yapabilirim?" soruldu: 12/12 hatasız, asistan her ekranda doğru ekranı tanıyıp 9-12 madde verdi. Eylem düğmelerine (talep aç, bağla, min/max yaz) basılmadı — gerçek veriye yazmaz.
+- **Mockup'lar (yalnız tasarım):** `Ekranlar/İcmal/` altında Sipariş (satış / alış, OTIF, stok karşılama), Kârlılık (müşteri / ürün / temsilci, ciro × marj, maliyet altı satış), Satınalma Süreç (talep → ödeme hunisi, bekleyen + onaycı, tedarikçi karnesi, bütçe — 724 şemasına göre), KDV (beyan öncesi ön kontrol, tevkifat, istisna, Ba/Bs, 191/391), Teknik Servis (çağrı / iş emri / ziyaret, SLA, kapsam 1-4, sözleşme kârlılığı — 773), Üretim (plan / gerçek, sarf, fire, maliyet sapması, iş merkezi yükü — 429). Her birinin sonunda öneriyle **açık sorular**; İcmal dizinine "ERP süreç icmalleri" bölümü.
+
+---
+
 ## 25.10.2026 — İcmaller (2): stok hareket / ölü stok / kritik stok (1174), satış / alış / irsaliye-fatura eşleşme / tahsilat-ödeme / çek-senet / nakit akış (1175), ekran asistanı "ne yapabilirim"
 
 Kullanıcı: *"Stok menüsü altına dökümlerden önce İcmal dizini aç"* (→ "İcmaller") → *"Stok Hareket, Ölü Stok / Devir Hızı, Kritik Stok icmalleri için mockup yap"* → *"3 mockup'ı web'e uygula, icmallerde neler yapıldığını yerel (ekran) yapay zekâya bildir, kullanıcı bu ekranda ne yapabilirim dediğinde gelsin, önceki tüm icmaller için de"* → *"Satış, Alış, İrsaliye-Fatura Eşleşme"* ve *"Tahsilat / Ödeme, Çek / Senet, Nakit Akış (Vade)"* mockup'ları → açık soruların önerileri onaylandı (*"onayla, hepsini işle"*) → *"önce mockupları kodla"*.

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teknik Servis İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔧 Teknik Servis İcmali — 01.10.2026 – 25.10.2026
+    <span class="sp">Gentegre AI · Teknik Servis › İcmaller · Tüm şubeler · Okan ŞEN (Servis Müdürü)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Teknik Servis İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔧</span> Seçili iş emrini aç</div>
+    <div class="btn"><span>🧾</span> Seçilenleri faturala</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📅</span> Çizelge</div>
+    <div class="btn"><span>📑</span> Sözleşme Listesi</div>
+    <div class="btn"><span>📋</span> Cihaz Parkı</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Çağrı açılışı: <b>01.10.2026 – 25.10.2026</b> ▾</div>
+    <div class="sel">🏢 Şube: <b>Tümü</b> ▾</div>
+    <div class="sel">👷 Teknisyen: <b>Tümü</b> ▾</div>
+    <div class="sel">👥 Müşteri: <b>Tümü</b> ▾</div>
+    <div class="sel">🏷 Marka / model: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Tüm kapsam</span><span>Ücretli</span><span>Sözleşme</span><span>Üretici garantisi</span><span>Kendi garantimiz</span></div>
+    <div class="seg"><span class="on">Dış (müşteri)</span><span>İç (demirbaş)</span><span>İkisi</span></div>
+    <span class="sp"></span>
+    <span class="rz kir">SLA aşan açık çağrı: 3</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Çağrı</div><div class="deg">186</div><div class="alt">kapanan 162 · iptal 6</div></div>
+    <div class="kutu uy"><div class="bas">Açık Çağrı</div><div class="deg">18</div><div class="alt">parça bekliyor 5 · atanmamış 2</div></div>
+    <div class="kutu "><div class="bas">İlk Yanıt</div><div class="deg">2,4 saat</div><div class="alt">medyan 1,6 saat</div></div>
+    <div class="kutu "><div class="bas">Çözüm Süresi</div><div class="deg">19,8 saat</div><div class="alt">açılıştan kapanışa</div></div>
+    <div class="kutu teh"><div class="bas">SLA İhlali</div><div class="deg">%6,8</div><div class="alt">11 çağrı · 3'ü hâlâ açık</div></div>
+    <div class="kutu iyi"><div class="bas">İlk Ziyarette Çözüm</div><div class="deg">%78,4</div><div class="alt">ikinci ziyaret 35</div></div>
+    <div class="kutu uy"><div class="bas">Tekrar Arıza (30 gün)</div><div class="deg">9</div><div class="alt">aynı cihaz · %5,6</div></div>
+    <div class="kutu mor"><div class="bas">Servis Cirosu</div><div class="deg">412.600 ₺</div><div class="alt">işçilik 168.200 · parça 244.400</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ozt">Özet</div>
+    <div class="sekme" data-s="tek">Teknisyen</div>
+    <div class="sekme" data-s="cih">Cihaz / Model</div>
+    <div class="sekme" data-s="sla">SLA <span class="rz kir">11</span></div>
+    <div class="sekme" data-s="prc">Parça Tüketimi</div>
+    <div class="sekme" data-s="emn">Emanet Cihaz <span class="rz sari">4</span></div>
+    <div class="sekme" data-s="soz">Sözleşme Kârlılığı</div>
+    <div class="sekme" data-s="ftr">Faturalanmamış <span class="rz kir">13</span></div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ OZT ============ -->
+  <div class="pnl" data-s="ozt">
+    <div class="iki">
+    <div class="grp" style="grid-column:1 / -1"><h4>Kapsama göre</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kapsam</th><th class="sag">Çağrı</th><th class="sag">İş emri</th><th class="sag">İşçilik</th><th class="sag">Parça</th><th class="sag">Toplam</th><th>Kime yazılır</th></tr></thead>
+  <tbody>
+    <tr><td>1 · Ücretli</td><td class="sag">74</td><td class="sag">81</td><td class="sag">92.400</td><td class="sag">138.100</td><td class="sag">230.500</td><td>müşteriye fatura</td></tr>
+    <tr><td>2 · Sözleşme</td><td class="sag">63</td><td class="sag">66</td><td class="sag">48.600</td><td class="sag">61.300</td><td class="sag">109.900</td><td>sözleşme kârlılığına</td></tr>
+    <tr><td>3 · Üretici garantisi</td><td class="sag">28</td><td class="sag">29</td><td class="sag">19.800</td><td class="sag">38.600</td><td class="sag">58.400</td><td>üreticiye fatura (gelir)</td></tr>
+    <tr><td>4 · Kendi garantimiz</td><td class="sag">15</td><td class="sag">15</td><td class="sag">7.400</td><td class="sag">6.400</td><td class="sag">13.800</td><td>garanti gideri</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">180</td><td class="sag">191</td><td class="sag">168.200</td><td class="sag">244.400</td><td class="sag">412.600</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Tutar hiçbir kapsamda sıfırlanmaz, yalnız tahsil yolu değişir (773). Ciro = ücretli + üretici garantisi; sözleşme ve kendi garantimiz maliyet olarak izlenir.</div></div>
+    <div class="grp"><h4>Çağrı durumu (şu an)</h4>
+<div class="dg"><table>
+  <thead><tr><th>Durum</th><th class="sag">Adet</th><th class="sag">SLA aşan</th></tr></thead>
+  <tbody>
+    <tr><td>0 · Açık (atanmamış)</td><td class="sag">2</td><td class="sag">1</td></tr>
+    <tr><td>1 · Atandı</td><td class="sag">6</td><td class="sag">0</td></tr>
+    <tr><td>2 · Yolda</td><td class="sag">2</td><td class="sag">0</td></tr>
+    <tr><td>3 · Yerinde</td><td class="sag">3</td><td class="sag">0</td></tr>
+    <tr><td>4 · Parça bekliyor</td><td class="sag">5</td><td class="sag kir">2</td></tr>
+    <tr class="toplam"><td>Açık toplam</td><td class="sag">18</td><td class="sag">3</td></tr>
+  </tbody></table></div></div>
+    <div class="grp"><h4>Çağrı türü / öncelik</h4>
+<div class="dg"><table>
+  <thead><tr><th>Öncelik</th><th class="sag">Çağrı</th><th class="sag">Ort. ilk yanıt</th><th class="sag">Ort. çözüm</th></tr></thead>
+  <tbody>
+    <tr><td>1 · Acil</td><td class="sag">14</td><td class="sag">0,8 saat</td><td class="sag">6,2 saat</td></tr>
+    <tr><td>2 · Yüksek</td><td class="sag">41</td><td class="sag">1,9 saat</td><td class="sag">14,1 saat</td></tr>
+    <tr><td>3 · Normal</td><td class="sag">131</td><td class="sag">2,8 saat</td><td class="sag">23,4 saat</td></tr>
+  </tbody></table></div></div>
+    </div>
+  </div>
+  <!-- ============ TEK ============ -->
+  <div class="pnl" data-s="tek">
+    <div class="grp"><h4>Teknisyen performansı <span class="mini">satıra tıkla: ziyaretleri</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>Teknisyen</th><th class="sag">Ziyaret</th><th class="sag">Çözülen çağrı</th><th class="sag">İlk ziyarette çözüm</th><th class="sag">İşçilik saati</th><th class="sag">Yol (km)</th><th class="sag">SLA ihlali</th><th class="sag">Tekrar arıza</th><th class="sag">Ciro</th><th class="sag">İmzasız</th></tr></thead>
+  <tbody>
+    <tr><td>Burak YILDIZ</td><td class="sag">58</td><td class="sag">44</td><td class="sag">%84</td><td class="sag">96,5</td><td class="sag">1.840</td><td class="sag">1</td><td class="sag">1</td><td class="sag">128.400</td><td class="sag">0</td></tr>
+    <tr><td>Emre KOÇ</td><td class="sag">51</td><td class="sag">39</td><td class="sag">%79</td><td class="sag">88,0</td><td class="sag">2.310</td><td class="sag">3</td><td class="sag">2</td><td class="sag">104.900</td><td class="sag">1</td></tr>
+    <tr><td>Hakan ARSLAN</td><td class="sag">47</td><td class="sag">36</td><td class="sag">%72</td><td class="sag">81,5</td><td class="sag">960</td><td class="sag kir">5</td><td class="sag kir">4</td><td class="sag">96.100</td><td class="sag">0</td></tr>
+    <tr><td>Serkan AYDIN</td><td class="sag">41</td><td class="sag">37</td><td class="sag">%88</td><td class="sag">64,0</td><td class="sag">1.120</td><td class="sag">2</td><td class="sag">2</td><td class="sag">83.200</td><td class="sag">0</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">197</td><td class="sag">156</td><td class="sag">%78,4</td><td class="sag">330,0</td><td class="sag">6.230</td><td class="sag">11</td><td class="sag">9</td><td class="sag">412.600</td><td class="sag">1</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Ziyaret = servis_ziyaret satırı (bir gidiş). İlk ziyarette çözüm: çağrının 1. ziyareti "çözüldü" ile kapandı. İmzasız ziyaret kapanmaz; gerekçe yazılmış imzasız ziyaretler sayılır. Müşteri memnuniyet puanı sistemde yok (öneri — açık soru 4).</div></div>
+  </div>
+  <!-- ============ CIH ============ -->
+  <div class="pnl" data-s="cih">
+    <div class="grp"><h4>Marka / model bazında arıza</h4>
+<div class="dg"><table>
+  <thead><tr><th>Marka</th><th>Model</th><th class="sag">Parkta cihaz</th><th class="sag">Çağrı</th><th class="sag">Arıza / cihaz</th><th class="sag">Tekrar (30 g)</th><th>En sık arıza</th><th class="sag">Ort. çözüm</th><th class="sag">Parça tutarı</th></tr></thead>
+  <tbody>
+    <tr><td>W&H</td><td>Lisa 522 otoklav</td><td class="sag">38</td><td class="sag">22</td><td class="sag kir">0,58</td><td class="sag">3</td><td>kapı contası / sızdırma</td><td class="sag">26,4 saat</td><td class="sag">41.800</td></tr>
+    <tr><td>KaVo</td><td>Estetica E50 ünit</td><td class="sag">61</td><td class="sag">19</td><td class="sag">0,31</td><td class="sag">1</td><td>tükürük hortumu</td><td class="sag">12,1 saat</td><td class="sag">22.400</td></tr>
+    <tr><td>NSK</td><td>Surgic Pro motor</td><td class="sag">44</td><td class="sag">14</td><td class="sag">0,32</td><td class="sag">2</td><td>el aleti rulman</td><td class="sag">31,0 saat</td><td class="sag">28.900</td></tr>
+    <tr><td>Planmeca</td><td>ProX röntgen</td><td class="sag">12</td><td class="sag">3</td><td class="sag">0,25</td><td class="sag">0</td><td>sensör kablosu</td><td class="sag">8,5 saat</td><td class="sag">9.600</td></tr>
+    <tr><td colspan="9" class="sonuk">… 23 model daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Parktaki cihaz = taraf_cihaz (müşteri cihaz parkı, aktif). Arıza metni çağrının şikâyet / sonuç alanından gruplanır; serbest metin olduğu için "en sık arıza" öneri niteliğindedir (açık soru 2).</div></div>
+  </div>
+  <!-- ============ SLA ============ -->
+  <div class="pnl" data-s="sla">
+    <div class="grp"><h4>SLA — sözleşme hedefi ve gerçekleşen</h4>
+<div class="dg"><table>
+  <thead><tr><th>Sözleşme</th><th>Müşteri</th><th>Kapsam</th><th class="sag">SLA</th><th class="sag">Çağrı</th><th class="sag">Ort. ilk yanıt</th><th class="sag">İhlal</th><th class="sag">En uzun gecikme</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">SS-2026/014</span></td><td>DENTA KLİNİK LTD. ŞTİ.</td><td>tam kapsam</td><td class="sag">4 saat</td><td class="sag">21</td><td class="sag">2,1 saat</td><td class="sag kir">3</td><td class="sag">5,5 saat</td><td><span class="rz kir">ihlal</span></td></tr>
+    <tr><td><span class="lnk">SS-2026/009</span></td><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td>işçilik + yol</td><td class="sag">8 saat</td><td class="sag">17</td><td class="sag">3,4 saat</td><td class="sag">1</td><td class="sag">1,2 saat</td><td><span class="rz sari">sınırda</span></td></tr>
+    <tr><td><span class="lnk">SS-2025/031</span></td><td>GÜLÜMSE AĞIZ</td><td>işçilik</td><td class="sag">24 saat</td><td class="sag">12</td><td class="sag">6,0 saat</td><td class="sag">0</td><td class="sag">—</td><td><span class="rz ok">uygun</span></td></tr>
+    <tr><td colspan="9" class="sonuk">… 9 sözleşme daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">SLA saati çağrının açılışında başlar (sla_bitis açılışta yazılır, teknisyen atanınca değil). İhlal: ilk yanıt sla_bitis'ten sonra ya da hâlâ yanıt yok ve süre geçti.</div></div>
+  </div>
+  <!-- ============ PRC ============ -->
+  <div class="pnl" data-s="prc">
+    <div class="grp"><h4>İş emirlerinde kullanılan parçalar</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kod</th><th>Parça</th><th class="sag">Miktar</th><th class="sag">Maliyet</th><th class="sag">Faturalanan</th><th class="sag">Faturalanmayan</th><th class="sag">Sözleşme / garanti</th><th>Üreticiye iade</th></tr></thead>
+  <tbody>
+    <tr><td>WH-CNT522</td><td>W&H Lisa kapı contası</td><td class="sag">14</td><td class="sag">9.800</td><td class="sag">4.200</td><td class="sag kir">2.100</td><td class="sag">5.600</td><td><span class="rz sari">3 bekliyor</span></td></tr>
+    <tr><td>NSK-RLM</td><td>Surgic Pro rulman seti</td><td class="sag">9</td><td class="sag">12.600</td><td class="sag">8.400</td><td class="sag">0</td><td class="sag">6.300</td><td><span class="rz ok">iade edildi 4</span></td></tr>
+    <tr><td>KV-HRT</td><td>KaVo tükürük hortumu</td><td class="sag">22</td><td class="sag">4.400</td><td class="sag">3.300</td><td class="sag">0</td><td class="sag">2.200</td><td>—</td></tr>
+    <tr><td colspan="8" class="sonuk">… 41 parça daha</td></tr>
+    <tr class="toplam"><td>Toplam</td><td></td><td class="sag">186</td><td class="sag">98.400</td><td class="sag">76.900</td><td class="sag">6.300</td><td class="sag">42.800</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Parça = demirbas_is_emri_parca (stoktan çıkış). Üretici garantisinde sökülen parça iade edilmezse üretici alacağı reddeder — "iade bekliyor" kırmızıya döner 15 günde.</div></div>
+  </div>
+  <!-- ============ EMN ============ -->
+  <div class="pnl" data-s="emn">
+    <div class="grp"><h4>Dışarıdaki emanet cihazlar</h4>
+<div class="dg"><table>
+  <thead><tr><th>Emanet</th><th>Cihaz</th><th>Müşteri</th><th>İş emri</th><th>Veriliş</th><th class="orta">Gün</th><th>İş emri durumu</th></tr></thead>
+  <tbody>
+    <tr><td>EM-2026/0031</td><td>Yedek otoklav (W&H Lisa)</td><td>GÜLÜMSE AĞIZ</td><td>İE-2026/0412</td><td>02.10.2026</td><td class="orta"><span class="rz kir">23</span></td><td>parça bekliyor</td></tr>
+    <tr><td>EM-2026/0036</td><td>Yedek motor (NSK)</td><td>DENTA KLİNİK</td><td>İE-2026/0438</td><td>14.10.2026</td><td class="orta"><span class="rz sari">11</span></td><td>yerinde</td></tr>
+    <tr><td>EM-2026/0038</td><td>Yedek el aleti</td><td>DR. AYŞE KARA</td><td>İE-2026/0441</td><td>18.10.2026</td><td class="orta">7</td><td>çözüldü · iade bekleniyor</td></tr>
+    <tr><td>EM-2026/0040</td><td>Yedek sensör</td><td>AĞIZ DİŞ MERKEZİ</td><td>İE-2026/0450</td><td>22.10.2026</td><td class="orta">3</td><td>atandı</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Emanet stoktan düşmez, iade edilmeden iş emri kapanmaz (773). İş emri çözüldü ama emanet dönmediyse sarı rozet.</div></div>
+  </div>
+  <!-- ============ SOZ ============ -->
+  <div class="pnl" data-s="soz">
+    <div class="grp"><h4>Sözleşme kârlılığı — yıllık bedel ile harcanan</h4>
+<div class="dg"><table>
+  <thead><tr><th>Sözleşme</th><th>Müşteri</th><th>Dönem</th><th class="sag">Yıllık bedel</th><th class="sag">Geçen süre payı</th><th class="sag">Harcanan işçilik</th><th class="sag">Harcanan parça</th><th class="sag">Yol</th><th class="sag">Kâr</th><th class="sag">Kâr %</th></tr></thead>
+  <tbody>
+    <tr><td>SS-2026/014</td><td>DENTA KLİNİK</td><td>01.03.2026–28.02.2027</td><td class="sag">120.000</td><td class="sag">64.900</td><td class="sag">38.400</td><td class="sag">41.200</td><td class="sag">3.100</td><td class="sag kir">−17.800</td><td class="sag kir">−%27</td></tr>
+    <tr><td>SS-2026/009</td><td>AĞIZ DİŞ MERKEZİ</td><td>01.01.2026–31.12.2026</td><td class="sag">72.000</td><td class="sag">58.800</td><td class="sag">22.600</td><td class="sag">0</td><td class="sag">2.400</td><td class="sag">33.800</td><td class="sag">%57</td></tr>
+    <tr><td>SS-2025/031</td><td>GÜLÜMSE AĞIZ</td><td>01.11.2025–31.10.2026</td><td class="sag">36.000</td><td class="sag">35.000</td><td class="sag">14.100</td><td class="sag">0</td><td class="sag">1.200</td><td class="sag">19.700</td><td class="sag">%56</td></tr>
+    <tr><td colspan="10" class="sonuk">… 9 sözleşme daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Geçen süre payı = yıllık bedel × geçen gün / sözleşme günü. Harcanan = sözleşme kapsamındaki iş emirlerinin hesaplanmış tutarı (tutar sıfırlanmadığı için ölçülebilir). Zarardaki sözleşme yenilemede fiyat artışı adayıdır.</div></div>
+  </div>
+  <!-- ============ FTR ============ -->
+  <div class="pnl" data-s="ftr">
+    <div class="grp"><h4>⚠ Kapanmış ama faturalanmamış ücretli işler <span class="mini">☐ seç: aynı müşterinin işleri tek faturada</span></h4>
+<div class="dg"><table>
+  <thead><tr><th>☐</th><th>İş emri</th><th>Kapanış</th><th>Müşteri / üretici</th><th>Kapsam</th><th class="sag">İşçilik</th><th class="sag">Parça</th><th class="sag">Toplam</th><th class="orta">Gün</th></tr></thead>
+  <tbody>
+    <tr><td>☐</td><td>İE-2026/0398</td><td>03.10</td><td>DENTA KLİNİK</td><td>ücretli</td><td class="sag">2.400</td><td class="sag">6.900</td><td class="sag">9.300</td><td class="orta"><span class="rz kir">22</span></td></tr>
+    <tr><td>☐</td><td>İE-2026/0405</td><td>06.10</td><td>W&H TÜRKİYE (üretici)</td><td>üretici garantisi</td><td class="sag">1.800</td><td class="sag">3.500</td><td class="sag">5.300</td><td class="orta"><span class="rz kir">19</span></td></tr>
+    <tr><td>☐</td><td>İE-2026/0429</td><td>15.10</td><td>GÜLÜMSE AĞIZ</td><td>ücretli</td><td class="sag">1.200</td><td class="sag">0</td><td class="sag">1.200</td><td class="orta"><span class="rz sari">10</span></td></tr>
+    <tr><td colspan="9" class="sonuk">… 10 iş daha · 38.700 ₺</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Faturala: iş emirlerinden taslak satış faturası oluşturur (belge_id iş emrine yazılır). Üretici garantisi işleri üreticiye ayrı faturalanır.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>TEKNİK SERVİS İCMALİ</h1>
+        <div class="bilgi"><span>Dönem: 01.10.2026 – 25.10.2026</span><span>Şube: Tümü · Dış servis</span><span>186 çağrı · 191 iş emri</span><span>4 teknisyen · 12 sözleşme</span></div>
+        <table>
+          <thead><tr><th>Teknisyen</th><th>Ziyaret</th><th>İlk ziyarette çözüm</th><th>SLA ihlali</th><th>Ciro</th></tr></thead>
+          <tbody>
+            <tr><td>Burak YILDIZ</td><td>58</td><td>%84</td><td>1</td><td>128.400</td></tr>
+            <tr><td>Emre KOÇ</td><td>51</td><td>%79</td><td>3</td><td>104.900</td></tr>
+            <tr><td>Hakan ARSLAN</td><td>47</td><td>%72</td><td>5</td><td>96.100</td></tr>
+            <tr><td>Serkan AYDIN</td><td>41</td><td>%88</td><td>2</td><td>83.200</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>İşçilik</span><span>168.200,00</span></div><div><span>Parça</span><span>244.400,00</span></div><div><span>Faturalanmamış</span><span>38.700,00</span></div><div class="b"><span>SERVİS TUTARI</span><span>412.600,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Servis Müdürü<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · Teknik Servis İcmali · tutarlar KDV hariç · sözleşme ve garanti tutarları tahsil edilmez, maliyet olarak izlenir</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>186 çağrı</span><span>197 ziyaret</span><span>Dış servis</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>Teknik Servis İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Taahhüdümüzü tutuyor muyuz, hangi teknisyen ilk gidişte çözüyor, hangi cihaz sık arızalanıyor, sözleşmeler kâr ediyor mu, faturalanmayı unuttuğumuz iş var mı?" Servis müdürü ve yönetim.</li>
+    <li><b>Üç katman (773):</b> çağrı (SLA ölçülür) → iş emri (iş ve tutar) → ziyaret (bir gidiş; ilk ziyarette çözüm buradan). Ekran bu ayrımı korur.</li>
+    <li><b>İç / dış:</b> şeritte Dış (müşteri cihazı, ücretli) / İç (kurum demirbaşı, maliyet) — aynı iş emri tablosu, sahiplik alanıyla ayrılır. HBYS'de varsayılan İç.</li>
+    <li><b>Eylemler:</b> iş emrine git, seçilenleri faturala (belge.satis.fatura Ekle; taslak fatura), Excel, A4.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Ciroya hangi kapsamlar girsin?<span class="oneri"><b>Öneri:</b> Ücretli + üretici garantisi (ikisi de faturalanır). Sözleşme ve kendi garantimiz ciro değil, "servis maliyeti" kutusunda ayrıca gösterilsin.</span></li>
+    <li>Arıza nedeni serbest metin; sınıflandırma için arıza kodu listesi eklensin mi?<span class="oneri"><b>Öneri:</b> Evet — iş emrine isteğe bağlı "arıza kodu" (marka/model bazlı liste); kodsuz eski kayıtlar metinden gruplanmaya devam eder.</span></li>
+    <li>İşçilik maliyeti teknisyenin saat ücretinden mi, sabit tarifeden mi?<span class="oneri"><b>Öneri:</b> Faturada tarife (iş emrindeki işçilik tutarı), sözleşme kârlılığında personel saat maliyeti; personel ücreti yoksa tarife kullanılsın ve rozetle belirtilsin.</span></li>
+    <li>Müşteri memnuniyet puanı toplansın mı?<span class="oneri"><b>Öneri:</b> Ziyaret kapanışında (imza ekranında) 1-5 isteğe bağlı puan; teknisyen tablosuna ortalama sütunu. Şimdilik şemada yok — önerilen.</span></li>
+    <li>Tekrar arıza süresi 30 gün sabit mi?<span class="oneri"><b>Öneri:</b> Ayarlanabilir (varsayılan 30 gün); aynı cihazın (taraf_cihaz) kapanıştan sonraki yeni çağrısı sayılır, farklı arıza da olsa.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

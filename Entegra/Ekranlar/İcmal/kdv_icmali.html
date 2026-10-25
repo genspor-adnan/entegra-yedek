@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KDV İcmali — Mockup (Gentegre AI · İcmal)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+  .seg span{padding:4px 12px;font-size:11.5px;color:#4d5d6e;border-right:1px solid var(--line2);cursor:pointer}
+  .seg span:last-child{border-right:none}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .ozet{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)} .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)} .kutu.mor .deg{color:#6a3fb5}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.grs td{background:#f1f5fa;font-weight:bold;color:#2c4a6b}
+  tr.ac{cursor:pointer}
+  tr.det td{background:#f9fbfd;font-size:11px;color:#3a4c5e;padding:3px 8px}
+  tr.det td:first-child{padding-left:26px}
+  .ok-ic{display:inline-block;width:12px;color:var(--accent)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)} .kir{color:var(--kirmizi)} .ok-y{color:var(--ok)}
+  .lnk{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .cubuk{height:8px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:90px}
+  .cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .iki{display:grid;grid-template-columns:1fr 1fr}
+  .iki > .grp{margin:12px 6px 12px 12px} .iki > .grp:nth-child(2n){margin:12px 12px 12px 6px}
+  .ipucu{padding:6px 10px;font-size:10.5px;color:var(--muted);background:#fff;border-top:1px solid var(--line2)}
+  .isi td.h{text-align:right}
+  .isi td.h1{background:#eef5fd} .isi td.h2{background:#d7e7fb} .isi td.h3{background:#b7d3f4} .isi td.h4{background:#8fb8ea;color:#0d2a4f}
+  .onz{background:#dfe5ec;padding:16px;display:flex;justify-content:center;flex-wrap:wrap;gap:16px}
+  .a4{background:#fff;width:100%;max-width:640px;aspect-ratio:210/297;box-shadow:0 2px 10px rgba(0,0,0,.18);
+    padding:22px 22px 16px;font-size:9px;line-height:1.4;display:flex;flex-direction:column}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  .a4 .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(#4d8fd6,#14315a)}
+  .a4 h1{font-size:12.5px;margin:9px 0 7px;text-align:center;letter-spacing:.6px;color:var(--navy)}
+  .a4 .bilgi{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;border:1px solid #c9d2dc;padding:4px 6px}
+  .a4 table{margin-top:7px}
+  .a4 th,.a4 td{font-size:8px;padding:2px 3px;border:1px solid #d6dde5;background:none;color:var(--ink)}
+  .a4 th{background:#eef2f7}
+  .a4 .top{margin-left:auto;width:52%;margin-top:7px}
+  .a4 .top div{display:flex;justify-content:space-between;border-bottom:1px dotted #c9d2dc;padding:1px 0}
+  .a4 .top .b{font-weight:bold;font-size:10px;color:var(--navy);border-bottom:none}
+  .a4 .imza{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center}
+  .a4 .imza div{border-top:1px solid #8a98a8;padding-top:3px;margin-top:26px}
+  .a4 .dip{font-size:7px;color:var(--muted);text-align:center;margin-top:8px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media (max-width:1100px){.ozet{grid-template-columns:repeat(4,1fr)}.iki{grid-template-columns:1fr}}
+  @media (max-width:640px){body{padding:6px}.ozet{grid-template-columns:repeat(2,1fr)}}
+  .soru{max-width:1400px;margin:10px auto;background:#fffaf0;border:1px solid #f2ddbf;border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .soru b.bas{color:#8a6218} .soru ol{margin:6px 0 0 18px;padding:0} .soru li{margin:6px 0}
+  .soru .oneri{display:block;color:#2e5a2e;background:#eef7ee;border-left:3px solid #2e7d46;padding:2px 8px;margin-top:2px}
+  .rz.onr{background:#fff4e0;color:#8a5a00;border-color:#f0d3a0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧮 KDV İcmali — Ekim 2026
+    <span class="sp">Gentegre AI · Muhasebe › İcmaller · UNIVERSE MEDİKAL (VKN 891 042 7733) · Selin YILMAZ (Muhasebe)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> KDV İcmali ▾</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📄</span> Seçili belgeyi aç</div>
+    <div class="btn"><span>📤</span> Müşavir dökümü (Excel)</div>
+    <div class="sp"></div>
+    <div class="btn"><span>📨</span> Fatura / e-Belge İcmali</div>
+    <div class="btn"><span>📕</span> Muhasebe Fişi Listesi</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📅 Dönem: <b>Ekim 2026</b> <span class="rz">açık ay</span> ▾</div>
+    <div class="sel">🏢 Mükellef: <b>UNIVERSE MEDİKAL · 891 042 7733</b> ▾</div>
+    <div class="sel">📑 Belge türü: <b>Tümü</b> ▾</div>
+    <div class="seg"><span class="on">Hepsi</span><span>e-Fatura</span><span>e-Arşiv</span><span>Kağıt</span></div>
+    <label class="chk"><input type="checkbox"> Taslaklar dahil (ön izleme)</label>
+    <span class="sp"></span>
+    <span class="rz sari">Beyanname değildir · ön kontrol</span>
+    <span class="rz kir">Uyarı: 11</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu "><div class="bas">Hesaplanan KDV</div><div class="deg">368.460 ₺</div><div class="alt">satış · matrah 1.842.300</div></div>
+    <div class="kutu "><div class="bas">İndirilecek KDV</div><div class="deg">239.704 ₺</div><div class="alt">alış + gider · matrah 1.236.900</div></div>
+    <div class="kutu uy"><div class="bas">Tevkifat</div><div class="deg">9.600 ₺</div><div class="alt">alıcı olarak KDV-2 · 3 belge</div></div>
+    <div class="kutu mor"><div class="bas">Ödenecek KDV (tahmini)</div><div class="deg">120.592 ₺</div><div class="alt">devreden yok</div></div>
+    <div class="kutu "><div class="bas">İstisna Matrahı</div><div class="deg">74.300 ₺</div><div class="alt">ihracat 301 · bedelsiz 351</div></div>
+    <div class="kutu teh"><div class="bas">İade KDV</div><div class="deg">−9.640 ₺</div><div class="alt">satış iadesi 27 belge</div></div>
+    <div class="kutu "><div class="bas">Belge</div><div class="deg">512</div><div class="alt">satış 311 · alış 201</div></div>
+    <div class="kutu teh"><div class="bas">Uyarı</div><div class="deg">11</div><div class="alt">GİB'e gitmemiş 3 · KDV'siz 4</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on" data-s="orn">Oran Bazında</div>
+    <div class="sekme" data-s="tev">Tevkifat <span class="rz">3</span></div>
+    <div class="sekme" data-s="ist">İstisnalar</div>
+    <div class="sekme" data-s="iad">İadeler</div>
+    <div class="sekme" data-s="ba">Ba / Bs Ön Kontrol</div>
+    <div class="sekme" data-s="uyr">Uyarılar <span class="rz kir">11</span></div>
+    <div class="sekme" data-s="muh">Muhasebe Bağı</div>
+    <div class="sekme" data-s="onz">🖨 Önizleme (A4)</div>
+  </div>
+  <!-- ============ ORN ============ -->
+  <div class="pnl" data-s="orn">
+    <div class="iki">
+    <div class="grp"><h4>Satış — hesaplanan KDV</h4>
+<div class="dg"><table>
+  <thead><tr><th>Oran</th><th class="sag">Belge</th><th class="sag">Matrah</th><th class="sag">KDV</th><th class="sag">Pay</th></tr></thead>
+  <tbody>
+    <tr><td>%20</td><td class="sag">248</td><td class="sag">1.512.400</td><td class="sag">302.480</td><td class="sag">%82,1</td></tr>
+    <tr><td>%10</td><td class="sag">61</td><td class="sag">254.800</td><td class="sag">25.480</td><td class="sag">%6,9</td></tr>
+    <tr><td>%1</td><td class="sag">4</td><td class="sag">800</td><td class="sag">8</td><td class="sag">%0,0</td></tr>
+    <tr><td>%0 (istisna)</td><td class="sag">6</td><td class="sag">74.300</td><td class="sag">0</td><td class="sag">—</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">311</td><td class="sag">1.842.300</td><td class="sag">368.460</td><td class="sag">%100</td></tr>
+  </tbody></table></div></div>
+    <div class="grp"><h4>Alış ve gider — indirilecek KDV</h4>
+<div class="dg"><table>
+  <thead><tr><th>Oran</th><th class="sag">Belge</th><th class="sag">Matrah</th><th class="sag">KDV</th><th class="sag">Tevkif edilen</th></tr></thead>
+  <tbody>
+    <tr><td>%20</td><td class="sag">163</td><td class="sag">1.164.100</td><td class="sag">232.820</td><td class="sag">9.600</td></tr>
+    <tr><td>%10</td><td class="sag">31</td><td class="sag">68.400</td><td class="sag">6.840</td><td class="sag">0</td></tr>
+    <tr><td>%1</td><td class="sag">7</td><td class="sag">4.400</td><td class="sag">44</td><td class="sag">0</td></tr>
+    <tr class="toplam"><td>Toplam</td><td class="sag">201</td><td class="sag">1.236.900</td><td class="sag">239.704</td><td class="sag">9.600</td></tr>
+  </tbody></table></div></div>
+    <div class="grp" style="grid-column:1 / -1"><h4>Hesap özeti</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kalem</th><th class="sag">Tutar</th></tr></thead>
+  <tbody>
+    <tr><td>Hesaplanan KDV (satış)</td><td class="sag">368.460</td></tr>
+    <tr><td>− Satış iadelerinin KDV'si</td><td class="sag kir">−9.640</td></tr>
+    <tr><td>− İndirilecek KDV (alış + gider)</td><td class="sag">−239.704</td></tr>
+    <tr><td>+ Alış iadelerinin KDV'si (indirimden düşülür)</td><td class="sag">+1.476</td></tr>
+    <tr><td>+ Sorumlu sıfatıyla KDV-2 (tevkifat)</td><td class="sag">+9.600</td></tr>
+    <tr><td>− KDV-2 indirimi</td><td class="sag">−9.600</td></tr>
+    <tr><td>− Önceki dönemden devreden</td><td class="sag">0</td></tr>
+    <tr class="toplam"><td><b>Ödenecek KDV (tahmini)</b></td><td class="sag">120.592</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Tahmindir; beyanname müşavirin programında hazırlanır. Satır KDV'si belge satırlarından (BelgeHesap — Delphi formülü), toplam fn_belge_diptoplam'dan; ekran yeniden yuvarlamaz.</div></div>
+    </div>
+  </div>
+  <!-- ============ TEV ============ -->
+  <div class="pnl" data-s="tev">
+    <div class="grp"><h4>Tevkifatlı belgeler</h4>
+<div class="dg"><table>
+  <thead><tr><th>Belge</th><th>Tarih</th><th>Taraf</th><th>Yön</th><th>Tevkifat kodu</th><th class="orta">Oran</th><th class="sag">Matrah</th><th class="sag">KDV</th><th class="sag">Tevkif edilen</th><th class="sag">Ödenen KDV</th></tr></thead>
+  <tbody>
+    <tr><td><span class="lnk">AF2026000298</span></td><td>08.10</td><td>ÖZGÜR TEKNİK SERVİS</td><td>alış</td><td>614 · bakım-onarım</td><td class="orta">7/10</td><td class="sag">18.000</td><td class="sag">3.600</td><td class="sag">2.520</td><td class="sag">1.080</td></tr>
+    <tr><td><span class="lnk">AF2026000305</span></td><td>14.10</td><td>GÜVEN TEMİZLİK HİZM.</td><td>alış</td><td>604 · temizlik</td><td class="orta">9/10</td><td class="sag">32.000</td><td class="sag">6.400</td><td class="sag">5.760</td><td class="sag">640</td></tr>
+    <tr><td><span class="lnk">AF2026000317</span></td><td>21.10</td><td>MAVİ YEMEK LTD.</td><td>alış</td><td>603 · yemek servisi</td><td class="orta">5/10</td><td class="sag">13.200</td><td class="sag">2.640</td><td class="sag">1.320</td><td class="sag">1.320</td></tr>
+    <tr><td><span class="sonuk">satış</span></td><td></td><td></td><td><span class="sonuk">satış tarafında tevkifat yok</span></td><td></td><td class="orta"></td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td class="sag"></td></tr>
+    <tr class="toplam"><td>Toplam</td><td></td><td>3 belge</td><td></td><td></td><td class="orta"></td><td class="sag">63.200</td><td class="sag">12.640</td><td class="sag">9.600</td><td class="sag">3.040</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Tevkifat kodu ve oranı belge satırından. Tevkif edilen KDV-2 ile beyan edilir ve aynı dönemde indirilir. e-Fatura XML'inde WithholdingTax TaxableAmount = KDV tutarıdır (net değil).</div></div>
+  </div>
+  <!-- ============ IST ============ -->
+  <div class="pnl" data-s="ist">
+    <div class="grp"><h4>İstisna ve muafiyetler</h4>
+<div class="dg"><table>
+  <thead><tr><th>Kod</th><th>Açıklama</th><th class="sag">Belge</th><th class="sag">Matrah</th><th>Not</th></tr></thead>
+  <tbody>
+    <tr><td>301</td><td>Mal ihracatı (11/1-a)</td><td class="sag">2</td><td class="sag">61.900</td><td><span class="rz mavi">€ 1.700</span> · GÇB bağlantısı 1 belgede eksik</td></tr>
+    <tr><td>351</td><td>Bedelsiz / %100 iskonto (KDV 0)</td><td class="sag">3</td><td class="sag">12.400</td><td>promosyon numune</td></tr>
+    <tr><td>—</td><td>Hizmet ihracatı</td><td class="sag">0</td><td class="sag">0</td><td></td></tr>
+    <tr class="toplam"><td>Toplam</td><td></td><td class="sag">5</td><td class="sag">74.300</td><td></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Kod belge satırının muafiyet kodundan (GİB kod listesi). %0 KDV'li satırda kod yoksa Uyarılar'a düşer.</div></div>
+  </div>
+  <!-- ============ IAD ============ -->
+  <div class="pnl" data-s="iad">
+    <div class="grp"><h4>İade faturaları</h4>
+<div class="dg"><table>
+  <thead><tr><th>Belge</th><th>Tarih</th><th>Taraf</th><th>Yön</th><th>İade edilen belge</th><th class="sag">Matrah</th><th class="sag">KDV</th><th>Not</th></tr></thead>
+  <tbody>
+    <tr><td>UNV2026000455</td><td>14.10</td><td>DENTA KLİNİK</td><td>satış iadesi</td><td>UNV2026000412</td><td class="sag">−4.333</td><td class="sag">−867</td><td></td></tr>
+    <tr><td>UNV2026000470-İ</td><td>18.10</td><td>GÜLÜMSE AĞIZ</td><td>satış iadesi</td><td><span class="sonuk">(bağsız)</span></td><td class="sag">−8.167</td><td class="sag">−1.633</td><td><span class="rz sari">orijinal belge bağı yok</span></td></tr>
+    <tr><td>AFİ2026000011</td><td>20.10</td><td>MAVİ SARF</td><td>alış iadesi</td><td>AF2026000277</td><td class="sag">−7.380</td><td class="sag">−1.476</td><td></td></tr>
+    <tr><td colspan="8" class="sonuk">… 25 iade daha</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">İade e-Faturası orijinal faturaya BillingReference ile bağlanır; bağsız iade hem beyan hem cari mutabakatta sorun çıkarır, Uyarılar'a da yazılır.</div></div>
+  </div>
+  <!-- ============ BA ============ -->
+  <div class="pnl" data-s="ba">
+    <div class="grp"><h4>Ba / Bs ön kontrol — 5.000 TL ve üstü</h4>
+<div class="dg"><table>
+  <thead><tr><th>Form</th><th>Taraf</th><th>VKN / TCKN</th><th class="sag">Belge</th><th class="sag">Tutar (KDV hariç)</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td>Bs</td><td>DENTA KLİNİK LTD. ŞTİ.</td><td>412 336 2811</td><td class="sag">24</td><td class="sag">211.800</td><td><span class="rz ok">tamam</span></td></tr>
+    <tr><td>Bs</td><td>AĞIZ DİŞ MERKEZİ A.Ş.</td><td>018 774 2290</td><td class="sag">19</td><td class="sag">164.200</td><td><span class="rz ok">tamam</span></td></tr>
+    <tr><td>Bs</td><td>DR. AYŞE KARA DİŞ POLİKLİNİĞİ</td><td><span class="kir">(boş)</span></td><td class="sag">11</td><td class="sag">93.400</td><td><span class="rz kir">VKN/TCKN eksik</span></td></tr>
+    <tr><td>Ba</td><td>TEKNO MEDİKAL A.Ş.</td><td>836 220 1904</td><td class="sag">12</td><td class="sag">298.400</td><td><span class="rz ok">tamam</span></td></tr>
+    <tr><td>Ba</td><td>MAVİ SARF MALZ.</td><td>604 118 0032</td><td class="sag">7</td><td class="sag">48.300</td><td><span class="rz ok">tamam</span></td></tr>
+    <tr><td colspan="6" class="sonuk">… Bs 38 taraf · Ba 14 taraf</td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Belge adedi ve KDV hariç tutar taraf bazında; 5.000 TL sınırı ayarlanabilir (mevzuat değişirse). Bu ekran form üretmez, eksik vergi numarası ve mutabakat farkını önceden yakalar.</div></div>
+  </div>
+  <!-- ============ UYR ============ -->
+  <div class="pnl" data-s="uyr">
+    <div class="grp"><h4>⚠ Beyandan önce düzeltilmesi gerekenler</h4>
+<div class="dg"><table>
+  <thead><tr><th>Tür</th><th>Belge</th><th>Tarih</th><th>Taraf</th><th>Açıklama</th><th>Öneri</th></tr></thead>
+  <tbody>
+    <tr><td><span class="rz kir">GİB</span></td><td>UNV2026000502</td><td>24.10</td><td>DR. AYŞE KARA</td><td>e-Arşiv hazırlandı, gönderilmedi</td><td><span class="lnk">e-Belge'ye git</span></td></tr>
+    <tr><td><span class="rz kir">GİB</span></td><td>UNV2026000506</td><td>25.10</td><td>DENTA KLİNİK</td><td>e-Fatura GİB'den ret yanıtı</td><td><span class="lnk">Belgeyi aç</span></td></tr>
+    <tr><td><span class="rz kir">KDV'siz</span></td><td>AF2026000309</td><td>15.10</td><td>KIRTASİYE DÜNYASI</td><td>KDV %0, muafiyet kodu yok</td><td>oran ya da kod gir</td></tr>
+    <tr><td><span class="rz sari">oran</span></td><td>UNV2026000477</td><td>17.10</td><td>GÜLÜMSE AĞIZ</td><td>İMPLANT satırında %10 — stok kartında %20</td><td>kontrol et</td></tr>
+    <tr><td><span class="rz sari">tarih</span></td><td>AF2026000288</td><td>02.10</td><td>TEKNO MEDİKAL</td><td>fatura tarihi Eylül (28.09), kayıt Ekim</td><td>hangi dönem? (açık soru 3)</td></tr>
+    <tr><td><span class="rz mavi">aktarım</span></td><td>—</td><td>Ekim</td><td>—</td><td>Delphi'den satırsız aktarılan 0 tahakkuk bu ayda</td><td><span class="sonuk">etkisi yok</span></td></tr>
+    <tr><td colspan="6" class="sonuk">… 5 uyarı daha</td></tr>
+  </tbody></table></div></div>
+  </div>
+  <!-- ============ MUH ============ -->
+  <div class="pnl" data-s="muh">
+    <div class="grp"><h4>Muhasebe hesaplarıyla karşılaştırma</h4>
+<div class="dg"><table>
+  <thead><tr><th>Hesap</th><th>Ad</th><th class="sag">İcmal</th><th class="sag">Muhasebe bakiyesi</th><th class="sag">Fark</th><th>Durum</th></tr></thead>
+  <tbody>
+    <tr><td>391</td><td>Hesaplanan KDV</td><td class="sag">358.820</td><td class="sag">358.820</td><td class="sag">0</td><td><span class="rz ok">tutuyor</span></td></tr>
+    <tr><td>191</td><td>İndirilecek KDV</td><td class="sag">238.228</td><td class="sag">236.088</td><td class="sag kir">2.140</td><td><span class="rz kir">fişlenmemiş 1 alış faturası</span></td></tr>
+    <tr><td>360</td><td>Ödenecek vergi ve fonlar (KDV-2)</td><td class="sag">9.600</td><td class="sag">9.600</td><td class="sag">0</td><td><span class="rz ok">tutuyor</span></td></tr>
+  </tbody></table></div>
+      <div class="ipucu">Muhasebe fişi oluşmuş belgeler için hesap planındaki 391/191/360 bakiyesi (dönem hareketi). Fark varsa fişi olmayan ya da elle düzeltilmiş belge listelenir.</div></div>
+  </div>
+  <div class="pnl" data-s="onz">
+    <div class="onz">
+      <div class="a4">
+        <div class="antet"><div style="display:flex;gap:8px;align-items:center"><div class="logo"></div>
+          <div><b>UNIVERSE MEDİKAL</b><br><span style="font-size:8px;color:#6b7a8b">Merkez</span></div></div>
+          <div style="text-align:right;font-size:8px">Düzenleme: 25.10.2026<br>Düzenleyen: Selin YILMAZ</div></div>
+        <h1>KDV İCMALİ — EKİM 2026</h1>
+        <div class="bilgi"><span>Mükellef: UNIVERSE MEDİKAL</span><span>VKN: 891 042 7733</span><span>Dönem: 01.10.2026 – 31.10.2026</span><span>512 belge · ön kontrol</span></div>
+        <table>
+          <thead><tr><th>Oran</th><th>Satış matrah</th><th>Hesaplanan</th><th>Alış matrah</th><th>İndirilecek</th></tr></thead>
+          <tbody>
+            <tr><td>%20</td><td>1.512.400</td><td>302.480</td><td>1.164.100</td><td>232.820</td></tr>
+            <tr><td>%10</td><td>254.800</td><td>25.480</td><td>68.400</td><td>6.840</td></tr>
+            <tr><td>%1</td><td>800</td><td>8</td><td>4.400</td><td>44</td></tr>
+            <tr><td>%0 istisna</td><td>74.300</td><td>0</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <div class="top"><div><span>Hesaplanan KDV</span><span>368.460,00</span></div><div><span>Satış iadeleri</span><span>−9.640,00</span></div><div><span>İndirilecek KDV</span><span>−239.704,00</span></div><div><span>Alış iadeleri</span><span>+1.476,00</span></div><div class="b"><span>ÖDENECEK (tahmini)</span><span>120.592,00 ₺</span></div></div>
+        <div class="imza"><div>Hazırlayan<br>Ad Soyad · İmza</div><div>Mali Müşavir<br>Kaşe · İmza</div></div>
+        <div class="dip">Gentegre AI · KDV İcmali · beyanname değildir · dövizli belgeler belge kuruyla TL · tevkifat KDV-2 ayrıca: 9.600,00</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>512 belge</span><span>Dönem: Ekim 2026 (açık)</span><span>Mükellef: 891 042 7733</span><span class="sp">Hesap sunucuda · ekran toplamaz</span></div>
+</div>
+
+<div class="not">
+  <b>KDV İcmali — tasarım notları</b>
+  <ul>
+    <li><b>Ne sorar:</b> "Bu ay ne kadar KDV ödeyeceğiz, beyandan önce düzeltmemiz gereken belge var mı, müşavire ne göndereceğiz?" Muhasebe ve mali müşavir.</li>
+    <li><b>Beyanname değildir:</b> beyan müşavirin programında hazırlanır; bu ekran ön kontrol ve döküm verir. A4 ve Excel "müşavir dökümü" olarak basılır.</li>
+    <li><b>Kaynak:</b> kesin satış / alış faturaları, fişler ve iadeleri; KDV satır satır (BelgeHesap), toplam fn_belge_diptoplam. Tevkifat ve muafiyet kodu satırdan. Dövizli belgede TL karşılığı belge kuruyla (faturanın yasal TL tutarı).</li>
+    <li><b>Mükellef:</b> şube VKN'sine göre; aynı VKN'li şubeler birleşir, farklı VKN ayrı icmaldir.</li>
+    <li><b>Uyarılar:</b> GİB'e gitmemiş / reddedilmiş e-Belge, KDV'siz ve kodsuz satır, stok kartı oranıyla uyuşmayan satır, dönem dışı tarih, bağsız iade, Ba/Bs için eksik vergi numarası.</li>
+  </ul>
+</div>
+
+<div class="soru">
+  <b class="bas">❓ Açık sorular (25.10.2026) — onayınızı bekliyor</b>
+  <ol>
+    <li>Mükellef kırılımı şube mi, VKN mi?<span class="oneri"><b>Öneri:</b> VKN — KDV beyanı vergi numarasına verilir; aynı VKN'li şubeler tek icmalde, şube kırılımı ayrı sekmede değil şeritte filtre olarak.</span></li>
+    <li>Devreden KDV nereden gelsin?<span class="oneri"><b>Öneri:</b> Önceki ayın bu icmaldeki sonucundan otomatik değil — muhasebedeki 190 bakiyesinden; muhasebe kullanılmıyorsa elle girilen "devreden" alanı (dönem başına bir değer, loglanır).</span></li>
+    <li>Fatura tarihi önceki ay, kayıt bu ay olan alış faturası hangi döneme yazılsın?<span class="oneri"><b>Öneri:</b> Belge tarihine (fatura tarihi) göre; ancak kapanmış (beyanı verilmiş) aya düşüyorsa Uyarılar'da "dönemi kapanmış, bu aya indirilecek" diye işaretlensin.</span></li>
+    <li>Taslak belgeler gösterilsin mi?<span class="oneri"><b>Öneri:</b> Varsayılan hayır; "Taslaklar dahil (ön izleme)" işaretlenince ayrı renkle ve toplamın altında ayrı satırda — ödenecek KDV'ye eklenmeden.</span></li>
+    <li>Gider makbuzları / serbest meslek makbuzu (stopaj) kapsam içinde mi?<span class="oneri"><b>Öneri:</b> Bu sürümde yalnız KDV; stopaj (muhtasar) için ayrı bir icmal önerilir.</span></li>
+    <li>Ba/Bs sınırı sabit 5.000 TL mi?<span class="oneri"><b>Öneri:</b> Ayarlanabilir parametre (Genel Ayarlar › Muhasebe); mevzuat değişince kod değişmeden güncellensin.</span></li>
+  </ol>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.sekmeler .sekme'));
+  var pnls=[].slice.call(document.querySelectorAll('.pnl'));
+  function goster(k){pnls.forEach(function(p){p.hidden=(p.dataset.s!==k);});}
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(t.dataset.s);});});
+  goster(document.querySelector('.sekmeler .sekme.on').dataset.s);
+})();
+document.querySelectorAll('tr.ac[data-d]').forEach(function(tr){tr.addEventListener('click',function(){
+  var d=document.querySelector('tr.det[data-p="'+tr.dataset.d+'"]'); if(!d) return;
+  d.hidden=!d.hidden; tr.querySelector('.ok-ic').textContent=d.hidden?'▸':'▾';});});
+document.querySelectorAll('.seg span').forEach(function(s){s.addEventListener('click',function(){
+  s.parentNode.querySelectorAll('span').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});});
+</script>
+</body>
+</html>

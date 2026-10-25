@@ -56,13 +56,18 @@ const bekleyen = new Map<string, Promise<KasaKartOzeti>>();
 function ozetGetir(id: number, tazele: number) {
   const anahtar = `${id}:${tazele}`;
   let p = bekleyen.get(anahtar);
-  if (!p) { p = api.kasaKartOzet(id); bekleyen.set(anahtar, p); void p.finally(() => setTimeout(() => bekleyen.delete(anahtar), 2000)) }
+  // finally() yeni bir söz döndürür: p reddedilince o da reddedilir ve kimse dinlemediği için
+  //   "yakalanmamış hata" olurdu (duman 25.10.2026) - temizlik zinciri hatayı yutar, asıl
+  //   hata çağırana p üzerinden gider.
+  if (!p) { p = api.kasaKartOzet(id); bekleyen.set(anahtar, p); p.finally(() => setTimeout(() => bekleyen.delete(anahtar), 2000)).catch(() => {}) }
   return p;
 }
 export function useKasaKartOzeti(id: number, tazele: number) {
   const [veri, setVeri] = useState<KasaKartOzeti | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   useEffect(() => {
+    // Seçili kasa yokken (önizleme boş) istek atılmaz - /api/kasa/0/ozet 404 döner.
+    if (!(id > 0)) { setVeri(null); setHata(null); return }
     let iptal = false; setHata(null);
     ozetGetir(id, tazele).then(v => { if (!iptal) setVeri(v) }, h => { if (!iptal) setHata(hataMetni(h)) });
     return () => { iptal = true };

@@ -35,8 +35,9 @@ function ozetGetir(id: number, tazele: number): Promise<CariKartOzeti> {
   if (!p) {
     p = api.cariKartOzet(id);
     bekleyen.set(anahtar, p);
-    // Eski anahtarlar birikmesin; bir sonraki tazelemede yeniden istenir.
-    void p.finally(() => setTimeout(() => bekleyen.delete(anahtar), 2000));
+    // Eski anahtarlar birikmesin; bir sonraki tazelemede yeniden istenir. finally() zinciri
+    //   p reddedilince yakalanmamış hata olurdu - hatayı yutar, asıl hata p'den çağırana gider.
+    p.finally(() => setTimeout(() => bekleyen.delete(anahtar), 2000)).catch(() => {});
   }
   return p;
 }
