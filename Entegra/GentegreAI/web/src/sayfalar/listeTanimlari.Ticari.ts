@@ -196,7 +196,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
     //   aşağıdaki ikiz tanıma bak.
     urunModu: 1,
-    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturası Listesi', ic: '🧾', yetkiKodu: 'belge.satis.fatura',
+    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturası Listesi', ic: '@fatura', yetkiKodu: 'belge.satis.fatura',
   },
   {
     // HBYS'DE DE FATURA KESİLİR (kullanıcı: "satış faturaları için menü
@@ -240,7 +240,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: '',
     menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Satış Faturası Listesi',
-    ic: '🧾', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
+    ic: '@fatura', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
   },
   {
     // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.

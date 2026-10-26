@@ -6,6 +6,7 @@
  */
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { CekIkon } from '../../bilesenler/CekIkon';
+import { FaturaIkon } from '../../bilesenler/BelgeIkonlari';
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
@@ -105,6 +106,9 @@ export function MenuIkon({ ic }: { ic: string }) {
   // '@cek' (kullanıcı 26.10.2026: "çek listesi ikonu değiş çek resmi yap"): çek kağıdı (CekIkon).
   if (ic === '@cek')
     return <span className="ic ic-hilal" aria-hidden="true"><CekIkon /></span>;
+  // '@fatura' (kullanıcı 26.10.2026: "satış fat ikonu ... menüde değiş"): fiş 🧾'ünden ayrı fatura sayfası.
+  if (ic === '@fatura')
+    return <span className="ic ic-hilal" aria-hidden="true"><FaturaIkon /></span>;
   if (ic === '@icmal')
     return (
       <span className="ic ic-hilal" aria-hidden="true">
