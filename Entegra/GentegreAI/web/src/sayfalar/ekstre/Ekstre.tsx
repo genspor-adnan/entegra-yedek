@@ -131,6 +131,32 @@ export function Ekstre() {
 
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const konum = useLocation();
+  const kartaGit = (y: string) => (ekranSekmesi ? ekranSekmesi.kartaGit(y) : git(y));
+  /**
+   * BELGEYİ KOPYALA (kullanıcı 26.10.2026: "aksiyon menüsüne diğer altına Belgeyi Kopyala ekle.. eğer tek belge
+   * seçili ise ve o belge içinde izlemli satır yoksa kopyala varsa uyar"): işaretli (yoksa seçili) TEK belge
+   * satırı; lot / seri takipli kalem varsa kopyalanmaz - kopyada lot yeniden seçilmeli, aynı lot ikinci kez
+   * düşülemez. Kopya yeni belge kartında KAYDEDİLMEMİŞ açılır (BelgeKarti kopyaId).
+   */
+  const belgeyiKopyala = async () => {
+    const tum = veri?.paralar.flatMap(x => x.satirlar) ?? [];
+    const sec = isaretli.size ? tum.filter(s => isaretli.has(s.id)) : secili ? [secili] : [];
+    if (sec.length !== 1) { mesaj(sec.length ? c('Kopyalamak için tek bir belge seçin.') : c('Önce kopyalanacak belgeyi seçin.')); return }
+    const s = sec[0];
+    if (!s.belgeId || s.kasaIslemId) { mesaj(c('Seçili satır bir belge değil (kasa işlemi / devir) - kopyalanamaz.')); return }
+    try {
+      const y = await api.belgeOku(s.belgeId);
+      const izlemli = (y.satirlar ?? []).filter(r => Number(r.izleme ?? 0) > 0
+        || ((r.izlemler as unknown[] | undefined)?.length ?? 0) > 0);
+      if (izlemli.length) {
+        mesaj(c('Bu belgede lot / seri takipli kalem var, kopyalanamaz: {0}. Yeni belgeyi bu kalemlerin lotunu seçerek girin.')
+          .replace('{0}', izlemli.map(r => String(r.stokAdi || r.stokKodu || '')).filter(Boolean).join(', ')));
+        return;
+      }
+      // Cari de adreste: kart açılırken carisiz kalıp cari arama penceresini açmasın.
+      kartaGit(`/belge/yeni?kopya=${s.belgeId}${h ? `&tarafId=${h.id}&tarafUnvan=${encodeURIComponent(h.ad)}` : ''}`);
+    } catch (h) { mesaj(hataMetni(h)) }
+  };
   // SEKME BAŞLIĞI HESABIN ADI (kullanıcı 26.10.2026: "ekstre sekme başlıkta cari/kasa... adın ilk 2 kelimesi").
   const sekmeBasligi = h ? sekmeAdi(h.ad) : '';
   const baslikYolu = baslikAnahtari(konum);
@@ -156,8 +182,8 @@ export function Ekstre() {
                 açılış fişi tek menüde, müşteri / tedarikçiye göre - Devir / Açılış düğmesi bu menüye taşındı.
                 Kasa / banka / POS hesabında düğme yerinde kalır. */}
             {h && gercekTur === 'cari' && (
-              <CariAksiyonMenusu id={h.id} ad={h.ad} git={y => (ekranSekmesi ? ekranSekmesi.kartaGit(y) : git(y))}
-                                 onAcilis={() => setDevirAcik(true)} />)}
+              <CariAksiyonMenusu id={h.id} ad={h.ad} git={kartaGit}
+                                 onAcilis={() => setDevirAcik(true)} onKopyala={() => void belgeyiKopyala()} />)}
             {h && gercekTur !== 'cari' && yetki('finans.devir', 'gor') && (
               <button type="button" className="d" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
             {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" className="d" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}

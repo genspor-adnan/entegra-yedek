@@ -89,11 +89,17 @@ interface Props {
   randevuId?: number;
   onDolguPersonel?: { id: number; ad: string };
   onDolguBolumId?: number;
+  /**
+   * BELGEYİ KOPYALA (kullanıcı 26.10.2026, ekstre Aksiyon › Diğer): yeni belge bu belgenin başlığı ve
+   * kalemleriyle KAYDEDİLMEMİŞ açılır - numara, tarih (bugün), e-Belge durumu, lot / seri, dönüşüm zinciri
+   * taşınmaz. İzlemli (lot / seri) kalem içeren belge kopyalanmaz (ekstre uyarır).
+   */
+  kopyaId?: number;
 }
 
 export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
                             tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa,
-                            randevuId, onDolguPersonel, onDolguBolumId }: Props = {}) {
+                            randevuId, onDolguPersonel, onDolguBolumId, kopyaId }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
@@ -816,6 +822,48 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       } finally { setAciliyor(false) }
     })();
   }, [belgeId]);
+
+  // KOPYA: kaynak belge okunur, kimliksiz yeni belgeye dökülür (bkz. Props.kopyaId).
+  useEffect(() => {
+    if (belgeId || !kopyaId) return;
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.belgeOku(kopyaId);
+        if (iptal) return;
+        const d = yanittanBaslik(y.belge, yerelPara);
+        setTur(d.tur);
+        setCari(d.cari);
+        setSeri(d.seri);
+        setVadeGun(d.vadeGun);
+        setAciklama(d.aciklama);
+        setFiyatListesiIdHam(d.fiyatListesiId);
+        setPersonelId(d.personelId);
+        setKampanyaId(d.kampanyaId);
+        setKampanyaAdi(d.kampanyaAdi);
+        teklif.setKonu(d.teklifKonusu);
+        teklif.setTeslim(d.teklifTeslim);
+        setDepo(d.depo);
+        setGirisDepo(d.girisDepo);
+        setSatici(d.satici);
+        sevkiyat.setTeslimSekli(d.teslimSekli);
+        setSenaryo(d.senaryo);
+        setFisTipi(d.fisTipi);
+        setFaturaTipi(d.faturaTipi);
+        setRaporDovizi(d.raporDovizi);
+        setEkstreDovizi(d.ekstreDovizi);
+        setBelgeKuru(d.belgeKuru);
+        setSatirlar(yanittanSatirlar(y.satirlar, yerelPara).map(s => ({
+          ...s, satirId: undefined, kaynakSatirId: undefined, donustu: false,
+          izlemler: [], kayitliIzlemler: undefined, izlemeKodu: '',
+        })));
+        setKalemDegisti(true);
+      } catch (h) {
+        if (!iptal) setHata(hataMetni(h));
+      }
+    })();
+    return () => { iptal = true };
+  }, [kopyaId]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   // YENI belgede cikis deposu ANA DEPO ile dolu gelir (depo.varsayilan = 1).
   //   Depo cogu belgede hep aynidir; kullaniciyi her seferinde secmeye zorlamak

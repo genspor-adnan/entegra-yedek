@@ -730,6 +730,8 @@ function BelgeYeniRota() {
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   // CARİ ÖN DOLGUSU (Ctrl+K "cari seç -> fat kes", 25.10.2026): ?tarafId=&tarafUnvan= ile cari seçili açılır.
   const [sorgu] = useSearchParams();
-  const taraf = { tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined };
+  // ?kopya=<belgeId> (ekstre Aksiyon › Belgeyi Kopyala): kaynak belgenin türü, başlığı ve kalemleriyle.
+  const taraf = { tarafId: Number(sorgu.get('tarafId')) || undefined, tarafUnvan: sorgu.get('tarafUnvan') ?? undefined,
+                  kopyaId: Number(sorgu.get('kopya')) || undefined };
   return ekranSekmesi ? <BelgeKarti sayfa {...taraf} onKapat={() => ekranSekmesi.kapat()} /> : <BelgeKarti {...taraf} />;
 }

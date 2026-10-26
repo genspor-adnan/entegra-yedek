@@ -14,6 +14,7 @@ import { c } from '../dil/ceviri';
  * menü o zaman daha geniş (4 sütun - kullanıcı 26.10.2026: "hem tedarikçi hem müş ise aksiyon menüsü daha geniş olsun").
  * Müşteri / tedarikçi listesi önizlemesinde ve cari kartında da aynı menü (Fatura / Sipariş / Tahsilat düğmeleri yerine).
  * Her seçim kendi sekmesinde, cari dolu (ve kilitli) açılır; Açılış Fişi ekranın kendi devir penceresidir.
+ * İkonlar yan menüdeki ekranların ikonları (kullanıcı 26.10.2026). Belgeyi Kopyala ekstreden (onKopyala).
  */
 type Oge = { ad: string; yol?: string; tikla?: () => void; yetkili: boolean };
 
@@ -22,12 +23,14 @@ const belgeYolu = (rota: string, id: number, ad: string) =>
 const kasaYolu = (tur: number, id: number, ad: string) =>
   `/kasa-islem/yeni?tur=${tur}&tarafId=${id}&tarafUnvan=${encodeURIComponent(ad)}`;
 
-export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
+export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
   id: number; ad: string;
   /** Kart sekmesi yolu (ekranSekmesi.kartaGit ya da navigate). */
   git(yol: string): void;
   /** Açılış fişi / devir - verilmezse menüde yok. */
   onAcilis?: () => void;
+  /** Belgeyi Kopyala (ekstre: seçili tek belge) - verilmezse menüde yok. */
+  onKopyala?: () => void;
 }) {
   const { yetki } = useOturum();
   const [acik, setAcik] = useState(false);
@@ -57,12 +60,12 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
   const gruplar: [string, Oge[]][] = [];
   if (satis) {
     gruplar.push([c('Satış Belgesi'), [
-      { ad: c('Satış Faturası'), yol: belgeYolu('/belge', id, ad), yetkili: belge },
-      { ad: c('Satış Fişi'), yol: belgeYolu('/satis-fisi', id, ad), yetkili: belge },
-      { ad: c('Satış İrsaliyesi'), yol: belgeYolu('/satis-irsaliye', id, ad), yetkili: belge },
-      { ad: c('Satış Tahakkuku'), yol: belgeYolu('/tahakkuk', id, ad), yetkili: belge },
-      { ad: c('Satış Siparişi'), yol: belgeYolu('/siparis', id, ad), yetkili: belge },
-      { ad: c('Satış Teklifi'), yol: belgeYolu('/teklif', id, ad), yetkili: belge },
+      { ad: `🧾 ${c('Satış Faturası')}`, yol: belgeYolu('/belge', id, ad), yetkili: belge },
+      { ad: `🧾 ${c('Satış Fişi')}`, yol: belgeYolu('/satis-fisi', id, ad), yetkili: belge },
+      { ad: `🚚 ${c('Satış İrsaliyesi')}`, yol: belgeYolu('/satis-irsaliye', id, ad), yetkili: belge },
+      { ad: `📑 ${c('Satış Tahakkuku')}`, yol: belgeYolu('/tahakkuk', id, ad), yetkili: belge },
+      { ad: `📋 ${c('Satış Siparişi')}`, yol: belgeYolu('/siparis', id, ad), yetkili: belge },
+      { ad: `✉️ ${c('Satış Teklifi')}`, yol: belgeYolu('/teklif', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Cari Tahsilat'), [
       { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(21, id, ad), yetkili: kasa },
@@ -75,11 +78,11 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
   }
   if (alis) {
     gruplar.push([c('Alış Belgesi'), [
-      { ad: c('Alış Faturası'), yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
-      { ad: c('Alış Fişi'), yol: belgeYolu('/alis-fisi', id, ad), yetkili: belge },
-      { ad: c('Alış İrsaliyesi'), yol: belgeYolu('/alis-irsaliye', id, ad), yetkili: belge },
-      { ad: c('Alış Tahakkuku'), yol: belgeYolu('/borc-tahakkuk', id, ad), yetkili: belge },
-      { ad: c('Alış Siparişi'), yol: belgeYolu('/alis-siparis', id, ad), yetkili: belge },
+      { ad: `🧾 ${c('Alış Faturası')}`, yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
+      { ad: `🧾 ${c('Alış Fişi')}`, yol: belgeYolu('/alis-fisi', id, ad), yetkili: belge },
+      { ad: `🚛 ${c('Alış İrsaliyesi')}`, yol: belgeYolu('/alis-irsaliye', id, ad), yetkili: belge },
+      { ad: `📑 ${c('Alış Tahakkuku')}`, yol: belgeYolu('/borc-tahakkuk', id, ad), yetkili: belge },
+      { ad: `📋 ${c('Alış Siparişi')}`, yol: belgeYolu('/alis-siparis', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Cari Ödeme'), [
       { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(31, id, ad), yetkili: kasa },
@@ -93,6 +96,7 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
   gruplar.push([c('Diğer'), [
     ...(onAcilis ? [{ ad: `↪️ ${c('Açılış Fişi / Devir')}`, tikla: onAcilis, yetkili: yetki('finans.devir', 'gor') }] : []),
     { ad: `🔁 ${c('Cariler Arası Transfer')}`, yol: kasaYolu(49, id, ad), yetkili: kasa },
+    ...(onKopyala ? [{ ad: `📄 ${c('Belgeyi Kopyala')}`, tikla: onKopyala, yetkili: belge }] : []),
   ]]);
   const gorunen = gruplar.map(([b, o]) => [b, o.filter(x => x.yetkili)] as [string, Oge[]]).filter(([, o]) => o.length);
   if (!gorunen.length) return null;
