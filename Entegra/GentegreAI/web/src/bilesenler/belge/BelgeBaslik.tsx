@@ -6,6 +6,8 @@ import { api } from '../../api/istemci';
 import { KodListesiModali } from '../KodListesiModali';
 import { yerelAnMetni } from '../bicim';
 import { TarafAlani } from './TarafAlani';
+import { CariBilgiBandi } from '../CariBilgiBandi';
+import { useCariSatiri } from '../cariSatiri';
 import {
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
 } from '../../sayfalar/belgeSabitleri';
@@ -55,6 +57,16 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     eBelgeYok, teklif, provizyonVar,
     numaraElle,
   } = p;
+
+  /**
+   * CARİ BİLGİ BANDI (kullanıcı 26.10.2026: "satış/alış belgelere de firma bilgi bandı uygula... cari ad editi
+   * kaldır"): carili belgede cari seçiliyse başlığın üstünde band (avatar, kod, VKN, bakiye...) ve cari hücresi
+   * yok; değiştirmek bandın "Değiştir" düğmesiyle. Cari seçili değilse (yeni belge) ya da cari listesinden
+   * okunamazsa hücre yerinde - seçim ve "zorunlu" hatası orada.
+   */
+  const carili = !stokFisiMi && !depoBelgesi;
+  const cariSatiri = useCariSatiri(carili && !basvuruMu ? cari?.id ?? 0 : 0);
+  const bantli = carili && !!cari?.id && !!cariSatiri;
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
   const teklifMi = belgeAdi === 'Teklif';
@@ -109,6 +121,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     Basligi bosuna cizmek kart tepesinde iki kez ayni bilgiyi gosteriyordu. */}
 {!basvuruMu && (
 <div className="belge-hdr-sar">
+  {bantli && (
+    <CariBilgiBandi id={cari!.id} tedarikci={alisMi}
+                    ek={!kilitli && <button type="button" className="d" onClick={() => setCariArama(true)}>🔍 {c('Değiştir')}</button>} />)}
   <div className="alan-izgara dort-sutun belge-hdr">
     {/* --- 1) KIMLIK --- */}
     {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
@@ -141,7 +156,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hata={alanHatalari.cikisDepoId}
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
-    ) : (
+    ) : bantli ? null : (
       <TarafAlani
         etiket={alisMi ? 'Tedarikçi (Cari)' : 'Müşteri (Cari)'}
         deger={cari?.unvan}

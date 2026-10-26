@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useCariSatiri } from './cariSatiri';
 import { para } from './bicim';
 import { Avatar, dovizBakiyeMetni } from './grid/satirHucre';
@@ -25,8 +26,10 @@ const STIL = `
 
 const isaret = (n: number) => (n > 0.005 ? ' B' : n < -0.005 ? ' A' : '');
 
-export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci }: {
+export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, ek }: {
   id: number; tazele?: number; bakiyesiz?: boolean;
+  /** Bandın en sağında (ör. belge kartında "Değiştir"). */
+  ek?: ReactNode;
   /** Tedarikçi gözü: bakiye "borcumuz" (A = biz borçluyuz) okunur. */
   tedarikci?: boolean;
 }) {
@@ -67,6 +70,7 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci }: {
           {!ted && vade > 0.005 && <span className="kir">{c('Vadesi geçen')} {para.format(vade)}</span>}
           {!ted && risk !== null && <span className={risk > 100 ? 'kir' : ''}>{c('Risk')} %{Math.round(risk)}</span>}
         </div>)}
+      {ek}
     </div>
   );
 }
