@@ -834,7 +834,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         const d = yanittanBaslik(y.belge, yerelPara);
         setTur(d.tur);
         setCari(d.cari);
-        setSeri(d.seri);
+        // YALNIZ TASLAK KISMI (kullanıcı 26.10.2026: "hazırlanmış ya da gönderilmiş fatura kopyalanırsa sadece
+        //   taslak fat kısmı kopyalanmalı.. xml vb diğer kısımlar değil"): e-Belge seri öneki, numara, ETTN /
+        //   XML / GİB durumu / alias, e-Belge dipnotları ve eski tarihin kuru TAŞINMAZ - kopya taslak gibi
+        //   başlar, e-Belge hazırlamada hepsi yeniden üretilir.
         setVadeGun(d.vadeGun);
         setAciklama(d.aciklama);
         setFiyatListesiIdHam(d.fiyatListesiId);
@@ -852,7 +855,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         setFaturaTipi(d.faturaTipi);
         setRaporDovizi(d.raporDovizi);
         setEkstreDovizi(d.ekstreDovizi);
-        setBelgeKuru(d.belgeKuru);
         setSatirlar(yanittanSatirlar(y.satirlar, yerelPara).map(s => ({
           ...s, satirId: undefined, kaynakSatirId: undefined, donustu: false,
           izlemler: [], kayitliIzlemler: undefined, izlemeKodu: '',
