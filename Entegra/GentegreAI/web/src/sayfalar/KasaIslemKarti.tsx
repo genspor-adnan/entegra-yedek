@@ -203,7 +203,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const sekmeBasligi = !modalMi && secili ? [secili.ad, cari?.unvan ? sekmeAdi(cari.unvan) : ''].filter(Boolean).join(' · ') : '';
   const baslikYolu = baslikAnahtari(konum);
   // SEKME İKONU YÖNDEN (kullanıcı 26.10.2026): tahsilat yeşil, ödeme kırmızı (BelgeIkonlari).
-  const sekmeIkonu = grup === 'tahsilat' ? '@b:tahsilat:s' : grup === 'odeme' ? '@b:odeme:a' : undefined;
+  //   Ödeme yolunun ikonu (21/31 nakit, 22/32 havale, 23/33 çek, 24/34 senet, 25 POS / 35 kredi kartı, 61/71 plan).
+  const yontem = tur === 61 || tur === 71 ? 'plan'
+    : ({ 1: 'nakit', 2: 'havale', 3: 'cek', 4: 'senet', 5: grup === 'odeme' ? 'kart' : 'pos' } as Record<number, string>)[tur % 10] ?? grup;
+  const sekmeIkonu = grup === 'tahsilat' ? `@b:${yontem}:s` : grup === 'odeme' ? `@b:${yontem}:a` : undefined;
   useEffect(() => { if (ekranSekmesi && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikYolu, sekmeIkonu) },
             [ekranSekmesi, sekmeBasligi, baslikYolu, sekmeIkonu]);
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;

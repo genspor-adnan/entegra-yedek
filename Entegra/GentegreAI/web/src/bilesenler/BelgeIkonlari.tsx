@@ -11,7 +11,9 @@ import type { ReactNode } from 'react';
 const STIL = { verticalAlign: '-3px', flex: 'none' } as const;
 
 export type BelgeIkonTuru = 'fatura' | 'fis' | 'irsaliye' | 'tahakkuk' | 'siparis' | 'teklif' | 'konsinye'
-  | 'tahsilat' | 'odeme';
+  | 'tahsilat' | 'odeme'
+  // Ödeme yolları (Aksiyon › Tahsilat / Ödeme - kullanıcı 26.10.2026: "tahsilat ve ödemeleri de renklendir").
+  | 'nakit' | 'havale' | 'pos' | 'kart' | 'cek' | 'senet' | 'plan';
 /** s = satış / tahsilat (yeşil), a = alış / ödeme (kırmızı). */
 export type BelgeYonu = 's' | 'a';
 
@@ -71,6 +73,50 @@ function cizim(tur: BelgeIkonTuru, k: string, a: string, o: string): ReactNode {
       // Koli.
       return <><path d="M3 7.5l9-4.5 9 4.5v9.5l-9 4.5-9-4.5z" fill={a} stroke={k} strokeWidth="1.5" strokeLinejoin="round" />
         <path d="M3 7.5l9 4.5 9-4.5M12 12v9.5" fill="none" stroke={k} strokeWidth="1.3" strokeLinejoin="round" /></>;
+    case 'nakit':
+      // Banknot.
+      return <><rect x="1.5" y="6" width="21" height="12" rx="1.5" fill={a} stroke={k} strokeWidth="1.5" />
+        <circle cx="12" cy="12" r="3.3" fill={o} stroke={k} strokeWidth="1.2" />
+        <text x="12" y="14.2" textAnchor="middle" fontSize="5.4" fontWeight="700" fontFamily="Arial, sans-serif" fill={k}>₺</text>
+        <circle cx="5" cy="12" r="0.9" fill={k} /><circle cx="19" cy="12" r="0.9" fill={k} /></>;
+    case 'havale':
+      // Banka binası.
+      return <><path d="M2.5 9L12 3.5 21.5 9z" fill={o} stroke={k} strokeWidth="1.4" strokeLinejoin="round" />
+        <rect x="3.5" y="9" width="17" height="1.6" fill={k} />
+        {[6, 10, 14, 18].map(x => <rect key={x} x={x - 0.9} y="11.5" width="1.8" height="6" fill={k} />)}
+        <rect x="2.5" y="18.3" width="19" height="2.2" rx="0.4" fill={k} /></>;
+    case 'pos':
+      // POS cihazı: ekran + tuşlar.
+      return <><rect x="5" y="2" width="14" height="20" rx="2" fill={a} stroke={k} strokeWidth="1.5" />
+        <rect x="7.5" y="4.5" width="9" height="5" rx="0.8" fill={o} stroke={k} strokeWidth="1" />
+        {[8.5, 12, 15.5].flatMap(x => [12.8, 15.8, 18.8].map(y => <circle key={`${x}-${y}`} cx={x} cy={y} r="1" fill={k} />))}</>;
+    case 'kart':
+      // Kredi kartı.
+      return <><rect x="1.5" y="5" width="21" height="14" rx="2" fill={a} stroke={k} strokeWidth="1.5" />
+        <rect x="1.5" y="8.2" width="21" height="2.6" fill={k} />
+        <rect x="4.5" y="13.5" width="5" height="2.4" rx="0.5" fill={o} stroke={k} strokeWidth="0.8" />
+        <line x1="12" y1="15.5" x2="19" y2="15.5" stroke={k} strokeWidth="1.2" strokeLinecap="round" /></>;
+    case 'cek':
+      // Çek kağıdı (CekIkon çizimi, yön rengiyle).
+      return <><rect x="1" y="5" width="22" height="14" rx="2" fill={a} stroke={k} strokeWidth="1.6" />
+        <line x1="4" y1="9" x2="11" y2="9" stroke={k} strokeWidth="1.8" strokeLinecap="round" />
+        <rect x="14.5" y="7.6" width="6" height="3.2" rx="0.6" fill={k} />
+        <line x1="4" y1="15.5" x2="10" y2="15.5" stroke={k} strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M13 16 q1.3 -2.6 2.6 0 t2.6 0 t2.3 -0.6" fill="none" stroke={k} strokeWidth="1.4" strokeLinecap="round" /></>;
+    case 'senet':
+      // Rulo senet: kıvrık uçlu kağıt + imza.
+      return <><path d="M5 3.5h12.5a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" fill={a} stroke={k} strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M5 3.5a2 2 0 0 0-2 2v1.5h2" fill={o} stroke={k} strokeWidth="1.3" strokeLinejoin="round" />
+        <line x1="8" y1="8" x2="16.5" y2="8" stroke={k} strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="8" y1="11" x2="16.5" y2="11" stroke={k} strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M8.5 17 q1.3 -2.6 2.6 0 t2.6 0 t2.2 -0.6" fill="none" stroke={k} strokeWidth="1.3" strokeLinecap="round" /></>;
+    case 'plan':
+      // Takvim.
+      return <><rect x="3" y="4.5" width="18" height="16.5" rx="1.8" fill={a} stroke={k} strokeWidth="1.5" />
+        <rect x="3" y="4.5" width="18" height="4.2" rx="1.2" fill={k} />
+        <line x1="8" y1="2.5" x2="8" y2="6.5" stroke={k} strokeWidth="1.6" strokeLinecap="round" />
+        <line x1="16" y1="2.5" x2="16" y2="6.5" stroke={k} strokeWidth="1.6" strokeLinecap="round" />
+        {[7.5, 12, 16.5].flatMap(x => [12.3, 16.5].map(y => <rect key={`${x}-${y}`} x={x - 1.3} y={y - 1.3} width="2.6" height="2.6" rx="0.4" fill={o} stroke={k} strokeWidth="0.7" />))}</>;
     case 'tahsilat':
     case 'odeme': {
       // Para + ok: tahsilat içeri (aşağı), ödeme dışarı (yukarı).
@@ -94,7 +140,7 @@ export function BelgeIkon({ tur, yon, boyut = 16 }: { tur: BelgeIkonTuru; yon: B
 
 /** Menü kodu `@b:<tür>:<s|a>` çözümü (MenuIkon); tanınmazsa null. */
 export function belgeIkonKodu(ic: string): { tur: BelgeIkonTuru; yon: BelgeYonu } | null {
-  const m = /^@b:(fatura|fis|irsaliye|tahakkuk|siparis|teklif|konsinye|tahsilat|odeme):([sa])$/.exec(ic);
+  const m = /^@b:(fatura|fis|irsaliye|tahakkuk|siparis|teklif|konsinye|tahsilat|odeme|nakit|havale|pos|kart|cek|senet|plan):([sa])$/.exec(ic);
   return m ? { tur: m[1] as BelgeIkonTuru, yon: m[2] as BelgeYonu } : null;
 }
 

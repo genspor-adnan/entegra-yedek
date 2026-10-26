@@ -73,12 +73,12 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
       { ad: c('Satış Teklifi'), ik: bi('teklif', 's'), yol: belgeYolu('/teklif', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Tahsilat'), [
-      { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(21, id, ad), yetkili: kasa },
-      { ad: `🏦 ${c('Havale / EFT')}`, yol: kasaYolu(22, id, ad), yetkili: kasa },
-      { ad: `📟 ${c('POS')}`, yol: kasaYolu(25, id, ad), yetkili: kasa },
-      { ad: `🧾 ${c('Çek')}`, yol: kasaYolu(23, id, ad), yetkili: kasa },
-      { ad: `📜 ${c('Senet')}`, yol: kasaYolu(24, id, ad), yetkili: kasa },
-      { ad: `📅 ${c('Tahsilat Planı')}`, yol: kasaYolu(61, id, ad), yetkili: kasa },
+      { ad: c('Nakit'), ik: bi('nakit', 's'), yol: kasaYolu(21, id, ad), yetkili: kasa },
+      { ad: c('Havale / EFT'), ik: bi('havale', 's'), yol: kasaYolu(22, id, ad), yetkili: kasa },
+      { ad: c('POS'), ik: bi('pos', 's'), yol: kasaYolu(25, id, ad), yetkili: kasa },
+      { ad: c('Çek'), ik: bi('cek', 's'), yol: kasaYolu(23, id, ad), yetkili: kasa },
+      { ad: c('Senet'), ik: bi('senet', 's'), yol: kasaYolu(24, id, ad), yetkili: kasa },
+      { ad: c('Tahsilat Planı'), ik: bi('plan', 's'), yol: kasaYolu(61, id, ad), yetkili: kasa },
     ]]);
   }
   if (alis) {
@@ -90,12 +90,12 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
       { ad: c('Alış Siparişi'), ik: bi('siparis', 'a'), yol: belgeYolu('/alis-siparis', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Ödeme'), [
-      { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(31, id, ad), yetkili: kasa },
-      { ad: `🏦 ${c('Havale / EFT')}`, yol: kasaYolu(32, id, ad), yetkili: kasa },
-      { ad: `💳 ${c('Kredi Kartı')}`, yol: kasaYolu(35, id, ad), yetkili: kasa },
-      { ad: `🧾 ${c('Çek')}`, yol: kasaYolu(33, id, ad), yetkili: kasa },
-      { ad: `📜 ${c('Senet')}`, yol: kasaYolu(34, id, ad), yetkili: kasa },
-      { ad: `📅 ${c('Ödeme Planı')}`, yol: kasaYolu(71, id, ad), yetkili: kasa },
+      { ad: c('Nakit'), ik: bi('nakit', 'a'), yol: kasaYolu(31, id, ad), yetkili: kasa },
+      { ad: c('Havale / EFT'), ik: bi('havale', 'a'), yol: kasaYolu(32, id, ad), yetkili: kasa },
+      { ad: c('Kredi Kartı'), ik: bi('kart', 'a'), yol: kasaYolu(35, id, ad), yetkili: kasa },
+      { ad: c('Çek'), ik: bi('cek', 'a'), yol: kasaYolu(33, id, ad), yetkili: kasa },
+      { ad: c('Senet'), ik: bi('senet', 'a'), yol: kasaYolu(34, id, ad), yetkili: kasa },
+      { ad: c('Ödeme Planı'), ik: bi('plan', 'a'), yol: kasaYolu(71, id, ad), yetkili: kasa },
     ]]);
   }
   gruplar.push([c('Diğer'), [
