@@ -1121,6 +1121,9 @@ input.skt-gecmis {
 /* SEÇİLİ CARİ ÇİPİ (Ctrl+K ad ile cari, 25.10.2026): kutunun solunda; kutu yan yana dizilir. */
 .palet-kutu.cipli { display: flex; align-items: center; gap: 6px }
 /* KART BAŞLIĞI ARAÇ SATIRINDA (GenForm baslikAracta, cari kartı 25.10.2026): düğmelerin sağında, düğme değil metin. */
+/* Cari kartinda kimlik seridinin ustundeki firma bilgi bandi (kartEklentileri). */
+.kart-cbb { padding: 8px 10px 0 }
+.kart-cbb .cbb { margin: 0 }
 .belge-ara-baslik { display: inline-flex; align-items: center; gap: 6px; color: var(--baslik, #14315a);
   font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
 .kart-ara-baslik { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--cizgi); color: var(--baslik, #14315a); font-size: 13px; white-space: nowrap }
