@@ -110,6 +110,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
                   'sonAlisGun', 'alisEgri', 'onayDurumu', 'efatura', 'durum'],
     kolonBasliklari: { temsilci: 'Satınalmacı', bakiye: 'Bakiye (A = borcumuz)' },
+    // Unvan dar - musteri listesiyle ayni (kullanici 26.10.2026).
+    kolonGenislikleri: { unvan: 320 },
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci', 'vadesiGecen', 'riskYuzde', 'sonSatisGun', 'ciroEgri'],
     toplam: ['bakiye', 'vadesiGecenOdeme', 'odenecek30'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
