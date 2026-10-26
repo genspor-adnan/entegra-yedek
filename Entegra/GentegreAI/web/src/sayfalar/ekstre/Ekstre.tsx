@@ -1,5 +1,6 @@
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
+import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { EkranSekmesiBaglami, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
@@ -151,7 +152,13 @@ export function Ekstre() {
             {h && <button type="button" className="d" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
             <button type="button" className="d" disabled={!secili} title={secili ? 'Seçili satırın belgesi / kasa işlemi' : 'Önce bir satır seçin'}
                     onClick={() => kayitAc(secili)}>📂 {c('Belge / İşlem Aç')}</button>
-            {h && yetki('finans.devir', 'gor') && (
+            {/* AKSİYON (kullanıcı 26.10.2026, Delphi cari listesi Aksiyon menüsü): caride belge / tahsilat / ödeme /
+                açılış fişi tek menüde, müşteri / tedarikçiye göre - Devir / Açılış düğmesi bu menüye taşındı.
+                Kasa / banka / POS hesabında düğme yerinde kalır. */}
+            {h && gercekTur === 'cari' && (
+              <CariAksiyonMenusu id={h.id} ad={h.ad} git={y => (ekranSekmesi ? ekranSekmesi.kartaGit(y) : git(y))}
+                                 onAcilis={() => setDevirAcik(true)} />)}
+            {h && gercekTur !== 'cari' && yetki('finans.devir', 'gor') && (
               <button type="button" className="d" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
             {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" className="d" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}
             {gercekTur === 'kasa' && yetki('kasa.gun_sonu', 'gor') && <button type="button" className="d" onClick={() => git('/kasa-gun-sonu')}>🧮 {c('Gün Sonu')}</button>}
