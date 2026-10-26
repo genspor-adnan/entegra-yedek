@@ -6511,6 +6511,9 @@ textarea.fm-giris { resize: vertical }
   white-space: nowrap; font-size: 12px; user-select: none }
 .es-sekme.on { background: var(--yuz); color: var(--yazi); font-weight: 600; position: relative; top: 1px }
 .es-sekme.es-ev { padding-right: 11px }
+/* Sekme taşıma (sürükle-bırak): bırakılacak yer çizgisi. */
+.es-sekme.es-hedef-sol { box-shadow: inset 3px 0 0 var(--mavi, #2563eb) }
+.es-sekme.es-hedef-sag { box-shadow: inset -3px 0 0 var(--mavi, #2563eb) }
 .es-ad { overflow: hidden; text-overflow: ellipsis }
 .es-x { width: 16px; height: 16px; line-height: 15px; text-align: center; border-radius: 3px; font-weight: 400; opacity: .7 }
 .es-x:hover { background: var(--cizgi); opacity: 1 }

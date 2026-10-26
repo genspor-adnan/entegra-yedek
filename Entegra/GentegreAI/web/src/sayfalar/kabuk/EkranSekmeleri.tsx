@@ -283,6 +283,31 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     return () => window.removeEventListener('keydown', tus);
   });
 
+  /**
+   * SEKME TAŞIMA (kullanıcı 26.10.2026: "sekmelerin yerlerini değişebileyim"): sürükle-bırak. Bırakılan
+   * sekmenin soluna / sağına (imlecin yarısına göre) taşınır; Başlangıç (🏠) yerinde kalır. Sıra
+   * oturumda saklanır (sekmeleriYaz).
+   */
+  const surukle = useRef<string | null>(null);
+  const [hedef, setHedef] = useState<{ anahtar: string; sag: boolean } | null>(null);
+  const birak = (anahtar: string, sag: boolean) => {
+    const kaynak = surukle.current;
+    surukle.current = null; setHedef(null);
+    if (!kaynak || kaynak === anahtar || anahtar === BASLANGIC && !sag) return;
+    setSekmeler(o => {
+      const tasinan = o.find(s => s.anahtar === kaynak);
+      if (!tasinan) return o;
+      const kalan = o.filter(s => s.anahtar !== kaynak);
+      const i = kalan.findIndex(s => s.anahtar === anahtar);
+      if (i < 0) return o;
+      return [...kalan.slice(0, i + (sag ? 1 : 0)), tasinan, ...kalan.slice(i + (sag ? 1 : 0))];
+    });
+  };
+  const sagYarida = (e: React.DragEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    return e.clientX > r.left + r.width / 2;
+  };
+
   const cubuk = (
     <div className="ekran-sekmeleri" role="tablist">
       {!baslangicVar && (
@@ -290,8 +315,20 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
       )}
       {liste.map(s => (
         <div key={s.anahtar} role="tab" aria-selected={s.anahtar === simdiki.anahtar}
-             className={`es-sekme${s.anahtar === simdiki.anahtar ? ' on' : ''}${s.anahtar === BASLANGIC ? ' es-ev' : ''}`}
+             className={`es-sekme${s.anahtar === simdiki.anahtar ? ' on' : ''}${s.anahtar === BASLANGIC ? ' es-ev' : ''}`
+                        + (hedef?.anahtar === s.anahtar ? (hedef.sag ? ' es-hedef-sag' : ' es-hedef-sol') : '')}
              title={c(ad(s))}
+             draggable={s.anahtar !== BASLANGIC}
+             onDragStart={e => { surukle.current = s.anahtar; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', s.anahtar) }}
+             onDragOver={e => {
+               if (!surukle.current || surukle.current === s.anahtar) return;
+               const sag = s.anahtar === BASLANGIC || sagYarida(e);
+               e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+               if (hedef?.anahtar !== s.anahtar || hedef.sag !== sag) setHedef({ anahtar: s.anahtar, sag });
+             }}
+             onDragLeave={() => setHedef(h => (h?.anahtar === s.anahtar ? null : h))}
+             onDrop={e => { e.preventDefault(); birak(s.anahtar, s.anahtar === BASLANGIC || sagYarida(e)) }}
+             onDragEnd={() => { surukle.current = null; setHedef(null) }}
              onClick={() => ac(s)}
              onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapatIste(s.anahtar) } }}>
           {/* Menüdeki ikonun AYNISI: '@icmal' ve yüklenen görsel ikonlar metin değil (sekmede "@icmal" yazıyordu). */}
