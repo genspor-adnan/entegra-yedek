@@ -92,7 +92,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Red',          filtre: { alan: 'teklifDurum', op: 'esit', deger: 4 } },
       { ad: 'İptal',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Teklifi Listesi', ic: '📄', yetkiKodu: 'belge.satis', menuSira: 10,
+    menuGrup: 'Satış', menuAd: 'Satış Teklifi Listesi', ic: '✉️', yetkiKodu: 'belge.satis', menuSira: 10,
   },
   {
     // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/

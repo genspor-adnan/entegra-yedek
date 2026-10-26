@@ -70,6 +70,14 @@ public static partial class KartKatalogu
             new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
             new("efatura",     "efatura",      "mantik", Baslik: "e-Fatura mukellefi", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
             new("aliasEposta", "alias_eposta", "metin", EnFazlaUzunluk: 200, Baslik: "Alias / e-Posta", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari"),
+            // CARİYE ÖZEL FATURA TİPİ / SENARYO (1193, kullanıcı 26.10.2026): seçiliyse bu cariye kesilen satış
+            //   faturası bunlarla açılır; boşsa genel varsayılan (Satış / efatura.senaryo). Kodlar belge.tipi / belge.senaryo.
+            new("varsayilanFaturaTipi", "varsayilan_fatura_tipi", "kod", Baslik: "Fatura Tipi",
+                Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari", SabitKodlar: CariFaturaTipleri,
+                Ipucu: "Seçiliyse bu cariye kesilen satış faturası bu tiple açılır; boşsa Satış."),
+            new("varsayilanSenaryo", "varsayilan_senaryo", "kod", Baslik: "Senaryo",
+                Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari", SabitKodlar: CariSenaryolari,
+                Ipucu: "Seçiliyse bu cariye kesilen satış faturası bu senaryoyla açılır; boşsa Genel Ayarlar'daki varsayılan senaryo."),
             // E-POSTA GİTMESİN (1184, kullanıcı 25.10.2026): e-Arşiv faturada e-posta sorulmaz, izibiz'e KAĞIT gider.
             new("earsivEpostaYok", "earsiv_eposta_yok", "mantik", Baslik: "E-Posta gitmesin", Grup: "Adres / Fatura Bilgisi", AltGrup: "e-Belge Ayarlari",
                 Ipucu: "İşaretliyse e-Arşiv faturada e-posta adresi sorulmaz; belge izibiz'e KAĞIT gönderim şekliyle gider."),
@@ -640,4 +648,18 @@ public static partial class KartKatalogu
             new SilmeEngeli("public.taraf_kullanici", "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
 
+    /// <summary>Satış faturası tipleri (belge.tipi) - web belgeSabitleri.FATURA_TIPLERI ile aynı kodlar. Özellik (alan değil):
+    ///   partial sınıfın statik alan sırası dosyalar arası belirsiz, tanım bu sözlükten önce kurulabilirdi.</summary>
+    private static Dictionary<string, string> CariFaturaTipleri => new()
+    {
+        ["1"] = "Satış", ["2"] = "İade", ["3"] = "Fiyat Farkı", ["4"] = "S. Meslek Makbuzu", ["5"] = "Kur Farkı",
+        ["6"] = "İthalat", ["7"] = "Kira", ["8"] = "Gider Pusulası", ["9"] = "İhraç Kayıtlı", ["22"] = "Tevkifatlı",
+        ["24"] = "KDV İstisna", ["25"] = "SGK", ["26"] = "İhracat",
+    };
+
+    /// <summary>e-Fatura senaryoları (belge.senaryo) - web belgeSabitleri.SENARYO_SECENEK ile aynı kodlar.</summary>
+    private static Dictionary<string, string> CariSenaryolari => new()
+    {
+        ["1"] = "Temel Fatura", ["2"] = "Ticari Fatura", ["3"] = "İhracat", ["7"] = "Kamu", ["8"] = "İlaç / Tıbbi Cihaz",
+    };
 }

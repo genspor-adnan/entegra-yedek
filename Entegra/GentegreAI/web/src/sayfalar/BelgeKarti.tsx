@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
+import { ayarSayi } from '../api/ayarlar';
 import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
@@ -499,6 +500,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const eBelgeYok = !bilgi.eBelge;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = etkinBelgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+  /**
+   * CARİYE ÖZEL FATURA TİPİ / SENARYO (1193, kullanıcı 26.10.2026: "müş kartı ebelge ayarlarına Fatura Tipi ve
+   * Senaryo comboları ekle.. seçilmişse bu müşteriye fat keserken bunlar kullanılır yoksa default ayarlar"):
+   * YENİ satış faturasında cari seçilince (ya da kaynaktan dolu gelince) carinin kartındaki değerler; boşsa
+   * Satış (1) ve Genel Ayarlar efatura.senaryo. Kayıtlı belgede dokunulmaz - belgenin kendi değeri esas.
+   */
+  const cariVarsayilanId = faturaMi && !alisMi && !basvuruMu && !kayitliId ? cari?.id ?? 0 : 0;
+  useEffect(() => {
+    if (!(cariVarsayilanId > 0)) return;
+    let iptal = false;
+    void (async () => {
+      const k = await api.kartOku('cari', cariVarsayilanId).then(y => y.kart as Record<string, unknown>, () => null);
+      const ayarSenaryo = await ayarSayi('efatura.senaryo', 1);
+      if (iptal) return;
+      setFaturaTipi(Number(k?.varsayilanFaturaTipi ?? 0) || 1);
+      setSenaryo(Number(k?.varsayilanSenaryo ?? 0) || ayarSenaryo);
+    })();
+    return () => { iptal = true };
+  }, [cariVarsayilanId]);
+
   // RANDEVU BAĞI (17.10.2026): yeni başvuru ilk kez kaydedilince randevu ona bağlanır ve Geldi olur.
   const randevuBaglandi = useRef(false);
   useEffect(() => {
@@ -1275,10 +1296,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     ekranSekmesi.kapatmaIsleyicisi(() => kapatRef.current(), () => kirliRef.current);
     return () => ekranSekmesi.kapatmaIsleyicisi(null);
   }, [sayfa, ekranSekmesi]);
-  const sekmeBasligi = [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',
-                        sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')].filter(Boolean).join(' · ');
+  // ERP BELGESİNDE YALNIZ CARİ (kullanıcı 26.10.2026: "sekme başlıkta numara olmasın sadece müşteri adı ilk 2
+  //   kelime olsun") - yeni belgede de cari seçilince. Başvuru eskisi gibi: protokol no · hasta.
+  const sekmeBasligi = basvuruMu
+    ? [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',
+       sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')].filter(Boolean).join(' · ')
+    : sekmeAdi(cari?.unvan || '');
   useEffect(() => {
-    if (sayfa && ekranSekmesi && kayitliId && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
+    if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
   }, [sayfa, ekranSekmesi, kayitliId, sekmeBasligi]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const kapat = async (zorla = false) => {
