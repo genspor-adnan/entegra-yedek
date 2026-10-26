@@ -1162,6 +1162,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : cariEkstre.onTarihAraligi}
       basSag={cariEkstre.basSag}
+      onKapat={ekranSekmesi ? () => ekranSekmesi.kapat() : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       aracCubuguAltSatir={tanim.aracCubuguAltSatir}
       ebelgeMenusu={tanim.ebelgeMenusu}

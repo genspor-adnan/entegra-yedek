@@ -93,6 +93,9 @@ interface Props {
   cipSonu?: React.ReactNode;
   /** Baslik satirinin SAG USTUNDE, aksiyon dugmelerinin sagina (ör. cikti menusu - icmal deseni). */
   basSag?: React.ReactNode;
+  /** KAPAT (kullanıcı 26.10.2026: "listelerde yazdır butonun sağına kapat butonu ekle ekstre gibi"):
+   *  verilirse başlık satırında en sağda "✖ Kapat" - ekranın sekmesini kapatır. */
+  onKapat?: () => void;
   /**
    * EK ARAMA ALANLARI (16.10.2026, hasta: "telefon / kimlik no ile de arayabilmeliyim"): hızlı arama
    * görünen metin kolonlarına ek olarak bu (gizli olabilen) kolonlarda da arar - ör. telefonHam, vknoHam.
@@ -275,7 +278,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
-                          seciliBaslangicId, cipSonu, basSag, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
+                          seciliBaslangicId, cipSonu, basSag, onKapat, cipOnu, aramaEkAlanlari, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, grupBirimi, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
@@ -657,6 +660,11 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const altSatirda = (kod: string) => !(kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('-imzala')
                                          || kod === 'genel.yazdir');
 
+  // KAPAT Yazdır'ın SAĞINDA, araç çubuğunun ilk sırasında (iki sıralı çubukta ortada kalmasın).
+  const kapatDugmesi = onKapat
+    ? <button type="button" className="d" title={cev('Ekranı kapat (Alt+W)')} onClick={onKapat}>✖ {cev('Kapat')}</button>
+    : null;
+
   return (
     <>
       {!gomulu && (
@@ -668,8 +676,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             <div className="sag">
               {aksiyonEkrani && <GenToolbar aksiyonlar={aracCubuguAltSatir ? aksiyonlar.filter(x => !altSatirda(x.kod)) : aksiyonlar}
                                             calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler}
-                                            yazdirOncesi={efaturaMenusu} />}
+                                            yazdirOncesi={efaturaMenusu} sonEk={basSag ? undefined : kapatDugmesi} />}
               {basSag}
+              {(!aksiyonEkrani || basSag) && kapatDugmesi}
             </div>
           </div>
           {aracCubuguAltSatir && aksiyonEkrani && (

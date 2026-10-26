@@ -46,10 +46,12 @@ interface CalistirProps {
  */
 export interface AltSecenek { kod: string; ad: string }
 
-export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi }: CalistirProps & {
+export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi, sonEk }: CalistirProps & {
   altSecenekler?: Record<string, AltSecenek[]>;
   /** Yazdir dugmesinin SOLUNA konan ek dugme (e-Fatura menusu, 11.10.2026); yazdir yoksa sona. */
   yazdirOncesi?: React.ReactNode;
+  /** Birinci siranin EN SONUNA (Yazdir'in sagina) konan ek dugme - listenin "✖ Kapat"i (26.10.2026). */
+  sonEk?: React.ReactNode;
 }) {
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
   // IKINCI SIRA (hedef "araccubugu2"): gunluk akisin disinda kalan, daha
@@ -67,11 +69,12 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi }
     return () => window.removeEventListener('click', kapat);
   }, [acikMenu]);
 
-  if (gorunen.length === 0 && ikinciSira.length === 0 && !yazdirOncesi) return null;
+  if (gorunen.length === 0 && ikinciSira.length === 0 && !yazdirOncesi && !sonEk) return null;
   const yazdirSira = gorunen.findIndex(a => a.kod.startsWith('genel.yazdir'));
   const birinci = (): React.ReactNode[] => {
     const d: React.ReactNode[] = gorunen.map(dugme);
     if (yazdirOncesi) d.splice(yazdirSira >= 0 ? yazdirSira : d.length, 0, <span key="yazdir-oncesi">{yazdirOncesi}</span>);
+    if (sonEk) d.push(<span key="son-ek">{sonEk}</span>);
     return d;
   };
 
