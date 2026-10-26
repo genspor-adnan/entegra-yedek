@@ -1134,6 +1134,11 @@ input.skt-gecmis {
 .kart-cbb-sar .alan-temsilci { grid-column: 3; grid-row: 2 }
 .kart-cbb-sar .alan-durum { grid-column: 4; grid-row: 2 }
 .kart-cbb-sar:not(.duzen) > .kaid .alan:not(:has(.alan-hata)) { display: none }
+/* Yazilabilir combo (teklif konusu - BelgeBaslik KodListeAlani): edit + ▾, liste editin altinda. */
+.kla-combo { position: relative }
+.kla-liste { top: 100%; left: 0; right: 0; min-width: 0; max-height: 240px; overflow: auto; z-index: 30 }
+.kla-liste .mi[aria-selected="true"] { font-weight: bold }
+.kla-bos { padding: 6px 8px; font-size: 11px }
 .belge-ara-baslik { display: inline-flex; align-items: center; gap: 6px; color: var(--baslik, #14315a);
   font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
 .kart-ara-baslik { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--cizgi); color: var(--baslik, #14315a); font-size: 13px; white-space: nowrap }

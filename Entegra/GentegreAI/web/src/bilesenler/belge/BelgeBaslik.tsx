@@ -557,6 +557,13 @@ function KodListeAlani({ etiket, listeKod, deger, onDeger, kilitli, yazilabilir 
   const [secenekler, setSecenekler] = useState<string[]>([]);
   const [modal, setModal] = useState(false);
   const [surum, setSurum] = useState(0);
+  const [acik, setAcik] = useState(false);
+  useEffect(() => {
+    if (!acik) return;
+    const kapat = () => setAcik(false);
+    window.addEventListener('click', kapat);
+    return () => window.removeEventListener('click', kapat);
+  }, [acik]);
   useEffect(() => {
     let iptal = false;
     void (async () => {
@@ -576,16 +583,23 @@ function KodListeAlani({ etiket, listeKod, deger, onDeger, kilitli, yazilabilir 
         {etiket} ✎
       </span>
       {yazilabilir ? (
-        /* HEM EDIT HEM COMBO (kullanici): solda serbest metin, sagda dar
-           liste - secim editi doldurur, kullanici uzerine yazabilir. */
-        <span className="ikili">
-          <input value={deger} maxLength={100} disabled={kilitli}
+        /* TEK ALAN, HEM LISTE HEM SERBEST (kullanici 26.10.2026: "konusu 2 alan degil tek olsun.. hem listeden
+           secebileyim hem de istersem serbest yazayim", "combo yap"): yazilabilir edit + ▾ - ok BUTUN listeyi acar,
+           secim editi doldurur, yazilan serbest kalir. */
+        <span className="lookup-kutu kla-combo" onClick={e => e.preventDefault()}>
+          <input value={deger} maxLength={100} disabled={kilitli} autoComplete="off"
                  onChange={e => onDeger(e.target.value)} />
-          <select value="" disabled={kilitli} aria-label={`${etiket} listesi`}
-                  onChange={e => { if (e.target.value) onDeger(e.target.value) }}>
-            <option value="" />
-            {secenekler.map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
+          {!kilitli && (
+            <button type="button" className="mini" aria-haspopup="listbox" aria-expanded={acik}
+                    title={c('Listeden seç')} onClick={e => { e.stopPropagation(); setAcik(a => !a) }}>▾</button>)}
+          {acik && (
+            <div className="dugme-menu-liste kla-liste" role="listbox" onClick={e => e.stopPropagation()}>
+              {secenekler.length === 0
+                ? <div className="sonuk kla-bos">{c('Liste boş - etikete tıklayıp ekleyin.')}</div>
+                : secenekler.map(a => (
+                    <button key={a} type="button" className="mi" role="option" aria-selected={a === deger}
+                            onClick={() => { onDeger(a); setAcik(false) }}>{a}</button>))}
+            </div>)}
         </span>
       ) : (
         <select value={deger} disabled={kilitli}
