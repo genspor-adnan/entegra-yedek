@@ -176,6 +176,21 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     simdiki = { ...bulunan, anahtar };
   }
   useEffect(() => { sonAktif.current = simdiki.anahtar });
+  /**
+   * YENİ SEKMENİN YERİ (kullanıcı 26.10.2026: "bir liste/kart sekmesindeyken orayla ilgili bir butona basıp yeni
+   * sekme açarsam o sekmenin hemen sağına açsın.. ara prompttan yeni bir sekme açarsam sona açsın"): son tıklama /
+   * tuş bir sekmenin GÖVDESİNDEYSE (React ağacında - o sekmenin açtığı pencereler de sayılır) yeni sekme o sekmenin
+   * sağına, değilse (komut paleti, sol menü, üst şerit) sona. `kaynakSekme` adres değişmeden önce öndeki sekme.
+   */
+  const govdedenMi = useRef(false);
+  const kaynakSekme = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const disarida = () => { govdedenMi.current = false };
+    window.addEventListener('pointerdown', disarida, true);
+    window.addEventListener('keydown', disarida, true);
+    return () => { window.removeEventListener('pointerdown', disarida, true); window.removeEventListener('keydown', disarida, true) };
+  }, []);
+  const govdede = () => { govdedenMi.current = true };
   /** Ekranın kendisinin verdiği sekme başlığı (ör. hasta kartında hastanın adı). */
   const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>(ilk.basliklar);
   useEffect(() => { sekmeleriYaz(sekmeler, ozelBaslik) }, [sekmeler, ozelBaslik]);
@@ -186,19 +201,23 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
   useEffect(() => {
+    const kaynak = govdedenMi.current ? kaynakSekme.current : undefined;
+    kaynakSekme.current = simdiki.anahtar;
     setSekmeler(onceki => {
       const var_ = onceki.find(s => s.anahtar === simdiki.anahtar);
       let yeni: Sekme[];
       if (var_) yeni = onceki.map(s => s.anahtar === simdiki.anahtar ? { ...s, ...simdiki, konum, erisim: Date.now() } : s);
       else {
-        // KART SEKMESİ listesinin hemen yanına (kullanıcı: "hasta kartı hemen yanına yeni sekme
-        //   olarak açılacak"); liste yoksa sona. Diğer ekranlar sona.
+        // Sekme gövdesinden açıldıysa o sekmenin hemen sağına, değilse sona (bkz. govdedenMi).
+        //   KART SEKMESİ kendi listesinden / kardeş kartından açıldıysa aynı listenin kartlarının ardına
+        //   (liste · kart 1 · kart 2 · kart 3 - kullanıcı: "hasta kartı hemen yanına yeni sekme olarak açılacak").
         const yeniSekme: Sekme = { ...simdiki, konum, erisim: Date.now() };
-        //   Aynı listenin öteki kartları varsa onların ardına (liste · kart 1 · kart 2 · kart 3).
         const taban = simdiki.ust ? `${simdiki.ust}#kart#` : '';
-        const listeI = simdiki.ust ? onceki.reduce((son, s, i) =>
-          (s.anahtar === simdiki.ust || s.anahtar.startsWith(taban) ? i : son), -1) : -1;
-        yeni = listeI >= 0 ? [...onceki.slice(0, listeI + 1), yeniSekme, ...onceki.slice(listeI + 1)] : [...onceki, yeniSekme];
+        const kardes = (a: string) => !!simdiki.ust && (a === simdiki.ust || a.startsWith(taban));
+        const yerI = !kaynak ? -1 : kardes(kaynak)
+          ? onceki.reduce((son, s, i) => (kardes(s.anahtar) ? i : son), -1)
+          : onceki.findIndex(s => s.anahtar === kaynak);
+        yeni = yerI >= 0 ? [...onceki.slice(0, yerI + 1), yeniSekme, ...onceki.slice(yerI + 1)] : [...onceki, yeniSekme];
       }
       const kapanabilir = yeni.filter(s => s.anahtar !== BASLANGIC);
       if (kapanabilir.length > SEKME_SINIRI) {
@@ -353,7 +372,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const govde = liste.map(s => {
     const aktif = s.anahtar === simdiki.anahtar;
     return (
-      <div key={s.anahtar} className="es-govde" hidden={!aktif}>
+      <div key={s.anahtar} className="es-govde" hidden={!aktif} onPointerDownCapture={govdede} onKeyDownCapture={govdede}>
         <SekmeGorunurBaglami.Provider value={aktif}>
          <EkranSekmesiBaglami.Provider value={{
            kapat: hedef => kapat(s.anahtar, hedef),
