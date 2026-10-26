@@ -1171,6 +1171,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   yer harcayan bir tekrar olurdu.
       gizliKolonlar={gizlenecekKolonlar}
       kolonBasliklari={tanim.kolonBasliklari}
+      kolonGenislikleri={tanim.kolonGenislikleri}
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU,

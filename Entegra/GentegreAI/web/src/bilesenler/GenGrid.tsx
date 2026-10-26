@@ -195,6 +195,8 @@ interface Props {
   gizliKolonlar?: string[];
   /** Ekrana ozel kolon basligi (bkz. useKolonTercihi). */
   kolonBasliklari?: Record<string, string>;
+  /** Ekrana ozel kolon genisligi, px (bkz. useKolonTercihi). */
+  kolonGenislikleri?: Record<string, number>;
   /** Bu ekranda ONE alinacak kolonlar (soldan saga). Verilmeyenler katalog
       sirasinda arkada kalir - kolon sirasi kaynak tanimina bagli olmasin. */
   kolonSirasi?: string[];
@@ -268,7 +270,7 @@ const COKLU_AKSIYONLAR = new Set(['gelen.kabul', 'gelen.red', 'gelen.aktar']);
 export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
-                          gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
+                          gizliKolonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi, altSecenekler,
                           tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
@@ -366,7 +368,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   //   ayni kutuda gosterilir.
   const [kolonHatasi, setKolonHatasi] = useState<string | null>(null);
   const { kolonlar, tumKolonlar, kolonTasi, kolonDegistir, kolonlariSifirla } =
-    useKolonTercihi({ kaynak, gizliKolonlar, kolonBasliklari, kolonSirasi,
+    useKolonTercihi({ kaynak, gizliKolonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi,
                       setHata: setKolonHatasi });
 
   const [filtreAcik, setFiltreAcik] = useState(false);

@@ -65,6 +65,9 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   egri. Iletisim kolonlari onizleme panelinde - kolon seciciden acilir.
     kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
                   'sonSatisGun', 'ciroEgri', 'efatura', 'durum'],
+    // UNVAN DAR (kullanici 26.10.2026: "unvan genisligi %40 daralt - diger sutunlar arkada kaliyor"): genislik
+    //   verilmeyince en uzun unvan (81 karakter, ~540 px) kadar aciliyordu; uzunu uc noktayla kesilir, tamami ipucunda.
+    kolonGenislikleri: { unvan: 320 },
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci'],
     toplam: ['bakiye', 'vadesiGecen'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde

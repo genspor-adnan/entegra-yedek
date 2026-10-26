@@ -70,6 +70,9 @@ export interface ListeTanimi {
    * (kullanici: basvuruda "Belge No" degil "Protokol No").
    */
   kolonBasliklari?: Record<string, string>;
+  /** EKRANA OZEL kolon genisligi (px) - katalogdaki genisligi bu ekranda ezer
+   *  (kullanici 26.10.2026: musteri listesinde Unvan dar; tedarikci ayni kaynak). */
+  kolonGenislikleri?: Record<string, number>;
   kaynak: string;
   baslik: string;
   yol: string;

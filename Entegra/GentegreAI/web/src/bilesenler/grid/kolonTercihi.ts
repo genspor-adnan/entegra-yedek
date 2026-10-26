@@ -47,7 +47,7 @@ function oku(kaynak: string): KolonTercihi | null {
 }
 
 export function useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi,
-                                 kolonBasliklari, setHata }: {
+                                 kolonBasliklari, kolonGenislikleri, setHata }: {
   kaynak: string;
   gizliKolonlar?: string[];
   kolonSirasi?: string[];
@@ -58,6 +58,9 @@ export function useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi,
    * kolon anahtari, kolon tercihi ve filtreler ayni kalir.
    */
   kolonBasliklari?: Record<string, string>;
+  /** EKRANA OZEL kolon genisligi (px): ayni kaynagi paylasan listeler katalog genisligini degistirmeden
+   *  bu ekranda baska genislik kullanir (musteri listesinde Unvan, tedarikci etkilenmez). */
+  kolonGenislikleri?: Record<string, number>;
   setHata(mesaj: string): void;
 }) {
   /** Gosterilen kolonlar - kullanicinin sirasiyla. */
@@ -72,9 +75,10 @@ export function useKolonTercihi({ kaynak, gizliKolonlar, kolonSirasi,
         if (iptal) return;
         // Ekran basliklari kolonlar dagitilmadan ONCE uygulanir: grid, kolon
         //   menusu ve disa aktarim ayni metni gorsun.
-        const y = kolonBasliklari
-          ? { ...ham, kolonlar: ham.kolonlar.map(k =>
-              kolonBasliklari[k.ad] ? { ...k, baslik: kolonBasliklari[k.ad] } : k) }
+        const y = kolonBasliklari || kolonGenislikleri
+          ? { ...ham, kolonlar: ham.kolonlar.map(k => ({ ...k,
+              ...(kolonBasliklari?.[k.ad] ? { baslik: kolonBasliklari[k.ad] } : {}),
+              ...(kolonGenislikleri?.[k.ad] ? { genislik: kolonGenislikleri[k.ad] } : {}) })) }
           : ham;
         const gizli = new Set(gizliKolonlar ?? []);
         // kolonSirasi'nda ADI GECEN kolon, katalogda varsayilan olmasa bile
