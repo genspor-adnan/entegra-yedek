@@ -107,7 +107,6 @@ export function Ekstre() {
   const h = veri?.hesap ?? null;
   const o = veri?.ozet;
   const baslik = h ? `${TUR_AD[gercekTur].replace(/^\S+\s/, '')} — ${h.ad}` : TUR_AD[gercekTur].replace(/^\S+\s/, '');
-  const yerelPara = veri?.paralar.find(x => x.yerelMi) ?? veri?.paralar[0];
   const etiket = (b: string, a: string) => (cari ? b : a);
   const bakiyeYaz = (n: number) => (cari ? `${p(Math.abs(n))} ${n > 0.005 ? 'B' : n < -0.005 ? 'A' : ''}`.trim() : p(n));
 
@@ -159,24 +158,19 @@ export function Ekstre() {
 
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      <div className="hi-serit">
-        {!kaynaktan && <div className="ek-seg">
+      {/* BAKİYE ROZETİ KALKTI (kullanıcı 26.10.2026: "Bakiye TL .. şerit var.. bunlar zaten kutularda var..
+          kaldıralım") - Bakiye kutusu aynı bilgiyi (yerel + dövizler) veriyor. Kaynaktan açılışta şerit boş kalır, yok. */}
+      {!kaynaktan && <div className="hi-serit">
+        <div className="ek-seg">
           {(Object.keys(TUR_AD) as EkstreTuru[]).filter(t => turler.length === 0 ? t === gercekTur : turler.includes(t)).map(t => (
             <button key={t} type="button" className={t === gercekTur ? 'on' : ''}
                     onClick={() => { if (t !== gercekTur) { const q = new URLSearchParams(arama); q.set('tur', t); q.delete('id'); if (gor === 'detay') q.delete('gor'); setArama(q, { replace: true }) } }}>
               {TUR_AD[t]}</button>
           ))}
-        </div>}
-        {!kaynaktan && <HesapSecici tur={gercekTur} secili={h ? { id: h.id, ad: h.ad, altBilgi: h.altBilgi, kod: h.kod } : null}
-                     onSec={s => degistir({ id: String(s.id) })} />}
-        <span className="sp" />
-        {yukleniyor && <span className="ki-soluk">yükleniyor…</span>}
-        {veri && h && yerelPara && (
-          <span className={'bo-rz ' + (cari ? (yerelPara.bakiye > 0.005 ? 'kir' : yerelPara.bakiye < -0.005 ? 'ok' : 'mavi') : 'ok')}>
-            {c('Bakiye')} {yerelPara.doviz} {bakiyeYaz(yerelPara.bakiye)}
-            {veri.paralar.filter(x => !x.yerelMi && Math.abs(x.bakiye) > 0.005).map(x => ` · ${x.doviz} ${bakiyeYaz(x.bakiye)}`).join('')}
-          </span>)}
-      </div>
+        </div>
+        <HesapSecici tur={gercekTur} secili={h ? { id: h.id, ad: h.ad, altBilgi: h.altBilgi, kod: h.kod } : null}
+                     onSec={s => degistir({ id: String(s.id) })} />
+      </div>}
 
       {/* İKİNCİ ŞERİT (kullanıcı: "dönem ve liste/aylık butonlar bir alt satıra"): dönem + görünüm. */}
       <div className="hi-serit ek-serit2">
@@ -190,6 +184,7 @@ export function Ekstre() {
           <button type="button" className="ek-mini" onClick={() => degistir({ bas: yilBasi(), bit: bugunYerel() })}>Bu yıl</button>
         </div>
 <span className="sp" />
+        {yukleniyor && <span className="ki-soluk">yükleniyor…</span>}
         {veri && h && <span className="ki-soluk">{v_adet(veri)} hareket · {tarihKisa(bas)} – {tarihKisa(bit)}</span>}
       </div>
 
@@ -218,13 +213,8 @@ export function Ekstre() {
 
         <div className="hi-govde">
           <div className="ek-grup">
-            <h4>
-              {cari ? c('Cari Hesap Ekstresi') : c('Hesap Ekstresi')}
-              <span className="mini">{gor === 'aylik'
-                ? 'Ay ay toplam: ay başı bakiye, ayın hareketleri, ay sonu bakiye. Aya tıklayınca o ayın hareketleri.'
-                : cari ? 'Borç: cari bize borçlandı (satış, iade alımı) · Alacak: tahsilat, iade, çek. Çift tık: belge / kasa işlemi.'
-                       : 'Giriş: tahsilat, yatırma · Çıkış: ödeme, çekme, masraf. Karşı sütunu işlemin carisi. Çift tık: kasa işlemi.'}</span>
-            </h4>
+            {/* BAŞLIK SATIRI KALKTI (kullanıcı 26.10.2026: "gridin en üst kısmında "Cari Hesap Ekstresi" satırı var
+                o da gereksiz") - ekran başlığı ve çıktı aynı adı taşıyor. */}
             {gor === 'aylik'
               ? <AylikTablo v={veri} cari={cari} bakiyeYaz={bakiyeYaz} onAy={(b, s) => degistir({ bas: b, bit: s, gor: '' })} />
               : <EkstreTablosu v={veri} cari={cari} detay={gor === 'detay'} bakiyeYaz={bakiyeYaz}
@@ -550,9 +540,10 @@ const EKSTRE_STILI = `
 .ek-sec-satir.on { background:#eef4fb; } .ek-sec-satir.pasif b { color:#9aa7b4; font-weight:normal; }
 .ek-sec-bos { padding:8px 10px; font-size:12px; color:#6b7a8b; }
 .ek-bos { margin:24px 12px; padding:22px; text-align:center; color:#6b7a8b; border:1px dashed #cdd6e0; border-radius:6px; background:#fff; }
-.ek-grup { border:1px solid #e3e9f0; border-radius:4px; overflow:hidden; background:#fff; }
-.ek-grup h4 { margin:0; padding:7px 10px; font-size:12px; background:linear-gradient(#f6f9fc,#eef3f9); border-bottom:1px solid #e3e9f0; color:#2c4a6b; display:flex; gap:8px; }
-.ek-grup h4 .mini { margin-left:auto; font-weight:normal; font-size:11px; color:#6b7a8b; text-align:right; }
+/* GRID TAM OTURSUN (kullanıcı 26.10.2026: "gridin üst ve sol kısmında boşluk var. tam otursun"): gövde
+   boşluğu ve grup çerçevesi yok - grid özet kutularının altına kenardan kenara. */
+.ek .hi-govde { padding:0; }
+.ek-grup { background:#fff; }
 .ek-dg { overflow:auto; max-height:calc(100vh - 330px); }
 .ek-tablo th { position:sticky; top:0; z-index:1; }
 .ek-tablo tr.ek-para td { background:#f1f5fa; font-weight:bold; color:#2c4a6b; }
