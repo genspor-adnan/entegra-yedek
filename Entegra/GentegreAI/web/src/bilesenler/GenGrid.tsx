@@ -660,6 +660,12 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   const altSatirda = (kod: string) => !(kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('-imzala')
                                          || kod === 'genel.yazdir');
 
+  // İKİNCİ SIRA ARAMA ŞERİDİNDE (kullanıcı 26.10.2026: "onun altındaki diğer arama filtre butonları da birer
+  //   satır üste al"): başlık satırının altında yalnız ikinci sıra düğmeleri (Portal Erişimi...) kalıyor, arama
+  //   bir satır aşağıda başlıyordu - ikinci sıra arama şeridinin sağına iner, başlık tek satır.
+  const ikinciSiraSeritte = !gomulu && !seritGizli && !!aksiyonEkrani && !aracCubuguSeritte && !aracCubuguAltSatir
+    && aksiyonlar.some(a => hedefte(a, 'araccubugu2'));
+
   // KAPAT Yazdır'ın SAĞINDA, araç çubuğunun ilk sırasında (iki sıralı çubukta ortada kalmasın).
   const kapatDugmesi = onKapat
     ? <button type="button" className="d" title={cev('Ekranı kapat (Alt+W)')} onClick={onKapat}>✖ {cev('Kapat')}</button>
@@ -678,7 +684,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             <div className="sag">
               {aksiyonEkrani && <GenToolbar aksiyonlar={aracCubuguAltSatir ? aksiyonlar.filter(x => !altSatirda(x.kod)) : aksiyonlar}
                                             calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler}
-                                            yazdirOncesi={efaturaMenusu} sonEk={basSag ? undefined : kapatDugmesi} />}
+                                            yazdirOncesi={efaturaMenusu} sonEk={basSag ? undefined : kapatDugmesi}
+                                            sira={ikinciSiraSeritte ? 1 : undefined} />}
               {basSag}
               {(!aksiyonEkrani || basSag) && kapatDugmesi}
             </div>
@@ -757,6 +764,11 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             arac cubugunda, sag tus menusunde ve komut paletinde zaten var;
             dorduncu bir tetikleme yolu seridi doldurup hangi komutun nereden
             calistigini belirsizlestiriyordu. */}
+        {ikinciSiraSeritte && (
+          <span className="cipsag">
+            <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} sira={2} />
+          </span>
+        )}
         {icerikAlani && (
         <span className="cipsag">
 

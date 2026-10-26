@@ -46,19 +46,21 @@ interface CalistirProps {
  */
 export interface AltSecenek { kod: string; ad: string }
 
-export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi, sonEk }: CalistirProps & {
+export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi, sonEk, sira }: CalistirProps & {
   altSecenekler?: Record<string, AltSecenek[]>;
   /** Yazdir dugmesinin SOLUNA konan ek dugme (e-Fatura menusu, 11.10.2026); yazdir yoksa sona. */
   yazdirOncesi?: React.ReactNode;
   /** Birinci siranin EN SONUNA (Yazdir'in sagina) konan ek dugme - listenin "✖ Kapat"i (26.10.2026). */
   sonEk?: React.ReactNode;
+  /** Yalniz bir sira: 1 = ikinci sira cizilmez, 2 = yalniz ikinci sira (liste: ikinci sira arama seridinde). */
+  sira?: 1 | 2;
 }) {
-  const gorunen = aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
+  const gorunen = sira === 2 ? aksiyonlar.filter(a => hedefte(a, 'araccubugu2')) : aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
   // IKINCI SIRA (hedef "araccubugu2"): gunluk akisin disinda kalan, daha
   //   seyrek kullanilan islemler (mockup'ta ayracin sagindakiler). Birinci
   //   sirayi uzatmak, asil dugmeleri gorsel olarak bogardi. Sagda durur -
   //   arac cubugu zaten saga yasli, ikinci sira onun altina hizalanir.
-  const ikinciSira = aksiyonlar.filter(a => hedefte(a, 'araccubugu2'));
+  const ikinciSira = sira ? [] : aksiyonlar.filter(a => hedefte(a, 'araccubugu2'));
   const [acikMenu, setAcikMenu] = useState<string | null>(null);
 
   // Disari tiklaninca menu kapansin - acik menu ekranda unutulmasin.
