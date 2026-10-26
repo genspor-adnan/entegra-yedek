@@ -7,6 +7,18 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 24-26.10.2026 — Hasta kartı sekmeleri, lot ekranı, stok fişi kaydı (1167), belge numarası kaldığı yerden (1168), liste genişlikleri
+
+Kullanıcı testleri (dev + UNIVERSE), istek istek.
+
+- **Hasta kartı:** bant tek satır "Dosya · TC (maskeli 👁) · Doğum (yaş) · Kan · Kayıt yılı · başvuru sayısı"; avatar köşesinde yaş / cinsiyet harfi; alerji / ilaç / tanı rozetleri kısa ve ad satırında sağa yaslı. Kimlik çerçevesiz, Dosya No yerine Doğum Tarihi + Cinsiyet. Belgeler / Belge Durumu sekmeleri yerine **Randevular**, **Mali**, **Onam & Belgeler**; "Yakınlar / Acil Durumda Aranacak" → **Yakınlar** sekmesi (Adres'ten sonra). Başvurular sekmesinde çift tık başvuruyu sekmede açar.
+- **Lot ekranı (izlem penceresi):** kayıtlı çıkış belgesinde lot değiştirilebilir (depodaki lotlar + bu belgenin seçtikleri; seçili lotun kalanına belgenin düştüğü miktar eklenir; miktar azaltılıp yeniden artırılınca bırakılan lotlar geri seçilebilir). Hızlı eklemede lotlu stok lot ekranını açar (fiyat penceresinin altında kalmaz), lot gridinde çift tık izlem ekranı. Üst bantta Gereken / Girilen / Kalan (Tamam ile Kapat arasında), raf ömrü etiketi (tık = düzenleme penceresi, stok kartına yazar), Ürt. girilince SKT raf ömründen, SKT girilince Ürt. Seri No ve Ürt. / SKT sütunları izleme türüne göre (eski satırda dolu değer varsa gizlenmez). Lot Ekle imleci yeni satırın Lot No'sunda; Enter = Tamam.
+- **Giriş / çıkış fişi kaydı (1167):** carisiz belgede `taraf_id` 0 gönderiliyordu → `fk_belge_taraf`; artık NULL (fişte taraf şube değil, boş). Stok fişi (3 / 4) otomatik muhasebe fişi üretmez - gider / gelir eşlemesi yokken "Cari için muhasebe hesabı çözülemedi" bütün kaydı geri alıyordu.
+- **Belge numarası (1168):** kullanıcı *"bütün belgeler kaldıkları numaradan ve hane sayısı kadar devam edecek"*. Sayaç ilk kurulurken kapsamdaki en büyük numaradan başlar (şablon başlangıcı büyükse o); şablonsuz türde hane son numaradan. Kurulu sayaçlar değişmez. UNIVERSE'te fiş no 6 hane, fatura / irsaliye / sipariş şablonları mevcut hanelerine göre ayarlandı.
+- **Üst bant:** şubenin logosu varsa yalnız logo, ad ipucunda (logosuz şube adıyla).
+- **Müşteri / Tedarikçi listesi:** ekrana özel kolon genişliği (`kolonGenislikleri`, liste tanımı; aynı kaynağı paylaşan listeler katalog genişliğini değiştirmeden). Unvan 320 px (en uzun unvan ~540 px açıyor, diğer sütunları itiyordu; kesilen ipucunda), Bakiye 115 px, İl Durum'un soluna.
+- **Açık:** UNIVERSE'teki aktarılmış fiş tipleri (99 → 9, Delphi çıkış 14 = İmha mı Diğer mi) ve e-Fatura serisi (satırlar BILIM'den kopya görünüyor) kullanıcı kararında; pencerelerde max yerine "sekmede aç" düğmesi yarım (yalnız `kartSekmeAdresi.ts`, bağlanmadı).
+
 ## 26.10.2026 — Ortak giriş paneli (gentegreai.com), giriş kodu, hesap askısı (1190)
 
 Kullanıcı: *"sunucuya panel adresi altında bir sayfa tasarlasak, tüm müşteriler girişlerini bu sayfa üzerinden yapsa"* → mockup `Ekranlar/Ayarlar/ortak_giris_paneli.html` → kararlar (gentegreai.com, kısa firma kodu, pasif firmaya doğru şifreden sonra "askıda", eski adresler yönlenir) → *"önce mockup'ları kodla"* → *"panel kalsın"*, *"direkt gentegreai.com'da açılsın"*, *"zaten Cloudflare kullanıyorum"*.
