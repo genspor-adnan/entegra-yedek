@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavigationType, UNSAFE_LocationContext, type Location } from 'react-router-dom';
-import { EkranSekmesiBaglami, SekmeGorunurBaglami } from '../../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, SekmeGorunurBaglami, baslikAnahtari, ekstreKimligi } from '../../bilesenler/sekmeBaglami';
 import { PALET_AC_OLAYI } from '../Baslangic';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c } from '../../dil/ceviri';
@@ -19,6 +19,7 @@ import { MenuIkon, type MenuSatiri } from './menuAgaci';
  *  - Başlangıç (/panel) sabit, kapanmaz.
  *  - En fazla SEKME_SINIRI sekme: aşınca en uzun süredir bakılmayan kapanır, söylenir.
  *  - Aynı listenin kartı en fazla KART_SEKME_SINIRI sekmede (bkz. kartYuvasiSec).
+ *  - Hesapla açılan ekstre hesabın sekmesidir, en fazla KART_SEKME_SINIRI (bkz. ekstreYuvasiSec).
  */
 export const SEKME_SINIRI = 8;
 /** Aynı tür kart için yan yana açık sekme sayısı (kullanıcı 24.10.2026: "3 tedarikçi kartı yan yana"). */
@@ -81,6 +82,25 @@ export function kartYuvasiSec(taban: string, yolu: string, sekmeler: { anahtar: 
 }
 
 /**
+ * EKSTRE YUVASI SEÇİMİ (kullanıcı 26.10.2026: "3 sekmeye kadar izin verilmeli", "carinin zaten açık
+ * ekstresi varsa ona konumlanmalı tekrar açmamalı"). `taban` genel Ekstre sekmesinin anahtarı, yuvalar
+ * `${taban}#ek#0..2`; `kimlik` ekstreKimligi.
+ *  1. Hesabın ekstresi açıksa (yuvada ya da genel sekmede) o sekme - dönem değişince de aynı sekme.
+ *  2. Genel Ekstre sekmesinde hesap seçilirse sekme değişmez (kutudan seçim yeni sekme açmaz).
+ *  3. Boş yuva varsa o; yoksa en uzun süredir bakılmayan yuva yeni hesapla dolar.
+ */
+export function ekstreYuvasiSec(taban: string, kimlik: string, sekmeler: { anahtar: string; konum: { pathname: string; search: string }; erisim: number }[],
+                                oncekiAktif: string | undefined): string {
+  const grup = sekmeler.filter(s => s.anahtar.startsWith(taban + '#ek#'));
+  const ayni = [...grup, ...sekmeler.filter(s => s.anahtar === taban)].find(s => ekstreKimligi(s.konum) === kimlik);
+  if (ayni) return ayni.anahtar;
+  if (oncekiAktif === taban) return taban;
+  for (let i = 0; i < KART_SEKME_SINIRI; i++)
+    if (!grup.some(s => s.anahtar === `${taban}#ek#${i}`)) return `${taban}#ek#${i}`;
+  return grup.sort((a, b) => a.erisim - b.erisim)[0].anahtar;
+}
+
+/**
  * AÇIK SEKMELER F5'TE GERİ GELİR (kullanıcı 15.10.2026: "F5 ile refresh yaptım liste kayboldu ama
  * reçete kartı kaldı"): sekme listesi (adres, başlık, ikon) ve ekranların verdiği başlıklar tarayıcı
  * OTURUMUNDA saklanır - sekme / tarayıcı kapanınca sıfırlanır. Geri gelen sekmenin ekranı ilk
@@ -103,7 +123,7 @@ function sekmeleriOku(): { sekmeler: Sekme[]; basliklar: Record<string, string> 
 }
 function sekmeleriYaz(sekmeler: Sekme[], basliklar: Record<string, string>) {
   try {
-    const yollar = new Set(sekmeler.map(x => x.konum.pathname));
+    const yollar = new Set(sekmeler.map(x => baslikAnahtari(x.konum)));
     sessionStorage.setItem(DEPO_ANAHTARI, JSON.stringify({
       sekmeler: sekmeler.map(x => ({ anahtar: x.anahtar, baslik: x.baslik, ikon: x.ikon, ust: x.ust, erisim: x.erisim,
                                      konum: { pathname: x.konum.pathname, search: x.konum.search } })),
@@ -139,12 +159,14 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const sonAktif = useRef<string | undefined>(undefined);
   const bulunan = sekmeBul(satirlar, konum, ekBasliklar, kartSekmeleri);
   let simdiki = bulunan;
-  if (bulunan.ust) {
+  const ekKimlik = ekstreKimligi(konum);
+  if (bulunan.ust || ekKimlik) {
     // Dışarıdan history.pushState edilen adreslerin key'i hep 'default' - adres de anahtarda.
     const yuvaAnahtari = `${konum.key}|${konum.pathname}${konum.search}`;
     let anahtar = yuvalar.current.get(yuvaAnahtari);
     if (!anahtar) {
-      anahtar = kartYuvasiSec(bulunan.anahtar, konum.pathname, sekmeler, sonAktif.current, kirliMi)
+      anahtar = !bulunan.ust ? ekstreYuvasiSec(bulunan.anahtar, ekKimlik, sekmeler, sonAktif.current)
+        : kartYuvasiSec(bulunan.anahtar, konum.pathname, sekmeler, sonAktif.current, kirliMi)
         // Hepsi kirliyken dışarıdan gelinirse (kartaGit dışı yol) en eskisi - adres zaten değişti.
         ?? sekmeler.filter(s => s.anahtar.startsWith(bulunan.anahtar + '#')).sort((a, b) => a.erisim - b.erisim)[0]?.anahtar
         ?? `${bulunan.anahtar}#0`;
@@ -157,7 +179,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   const [ozelBaslik, setOzelBaslik] = useState<Record<string, string>>(ilk.basliklar);
   useEffect(() => { sekmeleriYaz(sekmeler, ozelBaslik) }, [sekmeler, ozelBaslik]);
   // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
-  const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[s.konum.pathname] ?? s.baslik;
+  //   Hesaplı ekstrede adres + hesap (bkz. baslikAnahtari).
+  const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[baslikAnahtari(s.konum)] ?? s.baslik;
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.

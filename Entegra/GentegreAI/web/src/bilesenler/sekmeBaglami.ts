@@ -35,3 +35,23 @@ export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';
  * sekmeyi kesiyordu. Yalnız ad / ünvan kısaltılır; belge no, kod gibi başlıklar olduğu gibi kalır.
  */
 export const sekmeAdi = (ad: string) => ad.trim().split(/\s+/).filter(Boolean).slice(0, 2).join(' ');
+
+/**
+ * EKSTRE SEKMESİ KİMLİĞİ (kullanıcı 26.10.2026: "ekstre sekme başlıkta cari/kasa... adın ilk 2 kelimesi
+ * yazsın ve 3 sekmeye kadar izin verilmeli", "carinin zaten açık ekstresi varsa ona konumlanmalı tekrar
+ * açmamalı"): hesapla açılan ekstre (`/ekstre?tur=..&id=..`) hesabın kendi sekmesidir. Cari taraf, öteki
+ * türler hesap tablosundandır - 'hesap' türü sunucuda kasa / banka ... diye çözülse de kimlik aynı kalır.
+ * Hesapsız ekstre (menü / komut araması) '' - tek, genel Ekstre sekmesi.
+ */
+export function ekstreKimligi(k: { pathname: string; search: string }): string {
+  if (k.pathname !== '/ekstre') return '';
+  const q = new URLSearchParams(k.search);
+  const id = Number(q.get('id') ?? 0);
+  const tur = q.get('tur') || 'cari';
+  return id > 0 ? `${tur === 'cari' ? 'c' : 'h'}:${id}` : '';
+}
+/** Ekranın verdiği sekme başlığının anahtarı: adres; hesaplı ekstrede adres + hesap (hepsi /ekstre). */
+export const baslikAnahtari = (k: { pathname: string; search: string }) => {
+  const e = ekstreKimligi(k);
+  return e ? `/ekstre?${e}` : k.pathname;
+};

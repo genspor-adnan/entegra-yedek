@@ -1,7 +1,7 @@
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { EkranSekmesiBaglami, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { Ekstre as Veri, EkstreHesapSecimi, EkstreParasi, EkstreSatiri, EkstreTuru } from '../../api/uclar/ekstre';
@@ -125,6 +125,11 @@ export function Ekstre() {
   const gunFarki = (t: string | null | undefined) => (t ? Math.round((Date.now() - new Date(t).getTime()) / 864e5) : null);
 
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const konum = useLocation();
+  // SEKME BAŞLIĞI HESABIN ADI (kullanıcı 26.10.2026: "ekstre sekme başlıkta cari/kasa... adın ilk 2 kelimesi").
+  const sekmeBasligi = h ? sekmeAdi(h.ad) : '';
+  const baslikYolu = baslikAnahtari(konum);
+  useEffect(() => { if (ekranSekmesi && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikYolu) }, [ekranSekmesi, sekmeBasligi, baslikYolu]);
   const turler = veri?.turler ?? [];
   const gorunumler: [Gorunum, string][] = [['liste', '☰ Liste'], ...(cari ? [['detay', '🧾 Detay'] as [Gorunum, string]] : []), ['aylik', '📆 Aylık']];
 
