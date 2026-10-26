@@ -94,7 +94,7 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html: kimlik şeridinin altında özet şeridi, sağda dikkat /
   //   yaşlandırma / kişiler / son olaylar, Finansal · Belgeler · CRM sekmeleri, araç
-  //   çubuğunda bu cariyle dolu Fatura / Sipariş / Teklif / Tahsilat. Ekstre sekme DEĞİL
+  //   çubuğunda bu cariyle dolu Aksiyon ▾ menüsü. Ekstre sekme DEĞİL
   //   (kullanıcı 23.10.2026): üstteki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
   //   Tedarikçi kartı da aynı kaynak (`cari`) - özet onda da geçerli.
   cari: {
@@ -117,8 +117,7 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
       { anahtar: 'ozel:cari-crm', baslik: 'CRM', ciz: () => <CariCrm id={b.kartId as number} gitKart={b.git} /> },
     ] : undefined,
     ekAraclar: b => kayitli(b.kartId)
-      ? d => <CariHizliIslemler id={b.kartId as number} ad={String(d.unvan ?? '')} yetki={b.yetki}
-                                tazele={b.kartiTazele} />
+      ? d => <CariHizliIslemler id={b.kartId as number} ad={String(d.unvan ?? '')} git={b.git} />
       : undefined,
   },
 

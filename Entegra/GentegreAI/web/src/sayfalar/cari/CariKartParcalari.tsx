@@ -9,7 +9,7 @@ import { GenGrid } from '../../bilesenler/GenGrid';
 import { para, sayi, tarihSaat } from '../../bilesenler/bicim';
 import { Avatar, dovizBakiyeMetni, Egri } from '../../bilesenler/grid/satirHucre';
 import { BelgeKarti } from '../BelgeKarti';
-import { KasaIslemKarti } from '../KasaIslemKarti';
+import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -21,7 +21,7 @@ import { c } from '../../dil/ceviri';
  *  · CariFinansal     Finansal sekmesi: para birimi özeti, yaşlandırma, vadesi geçen belgeler, çekler
  *  · CariBelgeler     Belgeler sekmesi: carinin bütün belgeleri, türe göre çip
  *  · CariCrm          CRM sekmesi: görevler + satış fırsatları
- *  · CariHizliIslemler araç çubuğu: Fatura / Sipariş / Teklif / Tahsilat bu cariyle dolu
+ *  · CariHizliIslemler araç çubuğu: Aksiyon ▾ menüsü (belge / tahsilat-ödeme) bu cariyle dolu
  *
  * Rakamların hepsi tek uçtan (GET /api/cari/{id}/kart-ozet) - şerit, panel ve sekme aynı
  * isteği paylaşır (aynı kart + tazeleme için tek istek).
@@ -398,23 +398,8 @@ export function CariCrm({ id, gitKart }: { id: number; gitKart(yol: string): voi
 }
 
 // ---------------------------------------------------- hızlı işlemler ----
-type Acik = { tur: 'belge'; belgeTuru: number } | { tur: 'tahsilat' };
-
-export function CariHizliIslemler({ id, ad, yetki, tazele }: {
-  id: number; ad: string; yetki(kod: string, islem?: 'gor' | 'ekle' | 'degistir' | 'sil'): boolean; tazele(): void;
-}) {
-  const [acik, setAcik] = useState<Acik | null>(null);
-  const kapat = () => { setAcik(null); tazele() };
-  const belge = yetki('belge', 'ekle');
-  return (
-    <>
-      {belge && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 15 })}>🧾 {c('Satış Faturası')}</button>}
-      {belge && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 19 })}>📝 {c('Sipariş')}</button>}
-      {belge && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 18 })}>📋 {c('Teklif')}</button>}
-      {yetki('kasa_islem', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'tahsilat' })}>💰 {c('Tahsilat')}</button>}
-      {acik?.tur === 'belge' && <BelgeKarti tur={acik.belgeTuru} tarafId={id} tarafUnvan={ad} onKapat={kapat} onKaydedildi={tazele} />}
-      {/* 21 = nakit tahsilat; kartta tür şeridinden banka / POS / çek seçilir. */}
-      {acik?.tur === 'tahsilat' && <KasaIslemKarti acilis={{ tur: 21, tarafId: id, tarafUnvan: ad }} onKapat={kapat} onKaydedildi={tazele} />}
-    </>
-  );
+// AKSİYON ▾ (kullanıcı 26.10.2026: "müş/ted kartı da aynı şekilde fat sip tah tek kaldır aksiyon ekle"): Satış
+//   Faturası / Sipariş / Teklif / Tahsilat düğmeleri yerine ekstre ve liste önizlemesindeki menü; seçim kendi sekmesinde.
+export function CariHizliIslemler({ id, ad, git }: { id: number; ad: string; git(yol: string): void }) {
+  return <CariAksiyonMenusu id={id} ad={ad} git={git} />;
 }

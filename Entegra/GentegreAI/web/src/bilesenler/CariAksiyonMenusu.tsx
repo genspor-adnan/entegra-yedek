@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
@@ -10,7 +10,9 @@ import { c } from '../dil/ceviri';
  *
  * Delphi karşılığı: UReharadlg AksiyonEkleTus / PopupMenuYeni - Alış Belgesi, Satış Belgesi, Açılış Fişi Gir,
  * Cari Tahsilat, Cari Ödeme, Cariler Arası Transfer, Tahsilat / Ödeme Planı. Delphi rol ayırmıyordu; burada
- * müşteriye satış + tahsilat, tedarikçiye alış + ödeme gelir (ikisiyse ikisi de, rolsüzse hepsi).
+ * müşteriye satış + tahsilat, tedarikçiye alış + ödeme gelir; hem müşteri hem tedarikçiyse (ya da rolsüzse) hepsi,
+ * menü o zaman daha geniş (4 sütun - kullanıcı 26.10.2026: "hem tedarikçi hem müş ise aksiyon menüsü daha geniş olsun").
+ * Müşteri / tedarikçi listesi önizlemesinde ve cari kartında da aynı menü (Fatura / Sipariş / Tahsilat düğmeleri yerine).
  * Her seçim kendi sekmesinde, cari dolu (ve kilitli) açılır; Açılış Fişi ekranın kendi devir penceresidir.
  */
 type Oge = { ad: string; yol?: string; tikla?: () => void; yetkili: boolean };
@@ -46,12 +48,20 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
     return () => window.removeEventListener('click', kapat);
   }, [acik]);
 
-  // Tedarikçi kartı müşteri bayrağını da taşır (Delphi'den gelen) - tedarikçiyse alış tarafı; müşteri bayrağı
-  //   tek başınaysa satış tarafı; ikisi de yoksa ya da okunamadıysa ikisi de.
-  const ted = !!rol?.tedarikci;
-  const mus = !!rol?.musteri && !ted;
-  const satis = !rol || mus || (!rol.musteri && !rol.tedarikci);
-  const alis = !rol || ted || (!rol.musteri && !rol.tedarikci);
+  // Müşteri bayrağı satış + tahsilat, tedarikçi bayrağı alış + ödeme; ikisi de yoksa ya da okunamadıysa hepsi.
+  const rolsuz = !rol || (!rol.musteri && !rol.tedarikci);
+  const satis = rolsuz || !!rol?.musteri;
+  const alis = rolsuz || !!rol?.tedarikci;
+  const genis = satis && alis;
+  // Menü ekrandan taşarsa (sağ panelde düğme sağ kenara yakın) sola kaydırılır.
+  const liste = useRef<HTMLDivElement>(null);
+  const [kayma, setKayma] = useState(0);
+  useLayoutEffect(() => {
+    if (!acik) { setKayma(0); return }
+    const el = liste.current; if (!el) return;
+    const r = el.getBoundingClientRect(), tasma = r.right - kayma - (window.innerWidth - 8);
+    setKayma(tasma > 0 ? Math.min(tasma, r.left - kayma - 8) : 0);
+  }, [acik, genis]);
   const belge = yetki('belge', 'ekle'), kasa = yetki('kasa_islem', 'ekle');
 
   const gruplar: [string, Oge[]][] = [];
@@ -103,7 +113,8 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
       <button type="button" className="d" aria-haspopup="menu" aria-expanded={acik}
               onClick={e => { e.stopPropagation(); setAcik(a => !a) }}>⚡ {c('Aksiyon')} ▾</button>
       {acik && (
-        <div className="dugme-menu-liste cam-liste" role="menu" onClick={e => e.stopPropagation()}>
+        <div ref={liste} className={`dugme-menu-liste cam-liste${genis ? ' genis' : ''}`} role="menu"
+             style={kayma ? { transform: `translateX(${-kayma}px)` } : undefined} onClick={e => e.stopPropagation()}>
           {gorunen.map(([baslik, ogeler]) => (
             <div key={baslik} className="cam-grup">
               <div className="cam-bas">{baslik}</div>
@@ -117,9 +128,11 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
 }
 
 const CAM_STILI = `
-.cam .cam-liste { right: 0; left: auto; display: grid; grid-template-columns: repeat(2, minmax(150px, auto)); gap: 2px 10px;
+.cam .cam-liste { left: 0; right: auto; display: grid; grid-template-columns: repeat(2, minmax(150px, auto)); gap: 2px 10px;
   padding: 6px; max-height: 70vh; overflow: auto }
+.cam .cam-liste.genis { grid-template-columns: repeat(4, minmax(140px, auto)) }
 .cam .cam-grup { display: flex; flex-direction: column }
+.cam .cam-liste .mi { white-space: nowrap }
 .cam .cam-bas { font-size: 10.5px; font-weight: bold; color: var(--soluk, #6b7a8b); text-transform: uppercase; letter-spacing: .3px;
   padding: 6px 8px 3px; border-bottom: 1px solid var(--cizgi2, #e3e9f0); margin-bottom: 2px }
 `;

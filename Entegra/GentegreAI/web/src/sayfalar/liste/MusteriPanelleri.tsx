@@ -8,7 +8,7 @@ import { Avatar, dovizBakiyeMetni, Egri } from '../../bilesenler/grid/satirHucre
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { BelgeKarti } from '../BelgeKarti';
 import { KasaIslemKarti } from '../KasaIslemKarti';
-import { KASA_ARAC_MENUSU } from '../listeTanimlari';
+import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -17,7 +17,7 @@ import { c } from '../../dil/ceviri';
  *  · MusteriGostergesi - üst şerit: aktif, alacak, vadesi geçen, limit aşan, 90 gündür
  *    satış yok, bu yıl ciro. Kutu listenin AKILLI ÇİPİNİ açar (aynı koşul, aynı sayı).
  *  · MusteriOnizleme - sağ panel: seçili müşterinin mali durumu, son 5 cari hareketi,
- *    iletişim ve hızlı işlemler (fatura / sipariş / tahsilat bu müşteriyle dolu açılır).
+ *    iletişim ve hızlı işlemler (Aksiyon ▾ menüsü: belge / tahsilat-ödeme bu müşteriyle dolu, kendi sekmesinde).
  *
  * Rakamlar satırdan ve sunucudan gelir; panel hesap yapmaz.
  */
@@ -93,30 +93,7 @@ export function TedarikciGostergesi({ yenile, cipIndeks, onCip }:
   );
 }
 
-type Yeni = { tur: 'belge'; belgeTuru: number } | { tur: 'tahsilat' } | { tur: 'odeme' } | { tur: 'kayit'; kasa?: number; belge?: number };
-
-/** Tahsilat / Ödeme açılır menüsü: araç seçilince (nakit / banka / POS / çek / senet) tür kodu döner. */
-function KasaTurMenusu({ etiket, secenekler, onSec }: { etiket: string; secenekler: { kod: string; ad: string }[]; onSec(tur: number): void }) {
-  const [acik, setAcik] = useState(false);
-  useEffect(() => {
-    if (!acik) return;
-    const kapat = () => setAcik(false);
-    window.addEventListener('click', kapat);
-    return () => window.removeEventListener('click', kapat);
-  }, [acik]);
-  return (
-    <span className="dugme-menu">
-      <button type="button" className="d" aria-haspopup="menu" aria-expanded={acik}
-              onClick={e => { e.stopPropagation(); setAcik(a => !a) }}>{etiket} ▾</button>
-      {acik && (
-        <div className="dugme-menu-liste" role="menu">
-          {secenekler.map(o => (
-            <button key={o.kod} type="button" className="mi" role="menuitem"
-                    onClick={() => { setAcik(false); onSec(Number(o.kod.split('.').pop())) }}>{c(o.ad)}</button>))}
-        </div>)}
-    </span>
-  );
-}
+type Yeni = { tur: 'kayit'; kasa?: number; belge?: number };
 
 export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci }: {
   satir: ListeSatiri | null; yenile: number; tazele(): void;
@@ -155,15 +132,9 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
           <small>{Number(satir.efatura) === 1 ? 'e-Fatura' : 'e-Arşiv'}{Number(satir.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}</small></div></div>
 
       <div className="ml-hizli">
-        {yetki('belge', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: tedarikci ? 11 : 15 })}>🧾 {tedarikci ? c('Alış Fat.') : c('Fatura')}</button>}
-        {yetki('belge', 'ekle') && <button type="button" className="d" onClick={() => setAcik({ tur: 'belge', belgeTuru: 19 })}>📝 {c('Sipariş')}</button>}
-        {/* TAHSİLAT / ÖDEME ▾ (kullanıcı 26.10.2026: "tahsilat/ödeme buton alta doğru türlerin (nakit....) olduğu
-            menü olsun.. birini seçince yeni sekmede açılsın"): kasa listesindeki araç menüsünün aynısı; kart
-            bu cariyle dolu, kendi sekmesinde. */}
-        {yetki('kasa_islem', 'ekle') && (
-          <KasaTurMenusu etiket={tedarikci ? `💸 ${c('Ödeme')}` : `💰 ${c('Tahsilat')}`}
-                         secenekler={KASA_ARAC_MENUSU[tedarikci ? 'kasa.odeme.yeni' : 'kasa.tahsilat.yeni']}
-                         onSec={t => gitKart(`/kasa-islem/yeni?tur=${t}&tarafId=${id}&tarafUnvan=${encodeURIComponent(ad)}`)} />)}
+        {/* AKSİYON ▾ (kullanıcı 26.10.2026: "müş/ted listesi sağ panele de aksiyon menüsü koy.. fat sip tah/öde
+            kaldır"): ekstredeki menünün aynısı (müşteriye satış + tahsilat, tedarikçiye alış + ödeme, ikisiyse geniş menü). */}
+        <CariAksiyonMenusu id={id} ad={ad} git={gitKart} />
         {ekstreYetkisi && <button type="button" className="d"
                 onClick={() => git(`/ekstre?tur=cari&id=${id}`)}><EkstreIkon /> {c('Ekstre')}</button>}
         <button type="button" className="d bir" onClick={kart}>{c('Kartı Aç')} ↗</button>
@@ -234,17 +205,6 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
         {!satir.telefon && !satir.cepTel && !satir.eposta && <div className="sonuk">{c('İletişim bilgisi yok.')}</div>}
       </div>
 
-      {acik?.tur === 'belge' && (
-        <BelgeKarti tur={acik.belgeTuru} tarafId={id} tarafUnvan={ad} onKapat={kapat} onKaydedildi={tazele} />
-      )}
-      {acik?.tur === 'tahsilat' && (
-        // 21 = nakit tahsilat; kart açıkken tür şeridinden banka / POS / çek seçilir.
-        <KasaIslemKarti acilis={{ tur: 21, tarafId: id, tarafUnvan: ad }} onKapat={kapat} onKaydedildi={tazele} />
-      )}
-      {acik?.tur === 'odeme' && (
-        // 31 = nakit ödeme (tedarikçi); tür şeridinden banka / çek seçilir.
-        <KasaIslemKarti acilis={{ tur: 31, tarafId: id, tarafUnvan: ad }} onKapat={kapat} onKaydedildi={tazele} />
-      )}
       {acik?.tur === 'kayit' && acik.kasa && <KasaIslemKarti kayitIdProp={acik.kasa} onKapat={kapat} />}
       {acik?.tur === 'kayit' && acik.belge && <BelgeKarti id={acik.belge} onKapat={kapat} />}
     </div>
