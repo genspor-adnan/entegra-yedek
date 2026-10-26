@@ -168,6 +168,9 @@ export function GenelAyarlar() {
                 {alan('banka.mutabakat_dort_goz', 'Banka mutabakat: onaylayan hazırlayandan farklı olmalı', { tip: 'mantik' })}
                 {alan('teklif.otomatik_kayip', 'Teklif: geçerliliği dolan teklif gece kendiliğinden "kaybedildi · süre doldu" olsun (boş = evet; 0 = hayır)')}
                 {alan('finans.degerleme_kuru', 'Döviz pozisyonu: değerleme kuru — "alis", "efektif" ya da "satis" (boş = alis, TCMB)')}
+                {/* CARİ KOD GRUBU (1191, 26.10.2026): Delphi kod grubu gibi - kod boş bırakılınca grubun sıradaki kodu. */}
+                {alan('cari.kod_grubu_musteri', 'Müşteri kodu grubu: kod boş bırakılırsa grubun sıradaki kodu verilir, ör. 120.01 → 120.01.605 (boş = kayıt no)')}
+                {alan('cari.kod_grubu_tedarikci', 'Tedarikçi kodu grubu: kod boş bırakılırsa grubun sıradaki kodu verilir, ör. 320.01 → 320.01.305 (boş = kayıt no)')}
               </div>
             </div>
 

@@ -75,6 +75,9 @@ public sealed class AyarDeposu
         // TEKLİF / DÖVİZ İCMALLERİ (1186, kararlar 25.10.2026): boş = varsayılan (süresi dolan teklif kendiliğinden
         //   kayba düşer = açık; değerleme kuru TCMB döviz alış). finans.degerleme_kuru METİN: 'alis' | 'efektif' | 'satis'.
         "teklif.otomatik_kayip", "finans.degerleme_kuru",
+        // CARİ KOD GRUBU (1191, 26.10.2026): yeni müşteri / tedarikçi kodu boşsa grubun sıradaki kodu
+        //   (120.01 → 120.01.605) - fn_taraf_kod_uret. Boş = kaydın ID'si.
+        "cari.kod_grubu_musteri", "cari.kod_grubu_tedarikci",
         // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
         //   depodan dusmek iki birimin sayimini da bozar.
         "eczane.depo", "demirbas.parca_depo",
@@ -187,6 +190,8 @@ public sealed class AyarDeposu
         ["esmm.sabit_notlar"] = 1000,
         ["satis.limit_davranis"] = 10,
         ["finans.degerleme_kuru"] = 10,
+        ["cari.kod_grubu_musteri"] = 30,
+        ["cari.kod_grubu_tedarikci"] = 30,
     };
 
     /// <summary>Ayar yoksa kullanilan degerler - DB'siz de dogru davranis.</summary>

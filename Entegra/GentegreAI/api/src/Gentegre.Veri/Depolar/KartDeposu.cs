@@ -138,8 +138,12 @@ public sealed partial class KartDeposu
             string.IsNullOrWhiteSpace(degerler.TryGetValue("kod", out var kodDeger) ? kodDeger as string : null))
         {
             var kodMetni = yeniId.ToString(CultureInfo.InvariantCulture);
+            // CARİ KODU GRUPTAN (1191, kullanıcı 26.10.2026): ayarda rolün kod grubu varsa (ör. 120.01)
+            //   Delphi gibi grubun sıradaki kodu (120.01.605); yoksa ID.
+            var kodIfadesi = tanim.Tablo == "public.taraf"
+                ? "coalesce(public.fn_taraf_kod_uret(@p1::integer), @p0)" : "@p0";
             await using (var kodKomut = new NpgsqlCommand(
-                $"update {tanim.Tablo} set {kodAlan.Kolon} = @p0 "
+                $"update {tanim.Tablo} set {kodAlan.Kolon} = {kodIfadesi} "
                 + $" where {tanim.IdKolonu} = @p1 and coalesce(btrim({kodAlan.Kolon}), '') = '' "
                 + $"returning {kodAlan.Kolon}", baglanti, islem))
             {
