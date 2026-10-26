@@ -214,6 +214,7 @@ input, select { font: inherit; color: inherit }
 .basrow .yol { font-size: 11px; color: var(--soluk) }
 .basrow .geri-dugme { padding: 3px 9px; font-size: 12px }
 .basrow .sag { margin-left: auto; display: flex; align-items: center; gap: 6px }
+.basrow.gg-bas { align-items: baseline }
 
 .d {
   display: inline-flex; align-items: center; gap: 5px; height: 25px; padding: 0 10px;

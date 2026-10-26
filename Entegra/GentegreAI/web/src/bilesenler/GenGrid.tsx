@@ -669,7 +669,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     <>
       {!gomulu && (
         <div className="sayfabas">
-          <div className="basrow">
+          {/* BAŞLIK İLK SIRADA (kullanıcı 26.10.2026: "müş ve tedarikçi listesinde başlık 1.sırada olsun"): iki
+              sıralı araç çubuğunda başlık ortaya düşüyordu - ilk sıranın hizasında (baseline). */}
+          <div className="basrow gg-bas">
             {geriYolu && <button type="button" className="d geri-dugme" title={`Geri: ${geriYolu}`} onClick={onGeri}>← Geri</button>}
             <h1>{baslik ?? kaynak}</h1>
             {yol && <span className="yol">{yol}</span>}
