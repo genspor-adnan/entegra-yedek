@@ -1383,6 +1383,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             <TeklifCiktisi cariId={cari.id} belgeNo={String(sonuc?.belge.belgeNo ?? '')} revizeNo={teklif.revizeNo}
                            tarih={tarih} gecerlilikGun={vadeGun} konu={teklif.konu} teslim={teklif.teslim}
                            aciklama={aciklama} satirlar={satirlar} toplam={onizleme} />) : undefined}
+          satirSayisi={satirlar.length}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}

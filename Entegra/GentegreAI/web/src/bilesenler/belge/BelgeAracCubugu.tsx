@@ -16,7 +16,7 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu,
+  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu, satirSayisi = 0,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
   belgeYenile?(): void;
@@ -24,6 +24,8 @@ export function BelgeAracCubugu({
   baslik?: React.ReactNode;
   /** Kapat'ın hemen solunda (ör. teklifte "Teklif" çıktı menüsü). */
   kapatSolu?: React.ReactNode;
+  /** Kartın kalem sayısı - kalemliyse Sil yok. */
+  satirSayisi?: number;
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
   duzenlenebilir: boolean;
@@ -83,7 +85,9 @@ export function BelgeAracCubugu({
                   title="e-Belge gönderilmiş ya da faturalanmış belge değiştirilemez; iptal edip yeniden kesin.">
             💾 Kaydet
           </button>)
-    : sonuc
+    // "＋ Yeni Belge" yalnız başvuruda (kullanıcı 26.10.2026: "kayıtlı fatura kartında +yeni belge butonu ...
+    //   görünmesin") - kayıtlı ERP belgesi mevcutBelge dalında Kaydet gösterir.
+    : sonuc && basvuruMu
       ? <button className="d onay" onClick={yeniBelge}>
           {basvuruMu ? '＋ Yeni Başvuru' : '＋ Yeni Belge'}
         </button>
@@ -96,7 +100,8 @@ export function BelgeAracCubugu({
             : basvuruMu ? '💾 Kaydet (Protokol Ver)' : '💾 Kaydet'}
         </button>}
   {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
-  {!basvuruMu && (
+  {/* KALEMLİ BELGEDE SİL YOK (kullanıcı 26.10.2026: "1 veya daha fazla satır varsa da sil butonu görünmesin"). */}
+  {!basvuruMu && satirSayisi === 0 && (
     <button className="d teh" disabled title={c('Belge iptali henüz bağlanmadı (F7).')}>
       🗑 Sil
     </button>

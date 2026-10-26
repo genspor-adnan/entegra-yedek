@@ -107,6 +107,9 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       //   kalir; ucretlendirme ve provizyon girildikten sonra ayni dugmeyle
       //   kaydedilip kapatilir.
       if (b.basvuruMu && !b.etkinBelgeId && yeniId) { b.setAcilanId(yeniId); return yeniId }
+      // KART AÇIK KALDIYSA (Fatura İşlem'den önce kayıt) kart artık KAYITLI belgedir: sonraki Kaydet aynı belgeyi
+      //   günceller - etkinBelgeId boş kalsa ikinci Kaydet yeni belge eklerdi.
+      if (!kapatilsin && !b.etkinBelgeId && yeniId) b.setAcilanId(yeniId);
       if (kapatilsin) b.kapat(true);
       return yeniId;
     } catch (h) {
