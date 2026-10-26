@@ -243,6 +243,16 @@ public static partial class KartKatalogu
         {
             new SilmeEngeli("public.belge",        "taraf_id", "Bu cariye ait belge var, silinemez."),
             new SilmeEngeli("public.mali_hareket", "taraf_id", "Bu cariye ait kasa/banka hareketi var, silinemez."),
+            // HAREKETLİ CARİ SİLİNMEZ (kullanıcı 26.10.2026: "müş/ted ye ait hareket varsa silme kesinlikle
+            //   olmaz"): FK'lar NO ACTION zaten engeller ama genel mesajla - burada sebebi ve adedi ile 422.
+            new SilmeEngeli("public.kasa_islem",         "taraf_id",       "Bu cariye ait kasa/banka işlemi var, silinemez."),
+            new SilmeEngeli("public.kasa_islem",         "karsi_taraf_id", "Bu cari bir virman/transfer işleminde karşı taraf, silinemez."),
+            new SilmeEngeli("public.cek_senet",          "taraf_id",       "Bu cariye ait çek/senet var, silinemez."),
+            new SilmeEngeli("public.cek_senet",          "ciro_taraf_id",  "Bu cariye ciro edilmiş çek/senet var, silinemez."),
+            new SilmeEngeli("public.cek_senet_hareket",  "taraf_id",       "Bu cariye ait çek/senet hareketi var, silinemez."),
+            new SilmeEngeli("public.e_belge",            "taraf_id",       "Bu cariye ait e-belge var, silinemez."),
+            new SilmeEngeli("public.muhasebe_fis_satir", "taraf_id",       "Bu cariye ait muhasebe fişi satırı var, silinemez."),
+            new SilmeEngeli("public.kredi",              "taraf_id",       "Bu cariye ait kredi var, silinemez."),
             new SilmeEngeli("public.taraf_kullanici",    "id", "Bu kart bir kullaniciya bagli, silinemez.")
         });
 
