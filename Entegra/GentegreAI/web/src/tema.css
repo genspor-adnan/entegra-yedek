@@ -1121,9 +1121,20 @@ input.skt-gecmis {
 /* SEÇİLİ CARİ ÇİPİ (Ctrl+K ad ile cari, 25.10.2026): kutunun solunda; kutu yan yana dizilir. */
 .palet-kutu.cipli { display: flex; align-items: center; gap: 6px }
 /* KART BAŞLIĞI ARAÇ SATIRINDA (GenForm baslikAracta, cari kartı 25.10.2026): düğmelerin sağında, düğme değil metin. */
-/* Cari kartinda kimlik seridinin ustundeki firma bilgi bandi (kartEklentileri). */
-.kart-cbb { padding: 8px 10px 0 }
-.kart-cbb .cbb { margin: 0 }
+/* Cari kartinda firma bilgi bandi + kimlik seridi TEK IZGARA (kartEklentileri): 1. satir band | Temsilci |
+   Durum, 2. satir Kod | Unvan. Serit kaplari (display: contents) izgaraya acilir. */
+.kart-cbb-sar { display: grid; grid-template-columns: 180px minmax(0, 1fr) 220px 150px; gap: 6px 12px;
+  align-items: end; padding: 8px 10px; background: var(--serit1, #f6f9fc); border-bottom: 1px solid var(--cizgi) }
+.kart-cbb-sar > .kart-cbb { grid-column: 1 / 3; grid-row: 1; align-self: stretch }
+.kart-cbb-sar .cbb { margin: 0; height: 100% }
+.kart-cbb-sar > .kaid, .kart-cbb-sar > .kaid > .alan-izgara { display: contents }
+.kart-cbb-sar .alan-temsilci { grid-column: 3; grid-row: 1 }
+.kart-cbb-sar .alan-durum { grid-column: 4; grid-row: 1 }
+.kart-cbb-sar .alan-kod { grid-column: 1; grid-row: 2 }
+.kart-cbb-sar .alan-unvan { grid-column: 2 / 5; grid-row: 2 }
+.kart-cbb-sar:not(.duzen) .alan-kod:not(:has(.alan-hata)),
+.kart-cbb-sar:not(.duzen) .alan-unvan:not(:has(.alan-hata)) { display: none }
+.kart-cbb-sar .cbb > .d.mini { flex: none }
 .belge-ara-baslik { display: inline-flex; align-items: center; gap: 6px; color: var(--baslik, #14315a);
   font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
 .kart-ara-baslik { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding-left: 10px; border-left: 1px solid var(--cizgi); color: var(--baslik, #14315a); font-size: 13px; white-space: nowrap }

@@ -11,6 +11,7 @@ import { Avatar, dovizBakiyeMetni, Egri } from '../../bilesenler/grid/satirHucre
 import { BelgeKarti } from '../BelgeKarti';
 import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { CariEkstreDugmesi } from '../../bilesenler/kart/KartAracGruplari';
+import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -405,4 +406,24 @@ export function CariHizliIslemler({ id, ad, git }: { id: number; ad: string; git
   // Sil'in sağında ayraç; Ekstre Hatırlat'tan önce (kullanıcı 26.10.2026: "sil sağına separatör ekle.. ekstre ile
   //   hatırlat yer değiş" - Hatırlat GenForm'da ekAraclar'dan sonra gelir).
   return <><span className="ayrac" /><CariAksiyonMenusu id={id} ad={ad} git={git} /><CariEkstreDugmesi tarafId={id} ad={ad} /></>;
+}
+
+// ------------------------------------------------- kimlik + firma bandı ----
+// FİRMA BANDI + KİMLİK ŞERİDİ TEK IZGARADA (kullanıcı 26.10.2026: "müş/ted kartına firma bilgi bant ekle",
+//   "temsilci ve durum da firma bantta yer alsın", "kayıtlı kartta müş kod, müş ad olan band görünmez olsun..
+//   firma bandına kalem ekle basınca altta kod, ad görünür olsun"): 1. satır band | Temsilci | Durum; Kod / Ünvan
+//   satırı kalemle açılır (alan hatası varsa kendiliğinden görünür - tema.css .kart-cbb-sar).
+export function CariKimlikBandi({ id, tazele, serit }: { id: number; tazele: number; serit: React.ReactNode }) {
+  const [duzen, setDuzen] = useState(false);
+  return (
+    <div className={`kart-cbb-sar${duzen ? ' duzen' : ''}`}>
+      <div className="kart-cbb">
+        <CariBilgiBandi id={id} tazele={tazele} bakiyesiz
+          ek={<button type="button" className={`d mini${duzen ? ' secili' : ''}`} aria-pressed={duzen}
+                      title={duzen ? c('Kod / Ünvan alanlarını gizle') : c('Kod / Ünvan düzenle')}
+                      onClick={() => setDuzen(d => !d)}>✎</button>} />
+      </div>
+      {serit}
+    </div>
+  );
 }

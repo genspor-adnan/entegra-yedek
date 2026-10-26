@@ -14,8 +14,7 @@ import { BelgeTuruAraclari, BelgeTuruBaslik, BelgeTuruGenel, BelgeTuruHareketSek
          BelgeTuruKapsam, BelgeTuruPersonelSekmesi } from '../../bilesenler/kart/BelgeTuruKarti';
 import { MetinMakroGovdesi } from '../../bilesenler/MetinMakroGovdesi';
 import { IlgiliKisiler } from '../../bilesenler/IlgiliKisiler';
-import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
-import { CariBelgeler, CariCrm, CariDevirSorusu, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
+import { CariBelgeler, CariCrm, CariDevirSorusu, CariKimlikBandi, CariFinansal, CariHizliIslemler, CariOzetSeridi, CariYanPanel } from '../cari/CariKartParcalari';
 import { SevkKartGovdesi } from '../sevk/SevkKarti';
 import { KonsultasyonIstekGovdesi } from '../konsultasyon/KonsultasyonKarti';
 import { GozMuayeneSeridi } from '../../bilesenler/goz/GozMuayeneSeridi';
@@ -100,10 +99,8 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   //   Tedarikçi kartı da aynı kaynak (`cari`) - özet onda da geçerli.
   cari: {
     seritSarmalayici: b => kayitli(b.kartId)
-      // FİRMA BİLGİ BANDI (kullanıcı 26.10.2026: "müş/ted kartına firma bilgi bant ekle"): kimlik şeridinin
-      //   üstünde; bakiye rozetleri yok - özet şeridinde var.
-      ? (serit, d) => <><div className="kart-cbb"><CariBilgiBandi id={b.kartId as number} tazele={b.tazeleKayit} bakiyesiz /></div>
-                         {serit}<CariDevirSorusu id={b.kartId as number} onDegisti={b.kartiTazele} />
+      // FİRMA BİLGİ BANDI (CariKimlikBandi): bakiye rozetleri yok - özet şeridinde var. Yeni kartta band yok.
+      ? (serit, d) => <><CariKimlikBandi id={b.kartId as number} tazele={b.tazeleKayit} serit={serit} /><CariDevirSorusu id={b.kartId as number} onDegisti={b.kartiTazele} />
                          <CariOzetSeridi id={b.kartId as number} tazele={b.tazeleKayit}
                                          ad={String(d.unvan ?? '')} git={b.git}
                                          tedarikci={Number(d.tedarikci ?? 0) === 1 && Number(d.musteri ?? 0) !== 1} /></>
