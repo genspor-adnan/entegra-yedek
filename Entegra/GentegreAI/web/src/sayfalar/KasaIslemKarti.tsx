@@ -453,13 +453,6 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   /** Baslik cubugu dugmeleri - hem sayfa hem modal duzeninde AYNI. */
   const dugmeler = (
           <>
-            {modalMi
-              ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
-              : ekranSekmesi
-                ? <button className="d kapat-dugmesi" onClick={() => sayfaKapat()}>✖ {cev('Kapat')}</button>
-                : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
-                  Listeye Dön
-                </button>}
             {/* TASLAK KAYDET KALKTI (kullanici): kasa islemi kaydedilince
                 kesindir - belge kartindaki kuralla ayni. Taslak (durum 0)
                 sunucuda duruyor, gocten gelen kayitlar ve API icin. */}
@@ -485,6 +478,15 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 İptal Et
               </button>
             )}
+            {/* KAPAT EN SAĞDA (kullanıcı 26.10.2026: "cari virman da kapat ve kaydet yer değiş"): Kaydet solda,
+                Kapat sonda - belge kartlarıyla aynı sıra, bütün kasa işlemi türlerinde. */}
+            {modalMi
+              ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
+              : ekranSekmesi
+                ? <button className="d kapat-dugmesi" onClick={() => sayfaKapat()}>✖ {cev('Kapat')}</button>
+                : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
+                  Listeye Dön
+                </button>}
           </>
   );
 
