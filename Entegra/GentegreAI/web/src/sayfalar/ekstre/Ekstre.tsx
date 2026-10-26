@@ -106,7 +106,6 @@ export function Ekstre() {
   const gercekTur: EkstreTuru = veri?.tur ?? (tur === 'hesap' ? 'kasa' : tur);
   const h = veri?.hesap ?? null;
   const o = veri?.ozet;
-  const baslik = h ? `${TUR_AD[gercekTur].replace(/^\S+\s/, '')} — ${h.ad}` : TUR_AD[gercekTur].replace(/^\S+\s/, '');
   const etiket = (b: string, a: string) => (cari ? b : a);
   const bakiyeYaz = (n: number) => (cari ? `${p(Math.abs(n))} ${n > 0.005 ? 'B' : n < -0.005 ? 'A' : ''}`.trim() : p(n));
 
@@ -133,12 +132,15 @@ export function Ekstre() {
     <div className="hi ek">
       <style>{icmalStili + EKSTRE_STILI}</style>
       <div className="sayfabas">
-        <div className="basrow"><h1><EkstreIkon boyut={20} /> {c('Ekstre')} — {baslik}</h1><span className="yol">Finans › {c('Ekstre')}</span></div>
+        {/* BAŞLIK (kullanıcı 26.10.2026: "Ekstre — Cari yerine Ekstre / ikon Cari"): tür ikonuyla. */}
+        <div className="basrow"><h1><EkstreIkon boyut={20} /> {c('Ekstre')} / {TUR_AD[gercekTur]}</h1><span className="yol">Finans › {c('Ekstre')}</span></div>
       </div>
 
       {/* ARAÇ ÇUBUĞU (kullanıcı: "print combo'yu en sağa al", "diğer butonları da print soluna al"):
-          hepsi SAĞDA - Kartı Aç · Belge / İşlem Aç · türe özgü düğmeler · Çıktı. */}
+          hepsi SAĞDA - Kartı Aç · Belge / İşlem Aç · türe özgü düğmeler · Çıktı. HESAP ADI SOLDA, aynı satırda
+          (kullanıcı 26.10.2026: "cari adı bir alt satırda olsun", "sağ üstteki butonlar da 2. satırda olsun"). */}
       <div className="hi-arac">
+        {h && <span className="ek-hesap-ad">{h.ad}</span>}
         <span className="sp" />
         {h && <button type="button" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
         <button type="button" disabled={!secili} title={secili ? 'Seçili satırın belgesi / kasa işlemi' : 'Önce bir satır seçin'}
@@ -517,6 +519,7 @@ function EkstreA4({ v, antet, duzenleyen }: { v: Veri; antet: Record<string, unk
 
 const EKSTRE_STILI = `
 /* OVAL (kullanıcı: "dönem ve seçim editleri de oval olsun"): şeritteki kutular tür / görünüm seçicisiyle aynı yuvarlaklıkta. */
+.ek .ek-hesap-ad { margin-left:8px; font-size:15px; font-weight:600; color:var(--yazi2,#2c4a6b); }
 .ek .hi-serit .sel { border-radius:13px; padding-left:10px; padding-right:10px; }
 .ek .hi-serit input[type=date] { border:1px solid var(--cizgi,#cdd6e0); border-radius:10px; font-size:12px; padding:1px 6px; }
 /* Çıktı menüsü en sağda: açılır liste sağa hizalı, ekrandan taşmasın. */
