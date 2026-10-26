@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { api } from '../api/istemci';
 import {
   hataAyristir, KASA_DURUM,
@@ -97,6 +98,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [sorgu] = useSearchParams();
   const modalMi = typeof onKapat === 'function';
   const { yetki, kullanici } = useOturum();
+  /** KENDİ SEKMESİNDE (26.10.2026, müşteri / tedarikçi listesi Tahsilat / Ödeme ▾): kaydet / kapat sekmeyi
+   *  kapatır, listeler (cari bakiyesi, kasa) tazelenir. Sekme yoksa eski davranış: kasa listesine dönülür. */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const konum = useLocation();
+  const sayfaKapat = (hedef = '/kasa-islem') => { if (ekranSekmesi) ekranSekmesi.kapat(); else git(hedef) };
+  const listeleriTazele = () => {
+    for (const k of ['cari', 'kasa-islem']) window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: k }));
+  };
 
   const kayitId = kayitIdProp ?? (id && id !== 'yeni' ? Number(id) : null);
 
@@ -122,8 +131,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   //   girmesin (URL parametreleri tam sayfa acilista ayni isi gorur).
   const [cari, setCari] = useState<CariSecimi | null>(() => {
     const tarafId = acilis?.tarafId ?? (Number(sorgu.get('tarafId')) || 0);
-    return tarafId ? { id: tarafId, unvan: acilis?.tarafUnvan ?? '' } : null;
+    return tarafId ? { id: tarafId, unvan: acilis?.tarafUnvan ?? sorgu.get('tarafUnvan') ?? '' } : null;
   });
+  /** CARİ SABİT (kullanıcı 26.10.2026: "tahsilat sekmesi bir yerden geliyorsa cari değişemez"): yeni işlem
+   *  bir carinin üstünden (liste önizlemesi, belge, kart) cariyle açıldıysa cari değiştirilemez. */
+  const [cariSabit] = useState(() => kayitId === null && !!(acilis?.tarafId ?? (Number(sorgu.get('tarafId')) || 0)));
   const [karsiCari, setKarsiCari] = useState<CariSecimi | null>(null);
   const [hesap, setHesap] = useState<HesapSecimi | null>(null);
   const [karsiHesap, setKarsiHesap] = useState<HesapSecimi | null>(null);
@@ -186,6 +198,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     })();
   }, [kayitId, hesap, secili?.anaHesapTuru]);
   const grup = secili?.grup ?? 'tahsilat';
+  // SEKME BAŞLIĞI: işlem türü + carinin ilk iki kelimesi ("Nakit Tahsilat · Zone Medikal").
+  const sekmeBasligi = !modalMi && secili ? [secili.ad, cari?.unvan ? sekmeAdi(cari.unvan) : ''].filter(Boolean).join(' · ') : '';
+  const baslikYolu = baslikAnahtari(konum);
+  useEffect(() => { if (ekranSekmesi && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikYolu) }, [ekranSekmesi, sekmeBasligi, baslikYolu]);
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;
   /**
    * SALT GORUNUM yalniz IPTAL edilmis islemde (durum 3). Gerceklesmis
@@ -327,7 +343,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Modalde cagiran
       //   kapatir (belge kartinin Tahsilat sekmesi), tam sayfada listeye donulur.
       if (modalMi) onKapat?.();
-      else git('/kasa-islem');
+      else { listeleriTazele(); sayfaKapat() }
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
@@ -338,7 +354,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     try {
       yaniti(await api.kasaKesinlestir(kayitId));
       // Kesinlestirme de bir "kaydet": islem bitti, form kapanir.
-      if (modalMi) onKapat?.(); else git('/kasa-islem');
+      if (modalMi) onKapat?.(); else { listeleriTazele(); sayfaKapat() }
     }
     catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
@@ -388,7 +404,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
           <>
             {modalMi
               ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
-              : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
+              : ekranSekmesi
+                ? <button className="d kapat-dugmesi" onClick={() => sayfaKapat()}>✖ {cev('Kapat')}</button>
+                : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
                   Listeye Dön
                 </button>}
             {/* TASLAK KAYDET KALKTI (kullanici): kasa islemi kaydedilince
@@ -449,7 +467,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   // IADEDE HASTA DEGISTIRILEMEZ (780): iade avansin sahibine
                   //   yapilir; baskasina odenen para iade degil baska bir
                   //   islemdir (sunucu tetigi de reddeder).
-                  kilitli={kilitli || iadeKipi}
+                  kilitli={kilitli || iadeKipi || cariSabit}
                   // PERSONEL de taraf olabilir (kullanici): is avansi, maas
                   //   odemesi, harcirah... Muhasebe tarafi zaten hazir -
                   //   fn_muh_hesap_coz personeli 335/196'ya yaziyor.

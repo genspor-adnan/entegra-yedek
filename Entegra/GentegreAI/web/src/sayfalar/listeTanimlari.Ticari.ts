@@ -879,7 +879,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Finans', menuSira: 60, menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet.liste',
+    menuGrup: 'Finans', menuSira: 60, menuAd: 'Çek Listesi', ic: '@cek', yetkiKodu: 'cek_senet.liste',
   },
   {
     kaynak: 'cek-senet', rota: 'senet', baslik: 'Senet Listesi', yol: 'Banka › Senet Listesi',

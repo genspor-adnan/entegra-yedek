@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavigationType, UNSAFE_LocationContext, type Location } from 'react-router-dom';
-import { EkranSekmesiBaglami, SekmeGorunurBaglami, baslikAnahtari, ekstreKimligi } from '../../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, SekmeGorunurBaglami, baslikAnahtari, ekstreKimligi, yuvaYolu } from '../../bilesenler/sekmeBaglami';
 import { PALET_AC_OLAYI } from '../Baslangic';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
 import { c } from '../../dil/ceviri';
@@ -68,10 +68,11 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
  *  3. Boş yuva varsa o.
  *  4. Yoksa kayıtsız değişikliği olmayan en eski yuva; hepsi kirliyse null (kartaGit uyarır).
  */
-export function kartYuvasiSec(taban: string, yolu: string, sekmeler: { anahtar: string; konum: { pathname: string }; erisim: number }[],
+export function kartYuvasiSec(taban: string, yolu: string, sekmeler: { anahtar: string; konum: { pathname: string; search?: string }; erisim: number }[],
                               oncekiAktif: string | undefined, kirliMi: (anahtar: string) => boolean): string | null {
   const grup = sekmeler.filter(s => s.anahtar.startsWith(taban + '#'));
-  const ayni = grup.find(s => s.konum.pathname === yolu);
+  // `yolu` yuvaYolu: yeni kayıtta ön değerler de (sorgu) kimliğin parçası.
+  const ayni = grup.find(s => yuvaYolu(s.konum) === yolu);
   if (ayni) return ayni.anahtar;
   // Kirli kartın yerine başka kayıt konmaz - öteki yuvalara bakılır.
   if (oncekiAktif?.startsWith(taban + '#') && !kirliMi(oncekiAktif)) return oncekiAktif;
@@ -166,7 +167,7 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     let anahtar = yuvalar.current.get(yuvaAnahtari);
     if (!anahtar) {
       anahtar = !bulunan.ust ? ekstreYuvasiSec(bulunan.anahtar, ekKimlik, sekmeler, sonAktif.current)
-        : kartYuvasiSec(bulunan.anahtar, konum.pathname, sekmeler, sonAktif.current, kirliMi)
+        : kartYuvasiSec(bulunan.anahtar, yuvaYolu(konum), sekmeler, sonAktif.current, kirliMi)
         // Hepsi kirliyken dışarıdan gelinirse (kartaGit dışı yol) en eskisi - adres zaten değişti.
         ?? sekmeler.filter(s => s.anahtar.startsWith(bulunan.anahtar + '#')).sort((a, b) => a.erisim - b.erisim)[0]?.anahtar
         ?? `${bulunan.anahtar}#0`;
@@ -249,7 +250,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     const [yolu, sorgu = ''] = yol.split('?');
     const hedef = sekmeBul(satirlar, { pathname: yolu, search: sorgu ? `?${sorgu}` : '', hash: '', state: null, key: '' },
                            ekBasliklar, kartSekmeleri);
-    if (hedef.ust && kartYuvasiSec(hedef.anahtar, yolu, liste, simdiki.anahtar, kirliMi) === null) {
+    if (hedef.ust && kartYuvasiSec(hedef.anahtar, yuvaYolu({ pathname: yolu, search: sorgu ? `?${sorgu}` : '' }),
+                                   liste, simdiki.anahtar, kirliMi) === null) {
       const s = liste.filter(x => x.anahtar.startsWith(hedef.anahtar + '#')).sort((a, b) => a.erisim - b.erisim)[0];
       if (s) ac(s);
       setBildirim(c('Açık kartta kaydedilmemiş değişiklik var - önce kaydedin ya da kapatın.'));

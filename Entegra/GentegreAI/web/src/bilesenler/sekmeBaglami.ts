@@ -50,8 +50,14 @@ export function ekstreKimligi(k: { pathname: string; search: string }): string {
   const tur = q.get('tur') || 'cari';
   return id > 0 ? `${tur === 'cari' ? 'c' : 'h'}:${id}` : '';
 }
+/**
+ * YENİ KAYIT YUVASI ADRESİ: '/…/yeni' kartı ön değerleriyle (ör. /kasa-islem/yeni?tur=22&tarafId=5) ayrı kayıttır -
+ * iki müşteriye açılan iki tahsilat aynı sekmeye düşüp birinin yerine geçmesin. Kayıtlı kart yalnız adresiyle.
+ */
+export const yuvaYolu = (k: { pathname: string; search?: string }) =>
+  k.pathname.endsWith('/yeni') ? k.pathname + (k.search ?? '') : k.pathname;
 /** Ekranın verdiği sekme başlığının anahtarı: adres; hesaplı ekstrede adres + hesap (hepsi /ekstre). */
 export const baslikAnahtari = (k: { pathname: string; search: string }) => {
   const e = ekstreKimligi(k);
-  return e ? `/ekstre?${e}` : k.pathname;
+  return e ? `/ekstre?${e}` : yuvaYolu(k);
 };
