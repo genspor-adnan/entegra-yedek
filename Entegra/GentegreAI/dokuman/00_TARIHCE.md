@@ -7,6 +7,26 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 26.10.2026 — Ortak giriş paneli (gentegreai.com), giriş kodu, hesap askısı (1190)
+
+Kullanıcı: *"sunucuya panel adresi altında bir sayfa tasarlasak, tüm müşteriler girişlerini bu sayfa üzerinden yapsa"* → mockup `Ekranlar/Ayarlar/ortak_giris_paneli.html` → kararlar (gentegreai.com, kısa firma kodu, pasif firmaya doğru şifreden sonra "askıda", eski adresler yönlenir) → *"önce mockup'ları kodla"* → *"panel kalsın"*, *"direkt gentegreai.com'da açılsın"*, *"zaten Cloudflare kullanıyorum"*.
+
+- **Panel** (`panel/index.html`, tek statik sayfa): `gentegreai.com` (www / panel. buraya 301). Firma kodu Türkçe / büyük harf duyarsız; hatırlanan yalnız firma kodu + kullanıcı; her hatada tek genel mesaj (bilinmeyen firma da aynı 401 - firma listesi sızmaz). Şifre sıfırlama ve ilk parola firmanın kendi ekranında.
+- **Giriş kodu (1190):** `POST /api/kimlik/giris-kodu` normal girişi yapar ama token yerine 60 sn tek kullanımlık kod döner (tabloda sha256); firma ekranı `?giris=<kod>`'u `.../giris-kodu/kullan` ile oturuma çevirir, adres çubuğundan siler. Panel token görmez.
+- **Askı:** referans `genel.hesap_askida = 1` → doğru parolada "Hesabınız askıda", açık oturum da yenilenemez.
+- **Sunucu:** `yayin/nginx-gentegreai.conf` + `panel-hazirla.sh` - firma `<kod>.gentegreai.com/<kod>/` (kayıtlı kod haritası, başka firmanın yolu 404, basic auth yok), panel girişinde deneme sınırı; DNS Cloudflare'de (`@` ve `*`), HTTPS Cloudflare Origin sertifikası (joker, 15 yıl), Cloudflare arkasında gerçek istemci IP. Yeni müşteri için DNS / sertifika işi yok, haritaya bir satır.
+- Yerel uçtan uca test (UNIVERSE): genel hata, firma kodu tanıma, kodla oturum, ikinci kullanım 401, hatırlama.
+
+## 25.10.2026 — ZONE / MEDX kalıcı geçiş, tahakkuk aktarımı (1188), hesap planı (1189), aktarım sağlamlaştırma
+
+Kullanıcı: *"mssql'de zone ve medx db'leri var.. onlar için de sunucuda DB oluşturup migrate yap.. önce bütün dataları sıfırla"*, *"bunlar 2 ayrı müşteri"*, *"borç/alacak tahakkuklarda açıklama migrate edince gelmemiş"*.
+
+- **ZONE / MEDX:** FETA akışı (dokuman/19 §5b) - MSSQL kopyaya Update_SQL_208/209/216 + CT, `kur.ps1 -SadeceSema -Urun erp -AktarimIcin` (tohumlar boşaltıldı), kurum tipi `erp`, ajan + `aktar_ek` + mutabakat (ZONE 26.326 belge / 15.346 kasa / 905 cari bakiye; MEDX 6.666 / 1.244 / 534 - hepsi Delphi'ye eşit), dump → sunucu `/zone/` (5184), `/medx/` (5185).
+- **1188 tahakkuk:** Delphi borç / alacak tahakkuku yalnız başlık (ACIKLAMA + tutar, satırsız, BASLIK boş) - cari hareket açıklaması boş, kartta cari / açıklama / toplam boştu. Aktarım düzeltildi + onarım (UNIVERSE 10.089, FETA 630 tahakkuk).
+- **1189:** Delphi hesap planında mükerrer kod hesap planını hiç taşıtmıyordu - kod tekil.
+- **goc_al / aktar_ek (eski sürüm Delphi):** kaynakta olmayan tablo atlanır, GENDEPO yoksa e-Belge adımı atlanır, 0x00 atılır, money uç değeri NULL, metin stg uzunluğuna kırpılır, psql hatası artık SESSİZ GEÇMEZ.
+- **Ek:** Hizmet Listesi Hizmet Adı önde; ikonlar (Müşteri 💼, devir ↪️, POS 📟, Ekstre Σ - `EkstreIkon`); Devir Girişi tür seçici yalnız Cari gösteriyordu (id 0 → 404) - düzeldi; SterilTestleri gece 00-01 arası kırılıyordu.
+
 ## 25.10.2026 — Teklif / Temsilci / Ba-Bs / Döviz icmalleri (1186), cariye özel e-Belge dipnotu (1187)
 
 Kullanıcı: *"erp için başka icmal var mı"* → *"ilk dördü için mockup yap"* → kararlar (*"süresi geçen teklif kendiliğinden kayba çevrilsin, temsilci faturadan alınsın"*) → *"önce mockup'ları kodla"*. Kalan açık sorularda mockup önerileri uygulandı.

@@ -1824,6 +1824,17 @@ POST /api/doviz-pozisyon/kur-farki · DELETE …/{id}     finans.kur_farki      
   e-Beyanname XML'i ve gider pusulası / SMM henüz yok (Excel dökümü).
 - **Döviz:** değerleme kuru `finans.degerleme_kuru` (boş = TCMB alış); kur farkı faturası OTOMATİK kesilmez, önerilir.
 
+## 9.28 Ortak giriş paneli - tek kullanımlık giriş kodu (1190)
+
+```
+POST /api/kimlik/giris-kodu         anonim   {kod, parola}  -> {kod}   (normal giriş; token YERİNE 60 sn tek kullanımlık kod)
+POST /api/kimlik/giris-kodu/kullan  anonim   {kod}          -> GirisYaniti (kod silinerek okunur; geçersiz / süresi dolmuş 401)
+```
+
+- Hatalar normal girişle aynı (yanlış parola 401, kilit 401, ILK_PAROLA 401, askı 403 `engel: HESAP_ASKIDA`).
+- `genel.hesap_askida = 1` (referans): doğru parolada 403 "Hesabınız askıda"; `/yenile` de 403.
+- Web `?giris=<kod>` görürse `kullan` ile oturum açar ve parametreyi adres çubuğundan siler.
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).
