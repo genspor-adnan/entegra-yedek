@@ -43,7 +43,7 @@ export function BelgeAracCubugu({
   eBelgeYok: boolean;
   kayitliId: number;
   /** Belgeyi kaydeder; kaydedilen id'yi doner (0 = kaydedilemedi). */
-  kes(): Promise<number>;
+  kes(kapatilsin?: boolean): Promise<number>;
   yeniBelge(): void;
   kapat(): void;
   /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
@@ -219,7 +219,7 @@ export function BelgeAracCubugu({
           (Hazirla / Onizle / Gonder / Kaydet / Seri / Geri Al / Mesajlar) - yalniz
           satis irsaliyesi; alis irsaliyesi gelen kutusundan gelir. */}
       {!eBelgeYok && !alisMi && (
-        <EFaturaMenusu belgeId={kayitliId} devre={!kayitliId} devreSebep="Önce irsaliyeyi kaydedin."
+        <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)}
                        onDegisti={belgeYenile} etiket="e-İrsaliye" />
       )}
       <button className="d" disabled={!kayitliId}
@@ -249,8 +249,8 @@ export function BelgeAracCubugu({
     <>
       {/* e-FATURA MENUSU (11.10.2026, Delphi e-Fatura menusu) - yalniz satis faturasi. */}
       {!alisMi && (
-        <EFaturaMenusu belgeId={kayitliId} devre={!kayitliId} devreSebep="Önce belgeyi kaydedin."
-                       onDegisti={belgeYenile} />
+        // Kayıtsız belgede tıklayınca önce kaydedilir (kart açık kalır), menü sonra açılır.
+        <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)} onDegisti={belgeYenile} />
       )}
       {/* TAHSILAT ve IADE dugmeleri arac cubugundan KALKTI (kullanici):
           tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /

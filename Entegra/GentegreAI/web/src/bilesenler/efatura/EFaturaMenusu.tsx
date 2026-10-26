@@ -42,7 +42,7 @@ const MADDELER: (readonly [EFaturaKodu, string, string] | null)[] = [
   ['ebelge.mesajlar', mesajlarIkon, 'Mesaj Geçmişini Göster'],
 ];
 
-export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegisti, etiket = 'Fatura İşlem' }: {
+export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegisti, etiket = 'Fatura İşlem', onceKaydet }: {
   belgeId?: number;
   /** ÇOKLU SEÇİM: verilirse menü bu belgelerin hepsinde çalışır (tek-belge maddeleri pasif). */
   belgeIdler?: number[];
@@ -51,9 +51,18 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
   /** Durum değiştiren adımdan sonra (liste / kart tazelensin). */
   onDegisti?(): void;
   etiket?: string;
+  /**
+   * KAYITSIZ BELGEDE ÖNCE KAYDET (kullanıcı 26.10.2026: "fatura işlem butona tıkladığımda fatura kayıtlı değilse
+   * kaydedilsin sonra menü açsın"): belge id'si yokken tıklanınca çağrılır, kaydedilen id döner (0 = kaydedilemedi,
+   * hata kartta gösterildi) ve menü o belgeyle açılır.
+   */
+  onceKaydet?(): Promise<number>;
 }) {
   const [acik, setAcik] = useState(false);
-  const idler = belgeIdler ?? (belgeId ? [belgeId] : []);
+  /** onceKaydet'in döndürdüğü id - üst bileşen yeni belgeId'yi verene kadar. */
+  const [kaydedilen, setKaydedilen] = useState(0);
+  const tekId = belgeId || kaydedilen;
+  const idler = belgeIdler ?? (tekId ? [tekId] : []);
   const coklu = idler.length > 1;
   const [durum, setDurum] = useState<EFaturaDurumu | null>(null);
   const [durumlar, setDurumlar] = useState<EFaturaDurumu[]>([]);
@@ -63,11 +72,17 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
   // SABIT KONUM: menu kart modalinin / .kagrup'un overflow'unda kirpiliyordu -
   //   dugmeye gore ekrana sabitlenir, altta yer yoksa yukari acilir.
   const [konum, setKonum] = useState<React.CSSProperties>({});
-  const ac = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const ac = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    const dugme = e.currentTarget;
+    if (!acik && idler.length === 0 && onceKaydet && !devre) {
+      const id = await onceKaydet();
+      if (!id) return;
+      setKaydedilen(id);
+    }
     // PASIF DUGME SESSIZ KALMASIN: sebep mesajla soylenir (title'i kimse okumuyor).
-    if (devre || idler.length === 0) { mesaj(devreSebep || 'Önce belgeyi kaydedin.'); return }
-    const d = e.currentTarget.getBoundingClientRect();
+    else if (devre || idler.length === 0) { mesaj(devreSebep || 'Önce belgeyi kaydedin.'); return }
+    const d = dugme.getBoundingClientRect();
     // Asagida yer yoksa yukari acilir. top/bottom IKISI de acikca verilir: ortak
     //   .dugme-menu-liste stilindeki `top: 100%` kalinca yukari acilan menu
     //   ekranin altina itiliyordu (kullanici: 768 px ekranda "menü çıkmadı").
@@ -109,9 +124,9 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
 
   return (
     <span className="dugme-menu efm" ref={kok}>
-      <button type="button" className={'d bir' + (devre || idler.length === 0 ? ' efm-pasif' : '')}
+      <button type="button" className={'d bir' + (devre || (idler.length === 0 && !onceKaydet) ? ' efm-pasif' : '')}
               title={devre ? devreSebep : etiket === 'Fatura İşlem' ? 'e-Fatura / e-Arşiv işlemleri' : `${etiket} işlemleri`}
-              onClick={ac}>
+              onClick={e => void ac(e)}>
         <img src={efaturaIkon} alt="" width={16} height={16} className="efm-dugme-ikon" /> {etiket}{coklu ? ` (${idler.length})` : ''} ▾
       </button>
       {acik && createPortal(
