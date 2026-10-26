@@ -3,7 +3,8 @@ import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
 import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { EkranSekmesiBaglami, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
+import { belgeTuruBilgisi } from '../belgeTuru';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { Ekstre as Veri, EkstreHesapSecimi, EkstreParasi, EkstreSatiri, EkstreTuru } from '../../api/uclar/ekstre';
@@ -118,20 +119,35 @@ export function Ekstre() {
    *  diğerleri kalksın"): tık = tek işaret; çoklu işaret yalnız kutucuklardan. */
   const satirSec = (s: EkstreSatiri) => { setSecili(s); setIsaretli(new Set([s.id])) };
   /** Satırı üreten kayıt: önce kasa işlemi, yoksa belge. */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  /**
+   * KAYIT KENDİ SEKMESİNDE (kullanıcı 27.10.2026: "ekstrede belge çift tıklayıp açılacaksa hemen yanda yeni
+   * sekmede açılsın.. modal değil"): kasa işlemi /kasa-islem/<id>, belge türünün kart yolunda - sekme ekstrenin
+   * sağına açılır (EkranSekmeleri). Sekmeler kapalıysa (eski görünüm) modal.
+   */
   const kayitAc = (s: EkstreSatiri | null) => {
     if (!s) { mesaj('Önce bir satır seçin.'); return }
+    if (!s.kasaIslemId && !s.belgeId) { mesaj('Bu satırın bağlı olduğu bir kayıt yok (devir / açılış).'); return }
+    if (ekranSekmesi) {
+      ekranSekmesi.kartaGit(s.kasaIslemId ? `/kasa-islem/${s.kasaIslemId}` : `${belgeTuruBilgisi(s.tur).liste}/${s.belgeId}`);
+      return;
+    }
     if (s.kasaIslemId) setAcikKasa(s.kasaIslemId);
-    else if (s.belgeId) setAcikBelge(s.belgeId);
-    else mesaj('Bu satırın bağlı olduğu bir kayıt yok (devir / açılış).');
+    else setAcikBelge(s.belgeId);
   };
   const kutu = (b: string, deg: string, alt: string, sinif = '') => (
     <div className={'hi-kutu ' + sinif}><div className="bas">{b}</div><div className="deg">{deg}</div><div className="alt">{alt}</div></div>
   );
   const gunFarki = (t: string | null | undefined) => (t ? Math.round((Date.now() - new Date(t).getTime()) / 864e5) : null);
 
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const konum = useLocation();
   const kartaGit = (y: string) => (ekranSekmesi ? ekranSekmesi.kartaGit(y) : git(y));
+  // Sekmede açılan kayıt kaydedilince / silinince ekstre tazelenir (modal kapanışındaki tazelemenin yerine).
+  useEffect(() => {
+    const tazele = () => setYenile(x => x + 1);
+    window.addEventListener(LISTE_TAZELE_OLAYI, tazele);
+    return () => window.removeEventListener(LISTE_TAZELE_OLAYI, tazele);
+  }, []);
   /**
    * BELGEYİ KOPYALA (kullanıcı 26.10.2026: "aksiyon menüsüne diğer altına Belgeyi Kopyala ekle.. eğer tek belge
    * seçili ise ve o belge içinde izlemli satır yoksa kopyala varsa uyar"): işaretli (yoksa seçili) TEK belge
