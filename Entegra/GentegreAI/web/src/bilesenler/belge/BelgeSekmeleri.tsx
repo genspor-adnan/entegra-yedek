@@ -97,12 +97,14 @@ export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
 }
 
 export function EBelgeSekmesi({
-  kilitli, irsaliyeMi, tur, senaryo, setSenaryo, belge, belgeYenile,
+  kilitli, irsaliyeMi, tur, senaryo, setSenaryo, senaryoGizli, belge, belgeYenile,
 }: {
   kilitli: boolean;
   irsaliyeMi: boolean;
   tur: number;
   senaryo: number; setSenaryo(v: number): void;
+  /** Senaryo kart başlığında (fatura - kullanıcı 26.10.2026). */
+  senaryoGizli?: boolean;
   belge?: BelgeYaniti['belge'];
   belgeYenile?(): void;
 }) {
@@ -133,7 +135,7 @@ export function EBelgeSekmesi({
         <input value={String(belge?.gondericiAlias ?? '') || '—'} readOnly />
       </label>
 
-      <label className="alan">
+      {!senaryoGizli && <label className="alan">
         <span className="etiket">Senaryo</span>
         <select value={senaryo} disabled={kilitli}
                 onChange={e => setSenaryo(Number(e.target.value))}>
@@ -141,7 +143,7 @@ export function EBelgeSekmesi({
             <option key={o.deger} value={o.deger}>{o.ad}</option>
           ))}
         </select>
-      </label>
+      </label>}
       <label className="alan">
         <span className="etiket">Durum</span>
         <span className="deger-serit">

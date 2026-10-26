@@ -9,7 +9,7 @@ import { TarafAlani } from './TarafAlani';
 import { CariBilgiBandi } from '../CariBilgiBandi';
 import { useCariSatiri } from '../cariSatiri';
 import {
-  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
+  LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI, FATURA_TIPLERI, SENARYO_SECENEK,
 } from '../../sayfalar/belgeSabitleri';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
@@ -31,10 +31,10 @@ import { c } from '../../dil/ceviri';
  *   2) Belge No
  *   3) Belge Tarihi
  *   4) e-Belge rozeti (kavrami olan turlerde)
+ *   Faturada (kullanici 26.10.2026) sira: Fatura Tipi · Senaryo · No · Tarih | Temsilci · Depo · Vade · e-Belge+Sipariş No
  *   5) Kisi-1   - Satis Temsilcisi / Sorumlu / Teslim Eden
  *   6) Depo-2   - Giris Deposu / Teslim Deposu / fisin deposu
  *   7) Kisi-2   - Teslim Alan / Talep Eden (depo belgeleri)
- *   8) Fatura Tipi (yalniz fatura)
  *   9) Vade (gun)
  *  10) Bagli Siparis / Kaynak Belge
  *  11) Faturalama Durumu (kapanma)
@@ -54,7 +54,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
-    eBelgeYok, teklif, provizyonVar,
+    eBelgeYok, teklif, provizyonVar, faturaTipi, setFaturaTipi, senaryo, setSenaryo,
     numaraElle,
   } = p;
 
@@ -92,6 +92,31 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   const numaraSozu = basvuruMu ? 'Protokol' : belgeSozu;
 
   /** Tarih hucresi: basvuruda bolum/hekimden SONRA cizildigi icin degisken. */
+  /** e-Belge rozetleri; faturada Sipariş No da burada ve hücre 2. satırın sonunda (bkz. 4b). */
+  const eBelgeHucresi = (
+  <label className="alan">
+    {/* FATURADA SIPARIS NO DA BURADA (kullanici 26.10.2026: "sip no da e-belge bölümüne gelsin 3. satır
+        olmasın"): Fatura Tipi + Senaryo eklenince baslik 3. satira tasiyordu. */}
+    <span className="etiket">{faturaMi ? 'e-Belge · Sipariş No' : 'e-Belge'}</span>
+    <span className="deger-serit">
+      {/* TUR + DURUM (11.10.2026): listedeki "e-Belge" ve "e-Belge Durum"
+          kolonlariyla ayni kural. Eski hali hazirlanmis belgeye de
+          "Gönderildi" diyor, e-Arsivi e-Fatura gosteriyordu. */}
+      <span className="rozet bilgi">
+        {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye'
+          : [11, 12].includes(efDurum) ? 'e-Arşiv' : 'e-Fatura'}
+      </span>
+      {[2, 12, 52].includes(efDurum) ? <span className="rozet ok">{c('Gönderildi')}</span>
+        : efDurum > 0 && efSonuc === 3 ? <span className="rozet hata">{c('Gönderim hatası')}</span>
+        : efDurum > 0 ? <span className="rozet uyari">{c('Hazır')}</span>
+        : <span className="rozet gri">{c('Taslak')}</span>}
+      {faturaMi && sonuc?.belge.kaynakBelgeNo ? (
+        <span className="rozet gri" title={`${String(sonuc.belge.kaynakTurAdi ?? '')} · ${c('Belge No')}`}>
+          {String(sonuc.belge.kaynakBelgeNo)}</span>) : null}
+    </span>
+  </label>
+  );
+
   const tarihHucresi = (
     <label className="alan">
       {/* ZORUNLU (kullanici): belge/siparis tarihi bos kalamaz - kalem, prim ve
@@ -168,6 +193,33 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       />
     )}
 
+    {/* --- 4b) FATURA TIPI + SENARYO (kullanici 26.10.2026: "satış/alış fatura kartına fatura tipi ve senaryoyu
+        taşı"): Fatura Tipi arac cubugundaydi, Senaryo e-Belge sekmesindeydi. Faturanin cinsi hem muhasebe fisini
+        hem e-Belge senaryosunu etkiler; belge.tipi alaninda tutulur (iade zaten 2 idi).
+        SIRA (kullanici 26.10.2026): 1. satir Fatura Tipi · Senaryo · Fatura No · Tarih; 2. satir Temsilci · Depo ·
+        Vade · e-Belge + Sipariş No (cari bantta - hucre yok). */}
+    {faturaMi && (
+      <label className="alan">
+        <span className="etiket">{c('Fatura Tipi')}</span>
+        <select value={faturaTipi} disabled={kilitli} onChange={e => setFaturaTipi(Number(e.target.value))}>
+          {/* Tip 1 KATALOGTA "Alış / Satış" (tek kod, iki yon): belgenin kendi yonuyle yazilir. */}
+          {FATURA_TIPLERI.map(t => (
+            <option key={t.deger} value={t.deger}>{t.deger === 1 ? (alisMi ? 'Alış' : 'Satış') : t.ad}</option>))}
+          {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak EKLENIR, yoksa kart acilinca ilk
+              tipe duser ve kaydedince belgenin gercek tipi sessizce degisirdi. */}
+          {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>}
+        </select>
+      </label>
+    )}
+    {faturaMi && !eBelgeYok && (
+      <label className="alan">
+        <span className="etiket">{c('Senaryo')}</span>
+        <select value={senaryo} disabled={kilitli} onChange={e => setSenaryo(Number(e.target.value))}>
+          {SENARYO_SECENEK.map(o => <option key={o.deger} value={o.deger}>{o.ad}</option>)}
+        </select>
+      </label>
+    )}
+
     {/* --- 2) BELGE NO ---
         Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
@@ -225,22 +277,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         XML'e giden alanlarla birlikte duruyorlar. Vergi Dairesi/VKN kartta
         gosterilmiyor - cari kartindan gelip belgeye DONDURULAN bilgi. */}
     {!eBelgeYok ? (
-    <label className="alan">
-      <span className="etiket">e-Belge</span>
-      <span className="deger-serit">
-        {/* TUR + DURUM (11.10.2026): listedeki "e-Belge" ve "e-Belge Durum"
-            kolonlariyla ayni kural. Eski hali hazirlanmis belgeye de
-            "Gönderildi" diyor, e-Arsivi e-Fatura gosteriyordu. */}
-        <span className="rozet bilgi">
-          {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye'
-            : [11, 12].includes(efDurum) ? 'e-Arşiv' : 'e-Fatura'}
-        </span>
-        {[2, 12, 52].includes(efDurum) ? <span className="rozet ok">{c('Gönderildi')}</span>
-          : efDurum > 0 && efSonuc === 3 ? <span className="rozet hata">{c('Gönderim hatası')}</span>
-          : efDurum > 0 ? <span className="rozet uyari">{c('Hazır')}</span>
-          : <span className="rozet gri">{c('Taslak')}</span>}
-      </span>
-    </label>
+    faturaMi ? null : eBelgeHucresi
     ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu ? null : kapanmaGoster ? kapanmaAlani : (
       /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
          Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
@@ -357,6 +394,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                onChange={e => setVadeGun(e.target.value)} />
       </label>
     )}
+    {faturaMi && !eBelgeYok && eBelgeHucresi}
 
     {/* Fiyat Listesi combosu ASAGIDA, Rapor Dovizi cercevesinin saginda
         (kullanici, 218) - KalemSekmesi cizer. */}
@@ -366,7 +404,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
         o dolduruyor (temsilci carinin altina insin diye).
         Teklifte "Bağlı Sipariş" cizilmez (kullanici) - teklif zincirin BASI. */}
-    {!depoBelgesi && !stokFisiMi && !teklifMi && bagliSiparisAlani}
+    {!depoBelgesi && !stokFisiMi && !teklifMi && !(faturaMi && !eBelgeYok) && bagliSiparisAlani}
     {!eBelgeYok && kapanmaGoster && kapanmaAlani}
   </div>
 </div>
@@ -473,6 +511,8 @@ export interface BelgeBaslikProps {
   /** Fatura tipi (130) - yalniz faturada gorunur. */
   faturaTipi: number;
   setFaturaTipi(v: number): void;
+  senaryo: number;
+  setSenaryo(v: number): void;
   satirlar: SatirDurumu[];
   donusumler: Record<string, unknown>[];
   /** Secim modallarini acan tetikleyiciler (kartta yasiyor). */

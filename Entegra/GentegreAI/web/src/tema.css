@@ -1351,6 +1351,18 @@ input.skt-gecmis {
 .belge-hdr-sar .alan select,
 .alan-izgara.belge-hdr .alan input,
 .alan-izgara.belge-hdr .alan select { height: 21px; font-size: 11.5px }
+/* BELGE KARTINDA ETIKET SOLDA (kullanici 26.10.2026: "başlıktaki label ları sola al"): etiket sabit
+   genislikte solda, edit sagda - iki satirlik baslik daha alcak. Tahsilat/kasa basligi (.belge-hdr,
+   seritsiz) dikey kalir. */
+.belge-hdr-sar .alan-izgara.belge-hdr .alan,
+.belge-hdr-sar .alan-izgara.belge-hdr .lookup {
+  display: grid; grid-template-columns: 104px minmax(0, 1fr); column-gap: 6px; align-items: center;
+}
+.belge-hdr-sar .alan-izgara.belge-hdr .alan .etiket,
+.belge-hdr-sar .alan-izgara.belge-hdr .lookup > .etiket { grid-column: 1; font-size: 10.5px; color: var(--soluk); text-align: left; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis }
+.belge-hdr-sar .alan-izgara.belge-hdr .alan > :not(.etiket),
+.belge-hdr-sar .alan-izgara.belge-hdr .lookup > :not(.etiket) { grid-column: 2; min-width: 0 }
 
 /* Belge karti basligi: mockup (.hdr) 3 sutunlu izgara. */
 .alan-izgara.uc-sutun { grid-template-columns: repeat(3, minmax(0, 1fr)) }

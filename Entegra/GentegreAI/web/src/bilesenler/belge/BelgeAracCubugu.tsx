@@ -1,5 +1,4 @@
 import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
-import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -12,8 +11,8 @@ import { c } from '../../dil/ceviri';
  */
 export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
-  iadeKutusu, iade, setIade, faturaTipi, setFaturaTipi,
-  siparisMi, irsaliyeMi, faturaMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
+  iadeKutusu, iade, setIade,
+  siparisMi, irsaliyeMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
@@ -32,8 +31,6 @@ export function BelgeAracCubugu({
   iade: boolean;
   setIade(v: boolean): void;
   /** Fatura tipi (130) - yalniz faturada, dugmelerin saginda. */
-  faturaTipi: number;
-  setFaturaTipi(v: number): void;
   siparisMi: boolean;
   irsaliyeMi: boolean;
   faturaMi: boolean;
@@ -256,7 +253,7 @@ export function BelgeAracCubugu({
       {/* TAHSILAT ve IADE dugmeleri arac cubugundan KALKTI (kullanici):
           tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /
           Senet dugmeleriyle, arac aracina gore), iade ise faturanin TIPI -
-          sagdaki "Fatura Tipi" listesinden secilir. */}
+          basliktaki "Fatura Tipi" listesinden secilir. */}
       <button className="d" disabled title={c('Yazdırma henüz bağlanmadı.')}>🖨️ Yazdır</button>
     </>
   )}
@@ -272,32 +269,6 @@ export function BelgeAracCubugu({
       cikmadan kart kapanirdi (kullanici: "değişiklik yaptım kapat deyince
       uyarı gelmedi"). */}
   <button className="d kapat-dugmesi" onClick={() => kapat()}>✖ {c('Kapat')}</button>
-
-  {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan
-      alindi - irsaliyedeki IADE kutusuyla ayni yeri kullanir. Faturanin cinsi
-      hem muhasebe fisini hem e-Belge senaryosunu etkiler; belge.tipi alaninda
-      tutulur (iade zaten 2 idi). */}
-  {faturaMi && (
-    <label className="satir-ici" title="Faturanın cinsi (e-Belge senaryosu ve muhasebe fişi buna bağlı)">
-      Fatura Tipi
-      <select value={faturaTipi} disabled={kilitli} style={{ width: 150 }}
-              onChange={e => setFaturaTipi(Number(e.target.value))}>
-        {/* Tip 1 KATALOGTA "Alış / Satış" (tek kod, iki yon): ekranda belgenin
-            kendi yonuyle yazilir - satis faturasinda "Satış", alista "Alış". */}
-        {FATURA_TIPLERI.map(t => (
-          <option key={t.deger} value={t.deger}>
-            {t.deger === 1 ? (alisMi ? 'Alış' : 'Satış') : t.ad}
-          </option>
-        ))}
-        {/* Gocten gelen tanimsiz tip (or. 17) listede yok: secenek olarak
-            EKLENIR, yoksa kart acilinca ilk tipe duser ve kaydedince belgenin
-            gercek tipi sessizce degisirdi. */}
-        {!FATURA_TIPLERI.some(t => t.deger === faturaTipi) && (
-          <option value={faturaTipi}>Tanımsız ({faturaTipi})</option>
-        )}
-      </select>
-    </label>
-  )}
 
   {/* TASLAK KUTUSU KALDIRILDI (kullanici): belge kaydedilince kesindir.
       Numara tuketmeyen "taslak" hali kullanilmiyordu, arac cubugunda yer

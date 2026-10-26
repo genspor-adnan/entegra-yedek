@@ -1337,7 +1337,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           kilitli={kilitli}
           iadeKutusu={irsaliyePilot} iade={iadeMi}
           setIade={v => setFaturaTipi(v ? 2 : 1)}
-          faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
           basvuruMu={basvuruMu}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
@@ -1446,6 +1445,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           sevkiyat={sevkiyat}
           fisTipi={fisTipi} setFisTipi={setFisTipi}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
+          senaryo={senaryo} setSenaryo={setSenaryo}
           satirlar={satirlar} donusumler={donusumler.liste}
           setCariArama={arama.setCari} setSaticiArama={arama.setSatici}
           setPersonelArama={arama.setPersonel}
@@ -1532,7 +1532,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         <BelgeErpSekmeleri
           aktifSekme={aktifSekme} kilitli={kilitli} sevkiyat={sevkiyat}
           belge={sonuc?.belge} irsaliyeMi={irsaliyeMi} tur={tur}
-          senaryo={senaryo} setSenaryo={setSenaryo}
+          senaryo={senaryo} setSenaryo={setSenaryo} senaryoBaslikta={faturaMi}
           belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
           faturalama={{
             donusumler: donusumListesi,

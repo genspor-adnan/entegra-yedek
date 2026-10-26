@@ -12,7 +12,7 @@ import { c } from '../../dil/ceviri';
  * çizildiği bir bakışta okunur.
  */
 export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
-                                    irsaliyeMi, tur, senaryo, setSenaryo,
+                                    irsaliyeMi, tur, senaryo, setSenaryo, senaryoBaslikta,
                                     faturalama, belgeYenile }: {
   aktifSekme: string;
   kilitli: boolean;
@@ -22,6 +22,8 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   tur: number;
   senaryo: number;
   setSenaryo(v: number): void;
+  /** Faturada senaryo başlıkta seçilir - sekmede yok. */
+  senaryoBaslikta?: boolean;
   /** Faturalama sekmesinin tüm girdisi - kart kurar, burada aynen geçer. */
   faturalama: React.ComponentProps<typeof FaturalamaSekmesi>;
   /** Belge başlığını sunucudan yeniden oku (e-Fatura menüsünden sonra). */
@@ -33,7 +35,7 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   if (aktifSekme === 'ebelge') {
     return (
       <EBelgeSekmesi kilitli={kilitli} irsaliyeMi={irsaliyeMi} tur={tur}
-                     senaryo={senaryo} setSenaryo={setSenaryo} belge={belge}
+                     senaryo={senaryo} setSenaryo={setSenaryo} senaryoGizli={senaryoBaslikta} belge={belge}
                      belgeYenile={belgeYenile} />
     );
   }
