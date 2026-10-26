@@ -48,7 +48,7 @@ export interface KartAracBaglami {
 export function kartAracGrubu(b: KartAracBaglami): ReactNode {
   switch (b.kaynak) {
     case 'hasta': return <HastaKimlikAraclari b={b} />;
-    case 'cari': return b.yeniMi ? null : <CariEkstreDugmesi tarafId={Number(b.id)} ad={String(b.deger.unvan ?? '')} />;
+    // 'cari': Ekstre düğmesi kartEklentileri › CariHizliIslemler'de (Aksiyon'un sağında, Hatırlat'tan önce - 26.10.2026).
     case 'hesap': return b.yeniMi ? null : <HesapAraclari hesapId={Number(b.id)} tur={String(b.deger.tur ?? '')} />;
     // Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
     //   tek degistirme yolu bu buton + TarafArama modali. Kisi zaten bagliysa (bagId
@@ -426,7 +426,7 @@ function HesapAraclari({ hesapId, tur }: { hesapId: number; tur: string }) {
  * Ekstre butonu ekle"): kartta ayrı bir ekstre yok - Kasa › Cari Ekstre listesi bu cariye süzülmüş
  * olarak açılır (sekme düzeninde kendi sekmesinde). Listeye erişimi olmayana düğme yok.
  */
-function CariEkstreDugmesi({ tarafId, ad }: { tarafId: number; ad: string }) {
+export function CariEkstreDugmesi({ tarafId, ad }: { tarafId: number; ad: string }) {
   const { yetki: oturumYetki } = useOturum();
   const git = useNavigate();
   if (!oturumYetki('mali_hareket', 'gor')) return null;

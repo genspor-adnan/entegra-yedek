@@ -10,6 +10,7 @@ import { para, sayi, tarihSaat } from '../../bilesenler/bicim';
 import { Avatar, dovizBakiyeMetni, Egri } from '../../bilesenler/grid/satirHucre';
 import { BelgeKarti } from '../BelgeKarti';
 import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
+import { CariEkstreDugmesi } from '../../bilesenler/kart/KartAracGruplari';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -401,5 +402,7 @@ export function CariCrm({ id, gitKart }: { id: number; gitKart(yol: string): voi
 // AKSİYON ▾ (kullanıcı 26.10.2026: "müş/ted kartı da aynı şekilde fat sip tah tek kaldır aksiyon ekle"): Satış
 //   Faturası / Sipariş / Teklif / Tahsilat düğmeleri yerine ekstre ve liste önizlemesindeki menü; seçim kendi sekmesinde.
 export function CariHizliIslemler({ id, ad, git }: { id: number; ad: string; git(yol: string): void }) {
-  return <CariAksiyonMenusu id={id} ad={ad} git={git} />;
+  // Sil'in sağında ayraç; Ekstre Hatırlat'tan önce (kullanıcı 26.10.2026: "sil sağına separatör ekle.. ekstre ile
+  //   hatırlat yer değiş" - Hatırlat GenForm'da ekAraclar'dan sonra gelir).
+  return <><span className="ayrac" /><CariAksiyonMenusu id={id} ad={ad} git={git} /><CariEkstreDugmesi tarafId={id} ad={ad} /></>;
 }
