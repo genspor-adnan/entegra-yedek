@@ -58,6 +58,17 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       return 0;
     }
 
+    // KAYITLI BELGE ASLA İKİNCİ KEZ EKLENMEZ (kullanıcı 26.10.2026: "1 adet seçip kaydettim, fatura hazırlandı..
+    //   kaydet deyince yeniden mi düşmeye çalışıyor"): kart kaydedilmiş belgeyi biliyor (etkinBelgeId ya da son
+    //   yanıt) ama düzenlenemiyorsa (e-Belgesi hazır / gönderilmiş, faturalanmış) ya da kimliği kartta yoksa, eski
+    //   kod belgeEkle'ye düşüyordu - aynı fatura İKİNCİ KEZ yazılıyor, lot ikinci kez düşülmeye çalışılıyordu.
+    //   Kilitli belgede yazma yok, mevcut kimlik döner (tahsilat vb. akışlar onunla sürer).
+    const mevcutId = b.etkinBelgeId || Number(b.sonuc?.belge.id ?? 0);
+    if (mevcutId && !b.duzenlenebilir) {
+      if (!b.etkinBelgeId) b.setAcilanId(mevcutId);
+      return mevcutId;
+    }
+
     const dolu = doluSatirlar(b.satirlar);
     // OTOMATIK KAYIT SATIR SILMEZ (kullanici: basvuru 114413 iki kez
     //   "satirAdedi: 0" ile guncellendi): kart bir sebeple kalemsiz kalirsa
@@ -84,8 +95,8 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       // IKINCI kayit UPDATE olmali: basvuru kartta acik kaldigi icin ayni
       //   dugmeye tekrar basiliyor - etkinBelgeId olmasa her basis yeni belge
       //   uretirdi.
-      const yanit = b.duzenlenebilir && b.etkinBelgeId
-        ? await api.belgeGuncelle(b.etkinBelgeId, govde)
+      const yanit = mevcutId
+        ? await api.belgeGuncelle(mevcutId, govde)
         : await api.belgeEkle(govde);
       b.setSonuc(yanit);
       // SUNUCU UYARILARI (ör. "Belge tarihi 7 günden eski", 23.10.2026): kayıt yapıldı ama
