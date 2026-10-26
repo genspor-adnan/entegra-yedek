@@ -18,7 +18,8 @@ export const EkranSekmesiBaglami = createContext<{
   kapat(hedef?: string): void;
   /** Kart aç - aynı kart sekmesindeki kart kayıtsız değişiklikliyse açmaz, onu öne alır. */
   kartaGit(yol: string): void;
-  baslik(ad: string, yol: string): void;
+  /** `ikon` (menü kodu, ör. '@b:tahsilat:s'): ekran sekmenin ikonunu da verir - kasa işleminde tahsilat / ödeme. */
+  baslik(ad: string, yol: string, ikon?: string): void;
   /**
    * Sekmenin × / Alt+W'si ekranın KENDİ Kapat'ını çağırsın (kayıtsız değişiklik sorusu). null = kaldır.
    * `kirli`: kart sekmesinde kayıtsız değişiklik var mı - varken aynı sekmede başka kart açılmaz.

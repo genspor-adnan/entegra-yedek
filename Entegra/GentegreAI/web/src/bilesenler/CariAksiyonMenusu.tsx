@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useCariSatiri } from './cariSatiri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
-import { FaturaIkon, KopyaIkon } from './BelgeIkonlari';
+import { BelgeIkon, KopyaIkon, type BelgeIkonTuru, type BelgeYonu } from './BelgeIkonlari';
 
 /**
  * CARİ AKSİYON MENÜSÜ (kullanıcı 26.10.2026: "delphi erp projesinde cari listede aksiyon butonu menüsü vardı.. bir
@@ -19,6 +19,9 @@ import { FaturaIkon, KopyaIkon } from './BelgeIkonlari';
  */
 /** `ik`: emoji yerine SVG ikon (fatura, kopya) - adın önünde. */
 type Oge = { ad: string; ik?: React.ReactNode; yol?: string; tikla?: () => void; yetkili: boolean };
+
+/** Yönle renklenen belge ikonu (satış yeşil, alış kırmızı - menüdeki `@b:` ikonlarıyla aynı). */
+const bi = (tur: BelgeIkonTuru, yon: BelgeYonu) => <BelgeIkon tur={tur} yon={yon} />;
 
 const belgeYolu = (rota: string, id: number, ad: string) =>
   `${rota}/yeni?${rota === '/belge' ? 'tur=15&' : ''}tarafId=${id}&tarafUnvan=${encodeURIComponent(ad)}`;
@@ -62,12 +65,12 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
   const gruplar: [string, Oge[]][] = [];
   if (satis) {
     gruplar.push([c('Satış Belgesi'), [
-      { ad: c('Satış Faturası'), ik: <FaturaIkon />, yol: belgeYolu('/belge', id, ad), yetkili: belge },
-      { ad: `🧾 ${c('Satış Fişi')}`, yol: belgeYolu('/satis-fisi', id, ad), yetkili: belge },
-      { ad: `🚚 ${c('Satış İrsaliyesi')}`, yol: belgeYolu('/satis-irsaliye', id, ad), yetkili: belge },
-      { ad: `📑 ${c('Satış Tahakkuku')}`, yol: belgeYolu('/tahakkuk', id, ad), yetkili: belge },
-      { ad: `📋 ${c('Satış Siparişi')}`, yol: belgeYolu('/siparis', id, ad), yetkili: belge },
-      { ad: `✉️ ${c('Satış Teklifi')}`, yol: belgeYolu('/teklif', id, ad), yetkili: belge },
+      { ad: c('Satış Faturası'), ik: bi('fatura', 's'), yol: belgeYolu('/belge', id, ad), yetkili: belge },
+      { ad: c('Satış Fişi'), ik: bi('fis', 's'), yol: belgeYolu('/satis-fisi', id, ad), yetkili: belge },
+      { ad: c('Satış İrsaliyesi'), ik: bi('irsaliye', 's'), yol: belgeYolu('/satis-irsaliye', id, ad), yetkili: belge },
+      { ad: c('Satış Tahakkuku'), ik: bi('tahakkuk', 's'), yol: belgeYolu('/tahakkuk', id, ad), yetkili: belge },
+      { ad: c('Satış Siparişi'), ik: bi('siparis', 's'), yol: belgeYolu('/siparis', id, ad), yetkili: belge },
+      { ad: c('Satış Teklifi'), ik: bi('teklif', 's'), yol: belgeYolu('/teklif', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Tahsilat'), [
       { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(21, id, ad), yetkili: kasa },
@@ -80,11 +83,11 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
   }
   if (alis) {
     gruplar.push([c('Alış Belgesi'), [
-      { ad: c('Alış Faturası'), ik: <FaturaIkon />, yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
-      { ad: `🧾 ${c('Alış Fişi')}`, yol: belgeYolu('/alis-fisi', id, ad), yetkili: belge },
-      { ad: `🚛 ${c('Alış İrsaliyesi')}`, yol: belgeYolu('/alis-irsaliye', id, ad), yetkili: belge },
-      { ad: `📑 ${c('Alış Tahakkuku')}`, yol: belgeYolu('/borc-tahakkuk', id, ad), yetkili: belge },
-      { ad: `📋 ${c('Alış Siparişi')}`, yol: belgeYolu('/alis-siparis', id, ad), yetkili: belge },
+      { ad: c('Alış Faturası'), ik: bi('fatura', 'a'), yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
+      { ad: c('Alış Fişi'), ik: bi('fis', 'a'), yol: belgeYolu('/alis-fisi', id, ad), yetkili: belge },
+      { ad: c('Alış İrsaliyesi'), ik: bi('irsaliye', 'a'), yol: belgeYolu('/alis-irsaliye', id, ad), yetkili: belge },
+      { ad: c('Alış Tahakkuku'), ik: bi('tahakkuk', 'a'), yol: belgeYolu('/borc-tahakkuk', id, ad), yetkili: belge },
+      { ad: c('Alış Siparişi'), ik: bi('siparis', 'a'), yol: belgeYolu('/alis-siparis', id, ad), yetkili: belge },
     ]]);
     gruplar.push([c('Ödeme'), [
       { ad: `💵 ${c('Nakit')}`, yol: kasaYolu(31, id, ad), yetkili: kasa },
@@ -112,7 +115,7 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
         <div ref={liste} className={`dugme-menu-liste cam-liste${genis ? ' genis' : ''}`} role="menu"
              style={kayma ? { transform: `translateX(${-kayma}px)` } : undefined} onClick={e => e.stopPropagation()}>
           {gorunen.map(([baslik, ogeler]) => (
-            <div key={baslik} className="cam-grup">
+            <div key={baslik} className={`cam-grup${baslik === c('Diğer') ? ' cam-yatay' : ''}`}>
               <div className="cam-bas">{baslik}</div>
               {ogeler.map(o => (
                 <button key={o.ad} type="button" className="mi" role="menuitem"
@@ -129,6 +132,10 @@ const CAM_STILI = `
 .cam .cam-liste.genis { grid-template-columns: repeat(4, minmax(140px, auto)) }
 .cam .cam-grup { display: flex; flex-direction: column }
 .cam .cam-ik { margin-right: 4px }
+/* DİĞER SOLDAN SAĞA (kullanıcı 26.10.2026): menünün altında tam genişlik satır, öğeler yan yana. */
+.cam .cam-grup.cam-yatay { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0 4px }
+.cam .cam-grup.cam-yatay .cam-bas { flex-basis: 100% }
+.cam .cam-grup.cam-yatay .mi { width: auto }
 .cam .cam-liste .mi { white-space: nowrap }
 .cam .cam-bas { font-size: 10.5px; font-weight: bold; color: var(--soluk, #6b7a8b); text-transform: uppercase; letter-spacing: .3px;
   padding: 6px 8px 3px; border-bottom: 1px solid var(--cizgi2, #e3e9f0); margin-bottom: 2px }

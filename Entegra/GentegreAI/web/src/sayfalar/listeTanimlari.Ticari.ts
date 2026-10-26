@@ -92,7 +92,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Red',          filtre: { alan: 'teklifDurum', op: 'esit', deger: 4 } },
       { ad: 'İptal',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Teklifi Listesi', ic: '✉️', yetkiKodu: 'belge.satis', menuSira: 10,
+    menuGrup: 'Satış', menuAd: 'Satış Teklifi Listesi', ic: '@b:teklif:s', yetkiKodu: 'belge.satis', menuSira: 10,
   },
   {
     // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
@@ -118,7 +118,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Satış', menuSira: 20, menuAd: 'Satış Siparişi Listesi', ic: '📋', yetkiKodu: 'belge.satis.siparis',
+    menuGrup: 'Satış', menuSira: 20, menuAd: 'Satış Siparişi Listesi', ic: '@b:siparis:s', yetkiKodu: 'belge.satis.siparis',
   },
   {
     // Satis irsaliyeleri (Ekranlar/satis_irsaliye_listesi.html): AYRI kaynak
@@ -136,7 +136,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
     // FATURANIN ALTINDA (kullanici 11.10.2026: "Satış Faturası menüsünün altına Satış İrsaliyesi").
-    menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış İrsaliyesi Listesi', ic: '🚚', yetkiKodu: 'belge.satis.irsaliye',
+    menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış İrsaliyesi Listesi', ic: '@b:irsaliye:s', yetkiKodu: 'belge.satis.irsaliye',
   },
   {
     // HBYS IKIZI: Satış grubu (erp_satis) hastanede kapali - irsaliye Kurumlar & Sigorta ›
@@ -153,7 +153,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: '',
     // Kendi menu kodu (1038): bir yetki kodu tek menu ekrani acar (menuKoduTekEkran); haklar
     //   belge.satis.irsaliye'den kopyalanir, veri yine o kodla okunur.
-    menuGrup: 'Kurumlar & Sigorta', menuSira: 61, menuAd: 'Satış İrsaliyesi Listesi', ic: '🚚', yetkiKodu: 'belge.kurum_irsaliye',
+    menuGrup: 'Kurumlar & Sigorta', menuSira: 61, menuAd: 'Satış İrsaliyesi Listesi', ic: '@b:irsaliye:s', yetkiKodu: 'belge.kurum_irsaliye',
   },
   {
     // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
@@ -196,7 +196,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
     //   aşağıdaki ikiz tanıma bak.
     urunModu: 1,
-    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturası Listesi', ic: '@fatura', yetkiKodu: 'belge.satis.fatura',
+    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturası Listesi', ic: '@b:fatura:s', yetkiKodu: 'belge.satis.fatura',
   },
   {
     // HBYS'DE DE FATURA KESİLİR (kullanıcı: "satış faturaları için menü
@@ -240,7 +240,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: '',
     menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Satış Faturası Listesi',
-    ic: '@fatura', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
+    ic: '@b:fatura:s', yetkiKodu: 'belge.kurum_fatura',   // 1003: Satış grubundan ayrı kod
   },
   {
     // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.
@@ -328,7 +328,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fiş',  filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Satış', menuSira: 50, menuAd: 'Satış Fişi Listesi', ic: '🧾', yetkiKodu: 'belge.satis.fis',
+    menuGrup: 'Satış', menuSira: 50, menuAd: 'Satış Fişi Listesi', ic: '@b:fis:s', yetkiKodu: 'belge.satis.fis',
   },
   {
     // TAHAKKUK (17 satis / 13 alis - 334: kucuk kod ALIS, buyuk kod SATIS):
@@ -340,7 +340,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Satış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '📑', yetkiKodu: 'belge.satis.tahakkuk',
+    menuGrup: 'Satış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '@b:tahakkuk:s', yetkiKodu: 'belge.satis.tahakkuk',
   },
   {
     // SATIS KONSINYE (tur 119 Giden Konsinye): musteriye BIRAKILAN mal.
@@ -358,7 +358,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     // Yalniz HBYS (kullanici): konsinye takibi tibbi malzeme/implant akisinda
     //   kullaniliyor, ERP kurulumunda menude yer kaplamasin.
-    urunModu: 2, menuAd: 'Satış Konsinye Listesi', menuGizli: true, ic: '📦', yetkiKodu: 'belge.satis',
+    urunModu: 2, menuAd: 'Satış Konsinye Listesi', menuGizli: true, ic: '@b:konsinye:s', yetkiKodu: 'belge.satis',
   },
   // ------------------------------------------------------------- ALIS ----
   //  Satis tarafinin birebir karsiligi: ayni 'belge' kaynagi, ayni kart, yalniz
@@ -375,7 +375,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Alış', menuSira: 20, menuAd: 'Alış Siparişi Listesi', ic: '📋', yetkiKodu: 'belge.alis',
+    menuGrup: 'Alış', menuSira: 20, menuAd: 'Alış Siparişi Listesi', ic: '@b:siparis:a', yetkiKodu: 'belge.alis',
   },
   {
     kaynak: 'belge', rota: 'alis-irsaliye', baslik: 'Alış İrsaliyesi Listesi',
@@ -397,7 +397,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       ...GELEN_IRSALIYE_SEKMELERI,
     ],
     // ALIS FATURASININ ALTINDA (kullanici 11.10.2026): Stok & Hizmet - iki urunde de acik.
-    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '🚛', yetkiKodu: 'belge.alis.irsaliye',
+    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '@b:irsaliye:a', yetkiKodu: 'belge.alis.irsaliye',
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturası Listesi',
@@ -420,7 +420,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   bu liste). Sube mukellef degilse cizilmez.
       ...GELEN_SEKMELERI,
     ],
-    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@fatura',
+    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@b:fatura:a',
     yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod
   },
   {
@@ -429,7 +429,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
-    menuGrup: 'Alış', menuSira: 50, menuAd: 'Alış Fişi Listesi', ic: '🧾', yetkiKodu: 'belge.alis.fis',
+    menuGrup: 'Alış', menuSira: 50, menuAd: 'Alış Fişi Listesi', ic: '@b:fis:a', yetkiKodu: 'belge.alis.fis',
   },
   {
     // ALIS tarafi: alis tahakkuku (13) - tedarikciye borc.
@@ -438,7 +438,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Alış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '📑', yetkiKodu: 'belge.alis.tahakkuk',
+    menuGrup: 'Alış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '@b:tahakkuk:a', yetkiKodu: 'belge.alis.tahakkuk',
   },
   {
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinye Listesi',
@@ -452,7 +452,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Alış', menuSira: 70, menuAd: 'Alış Konsinye Listesi', ic: '📦', yetkiKodu: 'belge.alis.konsinye',
+    menuGrup: 'Alış', menuSira: 70, menuAd: 'Alış Konsinye Listesi', ic: '@b:konsinye:a', yetkiKodu: 'belge.alis.konsinye',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.

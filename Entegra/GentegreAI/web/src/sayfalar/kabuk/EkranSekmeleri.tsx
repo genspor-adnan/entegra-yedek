@@ -197,6 +197,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
   // Başlık ADRESE bağlı: tek kart sekmesinde başka kart açılınca eski hastanın adı kalmaz.
   //   Hesaplı ekstrede adres + hesap (bkz. baslikAnahtari).
   const ad = (s: { baslik: string; konum: Location }) => ozelBaslik[baslikAnahtari(s.konum)] ?? s.baslik;
+  /** Ekranın verdiği sekme ikonu (kasa işlemi: tahsilat yeşil / ödeme kırmızı - kullanıcı 26.10.2026). */
+  const [ozelIkon, setOzelIkon] = useState<Record<string, string>>({});
   ekranlar.current.set(simdiki.anahtar, outlet);
 
   // Adres değişince sekme açılır / güncellenir; sınır aşılırsa en eskisi kapanır.
@@ -353,7 +355,8 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
              onClick={() => ac(s)}
              onAuxClick={e => { if (e.button === 1) { e.preventDefault(); kapatIste(s.anahtar) } }}>
           {/* Menüdeki ikonun AYNISI: '@icmal' ve yüklenen görsel ikonlar metin değil (sekmede "@icmal" yazıyordu). */}
-          <span className="es-ikon">{s.ikon.startsWith('@') || s.ikon.startsWith('data:image/') ? <MenuIkon ic={s.ikon} /> : s.ikon}</span>
+          {(() => { const ik = ozelIkon[baslikAnahtari(s.konum)] ?? s.ikon;
+            return <span className="es-ikon">{ik.startsWith('@') || ik.startsWith('data:image/') ? <MenuIkon ic={ik} /> : ik}</span> })()}
           {s.anahtar !== BASLANGIC && <span className="es-ad">{c(ad(s))}</span>}
           {s.anahtar !== BASLANGIC && (
             <span className="es-x" title={c('Kapat (Alt+W)')}
@@ -382,7 +385,10 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
              if (f && kirli) kirliler.current.set(s.anahtar, kirli); else kirliler.current.delete(s.anahtar);
            },
            // Yol ÇAĞIRANDAN: kart yüklenirken sekmenin kayıtlı adresi henüz eski olabilir.
-           baslik: (b, yol) => setOzelBaslik(o => (o[yol] === b ? o : { ...o, [yol]: b })) }}>
+           baslik: (b, yol, ik) => {
+             setOzelBaslik(o => (o[yol] === b ? o : { ...o, [yol]: b }));
+             if (ik) setOzelIkon(o => (o[yol] === ik ? o : { ...o, [yol]: ik }));
+           } }}>
           <UNSAFE_LocationContext.Provider
             value={{ location: aktif ? konum : s.konum, navigationType: aktif ? navTuru : NavigationType.Pop }}>
             {aktif ? outlet : ekranlar.current.get(s.anahtar)}

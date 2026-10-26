@@ -6,7 +6,7 @@
  */
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { CekIkon } from '../../bilesenler/CekIkon';
-import { FaturaIkon } from '../../bilesenler/BelgeIkonlari';
+import { BelgeIkon, FaturaIkon, belgeIkonKodu } from '../../bilesenler/BelgeIkonlari';
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
@@ -109,6 +109,11 @@ export function MenuIkon({ ic }: { ic: string }) {
   // '@fatura' (kullanıcı 26.10.2026: "satış fat ikonu ... menüde değiş"): fiş 🧾'ünden ayrı fatura sayfası.
   if (ic === '@fatura')
     return <span className="ic ic-hilal" aria-hidden="true"><FaturaIkon /></span>;
+  // '@b:<tür>:<s|a>' (kullanıcı 26.10.2026): yönle renklenen belge ikonu - satış / tahsilat yeşil, alış / ödeme
+  //   kırmızı; sekmede belgenin yönü ikondan okunur (BelgeIkonlari).
+  const bk = belgeIkonKodu(ic);
+  if (bk)
+    return <span className="ic ic-hilal" aria-hidden="true"><BelgeIkon tur={bk.tur} yon={bk.yon} /></span>;
   if (ic === '@icmal')
     return (
       <span className="ic ic-hilal" aria-hidden="true">

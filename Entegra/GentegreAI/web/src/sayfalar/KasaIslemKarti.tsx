@@ -202,7 +202,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   // SEKME BAŞLIĞI: işlem türü + carinin ilk iki kelimesi ("Nakit Tahsilat · Zone Medikal").
   const sekmeBasligi = !modalMi && secili ? [secili.ad, cari?.unvan ? sekmeAdi(cari.unvan) : ''].filter(Boolean).join(' · ') : '';
   const baslikYolu = baslikAnahtari(konum);
-  useEffect(() => { if (ekranSekmesi && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikYolu) }, [ekranSekmesi, sekmeBasligi, baslikYolu]);
+  // SEKME İKONU YÖNDEN (kullanıcı 26.10.2026): tahsilat yeşil, ödeme kırmızı (BelgeIkonlari).
+  const sekmeIkonu = grup === 'tahsilat' ? '@b:tahsilat:s' : grup === 'odeme' ? '@b:odeme:a' : undefined;
+  useEffect(() => { if (ekranSekmesi && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikYolu, sekmeIkonu) },
+            [ekranSekmesi, sekmeBasligi, baslikYolu, sekmeIkonu]);
   const durum = sonuc ? Number(sonuc.islem.durum ?? 0) : null;
   /**
    * SALT GORUNUM yalniz IPTAL edilmis islemde (durum 3). Gerceklesmis
