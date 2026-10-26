@@ -61,7 +61,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   /**
    * CARİ BİLGİ BANDI (kullanıcı 26.10.2026: "satış/alış belgelere de firma bilgi bandı uygula... cari ad editi
    * kaldır"): carili belgede cari seçiliyse başlığın üstünde band (avatar, kod, VKN, bakiye...) ve cari hücresi
-   * yok; değiştirmek bandın "Değiştir" düğmesiyle. Cari seçili değilse (yeni belge) ya da cari listesinden
+   * yok; "Değiştir" düğmesi de yok (kullanıcı 26.10.2026: "belge kartlarındaki değiştir butonları kaldır"). Cari seçili değilse (yeni belge) ya da cari listesinden
    * okunamazsa hücre yerinde - seçim ve "zorunlu" hatası orada.
    */
   const carili = !stokFisiMi && !depoBelgesi;
@@ -147,8 +147,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 {!basvuruMu && (
 <div className="belge-hdr-sar">
   {bantli && (
-    <CariBilgiBandi id={cari!.id} tedarikci={alisMi}
-                    ek={!kilitli && <button type="button" className="d" onClick={() => setCariArama(true)}>🔍 {c('Değiştir')}</button>} />)}
+    <CariBilgiBandi id={cari!.id} tedarikci={alisMi} />)}
   <div className="alan-izgara dort-sutun belge-hdr">
     {/* --- 1) KIMLIK --- */}
     {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
