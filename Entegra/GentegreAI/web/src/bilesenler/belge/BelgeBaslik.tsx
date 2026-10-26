@@ -220,6 +220,13 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       </label>
     )}
 
+    {/* --- 1b) TEKLIF KONUSU (kullanici 26.10.2026: "teklif kartı başlık 1.sıra: teklif konusu, teklif no,
+        tek tarihi, durumu 2.sıra satış tem, teslim şekli, geçerlilik"). Cari bantta - hucre yok. */}
+    {teklifMi && (
+      <KodListeAlani etiket="Teklif Konusu" listeKod="belge.teklif_konusu"
+                     deger={teklif.konu} onDeger={teklif.setKonu}
+                     kilitli={kilitli} yazilabilir />
+    )}
     {/* --- 2) BELGE NO ---
         Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
@@ -342,17 +349,12 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       />
     ) : teklifMi ? (
       /* Teklifte depo YOK (stok cikisi yapmaz, 222) - yerine 2. sira uclusu:
-         Teklif Konusu (yazilabilir combo) | Teslim Sekli (salt combo).
+         Teslim Sekli (salt combo); Teklif Konusu 1. satirin basinda (bkz. 1b).
          Ikisi de kod listesinden; ETIKETE tiklaninca jenerik modalda
          duzenlenir (AyarAlani listeKod deseni). Gecerlilik Suresi = vade. */
-      <>
-        <KodListeAlani etiket="Teklif Konusu" listeKod="belge.teklif_konusu"
-                       deger={teklif.konu} onDeger={teklif.setKonu}
-                       kilitli={kilitli} yazilabilir />
-        <KodListeAlani etiket="Teslim Şekli" listeKod="belge.teslim_sekli"
-                       deger={teklif.teslim} onDeger={teklif.setTeslim}
-                       kilitli={kilitli} />
-      </>
+      <KodListeAlani etiket="Teslim Şekli" listeKod="belge.teslim_sekli"
+                     deger={teklif.teslim} onDeger={teklif.setTeslim}
+                     kilitli={kilitli} />
     ) : !tahakkukMu ? (
       <GenLookup
         kaynak="depo"
