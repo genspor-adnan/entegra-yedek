@@ -78,6 +78,14 @@ public static partial class KaynakKatalogu
             //   genisleyip unvani sikistiriyordu.
             new("kod",          "t.kod",           "metin", "Kod", Genislik: 110),
             new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan"),
+            // UNVAN + FATURA UNVANI (kullanıcı 27.10.2026: "müşteri / ted listesinde unvan yanına eğer Fatura unvanı da
+            //   varsa parantez içinde", "fatura unvanı max 3 kelime"): yalnız GÖRÜNTÜ kolonu - müşteri / tedarikçi listesi
+            //   bunu gösterir, `unvan` (temiz ad) satırda kalır (önizleme, bant, kart ön dolgusu onu kullanır).
+            //   Fatura unvanı boşsa ya da unvanla aynıysa parantez yok.
+            new("unvanTam",     "(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) || case when nullif(btrim(t.fatura_unvan), '') is not null " +
+                                "and lower(btrim(t.fatura_unvan)) <> lower(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)) " +
+                                "then ' (' || array_to_string((regexp_split_to_array(btrim(t.fatura_unvan), '\\s+'))[1:3], ' ') || ')' else '' end)::varchar(200)",
+                                "metin", "Unvan", Varsayilan: false),
             // İLGİLİ KİŞİ (kullanıcı 25.10.2026: "müşteri ve tedarikçi listelerinde default ilgili kişi Unvan'dan sonra
             //   sütun gelsin, aramada o kişi adından da aranabilsin"): carinin AKTİF ilgili kişileri (taraf kisi = 1,
             //   bag_id = cari). Metin kolonu olduğu için listenin arama kutusu bunda da arar (gridSorgu.aramaKosulu).
