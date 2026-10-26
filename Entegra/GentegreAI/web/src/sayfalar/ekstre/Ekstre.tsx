@@ -77,6 +77,11 @@ export function Ekstre() {
   const [acikBelge, setAcikBelge] = useState<number | null>(null);
   const [devirAcik, setDevirAcik] = useState(false);
   const [yenile, setYenile] = useState(0);
+  /** KAYNAKTAN AÇILIŞ (kullanıcı 26.10.2026: "müşteri/ted/kasa/banka vb kaynaktan ekstre sekmesi açılırsa
+   *  cari kasa banka vb buton seçimlerin olduğu satır görünmesin.. prompt aramadan ekstre diye açılırsa seçimler
+   *  gelsin", "cari arama da kalksın"): ekran bir hesapla (id) açıldıysa tür düğmeleri ve hesap arama kutusu yok; menü / komut aramasından boş açılınca var.
+   *  Açılıştaki adrese bakılır - sonradan hesap seçmek düğmeleri gizlemez. */
+  const [kaynaktan] = useState(() => id > 0);
 
   const degistir = useCallback((d: Record<string, string>) => {
     const yeni = new URLSearchParams(arama);
@@ -155,15 +160,15 @@ export function Ekstre() {
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className="hi-serit">
-        <div className="ek-seg">
+        {!kaynaktan && <div className="ek-seg">
           {(Object.keys(TUR_AD) as EkstreTuru[]).filter(t => turler.length === 0 ? t === gercekTur : turler.includes(t)).map(t => (
             <button key={t} type="button" className={t === gercekTur ? 'on' : ''}
                     onClick={() => { if (t !== gercekTur) { const q = new URLSearchParams(arama); q.set('tur', t); q.delete('id'); if (gor === 'detay') q.delete('gor'); setArama(q, { replace: true }) } }}>
               {TUR_AD[t]}</button>
           ))}
-        </div>
-        <HesapSecici tur={gercekTur} secili={h ? { id: h.id, ad: h.ad, altBilgi: h.altBilgi, kod: h.kod } : null}
-                     onSec={s => degistir({ id: String(s.id) })} />
+        </div>}
+        {!kaynaktan && <HesapSecici tur={gercekTur} secili={h ? { id: h.id, ad: h.ad, altBilgi: h.altBilgi, kod: h.kod } : null}
+                     onSec={s => degistir({ id: String(s.id) })} />}
         <span className="sp" />
         {yukleniyor && <span className="ki-soluk">yükleniyor…</span>}
         {veri && h && yerelPara && (
