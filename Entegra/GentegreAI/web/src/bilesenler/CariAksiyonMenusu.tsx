@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { api } from '../api/istemci';
+import { useCariSatiri } from './cariSatiri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 
@@ -31,16 +31,7 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
 }) {
   const { yetki } = useOturum();
   const [acik, setAcik] = useState(false);
-  const [rol, setRol] = useState<{ musteri: boolean; tedarikci: boolean } | null>(null);
-  useEffect(() => {
-    let iptal = false;
-    api.liste('cari', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: id } })
-       .then(y => {
-         const s = y.satirlar[0];
-         if (!iptal && s) setRol({ musteri: Number(s.musteri) === 1, tedarikci: Number(s.tedarikci) === 1 });
-       }, () => { /* rol okunamadı: hepsi gösterilir */ });
-    return () => { iptal = true };
-  }, [id]);
+  const s = useCariSatiri(id);
   useEffect(() => {
     if (!acik) return;
     const kapat = () => setAcik(false);
@@ -49,9 +40,8 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis }: {
   }, [acik]);
 
   // Müşteri bayrağı satış + tahsilat, tedarikçi bayrağı alış + ödeme; ikisi de yoksa ya da okunamadıysa hepsi.
-  const rolsuz = !rol || (!rol.musteri && !rol.tedarikci);
-  const satis = rolsuz || !!rol?.musteri;
-  const alis = rolsuz || !!rol?.tedarikci;
+  const mus = Number(s?.musteri) === 1, ted = Number(s?.tedarikci) === 1;
+  const satis = mus || !ted, alis = ted || !mus;
   const genis = satis && alis;
   // Menü ekrandan taşarsa (sağ panelde düğme sağ kenara yakın) sola kaydırılır.
   const liste = useRef<HTMLDivElement>(null);

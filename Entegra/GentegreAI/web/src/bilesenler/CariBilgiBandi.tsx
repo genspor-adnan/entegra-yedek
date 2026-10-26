@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/istemci';
-import type { ListeSatiri } from '../api/sozlesme';
+import { useCariSatiri } from './cariSatiri';
 import { para } from './bicim';
 import { Avatar, dovizBakiyeMetni } from './grid/satirHucre';
 import { c } from '../dil/ceviri';
@@ -32,14 +30,7 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci }: {
   /** Tedarikçi gözü: bakiye "borcumuz" (A = biz borçluyuz) okunur. */
   tedarikci?: boolean;
 }) {
-  const [s, setS] = useState<ListeSatiri | null>(null);
-  useEffect(() => {
-    if (!(id > 0)) { setS(null); return }
-    let iptal = false;
-    api.liste('cari', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: id } })
-       .then(y => { if (!iptal) setS(y.satirlar[0] ?? null) }, () => { if (!iptal) setS(null) });
-    return () => { iptal = true };
-  }, [id, tazele]);
+  const s = useCariSatiri(id, tazele);
   if (!s) return null;
 
   const ad = String(s.unvan ?? '');

@@ -93,8 +93,6 @@ export function TedarikciGostergesi({ yenile, cipIndeks, onCip }:
   );
 }
 
-type Yeni = { tur: 'kayit'; kasa?: number; belge?: number };
-
 export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci }: {
   satir: ListeSatiri | null; yenile: number; tazele(): void;
   git(yol: string): void; gitKart(yol: string): void;
@@ -104,7 +102,8 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
   const { yetki } = useOturum();
   const id = satir ? Number(satir.id) : 0;
   const [hareket, setHareket] = useState<ListeSatiri[] | null>(null);
-  const [acik, setAcik] = useState<Yeni | null>(null);
+  /** Son hareketlerde çift tıklanan kayıt (kasa işlemi ya da belge). */
+  const [acik, setAcik] = useState<{ kasa?: number; belge?: number } | null>(null);
   const ekstreYetkisi = yetki('mali_hareket', 'gor');
   useEffect(() => {
     setHareket(null);
@@ -183,7 +182,7 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
                 return (
                   // Çift tık: hareketi ÜRETEN kayıt (önce kasa işlemi, yoksa belge) - ekstre kuralı.
                   <tr key={String(h.id)} title={c('Çift tıkla: kaydı aç')}
-                      onDoubleClick={() => (kasa || belge) && setAcik({ tur: 'kayit', kasa: kasa || undefined, belge: kasa ? undefined : belge })}>
+                      onDoubleClick={() => (kasa || belge) && setAcik(kasa ? { kasa } : { belge })}>
                     <td>{tarihSaat(h.islemTarihi).slice(0, 10)}</td>
                     <td title={String(h.aciklama ?? '')}>{String(h.turAdi ?? '')}{h.belgeNo ? ` ${h.belgeNo}` : ''}</td>
                     <td className={`hiza-sag ${b ? 'ml-borc' : 'ml-alacak'}`}>
@@ -205,8 +204,8 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
         {!satir.telefon && !satir.cepTel && !satir.eposta && <div className="sonuk">{c('İletişim bilgisi yok.')}</div>}
       </div>
 
-      {acik?.tur === 'kayit' && acik.kasa && <KasaIslemKarti kayitIdProp={acik.kasa} onKapat={kapat} />}
-      {acik?.tur === 'kayit' && acik.belge && <BelgeKarti id={acik.belge} onKapat={kapat} />}
+      {acik?.kasa && <KasaIslemKarti kayitIdProp={acik.kasa} onKapat={kapat} />}
+      {acik?.belge && <BelgeKarti id={acik.belge} onKapat={kapat} />}
     </div>
   );
 }
