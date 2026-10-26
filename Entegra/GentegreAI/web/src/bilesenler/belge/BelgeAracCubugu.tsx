@@ -16,12 +16,14 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur, belgeYenile, baslik,
+  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
   belgeYenile?(): void;
   /** Sekme (sayfa) kipinde kart başlığı - pencere başlık şeridi yok, ayracın sağında (kullanıcı 26.10.2026). */
   baslik?: React.ReactNode;
+  /** Kapat'ın hemen solunda (ör. teklifte "Teklif" çıktı menüsü). */
+  kapatSolu?: React.ReactNode;
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
   duzenlenebilir: boolean;
@@ -271,6 +273,7 @@ export function BelgeAracCubugu({
       `zorla = true` demek olur ve kaydedilmemis degisiklik uyarisi HIC
       cikmadan kart kapanirdi (kullanici: "değişiklik yaptım kapat deyince
       uyarı gelmedi"). */}
+  {kapatSolu && <span className="kapat-solu">{kapatSolu}</span>}
   <button className="d kapat-dugmesi" onClick={() => kapat()}>✖ {c('Kapat')}</button>
 
   {/* TASLAK KUTUSU KALDIRILDI (kullanici): belge kaydedilince kesindir.

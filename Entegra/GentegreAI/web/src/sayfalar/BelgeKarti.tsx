@@ -3,6 +3,7 @@ import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
+import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
 import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
@@ -1377,6 +1378,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             })}</b>
             {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
           </> : undefined}
+          // TEKLİF ÇIKTISI (kullanıcı 26.10.2026): Kapat'ın solunda "Teklif" önizleme / yazdır / kaydet menüsü.
+          kapatSolu={teklifMi && cari?.id ? (
+            <TeklifCiktisi cariId={cari.id} belgeNo={String(sonuc?.belge.belgeNo ?? '')} revizeNo={teklif.revizeNo}
+                           tarih={tarih} gecerlilikGun={vadeGun} konu={teklif.konu} teslim={teklif.teslim}
+                           aciklama={aciklama} satirlar={satirlar} toplam={onizleme} />) : undefined}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
