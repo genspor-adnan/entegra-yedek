@@ -63,11 +63,13 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Para kolonlari ERP'nin sorusuna gore (mockup): bakiye (B/A, doviz alti),
     //   vadesi gecen, risk limiti kullanimi, son satistan bu yana gun, 12 ay
     //   egri. Iletisim kolonlari onizleme panelinde - kolon seciciden acilir.
-    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
-                  'sonSatisGun', 'ciroEgri', 'efatura', 'durum'],
+    // Il durumun solunda (kullanici 26.10.2026).
+    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'temsilci', 'bakiye', 'vadesiGecen', 'riskYuzde',
+                  'sonSatisGun', 'ciroEgri', 'efatura', 'il', 'durum'],
     // UNVAN DAR (kullanici 26.10.2026: "unvan genisligi %40 daralt - diger sutunlar arkada kaliyor"): genislik
     //   verilmeyince en uzun unvan (81 karakter, ~540 px) kadar aciliyordu; uzunu uc noktayla kesilir, tamami ipucunda.
-    kolonGenislikleri: { unvan: 320 },
+    //   Bakiye de Vadesi Gecen kadar (kullanici 26.10.2026) - doviz satiri sigmazsa ipucunda.
+    kolonGenislikleri: { unvan: 320, bakiye: 115 },
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci'],
     toplam: ['bakiye', 'vadesiGecen'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
@@ -107,11 +109,11 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
         { alan: 'durum', op: 'esit', deger: 1 }, { alan: 'sonAlisGun', op: 'buyukEsit', deger: 90 }] } },
       { ad: 'Dövizli', filtre: { alan: 'dovizli', op: 'esit', deger: 1 } },
     ],
-    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'il', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
-                  'sonAlisGun', 'alisEgri', 'onayDurumu', 'efatura', 'durum'],
+    kolonSirasi: ['kod', 'unvan', 'ilgiliKisi', 'temsilci', 'bakiye', 'vadesiGecenOdeme', 'odenecek30',
+                  'sonAlisGun', 'alisEgri', 'onayDurumu', 'efatura', 'il', 'durum'],
     kolonBasliklari: { temsilci: 'Satınalmacı', bakiye: 'Bakiye (A = borcumuz)' },
-    // Unvan dar - musteri listesiyle ayni (kullanici 26.10.2026).
-    kolonGenislikleri: { unvan: 320 },
+    // Unvan, Bakiye dar; Il durumun solunda - musteri listesiyle ayni (kullanici 26.10.2026).
+    kolonGenislikleri: { unvan: 320, bakiye: 115 },
     gizliKolonlar: ['vkno', 'telefon', 'eposta', 'adres', 'ilce', 'musteri', 'tedarikci', 'vadesiGecen', 'riskYuzde', 'sonSatisGun', 'ciroEgri'],
     toplam: ['bakiye', 'vadesiGecenOdeme', 'odenecek30'],
     // Cari ekstresi ayni gridde (hesap ekranlarindaki desen): cip seridinde
