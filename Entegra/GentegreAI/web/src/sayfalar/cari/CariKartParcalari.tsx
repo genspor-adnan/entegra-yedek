@@ -411,16 +411,17 @@ export function CariHizliIslemler({ id, ad, git }: { id: number; ad: string; git
 // ------------------------------------------------- kimlik + firma bandı ----
 // FİRMA BANDI + KİMLİK ŞERİDİ TEK IZGARADA (kullanıcı 26.10.2026: "müş/ted kartına firma bilgi bant ekle",
 //   "temsilci ve durum da firma bantta yer alsın", "kayıtlı kartta müş kod, müş ad olan band görünmez olsun..
-//   firma bandına kalem ekle basınca altta kod, ad görünür olsun"): 1. satır band | Temsilci | Durum; Kod / Ünvan
-//   satırı kalemle açılır (alan hatası varsa kendiliğinden görünür - tema.css .kart-cbb-sar).
+//   firma bandına kalem ekle basınca altta kod, ad görünür olsun", "temsilci ve durum bilgileri de bant içine label
+//   olarak al.. edit olunca onlar da görünür olsun"): band Temsilci ve Durum'u yazı olarak gösterir; Kod · Ünvan ·
+//   Temsilci · Durum editleri kalemle açılır (alan hatası varsa kendiliğinden görünür - tema.css .kart-cbb-sar).
 export function CariKimlikBandi({ id, tazele, serit }: { id: number; tazele: number; serit: React.ReactNode }) {
   const [duzen, setDuzen] = useState(false);
   return (
     <div className={`kart-cbb-sar${duzen ? ' duzen' : ''}`}>
       <div className="kart-cbb">
-        <CariBilgiBandi id={id} tazele={tazele} bakiyesiz
-          ek={<button type="button" className={`d mini${duzen ? ' secili' : ''}`} aria-pressed={duzen}
-                      title={duzen ? c('Kod / Ünvan alanlarını gizle') : c('Kod / Ünvan düzenle')}
+        <CariBilgiBandi id={id} tazele={tazele} bakiyesiz durumlu
+          adYani={<button type="button" className="cbb-kalem" aria-pressed={duzen}
+                      title={duzen ? c('Kimlik alanlarını gizle') : c('Kod / Ünvan / Temsilci / Durum düzenle')}
                       onClick={() => setDuzen(d => !d)}>✎</button>} />
       </div>
       {serit}

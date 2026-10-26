@@ -16,6 +16,9 @@ const STIL = `
 .cbb .gh-av.buyuk { width: 34px; height: 34px; font-size: 13px; flex: none }
 .cbb-govde { flex: 1; min-width: 0 }
 .cbb-ad { font-size: 14px; font-weight: bold; color: var(--lacivert, #14315a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cbb-kalem { border: 0; background: none; padding: 0 4px; margin-left: 4px; cursor: pointer; color: var(--soluk, #6b7a8b);
+  font-size: 13px; line-height: 1; vertical-align: baseline }
+.cbb-kalem:hover, .cbb-kalem[aria-pressed="true"] { color: var(--mor, #3b5bdb) }
 .cbb-alt { color: var(--soluk, #6b7a8b); font-size: 11.5px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .cbb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
 .cbb-rz { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: none }
@@ -26,12 +29,14 @@ const STIL = `
 
 const isaret = (n: number) => (n > 0.005 ? ' B' : n < -0.005 ? ' A' : '');
 
-export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, ek }: {
+export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, durumlu }: {
   id: number; tazele?: number; bakiyesiz?: boolean;
   /** Tedarikçi gözü: bakiye "borcumuz" (A = biz borçluyuz) okunur. */
   tedarikci?: boolean;
-  /** Bandın en sağında (ör. cari kartında Kod / Ünvan düzenleme kalemi). */
-  ek?: ReactNode;
+  /** Ünvanın hemen sağında (ör. cari kartında kimlik alanlarını açan kalem). */
+  adYani?: ReactNode;
+  /** Cari kartı: Temsilci (boşsa —) ve Durum (Aktif / Pasif) her zaman yazılır - combolar düzenlemede açılır. */
+  durumlu?: boolean;
 }) {
   const s = useCariSatiri(id, tazele);
   if (!s) return null;
@@ -47,7 +52,8 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, ek }: {
     [c('VKN / TCKN'), String(s.vkno ?? '')],
     [c('Tel'), tel],
     [c('İl'), String(s.il ?? '')],
-    [c('Temsilci'), String(s.temsilci ?? '')],
+    [c('Temsilci'), String(s.temsilci ?? '') || (durumlu ? '—' : '')],
+    ...(durumlu ? [[c('Durum'), Number(s.durum ?? 1) === 1 ? c('Aktif') : c('Pasif')]] : []),
   ] as [string, string][]).filter(([, v]) => v.trim() !== '');
 
   return (
@@ -55,11 +61,11 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, ek }: {
       <style>{STIL}</style>
       <Avatar ad={ad} buyuk soluk={Number(s.durum ?? 1) !== 1} />
       <div className="cbb-govde">
-        <div className="cbb-ad" title={ad}>{ad}</div>
+        <div className="cbb-ad" title={ad}>{ad}{adYani}</div>
         <div className="cbb-alt">
           {alt.map(([e, v], i) => <span key={e}>{i > 0 ? ' · ' : ''}{e} <b>{v}</b></span>)}
           {alt.length ? ' · ' : ''}{Number(s.efatura) === 1 ? 'e-Fatura' : 'e-Arşiv'}
-          {Number(s.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}
+          {!durumlu && Number(s.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}
         </div>
       </div>
       {!bakiyesiz && (
@@ -70,7 +76,6 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, ek }: {
           {!ted && vade > 0.005 && <span className="kir">{c('Vadesi geçen')} {para.format(vade)}</span>}
           {!ted && risk !== null && <span className={risk > 100 ? 'kir' : ''}>{c('Risk')} %{Math.round(risk)}</span>}
         </div>)}
-      {ek}
     </div>
   );
 }
