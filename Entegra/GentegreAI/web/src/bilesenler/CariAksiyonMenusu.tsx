@@ -80,7 +80,7 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
   }
   if (alis) {
     gruplar.push([c('Alış Belgesi'), [
-      { ad: `🧾 ${c('Alış Faturası')}`, yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
+      { ad: c('Alış Faturası'), ik: <FaturaIkon />, yol: belgeYolu('/alis-fatura', id, ad), yetkili: belge },
       { ad: `🧾 ${c('Alış Fişi')}`, yol: belgeYolu('/alis-fisi', id, ad), yetkili: belge },
       { ad: `🚛 ${c('Alış İrsaliyesi')}`, yol: belgeYolu('/alis-irsaliye', id, ad), yetkili: belge },
       { ad: `📑 ${c('Alış Tahakkuku')}`, yol: belgeYolu('/borc-tahakkuk', id, ad), yetkili: belge },

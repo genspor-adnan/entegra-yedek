@@ -420,7 +420,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   bu liste). Sube mukellef degilse cizilmez.
       ...GELEN_SEKMELERI,
     ],
-    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '🧾',
+    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@fatura',
     yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod
   },
   {
