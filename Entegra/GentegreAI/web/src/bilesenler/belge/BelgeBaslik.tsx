@@ -117,6 +117,23 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   </label>
   );
 
+  const saticiHucresi = (
+    <TarafAlani
+      etiket={stokFisiMi || alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
+      deger={satici?.ad}
+      kilitli={stokFisiMi ? baslikKilitli : kilitli}
+      ipucu="Personel ara"
+      onAc={() => setSaticiArama(true)}
+    />
+  );
+  const vadeHucresi = bilgi.vade && (
+    <label className="alan">
+      <span className="etiket">{teklifMi ? 'Geçerlilik Süresi (gün)' : 'Vade (gün)'}</span>
+      <input className="hiza-sag" value={vadeGun} disabled={kilitli}
+             onChange={e => setVadeGun(e.target.value)} />
+    </label>
+  );
+
   const tarihHucresi = (
     <label className="alan">
       {/* ZORUNLU (kullanici): belge/siparis tarihi bos kalamaz - kalem, prim ve
@@ -148,7 +165,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 <div className="belge-hdr-sar">
   {bantli && (
     <CariBilgiBandi id={cari!.id} tedarikci={alisMi} />)}
-  <div className="alan-izgara dort-sutun belge-hdr">
+  <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}`}>
     {/* --- 1) KIMLIK --- */}
     {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
         gezer, cari hucresinin yerini cikis deposu alir. Stok fisinde ise
@@ -226,6 +243,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                      deger={teklif.konu} onDeger={teklif.setKonu}
                      kilitli={kilitli} yazilabilir />
     )}
+    {/* --- 1c) TAHAKKUK TEK SATIR (kullanici 26.10.2026: "Satış Tahakkuku.. başlık 1.sıra satış tem, vade, tah no,
+        tah tarihi, sip no... tek satır olsun"): Temsilci ve Vade numaranin ONUNE, izgara 5 sutun (cari bantta). */}
+    {tahakkukMu && <>{saticiHucresi}{vadeHucresi}</>}
     {/* --- 2) BELGE NO ---
         Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
@@ -284,7 +304,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         gosterilmiyor - cari kartindan gelip belgeye DONDURULAN bilgi. */}
     {!eBelgeYok ? (
     faturaMi ? null : eBelgeHucresi
-    ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu ? null : kapanmaGoster ? kapanmaAlani : (
+    ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu || tahakkukMu ? null : kapanmaGoster ? kapanmaAlani : (
       /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
          Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
          her turde CARININ ALTINDA istiyor. Teklifte yer tutucuya gerek yok:
@@ -308,15 +328,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         onAc={() => setPersonelArama('eden')}
         hata={alanHatalari.teslimEdenId}
       />
-    ) : talepMi ? null : (
-      <TarafAlani
-        etiket={stokFisiMi || alisMi ? 'Sorumlu' : 'Satış Temsilcisi'}
-        deger={satici?.ad}
-        kilitli={stokFisiMi ? baslikKilitli : kilitli}
-        ipucu="Personel ara"
-        onAc={() => setSaticiArama(true)}
-      />
-    )}
+    ) : talepMi || tahakkukMu ? null : saticiHucresi}
 
     {/* --- 6) DEPO-2 ---
         Depo belgesinde malin GITTIGI depo, stok fisinde fisin tek deposu,
@@ -388,13 +400,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         BASVURUDA (249) vade YOK, yerine ODEYEN KURUM: hizmeti kim odeyecek
         (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
         listelensin"). Bos birakilirsa hasta kendi oder. */}
-    {bilgi.vade && (
-      <label className="alan">
-        <span className="etiket">{teklifMi ? 'Geçerlilik Süresi (gün)' : 'Vade (gün)'}</span>
-        <input className="hiza-sag" value={vadeGun} disabled={kilitli}
-               onChange={e => setVadeGun(e.target.value)} />
-      </label>
-    )}
+    {!tahakkukMu && vadeHucresi}
     {faturaMi && !eBelgeYok && eBelgeHucresi}
 
     {/* Fiyat Listesi combosu ASAGIDA, Rapor Dovizi cercevesinin saginda

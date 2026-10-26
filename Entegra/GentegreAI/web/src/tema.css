@@ -1399,6 +1399,8 @@ input.skt-gecmis {
    (Doviz/Kur grid altindaki kutuda.) */
 .alan-izgara.dort-sutun { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px }
 .alan-izgara.dort-sutun .genis-2 { grid-column: span 2 }
+/* Tahakkuk basligi tek satir: Temsilci · Vade · No · Tarih · Siparis No (BelgeBaslik). */
+.alan-izgara.dort-sutun.bes-sutun { grid-template-columns: repeat(5, minmax(0, 1fr)) }
 /* Tam satir kaplayan alan (ör. Başvuru Notu) - dort sutunun hepsi. */
 .alan-izgara.dort-sutun .genis-4 { grid-column: 1 / -1 }
 .alan-izgara .genis-4 textarea { resize: vertical; font: inherit; font-size: 12px;
