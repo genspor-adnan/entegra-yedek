@@ -1315,6 +1315,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   return (
     <Modal
       sayfa={sayfa} buyutmeYok={sayfa || undefined}
+      // SEKMEDE BAŞLIK ŞERİDİ YOK (kullanıcı 26.10.2026: "sekmeler ile kaydet butonu arasındaki satış faturası
+      //   yazan alanı kaldır.. satış faturası yazısı ve kart ID yi ... separatorun sağına koy"): başlık araç
+      //   çubuğunda (BelgeAracCubugu baslik).
+      baslikYok={sayfa || undefined}
       // GenoTIP'te ayni tur "Başvuru" adiyla acilir (279): tur katalogundaki ad
       //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
       baslik={kartBasligi({
@@ -1341,6 +1345,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           basvuruMu={basvuruMu}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
+          baslik={sayfa ? <>
+            <b>{kartBasligi({
+              basvuruMu, turAdi: seciliTurAdi, mevcutBelge: !!mevcutBelge,
+              kayitliId, belgeNo: sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : null,
+            })}</b>
+            {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
+          </> : undefined}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}

@@ -16,10 +16,12 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur, belgeYenile,
+  basvuruIptalGorunur, belgeYenile, baslik,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
   belgeYenile?(): void;
+  /** Sekme (sayfa) kipinde kart başlığı - pencere başlık şeridi yok, ayracın sağında (kullanıcı 26.10.2026). */
+  baslik?: React.ReactNode;
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
   duzenlenebilir: boolean;
@@ -259,6 +261,7 @@ export function BelgeAracCubugu({
   )}
 
   <span className="ayrac" />
+  {baslik && <span className="belge-ara-baslik">{baslik}</span>}
 
   {/* BASVURUDA arac cubugunda ROZET YOK (kullanici): protokol no hasta arama
       satirinda, kapanma ("Faturalanmadı") rozeti ise hasta bandinda acik
