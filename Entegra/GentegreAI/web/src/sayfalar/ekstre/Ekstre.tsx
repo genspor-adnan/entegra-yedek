@@ -80,8 +80,11 @@ export function Ekstre() {
   /** KAYNAKTAN AÇILIŞ (kullanıcı 26.10.2026: "müşteri/ted/kasa/banka vb kaynaktan ekstre sekmesi açılırsa
    *  cari kasa banka vb buton seçimlerin olduğu satır görünmesin.. prompt aramadan ekstre diye açılırsa seçimler
    *  gelsin", "cari arama da kalksın"): ekran bir hesapla (id) açıldıysa tür düğmeleri ve hesap arama kutusu yok; menü / komut aramasından boş açılınca var.
-   *  Açılıştaki adrese bakılır - sonradan hesap seçmek düğmeleri gizlemez. */
-  const [kaynaktan] = useState(() => id > 0);
+   *  Açılıştaki adrese bakılır - sonradan hesap seçmek düğmeleri gizlemez. Aynı sekme hesapsız adrese
+   *  geçerse (kullanıcı: "prompt tan ekstre girişi yaptım boş ekstre ekranı geldi ama ... seçim butonları
+   *  gelmedi" - hesaplı açılmış genel Ekstre sekmesi komut aramasıyla yeniden kullanıldı) genel ekrana döner. */
+  const [kaynaktan, setKaynaktan] = useState(() => id > 0);
+  useEffect(() => { if (!id) setKaynaktan(false) }, [id]);
 
   const degistir = useCallback((d: Record<string, string>) => {
     const yeni = new URLSearchParams(arama);
