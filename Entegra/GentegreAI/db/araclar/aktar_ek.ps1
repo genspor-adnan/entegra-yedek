@@ -7,7 +7,8 @@
 #  e-Belge gecmisi (GENDEPO), cek/senet, teklif, hesap plani, demirbas,
 #  stok kategorileri (KATEGORI, 1171 - ayni kimlikle; kurulum tohumu silinir), GENINI kod
 #  listeleri (1180 - fn_aktar_kod_listesi; eklemeli), cari kisi bolum / gorev listeleri (1182), e-Belge alias
-#  ayarlari (REHBERALIAS, 1185).
+#  ayarlari (REHBERALIAS, 1185), siparisler (SIPARIS / SIPARISDETAY, 1192 - FATURA teslim bagi icin
+#  yil filtresiz alinir: -Yil 0).
 #
 #  1) goc_al.ps1 ile MSSQL -> stg (Delphi DB ve depo DB'si)
 #  2) IMAJ icerigi: BELGE ZLib ise acilir (Delphi KutugeYaz); ICDIS=1 ise dosya
@@ -46,7 +47,7 @@ function GocAl([string]$mdb, [string[]]$tablolar) {
     & powershell -ExecutionPolicy Bypass -File (Join-Path $dbDizin "goc_al.ps1") `
         -Kap $Kap -Db $Db -Sema "stg" -Kul $Kul -Parola $Parola `
         -MssqlServer $MssqlServer -MssqlDb $mdb -MssqlUser $MssqlUser -MssqlPass $MssqlPass `
-        -Tablolar $tb | Where-Object { $_ -match 'satir|ATLANDI|HATA' }
+        -Tablolar $tb -Yil 0 | Where-Object { $_ -match 'satir|ATLANDI|HATA' }
     if ($LASTEXITCODE -ne 0) { throw ("goc_al basarisiz: " + $mdb + "." + $tb) }
   }
 }
@@ -60,7 +61,7 @@ Adim ("Delphi tablolari: " + $MssqlDb)
 GocAl $MssqlDb @("KATEGORI","KULLANICI","ROLLER","REHBERPERSONEL","PERSONELIZIN","PERS_HAREKET",
                  "GOREVLER","GOREVKULLANICI","GOREVYORUM","AKTIVITELER","AKTIVITENOTLAR","ANIMSAT",
                  "DOKUMAN","DOKUMANKLASOR","CEKLER","CEKHAREKET","TEKLIF","TEKLIFDETAY",
-                 "HESAPPLANI","DEMIRBAS","GENINI","REHBERALIAS")
+                 "HESAPPLANI","DEMIRBAS","GENINI","REHBERALIAS","SIPARIS","SIPARISDETAY","FATURA")
 
 Adim ("Depo tablolari: " + $DepoDb)
 # ESKI SURUM DELPHI (25.10.2026, ZONE / MEDX): GENDEPO veritabani hic kurulmamis olabilir - e-Belge

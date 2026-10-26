@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (630 ad, 161 tanesi birden cok dosyada)
+## Fonksiyonlar (632 ad, 161 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -18,7 +18,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_ebelge_alias` | `1185_aktarim_ebelge_alias.sql` | — |
-| `fn_aktar_ek` | `1172_aktarim_lot_defteri.sql` | 1149_aktarim_ek_toplu.sql, 1171_aktarim_ek_kategori.sql |
+| `fn_aktar_ek` | `1192_aktarim_siparis.sql` | 1149_aktarim_ek_toplu.sql, 1171_aktarim_ek_kategori.sql, 1172_aktarim_lot_defteri.sql |
 | `fn_aktar_ek_cek` | `1147_aktarim_ek_cek.sql` | — |
 | `fn_aktar_ek_demirbas` | `1151_aktarim_demirbas_mukerrer_kod.sql` | 1148_aktarim_ek_teklif_hesap_demirbas.sql |
 | `fn_aktar_ek_dokuman` | `1146_aktarim_ek_dokuman.sql` | — |
@@ -28,6 +28,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_ek_kategori` | `1171_aktarim_ek_kategori.sql` | — |
 | `fn_aktar_ek_kisi` | `1144_aktarim_ek_kisi.sql` | — |
 | `fn_aktar_ek_lot_durum` | `1172_aktarim_lot_defteri.sql` | — |
+| `fn_aktar_ek_siparis` | `1192_aktarim_siparis.sql` | — |
 | `fn_aktar_ek_teklif` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
@@ -467,6 +468,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_ad` | `940_personel_unvan_yalniz_onek.sql` | — |
 | `fn_taraf_kampanya` | `468_kurum_sozlesme_1n.sql` | 274_belge_kampanya.sql |
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
+| `fn_taraf_kod_uret` | `1191_cari_kod_grubu.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
 | `fn_telerad_bakanlik_eksik` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
 | `fn_telerad_fatura_rol` | `808_dis_hekim_raporlayan.sql` | 807_telerad_hakedis_bagi.sql |
