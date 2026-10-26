@@ -140,30 +140,30 @@ export function Ekstre() {
     <div className="hi ek">
       <style>{icmalStili + EKSTRE_STILI}</style>
       <div className="sayfabas">
-        {/* BAŞLIK (kullanıcı 26.10.2026: "Ekstre — Cari yerine Ekstre / ikon Cari"): tür ikonuyla. */}
-        <div className="basrow"><h1><EkstreIkon boyut={20} /> {c('Ekstre')} / {TUR_AD[gercekTur]}</h1><span className="yol">Finans › {c('Ekstre')}</span></div>
-      </div>
-
-      {/* ARAÇ ÇUBUĞU (kullanıcı: "print combo'yu en sağa al", "diğer butonları da print soluna al"):
-          hepsi SAĞDA - Kartı Aç · Belge / İşlem Aç · türe özgü düğmeler · Çıktı. HESAP ADI SOLDA, aynı satırda
-          (kullanıcı 26.10.2026: "cari adı bir alt satırda olsun", "sağ üstteki butonlar da 2. satırda olsun"). */}
-      <div className="hi-arac">
-        {h && <span className="ek-hesap-ad">{h.ad}</span>}
-        <span className="sp" />
-        {h && <button type="button" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
-        <button type="button" disabled={!secili} title={secili ? 'Seçili satırın belgesi / kasa işlemi' : 'Önce bir satır seçin'}
-                onClick={() => kayitAc(secili)}>📂 {c('Belge / İşlem Aç')}</button>
-        {h && yetki('finans.devir', 'gor') && (
-          <button type="button" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
-        {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}
-        {gercekTur === 'kasa' && yetki('kasa.gun_sonu', 'gor') && <button type="button" onClick={() => git('/kasa-gun-sonu')}>🧮 {c('Gün Sonu')}</button>}
-        {gercekTur === 'banka' && yetki('banka.hareket', 'gor') && <button type="button" onClick={() => git(`/banka-hareket${h ? `?hesapId=${h.id}` : ''}`)}>🔗 {c('Banka Hareketleri')}</button>}
-        <CiktiMenusu etiket={cari ? 'Cari Ekstre' : 'Hesap Ekstresi'} dosyaAdi={`Ekstre ${h?.ad ?? ''} ${bas} ${bit}`.trim()} devre={!veri || !h}>
-          {veri && h && <EkstreA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
-        </CiktiMenusu>
-        {/* KAPAT (kullanıcı 24.10.2026: "ekstre sekmeye kapat butonu ekle"): kartlardaki gibi en sağda;
-            ekranın kendi sekmesini kapatır (sekme yoksa başlangıca döner). */}
-        <button type="button" onClick={() => ekranSekmesi ? ekranSekmesi.kapat() : git('/panel')}>✖ {c('Kapat')}</button>
+        {/* BAŞLIK (kullanıcı 26.10.2026: "Ekstre — Cari yerine Ekstre / ikon Cari"): tür ikonuyla.
+            ARAÇ ÇUBUĞU BAŞLIK SATIRINDA, STANDART LİSTE DÜĞMESİ BOYUNDA (kullanıcı 26.10.2026: "ekstrede üstte kart
+            aç/belge aç vb butonlar diğer listedeki butonlardan daha mı büyük", "standart listeler deseni büyüklüğünde
+            yap sonra da 1.sıraya al"): .d düğmeler, sağda - Kartı Aç · Belge / İşlem Aç · türe özgü · Çıktı · Kapat.
+            HESAP ADI altta (kullanıcı: "cari adı bir alt satırda olsun"). */}
+        <div className="basrow gg-bas"><h1><EkstreIkon boyut={20} /> {c('Ekstre')} / {TUR_AD[gercekTur]}</h1><span className="yol">Finans › {c('Ekstre')}</span>
+          <div className="sag ek-arac">
+            {h && <button type="button" className="d" onClick={() => git(`${KART_YOLU[gercekTur]}/${h.id}`)}>🗂 {c('Kartı Aç')}</button>}
+            <button type="button" className="d" disabled={!secili} title={secili ? 'Seçili satırın belgesi / kasa işlemi' : 'Önce bir satır seçin'}
+                    onClick={() => kayitAc(secili)}>📂 {c('Belge / İşlem Aç')}</button>
+            {h && yetki('finans.devir', 'gor') && (
+              <button type="button" className="d" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
+            {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" className="d" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}
+            {gercekTur === 'kasa' && yetki('kasa.gun_sonu', 'gor') && <button type="button" className="d" onClick={() => git('/kasa-gun-sonu')}>🧮 {c('Gün Sonu')}</button>}
+            {gercekTur === 'banka' && yetki('banka.hareket', 'gor') && <button type="button" className="d" onClick={() => git(`/banka-hareket${h ? `?hesapId=${h.id}` : ''}`)}>🔗 {c('Banka Hareketleri')}</button>}
+            <CiktiMenusu etiket={cari ? 'Cari Ekstre' : 'Hesap Ekstresi'} dosyaAdi={`Ekstre ${h?.ad ?? ''} ${bas} ${bit}`.trim()} devre={!veri || !h}>
+              {veri && h && <EkstreA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
+            </CiktiMenusu>
+            {/* KAPAT (kullanıcı 24.10.2026: "ekstre sekmeye kapat butonu ekle"): kartlardaki gibi en sağda;
+                ekranın kendi sekmesini kapatır (sekme yoksa başlangıca döner). */}
+            <button type="button" className="d" onClick={() => ekranSekmesi ? ekranSekmesi.kapat() : git('/panel')}>✖ {c('Kapat')}</button>
+          </div>
+        </div>
+        {h && <div className="ek-hesap-ad">{h.ad}</div>}
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -527,7 +527,10 @@ function EkstreA4({ v, antet, duzenleyen }: { v: Veri; antet: Record<string, unk
 
 const EKSTRE_STILI = `
 /* OVAL (kullanıcı: "dönem ve seçim editleri de oval olsun"): şeritteki kutular tür / görünüm seçicisiyle aynı yuvarlaklıkta. */
-.ek .ek-hesap-ad { margin-left:8px; font-size:15px; font-weight:600; color:var(--yazi2,#2c4a6b); }
+.ek .ek-hesap-ad { margin:4px 0 8px 29px; font-size:15px; font-weight:600; color:var(--yazi2,#2c4a6b); }
+.ek .ek-arac .cm-dugme { display:inline-flex; align-items:center; gap:5px; height:25px; padding:0 10px; border-radius:3px;
+  border:1px solid var(--cizgi); background:linear-gradient(var(--dug1), var(--dug2)); color:var(--yazi); font-size:11.5px; cursor:pointer; }
+.ek .ek-arac .cm-dugme:disabled { opacity:.45; cursor:default; }
 .ek .hi-serit .sel { border-radius:13px; padding-left:10px; padding-right:10px; }
 .ek .hi-serit input[type=date] { border:1px solid var(--cizgi,#cdd6e0); border-radius:10px; font-size:12px; padding:1px 6px; }
 /* Çıktı menüsü en sağda: açılır liste sağa hizalı, ekrandan taşmasın. */
