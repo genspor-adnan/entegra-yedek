@@ -1,4 +1,5 @@
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
+import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { EkranSekmesiBaglami, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
@@ -163,7 +164,11 @@ export function Ekstre() {
             <button type="button" className="d" onClick={() => ekranSekmesi ? ekranSekmesi.kapat() : git('/panel')}>✖ {c('Kapat')}</button>
           </div>
         </div>
-        {h && <div className="ek-hesap-ad">{h.ad}</div>}
+        {/* CARİ BİLGİ BANDI (26.10.2026): carinin avatarlı özeti; bakiye kutularda olduğundan bantta yok.
+            Kasa / banka / POS hesabında yalnız ad. */}
+        {h && (gercekTur === 'cari'
+          ? <div className="ek-bant"><CariBilgiBandi id={h.id} tazele={yenile} bakiyesiz /></div>
+          : <div className="ek-hesap-ad">{h.ad}</div>)}
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -527,6 +532,8 @@ function EkstreA4({ v, antet, duzenleyen }: { v: Veri; antet: Record<string, unk
 
 const EKSTRE_STILI = `
 /* OVAL (kullanıcı: "dönem ve seçim editleri de oval olsun"): şeritteki kutular tür / görünüm seçicisiyle aynı yuvarlaklıkta. */
+.ek .ek-bant { margin-top: 6px }
+.ek .ek-bant .cbb { margin-bottom: 4px }
 .ek .ek-hesap-ad { margin:4px 0 8px 29px; font-size:15px; font-weight:600; color:var(--yazi2,#2c4a6b); }
 .ek .ek-arac .cm-dugme { display:inline-flex; align-items:center; gap:5px; height:25px; padding:0 10px; border-radius:3px;
   border:1px solid var(--cizgi); background:linear-gradient(var(--dug1), var(--dug2)); color:var(--yazi); font-size:11.5px; cursor:pointer; }

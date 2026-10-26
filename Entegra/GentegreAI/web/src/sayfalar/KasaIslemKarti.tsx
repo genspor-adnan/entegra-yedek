@@ -6,6 +6,7 @@ import {
   hataAyristir, KASA_DURUM,
   type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenLookup } from '../bilesenler/GenLookup';
+import { CariBilgiBandi } from '../bilesenler/CariBilgiBandi';
 import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -443,6 +444,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         {sonuc?.uyarilar?.length ? (
           <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>
         ) : null}
+
+        {/* CARİ BİLGİ BANDI (26.10.2026): seçili carinin avatarlı özeti - kod, VKN, tel, bakiye, vadesi geçen. */}
+        {cari && cari.id > 0 && <CariBilgiBandi id={cari.id} />}
 
         <div className="kutu" style={{ padding: 14 }}>
           {/* TUR SERIDI KALKTI (kullanici): islem turu zaten bu karti acan
