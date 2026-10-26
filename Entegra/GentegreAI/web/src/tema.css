@@ -7652,6 +7652,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ml-kpi b { font-size: 16px }
 .ml-hizli { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2) }
 .ml-hizli .d { justify-content: center; font-size: 11px; padding: 4px }
+/* Aksiyon ▾ menusu de hucreyi doldurur (Ekstre / Karti Ac kadar - kullanici 26.10.2026). */
+.ml-hizli > .dugme-menu { display: flex }
+.ml-hizli > .dugme-menu > .d { flex: 1 }
 .ml-mali { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
 .ml-mali > div { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 4px 8px; background: var(--yuz) }
 .ml-mali > div span { display: block; font-size: 10px; color: var(--soluk) }
