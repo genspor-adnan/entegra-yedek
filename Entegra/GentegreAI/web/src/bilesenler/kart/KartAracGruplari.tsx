@@ -182,7 +182,10 @@ function CekSenetYonu({ b }: { b: KartAracBaglami }) {
       Yön
       {/* Arac cubugundaki tek secim - kutu ve yazi biraz daha buyuk
           (kullanici): kagidin yonunu belirleyen alan goze carpsin. */}
-      <select value={String(b.deger.yon ?? 1)} disabled={b.salt}
+      {/* YÖN SABİT (kullanıcı 26.10.2026: "tahsilat ya da ödeme menüsünden geliyorsa yön değişemez"): ekran
+          'yon'u gizliAlanlar'a koyduysa (kasa işleminden açılan kıymet kartı) seçim görünür ama kilitli -
+          tahsilat alınan, ödeme verilen çektir. */}
+      <select value={String(b.deger.yon ?? 1)} disabled={b.salt || !!b.gizliAlanlar?.includes('yon')}
               style={{ width: 150, height: 28, fontSize: 13 }}
               onChange={e => b.setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
         <option value={1}>{c('Alınan')}</option>

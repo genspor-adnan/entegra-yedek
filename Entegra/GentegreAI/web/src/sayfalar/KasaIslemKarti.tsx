@@ -10,7 +10,7 @@ import { CariBilgiBandi } from '../bilesenler/CariBilgiBandi';
 import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { Modal } from '../bilesenler/GenForm';
+import { GenForm, Modal } from '../bilesenler/GenForm';
 import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } from '../bilesenler/bicim';
 import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
@@ -216,8 +216,30 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   //   mantigiyla ayni yerden gelir: kasaKaydet.kasaTurBilgisi.
   const { planMi, karsiHesapli, donusum, cariVirman, cekSenetMi } =
     kasaTurBilgisi(tur, grup);
-  /** Kart disaridan MEVCUT bir kiymetle acildi (kasa listesi akisi). */
-  const mevcutKiymet = acilis?.cekSenetId ?? 0;
+  /** Kart disaridan MEVCUT bir kiymetle acildi (kasa listesi akisi) ya da kendi sekmesinde once kiymet
+   *  karti dolduruldu (asagida, kiymetAdimi). */
+  const [kiymetId, setKiymetId] = useState<number>(acilis?.cekSenetId ?? (Number(sorgu.get('cekSenetId')) || 0));
+  const mevcutKiymet = kiymetId;
+  /**
+   * ÇEK / SENET GİRİŞ EKRANI ÖNCE (kullanıcı 26.10.2026: "müş listesinde çek ile tahsilat dediğimizde çek giriş
+   * ekranı gelsin.. çek listesinde yeni dediğimiz desen"): kendi sekmesinde açılan yeni çek / senet işleminde önce
+   * kıymet kartı (banka, şube, keşideci, seri no, vade...), kaydedilince kasa işlemi o kıymete bağlı açılır -
+   * kasa listesindeki Çek / Senet akışının aynısı (Liste.cekKartKaydedildi).
+   */
+  const kiymetAdimi = !modalMi && kayitId === null && cekSenetMi && !kiymetId;
+  const kiymetKaydedildiRef = useRef(false);
+  async function kiymetKaydedildi(yeniId: number) {
+    kiymetKaydedildiRef.current = true;
+    try {
+      const k = await api.kartOku('cek-senet', yeniId);
+      const kart = k.kart as Record<string, unknown>;
+      setTutar(tutarMetni(kart.tutar as string));
+      if (kart.dovizCinsi) setDoviz(String(kart.dovizCinsi));
+      if (!cari && Number(kart.tarafId))
+        setCari({ id: Number(kart.tarafId), unvan: String(k.kodAd?.tarafId?.[String(kart.tarafId)] ?? '') });
+    } catch { /* kiymet kaydedildi ama okunamadi: kart bos tutarla acilir, kullanici yazar */ }
+    setKiymetId(yeniId);
+  }
   const senetMi = kasaTurBilgisi(tur, grup).senetMi;
   // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
   //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
@@ -396,6 +418,28 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   if (!ekleyebilir && kayitId === null)
     return <div className="sahne"><div className="hata-kutusu">{cev('Kasa işlemi ekleme yetkiniz yok.')}</div></div>;
 
+  if (kiymetAdimi)
+    return (
+      <GenForm
+        kaynak="cek-senet"
+        id="yeni"
+        sayfaKipi
+        baslik={tur === 24 || tur === 34 ? 'Senet' : 'Çek'}
+        // CARİ BANTTA (kullanıcı 26.10.2026: "onda da üstte firma bandı olsun.. cari edit varsa kaldır"): cari
+        //   bir yerden geldiyse alan çizilmez (değeri varsayılanla gider), üstte avatarlı bilgi bandı.
+        ustBaglam={() => (cari ? <CariBilgiBandi id={cari.id} /> : null)}
+        gizliAlanlar={cari ? ['tarafId', 'yon'] : ['yon']}
+        yeniKayitVarsayilanlari={{
+          tur: tur === 24 || tur === 34 ? 2 : 1,
+          yon: tur === 33 || tur === 34 ? 2 : 1,
+          ...(cari ? { tarafId: cari.id } : {}),
+        }}
+        // GenForm kaydedince onKapat'i da cagirir - kiymet kaydedildiyse sekme kapanmaz, kasa adimina gecilir.
+        onKapat={() => { if (!kiymetKaydedildiRef.current) sayfaKapat() }}
+        onKaydedildi={id => { void kiymetKaydedildi(id) }}
+      />
+    );
+
   const anaEtiket = grup === 'odeme' ? 'Ödenen Hesap'
                   : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
                   : 'Tahsil Edilen Hesap';
@@ -457,7 +501,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               sirasiyla Cari · Tutar (+ para birimi) · Tahsil Hesabi · Islem
               Tarihi. Kalan alanlar (masraf, proje, aciklama) altta akar. */}
           <div className="alan-izgara dort-sutun belge-hdr">
-              {secili?.cariZorunlu !== -1 && (
+              {/* CARİ ALANI BANT VARKEN YOK (kullanıcı 26.10.2026: "tahsilat/ödeme ekranından cari editi kaldır
+                  gerek kalmadı üstte bant var"): cari bir yerden geldiyse (sabit) üstteki bilgi bandı gösterir. */}
+              {secili?.cariZorunlu !== -1 && !cariSabit && (
                 <TarafSecici
                   // AVANSTA (779) taraf ZORUNLU ve yalniz HASTA: avans
                   //   "kimin parasi" sorusunun cevabi olmadan takip

@@ -189,6 +189,8 @@ public static partial class KartKatalogu
             new("tutar",         "tutar",           "para",  Zorunlu: true, Baslik: "Tutar", Grup: "Kimlik", EslesAlan: "dovizCinsi"),
             new("dovizCinsi",    "doviz_cinsi",     "kod",   SabitKodlar: DovizKodlari, Baslik: "Para Birimi", Grup: "Kimlik"),
             new("vade",          "vade",            "tarih", Zorunlu: true, Baslik: "Vade", Grup: "Kimlik"),
+            // SERİ NO BAŞLIKTA, VADENİN SAĞINDA (kullanıcı 26.10.2026: "seri no editi başlıkta vade sağına al").
+            new("seriNo",        "seri_no",         "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Kimlik"),
             // YON arac cubugunda, Kaydet'in saginda (kullanici) - kagidin alinan
             //   mi verilen mi oldugu tek secim, seritte yer kaplamasin. Alan
             //   burada GIZLI: degeri yine kaydedilir.
@@ -201,15 +203,13 @@ public static partial class KartKatalogu
             //   seri no, dovizli ise kur ve yerel karsilik. TARAF kutusu bunun
             //   SAGINDA durur (normal izgara akisi).
             new("tarih",         "tarih",           "zaman", Zorunlu: true, Baslik: "Tarih / Saat", Grup: "Genel", AltGrup: "Belge"),
-            // Seri No tarihin HEMEN ALTINDA (kullanici): kagidin uzerindeki
-            //   iki bilgi (ne zaman, hangi numara) birlikte okunuyor.
-            new("seriNo",        "seri_no",         "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Seri No", Grup: "Genel", AltGrup: "Belge"),
+            // KEŞİDECİ VE CİRO EDİLEN TARİHTEN SONRA, BELGE kutusunda (kullanıcı 26.10.2026) - Taraf kutusu kalktı.
+            new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Belge"),
+            new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Belge"),
             new("dovizKuru",     "doviz_kuru",      "para",  Baslik: "Kur", Grup: "Genel", AltGrup: "Belge"),
             // Yerel karsilik SUNUCUDA hesaplanir (tutar x kur) - kullanici
             //   yazamaz; yoksa kurla tutarsiz bir yerel tutar kaydedilebilirdi.
             new("yerelTutar",    "yerel_tutar",     "para",  Yazilabilir: false, Baslik: "Yerel Tutar", Grup: "Genel", AltGrup: "Belge"),
-            new("kesideci",      "kesideci",        "metin", EnFazlaUzunluk: 150, Baslik: "Keşideci", Grup: "Genel", AltGrup: "Taraf"),
-            new("ciroTarafId",   "ciro_taraf_id",   "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Ciro Edilen", Grup: "Genel", AltGrup: "Taraf"),
             new("bankaId",       "banka_id",        "kod",   KodTablosu: "public.v_banka_lookup", Baslik: "Banka", Grup: "Genel", AltGrup: "Banka"),
             new("bankaSubeId",   "banka_sube_id",   "kod",   KodTablosu: "public.v_banka_sube_lookup", BagliAlan: "bankaId", Baslik: "Şube", Grup: "Genel", AltGrup: "Banka"),
             new("hesapNo",       "hesap_no",        "metin", EnFazlaUzunluk: 30, Baslik: "Hesap No", Grup: "Genel", AltGrup: "Banka"),

@@ -1440,6 +1440,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           tur: cekTuru === 24 || cekTuru === 34 ? 2 : 1,
           yon: cekTuru === 33 || cekTuru === 34 ? 2 : 1,
         }}
+        // Yön kasa işleminden (tahsilat = alınan, ödeme = verilen) - kartta kilitli.
+        gizliAlanlar={['yon']}
         onKapat={() => setCekTuru(null)}
         onKaydedildi={id => { void cekKartKaydedildi(cekTuru, id) }}
       />
