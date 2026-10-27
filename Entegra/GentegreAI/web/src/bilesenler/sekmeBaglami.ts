@@ -38,6 +38,8 @@ export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';
  */
 export const CARI_HAREKET = 'cari-hareket';
 export function cariHareketiDegisti() {
+  // Bildirim kaydı ASLA düşürmez (kayıt zaten yazıldı): pencere yoksa (test / sunucu) sessiz geçer.
+  if (typeof window === 'undefined') return;
   for (const k of ['cari', 'belge', 'kasa-islem', CARI_HAREKET])
     window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: k }));
 }
