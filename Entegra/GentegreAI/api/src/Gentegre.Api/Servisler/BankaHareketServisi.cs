@@ -37,7 +37,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
     private sealed record Kaynakli(Baglanti Bag, short Kaynak);
     private sealed record Baglanti(int HesapId, string HesapAd, int SubeId, string Doviz, string Iban, string SubeKodu,
         string HesapNo, string OnayNo, DateTime? IlkTarih, bool OtomatikIsle, int EntegrasyonId, string Kod,
-        bool Test, string Url, string TestUrl, string ClientId, string Secret);
+        bool Test, string Url, string TestUrl, string ClientId, string Secret, string Scope);
 
     // ================================================================= çek ====
     public async Task<CekimSonucu> CekAsync(int hesapId, DateTime? bas, DateTime? bit, int kullanici, CancellationToken iptal)
@@ -48,13 +48,13 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
                    coalesce(x.banka_sube_kodu, ''), coalesce(x.hesap_no, ''), coalesce(x.banka_onay_no, ''), x.banka_ilk_tarih,
                    x.banka_otomatik_isle = 1, coalesce(e.id, 0), coalesce(e.kod, ''), coalesce(e.test_mi, 0) = 1,
                    coalesce(e.url, ''), coalesce(e.test_url, ''), coalesce(e.kullanici_adi, ''), coalesce(e.sifre, ''),
-                   x.banka_kaynak
+                   x.banka_kaynak, coalesce(e.ayarlar->>'scope', '')
               from public.hesap x left join public.entegrasyon_hesap e on e.id = x.banka_entegrasyon_id
              where x.id = @p0
             """, null, [hesapId], o => new Kaynakli(new Baglanti(o.GetInt32(0), o.GetString(1), o.GetInt32(2), o.GetString(3),
                 o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7), o.IsDBNull(8) ? null : o.GetDateTime(8),
                 o.GetBoolean(9), o.GetInt32(10), o.GetString(11), o.GetBoolean(12), o.GetString(13), o.GetString(14),
-                o.GetString(15), o.GetString(16)), o.GetInt16(17)), iptal)
+                o.GetString(15), o.GetString(16), o.GetString(18)), o.GetInt16(17)), iptal)
             ?? throw GentegreHatasi.Bulunamadi("Banka hesabı bulunamadı.");
         var bag = g.Bag;
         if (g.Kaynak != 1) throw GentegreHatasi.IsKurali($"{bag.HesapAd}: hareket kaynağı 'Banka API' değil (kartın Banka Bağlantısı sekmesi).");
@@ -152,22 +152,14 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
         var istemci = http.CreateClient("banka");
         istemci.Timeout = TimeSpan.FromSeconds(60);
 
-        // Garanti kuralı: her istek için YENİ erişim jetonu.
+        // Garanti kuralı: her istek için YENİ erişim jetonu (scope ve yeniden deneme: GarantiJeton).
+        //   İlk jetonu veren scope sonraki sayfalarda da kullanılır (her sayfada yeniden deneme olmaz).
+        string? scope = bag.Scope == "" ? null : bag.Scope;
         async Task<string> JetonAsync()
         {
-            using var istek = new HttpRequestMessage(HttpMethod.Post, kok + "/auth/oauth/v2/token");
-            istek.Headers.Authorization = new AuthenticationHeaderValue("Basic",
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{bag.ClientId}:{bag.Secret}")));
-            istek.Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["grant_type"] = "client_credentials", ["scope"] = "oob", ["redirect_uri"] = "oob",
-                ["client_id"] = bag.ClientId, ["client_secret"] = bag.Secret,
-            });
-            using var yanit = await istemci.SendAsync(istek, iptal);
-            var govde = await yanit.Content.ReadAsStringAsync(iptal);
-            if (!yanit.IsSuccessStatusCode) throw new InvalidOperationException($"jeton alınamadı ({(int)yanit.StatusCode})");
-            using var j = JsonDocument.Parse(govde);
-            return j.RootElement.GetProperty("access_token").GetString() ?? throw new InvalidOperationException("jeton boş");
+            var j = await GarantiJeton.AlAsync(istemci, kok, bag.ClientId, bag.Secret, scope, iptal);
+            scope = j.Scope;
+            return j.Jeton ?? throw new InvalidOperationException($"jeton alınamadı ({j.Kod}): {Kisa(j.Govde, 200)}");
         }
 
         var sonuc = new List<BankaHareketSatiri>();

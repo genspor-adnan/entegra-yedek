@@ -233,9 +233,14 @@ public static class EntegrasyonUclari
             //   yapılır; öteki servislerde SKRS SOAP gövdesi göndermek anlamsız
             //   (İzibiz "Servis kullanılmamaktadır" dönüyordu) - orada adresin
             //   ayakta olup olmadığına ve kimliğin dolu olduğuna bakılır.
-            var (basarili, mesaj) = string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase)
-                ? await SkrsDenemeAsync(hesap, istemciler, iptal)
-                : await AdresDenemeAsync(hesap, istemciler, iptal);
+            //   GARANTI: ağ geçidi kök adrese HEAD'i yanıtsız kapatıyor ("Adrese ulaşılamadı") - gerçek
+            //   jeton isteği yapılır (BankaHareketServisi ile aynı çağrı; hesap kilitlemez).
+            var (basarili, mesaj) = hesap.Kod.ToUpperInvariant() switch
+            {
+                "SKRS"    => await SkrsDenemeAsync(hesap, istemciler, iptal),
+                "GARANTI" => await GarantiDenemeAsync(hesap, istemciler, iptal),
+                _         => await AdresDenemeAsync(hesap, istemciler, iptal),
+            };
             await SonucYazAsync(baglanti, id, mesaj, iptal);
 
             return Results.Ok(new { basarili, mesaj });
@@ -525,7 +530,7 @@ public static class EntegrasyonUclari
 
     // ============================================================== yardımcı ==
     private sealed record Hesap(int Id, string Kod, string KullaniciAdi, string Sifre,
-                                string UygulamaKodu, string Adres);
+                                string UygulamaKodu, string Adres, string Scope = "");
 
     private static async Task<Hesap> HesapOkuAsync(
         NpgsqlConnection baglanti, int id, CancellationToken iptal)
@@ -553,6 +558,7 @@ public static class EntegrasyonUclari
                               else 'https://utsuygulama.saglik.gov.tr' end)
                      end,
                      '') as adres,
+                   coalesce(e.ayarlar->>'scope', '') as scope,
                    e.aktif
               from public.entegrasyon_hesap e where e.id = @p0
             """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
@@ -572,7 +578,7 @@ public static class EntegrasyonUclari
                 "SKRS kullanıcı adı ve şifresi girilmemiş (Ayarlar › Genel › Entegrasyon).");
 
         return new Hesap(id, M("kod"), M("kullanici_adi"), M("sifre"),
-                         M("uygulama_kodu"), M("adres"));
+                         M("uygulama_kodu"), M("adres"), M("scope"));
     }
 
     private static async Task SonucYazAsync(
@@ -644,6 +650,39 @@ public static class EntegrasyonUclari
         return sonuc;
     }
 
+
+    /// <summary>
+    /// GARANTİ BBVA sınaması (kullanıcı 27.10.2026: "bağlantı sına deyince adrese ulaşılamadı"): ağ geçidi
+    /// kök adrese gelen isteği yanıtsız kapatır, HEAD sınaması hep düşer. Onun yerine hareket çekiminin ilk
+    /// adımı yapılır - Client ID / Secret ile OAuth jetonu (client_credentials, scope oob). Jeton gelirse
+    /// adres de kimlik de doğrudur; consentId / hesap bilgisi banka hesabı kartında, çekimde doğrulanır.
+    /// </summary>
+    private static async Task<(bool, string)> GarantiDenemeAsync(
+        Hesap hesap, IHttpClientFactory istemciler, CancellationToken iptal)
+    {
+        if (string.IsNullOrWhiteSpace(hesap.Adres))
+            return (false, "Servis adresi boş - hesap kartında doldurun.");
+        if (string.IsNullOrWhiteSpace(hesap.KullaniciAdi) || string.IsNullOrWhiteSpace(hesap.Sifre))
+            return (false, "Client ID (Kullanıcı Adı) / Client Secret (Şifre) boş.");
+
+        try
+        {
+            var j = await Servisler.GarantiJeton.AlAsync(istemciler.CreateClient("banka"), hesap.Adres,
+                                                         hesap.KullaniciAdi, hesap.Sifre,
+                                                         hesap.Scope == "" ? null : hesap.Scope, iptal);
+            if (j.Jeton != null)
+                return (true, $"Garanti jetonu alındı (HTTP {j.Kod}, scope: {(j.Scope == "" ? "gönderilmedi" : j.Scope)}) - "
+                              + "Client ID / Secret doğru. Hesap bilgileri (consentId, şube, hesap no) ilk çekimde doğrulanır.");
+            var ozet = j.Govde.Length > 200 ? j.Govde[..200] + "…" : j.Govde;
+            return j.Kod is 400 or 401 or 403
+                ? (false, $"Garanti jeton vermedi (HTTP {j.Kod}) - Client ID / Secret ya da ortam (sandbox / canlı) yanlış olabilir. {ozet}")
+                : (false, $"Garanti jeton servisi HTTP {j.Kod}: {ozet}");
+        }
+        catch (Exception h)
+        {
+            return (false, $"Adrese ulaşılamadı: {h.Message}");
+        }
+    }
 
     /// <summary>
     /// SKRS dışındaki servisler için hafif sınama (340): adres ayakta mı ve
