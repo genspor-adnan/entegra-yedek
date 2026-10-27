@@ -177,7 +177,7 @@
         <a id="baskaFirma">Başka firma</a>
       </div>
       <div class="alan" id="firmaAlan"><label for="firma">Firma Kodu</label>
-        <div class="kutu"><span class="ic">🏢</span><input id="firma" name="organization" placeholder="ör. zone, medx" autocomplete="organization" autocapitalize="off" spellcheck="false"></div>
+        <div class="kutu"><span class="ic">🏢</span><input id="firma" name="organization" placeholder="firma kodunuz" autocomplete="organization" autocapitalize="off" spellcheck="false"></div>
         <div class="ipucu">Size verilen firma kodu. Büyük / küçük harf ve Türkçe karakter fark etmez.</div></div>
       <div class="alan"><label for="kullanici">Kullanıcı Adı</label>
         <div class="kutu"><span class="ic">👤</span><input id="kullanici" name="username" placeholder="kullanıcı adınız" autocomplete="username" autocapitalize="off" spellcheck="false"></div></div>
@@ -203,7 +203,7 @@
     var tr = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'c', 'Ğ': 'g', 'Ö': 'o', 'Ş': 's', 'Ü': 'u' };
     return String(k || '').trim().replace(/[çğıİöşüÇĞÖŞÜ]/g, function (c) { return tr[c] }).toLowerCase().replace(/[^a-z0-9-]/g, '');
   }
-  // Firma adresi: gentegreai.com -> zone.gentegreai.com/zone/ (alt alan adında açılırsa da aynı alan).
+  // Firma adresi: gentegreai.com -> <kod>.gentegreai.com/<kod>/ (alt alan adında açılırsa da aynı alan).
   //   IP / localhost'ta aynı sunucu /<kod>/.
   function adres(kod) {
     var h = location.hostname, p = h.split('.');
