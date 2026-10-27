@@ -3,7 +3,7 @@ import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
 import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
+import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
 import { belgeTuruBilgisi } from '../belgeTuru';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
@@ -144,7 +144,7 @@ export function Ekstre() {
   const kartaGit = (y: string) => (ekranSekmesi ? ekranSekmesi.kartaGit(y) : git(y));
   // Sekmede açılan kayıt kaydedilince / silinince ekstre tazelenir (modal kapanışındaki tazelemenin yerine).
   useEffect(() => {
-    const tazele = () => setYenile(x => x + 1);
+    const tazele = (e: Event) => { if ((e as CustomEvent<string>).detail === CARI_HAREKET) setYenile(x => x + 1) };
     window.addEventListener(LISTE_TAZELE_OLAYI, tazele);
     return () => window.removeEventListener(LISTE_TAZELE_OLAYI, tazele);
   }, []);

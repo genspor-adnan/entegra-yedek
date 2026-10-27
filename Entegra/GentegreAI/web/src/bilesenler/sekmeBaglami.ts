@@ -31,6 +31,18 @@ export const EkranSekmesiBaglami = createContext<{
 export const LISTE_TAZELE_OLAYI = 'gentegre-liste-tazele';
 
 /**
+ * CARİ HAREKETİ DEĞİŞTİ (kullanıcı 27.10.2026: "aksiyon çağrılan yerlerde (müş/ted kartı ve listesi, ekstre) tah/ödeme
+ * vb işlem yaptığımızda sayfa anında güncellenmiyor.. ancak sayfa refresh ederse"): belge ya da kasa işlemi kaydedilince /
+ * kesinleşince / iptal edilince yayınlanır. Cari listesi ('cari'), belge ve kasa listeleri kendi kaynak adıyla; cari
+ * kartı (özet, finansal, band) ve ekstre `CARI_HAREKET` ile tazelenir.
+ */
+export const CARI_HAREKET = 'cari-hareket';
+export function cariHareketiDegisti() {
+  for (const k of ['cari', 'belge', 'kasa-islem', CARI_HAREKET])
+    window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: k }));
+}
+
+/**
  * SEKME BAŞLIĞINDA AD (kullanıcı 24.10.2026: "müşteri, tedarikçi, hasta, başvuru, kurum, dış doktor,
  * kişi vb. sekme kartı açıldığında başlığa ünvanı / ad soyadından ilk 2 kelimeyi yaz"): uzun ünvan
  * sekmeyi kesiyordu. Yalnız ad / ünvan kısaltılır; belge no, kod gibi başlıklar olduğu gibi kalır.

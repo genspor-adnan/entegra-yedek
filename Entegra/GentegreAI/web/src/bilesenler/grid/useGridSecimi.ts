@@ -103,6 +103,16 @@ export function useGridSecimi(opts: {
     ilkSecimUygulandi.current = true;
   }, [satirlar, seciliBaslangicId]);
 
+  // LISTE TAZELENINCE SECILI SATIR DA TAZE (27.10.2026: tahsilattan sonra önizleme eski bakiyeyi gösteriyordu):
+  //   ayni kayit yeni satirlarda varsa secim onun yeni haline gecer.
+  useEffect(() => {
+    setSeciliSatir(s => {
+      if (!s) return s;
+      const yeni = satirlar.find(r => String(r.id) === String(s.id));
+      return yeni && yeni !== s ? yeni : s;
+    });
+  }, [satirlar]);
+
   // Secim degisince disariya bildir (ör. "Ekstre" dugmesinin aktifligi).
   useEffect(() => { onSecimDegisti?.(seciliSatir) }, [seciliSatir, onSecimDegisti]);
 

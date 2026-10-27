@@ -36,7 +36,7 @@ import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../../bilesenler/sekmeBaglami';
+import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../../bilesenler/sekmeBaglami';
 import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
 import { MakroluMetin } from '../../bilesenler/MakroluMetin';
 import { MakroIpucu } from '../../bilesenler/MakroIpucu';
@@ -240,6 +240,14 @@ export function ListeKarti({
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   const [kayitSayaci, setKayitSayaci] = useState(0);
+  // CARİ KARTI başka sekmede yapılan belge / tahsilat / ödemeyle tazelenir (özet, finansal, band - form
+  //   yeniden yüklenmez, kayıtsız değişiklik korunur). Bkz. cariHareketiDegisti.
+  useEffect(() => {
+    if (tanim.kaynak !== 'cari' || typeof kartId !== 'number') return;
+    const dinle = (e: Event) => { if ((e as CustomEvent<string>).detail === CARI_HAREKET) setKayitSayaci(s => s + 1) };
+    window.addEventListener(LISTE_TAZELE_OLAYI, dinle);
+    return () => window.removeEventListener(LISTE_TAZELE_OLAYI, dinle);
+  }, [tanim.kaynak, kartId]);
   /** KART EKLENTİSİ (kartEklentileri.tsx): bu kaynağın ekran-özel parçaları - yoksa zincir. */
   const eklenti = KART_EKLENTILERI[tanim.kaynak];
   /** Eklentinin sekme rozeti (ör. belge türü "Personel durumu": eksik + süresi dolan). */

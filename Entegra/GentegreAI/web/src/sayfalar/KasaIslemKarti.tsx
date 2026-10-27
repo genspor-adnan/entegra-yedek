@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { api } from '../api/istemci';
 import {
   hataAyristir, KASA_DURUM,
@@ -104,9 +104,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const konum = useLocation();
   const sayfaKapat = (hedef = '/kasa-islem') => { if (ekranSekmesi) ekranSekmesi.kapat(); else git(hedef) };
-  const listeleriTazele = () => {
-    for (const k of ['cari', 'kasa-islem']) window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: k }));
-  };
+  /** Cari / kasa listeleri, cari kartı ve ekstre tazelenir (modalde de - cariHareketiDegisti). */
+  const listeleriTazele = cariHareketiDegisti;
 
   const kayitId = kayitIdProp ?? (id && id !== 'yeni' ? Number(id) : null);
 
@@ -371,8 +370,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       }
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Modalde cagiran
       //   kapatir (belge kartinin Tahsilat sekmesi), tam sayfada listeye donulur.
+      listeleriTazele();
       if (modalMi) onKapat?.();
-      else { listeleriTazele(); sayfaKapat() }
+      else sayfaKapat();
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
@@ -383,7 +383,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     try {
       yaniti(await api.kasaKesinlestir(kayitId));
       // Kesinlestirme de bir "kaydet": islem bitti, form kapanir.
-      if (modalMi) onKapat?.(); else { listeleriTazele(); sayfaKapat() }
+      listeleriTazele();
+      if (modalMi) onKapat?.(); else sayfaKapat();
     }
     catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
@@ -397,6 +398,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     try {
       await api.kasaIptal(kayitId, sebep);
       yaniti(await api.kasaOku(kayitId));
+      listeleriTazele();
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 

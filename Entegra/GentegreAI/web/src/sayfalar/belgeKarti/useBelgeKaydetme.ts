@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
 import { mesaj } from '../../bilesenler/mesaj';
+import { cariHareketiDegisti } from '../../bilesenler/sekmeBaglami';
 import { hataAyristir, type BelgeYaniti } from '../../api/sozlesme';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from '../belgeKaydet';
 import { yanittanSatirlar, type SatirDurumu } from '../belgeSatir';
@@ -108,6 +109,8 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       b.setKalemDegisti(false);
       b.imzayiTemizle();
       b.onKaydedildi?.();
+      // Açık listeler, cari kartı ve ekstre (başka sekmede) bu kaydı hemen görsün.
+      cariHareketiDegisti();
 
       // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye
       //   sonradan yapilacak isler (e-Belge gonderimi, donusum) listeden belge
