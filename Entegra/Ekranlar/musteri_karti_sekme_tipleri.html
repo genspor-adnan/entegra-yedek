@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Müşteri Kartı - Sekme Tipleri</title>
+<style>
+:root {
+  --yuz: #ffffff; --yuz2: #f3f6fa; --zemin: #e4eaf1; --cizgi: #cdd6e0; --cizgi2: #e1e7ee;
+  --yazi: #1d2a38; --yazi2: #14315a; --soluk: #6b7a8b; --mor: #2f6db3; --sekmezem: #e9eef4;
+  --yesil: #2e7d46;
+}
+* { box-sizing: border-box }
+body { margin: 0; background: var(--zemin); font: 12px "Trebuchet MS", Segoe UI, sans-serif; color: var(--yazi); padding: 18px }
+h1 { font-size: 16px; color: var(--yazi2); margin: 0 0 4px }
+.ac { color: var(--soluk); margin: 0 0 18px }
+.ornek { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 6px; margin-bottom: 22px; overflow: hidden; box-shadow: 0 1px 3px rgba(20,49,90,.06) }
+.ornek > .bas { display: flex; align-items: baseline; gap: 10px; padding: 8px 12px; background: #fafbfd; border-bottom: 1px solid var(--cizgi2) }
+.ornek > .bas b { color: var(--yazi2); font-size: 13px }
+.ornek > .bas span { color: var(--soluk) }
+.ornek > .bas .etk { margin-left: auto; font-size: 11px; background: #e6f4ea; color: var(--yesil); border-radius: 9px; padding: 1px 8px }
+
+/* ortak firma bandı */
+.bant { display: flex; align-items: center; gap: 14px; padding: 9px 14px; background: linear-gradient(#f7f9fc, #eef3f9); border-bottom: 1px solid var(--cizgi2) }
+.bant .ad { font-size: 14px; font-weight: 700; color: var(--yazi2) }
+.bant .r { font-size: 11px; color: var(--soluk) }
+.bant .r b { color: var(--yazi) }
+.bant .bk { margin-left: auto; font-weight: 700; color: var(--yesil) }
+
+/* ortak içerik */
+.icerik { padding: 14px; min-height: 120px }
+.izgara { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 14px }
+.alan { display: flex; flex-direction: column; gap: 3px }
+.alan .e { font-size: 11px; color: var(--soluk) }
+.alan .g { height: 26px; border: 1px solid var(--cizgi); border-radius: 3px; background: #fff; padding: 4px 7px; color: var(--yazi) }
+.rozet { background: #cdd9e6; color: #34506e; border-radius: 9px; font-size: 10px; padding: 0 5px; font-weight: 700; min-width: 15px; text-align: center }
+.uyari .rozet { background: #fde2c4; color: #9a4b00 }
+
+/* 1 - MEVCUT: klasör kulağı */
+.t1 { display: flex; gap: 2px; padding: 0 8px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi) }
+.t1 .k { padding: 7px 11px; color: var(--soluk); cursor: pointer; background: var(--sekmezem); border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0; margin-top: 5px; position: relative; top: 1px; display: flex; gap: 6px; align-items: center }
+.t1 .k.on { color: var(--yazi2); font-weight: 700; background: var(--yuz) }
+
+/* 2 - ALT ÇİZGİLİ DÜZ */
+.t2 { display: flex; gap: 4px; padding: 0 12px; border-bottom: 1px solid var(--cizgi2) }
+.t2 .k { padding: 10px 10px 8px; color: var(--soluk); cursor: pointer; border-bottom: 3px solid transparent; display: flex; gap: 6px; align-items: center }
+.t2 .k:hover { color: var(--yazi2) }
+.t2 .k.on { color: var(--mor); font-weight: 700; border-bottom-color: var(--mor) }
+
+/* 3 - HAP / KAPSÜL */
+.t3 { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap }
+.t3 .k { padding: 5px 13px; border-radius: 999px; color: var(--soluk); cursor: pointer; background: var(--yuz2); border: 1px solid var(--cizgi2); display: flex; gap: 6px; align-items: center }
+.t3 .k:hover { border-color: var(--cizgi) }
+.t3 .k.on { background: var(--mor); border-color: var(--mor); color: #fff; font-weight: 700 }
+.t3 .k.on .rozet { background: rgba(255,255,255,.25); color: #fff }
+
+/* 4 - SEGMENT (bitişik düğme grubu) */
+.t4w { padding: 10px 12px; border-bottom: 1px solid var(--cizgi2) }
+.t4 { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 5px; overflow: hidden; background: var(--yuz2) }
+.t4 .k { padding: 6px 14px; color: var(--soluk); cursor: pointer; border-right: 1px solid var(--cizgi); display: flex; gap: 6px; align-items: center }
+.t4 .k:last-child { border-right: none }
+.t4 .k.on { background: #fff; color: var(--yazi2); font-weight: 700; box-shadow: inset 0 -2px 0 var(--mor) }
+
+/* 5 - SOL DİKEY MENÜ */
+.t5w { display: grid; grid-template-columns: 190px 1fr }
+.t5 { background: var(--yuz2); border-right: 1px solid var(--cizgi2); padding: 8px 0 }
+.t5 .k { padding: 8px 14px; color: var(--soluk); cursor: pointer; display: flex; gap: 8px; align-items: center; border-left: 3px solid transparent }
+.t5 .k .rozet { margin-left: auto }
+.t5 .k:hover { background: #eaf0f7 }
+.t5 .k.on { background: #fff; color: var(--yazi2); font-weight: 700; border-left-color: var(--mor) }
+.t5 .ayr { font-size: 10px; letter-spacing: .06em; color: #93a1b1; padding: 10px 14px 4px; text-transform: uppercase }
+
+/* 6 - İKONLU KUTU SEKMELER */
+.t6 { display: flex; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz2) }
+.t6 .k { width: 92px; padding: 8px 4px 6px; border: 1px solid var(--cizgi2); border-radius: 6px; background: #fff; color: var(--soluk); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; font-size: 11px }
+.t6 .k .i { font-size: 18px; line-height: 1 }
+.t6 .k .rozet { position: absolute; top: 4px; right: 5px }
+.t6 .k:hover { border-color: var(--cizgi) }
+.t6 .k.on { border-color: var(--mor); color: var(--yazi2); font-weight: 700; box-shadow: 0 0 0 2px rgba(47,109,179,.15) }
+
+/* 7 - ÜST VURGU ÇİZGİLİ (modern klasör) */
+.t7 { display: flex; padding: 0 12px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi) }
+.t7 .k { padding: 9px 14px 8px; color: var(--soluk); cursor: pointer; border-top: 3px solid transparent; display: flex; gap: 6px; align-items: center; position: relative; top: 1px; border-left: 1px solid transparent; border-right: 1px solid transparent }
+.t7 .k.on { background: #fff; color: var(--yazi2); font-weight: 700; border-top-color: var(--mor); border-left-color: var(--cizgi); border-right-color: var(--cizgi) }
+
+/* 8 - AKORDİYON / TEK SAYFA (bölüm başlıklı, sekmesiz) */
+.t8w { display: grid; grid-template-columns: 1fr 170px }
+.t8 .bol { border-bottom: 1px solid var(--cizgi2) }
+.t8 .bb { display: flex; align-items: center; gap: 8px; padding: 9px 14px; cursor: pointer; color: var(--yazi2); font-weight: 700; background: #fafbfd }
+.t8 .bb::before { content: '▸'; color: var(--soluk); transition: transform .15s }
+.t8 .bol.ac .bb::before { transform: rotate(90deg) }
+.t8 .bg { display: none; padding: 12px 14px }
+.t8 .bol.ac .bg { display: block }
+.t8n { border-left: 1px solid var(--cizgi2); padding: 10px 0; font-size: 11px; position: sticky; top: 0 }
+.t8n div { padding: 5px 14px; color: var(--soluk); cursor: pointer }
+.t8n div:hover { color: var(--mor) }
+</style>
+</head>
+<body>
+<h1>Müşteri Kartı · Sekme Tipleri</h1>
+<p class="ac">Aynı kart, sekme şeridi 8 farklı tipte. Sekmelere tıklanabilir. Mevcut tip = 1.</p>
+
+<div id="kutular"></div>
+
+<script>
+const SEKMELER = [
+  { ad: 'Genel', i: '🪪' },
+  { ad: 'İletişim', i: '☎️', r: 3 },
+  { ad: 'Satış Koşulları', i: '🏷️' },
+  { ad: 'e-Belge Ayarları', i: '🧾' },
+  { ad: 'Risk', i: '⚠️', r: 1, u: true },
+  { ad: 'Finansal', i: '📊' },
+  { ad: 'Resim / Doküman', i: '📎', r: 5 },
+  { ad: 'Notlar', i: '📝' },
+];
+const ALANLAR = {
+  'Genel': ['Kod', 'Ünvan', 'Fatura Ünvanı', 'Temsilci', 'Durum', 'Kod Grubu'],
+  'İletişim': ['Telefon', 'Cep', 'E-posta', 'Web', 'Yetkili', 'Faks'],
+  'Satış Koşulları': ['Fiyat Listesi', 'Vade (gün)', 'İskonto %', 'Ödeme Şekli', 'Döviz', 'Teslim Şekli'],
+  'e-Belge Ayarları': ['Fatura Tipi', 'Senaryo', 'e-Fatura Alias', 'e-İrsaliye Alias', 'E-posta', 'Gönderim'],
+  'Risk': ['Risk Limiti', 'Açık Bakiye', 'Çek Riski', 'Kalan Limit', 'Uyarı Tipi', 'Blokaj'],
+  'Finansal': ['Bakiye', 'Son Tahsilat', 'Ort. Vade', 'Bu Yıl Satış', 'Bu Yıl Tahsilat', 'Gecikmiş'],
+  'Resim / Doküman': ['Dosya', 'Tür', 'Yükleyen', 'Tarih', 'Boyut', 'Açıklama'],
+  'Notlar': ['Not', 'Yazan', 'Tarih', 'Hatırlatma', 'Etiket', 'Görünürlük'],
+};
+const TIPLER = [
+  { s: 't1', ad: '1 · Klasör kulağı (mevcut)', ac: 'Bugünkü .katab - gri şerit, beyaz seçili sekme.', mevcut: true },
+  { s: 't2', ad: '2 · Alt çizgili düz', ac: 'Kenarlıksız; seçili sekme mavi alt çizgi. Sade, modern.' },
+  { s: 't3', ad: '3 · Hap / kapsül', ac: 'Yuvarlak düğmeler; seçili dolu mavi. Sığmazsa alt satıra sarar.' },
+  { s: 't4', ad: '4 · Segment', ac: 'Bitişik düğme grubu; az sekmeli kartlara uygun.', w: 't4w' },
+  { s: 't5', ad: '5 · Sol dikey menü', ac: 'Muayene sekmesiz düzenine benzer; çok sekmede bile tek bakışta liste.', dikey: true },
+  { s: 't6', ad: '6 · İkonlu kutular', ac: 'İkon + ad; dokunmatik/tablet dostu, yer kaplar.' },
+  { s: 't7', ad: '7 · Üst vurgulu klasör', ac: 'Mevcudun modern hali: seçili sekmenin üstünde mavi çizgi.' },
+  { s: 't8', ad: '8 · Tek sayfa / akordiyon', ac: 'Sekme yok; bölümler alt alta, sağda atlama listesi.', akordiyon: true },
+];
+
+const rozet = s => s.r ? `<span class="rozet">${s.r}</span>` : '';
+const ikon = (tip, s) => (tip.s === 't6' ? `<span class="i">${s.i}</span>` : tip.dikey ? `<span>${s.i}</span>` : '');
+const izgara = ad => `<div class="izgara">${ALANLAR[ad].map(a => `<label class="alan"><span class="e">${a}</span><span class="g"></span></label>`).join('')}</div>`;
+const bant = `<div class="bant"><span class="ad">ATLAS HASTANESİ A.Ş.</span>
+  <span class="r">Kod <b>120.01.0042</b></span><span class="r">Temsilci <b>Ercan Temel</b></span>
+  <span class="r">Durum <b>Aktif</b></span><span class="bk">Bakiye 48.250,00 ₺ (B)</span></div>`;
+
+const kutular = document.getElementById('kutular');
+for (const tip of TIPLER) {
+  const k = document.createElement('div');
+  k.className = 'ornek';
+  let govde;
+  if (tip.akordiyon) {
+    govde = `<div class="t8w"><div class="t8">${SEKMELER.map((s, n) =>
+      `<div class="bol${n < 2 ? ' ac' : ''}" id="${tip.s}-${n}"><div class="bb">${s.i} ${s.ad} ${rozet(s)}</div><div class="bg">${izgara(s.ad)}</div></div>`).join('')}</div>
+      <div class="t8n">${SEKMELER.map((s, n) => `<div data-n="${n}">${s.ad}</div>`).join('')}</div></div>`;
+  } else {
+    const serit = `<div class="${tip.s}">${tip.dikey ? '<div class="ayr">Kart</div>' : ''}${SEKMELER.map((s, n) =>
+      `${tip.dikey && n === 4 ? '<div class="ayr">Finans</div>' : ''}${tip.dikey && n === 6 ? '<div class="ayr">Ekler</div>' : ''}<div class="k${n === 0 ? ' on' : ''}${s.u ? ' uyari' : ''}" data-ad="${s.ad}">${ikon(tip, s)}${tip.s === 't6' ? `<span>${s.ad}</span>` : s.ad}${rozet(s)}</div>`).join('')}</div>`;
+    const ic = `<div class="icerik">${izgara('Genel')}</div>`;
+    govde = tip.dikey ? `<div class="t5w">${serit}${ic}</div>` : (tip.w ? `<div class="${tip.w}">${serit}</div>` : serit) + ic;
+  }
+  k.innerHTML = `<div class="bas"><b>${tip.ad}</b><span>${tip.ac}</span>${tip.mevcut ? '<span class="etk">mevcut</span>' : ''}</div>${bant}${govde}`;
+  kutular.appendChild(k);
+
+  k.addEventListener('click', e => {
+    const sek = e.target.closest('.k');
+    if (sek) {
+      k.querySelectorAll('.k').forEach(x => x.classList.toggle('on', x === sek));
+      k.querySelector('.icerik').innerHTML = izgara(sek.dataset.ad);
+      return;
+    }
+    const bb = e.target.closest('.bb');
+    if (bb) { bb.parentElement.classList.toggle('ac'); return }
+    const n = e.target.closest('.t8n div');
+    if (n) {
+      const b = document.getElementById(`${tip.s}-${n.dataset.n}`);
+      b.classList.add('ac'); b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+</script>
+</body>
+</html>

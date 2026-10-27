@@ -109,10 +109,10 @@ export const PLANLI_GIDER_STILI = `
 .pg-bas .pg-islem { margin-left:auto; display:flex; gap:6px; align-items:center; flex:none; }
 .pg-hizli { display:flex; gap:4px; padding:6px 12px; background:var(--yuz2); border-bottom:1px solid var(--cizgi); flex-wrap:wrap; align-items:center; }
 .pg-ana { min-width:0; border-right:1px solid var(--cizgi); }
-.pg-tabs { display:flex; padding:0 8px; border-bottom:1px solid var(--cizgi); background:var(--yuz); overflow-x:auto; }
-.pg-tab { padding:8px 12px; color:var(--soluk); font-size:12px; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; display:flex; gap:5px; align-items:center; }
+.pg-tabs { display:flex; padding:0 8px; border-bottom:1px solid var(--cizgi); background:var(--yuz2); overflow-x:auto; }
+/* Görünüm (üst vurgulu klasör) tema.css ORTAK SEKME GÖRÜNÜMÜ - burada yalnız yerleşim. */
+.pg-tab { padding:8px 12px 7px; margin-top:4px; position:relative; top:1px; font-size:12px; cursor:pointer; white-space:nowrap; display:flex; gap:5px; align-items:center; }
 .pg-tab .n { background:#eef2f7; border-radius:8px; padding:0 6px; font-size:10px; }
-.pg-tab.on { color:var(--yazi2); font-weight:bold; border-bottom-color:var(--vurgu); }
 .pg-pane { padding:12px; }
 .pg-serit { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
 .pg-kisi { display:flex; gap:8px; align-items:center; padding:7px 0; border-bottom:1px dashed var(--cizgi2); }

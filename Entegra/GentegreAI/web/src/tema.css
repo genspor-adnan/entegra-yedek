@@ -553,16 +553,8 @@ table.grid tr.flt input {
   display: flex; gap: 2px; padding: 8px 12px 0; background: var(--yuz2);
   border-bottom: 1px solid var(--cizgi); flex-wrap: wrap;
 }
-.ka-sekme {
-  border: 1px solid var(--cizgi); border-bottom: none; border-radius: 4px 4px 0 0;
-  padding: 6px 14px; font-size: 12px; background: var(--yuz3, var(--yuz2));
-  color: var(--soluk); cursor: pointer;
-}
-.ka-sekme:hover { color: var(--yazi) }
-.ka-sekme.on {
-  background: var(--yuz); color: var(--vurgu); font-weight: 700;
-  position: relative; top: 1px;
-}
+.ka-sekme { padding: 6px 14px; font-size: 12px; cursor: pointer }
+.ka-sekme.on { position: relative; top: 1px }
 /* Sekmeye gore degisen aciklama: hangi ayarin ne zaman gecerli oldugu farkli
    (tema aninda, dil Kaydet ile) - kullanici tahmin etmesin. */
 .kaalt-durum {
@@ -668,18 +660,35 @@ table.grid tr.flt input {
   flex: none;
 }
 .katab .kat {
-  padding: 7px 11px; font-size: 12px; flex: none; color: var(--soluk); cursor: pointer; white-space: nowrap;
-  background: var(--sekmezem); border: 1px solid var(--cizgi); border-bottom: none; border-radius: 3px 3px 0 0;
-  margin-top: 5px; position: relative; top: 1px; display: flex; align-items: center; gap: 6px; user-select: none;
+  padding: 8px 13px 7px; font-size: 12px; flex: none; cursor: pointer; white-space: nowrap;
+  margin-top: 4px; position: relative; top: 1px; display: flex; align-items: center; gap: 6px; user-select: none;
 }
-.katab .kat:hover { color: var(--yazi2) }
 .katab .katab-buyut {
   margin-left: auto; flex: none; align-self: center; border: 1px solid var(--cizgi); background: var(--yuz);
   color: var(--soluk); border-radius: 3px; padding: 1px 7px; font-size: 13px; line-height: 20px; cursor: pointer;
   position: sticky; right: 0;
 }
 .katab .katab-buyut:hover, .katab .katab-buyut[aria-pressed="true"] { color: var(--yazi2); border-color: var(--mor) }
-.katab .kat.on { color: var(--yazi2); font-weight: 700; background: var(--yuz); border-bottom: 1px solid var(--yuz) }
+/* ORTAK SEKME GÖRÜNÜMÜ - ÜST VURGULU KLASÖR (kullanıcı 27.10.2026: "7 nolu üst vurgulu klasörü uygula",
+   "yeni sekme stilini formlara genelleştirelim"; mockup Ekranlar/musteri_karti_sekme_tipleri.html tip 7).
+   Pasif sekme zeminsiz / kenarsız, seçili sekme gövde zemininde + yan kenarlık + üstte 3 px mavi çizgi.
+   GÖRÜNÜM YALNIZ BURADA: ekranların kendi sekme kuralları (ayarlar, mesaj, iskonto, alt panel, talep,
+   konsültasyon, planlı gider, kurum tipi) yalnız yerleşim taşır - zemin / kenarlık / renk yazmaz. */
+.katab .kat, .ka-sekme, .msb-sekme, .isk-sekme, .altpanel-sekme, .tl-sekmeler > button, .kns-sekmeler button,
+.pg-tab, .kt-kok .sekme {
+  background: transparent; border: 1px solid transparent; border-top: 3px solid transparent; border-bottom: none;
+  border-radius: 0; color: var(--soluk);
+}
+.katab .kat:hover, .ka-sekme:hover, .msb-sekme:hover, .isk-sekme:hover, .altpanel-sekme:hover,
+.tl-sekmeler > button:hover, .kns-sekmeler button:hover, .pg-tab:hover, .kt-kok .sekme:hover { color: var(--yazi2) }
+.katab .kat.on, .ka-sekme.on, .msb-sekme.on, .isk-sekme.on, .altpanel-sekme.on, .tl-sekmeler > button.on,
+.kns-sekmeler button.on, .pg-tab.on, .kt-kok .sekme.on {
+  background: var(--yuz); color: var(--yazi2); font-weight: 700;
+  border-color: var(--cizgi); border-top-color: var(--mor);
+}
+/* Kart sekmesi şeridin alt çizgisini örter; alt panel gövdesi kart zemininde. */
+.katab .kat.on { border-bottom: 1px solid var(--yuz) }
+.altpanel-sekme.on { background: var(--kartzem) }
 .katab .kat .b {
   background: #cdd9e6; color: #34506e; border-radius: 9px; font-size: 10px; padding: 0 5px;
   font-weight: 700; min-width: 15px; text-align: center;
@@ -3496,9 +3505,8 @@ input.skt-gecmis {
   font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px }
 .msb-title .msb-sp { margin-left: auto; font-weight: 400; opacity: .85; font-size: 11px }
 .msb-sekmeler { display: flex; gap: 2px; padding: 6px 10px 0; background: #f3f6fa; border-bottom: 1px solid var(--cizgi, #cdd6e0); flex-wrap: wrap }
-.msb-sekme { border: 1px solid var(--cizgi, #cdd6e0); border-bottom: none; border-radius: 4px 4px 0 0;
-  padding: 6px 12px; font-size: 11.5px; background: #e7edf4; color: #4d5d6e; cursor: pointer }
-.msb-sekme.on { background: #fff; color: #14315a; font-weight: 700; position: relative; top: 1px }
+.msb-sekme { padding: 6px 12px; font-size: 11.5px; cursor: pointer }
+.msb-sekme.on { position: relative; top: 1px }
 .msb-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 0 }
 @media (max-width: 900px) { .msb-iki { grid-template-columns: 1fr } }
 .msb-sol { border-right: 1px solid var(--cizgi2, #e3e9f0) }
@@ -4045,17 +4053,12 @@ td.hucre-panik input { border-color: var(--hata); color: var(--hata); font-weigh
   border-bottom: 1px solid var(--cizgi); margin-bottom: 10px;
 }
 .isk-sekme {
-  border: 1px solid var(--cizgi); border-bottom: 0;
-  border-radius: 4px 4px 0 0; padding: 6px 12px; font-size: 12px;
-  background: var(--yuz2); color: var(--soluk); cursor: pointer;
+  padding: 6px 12px; font-size: 12px; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
 }
 /* Etkin sekme govdeyle BIRLESIR: alt cizgisi kalkar - hangi panelin acik
    oldugu rozetten degil, serit butunlugunden okunur. */
-.isk-sekme.on {
-  background: var(--yuz); color: var(--yazi); font-weight: 700;
-  margin-bottom: -1px; padding-bottom: 7px;
-}
+.isk-sekme.on { margin-bottom: -1px; padding-bottom: 7px }
 .isk-sekme .rozet { padding: 0 7px }
 
 /* Sayac kutusunun ALT SATIRI (mockup .kutu .alt): rakamin altinda kucuk
@@ -4316,15 +4319,10 @@ select.acil {
   border-bottom: 1px solid var(--cizgi);
 }
 .altpanel-sekme {
-  border: 1px solid var(--cizgi); border-bottom: none; border-radius: var(--r) var(--r) 0 0;
-  padding: 5px 12px; font: inherit; font-size: 11.5px; color: var(--soluk);
-  background: var(--zemin); cursor: pointer;
+  padding: 5px 12px; font: inherit; font-size: 11.5px; cursor: pointer;
   display: inline-flex; align-items: center; gap: 5px;
 }
-.altpanel-sekme.on {
-  background: var(--kartzem); color: var(--yazi2); font-weight: 700;
-  position: relative; top: 1px;
-}
+.altpanel-sekme.on { position: relative; top: 1px }
 .altpanel-govde { background: var(--kartzem); padding: 8px 4px }
 /* Roller ve Subeler YAN YANA: yetki ana rol + ek rollerin birlesimi, sube ise
    rolden gelir - iki kutu birbirinin cevabi, alt alta konursa bagi kopar. */
@@ -7305,9 +7303,7 @@ table.tl-masraf .sag { text-align: right }
 /* --- Taleplerim: gelen isler + ariza bildir + anlik bildirim (954/955,
    mockup Ekranlar/Taleplerim/ariza_bildir.html, gelen_talepler.html) --- */
 .tl-sekmeler { display: flex; gap: 0; padding: 0 20px; border-bottom: 1px solid var(--cizgi2); margin-bottom: 10px }
-.tl-sekmeler > button { border: 0; background: none; padding: 8px 14px; font-size: 12px; color: var(--soluk); cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px }
-.tl-sekmeler > button.on { color: var(--yazi2); font-weight: 700; border-bottom-color: var(--mor) }
+.tl-sekmeler > button { padding: 8px 14px; font-size: 12px; cursor: pointer; margin-bottom: -1px }
 .tl-say { font-size: 10.5px; background: var(--yuz2); border-radius: 8px; padding: 0 6px; margin-left: 4px; font-weight: 400 }
 .tl-say-k { background: var(--hata); color: #fff; font-weight: 700 }
 .tl-psek { display: flex; border-bottom: 1px solid var(--kenar2) }
@@ -8427,9 +8423,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
    Mockup Ekranlar/Muayene/konsultasyon_listesi.html · konsultasyon_karti.html. */
 .kns-ust { display: grid; gap: 6px; margin-bottom: 6px }
 .kns-sekmeler { display: flex; gap: 2px; border-bottom: 1px solid var(--cizgi) }
-.kns-sekmeler button { border: 1px solid transparent; border-bottom: 0; background: none; padding: 6px 14px; border-radius: 4px 4px 0 0;
-  cursor: pointer; color: var(--soluk); font-size: 12px; display: inline-flex; gap: 6px; align-items: center }
-.kns-sekmeler button.on { background: var(--yuz); border-color: var(--cizgi); color: var(--vurgu); font-weight: bold; margin-bottom: -1px }
+.kns-sekmeler button { padding: 6px 14px; cursor: pointer; font-size: 12px; display: inline-flex; gap: 6px; align-items: center }
+.kns-sekmeler button.on { margin-bottom: -1px }
 .kns-onizleme { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 6px 0 }
 .kns-onizleme.bos { display: block; color: var(--soluk); padding: 10px; font-size: 12px }
 @media (max-width: 1000px) { .kns-onizleme, .kns-iki { grid-template-columns: 1fr } }
