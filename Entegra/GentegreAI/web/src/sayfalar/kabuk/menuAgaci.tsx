@@ -7,6 +7,7 @@
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { CekIkon } from '../../bilesenler/CekIkon';
 import { BelgeIkon, FaturaIkon, belgeIkonKodu } from '../../bilesenler/BelgeIkonlari';
+import { BasvuruIkon } from '../../bilesenler/BasvuruIkon';
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
@@ -103,6 +104,9 @@ export function MenuIkon({ ic }: { ic: string }) {
   // '@ekstre' (kullanıcı 25.10.2026: "ekstre ikonu sigma yap"): mavi kare üstünde Σ (EkstreIkon).
   if (ic === '@ekstre')
     return <span className="ic ic-hilal" aria-hidden="true"><EkstreIkon /></span>;
+  // '@basvuru' (kullanıcı 27.10.2026): mavi zemin, beyaz H (BasvuruIkon).
+  if (ic === '@basvuru')
+    return <span className="ic ic-hilal" aria-hidden="true"><BasvuruIkon /></span>;
   // '@cek' (kullanıcı 26.10.2026: "çek listesi ikonu değiş çek resmi yap"): çek kağıdı (CekIkon).
   if (ic === '@cek')
     return <span className="ic ic-hilal" aria-hidden="true"><CekIkon /></span>;
