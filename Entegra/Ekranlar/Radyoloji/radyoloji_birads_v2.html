@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu · Biçim × Giriş (BI-RADS) — Mockup v2 (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  h1{font-size:16px;color:var(--navy);margin:0 auto 4px;max-width:1420px}
+  .acik{color:var(--muted);margin:0 auto 12px;max-width:1420px;line-height:1.5}
+  .win{max-width:1420px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;font-family:inherit}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 7px;font-size:11px}
+
+  .hbnd{display:flex;align-items:stretch;border-bottom:1px solid var(--line2);background:#fff}
+  .hbnd>div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .hbnd .foto{width:52px;display:grid;place-items:center;font-weight:bold;color:var(--navy);font-size:15px;background:#f3f6fa;border-left:4px solid #3d6aa8}
+  .hbnd .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .hbnd .alt{color:var(--muted);font-size:11px}
+  .hbnd .et{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;border:1px solid}
+  .rz.al{background:#fdecec;color:#b23b3b;border-color:#f3c2c2}
+  .rz.gri{background:#f1f4f8;color:#4d5d6e;border-color:#dfe5ec}
+
+  .idstrip{display:grid;grid-template-columns:1.4fr 1fr 1fr 210px;gap:10px;padding:8px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-taslak{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+
+  /* BICIM x GIRIS SERIDI */
+  .mod{display:flex;align-items:center;gap:14px;padding:7px 12px;border-bottom:1px solid var(--line2);background:#fafbfd;flex-wrap:wrap}
+  .mod .et{font-size:11px;color:var(--muted)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;vertical-align:middle}
+  .seg button{border:0;background:var(--head);padding:4px 14px;font:inherit;font-size:11.5px;cursor:pointer;color:var(--muted)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:bold}
+  .seg button:disabled{opacity:.45;cursor:not-allowed}
+  .mod .ozet{margin-left:auto;font-size:11px;color:var(--navy);background:#eef4fb;border:1px solid #d3e2f3;border-radius:10px;padding:2px 10px}
+  .mod select{width:auto}
+
+  .br{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:11px;font-weight:bold;font-size:11px;border:1px solid}
+  .br0{background:#eef1f5;color:#4d5d6e;border-color:#d5dde6}
+  .br1,.br2{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .br3{background:#fff6d6;color:#8a6a00;border-color:#efdc95}
+  .br4{background:#fde9d7;color:#a65300;border-color:#f3c79d}
+  .br5,.br6{background:#fbe0de;color:#a3241b;border-color:#f0b4ae}
+
+  .ana{display:grid;grid-template-columns:210px 1fr 370px;min-height:660px}
+  .ana.yapisal{grid-template-columns:210px 1fr 430px}
+  .sol{border-right:1px solid var(--line2);background:#fbfcfd;padding:8px}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfd;padding:8px}
+  .sol h5,.sag h5{margin:2px 0 6px;font-size:11.5px;color:var(--navy)}
+  .kart{border:1px solid var(--line2);border-radius:3px;background:#fff;padding:6px 8px;margin-bottom:6px;font-size:11px;line-height:1.5}
+  .kart b{color:var(--navy)}
+  .kart .tar{color:var(--muted);font-size:10.5px}
+  .orta{padding:10px 12px;min-width:0}
+
+  .bol{margin-bottom:10px}
+  .bol .bas{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--navy);
+    font-weight:bold;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .bol .bas .not{margin-left:auto;font-weight:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10.5px}
+  .ta{width:100%;border:1px solid var(--line);border-radius:3px;padding:6px 8px;font:inherit;line-height:1.55;resize:vertical;background:#fff}
+  .ta.oto{background:#f6faff;border-color:#c8dcf3}
+  .ta[readonly]{color:#33475b}
+  .a4{width:100%;max-width:794px;min-height:900px;margin:0 auto;display:block;padding:44px 52px;background:#fff;border:1px solid var(--line);
+      box-shadow:0 2px 10px rgba(20,49,90,.12);font:inherit;font-size:13px;line-height:1.65;resize:vertical}
+  .a4.kucuk{min-height:520px;padding:22px 24px;font-size:11.5px;max-width:none}
+  .onizbas{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  .onizbas b{color:var(--navy)}
+  .onizbas .sp{margin-left:auto}
+  .canli{font-size:10px;color:#2e7d46;background:#e2f3e8;border:1px solid #bfe3cb;border-radius:9px;padding:0 7px}
+
+  select,input{font:inherit;font-size:11.5px;border:1px solid var(--line);border-radius:2px;height:23px;padding:0 4px;background:#fff;width:100%}
+  .satir{display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;margin-bottom:5px}
+  .satir>span{font-size:10.5px;color:var(--muted);text-align:right}
+
+  /* BI-RADS PANELI / FORMU */
+  .bp{border:1px solid #c8dcf3;border-radius:5px;background:#fff;overflow:hidden}
+  .bp-bas{display:flex;align-items:center;gap:8px;padding:7px 9px;background:linear-gradient(#f4f8fd,#e9f1fb);border-bottom:1px solid #c8dcf3}
+  .bp-bas b{color:var(--navy);font-size:12.5px}
+  .bp-ic{padding:8px 9px}
+  .lezler{display:grid;grid-template-columns:1fr;gap:8px;margin:8px 0}
+  .genis .lezler{grid-template-columns:1fr 1fr}
+  .lez{border:1px solid var(--line2);border-radius:4px;background:#fcfdfe}
+  .lez-bas{display:flex;gap:6px;align-items:center;padding:5px 7px;border-bottom:1px solid var(--line2);background:#f6f9fc;cursor:pointer}
+  .lez-bas b{color:var(--navy)}
+  .lez-bas .sp{margin-left:auto}
+  .lez-ic{padding:7px}
+  .lez.kapali .lez-ic{display:none}
+  .genis .lez.kapali .lez-ic{display:block}       /* genis formda hep acik */
+  .ilk4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px}
+  .ilk4 label{display:flex;flex-direction:column;gap:2px;font-size:10px;color:var(--muted)}
+  .genis .soz{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+  .genis .soz .satir{grid-template-columns:86px 1fr}
+  .oneri{border:1px dashed #98c2ee;border-radius:5px;background:#f6faff;padding:8px;margin-top:8px}
+  .oneri .neden{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+  .oneri .neden span{display:inline-block;background:#fff;border:1px solid #dbe6f3;border-radius:9px;padding:0 6px;margin:2px 3px 0 0}
+  .karar{border:1px solid var(--line2);border-radius:5px;padding:8px;margin-top:8px;background:#fff}
+  .genis .altlar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .uyari{font-size:10.5px;color:#9a4b00;background:#fff6ea;border:1px solid #f3dcbd;border-radius:3px;padding:4px 6px;margin-top:5px}
+  .takip{font-size:11px;background:#f3f9f4;border:1px solid #cfe7d6;border-radius:4px;padding:6px 8px;margin-top:8px;line-height:1.5}
+  .bilgi{font-size:11px;background:#f6f9fc;border:1px solid var(--line2);border-radius:4px;padding:8px;color:var(--muted);line-height:1.5}
+  .makro{display:flex;gap:6px;align-items:center;border:1px solid var(--line2);border-radius:3px;background:#fff;padding:4px 6px;margin-bottom:5px;font-size:11px}
+  .makro .k{font-family:Consolas,monospace;background:#eef2f7;border-radius:3px;padding:0 4px}
+
+  .nasil{max-width:1420px;margin:16px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .nb{background:#fff;border:1px solid var(--line);border-radius:5px;padding:10px 12px;line-height:1.55}
+  .nb h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .nb ul{margin:0;padding-left:16px}
+  .nb table{border-collapse:collapse;width:100%;font-size:11px}
+  .nb td,.nb th{border:1px solid var(--line2);padding:4px 6px;text-align:left;vertical-align:top}
+  .nb th{background:var(--head)}
+  .nb tr.on td{background:#eef4fb}
+  .genis4{grid-column:span 4}
+  @media (max-width:1100px){.ana,.ana.yapisal{grid-template-columns:1fr}.nasil{grid-template-columns:1fr}.genis4{grid-column:auto}
+    .genis .lezler,.genis .soz,.genis .altlar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>Radyoloji Raporu · Biçim × Giriş (BI-RADS örneği) — v2</h1>
+<p class="acik">İki bağımsız seçim: <b>Biçim</b> = raporun metni nasıl durur (Tek A4 / Parçalı bölümler),
+  <b>Giriş</b> = hekim nasıl yazar (Serbest metin / Yapısal form). Dört birleşimin hepsi aynı ekran.
+  Yapısal yalnız formu olan şablonda açılır - üstteki <i>Şablon</i> listesinden "Beyin BT" seçip deneyin.
+  Her iki seçim hekim başına hatırlanır.</p>
+
+<div class="win">
+  <div class="title">📝 Radyoloji Raporu · R-000214 <span class="sp">GenoTIP AI · Radyoloji</span></div>
+  <div class="toolbar">
+    <button class="btn primary">💾 Taslak Kaydet</button>
+    <button class="btn">➜ Uzmana Gönder</button>
+    <button class="btn ok">✍ Onayla ve İmzala</button>
+    <button class="btn danger">⚠ Kritik Bulgu Bildir</button>
+    <button class="btn">🖨 Çıktı</button>
+    <span style="margin-left:auto"></span>
+    <button class="btn">✖ Kapat</button>
+  </div>
+
+  <div class="hbnd">
+    <div class="foto">AY</div>
+    <div><div class="ad">Ayşe Yılmaz</div><div class="alt"><b>K 41y</b> · SGK</div><div class="alt">D H-000412 · P-000981</div></div>
+    <div><div class="et">Alerji / Kronik</div><span class="rz al">⚠ penisilin</span></div>
+    <div style="flex:1"><div class="et">Meme öyküsü</div>
+      <span class="rz gri">Ailede meme Ca (anne, 52y)</span> <span class="rz gri">Son meme US 04.2026 · BI-RADS 3</span></div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label>Tetkik</label><div><b>MEMUS</b> · Meme ultrasonografisi (bilateral)</div></div>
+    <div class="fld"><label>Çekim</label><div>27.10.2026 10:42 · US-2 (Logiq E10)</div></div>
+    <div class="fld"><label>Durum</label><div><span class="chip c-taslak">Taslak</span></div></div>
+    <div class="fld"><label>Genel BI-RADS</label><div id="genelRozet">—</div></div>
+  </div>
+
+  <!-- BICIM x GIRIS -->
+  <div class="mod">
+    <span class="et">Biçim</span>
+    <span class="seg" id="bicim"><button data-v="tek">Tek</button><button data-v="parcali">Parçalı</button></span>
+    <span class="et">Giriş</span>
+    <span class="seg" id="giris"><button data-v="serbest">Serbest</button><button data-v="yapisal">Yapısal</button></span>
+    <span class="et" style="margin-left:14px">Şablon</span>
+    <select id="sablon"><option value="memus">MEMUS-01 · Meme US (BI-RADS)</option><option value="bt">BT-BEY-01 · Beyin BT (yapısal form yok)</option></select>
+    <span class="ozet" id="ozet"></span>
+  </div>
+
+  <div class="ana" id="ana">
+    <div class="sol">
+      <h5>Önceki meme tetkikleri</h5>
+      <div class="kart"><b>Meme US</b> <span class="br br3">BI-RADS 3</span>
+        <div class="tar">14.04.2026 · Dr. Selin Kaya</div>Sağ 10:00, 9 mm oval, düzgün sınırlı. 6 ay kontrol.</div>
+      <div class="kart"><b>Mamografi</b> <span class="br br2">BI-RADS 2</span>
+        <div class="tar">02.03.2025 · Dr. Selin Kaya</div>Kompozisyon C. Benign kalsifikasyonlar.</div>
+      <h5 style="margin-top:10px">Takip</h5>
+      <div class="kart" style="border-color:#efdc95;background:#fffbea"><b>BI-RADS 3 kontrolü</b>
+        <div class="tar">Hedef 14.10.2026 · bugün yapıldı ✓</div></div>
+      <h5 style="margin-top:10px">İstem</h5>
+      <div class="kart"><b>Klinik:</b> Sağ memede ele gelen kitle, 6 ay kontrol.<br><b>İsteyen:</b> Dr. Kemal Aydın</div>
+    </div>
+    <div class="orta" id="orta"></div>
+    <div class="sag" id="sag"></div>
+  </div>
+</div>
+
+<div class="nasil">
+  <div class="nb genis4">
+    <h3>Dört birleşim</h3>
+    <table id="tablo">
+      <tr><th></th><th>Serbest (hekim yazar)</th><th>Yapısal (form → metin üretilir)</th></tr>
+      <tr data-b="tek"><th>Tek</th>
+        <td data-g="serbest">Şablondan gelen A4 metin; makrolar metne eklenir. BI-RADS paneli sağda yardımcı ("Rapora aktar" metnin sonuna ekler).</td>
+        <td data-g="yapisal">Ortada geniş form; sağda A4 önizleme canlı üretilir. Teknik / klinik / karşılaştırma şablondan, BULGULAR ve SONUÇ formdan.</td></tr>
+      <tr data-b="parcali"><th>Parçalı</th>
+        <td data-g="serbest">Bölüm bölüm yazım (bugünkü). BI-RADS paneli sağda; "Rapora aktar" Bulgular + Sonuç'u yazar.</td>
+        <td data-g="yapisal">Ortada geniş form; sağda bölümler. Teknik / Klinik / Karşılaştırma düzenlenir, Bulgular + Sonuç formdan üretilir (kilitli).</td></tr>
+    </table>
+  </div>
+  <div class="nb">
+    <h3>Geçiş kuralları</h3>
+    <ul>
+      <li><b>Yapısal → Serbest</b>: üretilen metin olduğu gibi kalır, artık elle düzenlenir. Form verisi silinmez.</li>
+      <li><b>Serbest → Yapısal</b>: Bulgular / Sonuç elle değiştirildiyse sorulur: "Formdan yeniden üretilsin mi? Elle değişiklik kaybolur."</li>
+      <li><b>Tek ⇄ Parçalı</b>: bugünkü kural (birleştir / Bulgular'a taşı).</li>
+    </ul>
+  </div>
+  <div class="nb">
+    <h3>Yapısal ne zaman açık</h3>
+    <ul>
+      <li>Şablon kartında <i>Yapısal rapor türü</i> doluysa (BI-RADS; ileride LI-RADS, PI-RADS, TI-RADS, Lung-RADS).</li>
+      <li>Değilse düğme soluk; "Yapısal" hatırlanan hekimde ekran Serbest açılır, tercih bozulmaz.</li>
+    </ul>
+  </div>
+  <div class="nb">
+    <h3>Ne kaydedilir</h3>
+    <ul>
+      <li>Metin her zaman bölüm(ler)de - çıktı, onay, e-Nabız değişmez.</li>
+      <li>Form verisi ayrıca: <b>radyoloji_rapor_lezyon</b> + raporda kompozisyon, önerilen / son kategori, gerekçe.</li>
+      <li>Raporda <i>giriş</i> işareti: yapısal mı yazıldı (denetim, istatistik).</li>
+    </ul>
+  </div>
+  <div class="nb">
+    <h3>Takip ve denetim</h3>
+    <ul>
+      <li>BI-RADS 3 → 6 ay kontrol; 0 → ek görüntüleme; 4/5 → biyopsi takibi (patolojiyle eşleşir).</li>
+      <li>Serbest girişte de kategori seçilirse aynı takip açılır.</li>
+      <li>Denetim icmali: hekim bazında dağılım, biyopsi oranı, PPV.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ------------------------------------------------------------------ veri
+const KOMP = ['Homojen - yağ','Homojen - fibroglandüler','Heterojen'];
+const SOZ = {
+  sekil: ['Oval','Yuvarlak','Düzensiz'], oryantasyon: ['Paralel','Paralel değil'],
+  kenar: ['Düzgün sınırlı','Belirsiz','Açılı','Mikrolobüle','Spiküle'],
+  eko: ['Anekoik','Hiperekoik','Kompleks kistik-solid','Hipoekoik','İzoekoik','Heterojen'],
+  arka: ['Yok','Güçlenme','Gölgelenme','Kombine'],
+  kals: ['Yok','Tipik benign','Kaba heterojen','Amorf','İnce pleomorfik','İnce lineer / dallanan'],
+};
+const ET = { sekil:'Şekil', oryantasyon:'Oryantasyon', kenar:'Kenar', eko:'Eko paterni', arka:'Arka akustik', kals:'Kalsifikasyon' };
+const YONETIM = { '0':'Ek görüntüleme / önceki tetkiklerle karşılaştırma','1':'Rutin tarama','2':'Rutin tarama',
+  '3':'6 ay sonra kısa aralıklı kontrol','4A':'Doku tanısı (biyopsi)','4B':'Doku tanısı (biyopsi)','4C':'Doku tanısı (biyopsi)',
+  '5':'Doku tanısı (biyopsi)','6':'Uygun tedavi planı (cerrahi / onkoloji)' };
+const SIRA = ['1','2','3','4A','4B','4C','5','6'];
+const rozet = k => `<span class="br br${k[0]}">BI-RADS ${k}</span>`;
+const kucuk = s => s.toLocaleLowerCase('tr');
+
+const durum = {
+  bicim: 'parcali', giris: 'yapisal', sablon: 'memus', komp: KOMP[1], sonElle: null, gerekce: '', elleDegisti: false,
+  lez: [
+    { taraf:'Sağ', saat:'10:00', uzak:'3 cm', boyut:'14×9 mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Belirsiz',
+      eko:'Hipoekoik', arka:'Yok', kals:'Yok', buyume:true, acik:true },
+    { taraf:'Sol', saat:'2:00', uzak:'5 cm', boyut:'6×5 mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Düzgün sınırlı',
+      eko:'Anekoik', arka:'Güçlenme', kals:'Yok', buyume:false, acik:false },
+  ],
+  bolum: {
+    'Teknik': 'Her iki meme ve aksiller bölgeler yüksek rezolüsyonlu lineer prob ile değerlendirildi.',
+    'Klinik bilgi': 'Sağ memede ele gelen kitle, 6 ay kontrol.',
+    'Karşılaştırma': '14.04.2026 tarihli US ile karşılaştırıldı: sağ 10:00 lezyon 9 mm\'den 14 mm\'ye büyümüştür.',
+    'Bulgular': '', 'Sonuç': '',
+  },
+  tekMetin: '',
+};
+const MEMUS_BOLUM = { ...durum.bolum };
+const BT_BOLUM = { 'Teknik':'Kontrast madde verilmeden aksiyel kesitler elde edildi.', 'Klinik bilgi':'Baş ağrısı.',
+  'Karşılaştırma':'Önceki tetkik yok.', 'Bulgular':'Beyin parankiminde akut kanama, kitle ya da yer kaplayan lezyon izlenmedi.',
+  'Sonuç':'Akut intrakraniyal patoloji saptanmadı.' };
+
+// ------------------------------------------------------------- hesap
+function lezKat(l){
+  const n = []; let k = '3';
+  if (l.eko==='Anekoik' && l.kenar==='Düzgün sınırlı' && l.sekil!=='Düzensiz') { k='2'; n.push('basit kist → 2'); }
+  else if (l.sekil!=='Düzensiz' && l.kenar==='Düzgün sınırlı' && l.oryantasyon==='Paralel') n.push('oval, düzgün, paralel solid → 3');
+  const yuk = x => { if (SIRA.indexOf(x) > SIRA.indexOf(k)) k = x; };
+  if (l.kenar==='Mikrolobüle') { yuk('4A'); n.push('mikrolobüle → 4A'); }
+  if (l.kenar==='Belirsiz' || l.kenar==='Açılı') { yuk('4B'); n.push(`${kucuk(l.kenar)} kenar → 4B`); }
+  if (l.sekil==='Düzensiz' && l.oryantasyon==='Paralel değil') { yuk('4C'); n.push('düzensiz + paralel değil → 4C'); }
+  if (l.kenar==='Spiküle') { const s = l.sekil==='Düzensiz' ? '5' : '4C'; yuk(s); n.push('spiküle → ' + s); }
+  const kk = { 'Tipik benign':'2','Kaba heterojen':'4A','Amorf':'4B','İnce pleomorfik':'4C','İnce lineer / dallanan':'5' }[l.kals];
+  if (kk) { yuk(kk); n.push(`${kucuk(l.kals)} kalsifikasyon → ${kk}`); }
+  if (l.buyume && SIRA.indexOf(k) < SIRA.indexOf('4A')) { k='4A'; n.push('büyüme → en az 4A'); }
+  return { k, n };
+}
+function oneri(){
+  let g = '1', n = [];
+  durum.lez.forEach((l,i) => { const r = lezKat(l); if (SIRA.indexOf(r.k) > SIRA.indexOf(g)) g = r.k; n.push(...r.n.map(x => `L${i+1}: ${x}`)); });
+  if (!durum.lez.length) n = ['lezyon yok → 1'];
+  return { g, n };
+}
+const sonKat = () => durum.sonElle ?? oneri().g;
+function uret(){
+  const s = [`Doku kompozisyonu: ${kucuk(durum.komp)}.`];
+  durum.lez.forEach(l => {
+    const { k } = lezKat(l);
+    const arka = l.arka!=='Yok' ? `, arka akustik ${kucuk(l.arka)}` : '';
+    const kal = l.kals!=='Yok' ? `, ${kucuk(l.kals)} kalsifikasyon` : '';
+    s.push(`${l.taraf} meme saat ${l.saat} hizasında, meme başına ${l.uzak} uzaklıkta, ${l.boyut} boyutlarında ${kucuk(l.sekil)}, `
+         + `${kucuk(l.oryantasyon)} oryantasyonlu, ${kucuk(l.kenar)} kenarlı, ${kucuk(l.eko)}${arka}${kal} lezyon izlenmiştir`
+         + `${l.buyume?' (önceki tetkike göre büyüme)':''}. [BI-RADS ${k}]`);
+  });
+  if (!durum.lez.length) s.push('Her iki memede kitle, şüpheli kalsifikasyon ya da mimari distorsiyon izlenmemiştir.');
+  const k = sonKat();
+  return { bulgu: s.join('\n'), sonuc: `BI-RADS ${k}. ${YONETIM[k]}.` + (k !== oneri().g && durum.gerekce ? `\nNot: ${durum.gerekce}` : '') };
+}
+const birlestir = b => Object.entries(b).map(([k,v]) => `${k.toLocaleUpperCase('tr')}:\n${v}`).join('\n\n');
+
+// ------------------------------------------------------------- cizim
+const yapisalVar = () => durum.sablon === 'memus';
+const etkinGiris = () => (durum.giris === 'yapisal' && yapisalVar()) ? 'yapisal' : 'serbest';
+
+function formHtml(genis){
+  const { g, n } = oneri(); const k = sonKat();
+  const lez = durum.lez.map((l,i) => `
+    <div class="lez${l.acik?'':' kapali'}" data-i="${i}">
+      <div class="lez-bas" data-ac="${i}"><b>Lezyon ${i+1}</b> ${l.taraf} ${l.saat} · ${l.boyut}
+        <span class="sp">${rozet(lezKat(l).k)}</span><span style="color:#b23b3b;cursor:pointer" data-sil="${i}" title="Sil">✕</span></div>
+      <div class="lez-ic">
+        <div class="ilk4">
+          <label>Taraf<select data-a="taraf">${['Sağ','Sol'].map(x=>`<option${x===l.taraf?' selected':''}>${x}</option>`).join('')}</select></label>
+          <label>Saat<input data-a="saat" value="${l.saat}"></label>
+          <label>Meme başına<input data-a="uzak" value="${l.uzak}"></label>
+          <label>Boyut<input data-a="boyut" value="${l.boyut}"></label>
+        </div>
+        <div class="soz">${Object.keys(SOZ).map(a => `<div class="satir"><span>${ET[a]}</span><select data-a="${a}">${SOZ[a].map(x=>`<option${x===l[a]?' selected':''}>${x}</option>`).join('')}</select></div>`).join('')}</div>
+        <div class="satir"><span>Değişim</span><label style="font-size:11px"><input type="checkbox" data-a="buyume" ${l.buyume?'checked':''} style="width:auto;height:auto"> önceki tetkike göre büyüme</label></div>
+      </div></div>`).join('');
+  const yon = [...new Set(Object.values(YONETIM))].map(v=>`<option${v===YONETIM[k]?' selected':''}>${v}</option>`).join('');
+  const takip = k==='3' ? '📅 Kaydedilince <b>6 ay kontrol</b> takibi açılır (hedef 27.04.2027).'
+    : (k[0]==='4' || k==='5') ? '🧪 Kaydedilince <b>biyopsi takibi</b> açılır; patoloji sonucuyla eşleşir. İsteyen hekime bildirim.'
+    : k==='0' ? '🔁 <b>Ek görüntüleme</b> işi açılır.' : k==='6' ? '🩺 Tedavi planı bilgisi.' : '✓ Rutin tarama - takip açılmaz.';
+  return `<div class="bp ${genis?'genis':''}">
+    <div class="bp-bas"><b>BI-RADS ${genis?'· yapısal form':'· yardımcı panel'}</b>
+      <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">Meme US</span></div>
+    <div class="bp-ic">
+      <div class="satir"><span>Doku kompozisyonu</span><select id="komp">${KOMP.map(x=>`<option${x===durum.komp?' selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="lezler">${lez}</div>
+      <button class="btn kucuk" id="lezEkle">＋ Lezyon ekle</button>
+      <button class="btn kucuk" id="lezYok">Lezyon yok (BI-RADS 1)</button>
+      <div class="altlar">
+        <div class="oneri"><div style="display:flex;align-items:center;gap:6px">Önerilen: ${rozet(g)}</div>
+          <div class="neden">${n.map(x=>`<span>${x}</span>`).join('')}</div></div>
+        <div class="karar">
+          <div class="satir"><span><b>Son kategori</b></span><select id="son">${['0',...SIRA].map(x=>`<option value="${x}"${x===k?' selected':''}>BI-RADS ${x}</option>`).join('')}</select></div>
+          ${k!==g ? `<div class="uyari">Öneriden farklı - gerekçe zorunlu:<input id="gerekce" value="${durum.gerekce}" placeholder="ör. önceki tetkikle stabil" style="margin-top:4px"></div>` : ''}
+          <div class="satir" style="margin-top:5px"><span>Öneri</span><select>${yon}</select></div>
+        </div>
+      </div>
+      <div class="takip">${takip}</div>
+      ${genis ? '' : `<div style="display:flex;gap:6px;margin-top:8px;align-items:center"><button class="btn primary" id="aktar">⤵ Rapora aktar</button>
+        <span style="font-size:10.5px;color:var(--muted)">${durum.bicim==='tek'?'A4 metnin BULGULAR / SONUÇ kısmını yazar':'Bulgular + Sonuç yeniden yazılır'}</span></div>`}
+    </div></div>`;
+}
+
+function makroHtml(){
+  return `<h5>Şablon makroları</h5>
+    <div class="makro"><span class="k">.nl</span>Normal ${durum.sablon==='bt'?'beyin BT':'meme US'}</div>
+    <div class="makro"><span class="k">.kst</span>Basit kist</div>
+    <div class="makro"><span class="k">.ksz</span>Karşılaştırma yok</div>`;
+}
+
+function ciz(){
+  const giris = etkinGiris(), bicim = durum.bicim;
+  document.querySelectorAll('#bicim button').forEach(b => b.classList.toggle('on', b.dataset.v===bicim));
+  document.querySelectorAll('#giris button').forEach(b => {
+    b.classList.toggle('on', b.dataset.v===giris);
+    if (b.dataset.v==='yapisal') { b.disabled = !yapisalVar(); b.title = yapisalVar() ? '' : 'Bu şablonda yapısal form yok'; }
+  });
+  document.getElementById('ozet').textContent = `${bicim==='tek'?'Tek':'Parçalı'} + ${giris==='yapisal'?'Yapısal':'Serbest'}`
+    + (durum.giris==='yapisal' && !yapisalVar() ? ' (tercih Yapısal - bu şablonda form yok)' : '');
+  document.getElementById('ana').classList.toggle('yapisal', giris==='yapisal');
+  document.getElementById('genelRozet').innerHTML = yapisalVar() ? rozet(sonKat()) : '—';
+  document.querySelectorAll('#tablo tr[data-b] td').forEach(td =>
+    td.parentElement.classList.toggle('on', false));
+  document.querySelectorAll('#tablo tr[data-b] td').forEach(td =>
+    td.style.background = (td.parentElement.dataset.b===bicim && td.dataset.g===giris) ? '#eef4fb' : '');
+
+  // yapisalda Bulgular / Sonuc formdan uretilir
+  if (giris==='yapisal') { const u = uret(); durum.bolum['Bulgular'] = u.bulgu; durum.bolum['Sonuç'] = u.sonuc; }
+  const orta = document.getElementById('orta'), sag = document.getElementById('sag');
+
+  if (giris==='yapisal') {
+    orta.innerHTML = formHtml(true);
+    const sabit = ['Teknik','Klinik bilgi','Karşılaştırma'];
+    if (bicim==='tek') {
+      sag.innerHTML = `<div class="onizbas"><b>Rapor önizleme (A4)</b><span class="canli">● canlı</span>
+          <button class="btn kucuk sp" id="elle">✎ Elle düzenle</button></div>
+        <textarea class="a4 kucuk" readonly>${birlestir(durum.bolum)}</textarea>
+        <div class="bilgi" style="margin-top:6px">Teknik / klinik / karşılaştırma şablondan; BULGULAR ve SONUÇ formdan üretilir.
+          "Elle düzenle" girişi Serbest'e çevirir, metin olduğu gibi kalır.</div>`;
+    } else {
+      sag.innerHTML = `<div class="onizbas"><b>Rapor bölümleri</b><span class="canli">● canlı</span>
+          <button class="btn kucuk sp" id="elle">✎ Elle düzenle</button></div>
+        ${Object.entries(durum.bolum).map(([k,v]) => `<div class="bol"><div class="bas">${k}
+          ${sabit.includes(k) ? '' : '<span class="not">🧩 formdan · kilitli</span>'}</div>
+          <textarea class="ta${sabit.includes(k)?'':' oto'}" data-bolum="${k}" rows="${k==='Bulgular'?7:k==='Sonuç'?3:2}" ${sabit.includes(k)?'':'readonly'}>${v}</textarea></div>`).join('')}`;
+    }
+  } else {
+    if (bicim==='tek') {
+      if (!durum.tekMetin) durum.tekMetin = birlestir(durum.bolum);
+      orta.innerHTML = `<textarea class="a4" id="tekMetin">${durum.tekMetin}</textarea>`;
+    } else {
+      orta.innerHTML = Object.entries(durum.bolum).map(([k,v]) => `<div class="bol"><div class="bas">${k}${k==='Bulgular'||k==='Sonuç'?' *':''}</div>
+        <textarea class="ta" data-bolum="${k}" rows="${k==='Bulgular'?8:k==='Sonuç'?3:2}">${v}</textarea></div>`).join('');
+    }
+    sag.innerHTML = (yapisalVar() ? formHtml(false) : `<div class="bilgi">Bu şablonun yapısal formu yok (BI-RADS paneli çıkmaz).</div>`)
+      + `<div style="margin-top:10px">${makroHtml()}</div>`;
+  }
+  bagla();
+}
+
+function bagla(){
+  const q = id => document.getElementById(id);
+  q('komp') && (q('komp').onchange = e => { durum.komp = e.target.value; ciz(); });
+  q('son') && (q('son').onchange = e => { durum.sonElle = e.target.value; ciz(); });
+  q('gerekce') && (q('gerekce').onchange = e => { durum.gerekce = e.target.value; ciz(); });
+  q('lezEkle') && (q('lezEkle').onclick = () => { durum.lez.forEach(l => l.acik=false);
+    durum.lez.push({ taraf:'Sağ', saat:'12:00', uzak:'2 cm', boyut:'— mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Düzgün sınırlı',
+      eko:'Hipoekoik', arka:'Yok', kals:'Yok', buyume:false, acik:true }); durum.sonElle=null; ciz(); });
+  q('lezYok') && (q('lezYok').onclick = () => { durum.lez = []; durum.sonElle = null; ciz(); });
+  q('aktar') && (q('aktar').onclick = () => { const u = uret();
+    durum.bolum['Bulgular'] = u.bulgu; durum.bolum['Sonuç'] = u.sonuc; durum.tekMetin = birlestir(durum.bolum); ciz(); });
+  q('elle') && (q('elle').onclick = () => { durum.giris = 'serbest'; durum.tekMetin = birlestir(durum.bolum); ciz(); });
+  q('tekMetin') && (q('tekMetin').oninput = e => { durum.tekMetin = e.target.value; durum.elleDegisti = true; });
+  document.querySelectorAll('textarea[data-bolum]:not([readonly])').forEach(t => t.oninput = e => {
+    durum.bolum[e.target.dataset.bolum] = e.target.value; durum.elleDegisti = true; durum.tekMetin = ''; });
+  document.querySelectorAll('.lez').forEach(el => {
+    const i = +el.dataset.i;
+    el.onchange = e => { const a = e.target.dataset.a; if (!a) return;
+      durum.lez[i][a] = e.target.type==='checkbox' ? e.target.checked : e.target.value; durum.sonElle=null; ciz(); };
+    el.onclick = e => {
+      if (e.target.dataset.sil !== undefined) { durum.lez.splice(i,1); durum.sonElle=null; ciz(); return; }
+      if (e.target.closest('[data-ac]') && !e.target.closest('select,input')) { durum.lez[i].acik = !durum.lez[i].acik; ciz(); }
+    };
+  });
+}
+
+document.getElementById('bicim').onclick = e => { const v = e.target.dataset.v; if (!v || v===durum.bicim) return;
+  if (v==='tek') durum.tekMetin = birlestir(durum.bolum);
+  durum.bicim = v; ciz(); };
+document.getElementById('giris').onclick = e => { const v = e.target.dataset.v; if (!v || e.target.disabled || v===etkinGiris()) return;
+  if (v==='yapisal' && durum.elleDegisti &&
+      !confirm('Bulgular / Sonuç elle değiştirildi. Formdan yeniden üretilsin mi? Elle değişiklik kaybolur.')) return;
+  durum.giris = v; durum.elleDegisti = false; durum.tekMetin = ''; ciz(); };
+document.getElementById('sablon').onchange = e => { durum.sablon = e.target.value;
+  durum.bolum = { ...(durum.sablon==='bt' ? BT_BOLUM : MEMUS_BOLUM) }; durum.tekMetin = ''; ciz(); };
+ciz();
+</script>
+</body>
+</html>

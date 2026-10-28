@@ -13,6 +13,9 @@
 /// </summary>
 public static partial class KartKatalogu
 {
+    /// <summary>radyoloji_sablon.yapisal_tur (1194): 0 yok, 1 BI-RADS.</summary>
+    private static Dictionary<string, string> RadyolojiYapisalTurler => new() { ["0"] = "Yok", ["1"] = "BI-RADS" };
+
     private static KartTanimi RadyolojiIstem() => new(
         Ad: "radyoloji-istem",
         // Liste ile AYNI yetki (796): kart serbest kalirsa liste suzmesi
@@ -398,6 +401,10 @@ public static partial class KartKatalogu
             new("istemBilgi", "istem_bilgi", "mantik", Baslik: "Klinik bilgi istemden dolsun", Grup: "Genel", AltGrup: "Davranış"),
             new("karsilastirma", "karsilastirma", "mantik", Baslik: "Önceki aynı bölge tetkiki karşılaştırmaya önerilsin", Grup: "Genel", AltGrup: "Davranış"),
             new("kritikSor", "kritik_sor", "mantik", Baslik: "Sonuçta kritik ifade geçerse kritik bulgu bildirimi sor", Grup: "Genel", AltGrup: "Davranış"),
+            // YAPISAL RAPOR (1194, kullanıcı 27.10.2026): doluysa rapor ekranında Giriş = Yapısal açılır (BI-RADS formu).
+            new("yapisalTur", "yapisal_tur", "kod", SabitKodlar: RadyolojiYapisalTurler, Baslik: "Yapısal rapor formu",
+                Grup: "Genel", AltGrup: "Davranış",
+                Ipucu: "BI-RADS seçiliyse hekim raporu formla yazabilir (lezyonlar, kategori önerisi); metin formdan üretilir."),
             new("eimzaZorunlu", "eimza_zorunlu", "mantik", Baslik: "Onayda e-imza zorunlu", Grup: "Genel", AltGrup: "Davranış"),
             new("subeId",   "sube_id",  "kod", Gizli: true),
         },

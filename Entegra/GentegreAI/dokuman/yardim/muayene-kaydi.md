@@ -11,7 +11,7 @@ surum: 1
 urun_modu: 2
 yetki: muayene
 erisim: kullanici
-ozet: Hekim Çalışma Listesi'nden hastayı muayeneye alma, muayene kartının sekmeleri (anamnez, bulgu, ICD-10 tanı, istem, rapor), reçete ve muayeneyi tamamlama kuralları.
+ozet: Doktor Bekleme Listesi'nden hastayı muayeneye alma, muayene kartının sekmeleri (anamnez, bulgu, ICD-10 tanı, istem, rapor), reçete ve muayeneyi tamamlama kuralları.
 guncelleme: 2026-09-19
 dogrulama: kod-incelemesi
 ---

@@ -21,7 +21,7 @@ public sealed record KullaniciKaydi(
     bool RolAtanmamis);
 
 /// <summary>Oturum kapisi (denetim 28.09.2026 #4): hesabin istek anindaki durumu.</summary>
-public sealed record HesapDurumu(bool Aktif, bool ParolaDegismeli, bool RolAtanmamis);
+public sealed record HesapDurumu(bool Aktif, bool ParolaDegismeli, bool RolAtanmamis, bool AileAcik);
 
 /// <summary>Kullanici Ayarlari > Hesabim (669): kisinin kendi hesap ozeti.</summary>
 public sealed record HesapBilgisi(
@@ -488,14 +488,19 @@ public sealed class KullaniciDeposu
     /// mi, ya da hic aktif degil mi. Istek basina okunur - bayrak token
     /// alindiktan SONRA acilsa da bir sonraki istekte gecerlidir.
     /// </summary>
-    public Task<HesapDurumu?> OturumDurumuAsync(int kullaniciId,
+    /// <param name="aileId">Token'ın oturum ailesi (B05). Ailenin açık (iptal edilmemiş, süresi dolmamış) bir
+    /// satırı yoksa <see cref="HesapDurumu.AileAcik"/> false - çıkış / cihaz kapatma / parola değişimi / tekrar
+    /// kullanım aileyi kapatınca eldeki access token da düşer.</param>
+    public Task<HesapDurumu?> OturumDurumuAsync(int kullaniciId, Guid aileId,
         CancellationToken iptal = default)
         => _veri.TekAsync(
-            "select k.aktif, k.parola_degismeli, " + RolAtanmamisIfade + " as rol_atanmamis "
+            "select k.aktif, k.parola_degismeli, " + RolAtanmamisIfade + " as rol_atanmamis, "
+            + "exists (select 1 from public.oturum o where o.kullanici_id = k.id and o.aile_id = @p1 "
+            + "and o.iptal_tarihi is null and o.bitis_tarihi > now()) as aile_acik "
             + "from public.taraf_kullanici k where k.id = @p0",
-            new object?[] { kullaniciId },
+            new object?[] { kullaniciId, aileId },
             o => new HesapDurumu(o.Bayrak("aktif"), o.Bayrak("parola_degismeli"),
-                                 o.Bayrak("rol_atanmamis")), iptal);
+                                 o.Bayrak("rol_atanmamis"), o.GetBoolean(o.GetOrdinal("aile_acik"))), iptal);
 
     /// <summary>
     /// Kayit kapsami (eski YETKIALANI). Bos liste = kapsam SINIRSIZ;

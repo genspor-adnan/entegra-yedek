@@ -38,10 +38,12 @@ export const radyolojiUclari = {
       kritikler: Record<string, unknown>[];
       /** Bakanlik profili acik mi (809) - OBX-13 alanlari buna gore gosterilir. */
       bakanlikProfili: boolean;
+      /** BI-RADS lezyonlari (1194) - yapisal formun verisi. */
+      lezyonlar: Record<string, unknown>[];
     }>(`/api/radyoloji/istem/${istemId}/rapor`),
 
   radyolojiRaporYaz: (istemId: number, govde: unknown) =>
-    gonder<{ raporId: number }>(`/api/radyoloji/istem/${istemId}/rapor`, govde),
+    gonder<{ raporId: number; surum: string }>(`/api/radyoloji/istem/${istemId}/rapor`, govde),
 
   /** Sablon iskeleti - "yeniden uygula" bolumleri buradan kurar. */
   radyolojiSablonBolumleri: async (sablonId: number) => {
@@ -51,8 +53,9 @@ export const radyolojiUclari = {
   },
 
   /** Ön rapor / onay. Onay ön kosullari sunucuda (fn_radyoloji_rapor_onaylanabilir). */
-  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay') =>
-    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}`, {}),
+  /** `surum`: onaylanan metnin sürümü (kaydın döndürdüğü) - arada değiştiyse sunucu 409 döner. */
+  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}&surum=${encodeURIComponent(surum)}`, {}),
 
   /**
    * RAPOR CIKTISI (303): hastaya verilen belge. Yazma ekraninin verisinden

@@ -22,14 +22,31 @@ public static partial class RadyolojiUclari
     /// <summary>islem_log.tablo_id - rapor.</summary>
     private const int LogTabloRapor = 941;
 
-    public sealed record BolumIstegi(int? Id, int Sira, string Baslik, string Metin, short Yazdir);
+    /// <summary>MetinHtml (1195): editörün biçimli hali - sunucuda temizlenir; Metin düz hali (e-Nabız / HL7).</summary>
+    public sealed record BolumIstegi(int? Id, int Sira, string Baslik, string Metin, short Yazdir, string? MetinHtml = null);
     public sealed record AlanIstegi(string AlanKod, string AlanAd, string Deger);
+    /// <summary>BI-RADS lezyonu (1194) - sözlük seçimleri ekranda; kategori ekranın kural motorundan.</summary>
+    public sealed record LezyonIstegi(string? Taraf, string? Saat, string? Uzaklik, string? Boyut, string? Sekil,
+                                      string? Oryantasyon, string? Kenar, string? Eko, string? Arka,
+                                      string? Kalsifikasyon, short Buyume, string? Kategori);
+    /// <summary>BI-RADS raporu (1194): öneri sistemin, kategori radyoloğun; farklıysa gerekçe zorunlu.</summary>
+    public sealed record BiradsIstegi(string? Kompozisyon, string? Oneri, string? Kategori, string? Gerekce,
+                                      string? Yonetim, IReadOnlyList<LezyonIstegi>? Lezyonlar);
     public sealed record RaporIstegi(int? SablonId, IReadOnlyList<BolumIstegi>? Bolumler,
                                      IReadOnlyList<AlanIstegi>? Alanlar, short? Kritik,
                                      /// <summary>OBX-13 birinci deger: istemin gerekcesi (811) - 0 girilmedi.</summary>
                                      short? IstemNedeniPuan = null,
                                      /// <summary>OBX-13 ikinci deger: cekim kalitesi (811) - 0 girilmedi.</summary>
-                                     short? CekimKalitePuan = null);
+                                     short? CekimKalitePuan = null,
+                                     /// <summary>1 serbest, 2 yapısal (1194). Null = değişmez.</summary>
+                                     short? Giris = null,
+                                     /// <summary>Yapısal BI-RADS verisi (1194). Null = dokunulmaz.</summary>
+                                     BiradsIstegi? Birads = null,
+                                     /// <summary>
+                                     /// SÜRÜM (kod inceleme raporu 28.10.2026 B04): okunan raporun xmin damgası. Kayıtlı
+                                     /// raporda zorunlu - başkası arada kaydettiyse / onayladıysa 409 (sessiz ezme yok).
+                                     /// </summary>
+                                     string? Surum = null);
     public sealed record KritikIstegi(string Bulgu, string BildirilenAd, short Yol,
                                       string GeriBildirim,
                                       /// <summary>Bildirilen hekim aldigini teyit etti mi (318).</summary>
@@ -138,18 +155,26 @@ public static partial class RadyolojiUclari
 
     public static void RadyolojiUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/radyoloji").WithTags("Radyoloji").RequireAuthorization();
+        // KAYIT KAPISI (kod inceleme raporu 28.10.2026 B02): /istem/{id}, /rapor/{id}, /hasta/{id} uçlarının kimliği
+        //   liste ile aynı şube / kapsam / portal kuralından geçer - kapsam dışı 404.
+        var grup = yol.MapGroup("/api/radyoloji").WithTags("Radyoloji").RequireAuthorization()
+                      .AddEndpointFilter<RadyolojiKayitKapisi>();
 
         // ------------------------------------------- istem ekranı verisi ----
         // Tetkik ağacı (modalite > tetkik), isteyen hekim adayları ve hastanın
         //   SON 12 AYDA aynı tetkiği çekilip çekilmediği tek istekte gelir -
         //   mükerrer tetkik uyarısı (mockup) bu listeden çıkar.
         grup.MapGet("/istem-secenekleri", async (
-            int? hastaId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int? hastaId, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Gor);
+            // KAPSAM (kod inceleme raporu 28.10.2026 B02, ikinci tur): hasta SORGU PARAMETRESİYLE gelir -
+            //   RadyolojiKayitKapisi yalnız yol kimliğine bakar. Kapsam dışı hastanın tetkik geçmişi
+            //   bu uçtan sızıyordu; olmayan hastayla aynı 404.
+            if (hastaId is > 0)
+                await erisim.IsteAsync(baglam, "hasta", hastaId.Value, "Hasta bulunamadı.", iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -193,19 +218,33 @@ public static partial class RadyolojiUclari
                 select id, ad, kurum, brans from public.v_dis_hekim_lookup order by ad
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            // Son 12 ay: aynı tetkik tekrar isteniyorsa hekim gerekçelendirsin.
-            var gecmis = hastaId is null || hastaId <= 0
-                ? new List<IDictionary<string, object?>>()
-                : await baglanti.ListeAsync("""
-                    select i.hizmet_id as "hizmetId", coalesce(hz.ad, '') as "tetkikAdi",
-                           max(coalesce(i.cekim_tarihi, i.ekleme_tarihi)) as tarih
+            // Son 12 ay: aynı tetkik tekrar isteniyorsa hekim gerekçelendirsin. Yalnız KAPSAMDAKİ istemler
+            //   (rapor ekranındaki önceki tetkikler listesiyle aynı kural): başka şubenin istemi sayılmaz.
+            var gecmis = new List<IDictionary<string, object?>>();
+            if (hastaId is > 0)
+            {
+                var satirlar = await baglanti.ListeAsync("""
+                    select i.id, i.hizmet_id as "hizmetId", coalesce(hz.ad, '') as "tetkikAdi",
+                           coalesce(i.cekim_tarihi, i.ekleme_tarihi) as tarih
                       from public.radyoloji_istem i
                       left join public.hizmet hz on hz.id = i.hizmet_id
                      where i.hasta_id = @p0 and i.durum > 0
                        and coalesce(i.cekim_tarihi, i.ekleme_tarihi)
                            >= (current_date - interval '12 months')
-                     group by i.hizmet_id, hz.ad
                     """, null, [hastaId.Value], OkuyucuGenisletmeleri.Sozluk, iptal);
+                var gorunen = new List<IDictionary<string, object?>>();
+                foreach (var s in satirlar)
+                    if (await erisim.GorunurAsync(baglam, "radyoloji-istem", Convert.ToInt64(s["id"]), iptal))
+                        gorunen.Add(s);
+                gecmis = gorunen
+                    .GroupBy(s => (Hizmet: s["hizmetId"], Ad: s["tetkikAdi"]))
+                    .Select(g => (IDictionary<string, object?>)new Dictionary<string, object?>
+                    {
+                        ["hizmetId"] = g.Key.Hizmet, ["tetkikAdi"] = g.Key.Ad,
+                        ["tarih"] = g.Max(s => s["tarih"] as DateTime?),
+                    })
+                    .ToList();
+            }
 
             return Results.Ok(new { tetkikler, hekimler, disHekimler, gecmis });
         });
@@ -294,7 +333,7 @@ public static partial class RadyolojiUclari
         });
 
         grup.MapPost("/istem", async (
-            IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            IstemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
             BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -311,6 +350,16 @@ public static partial class RadyolojiUclari
             if (string.IsNullOrWhiteSpace(istek.KlinikBilgi))
                 throw GentegreHatasi.Dogrulama("Klinik bilgi / istem gerekçesi yazılmalı.",
                     new AlanHatasi("klinikBilgi", "Zorunlu."));
+
+            // KAPSAM (B02, ikinci tur): hasta ve başvuru GÖVDEDE gelir. Kapsam dışı hastaya istem açılamaz;
+            //   verilen başvuru bu hastanın ve çalışılan şubenin olmalı (başkasının başvurusuna kalem yazılmasın).
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
+            if (istek.BelgeId is int verilenBelge && verilenBelge > 0
+                && await veri.TekDegerAsync<int>("""
+                    select count(*)::int from public.belge
+                     where id = @p0 and taraf_id = @p1 and (@p2::int is null or sube_id = @p2)
+                    """, [verilenBelge, istek.HastaId, baglam.SubeId], iptal) == 0)
+                throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
 
             await using var baglanti = await veri.AcAsync(iptal);
             var basvuruUyarilari = new List<string>();

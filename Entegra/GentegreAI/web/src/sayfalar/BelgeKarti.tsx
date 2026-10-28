@@ -1348,10 +1348,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     return () => ekranSekmesi.kapatmaIsleyicisi(null);
   }, [sayfa, ekranSekmesi]);
   // ERP BELGESİNDE YALNIZ CARİ (kullanıcı 26.10.2026: "sekme başlıkta numara olmasın sadece müşteri adı ilk 2
-  //   kelime olsun") - yeni belgede de cari seçilince. Başvuru eskisi gibi: protokol no · hasta.
+  //   kelime olsun") - yeni belgede de cari seçilince. BAŞVURU DA YALNIZ HASTA ADI (kullanıcı 28.10.2026: "başvuru
+  //   kartı sekme başlıkta hasta adı olsun") - protokol no araç çubuğundaki başlıkta.
   const sekmeBasligi = basvuruMu
-    ? [sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : '',
-       sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')].filter(Boolean).join(' · ')
+    ? sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')
     : sekmeAdi(cari?.unvan || '');
   useEffect(() => {
     if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
@@ -1441,7 +1441,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           hastaVar={!!cari?.id}
           // Secili hastanin karti DOGRUDAN acilir (781) - arada arama
           //   penceresi yok (dugme zaten hasta secili degilken pasif).
-          hastaKartiAc={() => { if (cari?.id) arama.setHastaKartId(cari.id) }}
+          // HASTA KARTI KENDİ SEKMESİNDE (kullanıcı 27.10.2026: "başvuruda hasta kartı aç butona basınca sekmede
+          //   açsın"): başvurunun sağına; sekmesiz kullanımda (modal belge) eski pencere.
+          hastaKartiAc={() => {
+            if (!cari?.id) return;
+            if (sayfa && ekranSekmesi) ekranSekmesi.kartaGit(`/hasta/${cari.id}`);
+            else arama.setHastaKartId(cari.id);
+          }}
           doktorIstemVar={(doktorIstem?.toplam ?? 0) > 0}
           doktorIstemSayi={doktorIstem?.toplam ?? 0}
           doktorIstemi={() => setDoktorModal(true)}
@@ -1491,6 +1497,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                        // AVANS KARTTAN (781): serit kendi sormuyor, boylece
                        //   avans alinir alinmaz hucre degisiyor.
                        avans={avansDurumu.toplam}
+                       // BANT v3 (27.10.2026): ödeyen kurumun provizyonu (SGK'da sgk*, ÖSS'de oss*; kurum ödemiyorsa
+                       //   gerekmez), bu başvurunun kimliği ve protokol no.
+                       provizyon={!provizyonVar ? null
+                         : kurumlar.find(k => k.id === odeyenKurumId)?.tur === KURUM_SGK
+                           ? { durum: Number(basvuruBilgi.sgkDurum ?? 0),
+                               no: String(basvuruBilgi.sgkTakipNo || basvuruBilgi.sgkProvizyonNo || '') }
+                           : { durum: Number(basvuruBilgi.ossDurum ?? 0), no: String(basvuruBilgi.ossProvizyonNo || '') }}
+                       belgeId={kayitliId || null}
+                       protokolNo={String(sonuc?.belge.belgeNo ?? '')}
                        taraflar={seritTaraflari} />
         )}
 
@@ -1927,6 +1942,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           rolModali={rolModali} setRolModali={setRolModali}
           istemModali={arama.istem} setIstemModali={arama.setIstem}
           onKaydedildi={onKaydedildi} git={git}
+          // YENİ BAŞVURUDA ARAMA İPTALİ (kullanıcı 27.10.2026: "hasta seçilmediyse ya da yeni hasta kartı açılmadı
+          //   iptal dendiyse yeni başvuru da iptal olsun"): hastasız yeni başvuru açık kalmaz - kendi sekmesindeyse
+          //   sekme kapanır, değilse Kapat'ın yolu (listeye dönüş). Kayıtlı belge ya da hasta seçiliyse dokunulmaz.
+          onAramaIptal={() => {
+            if (!basvuruMu || kayitliId || cari) return;
+            if (sayfa && ekranSekmesi) ekranSekmesi.kapat(); else void kapat(true);
+          }}
         />
       </>
     </Modal>

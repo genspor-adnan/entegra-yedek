@@ -1,3 +1,4 @@
+import { htmlTemizle } from '../bilesenler/htmlGuvenlik';
 import { mesaj } from '../bilesenler/mesaj';
 import type { ListeSatiri } from '../api/sozlesme';
 
@@ -28,7 +29,8 @@ export async function belgeGoruntusuAc(html: string, baslik: string, yazdir: boo
     mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
     return;
   }
-  pencere.document.write(html);
+  // TEMİZ (kod inceleme raporu 28.10.2026 B03): XSLT çıktısı - gelen faturanın şablonu karşı firmadan gelir.
+  pencere.document.write(htmlTemizle(html));
   pencere.document.close();
   // Sablonun kendi <title>'i yazildiktan SONRA ezilir.
   try { pencere.document.title = baslik } catch { /* farkli koken - onemsiz */ }

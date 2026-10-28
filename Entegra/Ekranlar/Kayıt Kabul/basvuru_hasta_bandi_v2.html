@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Başvuru Kartı · Hasta Bandı v2 — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a;
+    --accent:#2f6db3; --head:#f3f6fa; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h1{font-size:16px;color:var(--navy);margin:0 auto 4px;max-width:1420px}
+  .acik{color:var(--muted);margin:0 auto 10px;max-width:1420px;line-height:1.5}
+  .senaryo{max-width:1420px;margin:0 auto 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .senaryo b{color:var(--navy);margin-right:4px}
+  .senaryo button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 11px;font:inherit;cursor:pointer;color:var(--muted)}
+  .senaryo button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .win{max-width:1420px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.12);overflow:hidden}
+  .arac{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 9px;font-size:11.5px;font-family:inherit}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.sag{margin-left:auto}
+  .baslik{font-weight:bold;color:var(--navy);margin-left:8px}
+  .rz{display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .r-al{background:#fdecec;color:#b23b3b;border-color:#f3c2c2}
+  .r-uy{background:#fff4e0;color:#9a5b00;border-color:#f3d7a8}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .r-gri{background:#f1f4f8;color:#4d5d6e;border-color:#dfe5ec}
+  .r-mavi{background:#e8f1fb;color:#1f5aa0;border-color:#c8dcf3}
+  .r-mor{background:#f1ebfb;color:#5b3a9a;border-color:#ddd0f3}
+  .et{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+  .foto{width:40px;height:40px;display:grid;place-items:center;font-weight:bold;color:#fff;font-size:13px;background:#4a6584;border-radius:50%}
+  .ad{font-size:15px;font-weight:bold;color:var(--navy)}
+  .para{font-weight:bold;font-size:13px}
+  .para.borc{color:#b23b3b}
+  .para.yok{color:var(--ok)}
+  .gizli{display:none !important}
+
+  /* B v2 - İKİ KAT */
+  .B{margin:10px 12px 12px;border:1px solid var(--line2);border-left:4px solid #3d6aa8;border-radius:5px;overflow:hidden;background:#fff}
+  .B .ust{display:grid;grid-template-columns:62px 1.5fr 1.5fr 1.3fr 1.3fr 125px 125px;align-items:stretch}
+  .B .ust>div{padding:8px 12px;border-right:1px solid var(--line2);display:flex;flex-direction:column;justify-content:center}
+  .B .ust>div:last-child{border-right:none}
+  .B .s{font-size:11px;color:var(--muted)}
+  .B .s b{color:var(--ink)}
+  .B .roz{display:flex;flex-wrap:wrap;gap:4px}
+  .B .para-k{text-align:right;align-items:flex-end}
+  /* İZİNLER: dört küçük satır, her biri ✓ / ✗ / ? */
+  .izin{display:grid;grid-template-columns:auto 1fr;gap:1px 6px;font-size:11px;align-items:center}
+  .izin .d{font-weight:bold;text-align:center;width:14px}
+  .izin .d.v{color:var(--ok)} .izin .d.y{color:var(--req)} .izin .d.b{color:#c9a000}
+  .izin .ac{color:var(--muted)}
+  .B .alt-s{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px;background:#fafbfd;border-top:1px solid var(--line2)}
+  .stepper{display:flex;margin:0 12px 10px;border-top:2px solid #e3e9f0;padding-top:4px;color:var(--muted);font-size:11px}
+  .stepper div{flex:1;text-align:center}
+  .stepper .on{color:#b23b3b;font-weight:bold}
+
+  .nasil{max-width:1420px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .nb{background:#fff;border:1px solid var(--line);border-radius:5px;padding:10px 12px;line-height:1.55}
+  .nb h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .nb ul{margin:0;padding-left:16px}
+</style>
+</head>
+<body>
+<h1>Başvuru Kartı · Hasta Bandı — v2 (B seçeneği, değiştirilmiş)</h1>
+<p class="acik">B'nin iki katlı yapısı korunur. Değişen: <b>Doğum</b> sütunu yerine <b>Uyarı</b> (klinik ve kimlik uyarıları), <b>Telefon</b> sütunu yerine
+  <b>İzinler</b> (SMS, KVKK açık rıza, e-Nabız paylaşımı, yakınına bilgi). Doğum tarihi adın altındaki satırda (yaş yanında) kalır. Alt kat yalnız
+  idari durum varsa görünür.</p>
+
+<div class="senaryo"><b>Senaryo:</b>
+  <button data-s="normal" class="on">Normal hasta</button>
+  <button data-s="sgk">SGK · provizyon yok</button>
+  <button data-s="borclu">Borçlu + açık başvuru</button>
+  <button data-s="oncelik">65+ · engelli · alerjik</button>
+  <button data-s="yeni">Yeni hasta (izin alınmamış)</button>
+</div>
+
+<div class="win">
+  <div class="arac">
+    <span class="btn ok">💾 Kaydet</span><span class="btn pas">🖨 Protokol Fişi</span><span class="btn">👤 Hasta Kartını Aç</span>
+    <span class="btn">📅 Randevudan Getir</span><span class="btn">🚑 Acil Başvuru</span>
+    <span class="baslik">Başvuru #15005 — P-000166</span>
+    <span class="btn sag">✖ Kapat</span>
+  </div>
+
+  <div class="B">
+    <div class="ust">
+      <div><div class="foto">SB</div></div>
+      <div>
+        <div class="ad">Saim Bulut <span class="rz r-mor gizli" data-g="yeni">YENİ HASTA</span></div>
+        <div class="s"><b>♂ E · 69 y</b> · 17.12.1956</div>
+        <div class="s">TC <b>•••••••••41</b> · D <b>H-000081</b> · P <b>P-000166</b></div>
+      </div>
+      <!-- UYARI (eski: Doğum) -->
+      <div>
+        <div class="et">Uyarı</div>
+        <div class="roz" data-v="uyari"></div>
+      </div>
+      <!-- İZİNLER (eski: Telefon) -->
+      <div>
+        <div class="et">İzinler</div>
+        <div class="izin" data-v="izin"></div>
+      </div>
+      <div>
+        <div class="et">Ödeyen kurum</div>
+        <b data-v="kurum">Özel (Ücretli)</b>
+        <div class="s" data-v="prov"></div>
+      </div>
+      <div class="para-k"><div class="et">Açık tahsilat</div><div class="para" data-v="tah">0,00 ₺</div></div>
+      <div class="para-k"><div class="et">Açık belge</div><div class="para yok">0,00 ₺</div></div>
+    </div>
+    <div class="alt-s" data-v="altkat"><span class="et" style="margin:0">Durum</span><span data-v="durum" style="display:flex;gap:4px;flex-wrap:wrap"></span></div>
+  </div>
+  <div class="stepper"><div class="on">● Başvuru</div><div>Ücretlendirme</div><div>Tahsilat</div><div>Belge Kesimi</div></div>
+</div>
+
+<div class="nasil">
+  <div class="nb"><h3>Uyarı sütunu (klinik / kimlik)</h3><ul>
+    <li>⚠ Alerji (kırmızı) ve kronik hastalık (sarı) - muayene bandıyla aynı kaynak, en çok 2 rozet + kalan sayısı.</li>
+    <li>Kara liste / şiddet notu, yabancı uyruklu / kimliksiz, aynı ad uyarısı.</li>
+    <li>Uyarı yoksa yeşil "Alerji: yok"; bilgi hiç girilmemişse gri "Alerji bilgisi yok".</li></ul></div>
+  <div class="nb"><h3>İzinler sütunu</h3><ul>
+    <li><b>SMS</b> (randevu / sonuç bildirimi) · <b>KVKK açık rıza</b> · <b>e-Nabız paylaşımı</b> · <b>Yakınına bilgi</b>.</li>
+    <li>✓ verildi · ✗ reddetti · ? sorulmadı. "?" varsa tıklayınca izin formu açılır (form motoru / onam).</li>
+    <li>Telefon bandda yok: Hasta Kartını Aç ya da SMS satırının ipucunda (maskeli).</li></ul></div>
+  <div class="nb"><h3>Alt kat - idari durum (yalnız varsa)</h3><ul>
+    <li>💰 Önceki borç · 📂 kapanmamış başvuru (tıkla → aç) · ⚠ provizyon alınmadı.</li>
+    <li>♿ Öncelik: 65+, engelli, gebe, şehit / gazi yakını · 📅 bugünkü randevu.</li>
+    <li>Hiç durum yoksa kat gizlenir, bant tek satır kalır.</li></ul></div>
+</div>
+
+<script>
+const V = '<span class="d v">✓</span>', Y = '<span class="d y">✗</span>', B = '<span class="d b">?</span>';
+const izin = (sms, kvkk, enabiz, yakin) =>
+  `${sms}<span>SMS <span class="ac">(0532 ••• 44 21)</span></span>${kvkk}<span>KVKK açık rıza</span>${enabiz}<span>e-Nabız paylaşımı</span>${yakin}<span>Yakınına bilgi</span>`;
+const S = {
+  normal: { kurum:'Özel (Ücretli)', prov:'', uyari:[['r-ok','Alerji: yok']], izin:izin(V,V,V,Y), durum:[], tah:['0,00 ₺',''], yeni:false },
+  sgk:    { kurum:'SGK · Genel Sağlık Sigortası', prov:'<span class="rz r-uy">⚠ Provizyon alınmadı</span>', uyari:[['r-ok','Alerji: yok']],
+            izin:izin(V,V,V,V), durum:[['r-uy','⚠ Provizyon bekliyor'],['r-mavi','📅 09:40 Dr. Kemal Aydın (Dahiliye)']], tah:['0,00 ₺',''], yeni:false },
+  borclu: { kurum:'Özel (Ücretli)', prov:'', uyari:[['r-ok','Alerji: yok'],['r-al','⛔ Kara liste notu']], izin:izin(V,V,Y,Y),
+            durum:[['r-al','💰 Önceki borç 1.250,00 ₺'],['r-uy','📂 Açık başvuru: 14.10 · Dahiliye']], tah:['1.250,00 ₺','borc'], yeni:false },
+  oncelik:{ kurum:'SGK · Emekli', prov:'<span class="rz r-ok">✓ Takip 2026AB12345</span>', uyari:[['r-al','⚠ Penisilin'],['r-uy','Diyabet'],['r-uy','Hipertansiyon']],
+            izin:izin(V,V,V,V), durum:[['r-mavi','♿ 65+ öncelikli'],['r-mavi','♿ Engelli %60'],['r-mavi','📅 10:15 Dr. Selin Kaya (KBB)']], tah:['0,00 ₺',''], yeni:false },
+  yeni:   { kurum:'Özel (Ücretli)', prov:'', uyari:[['r-gri','Alerji bilgisi yok'],['r-mor','🆔 Yabancı uyruklu']], izin:izin(B,B,B,B),
+            durum:[['r-uy','✍ İzinler sorulmadı - izin formunu açın']], tah:['0,00 ₺',''], yeni:true },
+};
+function uygula(k){
+  const s = S[k];
+  document.querySelectorAll('.senaryo button').forEach(b => b.classList.toggle('on', b.dataset.s === k));
+  const q = v => document.querySelector(`[data-v="${v}"]`);
+  q('kurum').textContent = s.kurum;
+  q('prov').innerHTML = s.prov;
+  q('uyari').innerHTML = s.uyari.map(([c,t]) => `<span class="rz ${c}">${t}</span>`).join('');
+  q('izin').innerHTML = s.izin;
+  q('durum').innerHTML = s.durum.map(([c,t]) => `<span class="rz ${c}">${t}</span>`).join('');
+  q('altkat').classList.toggle('gizli', s.durum.length === 0);
+  const t = q('tah'); t.textContent = s.tah[0]; t.classList.toggle('borc', s.tah[1] === 'borc');
+  document.querySelectorAll('[data-g="yeni"]').forEach(e => e.classList.toggle('gizli', !s.yeni));
+}
+document.querySelector('.senaryo').onclick = e => { if (e.target.dataset.s) uygula(e.target.dataset.s) };
+uygula('normal');
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import { istek } from '../../api/cekirdek';
 import { hataMetni } from '../../api/sozlesme';
 import type { Deger } from '../../bilesenler/kartAlanCizim';
 import { para, sayi } from '../../bilesenler/bicim';
+import { kartSekmeRozetiYayinla } from '../../bilesenler/kartSekmeleri';
 import { Avatar } from '../../bilesenler/grid/satirHucre';
 import { c } from '../../dil/ceviri';
 
@@ -35,23 +36,20 @@ const yas = (s: string | null) => {
   if (b.getMonth() < d.getMonth() || (b.getMonth() === d.getMonth() && b.getDate() < d.getDate())) y--;
   return y >= 0 && y < 130 ? y : null;
 };
-// "2019'dan", "2020'den", "2023'ten": ek, yılın okunuşundaki son sözcüğe göre (dokuz / yirmi / üç...).
-const BIRLER = ['', 'den', 'den', 'ten', 'ten', 'ten', 'dan', 'den', 'den', 'dan'];
-const ONLAR = ['', 'dan', 'den', 'dan', 'tan', 'den', 'tan', 'ten', 'den', 'dan'];
-const yildan = (yil: number) => `${yil}'${yil % 10 ? BIRLER[yil % 10] : yil % 100 ? ONLAR[(yil % 100) / 10] : 'den'}`;
 // Bant rozetleri KISA (kullanıcı 24.10.2026): uzun SKRS / ilaç adı kesilir, tamamı title'da.
 const kisalt = (s: string, n = 22) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 // "AKLAV BID 1000 MG FILM KAPLI TABLET, 14 ADET" -> "AKLAV BID": ilk rakam / virgülden önce.
 const ilacKisa = (s: string) => kisalt(s.split(/[\d,(]/)[0].trim() || s, 18);
-const maskele = (tc: string) => (tc.length >= 8 ? `${tc.slice(0, 3)}${'*'.repeat(tc.length - 6)}${tc.slice(-3)}` : tc);
 
 const STIL = `
-.hkb { display: flex; gap: 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--cizgi2) }
-.hkb .gh-av.buyuk { width: 52px; height: 52px; font-size: 19px; flex: none }
+.mk-ozet.hkb-tek { grid-template-columns: 1.9fr 1.3fr 1.2fr 1fr 1fr 1fr 1.1fr }
+.mk-ozet > .hkb-kim { display: flex; flex-direction: row; align-items: center; gap: 12px; min-width: 0 }
+.hkb-kim-m { display: flex; flex-direction: column; min-width: 0 }
+.hkb-kim-m small b { font-size: inherit; color: var(--yazi, #1f2d3a); font-weight: normal }
 .hkb-foto { position: relative; flex: none }
 .hkb-foto small { position: absolute; bottom: -6px; right: -10px; background: var(--zemin, #fff); border: 1px solid var(--cizgi2);
   border-radius: 8px; font-size: 9.5px; color: var(--soluk); padding: 0 4px; white-space: nowrap }
-.hkb-ad { font-size: 17px; font-weight: bold; color: var(--lacivert, #14315a) }
+.mk-ozet .hkb-ad { font-size: 15px; font-weight: bold; color: var(--lacivert, #14315a); overflow: hidden; text-overflow: ellipsis }
 .hkb-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
 .hkb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
 .hkb-alt .hkb-goz { cursor: pointer; margin-left: 3px; opacity: .7 }
@@ -68,7 +66,6 @@ export function HastaKartBandi({ id, deger, git }: {
 }) {
   const [o, setO] = useState<HastaKartOzeti | null>(null);
   const [hata, setHata] = useState('');
-  const [tcAcik, setTcAcik] = useState(false);
   // Kart her kaydedildiğinde (deger değişir) özet yeniden okunur - alerji / kurum değişmiş olabilir.
   const surum = String(deger.surum ?? '');
   useEffect(() => {
@@ -78,9 +75,12 @@ export function HastaKartBandi({ id, deger, git }: {
       .catch(e => { if (!iptal) setHata(hataMetni(e)) });
     return () => { iptal = true };
   }, [id, surum]);
+  // BAŞVURULAR SEKMESİ ROZETİ (kullanıcı 28.10.2026): sayı özetten - GenForm sekme adının yanına yazar.
+  useEffect(() => {
+    if (o) kartSekmeRozetiYayinla({ kaynak: 'hasta', id, anahtar: 'ozel:basvurular', metin: sayi.format(o.basvuruSayisi) });
+  }, [o, id]);
 
   const ad = [deger.ad, deger.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ') || String(deger.unvan ?? '');
-  const tc = String(deger.vkno ?? '');
   const y = yas(o?.dogumTarihi ?? null);
   const aktif = Number(deger.durum ?? 1) === 1;
   // Avatar köşesi (mockup "E · 63"): cinsiyet harfi + yaş.
@@ -89,56 +89,41 @@ export function HastaKartBandi({ id, deger, git }: {
   return (
     <>
       <style>{STIL}</style>
-      <div className="hkb">
-        <span className="hkb-foto"><Avatar ad={ad} buyuk soluk={!aktif} />{kose && <small>{kose}</small>}</span>
-        <div className="hkb-govde">
-          {/* Rozetler ad satırında, sağa yaslı (kullanıcı 24.10.2026). */}
-          <div className="hkb-ust">
-          <div className="hkb-ad">{ad || '—'}</div>
-          <div className="hkb-rz">
-            <span className={`rozet ${aktif ? 'ok' : 'gri'}`}>● {c(aktif ? 'Aktif' : 'Pasif')}</span>
-            {o?.kurum && <span className="rozet mavi">{o.kurum}</span>}
-            {o && o.alerjiSayisi > 0 && (
-              <span className="rozet hata buyuk" title={`${c('Alerji')}: ${o.alerjiler.join(', ')}`}>
-                ⚠ {c('Alerji')}: {kisalt(o.alerjiler[0] ?? '', 16)}{o.alerjiSayisi > 1 ? ` +${o.alerjiSayisi - 1}` : ''}</span>)}
-            {o && o.ilacSayisi > 0 && (
-              <span className="rozet mavi" title={`${c('Kullandığı ilaç')}: ${o.ilaclar.join(', ')}`}>
-                💊 {ilacKisa(o.ilaclar[0] ?? '')}{o.ilacSayisi > 1 ? ` +${o.ilacSayisi - 1}` : ''}</span>)}
-            {o?.kronikler.map(k => <span key={k} className="rozet mor" title={k}>{kisalt(k)}</span>)}
-            {o?.vefat === 1 && <span className="rozet gri">✝ {c('Vefat')}</span>}
-          </div>
-          </div>
-          <div className="hkb-alt">
-            {c('Dosya')} <b>{String(deger.kod ?? '') || '—'}</b>
-            {tc && <> · TC <b>{tcAcik ? tc : maskele(tc)}</b>
-              <span className="hkb-goz" title={c(tcAcik ? 'Gizle' : 'Göster')} onClick={() => setTcAcik(x => !x)}>👁</span></>}
-            {o?.dogumTarihi && <> · {c('Doğum')} <b>{tarih(o.dogumTarihi)}</b>{y !== null ? ` (${y} y)` : ''}</>}
-            {o?.kanGrubu && <> · {c('Kan')} <b>{o.kanGrubu}</b></>}
-            {o?.kayitTarihi && <> · {c('Kayıt')} <b>{yildan(new Date(o.kayitTarihi).getFullYear())}</b> {c('beri')}</>}
-            {o && <> · <b>{sayi.format(o.basvuruSayisi)}</b> {c('başvuru')}</>}
-          </div>
-        </div>
-      </div>
       {hata && <div className="hata-kutusu" style={{ margin: '0 12px 6px' }}>{hata}</div>}
-      <div className="mk-ozet">
-        <div><span>{c('Son başvuru')}</span><b>{o ? tarih(o.sonBasvuru) : '…'}</b>
-          <small>{o?.sonBasvuru ? [o.sonBolum, o.sonDoktor].filter(Boolean).join(' · ') : c('başvuru yok')}</small></div>
-        <div><span>{c('Sonraki randevu')}</span><b>{o ? tarih(o.sonrakiRandevu, true) : '…'}</b>
-          <small>{o?.sonrakiRandevu ? [o.randevuBolum, o.randevuHekim].filter(Boolean).join(' · ') : c('planlı randevu yok')}</small></div>
+      {/* TEK BANT (kullanıcı 28.10.2026: "2 bant 1 bant a düşsün"): üstteki kimlik bandı kalktı - avatar, ad soyad,
+          dosya / kan grubu özet şeridinin İLK hücresinde; "Toplam başvuru" hücresi kaldırıldı. Pasif / vefat
+          avatarın soluk hali ve alt satırda; alerjiler "Alerji · Kronik · İlaç" hücresinin ipucunda. */}
+      <div className="mk-ozet hkb-tek">
+        {/* 1 HASTA (kullanıcı: "avatar daha büyük ve adın solunda yalnız olsun"): büyük avatar tek başına solda. */}
+        <div className="hkb-kim">
+          <Avatar ad={ad} buyuk soluk={!aktif} />
+          <span className="hkb-kim-m">
+            <b className="hkb-ad" title={ad}>{ad || '—'}</b>
+            {/* Etiketsiz (kullanıcı 28.10.2026: "dosya ve kan label'lara gerek yok"): E · 69 · H-000081 · A Rh+. */}
+            <small>{[kose, String(deger.kod ?? ''), o?.kanGrubu ?? '',
+                     !aktif ? c('Pasif') : '', o?.vefat === 1 ? `✝ ${c('Vefat')}` : ''].filter(Boolean).join(' · ')}</small>
+          </span>
+        </div>
+        {/* SIRA (kullanıcı 28.10.2026): hasta · kurum · son başvuru · bakiye · alerji · bekleyen sonuç · sonraki randevu. */}
         <div><span>{c('Kurum / Ödeyen')}</span><b>{o ? (o.kurum || c('Özel (Ücretli)')) : '…'}</b>
           <small>{c('kartta bağlı kurum')}</small></div>
+        <div><span>{c('Son başvuru')}</span><b>{o ? tarih(o.sonBasvuru) : '…'}</b>
+          <small>{o?.sonBasvuru ? [o.sonBolum, o.sonDoktor].filter(Boolean).join(' · ') : c('başvuru yok')}</small></div>
         <button type="button" title={c('Hasta ekstresini aç')} onClick={() => git(`/ekstre?tur=cari&id=${id}`)}>
           <span>{c('Hasta bakiyesi')}</span>
           <b className={o && o.bakiye > 0.005 ? 'ml-borc' : o && o.bakiye < -0.005 ? 'ml-alacak' : undefined}>
             {o ? para.format(Math.abs(o.bakiye)) : '…'}</b>
           <small>{o && o.bakiye < -0.005 ? c('avans / alacak') : c('açık borç · ekstre')}</small></button>
-        <div><span>{c('Alerji · Kronik · İlaç')}</span>
+        <div title={o ? [o.alerjiler.length ? `${c('Alerji')}: ${o.alerjiler.join(', ')}` : '',
+                         o.kronikler.length ? `${c('Kronik')}: ${o.kronikler.join(', ')}` : '',
+                         o.ilaclar.length ? `${c('İlaç')}: ${o.ilaclar.map(ilacKisa).join(', ')}` : ''].filter(Boolean).join(' · ') : undefined}>
+          <span>{c('Alerji · Kronik · İlaç')}</span>
           <b>{o ? <><span className={o.alerjiSayisi > 0 ? 'ml-borc' : undefined}>{o.alerjiSayisi}</span> · {o.kronikSayisi} · {o.ilacSayisi}</> : '…'}</b>
           <small>{c('aktif kayıtlar')}</small></div>
         <div><span>{c('Bekleyen sonuç')}</span><b>{o ? o.bekleyenSonuc : '…'}</b>
           <small>{c('lab istemi · son 90 gün')}</small></div>
-        <div><span>{c('Toplam başvuru')}</span><b>{o ? sayi.format(o.basvuruSayisi) : '…'}</b>
-          <small>{c('ilk kayıttan bu yana')}</small></div>
+        <div><span>{c('Sonraki randevu')}</span><b>{o ? tarih(o.sonrakiRandevu, true) : '…'}</b>
+          <small>{o?.sonrakiRandevu ? [o.randevuBolum, o.randevuHekim].filter(Boolean).join(' · ') : c('planlı randevu yok')}</small></div>
       </div>
     </>
   );

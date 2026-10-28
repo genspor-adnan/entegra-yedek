@@ -64,7 +64,9 @@ public static class KimlikUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var refresh = ctx.Request.Headers["X-Refresh-Token"].ToString();
-            return Results.Ok(await servis.SubeSecAsync(baglam.KullaniciId, istek.SubeId, refresh, iptal));
+            var aile = Guid.TryParse(ctx.User.FindFirst(Talep.Aile)?.Value, out var a) ? a
+                       : throw GentegreHatasi.Yetkisiz();
+            return Results.Ok(await servis.SubeSecAsync(baglam.KullaniciId, istek.SubeId, refresh, aile, iptal));
         }).RequireAuthorization();
 
         // Kullanicinin giris / islem yapabilecegi subeler (rolunun subeleri - rol_sube, 234).

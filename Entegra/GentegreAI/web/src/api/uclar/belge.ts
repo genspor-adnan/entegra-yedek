@@ -130,6 +130,10 @@ export const belgeUclari = {
       + (ara ? `&ara=${encodeURIComponent(ara)}` : '')
       + (turler?.length ? `&turler=${turler.join(',')}` : '')).then(y => y.satirlar),
 
+  /** Hizmet bu hastaya uygun mu (482 cinsiyet / yaş kuralı) - boş mesaj = uygun; istisna (1197) = gerekçeyle geçer. */
+  hizmetUygunluk: (hizmetId: number, tarafId: number) =>
+    istek<{ mesaj: string; istisna?: boolean }>(`/api/belge/hizmet-uygunluk?hizmetId=${hizmetId}&tarafId=${tarafId}`),
+
   /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). */
   belgeSil: (id: number) =>
     istek<{ mesaj: string }>(`/api/belge/${id}`, { method: 'DELETE' }),

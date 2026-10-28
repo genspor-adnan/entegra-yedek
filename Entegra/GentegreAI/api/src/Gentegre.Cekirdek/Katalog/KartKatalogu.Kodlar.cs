@@ -187,7 +187,9 @@ public static partial class KartKatalogu
     /// cinsiyete de uygulanır ve boş bırakmak "bilinmiyor" demek değildir.
     /// </summary>
     private static readonly Dictionary<string, string> HizmetCinsiyetKodlari =
-        new() { ["0"] = "Farketmez", ["1"] = "Yalnız Erkek", ["2"] = "Yalnız Kadın" };
+        new() { ["0"] = "Farketmez", ["1"] = "Yalnız Erkek", ["2"] = "Yalnız Kadın",
+                // İSTİSNALI (1197, kullanıcı 27.10.2026): uyarır, gerekçeyle eklenir (ör. meme - erkekte de yapılır).
+                ["3"] = "İstisnalı Erkek", ["4"] = "İstisnalı Kadın" };
 
     // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
 

@@ -1,3 +1,4 @@
+import { htmlTemizle } from '../htmlGuvenlik';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { EFaturaHazirlaIstegi, EFaturaKodu } from '../../api/uclar/efatura';
@@ -74,7 +75,9 @@ export async function hazirla(belgeId: number, ikinciSeri = false, ortak?: Hazir
 function pencereAc(html: string, baslik: string, yazdir: boolean) {
   const p = window.open('', '_blank');
   if (!p) { mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
-  p.document.write(html);
+  // TEMİZ (kod inceleme raporu 28.10.2026 B03): XSLT çıktısı - gelen faturanın şablonu karşı firmadan gelir;
+  //   script / olay öznitelikleri aynı kökende çalışmasın.
+  p.document.write(htmlTemizle(html));
   p.document.close();
   try { p.document.title = baslik } catch { /* farklı köken */ }
   if (yazdir) p.setTimeout(() => p.print(), 500);

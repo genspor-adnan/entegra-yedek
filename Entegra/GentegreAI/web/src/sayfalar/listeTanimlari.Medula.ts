@@ -87,7 +87,7 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'medula-fatura', rota: 'medula-fatura', aksiyonEkrani: 'medula-fatura-liste', baslik: 'Medula Faturası Listesi',
-    yol: 'Medula › Fatura Listesi', kartYolu: '/medula-fatura', kartBaslik: 'Medula Faturası', tarihAlani: 'tarih',
+    yol: 'Medula › Medula Faturası Listesi', kartYolu: '/medula-fatura', kartBaslik: 'Medula Faturası', tarihAlani: 'tarih',
     cipler: [
       { ad: 'Kaydedildi',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Dönemde',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
@@ -96,7 +96,8 @@ export const MEDULA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     toplam: ['yerelTutar', 'medulaTutar', 'katilim', 'kesinti'],
-    urunModu: 2, menuGrup: 'Medula', menuAd: 'Fatura Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
+    // AD (kullanıcı 28.10.2026): menü ve sekmede "Medula Faturası Listesi".
+    urunModu: 2, menuGrup: 'Medula', menuAd: 'Medula Faturası Listesi', ic: '🧾', yetkiKodu: 'medula.fatura.liste', menuSira: 60,
   },
   {
     kaynak: 'medula-donem', rota: 'medula-donem', aksiyonEkrani: 'medula-donem-liste', baslik: 'Medula Dönemi Listesi',

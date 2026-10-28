@@ -1,5 +1,5 @@
 import { basHarfler } from './basHarfler';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
@@ -103,7 +103,15 @@ function antropometri(bd: MuayeneHastaBilgisi['band'] | undefined): { boyKilo: s
 /** Banttaki rozet metni: ilk 14 harf, uzunsa "…" (tamamı title'da). */
 const kisa = (t: string) => (t.length > 15 ? `${t.slice(0, 14).trimEnd()}…` : t);
 
-export function MuayeneHastaBandi({ bilgi, onSuAn }: { bilgi: MuayeneHastaBilgisi | null; onSuAn?(): void }) {
+export function MuayeneHastaBandi({ bilgi, onSuAn, kanGrubuYok, sonBlok, suAnYerine }: {
+  bilgi: MuayeneHastaBilgisi | null; onSuAn?(): void;
+  /** Kan grubu gösterilmez (radyoloji raporu, kullanıcı 27.10.2026). */
+  kanGrubuYok?: boolean;
+  /** Bandın SONUNA ekranın kendi bloğu (radyoloji raporunda Durum). */
+  sonBlok?: ReactNode;
+  /** "Şu an" bloğunun YERİNE (radyoloji raporunda İsteyen: hekim · bölüm - istemin muayenesi yok). */
+  suAnYerine?: ReactNode;
+}) {
   const [alerjiAcik, setAlerjiAcik] = useState(false);
   const u = bilgi?.ust ?? null;
   const ad = m(u?.hastaAdi);
@@ -127,13 +135,14 @@ export function MuayeneHastaBandi({ bilgi, onSuAn }: { bilgi: MuayeneHastaBilgis
         {/* D / P: numara kendi önekini taşıyorsa ("H-000079", "P-000154") tekrar eklenmez. */}
         <div className="hbnd-alt">{[onekli('D', m(u?.dosyaNo)), onekli('P', m(u?.protokolNo))].filter(Boolean).join(' · ')}</div>
       </div>
-      <div className="hbnd-blok">
-        <span className={`hbnd-kg${m(bilgi?.band.kanGrubu) ? '' : ' yok'}`}>{m(bilgi?.band.kanGrubu) || c('kan grubu ?')}</span>
+      {/* Kan grubu gizliyken ve ölçüm yoksa blok hiç çizilmez (boş sütun kalmasın). */}
+      {(!kanGrubuYok || antropometri(bilgi?.band).boyKilo || antropometri(bilgi?.band).vki || m(u?.sonVital)) && <div className="hbnd-blok">
+        {!kanGrubuYok && <span className={`hbnd-kg${m(bilgi?.band.kanGrubu) ? '' : ' yok'}`}>{m(bilgi?.band.kanGrubu) || c('kan grubu ?')}</span>}
         {/* BOY · KİLO · VKİ (mockup v7): hastanın son girilen değerleri. */}
         {antropometri(bilgi?.band).boyKilo && <div className="hbnd-alt" title={c('Son boy / kilo')}>{antropometri(bilgi?.band).boyKilo}</div>}
         {antropometri(bilgi?.band).vki && <div className="hbnd-alt" title={c('Vücut kitle indeksi')}>{antropometri(bilgi?.band).vki}</div>}
         {m(u?.sonVital) && <div className="hbnd-alt" title={c('Son vital')}>{m(u?.sonVital)}</div>}
-      </div>
+      </div>}
       <div className="hbnd-blok">
         <div className="hbnd-b">{c('Alerji / Kronik')}</div>
         <div className="hbnd-rozetler">
@@ -168,12 +177,13 @@ export function MuayeneHastaBandi({ bilgi, onSuAn }: { bilgi: MuayeneHastaBilgis
       </div>
       {/* "Şu an" tıklanır (onSuAn verilirse): muayene bilgisi (bölüm / hekim / tür) penceresi -
           sekmeli muayenede eski bağlam şeridinin "Bugün ✎" kutusunun yerini tutar (16.10.2026). */}
-      <div className={`hbnd-blok hbnd-simdi${onSuAn ? ' hbnd-tik' : ''}`} onClick={onSuAn}
+      {suAnYerine ? <div className="hbnd-blok hbnd-simdi">{suAnYerine}</div> : <div className={`hbnd-blok hbnd-simdi${onSuAn ? ' hbnd-tik' : ''}`} onClick={onSuAn}
            role={onSuAn ? 'button' : undefined} title={onSuAn ? c('Muayene bilgisini düzenle') : undefined}>
         <div className="hbnd-b">{c('Şu an')}{onSuAn && ' ✎'}</div>
         <div><b>{m(u?.bolumAdi) || '—'}</b></div>
         <div className="hbnd-alt">{m(u?.hekimAdi)}{u?.baslangic ? ` · ${tarihSaat(u.baslangic).slice(11)}` : ''}</div>
-      </div>
+      </div>}
+      {sonBlok && <div className="hbnd-blok">{sonBlok}</div>}
       {alerjiAcik && bilgi && (
         <div className="hbnd-ayr" onClick={() => setAlerjiAcik(false)}>
           <h5>⚠ {c('Alerjiler')} ({bilgi.alerji.length})</h5>

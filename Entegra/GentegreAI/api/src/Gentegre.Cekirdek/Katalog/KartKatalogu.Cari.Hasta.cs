@@ -48,6 +48,22 @@ public static partial class KartKatalogu
             var vknoIndex = alanlar.FindIndex(a => a.Ad == "vkno");
             alanlar.Insert(vknoIndex >= 0 ? vknoIndex + 1 : alanlar.Count, durum);
         }
+        // İLETİŞİM İZİNLERİ (kullanıcı 27.10.2026: "hasta kartına sms ve e-posta izin ekle"): Delphi REHBER.POSTA /
+        //   EPOSTA bayrakları (taraf.posta_izin / eposta_izin, yeni kolon değil). Telefonun / e-postanın hemen altında,
+        //   aynı grupta; başvuru hasta bandının "İzinler" hücresi bunları okur.
+        var tel = alanlar.FindIndex(a => a.Ad == "cepTel");
+        var epo = alanlar.FindIndex(a => a.Ad == "eposta");
+        var telAlani = tel >= 0 ? alanlar[tel] : null;
+        var izinler = new[]
+        {
+            // EslesAlan: iki onay kutusu TEK SATIRDA yan yana (ikili-mantik), editlerin başladığı hizada (kullanıcı).
+            new KartAlani("postaIzin",  "posta_izin",  "mantik", Baslik: "SMS İzni",     Grup: telAlani?.Grup, AltGrup: telAlani?.AltGrup,
+                          EslesAlan: "epostaIzin",
+                          Ipucu: "Hasta SMS ile bilgilendirilmeyi (randevu, sonuç) kabul etti."),
+            new KartAlani("epostaIzin", "eposta_izin", "mantik", Baslik: "E-posta İzni", Grup: telAlani?.Grup, AltGrup: telAlani?.AltGrup,
+                          Ipucu: "Hasta e-posta ile bilgilendirilmeyi kabul etti."),
+        };
+        alanlar.InsertRange(Math.Max(tel, epo) >= 0 ? Math.Max(tel, epo) + 1 : alanlar.Count, izinler);
         alanlar.AddRange(new[]
         {
             new KartAlani("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),

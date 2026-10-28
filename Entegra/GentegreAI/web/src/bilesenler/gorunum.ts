@@ -29,6 +29,11 @@ export interface GorunumTercihi {
   /** MUAYENE KARTI DÜZENİ (mockup muayene_duzen_tercihi): aynı alanlar, sekmeli ya da
       tek sayfa (sekmesiz). Varsayılan sekmeli - mevcut düzen değişmez. */
   muayeneDuzeni: MuayeneDuzeni;
+  /** RADYOLOJİ RAPORU DÜZENİ (kullanıcı 27.10.2026: "bazı doktorlar tek parça devam etmek istiyor"): bölüm bölüm
+      (parçalı) ya da eski programdaki gibi tek A4 metin. Varsayılan parçalı. */
+  radyolojiRaporDuzeni: RadyolojiRaporDuzeni;
+  /** RADYOLOJİ RAPORU GİRİŞİ (1194): serbest metin ya da yapısal form (yalnız formu olan şablonda). */
+  radyolojiRaporGiris: RadyolojiRaporGiris;
   /** ANA EKRAN v3 (mockup ana_ekran_sekmeli_v3): açılan ekranlar üstte sekme olarak
       kalır, dönünce kaldığı yerde. Kapatılırsa eski tek ekran davranışı. */
   ekranSekmeleri: boolean;
@@ -115,6 +120,8 @@ export async function anaResimKaldir(): Promise<void> {
 }
 
 export type MuayeneDuzeni = 'sekmeli' | 'sekmesiz';
+export type RadyolojiRaporDuzeni = 'parcali' | 'tek';
+export type RadyolojiRaporGiris = 'serbest' | 'yapisal';
 
 export const LISTE_SATIR_SECENEKLERI = [25, 50, 100, 200];
 export const YAZI_BOYU_SECENEKLERI: { deger: YaziBoyu; ad: string }[] = [
@@ -125,7 +132,7 @@ export const GRID_CIZGI_SECENEKLERI: { deger: GridCizgi; ad: string }[] = [
 ];
 
 const VARSAYILAN: GorunumTercihi = { yogunluk: 'normal', listeSatir: 50, yaziBoyu: 100, gridCizgi: 'ince',
-                                     muayeneDuzeni: 'sekmeli', ekranSekmeleri: true, menuSabit: true,
+                                     muayeneDuzeni: 'sekmeli', radyolojiRaporDuzeni: 'parcali', radyolojiRaporGiris: 'serbest', ekranSekmeleri: true, menuSabit: true,
                                      renkTemasi: 'mavi', anaSayfaArka: 'duz' };
 const AYNA = 'gentegre.gorunum';
 /** Görünüm tercihi değişti (uygulandı) olayı. */
@@ -153,6 +160,8 @@ function duzelt(h: unknown): GorunumTercihi {
     yaziBoyu: yb === 90 || yb === 110 ? yb : 100,
     gridCizgi: o.gridCizgi === 'belirgin' || o.gridCizgi === 'yok' ? o.gridCizgi : 'ince',
     muayeneDuzeni: o.muayeneDuzeni === 'sekmesiz' ? 'sekmesiz' : 'sekmeli',
+    radyolojiRaporDuzeni: o.radyolojiRaporDuzeni === 'tek' ? 'tek' : 'parcali',
+    radyolojiRaporGiris: o.radyolojiRaporGiris === 'yapisal' ? 'yapisal' : 'serbest',
     ekranSekmeleri: o.ekranSekmeleri !== false,
     menuSabit: o.menuSabit !== false,
     renkTemasi: RENK_TEMASI_SECENEKLERI.some(s => s.deger === o.renkTemasi) ? o.renkTemasi! : 'mavi',

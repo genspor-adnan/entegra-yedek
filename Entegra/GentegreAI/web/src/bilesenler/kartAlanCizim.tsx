@@ -481,7 +481,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           //   (kullanici: "Paket check te Paket label yok").
           if (a.tip === 'mantik' && hedef.tip === 'mantik')
             return (
-              <div key={a.ad} className="alan ikili-mantik">
+              <div key={a.ad} className={`alan ikili-mantik alan-${a.ad}`}>
                 <label className="alan tip-mantik">
                   {renderGirdi(a)}<span className="etiket">{c(a.baslik)}</span>
                 </label>

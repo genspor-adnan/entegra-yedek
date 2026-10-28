@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Başvuru Kartı · Hasta Bandı v3 — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a;
+    --accent:#2f6db3; --head:#f3f6fa; --ok:#2e7d46; --req:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h1{font-size:16px;color:var(--navy);margin:0 auto 4px;max-width:1420px}
+  .acik{color:var(--muted);margin:0 auto 10px;max-width:1420px;line-height:1.5}
+  .senaryo{max-width:1420px;margin:0 auto 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .senaryo b{color:var(--navy);margin-right:4px}
+  .senaryo button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 11px;font:inherit;cursor:pointer;color:var(--muted)}
+  .senaryo button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .win{max-width:1420px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.12);overflow:hidden}
+  .arac{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 9px;font-size:11.5px;font-family:inherit}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.sag{margin-left:auto}
+  .baslik{font-weight:bold;color:var(--navy);margin-left:8px}
+
+  /* ROZET - ince */
+  .rz{display:inline-flex;align-items:center;gap:2px;padding:0 6px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid;white-space:nowrap;line-height:15px}
+  .r-al{background:#fdecec;color:#b23b3b;border-color:#f3c2c2}
+  .r-uy{background:#fff4e0;color:#9a5b00;border-color:#f3d7a8}
+  .r-ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .r-gri{background:#f1f4f8;color:#4d5d6e;border-color:#dfe5ec}
+  .r-mavi{background:#e8f1fb;color:#1f5aa0;border-color:#c8dcf3}
+  .r-mor{background:#f1ebfb;color:#5b3a9a;border-color:#ddd0f3}
+
+  /* BANT v3: TEK KAT, her hücre EN ÇOK 2 SATIR (etiket + değer ya da iki değer satırı) */
+  .bant{display:grid;grid-template-columns:44px 1.7fr 1.4fr 1.15fr 1.35fr 1.5fr 104px 104px;align-items:center;
+        margin:8px 12px;border:1px solid var(--line2);border-left:3px solid #3d6aa8;border-radius:4px;background:#fff;height:46px}
+  .bant>div{padding:0 10px;border-right:1px solid var(--line2);height:100%;display:flex;flex-direction:column;justify-content:center;
+            gap:2px;overflow:hidden;min-width:0}
+  .bant>div:last-child{border-right:none}
+  .foto{width:30px;height:30px;display:grid;place-items:center;font-weight:bold;color:#fff;font-size:11px;background:#4a6584;border-radius:50%}
+  .bant .fotob{padding:0 0 0 8px;border-right:none}
+  .s1{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}
+  .s2{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:15px}
+  .s2 b{color:var(--ink);font-weight:normal}
+  .ad{font-size:13px;font-weight:bold;color:var(--navy)}
+  .et{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;line-height:13px}
+  .roz{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden}
+  /* İZİNLER 2x2: ✓ yeşil, ✗ kırmızı, ? sarı - harf kısaltmalı, ipucunda tam ad */
+  .izin{display:grid;grid-template-columns:repeat(2,auto);gap:1px 10px;font-size:11px;line-height:15px;justify-content:start}
+  .izin span b{display:inline-block;width:11px;text-align:center}
+  .v{color:var(--ok)} .y{color:var(--req)} .bl{color:#c9a000}
+  .para-k{text-align:right;align-items:flex-end}
+  .para{font-weight:bold;font-size:12.5px;line-height:16px}
+  .para.borc{color:#b23b3b} .para.yok{color:var(--ok)}
+  .gizli{display:none !important}
+
+  .stepper{display:flex;margin:0 12px 10px;border-top:2px solid #e3e9f0;padding-top:4px;color:var(--muted);font-size:11px}
+  .stepper div{flex:1;text-align:center}
+  .stepper .on{color:#b23b3b;font-weight:bold}
+
+  .nasil{max-width:1420px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .nb{background:#fff;border:1px solid var(--line);border-radius:5px;padding:10px 12px;line-height:1.55}
+  .nb h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .nb ul{margin:0;padding-left:16px}
+  .kiyas{max-width:1420px;margin:0 auto 12px;color:var(--muted);font-size:11px}
+</style>
+</head>
+<body>
+<h1>Başvuru Kartı · Hasta Bandı — v3 (ince, en çok 2 satır)</h1>
+<p class="acik">v2'nin içeriği, <b>tek katta</b> ve her hücrede <b>en çok iki satır</b>: bant 46 px (bugünkü bant ~52 px). Alt kat kalktı - durum çipleri kendi
+  sütununda. İzinler 2×2 kısaltmalı işaret (üstüne gelince tam ad ve tarih). Sığmayan çip "+n" olur, ipucunda tamamı.</p>
+
+<div class="senaryo"><b>Senaryo:</b>
+  <button data-s="normal" class="on">Normal hasta</button>
+  <button data-s="sgk">SGK · provizyon yok</button>
+  <button data-s="borclu">Borçlu + açık başvuru</button>
+  <button data-s="oncelik">65+ · engelli · alerjik</button>
+  <button data-s="yeni">Yeni hasta (izin alınmamış)</button>
+</div>
+
+<div class="win">
+  <div class="arac">
+    <span class="btn ok">💾 Kaydet</span><span class="btn pas">🖨 Protokol Fişi</span><span class="btn">👤 Hasta Kartını Aç</span>
+    <span class="btn">📅 Randevudan Getir</span><span class="btn">🚑 Acil Başvuru</span>
+    <span class="baslik">Başvuru #15005 — P-000166</span>
+    <span class="btn sag">✖ Kapat</span>
+  </div>
+
+  <div class="bant">
+    <div class="fotob"><div class="foto">SB</div></div>
+    <div title="TC •••••••••41">
+      <div class="s1"><span class="ad">Saim Bulut</span><span class="rz r-mor gizli" data-g="yeni">YENİ</span></div>
+      <div class="s2"><b>♂ E · 69 y</b> · 17.12.1956 · D <b>H-000081</b> · P <b>P-000166</b></div>
+    </div>
+    <div><div class="et">Uyarı</div><div class="roz" data-v="uyari"></div></div>
+    <div><div class="et">İzinler</div><div class="izin" data-v="izin"></div></div>
+    <!-- ÖDEYEN KURUM + PROVİZYON (kullanıcı: "ödeyen kurum kısmında provizyon durumu da"): üstte kurum, altta provizyon -->
+    <div title="Ödeyen kurum ve provizyon"><div class="s1"><b data-v="kurum">Özel (Ücretli)</b></div><div class="s2" data-v="prov"></div></div>
+    <div><div class="et">Durum</div><div class="roz" data-v="durum"></div></div>
+    <div class="para-k"><div class="et">Açık tahsilat</div><div class="para" data-v="tah">0,00 ₺</div></div>
+    <div class="para-k"><div class="et">Açık belge</div><div class="para yok">0,00 ₺</div></div>
+  </div>
+  <div class="stepper"><div class="on">● Başvuru</div><div>Ücretlendirme</div><div>Tahsilat</div><div>Belge Kesimi</div></div>
+</div>
+
+<div class="nasil">
+  <div class="nb"><h3>Satır bütçesi</h3><ul>
+    <li>Kimlik: ad (+ YENİ) / cinsiyet · yaş · doğum · dosya · protokol. TC ipucunda (maskeli).</li>
+    <li>Diğer hücreler: üstte küçük etiket, altta tek satır değer.</li>
+    <li>Yükseklik sabit 46 px - içerik ne olursa olsun bant büyümez.</li></ul></div>
+  <div class="nb"><h3>İzinler (2×2)</h3><ul>
+    <li><b>SMS · KVKK / e-Nabız · Yakın</b> - ✓ verildi, ✗ reddetti, ? sorulmadı.</li>
+    <li>Üstüne gelince tam ad + izin tarihi; "?" tıklanınca izin formu açılır.</li>
+    <li>Telefon SMS'in ipucunda (maskeli).</li></ul></div>
+  <div class="nb"><h3>Uyarı / Durum</h3><ul>
+    <li><b>Uyarı</b>: alerji, kronik, kara liste, yabancı uyruk - en çok 2 çip + "+n".</li>
+    <li><b>Ödeyen kurum</b>: altta her zaman provizyon - ✓ takip no / ⚠ alınmadı (tıkla → Medula) / gerekmez (özel).</li>
+    <li><b>Durum</b>: borç, açık başvuru, öncelik, bugünkü randevu - en çok 2 çip + "+n".</li>
+    <li>Boşsa sade "—".</li></ul></div>
+</div>
+
+<script>
+const I = (k, d, ad) => `<span title="${ad}"><b class="${d === '✓' ? 'v' : d === '✗' ? 'y' : 'bl'}">${d}</b>${k}</span>`;
+const izin = (a, b, c, d) => I('SMS', a, 'SMS bildirimi · 0532 ••• 44 21') + I('KVKK', b, 'KVKK açık rıza') + I('e-Nabız', c, 'e-Nabız paylaşımı') + I('Yakın', d, 'Yakınına bilgi verme');
+const S = {
+  normal: { kurum:'Özel (Ücretli)', prov:'Provizyon: <b>gerekmez</b>', uyari:[['r-ok','Alerji: yok']], izin:izin('✓','✓','✓','✗'), durum:[], tah:['0,00 ₺',''], yeni:false },
+  sgk:    { kurum:'SGK · GSS', prov:'Provizyon: <span class="rz r-uy">⚠ alınmadı · Medula</span>', uyari:[['r-ok','Alerji: yok']], izin:izin('✓','✓','✓','✓'),
+            durum:[['r-mavi','📅 09:40 Dahiliye']], tah:['0,00 ₺',''], yeni:false },
+  borclu: { kurum:'Özel (Ücretli)', prov:'Provizyon: <b>gerekmez</b>', uyari:[['r-ok','Alerji: yok'],['r-al','⛔ Kara liste']], izin:izin('✓','✓','✗','✗'),
+            durum:[['r-al','💰 Borç 1.250 ₺'],['r-uy','📂 Açık başvuru']], tah:['1.250,00 ₺','borc'], yeni:false },
+  oncelik:{ kurum:'SGK · Emekli', prov:'Provizyon: <span class="rz r-ok">✓ 2026AB12345</span>', uyari:[['r-al','⚠ Penisilin'],['r-uy','Diyabet'],['r-gri','+1']],
+            izin:izin('✓','✓','✓','✓'), durum:[['r-mavi','♿ 65+'],['r-mavi','♿ Engelli'],['r-gri','+1']], tah:['0,00 ₺',''], yeni:false },
+  yeni:   { kurum:'Özel (Ücretli)', prov:'Provizyon: <b>gerekmez</b>', uyari:[['r-gri','Alerji bilgisi yok'],['r-mor','🆔 Yabancı']], izin:izin('?','?','?','?'),
+            durum:[['r-uy','✍ İzinler sorulmadı']], tah:['0,00 ₺',''], yeni:true },
+};
+const roz = l => l.length ? l.map(([c,t]) => `<span class="rz ${c}">${t}</span>`).join('') : '<span class="s2">—</span>';
+function uygula(k){
+  const s = S[k];
+  document.querySelectorAll('.senaryo button').forEach(b => b.classList.toggle('on', b.dataset.s === k));
+  const q = v => document.querySelector(`[data-v="${v}"]`);
+  q('kurum').textContent = s.kurum; q('prov').innerHTML = s.prov;
+  q('uyari').innerHTML = roz(s.uyari); q('durum').innerHTML = roz(s.durum); q('izin').innerHTML = s.izin;
+  const t = q('tah'); t.textContent = s.tah[0]; t.classList.toggle('borc', s.tah[1] === 'borc');
+  document.querySelectorAll('[data-g="yeni"]').forEach(e => e.classList.toggle('gizli', !s.yeni));
+}
+document.querySelector('.senaryo').onclick = e => { if (e.target.dataset.s) uygula(e.target.dataset.s) };
+uygula('normal');
+</script>
+</body>
+</html>

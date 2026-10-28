@@ -831,6 +831,10 @@ public static partial class KaynakKatalogu
                                    "metin", "Cinsiyet", Hizalama: "orta", Genislik: 90,
                                    Varsayilan: false, Filtrelenebilir: false),
             new("cinsiyet",  "th.cinsiyet",  "sayi",  "Cinsiyet (ham)", Varsayilan: false),
+            // İLETİŞİM İZİNLERİ (başvuru hasta bandı v3, 27.10.2026): Delphi REHBER.POSTA / EPOSTA bayrakları - bant
+            //   "İzinler" hücresinde okur. Gizli, yalnız okunur.
+            new("postaIzin",  "t.posta_izin",  "sayi",  "SMS / Posta İzni", Varsayilan: false),
+            new("epostaIzin", "t.eposta_izin", "sayi",  "E-posta İzni", Varsayilan: false),
             // Yas dogum tarihinden HESAPLANIR: sabit bir "yas" kolonu tutmak her
             //   dogum gununde bayatlar.
             new("yas",

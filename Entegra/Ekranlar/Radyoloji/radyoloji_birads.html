@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu · BI-RADS — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  h1{font-size:16px;color:var(--navy);margin:0 auto 4px;max-width:1380px}
+  .acik{color:var(--muted);margin:0 auto 12px;max-width:1380px}
+  .win{max-width:1380px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;font-family:inherit}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fa96b,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff}
+  .btn.kucuk{padding:2px 7px;font-size:11px}
+
+  /* HASTA BANDI (standart) */
+  .hbnd{display:flex;align-items:stretch;border-bottom:1px solid var(--line2);background:#fff}
+  .hbnd>div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .hbnd .foto{width:52px;display:grid;place-items:center;font-weight:bold;color:var(--navy);font-size:15px;background:#f3f6fa;border-left:4px solid #3d6aa8}
+  .hbnd .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .hbnd .alt{color:var(--muted);font-size:11px}
+  .hbnd .et{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold;border:1px solid}
+  .rz.al{background:#fdecec;color:#b23b3b;border-color:#f3c2c2}
+  .rz.gri{background:#f1f4f8;color:#4d5d6e;border-color:#dfe5ec}
+
+  .idstrip{display:grid;grid-template-columns:1.4fr 1fr 1fr 210px;gap:10px;padding:8px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold}
+  .c-taslak{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+
+  /* BI-RADS KATEGORI ROZETLERI - renk: 1-2 yesil, 3 sari, 4 turuncu, 5-6 kirmizi, 0 gri */
+  .br{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:11px;font-weight:bold;font-size:11px;border:1px solid}
+  .br0{background:#eef1f5;color:#4d5d6e;border-color:#d5dde6}
+  .br1,.br2{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .br3{background:#fff6d6;color:#8a6a00;border-color:#efdc95}
+  .br4{background:#fde9d7;color:#a65300;border-color:#f3c79d}
+  .br5,.br6{background:#fbe0de;color:#a3241b;border-color:#f0b4ae}
+
+  .ana{display:grid;grid-template-columns:220px 1fr 380px;min-height:640px}
+  .sol{border-right:1px solid var(--line2);background:#fbfcfd;padding:8px}
+  .sag{border-left:1px solid var(--line2);background:#fbfcfd;padding:8px}
+  .sol h5,.sag h5{margin:2px 0 6px;font-size:11.5px;color:var(--navy)}
+  .kart{border:1px solid var(--line2);border-radius:3px;background:#fff;padding:6px 8px;margin-bottom:6px;font-size:11px;line-height:1.5}
+  .kart b{color:var(--navy)}
+  .kart .tar{color:var(--muted);font-size:10.5px}
+  /* zaman cizgisi: hastanin onceki BI-RADS'lari */
+  .tl{position:relative;padding-left:14px}
+  .tl::before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:#dbe3ec}
+  .tl .kart::before{content:"";position:absolute;margin-left:-14px;margin-top:5px;width:8px;height:8px;border-radius:50%;background:#98c2ee;border:2px solid #fff}
+
+  .rap{padding:10px 12px}
+  .bol{margin-bottom:10px}
+  .bol .bas{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--navy);
+    font-weight:bold;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .bol .bas .not{margin-left:auto;font-weight:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10.5px}
+  .ta{width:100%;border:1px solid var(--line);border-radius:3px;padding:6px 8px;font:inherit;line-height:1.55;resize:vertical;background:#fff}
+  .ta.oto{background:#f6faff;border-color:#c8dcf3}
+
+  /* BI-RADS PANELI */
+  .bp{border:1px solid #c8dcf3;border-radius:5px;background:#fff;overflow:hidden}
+  .bp-bas{display:flex;align-items:center;gap:8px;padding:7px 9px;background:linear-gradient(#f4f8fd,#e9f1fb);border-bottom:1px solid #c8dcf3}
+  .bp-bas b{color:var(--navy);font-size:12.5px}
+  .bp-ic{padding:8px 9px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .seg button{border:0;background:var(--head);padding:3px 10px;font:inherit;font-size:11px;cursor:pointer;color:var(--muted)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:bold}
+  .satir{display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;margin-bottom:5px}
+  .satir>span{font-size:10.5px;color:var(--muted);text-align:right}
+  select,input{font:inherit;font-size:11.5px;border:1px solid var(--line);border-radius:2px;height:23px;padding:0 4px;background:#fff;width:100%}
+  .lez{border:1px solid var(--line2);border-radius:4px;margin:8px 0;background:#fcfdfe}
+  .lez-bas{display:flex;gap:6px;align-items:center;padding:5px 7px;border-bottom:1px solid var(--line2);background:#f6f9fc;cursor:pointer}
+  .lez-bas b{color:var(--navy)}
+  .lez-bas .sp{margin-left:auto}
+  .lez-ic{padding:7px}
+  .lez.kapali .lez-ic{display:none}
+  .ilk3{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px}
+  .ilk3 label{display:flex;flex-direction:column;gap:2px;font-size:10px;color:var(--muted)}
+  .oneri{border:1px dashed #98c2ee;border-radius:5px;background:#f6faff;padding:8px;margin-top:8px}
+  .oneri .neden{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+  .oneri .neden span{display:inline-block;background:#fff;border:1px solid #dbe6f3;border-radius:9px;padding:0 6px;margin:2px 3px 0 0}
+  .karar{border:1px solid var(--line2);border-radius:5px;padding:8px;margin-top:8px;background:#fff}
+  .uyari{font-size:10.5px;color:#9a4b00;background:#fff6ea;border:1px solid #f3dcbd;border-radius:3px;padding:4px 6px;margin-top:5px}
+  .takip{font-size:11px;background:#f3f9f4;border:1px solid #cfe7d6;border-radius:4px;padding:6px 8px;margin-top:8px;line-height:1.5}
+
+  /* ACIKLAMA BLOKLARI */
+  .nasil{max-width:1380px;margin:16px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .nb{background:#fff;border:1px solid var(--line);border-radius:5px;padding:10px 12px;line-height:1.55}
+  .nb h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .nb ul{margin:0;padding-left:16px}
+  .nb table{border-collapse:collapse;width:100%;font-size:11px}
+  .nb td,.nb th{border:1px solid var(--line2);padding:3px 5px;text-align:left;vertical-align:top}
+  .nb th{background:var(--head)}
+  .genis{grid-column:span 3}
+  @media (max-width:1100px){.ana{grid-template-columns:1fr}.nasil{grid-template-columns:1fr}.genis{grid-column:auto}}
+</style>
+</head>
+<body>
+<h1>Radyoloji Raporu · BI-RADS yapısal raporlama</h1>
+<p class="acik">Meme tetkiklerinde (Mamografi / Meme US / Meme MR) rapor ekranının sağ paneline BI-RADS paneli gelir.
+  Lezyonlar sözlükten seçilir; sistem kategoriyi <b>önerir</b>, son kararı radyolog verir. "Rapora aktar" Bulgular ve Sonuç'u yazar.
+  Seçimler değiştirilebilir - öneri anında yeniden hesaplanır.</p>
+
+<div class="win">
+  <div class="title">📝 Radyoloji Raporu · R-000214 <span class="sp">GenoTIP AI · Radyoloji</span></div>
+  <div class="toolbar">
+    <button class="btn primary">💾 Taslak Kaydet</button>
+    <button class="btn">➜ Uzmana Gönder</button>
+    <button class="btn ok">✍ Onayla ve İmzala</button>
+    <button class="btn danger">⚠ Kritik Bulgu Bildir</button>
+    <button class="btn">🖨 Çıktı</button>
+    <span style="margin-left:auto"></span>
+    <button class="btn">✖ Kapat</button>
+  </div>
+
+  <div class="hbnd">
+    <div class="foto">AY</div>
+    <div><div class="ad">Ayşe Yılmaz</div><div class="alt"><b>K 41y</b> · SGK</div><div class="alt">D H-000412 · P-000981</div></div>
+    <div><div class="et">Alerji / Kronik</div><span class="rz al">⚠ penisilin</span></div>
+    <div style="flex:1"><div class="et">Meme öyküsü</div>
+      <span class="rz gri">Ailede meme Ca (anne, 52y)</span> <span class="rz gri">Son mamografi 04.2026 · BI-RADS 3</span></div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label>Tetkik</label><div><b>MEMUS</b> · Meme ultrasonografisi (bilateral)</div></div>
+    <div class="fld"><label>Çekim</label><div>27.10.2026 10:42 · US-2 (Logiq E10)</div></div>
+    <div class="fld"><label>Durum</label><div><span class="chip c-taslak">Taslak</span></div></div>
+    <div class="fld"><label>Genel BI-RADS (en yüksek)</label><div id="genelRozet"></div></div>
+  </div>
+
+  <div class="ana">
+    <!-- SOL: BI-RADS gecmisi -->
+    <div class="sol">
+      <h5>Önceki meme tetkikleri</h5>
+      <div class="tl">
+        <div class="kart"><b>Meme US</b> <span class="br br3">BI-RADS 3</span>
+          <div class="tar">14.04.2026 · Dr. Selin Kaya</div>
+          Sağ 10:00, 9 mm oval, düzgün sınırlı. 6 ay kontrol önerildi.</div>
+        <div class="kart"><b>Mamografi</b> <span class="br br2">BI-RADS 2</span>
+          <div class="tar">02.03.2025 · Dr. Selin Kaya</div>
+          Kompozisyon C. Benign kalsifikasyonlar.</div>
+      </div>
+      <h5 style="margin-top:10px">Takip</h5>
+      <div class="kart" style="border-color:#efdc95;background:#fffbea">
+        <b>BI-RADS 3 kontrolü</b><div class="tar">Hedef 14.10.2026 · bugün yapıldı ✓</div>
+        Takip listesinden kapanır.</div>
+      <h5 style="margin-top:10px">İstem</h5>
+      <div class="kart"><b>Klinik:</b> Sağ memede ele gelen kitle, 6 ay kontrol.<br><b>İsteyen:</b> Dr. Kemal Aydın (Genel Cerrahi)</div>
+    </div>
+
+    <!-- ORTA: rapor -->
+    <div class="rap">
+      <div class="bol"><div class="bas">Teknik</div>
+        <textarea class="ta" rows="2">Her iki meme ve aksiller bölgeler yüksek rezolüsyonlu lineer prob ile değerlendirildi.</textarea></div>
+      <div class="bol"><div class="bas">Klinik bilgi</div>
+        <textarea class="ta" rows="1">Sağ memede ele gelen kitle, 6 ay kontrol.</textarea></div>
+      <div class="bol"><div class="bas">Karşılaştırma <span class="not">önceki tetkikten (14.04.2026)</span></div>
+        <textarea class="ta" rows="2">14.04.2026 tarihli US ile karşılaştırıldı: sağ 10:00 lezyon 9 mm'den 14 mm'ye büyümüştür.</textarea></div>
+      <div class="bol"><div class="bas">Bulgular * <span class="not">🧩 BI-RADS panelinden - elle düzenlenebilir</span></div>
+        <textarea class="ta oto" id="bulgu" rows="9"></textarea></div>
+      <div class="bol"><div class="bas">Sonuç * <span class="not">🧩 BI-RADS panelinden</span></div>
+        <textarea class="ta oto" id="sonuc" rows="4"></textarea></div>
+    </div>
+
+    <!-- SAG: BI-RADS paneli -->
+    <div class="sag">
+      <div class="bp">
+        <div class="bp-bas"><b>BI-RADS</b>
+          <span class="seg" id="modalite" style="margin-left:auto">
+            <button data-m="mg">Mamografi</button><button data-m="us" class="on">US</button><button data-m="mr">MR</button>
+          </span></div>
+        <div class="bp-ic">
+          <div class="satir"><span id="kompEt">Doku kompozisyonu</span><select id="komp"></select></div>
+
+          <div id="lezyonlar"></div>
+          <button class="btn kucuk" id="lezEkle">＋ Lezyon ekle</button>
+          <button class="btn kucuk" id="bulguYok">Lezyon yok (BI-RADS 1)</button>
+
+          <div class="oneri">
+            <div style="display:flex;align-items:center;gap:6px">Önerilen: <span id="oneriRozet"></span></div>
+            <div class="neden" id="neden"></div>
+          </div>
+
+          <div class="karar">
+            <div class="satir"><span><b>Son kategori</b></span><select id="son"></select></div>
+            <div id="farkUyari" class="uyari" style="display:none">Öneriden farklı - gerekçe zorunlu:
+              <input id="gerekce" placeholder="ör. klinik bulgu, önceki tetkikle stabil..." style="margin-top:4px"></div>
+            <div class="satir" style="margin-top:5px"><span>Öneri</span><select id="yonetim"></select></div>
+            <div id="takip" class="takip"></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn primary" id="aktar">⤵ Rapora aktar</button>
+            <span style="font-size:10.5px;color:var(--muted);align-self:center">Bulgular + Sonuç yeniden yazılır</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="nasil">
+  <div class="nb">
+    <h3>1 · Nerede açılır</h3>
+    <ul>
+      <li><b>Şablon kartı</b>na yeni alan: <i>Yapısal rapor türü</i> = BI-RADS (ileride LI-RADS, PI-RADS, TI-RADS, Lung-RADS).</li>
+      <li>Meme şablonları (MG / US / MR) bu türle işaretlenir; rapor ekranı sağ panelde makroların üstünde BI-RADS panelini açar.</li>
+      <li>Tek / Parçalı ikisinde de çalışır: tek modda metin A4'ün sonuna eklenir.</li>
+    </ul>
+  </div>
+  <div class="nb">
+    <h3>2 · Ne kaydedilir</h3>
+    <ul>
+      <li><b>radyoloji_rapor_lezyon</b> (yeni): taraf, saat, meme başına uzaklık, boyut, sözlük seçimleri, lezyon kategorisi.</li>
+      <li><b>radyoloji_rapor</b>: kompozisyon, önerilen ve son kategori, fark gerekçesi, yönetim önerisi.</li>
+      <li>Metin yine bölümlere yazılır - çıktı, e-Nabız, teleradyoloji değişmez; yapı ayrıca durur.</li>
+    </ul>
+  </div>
+  <div class="nb">
+    <h3>3 · Sonrası (takip ve denetim)</h3>
+    <ul>
+      <li><b>BI-RADS 3</b>: 6 ay kontrol hatırlatması takip listesine düşer (bu ekranda solda görünen).</li>
+      <li><b>BI-RADS 0</b>: ek görüntüleme işi açılır. <b>4 / 5</b>: biyopsi takibi; patoloji sonucu gelince eşleşir.</li>
+      <li><b>Denetim icmali</b>: hekim bazında kategori dağılımı, biyopsi oranı, PPV (patoloji modülüyle).</li>
+    </ul>
+  </div>
+  <div class="nb genis">
+    <h3>Öneri kuralları (sadeleştirilmiş - karar radyologda, sistem yalnız önerir)</h3>
+    <table>
+      <tr><th>Bulgu</th><th>Önerilen</th><th>Bulgu</th><th>Önerilen</th></tr>
+      <tr><td>Anekoik, oval, düzgün sınırlı, arka güçlenme (basit kist)</td><td><span class="br br2">2</span></td>
+          <td>Kalsifikasyon: tipik benign</td><td><span class="br br2">2</span></td></tr>
+      <tr><td>Oval, düzgün sınırlı, paralel, hipoekoik solid; arka bulgu yok</td><td><span class="br br3">3</span></td>
+          <td>Kalsifikasyon: kaba heterojen</td><td><span class="br br4">4A</span></td></tr>
+      <tr><td>Mikrolobüle kenar</td><td><span class="br br4">4A</span></td>
+          <td>Kalsifikasyon: amorf</td><td><span class="br br4">4B</span></td></tr>
+      <tr><td>Belirsiz ya da açılı kenar</td><td><span class="br br4">4B</span></td>
+          <td>Kalsifikasyon: ince pleomorfik</td><td><span class="br br4">4C</span></td></tr>
+      <tr><td>Düzensiz şekil ve paralel olmayan oryantasyon</td><td><span class="br br4">4C</span></td>
+          <td>Kalsifikasyon: ince lineer / dallanan</td><td><span class="br br5">5</span></td></tr>
+      <tr><td>Spiküle kenar (düzensiz şekille)</td><td><span class="br br5">5</span></td>
+          <td>Önceki tetkike göre büyüme (BI-RADS 3 lezyonda)</td><td>en az <span class="br br4">4A</span></td></tr>
+      <tr><td>Değerlendirme eksik / ek görüntü gerekli</td><td><span class="br br0">0</span></td>
+          <td>Biyopsiyle kanıtlı malignite</td><td><span class="br br6">6</span></td></tr>
+    </table>
+    <p style="margin:6px 0 0;color:var(--muted)">Genel kategori = lezyonların en yükseği. Kurallar bir tanım tablosunda durur (kurum düzenleyebilir);
+      ekrandaki "neden" çipleri hangi kuralın uygulandığını gösterir.</p>
+  </div>
+</div>
+
+<script>
+const KOMP = {
+  mg: ['a - Neredeyse tamamen yağlı','b - Dağınık fibroglandüler','c - Heterojen yoğun','d - Son derece yoğun'],
+  us: ['Homojen - yağ','Homojen - fibroglandüler','Heterojen'],
+  mr: ['a - Neredeyse tamamen yağlı','b - Dağınık fibroglandüler','c - Heterojen fibroglandüler','d - Yoğun fibroglandüler'],
+};
+const SOZ = {
+  sekil: ['Oval','Yuvarlak','Düzensiz'],
+  oryantasyon: ['Paralel','Paralel değil'],
+  kenar: ['Düzgün sınırlı','Belirsiz','Açılı','Mikrolobüle','Spiküle'],
+  eko: ['Anekoik','Hiperekoik','Kompleks kistik-solid','Hipoekoik','İzoekoik','Heterojen'],
+  arka: ['Yok','Güçlenme','Gölgelenme','Kombine'],
+  kals: ['Yok','Tipik benign','Kaba heterojen','Amorf','İnce pleomorfik','İnce lineer / dallanan'],
+};
+const ET = { sekil:'Şekil', oryantasyon:'Oryantasyon', kenar:'Kenar', eko:'Eko paterni', arka:'Arka akustik', kals:'Kalsifikasyon' };
+const YONETIM = {
+  '0':'Ek görüntüleme / önceki tetkiklerle karşılaştırma','1':'Rutin tarama','2':'Rutin tarama',
+  '3':'6 ay sonra kısa aralıklı kontrol','4A':'Doku tanısı (biyopsi)','4B':'Doku tanısı (biyopsi)','4C':'Doku tanısı (biyopsi)',
+  '5':'Doku tanısı (biyopsi)','6':'Uygun tedavi planı (cerrahi / onkoloji)',
+};
+const SIRA = ['1','2','3','4A','4B','4C','5','6'];   // 0 ayri: "eksik"
+const rozet = k => `<span class="br br${k[0]}">BI-RADS ${k}</span>`;
+
+let modalite = 'us';
+let lezyonlar = [
+  { taraf:'Sağ', saat:'10:00', uzak:'3 cm', boyut:'14×9 mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Belirsiz',
+    eko:'Hipoekoik', arka:'Yok', kals:'Yok', buyume:true, acik:true },
+  { taraf:'Sol', saat:'2:00', uzak:'5 cm', boyut:'6×5 mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Düzgün sınırlı',
+    eko:'Anekoik', arka:'Güçlenme', kals:'Yok', buyume:false, acik:false },
+];
+let sonElle = null, oneriGenel = '1';
+
+function lezyonKategori(l){
+  const n = [];
+  let k = '3';
+  if (l.eko==='Anekoik' && l.kenar==='Düzgün sınırlı' && l.sekil!=='Düzensiz') { k='2'; n.push('basit kist görünümü → 2'); }
+  else if (l.sekil!=='Düzensiz' && l.kenar==='Düzgün sınırlı' && l.oryantasyon==='Paralel') { k='3'; n.push('oval, düzgün sınırlı, paralel solid → 3'); }
+  const yuk = x => { if (SIRA.indexOf(x) > SIRA.indexOf(k)) k = x; };
+  if (l.kenar==='Mikrolobüle') { yuk('4A'); n.push('mikrolobüle kenar → 4A'); }
+  if (l.kenar==='Belirsiz' || l.kenar==='Açılı') { yuk('4B'); n.push(`${l.kenar.toLocaleLowerCase('tr')} kenar → 4B`); }
+  if (l.sekil==='Düzensiz' && l.oryantasyon==='Paralel değil') { yuk('4C'); n.push('düzensiz + paralel değil → 4C'); }
+  if (l.kenar==='Spiküle') { yuk(l.sekil==='Düzensiz' ? '5' : '4C'); n.push('spiküle kenar → ' + (l.sekil==='Düzensiz' ? '5' : '4C')); }
+  const kk = { 'Tipik benign':'2','Kaba heterojen':'4A','Amorf':'4B','İnce pleomorfik':'4C','İnce lineer / dallanan':'5' }[l.kals];
+  if (kk) { yuk(kk); n.push(`kalsifikasyon ${l.kals.toLocaleLowerCase('tr')} → ${kk}`); }
+  if (l.buyume && SIRA.indexOf(k) < SIRA.indexOf('4A')) { k='4A'; n.push('önceki tetkike göre büyüme → en az 4A'); }
+  return { k, n };
+}
+
+function ciz(){
+  document.querySelectorAll('#modalite button').forEach(b => b.classList.toggle('on', b.dataset.m===modalite));
+  const komp = document.getElementById('komp'), eski = komp.value;
+  komp.innerHTML = KOMP[modalite].map(x => `<option>${x}</option>`).join('');
+  if (KOMP[modalite].includes(eski)) komp.value = eski; else komp.selectedIndex = modalite==='us' ? 1 : 2;
+  document.getElementById('kompEt').textContent = modalite==='mg' ? 'Meme kompozisyonu' : modalite==='mr' ? 'FGT miktarı' : 'Doku kompozisyonu';
+
+  const kap = document.getElementById('lezyonlar');
+  kap.innerHTML = lezyonlar.map((l,i) => {
+    const { k } = lezyonKategori(l);
+    const alanlar = Object.keys(SOZ).filter(a => modalite==='us' || !['eko','arka','oryantasyon'].includes(a));
+    return `<div class="lez${l.acik?'':' kapali'}" data-i="${i}">
+      <div class="lez-bas" data-ac="${i}"><b>Lezyon ${i+1}</b> ${l.taraf} ${l.saat} · ${l.boyut} <span class="sp">${rozet(k)}</span>
+        <span style="color:#b23b3b;cursor:pointer" data-sil="${i}" title="Sil">✕</span></div>
+      <div class="lez-ic">
+        <div class="ilk3">
+          <label>Taraf<select data-a="taraf">${['Sağ','Sol'].map(x=>`<option${x===l.taraf?' selected':''}>${x}</option>`).join('')}</select></label>
+          <label>Saat<input data-a="saat" value="${l.saat}"></label>
+          <label>Meme başına<input data-a="uzak" value="${l.uzak}"></label>
+          <label>Boyut<input data-a="boyut" value="${l.boyut}"></label>
+        </div>
+        ${alanlar.map(a => `<div class="satir"><span>${ET[a]}</span><select data-a="${a}">${SOZ[a].map(x=>`<option${x===l[a]?' selected':''}>${x}</option>`).join('')}</select></div>`).join('')}
+        <div class="satir"><span>Değişim</span><label style="font-size:11px"><input type="checkbox" data-a="buyume" ${l.buyume?'checked':''} style="width:auto;height:auto"> önceki tetkike göre büyüme</label></div>
+      </div></div>`;
+  }).join('');
+
+  // oneri: en yuksek lezyon kategorisi
+  let genel = '1', nedenler = [];
+  lezyonlar.forEach((l,i) => { const r = lezyonKategori(l);
+    if (SIRA.indexOf(r.k) > SIRA.indexOf(genel)) genel = r.k;
+    nedenler.push(...r.n.map(x => `L${i+1}: ${x}`)); });
+  if (!lezyonlar.length) nedenler = ['lezyon girilmedi → 1 (negatif)'];
+  oneriGenel = genel;
+  document.getElementById('oneriRozet').innerHTML = rozet(genel);
+  document.getElementById('neden').innerHTML = nedenler.map(x => `<span>${x}</span>`).join('');
+
+  const son = document.getElementById('son');
+  son.innerHTML = ['0',...SIRA].map(k => `<option value="${k}">BI-RADS ${k}</option>`).join('');
+  son.value = sonElle ?? genel;
+  const fark = son.value !== genel;
+  document.getElementById('farkUyari').style.display = fark ? '' : 'none';
+  const yon = document.getElementById('yonetim');
+  yon.innerHTML = Object.values(YONETIM).filter((v,i,a)=>a.indexOf(v)===i).map(v=>`<option${v===YONETIM[son.value]?' selected':''}>${v}</option>`).join('');
+  document.getElementById('genelRozet').innerHTML = rozet(son.value);
+  const t = son.value;
+  document.getElementById('takip').innerHTML =
+    t==='3' ? '📅 Kaydedilince <b>6 ay kontrol</b> takibi açılır (hedef 27.04.2027) - takip listesine ve hastanın bandına düşer.'
+  : t[0]==='4' || t==='5' ? '🧪 Kaydedilince <b>biyopsi takibi</b> açılır; patoloji sonucu gelince radyoloji–patoloji uyumu sorulur. İsteyen hekime bildirim gider.'
+  : t==='0' ? '🔁 <b>Ek görüntüleme</b> işi açılır (ör. spot kompresyon / US).'
+  : t==='6' ? '🩺 Tedavi planı bilgisi; denetim istatistiğine malignite olarak girmez.'
+  : '✓ Rutin tarama - takip açılmaz.';
+  aktar();
+}
+
+function aktar(){
+  const komp = document.getElementById('komp').value;
+  const satirlar = [`Doku kompozisyonu: ${komp.toLocaleLowerCase('tr')}.`];
+  lezyonlar.forEach((l,i) => {
+    const { k } = lezyonKategori(l);
+    const ozel = modalite==='us'
+      ? `${l.sekil.toLocaleLowerCase('tr')}, ${l.oryantasyon.toLocaleLowerCase('tr')} oryantasyonlu, ${l.kenar.toLocaleLowerCase('tr')} kenarlı, ${l.eko.toLocaleLowerCase('tr')}`
+      : `${l.sekil.toLocaleLowerCase('tr')}, ${l.kenar.toLocaleLowerCase('tr')} kenarlı`;
+    const arka = modalite==='us' && l.arka!=='Yok' ? `, arka akustik ${l.arka.toLocaleLowerCase('tr')}` : '';
+    const kal = l.kals!=='Yok' ? `, ${l.kals.toLocaleLowerCase('tr')} kalsifikasyon` : '';
+    satirlar.push(`${l.taraf} meme saat ${l.saat} hizasında, meme başına ${l.uzak} uzaklıkta, ${l.boyut} boyutlarında ${ozel}${arka}${kal} lezyon izlenmiştir${l.buyume?' (önceki tetkike göre büyüme)':''}. [BI-RADS ${k}]`);
+  });
+  if (!lezyonlar.length) satirlar.push('Her iki memede kitle, şüpheli kalsifikasyon ya da mimari distorsiyon izlenmemiştir.');
+  document.getElementById('bulgu').value = satirlar.join('\n');
+  const son = document.getElementById('son').value;
+  const g = document.getElementById('gerekce').value.trim();
+  document.getElementById('sonuc').value =
+    `BI-RADS ${son}. ${YONETIM[son]}.` + (son !== oneriGenel && g ? `\nNot: ${g}` : '');
+}
+
+document.getElementById('modalite').onclick = e => { const m = e.target.dataset?.m; if (m) { modalite = m; ciz(); } };
+document.getElementById('komp').onchange = aktar;
+document.getElementById('son').onchange = e => { sonElle = e.target.value; ciz(); };
+document.getElementById('gerekce').oninput = aktar;
+document.getElementById('aktar').onclick = aktar;
+document.getElementById('lezEkle').onclick = () => { lezyonlar.forEach(l => l.acik=false);
+  lezyonlar.push({ taraf:'Sağ', saat:'12:00', uzak:'2 cm', boyut:'— mm', sekil:'Oval', oryantasyon:'Paralel', kenar:'Düzgün sınırlı',
+                   eko:'Hipoekoik', arka:'Yok', kals:'Yok', buyume:false, acik:true }); sonElle=null; ciz(); };
+document.getElementById('bulguYok').onclick = () => { lezyonlar = []; sonElle = null; ciz(); };
+document.getElementById('lezyonlar').addEventListener('click', e => {
+  const sil = e.target.dataset?.sil; if (sil !== undefined) { lezyonlar.splice(+sil,1); sonElle=null; ciz(); return; }
+  const ac = e.target.closest('[data-ac]'); if (ac && !e.target.closest('select,input')) { const l = lezyonlar[+ac.dataset.ac]; l.acik=!l.acik; ciz(); }
+});
+document.getElementById('lezyonlar').addEventListener('change', e => {
+  const a = e.target.dataset?.a; if (!a) return;
+  const i = +e.target.closest('.lez').dataset.i;
+  lezyonlar[i][a] = e.target.type==='checkbox' ? e.target.checked : e.target.value; sonElle=null; ciz();
+});
+ciz();
+</script>
+</body>
+</html>

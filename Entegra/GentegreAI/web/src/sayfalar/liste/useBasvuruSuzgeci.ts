@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { guvenli } from '../../bilesenler/mesaj';
 import type { Kosul } from '../../api/sozlesme';
-import { tarihAraligi, type TarihOnAyar } from './tarihAralik';
 
 /** Serit combolarinin secenekleri: ad + o aralikta kac kayit var. */
 export interface SecenekSayili { id: number; ad: string; adet: number }
@@ -12,15 +11,18 @@ export interface SecenekSayili { id: number; ad: string; adet: number }
  * Tahsilat, Donusum, Odeyen kurum, Bolum agaci ve Doktor. Hepsi SUNUCUDA suzer
  * ve sabit filtreye AND'lenir.
  *
- * Tarih HAZIR ARALIK olarak secilir (Bugun / Son 3 gun / Bu yil...): kabul
- * ekraninda iki tarih kutusu doldurmak yerine tek tiklama.
+ * TARIH bu kancada DEGIL (28.10.2026): grid'in standart tarih kutulari
+ * (tanim `tarihAlani` + `tarihVarsayilan: 'bugun'`) suzer; kanca yalniz
+ * araligi `araligiBildir` ile ogrenir - secenek combolari o araliktan dolar.
  *
  * Durum `Liste` bileseninde degil BURADA yasar; ekran degisince sifirlanir.
  */
 export function useBasvuruSuzgeci(aktif: boolean | undefined, kaynak: string) {
-  // Acilista BUGUN (kullanici): kabul ekraninda gunun basvurulari beklenir,
-  //   tum gecmis bir arada anlamsizdi.
-  const [tarih, setTarih] = useState<TarihOnAyar | ''>('bugun');
+  // Grid'in tarih kutularindaki aralik (bos = sinirsiz). Acilista bugun-bugun gelir.
+  const [aralik, setAralik] = useState<{ bas: string; bit: string } | null>(null);
+  const araligiBildir = useCallback((bas: string, bit: string) => {
+    setAralik(o => (o?.bas === bas && o?.bit === bit) ? o : (bas || bit ? { bas, bit } : null));
+  }, []);
   const [odeyen, setOdeyen] = useState<number | ''>('');
   const [bolum, setBolum] = useState<{ id: number; agac: number[] } | null>(null);
   const [doktor, setDoktor] = useState<number | ''>('');
@@ -38,14 +40,14 @@ export function useBasvuruSuzgeci(aktif: boolean | undefined, kaynak: string) {
   //   degil. Tarih secimi degisince listeler yenilenir.
   useEffect(() => {
     if (!aktif) return;
-    const aralik = tarih === '' ? undefined : tarihAraligi(tarih);
     void guvenli(async () => {
-      const y = await api.basvuruSuzgecSecenekleri(aralik?.bas, aralik?.bit);
+      const y = await api.basvuruSuzgecSecenekleri(aralik?.bas || undefined, aralik?.bit || undefined);
       setKurumlar(y.odeyenler ?? []);
       setBolumler(y.bolumler ?? []);
       setDoktorlar(y.doktorlar ?? []);
     });
-  }, [aktif, tarih]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aktif, aralik?.bas, aralik?.bit]);
   // Aralik degisince listede kalmayan secim temizlenir: filtre sessizce bos
   //   liste verirdi.
   useEffect(() => {
@@ -58,7 +60,7 @@ export function useBasvuruSuzgeci(aktif: boolean | undefined, kaynak: string) {
   }, [doktorlar, doktor]);
 
   const sifirla = useCallback(() => {
-    setTarih('bugun'); setOdeyen(''); setBolum(null); setDoktor('');
+    setOdeyen(''); setBolum(null); setDoktor('');
     setTamamlanma(''); setTahsilat(''); setDonusum('');
   }, []);
   // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
@@ -72,10 +74,6 @@ export function useBasvuruSuzgeci(aktif: boolean | undefined, kaynak: string) {
     if (!aktif) return temel;
     const kosullar: Kosul[] = [];
     if (temel) kosullar.push(temel);
-    if (tarih !== '') {
-      const { bas, bit } = tarihAraligi(tarih);
-      kosullar.push({ alan: 'belgeTarihi', op: 'arasinda', deger: [bas, bit] });
-    }
     if (odeyen !== '') kosullar.push({ alan: 'odeyenKurumId', op: 'esit', deger: odeyen });
     // Bolum: secilen dal + TUM ALT BIRIMLERI (agac combosu).
     if (bolum && bolum.agac.length > 0)
@@ -93,13 +91,14 @@ export function useBasvuruSuzgeci(aktif: boolean | undefined, kaynak: string) {
     return kosullar.length === 0 ? undefined
          : kosullar.length === 1 ? kosullar[0]
          : { op: 'and', kosullar };
-  }, [aktif, tarih, odeyen, bolum, doktor, tamamlanma, tahsilat, donusum]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aktif, odeyen, bolum, doktor, tamamlanma, tahsilat, donusum]);
 
-  /** Varsayilandan (bugun, hepsi) sapan bir secim var mi - "×" dugmesi icin. */
-  const secimVar = tarih !== 'bugun' || odeyen !== '' || bolum !== null || doktor !== ''
+  /** Varsayilandan (hepsi) sapan bir secim var mi - "×" dugmesi icin. Tarih grid'in kutularinda. */
+  const secimVar = odeyen !== '' || bolum !== null || doktor !== ''
     || tamamlanma !== '' || tahsilat !== '' || donusum !== '';
 
-  return { tarih, setTarih, odeyen, setOdeyen, bolum, setBolum, doktor, setDoktor,
+  return { aralik, araligiBildir, odeyen, setOdeyen, bolum, setBolum, doktor, setDoktor,
            tamamlanma, setTamamlanma, tahsilat, setTahsilat, donusum, setDonusum,
            kurumlar, bolumler, doktorlar, filtre, sifirla, secimVar };
 }

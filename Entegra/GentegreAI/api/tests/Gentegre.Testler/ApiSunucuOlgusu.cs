@@ -61,7 +61,10 @@ public sealed class ApiSunucuOlgusu : IAsyncLifetime
             RedirectStandardError = true,
             UseShellExecute = false,
         };
-        bilgi.Environment["ConnectionStrings__Gentegre"] = dizge;
+        // GENTEGRE_TEST_API_DB (kod inceleme raporu 28.10.2026 B07): API süreci SINIRLI uygulama rolüyle bağlanır
+        //   (yayin/uygulama-rolu.sql) - fikstürler yine GENTEGRE_TEST_DB (postgres) ile yazar. Üretimde rolün
+        //   yetkisi yetmeyen bir uç varsa bütün API testleri "permission denied" ile burada kırmızı olur.
+        bilgi.Environment["ConnectionStrings__Gentegre"] = TestVeritabani.ApiDizge ?? dizge;
         bilgi.Environment["ArkaPlan__Kapali"] = "true";
         bilgi.Environment["Ai__Aktif"] = "false";
         bilgi.Environment["ASPNETCORE_ENVIRONMENT"] = "Test";

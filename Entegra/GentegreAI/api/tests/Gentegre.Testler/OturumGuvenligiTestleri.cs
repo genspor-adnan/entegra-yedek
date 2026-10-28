@@ -319,4 +319,62 @@ public sealed partial class OturumGuvenligiTestleri(ApiSunucuOlgusu api)
         Assert.Equal("kullanici_pasif", await api.Veri.TekDegerAsync<string>(
             "select iptal_nedeni from public.oturum where kullanici_id = @p0 order by id desc limit 1", [u]));
     }
+    // ------------------------------------- kod inceleme raporu 28.10.2026 B05 ----
+
+    private async Task<HttpStatusCode> BenAsync(string access)
+    {
+        using var h = api.Istemci(access, Merkez);
+        return (await h.GetAsync("/api/kimlik/ben")).StatusCode;
+    }
+
+    [VtFact]
+    public async Task Kapatilan_oturumun_eldeki_access_tokeni_hemen_duser()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var (kod, u) = await OturumKullanicisiAsync(d);
+        // Çok cihazlı senaryo: "tek oturum" ayarı test süresince kapalı, sonra eski değerine döner.
+        var tekOturum = await api.Veri.TekDegerAsync<string>(
+            "select deger from public.referans where anahtar = 'guvenlik.tek_oturum'");
+        if (tekOturum is not null)
+        {
+            await api.Veri.CalistirAsync("update public.referans set deger = '0' where anahtar = 'guvenlik.tek_oturum'", null);
+            d.Temizle($"update public.referans set deger = '{tekOturum.Replace("'", "''")}' where anahtar = 'guvenlik.tek_oturum'");
+        }
+
+        // 1) Çıkış: refresh iptali eldeki access token'ı da durdurur.
+        var (a1, r1) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        Assert.Equal(HttpStatusCode.OK, await BenAsync(a1));
+        using (var h = api.Istemci()) await h.PostAsJsonAsync("/api/kimlik/cikis", new { refreshToken = r1 });
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(a1));
+
+        // 2) Başka cihazdan oturum kapatma: A cihazının token'ı düşer, B çalışmaya devam eder.
+        var (aA, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        var oturumA = await api.Veri.TekDegerAsync<long>(
+            "select id from public.oturum where kullanici_id = @p0 and iptal_tarihi is null order by id desc limit 1", [u]);
+        var (aB, rB) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using (var hB = api.Istemci(aB, Merkez))
+            Assert.Equal(HttpStatusCode.OK, (await hB.PostAsync($"/api/kimlik/oturumlar/{oturumA}/kapat", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(aA));
+        Assert.Equal(HttpStatusCode.OK, await BenAsync(aB));
+
+        // 3) Refresh tekrar kullanımı: aile iptal edilince yenilemeden ÖNCE alınmış access token da düşer.
+        var y = await YenileAsync(rB);
+        var aB2 = (await y.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("accessToken").GetString()!;
+        Assert.Equal(HttpStatusCode.OK, await BenAsync(aB2));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await YenileAsync(rB)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(aB));
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(aB2));
+
+        // 4) Parola değişimi: öteki cihazların token'ı düşer, değiştiren cihaz yeni çiftle sürer.
+        var (aC, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        var (aD, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var hD = api.Istemci(aD, Merkez);
+        var p = await hD.PostAsJsonAsync("/api/kimlik/parola",
+            new { eskiParola = TestDunyasi.Parola, yeniParola = "Yeni.Parola.2026!" });
+        Assert.Equal(HttpStatusCode.OK, p.StatusCode);
+        var aYeni = (await p.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("accessToken").GetString()!;
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(aC));
+        Assert.Equal(HttpStatusCode.Unauthorized, await BenAsync(aD));
+        Assert.Equal(HttpStatusCode.OK, await BenAsync(aYeni));
+    }
 }

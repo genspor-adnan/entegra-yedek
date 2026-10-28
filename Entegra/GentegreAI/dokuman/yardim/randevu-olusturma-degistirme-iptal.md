@@ -21,7 +21,7 @@ Randevu, hastanın bir hekime (poliklinik) ya da bir cihaza (radyoloji) ayrılan
 
 ## Ekrana giriş yolları
 - Sol menü: **Randevu › Randevular**; aynı grupta **Çalışma Planları**, **Çalışma Şablonları**, **İzin & İstisnalar**, **Randevu Ayarları**.
-- Radyoloji Çalışma Listesi'nde **📅 Randevu Ver** (cihaz randevusu).
+- Radyoloji İstem Listesi'nde **📅 Randevu Ver** (cihaz randevusu).
 - Çağrı merkezi operatör panosunda **Randevu Ver** / **Randevu Değiştir**.
 - Komut paleti (Ctrl+K) › "Randevu".
 
@@ -78,7 +78,7 @@ Görünüm düğmesi **📅 Takvim**: hekim ya da cihaz sütunlu takvim; bölüm
 - Hekim listede yok → hekimin aktif çalışma şablonu yok; **Randevu › Çalışma Şablonları**'ndan tanımlayın.
 
 ## Diğer modüllere etkisi
-- Başvuruya dönüştürme kayıt kabulde protokol açar ve Hekim Çalışma Listesi'ne düşürür.
+- Başvuruya dönüştürme kayıt kabulde protokol açar ve Doktor Bekleme Listesi'ne düşürür.
 - Radyoloji randevusu cihaz çalışma listesine (MWL) gider; diş kliniğinde Günlük Akış randevunun diş görünümüdür.
 - Randevu hatırlatma SMS'i bildirim kuyruğundan gider; çağrı merkezi kampanyaları yarınki randevuları kaynak alır.
 - Muayene kartı randevu numarasını taşır.

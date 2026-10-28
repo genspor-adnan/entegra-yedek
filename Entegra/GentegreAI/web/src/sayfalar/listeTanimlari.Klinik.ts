@@ -295,6 +295,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   (kullanici). Ham id kolonlari gizli tutulur - suzme ADA gore
     //   calisamaz (ayni adli kurum / unvan degisikligi filtreyi kaydirir).
     basvuruSuzgeci: true,
+    // TARİH (kullanıcı 28.10.2026): Doktor Bekleme Listesi gibi STANDART grid tarih kutuları, açılışta
+    //   bugün-bugün. Seçenek combolarının (ödeyen / bölüm / doktor) aralığı da bu kutulardan gelir.
+    tarihAlani: 'belgeTarihi', tarihVarsayilan: 'bugun',
     // Basvuruda belge numarasi PROTOKOL NUMARASIDIR (kullanici); kart da
     //   oyle adlandiriyor. Katalogda "Belge No" kalir - ayni kaynagi 13
     //   liste paylasiyor.
@@ -676,10 +679,12 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   "Muayeneye Al" onu acar. Ayri bir liste tablosu YOK - kayit kabulun
     //   actigi basvurudan turer, yoksa ayni hasta iki yerde iki durumda
     //   gorunurdu.
-    kaynak: 'hekim-listesi', rota: 'hekim-listesi', baslik: 'Hekim Çalışma Listesi',
-    yol: 'Muayene › Çalışma Listesi',
+    kaynak: 'hekim-listesi', rota: 'hekim-listesi', baslik: 'Doktor Bekleme Listesi',
+    yol: 'Muayene › Doktor Bekleme Listesi',
     aksiyonEkrani: 'hekim-liste',
     tarihAlani: 'saat',
+    // TARİH (kullanıcı 28.10.2026): aralık açılışta GÜNÜN TARİHİ (bugün-bugün); geçmiş gün elle seçilir.
+    tarihVarsayilan: 'bugun',
     cipler: [
       { ad: 'Bekleyen',       filtre: { alan: 'durumKod', op: 'esit', deger: 0 } },
       { ad: 'Çağrıldı',       filtre: { alan: 'durumKod', op: 'esit', deger: 1 } },
@@ -689,7 +694,10 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 10, menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
+    // AD (kullanıcı 27.10.2026): önce "Muayene Çalışma Listesi", sonra "Hekim Çalışma Listesi rename Doktor Çalışma
+    //   Listesi yap hem menü hem de sekme başlığı" - radyolojinin çalışma listesinden ayrılsın.
+    //   28.10.2026: "Doktor Çalışma Listesi rename her yerde Doktor Bekleme Listesi".
+    menuSira: 10, menuGrup: 'Muayene', menuAd: 'Doktor Bekleme Listesi', ic: '📋', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE (409, Faz 1): tip merkezindeki uzman hekim muayenesi -

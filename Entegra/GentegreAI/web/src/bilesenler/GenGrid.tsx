@@ -72,7 +72,7 @@ interface Props {
       'arasinda' filtresi kurulur (ör. ekstrede 'islemTarihi'). */
   tarihAlani?: string;
   /** Acilista dolu gelen tarih araligi (ör. ekstre: 1 Ocak - bugun). */
-  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
+  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy' | 'bugun';
   /**
    * TARIH ARALIGI YERINE HAZIR COMBO (kullanici: "istemler listesi tarih
    * araligi yerine basvurudaki bugun/dun gibi tarih filtre combosu

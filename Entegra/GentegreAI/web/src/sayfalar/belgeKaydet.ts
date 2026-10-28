@@ -337,6 +337,8 @@ return {
     tur: s.satirTur,
     stokId: s.stokId,
     hizmetId: s.hizmetId,
+    // Uygunluk istisnasının gerekçesi (482) - tetik doluysa geçirir.
+    uygunlukNotu: s.uygunlukNotu || undefined,
     // `adet` GIRILEN miktardir (2 kutu); ANA BIRIM karsiligini (24 adet)
     //   sunucu carpandan hesaplar - iki yerde hesaplamak iki farkli sonuc
     //   demekti, o yuzden `miktar` GONDERILMEZ (143).

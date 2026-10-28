@@ -75,6 +75,12 @@ public static class TestVeritabani
     public static string? Dizge =>
         Environment.GetEnvironmentVariable("GENTEGRE_TEST_DB") is { Length: > 0 } d ? d : null;
 
+    /// <summary>
+    /// API sürecinin bağlantısı (B07): sınırlı uygulama rolü. Yoksa API de <see cref="Dizge"/> ile bağlanır.
+    /// </summary>
+    public static string? ApiDizge =>
+        Environment.GetEnvironmentVariable("GENTEGRE_TEST_API_DB") is { Length: > 0 } d ? d : null;
+
     /// <summary>CI bütünleşme aşaması: DB testleri atlanamaz.</summary>
     public static bool Zorunlu =>
         Environment.GetEnvironmentVariable("GENTEGRE_TEST_ZORUNLU") == "1";

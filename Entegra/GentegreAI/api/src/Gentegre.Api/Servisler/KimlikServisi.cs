@@ -140,7 +140,7 @@ public sealed class KimlikServisi
     /// guncellenir (yenilemede de ayni sube gelsin). Refresh token DEGISMEZ.
     /// </summary>
     public async Task<GirisYaniti> SubeSecAsync(int kullaniciId, int subeId, string refreshToken,
-                                                CancellationToken iptal = default)
+                                                Guid aileId, CancellationToken iptal = default)
     {
         var kullanici = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal)
                         ?? throw GentegreHatasi.Yetkisiz();
@@ -150,8 +150,9 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yasak("Bu subede calisma yetkiniz yok.");
 
         var dakika = await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal);
+        // Aynı oturum ailesi: şube değişimi yeni oturum açmaz (OturumKapisi aileyi doğrulamıştır).
         var (token, sonaErme) = _jwt.Uret(kullanici.TarafId, kullanici.RolId, kullanici.YetkiSurumu,
-            subeId, subeler.Select(s => s.Id), dakika);
+            subeId, subeler.Select(s => s.Id), dakika, aileId);
 
         if (!string.IsNullOrWhiteSpace(refreshToken))
             await _oturumlar.SubeGuncelleAsync(JwtUretici.Hashle(refreshToken), subeId, iptal);
@@ -372,8 +373,10 @@ public sealed class KimlikServisi
         var dakika = await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal);
         var gun = await AyarAsync("guvenlik.refresh_gun", _ayar.RefreshGun, iptal);
 
+        // Yeni aile burada belirlenir (DB varsayılanına bırakılmaz): access token aynı aile kimliğini taşır (B05).
+        var aile = aileId ?? Guid.NewGuid();
         var (token, sonaErme) = _jwt.Uret(kullanici.TarafId, kullanici.RolId, kullanici.YetkiSurumu,
-            subeId, subeler.Select(s => s.Id), dakika);
+            subeId, subeler.Select(s => s.Id), dakika, aile);
 
         var (refresh, hash) = JwtUretici.RefreshUret();
         // Veritabanina yazilacak: AN (UTC), duvar saati degil (667).
@@ -382,9 +385,9 @@ public sealed class KimlikServisi
         // Yenilemede satir, eski satiri kapatan AYNI islemle yazilir (#6).
         if (baglanti is not null)
             await OturumDeposu.AcAsync(baglanti, islem, kullanici.TarafId, hash, refreshBitis,
-                aileId, oncekiId, subeId, ip, istemci, iptal);
+                aile, oncekiId, subeId, ip, istemci, iptal);
         else
-            await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aileId, oncekiId,
+            await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aile, oncekiId,
                 subeId, ip, istemci, iptal);
 
         return new GirisYaniti

@@ -44,6 +44,8 @@ export interface SatirDurumu {
   satirTur: number;
   stokId: number | null;
   hizmetId: number | null;
+  /** Cinsiyet / yaş kuralına (482) aykırı hizmetin gerekçesi - doluysa kayıtta tetik geçirir. */
+  uygunlukNotu?: string;
   stokKodu: string;
   stokAdi: string;
   adet: string;
@@ -276,6 +278,7 @@ export function yanittanSatirlar(
     satirTur: Number(r.tur ?? 1),
     stokId: r.stokId ? Number(r.stokId) : null,
     hizmetId: r.hizmetId ? Number(r.hizmetId) : null,
+    uygunlukNotu: r.uygunlukNotu ? String(r.uygunlukNotu) : undefined,
     stokKodu: String(r.stokKodu ?? ''),
     // Odeme paylasimi (289): tutarlar ve kapanma sayaclari.
     kurumTutar: r.kurumTutar != null ? String(r.kurumTutar) : undefined,

@@ -1,10 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { gorunumKaydet, gorunumOku, type RadyolojiRaporDuzeni, type RadyolojiRaporGiris } from '../bilesenler/gorunum';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { Modal } from '../bilesenler/Modal';
+import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../bilesenler/MuayeneSekmesiz';
 import { c } from '../dil/ceviri';
+import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
+import { TEK_BASLIK, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi, yerTutucuDoldur } from './radyoloji/raporBicimi';
+import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
+import { BiradsFormu } from './radyoloji/BiradsFormu';
+import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml } from '../bilesenler/BicimliMetin';
 
 
 /**
@@ -15,19 +22,44 @@ import { c } from '../dil/ceviri';
  * KİLİTLENİR. Düzen mockup ile aynı (Ekranlar/radyoloji_rapor_yaz.html):
  * solda hastanın geçmişi ve istem, ortada bölümler, sağda şablon/makro/skor.
  */
+/** `html` (1195): editörün biçimli hali; yoksa düz metinden türetilir (htmlOf). */
 interface Bolum { id?: number; sira: number; baslik: string; metin: string;
-                  yazdir: number; zorunlu?: number }
+                  yazdir: number; zorunlu?: number; html?: string }
+const htmlOf = (b: Bolum) => b.html ?? duzdenHtml(b.metin);
 interface Sablon { id: number; kod: string; ad: string; surum: number;
-                   varsayilan: number; tetkigeOzel: number }
+                   varsayilan: number; tetkigeOzel: number;
+                   /** rad.modalite kodu ve yapısal form türü (1194: 1 = BI-RADS). */
+                   modalite?: number; yapisalTur?: number }
 interface Makro { kisayol: string; ad: string; metin: string; hedefBolum: string }
 interface Skor { alanKod: string; alanAd: string; tip: number; secenekler: string;
                  zorunlu: number; raporaBas: number }
 interface Gecmis { id: number; accessionNo: string; tetkikAdi: string; tarih: string;
-                   raporlayan: string; ozet: string }
+                   raporlayan: string; ozet: string;
+                   /** Kronolojik görünüm (27.10.2026): modalite adı, rapor durumu (0 yok, 1-3), BI-RADS. */
+                   modaliteAdi?: string; raporDurum?: number; birads?: string }
 interface Kritik { bulgu: string; bildirilenAd: string; yol: number;
                    bildirimZamani: string; geriBildirim: string }
 
 type Kayit = Record<string, unknown>;
+
+/**
+ * TEK / PARÇALI (kullanıcı 27.10.2026: "daha önce programımızda radyoloji raporu tek parça halinde yazılıyordu..
+ * bazı doktorlar o şekilde devam etmek istiyor", "onların şablonları da genelde A4 boyutunda tek sayfa idi").
+ * Tek modda rapor TEK BÖLÜM olarak saklanır (başlık TEK_BASLIK, radyoloji/raporBicimi): şema, onay, çıktı, e-Nabız aynı yoldan geçer.
+ * Şablon tek modda bölüm başlıkları + varsayılan metinlerle TEK A4 METNİNE birleşir. Onaydaki zorunlu bölüm
+ * kuralı şablon bölüm adıyla eşleştiği için tek bölüme uygulanmaz.
+ */
+const tekBolum = (metin: string, html?: string): Bolum[] => [{ sira: 1, baslik: TEK_BASLIK, metin, yazdir: 1, zorunlu: 0, html }];
+/** Bölümleri tek metne çevirir: basılan her bölüm "BAŞLIK:" satırı + metni, aralarında boş satır. */
+const birlestir = (b: Bolum[]): string => b
+  .filter(x => x.yazdir !== 0)
+  .map(x => `${x.baslik.toLocaleUpperCase('tr')}:\n${x.metin.trim()}`)
+  .join('\n\n');
+/** Biçimli birleştirme: başlık kalın satır, bölümün biçimi korunur. */
+const birlestirHtml = (b: Bolum[]): string => b
+  .filter(x => x.yazdir !== 0)
+  .map(x => `<div><b>${duzdenHtml(x.baslik.toLocaleUpperCase('tr'))}:</b></div><div>${htmlOf(x)}</div>`)
+  .join('<div><br></div>');
 
 /** Sunucudan gelen zaman damgasini "30.08.2026 14:05" olarak yazar. */
 function anMetni(d: unknown): string {
@@ -57,6 +89,8 @@ export function RadyolojiRapor() {
   const { istemId } = useParams();
   const git = useNavigate();
   const id = Number(istemId) || 0;
+  /** Kendi ekran sekmesinde açıldıysa (çalışma listesinden): başlık hasta adı, Kapat sekmeyi kapatır. */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
 
   const [istem, setIstem] = useState<Kayit | null>(null);
   const [rapor, setRapor] = useState<Kayit | null>(null);
@@ -91,6 +125,22 @@ export function RadyolojiRapor() {
                                                  geriBildirim: '' });
   /** Makro hangi bölüme eklenecek: en son dokunulan alan. */
   const sonBolum = useRef<number>(0);
+  /** Tek / parçalı: kayıtlı rapor kendi biçiminde açılır; yeni raporda hekimin tercihi (gorunum). */
+  const [duzen, setDuzenDurumu] = useState<RadyolojiRaporDuzeni>(() => gorunumOku().radyolojiRaporDuzeni);
+  const duzenRef = useRef(duzen);
+  const setDuzen = (d: RadyolojiRaporDuzeni) => { duzenRef.current = d; setDuzenDurumu(d) };
+  /**
+   * GİRİŞ (1194, mockup radyoloji_birads_v2): serbest = hekim yazar; yapısal = BI-RADS formu doldurulur,
+   * BULGULAR + SONUÇ formdan üretilir. Yapısal yalnız şablonun formu varsa etkin; yoksa ekran serbest açılır,
+   * hekimin tercihi bozulmaz. Kayıtlı rapor kendi girişiyle açılır.
+   */
+  const [giris, setGiris] = useState<RadyolojiRaporGiris>(() => gorunumOku().radyolojiRaporGiris);
+  const [birads, setBiradsDurumu] = useState<BiradsDurumu | null>(null);
+  /** Serbest girişte BI-RADS paneli kullanıldı mı - kullanılmadıysa kayda boş kategori yazılmaz (istatistik). */
+  const [biradsKullanildi, setBiradsKullanildi] = useState(false);
+  const setBirads = (d: BiradsDurumu) => { setBiradsDurumu(d); setBiradsKullanildi(true) };
+  /** Yapısal girişte bölüm iskeleti (teknik / klinik / karşılaştırma şablondan); BULGULAR + SONUÇ formdan yazılır. */
+  const [parcalar, setParcalar] = useState<Bolum[]>([]);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true); setHata('');
@@ -111,16 +161,29 @@ export function RadyolojiRapor() {
       const sec = (y.rapor?.sablonId as number | undefined)
                ?? (y.sablonlar as unknown as Sablon[])[0]?.id ?? null;
       setSablonId(sec);
+      // BI-RADS: şablonun formu varsa kayıtlı veriden (yoksa boş form).
+      const sb = (y.sablonlar as unknown as Sablon[]).find(s => s.id === sec);
+      const biradsli = Number(sb?.yapisalTur ?? 0) === 1;
+      setBiradsDurumu(biradsli ? durumOku(y.rapor, y.lezyonlar ?? [], modaliteKodundan(sb?.modalite)) : null);
+      setBiradsKullanildi(String(y.rapor?.biradsKategori ?? '') !== '');
+      const kayitliGiris: RadyolojiRaporGiris | null = y.bolumler.length > 0
+        ? (Number(y.rapor?.giris ?? 1) === 2 ? 'yapisal' : 'serbest') : null;
+      if (kayitliGiris) setGiris(kayitliGiris);
+      const yapisalAcilis = biradsli && (kayitliGiris ?? gorunumOku().radyolojiRaporGiris) === 'yapisal';
 
-      // Rapor varsa bölümleri ondan; yoksa şablon iskeletinden.
+      // Rapor varsa bölümleri ondan (biçimi de ondan: tek / parçalı); yoksa şablon iskeletinden.
       if (y.bolumler.length > 0) {
-        setBolumler((y.bolumler as Kayit[]).map(b => ({
+        setDuzen(tekParcaMi(y.bolumler as Kayit[]) ? 'tek' : 'parcali');
+        const kb = (y.bolumler as Kayit[]).map(b => ({
           id: Number(b.id), sira: Number(b.sira), baslik: String(b.baslik ?? ''),
           metin: String(b.metin ?? ''), yazdir: Number(b.yazdir ?? 1),
-          zorunlu: Number(b.zorunlu ?? 0),
-        })));
+          zorunlu: Number(b.zorunlu ?? 0), html: b.metinHtml ? String(b.metinHtml) : undefined,
+        }));
+        setBolumler(kb);
+        // Yapısal tek parça raporda iskelet şablondan (tek metin bölünemez).
+        if (yapisalAcilis) setParcalar(!tekParcaMi(kb) ? kb : sec ? await sablonParcalari(sec, y.istem) : []);
       } else if (sec) {
-        await sablonUygula(sec, true, String(y.istem?.klinikBilgi ?? ''));
+        await sablonUygula(sec, true, y.istem);
       }
 
       const d: Record<string, string> = {};
@@ -132,36 +195,148 @@ export function RadyolojiRapor() {
   }, [id]);
 
   useEffect(() => { void yukle() }, [yukle]);
+  const hastaAdi = String(istem?.hastaAdi ?? '').trim();
+  useEffect(() => {
+    if (ekranSekmesi && hastaAdi) ekranSekmesi.baslik(sekmeAdi(hastaAdi), `/radyoloji/rapor/${id}`);
+  // ekranSekmesi bağlamı sekme ömrü boyunca aynı.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hastaAdi, id]);
 
   /**
    * Şablonu uygular: bölüm iskeletini kurar. `ilk` değilse kullanıcıya sorar -
    * yazılmış metnin üstüne şablon basmak emeği siler.
    */
-  async function sablonUygula(sId: number, ilk = false, klinik = '') {
+  async function sablonUygula(sId: number, ilk = false, ist: Kayit | null = istem) {
     if (!ilk && bolumler.some(b => b.metin.trim())) {
       if (!(await onay('Şablon yeniden uygulansın mı? Yazılmış bölüm metinleri '
                      + 'şablonun varsayılan metniyle değişir.'))) return;
     }
+    const yeniParcalar = await sablonParcalari(sId, ist);
+    setParcalar(yeniParcalar);
+    setBolumler(duzenRef.current === 'tek' ? tekBolum(birlestir(yeniParcalar)) : yeniParcalar);
+    setSablonId(sId);
+    // Yeni şablonun BI-RADS formu varsa form (yoksa boş) hazırlanır; olmayan şablonda form durumu kalır, kullanılmaz.
+    const sb = sablonlar.find(s => s.id === sId);
+    if (Number(sb?.yapisalTur ?? 0) === 1 && !birads) setBiradsDurumu(durumOku(null, [], modaliteKodundan(sb?.modalite)));
+    const m = await api.radyolojiRapor(id);
+    setMakrolar(m.makrolar as unknown as Makro[]);
+  }
+
+  /** Şablonun bölüm iskeleti (varsayılan metinlerle). `ist` açıkça verilir: ilk yüklemede state henüz boş. */
+  async function sablonParcalari(sId: number, ist: Kayit | null): Promise<Bolum[]> {
+    const klinik = String(ist?.klinikBilgi ?? '');
     const y = await api.radyolojiSablonBolumleri(sId);
-    setBolumler(y.map((b, i) => {
+    return y.map((b, i) => {
       const baslik = String(b.baslik ?? '');
       // KLINIK BILGI istemden dolar: hekim ayni metni ikinci kez yazmasin.
       //   Sablonun kendi varsayilani varsa ona dokunulmaz.
-      const varsayilan = String(b.varsayilanMetin ?? '');
+      // Yer tutucular ({istem.on_tani} ...) istemle doldurulur.
+      const varsayilan = yerTutucuDoldur(String(b.varsayilanMetin ?? ''), ist).trim();
       const klinikMi = baslik.toLocaleLowerCase('tr').includes('klinik');
       return {
         sira: Number(b.sira ?? i + 1), baslik,
         metin: !varsayilan && klinikMi ? klinik : varsayilan,
         yazdir: Number(b.yazdir ?? 1), zorunlu: Number(b.zorunlu ?? 0),
       };
-    }));
-    setSablonId(sId);
-    const m = await api.radyolojiRapor(id);
-    setMakrolar(m.makrolar as unknown as Makro[]);
+    });
   }
 
-  const bolumYaz = (i: number, metin: string) =>
-    setBolumler(b => b.map((x, k) => (k === i ? { ...x, metin } : x)));
+  /**
+   * Tek ⇄ parçalı geçiş. Parçalıdan teke bölümler tek metne birleşir (kayıp yok). Tekten parçalıya metin
+   * bölünemez: şablonun iskeleti kurulur, metnin tamamı BULGULAR bölümüne (yoksa ilk bölüme) taşınır.
+   * Seçim hekimin tercihi olarak saklanır - sonraki yeni raporlar o biçimde açılır.
+   */
+  const duzenDegistir = (yeni: RadyolojiRaporDuzeni) => guvenli(async () => {
+    if (yeni === duzen) return;
+    // Yapısal girişte metin formdan üretilir: biçim değişince yeniden kurulur (etki aşağıda).
+    if (etkinGiris === 'yapisal') {
+      setDuzen(yeni);
+      void gorunumKaydet({ ...gorunumOku(), radyolojiRaporDuzeni: yeni }).catch(() => {});
+      return;
+    }
+    if (yeni === 'tek') {
+      setBolumler(b => (b.length === 0 || tekParcaMi(b) ? b : tekBolum(birlestir(b), birlestirHtml(b))));
+    } else if (tekParcaMi(bolumler)) {
+      const metin = bolumler[0].metin;
+      if (!sablonId) throw new Error('Parçalı yazmak için önce sağdan bir şablon seçin.');
+      const parcalar = await sablonParcalari(sablonId, istem);
+      if (metin.trim()) {
+        if (!(await onay('Tek parça metin bölünemez: şablonun bölümleri kurulur, yazdığınız metnin tamamı '
+                         + 'Bulgular bölümüne taşınır. Devam edilsin mi?'))) return;
+        const h = parcalar.findIndex(x => x.baslik.toLocaleLowerCase('tr').includes('bulgu'));
+        const i = h >= 0 ? h : 0;
+        if (parcalar[i]) parcalar[i] = { ...parcalar[i], metin, html: bolumler[0].html };
+      }
+      setBolumler(parcalar);
+    }
+    setDuzen(yeni);
+    void gorunumKaydet({ ...gorunumOku(), radyolojiRaporDuzeni: yeni }).catch(() => {});
+  });
+
+  // ------------------------------------------------------------ yapısal giriş (BI-RADS) --
+  const seciliSablon = sablonlar.find(s => s.id === sablonId);
+  const biradsli = Number(seciliSablon?.yapisalTur ?? 0) === 1 && birads !== null;
+  const modalite = modaliteKodundan(seciliSablon?.modalite);
+  const etkinGiris: RadyolojiRaporGiris = giris === 'yapisal' && biradsli ? 'yapisal' : 'serbest';
+
+  /** İskelette BULGULAR / SONUÇ formdan yazılır; bölüm yoksa eklenir. */
+  const formdanParcalar = (p: Bolum[], d: BiradsDurumu): Bolum[] => {
+    const u = metinUret(d, modalite);
+    const r = p.map(b => (bulguBolumuMu(b.baslik) ? { ...b, metin: u.bulgular, html: undefined }
+                        : sonucBolumuMu(b.baslik) ? { ...b, metin: u.sonuc, html: undefined } : b));
+    if (!r.some(b => bulguBolumuMu(b.baslik))) r.push({ sira: r.length + 1, baslik: 'Bulgular', metin: u.bulgular, yazdir: 1 });
+    if (!r.some(b => sonucBolumuMu(b.baslik))) r.push({ sira: r.length + 1, baslik: 'Sonuç', metin: u.sonuc, yazdir: 1 });
+    return r;
+  };
+
+  // YAPISAL: form / iskelet / biçim değişince rapor metni yeniden üretilir.
+  useEffect(() => {
+    if (etkinGiris !== 'yapisal' || !birads) return;
+    const p = formdanParcalar(parcalar, birads);
+    setBolumler(duzen === 'tek' ? tekBolum(birlestir(p)) : p);
+  // formdanParcalar her çizimde yeni; bağımlılıklar onun girdileri.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etkinGiris, birads, parcalar, duzen, modalite]);
+
+  /**
+   * Giriş değişimi. Yapısala geçerken BULGULAR / SONUÇ elle değiştirilmişse sorulur (formdan yeniden üretilecek);
+   * iskelet mevcut parçalı bölümlerden, tek parçada şablondan kurulur. Serbeste geçişte metin olduğu gibi kalır.
+   */
+  const girisDegistir = (yeni: RadyolojiRaporGiris) => guvenli(async () => {
+    if (yeni === etkinGiris) return;
+    if (yeni === 'yapisal') {
+      if (!biradsli || !birads) return;
+      const u = metinUret(birads, modalite);
+      const mevcut = tekParcaMi(bolumler) ? bolumler[0].metin
+        : bolumler.filter(b => bulguBolumuMu(b.baslik) || sonucBolumuMu(b.baslik)).map(b => b.metin.trim()).join('');
+      const elle = tekParcaMi(bolumler)
+        ? !(mevcut.includes(u.bulgular) && mevcut.includes(u.sonuc)) && /BULGULAR:\n\S/.test(mevcut)
+        : mevcut !== '' && mevcut !== `${u.bulgular.trim()}${u.sonuc.trim()}`;
+      if (elle && !(await onay('Bulgular / Sonuç elle yazılmış. Formdan yeniden üretilsin mi? Elle yazılan kaybolur.'))) return;
+      setParcalar(!tekParcaMi(bolumler) && bolumler.length > 0 ? bolumler
+                  : sablonId ? await sablonParcalari(sablonId, istem) : []);
+      setBiradsKullanildi(true);
+    }
+    setGiris(yeni);
+    void gorunumKaydet({ ...gorunumOku(), radyolojiRaporGiris: yeni }).catch(() => {});
+  });
+
+  /** Serbest girişte BI-RADS panelinden metne: BULGULAR + SONUÇ (tek parçada metnin ilgili kısmı) yazılır. */
+  const biradsAktar = () => guvenli(async () => {
+    if (!birads) return;
+    const u = metinUret(birads, modalite);
+    if (tekParcaMi(bolumler)) {
+      // Tek parça metinde bölüm düz metin üzerinden yazılır - biçim varsa kaybolacağı sorulur.
+      if (bicimVarMi(bolumler[0].html)
+          && !(await onay('Metindeki biçimlendirme (font, renk...) kaldırılacak. BI-RADS metni aktarılsın mı?'))) return;
+      const m = tekMetneBolumYaz(tekMetneBolumYaz(bolumler[0].metin, 'Bulgular', u.bulgular), 'Sonuç', u.sonuc);
+      setBolumler([{ ...bolumler[0], metin: m, html: undefined }]);
+    } else setBolumler(formdanParcalar(bolumler, birads));
+    setBiradsKullanildi(true);
+  });
+
+  const bolumYaz = (i: number, metin: string, html?: string) =>
+    setBolumler(b => b.map((x, k) => (k === i ? { ...x, metin, html } : x)));
 
   /** Makro metnini hedef bölüme (yoksa son dokunulan bölüme) ekler. */
   const makroEkle = (m: Makro) => {
@@ -169,37 +344,46 @@ export function RadyolojiRapor() {
       ? bolumler.findIndex(b => b.baslik.toLocaleLowerCase('tr') ===
                                 m.hedefBolum.toLocaleLowerCase('tr'))
       : -1;
-    const i = hedef >= 0 ? hedef : sonBolum.current;
+    const i = tekParcaMi(bolumler) ? 0 : hedef >= 0 ? hedef : sonBolum.current;
     if (i < 0 || i >= bolumler.length) return;
+    const ek = yerTutucuDoldur(m.metin, istem);
     setBolumler(b => b.map((x, k) => (k === i
-      ? { ...x, metin: x.metin ? `${x.metin.trimEnd()} ${m.metin}` : m.metin }
+      ? { ...x, metin: x.metin ? `${x.metin.trimEnd()} ${ek}` : ek,
+          html: x.html === undefined ? undefined : `${x.html} ${duzdenHtml(ek)}` }
       : x)));
   };
 
   const govde = () => ({
     sablonId,
+    // SÜRÜM (kod inceleme raporu 28.10.2026 B04): başkası arada kaydettiyse / onayladıysa sunucu 409 döner.
+    surum: rapor?.surum ? String(rapor.surum) : undefined,
     bolumler: bolumler.map(b => ({ id: b.id, sira: b.sira, baslik: b.baslik,
-                                   metin: b.metin, yazdir: b.yazdir })),
+                                   metin: b.metin, yazdir: b.yazdir, metinHtml: b.html ?? null })),
     alanlar: skorlar.map(s => ({ alanKod: s.alanKod, alanAd: s.alanAd,
                                  deger: skorDeger[s.alanKod] ?? '' })),
     kritik: kritik ? 1 : 0,
+    // GİRİŞ + BI-RADS (1194): serbest girişte panel hiç kullanılmadıysa BI-RADS gönderilmez (boş kategori yazılmaz).
+    giris: etkinGiris === 'yapisal' ? 2 : 1,
+    ...(birads && biradsli && (etkinGiris === 'yapisal' || biradsKullanildi)
+      ? { birads: biradsGovdesi(birads, modalite) } : {}),
     // PUANLAR YALNIZ PROFIL ACIKKEN GONDERILIR: kapaliyken alan ekranda yok,
     //   0 gondermek daha once girilmis degeri silerdi.
     ...(bakanlikProfili ? { istemNedeniPuan: nedeniPuan, cekimKalitePuan: kalitePuan } : {}),
   });
 
-  const kaydet = async (sonra?: () => Promise<void>) =>
+  const kaydet = async (sonra?: (k: { raporId: number; surum: string }) => Promise<void>) =>
     guvenli(async () => {
-      await api.radyolojiRaporYaz(id, govde());
-      if (sonra) await sonra();
-      await yukle();
+      const k = await api.radyolojiRaporYaz(id, govde());
+      // Kayıt geçtiyse sürüm değişti: sonraki adım hata verse de yeni sürüm okunur (yoksa ikinci kayıt 409 alırdı).
+      try { if (sonra) await sonra(k) } finally { await yukle() }
       if (!sonra) mesaj('Rapor taslağı kaydedildi.');
     });
 
-  const durumaGecir = (hedef: 'on-rapor' | 'onay') => kaydet(async () => {
-    const raporId = Number((await api.radyolojiRapor(id)).rapor?.id ?? 0);
+  // ONAY = EKRANDAKİ METİN: önce bu ekranın metni kaydedilir, onay KAYDIN döndürdüğü sürümle istenir. Rapor
+  //   yeniden okunmaz - okunsaydı arada başkasının kaydettiği (uzmanın görmediği) metin onaylanırdı.
+  const durumaGecir = (hedef: 'on-rapor' | 'onay') => kaydet(async ({ raporId, surum }) => {
     if (!raporId) throw new Error('Rapor bulunamadı.');
-    await api.radyolojiRaporDurum(raporId, hedef);
+    await api.radyolojiRaporDurum(raporId, hedef, surum);
     mesaj(hedef === 'onay'
       ? 'Rapor onaylandı ve imzalandı; artık kilitlidir.'
       : 'Ön rapor uzman onayına gönderildi.');
@@ -221,6 +405,11 @@ export function RadyolojiRapor() {
     mesaj('Ek rapor (addendum) açıldı; orijinal rapor değişmeden kalır.');
   });
 
+  // HASTA BANDI (kullanıcı 27.10.2026: "radyoloji raporu için hasta bandı yap"): sevk / konsültasyondaki standart
+  //   band - ad, yaş, kurum, dosya / protokol no, kan grubu, alerji, uyarılar. İstemde muayene yok: hastanın
+  //   en son muayenesinden (yoksa hasta kaydından) okunur.
+  const bant = useMuayeneHastaBilgisi(0, 0, Number(istem?.hastaId ?? 0));
+
   if (yukleniyor) return <div className="yukleniyor">{c('Yükleniyor…')}</div>;
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!istem) return <div className="hata-kutusu">{c('İstem bulunamadı.')}</div>;
@@ -235,7 +424,7 @@ export function RadyolojiRapor() {
   return (
     <div className="sayfa rad-rapor">
       <div className="sayfa-bas">
-        <h2>{c('Radyoloji Raporu')}<span className="sonuk">{String(istem.accessionNo ?? '')}</span></h2>
+        {/* BAŞLIK SATIRI KALKTI (kullanıcı 27.10.2026): sekme başlığı hasta adı; accession no solda "Bu tetkik"te. */}
         <div className="sayfa-eylem">
           <button className="d bir" disabled={kilitli} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
           <button className="d" disabled={kilitli}
@@ -254,48 +443,85 @@ export function RadyolojiRapor() {
                   onClick={() => git(`/radyoloji/cikti/${Number(rapor?.id)}`)}>
             🖨 Çıktı
           </button>
-          <button className="d" onClick={() => git('/radyoloji')}>✖ Kapat</button>
+          {/* İSTEM (kullanıcı 27.10.2026): istem kartını kendi sekmesinde açar. */}
+          <button className="d" title={c('Radyoloji istem kartını aç')}
+                  onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/${id}`) : git(`/radyoloji/${id}`))}>☢️ İstem</button>
+          <button className="d" onClick={() => (ekranSekmesi ? ekranSekmesi.kapat() : git('/radyoloji'))}>✖ Kapat</button>
         </div>
       </div>
 
-      {/* Kimlik şeridi - her zaman görünür */}
-      <div className="kaid">
-        <div className="alan-izgara rad-kimlik">
-          <label className="alan"><span className="etiket">Hasta</span>
-            <span className="deger-serit">
-              <b>{String(istem.hastaAdi ?? '')}</b>
-              {yas !== null && <span className="sonuk">{yas} y</span>}
-            </span></label>
-          <label className="alan"><span className="etiket">Tetkik</span>
-            <span className="deger-serit">
-              {String(istem.tetkikKodu ?? '')} · {String(istem.tetkikAdi ?? '')}
-            </span></label>
-          <label className="alan"><span className="etiket">Çekim</span>
-            <span className="deger-serit">
-              {istem.cekimTarihi ? anMetni(istem.cekimTarihi) : '—'}
-              {istem.cihazAdi ? ` · ${String(istem.cihazAdi)}` : ''}
-            </span></label>
-          <label className="alan"><span className="etiket">Durum</span>
-            <span className="deger-serit"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
-              {kilitli && <span className="rozet">🔒 Kilitli</span>}
-            </span></label>
+      {/* RADYOLOJİ BANDI (kullanıcı 27.10.2026): kan grubu yok, raporun DURUMU bandın sonunda. */}
+      {bant && <MuayeneHastaBandi bilgi={bant} kanGrubuYok
+        suAnYerine={<>
+          <div className="hbnd-b">{c('İsteyen')}</div>
+          <div><b>{String(istem.isteyen ?? '') || '—'}</b></div>
+          {String(istem.isteyenBolum ?? '') && <div className="hbnd-alt">{String(istem.isteyenBolum)}</div>}
+        </>}
+        sonBlok={<>
+        <div className="hbnd-b">{c('Durum')}</div>
+        <div className="hbnd-rozetler"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
+          {kilitli && <span className="rozet">🔒 {c('Kilitli')}</span>}</div>
+      </>} />}
+      {/* KİMLİK ŞERİDİ KALKTI (kullanıcı 27.10.2026: "hasta bandının altındaki banttaki bilgileri soldaki önceki
+          tetkiklere taşı ve bu bandı kaldır"): tetkik ve çekim solda "Bu tetkik" düğümünde, hasta ve durum bantta.
+          Bant okunamazsa (yedek) yalnız hasta + durum şeridi kalır. */}
+      {!bant && (
+        <div className="kaid">
+          <div className="alan-izgara rad-kimlik bantsiz">
+            <label className="alan"><span className="etiket">Hasta</span>
+              <span className="deger-serit">
+                <b>{String(istem.hastaAdi ?? '')}</b>
+                {yas !== null && <span className="sonuk">{yas} y</span>}
+              </span></label>
+            <label className="alan"><span className="etiket">Durum</span>
+              <span className="deger-serit"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
+                {kilitli && <span className="rozet">🔒 Kilitli</span>}
+              </span></label>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="rad-govde">
+      <div className={`rad-govde${etkinGiris === 'yapisal' ? ' yapisal' : ''}`}>
         {/* --------------------------------------------------- SOL: geçmiş --- */}
         <div className="rad-yan">
           <h5>{c('Önceki Tetkikler')}</h5>
-          {gecmis.length === 0 && <div className="sonuk kucuk">{c('Önceki tetkik yok.')}</div>}
-          {gecmis.map(g => (
-            <div className="rad-kart" key={g.id}>
-              <b>{g.tetkikAdi}</b>
-              <div className="sonuk kucuk">
-                {anMetni(g.tarih)}{g.raporlayan ? ` · ${g.raporlayan}` : ''}
+
+          {/* KRONOLOJİK GÖRÜNÜM (kullanıcı 27.10.2026): zaman çizgisi - en yeni üstte, yıl başlıkları,
+              bu tetkik en üstte "şimdi" düğümü. Tıklayınca o tetkikin raporu kendi sekmesinde açılır. */}
+          <div className="rad-zc">
+              <div className="rad-zc-dugum simdi">
+                <div className="rad-zc-tarih">{c('Bu tetkik')}
+                  {istem.tetkikKodu ? <span className="rad-zc-mod">{String(istem.tetkikKodu)}</span> : null}</div>
+                {istem.accessionNo ? <div className="sonuk kucuk" title={c('Erişim numarası: PACS ve cihazlar görüntüyü bu numarayla istemle eşleştirir')}>
+                  {c('Accession')}: <b>{String(istem.accessionNo)}</b></div> : null}
+                <b>{String(istem.tetkikAdi ?? '')}</b>
+                <div className="sonuk kucuk">{c('Çekim')}: {istem.cekimTarihi ? anMetni(istem.cekimTarihi) : '—'}
+                  {istem.cihazAdi ? ` · ${String(istem.cihazAdi)}` : ''}</div>
               </div>
-              {g.ozet && <div className="kucuk">{g.ozet}…</div>}
-            </div>
-          ))}
+              {gecmis.length === 0 && <div className="sonuk kucuk rad-zc-bos">{c('Önceki tetkik yok.')}</div>}
+              {gecmis.map((g, i) => {
+                const yil = g.tarih ? new Date(g.tarih).getFullYear() : 0;
+                const oncekiYil = i > 0 && gecmis[i - 1].tarih ? new Date(gecmis[i - 1].tarih).getFullYear() : null;
+                const durumAd = ({ 0: 'Raporsuz', 1: 'Taslak', 2: 'Ön rapor', 3: 'Onaylı' } as Record<number, string>)[Number(g.raporDurum ?? 0)];
+                return (
+                  <div key={g.id}>
+                    {yil > 0 && yil !== oncekiYil && <div className="rad-zc-yil">{yil}</div>}
+                    <button type="button" className={`rad-zc-dugum d${Number(g.raporDurum ?? 0)}`}
+                            title={c('Raporu kendi sekmesinde aç')}
+                            onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/rapor/${g.id}`) : git(`/radyoloji/rapor/${g.id}`))}>
+                      <div className="rad-zc-tarih">
+                        {anMetni(g.tarih)}
+                        {g.modaliteAdi && <span className="rad-zc-mod">{g.modaliteAdi}</span>}
+                        {g.birads && <span className={`brf-k k${g.birads[0]}`}>BI-RADS {g.birads}</span>}
+                      </div>
+                      <b>{g.tetkikAdi}</b>
+                      <div className="sonuk kucuk">{durumAd}{g.raporlayan ? ` · ${g.raporlayan}` : ''}</div>
+                      {g.ozet && <div className="kucuk rad-zc-ozet">{g.ozet}…</div>}
+                    </button>
+                  </div>
+                );
+              })}
+          </div>
 
           <h5>İstem Bilgisi</h5>
           <div className="rad-kart">
@@ -328,31 +554,89 @@ export function RadyolojiRapor() {
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
         <div className="rad-orta">
+          <div className="rad-duzen">
+            <span>{c('Rapor biçimi')}</span>
+            <span className="seg" role="group">
+              {(['tek', 'parcali'] as const).map(d => (
+                <button key={d} type="button" className={duzen === d ? 'on' : ''} disabled={kilitli}
+                        onClick={() => void duzenDegistir(d)}>{d === 'tek' ? c('Tek') : c('Parçalı')}</button>
+              ))}
+            </span>
+            <span>{c('Giriş')}</span>
+            <span className="seg" role="group">
+              {(['serbest', 'yapisal'] as const).map(g => (
+                <button key={g} type="button" className={etkinGiris === g ? 'on' : ''}
+                        disabled={kilitli || (g === 'yapisal' && !biradsli)}
+                        title={g === 'yapisal' && !biradsli ? c('Bu şablonda yapısal form yok') : undefined}
+                        onClick={() => void girisDegistir(g)}>{g === 'serbest' ? c('Serbest') : c('Yapısal')}</button>
+              ))}
+            </span>
+            {giris === 'yapisal' && !biradsli && (
+              <span className="sonuk kucuk">{c('tercih Yapısal - bu şablonda form yok')}</span>
+            )}
+            {duzen === 'tek' && bakanlikProfili && (
+              <span className="uyari-yazi">{c('Bakanlık profili açık: onay dört parça ister - parçalı yazın.')}</span>
+            )}
+          </div>
+          {etkinGiris === 'yapisal' && birads ? (
+            <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis kilitli={kilitli} />
+          ) : <>
+          {/* BİÇİM ÇUBUĞU (1195): imlecin bulunduğu alanda çalışır (tek A4 ya da herhangi bir bölüm). */}
+          {bolumler.length > 0 && <BicimAracCubugu pasif={kilitli} />}
           {bolumler.length === 0 && (
             <div className="bilgi-kutusu">
               Şablon seçilmemiş. Sağdan bir şablon seçip uygulayın.
             </div>
           )}
-          {bolumler.map((b, i) => (
+          {duzen === 'tek' && tekParcaMi(bolumler) ? (
+            <BicimliAlan className="rad-a4" html={htmlOf(bolumler[0])} salt={kilitli}
+                         onFocus={() => { sonBolum.current = 0 }}
+                         onDegis={(h, d) => bolumYaz(0, d, h)} />
+          ) : bolumler.map((b, i) => (
             <div className="rad-bolum" key={`${b.baslik}-${i}`}>
               <div className="rad-bolum-bas">
                 {b.baslik}{b.zorunlu === 1 && <span className="zor"> *</span>}
                 {b.yazdir === 0 && <span className="sonuk kucuk"> · çıktıya basılmaz</span>}
               </div>
-              <textarea
-                value={b.metin}
-                readOnly={kilitli}
-                onFocus={() => { sonBolum.current = i }}
-                onChange={e => bolumYaz(i, e.target.value)}
-                rows={b.baslik.toLocaleLowerCase('tr').includes('bulgu') ? 8 : 3}
-              />
+              <BicimliAlan className={`rad-bolum-metin${bulguBolumuMu(b.baslik) ? ' uzun' : ''}`}
+                           html={htmlOf(b)} salt={kilitli}
+                           onFocus={() => { sonBolum.current = i }}
+                           onDegis={(h, d) => bolumYaz(i, d, h)} />
             </div>
           ))}
+          </>}
         </div>
 
         {/* -------------------------------------------- SAĞ: şablon / makro --- */}
         <div className="rad-yan">
-          <h5>Şablon</h5>
+          {etkinGiris === 'yapisal' ? (
+            <div className="rad-oniz">
+              <div className="rad-oniz-bas">
+                <b>{duzen === 'tek' ? c('Rapor önizleme (A4)') : c('Rapor bölümleri')}</b>
+                <span className="rad-canli">● {c('canlı')}</span>
+                {!kilitli && <button type="button" className="d mini" title={c('Girişi Serbest yapar; metin olduğu gibi kalır')}
+                                     onClick={() => void girisDegistir('serbest')}>✎ {c('Elle düzenle')}</button>}
+              </div>
+              {duzen === 'tek' ? (
+                <textarea className="rad-a4 kucuk" readOnly value={bolumler[0]?.metin ?? ''} />
+              ) : bolumler.map((b, i) => {
+                const formdan = bulguBolumuMu(b.baslik) || sonucBolumuMu(b.baslik);
+                return (
+                  <div className="rad-bolum" key={`${b.baslik}-${i}`}>
+                    <div className="rad-bolum-bas">{b.baslik}
+                      {formdan && <span className="sonuk kucuk"> · 🧩 {c('formdan')}</span>}</div>
+                    <textarea value={b.metin} readOnly={kilitli || formdan} className={formdan ? 'formdan' : ''}
+                              rows={bulguBolumuMu(b.baslik) ? 7 : 2}
+                              onChange={e => setParcalar(p => p.map(x => (x.baslik === b.baslik ? { ...x, metin: e.target.value } : x)))} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : biradsli && birads && (
+            <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis={false} kilitli={kilitli}
+                         onAktar={biradsAktar} />
+          )}
+          <h5 style={{ marginTop: 12 }}>Şablon</h5>
           <select value={sablonId ?? ''} disabled={kilitli}
                   onChange={e => void sablonUygula(Number(e.target.value))}>
             <option value="">— seçiniz —</option>
@@ -366,7 +650,7 @@ export function RadyolojiRapor() {
           <h5 style={{ marginTop: 12 }}>{c('Makrolar')}</h5>
           {makrolar.length === 0 && <div className="sonuk kucuk">{c('Bu şablonda makro yok.')}</div>}
           {makrolar.map(m => (
-            <button type="button" className="rad-makro" key={m.kisayol} disabled={kilitli}
+            <button type="button" className="rad-makro" key={m.kisayol} disabled={kilitli || etkinGiris === 'yapisal'}
                     title={m.metin} onClick={() => makroEkle(m)}>
               <span className="kis">{m.kisayol}</span>
               <span>{m.ad}</span>

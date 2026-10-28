@@ -12,7 +12,8 @@ import { tarihSaat } from '../../bilesenler/bicim';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile, gunYaz } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
-import { c } from '../../dil/ceviri';
+import { c } from '../../dil/ceviri';
+import { h } from '../../bilesenler/htmlGuvenlik';
 
 /**
  * İZİN TALEP KARTI `/personel-izin/:id` (959, mockup Ekranlar/IK/izin_talep_karti.html).
@@ -215,8 +216,9 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
   const yazdir = () => {
     const w = window.open('', '_blank');
     if (!w) return;
-    const satir = (k: string, v: string) => `<tr><th>${k}</th><td>${(v || '—').replace(/</g, '&lt;')}</td></tr>`;
-    w.document.write(`<!doctype html><meta charset="utf-8"><title>İzin Formu ${ro.izinNo}</title>
+    // KAÇIŞ (kod inceleme raporu 28.10.2026 B03): yalnız '<' değil tam HTML kaçışı (h).
+    const satir = (k: string, v: string) => `<tr><th>${h(k)}</th><td>${h(v || '—')}</td></tr>`;
+    w.document.write(`<!doctype html><meta charset="utf-8"><title>İzin Formu ${h(ro.izinNo)}</title>
       <style>body{font:13px Arial;margin:32px}h2{margin:0 0 16px}table{border-collapse:collapse;width:100%}
       th,td{border:1px solid #999;padding:6px 8px;text-align:left}th{width:30%;background:#f2f2f2}
       .imza{display:flex;gap:24px;margin-top:40px}.imza div{flex:1;border-top:1px solid #333;padding-top:6px;text-align:center}</style>

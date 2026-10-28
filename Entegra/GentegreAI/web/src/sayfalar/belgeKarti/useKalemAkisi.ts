@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { hamSayi } from '../../bilesenler/bicim';
+import { mesaj, metinSor } from '../../bilesenler/mesaj';
 import type { SatirDurumu } from '../belgeSatir';
 import { sonAnahtar, paketIcerigiUygula } from '../belgeKalem';
 import { stokSeciminiCoz } from './stokSecimi';
@@ -120,10 +121,28 @@ export function useKalemAkisi({
    */
   /** Satir pencere ACMADAN gride dustuyse `true` (arama penceresinin sayaci icin). */
   const stokSecildi = async (sec: Record<string, unknown>, hizli = false): Promise<boolean> => {
+    // HİZMET UYGUNLUĞU (kullanıcı 27.10.2026: "erkek hastaya Obstetrik ... ekledim gene"): cinsiyet / yaş kuralı
+    //   (482) kalem SEÇİLİRKEN sorulur - kayıtta tetik zaten reddediyordu, kullanıcı satırı ekleyip sonra hata
+    //   görüyordu. İstisna gerekçeyle geçer (uygunluk_notu, tetik bunu kabul eder); gerekçe yoksa kalem eklenmez.
+    let uygunlukNotu: string | undefined;
+    if (sec.tip === 'hizmet' && cariId) {
+      const u = await api.hizmetUygunluk(Number(sec.id), cariId).catch(() => ({ mesaj: '', istisna: false }));
+      // KESİN KURAL (1197, kullanıcı: "obstetrik kesin kadındır.. erkeğe eklenemez"): gerekçe sorulmaz, eklenmez.
+      if (u.mesaj && !u.istisna) { mesaj(`Eklenemez: ${u.mesaj}`); return false }
+      if (u.mesaj) {
+        const not = await metinSor(`${u.mesaj}
+
+İstisna ise (ör. erkekte meme tetkiki) gerekçeyi yazın. `
+                                   + 'Boş bırakırsanız kalem eklenmez.', '', 'Gerekçe');
+        if (!not?.trim()) { mesaj(`Eklenmedi: ${u.mesaj}`); return false }
+        uygunlukNotu = not.trim();
+      }
+    }
     const yeni = await stokSeciminiCoz(sec, {
       satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
       fiyatListesiId, kampanyaId, basvuruBilgi,
     });
+    if (uygunlukNotu) yeni.uygunlukNotu = uygunlukNotu;
     // FIYATI SIFIR UCRET HIZLI EKLENMEZ (kullanici 12.10.2026: "ücret sıfırsa fiyat
     //   ekranı açılsın"; 12.10.2026 satis faturasina da): Enter ile secilen kalemin fiyati yoksa kalem
     //   (fiyat) penceresi acilir; orada da 0 ile kaydedilirse onay sorulur.

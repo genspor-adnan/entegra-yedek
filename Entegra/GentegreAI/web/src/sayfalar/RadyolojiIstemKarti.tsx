@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 
 /**
@@ -54,6 +55,14 @@ export function RadyolojiIstemKarti() {
     } catch (h) { setHata(hataMetni(h)) }
   }, [istemId]);
   useEffect(() => { void yukle() }, [yukle]);
+  // SEKME BAŞLIĞI = HASTA ADI (kullanıcı 27.10.2026: "rad istem sekme caption a da hasta ismi gelsin").
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const hastaAdi = M(k, 'hastaAdi').trim();
+  useEffect(() => {
+    if (ekranSekmesi && hastaAdi && istemId) ekranSekmesi.baslik(sekmeAdi(hastaAdi), `/radyoloji/${istemId}`);
+  // ekranSekmesi bağlamı sekme ömrü boyunca aynı.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hastaAdi, istemId]);
 
   const durum = N(k, 'durum');
   // Akış adımları: done (tamam) / simdi (şu an) / boş.
@@ -109,7 +118,7 @@ export function RadyolojiIstemKarti() {
   );
 
   if (hata) return <div className="fm-sayfa"><div className="hata-kutusu">{hata}</div>
-    <button className="d" onClick={() => git('/radyoloji')}>◀ Çalışma Listesi</button></div>;
+    <button className="d" onClick={() => git('/radyoloji')}>◀ İstem Listesi</button></div>;
   if (!k) return <div className="fm-sayfa"><div className="fm-bolum">Yükleniyor…</div></div>;
 
   const kontrastAd = N(k, 'kontrast') === 1 ? `Verildi${M(k, 'kontrastMl') !== '0' ? ` · ${M(k, 'kontrastMl')} ml` : ''}` : 'Verilmedi';
@@ -127,12 +136,13 @@ export function RadyolojiIstemKarti() {
           </> : <>
             {yetki('radyoloji-istem', 'degistir') &&
               <button className="d" onClick={() => { setForm(k ? formAl(k) : null); setDuzen(true) }}>✎ Düzenle</button>}
-            {yetki('radyoloji', 'degistir') && durum >= 2 && durum < 5 &&
-              <button className="d bir" onClick={() => git(`/radyoloji/rapor/${istemId}`)}>✎ Rapor Yaz</button>}
-            {durum >= 3 &&
-              <button className="d" onClick={() => git(`/radyoloji/rapor/${istemId}`)}>📄 Raporu Aç</button>}
+            {/* RAPOR (kullanıcı 27.10.2026: "istem kartına Rapor butonu ekle.. radyoloji raporunu açsın"): her durumda,
+                raporu kendi sekmesinde (istem kartının sağında) açar; rapor ekranındaki "İstem" buraya döner. */}
+            {yetki('radyoloji', 'gor') &&
+              <button className="d bir" onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/rapor/${istemId}`)
+                                                                     : git(`/radyoloji/rapor/${istemId}`))}>📄 Rapor</button>}
             <button className="d" onClick={() => void yukle()}>⟳ Yenile</button>
-            <button className="d" onClick={() => git('/radyoloji')}>◀ Çalışma Listesi</button>
+            <button className="d" onClick={() => git('/radyoloji')}>◀ İstem Listesi</button>
           </>}
         </div>
       </div></div>

@@ -5,6 +5,7 @@ import { AntetLogo } from '../bilesenler/AntetLogo';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
+import { tekParcaMi } from './radyoloji/raporBicimi';
 
 /**
  * RADYOLOJI RAPOR CIKTISI (mockup: Ekranlar/radyoloji_rapor_onizleme.html).
@@ -144,7 +145,8 @@ export function RadyolojiRaporCikti() {
                Şablonda "Klinik Bilgi" bölümü VARSA burada tekrar basılmaz -
                rapor yazılırken o bölüm zaten istemin metniyle dolduruluyor,
                ikisi birden basılınca aynı cümle iki kez çıkıyordu. --- */}
-        {!veri.bolumler.some(b => String(b.baslik ?? '')
+        {/* TEK PARÇA raporda klinik bilgi metnin içinde (şablondan) - ayrıca basılmaz. */}
+        {!tekParcaMi(veri.bolumler) && !veri.bolumler.some(b => String(b.baslik ?? '')
                                     .toLocaleLowerCase('tr').includes('klinik'))
          && String(r.klinikBilgi ?? '').trim() !== '' && (
           <div className="rapor-bolum">
@@ -159,8 +161,11 @@ export function RadyolojiRaporCikti() {
         {/* --- RAPOR BOLUMLERI (yalniz basilacaklar) --- */}
         {veri.bolumler.map((b, i) => (
           <div className="rapor-bolum" key={i}>
-            <h3>{String(b.baslik ?? '')}</h3>
-            <p>{String(b.metin ?? '')}</p>
+            {/* Tek parça raporun "Rapor" başlığı basılmaz - başlıklar metnin içinde. */}
+            {!tekParcaMi(veri.bolumler) && <h3>{String(b.baslik ?? '')}</h3>}
+            {/* BİÇİMLİ METİN (1195): sunucuda beyaz listeyle temizlenmiş HTML; yoksa düz metin. */}
+            {b.metinHtml ? <div className="rapor-html" dangerouslySetInnerHTML={{ __html: String(b.metinHtml) }} />
+                         : <p>{String(b.metin ?? '')}</p>}
           </div>
         ))}
 

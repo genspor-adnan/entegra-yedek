@@ -163,6 +163,8 @@ export interface BelgeKartiModalProps {
 
   /* ---- kartin disariya acilan uclari ---- */
   onKaydedildi?(): void;
+  /** Hasta / cari araması SEÇİMSİZ kapandı (İptal) - yeni başvuruda kart da kapanır (BelgeKarti karar verir). */
+  onAramaIptal?(): void;
   git(delta: number): void;
 }
 
@@ -185,7 +187,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     donusum, setDonusum, donusumPay, setDonusumPay,
     acilanDonusum, setAcilanDonusum, donusumleriYukle,
     terminAcik, setTerminAcik, rolModali, setRolModali,
-    istemModali, setIstemModali, onKaydedildi, git,
+    istemModali, setIstemModali, onKaydedildi, git, onAramaIptal,
   } = p;
 
   // POS SEÇİMİ ATLANDI: açık oturum ya da çalışan POS yoksa eski "POS hesabı"
@@ -193,6 +195,19 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
   //   seçim kapanınca sıfırlanıyor; yoksa bir sonraki tahsilatta POS listesi
   //   hiç denenmezdi.
   const [posAtlandi, setPosAtlandi] = useState(false);
+
+  // HASTANIN CİNSİYETİ - KALEM ARAMASI SÜZGECİ (kullanıcı 27.10.2026: "aramada kadına yapılan işlemler hiç
+  //   gelmesin"): başvuruda KESİN kurallı karşı cinsiyet hizmetleri listelenmez; sorarak olanlar (meme) gelir,
+  //   seçilince gerekçe sorulur. Cinsiyeti bilinmeyen hastada süzme yok.
+  const [hastaCinsiyet, setHastaCinsiyet] = useState(0);
+  useEffect(() => {
+    if (!basvuruMu || !cari?.id) { setHastaCinsiyet(0); return }
+    let iptal = false;
+    api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: cari.id } })
+      .then(y => { if (!iptal) setHastaCinsiyet(Number(y.satirlar?.[0]?.cinsiyet ?? 0)) })
+      .catch(() => { if (!iptal) setHastaCinsiyet(0) });
+    return () => { iptal = true };
+  }, [basvuruMu, cari?.id]);
   useEffect(() => { if (!hesapSecim) setPosAtlandi(false) }, [hesapSecim]);
 
   return (
@@ -214,6 +229,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           setCariArama(false);
           setHastaAramaMetni('');
           setHastaAramaYeni(false);
+          onAramaIptal?.();
         }}
         onSec={sec => {
           setCari({ id: sec.id, unvan: sec.unvan });
@@ -342,6 +358,10 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           // KULLANIM SIRASI (550): basvuruda hizmetler bu poliklinigin
           //   gecmisine gore siralanir.
           bolumId={bolumId}
+          // Farketmez (0), hastanın kesin cinsiyeti (1/2) ve istisnalılar (3/4 - seçilince gerekçe sorulur).
+          hizmetEkFiltre={hastaCinsiyet === 1 || hastaCinsiyet === 2
+            ? { alan: 'cinsiyet', op: 'icinde', deger: [0, hastaCinsiyet, 3, 4] }
+            : undefined}
           // MUKERRER KONTROL (kullanici): ayni stok/hizmet belgede zaten varsa
           //   cift tik / Enter ile eklemeden once uyarilir.
           zatenVarMi={r => satirlar.some(s => r.tip === 'hizmet'

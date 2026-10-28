@@ -4,6 +4,7 @@ import type { AcilYatakAyrinti } from '../../api/uclar/acil';
 import type { EkSekmeBaglami } from '../GenForm';
 import { c } from '../../dil/ceviri';
 import { tarihSaat } from '../bicim';
+import { h } from '../htmlGuvenlik';
 import { guvenli, listeSor, mesaj, metinSor } from '../mesaj';
 import { ACIL_CIKIS_SEKLI, ACIL_TRIYAJ_RENK } from './acilKodlari';
 
@@ -104,10 +105,11 @@ export function AcilYatakAraclari({ yatakId, deger, tazele, onDegisti }: {
     const alan = ACIL_ALAN[Number(deger.alan ?? 0)];
     const w = window.open('', '_blank', 'width=420,height=300');
     if (!w) return;
-    w.document.write(`<html><head><title>${String(deger.kod ?? '')}</title></head><body style="font-family:Trebuchet MS,sans-serif;text-align:center;padding:24px">
-      <div style="font-size:64px;font-weight:bold">${String(deger.kod ?? '')}</div>
-      <div style="font-size:20px">${String(deger.ad ?? '')}</div>
-      <div style="font-size:16px;margin-top:6px;color:${alan?.renk ?? '#333'}">${alan?.ad ?? ''}</div></body></html>`);
+    // KAÇIŞ (kod inceleme raporu 28.10.2026 B03): yatak kodu / adı kullanıcı metni - HTML olarak yorumlanmasın.
+    w.document.write(`<html><head><title>${h(deger.kod)}</title></head><body style="font-family:Trebuchet MS,sans-serif;text-align:center;padding:24px">
+      <div style="font-size:64px;font-weight:bold">${h(deger.kod)}</div>
+      <div style="font-size:20px">${h(deger.ad)}</div>
+      <div style="font-size:16px;margin-top:6px;color:${h(alan?.renk ?? '#333')}">${h(alan?.ad)}</div></body></html>`);
     w.document.close(); w.focus(); w.print();
   };
   return (

@@ -17,7 +17,7 @@ dogrulama: kod-incelemesi
 ---
 
 ## Amaç
-Radyoloji Çalışma Listesi modülün giriş ekranıdır: cihaza randevu verilir, çekim işaretlenir, rapor yazılır ve onaylanır, sonuç teslim edilir. İstem bu listeden **açılmaz**; yalnız başvurudan (banko kabulü, randevuda ✔ Geldi), muayeneden (hekim istemi) ya da dış kurum / dış doktor portalından gelir. Kart bu listeden açılır (`/radyoloji/[kayıt no]`).
+Radyoloji İstem Listesi modülün giriş ekranıdır: cihaza randevu verilir, çekim işaretlenir, rapor yazılır ve onaylanır, sonuç teslim edilir. İstem bu listeden **açılmaz**; yalnız başvurudan (banko kabulü, randevuda ✔ Geldi), muayeneden (hekim istemi) ya da dış kurum / dış doktor portalından gelir. Kart bu listeden açılır (`/radyoloji/[kayıt no]`).
 Rol bazlı ayrıntılı belgeler: `radyoloji-hasta-kabul` (banko), `radyoloji-calisma-listesi` (teknisyen), `radyoloji-rapor-yazma-onay` (radyolog), `radyoloji-sonuc-teslim`, genel akış `goruntuleme-gunluk-akis`.
 
 ## Ekrana giriş yolları

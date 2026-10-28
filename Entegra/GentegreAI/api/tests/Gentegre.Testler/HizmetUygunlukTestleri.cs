@@ -176,14 +176,18 @@ public class HizmetUygunlukTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLif
         if (!_olgu.Baglandi(nameof(HizmetUygunlukTestleri))) return;
         var veri = _olgu.Gerekli();
 
-        // Gerçek istisna: erkekte meme kanseri şüphesi.
-        var meme = await HizmetAsync(veri, "MEME US", 2, yasAlt: 25);
+        // Gerçek istisna: erkekte meme kanseri şüphesi. Meme işlemleri İSTİSNALI KADIN (4, göç 1197) - gerekçe kabul.
+        var meme = await HizmetAsync(veri, "MEME US", 4, yasAlt: 25);
         var erkek = await HastaAsync(veri, 1, 55);
 
         var satirId = await SatirYazAsync(veri, erkek, meme, "Erkekte meme kanseri suphesi");
         var not = await veri.TekDegerAsync<string>(
             "select uygunluk_notu from public.belge_satir where id = @p0", [satirId]);
         Assert.Equal("Erkekte meme kanseri suphesi", not);
+
+        // KESİN kural (2 = yalnız kadın, ör. obstetrik) gerekçeyle de aşılamaz.
+        var obstetrik = await HizmetAsync(veri, "OBSTETRIK US", 2, yasAlt: 0);
+        await Assert.ThrowsAnyAsync<Exception>(() => SatirYazAsync(veri, erkek, obstetrik, "Deneme gerekcesi"));
     }
 
     [VtFact]

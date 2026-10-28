@@ -28,6 +28,7 @@ import {
   alanGruplari, sekmeleriKur, detaySekmeAnahtari, grupSekmeAnahtari,
   KIMLIK_GRUP, TEK_SUTUN_KARTLAR, type SekmeTanimi, type SekmeParcalari,
 } from './kartSekmeleri';
+import { KART_SEKME_ROZETI, type KartSekmeRozeti } from './kartSekmeleri';
 import { TekKayit } from './TekKayit';
 export { Modal };
 import { KartKullaniciRolu } from './KartKullaniciRolu';
@@ -945,6 +946,16 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
    * cubuguna kadar uzar. Kart turu basina HATIRLANIR (tarayicida).
    */
   const sekmeMaksAnahtar = `kartSekmeMaks.${kaynak}`;
+  // ÖZEL SEKME ROZETİ dışarıdan (KART_SEKME_ROZETI): ör. hasta "Başvurular" sayısı hasta bandının özetinden.
+  const [disRozet, setDisRozet] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const dinle = (e: Event) => {
+      const r = (e as CustomEvent<KartSekmeRozeti>).detail;
+      if (r && r.kaynak === kaynak && r.id === id) setDisRozet(d => (d[r.anahtar] === r.metin ? d : { ...d, [r.anahtar]: r.metin }));
+    };
+    window.addEventListener(KART_SEKME_ROZETI, dinle);
+    return () => window.removeEventListener(KART_SEKME_ROZETI, dinle);
+  }, [kaynak, id]);
   const [sekmeMaks, setSekmeMaks] = useState(() => {
     try { return localStorage.getItem(sekmeMaksAnahtar) === '1' } catch { return false }
   });
@@ -1657,7 +1668,8 @@ Yine de yeni kayıt eklensin mi?`);
                   ?? (detaylar[s.detay.ad] ?? bosDetay()).guncel.length).toLocaleString('tr')
               }</span>}
               {s.tur === 'ozel' && (() => {
-                const r = ekSekmeler?.find(e => e.anahtar === s.anahtar)?.rozet;
+                const r = ekSekmeler?.find(e => e.anahtar === s.anahtar)?.rozet
+                  ?? (disRozet[s.anahtar] ? { metin: disRozet[s.anahtar], hata: false } : undefined);
                 return r ? <span className="b" style={r.hata ? { background: 'var(--hata)', color: '#fff' } : undefined}>{r.metin}</span> : null;
               })()}
             </div>

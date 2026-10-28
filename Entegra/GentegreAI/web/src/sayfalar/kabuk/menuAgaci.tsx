@@ -8,6 +8,7 @@ import { EkstreIkon } from '../../bilesenler/EkstreIkon';
 import { CekIkon } from '../../bilesenler/CekIkon';
 import { BelgeIkon, FaturaIkon, belgeIkonKodu } from '../../bilesenler/BelgeIkonlari';
 import { BasvuruIkon } from '../../bilesenler/BasvuruIkon';
+import { ErlenmeyerIkon } from '../../bilesenler/ErlenmeyerIkon';
 import { cm } from '../../dil/ceviri';
 import { modUyar } from '../../api/sozlesme';
 import { modulAcikMi } from '../listeTanimlari';
@@ -105,6 +106,9 @@ export function MenuIkon({ ic }: { ic: string }) {
   if (ic === '@ekstre')
     return <span className="ic ic-hilal" aria-hidden="true"><EkstreIkon /></span>;
   // '@basvuru' (kullanıcı 27.10.2026): mavi zemin, beyaz H (BasvuruIkon).
+  // '@erlen' (kullanıcı 27.10.2026): laboratuvar istem listesi - erlenmeyer şişe (ErlenmeyerIkon).
+  if (ic === '@erlen')
+    return <span className="ic ic-hilal" aria-hidden="true"><ErlenmeyerIkon /></span>;
   if (ic === '@basvuru')
     return <span className="ic ic-hilal" aria-hidden="true"><BasvuruIkon /></span>;
   // '@cek' (kullanıcı 26.10.2026: "çek listesi ikonu değiş çek resmi yap"): çek kağıdı (CekIkon).

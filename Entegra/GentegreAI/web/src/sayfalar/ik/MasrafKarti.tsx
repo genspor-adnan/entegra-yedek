@@ -11,6 +11,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
 import { c } from '../../dil/ceviri';
+import { h } from '../../bilesenler/htmlGuvenlik';
 
 /**
  * MASRAF BEYANI KARTI `/personel-masraf/:id` (961, mockup Ekranlar/IK/masraf_karti.html).
@@ -247,17 +248,18 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
   const yazdir = () => {
     const w = window.open('', '_blank');
     if (!w) return;
-    const satirlarHtml = satirlar.filter(s => s.belgeNo.trim()).map((s, i) => `<tr><td>${i + 1}</td><td>${s.tarih.split('-').reverse().join('.')}</td><td>${s.masrafAd}</td>
-      <td>${BELGE.find(x => x[0] === s.belgeTuru)?.[1] ?? ''} ${s.belgeNo}</td><td style="text-align:right">${s.tutar}</td><td style="text-align:right">${s.kdv}</td><td>${s.aciklama}</td></tr>`).join('');
-    w.document.write(`<!doctype html><meta charset="utf-8"><title>Masraf Formu ${ro.beyanNo}</title>
+    // KAÇIŞ (kod inceleme raporu 28.10.2026 B03): bütün kullanıcı metinleri h() ile - HTML olarak yorumlanmasın.
+    const satirlarHtml = satirlar.filter(s => s.belgeNo.trim()).map((s, i) => `<tr><td>${i + 1}</td><td>${h(s.tarih.split('-').reverse().join('.'))}</td><td>${h(s.masrafAd)}</td>
+      <td>${h(BELGE.find(x => x[0] === s.belgeTuru)?.[1])} ${h(s.belgeNo)}</td><td style="text-align:right">${h(s.tutar)}</td><td style="text-align:right">${h(s.kdv)}</td><td>${h(s.aciklama)}</td></tr>`).join('');
+    w.document.write(`<!doctype html><meta charset="utf-8"><title>Masraf Formu ${h(ro.beyanNo)}</title>
       <style>body{font:12px Arial;margin:28px}h2{margin:0 0 12px}table{border-collapse:collapse;width:100%;margin-bottom:12px}
       th,td{border:1px solid #999;padding:5px 7px;text-align:left}th{background:#f2f2f2}
       .imza{display:flex;gap:24px;margin-top:40px}.imza div{flex:1;border-top:1px solid #333;padding-top:6px;text-align:center}</style>
       <h2>MASRAF BEYAN FORMU</h2>
-      <table><tr><th>Beyan no</th><td>${ro.beyanNo || '—'}</td><th>Tarih</th><td>${bas.beyanTarihi.split('-').reverse().join('.')}</td></tr>
-      <tr><th>Personel</th><td>${personelAd}</td><th>Konu</th><td>${bas.konu}</td></tr><tr><th>Açıklama</th><td colspan="3">${bas.aciklama}</td></tr></table>
+      <table><tr><th>Beyan no</th><td>${h(ro.beyanNo || '—')}</td><th>Tarih</th><td>${h(bas.beyanTarihi.split('-').reverse().join('.'))}</td></tr>
+      <tr><th>Personel</th><td>${h(personelAd)}</td><th>Konu</th><td>${h(bas.konu)}</td></tr><tr><th>Açıklama</th><td colspan="3">${h(bas.aciklama)}</td></tr></table>
       <table><tr><th>#</th><th>Tarih</th><th>Gider kalemi</th><th>Belge</th><th>Tutar</th><th>KDV</th><th>Açıklama</th></tr>${satirlarHtml}
-      <tr><th colspan="4">Toplam</th><th style="text-align:right">${yazP(toplam)}</th><th style="text-align:right">${yazP(kdv)}</th><th></th></tr></table>
+      <tr><th colspan="4">Toplam</th><th style="text-align:right">${h(yazP(toplam))}</th><th style="text-align:right">${h(yazP(kdv))}</th><th></th></tr></table>
       <div class="imza"><div>Beyan eden</div><div>Birim âmiri</div><div>Mali işler</div></div>
       <script>setTimeout(()=>print(),300)</script>`);
     w.document.close();

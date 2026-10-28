@@ -10,7 +10,8 @@ import { para, tarihSaat, tutarOku, bugunIso } from '../../bilesenler/bicim';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
-import { c } from '../../dil/ceviri';
+import { c } from '../../dil/ceviri';
+import { h } from '../../bilesenler/htmlGuvenlik';
 
 /**
  * PERSONEL AVANSI KARTI `/personel-avans/:id` (960, mockup Ekranlar/IK/avans_karti.html).
@@ -202,10 +203,11 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
   const yazdir = () => {
     const w = window.open('', '_blank');
     if (!w) return;
-    const satir = (k: string, v: string) => `<tr><th>${k}</th><td>${(v || '—').replace(/</g, '&lt;')}</td></tr>`;
+    // KAÇIŞ (kod inceleme raporu 28.10.2026 B03): yalnız '<' değil tam HTML kaçışı (h).
+    const satir = (k: string, v: string) => `<tr><th>${h(k)}</th><td>${h(v || '—')}</td></tr>`;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const planHtml = plan.map((k: any) => `<tr><td>${k.sira}</td><td>${donemAd(k.donem)}</td><td style="text-align:right">${yazP(Number(k.tutar))}</td></tr>`).join('');
-    w.document.write(`<!doctype html><meta charset="utf-8"><title>Avans Formu ${ro.avansNo}</title>
+    const planHtml = plan.map((k: any) => `<tr><td>${h(k.sira)}</td><td>${h(donemAd(k.donem))}</td><td style="text-align:right">${h(yazP(Number(k.tutar)))}</td></tr>`).join('');
+    w.document.write(`<!doctype html><meta charset="utf-8"><title>Avans Formu ${h(ro.avansNo)}</title>
       <style>body{font:13px Arial;margin:32px}h2{margin:0 0 16px}table{border-collapse:collapse;width:100%;margin-bottom:14px}
       th,td{border:1px solid #999;padding:6px 8px;text-align:left}th{width:30%;background:#f2f2f2}
       .imza{display:flex;gap:24px;margin-top:40px}.imza div{flex:1;border-top:1px solid #333;padding-top:6px;text-align:center}</style>

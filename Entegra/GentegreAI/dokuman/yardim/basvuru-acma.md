@@ -79,7 +79,7 @@ Matrah / KDV bu ekranda gizlidir; hastaya söylenen rakam Genel Toplam, yanında
 - **CAKISMA (409)** → aynı kartı başka kullanıcı değiştirdi; kartı yenileyip tekrar kaydedin.
 
 ## Diğer modüllere etkisi
-- Muayene başvurudan doğar; Hekim Çalışma Listesi satırları başvurudur.
+- Muayene başvurudan doğar; Doktor Bekleme Listesi satırları başvurudur.
 - Lab ve radyoloji istemleri başvuruya bağlanır; diş seansı ücreti başvuru satırına düşer.
 - Tahsilat kasa modülüne, kesilen belge muhasebe fişine ve e-Belge kuyruğuna gider.
 - Başvuru açılınca e-Nabız "Hasta Kayıt (Kabul)" paketi, kapanınca "Hasta Çıkış" paketi üretilir.

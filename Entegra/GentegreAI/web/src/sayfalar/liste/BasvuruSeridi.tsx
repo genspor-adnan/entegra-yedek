@@ -1,27 +1,17 @@
 import { BolumSuzgeci } from '../../bilesenler/BolumSuzgeci';
-import { TARIH_ON_AYARLAR, type TarihOnAyar } from './tarihAralik';
 import type { BasvuruSuzgeci } from './useBasvuruSuzgeci';
 import { c } from '../../dil/ceviri';
 
 /**
- * BASVURU SERIDI (kullanici): serit "Sık" dugmesinin hemen saginda TARIH
- * ARALIGI ile baslar - listeyi once tarihe gore daraltmak en sik yapilan is;
- * combolarin arasinda kaldiginda aranıyordu. Sonra Tamamlanma / Tahsilat /
- * Dönüşüm, ardindan Odeyen, Bolum, Doktor.
+ * BASVURU SERIDI (kullanici): Tamamlanma / Tahsilat / Dönüşüm, ardindan
+ * Odeyen, Bolum, Doktor. TARIH grid'in standart kutularinda (28.10.2026,
+ * Doktor Bekleme Listesi ile ayni - acilista bugun).
  *
  * Secimlerin kendisi `useBasvuruSuzgeci` kancasinda; burasi yalniz cizim.
  */
 export function BasvuruSeridi({ s }: { s: BasvuruSuzgeci }) {
   return (
     <>
-      <select className="kat-suzgec" value={s.tarih} title={c('Tarih aralığı')}
-              onChange={e => s.setTarih(e.target.value as TarihOnAyar | '')}>
-        <option value="">{c('Tüm Tarihler')}</option>
-        {TARIH_ON_AYARLAR.map(t => (
-          <option key={t.deger} value={t.deger}>{t.ad}</option>
-        ))}
-      </select>
-      <span className="durumseg-ayrac" />
       <select className="kat-suzgec" value={s.tamamlanma} title={c('Tamamlanmaya göre süz')}
               onChange={e => s.setTamamlanma(e.target.value as '' | 'tamam' | 'devam')}>
         <option value="">{c('Tamamlanma: Tümü')}</option>
@@ -63,7 +53,7 @@ export function BasvuruSeridi({ s }: { s: BasvuruSuzgeci }) {
         ))}
       </select>
       {s.secimVar && (
-        <button type="button" className="kapat" title="Başvuru filtrelerini kaldır (tarih bugüne döner)"
+        <button type="button" className="kapat" title="Başvuru filtrelerini kaldır"
                 onClick={s.sifirla}>×</button>
       )}
     </>

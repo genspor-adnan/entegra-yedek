@@ -424,6 +424,9 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",      "h.id",       "sayi",  "Id",         Varsayilan: false),
+            // CİNSİYET (482 / 1197, kullanıcı 27.10.2026: "aramada kadına yapılan işlemler hiç gelmesin"): gizli,
+            //   kalem aramasını hastanın cinsiyetine göre süzmek için - KESİN (1/2) karşı cinsiyet hizmeti listelenmez.
+            new("cinsiyet", "h.cinsiyet", "sayi", "Cinsiyet", Varsayilan: false),
             // LABORATUVAR KARSILIGI VAR MI: hizmet bir tetkige ya da panele
             //   bagli mi (638-640). Lab istem kartinda tetkik JENERIK HIZMET
             //   penceresinden seciliyor; suzgec olmadan 10 binlik SUT listesi

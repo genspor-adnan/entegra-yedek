@@ -273,7 +273,8 @@ public static partial class KartKatalogu
             //   icin ikinci bir kutu acmak, hizmetin "kime yapilir" bilgisini
             //   KDV/birim gibi temel tanimlardan koparıyordu.
             new("cinsiyet", "cinsiyet", "kod", SabitKodlar: HizmetCinsiyetKodlari,
-                Baslik: "Cinsiyet", Grup: "Genel", AltGrup: "Detay"),
+                Baslik: "Cinsiyet", Grup: "Genel", AltGrup: "Detay",
+                Ipucu: "Yalnız Erkek / Kadın: karşı cinsiyete hiç eklenmez (obstetrik, prostat). İstisnalı: uyarılır, gerekçe yazılırsa eklenir (meme)."),
             new("yasAlt",   "yas_alt",  "sayi", Baslik: "En Küçük Yaş",
                 Grup: "Genel", AltGrup: "Detay", EslesAlan: "yasUst"),
             new("yasUst",   "yas_ust",  "sayi", Baslik: "En Büyük Yaş",

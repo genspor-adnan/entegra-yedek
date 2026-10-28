@@ -265,6 +265,15 @@ export function ListeKarti({
   // Hasta bandı her iki düzende (sekmeli de standart band, kullanıcı 16.10.2026).
   const hastaBilgisi = useMuayeneHastaBilgisi(tanim.kaynak === 'muayene' && typeof kartId === 'number' ? Number(kartId) : 0,
                                               kartTazele * 1000 + kayitSayaci);
+  // MUAYENE SEKMESİ BAŞLIĞI = HASTA ADI (kullanıcı 27.10.2026: "muayene kartı sekmesi caption a hasta adı yaz"):
+  //   muayene kaydında ad yok - hasta bandının okuduğu hastadan (ilk 2 kelime, sekmeAdi).
+  const muayeneHastaAdi = String(hastaBilgisi?.ust?.hastaAdi ?? '').trim();
+  useEffect(() => {
+    if (tanim.kaynak !== 'muayene' || typeof kartId !== 'number' || !yeniSekmede || !muayeneHastaAdi) return;
+    ekranSekmesi?.baslik(sekmeAdi(muayeneHastaAdi), `${tanim.kartYolu}/${kartId}`);
+  // ekranSekmesi bağlamı sekme ömrü boyunca aynı.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [muayeneHastaAdi, kartId, yeniSekmede]);
   /** SEKMESİZ ÖZET / DETAY (kullanıcı 14.10.2026): seçilmediyse muayene tamamlandıysa özet, değilse detay. */
   const [sekmesizGorunum, setSekmesizGorunum] = useState<'ozet' | 'detay' | null>(null);
   useEffect(() => { setSekmesizGorunum(null) }, [kartId]);
@@ -562,6 +571,8 @@ export function ListeKarti({
             || (tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'sevk' ? metin(d.no) : '')
             || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)
             || (kartId !== 'yeni' ? `${kartAdi(tanim)} #${kartId}` : '');
+          // Muayenede başlığı hasta adı verir (yukarıdaki etki) - "Muayene Kartı #id" onu ezmesin.
+          if (tanim.kaynak === 'muayene' && muayeneHastaAdi) return;
           if (ad) ekranSekmesi!.baslik(ad, `${tanim.kartYolu}/${kartId}`);
         } : undefined}
         // GÖZ KARTI v4 (mockup goz_muayene_karti_v4): solda aşamalı gezinti, sağda OD/OS

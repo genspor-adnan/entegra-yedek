@@ -15,6 +15,8 @@ public static class Talep
     public const string SubeId      = "subeId";
     public const string Subeler     = "subeler";
     public const string YetkiSurumu = "yetkiSurumu";
+    /// <summary>Oturum ailesi (public.oturum.aile_id) - OturumKapisi her istekte ailenin açık olduğuna bakar.</summary>
+    public const string Aile        = "aile";
 }
 
 public sealed class JwtUretici
@@ -30,7 +32,7 @@ public sealed class JwtUretici
     /// subeler ve yetkiSurumu tasinir; yetki her istekte rolden cozulur.
     /// </summary>
     public (string Token, DateTime SonaErme) Uret(int kullaniciId, int rolId, long yetkiSurumu,
-        int? subeId, IEnumerable<int> subeler, int dakika)
+        int? subeId, IEnumerable<int> subeler, int dakika, Guid aileId)
     {
         var simdi = DateTime.UtcNow;
         var sonaErme = simdi.AddMinutes(dakika);
@@ -42,7 +44,10 @@ public sealed class JwtUretici
             new(Talep.KullaniciId, kullaniciId.ToString(CultureInfo.InvariantCulture)),
             new(Talep.RolId, rolId.ToString(CultureInfo.InvariantCulture)),
             new(Talep.YetkiSurumu, yetkiSurumu.ToString(CultureInfo.InvariantCulture)),
-            new(Talep.Subeler, string.Join(",", subeler))
+            new(Talep.Subeler, string.Join(",", subeler)),
+            // OTURUM BAĞI (kod inceleme raporu 28.10.2026 B05): çıkış / cihaz kapatma / parola değişimi aileyi
+            //   kapatınca bu token da bir sonraki istekte düşer - süresinin dolmasını beklemez.
+            new(Talep.Aile, aileId.ToString("N"))
         };
 
         if (subeId is { } s)

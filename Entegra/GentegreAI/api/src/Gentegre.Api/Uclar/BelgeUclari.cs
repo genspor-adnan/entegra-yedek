@@ -313,6 +313,21 @@ public static class BelgeUclari
         // GET /api/belge/iade-satirlari - iade faturasinda "onceki alinanlar" (132).
         //   Cari zorunlu: iade her zaman BIR CARIYE kesilir, tum firmanin gecmisi
         //   listelenmez. belgeId verilirse yalniz o belgeden iade edilir.
+        // HİZMET UYGUNLUĞU (kullanıcı 27.10.2026: "erkek hastaya Obstetrik ... ekledim gene"): kural kayıtta tetikle
+        //   denetleniyordu (482) - kalem SEÇİLİRKEN de sorulur, ekran uyarır. Boş mesaj = uygun.
+        grup.MapGet("/hizmet-uygunluk", async (
+            int hizmetId, int tarafId, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            await cozucu.CozAsync(ctx, iptal);
+            await using var b = await veri.AcAsync(iptal);
+            var mesaj = await b.TekDegerAsync<string>(
+                "select coalesce(public.fn_hizmet_uygunluk(@p0, @p1, current_date), '')", null, [hizmetId, tarafId], iptal) ?? "";
+            // KESİN / İSTİSNALI (1197): istisnalı (cinsiyet 3/4) hizmette ekran gerekçe ister, kesinde hiç eklemez.
+            var istisna = mesaj != "" && await b.TekDegerAsync<int>(
+                "select coalesce(cinsiyet, 0)::int from public.hizmet where id = @p0", null, [hizmetId], iptal) is 3 or 4;
+            return Results.Ok(new { mesaj, istisna });
+        });
+
         grup.MapGet("/iade-satirlari", async (
             int tarafId, int? belgeId, string? ara, string? turler,
             BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>

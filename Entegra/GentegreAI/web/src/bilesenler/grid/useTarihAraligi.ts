@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 /** Grid ust seridindeki hazir tarih araligi secenegi. */
-export type TarihVarsayilan = 'yilbasindanBugune' | 'buAy' | undefined;
+export type TarihVarsayilan = 'yilbasindanBugune' | 'buAy' | 'bugun' | undefined;
 
 /** YEREL gun (toISOString UTC'ye kayar, gece yarisi tuzagi). */
 export const gunMetni = (t: Date) =>
@@ -26,11 +26,13 @@ export function useTarihAraligi(
     if (varsayilan === 'yilbasindanBugune') return `${t.getFullYear()}-01-01`;
     // 'buAy' (kullanici, hakedis satirlari): bulunulan ayin 1'i.
     if (varsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth(), 1));
+    // 'bugun' (kullanici, Doktor Bekleme Listesi): yalniz gunun isi - bugun-bugun.
+    if (varsayilan === 'bugun') return gunMetni(t);
     return '';
   });
   const [bit, setBit] = useState(() => {
     const t = new Date();
-    if (varsayilan === 'yilbasindanBugune') return gunMetni(t);
+    if (varsayilan === 'yilbasindanBugune' || varsayilan === 'bugun') return gunMetni(t);
     // Ayin SONU: gelecek ayin 0. gunu = bu ayin son gunu (28/29/30/31 dert degil).
     if (varsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth() + 1, 0));
     return '';

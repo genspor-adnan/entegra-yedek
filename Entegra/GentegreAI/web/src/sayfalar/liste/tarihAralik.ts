@@ -42,3 +42,11 @@ export function tarihAraligi(onAyar: TarihOnAyar): { bas: string; bit: string } 
     default:          return { bas: gun(b), bit: gun(b) };
   }
 }
+
+/** "27.10.2026" ya da "12.09 – 19.09.2026" (yıl farklıysa iki tarihte de yıl). */
+export function aralikEtiketi(bas: string, bit: string): string {
+  const t = (iso: string, yil = true) => { const [y, a, g] = iso.split('-'); return yil ? `${g}.${a}.${y}` : `${g}.${a}` };
+  if (!bas || !bit) return '';
+  if (bas === bit) return t(bas);
+  return `${t(bas, bas.slice(0, 4) !== bit.slice(0, 4))} – ${t(bit)}`;
+}

@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 
+/** İki satır alan alan aynı mı (sığ karşılaştırma). */
+function satirAyniMi(a: ListeSatiri, b: ListeSatiri): boolean {
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length && ka.every(k => (a as Record<string, unknown>)[k] === (b as Record<string, unknown>)[k]);
+}
+
 /**
  * GRID SATIR SECIMI - onay kutulari, tek satir hedefi ve klavye/fare kurallari.
  *
@@ -105,11 +111,14 @@ export function useGridSecimi(opts: {
 
   // LISTE TAZELENINCE SECILI SATIR DA TAZE (27.10.2026: tahsilattan sonra önizleme eski bakiyeyi gösteriyordu):
   //   ayni kayit yeni satirlarda varsa secim onun yeni haline gecer.
+  //   YALNIZ İÇERİK DEĞİŞTİYSE (başvuru listesinde satıra tıklayınca ekran yanıp sönüyordu): satırları her çizimde
+  //   yeniden üreten listede nesne kimliği hep farklı - kimliğe bakmak seçimi her çizimde "değişti" sayıp sağ
+  //   paneli durmadan yeniden yüklüyordu. Alanlar tek tek karşılaştırılır.
   useEffect(() => {
     setSeciliSatir(s => {
       if (!s) return s;
       const yeni = satirlar.find(r => String(r.id) === String(s.id));
-      return yeni && yeni !== s ? yeni : s;
+      return yeni && yeni !== s && !satirAyniMi(yeni, s) ? yeni : s;
     });
   }, [satirlar]);
 

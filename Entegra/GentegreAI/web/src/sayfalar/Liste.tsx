@@ -23,7 +23,7 @@ import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
   from '../bilesenler/radyoloji/RandevuBekleyenPanel';
 import { KategoriSuzgeci } from '../bilesenler/KategoriSuzgeci';
-import { TARIH_ON_AYARLAR } from './liste/tarihAralik';
+import { aralikEtiketi } from './liste/tarihAralik';
 import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
 import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
@@ -957,7 +957,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       if (await radyolojiAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
-        git: yol => git(yol),
+        // RAPOR YAZ / İSTEM KARTI KENDİ SEKMESİNDE (kullanıcı 27.10.2026: "çalışma listesinde rapor yaz seçince yeni
+        //   sekmede açılmalı"): listenin hemen sağına, liste yerinde kalır.
+        git: yol => gitKart(yol),
         setIstemHastaArama: radyolojiModal.setHastaArama,
         setSarfModali: radyolojiModal.setSarf,
         setRandevuModali: radyolojiModal.setRandevu,
@@ -1160,7 +1162,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         ))}</>
       ) : undefined}
       tarihVarsayilan={tanim.tarihVarsayilan}
-      onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : cariEkstre.onTarihAraligi}
+      onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir
+                      : tanim.basvuruSuzgeci ? basvuruSuzgec.araligiBildir : cariEkstre.onTarihAraligi}
       basSag={cariEkstre.basSag}
       onKapat={ekranSekmesi ? () => ekranSekmesi.kapat() : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1325,16 +1328,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // BOS BASVURU LISTESI (kullanici: "başvuru kayıtları listelenmedi"):
       //   varsayilan suzgec BUGUN; o gun kayit yoksa liste bos gorunuyor ve
       //   sebebi yazmiyordu. Sebep + tek tikla tum tarihler.
-      bosEk={tanim.basvuruSuzgeci && basvuruSuzgec.tarih !== '' ? (
+      bosEk={tanim.basvuruSuzgeci && basvuruSuzgec.aralik ? (
         <div style={{ marginTop: 6 }}>
           <span className="sonuk">
-            Seçili tarih aralığında başvuru yok
-            ({TARIH_ON_AYARLAR.find(t => t.deger === basvuruSuzgec.tarih)?.ad
-              ?? basvuruSuzgec.tarih}).
-          </span>{' '}
-          <button type="button" className="d" onClick={() => basvuruSuzgec.setTarih('')}>
-            Tüm tarihleri göster
-          </button>
+            Seçili tarih aralığında başvuru yok ({aralikEtiketi(basvuruSuzgec.aralik.bas, basvuruSuzgec.aralik.bit)}).
+            Tüm tarihler için tarih kutularının yanındaki × düğmesine basın.
+          </span>
         </div>
       ) : undefined}
       solPanel={tanim.kaynak === 'lab-tetkik'

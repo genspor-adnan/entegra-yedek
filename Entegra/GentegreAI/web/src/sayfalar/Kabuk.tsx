@@ -242,7 +242,7 @@ export function Kabuk() {
   const kartSekmeleri = useMemo(() => {
     const m: Record<string, { ad: string; ikon: string }> = {};
     // Sekme ikonu listenin ikonu (kullanıcı 23.10.2026).
-    for (const l of LISTELER) if (kartSekmesiVar(l)) m[kartSekmeYolu(l)] ??= { ad: yeniSekmeBasligi(l), ikon: l.ic };
+    for (const l of LISTELER) if (kartSekmesiVar(l)) m[kartSekmeYolu(l)] ??= { ad: yeniSekmeBasligi(l), ikon: l.kartIc ?? l.ic };
     // Özel kartlardan sekmede açılanlar (reçete, 15.10.2026) - "yeni" yolu yok, palete girmez.
     //   İkon yine listenin ikonu (stok sayımı 🧮); listesi bulunamazsa 📝.
     for (const [yol, ad] of Object.entries(OZEL_KART_SEKME_YOLLARI))

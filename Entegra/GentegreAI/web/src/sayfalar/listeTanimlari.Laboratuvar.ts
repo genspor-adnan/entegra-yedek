@@ -16,15 +16,16 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     //   bunlardan baslar; dal basliklari (Biyokimya/Mikrobiyoloji/Genetik)
     //   10-34, kalan ortak akis 50+.
     kaynak: 'lab-istem', rota: 'lab-istem', baslik: 'Laboratuvar İstemi Listesi',
-    yol: 'Laboratuvar › İstem Listesi',
+    yol: 'Laboratuvar › Laboratuvar İstemi Listesi',
     kartYolu: '/lab-istem', kartBaslik: 'Laboratuvar İstemi',
     // 433'e kadar aksiyonlar 'cari-liste'den geliyordu (kopyala-yapistir
     //   kalintisi): listede lab isine ait tek dugme yoktu.
     aksiyonEkrani: 'lab-istem-liste',
-    // GUNLUK EKRAN: iki tarih kutusu yerine hazir aralik combosu
-    //   (kullanici) - acilista BUGUN. Banko gunun istemleriyle calisir;
+    // GUNLUK EKRAN: acilista BUGUN. Banko gunun istemleriyle calisir;
     //   tum gecmisi birlikte gostermek listeyi kullanilamaz yapiyordu.
-    tarihAlani: 'istemTarihi', tarihCombo: true,
+    //   STANDART TARIH KUTULARI (kullanici 28.10.2026): hazir aralik combosu
+    //   yerine Doktor Bekleme / Basvuru / Radyoloji listeleriyle ayni iki kutu.
+    tarihAlani: 'istemTarihi', tarihVarsayilan: 'bugun',
     // CIPLER = mockup lab_istem_numune_kabul.html arama seridi: bankonun
     //   sorusu "hangi tup bekliyor", "hangisi reddedildi". Sonuc asamalari
     //   (Calisiliyor / Sonuclandi / Onaylandi) Sonuclar ekraninin isi;
@@ -38,9 +39,10 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'İstem Listesi', menuSira: 10,
-    // Enjektor (kullanici): grup ikonu zaten tup (🧪), istem satiri ayrisiyor.
-    ic: '💉', yetkiKodu: 'lab.liste',
+    // AD + İKON (kullanıcı 27.10.2026): menü ve sekmede "Laboratuvar İstemi Listesi", ikon erlenmeyer (@erlen).
+    menuGrup: 'Laboratuvar', menuAd: 'Laboratuvar İstemi Listesi', menuSira: 10,
+    // Erlenmeyer (kullanıcı 27.10.2026; önce enjektör 💉): grup ikonu tüp (🧪), istem satırı ayrışıyor.
+    ic: '@erlen', yetkiKodu: 'lab.liste',
   },
   {
     // NUMUNE KABUL (433): laboratuvarin giris kapisi. Varsayilan cip

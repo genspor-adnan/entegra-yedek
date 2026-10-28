@@ -494,6 +494,34 @@ table.grid tr.flt input {
    hicbir sinif verilmez - deger normal yazi renginde kalir (kullanici). */
 .hasta-serit .hs .v.olumlu { color: var(--ok) }
 
+/* HASTA BANDI v3 (27.10.2026, mockup Ekranlar/Kayıt Kabul/basvuru_hasta_bandi_v3.html): TEK KAT, ince (46 px),
+   her hücre en çok iki satır. Sıra: Kimlik · Ödeyen Kurum · İzinler · Uyarı · Durum · Açık Tahsilat · Açık Belge. */
+.hasta-serit.hs3 {
+  display: grid; grid-template-columns: minmax(230px, 1.7fr) 1.5fr 1.1fr 1.3fr 1.3fr minmax(110px, auto) minmax(110px, auto);
+  gap: 0; padding: 0; height: 46px; align-items: stretch; flex-wrap: nowrap; background: var(--yuz);
+  border-left: 3px solid var(--vurgu, #2b6cb0); border-radius: 4px;
+}
+.hasta-serit.hs3 > .hs { padding: 0 10px; border-right: 1px solid var(--cizgi2, #e3e9f0); justify-content: center; gap: 2px; overflow: hidden }
+.hasta-serit.hs3 > .hs:last-child { border-right: none }
+.hasta-serit.hs3 > .hs .k { font-size: 9.5px; line-height: 13px; text-transform: uppercase; letter-spacing: .3px }
+.hasta-serit.hs3 > .hs .v { font-size: 12px; line-height: 16px }
+.hasta-serit.hs3 > .hs .v .rozet { margin-left: 4px }
+.hasta-serit.hs3 .avatar { width: 30px; height: 30px; flex: 0 0 30px; font-size: 11px }
+.hs3-kimlik { flex-direction: row !important; align-items: center; gap: 8px }
+.hs3-kim { display: flex; flex-direction: column; min-width: 0 }
+.hs3-ad { font-size: 13px; font-weight: 700; color: var(--lacivert, #14315a); line-height: 16px;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.hs3-s2 { font-size: 11px; color: var(--sonuk, #6b7a8d); line-height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.hs3-roz { display: flex; gap: 3px; flex-wrap: nowrap; overflow: hidden; align-items: center }
+.hasta-serit.hs3 .rozet { font-size: 10px; line-height: 15px; padding: 0 6px; white-space: nowrap }
+.hs3-bos { font-size: 11px; color: var(--sonuk, #6b7a8d); font-weight: 400 }
+.hs3-izin { display: flex; gap: 9px; font-size: 11px; line-height: 16px; white-space: nowrap; overflow: hidden }
+.hs3-izin b { margin-right: 2px }
+.hs3-izin .iz-v { color: var(--ok) }
+.hs3-izin .iz-y { color: var(--teh, #b23c3c) }
+.hs3-izin .iz-b { color: #c9a000 }
+.hasta-serit.hs3 .taraf-satir { display: flex; gap: 4px; align-items: center; justify-content: flex-end }
+
 .kaperde { position: fixed; inset: 0; background: rgba(20, 40, 70, .45); z-index: 320 }
 /* Mesaj/onay penceresi HER ZAMAN en ustte: kart modali acikken sorulan onay
    ayni z-index'te kalip arkada kayboluyordu. */
@@ -895,6 +923,8 @@ tr.panel-basligi .d.mini {
 /* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
 .ikili-mantik { display: flex; align-items: center; gap: 18px }
 .ikili-mantik > .alan.tip-mantik { padding: 0 }
+/* Hasta kartı İletişim: SMS / E-posta izni editlerin başladığı hizada (84px etiket kolonu + 8px boşluk, kullanıcı). */
+.ikili-mantik.alan-postaIzin { padding-left: 92px; grid-column: 1 / -1 }
 
 /* Paket sekmesi arac satiri: yalniz ikon dugmeler + aciklama. */
 .detay-arac { display: flex; align-items: center; gap: 6px; padding: 8px 10px }
@@ -1945,6 +1975,111 @@ input.skt-gecmis {
             padding: 6px 8px; margin-bottom: 6px; font-size: 11px; line-height: 1.5; }
 .rad-kart.teh { border-color: #e4b7b2; background: #fdf3f2; }
 .rad-orta { display: flex; flex-direction: column; gap: 10px; }
+/* TEK / PARÇALI anahtarı ve tek parça A4 yazı alanı (RadyolojiRapor, 27.10.2026). */
+.rad-duzen { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--soluk) }
+.rad-duzen .seg { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 4px; overflow: hidden }
+.rad-duzen .seg button { border: 0; background: var(--yuz2); color: var(--soluk); padding: 3px 14px; font: inherit; cursor: pointer }
+.rad-duzen .seg button + button { border-left: 1px solid var(--cizgi) }
+.rad-duzen .seg button.on { background: var(--mor); color: #fff; font-weight: 700 }
+.rad-duzen .uyari-yazi { color: #9a4b00 }
+.rad-a4 { width: 100%; max-width: 794px; min-height: 1123px; margin: 0 auto; padding: 48px 56px;
+          background: #fff; color: #1d2a38; border: 1px solid var(--cizgi); border-radius: 2px;
+          box-shadow: 0 2px 10px rgba(20, 49, 90, .12); font: inherit; font-size: 13px; line-height: 1.65;
+          resize: vertical; }
+.rad-a4:focus { outline: none; border-color: #98c2ee }
+/* BİÇİMLİ METİN (1195, bilesenler/BicimliMetin) */
+.bm-arac { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; background: var(--yuz2);
+           border: 1px solid var(--cizgi); border-radius: 4px; position: sticky; top: 0; z-index: 2 }
+.bm-arac button { border: 1px solid transparent; background: none; min-width: 26px; height: 24px; border-radius: 3px;
+                  cursor: pointer; font: inherit; font-size: 12px; color: var(--yazi) }
+.bm-arac button:hover:not(:disabled) { background: var(--yuz); border-color: var(--cizgi) }
+.bm-arac select { height: 24px; font-size: 11.5px; width: auto; max-width: 140px }
+.bm-ayrac { width: 1px; height: 18px; background: var(--cizgi); margin: 0 4px }
+.bm-renk { position: relative; min-width: 26px; height: 24px; display: inline-grid; place-items: center; cursor: pointer;
+           font-weight: 700; color: #c00000; border-radius: 3px }
+.bm-renk.vurgu { color: #e0c000 }
+.bm-renk:hover { background: var(--yuz) }
+.bm-renk input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100% }
+.bm-alan { outline: none; white-space: pre-wrap; word-break: break-word; overflow: auto }
+.bm-alan[contenteditable="false"] { background: var(--yuz2) }
+.rad-bolum-metin { min-height: 3.6em; border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px; padding: 6px 8px;
+                   line-height: 1.55; background: #fff; resize: vertical }
+.rad-bolum-metin.uzun { min-height: 10em }
+.rad-bolum-metin:focus { border-color: #98c2ee; box-shadow: 0 0 0 2px rgba(152, 194, 238, .35) }
+.cikti-sayfa .rapor-bolum .rapor-html { line-height: 1.65; text-align: justify }
+.rad-a4.kucuk { min-height: 520px; padding: 20px 22px; font-size: 11.5px; max-width: none }
+/* YAPISAL GİRİŞ (1194): ortada geniş form, sağda canlı önizleme. */
+.rad-govde.yapisal { grid-template-columns: 230px 1fr 420px; }
+/* ÖNCEKİ TETKİKLER - KRONOLOJİK ZAMAN ÇİZGİSİ (RadyolojiRapor, 27.10.2026) */
+.rad-zc { position: relative; padding-left: 16px; margin-bottom: 8px }
+.rad-zc::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: #dbe3ec }
+.rad-zc-yil { position: relative; font-size: 10.5px; font-weight: 700; color: var(--lacivert, #14315a); margin: 8px 0 4px -16px;
+              padding-left: 16px; letter-spacing: .3px }
+.rad-zc-dugum { position: relative; display: block; width: 100%; text-align: left; font: inherit; font-size: 11px; line-height: 1.45;
+                border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 4px; background: #fff; padding: 5px 8px; margin-bottom: 6px;
+                cursor: pointer; color: var(--yazi) }
+.rad-zc-dugum::before { content: ""; position: absolute; left: -15px; top: 8px; width: 8px; height: 8px; border-radius: 50%;
+                        background: #98c2ee; border: 2px solid var(--yuz2, #fff) }
+.rad-zc-dugum:hover { border-color: #98c2ee; background: #f6faff }
+.rad-zc-dugum.simdi { cursor: default; background: #eef4fb; border-color: #c8dcf3 }
+.rad-zc-dugum.simdi::before { background: var(--mor, #2f6db3) }
+.rad-zc-dugum.d0::before { background: #c7cfd8 }
+.rad-zc-dugum.d3::before { background: #2e7d46 }
+.rad-zc-dugum b { color: var(--lacivert, #14315a) }
+.rad-zc-tarih { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 10.5px; color: var(--soluk) }
+.rad-zc-mod { background: #eef2f7; border-radius: 3px; padding: 0 5px; font-size: 10px; color: #34506e; font-weight: 700 }
+.rad-zc-ozet { color: #4d5d6e; margin-top: 2px }
+.rad-zc-bos { margin: 2px 0 8px }
+/* Başlık satırı kalkınca düğmeler sekme şeridine ve hasta bandına yapıştı (kullanıcı 27.10.2026) - nefes payı. */
+.rad-rapor > .sayfa-bas { padding: 8px 0; margin: 0 }
+.rad-oniz-bas { display: flex; align-items: center; gap: 6px; margin-bottom: 6px }
+.rad-oniz-bas b { color: var(--lacivert, #14315a) }
+.rad-oniz-bas .d { margin-left: auto }
+.rad-canli { font-size: 10px; color: #2e7d46; background: #e2f3e8; border: 1px solid #bfe3cb; border-radius: 9px; padding: 0 7px }
+.rad-bolum textarea.formdan { background: #f6faff; border-color: #c8dcf3 }
+/* BI-RADS FORMU (radyoloji/BiradsFormu) */
+.brf { border: 1px solid #c8dcf3; border-radius: 5px; background: var(--yuz); overflow: hidden; margin-bottom: 10px }
+.brf-bas { display: flex; align-items: center; gap: 8px; padding: 6px 9px; background: linear-gradient(#f4f8fd, #e9f1fb);
+           border-bottom: 1px solid #c8dcf3 }
+.brf-bas b { color: var(--lacivert, #14315a); margin-right: auto }
+.brf-ic { padding: 8px 9px }
+.brf-satir { display: grid; grid-template-columns: 104px 1fr; gap: 6px; align-items: center; margin-bottom: 5px }
+.brf-satir > span { font-size: 10.5px; color: var(--soluk); text-align: right }
+.brf-lezler { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 }
+/* Geniş form: öğe kendi `genis` / `dar` işaretini taşır (kapsayıcıya bağlı tanım iki anlamlı ad sayılır). */
+.brf-lezler.genis { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)) }
+.brf select, .brf input:not([type=checkbox]) { min-width: 0; width: 100%; box-sizing: border-box }
+.brf-lez { border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 4px; background: #fcfdfe }
+.brf-lez-bas { display: flex; align-items: center; gap: 6px; padding: 5px 7px; background: #f6f9fc;
+               border-bottom: 1px solid var(--cizgi2, #e3e9f0) }
+.brf-lez-bas b { color: var(--lacivert, #14315a) }
+.brf-lez-bas .brf-k { margin-left: auto }
+.brf-sil { border: 0; background: none; color: #b23b3b; cursor: pointer; padding: 0 2px }
+.brf-lez-ic { padding: 7px }
+.brf-ilk4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 6px }
+.brf-ilk4 label { display: flex; flex-direction: column; gap: 2px; font-size: 10px; color: var(--soluk) }
+.brf-soz.genis { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px }
+.brf-satir.dar { grid-template-columns: 86px 1fr }
+.brf-onay { font-size: 11px; display: flex; align-items: center; gap: 5px }
+.brf-dugmeler { display: flex; gap: 6px; align-items: center; margin-top: 6px }
+.brf-altlar { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px }
+.brf-altlar.genis { grid-template-columns: 1fr 1fr }
+.brf-oneri { border: 1px dashed #98c2ee; border-radius: 5px; background: #f6faff; padding: 7px 8px; font-size: 11.5px }
+.brf-neden { font-size: 10.5px; color: var(--soluk); margin-top: 4px; line-height: 1.5 }
+.brf-neden span { display: inline-block; background: #fff; border: 1px solid #dbe6f3; border-radius: 9px; padding: 0 6px; margin: 2px 3px 0 0 }
+.brf-karar { border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 5px; padding: 7px 8px; background: #fff }
+.brf-uyari { font-size: 10.5px; color: #9a4b00; background: #fff6ea; border: 1px solid #f3dcbd; border-radius: 3px;
+             padding: 4px 6px; margin: 4px 0; display: grid; gap: 4px }
+.brf-yonetim { font-size: 11px; color: #2e5b3a; background: #f3f9f4; border: 1px solid #cfe7d6; border-radius: 4px;
+               padding: 4px 7px; margin-top: 4px }
+/* Kategori rozeti: 1-2 yeşil, 3 sarı, 4 turuncu, 5-6 kırmızı, 0 gri. */
+.brf-k { display: inline-flex; padding: 1px 8px; border-radius: 10px; font-weight: 700; font-size: 10.5px; border: 1px solid;
+         white-space: nowrap }
+.brf-k.k0 { background: #eef1f5; color: #4d5d6e; border-color: #d5dde6 }
+.brf-k.k1, .brf-k.k2 { background: #e2f3e8; color: #2e7d46; border-color: #bfe3cb }
+.brf-k.k3 { background: #fff6d6; color: #8a6a00; border-color: #efdc95 }
+.brf-k.k4 { background: #fde9d7; color: #a65300; border-color: #f3c79d }
+.brf-k.k5, .brf-k.k6 { background: #fbe0de; color: #a3241b; border-color: #f0b4ae }
 .rad-bolum-bas { font-size: 11px; font-weight: bold; text-transform: uppercase;
                  letter-spacing: .3px; color: var(--lacivert, #14315a); margin-bottom: 3px; }
 .rad-bolum-bas .zor { color: #b23b3b; }
@@ -1962,6 +2097,8 @@ input.skt-gecmis {
                   border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px;
                   background: #f7f9fc; padding: 0 5px; flex: 0 0 auto; }
 .rad-kimlik { grid-template-columns: 1.4fr 1.6fr 1.2fr 1fr; }
+/* Şerit yalnız hasta bandı okunamazsa (hasta + durum); tetkik / çekim solda (RadyolojiRapor). */
+.rad-kimlik.bantsiz { grid-template-columns: 1.4fr 1fr; }
 .uyari-kutusu { border: 1px solid #f2ddbf; background: #fdf9f1; border-radius: 3px;
                 padding: 6px 8px; color: #8a6218; line-height: 1.5; }
 .kucuk { font-size: 11px; }

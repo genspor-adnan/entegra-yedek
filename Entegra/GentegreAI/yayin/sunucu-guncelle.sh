@@ -22,6 +22,12 @@
 #
 #      --temel-al : DB goclerini CALISTIRMADAN "uygulandi" diye isaretler.
 #                   Ilk kurulumda kullanilir - sema zaten dump'tan geldi.
+#
+#  UYGULAMA ROLU (kod inceleme raporu 28.10.2026 B07): API postgres ile DEGIL,
+#  kuruluma ozel sinirli rolle (<db kucuk harf>_uyg) baglanir. Rol ve parolasi
+#  burada kurulur / her yayinda yeniden dogrulanir; parola $KOK/.db_uygulama_parolasi.
+#  UYGULAMA_ROLU=0 (yayinla.ps1 -SuperRolIleBaglan): ACIL DURUM - rol adimi
+#  atlanir, API eski usul appsettings.Production.json'daki postgres dizesiyle baglanir.
 # ============================================================================
 set -euo pipefail
 
@@ -31,6 +37,7 @@ KAP=${KAP:-gentegre-api}
 PORT=${PORT:-5180}
 YOL=${YOL:-/ai/}
 PG=gentegre-pg18
+UYGULAMA_ROLU=${UYGULAMA_ROLU:-1}
 AG=gentegre-net
 IMAJ=mcr.microsoft.com/dotnet/aspnet:10.0
 
@@ -91,6 +98,29 @@ if [ -d "$GECICI/db" ]; then
     [ "$GOC_KOD" != "0" ] && hata "goc basarisiz - kod DEGISTIRILMEDI (islem geri alindi; yedek: $YEDEK_DIZIN)"
 fi
 
+# ------------------------------------------------------- uygulama rolu ---
+# Gocten SONRA calisir: yeni tablolar / fonksiyonlar da yetkisini alir.
+#   Rol hatasinda yayin DURUR - web ve api degismeden kalir.
+if [ "$UYGULAMA_ROLU" = "1" ]; then
+    [[ "$DB" =~ ^[A-Za-z0-9_]+$ ]] || hata "DB adi rol icin uygun degil: $DB"
+    ROL="$(echo "$DB" | tr 'A-Z' 'a-z')_uyg"
+    [ -f "$GECICI/uygulama-rolu.sql" ] || hata "pakette uygulama-rolu.sql yok"
+    if [ ! -s "$KOK/.db_uygulama_parolasi" ]; then
+        # Yalniz harf/rakam: SQL ve baglanti dizesinde kacis gerektirmez.
+        ( umask 077; head -c 64 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 40 > "$KOK/.db_uygulama_parolasi" )
+        bilgi "uygulama rolu parolasi URETILDI: $ROL"
+    fi
+    chmod 600 "$KOK/.db_uygulama_parolasi"
+    DB_UYG_PAROLA=$(cat "$KOK/.db_uygulama_parolasi")
+    # Parola komut satirinda DEGIL, stdin'in ilk satirinda (ps ciktisinda gorunmez).
+    { printf '\\set parola %s\n' "'$DB_UYG_PAROLA'"; cat "$GECICI/uygulama-rolu.sql"; } \
+        | psqlq -v db="$DB" -v rol="$ROL" -q \
+        || hata "uygulama rolu kurulamadi ($ROL) - web/api DEGISTIRILMEDI"
+    bilgi "uygulama rolu hazir: $ROL (yalniz $DB, super degil)"
+else
+    echo "UYARI: UYGULAMA_ROLU=0 - API postgres (super kullanici) ile baglanacak" >&2
+fi
+
 # -------------------------------------------------------------------- web ---
 if [ -d "$GECICI/web" ]; then
     rm -rf "$KOK/web.yeni"
@@ -107,6 +137,25 @@ fi
 if [ -d "$GECICI/api" ]; then
     [ -d "$KOK/api" ] && { rm -rf "$KOK/api.onceki"; cp -r "$KOK/api" "$KOK/api.onceki"; }
     rm -rf "$KOK/api"; cp -r "$GECICI/api" "$KOK/api"
+
+    # KURULUM JWT ANAHTARI (kod inceleme raporu 28.10.2026 B01): depodaki geliştirme anahtarı sunucuya gitmez.
+    #   Her kurulumun KENDİ rastgele anahtarı kurulum klasöründe kalıcı durur (ilk yayında üretilir; sonraki
+    #   yayınlar aynısını kullanır - oturumlar düşmez) ve API'nin yanına appsettings.Gizli.json olarak yazılır.
+    #   A kurulumunun token'ı B'de geçmez. Anahtar dönüşümü: dosyayı silip yayınla (herkes yeniden giriş yapar).
+    if [ ! -s "$KOK/.jwt_imza_anahtari" ]; then
+        head -c 48 /dev/urandom | base64 | tr -d '\n' > "$KOK/.jwt_imza_anahtari"
+        chmod 600 "$KOK/.jwt_imza_anahtari"
+        bilgi "kurulum JWT anahtari URETILDI (mevcut oturumlar yeniden giris yapacak)"
+    fi
+    # Baglanti dizesi de burada (B07): API uygulama rolüyle baglanir. appsettings.Gizli.json en son
+    #   yuklenir, Production.json'daki dizeyi ezer. Dosya yalniz sahibine okunur degil - konteyner
+    #   farkli kullanici ile okur; api klasoru ev dizininde, disariya servis edilmez.
+    if [ "$UYGULAMA_ROLU" = "1" ]; then
+        printf '{ "Guvenlik": { "ImzaAnahtari": "%s" },\n  "ConnectionStrings": { "Gentegre": "Host=%s;Port=5432;Database=%s;Username=%s;Password=%s" } }\n' \
+            "$(cat "$KOK/.jwt_imza_anahtari")" "$PG" "$DB" "$ROL" "$DB_UYG_PAROLA" > "$KOK/api/appsettings.Gizli.json"
+    else
+        printf '{ "Guvenlik": { "ImzaAnahtari": "%s" } }\n' "$(cat "$KOK/.jwt_imza_anahtari")" > "$KOK/api/appsettings.Gizli.json"
+    fi
     chmod -R a+rX "$KOK/api"
 
     # Konteyner YOKSA kurulur: yeni kurulum ilk yayininda elle docker run
@@ -146,6 +195,17 @@ if [ "$SAGLAM" != "1" ]; then
     [ -d "$KOK/web.onceki" ] && { rm -rf "$KOK/web"; mv "$KOK/web.onceki" "$KOK/web"; }
     docker logs --tail 20 "$KAP" 2>&1 | sed 's/^/    /' >&2
     hata "yayin geri alindi; onceki surum calisiyor"
+fi
+
+# API'nin DB baglantisi gercekten uygulama rolüyle mi (B07)? Giris denemesi DB'ye sorar; havuzda
+#   baglanti kalir. Postgres ile bagli gorunurse yalniz UYARI - yayin ayakta, geri alinmaz.
+if [ "$UYGULAMA_ROLU" = "1" ] && [ -d "$GECICI/api" ]; then
+    BAGLI=$(psqlq -tA -c "select string_agg(distinct usename, ',') from pg_stat_activity where datname = '$DB' and application_name not like 'psql%' and backend_type = 'client backend'" || true)
+    case ",$BAGLI," in
+        *",postgres,"*) echo "UYARI: $DB'ye postgres ile bagli istemci var ($BAGLI) - API ayarini kontrol edin" >&2 ;;
+        *",$ROL,"*)     bilgi "api DB baglantisi: $ROL" ;;
+        *)              bilgi "api DB baglantisi henuz gorunmedi (havuz bos) - beklenen rol: $ROL" ;;
+    esac
 fi
 
 WEB=$(curl -s -o /dev/null -w "%{http_code}" -m 5 "http://127.0.0.1$YOL" || true)   # 401 = basic auth (beklenen)

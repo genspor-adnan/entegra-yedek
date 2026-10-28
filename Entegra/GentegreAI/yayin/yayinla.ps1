@@ -15,6 +15,19 @@
 #     powershell -File yayin\yayinla.ps1 -TemelAl            # gocleri
 #                                        # CALISTIRMA, "uygulandi" isaretle
 #
+#  KALITE KAPISI (27.10.2026, kullanici: "canliya cikmadan once duman + testler
+#  zorunlu adim olsun"): paket hazirlanmadan ONCE, cagri basina BIR kez:
+#     1) web testleri  (vitest)
+#     2) api testleri  (dotnet test; DB testleri GENTEGRE_TEST_DB ile - yoksa
+#        appsettings.json dizesinden gentegre_ai_test; DB yoksa KIRMIZI, atlanmaz).
+#        Test API'si canlidaki gibi SINIRLI uygulama rolüyle baglanir (B07)
+#     3) duman testi   (npm run duman; yerel web + API acik olmali;
+#        DUMAN_SIFRE zorunlu, DUMAN_URL varsayilan http://localhost:5173,
+#        DUMAN_GRUP ile tek grup)
+#  Biri kirmiziysa yayin DURUR, sunucuya hicbir sey gitmez.
+#     -DumanAtla : yalniz 3. adimi atla (yerel sunucu kapaliysa) - uyari basilir
+#     -KapiAtla  : ACIL DURUM, kapinin tamami atlanir - uyari basilir
+#
 #  Ne yapar: web'i kurulumun alt yolu icin derler, api'yi Release yayinlar,
 #  sunucu ayarlarini (DB adi dahil) uretir, hepsini tek pakette sunucuya atar
 #  ve orada sunucu-guncelle.sh'i calistirir (goc -> web -> api -> saglik
@@ -45,6 +58,12 @@ param(
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
     [switch]$TemelAl,
+    # KALITE KAPISI atlama anahtarlari (ustteki aciklama).
+    [switch]$KapiAtla,
+    [switch]$DumanAtla,
+    # B07 ACIL DURUM: uygulama rolu adimi atlanir, API postgres (super kullanici) ile baglanir.
+    #   Yalniz rolün yetkisi yetmeyen bir hata canlida cikarsa, duzeltme yayinlanana kadar.
+    [switch]$SuperRolIleBaglan,
     # Sunucudaki DB parolasi appsettings.Production.json'a yazilir. Yerel
     #   gelistirme parolasiyla ayni olmasi KULLANICI KARARIYDI; degistirilirse
     #   hem burada hem PG konteynerinde degismeli.
@@ -144,6 +163,68 @@ $secilen =
 function Adim($m) { Write-Host "`n=== $m" -ForegroundColor Cyan }
 function Bilgi($m) { Write-Host "  $m" }
 
+# ------------------------------------------------------ kalite kapisi -------
+function KaliteKapisi {
+    if ($KapiAtla) {
+        Write-Warning 'KALITE KAPISI ATLANDI (-KapiAtla) - testler kosulmadan yayinlaniyor.'
+        return
+    }
+
+    Adim 'kalite kapisi 1/3: web testleri (vitest)'
+    Push-Location (Join-Path $kok 'web')
+    try {
+        npx vitest run --reporter=dot
+        if ($LASTEXITCODE -ne 0) { throw 'KALITE KAPISI: web testleri kirmizi - yayin durdu, sunucuya bir sey gitmedi.' }
+    } finally { Pop-Location }
+
+    Adim 'kalite kapisi 2/3: api testleri (dotnet test)'
+    # DB testleri yalniz GENTEGRE_TEST_DB ile kosar (adi 'test' icermeli); yoksa yerel
+    #   appsettings.json dizesinin veritabani gentegre_ai_test yapilir. ZORUNLU=1:
+    #   DB'ye ulasilamazsa testler ATLANMAZ, kirmizi olur - sessiz "gecti" olmasin.
+    $testDb = $env:GENTEGRE_TEST_DB
+    if (-not $testDb) {
+        $ayar = Get-Content (Join-Path $kok 'api\src\Gentegre.Api\appsettings.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        $testDb = $ayar.ConnectionStrings.Gentegre -replace '(?i)Database=[^;]*', 'Database=gentegre_ai_test'
+    }
+    # UYGULAMA ROLU (B07): test API'si canlidaki gibi SINIRLI rolle baglanir - rolün yetkisi yetmeyen
+    #   bir uc yayindan ONCE burada kirmizi olur. Rol yerel test DB'sinde ayni SQL ile kurulur; parola
+    #   her calismada yenilenir, dosyaya yazilmaz.
+    $testDbAdi = if ($testDb -match '(?i)Database=([^;]+)') { $Matches[1] } else { throw 'KALITE KAPISI: test DB adi okunamadi.' }
+    $testRol = ($testDbAdi.ToLowerInvariant()) + '_uyg'
+    $testParola = -join ((1..40) | ForEach-Object { [char[]]'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789' | Get-Random })
+    $rolSql = "\set parola '$testParola'`n" + (Get-Content (Join-Path $PSScriptRoot 'uygulama-rolu.sql') -Raw -Encoding UTF8)
+    $rolSql | docker exec -i gentegre-pg18 psql -U postgres -d $testDbAdi -v db=$testDbAdi -v rol=$testRol -q | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "KALITE KAPISI: test DB'sinde uygulama rolu kurulamadi ($testRol)." }
+    $testApiDb = ($testDb -replace '(?i)(Username|User Id)=[^;]*', "Username=$testRol") -replace '(?i)Password=[^;]*', "Password=$testParola"
+    $eskiDb = $env:GENTEGRE_TEST_DB; $eskiZorunlu = $env:GENTEGRE_TEST_ZORUNLU; $eskiApiDb = $env:GENTEGRE_TEST_API_DB
+    $env:GENTEGRE_TEST_DB = $testDb; $env:GENTEGRE_TEST_ZORUNLU = '1'; $env:GENTEGRE_TEST_API_DB = $testApiDb
+    try {
+        # Cikti depo ICINDE (bin altinda, git disi): testler depo kokunu derleme klasorunden yukari
+        #   yururek bulur. Ayri klasor = calisan gelistirme API'sinin (5180) kilitledigi bin'e dokunmaz.
+        dotnet test (Join-Path $kok 'api\tests\Gentegre.Testler') -o (Join-Path $kok 'api\tests\Gentegre.Testler\bin\yayin-kapisi') --nologo -v q
+        if ($LASTEXITCODE -ne 0) { throw 'KALITE KAPISI: api testleri kirmizi - yayin durdu, sunucuya bir sey gitmedi.' }
+    } finally { $env:GENTEGRE_TEST_DB = $eskiDb; $env:GENTEGRE_TEST_ZORUNLU = $eskiZorunlu; $env:GENTEGRE_TEST_API_DB = $eskiApiDb }
+
+    Adim 'kalite kapisi 3/3: duman testi (menu ekranlari)'
+    if ($DumanAtla) {
+        Write-Warning 'DUMAN TESTI ATLANDI (-DumanAtla).'
+        return
+    }
+    $dumanUrl = if ($env:DUMAN_URL) { $env:DUMAN_URL } else { 'http://localhost:5173' }
+    if (-not $env:DUMAN_SIFRE) {
+        throw "KALITE KAPISI: DUMAN_SIFRE yok - $dumanUrl girisinin admin parolasini ortam degiskenine verin (ya da -DumanAtla)."
+    }
+    try { Invoke-WebRequest $dumanUrl -UseBasicParsing -TimeoutSec 5 | Out-Null }
+    catch { throw "KALITE KAPISI: duman adresi $dumanUrl acik degil - yerel web + API'yi baslatin (ya da -DumanAtla)." }
+    $env:DUMAN_URL = $dumanUrl
+    Push-Location (Join-Path $kok 'web')
+    try {
+        npm run duman
+        if ($LASTEXITCODE -ne 0) { throw 'KALITE KAPISI: duman testinde hatali ekran var (rapor web/duman/sonuc/) - yayin durdu.' }
+    } finally { Pop-Location }
+    Bilgi 'kalite kapisi GECTI'
+}
+
 # YEREL KILIT: dosya paylasimsiz acik tutulur; surec bitince (hata dahil)
 #   isletim sistemi birakir - eski kilit dosyasi kalsa bile engellemez.
 $kilitYolu = Join-Path $env:TEMP 'gentegre-yayin.kilit'
@@ -154,6 +235,7 @@ try {
 }
 
 try {
+KaliteKapisi
 foreach ($k in $secilen) {
     Write-Host "`n################ $($k.Etiket) -> $($k.Yol)" -ForegroundColor Yellow
     # Uzak dosyalar benzersiz: ayni sabit /tmp yoluna iki yayin yuklemesin.
@@ -187,14 +269,19 @@ foreach ($k in $secilen) {
         dotnet publish (Join-Path $kok 'api\src\Gentegre.Api') -c Release -o $apiCikti -v q --nologo
         if ($LASTEXITCODE -ne 0) { throw 'api publish basarisiz' }
 
-        # Sunucuya OZEL ayarlar: DB adresi docker agindaki konteyner adi,
-        #   VERITABANI ADI kuruluma gore degisir - iki kurulumun verisi ayri.
+        # Sunucuya OZEL ayarlar. BAGLANTI DIZESI (B07) artik sunucuda uretilir: sunucu-guncelle.sh
+        #   kuruluma ozel uygulama rolünü kurar ve dizeyi appsettings.Gizli.json'a yazar - postgres
+        #   (super kullanici) parolasi API klasorune hic girmez. Yalniz -SuperRolIleBaglan (acil durum)
+        #   eski usul postgres dizesini buraya yazar.
         $ayar = [ordered]@{
-            ConnectionStrings = @{
-                Gentegre = "Host=gentegre-pg18;Port=5432;Database=$($k.Db);Username=postgres;Password=$DbParola"
-            }
             Cors = @{ Kaynaklar = @('http://46.36.201.170', 'http://localhost') }
             AllowedHosts = '*'
+        }
+        if ($SuperRolIleBaglan) {
+            Write-Warning "ACIL DURUM (-SuperRolIleBaglan): $($k.Db) API'si postgres ile baglanacak."
+            $ayar.ConnectionStrings = @{
+                Gentegre = "Host=gentegre-pg18;Port=5432;Database=$($k.Db);Username=postgres;Password=$DbParola"
+            }
         }
         $ayar | ConvertTo-Json -Depth 5 |
             Set-Content (Join-Path $apiCikti 'appsettings.Production.json') -Encoding utf8
@@ -221,6 +308,9 @@ foreach ($k in $secilen) {
     # Goc uygulayici: satir sonu LF (sunucu-guncelle.sh ile ayni sebep, asagida).
     [System.IO.File]::WriteAllText((Join-Path $gecici 'goc_uygula.sh'),
         ((Get-Content (Join-Path $PSScriptRoot 'goc_uygula.sh') -Raw) -replace "`r`n", "`n"))
+    # Uygulama rolü (B07): sunucu-guncelle.sh goclerden sonra calistirir.
+    [System.IO.File]::WriteAllText((Join-Path $gecici 'uygulama-rolu.sql'),
+        ((Get-Content (Join-Path $PSScriptRoot 'uygulama-rolu.sql') -Raw -Encoding UTF8) -replace "`r`n", "`n"))
     Bilgi "$((Get-ChildItem $dbHedef -Filter *.sql).Count) goc dosyasi"
 
     # ----------------------------------------------------------- paketle ----
@@ -255,7 +345,7 @@ foreach ($k in $secilen) {
     $bayrak = if ($TemelAl) { '--temel-al' } else { '' }
     # Kurulum bilgisi ORTAM DEGISKENIYLE gecer: betik tek, kurulum coktur.
     # URUN: bos kurulumda urune ozgu duzeltmeler (db/kurulum/bos/erp) - goc_uygula.sh.
-    $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol) URUN=$($k.Urun)"
+    $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol) URUN=$($k.Urun) UYGULAMA_ROLU=$(if ($SuperRolIleBaglan) { 0 } else { 1 })"
     # SUNUCU KILIDI: baska bir yayin (baska makineden de) sunucu adimindaysa
     #   BEKLER (en fazla 30 dk); sure dolarsa 75 ile cikar, hicbir sey yapilmaz.
     ssh $Sunucu "flock -w 1800 -E 75 /tmp/gentegre-yayin.kilit env $ortam PAKET=$uzakPaket bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"

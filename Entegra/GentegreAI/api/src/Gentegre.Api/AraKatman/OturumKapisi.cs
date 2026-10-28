@@ -21,6 +21,10 @@ namespace Gentegre.Api.AraKatman;
 ///
 /// <para><b>Pasif hesap</b> gecerli token'la da iceri giremez (401).</para>
 ///
+/// <para><b>Kapatılmış oturum</b> (kod inceleme raporu 28.10.2026 B05): token oturum ailesini (<c>aile</c>) taşır;
+/// ailenin açık satırı yoksa (çıkış, cihaz kapatma, parola değişimi, refresh tekrar kullanımı) 401. Aile
+/// taşımayan eski token da reddedilir - istemci refresh ile yenisini alır.</para>
+///
 /// <para>Anonim uclar (giris, yenile, ilk parola...) kapiya girmez.</para>
 /// </summary>
 public sealed class OturumKapisi
@@ -38,8 +42,10 @@ public sealed class OturumKapisi
             && int.TryParse(ctx.User.FindFirst(Talep.KullaniciId)?.Value, NumberStyles.Integer,
                             CultureInfo.InvariantCulture, out var kullaniciId))
         {
-            var durum = await kullanicilar.OturumDurumuAsync(kullaniciId, ctx.RequestAborted);
-            if (durum is null || !durum.Aktif)
+            if (!Guid.TryParse(ctx.User.FindFirst(Talep.Aile)?.Value, out var aileId))
+                throw GentegreHatasi.Yetkisiz();
+            var durum = await kullanicilar.OturumDurumuAsync(kullaniciId, aileId, ctx.RequestAborted);
+            if (durum is null || !durum.Aktif || !durum.AileAcik)
                 throw GentegreHatasi.Yetkisiz();
             // ROL ATANMAMIS (kullanici): rolu oturum acikken "Rol Atanmamis"a
             //   cekilen kisi bir sonraki istekte duser - token suresini beklemez.

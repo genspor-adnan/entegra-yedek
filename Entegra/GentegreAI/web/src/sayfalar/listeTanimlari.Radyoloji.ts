@@ -13,10 +13,10 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani - rapor yazma,
     //   PACS acma ve onay buradan baslar. Cipler gunun isini bolumler:
     //   once cekilecekler, sonra raporlanacaklar, sonra onay bekleyenler.
-    kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji Çalışma Listesi',
-    yol: 'Radyoloji › Çalışma Listesi',
+    kaynak: 'radyoloji-istem', rota: 'radyoloji', baslik: 'Radyoloji İstem Listesi',
+    yol: 'Radyoloji › Radyoloji İstem Listesi',
     // Kart rotasi LISTE ROTASINDAN turetilir (/radyoloji/:id).
-    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
     // OZEL KART (mockup radyoloji_istem_karti.html): generic form yerine
     //   RadyolojiIstemKarti bileseni - akis seridi + kontrol listesi + cekim
     //   alanlari generic karta sigmaz. LISTELER dongusu /radyoloji/:id kaydini
@@ -27,6 +27,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yerTutucuSekmeler: ['Kontrol Listesi'],
     aksiyonEkrani: 'radyoloji-liste',
     tarihAlani: 'saat',
+    // TARİH (kullanıcı 28.10.2026): açılışta bugün-bugün (Doktor Bekleme / Başvuru listesi gibi).
+    tarihVarsayilan: 'bugun',
     cipler: [
       { ad: 'Bekleyen Çekim', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Raporlanacak',   filtre: { alan: 'durum', op: 'esit', deger: 2 } },
@@ -43,7 +45,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // DAR YETKI (796): calisma listesi `radyoloji-istem` yetkisine bagli -
     //   `radyoloji` yedi ekrani birden aciyor, dis hekim portali icin
     //   kurumun butun radyoloji ayarlarini acmak gerekiyordu.
-    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji-istem.liste',
+    // AD (kullanıcı 27.10.2026): "Radyoloji Çalışma Listesi" -> "Radyoloji İstem Listesi"; ikon istem kartı gibi ☢️.
+    menuGrup: 'Radyoloji', menuAd: 'Radyoloji İstem Listesi', ic: '☢️', yetkiKodu: 'radyoloji-istem.liste',
     menuSira: 10,
   },
   {
@@ -141,7 +144,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'radyoloji-kritik-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
-    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
     gizliKolonlar: ['modalite', 'takipDurum', 'bildirimId', 'hastaId', 'istemId'],
     cipler: [
       { ad: 'Bildirilmedi',   filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
@@ -164,7 +167,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'radyoloji-konsultasyon-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
-    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
     gizliKolonlar: ['tip', 'durum', 'hekimId', 'hastaId', 'istemId'],
     cipler: [
       { ad: 'Bekleyen',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
@@ -183,7 +186,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'radyoloji-teslim-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
-    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi',
+    kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
     gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId'],
     cipler: [
       { ad: 'Teslim Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },

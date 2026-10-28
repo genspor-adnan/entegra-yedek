@@ -23,24 +23,43 @@ public static partial class RadyolojiUclari
         // İki aşama: asistan ÖN RAPOR gönderir (durum 2), uzman ONAYLAR
         //   (durum 3 + kilit). Onay ön koşulları veritabanında (284).
         grup.MapPost("/rapor/{id:int}/durum", async (
-            int id, string hedef, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, string hedef, string? surum, BaglamCozucu cozucu, VeriKaynagi veri,
             LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            // HEDEF BEYAZ LİSTE (kod inceleme raporu 28.10.2026 B06): tanımsız hedef "ön rapor" koluna düşüyordu.
             var onayMi = string.Equals(hedef, "onay", StringComparison.OrdinalIgnoreCase);
+            if (!onayMi && !string.Equals(hedef, "on-rapor", StringComparison.OrdinalIgnoreCase))
+                throw GentegreHatasi.Dogrulama("Geçersiz hedef: onay ya da on-rapor olmalı.", new AlanHatasi("hedef", "Geçersiz."));
             baglam.AksiyonIste(onayMi ? "rad.rapor_onayla" : "rad.rapor_yaz");
 
             await using var baglanti = await veri.AcAsync(iptal);
-
-            var engel = await baglanti.TekDegerAsync<string>(
-                "select public.fn_radyoloji_rapor_onaylanabilir(@p0)", null, [id], iptal) ?? "";
-            if (onayMi && engel.Length > 0) throw GentegreHatasi.IsKurali(engel);
-
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var istemId = await baglanti.TekDegerAsync<int>(
-                "select istem_id from public.radyoloji_rapor where id = @p0", islem, [id], iptal);
+            // SATIR KİLİDİ (B04 / B06): istem ve rapor kilitlenir; kilit ve onay uygunluğu KİLİDİN ALTINDA denetlenir -
+            //   denetim ile yazım arasında başka bir kayıt / onay araya giremez.
+            var istemId = await baglanti.TekDegerAsync<int?>(
+                "select istem_id from public.radyoloji_rapor where id = @p0", islem, [id], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update",
+                islem, [istemId], iptal);
+            var satir = await baglanti.TekAsync(
+                "select coalesce(kilit, 0)::int, xmin::text from public.radyoloji_rapor where id = @p0 for update",
+                islem, [id], o => new { Kilit = o.GetInt32(0), Surum = o.GetString(1) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            if (satir.Kilit == 1)
+                throw GentegreHatasi.IsKurali("Rapor onaylanmış ve kilitli; düzeltme için ek rapor (addendum) açın.");
+            // SÜRÜM (kod inceleme raporu 28.10.2026, ikinci tur P2): onaylanan / uzmana giden metin, isteyenin
+            //   GÖRDÜĞÜ (kendi kaydettiği) metin olmalı. Arada başkası kaydettiyse 409 - sürümsüz istek de.
+            if (surum != satir.Surum)
+                throw GentegreHatasi.Cakisma(new { surum = satir.Surum });
+            if (onayMi)
+            {
+                var engel = await baglanti.TekDegerAsync<string>(
+                    "select public.fn_radyoloji_rapor_onaylanabilir(@p0)", islem, [id], iptal) ?? "";
+                if (engel.Length > 0) throw GentegreHatasi.IsKurali(engel);
+            }
 
             if (onayMi)
             {
@@ -61,11 +80,14 @@ public static partial class RadyolojiUclari
             }
             else
             {
-                await baglanti.CalistirAsync("""
+                // Etkilenen satır yoksa istem ve log DEĞİŞMEZ (B06) - kilitli rapor yukarıda zaten reddedildi.
+                var degisen = await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor
                        set durum = 2, degistiren = @p1, degistirme_tarihi = now()::timestamp
                      where id = @p0 and coalesce(kilit, 0) = 0
                     """, islem, [id, baglam.KullaniciId], iptal);
+                if (degisen != 1)
+                    throw GentegreHatasi.IsKurali("Rapor ön rapora geçirilemedi (kilitli ya da bulunamadı).");
                 await baglanti.CalistirAsync(
                     "update public.radyoloji_istem set durum = 4 where id = @p0", islem, [istemId], iptal);
             }

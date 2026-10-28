@@ -42,10 +42,10 @@ export interface ListeTanimi {
   rolSuzgeci?: boolean;
   /**
    * Tarih araliginin ACILIS degeri. 'buAy' = bulunulan ayin 1'i - son gunu
-   * (kullanici, hakedis satirlari); 'yilbasindanBugune' = 1 Ocak - bugun.
-   * Verilmezse aralik BOS acilir (sinir yok).
+   * (kullanici, hakedis satirlari); 'yilbasindanBugune' = 1 Ocak - bugun;
+   * 'bugun' = bugun - bugun. Verilmezse aralik BOS acilir (sinir yok).
    */
-  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
+  tarihVarsayilan?: 'yilbasindanBugune' | 'buAy' | 'bugun';
   /**
    * Tarih araligi kutulari yerine HAZIR ARALIK COMBOSU (Bugun / Dun / Son 3
    * Gun ...) - basvuru seridindekinin aynisi. Gunluk calisilan ekranlarda
@@ -101,6 +101,8 @@ export interface ListeTanimi {
    * kart tek bir ISTEM'i gosterir, listenin adini tasimamali.
    */
   kartBaslik?: string;
+  /** Kart sekmesinin ikonu; yoksa listenin ikonu (ic). Ör. radyoloji istemi ☢️ - liste 🖥️ (kullanıcı 27.10.2026). */
+  kartIc?: string;
   aksiyonEkrani?: string;
   /** Yeni / Düzenle / Yazdır başlık satırında; diğer araç düğmeleri ALTINDA
       ayrı satırda sağa yaslı. */

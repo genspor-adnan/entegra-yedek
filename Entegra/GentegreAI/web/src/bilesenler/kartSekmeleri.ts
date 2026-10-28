@@ -255,6 +255,7 @@ export function sekmeleriKur(secenek: {
     if (yi >= 0 && ai >= 0) { const [y] = s.splice(yi, 1); s.splice((ai > yi ? ai - 1 : ai) + 1, 0, y) }
   }
   if (kaynak === 'hasta' && !yeniMi) {
+    // Rozet (başvuru sayısı) hasta bandından gelir - KART_SEKME_ROZETI olayı (GenForm).
     s.push({ tur: 'ozel', anahtar: 'ozel:basvurular', baslik: 'Başvurular' });
     // Mockup hasta_karti_v5 (kullanıcı 24.10.2026): Belgeler / Belge Durumu yerine Randevular · Mali ·
     //   Onam & Belgeler - Başvurular'ın sağında, salt okunur (sayfalar/hasta/HastaKartSekmeleri).
@@ -365,4 +366,15 @@ export interface SekmeParcalari {
   /** Bir detayın metası ve EKRANDAKİ (düzenlenmiş) satırları - ekran kendi
       gösterimini çizebilsin (muayene: fizik muayene bulgularının sade görünümü). */
   detayVerisi(ad: string): { meta: KartDetayMeta; satirlar: Record<string, unknown>[] } | null;
+}
+
+/**
+ * ÖZEL SEKME ROZETİ (kullanıcı 28.10.2026: "başvurular sekmesinde sayısı rozette yazsın"): özel sekmenin sayısı
+ * kartın detayından değil başka bir kaynaktan gelir (hasta başvuruları - hasta bandının özeti). Kaynak bunu bu
+ * olayla yayınlar, GenForm dinleyip sekme adının yanına yazar.
+ */
+export const KART_SEKME_ROZETI = 'gentegre-kart-sekme-rozeti';
+export interface KartSekmeRozeti { kaynak: string; id: number; anahtar: string; metin: string }
+export function kartSekmeRozetiYayinla(r: KartSekmeRozeti) {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent<KartSekmeRozeti>(KART_SEKME_ROZETI, { detail: r }));
 }

@@ -29,6 +29,11 @@ if (args.Contains("--yardim-dizin"))
 
 var kurucu = WebApplication.CreateBuilder(args);
 
+// KURULUMA ÖZEL GİZLİ AYAR (kod inceleme raporu 28.10.2026 B01): JWT imza anahtarı depodaki appsettings'ten
+//   DEĞİL, sunucunun kurulum klasöründe üretilip her yayında API'nin yanına yazılan bu dosyadan gelir
+//   (yayin/sunucu-guncelle.sh). Ortam ayarlarından SONRA eklenir - onları ezer. Yoksa (geliştirme) atlanır.
+kurucu.Configuration.AddJsonFile("appsettings.Gizli.json", optional: true, reloadOnChange: false);
+
 // ARKA PLAN ISCILERI (bildirim, zamanli is, cihaz/ORU dinleyicileri) test
 //   sunucusunda KAPATILABILIR: `ArkaPlan:Kapali=true`. Butunlesme testleri
 //   gercek SMS/e-posta gondermemeli, cihaz portu dinlememeli (denetim
@@ -219,6 +224,8 @@ kurucu.Services.ConfigureHttpJsonOptions(o =>
 });
 
 var guvenlik = kurucu.Configuration.GetSection("Guvenlik").Get<GuvenlikAyarlari>() ?? new();
+// GELİŞTİRME / ZAYIF ANAHTARLA ÜRETİM AÇILMAZ (B01): depodaki anahtarı bilen geçerli token üretebilirdi.
+GuvenlikAyarlari.UretimAnahtariniDogrula(guvenlik.ImzaAnahtari, kurucu.Environment.IsProduction());
 
 // ISTEMCI IP'SI (denetim 28.09.2026 #5): nginx arkasinda RemoteIpAddress
 //   hep 127.0.0.1'dir - IP bazli deneme siniri herkesi tek istemci sayardi.
