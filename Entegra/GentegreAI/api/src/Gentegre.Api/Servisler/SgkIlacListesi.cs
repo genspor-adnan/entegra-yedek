@@ -38,6 +38,22 @@ public sealed class SgkIlacListesi
                                string Yururluk);
 
     /// <summary>
+    /// ADRES İZİN LİSTESİ (kod inceleme 30.10.2026 K27): kullanıcının yapıştırdığı adres sunucudan çekiliyor -
+    /// `katalog` yetkisiyle iç ağa (169.254.169.254, localhost:5432) istek attırılabiliyordu. Yalnız https ve
+    /// sgk.gov.tr; `katalog` HttpClient'ı yönlendirmeyi izlemez (Program.cs) - izinli adresin iç ağa
+    /// yönlendirmesi de boşa düşer.
+    /// </summary>
+    public static void AdresDogrula(string adres)
+    {
+        if (!Uri.TryCreate(adres.Trim(), UriKind.Absolute, out var u)
+            || u.Scheme != Uri.UriSchemeHttps
+            || !(u.Host.Equals("sgk.gov.tr", StringComparison.OrdinalIgnoreCase)
+                 || u.Host.EndsWith(".sgk.gov.tr", StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidOperationException(
+                "Ek-4/A adresi yalnız https://…sgk.gov.tr altında olabilir; duyurudaki bağlantıyı yapıştırın.");
+    }
+
+    /// <summary>
     /// Ek-4/A'yı verilen adresten (ya da yüklenen içerikten) okur ve yazar.
     /// <paramref name="yururluk"/> verilmezse bugün alınır: listenin kendi
     /// yürürlük tarihi duyuruda yazıyor, dosyada değil.
@@ -55,6 +71,7 @@ public sealed class SgkIlacListesi
             if (string.IsNullOrWhiteSpace(adres))
                 throw new InvalidOperationException(
                     "SGK Ek-4/A adresi verilmedi. Duyurudaki .xlsx bağlantısını yapıştırın.");
+            AdresDogrula(adres);
             var istemci = _http.CreateClient("katalog");
             istemci.Timeout = TimeSpan.FromMinutes(5);
             veri = await istemci.GetByteArrayAsync(adres, iptal);

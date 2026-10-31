@@ -114,13 +114,13 @@ public static class GarantiOrnekUclari
     }
 
     /// <summary>Geliştirme ortamı ya da demo / eğitim kurulumu - canlı kurumda örnek sunucu yok.</summary>
-    private static async Task<bool> AcikMiAsync(VeriKaynagi veri, IWebHostEnvironment ortam, CancellationToken iptal)
-    {
-        if (ortam.IsDevelopment()) return true;
-        await using var b = await veri.AcAsync(iptal);
-        var o = (await AyarDeposu.MetinAsync(b, null, "genel.ortam", "canli", iptal)).Trim().ToLowerInvariant();
-        return o is "demo" or "egitim";
-    }
+    /// <summary>
+    /// YALNIZ GELİŞTİRME (kod inceleme 30.10.2026 K51): demo / eğitim ortamında da açıktı ve kimliksiz jeton
+    /// ucu gerçek taraf VKN / IBAN / açık belge numarası dönüyordu - eğitim kurulumuna müşteri verisi
+    /// kopyalanmışsa dışarıdan okunabiliyordu. Taklit sunucu artık yalnız Development'ta.
+    /// </summary>
+    private static Task<bool> AcikMiAsync(VeriKaynagi veri, IWebHostEnvironment ortam, CancellationToken iptal)
+        => Task.FromResult(ortam.IsDevelopment());
 
     /// <summary>Karşı taraflar kurumun kendi kayıtlarından - öneri motoru boşa dönmesin.</summary>
     private static async Task<GarantiOrnekVerisi.Taraflar> OrnekAsync(VeriKaynagi veri, string iban, CancellationToken iptal)

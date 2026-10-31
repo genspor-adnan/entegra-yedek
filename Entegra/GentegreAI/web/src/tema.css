@@ -2032,6 +2032,13 @@ input.skt-gecmis {
 .rad-zc-bos { margin: 2px 0 8px }
 /* Başlık satırı kalkınca düğmeler sekme şeridine ve hasta bandına yapıştı (kullanıcı 27.10.2026) - nefes payı. */
 .rad-rapor > .sayfa-bas { padding: 8px 0; margin: 0 }
+/* Bant: yazan asistansa mor rozet, onay bekleme süresi sarı (1199, mockup seçenek C). */
+.rozet.rad-asistan { background: #efe9fb; color: #5b3fa6; border: 1px solid #d8ccf3; font-size: 10px; padding: 0 6px }
+.hbnd-alt.rad-bekliyor { color: #8a6218; font-style: italic }
+.rad-onay-notu { margin: 6px 0 0; padding: 6px 12px; background: #fdf6e3; border: 1px solid #ecd9a6;
+                 border-radius: 4px; color: #5c4a1a; font-size: 12px }
+/* Düğme satırı tam genişlik: Çıktı + Kapat .ck-bosluk ile sağ uçta (kullanıcı 28.10.2026). */
+.rad-rapor > .sayfa-bas > .sayfa-eylem { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100% }
 .rad-oniz-bas { display: flex; align-items: center; gap: 6px; margin-bottom: 6px }
 .rad-oniz-bas b { color: var(--lacivert, #14315a) }
 .rad-oniz-bas .d { margin-left: auto }
@@ -6652,6 +6659,8 @@ textarea.fm-giris { resize: vertical }
 .hbnd-tik { cursor: pointer }
 .hbnd-genis { flex: 1 }
 .hbnd-simdi { border-right: 0; white-space: nowrap }
+/* Ardından blok geliyorsa (radyoloji: İsteyen → Yazan, 28.10.2026) ayraç çizgisi kalır. */
+.hbnd-simdi.hbnd-arada { border-right: 1px solid var(--cizgi2) }
 .hbnd-kg { font-family: Consolas, monospace; font-weight: 700; color: var(--hata); background: var(--hatazem); border-radius: 3px; padding: 1px 6px }
 .hbnd-kg.yok { color: var(--soluk); background: var(--yuz2); font-family: inherit; font-weight: 400 }
 .hbnd-ayr { position: absolute; top: 100%; left: 280px; z-index: 6; width: 320px; background: var(--yuz); border: 1px solid var(--cizgi);

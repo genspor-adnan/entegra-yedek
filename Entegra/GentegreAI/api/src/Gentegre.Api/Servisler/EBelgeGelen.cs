@@ -113,7 +113,9 @@ public sealed class EBelgeGelen(VeriKaynagi veri, IHttpClientFactory istemciUret
             if (v.ValueKind == JsonValueKind.Number) return v.ToString();
             var m = (v.GetString() ?? "").Trim();
             if (m.Length == 0) return "0";
-            return m.Replace(".", "").Replace(',', '.');
+            // BİÇİM AYRIMI (kod inceleme 30.10.2026 K70): virgül varsa Türkçe ("1.234,50"); yoksa nokta ONDALIKTIR
+            //   ("1234.50") - eskiden her nokta binlik sayılıp 1234.50 → 123450 oluyordu.
+            return m.Contains(',') ? m.Replace(".", "").Replace(',', '.') : m;
         }
 
         var alt = satir.TryGetProperty("accountingSupplier", out var s) ? s : default;

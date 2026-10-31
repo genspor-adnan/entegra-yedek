@@ -100,7 +100,9 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizErisimServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGunSonuServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.ItsServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Uclar.ItsServisiKisayol>();
-kurucu.Services.AddHttpClient("katalog");
+// Yönlendirme kapalı (K27): izinli SGK adresinin iç ağa yönlendirmesi izlenmez.
+kurucu.Services.AddHttpClient("katalog")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 // FAZ 0 - ZAMANLI ISLER (405): TITCK haftalik guncelleme gibi isler.
 //   Isci SINGLETON (hosted) ama elle calistirma ucundan da cagriliyor -
 //   bu yuzden ayrica singleton olarak kaydedilip hosted servis ondan alinir.
@@ -232,12 +234,52 @@ GuvenlikAyarlari.UretimAnahtariniDogrula(guvenlik.ImzaAnahtari, kurucu.Environme
 //   X-Forwarded-For YALNIZ guvenilen proxy'den (varsayilan loopback) kabul
 //   edilir ve yalniz SON atlama (proxy'nin gordugu adres) alinir: istemcinin
 //   basliga kendi yazdigi adresler dikkate alinmaz.
+//   Docker köprü ağı (kod inceleme 30.10.2026 K08): proxy adresi sabit değil, ağ geçididir — `GuvenilenAglar`
+//   (CIDR) ile ağ bazında güvenilir. X-Forwarded-Proto da okunur: API'nin ürettiği bağlantılar (açık form adresi)
+//   HTTPS kurulumda https:// olsun.
 kurucu.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(o =>
 {
-    o.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor;
+    o.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                       | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
     o.ForwardLimit = 1;
     foreach (var adres in guvenlik.GuvenilenProxyler)
         if (System.Net.IPAddress.TryParse(adres, out var ip)) o.KnownProxies.Add(ip);
+    foreach (var cidr in guvenlik.GuvenilenAglar)
+        if (System.Net.IPNetwork.TryParse(cidr, out var ag))
+            o.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(ag.BaseAddress, ag.PrefixLength));
+});
+
+// GİRİŞ HIZ SINIRI (kod inceleme 30.10.2026 K30): /api/kimlik grubu "kimlik" ilkesini taşır; ilke yalnız anonim
+//   parola / token uçlarında IP başına sabit pencere uygular, öteki kimlik uçları (ben, şube, oturumlar) sınırsız.
+//   IP ForwardedHeaders'tan sonra çözülür (UseRateLimiter boru hattında UseForwardedHeaders'ın ardında).
+kurucu.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.OnRejected = async (ctx, iptal) =>
+    {
+        ctx.HttpContext.Response.ContentType = "application/json; charset=utf-8";
+        await ctx.HttpContext.Response.WriteAsync(
+            "{\"hata\":{\"kod\":\"SINIR\",\"mesaj\":\"Çok fazla deneme; bir dakika sonra yeniden deneyin.\"}}", iptal);
+    };
+    o.AddPolicy("kimlik", ctx =>
+    {
+        var yol = ctx.Request.Path.Value ?? "";
+        var sinirli = yol.EndsWith("/giris", StringComparison.Ordinal)
+                   || yol.EndsWith("/yenile", StringComparison.Ordinal)
+                   || yol.Contains("/ilk-parola", StringComparison.Ordinal)
+                   || yol.Contains("/parola-unuttum", StringComparison.Ordinal)
+                   || yol.Contains("/giris-kodu", StringComparison.Ordinal);
+        if (!sinirli || guvenlik.GirisDakikaSinir <= 0)
+            return System.Threading.RateLimiting.RateLimitPartition.GetNoLimiter("-");
+        var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "?";
+        return System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(ip,
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = guvenlik.GirisDakikaSinir,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+            });
+    });
 });
 
 kurucu.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -306,8 +348,15 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.GelenBelgeAktar>();
 
 var uygulama = kurucu.Build();
 
+// PROXY ARKASINDA AMA GÜVENİLEN PROXY YOK (K08): üretimde bu ayar eksikse IP tabanlı sınırlar ve denetim izi
+//   sessizce bozulur; açılışta bir kez uyarılır (yayın ayarı Guvenlik:GuvenilenAglar yazar).
+if (uygulama.Environment.IsProduction() && guvenlik.GuvenilenProxyler.Length == 0 && guvenlik.GuvenilenAglar.Length == 0)
+    uygulama.Logger.LogWarning("Guvenlik:GuvenilenProxyler / GuvenilenAglar bos: X-Forwarded-For yalniz loopback'ten okunur; "
+                               + "docker koprusu arkasinda istemci IP'si hep ag gecidi gorunur.");
+
 // ------------------------------------------------------------------- boru hatti ----
 uygulama.UseForwardedHeaders();
+uygulama.UseRateLimiter();
 uygulama.UseMiddleware<HataAraKatmani>();
 uygulama.UseCors();
 uygulama.UseAuthentication();
@@ -321,13 +370,15 @@ uygulama.UseMiddleware<SaatDilimiKapisi>();
 if (uygulama.Environment.IsDevelopment())
     uygulama.MapOpenApi();
 
+// SÜRÜM SIZDIRMAZ (kod inceleme 30.10.2026 K87): anonim uç PG sürüm dizgesini döndürüyordu; DB'ye yine
+//   sorulur (yayın sağlık kontrolü 200 bekler) ama yanıtta yalnız "ayakta".
 uygulama.MapGet("/api/saglik", async (VeriKaynagi veri, CancellationToken iptal) =>
 {
-    var surum = await veri.TekDegerAsync<string>("select version()", null, iptal);
+    await veri.TekDegerAsync<int>("select 1", null, iptal);
     return Results.Ok(new
     {
         durum = "ayakta",
-        veritabani = surum,
+        veritabani = "ayakta",
         zaman = Saat.Simdi
     });
 }).AllowAnonymous().WithTags("Saglik");

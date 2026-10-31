@@ -35,11 +35,15 @@ public sealed class RadyolojiRaporYarisTestleri(ApiSunucuOlgusu api)
         return (istem, rapor);
     }
 
+    /// <summary>Son açılan istemcinin kullanıcısı - ön raporda kendisi onaylayacak uzman olarak seçilir.</summary>
+    private int _uzman;
+
     private async Task<HttpClient> IstemciAsync(TestDunyasi d)
     {
         var rol = await d.RolAsync("rad", "radyoloji:gde", "radyoloji-istem:gde", "rad.rapor_yaz", "rad.rapor_onayla");
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
+        _uzman = u;
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
         return api.Istemci(access, Merkez);
     }
@@ -74,7 +78,7 @@ public sealed class RadyolojiRaporYarisTestleri(ApiSunucuOlgusu api)
         var (istem, rapor) = await IstemAsync(d, onayli: true);
         using var h = await IstemciAsync(d);
 
-        var onRapor = await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor", null);
+        var onRapor = await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&onaylayacakId={_uzman}", null);
         Assert.Equal(HttpStatusCode.UnprocessableEntity, onRapor.StatusCode);
         var tanimsiz = await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=xyz", null);
         Assert.Equal(HttpStatusCode.BadRequest, tanimsiz.StatusCode);
@@ -105,14 +109,74 @@ public sealed class RadyolojiRaporYarisTestleri(ApiSunucuOlgusu api)
         Assert.NotEqual(s0, s1);
 
         // Uzmanın gördüğü (eski) sürümle ve sürümsüz: 409, durum değişmez.
-        Assert.Equal(HttpStatusCode.Conflict, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={s0}", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={s0}&onaylayacakId={_uzman}", null)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=onay&surum={s0}", null)).StatusCode);
-        Assert.Equal(HttpStatusCode.Conflict, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&onaylayacakId={_uzman}", null)).StatusCode);
         Assert.Equal(1, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor where id = @p0", [rapor]));
         Assert.Equal(3, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_istem where id = @p0", [istem]));
 
         // Kaydın döndürdüğü güncel sürümle geçer.
-        Assert.Equal(HttpStatusCode.OK, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={s1}", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={s1}&onaylayacakId={_uzman}", null)).StatusCode);
         Assert.Equal(2, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor where id = @p0", [rapor]));
+        // BİLDİRİM (kullanıcı 28.10.2026): seçilen uzmana raporu açan açık bir hatırlatma.
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.hatirlatma where kaynak = 'radyoloji/rapor' and kaynak_id = @p0 and sahip_id = @p1 and durum = 1",
+            [istem, _uzman]));
+        d.Temizle($"delete from public.hatirlatma where kaynak = 'radyoloji/rapor' and kaynak_id = {istem}");
+        // ONAYLAYACAK (1199): seçilen uzman ve gönderme anı yazıldı.
+        Assert.Equal(_uzman, await api.Veri.TekDegerAsync<int>("select onaylayacak_id from public.radyoloji_rapor where id = @p0", [rapor]));
+        Assert.True(await api.Veri.TekDegerAsync<bool>("select onaya_gonderme is not null from public.radyoloji_rapor where id = @p0", [rapor]));
+    }
+    [VtFact]
+    public async Task Uzmana_gonderirken_onay_yetkili_uzman_secilmeli()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var (istem, rapor) = await IstemAsync(d, onayli: false);
+        using var h = await IstemciAsync(d);
+        var uzman = _uzman;
+        // Onay yetkisi OLMAYAN biri (asistan).
+        var asistanRol = await d.RolAsync("asistan", "radyoloji:gde", "rad.rapor_yaz");
+        var (asistan, _) = await d.KullaniciAsync(asistanRol, Merkez);
+
+        var y = await h.GetFromJsonAsync<JsonElement>("/api/radyoloji/onay-uzmanlari");
+        var idler = y.EnumerateArray().Select(x => x.GetProperty("id").GetInt32()).ToList();
+        Assert.Contains(uzman, idler);
+        Assert.DoesNotContain(asistan, idler);
+
+        var surum = (await h.GetFromJsonAsync<JsonElement>($"/api/radyoloji/istem/{istem}/rapor"))
+            .GetProperty("rapor").GetProperty("surum").GetString();
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={surum}", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await h.PostAsync($"/api/radyoloji/rapor/{rapor}/durum?hedef=on-rapor&surum={surum}&onaylayacakId={asistan}", null)).StatusCode);
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor where id = @p0", [rapor]));
+    }
+    [VtFact]
+    public async Task Bos_kritik_bulgu_bildirimi_reddedilir_dolu_olan_onay_kapisini_acar()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var (istem, rapor) = await IstemAsync(d, onayli: false);
+        using var h = await IstemciAsync(d);
+        d.Temizle($"delete from public.radyoloji_kritik_bulgu where istem_id = {istem}");
+
+        // K22: boş bulgu / boş bildirilen → 400, satır yazılmaz.
+        Assert.Equal(HttpStatusCode.BadRequest, (await h.PostAsJsonAsync($"/api/radyoloji/istem/{istem}/kritik-bulgu",
+            new { bulgu = "", bildirilenAd = "Dr. X", yol = 1 })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await h.PostAsJsonAsync($"/api/radyoloji/istem/{istem}/kritik-bulgu",
+            new { bulgu = "Pnömotoraks", bildirilenAd = "  ", yol = 1 })).StatusCode);
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.radyoloji_kritik_bulgu where istem_id = @p0", [istem]));
+
+        // Onay ön koşulu (1206): kritik işaretli raporda yalnız DOLU bildirim sayılır.
+        await api.Veri.CalistirAsync("update public.radyoloji_istem set kritik = 1 where id = @p0", [istem]);
+        await api.Veri.CalistirAsync(
+            "insert into public.radyoloji_kritik_bulgu (istem_id, rapor_id, bulgu, bildiren_id, bildirilen_ad, yol, ekleyen) values (@p0, @p1, '', 0, '', 1, 0)",
+            [istem, rapor]);
+        Assert.Contains("Kritik bulgu", await api.Veri.TekDegerAsync<string>(
+            "select coalesce(public.fn_radyoloji_rapor_onaylanabilir(@p0), '')", [rapor]) ?? "");
+        Assert.Equal(HttpStatusCode.OK, (await h.PostAsJsonAsync($"/api/radyoloji/istem/{istem}/kritik-bulgu",
+            new { bulgu = "Pnömotoraks", bildirilenAd = "Dr. X", yol = 1 })).StatusCode);
+        Assert.DoesNotContain("Kritik bulgu", await api.Veri.TekDegerAsync<string>(
+            "select coalesce(public.fn_radyoloji_rapor_onaylanabilir(@p0), '')", [rapor]) ?? "");
     }
 }

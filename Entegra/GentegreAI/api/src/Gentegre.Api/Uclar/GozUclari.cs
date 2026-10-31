@@ -42,7 +42,10 @@ public static partial class GozUclari
 
     public static void GozUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/goz").WithTags("Göz").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): muayene / görüntüleme / gözlük / akış / hasta / cihaz
+        //   kimlikleri liste ile aynı şube - kapsam kuralından geçer; başka şubenin kaydı kimlikle açılamaz (404).
+        var grup = yol.MapGroup("/api/goz").WithTags("Göz").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Goz());
 
         // Ünite panosu sayaçları ayrı dosyada: bu dosya HASTANIN göz özetini
         //   tutuyor, o ise ÜNİTENİN o günkü hâlini.

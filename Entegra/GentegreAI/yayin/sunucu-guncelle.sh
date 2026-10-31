@@ -56,6 +56,21 @@ YEDEK_DIZIN=${YEDEK_DIZIN:-$KOK/yedek}
 
 bilgi() { echo "  $*"; }
 hata()  { echo "HATA: $*" >&2; exit 1; }
+
+# GERİ ALMA TEK YERDEN (kod inceleme 30.10.2026 K49): web/api degistirildikten sonra herhangi bir komut
+#   (docker restart, chmod…) `set -e` ile duserse betik geri alma blogunu gormeden cikiyordu - api/ yeni,
+#   konteyner eski kalıyordu. DEGISTI=1 olduktan sonra her hata ayni geri almayi yapar.
+DEGISTI=0
+geri_al() {
+    [ "$DEGISTI" = "1" ] || return 0
+    DEGISTI=0
+    echo "  geri aliniyor…" >&2
+    [ -d "$KOK/api.onceki" ] && { rm -rf "$KOK/api"; mv "$KOK/api.onceki" "$KOK/api"; docker restart "$KAP" >/dev/null 2>&1 || true; }
+    [ -d "$KOK/web.onceki" ] && { rm -rf "$KOK/web"; mv "$KOK/web.onceki" "$KOK/web"; }
+    docker logs --tail 20 "$KAP" 2>&1 | sed 's/^/    /' >&2 || true
+    echo "HATA: yayin geri alindi; onceki surum calisiyor" >&2
+}
+trap 'KOD_=$?; if [ $KOD_ -ne 0 ]; then geri_al; fi' EXIT
 psqlq() { docker exec -i -e PGOPTIONS='-c client_min_messages=warning' "$PG" psql -U postgres -d "$DB" "$@"; }
 
 [ -f "$PAKET" ] || hata "paket yok: $PAKET"
@@ -84,8 +99,9 @@ if [ -d "$GECICI/db" ]; then
         case "$UYGULANMIS" in *" $(basename "$D") "*) ;; *) BEKLEYEN=$((BEKLEYEN+1)) ;; esac
     done
     if [ "$BEKLEYEN" -gt 0 ] && [ "$TEMEL_AL" != "1" ]; then
-        mkdir -p "$YEDEK_DIZIN"
-        docker exec "$PG" pg_dump -U postgres -Fc "$DB" > "$YEDEK_DIZIN/$DB-$DAMGA.dump" \
+        # YEDEK YALNIZ SAHIBINE (kod inceleme 30.10.2026 K10): dump hasta verisi + parola hash'leri tasir.
+        mkdir -p "$YEDEK_DIZIN"; chmod 700 "$YEDEK_DIZIN"
+        ( umask 077; docker exec "$PG" pg_dump -U postgres -Fc "$DB" > "$YEDEK_DIZIN/$DB-$DAMGA.dump" ) \
             || hata "goc oncesi yedek alinamadi - goc CALISTIRILMADI"
         bilgi "goc oncesi yedek: $YEDEK_DIZIN/$DB-$DAMGA.dump ($BEKLEYEN bekleyen goc)"
         ls -1t "$YEDEK_DIZIN/$DB-"*.dump 2>/dev/null | tail -n +6 | xargs -r rm -f   # son 5 yedek
@@ -130,13 +146,15 @@ if [ -d "$GECICI/web" ]; then
     #   kopyalama bitince tek hamlede yer degistirilir.
     [ -d "$KOK/web" ] && { rm -rf "$KOK/web.onceki"; mv "$KOK/web" "$KOK/web.onceki"; }
     mv "$KOK/web.yeni" "$KOK/web"
+    DEGISTI=1
     bilgi "web guncellendi"
 fi
 
 # -------------------------------------------------------------------- api ---
 if [ -d "$GECICI/api" ]; then
-    [ -d "$KOK/api" ] && { rm -rf "$KOK/api.onceki"; cp -r "$KOK/api" "$KOK/api.onceki"; }
+    [ -d "$KOK/api" ] && { rm -rf "$KOK/api.onceki"; cp -r "$KOK/api" "$KOK/api.onceki"; chmod 700 "$KOK/api.onceki"; }
     rm -rf "$KOK/api"; cp -r "$GECICI/api" "$KOK/api"
+    DEGISTI=1
 
     # KURULUM JWT ANAHTARI (kod inceleme raporu 28.10.2026 B01): depodaki geliştirme anahtarı sunucuya gitmez.
     #   Her kurulumun KENDİ rastgele anahtarı kurulum klasöründe kalıcı durur (ilk yayında üretilir; sonraki
@@ -148,32 +166,52 @@ if [ -d "$GECICI/api" ]; then
         bilgi "kurulum JWT anahtari URETILDI (mevcut oturumlar yeniden giris yapacak)"
     fi
     # Baglanti dizesi de burada (B07): API uygulama rolüyle baglanir. appsettings.Gizli.json en son
-    #   yuklenir, Production.json'daki dizeyi ezer. Dosya yalniz sahibine okunur degil - konteyner
-    #   farkli kullanici ile okur; api klasoru ev dizininde, disariya servis edilmez.
+    #   yuklenir, Production.json'daki dizeyi ezer.
+    # IZINLER (kod inceleme 30.10.2026 K10): api klasoru ve Gizli.json YALNIZ SAHIBINE - konteyner ayni
+    #   kullanici kimligiyle (--user) calisir, nginx api klasorune girmez. Eskiden a+rX idi: JWT anahtari ve
+    #   DB parolasi sunucudaki her yerel surece acikti.
     if [ "$UYGULAMA_ROLU" = "1" ]; then
         printf '{ "Guvenlik": { "ImzaAnahtari": "%s" },\n  "ConnectionStrings": { "Gentegre": "Host=%s;Port=5432;Database=%s;Username=%s;Password=%s" } }\n' \
             "$(cat "$KOK/.jwt_imza_anahtari")" "$PG" "$DB" "$ROL" "$DB_UYG_PAROLA" > "$KOK/api/appsettings.Gizli.json"
     else
         printf '{ "Guvenlik": { "ImzaAnahtari": "%s" } }\n' "$(cat "$KOK/.jwt_imza_anahtari")" > "$KOK/api/appsettings.Gizli.json"
     fi
-    chmod -R a+rX "$KOK/api"
+    chmod -R u+rwX,go-rwx "$KOK/api"
+    chmod 600 "$KOK/api/appsettings.Gizli.json"
 
-    # Konteyner YOKSA kurulur: yeni kurulum ilk yayininda elle docker run
-    #   yazdirmak, kurulumu belgeye degil hafizaya baglar.
-    if ! docker inspect "$KAP" >/dev/null 2>&1; then
+    # KONTEYNER: host kullanicisiyla (--user) calisir (K10) ve taban imaj her yayinda tazelenir (K86).
+    #   Kullanici / imaj degistiyse konteyner YENIDEN KURULUR (docker restart eski ayarlarla kalkardi);
+    #   yoksa yalniz yeniden baslatilir. HOME=/tmp: salt-okunur /app'te veri koruma anahtari yazmaya calismasin.
+    KULLANICI="$(id -u):$(id -g)"
+    docker pull -q "$IMAJ" >/dev/null 2>&1 || bilgi "imaj cekilemedi, eldeki kullanilacak: $IMAJ"
+    kap_kur() {
         docker network inspect "$AG" >/dev/null 2>&1 || docker network create "$AG" >/dev/null
         docker run -d --name "$KAP" --restart unless-stopped --network "$AG" \
+            --user "$KULLANICI" \
             -p "127.0.0.1:$PORT:8080" \
             -e ASPNETCORE_ENVIRONMENT=Production \
             -e ASPNETCORE_URLS=http://0.0.0.0:8080 \
+            -e HOME=/tmp \
             -v "$KOK/api:/app:ro" -w /app \
             "$IMAJ" dotnet /app/Gentegre.Api.dll >/dev/null
-        bilgi "api konteyneri KURULDU: $KAP (127.0.0.1:$PORT)"
         # PG konteyneri ayni agda degilse baglanamaz - bir kez baglanir.
         docker network connect "$AG" "$PG" 2>/dev/null || true
+    }
+    if ! docker inspect "$KAP" >/dev/null 2>&1; then
+        kap_kur
+        bilgi "api konteyneri KURULDU: $KAP (127.0.0.1:$PORT)"
     else
-        docker restart "$KAP" >/dev/null
-        bilgi "api guncellendi, konteyner yeniden baslatildi"
+        ESKI_KULLANICI=$(docker inspect -f '{{.Config.User}}' "$KAP" 2>/dev/null || true)
+        ESKI_IMAJ=$(docker inspect -f '{{.Image}}' "$KAP" 2>/dev/null || true)
+        YENI_IMAJ=$(docker image inspect -f '{{.Id}}' "$IMAJ" 2>/dev/null || true)
+        if [ "$ESKI_KULLANICI" != "$KULLANICI" ] || { [ -n "$YENI_IMAJ" ] && [ "$ESKI_IMAJ" != "$YENI_IMAJ" ]; }; then
+            docker rm -f "$KAP" >/dev/null
+            kap_kur
+            bilgi "api konteyneri YENIDEN KURULDU (kullanici/imaj degisti): $KAP"
+        else
+            docker restart "$KAP" >/dev/null
+            bilgi "api guncellendi, konteyner yeniden baslatildi"
+        fi
     fi
 fi
 
@@ -182,19 +220,14 @@ bilgi "saglik kontrolu…"
 SAGLAM=0
 for i in $(seq 1 20); do
     sleep 2
-    KOD=$(curl -s -o /dev/null -w "%{http_code}" -m 5 -X POST \
-          "http://127.0.0.1:$PORT/api/kimlik/giris" -H "Content-Type: application/json" \
-          -d '{"kod":"?","parola":"?"}' || true)
-    # 401 = servis ayakta, kimlik reddedildi (beklenen). 000/502 = ayakta degil.
-    [ "$KOD" = "401" ] && { SAGLAM=1; break; }
+    # /api/saglik DB'ye sorar (select version()): uygulama rolu yeni semaya erisemiyorsa / baglanti dizesi
+    #   bozuksa 500 doner - eski "giris 401" kontrolu DB'ye hic ugramadan geciyordu (K49).
+    KOD=$(curl -s -o /dev/null -w "%{http_code}" -m 5 "http://127.0.0.1:$PORT/api/saglik" || true)
+    [ "$KOD" = "200" ] && { SAGLAM=1; break; }
 done
 
 if [ "$SAGLAM" != "1" ]; then
-    echo "SAGLIK KONTROLU BASARISIZ (son kod: ${KOD:-yok}) - geri aliniyor" >&2
-    [ -d "$KOK/api.onceki" ] && { rm -rf "$KOK/api"; mv "$KOK/api.onceki" "$KOK/api"; docker restart "$KAP" >/dev/null; }
-    [ -d "$KOK/web.onceki" ] && { rm -rf "$KOK/web"; mv "$KOK/web.onceki" "$KOK/web"; }
-    docker logs --tail 20 "$KAP" 2>&1 | sed 's/^/    /' >&2
-    hata "yayin geri alindi; onceki surum calisiyor"
+    hata "SAGLIK KONTROLU BASARISIZ (son kod: ${KOD:-yok})"
 fi
 
 # API'nin DB baglantisi gercekten uygulama rolüyle mi (B07)? Giris denemesi DB'ye sorar; havuzda
@@ -209,6 +242,10 @@ if [ "$UYGULAMA_ROLU" = "1" ] && [ -d "$GECICI/api" ]; then
 fi
 
 WEB=$(curl -s -o /dev/null -w "%{http_code}" -m 5 "http://127.0.0.1$YOL" || true)   # 401 = basic auth (beklenen)
+# Web de karara bagli (K49): index yoksa / nginx okuyamiyorsa (403/404/5xx) yayin "TAMAM" bitmesin.
+case "$WEB" in 200|301|302|304|401) ;; *) hata "WEB SAGLIK KONTROLU BASARISIZ (kod: ${WEB:-yok})" ;; esac
+[ -f "$KOK/web/index.html" ] || hata "web/index.html yok"
+DEGISTI=0
 bilgi "saglik: api=$KOD web=$WEB"
 echo "$DAMGA" > "$KOK/son-yayin.txt"
 rm -rf "$GECICI" "$PAKET"

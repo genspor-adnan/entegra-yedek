@@ -16,6 +16,8 @@ public static partial class KaynakKatalogu
 {
     private static KaynakTanimi AcilBasvuru() => new(
         Ad: "acilBasvuru",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "b.hasta_id",
         YetkiKodu: "acil.triyaj",
         Kaynak: "public.acil_basvuru b" +
                 " join public.v_acil_sure v on v.basvuru_id = b.id" +

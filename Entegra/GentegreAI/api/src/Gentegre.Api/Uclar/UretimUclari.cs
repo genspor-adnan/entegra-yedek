@@ -31,6 +31,15 @@ public static class UretimUclari
     private const short Iptal = 0, Taslak = 1, Onayli = 2,
                         Uretimde = 4, Kismi = 5, Tamamlandi = 6, Kapatildi = 7;
 
+    /// <summary>
+    /// islem_log.tablo_id - uretim_emri (K33: üretimde denetim izi yoktu). KartKatalogu.Uretim
+    /// "uretim-emri" kartı ile AYNI numara (993) - kart yolundan ve bu uçlardan yazılan loglar
+    /// tek tabloda birleşsin (önceki 1429 katalogla çelişiyordu).
+    /// </summary>
+    private const int LogEmir = 993;
+    /// <summary>islem_log.tablo_id - urun_agaci (KartKatalogu.Uretim "urun-agaci").</summary>
+    private const int LogAgac = 990;
+
     public sealed record EmirIstegi(int StokId, int? AgacId, decimal Adet, short? Tur,
                                     DateOnly? PlanBas, DateOnly? Termin,
                                     int? SarfDepoId, int? MamulDepoId,
@@ -59,29 +68,50 @@ public static class UretimUclari
         //   ve TARİHLİ olarak karta yaz. Sonuç kolonlara yazılmasaydı liste
         //   ekranında maliyet gösterilemez, her satır için hesap gerekirdi.
         grup.MapPost("/agac/{id:int}/maliyet", async (
-            int id, MaliyetIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, MaliyetIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim", Islem.Degistir);
 
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
             var gug = istek?.GugYuzde ?? 0m;
-            var sonuc = await veri.TekAsync("""
+            var sonuc = await baglanti.TekAsync("""
                 select malzeme, iscilik, gug, toplam
                   from public.fn_urun_agaci_maliyet(@p0, @p1)
-                """, [id, gug],
+                """, islem, [id, gug],
                 o => new { Malzeme = o.GetDecimal(0), Iscilik = o.GetDecimal(1),
                            Gug = o.GetDecimal(2), Toplam = o.GetDecimal(3) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Ürün ağacı bulunamadı.");
 
-            await veri.CalistirAsync("""
+            // DEĞİŞİKLİK LOGU ALAN BAZLI (kod inceleme 30.10.2026 K33): eski maliyet kilitli
+            //   okunur, yeni değer yazılır; değişen alan yoksa log satırı açılmaz.
+            var eski = await baglanti.TekAsync("""
+                select maliyet_malzeme, maliyet_iscilik, maliyet_gug, maliyet_toplam
+                  from public.urun_agaci where id = @p0 for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Ürün ağacı bulunamadı.");
+
+            await baglanti.CalistirAsync("""
                 update public.urun_agaci
                    set maliyet_malzeme = @p1, maliyet_iscilik = @p2, maliyet_gug = @p3,
                        maliyet_toplam = @p4, maliyet_tarih = now(),
                        degistiren = @p5, degistirme_tarihi = now()
                  where id = @p0
-                """, [id, sonuc.Malzeme, sonuc.Iscilik, sonuc.Gug, sonuc.Toplam,
+                """, islem, [id, sonuc.Malzeme, sonuc.Iscilik, sonuc.Gug, sonuc.Toplam,
                       baglam.KullaniciId], iptal);
+
+            var fark = LogDeposu.Fark(eski, new Dictionary<string, object?>
+            {
+                ["maliyet_malzeme"] = sonuc.Malzeme, ["maliyet_iscilik"] = sonuc.Iscilik,
+                ["maliyet_gug"] = sonuc.Gug, ["maliyet_toplam"] = sonuc.Toplam,
+            });
+            if (fark is not null)
+                await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogAgac, id,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, sonuc.Malzeme, sonuc.Iscilik, sonuc.Gug,
                                     sonuc.Toplam, izlemeNo = baglam.IzlemeNo });
@@ -90,7 +120,7 @@ public static class UretimUclari
         // POST /api/uretim/agac/{id}/yeni-surum - ağacı kopyalar, sürümü artırır.
         //   ESKİ SÜRÜM SİLİNMEZ, pasifleşir: açık emirler ona bakmaya devam eder.
         grup.MapPost("/agac/{id:int}/yeni-surum", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -139,6 +169,15 @@ public static class UretimUclari
                   from public.urun_agaci_operasyon o where o.agac_id = @p0 order by o.sira, o.id
                 """, islem, [id, yeniId, baglam.KullaniciId], iptal);
 
+            // EKLEME LOGU (kod inceleme 30.10.2026 K33): yeni sürüm satırının tam hâli + kaynak ağaç.
+            var yeniSatir = await baglanti.TekAsync("select * from public.urun_agaci where id = @p0",
+                islem, [yeniId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var bilgi = yeniSatir?.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value))
+                        ?? new Dictionary<string, object?>();
+            bilgi["kaynak"] = "yeni sürüm #" + id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogAgac, yeniId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, bilgi, iptal: iptal);
+
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id = yeniId, kod, surum = yeniSurum,
                 mesaj = $"{kod} v{yeniSurum} oluşturuldu (taslak, varsayılan değil).",
@@ -175,7 +214,7 @@ public static class UretimUclari
 
         // POST /api/uretim/emri - emir aç ve ağacı emre kopyala.
         grup.MapPost("/emri", async (
-            EmirIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            EmirIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -221,6 +260,17 @@ public static class UretimUclari
 
             await PlanMaliyetiYazAsync(baglanti, islem, emirId, iptal);
 
+            // EKLEME LOGU (kod inceleme 30.10.2026 K33): emir başlığının tam hâli; bileşen /
+            //   operasyon sayısı bilgi olarak. Log emirle aynı transaction'da.
+            var emirSatir = await baglanti.TekAsync("select * from public.uretim_emri where id = @p0",
+                islem, [emirId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var emirBilgi = emirSatir?.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value))
+                            ?? new Dictionary<string, object?>();
+            emirBilgi["__detaylar"] = new { bilesen, operasyon };
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogEmir, emirId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, emirBilgi,
+                stokId: istek.StokId, iptal: iptal);
+
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id = emirId, no, bilesen, operasyon,
                 mesaj = $"{no} açıldı: {bilesen} bileşen, {operasyon} operasyon.",
@@ -231,7 +281,7 @@ public static class UretimUclari
         //   YALNIZ TASLAK/ONAYLI: üretimdeki emirde sürüm sabittir, yoksa
         //   sarf edilmiş malzemenin karşılığı olmayan bir satır listesi kalır.
         grup.MapPost("/emri/{id:int}/agactan-yenile", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -240,7 +290,7 @@ public static class UretimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var emir = await EmirOkuAsync(baglanti, islem, id, iptal);
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum is not (Taslak or Onayli))
                 throw GentegreHatasi.IsKurali(
                     "Ağaçtan yenileme yalnız Taslak ve Onaylı emirde yapılabilir.");
@@ -266,6 +316,10 @@ public static class UretimUclari
 
             await PlanMaliyetiYazAsync(baglanti, islem, id, iptal);
 
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { agactanYenile = true, agacId = emir.AgacId, bilesen, operasyon }, iptal: iptal);
+
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, bilesen, operasyon,
                 mesaj = $"Ağaçtan yenilendi: {bilesen} bileşen, {operasyon} operasyon.",
@@ -273,8 +327,10 @@ public static class UretimUclari
         });
 
         // POST /api/uretim/emri/{id}/rezerve?ac=true|false
+        //   DURUM KAPISI (K34): iptal / kapatılmış emirde rezerv açılamaz - kapanmış
+        //   emrin satırları depoda hayalet rezerv bırakırdı.
         grup.MapPost("/emri/{id:int}/rezerve", async (
-            int id, bool? ac, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, bool? ac, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -283,8 +339,16 @@ public static class UretimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
+            if (emir.Durum is Iptal or Kapatildi)
+                throw GentegreHatasi.IsKurali(
+                    "İptal edilmiş ya da kapatılmış emirde rezerv işlemi yapılamaz.");
+
             var acMi = ac ?? true;
             var etkilenen = await RezerveUygulaAsync(baglanti, islem, id, acMi, iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { rezerve = acMi, satir = etkilenen }, iptal: iptal);
             await islem.CommitAsync(iptal);
 
             var hazirlik = await veri.TekDegerAsync<decimal>(
@@ -298,20 +362,28 @@ public static class UretimUclari
 
         // POST /api/uretim/emri/{id}/onayla
         grup.MapPost("/emri/{id:int}/onayla", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim.onayla", Islem.Degistir);
 
-            var etkilenen = await veri.CalistirAsync("""
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set durum = 2, degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0 and durum = 1
-                """, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
 
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali("Yalnız Taslak emir onaylanabilir.");
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = Onayli, durumAdi = "Onaylı" }, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, durum = Onayli, mesaj = "Emir onaylandı.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -319,30 +391,47 @@ public static class UretimUclari
 
         // POST /api/uretim/emri/{id}/baslat - emri üretime al; sarf modu "tek
         //   seferde" ise bütün bileşenler tek sarf fişiyle çıkar.
+        //
+        //   TEK İŞLEM + SATIR KİLİDİ (K13 / K12): emir `for update` ile okunur, sarf
+        //   fişi ve durum geçişi aynı transaction'da yazılır ve güncelleme
+        //   `durum = 2` koşuluyla yapılır. Eskiden okuma ile yazma arası boştu:
+        //   iki eşzamanlı "Başlat" iki sarf fişi kesiyor, ikisi de "başlatıldı"
+        //   diyordu; fiş kesilip durum yazılamazsa da emir onaylıda kalıp ikinci
+        //   denemede malzeme yeniden çıkıyordu.
         grup.MapPost("/emri/{id:int}/baslat", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, BelgeDeposu belgeDepo,
-            HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var emir = await EmirOkuAsync(baglanti, null, id, iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum != Onayli)
                 throw GentegreHatasi.IsKurali(
                     "Yalnız Onaylı emir başlatılabilir (önce Onayla).");
 
             int? belgeId = null;
             if (emir.SarfModu == 1)
-                belgeId = await SarfEtAsync(baglanti, veri, belgeDepo, baglam, emir,
+                belgeId = await SarfEtAsync(baglanti, islem, belgeDepo, baglam, emir,
                                             null, iptal);
 
-            await veri.CalistirAsync("""
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set durum = 4, gercek_bas = coalesce(gercek_bas, now()),
                        degistiren = @p1, degistirme_tarihi = now()
-                 where id = @p0
-                """, [id, baglam.KullaniciId], iptal);
+                 where id = @p0 and durum = 2
+                """, islem, [id, baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Emir bu arada değişti (artık Onaylı değil); ekranı yenileyip tekrar deneyin.");
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = Uretimde, durumAdi = "Üretimde", sarfBelgeId = belgeId }, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, durum = Uretimde, sarfBelgeId = belgeId,
                 mesaj = belgeId is null ? "Emir üretime alındı."
@@ -354,21 +443,29 @@ public static class UretimUclari
         //   eksik malzeme sonradan gelince kullanılır).
         grup.MapPost("/emri/{id:int}/sarf", async (
             int id, SarfIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            BelgeDeposu belgeDepo, HttpContext ctx, CancellationToken iptal) =>
+            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var emir = await EmirOkuAsync(baglanti, null, id, iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // Emir kilitli okunur: eşzamanlı iki sarf aynı kalanı iki kez çıkarmasın.
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum is < Onayli or >= Tamamlandi)
                 throw GentegreHatasi.IsKurali(
                     "Sarf yalnız Onaylı ya da üretimdeki emirde yapılabilir.");
 
-            var belgeId = await SarfEtAsync(baglanti, veri, belgeDepo, baglam, emir,
+            var belgeId = await SarfEtAsync(baglanti, islem, belgeDepo, baglam, emir,
                                             istek?.Satirlar, iptal);
             if (belgeId is null)
                 throw GentegreHatasi.IsKurali("Sarf edilecek malzeme kalmadı.");
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { sarfBelgeId = belgeId, secili = istek?.Satirlar?.Length ?? 0 }, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, belgeId, mesaj = "Sarf fişi kesildi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -377,9 +474,13 @@ public static class UretimUclari
         // POST /api/uretim/emri/{id}/mamul-giris - kısmi parti girişi.
         //   LOT = EMİR NO: kısmi girişlerin hepsi aynı lota yazılır, böylece
         //   "bu parti hangi emirden çıktı" izi tek anahtarda kalır.
+        //
+        //   BELGE + SAYAÇ TEK İŞLEMDE (K12): giriş fişi kesilip emrin üretilen adedi
+        //   yazılamazsa stokta mal var, emirde yok görünürdü; ikinci deneme aynı
+        //   partiyi iki kez girerdi.
         grup.MapPost("/emri/{id:int}/mamul-giris", async (
             int id, MiktarIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            BelgeDeposu belgeDepo, HttpContext ctx, CancellationToken iptal) =>
+            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim", Islem.Degistir);
@@ -389,7 +490,9 @@ public static class UretimUclari
                     [new("adet", "Adet sıfırdan büyük olmalı.")]);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var emir = await EmirOkuAsync(baglanti, null, id, iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum is < Onayli or >= Tamamlandi)
                 throw GentegreHatasi.IsKurali(
                     "Mamul girişi yalnız onaylı/üretimdeki emirde yapılabilir.");
@@ -430,28 +533,37 @@ public static class UretimUclari
                 ["sira"] = 1,
             });
 
-            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(
+            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem,
                 belge, [satir], new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 
             // ÜRETİLEN ADET VE DURUM: emir adedine ulaşınca Tamamlandı, altındaysa
             //   Kısmi. Durum burada hesaplanır ki liste ekranı ayrı bir işe
-            //   bağımlı olmasın.
-            await veri.CalistirAsync("""
+            //   bağımlı olmasın. Koşul (durum 2..5) kilitli okumanın sigortası.
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set uretilen_adet = uretilen_adet + @p1,
                        durum = case when uretilen_adet + @p1 >= adet then 6 else 5 end,
                        gercek_bit = case when uretilen_adet + @p1 >= adet
                                          then now() else gercek_bit end,
                        degistiren = @p2, degistirme_tarihi = now()
-                 where id = @p0
-                """, [id, istek.Adet, baglam.KullaniciId], iptal);
+                 where id = @p0 and durum between 2 and 5
+                """, islem, [id, istek.Adet, baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Emir bu arada değişti; ekranı yenileyip tekrar deneyin.");
 
-            var yeni = await veri.TekAsync("""
+            var yeni = await baglanti.TekAsync("""
                 select uretilen_adet, adet, durum from public.uretim_emri where id = @p0
-                """, [id],
+                """, islem, [id],
                 o => new { Uretilen = o.GetDecimal(0), Adet = o.GetDecimal(1),
                            Durum = o.GetInt16(2) }, iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { mamulGiris = istek.Adet, belgeId, uretilen = yeni?.Uretilen, durum = yeni?.Durum },
+                iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, belgeId, uyarilar,
                 uretilen = yeni?.Uretilen, adet = yeni?.Adet, durum = yeni?.Durum,
@@ -460,9 +572,11 @@ public static class UretimUclari
         });
 
         // POST /api/uretim/emri/{id}/fire - ret/fire çıkışı.
+        //   DURUM KAPISI (K34): iptal / kapatılmış emre fire yazılmaz - kapanmış
+        //   maliyetin altından stok çıkardı. Fiş + sayaç tek işlemde (K12).
         grup.MapPost("/emri/{id:int}/fire", async (
             int id, FireIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            BelgeDeposu belgeDepo, HttpContext ctx, CancellationToken iptal) =>
+            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim", Islem.Degistir);
@@ -472,7 +586,12 @@ public static class UretimUclari
                     [new("adet", "Adet sıfırdan büyük olmalı.")]);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var emir = await EmirOkuAsync(baglanti, null, id, iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
+            if (emir.Durum is Iptal or Kapatildi)
+                throw GentegreHatasi.IsKurali(
+                    "İptal edilmiş ya da kapatılmış emre fire kaydedilemez.");
 
             var depoId = emir.FireDepoId ?? emir.SarfDepoId
                 ?? throw GentegreHatasi.IsKurali(
@@ -506,27 +625,36 @@ public static class UretimUclari
                 ["sira"] = 1,
             });
 
-            var (belgeId, _) = await belgeDepo.KaydetAsync(
+            var (belgeId, _) = await belgeDepo.KaydetAsync(baglanti, islem,
                 belge, [satir], new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 
             // Fire adedi yalnız MAMUL firesinde emrin sayacına işlenir; bileşen
             //   firesi zaten sarfın içindedir.
             if (istek.StokId == emir.StokId)
-                await veri.CalistirAsync("""
+                await baglanti.CalistirAsync("""
                     update public.uretim_emri set fire_adet = fire_adet + @p1,
                            degistiren = @p2, degistirme_tarihi = now()
                      where id = @p0
-                    """, [id, istek.Adet, baglam.KullaniciId], iptal);
+                    """, islem, [id, istek.Adet, baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { fire = istek.Adet, stokId = istek.StokId, belgeId, neden = istek.Neden },
+                stokId: istek.StokId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, belgeId, mesaj = "Fire kaydedildi.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/uretim/emri/{id}/maliyet-kapat
+        //   TEK KAPANIŞ (K57): emir kilitli okunur, kapanış satırı varsa ikinci
+        //   kapanış reddedilir (db/1201 benzersiz indeksi son sigorta). İki
+        //   kapanış mamul giriş fiyatını iki kez ezip stok ortalamasını kaydırırdı.
         grup.MapPost("/emri/{id:int}/maliyet-kapat", async (
             int id, MaliyetIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("uretim.maliyet", Islem.Degistir);
@@ -534,10 +662,18 @@ public static class UretimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var emir = await EmirOkuAsync(baglanti, islem, id, iptal);
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
+            if (emir.Durum is Iptal or Kapatildi)
+                throw GentegreHatasi.IsKurali(
+                    "İptal edilmiş ya da kapatılmış emirde maliyet kapanışı yapılamaz.");
             if (emir.Uretilen <= 0)
                 throw GentegreHatasi.IsKurali(
                     "Mamul girişi yapılmamış emrin maliyeti kapatılamaz.");
+            var kapanisVar = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.uretim_maliyet where emir_id = @p0",
+                islem, [id], iptal);
+            if (kapanisVar > 0)
+                throw GentegreHatasi.IsKurali("Bu emrin maliyeti zaten kapatılmış.");
 
             // MALZEME: sarf fişlerinin tutarı (hareket anındaki fiyat).
             var malzeme = await baglanti.TekDegerAsync<decimal>("""
@@ -587,12 +723,28 @@ public static class UretimUclari
                 """, islem, [id, BelgeTuru.KaynakTurUretimEmri, birim,
                              BelgeTuru.UretimGirisi], iptal);
 
+            // DİP TOPLAM TAZELENİR (K57): satır fiyatı değişti, başlıktaki
+            //   matrah / genel_toplam eski (plan) tutarda kalıyordu. Tek kaynak
+            //   fn_belge_diptoplam - uygulama ikinci bir toplam hesabı yapmaz.
+            var girisBelgeleri = await baglanti.ListeAsync("""
+                select b.id from public.belge b
+                 where b.kaynak_tur = @p1 and b.kaynak_id = @p0 and b.tur = @p2
+                """, islem, [id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.UretimGirisi],
+                o => o.GetInt32(0), iptal);
+            foreach (var belgeId in girisBelgeleri)
+                await BelgeToplamTazeleAsync(baglanti, islem, belgeDepo, belgeId, iptal);
+
             await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set gercek_malzeme = @p1, gercek_iscilik = @p2, gercek_toplam = @p3,
                        degistiren = @p4, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, malzeme, iscilik, toplam, baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { maliyetKapanis = true, malzeme, iscilik, gug, fire, toplam, birim, planBirim,
+                      farkYuzde = fark, girisBelgesi = girisBelgeleri.Count }, iptal: iptal);
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, malzeme, iscilik, gug, fire, toplam,
@@ -603,7 +755,7 @@ public static class UretimUclari
 
         // POST /api/uretim/emri/{id}/kapat - kalan rezervi bırak, emri kilitle.
         grup.MapPost("/emri/{id:int}/kapat", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -612,7 +764,7 @@ public static class UretimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var emir = await EmirOkuAsync(baglanti, islem, id, iptal);
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum is not (Kismi or Tamamlandi))
                 throw GentegreHatasi.IsKurali(
                     "Yalnız kısmi ya da tamamlanmış emir kapatılabilir.");
@@ -625,15 +777,22 @@ public static class UretimUclari
                     "Önce maliyet kapanışı yapılmalı (Maliyet Kapat).");
 
             await RezerveUygulaAsync(baglanti, islem, id, false, iptal);
-            await baglanti.CalistirAsync("""
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set durum = 7, degistiren = @p1, degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum in (5, 6)
                 """, islem, [id, baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Emir bu arada değişti; ekranı yenileyip tekrar deneyin.");
             await baglanti.CalistirAsync("""
                 update public.uretim_operasyon set durum = 4
                  where emir_id = @p0 and durum < 4
                 """, islem, [id], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = Kapatildi, durumAdi = "Kapatıldı", eskiDurum = emir.Durum }, iptal: iptal);
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = Kapatildi, mesaj = "Emir kapatıldı.",
@@ -645,7 +804,7 @@ public static class UretimUclari
         //   sarf ve girişlerin TERS KAYITLA kapatılması gerekir; onu sessizce
         //   yapmak stok bakiyesini bozar, o yüzden Faz 2'ye bırakıldı.
         grup.MapPost("/emri/{id:int}/iptal", async (
-            int id, IptalIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, IptalIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -658,19 +817,27 @@ public static class UretimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var emir = await EmirOkuAsync(baglanti, islem, id, iptal);
+            var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
             if (emir.Durum is not (Taslak or Onayli))
                 throw GentegreHatasi.IsKurali(
                     "Üretime başlamış emir iptal edilemez; sarf ve girişler ters "
                   + "kayıtla kapatılmalıdır.");
 
             await RezerveUygulaAsync(baglanti, islem, id, false, iptal);
-            await baglanti.CalistirAsync("""
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.uretim_emri
                    set durum = 0, iptal_neden = @p1, degistiren = @p2,
                        degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum in (1, 2)
                 """, islem, [id, istek.Neden, baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Emir bu arada değişti; ekranı yenileyip tekrar deneyin.");
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogEmir, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = Iptal, durumAdi = "İptal", eskiDurum = emir.Durum, neden = istek.Neden },
+                iptal: iptal);
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = Iptal, mesaj = "Emir iptal edildi.",
@@ -751,14 +918,19 @@ public static class UretimUclari
                                       int? FireDepoId, string MamulLot, decimal PlanToplam,
                                       int SubeId);
 
+    /// <summary>
+    /// Emri okur; <paramref name="kilitle"/> ile satır `for update` kilitlenir (K13):
+    /// durum geçişi yapan uçlar okuma ile yazma arasına ikinci bir isteğin
+    /// girmesini böyle önler. Kilit işlem ister.
+    /// </summary>
     private static async Task<EmirBilgisi> EmirOkuAsync(NpgsqlConnection baglanti,
-        NpgsqlTransaction? islem, int id, CancellationToken iptal)
+        NpgsqlTransaction? islem, int id, CancellationToken iptal, bool kilitle = false)
         => await baglanti.TekAsync("""
             select id, no, durum, stok_id, agac_id, adet, uretilen_adet, sarf_modu,
                    sarf_depo_id, mamul_depo_id, fire_depo_id, mamul_lot, plan_toplam,
                    sube_id
               from public.uretim_emri where id = @p0
-            """, islem, [id],
+            """ + (kilitle ? " for update" : ""), islem, [id],
             o => new EmirBilgisi(o.GetInt32(0), o.GetString(1), o.GetInt16(2),
                                  o.GetInt32(3), o.IsDBNull(4) ? null : o.GetInt32(4),
                                  o.GetDecimal(5), o.GetDecimal(6), o.GetInt16(7),
@@ -900,8 +1072,14 @@ public static class UretimUclari
     /// Rezerv sarf ANINDA bırakılır: mal fiilen çıktıysa artık "ayrılmış"
     /// değildir; bırakılmazsa aynı miktar hem düşmüş hem rezerve görünür.
     /// Sarf edilecek satır kalmadıysa null döner (belge açılmaz).
+    ///
+    /// <para>ÇAĞIRANIN İŞLEMİNDE (K12): sarf fişi, satırların sarf_edilen / rezerve
+    /// sayaçları ve emrin gerçek malzemesi tek transaction'da yazılır. Eskiden
+    /// fiş kendi işleminde kesiliyor, sayaçlar ayrı bağlantıdan yazılıyordu -
+    /// arada kopan istek stoktan düşmüş ama emirde "sarf edilmemiş" malzeme
+    /// bırakıyor, ikinci deneme aynı malzemeyi yeniden çıkarıyordu.</para>
     /// </summary>
-    private static async Task<int?> SarfEtAsync(NpgsqlConnection baglanti, VeriKaynagi veri,
+    private static async Task<int?> SarfEtAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         BelgeDeposu belgeDepo, IstekBaglami baglam, EmirBilgisi emir,
         SarfSatiri[]? secili, CancellationToken iptal)
     {
@@ -920,7 +1098,8 @@ public static class UretimUclari
               join public.uretim_emri e on e.id = s.emir_id
              where s.emir_id = @p0
              order by s.sira, s.id
-            """, null, [emir.Id],
+               for update of s
+            """, islem, [emir.Id],
             o => new { Id = o.GetInt32(0), StokId = o.GetInt32(1), DepoId = o.GetInt32(2),
                        Gerekli = o.GetDecimal(3), Sarf = o.GetDecimal(4),
                        Rezerve = o.GetDecimal(5), Maliyet = o.GetDecimal(6) }, iptal);
@@ -970,7 +1149,7 @@ public static class UretimUclari
             ["aciklama"] = $"Üretim sarfı · {emir.No}",
         };
 
-        var (belgeId, _) = await belgeDepo.KaydetAsync(
+        var (belgeId, _) = await belgeDepo.KaydetAsync(baglanti, islem,
             belge, fisSatirlari,
             // STOK KONTROLÜ AÇIK: elde olmayan malzeme sarf edilemez - eksi
             //   bakiye üretim maliyetini baştan yanlış kılar.
@@ -981,24 +1160,24 @@ public static class UretimUclari
         {
             var birakilan = Math.Min(c.Rezerve, c.Miktar);
             if (birakilan > 0)
-                await veri.CalistirAsync("""
+                await baglanti.CalistirAsync("""
                     update public.stok_durum
                        set rezerve = greatest(0, rezerve - @p2)
                      where stok_id = @p0 and depo_id = @p1
-                    """, [c.StokId, c.DepoId, birakilan], iptal);
+                    """, islem, [c.StokId, c.DepoId, birakilan], iptal);
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 update public.uretim_emri_satir
                    set sarf_edilen = sarf_edilen + @p1,
                        rezerve = greatest(0, rezerve - @p2),
                        durum = case when sarf_edilen + @p1 >= gerekli then 3 else 2 end
                  where id = @p0
-                """, [c.Id, c.Miktar, birakilan], iptal);
+                """, islem, [c.Id, c.Miktar, birakilan], iptal);
         }
 
         // GERÇEK MALZEME: sarf fişlerinin tutarı. Belge yazma hattı satır
         //   tutarını hareket anındaki maliyetle doldurur, biz onu toplarız.
-        await veri.CalistirAsync("""
+        await baglanti.CalistirAsync("""
             update public.uretim_emri e
                set gercek_malzeme = coalesce((
                        select sum(bs.tutar)
@@ -1010,9 +1189,44 @@ public static class UretimUclari
                         where b.kaynak_tur = @p1 and b.kaynak_id = @p0 and b.tur = @p2), 0)
                                  + e.gercek_iscilik
              where e.id = @p0
-            """, [emir.Id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.SarfCikisi], iptal);
+            """, islem, [emir.Id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.SarfCikisi], iptal);
 
         return belgeId;
     }
 
+    /// <summary>
+    /// Satır fiyatı dışarıdan değiştirilen belgenin başlık toplamlarını tazeler
+    /// (maliyet kapanışı mamul giriş fiyatını gerçekleşenle ezer). Toplam TEK
+    /// KAYNAKTAN: <c>fn_belge_diptoplam</c> (BelgeDeposu.DipToplamAsync); yazılan
+    /// kolonlar belge kaydındaki ToplamlariYazAsync ile aynı. Üretim girişi her
+    /// zaman yerel parada kesilir; rapor dövizi yalnız farklıysa karşılık yazılır.
+    /// </summary>
+    private static async Task BelgeToplamTazeleAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, BelgeDeposu belgeDepo, int belgeId, CancellationToken iptal)
+    {
+        var dip = await belgeDepo.DipToplamAsync(baglanti, islem, belgeId, iptal);
+        decimal Topla(int tur) => dip.Where(d => d.Tur == tur).Sum(d => d.Deger);
+
+        var matrah = Topla(DipToplamTuru.AraToplam);
+        var kdv    = Topla(DipToplamTuru.KdvToplam);
+        var ek     = Topla(DipToplamTuru.EkVergi) + Topla(DipToplamTuru.Stopaj);
+        var genel  = Topla(DipToplamTuru.GenelToplam);
+
+        var doviz = await baglanti.TekAsync("""
+            select coalesce(nullif(btrim(rapor_dovizi), ''), ''),
+                   coalesce(nullif(btrim(belge_dovizi), ''), ''), coalesce(doviz_kuru, 1)
+              from public.belge where id = @p0
+            """, islem, [belgeId],
+            o => new { Rapor = o.GetString(0), Belge = o.GetString(1), Kur = o.GetDecimal(2) }, iptal);
+        var dovizGenel = doviz is { Rapor.Length: > 0 } d
+                      && !d.Rapor.Equals(d.Belge, StringComparison.OrdinalIgnoreCase) && d.Kur > 0
+            ? Math.Round(genel / d.Kur, 2, MidpointRounding.ToEven) : 0m;
+
+        await baglanti.CalistirAsync("""
+            update public.belge
+               set matrah = @p1, kdv_tutari = @p2, ek_vergi = @p3, genel_toplam = @p4,
+                   doviz_tutari = @p5
+             where id = @p0
+            """, islem, [belgeId, matrah, kdv, ek, genel, dovizGenel], iptal);
+    }
 }

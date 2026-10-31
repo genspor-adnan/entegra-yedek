@@ -111,20 +111,20 @@ public static class YatanDonemIcmalUclari
             // Gece sayısı: [giriş günü, çıkış günü) ∩ [a, b); hâlâ yatan için bugün dahil.
             int Gece(Yatis y, DateTime a, DateTime son)
             {
-                var g = y.Giris.ToLocalTime().Date;
-                var c = y.Cikis?.ToLocalTime().Date ?? bugun.AddDays(1);
+                var g = Saat.Gun(y.Giris);
+                var c = (y.Cikis is { } ck ? Saat.Gun(ck) : bugun.AddDays(1));
                 var ilk = g > a ? g : a; var sonr = c < son ? c : son;
                 return Math.Max(0, (sonr - ilk).Days);
             }
-            int ToplamGun(Yatis y) => Math.Max(1, ((y.Cikis?.ToLocalTime().Date ?? bugun) - y.Giris.ToLocalTime().Date).Days);
+            int ToplamGun(Yatis y) => Math.Max(1, ((y.Cikis is { } ck ? Saat.Gun(ck) : bugun) - Saat.Gun(y.Giris)).Days);
             bool Donemde(DateTime t) => t >= baslangic && t < bitis;
-            bool Taburcu(Yatis y) => y.Cikis is { } c && Donemde(c.ToLocalTime()) && y.Durum is 4 or 5;
+            bool Taburcu(Yatis y) => y.Cikis is { } c && Donemde(Saat.Yerel(c)) && y.Durum is 4 or 5;
 
             // Tekrar yatış: aynı hastanın önceki çıkışından sonraki 30 gün içinde yeni yatış.
-            var tekrarlar = hepsi.Where(y => Donemde(y.Giris.ToLocalTime()) && hepsi.Any(o => o.HastaId == y.HastaId && o.Id != y.Id
+            var tekrarlar = hepsi.Where(y => Donemde(Saat.Yerel(y.Giris)) && hepsi.Any(o => o.HastaId == y.HastaId && o.Id != y.Id
                 && o.Cikis is { } c && c <= y.Giris && (y.Giris - c).TotalDays <= 30)).Select(y => y.Id).ToHashSet();
 
-            var donem = hepsi.Where(y => Gece(y, baslangic, bitis) > 0 || Donemde(y.Giris.ToLocalTime()) || Taburcu(y)).ToList();
+            var donem = hepsi.Where(y => Gece(y, baslangic, bitis) > 0 || Donemde(Saat.Yerel(y.Giris)) || Taburcu(y)).ToList();
             var servisAdlari = donem.Where(y => y.ServisId > 0).Select(y => new { id = y.ServisId, ad = y.Servis }).DistinctBy(x => x.id).OrderBy(x => x.ad).ToList();
             var kume = donem.Where(y => servis is not > 0 || y.ServisId == servis).ToList();
 
@@ -142,7 +142,7 @@ public static class YatanDonemIcmalUclari
                 var acik = l.Where(y => AcikNeden(y) != null).ToList();
                 return new
                 {
-                    yatak, yatis = l.Count(y => Donemde(y.Giris.ToLocalTime())), taburcu = taburcu.Count, hastaGun,
+                    yatak, yatis = l.Count(y => Donemde(Saat.Yerel(y.Giris))), taburcu = taburcu.Count, hastaGun,
                     doluluk = Oran(hastaGun, yatak * gunSayisi),
                     alos = taburcu.Count > 0 ? Math.Round((decimal)taburcu.Average(ToplamGun), 1) : (decimal?)null,
                     ciro = l.Sum(y => y.Ciro), gunBasi = hastaGun > 0 ? Math.Round(l.Sum(y => y.Ciro) / hastaGun, 2) : 0m,
@@ -166,7 +166,7 @@ public static class YatanDonemIcmalUclari
                 };
             }).OrderBy(x => x.ad).ToList();
 
-            var yatislar = kume.Where(y => Donemde(y.Giris.ToLocalTime())).OrderBy(y => y.Giris).Select(y => new
+            var yatislar = kume.Where(y => Donemde(Saat.Yerel(y.Giris))).OrderBy(y => y.Giris).Select(y => new
             {
                 y.Id, protokolNo = y.ProtokolNo, hasta = y.Hasta, servis = y.Servis, doktor = y.Hekim, giris = y.Giris, cikis = y.Cikis,
                 gun = ToplamGun(y), odeyen = y.KurumVar ? y.Odeyen : "Ücretli", ciro = y.Ciro, tekrar = tekrarlar.Contains(y.Id),
@@ -176,7 +176,7 @@ public static class YatanDonemIcmalUclari
             var acikHesaplar = kume.Where(y => AcikNeden(y) != null).OrderBy(y => y.Cikis).Select(y => new
             {
                 y.Id, protokolNo = y.ProtokolNo, hasta = y.Hasta, servis = y.Servis, odeyen = y.KurumVar ? y.Odeyen : "Ücretli",
-                cikis = y.Cikis, bekleme = (bugun - y.Cikis!.Value.ToLocalTime().Date).Days,
+                cikis = y.Cikis, bekleme = (bugun - Saat.Gun(y.Cikis!.Value)).Days,
                 toplam = y.ToplamTum, faturasiz = y.Faturasiz, neden = AcikNeden(y),
             }).ToList();
 
@@ -197,7 +197,7 @@ public static class YatanDonemIcmalUclari
                 };
             }).ToList();
 
-            var tanilar = kume.Where(y => Donemde(y.Giris.ToLocalTime()) && y.Tani != "").GroupBy(y => (y.Tani, y.TaniAd))
+            var tanilar = kume.Where(y => Donemde(Saat.Yerel(y.Giris)) && y.Tani != "").GroupBy(y => (y.Tani, y.TaniAd))
                 .Select(g => new
                 {
                     kod = g.Key.Tani, ad = g.Key.TaniAd, adet = g.Count(),

@@ -4,6 +4,7 @@ using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -24,6 +25,12 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class KatalogUclari
 {
+    /// <summary>
+    /// islem_log.tablo_id - katalog yüklemesi (katalog_senkron; kod inceleme 30.10.2026 K36 / K33).
+    /// Yükleme toplu bir yazımdır; satır başına değil, yükleme başına tek log (kayit_id = 0, bilgi = özet).
+    /// </summary>
+    private const int LogKatalog = 1795;
+
     /// <summary>Yükleme isteği: ayraçlı metin (CSV/TSV) ve başlık satırı var mı.</summary>
     public sealed record YuklemeIstegi(string Icerik, string? Ayrac, bool? BaslikVar);
 
@@ -59,13 +66,19 @@ public static class KatalogUclari
         // POST /api/katalog/icd-yukle
         //   Sütunlar: kod ; ad ; ust_kod(ops) ; cinsiyet(ops 0/1/2)
         grup.MapPost("/icd-yukle", async (
-            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("katalog", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // TEK TRANSACTION (kod inceleme 30.10.2026 K36): bütün satırlar, izleme satırı ve log birlikte -
+            //   eskiden her satır autocommit'ti; ortada bozuk bir satır (ör. cinsiyet 'x') yüklemeyi yarıda
+            //   kesiyor, katalog yarı dolu kalıyor ve izleme satırı "hiç yüklenmedi" diyordu. Katalog kodu
+            //   başına danışma kilidi: iki eşzamanlı yükleme sıraya girer (upsert'ler birbirini beklemesin).
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select pg_advisory_xact_lock(@p0, 1)", islem, [LogKatalog], iptal);
             int yazilan = 0, atlanan = 0;
 
             foreach (var s in Satirlar(istek))
@@ -85,13 +98,16 @@ public static class KatalogUclari
                            ust_kod = coalesce(excluded.ust_kod, public.icd.ust_kod),
                            cinsiyet = excluded.cinsiyet,
                            aktif = 1, kaynak_surum = 'dosya', guncelleme = now()
-                    """, null,
+                    """, islem,
                     [kod, Kirp(ad, 300), Kirp(Alan(s, 2), 12), Alan(s, 3)], iptal);
                 yazilan++;
             }
 
-            await SenkronYazAsync(baglanti, "icd", "ICD-10 Tanı", yazilan,
-                $"Dosyadan: {yazilan} kod yazıldı, {atlanan} satır atlandı.", iptal);
+            var sonuc = $"Dosyadan: {yazilan} kod yazıldı, {atlanan} satır atlandı.";
+            await SenkronYazAsync(baglanti, islem, "icd", "ICD-10 Tanı", yazilan, sonuc, iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogKatalog, 0, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { katalog = "icd", kaynak = "dosya", yazilan, atlanan }, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { yazilan, atlanan, izlemeNo = baglam.IzlemeNo });
         });
@@ -102,13 +118,16 @@ public static class KatalogUclari
         //   AKTİF sütunu ruhsatı ASKIDA ürünler için: katalogdan silmek yanlış
         //   olur (stokta kalmış olabilir, geçmiş reçetede geçer), pasif işaretlenir.
         grup.MapPost("/ilac-yukle", async (
-            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            YuklemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("katalog", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // Tek transaction + katalog kilidi (K36) - icd-yukle ile aynı gerekçe.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select pg_advisory_xact_lock(@p0, 2)", islem, [LogKatalog], iptal);
             int yazilan = 0, atlanan = 0;
 
             foreach (var s in Satirlar(istek))
@@ -133,7 +152,7 @@ public static class KatalogUclari
                            recete_turu = excluded.recete_turu,
                            ambalaj = excluded.ambalaj,
                            aktif = excluded.aktif, kaynak_surum = 'dosya', guncelleme = now()
-                    """, null,
+                    """, islem,
                     // DOSYADAN GELEN DEGER KOLONU TASABILIR (TITCK listesinde
                     //   etken madde kombinasyonlari ve firma unvanlari uzun):
                     //   23 bin satirin biri yuzunden yukleme durmamali, deger
@@ -144,8 +163,11 @@ public static class KatalogUclari
                 yazilan++;
             }
 
-            await SenkronYazAsync(baglanti, "ilac", "İlaç (barkod)", yazilan,
-                $"Dosyadan: {yazilan} ilaç yazıldı, {atlanan} satır atlandı.", iptal);
+            var sonuc = $"Dosyadan: {yazilan} ilaç yazıldı, {atlanan} satır atlandı.";
+            await SenkronYazAsync(baglanti, islem, "ilac", "İlaç (barkod)", yazilan, sonuc, iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogKatalog, 0, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { katalog = "ilac", kaynak = "dosya", yazilan, atlanan }, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { yazilan, atlanan, izlemeNo = baglam.IzlemeNo });
         });
@@ -363,8 +385,8 @@ public static class KatalogUclari
     /// listeler parça parça yükleniyor (23 bin ilaç = 6 istek) ve son parçanın
     /// sayısını yazmak "3.053 ilaç" gibi yanıltıcı bir rakam bırakıyordu.
     /// </summary>
-    private static Task SenkronYazAsync(Npgsql.NpgsqlConnection baglanti, string kod, string ad,
-                                        int satir, string sonuc, CancellationToken iptal)
+    private static Task SenkronYazAsync(Npgsql.NpgsqlConnection baglanti, Npgsql.NpgsqlTransaction? islem,
+                                        string kod, string ad, int satir, string sonuc, CancellationToken iptal)
         => baglanti.CalistirAsync($"""
             insert into public.katalog_senkron (kod, ad, son_calisma, satir_sayisi, sonuc, basarili)
             values (@p0, @p1, now(),
@@ -372,5 +394,5 @@ public static class KatalogUclari
             on conflict (kod) do update
                set son_calisma = now(), satir_sayisi = excluded.satir_sayisi,
                    sonuc = excluded.sonuc, basarili = 1
-            """, null, [kod, ad, satir, sonuc], iptal);
+            """, islem, [kod, ad, satir, sonuc], iptal);
 }

@@ -18,6 +18,9 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class KasaUclari
 {
+    /// <summary>islem_log.tablo_id - kasa_islem (908; KartKatalogu.Izin notu: 907 hasta, 908 kasa islemi).</summary>
+    private const int LogTabloKasa = 908;
+
     /// <summary>
     /// TAHSILAT DAGITIMI (321): odemenin hangi belge satirina, hangi paya
     /// (1 hasta / 2 kurum) ne kadar gittigi. Otomatik = sunucu kalanlari
@@ -56,13 +59,26 @@ public static class KasaUclari
     /// KORUNUR: mahsup ekleme islemidir, yeniden yazma degil.
     /// </summary>
     private static async Task<decimal> AvansDagitAsync(NpgsqlConnection baglanti,
-        int kasaIslemId, int belgeId, int kullaniciId, CancellationToken iptal,
-        decimal? azami = null)
+        LogDeposu log, IstekBaglami baglam, int kasaIslemId, int belgeId,
+        CancellationToken iptal, decimal? azami = null)
     {
+        var kullaniciId = baglam.KullaniciId;
+        // DURUM KOŞULLU (kod inceleme 30.10.2026 K15): okuma, kilit ve yazma TEK
+        //   transaction. Kasa islemi satiri `for update` ile kilitlenir - ayni
+        //   avansi iki istek ayni anda mahsup etmesin; yalniz GERCEKLESMIS (2)
+        //   isleme dagitim yazilir (taslak / plan / iptal para degildir).
+        await using var tx = await baglanti.BeginTransactionAsync(iptal);
+        var durum = await baglanti.TekDegerAsync<int?>(
+            "select coalesce(k.durum, 0) from public.kasa_islem k where k.id = @p0 for update",
+            tx, [kasaIslemId], iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Kasa işlemi bulunamadı.");
+        if (durum != KasaDurum.Gerceklesti)
+            throw GentegreHatasi.IsKurali("Yalnız gerçekleşmiş kasa işlemi mahsup edilir.");
+
         var kalanTutar = await baglanti.TekDegerAsync<decimal>("""
             select coalesce(v.dagitilmamis, 0) from public.v_kasa_islem_dagitim v
              where v.kasa_islem_id = @p0
-            """, null, [kasaIslemId], iptal);
+            """, tx, [kasaIslemId], iptal);
         // KISMI MAHSUP (783): kullanicinin verdigi tutar TAVANDIR - avansta
         //   daha cok para olsa bile yalniz bu kadari bu belgeye sayilir.
         if (azami is { } tavan) kalanTutar = Math.Min(kalanTutar, tavan);
@@ -79,10 +95,9 @@ public static class KasaUclari
                and (t.hasta_provizyon_kalan + t.hasta_ek_katki_kalan
                   + t.sgk_katilim_kalan + t.oss_kalan + t.sgk_kalan) > 0
              order by t.sira, t.satir_id
-            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            """, tx, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         decimal yazilan = 0;
-        await using var tx = await baglanti.BeginTransactionAsync(iptal);
 
         // FIFO SIRASI (470) KOVA ONCELIKLI (kullanici: hastadan alinan 500 TL'nin
         //   300'u kurumun ÖSS kovasina yazilmisti): once HASTANIN odedigi
@@ -140,6 +155,12 @@ public static class KasaUclari
         //   hicbir sey yapmaz.
         await baglanti.CalistirAsync(
             "select public.fn_sgk_katilim_emanet_yaz(@p0)", tx, [kasaIslemId], iptal);
+
+        // DENETIM IZI (K15): mahsup kasa isleminin dagitimini degistirir - log ayni tx'te.
+        if (yazilan > 0)
+            await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, kasaIslemId,
+                kullaniciId, baglam.SubeId, baglam.Ip,
+                new { aksiyon = "avans-mahsup", belgeId, dagitilan = yazilan }, iptal: iptal);
 
         await tx.CommitAsync(iptal);
         return yazilan;
@@ -357,19 +378,30 @@ public static class KasaUclari
         //   sira once). Radyoloji kabulu gibi tek tikla akislar bunu kullanir -
         //   kullanici dagitim ekranini hic gormeden dogru satira yazilir.
         grup.MapPost("/{id:int}/dagitim", async (
-            int id, DagitimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            int id, DagitimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, KasaDeposu depo,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kasa_islem", Islem.Degistir);
+            // SUBE KAPSAMI (kod inceleme 30.10.2026 K15): baska subenin islemi
+            //   dosyadaki oteki uclar gibi 404 - varligi bile sizmaz.
+            await SubeKontrolAsync(depo, id, baglam, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var tx = await baglanti.BeginTransactionAsync(iptal);
 
+            // DURUM KOŞULLU (K15): satir `for update` kilitlenir, yalniz GERCEKLESMIS
+            //   (2) isleme dagitim yazilir - taslak / plan / iptal edilmis islemin
+            //   parasi yoktur, dagitimi da olmaz.
             var islem = await baglanti.TekAsync("""
                 select k.tutar, k.belge_id as "belgeId", coalesce(k.durum, 0) as durum
                   from public.kasa_islem k where k.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Kasa işlemi bulunamadı.");
+            if (Convert.ToInt32(islem["durum"]) != KasaDurum.Gerceklesti)
+                throw GentegreHatasi.IsKurali(
+                    "Yalnız gerçekleşmiş kasa işlemine dağıtım yazılır; taslak / plan / iptal edilmiş işlem dağıtılamaz.");
 
             var belgeId = istek.BelgeId ?? (islem["belgeId"] is null ? 0
                                             : Convert.ToInt32(islem["belgeId"]));
@@ -379,7 +411,26 @@ public static class KasaUclari
 
             var tutar = Convert.ToDecimal(islem["tutar"]);
 
-            await using var tx = await baglanti.BeginTransactionAsync(iptal);
+            // ELLE DAGITIMDA SATIR KIMLIKLERI BELGEYE AIT OLMALI (K15): istemciden
+            //   gelen belge_satir_id baska bir belgenin satiri olabilir - tetik
+            //   yalniz pay sinirina bakar, belgeyi bilmez. Uymayan kimlik 400.
+            if (!istek.Otomatik && istek.Satirlar is { Count: > 0 })
+            {
+                var istenen = istek.Satirlar.Where(s => s.Tutar > 0)
+                                   .Select(s => s.BelgeSatirId).Distinct().ToArray();
+                if (istenen.Length > 0)
+                {
+                    var bulunan = await baglanti.ListeAsync(
+                        "select id from public.belge_satir where id = any(@p0::int[]) and belge_id = @p1",
+                        tx, [istenen, belgeId], o => o.GetInt32(0), iptal);
+                    var yabanci = istenen.Except(bulunan).ToArray();
+                    if (yabanci.Length > 0)
+                        throw GentegreHatasi.Dogrulama(
+                            "Dağıtım satırı bu belgeye ait değil.",
+                            new AlanHatasi("satirlar",
+                                $"Belgeye ait olmayan satır: {string.Join(", ", yabanci)}."));
+                }
+            }
 
             await baglanti.CalistirAsync(
                 "delete from public.kasa_islem_dagitim where kasa_islem_id = @p0",
@@ -401,7 +452,7 @@ public static class KasaUclari
                       from public.v_belge_satir_tahsilat t
                      where t.belge_id = @p0
                      order by t.sira, t.satir_id
-                    """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                    """, tx, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 // DIS DONGU KOVA, IC DONGU SATIR (kullanici: hastadan alinan
                 //   500 TL'nin 300'u kurumun ÖSS kovasina yaziliyordu).
@@ -454,9 +505,16 @@ public static class KasaUclari
             //   basvuruya bolununce de yaniltiyordu. Liste artik
             //   `v_belge_tahsilat` uzerinden dagitimi okuyor.
 
+            var toplam = yazilacak.Sum(x => x.Tutar);
+            // DENETIM IZI (K15): dagitim kasa isleminin "hangi satira ne kadar"
+            //   bilgisini degistirir - log ayni tx'te, yazim ile birlikte.
+            await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { aksiyon = "dagitim", belgeId, otomatik = istek.Otomatik,
+                      dagitilan = toplam, satirSayisi = yazilacak.Count }, iptal: iptal);
+
             await tx.CommitAsync(iptal);
 
-            var toplam = yazilacak.Sum(x => x.Tutar);
             return Results.Ok(new
             {
                 dagitilan = toplam,
@@ -505,8 +563,8 @@ public static class KasaUclari
         //   PRIM TARIHI: dagitim tarihi degil, kasa isleminin ISLEM TARIHI
         //   gecerlidir (kullanici karari) - hakedis parayi girdigi gune yazar.
         grup.MapPost("/avans-mahsup", async (
-            MahsupIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            MahsupIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, KasaDeposu depo,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kasa_islem", Islem.Degistir);
@@ -514,20 +572,34 @@ public static class KasaUclari
             if (istek.BelgeId <= 0)
                 throw GentegreHatasi.IsKurali("Mahsup için belge gerekli.");
 
+            // SUBE KAPSAMI (kod inceleme 30.10.2026 K15): istemcinin SECTIGI avans
+            //   islemleri dosyadaki oteki uclar gibi sube kontrolunden gecer -
+            //   baska subenin islemi 404. Secim yoksa liste zaten subeyle suzulur.
+            if (istek.IslemIdler is { Count: > 0 })
+                foreach (var secilen in istek.IslemIdler.Distinct())
+                    await SubeKontrolAsync(depo, secilen, baglam, iptal);
+
             await using var baglanti = await veri.AcAsync(iptal);
 
-            var tarafId = await baglanti.TekDegerAsync<int?>(
-                "select taraf_id from public.belge where id = @p0", null, [istek.BelgeId], iptal)
+            var belge = await baglanti.TekAsync(
+                "select taraf_id, sube_id from public.belge where id = @p0", null, [istek.BelgeId],
+                o => new { tarafId = o.IsDBNull(0) ? (int?)null : o.GetInt32(0), subeId = o.GetInt32(1) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
+            // Belge de hareket kaynagi: baska subenin belgesi yokmus gibi (API §8).
+            if (baglam.SubeId is { } sube && belge.subeId != sube)
+                throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
+            var tarafId = belge.tarafId ?? throw GentegreHatasi.Bulunamadi("Belge bulunamadı.");
 
             var islemler = await baglanti.ListeAsync("""
                 select a.kasa_islem_id as "id", a.dagitilmamis
                   from public.v_taraf_avans a
+                  join public.kasa_islem k on k.id = a.kasa_islem_id
                  where a.taraf_id = @p0
                    and (@p1::int[] is null or a.kasa_islem_id = any(@p1))
+                   and (@p2::int is null or k.sube_id = @p2)
                  order by a.islem_tarihi
                 """, null,
-                [tarafId, istek.IslemIdler is { Count: > 0 } ? istek.IslemIdler.ToArray() : null],
+                [tarafId, istek.IslemIdler is { Count: > 0 } ? istek.IslemIdler.ToArray() : null, baglam.SubeId],
                 OkuyucuGenisletmeleri.Sozluk, iptal);
 
             decimal toplam = 0;
@@ -554,8 +626,8 @@ public static class KasaUclari
                     """, null, [istek.BelgeId], iptal);
                 if (kalanVar <= 0) break;
 
-                var dagitilan = await AvansDagitAsync(baglanti, islemId, istek.BelgeId,
-                                                      baglam.KullaniciId, iptal, butce);
+                var dagitilan = await AvansDagitAsync(baglanti, log, baglam, islemId, istek.BelgeId,
+                                                      iptal, butce);
                 if (dagitilan > 0)
                 {
                     toplam += dagitilan; sayac++;
@@ -570,8 +642,8 @@ public static class KasaUclari
         //   Bir avansin BU BELGEYE yapilmis mahsubunu geri alir: dagitim
         //   satirlari silinir, avansin kalani geri doner.
         grup.MapPost("/avans-mahsup/iptal", async (
-            MahsupIptalIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            MahsupIptalIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, KasaDeposu depo,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kasa_islem", Islem.Degistir);
@@ -579,7 +651,16 @@ public static class KasaUclari
             if (istek.BelgeId <= 0 || istek.KasaIslemId <= 0)
                 throw GentegreHatasi.IsKurali("Geri alınacak avans mahsubu belirtilmeli.");
 
+            // SUBE KAPSAMI (kod inceleme 30.10.2026 K15): baska subenin avansi 404.
+            await SubeKontrolAsync(depo, istek.KasaIslemId, baglam, iptal);
+
             await using var baglanti = await veri.AcAsync(iptal);
+            // OKUMA + SILME TEK TRANSACTION (K15): kasa islemi satiri kilitlenir;
+            //   iki istek ayni mahsubu ayni anda geri alamaz, "geri alinan" tutar
+            //   gercekten silinen tutardir.
+            await using var tx = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select 1 from public.kasa_islem where id = @p0 for update",
+                                         tx, [istek.KasaIslemId], iptal);
 
             // SILINEN TUTAR once okunur: kullaniciya "ne kadar geri dondu"
             //   soylenecek ve silme sonrasi bu bilgi kalmaz.
@@ -588,7 +669,7 @@ public static class KasaUclari
                   from public.kasa_islem_dagitim d
                   join public.belge_satir bs on bs.id = d.belge_satir_id
                  where d.kasa_islem_id = @p0 and bs.belge_id = @p1
-                """, null, [istek.KasaIslemId, istek.BelgeId], iptal);
+                """, tx, [istek.KasaIslemId, istek.BelgeId], iptal);
 
             if (tutar <= 0)
                 throw GentegreHatasi.IsKurali("Bu belgeye yapılmış bir avans mahsubu yok.");
@@ -601,7 +682,12 @@ public static class KasaUclari
                  using public.belge_satir bs
                  where bs.id = d.belge_satir_id
                    and d.kasa_islem_id = @p0 and bs.belge_id = @p1
-                """, null, [istek.KasaIslemId, istek.BelgeId], iptal);
+                """, tx, [istek.KasaIslemId, istek.BelgeId], iptal);
+
+            await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, istek.KasaIslemId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { aksiyon = "avans-mahsup-iptal", belgeId = istek.BelgeId, geriAlinan = tutar }, iptal: iptal);
+            await tx.CommitAsync(iptal);
 
             return Results.Ok(new { geriAlinan = tutar, izlemeNo = baglam.IzlemeNo });
         });

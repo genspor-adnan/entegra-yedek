@@ -24,9 +24,19 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static partial class MuayeneUclari
 {
+    // islem_log.tablo_id - KartKatalogu.Saglik ile aynı ("muayene" kartı 960, "tanilar" detayı 963).
+    private const int LogMuayene = 960;
+    private const int LogTani = 963;
+
+    /// <summary>Muayene durumu: 3 = tamamlandı (kilitli).</summary>
+    private const short MuayeneTamamlandi = 3;
+
     public static void MuayeneUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/muayene").WithTags("Muayene").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): /{id}, /istem/{id}, /rapor/{raporId}, /basvuru/{belgeId}
+        //   kimlikleri liste ile aynı şube / kapsam / hekim kuralından geçer - kapsam dışı 404.
+        var grup = yol.MapGroup("/api/muayene").WithTags("Muayene").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Muayene());
 
         // UÇLAR KONU BAŞINA AYRI DOSYADA (partial): tek metotta 29 uç ve 1748
         //   satır vardı, hangi ucun hangi ekranı beslediği okunmuyordu.
@@ -389,6 +399,24 @@ public static partial class MuayeneUclari
         foreach (var e in await MuayeneSablonUclari.KuralEksikleriAsync(baglanti, islem, id, iptal))
             k.Add((e.Alan, e.Mesaj, false, e.Mesaj, true));
         return k;
+    }
+
+    /// <summary>
+    /// AÇIK MUAYENE KAPISI (kod inceleme 30.10.2026 K34): tanı / bulgu / şablon yazan her uç önce buradan
+    /// geçer. Satır <c>for update</c> ile kilitlenir (aynı anda gelen "Tamamla" ile yarışmasın), tamamlanmış
+    /// (durum 3) muayeneye yazmak 422'dir - kilitli kaydın e-Nabız'a gitmiş içeriği sessizce değişmesin.
+    /// Olmayan kayıt 404. Dönen değer muayenenin durumu.
+    /// </summary>
+    private static async Task<short> MuayeneAcikIsteAsync(Npgsql.NpgsqlConnection baglanti,
+        Npgsql.NpgsqlTransaction? islem, int id, CancellationToken iptal)
+    {
+        var durum = await baglanti.TekDegerAsync<short?>(
+            "select durum from public.muayene where id = @p0" + (islem is null ? "" : " for update"),
+            islem, [id], iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadi.");
+        if (durum == MuayeneTamamlandi)
+            throw GentegreHatasi.IsKurali("Tamamlanmış muayene değiştirilemez.");
+        return durum;
     }
 
     private static async Task<string> OzetDerleAsync(Npgsql.NpgsqlConnection baglanti,

@@ -46,13 +46,17 @@ const GONDER: { bicim: Bicim; ik: ReactNode; ad: string }[] = [
   { bicim: 'html', ik: <DosyaIkonu renk="#e8710a" yazi="</>" />, ad: 'HTML' },
 ];
 
-export function CiktiMenusu({ etiket, dosyaAdi, devre, children }: {
+export function CiktiMenusu({ etiket, dosyaAdi, devre, dugmeSinifi = 'hi-ana cm-dugme', sagda, children }: {
   /** Düğmede görünen ad (ekranın adı). */
   etiket: string;
   /** Uzantısız dosya adı (or. "İskonto İcmali 2026-09"). */
   dosyaAdi: string;
   /** Belge hazır değilse (veri yükleniyor) menü kapalı. */
   devre?: boolean;
+  /** Düğmenin sınıfı - icmal şeridi dışında (ör. rapor ekranı 'd') çevredeki düğmelere uysun. */
+  dugmeSinifi?: string;
+  /** Satırın SAĞ ucundaysa menü sağa hizalanır, alt menü sola açılır (ekrandan taşmasın). */
+  sagda?: boolean;
   /** A4 belgesi. */
   children: ReactNode;
 }) {
@@ -125,9 +129,9 @@ export function CiktiMenusu({ etiket, dosyaAdi, devre, children }: {
   };
 
   return (
-    <span className="cm" ref={kutu}>
+    <span className={'cm' + (sagda ? ' cm-sagda' : '')} ref={kutu}>
       <style>{CM_STILI}</style>
-      <button type="button" className="hi-ana cm-dugme" disabled={devre || !!mesgul} aria-haspopup="menu" aria-expanded={acik}
+      <button type="button" className={dugmeSinifi} disabled={devre || !!mesgul} aria-haspopup="menu" aria-expanded={acik}
               onClick={() => { setAcik(a => !a); setAltAcik(false) }}>
         🖨️ {etiket}{mesgul ? ' · hazırlanıyor…' : ''} <span className="cm-ok">▾</span>
       </button>
@@ -180,6 +184,10 @@ const CM_STILI = `
 .cm-ayrac { height:1px; background:var(--cizgi,#dde3ea); margin:4px 6px; }
 .cm-alt-kap { position:relative; }
 .cm-menu.cm-alt { top:-5px; left:100%; margin:0 0 0 2px; min-width:160px; }
+.cm.cm-sagda .cm-menu { left:auto; right:0; }
+.cm.cm-sagda .cm-menu.cm-alt { left:auto; right:100%; margin:0 2px 0 0; }
+/* Belge ekranda gizli, yazdırırken görünür - icmal stili yüklenmemiş ekranda da (rapor kartı). */
+@media screen { .hi-onizleme.cm-belge.gizli:not(.cm-olcum) { display:none; } }
 .cm-perde { position:fixed; inset:0; background:rgba(15,25,40,.45); z-index:70; }
 .cm-onizleme-bar { position:fixed; left:50%; transform:translateX(-50%); top:14px; width:min(794px, calc(100vw - 32px)); z-index:72;
   display:flex; align-items:center; gap:8px; background:var(--yuz,#fff); border-radius:6px; padding:6px 10px; box-shadow:0 4px 16px rgba(0,0,0,.2); }

@@ -13,6 +13,9 @@ namespace Gentegre.Api.Servisler;
 /// doner (rotating) refresh token; iptal edilmis refresh tekrar kullanilirsa
 /// AILE komple iptal edilir.
 /// </summary>
+/// <summary>Panel giriş kodunun sakladığı kimlik (K29): token değil, kullanıcı + şube.</summary>
+public sealed record PanelGirisKimligi(int KullaniciId, int? SubeId, bool SubeSecimiGerekli);
+
 public sealed class KimlikServisi
 {
     private readonly KullaniciDeposu _kullanicilar;
@@ -44,31 +47,88 @@ public sealed class KimlikServisi
     public async Task<GirisYaniti> GirisAsync(GirisIstegi istek, string ip, string istemci,
                                               CancellationToken iptal = default)
     {
+        var (kullanici, subeler, subeId) = await GirisDogrulaAsync(istek, ip, istemci, iptal);
+        return await OturumAcAsync(kullanici, subeler, subeId, istek.SubeId is null && subeler.Count > 1, ip, istemci, iptal);
+    }
+
+    /// <summary>
+    /// PANEL GİRİŞ KODU (kod inceleme 30.10.2026 K29): ortak panel girişi kimliği DOĞRULAR ama oturum açmaz -
+    /// eskiden access + refresh token üretilip `giris_kodu.yanit`'a düz metin yazılıyordu (DB yedeği = geçerli
+    /// oturum; kullanılmayan kodun oturumu 30 gün açık kalıyordu). Artık yalnız kimlik saklanır, token kod
+    /// KULLANILIRKEN üretilir (<see cref="PanelKodundanGirisAsync"/>).
+    /// </summary>
+    public async Task<PanelGirisKimligi> PanelGirisDogrulaAsync(GirisIstegi istek, string ip, string istemci,
+                                                                CancellationToken iptal = default)
+    {
+        var (kullanici, subeler, subeId) = await GirisDogrulaAsync(istek, ip, istemci, iptal);
+        return new PanelGirisKimligi(kullanici.TarafId, subeId, istek.SubeId is null && subeler.Count > 1);
+    }
+
+    /// <summary>Panel kodu kullanılırken oturum açar (kimlik 60 sn önce parola ile doğrulanmıştı).</summary>
+    public async Task<GirisYaniti> PanelKodundanGirisAsync(PanelGirisKimligi kimlik, string ip, string istemci,
+                                                           CancellationToken iptal = default)
+    {
+        var kullanici = await _kullanicilar.IdIleBulAsync(kimlik.KullaniciId, iptal)
+                        ?? throw GentegreHatasi.Yetkisiz();
+        if (!kullanici.Aktif) throw GentegreHatasi.Yetkisiz();
+        var subeler = await _kullanicilar.SubeleriAsync(kullanici.TarafId, iptal);
+        if (kimlik.SubeId is { } s && subeler.All(x => x.Id != s))
+            throw GentegreHatasi.Yasak("Bu subede calisma yetkiniz yok.");
+        return await OturumAcAsync(kullanici, subeler, kimlik.SubeId, kimlik.SubeSecimiGerekli, ip, istemci, iptal);
+    }
+
+    private async Task<GirisYaniti> OturumAcAsync(KullaniciKaydi kullanici, List<SubeOzeti> subeler, int? subeId,
+                                                  bool subeSecimiGerekli, string ip, string istemci, CancellationToken iptal)
+    {
+        // Tek oturum ayari acikken yeni giris oncekileri kapatir.
+        if (await AyarAsync("guvenlik.tek_oturum", 0, iptal) == 1)
+            await _oturumlar.KullaniciOturumlariniKapatAsync(kullanici.TarafId, "yeni_giris", iptal);
+
+        var yanit = await TokenUretAsync(kullanici, subeler, subeId, null, null, ip, istemci, iptal);
+
+        // Cok subeli kullanici sube secmeden girdiyse istemci secim ekrani gosterir.
+        yanit.SubeSecimiGerekli = subeSecimiGerekli;
+        return yanit;
+    }
+
+    /// <summary>Kimlik + sube dogrulamasi (parola, aktiflik, kilit, rol, aski); oturum ACMAZ.</summary>
+    private async Task<(KullaniciKaydi Kullanici, List<SubeOzeti> Subeler, int? SubeId)> GirisDogrulaAsync(
+        GirisIstegi istek, string ip, string istemci, CancellationToken iptal)
+    {
         var kod = (istek.Kod ?? "").Trim().ToLowerInvariant();
         if (kod.Length == 0 || string.IsNullOrEmpty(istek.Parola))
             throw GentegreHatasi.Dogrulama("Kullanici adi ve parola gerekli.",
                 new AlanHatasi("kod", "Bos birakilamaz."));
 
         // Kullanici adi KOD, CEP, E-POSTA ya da AD SOYAD olabilir (kullanici).
+        // HESAP VARLIĞI SIZMAZ (kod inceleme 30.10.2026 K30): pasif / kilitli / belirsiz cevapları parola
+        //   doğrulanmadan dönüyordu - ad bilen biri hesabın var olduğunu ve durumunu öğrenebiliyordu. Artık yanlış
+        //   parolada HER durumda aynı genel mesaj; hesabın durumu yalnız DOĞRU parola girene söylenir (kendi
+        //   hesabı pasif ya da kilitliyse bunu bilmesi gerekir). Günlüğe gerçek neden yine yazılır.
+        const string genel = "Kullanici adi ya da parola hatali.";
         var (kullanici, belirsiz) = await _kullanicilar.EsnekBulAsync(kod, iptal);
         if (belirsiz)
         {
             await _gunluk.GirisDenemesiAsync(kod, null, ip, istemci, false, "belirsiz", iptal);
-            throw GentegreHatasi.Yetkisiz(
-                "Bu bilgiyle birden fazla kullanıcı eşleşiyor - sicil no ya da cep numaranızla girin.");
+            throw GentegreHatasi.Yetkisiz(genel);
         }
 
         if (kullanici is null)
         {
             await _gunluk.GirisDenemesiAsync(kod, null, ip, istemci, false, "yok", iptal);
-            // Kullanici var mi yok mu bilgisini SIZDIRMA - ayni mesaj.
-            throw GentegreHatasi.Yetkisiz("Kullanici adi ya da parola hatali.");
+            throw GentegreHatasi.Yetkisiz(genel);
         }
+
+        // PAROLASI HIC TANIMLANMAMIS hesap: istemci dogrudan "parolani belirle"
+        //   ekranini acar (kullanici: "sifre bossa user pass ekrani direk ciksin").
+        //   Bilinçli istisna: ilk-parola akışı bu sinyale muhtaç; hesap aktif ve kilitsizse söylenir.
+        var parolaDogru = kullanici.ParolaHash.Length > 0
+                       && BCrypt.Net.BCrypt.Verify(istek.Parola, kullanici.ParolaHash);
 
         if (!kullanici.Aktif)
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "pasif", iptal);
-            throw GentegreHatasi.Yetkisiz("Bu kullanici pasif durumda.");
+            throw GentegreHatasi.Yetkisiz(parolaDogru ? "Bu kullanici pasif durumda." : genel);
         }
 
         // 667: kilit bitisi veritabanindan UTC AN olarak gelir - duvar saatiyle
@@ -76,20 +136,17 @@ public sealed class KimlikServisi
         if (kullanici.KilitBitis is { } kilit && kilit > Saat.An)
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "kilitli", iptal);
-            throw GentegreHatasi.Yetkisiz(
-                $"Cok sayida hatali giris - hesap {kilit:HH:mm}'e kadar kilitli.");
+            throw GentegreHatasi.Yetkisiz(parolaDogru
+                ? $"Cok sayida hatali giris - hesap {kilit:HH:mm}'e kadar kilitli."
+                : genel);
         }
 
-        // PAROLASI HIC TANIMLANMAMIS hesap: istemci dogrudan "parolani belirle"
-        //   ekranini acar (kullanici: "sifre bossa user pass ekrani direk ciksin").
         if (kullanici.ParolaHash.Length == 0)
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false,
                                              "parola_yok", iptal);
             throw GentegreHatasi.IlkParolaGerekli();
         }
-
-        var parolaDogru = BCrypt.Net.BCrypt.Verify(istek.Parola, kullanici.ParolaHash);
 
         if (!parolaDogru)
         {
@@ -124,15 +181,7 @@ public sealed class KimlikServisi
         if (istek.SubeId is { } istenen && subeler.All(s => s.Id != istenen))
             throw GentegreHatasi.Yasak("Bu subede calisma yetkiniz yok.");
 
-        // Tek oturum ayari acikken yeni giris oncekileri kapatir.
-        if (await AyarAsync("guvenlik.tek_oturum", 0, iptal) == 1)
-            await _oturumlar.KullaniciOturumlariniKapatAsync(kullanici.TarafId, "yeni_giris", iptal);
-
-        var yanit = await TokenUretAsync(kullanici, subeler, subeId, null, null, ip, istemci, iptal);
-
-        // Cok subeli kullanici sube secmeden girdiyse istemci secim ekrani gosterir.
-        yanit.SubeSecimiGerekli = istek.SubeId is null && subeler.Count > 1;
-        return yanit;
+        return (kullanici, subeler, subeId);
     }
 
     /// <summary>

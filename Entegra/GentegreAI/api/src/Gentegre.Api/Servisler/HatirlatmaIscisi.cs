@@ -77,11 +77,11 @@ public sealed class HatirlatmaIscisi(IServiceProvider servisler, ILogger<Hatirla
                 foreach (var a in alicilar)
                 {
                     if (h.sms && a.tel.Length > 0
-                        && await bildirim.KuyrugaEkleAsync(new BildirimIstegi("hatirlatma.kisisel", BildirimKanali.Sms, a.tel, degisken,
+                        && await bildirim.KuyrugaEkleAsync(bg, islem, new BildirimIstegi("hatirlatma.kisisel", BildirimKanali.Sms, a.tel, degisken,
                                TarafId: a.id, KullaniciId: a.id, KaynakTur: KaynakHatirlatma, KaynakId: h.id, Oncelik: 3), 0, h.sube, iptal) is not null)
                         giden.Add("SMS");
                     if (h.eposta && a.eposta.Length > 0
-                        && await bildirim.KuyrugaEkleAsync(new BildirimIstegi("hatirlatma.kisisel.eposta", BildirimKanali.Eposta, a.eposta, degisken,
+                        && await bildirim.KuyrugaEkleAsync(bg, islem, new BildirimIstegi("hatirlatma.kisisel.eposta", BildirimKanali.Eposta, a.eposta, degisken,
                                TarafId: a.id, KullaniciId: a.id, KaynakTur: KaynakHatirlatma, KaynakId: h.id, Oncelik: 3), 0, h.sube, iptal) is not null)
                         giden.Add("e-posta");
                 }

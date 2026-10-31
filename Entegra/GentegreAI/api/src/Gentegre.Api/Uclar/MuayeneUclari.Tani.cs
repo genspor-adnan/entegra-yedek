@@ -2,6 +2,7 @@
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -45,18 +46,38 @@ public static partial class MuayeneUclari
         //   Kart üzerinden de silinebilir; araç çubuğundaki sil AYNI ucu
         //   kullanır ki silme izi (log) tek yoldan geçsin.
         grup.MapDelete("/{id:int}/tani/{taniId:int}", async (
-            int id, int taniId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, int taniId, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var silinen = await baglanti.CalistirAsync(
-                "delete from public.tani where id = @p0 and muayene_id = @p1",
-                null, [taniId, id], iptal);
-            if (silinen == 0) return Results.NotFound(new { hata = new
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // AÇIK MUAYENE (kod inceleme 30.10.2026 K34): tamamlanmış muayenenin tanısı da silinmez.
+            await MuayeneAcikIsteAsync(baglanti, islem, id, iptal);
+
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K34; proje kuralı "Geri Al"):
+            //   silinen tanı sonradan yalnız logdan okunabilir. Log ve silme tek transaction.
+            var satir = await baglanti.TekAsync(
+                "select t.*, (select m.taraf_id from public.muayene m where m.id = t.muayene_id) as hasta_id " +
+                "  from public.tani t where t.id = @p0 and t.muayene_id = @p1 for update of t",
+                islem, [taniId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Tani satiri bulunamadi." } });
+
+            var hastaId = satir["hasta_id"] is { } h ? Convert.ToInt32(h) : (int?)null;
+            satir.Remove("hasta_id");
+            await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogTani, taniId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                ustTabloId: LogMuayene, ustKayitId: id, tarafId: hastaId, iptal: iptal);
+
+            await baglanti.CalistirAsync(
+                "delete from public.tani where id = @p0 and muayene_id = @p1",
+                islem, [taniId, id], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, taniId, mesaj = "Tani kaldirildi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -131,6 +152,9 @@ public static partial class MuayeneUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // AÇIK MUAYENE (kod inceleme 30.10.2026 K34): tamamlanmış muayeneye tanı eklenmez (422).
+            await MuayeneAcikIsteAsync(baglanti, islem, id, iptal);
 
             var kodVar = await baglanti.TekDegerAsync<int>(
                 "select count(*) from public.icd where kod = @p0", islem, [icdKod], iptal);

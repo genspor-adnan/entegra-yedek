@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useYoklama } from '../../bilesenler/yoklama';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
@@ -38,7 +39,8 @@ export function CagriOperator() {
   const yukle = useCallback(async () => {
     try { const y = await api.cagriPano(); setP(y); setHata(null) } catch (h) { setHata(hataMetni(h)) }
   }, []);
-  useEffect(() => { void yukle(); const t = setInterval(() => { void yukle(); setTik(x => x + 1) }, 5000); return () => clearInterval(t) }, [yukle]);
+  useEffect(() => { void yukle() }, [yukle]);
+  useYoklama(yukle, 5000);   // K53: gizli sekmede durur, hatada geri çekilir
   useEffect(() => { const t = setInterval(() => setTik(x => x + 1), 1000); return () => clearInterval(t) }, []);
 
   // Seçili çağrı: aktif çağrı ya da listeden tıklanan (kayıt bekleyen / kuyruktaki).

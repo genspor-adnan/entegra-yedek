@@ -150,7 +150,10 @@ public static partial class EczaneUclari
     // ============================================================= kayıt ==
     public static void EczaneUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/eczane").WithTags("Eczane").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): kontrol / doz / hazırlama / iade / imha kimlikleri liste
+        //   ile aynı şube kuralından geçer - kapsam dışı 404. Sayım ve gövdeden gelen kimlikler handler'da.
+        var grup = yol.MapGroup("/api/eczane").WithTags("Eczane").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Eczane());
 
         KontrolUclari(grup);
         DozUclari(grup);

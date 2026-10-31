@@ -34,7 +34,7 @@ public static partial class EczaneUclari
         // SERVİS İADESİ KARARI.
         grup.MapPost("/iade/{id:long}/karar", async (
             long id, IadeKararIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            BelgeDeposu belgeDepo, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            BelgeDeposu belgeDepo, LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("eczane.iade", Islem.Degistir);
@@ -43,7 +43,17 @@ public static partial class EczaneUclari
                 throw GentegreHatasi.Dogrulama("Geçersiz karar.",
                     new AlanHatasi("karar", "1 stoğa kabul · 2 imhaya · 3 kasaya"));
 
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdedeki imha tutanağı başka şubenin olabilir -
+            //   yol kimliği kapıdan geçer, gövdeninki burada; kapsam dışı olmayanla aynı 404.
+            if (istek.Karar == 2 && istek.ImhaId is { } kapsamImhaId)
+                await erisim.IsteAsync(baglam, "eczaneImha", kapsamImhaId, "İmha tutanağı bulunamadı.", iptal);
+
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): iade satırı `for update`
+            //   ile kilitlenir; giriş fişi, defter/tutanak satırı ve karar aynı
+            //   transaction'da yazılır. Eskiden fiş kendi bağlantısında commit
+            //   oluyordu: eş zamanlı ikinci karar aynı ilacı iki kez stoğa alırdı.
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var i = await baglanti.TekAsync("""
                 select i.karar, i.stok_id as "stokId", i.seri_lot_id as "seriLotId",
@@ -57,7 +67,8 @@ public static partial class EczaneUclari
                   from public.eczane_iade i
                   left join public.stok s on s.id = i.stok_id
                  where i.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of i
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İade kaydı bulunamadı.");
 
             if (Convert.ToInt16(i["karar"] ?? (short)0) != 0)
@@ -79,8 +90,6 @@ public static partial class EczaneUclari
             var simdi = Saat.Simdi;
             int? girisBelgeId = null;
             var uyarilar = new List<string>();
-
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             if (istek.Karar == 1)
             {
@@ -126,7 +135,7 @@ public static partial class EczaneUclari
                         new() { ["seriLotId"] = i["seriLotId"], ["miktar"] = i["miktar"] },
                     };
 
-                var (fisId, belgeUyari) = await belgeDepo.KaydetAsync(
+                var (fisId, belgeUyari) = await belgeDepo.KaydetAsync(baglanti, islem,
                     fis, [BelgeGovdesi.Satir(satir)],
                     new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                     new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
@@ -175,13 +184,17 @@ public static partial class EczaneUclari
                      baglam.KullaniciId, istek.Aciklama ?? "Servis iadesi"], iptal);
             }
 
-            await baglanti.CalistirAsync("""
+            // Karar yalnız HENÜZ KARARSIZ (karar = 0) satıra yazılır; satır kilitli
+            //   okunduğu için 0 dönmesi beklenmez, dönerse fiş de geri alınır (K12).
+            var kararYazildi = await baglanti.CalistirAsync("""
                 update public.eczane_iade
                    set karar = @p1, karar_veren_id = @p2, karar_zamani = @p3,
                        belge_id = coalesce(@p4, belge_id),
                        degistiren = @p2, degistirme_tarihi = (now())::timestamp
-                 where id = @p0
+                 where id = @p0 and karar = 0
                 """, islem, [id, istek.Karar, baglam.KullaniciId, simdi, girisBelgeId], iptal);
+            if (kararYazildi != 1)
+                throw GentegreHatasi.IsKurali("Bu iade için karar zaten verilmiş.");
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogIade, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -211,16 +224,21 @@ public static partial class EczaneUclari
                     new AlanHatasi("komisyon", "İmha komisyonu yazılmadan onay verilemez."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // GUNCELLEME + LOG TEK TRANSACTION (kod inceleme 30.10.2026 K33): eskiden log ayri
+            //   baglantida autocommit yaziliyordu. Tutanak kilitli okunur; log alan bazli.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var t = await baglanti.TekAsync("""
-                select m.durum,
+                select m.durum, m.komisyon, m.aciklama,
                        (select count(*) from public.eczane_imha_satir x
                          where x.imha_id = m.id) as "satirSayisi"
                   from public.eczane_imha m where m.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of m
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İmha tutanağı bulunamadı.");
 
-            if (Convert.ToInt16(t["durum"] ?? (short)0) >= 2)
+            var eskiDurum = Convert.ToInt16(t["durum"] ?? (short)0);
+            if (eskiDurum >= 2)
                 throw GentegreHatasi.IsKurali("İmha edilmiş tutanak yeniden onaylanamaz.");
             if (Convert.ToInt32(t["satirSayisi"] ?? 0) == 0)
                 throw GentegreHatasi.IsKurali("Boş tutanak onaylanamaz.");
@@ -231,11 +249,16 @@ public static partial class EczaneUclari
                        aciklama = coalesce(nullif(@p2, ''), aciklama),
                        degistiren = @p3, degistirme_tarihi = (now())::timestamp
                  where id = @p0
-                """, null, [id, istek.Komisyon, istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+                """, islem, [id, istek.Komisyon, istek.Aciklama ?? "", baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogImha, id, baglam.KullaniciId,
-                baglam.SubeId, baglam.Ip, new { durum = 1, komisyon = istek.Komisyon },
-                iptal: iptal);
+            var yeniAciklama = string.IsNullOrEmpty(istek.Aciklama) ? t["aciklama"] : istek.Aciklama;
+            var fark = LogDeposu.Fark(
+                new Dictionary<string, object?> { ["durum"] = eskiDurum, ["komisyon"] = t["komisyon"], ["aciklama"] = t["aciklama"] },
+                new Dictionary<string, object?> { ["durum"] = (short)1, ["komisyon"] = istek.Komisyon, ["aciklama"] = yeniAciklama });
+            if (fark is not null)
+                await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogImha, id, baglam.KullaniciId,
+                    baglam.SubeId, baglam.Ip, fark, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { durum = 1, izlemeNo = baglam.IzlemeNo });
         });
@@ -250,13 +273,20 @@ public static partial class EczaneUclari
             baglam.AksiyonIste("eczane.imha_onay");
             baglam.YetkiIste("stok", Islem.Degistir);
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): tutanak `for update` ile
+            //   kilitlenir; çıkış fişi, tutanak durumu, defter satırları ve log
+            //   aynı transaction'da yazılır. Eskiden fiş kendi bağlantısında
+            //   commit oluyor, durum sonra yazılıyordu: eş zamanlı ikinci "imha
+            //   et" (ya da arada hata) aynı ilacı iki kez stoktan düşerdi.
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var t = await baglanti.TekAsync("""
                 select m.durum, m.tutanak_no as "tutanakNo", m.sube_id as "subeId",
                        m.belge_id as "belgeId"
                   from public.eczane_imha m where m.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İmha tutanağı bulunamadı.");
 
             var durum = Convert.ToInt16(t["durum"] ?? (short)0);
@@ -275,13 +305,14 @@ public static partial class EczaneUclari
                   left join public.stok s on s.id = x.stok_id
                  where x.imha_id = @p0 and x.stok_id is not null and x.miktar > 0
                  order by x.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+                   for update of x
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (satirlar.Count == 0)
                 throw GentegreHatasi.IsKurali(
                     "Stok kartına bağlı kalem yok - düşülecek bir şey bulunamadı.");
 
-            var depoId = istek.DepoId ?? await VarsayilanDepoAsync(baglanti, null, iptal);
+            var depoId = istek.DepoId ?? await VarsayilanDepoAsync(baglanti, islem, iptal);
 
             var fis = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
@@ -319,20 +350,24 @@ public static partial class EczaneUclari
                 govde.Add(BelgeGovdesi.Satir(alanlar));
             }
 
-            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(
+            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem,
                 fis, govde,
                 // Stok kontrolü AÇIK: imha edilen şey elde olmalıydı. Negatif
                 //   bakiyede ne olacağı kurum ayarıdır (uyarı ya da engel).
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = true },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 
-            await baglanti.CalistirAsync("""
+            // Durum yalnız HENÜZ İMHA EDİLMEMİŞ tutanağa yazılır; 0 dönerse fiş
+            //   geri alınır (K12).
+            var imhaEdildi = await baglanti.CalistirAsync("""
                 update public.eczane_imha
                    set durum = 2, belge_id = @p1,
                        atik_teslim_no = coalesce(nullif(@p2, ''), atik_teslim_no),
                        degistiren = @p3, degistirme_tarihi = (now())::timestamp
-                 where id = @p0
-                """, null, [id, fisId, istek.AtikTeslimNo ?? "", baglam.KullaniciId], iptal);
+                 where id = @p0 and durum < 2 and belge_id is null
+                """, islem, [id, fisId, istek.AtikTeslimNo ?? "", baglam.KullaniciId], iptal);
+            if (imhaEdildi != 1)
+                throw GentegreHatasi.IsKurali("Bu tutanak zaten imha edildi.");
 
             // KONTROLLÜ İLAÇ İMHASI DEFTERE DE YAZILIR. Yalnız çıkış fişine
             //   yazsaydık defter eksik kalırdı; defter mevzuatın istediği kayıt.
@@ -353,13 +388,15 @@ public static partial class EczaneUclari
                   join public.ilac il on il.stok_id = x.stok_id
                                      and il.recete_turu in (1, 2)
                  where x.imha_id = @p0
-                """, null,
+                """, islem,
                 [id, baglam.SubeId ?? 0, fisId, t["tutanakNo"] ?? "", baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogImha, id, baglam.KullaniciId,
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogImha, id, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip,
                 new { durum = 2, belgeId = fisId, satir = satirlar.Count, kontrolluSatir },
                 iptal: iptal);
+
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new
             {
@@ -375,10 +412,16 @@ public static partial class EczaneUclari
         // DEFTER SATIRI. Yalnız EKLENİR; düzeltme ters satırla yapılır.
         grup.MapPost("/defter", async (
             DefterIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("eczane.kontrollu", Islem.Ekle);
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): düzeltilen defter satırı gövdeden gelir -
+            //   başka şubenin satırı bu şubeden "düzeltilemez"; kapsam dışı olmayanla aynı 404.
+            if (istek.DuzeltilenId is { } kapsamDuzeltilen)
+                await erisim.IsteAsync(baglam, "kontrolluDefter", kapsamDuzeltilen,
+                    "Düzeltilecek defter satırı bulunamadı.", iptal);
 
             if (istek.Hareket is < 1 or > 6)
                 throw GentegreHatasi.Dogrulama("Geçersiz hareket.",
@@ -402,6 +445,9 @@ public static partial class EczaneUclari
                     new AlanHatasi("tanikId", "Kırmızı reçete (narkotik) tanık ister."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // EKLEME + LOG TEK TRANSACTION (kod inceleme 30.10.2026 K33): eskiden log ayri
+            //   baglantida autocommit yaziliyordu. Ekleme logu satirin TAM haliyle.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // DÜZELTME: düzeltilen satır var mı ve zaten düzeltilmiş mi?
             //   Aynı satırı iki kez düzeltmek, defteri okunamaz hâle getirir.
@@ -412,7 +458,8 @@ public static partial class EczaneUclari
                            (select count(*) from public.kontrollu_defter x
                              where x.duzeltilen_id = f.id) as "zatenDuzeltildi"
                       from public.kontrollu_defter f where f.id = @p0
-                    """, null, [duzeltilen], OkuyucuGenisletmeleri.Sozluk, iptal)
+                       for update of f
+                    """, islem, [duzeltilen], OkuyucuGenisletmeleri.Sozluk, iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Düzeltilecek defter satırı bulunamadı.");
                 if (Convert.ToInt32(d["zatenDuzeltildi"] ?? 0) > 0)
                     throw GentegreHatasi.IsKurali("Bu satır zaten bir düzeltme satırıyla kapatılmış.");
@@ -433,20 +480,21 @@ public static partial class EczaneUclari
                         @p5, coalesce(@p6, 0), @p7, @p8, @p9, @p10, @p11, @p12, @p13,
                         @p14, @p15, @p16)
                 returning id
-                """, null,
+                """, islem,
                 [baglam.SubeId ?? 0, istek.Hareket, istek.StokId, istek.SeriLotId,
                  istek.Ad ?? "", istek.Miktar, istek.ReceteRenk, istek.ReceteNo ?? "",
                  istek.HastaId, istek.DepartmanId, istek.TeslimEdenId, istek.TeslimAlanId,
                  istek.TanikId, istek.BelgeId, istek.Aciklama ?? "", istek.DuzeltilenId,
                  baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Ekle, LogDefter, yeniId, baglam.KullaniciId,
+            var yeniSatir = await baglanti.TekAsync(
+                "select * from public.kontrollu_defter where id = @p0", islem, [yeniId],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogDefter, yeniId, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip,
-                new
-                {
-                    hareket = istek.Hareket, miktar = istek.Miktar,
-                    receteRenk = istek.ReceteRenk, duzeltilenId = istek.DuzeltilenId
-                }, iptal: iptal);
+                yeniSatir?.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value)),
+                tarafId: istek.HastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id = yeniId, izlemeNo = baglam.IzlemeNo });
         });
@@ -465,9 +513,12 @@ public static partial class EczaneUclari
             baglam.YetkiIste("eczane.kontrollu", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // KAPANIS + LOG TEK TRANSACTION (kod inceleme 30.10.2026 K33): eskiden log ayri
+            //   baglantida autocommit yaziliyordu. Sayim satiri kilitli okunur.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var s = await baglanti.TekAsync("""
-                select y.durum, y.sayan1_id as "sayan1", y.sayan2_id as "sayan2",
+                select y.durum, y.sayan1_id as "sayan1", y.sayan2_id as "sayan2", y.aciklama as "eskiAciklama",
                        (select count(*) from public.kontrollu_sayim_satir x
                          where x.sayim_id = y.id) as "satirSayisi",
                        (select count(*) from public.kontrollu_sayim_satir x
@@ -476,7 +527,11 @@ public static partial class EczaneUclari
                          where x.sayim_id = y.id and coalesce(x.uyumlu, 0) = 0
                            and coalesce(x.aciklama, '') = '') as "aciklamasiz"
                   from public.kontrollu_sayim y where y.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   -- KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): sayımın liste kaynağı yok, şube koşulu burada -
+                   --   kart (KartKatalogu.Eczane sayım, SubeKolonu sube_id) ile aynı kural; başka şube 404.
+                   and y.sube_id = @p1
+                   for update of y
+                """, islem, [id, baglam.SubeId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Sayım bulunamadı.");
 
             if (Convert.ToInt16(s["durum"] ?? (short)0) != 0)
@@ -515,11 +570,17 @@ public static partial class EczaneUclari
                    set durum = @p1, aciklama = coalesce(nullif(@p2, ''), aciklama),
                        degistiren = @p3, degistirme_tarihi = (now())::timestamp
                  where id = @p0
-                """, null, [id, yeniDurum, istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+                """, islem, [id, yeniDurum, istek.Aciklama ?? "", baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogSayim, id, baglam.KullaniciId,
-                baglam.SubeId, baglam.Ip,
-                new { durum = yeniDurum, uyumsuz, aciklama = istek.Aciklama }, iptal: iptal);
+            var yeniAciklama = string.IsNullOrEmpty(istek.Aciklama) ? s["eskiAciklama"] : istek.Aciklama;
+            var fark = LogDeposu.Fark(
+                new Dictionary<string, object?> { ["durum"] = (short)0, ["aciklama"] = s["eskiAciklama"] },
+                new Dictionary<string, object?> { ["durum"] = yeniDurum, ["aciklama"] = yeniAciklama })
+                ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            fark["uyumsuz"] = uyumsuz.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogSayim, id, baglam.KullaniciId,
+                baglam.SubeId, baglam.Ip, fark, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { durum = yeniDurum, uyumsuz, izlemeNo = baglam.IzlemeNo });
         });

@@ -36,6 +36,10 @@ public static partial class BelgeTalebiUclari
     private const short Taslak = 0, Onayda = 1, Hazirlanacak = 2, Reddedildi = 3,
                         Hazirlandi = 4, TeslimEdildi = 5, Iptal = 8;
 
+    /// <summary>KAYIT KAPSAMI (K26): İK uçları talebi liste kaynağının (şube) kuralıyla açar.</summary>
+    private const string TalepKaynagi = "personelBelgeTalep";
+    private const string TalepYok = "Belge talebi bulunamadı.";
+
     public sealed class TalepIstegi
     {
         public int TarafId { get; set; }
@@ -274,10 +278,12 @@ public static partial class BelgeTalebiUclari
         //   dışına, kendi bilgisayarındaki Word'e iterdi - tam kaçtığımız şey.
         grup.MapPost("/belge-talep/{id:int}/yazi", async (
             int id, YaziIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ik.belge_talep", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): talep aktif şubenin olmalı (liste kuralı).
+            await erisim.IsteAsync(baglam, TalepKaynagi, id, TalepYok, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Govde))
                 throw GentegreHatasi.Dogrulama("Yazı boş olamaz.",
@@ -320,10 +326,12 @@ public static partial class BelgeTalebiUclari
         //   önceden elle dondurulmuşsa KORUNUR; yoksa şablondan üretilir.
         grup.MapPost("/belge-talep/{id:int}/hazirla", async (
             int id, GerekceIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ik.belge_talep", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): talep aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, TalepKaynagi, id, TalepYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -389,10 +397,12 @@ public static partial class BelgeTalebiUclari
         // ------------------------------------------------------ teslim ----
         grup.MapPost("/belge-talep/{id:int}/teslim", async (
             int id, GerekceIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ik.belge_talep", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): talep aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, TalepKaynagi, id, TalepYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -427,10 +437,12 @@ public static partial class BelgeTalebiUclari
         //   İK hazırlık aşamasında haklı bir gerekçeyle durdurabilir.
         grup.MapPost("/belge-talep/{id:int}/reddet", async (
             int id, GerekceIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("ik.belge_talep_onay");
+            // KAYIT KAPSAMI (K26): talep aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, TalepKaynagi, id, TalepYok, iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Gerekce))
                 throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.",

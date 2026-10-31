@@ -26,7 +26,7 @@ public static partial class GozUclari
             // BUGÜN dışındaki kutular SON 30 GÜN (kontrol gecikmesi ve taslak hariç):
             //   eski bir muayenenin yüksek GİB'i bugünün işi değil, gecikmiş kontrol ise öyle.
             var gosterge = await b.TekAsync("""
-                select count(*) filter (where (m.muayene_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date) as bugun,
+                select count(*) filter (where (m.muayene_tarihi at time zone public.fn_sube_zaman_dilimi(@p0::int))::date = (now() at time zone public.fn_sube_zaman_dilimi(@p0::int))::date) as bugun,
                        count(*) filter (where v.dilatasyon_bekliyor = 1)                                   as dilatasyon,
                        count(*) filter (where v.gib_yuksek > 0 and m.muayene_tarihi >= now() - interval '30 days') as "gibYuksek",
                        count(*) filter (where v.gorme_dusus > 0 and m.muayene_tarihi >= now() - interval '30 days') as "gormeDusus",

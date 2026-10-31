@@ -167,6 +167,10 @@ public static class SigortaUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("sigorta", Islem.Gor);
+            // YAZMA YETKİSİ (K16): tazeleme provizyon durumunu YAZAR - salt okuma
+            //   şubede çalışmaz. Rol yetkisi Gör kalır (çoğu rolde Değiştir yok),
+            //   şube yazma kapısı ayrıca istenir.
+            baglam.YazmaIste();
 
             await servis.ProvizyonTazeleAsync(id, baglam, iptal);
             var ozet = await OzetAsync(veri, id, iptal);

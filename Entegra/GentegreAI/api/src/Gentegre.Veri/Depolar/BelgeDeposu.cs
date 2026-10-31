@@ -157,6 +157,37 @@ public sealed partial class BelgeDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
+        var sonuc = await GuncelleIcAsync(baglanti, islem, belgeId, belge, satirlar, secenekler, baglam, iptal);
+
+        await islem.CommitAsync(iptal);
+        return sonuc;
+    }
+
+    /// <summary>
+    /// CAGIRANIN TRANSACTION'INDA duzenle (kod inceleme 30.10.2026 K12): ameliyat
+    /// faturalama ve doktor istemi ucretlendirme belgeye satir ekleyip kaynak
+    /// kalemin bagini AYNI islemde yazar - belge commit olup bag yazilamazsa
+    /// ikinci denemede ayni kalem bir daha faturalanirdi. Commit CAGIRANIN isi.
+    /// </summary>
+    public Task<(int Id, List<string> Uyarilar)> GuncelleAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId,
+        IDictionary<string, object?> belge,
+        List<Dictionary<string, JsonElement>> satirlar,
+        BelgeSecenekleri secenekler,
+        YazmaBaglami baglam,
+        CancellationToken iptal = default)
+        => GuncelleIcAsync(baglanti, islem, belgeId, belge, satirlar, secenekler, baglam, iptal);
+
+    private async Task<(int Id, List<string> Uyarilar)> GuncelleIcAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId,
+        IDictionary<string, object?> belge,
+        List<Dictionary<string, JsonElement>> satirlar,
+        BelgeSecenekleri secenekler,
+        YazmaBaglami baglam,
+        CancellationToken iptal)
+    {
         // --------------------------------------------------- 1) kilit kontrolu ----
         int tur, tipi, eskiDurum, efaturaDurum, kapanma;
         DateTime belgeTarihi;
@@ -319,7 +350,6 @@ public sealed partial class BelgeDeposu
                                                     eskiBelgeTarihi: Saat.Yerel(belgeTarihi, baglam.ZamanDilimi));
         uyarilar.AddRange(yeniUyarilar);
 
-        await islem.CommitAsync(iptal);
         return (belgeId, uyarilar);
     }
 

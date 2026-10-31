@@ -40,10 +40,10 @@ public static class DemoUclari
             // BUGÜNÜN SAHNESİ: tanıtım başında ekranda görünenler.
             var sahne = await b.TekAsync("""
                 select (select count(*) from public.randevu r
-                         where (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
+                         where (r.baslangic at time zone public.fn_sube_zaman_dilimi(@p0::int))::date = (now() at time zone public.fn_sube_zaman_dilimi(@p0::int))::date
                            and r.durum not in (4, 5)) as "bugunRandevu",
                        (select count(*) from public.randevu r
-                         where (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
+                         where (r.baslangic at time zone public.fn_sube_zaman_dilimi(@p0::int))::date = (now() at time zone public.fn_sube_zaman_dilimi(@p0::int))::date
                            and r.durum = 1 and r.baslangic > now()) as "bekleyen",
                        (select count(*) from public.demo_kayit) as "demoKayit",
                        (select count(*) from public.demo_kayit k join public.taraf t on t.id = k.kayit_id
@@ -51,13 +51,13 @@ public static class DemoUclari
                        (select count(*) from public.demo_kayit k join public.taraf t on t.id = k.kayit_id
                          where k.tablo = 'taraf' and t.personel = 1) as personel,
                        (select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) || ' · ' ||
-                               to_char(r.baslangic at time zone 'Europe/Istanbul', 'HH24:MI') || ' ' ||
+                               to_char(r.baslangic at time zone public.fn_sube_zaman_dilimi(@p0::int), 'HH24:MI') || ' ' ||
                                coalesce((select d.ad from public.departman d where d.id = r.bolum), '')
                           from public.taraf t join public.randevu r on r.hasta_id = t.id
                          where t.ad = 'Elif' and t.soyad = 'Demo'
                            and t.id in (select kayit_id from public.demo_kayit where tablo = 'taraf')
                          order by r.baslangic desc limit 1) as senaryo
-                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
             var kullanicilar = await b.ListeAsync("""
                 select k.kod, coalesce(r.ad, '') as rol, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad
                   from public.taraf_kullanici k join public.taraf t on t.id = k.id

@@ -1,4 +1,4 @@
-import { htmlTemizle } from '../bilesenler/htmlGuvenlik';
+import { guvenliPencereAc } from '../bilesenler/htmlGuvenlik';
 import { mesaj } from '../bilesenler/mesaj';
 import type { ListeSatiri } from '../api/sozlesme';
 
@@ -24,17 +24,10 @@ export { dosyaIndir };
  * ("e-Fatura") geliyordu; kullanicinin istedigi ad ancak boyle gecer.
  */
 export async function belgeGoruntusuAc(html: string, baslik: string, yazdir: boolean) {
-  const pencere = window.open('', '_blank');
-  if (!pencere) {
+  // SANDBOX (kod inceleme 28.10.2026 B03 + 30.10.2026 K54): XSLT çıktısı karşı firmadan gelir - temizlenir ve
+  //   opak kökenli iframe'de açılır; başlık (PDF dosya adı) sargıda.
+  if (!guvenliPencereAc(html, baslik, yazdir))
     mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
-    return;
-  }
-  // TEMİZ (kod inceleme raporu 28.10.2026 B03): XSLT çıktısı - gelen faturanın şablonu karşı firmadan gelir.
-  pencere.document.write(htmlTemizle(html));
-  pencere.document.close();
-  // Sablonun kendi <title>'i yazildiktan SONRA ezilir.
-  try { pencere.document.title = baslik } catch { /* farkli koken - onemsiz */ }
-  if (yazdir) pencere.setTimeout(() => pencere.print(), 400);
 }
 
 /**

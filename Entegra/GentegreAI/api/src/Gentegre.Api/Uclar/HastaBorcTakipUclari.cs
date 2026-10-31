@@ -183,6 +183,9 @@ public static class HastaBorcTakipUclari
 
             var atlanan = new List<object>();
             var konan = 0;
+            // TEK İŞLEM (kod inceleme 30.10.2026 K52): bildirim kuyruğu + borç işlemi birlikte yazılır; işlem
+            //   satırı düşerse SMS kuyrukta yetim kalmaz, 24 saat kuralı atlanmaz.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             foreach (var k in kisiler)
             {
                 if (!borc.TryGetValue(k.id, out var tutar)) { atlanan.Add(new { k.ad, neden = "açık borcu yok" }); continue; }
@@ -191,7 +194,7 @@ public static class HastaBorcTakipUclari
                 { atlanan.Add(new { k.ad, neden = istek.Kanal == 1 ? "cep telefonu yok" : "e-posta yok" }); continue; }
                 if (k.yakin) { atlanan.Add(new { k.ad, neden = "son 24 saatte bu kanaldan hatırlatıldı" }); continue; }
 
-                var bildirimId = await bildirim.KuyrugaEkleAsync(new BildirimIstegi(
+                var bildirimId = await bildirim.KuyrugaEkleAsync(b, islem, new BildirimIstegi(
                         SablonKodu: istek.Kanal == 1 ? "borc.hatirlatma" : "borc.hatirlatma.eposta",
                         Kanal: (BildirimKanali)istek.Kanal,
                         Alici: alici,
@@ -205,14 +208,17 @@ public static class HastaBorcTakipUclari
                         TarafId: k.id, KaynakTur: KaynakBorc, KaynakId: k.id, Oncelik: 7),
                     baglam.KullaniciId, baglam.SubeId, iptal);
                 if (bildirimId is null) { atlanan.Add(new { k.ad, neden = "hatırlatma şablonu pasif" }); continue; }
-                await IslemYazAsync(b, k.id, TurHatirlatma, istek.Kanal, bildirimId, tutar, null, null, "", baglam, iptal);
+                await IslemYazAsync(b, k.id, TurHatirlatma, istek.Kanal, bildirimId, tutar, null, null, "", baglam, iptal, islem);
                 konan++;
             }
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { kuyruga = konan, atlanan });
         });
 
         // ------------------------------------------------ söz / plan / işaret --
-        grup.MapPost("/soz", async (SozIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): hasta kimliği GÖVDEDEN gelir (soz / isaret / not) -
+        //   kapsam dışı hastaya söz / işaret / not yazılamaz; olmayan hastayla aynı 404.
+        grup.MapPost("/soz", async (SozIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
                                     HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -222,44 +228,61 @@ public static class HastaBorcTakipUclari
             if (istek.Vade.Date < Saat.Bugun) throw GentegreHatasi.Dogrulama("Vade bugünden önce olamaz.");
             if (istek.Tur == TurPlan && istek.TaksitSayisi is not (>= 2 and <= 36))
                 throw GentegreHatasi.Dogrulama("Ödeme planı 2 ile 36 taksit arasında olmalı.");
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
+            // TEK İŞLEM + HASTA KİLİDİ (K36): eski sözün kapanışı ve yeni söz birlikte - araya düşen istek hastayı
+            //   sözsüz bırakmasın; aynı hastaya eşzamanlı iki söz danışma kilidiyle sıraya girer (ikisi de "açık"
+            //   kalamaz).
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            await b.CalistirAsync("select pg_advisory_xact_lock(@p0, @p1)", islem, [(int)KaynakBorc, istek.HastaId], iptal);
             // Yeni söz / plan eskisinin yerine geçer: aynı anda iki söz takip edilmez.
             await b.CalistirAsync("""
                 update public.hasta_borc_islem set durum = 9, degistiren = @p1, degistirme_tarihi = now()
                  where hasta_id = @p0 and tur in (2, 3) and durum = 0
-                """, null, [istek.HastaId, baglam.KullaniciId], iptal);
+                """, islem, [istek.HastaId, baglam.KullaniciId], iptal);
             var id = await IslemYazAsync(b, istek.HastaId, istek.Tur, null, null, istek.Tutar, istek.Vade.Date,
-                                         istek.Tur == TurPlan ? istek.TaksitSayisi : null, istek.Aciklama ?? "", baglam, iptal);
+                                         istek.Tur == TurPlan ? istek.TaksitSayisi : null, istek.Aciklama ?? "", baglam, iptal, islem);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id });
         });
 
-        grup.MapPost("/isaret", async (IsaretIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
+        grup.MapPost("/isaret", async (IsaretIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
                                        HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Ekle);
             var ids = (istek.HastaIds ?? []).Where(x => x > 0).Distinct().ToArray();
             if (ids.Length == 0) throw GentegreHatasi.Dogrulama("Hasta seçilmedi.");
+            // Kapsam (K26): listedeki her hasta - biri dışarıdaysa hiçbiri işaretlenmez (toplu istek bütündür).
+            foreach (var h in ids)
+                await erisim.IsteAsync(baglam, "hasta", h, "Hasta bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
+            // TEK İŞLEM (K36): toplu işaret bütündür - yarıda kalan istek listenin yarısını işaretli bırakmaz.
+            //   "Var mı?" + ekle, hasta başına danışma kilidi altında: eşzamanlı iki toplu istek aynı hastaya
+            //   iki açık işaret koyamaz.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             var konan = 0;
             foreach (var h in ids)
             {
+                await b.CalistirAsync("select pg_advisory_xact_lock(@p0, @p1)", islem, [(int)KaynakBorc, h], iptal);
                 var var_ = await b.TekDegerAsync<bool>("""
                     select exists (select 1 from public.hasta_borc_islem where hasta_id = @p0 and tur = 4 and durum = 0)
-                    """, null, [h], iptal);
+                    """, islem, [h], iptal);
                 if (var_) continue;
-                await IslemYazAsync(b, h, TurIsaret, null, null, null, null, null, istek.Aciklama ?? "", baglam, iptal);
+                await IslemYazAsync(b, h, TurIsaret, null, null, null, null, null, istek.Aciklama ?? "", baglam, iptal, islem);
                 konan++;
             }
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { isaretlenen = konan });
         });
 
-        grup.MapPost("/not", async (NotIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
+        grup.MapPost("/not", async (NotIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
                                     HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Ekle);
             if (string.IsNullOrWhiteSpace(istek.Aciklama)) throw GentegreHatasi.Dogrulama("Not boş olamaz.");
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
             var id = await IslemYazAsync(b, istek.HastaId, TurNot, null, null, null, null, null, istek.Aciklama.Trim(), baglam, iptal);
             return Results.Ok(new { id });
@@ -301,13 +324,14 @@ public static class HastaBorcTakipUclari
                 o.GetString(12)), iptal);
 
     private static Task<int> IslemYazAsync(NpgsqlConnection b, int hastaId, short tur, short? kanal, long? bildirimId,
-        decimal? tutar, DateTime? vade, short? taksit, string aciklama, IstekBaglami baglam, CancellationToken iptal)
+        decimal? tutar, DateTime? vade, short? taksit, string aciklama, IstekBaglami baglam, CancellationToken iptal,
+        NpgsqlTransaction? islem = null)
         => b.TekDegerAsync<int>("""
             insert into public.hasta_borc_islem (hasta_id, tur, kanal, bildirim_id, tutar, vade, taksit_sayisi,
                                                  aciklama, sube_id, ekleyen)
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
             returning id
-            """, null, [hastaId, tur, kanal, bildirimId, tutar, vade, taksit,
+            """, islem, [hastaId, tur, kanal, bildirimId, tutar, vade, taksit,
                         aciklama.Length > 500 ? aciklama[..500] : aciklama, baglam.SubeId, baglam.KullaniciId], iptal);
 
     /// <summary>"0555 *** ** 89": son iki hane - görevli doğru kişiyi arıyor mu anlasın.</summary>

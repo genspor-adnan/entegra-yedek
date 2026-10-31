@@ -18,6 +18,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi HastaKronikTani() => new(
         Ad: "hasta-kronik",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "k.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.hasta_kronik_tani k "
               + "  join public.taraf h on h.id = k.hasta_id "
@@ -50,6 +52,8 @@ public static partial class KaynakKatalogu
     /// <summary>HASTA GEÇMİŞ OLAYLARI (420) — ameliyat · girişim · yatış · aşı.</summary>
     private static KaynakTanimi HastaGecmisOlay() => new(
         Ad: "hasta-gecmis",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "o.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.hasta_gecmis_olay o join public.taraf h on h.id = o.hasta_id",
         VarsayilanSirala: "o.tarih desc nulls last, o.id desc",
@@ -80,6 +84,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi HastaTibbiOzet() => new(
         Ad: "hasta-tibbi-ozet",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "o.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.v_hasta_tibbi_ozet o join public.taraf h on h.id = o.hasta_id",
         VarsayilanSirala: "o.son_muayene desc nulls last, public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120) asc",

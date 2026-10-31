@@ -26,7 +26,7 @@ public static partial class GozUclari
             baglam.YetkiIste("goz.goruntuleme", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var gosterge = await b.TekAsync("""
-                select count(*) filter (where (g.istem_zamani at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date) as bugun,
+                select count(*) filter (where (g.istem_zamani at time zone public.fn_sube_zaman_dilimi(@p0::int))::date = (now() at time zone public.fn_sube_zaman_dilimi(@p0::int))::date) as bugun,
                        count(*) filter (where g.durum = 1 and g.serbest = 1)            as sirada,
                        count(*) filter (where g.durum = 1 and g.serbest = 0)            as "odemeBekliyor",
                        count(*) filter (where g.durum = 2)                              as "degerlendirmeBekleyen",
@@ -211,6 +211,9 @@ public static partial class GozUclari
             var r = await DurumOkuAsync(b, id, iptal);
             if (r.Durum != 2) throw GentegreHatasi.IsKurali("Yalnız çekilmiş, değerlendirilmemiş kayıt yeniden çekime gönderilir.");
             await using var islem = await b.BeginTransactionAsync(iptal);
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): eski kayıt yalnız hâlâ ÇEKİLMİŞ (2) iken iptal edilir;
+            //   iki "yeniden çekim" aynı anda gelirse ikincisi satırı etkilemez, yeni (ücretsiz) kaydı da
+            //   transaction ile geri alınır - bir istemden bir yeniden çekim doğar.
             var yeni = await b.TekDegerAsync<int>("""
                 insert into public.goz_goruntuleme
                     (sube_id, muayene_id, hasta_id, goz, tetkik, hizmet_id, belge_id, serbest, oncelik,
@@ -220,9 +223,10 @@ public static partial class GozUclari
                   from public.goz_goruntuleme where id = @p0
                 returning id
                 """, islem, [id, baglam.KullaniciId], iptal);
-            await b.CalistirAsync("""
-                update public.goz_goruntuleme set durum = 0, degistiren = @p1, degistirme_tarihi = now() where id = @p0
+            var etkilenen = await b.CalistirAsync("""
+                update public.goz_goruntuleme set durum = 0, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 2
                 """, islem, [id, baglam.KullaniciId], iptal);
+            if (etkilenen == 0) throw GentegreHatasi.IsKurali("Yalnız çekilmiş, değerlendirilmemiş kayıt yeniden çekime gönderilir.");
             await b.CalistirAsync("""
                 update public.muayene_istem set hedef_id = @p1 where hedef_tablo = 'goz_goruntuleme' and hedef_id = @p0
                 """, islem, [id, yeni], iptal);

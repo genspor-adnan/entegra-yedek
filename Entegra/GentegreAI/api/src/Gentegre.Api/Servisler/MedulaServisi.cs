@@ -129,6 +129,11 @@ public sealed class MedulaServisi
         int enFazla, int kullaniciId, int? subeId, string ip, bool hatalilarDa, CancellationToken iptal, bool hemen = false)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
+        // TEK İŞLEYİCİ (kod inceleme 30.10.2026 K37): zamanlı iş ile ekranın "Bekleyenleri gönder"i aynı satırı
+        //   iki kez kapıya götürebiliyordu (gerçek Medula'da çift provizyon). Kuyruk oturum kilidiyle işlenir.
+        await using var kilit = await DanismaKilidi.DeneAsync(baglanti, "medula_kuyruk", iptal);
+        if (kilit is null)
+            return (0, 0, 0, 0, "Kuyruk başka bir gönderim tarafından işleniyor; birazdan yeniden deneyin.");
         // hemen: "Bekleyenleri gönder" düğmesi - sonraki deneme zamanını beklemez.
         //   Zamanlı iş beklemeyi tutar (kapı kapalıyken her dakika vurmasın).
         var ids = await baglanti.ListeAsync("""

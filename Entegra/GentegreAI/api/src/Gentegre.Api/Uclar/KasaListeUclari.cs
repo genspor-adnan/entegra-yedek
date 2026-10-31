@@ -80,7 +80,7 @@ public static class KasaListeUclari
                        coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as sayan,
                        (select coalesce(sum(m.borc - m.alacak), 0) from public.v_mali_hareket_ek m
                          where m.hesap_id = s.hesap_id and m.hesap_ekstre = 1 and m.islem_durum = 2
-                           and (m.islem_tarihi at time zone 'Europe/Istanbul')::date <= s.tarih) as sistem,
+                           and (m.islem_tarihi at time zone public.fn_sube_zaman_dilimi(s.sube_id))::date <= s.tarih) as sistem,
                        coalesce(f.neden, 0), coalesce(f.aciklama, '')
                   from public.kasa_gun_sayim s
                   left join public.taraf t on t.id = s.sayan_id

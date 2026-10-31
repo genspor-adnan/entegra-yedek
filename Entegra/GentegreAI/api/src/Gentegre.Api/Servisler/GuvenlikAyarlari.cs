@@ -36,4 +36,17 @@ public sealed class GuvenlikAyarlari
     /// 127.0.0.1'e proxy_pass). Istemcinin kendi yazdigi basliga guvenilmez.
     /// </summary>
     public string[] GuvenilenProxyler { get; set; } = [];
+    /// <summary>
+    /// GÜVENİLEN AĞLAR (kod inceleme 30.10.2026 K08): API docker köprü ağında çalışınca nginx'in adresi loopback
+    /// değil köprünün ağ geçidi (172.x.0.1) olur ve X-Forwarded-For hiç okunmazdı — bütün kurum tek IP sayılıyor,
+    /// IP eşiği toplu DoS'a dönüşüyor, denetim IP'leri boş kalıyordu. CIDR listesi (ör. "172.16.0.0/12") yayın
+    /// ayarında verilir; yalnız bu ağlardan gelen başlık okunur.
+    /// </summary>
+    public string[] GuvenilenAglar { get; set; } = [];
+    /// <summary>
+    /// GİRİŞ HIZ SINIRI (kod inceleme 30.10.2026 K30): anonim kimlik uçlarına (giriş, yenile, ilk parola, parola
+    /// unuttum, panel kodu) IP başına dakikada en çok bu kadar istek; aşımı 429. 0 = kapalı. Hesap kilidi tek
+    /// savunmaydı: ad bilen biri 5 denemeyle herkesi kilitleyebiliyor, parola püskürtme sınırsızdı.
+    /// </summary>
+    public int GirisDakikaSinir { get; set; } = 30;
 }

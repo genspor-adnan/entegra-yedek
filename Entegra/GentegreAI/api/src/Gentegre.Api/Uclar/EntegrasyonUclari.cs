@@ -73,6 +73,10 @@ public static class EntegrasyonUclari
     };
 
 
+    /// <summary>KAYIT KAPSAMI (K26): `{id}` uçları hesabı katalog kaynağının kuralıyla açar.</summary>
+    private const string HesapKaynagi = "entegrasyon-hesap";
+    private const string HesapYok = "Entegrasyon hesabı bulunamadı.";
+
     public static void EntegrasyonUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/entegrasyon").WithTags("Entegrasyon")
@@ -85,10 +89,13 @@ public static class EntegrasyonUclari
         //   mi "ICD10" mi?) ve yanlis ad sessiz bir "yok" raporu uretiyor.
         grup.MapGet("/{id:int}/skrs-listeler", async (
             int id, string? ara, BaglamCozucu cozucu, VeriKaynagi veri,
-            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+            IHttpClientFactory istemciler, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Gor);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -115,10 +122,13 @@ public static class EntegrasyonUclari
         //   kodun paketin içine sessizce girmesi demekti.
         grup.MapGet("/{id:int}/skrs-liste", async (
             int id, string ad, string? ara, BaglamCozucu cozucu, VeriKaynagi veri,
-            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+            IHttpClientFactory istemciler, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Gor);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -157,11 +167,14 @@ public static class EntegrasyonUclari
         //   toplu işlem onu ezerse hem bildirim hem kurumun kendi düzeni
         //   bozulur. Eşleşmeyenler rapora düşer, elle seçilir.
         grup.MapPost("/{id:int}/skrs-klinik-esle", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -221,10 +234,15 @@ public static class EntegrasyonUclari
         //   kayda yazılır (son_kullanim / son_sonuc) - kullanıcı ekranda görür.
         grup.MapPost("/{id:int}/sina", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("entegrasyon", Islem.Gor);
+            // YAZMA YETKİSİ (K16): sınama `son_kullanim / son_sonuc` YAZAR - Gör yetkisi
+            //   salt okuma şubede de geçiyordu; Değiştir ister (şube yazma kapısı dahil).
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -256,10 +274,13 @@ public static class EntegrasyonUclari
         //   SQL ile uretilir, alan adi degisirse servise tekrar gidilmez.
         grup.MapPost("/{id:int}/skrs-ham", async (
             int id, string ad, BaglamCozucu cozucu, VeriKaynagi veri,
-            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+            IHttpClientFactory istemciler, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -293,21 +314,29 @@ public static class EntegrasyonUclari
                 throw GentegreHatasi.IsKurali(
                     $"'{anahtar}' çekilemedi - servis {sayfa}. sayfada hata döndü.");
 
+            // TEK TRANSACTION (kod inceleme 30.10.2026 K36): eski ambarın silinmesi, sayfaların yazımı ve
+            //   hesap sonucu birlikte - eskiden DELETE autocommit'ti; ortadaki bir sayfa INSERT'i düşerse
+            //   (ör. bozuk JSON) ambar BOŞ kalıyordu. HTTP çekimi (SkrsHamCekAsync) işlem DIŞINDA, yukarıda
+            //   bitti; burada yalnız DB yazımı var. Liste başına danışma kilidi: aynı listeyi iki eşzamanlı
+            //   çekim üst üste yazmasın.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select pg_advisory_xact_lock(hashtext('skrs_ham'), hashtext(@p0))", islem, [anahtar], iptal);
             await baglanti.CalistirAsync(
-                "delete from public.skrs_ham where liste = @p0", null, [anahtar], iptal);
+                "delete from public.skrs_ham where liste = @p0", islem, [anahtar], iptal);
             // TOPLU YAZIM: 15 bin satiri tek tek yazmak cekimin kendisinden
             //   uzun suruyordu - sayfa basina tek INSERT (dizi acilir).
             foreach (var oebek in kayitlar.GroupBy(x => x.Sayfa))
                 await baglanti.CalistirAsync("""
                     insert into public.skrs_ham (liste, sayfa, kayit)
                     select @p0, @p1, x from jsonb_array_elements(@p2::jsonb) as x
-                    """, null,
+                    """, islem,
                     [anahtar, oebek.Key,
                      "[" + string.Join(",", oebek.Select(x => x.Json)) + "]"], iptal);
 
             var ozet = $"{anahtar}: {kayitlar.Count} kayıt ({sayfa} sayfa)"
                        + (kesildi ? " - servis hatası nedeniyle YARIM" : "");
-            await SonucYazAsync(baglanti, id, ozet, iptal);
+            await SonucYazAsync(baglanti, id, ozet, iptal, islem);
+            await islem.CommitAsync(iptal);
 
             var alanlar = await baglanti.ListeAsync("""
                 select x.alan, count(*) as adet
@@ -338,10 +367,13 @@ public static class EntegrasyonUclari
         //   soyler.
         grup.MapPost("/{id:int}/skrs-kod-listeleri", async (
             int id, string? kod, BaglamCozucu cozucu, VeriKaynagi veri,
-            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+            IHttpClientFactory istemciler, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -392,10 +424,13 @@ public static class EntegrasyonUclari
         // ------------------------------------------------- SKRS liste senkron
         grup.MapPost("/{id:int}/skrs-senkron", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hesap katalog kaynağından (entegrasyon-hesap) açılır -
+            //   hesaplar kurum geneli olduğundan şube koşulu yok, kapı yine tek yerden geçer.
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
@@ -582,13 +617,14 @@ public static class EntegrasyonUclari
     }
 
     private static async Task SonucYazAsync(
-        NpgsqlConnection baglanti, int id, string sonuc, CancellationToken iptal)
+        NpgsqlConnection baglanti, int id, string sonuc, CancellationToken iptal,
+        NpgsqlTransaction? islem = null)
         => await baglanti.CalistirAsync("""
             update public.entegrasyon_hesap
                set son_kullanim = (now())::timestamp,
                    son_sonuc = left(@p1, 300)
              where id = @p0
-            """, null, [id, sonuc], iptal);
+            """, islem, [id, sonuc], iptal);
 
     /// <summary>
     /// SKRS'ye en ucuz çağrı: kod sistemi listesini ister. Amaç veriyi almak

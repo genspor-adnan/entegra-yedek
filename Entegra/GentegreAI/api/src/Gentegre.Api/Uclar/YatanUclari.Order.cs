@@ -65,11 +65,11 @@ public static partial class YatanUclari
                        coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as hekim,
                        public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as hasta,
                        coalesce(yk.kod, '') as yatak, v.servis, v.oda, v.yas, v.cinsiyet, v.alerjiler,
-                       ((now() at time zone 'Europe/Istanbul')::date - (y.giris_tarihi at time zone 'Europe/Istanbul')::date) + 1 as "yatisGunu",
+                       ((now() at time zone public.fn_sube_zaman_dilimi(od.sube_id))::date - (y.giris_tarihi at time zone public.fn_sube_zaman_dilimi(od.sube_id))::date) + 1 as "yatisGunu",
                        coalesce(nullif(ic.ad, ''), y.yatis_tani_kodu, '') as tani,
                        v.gun_no as "gunNo", v.gun_toplam as "gunToplam", v.toplam_doz as "toplamDoz",
                        v.verilen_doz as "verilenDoz", v.geciken_doz as "gecikenDoz",
-                       to_char(v.sonraki at time zone 'Europe/Istanbul', 'DD.MM.YYYY HH24:MI') as sonraki,
+                       to_char(v.sonraki at time zone public.fn_sube_zaman_dilimi(od.sube_id), 'DD.MM.YYYY HH24:MI') as sonraki,
                        v.yuksek_risk as "yuksekRisk", v.risk_anahtar as "riskAnahtar",
                        v.alerji_eslesen as "alerjiEslesen", v.mukerrer, coalesce(i.etken_madde, '') as etken,
                        (select count(*) from public.yatis_order x where x.yatis_id = od.yatis_id and x.durum = 1 and x.id <> od.id) as "digerAktif"
@@ -84,13 +84,13 @@ public static partial class YatanUclari
                  where od.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Order bulunamadı.");
             var bugun = await b.ListeAsync("""
-                select to_char(u.planlanan at time zone 'Europe/Istanbul', 'HH24:MI') as saat,
+                select to_char(u.planlanan at time zone z.tz, 'HH24:MI') as saat,
                        case when u.durum = 1 and u.planlanan < now() - interval '30 minutes' then 5 else u.durum end as durum,
-                       to_char(u.uygulanan at time zone 'Europe/Istanbul', 'HH24:MI') as uygulanan,
+                       to_char(u.uygulanan at time zone z.tz, 'HH24:MI') as uygulanan,
                        coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as uygulayan
-                  from public.order_uygulama u left join public.taraf p on p.id = u.uygulayan_id
+                  from public.order_uygulama u left join public.taraf p on p.id = u.uygulayan_id cross join (select public.fn_sube_zaman_dilimi(sube_id) as tz from public.yatis_order where id = @p0) z
                  where u.order_id = @p0
-                   and (u.planlanan at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
+                   and (u.planlanan at time zone z.tz)::date = (now() at time zone z.tz)::date
                  order by u.planlanan
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -125,18 +125,18 @@ public static partial class YatanUclari
             baglam.YetkiIste("yatan.order", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var o = await b.TekAsync("""
-                select (od.baslangic at time zone 'Europe/Istanbul')::date as bas,
-                       (od.bitis at time zone 'Europe/Istanbul')::date as bit, coalesce(od.saatler::text, '[]') as saatler,
-                       od.durum, od.tur, (now() at time zone 'Europe/Istanbul')::date as bugun,
-                       to_char(now() at time zone 'Europe/Istanbul', 'HH24:MI') as simdi
+                select (od.baslangic at time zone public.fn_sube_zaman_dilimi(od.sube_id))::date as bas,
+                       (od.bitis at time zone public.fn_sube_zaman_dilimi(od.sube_id))::date as bit, coalesce(od.saatler::text, '[]') as saatler,
+                       od.durum, od.tur, (now() at time zone public.fn_sube_zaman_dilimi(od.sube_id))::date as bugun,
+                       to_char(now() at time zone public.fn_sube_zaman_dilimi(od.sube_id), 'HH24:MI') as simdi
                   from public.yatis_order od where od.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Order bulunamadı.");
             var satirlar = await b.ListeAsync("""
-                select (u.planlanan at time zone 'Europe/Istanbul')::date as gun,
-                       to_char(u.planlanan at time zone 'Europe/Istanbul', 'HH24:MI') as saat,
+                select (u.planlanan at time zone z.tz)::date as gun,
+                       to_char(u.planlanan at time zone z.tz, 'HH24:MI') as saat,
                        case when u.durum = 1 and u.planlanan < now() - interval '30 minutes' then 5 else u.durum end as durum,
-                       to_char(u.uygulanan at time zone 'Europe/Istanbul', 'HH24:MI') as uygulanan
-                  from public.order_uygulama u where u.order_id = @p0 order by u.planlanan
+                       to_char(u.uygulanan at time zone z.tz, 'HH24:MI') as uygulanan
+                  from public.order_uygulama u cross join (select public.fn_sube_zaman_dilimi(sube_id) as tz from public.yatis_order where id = @p0) z where u.order_id = @p0 order by u.planlanan
                 """, null, [id], o => (Gun: DateOnly.FromDateTime(o.GetDateTime(0)), Saat: o.GetString(1),
                                        Durum: Convert.ToInt32(o.GetValue(2)), Uygulanan: o.IsDBNull(3) ? null : o.GetString(3)), iptal);
             var saatler = new List<string>();
@@ -188,10 +188,10 @@ public static partial class YatanUclari
                     union all
                     select u.uygulanan, coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), ''),
                            case u.durum when 2 then 'Doz verildi' when 3 then 'Doz atlandı' when 4 then 'Hasta reddetti' else 'Doz' end,
-                           concat_ws(' · ', 'planlanan ' || to_char(u.planlanan at time zone 'Europe/Istanbul', 'DD.MM HH24:MI'),
+                           concat_ws(' · ', 'planlanan ' || to_char(u.planlanan at time zone z.tz, 'DD.MM HH24:MI'),
                                      case when u.elle_dogrulandi = 1 then 'elle doğrulandı' end,
                                      nullif(u.atlama_nedeni, ''), nullif(u.gecikme_nedeni, ''))
-                      from public.order_uygulama u left join public.taraf p on p.id = u.uygulayan_id
+                      from public.order_uygulama u left join public.taraf p on p.id = u.uygulayan_id cross join (select public.fn_sube_zaman_dilimi(sube_id) as tz from public.yatis_order where id = @p0) z
                      where u.order_id = @p0 and u.uygulanan is not null and u.durum in (2, 3, 4)
                 ) x order by 1 desc limit 100
                 """, null, [id, LogTabloYatisOrder, 1124],

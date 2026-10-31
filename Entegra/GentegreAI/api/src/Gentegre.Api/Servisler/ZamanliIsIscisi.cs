@@ -314,7 +314,7 @@ public static class ZamanliIsler
         {
             var veri = servisler.GetRequiredService<VeriKaynagi>();
             return await veri.TekDegerAsync<string>(
-                "select public.fn_hata_ozet_metin(((now() at time zone 'Europe/Istanbul')::date - 1))",
+                "select public.fn_hata_ozet_metin(((now() at time zone public.fn_sube_zaman_dilimi(null::int))::date - 1))",
                 null, iptal) ?? "Sonuc okunamadi.";
         },
         // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
@@ -392,15 +392,7 @@ public sealed class ZamanliIsIscisi : BackgroundService
         await using var kapsam = _servisler.CreateAsyncScope();
         var veri = kapsam.ServiceProvider.GetRequiredService<VeriKaynagi>();
 
-        var serbest = await veri.CalistirAsync("""
-            update public.zamanli_is
-               set calisiyor = 0,
-                   son_sonuc = 'Çalışma yarıda kaldı (servis yeniden başladı).',
-                   basarili = 0
-             where calisiyor = 1 and calisma_bas < now() - interval '6 hours'
-            """, null, iptal);
-        if (serbest > 0)
-            _gunluk.LogWarning("Zamanlı iş: yarıda kalan {Adet} kayıt serbest bırakıldı.", serbest);
+        await TakiliSerbestBirakAsync(veri, "Çalışma yarıda kaldı (servis yeniden başladı).", iptal);
 
         // Sonraki zamanı olmayan (yeni eklenmiş) işler hesaplansın.
         var kodlar = await veri.ListeAsync(
@@ -409,10 +401,27 @@ public sealed class ZamanliIsIscisi : BackgroundService
         foreach (var kod in kodlar) await SonrakiYazAsync(veri, kod, iptal);
     }
 
+    /// <summary>
+    /// TAKILI KAYIT (kod inceleme 30.10.2026 K37): 6 saattir "çalışıyor" görünen iş serbest bırakılır. Eskiden
+    /// yalnız açılışta yapılıyordu (sınıf yorumu "6 saat sonra" diyordu) - iki örnekten biri çökünce iş süresiz
+    /// kilitli kalıyor, "Şimdi çalıştır" da "zaten çalışıyor" diyordu. Artık her turda.
+    /// </summary>
+    private async Task TakiliSerbestBirakAsync(VeriKaynagi veri, string sonuc, CancellationToken iptal)
+    {
+        var serbest = await veri.CalistirAsync("""
+            update public.zamanli_is
+               set calisiyor = 0, son_sonuc = @p0, basarili = 0
+             where calisiyor = 1 and calisma_bas < now() - interval '6 hours'
+            """, [sonuc], iptal);
+        if (serbest > 0)
+            _gunluk.LogWarning("Zamanlı iş: yarıda kalan {Adet} kayıt serbest bırakıldı.", serbest);
+    }
+
     private async Task TurAsync(CancellationToken iptal)
     {
         await using var kapsam = _servisler.CreateAsyncScope();
         var veri = kapsam.ServiceProvider.GetRequiredService<VeriKaynagi>();
+        await TakiliSerbestBirakAsync(veri, "Çalışma 6 saati aştı, serbest bırakıldı.", iptal);
 
         // Sonraki zamanı boşalmış işler (kartta zamanlaması değişti - 1079
         //   tetiği boşaltır) bu turda hesaplansın; yalnız açılışta yapılınca

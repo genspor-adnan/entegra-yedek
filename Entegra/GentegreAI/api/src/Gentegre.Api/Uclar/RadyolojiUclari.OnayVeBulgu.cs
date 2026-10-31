@@ -23,7 +23,7 @@ public static partial class RadyolojiUclari
         // İki aşama: asistan ÖN RAPOR gönderir (durum 2), uzman ONAYLAR
         //   (durum 3 + kilit). Onay ön koşulları veritabanında (284).
         grup.MapPost("/rapor/{id:int}/durum", async (
-            int id, string hedef, string? surum, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, string hedef, string? surum, int? onaylayacakId, DurumIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri,
             LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz,
             HttpContext ctx, CancellationToken iptal) =>
         {
@@ -33,6 +33,9 @@ public static partial class RadyolojiUclari
             if (!onayMi && !string.Equals(hedef, "on-rapor", StringComparison.OrdinalIgnoreCase))
                 throw GentegreHatasi.Dogrulama("Geçersiz hedef: onay ya da on-rapor olmalı.", new AlanHatasi("hedef", "Geçersiz."));
             baglam.AksiyonIste(onayMi ? "rad.rapor_onayla" : "rad.rapor_yaz");
+            // ONAYLAYACAK (1199): ön rapor bir uzmana gönderilir - seçilmeden gönderilmez.
+            if (!onayMi && onaylayacakId is not > 0)
+                throw GentegreHatasi.Dogrulama("Onaylayacak uzmanı seçin.", new AlanHatasi("onaylayacakId", "Zorunlu."));
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -77,17 +80,31 @@ public static partial class RadyolojiUclari
                     """, islem, [id, baglam.KullaniciId], iptal);
                 await baglanti.CalistirAsync(
                     "update public.radyoloji_istem set durum = 5 where id = @p0", islem, [istemId], iptal);
+                // Onay geldi: uzmanın "onayınızı bekliyor" hatırlatması kapanır (vekâleten onaylansa da).
+                await OnayBildirimiKapatAsync(baglanti, islem, istemId, iptal);
             }
             else
             {
+                // Seçilen kişi gerçekten onaylayabilmeli (aktif + rad.rapor_onayla) - yoksa rapor kimsenin
+                //   kuyruğuna düşmeyen bir "bekliyor"da kalırdı.
+                if (!await baglanti.TekDegerAsync<bool>("""
+                        select exists (select 1 from public.taraf_kullanici k
+                                        where k.id = @p0 and k.aktif = 1
+                                          and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla'))
+                        """, islem, [onaylayacakId!.Value], iptal))
+                    throw GentegreHatasi.IsKurali("Seçilen kişinin rapor onaylama yetkisi yok.");
                 // Etkilenen satır yoksa istem ve log DEĞİŞMEZ (B06) - kilitli rapor yukarıda zaten reddedildi.
                 var degisen = await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor
-                       set durum = 2, degistiren = @p1, degistirme_tarihi = now()::timestamp
+                       set durum = 2, onaylayacak_id = @p2, onaya_gonderme = now(),
+                           -- NOT (1200): her gönderimde yenilenir - eski gönderimin notu yeni uzmana kalmasın.
+                           onay_notu = @p3,
+                           degistiren = @p1, degistirme_tarihi = now()::timestamp
                      where id = @p0 and coalesce(kilit, 0) = 0
-                    """, islem, [id, baglam.KullaniciId], iptal);
+                    """, islem, [id, baglam.KullaniciId, onaylayacakId.Value, Kisalt(govde?.Not, 500)], iptal);
                 if (degisen != 1)
                     throw GentegreHatasi.IsKurali("Rapor ön rapora geçirilemedi (kilitli ya da bulunamadı).");
+                await OnayBildirimiAsync(baglanti, islem, istemId, onaylayacakId.Value, govde?.Not, baglam, iptal);
                 await baglanti.CalistirAsync(
                     "update public.radyoloji_istem set durum = 4 where id = @p0", islem, [istemId], iptal);
             }
@@ -126,12 +143,26 @@ public static partial class RadyolojiUclari
         // Onaylı rapor kilitlidir; düzeltme AYRI kayıt olarak eklenir ve
         //   orijinal metin korunur.
         grup.MapPost("/rapor/{id:int}/addendum", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("rad.rapor_yaz");
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // TEK İŞLEM + ÖN KOŞUL (kod inceleme 30.10.2026 K12/K13): kaynak rapor satır kilidi altında
+            //   okunur; ek rapor yalnız ONAYLI-KİLİTLİ ANA rapora açılır - kilitsiz (taslak / ön rapor)
+            //   rapor doğrudan düzeltilir, addendumun addendumu açılmaz. Rapor ve bölüm aynı transaction'da:
+            //   bölümsüz rapor ekranda açılamayan boş bir ek rapor bırakıyordu.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var kaynak = await baglanti.TekAsync("""
+                select coalesce(r.kilit, 0)::int, (r.ust_rapor_id is null), r.istem_id
+                  from public.radyoloji_rapor r where r.id = @p0 for update
+                """, islem, [id], o => new { Kilit = o.GetInt32(0), AnaRapor = o.GetBoolean(1), IstemId = o.GetInt32(2) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            if (kaynak.Kilit != 1 || !kaynak.AnaRapor)
+                throw GentegreHatasi.IsKurali("Ek rapor yalnız onaylanmış (kilitli) ana rapora açılır; onaysız raporu doğrudan düzeltin.");
+
             var yeni = await baglanti.TekDegerAsync<int>("""
                 insert into public.radyoloji_rapor
                        (istem_id, sablon_id, sablon_surum, durum, ust_rapor_id,
@@ -139,13 +170,19 @@ public static partial class RadyolojiUclari
                 select r.istem_id, r.sablon_id, r.sablon_surum, 1, r.id, @p1, now()::timestamp, @p1
                   from public.radyoloji_rapor r where r.id = @p0
                 returning id
-                """, null, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
 
             await baglanti.CalistirAsync("""
                 insert into public.radyoloji_rapor_bolum (rapor_id, sira, baslik, metin, yazdir)
                 values (@p0, 1, 'Ek Rapor', '', 1)
-                """, null, [yeni], iptal);
+                """, islem, [yeni], iptal);
 
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloRapor, yeni,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { addendum = true, ustRaporId = id, istemId = kaynak.IstemId },
+                ustTabloId: LogTabloRapor, ustKayitId: id, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { raporId = yeni });
         });
 
@@ -156,6 +193,12 @@ public static partial class RadyolojiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("rad.rapor_yaz");
+            // BOŞ BİLDİRİM ONAY KAPISINI GEÇMESİN (kod inceleme 30.10.2026 K22): "kime, hangi yolla, ne zaman
+            //   haber verildi" kaydının vaadi bulgu ve bildirilen kişi dolu olmasına bağlı; boş satır onayı açıyordu.
+            if (string.IsNullOrWhiteSpace(istek.Bulgu))
+                throw GentegreHatasi.Dogrulama("Kritik bulgu metni boş olamaz.", new AlanHatasi("bulgu", "Zorunlu."));
+            if (string.IsNullOrWhiteSpace(istek.BildirilenAd))
+                throw GentegreHatasi.Dogrulama("Bildirilen kişi yazılmalı.", new AlanHatasi("bildirilenAd", "Zorunlu."));
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -287,12 +330,17 @@ public static partial class RadyolojiUclari
                 if (string.IsNullOrWhiteSpace(istek.Gorus))
                     throw GentegreHatasi.Dogrulama("Görüş metni boş olamaz.",
                         new AlanHatasi("gorus", "Zorunlu."));
-                await baglanti.CalistirAsync("""
+                // KAPSAM (kod inceleme 30.10.2026 K17): görüş yalnız YOLDAKİ istemin AÇIK (durum 1)
+                //   konsültasyonuna yazılır - başka istemin konsültasyon id'siyle görüş ezilemez,
+                //   cevaplanmış görüş üstüne yazılamaz. Eşleşmeyen kayıt var olmayanla aynı: 404.
+                var degisen = await baglanti.CalistirAsync("""
                     update public.radyoloji_konsultasyon
                        set gorus = @p1, durum = 2, donus_zamani = now()::timestamp,
                            degistiren = @p2, degistirme_tarihi = now()::timestamp
-                     where id = @p0
-                    """, null, [kid, istek.Gorus, baglam.KullaniciId], iptal);
+                     where id = @p0 and istem_id = @p3 and durum = 1
+                    """, null, [kid, istek.Gorus, baglam.KullaniciId, id], iptal);
+                if (degisen == 0)
+                    throw GentegreHatasi.Bulunamadi("Bu istemde cevap bekleyen konsültasyon bulunamadı.");
                 return Results.Ok(new { id = kid });
             }
 
@@ -335,4 +383,54 @@ public static partial class RadyolojiUclari
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal));
         });
     }
+    private const string BildirimKaynagi = "radyoloji/rapor";
+
+    /// <summary>
+    /// UZMANA BİLDİRİM (kullanıcı 28.10.2026: "bildirim ve not ekle"): seçilen uzmana zil 🔔 listesinde görünen,
+    /// raporu açan bir HATIRLATMA (kaynak 'radyoloji/rapor' + istem id → "↗ Kaydı aç" /radyoloji/rapor/{istem}).
+    /// Uygulama içi bildirimin ayrı bir tablosu yok; hatırlatma zili kişiye ait, bağlantılı satırın tek yeri.
+    /// Aynı raporun ÖNCEKİ açık bildirimi kapanır (başka uzmana yeniden gönderim iki kişide asılı kalmasın).
+    /// </summary>
+    private static async Task OnayBildirimiAsync(NpgsqlConnection b, NpgsqlTransaction islem, int istemId, int uzmanId,
+        string? not, IstekBaglami baglam, CancellationToken iptal)
+    {
+        await OnayBildirimiKapatAsync(b, islem, istemId, iptal);
+        var id = await b.TekDegerAsync<int>("""
+            insert into public.hatirlatma (sahip_id, baslik, notu, zaman, uyar_dk, oncelik, kanal_uygulama,
+                                           kaynak, kaynak_id, kaynak_ad, sube_id, ekleyen)
+            select @p0,
+                   left('Radyoloji raporu onayınızı bekliyor: '
+                        || coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')
+                        || coalesce(' · ' || nullif(hz.ad, ''), ''), 200),
+                   left(@p1, 500), now(), 0,
+                   case when coalesce(i.kritik, 0) = 1 then 3 else 2 end, 1,
+                   @p2, i.id, left(coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), 120),
+                   coalesce(@p3, i.sube_id, 0), @p4
+              from public.radyoloji_istem i
+              left join public.taraf t on t.id = i.hasta_id
+              left join public.hizmet hz on hz.id = i.hizmet_id
+             where i.id = @p5
+            returning id
+            """, islem, [uzmanId, Kisalt(not, 500), BildirimKaynagi, baglam.SubeId, baglam.KullaniciId, istemId], iptal);
+        await b.CalistirAsync("""
+            insert into public.hatirlatma_hareket (hatirlatma_id, olay, ayrinti, kullanici_id)
+            values (@p0, 1, 'radyoloji: uzmana gönderildi', @p1)
+            """, islem, [id, baglam.KullaniciId], iptal);
+    }
+
+    /// <summary>Raporun açık "onayınızı bekliyor" hatırlatmalarını tamamlar.</summary>
+    private static Task<int> OnayBildirimiKapatAsync(NpgsqlConnection b, NpgsqlTransaction islem, int istemId,
+        CancellationToken iptal)
+        => b.CalistirAsync("""
+            update public.hatirlatma set durum = 2, tamamlanma = now()
+             where kaynak = @p0 and kaynak_id = @p1 and durum = 1
+            """, islem, [BildirimKaynagi, istemId], iptal);
+
+    /// <summary>Not: kırpılmış, boşluksuz; yoksa boş metin (kolon not null).</summary>
+    private static string Kisalt(string? metin, int uzunluk)
+    {
+        var t = (metin ?? "").Trim();
+        return t.Length > uzunluk ? t[..uzunluk] : t;
+    }
+
 }

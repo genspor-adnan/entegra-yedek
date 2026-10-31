@@ -332,9 +332,20 @@ public static class StokSayimUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
             var b = await AcikBaslikAsync(baglanti, islem, baglam, id, iptal);
-            // Silme logu SİLMEDEN ÖNCE (ULog kuralı).
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
+            //   eskiden yalnız sayım no + depo yazılıyordu; başlığın tam hâli ve sayım satırları
+            //   (`__detaylar`) logdan okunabilmeli. Log ve silme aynı transaction.
+            var tam = await baglanti.TekAsync("select * from public.stok_sayim where id = @p0 for update",
+                islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Sayım bulunamadı.");
+            var satirlar = await baglanti.ListeAsync("select * from public.stok_sayim_satir where sayim_id = @p0 order by id",
+                islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var bilgi = tam.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value));
+            bilgi["__detaylar"] = new
+            {
+                satirlar = satirlar.Select(s => s.ToDictionary(x => x.Key, x => LogDeposu.Metin(x.Value))),
+            };
             await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogSayim, id,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { b.SayimNo, b.DepoId }, iptal: iptal);
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, bilgi, iptal: iptal);
             await baglanti.CalistirAsync("delete from public.stok_sayim where id = @p0", islem, [id], iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id });

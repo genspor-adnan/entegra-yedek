@@ -106,4 +106,82 @@ public class SorguUreticiTestleri
         // 399/400 ile eklenen sıralama anahtarları da seçime giriyor.
         Assert.Contains("aramaSonTarih", p.Sql, StringComparison.Ordinal);
     }
+    // ------------------------------------------ kod inceleme 30.10.2026 K19 ----
+
+    [Fact]
+    public void GizliAlan_filtrede_BILINMEYEN_sayilir()
+    {
+        var kaynak = KaynakKatalogu.Bul("hasta")!;
+        var u = new SorguUretici(kaynak) { GorunurAlanlar = new HashSet<string> { "id" } };
+        var istek = new ListeIstegi
+        {
+            Filtre = new Kosul { Alan = "unvan", Op = KosulOperatoru.Icerir, Deger = "x" },
+        };
+        var h = Assert.Throws<GentegreHatasi>(() => u.Satirlar(istek, Kolonlar(), subeId: 1,
+                                                                kapsamTarafIdleri: null, kullaniciId: null));
+        // Olmayan alanla AYNI metin: yetkisiz kolonun varligi da sir.
+        Assert.Contains("Bilinmeyen alan", h.Message);
+        Assert.DoesNotContain("yetki", h.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void GizliAlan_siralamada_ATLANIR_kume_yoksa_kisit_yok()
+    {
+        var kaynak = KaynakKatalogu.Bul("hasta")!;
+        var unvan = kaynak.Kolon("unvan")!;
+        var istek = new ListeIstegi { Sirala = [new Siralama { Alan = "unvan", Yon = "desc" }] };
+
+        var gizli = new SorguUretici(kaynak) { GorunurAlanlar = new HashSet<string> { "id" } }
+            .Satirlar(istek, Kolonlar(), 1, null, null);
+        Assert.DoesNotContain((unvan.SiraSql ?? unvan.Sql) + " desc", gizli.Sql);
+
+        var acik = new SorguUretici(kaynak).Satirlar(istek, Kolonlar(), 1, null, null);
+        Assert.Contains((unvan.SiraSql ?? unvan.Sql) + " desc", acik.Sql);
+    }
+
+    // ------------------------------------------ kod inceleme 30.10.2026 K41 ----
+
+    [Fact]
+    public void Tarih_kucukEsit_ve_esit_GUN_SONUNU_kapsar()
+    {
+        var kaynak = KaynakKatalogu.Bul("hasta")!;
+        var tarih = kaynak.Kolonlar.First(k => k.Tip is "tarih" or "zaman" && k.Filtrelenebilir);
+        SorguParcasi P(string op, object deger) => new SorguUretici(kaynak).Satirlar(
+            new ListeIstegi { Filtre = new Kosul { Alan = tarih.Ad, Op = op, Deger = deger } },
+            Kolonlar(), 1, null, null);
+
+        Assert.Contains("interval '1 day'", P(KosulOperatoru.KucukEsit, "2026-10-28").Sql);
+        Assert.Contains("interval '1 day'", P(KosulOperatoru.Esit, "2026-10-28").Sql);
+        // Saat verildiyse gun kurali uygulanmaz.
+        Assert.DoesNotContain("interval '1 day'", P(KosulOperatoru.KucukEsit, "2026-10-28T10:30:00").Sql);
+    }
+
+    /// <summary>K65: yaprak sayısı ve `icinde` listesi sınırlı - aşım 400 DOGRULAMA, 500 değil.</summary>
+    [Fact]
+    public void Suzgec_siniri_asilirsa_DOGRULAMA()
+    {
+        var uzun = new ListeIstegi
+        {
+            Filtre = new Kosul { Alan = "id", Op = KosulOperatoru.Icinde,
+                                 Deger = Enumerable.Range(1, SorguUretici.EnFazlaListe + 1).Cast<object>().ToArray() },
+        };
+        var h1 = Assert.Throws<GentegreHatasi>(() => Uretici().Satirlar(uzun, Kolonlar(), 1, null, null));
+        Assert.Equal("DOGRULAMA", h1.Kod);
+
+        var cok = new ListeIstegi
+        {
+            Filtre = new Kosul { Op = "and", Kosullar = Enumerable.Range(1, SorguUretici.EnFazlaYaprak + 1)
+                .Select(i => new Kosul { Alan = "id", Op = KosulOperatoru.Esit, Deger = i }).ToList() },
+        };
+        var h2 = Assert.Throws<GentegreHatasi>(() => Uretici().Satirlar(cok, Kolonlar(), 1, null, null));
+        Assert.Equal("DOGRULAMA", h2.Kod);
+
+        // Sınırın altı geçer.
+        var tam = new ListeIstegi
+        {
+            Filtre = new Kosul { Alan = "id", Op = KosulOperatoru.Icinde,
+                                 Deger = Enumerable.Range(1, SorguUretici.EnFazlaListe).Cast<object>().ToArray() },
+        };
+        Assert.NotNull(Uretici().Satirlar(tam, Kolonlar(), 1, null, null));
+    }
 }

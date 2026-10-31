@@ -34,6 +34,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi Sevk() => new(
         Ad: "sevk",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "s.taraf_id",
         // Muayene yetkisi (16.10.2026): muayenedeki Sevk çerçevesi bu kaynağı okur; Sevk Listesi
         //   menüsünü muayene.sevk açar.
         YetkiKodu: "muayene",

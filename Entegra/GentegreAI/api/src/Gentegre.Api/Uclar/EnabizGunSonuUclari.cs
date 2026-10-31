@@ -25,6 +25,19 @@ public static class EnabizGunSonuUclari
     private const decimal AltSinir = 95m;
     private const decimal UstSinir = 103m;
 
+    /// <summary>
+    /// ŞUBE KAPISI (K32): hesaplama istemciden gelen şubeye yazılır - o şube
+    /// kullanıcının yetkili şubelerinden biri olmalı; verilmezse aktif şube.
+    /// 0 (kurum geneli) mevcut `enabiz.gun_sonu` yetkisiyle kalır.
+    /// </summary>
+    private static int HedefSube(IstekBaglami baglam, int? istenen)
+    {
+        var sube = istenen ?? baglam.SubeId ?? 0;
+        if (sube != 0 && !baglam.Subeler.Any(s => s.Id == sube))
+            throw GentegreHatasi.Yasak("Bu şubede işlem yetkiniz yok.");
+        return sube;
+    }
+
     public static void EnabizGunSonuUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/enabiz/gun-sonu").WithTags("e-Nabız").RequireAuthorization();
@@ -184,7 +197,7 @@ public static class EnabizGunSonuUclari
             if (new DateTime(yil, ay, 1) > new DateTime(Saat.Simdi.Year, Saat.Simdi.Month, 1))
                 throw GentegreHatasi.Dogrulama("Gelecek bir ayın özeti hesaplanamaz.");
 
-            var s = await servis.AyHesaplaAsync(yil, ay, istek?.SubeId ?? baglam.SubeId ?? 0,
+            var s = await servis.AyHesaplaAsync(yil, ay, HedefSube(baglam, istek?.SubeId),
                 baglam.KullaniciId, istek?.PaketUret ?? true, iptal);
             return Results.Ok(new { s.AySonuId, s.Yil, s.Ay, s.KlinikSayisi, s.SatirSayisi,
                                     s.PaketNo, mesaj = s.Aciklama });
@@ -204,7 +217,7 @@ public static class EnabizGunSonuUclari
             if (tarih > DateOnly.FromDateTime(Saat.Simdi))
                 throw GentegreHatasi.Dogrulama("Gelecek bir günün gün sonu hesaplanamaz.");
 
-            var s = await servis.HesaplaAsync(tarih, istek?.SubeId ?? baglam.SubeId ?? 0,
+            var s = await servis.HesaplaAsync(tarih, HedefSube(baglam, istek?.SubeId),
                 baglam.KullaniciId, istek?.PaketUret ?? true, iptal);
             return Results.Ok(new { s.GunSonuId, tarih = s.Tarih, s.OlcutSayisi, s.ToplamSayi,
                                     s.PaketNo, mesaj = s.Aciklama });

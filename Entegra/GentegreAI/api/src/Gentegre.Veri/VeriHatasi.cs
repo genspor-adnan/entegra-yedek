@@ -169,7 +169,9 @@ public static class VeriHatasi
     private static string BenzersizMesaji(PostgresException h)
         => h.ConstraintName is not null && BenzersizMesajlari.TryGetValue(h.ConstraintName, out var m)
             ? m
-            : $"Ayni kayit zaten var{(h.ConstraintName is null ? "" : $" ({h.ConstraintName})")}.";
+            // Kısıt adı istemciye GİTMEZ (kod inceleme 30.10.2026 K62): şema adı sızdırıyordu; izleme no ile
+            //   sunucu günlüğünden bulunur (ara katman istisnayı tam yazar).
+            : "Aynı kayıt zaten var.";
 
     /// <summary>PG kolon adi (snake_case) -> API alan adi (camelCase).</summary>
     private static string Alan(PostgresException h)

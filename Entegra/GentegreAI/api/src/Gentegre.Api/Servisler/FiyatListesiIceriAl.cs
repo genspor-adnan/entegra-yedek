@@ -40,9 +40,14 @@ public static class FiyatListesiIceriAl
                                    decimal Fiyat, string Doviz, short KdvDahil,
                                    short Birim, short Durum);
 
+    /// <param name="islemIcinde">
+    /// Upsert transaction'ı commit edilmeden ÖNCE çağrılır (kod inceleme 30.10.2026 K33): çağıran
+    /// denetim logunu satırlarla AYNI transaction'a yazar. Hata vermesi upsert'i de geri alır.
+    /// </param>
     public static async Task<Sonuc> CalistirAsync(
         NpgsqlConnection baglanti, int listeId, short listeKdvDahil,
-        ExcelOkuma.Sayfa sayfa, int kullaniciId, CancellationToken iptal)
+        ExcelOkuma.Sayfa sayfa, int kullaniciId, CancellationToken iptal,
+        Func<NpgsqlTransaction, Sonuc, Task>? islemIcinde = null)
     {
         // ---- 1) baslik eslestirme ------------------------------------------
         // Basliklar SAYFANIN baslik satirindan kontrol edilir, veri satirindan
@@ -257,10 +262,11 @@ public static class FiyatListesiIceriAl
                 var yeni = (bool)(await komut.ExecuteScalarAsync(iptal))!;
                 if (yeni) eklenen++; else guncellenen++;
             }
+            var sonuc = new Sonuc(eklenen, guncellenen, temiz.Count, Array.Empty<SatirHatasi>(), 0);
+            if (islemIcinde is not null) await islemIcinde(islem, sonuc);
             await islem.CommitAsync(iptal);
+            return sonuc;
         }
-
-        return new Sonuc(eklenen, guncellenen, temiz.Count, Array.Empty<SatirHatasi>(), 0);
     }
 
     /// <summary>

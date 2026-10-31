@@ -505,14 +505,19 @@ public static class BankoOturumUclari
                     + "Tek kişi çalışılıyorsa Ayarlar'dan \"banko.kendi_onay\" açılabilir.");
 
             await using var islem = await b.BeginTransactionAsync(iptal);
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K14): okunan durum ile yazım
+            //   arasında başkası onaylamış / reddetmiş olabilir - güncelleme
+            //   `durum = beklenen` koşuluyla yazılır, satır etkilenmediyse 422.
+            //   İkinci onay böylece ikinci tutanak ve ikinci fark fişi üretmez.
             if (o.Durum == OnayBekler)
             {
-                await b.CalistirAsync("""
+                var etkilenen = await b.CalistirAsync("""
                     update public.banko_oturum
                        set durum = 2, acilis_ts = now(), acilis_onay_id = @p1,
                            acilis_onay_ts = now(), degistiren = @p1, degistirme_tarihi = now()
-                     where id = @p0
-                    """, islem, [id, baglam.KullaniciId], iptal);
+                     where id = @p0 and durum = @p2
+                    """, islem, [id, baglam.KullaniciId, OnayBekler], iptal);
+                if (etkilenen == 0) throw GentegreHatasi.IsKurali("Bu oturum artık onay beklemiyor; liste yenilenmeli.");
             }
             else if (o.Durum == TeslimBekler)
             {
@@ -520,14 +525,15 @@ public static class BankoOturumUclari
                 //   fark ayrı fişle muhasebeleşir, kasa bakiyesi sayımla
                 //   eşitlenir ve fark geçmişi bozulmaz.
                 var tutanak = await TutanakNoAsync(b, islem, iptal);
-                await b.CalistirAsync("""
+                var etkilenen = await b.CalistirAsync("""
                     update public.banko_oturum
                        set durum = 4, kapanis_ts = now(), kapanis_onay_id = @p1,
                            kapanis_onay_ts = now(), tutanak_no = @p2,
                            teslim_alan_id = coalesce(teslim_alan_id, @p1),
                            degistiren = @p1, degistirme_tarihi = now()
-                     where id = @p0
-                    """, islem, [id, baglam.KullaniciId, tutanak], iptal);
+                     where id = @p0 and durum = @p3
+                    """, islem, [id, baglam.KullaniciId, tutanak, TeslimBekler], iptal);
+                if (etkilenen == 0) throw GentegreHatasi.IsKurali("Bu oturum artık onay beklemiyor; liste yenilenmeli.");
                 // FARK FISI KAPANISTA YAZILIR, teslime gonderirken degil:
                 //   sorumlu reddederse gorevli yeniden sayar ve fark degisir -
                 //   her denemede fis yazmak kasayi birkac kez duzeltirdi.
@@ -637,10 +643,20 @@ public static class BankoOturumUclari
             if (birakilan > sayim)
                 throw GentegreHatasi.Dogrulama("Kasada bırakılan tutar sayılan nakitten fazla olamaz.",
                     new AlanHatasi("kasadaBirakilan", "Sayılan nakitten fazla olamaz."));
+            // ŞUBE KAPISI (K32): teslim alan, AKTİF bir kullanıcı hesabı olmalı -
+            //   istemciden gelen kimlik doğrulanmadan tutanağa yazılıyordu.
+            if (istek.TeslimAlanId is { } teslimAlan && !await b.TekDegerAsync<bool>(
+                    "select exists (select 1 from public.taraf_kullanici k where k.id = @p0 and coalesce(k.aktif, 1) = 1)",
+                    null, [teslimAlan], iptal))
+                throw GentegreHatasi.Dogrulama("Teslim alan geçerli bir kullanıcı değil.",
+                    new AlanHatasi("teslimAlanId", "Aktif bir kullanıcı seçilmeli."));
 
             var onayIster = ozet.GunSonuOnay;
             await using var islem = await b.BeginTransactionAsync(iptal);
-            await b.CalistirAsync("""
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K14): yalnız hâlâ AÇIK (2)
+            //   oturum gün sonuna gider; iki gün-sonu isteği aynı anda gelirse
+            //   ikincisi satırı etkilemez ve 422 alır - tutanak ve fark fişi tek.
+            var etkilenen = await b.CalistirAsync("""
                 update public.banko_oturum
                    set durum = @p1, kapanis_talep_ts = now(),
                        kapanis_sayim = @p2, kapanis_beklenen = @p3, kapanis_fark = @p4,
@@ -649,12 +665,14 @@ public static class BankoOturumUclari
                        teslim_alan_id = @p9,
                        kapanis_ts = case when @p1 = 4 then now() end,
                        degistiren = @p10, degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum = @p11
                 """, islem,
                 [id, onayIster ? TeslimBekler : Kapandi, sayim, beklenen, fark,
                  (short)(istek.FarkNeden ?? 0), Kirp(istek.FarkAciklama, 600),
                  birakilan, Math.Round(sayim - birakilan, 2),
-                 istek.TeslimAlanId, baglam.KullaniciId], iptal);
+                 istek.TeslimAlanId, baglam.KullaniciId, Acik], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Oturum artık açık değil (bu arada teslime gönderilmiş ya da kapanmış); ekranı yenileyin.");
 
             await b.CalistirAsync("delete from public.banko_oturum_kupur where oturum_id = @p0 and asama = 2",
                                   islem, [id], iptal);
@@ -959,6 +977,15 @@ public static class BankoOturumUclari
         if (kasaHesapId is not > 0)
             return " Fark fişi üretilmedi: bankonun kasa hesabı tanımlı değil.";
 
+        // TEK FARK FİŞİ (kod inceleme 30.10.2026 K14): oturum satırı kilitlenir ve
+        //   fiş yalnız `fark_islem_id` boşken yazılır - ikinci kapanış denemesi
+        //   (yarışan onay, yeniden açılıp kapanan oturum) kasayı iki kez düzeltmez.
+        var mevcutFis = await b.TekDegerAsync<int?>(
+            "select fark_islem_id from public.banko_oturum where id = @p0 for update",
+            islem, [oturumId], iptal);
+        if (mevcutFis is > 0)
+            return $" Fark fişi daha önce oluşturulmuş (#{mevcutFis}); yeniden yazılmadı.";
+
         var karsi = await AyarAsync(b, islem, "banko.fark_hesap_id", iptal);
         if (!int.TryParse(karsi, out var karsiHesap) || karsiHesap <= 0)
             return " Fark fişi üretilmedi: \"Kasa sayım farkı hesabı\" (banko.fark_hesap_id) tanımlı değil.";
@@ -983,9 +1010,16 @@ public static class BankoOturumUclari
             [tur, kasaHesapId, karsiHesap, Math.Abs(fark), oturumId,
              Kirp(not, 300), baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
 
-        await b.CalistirAsync(
-            "update public.banko_oturum set fark_islem_id = @p1 where id = @p0",
+        // KOŞULLU BAĞ (K14): satır bu arada fiş almışsa yeni fiş geri alınır
+        //   (aynı tx içinde silinir) - oturumda tek fark fişi kalır.
+        var baglandi = await b.CalistirAsync(
+            "update public.banko_oturum set fark_islem_id = @p1 where id = @p0 and fark_islem_id is null",
             islem, [oturumId, (int)fisId], iptal);
+        if (baglandi == 0)
+        {
+            await b.CalistirAsync("delete from public.kasa_islem where id = @p0", islem, [(int)fisId], iptal);
+            return " Fark fişi daha önce oluşturulmuş; yeniden yazılmadı.";
+        }
 
         return $" Fark fişi oluşturuldu (#{fisId}, {Math.Abs(fark):N2} ₺ "
                + (fark > 0 ? "fazla" : "noksan") + ").";
@@ -1029,6 +1063,11 @@ public static class BankoOturumUclari
     private static async Task<string> TutanakNoAsync(NpgsqlConnection b, NpgsqlTransaction islem,
                                                      CancellationToken iptal)
     {
+        // BENZERSİZ NUMARA (kod inceleme 30.10.2026 K14): `max + 1` iki eşzamanlı
+        //   kapanışta aynı numarayı verirdi. Transaction ömürlü danışma kilidi
+        //   sayacı sıralar: ikinci tx kilidi birincinin commit'inden sonra alır ve
+        //   max'ı o zaman okur. Kalıcı güvence db/1202 kısmi benzersiz indeks.
+        await b.CalistirAsync("select pg_advisory_xact_lock(hashtext('banko_tutanak'))", islem, [], iptal);
         var n = await b.TekDegerAsync<int>("""
             select coalesce(max(nullif(split_part(tutanak_no, '-', 3), '')::int), 0) + 1
               from public.banko_oturum

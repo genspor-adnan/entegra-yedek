@@ -101,6 +101,10 @@ public sealed class LogDeposu
     {
         null => "",
         DateTime t => t.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
+        // Aynı biçim ailesi (K74): timestamptz UTC'ye çevrilip DateTime gibi, date yalnız gün, time saat.
+        DateTimeOffset z => z.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
+        DateOnly g => g.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+        TimeOnly sa => sa.ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
         decimal m => m.ToString(System.Globalization.CultureInfo.InvariantCulture),
         double f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
         float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),

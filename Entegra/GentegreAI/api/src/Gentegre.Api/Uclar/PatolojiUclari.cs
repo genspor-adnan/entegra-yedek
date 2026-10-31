@@ -63,33 +63,44 @@ public static class PatolojiUclari
             baglam.YetkiIste("patoloji.gonderim", Islem.Degistir);
             if (g.Idler is not { Length: > 0 }) throw GentegreHatasi.Dogrulama("Vaka seçilmedi.");
             await using var b = await veri.AcAsync(iptal);
+            // TEK İŞLEM + VAKA KİLİDİ (K12 / K13): vakalar `for update` okunur, bütün bağlar ve log aynı
+            //   transaction'da; eşzamanlı iki ekleme aynı vakayı iki pakete yazamaz (koşullu update de sigorta).
+            await using var tx = await b.BeginTransactionAsync(iptal);
             var vakalar = await b.ListeAsync(
-                "select id, vaka_no, durum, calisma_yeri, dis_lab_id, gonderim_id, serbest from public.pat_vaka where id = any(@p0)",
-                null, [g.Idler], o => new { id = o.GetInt32(0), no = o.GetString(1), durum = o.GetInt16(2), yer = o.GetInt16(3),
-                                            lab = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), paket = o.IsDBNull(5) ? (int?)null : o.GetInt32(5),
-                                            serbest = o.GetInt16(6) }, iptal);
+                "select id, vaka_no, durum, calisma_yeri, dis_lab_id, gonderim_id, serbest from public.pat_vaka where id = any(@p0) order by id for update",
+                tx, [g.Idler], o => new { id = o.GetInt32(0), no = o.GetString(1), durum = o.GetInt16(2), yer = o.GetInt16(3),
+                                          lab = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), paket = o.IsDBNull(5) ? (int?)null : o.GetInt32(5),
+                                          serbest = o.GetInt16(6) }, iptal);
             var eklenen = new List<string>(); var atlanan = new List<string>(); var paketler = new HashSet<string>();
+            var kilitliLablar = new HashSet<int>();
             foreach (var v in vakalar)
             {
                 if (v.serbest == 0) { atlanan.Add($"{v.no} (başvuru kaydı bekliyor)"); continue; }
                 if (v.yer != 1 || v.lab is null) { atlanan.Add($"{v.no} (kurum içi / lab yok)"); continue; }
                 if (v.paket is not null) { atlanan.Add($"{v.no} (zaten pakette)"); continue; }
                 if (v.durum is not (1 or 2)) { atlanan.Add($"{v.no} (durum uygun değil)"); continue; }
+                // AÇIK PAKET SEÇİMİ: "yoksa aç" kararı lab + şube başına danışma kilidiyle sıralanır - satır
+                //   kilidi henüz olmayan paketi koruyamaz, iki istek aynı laba iki açık paket açıyordu.
+                if (kilitliLablar.Add(v.lab.Value))
+                    await b.CalistirAsync("select pg_advisory_xact_lock(@p0, @p1)", tx, [v.lab.Value, baglam.SubeId ?? 0], iptal);
                 var paketId = await b.TekDegerAsync<int?>(
-                    "select id from public.pat_gonderim where dis_lab_id = @p0 and durum = 1 and sube_id = @p1 order by id desc limit 1",
-                    null, [v.lab, baglam.SubeId], iptal);
+                    "select id from public.pat_gonderim where dis_lab_id = @p0 and durum = 1 and sube_id = @p1 order by id desc limit 1 for update",
+                    tx, [v.lab, baglam.SubeId], iptal);
                 if (paketId is null)
                 {
                     paketId = await b.TekDegerAsync<int>(
                         "insert into public.pat_gonderim (dis_lab_id, sube_id, ekleyen) values (@p0, @p1, @p2) returning id",
-                        null, [v.lab, baglam.SubeId, baglam.KullaniciId], iptal);
-                    await log.YazAsync(LogIslemi.Ekle, LogGonderim, paketId.Value, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { otomatik = true }, iptal: iptal);
+                        tx, [v.lab, baglam.SubeId, baglam.KullaniciId], iptal);
+                    await log.YazAsync(b, tx, LogIslemi.Ekle, LogGonderim, paketId.Value, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { otomatik = true }, iptal: iptal);
                 }
-                await b.CalistirAsync("update public.pat_vaka set gonderim_id = @p1, durum = 2, degistiren = @p2, degistirme_tarihi = now() where id = @p0",
-                    null, [v.id, paketId, baglam.KullaniciId], iptal);
-                paketler.Add(await b.TekDegerAsync<string>("select gonderim_no from public.pat_gonderim where id = @p0", null, [paketId], iptal) ?? "");
+                var n = await b.CalistirAsync("update public.pat_vaka set gonderim_id = @p1, durum = 2, degistiren = @p2, degistirme_tarihi = now() where id = @p0 and gonderim_id is null and durum in (1, 2)",
+                    tx, [v.id, paketId, baglam.KullaniciId], iptal);
+                if (n == 0) { atlanan.Add($"{v.no} (bu arada değişti)"); continue; }
+                await log.YazAsync(b, tx, LogIslemi.Degistir, LogVaka, v.id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Hazırlandı", gonderimId = paketId }, iptal: iptal);
+                paketler.Add(await b.TekDegerAsync<string>("select gonderim_no from public.pat_gonderim where id = @p0", tx, [paketId], iptal) ?? "");
                 eklenen.Add(v.no);
             }
+            await tx.CommitAsync(iptal);
             var mesaj = eklenen.Count > 0 ? $"{eklenen.Count} vaka pakete eklendi ({string.Join(", ", paketler)})." : "Pakete eklenen vaka yok.";
             if (atlanan.Count > 0) mesaj += " Atlanan: " + string.Join(", ", atlanan) + ".";
             return Results.Ok(new { mesaj });
@@ -159,10 +170,12 @@ public static class PatolojiUclari
         });
 
         // GÖRDÜM: isteyen hekim raporu açtı / okudu. Raporsuz vaka "görülemez".
+        //   YAZAN UÇ = Değiştir yetkisi (K13 inceleme): durum 11→12 geçişi ve gordu_id damgası yazımdır;
+        //   Gor ile salt-okuma şubesinde de yazılabiliyordu.
         grup.MapPost("/vaka/{id:int}/gordum", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("patoloji.vaka", Islem.Gor);
+            baglam.YetkiIste("patoloji.vaka", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             var n = await b.CalistirAsync(
                 "update public.pat_vaka set durum = 12, gordu_zamani = now(), gordu_id = @p1 where id = @p0 and durum = 11",
@@ -178,7 +191,9 @@ public static class PatolojiUclari
         grup.MapPost("/vaka/{id:int}/ek-{karar}", async (int id, string karar, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("patoloji.ek-onay", Islem.Gor);
+            // patoloji.ek-onay yetki tablosunda AKSİYON (tür 1) - kaynak yetkisi gibi Gor ile sorulması hem
+            //   yanlış türdü hem de yazan ucu salt-okuma şubesinde açık bırakıyordu (AksiyonIste yazma hakkı ister).
+            baglam.AksiyonIste("patoloji.ek-onay");
             if (karar is not ("onayla" or "reddet")) throw GentegreHatasi.Bulunamadi();
             await using var b = await veri.AcAsync(iptal);
             var n = await b.CalistirAsync(

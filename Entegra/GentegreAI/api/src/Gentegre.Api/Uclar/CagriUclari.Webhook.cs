@@ -14,8 +14,12 @@ public static partial class CagriUclari
 {
     private static void WebhookUclari(RouteGroupBuilder grup)
     {
-        grup.MapPost("/olay/{saglayici}", async (string saglayici, string? anahtar, OlayIstegi g, VeriKaynagi veri, CancellationToken iptal) =>
+        grup.MapPost("/olay/{saglayici}", async (string saglayici, string? anahtar, OlayIstegi g, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
+            // ANAHTAR BAŞLIKTA (kod inceleme 30.10.2026 K60): sorgu dizesi nginx erişim günlüğüne düşer. Önce
+            //   X-Santral-Anahtar başlığı; `?anahtar=` eski santral tanımları için geçici olarak kabul edilir.
+            var baslikAnahtar = ctx.Request.Headers["X-Santral-Anahtar"].ToString();
+            if (!string.IsNullOrWhiteSpace(baslikAnahtar)) anahtar = baslikAnahtar;
             await using var b = await veri.AcAsync(iptal);
             var sube = string.IsNullOrWhiteSpace(anahtar) ? null :
                 await b.TekDegerAsync<int?>("select sube_id from public.cagri_santral where webhook_anahtar = @p0 and webhook_anahtar <> ''", null, [anahtar], iptal);
@@ -25,7 +29,8 @@ public static partial class CagriUclari
             var reff = (g.Ref ?? "").Trim();
             var kuyrukId = await KuyrukBulAsync(b, g.Kuyruk, iptal);
             var agentId = await AgentBulAsync(b, g.Dahili, iptal);
-            int? id = reff == "" ? null : await b.TekDegerAsync<int?>("select id from public.cagri where dis_ref = @p0", null, [reff], iptal);
+            // Çağrı yalnız anahtarın şubesinde aranır (K60): bir şubenin anahtarıyla başkasının çağrısı kapatılamaz.
+            int? id = reff == "" ? null : await b.TekDegerAsync<int?>("select id from public.cagri where dis_ref = @p0 and sube_id = @p1", null, [reff, sube], iptal);
             var ham = Kirp(JsonSerializer.Serialize(g), 1000);
             switch (olay)
             {
@@ -74,14 +79,14 @@ public static partial class CagriUclari
                                kayit_url = coalesce(nullif(@p2, ''), kayit_url),
                                durum = case when cevap is null then 6 when konu_id is null then 4 else 5 end
                          where id = @p0 and durum not in (5)
-                        """, null, [id, g.SureSn, g.KayitUrl ?? ""], iptal);
+                        """, null, [id, g.SureSn, KayitUrlTemiz(g.KayitUrl)], iptal);
                     await OlayYazAsync(b, id.Value, 6, agentId, cevaplandi ? "Kapandı" : "Kaçan çağrı", ham, iptal);
                     if (cevaplandi)
                         await AgentIslemSonrasinaAlAsync(b, await b.TekDegerAsync<int?>("select agent_id from public.cagri where id = @p0", null, [id], iptal), iptal);
                     break;
                 case "voicemail":
                     if (id is null) return Results.NotFound();
-                    await b.CalistirAsync("update public.cagri set durum = 7, bitis = now(), kayit_url = coalesce(nullif(@p1, ''), kayit_url) where id = @p0", null, [id, g.KayitUrl ?? ""], iptal);
+                    await b.CalistirAsync("update public.cagri set durum = 7, bitis = now(), kayit_url = coalesce(nullif(@p1, ''), kayit_url) where id = @p0", null, [id, KayitUrlTemiz(g.KayitUrl)], iptal);
                     await OlayYazAsync(b, id.Value, 6, null, "Sesli mesaj bırakıldı", ham, iptal);
                     break;
                 default:
@@ -101,4 +106,8 @@ public static partial class CagriUclari
             values (1, 1, @p0, @p1, @p2, @p3, @p4, @p5, now(), case when @p6 then now() end, case when @p6 then 2 else 1 end, @p7) returning id
             """, null, [tel, (g.Aranan ?? "").Trim(), tarafId, kuyrukId, agentId, reff, cevaplandi, sube], iptal);
     }
+    /// <summary>Kayıt adresi yalnız http(s) olabilir (K60): dışarıdan gelen `javascript:` / dosya yolu saklanmaz.</summary>
+    private static string KayitUrlTemiz(string? url)
+        => Uri.TryCreate((url ?? "").Trim(), UriKind.Absolute, out var u)
+           && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp) ? u.ToString() : "";
 }

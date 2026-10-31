@@ -145,7 +145,13 @@ public static partial class AmeliyathaneUclari
             baglam.AksiyonIste("ameliyathane.faturala");
             baglam.YetkiIste("belge", Islem.Degistir);
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): ameliyat satırı kilitlenir,
+            //   bağsız kalemler `for update` ile okunur, başvuru/belge yazımı ve
+            //   kalem bağları aynı transaction'da gider. Eskiden belge kendi
+            //   bağlantısında commit oluyor, bağ sonra yazılıyordu: eş zamanlı
+            //   ikinci istek (ya da arada hata) aynı kalemi iki kez faturalardı.
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var a = await baglanti.TekAsync("""
                 select a.hasta_id as "hastaId", a.sube_id as "subeId",
@@ -153,7 +159,8 @@ public static partial class AmeliyathaneUclari
                        a.ameliyat_no as "ameliyatNo", a.durum,
                        (select y.belge_id from public.yatis y where y.id = a.yatis_id) as "yatisBelgeId"
                   from public.ameliyat a where a.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Ameliyat bulunamadı.");
 
             if (Convert.ToInt16(a["durum"] ?? (short)0) == DurumIptal)
@@ -169,13 +176,15 @@ public static partial class AmeliyathaneUclari
             var yazma = new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip);
             if (belgeId is null)
             {
-                belgeId = await BasvuruAcAsync(baglanti, belgeDepo, a, istek.OdeyenKurumId,
+                belgeId = await BasvuruAcAsync(baglanti, islem, belgeDepo, a, istek.OdeyenKurumId,
                                                yazma, iptal);
                 yeniBasvuru = true;
             }
 
             // ------------------------------------------- faturalanacaklar ----
             // YALNIZ BAĞSIZ SATIRLAR: ikinci çağrı aynı kalemi tekrar yazmaz.
+            //   `for update of i`: eş zamanlı ikinci faturalama bu satırlarda
+            //   bekler, kilit açılınca bağlı görür ve hiç kalem bulamaz (K12).
             var islemler = await baglanti.ListeAsync("""
                 select i.id, i.hizmet_id as "hizmetId", i.taraf,
                        coalesce(hz.ad, i.aciklama) as ad, coalesce(hz.kdv, 0) as kdv
@@ -184,7 +193,8 @@ public static partial class AmeliyathaneUclari
                  where i.ameliyat_id = @p0 and i.belge_satir_id is null
                    and i.hizmet_id is not null
                  order by i.sira, i.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+                   for update of i
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var sarflar = istek.MalzemeDahil
                 ? await baglanti.ListeAsync("""
@@ -196,7 +206,8 @@ public static partial class AmeliyathaneUclari
                      where f.ameliyat_id = @p0 and f.belge_satir_id is null
                        and f.faturaya = 1 and f.stok_id is not null and f.miktar > 0
                      order by f.id
-                    """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                       for update of f
+                    """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 : [];
 
             if (islemler.Count == 0 && sarflar.Count == 0)
@@ -221,7 +232,7 @@ public static partial class AmeliyathaneUclari
                     ["tur"] = 2,                        // 2 = hizmet kalemi
                     ["hizmetId"] = i["hizmetId"],
                     ["miktar"] = 1m,
-                    ["birimFiyat"] = await FiyatAsync(baglanti, belgeId.Value, a["hastaId"],
+                    ["birimFiyat"] = await FiyatAsync(baglanti, islem, belgeId.Value, a["hastaId"],
                                                       null, i["hizmetId"], iptal),
                     ["kdv"] = i["kdv"],
                     ["dovizCinsi"] = "TL",
@@ -241,7 +252,7 @@ public static partial class AmeliyathaneUclari
                     ["tur"] = 1,
                     ["stokId"] = f["stokId"],
                     ["miktar"] = f["miktar"],
-                    ["birimFiyat"] = await FiyatAsync(baglanti, belgeId.Value, a["hastaId"],
+                    ["birimFiyat"] = await FiyatAsync(baglanti, islem, belgeId.Value, a["hastaId"],
                                                       f["stokId"], null, iptal),
                     ["kdv"] = f["kdv"],
                     ["dovizCinsi"] = "TL",
@@ -250,40 +261,57 @@ public static partial class AmeliyathaneUclari
                 }));
             }
 
-            var (_, uyarilar) = await belgeDepo.GuncelleAsync(belgeId.Value, belge, satirlar,
+            var (_, uyarilar) = await belgeDepo.GuncelleAsync(baglanti, islem, belgeId.Value, belge, satirlar,
                 // Stok kontrolü KAPALI: tür 19 stoğa dokunmuyor, kontrol
                 //   açılsaydı henüz düşülmemiş malzeme için boş yere engel çıkardı.
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = false }, yazma, iptal);
 
             // Üretilen satırlar kaleme BAĞLANIR: "bu işlem faturalandı mı"
             //   sorusu tek join ile, tekrar faturalama da bu bağla engelleniyor.
-            await baglanti.CalistirAsync("""
+            // EŞLEŞME ANAHTARI HÂLÂ `aciklama` (K12 notu): belge_satir.kaynak_tur /
+            //   kaynak_id belge dönüşümüne (30) ayrılmış, yeni bir kod korunan-satır
+            //   ve dağılım kurallarına dokunurdu. Açıklama kullanıcı tarafından
+            //   düzenlenebilir olsa da bu satırlar AYNI işlemde az önce yazıldı;
+            //   kilit + `belge_satir_id is null` koşulu + sayı denetimi bağı
+            //   garanti eder: beklenen kadar satır bağlanmadıysa işlem geri alınır,
+            //   belge de yazılmamış olur.
+            var bagliIslem = await baglanti.CalistirAsync("""
                 update public.ameliyat_islem i
                    set belge_satir_id = s.id
                   from public.belge_satir s
                  where s.belge_id = @p0 and s.aciklama = 'AML:' || @p1 || ':I' || i.id
                    and i.ameliyat_id = @p1 and i.belge_satir_id is null
-                """, null, [belgeId, id], iptal);
+                """, islem, [belgeId, id], iptal);
+            if (bagliIslem != islemler.Count)
+                throw GentegreHatasi.IsKurali(
+                    "Ameliyat işlemleri faturaya bağlanamadı - kalemler bu arada değişmiş ya da "
+                    + "zaten faturalanmış; ekranı yenileyip tekrar deneyin.");
 
-            await baglanti.CalistirAsync("""
+            var bagliSarf = await baglanti.CalistirAsync("""
                 update public.ameliyat_sarf f
                    set belge_satir_id = s.id
                   from public.belge_satir s
                  where s.belge_id = @p0 and s.aciklama = 'AML:' || @p1 || ':S' || f.id
                    and f.ameliyat_id = @p1 and f.belge_satir_id is null
-                """, null, [belgeId, id], iptal);
+                """, islem, [belgeId, id], iptal);
+            if (bagliSarf != sarflar.Count)
+                throw GentegreHatasi.IsKurali(
+                    "Ameliyat malzemeleri faturaya bağlanamadı - kalemler bu arada değişmiş ya da "
+                    + "zaten faturalanmış; ekranı yenileyip tekrar deneyin.");
 
             if (a["belgeId"] is null)
                 await baglanti.CalistirAsync("""
                     update public.ameliyat set belge_id = @p1, degistiren = @p2,
                            degistirme_tarihi = (now())::timestamp
                      where id = @p0
-                    """, null, [id, belgeId, baglam.KullaniciId], iptal);
+                    """, islem, [id, belgeId, baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloAmeliyat, id,
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloAmeliyat, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { belgeId, islem = islemler.Count, malzeme = sarflar.Count, yeniBasvuru },
                 iptal: iptal);
+
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new
             {
@@ -306,12 +334,20 @@ public static partial class AmeliyathaneUclari
             baglam.AksiyonIste("ameliyathane.stok_dus");
             baglam.YetkiIste("stok", Islem.Degistir);
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): sarf satırları kilitli
+            //   okunur, çıkış fişi ve `cikis_belge_id` bağı aynı transaction'da
+            //   yazılır - eskiden fiş kendi bağlantısında commit oluyordu, bağ
+            //   yazılamazsa ya da ikinci istek araya girerse stok iki kez düşerdi.
+            //   ÜTS bildirimi dış servis: fiş commit olduktan SONRA çağrılır
+            //   (bkz UtsBildirAsync - bildirim hatası stok hareketini düşürmez).
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var a = await baglanti.TekAsync("""
                 select a.ameliyat_no as "ameliyatNo", a.sube_id as "subeId", a.durum
                   from public.ameliyat a where a.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Ameliyat bulunamadı.");
 
             if (Convert.ToInt16(a["durum"] ?? (short)0) == DurumIptal)
@@ -351,13 +387,14 @@ public static partial class AmeliyathaneUclari
                    and f.stok_id is not null and f.miktar > 0
                    and (@p1::bigint[] is null or f.id = any(@p1::bigint[]))
                  order by f.id
-                """, null, [id, secim], OkuyucuGenisletmeleri.Sozluk, iptal);
+                   for update of f
+                """, islem, [id, secim], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (satirlar.Count == 0)
                 throw GentegreHatasi.IsKurali(
                     "Düşülecek malzeme yok - stok kartı olmayan kalemler düşülemez.");
 
-            var depoAyar = await AyarDeposu.MetinAsync(baglanti, null,
+            var depoAyar = await AyarDeposu.MetinAsync(baglanti, islem,
                                                        "ameliyathane.sarf_depo", "", iptal);
             var depoId = istek.DepoId
                 ?? await baglanti.TekDegerAsync<int?>("""
@@ -366,7 +403,7 @@ public static partial class AmeliyathaneUclari
                              where x.varsayilan = 1 and coalesce(x.durum, 1) = 1),
                            (select min(x.id) from public.depo x
                              where coalesce(x.durum, 1) = 1))
-                    """, null, [depoAyar], iptal)
+                    """, islem, [depoAyar], iptal)
                 ?? throw GentegreHatasi.IsKurali(
                     "Sarf çıkışı için depo bulunamadı - Genel Ayarlar'dan ameliyathane "
                     + "sarf deposunu seçin.");
@@ -407,7 +444,7 @@ public static partial class AmeliyathaneUclari
                 govde.Add(BelgeGovdesi.Satir(alanlar));
             }
 
-            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(
+            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem,
                 fis, govde,
                 // Stok kontrolü AÇIK. Negatif bakiyede ne olacağı KURUM AYARI
                 //   (Genel Ayarlar > Stok: negatif stok) - uyarı ya da engel.
@@ -418,12 +455,26 @@ public static partial class AmeliyathaneUclari
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = true },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 
-            await baglanti.CalistirAsync("""
+            // Bağ KOŞULLU (`cikis_belge_id is null`) ve sayısı denetlenir: satırlar
+            //   kilitli okunduğu için fark normalde çıkmaz; çıkarsa fiş geri alınır.
+            var dusulen = await baglanti.CalistirAsync("""
                 update public.ameliyat_sarf
                    set cikis_belge_id = @p1, depo_id = @p2
-                 where ameliyat_id = @p0 and id = any(@p3)
-                """, null, [id, fisId, depoId,
-                            satirlar.Select(x => Convert.ToInt64(x["id"])).ToArray()], iptal);
+                 where ameliyat_id = @p0 and id = any(@p3) and cikis_belge_id is null
+                """, islem, [id, fisId, depoId,
+                             satirlar.Select(x => Convert.ToInt64(x["id"])).ToArray()], iptal);
+            if (dusulen != satirlar.Count)
+                throw GentegreHatasi.IsKurali(
+                    "Malzeme zaten stoktan düşülmüş - ekranı yenileyip tekrar deneyin.");
+
+            // DENETİM İZİ FİŞLE AYNI TRANSACTION (kod inceleme 30.10.2026 K33): eskiden commit'ten
+            //   sonra ayrı bağlantıda yazılıyordu - fiş kesilip log düşmeyebilirdi. ÜTS sonucu
+            //   commit'ten SONRA oluşur, kendi satırını alır (aşağıda).
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloAmeliyat, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { islem = "stok düşümü", fisId, depoId, satir = satirlar.Count }, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
 
             // KRİTİK STOK: düşümden sonra kalan min_stok altına indiyse uyarı -
             //   satın alma talebini kullanıcı açar, biz sessizce geçmeyiz.
@@ -447,10 +498,12 @@ public static partial class AmeliyathaneUclari
                  where f.ameliyat_id = @p0 and f.implant = 1 and f.uts_durum in (1, 3)
                 """, null, [id], iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloAmeliyat, id,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { fisId, depoId, satir = satirlar.Count,
-                      uts = utsSonuc.Count, utsMesaj }, iptal: iptal);
+            // ÜTS bildirimi yapıldıysa sonucu AYNI bağlantıdan loglanır (UtsBildirAsync kendi
+            //   satırlarını zaten yazdı; transaction yok, tek insert).
+            if (istek.UtsBildir)
+                await log.YazAsync(baglanti, null!, LogIslemi.Degistir, LogTabloAmeliyat, id,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new { islem = "ÜTS bildirim", fisId, uts = utsSonuc.Count, utsMesaj }, iptal: iptal);
 
             return Results.Ok(new
             {
@@ -482,7 +535,8 @@ public static partial class AmeliyathaneUclari
                 throw GentegreHatasi.IsKurali(
                     "Bildirilecek implant yok - bildirilmemiş implant, düşülmüş olmalı.");
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloAmeliyat, id,
+            // Log AYNI bağlantıdan (K33): UtsBildirAsync transaction açmaz, ayrı bağlantı gereksiz.
+            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, LogTabloAmeliyat, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { islem = "ÜTS tekrar", satir = sonuc.Count, mesaj }, iptal: iptal);
 
@@ -501,23 +555,24 @@ public static partial class AmeliyathaneUclari
     /// eşleştiriliyor; burada eklersek iki yerde satır kurmuş olurduk.
     /// </summary>
     private static async Task<int> BasvuruAcAsync(
-        NpgsqlConnection baglanti, BelgeDeposu belgeDepo, IDictionary<string, object?> a,
-        int? odeyenKurumId, YazmaBaglami yazma, CancellationToken iptal)
+        NpgsqlConnection baglanti, NpgsqlTransaction islem, BelgeDeposu belgeDepo,
+        IDictionary<string, object?> a, int? odeyenKurumId, YazmaBaglami yazma,
+        CancellationToken iptal)
     {
         var hasta = await baglanti.TekAsync("""
             select coalesce(unvan, '') as unvan, coalesce(vkno, '') as vkno,
                    coalesce(vd, '') as vd
               from public.taraf where id = @p0
-            """, null, [a["hastaId"]], OkuyucuGenisletmeleri.Sozluk, iptal)
+            """, islem, [a["hastaId"]], OkuyucuGenisletmeleri.Sozluk, iptal)
             ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
 
         var listeId = await baglanti.TekDegerAsync<int?>("""
             select public.fn_belge_varsayilan_liste(19, @p0, current_date, @p1)
-            """, null, [a["hastaId"], odeyenKurumId], iptal);
+            """, islem, [a["hastaId"], odeyenKurumId], iptal);
 
         var kampanyaId = await baglanti.TekDegerAsync<int?>("""
             select public.fn_taraf_kampanya(coalesce(@p1, @p0), current_date)
-            """, null, [a["hastaId"], odeyenKurumId], iptal);
+            """, islem, [a["hastaId"], odeyenKurumId], iptal);
 
         var basvuru = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
@@ -537,7 +592,9 @@ public static partial class AmeliyathaneUclari
             ["aciklama"] = $"Ameliyat · {a["ameliyatNo"]}",
         };
 
-        var (id, _) = await belgeDepo.KaydetAsync(basvuru, [],
+        // ÇAĞIRANIN İŞLEMİNDE (K12): başvuru açılıp kalemler bağlanamazsa
+        //   boş başvuru da geri alınır.
+        var (id, _) = await belgeDepo.KaydetAsync(baglanti, islem, basvuru, [],
             new BelgeSecenekleri { Taslak = false, StokKontrolu = false }, yazma, iptal);
         return id;
     }
@@ -678,7 +735,7 @@ public static partial class AmeliyathaneUclari
     /// tutar aynı yoldan gelmeli, hastaya söylenen rakam birebir tutmalı.
     /// </summary>
     private static async Task<decimal> FiyatAsync(
-        NpgsqlConnection baglanti, int belgeId, object? tarafId,
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem, int belgeId, object? tarafId,
         object? stokId, object? hizmetId, CancellationToken iptal)
     {
         var fiyat = await baglanti.TekDegerAsync<decimal>("""
@@ -695,17 +752,17 @@ public static partial class AmeliyathaneUclari
                             @p0, 2::smallint, @p1::int, @p2::int, current_date) f
                   limit 1),
                 0)
-            """, null, [tarafId, stokId, hizmetId, belgeId], iptal);
+            """, islem, [tarafId, stokId, hizmetId, belgeId], iptal);
 
         var kampanya = await baglanti.TekDegerAsync<int?>(
-            "select kampanya_id from public.belge where id = @p0", null, [belgeId], iptal);
+            "select kampanya_id from public.belge where id = @p0", islem, [belgeId], iptal);
 
         if (kampanya is int kid && kid > 0 && fiyat > 0)
             fiyat = await baglanti.TekDegerAsync<decimal>("""
                 select coalesce(f.fiyat, @p4)
                   from public.fn_kampanya_fiyat(@p0, @p1::int, @p2::int, @p3) f
                  limit 1
-                """, null, [kid, stokId, hizmetId, fiyat, fiyat], iptal);
+                """, islem, [kid, stokId, hizmetId, fiyat, fiyat], iptal);
 
         return fiyat;
     }

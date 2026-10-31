@@ -63,10 +63,39 @@ export const oturum = {
  */
 let yenilemeIslemi: Promise<boolean> | null = null;
 
-/** Tarayici sekmeleri arasi kilit (Web Locks) - yoksa yalniz sekme ici birlestirme. */
+/** Tarayici sekmeleri arasi kilit (Web Locks) - yoksa localStorage kilidi (asagida). */
 type Kilitler = { request<T>(ad: string, f: () => Promise<T>): Promise<T> };
 const kilitler = (): Kilitler | undefined =>
   (globalThis.navigator as { locks?: Kilitler } | undefined)?.locks;
+
+/**
+ * LOCALSTORAGE KİLİDİ (kod inceleme 30.10.2026 K23): `navigator.locks` yalnız güvenli bağlamda (https /
+ * localhost) var. IP üzerinden HTTP kurulumlarda iki sekme aynı anda 401 alınca ikisi de aynı refresh ile
+ * yenilemeye gidiyor, sunucu tekrar kullanım sayıp aileyi iptal ediyordu. Yedek kilit: `anahtar|zaman`
+ * yazılır, 8 sn'den eski kilit ölü sayılır; kilidi alamayan sekme bekler (en çok ~8 sn), sonra çalışır -
+ * bu arada öteki sekme yenilediyse `calis` zaten depodaki yeni token'ı görür ve sunucuya gitmez.
+ */
+async function yerelKilitle<T>(f: () => Promise<T>): Promise<T> {
+  const ANAHTAR = 'gentegre.yenile.kilit';
+  const KIMLIK = Math.random().toString(36).slice(2);
+  const OMUR = 8000;
+  const oku = (): string | null => { try { return localStorage.getItem(ANAHTAR) } catch { return null } };
+  const bekle = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+  for (let deneme = 0; deneme < 40; deneme++) {
+    const mevcut = oku();
+    const zaman = Number(mevcut?.split('|')[1] ?? 0);
+    if (!mevcut || Date.now() - zaman > OMUR) {
+      try { localStorage.setItem(ANAHTAR, `${KIMLIK}|${Date.now()}`) } catch { return f() }
+      await bekle(25);                                   // aynı anda yazan sekmeyle yarış
+      if (oku()?.startsWith(`${KIMLIK}|`)) {
+        try { return await f() }
+        finally { try { if (oku()?.startsWith(`${KIMLIK}|`)) localStorage.removeItem(ANAHTAR) } catch { /* yerel depo kapalı */ } }
+      }
+    }
+    await bekle(200);
+  }
+  return f();
+}
 
 /**
  * @param kullanilanAccess 401 alan istegin tasidigi access token. Kilit
@@ -89,7 +118,7 @@ async function yenile(kullanilanAccess?: string | null): Promise<boolean> {
         return sunucudaYenile();
       };
       const k = kilitler();
-      return k ? await k.request('gentegre.yenile', calis) : await calis();
+      return k ? await k.request('gentegre.yenile', calis) : await yerelKilitle(calis);
     } finally {
       setTimeout(() => { yenilemeIslemi = null }, 0);
     }
@@ -111,7 +140,14 @@ async function sunucudaYenile(): Promise<boolean> {
     //   baslarken (502/503) ya da gecici hata verirken token silmek
     //   calisan herkesi disari atiyordu - kullanici hicbir sey yapmadigi
     //   halde giris ekranina duser ve yazdigi form kaybolurdu.
-    if (yanit.status === 401 || yanit.status === 403) { oturum.temizle(); return false }
+    if (yanit.status === 401 || yanit.status === 403) {
+      // OTURUM BİTTİ, EKRAN DA BİLSİN (kod inceleme 30.10.2026 K23): token silinip sessiz kalınca kabuk açık
+      //   kalıyor, her istek 401 alıyor, kullanıcı F5'e kadar ölü ekranda kalıyordu. Oturum bağlamı bu olayla
+      //   /ben'i yeniden okur, access yoksa giriş ekranına döner.
+      oturum.temizle();
+      try { window.dispatchEvent(new Event(OTURUM_TAZELE_OLAYI)) } catch { /* pencere yok (test) */ }
+      return false;
+    }
     if (!yanit.ok) return false;
     oturum.yaz(await yanit.json() as GirisYaniti);
     return true;

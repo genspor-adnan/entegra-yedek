@@ -54,8 +54,12 @@ export const radyolojiUclari = {
 
   /** Ön rapor / onay. Onay ön kosullari sunucuda (fn_radyoloji_rapor_onaylanabilir). */
   /** `surum`: onaylanan metnin sürümü (kaydın döndürdüğü) - arada değiştiyse sunucu 409 döner. */
-  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string) =>
-    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}&surum=${encodeURIComponent(surum)}`, {}),
+  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string, onaylayacakId?: number, not?: string) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}&surum=${encodeURIComponent(surum)}`
+      + (onaylayacakId ? `&onaylayacakId=${onaylayacakId}` : ''), { not: not ?? '' }),
+  /** UZMANA GÖNDER (1199): onay yetkili, bu şubede çalışan uzmanlar + üzerlerinde bekleyen ön rapor sayısı. */
+  radyolojiOnayUzmanlari: () =>
+    istek<{ id: number; ad: string; bekleyen: number }[]>('/api/radyoloji/onay-uzmanlari'),
 
   /**
    * RAPOR CIKTISI (303): hastaya verilen belge. Yazma ekraninin verisinden

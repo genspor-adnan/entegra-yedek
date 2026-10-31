@@ -110,8 +110,12 @@ public static class PortalDavetUclari
             const string ortakHata = "Bağlantı geçersiz ya da kimlik doğrulaması hatalı.";
 
             var parola = (istek.YeniParola ?? "").Trim();
-            if (parola.Length < 6)
-                throw GentegreHatasi.Dogrulama("Parola en az 6 karakter olmalı.");
+            // PAROLA POLİTİKASI (kod inceleme 30.10.2026 K50): öteki bütün akışlar ParolaKurali + kurum eşiğini
+            //   uygular; davetle açılan hasta hesabı 6 karakterle açılıyordu.
+            var enAz = await veri.TekDegerAsync<int?>(
+                "select nullif(trim(deger), '')::int from public.referans where anahtar = 'guvenlik.parola_min_uzunluk'", null, iptal)
+                ?? ParolaKurali.VarsayilanEnAz;
+            ParolaKurali.Dogrula(parola, enAz);
 
             await using var b = await veri.AcAsync(iptal);
             var d = await DavetBulAsync(b, istek.Jeton, iptal)
@@ -185,11 +189,15 @@ public static class PortalDavetUclari
                     islem, [tarafId], iptal) ?? kod;
             }
 
-            var subeId = await b.TekDegerAsync<int?>(
-                "select sube_id from public.portal_davet where id = @p0", islem, [davetId], iptal);
+            // ŞUBE (K50): davetin şubesi; yoksa daveti oluşturanın şubesi - sabit 1 değil.
+            var subeId = await b.TekDegerAsync<int?>("""
+                select coalesce(d.sube_id, t.sube_id)
+                  from public.portal_davet d left join public.taraf t on t.id = d.ekleyen
+                 where d.id = @p0
+                """, islem, [davetId], iptal);
             await b.CalistirAsync("""
                 insert into public.kullanici_sube (taraf_id, sube_id, varsayilan)
-                values (@p0, coalesce(@p1, 1), 1)
+                values (@p0, coalesce(@p1, (select min(id) from public.sube where aktif = 1)), 1)
                 on conflict do nothing
                 """, islem, [tarafId, subeId], iptal);
 

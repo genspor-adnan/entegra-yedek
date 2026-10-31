@@ -1,3 +1,5 @@
+using Gentegre.Cekirdek.Sozlesme;
+
 namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
@@ -25,6 +27,24 @@ public static class BelgeHesap
 
     public static decimal Yuvarla(decimal deger, int hane = VarsayilanHane)
         => Math.Round(deger, hane, MidpointRounding.ToEven);
+
+    /// <summary>
+    /// SATIR ALAN ARALIĞI (kod inceleme 30.10.2026 K40): iskonto 0–100 dışında negatif ya da brütten büyük
+    /// tutar üretilir, adet sıfır satır anlamsızdır. Delphi'deki ekran doğrulamasının sunucu karşılığı; yazma
+    /// yolu (BelgeDeposu) satırı hesaplamadan önce çağırır. DB tarafı: 1205 CHECK kısıtı.
+    /// </summary>
+    public static void Dogrula(decimal adet, decimal iskonto = 0, decimal iskonto2 = 0, string alanOneki = "")
+    {
+        if (iskonto is < 0 or > 100)
+            throw GentegreHatasi.Dogrulama("İskonto 0 ile 100 arasında olmalı.",
+                new AlanHatasi(alanOneki + "iskonto", "0–100 arası yüzde."));
+        if (iskonto2 is < 0 or > 100)
+            throw GentegreHatasi.Dogrulama("İkinci iskonto 0 ile 100 arasında olmalı.",
+                new AlanHatasi(alanOneki + "iskonto2", "0–100 arası yüzde."));
+        if (adet == 0)
+            throw GentegreHatasi.Dogrulama("Satır adedi sıfır olamaz.",
+                new AlanHatasi(alanOneki + "adet", "Sıfır olamaz."));
+    }
 
     /// <summary>Delphi TutarIslemler ile birebir satir tutari.</summary>
     public static decimal SatirTutari(decimal adet, decimal birimFiyat,

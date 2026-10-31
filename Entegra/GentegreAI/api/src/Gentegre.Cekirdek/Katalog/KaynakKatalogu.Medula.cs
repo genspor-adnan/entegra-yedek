@@ -14,6 +14,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi MedulaTakip() => new(
         Ad: "medula-takip",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "v.hasta_id",
         YetkiKodu: "medula",
         Kaynak: "public.v_medula_takip v",
         SubeKolonu: "v.sube_id",
@@ -46,6 +48,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi MedulaIslem() => new(
         Ad: "medula-islem",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "b.taraf_id",
         YetkiKodu: "medula.hizmet",
         Kaynak: "public.medula_islem i join public.belge b on b.id = i.belge_id join public.taraf t on t.id = b.taraf_id left join public.taraf h on h.id = i.hekim_id",
         SubeKolonu: "i.sube_id",
@@ -73,6 +77,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi MedulaFatura() => new(
         Ad: "medula-fatura",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "f.hasta_id",
         YetkiKodu: "medula.fatura",
         Kaynak: "public.v_medula_fatura f",
         SubeKolonu: "f.sube_id",
@@ -154,6 +160,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi MedulaRapor() => new(
         Ad: "medula-rapor",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "r.hasta_id",
         YetkiKodu: "medula.recete",
         Kaynak: "public.medula_rapor r join public.taraf t on t.id = r.hasta_id left join public.taraf h on h.id = r.hekim_id",
         SubeKolonu: "r.sube_id",

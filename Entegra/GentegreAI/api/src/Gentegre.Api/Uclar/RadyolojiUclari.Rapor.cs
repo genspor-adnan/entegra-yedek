@@ -24,6 +24,32 @@ public static partial class RadyolojiUclari
         //   rapor (varsa bölümleriyle), uygun şablonlar, makrolar, skor
         //   tanımları ve hastanın önceki tetkikleri. Beş ayrı istek atmak
         //   ekranı açılışta yavaşlatır ve yarı dolu göstermeye açık bırakır.
+        // ------------------------------------------------ onay uzmanları ----
+        // UZMANA GÖNDER (1199): onaylayacak uzman seçimi. Liste = onay yetkisi (rad.rapor_onayla) olan, aktif
+        //   ve bu şubede çalışan kişiler (şube kuralı KullaniciDeposu.SubeleriHamAsync ile aynı sıra: kişiye
+        //   tanımlı şubeler, yoksa rolün şubeleri, yoksa sınırsız) + üzerinde bekleyen ön rapor sayısı.
+        grup.MapGet("/onay-uzmanlari", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.rapor_yaz");
+            var liste = await veri.ListeAsync("""
+                select k.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad,
+                       (select count(*)::int from public.radyoloji_rapor r
+                         where r.onaylayacak_id = k.id and r.durum = 2) as bekleyen
+                  from public.taraf_kullanici k
+                  join public.taraf t on t.id = k.id
+                 where k.aktif = 1
+                   and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla')
+                   and (@p0::int is null
+                        or exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id and ks.sube_id = @p0)
+                        or (not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id)
+                            and (exists (select 1 from public.fn_kullanici_subeleri(k.id) s where s.sube_id = @p0)
+                                 or not exists (select 1 from public.fn_kullanici_subeleri(k.id)))))
+                 order by 2
+                """, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(liste);
+        });
+
         grup.MapGet("/istem/{id:int}/rapor", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -45,8 +71,11 @@ public static partial class RadyolojiUclari
                        i.seri_sayisi as "seriSayisi", i.goruntu_sayisi as "goruntuSayisi",
                        i.study_uid as "studyUid",
                        i.belge_id as "belgeId", coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum",
-                       -- BANT "İSTEYEN" BLOĞU (kullanıcı 27.10.2026): başvurunun bölümü, yoksa isteyen dış kurum.
-                       coalesce((select dp.ad from public.departman dp where dp.id = bb.bolum_id),
+                       -- BANT "İSTEYEN" BLOĞU (kullanıcı 27.10.2026): adın altında bölüm. Sıra (28.10.2026: "isteyen
+                       --   dr'un bölümü varsa ismi altına gelmeli"): HEKİMİN bölümü (taraf.departman), yoksa başvurunun
+                       --   bölümü, yoksa isteyen dış kurum.
+                       coalesce((select dp.ad from public.departman dp where dp.id = ih.departman),
+                                (select dp.ad from public.departman dp where dp.id = bb.bolum_id),
                                 (select public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120)
                                    from public.taraf ik where ik.id = i.istek_kurum_id), '') as "isteyenBolum"
                   from public.radyoloji_istem i
@@ -70,6 +99,14 @@ public static partial class RadyolojiUclari
                        r.durum, r.kilit, r.ust_rapor_id as "ustRaporId",
                        coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
                        coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                       -- YAZAN / ONAYLAYACAK / ONAYLAYAN (1199, bant seçenek C): yazanın onay yetkisi yoksa
+                       --   "asistan" rozeti; onaylayacak = Uzmana Gönder'de seçilen uzman.
+                       case when r.yazan_id is null then 0
+                            when public.fn_kullanici_yetkili(r.yazan_id, 'rad.rapor_onayla') then 0 else 1 end as "yazanAsistan",
+                       r.onaylayacak_id as "onaylayacakId", r.onaya_gonderme as "onayaGonderme", r.onay_notu as "onayNotu",
+                       coalesce(public.fn_taraf_ad(oy.unvan, oy.ad, oy.soyad)::varchar(120), '') as "onaylayacak",
+                       r.onaylayan_id as "onaylayanId",
+                       coalesce(r.rapor_no, '') as "raporNo",
                        -- BAKANLIK OBX-13 (811): iki ayri degerlendirme.
                        r.istem_nedeni_puan as "istemNedeniPuan",
                        r.cekim_kalite_puan as "cekimKalitePuan",
@@ -80,6 +117,7 @@ public static partial class RadyolojiUclari
                   from public.radyoloji_rapor r
                   left join public.taraf yz on yz.id = r.yazan_id
                   left join public.taraf on_ on on_.id = r.onaylayan_id
+                  left join public.taraf oy on oy.id = r.onaylayacak_id
                  where r.istem_id = @p0 and r.ust_rapor_id is null
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 

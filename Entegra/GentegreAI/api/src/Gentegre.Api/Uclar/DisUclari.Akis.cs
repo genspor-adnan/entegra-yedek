@@ -139,11 +139,16 @@ public static partial class DisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("randevu", Islem.Ekle);
             await using var baglanti = await veri.AcAsync(iptal);
+            // TEK TRANSACTION + RANDEVU KİLİDİ (kod inceleme 30.10.2026 K36): yeni randevu, eskisinin "gelmedi"ye
+            //   çekilmesi ve log birlikte; eski satır `for update` okunur - aynı randevuya eşzamanlı iki "yeniden
+            //   planla" iki yeni randevu açamaz (durum geçişi koşullu, ikinci istek 422).
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
             var eski = await baglanti.TekAsync("""
                 select r.sube_id, r.bolum, r.hekim_id, r.hasta_id, r.sure_dk, r.aciklama, r.hizmet_id,
                        r.unit_id, r.plan_satir_id, r.lab_isemri_id, r.durum, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as unvan
                   from public.randevu r join public.taraf t on t.id = r.hasta_id where r.id = @p0
-                """, null, [id], o => new
+                   for update of r
+                """, islem, [id], o => new
             {
                 subeId = o.GetInt32(0), bolum = o.GetInt16(1),
                 hekimId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), hastaId = o.GetInt32(3),
@@ -163,7 +168,7 @@ public static partial class DisUclari
             if (eski.labIsemriId is int lid)
             {
                 var beklenen = await baglanti.TekDegerAsync<DateTime?>(
-                    "select beklenen_tarih from public.dis_lab_isemri where id = @p0", null, [lid], iptal);
+                    "select beklenen_tarih from public.dis_lab_isemri where id = @p0", islem, [lid], iptal);
                 if (beklenen is DateTime b && istek.Baslangic.Date < b.Date)
                     throw GentegreHatasi.IsKurali($"Lab işi {b:dd.MM.yyyy} tarihinde bekleniyor; prova/teslim randevusu ondan önce verilemez.");
             }
@@ -174,20 +179,25 @@ public static partial class DisUclari
                         unit_id, plan_satir_id, lab_isemri_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, 1, @p6, @p7, @p8, @p9, @p10, @p11)
                 returning id
-                """, null, [eski.subeId, eski.bolum, istek.HekimId ?? eski.hekimId, eski.hastaId,
+                """, islem, [eski.subeId, eski.bolum, istek.HekimId ?? eski.hekimId, eski.hastaId,
                             istek.Baslangic, (short)(istek.SureDk ?? eski.sureDk),
                             eski.aciklama, eski.hizmetId, istek.UnitId ?? eski.unitId, eski.planSatirId,
                             eski.labIsemriId, baglam.KullaniciId], iptal);
             // Eski randevu planlandı durumundaysa "gelmedi"ye çekilir; zaten
-            //   gelmedi/iptal ise dokunulmaz.
+            //   gelmedi/iptal ise dokunulmaz. Geçiş koşullu: kilit altında okunan
+            //   durum değişmiş olamaz, `and durum = 1` sigortadır.
             if (eski.durum == 1)
-                await baglanti.CalistirAsync(
-                    "update public.randevu set durum = 3, degistiren = @p1, degistirme_tarihi = now() where id = @p0",
-                    null, [id, baglam.KullaniciId], iptal);
+            {
+                var n = await baglanti.CalistirAsync(
+                    "update public.randevu set durum = 3, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1",
+                    islem, [id, baglam.KullaniciId], iptal);
+                if (n == 0) throw GentegreHatasi.IsKurali("Randevu bu arada değişti; listeyi yenileyin.");
+            }
 
-            await log.YazAsync(LogIslemi.Ekle, 243, yeniId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, 243, yeniId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { yenidenPlanla = id, hasta = eski.hasta, baslangic = istek.Baslangic },
                 tarafId: eski.hastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id = yeniId, hasta = eski.hasta });
         });
     }

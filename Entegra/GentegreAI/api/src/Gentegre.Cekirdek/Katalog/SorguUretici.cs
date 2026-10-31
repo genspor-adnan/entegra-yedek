@@ -79,6 +79,20 @@ public sealed partial class SorguUretici
     /// </summary>
     public string? EkranKosulu { get; init; }
 
+    /// <summary>
+    /// GÖRÜNÜR ALANLAR (kod inceleme 30.10.2026 K19): alan yetkisi yalnız SELECT kolonlarına uygulanıyor, filtre ve
+    /// sıralama tam katalogdan çözülüyordu — gizli kolon (ör. <c>stok.maliyet</c>) <c>buyuk/kucuk</c> filtresiyle
+    /// ikili aramayla kuruşa kadar okunabiliyordu. Verilirse (liste ucu verir) kümede olmayan alan filtre için
+    /// "bilinmeyen alan" sayılır (yetkisiz alanın VARLIĞI da sır), sıralamada atlanır. <c>null</c> = kısıt yok
+    /// (kayıt kapısı yalnız <c>id</c> ile sorar, döküm kendi doğrulayıcısından geçer).
+    /// </summary>
+    public IReadOnlySet<string>? GorunurAlanlar { get; init; }
+
+    private bool AlanGorunur(string? ad) => GorunurAlanlar is null || (ad is not null && GorunurAlanlar.Contains(ad));
+
+    /// <summary>İstekten gelen alan adı hata metnine / loga sınırsız uzunlukta geri yazılmasın (K65).</summary>
+    private static string Kisalt(string ad) => ad.Length > 64 ? ad[..64] + "…" : ad;
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -334,6 +348,14 @@ public sealed partial class SorguUretici
         return parcalar.Count == 0 ? "" : " where " + string.Join(" and ", parcalar);
     }
 
+    /// <summary>
+    /// SÜZGEÇ SINIRI (kod inceleme 30.10.2026 K65): yaprak sayısı ve `icinde` listesi sınırsızdı - 65.535
+    /// parametreyi aşan istek 500 veriyor, tam SQL hata günlüğüne düşüyordu. Aşım 400 DOGRULAMA.
+    /// </summary>
+    public const int EnFazlaYaprak = 200;
+    public const int EnFazlaListe = 500;
+    private int _yaprak;
+
     private string Kosul(Kosul kosul)
     {
         if (kosul.DalMi)
@@ -347,10 +369,14 @@ public sealed partial class SorguUretici
         }
 
         if (string.IsNullOrWhiteSpace(kosul.Alan)) return "";
+        if (++_yaprak > EnFazlaYaprak)
+            throw GentegreHatasi.Dogrulama($"Süzgeç çok karmaşık: en çok {EnFazlaYaprak} koşul.");
 
-        var kolon = _kaynak.Kolon(kosul.Alan)
-            ?? throw GentegreHatasi.Dogrulama($"Bilinmeyen alan: {kosul.Alan}",
-                   new AlanHatasi(kosul.Alan!, "Bu listede boyle bir alan yok."));
+        var kolon = _kaynak.Kolon(kosul.Alan);
+        // Yetkisiz alan = bilinmeyen alan (K19): aynı metin, kolon adı dışarı sızmasın diye kırpılır.
+        if (kolon is null || !AlanGorunur(kosul.Alan))
+            throw GentegreHatasi.Dogrulama($"Bilinmeyen alan: {Kisalt(kosul.Alan!)}",
+                   new AlanHatasi(Kisalt(kosul.Alan!), "Bu listede boyle bir alan yok."));
 
         if (!kolon.Filtrelenebilir)
             throw GentegreHatasi.Dogrulama($"{kolon.Baslik} alaninda filtre kullanilamaz.",
@@ -399,6 +425,8 @@ public sealed partial class SorguUretici
             {
                 var liste = Liste(kosul.Deger, kolon);
                 if (liste.Count == 0) return "false";
+                if (liste.Count > EnFazlaListe)
+                    throw GentegreHatasi.Dogrulama($"'{kosul.Alan}' listesi çok uzun: en çok {EnFazlaListe} değer.");
                 // `= any(@p)` KULLANILMAZ: liste object?[] oldugu icin Npgsql tipi
                 //   cikaramiyor ve "Writing values of 'System.Object[]' is not
                 //   supported" ile patliyordu. Her deger AYRI parametre olarak
@@ -412,8 +440,9 @@ public sealed partial class SorguUretici
                 if (liste.Count != 2)
                     throw GentegreHatasi.Dogrulama("'arasinda' iki deger ister.",
                         new AlanHatasi(kosul.Alan!, "Alt ve ust sinir verilmeli."));
-                // Tarihte ust sinir GUN SONUNA kadar kapsar (saat bileseni tuzagi).
-                if (kolon.Tip == "tarih")
+                // Tarihte ust sinir GUN SONUNA kadar kapsar (saat bileseni tuzagi). "zaman" tipinde de ust
+                //   sinir gun (saat 00:00) verildiyse ayni kural (K41) - yoksa son gunun hareketleri dusuyordu.
+                if (kolon.Tip == "tarih" || (kolon.Tip == "zaman" && GunMu(liste[1])))
                     return $"({x} >= {Ekle(liste[0])} and {x} < ({Ekle(liste[1])}::timestamp + interval '1 day'))";
                 return $"({x} >= {Ekle(liste[0])} and {x} <= {Ekle(liste[1])})";
             }
@@ -433,6 +462,21 @@ public sealed partial class SorguUretici
                 var deger = Deger(kosul.Deger, kolon);
                 if (deger is null)
                     return kosul.Op == KosulOperatoru.EsitDegil ? $"{x} is not null" : $"{x} is null";
+                // GUN SINIRI (kod inceleme 30.10.2026 K41): saat tasiyan kolonda "<= 2026-10-28" o gunun 00:00'i
+                //   demekti - yalniz bitis girilince son gunun kayitlari, sayimi ve dip toplami dusuyordu.
+                //   Gun verildiyse (saat 00:00) esit / kucukEsit / buyuk gun bazinda yorumlanir.
+                if (kolon.Tip is "tarih" or "zaman" && GunMu(deger))
+                {
+                    var g = Ekle(deger);
+                    switch (kosul.Op)
+                    {
+                        case KosulOperatoru.Esit:      return $"({x} >= {g} and {x} < ({g}::timestamp + interval '1 day'))";
+                        case KosulOperatoru.EsitDegil: return $"not ({x} >= {g} and {x} < ({g}::timestamp + interval '1 day'))";
+                        case KosulOperatoru.KucukEsit: return $"{x} < ({g}::timestamp + interval '1 day')";
+                        case KosulOperatoru.Buyuk:     return $"{x} >= ({g}::timestamp + interval '1 day')";
+                        default:                       return $"{x} {op} {g}";
+                    }
+                }
                 return $"{x} {op} {Ekle(deger)}";
             }
         }
@@ -451,7 +495,7 @@ public sealed partial class SorguUretici
         foreach (var s in istek.Sirala)
         {
             var kolon = _kaynak.Kolon(s.Alan);
-            if (kolon is null || !kolon.Siralanabilir) continue;
+            if (kolon is null || !kolon.Siralanabilir || !AlanGorunur(s.Alan)) continue;
             var yon = s.Yon.Equals("desc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
             parcalar.Add($"{kolon.SiraSql ?? kolon.Sql} {yon}");
         }
@@ -460,6 +504,9 @@ public sealed partial class SorguUretici
 
     // ------------------------------------------------------------ deger cevrimi ----
     private static string Metin(object? d) => JsonMetin(d) ?? "";
+
+    /// <summary>Deger bir GUN mu (saat bileseni yok)? DateOnly ya da gece yarisi DateTime.</summary>
+    private static bool GunMu(object? d) => d is DateOnly || (d is DateTime dt && dt.TimeOfDay == TimeSpan.Zero);
 
     private static List<object?> Liste(object? d, KolonTanimi kolon)
     {

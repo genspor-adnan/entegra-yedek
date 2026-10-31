@@ -521,6 +521,8 @@ public sealed class EnabizGonderimi
                                                   : Kirp(govde, 400)),
                     Kirp(govde, 4000), (int)kronometre.ElapsedMilliseconds);
         }
+        // Servis kapanırken iptal (K73): deneme sayılmaz, hata olarak da yazılmaz - yukarıya çıkar.
+        catch (OperationCanceledException) when (iptal.IsCancellationRequested) { throw; }
         catch (Exception h)
         {
             kronometre.Stop();

@@ -24,15 +24,18 @@ const onekli = (on: string, v: string) => !v ? '' : /^[A-ZÇĞİÖŞÜ]+-/.test(
 
 export interface MuayeneHastaBilgisi {
   ust: Satir | null; alerji: Satir[]; kronik: Satir[]; ilac: Satir[];
+  /** Alerji listesi OKUNAMADI (ağ / yetki / sunucu): "yok" değil "bilinmiyor" - band yeşil rozet basmaz (K24). */
+  alerjiHata: boolean;
   sonuclar: Awaited<ReturnType<typeof api.muayeneSonSonuclar>>;
   band: Awaited<ReturnType<typeof api.muayeneBand>>;
 }
 
-async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
+/** Hata = null (K24): boş dizi "kayıt yok" demektir, okunamayan liste onunla karışmamalı. */
+async function listele(kaynak: string, hastaId: number): Promise<Satir[] | null> {
   try {
     const y = await api.liste(kaynak, { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } });
     return (y.satirlar ?? []) as Satir[];
-  } catch { return [] }
+  } catch { return null }
 }
 
 /** Band ve sağ sütunun ORTAK verisi (tek yükleme). */
@@ -76,9 +79,10 @@ export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number, hastaI
       if (iptal) return;
       setB({
         ust,
-        alerji: a.filter(x => Number(x.aktif ?? 1) === 1),
-        kronik: k.filter(x => Number(x.durum ?? 1) !== 0),
-        ilac: i.filter(x => Number(x.aktif ?? 1) === 1),
+        alerji: (a ?? []).filter(x => Number(x.aktif ?? 1) === 1),
+        alerjiHata: a === null,
+        kronik: (k ?? []).filter(x => Number(x.durum ?? 1) !== 0),
+        ilac: (i ?? []).filter(x => Number(x.aktif ?? 1) === 1),
         sonuclar: s, band: bd,
       });
     })();
@@ -107,8 +111,8 @@ export function MuayeneHastaBandi({ bilgi, onSuAn, kanGrubuYok, sonBlok, suAnYer
   bilgi: MuayeneHastaBilgisi | null; onSuAn?(): void;
   /** Kan grubu gösterilmez (radyoloji raporu, kullanıcı 27.10.2026). */
   kanGrubuYok?: boolean;
-  /** Bandın SONUNA ekranın kendi bloğu (radyoloji raporunda Durum). */
-  sonBlok?: ReactNode;
+  /** Bandın SONUNA ekranın kendi blok(lar)ı (radyoloji raporunda Yazan · Onaylayacak/Onaylayan · Durum). */
+  sonBlok?: ReactNode | ReactNode[];
   /** "Şu an" bloğunun YERİNE (radyoloji raporunda İsteyen: hekim · bölüm - istemin muayenesi yok). */
   suAnYerine?: ReactNode;
 }) {
@@ -146,7 +150,9 @@ export function MuayeneHastaBandi({ bilgi, onSuAn, kanGrubuYok, sonBlok, suAnYer
       <div className="hbnd-blok">
         <div className="hbnd-b">{c('Alerji / Kronik')}</div>
         <div className="hbnd-rozetler">
-          {bilgi && bilgi.alerji.length === 0 && <span className="rozet olumlu">{c('Alerji: yok')}</span>}
+          {/* "YOK" ile "BİLİNMİYOR" ayrı (K24): liste okunamadıysa yeşil rozet yerine uyarı. */}
+          {bilgi && bilgi.alerjiHata && <span className="rozet uyari" title={c('Alerji listesi okunamadı - kartı yenileyin')}>⚠ {c('Alerji: ?')}</span>}
+          {bilgi && !bilgi.alerjiHata && bilgi.alerji.length === 0 && <span className="rozet olumlu">{c('Alerji: yok')}</span>}
           {/* KISA (kullanıcı 15.10.2026: "alerji/kronik bilgiler daha kısa gelsin"): ad kısaltılır,
               tamamı ipucunda; kronikte en çok 2 rozet + kalan sayısı. */}
           {(bilgi?.alerji.length ?? 0) > 0 && (
@@ -177,13 +183,13 @@ export function MuayeneHastaBandi({ bilgi, onSuAn, kanGrubuYok, sonBlok, suAnYer
       </div>
       {/* "Şu an" tıklanır (onSuAn verilirse): muayene bilgisi (bölüm / hekim / tür) penceresi -
           sekmeli muayenede eski bağlam şeridinin "Bugün ✎" kutusunun yerini tutar (16.10.2026). */}
-      {suAnYerine ? <div className="hbnd-blok hbnd-simdi">{suAnYerine}</div> : <div className={`hbnd-blok hbnd-simdi${onSuAn ? ' hbnd-tik' : ''}`} onClick={onSuAn}
+      {suAnYerine ? <div className={`hbnd-blok hbnd-simdi${sonBlok ? ' hbnd-arada' : ''}`}>{suAnYerine}</div> : <div className={`hbnd-blok hbnd-simdi${onSuAn ? ' hbnd-tik' : ''}`} onClick={onSuAn}
            role={onSuAn ? 'button' : undefined} title={onSuAn ? c('Muayene bilgisini düzenle') : undefined}>
         <div className="hbnd-b">{c('Şu an')}{onSuAn && ' ✎'}</div>
         <div><b>{m(u?.bolumAdi) || '—'}</b></div>
         <div className="hbnd-alt">{m(u?.hekimAdi)}{u?.baslangic ? ` · ${tarihSaat(u.baslangic).slice(11)}` : ''}</div>
       </div>}
-      {sonBlok && <div className="hbnd-blok">{sonBlok}</div>}
+      {(Array.isArray(sonBlok) ? sonBlok : [sonBlok]).filter(Boolean).map((b, i) => <div key={i} className="hbnd-blok">{b}</div>)}
       {alerjiAcik && bilgi && (
         <div className="hbnd-ayr" onClick={() => setAlerjiAcik(false)}>
           <h5>⚠ {c('Alerjiler')} ({bilgi.alerji.length})</h5>

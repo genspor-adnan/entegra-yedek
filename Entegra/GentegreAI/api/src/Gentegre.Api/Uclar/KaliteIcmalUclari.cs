@@ -127,8 +127,8 @@ public static class KaliteIcmalUclari
                   left join public.belge_basvuru bb on bb.id = ri.belge_id
                   left join public.departman d on d.id = bb.bolum_id
                  where k.bildirim_zamani >= @p0 and k.bildirim_zamani < @p1 and (@p2 = 0 or coalesce(ri.sube_id, 0) in (0, @p2))
-                """, null, [oncBas, bitis, sube], o => new Bildirim(o.GetString(0)[0], o.GetInt32(1), o.GetDateTime(2).ToLocalTime(),
-                    o.IsDBNull(3) ? null : o.GetDateTime(3).ToLocalTime(), o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7),
+                """, null, [oncBas, bitis, sube], o => new Bildirim(o.GetString(0)[0], o.GetInt32(1), Saat.Yerel(o.GetDateTime(2)),
+                    o.IsDBNull(3) ? null : Saat.Yerel(o.GetDateTime(3)), o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7),
                     o.GetString(8), o.GetInt16(9), o.GetBoolean(10), o.GetBoolean(11)), iptal);
 
             // ----------------------------------------------------------- form motoru --
@@ -169,7 +169,7 @@ public static class KaliteIcmalUclari
                  where coalesce(y.durum, 1) <> 0 and y.giris_tarihi < @p1 and (y.cikis_tarihi is null or y.cikis_tarihi >= @p0)
                    and (@p2 = 0 or coalesce(y.sube_id, 0) in (0, @p2))
                 """, null, [oncBas, bitis, sube], o => new Yatis(o.GetInt32(0), o.GetInt32(1), o.GetString(2),
-                    o.GetDateTime(3).ToLocalTime(), o.IsDBNull(4) ? null : o.GetDateTime(4).ToLocalTime()), iptal);
+                    Saat.Yerel(o.GetDateTime(3)), o.IsDBNull(4) ? null : Saat.Yerel(o.GetDateTime(4))), iptal);
 
             var ameliyatlar = await b.ListeAsync("""
                 select coalesce(a.salondan_cikis, a.bitis_zamani),
@@ -178,7 +178,7 @@ public static class KaliteIcmalUclari
                   from public.ameliyat a
                  where a.durum = 4 and coalesce(a.salondan_cikis, a.bitis_zamani) >= @p0 and coalesce(a.salondan_cikis, a.bitis_zamani) < @p1
                    and (@p2 = 0 or coalesce(a.sube_id, 0) in (0, @p2))
-                """, null, [oncBas, bitis, sube], o => (zaman: o.GetDateTime(0).ToLocalTime(), madde: o.GetInt32(1), eksik: o.GetInt32(2)), iptal);
+                """, null, [oncBas, bitis, sube], o => (zaman: Saat.Yerel(o.GetDateTime(0)), madde: o.GetInt32(1), eksik: o.GetInt32(2)), iptal);
 
             var klinikHam = await b.ListeAsync("""
                 select g.id, g.kod, g.ad, d.periyot, d.donem_yil, d.donem_no, d.pay, d.payda, d.sonuc,

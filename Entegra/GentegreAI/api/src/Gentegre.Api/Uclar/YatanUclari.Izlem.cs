@@ -48,11 +48,14 @@ public static partial class YatanUclari
         // TEK İSTEK: vital serisi + sıvı + risk + gözlem. Dördü aynı ekranda
         //   yan yana; ayrı isteklere bölmek ekranı parça parça doldururdu.
         grup.MapGet("/izlem", async (
-            int yatisId, int? saat, VeriKaynagi veri, BaglamCozucu cozucu,
+            int yatisId, int? saat, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.izlem", Islem.Gor);
+            // KAPSAM (kod inceleme 30.10.2026 K59): yatış kimliği sorgu / gövdeden gelir, yol
+            //   kapısından geçmez - liste ile aynı şube / kapsam kuralı; kapsam dışı yatış 404.
+            await erisim.IsteAsync(baglam, "yatan", yatisId, "Yatış bulunamadı.", iptal);
 
             // PENCERE 48 SAAT: eğri "şu an ne oluyor" sorusunu cevaplar.
             //   Yatışın tamamını çizmek, altıncı günde ilk günün ateşini
@@ -203,7 +206,7 @@ public static partial class YatanUclari
 
         // --------------------------------------------------- ölçüm kaydetme ----
         grup.MapPost("/izlem", async (
-            IzlemIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
+            IzlemIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -212,6 +215,8 @@ public static partial class YatanUclari
             if (istek.YatisId <= 0)
                 throw GentegreHatasi.Dogrulama("Yatış seçilmeli.",
                     new AlanHatasi("yatisId", "Zorunlu."));
+            // KAPSAM (K59): gövdedeki yatış kullanıcının kapsamında olmalı.
+            await erisim.IsteAsync(baglam, "yatan", istek.YatisId, "Yatış bulunamadı.", iptal);
 
             // BOŞ ÖLÇÜM SATIRI AÇILMAZ: hiçbir değeri olmayan kayıt, "ölçüm
             //   yapıldı" izlenimi verir ve eğride hayalet nokta üretir.
@@ -261,11 +266,16 @@ public static partial class YatanUclari
         // Bildirim SATIRDA durur: "eşik aşıldı, hekime haber verildi mi"
         //   sorusunun cevabı ölçümün yanında olmalı.
         grup.MapPost("/izlem/{id:long}/bildirildi", async (
-            long id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            long id, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.izlem", Islem.Degistir);
+            // KAPSAM (K59): ölçümün yatışı kapsamda olmalı; yoksa var olmayanla aynı 404.
+            var yatisId = await veri.TekDegerAsync<int?>(
+                "select yatis_id from public.yatis_izlem where id = @p0", [id], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Kayıt bulunamadı.");
+            await erisim.IsteAsync(baglam, "yatan", yatisId, "Kayıt bulunamadı.", iptal);
 
             var etkilenen = await veri.CalistirAsync("""
                 update public.yatis_izlem
@@ -281,11 +291,13 @@ public static partial class YatanUclari
 
         // ------------------------------------------------------- sıvı kaydı ----
         grup.MapPost("/sivi", async (
-            SiviIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            SiviIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.izlem", Islem.Ekle);
+            // KAPSAM (K59): gövdedeki yatış kullanıcının kapsamında olmalı.
+            await erisim.IsteAsync(baglam, "yatan", istek.YatisId, "Yatış bulunamadı.", iptal);
 
             if (istek.MiktarMl <= 0)
                 throw GentegreHatasi.Dogrulama("Miktar sıfırdan büyük olmalı.",
@@ -310,11 +322,13 @@ public static partial class YatanUclari
 
         // ------------------------------------------- risk değerlendirmesi ----
         grup.MapPost("/risk", async (
-            RiskIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            RiskIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.izlem", Islem.Ekle);
+            // KAPSAM (K59): gövdedeki yatış kullanıcının kapsamında olmalı.
+            await erisim.IsteAsync(baglam, "yatan", istek.YatisId, "Yatış bulunamadı.", iptal);
 
             // ÖNLEMSİZ "YÜKSEK RİSK" BOŞ KAYITTIR: puan tek başına kayıt
             //   değildir, alınan önlem de satırda durmalı. Denetimde de
@@ -343,11 +357,13 @@ public static partial class YatanUclari
         // NOT SİLİNMEZ, DÜZELTİLMEZ: yanlış yazılan not yeni bir satırla
         //   düzeltilir ve ikisi de durur. Bu yüzden güncelleme ucu YOK.
         grup.MapPost("/gozlem", async (
-            GozlemIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            GozlemIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.izlem", Islem.Ekle);
+            // KAPSAM (K59): gövdedeki yatış kullanıcının kapsamında olmalı.
+            await erisim.IsteAsync(baglam, "yatan", istek.YatisId, "Yatış bulunamadı.", iptal);
 
             if (string.IsNullOrWhiteSpace(istek.Not))
                 throw GentegreHatasi.Dogrulama("Gözlem metni boş olamaz.",

@@ -7,6 +7,7 @@ import type { DuyuruSatiri } from '../../api/uclar/duyuru';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { para } from '../bicim';
 import { masaustuBildir } from '../bildirimTercihi';
+import { useYoklama } from '../yoklama';
 
 /**
  * TALEPLERİM ÖZETİ - üst şerit 📨 paneli, avatar menüsü ve Taleplerim
@@ -154,11 +155,12 @@ export function useTaleplerimOzeti(kullaniciId: number | undefined) {
     if (!kullaniciId) return;
     setSonBakis(sonBakisOku(kullaniciId));
     void yukle();
-    const z = window.setInterval(() => void yukle(), YOKLAMA_MS);
     const dinle = () => void yukle();
     window.addEventListener(TALEPLER_YENILE, dinle);
-    return () => { window.clearInterval(z); window.removeEventListener(TALEPLER_YENILE, dinle) };
+    return () => window.removeEventListener(TALEPLER_YENILE, dinle);
   }, [kullaniciId, yukle]);
+  // Yoklama (K53): gizli sekmede durur, görünür olunca hemen tazeler, hatada geri çekilir.
+  useYoklama(yukle, YOKLAMA_MS, Boolean(kullaniciId));
 
   const yeniler = useMemo(() => (veri?.satirlar ?? []).filter(s =>
     new Date(s.sonHareket).getTime() > sonBakis && baskaHareketi(s) && s.sonDegistiren !== kullaniciId

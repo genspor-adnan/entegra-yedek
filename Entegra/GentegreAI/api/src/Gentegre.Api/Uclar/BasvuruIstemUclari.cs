@@ -18,6 +18,11 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class BasvuruIstemUclari
 {
+    // islem_log.tablo_id'leri - KartKatalogu ile AYNI numaralar (kod inceleme 30.10.2026 K33):
+    //   lab_istem 961 (KartKatalogu.Saglik.LabIstem), radyoloji_istem 940 (KartKatalogu.Radyoloji),
+    //   goz_goruntuleme 1101 (KartKatalogu.Goz LogGozGoruntuleme), pat_vaka 1390 (PatolojiUclari LogVaka).
+    private const int LogLabIstem = 961, LogRadyolojiIstem = 940, LogGozGoruntuleme = 1101, LogPatVaka = 1390;
+
     public sealed record SerbestIstegi(int[]? LabIstemIdler, int[]? RadyolojiIstemIdler, int[]? GozIstemIdler = null,
                                        int[]? PatolojiIstemIdler = null);
 
@@ -173,12 +178,16 @@ public static class BasvuruIstemUclari
         // SERBEST BIRAK: banko ücretlendirdi → istemler worklist'e düşsün.
         //   Id verilmezse başvurunun TÜM bekleyen istemleri serbest bırakılır.
         grup.MapPost("/{belgeId:int}/istem-serbest", async (
-            int belgeId, SerbestIstegi? istek, VeriKaynagi veri, BaglamCozucu cozucu,
+            int belgeId, SerbestIstegi? istek, VeriKaynagi veri, BaglamCozucu cozucu, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            // TEK TRANSACTION + DENETİM İZİ (kod inceleme 30.10.2026 K33): serbest bırakma istemin
+            //   durumunu değiştirir (çalışma listesine düşer); her etkilenen satır alan bazlı
+            //   değişiklik logu alır ("serbest: 0 -> 1"), log yazımla aynı transaction'da.
+            await using var tx = await b.BeginTransactionAsync(iptal);
 
             var labIds = istek?.LabIstemIdler;
             var radIds = istek?.RadyolojiIstemIdler;
@@ -189,29 +198,29 @@ public static class BasvuruIstemUclari
                       && (gozIds is null || gozIds.Length == 0)
                       && (patIds is null || patIds.Length == 0);
 
-            var labN = await b.CalistirAsync("""
-                update public.lab_istem set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
-                 where belge_id = @p0 and serbest = 0
-                   and (@p2::bool or id = any(@p3))
-                """, null, [belgeId, baglam.KullaniciId, hepsi, labIds ?? []], iptal);
+            // Etkilenen kimlikler `returning id` ile alınır; her biri kendi log satırını alır
+            //   (üst = başvuru belgesi 30).
+            async Task<int> SerbestBirakAsync(string tablo, string belgeKolonu, int tabloId, int[]? idler)
+            {
+                var idListe = await b.ListeAsync($"""
+                    update public.{tablo} set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
+                     where {belgeKolonu} = @p0 and serbest = 0
+                       and (@p2::bool or id = any(@p3))
+                    returning id
+                    """, tx, [belgeId, baglam.KullaniciId, hepsi, idler ?? []], o => o.GetInt32(0), iptal);
+                foreach (var kayitId in idListe)
+                    await log.YazAsync(b, tx, LogIslemi.Degistir, tabloId, kayitId,
+                        baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                        new Dictionary<string, string> { ["serbest"] = "0 -> 1" },
+                        ustTabloId: 30, ustKayitId: belgeId, iptal: iptal);
+                return idListe.Count;
+            }
 
-            var radN = await b.CalistirAsync("""
-                update public.radyoloji_istem set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
-                 where belge_id = @p0 and serbest = 0
-                   and (@p2::bool or id = any(@p3))
-                """, null, [belgeId, baglam.KullaniciId, hepsi, radIds ?? []], iptal);
-
-            var gozN = await b.CalistirAsync("""
-                update public.goz_goruntuleme set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
-                 where belge_id = @p0 and serbest = 0
-                   and (@p2::bool or id = any(@p3))
-                """, null, [belgeId, baglam.KullaniciId, hepsi, gozIds ?? []], iptal);
-
-            var patN = await b.CalistirAsync("""
-                update public.pat_vaka set serbest = 1, degistiren = @p1, degistirme_tarihi = now()
-                 where basvuru_id = @p0 and serbest = 0
-                   and (@p2::bool or id = any(@p3))
-                """, null, [belgeId, baglam.KullaniciId, hepsi, patIds ?? []], iptal);
+            var labN = await SerbestBirakAsync("lab_istem", "belge_id", LogLabIstem, labIds);
+            var radN = await SerbestBirakAsync("radyoloji_istem", "belge_id", LogRadyolojiIstem, radIds);
+            var gozN = await SerbestBirakAsync("goz_goruntuleme", "belge_id", LogGozGoruntuleme, gozIds);
+            var patN = await SerbestBirakAsync("pat_vaka", "basvuru_id", LogPatVaka, patIds);
+            await tx.CommitAsync(iptal);
 
             var top = labN + radN + gozN + patN;
             return Results.Ok(new { lab = labN, radyoloji = radN, goz = gozN, patoloji = patN, toplam = top,
@@ -234,6 +243,14 @@ public static class BasvuruIstemUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): "zaten ücret satırı var mı"
+            //   denetimi ile satır ekleme aynı transaction'da; başvuru satırı
+            //   başta kilitlenir ki eş zamanlı ikinci istek bekleyip yeni satırı
+            //   görsün - eskiden ikisi de "yok" görür, aynı hizmet iki kez
+            //   ücretlenirdi.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            _ = await b.TekDegerAsync<int?>("select id from public.belge where id = @p0 for update", islem, [belgeId], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
             // Seçili istem id'leri (grid'den); boşsa TÜM bekleyenler ücretlenir.
             var labIds = istek?.LabIstemIdler ?? [];
             var radIds = istek?.RadyolojiIstemIdler ?? [];
@@ -275,11 +292,14 @@ public static class BasvuruIstemUclari
                                     cross join lateral public.fn_hizmet_paket_kapsam(bs.hizmet_id) a
                                     where bs.belge_id = @p0 and bs.hizmet_id is not null
                                       and a.hizmet_id = hz.id)
-                """, null, [belgeId, hepsi, labIds, radIds, gozIds, patIds], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
+                """, islem, [belgeId, hepsi, labIds, radIds, gozIds, patIds], o => (Id: o.GetInt32(0), Modalite: o.GetInt32(1)), iptal);
 
             if (hizmetler.Count == 0)
+            {
+                await islem.RollbackAsync(iptal);     // yalnız kilit alındı, yazılacak bir şey yok
                 return Results.Ok(new { eklenen = 0, mesaj = "Ücretlendirilecek bekleyen doktor istemi yok.",
                                         izlemeNo = baglam.IzlemeNo });
+            }
 
             var sz = await SozlesmeAsync(b, belgeId, iptal);
             var (labIsk, radIsk, karsilama) = (sz.LabIskonto, sz.RadIskonto, sz.Karsilama);
@@ -298,11 +318,12 @@ public static class BasvuruIstemUclari
                     ["pay"] = (int)karsilama, ["kdv"] = kdv, ["dovizCinsi"] = "TL", ["sira"] = ++sira,
                 }));
             }
-            await belgeDepo.GuncelleAsync(belgeId, belge, satirlar,
+            await belgeDepo.GuncelleAsync(b, islem, belgeId, belge, satirlar,
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
             // Karşılama dağılımı (915) - kurum payı.
-            await b.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(id) from public.belge_satir where belge_id=@p0 and hizmet_id is not null", null, [belgeId], iptal);
+            await b.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(id) from public.belge_satir where belge_id=@p0 and hizmet_id is not null", islem, [belgeId], iptal);
+            await islem.CommitAsync(iptal);
             // NOT: serbest bırakma BURADA YAPILMAZ (kullanici: "başvuru kaydedilip
             //   kapanınca istemler lab/radyolojide görünmeli"). Hasta pahalı
             //   tetkikten vazgeçip başvuruyu kaydetmeden kapatabilir; istem o

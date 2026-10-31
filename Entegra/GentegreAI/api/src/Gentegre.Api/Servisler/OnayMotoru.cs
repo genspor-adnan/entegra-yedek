@@ -262,12 +262,16 @@ public sealed class OnayMotoru
             throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.",
                 new AlanHatasi("gerekce", "Ret ve bilgi isteğinde gerekçe zorunlu."));
 
+        // KİLİT (kod inceleme 30.10.2026 K37): onay satırı `for update` - aynı basamağa iki karar
+        //   aynı anda gelirse ikincisi birincinin bitmesini bekler; bekleyen basamak okuması ile
+        //   karar yazımı arasına başka karar giremez.
         var n = await baglanti.TekAsync("""
             select o.id, o.durum,
                    (select min(a.sira) from public.onay_adim a
                      where a.onay_id = o.id and a.durum in (0, 3)) as "bekleyen"
               from public.onay o
              where o.kaynak_tur = @p0 and o.kaynak_id = @p1 and o.durum = 0
+               for update of o
             """, islem, [kaynakTur, kaynakId], OkuyucuGenisletmeleri.Sozluk, iptal)
             ?? throw GentegreHatasi.IsKurali("Bu kayıtta yürüyen onay zinciri yok.");
 
@@ -297,17 +301,21 @@ public sealed class OnayMotoru
 
         var simdi = Saat.Simdi;
 
-        await baglanti.CalistirAsync("""
+        // KARARA BAĞLANMIŞ BASAMAK YENİDEN YAZILMAZ (K37): yalnız bekleyen (0) ya da bilgi
+        //   istenmiş (3) basamak karar alır; kilit beklerken başkası yazdıysa etkilenen 0 olur.
+        var etkilenen = await baglanti.CalistirAsync("""
             update public.onay_adim
                set durum = @p2, karar_veren_id = @p3, karar_zamani = @p4,
                    gerekce = coalesce(nullif(@p5, ''), gerekce),
                    yazili_son = case when @p2 = 4 then @p4 + (@p6 || ' hours')::interval
                                      else yazili_son end,
                    degistiren = @p3, degistirme_tarihi = now()
-             where onay_id = @p0 and sira = @p1
+             where onay_id = @p0 and sira = @p1 and durum in (0, 3)
             """, islem,
             [onayId, sira, karar, baglam.KullaniciId, simdi, gerekce ?? "",
              ((int)yaziliSaat).ToString()], iptal);
+        if (etkilenen == 0)
+            throw GentegreHatasi.IsKurali("Basamak zaten karara bağlandı.");
 
         short zincirDurum;
         short? sonraki = null;

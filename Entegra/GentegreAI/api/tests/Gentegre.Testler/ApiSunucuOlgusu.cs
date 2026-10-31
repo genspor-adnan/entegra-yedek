@@ -69,6 +69,8 @@ public sealed class ApiSunucuOlgusu : IAsyncLifetime
         bilgi.Environment["Ai__Aktif"] = "false";
         bilgi.Environment["ASPNETCORE_ENVIRONMENT"] = "Test";
         bilgi.Environment["Guvenlik__ImzaAnahtari"] = "butunlesme-testi-imza-anahtari-en-az-32-karakter-uzun";
+        // Giriş hız sınırı (K30): testler tek IP'den yüzlerce giriş yapar; ilke çalışsın ama engellemesin.
+        bilgi.Environment["Guvenlik__GirisDakikaSinir"] = "100000";
 
         _surec = Process.Start(bilgi) ?? throw new InvalidOperationException("API süreci başlatılamadı.");
         _surec.OutputDataReceived += (_, e) => { lock (_cikti) _cikti.AppendLine(e.Data); };

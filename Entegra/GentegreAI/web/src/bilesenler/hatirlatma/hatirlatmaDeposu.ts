@@ -107,5 +107,7 @@ export const KAYIT_TURLERI: Record<string, { ic: string; ad: string }> = {
   hasta: { ic: '🧑', ad: 'Hasta' }, cari: { ic: '🏢', ad: 'Cari' }, personel: { ic: '👤', ad: 'Personel' },
   kisi: { ic: '👥', ad: 'Kişi' }, belge: { ic: '📄', ad: 'Belge' }, fatura: { ic: '📄', ad: 'Fatura' },
   randevu: { ic: '📅', ad: 'Randevu' }, gorev: { ic: '✅', ad: 'Görev' }, stok: { ic: '📦', ad: 'Stok' },
+  // Sunucu açar (uzmana gönderilen rapor, kaynak 'radyoloji/rapor'): "↗ Kaydı aç" raporu açar.
+  radyoloji: { ic: '☢️', ad: 'Radyoloji raporu' },
 };
 export const kayitIkonu = (kaynak: string) => KAYIT_TURLERI[kaynak.split('/')[0]]?.ic ?? '🔗';

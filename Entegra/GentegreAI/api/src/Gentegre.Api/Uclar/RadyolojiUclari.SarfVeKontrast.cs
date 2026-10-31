@@ -191,8 +191,13 @@ public static partial class RadyolojiUclari
                 fisSatirlari.Add(BelgeGovdesi.Satir(alanlar));
             }
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): çıkış fişi ve radyoloji_sarf bağı AYNI
+            //   transaction'da. Fiş kesilip bağ yazılamazsa stok düşmüş ama istemde "sarf yok"
+            //   görünür; ikinci deneme aynı malzemeyi iki kez düşerdi.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
             var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(
-                fis, fisSatirlari,
+                baglanti, islem, fis, fisSatirlari,
                 // Stok kontrolu ACIK. Negatif bakiyede ENGEL mi UYARI mi olacagi
                 //   kurum ayarina bagli (Genel Ayarlar > Stok: negatif stok);
                 //   varsayilan uyaridir ve `uyarilar` icinde cagirana doner.
@@ -204,8 +209,10 @@ public static partial class RadyolojiUclari
                     insert into public.radyoloji_sarf
                            (istem_id, belge_id, stok_id, miktar, depo_id, ekleyen)
                     values (@p0, @p1, @p2, @p3, @p4, @p5)
-                    """, null,
+                    """, islem,
                     [id, belgeId, sa.StokId, sa.Miktar, depoId, baglam.KullaniciId], iptal);
+
+            await islem.CommitAsync(iptal);
 
             // KRITIK STOK: dusumden sonra kalan, stok_durum.min_stok altina
             //   indiyse uyari doner - satin alma talebini kullanici acar.

@@ -115,7 +115,10 @@ public static class BiyomedikalUclari
     // ============================================================= kayıt ==
     public static void BiyomedikalUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/demirbas").WithTags("Biyomedikal").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): iş emri / kalibrasyon / demirbaş kimlikleri liste ile aynı
+        //   şube kuralından geçer; başka şubenin iş emri kimlikle ilerletilemez (404).
+        var grup = yol.MapGroup("/api/demirbas").WithTags("Biyomedikal").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Biyomedikal());
 
         IsEmriUclari(grup);
         KalibrasyonUclari(grup);
@@ -207,10 +210,14 @@ public static class BiyomedikalUclari
 
         grup.MapPost("/is-emri/{id:long}/adim", async (
             long id, IsEmriAdimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("demirbas.isemri", Islem.Degistir);
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen yedek cihaz başka şubenin olamaz.
+            if (istek.YedekDemirbasId is > 0)
+                await erisim.IsteAsync(baglam, "demirbas", istek.YedekDemirbasId.Value, "Yedek cihaz bulunamadı.", iptal);
 
             var adim = (istek.Adim ?? "").Trim().ToLowerInvariant();
             // durum: 0 açık · 1 atandı · 2 müdahalede · 3 parça bekliyor
@@ -447,7 +454,13 @@ public static class BiyomedikalUclari
             baglam.YetkiIste("demirbas.isemri", Islem.Degistir);
             baglam.YetkiIste("stok", Islem.Degistir);
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): iş emri ve parça satırları
+            //   `for update` ile kilitlenir; çıkış fişi, parça bağı ve log aynı
+            //   transaction'da yazılır. Eskiden fiş kendi bağlantısında commit
+            //   oluyor, bağ sonra yazılıyordu: eş zamanlı ikinci istek (ya da
+            //   arada hata) aynı parçayı iki kez stoktan düşerdi.
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var e = await baglanti.TekAsync("""
                 select e.is_emri_no as "isEmriNo", e.durum, e.sube_id as "subeId",
@@ -455,7 +468,8 @@ public static class BiyomedikalUclari
                   from public.demirbas_is_emri e
                   left join public.demirbas d on d.id = e.demirbas_id
                  where e.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of e
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İş emri bulunamadı.");
 
             if (Convert.ToInt16(e["durum"] ?? (short)0) == 8)
@@ -474,20 +488,21 @@ public static class BiyomedikalUclari
                    and coalesce(p.kapsam, 0) = 0
                    and (@p1::bigint[] is null or p.id = any(@p1::bigint[]))
                  order by p.id
-                """, null, [id, secim], OkuyucuGenisletmeleri.Sozluk, iptal);
+                   for update of p
+                """, islem, [id, secim], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (satirlar.Count == 0)
                 throw GentegreHatasi.IsKurali(
                     "Düşülecek parça yok - garanti/sözleşme kapsamındaki parçalar stoktan düşülmez.");
 
-            var depoAyar = await AyarDeposu.MetinAsync(baglanti, null, "demirbas.parca_depo", "", iptal);
+            var depoAyar = await AyarDeposu.MetinAsync(baglanti, islem, "demirbas.parca_depo", "", iptal);
             var depoId = istek.DepoId
                 ?? await baglanti.TekDegerAsync<int?>("""
                     select coalesce(nullif(@p0, '')::int,
                            (select min(x.id) from public.depo x
                              where x.varsayilan = 1 and coalesce(x.durum, 1) = 1),
                            (select min(x.id) from public.depo x where coalesce(x.durum, 1) = 1))
-                    """, null, [depoAyar], iptal)
+                    """, islem, [depoAyar], iptal)
                 ?? throw GentegreHatasi.IsKurali(
                     "Parça çıkışı için depo bulunamadı - Genel Ayarlar'dan teknik servis deposunu seçin.");
 
@@ -519,22 +534,29 @@ public static class BiyomedikalUclari
                     ["sira"] = ++sira,
                 }));
 
-            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(
+            var (fisId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem,
                 fis, govde,
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = true },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 
-            await baglanti.CalistirAsync("""
+            // Bağ KOŞULLU (`belge_id is null`) ve sayısı denetlenir; 0/eksik
+            //   dönerse fiş geri alınır (K12).
+            var dusulen = await baglanti.CalistirAsync("""
                 update public.demirbas_is_emri_parca
                    set belge_id = @p1, degistiren = @p2,
                        degistirme_tarihi = (now())::timestamp
-                 where is_emri_id = @p0 and id = any(@p3)
-                """, null, [id, fisId, baglam.KullaniciId,
-                            satirlar.Select(x => Convert.ToInt64(x["id"])).ToArray()], iptal);
+                 where is_emri_id = @p0 and id = any(@p3) and belge_id is null
+                """, islem, [id, fisId, baglam.KullaniciId,
+                             satirlar.Select(x => Convert.ToInt64(x["id"])).ToArray()], iptal);
+            if (dusulen != satirlar.Count)
+                throw GentegreHatasi.IsKurali(
+                    "Parçalar zaten stoktan düşülmüş - ekranı yenileyip tekrar deneyin.");
 
-            await log.YazAsync(LogIslemi.Degistir, LogIsEmri, id, baglam.KullaniciId,
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogIsEmri, id, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip,
                 new { belgeId = fisId, satir = satirlar.Count, depoId }, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new
             {
@@ -683,9 +705,13 @@ public static class BiyomedikalUclari
         //   güncelleseydik ikincisi hiç sorulamazdı.
         grup.MapPost("/{id:int}/hareket", async (
             int id, HareketIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen iş emri başka şubenin olamaz.
+            if (istek.IsEmriId is > 0)
+                await erisim.IsteAsync(baglam, "demirbasIsEmri", istek.IsEmriId.Value, "İş emri bulunamadı.", iptal);
 
             if (istek.Hareket is < 1 or > 8)
                 throw GentegreHatasi.Dogrulama("Geçersiz hareket.",

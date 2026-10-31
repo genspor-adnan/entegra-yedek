@@ -47,15 +47,15 @@ const ZAMAN = (v: unknown, saatli: boolean) => {
 
 /** "25 dk" · "1 sa 05 dk" - baslamamissa bos. Bitis yoksa SUREN muayene. */
 
-/** Listeyi bir kez çeker; hata olursa şerit sessizce boş kalır. */
-async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
+/** Listeyi bir kez çeker; hata = null (K24): okunamayan liste "kayıt yok" ile karışmasın. */
+async function listele(kaynak: string, hastaId: number): Promise<Satir[] | null> {
   try {
     const y = await api.liste(kaynak, {
       sayfa: 1, boyut: 20,
       filtre: { alan: 'hastaId', op: 'esit', deger: hastaId },
     });
     return (y.satirlar ?? []) as Satir[];
-  } catch { return [] }
+  } catch { return null }
 }
 
 /**
@@ -94,6 +94,8 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
   const [kronik, setKronik] = useState<Satir[]>([]);
   const [ilac, setIlac] = useState<Satir[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
+  // ALERJİ OKUNAMADI (kod inceleme 30.10.2026 K24): yeşil "Alerji: yok" yerine uyarı rozeti.
+  const [alerjiHata, setAlerjiHata] = useState(false);
   /** Acik hasta kayitlari penceresi (alerji+kronik ya da aktif ilac). */
   const [pencere, setPencere] = useState<'alerji' | 'ilac' | null>(null);
   const [tazele, setTazele] = useState(0);
@@ -123,9 +125,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       if (iptal) return;
       // AKTİF olanlar önce ve yalnız onlar: geçmişte kesilmiş ilacı "aktif
       //   ilaç" diye göstermek, hekimi yanlış bilgiyle yazdırır.
-      setAlerji(a.filter(x => Number(x.aktif ?? 1) === 1));
-      setKronik(k.filter(x => Number(x.durum ?? 1) !== 0));
-      setIlac(i.filter(x => Number(x.aktif ?? 1) === 1));
+      setAlerji((a ?? []).filter(x => Number(x.aktif ?? 1) === 1));
+      setAlerjiHata(a === null);
+      setKronik((k ?? []).filter(x => Number(x.durum ?? 1) !== 0));
+      setIlac((i ?? []).filter(x => Number(x.aktif ?? 1) === 1));
       setYuklendi(true);
     })();
     return () => { iptal = true };
@@ -189,9 +192,11 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {/* ALERJİ YOKSA DA YAZILIR: boş kutu "bakılmadı" ile "yok"u
               ayırt ettirmez; mockup da "Alerji: yok" rozetini gösteriyor. */}
           {alerji.length === 0
-            ? <span className={`rozet ${yuklendi ? 'olumlu' : 'gri'}`}>
-                {yuklendi ? 'Alerji: yok' : 'Alerji: …'}
-              </span>
+            ? (alerjiHata
+                ? <span className="rozet uyari" title="Alerji listesi okunamadı - kartı yenileyin">⚠ Alerji: ?</span>
+                : <span className={`rozet ${yuklendi ? 'olumlu' : 'gri'}`}>
+                    {yuklendi ? 'Alerji: yok' : 'Alerji: …'}
+                  </span>)
             : alerji.slice(0, SERIT_ROZET).map((a, i) => {
                 const ad = metin(a.etken) || metin(a.etkenMadde) || 'Alerji';
                 return (

@@ -198,7 +198,20 @@ public sealed class KurumProfilDeposu
         {
             await using var baglanti = await _veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var sonuc = await YazAsync(baglanti, islem, yeni, baglam, iptal);
+            await islem.CommitAsync(iptal);
+            return sonuc;
+        });
 
+    /// <summary>
+    /// AYNI İŞLEMDE profil yazımı (kod inceleme 30.10.2026 K36): profil ve ona bağlı rol haritası tek
+    /// transaction'da yazılabilsin diye çağıranın bağlantı / işlemini alır - çağıran commit eder / geri alır.
+    /// FK / CHECK ihlali iş kuralı hatasına çevrilir (kendi işlemini açan sürümle aynı).
+    /// </summary>
+    public async Task<KurumProfil> YazAsync(NpgsqlConnection baglanti, NpgsqlTransaction? islem,
+        KurumProfil yeni, YazmaBaglami baglam, CancellationToken iptal = default)
+        => await IsKuraliCevirAsync(async () =>
+        {
             var moduller = JsonSerializer.Serialize(yeni.Moduller);
             // SUBE BAZLI (364): anahtar sube_id - 0 kurum geneli, N o sube.
             //   Bir subeye ilk kez yazildiginda kurum genelinden AYRILMIS olur.
@@ -244,9 +257,7 @@ public sealed class KurumProfilDeposu
             // Ayar degisti: onbellek dussun, bir dakika beklemeden gecerli olsun.
             KimlikKuraliDeposu.Unut();
 
-            var sonuc = await ProfilOkuAsync(baglanti, islem, yeni.SubeId, iptal);
-            await islem.CommitAsync(iptal);
-            return sonuc;
+            return await ProfilOkuAsync(baglanti, islem, yeni.SubeId, iptal);
         });
 
     /// <summary>

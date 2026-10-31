@@ -93,10 +93,13 @@ public static class IskontoOnayUclari
         grup.MapPost("/", async (
             TalepIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
+            // ŞUBE KAPISI (K32): istemciden gelen belgeId aktif şubenin / kapsamın
+            //   belgesi olmalı - başka şubenin başvurusuna talep açılamaz.
+            await erisim.IsteAsync(baglam, "belge", istek.BelgeId, "Belge bulunamadı.", iptal);
             if (istek.Kalemler.Count == 0)
                 throw GentegreHatasi.Dogrulama("Onaya gönderilecek satır seçilmeli.",
                     new AlanHatasi("kalemler", "En az bir satır seçin."));
@@ -114,6 +117,12 @@ public static class IskontoOnayUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // ŞUBE KAPISI (K32): talebin şubesi BELGENİN şubesidir, başlıktan
+            //   gelen değil - zil ve geçmiş o şubeye süzülür.
+            var belgeSube = await baglanti.TekDegerAsync<int?>(
+                "select sube_id from public.belge where id = @p0", null, [istek.BelgeId], iptal)
+                ?? baglam.SubeId ?? 0;
+
             var bayraklar = new List<string>();
             if (await IskontoTalepDeposu.TekrarIndirimMiAsync(
                     baglanti, null, satirIdler, iptal))
@@ -124,7 +133,7 @@ public static class IskontoOnayUclari
             var id = await IskontoTalepDeposu.TalepAcAsync(baglanti, islem,
                 istek.BelgeId, enYuksek, istek.Gerekce,
                 istek.Kalemler.Select(k => (k.SatirId, k.Oran)).ToList(),
-                baglam.KullaniciId, baglam.SubeId ?? 0, iptal);
+                baglam.KullaniciId, belgeSube, iptal);
 
             // ÖLÇÜ = ORAN (yüzde), tutar değil: aynı %30 küçük ve büyük
             //   başvuruda kurumun fiyat politikasına aynı ölçüde dokunur.

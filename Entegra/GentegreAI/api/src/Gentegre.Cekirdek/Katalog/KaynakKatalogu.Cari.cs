@@ -946,6 +946,8 @@ public static partial class KaynakKatalogu
         return p with
         {
             Ad = "hasta",
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+            KapsamKolonu = "t.id",
             // HASTANIN KENDI YETKISI (684, kullanici: "yetki matrisine girdim
             //   kayit kabul altinda personel var, neden"): hasta listesi
             //   `personel` yetkisine bagliydi ve matriste Kayit Kabul basligi

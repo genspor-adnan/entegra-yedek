@@ -35,10 +35,8 @@ public static partial class MuayeneUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var varMi = await baglanti.TekDegerAsync<int>(
-                "select count(*) from public.muayene where id = @p0", islem, [id], iptal);
-            if (varMi == 0) return Results.NotFound(new { hata = new
-                { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
+            // AÇIK MUAYENE (kod inceleme 30.10.2026 K34): tamamlanmış muayeneye şablon uygulanmaz (422).
+            await MuayeneAcikIsteAsync(baglanti, islem, id, iptal);
 
             var acilan = await baglanti.CalistirAsync("""
                 insert into public.muayene_bulgu (muayene_id, sablon_alan_id, normal)
@@ -214,6 +212,9 @@ public static partial class MuayeneUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
+            // AÇIK MUAYENE (kod inceleme 30.10.2026 K34): tamamlanmış karta anamnez / tanı kopyalanmaz (422).
+            await MuayeneAcikIsteAsync(baglanti, islem, id, iptal);
+
             // AYNI HASTA ŞARTI: başka hastanın anamnezini bu karta taşımak
             //   hasta karıştırmanın en sessiz yoludur.
             var ayniHasta = await baglanti.TekDegerAsync<int>(
@@ -281,10 +282,8 @@ public static partial class MuayeneUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var varMi = await baglanti.TekDegerAsync<int>(
-                "select count(*) from public.muayene where id = @p0", islem, [id], iptal);
-            if (varMi == 0) return Results.NotFound(new { hata = new
-                { kod = "BULUNAMADI", mesaj = "Muayene bulunamadi." } });
+            // AÇIK MUAYENE (kod inceleme 30.10.2026 K34): tamamlanmış muayenenin bulgusu değiştirilmez (422).
+            await MuayeneAcikIsteAsync(baglanti, islem, id, iptal);
 
             var isaretlenen = await baglanti.CalistirAsync(
                 "update public.muayene_bulgu set normal = 1 " +

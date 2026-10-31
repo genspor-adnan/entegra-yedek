@@ -165,7 +165,14 @@ public static class IcmalUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Ekle);
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): icmal `for update` ile
+            //   kilitlenir; fatura ve icmal durumu aynı transaction'da yazılır.
+            //   Eskiden fatura kendi bağlantısında commit oluyor, durum sonra
+            //   yazılıyordu: eş zamanlı ikinci "faturala" aynı icmali iki kez
+            //   faturalardı (arada hata olsa icmal "hazırlandı"da kalır, fatura
+            //   kesilmiş olurdu).
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var icmal = await baglanti.TekAsync("""
                 select i.id, i.kurum_id as "kurumId", i.durum, i.toplam,
@@ -174,7 +181,8 @@ public static class IcmalUclari
                   from public.kurum_icmal i
                   left join public.taraf t on t.id = i.kurum_id
                  where i.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of i
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İcmal bulunamadı.");
 
             if (Convert.ToInt32(icmal["durum"] ?? 0) != 1)
@@ -190,7 +198,7 @@ public static class IcmalUclari
                   left join public.hizmet hz on hz.id = s.hizmet_id
                   left join public.stok   st on st.id = s.stok_id
                  where ks.icmal_id = @p0 order by ks.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (kalemler.Count == 0)
                 throw GentegreHatasi.IsKurali("İcmalde satır yok.");
@@ -247,16 +255,33 @@ public static class IcmalUclari
 
             // Secenekler ZORUNLU: null gecilince kayit hatti "Taslak" bayragini
             //   okurken patliyor. Icmal faturasi KESIN belgedir.
-            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(belge, satirlar,
+            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem, belge, satirlar,
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                 baglam.Yazma, iptal);
 
-            await baglanti.CalistirAsync("""
+            // Durum yalnız HENÜZ FATURALANMAMIŞ (durum = 1, belge_id boş) icmale
+            //   yazılır; 0 dönerse fatura da geri alınır (K12).
+            var faturalandi = await baglanti.CalistirAsync("""
                 update public.kurum_icmal
                    set durum = 2, belge_id = @p1, degistiren = @p2,
                        degistirme_tarihi = now()::timestamp
-                 where id = @p0
-                """, null, [id, belgeId, baglam.KullaniciId], iptal);
+                 where id = @p0 and durum = 1 and belge_id is null
+                """, islem, [id, belgeId, baglam.KullaniciId], iptal);
+            if (faturalandi != 1)
+                throw GentegreHatasi.IsKurali("Bu icmal zaten faturalanmış.");
+
+            // DENETİM İZİ (kod inceleme 30.10.2026 K33): icmalin faturalanması durumu
+            //   değiştirir; alan bazlı değişiklik logu fatura ile AYNI transaction'da.
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloIcmal, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string>
+                {
+                    ["durum"] = "1 -> 2",
+                    ["belge_id"] = " -> " + belgeId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                },
+                tarafId: icmal["kurumId"] is { } kurum ? Convert.ToInt32(kurum) : null, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { belgeId, satir = kalemler.Count, uyarilar });
         });

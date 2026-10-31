@@ -186,6 +186,10 @@ public static partial class DisUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.lab", Islem.Gor);
+            // YAZMA YETKİSİ (K16): sayaç + zaman damgası YAZILIR - salt okuma şubede
+            //   çalışmaz. Rol yetkisi Gör kalır (basmak iş kararı değil), şube yazma
+            //   kapısı ayrıca istenir.
+            baglam.YazmaIste();
             await using var b = await veri.AcAsync(iptal);
             var sayi = await b.TekDegerAsync<int>("""
                 update public.dis_lab_isemri

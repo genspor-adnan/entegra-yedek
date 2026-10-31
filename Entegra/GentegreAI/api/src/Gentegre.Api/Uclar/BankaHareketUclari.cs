@@ -23,6 +23,8 @@ namespace Gentegre.Api.Uclar;
 public static class BankaHareketUclari
 {
     private const string Kod = "banka.hareket";
+    /// <summary>Olmayan ve kapsam dışı hareket aynı metni alır (K26).</summary>
+    private const string HareketYok = "Hareket bulunamadı.";
 
     public sealed record CekIstegi(int? HesapId, DateTime? Bas, DateTime? Bit);
     public sealed record IsleIstegi(string? Tur, int? TarafId, int? BelgeId, int? HedefHesapId, int? MasrafId,
@@ -146,11 +148,13 @@ public static class BankaHareketUclari
         });
 
         grup.MapPost("/{id:long}/isle", async (long id, IsleIstegi i, BankaHareketServisi servis, BaglamCozucu cozucu,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Degistir);
             baglam.YetkiIste("kasa_islem", Islem.Ekle);
+            // KAYIT KAPSAMI (K26): hareket aktif şubenin olmalı (liste kuralı).
+            await erisim.IsteAsync(baglam, "banka-hareket", id, HareketYok, iptal);
             var karar = string.IsNullOrEmpty(i.Tur) ? null
                 : new BankaHareketServisi.Karar(i.Tur, i.TarafId, i.BelgeId, i.HedefHesapId, i.MasrafId, i.IbanEkle ?? false, i.Kural);
             var kasaId = await servis.IsleAsync(id, karar, baglam.KullaniciId, baglam.SubeId ?? 0, iptal);
@@ -158,7 +162,7 @@ public static class BankaHareketUclari
         });
 
         grup.MapPost("/isle-toplu", async (TopluIstegi i, BankaHareketServisi servis, BaglamCozucu cozucu,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Degistir);
@@ -166,16 +170,24 @@ public static class BankaHareketUclari
             int islenen = 0; var hatalar = new List<string>();
             foreach (var id in i.Idler.Distinct())
             {
-                try { await servis.OneriyiIsleAsync(id, baglam.KullaniciId, baglam.SubeId ?? 0, iptal); islenen++; }
+                try
+                {
+                    // KAYIT KAPSAMI (K26): şube dışı kimlik hata listesine düşer, ötekiler sürer.
+                    await erisim.IsteAsync(baglam, "banka-hareket", id, HareketYok, iptal);
+                    await servis.OneriyiIsleAsync(id, baglam.KullaniciId, baglam.SubeId ?? 0, iptal); islenen++;
+                }
                 catch (GentegreHatasi h) { hatalar.Add($"#{id}: {h.Message}"); }
             }
             return Results.Ok(new { islenen, hatalar });
         });
 
-        grup.MapPost("/{id:long}/yoksay", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapPost("/{id:long}/yoksay", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hareket aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, "banka-hareket", id, HareketYok, iptal);
             var n = await veri.CalistirAsync("""
                 update public.banka_hareket set durum = 3, isleyen = @p1, isleme_zamani = now()
                  where id = @p0 and durum in (0, 1, 4)
@@ -184,10 +196,13 @@ public static class BankaHareketUclari
             return Results.Ok(new { tamam = true });
         });
 
-        grup.MapPost("/{id:long}/geri-al", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapPost("/{id:long}/geri-al", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Degistir);
+            // KAYIT KAPSAMI (K26): hareket aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, "banka-hareket", id, HareketYok, iptal);
             var n = await veri.CalistirAsync("""
                 update public.banka_hareket set durum = 0, isleyen = null, isleme_zamani = null where id = @p0 and durum = 3
                 """, [id], iptal);

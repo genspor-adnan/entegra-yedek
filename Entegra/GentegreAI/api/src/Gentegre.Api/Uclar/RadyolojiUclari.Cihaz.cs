@@ -182,17 +182,12 @@ public static partial class RadyolojiUclari
                 throw GentegreHatasi.Dogrulama("Bitiş başlangıçtan sonra olmalı.", new AlanHatasi("bitis", "Bitiş başlangıçtan sonra olmalı."));
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
-            var kid = await b.TekDegerAsync<int>("""
-                insert into public.radyoloji_cihaz_kapatma (cihaz_id, baslangic, bitis, neden_tur, aciklama, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5) returning id
-                """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime(), istek.NedenTur,
-                             (istek.Aciklama ?? "").Trim(), baglam.KullaniciId], iptal);
             var etkilenen = await b.TekDegerAsync<long>("""
                 select count(*) from public.randevu where cihaz_id = @p0 and durum not in (4, 5) and baslangic >= @p1 and baslangic < @p2
                 """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime()], iptal);
-            await log.YazAsync(b, islem, Gentegre.Veri.Depolar.LogIslemi.Ekle, 1282, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { neden = istek.NedenTur, baslangic = istek.Baslangic, bitis = istek.Bitis, istek.Aciklama, etkilenen },
-                ustTabloId: 944, ustKayitId: id, iptal: iptal);
+            // Ortak yazım (K77): takvimin `/kapatma` ucu ile aynı satır + aynı log.
+            var kid = await KapatmaYazAsync(b, islem, log, baglam, id, istek.Baslangic.UtcDateTime, istek.Bitis.UtcDateTime,
+                                            istek.NedenTur, istek.Aciklama ?? "", etkilenen, iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id = kid, etkilenen, izlemeNo = baglam.IzlemeNo });
         });
@@ -332,9 +327,15 @@ public static partial class RadyolojiUclari
         // KAPATMA EKLEME (318): takvimden "Cihazı Kapat". Aralıga düsen
         //   randevular SAYILIR ve kullaniciya bildirilir - tetik yalniz
         //   yeni/degisen randevuyu denetler, mevcutlar kapali saatte kalir.
+        //
+        // K77 (kod inceleme 30.10.2026): bu uç ile kartın `/cihaz/{id}/kapat` ucu AYNI işi yapıyordu; bu
+        //   sürüm transaction'sız ve logsuzdu. İki uç da kalıyor (takvim DateTime + ops. neden, kart
+        //   DateTimeOffset + zorunlu neden gönderiyor - istemci sözleşmeleri farklı) ama yazım artık tek
+        //   yerden: `KapatmaYazAsync` (tx + cihaz kilidi + log 1282). Buradaki randevu sayımı ÇAKIŞAN
+        //   aralığı (süre dahil) sayar, kart ucu yalnız başlangıcı aralıkta olanı - kural değiştirilmedi.
         grup.MapPost("/cihaz/{id:int}/kapatma", async (
             int id, KapatmaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            Gentegre.Veri.Depolar.LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Degistir);
@@ -343,6 +344,7 @@ public static partial class RadyolojiUclari
                 throw GentegreHatasi.IsKurali("Kapatma bitişi başlangıçtan sonra olmalı.");
 
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var etkilenen = await baglanti.TekDegerAsync<int>("""
                 select count(*) from public.randevu r
@@ -351,19 +353,37 @@ public static partial class RadyolojiUclari
                    and r.baslangic < @p2
                    and (r.baslangic + make_interval(mins => greatest(coalesce(r.sure_dk, 0), 1)))
                        > @p1
-                """, null, [id, istek.Baslangic, istek.Bitis], iptal);
+                """, islem, [id, istek.Baslangic, istek.Bitis], iptal);
 
-            var yeni = await baglanti.TekDegerAsync<int>("""
-                insert into public.radyoloji_cihaz_kapatma
-                       (cihaz_id, baslangic, bitis, neden_tur, aciklama, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5)
-                returning id
-                """, null,
-                [id, istek.Baslangic, istek.Bitis, istek.NedenTur ?? (short)1,
-                 istek.Aciklama ?? "", baglam.KullaniciId], iptal);
+            var yeni = await KapatmaYazAsync(baglanti, islem, log, baglam, id, istek.Baslangic, istek.Bitis,
+                                             istek.NedenTur ?? (short)1, istek.Aciklama ?? "", etkilenen, iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id = yeni, etkilenenRandevu = etkilenen });
         });
+    }
+
+    /// <summary>islem_log.tablo_id: cihaz kapatma satırı (üst: cihaz kartı 944).</summary>
+    private const int LogKapatma = 1282, LogCihazKarti = 944;
+
+    /// <summary>
+    /// Cihaz kapatma satırını AÇIK İŞLEMDE yazar: cihaz `for update` kilitlenir (yoksa 404), satır eklenir,
+    /// log yazılır. `/kapat` (kart) ve `/kapatma` (takvim) uçlarının ortak yazımı (K77 / K36). Çağıran commit eder.
+    /// </summary>
+    private static async Task<int> KapatmaYazAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction islem,
+        Gentegre.Veri.Depolar.LogDeposu log, IstekBaglami baglam, int cihazId, DateTime baslangic, DateTime bitis,
+        short nedenTur, string aciklama, long etkilenen, CancellationToken iptal)
+    {
+        _ = await b.TekDegerAsync<int?>("select id from public.radyoloji_cihaz where id = @p0 for update", islem, [cihazId], iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
+        var kid = await b.TekDegerAsync<int>("""
+            insert into public.radyoloji_cihaz_kapatma (cihaz_id, baslangic, bitis, neden_tur, aciklama, ekleyen)
+            values (@p0, @p1, @p2, @p3, @p4, @p5) returning id
+            """, islem, [cihazId, baslangic, bitis, nedenTur, aciklama.Trim(), baglam.KullaniciId], iptal);
+        await log.YazAsync(b, islem, Gentegre.Veri.Depolar.LogIslemi.Ekle, LogKapatma, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new { neden = nedenTur, baslangic, bitis, aciklama, etkilenen },
+            ustTabloId: LogCihazKarti, ustKayitId: cihazId, iptal: iptal);
+        return kid;
     }
 
     /// <summary>Son 30 gün doz özeti CTE'si (@p0 = cihaz); `son` sorgu `doz`dan okur.</summary>

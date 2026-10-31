@@ -695,6 +695,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi CocukIzlem() => new(
         Ad: "cocuk-izlem",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "i.taraf_id",
         YetkiKodu: "cocuk.izlem",
         Kaynak: "public.v_cocuk_izlem i",
         SubeKolonu: "i.sube_id",
@@ -751,6 +753,8 @@ public static partial class KaynakKatalogu
     /// <summary>GEBELİK DOSYALARI (900, KTS H10).</summary>
     private static KaynakTanimi Gebelik() => new(
         Ad: "gebelik",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "g.taraf_id",
         YetkiKodu: "gebe.dosya",
         Kaynak: "public.v_gebelik g",
         SubeKolonu: "g.sube_id",
@@ -817,6 +821,8 @@ public static partial class KaynakKatalogu
     /// <summary>GEBE İZLEMLERİ (900, USS 221).</summary>
     private static KaynakTanimi GebeIzlem() => new(
         Ad: "gebe-izlem",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "i.taraf_id",
         YetkiKodu: "gebe.izlem",
         Kaynak: "public.v_gebe_izlem i",
         SubeKolonu: "i.sube_id",
@@ -876,6 +882,8 @@ public static partial class KaynakKatalogu
     /// <summary>AŞI UYGULAMALARI (898): hasta bazlı kayıt - USS 207'nin kaynağı.</summary>
     private static KaynakTanimi AsiUygulama() => new(
         Ad: "asi-uygulama",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "u.taraf_id",
         YetkiKodu: "asi",
         Kaynak: "public.v_asi_uygulama u",
         SubeKolonu: "u.sube_id",

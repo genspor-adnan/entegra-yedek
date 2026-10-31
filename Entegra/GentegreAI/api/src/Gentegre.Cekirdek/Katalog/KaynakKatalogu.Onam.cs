@@ -46,6 +46,8 @@ public static partial class KaynakKatalogu
     /// <summary>Verilen / reddedilen onamlar (398). Kaynak generic.</summary>
     private static KaynakTanimi Onam() => new(
         Ad: "onam",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "o.taraf_id",
         YetkiKodu: "onam",
         Kaynak: "public.onam o "
               + "  join public.onam_metni m on m.id = o.metin_id "

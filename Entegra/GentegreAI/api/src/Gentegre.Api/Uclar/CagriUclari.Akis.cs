@@ -50,7 +50,9 @@ public static partial class CagriUclari
         grup.MapPost("/agent/durum", async (AgentDurumIstegi g, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("cagri.pano", Islem.Gor);
+            // YAZMA YETKİSİ (K16): agent satırı açılır / durumu yazılır - pano Gor ile salt-okuma şubede yazılıyordu.
+            //   Çağrı üstlenmekle aynı kapı: agent olan kullanıcı çağrı kaydını değiştirebilen kullanıcıdır.
+            baglam.YetkiIste("cagri.kayit", Islem.Degistir);
             if (g.Durum is not (AgentHazir or AgentMola or AgentCikis)) throw GentegreHatasi.IsKurali("Durum yalnız Hazır / Mola / Çıkış seçilebilir.");
             if (g.Durum == AgentMola && (g.MolaSebep ?? 0) == 0) throw GentegreHatasi.IsKurali("Mola sebebi zorunlu.");
             await using var b = await veri.AcAsync(iptal);
@@ -80,28 +82,38 @@ public static partial class CagriUclari
 
         // ---------------------------------------------------- çağrı akışı ----
         // Elle başlatılan çağrı (tıkla-ara, WhatsApp/e-posta kaydı, santralsiz kurulum).
-        grup.MapPost("/baslat", async (BaslatIstegi g, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapPost("/baslat", async (BaslatIstegi g, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cagri.kayit", Islem.Ekle);
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen kampanya kişisi şube kapsamından geçer.
+            if (g.KampanyaKisiId is int kki)
+                await erisim.IsteAsync(baglam, "cagri-kampanya-kisi", kki, "Kampanya kişisi bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
+            // TEK TRANSACTION + AGENT KİLİDİ (kod inceleme 30.10.2026 K36): agent satırı, çağrı, olay, kampanya
+            //   kişisi, agent durumu ve log birlikte yazılır; agent satırı `for update` kilitli olduğu için aynı
+            //   kullanıcının eşzamanlı iki "başlat"ı iki açık çağrı açamaz (açık çağrı kontrolü kilit altında).
+            //   (Yardımcılar transaction parametresi almıyor; Npgsql aynı bağlantıdaki her komutu açık transaction'a dahil eder.)
+            await using var islem = await b.BeginTransactionAsync(iptal);
             await AgentSaglaAsync(b, baglam, iptal);
-            var acik = await b.TekDegerAsync<int?>("select id from public.cagri where agent_id = @p0 and durum in (2, 3) order by id desc limit 1", null, [baglam.KullaniciId], iptal);
+            await b.CalistirAsync("select 1 from public.cagri_agent where kullanici_id = @p0 for update", islem, [baglam.KullaniciId], iptal);
+            var acik = await b.TekDegerAsync<int?>("select id from public.cagri where agent_id = @p0 and durum in (2, 3) order by id desc limit 1", islem, [baglam.KullaniciId], iptal);
             if (acik is not null) throw GentegreHatasi.IsKurali($"Açık çağrınız var (#{acik}); önce onu kapatın.");
             var tel = (g.ArayanNo ?? "").Trim();
             var tarafId = g.TarafId ?? await TarafBulAsync(b, tel, iptal);
             if (tel == "" && tarafId is not null)
-                tel = await b.TekDegerAsync<string>($"select {TarafTel} from public.taraf t where t.id = @p0", null, [tarafId], iptal) ?? "";
+                tel = await b.TekDegerAsync<string>($"select {TarafTel} from public.taraf t where t.id = @p0", islem, [tarafId], iptal) ?? "";
             var id = await b.TekDegerAsync<int>("""
                 insert into public.cagri (kanal, yon, arayan_no, taraf_id, kuyruk_id, agent_id, baslama, cevap, durum, kampanya_kisi_id, kampanya_id, sube_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, now(), now(), 2, @p6,
                         (select kampanya_id from public.cagri_kampanya_kisi where id = @p6), @p7, @p5) returning id
-                """, null, [g.Kanal ?? (short)1, g.Yon ?? (short)2, tel, tarafId, g.KuyrukId, baglam.KullaniciId, g.KampanyaKisiId, baglam.SubeId ?? 0], iptal);
+                """, islem, [g.Kanal ?? (short)1, g.Yon ?? (short)2, tel, tarafId, g.KuyrukId, baglam.KullaniciId, g.KampanyaKisiId, baglam.SubeId ?? 0], iptal);
             await OlayYazAsync(b, id, 2, baglam.KullaniciId, g.Yon == 1 ? "Elle kaydedildi" : "Tıkla-ara", "", iptal);
             if (g.KampanyaKisiId is not null)
-                await b.CalistirAsync("update public.cagri_kampanya_kisi set deneme = deneme + 1, son_deneme = now(), cagri_id = @p1 where id = @p0", null, [g.KampanyaKisiId, id], iptal);
+                await b.CalistirAsync("update public.cagri_kampanya_kisi set deneme = deneme + 1, son_deneme = now(), cagri_id = @p1 where id = @p0", islem, [g.KampanyaKisiId, id], iptal);
             await AgentDurumAsync(b, baglam.KullaniciId, AgentCagrida, iptal);
-            await log.YazAsync(LogIslemi.Ekle, LogCagri, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { kanal = g.Kanal, yon = g.Yon, tel }, tarafId: tarafId, iptal: iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogCagri, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { kanal = g.Kanal, yon = g.Yon, tel }, tarafId: tarafId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, tarafId });
         });
 
@@ -111,15 +123,18 @@ public static partial class CagriUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("cagri.kayit", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
+            // Üstlenme, olay ve agent durumu tek transaction (K36); durum geçişi koşullu (K13).
+            await using var islem = await b.BeginTransactionAsync(iptal);
             await AgentSaglaAsync(b, baglam, iptal);
             var n = await b.CalistirAsync("""
                 update public.cagri set agent_id = @p1, cevap = coalesce(cevap, now()), bekleme_sn = extract(epoch from (coalesce(cevap, now()) - baslama))::int,
                        durum = 2, degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0 and durum in (1, 3, 7)
-                """, null, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Çağrı beklemede değil.");
             await OlayYazAsync(b, id, 2, baglam.KullaniciId, "Üstlenildi", "", iptal);
             await AgentDurumAsync(b, baglam.KullaniciId, AgentCagrida, iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id });
         });
 
@@ -135,9 +150,15 @@ public static partial class CagriUclari
             if (g.KonuId is null) throw GentegreHatasi.IsKurali("Konu seçilmeden çağrı kapatılamaz.");
             var geriAranacak = g.Sonuc == 2;
             if (geriAranacak && g.GeriArama is null) throw GentegreHatasi.IsKurali("\"Geri aranacak\" için tarih/saat zorunlu.");
+            if (c.durum == 5) throw GentegreHatasi.IsKurali("Çağrı zaten kapatılmış.");
             var tarafId = g.TarafId ?? c.tarafId;
             var ad = tarafId is null ? c.tel : await b.TekDegerAsync<string>($"select {TarafAdi} from public.taraf t where t.id = @p0", null, [tarafId], iptal) ?? c.tel;
             int? gorevId = c.gorevId;
+            // DURUM KOŞULLU + TEK TRANSACTION (kod inceleme 30.10.2026 K13): görevler, çağrı kapanışı, olay ve kampanya
+            //   satırı birlikte yazılır; çağrı yalnız KAPALI (5) DEĞİLKEN kapanır. İkinci "kapat" satırı etkilemez,
+            //   açılan görevleri de transaction geri alır - bir çağrıdan bir geri arama görevi, bir SMS doğar.
+            //   (Yardımcılar transaction parametresi almıyor; Npgsql aynı bağlantıdaki her komutu açık transaction'a dahil eder.)
+            await using var islem = await b.BeginTransactionAsync(iptal);
             if (geriAranacak)
             {
                 // gorev.termin/hatirlatma timestamptz: istemci yerel saat gönderir (offset yok) -> ŞUBENİN
@@ -146,7 +167,7 @@ public static partial class CagriUclari
                 gorevId = (int)await b.TekDegerAsync<long>("""
                     insert into public.gorev (konu, aciklama, tur, oncelik, durum, sorumlu_id, acan_id, taraf_id, termin, hatirlatma, sube_id, ekleyen)
                     values (@p0, @p1, 2, @p2, 0, @p3, @p3, @p4, @p5, @p5, @p6, @p3) returning id
-                    """, null, [$"Geri ara: {ad} · {c.tel}", $"Çağrı #{id}. {g.Notu ?? ""}", (short)(g.Oncelik ?? 1), c.agentId ?? baglam.KullaniciId, tarafId, geriUtc, baglam.SubeId ?? 0], iptal);
+                    """, islem, [$"Geri ara: {ad} · {c.tel}", $"Çağrı #{id}. {g.Notu ?? ""}", (short)(g.Oncelik ?? 1), c.agentId ?? baglam.KullaniciId, tarafId, geriUtc, baglam.SubeId ?? 0], iptal);
                 await IlgiliEkleAsync(b, id, "gorev", gorevId.Value, "Geri arama görevi", baglam.KullaniciId, iptal);
             }
             if (!string.IsNullOrWhiteSpace(g.GorevKonu))
@@ -154,26 +175,29 @@ public static partial class CagriUclari
                 var sid = (int)await b.TekDegerAsync<long>("""
                     insert into public.gorev (konu, aciklama, tur, oncelik, durum, sorumlu_id, acan_id, taraf_id, termin, sube_id, ekleyen)
                     values (@p0, @p1, 1, 2, 0, @p2, @p2, @p3, now() + interval '2 days', @p4, @p2) returning id
-                    """, null, [g.GorevKonu.Trim(), $"Çağrı #{id} · {ad} · {c.tel}\n{g.Notu ?? ""}", baglam.KullaniciId, tarafId, baglam.SubeId ?? 0], iptal);
+                    """, islem, [g.GorevKonu.Trim(), $"Çağrı #{id} · {ad} · {c.tel}\n{g.Notu ?? ""}", baglam.KullaniciId, tarafId, baglam.SubeId ?? 0], iptal);
                 await IlgiliEkleAsync(b, id, "gorev", sid, "Şikayet / öneri görevi (48 saat)", baglam.KullaniciId, iptal);
                 gorevId ??= sid;
             }
-            await b.CalistirAsync("""
+            var etkilenen = await b.CalistirAsync("""
                 update public.cagri
                    set konu_id = @p1, alt_konu_id = @p2, sonuc = @p3, notu = @p4, oncelik = coalesce(@p5, oncelik), taraf_id = @p6,
                        geri_arama = @p7, gorev_id = @p8, memnuniyet = coalesce(@p9, memnuniyet),
                        bitis = coalesce(bitis, now()), sure_sn = case when cevap is null then sure_sn else extract(epoch from (coalesce(bitis, now()) - cevap))::int end,
                        islem_sonrasi_sn = case when bitis is null then 0 else extract(epoch from (now() - bitis))::int end,
                        durum = 5, degistiren = @p10, degistirme_tarihi = now()
-                 where id = @p0
-                """, null, [id, g.KonuId, g.AltKonuId, g.Sonuc ?? (short)1, Kirp(g.Notu, 1200), g.Oncelik, tarafId,
+                 where id = @p0 and durum <> 5
+                """, islem, [id, g.KonuId, g.AltKonuId, g.Sonuc ?? (short)1, Kirp(g.Notu, 1200), g.Oncelik, tarafId,
                             g.GeriArama is null ? null : Saat.UtcYap(DateTime.SpecifyKind(g.GeriArama.Value, DateTimeKind.Unspecified)), gorevId, g.Memnuniyet, baglam.KullaniciId], iptal);
+            if (etkilenen == 0) throw GentegreHatasi.IsKurali("Çağrı zaten kapatılmış.");
             await OlayYazAsync(b, id, 9, baglam.KullaniciId, "Kayıt tamamlandı", "", iptal);
             if (c.kisiId is not null)
             {
                 short kd = g.Sonuc switch { 7 or 1 or 6 => 5, 4 => 3, 8 => 6, 2 => 1, _ => 4 };
-                await b.CalistirAsync("update public.cagri_kampanya_kisi set durum = @p1, sonuc = @p2, cagri_id = @p3 where id = @p0", null, [c.kisiId, kd, Kirp(g.Notu, 200), id], iptal);
+                await b.CalistirAsync("update public.cagri_kampanya_kisi set durum = @p1, sonuc = @p2, cagri_id = @p3 where id = @p0", islem, [c.kisiId, kd, Kirp(g.Notu, 200), id], iptal);
             }
+            await islem.CommitAsync(iptal);
+            // SMS / agent durumu / log yalnız kapanış gerçekten yazıldıysa (commit sonrası; ikisi kendi bağlantısını açar).
             if (geriAranacak && tarafId is not null && c.tel != "")
             {
                 try
@@ -220,10 +244,13 @@ public static partial class CagriUclari
             if (tel == "") throw GentegreHatasi.IsKurali("Telefon numarası yok.");
             var sablon = g.Sablon switch { "odeme_linki" => "cagri.odeme_linki", "yol_tarifi" => "cagri.yol_tarifi", "anket" => "cagri.anket", "geri_arama" => "cagri.geri_arama", _ => throw GentegreHatasi.IsKurali("Bilinmeyen mesaj şablonu.") };
             var adres = await b.TekDegerAsync<string>("select coalesce(adres, '') from public.sube where id = @p0", null, [baglam.SubeId ?? 0], iptal) ?? "";
+            // Bildirim kuyruğu satırı, ilgili kaydı ve olay TEK transaction (K36): kuyruk aynı bağlantıda yazılır,
+            //   ilgili/olay düşerse SMS kuyrukta yetim kalmaz. Gönderimin kendisi işçide, tx dışında.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             long? bid;
             try
             {
-                bid = await bildirim.KuyrugaEkleAsync(new BildirimIstegi(sablon, null, tel, new Dictionary<string, string>
+                bid = await bildirim.KuyrugaEkleAsync(b, islem, new BildirimIstegi(sablon, null, tel, new Dictionary<string, string>
                 {
                     ["ad"] = c.ad == "" ? "Sayın müşterimiz" : c.ad, ["kurum"] = KurumAdi(baglam), ["tutar"] = g.Tutar ?? "", ["baglanti"] = g.Baglanti ?? "",
                     ["saat"] = g.Saat ?? "", ["adres"] = adres, ["konum"] = g.Baglanti ?? "",
@@ -232,6 +259,7 @@ public static partial class CagriUclari
             catch (InvalidOperationException h) { throw GentegreHatasi.IsKurali(h.Message); }
             if (bid is not null) await IlgiliEkleAsync(b, id, "bildirim", (int)bid.Value, $"{g.Sablon} → {tel}", baglam.KullaniciId, iptal);
             await OlayYazAsync(b, id, 8, baglam.KullaniciId, $"{g.Sablon} gönderildi ({tel})", "", iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { bildirimId = bid });
         });
 
@@ -269,15 +297,21 @@ public static partial class CagriUclari
             baglam.YetkiIste("cagri.kalite", Islem.Ekle);
             if (g.Puan is < 0 or > 100) throw GentegreHatasi.IsKurali("Puan 0-100 arası olmalı.");
             await using var b = await veri.AcAsync(iptal);
+            // TEK TRANSACTION + ÇAĞRI KİLİDİ (K36): değerlendirme satırı, çağrıdaki puan ve log birlikte;
+            //   çağrı `for update` okunur - yoksa 404, iki eşzamanlı değerlendirme sıraya girer.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            _ = await b.TekDegerAsync<int?>("select id from public.cagri where id = @p0 for update", islem, [id], iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Çağrı bulunamadı.");
             var kid = await b.TekDegerAsync<int>("""
                 insert into public.cagri_kalite (cagri_id, degerlendiren, puan, olcutler, notu, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p1)
                 on conflict (cagri_id) do update set degerlendiren = excluded.degerlendiren, puan = excluded.puan, olcutler = excluded.olcutler, notu = excluded.notu,
                                                      degistiren = excluded.ekleyen, degistirme_tarihi = now()
                 returning id
-                """, null, [id, baglam.KullaniciId, g.Puan, g.Olcutler?.ToJsonString() ?? "[]", Kirp(g.Notu, 600)], iptal);
-            await b.CalistirAsync("update public.cagri set kalite_puan = @p1 where id = @p0", null, [id, g.Puan], iptal);
-            await log.YazAsync(LogIslemi.Ekle, LogKalite, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { cagriId = id, g.Puan }, iptal: iptal);
+                """, islem, [id, baglam.KullaniciId, g.Puan, g.Olcutler?.ToJsonString() ?? "[]", Kirp(g.Notu, 600)], iptal);
+            await b.CalistirAsync("update public.cagri set kalite_puan = @p1 where id = @p0", islem, [id, g.Puan], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogKalite, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { cagriId = id, g.Puan }, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id = kid, g.Puan });
         });
 
@@ -287,7 +321,8 @@ public static partial class CagriUclari
         grup.MapPost("/{id:int}/ozet", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("cagri.kalite", Islem.Gor);
+            // YAZMA YETKİSİ (K16): cagri_kalite satırı yazılır (upsert) - /kalite ile aynı kapı, Gor yetmez.
+            baglam.YetkiIste("cagri.kalite", Islem.Ekle);
             await using var b = await veri.AcAsync(iptal);
             var cagri = await JsonTekAsync(b, "select row_to_json(c)::text from public.v_cagri c where c.id = @p0", [id], iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Çağrı bulunamadı.");

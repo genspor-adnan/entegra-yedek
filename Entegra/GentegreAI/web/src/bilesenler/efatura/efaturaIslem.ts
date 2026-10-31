@@ -1,4 +1,4 @@
-import { htmlTemizle } from '../htmlGuvenlik';
+import { guvenliPencereAc } from '../htmlGuvenlik';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { EFaturaHazirlaIstegi, EFaturaKodu } from '../../api/uclar/efatura';
@@ -73,14 +73,9 @@ export async function hazirla(belgeId: number, ikinciSeri = false, ortak?: Hazir
 
 /** Yazdırma penceresi: PDF Kaydet tarayıcının "PDF olarak kaydet"iyle (başlık = dosya adı). */
 function pencereAc(html: string, baslik: string, yazdir: boolean) {
-  const p = window.open('', '_blank');
-  if (!p) { mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.'); return }
-  // TEMİZ (kod inceleme raporu 28.10.2026 B03): XSLT çıktısı - gelen faturanın şablonu karşı firmadan gelir;
-  //   script / olay öznitelikleri aynı kökende çalışmasın.
-  p.document.write(htmlTemizle(html));
-  p.document.close();
-  try { p.document.title = baslik } catch { /* farklı köken */ }
-  if (yazdir) p.setTimeout(() => p.print(), 500);
+  // SANDBOX (kod inceleme 28.10.2026 B03 + 30.10.2026 K54): XSLT çıktısı karşı firmadan gelir - temizlenir ve
+  //   opak kökenli iframe'de açılır (localStorage'a / API'ye erişemez).
+  if (!guvenliPencereAc(html, baslik, yazdir)) mesaj('Tarayıcı yeni sekmeyi engelledi; açılır pencere iznini verin.');
 }
 
 /** Menü maddesini çalıştırır. Kod bilinmiyorsa false (çağıran kendi işine devam etsin). */

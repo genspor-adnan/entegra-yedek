@@ -92,8 +92,11 @@ public static partial class AmeliyathaneUclari
 
     public static void AmeliyathaneUclariniEkle(this IEndpointRouteBuilder yol)
     {
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): ameliyat / talep kimlikleri liste ile aynı şube kuralından
+        //   geçer (fatura, stok düşümü ve ÜTS uçları dahil); başka şubenin ameliyatı kimlikle ilerletilemez (404).
         var grup = yol.MapGroup("/api/ameliyathane").WithTags("Ameliyathane")
-                      .RequireAuthorization();
+                      .RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Ameliyathane());
 
         TalepUclari(grup);
         AmeliyatUclari(grup);
@@ -159,13 +162,13 @@ public static partial class AmeliyathaneUclari
                 if (Convert.ToInt16(a["durum"] ?? (short)0) == DurumIptal) continue;
                 if (a["bas"] is not DateTime hamB || a["bit"] is not DateTime hamT) continue;
 
-                // YEREL SAATE CEVRILIR. Kolonlar timestamptz (UTC doner), pencere
+                // SUBENIN SAATINE CEVRILIR (1097, Saat.Yerel - sunucu dilimi DEGIL). Kolonlar timestamptz (UTC doner), pencere
                 //   ise duvar saati (08-18). Karsilastirmayi cevirmeden yapsaydik
                 //   gece yarisina sarkan vaka pencereyi uzatmaz ve ekranda
                 //   kirpilirdi - UTC+3'te ogleden sonraki her vaka icin gecerli
                 //   bir hata olurdu.
-                var b = hamB.Kind == DateTimeKind.Utc ? hamB.ToLocalTime() : hamB;
-                var t = hamT.Kind == DateTimeKind.Utc ? hamT.ToLocalTime() : hamT;
+                var b = hamB.Kind == DateTimeKind.Utc ? Saat.Yerel(hamB) : hamB;
+                var t = hamT.Kind == DateTimeKind.Utc ? Saat.Yerel(hamT) : hamT;
 
                 if (b < bas) bas = new DateTime(b.Year, b.Month, b.Day, b.Hour, 0, 0);
                 if (t > son) son = new DateTime(t.Year, t.Month, t.Day, t.Hour, 0, 0).AddHours(1);
@@ -280,6 +283,12 @@ public static partial class AmeliyathaneUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): talep satırı `for update`
+            //   ile kilitli okunur ve işlemin tamamı (kontroller, ameliyat kaydı,
+            //   talep durumu) TEK transaction - iki planlama isteği aynı talepten
+            //   iki ameliyat doğuramaz; ikincisi kilidi alınca talep 1'dir ve 422.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
             var talep = await baglanti.TekAsync("""
                 select t.id, t.sube_id as "subeId", t.hasta_id as "hastaId",
                        t.hizmet_id as "hizmetId", t.taraf, t.durum,
@@ -288,7 +297,8 @@ public static partial class AmeliyathaneUclari
                        t.anestezi_onay as "anesteziOnay", t.tetkik_tamam as "tetkikTamam",
                        t.kan_hazir as "kanHazir", t.onam_alindi as "onamAlindi"
                   from public.ameliyat_talep t where t.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Ameliyat talebi bulunamadı.");
 
             // Planlanmış talebi ikinci kez planlamak aynı hastayı iki masaya
@@ -321,15 +331,13 @@ public static partial class AmeliyathaneUclari
                 select c.id, c.ameliyat_no as "ameliyatNo", c.plan_baslangic as "planBaslangic",
                        c.bitis, c.hasta_ad as "hastaAd"
                   from public.fn_ameliyat_salon_cakisma(@p0, @p1, @p2, null) c
-                """, null, [istek.SalonId, istek.PlanBaslangic, (int)sure],
+                """, islem, [istek.SalonId, istek.PlanBaslangic, (int)sure],
                 OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (cakisanlar.Count > 0 && !istek.CakismayaRagmen)
                 throw GentegreHatasi.IsKurali(
                     $"Bu salonda aynı saatte {cakisanlar.Count} ameliyat var.",
                     new { cakisanlar });
-
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var subeId = baglam.SubeId ?? Convert.ToInt32(talep["subeId"] ?? 0);
 
@@ -364,11 +372,16 @@ public static partial class AmeliyathaneUclari
 
             await KontrolListesiKopyalaAsync(baglanti, islem, ameliyatId, iptal);
 
-            await baglanti.CalistirAsync("""
+            // Talep yalnız BEKLİYORKEN (0) planlanmış sayılır; etkilenmediyse ameliyat
+            //   kaydı da transaction ile geri alınır (K13).
+            var talepEtkilenen = await baglanti.CalistirAsync("""
                 update public.ameliyat_talep
                    set durum = 1, degistiren = @p1, degistirme_tarihi = (now())::timestamp
-                 where id = @p0
+                 where id = @p0 and durum = 0
                 """, islem, [id, baglam.KullaniciId], iptal);
+            if (talepEtkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Bu talep zaten planlanmış ya da kapanmış; bekleyen talep değil.");
 
             await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloAmeliyat,
                 ameliyatId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,

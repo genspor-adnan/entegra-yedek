@@ -43,6 +43,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi Muayene() => new(
         Ad: "muayene",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "m.taraf_id",
         YetkiKodu: "muayene",
         Kaynak: "public.muayene m "
               + "  join public.taraf h on h.id = m.taraf_id "
@@ -227,6 +229,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi HekimCalismaListesi() => new(
         Ad: "hekim-listesi",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "b.taraf_id",
         YetkiKodu: "muayene",
         Kaynak: "public.belge b "
               + "  join public.belge_basvuru bb on bb.id = b.id "

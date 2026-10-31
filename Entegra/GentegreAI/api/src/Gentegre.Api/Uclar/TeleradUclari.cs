@@ -27,7 +27,10 @@ public static partial class TeleradUclari
 {
     public static void TeleradUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/telerad").WithTags("Teleradyoloji").RequireAuthorization();
+        // KAYIT KAPISI (kod inceleme 30.10.2026 K06): dış kurum portalı başka kurumun isteğini (hasta TCKN dahil)
+        //   kimlikle okuyabiliyordu; istek / teslim / gelen kimlikleri telerad-istek kapsamından geçer.
+        var grup = yol.MapGroup("/api/telerad").WithTags("Teleradyoloji").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Telerad());
 
         // DÖNEM FATURASI (803) ayrı dosyada: bu dosya panonun sorgularıyla
         //   zaten uzun; fatura hattı kendi kurallarını taşıyor.

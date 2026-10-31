@@ -326,6 +326,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi RadyolojiKritik() => new(
         Ad: "radyoloji-kritik",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "k.hasta_id",
         YetkiKodu: "radyoloji",
         Kaynak: "public.v_radyoloji_kritik_takip k",
         SubeKolonu: "k.sube_id",
@@ -381,6 +383,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi RadyolojiKonsultasyon() => new(
         Ad: "radyoloji-konsultasyon",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "i.hasta_id",
         YetkiKodu: "radyoloji",
         Kaynak: "public.radyoloji_konsultasyon ks " +
                 "join public.radyoloji_istem i on i.id = ks.istem_id " +
@@ -442,6 +446,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi RadyolojiTeslim() => new(
         Ad: "radyoloji-teslim",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "t.hasta_id",
         YetkiKodu: "radyoloji",
         Kaynak: "public.v_radyoloji_teslim_takip t",
         SubeKolonu: "t.sube_id",

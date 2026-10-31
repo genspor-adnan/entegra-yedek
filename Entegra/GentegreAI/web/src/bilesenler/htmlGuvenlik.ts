@@ -32,3 +32,29 @@ export function htmlTemizle(html: string): string {
   });
   return '<!doctype html>' + belge.documentElement.outerHTML;
 }
+
+/**
+ * YAZDIRMA SARGISI (kod inceleme 30.10.2026 K54): `htmlTemizle` kara listedir - DOMParser → outerHTML yeniden
+ * serileştirmesi mXSS'e açık; kaçan tek yük aynı kökende localStorage'daki oturum anahtarını alırdı. Belge artık
+ * `sandbox` iframe'de (allow-same-origin YOK = opak köken) açılır: betik çalışsa bile ana pencerenin
+ * depolamasına, çerezine, API'sine ulaşamaz. Temizlik yine uygulanır (katmanlı). Yazdırma iframe'in içinden
+ * tetiklenir (allow-modals); sekme başlığı = PDF dosya adı dışta kalır.
+ */
+export function yazdirmaSargisi(html: string, baslik: string, yazdir: boolean): string {
+  let ic = htmlTemizle(html).replace(/<title>[\s\S]*?<\/title>/i, '');
+  const ek = `<title>${h(baslik)}</title>` + (yazdir ? '<script>addEventListener("load",function(){setTimeout(function(){print()},400)})</script>' : '');
+  ic = /<head[^>]*>/i.test(ic) ? ic.replace(/<head[^>]*>/i, m => m + ek) : ek + ic;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${h(baslik)}</title>`
+    + `<style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;width:100%;height:100%}</style></head>`
+    + `<body><iframe sandbox="allow-scripts allow-modals" srcdoc="${h(ic)}"></iframe></body></html>`;
+}
+
+/** Dışarıdan gelen HTML'i yeni sekmede güvenli (sandbox) açar; `yazdir` ile yazdırma diyaloğu gelir. */
+export function guvenliPencereAc(html: string, baslik: string, yazdir: boolean): Window | null {
+  const p = window.open('', '_blank');
+  if (!p) return null;
+  p.opener = null;   // K90: yazdırma penceresi ana pencereyi yönlendiremez
+  p.document.write(yazdirmaSargisi(html, baslik, yazdir));
+  p.document.close();
+  return p;
+}

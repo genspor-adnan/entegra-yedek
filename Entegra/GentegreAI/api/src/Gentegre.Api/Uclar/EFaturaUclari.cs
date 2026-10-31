@@ -4,6 +4,7 @@ using Gentegre.Api.Servisler.EFatura;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -99,29 +100,12 @@ public static class EFaturaUclari
         {
             await ErisimAsync(cozucu, veri, ctx, id, false, iptal);
             await using var b = await veri.AcAsync(iptal);
-            var baslik = await b.TekAsync("""
-                select bl.tipi, coalesce(bl.senaryo, 0) senaryo, coalesce(bl.efatura_durum, 0) efatura_durum,
-                       coalesce(e.tevkifat_kodu, 0) tevkifat_kodu, coalesce(e.istisna_kodu, 0) istisna_kodu,
-                       coalesce(e.navlun, 0) navlun, coalesce(e.sigorta, 0) sigorta, coalesce(e.sgk_tip, '') sgk_tip,
-                       coalesce(e.sgk_mukellef_kod, '') sgk_mukellef_kod, coalesce(e.sgk_mukellef_ad, '') sgk_mukellef_ad,
-                       coalesce(e.sgk_dosya_no, '') sgk_dosya_no, e.sgk_donem_bas, e.sgk_donem_bit, e.kamu_hesap_id
-                  from public.belge bl left join public.belge_efatura e on e.belge_id = bl.id where bl.id = @p0
-                """, null, [id], o => o.Sozluk(), iptal) ?? throw GentegreHatasi.Bulunamadi();
-            var satirlar = await b.ListeAsync("""
-                select s.id satir_id, coalesce(nullif(btrim(s.aciklama), ''), st.ad, hz.ad, '') ad,
-                       coalesce(nullif(es.gtip, ''), st.gtip_kodu, '') gtip, coalesce(es.teslim_sarti, '') teslim_sarti,
-                       coalesce(es.tasima_sekli, 0) tasima_sekli, coalesce(es.kap_cinsi, '') kap_cinsi,
-                       coalesce(es.kap_no, '') kap_no, coalesce(es.kap_adet, 0) kap_adet, coalesce(s.kdv, 0) kdv
-                  from public.belge_satir s
-                  left join public.stok st on st.id = s.stok_id
-                  left join public.hizmet hz on hz.id = s.hizmet_id
-                  left join public.belge_efatura_satir es on es.satir_id = s.id
-                 where s.belge_id = @p0 order by s.sira, s.id
-                """, null, [id], o => o.Sozluk(), iptal);
+            var baslik = await b.TekAsync(BilgiBaslikSql, null, [id], o => o.Sozluk(), iptal) ?? throw GentegreHatasi.Bulunamadi();
+            var satirlar = await b.ListeAsync(BilgiSatirSql, null, [id], o => o.Sozluk(), iptal);
             return Results.Ok(new { baslik = Deve(baslik), satirlar = satirlar.Select(Deve) });
         });
 
-        grup.MapPut("/{id:int}/bilgi", async (int id, JsonElement g, VeriKaynagi veri, BaglamCozucu cozucu,
+        grup.MapPut("/{id:int}/bilgi", async (int id, JsonElement g, VeriKaynagi veri, BaglamCozucu cozucu, LogDeposu log,
                                               HttpContext ctx, CancellationToken iptal) =>
         {
             var bg = await ErisimAsync(cozucu, veri, ctx, id, true, iptal);
@@ -138,6 +122,11 @@ public static class EFaturaUclari
             int? HesapId() => D(h, "kamuHesapId") is var d && d > 0 ? (int)d : null;
 
             await using var tx = await b.BeginTransactionAsync(iptal);
+            // DEĞİŞİKLİK LOGU ALAN BAZLI (kod inceleme 30.10.2026 K33): e-Fatura bilgileri belgenin
+            //   (tablo 30) parçasıdır; eski hâl yazımdan önce, yeni hâl yazımdan sonra AYNI sorguyla
+            //   okunur, fark yoksa log satırı açılmaz. Log yazımla aynı transaction'da.
+            var eskiBaslik = await b.TekAsync(BilgiBaslikSql, tx, [id], o => o.Sozluk(), iptal) ?? new Dictionary<string, object?>();
+            var eskiSatirlar = await BilgiSatirSozluguAsync(b, tx, id, iptal);
             await b.CalistirAsync("""
                 insert into public.belge_efatura (belge_id, tevkifat_kodu, istisna_kodu, navlun, sigorta, sgk_tip, sgk_mukellef_kod,
                                                   sgk_mukellef_ad, sgk_dosya_no, sgk_donem_bas, sgk_donem_bit, kamu_hesap_id, ekleyen)
@@ -166,6 +155,19 @@ public static class EFaturaUclari
                         """, tx, [(int)D(s, "satirId"), id, Kirp(EFaturaKodlari.Rakam(SM("gtip")), 12), Kirp(SM("teslimSarti"), 3),
                                   (short)D(s, "tasimaSekli"), Kirp(SM("kapCinsi"), 3), Kirp(SM("kapNo"), 30), D(s, "kapAdet")], iptal);
                 }
+
+            var yeniBaslik = await b.TekAsync(BilgiBaslikSql, tx, [id], o => o.Sozluk(), iptal) ?? new Dictionary<string, object?>();
+            var yeniSatirlar = await BilgiSatirSozluguAsync(b, tx, id, iptal);
+            var fark = LogDeposu.Fark(eskiBaslik, yeniBaslik) ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var (satirId, yeni) in yeniSatirlar)
+            {
+                var eski = eskiSatirlar.GetValueOrDefault(satirId) ?? new Dictionary<string, object?>();
+                var satirFark = LogDeposu.Fark(eski, yeni);
+                if (satirFark is null) continue;
+                foreach (var (alan, deger) in satirFark) fark[$"satir[{satirId}].{alan}"] = deger;
+            }
+            if (fark.Count > 0)
+                await log.YazAsync(b, tx, LogIslemi.Degistir, LogTabloBelge, id, bg.KullaniciId, bg.SubeId, bg.Ip, fark, iptal: iptal);
             await tx.CommitAsync(iptal);
             return Results.Ok(new { mesaj = "e-Fatura bilgileri kaydedildi.", izlemeNo = bg.IzlemeNo });
         });
@@ -197,11 +199,18 @@ public static class EFaturaUclari
         });
     }
 
-    /// <summary>Belgenin türünü görme / değiştirme yetkisi; yazmada ayrıca e-Belge aksiyonu.</summary>
+    /// <summary>
+    /// Belgenin türünü görme / değiştirme yetkisi; yazmada ayrıca e-Belge aksiyonu.
+    /// KAYIT KAPSAMI (K26): tür yetkisinden önce belge aktif şubenin / kapsamın belgesi olmalı
+    /// (katalog <c>belge</c> kaynağı, liste ile aynı kural) - başka şubenin faturası kimliğiyle
+    /// hazırlanamaz / gönderilemez; kapsam dışı ve olmayan belge aynı 404'ü alır.
+    /// </summary>
     private static async Task<IstekBaglami> ErisimAsync(BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, int id,
                                                         bool yaz, CancellationToken iptal)
     {
         var baglam = await cozucu.CozAsync(ctx, iptal);
+        await ctx.RequestServices.GetRequiredService<KayitErisimi>()
+                 .IsteAsync(baglam, "belge", id, "Belge bulunamadı.", iptal);
         var tt = await veri.TekAsync("select tur, tipi from public.belge where id = @p0", [id],
                                      r => new[] { (int)r.GetInt16(0), (int)r.GetInt16(1) }, iptal);
         if (tt is null || !BelgeUclari.TurIzinli(baglam, tt[0], tt[1], yaz ? Islem.Degistir : Islem.Gor))
@@ -216,4 +225,40 @@ public static class EFaturaUclari
                           k => k.Value);
 
     private static string Kirp(string s, int n) => s.Length <= n ? s : s[..n];
+
+    /// <summary>islem_log.tablo_id - belge (BelgeUclari / EslesmeIcmalUclari ile aynı: 30). belge_efatura belgenin uzantısıdır.</summary>
+    private const int LogTabloBelge = 30;
+
+    /// <summary>e-Fatura başlık bilgisi - GET ve PUT öncesi/sonrası fark okuması AYNI sorgudan.</summary>
+    private const string BilgiBaslikSql = """
+        select bl.tipi, coalesce(bl.senaryo, 0) senaryo, coalesce(bl.efatura_durum, 0) efatura_durum,
+               coalesce(e.tevkifat_kodu, 0) tevkifat_kodu, coalesce(e.istisna_kodu, 0) istisna_kodu,
+               coalesce(e.navlun, 0) navlun, coalesce(e.sigorta, 0) sigorta, coalesce(e.sgk_tip, '') sgk_tip,
+               coalesce(e.sgk_mukellef_kod, '') sgk_mukellef_kod, coalesce(e.sgk_mukellef_ad, '') sgk_mukellef_ad,
+               coalesce(e.sgk_dosya_no, '') sgk_dosya_no, e.sgk_donem_bas, e.sgk_donem_bit, e.kamu_hesap_id
+          from public.belge bl left join public.belge_efatura e on e.belge_id = bl.id where bl.id = @p0
+        """;
+
+    private const string BilgiSatirSql = """
+        select s.id satir_id, coalesce(nullif(btrim(s.aciklama), ''), st.ad, hz.ad, '') ad,
+               coalesce(nullif(es.gtip, ''), st.gtip_kodu, '') gtip, coalesce(es.teslim_sarti, '') teslim_sarti,
+               coalesce(es.tasima_sekli, 0) tasima_sekli, coalesce(es.kap_cinsi, '') kap_cinsi,
+               coalesce(es.kap_no, '') kap_no, coalesce(es.kap_adet, 0) kap_adet, coalesce(s.kdv, 0) kdv
+          from public.belge_satir s
+          left join public.stok st on st.id = s.stok_id
+          left join public.hizmet hz on hz.id = s.hizmet_id
+          left join public.belge_efatura_satir es on es.satir_id = s.id
+         where s.belge_id = @p0 order by s.sira, s.id
+        """;
+
+    /// <summary>Satır bilgisi satir_id anahtarıyla - fark hesabı için (ad / kdv satırın kendisinden gelir, fark üretmez).</summary>
+    private static async Task<Dictionary<long, IDictionary<string, object?>>> BilgiSatirSozluguAsync(
+        Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction tx, int belgeId, CancellationToken iptal)
+    {
+        var liste = await b.ListeAsync(BilgiSatirSql, tx, [belgeId], o => o.Sozluk(), iptal);
+        return liste.ToDictionary(
+            s => Convert.ToInt64(s["satir_id"]),
+            s => (IDictionary<string, object?>)s.Where(k => k.Key is not ("satir_id" or "ad" or "kdv"))
+                                                .ToDictionary(k => k.Key, k => k.Value));
+    }
 }

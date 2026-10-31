@@ -25,19 +25,23 @@ export function MuayeneOzetiModal({ muayeneId, onKapat }: { muayeneId: number; o
   const [raporlar, setRaporlar] = useState<Satir[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [mesgul, setMesgul] = useState(false);
+  // SÜRÜM (kod inceleme 30.10.2026 K21): kartGuncelle sürümsüz gidince sunucu 400 döner, özet hiç kaydedilmiyordu.
+  const [surum, setSurum] = useState<string | null>(null);
 
   useEffect(() => {
     let iptal = false;
     void (async () => {
       setYukleniyor(true);
       try {
-        const [derle, sonuc, sekme, rapor] = await Promise.all([
+        const [derle, sonuc, sekme, rapor, kart] = await Promise.all([
           api.muayeneOzetDerle(muayeneId).catch(() => ({ bulguOzet: '' })),
           api.muayeneSonuclari(muayeneId).catch(() => null),
           api.muayeneSekmeVerisi(muayeneId).catch(() => null) as Promise<any>,
           api.muayeneRaporlari(muayeneId).catch(() => ({ raporlar: [] })),
+          api.kartOku('muayene', muayeneId).catch(() => null),
         ]);
         if (iptal) return;
+        setSurum(kart?.kart.surum != null ? String(kart.kart.surum) : null);
         setOzet(derle.bulguOzet ?? '');
         setIstemler((sonuc?.istemler ?? []) as Satir[]);
         setRadyoloji((sonuc?.radyoloji ?? []) as Satir[]);
@@ -62,7 +66,10 @@ export function MuayeneOzetiModal({ muayeneId, onKapat }: { muayeneId: number; o
   const kaydet = async () => {
     setMesgul(true);
     await guvenli(async () => {
-      await api.kartGuncelle('muayene', muayeneId, { kart: { bulguOzet: ozet } });
+      const guncel = surum ?? String((await api.kartOku('muayene', muayeneId)).kart.surum ?? '');
+      await api.kartGuncelle('muayene', muayeneId, { surum: guncel, kart: { bulguOzet: ozet } });
+      // Bir sonraki kayıt yeni sürümle gitsin.
+      setSurum(String((await api.kartOku('muayene', muayeneId)).kart.surum ?? ''));
       mesaj('Özet kaydedildi.');
     });
     setMesgul(false);

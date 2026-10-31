@@ -50,7 +50,9 @@ public static class IsgUclari
 
     public static void IsgUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/isg").WithTags("İSG").RequireAuthorization();
+        // KAYIT KAPISI (kod inceleme 30.10.2026 K07): firma yetkilisi portalı başka firmanın çalışanını okuyabiliyordu.
+        var grup = yol.MapGroup("/api/isg").WithTags("İSG").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Isg());
 
         // ---------------------------------------------------------- pano ----
         grup.MapGet("/pano", async (int? hekimId, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
@@ -176,10 +178,13 @@ public static class IsgUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("isg.muayene", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var n = await b.CalistirAsync("update public.isg_muayene set durum = 3, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1", null, [id, baglam.KullaniciId], iptal);
+            // Muayene iptali + form isteğinin kapanışı + log tek transaction (K36).
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var n = await b.CalistirAsync("update public.isg_muayene set durum = 3, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1", islem, [id, baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Yalnız açık muayene iptal edilir.");
-            await b.CalistirAsync("update public.form_istek set durum = 8, belirtec_ozet = '', oturum_anahtari = '' where id = (select form_istek_id from public.isg_muayene where id = @p0) and durum in (1, 2, 3)", null, [id], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogMuayene, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { iptal = true }, iptal: iptal);
+            await b.CalistirAsync("update public.form_istek set durum = 8, belirtec_ozet = '', oturum_anahtari = '' where id = (select form_istek_id from public.isg_muayene where id = @p0) and durum in (1, 2, 3)", islem, [id], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogMuayene, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { iptal = true }, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = 3 });
         });
 
@@ -226,8 +231,12 @@ public static class IsgUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("isg.olay", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            await b.CalistirAsync("update public.isg_olay set sgk_bildirim = coalesce(@p1, current_date), degistiren = @p2, degistirme_tarihi = now() where id = @p0", null, [id, g.Tarih, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogOlay, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { sgkBildirim = g.Tarih?.ToString() ?? "bugün" }, iptal: iptal);
+            // Değişiklik + log aynı işlemde (K36); satır yoksa 404 (eskiden sessizce "ok" dönüyordu).
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var n = await b.CalistirAsync("update public.isg_olay set sgk_bildirim = coalesce(@p1, current_date), degistiren = @p2, degistirme_tarihi = now() where id = @p0", islem, [id, g.Tarih, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.Bulunamadi("Olay bulunamadı.");
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogOlay, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { sgkBildirim = g.Tarih?.ToString() ?? "bugün" }, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id });
         });
         grup.MapPost("/olay/{id:int}/kapat", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
@@ -235,34 +244,48 @@ public static class IsgUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("isg.olay", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            await b.CalistirAsync("update public.isg_olay set durum = 2, degistiren = @p1, degistirme_tarihi = now() where id = @p0", null, [id, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogOlay, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { kapandi = true }, iptal: iptal);
+            // Kapanış + log aynı işlemde (K36); satır yoksa 404.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var n = await b.CalistirAsync("update public.isg_olay set durum = 2, degistiren = @p1, degistirme_tarihi = now() where id = @p0", islem, [id, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.Bulunamadi("Olay bulunamadı.");
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogOlay, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { kapandi = true }, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = 2 });
         });
     }
 
     // ============================================================ yardımcı ====
-    /// <summary>Muayene + Ek-2 form isteği açar (form motoru gönderimi ile).</summary>
+    /// <summary>
+    /// Muayene + Ek-2 form isteği açar (form motoru gönderimi ile).
+    ///
+    /// <para><b>TEK TRANSACTION + ÇALIŞAN KİLİDİ</b> (kod inceleme 30.10.2026 K36): muayene satırı, form
+    /// isteği, bildirim kuyruğu satırı, muayene-form bağı ve log birlikte yazılır; işlem bu yardımcının
+    /// içinde açılır (toplu uçta her çalışan kendi işlemini alır, biri düşerse ötekiler yazılır). Çalışan
+    /// `for update` okunur: "açık muayene var mı" denetimi kilit altında - eşzamanlı iki açma iki muayene
+    /// açamaz. Eskiden form isteği düşerse (ör. telefonu yok → 422) muayene satırı formsuz, yetim kalıyordu.</para>
+    /// </summary>
     private static async Task<object> MuayeneAcAsync(NpgsqlConnection b, BildirimDeposu bildirim, LogDeposu log, IstekBaglami baglam, HttpContext ctx,
                                                     int calisanId, int tur, int kanal, int? hekimId, string? telefon, CancellationToken iptal)
     {
-        var c = await b.TekAsync("select c.hasta_id, c.firma_id, f.hekim_id, c.durum from public.isg_calisan c join public.isg_firma f on f.id = c.firma_id where c.id = @p0", null, [calisanId],
+        await using var islem = await b.BeginTransactionAsync(iptal);
+        var c = await b.TekAsync("select c.hasta_id, c.firma_id, f.hekim_id, c.durum from public.isg_calisan c join public.isg_firma f on f.id = c.firma_id where c.id = @p0 for update of c", islem, [calisanId],
             o => new { hastaId = o.GetInt32(0), firmaId = o.GetInt32(1), hekimId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), durum = o.GetInt16(3) }, iptal)
             ?? throw GentegreHatasi.Bulunamadi("Çalışan bulunamadı.");
         if (c.durum != CalisanAktif) throw GentegreHatasi.IsKurali("Ayrılmış çalışana muayene açılmaz.");
-        var acik = await b.TekAsync("select id, form_istek_id from public.isg_muayene where calisan_id = @p0 and durum = 1 order by id desc limit 1", null, [calisanId],
+        var acik = await b.TekAsync("select id, form_istek_id from public.isg_muayene where calisan_id = @p0 and durum = 1 order by id desc limit 1", islem, [calisanId],
             o => new { id = o.GetInt32(0), formId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1) }, iptal);
         if (acik is not null) return new { id = acik.id, formIstekId = acik.formId, mevcut = true };
 
         var id = await b.TekDegerAsync<int>("""
             insert into public.isg_muayene (calisan_id, hasta_id, firma_id, tur, tarih, hekim_id, durum, sube_id, ekleyen)
             values (@p0, @p1, @p2, @p3, current_date, @p4, 1, @p5, @p6) returning id
-            """, null, [calisanId, c.hastaId, c.firmaId, (short)tur, hekimId ?? c.hekimId, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+            """, islem, [calisanId, c.hastaId, c.firmaId, (short)tur, hekimId ?? c.hekimId, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
         // Ek-2 form isteği: bağlam İSG (8), kaynak = muayene.
         var gonder = await FormUclari.GonderCalistirAsync(new FormUclari.GonderIstegi("ek2", null, c.hastaId, 8, id, kanal, telefon, null, null, $"Ek-2 muayene #{id}"),
-                                                          b, bildirim, log, baglam, ctx, iptal);
-        await b.CalistirAsync("update public.isg_muayene set form_istek_id = @p1 where id = @p0", null, [id, gonder.id], iptal);
-        await log.YazAsync(LogIslemi.Ekle, LogMuayene, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { tur, kanal, formIstekId = gonder.id }, tarafId: c.hastaId, iptal: iptal);
+                                                          b, bildirim, log, baglam, ctx, iptal, islem);
+        await b.CalistirAsync("update public.isg_muayene set form_istek_id = @p1 where id = @p0", islem, [id, gonder.id], iptal);
+        await log.YazAsync(b, islem, LogIslemi.Ekle, LogMuayene, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { tur, kanal, formIstekId = gonder.id }, tarafId: c.hastaId, iptal: iptal);
+        await islem.CommitAsync(iptal);
         return new { id, formIstekId = gonder.id, gonder.kod, gonder.baglanti, gonder.bildirimId, mevcut = false };
     }
 

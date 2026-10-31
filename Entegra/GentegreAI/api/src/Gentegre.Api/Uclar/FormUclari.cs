@@ -44,7 +44,11 @@ public static class FormUclari
 
     public static void FormUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        YetkiliUclar(yol.MapGroup("/api/form").WithTags("Form").RequireAuthorization());
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): /istek/{id} form-istek (şube), /hasta/{hastaId} hasta
+        //   kimlikleri liste ile aynı kuraldan geçer - kapsam dışı 404. Açık (anonim) grup bu kapıdan geçmez:
+        //   orada kimlik belirteçle çözülür.
+        YetkiliUclar(yol.MapGroup("/api/form").WithTags("Form").RequireAuthorization()
+                        .AddEndpointFilter(KayitKapisi.Form()));
         AcikUclar(yol.MapGroup("/api/acik/form").WithTags("Form (açık)").AllowAnonymous());
     }
 
@@ -84,10 +88,14 @@ public static class FormUclari
         });
 
         // GÖNDER: SMS / e-posta bağlantısı ya da kiosk/iç ekran isteği açar.
-        grup.MapPost("/gonder", async (GonderIstegi g, VeriKaynagi veri, BildirimDeposu bildirim, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapPost("/gonder", async (GonderIstegi g, VeriKaynagi veri, BildirimDeposu bildirim, LogDeposu log, BaglamCozucu cozucu, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("form.gonder", Islem.Ekle);
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): hasta GÖVDEDEN gelir - kapsam dışı hastaya form
+            //   gönderilemez; olmayan hastayla aynı 404. (/yeniden mevcut isteğin hastasını kullanır; istek
+            //   kimliği kapıdan geçer.)
+            await erisim.IsteAsync(baglam, "hasta", g.HastaId, "Hasta bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
             var sablon = await SablonBulAsync(b, g.SablonId, g.SablonKod, iptal);
             var hasta = await HastaOkuAsync(b, g.HastaId, iptal) ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
@@ -102,11 +110,14 @@ public static class FormUclari
                                                          : "Hastanın e-posta adresi yok.");
 
             var (kod, ozet) = BelirtecUret();
+            // İstek + bildirim kuyruğu + log tek transaction (K36): kuyruk satırı istek olmadan, istek kuyruksuz kalmaz.
+            //   Gönderimin kendisi işçide, işlem dışında.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             var id = await b.TekDegerAsync<int>("""
                 insert into public.form_istek (sablon_id, surum, hasta_id, kaynak_tur, kaynak_id, kanal, belirtec_ozet, son_gecerlilik,
                                                gonderim, durum, aciklama, sube_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, now() + make_interval(hours => @p7), now(), 1, @p8, @p9, @p10) returning id
-                """, null, [sablon.id, (short)sablon.surum, g.HastaId, (short)(g.KaynakTur ?? sablon.baglam), g.KaynakId, kanal, ozet, saat,
+                """, islem, [sablon.id, (short)sablon.surum, g.HastaId, (short)(g.KaynakTur ?? sablon.baglam), g.KaynakId, kanal, ozet, saat,
                             g.Not ?? "", baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
 
             var baglanti = BaglantiKur(ctx, kod);
@@ -114,17 +125,18 @@ public static class FormUclari
             if (kanal is 3 or 4)
             {
                 var kurum = baglam.Subeler.FirstOrDefault(s => s.Id == baglam.SubeId)?.Ad ?? "GenoTIP";
-                bildirimId = await bildirim.KuyrugaEkleAsync(new BildirimIstegi(
+                bildirimId = await bildirim.KuyrugaEkleAsync(b, islem, new BildirimIstegi(
                     kanal == 3 ? "form.baglanti" : "form.baglanti.eposta", kanal == 3 ? BildirimKanali.Sms : BildirimKanali.Eposta, alici,
                     new Dictionary<string, string>
                     {
                         ["kurum"] = kurum, ["form"] = sablon.ad, ["baglanti"] = baglanti, ["saat"] = saat.ToString(),
                         ["gonderen"] = baglam.Subeler.Count > 0 ? kurum : "", ["hasta"] = hasta.ad,
                     }, TarafId: g.HastaId, KaynakTur: 40, KaynakId: id), baglam.KullaniciId, baglam.SubeId, iptal);
-                await b.CalistirAsync("update public.form_istek set bildirim_id = @p1 where id = @p0", null, [id, bildirimId], iptal);
+                await b.CalistirAsync("update public.form_istek set bildirim_id = @p1 where id = @p0", islem, [id, bildirimId], iptal);
             }
-            await log.YazAsync(LogIslemi.Ekle, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { sablon = sablon.kod, kanal, alici = kanal is 3 or 4 ? Maskele(alici) : "", saat }, tarafId: g.HastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             // Kiosk / iç ekranda kod ekrana verilir (QR / tablet); uzaktan kanalda verilmez.
             return Results.Ok(new { id, kod = kanal is 1 or 2 ? kod : null, baglanti = kanal is 1 or 2 ? baglanti : null, bildirimId });
         });
@@ -157,6 +169,9 @@ public static class FormUclari
             var yeniAsama = d.asama;
             if (d.asamali == 1 && tamamla && d.asama < sonAsama) { yeniAsama = (short)(d.asama + 1); tamamla = false; }
             var (skor, sonuc) = tamamla ? SkorHesapla(d.tanim, cevap) : (null, "");
+            // Cevap, log ve İSG kanaat akışı tek transaction (K36): form "tamamlandı" yazılıp muayene güncellemesi
+            //   düşerse kanaat bir daha hiç akmazdı (isle ucu yalnız tamamlanmış formu okur).
+            await using var islem = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("""
                 update public.form_istek
                    set taslak = case when @p2 then '{}'::jsonb else cast(@p1 as jsonb) end,
@@ -166,12 +181,13 @@ public static class FormUclari
                        skor = @p7, sonuc = case when @p2 then @p8 else sonuc end, asama = @p5,
                        ip = @p9, degistiren = @p4, degistirme_tarihi = now()
                  where id = @p0
-                """, null, [id, cevap, tamamla, imzalar, baglam.KullaniciId, yeniAsama, d.asamali, skor, sonuc, baglam.Ip], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                """, islem, [id, cevap, tamamla, imzalar, baglam.KullaniciId, yeniAsama, d.asamali, skor, sonuc, baglam.Ip], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { tamamla, asama = yeniAsama, skor, sonuc }, tarafId: d.hastaId, iptal: iptal);
-            // İSG (741): Ek-2 tamamlanınca kanaat isg_muayene'ye akar.
+            // İSG (741): Ek-2 tamamlanınca kanaat isg_muayene'ye akar (komutlar açık işleme katılır).
             object? isg = null;
             if (tamamla && d.kaynakTur == 8) isg = await IsgUclari.MuayeneyiIsleAsync(b, id, baglam.KullaniciId, iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = tamamla ? 4 : 3, asama = yeniAsama, skor, sonuc, isg });
         });
 
@@ -207,12 +223,17 @@ public static class FormUclari
                 o => new { sablonId = o.GetInt32(0), hastaId = o.IsDBNull(1) ? 0 : o.GetInt32(1), kaynakTur = (int)o.GetInt16(2), kaynakId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3), kanal = (int)o.GetInt16(4), durum = o.GetInt16(5) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi();
             if (i.durum == 4) throw GentegreHatasi.IsKurali("Tamamlanmış form yeniden gönderilmez; yeni istek açın.");
-            await b.CalistirAsync("update public.form_istek set durum = 8, belirtec_ozet = '', oturum_anahtari = '', degistiren = @p1, degistirme_tarihi = now() where id = @p0", null, [id, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { iptal = "yeniden gönderildi" }, tarafId: i.hastaId, iptal: iptal);
+            // Eskinin iptali + yeni istek + kuyruk + log tek transaction (K36): yeni gönderim düşerse eski
+            //   bağlantı geçersiz kılınmış, hasta formsuz kalmış olmasın.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            await b.CalistirAsync("update public.form_istek set durum = 8, belirtec_ozet = '', oturum_anahtari = '', degistiren = @p1, degistirme_tarihi = now() where id = @p0", islem, [id, baglam.KullaniciId], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { iptal = "yeniden gönderildi" }, tarafId: i.hastaId, iptal: iptal);
             // Yeni istek: /gonder ile aynı yol (kod üretimi + bildirim).
             ctx.Items["form.yeniden"] = true;
             var g = new GonderIstegi(null, i.sablonId, i.hastaId, i.kaynakTur, i.kaynakId, i.kanal, null, null, null, $"yeniden (#{id})");
-            return await GonderCalistir(g, b, bildirim, log, baglam, ctx, iptal);
+            var sonuc = await GonderCalistirAsync(g, b, bildirim, log, baglam, ctx, iptal, islem);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(sonuc);
         });
 
         grup.MapPost("/istek/{id:int}/iptal", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
@@ -232,8 +253,11 @@ public static class FormUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("form.aktar", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var d = await b.TekAsync("select i.durum, s.tanim::text, i.cevap::text, i.kaynak_tur, i.kaynak_id, i.hasta_id from public.form_istek i join public.form_sablon s on s.id = i.sablon_id where i.id = @p0",
-                null, [id], o => new { durum = o.GetInt16(0), tanim = o.GetString(1), cevap = o.GetString(2), kaynakTur = o.GetInt16(3), kaynakId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), hastaId = o.IsDBNull(5) ? (int?)null : o.GetInt32(5) }, iptal)
+            // TEK TRANSACTION + İSTEK KİLİDİ (K36): muayene alanları, aktarım damgası ve log birlikte; istek
+            //   `for update` okunur - aynı form eşzamanlı iki kez aktarılıp aynı metin iki kez eklenmesin.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var d = await b.TekAsync("select i.durum, s.tanim::text, i.cevap::text, i.kaynak_tur, i.kaynak_id, i.hasta_id from public.form_istek i join public.form_sablon s on s.id = i.sablon_id where i.id = @p0 for update of i",
+                islem, [id], o => new { durum = o.GetInt16(0), tanim = o.GetString(1), cevap = o.GetString(2), kaynakTur = o.GetInt16(3), kaynakId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), hastaId = o.IsDBNull(5) ? (int?)null : o.GetInt32(5) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi();
             if (d.durum != 4) throw GentegreHatasi.IsKurali("Yalnız tamamlanmış form aktarılır.");
             var yazilan = new List<string>();
@@ -248,13 +272,14 @@ public static class FormUclari
                 {
                     // Mevcut metnin ÜSTÜNE değil, sonuna: hekimin yazdığı kaybolmasın.
                     await b.CalistirAsync($"update public.muayene set {kolon} = case when coalesce({kolon}, '') = '' then @p1 else {kolon} || E'\\n' || @p1 end, degistiren = @p2, degistirme_tarihi = now() where id = @p0",
-                        null, [mid, $"[Hasta beyanı] {deger}", baglam.KullaniciId], iptal);
+                        islem, [mid, $"[Hasta beyanı] {deger}", baglam.KullaniciId], iptal);
                     yazilan.Add($"{etiket} → muayene.{kolon}");
                 }
                 else atlanan.Add($"{etiket} → {hedef}: bu bağlamda hedef yok");
             }
-            await b.CalistirAsync("update public.form_istek set aktarim_zamani = now(), degistiren = @p1, degistirme_tarihi = now() where id = @p0", null, [id, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { aktarim = yazilan, atlanan }, tarafId: d.hastaId, iptal: iptal);
+            await b.CalistirAsync("update public.form_istek set aktarim_zamani = now(), degistiren = @p1, degistirme_tarihi = now() where id = @p0", islem, [id, baglam.KullaniciId], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { aktarim = yazilan, atlanan }, tarafId: d.hastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { yazilan, atlanan });
         });
 
@@ -394,15 +419,25 @@ public static class FormUclari
             if (i.suresiDoldu) throw GentegreHatasi.IsKurali("Bağlantının süresi dolmuş.");
             var son4 = (g.TcknSon4 ?? "").Trim();
             var yil = (g.DogumYili ?? "").Trim();
-            var dogru = son4.Length == 4 && i.tckn.Length >= 4 && i.tckn.EndsWith(son4, StringComparison.Ordinal)
-                        && (i.dogumYili is null || string.IsNullOrEmpty(yil) || yil == i.dogumYili.Value.ToString());
+            // SABİT ZAMANLI KARŞILAŞTIRMA + yıl zorunlu (kod inceleme 30.10.2026 K52): kartta doğum yılı
+            //   VARSA boş gönderilen yıl kabul edilmiyor (eskiden boş yıl = atla).
+            var dogru = son4.Length == 4 && i.tckn.Length >= 4
+                        && System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
+                               System.Text.Encoding.UTF8.GetBytes(i.tckn[^4..]), System.Text.Encoding.UTF8.GetBytes(son4))
+                        && (i.dogumYili is null || yil == i.dogumYili.Value.ToString());
             // Hasta kartında doğum tarihi yoksa yıl istenmez; TCKN yoksa (kimliksiz)
             //   yalnız telefon sahipliği yeter (bağlantı zaten SMS ile geldi).
             if (string.IsNullOrEmpty(i.tckn)) dogru = true;
             if (!dogru)
             {
-                var deneme = i.deneme + 1;
-                await b.CalistirAsync("update public.form_istek set dogrulama_deneme = @p1, durum = case when @p1 >= @p2 then 6 else durum end where id = @p0", null, [i.id, (short)deneme, (short)EnFazlaDeneme], iptal);
+                // Sayaç DB'de artar (K52): eş zamanlı denemeler bellekteki `deneme + 1` ile sınırı aşıyordu.
+                var deneme = await b.TekDegerAsync<short>("""
+                    update public.form_istek
+                       set dogrulama_deneme = dogrulama_deneme + 1,
+                           durum = case when dogrulama_deneme + 1 >= @p1 then 6 else durum end
+                     where id = @p0
+                    returning dogrulama_deneme
+                    """, null, [i.id, (short)EnFazlaDeneme], iptal);
                 if (deneme >= EnFazlaDeneme) throw GentegreHatasi.IsKurali("Çok sayıda hatalı deneme; bağlantı kilitlendi.");
                 throw GentegreHatasi.Dogrulama($"Bilgiler eşleşmedi. Kalan deneme: {EnFazlaDeneme - deneme}");
             }
@@ -502,11 +537,16 @@ public static class FormUclari
 
     public sealed record GonderSonucu(int id, string? kod, string? baglanti, long? bildirimId);
 
-    private static async Task<IResult> GonderCalistir(GonderIstegi g, NpgsqlConnection b, BildirimDeposu bildirim, LogDeposu log, IstekBaglami baglam, HttpContext ctx, CancellationToken iptal)
-        => Results.Ok(await GonderCalistirAsync(g, b, bildirim, log, baglam, ctx, iptal));
-
-    /// <summary>Gönderimin çekirdeği - İSG (741) Ek-2 muayenesi de buradan istek açar.</summary>
-    public static async Task<GonderSonucu> GonderCalistirAsync(GonderIstegi g, NpgsqlConnection b, BildirimDeposu bildirim, LogDeposu log, IstekBaglami baglam, HttpContext ctx, CancellationToken iptal)
+    /// <summary>
+    /// Gönderimin çekirdeği - İSG (741) Ek-2 muayenesi de buradan istek açar.
+    ///
+    /// <para><b>İŞLEM (K36):</b> <paramref name="islem"/> verilirse istek satırı, bildirim kuyruğu satırı ve log
+    /// AYNI transaction'a yazılır - çağıran commit eder. Eskiden kuyruk ve log kendi bağlantılarıyla autocommit'ti:
+    /// istek satırı geri alınsa bile SMS kuyrukta kalıyordu. Verilmezse eski davranış (çağıran kendi işlemini
+    /// açmamışsa autocommit; açmışsa Npgsql komutları o işleme katar, kuyruk/log yine ayrı bağlantıda kalır).
+    /// Gönderimin kendisi işçide, işlem dışındadır.</para>
+    /// </summary>
+    public static async Task<GonderSonucu> GonderCalistirAsync(GonderIstegi g, NpgsqlConnection b, BildirimDeposu bildirim, LogDeposu log, IstekBaglami baglam, HttpContext ctx, CancellationToken iptal, NpgsqlTransaction? islem = null)
     {
         var sablon = await SablonBulAsync(b, g.SablonId, g.SablonKod, iptal);
         var hasta = await HastaOkuAsync(b, g.HastaId, iptal) ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
@@ -518,18 +558,25 @@ public static class FormUclari
         var id = await b.TekDegerAsync<int>("""
             insert into public.form_istek (sablon_id, surum, hasta_id, kaynak_tur, kaynak_id, kanal, belirtec_ozet, son_gecerlilik, gonderim, durum, aciklama, sube_id, ekleyen)
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, now() + make_interval(hours => @p7), now(), 1, @p8, @p9, @p10) returning id
-            """, null, [sablon.id, (short)sablon.surum, g.HastaId, (short)(g.KaynakTur ?? sablon.baglam), g.KaynakId, kanal, ozet, saat, g.Not ?? "", baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+            """, islem, [sablon.id, (short)sablon.surum, g.HastaId, (short)(g.KaynakTur ?? sablon.baglam), g.KaynakId, kanal, ozet, saat, g.Not ?? "", baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
         var baglanti = BaglantiKur(ctx, kod);
         long? bildirimId = null;
         if (kanal is 3 or 4)
         {
             var kurum = baglam.Subeler.FirstOrDefault(s => s.Id == baglam.SubeId)?.Ad ?? "GenoTIP";
-            bildirimId = await bildirim.KuyrugaEkleAsync(new BildirimIstegi(kanal == 3 ? "form.baglanti" : "form.baglanti.eposta", kanal == 3 ? BildirimKanali.Sms : BildirimKanali.Eposta, alici,
+            var bistek = new BildirimIstegi(kanal == 3 ? "form.baglanti" : "form.baglanti.eposta", kanal == 3 ? BildirimKanali.Sms : BildirimKanali.Eposta, alici,
                 new Dictionary<string, string> { ["kurum"] = kurum, ["form"] = sablon.ad, ["baglanti"] = baglanti, ["saat"] = saat.ToString(), ["gonderen"] = kurum, ["hasta"] = hasta.ad },
-                TarafId: g.HastaId, KaynakTur: 40, KaynakId: id), baglam.KullaniciId, baglam.SubeId, iptal);
-            await b.CalistirAsync("update public.form_istek set bildirim_id = @p1 where id = @p0", null, [id, bildirimId], iptal);
+                TarafId: g.HastaId, KaynakTur: 40, KaynakId: id);
+            bildirimId = islem is null
+                ? await bildirim.KuyrugaEkleAsync(bistek, baglam.KullaniciId, baglam.SubeId, iptal)
+                : await bildirim.KuyrugaEkleAsync(b, islem, bistek, baglam.KullaniciId, baglam.SubeId, iptal);
+            await b.CalistirAsync("update public.form_istek set bildirim_id = @p1 where id = @p0", islem, [id, bildirimId], iptal);
         }
-        await log.YazAsync(LogIslemi.Ekle, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { sablon = sablon.kod, kanal, not_ = g.Not }, tarafId: g.HastaId, iptal: iptal);
+        var bilgi = new { sablon = sablon.kod, kanal, not_ = g.Not };
+        if (islem is null)
+            await log.YazAsync(LogIslemi.Ekle, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, bilgi, tarafId: g.HastaId, iptal: iptal);
+        else
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogIstek, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, bilgi, tarafId: g.HastaId, iptal: iptal);
         return new GonderSonucu(id, kanal is 1 or 2 ? kod : null, kanal is 1 or 2 ? baglanti : null, bildirimId);
     }
 

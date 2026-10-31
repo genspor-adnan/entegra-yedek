@@ -1,4 +1,5 @@
 import { basHarfler } from '../bilesenler/basHarfler';
+import { useYoklama } from '../bilesenler/yoklama';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
@@ -160,15 +161,13 @@ export function Mesajlar() {
     });
   }, [secili, akisYukle]);
 
-  // TAZELEME: liste ve açık sohbet birlikte. Sekme arka plandayken de çalışır -
-  //   kullanıcı geri döndüğünde okunmamış sayısı güncel olsun.
-  useEffect(() => {
-    const t = window.setInterval(() => {
-      void listeYukle().catch(() => { /* tazelemede sessiz */ });
-      if (secili !== null) void akisYukle(secili).catch(() => { /* sessiz */ });
-    }, TAZELE_MS);
-    return () => window.clearInterval(t);
+  // TAZELEME: liste ve açık sohbet birlikte. Sekme arka plandayken DURUR, görünür olunca hemen tazeler
+  //   (K53) - kullanıcı geri döndüğünde okunmamış sayısı yine güncel.
+  const tazele = useCallback(async () => {
+    await listeYukle();
+    if (secili !== null) await akisYukle(secili);
   }, [listeYukle, akisYukle, secili]);
+  useYoklama(tazele, TAZELE_MS);
 
   // Yeni mesaj gelince akışın SONUNA kaydır (mockup: akış altta açılır).
   useEffect(() => {

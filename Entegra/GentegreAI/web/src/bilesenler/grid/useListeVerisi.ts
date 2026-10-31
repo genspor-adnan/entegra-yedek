@@ -86,8 +86,12 @@ export function useListeVerisi(g: ListeVerisiGirdisi) {
   ]), [sabitFiltre, cipler, cipIndeks, tarihAlani, tarihBas, tarihBit,
        kodSuzgeci, kodSuzgecDeger, aramaFiltresi, filtreSatiriFiltresi]);
 
+  // YÜKLEME SIRASI (kod inceleme 30.10.2026 K53): hızlı sayfa/filtre değişiminde yavaş gelen eski yanıt
+  //   yeniyi ezmesin - araya yeni yükleme girdiyse eski yanıt atılır.
+  const yukleSira = useRef(0);
   const yukle = useCallback(async () => {
     if (kolonlar.length === 0) return;
+    const sira = ++yukleSira.current;
     setYukleniyor(true);
     setHata(null);
     try {
@@ -95,6 +99,7 @@ export function useListeVerisi(g: ListeVerisiGirdisi) {
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
       const yanit = await api.liste(kaynak,
         { sayfa, boyut: sayfaBoyu, sirala, filtre, toplam, gorunum });
+      if (sira !== yukleSira.current) return;
       setSatirlar(yanit.satirlar);
       setToplamKayit(yanit.toplamKayit);
       setToplamlar(yanit.toplamlar);
@@ -102,10 +107,11 @@ export function useListeVerisi(g: ListeVerisiGirdisi) {
       setGrupKolonu(yanit.grupKolonu ?? null);
       setSureMs(yanit.sureMs);
     } catch (h) {
+      if (sira !== yukleSira.current) return;
       setHata(hataMetni(h, true));
       setSatirlar([]);
     } finally {
-      setYukleniyor(false);
+      if (sira === yukleSira.current) setYukleniyor(false);
     }
   }, [kaynak, sayfa, sayfaBoyu, sirala, toplam, kolonlar.length, aramaGorunumu, filtreKur]);
 
@@ -150,11 +156,16 @@ export function useListeVerisi(g: ListeVerisiGirdisi) {
       const filtre = filtreKur();
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
       const tumu: ListeSatiri[] = [];
+      let toplamKayit = 0;
       for (let sf = 1; sf <= 20; sf++) {
         const y = await api.liste(kaynak, { sayfa: sf, boyut: 500, sirala, filtre, gorunum });
         tumu.push(...y.satirlar);
+        toplamKayit = y.toplamKayit;
         if (tumu.length >= y.toplamKayit || y.satirlar.length === 0) break;
       }
+      // Sessiz kesme yok (K90): 10.000 satır sınırı aşıldıysa kullanıcı bilir.
+      if (toplamKayit > tumu.length)
+        setHata(cev(`CSV ilk ${tumu.length} satırı içeriyor (toplam ${toplamKayit}); süzgeci daraltın.`));
 
       const metin = csvMetni(
         kolonlar.map(k => cev(k.baslik)),

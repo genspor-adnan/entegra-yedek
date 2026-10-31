@@ -196,7 +196,11 @@ public sealed partial class KartDeposu
                 ?? throw GentegreHatasi.Dogrulama($"{detay.Ad}: bilinmeyen alan {ad}",
                        new AlanHatasi($"{detay.Ad}.{ad}", "Bu detayda boyle bir alan yok."));
 
-            if (!alan.Yazilabilir) continue;
+            // SESSİZ YOKSAYMA YOK (kod inceleme 30.10.2026 K39, sözleşme §3.2): salt okunur / hesaplanan alan
+            //   gönderildiyse kayıt "kaydedildi" deyip alanı atmak yerine 400 - kart yolu (KartUclari) ile aynı.
+            if (!alan.Yazilabilir)
+                throw GentegreHatasi.Dogrulama($"{detay.Ad}: {ad} alani degistirilemez.",
+                    new AlanHatasi($"{detay.Ad}.{ad}", "Bu alan sunucuda hesaplanir, gonderilmez."));
 
             var cevrilmis = DegerCevirici.Cevir(deger, alan.Tip, $"{detay.Ad}.{ad}", ad, zamanDilimi);
             DegerCevirici.UzunlukKontrol(alan, cevrilmis, $"{detay.Ad}.{ad}",

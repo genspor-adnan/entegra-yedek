@@ -68,7 +68,8 @@ public static partial class RandevuUclari
             var dilim = await b.TekDegerAsync<string>(
                 "select coalesce((select nullif(zaman_dilimi, '') from public.sube where id = @p0), 'Europe/Istanbul')",
                 null, [s.SubeId], iptal) ?? "Europe/Istanbul";
-            var simdi = await b.TekDegerAsync<DateTime>($"select (now() at time zone '{dilim.Replace("'", "")}')::timestamp", null, [], iptal);
+            // Dilim PARAMETRE (kod inceleme 30.10.2026 K67): DB'den okunan değer de enterpolasyona girmez.
+            var simdi = await b.TekDegerAsync<DateTime>("select (now() at time zone @p0)::timestamp", null, [dilim], iptal);
 
             await using var islem = await b.BeginTransactionAsync(iptal);
             var siraSon = istek.FtrProgramId is int fp0
@@ -97,11 +98,11 @@ public static partial class RandevuUclari
                         insert into public.randevu
                                (sube_id, bolum, hekim_id, hasta_id, baslangic, sure_dk, durum, aciklama, hizmet_id, tip, kaynak,
                                 cihaz_id, gonderen_id, ekleyen)
-                        values (@p0, @p1, @p2, @p3, @p4::timestamp at time zone '{dilim.Replace("'", "")}', @p5, 1, @p6, @p7, @p8, @p9,
+                        values (@p0, @p1, @p2, @p3, @p4::timestamp at time zone @p13, @p5, 1, @p6, @p7, @p8, @p9,
                                 @p10, @p11, @p12)
                         returning id
                         """, islem, [s.SubeId, s.Bolum, s.HekimId, s.HastaId, t, s.SureDk, s.Aciklama, s.HizmetId, s.Tip, s.Kaynak,
-                                     s.CihazId, s.GonderenId, baglam.KullaniciId], iptal);
+                                     s.CihazId, s.GonderenId, baglam.KullaniciId, dilim], iptal);
                     if (istek.FtrProgramId is int fp && kalici)
                         await b.CalistirAsync("""
                             insert into public.ftr_seans (sube_id, program_id, sira, tarih, saat, fizyoterapist_id, kabin_id, randevu_id, durum, ekleyen)

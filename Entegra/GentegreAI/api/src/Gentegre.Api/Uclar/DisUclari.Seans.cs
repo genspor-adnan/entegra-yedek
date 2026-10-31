@@ -33,6 +33,12 @@ public static partial class DisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.seans", Islem.Ekle);
             await using var baglanti = await veri.AcAsync(iptal);
+            // TEK TRANSACTION + RANDEVU KİLİDİ (kod inceleme 30.10.2026 K36): başvuru (belge + belge_basvuru +
+            //   provizyon + log), seans, ilk işlem satırı, randevu durumu ve log birlikte yazılır. Randevu satırı
+            //   `for update` okunur: aynı randevuya eşzamanlı iki "seans aç" ikinci açık seansı açamaz (açık seans
+            //   kontrolü kilit altında). BasvuruAcAsync eskiden `islem = null` ile çağrılıyordu - başvuru yazılıp
+            //   seans düşerse belge yetim kalıyordu.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             int hastaId; int? unitId = istek.UnitId, hekimId = istek.HekimId, belgeId = istek.BelgeId,
                 planId = istek.PlanId, planSatirId = istek.PlanSatirId;
@@ -43,7 +49,8 @@ public static partial class DisUclari
                     select r.hasta_id, r.unit_id, r.hekim_id, r.belge_id, r.plan_satir_id, ps.plan_id
                       from public.randevu r left join public.dis_tedavi_plani_satir ps on ps.id = r.plan_satir_id
                      where r.id = @p0
-                    """, null, [rid], o => new
+                     for update of r
+                    """, islem, [rid], o => new
                 {
                     hastaId = o.GetInt32(0),
                     unitId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
@@ -53,7 +60,7 @@ public static partial class DisUclari
                     planId = o.IsDBNull(5) ? (int?)null : o.GetInt32(5),
                 }, iptal) ?? throw GentegreHatasi.Bulunamadi("Randevu bulunamadı.");
                 var acik = await baglanti.TekDegerAsync<int?>(
-                    "select id from public.dis_seans where randevu_id = @p0 and durum = 1", null, [rid], iptal);
+                    "select id from public.dis_seans where randevu_id = @p0 and durum = 1", islem, [rid], iptal);
                 if (acik is int a) return Results.Ok(new { id = a, mevcut = true });
                 hastaId = r.hastaId; unitId ??= r.unitId; hekimId ??= r.hekimId; belgeId ??= r.belgeId;
                 planSatirId ??= r.planSatirId; planId ??= r.planId;
@@ -66,10 +73,10 @@ public static partial class DisUclari
                 select b.id from public.belge b
                  where b.tur = @p1 and b.taraf_id = @p0 and b.durum = 0 and b.belge_tarihi >= current_date - 1
                  order by b.id desc limit 1
-                """, null, [hastaId, BasvuruTuru], iptal);
+                """, islem, [hastaId, BasvuruTuru], iptal);
             planId ??= await baglanti.TekDegerAsync<int?>("""
                 select id from public.dis_tedavi_plani where hasta_id = @p0 and durum in (3, 4) order by id desc limit 1
-                """, null, [hastaId], iptal);
+                """, islem, [hastaId], iptal);
 
             // BAŞVURU YOKSA AÇ (kullanıcı: "diş için önce kimlik ve başvuru mu
             //   açılmalı" → başvuru ziyaret başına, ücret için şart). Kayıt
@@ -77,7 +84,7 @@ public static partial class DisUclari
             AcilanBasvuru? acilan = null;
             if (belgeId is null)
             {
-                acilan = await BasvuruAcAsync(baglanti, null, log, baglam, hastaId, hekimId, iptal);
+                acilan = await BasvuruAcAsync(baglanti, islem, log, baglam, hastaId, hekimId, iptal);
                 belgeId = acilan.BelgeId;
             }
 
@@ -85,7 +92,7 @@ public static partial class DisUclari
                 insert into public.dis_seans
                        (sube_id, randevu_id, belge_id, hasta_id, hekim_id, unit_id, plan_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7) returning id
-                """, null, [baglam.SubeId ?? 0, istek.RandevuId, belgeId, hastaId, hekimId, unitId, planId,
+                """, islem, [baglam.SubeId ?? 0, istek.RandevuId, belgeId, hastaId, hekimId, unitId, planId,
                             baglam.KullaniciId], iptal);
 
             // Plan satırı biliniyorsa ilk işlem satırı hazır gelir: hekim
@@ -95,19 +102,20 @@ public static partial class DisUclari
                     insert into public.dis_seans_islem (seans_id, plan_satir_id, hizmet_id, dis_no, yuzeyler, seans_no, sube_id, ekleyen)
                     select @p0, s.id, s.hizmet_id, s.dis_no, s.yuzeyler, s.yapilan_seans + 1, @p2, @p3
                       from public.dis_tedavi_plani_satir s where s.id = @p1
-                    """, null, [id, psid, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+                    """, islem, [id, psid, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
 
             if (istek.RandevuId is int rid2)
                 await baglanti.CalistirAsync(
                     "update public.randevu set durum = 2, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1",
-                    null, [rid2, baglam.KullaniciId], iptal);
+                    islem, [rid2, baglam.KullaniciId], iptal);
 
-            await log.YazAsync(LogIslemi.Ekle, LogTabloSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogTabloSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { randevuId = istek.RandevuId, planSatirId, basvuru = belgeId }, tarafId: hastaId, iptal: iptal);
             // Randevu başvuruya bağlanır: aynı ziyaretin ikinci seansı yeni başvuru açmasın.
             if (istek.RandevuId is int rid3 && acilan is not null)
                 await baglanti.CalistirAsync("update public.randevu set belge_id = @p1 where id = @p0 and belge_id is null",
-                    null, [rid3, belgeId], iptal);
+                    islem, [rid3, belgeId], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new
             {

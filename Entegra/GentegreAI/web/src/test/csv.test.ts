@@ -28,4 +28,15 @@ describe('csvMetni', () => {
   it('satir sonu tasiyan alan tirnaklanir - satir kaymaz', () => {
     expect(csvMetni(['a'], [['iki\nsatir']])).toBe('﻿a\r\n"iki\nsatir"');
   });
+
+  /** K90: formül enjeksiyonu - Excel'de formül olabilecek öncü karakterler kesme ile nötrlenir, sayılar değil. */
+  it('formul oncusu kesme alir, negatif sayi dokunulmaz', () => {
+    const satirlar = csvMetni(['a'], [['=HYPERLINK("x")'], ['@SUM(1)'], ['+cmd'], ['-5'], ['-1.250,00'], ['normal']]).split('\r\n');
+    expect(satirlar[1]).toBe(`"'=HYPERLINK(""x"")"`);
+    expect(satirlar[2]).toBe(`"'@SUM(1)"`);
+    expect(satirlar[3]).toBe(`"'+cmd"`);
+    expect(satirlar[4]).toBe('-5');
+    expect(satirlar[5]).toBe('-1.250,00');
+    expect(satirlar[6]).toBe('normal');
+  });
 });

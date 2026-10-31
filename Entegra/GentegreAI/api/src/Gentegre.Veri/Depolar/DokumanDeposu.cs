@@ -108,6 +108,9 @@ public sealed class DokumanDeposu
 
     private const int AzamiBoyut = 5 * 1024 * 1024; // 5 MB
 
+    /// <summary>islem_log.tablo_id - dokuman (KartKatalogu.Saglik.Dokuman ile aynı numara).</summary>
+    private const int LogTabloDokuman = 975;
+
     private readonly VeriKaynagi _veri;
 
     public DokumanDeposu(VeriKaynagi veri) => _veri = veri;
@@ -326,8 +329,21 @@ public sealed class DokumanDeposu
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
         var (kaynak, kaynakId, varsayilanMiydi, hash) = await SatirBulAsync(baglanti, islem,
-            "select kaynak, kaynak_id, varsayilan, hash from public.dokuman where id = @p0", dokumanId,
+            "select kaynak, kaynak_id, varsayilan, hash from public.dokuman where id = @p0 for update", dokumanId,
             r => (r.GetString(0), r.GetInt32(1), r.GetInt16(2) == 1, r.GetString(3)), iptal);
+
+        // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
+        //   doküman meta satırı (ad, tür, boyut, hash, kaynak bağı) silmeden sonra yalnız logdan okunabilir.
+        //   İçerik (bytea) loga yazılmaz - hash üzerinden dokuman_icerik'te duruyorsa bulunur.
+        //   Log ve silme AYNI transaction. tablo_id 975 = KartKatalogu.Saglik.Dokuman "dokuman".
+        var tamSatir = await baglanti.TekAsync(
+            "select * from public.dokuman where id = @p0", islem, [dokumanId], o => o.Sozluk(), iptal);
+        if (tamSatir is not null)
+            await new LogDeposu().YazAsync(baglanti, islem, LogIslemi.Sil, LogTabloDokuman, dokumanId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                tamSatir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                tarafId: kaynak == "taraf" ? kaynakId : null,
+                iptal: iptal);
 
         await using (var sil = new NpgsqlCommand("delete from public.dokuman where id = @p0", baglanti, islem))
         {

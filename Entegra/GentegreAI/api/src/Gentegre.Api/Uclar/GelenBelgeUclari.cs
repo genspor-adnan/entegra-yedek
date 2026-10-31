@@ -34,6 +34,10 @@ public static class GelenBelgeUclari
     }
 
 
+    /// <summary>KAYIT KAPSAMI (K26): kimlikli uçlar gelen belgeyi liste kaynağının (şube) kuralıyla açar.</summary>
+    private const string GelenKaynagi = "gelen-belge";
+    private const string GelenYok = "Gelen belge bulunamadı.";
+
     private static Gentegre.Veri.Depolar.YazmaBaglami Baglam(dynamic baglam, HttpContext ctx)
         => new(baglam.KullaniciId, (int?)baglam.SubeId, BaglamCozucu.IpCoz(ctx));
 
@@ -67,22 +71,26 @@ public static class GelenBelgeUclari
 
         // GET /api/gelen-belge/{id}/ubl - UBL XML (ilk cagride entegratorden indirilir).
         grup.MapGet("/{id:long}/ubl", async (
-            long id, BaglamCozucu cozucu, EBelgeGelen gelen,
+            long id, BaglamCozucu cozucu, EBelgeGelen gelen, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            // KAYIT KAPSAMI (K26): gelen belge aktif şubenin olmalı (liste kuralı).
+            await erisim.IsteAsync(baglam, GelenKaynagi, id, GelenYok, iptal);
             var xml = await gelen.IcerikIndirAsync(id, baglam.SubeId, baglam.KullaniciId, iptal);
             return Results.Ok(new { ubl = xml, izlemeNo = baglam.IzlemeNo });
         });
 
         // GET /api/gelen-belge/{id}/mesajlar - gelen belgenin gecmisi (189).
         grup.MapGet("/{id:long}/mesajlar", async (
-            long id, BaglamCozucu cozucu, Gentegre.Veri.VeriKaynagi veri,
+            long id, BaglamCozucu cozucu, Gentegre.Veri.VeriKaynagi veri, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            // KAYIT KAPSAMI (K26): gelen belge aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, GelenKaynagi, id, GelenYok, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var komut = new Npgsql.NpgsqlCommand(
@@ -136,10 +144,12 @@ public static class GelenBelgeUclari
         //   soylenir ve "Faturaya Aktar" ile elle tekrarlanabilir.
         grup.MapPost("/{id:long}/yanit", async (
             long id, YanitIstegi istek, BaglamCozucu cozucu, EBelgeGelen gelen,
-            GelenBelgeAktar aktar, HttpContext ctx, CancellationToken iptal) =>
+            GelenBelgeAktar aktar, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): gelen belge aktif şubenin olmalı (`/tasi` ile aynı süzgeç).
+            await erisim.IsteAsync(baglam, GelenKaynagi, id, GelenYok, iptal);
             var s = await gelen.YanitlaAsync(id, istek.Kabul, istek.Aciklama ?? "",
                                              baglam.SubeId, baglam.KullaniciId, iptal);
 
@@ -167,11 +177,13 @@ public static class GelenBelgeUclari
         //   Yanit gerektirmeyen belgeler (temel fatura, e-Arsiv) ve kabulde
         //   aktarim basarisiz kalan belgeler icin ayri adim.
         grup.MapPost("/{id:long}/aktar", async (
-            long id, BaglamCozucu cozucu, GelenBelgeAktar aktar,
+            long id, BaglamCozucu cozucu, GelenBelgeAktar aktar, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Ekle);
+            // KAYIT KAPSAMI (K26): gelen belge aktif şubenin olmalı.
+            await erisim.IsteAsync(baglam, GelenKaynagi, id, GelenYok, iptal);
             var a = await aktar.AktarAsync(id, Baglam(baglam, ctx), iptal);
             return Results.Ok(new { a.BelgeId, a.BelgeNo, a.SatirSayisi, a.EslesenStok,
                                     a.Mesaj, izlemeNo = baglam.IzlemeNo });

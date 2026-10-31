@@ -151,7 +151,7 @@ public static partial class GozUclari
             var r = await b.TekAsync("""
                 select r.durum, r.hasta_id,
                        coalesce(nullif(r.recete_no, ''), 'GR-' || r.id)                        as "receteNo",
-                       to_char(r.ekleme_tarihi at time zone 'Europe/Istanbul', 'DD.MM.YYYY')   as tarih,
+                       to_char(r.ekleme_tarihi at time zone public.fn_sube_zaman_dilimi(r.sube_id), 'DD.MM.YYYY')   as tarih,
                        case when r.gecerlilik_bitis is null then '-'
                             else to_char(r.gecerlilik_bitis, 'DD.MM.YYYY') end                 as gecerlilik,
                        public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)                as hasta,
@@ -216,7 +216,7 @@ public static partial class GozUclari
             baglam.YetkiIste("goz.recete", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var gosterge = await b.TekAsync("""
-                select count(*) filter (where (r.ekleme_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date) as bugun,
+                select count(*) filter (where (r.ekleme_tarihi at time zone public.fn_sube_zaman_dilimi(@p0::int))::date = (now() at time zone public.fn_sube_zaman_dilimi(@p0::int))::date) as bugun,
                        count(*) filter (where r.durum = 1)                                    as taslak,
                        count(*) filter (where r.durum = 3)                                    as optikte,
                        count(*) filter (where r.durum between 2 and 3 and r.gecerlilik_bitis between current_date and current_date + 30) as "bitecek",

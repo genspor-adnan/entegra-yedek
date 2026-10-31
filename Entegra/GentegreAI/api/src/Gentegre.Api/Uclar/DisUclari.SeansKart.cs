@@ -126,8 +126,12 @@ public static partial class DisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.seans", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var durum = await b.TekDegerAsync<short?>("select durum from public.dis_seans where id = @p0", null, [id], iptal)
+            // DEĞİŞİKLİK LOGU ALAN BAZLI, YAZIMLA AYNI TRANSACTION (kod inceleme 30.10.2026 K33):
+            //   eski hâl kilitli okunur, güncellemeden sonra yeni hâl okunur; fark yoksa log yok.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var eski = await b.TekAsync("select * from public.dis_seans where id = @p0 for update", tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
+            var durum = Convert.ToInt16(eski["durum"] ?? (short)0);
             if (durum != 1) throw GentegreHatasi.IsKurali("Kapanmış seans değiştirilmez.");
             await b.CalistirAsync("""
                 update public.dis_seans
@@ -139,9 +143,15 @@ public static partial class DisUclari
                        sterilizasyon_paket = coalesce(@p11, sterilizasyon_paket),
                        degistiren = @p12, degistirme_tarihi = now()
                  where id = @p0
-                """, null, [id, g.HekimId, g.AsistanId, g.UnitId, g.UygulamaNotu, g.Komplikasyon, g.HastayaTalimat, g.SonrakiPlan,
+                """, tx, [id, g.HekimId, g.AsistanId, g.UnitId, g.UygulamaNotu, g.Komplikasyon, g.HastayaTalimat, g.SonrakiPlan,
                             g.AnesteziTur, g.AnesteziIlac, g.AnesteziDoz, g.SterilizasyonPaket, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogTabloSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { alan = "seans" }, iptal: iptal);
+            var yeni = await b.TekAsync("select * from public.dis_seans where id = @p0", tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
+            var fark = LogDeposu.Fark(LogAlanlari(eski), LogAlanlari(yeni));
+            if (fark is not null)
+                await log.YazAsync(b, tx, LogIslemi.Degistir, LogTabloSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark,
+                    tarafId: eski["hasta_id"] is { } h ? Convert.ToInt32(h) : null, iptal: iptal);
+            await tx.CommitAsync(iptal);
             return Results.NoContent();
         });
 
@@ -152,18 +162,21 @@ public static partial class DisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.seans", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var s = await b.TekAsync("select durum, hasta_id from public.dis_seans where id = @p0", null, [id],
+            // LOG YAZIMLA AYNI TRANSACTION (kod inceleme 30.10.2026 K33): eskiden ekleme logu ayrı bağlantıda
+            //   (autocommit) yazılıyordu - insert geri alınsa log kalıyordu.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var s = await b.TekAsync("select durum, hasta_id from public.dis_seans where id = @p0 for update", tx, [id],
                 o => new { durum = o.GetInt16(0), hastaId = o.GetInt32(1) }, iptal) ?? throw GentegreHatasi.Bulunamadi("Seans bulunamadı.");
             if (s.durum != 1) throw GentegreHatasi.IsKurali("Kapanmış seansa işlem eklenmez.");
             int islemId;
             if (g.PlanSatirId is int psid)
             {
-                var var = await b.TekDegerAsync<int?>("select id from public.dis_seans_islem where seans_id = @p0 and plan_satir_id = @p1", null, [id, psid], iptal);
+                var var = await b.TekDegerAsync<int?>("select id from public.dis_seans_islem where seans_id = @p0 and plan_satir_id = @p1", tx, [id, psid], iptal);
                 if (var is not null) throw GentegreHatasi.IsKurali("Bu plan satırı seansta zaten var.");
                 var ps = await b.TekAsync("""
                     select s.hizmet_id, s.dis_no, s.yuzeyler, s.yapilan_seans, s.seans_sayisi, s.durum, p.hasta_id
                       from public.dis_tedavi_plani_satir s join public.dis_tedavi_plani p on p.id = s.plan_id where s.id = @p0
-                    """, null, [psid], o => new { hizmetId = o.GetInt32(0), disNo = o.GetInt16(1), yuzey = o.GetString(2),
+                    """, tx, [psid], o => new { hizmetId = o.GetInt32(0), disNo = o.GetInt16(1), yuzey = o.GetString(2),
                         yapilan = o.GetInt16(3), toplam = o.GetInt16(4), durum = o.GetInt16(5), hastaId = o.GetInt32(6) }, iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Plan satırı bulunamadı.");
                 if (ps.hastaId != s.hastaId) throw GentegreHatasi.IsKurali("Plan satırı başka hastanın.");
@@ -173,7 +186,7 @@ public static partial class DisUclari
                 islemId = await b.TekDegerAsync<int>("""
                     insert into public.dis_seans_islem (seans_id, plan_satir_id, hizmet_id, dis_no, yuzeyler, seans_no, tamamlandi, sube_id, ekleyen)
                     values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8) returning id
-                    """, null, [id, psid, ps.hizmetId, ps.disNo, ps.yuzey, (short)(ps.yapilan + 1), (short)(tamam ? 1 : 0),
+                    """, tx, [id, psid, ps.hizmetId, ps.disNo, ps.yuzey, (short)(ps.yapilan + 1), (short)(tamam ? 1 : 0),
                                 baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
             }
             else
@@ -183,45 +196,84 @@ public static partial class DisUclari
                 islemId = await b.TekDegerAsync<int>("""
                     insert into public.dis_seans_islem (seans_id, hizmet_id, dis_no, yuzeyler, seans_no, tamamlandi, sube_id, ekleyen)
                     values (@p0, @p1, @p2, @p3, 1, @p4, @p5, @p6) returning id
-                    """, null, [id, hizmetId, (short)(g.DisNo ?? 0), YuzeyNormalle(g.Yuzeyler), (short)(g.Tamamlandi == false ? 0 : 1),
+                    """, tx, [id, hizmetId, (short)(g.DisNo ?? 0), YuzeyNormalle(g.Yuzeyler), (short)(g.Tamamlandi == false ? 0 : 1),
                                 baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
             }
-            await log.YazAsync(LogIslemi.Ekle, LogTabloSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { islemId, g.PlanSatirId, g.HizmetId }, tarafId: s.hastaId, iptal: iptal);
+            // Ekleme logu İŞLEM satırının kendi tablosuna (1133), üst = seans (1132) - tam satırla.
+            var yeniSatir = await b.TekAsync("select * from public.dis_seans_islem where id = @p0", tx, [islemId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            await log.YazAsync(b, tx, LogIslemi.Ekle, LogTabloSeansIslem, islemId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                yeniSatir?.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value)),
+                ustTabloId: LogTabloSeans, ustKayitId: id, tarafId: s.hastaId, iptal: iptal);
+            await tx.CommitAsync(iptal);
             return Results.Ok(new { id = islemId });
         });
 
         grup.MapPatch("/seans/islem/{id:int}", async (
-            int id, SeansIslemGuncelleIstegi g, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+            int id, SeansIslemGuncelleIstegi g, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.seans", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var acik = await b.TekDegerAsync<int?>("select 1 from public.dis_seans_islem i join public.dis_seans s on s.id = i.seans_id where i.id = @p0 and s.durum = 1", null, [id], iptal);
-            if (acik != 1) throw GentegreHatasi.IsKurali("Kapanmış seansın işlemi değiştirilmez.");
+            // DEĞİŞİKLİK LOGU ALAN BAZLI (kod inceleme 30.10.2026 K33): eski hâl kilitli okunur, fark yoksa log yok;
+            //   log yazımla aynı transaction.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var eski = await b.TekAsync("""
+                select i.*, s.hasta_id as __hasta_id from public.dis_seans_islem i join public.dis_seans s on s.id = i.seans_id
+                 where i.id = @p0 and s.durum = 1 for update of i
+                """, tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (eski is null) throw GentegreHatasi.IsKurali("Kapanmış seansın işlemi değiştirilmez.");
+            var hastaId = eski["__hasta_id"] is { } h ? Convert.ToInt32(h) : (int?)null;
+            eski.Remove("__hasta_id");
             await b.CalistirAsync("""
                 update public.dis_seans_islem
                    set tamamlandi = coalesce(@p1, tamamlandi), uygulama_notu = coalesce(@p2, uygulama_notu), calisma_boyu = coalesce(@p3, calisma_boyu),
                        komplikasyon = coalesce(@p4, komplikasyon), sonraki_plan = coalesce(@p5, sonraki_plan), not_metin = coalesce(@p6, not_metin),
                        dis_no = coalesce(@p7, dis_no), yuzeyler = coalesce(@p8, yuzeyler), degistiren = @p9, degistirme_tarihi = now()
                  where id = @p0
-                """, null, [id, g.Tamamlandi is null ? null : (short?)(g.Tamamlandi.Value ? 1 : 0), g.UygulamaNotu, g.CalismaBoyu, g.Komplikasyon,
+                """, tx, [id, g.Tamamlandi is null ? null : (short?)(g.Tamamlandi.Value ? 1 : 0), g.UygulamaNotu, g.CalismaBoyu, g.Komplikasyon,
                             g.SonrakiPlan, g.NotMetin, g.DisNo is null ? null : (short?)g.DisNo, g.Yuzeyler is null ? null : YuzeyNormalle(g.Yuzeyler),
                             baglam.KullaniciId], iptal);
+            var yeni = await b.TekAsync("select * from public.dis_seans_islem where id = @p0", tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("İşlem bulunamadı.");
+            var fark = LogDeposu.Fark(LogAlanlari(eski), LogAlanlari(yeni));
+            if (fark is not null)
+                await log.YazAsync(b, tx, LogIslemi.Degistir, LogTabloSeansIslem, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark,
+                    ustTabloId: LogTabloSeans, ustKayitId: Convert.ToInt64(eski["seans_id"]), tarafId: hastaId, iptal: iptal);
+            await tx.CommitAsync(iptal);
             return Results.NoContent();
         });
 
         grup.MapDelete("/seans/islem/{id:int}", async (
-            int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+            int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.seans", Islem.Degistir);
-            var n = await veri.CalistirAsync("""
-                delete from public.dis_seans_islem i using public.dis_seans s
-                 where i.id = @p0 and s.id = i.seans_id and s.durum = 1 and i.belge_satir_id is null
-                """, [id], iptal);
+            await using var b = await veri.AcAsync(iptal);
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
+            //   eskiden hiç log yoktu. Silme koşulu (açık seans, ücretlenmemiş satır) aynı; log ve silme tek transaction.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var satir = await b.TekAsync("""
+                select i.*, s.hasta_id as __hasta_id from public.dis_seans_islem i join public.dis_seans s on s.id = i.seans_id
+                 where i.id = @p0 and s.durum = 1 and i.belge_satir_id is null for update of i
+                """, tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null) throw GentegreHatasi.IsKurali("Ücretlenmiş ya da kapanmış seansın işlemi silinmez.");
+            var hastaId = satir["__hasta_id"] is { } h ? Convert.ToInt32(h) : (int?)null;
+            satir.Remove("__hasta_id");
+            await log.YazAsync(b, tx, LogIslemi.Sil, LogTabloSeansIslem, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value)),
+                ustTabloId: LogTabloSeans, ustKayitId: Convert.ToInt64(satir["seans_id"]), tarafId: hastaId, iptal: iptal);
+            var n = await b.CalistirAsync("delete from public.dis_seans_islem where id = @p0", tx, [id], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Ücretlenmiş ya da kapanmış seansın işlemi silinmez.");
+            await tx.CommitAsync(iptal);
             return Results.NoContent();
         });
     }
+
+    /// <summary>islem_log.tablo_id - dis_seans_islem (KartKatalogu.Dis LogDisSeansDetay ile aynı numara).</summary>
+    private const int LogTabloSeansIslem = 1133;
+
+    /// <summary>Fark hesabına girmeyen teknik kolonlar atılır: değiştiren / değiştirme tarihi her yazımda değişir, "değişiklik" sayılmaz.</summary>
+    private static IDictionary<string, object?> LogAlanlari(IDictionary<string, object?> satir)
+        => satir.Where(k => k.Key is not ("degistiren" or "degistirme_tarihi" or "ekleyen" or "ekleme_tarihi"))
+                .ToDictionary(k => k.Key, k => k.Value);
 }

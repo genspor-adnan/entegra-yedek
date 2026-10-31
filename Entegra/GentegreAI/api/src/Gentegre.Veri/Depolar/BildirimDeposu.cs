@@ -29,6 +29,17 @@ public sealed class BildirimDeposu
                                               CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
+        return await KuyrugaEkleAsync(baglanti, null, istek, kullaniciId, subeId, iptal);
+    }
+
+    /// <summary>
+    /// AYNI İŞLEMDE kuyruğa ekleme (kod inceleme 30.10.2026 K37): hatırlatma işçisi kilitli işlem içinde ayrı
+    /// bağlantıyla autocommit yazıyordu - `uyari_gonderildi` güncellemesi düşerse SMS kuyrukta kalıyor, sonraki
+    /// tur aynı hatırlatmayı yeniden alıp ikinci SMS'i yazıyordu. Çağıran commit eder / geri alır.
+    /// </summary>
+    public async Task<long?> KuyrugaEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction? islem, BildirimIstegi istek,
+                                              int kullaniciId, int? subeId, CancellationToken iptal = default)
+    {
 
         int? sablonId = null;
         var kanal = istek.Kanal ?? BildirimKanali.Sms;
@@ -40,7 +51,7 @@ public sealed class BildirimDeposu
             var s = await baglanti.TekAsync("""
                 select id, kanal, konu, govde, durum
                   from public.bildirim_sablon where kod = @p0
-                """, null, [istek.SablonKodu], SablonSatiri, iptal);
+                """, islem, [istek.SablonKodu], SablonSatiri, iptal);
 
             if (s is null) throw new InvalidOperationException($"Bildirim şablonu yok: {istek.SablonKodu}");
             if (s.Durum != 1) return null;      // pasif şablon: sessizce gönderilmez
@@ -63,7 +74,7 @@ public sealed class BildirimDeposu
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10,
                     coalesce(@p11, now()), @p12, @p13)
             returning id
-            """, null,
+            """, islem,
             [(short)kanal, sablonId, istek.HesapId, istek.Alici.Trim(), istek.TarafId,
              istek.KullaniciId, konu, govde, istek.KaynakTur, istek.KaynakId, istek.Oncelik,
              istek.Planlanan, subeId, kullaniciId], iptal);
@@ -87,7 +98,7 @@ public sealed class BildirimDeposu
                  for update skip locked
             )
             update public.bildirim b
-               set durum = 2, deneme = b.deneme + 1
+               set durum = 2, deneme = b.deneme + 1, gonderim_bas = now()
               from secilen s
              where b.id = s.id
             returning b.id, b.kanal, b.alici, b.konu, b.govde, b.hesap_id,
@@ -157,7 +168,9 @@ public sealed class BildirimDeposu
                set durum = case when deneme >= en_fazla_deneme then 6 else 1 end,
                    hata = 'Gönderim yarıda kaldı (servis yeniden başladı).'
              where durum = 2
-               and ekleme_tarihi < now() - @p0::interval
+               -- GÖNDERİME ALINMA ANI (1207, K37): ekleme tarihi değil - yeni alınmış satır "eski" sayılıp iki kez
+               --   gitmesin, çökme anında 2'de kalan satır yeniden başlatmayı beklemesin.
+               and coalesce(gonderim_bas, ekleme_tarihi) < now() - @p0::interval
             """, null, [$"{(int)yas.TotalSeconds} seconds"], iptal);
     }
 

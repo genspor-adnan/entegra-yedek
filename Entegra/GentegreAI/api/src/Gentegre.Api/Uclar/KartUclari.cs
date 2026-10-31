@@ -704,11 +704,14 @@ public static class KartUclari
             sonuc[ad] = cevrilmis;
         }
 
-        if (yeni)
-            foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu || KapiylaZorunlu(a, kapaliKapilar)))
+        // ZORUNLU ALAN (kod inceleme 30.10.2026 K39): yeni kayıtta gelmeli; GÜNCELLEMEDE gönderildiyse
+        //   boşaltılamaz (eskiden yalnız INSERT'te denetleniyordu, PUT ile null geçiyordu). Gönderilmeyen alan
+        //   güncellemede korunur - "yalnız gelen alanlar değişir" kuralı bozulmaz.
+        foreach (var zorunlu in tanim.Alanlar.Where(a => a.Zorunlu || KapiylaZorunlu(a, kapaliKapilar)))
             {
                 // MUAF: muaf alan doluysa (ör. randevuda cihaz seçili) bu alan istenmez.
                 if (zorunlu.ZorunluMuafAlan is { } muaf && Dolu(sonuc.GetValueOrDefault(muaf))) continue;
+                if (!yeni && !sonuc.ContainsKey(zorunlu.Ad)) continue;
                 var bos = !sonuc.TryGetValue(zorunlu.Ad, out var d) || d is null
                           || (d is string m && m.Trim().Length == 0)
                           // Kapıyla zorunlu KOD alanında 0 da boştur (randevu bölümü varsayılan 0 gelir).

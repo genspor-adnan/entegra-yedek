@@ -157,14 +157,23 @@ public static partial class MasrafBeyaniUclari
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var silinen = await baglanti.CalistirAsync(
-                "delete from public.personel_masraf_satir where id = @p0",
-                islem, [satirId], iptal);
-            if (silinen == 0) throw GentegreHatasi.Bulunamadi("Satır bulunamadı.");
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı
+            //   "Geri Al"): eskiden silmeden SONRA yalnız kimlik yazılıyordu - fişin tutarı,
+            //   belge no'su logdan okunamıyordu. Log ve silme tek transaction.
+            var satir = await baglanti.TekAsync(
+                "select * from public.personel_masraf_satir where id = @p0 for update",
+                islem, [satirId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Satır bulunamadı.");
 
             await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogSatir, satirId,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { satirId },
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                ustTabloId: LogBeyan, ustKayitId: Convert.ToInt64(satir["beyan_id"]),
                 iptal: iptal);
+
+            await baglanti.CalistirAsync(
+                "delete from public.personel_masraf_satir where id = @p0",
+                islem, [satirId], iptal);
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { satirId, izlemeNo = baglam.IzlemeNo });

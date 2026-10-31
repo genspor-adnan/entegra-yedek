@@ -207,7 +207,13 @@ public sealed class CihazServisi(VeriKaynagi veri, IEnumerable<ICihazSurucu> sur
                 continue;
             }
 
-            foreach (var dosya in Directory.EnumerateFiles(c.KlasorYolu).Take(200))
+            // ISLENMIS DOSYA YENIDEN OKUNMAZ (kod inceleme 30.10.2026 K25): arsiv klasoru yoksa dosya ".alindi"
+            //   uzantisiyla yerinde kalir; suzgec olmadan ayni dosya her turda yeniden okunup ".alindi.alindi"
+            //   oluyor, MSH-10'suz cihazda sonuc her turda yeniden kaydediliyor, Take(200) dolunca yeni dosya
+            //   siraya giremiyordu.
+            foreach (var dosya in Directory.EnumerateFiles(c.KlasorYolu)
+                                           .Where(d => !d.EndsWith(".alindi", StringComparison.OrdinalIgnoreCase))
+                                           .Take(200))
             {
                 if (iptal.IsCancellationRequested) break;
                 try

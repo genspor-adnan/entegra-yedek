@@ -137,7 +137,9 @@ public static class EnabizMesajUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("enabiz.erisim", Islem.Gor);
+            // YAZMA YETKİSİ (K16): erişim anahtarı almak `enabiz_erisim` + işlem günlüğü
+            //   YAZAR (KVKK izi); Gör yetkisi salt okuma şubede de geçiyordu - Değiştir ister.
+            baglam.YetkiIste("enabiz.erisim", Islem.Degistir);
             if (istek.HastaId <= 0) throw GentegreHatasi.Dogrulama("Hasta seçilmeli.");
 
             // Hekim verilmezse oturumun sahibi (kullanıcı zaten bir taraftır).

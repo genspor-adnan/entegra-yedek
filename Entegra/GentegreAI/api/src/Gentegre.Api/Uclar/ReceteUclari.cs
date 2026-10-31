@@ -1,8 +1,11 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Its;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -26,6 +29,10 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class ReceteUclari
 {
+    // islem_log.tablo_id - KartKatalogu.Saglik.Hasta ile aynı ("recete" kartı 969, "ilaclar" detayı 970).
+    private const int LogRecete = 969;
+    private const int LogReceteSatir = 970;
+
     /// <summary>Reçete satırı düzeltme: verilmeyen alan değişmez.</summary>
     public sealed record SatirIstegi(string? Doz, string? Periyot, short? KullanimSekli,
                                      short? SureGun, short? Kutu, string? Aciklama);
@@ -40,7 +47,10 @@ public static class ReceteUclari
 
     public static void ReceteUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/recete").WithTags("Reçete").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): /{id} reçete, /muayene/{muayeneId} muayene,
+        //   /hasta/{hastaId} hasta kimlikleri liste ile aynı şube / kapsam kuralından geçer - kapsam dışı 404.
+        var grup = yol.MapGroup("/api/recete").WithTags("Reçete").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Recete());
 
         // GET /api/recete/kontrol?hastaId=&barkod= - alerji + tekrar kontrolü
         //   İlaç seçilirken çağrılır; yazmadan önce uyarı görünsün.
@@ -199,24 +209,39 @@ public static class ReceteUclari
         //   varsa reçete iptal edilip yenisi yazılır - imzalanan kâğıdın
         //   içeriğini sonradan değiştirmek izi bozar.
         grup.MapDelete("/{id:int}/ilac/{satirId:int}", async (
-            int id, int satirId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, int satirId, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var durum = await baglanti.TekDegerAsync<int>(
-                "select durum from public.recete where id = @p0", null, [id], iptal);
-            if (durum != 1)
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var r = await baglanti.TekAsync(
+                "select durum, hasta_id from public.recete where id = @p0 for update", islem, [id],
+                o => new { Durum = o.GetInt16(0), HastaId = o.GetInt32(1) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Recete bulunamadi.");
+            if (r.Durum != 1)
                 throw GentegreHatasi.IsKurali(
                     "Imzalanmis ya da iptal edilmis receteden ilac cikarilamaz.");
 
-            var silinen = await baglanti.CalistirAsync(
-                "delete from public.recete_satir where id = @p0 and recete_id = @p1",
-                null, [satirId, id], iptal);
-            if (silinen == 0) return Results.NotFound(new { hata = new
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K26/K35; proje kuralı "Geri Al"):
+            //   çıkarılan ilaç sonradan yalnız logdan okunabilir. Log ve silme tek transaction.
+            var satir = await baglanti.TekAsync(
+                "select * from public.recete_satir where id = @p0 and recete_id = @p1 for update",
+                islem, [satirId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogReceteSatir, satirId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                ustTabloId: LogRecete, ustKayitId: id, tarafId: r.HastaId, iptal: iptal);
+
+            await baglanti.CalistirAsync(
+                "delete from public.recete_satir where id = @p0 and recete_id = @p1",
+                islem, [satirId, id], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, satirId, mesaj = "Ilac cikarildi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -228,7 +253,7 @@ public static class ReceteUclari
         //   ilaç gerekiyorsa satır çıkarılıp yenisi eklenir (etkileşim/alerji
         //   kontrolü eklemede çalışır). İMZALI REÇETEYE DOKUNULMAZ.
         grup.MapPut("/{id:int}/ilac/{satirId:int}", async (
-            int id, int satirId, SatirIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, int satirId, SatirIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -242,11 +267,23 @@ public static class ReceteUclari
                 throw GentegreHatasi.Dogrulama("Gecersiz kullanim sekli.");
 
             await using var baglanti = await veri.AcAsync(iptal);
-            var durum = await baglanti.TekDegerAsync<int>(
-                "select durum from public.recete where id = @p0", null, [id], iptal);
-            if (durum != 1)
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var r = await baglanti.TekAsync(
+                "select durum, hasta_id from public.recete where id = @p0 for update", islem, [id],
+                o => new { Durum = o.GetInt16(0), HastaId = o.GetInt32(1) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Recete bulunamadi.");
+            if (r.Durum != 1)
                 throw GentegreHatasi.IsKurali(
                     "Imzalanmis ya da iptal edilmis recetede ilac degistirilemez.");
+
+            // DEĞİŞİKLİK LOGU ALAN BAZLI (kod inceleme 30.10.2026 K26/K35): eski satır okunur, yazılır, fark
+            //   logu düşer; hiçbir alan değişmediyse log satırı açılmaz (proje kuralı).
+            const string satirSql = "select doz, periyot, kullanim_sekli, sure_gun, kutu, aciklama "
+                                  + "  from public.recete_satir where id = @p0 and recete_id = @p1";
+            var eski = await baglanti.TekAsync(satirSql + " for update", islem, [satirId, id],
+                                               OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (eski is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
 
             var yazilan = await baglanti.CalistirAsync("""
                 update public.recete_satir
@@ -258,12 +295,19 @@ public static class ReceteUclari
                        aciklama = coalesce(@p7, aciklama),
                        degistiren = @p8, degistirme_tarihi = now()
                  where id = @p0 and recete_id = @p1
-                """, null,
+                """, islem,
                 [satirId, id, Kirp(istek.Doz, 20), Kirp(istek.Periyot, 20),
                  istek.KullanimSekli, istek.SureGun, istek.Kutu, Kirp(istek.Aciklama, 200),
                  baglam.KullaniciId], iptal);
             if (yazilan == 0) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Ilac satiri bulunamadi." } });
+
+            var yeni = await baglanti.TekAsync(satirSql, islem, [satirId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (yeni is not null && LogDeposu.Fark(eski, yeni) is { } fark)
+                await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogReceteSatir, satirId,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark,
+                    ustTabloId: LogRecete, ustKayitId: id, tarafId: r.HastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, satirId, mesaj = "Ilac guncellendi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -341,8 +385,13 @@ public static class ReceteUclari
         // POST /api/recete/{id}/imzala
         //   İmza reçeteyi KİLİTLER ve aktif ilaç listesine işler. Medula
         //   kapısı açılınca gönderim buradan tetiklenecek; şimdilik durum 2.
+        //
+        //   İMZA ÖZETİ (kod inceleme 30.10.2026 K35): imza iki uçta farklıydı - Medula ucu (MedulaUclari.Recete)
+        //   satırların metninden SHA-256 özeti yazıyor, bu uç yalnız durumu değiştiriyordu; aynı reçetenin iki
+        //   imzası iki ayrı kayıt bırakıyordu. Özet üretimi buraya da alındı: TEK YOL = ReceteUclari. Gerçek
+        //   e-imza (akıllı kart) istemci tarafında; sunucu özeti saklar ki sonradan "ne imzalandı" okunsun.
         grup.MapPost("/{id:int}/imzala", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -367,12 +416,19 @@ public static class ReceteUclari
                 throw GentegreHatasi.Dogrulama("Bos recete imzalanamaz.",
                     [new("ilaclar", "En az bir ilac ekleyin.")]);
 
+            // İmza özeti: satırların metni + zaman (Medula ucundakiyle aynı biçim).
+            var metin = await baglanti.TekDegerAsync<string>("""
+                select string_agg(ilac_barkod || '|' || ilac_ad || '|' || doz || '|' || periyot, ';' order by sira, id)
+                  from public.recete_satir where recete_id = @p0
+                """, islem, [id], iptal) ?? "";
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(metin + "|" + DateTime.UtcNow.Ticks)))[..32];
+
             await baglanti.CalistirAsync("""
                 update public.recete
-                   set durum = 2, imza_zamani = now(),
+                   set durum = 2, imza_zamani = now(), imza_hash = @p2,
                        degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0
-                """, islem, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId, hash], iptal);
 
             // AKTIF ILAC LISTESINE ISLE: ayni barkod zaten aktifse yeniden
             //   eklenmez - liste "su an ne kullaniyor" sorusunun cevabi,
@@ -391,8 +447,14 @@ public static class ReceteUclari
                                       and h.ilac_barkod = s.ilac_barkod)
                 """, islem, [id, r.HastaId, baglam.KullaniciId], iptal);
 
+            // İMZA LOGU (K26/K35): imza kilit koyan bir işlemdir - kim, ne zaman, hangi özetle.
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogRecete, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { durum = 2, imza = hash, aktifIlacaEklenen = eklenen },
+                tarafId: r.HastaId, iptal: iptal);
+
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { id, aktifIlacaEklenen = eklenen,
+            return Results.Ok(new { id, aktifIlacaEklenen = eklenen, imzaHash = hash,
                                     mesaj = "Recete imzalandi.",
                                     izlemeNo = baglam.IzlemeNo });
         });

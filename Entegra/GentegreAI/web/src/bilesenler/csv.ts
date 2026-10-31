@@ -16,10 +16,16 @@
 /** UTF-8 BOM - Excel'in dosyayi UTF-8 saymasi icin. */
 const BOM = '﻿';
 
-/** Alanda ayrac/tirnak/satir sonu varsa tirnakla, ictekileri ikile. */
+/**
+ * Alanda ayrac/tirnak/satir sonu varsa tirnakla, ictekileri ikile.
+ * FORMÜL ENJEKSİYONU (kod inceleme 30.10.2026 K90): `=`, `@` ya da rakamla sürmeyen `+`/`-` ile başlayan
+ * metin Excel'de formül olur (=HYPERLINK, =cmd|…); başına kesme konur. Negatif sayılar ("-5", "-1.250,00")
+ * dokunulmaz.
+ */
 const kacir = (deger: unknown) => {
-  const m = String(deger ?? '');
-  return /[";\r\n]/.test(m) ? `"${m.replace(/"/g, '""')}"` : m;
+  let m = String(deger ?? '');
+  if (/^[=@]|^[+-](?![\d.,\s])|^[\t\r]/.test(m)) m = "'" + m;
+  return /[";\r\n']/.test(m) ? `"${m.replace(/"/g, '""')}"` : m;
 };
 
 /** Baslik satiri + veri satirlarindan CSV metni (BOM dahil). */

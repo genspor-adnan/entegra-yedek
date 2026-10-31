@@ -174,6 +174,7 @@ public static class StandartRolUclari
         ["goz_hekimi"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 70),
         ["ftr_uzmani"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 80),
         ["radyolog"]             = new("Tıbbi hizmetler", "bashekim_yardimcisi", 90),
+        ["rad_asistan"]          = new("Tıbbi hizmetler", "radyolog", 95),
         ["lab_uzmani"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 100),
         ["isyeri_hekimi"]        = new("Tıbbi hizmetler", "bashekim_yardimcisi", 110),
         ["anestezi_uzmani"]      = new("Tıbbi hizmetler", "bashekim_yardimcisi", 120),
@@ -296,7 +297,7 @@ public static class StandartRolUclari
         ["tedavi_danismani"] = "dis", ["dis_lab_sorumlu"] = "dis",
         ["goz_hekimi"] = "goz", ["optometrist"] = "goz", ["goz_teknisyen"] = "goz",
         ["ftr_uzmani"] = "ftr", ["fizyoterapist"] = "ftr",
-        ["radyolog"] = "radyoloji", ["rad_teknisyen"] = "radyoloji",
+        ["radyolog"] = "radyoloji", ["rad_teknisyen"] = "radyoloji", ["rad_asistan"] = "radyoloji",
         ["teleradyoloji_hekim"] = "teleradyoloji",
         ["lab_uzmani"] = "lab", ["lab_teknisyen"] = "lab",
         ["numune_kabul"] = "lab", ["dis_istem_kurumu"] = "lab",
@@ -566,6 +567,12 @@ public static class StandartRolUclari
               // TELERADYOLOJI (797): kurumun kendi radyologu dis kurum
               //   isteklerini de okur - calisma listesi ve atama onda.
               Y("teleradyoloji"), A("telerad.ata"), A("telerad.teslim"))),
+        // RADYOLOJI ASISTANI (kullanici 28.10.2026: "bazi doktorlar kendi yaziyor ve onayliyor.. bazi
+        //   doktorlarin da asistani yaziyor uzman onayliyor"): on raporu YAZAR ve "Uzmana Gonder"le
+        //   onaya yollar; rad.rapor_onayla YOK - onay Radyolog'da. Kendi yazip onaylayan doktor
+        //   Radyolog rolunde kalir; iki akis yan yana calisir.
+        new("rad_asistan", "Radyoloji Asistanı", "Ön rapor yazar ve uzman onayına gönderir; raporu onaylayamaz.", ["goruntuleme", "goruntuleme_lab", "tip_merkezi", "hastane"],
+            K(Y("radyoloji"), Y("radyoloji-istem"), A("rad.rapor_yaz"), T("hasta"), T("katalog"), T("muayene"))),
         new("rad_teknisyen", "Radyoloji Teknisyeni", "Çekim, cihaz, sonuç teslimi.", ["goruntuleme", "goruntuleme_lab", "tip_merkezi", "hastane"],
             K(Y("radyoloji"), Y("radyoloji-istem"), Y("cihaz"), A("cihaz.isle"), A("rad.teslim"), T("hasta"), T("randevu"))),
         // TELERADYOLOJI HEKIMI (797 ile genisledi): calisma listesi + atama +
@@ -1064,6 +1071,13 @@ public static class StandartRolUclari
                         insert into public.rol_sube (rol_id, sube_id, varsayilan, yazma, ekleyen) values (@p0, @p1, @p2, 1, @p3)
                         on conflict do nothing
                         """, islem, [yeniId, sb.id, (short)(sb.varsayilan ? 1 : 0), baglam.KullaniciId], iptal);
+                // KADRO AGACI (847): ust rol SablonKadro'dan. 847 yalniz o gun VAR OLAN rolleri bagladi;
+                //   sonradan sablondan kurulan rol (or. rad_asistan) agacta ustsuz kaliyordu. Ust rol bu
+                //   kurulumda yoksa bos kalir (ust kurulunca 847 gibi elle baglanir).
+                if (SablonKadro.GetValueOrDefault(s.Kod)?.Ust is { } ustKod)
+                    await b.CalistirAsync(
+                        "update public.rol set ust_rol_id = (select id from public.rol where kod = @p1) where id = @p0",
+                        islem, [yeniId, ustKod], iptal);
                 kuruldu.Add(s.Ad);
                 await log.YazAsync(b, islem, LogIslemi.Ekle, LogTabloRol, yeniId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                     new { standartSablon = s.Kod, kurumTipi = tip, s.Ad }, iptal: iptal);

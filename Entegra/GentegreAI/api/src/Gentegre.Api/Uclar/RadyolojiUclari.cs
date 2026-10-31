@@ -23,6 +23,9 @@ public static partial class RadyolojiUclari
     private const int LogTabloRapor = 941;
 
     /// <summary>MetinHtml (1195): editörün biçimli hali - sunucuda temizlenir; Metin düz hali (e-Nabız / HL7).</summary>
+    /// <summary>Durum geçişi gövdesi (1200): uzmana gönderirken bırakılan not. Boş gövde de geçerli.</summary>
+    public sealed record DurumIstegi(string? Not = null);
+
     public sealed record BolumIstegi(int? Id, int Sira, string Baslik, string Metin, short Yazdir, string? MetinHtml = null);
     public sealed record AlanIstegi(string AlanKod, string AlanAd, string Deger);
     /// <summary>BI-RADS lezyonu (1194) - sözlük seçimleri ekranda; kategori ekranın kural motorundan.</summary>
@@ -158,7 +161,7 @@ public static partial class RadyolojiUclari
         // KAYIT KAPISI (kod inceleme raporu 28.10.2026 B02): /istem/{id}, /rapor/{id}, /hasta/{id} uçlarının kimliği
         //   liste ile aynı şube / kapsam / portal kuralından geçer - kapsam dışı 404.
         var grup = yol.MapGroup("/api/radyoloji").WithTags("Radyoloji").RequireAuthorization()
-                      .AddEndpointFilter<RadyolojiKayitKapisi>();
+                      .AddEndpointFilter(KayitKapisi.Radyoloji());
 
         // ------------------------------------------- istem ekranı verisi ----
         // Tetkik ağacı (modalite > tetkik), isteyen hekim adayları ve hastanın
@@ -305,7 +308,7 @@ public static partial class RadyolojiUclari
         // DELETE /api/radyoloji/istem/{id} - yanlış açılan görüntüleme istemini
         //   sil (muayene grid'i "🗑"). Güvence: çekilmiş/raporlanmış silinmez.
         grup.MapDelete("/istem/{id:int}", async (
-            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -313,22 +316,32 @@ public static partial class RadyolojiUclari
             // Radyoloji yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
             await IstemSahipligi.IsteAsync(baglam, b, "radyoloji", Islem.Sil, "radyoloji_istem", id, muayeneden == true, iptal);
 
-            var r = await b.TekAsync(
-                "select coalesce(durum,0), (cekim_tarihi is not null) as cekildi " +
-                "  from public.radyoloji_istem where id = @p0",
-                null, [id], o => new { Durum = o.GetInt32(0), Cekildi = o.GetBoolean(1) }, iptal);
-            if (r is null)
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
+            //   istem satırı kilitlenip tam hâliyle okunur, log yazılır, sonra silinir - hepsi TEK transaction.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var satir = await b.TekAsync(
+                "select * from public.radyoloji_istem where id = @p0 for update",
+                tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            var durum = satir["durum"] is { } d ? Convert.ToInt32(d) : 0;
+            var cekildi = satir["cekim_tarihi"] is not null;
             var raporVar = await b.TekDegerAsync<bool>(
                 "select exists(select 1 from public.radyoloji_rapor where istem_id = @p0)",
-                null, [id], iptal);
-            if (r.Cekildi || raporVar || r.Durum >= 2)
+                tx, [id], iptal);
+            if (cekildi || raporVar || durum >= 2)
                 throw GentegreHatasi.IsKurali("Çekilmiş/raporlanmış görüntüleme istemi silinemez.");
 
-            await b.CalistirAsync("select public.fn_radyoloji_istem_sil(@p0)", null, [id], iptal);
+            await log.YazAsync(b, tx, LogIslemi.Sil, LogTabloIstem, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value)),
+                tarafId: satir["hasta_id"] is { } h ? Convert.ToInt32(h) : null, iptal: iptal);
+
+            await b.CalistirAsync("select public.fn_radyoloji_istem_sil(@p0)", tx, [id], iptal);
             // Muayene bağı iptal (1109): silinen istem "istem var / sonuç bekliyor" sayılmasın.
             await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'radyoloji_istem' and hedef_id = @p0",
-                null, [id], iptal);
+                tx, [id], iptal);
+            await tx.CommitAsync(iptal);
             return Results.Ok(new { id, mesaj = "Görüntüleme istemi silindi.", izlemeNo = baglam.IzlemeNo });
         });
 
@@ -371,68 +384,75 @@ public static partial class RadyolojiUclari
             //   kalmis istem" penceresi acardi.
             var belgeId = istek.BelgeId is int bid && bid > 0 ? bid : (int?)null;
             var yazma = new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip);
-            if (belgeId is null && istek.BasvuruAc)
-            {
-                var hasta = await baglanti.TekAsync("""
-                    select coalesce(unvan, '') as unvan, coalesce(vkno, '') as vkno,
-                           coalesce(vd, '') as vd
-                      from public.taraf where id = @p0
-                    """, null, [istek.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal)
-                    ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
-
-                // Fiyat listesi belgenin KIMLIGIDIR (274/302): kampanya ->
-                //   sozlesme -> cari -> varsayilan sirasi tek yerde (fn)
-                //   cozulur; burada ikinci bir sira kurmak ikisinin sapmasi olur.
-                var listeId = await baglanti.TekDegerAsync<int?>("""
-                    -- ARGUMAN SIRASI: (p_tur, p_taraf_id, ...) - tur ONCE gelir. Ters
-                    --   yazilmisti: hasta id'si `p_tur` olarak gidiyor ve
-                    --   liste hemen her zaman NULL donuyordu (basvuru
-                    --   fiyat listesiz aciliyordu).
-                    select public.fn_belge_varsayilan_liste(19, @p0, current_date, @p1)
-                    """, null, [istek.HastaId, istek.OdeyenKurumId], iptal);
-
-                // KAMPANYA (274) belgenin KIMLIGIDIR: liste BAZ fiyati, kampanya
-                //   INDIRIMI verir. Basliga yazilmazsa "bu tutar hangi anlasmayla
-                //   olustu" izi kaybolur ve sonradan eklenen kalem indirimsiz
-                //   fiyatlanir (ayni belgede iki fiyat politikasi).
-                var kampanyaId = await baglanti.TekDegerAsync<int?>("""
-                    select public.fn_taraf_kampanya(coalesce(@p1, @p0), current_date)
-                    """, null, [istek.HastaId, istek.OdeyenKurumId], iptal);
-
-                var basvuru = new Dictionary<string, object?>(StringComparer.Ordinal)
-                {
-                    ["tur"] = 19,
-                    // 30 = Hasta Basvurusu (301) - ayni turun siparisinden ayirir.
-                    ["tipi"] = 30,
-                    ["tarafId"] = istek.HastaId,
-                    ["tarafUnvan"] = hasta["unvan"],
-                    ["tarafVkno"] = hasta["vkno"],
-                    ["tarafVd"] = hasta["vd"],
-                    ["belgeTarihi"] = Saat.Simdi,
-                    ["belgeDovizi"] = "TL",
-                    ["dovizKuru"] = 1m,
-                    ["fiyatListesiId"] = listeId,
-                    ["kampanyaId"] = kampanyaId,
-                    ["odeyenKurumId"] = istek.OdeyenKurumId,
-                    ["ossPoliceNo"] = istek.PoliceNo ?? "",
-                    ["aciklama"] = "Radyoloji kabul",
-                };
-
-                // Kalemsiz acilir: ucret satirlari accession uretildikten SONRA
-                //   eklenir (satir aciklamasi accession no ile eslesiyor).
-                var (yeniBelgeId, basvuruUyari) = await belgeDepo.KaydetAsync(
-                    basvuru, new List<Dictionary<string, JsonElement>>(),
-                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
-                    yazma, iptal);
-                belgeId = yeniBelgeId;
-                basvuruUyarilari.AddRange(basvuruUyari);
-            }
+            var basvuruAcildi = false;
 
             var idler = new List<int>();
             var accessionlar = new List<string>();
 
+            // TEK İŞLEM (kod inceleme 30.10.2026 K12): başvuru belgesi + istem satırları + logları
+            //   AYNI transaction'da (BelgeDeposu'nun çağıranın işlemini kullanan KaydetAsync'i).
+            //   Başvuru ayrı işlemde kesiliyordu: istem satırı reddedilince (modalitesiz tetkik vb.)
+            //   ortada istemsiz, kalemsiz bir başvuru kalıyordu.
             await using (var islem = await baglanti.BeginTransactionAsync(iptal))
             {
+                if (belgeId is null && istek.BasvuruAc)
+                {
+                    var hasta = await baglanti.TekAsync("""
+                        select coalesce(unvan, '') as unvan, coalesce(vkno, '') as vkno,
+                               coalesce(vd, '') as vd
+                          from public.taraf where id = @p0
+                        """, islem, [istek.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                        ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
+
+                    // Fiyat listesi belgenin KIMLIGIDIR (274/302): kampanya ->
+                    //   sozlesme -> cari -> varsayilan sirasi tek yerde (fn)
+                    //   cozulur; burada ikinci bir sira kurmak ikisinin sapmasi olur.
+                    var listeId = await baglanti.TekDegerAsync<int?>("""
+                        -- ARGUMAN SIRASI: (p_tur, p_taraf_id, ...) - tur ONCE gelir. Ters
+                        --   yazilmisti: hasta id'si `p_tur` olarak gidiyor ve
+                        --   liste hemen her zaman NULL donuyordu (basvuru
+                        --   fiyat listesiz aciliyordu).
+                        select public.fn_belge_varsayilan_liste(19, @p0, current_date, @p1)
+                        """, islem, [istek.HastaId, istek.OdeyenKurumId], iptal);
+
+                    // KAMPANYA (274) belgenin KIMLIGIDIR: liste BAZ fiyati, kampanya
+                    //   INDIRIMI verir. Basliga yazilmazsa "bu tutar hangi anlasmayla
+                    //   olustu" izi kaybolur ve sonradan eklenen kalem indirimsiz
+                    //   fiyatlanir (ayni belgede iki fiyat politikasi).
+                    var kampanyaId = await baglanti.TekDegerAsync<int?>("""
+                        select public.fn_taraf_kampanya(coalesce(@p1, @p0), current_date)
+                        """, islem, [istek.HastaId, istek.OdeyenKurumId], iptal);
+
+                    var basvuru = new Dictionary<string, object?>(StringComparer.Ordinal)
+                    {
+                        ["tur"] = 19,
+                        // 30 = Hasta Basvurusu (301) - ayni turun siparisinden ayirir.
+                        ["tipi"] = 30,
+                        ["tarafId"] = istek.HastaId,
+                        ["tarafUnvan"] = hasta["unvan"],
+                        ["tarafVkno"] = hasta["vkno"],
+                        ["tarafVd"] = hasta["vd"],
+                        ["belgeTarihi"] = Saat.Simdi,
+                        ["belgeDovizi"] = "TL",
+                        ["dovizKuru"] = 1m,
+                        ["fiyatListesiId"] = listeId,
+                        ["kampanyaId"] = kampanyaId,
+                        ["odeyenKurumId"] = istek.OdeyenKurumId,
+                        ["ossPoliceNo"] = istek.PoliceNo ?? "",
+                        ["aciklama"] = "Radyoloji kabul",
+                    };
+
+                    // Kalemsiz acilir: ucret satirlari accession uretildikten SONRA
+                    //   eklenir (satir aciklamasi accession no ile eslesiyor).
+                    var (yeniBelgeId, basvuruUyari) = await belgeDepo.KaydetAsync(
+                        baglanti, islem, basvuru, new List<Dictionary<string, JsonElement>>(),
+                        new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
+                        yazma, iptal);
+                    belgeId = yeniBelgeId;
+                    basvuruAcildi = true;
+                    basvuruUyarilari.AddRange(basvuruUyari);
+                }
+
                 foreach (var t in istek.Tetkikler)
                 {
                     // Modalite HIZMETTEN okunur: tetkikin hangi cihaz ailesine
@@ -527,103 +547,134 @@ public static partial class RadyolojiUclari
             // ÜCRET (913): kabulde başvuru açıldıysa ücret HER ZAMAN eklenir -
             //   ödeyen kurum + ücret girilmeden istem çekim listesine düşmez.
             //   UcretEkle bayrağı geriye dönük uyum için ayrıca kabul edilir.
-            if ((istek.UcretEkle || istek.BasvuruAc) && belgeId is int ucretBelgeId && ucretBelgeId > 0)
+            // AYRI İŞLEM + GERİ ALMA (kod inceleme 30.10.2026 K12): BelgeDeposu.GuncelleAsync
+            //   çağıranın transaction'ında çalışamıyor (kendi bağlantısını açar); ücret adımı bu
+            //   yüzden yukarıdaki işlemden ayrı kalıyor. Başvuru BU İSTEKTE açıldıysa ve ücret
+            //   yazılamazsa istemler ve başvuru silinir - "istemi açtım ama ücreti yok"
+            //   (serbest=0, çekim listesine hiç düşmeyen) yarım kayıt kalmaz.
+            try
             {
-                var (belge, satirlar) = await BelgeGovdesi.OkuAsync(baglanti, ucretBelgeId, iptal);
-
-                var sira = satirlar.Count;
-                // SÖZLEŞME İSKONTOSU (914): radyoloji kalemlerine sözleşmenin
-                //   radyoloji iskontosu uygulanır (baz = özel fiyat listesi).
-                var radIskonto = await baglanti.TekDegerAsync<int>("""
-                    select coalesce(s.rad_iskonto, 0)
-                      from public.belge_basvuru bb
-                      join public.kurum_sozlesme s on s.id = bb.sozlesme_id
-                     where bb.id = @p0
-                    """, null, [ucretBelgeId], iptal);
-                // Kurum payı = karşılama (ödeyen kurum yüzdesi) - kurum öder.
-                var radKarsilama = await baglanti.TekDegerAsync<decimal>("""
-                    select coalesce(s.varsayilan_karsilama, 0)
-                      from public.belge_basvuru bb
-                      join public.kurum_sozlesme s on s.id = bb.sozlesme_id
-                     where bb.id = @p0
-                    """, null, [ucretBelgeId], iptal);
-                for (var i = 0; i < istek.Tetkikler.Count; i++)
+                if ((istek.UcretEkle || istek.BasvuruAc) && belgeId is int ucretBelgeId && ucretBelgeId > 0)
                 {
-                    var t = istek.Tetkikler[i];
-                    // FIYAT: once belgenin KENDI listesinden (basvuruya sozlesme
-                    //   listesi islenmis olabilir), yoksa carinin kuralindan.
-                    //   fn_belge_kalem_fiyati TABLO donduruyor - FROM'da
-                    //   cagrilmali, COALESCE icinde kullanilamaz.
-                    var fiyat = await baglanti.TekDegerAsync<decimal>("""
-                        select coalesce(
-                            (select fs.fiyat
-                               from public.fiyat_listesi_satir fs
-                               join public.belge b on b.id = @p2
-                              where fs.liste_id = b.fiyat_listesi_id
-                                and fs.hizmet_id = @p1
-                              limit 1),
-                            (select f.fiyat
-                               from public.fn_belge_kalem_fiyati(
-                                        @p0, 2::smallint, null, @p1, current_date) f
-                              limit 1),
-                            0)
-                        """, null, [istek.HastaId, t.HizmetId, ucretBelgeId], iptal);
-                    // KAMPANYA INDIRIMI: baz fiyat listeden, indirim kampanyadan.
-                    //   Ekranda gosterilen tutar (fiyat/kalem ucu) ayni zinciri
-                    //   kullaniyor - ikisi sapmamali, hastaya soylenen rakam
-                    //   faturaya birebir gecmeli.
-                    var belgeKampanya = await baglanti.TekDegerAsync<int?>(
-                        "select kampanya_id from public.belge where id = @p0",
-                        null, [ucretBelgeId], iptal);
-                    if (belgeKampanya is int kid && kid > 0 && fiyat > 0)
-                        fiyat = await baglanti.TekDegerAsync<decimal>("""
-                            select coalesce(f.fiyat, @p3)
-                              from public.fn_kampanya_fiyat(@p0, null, @p1, @p2) f
-                             limit 1
-                            """, null, [kid, t.HizmetId, fiyat, fiyat], iptal);
+                    var (belge, satirlar) = await BelgeGovdesi.OkuAsync(baglanti, ucretBelgeId, iptal);
 
-                    var kdv = await baglanti.TekDegerAsync<int>(
-                        "select coalesce(kdv, 0) from public.hizmet where id = @p0",
-                        null, [t.HizmetId], iptal);
-
-                    satirlar.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>
+                    var sira = satirlar.Count;
+                    // SÖZLEŞME İSKONTOSU (914): radyoloji kalemlerine sözleşmenin
+                    //   radyoloji iskontosu uygulanır (baz = özel fiyat listesi).
+                    var radIskonto = await baglanti.TekDegerAsync<int>("""
+                        select coalesce(s.rad_iskonto, 0)
+                          from public.belge_basvuru bb
+                          join public.kurum_sozlesme s on s.id = bb.sozlesme_id
+                         where bb.id = @p0
+                        """, null, [ucretBelgeId], iptal);
+                    // Kurum payı = karşılama (ödeyen kurum yüzdesi) - kurum öder.
+                    var radKarsilama = await baglanti.TekDegerAsync<decimal>("""
+                        select coalesce(s.varsayilan_karsilama, 0)
+                          from public.belge_basvuru bb
+                          join public.kurum_sozlesme s on s.id = bb.sozlesme_id
+                         where bb.id = @p0
+                        """, null, [ucretBelgeId], iptal);
+                    for (var i = 0; i < istek.Tetkikler.Count; i++)
                     {
-                        ["tur"] = 2,
-                        ["hizmetId"] = t.HizmetId,
-                        ["miktar"] = 1m,
-                        ["birimFiyat"] = fiyat,
-                        ["iskonto"] = (decimal)radIskonto,
-                        // Sözleşme iskontosu ÖN-ONAYLI: eşik onayına takılmasın.
-                        ["iskontoKilit"] = radIskonto > 0 ? 1 : 0,
-                        ["pay"] = (int)radKarsilama,
-                        ["kdv"] = kdv,
-                        ["dovizCinsi"] = "TL",
-                        ["aciklama"] = accessionlar[i],
-                        ["sira"] = ++sira,
-                    }));
+                        var t = istek.Tetkikler[i];
+                        // FIYAT: once belgenin KENDI listesinden (basvuruya sozlesme
+                        //   listesi islenmis olabilir), yoksa carinin kuralindan.
+                        //   fn_belge_kalem_fiyati TABLO donduruyor - FROM'da
+                        //   cagrilmali, COALESCE icinde kullanilamaz.
+                        var fiyat = await baglanti.TekDegerAsync<decimal>("""
+                            select coalesce(
+                                (select fs.fiyat
+                                   from public.fiyat_listesi_satir fs
+                                   join public.belge b on b.id = @p2
+                                  where fs.liste_id = b.fiyat_listesi_id
+                                    and fs.hizmet_id = @p1
+                                  limit 1),
+                                (select f.fiyat
+                                   from public.fn_belge_kalem_fiyati(
+                                            @p0, 2::smallint, null, @p1, current_date) f
+                                  limit 1),
+                                0)
+                            """, null, [istek.HastaId, t.HizmetId, ucretBelgeId], iptal);
+                        // KAMPANYA INDIRIMI: baz fiyat listeden, indirim kampanyadan.
+                        //   Ekranda gosterilen tutar (fiyat/kalem ucu) ayni zinciri
+                        //   kullaniyor - ikisi sapmamali, hastaya soylenen rakam
+                        //   faturaya birebir gecmeli.
+                        var belgeKampanya = await baglanti.TekDegerAsync<int?>(
+                            "select kampanya_id from public.belge where id = @p0",
+                            null, [ucretBelgeId], iptal);
+                        if (belgeKampanya is int kid && kid > 0 && fiyat > 0)
+                            fiyat = await baglanti.TekDegerAsync<decimal>("""
+                                select coalesce(f.fiyat, @p3)
+                                  from public.fn_kampanya_fiyat(@p0, null, @p1, @p2) f
+                                 limit 1
+                                """, null, [kid, t.HizmetId, fiyat, fiyat], iptal);
+
+                        var kdv = await baglanti.TekDegerAsync<int>(
+                            "select coalesce(kdv, 0) from public.hizmet where id = @p0",
+                            null, [t.HizmetId], iptal);
+
+                        satirlar.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>
+                        {
+                            ["tur"] = 2,
+                            ["hizmetId"] = t.HizmetId,
+                            ["miktar"] = 1m,
+                            ["birimFiyat"] = fiyat,
+                            ["iskonto"] = (decimal)radIskonto,
+                            // Sözleşme iskontosu ÖN-ONAYLI: eşik onayına takılmasın.
+                            ["iskontoKilit"] = radIskonto > 0 ? 1 : 0,
+                            ["pay"] = (int)radKarsilama,
+                            ["kdv"] = kdv,
+                            ["dovizCinsi"] = "TL",
+                            ["aciklama"] = accessionlar[i],
+                            ["sira"] = ++sira,
+                        }));
+                    }
+
+                    var (_, uy) = await belgeDepo.GuncelleAsync(ucretBelgeId, belge, satirlar,
+                        new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
+                        new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
+                    uyarilar.AddRange(uy);
+
+                    // Üretilen satırlar istemlere BAĞLANIR: sonra "bu tetkik
+                    //   faturalandı mı" sorusu tek join ile cevaplanır.
+                    await baglanti.CalistirAsync("""
+                        update public.radyoloji_istem i
+                           set belge_satir_id = s.id
+                          from public.belge_satir s
+                         where s.belge_id = @p0 and s.aciklama = i.accession_no
+                           and i.belge_satir_id is null and i.id = any(@p1)
+                        """, null, [ucretBelgeId, idler.ToArray()], iptal);
+
+                    // KARŞILAMA DAĞILIMI (915): ödeyen kurum payını üret - "Kurumu
+                    //   Öder" türünde tutar kurum kovasına, hasta payı 0.
+                    await baglanti.CalistirAsync(
+                        "select public.fn_belge_satir_dagilim_tazele(id) "
+                      + "from public.belge_satir where belge_id = @p0 and hizmet_id is not null",
+                        null, [ucretBelgeId], iptal);
                 }
-
-                var (_, uy) = await belgeDepo.GuncelleAsync(ucretBelgeId, belge, satirlar,
-                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
-                    new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
-                uyarilar.AddRange(uy);
-
-                // Üretilen satırlar istemlere BAĞLANIR: sonra "bu tetkik
-                //   faturalandı mı" sorusu tek join ile cevaplanır.
-                await baglanti.CalistirAsync("""
-                    update public.radyoloji_istem i
-                       set belge_satir_id = s.id
-                      from public.belge_satir s
-                     where s.belge_id = @p0 and s.aciklama = i.accession_no
-                       and i.belge_satir_id is null and i.id = any(@p1)
-                    """, null, [ucretBelgeId, idler.ToArray()], iptal);
-
-                // KARŞILAMA DAĞILIMI (915): ödeyen kurum payını üret - "Kurumu
-                //   Öder" türünde tutar kurum kovasına, hasta payı 0.
-                await baglanti.CalistirAsync(
-                    "select public.fn_belge_satir_dagilim_tazele(id) "
-                  + "from public.belge_satir where belge_id = @p0 and hizmet_id is not null",
-                    null, [ucretBelgeId], iptal);
+            }
+            catch (Exception) when (basvuruAcildi && belgeId is int telafiBelgeId)
+            {
+                // Geri alma iptal edilmiş istekte de tamamlanmalı - CancellationToken.None.
+                try
+                {
+                    await using (var telafi = await baglanti.BeginTransactionAsync(CancellationToken.None))
+                    {
+                        foreach (var silinecek in idler)
+                            await baglanti.CalistirAsync("select public.fn_radyoloji_istem_sil(@p0)",
+                                telafi, [silinecek], CancellationToken.None);
+                        await telafi.CommitAsync(CancellationToken.None);
+                    }
+                    await belgeDepo.SilAsync(telafiBelgeId, yazma, CancellationToken.None);
+                }
+                catch (Exception telafiHatasi)
+                {
+                    ctx.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("radyoloji")
+                       .LogError(telafiHatasi,
+                           "Ücreti yazılamayan radyoloji kabulü geri alınamadı (başvuru {Belge}, istemler {Idler})",
+                           telafiBelgeId, string.Join(",", idler));
+                }
+                throw;
             }
 
             // Kabul ekrani kaydettikten sonra PROTOKOL numarasini ve tutari

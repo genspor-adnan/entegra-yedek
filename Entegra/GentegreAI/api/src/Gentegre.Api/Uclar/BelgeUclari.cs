@@ -28,13 +28,13 @@ public static class BelgeUclari
         // POST /api/belge - yeni belge (sozlesme §4)
         grup.MapPost("/", async (
             BelgeYazmaIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Ekle);
 
             var belge = BaslikDegerleri(istek.Belge);
-            await BelgeYazmaIsteAsync(baglam, veri, null, belge, Islem.Ekle, iptal);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, null, belge, Islem.Ekle, iptal);
             BelgeTarihiSaatle(belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
@@ -268,13 +268,13 @@ public static class BelgeUclari
         //   depoda: e-Belge gonderilmis / faturalanmis / duzenleme suresi gecmis.
         grup.MapPut("/{id:int}", async (
             int id, BelgeYazmaIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
 
             var belge = BaslikDegerleri(istek.Belge);
-            await BelgeYazmaIsteAsync(baglam, veri, id, belge, Islem.Degistir, iptal);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, belge, Islem.Degistir, iptal);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
             UygunlukZorlamaYetkisi(baglam, satirlar);
             LimitKontroluIste(baglam, istek);
@@ -353,14 +353,17 @@ public static class BelgeUclari
         //   liste fiyati yerine ONAYLANAN gecer.
         grup.MapPost("/{id:int}/dagit", async (
             int id, DagitIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): şube / tür kapısı - PUT ile aynı kural.
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
 
-            var satirlar = await veri.ListeAsync(
+            await using var baglanti = await veri.AcAsync(iptal);
+            var satirlar = await baglanti.ListeAsync(
                 "select id from public.belge_satir where belge_id = @p0 order by sira, id",
-                [id], o => o.GetInt32(0), iptal);
+                null, [id], o => o.GetInt32(0), iptal);
             if (satirlar.Count == 0)
                 throw GentegreHatasi.IsKurali("Belgede satır yok.");
 
@@ -369,27 +372,32 @@ public static class BelgeUclari
             var prov = istek?.SgkProvizyon?
                 .Where(x => x.SatirId > 0).ToDictionary(x => x.SatirId, x => x) ?? [];
 
+            // TEK TRANSACTION (K36): satır dağılımları + provizyon no + dip
+            //   toplam ya hep yazılır ya hiçbiri - ortada kesilen istek yarı
+            //   tazelenmiş belge bırakmasın.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
             foreach (var satirId in satirlar)
             {
                 prov.TryGetValue(satirId, out var p);
-                await veri.CalistirAsync(
+                await baglanti.CalistirAsync(
                     // Katki (6. parametre) BURADA GECILMEZ: provizyon
                     //   tazelemesi hasta katilim payini degistirmez - elle
                     //   girilmisse bayragiyla korunur (586).
                     "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2, @p3, @p4, null)",
-                    [satirId, p?.Tutar, istek?.OssProvizyon,
-                     p?.SgkListe, p?.HuvListe], iptal);
+                    islem, [satirId, p?.Tutar, istek?.OssProvizyon,
+                            p?.SgkListe, p?.HuvListe], iptal);
                 if (p?.ProvizyonNo is { Length: > 0 } no)
-                    await veri.CalistirAsync(
+                    await baglanti.CalistirAsync(
                         "update public.belge_satir_dagilim " +
                         "   set sgk_provizyon_no = @p1, sgk_provizyon_durum = 1, " +
                         "       degistirme_tarihi = now() " +
-                        " where belge_satir_id = @p0", [satirId, no], iptal);
+                        " where belge_satir_id = @p0", islem, [satirId, no], iptal);
             }
 
             // Rota 3/5'te satir tutari kovalardan yeniden dogar: belge dip
             //   toplami da tazelenmeli, yoksa baslik eski tutari gosterir.
-            await veri.CalistirAsync("select public.fn_belge_diptoplam(@p0)", [id], iptal);
+            await baglanti.CalistirAsync("select public.fn_belge_diptoplam(@p0)", islem, [id], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, satir = satirlar.Count,
                 mesaj = $"{satirlar.Count} satırın ödeme dağılımı yenilendi.",
@@ -502,12 +510,14 @@ public static class BelgeUclari
         // POST /api/belge/{id}/rezerve - siparis satirlarini depoda ayir (142)
         grup.MapPost("/{id:int}/rezerve", async (
             int id, RezerveIstegi? istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // Rezervasyon stok/cari YAZMAZ, yalniz "soz verildi" isareti koyar:
             //   belgeyi degistirme yetkisi yeterli.
             baglam.YetkiIste("belge", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): şube / tür kapısı - PUT ile aynı kural.
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
 
             var ac = istek?.Ac ?? true;
             var adet = await depo.RezerveAsync(id, ac,
@@ -529,11 +539,11 @@ public static class BelgeUclari
         //   arayuz ve uc AYNI cevabi alsin diye.
         grup.MapDelete("/{id:int}", async (
             int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Sil);
-            await BelgeYazmaIsteAsync(baglam, veri, id, null, Islem.Sil, iptal);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Sil, iptal);
 
             var mesaj = await depo.SilAsync(id,
                 baglam.Yazma, iptal);
@@ -543,12 +553,14 @@ public static class BelgeUclari
         // POST /api/belge/{id}/termin - satirlarin teslim tarihini guncelle (140)
         grup.MapPost("/{id:int}/termin", async (
             int id, TerminIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // Termin degisikligi tutar/stok/cari etkilemez: belgeyi DEGISTIRME
             //   yetkisi yeterli, ayri bir aksiyon istenmiyor.
             baglam.YetkiIste("belge", Islem.Degistir);
+            // KAYIT KAPSAMI (K26): şube / tür kapısı - PUT ile aynı kural.
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
 
             var secilen = (istek?.Satirlar ?? new List<TerminSatiri>())
                 .Where(s => s.SatirId > 0)
@@ -964,11 +976,16 @@ public static class BelgeUclari
     /// kısıt dışındaysa "bulunamadı" (okumayla aynı cevap).
     /// </summary>
     private static async Task BelgeYazmaIsteAsync(IstekBaglami baglam, VeriKaynagi veri,
-        int? id, IDictionary<string, object?>? yeni, Islem islem, CancellationToken iptal)
+        KayitErisimi erisim, int? id, IDictionary<string, object?>? yeni, Islem islem,
+        CancellationToken iptal)
     {
         int[]? mevcut = null;
         if (id is not null)
         {
+            // KAYIT KAPSAMI (K26): kayıtlı belge aktif şubenin / kapsamın
+            //   belgesi olmalı - liste ile AYNI kural (katalog `belge`
+            //   kaynağı + tek kimlik). Başka şubenin belgesi "bulunamadı".
+            await erisim.IsteAsync(baglam, "belge", id.Value, "Belge bulunamadı.", iptal);
             mevcut = await veri.TekAsync("select tur, tipi from public.belge where id = @p0",
                 [id.Value], r => new[] { (int)r.GetInt16(0), (int)r.GetInt16(1) }, iptal);
             if (mevcut is null || !TurIzinli(baglam, mevcut[0], mevcut[1], islem))

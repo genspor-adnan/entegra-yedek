@@ -48,6 +48,9 @@ public sealed class GozCihazServisi
                                            CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
+        // TEK İŞLEYİCİ (kod inceleme 30.10.2026 K37): zamanlı iş + ekran aynı cihaz mesajını iki ölçüm yapmasın.
+        await using var kilit = await DanismaKilidi.DeneAsync(baglanti, "goz_cihaz_mesaj", iptal);
+        if (kilit is null) return new Sonuc(0, 0, 0, 0, "Cihaz mesajları başka bir işleyici tarafından işleniyor.");
 
         var mesajlar = await baglanti.ListeAsync("""
             select m.id, m.cihaz_id, m.zaman, m.hasta_eslesme, m.ham,

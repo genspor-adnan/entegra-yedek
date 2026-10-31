@@ -30,8 +30,11 @@ public static class CocukIzlemUclari
 
     public static void CocukIzlemUclariniEkle(this IEndpointRouteBuilder yol)
     {
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): /hasta/{id} hasta, /{id}/iptal izlem kaydı liste ile
+        //   aynı şube / kapsam kuralından geçer - kapsam dışı 404. Gövdedeki hasta POST içinde denetlenir.
         var grup = yol.MapGroup("/api/cocuk-izlem").WithTags("Çocuk İzlem")
-                      .RequireAuthorization();
+                      .RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.CocukIzlem());
 
         // GET /api/cocuk-izlem/hasta/{id} - çocuğun izlem geçmişi + persentiller.
         grup.MapGet("/hasta/{id:int}", async (
@@ -73,7 +76,7 @@ public static class CocukIzlemUclari
 
         // POST /api/cocuk-izlem - izlem kaydı + 209 paketi.
         grup.MapPost("/", async (
-            IzlemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            IzlemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
             EnabizTetikleyici tetik, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -82,6 +85,10 @@ public static class CocukIzlemUclari
             if (istek.KacinciIzlem <= 0)
                 throw GentegreHatasi.Dogrulama("İzlem sırası gerekli.",
                     [new("kacinciIzlem", "Kaçıncı izlem olduğunu seçin.")]);
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): hasta GÖVDEDEN gelir - kapsam dışı hastaya izlem
+            //   yazılamaz; olmayan hastayla aynı 404.
+            await erisim.IsteAsync(baglam, "hasta", istek.TarafId, "Hasta bulunamadı.", iptal);
 
             int id;
             try

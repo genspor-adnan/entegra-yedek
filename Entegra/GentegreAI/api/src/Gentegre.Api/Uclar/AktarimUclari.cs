@@ -178,12 +178,13 @@ public static class AktarimUclari
         // Tek çağrı: özet kutuları + adım tablosu + hata kuyruğu + son paketler.
         grup.MapGet("/durum", async (VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
-            (await cozucu.CozAsync(ctx, iptal)).YetkiIste(EkranKodu, Islem.Gor);
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste(EkranKodu, Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var json = await b.TekDegerAsync<string>("""
                 with bugun as (
                     select p.* from public.aktarim_paket p
-                     where p.alinma >= date_trunc('day', now() at time zone 'Europe/Istanbul') at time zone 'Europe/Istanbul')
+                     where p.alinma >= date_trunc('day', now() at time zone public.fn_sube_zaman_dilimi(@p0::int)) at time zone public.fn_sube_zaman_dilimi(@p0::int))
                 select json_build_object(
                   'veriKaynagi', (select k.veri_kaynagi from public.kurum_profil k where k.sube_id = 0),
                   'hareketBaslangic', (select deger from public.aktarim_ayar where anahtar = 'hareket_baslangic'),
@@ -229,7 +230,7 @@ public static class AktarimUclari
                                              and v ~ '^[0-9]+$') as yazilan
                                     from public.aktarim_paket p order by p.alinma desc limit 50) x)
                 )::text
-                """, null, [], iptal);
+                """, null, [baglam.SubeId], iptal);
             return Results.Content(json!, "application/json; charset=utf-8");
         });
 

@@ -110,6 +110,9 @@ public sealed class EnabizMesajServisi
     public async Task<Sonuc> CalistirAsync(int adet, long? mesajId, CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
+        // TEK İŞLEYİCİ (kod inceleme 30.10.2026 K37): zamanlı iş + ekran aynı mesajı iki paket yapmasın.
+        await using var kilit = await DanismaKilidi.DeneAsync(baglanti, "enabiz_mesaj", iptal);
+        if (kilit is null) return new Sonuc(0, 0, 0, "Mesaj kuyruğu başka bir işleyici tarafından işleniyor.");
         var kuyruk = await baglanti.ListeAsync("""
             select m.id, m.ekleyen,
                    coalesce((select bb.sys_takip_no from public.belge_basvuru bb

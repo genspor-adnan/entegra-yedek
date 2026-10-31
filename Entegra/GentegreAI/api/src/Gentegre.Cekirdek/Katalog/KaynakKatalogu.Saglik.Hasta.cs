@@ -17,6 +17,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi Recete() => new(
         Ad: "recete",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "r.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.recete r "
               + "  join public.taraf h on h.id = r.hasta_id "
@@ -67,6 +69,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi ReceteSatir() => new(
         Ad: "recete-satir",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "r.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.recete_satir s "
               + "  join public.recete r on r.id = s.recete_id",
@@ -114,6 +118,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi HastaAlerji() => new(
         Ad: "hasta-alerji",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "a.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.hasta_alerji a join public.taraf h on h.id = a.hasta_id",
         VarsayilanSirala: "a.siddet desc, a.id desc",
@@ -153,6 +159,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi HastaIlac() => new(
         Ad: "hasta-ilac",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "i.hasta_id",
         YetkiKodu: "muayene",
         Kaynak: "public.hasta_ilac i join public.taraf h on h.id = i.hasta_id",
         VarsayilanSirala: "i.aktif desc, i.baslangic desc nulls last, i.id desc",

@@ -25,6 +25,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi Yatan() => new(
         Ad: "yatan",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "y.hasta_id",
         YetkiKodu: "yatan",
         Kaynak: "public.yatis y "
               + "join public.taraf t on t.id = y.hasta_id "
@@ -169,6 +171,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi YatisOrder() => new(
         Ad: "yatis-order",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "(select yt.hasta_id from public.yatis yt where yt.id = od.yatis_id)",
         YetkiKodu: "yatan.order",
         Kaynak: "public.yatis_order od "
               + "join public.yatis y on y.id = od.yatis_id "
@@ -270,6 +274,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi OrderUygulama() => new(
         Ad: "order-uygulama",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "(select yt.hasta_id from public.yatis_order o2 join public.yatis yt on yt.id = o2.yatis_id where o2.id = u.order_id)",
         YetkiKodu: "yatan.order",
         Kaynak: "public.order_uygulama u "
               + "join public.yatis_order od on od.id = u.order_id "
@@ -368,6 +374,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi YatisIzlem() => new(
         Ad: "yatis-izlem",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "y.hasta_id",
         YetkiKodu: "yatan.izlem",
         Kaynak: "public.yatis_izlem i "
               + "join public.yatis y on y.id = i.yatis_id "
@@ -433,6 +441,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi YatisTahakkuk() => new(
         Ad: "yatis-tahakkuk",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "(select yt.hasta_id from public.yatis yt where yt.id = th.yatis_id)",
         YetkiKodu: "yatan",
         Kaynak: "public.yatis_tahakkuk th "
               + "join public.yatis y on y.id = th.yatis_id "

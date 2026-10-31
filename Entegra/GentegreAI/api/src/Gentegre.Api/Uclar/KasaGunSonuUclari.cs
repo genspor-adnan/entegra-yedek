@@ -188,13 +188,13 @@ public static class KasaGunSonuUclari
                    coalesce(e.tur_adi, ''), coalesce(e.yerel_borc, e.borc, 0), coalesce(e.yerel_alacak, e.alacak, 0), e.islem_tarihi,
                    coalesce(e.belge_no, ''), coalesce(nullif(e.aciklama, ''), e.taraf_unvan, ''),
                    coalesce(public.fn_taraf_ad(u.unvan, u.ad, u.soyad)::varchar(120), ''),
-                   (e.islem_tarihi at time zone 'Europe/Istanbul')::date = @p0::date
+                   (e.islem_tarihi at time zone public.fn_sube_zaman_dilimi(@p1))::date = @p0::date
               from public.v_mali_hareket_ek e
               left join public.kasa_islem ki on ki.id = e.kasa_islem_id
               left join public.taraf u on u.id = ki.ekleyen
              where e.hesap_id is not null and e.hesap_ekstre = 1 and e.islem_durum = 2
                and e.hesap_turu in ('K', 'P', 'B')
-               and (e.islem_tarihi at time zone 'Europe/Istanbul')::date <= @p0::date
+               and (e.islem_tarihi at time zone public.fn_sube_zaman_dilimi(@p1))::date <= @p0::date
                and (@p1 = 0 or coalesce(e.sube_id, 0) in (0, @p1))
             """, null, [tarih, sube], o => new Hareket(o.GetInt32(0), o.GetInt32(1), o.GetString(2), o.GetString(3), o.GetInt16(4),
                 o.GetString(5), o.GetDecimal(6), o.GetDecimal(7), o.GetDateTime(8), o.GetString(9), o.GetString(10), o.GetString(11),
@@ -209,8 +209,8 @@ public static class KasaGunSonuUclari
               left join lateral (
                   select x.* from public.banko_oturum x
                    where x.banko_id = bk.id
-                     and (x.acilis_ts at time zone 'Europe/Istanbul')::date <= @p0::date
-                     and (x.durum in (1, 2, 3) or (x.kapanis_ts at time zone 'Europe/Istanbul')::date = @p0::date)
+                     and (x.acilis_ts at time zone public.fn_sube_zaman_dilimi(@p1))::date <= @p0::date
+                     and (x.durum in (1, 2, 3) or (x.kapanis_ts at time zone public.fn_sube_zaman_dilimi(@p1))::date = @p0::date)
                    order by (x.durum in (1, 2, 3)) desc, x.kapanis_ts desc nulls first limit 1) o on true
               left join public.taraf u on u.id = o.kullanici_id
              where bk.hesap_id is not null and coalesce(bk.aktif, 1) = 1
@@ -235,7 +235,7 @@ public static class KasaGunSonuUclari
               join public.banko_oturum o on o.id = op.oturum_id
               join public.banko_pos bp on bp.id = op.banko_pos_id
              where bp.hesap_id is not null and op.cihaz_toplam is not null
-               and (o.kapanis_ts at time zone 'Europe/Istanbul')::date = @p0::date
+               and (o.kapanis_ts at time zone public.fn_sube_zaman_dilimi(@p1))::date = @p0::date
                and (@p1 = 0 or coalesce(o.sube_id, 0) in (0, @p1))
              group by 1
             """, null, [tarih, sube], o => (hesap: o.GetInt32(0), tutar: o.GetDecimal(1)), iptal)).ToDictionary(x => x.hesap, x => x.tutar);
@@ -286,9 +286,9 @@ public static class KasaGunSonuUclari
                 sorumlu = bo.sorumlu;
                 if (bo.oturum == 0) { durum = "Oturum yok"; sayilan = gun.Count == 0 ? beklenen : null; }
                 else if (bo.durum is 1 or 2 or 3) durum = bo.durum == 3 ? "Kapanış onayı bekliyor" : "Oturum açık";
-                else { durum = $"Kapandı {bo.kapanis?.ToLocalTime():HH:mm}"; sayilan = bo.birakilan; }
+                else { durum = bo.kapanis is { } kp ? $"Kapandı {Saat.Yerel(kp):HH:mm}" : "Kapandı"; sayilan = bo.birakilan; }
             }
-            else if (sayimlar.TryGetValue(id, out var s)) { sayilan = s.sayilan; durum = $"Sayıldı {s.zaman.ToLocalTime():HH:mm}"; sorumlu = s.sayan; }
+            else if (sayimlar.TryGetValue(id, out var s)) { sayilan = s.sayilan; durum = $"Sayıldı {Saat.Yerel(s.zaman):HH:mm}"; sorumlu = s.sayan; }
             else durum = "Sayım girilmedi";
             var fark = sayilan is { } sy ? sy - beklenen : (decimal?)null;
             var kirilim = gun.GroupBy(h => h.TurAdi).Select(g => new { ad = g.Key, adet = g.Count(), tutar = g.Sum(h => h.Borc - h.Alacak) }).ToList();

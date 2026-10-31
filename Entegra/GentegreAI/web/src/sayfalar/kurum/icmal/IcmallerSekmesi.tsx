@@ -86,10 +86,18 @@ export function IcmallerSekmesi({ seciliKurumlar, tazele, kurumlar, varsayilanKu
     const toplam = faturalanacak.reduce((s, k) => s + k.kurumPayi, 0);
     if (!(await onay(`${faturalanacak.length} icmal faturalansın mı? Her icmal için kuruma TEK fatura kesilir `
           + `(toplam ${paraYaz(toplam)}), satırların kurum payı kapanır.`))) return;
+    // KISMİ BAŞARI (kod inceleme 30.10.2026 K92): biri düşerse öbürleri kesilmiş kalır - kaçı kesildi,
+    //   hangileri düştü söylenir; liste her hâlde tazelenir (eskiden ilk hatada sessizce çıkılıyordu).
     let kesilen = 0;
-    for (const k of faturalanacak) { await api.icmalFaturala(k.id); kesilen++ }
-    mesaj(`${kesilen} fatura kesildi.`);
+    const dusen: string[] = [];
+    for (const k of faturalanacak) {
+      try { await api.icmalFaturala(k.id); kesilen++ }
+      catch (h) { dusen.push(`${k.kurum || k.id}: ${hataMetni(h)}`) }
+    }
     setIsaretli([]); setYerel(y => y + 1); degisti();
+    mesaj(dusen.length === 0
+      ? `${kesilen} fatura kesildi.`
+      : `${kesilen} fatura kesildi, ${dusen.length} icmal kesilemedi:\n${dusen.join('\n')}`);
   });
 
   const cipler: [Cip, string][] = [['hazirlaniyor', 'Hazırlanıyor'], ['faturalandi', 'Faturalandı'], ['tahsil', 'Tahsil edildi'], ['hepsi', 'Tümü']];

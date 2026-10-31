@@ -74,18 +74,22 @@ public static class FiyatListesiUclari
             if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
                 throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
 
+            // URETIM + LOG TEK TRANSACTION (kod inceleme 30.10.2026 K33): eskiden fonksiyon autocommit
+            //   calisiyor, log ayri yaziliyordu - log yazilamazsa uretim yine kalirdi.
+            await using var tx = await baglanti.BeginTransactionAsync(iptal);
             await using var komut = baglanti.Komut(
                 "select eklenen, guncellenen, korunan, fiyatsiz from public.fn_fiyat_listesi_uret(@p0, @p1, @p2, @p3)",
-                null, id, baglam.KullaniciId, istek?.Stok ?? true, istek?.Hizmet ?? true);
+                tx, id, baglam.KullaniciId, istek?.Stok ?? true, istek?.Hizmet ?? true);
 
-            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
-            if (!await okuyucu.ReadAsync(iptal))
-                throw GentegreHatasi.IsKurali("Liste üretilemedi.");
-
-            var sonuc = new UretimSonucu(
-                okuyucu.GetInt32(0), okuyucu.GetInt32(1), okuyucu.GetInt32(2), okuyucu.GetInt32(3),
-                "");
-            await okuyucu.CloseAsync();
+            UretimSonucu sonuc;
+            await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
+            {
+                if (!await okuyucu.ReadAsync(iptal))
+                    throw GentegreHatasi.IsKurali("Liste üretilemedi.");
+                sonuc = new UretimSonucu(
+                    okuyucu.GetInt32(0), okuyucu.GetInt32(1), okuyucu.GetInt32(2), okuyucu.GetInt32(3),
+                    "");
+            }
 
             // Fiyati cozulemeyen kalem sayisi SESSIZ GECILMEZ: kullanici "liste
             //   hazir" sanip eksik listeyle satisa cikmasin.
@@ -93,9 +97,10 @@ public static class FiyatListesiUclari
             if (sonuc.Korunan > 0) mesaj += $" {sonuc.Korunan} manuel satır korundu.";
             if (sonuc.Fiyatsiz > 0) mesaj += $" {sonuc.Fiyatsiz} kalem fiyatı çözülemediği için atlandı.";
 
-            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, LogTabloFiyatListesi, id,
+            await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloFiyatListesi, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string> { ["uretim"] = mesaj }, iptal: iptal);
+            await tx.CommitAsync(iptal);
 
             return Results.Ok(sonuc with { Mesaj = mesaj });
         }).WithTags("FiyatListesi").RequireAuthorization();
@@ -283,6 +288,8 @@ public static class FiyatListesiUclari
                 : istek.Deger;
             if (islem == "fiyat-yuzde" && deger < 0) deger = 0m;
 
+            // GUNCELLEME + LOG TEK TRANSACTION (kod inceleme 30.10.2026 K33).
+            await using var tx = await baglanti.BeginTransactionAsync(iptal);
             int etkilenen;
             if (kapsam == "kategori")
             {
@@ -301,7 +308,7 @@ public static class FiyatListesiUclari
                     + "        (select h.kategori from public.hizmet h where h.id = s.hizmet_id), "
                     + "        (select t.kategori from public.stok   t where t.id = s.stok_id)) "
                     + "       in (select id from dal)",
-                    null, id, deger, istek.KategoriId.Value);
+                    tx, id, deger, istek.KategoriId.Value);
                 etkilenen = await komut.ExecuteNonQueryAsync(iptal);
             }
             else if (kapsam == "secili")
@@ -312,14 +319,14 @@ public static class FiyatListesiUclari
                 await using var komut = baglanti.Komut(
                     "update public.fiyat_listesi_satir s set " + atama
                     + " where s.liste_id = @p0 and s.id = any(@p2)",
-                    null, id, deger, idler);
+                    tx, id, deger, idler);
                 etkilenen = await komut.ExecuteNonQueryAsync(iptal);
             }
             else
             {
                 await using var komut = baglanti.Komut(
                     "update public.fiyat_listesi_satir s set " + atama
-                    + " where s.liste_id = @p0", null, id, deger);
+                    + " where s.liste_id = @p0", tx, id, deger);
                 etkilenen = await komut.ExecuteNonQueryAsync(iptal);
             }
 
@@ -344,9 +351,11 @@ public static class FiyatListesiUclari
             // TOPLU FIYAT DEGISIMI LOGLANIR: tek satirlik duzeltmeden farkli
             //   olarak binlerce satiri birden degistiriyor - "bu listeye ne
             //   oldu" sorusu sonradan cevaplanabilmeli.
-            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, LogTabloFiyatListesi, id,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new Dictionary<string, string> { ["toplu"] = mesaj }, iptal: iptal);
+            if (etkilenen > 0)
+                await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloFiyatListesi, id,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new Dictionary<string, string> { ["toplu"] = mesaj }, iptal: iptal);
+            await tx.CommitAsync(iptal);
 
             return Results.Ok(new
             {
@@ -687,8 +696,18 @@ public static class FiyatListesiUclari
             await using (var akis = dosya.OpenReadStream())
                 sayfa = ExcelOkuma.Oku(akis);
 
+            // LOG SATIRLARLA AYNI TRANSACTION (kod inceleme 30.10.2026 K33): eskiden upsert commit'inden
+            //   sonra autocommit yazılıyordu; tablo_id de satır tablosu (924) yerine LİSTENİN kendisi (923) -
+            //   kayit_id liste kimliği.
             var sonuc = await FiyatListesiIceriAl.CalistirAsync(
-                baglanti, id, liste.Value.KdvDahil, sayfa, baglam.KullaniciId, iptal);
+                baglanti, id, liste.Value.KdvDahil, sayfa, baglam.KullaniciId, iptal,
+                async (tx, s) =>
+                {
+                    var m = $"\"{liste.Value.Ad}\": {s.Eklenen} yeni, {s.Guncellenen} güncellenen satır ({dosya.FileName}).";
+                    await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloFiyatListesi, id,
+                        baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                        new Dictionary<string, string> { ["iceriAl"] = m }, iptal: iptal);
+                });
 
             if (sonuc.ToplamHata > 0)
             {
@@ -711,9 +730,6 @@ public static class FiyatListesiUclari
 
             var mesaj = $"\"{liste.Value.Ad}\": {sonuc.Eklenen} yeni, {sonuc.Guncellenen} güncellenen satır " +
                         $"({dosya.FileName}).";
-            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, 924, id,
-                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new Dictionary<string, string> { ["iceriAl"] = mesaj }, iptal: iptal);
 
             return Results.Ok(new { sonuc.Eklenen, sonuc.Guncellenen, sonuc.Toplam, mesaj });
         }).WithTags("FiyatListesi").RequireAuthorization();

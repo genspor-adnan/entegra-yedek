@@ -239,6 +239,13 @@ public static partial class AvansUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): durum kontrolü, avans
+            //   güncellemesi ve kasa işlemi TEK transaction. Satır `for update`
+            //   ile kilitlenir; iki "öde" isteği aynı anda gelirse ikincisi
+            //   kilidi beklerken birincisi durumu 4'e çeker, ikincisi 422 alır -
+            //   para bir kez çıkar, kasa işlemi bir kez yazılır.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
             var a = await baglanti.TekAsync("""
                 select a.taraf_id as "tarafId", a.tutar, a.durum, a.taksit_sayisi as "taksit",
                        a.ilk_donem as "ilkDonem", a.odeme_islem_id as "odemeId",
@@ -246,7 +253,8 @@ public static partial class AvansUclari
                   from public.personel_avans a
                   join public.taraf t on t.id = a.taraf_id
                  where a.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of a
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Avans bulunamadı.");
 
             var durum = Convert.ToInt16(a["durum"] ?? (short)0);
@@ -259,7 +267,16 @@ public static partial class AvansUclari
             var tarih = (istek.Tarih ?? DateOnly.FromDateTime(Saat.Bugun))
                 .ToDateTime(TimeOnly.MinValue);
 
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            // AVANS ÖNCE, KASA SONRA (K13): durum koşullu güncelleme etkilemediyse
+            //   (arada başkası ödedi / iptal etti) kasa işlemi hiç yazılmaz.
+            var etkilenen = await baglanti.CalistirAsync("""
+                update public.personel_avans
+                   set durum = @p1, odeme_tarihi = @p2,
+                       degistiren = @p3, degistirme_tarihi = now()
+                 where id = @p0 and durum = @p4
+                """, islem, [id, Odendi, tarih, baglam.KullaniciId, Onaylandi], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Avansın durumu bu arada değişti; ödeme yapılmadı. Kartı yenileyin.");
 
             // KASA İŞLEMİ: ödeme yönü çıkış (tür 31 nakit / 32 havale).
             //   `kaynak_tur`/`kaynak_id` avansı gösterir - kasa ekstresinden
@@ -299,12 +316,12 @@ public static partial class AvansUclari
                      baglam.KullaniciId], iptal);
             }
 
+            // Ödeme bağı (kasa işlemi kimliği) ancak kasa satırı yazıldıktan sonra bilinir.
             await baglanti.CalistirAsync("""
                 update public.personel_avans
-                   set durum = @p1, odeme_islem_id = @p2, odeme_tarihi = @p3,
-                       degistiren = @p4, degistirme_tarihi = now()
-                 where id = @p0
-                """, islem, [id, Odendi, islemId, tarih, baglam.KullaniciId], iptal);
+                   set odeme_islem_id = @p1
+                 where id = @p0 and durum = @p2
+                """, islem, [id, islemId, Odendi], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogAvans, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -329,6 +346,13 @@ public static partial class AvansUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): seçim, kesinti ve avans
+            //   kapanışı TEK transaction; avans satırı kilitli (aynı taksit iki kez
+            //   kesilmesin, kalan sayımı yarışmasın).
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select 1 from public.personel_avans where id = @p0 for update",
+                                         islem, [id], iptal);
+
             // BEKLEYEN EN ESKİ TAKSİT: sıra atlanmaz - üçüncü ayı kesip
             //   birinciyi açık bırakmak, kalan tutarı doğru ama planı yalan
             //   yapar.
@@ -338,23 +362,24 @@ public static partial class AvansUclari
                  where k.avans_id = @p0 and k.durum = 0
                    and (@p1 = 0 or k.id = @p1)
                  order by k.sira limit 1
-                """, null, [id, istek.KesintiId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id, istek.KesintiId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.IsKurali("Bekleyen kesinti yok.");
 
             var kesintiId = Convert.ToInt32(k["id"]);
             var tarih = (istek.Tarih ?? DateOnly.FromDateTime(Saat.Bugun))
                 .ToDateTime(TimeOnly.MinValue);
 
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-            await baglanti.CalistirAsync("""
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.personel_avans_kesinti
                    set durum = 1, kesinti_tarihi = @p1,
                        aciklama = coalesce(nullif(@p2, ''), aciklama),
                        degistiren = @p3, degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum = 0
                 """, islem, [kesintiId, tarih, istek.Aciklama ?? "",
                              baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Kesinti bu arada işlenmiş; yeniden deneyin.");
 
             // SON TAKSİT KESİLİNCE AVANS KAPANIR: "ödendi" ile "kapandı"
             //   ayrı - biri parayı, öteki borcu anlatır.
@@ -363,12 +388,13 @@ public static partial class AvansUclari
                  where avans_id = @p0 and durum = 0
                 """, islem, [id], iptal);
 
+            // Yalnız ÖDENMİŞ avans kapanır (K13): iptal / başka durumdaki kayıt ezilmez.
             if (kalan == 0)
                 await baglanti.CalistirAsync("""
                     update public.personel_avans set durum = @p1,
                            degistiren = @p2, degistirme_tarihi = now()
-                     where id = @p0
-                    """, islem, [id, Kapandi, baglam.KullaniciId], iptal);
+                     where id = @p0 and durum = @p3
+                    """, islem, [id, Kapandi, baglam.KullaniciId, Odendi], iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogKesinti,
                 kesintiId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,

@@ -90,7 +90,15 @@ public static class DokumanYonetimUclari
             // TUR VARSAYILANLARI: surumlu mu, hangi akis, hangi gizlilik.
             //   Klasorun varsayilan turu varsa o kullanilir - kullaniciya her
             //   yuklemede ayni soruyu sormamak icin.
-            await veri.CalistirAsync("""
+            // TEK TRANSACTION (kod inceleme 30.10.2026 K36): klasör damgası, sürüm 1 ve olay satırı birlikte -
+            //   eskiden üçü autocommit'ti; sürüm satırı düşerse doküman klasörde "sürümsüz" kalıyordu. İçeriğin
+            //   kendisi depo.EkleAsync'te (hash-dedup, kendi işlemi) yazılır; o satır burada `for update`
+            //   kilitlenir ki eşzamanlı bir taşıma / sürüm açma arada girmesin.
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            _ = await baglanti.TekDegerAsync<int?>("select id from public.dokuman where id = @p0 for update", islem, [dokumanId], iptal)
+                ?? throw GentegreHatasi.IsKurali("Dokuman kaydedilemedi.");
+            await baglanti.CalistirAsync("""
                 update public.dokuman d
                    set klasor_id = @p1,
                        kategori_id = coalesce(nullif(@p2, 0), k.varsayilan_kategori_id,
@@ -105,9 +113,9 @@ public static class DokumanYonetimUclari
                   left join public.dokuman_kategori t
                          on t.id = coalesce(nullif(@p2, 0), k.varsayilan_kategori_id)
                  where d.id = @p0 and k.id = @p1
-                """, [dokumanId, klasorId, turId, baglam.KullaniciId], iptal);
+                """, islem, [dokumanId, klasorId, turId, baglam.KullaniciId], iptal);
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 insert into public.dokuman_surum (dokuman_id, surum_no, hash, content_type,
                                                   boyut, yukleyen_id, durum, yayin_tarihi)
                 select d.id, 1, d.hash, d.content_type, d.boyut, @p1,
@@ -117,12 +125,13 @@ public static class DokumanYonetimUclari
                  where d.id = @p0
                    and not exists (select 1 from public.dokuman_surum s
                                     where s.dokuman_id = d.id)
-                """, [dokumanId, baglam.KullaniciId], iptal);
+                """, islem, [dokumanId, baglam.KullaniciId], iptal);
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
                 values (@p0, @p1, 1, 'Kurumsal klasore yuklendi')
-                """, [dokumanId, baglam.KullaniciId], iptal);
+                """, islem, [dokumanId, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
 
             // YUKLENEN BELGE TASLAK DOGABILIR: kategorisi "sürümlü" ise durum
             //   1 (Taslak) olur ve liste VARSAYILAN "Aktif" cipinde onu
@@ -236,7 +245,10 @@ public static class DokumanYonetimUclari
             //   yerine gecmez (tekrar denetim #1).
             await erisim.IsteAsync(baglam, id, Islem.Degistir, iptal);
 
-            var etkilenen = await veri.CalistirAsync("""
+            // Değişiklik + KVKK olay satırı tek transaction (K36): olay düşerse değişiklik de geri alınır.
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.dokuman
                    set klasor_id = coalesce(@p1, klasor_id),
                        etiketler = case when @p2::varchar[] is null then etiketler
@@ -244,7 +256,7 @@ public static class DokumanYonetimUclari
                        gizlilik = coalesce(@p3, gizlilik),
                        degistiren = @p4, degistirme_tarihi = now()
                  where id = @p0 and durum <> 0
-                """, [id, istek.KlasorId,
+                """, islem, [id, istek.KlasorId,
                       istek.Etiketler is { Length: > 0 } ? istek.Etiketler : null,
                       istek.Gizlilik is > 0 ? (short?)istek.Gizlilik : null,
                       baglam.KullaniciId], iptal);
@@ -252,10 +264,11 @@ public static class DokumanYonetimUclari
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali("Dokuman bulunamadi ya da silinmis.");
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
                 values (@p0, @p1, 4, 'Klasor / etiket / gizlilik degisikligi')
-                """, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { id, mesaj = "Dokuman guncellendi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -287,23 +300,27 @@ public static class DokumanYonetimUclari
             var kod = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator
                                             .GetBytes(16)).ToLowerInvariant();
 
-            var paylasimId = await veri.TekDegerAsync<int>("""
+            // Link + KVKK olay satırı tek transaction (K36): olaysız link (kim, neden açtı?) kalmasın.
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var paylasimId = await baglanti.TekDegerAsync<int>("""
                 insert into public.dokuman_paylasim
                        (dokuman_id, kod, olusturan_id, son_kullanma, indirme_izni,
                         azami_acilma, alici_eposta)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
                 returning id
-                """,
+                """, islem,
                 [id, kod, baglam.KullaniciId,
                  istek.GunSayisi is > 0 ? Saat.Simdi.AddDays(istek.GunSayisi.Value) : null,
                  (short)(istek.IndirmeIzni == false ? 0 : 1),
                  istek.AzamiAcilma ?? 0, istek.AliciEposta ?? ""], iptal);
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
                 values (@p0, @p1, 11, @p2)
-                """, [id, baglam.KullaniciId,
+                """, islem, [id, baglam.KullaniciId,
                       istek.Gerekce ?? "Paylasim linki uretildi"], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { paylasimId, kod, mesaj = "Paylasim linki uretildi.",
                                     izlemeNo = baglam.IzlemeNo });
@@ -323,20 +340,24 @@ public static class DokumanYonetimUclari
 
             // Kod SILINMEZ, iptal DAMGALANIR: silinen kod bir sure sonra
             //   yeniden uretilebilir ve eski alici erisim kazanirdi.
-            var d = await veri.TekDegerAsync<int?>("""
+            // İptal damgası + olay satırı tek transaction (K36).
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var d = await baglanti.TekDegerAsync<int?>("""
                 update public.dokuman_paylasim
                    set iptal = coalesce(iptal, now())
                  where id = @p0
                 returning dokuman_id
-                """, [paylasimId], iptal);
+                """, islem, [paylasimId], iptal);
 
             if (d is null)
                 throw GentegreHatasi.IsKurali("Paylasim linki bulunamadi.");
 
-            await veri.CalistirAsync("""
+            await baglanti.CalistirAsync("""
                 insert into public.dokuman_olay (dokuman_id, kullanici_id, olay, gerekce)
                 values (@p0, @p1, 11, 'Paylasim linki iptal edildi')
-                """, [d, baglam.KullaniciId], iptal);
+                """, islem, [d, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { paylasimId, mesaj = "Link iptal edildi.",
                                     izlemeNo = baglam.IzlemeNo });

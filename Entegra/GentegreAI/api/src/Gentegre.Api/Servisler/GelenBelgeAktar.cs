@@ -67,13 +67,29 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             throw GentegreHatasi.IsKurali(
                 $"Bu belge zaten {hedefAdi} aktarılmış (belge #{eski}).");
 
-        // 2) UBL - yoksa entegratorden indirilir.
+        // 2) UBL - yoksa entegratorden indirilir. Dis servis cagrisi TRANSACTION
+        //    DISINDA kalir: kilit altinda HTTP beklemek baska kullanicinin
+        //    kutusunu da bekletirdi.
         var ubl = await gelen.IcerikIndirAsync(eBelgeId, baglam.SubeId, baglam.KullaniciId, iptal);
         var kok = XDocument.Parse(ubl).Root
                   ?? throw GentegreHatasi.IsKurali("Belge içeriği okunamadı.");
 
+        // TEK ISLEM (kod inceleme 30.10.2026 K12): kutu satiri `for update` ile
+        //   kilitlenip "aktarilmis mi" YENIDEN sorulur; cari acilisi, belge
+        //   kaydi ve bag ayni transaction'da gider. Eskiden belge kendi
+        //   baglantisinda commit oluyor, bag sonra kosulsuz yaziliyordu: es
+        //   zamanli ikinci "Aktar" (ya da arada hata) ayni e-faturadan iki alis
+        //   faturasi dogururdu.
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+        var kilitliBelge = await baglanti.TekDegerAsync<int?>(
+            "select belge_id from public.e_belge where id = @p0 and yon = 2 for update",
+            islem, [eBelgeId], iptal);
+        if (kilitliBelge is { } onceki)
+            throw GentegreHatasi.IsKurali(
+                $"Bu belge zaten {hedefAdi} aktarılmış (belge #{onceki}).");
+
         // 3) Cari: VKN ile eslesen taraf; yoksa TEDARIKCI olarak acilir.
-        var tarafId = await TarafBulVeyaAcAsync(baglanti, gondericiVkno, gondericiUnvan,
+        var tarafId = await TarafBulVeyaAcAsync(baglanti, islem, gondericiVkno, gondericiUnvan,
                                                 kok, baglam, iptal, irsaliye ? "DespatchSupplierParty" : "AccountingSupplierParty");
 
         // 4) Baslik + satirlar.
@@ -127,7 +143,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             var ad = urun?.Element(Cbc + "Name")?.Value?.Trim() ?? "";
             var kod = UrunKodu(urun);
 
-            var (stokId, esles) = await StokBulAsync(baglanti, kod, iptal);
+            var (stokId, esles) = await StokBulAsync(baglanti, islem, kod, iptal);
             if (esles) eslesen++;
 
             satirlar.Add(new Dictionary<string, JsonElement>
@@ -153,6 +169,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
         //    Stok kontrolu KAPALI: alis girisi stok azaltmaz, gelen belgeyi
         //    stok yetersizligi yuzunden reddetmek anlamsiz olurdu.
         var (belgeId, uyarilar) = await belgeler.KaydetAsync(
+            baglanti, islem,
             belge,
             satirlar,
             new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
@@ -164,21 +181,20 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
         if (irsaliye && belgeNo.Length > 0)
             foreach (var sql in new[] { "update public.belge set belge_no = @p1 where id = @p0",
                                         "update public.mali_hareket set belge_no = @p1 where belge_id = @p0" })
-                await baglanti.CalistirAsync(sql, null, [belgeId, belgeNo.Length > 20 ? belgeNo[..20] : belgeNo], iptal);
+                await baglanti.CalistirAsync(sql, islem, [belgeId, belgeNo.Length > 20 ? belgeNo[..20] : belgeNo], iptal);
 
         // 6) Bag: kutu satiri artik belgeye isaret eder (tekrar aktarim engellenir).
-        await using (var bag = new NpgsqlCommand("""
+        //    KOSULLU (`belge_id is null`): satir kilitli okundugu icin 0 donmesi
+        //    beklenmez; donerse belge de geri alinir.
+        var baglandi = await baglanti.CalistirAsync("""
             update public.e_belge set belge_id = @p1, taraf_id = coalesce(taraf_id, @p2), tasnif = 2,
                    degistiren = @p3, degistirme_tarihi = now()::timestamp
-             where id = @p0
-            """, baglanti))
-        {
-            bag.Parameters.AddWithValue("p0", eBelgeId);
-            bag.Parameters.AddWithValue("p1", belgeId);
-            bag.Parameters.AddWithValue("p2", tarafId);
-            bag.Parameters.AddWithValue("p3", baglam.KullaniciId);
-            await bag.ExecuteNonQueryAsync(iptal);
-        }
+             where id = @p0 and belge_id is null
+            """, islem, [eBelgeId, belgeId, tarafId, baglam.KullaniciId], iptal);
+        if (baglandi != 1)
+            throw GentegreHatasi.IsKurali($"Bu belge zaten {hedefAdi} aktarılmış.");
+
+        await islem.CommitAsync(iptal);
 
         var mesaj = $"{(irsaliye ? "Alış irsaliyesi" : "Alış faturası")} oluşturuldu ({satirlar.Count} kalem, " +
                     $"{eslesen} kalem stok kartıyla eşleşti).";
@@ -188,7 +204,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
     }
 
     // --------------------------------------------------------------- cari ----
-    private static async Task<int> TarafBulVeyaAcAsync(NpgsqlConnection baglanti,
+    private static async Task<int> TarafBulVeyaAcAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         string vkno, string unvan, XElement kok, YazmaBaglami baglam, CancellationToken iptal,
         string partiAdi = "AccountingSupplierParty")
     {
@@ -196,8 +212,13 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
 
         if (temiz.Length > 0)
         {
+            // AYNI VKN İÇİN TEK AÇICI (kod inceleme 30.10.2026 K72): seç-sonra-ekle iki eş zamanlı aktarımda iki
+            //   tedarikçi kartı açıyordu (taraf.vkno'da benzersiz kısıt yok - Delphi verisinde çift olabilir). İşlem
+            //   kilidi VKN başına sıraya sokar; commit/rollback ile düşer.
+            await using (var kilit = baglanti.Komut("select pg_advisory_xact_lock(hashtext('taraf_vkno:' || @p0))", islem, temiz))
+                await kilit.ExecuteNonQueryAsync(iptal);
             await using var ara = baglanti.Komut(
-                "select id from public.taraf where regexp_replace(coalesce(vkno,''), '\\D', '', 'g') = @p0 order by id limit 1", null,
+                "select id from public.taraf where regexp_replace(coalesce(vkno,''), '\\D', '', 'g') = @p0 order by id limit 1", islem,
                 temiz);
             if (await ara.ExecuteScalarAsync(iptal) is int bulunan) return bulunan;
         }
@@ -217,7 +238,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             insert into public.taraf (unvan, vkno, vd, tedarikci, durum, sube_id, ekleyen)
             values (left(@p0, 120), left(@p1, 20), left(@p2, 60), 1, 1, @p3, @p4)
             returning id
-            """, null,
+            """, islem,
             ad, temiz);
         ekle.Parameters.AddWithValue("p2",
             taraf?.Element(Cac + "PartyTaxScheme")?.Element(Cac + "TaxScheme")
@@ -232,7 +253,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
     /// <summary>Stok KODU ile eslestirme. Ad benzerligiyle eslestirme YOK -
     /// yanlis stoga hareket yazmak, hic yazmamaktan kotudur.</summary>
     private static async Task<(int? Id, bool Eslesti)> StokBulAsync(NpgsqlConnection baglanti,
-        string kod, CancellationToken iptal)
+        NpgsqlTransaction islem, string kod, CancellationToken iptal)
     {
         if (string.IsNullOrWhiteSpace(kod)) return (null, false);
 
@@ -240,7 +261,7 @@ public sealed class GelenBelgeAktar(VeriKaynagi veri, BelgeDeposu belgeler, EBel
             select id from public.stok
              where upper(btrim(kod)) = upper(btrim(@p0))
              order by id limit 1
-            """, null,
+            """, islem,
             kod);
         return await komut.ExecuteScalarAsync(iptal) is int id ? (id, true) : (null, false);
     }

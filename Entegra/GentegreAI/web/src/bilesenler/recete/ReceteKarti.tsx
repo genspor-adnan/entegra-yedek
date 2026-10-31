@@ -83,6 +83,8 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
   const [aciklama, setAciklama] = useState('');
   const [muayene, setMuayene] = useState<ListeSatiri | null>(null);
   const [alerjiler, setAlerjiler] = useState<ListeSatiri[]>([]);
+  // ALERJİ OKUNAMADI (kod inceleme 30.10.2026 K24): rozetler sessizce kaybolmasın, uyarı çıksın.
+  const [alerjiHata, setAlerjiHata] = useState(false);
   const [aktifIlac, setAktifIlac] = useState<ListeSatiri[]>([]);
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
   const [isaretli, setIsaretli] = useState<ListeSatiri[]>([]);
@@ -108,13 +110,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
         api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: muayeneId } })
            .then(r => r.satirlar[0] ?? null).catch(() => null),
         api.liste('hasta-alerji', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
-           .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => []),
+           .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => null),
         api.liste('hasta-ilac', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
            .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => []),
         api.liste('recete-satir', { sayfa: 1, boyut: 200, filtre: { alan: 'receteId', op: 'esit', deger: receteId } })
            .then(r => r.satirlar).catch(() => []),
       ]);
-      setMuayene(m); setAlerjiler(a); setAktifIlac(i); setSatirlar(s);
+      setMuayene(m); setAlerjiler(a ?? []); setAlerjiHata(a === null); setAktifIlac(i); setSatirlar(s);
       setHata(null);
     } catch (h) { setHata(hataMetni(h)) }
   }, [receteId]);
@@ -241,6 +243,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
             <span className="rk-bosluk" />
             <span className={`rozet ${d.sinif}`}>{d.ad}</span>
             <span className="rozet gri">{turAdi} {c('reçete')}</span>
+            {alerjiHata && <span className="rozet uyari" title={c('Alerji listesi okunamadı - kartı yenileyin')}>⚠ {c('Alerji: ?')}</span>}
             {alerjiler.slice(0, 3).map((a, i) => (
               <span key={i} className="rozet hata" title={metin(a.etkenMadde)}>
                 ⚠ {c('Alerji')}: {metin(a.etken) || metin(a.etkenMadde)}

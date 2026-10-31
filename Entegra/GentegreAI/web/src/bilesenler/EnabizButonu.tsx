@@ -55,10 +55,12 @@ const AKSIYON: Record<EnabizButonuTuru, string> = {
  */
 export async function enabizSekmedeAc(hastaId: number, muayeneId?: number | null, belgeId?: number | null) {
   const sekme = window.open('', '_blank');
+  // Dış siteye `opener` verilmez (K90, tabnabbing): e-Nabız sekmesi bu pencereyi yönlendiremez.
+  if (sekme) sekme.opener = null;
   try {
     const y = await api.enabizErisimAc({ hastaId, muayeneId: muayeneId ?? null, belgeId: belgeId ?? null });
     if (sekme) sekme.location.href = y.adres;
-    else window.open(y.adres, '_blank');
+    else window.open(y.adres, '_blank', 'noopener');
   } catch (h) {
     sekme?.close();
     mesaj(hataMetni(h));

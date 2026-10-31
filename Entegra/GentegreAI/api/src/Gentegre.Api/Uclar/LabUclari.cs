@@ -21,6 +21,9 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static partial class LabUclari
 {
+    /// <summary>islem_log.tablo_id - lab_istem (KartKatalogu.Saglik.LabIstem ile aynı numara).</summary>
+    private const int LogTabloLabIstem = 961;
+
     /// <param name="BelgeId">
     /// Başvurulu istem (hasta burada). Dış kurum numunesinde BOŞ - o zaman
     /// <paramref name="DisKurumId"/> ve <paramref name="HastaId"/> zorunlu (637).
@@ -73,7 +76,10 @@ public static partial class LabUclari
 
     public static void LabUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/lab").WithTags("Laboratuvar").RequireAuthorization();
+        // KAYIT KAPISI (kod inceleme 30.10.2026 K05): istem / numune / barkod / satır / kültür / genetik kimlikleri
+        //   merkezi kapsam kapısından geçer (ardışık barkodla başka hastanın istemi okunuyordu).
+        var grup = yol.MapGroup("/api/lab").WithTags("Laboratuvar").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Lab());
 
         // ------------------------------------------------------------ istem ---
 
@@ -147,89 +153,116 @@ public static partial class LabUclari
 
             // disKurumId İSTEMDE de yazılır (kaynak=4) - başvurulu da olsa dış
             //   kurum numunesidir; fatura ödeyen kuruma, kaynak "dış" kalır.
-            var id = await servis.IstemAcAsync(
-                belgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
-                istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal,
-                istek.HastaId, istek.DisKurumId, akilci: istek.Akilci);
-
-            // ÜCRET (913): dış kabulde açılan başvuruya tetkik/panel ÜCRET
-            //   satırları eklenir - ödeyen kurum + ücret girilmeden istem
-            //   worklist'e düşmez. Ücret girilince belge_satir tetiği istemi
-            //   serbest bırakır. Fiyat/pay bölüşümü BelgeDeposu'nda (tek hesap).
-            if (disBasvuruAcildi && belgeId is int ucretBelgeId && ucretBelgeId > 0)
+            // AYRI İŞLEMLER + GERİ ALMA (kod inceleme 30.10.2026 K12): LabServisi.IstemAcAsync ve
+            //   BelgeDeposu.GuncelleAsync kendi bağlantı/transaction'larını açar - başvuru, istem ve
+            //   ücret TEK işlemde yazılamıyor (çağıranın işlemini alan sürümleri yok). Başvuru BU
+            //   İSTEKTE açıldıysa istem ya da ücret yazılamadığında açılan istem ve başvuru silinir:
+            //   dış kurum kabulünde istemsiz başvuru ya da ücretsiz istem (yarım kayıt) kalmaz.
+            var id = 0;
+            try
             {
-                await using var bkonn = await veri.AcAsync(iptal);
-                // Sipariş edilen kalemlerin FATURALANACAK hizmeti: panel tek
-                //   SUT kalemidir (içeriği değil), tetkik kendi hizmeti.
-                var hizmetIdler = new List<int>();
-                foreach (var s in istek.Satirlar ?? [])
-                {
-                    int? hid = null;
-                    if (s.PanelId is > 0)
-                        hid = await bkonn.TekDegerAsync<int?>(
-                            "select hizmet_id from public.lab_panel where id = @p0", null, [s.PanelId], iptal);
-                    else if (s.TetkikId is > 0)
-                        hid = await bkonn.TekDegerAsync<int?>(
-                            "select hizmet_id from public.lab_tetkik where id = @p0", null, [s.TetkikId], iptal);
-                    if (hid is int h && h > 0 && !hizmetIdler.Contains(h)) hizmetIdler.Add(h);
-                }
+                id = await servis.IstemAcAsync(
+                    belgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
+                    istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal,
+                    istek.HastaId, istek.DisKurumId, akilci: istek.Akilci);
 
-                if (hizmetIdler.Count > 0)
+                // ÜCRET (913): dış kabulde açılan başvuruya tetkik/panel ÜCRET
+                //   satırları eklenir - ödeyen kurum + ücret girilmeden istem
+                //   worklist'e düşmez. Ücret girilince belge_satir tetiği istemi
+                //   serbest bırakır. Fiyat/pay bölüşümü BelgeDeposu'nda (tek hesap).
+                if (disBasvuruAcildi && belgeId is int ucretBelgeId && ucretBelgeId > 0)
                 {
-                    var (belge, satirlar) = await BelgeGovdesi.OkuAsync(bkonn, ucretBelgeId, iptal);
-                    var sira = satirlar.Count;
-                    var belgeKampanya = await bkonn.TekDegerAsync<int?>(
-                        "select kampanya_id from public.belge where id = @p0", null, [ucretBelgeId], iptal);
-                    // SÖZLEŞME İSKONTOSU (914) + KARŞILAMA: lab kalemlerine
-                    //   sözleşmenin lab iskontosu; kurum payı (pay) = varsayılan
-                    //   karşılama (ödeyen kurum yüzdesi) - "kurum öder, hasta ödemez".
-                    var iskonto = await bkonn.TekDegerAsync<int>("""
-                        select coalesce(s.lab_iskonto, 0) from public.belge_basvuru bb
-                          join public.kurum_sozlesme s on s.id = bb.sozlesme_id where bb.id = @p0
-                        """, null, [ucretBelgeId], iptal);
-                    var karsilama = await bkonn.TekDegerAsync<decimal>("""
-                        select coalesce(s.varsayilan_karsilama, 0) from public.belge_basvuru bb
-                          join public.kurum_sozlesme s on s.id = bb.sozlesme_id where bb.id = @p0
-                        """, null, [ucretBelgeId], iptal);
-                    foreach (var hid in hizmetIdler)
+                    await using var bkonn = await veri.AcAsync(iptal);
+                    // Sipariş edilen kalemlerin FATURALANACAK hizmeti: panel tek
+                    //   SUT kalemidir (içeriği değil), tetkik kendi hizmeti.
+                    var hizmetIdler = new List<int>();
+                    foreach (var s in istek.Satirlar ?? [])
                     {
-                        var fiyat = await bkonn.TekDegerAsync<decimal>("""
-                            select coalesce(
-                                (select fs.fiyat from public.fiyat_listesi_satir fs
-                                   join public.belge b on b.id = @p2
-                                  where fs.liste_id = b.fiyat_listesi_id and fs.hizmet_id = @p1 limit 1),
-                                (select f.fiyat from public.fn_belge_kalem_fiyati(
-                                        @p0, 2::smallint, null, @p1, current_date) f limit 1),
-                                0)
-                            """, null, [istek.HastaId, hid, ucretBelgeId], iptal);
-                        if (belgeKampanya is int kid && kid > 0 && fiyat > 0)
-                            fiyat = await bkonn.TekDegerAsync<decimal>("""
-                                select coalesce(f.fiyat, @p3) from public.fn_kampanya_fiyat(@p0, null, @p1, @p2) f limit 1
-                                """, null, [kid, hid, fiyat, fiyat], iptal);
-                        var kdv = await bkonn.TekDegerAsync<int>(
-                            "select coalesce(kdv, 0) from public.hizmet where id = @p0", null, [hid], iptal);
-                        satirlar.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>
-                        {
-                            ["tur"] = 2, ["hizmetId"] = hid, ["miktar"] = 1m,
-                            ["birimFiyat"] = fiyat, ["iskonto"] = (decimal)iskonto,
-                            // Sözleşme iskontosu ÖN-ONAYLI: eşik onayına takılmasın.
-                            ["iskontoKilit"] = iskonto > 0 ? 1 : 0,
-                            // Kurum payı = karşılama (ödeyen kurum yüzdesi).
-                            ["pay"] = (int)karsilama,
-                            ["kdv"] = kdv, ["dovizCinsi"] = "TL",
-                            ["sira"] = ++sira,
-                        }));
+                        int? hid = null;
+                        if (s.PanelId is > 0)
+                            hid = await bkonn.TekDegerAsync<int?>(
+                                "select hizmet_id from public.lab_panel where id = @p0", null, [s.PanelId], iptal);
+                        else if (s.TetkikId is > 0)
+                            hid = await bkonn.TekDegerAsync<int?>(
+                                "select hizmet_id from public.lab_tetkik where id = @p0", null, [s.TetkikId], iptal);
+                        if (hid is int h && h > 0 && !hizmetIdler.Contains(h)) hizmetIdler.Add(h);
                     }
-                    await belgeDepo.GuncelleAsync(ucretBelgeId, belge, satirlar,
-                        new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
-                        new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
-                    // KARŞILAMA DAĞILIMI (915): ödeyen kurum payını üret - "Kurumu
-                    //   Öder" türünde tutar kurum kovasına (oss), hasta payı 0.
-                    await bkonn.CalistirAsync(
-                        "select public.fn_belge_satir_dagilim_tazele(id) "
-                      + "from public.belge_satir where belge_id = @p0 and hizmet_id is not null",
-                        null, [ucretBelgeId], iptal);
+
+                    if (hizmetIdler.Count > 0)
+                    {
+                        var (belge, satirlar) = await BelgeGovdesi.OkuAsync(bkonn, ucretBelgeId, iptal);
+                        var sira = satirlar.Count;
+                        var belgeKampanya = await bkonn.TekDegerAsync<int?>(
+                            "select kampanya_id from public.belge where id = @p0", null, [ucretBelgeId], iptal);
+                        // SÖZLEŞME İSKONTOSU (914) + KARŞILAMA: lab kalemlerine
+                        //   sözleşmenin lab iskontosu; kurum payı (pay) = varsayılan
+                        //   karşılama (ödeyen kurum yüzdesi) - "kurum öder, hasta ödemez".
+                        var iskonto = await bkonn.TekDegerAsync<int>("""
+                            select coalesce(s.lab_iskonto, 0) from public.belge_basvuru bb
+                              join public.kurum_sozlesme s on s.id = bb.sozlesme_id where bb.id = @p0
+                            """, null, [ucretBelgeId], iptal);
+                        var karsilama = await bkonn.TekDegerAsync<decimal>("""
+                            select coalesce(s.varsayilan_karsilama, 0) from public.belge_basvuru bb
+                              join public.kurum_sozlesme s on s.id = bb.sozlesme_id where bb.id = @p0
+                            """, null, [ucretBelgeId], iptal);
+                        foreach (var hid in hizmetIdler)
+                        {
+                            var fiyat = await bkonn.TekDegerAsync<decimal>("""
+                                select coalesce(
+                                    (select fs.fiyat from public.fiyat_listesi_satir fs
+                                       join public.belge b on b.id = @p2
+                                      where fs.liste_id = b.fiyat_listesi_id and fs.hizmet_id = @p1 limit 1),
+                                    (select f.fiyat from public.fn_belge_kalem_fiyati(
+                                            @p0, 2::smallint, null, @p1, current_date) f limit 1),
+                                    0)
+                                """, null, [istek.HastaId, hid, ucretBelgeId], iptal);
+                            if (belgeKampanya is int kid && kid > 0 && fiyat > 0)
+                                fiyat = await bkonn.TekDegerAsync<decimal>("""
+                                    select coalesce(f.fiyat, @p3) from public.fn_kampanya_fiyat(@p0, null, @p1, @p2) f limit 1
+                                    """, null, [kid, hid, fiyat, fiyat], iptal);
+                            var kdv = await bkonn.TekDegerAsync<int>(
+                                "select coalesce(kdv, 0) from public.hizmet where id = @p0", null, [hid], iptal);
+                            satirlar.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>
+                            {
+                                ["tur"] = 2, ["hizmetId"] = hid, ["miktar"] = 1m,
+                                ["birimFiyat"] = fiyat, ["iskonto"] = (decimal)iskonto,
+                                // Sözleşme iskontosu ÖN-ONAYLI: eşik onayına takılmasın.
+                                ["iskontoKilit"] = iskonto > 0 ? 1 : 0,
+                                // Kurum payı = karşılama (ödeyen kurum yüzdesi).
+                                ["pay"] = (int)karsilama,
+                                ["kdv"] = kdv, ["dovizCinsi"] = "TL",
+                                ["sira"] = ++sira,
+                            }));
+                        }
+                        await belgeDepo.GuncelleAsync(ucretBelgeId, belge, satirlar,
+                            new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
+                            new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
+                        // KARŞILAMA DAĞILIMI (915): ödeyen kurum payını üret - "Kurumu
+                        //   Öder" türünde tutar kurum kovasına (oss), hasta payı 0.
+                        await bkonn.CalistirAsync(
+                            "select public.fn_belge_satir_dagilim_tazele(id) "
+                          + "from public.belge_satir where belge_id = @p0 and hizmet_id is not null",
+                            null, [ucretBelgeId], iptal);
+                    }
                 }
+            }
+            catch (Exception) when (disBasvuruAcildi && belgeId > 0)
+            {
+                // Geri alma iptal edilmiş istekte de tamamlanmalı - CancellationToken.None.
+                try
+                {
+                    if (id > 0)
+                        await veri.CalistirAsync("select public.fn_lab_istem_sil(@p0)", [id], CancellationToken.None);
+                    await belgeDepo.SilAsync(belgeId,
+                        new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), CancellationToken.None);
+                }
+                catch (Exception telafiHatasi)
+                {
+                    ctx.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("lab")
+                       .LogError(telafiHatasi,
+                           "Yarım kalan dış kurum kabulü geri alınamadı (başvuru {Belge}, istem {Istem})", belgeId, id);
+                }
+                throw;
             }
 
             var ozet = await IstemOzetAsync(veri, id, iptal);
@@ -278,7 +311,8 @@ public static partial class LabUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("lab.onay", Islem.Gor);
+            // YAZMA YETKİSİ (kod inceleme 30.10.2026 K16): reflektif test ekler - Gor ile salt-okuma şubede yazılıyordu.
+            baglam.YetkiIste("lab.onay", Islem.Degistir);
             var eklenen = await servis.ReflektifEkleAsync(id, istek.TetkikIdler ?? [], istek.Aciklama ?? "", baglam, iptal);
             var barkodlar = eklenen.Count > 0 ? await servis.NumunePlaniAsync(id, baglam, iptal) : [];
             return Results.Ok(new { eklenen, barkodlar,
@@ -601,7 +635,7 @@ public static partial class LabUclari
         // DELETE /api/lab/istem/{id} - yanlış açılan lab istemini sil (muayene
         //   grid'i "🗑"). Güvence: sonucu girilmiş / onaylı istem silinmez.
         grup.MapDelete("/istem/{id:int}", async (
-            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            int id, bool? muayeneden, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -609,23 +643,42 @@ public static partial class LabUclari
             // Lab yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
             await IstemSahipligi.IsteAsync(baglam, b, "lab", Islem.Sil, "lab_istem", id, muayeneden == true, iptal);
 
-            var durum = await b.TekDegerAsync<int?>(
-                "select durum from public.lab_istem where id = @p0", null, [id], iptal);
-            if (durum is null)
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
+            //   istem başlığı kilitlenip tam hâliyle, tetkik satırları `__detaylar` altında yazılır;
+            //   log ve silme TEK transaction. tablo_id 961 / detay 1288 = KartKatalogu.Saglik.LabIstem.
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            var satir = await b.TekAsync(
+                "select * from public.lab_istem where id = @p0 for update",
+                tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            var durum = satir["durum"] is { } d ? Convert.ToInt32(d) : 0;
             if (durum >= 4)
                 throw GentegreHatasi.IsKurali("Sonuçlanmış/onaylı istem silinemez.");
             var sonucVar = await b.TekDegerAsync<bool>(
                 "select exists(select 1 from public.lab_sonuc s " +
                 "  join public.lab_istem_satir t on t.id = s.istem_satir_id " +
-                " where t.istem_id = @p0)", null, [id], iptal);
+                " where t.istem_id = @p0)", tx, [id], iptal);
             if (sonucVar)
                 throw GentegreHatasi.IsKurali("Sonucu girilmiş istem silinemez.");
 
-            await b.CalistirAsync("select public.fn_lab_istem_sil(@p0)", null, [id], iptal);
+            var tetkikler = await b.ListeAsync(
+                "select * from public.lab_istem_satir where istem_id = @p0 order by id",
+                tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var bilgi = satir.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value));
+            bilgi["__detaylar"] = new
+            {
+                tetkikler = tetkikler.Select(t => t.ToDictionary(x => x.Key, x => LogDeposu.Metin(x.Value))),
+            };
+            await log.YazAsync(b, tx, LogIslemi.Sil, LogTabloLabIstem, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip, bilgi,
+                tarafId: satir["taraf_id"] is { } h ? Convert.ToInt32(h) : null, iptal: iptal);
+
+            await b.CalistirAsync("select public.fn_lab_istem_sil(@p0)", tx, [id], iptal);
             // Muayene bağı iptal (1109): silinen istem "istem var / sonuç bekliyor" sayılmasın.
             await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'lab_istem' and hedef_id = @p0",
-                null, [id], iptal);
+                tx, [id], iptal);
+            await tx.CommitAsync(iptal);
             return Results.Ok(new { id, mesaj = "Lab istemi silindi.", izlemeNo = baglam.IzlemeNo });
         });
 

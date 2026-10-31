@@ -107,11 +107,13 @@ public static partial class GozUclari
 
         // BAŞVURUYU PANOYA AL: Kabul istasyonunda açık satır (sıra numarası günün sırası).
         grup.MapPost("/akis/ekle", async (AkisEkleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("goz", Islem.Degistir);
             baglam.YazmaIste();
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen başvuru kimliği belge kapsamından geçer.
+            await erisim.IsteAsync(baglam, "belge", istek.BelgeId, "Başvuru bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var bs = await b.TekAsync("""
@@ -126,8 +128,8 @@ public static partial class GozUclari
                 insert into public.goz_ziyaret_istasyon (sube_id, belge_id, hasta_id, istasyon, ekleyen, sira_no)
                 values (@p0, @p1, @p2, 1, @p3,
                         coalesce((select max(i.sira_no) from public.goz_ziyaret_istasyon i
-                                   where i.sube_id = @p0 and (i.giris at time zone 'Europe/Istanbul')::date
-                                                           = (now() at time zone 'Europe/Istanbul')::date), 0) + 1)
+                                   where i.sube_id = @p0 and (i.giris at time zone public.fn_sube_zaman_dilimi(@p0))::date
+                                                           = (now() at time zone public.fn_sube_zaman_dilimi(@p0))::date), 0) + 1)
                 returning id
                 """, islem, [bs.Sube, istek.BelgeId, bs.Hasta, baglam.KullaniciId], iptal);
             await log.YazAsync(b, islem, LogIslemi.Ekle, LogTabloGozAkis, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -141,7 +143,9 @@ public static partial class GozUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("goz.muayene", Islem.Gor);
+            // YAZMA YETKİSİ (K16): muayene + göz uzantısı INSERT eder (muayene no tüketir) - Gor ile salt-okuma
+            //   şubede yazılıyordu; Ekle şube yazma hakkını da ister.
+            baglam.YetkiIste("goz.muayene", Islem.Ekle);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var belgeId = await b.TekDegerAsync<int?>(
@@ -167,7 +171,8 @@ public static partial class GozUclari
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("muayene", Islem.Gor);
+            // YAZMA YETKİSİ (K16): göz uzantısı (ve gerekirse muayene) açar - GET'teki Gor yetmez.
+            baglam.YetkiIste("muayene", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var belgeId = await b.TekDegerAsync<int?>("""

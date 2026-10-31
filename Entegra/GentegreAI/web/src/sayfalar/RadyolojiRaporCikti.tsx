@@ -39,9 +39,7 @@ const RAPOR_ADI: Record<number, string> = {
 export function RadyolojiRaporCikti() {
   const { id } = useParams();
   const git = useNavigate();
-  const [veri, setVeri] = useState<{
-    rapor: Satir; bolumler: Satir[]; alanlar: Satir[]; ekler: Satir[]; kurum: Satir | null;
-  } | null>(null);
+  const [veri, setVeri] = useState<RaporCiktiVerisi | null>(null);
   const [hata, setHata] = useState<string | null>(null);
 
   const yukle = useCallback(async () => {
@@ -56,10 +54,7 @@ export function RadyolojiRaporCikti() {
   if (!veri) return <div className="yukleniyor">Yükleniyor…</div>;
 
   const r = veri.rapor;
-  const k = veri.kurum ?? {};
   const onayli = Number(r.durum ?? 0) === 3;
-  const adresSatiri = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
-    .filter(x => String(x ?? '').trim() !== '').join(' · ');
 
   return (
     <div className="rapor-cikti">
@@ -85,138 +80,158 @@ export function RadyolojiRaporCikti() {
         <button className="d" onClick={() => git(-1)}>✖ Kapat</button>
       </div>
 
-      <div className="cikti-sayfa">
-        {/* --- KURUM ANTETI --- */}
-        <div className="kbaslik">
-          <AntetLogo dokumanId={k.logoDokumanId as number | undefined} yedek="🏥" />
-          <div>
-            <h1>{String(k.unvan ?? '—')}</h1>
-            <div className="alt">
-              Radyoloji Bölümü{adresSatiri ? ` · ${adresSatiri}` : ''}<br />
-              {[k.telefon ? `Tel: ${k.telefon}` : '',
-                k.mersisNo ? `MERSİS ${k.mersisNo}` : '',
-                k.vkno ? `VKN ${k.vkno}` : ''].filter(Boolean).join(' · ')}
+      <RadyolojiRaporBelgesi veri={veri} />
+    </div>
+  );
+}
+
+/** Rapor çıktısının verisi (GET /api/radyoloji/rapor/{id}/cikti). */
+export type RaporCiktiVerisi = {
+  rapor: Satir; bolumler: Satir[]; alanlar: Satir[]; ekler: Satir[]; kurum: Satir | null;
+};
+
+/**
+ * A4 RAPOR BELGESİ: çıktı sayfası ve rapor kartının yazdırma önizlemesi (CiktiMenusu) AYNI belgeyi çizer -
+ * kâğıda giden ile önizlenen ayrışmasın.
+ */
+export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
+  const r = veri.rapor;
+  const k = veri.kurum ?? {};
+  const onayli = Number(r.durum ?? 0) === 3;
+  const adresSatiri = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
+    .filter(x => String(x ?? '').trim() !== '').join(' · ');
+  return (
+    <div className="cikti-sayfa">
+      {/* --- KURUM ANTETI --- */}
+      <div className="kbaslik">
+        <AntetLogo dokumanId={k.logoDokumanId as number | undefined} yedek="🏥" />
+        <div>
+          <h1>{String(k.unvan ?? '—')}</h1>
+          <div className="alt">
+            Radyoloji Bölümü{adresSatiri ? ` · ${adresSatiri}` : ''}<br />
+            {[k.telefon ? `Tel: ${k.telefon}` : '',
+              k.mersisNo ? `MERSİS ${k.mersisNo}` : '',
+              k.vkno ? `VKN ${k.vkno}` : ''].filter(Boolean).join(' · ')}
+          </div>
+        </div>
+        <div className="sag">
+          Rapor No: <b>{String(r.raporNo ?? '') || '(onayda verilir)'}</b><br />
+          Protokol: {String(r.protokolNo ?? '—')}<br />
+          Accession: {String(r.accessionNo ?? '—')}
+        </div>
+      </div>
+
+      <div className="rapadi">
+        {RAPOR_ADI[Number(r.modalite ?? 0)] ?? 'Radyolojik İnceleme Raporu'}
+      </div>
+
+      {/* --- KIMLIK IKILISI --- */}
+      <div className="kimlik">
+        <div><span className="et">Hasta</span><span className="dg">{String(r.hastaAdi ?? '—')}</span></div>
+        <div><span className="et">Tetkik</span><span className="dg">{String(r.tetkikAdi ?? '—')}</span></div>
+        <div>
+          <span className="et">Doğum T. / Yaş</span>
+          <span className="dg">
+            {[gunNokta(r.dogumTarihi), yasMetni(r.dogumTarihi), cinsiyetAdi(r.cinsiyet)]
+              .filter(Boolean).join(' · ') || '—'}
+          </span>
+        </div>
+        <div>
+          <span className="et">Çekim Tarihi</span>
+          <span className="dg">{r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}</span>
+        </div>
+        <div><span className="et">Hasta No</span><span className="dg">{String(r.hastaNo ?? '—')}</span></div>
+        <div>
+          <span className="et">Rapor Tarihi</span>
+          <span className="dg">{r.onayTarihi ? tarihSaat(r.onayTarihi)
+                              : r.yazmaTarihi ? tarihSaat(r.yazmaTarihi) : '—'}</span>
+        </div>
+        <div>
+          <span className="et">İsteyen Hekim</span>
+          <span className="dg">
+            {String(r.isteyen ?? '—')}
+            {r.isteyenKurum ? ` · ${r.isteyenKurum}` : ''}
+          </span>
+        </div>
+        <div><span className="et">Ödeyen Kurum</span>
+             <span className="dg">{String(r.odeyenKurum ?? '') || 'Hasta kendi öder'}</span></div>
+      </div>
+
+      {/* --- KLINIK BILGI: istemden gelir, radyoloğun yazdığı bölüm değil.
+             Şablonda "Klinik Bilgi" bölümü VARSA burada tekrar basılmaz -
+             rapor yazılırken o bölüm zaten istemin metniyle dolduruluyor,
+             ikisi birden basılınca aynı cümle iki kez çıkıyordu. --- */}
+      {/* TEK PARÇA raporda klinik bilgi metnin içinde (şablondan) - ayrıca basılmaz. */}
+      {!tekParcaMi(veri.bolumler) && !veri.bolumler.some(b => String(b.baslik ?? '')
+                                  .toLocaleLowerCase('tr').includes('klinik'))
+       && String(r.klinikBilgi ?? '').trim() !== '' && (
+        <div className="rapor-bolum">
+          <h3>Klinik Bilgi</h3>
+          <p>
+            {String(r.klinikBilgi)}
+            {String(r.onTani ?? '').trim() !== '' && ` Ön tanı: ${r.onTani}.`}
+          </p>
+        </div>
+      )}
+
+      {/* --- RAPOR BOLUMLERI (yalniz basilacaklar) --- */}
+      {veri.bolumler.map((b, i) => (
+        <div className="rapor-bolum" key={i}>
+          {/* Tek parça raporun "Rapor" başlığı basılmaz - başlıklar metnin içinde. */}
+          {!tekParcaMi(veri.bolumler) && <h3>{String(b.baslik ?? '')}</h3>}
+          {/* BİÇİMLİ METİN (1195): sunucuda beyaz listeyle temizlenmiş HTML; yoksa düz metin. */}
+          {b.metinHtml ? <div className="rapor-html" dangerouslySetInnerHTML={{ __html: String(b.metinHtml) }} />
+                       : <p>{String(b.metin ?? '')}</p>}
+        </div>
+      ))}
+
+      {/* --- SKOR / OLCUM ALANLARI --- */}
+      {veri.alanlar.length > 0 && (
+        <div className="rapor-bolum">
+          <h3>Ölçüm / Skorlama</h3>
+          <table className="cikti-alan">
+            <tbody>
+              {veri.alanlar.map((a, i) => (
+                <tr key={i}>
+                  <td>{String(a.alanAd ?? '')}</td>
+                  <td><b>{String(a.deger ?? '')}</b></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* --- EK RAPORLAR: orijinalin ALTINDA, metni degistirmeden. --- */}
+      {veri.ekler.map((e, i) => (
+        <div className="bolum ek-rapor" key={`ek${i}`}>
+          <h3>
+            Ek Rapor (Addendum)
+            {e.onayTarihi ? ` · ${tarihSaat(e.onayTarihi)}` : ''}
+            {e.raporNo ? ` · ${e.raporNo}` : ''}
+          </h3>
+          <p>{String(e.metin ?? '')}</p>
+        </div>
+      ))}
+
+      {/* --- IMZA --- */}
+      <div className="imza">
+        <div className="imzak">
+          <div className="cizgi" />
+          <b>{String(r.onaylayan ?? '') || String(r.yazan ?? '') || '—'}</b><br />
+          Radyoloji Uzmanı
+          {onayli && (
+            <div className="eimza">
+              ✓ Elektronik olarak onaylandı · {tarihSaat(r.onayTarihi)}
             </div>
-          </div>
-          <div className="sag">
-            Rapor No: <b>{String(r.raporNo ?? '') || '(onayda verilir)'}</b><br />
-            Protokol: {String(r.protokolNo ?? '—')}<br />
-            Accession: {String(r.accessionNo ?? '—')}
-          </div>
+          )}
         </div>
+      </div>
 
-        <div className="rapadi">
-          {RAPOR_ADI[Number(r.modalite ?? 0)] ?? 'Radyolojik İnceleme Raporu'}
-        </div>
-
-        {/* --- KIMLIK IKILISI --- */}
-        <div className="kimlik">
-          <div><span className="et">Hasta</span><span className="dg">{String(r.hastaAdi ?? '—')}</span></div>
-          <div><span className="et">Tetkik</span><span className="dg">{String(r.tetkikAdi ?? '—')}</span></div>
-          <div>
-            <span className="et">Doğum T. / Yaş</span>
-            <span className="dg">
-              {[gunNokta(r.dogumTarihi), yasMetni(r.dogumTarihi), cinsiyetAdi(r.cinsiyet)]
-                .filter(Boolean).join(' · ') || '—'}
-            </span>
-          </div>
-          <div>
-            <span className="et">Çekim Tarihi</span>
-            <span className="dg">{r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}</span>
-          </div>
-          <div><span className="et">Hasta No</span><span className="dg">{String(r.hastaNo ?? '—')}</span></div>
-          <div>
-            <span className="et">Rapor Tarihi</span>
-            <span className="dg">{r.onayTarihi ? tarihSaat(r.onayTarihi)
-                                : r.yazmaTarihi ? tarihSaat(r.yazmaTarihi) : '—'}</span>
-          </div>
-          <div>
-            <span className="et">İsteyen Hekim</span>
-            <span className="dg">
-              {String(r.isteyen ?? '—')}
-              {r.isteyenKurum ? ` · ${r.isteyenKurum}` : ''}
-            </span>
-          </div>
-          <div><span className="et">Ödeyen Kurum</span>
-               <span className="dg">{String(r.odeyenKurum ?? '') || 'Hasta kendi öder'}</span></div>
-        </div>
-
-        {/* --- KLINIK BILGI: istemden gelir, radyoloğun yazdığı bölüm değil.
-               Şablonda "Klinik Bilgi" bölümü VARSA burada tekrar basılmaz -
-               rapor yazılırken o bölüm zaten istemin metniyle dolduruluyor,
-               ikisi birden basılınca aynı cümle iki kez çıkıyordu. --- */}
-        {/* TEK PARÇA raporda klinik bilgi metnin içinde (şablondan) - ayrıca basılmaz. */}
-        {!tekParcaMi(veri.bolumler) && !veri.bolumler.some(b => String(b.baslik ?? '')
-                                    .toLocaleLowerCase('tr').includes('klinik'))
-         && String(r.klinikBilgi ?? '').trim() !== '' && (
-          <div className="rapor-bolum">
-            <h3>Klinik Bilgi</h3>
-            <p>
-              {String(r.klinikBilgi)}
-              {String(r.onTani ?? '').trim() !== '' && ` Ön tanı: ${r.onTani}.`}
-            </p>
-          </div>
-        )}
-
-        {/* --- RAPOR BOLUMLERI (yalniz basilacaklar) --- */}
-        {veri.bolumler.map((b, i) => (
-          <div className="rapor-bolum" key={i}>
-            {/* Tek parça raporun "Rapor" başlığı basılmaz - başlıklar metnin içinde. */}
-            {!tekParcaMi(veri.bolumler) && <h3>{String(b.baslik ?? '')}</h3>}
-            {/* BİÇİMLİ METİN (1195): sunucuda beyaz listeyle temizlenmiş HTML; yoksa düz metin. */}
-            {b.metinHtml ? <div className="rapor-html" dangerouslySetInnerHTML={{ __html: String(b.metinHtml) }} />
-                         : <p>{String(b.metin ?? '')}</p>}
-          </div>
-        ))}
-
-        {/* --- SKOR / OLCUM ALANLARI --- */}
-        {veri.alanlar.length > 0 && (
-          <div className="rapor-bolum">
-            <h3>Ölçüm / Skorlama</h3>
-            <table className="cikti-alan">
-              <tbody>
-                {veri.alanlar.map((a, i) => (
-                  <tr key={i}>
-                    <td>{String(a.alanAd ?? '')}</td>
-                    <td><b>{String(a.deger ?? '')}</b></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* --- EK RAPORLAR: orijinalin ALTINDA, metni degistirmeden. --- */}
-        {veri.ekler.map((e, i) => (
-          <div className="bolum ek-rapor" key={`ek${i}`}>
-            <h3>
-              Ek Rapor (Addendum)
-              {e.onayTarihi ? ` · ${tarihSaat(e.onayTarihi)}` : ''}
-              {e.raporNo ? ` · ${e.raporNo}` : ''}
-            </h3>
-            <p>{String(e.metin ?? '')}</p>
-          </div>
-        ))}
-
-        {/* --- IMZA --- */}
-        <div className="imza">
-          <div className="imzak">
-            <div className="cizgi" />
-            <b>{String(r.onaylayan ?? '') || String(r.yazan ?? '') || '—'}</b><br />
-            Radyoloji Uzmanı
-            {onayli && (
-              <div className="eimza">
-                ✓ Elektronik olarak onaylandı · {tarihSaat(r.onayTarihi)}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="dipnot">
-          Bu rapor yalnızca yukarıda adı geçen tetkike aittir; klinik bulgular ve
-          diğer tetkiklerle birlikte değerlendirilmelidir.
-          {r.cihazAdi ? ` Çekim cihazı: ${r.cihazAdi}.` : ''}
-        </div>
+      <div className="dipnot">
+        Bu rapor yalnızca yukarıda adı geçen tetkike aittir; klinik bulgular ve
+        diğer tetkiklerle birlikte değerlendirilmelidir.
+        {r.cihazAdi ? ` Çekim cihazı: ${r.cihazAdi}.` : ''}
       </div>
     </div>
   );

@@ -45,11 +45,14 @@ public static partial class YatanUclari
         //   Üçü aynı anda görünüyor; ayrı isteklere bölmek çizelgeyi yarım
         //   çizdirirdi.
         grup.MapGet("/emar", async (
-            int yatisId, DateOnly? gun, VeriKaynagi veri, BaglamCozucu cozucu,
+            int yatisId, DateOnly? gun, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("yatan.order", Islem.Gor);
+            // KAPSAM (kod inceleme 30.10.2026 K59): yatış kimliği sorgudan gelir - liste ile aynı
+            //   şube / kapsam kuralı; kapsam dışı yatış 404.
+            await erisim.IsteAsync(baglam, "yatan", yatisId, "Yatış bulunamadı.", iptal);
 
             var tarih = gun ?? DateOnly.FromDateTime(Gentegre.Cekirdek.Saat.Bugun);
 
@@ -165,7 +168,7 @@ public static partial class YatanUclari
 
         // --------------------------------------------------- doz uygulandı ----
         grup.MapPost("/doz/{id:long}/uygula", async (
-            long id, DozUygulaIstegi istek, VeriKaynagi veri, LogDeposu log,
+            long id, DozUygulaIstegi istek, VeriKaynagi veri, LogDeposu log, KayitErisimi erisim,
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -186,15 +189,23 @@ public static partial class YatanUclari
                 yatisId = o.GetInt32(3),
             }, iptal) ?? throw GentegreHatasi.Bulunamadi("Doz kaydı bulunamadı.");
 
+            // KAPSAM (kod inceleme 30.10.2026 K59): dozun yatışı, liste ile aynı şube / kapsam
+            //   kuralından geçmeli - kapsam dışı yatışın dozu var olmayanla aynı (404).
+            await erisim.IsteAsync(baglam, "yatan", doz.yatisId, "Doz kaydı bulunamadı.", iptal);
+
             if (doz.durum == 2)
                 throw GentegreHatasi.IsKurali("Bu doz zaten uygulanmış.");
 
-            var zaman = istek.UygulananZaman ?? Saat.Simdi;
+            // SAAT (kod inceleme 30.10.2026 K18): `planlanan` timestamptz = UTC AN; Saat.Simdi şube
+            //   DUVAR saatiydi (Kind Unspecified) - UTC anla kıyaslanınca her doz 3 saat "geç"
+            //   çıkıyor ve gecikme sebebi isteniyordu. Kıyas iki tarafta da UTC an; istemciden
+            //   dilimsiz saat gelirse şube diliminde yorumlanır (Saat.AnOlarak), yazılan da UTC an.
+            var zaman = istek.UygulananZaman is { } verilen ? Saat.AnOlarak(verilen) : Saat.An;
 
             // GECİKME SEBEBİ: 30 dakikayı geçen dozda sorulur. "Neden geç
             //   verildi" sorusunun cevabı sonradan hatırlanmaz; şimdi
             //   yazılmazsa hiç yazılmaz.
-            var gecikti = zaman > doz.planlanan.AddMinutes(30);
+            var gecikti = zaman > Saat.AnOlarak(doz.planlanan).AddMinutes(30);
             if (gecikti && string.IsNullOrWhiteSpace(istek.GecikmeNedeni))
                 throw GentegreHatasi.Dogrulama(
                     "Doz gecikmiş: gecikme sebebi yazılmalı.",
@@ -206,7 +217,9 @@ public static partial class YatanUclari
             //   kâğıt üstünde bırakırdı.
             var elle = istek.ElleDogrulandi || string.IsNullOrWhiteSpace(istek.Barkod);
 
-            await baglanti.CalistirAsync("""
+            // YARIŞ (kod inceleme 30.10.2026 K59): okuma ile yazma arasında başka hemşire
+            //   uygulamışsa koşulsuz UPDATE onun kaydının üstüne yazardı - durum koşulu + etkilenen.
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.order_uygulama
                    set durum = 2, uygulanan = @p1, uygulayan_id = @p2,
                        miktar = coalesce(@p3, miktar),
@@ -215,10 +228,12 @@ public static partial class YatanUclari
                        gecikme_nedeni = coalesce(@p6, gecikme_nedeni),
                        atlama_nedeni = '',
                        degistiren = @p2, degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum <> 2
                 """, null,
                 [id, zaman, baglam.KullaniciId, istek.Miktar, istek.Barkod?.Trim(),
                  (short)(elle ? 1 : 0), istek.GecikmeNedeni?.Trim()], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Bu doz az önce başka bir kullanıcı tarafından uygulandı.");
 
             await log.YazAsync(LogIslemi.Degistir, LogTabloYatis, doz.yatisId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -235,7 +250,7 @@ public static partial class YatanUclari
 
         // ------------------------------------------------------ doz atlandı ----
         grup.MapPost("/doz/{id:long}/atla", async (
-            long id, DozAtlaIstegi istek, VeriKaynagi veri, LogDeposu log,
+            long id, DozAtlaIstegi istek, VeriKaynagi veri, LogDeposu log, KayitErisimi erisim,
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -262,6 +277,9 @@ public static partial class YatanUclari
                 yatisId = o.GetInt32(3),
             }, iptal) ?? throw GentegreHatasi.Bulunamadi("Doz kaydı bulunamadı.");
 
+            // KAPSAM (K59): uygula ile aynı kural.
+            await erisim.IsteAsync(baglam, "yatan", doz.yatisId, "Doz kaydı bulunamadı.", iptal);
+
             if (doz.durum == 2)
                 throw GentegreHatasi.IsKurali(
                     "Uygulanmış doz atlanmış yapılamaz; düzeltme için kayıt notu girin.");
@@ -271,12 +289,16 @@ public static partial class YatanUclari
             //   şey söyler.
             var yeni = (short)(istek.HastaReddetti ? 4 : 3);
 
-            await baglanti.CalistirAsync("""
+            // YARIŞ (K59): arada uygulanmış doz atlanmış yapılamaz - durum koşulu + etkilenen.
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.order_uygulama
                    set durum = @p1, atlama_nedeni = @p2, uygulayan_id = @p3,
                        degistiren = @p3, degistirme_tarihi = now()
-                 where id = @p0
+                 where id = @p0 and durum <> 2
                 """, null, [id, yeni, istek.AtlamaNedeni.Trim(), baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Bu doz az önce uygulandı; atlanmış yapılamaz.");
 
             await log.YazAsync(LogIslemi.Degistir, LogTabloYatis, doz.yatisId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

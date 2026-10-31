@@ -67,7 +67,10 @@ public static class BzbhUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("bzbh", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            var kayit = await b.TekAsync(Secim + " where v.id = @p0", null, [id], Oku, iptal)
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): bildirimin katalog kaynağı yok - şube koşulu sorguda;
+            //   başka şubenin bildirimi olmayan kayıtla aynı 404'ü alır.
+            var kayit = await b.TekAsync(Secim + " where v.id = @p0 and (@p1::int is null or v.sube_id = @p1)",
+                null, [id, baglam.SubeId], Oku, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Bildirim bulunamadı.");
             return Results.Ok(new { bildirim = kayit });
         });
@@ -90,8 +93,10 @@ public static class BzbhUclari
                        coalesce(b.vaka_tipi, 0) as vaka_tipi, b.belirti_tarihi,
                        coalesce((select bb.sys_takip_no from public.belge_basvuru bb
                                   where bb.id = b.belge_id), '') as takip
-                  from public.bzbh_bildirim b where b.id = @p0
-                """, null, [id], o => new
+                  from public.bzbh_bildirim b
+                 -- KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): başka şubenin bildirimi gönderilemez (404).
+                 where b.id = @p0 and (@p1::int is null or b.sube_id = @p1)
+                """, null, [id, baglam.SubeId], o => new
             {
                 durum = o.GetInt16(0), hastaId = o.GetInt32(1),
                 belgeId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2),
@@ -175,9 +180,10 @@ public static class BzbhUclari
                     [new("not", "Gerekçe yazılmalı.")]);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): başka şubenin bildiriminden vazgeçilemez (404).
             var kayit = await baglanti.TekAsync(
-                "select durum, hasta_id from public.bzbh_bildirim where id = @p0",
-                null, [id], o => new { durum = o.GetInt16(0), hastaId = o.GetInt32(1) }, iptal)
+                "select durum, hasta_id from public.bzbh_bildirim where id = @p0 and (@p1::int is null or sube_id = @p1)",
+                null, [id, baglam.SubeId], o => new { durum = o.GetInt16(0), hastaId = o.GetInt32(1) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Bildirim bulunamadı.");
             if (kayit.durum == 1)
                 throw GentegreHatasi.IsKurali("Gönderilmiş bildirimden vazgeçilemez.");

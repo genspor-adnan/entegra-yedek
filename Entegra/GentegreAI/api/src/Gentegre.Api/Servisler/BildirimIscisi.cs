@@ -60,8 +60,21 @@ public sealed class BildirimIscisi : BackgroundService
             _gunluk.LogError(h, "Bildirim: askıdakiler kurtarılamadı.");
         }
 
+        var tur = 0;
         while (!iptal.IsCancellationRequested)
         {
+            // Askıda kalanlar yalnız açılışta değil, her ~60 turda bir (K37): iki örnekten biri çökerse öteki toplar.
+            if (++tur % 60 == 0)
+            {
+                try
+                {
+                    await using var k = _servisler.CreateAsyncScope();
+                    var n = await k.ServiceProvider.GetRequiredService<BildirimDeposu>()
+                                   .AskidakileriKurtarAsync(TimeSpan.FromMinutes(10), iptal);
+                    if (n > 0) _gunluk.LogWarning("Bildirim: askıda kalan {Adet} satır kuyruğa geri alındı.", n);
+                }
+                catch (Exception h) { _gunluk.LogError(h, "Bildirim: askıdakiler kurtarılamadı."); }
+            }
             var isledi = 0;
             try
             {

@@ -428,11 +428,20 @@ public static class AiUclari
             if (Convert.ToInt32(t["durum"]) != 1)
                 throw GentegreHatasi.IsKurali("Bu taslak zaten karara bağlanmış.");
 
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): görev kaydı ve taslak
+            //   kararı TEK transaction; taslak yalnız hâlâ BEKLİYOR (1) iken
+            //   kapanır. İki onay aynı anda gelirse ikincisi satırı etkilemez,
+            //   görevi de geri alınır - bir taslaktan bir görev doğar.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
             if (istek.Iptal)
             {
-                await baglanti.CalistirAsync(
-                    "update public.ai_taslak set durum = 3 where id = @p0",
-                    null, [istek.TaslakId], iptal);
+                var iptalEtkilenen = await baglanti.CalistirAsync(
+                    "update public.ai_taslak set durum = 3 where id = @p0 and durum = 1",
+                    islem, [istek.TaslakId], iptal);
+                if (iptalEtkilenen == 0)
+                    throw GentegreHatasi.IsKurali("Bu taslak zaten karara bağlanmış.");
+                await islem.CommitAsync(iptal);
                 return Results.Ok(new { durum = 3 });
             }
 
@@ -449,21 +458,24 @@ public static class AiUclari
                                               sorumlu_id, acan_id, taraf_id, sube_id, ekleyen)
                     values (@p0, @p1, 1, 2, 0, @p2, @p2, nullif(@p3, 0), @p4, @p2)
                     returning id
-                    """, null,
+                    """, islem,
                     [t["baslik"]?.ToString() ?? "AI görevi", t["icerik"]?.ToString() ?? "",
                      baglam.KullaniciId, t["tarafId"] is null ? 0 : Convert.ToInt32(t["tarafId"]),
                      baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
                 hedefId = Convert.ToInt32(g!["id"]);
             }
 
-            await baglanti.CalistirAsync("""
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.ai_taslak
                    set durum = 2, onaylayan = @p1, onay_tarihi = (now())::timestamp,
                        hedef_modul = case when @p2 is null then '' else 'gorev' end,
                        hedef_id = @p2
-                 where id = @p0
-                """, null, [istek.TaslakId, baglam.KullaniciId, hedefId], iptal);
+                 where id = @p0 and durum = 1
+                """, islem, [istek.TaslakId, baglam.KullaniciId, hedefId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Bu taslak zaten karara bağlanmış.");
 
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { durum = 2, hedefModul = hedefId is null ? "" : "gorev", hedefId });
         });
 

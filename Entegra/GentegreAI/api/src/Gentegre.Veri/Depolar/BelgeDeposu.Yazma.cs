@@ -347,6 +347,8 @@ public sealed partial class BelgeDeposu
             birimFiyatKdvli = Math.Round(birimFiyat * kdvCarpani, 4,
                                          MidpointRounding.AwayFromZero);
 
+        // ALAN ARALIGI (kod inceleme 30.10.2026 K40): iskonto 0-100, adet sifir degil - yoksa negatif tutar.
+        BelgeHesap.Dogrula(adet, iskonto, iskonto2);
         // TUTAR: Delphi formulu birebir (ic yuvarlama + carpimsal iskonto + banker's).
         var tutar      = BelgeHesap.SatirTutari(adet, birimFiyat, iskonto, iskonto2);
         var dovizTutar = BelgeHesap.SatirTutari(adet, dovizBirimFiyat, iskonto, iskonto2);

@@ -30,6 +30,11 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
                                         ILogger<TeleradOruDinleyici> gunluk) : BackgroundService
 {
     private const byte Bas = 0x0B, Bit1 = 0x1C, Bit2 = 0x0D;
+    // MLLP SINIRLARI (kod inceleme 30.10.2026 K38): çerçevesiz akıtılan veri belleği doldurup API'yi düşürmesin;
+    //   boşta bağlantı sonsuza dek tutulmasın; aynı anda kabul edilen bağlantı sayısı sınırlı.
+    private const int AzamiCerceve = 4 * 1024 * 1024;
+    private static readonly TimeSpan BostaZamanAsimi = TimeSpan.FromSeconds(60);
+    private static readonly SemaphoreSlim BaglantiKotasi = new(64, 64);
 
     private string[] _izinliIp = [];
     private Encoding _kodlama = Encoding.UTF8;
@@ -76,6 +81,13 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
             while (!dur.IsCancellationRequested)
             {
                 var istemci = await dinleyici.AcceptTcpClientAsync(dur);
+                if (!await BaglantiKotasi.WaitAsync(0, dur))
+                {
+                    gunluk.LogWarning("MLLP: bağlantı kotası dolu, yeni bağlantı reddedildi ({Uzak}).",
+                                      istemci.Client.RemoteEndPoint);
+                    istemci.Dispose();
+                    continue;
+                }
                 _ = BaglantiIsleAsync(istemci, dur);
             }
         }
@@ -90,6 +102,7 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
     private async Task BaglantiIsleAsync(TcpClient istemci, CancellationToken dur)
     {
         using (istemci)
+        try
         {
             var uzak = (istemci.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "";
             if (_izinliIp.Length > 0 && !_izinliIp.Contains(uzak))
@@ -106,16 +119,33 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
                 var tampon = new byte[16384];
                 var biriken = new List<byte>(32768);
 
+                var aramaBasi = 0;
                 while (!dur.IsCancellationRequested)
                 {
-                    var okunan = await akis.ReadAsync(tampon, dur);
+                    int okunan;
+                    using (var zamanAsimi = CancellationTokenSource.CreateLinkedTokenSource(dur))
+                    {
+                        zamanAsimi.CancelAfter(BostaZamanAsimi);
+                        try { okunan = await akis.ReadAsync(tampon, zamanAsimi.Token); }
+                        catch (OperationCanceledException) when (!dur.IsCancellationRequested)
+                        {
+                            gunluk.LogWarning("MLLP: boşta bağlantı kapatıldı ({Uzak}).", uzak);
+                            break;
+                        }
+                    }
                     if (okunan == 0) break;
                     biriken.AddRange(tampon.AsSpan(0, okunan).ToArray());
+                    if (biriken.Count > AzamiCerceve)
+                    {
+                        gunluk.LogWarning("MLLP: çerçeve sınırı aşıldı ({Boyut} bayt), bağlantı kapatıldı ({Uzak}).",
+                                          biriken.Count, uzak);
+                        break;
+                    }
 
                     // AYNI BAĞLANTIDAN ARKA ARKAYA MESAJ gelebilir: her
                     //   tamamlanan çerçeve ayrı rapordur.
                     int son;
-                    while ((son = CerceveSonu(biriken)) > 0)
+                    while ((son = CerceveSonu(biriken, aramaBasi)) > 0)
                     {
                         var bas = biriken.IndexOf(Bas);
                         var govde = biriken.Skip(bas + 1).Take(son - bas - 1).ToArray();
@@ -125,7 +155,10 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
                         var ack = await AlVeAckAsync(ham, uzak, dur);
                         await akis.WriteAsync(ack, dur);
                         await akis.FlushAsync(dur);
+                        aramaBasi = 0;
                     }
+                    // Çerçeve sonu henüz yok: bir sonraki okumada taramaya son bayttan devam (O(n²) olmasın).
+                    aramaBasi = Math.Max(0, biriken.Count - 1);
                 }
             }
             catch (Exception h)
@@ -133,11 +166,12 @@ public sealed class TeleradOruDinleyici(IServiceScopeFactory kapsam, VeriKaynagi
                 gunluk.LogError(h, "Gelen ORU: bağlantı hatası ({Ip}).", uzak);
             }
         }
+        finally { BaglantiKotasi.Release(); }
     }
 
-    private static int CerceveSonu(List<byte> veri)
+    private static int CerceveSonu(List<byte> veri, int bas = 0)
     {
-        for (var i = 0; i < veri.Count - 1; i++)
+        for (var i = Math.Max(0, bas); i < veri.Count - 1; i++)
             if (veri[i] == Bit1 && veri[i + 1] == Bit2) return i;
         return -1;
     }

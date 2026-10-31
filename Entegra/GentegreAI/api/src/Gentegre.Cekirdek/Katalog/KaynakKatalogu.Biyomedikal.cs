@@ -150,8 +150,10 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi DemirbasIsEmri() => new(
         Ad: "demirbasIsEmri",
         YetkiKodu: "demirbas.isemri",
+        // LEFT JOIN (K26 kapısı): müşteri cihazı iş emrinde (sahiplik 2) demirbas_id boş - iç join kaydı
+        //   listeden ve kayıt kapısından düşürüyordu (parça çıkışı 404).
         Kaynak: @"public.demirbas_is_emri e
-                  join public.demirbas d on d.id = e.demirbas_id
+                  left join public.demirbas d on d.id = e.demirbas_id
                   left join public.departman dp on dp.id = e.departman_id
                   left join public.taraf y on y.id = e.yapan_id
                   left join public.taraf f on f.id = e.firma_id

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useYoklama } from '../../bilesenler/yoklama';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
@@ -24,7 +25,8 @@ export function CagriSupervizor() {
   const [hata, setHata] = useState<string | null>(null);
   const [sekme, setSekme] = useState<Sekme>('kuyruk');
   const yukle = useCallback(async () => { try { setS(await api.cagriSupervizor()); setHata(null) } catch (h) { setHata(hataMetni(h)) } }, []);
-  useEffect(() => { void yukle(); const t = setInterval(() => void yukle(), 5000); return () => clearInterval(t) }, [yukle]);
+  useEffect(() => { void yukle() }, [yukle]);
+  useYoklama(yukle, 5000);   // K53: gizli sekmede durur, hatada geri çekilir
 
   const agentEkle = async (kuyrukId: number, kuyrukAd: string) => {
     if (!s) return;

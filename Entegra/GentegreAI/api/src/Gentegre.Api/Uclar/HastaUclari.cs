@@ -50,14 +50,23 @@ public static class HastaUclari
 
     public static void HastaUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/hasta").WithTags("Hasta").RequireAuthorization();
+        // KAYIT KAPISI (kod inceleme 30.10.2026 K01): /{id}/… uçları hasta kapsamından (şube / portal) geçer -
+        //   portal hastası başka hastanın özetini kimlikle açamaz.
+        var grup = yol.MapGroup("/api/hasta").WithTags("Hasta").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Hasta());
 
         grup.MapGet("/mukerrer", async (string? rol, string? vkno, string? cepTel, string? eposta,
             int? haric, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var rolKol = (rol == "personel") ? "personel" : "hasta";
-            baglam.YetkiIste(rolKol == "personel" ? "personel" : "hasta", Islem.Gor);
+            // MÜKERRER KONTROLÜ KAYIT AÇANIN İŞİ (kod inceleme 30.10.2026 K02): TCKN / telefon / e-posta → kimlik
+            //   çözücüsü yalnız görme yetkisiyle açıktı; portal rolleri (hasta, dış doktor, dış kurum) de "hasta.gor"
+            //   taşıdığı için toplu tarama kapısıydı. Portal için yok sayılır; kurum içinde kart yazma yetkisi ister.
+            var kaynakKodu = rolKol == "personel" ? "personel" : "hasta";
+            if (baglam.PortalTuru > 0) throw GentegreHatasi.Bulunamadi("Kayıt bulunamadı.");
+            if (!baglam.Yetkiler.Var(kaynakKodu, Islem.Ekle) && !baglam.Yetkiler.Var(kaynakKodu, Islem.Degistir))
+                throw GentegreHatasi.Yasak();
             await using var b = await veri.AcAsync(iptal);
             var kimlik = await KimlikBulAsync(b, rolKol, vkno, haric, iptal);
             var telefon = await TelefonBulAsync(b, rolKol, cepTel, haric, iptal);

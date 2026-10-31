@@ -90,7 +90,10 @@ public static class AcilUclari
 
     public static void AcilUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/acil").WithTags("Acil Servis").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): başvuru / çağrı / yatak kimlikleri liste ile aynı şube -
+        //   kapsam kuralından geçer; başka şubenin başvurusuna triyaj / çıkış yazılamaz (404).
+        var grup = yol.MapGroup("/api/acil").WithTags("Acil Servis").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Acil());
 
         BasvuruUclari(grup);
         CikisUclari(grup);
@@ -304,7 +307,7 @@ public static class AcilUclari
         //   satırda yok. Güncellemeden sonra o satırın gerekçesini dolduruyoruz.
         grup.MapPost("/basvuru/{id:long}/triyaj", async (
             long id, TriyajIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("acil.triyaj", Islem.Degistir);
@@ -312,6 +315,10 @@ public static class AcilUclari
             if (istek.Duzey is < 1 or > 5)
                 throw GentegreHatasi.Dogrulama("Triyaj düzeyi 1-5 olmalı.",
                     new AlanHatasi("duzey", "Triyaj düzeyi 1-5 olmalı."));
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen yatak başka şubenin olamaz.
+            if (istek.YatakId is > 0)
+                await erisim.IsteAsync(baglam, "acilYatak", istek.YatakId.Value, "Yatak bulunamadı.", iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -427,10 +434,14 @@ public static class AcilUclari
         // --------------------------------------------------- yatak ata / boşalt ----
         grup.MapPost("/basvuru/{id:long}/yatak", async (
             long id, YatakIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("acil.basvuru", Islem.Degistir);
+
+            // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): gövdeden gelen yatak başka şubenin olamaz.
+            if (istek.YatakId is > 0)
+                await erisim.IsteAsync(baglam, "acilYatak", istek.YatakId.Value, "Yatak bulunamadı.", iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
 
@@ -512,16 +523,22 @@ public static class AcilUclari
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            await baglanti.CalistirAsync("""
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): çıkış yalnız henüz
+            //   ÇIKIŞI YAPILMAMIŞ başvuruya yazılır; iki çıkış isteği aynı anda
+            //   gelirse ikincisi satırı etkilemez (çıkış zamanı/şekli ezilmez,
+            //   yatak ikinci kez temizliğe düşmez) ve 422 alır.
+            var etkilenen = await baglanti.CalistirAsync("""
                 update public.acil_basvuru
                    set cikis_sekli = @p1, cikis_tani = @p2, hedef_bolum_id = @p3,
                        cikis_notu = coalesce(@p4, cikis_notu),
                        cikis_zamani = @p5,
                        degistiren = @p6, degistirme_tarihi = (now())::timestamp
-                 where id = @p0
+                 where id = @p0 and cikis_zamani is null
                 """, islem,
                 [id, istek.CikisSekli, istek.CikisTani.Trim(), istek.HedefBolumId,
                  istek.CikisNotu, istek.Zaman ?? Saat.Simdi, baglam.KullaniciId], iptal);
+            if (etkilenen == 0)
+                throw GentegreHatasi.IsKurali("Bu başvurunun çıkışı zaten yapılmış.");
 
             // YATAK BOŞ DEĞİL, TEMİZLİKTE: temizlenmemiş yatağa hasta yollamak
             //   panonun yalan söylemesidir. "Temizlik bitti" ayrı bir olaydır.

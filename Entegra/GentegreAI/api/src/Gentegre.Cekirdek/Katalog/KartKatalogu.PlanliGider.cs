@@ -19,7 +19,7 @@ public static partial class KartKatalogu
     };
 
     private static KartTanimi PlanliGiderKategori() => new(
-        Ad: "planliGiderKategori",
+        Ad: "planli-gider-kategori",   // liste kaynağıyla aynı ad: web genel kartı /api/kart/<kaynak>/{id} ile açar (duman 31.10.2026)
         YetkiKodu: "finans.planli_gider_kategori",
         Tablo: "public.planli_gider_kategori",
         LogTabloId: 1723,

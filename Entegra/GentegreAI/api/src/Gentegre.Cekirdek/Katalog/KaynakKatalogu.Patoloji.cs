@@ -24,6 +24,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi PatolojiVaka() => new(
         Ad: "patoloji-vaka",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "v.hasta_id",
         YetkiKodu: "patoloji.vaka",
         Kaynak: "public.pat_vaka v "
               + "  join public.taraf h on h.id = v.hasta_id "

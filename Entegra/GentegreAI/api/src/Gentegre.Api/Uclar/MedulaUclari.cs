@@ -101,6 +101,10 @@ public static partial class MedulaUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("medula.provizyon", Islem.Gor);
+            // YAZMA YETKİSİ (K16): sorgu Medula kuyruğuna ve provizyon satırına YAZAR -
+            //   salt okuma şubede çalışmaz. Rol yetkisi Gör kalır (sorgulama hakkı), şube
+            //   yazma kapısı ayrıca istenir.
+            baglam.YazmaIste();
             await using var b = await veri.AcAsync(iptal);
             var tckn = await b.TekDegerAsync<string>("select coalesce(vkno, '') from public.taraf where id = @p0", null, [istek.HastaId], iptal) ?? "";
             var tesis = await TesisKoduAsync(b, iptal);

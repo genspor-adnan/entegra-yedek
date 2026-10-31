@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { gorunumKaydet, gorunumOku, type RadyolojiRaporDuzeni, type RadyolojiRaporGiris } from '../bilesenler/gorunum';
-import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
+import { guvenli, listeSor, mesaj, metinSor, onay } from '../bilesenler/mesaj';
+import { tarihSaat } from '../bilesenler/bicim';
 import { Modal } from '../bilesenler/Modal';
 import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../bilesenler/MuayeneSekmesiz';
 import { c } from '../dil/ceviri';
@@ -12,6 +13,8 @@ import { TEK_BASLIK, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi,
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
 import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml } from '../bilesenler/BicimliMetin';
+import { CiktiMenusu } from '../bilesenler/cikti/CiktiMenusu';
+import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from './RadyolojiRaporCikti';
 
 
 /**
@@ -76,6 +79,18 @@ const RAPOR_DURUM: Record<number, { ad: string; sinif: string }> = {
   3: { ad: 'Onaylı',    sinif: 'basari' },
 };
 
+/** "14:20" (bugün) ya da "27.10 14:20". */
+const saatYaz = (t: unknown) => {
+  const s = tarihSaat(t as string);
+  const bugun = new Date().toLocaleDateString('tr-TR');
+  return s.startsWith(bugun) ? s.slice(11) : `${s.slice(0, 5)} ${s.slice(11)}`;
+};
+/** Uzmana gönderilmeden bu yana: "25 dk", "3 sa", "2 gün". */
+const sureYaz = (t: unknown) => {
+  const dk = Math.max(0, Math.floor((Date.now() - new Date(String(t)).getTime()) / 60000));
+  return dk < 60 ? `${dk} dk` : dk < 1440 ? `${Math.floor(dk / 60)} sa` : `${Math.floor(dk / 1440)} gün`;
+};
+
 const KRITIK_YOL: Record<number, string> = {
   1: 'Telefon', 2: 'SMS', 3: 'Yüz yüze', 4: 'e-Posta',
 };
@@ -94,6 +109,19 @@ export function RadyolojiRapor() {
 
   const [istem, setIstem] = useState<Kayit | null>(null);
   const [rapor, setRapor] = useState<Kayit | null>(null);
+  // YAZDIRMA BELGESİ: kayıtlı raporun çıktı verisi. Her kayıtta sürüm değişir - belge yeniden okunur,
+  //   önizlenen metin kaydedilmiş metin olur.
+  const [ciktiVeri, setCiktiVeri] = useState<RaporCiktiVerisi | null>(null);
+  const ciktiRaporId = Number(rapor?.id ?? 0);
+  const ciktiSurum = String(rapor?.surum ?? '');
+  useEffect(() => {
+    if (!ciktiRaporId) { setCiktiVeri(null); return }
+    let iptal = false;
+    api.radyolojiRaporCikti(ciktiRaporId)
+      .then(v => { if (!iptal) setCiktiVeri(v as RaporCiktiVerisi) })
+      .catch(() => { if (!iptal) setCiktiVeri(null) });
+    return () => { iptal = true };
+  }, [ciktiRaporId, ciktiSurum]);
   const [bolumler, setBolumler] = useState<Bolum[]>([]);
   const [sablonlar, setSablonlar] = useState<Sablon[]>([]);
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
@@ -142,17 +170,24 @@ export function RadyolojiRapor() {
   /** Yapısal girişte bölüm iskeleti (teknik / klinik / karşılaştırma şablondan); BULGULAR + SONUÇ formdan yazılır. */
   const [parcalar, setParcalar] = useState<Bolum[]>([]);
 
+  // YÜKLEME SIRASI (kod inceleme 30.10.2026 K53): hızlı tetkik geçişinde eski yanıt yeniyi ezmesin -
+  //   her yükleme bir sıra numarası alır, araya yeni yükleme girdiyse eski yanıt atılır.
+  const yukleSira = useRef(0);
   const yukle = useCallback(async () => {
+    const sira = ++yukleSira.current;
     setYukleniyor(true); setHata('');
     try {
       const y = await api.radyolojiRapor(id);
+      if (sira !== yukleSira.current) return;
       setIstem(y.istem); setRapor(y.rapor);
       setSablonlar(y.sablonlar as unknown as Sablon[]);
       setMakrolar(y.makrolar as unknown as Makro[]);
       setSkorlar(y.skorlar as unknown as Skor[]);
       setGecmis(y.gecmis as unknown as Gecmis[]);
       setKritikler(y.kritikler as unknown as Kritik[]);
-      setKonsultasyonlar(await api.radyolojiKonsultasyonlar(id));
+      const konsultasyonlar = await api.radyolojiKonsultasyonlar(id);
+      if (sira !== yukleSira.current) return;
+      setKonsultasyonlar(konsultasyonlar);
       setKritik(Number(y.istem?.kritik ?? 0) === 1);
       setBakanlikProfili(Boolean(y.bakanlikProfili));
       setNedeniPuan(Number(y.rapor?.istemNedeniPuan ?? 0));
@@ -189,7 +224,8 @@ export function RadyolojiRapor() {
       const d: Record<string, string> = {};
       (y.alanlar as Kayit[]).forEach(a => { d[String(a.alanKod)] = String(a.deger ?? '') });
       setSkorDeger(d);
-    } catch (h) { setHata(hataMetni(h)) } finally { setYukleniyor(false) }
+    } catch (h) { if (sira === yukleSira.current) setHata(hataMetni(h)) }
+    finally { if (sira === yukleSira.current) setYukleniyor(false) }
   // sablonUygula bilerek bagimlilikta degil: ilk yuklemede tek yon calisir.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -371,19 +407,61 @@ export function RadyolojiRapor() {
     ...(bakanlikProfili ? { istemNedeniPuan: nedeniPuan, cekimKalitePuan: kalitePuan } : {}),
   });
 
-  const kaydet = async (sonra?: (k: { raporId: number; surum: string }) => Promise<void>) =>
-    guvenli(async () => {
-      const k = await api.radyolojiRaporYaz(id, govde());
-      // Kayıt geçtiyse sürüm değişti: sonraki adım hata verse de yeni sürüm okunur (yoksa ikinci kayıt 409 alırdı).
-      try { if (sonra) await sonra(k) } finally { await yukle() }
-      if (!sonra) mesaj('Rapor taslağı kaydedildi.');
-    });
+  // ÇİFT TIK KORUMASI (K55): kaydet / uzmana gönder / onayla sürerken ikinci istek gitmez (ref anlık,
+  //   state düğmeleri kapatır).
+  const islemdeRef = useRef(false);
+  const [islemde, setIslemde] = useState(false);
+  const kaydet = async (sonra?: (k: { raporId: number; surum: string }) => Promise<void>) => {
+    if (islemdeRef.current) return false;
+    islemdeRef.current = true; setIslemde(true);
+    try {
+      return await guvenli(async () => {
+        const k = await api.radyolojiRaporYaz(id, govde());
+        // Kayıt geçtiyse sürüm değişti: sonraki adım hata verse de yeni sürüm okunur (yoksa ikinci kayıt 409 alırdı).
+        try { if (sonra) await sonra(k) } finally { await yukle() }
+        if (!sonra) mesaj('Rapor taslağı kaydedildi.');
+      });
+    } finally { islemdeRef.current = false; setIslemde(false) }
+  };
 
   // ONAY = EKRANDAKİ METİN: önce bu ekranın metni kaydedilir, onay KAYDIN döndürdüğü sürümle istenir. Rapor
   //   yeniden okunmaz - okunsaydı arada başkasının kaydettiği (uzmanın görmediği) metin onaylanırdı.
-  const durumaGecir = (hedef: 'on-rapor' | 'onay') => kaydet(async ({ raporId, surum }) => {
+  // UZMANA GÖNDER (1199): onaylayacak uzman SEÇİLİR. Varsayılan: raporun önceki onaylayacağı, yoksa bu
+  //   kullanıcının son seçtiği uzman (yerel). Seçim kayıttan ÖNCE sorulur - vazgeçilirse hiçbir şey yazılmaz.
+  const uzmanSec = async (): Promise<{ id: number; not: string } | null> => {
+    const liste = await api.radyolojiOnayUzmanlari();
+    if (liste.length === 0) { mesaj('Bu şubede rapor onaylama yetkisi olan uzman yok.'); return null }
+    let son = '';
+    try { son = localStorage.getItem('rad.sonUzman') ?? '' } catch { /* yerel depo kapalı */ }
+    const onceki = String(rapor?.onaylayacakId ?? '');
+    const varsayilan = [onceki, son].find(k => k && liste.some(u => String(u.id) === k)) ?? String(liste[0].id);
+    const secilen = await listeSor('Raporu onaylayacak uzmanı seçin.',
+      liste.map(u => ({ kod: String(u.id), ad: `${u.ad} — ${u.bekleyen} onay bekliyor` })), varsayilan, 'Onaylayacak uzman');
+    if (!secilen) return null;
+    try { localStorage.setItem('rad.sonUzman', secilen) } catch { /* yerel depo kapalı */ }
+    // NOT (1200): isteğe bağlı; uzman raporu açınca bandın altında sarı şerit. Vazgeç = gönderim iptal.
+    const not = await metinSor('Uzmana not (isteğe bağlı):', '', 'ör. Sol memedeki lezyona özellikle bakar mısınız?');
+    if (not === null) return null;
+    return { id: Number(secilen), not: not.trim() };
+  };
+
+  const durumaGecir = async (hedef: 'on-rapor' | 'onay') => {
+    if (islemdeRef.current) return;
+    // ONAY SORUSU (K55): imza geri alınamaz - kilitlemeden önce sorulur.
+    if (hedef === 'onay' && !await onay('Rapor onaylanıp imzalanacak ve kilitlenecek. Devam edilsin mi?')) return;
+    let uzman: { id: number; not: string } | undefined;
+    if (hedef === 'on-rapor') {
+      // guvenli yalniz basari bayragi doner - secim disaridaki degiskene yazilir.
+      let secilen: { id: number; not: string } | null = null;
+      if (!await guvenli(async () => { secilen = await uzmanSec() }) || !secilen) return;
+      uzman = secilen;
+    }
+    await kaydetVeGecir(hedef, uzman);
+  };
+
+  const kaydetVeGecir = (hedef: 'on-rapor' | 'onay', uzman?: { id: number; not: string }) => kaydet(async ({ raporId, surum }) => {
     if (!raporId) throw new Error('Rapor bulunamadı.');
-    await api.radyolojiRaporDurum(raporId, hedef, surum);
+    await api.radyolojiRaporDurum(raporId, hedef, surum, uzman?.id, uzman?.not);
     mesaj(hedef === 'onay'
       ? 'Rapor onaylandı ve imzalandı; artık kilitlidir.'
       : 'Ön rapor uzman onayına gönderildi.');
@@ -415,6 +493,27 @@ export function RadyolojiRapor() {
   if (!istem) return <div className="hata-kutusu">{c('İstem bulunamadı.')}</div>;
 
   const kilitli = Number(rapor?.kilit ?? 0) === 1;
+  // ONAYLAYACAK → ONAYLAYAN (1199): onaya kadar seçilen uzman + bekleme süresi, onaydan sonra imzalayan.
+  //   Başka bir uzman onayladıysa (izin / nöbet) "(X yerine)". Kendi onaylayan akışta onaylayacak hiç yok.
+  const onayBlogu = () => {
+    if (!rapor) return null;
+    const onayli = Number(rapor.durum ?? 0) === 3;
+    if (onayli) return <>
+      <div className="hbnd-b">✔ {c('Onaylayan')}</div>
+      <div><b>{String(rapor.onaylayan ?? '') || '—'}</b></div>
+      <div className="hbnd-alt">
+        {rapor.onaylayacakId && Number(rapor.onaylayacakId) !== Number(rapor.onaylayanId)
+          ? `(${String(rapor.onaylayacak)} ${c('yerine')}) ` : ''}
+        {rapor.onayTarihi ? `${saatYaz(rapor.onayTarihi)} · e-imza` : ''}</div>
+    </>;
+    return <>
+      <div className="hbnd-b">⏳ {c('Onaylayacak')}</div>
+      {String(rapor.onaylayacak ?? '')
+        ? <><div><b>{String(rapor.onaylayacak)}</b></div>
+            {rapor.onayaGonderme && <div className="hbnd-alt rad-bekliyor">{c('bekliyor')} · {sureYaz(rapor.onayaGonderme)}</div>}</>
+        : <div className="hbnd-alt">— {c('gönderirken seçilir')}</div>}
+    </>;
+  };
   const durum = RAPOR_DURUM[Number(rapor?.durum ?? 1)] ?? RAPOR_DURUM[1];
   const yas = istem.dogumTarihi
     ? Math.floor((Date.now() - new Date(String(istem.dogumTarihi)).getTime())
@@ -426,26 +525,26 @@ export function RadyolojiRapor() {
       <div className="sayfa-bas">
         {/* BAŞLIK SATIRI KALKTI (kullanıcı 27.10.2026): sekme başlığı hasta adı; accession no solda "Bu tetkik"te. */}
         <div className="sayfa-eylem">
-          <button className="d bir" disabled={kilitli} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
-          <button className="d" disabled={kilitli}
+          <button className="d bir" disabled={kilitli || islemde} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
+          <button className="d" disabled={kilitli || islemde}
                   onClick={() => void durumaGecir('on-rapor')}>➜ Uzmana Gönder</button>
-          <button className="d basari" disabled={kilitli}
+          <button className="d basari" disabled={kilitli || islemde}
                   onClick={() => void durumaGecir('onay')}>✍ Onayla ve İmzala</button>
           <button className="d teh" disabled={kilitli}
                   onClick={() => setKritikModal(true)}>⚠ Kritik Bulgu Bildir</button>
           {kilitli && <button className="d" onClick={() => void addendum()}>＋ Ek Rapor</button>}
-          {/* CIKTI (303): rapor kaydedilmeden numarasi/bolumleri olmaz -
-              rapor yoksa dugme kapali. Onaysiz raporun ciktisinda "taslak"
-              uyarisi cikar, basilmasi engellenmez (hekim kontrol icin alir). */}
-          <button className="d" disabled={!rapor?.id}
-                  title={rapor?.id ? 'Hastaya verilecek rapor çıktısı'
-                                   : 'Önce raporu kaydedin.'}
-                  onClick={() => git(`/radyoloji/cikti/${Number(rapor?.id)}`)}>
-            🖨 Çıktı
-          </button>
           {/* İSTEM (kullanıcı 27.10.2026): istem kartını kendi sekmesinde açar. */}
           <button className="d" title={c('Radyoloji istem kartını aç')}
                   onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/${id}`) : git(`/radyoloji/${id}`))}>☢️ İstem</button>
+          {/* SAĞA YASLI (kullanıcı 28.10.2026): Çıktı ve Kapat satırın sağ ucunda. */}
+          <span className="ck-bosluk" />
+          {/* YAZDIR (kullanıcı 28.10.2026, icmallerdeki gibi): Baskı Önizleme / Yazıcıya Yazdır / Gönder (PDF,
+              Word, Excel, HTML) - çıktı sayfasına gitmeden. Belge KAYITLI rapordan çizilir (303): kaydedilmemiş
+              raporda menü kapalı; onaysız rapor basılabilir, hekim kontrol için alır. */}
+          <CiktiMenusu etiket="Yazdır" dugmeSinifi="d" sagda devre={!ciktiVeri}
+                       dosyaAdi={`Radyoloji Raporu ${String(ciktiVeri?.rapor.hastaAdi ?? '')} ${String(ciktiVeri?.rapor.raporNo ?? '')}`.trim()}>
+            {ciktiVeri && <RadyolojiRaporBelgesi veri={ciktiVeri} />}
+          </CiktiMenusu>
           <button className="d" onClick={() => (ekranSekmesi ? ekranSekmesi.kapat() : git('/radyoloji'))}>✖ Kapat</button>
         </div>
       </div>
@@ -453,15 +552,30 @@ export function RadyolojiRapor() {
       {/* RADYOLOJİ BANDI (kullanıcı 27.10.2026): kan grubu yok, raporun DURUMU bandın sonunda. */}
       {bant && <MuayeneHastaBandi bilgi={bant} kanGrubuYok
         suAnYerine={<>
-          <div className="hbnd-b">{c('İsteyen')}</div>
+          <div className="hbnd-b">🩺 {c('İsteyen')}</div>
           <div><b>{String(istem.isteyen ?? '') || '—'}</b></div>
           {String(istem.isteyenBolum ?? '') && <div className="hbnd-alt">{String(istem.isteyenBolum)}</div>}
         </>}
-        sonBlok={<>
-        <div className="hbnd-b">{c('Durum')}</div>
-        <div className="hbnd-rozetler"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
-          {kilitli && <span className="rozet">🔒 {c('Kilitli')}</span>}</div>
-      </>} />}
+        sonBlok={[
+          // YAZAN · ONAYLAYACAK/ONAYLAYAN · DURUM (kullanıcı 28.10.2026, mockup seçenek C).
+          rapor?.yazan ? <>
+            <div className="hbnd-b">✍ {c('Yazan')}</div>
+            <div><b>{String(rapor.yazan)}</b></div>
+            <div className="hbnd-alt">{Number(rapor.yazanAsistan) === 1 && <span className="rozet rad-asistan">{c('asistan')}</span>}
+              {rapor.yazmaTarihi ? ` ${saatYaz(rapor.yazmaTarihi)}` : ''}</div>
+          </> : null,
+          onayBlogu(),
+          <>
+            <div className="hbnd-b">{c('Durum')}</div>
+            <div className="hbnd-rozetler"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
+              {kilitli && <span className="rozet">🔒 {c('Kilitli')}</span>}</div>
+            {String(rapor?.raporNo ?? '') && <div className="hbnd-alt">{String(rapor?.raporNo)}</div>}
+          </>,
+        ]} />}
+      {/* UZMANA NOT (1200): ön rapor beklerken bandın altında sarı şerit - uzman raporu açınca ilk bunu görür. */}
+      {Number(rapor?.durum ?? 0) === 2 && String(rapor?.onayNotu ?? '').trim() !== '' && (
+        <div className="rad-onay-notu">📝 <b>{String(rapor?.yazan ?? '') || c('Gönderen')}:</b> {String(rapor?.onayNotu)}</div>
+      )}
       {/* KİMLİK ŞERİDİ KALKTI (kullanıcı 27.10.2026: "hasta bandının altındaki banttaki bilgileri soldaki önceki
           tetkiklere taşı ve bu bandı kaldır"): tetkik ve çekim solda "Bu tetkik" düğümünde, hasta ve durum bantta.
           Bant okunamazsa (yedek) yalnız hasta + durum şeridi kalır. */}
@@ -638,7 +752,7 @@ export function RadyolojiRapor() {
           )}
           <h5 style={{ marginTop: 12 }}>Şablon</h5>
           <select value={sablonId ?? ''} disabled={kilitli}
-                  onChange={e => void sablonUygula(Number(e.target.value))}>
+                  onChange={e => { const v = Number(e.target.value); if (v > 0) void sablonUygula(v) }}>
             <option value="">— seçiniz —</option>
             {sablonlar.map(s => (
               <option key={s.id} value={s.id}>
@@ -806,7 +920,9 @@ export function RadyolojiRapor() {
       {kritikModal && (
         <Modal baslik="Kritik Bulgu Bildirimi" onKapat={() => setKritikModal(false)}
                alt={<>
-                 <button className="d bir" onClick={() => void kritikKaydet()}>Kaydet</button>
+                 {/* Boş bildirim kaydedilmez (K22): bulgu ve bildirilen kişi zorunlu - sunucu da reddeder. */}
+                 <button className="d bir" disabled={!kritikForm.bulgu.trim() || !kritikForm.bildirilenAd.trim()}
+                         onClick={() => void kritikKaydet()}>Kaydet</button>
                  <button className="d" onClick={() => setKritikModal(false)}>✖ Kapat</button>
                </>}>
           <div className="alan-izgara tek-sutun">

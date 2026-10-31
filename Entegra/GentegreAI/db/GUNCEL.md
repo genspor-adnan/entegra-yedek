@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (632 ad, 161 tanesi birden cok dosyada)
+## Fonksiyonlar (633 ad, 164 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -108,6 +108,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_satir_hizmet_kullanim` | `552_stok_ilac_kisa_ad_kullanim.sql` | 550_hizmet_kullanim_puani.sql |
 | `fn_belge_satir_kapatma` | `191_kapanma_tazele.sql` | 082_belge_donusum.sql |
 | `fn_belge_satir_kapatma_tazele` | `478_pay_kolonlari_dusur.sql` | 082_belge_donusum.sql, 086_belge_donusum_kurallar.sql, 142_siparis_rezervasyon.sql, 289_odeme_paylasimi.sql, 471_dagilim_kapanma_tahsil.sql |
+| `fn_belge_satir_kapatma_toplu` | `1209_belge_satir_kapatma_toplu_tetik.sql` | — |
 | `fn_belge_satir_paylastir` | `291_katilim_payi.sql` | 289_odeme_paylasimi.sql |
 | `fn_belge_satir_rezerve_kirp` | `142_siparis_rezervasyon.sql` | — |
 | `fn_belge_satir_tahsil_tazele` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 471_dagilim_kapanma_tahsil.sql, 478_pay_kolonlari_dusur.sql |
@@ -247,7 +248,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `fn_hizmet_paket_kapsam` | `925_basvuru_istem_serbest_panel.sql` | — |
 | `fn_hizmet_puan` | `550_hizmet_kullanim_puani.sql` | — |
-| `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
+| `fn_hizmet_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `fn_ilac_alerji_kontrol` | `935_ilac_alerji_sinif.sql` | 413_recete.sql, 414_metin_sadelestir.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
@@ -418,7 +419,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_istem_sil` | `920_muayene_istem_sil.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
-| `fn_radyoloji_rapor_onaylanabilir` | `809_bakanlik_rapor_parcalari.sql` | 284_radyoloji_operasyon.sql |
+| `fn_radyoloji_rapor_onaylanabilir` | `1206_radyoloji_onay_kritik_dolu.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_resmi_tatil_uret` | `749_resmi_tatil.sql` | — |
 | `fn_rol_kilit_koru` | `786_kurum_tipi_rol.sql` | — |
@@ -526,7 +527,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_istem_serbest` | `913_istem_ucret_kapisi.sql` | — |
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql |
-| `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
+| `tg_belge_satir_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `tg_belge_talep_dogrulama` | `962_belge_talep_karti.sql` | — |
 | `tg_calisma_istisna_onay` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 945_calisma_karti_kurallari.sql |
 | `tg_calisma_sablon_cakisma` | `945_calisma_karti_kurallari.sql` | — |
@@ -610,7 +611,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_guncelle` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_radyoloji_istem_hazirla` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_radyoloji_istem_hizmet` | `459_radyoloji_istem_hizmet_kontrolu.sql` | — |
-| `tg_radyoloji_istem_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
+| `tg_radyoloji_istem_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
 | `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
@@ -792,7 +793,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
 | `v_hizmet_baslik_lookup` | `521_skrs_katalog_kurulum.sql` | — |
 | `v_hizmet_kategori_lookup` | `544_stok_kategori_marka_model.sql` | — |
-| `v_hizmet_lookup` | `482_hizmet_cinsiyet_yas.sql` | 071_kasa_master.sql |
+| `v_hizmet_lookup` | `1197_hizmet_cinsiyet_istisna.sql` | 071_kasa_master.sql, 482_hizmet_cinsiyet_yas.sql |
 | `v_hizmet_paket_eksik` | `502_hizmet_paket_bayragi.sql` | — |
 | `v_hizmet_paket_ozet` | `496_hizmet_paket.sql` | — |
 | `v_hizmet_radyoloji_eksik` | `514_hizmet_radyoloji_bayragi.sql` | — |

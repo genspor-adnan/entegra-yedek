@@ -16,6 +16,8 @@ namespace Gentegre.Api.Uclar;
 public static class FtrUclari
 {
     private const int LogProgram = 1182;
+    /// <summary>ftr_program_uygulama (KartKatalogu.Ftr LogFtrProgramUyg ile aynı numara).</summary>
+    private const int LogProgramUygulama = 1183;
     private const int LogSeans   = 1185;
 
     // ---------------------------------------------------- durum eşikleri ----
@@ -53,7 +55,10 @@ public static class FtrUclari
 
     public static void FtrUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/ftr").WithTags("FTR").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): /program/{id}, /seans/{id} ve uygulama satırları
+        //   (ftr-program / ftr-seans kaynakları) liste ile aynı şube kuralından geçer - kapsam dışı 404.
+        var grup = yol.MapGroup("/api/ftr").WithTags("FTR").RequireAuthorization()
+                      .AddEndpointFilter(KayitKapisi.Ftr());
 
         // ------------------------------------------------------ program kartı ----
         grup.MapGet("/program/{id:int}", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
@@ -124,22 +129,47 @@ public static class FtrUclari
             var p = await ProgramOkuAsync(b, id, iptal);
             if (ProgramKapali(p.durum)) throw GentegreHatasi.IsKurali("Kapanmış programa uygulama eklenmez.");
             if (g.HizmetId is null && string.IsNullOrWhiteSpace(g.Ad)) throw GentegreHatasi.Dogrulama("Uygulama seçin ya da ad yazın.");
+            // LOG YAZIMLA AYNI TRANSACTION (kod inceleme 30.10.2026 K33): eskiden log ayrı bağlantıda (autocommit) düşüyordu.
+            //   Ekleme logu uygulama satırının KENDİ tablosuna (1183), üst = program (1182); tam satırla.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             var yeniId = await b.TekDegerAsync<int>("""
                 insert into public.ftr_program_uygulama (program_id, sira, hizmet_id, ad, bolge_metin, sure_dk, parametre, cihaz_ad, seans_bas, seans_bit, sube_id, ekleyen)
                 values (@p0, (select coalesce(max(sira), 0) + 1 from public.ftr_program_uygulama where program_id = @p0), @p1,
                         coalesce(@p2, (select ad from public.hizmet where id = @p1), ''), coalesce(@p3, ''), coalesce(@p4, 15), coalesce(@p5, ''), coalesce(@p6, ''),
                         coalesce(@p7, 1), @p8, @p9, @p10) returning id
-                """, null, [id, g.HizmetId, g.Ad, g.BolgeMetin, g.SureDk is int s ? (short)s : null, g.Parametre, g.CihazAd,
+                """, islem, [id, g.HizmetId, g.Ad, g.BolgeMetin, g.SureDk is int s ? (short)s : null, g.Parametre, g.CihazAd,
                             g.SeansBas is int sb ? (short)sb : null, g.SeansBit is int sbt ? (short)sbt : null, baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogProgram, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { uygulamaEklendi = yeniId, g.HizmetId, g.Ad }, tarafId: p.hastaId, iptal: iptal);
+            var yeniSatir = await b.TekAsync("select * from public.ftr_program_uygulama where id = @p0", islem, [yeniId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogProgramUygulama, yeniId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                yeniSatir?.ToDictionary(x => x.Key, x => (object?)LogDeposu.Metin(x.Value)),
+                ustTabloId: LogProgram, ustKayitId: id, tarafId: p.hastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id = yeniId });
         });
-        grup.MapDelete("/program/uygulama/{id:int}", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapDelete("/program/uygulama/{id:int}", async (int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ftr.program", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            await b.CalistirAsync("delete from public.ftr_program_uygulama where id = @p0", null, [id], iptal);
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K13; proje kuralı "Geri Al"):
+            //   silinen uygulama sonradan yalnız logdan okunabilir. Log ve silme tek transaction.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var u = await b.TekAsync("""
+                select program_id, sira, hizmet_id, ad, bolge_metin, sure_dk, parametre, cihaz_ad, kabin_id, seans_bas, seans_bit, not_metin, sube_id
+                  from public.ftr_program_uygulama where id = @p0 for update
+                """, islem, [id], o => new
+                {
+                    programId = o.GetInt32(0), sira = (int)o.GetInt16(1), hizmetId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2), ad = o.GetString(3),
+                    bolgeMetin = o.GetString(4), sureDk = (int)o.GetInt16(5), parametre = o.GetString(6), cihazAd = o.GetString(7),
+                    kabinId = o.IsDBNull(8) ? (int?)null : o.GetInt32(8), seansBas = (int)o.GetInt16(9), seansBit = o.IsDBNull(10) ? (int?)null : (int)o.GetInt16(10),
+                    notMetin = o.GetString(11), subeId = o.GetInt32(12),
+                }, iptal) ?? throw GentegreHatasi.Bulunamadi("Uygulama bulunamadı.");
+            var p = await ProgramOkuAsync(b, u.programId, iptal);
+            await log.YazAsync(b, islem, LogIslemi.Sil, LogProgramUygulama, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { id, u.programId, u.sira, u.hizmetId, u.ad, u.bolgeMetin, u.sureDk, u.parametre, u.cihazAd, u.kabinId, u.seansBas, u.seansBit, u.notMetin, u.subeId },
+                ustTabloId: LogProgram, ustKayitId: u.programId, tarafId: p.hastaId, iptal: iptal);
+            await b.CalistirAsync("delete from public.ftr_program_uygulama where id = @p0", islem, [id], iptal);
+            await islem.CommitAsync(iptal);
             return Results.NoContent();
         });
 
@@ -324,8 +354,11 @@ public static class FtrUclari
             if (SeansKapali(s.durum)) throw GentegreHatasi.IsKurali("Seans zaten kapalı.");
             var p = await ProgramOkuAsync(b, s.programId, iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
-            await b.CalistirAsync("update public.ftr_seans set durum = 3, bitis = now(), baslangic = coalesce(baslangic, now() - interval '30 minute'), degistiren = @p1, degistirme_tarihi = now() where id = @p0",
+            // DURUM KOŞULLU (kod inceleme 30.10.2026 K13): seans yalnız hâlâ AÇIKKEN (yapıldı 3 / iptal 5 değil) biter;
+            //   iki "bitir" aynı anda gelirse ikincisi satırı etkilemez ve kalan_hak ikinci kez düşmez.
+            var etkilenen = await b.CalistirAsync("update public.ftr_seans set durum = 3, bitis = now(), baslangic = coalesce(baslangic, now() - interval '30 minute'), degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum not in (3, 5)",
                 islem, [id, baglam.KullaniciId], iptal);
+            if (etkilenen == 0) throw GentegreHatasi.IsKurali("Seans zaten kapalı.");
             var yapilan = await b.TekDegerAsync<int>("select count(*) from public.ftr_seans where program_id = @p0 and durum = 3", islem, [s.programId], iptal);
             var yeniDurum = yapilan >= p.seansSayisi ? 4 : (p.araSeans > 0 && yapilan == p.araSeans ? 3 : 2);
             await b.CalistirAsync("""
@@ -360,9 +393,14 @@ public static class FtrUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ftr.seans", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            await b.CalistirAsync("update public.ftr_seans set durum = 6, bitis = now(), yarim_neden = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 2",
-                null, [id, g.Neden, baglam.KullaniciId], iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Yarım", g.Neden }, iptal: iptal);
+            // LOG YAZIMLA AYNI TRANSACTION (kod inceleme 30.10.2026 K33); satır değişmediyse (seans sürmüyor) log da yok.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var etkilenen = await b.CalistirAsync("update public.ftr_seans set durum = 6, bitis = now(), yarim_neden = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 2",
+                islem, [id, g.Neden, baglam.KullaniciId], iptal);
+            if (etkilenen > 0)
+                await log.YazAsync(b, islem, LogIslemi.Degistir, LogSeans, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new Dictionary<string, string> { ["durum"] = "2 -> 6 (Yarım)", ["yarim_neden"] = " -> " + (g.Neden ?? "") }, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id });
         });
 

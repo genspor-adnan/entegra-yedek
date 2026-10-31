@@ -33,6 +33,8 @@ public static class TeknikServisUclari
 {
     /// <summary>islem_log.tablo_id — demirbas_is_emri (1224, 752'den beri).</summary>
     private const int LogIsEmri = 1224;
+    /// <summary>islem_log.tablo_id — demirbas_is_emri_parca (KartKatalogu.Biyomedikal "parcalar" detayı).</summary>
+    private const int LogIsEmriParca = 1226;
     /// <summary>islem_log.tablo_id — servis_cagri (773).</summary>
     private const int LogCagri = 1316;
     /// <summary>islem_log.tablo_id — servis_ziyaret (773).</summary>
@@ -737,32 +739,34 @@ public static class TeknikServisUclari
             baglam.YetkiIste("servis", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var p = await baglanti.TekAsync("""
-                select is_emri_id as "isEmriId", belge_id as "belgeId"
-                  from public.demirbas_is_emri_parca where id = @p0
-                """, null, [id],
-                o => new { IsEmriId = o.GetInt64(0),
-                           Cikildi = !o.IsDBNull(o.GetOrdinal("belgeId")) }, iptal)
+            // SATIR KİLİTLİ VE TAM OKUNUR (kod inceleme 30.10.2026 K33): silme logu
+            //   DELETE'ten ÖNCE satırın tam hâliyle yazılır - eskiden silmeden sonra
+            //   iş emrine "parça silindi: <id>" düşüyordu, parçanın ne olduğu kaybolurdu.
+            var satir = await baglanti.TekAsync(
+                "select * from public.demirbas_is_emri_parca where id = @p0 for update",
+                islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Parça satırı bulunamadı.");
+            var isEmriId = Convert.ToInt64(satir["is_emri_id"]);
 
-            if (p.Cikildi)
+            if (satir["belge_id"] is not null)
                 throw GentegreHatasi.IsKurali(
                     "Bu parçanın stok çıkışı yapılmış - satır silinemez. "
                   + "Gerekiyorsa stok tarafında iade fişi kesin.");
 
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogIsEmriParca, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                ustTabloId: LogIsEmri, ustKayitId: isEmriId, iptal: iptal);
             await baglanti.CalistirAsync(
                 "delete from public.demirbas_is_emri_parca where id = @p0",
                 islem, [id], iptal);
-            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogIsEmri,
-                (int)p.IsEmriId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { parcaSilindi = id }, iptal: iptal);
             await islem.CommitAsync(iptal);
 
             var t = await baglanti.TekDegerAsync<decimal>(
                 "select toplam_tutar from public.demirbas_is_emri where id = @p0",
-                null, [p.IsEmriId], iptal);
+                null, [isEmriId], iptal);
 
             return Results.Ok(new { silindi = id, toplamTutar = t,
                                     izlemeNo = baglam.IzlemeNo });

@@ -55,6 +55,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi Konsultasyon() => new(
         Ad: "konsultasyon",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "k.taraf_id",
         YetkiKodu: "muayene.konsultasyon",
         Kaynak: "public.konsultasyon k "
               + "  join public.taraf h on h.id = k.taraf_id "

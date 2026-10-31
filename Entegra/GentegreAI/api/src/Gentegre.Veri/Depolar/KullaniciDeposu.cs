@@ -236,6 +236,33 @@ public sealed class KullaniciDeposu
             """, new object?[] { tarafId, (short)(sifirla ? 1 : 0) },
             o => o.GetInt32(0), iptal);
 
+    /// <summary>
+    /// HEDEF YÖNETİLEBİLİR Mİ (kod inceleme 30.10.2026 K03/K04): bir hesabı pasife alan, parolasını sıfırlayan,
+    /// oturumunu kapatan kişi hedeften daha dar bir HESAP YÖNETİMİ yetkisine sahip olmamalı. Karşılaştırma yalnız
+    /// yönetim yetkileri üzerinden (`kullanici`, `rol` kaynakları ve `yonetici` sistem rolü): hedefte olup yönetende
+    /// olmayan ya da daha geniş bir yönetim yetkisi varsa 403. Klinik / ticari yetkiler karşılaştırılmaz — bilgi
+    /// işlemci hemşirenin hesabını yönetir ama yöneticiyi kilitleyemez; İK yetkilisi yönetici parolasını
+    /// sıfırlayamaz. `admin` hesabını yalnız kendisi yönetir.
+    /// </summary>
+    public Task<bool> HedefYonetilebilirAsync(int yonetenId, int hedefId, CancellationToken iptal = default)
+        => yonetenId == hedefId
+            ? Task.FromResult(true)
+            : _veri.TekDegerAsync<bool>("""
+                select not exists (
+                           select 1 from public.fn_kullanici_yetkileri(@p1) h
+                            where h.yetki_kod in ('kullanici', 'rol')
+                              and not exists (select 1 from public.fn_kullanici_yetkileri(@p0) y
+                                               where y.yetki_kod = h.yetki_kod
+                                                 and y.gor >= h.gor and y.ekle >= h.ekle
+                                                 and y.degistir >= h.degistir and y.sil >= h.sil))
+                   and not (exists (select 1 from public.fn_kullanici_rolleri(@p1) r
+                                     join public.rol ro on ro.id = r.rol_id where ro.kod = 'yonetici')
+                            and not exists (select 1 from public.fn_kullanici_rolleri(@p0) r
+                                             join public.rol ro on ro.id = r.rol_id where ro.kod = 'yonetici'))
+                   and not exists (select 1 from public.taraf_kullanici k
+                                    where k.id = @p1 and lower(k.kod) = 'admin')
+                """, new object?[] { yonetenId, hedefId }, iptal);
+
     // ------------------------------------------- KULLANICI AYARLARI (669) ----
 
     /// <summary>

@@ -40,7 +40,8 @@ public static partial class MuayeneUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("muayene", Islem.Gor);
+            // YAZMA = DEĞİŞTİR (kod inceleme 30.10.2026 K16): not yazmak salt okuma yetkisiyle yürüyordu.
+            baglam.YetkiIste("muayene", Islem.Degistir);
             var metin = (istek.Metin ?? "").Trim();
             if (metin.Length > 4000)
                 throw GentegreHatasi.Dogrulama("Not en fazla 4000 karakter olabilir.",

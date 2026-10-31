@@ -53,6 +53,8 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi EnabizPaket() => new(
         Ad: "enabiz-paket",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "p.hasta_id",
         YetkiKodu: "entegrasyon",
         Kaynak: "public.enabiz_paket p "
               + "  join public.enabiz_paket_turu t on t.id = p.paket_turu_id "

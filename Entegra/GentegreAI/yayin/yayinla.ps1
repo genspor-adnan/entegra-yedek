@@ -64,10 +64,9 @@ param(
     # B07 ACIL DURUM: uygulama rolu adimi atlanir, API postgres (super kullanici) ile baglanir.
     #   Yalniz rolün yetkisi yetmeyen bir hata canlida cikarsa, duzeltme yayinlanana kadar.
     [switch]$SuperRolIleBaglan,
-    # Sunucudaki DB parolasi appsettings.Production.json'a yazilir. Yerel
-    #   gelistirme parolasiyla ayni olmasi KULLANICI KARARIYDI; degistirilirse
-    #   hem burada hem PG konteynerinde degismeli.
-    [string]$DbParola = 'FETAGEN'
+    # YALNIZ -SuperRolIleBaglan ile gerekir: postgres parolasi Production.json'a yazilir. Varsayilan YOK
+    #   (kod inceleme 30.10.2026 K11): depodaki betikte duran deger sunucunun super kullanici parolasiydi.
+    [string]$DbParola = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -273,11 +272,21 @@ foreach ($k in $secilen) {
         #   kuruluma ozel uygulama rolünü kurar ve dizeyi appsettings.Gizli.json'a yazar - postgres
         #   (super kullanici) parolasi API klasorune hic girmez. Yalniz -SuperRolIleBaglan (acil durum)
         #   eski usul postgres dizesini buraya yazar.
+        # GUVENILEN AGLAR (K08): API docker koprusunde, nginx host'ta - X-Forwarded-For ag gecidinden gelir.
+        #   172.16.0.0/12 docker'in varsayilan kopru araligi. CORS'ta localhost yok (K87).
         $ayar = [ordered]@{
-            Cors = @{ Kaynaklar = @('http://46.36.201.170', 'http://localhost') }
+            Cors = @{ Kaynaklar = @('http://46.36.201.170', 'https://46.36.201.170') }
             AllowedHosts = '*'
+            Guvenlik = @{ GuvenilenAglar = @('172.16.0.0/12') }
         }
+        # YEREL BAGLANTI DIZESI YAYINA GITMEZ (K11): appsettings.json'daki gelistirme parolasi pakette durmasin.
+        $temelAyarYolu = Join-Path $apiCikti 'appsettings.json'
+        $temelAyar = Get-Content $temelAyarYolu -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($temelAyar.PSObject.Properties['ConnectionStrings']) { $temelAyar.PSObject.Properties.Remove('ConnectionStrings') }
+        $temelAyar | ConvertTo-Json -Depth 10 | Set-Content $temelAyarYolu -Encoding utf8
+        Remove-Item (Join-Path $apiCikti 'appsettings.Development.json') -ErrorAction SilentlyContinue
         if ($SuperRolIleBaglan) {
+            if (-not $DbParola) { throw '-SuperRolIleBaglan icin -DbParola verin (postgres parolasi).' }
             Write-Warning "ACIL DURUM (-SuperRolIleBaglan): $($k.Db) API'si postgres ile baglanacak."
             $ayar.ConnectionStrings = @{
                 Gentegre = "Host=gentegre-pg18;Port=5432;Database=$($k.Db);Username=postgres;Password=$DbParola"
@@ -338,7 +347,10 @@ foreach ($k in $secilen) {
     [IO.File]::WriteAllText($betikLf,
         ((Get-Content (Join-Path $PSScriptRoot 'sunucu-guncelle.sh') -Raw) -replace "`r`n", "`n"))
     scp -q $betikLf "${Sunucu}:$uzakBetik"
+    if ($LASTEXITCODE -ne 0) { throw 'betik scp basarisiz' }
     ssh $Sunucu "mkdir -p ~/$($k.Kok) && mv $uzakBetik ~/$($k.Kok)/sunucu-guncelle.sh && chmod +x ~/$($k.Kok)/sunucu-guncelle.sh"
+    # Betik kopyasi dogrulanmadan paket calistirilmaz (K88): eski betik + yeni paket uyumsuz olabilir.
+    if ($LASTEXITCODE -ne 0) { throw 'sunucu-guncelle.sh sunucuya yerlestirilemedi' }
 
     # ------------------------------------------------------------ uygula ----
     Adim 'sunucuda uygulaniyor'

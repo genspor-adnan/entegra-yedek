@@ -16,6 +16,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi LabKultur() => new(
         Ad: "lab-kultur",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "k.hasta_id",
         YetkiKodu: "lab.kultur",
         Kaynak: "public.lab_kultur k "
               + "  join public.lab_tetkik t on t.id = k.tetkik_id "

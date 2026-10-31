@@ -113,6 +113,11 @@ public static class KurumProfilUclari
             //   otekilerin degerini sifirlamasin.
             // Hedef sube: istekte gelen, yoksa aktif sube (0 = kurum geneli).
             var subeId = istek.SubeId ?? baglam.SubeId ?? 0;
+            // ŞUBE KAPISI (K32): istemciden gelen şube kullanıcının yetkili şubelerinden
+            //   biri olmalı - yetkisiz şubenin profili kimliğiyle değiştirilemez.
+            //   0 (kurum geneli) mevcut `ayar` yetkisiyle kalır.
+            if (subeId != 0 && !baglam.Subeler.Any(s => s.Id == subeId))
+                throw GentegreHatasi.Yasak("Bu şubede işlem yetkiniz yok.");
             var (mevcut, _, _, _, _, _, _) = await depo.OkuAsync(subeId, iptal);
             var yeni = new KurumProfil(
                 istek.UrunModu    ?? mevcut.UrunModu,
@@ -132,24 +137,27 @@ public static class KurumProfilUclari
                 KimlikDeseni: istek.KimlikDeseni ?? mevcut.KimlikDeseni,
                 KimlikAciklama: istek.KimlikAciklama ?? mevcut.KimlikAciklama);
 
-            var sonuc = await depo.YazAsync(yeni, baglam.Yazma, iptal);
-
             // ROL HARITASI AYNI KAYDETTE (786): "ustte kaydet deyip o profilin
             //   rollerine girince onlar gecerli olsun". Profil yazildiktan
             //   SONRA uygulanir - acik modul kumesi degismis olabilir ve
             //   gecerlilik ona da bagli.
+            // TEK TRANSACTION (kod inceleme 30.10.2026 K36): profil ve rol haritasi
+            //   ayni islemde - eskiden profil kendi isleminde yazilip rol haritasi
+            //   ikinci islemde dusebiliyordu (profil yeni, roller eski).
+            var rolYaz = istek.Roller is not null && istek.RolAdaylari is { Count: > 0 };
+            if (rolYaz) baglam.YetkiIste("rol", Islem.Degistir);
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var sonuc = await depo.YazAsync(b, islem, yeni, baglam.Yazma, iptal);
             int? rolSayisi = null;
-            if (istek.Roller is not null && istek.RolAdaylari is { Count: > 0 })
+            if (rolYaz)
             {
-                baglam.YetkiIste("rol", Islem.Degistir);
-                await using var b = await veri.AcAsync(iptal);
-                await using var islem = await b.BeginTransactionAsync(iptal);
                 await StandartRolUclari.ProfilRolleriYazAsync(
-                    b, islem, sonuc.KurumTipi ?? "", istek.Roller, istek.RolAdaylari,
+                    b, islem, sonuc.KurumTipi ?? "", istek.Roller!, istek.RolAdaylari!,
                     baglam.KullaniciId, iptal);
-                await islem.CommitAsync(iptal);
-                rolSayisi = istek.Roller.Count;
+                rolSayisi = istek.Roller!.Count;
             }
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { profil = sonuc, rolSayisi, izlemeNo = baglam.IzlemeNo });
         });

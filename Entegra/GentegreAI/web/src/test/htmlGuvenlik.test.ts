@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { h, htmlTemizle } from '../bilesenler/htmlGuvenlik';
+import { h, htmlTemizle, yazdirmaSargisi } from '../bilesenler/htmlGuvenlik';
 
 /** KOD İNCELEME RAPORU 28.10.2026 — B03: yazdırma pencerelerinde kullanıcı metni HTML olarak yorumlanmaz. */
 describe('html güvenliği', () => {
@@ -18,5 +18,17 @@ describe('html güvenliği', () => {
     expect(t).toContain('<style>td{color:red}</style>');
     expect(t).toContain('>Fatura</td>');
     expect(t).toContain('data:image/png;base64,AA');
+  });
+
+  /** K54: belge opak kökenli sandbox iframe'de; allow-same-origin YOK. */
+  it('yazdirmaSargisi: sandbox iframe, başlık dışta, yazdırma içte', () => {
+    const s = yazdirmaSargisi('<html><head><title>e-Fatura</title></head><body><p>x</p><script>a()</script></body></html>', 'GNY1 "Firma"', true);
+    expect(s).toContain('<iframe sandbox="allow-scripts allow-modals" srcdoc="');
+    expect(s).not.toContain('allow-same-origin');
+    expect(s).toContain('<title>GNY1 &quot;Firma&quot;</title>');
+    expect(s).not.toContain('<title>e-Fatura</title>');
+    expect(s).not.toContain('a()');                         // temizlik hâlâ uygulanır
+    expect(s).toContain('print()');                         // yazdırma iframe içinden
+    expect(yazdirmaSargisi('<p>y</p>', 'B', false)).not.toContain('print()');
   });
 });

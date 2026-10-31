@@ -68,9 +68,13 @@ public static partial class GozUclari
                    --   kuyruğun başındaki çağrılmış hasta yüzünden düğme
                    --   hep aynı kişiyi çağırır, sıra ilerlemezdi.
                    and (@p0::int is not null or i.cagri_zamani is null)
+                   -- KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): id'siz çağrı TÜM şubelerin
+                   --   bekleyenini çağırıyordu; sıradaki yalnız aktif şubeden seçilir (seçili
+                   --   satır da grup filtresinden geçer).
+                   and (@p2::int is null or i.sube_id = @p2)
                  order by i.giris
                  limit 1
-                """, null, [istasyonId, istasyon], o => new
+                """, null, [istasyonId, istasyon, baglam.SubeId], o => new
             {
                 id = o.GetInt32(0),
                 hasta = o.GetString(1),

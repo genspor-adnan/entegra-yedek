@@ -28,6 +28,17 @@ public static class KullaniciYonetimUclari
     /// <summary>Kullanici kart tablosu (islem_log) - rol karti 903, kullanici 902.</summary>
     private const int LogTabloKullanici = 902;
 
+    /// <summary>
+    /// HEDEF KAPISI (kod inceleme 30.10.2026 K04): hedef hesap yönetenden daha geniş yetkiliyse 403 — yetki
+    /// kümesi karşılaştırması <see cref="KullaniciDeposu.HedefYonetilebilirAsync"/>.
+    /// </summary>
+    private static async Task HedefKapisiAsync(KullaniciDeposu kullanicilar, IstekBaglami baglam, int hedefId,
+        CancellationToken iptal)
+    {
+        if (!await kullanicilar.HedefYonetilebilirAsync(baglam.KullaniciId, hedefId, iptal))
+            throw GentegreHatasi.Yasak("Bu hesap sizden daha geniş yetkili; pasife alamaz, parolasını sıfırlayamaz ya da oturumunu kapatamazsınız.");
+    }
+
     public static void KullaniciYonetimUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/kullanici").WithTags("Kullanıcı")
@@ -38,37 +49,45 @@ public static class KullaniciYonetimUclari
         //   birlikte yapılır: parolası sıfırlanan hesabın açık oturumu kalırsa
         //   sıfırlama hiçbir şeyi korumamış olur.
         grup.MapPost("/{id:int}/parola-sifirla", async (
-            int id, bool? kilitCoz, VeriKaynagi veri, OturumDeposu oturumlar,
+            int id, bool? kilitCoz, VeriKaynagi veri, KullaniciDeposu kullanicilar,
             LogDeposu log, YetkiCozucu yetkiCozucu, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kullanici", Islem.Degistir);
+            await HedefKapisiAsync(kullanicilar, baglam, id, iptal);
 
-            var kod = await veri.TekDegerAsync<string>(
-                "select kod from public.taraf_kullanici where id = @p0",
-                new object?[] { id }, iptal);
+            // TEK TRANSACTION + HESAP KİLİDİ (kod inceleme 30.10.2026 K36): parola sıfırlama, oturumların
+            //   kapanışı ve log birlikte - eskiden üçü autocommit'ti; oturum kapatma düşerse hesap parolasız
+            //   ama açık oturumlu kalıyordu (sıfırlama hiçbir şeyi korumuyordu). Hesap satırı `for update`.
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var kod = await b.TekDegerAsync<string>(
+                "select kod from public.taraf_kullanici where id = @p0 for update",
+                islem, [id], iptal);
             if (string.IsNullOrEmpty(kod)) return Results.NotFound();
 
-            await veri.CalistirAsync("""
+            await b.CalistirAsync("""
                 update public.taraf_kullanici
                    set parola_hash = '', parola_degismeli = 1,
                        hatali_giris = 0,
                        kilit_bitis = case when @p1 then null else kilit_bitis end,
                        degistiren = @p2, degistirme_tarihi = now()
                  where id = @p0
-                """, new object?[] { id, kilitCoz != false, baglam.KullaniciId }, iptal);
+                """, islem, [id, kilitCoz != false, baglam.KullaniciId], iptal);
 
-            await oturumlar.KullaniciOturumlariniKapatAsync(id, "parola_sifirlandi", iptal);
-            yetkiCozucu.Temizle(id);
+            await OturumDeposu.KullaniciOturumlariniKapatAsync(b, islem, id, "parola_sifirlandi", iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloKullanici, id,
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloKullanici, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string>
                 {
                     ["islem"] = "Parola sıfırlandı",
                     ["kullanici"] = kod,
                 }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            // Yetki önbelleği commit'ten sonra: geri alınan bir değişiklik için önbellek boşa düşmesin.
+            yetkiCozucu.Temizle(id);
 
             return Results.Ok(new
             {
@@ -87,22 +106,22 @@ public static class KullaniciYonetimUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kullanici", Islem.Degistir);
 
-            var etkilenen = await veri.TekDegerAsync<int>("""
-                with g as (
-                    update public.taraf_kullanici
-                       set kilit_bitis = null, hatali_giris = 0,
-                           degistiren = @p1, degistirme_tarihi = now()
-                     where id = @p0
-                    returning 1
-                )
-                select count(*)::int from g
-                """, new object?[] { id, baglam.KullaniciId }, iptal);
+            // Değişiklik + log tek transaction (K36).
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var etkilenen = await b.CalistirAsync("""
+                update public.taraf_kullanici
+                   set kilit_bitis = null, hatali_giris = 0,
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [id, baglam.KullaniciId], iptal);
             if (etkilenen == 0) return Results.NotFound();
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloKullanici, id,
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloKullanici, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string> { ["islem"] = "Hesap kilidi çözüldü" },
                 iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { mesaj = "Kilit çözüldü, hatalı giriş sayacı sıfırlandı." });
         });
@@ -111,17 +130,22 @@ public static class KullaniciYonetimUclari
         // İşten ayrılan ya da cihazını kaybeden kişi: parolası DEĞİŞMEDEN
         //   oturumları kapatılabilmeli (parola sıfırlamak kişiyi de kilitler).
         grup.MapPost("/{id:int}/oturum-kapat", async (
-            int id, OturumDeposu oturumlar, LogDeposu log, BaglamCozucu cozucu,
+            int id, VeriKaynagi veri, KullaniciDeposu kullanicilar, LogDeposu log, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kullanici", Islem.Degistir);
+            await HedefKapisiAsync(kullanicilar, baglam, id, iptal);
 
-            await oturumlar.KullaniciOturumlariniKapatAsync(id, "yonetici", iptal);
-            await log.YazAsync(LogIslemi.Degistir, LogTabloKullanici, id,
+            // Oturum kapanışı + log tek transaction (K36).
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            await OturumDeposu.KullaniciOturumlariniKapatAsync(b, islem, id, "yonetici", iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloKullanici, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string> { ["islem"] = "Oturumlar kapatıldı" },
                 iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             return Results.Ok(new { mesaj = "Kullanıcının tüm oturumları kapatıldı." });
         });
@@ -131,38 +155,40 @@ public static class KullaniciYonetimUclari
         //   bağlı - silinen hesap geçmişi sahipsiz bırakır. Pasif hesap giriş
         //   yapamaz ve açık oturumları kapanır.
         grup.MapPost("/{id:int}/durum", async (
-            int id, bool aktif, VeriKaynagi veri, OturumDeposu oturumlar,
+            int id, bool aktif, VeriKaynagi veri, KullaniciDeposu kullanicilar,
             LogDeposu log, YetkiCozucu yetkiCozucu, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("kullanici", Islem.Degistir);
+            await HedefKapisiAsync(kullanicilar, baglam, id, iptal);
 
             // KENDİNİ PASİFE ALMA: yönetici kendi hesabını kapatırsa sistemde
             //   yetkili kimse kalmayabilir ve geri açacak kişi de yoktur.
             if (id == baglam.KullaniciId && !aktif)
                 throw GentegreHatasi.IsKurali("Kendi hesabınızı pasife alamazsınız.");
 
-            var etkilenen = await veri.TekDegerAsync<int>("""
-                with g as (
-                    update public.taraf_kullanici
-                       set aktif = @p1, degistiren = @p2, degistirme_tarihi = now()
-                     where id = @p0
-                    returning 1
-                )
-                select count(*)::int from g
-                """, new object?[] { id, (short)(aktif ? 1 : 0), baglam.KullaniciId }, iptal);
+            // Durum + oturum kapanışı + log tek transaction (K36): pasife alınan hesabın oturumları
+            //   kapanmadan kalmasın; hesap satırı `for update`.
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var etkilenen = await b.CalistirAsync("""
+                update public.taraf_kullanici
+                   set aktif = @p1, degistiren = @p2, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [id, (short)(aktif ? 1 : 0), baglam.KullaniciId], iptal);
             if (etkilenen == 0) return Results.NotFound();
 
-            if (!aktif) await oturumlar.KullaniciOturumlariniKapatAsync(id, "pasif", iptal);
-            yetkiCozucu.Temizle(id);
+            if (!aktif) await OturumDeposu.KullaniciOturumlariniKapatAsync(b, islem, id, "pasif", iptal);
 
-            await log.YazAsync(LogIslemi.Degistir, LogTabloKullanici, id,
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloKullanici, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string>
                 {
                     ["islem"] = aktif ? "Hesap aktifleştirildi" : "Hesap pasife alındı",
                 }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            yetkiCozucu.Temizle(id);
 
             return Results.Ok(new
             {

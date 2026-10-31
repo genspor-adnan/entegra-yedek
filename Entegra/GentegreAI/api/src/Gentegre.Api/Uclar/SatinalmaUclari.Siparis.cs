@@ -51,6 +51,10 @@ public static partial class SatinalmaUclari
         public string? Aciklama { get; set; }
     }
 
+    /// <summary>Elle girilen ceza tutarının üst sınırı (K58): numeric(18,2) kolon
+    /// 9,99 katrilyonu kabul eder, hiçbir gecikme cezası buna yaklaşmaz.</summary>
+    private const decimal CezaUstSinir = 99_999_999.99m;
+
     public sealed class KabulIstegi
     {
         public int BelgeId { get; set; }
@@ -122,12 +126,20 @@ public static partial class SatinalmaUclari
                     new AlanHatasi("tarafId", "Sipariş için tedarikçi seçilmeli."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // TEK İŞLEM + TALEP KİLİDİ (K12 / K13): sipariş belgesi, satır bağları,
+            //   süreç uzantısı ve talebin durumu ya hep yazılır ya hiçbiri. Eskiden
+            //   belge kendi işleminde kesiliyor, bağ sonra ayrı işlemde yazılıyordu:
+            //   arada kopan istek bağsız bir sipariş bırakıyor, ikinci "Siparişe
+            //   Çevir" aynı satırlardan ikinci siparişi kesiyordu. `for update`
+            //   eşzamanlı iki dönüştürmeyi sıraya koyar; ikincisi durum kontrolünde düşer.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var t = await baglanti.TekAsync("""
                 select t.durum, t.talep_no as "talepNo", t.sube_id as "subeId",
                        t.departman_id as "departmanId"
                   from public.satinalma_talep t where t.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Talep bulunamadı.");
 
             // ONAYSIZ TALEP SİPARİŞE DÖNMEZ: zincir tam da bunun için var.
@@ -144,7 +156,7 @@ public static partial class SatinalmaUclari
                   left join public.stok st on st.id = s.stok_id
                  where s.talep_id = @p0 and s.belge_satir_id is null and s.miktar > 0
                  order by s.sira, s.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             if (satirlar.Count == 0)
                 throw GentegreHatasi.IsKurali(
@@ -161,7 +173,7 @@ public static partial class SatinalmaUclari
                      where f.sozlesme_id = @p0
                        and (f.gecerli_bas is null or f.gecerli_bas <= current_date)
                        and (f.gecerli_son is null or f.gecerli_son >= current_date)
-                    """, null, [soz], OkuyucuGenisletmeleri.Sozluk, iptal)
+                    """, islem, [soz], OkuyucuGenisletmeleri.Sozluk, iptal)
                 : [];
 
             var belge = new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -203,14 +215,12 @@ public static partial class SatinalmaUclari
                 }));
             }
 
-            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(
+            var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(baglanti, islem,
                 belge, govde,
                 // SİPARİŞ STOK ETKİLEMEZ: mal henüz gelmedi. Kontrol açmak,
                 //   olmayan bir bakiyeyi sorgulamak olurdu.
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
-
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // TALEP SATIRI -> BELGE SATIRI BAĞI. Sıraya göre eşleştiriyoruz:
             //   belge hattı satırları verdiğimiz sırayla yazıyor.
@@ -237,11 +247,15 @@ public static partial class SatinalmaUclari
                 """, islem,
                 [belgeId, id, istek.TeklifId, istek.SozlesmeId, istek.SozTeslim], iptal);
 
-            await baglanti.CalistirAsync("""
+            // Durum koşullu: kilit altında zaten değişemez, koşul yine de sigorta.
+            var talepGecti = await baglanti.CalistirAsync("""
                 update public.satinalma_talep set durum = @p1,
                        degistiren = @p2, degistirme_tarihi = (now())::timestamp
-                 where id = @p0
-                """, islem, [id, TalepSiparise, baglam.KullaniciId], iptal);
+                 where id = @p0 and durum in (@p3, @p4)
+                """, islem, [id, TalepSiparise, baglam.KullaniciId, TalepOnaylandi, TalepTeklifte], iptal);
+            if (talepGecti == 0)
+                throw GentegreHatasi.IsKurali(
+                    "Talep bu arada değişti; ekranı yenileyip tekrar deneyin.");
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTalep, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -352,7 +366,18 @@ public static partial class SatinalmaUclari
             baglam.YetkiIste("satinalma.siparis", Islem.Degistir);
             baglam.AksiyonIste("satinalma.ceza");
 
+            // ELLE TUTAR: sıfır / eksi ceza anlamsız, devasa tutar tuş hatasıdır.
+            //   Sözleşme üst sınırı yalnız hesaplanan cezaya uygulanır; elle girilen
+            //   tutar bilinçli bir karardır ama yine de makul aralıkta olmalı.
+            if (istek.Tutar is { } elle && (elle <= 0 || elle > CezaUstSinir))
+                throw GentegreHatasi.Dogrulama("Ceza tutarı geçersiz.",
+                    new AlanHatasi("tutar", $"0'dan büyük, en çok {CezaUstSinir:N2} olmalı."));
+
             await using var baglanti = await veri.AcAsync(iptal);
+            // SATIR KİLİDİ (K13 / K58): eşzamanlı iki "Ceza İşle" ikinci kez ceza ve
+            //   ikinci tedarikçi olayı yazıyordu; kilit + `ceza_islendi = 0` koşulu
+            //   yalnız birini geçirir.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var s = await baglanti.TekAsync("""
                 select b.genel_toplam as "tutar", b.taraf_id as "tarafId",
@@ -363,7 +388,8 @@ public static partial class SatinalmaUclari
                   join public.belge_satinalma s on s.id = b.id
                   left join public.tedarikci_sozlesme z on z.id = s.sozlesme_id
                  where b.id = @p0 and b.tur = 9
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update of s
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Alış siparişi bulunamadı.");
 
             if (Convert.ToInt16(s["cezaIslendi"] ?? (short)0) == 1)
@@ -397,15 +423,16 @@ public static partial class SatinalmaUclari
             }
 
             var simdi = Saat.Simdi;
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            await baglanti.CalistirAsync("""
+            var islendi = await baglanti.CalistirAsync("""
                 update public.belge_satinalma
                    set ceza_tutar = @p1, ceza_islendi = 1,
                        aciklama = trim(both ' ' from coalesce(aciklama, '')
                                   || ' · Ceza: ' || @p1)
-                 where id = @p0
+                 where id = @p0 and ceza_islendi = 0
                 """, islem, [id, tutar], iptal);
+            if (islendi == 0)
+                throw GentegreHatasi.IsKurali("Bu sipariş için ceza zaten işlenmiş.");
 
             if (s["tarafId"] is { } taraf)
                 await baglanti.CalistirAsync("""
@@ -546,22 +573,27 @@ public static partial class SatinalmaUclari
                     new AlanHatasi("uygunsuzluk", "Kısmi kabul ve rette uygunsuzluk yazılmalı."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // BELGE KİLİDİ (K13 / K58): "tutanak var mı" kontrolü ile insert aynı
+            //   işlemde ve belge satırı kilitli - eşzamanlı iki açılış iki tutanak
+            //   yazıyordu. db/1201 benzersiz indeksi (satinalma_kabul.belge_id)
+            //   son sigorta: kaçan ikinci kayıt 23505 → 422 ile döner.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var b = await baglanti.TekAsync("""
                 select b.tur, b.taraf_id as "tarafId", b.sube_id as "subeId",
                        coalesce(b.belge_no, '') as "belgeNo"
                   from public.belge b where b.id = @p0
-                """, null, [istek.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                   for update
+                """, islem, [istek.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İrsaliye/fatura bulunamadı.");
 
             var mevcut = await baglanti.TekDegerAsync<long?>("""
                 select id from public.satinalma_kabul where belge_id = @p0
-                """, null, [istek.BelgeId], iptal);
+                """, islem, [istek.BelgeId], iptal);
             if (mevcut is not null)
                 throw GentegreHatasi.IsKurali("Bu belge için kabul tutanağı zaten var.");
 
             var simdi = Saat.Simdi;
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var kabulId = await baglanti.TekDegerAsync<long>("""
                 insert into public.satinalma_kabul

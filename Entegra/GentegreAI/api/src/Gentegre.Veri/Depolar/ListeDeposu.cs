@@ -24,10 +24,12 @@ public sealed class ListeDeposu
         // PORTAL KAPSAMI (794): tur > 0 ise her sorgu (satir, sayim, toplam)
         //   AYNI kosulu tasir - biri unutulursa sayfa "3 kayit" der, gride
         //   baskasinin kaydini cizer.
+        // GÖRÜNÜR ALANLAR (K19): filtre / sıralama yalnız kullanıcının görebildiği kolonlardan.
+        var gorunur = kolonlar.Select(k => k.Ad).ToHashSet(StringComparer.Ordinal);
         SorguUretici Uretici() => portalTuru > 0
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
                   { HekimId = hekimId, TetkikRolleri = tetkikRolleri,
-                    BelgeKumeleri = belgeKumeleri, EkranKosulu = ekranKosulu }
+                    BelgeKumeleri = belgeKumeleri, EkranKosulu = ekranKosulu, GorunurAlanlar = gorunur }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
             : new SorguUretici(kaynak)
             {
@@ -42,6 +44,7 @@ public sealed class ListeDeposu
                 //   kendi kayitlari" kurali katalogda yazili, deger burada
                 //   baglaniyor.
                 KullaniciId = kullaniciId,
+                GorunurAlanlar = gorunur,
             };
 
         var satirUretici = Uretici();

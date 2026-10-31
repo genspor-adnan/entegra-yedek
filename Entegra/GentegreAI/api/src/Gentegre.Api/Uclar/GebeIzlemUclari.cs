@@ -3,6 +3,7 @@ using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -19,6 +20,13 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class GebeIzlemUclari
 {
+    /// <summary>
+    /// islem_log.tablo_id (kod inceleme 30.10.2026 K36 / K33): gebelik dosyası, gebe izlemi ve
+    /// gebelik sonucu eskiden hiç loglanmıyordu. 1771 (banka mutabakat) sonrası boş aralık;
+    /// 1390'lar Patoloji, 1720'ler planlı gider.
+    /// </summary>
+    private const int LogGebelik = 1790, LogIzlem = 1791, LogSonuc = 1792;
+
     public sealed record DosyaIstegi(int TarafId, DateOnly? Sat, DateOnly? BeklenenDogum,
         short? GebelikNo, short? RiskDurumu, string? Aciklama,
         // 223 Gebelik Bildirim'in ZORUNLU ögesi (901): SKRS "bir önceki
@@ -111,7 +119,7 @@ public static class GebeIzlemUclari
 
         // POST /api/gebelik - dosya açar.
         grup.MapPost("/", async (
-            DosyaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            DosyaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -126,21 +134,27 @@ public static class GebeIzlemUclari
 
             try
             {
-                var id = await veri.TekDegerAsync<int>("""
+                // Dosya + log tek transaction (K36 / K33).
+                await using var b = await veri.AcAsync(iptal);
+                await using var islem = await b.BeginTransactionAsync(iptal);
+                var id = await b.TekDegerAsync<int>("""
                     insert into public.gebelik
                            (taraf_id, sat, beklenen_dogum, gebelik_no, risk_durumu,
                             aciklama, onceki_dogum, sube_id, ekleyen)
                     values (@p0, @p1, @p2, coalesce(@p3, 1), coalesce(@p4, 0), @p5,
                             @p8, @p6, @p7)
                     returning id
-                    """,
+                    """, islem,
                     [istek.TarafId, istek.Sat, istek.BeklenenDogum, istek.GebelikNo,
                      istek.RiskDurumu, istek.Aciklama ?? "", baglam.SubeId ?? 0,
                      baglam.KullaniciId, istek.OncekiDogum], iptal);
 
-                var hafta = await veri.TekDegerAsync<int?>("""
+                var hafta = await b.TekDegerAsync<int?>("""
                     select hafta from public.v_gebelik where id = @p0
-                    """, [id], iptal);
+                    """, islem, [id], iptal);
+                await log.YazAsync(b, islem, LogIslemi.Ekle, LogGebelik, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new { istek.Sat, istek.BeklenenDogum, istek.GebelikNo, istek.RiskDurumu, hafta }, tarafId: istek.TarafId, iptal: iptal);
+                await islem.CommitAsync(iptal);
 
                 return Results.Ok(new { id, hafta,
                     mesaj = hafta is null ? "Gebelik dosyası açıldı."
@@ -159,22 +173,29 @@ public static class GebeIzlemUclari
 
         // POST /api/gebelik/{id}/kapat - dosyayı sonuçlandırır (224'ün yeri).
         grup.MapPost("/{id:int}/kapat", async (
-            int id, KapatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, KapatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("gebe.dosya", Islem.Degistir);
 
-            var etkilenen = await veri.CalistirAsync("""
+            // Kapanış + log tek transaction (K36 / K33); durum geçişi koşullu (ikinci kapat 422).
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var tarafId = await b.TekDegerAsync<int?>("select taraf_id from public.gebelik where id = @p0 for update", islem, [id], iptal);
+            var etkilenen = await b.CalistirAsync("""
                 update public.gebelik
                    set durum = 2, sonuc_tarihi = coalesce(@p1, current_date),
                        aciklama = case when coalesce(@p2, '') = '' then aciklama else @p2 end,
                        degistiren = @p3, degistirme_tarihi = now()
                  where id = @p0 and durum = 1
-                """, [id, istek.SonucTarihi, istek.Aciklama, baglam.KullaniciId], iptal);
+                """, islem, [id, istek.SonucTarihi, istek.Aciklama, baglam.KullaniciId], iptal);
 
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali("Açık gebelik dosyası bulunamadı.");
+            await log.YazAsync(b, islem, LogIslemi.Degistir, LogGebelik, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { kapandi = true, istek.SonucTarihi, istek.Aciklama }, tarafId: tarafId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             // 224 GEBELİK SONUCU PAKETİ HENÜZ BAĞLI DEĞİL: doğum/düşük
             //   ayrıntısı (doğum şekli, bebek bilgileri) kayıt altında değil.
@@ -190,18 +211,23 @@ public static class GebeIzlemUclari
         //   bildirilmemiş gebelikler üretirdi (`v_gebelik_sonucsuz` bunları
         //   zaten sayıyor).
         grup.MapPost("/{id:int}/sonuc", async (
-            int id, SonucIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int id, SonucIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             EnabizTetikleyici tetik, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("gebe.sonuc", Islem.Ekle);
 
+            // TEK TRANSACTION (K36): fn_gebelik_sonucla (sonuç satırı + dosyanın kapanışı) ve ikinci adımdaki
+            //   ayrıntı güncellemesi birlikte - eskiden ayrıntı düşerse dosya kapanmış, sonuç yarım kalıyordu.
+            //   e-Nabız paketi commit'ten SONRA (kendi bağlantısı; kesinleşmiş satırı okur).
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
             int sonucId;
             try
             {
-                sonucId = await veri.TekDegerAsync<int>("""
+                sonucId = await b.TekDegerAsync<int>("""
                     select public.fn_gebelik_sonucla(@p0, @p1, @p2, @p3)
-                    """, [id, istek.Sonuc, istek.SonlanmaTarihi, baglam.KullaniciId],
+                    """, islem, [id, istek.Sonuc, istek.SonlanmaTarihi, baglam.KullaniciId],
                     iptal);
             }
             catch (Npgsql.PostgresException h) when (h.SqlState == "23505")
@@ -217,18 +243,23 @@ public static class GebeIzlemUclari
 
             // Ayrıntılar ikinci adımda: doğumla sonuçlanmayan gebelikte
             //   bunların hepsi boş kalır.
-            await veri.CalistirAsync("""
+            await b.CalistirAsync("""
                 update public.gebelik_sonuc
                    set belge_id = @p1, dogum_yontemi = @p2, dogum_yeri = @p3,
                        doguma_yardim = @p4, canli_bebek = @p5, olu_bebek = @p6,
                        sezaryan_endikasyon = @p7, endikasyon_neden = @p8,
                        aciklama = @p9
                  where id = @p0
-                """,
+                """, islem,
                 [sonucId, istek.BelgeId, istek.DogumYontemi, istek.DogumYeri,
                  istek.DogumaYardim, istek.CanliBebek, istek.OluBebek,
                  istek.SezaryanEndikasyon, istek.EndikasyonNeden,
                  istek.Aciklama ?? ""], iptal);
+            var tarafId = await b.TekDegerAsync<int?>("select taraf_id from public.gebelik where id = @p0", islem, [id], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogSonuc, sonucId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { gebelikId = id, istek.Sonuc, istek.SonlanmaTarihi, istek.DogumYontemi, istek.CanliBebek, istek.OluBebek },
+                ustTabloId: LogGebelik, ustKayitId: id, tarafId: tarafId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             await tetik.GebelikSonuclandiAsync(sonucId, baglam.KullaniciId, iptal);
 
@@ -239,15 +270,20 @@ public static class GebeIzlemUclari
 
         // POST /api/gebelik/izlem - izlem kaydı + 221 paketi.
         grup.MapPost("/izlem", async (
-            IzlemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            IzlemIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             EnabizTetikleyici tetik, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("gebe.izlem", Islem.Ekle);
 
-            var dosya = await veri.TekAsync("""
-                select taraf_id, durum from public.gebelik where id = @p0
-                """, [istek.GebelikId],
+            // TEK TRANSACTION + DOSYA KİLİDİ (K36): izlem, risk faktörleri ve log birlikte; dosya `for update`
+            //   okunur - "açık mı" kontrolü ile eşzamanlı bir kapatma arasına girilemez. e-Nabız paketleri
+            //   commit'ten SONRA (kendi bağlantılarıyla kesinleşmiş izlemi okurlar).
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var dosya = await b.TekAsync("""
+                select taraf_id, durum from public.gebelik where id = @p0 for update
+                """, islem, [istek.GebelikId],
                 o => new { TarafId = o.GetInt32(0), Durum = o.GetInt16(1) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Gebelik dosyası bulunamadı.");
 
@@ -258,7 +294,7 @@ public static class GebeIzlemUclari
             int id;
             try
             {
-                id = await veri.TekDegerAsync<int>("""
+                id = await b.TekDegerAsync<int>("""
                     insert into public.gebe_izlem
                            (gebelik_id, taraf_id, belge_id, muayene_id, kacinci_izlem,
                             islem_turu, izlem_tarihi, boy_cm, kilo_kg, sistolik,
@@ -269,7 +305,7 @@ public static class GebeIzlemUclari
                             @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15,
                             @p16, @p17, @p18, @p19, @p20, @p21)
                     returning id
-                    """,
+                    """, islem,
                     [istek.GebelikId, dosya.TarafId, istek.BelgeId, istek.MuayeneId,
                      istek.KacinciIzlem, istek.IslemTuru, istek.IzlemTarihi,
                      istek.BoyCm, istek.KiloKg, istek.Sistolik, istek.Diastolik,
@@ -287,10 +323,18 @@ public static class GebeIzlemUclari
             // RİSK FAKTÖRLERİ TEKRARLI: pakette [1], [2] ... olarak gider.
             var sira = (short)0;
             foreach (var r in (istek.Riskler ?? []).Distinct())
-                await veri.CalistirAsync("""
+                await b.CalistirAsync("""
                     insert into public.gebe_izlem_risk (izlem_id, risk, sira)
                     values (@p0, @p1, @p2) on conflict do nothing
-                    """, [id, r, ++sira], iptal);
+                    """, islem, [id, r, ++sira], iptal);
+
+            var hafta = await b.TekDegerAsync<int?>("""
+                select hafta from public.v_gebe_izlem where id = @p0
+                """, islem, [id], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, LogIzlem, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { istek.GebelikId, istek.KacinciIzlem, hafta, riskSayisi = sira, istek.BelgeId },
+                ustTabloId: LogGebelik, ustKayitId: istek.GebelikId, tarafId: dosya.TarafId, iptal: iptal);
+            await islem.CommitAsync(iptal);
 
             await tetik.GebeIzlemiKaydedildiAsync(id, baglam.KullaniciId, iptal);
             // 223 GEBELİK BİLDİRİMİ (901): dosyanın kendi başvurusu yok,
@@ -298,10 +342,6 @@ public static class GebeIzlemUclari
             //   izlemle birlikte üretiliyor. "Aynı içerik → aynı paket"
             //   sonraki izlemlerde yeni satır açmaz.
             await tetik.GebelikBildirimiAsync(istek.GebelikId, baglam.KullaniciId, iptal);
-
-            var hafta = await veri.TekDegerAsync<int?>("""
-                select hafta from public.v_gebe_izlem where id = @p0
-                """, [id], iptal);
 
             return Results.Ok(new { id, hafta,
                 mesaj = $"{istek.KacinciIzlem}. gebe izlemi kaydedildi"

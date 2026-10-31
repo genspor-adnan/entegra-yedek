@@ -17,6 +17,8 @@ public static partial class KaynakKatalogu
     /// </summary>
     private static KaynakTanimi LabGenetikVaka() => new(
         Ad: "lab-genetik-vaka",
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K42): kullanici_kapsam tanimli kullanici yalniz kapsamindaki hastayi gorur.
+        KapsamKolonu: "g.hasta_id",
         YetkiKodu: "lab.genetik",
         Kaynak: "public.lab_genetik_vaka g "
               + "  join public.taraf h on h.id = g.hasta_id "

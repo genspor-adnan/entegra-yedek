@@ -11,7 +11,8 @@ public static class KimlikUclari
 {
     public static void KimlikUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/kimlik").WithTags("Kimlik");
+        // "kimlik" hız sınırı ilkesi (K30): yalnız anonim parola / token uçlarında etkili (Program.cs).
+        var grup = yol.MapGroup("/api/kimlik").WithTags("Kimlik").RequireRateLimiting("kimlik");
 
         grup.MapPost("/giris", [AllowAnonymous] async (
             GirisIstegi istek, KimlikServisi servis, HttpContext ctx, CancellationToken iptal)
@@ -21,28 +22,34 @@ public static class KimlikUclari
         //   token PANELE VERİLMEZ - 60 sn geçerli tek kullanımlık kod döner. Panel kullanıcıyı firmanın kendi
         //   adresine <adres>?giris=<kod> ile gönderir, firma ekranı kodu /giris-kodu/kullan ile oturuma çevirir.
         //   Hatalar normal girişle aynı (yanlış parola / kilit / askı) - panel ayrıca genel mesaj gösterir.
+        //   KODDA TOKEN YOK (kod inceleme 30.10.2026 K29): eskiden tam giriş yanıtı (access + 30 günlük refresh)
+        //   `yanit` jsonb'ye düz metin yazılıyor, kullanılmayan kodun oturumu açık kalıyordu. Artık yalnız doğrulanmış
+        //   kimlik (kullanıcı + şube) saklanır; oturum kod KULLANILINCA açılır.
         grup.MapPost("/giris-kodu", [AllowAnonymous] async (
             GirisIstegi istek, KimlikServisi servis, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
-            var yanit = await servis.GirisAsync(istek, Ip(ctx), Istemci(ctx), iptal);
+            var kimlik = await servis.PanelGirisDogrulaAsync(istek, Ip(ctx), Istemci(ctx), iptal);
             var kod = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))
                              .TrimEnd('=').Replace('+', '-').Replace('/', '_');
             await veri.CalistirAsync("delete from public.giris_kodu where son_an < now()", null, iptal);
             await veri.CalistirAsync("""
                 insert into public.giris_kodu (kod_ozet, yanit, son_an, ip) values (@p0, @p1::jsonb, now() + interval '60 seconds', @p2)
-                """, [KodOzet(kod), System.Text.Json.JsonSerializer.Serialize(yanit, System.Text.Json.JsonSerializerOptions.Web), Ip(ctx)], iptal);
+                """, [KodOzet(kod), System.Text.Json.JsonSerializer.Serialize(kimlik, System.Text.Json.JsonSerializerOptions.Web), Ip(ctx)], iptal);
             return Results.Ok(new { kod });
         });
 
         grup.MapPost("/giris-kodu/kullan", [AllowAnonymous] async (
-            GirisKoduIstegi istek, VeriKaynagi veri, CancellationToken iptal) =>
+            GirisKoduIstegi istek, KimlikServisi servis, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             // Tek kullanım: SİLEREK okunur (aynı kod ikinci kez ya da 60 sn sonra 401).
             var json = string.IsNullOrWhiteSpace(istek.Kod) ? null : await veri.TekDegerAsync<string>("""
                 delete from public.giris_kodu where kod_ozet = @p0 and son_an >= now() returning yanit::text
                 """, [KodOzet(istek.Kod.Trim())], iptal);
             if (json is null) throw GentegreHatasi.Yetkisiz("Giris kodu gecersiz ya da suresi dolmus; yeniden giris yapin.");
-            return Results.Text(json, "application/json");
+            var kimlik = System.Text.Json.JsonSerializer.Deserialize<PanelGirisKimligi>(json, System.Text.Json.JsonSerializerOptions.Web);
+            if (kimlik is null || kimlik.KullaniciId <= 0)
+                throw GentegreHatasi.Yetkisiz("Giris kodu gecersiz ya da suresi dolmus; yeniden giris yapin.");
+            return Results.Ok(await servis.PanelKodundanGirisAsync(kimlik, Ip(ctx), Istemci(ctx), iptal));
         });
 
         grup.MapPost("/yenile", [AllowAnonymous] async (
@@ -226,14 +233,36 @@ public static class KimlikUclari
         //   ya da gocle gelmis personel bu ucla girise acilir - kart ekranindan
         //   tek tek gecmek 93 kisilik listede gercekci degil.
         //   `sifirla=true` DOLU parolalari da kart id'sine ceker (admin haric).
+        //   SIFIRLAMA KAPISI (kod inceleme 30.10.2026 K03): `sifirla=true` dolu parolayı bilinen değere çeker -
+        //   `personel.degistir` taşıyan İK görevlisi admin dışı HER hesabı (yönetici dahil) ele geçirebiliyordu.
+        //   Artık tek kişi için, `kullanici.degistir` ile, hedef yönetenden geniş yetkili değilse yapılır;
+        //   hedefin oturumları kapanır ve log yazılır. Parolasız hesapları açan toplu yol değişmedi.
         grup.MapPost("/personel-hesap", async (
-            int? tarafId, bool? sifirla, KimlikServisi servis, BaglamCozucu cozucu,
+            int? tarafId, bool? sifirla, KimlikServisi servis, KullaniciDeposu kullanicilar,
+            OturumDeposu oturumlar, LogDeposu log, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("personel", Gentegre.Cekirdek.Yetki.Islem.Degistir);
+            if (sifirla == true)
+            {
+                if (tarafId is not > 0)
+                    throw GentegreHatasi.Dogrulama("Parola sıfırlama tek kişi için yapılır: tarafId verin.",
+                        new AlanHatasi("tarafId", "Zorunlu."));
+                baglam.YetkiIste("kullanici", Gentegre.Cekirdek.Yetki.Islem.Degistir);
+                if (!await kullanicilar.HedefYonetilebilirAsync(baglam.KullaniciId, tarafId.Value, iptal))
+                    throw GentegreHatasi.Yasak("Bu hesap sizden daha geniş yetkili; parolasını sıfırlayamazsınız.");
+            }
             var (acilan, parola) = await servis.PersonelHesaplariHazirlaAsync(
                 tarafId, sifirla == true, iptal);
+            if (sifirla == true && parola > 0)
+            {
+                await oturumlar.KullaniciOturumlariniKapatAsync(tarafId!.Value, "parola_sifirlandi", iptal);
+                await log.YazAsync(LogIslemi.Degistir, 902 /* kullanıcı */, tarafId.Value,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new Dictionary<string, string> { ["islem"] = "Parola varsayılana çekildi (personel-hesap)" },
+                    iptal: iptal);
+            }
             return Results.Ok(new { acilan, parolaAtanan = parola });
         }).RequireAuthorization();
 

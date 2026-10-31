@@ -32,8 +32,12 @@ select format('create role %I login', :'rol')
  where not exists (select 1 from pg_roles where rolname = :'rol') \gexec
 
 -- Kısıtlar HER çalışmada yeniden yazılır (elle açılmış yetki kalıcı olmasın).
+-- PAROLA GÜNLÜĞE DÜŞMEZ (kod inceleme 30.10.2026 K85): log_statement=all açıksa ALTER ROLE düz parolayla
+--   sunucu günlüğüne yazılırdı; yalnız bu ifade için kapatılır (oturum düzeyi, süper kullanıcı).
+set log_statement = 'none';
 alter role :"rol" with login nosuperuser nocreatedb nocreaterole noreplication nobypassrls
     inherit connection limit 200 password :'parola';
+reset log_statement;
 
 -- Hiçbir role üye değil (pg_read_server_files, pg_write_all_data... dahil).
 select format('revoke %I from %I', g.rolname, :'rol')
@@ -48,6 +52,10 @@ select format('revoke %I from %I', g.rolname, :'rol')
 --   Süper kullanıcı (göç, yedek) etkilenmez.
 revoke connect on database :"db" from public;
 grant connect, temporary on database :"db" to :"rol";
+-- Bakım veritabanlarına uygulama rolü bağlanamaz (K85): PUBLIC'in varsayılan CONNECT'i kaldırılır;
+--   süper kullanıcı ve sahip etkilenmez.
+revoke connect on database postgres from public;
+revoke connect on database template1 from public;
 
 -- ----------------------------------------------------------- şemalar ----
 -- public + stg (Delphi aktarım ara tabloları). CREATE hakkı YOK: uygulama
@@ -63,6 +71,12 @@ select format('revoke create on schema %I from public, %I', n.nspname, :'rol'),
        format('alter default privileges for role postgres in schema %I grant execute on routines to %I', n.nspname, :'rol')
   from pg_namespace n
  where n.nspname in ('public', 'stg') \gexec
+
+-- YEDEK TABLOLARI uygulamaya kapalı (kod inceleme 30.10.2026 K82): göçlerin bıraktığı _yedek_* kopyaları
+--   (eski şifreler, hesap satırları) uygulama rolünden okunamaz; yalnız süper kullanıcı inceler/siler.
+select format('revoke all on table %I.%I from %I', n.nspname, c.relname, :'rol')
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+ where c.relkind = 'r' and n.nspname in ('public', 'stg') and c.relname like '\_yedek\_%' \gexec
 
 -- Göç defteri uygulamanın değil: yalnız okunur.
 select format('revoke insert, update, delete, truncate on public.goc_gecmisi from %I', :'rol')

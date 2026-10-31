@@ -64,7 +64,10 @@ public static partial class CagriUclari
 
     public static void CagriUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var yetkili = yol.MapGroup("/api/cagri").WithTags("Çağrı Merkezi").RequireAuthorization();
+        // KAYIT KAPSAMI (kod inceleme 30.10.2026 K26): çağrı / kampanya / kampanya kişisi kimlikleri liste ile aynı
+        //   şube kuralından geçer; başka şubenin çağrısı kimlikle açılamaz, kapatılamaz (404). Webhook grubu ayrı.
+        var yetkili = yol.MapGroup("/api/cagri").WithTags("Çağrı Merkezi").RequireAuthorization()
+                         .AddEndpointFilter(KayitKapisi.Cagri());
         AkisUclari(yetkili);
         GidenUclari(yetkili);
         SupervizorUclari(yetkili);
