@@ -14,6 +14,7 @@ import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile, gunYaz } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
 import { c } from '../../dil/ceviri';
 import { h } from '../../bilesenler/htmlGuvenlik';
+import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
 /**
  * İZİN TALEP KARTI `/personel-izin/:id` (959, mockup Ekranlar/IK/izin_talep_karti.html).
@@ -229,7 +230,7 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
       ${satir('Vekil', vekilAd)}${satir('İzin adresi / ulaşım', [d.izinAdres, d.izinTel].filter(Boolean).join(' · '))}
       ${satir('Açıklama', d.aciklama)}</table>
       <div class="imza"><div>Personel</div><div>Birim âmiri</div><div>İnsan Kaynakları</div></div>
-      <script>setTimeout(()=>print(),300)</script>`);
+      ${YAZDIR_ETIKETI}`);
     w.document.close();
   };
 

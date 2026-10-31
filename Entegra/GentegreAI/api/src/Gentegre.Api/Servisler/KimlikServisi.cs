@@ -198,7 +198,7 @@ public sealed class KimlikServisi
         if (subeler.All(s => s.Id != subeId))
             throw GentegreHatasi.Yasak("Bu subede calisma yetkiniz yok.");
 
-        var dakika = await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal);
+        var dakika = ErisimDakikasi(await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal));
         // Aynı oturum ailesi: şube değişimi yeni oturum açmaz (OturumKapisi aileyi doğrulamıştır).
         var (token, sonaErme) = _jwt.Uret(kullanici.TarafId, kullanici.RolId, kullanici.YetkiSurumu,
             subeId, subeler.Select(s => s.Id), dakika, aileId);
@@ -419,7 +419,7 @@ public sealed class KimlikServisi
         string ip, string istemci, CancellationToken iptal,
         NpgsqlConnection? baglanti = null, NpgsqlTransaction? islem = null)
     {
-        var dakika = await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal);
+        var dakika = ErisimDakikasi(await AyarAsync("guvenlik.jwt_dakika", _ayar.JwtDakika, iptal));
         var gun = await AyarAsync("guvenlik.refresh_gun", _ayar.RefreshGun, iptal);
 
         // Yeni aile burada belirlenir (DB varsayılanına bırakılmaz): access token aynı aile kimliğini taşır (B05).
@@ -567,6 +567,15 @@ public sealed class KimlikServisi
     }
 
     /// <summary>Guvenlik ayarlari referans tablosunda; yoksa appsettings varsayilani.</summary>
+    /// <summary>
+    /// ERİŞİM TOKEN'I EN ÇOK 60 DK (kod inceleme 30.10.2026 K61): `guvenlik.jwt_dakika` kurulumlarda 480'e
+    /// ayarlanmıştı - çalınan token 8 saat geçerli kalıyordu ve oturum kapatma / rol değişikliği o süre boyunca
+    /// ancak OturumKapisi'na dayanıyordu. Ayar korunur (müşteri değerine dokunulmaz) ama üst sınır kodda:
+    /// istemci süresi dolan token'ı refresh ile sessizce yeniler, kullanıcı fark etmez. Alt sınır 5 dk.
+    /// </summary>
+    public const int EnFazlaErisimDakika = 60;
+    public static int ErisimDakikasi(int ayar) => Math.Clamp(ayar, 5, EnFazlaErisimDakika);
+
     private async Task<int> AyarAsync(string anahtar, int varsayilan, CancellationToken iptal)
     {
         try

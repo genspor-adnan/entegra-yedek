@@ -11,7 +11,8 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
 import { c } from '../../dil/ceviri';
-import { h } from '../../bilesenler/htmlGuvenlik';
+import { h } from '../../bilesenler/htmlGuvenlik';
+import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
 /**
  * MASRAF BEYANI KARTI `/personel-masraf/:id` (961, mockup Ekranlar/IK/masraf_karti.html).
@@ -261,7 +262,7 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
       <table><tr><th>#</th><th>Tarih</th><th>Gider kalemi</th><th>Belge</th><th>Tutar</th><th>KDV</th><th>Açıklama</th></tr>${satirlarHtml}
       <tr><th colspan="4">Toplam</th><th style="text-align:right">${h(yazP(toplam))}</th><th style="text-align:right">${h(yazP(kdv))}</th><th></th></tr></table>
       <div class="imza"><div>Beyan eden</div><div>Birim âmiri</div><div>Mali işler</div></div>
-      <script>setTimeout(()=>print(),300)</script>`);
+      ${YAZDIR_ETIKETI}`);
     w.document.close();
   };
 

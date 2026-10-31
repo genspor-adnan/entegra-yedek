@@ -1,3 +1,5 @@
+import { YAZDIR_ETIKETI } from './yazdirBetigi';
+
 /**
  * YAZDIRMA PENCERESİ GÜVENLİĞİ (kod inceleme raporu 28.10.2026 B03): `document.write` ile açılan yazdırma
  * pencereleri AYNI KÖKENDE çalışır - kayıttaki bir metin (yatak adı, masraf açıklaması) HTML olarak yorumlanırsa
@@ -42,7 +44,8 @@ export function htmlTemizle(html: string): string {
  */
 export function yazdirmaSargisi(html: string, baslik: string, yazdir: boolean): string {
   let ic = htmlTemizle(html).replace(/<title>[\s\S]*?<\/title>/i, '');
-  const ek = `<title>${h(baslik)}</title>` + (yazdir ? '<script>addEventListener("load",function(){setTimeout(function(){print()},400)})</script>' : '');
+  // Yazdırma betiği ORTAK metin (yazdirBetigi.ts): CSP onu hash'iyle tanır, iframe politikayı devralır.
+  const ek = `<title>${h(baslik)}</title>` + (yazdir ? YAZDIR_ETIKETI : '');
   ic = /<head[^>]*>/i.test(ic) ? ic.replace(/<head[^>]*>/i, m => m + ek) : ek + ic;
   return `<!doctype html><html><head><meta charset="utf-8"><title>${h(baslik)}</title>`
     + `<style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;width:100%;height:100%}</style></head>`

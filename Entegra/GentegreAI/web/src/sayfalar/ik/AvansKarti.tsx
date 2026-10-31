@@ -12,6 +12,7 @@ import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
 import { c } from '../../dil/ceviri';
 import { h } from '../../bilesenler/htmlGuvenlik';
+import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
 /**
  * PERSONEL AVANSI KARTI `/personel-avans/:id` (960, mockup Ekranlar/IK/avans_karti.html).
@@ -218,7 +219,7 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
       <table><tr><th>Sıra</th><th>Dönem</th><th style="text-align:right">Tutar</th></tr>${planHtml}</table>
       <p>Yukarıdaki tutarın maaşımdan belirtilen dönemlerde kesilmesini kabul ederim.</p>
       <div class="imza"><div>Personel</div><div>Birim âmiri</div><div>Mali işler</div></div>
-      <script>setTimeout(()=>print(),300)</script>`);
+      ${YAZDIR_ETIKETI}`);
     w.document.close();
   };
 

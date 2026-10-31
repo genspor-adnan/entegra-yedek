@@ -4,6 +4,7 @@ import { DokumanGalerisi } from '../DokumanGalerisi';
 import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { tarihSaat, tarihYaz } from '../bicim';
+import { YAZDIR_ETIKETI } from '../yazdirBetigi';
 
 /**
  * PERSONEL KARTI "BELGELER" SEKMESİ (1135-1137, mockup Ekranlar/IK/personel_belge_takibi.html (1)).
@@ -369,6 +370,6 @@ th,td{border:1px solid #999;padding:4px 6px;text-align:left}th{background:#eee}t
 <table><thead><tr><th>Belge</th><th>Zorunlu</th><th>Durum</th><th>Belge tarihi</th><th>Geçerlilik</th><th>Not</th></tr></thead>
 <tbody>${satirlar}</tbody></table>
 <div class="imza"><span>Kontrol eden (İK): ................................</span><span>İmza: ................</span></div>
-<script>window.onload=function(){window.print()}<\/script></body></html>`);
+${YAZDIR_ETIKETI}</body></html>`);
   w.document.close();
 }
