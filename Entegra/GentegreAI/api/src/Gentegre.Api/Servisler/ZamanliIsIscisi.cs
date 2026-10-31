@@ -310,6 +310,15 @@ public static class ZamanliIsler
         //   türler ve sunucu hataları önde. Sonuç işin son sonucunda okunur,
         //   ayrıntı Yönetim › Hata Özeti. Kimseye mesaj GÖNDERMEZ (bildirim
         //   kuyruğu dışarıya SMS / e-posta yollar).
+        // AI GÜNLÜK / SOHBET TEMİZLİĞİ (871): fn_ai_temizle saklama sürelerine göre (ai.log_saklama_gun,
+        //   ai.sohbet_saklama_gun) eski kayıtları siler. Göç işi tanımlamıştı ama işçide karşılığı yoktu -
+        //   her tur "Bilinmeyen iş kodu" yazıyordu (izleme alarmı 31.10.2026).
+        ["ai.temizlik"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>("select public.fn_ai_temizle()", null, iptal)
+                ?? "Sonuc okunamadi.";
+        },
         ["hata.ozet"] = async (servisler, iptal) =>
         {
             var veri = servisler.GetRequiredService<VeriKaynagi>();

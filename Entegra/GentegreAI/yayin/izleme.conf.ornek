@@ -1,0 +1,38 @@
+# Gentegre izleme ayarı — sunucuda ~/izleme/izleme.conf (chmod 600). Depoya GİZLİ DEĞER YAZILMAZ;
+# bu dosya yalnız örnektir, gerçek değerler sunucudaki kopyaya girilir.
+
+# İzlenen kurulumlar: ad:kok_klasoru:api_konteyneri:port:veritabani (yayinla.ps1 KURULUMLAR ile aynı).
+# Sunucuda klasörü olmayan kurulum atlanır. hbys (gentegre-ai, 5180) sunucuda kurulu değil - eski klasör
+# kaldığı için listede yok; kurulursa eklenir. Profiller: yayinla.ps1 PROFILLER sırası, port 5190'dan.
+KURULUMLAR="erp:gentegre-erp:gentegre-api-erp:5181:gentegre_erp
+bilim:gentegre-bilim:gentegre-api-bilim:5182:BILIM
+feta:gentegre-feta:gentegre-api-feta:5183:FETA
+zone:gentegre-zone:gentegre-api-zone:5184:ZONE
+medx:gentegre-medx:gentegre-api-medx:5185:MEDX
+hastane:gentegre-ai-hastane:gentegre-api-hastane:5190:gentegre_ai_hastane
+tipmerkezi:gentegre-ai-tipmerkezi:gentegre-api-tipmerkezi:5191:gentegre_ai_tipmerkezi
+dis:gentegre-ai-dis:gentegre-api-dis:5192:gentegre_ai_dis
+lab:gentegre-ai-lab:gentegre-api-lab:5193:gentegre_ai_lab
+osgb:gentegre-ai-osgb:gentegre-api-osgb:5194:gentegre_ai_osgb
+goz:gentegre-ai-goz:gentegre-api-goz:5195:gentegre_ai_goz
+ftr:gentegre-ai-ftr:gentegre-api-ftr:5196:gentegre_ai_ftr
+goruntuleme:gentegre-ai-goruntuleme:gentegre-api-goruntuleme:5197:gentegre_ai_goruntuleme
+muayene:gentegre-ai-muayene:gentegre-api-muayene:5198:gentegre_ai_muayene"
+
+# Eşikler
+DISK_ESIK=85
+BELLEK_ESIK=92
+KUYRUK_BEKLEME_DK=20
+BILDIRIM_HATA_ESIK=10
+TEKRAR_DK=120
+
+# TELEGRAM (önerilen: API çökse de çalışır). @BotFather'dan bot aç, botla bir mesajlaş, sohbet no'yu
+#   https://api.telegram.org/bot<TOKEN>/getUpdates çıktısındaki "chat":{"id":...} alanından al.
+TELEGRAM_TOKEN=""
+TELEGRAM_SOHBET=""
+
+# İsteğe bağlı: alarmı bir kurulumun KENDİ bildirim kuyruğuna da yaz (o kurulumun SMS / e-posta
+#   hesabıyla gider; o API ayaktaysa). Boş = kapalı.
+KUYRUK_DB=""
+KUYRUK_EPOSTA=""
+KUYRUK_TEL=""
