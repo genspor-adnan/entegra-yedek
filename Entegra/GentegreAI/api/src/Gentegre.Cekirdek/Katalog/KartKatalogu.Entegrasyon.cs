@@ -55,8 +55,9 @@ public static partial class KartKatalogu
             new("kullaniciAdi", "kullanici_adi", "metin", EnFazlaUzunluk: 100,
                 Baslik: "Kullanıcı Adı", Grup: "Genel", AltGrup: "Hesap"),
             // UTS sistem token'i 200 karakteri asiyor (337) - kolon `text`.
+            // ŞİFRELİ (K28): DB'de AES-GCM; kart dolu şifreyi maskeyle gösterir, maske gelirse değişmez.
             new("sifre",        "sifre",         "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şifre / Token", Grup: "Genel", AltGrup: "Hesap"),
+                Baslik: "Şifre / Token", Grup: "Genel", AltGrup: "Hesap", Sifreli: true),
             // SKRS'de "UygulamaKodu", MEDULA'da tesis kodu gibi ucuncu kimlik.
             new("uygulamaKodu", "uygulama_kodu", "metin", EnFazlaUzunluk: 100,
                 Baslik: "Uygulama Kodu", Grup: "Genel", AltGrup: "Hesap"),
@@ -81,10 +82,11 @@ public static partial class KartKatalogu
             //
             //   BILDIRIM HESABI ICIN `bildirim_kanal` SART: kuyruk saglayiciyi
             //   yalniz bu anahtarla buluyor (1 SMS · 2 e-posta).
+            // client_secret (ASMED / sigorta OAuth) ŞİFRELİ (K28) - kartta maske, kayıtta maske = değişmez.
             new("ayarlar", "ayarlar", "json", EnFazlaUzunluk: 4000,
                 Baslik: "Sağlayıcı Ayarları (JSON) — SMTP: bildirim_kanal 2, "
                       + "port, ssl, gonderen · SMS: bildirim_kanal 1, baslik, govde",
-                Grup: "Genel", AltGrup: "Adres ve Durum"),
+                Grup: "Genel", AltGrup: "Adres ve Durum", SifreliAnahtarlar: ["client_secret"]),
 
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Genel", AltGrup: "Adres ve Durum"),

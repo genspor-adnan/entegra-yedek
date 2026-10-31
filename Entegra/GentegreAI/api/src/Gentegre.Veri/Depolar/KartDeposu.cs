@@ -97,6 +97,7 @@ public sealed partial class KartDeposu
 
         await SlugUretAsync(baglanti, islem, tanim, degerler, null, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, null, iptal);
+        SirlariSifrele(tanim, degerler, null);
 
         var kolonlar = new List<string>();
         var yerTutucular = new List<string>();
@@ -192,6 +193,59 @@ public sealed partial class KartDeposu
         return yeniId;
     }
 
+    /// <summary>
+    /// ŞİFRELİ ALANLAR (K28): maske geldiyse alan istekten çıkar (kayıtlı sır korunur), dolu değer
+    /// şifrelenir, boş değer sırrı siler. Log ve çakışma karşılaştırması şifreli metni görür - düz sır
+    /// islem_log'a da yazılmaz.
+    /// </summary>
+    private static void SirlariSifrele(KartTanimi tanim, IDictionary<string, object?> degerler,
+                                       IDictionary<string, object?>? oncesi)
+    {
+        foreach (var alan in tanim.Alanlar.Where(a => a.Sifreli))
+        {
+            if (!degerler.TryGetValue(alan.Ad, out var d) || d is not string s) continue;
+            if (s == GizliMetin.Maske) degerler.Remove(alan.Ad);
+            else if (s.Length > 0) degerler[alan.Ad] = GizliMetin.Sifrele(s);
+        }
+        // JSON içindeki şifreli anahtarlar: maske = kayıttaki şifreli değer korunur, dolu = şifrelenir.
+        foreach (var alan in tanim.Alanlar.Where(a => a.SifreliAnahtarlar is { Length: > 0 }))
+        {
+            if (!degerler.TryGetValue(alan.Ad, out var d) || d is not string json || json.Length == 0) continue;
+            var eski = oncesi is not null && oncesi.TryGetValue(alan.Ad, out var o) ? o?.ToString() : null;
+            degerler[alan.Ad] = JsonSirlari(json, alan.SifreliAnahtarlar!, (anahtar, deger) =>
+                deger == GizliMetin.Maske ? JsonDeger(eski, anahtar) : GizliMetin.Sifrele(deger));
+        }
+    }
+
+    /// <summary>JSON nesnesindeki verilen anahtarların METİN değerlerini dönüştürür (null = anahtar çıkar).</summary>
+    internal static string JsonSirlari(string json, string[] anahtarlar, Func<string, string, string?> donustur)
+    {
+        if (System.Text.Json.Nodes.JsonNode.Parse(json) is not System.Text.Json.Nodes.JsonObject nesne) return json;
+        var degisti = false;
+        foreach (var anahtar in anahtarlar)
+        {
+            if (nesne[anahtar] is not System.Text.Json.Nodes.JsonValue v || !v.TryGetValue<string>(out var s) || s.Length == 0)
+                continue;
+            var yeni = donustur(anahtar, s);
+            if (yeni is null) nesne.Remove(anahtar); else nesne[anahtar] = yeni;
+            degisti = true;
+        }
+        // Türkçe / maske karakteri kaçışsız kalsın: ekran JSON'u kullanıcıya olduğu gibi gösterir.
+        return degisti ? nesne.ToJsonString(JsonOkunur) : json;
+    }
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOkunur = new()
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
+
+    private static string? JsonDeger(string? json, string anahtar)
+    {
+        if (string.IsNullOrEmpty(json)) return null;
+        return System.Text.Json.Nodes.JsonNode.Parse(json) is System.Text.Json.Nodes.JsonObject n
+               && n[anahtar] is System.Text.Json.Nodes.JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
+    }
+
     // ========================================================== GUNCELLEME ====
     public async Task GuncelleAsync(KartTanimi tanim, long id, string surum,
         IDictionary<string, object?> degerler, Dictionary<string, DetayFarki>? detaylar,
@@ -209,6 +263,7 @@ public sealed partial class KartDeposu
         //   kayittan tamamlanir - yoksa kur 0 sayilip yerel tutar sifirlanirdi.
         await SlugUretAsync(baglanti, islem, tanim, degerler, id, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, iptal);
+        SirlariSifrele(tanim, degerler, oncesi.Kart);
 
         if (degerler.Count > 0)
         {

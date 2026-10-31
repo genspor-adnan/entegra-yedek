@@ -160,7 +160,7 @@ public sealed class EnabizGonderimi
              where e.kod = 'ENABIZ' and e.aktif = 1
              limit 1
             """, null,
-            o => new Hesap(o.GetString(0), o.GetString(1), o.GetString(2), (short)o.GetInt32(3)),
+            o => new Hesap(o.GetString(0), o.GetString(1), GizliMetin.Coz(o.GetString(2)), (short)o.GetInt32(3)),
             iptal);
 
         return h is null || h.Url.Length == 0 ? null : h;

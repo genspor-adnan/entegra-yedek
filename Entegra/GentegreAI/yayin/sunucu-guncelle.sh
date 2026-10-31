@@ -165,16 +165,25 @@ if [ -d "$GECICI/api" ]; then
         chmod 600 "$KOK/.jwt_imza_anahtari"
         bilgi "kurulum JWT anahtari URETILDI (mevcut oturumlar yeniden giris yapacak)"
     fi
+    # VERI SIFRELEME ANAHTARI (kod inceleme 30.10.2026 K28): entegrasyon sifreleri DB'de bununla sifreli.
+    #   BIR KEZ uretilir, ASLA yeniden uretilmez - silinirse kayitli sifreler cozulemez (ekrandan yeniden
+    #   girilir). Yedegi DB yedeginden AYRI, sunucu DISINDA saklanmali.
+    if [ ! -s "$KOK/.veri_anahtari" ]; then
+        head -c 32 /dev/urandom | base64 | tr -d '\n' > "$KOK/.veri_anahtari"
+        chmod 600 "$KOK/.veri_anahtari"
+        bilgi "kurulum VERI SIFRELEME anahtari URETILDI ($KOK/.veri_anahtari) - YEDEGINI ALIN"
+    fi
+    VERI_ANAHTARI=$(cat "$KOK/.veri_anahtari")
     # Baglanti dizesi de burada (B07): API uygulama rolüyle baglanir. appsettings.Gizli.json en son
     #   yuklenir, Production.json'daki dizeyi ezer.
     # IZINLER (kod inceleme 30.10.2026 K10): api klasoru ve Gizli.json YALNIZ SAHIBINE - konteyner ayni
     #   kullanici kimligiyle (--user) calisir, nginx api klasorune girmez. Eskiden a+rX idi: JWT anahtari ve
     #   DB parolasi sunucudaki her yerel surece acikti.
     if [ "$UYGULAMA_ROLU" = "1" ]; then
-        printf '{ "Guvenlik": { "ImzaAnahtari": "%s" },\n  "ConnectionStrings": { "Gentegre": "Host=%s;Port=5432;Database=%s;Username=%s;Password=%s" } }\n' \
-            "$(cat "$KOK/.jwt_imza_anahtari")" "$PG" "$DB" "$ROL" "$DB_UYG_PAROLA" > "$KOK/api/appsettings.Gizli.json"
+        printf '{ "Guvenlik": { "ImzaAnahtari": "%s", "VeriAnahtari": "%s" },\n  "ConnectionStrings": { "Gentegre": "Host=%s;Port=5432;Database=%s;Username=%s;Password=%s" } }\n' \
+            "$(cat "$KOK/.jwt_imza_anahtari")" "$VERI_ANAHTARI" "$PG" "$DB" "$ROL" "$DB_UYG_PAROLA" > "$KOK/api/appsettings.Gizli.json"
     else
-        printf '{ "Guvenlik": { "ImzaAnahtari": "%s" } }\n' "$(cat "$KOK/.jwt_imza_anahtari")" > "$KOK/api/appsettings.Gizli.json"
+        printf '{ "Guvenlik": { "ImzaAnahtari": "%s", "VeriAnahtari": "%s" } }\n' "$(cat "$KOK/.jwt_imza_anahtari")" "$VERI_ANAHTARI" > "$KOK/api/appsettings.Gizli.json"
     fi
     chmod -R u+rwX,go-rwx "$KOK/api"
     chmod 600 "$KOK/api/appsettings.Gizli.json"

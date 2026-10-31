@@ -612,7 +612,7 @@ public static class EntegrasyonUclari
             throw GentegreHatasi.IsKurali(
                 "SKRS kullanıcı adı ve şifresi girilmemiş (Ayarlar › Genel › Entegrasyon).");
 
-        return new Hesap(id, M("kod"), M("kullanici_adi"), M("sifre"),
+        return new Hesap(id, M("kod"), M("kullanici_adi"), GizliMetin.Coz(M("sifre")),
                          M("uygulama_kodu"), M("adres"), M("scope"));
     }
 

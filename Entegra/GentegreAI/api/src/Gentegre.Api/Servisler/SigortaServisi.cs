@@ -61,7 +61,7 @@ public sealed class SigortaServisi(
             """, [kurumId, subeId ?? 0],
             o => new SigortaHesabi(o.GetInt32(0), o.GetInt16(1), o.GetString(2),
                                    o.GetInt32(3), o.GetString(4), o.GetString(5),
-                                   o.GetString(6), o.GetString(7), o.GetString(8),
+                                   GizliMetin.Coz(o.GetString(6)), o.GetString(7), GizliMetin.Coz(o.GetString(8)),
                                    o.GetString(9), o.GetInt16(10) == 1), iptal)
             ?? throw GentegreHatasi.IsKurali(
                 "Bu kurum için sigorta entegrasyon hesabı tanımlı değil.");

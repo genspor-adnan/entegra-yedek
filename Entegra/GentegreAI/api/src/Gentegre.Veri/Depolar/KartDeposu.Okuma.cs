@@ -23,8 +23,18 @@ public sealed partial class KartDeposu
         short portalTuru = 0, int portalKullanici = 0)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        return await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal,
-                              portalTuru, portalKullanici);
+        var sonuc = await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal,
+                                   portalTuru, portalKullanici);
+        // SIR İSTEMCİYE GİTMEZ (K28): dolu şifreli alan yalnız maske olarak döner (ekran "kayıtlı" gösterir).
+        if (sonuc is { } k)
+            foreach (var alan in tanim.Alanlar.Where(a => a.Sifreli))
+                if (k.Kart.TryGetValue(alan.Ad, out var d) && d is string s && s.Length > 0)
+                    k.Kart[alan.Ad] = GizliMetin.Maske;
+        if (sonuc is { } j)
+            foreach (var alan in tanim.Alanlar.Where(a => a.SifreliAnahtarlar is { Length: > 0 }))
+                if (j.Kart.TryGetValue(alan.Ad, out var d) && d?.ToString() is { Length: > 0 } json)
+                    j.Kart[alan.Ad] = JsonSirlari(json, alan.SifreliAnahtarlar!, (_, _) => GizliMetin.Maske);
+        return sonuc;
     }
 
     private async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(

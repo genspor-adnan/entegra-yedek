@@ -111,7 +111,18 @@ public sealed record KartAlani(
     /// ZORUNLULUKTAN MUAF (17.10.2026: "cihaz seçiliyse doktor zorunlu olmasın"): bu alan doluysa
     /// kapıyla gelen zorunluluk kalkar. Ekran da aynı bilgiyle yıldızı kaldırır.
     /// </summary>
-    string? ZorunluMuafAlan = null
+    string? ZorunluMuafAlan = null,
+    /// <summary>
+    /// ŞİFRELİ SIR (kod inceleme 30.10.2026 K28): değer DB'ye <c>GizliMetin</c> ile şifreli yazılır, kart
+    /// okumasında dolu ise yalnız maske döner (sır istemciye hiç gitmez), kayıtta maske gelirse alan
+    /// değişmez. Okuyan servisler <c>GizliMetin.Coz</c> kullanır.
+    /// </summary>
+    bool Sifreli = false,
+    /// <summary>
+    /// JSON ALANINDA ŞİFRELİ ANAHTARLAR (K28): `json` tipli alanın bu anahtarları <see cref="Sifreli"/> ile aynı
+    /// kuralla saklanır (ör. entegrasyon `ayarlar.client_secret`). Diğer anahtarlar düz kalır.
+    /// </summary>
+    string[]? SifreliAnahtarlar = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

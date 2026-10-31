@@ -49,7 +49,7 @@ public sealed class EnabizPortalIstemcisi
                and coalesce(nullif(case when e.test_mi = 1 then e.test_url else e.url end, ''), '') <> ''
              limit 1
             """, null, [],
-            o => new Hesap(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3)),
+            o => new Hesap(o.GetString(0), o.GetString(1), GizliMetin.Coz(o.GetString(2)), o.GetString(3)),
             iptal);
 
     /// <summary>

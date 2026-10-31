@@ -50,7 +50,7 @@ public static class EBelgeIstemcisi
 
         var hesap = new EBelgeHesabi(
             o.IsDBNull(0) ? "" : o.GetString(0), o.IsDBNull(1) ? "" : o.GetString(1),
-            o.IsDBNull(2) ? "" : o.GetString(2), !o.IsDBNull(3) && o.GetBoolean(3),
+            o.IsDBNull(2) ? "" : GizliMetin.Coz(o.GetString(2)), !o.IsDBNull(3) && o.GetBoolean(3),
             o.IsDBNull(4) ? "" : o.GetString(4));
 
         if (string.IsNullOrWhiteSpace(hesap.Entegrator) || string.IsNullOrWhiteSpace(hesap.Url))

@@ -126,8 +126,8 @@ public static partial class CagriUclari
                        bot_ilk_yanit = coalesce(@p13::text, bot_ilk_yanit), eposta_adres = coalesce(@p14::text, eposta_adres), islem_sonrasi_sn = coalesce(@p15::int, islem_sonrasi_sn),
                        degistiren = @p16, degistirme_tarihi = now()
                  where sube_id = @p0
-                """, null, [sube, g.Saglayici, g.ApiAdres, g.Kimlik, g.Gizli, g.KayitKaynak, g.KvkkAnons, g.KayitSaklamaAy, g.Ivr?.ToJsonString(), g.Calisma?.ToJsonString(),
-                            g.MesaiDisiMesaj, g.WhatsappNo, g.WhatsappToken, g.BotIlkYanit, g.EpostaAdres, g.IslemSonrasiSn, baglam.KullaniciId], iptal);
+                """, null, [sube, g.Saglayici, g.ApiAdres, g.Kimlik, GizliMetin.Sifrele(g.Gizli), g.KayitKaynak, g.KvkkAnons, g.KayitSaklamaAy, g.Ivr?.ToJsonString(), g.Calisma?.ToJsonString(),
+                            g.MesaiDisiMesaj, g.WhatsappNo, GizliMetin.Sifrele(g.WhatsappToken), g.BotIlkYanit, g.EpostaAdres, g.IslemSonrasiSn, baglam.KullaniciId], iptal);
             await log.YazAsync(LogIslemi.Degistir, LogCagri, sube, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { santral = true, g.Saglayici }, iptal: iptal);
             return Results.Ok(new { subeId = sube });
         });

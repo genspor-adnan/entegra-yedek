@@ -228,6 +228,10 @@ kurucu.Services.ConfigureHttpJsonOptions(o =>
 var guvenlik = kurucu.Configuration.GetSection("Guvenlik").Get<GuvenlikAyarlari>() ?? new();
 // GELİŞTİRME / ZAYIF ANAHTARLA ÜRETİM AÇILMAZ (B01): depodaki anahtarı bilen geçerli token üretebilirdi.
 GuvenlikAyarlari.UretimAnahtariniDogrula(guvenlik.ImzaAnahtari, kurucu.Environment.IsProduction());
+// VERİ ŞİFRELEME ANAHTARI (K28): entegrasyon sırları DB'de bununla şifreli. Production'da yoksa / geliştirme
+//   anahtarıysa API açılmaz - sırlar ya düz kalır ya da başka kurulumun anahtarıyla okunamaz hâle gelirdi.
+GizliMetin.Kur(guvenlik.VeriAnahtari, kurucu.Environment.IsProduction());
+if (arkaPlanAcik) kurucu.Services.AddHostedService<GizliMetinTarayici>();
 
 // ISTEMCI IP'SI (denetim 28.09.2026 #5): nginx arkasinda RemoteIpAddress
 //   hep 127.0.0.1'dir - IP bazli deneme siniri herkesi tek istemci sayardi.

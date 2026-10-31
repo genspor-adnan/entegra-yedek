@@ -54,7 +54,7 @@ public sealed class BankaHareketServisi(VeriKaynagi veri, KasaDeposu kasa, IHttp
             """, null, [hesapId], o => new Kaynakli(new Baglanti(o.GetInt32(0), o.GetString(1), o.GetInt32(2), o.GetString(3),
                 o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7), o.IsDBNull(8) ? null : o.GetDateTime(8),
                 o.GetBoolean(9), o.GetInt32(10), o.GetString(11), o.GetBoolean(12), o.GetString(13), o.GetString(14),
-                o.GetString(15), o.GetString(16), o.GetString(18)), o.GetInt16(17)), iptal)
+                o.GetString(15), GizliMetin.Coz(o.GetString(16)), o.GetString(18)), o.GetInt16(17)), iptal)
             ?? throw GentegreHatasi.Bulunamadi("Banka hesabı bulunamadı.");
         var bag = g.Bag;
         if (g.Kaynak != 1) throw GentegreHatasi.IsKurali($"{bag.HesapAd}: hareket kaynağı 'Banka API' değil (kartın Banka Bağlantısı sekmesi).");

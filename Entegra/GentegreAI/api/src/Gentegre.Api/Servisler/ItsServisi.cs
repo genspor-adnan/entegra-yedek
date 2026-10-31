@@ -71,7 +71,7 @@ public sealed class ItsServisi
              where e.kod = 'ITS' and e.aktif = 1
              limit 1
             """, null,
-            o => new Hesap(o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3),
+            o => new Hesap(o.GetString(0), o.GetString(1), GizliMetin.Coz(o.GetString(2)), o.GetString(3),
                            o.GetInt16(4) == 1), iptal);
 
         return h is null || h.Adres.Length == 0 ? null : h;

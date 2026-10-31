@@ -58,7 +58,7 @@ public sealed class BildirimHesaplari
         object? par = hesapId is not null ? hesapId : ((short)kanal).ToString();
         return await _veri.TekAsync(sql, new[] { par }, o => new BildirimHesabi(
             o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetInt16(3) == 1,
-            o.GetString(4), o.GetString(5), o.GetString(6), o.GetString(7),
+            o.GetString(4), GizliMetin.Coz(o.GetString(5)), o.GetString(6), o.GetString(7),
             JsonDocument.Parse(o.GetString(8)).RootElement), iptal);
     }
 }

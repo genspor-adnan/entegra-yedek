@@ -41,7 +41,7 @@ public static class UtsIstemcisi
 
         var hesap = new UtsHesabi(
             o.IsDBNull(0) ? "" : o.GetString(0),
-            o.IsDBNull(1) ? "" : o.GetString(1),
+            o.IsDBNull(1) ? "" : GizliMetin.Coz(o.GetString(1)),   // ÜTS token (K28: şifreli)
             !o.IsDBNull(2) && o.GetBoolean(2),
             o.IsDBNull(3) ? "" : o.GetString(3));
 

@@ -26,6 +26,12 @@ public sealed class GuvenlikAyarlari
     }
 
     public string ImzaAnahtari { get; set; } = "";
+    /// <summary>
+    /// VERİ ŞİFRELEME ANAHTARI (K28, base64 32 bayt): entegrasyon sırlarını DB'de şifreler (GizliMetin). Kurulum
+    /// klasöründe bir kez üretilir ve HİÇ değişmez (yayin/sunucu-guncelle.sh, `.veri_anahtari`) - kaybolursa
+    /// kayıtlı şifreler çözülemez, ekrandan yeniden girilir. Yedeği DB yedeğinden AYRI saklanır.
+    /// </summary>
+    public string VeriAnahtari { get; set; } = "";
     public string Yayinci { get; set; } = "gentegre-ai";
     public string Hedef { get; set; } = "gentegre-ai-istemci";
     public int JwtDakika { get; set; } = 30;
