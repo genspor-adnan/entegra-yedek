@@ -400,6 +400,9 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           zatenVarMi={r => satirlar.some(s => r.tip === 'hizmet'
             ? s.hizmetId === Number(r.id)
             : s.stokId === Number(r.id))}
+          // TEK SEÇİM (kullanıcı 02.11.2026): alış / satış belgesinde yalnız işaretli tek satır eklenir.
+          //   Başvuruda çoklu seçim kalır (hizmetler toplu işaretlenip eklenir).
+          tekSecim={!basvuruMu}
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
           // HIZLI EKLEME (786): kalem penceresi acilmadan gride dustugu icin
           //   sayaci BURASI artirir - pencere yoluyla eklemede sayaci kalem

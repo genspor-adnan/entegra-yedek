@@ -444,9 +444,15 @@ function ParaGrubu({ x, cari, n, bakiyeYaz, detay, kalemler, bas, secili, onSec,
   isaretli: Set<number>; degistir(id: number): void;
 }) {
   const bakiyeSinif = (b: number) => 'sag' + (cari && b > 0.005 ? ' kir' : '');
+  // GRUP AÇ / KAPA (kullanıcı 03.11.2026: "para birimi (TL/Euro) gruplama var.. tıklanınca grup kapanabilmeli..
+  //   default açık gelecek"): başlığa tık devir ve hareket satırlarını gizler; grup toplamı görünür kalır.
+  const [acik, setAcik] = useState(true);
   return (
     <>
-      <tr className="ek-para"><td colSpan={n}>{x.doviz} · {x.adet} hareket</td></tr>
+      <tr className={'ek-para' + (acik ? '' : ' kapali')} role="button" aria-expanded={acik}
+          title={acik ? 'Tıkla: grubu kapat' : 'Tıkla: grubu aç'} onClick={() => setAcik(a => !a)}>
+        <td colSpan={n}><span className="ek-ok">{acik ? '▾' : '▸'}</span>{x.doviz} · {x.adet} hareket</td></tr>
+      {acik && <>
       <tr className="ek-devir">
         <td className="cbk" /><td>{tarihKisa(bas)}</td><td /><td>Devir</td><td /><td colSpan={cari ? 2 : 1}>Dönem başı bakiye</td>
         <td /><td /><td className={bakiyeSinif(x.devir)}>{bakiyeYaz(x.devir)}</td>
@@ -476,6 +482,7 @@ function ParaGrubu({ x, cari, n, bakiyeYaz, detay, kalemler, bas, secili, onSec,
             </tr>)),
         ];
       })}
+      </>}
       <tr className="ek-ara">
         <td colSpan={n - 3}>{x.doviz} toplamı</td>
         <td className="sag">{p(x.borc)}</td><td className="sag">{p(x.alacak)}</td>
@@ -617,6 +624,8 @@ const EKSTRE_STILI = `
 .ek-dg { overflow:auto; max-height:calc(100vh - 330px); }
 .ek-tablo th { position:sticky; top:0; z-index:1; }
 .ek-tablo tr.ek-para td { background:#f1f5fa; font-weight:bold; color:#2c4a6b; }
+.ek-tablo tr.ek-para { cursor:pointer; user-select:none; }
+.ek-tablo tr.ek-para .ek-ok { display:inline-block; width:16px; color:#6b7a8b; }
 .ek-tablo tr.ek-devir td { background:#fbfcfe; font-style:italic; color:#4d5d6e; }
 .ek-tablo tr.ek-ara td { background:#f7f9fc; font-weight:bold; border-top:1px solid #cdd6e0; }
 .ek-tablo tr.ek-genel td { background:#eef2f7; font-weight:bold; border-top:2px solid #9fb3c8; }

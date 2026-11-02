@@ -33,9 +33,17 @@ function kisaAdSirasi(satir: Record<string, unknown>, aranan: string): number {
   return kisa.includes(aranan) ? 1 : 2;
 }
 
-export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
+export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizStokSabit,
+                                    yalnizHizmet: yalnizHizmetSabit, yon,
                                     eklenen, fiyatListesiId, sgkBaglami, bolumId,
-                                    hizmetEkFiltre, zatenVarMi, kartAc }: {
+                                    hizmetEkFiltre, zatenVarMi, kartAc, tekSecim }: {
+  /**
+   * TEK SEÇİM (kullanıcı 02.11.2026, satış faturası ücret ekleme: "sadece 1 check yapılabilir.. ve sadece
+   * check yapılmış eklenebilir"): aynı anda yalnız bir kutu işaretli; ekleme düğmeleri ve Enter YALNIZ
+   * işaretli satırı ekler (fare altındaki satırı değil), işaret yoksa pasif. Ctrl/Shift çoklu seçim, "tümünü
+   * seç" kutusu ve "Seçilenleri Ekle" bu kipte yok. Verilmezse eski davranış (çoklu seçim).
+   */
+  tekSecim?: boolean;
   /**
    * KART AÇMA KİPİ (Ctrl+K "Kayıtlı Stok / Hizmet Kartı", kullanıcı 14.10.2026): aynı arama ve
    * kolonlar, ekleme düğmeleri yerine "Kartı Aç"; ilaç kataloğu aranmaz (seçim stok kartı
@@ -114,6 +122,29 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    * stok girer - boylece ne katalog stok listesini bogar, ne de eczane
    * cikisi icin memurun once elle stok karti acmasi gerekir.
    */
+  /**
+   * TÜR SÜZGECİ (kullanıcı 02.11.2026: "stok hizmet ara ekranına stok/hizmet/tümü filtre de ekle.. kategori
+   * ona göre gelsin"): çağıran yalnız stok / yalnız hizmet demediyse kullanıcı seçer. Kategori ağacı seçilen
+   * türün dallarını gösterir; tür değişince seçili kategori bırakılır (öteki türün dalı geçersiz kalır).
+   */
+  const turSabit = !!(yalnizStokSabit || yalnizHizmetSabit);
+  /**
+   * SÜZGEÇ HATIRLANIR (kullanıcı 03.11.2026: "kapatırken filtre nerde kaldıysa oradan aynen açılsın..
+   * hatırlasın"): tür, görünüm (Tüm / Son / Sık) ve kategori bu tarayıcıda saklanır. Anahtar pencerenin
+   * kipine göre ayrı (karma / yalnız stok / yalnız hizmet / kart açma) - yalnız hizmet aranan yerde stok
+   * kategorisi geri gelmesin. Arama METNİ saklanmaz: kalem penceresi kapanınca bilerek boşalıyor.
+   * Kişisel kolaylık; okunamazsa (gizli pencere, engelli depolama) varsayılanla açılır.
+   */
+  const suzgecAnahtari = `stokArama.suzgec.${kartAc ? 'kart.' : ''}${
+    yalnizStokSabit ? 'stok' : yalnizHizmetSabit ? 'hizmet' : 'karma'}`;
+  const [kayitliSuzgec] = useState<{ tur?: string; gorunum?: string; kategoriId?: number | null;
+                                     kategoriAltlari?: number[] } | null>(() => {
+    try { return JSON.parse(localStorage.getItem(suzgecAnahtari) ?? 'null') } catch { return null }
+  });
+  const [turSecimi, setTurSecimi] = useState<'tum' | 'stok' | 'hizmet'>(() =>
+    kayitliSuzgec?.tur === 'stok' || kayitliSuzgec?.tur === 'hizmet' ? kayitliSuzgec.tur : 'tum');
+  const yalnizStok = yalnizStokSabit || (!turSabit && turSecimi === 'stok');
+  const yalnizHizmet = yalnizHizmetSabit || (!turSabit && turSecimi === 'hizmet');
   const ilacAranir = kullanici?.urunModu === URUN_GENOTIP && !yalnizHizmet && !kartAc;
   const [arama, setArama] = useState('');
   const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
@@ -155,6 +186,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
   const [isaretli, setIsaretli] = useState<Map<string, ListeSatiri>>(() => new Map());
   const isaretAnahtari = (r: ListeSatiri) => `${String(r.tip)}-${String(r.id)}`;
   const isaretDegistir = (r: ListeSatiri) => setIsaretli(m => {
+    if (tekSecim) return m.has(isaretAnahtari(r)) ? new Map() : new Map([[isaretAnahtari(r), r]]);
     const n = new Map(m);
     const k = isaretAnahtari(r);
     n.has(k) ? n.delete(k) : n.set(k, r);
@@ -173,8 +205,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
   const satirTikla = (e: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean },
                       i: number, r: ListeSatiri) => {
     setSecili(i);
-    const ctrl = e.ctrlKey || e.metaKey;
-    if (e.shiftKey) {
+    const ctrl = !tekSecim && (e.ctrlKey || e.metaKey);
+    if (e.shiftKey && !tekSecim) {
       const [a, b] = capa <= i ? [capa, i] : [i, capa];
       setIsaretli(m => {
         const n = ctrl ? new Map(m) : new Map<string, ListeSatiri>();
@@ -189,15 +221,25 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     setIsaretli(new Map([[isaretAnahtari(r), r]]));
   };
   /** Liste / Son Aranan / Sik Aranan - GenGrid ile ayni (kullanici_arama). */
-  const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
+  const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>(() =>
+    kayitliSuzgec?.gorunum === 'son' || kayitliSuzgec?.gorunum === 'sik' ? kayitliSuzgec.gorunum : 'tum');
   /**
    * KATEGORI SUZGECI (kullanici: "sık kullanılan sağına filtre kategori combo
    * ağacı ekle"): katalog 10 bin kalem; memur adini tam bilmediginde daldan
    * daraltir ("Laboratuvar > Biyokimya"). Secilen dal ALT AGACIYLA suzer -
    * liste ekranlarindaki suzgecin aynisi (346).
    */
-  const [kategoriId, setKategoriId] = useState<number | null>(null);
-  const [kategoriAltlari, setKategoriAltlari] = useState<number[]>([]);
+  const [kategoriId, setKategoriId] = useState<number | null>(() =>
+    typeof kayitliSuzgec?.kategoriId === 'number' ? kayitliSuzgec.kategoriId : null);
+  const [kategoriAltlari, setKategoriAltlari] = useState<number[]>(() =>
+    Array.isArray(kayitliSuzgec?.kategoriAltlari)
+      ? kayitliSuzgec.kategoriAltlari.filter(x => typeof x === 'number') : []);
+  useEffect(() => {
+    try {
+      localStorage.setItem(suzgecAnahtari, JSON.stringify(
+        { tur: turSecimi, gorunum: aramaGorunumu, kategoriId, kategoriAltlari }));
+    } catch { /* saklanamadı - bir sonraki açılış varsayılanla */ }
+  }, [suzgecAnahtari, turSecimi, aramaGorunumu, kategoriId, kategoriAltlari]);
   const zamanlayici = useRef<number | undefined>(undefined);
   const kutu = useRef<HTMLInputElement | null>(null);
 
@@ -345,6 +387,9 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
 
       setSatirlar(sirali);
       setSecili(0); setCapa(0);
+      // ARAMADA TEK SONUÇ İŞARETLİ GELİR (kullanıcı 03.11.2026: "arama yaptım ve 1 adet listede kaldıysa
+      //   default işaretlensin"): Enter / Ekle doğrudan onu ekler. Birden çok sonuçta işarete dokunulmaz.
+      if (aranan && sirali.length === 1) setIsaretli(new Map([[isaretAnahtari(sirali[0]), sirali[0]]]));
 
       // LISTE FIYATLARI (495): arama sonucu geldikten sonra tek istekte
       //   cozulur; liste yoksa kart fiyati gosterilmeye devam eder.
@@ -463,6 +508,20 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
     } finally { setUretiliyor(false) }
   };
 
+  /** EKLENECEK SATIR: tek seçimde YALNIZ işaretli satır (yoksa ekleme yok); çoklu kipte imleçteki satır. */
+  //   İşaretli satırın GÜNCEL hali listeden okunur: fiyat listesi fiyatı işaretten sonra çözülebilir.
+  //   Yeni aramada listeden DÜŞEN işaretli satır eklenmez - kullanıcı görmediği kalemi Enter'la eklemesin.
+  const isaretliIlk = tekSecim ? [...isaretli.values()][0] : undefined;
+  const hedef: ListeSatiri | undefined = tekSecim
+    ? (isaretliIlk && satirlar.find(x => isaretAnahtari(x) === isaretAnahtari(isaretliIlk)))
+    : satirlar[secili];
+  /**
+   * FİYATSIZ KALEMDE TEK DÜĞME (kullanıcı 03.11.2026: "fiyat varsa hem 1 adet ekle hem miktarlı ekle görünsün..
+   * fiyat yoksa zaten adet/fiyat ekranı açılacak.. miktar ekle butonu görünmesin.. caption 'Ekle (Enter)'"):
+   * fiyatsız kalem hızlı eklenmez, Enter da fiyat penceresini açar - iki düğme aynı işi yapıyordu.
+   */
+  const hedefFiyatli = !!hedef && Number(hedef.fiyat ?? 0) > 0;
+
   /** Isaretlenenleri sirayla 1'er adet ekler (her biri tek tek eklemeyle ayni yol). */
   const [topluEkleniyor, setTopluEkleniyor] = useState(false);
   const isaretlileriEkle = async () => {
@@ -488,7 +547,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       if (satirlar.length === 0) return;
       const i = e.key === 'ArrowDown' ? Math.min(secili + 1, satirlar.length - 1) : Math.max(secili - 1, 0);
       setSecili(i);
-      if (e.shiftKey) {
+      if (e.shiftKey && !tekSecim) {
         const [a, b] = capa <= i ? [capa, i] : [i, capa];
         setIsaretli(new Map(satirlar.slice(a, b + 1).map(x => [isaretAnahtari(x), x])));
       } else {
@@ -496,7 +555,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
         setIsaretli(new Map([[isaretAnahtari(satirlar[i]), satirlar[i]]]));
       }
     }
-    else if (e.key === 'Enter' && satirlar[secili]) {
+    else if (e.key === 'Enter' && hedef) {
       e.preventDefault();
       // Basili tutulan Enter'in TEKRARI secim sayilmaz.
       if (e.repeat) return;
@@ -508,8 +567,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       //   (kullanici: "kısayolu shift+enter yap"). Shift+Enter ayni elin
       //   ayni tusu - hiz kaybi yok.
       // Birden çok satır işaretliyse (Shift+ok / Ctrl tık) Enter "Seçilenleri Ekle"dir.
-      if (!e.shiftKey && isaretli.size > 1) { void isaretlileriEkle(); return }
-      void sec(satirlar[secili], !e.shiftKey);
+      if (!tekSecim && !e.shiftKey && isaretli.size > 1) { void isaretlileriEkle(); return }
+      void sec(hedef, !e.shiftKey);
     }
   };
 
@@ -543,17 +602,20 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
             </span>
           ) : (
           <span className="stok-ara-eylem" style={{ marginRight: 'auto' }}>
-            <button className="d bir" disabled={!satirlar[secili]}
-                    title="Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)"
-                    onClick={() => satirlar[secili] && void sec(satirlar[secili], true)}>
-              ＋ 1 Adet Ekle (Enter)
+            <button className="d bir" disabled={!hedef}
+                    title={tekSecim && !hedef ? c('Önce eklenecek satırı işaretleyin')
+                           : hedefFiyatli ? 'Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)'
+                           : c('Fiyatı yok: miktar ve fiyat penceresi açılır')}
+                    onClick={() => hedef && void sec(hedef, true)}>
+              ＋ {hedefFiyatli || !hedef ? c('1 Adet Ekle (Enter)') : c('Ekle (Enter)')}
             </button>
-            <button className="d" disabled={!satirlar[secili]}
-                    title={c('Miktar ve fiyat penceresini açar')}
-                    onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
+            {(hedefFiyatli || !hedef) && (
+            <button className="d" disabled={!hedef}
+                    title={tekSecim && !hedef ? c('Önce eklenecek satırı işaretleyin') : c('Miktar ve fiyat penceresini açar')}
+                    onClick={() => hedef && void sec(hedef, false)}>
               🔢 Miktar Ekle (Shift+Enter)
-            </button>
-            {isaretli.size > 0 && (
+            </button>)}
+            {!tekSecim && isaretli.size > 0 && (
               <button className="d bir" disabled={topluEkleniyor}
                       title={c('İşaretli kalemleri 1\'er adet, liste fiyatıyla ekler')}
                       onClick={() => void isaretlileriEkle()}>
@@ -604,6 +666,20 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                       title={c('Sık Aranan')} onClick={() => setAramaGorunumu('sik')}>⭐</button>
             </div>
 
+            {/* TÜR: Tümü · Stok · Hizmet (02.11.2026) - çağıran türü sabitlediyse gösterilmez. */}
+            {!turSabit && (
+              <div className="durumseg" role="group" aria-label={c('Tür')}>
+                {([['tum', 'Tümü'], ['stok', 'Stok'], ['hizmet', 'Hizmet']] as const).map(([k, ad]) => (
+                  <button key={k} className={`ikon-liste ${turSecimi === k ? 'on' : ''}`} style={{ width: 'auto', padding: '0 10px' }}
+                          onClick={() => {
+                            if (turSecimi === k) return;
+                            setTurSecimi(k); setKategoriId(null); setKategoriAltlari([]);
+                            kutu.current?.focus({ preventScroll: true });
+                          }}>{c(ad)}</button>
+                ))}
+              </div>
+            )}
+
             {/* KATEGORI AGACI - Sık Aranan'ın SAĞINDA (kullanici). Aranan
                 turler neyse o agac(lar) gosterilir: yalniz hizmet aranirken
                 stok dallari secenek olarak durmasin. */}
@@ -617,7 +693,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               <tr>
                 {/* SECIM KUTUSU EN SOLDA (kullanici). */}
                 <th style={{ width: 30 }} className="hiza-orta">
-                  <input type="checkbox" title={c('Listedekilerin tümünü seç / bırak')}
+                  {!tekSecim && <input type="checkbox" title={c('Listedekilerin tümünü seç / bırak')}
                     checked={satirlar.length > 0 && satirlar.every(r => isaretli.has(isaretAnahtari(r)))}
                     onChange={e => setIsaretli(m => {
                       const n = new Map(m);
@@ -626,7 +702,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                         else n.delete(isaretAnahtari(r));
                       }
                       return n;
-                    })} />
+                    })} />}
                 </th>
                 <th style={{ width: 34 }} className="hiza-orta" title="Tür"></th>
                 {/* KATEGORI KODUN SOLUNDA (kullanici): ayni ad birden fazla
@@ -674,7 +750,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     onMouseDown={e => { if (e.shiftKey) e.preventDefault() }}
                     /* Tık odağı arama kutusuna geri verir: ok / Enter klavyeyle sürsün (kullanıcı 24.10.2026). */
                     onClick={e => { satirTikla(e, i, r); kutu.current?.focus({ preventScroll: true }) }}
-                    onDoubleClick={() => void sec(r, true)}>
+                    onDoubleClick={() => { if (tekSecim) setIsaretli(new Map([[isaretAnahtari(r), r]])); void sec(r, true) }}>
                   <td className="hiza-orta">
                     <input type="checkbox" checked={isaretli.has(isaretAnahtari(r))}
                       onClick={e => e.stopPropagation()}
