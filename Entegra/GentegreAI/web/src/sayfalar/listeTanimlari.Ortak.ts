@@ -183,6 +183,8 @@ export interface ListeTanimi {
       (Fiyat Listeleri HBYS'de Kurumlar & Sigorta, ERP'de Satış). Alt grup ERP'de
       düşer - hedef grubun kendi kırılımı yok. */
   erpMenuGrup?: string;
+  /** ERP grubundaki sıra (erpMenuGrup ile): ekran ERP'de başka gruba taşınınca oradaki yeri; verilmezse menuSira. */
+  erpMenuSira?: number;
   /** Cip seridine "Σ Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
       ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
   ekstre?: {

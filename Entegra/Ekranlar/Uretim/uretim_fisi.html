@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim Fişi — Mockup (Gentegre AI · Üretim)</title>
+<!--
+  Kullanıcı 02.11.2026: "Üretim fişi yaptık mı? yoksa mockup hazırla".
+  Web'de yalnız ÜRETİM EMRİ akışı var (429: emir → rezerv → sarf 121 → mamul girişi 122 → fire 123 → maliyet kapat).
+  Delphi'deki TEK ADIMLI ÜRETİM FİŞİ (UUretimWizard, FATBASLIK TUR=6) yok. Bu mockup onun web karşılığı.
+
+  Delphi fişinin içeriği (birebir taşınan):
+   · Başlık: Üretim No (FATURANO), Başlama (TARIH) / Bitiş (FATURATARIH), Çıkış (sarf) deposu, Giriş deposu,
+     Lokasyon + İstasyon, Sorumlu (SATICIKODU), Onaylayan, Ana ürün (AKTIVITEID) + miktar (STOKISK) + birim,
+     liste fiyatı, maliyet son/ortalama, döviz.
+   · Detay (FATURA): MIKTAR > 0 = ÜRÜN (giriş), MIKTAR < 0 = SARF (çıkış); TUR=1 stok, değilse MASRAFGELIR
+     (işçilik / genel gider); ANAURUN işareti; son ve ortalama maliyet (TL + döviz); depodaki stok durumu.
+   · Araçlar: Reçete (ürün ağacından doldur), Hesapla (maliyet), Dönüştür; "Otomatik Hesapla" seçeneği.
+   · Sekmeler: Detay · Genel/Bilgi (proje, açıklama) · Operasyon / Personel (URETIMOPERASYONPERSONEL) · Yorum.
+  Web düzeni alış/satış belgeleriyle AYNI: tür adı araç satırında renkli (üretim: mor), üstte BAŞLIK BANDI
+  (cari bandı yerine MAMUL bandı), altında 4 kolonlu ızgara, sekmeler.
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b; --mor:#6a3fb5; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:16px}
+  h2{font-size:13px;color:var(--yazi2);margin:24px 0 6px}
+  h2:first-child{margin-top:0}
+  .not{color:var(--soluk);font-size:11px;margin:0 0 8px;line-height:1.5;max-width:1360px}
+  .sayfa{background:var(--yuz);border:1px solid var(--cizgi);border-radius:4px;overflow:hidden;max-width:1360px}
+  .arac{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--cizgi2);background:var(--yuz2);flex-wrap:wrap}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .d.yesil{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .d.kirmizi{background:linear-gradient(#e7a3a3,#d98b8b);color:#fff;border-color:#d98b8b}
+  .d.mor{background:linear-gradient(#8a63cc,#6a3fb5);color:#fff;border-color:#6a3fb5}
+  .d.pas{opacity:.45}
+  .ayrac{width:1px;height:22px;background:var(--cizgi)}
+  .tur{font-size:15px;font-weight:700;letter-spacing:.3px;color:var(--mor)}
+  .tur small{font-size:13px;color:var(--yazi2);font-weight:700;letter-spacing:0}
+  .bas{padding:12px 14px;background:linear-gradient(#fff,#f4f7fb);border-bottom:1px solid var(--cizgi)}
+
+  /* MAMUL BANDI (cari bandının üretimdeki karşılığı) */
+  .mbb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 12px;
+    border:1px solid var(--cizgi2);border-radius:6px;background:#fff;margin-bottom:10px}
+  .av{width:36px;height:36px;border-radius:8px;background:#efe8fa;color:var(--mor);font-size:18px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd0f2}
+  .ad{font-size:13.5px;font-weight:700;color:var(--yazi2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ad .k{font-weight:400;color:var(--soluk);font-size:12px;margin-left:6px;cursor:pointer}
+  .kim{color:var(--soluk);font-size:11.5px;margin-top:2px}
+  .kim b{color:var(--yazi);font-weight:600}
+  .sag{display:flex;gap:6px;align-items:stretch}
+  .kt{border:1px solid var(--cizgi2);border-radius:5px;padding:4px 9px;min-width:112px;background:var(--yuz2);display:flex;flex-direction:column;gap:2px}
+  .kt .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .kt .v{font-size:12px;font-weight:700;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .kt .a{font-size:10.5px;color:var(--soluk)}
+  .kt.ok{background:#eef8f1;border-color:#c4e6d0}
+  .kt.uy{background:#fdf6e8;border-color:#f0dfb8}
+  .kt.hata{background:#fdf0f0;border-color:#f2c9c9}
+  .kt.mr{background:#f5f0fc;border-color:#ddd0f2}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.bilgi{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .rz.mor{background:#f1ecfa;color:var(--mor);border-color:#ddd0f2}
+
+  /* başlık ızgarası */
+  .iz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px}
+  .al{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:8px}
+  .al .et{font-size:11px;color:var(--soluk);text-align:right}
+  .al .et.z::after{content:" *";color:var(--hata)}
+  .al.c2{grid-column:span 2}
+  .inp{border:1px solid var(--cizgi);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff;white-space:nowrap;overflow:hidden}
+  .inp.ro{background:#f6f8fb;color:var(--soluk)}
+  .inp.sg{justify-content:flex-end}
+  .inp.cb::after{content:"▾";margin-left:auto;color:var(--soluk);padding-left:6px}
+  .sekmeler{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--cizgi)}
+  .sk{padding:8px 14px;color:var(--soluk);white-space:nowrap}
+  .sk.on{color:var(--yazi2);font-weight:700;border-bottom:2px solid var(--mavi)}
+  .sk .say{display:inline-block;background:#e6edf5;color:#4d6178;border-radius:8px;padding:0 6px;font-size:10.5px;margin-left:4px}
+
+  /* kalem ızgarası */
+  .karac{display:flex;gap:6px;align-items:center;padding:8px 10px;flex-wrap:wrap}
+  .seg{display:inline-flex;border:1px solid var(--mavi);border-radius:4px;overflow:hidden;margin-left:auto}
+  .seg span{padding:3px 10px;font-weight:600;color:var(--mavi);background:#fff}
+  .seg span+span{border-left:1px solid var(--mavi)}
+  .seg span.on{background:var(--mavi);color:#fff}
+  .chk{display:inline-flex;gap:5px;align-items:center;color:var(--yazi)}
+  .chk i{width:13px;height:13px;border:1px solid #8ea3ba;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;background:#fff}
+  .chk i.on{background:var(--mavi);border-color:var(--mavi);color:#fff}
+  table{border-collapse:collapse;width:100%}
+  .dg{margin:0 10px 10px;border:1px solid var(--cizgi2)}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--cizgi);border-right:1px solid var(--cizgi2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--cizgi2);border-right:1px solid #eef2f6;padding:4px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:700;color:#2c4a6b;border-right:0}
+  .dg tr.grup td .gs{font-weight:400;color:var(--soluk);margin-left:8px}
+  .dg tr.grup.cikti td{background:#f5f0fc;color:var(--mor)}
+  .dg tr.grup.fire td{background:#fdf3f2;color:var(--hata)}
+  .dg tr.sel td{background:var(--mavi2)}
+  .dg tr.eksik td{background:#fff6f5}
+  .dg tr.top td{background:#fbfcfe;font-weight:700;border-top:1px solid var(--cizgi)}
+  .sg{text-align:right} .or{text-align:center} .sl{color:var(--soluk)}
+  .ana{color:#c69214}
+  .lot{display:inline-flex;gap:4px;align-items:center;border:1px solid #cfe0f4;background:#f3f8fe;border-radius:3px;padding:0 6px;color:var(--mavi);font-size:11px}
+  .lot.bos{border-color:#f2c9c9;background:#fdf0f0;color:var(--hata)}
+  .eks{color:var(--hata);font-weight:700}
+
+  /* maliyet özeti */
+  .ozet{display:flex;gap:8px;justify-content:flex-end;padding:0 10px 12px;flex-wrap:wrap}
+  .oz{border:1px solid var(--cizgi2);border-radius:5px;padding:5px 12px;background:var(--yuz2);min-width:130px}
+  .oz .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .oz .v{font-size:13px;font-weight:700;text-align:right}
+  .oz.vurgu{background:#f5f0fc;border-color:#ddd0f2}
+  .oz.vurgu .v{color:var(--mor);font-size:14px}
+
+  .uyari{margin:8px 10px 0;padding:6px 10px;border:1px solid #f2c9c9;background:#fdf0f0;color:var(--hata);border-radius:4px;font-size:11.5px}
+  .bilgi{margin:8px 10px 0;padding:6px 10px;border:1px solid #cfe0f4;background:#f3f8fe;color:#2c4a6b;border-radius:4px;font-size:11.5px}
+  .aciklama{max-width:1360px;margin-top:16px;color:var(--soluk);font-size:11px;line-height:1.75}
+  .aciklama b{color:var(--yazi)}
+  .aciklama code{background:#f2f6fa;border:1px solid var(--cizgi2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- ============================================================== ① YENİ -->
+<h2>① Yeni üretim fişi — mamul ve miktar seçildi, "Ürün Ağacından Doldur" ile sarf satırları geldi</h2>
+<p class="not">Yeni fiş açılınca ilk iş MAMUL seçimi (alış/satışta cari arama gibi; iptal edilirse fiş de kapanır). Mamulün varsayılan ürün ağacı varsa satırlar
+  miktarla oranlanarak kendiliğinden dolar. Sarf deposunda yetmeyen malzeme kırmızı; izlemeli (lot/seri) satırda lot seçilmeden kayıt yok.</p>
+<div class="sayfa">
+  <div class="arac">
+    <span class="d yesil">💾 Kaydet</span><span class="d pas">🗑 Sil</span><span class="d">🖨 Yazdır</span><span class="ayrac"></span>
+    <span class="d">⏰ Hatırlat</span>
+    <span class="tur">ÜRETİM FİŞİ</span>
+    <span style="margin-left:auto" class="d">✖ Kapat</span>
+  </div>
+  <div class="bas">
+    <div class="mbb">
+      <div class="av">🏭</div>
+      <div style="min-width:0">
+        <div class="ad">AYAK BİLEĞİ PRİMER TİBİAL KOMPONENT SETİ <span class="k" title="Stok kartını yeni sekmede aç">↗</span></div>
+        <div class="kim">Kod <b>AP3000-SET</b> · Birim <b>Adet</b> · Ürün ağacı <b>v3 (varsayılan)</b> · İzleme <b>Lot</b> · Kategori <b>Artroplasti</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt mr"><span class="e">Üretilecek</span><span class="v">10 Adet</span><span class="a">ağaç 1 adet için</span></div>
+        <div class="kt"><span class="e">Stok (giriş depo)</span><span class="v">4 → 14</span><span class="a">Anadepo</span></div>
+        <div class="kt hata"><span class="e">Malzeme</span><span class="v">Eksik <span class="rz hata">1 kalem</span></span><span class="a">sarf deposunda yetmiyor</span></div>
+        <div class="kt"><span class="e">Birim maliyet</span><span class="v">2.526,60</span><span class="a">son maliyetle · tahmini</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et">Üretim No</span><span class="inp ro">kaydedince verilir</span></div>
+      <div class="al"><span class="et z">Başlama</span><span class="inp">02.11.2026 08:30</span></div>
+      <div class="al"><span class="et">Bitiş</span><span class="inp">02.11.2026 17:00</span></div>
+      <div class="al"><span class="et z">Miktar</span><span class="inp sg">10 Adet</span></div>
+      <div class="al"><span class="et z">Sarf Deposu</span><span class="inp cb">Hammadde Deposu</span></div>
+      <div class="al"><span class="et z">Giriş Deposu</span><span class="inp cb">Anadepo</span></div>
+      <div class="al"><span class="et">Lokasyon</span><span class="inp cb">Üretim Hattı 1</span></div>
+      <div class="al"><span class="et">Sorumlu</span><span class="inp cb">Sistem Yoneticisi</span></div>
+    </div>
+  </div>
+  <div class="sekmeler"><span class="sk on">Kalemler<span class="say">6</span></span><span class="sk">Operasyon / Personel</span><span class="sk">Genel</span><span class="sk">Resim / Doküman</span></div>
+
+  <div class="karac">
+    <span class="d">＋ Sarf</span><span class="d">＋ Ürün</span><span class="d">＋ Gider</span><span class="d">＋ Fire</span><span class="ayrac"></span>
+    <span class="d mor">🌳 Ürün Ağacından Doldur</span><span class="d">🧮 Hesapla</span>
+    <span class="chk"><i class="on">✓</i>Otomatik hesapla</span>
+    <span class="seg" title="Sarf maliyeti"><span class="on">Son maliyet</span><span>Ortalama</span></span>
+  </div>
+  <div class="uyari">⚠ <b>TİTANYUM VİDA 4.5×32</b>: Hammadde Deposu'nda 34 adet var, 40 gerekiyor. Kayıt için miktarı düşürün, depoyu değiştirin ya da "eksiye düşsün" yetkisiyle kaydedin.</div>
+  <div style="height:8px"></div>
+  <table class="dg">
+    <thead><tr>
+      <th style="width:28px"></th><th>Kod</th><th>Ad</th><th>Lot / Seri</th><th class="sg">Ağaç</th><th class="sg">Miktar</th><th>Birim</th>
+      <th class="sg">Depo Stoğu</th><th class="sg">Birim Maliyet</th><th class="sg">Tutar</th><th>Açıklama</th>
+    </tr></thead>
+    <tbody>
+      <tr class="grup"><td colspan="11">▼ GİRDİ — Sarf (hammadde) <span class="gs">Hammadde Deposu'ndan çıkar</span></td></tr>
+      <tr><td class="or sl">1</td><td>TB-200</td><td>TİBİAL PLAKA TASLAK Ti6Al4V</td><td><span class="lot">L-2410 · SKT 03.2029</span></td><td class="sg sl">1</td><td class="sg">10</td><td>Adet</td><td class="sg">22</td><td class="sg">1.540,00</td><td class="sg">15.400,00</td><td></td></tr>
+      <tr class="eksik"><td class="or sl">2</td><td>VD-4532</td><td>TİTANYUM VİDA 4.5×32</td><td><span class="lot bos">lot seç</span></td><td class="sg sl">4</td><td class="sg">40</td><td>Adet</td><td class="sg eks">34</td><td class="sg">86,50</td><td class="sg">3.460,00</td><td class="eks">6 eksik</td></tr>
+      <tr><td class="or sl">3</td><td>PE-110</td><td>POLİETİLEN İNSERT UHMWPE</td><td><span class="lot">L-PE77</span></td><td class="sg sl">1</td><td class="sg">10</td><td>Adet</td><td class="sg">31</td><td class="sg">412,00</td><td class="sg">4.120,00</td><td></td></tr>
+      <tr><td class="or sl">4</td><td>AMB-05</td><td>STERİL BLİSTER AMBALAJ</td><td class="sl">—</td><td class="sg sl">2</td><td class="sg">20</td><td>Adet</td><td class="sg">450</td><td class="sg">9,30</td><td class="sg">186,00</td><td></td></tr>
+      <tr class="grup"><td colspan="11">▼ GİRDİ — İşçilik / Gider <span class="gs">masraf kalemi (stok oynatmaz, maliyete eklenir)</span></td></tr>
+      <tr><td class="or sl">5</td><td>ISC-01</td><td>DİREKT İŞÇİLİK</td><td class="sl">—</td><td class="sg sl">0,5</td><td class="sg">5</td><td>Saat</td><td class="sg sl">—</td><td class="sg">420,00</td><td class="sg">2.100,00</td><td></td></tr>
+      <tr class="grup cikti"><td colspan="11">▲ ÇIKTI — Mamul / Yan ürün <span class="gs">Anadepo'ya girer</span></td></tr>
+      <tr class="sel"><td class="or ana" title="Ana ürün">★</td><td>AP3000-SET</td><td>AYAK BİLEĞİ PRİMER TİBİAL KOMPONENT SETİ</td><td><span class="lot">üretimde ver: L-2611-02</span></td><td class="sg sl">1</td><td class="sg">10</td><td>Adet</td><td class="sg">4</td><td class="sg">2.526,60</td><td class="sg">25.266,00</td><td>ana ürün</td></tr>
+    </tbody>
+  </table>
+  <div class="ozet">
+    <div class="oz"><div class="e">Malzeme</div><div class="v">23.166,00</div></div>
+    <div class="oz"><div class="e">İşçilik / Gider</div><div class="v">2.100,00</div></div>
+    <div class="oz"><div class="e">Fire</div><div class="v">0,00</div></div>
+    <div class="oz"><div class="e">Toplam maliyet</div><div class="v">25.266,00</div></div>
+    <div class="oz vurgu"><div class="e">Birim maliyet (ana ürün)</div><div class="v">2.526,60</div></div>
+  </div>
+</div>
+
+<!-- ============================================================== ② KAYITLI -->
+<h2>② Kayıtlı ve stoğa işlenmiş fiş — yan ürün ve fire var, maliyet ortalama ile</h2>
+<p class="not">Kaydet = sarf çıkışı + mamul girişi tek belgede, tek seferde (emirdeki ara adımlar yok). Birden çok ÇIKTI satırında maliyet ana ürüne yazılır;
+  yan ürün satırına elle birim maliyet girilirse o pay ana üründen düşülür. Fire satırı malzemeyi düşer, maliyeti ana ürüne yükler.</p>
+<div class="sayfa">
+  <div class="arac">
+    <span class="d yesil">💾 Kaydet</span><span class="d kirmizi">🗑 Sil</span><span class="d">🖨 Yazdır</span><span class="ayrac"></span>
+    <span class="d">⏰ Hatırlat</span>
+    <span class="tur">ÜRETİM FİŞİ <small>#UF-2026-000148</small></span>
+    <span style="margin-left:auto" class="d">✖ Kapat</span>
+  </div>
+  <div class="bas">
+    <div class="mbb">
+      <div class="av">🏭</div>
+      <div style="min-width:0">
+        <div class="ad">KALÇA FEMORAL STEM 12/14 KONİK — Nº 3 <span class="k">↗</span></div>
+        <div class="kim">Kod <b>FS-1214-3</b> · Birim <b>Adet</b> · Ürün ağacı <b>v2</b> · İzleme <b>Seri</b> · Kategori <b>Artroplasti</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt mr"><span class="e">Üretilen</span><span class="v">25 Adet</span><span class="a">+ 1 yan ürün</span></div>
+        <div class="kt ok"><span class="e">Durum</span><span class="v"><span class="rz ok">Stoğa işlendi</span></span><span class="a">onay: Ayşe K. · 01.11 17:40</span></div>
+        <div class="kt uy"><span class="e">Fire</span><span class="v">%3,8</span><span class="a">1 adet · 2.410,00 maliyete dahil</span></div>
+        <div class="kt"><span class="e">Birim maliyet</span><span class="v">3.119,24</span><span class="a">ortalama maliyetle</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et">Üretim No</span><span class="inp ro">UF-2026-000148</span></div>
+      <div class="al"><span class="et z">Başlama</span><span class="inp">01.11.2026 08:00</span></div>
+      <div class="al"><span class="et">Bitiş</span><span class="inp">01.11.2026 16:45</span></div>
+      <div class="al"><span class="et z">Miktar</span><span class="inp sg">25 Adet</span></div>
+      <div class="al"><span class="et z">Sarf Deposu</span><span class="inp cb">Hammadde Deposu</span></div>
+      <div class="al"><span class="et z">Giriş Deposu</span><span class="inp cb">Mamul Deposu</span></div>
+      <div class="al"><span class="et">Lokasyon</span><span class="inp cb">CNC Hücresi 2</span></div>
+      <div class="al"><span class="et">Sorumlu</span><span class="inp cb">Mehmet T.</span></div>
+    </div>
+  </div>
+  <div class="sekmeler"><span class="sk on">Kalemler<span class="say">7</span></span><span class="sk">Operasyon / Personel<span class="say">3</span></span><span class="sk">Genel</span><span class="sk">Resim / Doküman<span class="say">2</span></span></div>
+  <div class="karac">
+    <span class="d">＋ Sarf</span><span class="d">＋ Ürün</span><span class="d">＋ Gider</span><span class="d">＋ Fire</span><span class="ayrac"></span>
+    <span class="d">🌳 Ürün Ağacından Doldur</span><span class="d">🧮 Hesapla</span>
+    <span class="chk"><i class="on">✓</i>Otomatik hesapla</span>
+    <span class="seg"><span>Son maliyet</span><span class="on">Ortalama</span></span>
+  </div>
+  <table class="dg">
+    <thead><tr>
+      <th style="width:28px"></th><th>Kod</th><th>Ad</th><th>Lot / Seri</th><th class="sg">Miktar</th><th>Birim</th><th class="sg">Birim Maliyet</th><th class="sg">Tutar</th><th class="sg">Döviz</th><th>Açıklama</th>
+    </tr></thead>
+    <tbody>
+      <tr class="grup"><td colspan="10">▼ GİRDİ — Sarf <span class="gs">3 kalem · 71.420,00</span></td></tr>
+      <tr><td class="or sl">1</td><td>TI-BAR-14</td><td>TİTANYUM ÇUBUK Ø14 Ti6Al4V ELI</td><td><span class="lot">L-TB0921</span></td><td class="sg">26</td><td>Adet</td><td class="sg">2.410,00</td><td class="sg">62.660,00</td><td class="sg sl">1.786,90 €</td><td></td></tr>
+      <tr><td class="or sl">2</td><td>HA-KAP</td><td>HİDROKSİAPATİT KAPLAMA</td><td><span class="lot">L-HA55</span></td><td class="sg">2,5</td><td>Kg</td><td class="sg">3.200,00</td><td class="sg">8.000,00</td><td class="sg sl">—</td><td></td></tr>
+      <tr><td class="or sl">3</td><td>AMB-07</td><td>STERİL TÜP AMBALAJ</td><td class="sl">—</td><td class="sg">26</td><td>Adet</td><td class="sg">29,23</td><td class="sg">760,00</td><td class="sg sl">—</td><td></td></tr>
+      <tr class="grup"><td colspan="10">▼ GİRDİ — İşçilik / Gider <span class="gs">2 kalem · 7.650,00</span></td></tr>
+      <tr><td class="or sl">4</td><td>ISC-01</td><td>DİREKT İŞÇİLİK</td><td class="sl">—</td><td class="sg">12,5</td><td>Saat</td><td class="sg">420,00</td><td class="sg">5.250,00</td><td class="sg sl">—</td><td></td></tr>
+      <tr><td class="or sl">5</td><td>GUG-02</td><td>CNC MAKİNE SAATİ</td><td class="sl">—</td><td class="sg">6</td><td>Saat</td><td class="sg">400,00</td><td class="sg">2.400,00</td><td class="sg sl">—</td><td></td></tr>
+      <tr class="grup fire"><td colspan="10">✖ FİRE <span class="gs">malzeme düşer, maliyeti ana ürüne yüklenir</span></td></tr>
+      <tr><td class="or sl">6</td><td>TI-BAR-14</td><td>TİTANYUM ÇUBUK Ø14 Ti6Al4V ELI</td><td><span class="lot">L-TB0921</span></td><td class="sg">(1)</td><td>Adet</td><td class="sg">—</td><td class="sg sl">dahil</td><td class="sg sl">—</td><td>işleme hatası (çapak)</td></tr>
+      <tr class="grup cikti"><td colspan="10">▲ ÇIKTI <span class="gs">Mamul Deposu'na girer</span></td></tr>
+      <tr><td class="or ana">★</td><td>FS-1214-3</td><td>KALÇA FEMORAL STEM 12/14 KONİK — Nº 3</td><td><span class="lot">seri SN-261101-001…025</span></td><td class="sg">25</td><td>Adet</td><td class="sg">3.119,24</td><td class="sg">77.981,00</td><td class="sg sl">—</td><td>ana ürün</td></tr>
+      <tr><td class="or sl">7</td><td>TI-TALAS</td><td>TİTANYUM TALAŞ (geri dönüşüm)</td><td class="sl">—</td><td class="sg">1,8</td><td>Kg</td><td class="sg">605,00</td><td class="sg">1.089,00</td><td class="sg sl">—</td><td>yan ürün · elle maliyet</td></tr>
+      <tr class="top"><td></td><td colspan="6">Toplam girdi 79.070,00 = ana ürün 77.981,00 + yan ürün 1.089,00</td><td class="sg">79.070,00</td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="ozet">
+    <div class="oz"><div class="e">Malzeme</div><div class="v">71.420,00</div></div>
+    <div class="oz"><div class="e">İşçilik / Gider</div><div class="v">7.650,00</div></div>
+    <div class="oz"><div class="e">Yan ürün (−)</div><div class="v">1.089,00</div></div>
+    <div class="oz"><div class="e">Ana ürün maliyeti</div><div class="v">77.981,00</div></div>
+    <div class="oz vurgu"><div class="e">Birim maliyet</div><div class="v">3.119,24</div></div>
+  </div>
+</div>
+
+<!-- ============================================================== ③ OPERASYON -->
+<h2>③ Operasyon / Personel sekmesi — kim, hangi işte, ne kadar çalıştı</h2>
+<p class="not">Delphi'deki URETIMOPERASYONPERSONEL. Süre (bitiş − başlama − mola) işçilik satırına aktarılabilir: "İşçiliğe Aktar" kişi saat ücretiyle
+  (yoksa lokasyon / iş merkezi saat ücretiyle) İşçilik / Gider grubunu yeniden yazar.</p>
+<div class="sayfa">
+  <div class="sekmeler"><span class="sk">Kalemler<span class="say">7</span></span><span class="sk on">Operasyon / Personel<span class="say">3</span></span><span class="sk">Genel</span><span class="sk">Resim / Doküman<span class="say">2</span></span></div>
+  <div class="karac">
+    <span class="d">＋ Yeni</span><span class="d">✎ Düzenle</span><span class="d">🗑</span><span class="ayrac"></span>
+    <span class="d mor">⇢ İşçiliğe Aktar</span>
+    <span class="chk" style="margin-left:auto"><i>&nbsp;</i>Tamamlananları da göster</span>
+  </div>
+  <table class="dg">
+    <thead><tr><th>Operasyon</th><th>Personel</th><th>Lokasyon</th><th>Başlama</th><th>Bitiş</th><th class="sg">Mola (dk)</th><th class="sg">Süre (saat)</th><th class="sg">Adet</th><th>Durum</th><th>Açıklama</th></tr></thead>
+    <tbody>
+      <tr><td>CNC tornalama</td><td>Mehmet T.</td><td>CNC Hücresi 2</td><td>01.11 08:00</td><td>01.11 12:30</td><td class="sg">30</td><td class="sg">4,0</td><td class="sg">25</td><td><span class="rz ok">Tamamlandı</span></td><td></td></tr>
+      <tr><td>HA kaplama</td><td>Selin A.</td><td>Kaplama</td><td>01.11 13:00</td><td>01.11 15:30</td><td class="sg">0</td><td class="sg">2,5</td><td class="sg">25</td><td><span class="rz ok">Tamamlandı</span></td><td>2 parti</td></tr>
+      <tr><td>Paketleme + etiket</td><td>Mehmet T.</td><td>Temiz oda</td><td>01.11 15:30</td><td>01.11 16:45</td><td class="sg">0</td><td class="sg">1,25</td><td class="sg">25</td><td><span class="rz ok">Tamamlandı</span></td><td>UTS etiketi basıldı</td></tr>
+      <tr class="top"><td colspan="6">Toplam</td><td class="sg">7,75</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi">ℹ Genel sekmesi: Onaylayan, Proje, Açıklama, Döviz (cins + kur), Ek alanlar. Liste fiyatı ana ürün kartından gelir; maliyet hesaplanınca kartın son maliyeti güncellenir.</div>
+  <div style="height:10px"></div>
+</div>
+
+<div class="aciklama">
+  <b>Ne zaman fiş, ne zaman emir?</b> <b>Üretim Fişi</b> tek adımlı, gerçekleşmiş üretimin kaydıdır: kaydedince sarf çıkar, mamul girer, maliyet hesaplanır.
+  <b>Üretim Emri</b> (mevcut) planlı, çok adımlıdır: rezerv → sarf → kısmi mamul girişleri → maliyet kapanışı. İkisi aynı ürün ağacını kullanır;
+  emir ekranındaki "Mamul Girişi" fişe dönüşmez, ayrı kalır. Liste: <b>Üretim Fişleri</b> (Stok › Üretim menüsünde, Üretim Emirleri'nin yanında),
+  kolonlar: No · Tarih · Mamul · Miktar · Sarf / Giriş Deposu · Birim Maliyet · Toplam · Sorumlu · Durum; tarih aralığı süzgeci diğer belge listeleriyle aynı.<br>
+  <b>Satır grupları</b>: Sarf (stok, −) · İşçilik / Gider (masraf kalemi, stok yok) · Fire (stok, −, maliyet ana ürüne) · Çıktı (stok, +; ★ ana ürün tek).
+  Grup başlığı satırları sabit; "＋ Sarf / Ürün / Gider / Fire" ilgili gruba satır açar. Delphi'deki "Yeni Sarf / Yeni Ürün" düğmelerinin karşılığı.<br>
+  <b>Ürün Ağacından Doldur</b>: Ürün Ağacı / BOM sekmesindeki varsayılan sürüm × miktar; fire oranı tanımlıysa sarf miktarına eklenir.
+  Elle değiştirilen satır yeniden doldurmada sorulur ("ağaçtan gelenler yenilensin mi?").<br>
+  <b>Lot / Seri</b>: sarf satırında aynı jenerik lot seçme ekranı (çıkış kipi, SKT sırası) — satış irsaliyesi ve dönüşümdekiyle tek ekran.
+  Çıktı satırında yeni lot / seri numarası üretimde verilir (otomatik öneri: L-yyMM-sıra), SKT ağaçtaki raf ömründen hesaplanır.<br>
+  <b>Maliyet</b>: "Son maliyet / Ortalama" seçimi sarf satırlarının birim maliyetini belirler (Delphi'deki Son / Ort. kolonları); döviz kolonu
+  belgenin döviz cinsi seçiliyse görünür. Birim maliyet = (malzeme + işçilik/gider − yan ürün) ÷ ana ürün miktarı.<br>
+  <b>Aktarım</b>: Delphi <code>FATBASLIK TUR=6</code> + <code>FATURA</code> satırları (MIKTAR&gt;0 çıktı, &lt;0 sarf, TUR≠1 gider, VADE=ana ürün)
+  bu fişe birebir taşınır; operasyonlar <code>URETIMOPERASYONPERSONEL</code>'den.
+</div>
+</body>
+</html>

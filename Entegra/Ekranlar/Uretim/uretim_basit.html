@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim — Basit Seviye (Mockup)</title>
+<!--
+  Kullanıcı 02.11.2026: "bazı müşterilerimiz KOBİ basit üretim yapıyor.. üretim emri ve fişi karmaşık gelebilir.. basitleştirebilmek lazım"
+  -> "evet, basit seviye mockup'ını yap". Tek ekran, kurum ayarı "Üretim seviyesi: Basit / Standart / Denetimli".
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b; --mor:#6a3fb5; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:16px}
+  h2{font-size:13px;color:var(--yazi2);margin:24px 0 6px}
+  h2:first-child{margin-top:0}
+  .not{color:var(--soluk);font-size:11px;margin:0 0 8px;line-height:1.5;max-width:1360px}
+  .sayfa{background:var(--yuz);border:1px solid var(--cizgi);border-radius:4px;overflow:hidden;max-width:1360px}
+  .arac{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--cizgi2);background:var(--yuz2);flex-wrap:wrap}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .d.yesil{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .d.kirmizi{background:linear-gradient(#e7a3a3,#d98b8b);color:#fff;border-color:#d98b8b}
+  .d.mor{background:linear-gradient(#8a63cc,#6a3fb5);color:#fff;border-color:#6a3fb5}
+  .d.pas{opacity:.45}
+  .ayrac{width:1px;height:22px;background:var(--cizgi)}
+  .tur{font-size:15px;font-weight:700;letter-spacing:.3px;color:var(--mor)}
+  .tur small{font-size:13px;color:var(--yazi2);font-weight:700;letter-spacing:0}
+  .bas{padding:12px 14px;background:linear-gradient(#fff,#f4f7fb);border-bottom:1px solid var(--cizgi)}
+
+  /* MAMUL BANDI (cari bandının üretimdeki karşılığı) */
+  .mbb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 12px;
+    border:1px solid var(--cizgi2);border-radius:6px;background:#fff;margin-bottom:10px}
+  .av{width:36px;height:36px;border-radius:8px;background:#efe8fa;color:var(--mor);font-size:18px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd0f2}
+  .ad{font-size:13.5px;font-weight:700;color:var(--yazi2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ad .k{font-weight:400;color:var(--soluk);font-size:12px;margin-left:6px;cursor:pointer}
+  .kim{color:var(--soluk);font-size:11.5px;margin-top:2px}
+  .kim b{color:var(--yazi);font-weight:600}
+  .sag{display:flex;gap:6px;align-items:stretch}
+  .kt{border:1px solid var(--cizgi2);border-radius:5px;padding:4px 9px;min-width:112px;background:var(--yuz2);display:flex;flex-direction:column;gap:2px}
+  .kt .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .kt .v{font-size:12px;font-weight:700;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .kt .a{font-size:10.5px;color:var(--soluk)}
+  .kt.ok{background:#eef8f1;border-color:#c4e6d0}
+  .kt.uy{background:#fdf6e8;border-color:#f0dfb8}
+  .kt.hata{background:#fdf0f0;border-color:#f2c9c9}
+  .kt.mr{background:#f5f0fc;border-color:#ddd0f2}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.bilgi{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .rz.mor{background:#f1ecfa;color:var(--mor);border-color:#ddd0f2}
+
+  /* başlık ızgarası */
+  .iz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px}
+  .al{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:8px}
+  .al .et{font-size:11px;color:var(--soluk);text-align:right}
+  .al .et.z::after{content:" *";color:var(--hata)}
+  .al.c2{grid-column:span 2}
+  .inp{border:1px solid var(--cizgi);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff;white-space:nowrap;overflow:hidden}
+  .inp.ro{background:#f6f8fb;color:var(--soluk)}
+  .inp.sg{justify-content:flex-end}
+  .inp.cb::after{content:"▾";margin-left:auto;color:var(--soluk);padding-left:6px}
+  .sekmeler{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--cizgi)}
+  .sk{padding:8px 14px;color:var(--soluk);white-space:nowrap}
+  .sk.on{color:var(--yazi2);font-weight:700;border-bottom:2px solid var(--mavi)}
+  .sk .say{display:inline-block;background:#e6edf5;color:#4d6178;border-radius:8px;padding:0 6px;font-size:10.5px;margin-left:4px}
+
+  /* kalem ızgarası */
+  .karac{display:flex;gap:6px;align-items:center;padding:8px 10px;flex-wrap:wrap}
+  .seg{display:inline-flex;border:1px solid var(--mavi);border-radius:4px;overflow:hidden;margin-left:auto}
+  .seg span{padding:3px 10px;font-weight:600;color:var(--mavi);background:#fff}
+  .seg span+span{border-left:1px solid var(--mavi)}
+  .seg span.on{background:var(--mavi);color:#fff}
+  .chk{display:inline-flex;gap:5px;align-items:center;color:var(--yazi)}
+  .chk i{width:13px;height:13px;border:1px solid #8ea3ba;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;background:#fff}
+  .chk i.on{background:var(--mavi);border-color:var(--mavi);color:#fff}
+  table{border-collapse:collapse;width:100%}
+  .dg{margin:0 10px 10px;border:1px solid var(--cizgi2)}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--cizgi);border-right:1px solid var(--cizgi2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--cizgi2);border-right:1px solid #eef2f6;padding:4px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:700;color:#2c4a6b;border-right:0}
+  .dg tr.grup td .gs{font-weight:400;color:var(--soluk);margin-left:8px}
+  .dg tr.grup.cikti td{background:#f5f0fc;color:var(--mor)}
+  .dg tr.grup.fire td{background:#fdf3f2;color:var(--hata)}
+  .dg tr.sel td{background:var(--mavi2)}
+  .dg tr.eksik td{background:#fff6f5}
+  .dg tr.top td{background:#fbfcfe;font-weight:700;border-top:1px solid var(--cizgi)}
+  .sg{text-align:right} .or{text-align:center} .sl{color:var(--soluk)}
+  .ana{color:#c69214}
+  .lot{display:inline-flex;gap:4px;align-items:center;border:1px solid #cfe0f4;background:#f3f8fe;border-radius:3px;padding:0 6px;color:var(--mavi);font-size:11px}
+  .lot.bos{border-color:#f2c9c9;background:#fdf0f0;color:var(--hata)}
+  .eks{color:var(--hata);font-weight:700}
+
+  /* maliyet özeti */
+  .ozet{display:flex;gap:8px;justify-content:flex-end;padding:0 10px 12px;flex-wrap:wrap}
+  .oz{border:1px solid var(--cizgi2);border-radius:5px;padding:5px 12px;background:var(--yuz2);min-width:130px}
+  .oz .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .oz .v{font-size:13px;font-weight:700;text-align:right}
+  .oz.vurgu{background:#f5f0fc;border-color:#ddd0f2}
+  .oz.vurgu .v{color:var(--mor);font-size:14px}
+
+  .uyari{margin:8px 10px 0;padding:6px 10px;border:1px solid #f2c9c9;background:#fdf0f0;color:var(--hata);border-radius:4px;font-size:11.5px}
+  .bilgi{margin:8px 10px 0;padding:6px 10px;border:1px solid #cfe0f4;background:#f3f8fe;color:#2c4a6b;border-radius:4px;font-size:11.5px}
+  .aciklama{max-width:1360px;margin-top:16px;color:var(--soluk);font-size:11px;line-height:1.75}
+  .aciklama b{color:var(--yazi)}
+  .aciklama code{background:#f2f6fa;border:1px solid var(--cizgi2);border-radius:3px;padding:0 4px}
+  /* v2 ekleri */
+  .norm{max-width:1360px;background:#fff;border:1px solid #cfe0f4;border-left:4px solid var(--mavi);border-radius:4px;padding:8px 12px;line-height:1.9;margin-bottom:6px}
+  .d.ok{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .adim{display:flex;border-bottom:1px solid var(--cizgi2);background:#fbfcfe}
+  .adim .a{flex:1;padding:6px 10px 6px 22px;position:relative;color:var(--soluk);font-weight:700;font-size:11.5px;border-right:1px solid var(--cizgi2)}
+  .adim .a small{display:block;font-weight:400;font-size:10.5px}
+  .adim .a::before{content:"";position:absolute;left:8px;top:11px;width:8px;height:8px;border-radius:50%;background:#c9d3de}
+  .adim .a.bitti{color:var(--ok)} .adim .a.bitti::before{background:var(--ok)}
+  .adim .a.simdi{color:var(--uyari);background:#fdf6e8} .adim .a.simdi::before{background:var(--uyari)}
+  .sk .say.uy{background:#fdf1e2;color:var(--uyari)}
+  .uyy{color:var(--uyari);font-weight:700}
+  .oz.uyy{background:#fdf6e8;border-color:#f0dfb8} .oz.uyy .v{color:var(--uyari)}
+  .dg tr.anormal td{background:#fff4f3}
+  .dg tr.ic td{color:var(--soluk);font-size:10.5px;background:#fbfcfe;padding-left:22px}
+  .dg td.ind{padding-left:26px;color:#4d5d6e}
+  .gider{color:var(--hata);font-weight:700}
+  .iki{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;padding:10px}
+  .iki .dg{margin:0}
+  .kucuk td,.kucuk th{font-size:11px}
+  .kbas{font-weight:700;color:var(--yazi2);margin:0 0 6px}
+  .agac{border:1px solid var(--cizgi2);border-radius:4px;padding:6px 10px;font-family:Consolas,"Courier New",monospace;font-size:11px;line-height:1.9;background:#fbfcfe}
+  .agac .dug.cikti{color:var(--mor);font-weight:700}
+  .imza{margin-top:10px;border:1px solid #c4e6d0;background:#f6fbf7;border-radius:5px;padding:8px 10px}
+  .panel{display:none} .panel.on{display:block}
+  .sekmeler .sk{cursor:pointer;user-select:none} .sekmeler .sk:hover:not(.on){color:var(--yazi2);background:#f5f8fb}
+  /* seviye önizleme */
+  .seviye{display:inline-flex;align-items:center;margin-top:8px}
+  .seviye button{border:1px solid var(--mavi);background:#fff;color:var(--mavi);font:inherit;font-weight:700;padding:4px 12px;cursor:pointer}
+  .seviye button+button{border-left:0}
+  .seviye button:first-of-type{border-radius:4px 0 0 4px} .seviye button:last-of-type{border-radius:0 4px 4px 0}
+  .seviye button small{font-weight:400;opacity:.8;margin-left:4px}
+  .seviye button.on{background:var(--mavi);color:#fff}
+  body[data-seviye="basit"] .y-standart:not(.y-basit),body[data-seviye="basit"] .y-denetimli:not(.y-basit){display:none!important}
+  body[data-seviye="standart"] .y-basit:not(.y-standart),body[data-seviye="standart"] .y-denetimli:not(.y-standart){display:none!important}
+  body[data-seviye="denetimli"] .y-basit:not(.y-denetimli),body[data-seviye="denetimli"] .y-standart:not(.y-denetimli){display:none!important}
+  .g-basit,.g-standart,.g-denetimli{display:none}
+  body[data-seviye="basit"] .g-basit,body[data-seviye="standart"] .g-standart,body[data-seviye="denetimli"] .g-denetimli{display:block}
+  .basit-ek{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;padding:8px 10px 12px}
+  table.dg{width:calc(100% - 20px)}
+  .basit-ek .al{grid-template-columns:110px minmax(0,220px) minmax(0,1fr)}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3}
+  .bar{display:inline-block;width:110px;height:8px;border-radius:4px;background:#e6edf5;vertical-align:middle;margin-right:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--ok)}
+  .modal{width:440px;margin:14px 10px 14px auto;border:1px solid var(--cizgi);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.18);background:#fff}
+  .modal .m-bas{padding:8px 12px;font-weight:700;color:var(--yazi2);border-bottom:1px solid var(--cizgi2);background:var(--yuz2)}
+  .modal .m-ic{padding:10px 12px;display:grid;gap:7px}
+  .modal .m-ic .al{grid-template-columns:130px minmax(0,1fr)}
+  .modal .m-alt{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;border-top:1px solid var(--cizgi2)}
+  .ayar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+  .ayar .sec{border:1px solid var(--cizgi2);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;cursor:pointer}
+  .ayar .sec span{color:var(--soluk);font-size:11px}
+  .ayar .sec.on{border-color:var(--mavi);background:#f3f8fe}
+  .rz.bilgi{margin:0;padding:0 7px;border-radius:9px;font-size:10.5px;display:inline-block}
+</style>
+</head>
+<body data-seviye="basit">
+
+<div class="norm">
+  <b>Üretim — seviyeye göre ekran (kullanıcı 02.11.2026: "bazı müşterilerimiz KOBİ basit üretim yapıyor.. üretim emri ve fişi karmaşık gelebilir").</b>
+  Ekran ve kayıt yapısı TEK; kurum ayarındaki <b>Üretim seviyesi</b> yalnız görüneni değiştirir. Maliyet her seviyede arka planda IAS 2'ye göre hesaplanır,
+  kayıt hiçbir seviyede silinmez (Sil = ters kayıt).
+  <div class="seviye" role="group" aria-label="Üretim seviyesi">
+    <span class="sl" style="margin-right:6px">Önizleme:</span>
+    <button type="button" data-s="basit" class="on">Basit <small>KOBİ</small></button>
+    <button type="button" data-s="standart">Standart <small>maliyet takibi</small></button>
+    <button type="button" data-s="denetimli">Denetimli <small>tıbbi cihaz / ilaç / gıda</small></button>
+  </div>
+</div>
+
+<!-- ============================================================== ① ÜRETİM FİŞİ -->
+<h2>① Üretim Fişi — <span class="s-ad">Basit</span> seviye</h2>
+<p class="not g-basit">Atölye "bugün 20 sandalye yaptık" der: mamul + miktar seç, malzemeler ürün ağacından gelir, Kaydet. Sekme iki tane, durum adımı yok.</p>
+<p class="not g-standart">Standart: lot kolonu, işçilik/gider ayrıntısı, normal/anormal fire, Maliyet ve Operasyon sekmeleri açılır.</p>
+<p class="not g-denetimli">Denetimli: v2'nin tamamı — durum adımları, karantina, kalite, izlenebilirlik, denetim izi. Ayrıntı: <code>uretim_fisi_v2.html</code>.</p>
+<div class="sayfa">
+  <div class="arac">
+    <span class="d yesil">💾 Kaydet</span><span class="d kirmizi y-basit y-standart" title="Kayıt silinmez: ters kayıt atılır, stok geri döner">🗑 Sil</span>
+    <span class="d y-denetimli">↺ Ters Kayıt</span><span class="d">🖨 Yazdır</span><span class="ayrac"></span>
+    <span class="tur">ÜRETİM FİŞİ <small>#UF-2026-000231</small></span>
+    <span style="margin-left:auto"></span><span class="d ok y-denetimli">✔ Serbest Bırak…</span><span class="d">✖ Kapat</span>
+  </div>
+  <div class="adim y-denetimli">
+    <span class="a bitti">1 Taslak</span><span class="a bitti">2 Gerçekleşti</span><span class="a simdi">3 Kalite kontrol</span><span class="a">4 Serbest</span><span class="a">5 Maliyet kesin</span>
+  </div>
+  <div class="bas">
+    <div class="mbb">
+      <div class="av">🪑</div>
+      <div style="min-width:0">
+        <div class="ad">SANDALYE KLASİK CEVİZ <span class="k" title="Stok kartını aç">↗</span></div>
+        <div class="kim">Kod <b>SND-KLS-CV</b> · Birim <b>Adet</b> · Ürün ağacı <b>v1</b><span class="y-standart y-denetimli"> · İzleme <b>Lot</b></span></div>
+      </div>
+      <div class="sag">
+        <div class="kt mr"><span class="e">Üretilen</span><span class="v">20 Adet</span><span class="a">Atölye deposuna</span></div>
+        <div class="kt uy"><span class="e">Malzeme</span><span class="v">1 eksik</span><span class="a">ceviz kereste</span></div>
+        <div class="kt"><span class="e">Birim maliyet</span><span class="v">1.124,15</span><span class="a">malzeme + işçilik</span></div>
+        <div class="kt uy y-denetimli"><span class="e">Stok durumu</span><span class="v"><span class="rz uy">Karantina</span></span><span class="a">kalite onayı bekliyor</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et z">Tarih</span><span class="inp">02.11.2026</span></div>
+      <div class="al"><span class="et z">Miktar</span><span class="inp sg">20 Adet</span></div>
+      <div class="al"><span class="et z">Depo</span><span class="inp cb">Atölye</span></div>
+      <div class="al y-basit"><span class="et"></span><span class="sl" style="font-size:11px">malzeme bu depodan düşer, ürün buraya girer · <u>farklı giriş deposu</u></span></div>
+      <div class="al y-standart y-denetimli"><span class="et">Giriş Deposu</span><span class="inp cb">Mamul Deposu</span></div>
+      <div class="al c2"><span class="et">Açıklama</span><span class="inp">Deniz Mobilya siparişi için</span></div>
+      <div class="al y-standart y-denetimli"><span class="et">Kaynak</span><span class="inp ro">Üretim Emri UE-2026-0143 ↗</span></div>
+      <div class="al y-standart y-denetimli"><span class="et">Sorumlu</span><span class="inp cb">M. Demir</span></div>
+    </div>
+  </div>
+  <div class="sekmeler">
+    <span class="sk on">Kalemler<span class="say">5</span></span>
+    <span class="sk y-standart y-denetimli">Maliyet</span><span class="sk y-standart y-denetimli">Operasyonlar</span>
+    <span class="sk y-denetimli">Kalite</span><span class="sk y-denetimli">İzlenebilirlik</span><span class="sk y-denetimli">Denetim İzi</span>
+    <span class="sk">Resim / Doküman</span>
+  </div>
+
+  <div class="panel on" data-sk="Kalemler">
+    <div class="karac">
+      <span class="d mor">🌳 Ürün Ağacından Doldur</span><span class="d">＋ Malzeme</span>
+      <span class="sl y-basit">Miktarı değiştirince malzemeler kendiliğinden oranlanır.</span>
+      <span class="d y-standart y-denetimli">＋ Gider</span><span class="d y-standart y-denetimli">＋ Fire</span><span class="d y-standart y-denetimli">＋ Yan ürün</span>
+    </div>
+    <div class="uyari">⚠ <b>CEVİZ KERESTE</b>: Atölye'de 0,55 m³ var, 0,70 m³ gerekiyor (0,15 eksik).
+      <span class="d" style="margin-left:8px">Miktarı 15 adede düşür</span><span class="d">Yine de kaydet (stok eksiye düşer)</span></div>
+    <div style="height:8px"></div>
+    <table class="dg">
+      <thead><tr>
+        <th>Malzeme</th><th class="y-standart y-denetimli">Lot</th><th class="sg">Miktar</th><th>Birim</th><th class="sg">Depoda</th><th class="sg">Birim fiyat</th><th class="sg">Tutar</th>
+        <th class="sg y-standart y-denetimli">Plan</th><th class="sg y-standart y-denetimli">Sapma</th>
+      </tr></thead>
+      <tbody>
+        <tr class="eksik"><td>CEVİZ KERESTE 1. SINIF</td><td class="y-standart y-denetimli"><span class="lot">L-CV-0918</span></td><td class="sg">0,70</td><td>m³</td><td class="sg eks">0,55</td><td class="sg">18.000,00</td><td class="sg">12.600,00</td><td class="sg sl y-standart y-denetimli">0,70</td><td class="sg sl y-standart y-denetimli">0</td></tr>
+        <tr><td>KONTRPLAK OTURAK 40×40</td><td class="y-standart y-denetimli"><span class="lot">L-KP-31</span></td><td class="sg">21</td><td>Adet</td><td class="sg">64</td><td class="sg">75,00</td><td class="sg">1.575,00</td><td class="sg sl y-standart y-denetimli">20</td><td class="sg uyy y-standart y-denetimli">+1</td></tr>
+        <tr><td>AHŞAP VİDASI 4×40</td><td class="y-standart y-denetimli sl">—</td><td class="sg">320</td><td>Adet</td><td class="sg">5.200</td><td class="sg">0,40</td><td class="sg">128,00</td><td class="sg sl y-standart y-denetimli">320</td><td class="sg sl y-standart y-denetimli">0</td></tr>
+        <tr><td>VERNİK SU BAZLI</td><td class="y-standart y-denetimli"><span class="lot">L-VR-7</span></td><td class="sg">3,00</td><td>Lt</td><td class="sg">18</td><td class="sg">260,00</td><td class="sg">780,00</td><td class="sg sl y-standart y-denetimli">3,00</td><td class="sg sl y-standart y-denetimli">0</td></tr>
+        <tr><td>DÖŞEMELİK KUMAŞ BEJ</td><td class="y-standart y-denetimli sl">—</td><td class="sg">10,00</td><td>m</td><td class="sg">46</td><td class="sg">140,00</td><td class="sg">1.400,00</td><td class="sg sl y-standart y-denetimli">10,00</td><td class="sg sl y-standart y-denetimli">0</td></tr>
+      </tbody>
+    </table>
+
+    <!-- BASİT: fire ve işçilik tek satırlık alanlar -->
+    <div class="basit-ek y-basit">
+      <div class="al"><span class="et">Fire</span><span class="inp">KONTRPLAK OTURAK · 1 adet</span><span class="sl" style="font-size:11px">çatlak · malzemeden düşer, maliyete dahil</span></div>
+      <div class="al"><span class="et">İşçilik / gider</span><span class="inp sg">6.000,00</span><span class="sl" style="font-size:11px">ürün ağacından (20 saat × 300) · <u>değiştir</u></span></div>
+    </div>
+    <!-- STANDART+: ayrıntılı gider ve fire grupları -->
+    <table class="dg y-standart y-denetimli" style="margin-top:0">
+      <tbody>
+        <tr class="grup"><td colspan="7">▼ İşçilik / Gider <span class="gs">operasyonlardan</span></td></tr>
+        <tr><td>DİREKT İŞÇİLİK</td><td class="sg">20,00</td><td>Saat</td><td class="sg">300,00</td><td class="sg">6.000,00</td><td colspan="2" class="sl">Operasyonlar sekmesinden</td></tr>
+        <tr class="grup fire"><td colspan="7">✖ Fire</td></tr>
+        <tr><td>KONTRPLAK OTURAK 40×40</td><td class="sg">1</td><td>Adet</td><td class="sg">75,00</td><td class="sg">75,00</td><td><span class="rz gri">Normal</span></td><td class="sl">çatlak · maliyete dahil</td></tr>
+      </tbody>
+    </table>
+
+    <div class="ozet">
+      <div class="oz"><div class="e">Malzeme</div><div class="v">16.483,00</div></div>
+      <div class="oz"><div class="e">İşçilik / gider</div><div class="v">6.000,00</div></div>
+      <div class="oz"><div class="e">Toplam</div><div class="v">22.483,00</div></div>
+      <div class="oz vurgu"><div class="e">Birim maliyet</div><div class="v">1.124,15</div></div>
+    </div>
+  </div>
+  <div class="panel" data-sk="Maliyet"><div class="bilgi">Standart: plan / gerçek, sapma türleri, normal / anormal fire, yan ürün — <code>uretim_fisi_v2.html</code> › Maliyet sekmesinin aynısı.</div><div style="height:10px"></div></div>
+  <div class="panel" data-sk="Operasyonlar"><div class="bilgi">Operasyon / personel süreleri, "İşçiliğe Aktar" — v1 fişindeki tablo.</div><div style="height:10px"></div></div>
+  <div class="panel" data-sk="Kalite"><div class="bilgi">Denetimli: kontrol listesi + e-imzalı serbest bırakma — <code>uretim_fisi_v2.html</code>.</div><div style="height:10px"></div></div>
+  <div class="panel" data-sk="İzlenebilirlik"><div class="bilgi">Denetimli: çıktı lot/seri ← girdi lotları, sertifika, ekipman, UDI.</div><div style="height:10px"></div></div>
+  <div class="panel" data-sk="Denetim İzi"><div class="bilgi">Denetimli: kim / ne zaman / eski → yeni, silinemez.</div><div style="height:10px"></div></div>
+  <div class="panel" data-sk="Resim / Doküman">
+    <div class="karac"><span class="d">＋ Dosya ekle</span><span class="seg"><span class="on">Kart</span><span>Liste</span></span></div>
+    <div class="karac" style="gap:10px;padding-bottom:12px"><div class="oz" style="min-width:150px">📷 <b>parti_foto.jpg</b><div class="sl">Resim · 820 KB</div></div></div>
+  </div>
+</div>
+
+<!-- ============================================================== ② SADE EMİR -->
+<h2>② Üretim Emirleri — <span class="s-ad">Basit</span> seviye</h2>
+<p class="not g-basit">Basit seviyede emir <b>isteğe bağlı</b> (Kurum Profili › Üretim › "Üretim emri kullan"; varsayılan kapalı, menüde görünmez).
+  Açıksa yalnız iş listesi: ne üretilecek, kaç adet, ne zamana, malzeme yetiyor mu. <b>Üret</b> düğmesi üretilen adedi sorar ve arka planda ① fişini oluşturur;
+  emir dolunca kendiliğinden kapanır. Onay, rezerv, sarf fişi, maliyet kapanışı yok.</p>
+<p class="not g-standart">Standart: emir kartı açılır (onay → üretimde → kapandı, rezerv, kısmi giriş, operasyon süreleri, plan / gerçek maliyet, alt emir).</p>
+<p class="not g-denetimli">Denetimli: <code>uretim_emri_v2.html</code> (ön kontroller, serbest bırakma, karantina, hold point, e-imza, DHR).</p>
+<div class="sayfa">
+  <div class="arac"><span class="d bir">＋ Yeni emir</span><span class="d">🖨 İş listesi yazdır</span><span class="ayrac"></span>
+    <span class="chk"><i>&nbsp;</i>Tamamlananları göster</span>
+    <span class="d y-standart y-denetimli" style="margin-left:auto">📊 Planlama</span></div>
+  <table class="dg">
+    <thead><tr><th>Ürün</th><th class="sg">Miktar</th><th>Termin</th><th>Müşteri / not</th><th>Malzeme</th><th style="width:180px">Üretilen</th><th class="y-standart y-denetimli">Durum</th><th style="width:110px"></th></tr></thead>
+    <tbody>
+      <tr><td><b>SANDALYE KLASİK CEVİZ</b></td><td class="sg">40</td><td>06.11.2026</td><td>Deniz Mobilya</td><td><span class="rz uy">1 kalem eksik</span></td>
+        <td><div class="bar"><i style="width:50%"></i></div><span class="sl">20 / 40</span></td><td class="y-standart y-denetimli"><span class="rz bilgi">Üretimde</span></td><td><span class="d mor">▶ Üret…</span></td></tr>
+      <tr><td><b>YEMEK MASASI 160 CEVİZ</b></td><td class="sg">5</td><td>08.11.2026</td><td>Deniz Mobilya</td><td><span class="rz ok">Yeterli</span></td>
+        <td><div class="bar"><i style="width:40%"></i></div><span class="sl">2 / 5</span></td><td class="y-standart y-denetimli"><span class="rz bilgi">Üretimde</span></td><td><span class="d mor">▶ Üret…</span></td></tr>
+      <tr><td><b>TABURE MEŞE</b></td><td class="sg">30</td><td>12.11.2026</td><td>stok için</td><td><span class="rz ok">Yeterli</span></td>
+        <td><div class="bar"><i style="width:0%"></i></div><span class="sl">0 / 30</span></td><td class="y-standart y-denetimli"><span class="rz gri">Onaylı</span></td><td><span class="d mor">▶ Üret…</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="modal">
+    <div class="m-bas">▶ Üret — SANDALYE KLASİK CEVİZ</div>
+    <div class="m-ic">
+      <div class="al"><span class="et z">Kaç adet üretildi?</span><span class="inp sg" style="font-weight:700">20</span></div>
+      <div class="al"><span class="et">Tarih</span><span class="inp">02.11.2026</span></div>
+      <div class="al"><span class="et">Fire</span><span class="inp">KONTRPLAK OTURAK · 1 adet</span></div>
+      <div class="sl" style="font-size:11px;margin:6px 0 0 0">Malzemeler ürün ağacından Atölye deposundan düşülecek. Kalan 20 adet emirde açık kalır.</div>
+      <div class="uyari" style="margin:8px 0 0">⚠ Ceviz kereste 0,15 m³ eksik — yine de üretilsin mi?</div>
+    </div>
+    <div class="m-alt"><span class="d">Vazgeç</span><span class="d yesil">✔ Üret ve fişi oluştur</span></div>
+  </div>
+</div>
+
+<!-- ============================================================== ③ AYAR -->
+<h2>③ Kurum Profili › Üretim — seviye ayarı</h2>
+<div class="sayfa">
+  <div class="ayar">
+    <div class="sec on" data-s="basit"><b>◉ Basit</b><span>Tek ekran fiş · emir isteğe bağlı · fire tek alan · işçilik tek tutar</span></div>
+    <div class="sec" data-s="standart"><b>○ Standart</b><span>Emir akışı · kısmi giriş · operasyon süreleri · plan / gerçek maliyet · lot</span></div>
+    <div class="sec" data-s="denetimli"><b>○ Denetimli</b><span>Ön kontroller · karantina · kalite · e-imza · DHR · UDI / UTS · denetim izi</span></div>
+  </div>
+  <table class="dg kucuk">
+    <thead><tr><th>Seçenek</th><th>Basit</th><th>Standart</th><th>Denetimli</th></tr></thead>
+    <tbody>
+      <tr><td>Üretim emri kullan</td><td>kapalı (açılabilir)</td><td>açık</td><td>açık · zorunlu</td></tr>
+      <tr><td>Malzeme eksikken kaydet</td><td>uyarıyla izin</td><td>yetkiyle</td><td>yok</td></tr>
+      <tr><td>Farklı giriş deposu</td><td>gizli (bağlantıyla)</td><td>açık</td><td>açık · karantina</td></tr>
+      <tr><td>Lot / seri</td><td>stok kartında izleme varsa</td><td>açık</td><td>zorunlu</td></tr>
+      <tr><td>İşçilik / gider</td><td>tek tutar (ağaçtan)</td><td>operasyonlardan</td><td>operasyonlardan · e-imzalı</td></tr>
+      <tr><td>Fire</td><td>tek alan · normal</td><td>normal / anormal</td><td>normal / anormal + NCR</td></tr>
+      <tr><td>Sil</td><td colspan="2">"Sil" görünür → ters kayıt (stok geri döner, iz kalır)</td><td>"Ters Kayıt" (gerekçe zorunlu)</td></tr>
+      <tr><td>Maliyet (IAS 2)</td><td colspan="3">her seviyede arka planda aynı; ay sonu kapasite / sapma kaydını muhasebe kesinleştirir</td></tr>
+    </tbody>
+  </table>
+  <div class="sl" style="font-size:10.5px;padding:6px 10px 10px">Kurulum tipi ERP → varsayılan Basit; tıbbi cihaz üreticisi → Denetimli. Üst seviyeye geçişte eski kayıtlar bozulmaz, yeni alanlar boş başlar.
+    Alta geçiş: açık emir / karantinadaki stok varken engellenir.</div>
+</div>
+
+<div class="aciklama">
+  <b>Basit seviyede gizlenenler</b> (veri yapısı aynı, ekranda yok): durum adımları · ayrı giriş deposu · lot kolonu (stok izlemesiz) · işçilik/gider satırları (tek tutar) ·
+  fire grubu (tek alan) · plan / sapma kolonları · Maliyet, Operasyonlar, Kalite, İzlenebilirlik, Denetim İzi sekmeleri · emir onayı, rezerv, sarf fişi, maliyet kapanışı.<br>
+  <b>Basit seviyede de yapılanlar</b> (kullanıcı görmez): IAS 2 maliyet hesabı · Sil yerine ters kayıt · değişiklik günlüğü (ISLEMLOG) · ürün ağacı sürümünün fişe kopyalanması.<br>
+  <b>Önizleme</b>: üstteki seçiciyle Standart / Denetimli'ye geçince aynı ekranda neyin açıldığı görünür.
+</div>
+<script>
+// Sekme tıklaması: aynı sayfadaki paneli açar (sekme adı = data-sk; sayaç rozeti hariç).
+document.querySelectorAll('.sayfa').forEach(function (sayfa) {
+  sayfa.querySelectorAll('.sekmeler .sk').forEach(function (sk) {
+    sk.addEventListener('click', function () {
+      var ad = sk.childNodes[0].textContent.trim();
+      var hedef = sayfa.querySelector('.panel[data-sk="' + ad + '"]');
+      if (!hedef) return;
+      sayfa.querySelectorAll('.sekmeler .sk').forEach(function (x) { x.classList.toggle('on', x === sk) });
+      sayfa.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p === hedef) });
+    });
+  });
+});
+
+// Seviye önizleme: üstteki seçici ve ayar kartları body[data-seviye]'yi değiştirir; gizlenen sekme açıksa Kalemler'e döner.
+function seviyeSec(s) {
+  document.body.dataset.seviye = s;
+  document.querySelectorAll('.seviye button').forEach(function (b) { b.classList.toggle('on', b.dataset.s === s) });
+  document.querySelectorAll('.ayar .sec').forEach(function (b) {
+    b.classList.toggle('on', b.dataset.s === s);
+    var bb = b.querySelector('b'); bb.textContent = (b.dataset.s === s ? '◉ ' : '○ ') + bb.textContent.slice(2);
+  });
+  var ad = { basit: 'Basit', standart: 'Standart', denetimli: 'Denetimli' }[s];
+  document.querySelectorAll('.s-ad').forEach(function (e) { e.textContent = ad });
+  document.querySelectorAll('.sayfa').forEach(function (sayfa) {
+    var acik = sayfa.querySelector('.sekmeler .sk.on');
+    if (acik && getComputedStyle(acik).display === 'none') sayfa.querySelector('.sekmeler .sk').click();
+  });
+}
+document.querySelectorAll('.seviye button, .ayar .sec').forEach(function (b) { b.addEventListener('click', function () { seviyeSec(b.dataset.s) }) });
+</script>
+</body>
+
+</html>

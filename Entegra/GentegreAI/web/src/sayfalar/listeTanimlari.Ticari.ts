@@ -141,7 +141,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
     // FATURANIN ALTINDA (kullanici 11.10.2026: "Satış Faturası menüsünün altına Satış İrsaliyesi").
-    menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış İrsaliyesi Listesi', ic: '@b:irsaliye:s', yetkiKodu: 'belge.satis.irsaliye',
+    // SIRA sipariş → irsaliye → fatura (kullanıcı 02.11.2026), Alış'ta da aynı.
+    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış İrsaliyesi Listesi', ic: '@b:irsaliye:s', yetkiKodu: 'belge.satis.irsaliye',
   },
   {
     // HBYS IKIZI: Satış grubu (erp_satis) hastanede kapali - irsaliye Kurumlar & Sigorta ›
@@ -201,7 +202,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
     //   aşağıdaki ikiz tanıma bak.
     urunModu: 1,
-    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturası Listesi', ic: '@b:fatura:s', yetkiKodu: 'belge.satis.fatura',
+    menuGrup: 'Satış', menuSira: 41, menuAd: 'Satış Faturası Listesi', ic: '@b:fatura:s', yetkiKodu: 'belge.satis.fatura',
   },
   {
     // HBYS'DE DE FATURA KESİLİR (kullanıcı: "satış faturaları için menü
@@ -410,7 +411,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       ...GELEN_IRSALIYE_SEKMELERI,
     ],
     // ALIS FATURASININ ALTINDA (kullanici 11.10.2026): Stok & Hizmet - iki urunde de acik.
-    menuGrup: 'Stok & Hizmet', menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '@b:irsaliye:a', yetkiKodu: 'belge.alis.irsaliye',
+    // ERP'DE ALIŞ GRUBUNDA (kullanıcı 02.11.2026: "erp için kodda alış grubuna taşı"); sıra Satış'taki gibi
+    //   sipariş → irsaliye 40 → fatura 41. HBYS'de Stok & Hizmet'te kalır (sırası değişmez).
+    menuGrup: 'Stok & Hizmet', erpMenuGrup: 'Alış', erpMenuSira: 40, menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '@b:irsaliye:a', yetkiKodu: 'belge.alis.irsaliye',
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturası Listesi',
@@ -434,7 +437,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   bu liste). Sube mukellef degilse cizilmez.
       ...GELEN_SEKMELERI,
     ],
-    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@b:fatura:a',
+    // ERP'DE ALIŞ GRUBUNDA (kullanıcı 02.11.2026) - HBYS'de Stok & Hizmet.
+    menuGrup: 'Stok & Hizmet', erpMenuGrup: 'Alış', erpMenuSira: 41, menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@b:fatura:a',
     yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod
   },
   {

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim Emri v2 — Mockup (Gentegre AI · Üretim)</title>
+<!--
+  Kullanıcı 02.11.2026: "üretim emrinin de uluslararası vers var mı varsa v2 yap".
+  v1 = uretim_emri_karti.html. v2: serbest bırakma ön kontrolleri, onaylı sürüm, FEFO, hold point, kısmi giriş karantinası,
+  IAS 2 standart maliyet + sapmalar + ay sonu yarı mamul, OEE (ISO 22400), DHR, değişiklik / sapma izni, Part 11 e-imza + denetim izi.
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b; --mor:#6a3fb5; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:16px}
+  h2{font-size:13px;color:var(--yazi2);margin:24px 0 6px}
+  h2:first-child{margin-top:0}
+  .not{color:var(--soluk);font-size:11px;margin:0 0 8px;line-height:1.5;max-width:1360px}
+  .sayfa{background:var(--yuz);border:1px solid var(--cizgi);border-radius:4px;overflow:hidden;max-width:1360px}
+  .arac{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--cizgi2);background:var(--yuz2);flex-wrap:wrap}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .d.yesil{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .d.kirmizi{background:linear-gradient(#e7a3a3,#d98b8b);color:#fff;border-color:#d98b8b}
+  .d.mor{background:linear-gradient(#8a63cc,#6a3fb5);color:#fff;border-color:#6a3fb5}
+  .d.pas{opacity:.45}
+  .ayrac{width:1px;height:22px;background:var(--cizgi)}
+  .tur{font-size:15px;font-weight:700;letter-spacing:.3px;color:var(--mor)}
+  .tur small{font-size:13px;color:var(--yazi2);font-weight:700;letter-spacing:0}
+  .bas{padding:12px 14px;background:linear-gradient(#fff,#f4f7fb);border-bottom:1px solid var(--cizgi)}
+
+  /* MAMUL BANDI (cari bandının üretimdeki karşılığı) */
+  .mbb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 12px;
+    border:1px solid var(--cizgi2);border-radius:6px;background:#fff;margin-bottom:10px}
+  .av{width:36px;height:36px;border-radius:8px;background:#efe8fa;color:var(--mor);font-size:18px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd0f2}
+  .ad{font-size:13.5px;font-weight:700;color:var(--yazi2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ad .k{font-weight:400;color:var(--soluk);font-size:12px;margin-left:6px;cursor:pointer}
+  .kim{color:var(--soluk);font-size:11.5px;margin-top:2px}
+  .kim b{color:var(--yazi);font-weight:600}
+  .sag{display:flex;gap:6px;align-items:stretch}
+  .kt{border:1px solid var(--cizgi2);border-radius:5px;padding:4px 9px;min-width:112px;background:var(--yuz2);display:flex;flex-direction:column;gap:2px}
+  .kt .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .kt .v{font-size:12px;font-weight:700;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .kt .a{font-size:10.5px;color:var(--soluk)}
+  .kt.ok{background:#eef8f1;border-color:#c4e6d0}
+  .kt.uy{background:#fdf6e8;border-color:#f0dfb8}
+  .kt.hata{background:#fdf0f0;border-color:#f2c9c9}
+  .kt.mr{background:#f5f0fc;border-color:#ddd0f2}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.bilgi{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .rz.mor{background:#f1ecfa;color:var(--mor);border-color:#ddd0f2}
+
+  /* başlık ızgarası */
+  .iz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px}
+  .al{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:8px}
+  .al .et{font-size:11px;color:var(--soluk);text-align:right}
+  .al .et.z::after{content:" *";color:var(--hata)}
+  .al.c2{grid-column:span 2}
+  .inp{border:1px solid var(--cizgi);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff;white-space:nowrap;overflow:hidden}
+  .inp.ro{background:#f6f8fb;color:var(--soluk)}
+  .inp.sg{justify-content:flex-end}
+  .inp.cb::after{content:"▾";margin-left:auto;color:var(--soluk);padding-left:6px}
+  .sekmeler{display:flex;flex-wrap:wrap;gap:2px;padding:0 10px;border-bottom:1px solid var(--cizgi)}
+  .sk{padding:8px 14px;color:var(--soluk);white-space:nowrap}
+  .sk.on{color:var(--yazi2);font-weight:700;border-bottom:2px solid var(--mavi)}
+  .sk .say{display:inline-block;background:#e6edf5;color:#4d6178;border-radius:8px;padding:0 6px;font-size:10.5px;margin-left:4px}
+
+  /* kalem ızgarası */
+  .karac{display:flex;gap:6px;align-items:center;padding:8px 10px;flex-wrap:wrap}
+  .seg{display:inline-flex;border:1px solid var(--mavi);border-radius:4px;overflow:hidden;margin-left:auto}
+  .seg span{padding:3px 10px;font-weight:600;color:var(--mavi);background:#fff}
+  .seg span+span{border-left:1px solid var(--mavi)}
+  .seg span.on{background:var(--mavi);color:#fff}
+  .chk{display:inline-flex;gap:5px;align-items:center;color:var(--yazi)}
+  .chk i{width:13px;height:13px;border:1px solid #8ea3ba;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;background:#fff}
+  .chk i.on{background:var(--mavi);border-color:var(--mavi);color:#fff}
+  table{border-collapse:collapse;width:100%}
+  .dg{margin:0 10px 10px;border:1px solid var(--cizgi2)}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--cizgi);border-right:1px solid var(--cizgi2);
+    text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--cizgi2);border-right:1px solid #eef2f6;padding:4px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.grup td{background:#f7f9fc;font-weight:700;color:#2c4a6b;border-right:0}
+  .dg tr.grup td .gs{font-weight:400;color:var(--soluk);margin-left:8px}
+  .dg tr.grup.cikti td{background:#f5f0fc;color:var(--mor)}
+  .dg tr.grup.fire td{background:#fdf3f2;color:var(--hata)}
+  .dg tr.sel td{background:var(--mavi2)}
+  .dg tr.eksik td{background:#fff6f5}
+  .dg tr.top td{background:#fbfcfe;font-weight:700;border-top:1px solid var(--cizgi)}
+  .sg{text-align:right} .or{text-align:center} .sl{color:var(--soluk)}
+  .ana{color:#c69214}
+  .lot{display:inline-flex;gap:4px;align-items:center;border:1px solid #cfe0f4;background:#f3f8fe;border-radius:3px;padding:0 6px;color:var(--mavi);font-size:11px}
+  .lot.bos{border-color:#f2c9c9;background:#fdf0f0;color:var(--hata)}
+  .eks{color:var(--hata);font-weight:700}
+
+  /* maliyet özeti */
+  .ozet{display:flex;gap:8px;justify-content:flex-end;padding:0 10px 12px;flex-wrap:wrap}
+  .oz{border:1px solid var(--cizgi2);border-radius:5px;padding:5px 12px;background:var(--yuz2);min-width:130px}
+  .oz .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .oz .v{font-size:13px;font-weight:700;text-align:right}
+  .oz.vurgu{background:#f5f0fc;border-color:#ddd0f2}
+  .oz.vurgu .v{color:var(--mor);font-size:14px}
+
+  .uyari{margin:8px 10px 0;padding:6px 10px;border:1px solid #f2c9c9;background:#fdf0f0;color:var(--hata);border-radius:4px;font-size:11.5px}
+  .bilgi{margin:8px 10px 0;padding:6px 10px;border:1px solid #cfe0f4;background:#f3f8fe;color:#2c4a6b;border-radius:4px;font-size:11.5px}
+  .aciklama{max-width:1360px;margin-top:16px;color:var(--soluk);font-size:11px;line-height:1.75}
+  .aciklama b{color:var(--yazi)}
+  .aciklama code{background:#f2f6fa;border:1px solid var(--cizgi2);border-radius:3px;padding:0 4px}
+  /* v2 ekleri */
+  .norm{max-width:1360px;background:#fff;border:1px solid #cfe0f4;border-left:4px solid var(--mavi);border-radius:4px;padding:8px 12px;line-height:1.9;margin-bottom:6px}
+  .d.ok{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .adim{display:flex;border-bottom:1px solid var(--cizgi2);background:#fbfcfe}
+  .adim .a{flex:1;padding:6px 10px 6px 22px;position:relative;color:var(--soluk);font-weight:700;font-size:11.5px;border-right:1px solid var(--cizgi2)}
+  .adim .a small{display:block;font-weight:400;font-size:10.5px}
+  .adim .a::before{content:"";position:absolute;left:8px;top:11px;width:8px;height:8px;border-radius:50%;background:#c9d3de}
+  .adim .a.bitti{color:var(--ok)} .adim .a.bitti::before{background:var(--ok)}
+  .adim .a.simdi{color:var(--uyari);background:#fdf6e8} .adim .a.simdi::before{background:var(--uyari)}
+  .sk .say.uy{background:#fdf1e2;color:var(--uyari)}
+  .uyy{color:var(--uyari);font-weight:700}
+  .oz.uyy{background:#fdf6e8;border-color:#f0dfb8} .oz.uyy .v{color:var(--uyari)}
+  .dg tr.anormal td{background:#fff4f3}
+  .dg tr.ic td{color:var(--soluk);font-size:10.5px;background:#fbfcfe;padding-left:22px}
+  .dg td.ind{padding-left:26px;color:#4d5d6e}
+  .gider{color:var(--hata);font-weight:700}
+  .iki{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;padding:10px}
+  .iki .dg{margin:0}
+  .kucuk td,.kucuk th{font-size:11px}
+  .kbas{font-weight:700;color:var(--yazi2);margin:0 0 6px}
+  .agac{border:1px solid var(--cizgi2);border-radius:4px;padding:6px 10px;font-family:Consolas,"Courier New",monospace;font-size:11px;line-height:1.9;background:#fbfcfe}
+  .agac .dug.cikti{color:var(--mor);font-weight:700}
+  .imza{margin-top:10px;border:1px solid #c4e6d0;background:#f6fbf7;border-radius:5px;padding:8px 10px}
+  .panel{display:none} .panel.on{display:block}
+  .sekmeler .sk{cursor:pointer;user-select:none} .sekmeler .sk:hover:not(.on){color:var(--yazi2);background:#f5f8fb}
+  .sk .say.ok{background:#e9f6ee;color:var(--ok)}
+  .alacak{color:var(--ok);font-weight:700}
+  .kt{min-width:120px}
+  .rz.bilgi{margin:0;padding:0 7px;border-radius:9px;font-size:10.5px;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="norm">
+  <b>Üretim Emri v2 — uluslararası normlara göre (kullanıcı 02.11.2026: "üretim emrinin de uluslararası vers var mı varsa v2 yap").</b>
+  v1 (<code>uretim_emri_karti.html</code>) atölye akışını kapsıyordu; v2 eklenenlerin dayanağı:
+  <span class="rz bilgi">IAS 2 / TMS 2</span> standart maliyet, sapmalar, normal kapasite, anormal fire, ay sonu yarı mamul ·
+  <span class="rz bilgi">ISO 13485 §7.5.1 · §7.5.8–7.5.9 · 21 CFR 820.184</span> serbest bırakma ön koşulları, parti kaydı (DHR), izlenebilirlik ·
+  <span class="rz bilgi">ISO 9001 §8.5.6 · §8.7</span> değişiklik kontrolü, sapma izni, uygunsuzluk ·
+  <span class="rz bilgi">21 CFR Part 11 · EU GMP Annex 11</span> e-imza, denetim izi ·
+  <span class="rz bilgi">ISA-95 · ISO 22400</span> plan / gerçek, OEE.
+</div>
+
+<h2>Üretim emri — üretimde, 2 kısmi giriş yapıldı · sekmelere tıklayın</h2>
+<p class="not">Emir <b>serbest bırakılmadan</b> (ön kontroller + planlama onayı e-imzası) atölyede başlatılamaz. Ürün ağacı ve rota yalnız <b>onaylı sürümden</b> alınır ve emirde kilitlenir.
+  Kısmi girişler <b>karantinaya</b> girer; her parti ayrı kalite onayıyla serbest kalır. Emir kapanınca maliyet kesinleşir ve parti kaydı (DHR) mühürlenir.</p>
+<div class="sayfa">
+  <div class="arac">
+    <span class="d pas">💾 Kaydet</span><span class="d">▶ Operasyon Başlat</span><span class="d">📤 Sarf</span><span class="d">📦 Mamul Girişi</span><span class="d">⏸ Beklet</span>
+    <span class="ayrac"></span><span class="d">🖨 Yazdır ▾</span><span class="d">⏰ Hatırlat</span>
+    <span class="tur">ÜRETİM EMRİ <small>#UE-2026-0091</small></span>
+    <span style="margin-left:auto" class="d pas" title="Kalan 39 adet ve 1 parti kalite onayı bekliyor">🔒 Emri Kapat…</span>
+    <span class="d">✖ Kapat</span>
+  </div>
+  <div class="adim">
+    <span class="a bitti">1 Taslak<small>28.10 · planlama</small></span>
+    <span class="a bitti">2 Onaylandı<small>29.10 · Planlama (e-imza)</small></span>
+    <span class="a bitti">3 Serbest bırakıldı<small>31.10 · 7/7 ön kontrol</small></span>
+    <span class="a simdi">4 Üretimde<small>61 / 100 · %61</small></span>
+    <span class="a">5 Tamamlandı<small>son partiler kalitede</small></span>
+    <span class="a">6 Kapandı<small>maliyet kesin · DHR mühürlü</small></span>
+  </div>
+  <div class="bas">
+    <div class="mbb">
+      <div class="av">🏭</div>
+      <div style="min-width:0">
+        <div class="ad">KALÇA FEMORAL STEM 12/14 KONİK — Nº 3 <span class="k">↗</span></div>
+        <div class="kim">Kod <b>FS-1214-3</b> · UDI-DI <b>08680000012345</b> · Ürün ağacı <b>v2 onaylı 🔒</b> · Rota <b>R-FS v4 onaylı 🔒</b> · İzleme <b>Seri</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt mr"><span class="e">Plan / Üretilen</span><span class="v">100 / 61</span><span class="a">60 sağlam · 1 hurda</span></div>
+        <div class="kt ok"><span class="e">Kalite onaylı</span><span class="v">40 <span class="rz uy">20 karantina</span></span><span class="a">satılabilir: 40</span></div>
+        <div class="kt uy"><span class="e">OEE</span><span class="v">%78,8</span><span class="a">hedef %80 · duruş 3,8 saat</span></div>
+        <div class="kt"><span class="e">Birim maliyet</span><span class="v">3.383,00</span><span class="a">standart 3.329,08 · +1,6%</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et">Emir No</span><span class="inp ro">UE-2026-0091</span></div>
+      <div class="al"><span class="et">Kaynak</span><span class="inp ro">Satış Sip. SS-2026-0412 ↗</span></div>
+      <div class="al"><span class="et">Öncelik</span><span class="inp ro">Yüksek · termin 06.11</span></div>
+      <div class="al"><span class="et z">Plan Miktar</span><span class="inp ro sg">100 Adet</span></div>
+      <div class="al"><span class="et">Plan Başlama</span><span class="inp ro">31.10.2026 08:00</span></div>
+      <div class="al"><span class="et">Plan Bitiş</span><span class="inp ro">05.11.2026 17:00</span></div>
+      <div class="al"><span class="et">Gerçek Başlama</span><span class="inp ro">01.11.2026 08:00</span></div>
+      <div class="al"><span class="et">Tahmini Bitiş</span><span class="inp ro">05.11.2026 15:30</span></div>
+      <div class="al"><span class="et z">Sarf Deposu</span><span class="inp ro">Hammadde Deposu</span></div>
+      <div class="al"><span class="et z">Giriş Deposu</span><span class="inp ro">Mamul Deposu · karantina</span></div>
+      <div class="al"><span class="et">İş Merkezi</span><span class="inp ro">CNC Hücresi 2 · temiz oda ISO 7</span></div>
+      <div class="al"><span class="et">Sorumlu</span><span class="inp ro">Mehmet T.</span></div>
+    </div>
+  </div>
+  <div class="sekmeler">
+    <span class="sk on">Ön Kontroller<span class="say ok">7/7</span></span><span class="sk">Malzeme<span class="say">4</span></span><span class="sk">Operasyonlar<span class="say">5</span></span>
+    <span class="sk">Personel / Zaman<span class="say">6</span></span><span class="sk">Üretim Girişleri<span class="say">2</span></span><span class="sk">Stok Hareketleri<span class="say">9</span></span>
+    <span class="sk">Kalite<span class="say uy">1 bekliyor</span></span><span class="sk">Maliyet (IAS 2)</span>
+    <span class="sk">Performans</span><span class="sk">İzlenebilirlik</span><span class="sk">Bağlı Emirler<span class="say">3</span></span><span class="sk">Değişiklik / Sapma<span class="say">2</span></span><span class="sk">Denetim İzi</span><span class="sk">Resim / Doküman</span>
+  </div>
+
+  <!-- ------------------------------------------------------------ ÖN KONTROLLER -->
+  <div class="panel on" data-sk="Ön Kontroller">
+    <p class="not" style="margin:10px 10px 0">Serbest bırakma (release to shop floor) ön koşulları — ISO 13485 §7.5.1 kontrollü koşullar. Biri kırmızıysa "Serbest Bırak" pasif; planlama yetkilisi
+      gerekçeyle <b>koşullu</b> serbest bırakabilir (sapma izni zorunlu, Değişiklik / Sapma sekmesine düşer).</p>
+    <table class="dg" style="margin-top:8px">
+      <thead><tr><th style="width:28px"></th><th>Kontrol</th><th>Kural</th><th>Sonuç</th><th>Kontrol zamanı</th></tr></thead>
+      <tbody>
+        <tr><td class="or">✔</td><td>Ürün ağacı onaylı sürüm</td><td class="sl">v2 · onay 12.09.2026 Dr. Ayşe K. · yürürlükte</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Rota / talimat onaylı sürüm</td><td class="sl">R-FS v4 · TL-CNC-12 rev.3 · TR-FS3 rev.E</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Malzeme mevcut ve rezerve</td><td class="sl">4/4 kalem · lotlar FEFO · girdi kalite onaylı (karantinadaki lot rezerve edilemez)</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Ekipman kalibrasyon / bakım</td><td class="sl">CNC-02 kalibrasyon 14.09.2027 · KF-1 bakım 20.12.2026</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Personel yetkinliği</td><td class="sl">atanan 3 kişinin TL-CNC-12 eğitimi geçerli</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Kapasite</td><td class="sl">CNC Hücresi 2 · 31.10–05.11 yük %86</td><td><span class="rz ok">Uygun</span></td><td class="sl">31.10 10:12</td></tr>
+        <tr><td class="or">✔</td><td>Ortam / hat temizliği</td><td class="sl">temiz oda ISO 7 izleme kaydı · önceki parti hat temizliği imzalı</td><td><span class="rz ok">Uygun</span></td><td class="sl">01.11 07:55</td></tr>
+      </tbody>
+    </table>
+    <div class="imza" style="margin:10px">✍ <b>Serbest bırakıldı</b> · Planlama: Hakan Y. · 31.10.2026 10:15 · anlam: "atölyeye serbest bırakıldı" · gerekçe: SS-2026-0412 termini</div>
+  </div>
+
+  <!-- ------------------------------------------------------------ MALZEME -->
+  <div class="panel" data-sk="Malzeme">
+    <div class="karac">
+      <span class="d">📤 Sarf Et</span><span class="d">🔁 İkame Talebi…</span><span class="d">🛒 Eksik için Satınalma Talebi</span>
+      <span class="sl">Rezervasyon FEFO (önce SKT'si yakın); lot değişikliği ve ikame yalnız onaylı sapma izniyle.</span>
+    </div>
+    <div class="karac" style="padding-top:0">
+      <span class="sl">Sarf yöntemi:</span>
+      <span class="seg" style="margin-left:0"><span>Elle</span><span class="on">Operasyon başında (geri-yıkama)</span><span>Başlatta tümü</span></span>
+      <span class="sl">Geri-yıkama: operasyon başlayınca o operasyonun malzemesi rezerv lottan kendiliğinden sarf edilir (SRF fişi). Gerçek kullanım farklıysa
+        operasyon bitişinde düzeltme satırı sorulur — sapma Malzeme ve Maliyet sekmelerine düşer.</span>
+    </div>
+    <table class="dg">
+      <thead><tr><th>Kod</th><th>Ad</th><th class="sg">Plan</th><th>Rezerve lot (FEFO)</th><th class="sg">Sarf</th><th class="sg">Std. kullanım (61 ad.)</th><th class="sg">Sapma</th><th class="sg">Kalan rezerv</th><th>Birim</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>TI-BAR-14</td><td>TİTANYUM ÇUBUK Ø14 Ti6Al4V ELI</td><td class="sg">102</td><td><span class="lot">L-TB0921 · 60</span> <span class="lot">L-TB0930 · 42</span></td><td class="sg">63</td><td class="sg sl">62,22</td><td class="sg uyy">+0,78</td><td class="sg">39</td><td>Adet</td><td class="sl">plan = 100 + %2 normal fire</td></tr>
+        <tr><td>HA-KAP</td><td>HİDROKSİAPATİT KAPLAMA</td><td class="sg">10,00</td><td><span class="lot">L-HA55 · 10</span></td><td class="sg">6,40</td><td class="sg sl">6,10</td><td class="sg uyy">+0,30</td><td class="sg">3,60</td><td>Kg</td><td></td></tr>
+        <tr><td>AMB-07</td><td>STERİL TÜP AMBALAJ</td><td class="sg">100</td><td><span class="lot">L-AM311 · 100</span></td><td class="sg">60</td><td class="sg sl">60</td><td class="sg sl">0</td><td class="sg">40</td><td>Adet</td><td></td></tr>
+        <tr class="anormal"><td>ETK-UDI</td><td>UDI ETİKETİ (ikame: ETK-UDI-B)</td><td class="sg">100</td><td><span class="lot">L-ET77 · 100</span></td><td class="sg">60</td><td class="sg sl">60</td><td class="sg sl">0</td><td class="sg">40</td><td>Adet</td><td><span class="rz uy">SAP-0007 ↗</span> ikame onaylı</td></tr>
+      </tbody>
+    </table>
+    <div class="ozet"><div class="oz uyy"><div class="e">Malzeme miktar sapması</div><div class="v">+2.798,92</div></div><div class="oz"><div class="e">Malzeme fiyat sapması</div><div class="v">0,00</div></div></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ OPERASYONLAR -->
+  <div class="panel" data-sk="Operasyonlar">
+    <div class="karac"><span class="d">▶ Başlat</span><span class="d">■ Bitir (e-imza)</span><span class="d">⏸ Duruş</span><span class="d">👷 Personel Ata</span><span class="d">🖥 Terminalde Aç</span><span class="d">🏭 Fason Çıkış İrsaliyesi</span><span class="d">📥 Fason Dönüş</span>
+      <span class="sl">🛑 = kalite bekleme noktası (hold point): kontrol onaylanmadan sonraki operasyon başlamaz.</span></div>
+    <table class="dg">
+      <thead><tr><th>Sıra</th><th>Operasyon</th><th>İş merkezi</th><th class="sg">Plan Süre (saat)</th><th class="sg">Gerçek Süre (saat)</th><th class="sg">Duruş (saat)</th><th class="sg">Biten adet</th><th>Personel</th><th>Kontrol</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>CNC tornalama</td><td>CNC-02</td><td class="sg">16,0</td><td class="sg">10,5</td><td class="sg">2,1</td><td class="sg">61</td><td>Mehmet T.</td><td class="sl">ilk ürün onayı ✔</td><td><span class="rz bilgi">Devam</span></td></tr>
+        <tr><td>20</td><td>Boyutsal ölçüm 🛑</td><td>Ölçüm odası</td><td class="sg">4,0</td><td class="sg">2,5</td><td class="sg">0</td><td class="sg">61</td><td>Selin A.</td><td class="sl">60 uygun · 1 ret (NCR-0042)</td><td><span class="rz bilgi">Devam</span></td></tr>
+        <tr><td>30</td><td>HA kaplama</td><td>KF-1</td><td class="sg">6,0</td><td class="sg">3,8</td><td class="sg">1,7</td><td class="sg">60</td><td>Selin A.</td><td class="sl">kaplama kalınlığı ✔</td><td><span class="rz bilgi">Devam</span></td></tr>
+        <tr><td>40</td><td>Paketleme + UDI etiket</td><td>Temiz oda</td><td class="sg">4,0</td><td class="sg">2,4</td><td class="sg">0</td><td class="sg">60</td><td>Mehmet T.</td><td class="sl">etiket doğrulama ✔</td><td><span class="rz bilgi">Devam</span></td></tr>
+        <tr><td>50</td><td>Sterilizasyon (fason) 🛑</td><td>Lab-X</td><td class="sg">—</td><td class="sg">—</td><td class="sg">—</td><td class="sg">40</td><td class="sl">fason</td><td class="sl">SAL 10⁻⁶ raporu</td><td><span class="rz uy">20 adet dışarıda</span> <span class="sl">FÇİ-2026-0019 ↗</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ------------------------------------------------------------ PERSONEL / ZAMAN -->
+  <div class="panel" data-sk="Personel / Zaman">
+    <div class="karac"><span class="d">＋ Zaman Kaydı</span><span class="d">✎ Düzenle</span><span class="d">⏱ Duruş Ekle</span><span class="d">📥 PDKS'den Al</span>
+      <span class="sl">Kişi saati makine saatinden farklı olabilir (CNC'de 2 kişi). Yetkinlik: kişinin o talimat için geçerli eğitimi (ön kontrolle aynı kural).</span></div>
+    <table class="dg">
+      <thead><tr><th>Personel</th><th>Operasyon</th><th>Başlangıç</th><th>Bitiş</th><th class="sg">Mola (dk)</th><th class="sg">Süre (saat)</th><th class="sg">Adet</th><th>Yetkinlik</th><th>Kaynak</th><th class="sg">Saat Ücreti</th><th class="sg">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>Mehmet T.</td><td>10 CNC tornalama</td><td>01.11 08:00</td><td>02.11 15:40</td><td class="sg">60</td><td class="sg">10,50</td><td class="sg">61</td><td><span class="rz ok">TL-CNC-12 ✓</span></td><td class="sl">terminal</td><td class="sg">420,00</td><td class="sg">4.410,00</td></tr>
+        <tr><td>Ali K.</td><td>10 CNC tornalama</td><td>01.11 08:00</td><td>02.11 15:40</td><td class="sg">60</td><td class="sg">10,50</td><td class="sg">61</td><td><span class="rz ok">TL-CNC-12 ✓</span></td><td class="sl">PDKS</td><td class="sg">420,00</td><td class="sg">4.410,00</td></tr>
+        <tr><td>Selin A.</td><td>20 Boyutsal ölçüm</td><td>01.11 14:00</td><td>02.11 15:10</td><td class="sg">0</td><td class="sg">2,50</td><td class="sg">61</td><td><span class="rz ok">TL-OLC-03 ✓</span></td><td class="sl">terminal</td><td class="sg">420,00</td><td class="sg">1.050,00</td></tr>
+        <tr><td>Selin A.</td><td>30 HA kaplama</td><td>01.11 15:00</td><td>02.11 16:00</td><td class="sg">0</td><td class="sg">3,80</td><td class="sg">60</td><td><span class="rz ok">TL-KAP-02 ✓</span></td><td class="sl">terminal</td><td class="sg">420,00</td><td class="sg">1.596,00</td></tr>
+        <tr><td>Mehmet T.</td><td>40 Paketleme + UDI</td><td>01.11 16:00</td><td>02.11 16:25</td><td class="sg">0</td><td class="sg">2,40</td><td class="sg">60</td><td><span class="rz ok">TL-PKT-05 ✓</span></td><td class="sl">terminal</td><td class="sg">420,00</td><td class="sg">1.008,00</td></tr>
+        <tr><td>Zeynep D.</td><td>40 Paketleme + UDI</td><td>02.11 14:10</td><td>02.11 16:25</td><td class="sg">0</td><td class="sg">2,30</td><td class="sg">20</td><td><span class="rz ok">TL-PKT-05 ✓</span></td><td class="sl">PDKS</td><td class="sg">420,00</td><td class="sg">966,00</td></tr>
+        <tr class="top"><td colspan="5">Toplam (Maliyet › Direkt işçilik)</td><td class="sg">32,00</td><td></td><td></td><td></td><td></td><td class="sg">13.440,00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ------------------------------------------------------------ ÜRETİM GİRİŞLERİ -->
+  <div class="panel" data-sk="Üretim Girişleri">
+    <p class="not" style="margin:10px 10px 0">Her kısmi giriş ayrı <b>parti</b>; Üretim Fişi v2'nin akışıyla aynı: gerçekleşir → karantina → kalite → serbest. Giriş fişleri emre bağlı, ayrı açılır.</p>
+    <table class="dg" style="margin-top:8px">
+      <thead><tr><th>Giriş fişi</th><th>Tarih</th><th>Parti</th><th>Seri aralığı</th><th class="sg">Sağlam</th><th class="sg">Hurda</th><th class="sg">Yeniden işleme</th><th>Stok durumu</th><th>Kalite</th></tr></thead>
+      <tbody>
+        <tr><td>UF-2026-000147 ↗</td><td>01.11 16:50</td><td>P-261101-03</td><td class="sl">SN-261101-001…041</td><td class="sg">40</td><td class="sg">1</td><td class="sg">0</td><td><span class="rz ok">Serbest</span></td><td class="sl">Dr. Ayşe K. · 02.11 11:20 ✍</td></tr>
+        <tr><td>UF-2026-000152 ↗</td><td>02.11 16:30</td><td>P-261102-01</td><td class="sl">SN-261102-001…020</td><td class="sg">20</td><td class="sg">0</td><td class="sg">0</td><td><span class="rz uy">Karantina</span></td><td class="sl">sterilite raporu bekleniyor</td></tr>
+        <tr class="top"><td colspan="4">Toplam</td><td class="sg">60</td><td class="sg">1</td><td class="sg">0</td><td colspan="2" class="sl">kalan 39 adet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ------------------------------------------------------------ STOK HAREKETLERİ -->
+  <div class="panel" data-sk="Stok Hareketleri">
+    <p class="not" style="margin:10px 10px 0">Emre bağlı bütün stok belgeleri — her biri ayrı açılır. Sarf toplamı Malzeme sekmesiyle, giriş toplamı Üretim Girişleri ile tutar.</p>
+    <table class="dg" style="margin-top:8px">
+      <thead><tr><th>Belge</th><th>Tarih</th><th>Tür</th><th>İçerik</th><th>Depo</th><th>Oluşturma</th><th class="sg">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>SRF-2026-0311 ↗</td><td>01.11 08:00</td><td>Sarf çıkışı</td><td>TI-BAR-14 ×42 (L-TB0921) · HA-KAP 4,20 kg</td><td>Hammadde → üretim</td><td class="sl">geri-yıkama op.10</td><td class="sg">114.660,00</td></tr>
+        <tr class="anormal"><td>FIR-2026-0042 ↗</td><td>01.11 16:31</td><td>Fire</td><td>FS-1214-3 ×1 · SN-261101-017 · anormal</td><td>üretim</td><td class="sl">NCR-0042</td><td class="sg">3.383,00</td></tr>
+        <tr><td>UF-2026-000147 ↗</td><td>01.11 16:50</td><td>Üretim girişi</td><td>FS-1214-3 ×40 · P-261101-03</td><td>Mamul (karantina)</td><td class="sl">kısmi giriş</td><td class="sg">135.320,00</td></tr>
+        <tr><td>FÇİ-2026-0017 ↗</td><td>01.11 17:30</td><td>Fason çıkış irsaliyesi</td><td>FS-1214-3 ×40 → Lab-X (sterilizasyon)</td><td>Mamul → fason</td><td class="sl">op.50</td><td class="sg sl">—</td></tr>
+        <tr><td>FGİ-2026-0017 ↗</td><td>02.11 10:00</td><td>Fason dönüş</td><td>FS-1214-3 ×40 ← Lab-X · rapor LX-26-4471</td><td>fason → Mamul</td><td class="sl">op.50</td><td class="sg sl">—</td></tr>
+        <tr><td>SRF-2026-0318 ↗</td><td>02.11 08:00</td><td>Sarf çıkışı</td><td>TI-BAR-14 ×21 (L-TB0921 18 · L-TB0930 3) · HA-KAP 2,20 kg</td><td>Hammadde → üretim</td><td class="sl">geri-yıkama op.10</td><td class="sg">57.650,00</td></tr>
+        <tr><td>SRF-2026-0319 ↗</td><td>02.11 15:50</td><td>Sarf çıkışı</td><td>AMB-07 ×60 · ETK-UDI-B ×60</td><td>Hammadde → üretim</td><td class="sl">geri-yıkama op.40</td><td class="sg">2.452,80</td></tr>
+        <tr><td>UF-2026-000152 ↗</td><td>02.11 16:30</td><td>Üretim girişi</td><td>FS-1214-3 ×20 · P-261102-01</td><td>Mamul (karantina)</td><td class="sl">kısmi giriş</td><td class="sg">67.659,80</td></tr>
+        <tr><td>FÇİ-2026-0019 ↗</td><td>02.11 17:00</td><td>Fason çıkış irsaliyesi</td><td>FS-1214-3 ×20 → Lab-X</td><td>Mamul → fason</td><td class="sl">op.50 · dönüş bekleniyor</td><td class="sg sl">—</td></tr>
+      </tbody>
+    </table>
+    <div class="ozet" style="padding-top:8px"><div class="oz"><div class="e">Sarf toplamı</div><div class="v">174.762,80</div></div><div class="oz"><div class="e">Giriş toplamı (60 adet)</div><div class="v">202.979,80</div></div><div class="oz uyy"><div class="e">Fasonda</div><div class="v">20 adet</div></div></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ KALİTE -->
+  <div class="panel" data-sk="Kalite">
+    <table class="dg" style="margin-top:10px">
+      <thead><tr><th>Aşama</th><th>Kontrol</th><th>Kabul kriteri</th><th class="sg">Numune</th><th>Sonuç</th><th>Yapan · zaman</th></tr></thead>
+      <tbody>
+        <tr><td>Proses içi</td><td>İlk ürün onayı</td><td class="sl">TR-FS3 rev.E</td><td class="sg">1</td><td><span class="rz ok">Uygun</span></td><td class="sl">Selin A. · 01.11 08:40</td></tr>
+        <tr><td>Proses içi</td><td>Boyutsal ölçüm (op. 20)</td><td class="sl">konik açı 5°43′ ±2′</td><td class="sg">61</td><td><span class="rz uy">60 / 61</span></td><td class="sl">NCR-2026-0042 açıldı</td></tr>
+        <tr><td>Parti P-261101-03</td><td>Son kontrol + sterilite</td><td class="sl">SAL 10⁻⁶ · etiket / UDI</td><td class="sg">5</td><td><span class="rz ok">Serbest</span></td><td class="sl">Dr. Ayşe K. · 02.11 11:20 ✍</td></tr>
+        <tr><td>Parti P-261102-01</td><td>Son kontrol + sterilite</td><td class="sl">SAL 10⁻⁶ · etiket / UDI</td><td class="sg">5</td><td><span class="rz gri">Bekliyor</span></td><td class="sl">numune Lab-X'te</td></tr>
+      </tbody>
+    </table>
+    <div class="karac"><span class="d ok pas">✔ Partiyi Serbest Bırak (e-imza)…</span><span class="d kirmizi">⛔ Ret / Uygunsuzluk</span><span class="d">📋 KK Formu</span></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ MALİYET -->
+  <div class="panel" data-sk="Maliyet (IAS 2)">
+    <p class="not" style="margin:10px 10px 0">Standart maliyet (onaylı ağaç + rota × standart fiyat / ücret / GÜG oranı) ile gerçek karşılaştırılır. Sapmalar ayrı hesaplarda;
+      anormal fire ve kullanılmayan kapasite <b>gider</b> (IAS 2.13, 2.16). Emir ay sonunda açıksa sarf edilmiş ama mamule dönmemiş tutar <b>151 Yarı Mamul</b> olarak değerlenir.</p>
+    <div class="iki">
+      <div>
+        <table class="dg kucuk">
+          <thead><tr><th>Bileşen (61 adet üretildi)</th><th class="sg">Standart</th><th class="sg">Gerçek</th><th class="sg">Sapma</th><th>Sapma türü</th></tr></thead>
+          <tbody>
+            <tr><td>Direkt ilk madde</td><td class="sg">171.963,88</td><td class="sg">174.762,80</td><td class="sg uyy">+2.798,92</td><td class="sl">miktar +2.798,92 · fiyat 0</td></tr>
+            <tr><td>Direkt işçilik</td><td class="sg">12.810,00</td><td class="sg">13.440,00</td><td class="sg uyy">+630,00</td><td class="sl">verim +630 · ücret 0</td></tr>
+            <tr><td>Değişken GÜG</td><td class="sg">3.660,00</td><td class="sg">3.520,00</td><td class="sg alacak">−140,00</td><td class="sl">harcama</td></tr>
+            <tr><td>Sabit GÜG (normal kapasite)</td><td class="sg">14.640,00</td><td class="sg">14.640,00</td><td class="sg sl">0</td><td class="sl">yüklenen = standart oran</td></tr>
+            <tr class="ic"><td colspan="5">↳ dönemin kullanılmayan kapasite payı 2.900,00 emre yüklenmez → 680 Çalışmayan Kısım Gid.</td></tr>
+            <tr class="top"><td>Toplam (61 adet)</td><td class="sg">203.073,88</td><td class="sg">206.362,80</td><td class="sg uyy">+3.288,92</td><td></td></tr>
+            <tr class="anormal"><td>Anormal fire — 1 adet (NCR-0042)</td><td class="sg">3.329,08</td><td class="sg">3.383,00</td><td></td><td class="sl gider">689 gidere</td></tr>
+            <tr class="top"><td>Mamule (60 adet, 152)</td><td class="sg">199.744,80</td><td class="sg">202.979,80</td><td></td><td class="sl">birim 3.383,00</td></tr>
+          </tbody>
+        </table>
+        <div class="bilgi" style="margin:8px 0 0">ℹ Sapmalar <b>Maliyet Kapat</b>ta emrin üretimine dağıtılır (yukarıdaki gerçek birim maliyet); önemsizse 7xx sapma hesabında bırakılır — muhasebe politikası ayarı.</div>
+      </div>
+      <div>
+        <div class="kbas">Ay sonu açık emir — yarı mamul değerlemesi (31.10.2026)</div>
+        <table class="dg kucuk">
+          <thead><tr><th>Kalem</th><th class="sg">Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>Sarf edilen, mamule dönmemiş malzeme (3 çubuk + kaplama)</td><td class="sg">8.190,00</td></tr>
+            <tr><td>Yarı mamule yüklenen işçilik (op. 10 tamamlanan 2 adet)</td><td class="sg">420,00</td></tr>
+            <tr><td>Yüklenen GÜG</td><td class="sg">600,00</td></tr>
+            <tr class="top"><td>151 Yarı Mamuller — Üretim</td><td class="sg">9.210,00</td></tr>
+          </tbody>
+        </table>
+        <div class="sl" style="font-size:10.5px;margin-top:4px">Bilançoda yarı mamul görünür; emir kapanınca 152'ye aktarılır. Tamamlanma derecesi operasyon ilerlemesinden.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------------ PERFORMANS -->
+  <div class="panel" data-sk="Performans">
+    <p class="not" style="margin:10px 10px 0">ISO 22400 KPI'ları — OEE = Kullanılabilirlik × Performans × Kalite.</p>
+    <div class="ozet" style="justify-content:flex-start;padding-top:10px">
+      <div class="oz"><div class="e">Kullanılabilirlik</div><div class="v">%88,0</div><div class="sl" style="font-size:10.5px">plan 32 saat · duruş 3,8 saat</div></div>
+      <div class="oz"><div class="e">Performans</div><div class="v">%91,0</div><div class="sl" style="font-size:10.5px">ideal çevrim / gerçek</div></div>
+      <div class="oz"><div class="e">Kalite</div><div class="v">%98,4</div><div class="sl" style="font-size:10.5px">60 sağlam / 61</div></div>
+      <div class="oz vurgu"><div class="e">OEE</div><div class="v">%78,8</div><div class="sl" style="font-size:10.5px">hedef %80</div></div>
+    </div>
+    <table class="dg kucuk">
+      <thead><tr><th>Duruş nedeni</th><th>Operasyon</th><th class="sg">Süre (saat)</th><th>Tür</th></tr></thead>
+      <tbody>
+        <tr><td>Takım değişimi</td><td>10 CNC</td><td class="sg">1,2</td><td class="sl">planlı</td></tr>
+        <tr><td>Malzeme bekleme (L-TB0930 kalite onayı)</td><td>10 CNC</td><td class="sg">0,9</td><td class="sl">plansız</td></tr>
+        <tr><td>Fırın ısınma arızası</td><td>30 Kaplama</td><td class="sg">1,7</td><td class="sl">plansız · bakım iş emri BK-118</td></tr>
+      </tbody>
+    </table>
+    <div style="height:10px"></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ İZLENEBİLİRLİK -->
+  <div class="panel" data-sk="İzlenebilirlik">
+    <div style="padding:10px">
+      <div class="kbas">Parti kaydı (DHR) — emir bazında, her parti için ayrı</div>
+      <div class="agac">
+        <div class="dug cikti">▲ Emir UE-2026-0091 · FS-1214-3 · ağaç v2 · rota R-FS v4</div>
+        <div class="dug">├─ Parti P-261101-03 · SN-261101-001…041 · Serbest ✍ Dr. Ayşe K.</div>
+        <div class="dug">│   ├─ TI-BAR-14 L-TB0921 (EN 10204 3.1 ✓) · HA-KAP L-HA55 (CoA ✓) · AMB-07 L-AM311 · ETK-UDI L-ET77</div>
+        <div class="dug sl">│   └─ CNC-02 · KF-1 · Mehmet T., Selin A. · sterilite LX-26-4471</div>
+        <div class="dug">├─ Parti P-261102-01 · SN-261102-001…020 · Karantina</div>
+        <div class="dug">│   ├─ TI-BAR-14 L-TB0921 + L-TB0930 · HA-KAP L-HA55 · AMB-07 L-AM311 · ETK-UDI L-ET77</div>
+        <div class="dug sl">│   └─ CNC-02 · KF-1 · sterilite bekleniyor</div>
+        <div class="dug sl">└─ Hurda: SN-261101-017 · NCR-2026-0042</div>
+      </div>
+      <div class="karac" style="padding:6px 0 0"><span class="d">⇠ Geri izle</span><span class="d">⇢ İleri izle (sevkiyat)</span><span class="d">🖨 DHR raporu</span><span class="d">📤 UTS üretim bildirimi</span></div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------------ BAĞLI EMİRLER -->
+  <div class="panel" data-sk="Bağlı Emirler">
+    <div class="karac"><span class="d">＋ Alt Emir Aç</span><span class="d">↗ Kaynak Belgeye Git</span>
+      <span class="sl">Alt emrin çıktısı (yarı mamul) <b>kalite onaylı / serbest</b> olmadan bu emirde sarf edilemez; alt emir ve üst emir aynı parti kaydında (DHR) birbirine bağlanır.</span></div>
+    <table class="dg">
+      <thead><tr><th>İlişki</th><th>Belge</th><th>İçerik</th><th class="sg">Adet</th><th>Termin</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Kaynak</td><td>SS-2026-0412 · satır 1 ↗</td><td>Ortopedi Dağıtım A.Ş. · FS-1214-3</td><td class="sg">100</td><td>06.11.2026</td><td><span class="rz bilgi">40 sevk edilebilir</span></td></tr>
+        <tr><td>Alt emir</td><td>UE-2026-0089 ↗</td><td>TI-BAR-14 boy kesme + alın tornalama (yarı mamul TB-KES-14)</td><td class="sg">102</td><td>31.10.2026</td><td><span class="rz ok">Kapandı · serbest</span></td></tr>
+        <tr><td>Sonraki emir</td><td>UE-2026-0098 ↗</td><td>FS-KIT-3 cerrahi set montajı — bu emrin çıktısını tüketir</td><td class="sg">20</td><td>10.11.2026</td><td><span class="rz gri">Onaylı · bekliyor</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ------------------------------------------------------------ DEĞİŞİKLİK / SAPMA -->
+  <div class="panel" data-sk="Değişiklik / Sapma">
+    <p class="not" style="margin:10px 10px 0">Serbest bırakılmış emirde miktar, ikame malzeme, rota veya depo değişikliği yalnız <b>onaylı talep</b> ile (ISO 9001 §8.5.6).
+      Ürün ağacı / rotanın kendisi değişecekse bu bir mühendislik değişikliğidir (ECO) — emir yeni sürüme ancak açık talep + onayla geçer.</p>
+    <table class="dg" style="margin-top:8px">
+      <thead><tr><th>No</th><th>Tür</th><th>Konu</th><th>Etki</th><th>Talep eden</th><th>Onaylayan</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>SAP-0007</td><td>Sapma izni</td><td>UDI etiketi ETK-UDI yerine ETK-UDI-B (aynı spesifikasyon, farklı tedarikçi)</td><td class="sl">yalnız bu emir</td><td>Mehmet T.</td><td>Dr. Ayşe K. ✍</td><td><span class="rz ok">Onaylı</span></td></tr>
+        <tr><td>NCR-0042</td><td>Uygunsuzluk</td><td>Konik açı tolerans dışı — 1 adet</td><td class="sl">hurda · DÖF-0019</td><td>Selin A.</td><td>—</td><td><span class="rz uy">Açık</span></td></tr>
+      </tbody>
+    </table>
+    <div class="karac"><span class="d">＋ Değişiklik talebi</span><span class="d">＋ Sapma izni</span><span class="d">＋ Uygunsuzluk</span></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ DENETİM İZİ -->
+  <div class="panel" data-sk="Denetim İzi">
+    <table class="dg kucuk" style="margin-top:10px">
+      <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Eski → Yeni</th><th>İmza anlamı</th></tr></thead>
+      <tbody>
+        <tr><td>28.10 14:02</td><td>Hakan Y.</td><td>Emir oluşturdu</td><td class="sl">SS-2026-0412'den · 100 adet</td><td></td></tr>
+        <tr><td>29.10 09:30</td><td>Hakan Y.</td><td>Onayladı</td><td class="sl">Taslak → Onaylandı</td><td class="sl">planlama onayı ✍</td></tr>
+        <tr><td>31.10 10:15</td><td>Hakan Y.</td><td>Serbest bıraktı</td><td class="sl">7/7 ön kontrol</td><td class="sl">atölyeye serbest ✍</td></tr>
+        <tr><td>01.11 11:05</td><td>Dr. Ayşe K.</td><td>Sapma izni SAP-0007 onayı</td><td class="sl">ETK-UDI → ETK-UDI-B</td><td class="sl">sapma onayı ✍</td></tr>
+        <tr><td>02.11 11:20</td><td>Dr. Ayşe K.</td><td>Parti serbest</td><td class="sl">P-261101-03 Karantina → Serbest</td><td class="sl">kalite serbest bırakma ✍</td></tr>
+      </tbody>
+    </table>
+    <div style="height:10px"></div>
+  </div>
+
+  <!-- ------------------------------------------------------------ RESİM / DOKÜMAN -->
+  <div class="panel" data-sk="Resim / Doküman">
+    <div class="karac"><span class="d">＋ Dosya ekle</span><span class="seg"><span class="on">Kart</span><span>Liste</span></span></div>
+    <div class="karac" style="gap:10px;padding-bottom:12px">
+      <div class="oz" style="min-width:150px">📄 <b>İş emri formu.pdf</b><div class="sl">otomatik · 31.10</div></div>
+      <div class="oz" style="min-width:150px">🧾 <b>LX-26-4471.pdf</b><div class="sl">Sterilite raporu</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <b>v1 → v2 farkları</b><br>
+  1. <b>Durum akışı</b>: Taslak → Onaylandı → <b>Serbest bırakıldı</b> → Üretimde → Tamamlandı → Kapandı. v1'de Onayla sonrası doğrudan Başlat vardı; v2'de atölyeye
+     serbest bırakma ayrı adım ve <b>7 ön kontrole</b> bağlı (onaylı ağaç/rota sürümü, malzeme + girdi kalite onayı, kalibrasyon, personel yetkinliği, kapasite, ortam/hat temizliği).<br>
+  2. <b>Sürüm disiplini</b>: yalnız onaylı ağaç / rota; emirde kilitli. v1'deki "Ağaçtan Yenile" serbest bırakılmış emirde yalnız Değişiklik talebiyle.<br>
+  3. <b>Malzeme</b>: FEFO lot rezervasyonu, karantinadaki lot rezerve edilemez; standart kullanıma göre <b>miktar sapması</b>; ikame yalnız sapma izniyle.<br>
+  4. <b>Operasyonlar</b>: kalite bekleme noktaları (hold point), operasyon bitişi e-imzalı, duruşlar nedenli.<br>
+  5. <b>Kısmi girişler</b>: her biri parti; karantina → kalite → serbest (Üretim Fişi v2 akışı). v1'de giriş doğrudan satılabilir stoktu.<br>
+  6. <b>Maliyet (IAS 2)</b>: standart / gerçek ve sapma türleri (malzeme miktar–fiyat, işçilik verim–ücret, GÜG harcama), kullanılmayan kapasite ve anormal fire gidere,
+     <b>ay sonu açık emir yarı mamul (151) değerlemesi</b>. v1'deki Maliyet Kapat hepsini mamule yüklüyordu.<br>
+  7. <b>Performans</b>: OEE (ISO 22400) ve duruş nedenleri.<br>
+  8. <b>İzlenebilirlik</b>: emir → parti → seri → girdi lotları, sertifikalar, ekipman, personel; DHR raporu, UTS bildirimi.<br>
+  9. <b>Değişiklik / Sapma</b>: değişiklik talebi, sapma izni, uygunsuzluk; ECO ayrımı.<br>
+  10. <b>Denetim izi</b> ve e-imza anlamı (planlama onayı, serbest bırakma, sapma onayı, kalite serbest bırakma).<br>
+  11. <b>v1'den korunanlar</b>: Personel / Zaman (PDKS'den al, kişi saati × ücret, yetkinlik), Stok Hareketleri (sarf / giriş / fire / fason belgeleri),
+     Bağlı Emirler (kaynak sipariş, alt emir, sonraki emir — serbest bırakılmamış yarı mamul sarf edilemez), geri-yıkama sarf yöntemi, fason çıkış / dönüş irsaliyesi.<br>
+  <b>Ayar ile sadeleşir</b>: tıbbi cihaz dışı kurumda e-imza, UDI, hold point ve karantina kapatılır; ön kontrollerden yalnız malzeme + kapasite kalır.
+  IAS 2 maliyet kuralları ve ay sonu yarı mamul değerlemesi her kurumda açık. <b>GÜG</b> = Genel Üretim Giderleri (730).
+</div>
+<script>
+// Sekme tıklaması: aynı sayfadaki paneli açar (sekme adı = data-sk; sayaç rozeti hariç).
+document.querySelectorAll('.sayfa').forEach(function (sayfa) {
+  sayfa.querySelectorAll('.sekmeler .sk').forEach(function (sk) {
+    sk.addEventListener('click', function () {
+      var ad = sk.childNodes[0].textContent.trim();
+      var hedef = sayfa.querySelector('.panel[data-sk="' + ad + '"]');
+      if (!hedef) return;
+      sayfa.querySelectorAll('.sekmeler .sk').forEach(function (x) { x.classList.toggle('on', x === sk) });
+      sayfa.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p === hedef) });
+    });
+  });
+});
+</script>
+</body>
+
+</html>
