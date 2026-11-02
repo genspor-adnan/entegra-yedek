@@ -159,7 +159,7 @@ export interface GozBeklemeEkrani {
  */
 export interface GozMuayeneSeridiYaniti {
   kimlik: {
-    hasta: string; yas: number | null; cinsiyet: number; hastaNo: string;
+    hasta: string; yas: number | null; yasKisa?: string; cinsiyet: number; hastaNo: string;
     protokol: string; tarih: string; hekim: string; bolum: string;
     sikayet: string; ozgecmis: string; sistem: string; soygecmis: string;
     dilate: boolean; dilatasyonIlac: string; muayeneTuru: number;
@@ -333,7 +333,7 @@ export interface GozlukOnceki { id: number; tarih: string; tur: number; durum: n
   odSph: number | null; odCyl: number | null; odAks: number | null; osSph: number | null; osCyl: number | null; osAks: number | null;
   add: number | null; odPd: number | null; osPd: number | null; pdYakin: number | null; camMalzeme: number | null; kaplamalar: string; tasarim: string }
 export interface GozlukKaynak {
-  hasta: { ad: string; hastaNo: string; yas: number | null; cinsiyet: number } | null;
+  hasta: { ad: string; hastaNo: string; yas: number | null; yasKisa?: string; cinsiyet: number } | null;
   muayene: { id: number; protokol: string; tarih: string; hekimId: number | null; hekim: string; dilate: number; gozMuayeneId: number | null } | null;
   refraksiyon: GozlukRefraksiyon[]; oncekiler: GozlukOnceki[];
   sonSgk: string | null; sgkHakVar: boolean; sgkHakTarihi: string | null;

@@ -229,7 +229,7 @@ export function GozlukHastaBandi({ k, durum }: { k: GozlukKaynak | null; durum: 
     <div className="gz4-ust">
       <div>
         <div className="ad">{h?.ad ?? '—'}</div>
-        <div className="sonuk">{[h?.yas != null ? `${h.yas} ${h.cinsiyet === 1 ? 'E' : h.cinsiyet === 2 ? 'K' : ''}` : '',
+        <div className="sonuk">{[h?.yasKisa || h?.yas != null ? `${h?.yasKisa || h?.yas} ${h.cinsiyet === 1 ? 'E' : h.cinsiyet === 2 ? 'K' : ''}` : '',
           m ? `${c('göz muayenesi')} ${tarihSaat(m.tarih)}` : '', m?.hekim].filter(Boolean).join(' · ')}</div>
       </div>
       <div className="bil">
@@ -413,7 +413,7 @@ export function GozlukReceteFormu({ b, k, kopyaId }: { b: EkSekmeBaglami; k: Goz
         <div className="gl-kagit" id="gozluk-onizleme">
           <div className="kb"><div><b>{c('GÖZLÜK REÇETESİ')}</b><br />{c('Göz Polikliniği')}</div>
             <div style={{ textAlign: 'right' }}>{c('No')}: {String(d.receteNo || '—')}<br />{tarihYaz(new Date().toISOString().slice(0, 10))}</div></div>
-          <div><b>{c('Hasta')}:</b> {k?.hasta?.ad ?? '—'}{k?.hasta?.yas != null ? ` · ${k.hasta.yas}` : ''}</div>
+          <div><b>{c('Hasta')}:</b> {k?.hasta?.ad ?? '—'}{(k?.hasta?.yasKisa || k?.hasta?.yas != null) ? ` · ${k?.hasta?.yasKisa || k?.hasta?.yas}` : ''}</div>
           <MiniRecete r={d as Record<string, unknown>} />
           <div><b>{c('Tür')}:</b> {c(GOZLUK_TUR[tur] ?? '')}{d.kullanim ? ` · ${c(KULLANIM[Number(d.kullanim)] ?? '')}` : ''}</div>
           {(camAd || kap.length > 0) && <div><b>{c('Cam')}:</b> {[camAd, kap.map(x => c(KAPLAMA[Number(x)])).join(', '), tur === 4 ? d.tasarim : ''].filter(Boolean).join(' · ')}</div>}

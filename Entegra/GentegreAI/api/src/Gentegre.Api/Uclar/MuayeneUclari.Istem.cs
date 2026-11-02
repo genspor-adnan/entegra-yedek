@@ -89,8 +89,7 @@ public static partial class MuayeneUclari
                             public.fn_istem_serbest(
                                 (select basvuru_turu from public.belge_basvuru where id = @p1)::smallint,
                                 @p4::smallint, 1::smallint),
-                            public.fn_numara_kimlik_uret(903, @p0, 'radyoloji_istem',
-                                                         'accession_no', current_date))
+                            public.fn_radyoloji_accession_ver(@p0, current_date))
                     returning id
                     """, islem,
                     [m.SubeId, m.BelgeId, m.HastaId, istek.HizmetId,

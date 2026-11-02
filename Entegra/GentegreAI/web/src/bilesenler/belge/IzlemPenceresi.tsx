@@ -44,6 +44,11 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
   const [liste, setListe] = useState<IzlemSatiri[]>(
     satirlar.length > 0 ? satirlar : cikis ? [] : [bosIzlem(String(miktar))]);
   const [hata, setHata] = useState<string | null>(null);
+  const [ara, setAra] = useState('');
+  const arananMi = (z: IzlemSatiri) => {
+    const q = ara.trim().toLocaleLowerCase('tr');
+    return !q || sayi(z.miktar) > 0 || `${z.lotNo} ${z.seriNo}`.toLocaleLowerCase('tr').includes(q);
+  };
   const [yukleniyor, setYukleniyor] = useState(cikis);
   const kural = izlemKurali(izleme);
   const seriVar = seriSutunuVar(izleme, satirlar);
@@ -226,6 +231,11 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
       alt={
         <>
           <button ref={tamamRef} className="d onay" onClick={kaydet}>💾 Tamam</button>
+          {/* ARAMA (kullanıcı 02.11.2026: "lot seçim ekranında tamam butonu sağına arama editi ekle"): lot / seri
+              numarasında arar; miktar girilmiş satır her zaman görünür kalır (seçim gözden kaybolmasın). */}
+          <input className="izlem-ara" value={ara} onChange={e => setAra(e.target.value)}
+                 placeholder={c('Lot / seri ara…')} style={{ width: 180, marginLeft: 6 }}
+                 onKeyDown={e => { if (e.key === 'Escape' && ara) { e.stopPropagation(); setAra('') } }} />
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
           {/* RAF OMRU UST BANTTA ETIKET (kullanici 24.10.2026: "label olarak gelsin, tıklarsam modal olarak
@@ -310,7 +320,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
               </tr>
             </thead>
             <tbody>
-              {liste.map((z, i) => (
+              {liste.map((z, i) => !arananMi(z) ? null : (
                 <tr key={z.seriLotId ?? i}>
                   {/* CIKISTA lot bilgisi stoktan gelir - yalniz miktar girilir. */}
                   <td><input value={z.lotNo} autoFocus={!cikis && i === 0} readOnly={cikis} disabled={cikis}

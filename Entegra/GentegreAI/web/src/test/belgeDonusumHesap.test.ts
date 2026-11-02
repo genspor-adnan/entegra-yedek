@@ -121,3 +121,12 @@ describe('kurus tamamlama - kova kalanini asmaz', () => {
     expect(secim[0].matrah).toBe(454.54);
   });
 });
+
+describe('payKalan - tüm satır (pay 0)', () => {
+  it('ERP siparişinde tutar ek katkı kovasında olsa da açık kalan satırın kalanıdır', () => {
+    const s = { tutarKalan: 150, hastaProvizyonKalan: 0, hastaEkKatkiKalan: 150, sgkKalan: 0, ossKalan: 0,
+                kurumTutar: 0, hastaTutar: 150, kdv: 10 } as unknown as Parameters<typeof payKalan>[0];
+    expect(payKalan(s, 0)).toBe(150);
+    expect(payKalan(s, 1)).toBe(0);
+  });
+});

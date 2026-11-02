@@ -4,6 +4,7 @@ import { telefonAlaniMi, epostaGecerliMi, bicimHatasi } from './alanBicim';
 import { agacSecenekleri } from './agacSecenek';
 import { grupluSecenekler } from './grupluSecenek';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
+import { AgacCombo } from './AgacCombo';
 
 /** Kart alanlarinda tutulan deger tipleri. */
 
@@ -276,6 +277,14 @@ export function alanCizici(b: AlanCizimBaglami) {
           .filter(([k]) => !a.bagliAlan
                            || a.kodUst?.[k] === undefined
                            || a.kodUst[k] === ustDegeri));
+        // AGAC SECICI (kullanici 02.11.2026: "kategori ağaç şeklinde gelsin"): girintili select
+        //   yerine acilir-kapanir dallar + arama; kutuda secili dugumun YOLU.
+        if (a.agac && !a.kodGrup && !a.bagliAlan)
+          return (
+            <AgacCombo key={a.ad} alanAdi={a.ad} kodlar={suzulmus} kodUst={a.kodUst}
+                       deger={String(deger[a.ad] ?? '')} zorunlu={a.zorunlu}
+                       disabled={salt || !a.yazilabilir} onDegis={k => alanDegistir(a.ad, k)} />
+          );
         // AGAC COMBO (484, kategori): secenekler duz ada gore degil AGAC
         //   SIRASINDA ve girintili dizilir - "Radyoloji" altindaki "Genel" ile
         //   "Laboratuvar" altindaki "Genel" duz listede ayirt edilemiyordu.
@@ -479,17 +488,27 @@ export function alanCizici(b: AlanCizimBaglami) {
           // IKI CHECK yan yana: her kutu KENDI adini tasir. Tek etiket altinda
           //   iki kutu ciziliyordu ve hangisinin hangi ad oldugu belirsizdi
           //   (kullanici: "Paket check te Paket label yok").
-          if (a.tip === 'mantik' && hedef.tip === 'mantik')
+          // ZINCIR (02.11.2026, stok "Satılan · Alınan · İnternet Satış"): hedefin de eslesAlan'i bir check ise
+          //   ucuncusu ayni satira eklenir.
+          if (a.tip === 'mantik' && hedef.tip === 'mantik') {
+            const zincir = [a, hedef];
+            for (let son = hedef; son.eslesAlan; ) {
+              const s2 = alanlar.find(x => x.ad === son.eslesAlan);
+              if (!s2 || s2.tip !== 'mantik' || zincir.includes(s2)) break;
+              zincir.push(s2); son = s2;
+            }
+            // STOK: İnternet Satış yalnız Satılan işaretliyken (satılmayan mal internette satılmaz).
+            const gorunen = zincir.filter(x => !(kaynak === 'stok' && x.ad === 'internetSatis'
+                                                 && Number(deger.satilan ?? 0) !== 1));
             return (
               <div key={a.ad} className={`alan ikili-mantik alan-${a.ad}`}>
-                <label className="alan tip-mantik">
-                  {renderGirdi(a)}<span className="etiket">{c(a.baslik)}</span>
-                </label>
-                <label className="alan tip-mantik">
-                  {renderGirdi(hedef)}<span className="etiket">{c(hedef.baslik)}</span>
-                </label>
+                {gorunen.map(x => (
+                  <label key={x.ad} className="alan tip-mantik">
+                    {renderGirdi(x)}<span className="etiket">{c(x.baslik)}</span>
+                  </label>))}
               </div>
             );
+          }
           return (
             <label key={a.ad} className={`alan tip-${durumRozetiMi(kaynak, a) ? 'kod' : a.tip} alan-${a.ad}`}>
               <span className="etiket">

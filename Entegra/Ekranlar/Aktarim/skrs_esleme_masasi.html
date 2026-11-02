@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKRS Eşleme Masası — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --warn:#b5731a; --err:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1440px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:default}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#58a872,#2e7d46);color:#fff;font-weight:bold}
+  .btn.k{padding:2px 7px;font-size:11px}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;background:#fff;height:24px;padding:0 10px;width:300px;color:var(--muted)}
+  .sekmeler{display:flex;gap:2px;padding:8px 10px 0;border-bottom:1px solid var(--line);background:#f7f9fb}
+  .sek{padding:6px 14px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#eef2f6;font-size:11.5px;color:#46576a;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+  .sek.on{background:#fff;color:var(--navy);font-weight:bold}
+  .sek i{font-style:normal;font-size:10px;background:#dde5ee;border-radius:8px;padding:0 6px;font-weight:normal}
+  .serit{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:7px 10px}
+  .kutu .s{font-size:19px;font-weight:bold;color:var(--navy);line-height:1.1}
+  .kutu .e{font-size:11px;color:var(--muted)}
+  .kutu.ok .s{color:var(--ok)} .kutu.uy .s{color:var(--warn)} .kutu.hata .s{color:var(--err)}
+  .ilerleme{grid-column:1/-1;height:8px;border-radius:4px;background:#e5eaf0;overflow:hidden;display:flex}
+  .ilerleme b{display:block;height:100%}
+  .cips{display:flex;gap:4px;padding:6px 10px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff;white-space:nowrap}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .cip i{font-style:normal;opacity:.75;margin-left:3px}
+  .ayrac{width:1px;height:18px;background:var(--line);margin:0 4px}
+  .govde{display:grid;grid-template-columns:minmax(0,1fr) 400px}
+  table.l{border-collapse:collapse;width:100%;font-size:11.5px}
+  table.l th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;font-size:11px;color:var(--navy);white-space:nowrap}
+  table.l td{border-bottom:1px solid var(--line2);padding:5px 7px;vertical-align:top}
+  table.l tr.sec td{background:var(--sel)}
+  .eski{font-family:Consolas,monospace;font-size:11px;color:#5a6b7d}
+  .yeni{font-family:Consolas,monospace;font-size:11px;font-weight:bold;color:var(--navy)}
+  small{display:block;color:var(--muted);font-size:10.5px}
+  .guven{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;white-space:nowrap}
+  .guven span{display:inline-block;width:46px;height:6px;border-radius:3px;background:#e5eaf0;overflow:hidden}
+  .guven span b{display:block;height:100%}
+  .g-yuk b{background:#2e7d46} .g-orta b{background:#e0a33a} .g-dus b{background:#c0392b}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;white-space:nowrap}
+  .c-ok{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-bek{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-yok{background:#f8e1df;color:#8f3d36;border:1px solid #e4b7b2}
+  .c-ozel{background:#efe6f8;color:#6a3d9a;border:1px solid #d9c6ee}
+  .c-bir{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .dikkat{color:var(--err);font-size:10.5px;font-weight:bold}
+  .mod{display:inline-block;min-width:30px;text-align:center;padding:0 5px;border-radius:3px;font-weight:bold;font-size:10px;color:#fff}
+  .m-rad{background:#6a3d9a} .m-lab{background:#16a085} .m-dig{background:#7f8c8d}
+  .yan{border-left:1px solid var(--line);background:#fbfcfd}
+  .bl{padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .bl h5{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .satir{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+  .satir span{color:var(--muted)}
+  .aday{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid var(--line2);border-radius:4px;margin-bottom:5px;background:#fff}
+  .aday.on{border-color:#2f6db3;background:#f2f7fe}
+  .aday .ic{flex:1}
+  .neden{font-size:10.5px;color:var(--muted)}
+  .alt{display:flex;gap:14px;padding:8px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);align-items:center}
+  .alt b{color:var(--ink)}
+  .onizle{margin:10px 12px;border:1px solid #bfe3cb;background:#f1f9f4;border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.6}
+  .not{max-width:1440px;margin:0 auto;color:#4a5a6b;font-size:11.5px;line-height:1.7;padding:10px 14px;background:#fff;border:1px solid var(--line);border-radius:4px}
+  .not b{color:#1f2d3a}
+  .n{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#e0a33a;color:#fff;font-size:10px;font-weight:bold;align-items:center;justify-content:center;margin-right:3px}
+  .karar{border:2px dashed #e0a33a;border-radius:6px;padding:8px 12px;background:#fffaf0;margin-top:8px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1440px;margin:0 auto 14px}
+  .ikili .win{margin:0}
+  code{background:#eef1f5;border-radius:3px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+
+<!-- ================================================================ EŞLEME MASASI -->
+<div class="win">
+  <div class="title">🧭 Aktarım › SKRS Eşleme Masası <span class="sp">Kaynak: KOŞUYOLU · eski HBYS (GEN3000) · son tarama 01.11.2026 14:20</span></div>
+  <div class="toolbar">
+    <span class="btn ok">✓ Yüksek güvenlileri onayla (40)</span>
+    <span class="btn">✓ Seçilileri onayla</span>
+    <span class="btn">🏷 Seçilileri kuruma özel yap</span>
+    <span class="btn">⇣ Kullanılmayanları pasife al (1291)</span>
+    <span class="btn">↻ Adayları yeniden hesapla</span>
+    <span class="btn">⬇ Excel'e ver</span>
+    <span class="btn">⬆ Excel'den al</span>
+    <span class="sp"></span>
+    <span class="btn primary">▶ Uygula… (önizleme)</span>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on">💉 Hizmetler → SUT <i>291 / 1582</i></div>
+    <div class="sek">🧪 Lab tetkik → LOINC <i>118</i></div>
+    <div class="sek">🏥 Bölüm / poliklinik → SKRS Klinik <i>28</i></div>
+    <div class="sek">🩺 Hekim branşı → SKRS Branş <i>28</i></div>
+    <div class="sek">🏛 Kurum türü / sosyal güvence <i>6</i></div>
+    <div class="sek">⚙ Diğer kod listeleri <i>9</i></div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ok"><div class="s">118</div><div class="e">Onaylı</div></div>
+    <div class="kutu"><div class="s">40</div><div class="e">Yüksek güven · onay bekliyor</div></div>
+    <div class="kutu uy"><div class="s">63</div><div class="e">Düşük güven · bakılmalı</div></div>
+    <div class="kutu hata"><div class="s">58</div><div class="e">Aday yok</div></div>
+    <div class="kutu"><div class="s">12</div><div class="e">Kuruma özel</div></div>
+    <div class="kutu"><div class="s">38</div><div class="e">Birleşen (aynı SUT kodu)</div></div>
+    <div class="ilerleme"><b style="width:44.6%;background:#2e7d46"></b><b style="width:13.7%;background:#9cc9ac"></b><b style="width:21.6%;background:#e0a33a"></b><b style="width:20%;background:#c0392b"></b></div>
+  </div>
+
+  <div class="cips">
+    <span class="ara">🔍 Eski kod, eski ad, SUT kodu, SUT adı…</span>
+    <span class="cip on">Kullanılan (2026) <i>291</i></span>
+    <span class="cip">Tümü <i>1582</i></span>
+    <span class="ayrac"></span>
+    <span class="cip">Onay bekleyen <i>103</i></span>
+    <span class="cip">⚠ Dikkat (terim farkı) <i>9</i></span>
+    <span class="cip">Aday yok <i>58</i></span>
+    <span class="cip">Onaylı <i>118</i></span>
+    <span class="cip">Kuruma özel <i>12</i></span>
+    <span class="ayrac"></span>
+    <span class="cip"><span class="mod m-rad">RAD</span> <i>176</i></span>
+    <span class="cip"><span class="mod m-lab">LAB</span> <i>97</i></span>
+    <span class="cip"><span class="mod m-dig">DİĞER</span> <i>18</i></span>
+  </div>
+
+  <div class="govde">
+    <div>
+      <table class="l">
+        <tr><th>☐</th><th>Tür</th><th>Eski kod / ad</th><th style="text-align:right">2026</th><th>Bakanlık önerisi (SUT)</th><th>Güven</th><th>Durum</th><th></th></tr>
+        <tr class="sec"><td>☑</td><td><span class="mod m-lab">LAB</span></td>
+          <td><span class="eski">L.B.005</span><br>ALBUMİN ( serum )</td><td style="text-align:right">312</td>
+          <td><span class="yeni">L100320</span> ALBÜMİN (SERUM/PLAZMA)<small>LOINC 1751-7 · sadeleştirme: "( serum )" → SERUM/PLAZMA, U → Ü</small></td>
+          <td><span class="guven g-yuk"><span><b style="width:91%"></b></span>%91</span></td>
+          <td><span class="chip c-bek">Onay bekliyor</span></td>
+          <td><span class="btn k">✓</span> <span class="btn k">⇄</span> <span class="btn k">🏷</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-lab">LAB</span></td>
+          <td><span class="eski">L.B.050</span><br>POTASYUM ( serum )</td><td style="text-align:right">298</td>
+          <td><span class="yeni">L106150</span> POTASYUM (SERUM/PLAZMA)<small>LOINC 2823-3</small></td>
+          <td><span class="guven g-yuk"><span><b style="width:96%"></b></span>%96</span></td>
+          <td><span class="chip c-ok">Onaylı</span></td><td><span class="btn k">↶</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-lab">LAB</span></td>
+          <td><span class="eski">L.He.002</span><br>PROTROMBİN ZAMANI</td><td style="text-align:right">141</td>
+          <td><span class="yeni">905440</span> TROMBİN ZAMANI<small class="dikkat">⚠ terim farkı: "PROTROMBİN" ≠ "TROMBİN" - başka tetkik olabilir</small></td>
+          <td><span class="guven g-orta"><span><b style="width:65%"></b></span>%65</span></td>
+          <td><span class="chip c-bek">Bakılmalı</span></td>
+          <td><span class="btn k">✓</span> <span class="btn k">⇄</span> <span class="btn k">🏷</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-rad">MR</span></td>
+          <td><span class="eski">MR.012</span><br>Sakroiliak Eklem MR ( Karşılaştırmalı )</td><td style="text-align:right">88</td>
+          <td><span class="yeni">801893</span> SAKROİLİAK EKLEM MR<small>modalite uyumlu · "Karşılaştırmalı" ek bilgi olarak atıldı</small></td>
+          <td><span class="guven g-yuk"><span><b style="width:84%"></b></span>%84</span></td>
+          <td><span class="chip c-bek">Onay bekliyor</span></td>
+          <td><span class="btn k">✓</span> <span class="btn k">⇄</span> <span class="btn k">🏷</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-rad">MR</span></td>
+          <td><span class="eski">MR.012B</span><br>SAKROİLİAK MR (KONTRASTLI)</td><td style="text-align:right">14</td>
+          <td><span class="yeni">801893</span> SAKROİLİAK EKLEM MR<small>kontrast ayrı SUT kalemi: <span class="yeni">801010</span> MR kontrast</small></td>
+          <td><span class="guven g-yuk"><span><b style="width:80%"></b></span>%80</span></td>
+          <td><span class="chip c-bir">Birleşir → MR.012</span></td>
+          <td><span class="btn k">✓</span> <span class="btn k">⇄</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-rad">BT</span></td>
+          <td><span class="eski">BT.061</span><br>Ayak Bileği BT</td><td style="text-align:right">23</td>
+          <td><span class="yeni">R10xxxx</span> BT, ALT EKSTREMİTE (AYAK BİLEĞİ)<small>önceki ilk aday "BT ARTROGRAFİ" elendi: artrografi terimi eskide yok</small></td>
+          <td><span class="guven g-orta"><span><b style="width:62%"></b></span>%62</span></td>
+          <td><span class="chip c-bek">Bakılmalı</span></td>
+          <td><span class="btn k">✓</span> <span class="btn k">⇄</span> <span class="btn k">🏷</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-dig">DİĞER</span></td>
+          <td><span class="eski">D.019</span><br>CD'YE KAYIT ÜCRETİ</td><td style="text-align:right">410</td>
+          <td><span style="color:var(--muted)">— aday yok —</span></td><td></td>
+          <td><span class="chip c-ozel">Kuruma özel</span></td><td><span class="btn k">↶</span></td></tr>
+        <tr><td>☐</td><td><span class="mod m-rad">USG</span></td>
+          <td><span class="eski">USG.044</span><br>RENKLİ DOPPLER ÜST EKSTREMİTE TEK TARAF</td><td style="text-align:right">31</td>
+          <td><span style="color:var(--muted)">— aday yok —</span><small>"Bakanlıkta ara" ile elle seçin</small></td><td></td>
+          <td><span class="chip c-yok">Aday yok</span></td>
+          <td><span class="btn k">⇄</span> <span class="btn k">🏷</span></td></tr>
+      </table>
+      <div class="alt"><span>Kayıt: 291 · seçili 1</span><span>Kısayol: <b>Enter</b> onayla · <b>↓</b> sonraki · <b>Ö</b> kuruma özel</span><span class="sp">‹ 1 / 15 ›</span></div>
+    </div>
+
+    <!-- SAĞ: seçili satırın adayları -->
+    <div class="yan">
+      <div class="bl"><h5>Eski hizmet</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">ALBUMİN ( serum )</div>
+        <div class="satir"><span>Eski kod</span><span class="eski">L.B.005</span></div>
+        <div class="satir"><span>Tür / bölüm</span>LAB · Biyokimya</div>
+        <div class="satir"><span>2026 kullanım</span>312 satır · 4 fiyat listesinde</div>
+        <div class="satir"><span>HUV kodu</span><span class="eski">—</span></div>
+      </div>
+      <div class="bl"><h5>Bakanlık adayları (SUT)</h5>
+        <div class="aday on"><input type="radio" checked>
+          <div class="ic"><span class="yeni">L100320</span> ALBÜMİN (SERUM/PLAZMA)
+            <div class="neden">ad %91 · tür LAB ✓ · numune "serum" ✓ · LOINC 1751-7</div></div></div>
+        <div class="aday"><input type="radio">
+          <div class="ic"><span class="yeni">L100330</span> ALBÜMİN (İDRAR)
+            <div class="neden">ad %70 · numune farklı (idrar) ✗</div></div></div>
+        <div class="aday"><input type="radio">
+          <div class="ic"><span class="yeni">L100340</span> MİKROALBÜMİN (İDRAR)
+            <div class="neden">ad %52</div></div></div>
+        <div class="ara" style="width:100%;margin-top:6px">🔍 Bakanlıkta ara (SUT kodu / ad)…</div>
+      </div>
+      <div class="bl"><h5>Aynı SUT koduna bağlanan diğer eskiler</h5>
+        <div class="satir"><span class="eski">L.B.005A</span>ALBUMIN (ACİL) · 12 satır</div>
+        <div style="color:var(--muted);font-size:10.5px;margin-top:4px">Onaylanırsa ikisi tek hizmette birleşir; eski kodların ikisi de "Eski kod" listesinde kalır.</div>
+      </div>
+      <div class="bl"><h5>Karar</h5>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="btn ok">✓ Onayla (Enter)</span><span class="btn">🏷 Kuruma özel</span><span class="btn">⇣ Pasife al</span>
+        </div>
+        <div style="margin-top:6px;color:var(--muted);font-size:10.5px">Not: <span style="color:var(--ink)">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="onizle">
+    <b>▶ Uygula önizlemesi:</b> 291 kullanılan hizmet → <b>241 Bakanlık hizmeti</b> (38 eski kod birleşti) + <b>12 kuruma özel</b>;
+    58 aday yok kaldı (uygulanmaz, eski koduyla kalır).
+    <b>6.833 başvuru satırı</b> ve <b>4 fiyat listesi</b> yeni hizmete yönlenir; radyoloji istemleri / raporları hizmet değişikliğinden etkilenmez.
+    Eski kodlar hizmetin <b>"Eski kod"</b> listesine yazılır, aramada bulunur. Geri alma: uygulama öncesi yedek (<code>aktarim_skrs_yedek</code>).
+  </div>
+</div>
+
+<!-- ================================================================ SONUÇ: HİZMET LİSTESİ + KART -->
+<div class="ikili">
+  <div class="win">
+    <div class="title">💉 Hizmet Listesi (uygulama sonrası)</div>
+    <div class="cips"><span class="ara">🔍 Ara: Kod, Ad, <b>Eski kod</b>…  "L.B.005"</span></div>
+    <table class="l">
+      <tr><th>Kod (SUT)</th><th>Hizmet</th><th>Eski kod</th><th>Kaynak</th></tr>
+      <tr class="sec"><td class="yeni">L100320</td><td>ALBÜMİN (SERUM/PLAZMA)<small>LOINC 1751-7</small></td><td><span class="eski">L.B.005 · L.B.005A</span></td><td><span class="chip c-ok">SUT</span></td></tr>
+      <tr><td class="yeni">801893</td><td>SAKROİLİAK EKLEM MR</td><td><span class="eski">MR.012 · MR.012B</span></td><td><span class="chip c-ok">SUT</span></td></tr>
+      <tr><td class="yeni">D.019</td><td>CD'YE KAYIT ÜCRETİ</td><td><span class="eski">D.019</span></td><td><span class="chip c-ozel">Kuruma özel</span></td></tr>
+    </table>
+  </div>
+  <div class="win">
+    <div class="title">💉 Hizmet Kartı › Kimlik</div>
+    <div style="padding:10px 12px;display:grid;grid-template-columns:120px 1fr;gap:6px 10px;align-items:center">
+      <span style="color:var(--muted)">Kod (SUT)</span><span class="yeni">L100320</span>
+      <span style="color:var(--muted)">Ad</span><b>ALBÜMİN (SERUM/PLAZMA)</b>
+      <span style="color:var(--muted)">LOINC</span><span>1751-7 · Albumin [Mass/volume] in Serum or Plasma</span>
+      <span style="color:var(--muted)">Kaynak</span><span><span class="chip c-ok">SUT</span> Bakanlık listesinden · ad / kod Bakanlıkla güncellenir</span>
+      <span style="color:var(--muted)">Eski HBYS</span><span><span class="eski">L.B.005</span> ALBUMİN ( serum ) · <span class="eski">L.B.005A</span> ALBUMIN (ACİL)</span>
+      <span style="color:var(--muted)">Eşleme</span><span>%91 öneri · onaylayan Dr. Radyolog A · 01.11.2026 14:32</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ BÖLÜM SEKMESİ ÖRNEĞİ -->
+<div class="win" style="max-width:1440px">
+  <div class="title">🏥 Eşleme Masası › Bölüm / poliklinik → SKRS Klinik <span class="sp">kısa liste - çoğu otomatik</span></div>
+  <table class="l">
+    <tr><th>Eski poliklinik</th><th style="text-align:right">2026</th><th>SKRS klinik</th><th>Güven</th><th>Durum</th></tr>
+    <tr><td>ORTOPEDİ</td><td style="text-align:right">1.214</td><td><span class="yeni">171</span> Ortopedi ve Travmatoloji</td><td><span class="guven g-yuk"><span><b style="width:100%"></b></span>sözlük</span></td><td><span class="chip c-ok">Onaylı</span></td></tr>
+    <tr><td>FİZİK TEDAVİ</td><td style="text-align:right">612</td><td><span class="yeni">142</span> Fiziksel Tıp ve Rehabilitasyon</td><td><span class="guven g-yuk"><span><b style="width:100%"></b></span>sözlük</span></td><td><span class="chip c-ok">Onaylı</span></td></tr>
+    <tr><td>HEKİM DIŞI</td><td style="text-align:right">88</td><td><span style="color:var(--muted)">— bölüm değil —</span></td><td></td><td><span class="chip c-ozel">Yok sayılır</span></td></tr>
+  </table>
+</div>
+
+<div class="not">
+<b>NOT (mockup, kullanıcı 01.11.2026):</b> "eski müşterilerde gelişigüzel işlem listeleri yapıldı.. yeni programla bakanlığın (SKRS) istediği
+standarda oturtmak istiyorum.. aktarımda bakanlık hizmet listesi, branş/bölüm listesi baz alınsın; önceki kod da gösterilsin".<br>
+<span class="n">1</span><b>Ana katalog Bakanlık:</b> hizmet kodu / adı SUT'tan (<code>skrs_sut</code>), lab tetkikine LOINC (<code>skrs_loinc</code>); bölüm SKRS klinik, branş SKRS branş. Karşılığı olmayan "kuruma özel" (kendi koduyla, işaretli).<br>
+<span class="n">2</span><b>Aday hesabı:</b> ad sadeleştirilir ("( serum )", "karşılaştırmalı", Türkçe harf), tür süzgeci (RAD → radyoloji SUT + aynı modalite, LAB → lab SUT + numune), benzerlik puanı; terim çelişkisi (PROTROMBİN / TROMBİN, ARTROGRAFİ) "⚠ dikkat" ile işaretlenir - <b>otomatik onay yok</b>, yalnız toplu "yüksek güvenlileri onayla".<br>
+<span class="n">3</span><b>Eski kod kaybolmaz:</b> hizmetin "Eski kod" listesi (birden çok eski kod tek SUT'a birleşebilir), aramada bulunur, kartta görünür; aktarım izi <code>eski.esleme</code>.<br>
+<span class="n">4</span><b>Uygula</b> önce önizleme gösterir, yedek alır; başvuru satırları ve fiyat listeleri yeni hizmete yönlenir. Kararlar <b>Excel'e verilip</b> kurumda doldurulup geri alınabilir.<br>
+<span class="n">5</span><b>Tekrar kullanılır:</b> her eski müşteride aynı masa; bir kurumda onaylanan eşleme (eski ad → SUT) sonraki kurumda <b>hazır öneri</b> olur (ortak sözlük).
+<div class="karar"><b>KARAR:</b> (1) ana hizmet kodu SUT · (2) karşılığı olmayan = kuruma özel · (3) kullanılmayan 1291 hizmet: pasif mi, hiç aktarılmasın mı · (4) eşlemeyi kim onaylar (yetki).</div>
+</div>
+</body>
+</html>

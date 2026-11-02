@@ -1,7 +1,7 @@
 import { api } from '../../api/istemci';
 import { mesaj } from '../../bilesenler/mesaj';
 import { cariHareketiDegisti } from '../../bilesenler/sekmeBaglami';
-import { hataAyristir, type BelgeYaniti } from '../../api/sozlesme';
+import { hataAyristir, type AcilanRadyolojiIstemi, type BelgeYaniti } from '../../api/sozlesme';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from '../belgeKaydet';
 import { yanittanSatirlar, type SatirDurumu } from '../belgeSatir';
 
@@ -30,6 +30,13 @@ export interface BelgeKaydetmeBaglami {
   imzayiTemizle(): void;
   onKaydedildi?(): void;
   kapat(zorla?: boolean): void;
+  /**
+   * RADYOLOJİ İSTEMİ (1242): ücret satırından açılan istemler kart ömrü boyunca birikir (tahsilat / ücret
+   * eklemenin OTOMATİK kaydında da açılabilir) ve kullanıcının Kaydet'inde duyurulur.
+   */
+  bekleyenRadyoloji?: { current: { istemler: AcilanRadyolojiIstemi[]; disSevk: boolean } };
+  /** Dış kurum sevkinde açılan istemin kartı (dış accession, doktor notu, istem kâğıdı) açılır. */
+  radyolojiKabulAc?(istemler: AcilanRadyolojiIstemi[]): void;
 }
 
 /**
@@ -109,6 +116,21 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       b.setKalemDegisti(false);
       b.imzayiTemizle();
       b.onKaydedildi?.();
+      // RADYOLOJİ İSTEMİ (1242, kullanıcı 01.11.2026): "önce başvuru aç, ücret satırı ekle, başvuru kaydet.. lab
+      //   veya rad istemi oluşsun"; dış kurumdan gelen hastada "başvuru kaydından sonra rad kabul ekranı açılabilir".
+      const br = b.bekleyenRadyoloji;
+      if (br) {
+        if (yanit.radyolojiIstemleri?.length) {
+          br.current.istemler.push(...yanit.radyolojiIstemleri);
+          br.current.disSevk = br.current.disSevk || !!yanit.disKurumSevki;
+        }
+        if (!otomatik && br.current.istemler.length) {
+          const { istemler, disSevk } = br.current;
+          br.current = { istemler: [], disSevk: false };
+          mesaj(`Radyoloji istemi açıldı: ${istemler.map(x => `${x.tetkik} · ${x.accessionNo || 'accession kabulde'}`).join(', ')}`);
+          if (disSevk) b.radyolojiKabulAc?.(istemler);
+        }
+      }
       // Açık listeler, cari kartı ve ekstre (başka sekmede) bu kaydı hemen görsün.
       cariHareketiDegisti();
 

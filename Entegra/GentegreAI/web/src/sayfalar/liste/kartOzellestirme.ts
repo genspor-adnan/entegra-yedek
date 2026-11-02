@@ -69,7 +69,7 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   'radyoloji-sablon': {
     seritAlanlari: ['kod', 'ad', 'modalite', 'bolge', 'sablonSurum', 'durum'],
     detayGrupta: { hizmetler: { grup: 'Genel' } },
-    sekmeSirasi: ['Genel', 'Bölümler', 'Yapılandırılmış alanlar', 'Makrolar', 'Önizleme', 'Sürümler', 'Kullanım'],
+    sekmeSirasi: ['Genel', 'Şablon Metni', 'Bölümler', 'Yapılandırılmış alanlar', 'Makrolar', 'Önizleme', 'Sürümler', 'Kullanım'],
   },
   // 974 (mockup goz_goruntuleme_karti_v2): görüntü & ölçümler önce, değerlendirme sonda.
   'goz-goruntuleme': {

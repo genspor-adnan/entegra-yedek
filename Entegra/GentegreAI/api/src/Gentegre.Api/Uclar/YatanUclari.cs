@@ -165,7 +165,7 @@ public static partial class YatanUclari
                        --   listesi ona bağlı: uygunluk hastanın cinsiyetiyle
                        --   hesaplanır. Ayrı bir istek, aynı yatışı ikinci kez
                        --   okumak olurdu.
-                       y.hasta_id, y.yatak_id
+                       y.hasta_id, y.yatak_id, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.yatis y
                   join public.taraf t on t.id = y.hasta_id
                   left join public.taraf_hasta th on th.id = y.hasta_id
@@ -182,7 +182,7 @@ public static partial class YatanUclari
                 """, new object?[] { yatisId }, o => new
             {
                 hasta = o.GetString(0),
-                yas = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                yas = o.IsDBNull(1) ? (int?)null : o.GetInt32(1), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")),
                 cinsiyet = (int)o.GetInt16(2),
                 yatak = o.GetString(3),
                 oda = o.GetString(4),

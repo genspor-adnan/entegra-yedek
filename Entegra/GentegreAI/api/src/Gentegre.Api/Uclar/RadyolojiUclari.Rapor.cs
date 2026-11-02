@@ -50,8 +50,35 @@ public static partial class RadyolojiUclari
             return Results.Ok(liste);
         });
 
+        // ------------------------------------------------ rapor listesi ----
+        // RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215, mockup radyoloji_rapor_listesi.html): kutular listenin
+        //   çiplerini açar - sayılar listenin kümesiyle aynı tanım (ana rapor, iptal edilmemiş istem).
+        grup.MapGet("/rapor-ozet", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var ozet = await b.TekAsync("""
+                select count(*) filter (where r.durum = 3 and r.onay_tarihi >= current_date)          as "bugunOnay",
+                       count(*) filter (where r.durum = 2)                                            as "onRapor",
+                       (select count(*) from public.radyoloji_rapor e
+                          join public.radyoloji_istem ei on ei.id = e.istem_id
+                         where e.ust_rapor_id is not null and e.ekleme_tarihi > now() - interval '7 days'
+                           and (@p0::int is null or ei.sube_id = @p0))                                 as "ekRapor",
+                       count(*) filter (where r.durum = 3 and i.durum <> 6)                           as "teslimBekleyen",
+                       count(*) filter (where b.aktarim_kaynak = 2)                                   as "eskiHbys"
+                  from public.radyoloji_rapor r
+                  join public.radyoloji_istem i on i.id = r.istem_id
+                  left join public.belge b on b.id = i.belge_id
+                 where r.ust_rapor_id is null and i.durum <> 0
+                   and (@p0::int is null or i.sube_id = @p0)
+                """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(ozet);
+        });
+
         grup.MapGet("/istem/{id:int}/rapor", async (
-            int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+            // sablon: ekranda yeni seçilen şablon (1217) - makro ve yapılandırılmış alanlar onunkiler gelir.
+            int id, int? sablon, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Gor);
@@ -63,13 +90,15 @@ public static partial class RadyolojiUclari
                        i.hasta_id as "hastaId", coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi",
                        coalesce(hs.cinsiyet, 0) as cinsiyet, hs.dogum_tarihi as "dogumTarihi",
                        i.hizmet_id as "hizmetId",
-                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') as "tetkikAdi",
+                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
                        i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
                        coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
                        i.cekim_tarihi as "cekimTarihi", i.kritik,
                        coalesce(cz.ad, '') as "cihazAdi",
                        i.seri_sayisi as "seriSayisi", i.goruntu_sayisi as "goruntuSayisi",
                        i.study_uid as "studyUid",
+                       -- ÇEKİMSİZ RAPOR YOK (kullanıcı 01.11.2026): ekran uyarı bandı ve düğme kilidi bu bayraktan.
+                       (i.durum >= 2 or coalesce(i.study_uid, '') <> '' or i.kaynak = 2)::int as cekildi,
                        i.belge_id as "belgeId", coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum",
                        -- BANT "İSTEYEN" BLOĞU (kullanıcı 27.10.2026): adın altında bölüm. Sıra (28.10.2026: "isteyen
                        --   dr'un bölümü varsa ismi altına gelmeli"): HEKİMİN bölümü (taraf.departman), yoksa başvurunun
@@ -142,20 +171,27 @@ public static partial class RadyolojiUclari
 
             // Şablonlar: önce tetkike bağlı olanlar, sonra aynı modalitenin
             //   genel şablonları (tetkike özel yoksa hekim yine bir şey bulsun).
+            // KAPSAM (1216, kullanıcı 01.11.2026: "bir doktora özel şablon diğer doktorlar tarafından görünmesin.. rapor
+            //   ekranında"): başka radyoloğun kişisel şablonu rapor ekranına HİÇ gelmez (liste / kart yönetim için hepsini
+            //   gösterir). kapsam 1 = benim kişisel, 2 = genel. Bölüm sayısı biçim rozeti (Tek / Parçalı) için.
             var sablonlar = await baglanti.ListeAsync("""
                 select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur",
                        case when s.hizmet_id = @p0
                                  or exists (select 1 from public.radyoloji_sablon_hizmet x
-                                             where x.sablon_id = s.id and x.hizmet_id = @p0) then 1 else 0 end as "tetkigeOzel"
+                                             where x.sablon_id = s.id and x.hizmet_id = @p0) then 1 else 0 end as "tetkigeOzel",
+                       case when s.sahip_id is null then 2 else 1 end as kapsam,
+                       coalesce(public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120), '') as sahip,
+                       (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)::int as "bolumSayisi"
                   from public.radyoloji_sablon s
-                 where s.durum = 1
+                  left join public.taraf sh on sh.id = s.sahip_id
+                 where s.durum = 1 and (s.sahip_id is null or s.sahip_id = @p2)
                    -- EK BAĞLI HİZMETLER (965): şablon birden çok tetkike bağlanabilir.
                    and (s.hizmet_id = @p0
                         or exists (select 1 from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id and x.hizmet_id = @p0)
                         or (s.hizmet_id is null and s.modalite = @p1
                             and not exists (select 1 from public.radyoloji_sablon_hizmet x where x.sablon_id = s.id)))
-                 order by "tetkigeOzel" desc, s.varsayilan desc, s.ad
-                """, null, [hizmetId, Convert.ToInt32(istem["modalite"] ?? 0)], OkuyucuGenisletmeleri.Sozluk, iptal);
+                 order by "tetkigeOzel" desc, kapsam, s.varsayilan desc, s.ad
+                """, null, [hizmetId, Convert.ToInt32(istem["modalite"] ?? 0), baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // YEDEK (kullanıcı 27.10.2026: "rapor yazacağım ama şablon yok diyor"): tetkike bağlı da genel de şablon
             //   yoksa (modalitenin bütün şablonları başka tetkiklere bağlı) liste boş kalıp hekim rapora hiç
@@ -163,13 +199,17 @@ public static partial class RadyolojiUclari
             //   hekim en yakınını seçer (tetkigeOzel 0, ★ yok).
             if (sablonlar.Count == 0)
                 sablonlar = await baglanti.ListeAsync("""
-                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", 0 as "tetkigeOzel"
+                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", 0 as "tetkigeOzel",
+                           case when s.sahip_id is null then 2 else 1 end as kapsam,
+                           coalesce(public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120), '') as sahip,
+                           (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)::int as "bolumSayisi"
                       from public.radyoloji_sablon s
-                     where s.durum = 1
-                     order by (s.modalite = @p0) desc, s.varsayilan desc, s.ad
-                    """, null, [Convert.ToInt32(istem["modalite"] ?? 0)], OkuyucuGenisletmeleri.Sozluk, iptal);
+                      left join public.taraf sh on sh.id = s.sahip_id
+                     where s.durum = 1 and (s.sahip_id is null or s.sahip_id = @p1)
+                     order by (s.modalite = @p0) desc, kapsam, s.varsayilan desc, s.ad
+                    """, null, [Convert.ToInt32(istem["modalite"] ?? 0), baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            var sablonId = rapor?["sablonId"] as int?
+            var sablonId = sablon ?? rapor?["sablonId"] as int?
                         ?? (sablonlar.Count > 0 ? Convert.ToInt32(sablonlar[0]["id"]) : (int?)null);
 
             var makrolar = sablonId is null
@@ -183,13 +223,15 @@ public static partial class RadyolojiUclari
                 ? new List<IDictionary<string, object?>>()
                 : await baglanti.ListeAsync("""
                     select alan_kod as "alanKod", alan_ad as "alanAd", tip, secenekler,
-                           zorunlu, rapora_bas as "raporaBas"
-                      from public.radyoloji_sablon_alan where sablon_id = @p0 order by sira
+                           zorunlu, rapora_bas as "raporaBas",
+                           -- METNE YAZILIŞ (1217): grup başlığı, kalıp ({değer}), normal kalıbı, birim, hedef bölüm.
+                           grup, birim, kalip, sifir_kalip as "sifirKalip", hedef_bolum as "hedefBolum"
+                      from public.radyoloji_sablon_alan where sablon_id = @p0 order by sira, id
                     """, null, [sablonId.Value], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Önceki tetkikler: karşılaştırma bölümü bunlardan yazılır.
             var gecmis = await baglanti.ListeAsync("""
-                select i.id, i.accession_no as "accessionNo", coalesce(hz.ad, '') as "tetkikAdi",
+                select i.id, i.accession_no as "accessionNo", coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
                        coalesce(i.cekim_tarihi, i.ekleme_tarihi) as tarih,
                        coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "raporlayan",
                        -- KRONOLOJİK GÖRÜNÜM (kullanıcı 27.10.2026): modalite adı, rapor durumu, BI-RADS.
@@ -263,7 +305,7 @@ public static partial class RadyolojiUclari
                        i.modalite, i.cekim_tarihi as "cekimTarihi",
                        i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
                        i.kontrast, coalesce(cz.ad, '') as "cihazAdi",
-                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') as "tetkikAdi",
+                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
                        coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
                        coalesce(h.vkno, '') as "hastaTc",
                        hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
@@ -359,6 +401,16 @@ public static partial class RadyolojiUclari
             //   Kilit / sürüm aynı kilidin altında okunur; arada onaylanan ya da kaydedilen rapor ezilmez.
             await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update",
                 islem, [id], iptal);
+            // ÇEKİM BİLGİSİ GİRİLMEDEN RAPOR YAZILAMAZ (kullanıcı 01.11.2026: "çekim bilgisi girilmeden rapor
+            //   yazılamasın.. uyarı ver"): istem Çekildi (durum >= 2) ya da görüntüsü (Study UID) gelmiş olmalı.
+            //   Teleradyolojiden gelen istem (kaynak 2) muaf - çekim gönderen kurumda yapıldı.
+            var cekildi = await baglanti.TekDegerAsync<int?>("""
+                select 1 from public.radyoloji_istem
+                 where id = @p0 and (durum >= 2 or coalesce(study_uid, '') <> '' or kaynak = 2)
+                """, islem, [id], iptal);
+            if (cekildi is null)
+                throw GentegreHatasi.IsKurali(
+                    "Çekim bilgisi girilmeden rapor yazılamaz. İstem kartında \"Çekim bilgisi gir\" ile çekimi kaydedin.");
             var mevcutSatir = await baglanti.TekAsync("""
                 select id, coalesce(kilit, 0)::int, xmin::text from public.radyoloji_rapor
                  where istem_id = @p0 and ust_rapor_id is null

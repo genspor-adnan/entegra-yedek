@@ -80,7 +80,7 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
             {c.ikon} {c.harf}
           </span>
           <b className="isk-ad">{talep.hasta || talep.belgeNo}</b>
-          {talep.yas > 0 && <span className="isk-yas">{talep.yas}</span>}
+          {(talep.yasKisa || talep.yas > 0) && <span className="isk-yas">{talep.yasKisa || talep.yas}</span>}
           <span className="sp" />
           <span className="sonuk">{talep.belgeNo}</span>
         </div>

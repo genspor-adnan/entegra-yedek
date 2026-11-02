@@ -54,7 +54,7 @@ function pencereBul(govde: HTMLElement | null): HTMLElement | null {
 }
 
 export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, yanPanelYatay, altSerit, alt, dar, ekSinif, enUst,
-                       buyutmeYok, olcumYok, onKapat, sayfa, baslikYok, children }: {
+                       olcumYok, onKapat, sayfa, baslikYok, children }: {
   baslik: string;
   /** Sayfa kipinde başlık satırı çizilmez (sekme başlığı zaten aynısını söylüyor). */
   baslikYok?: boolean;
@@ -92,6 +92,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, yanPanel
    * buyutulunce iki cumlelik onay penceresi de ekrani kapliyordu. Tek soruluk
    * pencerede buyutmenin bir karsiligi da yok: icerik zaten iki satir.
    */
+  /** Eskiden tam ekran düğmesini gizlerdi - düğme artık hiç yok (01.11.2026); çağıranlar için duruyor. */
   buyutmeYok?: boolean;
   /**
    * YUKSEKLIK OLCUMU YOK (kullanici: "her harf girildikçe ekran beyaz olup
@@ -283,23 +284,9 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, yanPanel
    * Tasima kaydirmasi tam ekranda SIFIRLANIR - ekrana oturmus bir pencerenin
    * kaydirilmis olmasi anlamsiz.
    */
-  const [tamEkranSecimi, setTamEkran] = useState(() => {
-    try { return localStorage.getItem('gentegre.kart.tamekran') === '1' }
-    catch { return false }
-  });
-  // Kayitli tercih tek soruluk pencereye UYGULANMAZ (543).
-  const tamEkran = tamEkranSecimi && !buyutmeYok;
-  const tamEkranDegis = () => setTamEkran(a => {
-    const yeni = !a;
-    try { localStorage.setItem('gentegre.kart.tamekran', yeni ? '1' : '0') } catch { /* yok say */ }
-    if (yeni) setKaydirma({ x: 0, y: 0 });
-    // YUKSEKLIK KILIDI SIFIRLANIR: tam ekranda buyuyen govde, pencereye
-    //   donunce de o yuksekligi koruyup ekranin yarisini kaplamis bir kart
-    //   birakiyordu. Kilit "sekme degisince alcalmasin" icin var, kip
-    //   degisiminde degil.
-    enYuksek.current = 0;
-    return yeni;
-  });
+  // MAX DÜĞMESİ KALDIRILDI (kullanıcı 01.11.2026: "tüm formlardaki max butonu kaldır"): pencere tam ekran
+  //   olmaz; daha önce kaydedilmiş "tam ekran" tercihi de uygulanmaz (düğmesiz kalırsa geri dönülemezdi).
+  const tamEkran = false;
 
   const pencere = (
     <div className={`kaperde${enUst ? ' enust' : ''}${sayfa ? ' sayfa' : ''}`} hidden={!sayfa && !sekmeGorunur}
@@ -326,13 +313,6 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, yanPanel, yanPanel
           <span>{baslik}</span>
           {ustBilgi}
           <span className="kapt">Esc ile kapanır</span>
-          {/* Baslik cubugundaki dugme SURUKLEMEYI baslatmasin. */}
-          {!buyutmeYok && (
-          <button type="button" className="kabas-dugme"
-                  title={tamEkran ? 'Pencereye döndür' : 'Tam ekran'}
-                  onMouseDown={e => e.stopPropagation()}
-                  onClick={tamEkranDegis}>{tamEkran ? '🗗' : '🗖'}</button>
-          )}
         </div>}
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>

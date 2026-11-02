@@ -167,6 +167,8 @@ public static partial class EkranKodlari
         ["radyoloji.kritik"] = "radyoloji",
         ["radyoloji.konsultasyon"] = "radyoloji",
         ["radyoloji.teslim"] = "radyoloji",
+        // RAPOR LİSTESİ (göç 1215): rapor arşivi - rapor ekranı / çıktı `radyoloji` ister, yalnız Gör.
+        ["radyoloji.rapor.liste"] = "radyoloji",
         ["servis.is_emri"] = "servis",
         // ORTAK KODLU LİSTELER (göç 1131, grup 2): kodun bütün liste ekranları; "(kart)" ekranı kartta.
         ["ftr.program.liste"] = "ftr.program",
@@ -454,6 +456,7 @@ public static partial class EkranKodlari
         //   Gör'de açar - YalnizGorListe.
         "hasta.liste", "basvuru.liste", "muayene.liste", "ftr.seans.liste", "medula.fatura.liste",
         "radyoloji.kritik", "radyoloji.konsultasyon", "radyoloji.teslim", "servis.is_emri",   // 1132
+        "radyoloji.rapor.liste",   // 1215
         "hesap.tanim.banka_tanim",   // banka kaynağı + kartı
         "hesap.tanim.ekstre",        // hesap-ekstre kaynağı
         "kasa.finans.vade",          // plan-vade kaynağı

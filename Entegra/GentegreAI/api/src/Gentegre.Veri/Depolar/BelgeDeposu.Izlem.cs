@@ -394,6 +394,44 @@ public sealed partial class BelgeDeposu
         return secim;
     }
 
+    /// <summary>
+    /// KULLANICININ SEÇTİĞİ LOTLAR (dönüşüm, 02.11.2026): toplam satır miktarına eşit olmalı; her lot bu stoğa ait ve
+    /// çıkış deposunda yeterli kalanı olmalı - yoksa depoda olmayan lottan mal çıkmış görünür.
+    /// </summary>
+    private static async Task<List<object>> SecilenLotlariDogrulaAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int stokId, int? depoId, decimal miktar,
+        IReadOnlyList<(int SeriLotId, decimal Miktar)> lotlar, int sira, CancellationToken iptal)
+    {
+        if (depoId is not { } depo || depo <= 0)
+            throw GentegreHatasi.IsKurali(
+                $"{sira}. satırdaki stok lot/seri izlemli - dönüşüm için çıkış deposu belirtilmeli.");
+        var toplam = lotlar.Sum(l => l.Miktar);
+        if (lotlar.Any(l => l.Miktar <= 0) || Math.Abs(toplam - miktar) > 0.0001m)
+            throw GentegreHatasi.IsKurali(
+                $"{sira}. satırda seçilen lot miktarı ({toplam:0.####}) satır miktarına ({miktar:0.####}) eşit olmalı.");
+
+        var secim = new List<object>();
+        foreach (var (lotId, m) in lotlar.GroupBy(l => l.SeriLotId).Select(g => (g.Key, g.Sum(x => x.Miktar))))
+        {
+            await using var komut = baglanti.Komut("""
+                select coalesce(d.kalan, 0), coalesce(nullif(sl.lot_no, ''), nullif(sl.seri_no, ''), '#' || sl.id)
+                  from public.stok_seri_lot sl
+                  left join public.stok_lot_durum d on d.seri_lot_id = sl.id and d.depo_id = @p2 and d.stok_id = @p0
+                 where sl.id = @p1 and sl.stok_id = @p0
+                """, islem, stokId, lotId, depo);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal))
+                throw GentegreHatasi.IsKurali($"{sira}. satırda seçilen lot bu stoğa ait değil.");
+            var kalan = o.GetDecimal(0);
+            var ad = o.GetString(1);
+            if (kalan + 0.0001m < m)
+                throw GentegreHatasi.IsKurali(
+                    $"{sira}. satırda {ad} lotunun depodaki kalanı ({kalan:0.####}) yetersiz: {m:0.####} istendi.");
+            secim.Add(new { seriLotId = lotId, miktar = m });
+        }
+        return secim;
+    }
+
     private static async Task<int> StokIzlemeTuruAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, int stokId, CancellationToken iptal)
     {

@@ -40,7 +40,7 @@ public static partial class DisUclari
                        (select string_agg(coalesce(nullif(x.etken, ''), x.etken_madde), ', ') from public.hasta_alerji x where x.hasta_id = s.hasta_id and x.aktif = 1) as alerji,
                        (select to_char(o.baslangic, 'DD.MM.YYYY') || ': ' || nullif(o.uygulama_notu, '') from public.dis_seans o
                          where o.hasta_id = s.hasta_id and o.id <> s.id and o.durum = 2 order by o.baslangic desc limit 1) as onceki_not,
-                       (select count(*) from public.dis_seans o where o.hasta_id = s.hasta_id and o.id < s.id)::int as onceki_seans
+                       (select count(*) from public.dis_seans o where o.hasta_id = s.hasta_id and o.id < s.id)::int as onceki_seans, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.dis_seans s
                   join public.taraf t on t.id = s.hasta_id
                   left join public.taraf_hasta th on th.id = s.hasta_id
@@ -52,7 +52,7 @@ public static partial class DisUclari
                  where s.id = @p0
                 """, null, [id], o => new
             {
-                id = o.GetInt32(0), hastaId = o.GetInt32(1), hasta = o.GetString(2), yas = o.IsDBNull(3) ? (int?)null : o.GetInt32(3),
+                id = o.GetInt32(0), hastaId = o.GetInt32(1), hasta = o.GetString(2), yas = o.IsDBNull(3) ? (int?)null : o.GetInt32(3), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")),
                 hekimId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), hekim = o.GetString(5),
                 asistanId = o.IsDBNull(6) ? (int?)null : o.GetInt32(6), asistan = o.GetString(7),
                 unitId = o.IsDBNull(8) ? (int?)null : o.GetInt32(8), unit = o.GetString(9),

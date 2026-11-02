@@ -116,18 +116,37 @@ public static partial class RadyolojiUclari
                        case when th.dogum_tarihi is null then null
                             else extract(year from age(th.dogum_tarihi))::int end as yas,
                        coalesce(h.telefon,'') as telefon,
-                       coalesce(hz.kod,'') as "tetkikKodu", coalesce(hz.ad,'') as "tetkikAdi",
+                       coalesce(hz.kod,'') as "tetkikKodu", coalesce(hz.ad,'') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
+                       i.yon, coalesce(hz.yon_zorunlu, 0) as "yonZorunlu", i.accession_dis as "accessionDis",
+                       i.accession_bekliyor as "accessionBekliyor", i.kabul_tarihi as "kabulTarihi", i.kaynak,
+                       coalesce((select x.ad from public.icd x where x.kod = i.on_tani limit 1), '') as "onTaniAdi",
+                       public.fn_hizmet_yonleri(i.hizmet_id) as yonlar,
                        coalesce(nullif(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120),''), nullif(i.dis_hekim_ad,''), '') as "isteyenHekim",
                        coalesce(public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120),'') as "isteyenKurum",
+                       i.istek_hekim_id as "istekHekimId", i.istek_kurum_id as "istekKurumId",
+                       coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120),'') as "istekHekimAd",
+                       coalesce(i.dis_hekim_ad, '') as "disHekimAd",
+                       -- İSTEYEN BRANŞI (kullanıcı 01.11.2026: "isteyen sağında branş da olsun"): dış hekim listesiyle
+                       --   aynı kaynak - görev ağacı, yoksa SKRS branş kodu (taraf_personel.brans).
+                       coalesce((select g.ad from public.personel_gorev g where g.id = ih.gorev_id),
+                                (select kd.ad from public.taraf_personel po
+                                   join public.kod_liste kl on kl.kod = 'hekim.brans'
+                                   join public.kod_deger kd on kd.liste_id = kl.id and kd.deger::text = nullif(po.brans, '')
+                                  where po.id = ih.id limit 1), '') as "isteyenBrans",
+                       -- İSTEYEN BÖLÜMÜ (hasta bandı, kullanıcı 01.11.2026: "izinler yerine isteyen adı ve bölüm"):
+                       --   hekim kaydındaki bölüm (dış hekimde SKRS eşleme masasının yazdığı).
+                       coalesce((select d.ad from public.departman d where d.id = ih.departman), '') as "isteyenBolum",
                        i.belge_id as "belgeId", coalesce(b.belge_no,'') as protokol, b.belge_tarihi as "protokolTarihi",
                        coalesce(i.on_tani,'') as "onTani", coalesce(i.klinik_bilgi,'') as "klinikBilgi",
                        coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120),'') as "odeyenKurum",
                        coalesce(cz.ad,'') as cihaz, coalesce(cz.kod,'') as "cihazKodu",
                        coalesce(public.fn_taraf_ad(tk.unvan, tk.ad, tk.soyad)::varchar(120),'') as tekniker,
+                       -- Elle çekim girişi (kart, 01.11.2026): düzeltmede seçili gelsin.
+                       i.cihaz_id as "cihazId", i.tekniker_id as "teknikerId",
                        i.cekim_tarihi as "cekimTarihi",
                        i.kontrast, coalesce(i.kontrast_ml,0) as "kontrastMl",
                        coalesce(i.seri_sayisi,0) as "seriSayisi", coalesce(i.goruntu_sayisi,0) as "goruntuSayisi",
-                       i.dlp, i.ctdi, coalesce(i.study_uid,'') as "studyUid"
+                       i.dlp, i.ctdi, coalesce(i.study_uid,'') as "studyUid", public.fn_yas_kisa(th.dogum_tarihi) as "yasKisa"
                   from public.radyoloji_istem i
                   left join public.taraf h on h.id = i.hasta_id
                   left join public.taraf_hasta th on th.id = i.hasta_id
@@ -159,18 +178,67 @@ public static partial class RadyolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Degistir);
             await using var baglanti = await veri.AcAsync(iptal);
+            if (istek.Yon is short y && (y < 0 || y > 3))
+                throw GentegreHatasi.Dogrulama("Geçersiz yön.", new AlanHatasi("yon", "Sağ / Sol / Bilateral."));
+            if (istek.Yon is short y2 && y2 > 0)
+            {
+                var hid = await baglanti.TekDegerAsync<int?>("select hizmet_id from public.radyoloji_istem where id = @p0", null, [id], iptal)
+                          ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+                await RadyolojiUclari.YonAilesiDenetleAsync(baglanti, null, hid, y2, iptal);
+            }
+            // ACCESSION DEĞİŞİMİ (1229): dışarıdan gelen hastanın numarası sonradan da girilebilir - ama yalnız
+            //   çekim yapılmadan (görüntü bu numarayla eşleşir; çekimden sonra değişirse PACS'teki görüntü yetim kalır).
+            var acc = istek.AccessionNo?.Trim();
+            if (!string.IsNullOrEmpty(acc))
+            {
+                var mevcut = await baglanti.TekAsync("""
+                    select accession_no as acc, durum, coalesce(study_uid, '') as study from public.radyoloji_istem where id = @p0
+                    """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+                if ((string?)mevcut["acc"] != acc)
+                {
+                    if (Convert.ToInt32(mevcut["durum"]) > 1 || (string?)mevcut["study"] != "")
+                        throw GentegreHatasi.Dogrulama("Çekim yapılmış istemin accession numarası değiştirilemez.",
+                            new AlanHatasi("accessionNo", "Çekimden sonra değişmez."));
+                    await RadyolojiUclari.AccessionDenetleAsync(baglanti, null, acc, id, iptal);
+                }
+                else acc = null;
+            }
             var n = await baglanti.CalistirAsync("""
                 update public.radyoloji_istem
                    set klinik_bilgi = @p1, on_tani = @p2, oncelik = @p3,
                        kontrast = @p4, kontrast_ml = @p5,
-                       seri_sayisi = @p6, goruntu_sayisi = @p7,
-                       degistiren = @p8, degistirme_tarihi = now()::timestamp
+                       -- Boş gelen sayı mevcut değeri korur (kolonlar boş geçilemez; kart boş kutuyu null yollar).
+                       seri_sayisi = coalesce(@p6::int, seri_sayisi), goruntu_sayisi = coalesce(@p7::int, goruntu_sayisi),
+                       degistiren = @p8, degistirme_tarihi = now()::timestamp,
+                       -- 1244: kart kaydı istemi KABUL EDİLMİŞ yapar (ilk kayıt zamanı kalır).
+                       kabul_tarihi = coalesce(kabul_tarihi, now()),
+                       yon = coalesce(@p9::smallint, yon),
+                       -- 1243: sevkli hastanın bekleyen accession'ı - dış numara girilmediyse kabul kaydında kurum numarası.
+                       accession_no = coalesce(nullif(@p10::varchar, ''),
+                                               case when accession_no = '' then coalesce(
+                                                   nullif(public.fn_radyoloji_accession_ver(sube_id, current_date), ''),
+                                                   public.fn_radyoloji_accession(current_date)) else accession_no end),
+                       accession_dis = case when coalesce(@p10::varchar, '') <> '' then 1 else accession_dis end
                  where id = @p0
                 """, null,
                 [id, istek.KlinikBilgi ?? "", istek.OnTani ?? "", (short)(istek.Oncelik ?? 1),
                  (short)(istek.Kontrast ?? 0), istek.KontrastMl,
-                 istek.SeriSayisi, istek.GoruntuSayisi, baglam.KullaniciId], iptal);
+                 istek.SeriSayisi, istek.GoruntuSayisi, baglam.KullaniciId, istek.Yon, acc], iptal);
             if (n == 0) throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+            // İSTEYEN HEKİM / KURUM: kayıtlı hekim seçildiyse kayıtsız ad boşalır (ikisi birlikte tutulmaz).
+            if (istek.IsteyenGuncelle == true)
+            {
+                var disAd = istek.IstekHekimId is > 0 ? "" : (istek.DisHekimAd ?? "").Trim();
+                if (disAd.Length > 120) throw GentegreHatasi.Dogrulama("Hekim adı en çok 120 karakter.", new AlanHatasi("disHekimAd", "Çok uzun."));
+                await baglanti.CalistirAsync("""
+                    update public.radyoloji_istem
+                       set istek_hekim_id = @p1, dis_hekim_ad = @p2, istek_kurum_id = @p3,
+                           degistiren = @p4, degistirme_tarihi = now()::timestamp
+                     where id = @p0
+                    """, null, [id, istek.IstekHekimId is > 0 ? istek.IstekHekimId : null, disAd,
+                                istek.IstekKurumId is > 0 ? istek.IstekKurumId : null, baglam.KullaniciId], iptal);
+            }
             return Results.Ok(new { id, mesaj = "İstem güncellendi.", izlemeNo = baglam.IzlemeNo });
         });
 

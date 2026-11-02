@@ -83,6 +83,9 @@ interface Props {
   tarihCombo?: boolean;
   /** Combo kipinin acilis secimi ('' = tum tarihler). */
   tarihComboVarsayilan?: TarihOnAyar | '';
+  /** Combo'nun yanında BAŞLANGIÇ - BİTİŞ kutuları da (satış siparişi listesi, kullanıcı 02.11.2026): combo seçimi
+      kutuları doldurur, kutu elle değişince combo "Özel aralık" (boş seçim) olur. */
+  tarihComboAralik?: boolean;
   /** Tarih araligi degisince haber verir: serit suzgecleri (hakedis satirlari
       Prim Rolu / Kisi) seceneklerini ARALIGA gore yeniler. */
   onTarihAraligi?: (bas: string, bit: string) => void;
@@ -274,7 +277,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           aksiyonEkrani, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi, altSecenekler,
-                          tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan,
+                          tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan, tarihComboAralik,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte, aracCubuguAltSatir,
@@ -901,25 +904,25 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           const a = v === '' ? { bas: '', bit: '' } : tarihAraligi(v);
                           setTarihBas(a.bas); setTarihBit(a.bit); setSayfa(1);
                         }}>
-                  <option value="">{cev('Tüm tarihler')}</option>
+                  <option value="">{tarihComboAralik && (tarihBas || tarihBit) ? cev('Özel aralık') : cev('Tüm tarihler')}</option>
                   {TARIH_ON_AYARLAR.map(t => (
                     <option key={t.deger} value={t.deger}>{t.ad}</option>
                   ))}
                 </select>
               </>
             )}
-            {tarihAlani && !tarihCombo && (
+            {tarihAlani && (!tarihCombo || tarihComboAralik) && (
               <>
-                <span className="durumseg-ayrac" />
+                {!tarihCombo && <span className="durumseg-ayrac" />}
                 <span className="tarih-araligi">
                   <input type="date" value={tarihBas} title={cev('Başlama tarihi')}
-                         onChange={e => { setTarihBas(e.target.value); setSayfa(1) }} />
+                         onChange={e => { setTarihBas(e.target.value); if (tarihCombo) setTarihOn(''); setSayfa(1) }} />
                   <span className="ayrac-metin">–</span>
                   <input type="date" value={tarihBit} title={cev('Bitiş tarihi')}
-                         onChange={e => { setTarihBit(e.target.value); setSayfa(1) }} />
+                         onChange={e => { setTarihBit(e.target.value); if (tarihCombo) setTarihOn(''); setSayfa(1) }} />
                   {(tarihBas || tarihBit) && (
                     <button type="button" className="kapat" title={cev('Tarih filtresini kaldır')}
-                            onClick={() => { setTarihBas(''); setTarihBit(''); setSayfa(1) }}>×</button>
+                            onClick={() => { setTarihBas(''); setTarihBit(''); if (tarihCombo) setTarihOn(''); setSayfa(1) }}>×</button>
                   )}
                 </span>
               </>

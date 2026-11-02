@@ -163,7 +163,7 @@ export function DisSeansKarti() {
 
   return (
     <Perde baslik={<>
-      <span>🪑 Seans Kaydı — {s.hasta}{s.yas != null ? ` · ${s.yas}` : ''} · {kart.islemler.length} işlem</span>
+      <span>🪑 Seans Kaydı — {s.hasta}{(s.yasKisa || s.yas != null) ? ` · ${s.yasKisa || s.yas}` : ''} · {kart.islemler.length} işlem</span>
       <span className="ds-kabas-yol">{s.unit || 'ünit —'} · {s.hekim || 'hekim —'} · {tarihSaat(s.baslangic)} · seans {s.id}{s.planNo ? ` · plan ${s.planNo}` : ''}{s.belgeNo ? ` · başvuru ${s.belgeNo}` : ''}</span>
       <span className={`rozet ${acik ? 'mavi' : s.durum === 2 ? 'ok' : 'gri'}`}>{acik ? 'Açık' : s.durum === 2 ? 'Bitti' : 'İptal'}</span>
     </>}>

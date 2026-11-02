@@ -41,7 +41,7 @@ public static partial class GozUclari
             var hasta = await b.TekAsync("""
                 select public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(t.kod, '') as "hastaNo",
                        case when th.dogum_tarihi is null then null::int else extract(year from age(th.dogum_tarihi))::int end as yas,
-                       coalesce(th.cinsiyet, 0) as cinsiyet
+                       coalesce(th.cinsiyet, 0) as cinsiyet, public.fn_yas_kisa(th.dogum_tarihi) as "yasKisa"
                   from public.taraf t left join public.taraf_hasta th on th.id = t.id where t.id = @p0
                 """, null, [hid], OkuyucuGenisletmeleri.Sozluk, iptal);
             var muayene = muayeneId is int mid ? await b.TekAsync("""

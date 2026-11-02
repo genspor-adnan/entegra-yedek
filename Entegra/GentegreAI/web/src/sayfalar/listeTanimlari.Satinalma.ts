@@ -70,8 +70,10 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
   },
   {
     kaynak: 'satinalmaSiparis', rota: 'satinalma-siparis',
-    baslik: 'Sipariş Takibi',
-    yol: 'Satınalma › Sipariş Listesi',
+    // "Sipariş Takibi / Sipariş Listesi" -> "Alış Siparişi Listesi" (kullanıcı 02.11.2026, tüm menü ve başlıklarda;
+    //   rehber ekran kataloğu 1247).
+    baslik: 'Alış Siparişi Listesi',
+    yol: 'Satınalma › Alış Siparişi Listesi',
     aksiyonEkrani: 'satinalma-siparis-liste',
     // KART YOK, BELGE MODALI VAR: sipariş `belge` tür 9'dur ve satır kimliği
     //   belge id'sidir - çift tık Liste.tsx'te belge kartını modal açar.
@@ -85,7 +87,7 @@ export const SATINALMA_LISTELERI: ListeGirdisi[] = [
       { ad: 'Cezası işlenmedi', filtre: { alan: 'cezaIslendi', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Satınalma', menuAd: 'Sipariş Listesi', ic: '📦',
+    menuGrup: 'Satınalma', menuAd: 'Alış Siparişi Listesi', ic: '📦',
     yetkiKodu: 'satinalma.siparis', menuSira: 30,
   },
   {

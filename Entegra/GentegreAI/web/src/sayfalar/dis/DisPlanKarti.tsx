@@ -245,7 +245,7 @@ export function DisPlanKarti() {
 
   return (
     <Perde baslik={<>
-      <span>📋 Tedavi Planı — {p.planNo} · {p.hasta}{p.yas != null ? ` · ${p.yas} ${cins}` : ''}</span>
+      <span>📋 Tedavi Planı — {p.planNo} · {p.hasta}{(p.yasKisa || p.yas != null) ? ` · ${p.yasKisa || p.yas} ${cins}` : ''}</span>
       <span className="ds-kabas-yol">varyant {p.varyant}{p.anaPlanNo ? ` (ana ${p.anaPlanNo})` : ''} · {oz.yapilanSayisi}/{oz.satirSayisi} işlem · {p.hekim || 'hekim —'} · Diş › Tedavi Planları</span>
       <span className={`rozet ${durumRozet[1]}`}>{durumRozet[0]}</span>
     </>}>

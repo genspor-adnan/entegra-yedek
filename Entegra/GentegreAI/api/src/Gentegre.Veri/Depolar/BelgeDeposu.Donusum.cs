@@ -44,7 +44,9 @@ public sealed partial class BelgeDeposu
         // ODEME PAYLASIMI (289): 0 tum satir · 1 yalniz HASTA payi · 2 yalniz
         //   KURUM payi. Pay donusumunde hedef belgenin CARISI de degisir:
         //   kurum payi kuruma faturalanir, hastaya degil.
-        short pay = 0)
+        short pay = 0,
+        // LOT / SERİ SEÇİMİ (02.11.2026): kaynak satır -> seçilen lotlar. Verilmeyen izlemli satırda FIFO.
+        IReadOnlyDictionary<int, IReadOnlyList<(int SeriLotId, decimal Miktar)>>? lotSecimi = null)
     {
         if (secilen.Count == 0)
             throw GentegreHatasi.Dogrulama("Dönüştürülecek satır seçilmeli.",
@@ -55,6 +57,8 @@ public sealed partial class BelgeDeposu
         //   yoksa satirin tamami zaten hasta payidir (Yazma: hastaTutar = tutar).
         var tutarBazli = secilen.Any(s => (s.Tutar ?? 0) > 0);
         if (tutarBazli && pay == 0) pay = 1;
+        // Satır başında istenen pay'a dönülür: bir satırda kova "ek katkı"ya (4) çevrilince sonraki satıra taşmasın.
+        var istenenPay = pay;
 
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -164,6 +168,7 @@ public sealed partial class BelgeDeposu
 
         foreach (var (satirId, miktarSecim, tutarSecim, brutSecim) in secilen)
         {
+            pay = istenenPay;
             if (!kaynakSatirlar.TryGetValue(satirId, out var ks2))
                 throw GentegreHatasi.Bulunamadi($"Kaynak satır bulunamadı: {satirId}");
             if (Convert.ToInt32(ks2["belge_id"]) != kaynakBelgeId)
@@ -207,6 +212,13 @@ public sealed partial class BelgeDeposu
                     // Hasta payi istendiyse EK KATKI kovasindan gider.
                     if (pay == 1) pay = 4;
                 }
+                // HASTA PAYI EK KATKIDA DURUYORSA (kullanıcı 02.11.2026, ERP satış siparişi -> fatura): sipariş
+                //   satırının dağılımı önceden "hasta ek katkı" olarak yazılmış (provizyon 0); tüm satır / hasta payı
+                //   istenince provizyon kovasına bakılıp "hasta payı zaten kapatılmış" deniyordu.
+                else if (pay == 1
+                         && Convert.ToDecimal(ks2["dg_hasta_provizyon"] ?? 0m) == 0
+                         && Convert.ToDecimal(ks2["dg_hasta_ek_katki"] ?? 0m) > 0)
+                    pay = 4;
 
                 // PAY DONUSUMU: sinir miktar degil TUTAR. Ayni pay ikinci kez
                 //   donusturulemez - yoksa kurum payi iki faturaya girerdi.
@@ -268,8 +280,12 @@ public sealed partial class BelgeDeposu
                 var cikisDepo = ks2["cikis_depo_id"] is { } sd and not DBNull ? Convert.ToInt32(sd)
                               : kaynak["cikis_depo_id"] is { } bd and not DBNull ? Convert.ToInt32(bd)
                               : (int?)null;
-                izlemler = await FifoLotTahsisAsync(baglanti, islem, stokId, cikisDepo, miktar,
-                                                    satirlar.Count + 1, iptal);
+                izlemler = lotSecimi is not null && lotSecimi.TryGetValue(satirId, out var secilenLotlar)
+                           && secilenLotlar.Count > 0
+                    ? await SecilenLotlariDogrulaAsync(baglanti, islem, stokId, cikisDepo, miktar, secilenLotlar,
+                                                       satirlar.Count + 1, iptal)
+                    : await FifoLotTahsisAsync(baglanti, islem, stokId, cikisDepo, miktar,
+                                               satirlar.Count + 1, iptal);
             }
 
             satirlar.Add(SatirJson(ks2, miktar, satirId,

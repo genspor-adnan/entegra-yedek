@@ -479,7 +479,9 @@ public static partial class AksiyonKatalogu
             //   Izi olmayan (kesinlesmemis) belge silinir; digerinde "İptal Et".
             new("belge.sil",      "🗑 Sil",          "belge", Kisayol: "Del",
                 KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
-            new("belge.donustur", "⇢ Belge Kes",     "belge",
+            // "Belge Kes" -> "Belge Dönüştür" (kullanıcı 02.11.2026, Satış Siparişi Listesi): sipariş irsaliyeye ya da
+            //   faturaya DÖNÜŞÜR; "kes" yalnız fatura için doğru sözdü.
+            new("belge.donustur", "⇢ Belge Dönüştür", "belge",
                 AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
             new("belge.iptal",    "İptal Et",        "belge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 40),
@@ -506,7 +508,7 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
             new("belge.sil",      "🗑 Sil",           "belge", Kisayol: "Del",
                 KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
-            new("belge.donustur", "🧾 Faturaya Dönüştür", "belge",
+            new("belge.donustur", "⇢ Belge Dönüştür", "belge",   // "Faturaya Dönüştür" -> (kullanıcı 02.11.2026)
                 AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),
             new("belge.iptal",    "✖ İrsaliyeyi İptal Et", "belge", Hedef: "sagtus,palet",
                 AksiyonYetkisi: "belge.iptal", KayitGerekir: true, Sira: 50),

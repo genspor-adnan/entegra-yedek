@@ -43,7 +43,7 @@ public static partial class DisUclari
                        (select o.plan_no from public.dis_tedavi_plani o
                          where o.hasta_id = p.hasta_id and o.id < p.id and o.durum in (5, 6, 7) order by o.id desc limit 1) as onceki_plan,
                        (select string_agg(coalesce(nullif(x.etken, ''), x.etken_madde), ', ') from public.hasta_alerji x
-                         where x.hasta_id = p.hasta_id and x.aktif = 1) as alerji
+                         where x.hasta_id = p.hasta_id and x.aktif = 1) as alerji, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.dis_tedavi_plani p
                   join public.taraf t on t.id = p.hasta_id
                   left join public.taraf_hasta th on th.id = p.hasta_id
@@ -56,7 +56,7 @@ public static partial class DisUclari
                 """, null, [id], o => new
             {
                 id = o.GetInt32(0), planNo = o.GetString(1), hastaId = o.GetInt32(2), hasta = o.GetString(3), tckn = o.GetString(4),
-                yas = o.IsDBNull(5) ? (int?)null : o.GetInt32(5), cinsiyet = (int)o.GetInt16(6),
+                yas = o.IsDBNull(5) ? (int?)null : o.GetInt32(5), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")), cinsiyet = (int)o.GetInt16(6),
                 hekimId = o.IsDBNull(7) ? (int?)null : o.GetInt32(7), hekim = o.GetString(8),
                 muayeneId = o.IsDBNull(9) ? (int?)null : o.GetInt32(9), muayeneTarih = o.IsDBNull(10) ? (DateTime?)null : o.GetDateTime(10),
                 varyant = o.GetString(11), anaPlanId = o.IsDBNull(12) ? (int?)null : o.GetInt32(12), anaPlanNo = o.GetString(13),

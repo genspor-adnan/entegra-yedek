@@ -6,6 +6,7 @@ import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { metinSor, onay, guvenli } from '../../bilesenler/mesaj';
 import { sayi, tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
+import { useOturum } from '../../kimlik/OturumBaglami';
 
 /**
  * RADYOLOJİ ŞABLON / PROTOKOL EKRAN PARÇALARI (965, mockup
@@ -18,42 +19,88 @@ import { c } from '../../dil/ceviri';
  *   SmsOnizleme          protokol kartı "Hasta hazırlığı" sekmesinin altı
  */
 
-/** Liste solu bölge seçimi - `useBolgeSuzgeci` ile Liste'nin filtre zincirine girer. */
+/** Kapsam seçimi (şablon listesi, 1216 / mockup radyoloji_sablon_listesi_v3.html): sahip id'si ya da grup. */
+type Kapsam = 'benim' | 'genel' | 'kisisel' | 'eslenmedi' | number;
+
+/**
+ * Liste solu seçim - `useBolgeSuzgeci` ile Liste'nin filtre zincirine girer. Bölge her iki ekranda; şablon listesinde
+ * ayrıca KAPSAM (benim / genel / kişisel - hekim bazında / sahibi eşlenmedi) ve ESKİ HBYS KLASÖRÜ. Seçimler AND'lenir.
+ */
 export function useBolgeSuzgeci(aktif: boolean) {
+  const { kullanici } = useOturum();
   const [bolge, setBolge] = useState<number | null>(null);
+  const [kapsam, setKapsam] = useState<Kapsam | null>(null);
+  const [klasor, setKlasor] = useState<string | null>(null);
   const filtre = (temel: Kosul | undefined): Kosul | undefined => {
-    if (!aktif || bolge === null) return temel;
-    const k: Kosul = bolge === 0 ? { alan: 'bolge', op: 'bos', deger: null } : { alan: 'bolge', op: 'esit', deger: bolge };
-    return temel ? { op: 'and', kosullar: [temel, k] } : k;
+    if (!aktif) return temel;
+    const k: Kosul[] = temel ? [temel] : [];
+    if (bolge !== null) k.push(bolge === 0 ? { alan: 'bolge', op: 'bos', deger: null } : { alan: 'bolge', op: 'esit', deger: bolge });
+    if (kapsam === 'benim') k.push({ alan: 'sahipId', op: 'esit', deger: Number(kullanici?.id ?? 0) });
+    else if (kapsam === 'genel') k.push({ alan: 'kapsamKod', op: 'esit', deger: 1 });
+    else if (kapsam === 'kisisel') k.push({ alan: 'kapsamKod', op: 'esit', deger: 2 });
+    else if (kapsam === 'eslenmedi') k.push({ alan: 'kapsamKod', op: 'esit', deger: 3 });
+    else if (typeof kapsam === 'number') k.push({ alan: 'sahipId', op: 'esit', deger: kapsam });
+    if (klasor !== null) k.push({ alan: 'eskiKlasor', op: 'esit', deger: klasor });
+    return k.length === 0 ? undefined : k.length === 1 ? k[0] : { op: 'and', kosullar: k };
   };
-  return { bolge, setBolge, filtre };
+  return { bolge, setBolge, kapsam, setKapsam, klasor, setKlasor, benimId: Number(kullanici?.id ?? 0), filtre };
 }
 
 export function BolgePaneli({ kaynak, s, yenile }: { kaynak: string; s: ReturnType<typeof useBolgeSuzgeci>; yenile: number }) {
   const [bolgeler, setBolgeler] = useState<{ deger: number; ad: string }[]>([]);
-  const [sayilar, setSayilar] = useState<Map<number, number>>(new Map());
+  const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
+  const sablon = kaynak === 'radyoloji-sablon';
   useEffect(() => {
     api.kodListe('rad.bolge').then(y => setBolgeler(y.degerler.map(d => ({ deger: Number(d.deger), ad: d.ad })))).catch(() => setBolgeler([]));
   }, []);
   // SAYILAR liste verisinden: tanım listeleri küçük (yüzler), tek istek yeter.
   useEffect(() => {
-    api.liste(kaynak, { sayfa: 1, boyut: 2000 }).then(y => {
-      const m = new Map<number, number>();
-      for (const r of y.satirlar) { const b = Number(r.bolge ?? 0); m.set(b, (m.get(b) ?? 0) + 1) }
-      setSayilar(m);
-    }).catch(() => setSayilar(new Map()));
+    api.liste(kaynak, { sayfa: 1, boyut: 2000 }).then(y => setSatirlar(y.satirlar)).catch(() => setSatirlar([]));
   }, [kaynak, yenile]);
-  const toplam = [...sayilar.values()].reduce((a, b) => a + b, 0);
-  const dal = (deger: number | null, ad: string, n: number) => (
-    <button key={String(deger)} type="button" className={`rt-dal${s.bolge === deger ? ' on' : ''}${deger === 0 ? ' rt-bos' : ''}`}
-            onClick={() => s.setBolge(deger)}><span>{c(ad)}</span><i>{n}</i></button>
+  const say = (f: (r: ListeSatiri) => boolean) => satirlar.filter(f).length;
+  const bolgeSayisi = (b: number) => say(r => Number(r.bolge ?? 0) === b);
+  // Kişisel şablonu olan hekimler (ad - sahip) ve eski HBYS klasörleri, sayılarıyla.
+  const hekimler = useMemo(() => {
+    const m = new Map<number, { ad: string; n: number }>();
+    for (const r of satirlar) {
+      const id = Number(r.sahipId ?? 0);
+      if (!id) continue;
+      const ad = String(r.kapsam ?? '').replace(/^Kişisel · /, '');
+      m.set(id, { ad, n: (m.get(id)?.n ?? 0) + 1 });
+    }
+    return [...m.entries()].sort((a, b) => a[1].ad.localeCompare(b[1].ad, 'tr'));
+  }, [satirlar]);
+  const klasorler = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of satirlar) { const k = String(r.eskiKlasor ?? ''); if (k) m.set(k, (m.get(k) ?? 0) + 1) }
+    return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'));
+  }, [satirlar]);
+
+  const dal = (anahtar: string, on: boolean, ad: string, n: number, f: () => void, sinif = '') => (
+    <button key={anahtar} type="button" className={`rt-dal${on ? ' on' : ''}${sinif ? ` ${sinif}` : ''}`}
+            onClick={f}><span>{ad}</span><i>{n}</i></button>
   );
   return (
     <div className="rt-agac">
       <h6>{c('Bölge')}</h6>
-      {dal(null, 'Tümü', toplam)}
-      {bolgeler.map(b => dal(b.deger, b.ad, sayilar.get(b.deger) ?? 0))}
-      {(sayilar.get(0) ?? 0) > 0 && dal(0, 'Bölge girilmemiş', sayilar.get(0) ?? 0)}
+      {dal('b-tum', s.bolge === null, c('Tümü'), satirlar.length, () => s.setBolge(null))}
+      {bolgeler.map(b => dal(`b-${b.deger}`, s.bolge === b.deger, c(b.ad), bolgeSayisi(b.deger), () => s.setBolge(b.deger)))}
+      {bolgeSayisi(0) > 0 && dal('b-0', s.bolge === 0, c('Bölge girilmemiş'), bolgeSayisi(0), () => s.setBolge(0), 'rt-bos')}
+      {sablon && <>
+        <h6 className="rt-agac-ara">{c('Kapsam')}</h6>
+        {dal('k-tum', s.kapsam === null, c('Tümü'), satirlar.length, () => s.setKapsam(null))}
+        {dal('k-benim', s.kapsam === 'benim', '★ ' + c('Benim şablonlarım'), say(r => s.benimId > 0 && Number(r.sahipId ?? 0) === s.benimId), () => s.setKapsam('benim'))}
+        {dal('k-genel', s.kapsam === 'genel', c('Genel (kurum)'), say(r => Number(r.kapsamKod) === 1), () => s.setKapsam('genel'))}
+        {dal('k-kis', s.kapsam === 'kisisel', c('Kişisel — tümü'), say(r => Number(r.kapsamKod) === 2), () => s.setKapsam('kisisel'))}
+        {hekimler.map(([id, h]) => dal(`k-${id}`, s.kapsam === id, h.ad, h.n, () => s.setKapsam(id), 'alt'))}
+        {say(r => Number(r.kapsamKod) === 3) > 0 &&
+          dal('k-esl', s.kapsam === 'eslenmedi', '⚠ ' + c('Sahibi eşlenmedi'), say(r => Number(r.kapsamKod) === 3), () => s.setKapsam('eslenmedi'), 'alt rt-bos')}
+        {klasorler.length > 0 && <>
+          <h6 className="rt-agac-ara">{c('Eski HBYS klasörü')}</h6>
+          {dal('e-tum', s.klasor === null, c('Tümü'), satirlar.length, () => s.setKlasor(null))}
+          {klasorler.map(([k, n]) => dal(`e-${k}`, s.klasor === k, k, n, () => s.setKlasor(k)))}
+        </>}
+      </>}
     </div>
   );
 }

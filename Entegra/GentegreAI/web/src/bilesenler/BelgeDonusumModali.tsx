@@ -4,14 +4,18 @@ import {
   payKalanDahil as hesapPayKalanDahil,
   tahsilDahil as hesapTahsilDahil,
 } from '../sayfalar/belgeDonusumHesap';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
 import { Modal } from './GenForm';
 import { DONUSUM_PAY_SECENEKLERI }
   from '../sayfalar/belgeKarti/dagilimKovalari';
-import { para, say4, bugunIso, sayiOku as sayi } from './bicim';
+import { para, say4, bugunIso, sayiOku as sayi, hamSayi } from './bicim';
 import { c } from '../dil/ceviri';
+import { gorunenBelgeNo } from '../sayfalar/belgeKartiKurallari';
+import { IzlemPenceresi } from './belge/IzlemPenceresi';
+import type { IzlemSatiri } from '../sayfalar/belgeSatir';
+
 
 
 /**
@@ -19,7 +23,8 @@ import { c } from '../dil/ceviri';
  * tedarikcinin fatura numarasidir, sayacimiz uretemez - kullanici girer.
  * Sunucudaki DisNumaraliTur ile ayni liste.
  */
-const DIS_NUMARALI = new Set([11]);
+// Alış belgeleri: numara tedarikçinin (BelgeTuru.DisNumaraliTurler, 02.11.2026).
+const DIS_NUMARALI = new Set([10, 11, 12, 109]);
 
 /**
  * Kaynak turden hangi hedeflere donusulebilir (belge turu kod uzayi, 073
@@ -33,7 +38,7 @@ const DIS_NUMARALI = new Set([11]);
  *     irsaliye tutari faturalanmadan cari hesaba islenmek istendiginde.
  * Yon KAYNAKTAN gelir: alis zincirinde alis hedefleri, satista satis.
  */
-const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
+export const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   // Satis teklifi (216): teklif YALNIZ siparise donusur (kullanici) -
   //   taahhut zinciri teklif -> siparis -> irsaliye/fatura sirasiyla yurur.
   18: [{ kod: 19, ad: 'Satış Siparişi' }],
@@ -88,6 +93,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                                     varsayilanPay, onKapat, onTamam }: Props) {
   const [satirlar, setSatirlar] = useState<AcikSatir[]>([]);
   const [miktarlar, setMiktarlar] = useState<Record<number, string>>({});
+  const miktarlarRef = useRef(miktarlar);
+  miktarlarRef.current = miktarlar;
   const [secili, setSecili] = useState<Record<number, boolean>>({});
   const [hedefTur, setHedefTur] = useState<number>(() => {
     const liste = HEDEFLER[belgeTur] ?? [];
@@ -119,6 +126,24 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   }, [belgeId]);
 
   const hedefler = HEDEFLER[belgeTur] ?? [];
+
+  /**
+   * LOT / SERİ SOR (kullanıcı 02.11.2026: "satış siparişini irsaliyeye ya da faturaya dönüştürürsek lot/serino
+   * sormalı"): sipariş stok düşürmez; irsaliye / fatura / fiş düşürür - izlemli satırda hangi lottan çıkılacağı
+   * seçilir. Öneri FIFO (en yakın SKT), kullanıcı değiştirir; toplam satırın miktarına eşit olmalı.
+   */
+  const lotSorulur = belgeTur === 19 && [14, 15, 16].includes(hedefTur);
+  // TEK LOT EKRANI (kullanıcı 02.11.2026: "normal sat.irs de jenerik lot seçme ekranı burada da olsa daha iyi..
+  //   her yerde tek ekran"): kalem penceresinin IzlemPenceresi'si (çıkış kipi) - depodaki lotlar, SKT, tamamla,
+  //   toplam kilidi aynı.
+  const [lotlar, setLotlar] = useState<Record<number, IzlemSatiri[]>>({});
+  const [lotAcik, setLotAcik] = useState<number | null>(null);
+  const izlemliMi = (s: AcikSatir) => lotSorulur && Number(s.izleme ?? 0) > 0 && !!s.stokId;
+  const lotKolonu = satirlar.some(izlemliMi);
+  /** Satırın bu belgeye giden miktarı - tutar kipinde sunucu kaynak miktarını yazar. */
+  const etkinMiktar = (s: AcikSatir) => tutarModRef.current ? Number(s.miktar) : sayi(miktarlarRef.current[s.satirId] ?? '0');
+  const lotToplam = (id: number) => (lotlar[id] ?? []).reduce((t, l) => t + hamSayi(l.miktar), 0);
+  const lotSecilenler = (id: number) => (lotlar[id] ?? []).filter(l => hamSayi(l.miktar) > 0 && l.seriLotId);
   const disNumarali = DIS_NUMARALI.has(hedefTur);
   /**
    * ODEME PAYLASIMI (289): satirda kurum ve hasta payi ayri duruyorsa
@@ -141,6 +166,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   //   ACIK BELGE TUTARI ne ise o gelecek"): kabul memuru adet degil TUTAR
   //   dusunur - "900 TL'lik muayenenin ne kadarina belge kesiyorum".
   const [tutarMod, setTutarMod] = useState(tutarModOlur);
+  const tutarModRef = useRef(tutarMod);
+  tutarModRef.current = tutarMod;
   const [tutarlar, setTutarlar] = useState<Record<number, string>>({});
   const [kalaniTahakkuk, setKalaniTahakkuk] = useState(true);
   /**
@@ -164,7 +191,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   const tutarModuDegistir = (acik: boolean) => {
     setTutarMod(acik);
     if (acik) setTutarlar(Object.fromEntries(
-      satirlar.map(s => [s.satirId, onerilenTutar(s, hedefTur).toFixed(2)])));
+      satirlar.map(s => [s.satirId, onerilenTutar(s, hedefTur).toFixed(2).replace('.', ',')])));   // ekran biçimi: sayiOku noktayı binlik sayar (1050.06 -> 105006)
   };
   useEffect(() => {
     if (!tutarModOlur && tutarMod) setTutarMod(false);
@@ -226,6 +253,27 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
           .map(s => ({ satirId: s.satirId, miktar: sayi(miktarlar[s.satirId]) }));
 
     if (gonderilecek.length === 0) { setHata('En az bir satır seçilmeli.'); return }
+    // LOT KONTROLÜ: izlemli her satırda lot seçilmiş ve toplamı miktara eşit olmalı.
+    for (const g of gonderilecek) {
+      const s = satirlar.find(x => x.satirId === g.satirId)!;
+      if (!izlemliMi(s)) continue;
+      const ad = s.stokAdi ?? s.kalemAdi ?? '';
+      if (lotSecilenler(g.satirId).length === 0) {
+        setHata(`${ad}: lot / seri seçilmeli.`); setLotAcik(g.satirId); return;
+      }
+      if (Math.abs(lotToplam(g.satirId) - g.miktar) > 0.0001) {
+        setHata(`${ad}: seçilen lot miktarı (${say4.format(lotToplam(g.satirId))}) satır miktarına (${say4.format(g.miktar)}) eşit olmalı.`);
+        setLotAcik(g.satirId); return;
+      }
+      const asan = lotSecilenler(g.satirId).find(l => l.kalan !== undefined && hamSayi(l.miktar) > l.kalan + 0.0001);
+      if (asan) { setHata(`${ad}: ${asan.lotNo || asan.seriNo} lotunda yalnız ${say4.format(asan.kalan ?? 0)} var.`); setLotAcik(g.satirId); return }
+    }
+    const lotluGonderilecek = gonderilecek.map(g => {
+      const s = satirlar.find(x => x.satirId === g.satirId)!;
+      return izlemliMi(s)
+        ? { ...g, lotlar: lotSecilenler(g.satirId).map(l => ({ seriLotId: l.seriLotId!, miktar: hamSayi(l.miktar) })) }
+        : g;
+    });
     if (!hedefTur) { setHata('Hedef belge türü seçilmeli.'); return }
 
     if (tutarMod) {
@@ -248,7 +296,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
 
     setCalisiyor(true);
     try {
-      const yeni = await api.belgeDonustur(belgeId, hedefTur, gonderilecek, tarih, taslak,
+      const yeni = await api.belgeDonustur(belgeId, hedefTur, lotluGonderilecek, tarih, taslak,
                                            disNumarali ? belgeNo.trim() : undefined,
                                            tutarMod ? (pay || 1) : paylasimVar ? pay : 0,
                                            tutarMod && kalaniTahakkuk && hedefTur !== 17);
@@ -257,6 +305,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
       setBelgeNo('');
       // Kalan satirlari tazele: ayni siparisten ikinci bir belge kesilebilir.
       setSatirlar(await api.belgeAcikSatirlar(belgeId));
+      setLotlar({}); setLotAcik(null);
       onTamam(yeni);
     } catch (h) {
       setHata(hataMetni(h));
@@ -290,7 +339,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               "Satış Fişi oluşturuldu" yazip aslinda tahakkuk uretmis gibi
               gorunuyordu. */}
           <b>{sonucAd || 'Belge'} oluşturuldu.</b>{' '}
-          No: <b>{String(sonuc.belge.belgeNo || '—')}</b> ·
+          No: <b>{gorunenBelgeNo(sonuc.belge.belgeNo) || (sonuc.belge.belgeNo ? c('e-Belge gönderiminde verilir') : '—')}</b> ·
           Genel toplam: <b>{para.format(Number(sonuc.belge.genelToplam))}</b>
           {sonuc.uyarilar && sonuc.uyarilar.length > 0 && (
             <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>
@@ -363,8 +412,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
               {disNumarali && (
                 <label className="alan">
-                  <span className="etiket zorunlu-isaret">{c('Tedarikçi Fatura No')}</span>
-                  <input value={belgeNo} maxLength={20} placeholder="örn. ABC2026000001234"
+                  <span className="etiket zorunlu-isaret">{hedefTur === 10 || hedefTur === 109 ? c('Tedarikçi İrsaliye No')
+                    : hedefTur === 12 ? c('Tedarikçi Fiş No') : c('Tedarikçi Fatura No')}</span>
+                  <input value={belgeNo} maxLength={20}
                          onChange={e => setBelgeNo(e.target.value)} />
                 </label>
               )}
@@ -390,14 +440,15 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                     <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
                     <th className="hiza-sag" style={{ width: 120 }}>{tutarMod ? 'Bu Belgeye (₺ KDV dahil)' : 'Bu Belgeye'}</th>
                     <th className="hiza-sag" style={{ width: 110 }}>{tutarMod ? 'Tahsil / Kalan (KDV dahil)' : 'Birim Fiyat'}</th>
+                    {lotKolonu && <th style={{ width: 190 }}>{c('Lot / Seri')}</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {satirlar.map(s => (
-                    // Satira tiklamak da isaretler: burada secim = "bu satiri
+                  {satirlar.map(s => (<Fragment key={s.satirId}>
+                    {/* Satira tiklamak da isaretler: burada secim = "bu satiri
                     //   donustur" isareti, coklu secim ASILDIR - o yuzden duz tik
-                    //   digerlerini kaldirmaz (liste gridlerinin aksine).
-                    <tr key={s.satirId}
+                    //   digerlerini kaldirmaz (liste gridlerinin aksine). */}
+                    <tr
                         className={secili[s.satirId] ? 'secili' : ''}
                         onClick={() => setSecili(x => ({ ...x, [s.satirId]: !x[s.satirId] }))}>
                       <td className="hiza-orta">
@@ -444,8 +495,18 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                           ? <>{para.format(tahsilDahil(s))} <span className="sonuk">/ {para.format(payKalanDahil(s))}</span></>
                           : para.format(payliFiyat(s))}
                       </td>
+                      {lotKolonu && (
+                        <td onClick={e => e.stopPropagation()}>
+                          {izlemliMi(s) && (
+                            <button type="button" className={`d mini${secili[s.satirId] && Math.abs(lotToplam(s.satirId) - etkinMiktar(s)) > 0.0001 ? ' teh' : ''}`}
+                                    disabled={!secili[s.satirId]} onClick={() => setLotAcik(s.satirId)}
+                                    title={c('Hangi lot / seriden çıkılacağını seçin')}>
+                              🏷 {lotSecilenler(s.satirId).map(l => `${l.lotNo || l.seriNo}×${l.miktar}`).join(', ') || c('Lot seç')}
+                            </button>)}
+                        </td>
+                      )}
                     </tr>
-                  ))}
+                  </Fragment>))}
                   {satirlar.length === 0 && (
                     <tr><td colSpan={7} className="bos">{c('Dönüştürülecek açık satır yok.')}</td></tr>
                   )}
@@ -461,6 +522,23 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               </table>
             )}
           </div>
+
+          {lotAcik !== null && (() => {
+            const ls = satirlar.find(x => x.satirId === lotAcik);
+            return ls ? (
+              <IzlemPenceresi
+                stokAdi={ls.stokAdi ?? ls.kalemAdi ?? ''}
+                stokId={ls.stokId ?? null}
+                depoId={ls.cikisDepoId ?? null}
+                cikis
+                izleme={Number(ls.izleme ?? 0)}
+                miktar={etkinMiktar(ls)}
+                satirlar={lotlar[ls.satirId] ?? []}
+                onKapat={() => setLotAcik(null)}
+                onKaydet={secim => { setLotlar(x => ({ ...x, [ls.satirId]: secim })); setLotAcik(null) }}
+              />
+            ) : null;
+          })()}
 
           <div className="not">
             Kalan miktar kaynağında durur; aynı siparişten birden fazla irsaliye/fatura

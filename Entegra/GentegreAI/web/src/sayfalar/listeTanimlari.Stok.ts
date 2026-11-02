@@ -15,7 +15,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
     // Kategori KOD'un SOLUNDA (kullanici) - hizmet listesiyle ayni duzen.
     // Kisa Ad, Ad'in SOLUNDA (552 - hizmet listesiyle ayni duzen).
-    kolonSirasi: ['kategori', 'kod', 'kisaAd', 'ad', 'kalan', 'anaBirim', 'durum'],
+    // Stok Adı Kısa Ad'ın SOLUNDA (kullanıcı 02.11.2026: "kısa ad ile stok adı yer değiş").
+    kolonSirasi: ['kategori', 'kod', 'ad', 'kisaAd', 'kalan', 'anaBirim', 'durum'],
     // Ciplerin sagina STOK kategori agaci (1 = stok, 346).
     kategoriSuzgeci: 1,
     kategoriSuzgecAlani: 'kategoriId',
@@ -23,7 +24,11 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   Stok Durumu icin gercek tablo (stok_durum) var ama PK'si (stok_id,depo_id) -
     //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
     // 'ÜTS Bilgileri' artik yer tutucu DEGIL - stok_uts (119) detayi olarak geliyor.
-    yerTutucuSekmeler: ['Reçete', 'Stok Durumu', 'Hareketler', 'Yorum / Medya', 'Ek Alanlar'],
+    // Sıra stok_karti_v2.html (02.11.2026): ... ÜTS · Ürün Ağacı / BOM · Stok Durumu · Hareketler · Resim / Doküman · Ek Alanlar.
+    yerTutucuSekmeler: ['Ürün Ağacı / BOM', 'Stok Durumu', 'Hareketler', 'Resim / Doküman', 'Ek Alanlar'],
+    // ÜRÜN AĞACI / BOM YALNIZ ERP'DE (kullanıcı 02.11.2026: "sadece erp modundayken Reçete sekmesi görünmelidir";
+    //   başlık "Reçete" -> "Ürün Ağacı / BOM" - HBYS'de reçete ilaç reçetesi demek).
+    erpSekmeleri: ['Ürün Ağacı / BOM'],
     resimYerTutucu: true,
     menuGrup: 'Stok & Hizmet', menuAd: 'Stok Listesi', ic: '📦', yetkiKodu: 'stok.liste',
     menuSira: 10,
@@ -42,10 +47,59 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // Kategori KOD'un SOLUNDA (kullanici): listede once "hangi grup", sonra
     //   kod ve ad okunuyor.
     // Hizmet Adı ÖNCE, Kısa Ad SAĞINDA (kullanıcı 25.10.2026: "kısa ad ve Hizmet Adı yer değiştir"; 549'da tersiydi).
-    kolonSirasi: ['kategoriAdi', 'kod', 'ad', 'kisaAd', 'durum'],
+    // ESKİ KOD (1222): SKRS eşleme masasında Bakanlık koduna çevrilen hizmet eski koduyla da bulunur.
+    kolonSirasi: ['kategoriAdi', 'kod', 'ad', 'kisaAd', 'eskiKodlar', 'standartAdi', 'durum'],
+    aramaEkAlanlari: ['eskiKodlar'],
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet.liste',
     menuSira: 20,
   },
+  {
+    // SKRS EŞLEME MASASI (1222, mockup Ekranlar/Aktarim/skrs_esleme_masasi.html; kullanıcı 01.11.2026: "eski
+    //   müşterilerde gelişigüzel hizmet listeleri.. bakanlığın (SKRS) standardına oturtmak istiyorum"). Satır = aktarılmış
+    //   eski hizmet; sağda Bakanlık (SUT) adayları ve karar, araç çubuğunda toplu onay / Uygula. Kartı yok.
+    //   Yetki: hizmet kartını değiştirebilen (kullanıcı kararı) - menü hizmet kodunun Gör'ü.
+    kaynak: 'aktarim-esleme-hizmet', rota: 'skrs-esleme',
+    baslik: 'SKRS Eşleme Masası', yol: 'Stok & Hizmet › SKRS Eşleme Masası',
+    // Çip sırası EslemeSeridi kutularıyla aynı (1 bekleyen · 3 onaylı · 4 aday yok · 5 kuruma özel · 6 uygulanan
+    //   · 7 yön ailesi).
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Bekleyen', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 0 }, { alan: 'uygulandi', op: 'esit', deger: 0 }] } },
+      { ad: '⚠ Bakılmalı', filtre: { alan: 'guvenKod', op: 'buyuk', deger: 1 } },
+      { ad: 'Onaylı', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }, { alan: 'uygulandi', op: 'esit', deger: 0 }] } },
+      { ad: 'Aday yok', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Kuruma özel', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 2 }, { alan: 'uygulandi', op: 'esit', deger: 0 }] } },
+      { ad: 'Uygulanan', filtre: { alan: 'uygulandi', op: 'esit', deger: 1 } },
+      { ad: 'Yön ailesi', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 4 }, { alan: 'uygulandi', op: 'esit', deger: 0 }] } },
+      { ad: 'RAD', filtre: { alan: 'tur', op: 'esit', deger: 'RAD' }, ayracOnce: true },
+      { ad: 'LAB', filtre: { alan: 'tur', op: 'esit', deger: 'LAB' } },
+      { ad: 'Diğer', filtre: { alan: 'tur', op: 'esit', deger: 'DIGER' } },
+    ],
+    gizliKolonlar: ['durum', 'uygulandi', 'guvenKod', 'modalite', 'kayitId', 'notlar', 'adayKod'],
+    kolonSirasi: ['tur', 'eskiKod', 'eskiAd', 'kullanim', 'adayAd', 'adayPuan', 'dikkat', 'aile', 'durumAdi', 'secilenKod', 'secilenAd'],
+    urunModu: 2,
+    menuGrup: 'Stok & Hizmet', menuAd: 'SKRS Eşleme Masası', ic: '🧭', yetkiKodu: 'hizmet',
+    menuSira: 25,
+  },
+  // SKRS EŞLEME MASASI - BÖLÜM / BRANŞ (1224): masanın diğer sekmeleri (menüde ayrı satır yok; masanın üstündeki
+  //   sekme şeridinden açılır). Eski POLIKLINIK -> SKRS kodlu bölüm, eski UZMANLIK -> SKRS branş.
+  ...(['bolum', 'brans'] as const).map(l => ({
+    kaynak: `aktarim-esleme-${l}`, rota: `skrs-esleme-${l}`,
+    baslik: 'SKRS Eşleme Masası', yol: `Stok & Hizmet › SKRS Eşleme Masası › ${l === 'bolum' ? 'Bölüm' : 'Branş'}`,
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Bekleyen', filtre: { op: 'and' as const, kosullar: [{ alan: 'durum', op: 'esit' as const, deger: 0 }, { alan: 'uygulandi', op: 'esit' as const, deger: 0 }] } },
+      { ad: '⚠ Bakılmalı', filtre: { alan: 'guvenKod', op: 'buyuk' as const, deger: 1 } },
+      { ad: 'Onaylı', filtre: { op: 'and' as const, kosullar: [{ alan: 'durum', op: 'esit' as const, deger: 1 }, { alan: 'uygulandi', op: 'esit' as const, deger: 0 }] } },
+      { ad: 'Aday yok', filtre: { alan: 'durum', op: 'esit' as const, deger: 3 } },
+      { ad: 'Yok sayılan', filtre: { op: 'and' as const, kosullar: [{ alan: 'durum', op: 'esit' as const, deger: 2 }, { alan: 'uygulandi', op: 'esit' as const, deger: 0 }] } },
+      { ad: 'Uygulanan', filtre: { alan: 'uygulandi', op: 'esit' as const, deger: 1 } },
+    ],
+    gizliKolonlar: ['durum', 'uygulandi', 'guvenKod', 'secilenKod'],
+    kolonSirasi: ['eskiAd', 'kullanim', 'adayAd', 'adayPuan', 'notlar', 'durumAdi', 'secilenAd'],
+    urunModu: 2, menuGizli: true,
+    menuGrup: 'Stok & Hizmet', menuAd: `SKRS Eşleme Masası (${l === 'bolum' ? 'bölüm' : 'branş'})`, ic: '🧭', yetkiKodu: 'hizmet',
+  })),
   {
     // SATIS FIYAT LISTELERI (201): liste bir KURALDIR (taban liste x carpan ->
     //   yuvarlama), satirlari o kuralin materyalize halidir. "⟳ Listeyi Üret"

@@ -312,6 +312,13 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     {
         try
         {
+            // YATAN BAŞVURU (basvuru_turu 3) HARİÇ (kullanıcı 01.11.2026: "yatan hasta değilse temel prensip önce
+            //   başvuru aç, ücret satırı ekle, başvuru kaydet.. lab veya rad istemi oluşsun"): yatan hastada istem
+            //   order'dan açılır; tahakkuk satırından ikinci istem açılmasın.
+            var yatan = await _veri.TekDegerAsync<int?>(
+                "select 1 from public.belge_basvuru where id = @p0 and basvuru_turu = 3", [belgeId], iptal);
+            if (yatan is not null) return 0;
+
             // ÜCRET SATIRI İKİ TÜRLÜ LABORATUVAR İŞİ OLABİLİR (638):
             //   * TEK TETKİK - hizmetin `lab_tetkik` karşılığı var (CRP, TSH…)
             //   * PANEL      - hizmetin `lab_panel` karşılığı var. Hemogram

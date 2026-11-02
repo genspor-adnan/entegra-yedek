@@ -7,6 +7,27 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 02.11.2026 — Stok kartı v2, alış / satış belge başlığı, lot dönüşümü, belge silme stok geri alma, UNIVERSE lot onarımı (1246-1249)
+
+Kullanıcı testleri (dev + UNIVERSE + KOSUYOLU), istek istek.
+
+- **Stok kartı v2** (mockup `Ekranlar/Stok/stok_karti_v2.html`): kimlik şeridi Kod (½) · Stok Adı · Kısa Ad · Kategori · Tür · Durum (½); Diğer › Satılan · Alınan · İnternet Satış (yalnız Satılan işaretliyse) · Paket · Reuse tek satır, sarar; **Açıklama** (1246, `stok.aciklama`) Diğer'in altında, 2 satır. Kategori **ağaç seçici** (`AgacCombo`, açılır dallar + arama, kutuda yol). **Ürün Ağacı / BOM** sekmesi yalnız ERP'de (`/api/kart/stok/{id}/urun-agaci`, salt okunur). Stok Durumu'na **Stok Değeri** kutusu (toplam × ağırlıklı ortalama alış maliyeti). Resim / Doküman **karo görünüm** (önizleme, ★ varsayılan, tür süzgeci, seçim kutusu, çerçevesiz); Hareketler çerçevesiz, başlıktan sıralama, tarih saatli. "Yorum / Medya" her yerde "Resim / Doküman".
+- **Alış / satış belgeleri:** cari araması alışta yalnız tedarikçi, satışta yalnız müşteri ("＋ Yeni" o rolle); arama iptal = yeni belge kapanır (seçimde kapanma hatası düzeltildi). Başlıkta cari bandı (müşteri kartındaki gibi, Durum'lu, avatar / ünvana tık = cari kartı yeni sekmede) + sağında **e-Belge · Faturalama · Ödeme/Tahsilat · Borcumuz/Bakiye** kutuları (mockup `Ekranlar/Satinalma/alis_faturasi_cari_baslik.html`). Tür adı büyük harf, satış yeşil / alış kırmızı. Sekme başlığı cari ön-dolu açılışta hemen cari adı.
+- **Alış belgelerinin numarası tedarikçinin** (`DisNumarali` 10 / 11 / 12 / 109); kutu boş, örnek yok. e-Belge numarası beklenen belgede "0" ekranda numara gibi görünmez ("e-Belge gönderiminde verilir"). UNIVERSE'te e-İrsaliye mükellef işareti kaldırıldı (kurum kullanmıyor; sayaç 000157'den sürer).
+- **Düzenler:** alış / satış / konsinye irsaliyesi tek satır No · Tarih ☐ İade · Depo · Temsilci (İade araç çubuğundan başlığa, Sipariş No yok); satış siparişi tek satır No · Tarih · Depo · Vade · Temsilci (Kaynak Belge yok); transferde Giriş Deposu, talepte Teslim Deposu çıkışın / istenenin sağında. Belge kartına **Sil** (kayıtlı, yetkili). Listelerde **başlama - bitiş tarih süzgeci** (bütün alış / satış belge listeleri; Alış Faturası'nda yalnız tarih kutuları).
+- **Dönüşüm:** "Belge Kes" → **Belge Dönüştür** (sipariş / irsaliye listeleri ve kartları; başvuruda kalır); alt menü listenin türünden (irsaliyede İrsaliye yok, satışta tahakkuk satış tahakkuku). Tüm satır (pay 0) ERP siparişinde ek katkı kovasındaki tutarı okumuyordu → Dönüştür pasif / "hasta payı kapatılmış" (web + sunucu düzeldi). Tutar kipinde "1050.06" 105.006 okunuyordu. **Lot / seri sorulur:** sipariş → irsaliye / fatura / fiş dönüşümünde izlemli satırda kalem penceresinin **Lot Seçimi** ekranı (tek ekran, arama kutulu); sunucu seçilen lotu doğrular, boşsa FIFO.
+- **Belge silme stok / lot geri almıyordu** (fn_belge_sil tanımsız `fn_stok_durum_geri_al`'a güveniyordu) - `BelgeDeposu.SilAsync` artık geri alır; **transfer** silme / düzenleme iki depoyu da geri alır (`TransferGeriAlAsync`).
+- **UNIVERSE lot onarımı:** Delphi transferi tek STOKIZLEME + iki STOKIZLEMEDEPO; aktarım varış tarafını hiç yazmıyordu (28 lot farklı, 10 eksi). **1248** `fn_aktarim_transfer_varis_tamamla()` (aktarım son adımında da) - 26 varış, +590 adet; silinen irsaliyenin ve SUPRAMİD'in lotu düzeltildi. **1249** `fn_stok_lot_hareketleri()`: lot defteri kurulumu ve aktarım tetiği transferi iki taraflı, irsaliyeden türeyen faturayı etkisiz sayar (UNIVERSE'te mevcut defteri birebir üretti). Kalan farklar aktarım sonrası web / Delphi hareketleri.
+- **Ad:** Satınalma "Sipariş Takibi / Sipariş Listesi" → **Alış Siparişi Listesi** (1247, rehber ekran kataloğu).
+- **Genel:** cari kutu sınıfı `cbk` grid işaret sütunuyla çakışıp sütunu 110 px yapıyordu (`bdk` oldu); GentegreAI API 5186 (UNIVERSE) yayımlanan kopyası her değişiklikte yeniden yayımlandı.
+
+## 31.10-01.11.2026 — SKRS yön ailesi (1232-1241), başvuru → radyoloji istemi (1242-1245), istem / rapor kartı v2, KOSUYOLU eşlemeleri
+
+- **SKRS yön ailesi:** sağ / sol / kontrastlı SUT kodları ayrı hizmet (ekrandan yön sorulmaz); eşleme masasında "⇆ Yönlere ayır" (durum 4), üye hizmetler fiyat / protokol / şablon kopyasıyla açılır, eski hizmet pasif (standart 3). KOSUYOLU: 14 aile → 64 SUT hizmet; LAB SUT kod / ad + alt kategoriler (ESKI.RAD.* / ESKI.LAB.*).
+- **Başvuru → istem (1242):** yatan dışı başvuruda ücret satırı + kaydet = radyoloji istemi (accession); silinen satırın otomatik istemi iptal. **Sevkli hasta (1243):** accession kabulde (boşsa verilir), başvuru kaydından sonra istem kartı kabul kipinde açılır. 1244 kabul tarihi; 1245 USG açlık kontrol sorusu.
+- **Radyoloji istem kartı v2** (mockup `Ekranlar/Radyoloji/radyoloji_istem_karti_v2.html`): başvuru tipi hasta bandı (İsteyen, Tetkik, Kurum, Durum), kabul bilgileri kalemle düzenleme, elle çekim girişi, istem kâğıdı + çekim öncesi kontrol sağ sütunda; çekimsiz rapor yazılamaz. Rapor kartı bandı aynı (Yazan / Onay / Durum).
+- **Diğer:** form büyütme düğmeleri kaldırıldı; başvurudan yeni hasta kartı sekmede; ICD genel seçim ekranı; Telegram uyarıları kapatıldı (sunucu `izleme.conf`); Cloudflare doğrulandı.
+
 ## 24-26.10.2026 — Hasta kartı sekmeleri, lot ekranı, stok fişi kaydı (1167), belge numarası kaldığı yerden (1168), liste genişlikleri
 
 Kullanıcı testleri (dev + UNIVERSE), istek istek.

@@ -54,7 +54,8 @@ public static partial class KaynakKatalogu
                                                  "metin", "Satış Temsilcisi",
                                                  Genislik: 150, Varsayilan: false,
                                                  Siralanabilir: false, Filtrelenebilir: false),
-            new("belgeNo",       "b.belge_no",       "metin", "Belge No",    Genislik: 155),
+            // '0' = e-Belge numarası henüz entegratörden gelmedi (02.11.2026) - listede numara gibi görünmesin.
+            new("belgeNo",       "nullif(b.belge_no, '0')", "metin", "Belge No", Genislik: 155),
             // e-BELGE DURUMU ROZET: ham kod (0/1/11/51...) listede hicbir sey
             //   anlatmiyordu. Metin hem TURU hem ASAMAYI soyler; gonderilmis
             //   belge "✓" ile ve yesil rozetle ayrilir (163/164 kodlari).
@@ -555,7 +556,7 @@ public static partial class KaynakKatalogu
             //   belgesiz. Ekran zaten YALNIZ satis irsaliyelerini gosterdigi icin her
             //   satirda ayni kisaltmayi tekrarlamanin bilgi degeri de yoktu.
             new("tipi",          "b.tipi",           "sayi",  "Tip Kodu",  Hizalama: "orta", Varsayilan: false),
-            new("belgeNo",       "b.belge_no",       "metin", "İrsaliye No", Genislik: 155),
+            new("belgeNo",       "nullif(b.belge_no, '0')", "metin", "İrsaliye No", Genislik: 155),
             // e-IRSALIYE DURUMU (kullanici: "irsaliye no saginda gidip gitmedigini
             //   anlayayim"). Kodlar e-Belge turune gore ayri: e-Irsaliye 51
             //   hazirlandi / 52 gonderildi. Eskiden burada FATURA kodlari (1/2/3/4)

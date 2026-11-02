@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji — Rapor Listesi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --req:#b23b3b;
+    --vurgu:#fff1a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .win{max-width:1360px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sp{margin-left:auto}
+  .ara{display:flex;align-items:center;gap:6px;border:1px solid var(--accent);border-radius:12px;
+    background:#fff;height:25px;padding:0 10px;width:360px;color:var(--ink);box-shadow:0 0 0 2px #e3eefb}
+  .ara .yer{color:var(--muted)}
+  .ara .kap{margin-left:auto;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:0 6px}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:11px;padding:2px 10px;font-size:11px;background:#fff;white-space:nowrap}
+  .cip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:bold}
+  .cip.teh{border-color:#e4b7b2;background:#fdf3f2;color:#8f3d36;font-weight:bold}
+  .cip i{font-style:normal;opacity:.75;margin-left:3px}
+  .suz{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;
+    font-size:11.5px;display:flex;align-items:center;white-space:nowrap}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .serit{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:10px 12px;
+    background:linear-gradient(#ffffff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu .s{font-size:20px;font-weight:bold;color:var(--navy);line-height:1.1}
+  .kutu .e{font-size:11px;color:var(--muted)}
+  .kutu.teh{border-color:#e4b7b2;background:#fdf3f2}
+  .kutu.teh .s{color:#a3352c}
+  .govde{display:grid;grid-template-columns:1fr 430px;min-height:520px}
+  .sol{border-right:1px solid var(--line);overflow:auto}
+  table.l{border-collapse:collapse;width:100%;font-size:11.5px}
+  table.l th{background:var(--head2);border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;
+     font-size:11px;color:var(--navy);white-space:nowrap;position:sticky;top:0}
+  table.l td{border-bottom:1px solid var(--line2);padding:5px 7px;white-space:nowrap;vertical-align:top}
+  table.l tr.sec td{background:var(--sel)}
+  table.l tr.ek td{background:#fbfcfd}
+  table.l tr.ek td.ekad{padding-left:22px;color:var(--muted)}
+  .ozet{white-space:normal !important;max-width:330px;line-height:1.4;color:#3a4a5a;font-size:11px}
+  mark{background:var(--vurgu);color:inherit;padding:0 1px;border-radius:2px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;white-space:nowrap}
+  .c-on{background:#e2f3e8;color:#2e7d46;border:1px solid #bfe3cb}
+  .c-onr{background:#fdf1e2;color:#b5731a;border:1px solid #f2ddbf}
+  .c-tes{background:#e3eefb;color:#2f6db3;border:1px solid #c3d8f1}
+  .c-ek{background:#efe8f8;color:#5b3e8f;border:1px solid #d9cbee}
+  .mod{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);
+    border-radius:3px;background:#fff;font-size:10px;font-weight:bold;color:var(--navy);padding:1px 4px}
+  .kr{color:#b23b3b;font-weight:bold}
+  .eski{display:inline-block;font-size:9.5px;border:1px solid var(--line);border-radius:3px;padding:0 4px;color:var(--muted);margin-left:4px}
+  .alt{display:block;color:var(--muted);font-size:10.5px}
+  .sag{background:#f7f9fc;display:flex;flex-direction:column}
+  .sag .bas{padding:8px 12px;border-bottom:1px solid var(--line);background:#fff}
+  .sag .bas b{color:var(--navy);font-size:13px}
+  .sag .bas .k{display:grid;grid-template-columns:78px 1fr;gap:2px 8px;margin-top:6px;font-size:11px}
+  .sag .bas .k span:nth-child(odd){color:var(--muted)}
+  .kagit{margin:10px 12px;background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px rgba(20,40,70,.08);
+    padding:14px 16px;font-family:Arial,sans-serif;font-size:11.5px;line-height:1.5;flex:1;overflow:auto}
+  .kagit h4{margin:0 0 6px;text-align:center;font-size:12.5px}
+  .kagit table{border-collapse:collapse;width:100%;margin:6px 0;font-size:10.5px}
+  .kagit table td{border:1px solid #888;padding:2px 5px}
+  .kagit .imza{margin-top:12px;text-align:right;font-size:11px}
+  .sag .alt-bar{display:flex;gap:4px;padding:6px 12px;border-top:1px solid var(--line);background:var(--head)}
+  .dip{display:flex;gap:14px;padding:6px 10px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .dip b{color:var(--ink)}
+  .not{max-width:1360px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not b{color:#1f2d3a}
+  .not code{background:#fff;border:1px solid var(--line2);padding:0 3px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📄 Radyoloji — Rapor Listesi <span class="sp">GenoTIP AI · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">📄 Raporu Aç</div>
+    <div class="btn">🖨 Yazdır (2)</div>
+    <div class="btn">⬇ PDF (2)</div>
+    <div class="btn">👁 İstemi Aç</div>
+    <div class="btn">🖼 Görüntü (PACS)</div>
+    <div class="btn pas">✉ Hekime Gönder</div>
+    <div class="ara sp">🔍 <span><b>menisküs</b></span><span class="kap">rapor metninde</span></div>
+  </div>
+
+  <!-- Sayaç şeridi: liste "ne bekliyor" sorusundan çok "ne yazıldı" listesidir;
+       yine de ön raporda kalanlar (onay bekleyen) görünür olsun. -->
+  <div class="serit">
+    <div class="kutu"><div class="s">38</div><div class="e">Bugün onaylanan</div></div>
+    <div class="kutu teh"><div class="s">6</div><div class="e">Ön raporda bekleyen</div></div>
+    <div class="kutu"><div class="s">2</div><div class="e">Ek / düzeltme raporu (7 gün)</div></div>
+    <div class="kutu"><div class="s">11</div><div class="e">Onaylı, teslim edilmemiş</div></div>
+    <div class="kutu"><div class="s">4.098</div><div class="e">Eski HBYS'den aktarılan</div></div>
+  </div>
+
+  <div class="cips">
+    <span class="cip on">Tümü <i>27</i></span>
+    <span class="cip">Ön rapor <i>1</i></span>
+    <span class="cip">Onaylı <i>21</i></span>
+    <span class="cip">Teslim edildi <i>4</i></span>
+    <span class="cip">Ek rapor <i>1</i></span>
+    <span class="cip teh">Kritik bulgu <i>0</i></span>
+    <span class="cip">Eski HBYS <i>19</i></span>
+    <div class="suz">
+      <div class="inp combo">Onay tarihi</div>
+      <div class="inp">01.01.2026</div>
+      <div class="inp">—</div>
+      <div class="inp">31.10.2026</div>
+      <div class="inp combo">MR</div>
+      <div class="inp combo">Tüm radyologlar</div>
+      <div class="inp combo">İsteyen bölüm: tümü</div>
+      <div class="inp combo">Kurum: tümü</div>
+    </div>
+  </div>
+
+  <div class="govde">
+    <div class="sol">
+      <table class="l">
+        <thead>
+          <tr>
+            <th style="width:22px">☐</th>
+            <th>Rapor Tarihi</th><th>Mod.</th><th>Hasta</th><th>Tetkik</th>
+            <th>Bulgu / sonuç (eşleşen)</th>
+            <th>Radyolog</th><th>İsteyen</th><th>Kurum</th><th>Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="sec">
+            <td>☑</td>
+            <td>30.10.2026 16:42<span class="alt">istem 29.10 · ACC-261029-0031</span></td>
+            <td><span class="mod">MR</span></td>
+            <td>HASTA A. <span class="alt">47y · K</span></td>
+            <td>Sağ Diz MR</td>
+            <td class="ozet">… medial <mark>menisküs</mark> arka boynuzda horizontal yırtık. Ön çapraz bağ sağlam. Eklem içi sıvı artışı …</td>
+            <td>Dr. Radyolog 1</td>
+            <td>Dr. Hekim K.<span class="alt">Ortopedi ve Travmatoloji</span></td>
+            <td>SGK</td>
+            <td><span class="chip c-on">Onaylı</span></td>
+          </tr>
+          <tr class="ek">
+            <td>☐</td>
+            <td class="ekad">↳ 31.10.2026 09:15<span class="alt">ek rapor</span></td>
+            <td></td><td></td><td></td>
+            <td class="ozet">Ek: lateral <mark>menisküs</mark> için önceki tetkikle karşılaştırma yapılmıştır; değişiklik yoktur.</td>
+            <td>Dr. Radyolog 1</td><td></td><td></td>
+            <td><span class="chip c-ek">Ek rapor</span></td>
+          </tr>
+          <tr>
+            <td>☑</td>
+            <td>28.10.2026 11:03<span class="alt">istem 28.10 · ACC-261028-0012</span></td>
+            <td><span class="mod">MR</span></td>
+            <td>HASTA B. <span class="alt">1y3a · E</span></td>
+            <td>Sol Diz MR</td>
+            <td class="ozet">… medial <mark>menisküs</mark> gövdede grade 2 sinyal artışı (dejenerasyon), yırtık izlenmedi …</td>
+            <td>Dr. Radyolog 2</td>
+            <td>Dr. Hekim T.<span class="alt">Fizik Tedavi</span></td>
+            <td>Özel sigorta</td>
+            <td><span class="chip c-tes">Teslim edildi</span></td>
+          </tr>
+          <tr>
+            <td>☐</td>
+            <td>27.10.2026 —<span class="alt">istem 27.10 · ACC-261027-0044</span></td>
+            <td><span class="mod">MR</span></td>
+            <td>HASTA C. <span class="alt">62y · K</span></td>
+            <td>Sağ Diz MR</td>
+            <td class="ozet">… kompleks <mark>menisküs</mark> yırtığı; kıkırdakta grade 3 kayıp …</td>
+            <td>Dr. Radyolog 2</td>
+            <td>Dr. Hekim K.<span class="alt">Ortopedi ve Travmatoloji</span></td>
+            <td>Ücretli</td>
+            <td><span class="chip c-onr">Ön rapor</span></td>
+          </tr>
+          <tr>
+            <td>☐</td>
+            <td>14.03.2026 15:20<span class="eski">eski HBYS</span><span class="alt">GELİS 98321</span></td>
+            <td><span class="mod">MR</span></td>
+            <td>HASTA D. <span class="alt">35y · E</span></td>
+            <td>Sol Diz MR</td>
+            <td class="ozet">… medial <mark>menisküs</mark> arka boynuzda oblik yırtık. Tablo: ölçümler ⊞</td>
+            <td>Dr. Radyolog 3</td>
+            <td>Dr. Hekim S.<span class="alt">Ortopedi ve Travmatoloji</span></td>
+            <td>SGK</td>
+            <td><span class="chip c-on">Onaylı</span></td>
+          </tr>
+          <tr>
+            <td>☐</td>
+            <td>02.02.2026 10:48<span class="eski">eski HBYS</span><span class="alt">GELİS 96110</span></td>
+            <td><span class="mod">MR</span></td>
+            <td>HASTA E. <span class="alt">3a5g · K</span></td>
+            <td>Sağ Kalça MR</td>
+            <td class="ozet">… asetabular labrum düzensiz; <mark>menisküs</mark> benzeri artefakt dışlanmıştır …</td>
+            <td>Dr. Radyolog 3</td>
+            <td>—<span class="alt">Kendi isteği</span></td>
+            <td>Ücretli</td>
+            <td><span class="chip c-on">Onaylı</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sağ önizleme: listede gezerken rapor açmadan okunur. Onaylı raporda
+         yazı alanı yok; düzenleme ancak "Raporu Aç" ile ve yetkiyle. -->
+    <div class="sag">
+      <div class="bas">
+        <b>Sağ Diz MR</b> &nbsp;<span class="chip c-on">Onaylı</span> <span class="chip c-ek">+1 ek rapor</span>
+        <div class="k">
+          <span>Hasta</span><span>HASTA A. · 47y · K</span>
+          <span>İsteyen</span><span>Dr. Hekim K. · Ortopedi ve Travmatoloji</span>
+          <span>Radyolog</span><span>Dr. Radyolog 1 · onay 30.10.2026 16:42</span>
+          <span>Accession</span><span>ACC-261029-0031</span>
+        </div>
+      </div>
+      <div class="kagit">
+        <h4>SAĞ DİZ MR</h4>
+        <b>Teknik:</b> Sagittal, koronal, aksiyel PD-FS ve T1 ağırlıklı sekanslar.<br>
+        <b>Bulgular:</b> Medial <mark>menisküs</mark> arka boynuzda alt yüzeye uzanan horizontal yırtık izlenmiştir.
+        Lateral <mark>menisküs</mark> normal. Ön ve arka çapraz bağlar sağlam. Eklem içi sıvı artışı mevcuttur.
+        <table>
+          <tr><td><b>Ölçüm</b></td><td><b>Sağ</b></td><td><b>Normal</b></td></tr>
+          <tr><td>Patellar tendon kalınlığı</td><td>5,1 mm</td><td>&lt; 7 mm</td></tr>
+          <tr><td>Kıkırdak (medial femoral)</td><td>2,2 mm</td><td>2–3 mm</td></tr>
+        </table>
+        <b>Sonuç:</b> Medial <mark>menisküs</mark> arka boynuz horizontal yırtığı. Efüzyon.
+        <div class="imza">Dr. Radyolog 1<br><span style="color:#888">e-imzalı · 30.10.2026 16:42</span></div>
+      </div>
+      <div class="alt-bar">
+        <div class="btn">◀ Önceki</div><div class="btn">Sonraki ▶</div>
+        <div class="btn sp">🖨 Yazdır</div><div class="btn primary">📄 Aç</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dip">
+    <span>Kayıt: <b>27</b> (6 gösteriliyor)</span>
+    <span>Arama: <b>"menisküs"</b> rapor metninde · 27 eşleşme</span>
+    <span>Seçili: <b>2</b></span>
+    <span class="sp">↑↓ satır · Enter aç · Ctrl+P yazdır</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ne için.</b> İstem listesi bir <b>iş listesidir</b> (çekilecek / raporlanacak). Bu ekran <b>yazılmış raporun
+  arşivi</b>: "geçen ay Dr. X'in gönderdiği diz MR'ları", "raporunda <i>nodül</i> geçen toraks BT'leri",
+  "hastanın eski HBYS raporu" gibi soruların cevabı. Satır = rapor (istem değil); ek / düzeltme raporu
+  ana raporun altında girintili satır.
+  <br><b>Arama.</b> Üstteki kutu hasta adı, TC, accession ve <b>rapor metninde</b> arar; eşleşen yer özet kolonunda
+  ve önizlemede işaretlenir. Tarih süzgecinin türü seçilir: <b>onay</b> / yazma / istem / çekim tarihi.
+  <br><b>Önizleme.</b> Sağ panel raporu açmadan gösterir (tablo + gömülü resim dahil, biçimli HTML).
+  Onaylı rapor burada değiştirilemez; "Raporu Aç" mevcut rapor ekranına gider (yetkiye göre okuma / ek rapor).
+  Toplu seçimle yazdır / PDF.
+  <br><b>Veri.</b> Yeni tablo yok: <code>radyoloji_rapor</code> (+ <code>ust_rapor_id</code> ek rapor) ⟶
+  <code>radyoloji_istem</code> ⟶ hasta / tetkik / isteyen hekim ve bölümü / kurum; metin
+  <code>radyoloji_rapor_bolum.metin</code>. Eski HBYS rozeti <code>aktarim_kaynak = 2</code>.
+  <br><b>Yetki.</b> Ekran kodu <code>radyoloji-rapor.liste</code>; dış hekim yalnız kendi istediği,
+  dış kurum kendi gönderdiği, hasta kendi raporunu görür (istem listesindeki portal kuralı).
+</div>
+</body>
+</html>

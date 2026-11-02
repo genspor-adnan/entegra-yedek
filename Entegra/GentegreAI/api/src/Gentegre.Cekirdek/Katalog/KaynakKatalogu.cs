@@ -270,6 +270,7 @@ public static partial class KaynakKatalogu
         //   alinmamis sonuc" sorularinin ekrani.
         Ekle(RadyolojiKritik());
         Ekle(RadyolojiKonsultasyon());
+        Ekle(RadyolojiRaporListe());   // rapor arşivi (1215)
         // TELERADYOLOJI (797): calisma listesi + kurum + sozlesme.
         Ekle(TeleradIstek());
         Ekle(TeleradKurum());
@@ -345,6 +346,8 @@ public static partial class KaynakKatalogu
         Ekle(KurumIcmal());
         Ekle(PersonelGorev());
         Ekle(Hizmet());
+        Ekle(AktarimEslemeHizmet());   // SKRS eşleme masası (1222)
+        Ekle(AktarimEslemeBolum()); Ekle(AktarimEslemeBrans());   // bölüm / branş sekmeleri (1224)
         Ekle(Masraf());
         Ekle(MaliHareket());
         Ekle(EBelge());

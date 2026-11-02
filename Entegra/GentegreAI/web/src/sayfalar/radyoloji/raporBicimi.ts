@@ -47,3 +47,28 @@ export function tekMetneBolumYaz(metin: string, baslik: string, yeni: string): s
 /** Bölüm başlığı BULGULAR / SONUÇ mu (yapısal metnin yazıldığı bölümler). */
 export const bulguBolumuMu = (baslik: string) => baslik.toLocaleLowerCase('tr').includes('bulgu');
 export const sonucBolumuMu = (baslik: string) => /sonu[çc]/.test(baslik.toLocaleLowerCase('tr'));
+
+/**
+ * YAPILANDIRILMIŞ ALAN -> CÜMLE (1217, hazır alan paketleri). Değer NORMAL sınıfındaysa (Normal / Yok / İntakt /
+ * Korunmuş ile başlıyorsa) normal kalıbı yazılır (boşsa hiçbir şey); değilse kalıp, {değer} seçilen değerle değişir.
+ * Değer cümle ortasındaysa ilk harfi küçülür ("Santral protrüzyon" -> "santral protrüzyon"); kısaltma (SLAP, L4-L5)
+ * ya da kalıbın başındaki değer olduğu gibi kalır. Kalıpsız alan "Ad: değer birim." olarak yazılır.
+ */
+export interface YapisalAlan {
+  alanKod: string; alanAd: string; kalip?: string; sifirKalip?: string; birim?: string;
+}
+const NORMAL_DEGER = /^(normal|yok|intakt|korunmuş)/;
+const kucukBas = (v: string) => (/^\p{Lu}\p{Ll}/u.test(v) ? v.charAt(0).toLocaleLowerCase('tr') + v.slice(1) : v);
+
+export function alanCumlesi(a: YapisalAlan, deger: string | undefined): string {
+  const v = String(deger ?? '').trim();
+  if (!v) return '';
+  if (NORMAL_DEGER.test(v.toLocaleLowerCase('tr'))) return (a.sifirKalip ?? '').trim();
+  const kalip = (a.kalip ?? '').trim();
+  if (!kalip) return `${a.alanAd}: ${v}${a.birim ? ` ${a.birim}` : ''}.`;
+  return kalip.replace(/\{değer\}/g, kalip.startsWith('{değer}') ? v : kucukBas(v));
+}
+
+/** Doldurulmuş alanların cümleleri, alan sırasıyla (boşlar atlanır). */
+export const alanCumleleri = (alanlar: YapisalAlan[], degerler: Record<string, string>) =>
+  alanlar.map(a => alanCumlesi(a, degerler[a.alanKod])).filter(Boolean);

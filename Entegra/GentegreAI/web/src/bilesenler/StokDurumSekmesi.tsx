@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { type StokDurumYaniti, type StokLotSatiri, hataMetni } from '../api/sozlesme';
-import { say4, gunMetni, sayiOkuNull as sayiCoz } from './bicim';
+import { say4, para, gunMetni, sayiOkuNull as sayiCoz } from './bicim';
 import { c } from '../dil/ceviri';
 
 
@@ -132,7 +132,8 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
     <>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      <div className="kpi-serit">
+      {/* BEŞİNCİ KUTU STOK DEĞERİ (stok_karti_v2.html, 02.11.2026). */}
+      <div className="kpi-serit" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
         <div className="kpi">
           <div className="k">{c('Toplam Stok')}</div>
           <div className="v">{say4.format(Number(o?.toplam ?? 0))}{birim}</div>
@@ -152,6 +153,13 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
           <div className="k">{c('Yoldaki (Sipariş)')}</div>
           <div className="v">{say4.format(Number(o?.yolda ?? 0))}{birim}</div>
           <div className="s">açık alış siparişleri</div>
+        </div>
+        <div className="kpi" title={c('Toplam stok × ağırlıklı ortalama alış maliyeti (Stok Değer İcmali ile aynı yöntem)')}>
+          <div className="k">{c('Stok Değeri')}</div>
+          <div className="v">{para.format(Number(o?.deger ?? 0))}</div>
+          <div className="s">{Number(o?.birimMaliyet ?? 0) > 0
+            ? <>{c('birim')} {para.format(Number(o!.birimMaliyet))} · {c('ortalama maliyet')}</>
+            : c('maliyet bilinmiyor (alış yok)')}</div>
         </div>
       </div>
 

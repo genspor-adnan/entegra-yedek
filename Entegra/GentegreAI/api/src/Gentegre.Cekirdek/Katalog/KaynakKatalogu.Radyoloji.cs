@@ -205,7 +205,8 @@ public static partial class KaynakKatalogu
             new("accessionNo",   "i.accession_no",    "metin", "Accession",     Genislik: 150),
             new("hastaAdi",      "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta",     Genislik: 190),
             new("tetkikKodu",    "coalesce(hz.kod, '')",  "metin", "Tetkik Kodu", Varsayilan: false),
-            new("tetkikAdi",     "coalesce(hz.ad, '')",   "metin", "Tetkik",    Genislik: 230),
+            // YÖN (1229): tek taraflı tetkik adıyla birlikte görünür - "Diz MR (SAĞ)".
+            new("tetkikAdi",     "coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon)", "metin", "Tetkik", Genislik: 230),
             // İsteyen: iç hekim kayıtlıysa adı, değilse dış hekim serbest alanı.
             new("isteyen",
                 "coalesce(nullif(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), ''), nullif(i.dis_hekim_ad, ''), '')",
@@ -256,6 +257,93 @@ public static partial class KaynakKatalogu
             new("raporDurum",    "coalesce(r.durum, 0)", "kod", "Rapor Durum Kodu", Varsayilan: false),
         });
 
+    // -------------------------------------------------- radyoloji-rapor ----
+    /// <summary>
+    /// RADYOLOJİ RAPOR LİSTESİ (1215, mockup Ekranlar/Radyoloji/radyoloji_rapor_listesi.html; kullanıcı
+    /// 31.10.2026: "raporlara kolay erişim için Radyoloji Rapor Listesi.. istemden üretilir"). İstem listesi
+    /// İŞ listesidir (çekilecek / raporlanacak); bu ekran YAZILMIŞ raporun arşivi. Satır = istemin ana
+    /// raporu (ek / düzeltme raporları sayıyla) - satır kimliği istem id'si, çift tık rapor ekranını açar.
+    /// Hızlı arama gizli <c>raporMetni</c> kolonuyla rapor gövdesinde de arar (kullanıcı: bulgu kolonu yok).
+    /// Kod: liste <c>radyoloji.rapor.liste</c> -> <c>radyoloji</c>'ye yalnız Gör (rapor ekranı / çıktı da
+    /// <c>radyoloji</c> ister). Portal kuralı YOK = portala kapalı (dış hekim istem listesinden görür).
+    /// </summary>
+    private static KaynakTanimi RadyolojiRaporListe() => new(
+        Ad: "radyoloji-rapor",
+        KapsamKolonu: "i.hasta_id",
+        YetkiKodu: "radyoloji",
+        Kaynak: "public.radyoloji_rapor r " +
+                "join public.radyoloji_istem i on i.id = r.istem_id " +
+                "left join public.taraf  h  on h.id  = i.hasta_id " +
+                "left join public.taraf_hasta hs on hs.id = i.hasta_id " +
+                "left join public.hizmet hz on hz.id = i.hizmet_id " +
+                "left join public.taraf  ih on ih.id = i.istek_hekim_id " +
+                "left join public.taraf  ik on ik.id = i.istek_kurum_id " +
+                "left join public.belge  b  on b.id  = i.belge_id " +
+                "left join public.belge_basvuru bb on bb.id = b.id " +
+                "left join public.taraf  ok on ok.id = bb.odeyen_kurum_id " +
+                "left join public.taraf  ry on ry.id = coalesce(r.onaylayan_id, r.yazan_id)",
+        SubeKolonu: "i.sube_id",
+        SabitKosul: "r.ust_rapor_id is null and i.durum <> 0",
+        VarsayilanSirala: "coalesce(r.onay_tarihi, r.yazma_tarihi) desc nulls last, r.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "i.id",           "sayi",  "Id", Varsayilan: false),
+            new("raporId",      "r.id",           "sayi",  "Rapor Id", Varsayilan: false),
+            new("raporTarihi",  "coalesce(r.onay_tarihi, r.yazma_tarihi)", "tarih", "Rapor Tarihi",
+                Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("onayTarihi",   "r.onay_tarihi",  "tarih", "Onay Tarihi", Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("yazmaTarihi",  "r.yazma_tarihi", "tarih", "Yazma Tarihi", Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("istemTarihi",  "coalesce(i.cekim_tarihi, i.ekleme_tarihi)", "tarih", "Çekim / İstem",
+                Varsayilan: false, Bicim: "dd.MM.yyyy HH:mm"),
+            new("modaliteAdi",
+                RadyolojiIfadeleri.ModaliteAdi("i.modalite"),
+                                              "metin", "Mod.", Hizalama: "orta",
+                                              Bicim: "rozet", Genislik: 80, Filtrelenebilir: false),
+            new("modalite",     "i.modalite",     "kod",   "Modalite Kodu", Varsayilan: false),
+            new("accessionNo",  "i.accession_no", "metin", "Accession", Genislik: 150),
+            new("raporNo",      "coalesce(r.rapor_no, '')", "metin", "Rapor No", Varsayilan: false),
+            new("hastaAdi",     "coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '')", "metin", "Hasta", Genislik: 190),
+            new("hastaTc",      "coalesce(h.vkno, '')", "metin", "TC Kimlik", Varsayilan: false),
+            new("hastaNo",      "coalesce(h.kod, '')",  "metin", "Hasta No", Varsayilan: false),
+            new("yas",          "public.fn_yas_kisa(hs.dogum_tarihi)", "metin", "Yaş", Hizalama: "orta",
+                Genislik: 60, Filtrelenebilir: false, Siralanabilir: false),
+            new("hastaId",      "i.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
+            new("tetkikKodu",   "coalesce(hz.kod, '')", "metin", "Tetkik Kodu", Varsayilan: false),
+            new("tetkikAdi",    "coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon)", "metin", "Tetkik", Genislik: 230),
+            new("radyolog",     "coalesce(public.fn_taraf_ad(ry.unvan, ry.ad, ry.soyad)::varchar(120), '')", "metin", "Radyolog", Genislik: 160),
+            // İsteyen + bölümü: rapor ekranının "İsteyen" bloğuyla aynı sıra (hekimin bölümü, yoksa
+            //   başvurunun bölümü, yoksa isteyen dış kurum).
+            new("isteyen",
+                "coalesce(nullif(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), ''), nullif(i.dis_hekim_ad, ''), '')",
+                                              "metin", "İsteyen", Genislik: 170),
+            new("isteyenBolum",
+                "coalesce((select dp.ad from public.departman dp where dp.id = ih.departman), " +
+                "         (select dp.ad from public.departman dp where dp.id = bb.bolum_id), " +
+                "         public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120), '')",
+                                              "metin", "İsteyen Bölüm", Genislik: 170),
+            new("istekHekimId", "i.istek_hekim_id", "sayi", "İsteyen Hekim Id", Varsayilan: false),
+            new("odeyenKurum",  "coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '')", "metin", "Kurum", Genislik: 150),
+            // Durum: istem teslim edildiyse "Teslim edildi", yoksa raporun kendi durumu.
+            new("durumAdi",
+                "case when i.durum = 6 then 'Teslim Edildi' when r.durum = 3 then 'Onaylı' " +
+                "when r.durum = 2 then 'Ön Rapor' else 'Taslak' end",
+                                              "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                              Genislik: 110, Filtrelenebilir: false),
+            new("durum",        "r.durum",        "kod",   "Rapor Durum Kodu", Varsayilan: false),
+            new("istemDurum",   "i.durum",        "kod",   "İstem Durum Kodu", Varsayilan: false),
+            new("ekRapor",      "(select count(*) from public.radyoloji_rapor e where e.ust_rapor_id = r.id)",
+                                              "sayi",  "Ek Rapor", Hizalama: "orta", Genislik: 80, Bicim: "sayac"),
+            new("kritik",       "i.kritik",       "mantik","Kritik", Hizalama: "orta", Genislik: 70),
+            new("eskiHbys",     "case when b.aktarim_kaynak = 2 then 1 else 0 end", "mantik", "Eski HBYS",
+                Hizalama: "orta", Genislik: 80),
+            new("belgeNo",      "coalesce(b.belge_no, '')", "metin", "Protokol", Genislik: 120, Varsayilan: false),
+            // ARAMA: rapor gövdesi (bütün bölümler) - görünmez, hızlı aramanın ek alanı.
+            new("raporMetni",
+                "coalesce((select string_agg(rb.metin, ' ' order by rb.sira) from public.radyoloji_rapor_bolum rb " +
+                "          where rb.rapor_id = r.id), '')",
+                                              "metin", "Rapor Metni", Varsayilan: false, Siralanabilir: false),
+        });
+
     // ------------------------------------------------- radyoloji-sablon ----
     /// <summary>
     /// Rapor sablonlari listesi (283). "Kullanim" sayaci hangi sablonun
@@ -286,6 +374,39 @@ public static partial class KaynakKatalogu
                 RadyolojiIfadeleri.ModaliteAdi("s.modalite"),
                                         "metin", "Modalite", Hizalama: "orta", Bicim: "rozet",
                                                  Genislik: 90, Filtrelenebilir: false),
+            // ŞABLON v3 (1216, mockup radyoloji_sablon_listesi_v3.html): biçim bölüm sayısından (tek bölüm = tek A4),
+            //   giriş yapisal_tur'dan, kapsam sahip_id'den - düzenlenen ayar değil, hesaplanır.
+            new("bicim",
+                "case when (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) <= 1 then 'Tek' " +
+                "     else 'Parçalı · ' || (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) end",
+                                        "metin", "Biçim", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
+            new("bicimKod",
+                "case when (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) <= 1 then 1 else 2 end",
+                                        "kod", "Biçim Kodu", Varsayilan: false),
+            // GİRİŞ (kullanıcı 01.11.2026: "yapısal butona basıyorum liste boş"): yapısal = BI-RADS gibi form YA DA
+            //   yapılandırılmış alanları (hazır alan paketleri 1217-1219) olan şablon.
+            new("girisAdi",
+                "case when s.yapisal_tur = 1 then 'Yapısal (BI-RADS)' when s.yapisal_tur > 0 then 'Yapısal' " +
+                "     when exists (select 1 from public.radyoloji_sablon_alan a where a.sablon_id = s.id) " +
+                "     then 'Yapısal alan (' || (select count(*) from public.radyoloji_sablon_alan a where a.sablon_id = s.id) || ')' " +
+                "     else 'Serbest' end",
+                                        "metin", "Giriş", Hizalama: "orta", Bicim: "rozet", Genislik: 120, Filtrelenebilir: false),
+            new("yapisalKod",
+                "case when s.yapisal_tur > 0 or exists (select 1 from public.radyoloji_sablon_alan a where a.sablon_id = s.id) then 1 else 0 end",
+                                        "kod", "Yapısal Kodu", Varsayilan: false),
+            new("yapisalTur", "s.yapisal_tur", "kod", "Yapısal Tür", Varsayilan: false),
+            new("kapsam",
+                "case when s.sahip_id is not null then 'Kişisel · ' || public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120) " +
+                "     when s.aciklama ~ '^Eski HBYS şablonu · (DR |MR-)' then '⚠ Sahibi eşlenmedi' else 'Genel' end",
+                                        "metin", "Kapsam", Genislik: 170),
+            new("kapsamKod",
+                "case when s.sahip_id is not null then 2 when s.aciklama ~ '^Eski HBYS şablonu · (DR |MR-)' then 3 else 1 end",
+                                        "kod", "Kapsam Kodu", Varsayilan: false),
+            new("eskiHbys",   "case when s.aciklama like 'Eski HBYS şablonu%' then 1 else 0 end", "mantik", "Eski HBYS",
+                Hizalama: "orta", Genislik: 80),
+            // Eski HBYS klasörü (MR, DIG, DR BERİL ...): liste solundaki "Eski HBYS klasörü" dalları.
+            new("eskiKlasor", "case when s.aciklama like 'Eski HBYS şablonu · %' then substr(s.aciklama, length('Eski HBYS şablonu · ') + 1) else '' end",
+                "metin", "Eski HBYS Klasörü", Varsayilan: false),
             new("modalite",   "s.modalite", "kod", "Modalite Kodu", Varsayilan: false),
             new("bolge",      "s.bolge", "kod", "Bölge Kodu", Varsayilan: false),
             new("tetkik",

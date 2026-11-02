@@ -820,8 +820,7 @@ public static partial class KaynakKatalogu
             //   başlık Yaş/Cins. olsun, 53 E gibi listelensin"). Ayrı Yaş / Cinsiyet kolonları kolon
             //   seçicide durur (kayıtlı görünümler bozulmasın) ama varsayılan görünmez. Sıra yaşa göre.
             new("yasCins",
-                "concat_ws(' ', case when th.dogum_tarihi is null then null "
-                + "else extract(year from age(current_date, th.dogum_tarihi))::int::text end, "
+                "concat_ws(' ', nullif(public.fn_yas_kisa(th.dogum_tarihi), ''), "   // 1214: 45y / 1y3a / 3a5g
                 + "case th.cinsiyet when 1 then 'E' when 2 then 'K' end)",
                                    "metin", "Yaş/Cins.", Hizalama: "orta", Genislik: 70,
                                    Filtrelenebilir: false,
@@ -841,6 +840,10 @@ public static partial class KaynakKatalogu
                 "case when th.dogum_tarihi is null then null "
                 + "else extract(year from age(current_date, th.dogum_tarihi))::int end",
                                    "sayi",  "Yaş", Hizalama: "sag", Genislik: 60,
+                                   Varsayilan: false, Filtrelenebilir: false),
+            // Görünen yaş (1214): 45y / 1y3a / 3a5g - hasta aramada bebek yaşı "0" görünmesin.
+            new("yasKisa", "public.fn_yas_kisa(th.dogum_tarihi)",
+                                   "metin", "Yaş (kısa)", Hizalama: "orta", Genislik: 60,
                                    Varsayilan: false, Filtrelenebilir: false),
             new("dogumTarihi", "th.dogum_tarihi", "tarih", "Doğum Tarihi",
                 Hizalama: "orta", Varsayilan: false),

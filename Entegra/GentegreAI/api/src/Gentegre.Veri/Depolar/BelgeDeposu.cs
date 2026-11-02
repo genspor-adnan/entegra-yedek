@@ -274,6 +274,23 @@ public sealed partial class BelgeDeposu
         //   sekmesinden "Fiş" demek de once kaydettigi icin ayni hataya
         //   dusuyordu). Korunan satir donusmus satirla ayni muameleyi gorur:
         //   yerinde kalir, istemcinin kopyasi atilir.
+        // OTOMATIK RADYOLOJI ISTEMI BIRAKILIR (1242): basvurunun ucret satirindan acilmis, cekimi yapilmamis istemin
+        //   satiri listeden cikarildiysa istem iptal olur ve bag kalkar - satir korumadan cikip silinir. Kabulden /
+        //   muayeneden acilmis istemin satiri asagida eskisi gibi korunur.
+        if (tur == BelgeTuru.SatisSiparisi)
+        {
+            var kalanIdler = satirlar
+                .Select(x => x.TryGetValue("satirId", out var sid) && sid.ValueKind == JsonValueKind.Number ? sid.GetInt32()
+                           : x.TryGetValue("id", out var kid) && kid.ValueKind == JsonValueKind.Number ? kid.GetInt32() : 0)
+                .Where(i => i > 0).ToArray();
+            if (kalanIdler.Length > 0 || satirlar.Count == 0)
+            {
+                await using var birak = baglanti.Komut(
+                    "select public.fn_basvuru_radyoloji_istem_birak(@p0, @p1::int[])", islem, belgeId, kalanIdler);
+                await birak.ExecuteScalarAsync(iptal);
+            }
+        }
+
         var korunan = new List<int>();
         await using (var oku = baglanti.Komut(KorunanSatirSql, islem, belgeId, kapanma > 0))
         {
@@ -361,6 +378,11 @@ public sealed partial class BelgeDeposu
     private static async Task StokDurumGeriAlAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, int belgeId, int tur, int tipi, CancellationToken iptal)
     {
+        if (BelgeTuru.TransferMi(tur))
+        {
+            await TransferGeriAlAsync(baglanti, islem, belgeId, iptal);
+            return;
+        }
         var cikis = BelgeTuru.CikisMi(tur, tipi);
         await using var komut = baglanti.Komut("""
             update public.stok_durum d
@@ -755,6 +777,64 @@ public sealed partial class BelgeDeposu
     private static async Task<bool> StokEtkilerMiAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, int tur, CancellationToken iptal)
         => (await TurEtkileriAsync(baglanti, islem, tur, iptal)).Stok;
+
+    /// <summary>
+    /// TRANSFERİN GERİ ALINMASI (kullanıcı 02.11.2026: "transfer silme/düzenlemeyi de düzelt"): transfer tek satırla
+    /// İKİ depoyu oynatır (StokDurumGuncelleAsync: çıkış deposu -, giriş deposu +). Genel geri alma yalnız bir depoyu
+    /// düzeltiyordu - silinen / düzenlenen transferin malı çıkış deposuna dönmüyor, giriş deposunda kalıyordu.
+    ///  - Stok: çıkış deposu cikan -= m, kalan += m; giriş deposu giren -= m, kalan -= m.
+    ///  - Lot: belgenin VARIŞ hareketleri (izlem satırının deposu = satırın giriş deposu; web transferi yalnız bunu
+    ///    yazar, aktarım 1248'den beri çıkış + varış yazar) giriş deposundan düşülür, çıkış deposuna eklenir.
+    /// </summary>
+    private static async Task TransferGeriAlAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, CancellationToken iptal)
+    {
+        await using (var stok = baglanti.Komut("""
+            with k as (
+                select s.stok_id,
+                       coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
+                       coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo,
+                       sum(case when coalesce(s.miktar, 0) <> 0 then s.miktar else coalesce(s.adet, 0) end) as miktar
+                  from public.belge_satir s
+                  join public.belge b on b.id = s.belge_id
+                 where s.belge_id = @p0 and s.stok_id is not null and s.tur = 1 and s.stok_durum_degis = 1
+                 group by 1, 2, 3),
+            cik as (
+                update public.stok_durum d
+                   set cikan = d.cikan - k.miktar, kalan = d.kalan + k.miktar
+                  from (select stok_id, cikis_depo, sum(miktar) miktar from k where cikis_depo is not null group by 1, 2) k
+                 where d.stok_id = k.stok_id and d.depo_id = k.cikis_depo
+                returning 1)
+            update public.stok_durum d
+               set giren = d.giren - k.miktar, kalan = d.kalan - k.miktar
+              from (select stok_id, giris_depo, sum(miktar) miktar from k where giris_depo is not null group by 1, 2) k
+             where d.stok_id = k.stok_id and d.depo_id = k.giris_depo
+            """, islem, belgeId))
+            await stok.ExecuteNonQueryAsync(iptal);
+
+        await using (var lot = baglanti.Komut("""
+            with v as (
+                select i.stok_id, i.seri_lot_id, i.adet,
+                       coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
+                       coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo
+                  from public.stok_izleme i
+                  join public.belge b on b.id = i.belge_id
+                  left join public.belge_satir s on s.id = i.belge_satir_id
+                 where i.belge_id = @p0 and i.seri_lot_id is not null
+                   and i.depo_id = coalesce(s.giris_depo_id, b.giris_depo_id)),
+            hedef as (
+                update public.stok_lot_durum l
+                   set kalan = l.kalan - x.adet
+                  from (select stok_id, giris_depo, seri_lot_id, sum(adet) adet from v group by 1, 2, 3) x
+                 where l.stok_id = x.stok_id and l.depo_id = x.giris_depo and l.seri_lot_id = x.seri_lot_id
+                returning 1)
+            insert into public.stok_lot_durum (stok_id, depo_id, seri_lot_id, kalan)
+            select stok_id, cikis_depo, seri_lot_id, sum(adet) from v where cikis_depo is not null group by 1, 2, 3
+            on conflict (stok_id, depo_id, seri_lot_id) do update
+               set kalan = public.stok_lot_durum.kalan + excluded.kalan
+            """, islem, belgeId))
+            await lot.ExecuteNonQueryAsync(iptal);
+    }
 
     /// <summary>
     /// Belge tarihi penceresi: bugunden ileri YOK (engel), N gunden eski UYARI (23.10.2026).

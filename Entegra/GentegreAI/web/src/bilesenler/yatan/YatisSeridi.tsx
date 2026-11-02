@@ -50,7 +50,7 @@ export function YatisSeridi({ yatisId }: { yatisId: number }) {
       <div className="yatis-kimlik">
         <div className="ad">{o.hasta}</div>
         <div className="kv"><span>{c('Yaş / cinsiyet')}</span>
-          <b>{o.yas != null ? o.yas : '—'}
+          <b>{o.yasKisa || (o.yas != null ? o.yas : '—')}
              {o.cinsiyet === 1 ? ' / Erkek' : o.cinsiyet === 2 ? ' / Kadın' : ''}</b></div>
         <div className="kv"><span>Yatak</span>
           <b className="yatak-kod">{o.yatak || '—'}</b></div>

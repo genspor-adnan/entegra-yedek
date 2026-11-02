@@ -56,7 +56,8 @@ public static partial class TeleradUclari
                        coalesce(i.isteyen_hekim_tckn, '')          as "isteyenHekimTckn",
                        public.fn_rad_modalite_kod(i.modalite)      as "modaliteKodu",
                        coalesce(i.study_uid, '')                   as "studyUid",
-                       coalesce(hz.sut_kodu, '')                   as "sutKodu",
+                       coalesce((select public.fn_hizmet_sut_kodu(r2.hizmet_id, r2.yon, r2.kontrast)
+                                   from public.radyoloji_istem r2 where r2.id = i.radyoloji_istem_id), hz.sut_kodu, '') as "sutKodu",
                        coalesce(hz.loinc, '')                      as "loinc",
                        i.rapor_id                                  as "raporId",
                        coalesce(rp.istem_nedeni_puan, 0)           as "istemNedeniPuan",

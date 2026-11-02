@@ -1040,7 +1040,7 @@ public static class IceriAlma
         var kalemOnbellek = new Dictionary<string, (int?, int?)>(StringComparer.Ordinal);
         var belgeVar = new Dictionary<string, long>(StringComparer.Ordinal);
         var sonuc = new List<FaturaSatiri>(ham.Count);
-        var disNumarali = hedef.BelgeTuru == 11;
+        var disNumarali = BelgeTuru.DisNumarali(hedef.BelgeTuru);
 
         foreach (var satir in ham)
         {

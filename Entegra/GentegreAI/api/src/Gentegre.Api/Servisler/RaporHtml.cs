@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,15 +10,26 @@ namespace Gentegre.Api.Servisler;
 /// Kalan: biçim etiketleri (b, i, u, s, sub, sup, br, p, div, span, font, ul, ol, li, h1-h3, blockquote) ve
 /// yalnız şu stiller: font-family, font-size, color, background-color, font-weight, font-style,
 /// text-decoration, text-align (+ font etiketinin color / size / face'i). Script, olay öznitelikleri,
-/// url(...), bağlantı, resim ve başka her şey düşer; metin parçaları yeniden kodlanır.
+/// url(...), bağlantı ve başka her şey düşer; metin parçaları yeniden kodlanır.
+/// <para><b>Tablo ve resim (kullanıcı 31.10.2026: "rapor html içinde resim ve tablo da olsun"):</b> table /
+/// thead / tbody / tr / td / th (colspan / rowspan; stilde width, height, border, padding, vertical-align,
+/// border-collapse) ve img. Resim YALNIZ gömülü <c>data:image/(png|jpeg|gif|webp);base64</c> olabilir -
+/// dış adres (izleme pikseli, iç ağ isteği) yok; src'si geçersiz img tamamen düşer.</para>
 /// </summary>
 public static partial class RaporHtml
 {
     private static readonly HashSet<string> IzinliEtiket =
         ["b", "strong", "i", "em", "u", "s", "strike", "sub", "sup", "br", "p", "div", "span", "font",
-         "ul", "ol", "li", "h1", "h2", "h3", "blockquote"];
+         "ul", "ol", "li", "h1", "h2", "h3", "blockquote",
+         "table", "thead", "tbody", "tr", "td", "th", "img"];
     private static readonly HashSet<string> IzinliStil =
-        ["font-family", "font-size", "color", "background-color", "font-weight", "font-style", "text-decoration", "text-align"];
+        ["font-family", "font-size", "color", "background-color", "font-weight", "font-style", "text-decoration", "text-align",
+         "width", "height", "border", "border-collapse", "padding", "vertical-align"];
+    /// <summary>Gömülü resim üst sınırı (base64 uzunluğu, ~3 MB resim).</summary>
+    private const int ResimAzami = 4_000_000;
+
+    [GeneratedRegex(@"^data:image/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+={0,2}$")]
+    private static partial Regex GomuluResim();
 
     [GeneratedRegex(@"<(script|style|iframe|object|embed|template)\b[\s\S]*?</\1\s*>|<!--[\s\S]*?-->", RegexOptions.IgnoreCase)]
     private static partial Regex TehlikeliBlok();
@@ -45,6 +56,13 @@ public static partial class RaporHtml
             if (ad == "strike") ad = "s";
             if (!IzinliEtiket.Contains(ad)) continue;
             if (ad == "br") { if (!kapanis) sb.Append("<br>"); continue; }
+            if (ad == "img")
+            {
+                if (kapanis) continue;
+                var oz = Oznitelikler(ad, m.Groups[3].Value);
+                if (oz.Contains(" src=\"", StringComparison.Ordinal)) sb.Append("<img").Append(oz).Append('>');
+                continue;
+            }
             if (kapanis) { sb.Append("</").Append(ad).Append('>'); continue; }
             sb.Append('<').Append(ad).Append(Oznitelikler(ad, m.Groups[3].Value)).Append('>');
         }
@@ -77,6 +95,12 @@ public static partial class RaporHtml
                 sb.Append(" size=\"").Append(deger).Append('"');
             else if (ad == "align" && etiket is "p" or "div" && deger.ToLowerInvariant() is "left" or "center" or "right" or "justify")
                 sb.Append(" align=\"").Append(deger.ToLowerInvariant()).Append('"');
+            else if (ad is "colspan" or "rowspan" && etiket is "td" or "th" && int.TryParse(deger, out var yay) && yay is > 1 and <= 50)
+                sb.Append(' ').Append(ad).Append("=\"").Append(yay).Append('"');
+            else if (ad == "src" && etiket == "img" && deger.Length <= ResimAzami && GomuluResim().IsMatch(deger))
+                sb.Append(" src=\"").Append(deger).Append('"');
+            else if (ad is "width" or "height" && etiket == "img" && int.TryParse(deger, out var boy) && boy is > 0 and <= 4000)
+                sb.Append(' ').Append(ad).Append("=\"").Append(boy).Append('"');
         }
         return sb.ToString();
     }
@@ -88,7 +112,8 @@ public static partial class RaporHtml
     /// <summary>Biçimli metnin düz hali (istemci göndermediyse): satır sonları korunur.</summary>
     public static string DuzMetin(string html)
     {
-        var s = Regex.Replace(html, @"<br\s*/?>|</(p|div|li|h1|h2|h3)>", "\n", RegexOptions.IgnoreCase);
+        var s = Regex.Replace(html, @"</t[dh]>", "\t", RegexOptions.IgnoreCase);
+        s = Regex.Replace(s, @"\t*(<br\s*/?>|</(p|div|li|h1|h2|h3|tr)>)", "\n", RegexOptions.IgnoreCase);
         s = Regex.Replace(s, "<[^>]+>", "");
         return WebUtility.HtmlDecode(s).Trim();
     }

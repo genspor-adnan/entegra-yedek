@@ -33,7 +33,7 @@ export interface DisPlanOzeti {
 /** Tedavi planı kartı (710) — mockup dis_tedavi_plani_karti.html; tek soruda tüm sekmeler. */
 export interface DisPlanKartVerisi {
   plan: {
-    id: number; planNo: string; hastaId: number; hasta: string; tckn: string; yas: number | null; cinsiyet: number;
+    id: number; planNo: string; hastaId: number; hasta: string; tckn: string; yas: number | null; yasKisa?: string; cinsiyet: number;
     hekimId: number | null; hekim: string; muayeneId: number | null; muayeneTarih: string | null;
     varyant: string; anaPlanId: number | null; anaPlanNo: string; durum: number;
     fiyatListesiId: number | null; fiyatListesi: string; odeyenKurumId: number | null; odeyenKurum: string;
@@ -73,7 +73,7 @@ export interface DisLabPano {
 
 export interface DisHastaKarti {
   hasta: {
-    id: number; unvan: string; cepTel: string; dogumTarihi: string | null; yas: number | null;
+    id: number; unvan: string; cepTel: string; dogumTarihi: string | null; yas: number | null; yasKisa?: string;
     cinsiyet: number; alerji: string; kronik: string; ilac: string; sonMuayene: string | null; sonHekim: string;
     dentalAnamnez: string; seansSayisi: number;
   };
@@ -139,7 +139,7 @@ export interface DisSeansIslem {
 }
 export interface DisSeansKarti {
   seans: {
-    id: number; hastaId: number; hasta: string; yas: number | null; hekimId: number | null; hekim: string; asistanId: number | null; asistan: string;
+    id: number; hastaId: number; hasta: string; yas: number | null; yasKisa?: string; hekimId: number | null; hekim: string; asistanId: number | null; asistan: string;
     unitId: number | null; unit: string; planId: number | null; planNo: string; randevuId: number | null; belgeId: number | null; belgeNo: string;
     baslangic: string; bitis: string | null; sureDk: number; durum: number; anesteziTur: string; anesteziIlac: string; anesteziDoz: string;
     anesteziSaat: string | null; uygulamaNotu: string; komplikasyon: string; hastayaTalimat: string; sonrakiPlan: string; sterilizasyonPaket: string;

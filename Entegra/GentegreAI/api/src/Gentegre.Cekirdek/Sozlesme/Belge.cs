@@ -34,6 +34,17 @@ public sealed class BelgeYaniti
     public IReadOnlyList<DipToplamSatiri> DipToplam { get; set; } = Array.Empty<DipToplamSatiri>();
     public IReadOnlyList<string> Uyarilar { get; set; } = Array.Empty<string>();
     public string IzlemeNo { get; set; } = "";
+    /// <summary>
+    /// Bu kayıtta başvurunun ücret satırından AÇILAN radyoloji istemleri (1242): id, accessionNo, tetkik.
+    /// Boşsa yeni istem yok.
+    /// </summary>
+    public IReadOnlyList<IDictionary<string, object?>> RadyolojiIstemleri { get; set; }
+        = Array.Empty<IDictionary<string, object?>>();
+    /// <summary>
+    /// Hasta dış kurumdan gönderildi (gönderen dış hekim ya da geliş şekli "Sevkli"): istemci açılan istemin
+    /// kartını kabul bilgileri (dış accession, doktor notu, istem kâğıdı) için açar.
+    /// </summary>
+    public bool DisKurumSevki { get; set; }
 }
 
 /// <summary>

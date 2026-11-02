@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapor Şablonları v3 — Kapsam / Biçim Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+<style>
+  .k-gen{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .k-kis{background:#efe6f8;color:#6a3d9a;border:1px solid #d9c6ee}
+  .k-ben{background:#fff1d6;color:#8a5a00;border:1px solid #f0d090}
+  .bc{display:inline-flex;gap:4px;align-items:center;font-size:11px;white-space:nowrap}
+  .bc .ik{display:inline-block;width:14px;height:17px;border:1px solid #9aa7b5;border-radius:1px;background:#fff;position:relative}
+  .bc .ik.p::before{content:"";position:absolute;left:2px;right:2px;top:4px;height:1px;background:#9aa7b5;box-shadow:0 4px 0 #9aa7b5,0 8px 0 #9aa7b5}
+  .eski{display:inline-block;font-size:9.5px;border:1px solid var(--line);border-radius:3px;padding:0 4px;color:var(--muted);margin-left:4px;font-weight:normal}
+  .dal .ek{color:#b06d0a}
+  .mini-a4{background:#fff;border:1px solid #cfd8e3;box-shadow:0 2px 8px rgba(20,40,70,.12);padding:12px 14px;font-family:Arial;font-size:9.5px;line-height:1.5;margin:4px 0}
+  .mini-a4 table{border-collapse:collapse;width:100%;margin:4px 0}
+  .mini-a4 td{border:1px solid #888;padding:1px 4px}
+  .secici{width:430px;border:1px solid var(--line);border-radius:4px;background:#fff;box-shadow:0 8px 24px rgba(20,40,70,.18);font-size:12px}
+  .secici .bas{padding:6px 8px;border-bottom:1px solid var(--line2)}
+  .secici .bas .ara{width:100%}
+  .secici h6{margin:0;padding:6px 10px 3px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:flex}
+  .secici h6 a{margin-left:auto;text-transform:none;color:var(--accent);letter-spacing:0;cursor:pointer}
+  .secici .o{display:flex;gap:8px;align-items:center;padding:4px 10px;cursor:pointer}
+  .secici .o:hover,.secici .o.on{background:var(--sel)}
+  .secici .o .ad{flex:1}
+  .secici .o small{color:var(--muted)}
+  .secici .kapali{color:var(--muted);padding:4px 10px 8px;font-size:11px}
+  .yan{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:14px;align-items:start}
+  .radyo{display:flex;flex-direction:column;gap:6px}
+  .radyo label{display:flex;gap:6px;align-items:flex-start}
+  .radyo small{display:block;color:var(--muted)}
+  .karar{border:2px dashed #e0a33a;border-radius:6px;padding:10px 12px;background:#fffaf0;margin:10px 14px;font-size:11.5px;line-height:1.6}
+  .karar b{color:#8a5a00}
+</style>
+</head>
+<body>
+
+<!-- =============================================================== 1. LİSTE -->
+<div class="win">
+  <div class="ust">
+    <h1>Rapor Şablonu Listesi</h1><span class="yol">Radyoloji › Ayarlar › Rapor Şablonu Listesi</span>
+    <span class="sp"></span>
+    <span class="btn primary">＋ Yeni şablon</span>
+    <span class="btn">⧉ Kopyala <small>(kendime)</small></span>
+    <span class="btn">✎ Aç</span>
+    <span class="btn">👤 Sahibini değiştir…</span>
+    <span class="btn">🌐 Genele aç</span>
+    <span class="btn">🖨 Yazdır ▾</span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+  <div class="serit">
+    <span class="ara">🔍 Ara: Kod, Şablon, Sahibi, Hizmet…</span>
+    <span class="cip on">Aktif <i>351</i></span>
+    <span class="cip"><span class="mod m-bt">BT</span> <i>48</i></span>
+    <span class="cip"><span class="mod m-mr">MR</span> <i>196</i></span>
+    <span class="cip"><span class="mod m-us">US</span> <i>86</i></span>
+    <span class="cip"><span class="mod m-dr">DR</span> <i>6</i></span>
+    <span class="cip"><span class="mod m-mg">MG</span> <i>3</i></span>
+    <span class="cip">▯ Tek <i>339</i></span>
+    <span class="cip">☰ Parçalı <i>12</i></span>
+    <span class="cip">▦ Yapısal <i>1</i></span>
+    <span class="cip">Eski HBYS <i>338</i></span>
+    <span class="cip">Pasif</span>
+    <span class="cip">Tümü</span>
+  </div>
+  <div class="govde3">
+    <div class="agac">
+      <h6>Kapsam</h6>
+      <div class="dal">Tümü <i>351</i></div>
+      <div class="dal on">Benim şablonlarım <i>23</i></div>
+      <div class="dal">Genel (kurum) <i>217</i></div>
+      <div class="dal">Kişisel — tümü <i>134</i></div>
+      <div class="dal alt">Dr. Radyolog A <i>23</i></div>
+      <div class="dal alt">Dr. Radyolog B <i>0</i></div>
+      <div class="dal alt ek">⚠ Sahibi eşlenmedi <i>111</i></div>
+      <h6 style="margin-top:12px">Eski HBYS klasörü</h6>
+      <div class="dal">MR <i>92</i></div>
+      <div class="dal">BT <i>45</i></div>
+      <div class="dal">USG <i>24</i></div>
+      <div class="dal">DIG <i>46</i></div>
+      <div class="dal">MR-AHMET <i>49</i></div>
+      <div class="dal">MR-RANA <i>34</i></div>
+      <div class="dal">DR BERİL <i>28</i></div>
+      <div class="dal">DR AYSE SAYI <i>23</i></div>
+    </div>
+    <div>
+      <table class="liste">
+        <tr><th></th><th>Kod</th><th>Şablon</th><th>Modalite</th><th>Biçim</th><th>Giriş</th><th>Kapsam</th><th>Bağlı hizmet</th><th class="o">Sürüm</th><th class="r">Kullanım <small>30 gün</small></th><th>Durum</th></tr>
+        <tr class="sec"><td></td><td>DR AYSE SAYI.21</td><td><b>Tiroid</b><span class="eski">eski HBYS</span><small>DR AYSE SAYI klasörü</small></td><td><span class="mod m-us">US</span></td>
+            <td><span class="bc"><span class="ik"></span>Tek</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip k-ben">★ Benim</span></td><td>—<small>modalitenin geneli</small></td><td class="o">v1</td><td class="r">12</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>DR AYSE SAYI.07</td><td><b>Gebelik İkiz</b><span class="eski">eski HBYS</span></td><td><span class="mod m-us">US</span></td>
+            <td><span class="bc"><span class="ik"></span>Tek</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip k-ben">★ Benim</span></td><td>—</td><td class="o">v1</td><td class="r">3</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td>⭐</td><td>MG-01</td><td><b>Mamografi (BI-RADS)</b><small>yapılandırılmış BI-RADS</small></td><td><span class="mod m-mg">MG</span></td>
+            <td><span class="bc"><span class="ik p"></span>Parçalı · 5</span></td><td><span class="chip c-mor">Yapısal · BI-RADS</span></td>
+            <td><span class="chip k-gen">Genel</span></td><td>Bilateral mamografi</td><td class="o">v2</td><td class="r">52</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>MR.77</td><td><b>Omuz MR</b><span class="eski">eski HBYS</span><small>MR klasörü</small></td><td><span class="mod m-mr">MR</span></td>
+            <td><span class="bc"><span class="ik"></span>Tek</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip k-gen">Genel</span></td><td>—</td><td class="o">v1</td><td class="r">31</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>DIG.05</td><td><b>Alt Ekstremite Arteryel Sistem Doppler</b><span class="eski">eski HBYS</span><small>ölçüm tablosu</small></td><td><span class="mod m-us">US</span></td>
+            <td><span class="bc"><span class="ik"></span>Tek</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip k-gen">Genel</span></td><td>—</td><td class="o">v1</td><td class="r">8</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>MR-AHMET.14</td><td><b>Sol Kol MR</b><span class="eski">eski HBYS</span><small>MR-AHMET klasörü</small></td><td><span class="mod m-mr">MR</span></td>
+            <td><span class="bc"><span class="ik"></span>Tek</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip c-bek">⚠ Sahibi eşlenmedi</span></td><td>—</td><td class="o">v1</td><td class="r">0</td><td><span class="chip c-ok">Aktif</span></td></tr>
+        <tr><td></td><td>BT-TOR-01</td><td><b>Toraks BT</b><small>pulmoner nodül alanları</small></td><td><span class="mod m-bt">BT</span></td>
+            <td><span class="bc"><span class="ik p"></span>Parçalı · 6</span></td><td><span class="chip c-gri">Serbest</span></td>
+            <td><span class="chip k-kis">Kişisel · Dr. Radyolog B</span></td><td>Toraks BT</td><td class="o">v5</td><td class="r">18</td><td><span class="chip c-ok">Aktif</span></td></tr>
+      </table>
+      <div class="altbar"><span>Kayıt: 23 · seçili 1</span><span>‹ Önceki &nbsp; 1 / 1 &nbsp; Sonraki ›</span></div>
+    </div>
+    <div class="oniz">
+      <div class="bl"><h5>Seçili şablon</h5>
+        <div style="font-weight:bold;font-size:13px;color:var(--navy)">Tiroid <span class="eski">eski HBYS</span></div>
+        <div class="satir"><span>Kod / sürüm</span>DR AYSE SAYI.21 · v1</div>
+        <div class="satir"><span>Modalite</span>US</div>
+        <div class="satir"><span>Biçim / giriş</span>Tek A4 · Serbest</div>
+        <div class="satir"><span>Kapsam</span><span class="chip k-ben">★ Kişisel · Dr. Radyolog A</span></div>
+      </div>
+      <div class="bl"><h5>Önizleme <a>Büyüt ›</a></h5>
+        <div class="mini-a4">
+          <b><u>TİROİD USG</u></b><br>
+          Tiroid bezi normal boyut ve konumdadır. Parankim ekosu homojendir.<br>
+          <table><tr><td></td><td>Sağ</td><td>Sol</td></tr><tr><td>AP (mm)</td><td></td><td></td></tr><tr><td>Tr (mm)</td><td></td><td></td></tr></table>
+          <b>SONUÇ:</b> …
+        </div>
+      </div>
+      <div class="bl"><h5>Kullanım · 30 gün</h5>
+        <div class="satir"><span>Rapor</span><b>12</b></div>
+        <div class="satir"><span>Son kullanım</span>30.10.2026</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================== 2. RAPOR EKRANI SEÇİCİ -->
+<div class="win">
+  <div class="ust"><h1 style="font-size:14px">Rapor ekranı › Şablon seçimi</h1><span class="yol">istem: Tiroid USG · yazan: Dr. Radyolog A</span></div>
+  <div class="yan">
+    <div class="secici">
+      <div class="bas"><span class="ara">🔍 Şablon ara…</span></div>
+      <h6>⭐ Bu tetkike bağlı</h6>
+      <div class="o"><span class="ad">Tiroid US (TI-RADS)</span><span class="chip k-gen">Genel</span><span class="chip c-mor">Yapısal</span></div>
+      <h6>★ Benim şablonlarım <a>Tümü (23)</a></h6>
+      <div class="o on"><span class="ad">Tiroid <small>· DR AYSE SAYI.21</small></span><span class="chip c-gri">Tek</span></div>
+      <div class="o"><span class="ad">Boyun USG</span><span class="chip c-gri">Tek</span></div>
+      <h6>Genel — US <a>Tümü (63)</a></h6>
+      <div class="o"><span class="ad">Tiroid US.DOT <small>· DIG.30</small></span><span class="chip c-gri">Tek</span></div>
+      <div class="o"><span class="ad">Tiroid USG <small>· DIG.31</small></span><span class="chip c-gri">Tek</span></div>
+      <h6>Diğer radyologların kişisel şablonları <a>Göster ▸</a></h6>
+      <div class="kapali">3 şablon · kapalı (tıklayınca açılır)</div>
+    </div>
+    <div class="not" style="padding:0">
+      <span class="n">1</span><b>Sıra:</b> tetkike bağlı → benim → genel (aynı modalite) → diğer radyologlar.<br>
+      <span class="n">2</span><b>Varsayılan seçim:</b> tetkike bağlı varsayılan (⭐), yoksa radyoloğun bu tetkikte en son kullandığı şablon, yoksa ilk sıradaki.<br>
+      <span class="n">3</span><b>Diğer radyologlar:</b> grup <b>kapalı</b> gelir, "Göster" ile açılır (karar 1).<br>
+      <span class="n">4</span>Rozet: <b>Tek</b> = A4 tek parça açılır, <b>Parçalı</b> = bölüm bölüm, <b>Yapısal</b> = form (BI-RADS).
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ 3. KART: KAPSAM -->
+<div class="win">
+  <div class="ust"><h1 style="font-size:14px">Rapor Şablonu Kartı › Genel sekmesi (yalnız yeni alanlar)</h1></div>
+  <div class="yan">
+    <div class="grp" style="width:430px;margin:0">
+      <h4>Kapsam</h4>
+      <div class="ic radyo">
+        <label><input type="radio" name="k"> <span><b>Genel (kurum)</b><small>bütün radyologların listesinde · "Genele aç" yetkisi gerekir</small></span></label>
+        <label><input type="radio" name="k" checked> <span><b>Kişisel</b><small>sahibinin listesinde; diğerlerinde kapalı grupta</small></span></label>
+        <div class="fld" style="margin-left:22px"><label>Sahibi</label><div class="inp">Dr. Radyolog A ▾</div></div>
+      </div>
+    </div>
+    <div class="grp" style="margin:0">
+      <h4>Biçim (bilgi — bölüm sekmesinden gelir)</h4>
+      <div class="ic">
+        <div class="satir"><span>Bölüm sayısı</span>1 → <b>Tek A4</b></div>
+        <div class="satir"><span>Yapısal form</span>Yok → <b>Serbest</b></div>
+        <div class="bilgi" style="margin-top:6px">Tek / parçalı ayrı bir ayar değil: tek bölümlü şablon tek A4 açılır, çok bölümlü bölüm bölüm
+          (hekim rapor ekranında teke birleştirebilir). Yapısal = şablonun BI-RADS gibi formu var.</div>
+      </div>
+    </div>
+  </div>
+  <div class="karar">
+    <b>KARAR 1 — başka radyoloğun kişisel şablonu rapor ekranında:</b> (a) kapalı grupta, "Göster" ile açılır <i>(mockup böyle)</i> · (b) hiç görünmez.<br>
+    <b>KARAR 2 — sahibi eşlenmeyen eski klasörler</b> (MR-AHMET 49, MR-RANA 34, DR BERİL 28): kime bağlanacak? Bağlanana kadar
+    "⚠ Sahibi eşlenmedi" süzgecinde ve <b>genel</b> davranır; liste toplu seçimle "👤 Sahibini değiştir…" ile bağlanır.<br>
+    <b>KARAR 3 — "Genele aç" yetkisi:</b> şablon kartını değiştirebilen herkes mi, yoksa ayrı aksiyon yetkisi (ör. <code>rad.sablon_genel</code>) mi?
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v3, kullanıcı 01.11.2026):</b> "Rapor Şablonu Listesi'ne baktım hiç şablon yoktu.. orayı da tek/parçalı serbest/yapısal
+yapmak gerekir mi? bir de genel/radyolog özel?" (Boş liste aktarım hatasıydı - şube 0; düzeltildi.)<br>
+<span class="n">1</span><b>Kapsam</b> yeni tablo istemez: <code>radyoloji_sablon.sahip_id</code> boş = genel, dolu = kişisel. Sol ağaç ve "Kapsam" kolonu bundan.<br>
+<span class="n">2</span><b>Biçim / Giriş</b> kolonları hesaplanır (bölüm sayısı, <code>yapisal_tur</code>) - düzenlenen ayar değil; çipler süzgeç.<br>
+<span class="n">3</span><b>Kopyala (kendime):</b> genel şablonun kişisel kopyası - hekim kurum şablonunu bozmadan kendine uyarlar.<br>
+<span class="n">4</span><b>Eski HBYS</b> rozeti ve klasör ağacı aktarılan şablonları bulmak için (açıklamadaki klasör adından).
+</div></div>
+</body>
+</html>

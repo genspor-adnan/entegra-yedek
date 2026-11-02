@@ -37,6 +37,9 @@ export interface AcikSatir {
   hastaTahsilMatrah?: number;
   kurumTahsilMatrah?: number;
   tutarKalan?: number;
+  /** Stok izleme türü (0 yok · >0 lot/seri) ve lotların okunacağı çıkış deposu (dönüşümde lot seçimi, 02.11.2026). */
+  izleme?: number | null;
+  cikisDepoId?: number | null;
   birim: number;
   birimFiyat: number;
   iskonto: number;

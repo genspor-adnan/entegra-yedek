@@ -12,4 +12,10 @@ export interface BelgeYaniti {
   dipToplam: DipToplamSatiri[];
   uyarilar?: string[];
   izlemeNo: string;
+  /** Bu kayıtta başvurunun ücret satırından açılan radyoloji istemleri (1242). */
+  radyolojiIstemleri?: AcilanRadyolojiIstemi[];
+  /** Hasta dış kurumdan gönderildi (gönderen dış hekim / geliş şekli Sevkli): istem kartı kabul için açılır. */
+  disKurumSevki?: boolean;
 }
+
+export interface AcilanRadyolojiIstemi { id: number; accessionNo: string; tetkik: string }

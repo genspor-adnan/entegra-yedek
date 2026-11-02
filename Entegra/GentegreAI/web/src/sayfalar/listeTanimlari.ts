@@ -85,6 +85,24 @@ export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   ],
 };
 
+/**
+ * LİSTENİN BELGE TÜRÜNE GÖRE DÖNÜŞÜM MENÜSÜ (kullanıcı 02.11.2026: satış irsaliyesi listesinde "menüde irsaliyeyi
+ * kaldır"): hedefler BelgeDonusumModali.HEDEFLER'den - irsaliye listesinde İrsaliye çıkmaz, satışta tahakkuk satış
+ * tahakkukudur (sabit menü 13 = alış tahakkuku veriyordu). Tür bilinmiyorsa sabit menü.
+ */
+const DONUSUM_KISA_AD: Record<number, string> = {
+  10: 'İrsaliye', 14: 'İrsaliye', 11: 'Fatura', 15: 'Fatura', 12: 'Fiş', 16: 'Fiş', 13: 'Tahakkuk', 17: 'Tahakkuk', 19: 'Sipariş' };
+const DONUSUM_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };
+export function donusumMenusu(kaynakTur: number | undefined,
+                              hedefler: Record<number, { kod: number; ad: string }[]>): Record<string, { kod: string; ad: string }[]> {
+  const h = kaynakTur ? hedefler[kaynakTur] : undefined;
+  if (!h?.length) return DONUSUM_MENUSU;
+  return { 'belge.donustur': h.map(x => ({
+    kod: `belge.donustur.${x.kod}`,
+    ad: `${DONUSUM_IKON[x.kod] ?? '⇢'} ${DONUSUM_KISA_AD[x.kod] ?? x.ad}`,
+  })) };
+}
+
 export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'kasa.tahsilat.yeni': [
     { kod: 'kasa.yeni.21', ad: '💵 Nakit' },

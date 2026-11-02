@@ -91,7 +91,8 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   gorevRol: String(s.gorev ?? ''),
   bolum: String(s.departmanAdi ?? ''),
   cinsiyet: String(s.cinsiyetAdi ?? ''),
-  yas: s.yas != null && s.yas !== '' ? String(s.yas) : '',
+  // Görünen yaş (1214): 45y / 1y3a / 3a5g; eski sunucuda tam yıl + 'y'.
+  yas: s.yasKisa ? String(s.yasKisa) : s.yas != null && s.yas !== '' ? `${String(s.yas)}y` : '',
   telefon: String(s.cepTel ?? ''),
   sonBasvuru: gun(s.sonBasvuru),
   sonBolum: String(s.sonBolum ?? ''),
@@ -167,6 +168,8 @@ interface Props {
   /** "＋ Yeni" tam kart yerine ÇAĞIRANIN penceresini açar (randevu: küçük hasta aday ekranı, 16.10.2026);
       aranan metin verilir (ad / telefon ön dolsun). */
   onYeni?(aranan: string): void;
+  /** "＋ Yeni" kartının ön değerleri (alış belgesinde tedarikçi, satışta müşteri rolü işaretli gelsin). */
+  yeniVarsayilanlari?: Record<string, string | number | boolean>;
 }
 
 /**
@@ -177,7 +180,7 @@ interface Props {
  * arar (Tip/Bağlı Kurum/Görev-Rol gibi taraf-ortak kolonlarla) ve disaridan (ör. toolbar
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
-export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre, onYeni,
+export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre, onYeni, yeniVarsayilanlari,
                              yerTutucu, baslangicMetni, baslangicYeni,
                              cokluSecim = false, onSecCoklu, secimDenetimi,
                              onKapat, onSec }: Props) {
@@ -420,6 +423,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
         // Kart basligi kaynak adindan uretiliyordu ("hasta-aday"); okunur ad.
         baslik={kaynak === 'hasta-aday' ? 'Aday Hasta' : undefined}
         cariyeBaglaGizli
+        yeniKayitVarsayilanlari={yeniMi ? yeniVarsayilanlari : undefined}
         onKapat={() => { setKartAcik(null); void ara(arama) }}
         onKaydedildi={id => { void kartKaydedildi(kaynak, yeniMi, id) }}
         // Kimlik no kayıtlı hastaya aitse yeni kart yerine o hasta SEÇİLİR.
@@ -557,7 +561,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
                     <>
                       <td>{satir.kod}</td>
                       <td>{satir.unvan}</td>
-                      <td>{[satir.cinsiyet.slice(0, 1), satir.yas ? `${satir.yas}y` : ''].filter(Boolean).join(' ')
+                      <td>{[satir.cinsiyet.slice(0, 1), satir.yas].filter(Boolean).join(' ')
                            || <span className="sonuk">—</span>}</td>
                       <td>{satir.telefon}</td>
                       <td>{satir.sonBasvuru || <span className="sonuk">—</span>}</td>

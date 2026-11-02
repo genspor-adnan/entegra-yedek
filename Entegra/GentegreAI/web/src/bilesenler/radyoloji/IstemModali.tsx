@@ -6,6 +6,7 @@ import { useIstemSecimi } from './useIstemSecimi';
 import { useIsteyenHekim } from './useIsteyenHekim';
 import type { Gecmis, Hekim, Tetkik } from './istemTipleri';
 import { TarafArama } from '../TarafArama';
+import { KaynakArama } from '../KaynakArama';
 import { mesaj } from '../mesaj';
 import { para, paraYaz } from '../bicim';
 import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
@@ -70,6 +71,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   const isteyen = useIsteyenHekim();
   const [gecmis, setGecmis] = useState<Gecmis[]>([]);
   const [onTani, setOnTani] = useState('');
+  /** ICD SEÇİMİ (kullanıcı 01.11.2026): genel ICD-10 arama penceresi; seçilen kodun adı yanında görünür. */
+  const [icdAcik, setIcdAcik] = useState(false);
+  const [onTaniAdi, setOnTaniAdi] = useState('');
   const [klinikBilgi, setKlinikBilgi] = useState('');
   const [ucretEkle, setUcretEkle] = useState(true);
   /** KABUL modu (mockup radyoloji_kayit_kabul): basvurusu olmayan dis hasta. */
@@ -200,7 +204,8 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
         //   isteme tasinir - cekim plandaki cihazda yapilacak.
         randevuId: randevuId ?? null,
         tetkikler: secili.map(s => ({ hizmetId: s.tetkik.id, oncelik: s.oncelik,
-                                      kontrast: s.kontrast })),
+                                      kontrast: s.kontrast,
+                                      accessionNo: (s.accessionNo ?? '').trim() })),
       });
       // ISTEM KAGIDI uretilen HER isteme eklenir: rapor yazan radyolog hangi
       //   accession'i acarsa acsin kagidi gormeli; tek isteme baglamak
@@ -316,12 +321,14 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
             <table className="detay-tablo">
               <thead>
                 <tr><th>Kod</th><th>Tetkik</th><th>Öncelik</th><th>Kontrast</th>
+                    <th title={c('Hasta başka kurumdan accession numarasıyla geldiyse girin; boşsa kurum numarası verilir.')}>
+                      {c('Dış accession')}</th>
                     <th className="sag">Liste</th><th className="sag">{c('İndirim')}</th>
                     <th className="sag">Tutar</th><th /></tr>
               </thead>
               <tbody>
                 {secili.length === 0 && (
-                  <tr><td colSpan={8} className="bos">{c('Soldaki listeden tetkik seçin.')}</td></tr>
+                  <tr><td colSpan={9} className="bos">{c('Soldaki listeden tetkik seçin.')}</td></tr>
                 )}
                 {secili.map(s => (
                   <tr key={s.tetkik.id}>
@@ -340,6 +347,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                                                       { kontrast: Number(e.target.value) })}>
                         {KONTRAST.map(o => <option key={o.deger} value={o.deger}>{o.ad}</option>)}
                       </select>
+                    </td>
+                    <td>
+                      <input value={s.accessionNo ?? ''} maxLength={16} placeholder={c('otomatik')} style={{ width: 120 }}
+                             onChange={e => degistir(s.tetkik.id, { accessionNo: e.target.value })} />
                     </td>
                     {/* FIYAT (mockup): liste, indirim ve odenecek tutar satir
                         satir gorunur - kabul masasi toplami kaydetmeden once
@@ -465,9 +476,19 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
               )}
               <label className="alan">
                 <span className="etiket">{c('Ön Tanı (ICD-10)')}</span>
-                <input value={onTani} maxLength={20} placeholder="örn. M51.1"
-                       onChange={e => setOnTani(e.target.value)} />
+                <span className="deger-serit">
+                  <input value={onTani} maxLength={20} placeholder="örn. M51.1" style={{ width: 110 }}
+                         onChange={e => { setOnTani(e.target.value); setOnTaniAdi('') }} />
+                  <button type="button" className="d" title={c('ICD-10 tanı ara')} onClick={() => setIcdAcik(true)}>🔍</button>
+                  {onTaniAdi && <span className="sonuk">{onTaniAdi}</span>}
+                </span>
               </label>
+              {icdAcik && (
+                <KaynakArama kaynak="icd" baslik={c('ICD-10 tanı ara')} ilkSik kullanimIsaretle
+                             ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+                             onSec={s => { setOnTani(String(s.kod ?? '')); setOnTaniAdi(String(s.ad ?? '')); setIcdAcik(false) }}
+                             onKapat={() => setIcdAcik(false)} />
+              )}
               <label className="alan">
                 <span className="etiket">Ücret</span>
                 <span className="deger-serit">

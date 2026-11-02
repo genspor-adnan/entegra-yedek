@@ -201,15 +201,10 @@ public static partial class KaynakKatalogu
                                                      Genislik: 40, Filtrelenebilir: false,
                                                      Varsayilan: false),
             // Bebeklerde yil yerine ay/gun: "3 ay" ile "0 y" arasindaki fark
-            //   doz ve referans araligi kararini degistirir.
+            //   doz ve referans araligi kararini degistirir. Kural fn_yas_kisa'da
+            //   (1214): 45y / 1y3a / 3a5g, sifir parca yazilmaz.
             new("yasMetni",
-                "case when th.dogum_tarihi is null then '' "
-                + "when age(th.dogum_tarihi) >= interval '2 years' "
-                + "     then extract(year from age(th.dogum_tarihi))::int::text || 'y' "
-                + "when age(th.dogum_tarihi) >= interval '1 month' "
-                + "     then (extract(year from age(th.dogum_tarihi))::int * 12 "
-                + "           + extract(month from age(th.dogum_tarihi))::int)::text || 'ay' "
-                + "else (current_date - th.dogum_tarihi)::text || 'g' end",
+                "public.fn_yas_kisa(th.dogum_tarihi)",
                                                      "metin", "Yaş", Hizalama: "orta",
                                                      Genislik: 70, Filtrelenebilir: false,
                                                      Varsayilan: false)

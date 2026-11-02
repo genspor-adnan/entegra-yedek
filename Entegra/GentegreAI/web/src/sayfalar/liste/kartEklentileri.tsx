@@ -26,6 +26,8 @@ import { DenetimAraclari } from '../kys/denetim/kysDenetimKarti';
 import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
 import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
 import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
+import { SablonMetniSekmesi } from '../radyoloji/SablonMetniSekmesi';
+import { AlanPaketiCubugu } from '../radyoloji/AlanPaketleri';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 import { HastaKartBandi } from '../hasta/HastaKartBandi';
@@ -287,12 +289,23 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   //   Önizleme girilen içerikle çalışır, Sürümler / Kullanım kayıttan sonra dolar.
   'radyoloji-sablon': {
     ekSekmeler: b => b.kartId === null ? undefined : [
+      // ŞABLON METNİ (1216, mockup radyoloji_sablon_karti_v3.html): bölümler biçimli (tablo / resim / yer tutucu),
+      //   Tek A4 ⇄ Bölümlü, Bakanlık parçaları. Kayıt kendi ucundan - yeni kartta kayıttan sonra.
+      { anahtar: 'ozel:rt-metin', baslik: 'Şablon Metni', yenideDe: true,
+        ciz: e => kayitli(b.kartId)
+          ? <SablonMetniSekmesi id={b.kartId} salt={e.saltOkunur} kartiKaydet={b.kartiKaydet} kartiTazele={b.kartiTazele} />
+          : <KayitSonraDolar /> },
       { anahtar: 'ozel:rt-oniz', baslik: 'Önizleme', yenideDe: true, ciz: e => <SablonOnizlemeSekmesi baglam={e} /> },
       { anahtar: 'ozel:rt-surum', baslik: 'Sürümler', yenideDe: true,
         ciz: () => kayitli(b.kartId) ? <SablonSurumSekmesi id={b.kartId} tazele={b.kartiTazele} /> : <KayitSonraDolar /> },
       { anahtar: 'ozel:rt-kul', baslik: 'Kullanım', yenideDe: true,
         ciz: () => kayitli(b.kartId) ? <SablonKullanimSekmesi id={b.kartId} /> : <KayitSonraDolar /> },
     ],
+    // HAZIR ALAN PAKETİ (1217): "Yapılandırılmış alanlar" sekmesinin üstünde paket seçip ekleme.
+    sekmeSarmalayici: b => (baslik, icerik) => baslik === 'Yapılandırılmış alanlar' && kayitli(b.kartId)
+      ? <><AlanPaketiCubugu sablonId={b.kartId} salt={!b.yetki('radyoloji', 'degistir')}
+                            kartiKaydet={b.kartiKaydet} kartiTazele={b.kartiTazele} />{icerik}</>
+      : icerik,
   },
   // PROTOKOL: hasta hazırlığı metni randevu SMS'inde nasıl görünür.
   'radyoloji-protokol': {

@@ -303,8 +303,11 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
                i.onay_zamani                        as "onayZamani",
                i.cekim_zamani                       as "cekimZamani",
                public.fn_rad_modalite_kod(i.modalite) as "modaliteKodu",
-               coalesce(hz.sut_kodu, '')            as "sutKodu",
-               coalesce(hz.ad, '')                  as "sutAdi",
+               -- 1232: yön ailesi hizmetinde kod istemin yön / kontrastından.
+               coalesce(public.fn_hizmet_sut_kodu(coalesce(ri.hizmet_id, hz.id), ri.yon, ri.kontrast), '') as "sutKodu",
+               coalesce((select ss.ad from public.skrs_sut ss where hz.standart = 3
+                            and ss.kod = public.fn_hizmet_sut_kodu(coalesce(ri.hizmet_id, hz.id), ri.yon, ri.kontrast)),
+                        hz.ad, '')                  as "sutAdi",
                coalesce(hz.loinc, '')               as loinc,
                public.fn_telerad_bakanlik_eksik(i.id) as "bakanlikEksik",
 

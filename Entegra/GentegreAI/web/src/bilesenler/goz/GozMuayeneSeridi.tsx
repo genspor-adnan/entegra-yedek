@@ -56,7 +56,7 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
       <div>
         <div className="ad">{k.hasta}</div>
         <div className="sonuk">
-          {[`${k.yas ?? '—'}${k.cinsiyet ? ` ${cinsiyetAdi(k.cinsiyet, true)}` : ''}`,
+          {[`${k.yasKisa || (k.yas ?? '—')}${k.cinsiyet ? ` ${cinsiyetAdi(k.cinsiyet, true)}` : ''}`,
             k.protokol ? `Prot. ${k.protokol}` : '', tarihSaat(k.tarih), k.hekim].filter(Boolean).join(' · ')}
         </div>
       </div>

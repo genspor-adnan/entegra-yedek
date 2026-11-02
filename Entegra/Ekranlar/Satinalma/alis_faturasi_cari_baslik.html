@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alış Faturası — Cari Başlığı (mockup)</title>
+<!--
+  Kullanıcı 02.11.2026: "alış faturası kartı cari başlık için mockup yap.. e-belge ve faturalama durumu da oraya alarak".
+  Bugünkü kart: cari bandı (avatar · ünvan · kod · VKN · il · temsilci · durum · e-Fatura | Borcumuz) + altında başlık ızgarası
+  (Fatura Tipi · Senaryo · Tedarikçi Fatura No · Tarih | Sorumlu · Giriş Deposu · Vade · "e-Belge · Sipariş No" rozetleri).
+  Öneri: e-Belge rozetleri ve faturalama / ödeme durumu bandın SAĞ BLOĞUNA taşınır; ızgaradaki e-Belge hücresi boşalır
+  (yerine Döviz değil - Proje / Masraf Merkezi gibi ileride gerekebilecek alan; şimdilik boş bırakılır).
+  Aynı başlık satış belgelerinde de kullanılır (satışta "Bakiye", "Tahsilat"; e-Arşiv / e-Fatura giden).
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mor:#2f6db3; --mor2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:16px}
+  h2{font-size:13px;color:var(--yazi2);margin:22px 0 6px}
+  h2:first-child{margin-top:0}
+  .not{color:var(--soluk);font-size:11px;margin:0 0 8px;line-height:1.5}
+  .sayfa{background:var(--yuz);border:1px solid var(--cizgi);border-radius:4px;overflow:hidden;max-width:1360px}
+  .arac{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--cizgi2);background:var(--yuz2)}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:600}
+  .d.yesil{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .d.kirmizi{background:linear-gradient(#e7a3a3,#d98b8b);color:#fff;border-color:#d98b8b}
+  .ayrac{width:1px;height:22px;background:var(--cizgi)}
+  .tur{font-size:15px;font-weight:700;letter-spacing:.3px;color:var(--hata)}
+  .tur.satis{color:var(--ok)}
+  .tur small{font-size:13px;color:var(--yazi2);font-weight:700;letter-spacing:0}
+  .bas{padding:12px 14px;background:linear-gradient(#fff,#f4f7fb);border-bottom:1px solid var(--cizgi)}
+
+  /* CARİ BAŞLIĞI */
+  .cbb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 12px;
+    border:1px solid var(--cizgi2);border-radius:6px;background:#fff;margin-bottom:10px}
+  .av{width:34px;height:34px;border-radius:50%;background:#2e9d5b;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .ad{font-size:13.5px;font-weight:700;color:var(--yazi2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ad .k{font-weight:400;color:var(--soluk);font-size:12px;margin-left:6px;cursor:pointer}
+  .kim{color:var(--soluk);font-size:11.5px;margin-top:2px}
+  .kim b{color:var(--yazi);font-weight:600}
+  /* sağ blok: durum kutucukları */
+  .sag{display:flex;gap:6px;align-items:stretch}
+  .kt{border:1px solid var(--cizgi2);border-radius:5px;padding:4px 9px;min-width:118px;background:var(--yuz2);display:flex;flex-direction:column;gap:2px}
+  .kt .e{font-size:10px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px}
+  .kt .v{font-size:12px;font-weight:700;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .kt .a{font-size:10.5px;color:var(--soluk)}
+  .kt.ok{background:#eef8f1;border-color:#c4e6d0}
+  .kt.uy{background:#fdf6e8;border-color:#f0dfb8}
+  .kt.hata{background:#fdf0f0;border-color:#f2c9c9}
+  .kt.tik{cursor:pointer}
+  .kt.tik:hover{border-color:#98c2ee}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid}
+  .rz.bilgi{background:#e6f0fb;color:var(--mor);border-color:#cfe0f4}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .borc{color:var(--hata)}
+  .alacak{color:var(--ok)}
+
+  /* başlık ızgarası (bugünkü) */
+  .iz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px}
+  .al{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:center;gap:8px}
+  .al .et{font-size:11px;color:var(--soluk);text-align:right}
+  .al .et.z::after{content:" *";color:var(--hata)}
+  .inp{border:1px solid var(--cizgi);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff;white-space:nowrap;overflow:hidden}
+  .inp.yt{color:#9aa7b5}
+  .bos{visibility:hidden}
+  .sekmeler{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--cizgi)}
+  .sk{padding:8px 14px;color:var(--soluk)}
+  .sk.on{color:var(--yazi2);font-weight:700;border-bottom:2px solid var(--mor)}
+  .aciklama{max-width:1360px;margin-top:14px;color:var(--soluk);font-size:11px;line-height:1.7}
+  .aciklama b{color:var(--yazi)}
+</style>
+</head>
+<body>
+
+<h2>① Yeni alış faturası — taslak, henüz kaydedilmedi</h2>
+<p class="not">e-Belge: gelen faturanın türü (e-Fatura / e-Arşiv / kâğıt) ve izibiz'den eşleşme durumu. Faturalama: hangi irsaliye / siparişten geldiği. Ödeme: belge kaydedilince.</p>
+<div class="sayfa">
+  <div class="arac"><span class="d yesil">💾 Kaydet</span><span class="d kirmizi">🗑 Sil</span><span class="d">🖨 Yazdır</span><span class="ayrac"></span>
+    <span class="tur">ALIŞ FATURASI</span><span style="margin-left:auto" class="d">✖ Kapat</span></div>
+  <div class="bas">
+    <div class="cbb">
+      <div class="av">CŞ</div>
+      <div style="min-width:0">
+        <div class="ad">2K CNC MAKİNA YEDEK PARÇA SANAYİ TİCARET LİMİTED ŞİRKETİ <span class="k" title="Cari kartını aç">↗</span></div>
+        <div class="kim">Kod <b>329.01.101</b> · VKN <b>0011659661</b> · İl <b>İstanbul</b> · Temsilci <b>Tanımsız</b> · Durum <b>Aktif</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt"><span class="e">e-Belge</span><span class="v"><span class="rz bilgi">e-Fatura</span><span class="rz gri">Taslak</span></span><span class="a">gelen e-fatura eşleşmedi</span></div>
+        <div class="kt"><span class="e">Faturalama</span><span class="v">Doğrudan</span><span class="a">irsaliye / sipariş bağı yok</span></div>
+        <div class="kt"><span class="e">Ödeme</span><span class="v" style="color:var(--soluk)">—</span><span class="a">kaydedince</span></div>
+        <div class="kt tik" title="Cari ekstresini aç"><span class="e">Borcumuz</span><span class="v">0,00</span><span class="a">vade 30 gün</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et">Fatura Tipi</span><span class="inp">Alış</span></div>
+      <div class="al"><span class="et">Senaryo</span><span class="inp">Temel Fatura</span></div>
+      <div class="al"><span class="et z">Tedarikçi Fatura No</span><span class="inp yt">örn. ABC2026000001234</span></div>
+      <div class="al"><span class="et z">Fatura Tarihi</span><span class="inp">02.11.2026 11:19</span></div>
+      <div class="al"><span class="et">Sorumlu</span><span class="inp">Sistem Yoneticisi</span></div>
+      <div class="al"><span class="et">Giriş Deposu</span><span class="inp">Anadepo</span></div>
+      <div class="al"><span class="et">Vade (gün)</span><span class="inp" style="justify-content:flex-end">30</span></div>
+      <div class="al bos"><span class="et">—</span><span class="inp"></span></div>
+    </div>
+  </div>
+  <div class="sekmeler"><span class="sk on">Kalemler 0</span><span class="sk">e-Belge</span><span class="sk">Ödeme</span><span class="sk">Resim / Doküman</span></div>
+</div>
+
+<h2>② Kayıtlı — gelen e-faturayla eşleşti, irsaliyeden, kısmen ödendi</h2>
+<div class="sayfa">
+  <div class="arac"><span class="d yesil">💾 Kaydet</span><span class="d">🗑 Sil</span><span class="d">🖨 Yazdır</span><span class="ayrac"></span>
+    <span class="tur">ALIŞ FATURASI <small>#15012 — ABC2026000001234</small></span><span style="margin-left:auto" class="d">✖ Kapat</span></div>
+  <div class="bas">
+    <div class="cbb">
+      <div class="av">CŞ</div>
+      <div style="min-width:0">
+        <div class="ad">2K CNC MAKİNA YEDEK PARÇA SANAYİ TİCARET LİMİTED ŞİRKETİ <span class="k">↗</span></div>
+        <div class="kim">Kod <b>329.01.101</b> · VKN <b>0011659661</b> · İl <b>İstanbul</b> · Temsilci <b>Tanımsız</b> · Durum <b>Aktif</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt ok tik" title="e-Belge sekmesine git"><span class="e">e-Belge</span><span class="v"><span class="rz bilgi">e-Fatura</span><span class="rz ok">Kabul edildi</span></span><span class="a">ETTN 7f3c…a91e · 01.11 14:20</span></div>
+        <div class="kt ok tik" title="Bağlı belgeleri göster"><span class="e">Faturalama</span><span class="v">İrsaliyeden <span class="rz ok">tamamı</span></span><span class="a">İR-2026-0441 · SP-2026-0118</span></div>
+        <div class="kt uy tik" title="Ödeme sekmesine git"><span class="e">Ödeme</span><span class="v">Kısmi <span class="rz uy">%40</span></span><span class="a">kalan 7.440,00 · vade 01.12</span></div>
+        <div class="kt tik"><span class="e">Borcumuz</span><span class="v borc">48.612,40 A</span><span class="a">vadesi geçen 0,00</span></div>
+      </div>
+    </div>
+    <div class="iz">
+      <div class="al"><span class="et">Fatura Tipi</span><span class="inp">Alış</span></div>
+      <div class="al"><span class="et">Senaryo</span><span class="inp">Ticari Fatura</span></div>
+      <div class="al"><span class="et z">Tedarikçi Fatura No</span><span class="inp">ABC2026000001234</span></div>
+      <div class="al"><span class="et z">Fatura Tarihi</span><span class="inp">01.11.2026 14:05</span></div>
+      <div class="al"><span class="et">Sorumlu</span><span class="inp">Ayşe K.</span></div>
+      <div class="al"><span class="et">Giriş Deposu</span><span class="inp">Anadepo</span></div>
+      <div class="al"><span class="et">Vade (gün)</span><span class="inp" style="justify-content:flex-end">30</span></div>
+      <div class="al bos"><span class="et">—</span><span class="inp"></span></div>
+    </div>
+  </div>
+  <div class="sekmeler"><span class="sk on">Kalemler 6</span><span class="sk">e-Belge</span><span class="sk">Ödeme 1</span><span class="sk">Resim / Doküman</span></div>
+</div>
+
+<h2>③ Sorunlu durumlar — e-fatura yanıtı bekliyor / reddedildi, ödeme vadesi geçti</h2>
+<div class="sayfa">
+  <div class="bas" style="border-bottom:0">
+    <div class="cbb">
+      <div class="av" style="background:#c06a2b">ME</div>
+      <div style="min-width:0">
+        <div class="ad">MEDİKAL EKİPMAN DAĞITIM A.Ş. <span class="k">↗</span></div>
+        <div class="kim">Kod <b>320.02.017</b> · VKN <b>6120045512</b> · İl <b>Ankara</b> · Temsilci <b>Mehmet T.</b> · Durum <b>Aktif</b></div>
+      </div>
+      <div class="sag">
+        <div class="kt uy tik"><span class="e">e-Belge</span><span class="v"><span class="rz bilgi">e-Fatura</span><span class="rz uy">Yanıt bekliyor</span></span><span class="a">ticari · 8 gün kaldı (Kabul / Red)</span></div>
+        <div class="kt uy tik"><span class="e">Faturalama</span><span class="v">İrsaliyeden <span class="rz uy">kısmi</span></span><span class="a">İR-2026-0450 · 3/5 kalem</span></div>
+        <div class="kt hata tik"><span class="e">Ödeme</span><span class="v">Açık <span class="rz hata">12 gün geçti</span></span><span class="a">12.400,00 · vade 21.10</span></div>
+        <div class="kt tik"><span class="e">Borcumuz</span><span class="v borc">212.960,00 A</span><span class="a">vadesi geçen 12.400,00</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <b>Sağ blok — dört kutucuk</b>, her biri tıklanınca ilgili yere gider:
+  <b>e-Belge</b> (tür rozeti + durum: Taslak · Hazır · Gönderildi / gelen için Eşleşmedi · Yanıt bekliyor · Kabul · Red; altında ETTN / tarih) → e-Belge sekmesi ·
+  <b>Faturalama</b> (Doğrudan · Siparişten · İrsaliyeden; tamamı / kısmi; kaynak belge numaraları — bugün ızgaradaki "Sipariş No" rozeti buraya gelir) → bağlı belgeler ·
+  <b>Ödeme</b> (Açık · Kısmi % · Kapandı; kalan ve vade, vadesi geçtiyse kırmızı) → Ödeme sekmesi ·
+  <b>Borcumuz</b> (cari bakiye, bugünkü rozet) → cari ekstresi.
+  Renk: yeşil tamam, sarı bekleyen / kısmi, kırmızı hata / gecikme.<br>
+  <b>Satış belgelerinde</b> aynı düzen: e-Belge giden (e-Fatura / e-Arşiv · Gönderildi …), Faturalama (siparişten / irsaliyeden), <b>Tahsilat</b>, <b>Bakiye</b>.
+  İrsaliye / siparişte "Faturalama" kutusu bugünkü kapanma bilgisini taşır (Faturalanmadı · Kısmen · Tamamı); siparişte e-Belge kutusu yok.<br>
+  <b>Izgara</b>: e-Belge hücresi boşalır (4. kolon 2. satır); kart yüksekliği değişmez.
+</div>
+</body>
+</html>

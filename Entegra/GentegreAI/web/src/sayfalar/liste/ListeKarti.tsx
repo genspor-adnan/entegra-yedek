@@ -239,6 +239,13 @@ export function ListeKarti({
   /** Kart KENDİ ekran sekmesinde mi (kartSekmesiVar + sekmeler açık): yeni ve düzenle. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
+  /** Yeni başvurunun hasta aramasından "＋ Yeni" ile açılan hasta kartı (BelgeKarti, ?basvuru=1). */
+  const basvurudanYeni = kartId === 'yeni' && tanim.kaynak === 'hasta' && sorgu.get('basvuru') === '1' && !!ekranSekmesi;
+  const basvuruyaDon = async (hastaId: number) => {
+    let unvan = '';
+    try { unvan = String((await api.kartOku('hasta', hastaId)).kart?.unvan ?? '') } catch { /* ad sonra yüklenir */ }
+    ekranSekmesi!.kapat(`/basvuru/yeni?tarafId=${hastaId}&tarafUnvan=${encodeURIComponent(unvan)}`);
+  };
   const [kayitSayaci, setKayitSayaci] = useState(0);
   // CARİ KARTI başka sekmede yapılan belge / tahsilat / ödemeyle tazelenir (özet, finansal, band - form
   //   yeniden yüklenmez, kayıtsız değişiklik korunur). Bkz. cariHareketiDegisti.
@@ -1559,7 +1566,8 @@ export function ListeKarti({
             }
           : undefined}
         baslik={kartAdi(tanim)}
-        yerTutucuSekmeler={tanim.yerTutucuSekmeler}
+        // ERP'YE ÖZGÜ SEKMELER (ör. stok "Reçete") yalnız ERP modunda (urunModu 1).
+        yerTutucuSekmeler={tanim.yerTutucuSekmeler?.filter(x => !(tanim.erpSekmeleri?.includes(x) && kullanici?.urunModu !== 1))}
         gizliAlanlar={tanim.gizliKartAlanlari}
         gizliSekmeler={tanim.gizliKartSekmeleri}
         zorunluAlanlar={tanim.zorunluKartAlanlari}
@@ -1573,9 +1581,14 @@ export function ListeKarti({
         //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
         onBasvuruAc={onBasvuruAc}
-        onKapat={() => yeniSekmede ? ekranSekmesi!.kapat() : git(sorgu.get('geri') ?? tanim.kartYolu!)}
+        // Başvurudan gelen yeni hasta kartı vazgeçilirse boş yeni başvuruya dönülür.
+        onKapat={() => basvurudanYeni ? ekranSekmesi!.kapat('/basvuru/yeni')
+                       : yeniSekmede ? ekranSekmesi!.kapat() : git(sorgu.get('geri') ?? tanim.kartYolu!)}
         // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
-        onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
+        onMevcutKayit={mevcutId => {
+          // Başvurudan gelen yeni hasta zaten kayıtlıysa o hastayla başvuruya dönülür.
+          if (basvurudanYeni) { void basvuruyaDon(mevcutId); return }
+          setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={(yeniId, acikKal) => {
           // AÇIK KALARAK KAYIT (çerçeve 💾, kullanıcı 15.10.2026: "save etsin ama kapanmasın"):
           //   kart yerinde yeniden yüklenir; yalnız açık liste ve band tazelenir.
@@ -1596,6 +1609,8 @@ export function ListeKarti({
           //   dönülür (liste açık değilse açılmaz - kullanıcı); açık liste tazelenir.
           if (yeniSekmede) {
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            // BAŞVURUDAN YENİ HASTA (01.11.2026): sekme kapanır, kaydedilen hastayla yeni başvuru açılır.
+            if (basvurudanYeni && yeniId) { void basvuruyaDon(yeniId); return }
             ekranSekmesi!.kapat();
             return;
           }

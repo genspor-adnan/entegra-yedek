@@ -20,6 +20,11 @@ export const kdvCarpan = (s: AcikSatir) => 1 + Number(s.kdv ?? 0) / 100;
  * sunucu donusumde satiri hasta payi olarak isaretler.
  */
 export function payKalan(s: AcikSatir, pay: number) {
+  // PAY 0 = TÜM SATIR (kullanıcı 02.11.2026: "satış siparişini belgeye dönüştür dedim.. dönüştür butonu aktif
+  //   değil"): ERP siparişinde tutar "hasta ek katkı" kovasında durur (sgk / oss / provizyon 0); eski kural pay 0'ı
+  //   provizyon kovası (1) sayıyor, açık tutar 0 çıkıp Dönüştür pasif kalıyordu. Tüm satırda kalan = satırın
+  //   açık kalanı.
+  if (!pay && s.tutarKalan !== undefined && s.tutarKalan !== null) return Number(s.tutarKalan);
   const p = pay || 1;
   // INCE KOVA (470): 1 hasta provizyon · 2 SGK · 3 sigorta/kurum · 4 hasta ek
   //   katkisi. Sunucu bu kodlarla calisiyor ("Bu satırın SGK payı zaten

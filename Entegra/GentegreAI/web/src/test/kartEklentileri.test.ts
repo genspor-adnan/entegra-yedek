@@ -86,7 +86,7 @@ describe('KART_EKLENTILERI', () => {
   it('kayıtlı karta bağlı ek sekmeler yeni kartta açılmaz; "yeni kartta da" olanlar açılır', () => {
     expect(KART_EKLENTILERI['personel-belge-turu'].ekSekmeler!(b('yeni'))).toBeUndefined();
     expect(KART_EKLENTILERI['yatis-order'].ekSekmeler!(b('yeni'))).toBeUndefined();
-    expect(KART_EKLENTILERI['radyoloji-sablon'].ekSekmeler!(b('yeni'))?.map(s => s.baslik)).toEqual(['Önizleme', 'Sürümler', 'Kullanım']);
+    expect(KART_EKLENTILERI['radyoloji-sablon'].ekSekmeler!(b('yeni'))?.map(s => s.baslik)).toEqual(['Şablon Metni', 'Önizleme', 'Sürümler', 'Kullanım']);
     expect(KART_EKLENTILERI['personel-belge-turu'].ekSekmeler!(b(5))?.map(s => s.baslik))
       .toEqual(['Personel durumu', 'Hatırlatma', 'Hareketler']);
   });

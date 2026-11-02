@@ -62,7 +62,7 @@ export function useMuayeneHastaBilgisi(muayeneId: number, tazele: number, hastaI
         try {
           const y = await api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: hastaIdYedek } });
           const h = y.satirlar?.[0] as Satir | undefined;
-          if (h) ust = { tarafId: h.id, hastaAdi: h.unvan, dosyaNo: h.kod, yasMetni: h.yas != null ? `${h.yas}y` : '',
+          if (h) ust = { tarafId: h.id, hastaAdi: h.unvan, dosyaNo: h.kod, yasMetni: h.yasKisa ? String(h.yasKisa) : h.yas != null ? `${h.yas}y` : '',
                          cinsiyetKisa: Number(h.cinsiyet) === 1 ? 'E' : Number(h.cinsiyet) === 2 ? 'K' : '' } as Satir;
         } catch { /* band zorunlu değil */ }
       }

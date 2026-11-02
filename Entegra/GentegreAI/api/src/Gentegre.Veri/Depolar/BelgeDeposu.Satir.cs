@@ -198,7 +198,13 @@ public sealed partial class BelgeDeposu
                    -- Tutar bazli donusum (352): matrah, tahsil edilen matrah ve
                    --   acik kalan tutar - "tahsil edilen kadar fis" onerisi.
                    v.tutar, v.hasta_tahsil_matrah as "hastaTahsilMatrah",
-                   v.kurum_tahsil_matrah as "kurumTahsilMatrah", v.tutar_kalan as "tutarKalan"
+                   v.kurum_tahsil_matrah as "kurumTahsilMatrah", v.tutar_kalan as "tutarKalan",
+                   -- LOT SEÇİMİ (02.11.2026): dönüşüm penceresi izlemli satırda lot sorar - izleme türü ve lotların
+                   --   okunacağı çıkış deposu (satırın, yoksa belgenin).
+                   (select st.izleme from public.stok st where st.id = v.stok_id) as izleme,
+                   (select coalesce(bs.cikis_depo_id, b.cikis_depo_id)
+                      from public.belge_satir bs join public.belge b on b.id = bs.belge_id
+                     where bs.id = v.satir_id) as "cikisDepoId"
               from public.v_belge_acik_satir v
              where v.belge_id = @p0 order by v.sira
             """, null,
@@ -352,6 +358,26 @@ public sealed partial class BelgeDeposu
                     };
             await _log.YazAsync(baglanti, islem, LogIslemi.Sil, LogTabloBelge, belgeId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip, logOzet, iptal: iptal);
+
+            // STOK / LOT GERİ ALINIR (02.11.2026): fn_belge_sil stok geri almayı tanımsız bir fonksiyona
+            //   (fn_stok_durum_geri_al) bırakıyordu - silinen irsaliye / faturanın düşürdüğü stok ve lot bakiyesi
+            //   geri gelmiyordu (UNIVERSE: silinen satış irsaliyesinin lotu 0'da kaldı). Düzenlemedeki geri alma
+            //   (StokDurumGeriAlAsync) burada da çalışır; silme engellenirse (fn_belge_silinebilir) aynı işlem
+            //   geri alınır. Yalnız KESİN (durum 0) ve stok etkileyen türde - taslak ve sipariş stoğa yazmaz.
+            await using (var bilgi = baglanti.Komut(
+                "select tur, coalesce(tipi, 0), coalesce(durum, 0) from public.belge where id = @p0", islem, belgeId))
+            await using (var o = await bilgi.ExecuteReaderAsync(iptal))
+            {
+                if (await o.ReadAsync(iptal))
+                {
+                    var tur = Convert.ToInt32(o.GetValue(0));
+                    var tipi = Convert.ToInt32(o.GetValue(1));
+                    var durum = Convert.ToInt32(o.GetValue(2));
+                    await o.CloseAsync();
+                    if (durum == 0 && await StokEtkilerMiAsync(baglanti, islem, tur, iptal))
+                        await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
+                }
+            }
 
             await using var komut = baglanti.Komut(
                 "select public.fn_belge_sil(@p0, @p1)", islem,

@@ -127,7 +127,7 @@ export function sekmeleriKur(secenek: {
           detaySatirlari = () => [] } = secenek;
   // HESAP (1157, mockup banka_hareketleri.html): banka sözleşmesi / API onay formu.
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap';
-  const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
+  const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Resim / Doküman');
   const s: SekmeTanimi[] = gruplar
     // Serit alanlari acikca verilmisse Kimlik grubu sekme olarak da cizilir;
     //   verilmemisse eski davranis (tum grup serittedir, sekmesi yoktur).
@@ -264,8 +264,11 @@ export function sekmeleriKur(secenek: {
     s.push({ tur: 'ozel', anahtar: 'ozel:onamlar', baslik: 'Onam & Belgeler' });
   }
   (yerTutucuSekmeler ?? []).forEach(baslik => {
-    if (dokumanliKart && !yeniMi && baslik === 'Yorum / Medya') {
+    if (dokumanliKart && !yeniMi && baslik === 'Resim / Doküman') {
       s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Resim / Doküman' });
+    } else if (kaynak === 'stok' && !yeniMi && baslik === 'Ürün Ağacı / BOM') {
+      // Salt okunur BOM özeti (stok_karti_v2.html); düzenleme Ürün Ağacı kartında.
+      s.push({ tur: 'ozel', anahtar: 'ozel:stokUrunAgaci', baslik });
     } else if (kaynak === 'stok' && !yeniMi && baslik === 'Hareketler') {
       // Salt okunur hareket dokumu (stok_karti.html "Hareketler").
       s.push({ tur: 'ozel', anahtar: 'ozel:stokHareket', baslik });

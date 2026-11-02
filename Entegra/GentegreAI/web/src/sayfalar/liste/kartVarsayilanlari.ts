@@ -36,6 +36,9 @@ export function yeniKartVarsayilanlari(tanim: ListeTanimi, kartId: number | 'yen
   //   (rol bayrağı listenin kendi varsayılanından: Müşteri Listesi müşteri, Tedarikçi Listesi tedarikçi).
   if (k === 'cari' && kartId === 'yeni' && g('vkno'))
     return { ...t, ...varsa('vkno', 'vkno', 'metin') };
+  // STOK KARTI › ÜRÜN AĞACI / BOM "＋ Yeni ürün ağacı" (02.11.2026): mamul o stok gelir.
+  if (k === 'urun-agaci' && kartId === 'yeni' && g('stokId'))
+    return { ...t, ...varsa('stokId') };
   // Önce sorulan hasta (ListeKarti'nin hasta araması) kartın hastasıdır.
   if (HASTA_ILE_YENI.has(k) && kartId === 'yeni' && g('tarafId'))
     return { ...t, tarafId: sayi('tarafId') };

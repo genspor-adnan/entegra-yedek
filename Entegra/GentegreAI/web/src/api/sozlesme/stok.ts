@@ -25,6 +25,9 @@ export interface StokDurumOzeti {
   kullanilabilir: number;
   yolda: number;
   depoSayisi: number;
+  /** Ağırlıklı ortalama alış maliyeti (fn_uretim_stok_maliyeti) ve toplam × maliyet. */
+  birimMaliyet?: number;
+  deger?: number;
 }
 
 export interface StokDurumYaniti {
@@ -59,6 +62,16 @@ export interface StokHareketYaniti {
   kapanis: number;
   satirlar: StokHareketSatiri[];
   birim: string;
+}
+
+/** Stok kartı Ürün Ağacı / BOM sekmesi (StokDurumDeposu.UrunAgaclariAsync). */
+export interface StokAgacBileseni {
+  sira: number; stokId: number | null; stokKod: string; stokAd: string; tip: string;
+  miktar: number; birim: string; fireYuzde: number; altAgac: string;
+}
+export interface StokUrunAgaci {
+  id: number; kod: string; ad: string; tur: string; surum: number; aktif: boolean; varsayilan: boolean;
+  ciktiMiktar: number; maliyetToplam: number; maliyetTarih: string | null; bilesenler: StokAgacBileseni[];
 }
 
 /** Genel Ayarlar satiri (public.referans, sunucuda beyaz listeli). */

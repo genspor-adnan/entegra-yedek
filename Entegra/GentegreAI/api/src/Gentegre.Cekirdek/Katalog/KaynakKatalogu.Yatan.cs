@@ -45,8 +45,7 @@ public static partial class KaynakKatalogu
             new("yatak",    "coalesce(yk.kod, '')", "metin", "Yatak", Genislik: 110),
             new("hasta",    "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",    "metin", "Hasta", Genislik: 220),
             new("yasCinsiyet",
-                "case when th.dogum_tarihi is null then '' "
-                + "     else extract(year from age(th.dogum_tarihi))::int::text end "
+                "public.fn_yas_kisa(th.dogum_tarihi) "   // 1214: 45y / 1y3a / 3a5g
                 + "|| case th.cinsiyet when 1 then ' / E' when 2 then ' / K' else '' end",
                                           "metin", "Yaş / C", Hizalama: "orta", Genislik: 90,
                                           Filtrelenebilir: false),

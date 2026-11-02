@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Kartı v2 — Mockup (Gentegre AI / GenoTIP AI)</title>
+<!--
+  v2 (kullanıcı 02.11.2026: "genel, ambalaj, fiyatlar, üts bilgileri, reçete, stok durumu, hareketler, yorum/medya rename
+  Resim Doküman, ek alanlar sekmelerini kapsayan yeni vers. stok kart mockup yap").
+  Bugünkü web kartının kararları üzerine:
+   * Kimlik şeridi: Stok Kodu · Stok Adı · Kısa Ad · Kategori · Tür · Durum - kod ve durum yarım genişlik (02.11.2026).
+   * Genel › Diğer: Satılan · Alınan · İnternet Satış · Paket · Reuse tek satır, sarar; İnternet Satış yalnız Satılan
+     işaretliyse.
+   * Reçete (ürün ağacı / BOM) yalnız ERP modunda (urunModu 1) - HBYS'de sekme yok.
+   * "Yorum / Medya" → "Resim / Doküman" (yorum akışı kalkar; resim, teknik föy, sertifika, kullanım kılavuzu).
+   * Birim / Barkod → "Ambalaj Birimleri" (birim + çarpan + barkod tek tabloda); Seri / Lot sekmesi yok (Genel›İzleme).
+  Kart kendi sekmesinde (kart sekmesi deseni): pencere çerçevesi yok, Kaydet / Kapat üstte.
+-->
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --warn:#b5731a; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .sayfa{max-width:1280px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .bas h1{margin:0;font-size:15px;color:var(--navy)}
+  .bas .yol{font-size:11px;color:var(--muted)}
+  .sag{margin-left:auto;display:flex;gap:4px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.mini{padding:2px 8px;font-size:11px}
+
+  /* KİMLİK ŞERİDİ - kod ve durum yarım */
+  .kaid{display:grid;grid-template-columns:minmax(0,.5fr) minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.5fr);
+    gap:10px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .inp.big{font-weight:bold;color:var(--navy)}
+  .inp.ro{background:#f7f9fb;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .agac::before{content:"🗂";font-size:11px}
+
+  /* SEKMELER */
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;user-select:none}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .tab .erp{display:inline-block;margin-left:6px;font-size:9px;font-weight:bold;letter-spacing:.3px;background:#fdf1e2;color:var(--warn);border:1px solid #f2ddbf;border-radius:3px;padding:0 4px}
+  .pane{display:none;padding:14px}.pane.active{display:block}
+
+  .row{display:grid;gap:14px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px;min-width:0}
+  .grp>h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;align-items:center;gap:8px}
+  .grp>h4 .ip{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .body{padding:10px}
+  .g2{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 10px;align-items:center}
+  .g2>label{font-size:11px;color:var(--muted);text-align:right}
+  .g2 .tam{grid-column:1 / -1}
+  .checks{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:2px 0 4px 106px}
+  .checks span{display:inline-flex;align-items:center;gap:5px}
+  .cb{width:13px;height:13px;border:1px solid #8ea2b8;border-radius:2px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+  .cb.on{background:#3d6ea8;border-color:#3d6ea8}
+  .ikili{display:flex;gap:5px}.ikili .inp:first-child{flex:1}
+  .imgbox{border:1px dashed #b9c6d4;border-radius:6px;background:linear-gradient(135deg,#eef3f9,#dbe6f1);height:150px;display:flex;align-items:center;justify-content:center;color:#7c93aa;font-size:40px}
+  .not{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573}
+  .dg td{border-bottom:1px solid var(--line2);padding:5px 8px;font-size:11.5px}
+  .dg tr:last-child td{border-bottom:0}
+  .dg tfoot td{background:#f7f9fb;font-weight:bold}
+  .r{text-align:right;font-family:"Segoe UI",Tahoma}.c{text-align:center}
+  .arac{display:flex;gap:4px;align-items:center;margin-bottom:6px}
+  .arac .ara{margin-left:auto;width:220px}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.r{background:#fdecec;color:#b23b3b;border-color:#f2c9c9}
+  .rz.m{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid var(--line2);border-radius:4px;background:linear-gradient(#fff,#f6f9fc);padding:9px 11px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}.kpi .v{font-size:17px;font-weight:bold;color:var(--navy);margin-top:3px}
+  .kpi .v.warn{color:var(--warn)}.kpi .v.ok{color:var(--ok)}.kpi .s{font-size:10px;color:var(--muted);margin-top:2px}
+  .neg{color:#b23b3b}.pos{color:var(--ok)}
+  .dosyalar{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .dosya{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+  .dosya .on{height:96px;display:flex;align-items:center;justify-content:center;font-size:32px;background:linear-gradient(135deg,#eef3f9,#dbe6f1)}
+  .dosya .on.pdf{background:linear-gradient(135deg,#fbefee,#f3d9d7)}
+  .dosya .alt{padding:6px 8px;font-size:11px}.dosya .alt small{display:block;color:var(--muted);font-size:10px}
+  .dosya.vars{outline:2px solid #e0a400}
+  .statusbar{display:flex;gap:16px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .aciklama{max-width:1280px;margin:12px auto 0;color:var(--muted);font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>📦 Stok Listesi</span><span class="on">📦 Parasetamol 500 mg ×</span></div>
+
+  <div class="bas">
+    <h1>📦 Stok Kartı</h1><span class="yol">Stok &amp; Hizmet › Stok Listesi › STK-00412</span>
+    <div class="sag"><span class="btn primary">💾 Kaydet</span><span class="btn">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <!-- KİMLİK ŞERİDİ: Stok Kodu (½) · Stok Adı · Kısa Ad · Kategori · Tür · Durum (½) -->
+  <div class="kaid">
+    <div class="fld"><label class="req">Stok Kodu</label><div class="inp big">STK-00412</div></div>
+    <div class="fld"><label class="req">Stok Adı</label><div class="inp big">Parasetamol 500 mg 20 Tablet</div></div>
+    <div class="fld"><label>Kısa Ad</label><div class="inp">Parol 500</div></div>
+    <div class="fld"><label class="req">Kategori</label><div class="inp combo agac">İlaç › Analjezik</div></div>
+    <div class="fld"><label class="req">Tür</label><div class="inp combo">Ticari Mal</div></div>
+    <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="tabs" id="sekmeler">
+    <div class="tab active" data-t="genel">Genel</div>
+    <div class="tab" data-t="ambalaj">Ambalaj Birimleri <span class="b">3</span></div>
+    <div class="tab" data-t="fiyat">Fiyatlar <span class="b">4</span></div>
+    <div class="tab" data-t="uts">ÜTS Bilgileri</div>
+    <div class="tab" data-t="recete">Reçete <span class="erp" title="Yalnız ERP modunda görünür">ERP</span></div>
+    <div class="tab" data-t="durum">Stok Durumu</div>
+    <div class="tab" data-t="hareket">Hareketler</div>
+    <div class="tab" data-t="dosya">Resim / Doküman <span class="b">4</span></div>
+    <div class="tab" data-t="ek">Ek Alanlar <span class="b">3</span></div>
+  </div>
+
+  <!-- ============================================================ GENEL -->
+  <div class="pane active" id="p-genel">
+    <div class="row" style="grid-template-columns:1fr 1fr 1fr 220px">
+      <div class="grp"><h4>Tanım / Sınıflandırma</h4><div class="body g2">
+        <label>Marka</label><div class="inp combo">Atabay</div>
+        <label>Model</label><div class="inp combo">— markanın modelleri</div>
+        <label>Grup</label><div class="inp combo">Ağrı kesici</div>
+        <label>Özellik</label><div class="inp combo">—</div>
+        <label>İçerik</label><div class="inp combo">Parasetamol</div>
+        <label>İzleme</label><div class="inp combo">Lot + SKT</div>
+        <label>Bildirim</label><div class="inp combo">İTS</div>
+      </div></div>
+      <div class="grp"><h4>Vergi &amp; Ana Birim</h4><div class="body g2">
+        <label>Ürün No</label><div class="inp">8699525095034</div>
+        <label>GTIP Kodu</label><div class="inp">3004.90.00.00.19</div>
+        <label>Ana Birim</label><div class="inp combo">Kutu</div>
+        <label class="req">KDV %</label><div class="inp combo">10</div>
+        <label>ÖTV %</label><div class="inp">0</div>
+        <label>Faturadaki Ad</label><div class="inp">Parol 500 mg 20 tb</div>
+      </div></div>
+      <div class="grp"><h4>Diğer</h4><div class="body">
+        <!-- tek satır, sarar; İnternet Satış yalnız Satılan işaretliyse -->
+        <div class="checks" style="padding-left:0">
+          <span><i class="cb on">✓</i>Satılan</span><span><i class="cb on">✓</i>Alınan</span>
+          <span><i class="cb"></i>İnternet Satış</span><span><i class="cb"></i>Paket</span><span><i class="cb"></i>Reuse</span>
+        </div>
+        <div class="g2" style="margin-top:6px">
+          <label>Raf / Konum</label><div class="inp">A-03-2</div>
+          <label>Raf Ömrü</label><div class="ikili"><div class="inp">36</div><div class="inp combo" style="width:64px">Ay</div></div>
+          <label>Min. Stok</label><div class="inp">50</div>
+          <label>Özel Kod</label><div class="inp">—</div>
+        </div>
+      </div></div>
+      <div class="grp"><h4>Resim</h4><div class="body"><div class="imgbox">💊</div>
+        <div class="not">Varsayılan resim "Resim / Doküman" sekmesinden seçilir.</div></div></div>
+    </div>
+    <div class="grp"><h4>Açıklama</h4><div class="body"><div class="inp" style="height:44px;align-items:flex-start;padding-top:5px;white-space:normal">Ağrı ve ateş tedavisinde. Oda sıcaklığında saklayın.</div></div></div>
+  </div>
+
+  <!-- ============================================================ AMBALAJ BİRİMLERİ -->
+  <div class="pane" id="p-ambalaj">
+    <div class="grp"><h4>Ambalaj Birimleri <span class="ip">birim · çarpan (ana birim cinsinden) · barkod tek tabloda</span></h4><div class="body">
+      <div class="arac"><span class="btn mini">＋ Birim</span><span class="btn mini">✎</span><span class="btn mini">🗑</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Birim</th><th class="r">Çarpan</th><th>Ana Birim Karşılığı</th><th>Barkod</th><th class="c">Varsayılan Alış</th><th class="c">Varsayılan Satış</th></tr></thead>
+        <tbody>
+          <tr><td>Kutu</td><td class="r">1</td><td>1 Kutu (ana birim)</td><td>8699525095034</td><td class="c">—</td><td class="c">✓</td></tr>
+          <tr><td>Koli</td><td class="r">48</td><td>48 Kutu</td><td>18699525095031</td><td class="c">✓</td><td class="c">—</td></tr>
+          <tr><td>Tablet</td><td class="r">0,05</td><td>1/20 Kutu</td><td>—</td><td class="c">—</td><td class="c">—</td></tr>
+        </tbody></table></div>
+      <div class="not">Belge satırında birim seçilince miktar ana birime çevrilir (stok bakiyesi ana birimde tutulur).</div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ FİYATLAR -->
+  <div class="pane" id="p-fiyat">
+    <div class="grp"><h4>Fiyat Listeleri</h4><div class="body">
+      <div class="arac"><span class="btn mini">＋ Fiyat</span><span class="btn mini">✎</span><span class="btn mini">🗑</span><span class="btn mini">⟳ Liste fiyatlarını güncelle</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Fiyat Listesi</th><th>Yön</th><th class="r">Fiyat</th><th>Döviz</th><th class="c">KDV Dahil</th><th>Birim</th><th>Geçerlilik</th></tr></thead>
+        <tbody>
+          <tr><td><b>Perakende Satış</b> ★</td><td><span class="rz g">Satış</span></td><td class="r">58,40</td><td>TL</td><td class="c">✓</td><td>Kutu</td><td>01.10.2026 —</td></tr>
+          <tr><td>Kurum Satış</td><td><span class="rz g">Satış</span></td><td class="r">49,90</td><td>TL</td><td class="c">✓</td><td>Kutu</td><td>01.10.2026 —</td></tr>
+          <tr><td>Depo Alış</td><td><span class="rz m">Alış</span></td><td class="r">38,15</td><td>TL</td><td class="c">—</td><td>Koli</td><td>15.09.2026 —</td></tr>
+          <tr><td>İhracat</td><td><span class="rz g">Satış</span></td><td class="r">1,45</td><td>USD</td><td class="c">—</td><td>Kutu</td><td>01.01.2026 — 31.12.2026</td></tr>
+        </tbody></table></div>
+      <div class="not">Son alış: 38,15 TL (12.10.2026, Selçuk Ecza) · Ortalama maliyet: 37,92 TL · Kâr marjı (perakende): %53</div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ ÜTS -->
+  <div class="pane" id="p-uts">
+    <div class="row" style="grid-template-columns:1.4fr 1fr">
+      <div class="grp"><h4>ÜTS / Medikal Bilgileri</h4><div class="body g2">
+        <label>UNO / Barkod</label><div class="inp">8699525095034</div>
+        <label>Ürün Tipi</label><div class="inp combo">İlaç dışı tıbbi cihaz</div>
+        <label>Sınıf</label><div class="inp combo">Sınıf I</div>
+        <label>Takip Tipi</label><div class="inp combo">Lot / Batch</div>
+        <label>Üretici</label><div class="inp">Atabay Kimya</div>
+        <label>SUT Kodu</label><div class="inp">—</div>
+        <label>Tekil Ürün</label><div class="checks" style="padding:0"><span><i class="cb"></i>Tekil (seri no) takip</span><span><i class="cb on">✓</i>Tüketim bildirimi</span></div>
+      </div></div>
+      <div class="grp"><h4>ÜTS Durumu</h4><div class="body g2">
+        <label>Kayıt</label><div><span class="rz g">ÜTS'de kayıtlı</span></div>
+        <label>Son Sorgu</label><div class="inp ro">01.11.2026 14:20</div>
+        <label>Bekleyen</label><div class="inp ro">2 alma bildirimi</div>
+        <label>Son Hata</label><div class="inp ro">—</div>
+        <div class="tam" style="padding-left:106px"><span class="btn mini">⟳ ÜTS'den sorgula</span> <span class="btn mini">📋 Bildirimler</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ REÇETE (ERP) -->
+  <div class="pane" id="p-recete">
+    <div class="grp"><h4>Ürün Reçetesi (Ürün Ağacı / BOM) <span class="rz s">yalnız ERP</span><span class="ip">üretimde bu mamulün 1 ana birimi için bileşenler</span></h4><div class="body">
+      <div class="arac"><span class="btn mini">＋ Bileşen</span><span class="btn mini">✎</span><span class="btn mini">🗑</span><span class="btn mini">⧉ Reçete kopyala</span>
+        <span class="ip" style="margin-left:auto;font-size:10.5px;color:var(--muted)">Reçete sürümü <b>v3</b> · 18.10.2026</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Bileşen (Stok)</th><th>Tür</th><th class="r">Miktar</th><th>Birim</th><th class="r">Fire %</th><th class="r">Birim Maliyet</th><th class="r">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>Parasetamol etken madde</td><td>Hammadde</td><td class="r">10,000</td><td>g</td><td class="r">2</td><td class="r">0,85</td><td class="r">8,67</td></tr>
+          <tr><td>Blister folyo</td><td>Ambalaj</td><td class="r">2</td><td>Adet</td><td class="r">1</td><td class="r">0,40</td><td class="r">0,81</td></tr>
+          <tr><td>Karton kutu</td><td>Ambalaj</td><td class="r">1</td><td>Adet</td><td class="r">0</td><td class="r">0,55</td><td class="r">0,55</td></tr>
+          <tr><td>Prospektüs</td><td>Ambalaj</td><td class="r">1</td><td>Adet</td><td class="r">0</td><td class="r">0,12</td><td class="r">0,12</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="6">Reçete maliyeti (1 Kutu)</td><td class="r">10,15</td></tr></tfoot></table></div>
+      <div class="not">HBYS (GenoTIP AI) kurulumunda bu sekme görünmez - üretim yok.</div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ STOK DURUMU -->
+  <div class="pane" id="p-durum">
+    <div class="kpis">
+      <div class="kpi"><div class="k">Toplam Mevcut</div><div class="v">1.284</div><div class="s">Kutu · 4 depo</div></div>
+      <div class="kpi"><div class="k">Rezerve</div><div class="v warn">96</div><div class="s">açık sipariş</div></div>
+      <div class="kpi"><div class="k">Kullanılabilir</div><div class="v ok">1.188</div><div class="s">mevcut − rezerve</div></div>
+      <div class="kpi"><div class="k">Min. Stok</div><div class="v">50</div><div class="s">altına düşmedi</div></div>
+      <div class="kpi"><div class="k">Stok Değeri</div><div class="v">48.689 TL</div><div class="s">ortalama maliyetle</div></div>
+    </div>
+    <div class="grp"><h4>Depo Bazlı Stok</h4><div class="body">
+      <div class="dg"><table>
+        <thead><tr><th>Depo</th><th class="r">Giren</th><th class="r">Çıkan</th><th class="r">Mevcut</th><th class="r">Rezerve</th><th>En Yakın SKT</th><th>Lot</th></tr></thead>
+        <tbody>
+          <tr><td>Ana Depo</td><td class="r">2.400</td><td class="r">1.420</td><td class="r"><b>980</b></td><td class="r">96</td><td>03/2028</td><td>L24-118 (3 lot)</td></tr>
+          <tr><td>Eczane</td><td class="r">420</td><td class="r">168</td><td class="r"><b>252</b></td><td class="r">0</td><td><span class="rz s">12/2026</span></td><td>L23-907</td></tr>
+          <tr><td>Acil</td><td class="r">60</td><td class="r">20</td><td class="r"><b>40</b></td><td class="r">0</td><td>05/2027</td><td>L24-031</td></tr>
+          <tr><td>Ameliyathane</td><td class="r">30</td><td class="r">18</td><td class="r"><b>12</b></td><td class="r">0</td><td>05/2027</td><td>L24-031</td></tr>
+        </tbody>
+        <tfoot><tr><td>Toplam</td><td class="r">2.910</td><td class="r">1.626</td><td class="r">1.284</td><td class="r">96</td><td></td><td></td></tr></tfoot></table></div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ HAREKETLER -->
+  <div class="pane" id="p-hareket">
+    <div class="grp"><h4>Stok Hareketleri <span class="ip">salt okunur · belgeye çift tıkla</span></h4><div class="body">
+      <div class="arac"><div class="inp combo" style="width:140px">Son 3 ay</div><div class="inp combo" style="width:140px">Tüm depolar</div>
+        <div class="inp combo" style="width:150px">Tüm hareketler</div><div class="inp ara"><span style="color:#9aa7b5">Belge no / cari ara…</span></div></div>
+      <div class="dg"><table>
+        <thead><tr><th>Tarih</th><th>Belge</th><th>Tür</th><th>Cari / Hasta</th><th>Depo</th><th class="r">Giriş</th><th class="r">Çıkış</th><th class="r">Bakiye</th><th class="r">Birim Fiyat</th></tr></thead>
+        <tbody>
+          <tr><td>01.11.2026</td><td>SF-2026-0981</td><td><span class="rz r">Satış</span></td><td>Kurum: Şifa Hastanesi</td><td>Ana Depo</td><td class="r"></td><td class="r neg">48</td><td class="r">1.284</td><td class="r">49,90</td></tr>
+          <tr><td>30.10.2026</td><td>HB-552113</td><td><span class="rz r">Hasta Sarf</span></td><td>Başvuru P-000151</td><td>Eczane</td><td class="r"></td><td class="r neg">2</td><td class="r">1.332</td><td class="r">—</td></tr>
+          <tr><td>12.10.2026</td><td>AF-2026-0442</td><td><span class="rz g">Alış</span></td><td>Selçuk Ecza</td><td>Ana Depo</td><td class="r pos">960</td><td class="r"></td><td class="r">1.334</td><td class="r">38,15</td></tr>
+          <tr><td>05.10.2026</td><td>TR-0078</td><td><span class="rz m">Transfer</span></td><td>Ana Depo → Eczane</td><td>Eczane</td><td class="r pos">120</td><td class="r"></td><td class="r">374</td><td class="r">—</td></tr>
+          <tr><td>01.10.2026</td><td>SY-2026-03</td><td><span class="rz gri">Sayım Farkı</span></td><td>—</td><td>Acil</td><td class="r"></td><td class="r neg">1</td><td class="r">254</td><td class="r">—</td></tr>
+        </tbody></table></div>
+      <div class="not">Dönem toplamı: giriş 1.080 · çıkış 1.126 · 18 belge.</div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ RESİM / DOKÜMAN (eski "Yorum / Medya") -->
+  <div class="pane" id="p-dosya">
+    <div class="grp"><h4>Resim / Doküman <span class="ip">resim, teknik föy, sertifika, kullanım kılavuzu · ★ varsayılan resim kartta görünür</span></h4><div class="body">
+      <div class="arac"><span class="btn mini primary">＋ Dosya ekle</span><span class="btn mini">⭐ Varsayılan yap</span><span class="btn mini">👁 Gör</span><span class="btn mini">⬇ İndir</span><span class="btn mini">🔗 Paylaş</span><span class="btn mini">🗑</span>
+        <div class="inp combo" style="margin-left:auto;width:160px">Tüm türler</div></div>
+      <div class="dosyalar">
+        <div class="dosya vars"><div class="on">💊</div><div class="alt">★ Ürün görseli<small>Resim · 01.10.2026</small></div></div>
+        <div class="dosya"><div class="on">📦</div><div class="alt">Kutu ön yüz<small>Resim · 01.10.2026</small></div></div>
+        <div class="dosya"><div class="on pdf">📄</div><div class="alt">Kullanma talimatı<small>PDF · Prospektüs · 12.09.2026</small></div></div>
+        <div class="dosya"><div class="on pdf">📄</div><div class="alt">Analiz sertifikası L24-118<small>PDF · Sertifika · 12.10.2026</small></div></div>
+      </div>
+      <div class="not">Yorum akışı bu sekmede yok (v1 "Yorum / Medya"); kalıcı belgeler buradan, iç yazışma mesajlaşmadan.</div>
+    </div></div>
+  </div>
+
+  <!-- ============================================================ EK ALANLAR -->
+  <div class="pane" id="p-ek">
+    <div class="grp"><h4>Ek Alanlar <span class="ip">kuruma özel tanımlı alanlar (Ayarlar › Ek Alan Tanımları)</span></h4><div class="body g2" style="grid-template-columns:150px minmax(0,420px)">
+      <label>Saklama koşulu</label><div class="inp combo">25 °C altı</div>
+      <label>Soğuk zincir</label><div class="checks" style="padding:0"><span><i class="cb"></i>Evet</span></div>
+      <label>Tedarikçi ürün kodu</label><div class="inp">ATB-PAR-500-20</div>
+      <label>Not</label><div class="inp" style="height:40px;align-items:flex-start;padding-top:5px;white-space:normal">—</div>
+    </div></div>
+  </div>
+
+  <div class="statusbar"><span>Oluşturan: <b>admin</b> · 12.03.2025</span><span>Son değişiklik: <b>Ayşe K.</b> · 01.11.2026 16:02</span><span style="margin-left:auto">Şube: Merkez</span></div>
+</div>
+
+<div class="aciklama">
+  <b>v1 → v2:</b> kimlik şeridi Stok Kodu · Stok Adı · Kısa Ad · Kategori · Tür · Durum (kod ve durum yarım) ·
+  "Birim / Barkod" → <b>Ambalaj Birimleri</b> (birim, çarpan, barkod tek tabloda) · <b>Seri / Lot</b> sekmesi kalktı (İzleme Genel'de, lot
+  bakiyesi Stok Durumu'nda) · <b>Reçete</b> yalnız ERP modunda · "Yorum / Medya" → <b>Resim / Doküman</b> (yorum akışı yok) ·
+  Genel › Diğer: Satılan · Alınan · İnternet Satış · Paket · Reuse tek satır, İnternet Satış yalnız Satılan işaretliyse.
+</div>
+
+<script>
+  document.getElementById('sekmeler').addEventListener('click', e => {
+    const t = e.target.closest('.tab'); if (!t) return;
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'p-' + t.dataset.t));
+  });
+</script>
+</body>
+</html>

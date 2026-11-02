@@ -83,7 +83,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
-    yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
+    yerTutucuSekmeler: ['Resim / Doküman', 'Ek Alanlar'],
     // Fiyat listeleri "Satış Koşulları" grubunda ama Satış & Risk sekmesinde çizilir (1152).
     //   Satınalma Koşulları (1162) tedarikçi kartının sekmesi.
     gizliKartSekmeleri: ['Satış Koşulları'], gizliDetaylar: ['satinalmaKosul'],
@@ -126,7 +126,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // EKSTRE SEKMESİ YOK (kullanıcı 23.10.2026): kartın üstündeki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
     // "Mali Durum" yer tutucusu yerine Finansal sekmesi (kart eklentisi, Ver3).
     // BANKA / IBAN artık gerçek sekme (1153, taraf_banka).
-    yerTutucuSekmeler: ['Yorum / Medya', 'Ek Alanlar'],
+    yerTutucuSekmeler: ['Resim / Doküman', 'Ek Alanlar'],
     // Tedarikçi kartı (1162): Satış & Risk yerine Satınalma Koşulları (taraf_tedarikci).
     gizliKartSekmeleri: ['Satış Koşulları'], gizliDetaylar: ['satisKosul'],
     menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçi Listesi',
@@ -228,7 +228,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
     ],
     toplam: ['tahminiTutar', 'agirlikliTutar'],
-    yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
+    yerTutucuSekmeler: ['Teklifler', 'Resim / Doküman', 'Ek Alanlar'],
     menuGrup: 'Cari & CRM', menuAd: 'Satış Fırsatı Listesi', ic: '🎯', yetkiKodu: 'firsat.liste', menuSira: 50,
   },
   {
@@ -262,7 +262,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   Temsilci ZORUNLU: sahipsiz aday takipsiz kalir (varsayilan karti acan
     //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
     zorunluKartAlanlari: ['temsilci'],
-    yerTutucuSekmeler: ['Yorum / Medya'],
+    yerTutucuSekmeler: ['Resim / Doküman'],
     menuGrup: 'Cari & CRM', menuAd: 'Aday Müşteri Listesi', ic: '🌱', yetkiKodu: 'aday.liste', menuSira: 40,
   },
   {

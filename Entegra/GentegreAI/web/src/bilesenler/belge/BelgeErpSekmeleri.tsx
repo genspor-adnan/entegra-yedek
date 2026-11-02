@@ -47,7 +47,7 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
         <div className="not">
           Teslim alan kişi, TC, görev, teslim zamanı, nüsha sayısı ve teslim notu
           alanları henüz şemada yok — e-İrsaliye teslim onayı akışıyla gelecek.
-          İmzalı teslim belgesi şimdilik Yorum / Medya sekmesine eklenebilir.
+          İmzalı teslim belgesi şimdilik Resim / Doküman sekmesine eklenebilir.
         </div>
       </div>
     );

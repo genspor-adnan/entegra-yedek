@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BankoOturumu } from '../../sayfalar/banko/BankoOturumu';
 
 /**
@@ -28,14 +28,8 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
   // ESC ile kapanır: modal bir pencere gibi davranmalı.
   // TAM EKRAN (kullanıcı 09.10.2026: "ekranı max yapma ikonu ekle"): seçim
   //   tarayıcıda hatırlanır - görevli vardiya boyunca aynı düzeni kullanır.
-  const [tam, setTam] = useState<boolean>(() => {
-    try { return localStorage.getItem('gentegre.bankoOturumTam') === '1' } catch { return false }
-  });
-  const tamCevir = () => setTam(t => {
-    const y = !t;
-    try { localStorage.setItem('gentegre.bankoOturumTam', y ? '1' : '0') } catch { /* yoksay */ }
-    return y;
-  });
+  // MAX DÜĞMESİ KALDIRILDI (kullanıcı 01.11.2026: "tüm formlardaki max butonu kaldır").
+  const tam = false;
   useEffect(() => {
     const t = (e: KeyboardEvent) => { if (e.key === 'Escape') onKapat() };
     window.addEventListener('keydown', t);
@@ -48,12 +42,6 @@ export function BankoOturumModali({ bankoId, oturumId, onKapat }: {
         <style>{stil}</style>
         <div className="bom-bas">
           {oturumId ? `🏦 Banko Oturumu #${oturumId}` : '🏦 Banko Oturumu'}
-          {/* Diğer pencerelerle AYNI kare ikon ve sınıf (Modal.tsx kabas-dugme)
-              - kullanıcı 09.10.2026: "max ikonu da kare yap diğer ekranlar gibi". */}
-          <button type="button" className="kabas-dugme bom-buyut" onClick={tamCevir}
-                  title={tam ? 'Pencereye döndür' : 'Tam ekran'} aria-pressed={tam}>
-            {tam ? '🗗' : '🗖'}
-          </button>
           {/* BAŞLIKTA ✖ YOK (kullanıcı 09.10.2026: "sağ üst köşeden kapatma x i
               kaldır"): kapatma oturum ekranındaki "Kapat" düğmesinde; Esc de kapatır. */}
         </div>

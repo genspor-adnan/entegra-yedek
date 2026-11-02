@@ -78,10 +78,11 @@ public static class BelgeTuru
     /// iliskisi yoktur (sayac tohumu eski veriden geldigi icin
     /// "3012026000357895" gibi anlamsiz numaralar uretiyordu).
     ///
-    /// Alis irsaliyesi (10) ve alis fisi (12) DISARIDA: sayaclari temiz
-    /// calisiyor; istenirse buraya eklenir.
+    /// BUTUN ALIS BELGELERI (kullanici 02.11.2026: "alım belgelerinde alış fatno/irs no/fiş no gibi numaralandırma
+    /// gelen belgedeki numara girişi ile yapılır"): alis irsaliyesi (10), alis faturasi (11), alis fisi (12) ve
+    /// konsinye giris (109). Alis SIPARISI (9) DISARIDA - siparisi biz veririz, numarasi bizim sayacimizdan.
     /// </summary>
-    private static readonly HashSet<int> DisNumaraliTurler = new() { 11 };
+    private static readonly HashSet<int> DisNumaraliTurler = new() { 10, 11, 12, 109 };
 
     // -------------------------------------------------------------- sorular ---
     /// <summary>

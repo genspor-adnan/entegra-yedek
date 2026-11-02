@@ -14,7 +14,9 @@ public sealed record IskontoTalebi(
     /// <summary>Onay penceresinin hasta şeridi (663): 1 erkek · 2 kadın · 0 bilinmiyor.</summary>
     short Cinsiyet, int Yas, string Kurum, string Doktor,
     /// <summary>Talebe giren hizmetler - "Muayene, EKG, USG" gibi yan yana yazılır.</summary>
-    IReadOnlyList<IskontoKalemi> Kalemler);
+    IReadOnlyList<IskontoKalemi> Kalemler,
+    /// <summary>Görünen kısa yaş (1214 fn_yas_kisa): 45y / 1y3a / 3a5g.</summary>
+    string YasKisa = "");
 
 /// <summary>Talep satırının ekranda okunan hali. <paramref name="Oran"/> KALEM
 /// BAZLI istenen yüzdedir (673) - onay ekranı kalem kalem gösterir.</summary>
@@ -57,7 +59,7 @@ public sealed class IskontoTalepDeposu
                case when th.dogum_tarihi is null then 0
                     else extract(year from age(th.dogum_tarihi))::int end as yas,
                coalesce(public.fn_taraf_ad(kr.unvan, kr.ad, kr.soyad)::varchar(120), '')   as kurum,
-               coalesce(public.fn_taraf_ad(dr.unvan, dr.ad, dr.soyad)::varchar(120), '')   as doktor
+               coalesce(public.fn_taraf_ad(dr.unvan, dr.ad, dr.soyad)::varchar(120), '')   as doktor, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
           from public.iskonto_talep t
           join public.belge b        on b.id = t.belge_id
           left join public.taraf h   on h.id = b.taraf_id
@@ -75,7 +77,7 @@ public sealed class IskontoTalepDeposu
         o.GetString(8), o.IsDBNull(9) ? null : o.GetDateTime(9), o.GetString(10),
         (int)o.GetInt64(11), o.GetDecimal(12), o.GetString(13), o.GetString(14),
         o.GetInt16(15), o.GetInt32(16), o.GetString(17), o.GetString(18),
-        Array.Empty<IskontoKalemi>());
+        Array.Empty<IskontoKalemi>(), o.GetString(19));
 
     /// <summary>
     /// TALEPLERİN KALEMLERİ TEK SORGUDA (663): onay penceresi hizmet adlarını

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { api } from '../../api/istemci';
 import type { BelgeYaniti } from '../../api/sozlesme';
@@ -81,6 +81,11 @@ export interface BelgeKartiModalProps {
   hastaAramaMetni: string;
   setHastaAramaMetni: Ayarla<string>;
   hastaAramaYeni: boolean;
+  /**
+   * YENİ HASTA SEKMEDE (kullanıcı 01.11.2026: "yeni başvuruda hasta arama ekranında yeni hasta butona basarsam
+   * hasta kartı sekmede açılsın"): verilirse arama penceresinin "＋ Yeni"si kartı pencere yerine sekmede açar.
+   */
+  yeniHastaSekmede?(): void;
   setHastaAramaYeni: Ayarla<boolean>;
   /** Doğrudan açılacak hasta kartının id'si (781) - arama penceresinden
       geçmez; null = kart kapalı. */
@@ -209,6 +214,19 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     return () => { iptal = true };
   }, [basvuruMu, cari?.id]);
   useEffect(() => { if (!hesapSecim) setPosAtlandi(false) }, [hesapSecim]);
+  useEffect(() => {
+    if (!(basvuruMu && cariArama && hastaAramaYeni && p.yeniHastaSekmede)) return;
+    setCariArama(false); setHastaAramaMetni(''); setHastaAramaYeni(false);
+    p.yeniHastaSekmede();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basvuruMu, cariArama, hastaAramaYeni]);
+
+  const secimYapildi = useRef(false);
+  const cariRolu: 'musteri' | 'tedarikci' | null =
+    basvuruMu || bilgi.tahakkuk || bilgi.depoBelgesi || bilgi.stokFisi || !bilgi.cariVar ? null
+      : bilgi.alis ? 'tedarikci' : 'musteri';
+  // Sabit nesne: TarafArama ekFiltre değişince yeniden arar - her çizimde yeni nesne sonsuz arama demekti.
+  const cariRolFiltresi = useMemo(() => cariRolu ? { alan: cariRolu, op: 'esit' as const, deger: 1 } : undefined, [cariRolu]);
 
   return (
     <>
@@ -221,17 +239,32 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
         //   tedarikci/kurum bu pencerede cikmamali. Kaynak 'hasta' sunucuda
         //   grup = 101 ile suzuluyor; "＋ Yeni" de hasta karti acar.
         kaynaklar={basvuruMu ? ['hasta'] : ['cari']}
-        yerTutucu={basvuruMu
-          ? 'Hastayı isim/tel ile ara…' : 'Müşteri / tedarikçi ara…'}
+        // ALIŞTA TEDARİKÇİ, SATIŞTA MÜŞTERİ (kullanıcı 02.11.2026, genel kural - fatura / fiş / sipariş /
+        //   irsaliye / teklif / konsinye): aramaya yalnız o roldeki cariler gelir; "＋ Yeni" de o rolle açılır.
+        //   Tahakkuk her iki rolde de kesilebildiği için süzülmez.
+        ekFiltre={cariRolFiltresi}
+        yeniVarsayilanlari={cariRolu === 'tedarikci' ? { musteri: false, tedarikci: true }
+                            : cariRolu === 'musteri' ? { musteri: true, tedarikci: false } : undefined}
+        yerTutucu={basvuruMu ? 'Hastayı isim/tel ile ara…'
+          : cariRolu === 'tedarikci' ? 'Tedarikçi ara…' : cariRolu === 'musteri' ? 'Müşteri ara…'
+          : 'Müşteri / tedarikçi ara…'}
         baslangicMetni={hastaAramaMetni}
-        baslangicYeni={hastaAramaYeni}
+        baslangicYeni={hastaAramaYeni && !p.yeniHastaSekmede}
+        onYeni={basvuruMu && p.yeniHastaSekmede ? () => {
+          setCariArama(false); setHastaAramaMetni(''); setHastaAramaYeni(false);
+          p.yeniHastaSekmede!();
+        } : undefined}
         onKapat={() => {
           setCariArama(false);
           setHastaAramaMetni('');
           setHastaAramaYeni(false);
+          // SEÇİMDEN SONRA DA onKapat GELİR (TarafArama: onSec + onKapat) - o an `cari` state'i henüz eski (boş);
+          //   seçim olduysa iptal sayılmaz, yoksa yeni belge seçilen cariyle birlikte kapanıyordu.
+          if (secimYapildi.current) { secimYapildi.current = false; return }
           onAramaIptal?.();
         }}
         onSec={sec => {
+          secimYapildi.current = true;
           setCari({ id: sec.id, unvan: sec.unvan });
           setCariArama(false);
           setHastaAramaMetni('');

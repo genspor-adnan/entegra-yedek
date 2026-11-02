@@ -41,7 +41,7 @@ public static partial class KaynakKatalogu
             // KISA AD (552, hizmetteki 549 ile ayni): gunluk dilde kullanilan
             //   ad, resmi adin SOLUNDA. Aramada da taranir.
             new("kisaAd",    "s.kisa_ad",   "metin", "Kısa Ad", Genislik: 160),
-            new("ad",        "s.ad",        "metin", "Stok Adi"),
+            new("ad",        "s.ad",        "metin", "Stok Adı"),
             // Kategori ve birim ADIYLA gosterilir: kolonlar "kod" tipindeydi ve
             //   listede kod ad'a cevrilmedigi icin ekranda ham id goruluyordu.
             // KATEGORI YOLU (kullanici: "kategori icinde alt ust bilgileri de
@@ -453,6 +453,15 @@ public static partial class KaynakKatalogu
             //   Resmi adin YERINE GECMEZ - fatura/rapor/e-Nabiz yine `ad`.
             new("kisaAd",  "h.kisa_ad",  "metin", "Kısa Ad",    Genislik: 160),
             new("ad",      "h.ad",       "metin", "Hizmet Adı"),
+            // SKRS EŞLEME (1222, kullanıcı 01.11.2026: "önceki kod da gösterilsin"): Bakanlık (SUT) koduna çevrilen ya da
+            //   birleşen hizmetin ESKİ kodları - aramada bulunur (liste tanımı aramaEkAlanlari).
+            new("eskiKodlar",
+                "coalesce((select string_agg(e.eski_kod, ' · ' order by e.id) from public.hizmet_eski_kod e where e.hizmet_id = h.id), '')",
+                "metin", "Eski Kod", Genislik: 120),
+            new("standartAdi",
+                "case h.standart when 1 then 'SUT' when 2 then 'Kuruma özel' when 3 then 'SUT yön ailesi' else '' end",
+                "metin", "Standart", Hizalama: "orta", Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
+            new("standart", "h.standart", "kod", "Standart Kodu", Varsayilan: false),
             // Eski `grubu` kolonu hic kullanilmamis (hepsi 0) - yerine 269'da
             //   eklenen kategori gosteriliyor.
             // KATEGORI YOLU (350/351, kullanici: "hizmet listesine de yansit"):

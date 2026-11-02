@@ -81,6 +81,15 @@ public static class StokDurumUclari
                                     izlemeNo = baglam.IzlemeNo });
         }).WithTags("Kart").RequireAuthorization();
 
+        // URUN AGACI / BOM SEKMESI (stok_karti_v2.html, yalniz ERP): salt okunur ozet; duzenleme Urun Agaci kartinda.
+        yol.MapGet("/api/kart/stok/{stokId:long}/urun-agaci", async (
+            long stokId, BaglamCozucu cozucu, StokDurumDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("uretim", Islem.Gor);
+            return Results.Ok(new { agaclar = await depo.UrunAgaclariAsync(stokId, iptal) });
+        }).WithTags("Kart").RequireAuthorization();
+
         grup.MapPut("/limit", async (
             long stokId, LimitIstegi istek, BaglamCozucu cozucu, StokDurumDeposu depo,
             HttpContext ctx, CancellationToken iptal) =>

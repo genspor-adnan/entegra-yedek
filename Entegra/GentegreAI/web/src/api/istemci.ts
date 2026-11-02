@@ -92,6 +92,7 @@ import { ekstreUclari } from './uclar/ekstre';
 import { duyuruUclari } from './uclar/duyuru';
 import { demoUclari } from './uclar/demo';
 import { radyolojiTanimUclari } from './uclar/radyolojiTanim';
+import { aktarimEslemeUclari } from './uclar/aktarimEsleme';
 import { servisUclari } from './uclar/servis';
 import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
@@ -140,6 +141,7 @@ export const api = {
   ...duyuruUclari,
   ...demoUclari,
   ...radyolojiTanimUclari,
+  ...aktarimEslemeUclari,
   ...servisUclari,
   ...arizaUclari,
   ...basvuruIstemUclari,

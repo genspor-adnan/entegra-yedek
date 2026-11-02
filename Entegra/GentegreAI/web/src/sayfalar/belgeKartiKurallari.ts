@@ -283,6 +283,15 @@ export function belgeOnizlemesi(
  * GenoTIP'te aynı tür "Başvuru" adıyla açılır (279): tür kataloğundaki ad
  * "Satış Siparişi"dir, hasta ekranında o başlığı göstermek yanlış olurdu.
  */
+/**
+ * GÖRÜNEN BELGE NO (kullanıcı 02.11.2026: "fatura no 0 geldi"): e-Belge numarasını entegratör verir; gönderilene
+ * dek belge_no '0' durur (Delphi de FATURANO = 0 bekler). Ekranda numara gibi görünmesin - boş döner.
+ */
+export const gorunenBelgeNo = (no: unknown): string => {
+  const m = String(no ?? '').trim();
+  return m === '0' ? '' : m;
+};
+
 export function kartBasligi({ basvuruMu, turAdi, mevcutBelge, kayitliId, belgeNo }: {
   basvuruMu: boolean; turAdi: string; mevcutBelge: boolean;
   kayitliId: number; belgeNo?: string | null;

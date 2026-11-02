@@ -17,7 +17,7 @@ import {
 import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
 import { api, oturum } from '../api/istemci';
-import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
+import { HEDEFLER as DONUSUM_HEDEFLERI, BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { BankoOturumModali } from '../bilesenler/banko/BankoOturumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
@@ -119,7 +119,7 @@ import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { BELGE_KARTI_KAYNAKLARI, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
-import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
+import { donusumMenusu, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
   from './listeTanimlari';
 
 /**
@@ -422,6 +422,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   };
   // Ekstre dugmesinin aktifligi icin gridden gelen secili satir.
   const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
+  /** Onay kutusuyla işaretli satırlar - ekran panelleri (rapor listesinin toplu çıktısı). */
+  const [isaretli, setIsaretli] = useState<ListeSatiri[]>([]);
   // Ekstreden donunce ayni satiri yeniden isaretlemek icin - grid unmount
   //   olurken secim null'a duser, o yuzden SON DOLU deger ayrica saklanir.
   const [sonSeciliId, setSonSeciliId] = useState<number | null>(null);
@@ -479,7 +481,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   kaynak tablosunda. Gridin üst / sol / yan / alt panelleri ve sabit filtre buradan.
   const ekranBaglami: ListeEkranBaglami = {
     kaynak: tanim.kaynak, rota: tanim.rota, portalda, yenile, tazele: () => setYenile(t => t + 1),
-    seciliSatir, git, gitKart, aksiyon: (kod, satir) => aksiyon(kod, satir), setCip: setCipIndeks, cipIndeks,
+    seciliSatir, isaretli, git, gitKart, aksiyon: (kod, satir) => aksiyon(kod, satir), setCip: setCipIndeks, cipIndeks,
     personelSuzgec,
     panoCipFiltresi: cipler?.[cipIndeks]?.filtre,
     panoSeciliId: Number(gozAkisSecili?.id ?? 0) || null, panoSec: setGozAkisSecili,
@@ -1164,7 +1166,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir
                       : tanim.basvuruSuzgeci ? basvuruSuzgec.araligiBildir : cariEkstre.onTarihAraligi}
-      basSag={cariEkstre.basSag}
+      basSag={cariEkstre.basSag ?? panel?.basSag?.(ekranBaglami)}
       onKapat={ekranSekmesi ? () => ekranSekmesi.kapat() : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       aracCubuguAltSatir={tanim.aracCubuguAltSatir}
@@ -1178,7 +1180,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       kolonGenislikleri={tanim.kolonGenislikleri}
       aramaGorunumGizli={tanim.aramaGorunumGizli}
       kolonSirasi={tanim.kolonSirasi}
-      altSecenekler={{ ...KASA_ARAC_MENUSU, ...DONUSUM_MENUSU,
+      altSecenekler={{ ...KASA_ARAC_MENUSU, ...donusumMenusu(tanim.yeniBelgeTuru, DONUSUM_HEDEFLERI),
                        ...(tanim.altSecenekler ?? {}),
                        // YENİ TALEP ▾ (personel): yalnız eklemeye yetkili türler.
                        ...(tanim.altSecenekler?.['personel.talep'] ? { 'personel.talep': personelTalepSecenekleri(yetki, seciliSatir) } : {}) }}
@@ -1218,12 +1220,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       tarihAlani={tanim.tarihAlani}
       tarihCombo={tanim.tarihCombo}
       tarihComboVarsayilan={tanim.tarihComboVarsayilan}
+      tarihComboAralik={tanim.tarihComboAralik}
       // Ekstreden donunce ayni hesap secili kalsin.
       seciliBaslangicId={sonSeciliId}
       cipBaslangic={cipIndeks}
       onCipSecildi={setCipIndeks}
       onCipRota={r => git(`/${r}`)}
       onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
+      onIsaretliDegisti={panel?.basSag ? setIsaretli : undefined}
       cipSonu={tanim.kategoriSuzgeci ? (
         // Ciplerin SAGINDA: agac panelini acan dugme + (panel kapaliyken)
         //   ayni suzgecin combo hali. Panel acikken combo cizilmez - ayni

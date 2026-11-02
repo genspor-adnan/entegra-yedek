@@ -85,11 +85,53 @@ public static partial class RadyolojiUclari
     /// istem (ayri accession no) olur; hasta bir kez yazilir, klinik bilgi
     /// hepsine gecer.
     /// </summary>
-    public sealed record TetkikIstegi(int HizmetId, short? Oncelik, short? Kontrast);
+    /// <summary>
+    /// Yon (1229): 0 yok · 1 sağ · 2 sol · 3 bilateral - hizmet kartında "yön zorunlu" ise boş geçilemez.
+    /// AccessionNo: dışarıdan gelen hastanın gönderen kurumdaki numarası; boşsa şube şablonundan üretilir.
+    /// </summary>
+    public sealed record TetkikIstegi(int HizmetId, short? Oncelik, short? Kontrast, short? Yon = null, string? AccessionNo = null);
     /// <summary>İstem kartı düzenlenebilir alanları (mockup). Hasta/tetkik/ödeyen
     /// kurum başvurudan gelir, burada değişmez.</summary>
     public sealed record IstemGuncelleIstegi(string? KlinikBilgi, string? OnTani, short? Oncelik,
-        short? Kontrast, decimal? KontrastMl, int? SeriSayisi, int? GoruntuSayisi);
+        short? Kontrast, decimal? KontrastMl, int? SeriSayisi, int? GoruntuSayisi,
+        short? Yon = null, string? AccessionNo = null,
+        // İSTEYEN (kullanıcı 01.11.2026: "isteyen dış hekim alanını da karta ekle"): yalnız IsteyenGuncelle = true
+        //   ise yazılır - kayıtlı dış hekim (IstekHekimId) ya da kayıtsız ad (DisHekimAd), sevk eden kurum.
+        bool? IsteyenGuncelle = null, int? IstekHekimId = null, string? DisHekimAd = null, int? IstekKurumId = null);
+
+    /// <summary>
+    /// DIŞ ACCESSION DENETİMİ (1229): 16 karakter DICOM AccessionNumber sınırı, yalnız harf / rakam / - . _
+    /// ve kurumda benzersiz (görüntü istemle yalnız bu numarayla eşleşir).
+    /// </summary>
+    /// <summary>
+    /// YÖN AİLESİ (1232): hizmetin Bakanlık kodu yönden çözülüyorsa seçilen yönün SUT kodu olmalı ("MRG, DİZ" ailesinde
+    /// bilateral kod yok - iki ayrı istem açılır). Varyantı olmayan hizmette sınır yok.
+    /// </summary>
+    internal static async Task YonAilesiDenetleAsync(NpgsqlConnection b, NpgsqlTransaction? tx, int hizmetId, short yon,
+                                                     CancellationToken iptal)
+    {
+        var yonlar = await b.TekDegerAsync<string?>("select public.fn_hizmet_yonleri(@p0)", tx, [hizmetId], iptal) ?? "";
+        if (yonlar == "" || yonlar.Split(',').Contains(yon.ToString())) return;
+        var adlar = string.Join(" / ", yonlar.Split(',').Select(y => y switch { "1" => "Sağ", "2" => "Sol", _ => "Bilateral" }));
+        throw GentegreHatasi.Dogrulama(
+            yon == 3 ? $"Bu tetkikin bilateral Bakanlık kodu yok; sağ ve sol için ayrı istem açın ({adlar})."
+                     : $"Bu tetkik için seçilebilen yön: {adlar}.",
+            new AlanHatasi("yon", adlar));
+    }
+
+    internal static async Task AccessionDenetleAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction? tx,
+        string acc, int? haricId, CancellationToken iptal)
+    {
+        if (acc.Length > 16 || !System.Text.RegularExpressions.Regex.IsMatch(acc, "^[A-Za-z0-9._-]+$"))
+            throw GentegreHatasi.Dogrulama($"Accession no geçersiz: {acc}",
+                new AlanHatasi("accessionNo", "En fazla 16 karakter; harf, rakam, - . _"));
+        var var_ = await b.TekDegerAsync<int?>(
+            "select 1 from public.radyoloji_istem where accession_no = @p0 and id <> coalesce(@p1::int, 0) limit 1",
+            tx, [acc, haricId], iptal);
+        if (var_ is not null)
+            throw GentegreHatasi.Dogrulama($"Bu accession no başka bir istemde kullanılmış: {acc}",
+                new AlanHatasi("accessionNo", "Benzersiz olmalı."));
+    }
     public sealed record IstemIstegi(
         int HastaId, int? BelgeId, int? IstekHekimId, string? DisHekimAd,
         int? IstekKurumId, string? OnTani, string? KlinikBilgi, short? Oncelik,
@@ -192,7 +234,12 @@ public static partial class RadyolojiUclari
                        --   oncesi sorulacaklar; hastaya verilen hazirliktan ayridir.
                        coalesce(p.ozel_uyari, '') as "ozelUyari",
                        coalesce(p.kontrast, 0) as "varsayilanKontrast",
-                       coalesce(p.sure_dk, 0) as "sureDk"
+                       coalesce(p.sure_dk, 0) as "sureDk",
+                       coalesce((select hy.yon_zorunlu from public.hizmet hy where hy.id = t.id), 0) as "yonZorunlu",
+                       -- 1230: yönlü SUT kodunun sabit yönü ("MRG, DİZ - SAĞ") - kabulde sorulmaz.
+                       coalesce((select hy.yon from public.hizmet hy where hy.id = t.id), 0) as "sabitYon",
+                       -- 1232: yön ailesinde SUT kodu olan yönler ("1,2" - MRG DİZ'de bilateral yok); '' = sınır yok.
+                       public.fn_hizmet_yonleri(t.id) as yonlar
                   from public.v_radyoloji_tetkik t
                   left join public.radyoloji_protokol p on p.hizmet_id = t.id
                   left join public.kod_liste kl on kl.kod = 'rad.hazirlik'
@@ -477,13 +524,31 @@ public static partial class RadyolojiUclari
                                              + "modalite girin.")]);
                     }
 
+                    // YÖN (1229): hizmet kartında "yön zorunlu" ise sağ / sol / bilateral seçilmeden istem açılmaz.
+                    var yon = t.Yon ?? 0;
+                    if (yon < 0 || yon > 3)
+                        throw GentegreHatasi.Dogrulama("Geçersiz yön.", new AlanHatasi("yon", "Sağ / Sol / Bilateral."));
+                    if (yon == 0)
+                    {
+                        var yz = await baglanti.TekAsync(
+                            "select coalesce(yon_zorunlu, 0) as z, coalesce(ad, '') as ad from public.hizmet where id = @p0",
+                            islem, [t.HizmetId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                        if (yz is not null && Convert.ToInt32(yz["z"]) == 1)
+                            throw GentegreHatasi.Dogrulama($"\"{yz["ad"]}\" için yön seçilmeli (Sağ / Sol / Bilateral).",
+                                new AlanHatasi("yon", "Zorunlu."));
+                    }
+                    else await YonAilesiDenetleAsync(baglanti, islem, t.HizmetId, (short)yon, iptal);
+                    // DIŞ ACCESSION (1229): hasta başka kurumdan numarasıyla geldiyse o kullanılır.
+                    var disAcc = (t.AccessionNo ?? "").Trim();
+                    if (disAcc != "") await AccessionDenetleAsync(baglanti, islem, disAcc, null, iptal);
+
                     var id = await baglanti.TekDegerAsync<int>("""
                         insert into public.radyoloji_istem
                             (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                              istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
                              kontrast, ekleyen,
                              mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi,
-                             randevu_id, serbest, accession_no)
+                             randevu_id, serbest, accession_no, yon, accession_dis, kabul_tarihi)
                         -- serbest (913): ücret girilene kadar çekim listesine
                         --   DÜŞMEZ. Ücret satırları aşağıda (UcretEkle/kabul)
                         --   eklenince belge_satir tetiği serbest yapar. Acil/
@@ -498,8 +563,11 @@ public static partial class RadyolojiUclari
                                 --   varsa numara verilir, yoksa BOS kalir
                                 --   (bugunku davranis). DICOM/MWL tarafinda
                                 --   istemi taniyan numara budur.
-                                public.fn_numara_kimlik_uret(903, @p0, 'radyoloji_istem',
-                                                             'accession_no', current_date))
+                                -- 1229: dış numara girildiyse o; yoksa şube şablonundan (çakışanı atlar).
+                                coalesce(nullif(@p18::varchar, ''), public.fn_radyoloji_accession_ver(@p0, current_date)),
+                                @p19::smallint, case when coalesce(@p18::varchar, '') <> '' then 1 else 0 end,
+                                -- 1244: kabul ekranından açılan istem kabul edilmiş doğar.
+                                now())
                         returning id
                         """, islem,
                         [baglam.SubeId, belgeId, istek.HastaId, t.HizmetId, modalite,
@@ -510,7 +578,7 @@ public static partial class RadyolojiUclari
                          istek.MwlIstendi, istek.SmsIstendi,
                          istek.HazirlikVerildi, istek.CdIstendi,
                          // Randevudan kabul (317): plan ile is ayni kayitta bagli.
-                         istek.RandevuId], iptal);
+                         istek.RandevuId, disAcc, yon], iptal);
 
                     // RANDEVUNUN CIHAZI isteme tasinir (317): cekim o cihazda
                     //   planlandi, MWL de bunu kullanacak. Kabul sirasinda

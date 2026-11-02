@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji İstem Kartı v2 — Mockup (GenoTIP AI)</title>
+<!--
+  v2 (kullanıcı 01.11.2026: "rad istem ekranı kutularla çok kalabalık görünüyor.. mockup yap bakalım").
+  İlkeler:
+   * Salt okunur bilgi KUTUSUZ: etiket + değer düz yazı (hasta, tetkik, başvuru, ödeyen kurum, modalite).
+   * Kutu yalnız GİRİLECEK alanda; kabulde girilenler tek blokta ("Kabul Bilgileri").
+   * Akış ince adım çizgisi (başvuru aşama şeridi gibi), altı büyük kutucuk yok.
+   * Çekim / görüntü bölümü çekimden önce TEK SATIR ("Henüz çekilmedi"); çekimden sonra açılır.
+   * İstem kâğıdı sağ sütunda küçük önizleme - radyolog bakar, kabul yükler.
+  Sağdaki ikinci pencere aynı kartın ÇEKİMDEN SONRAKİ halidir.
+-->
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --req:#b23b3b; --ok:#2e7d46; --warn:#a46a10;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .ikili-ekran{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1700px;margin:0 auto}
+  @media (max-width:1300px){.ikili-ekran{grid-template-columns:1fr}}
+  .cap{font-size:11px;color:var(--muted);margin:0 0 6px 2px}
+  .win{background:var(--card);border:1px solid var(--line);border-radius:4px;
+    box-shadow:0 6px 22px rgba(20,40,70,.12);overflow:hidden}
+
+  /* Başlık çubuğu: başlık + tek satır araç */
+  .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fff}
+  .bas h1{margin:0;font-size:15px;color:var(--navy)}
+  .bas .acc{font-family:Consolas,monospace;font-size:13px;color:var(--navy);background:var(--head);
+    border:1px solid var(--line2);border-radius:3px;padding:1px 6px}
+  .bas .acc.bekliyor{color:var(--warn);border-color:#f0dcb6;background:#fdf8ee;font-family:inherit;font-size:11px}
+  .sag{margin-left:auto;display:flex;gap:4px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+
+  /* Kimlik bandı: kutusuz, tek satır */
+  .band{display:flex;flex-wrap:wrap;gap:6px 22px;padding:9px 12px;background:linear-gradient(#fff,#f6f9fc);
+    border-bottom:1px solid var(--line2);align-items:baseline}
+  .band .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block}
+  .band .v{font-size:12.5px;font-weight:bold}
+  .band .hasta .v{font-size:14px;color:var(--navy)}
+  .rz{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10.5px;font-weight:bold}
+  .rz.bek{background:#eef1f5;color:#5b6b7c;border:1px solid #d4dde6}
+  .rz.cek{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .rz.sevk{background:#fdf3e1;color:var(--warn);border:1px solid #f0dcb6;font-weight:normal}
+
+  /* Akış: ince adım çizgisi */
+  .akis{display:flex;padding:8px 18px 10px;border-bottom:1px solid var(--line2)}
+  .adim{flex:1;text-align:center;font-size:10.5px;color:var(--muted);position:relative;padding-top:15px}
+  .adim::before{content:"";position:absolute;top:3px;left:50%;transform:translateX(-50%);
+    width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--line);z-index:1}
+  .adim::after{content:"";position:absolute;top:8px;left:50%;width:100%;height:2px;background:var(--line2)}
+  .adim:last-child::after{display:none}
+  .adim small{display:block;font-size:9.5px;color:var(--muted);font-weight:normal}
+  .adim.ok{color:var(--ok);font-weight:bold}.adim.ok::before{background:var(--ok);border-color:var(--ok)}
+  .adim.ok::after{background:#9fd0ae}
+  .adim.simdi{color:var(--accent);font-weight:bold}
+  .adim.simdi::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,109,179,.2)}
+
+  /* Gövde: sol form, sağ istem kâğıdı */
+  .govde{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:14px;padding:12px}
+  .blok{border:1px solid var(--line2);border-radius:4px;margin-bottom:12px}
+  .blok h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);
+    border-bottom:1px solid var(--line2);border-radius:4px 4px 0 0;display:flex;gap:8px;align-items:center}
+  .blok h4 .ip{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .form{display:grid;grid-template-columns:110px minmax(0,1fr) 110px minmax(0,1fr);gap:7px 10px;padding:10px;align-items:center}
+  .form .et{font-size:11px;color:var(--muted);text-align:right}
+  .form .et.req::after{content:" *";color:var(--req)}
+  .form .tam{grid-column:2 / -1}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+  .inp .ph{color:#9aa7b5}
+  .inp.alan{height:46px;align-items:flex-start;padding-top:5px;white-space:normal}
+  .inp.ara{padding-right:2px}.inp.ara .d{margin-left:auto;border-left:1px solid var(--line2);padding:0 6px;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .icd{color:var(--muted);font-size:11px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;height:24px;width:max-content}
+  .seg span{padding:0 10px;display:flex;align-items:center;font-size:11.5px;border-right:1px solid var(--line2)}
+  .seg span:last-child{border-right:0}.seg .on{background:#d7e7fb;color:var(--navy);font-weight:bold}
+
+  /* Salt okunur bilgi: kutusuz satırlar */
+  .bilgi{display:grid;grid-template-columns:110px minmax(0,1fr) 110px minmax(0,1fr);gap:5px 10px;padding:9px 10px}
+  .bilgi .et{font-size:11px;color:var(--muted);text-align:right}
+  .bilgi .d{font-size:12px}
+  .tek{padding:8px 10px;color:var(--muted);font-size:11.5px;display:flex;gap:8px;align-items:center}
+  .tek b{color:var(--ink);font-weight:normal}
+  .kontrol{width:100%;border-collapse:collapse;font-size:11.5px}
+  .kontrol td{padding:5px 10px;border-top:1px solid var(--line2)}
+  .kontrol td:first-child{width:20px}
+  .kontrol .y{color:var(--muted);text-align:right;white-space:nowrap}
+
+  /* İstem kâğıdı */
+  .kagit{border:1px solid var(--line2);border-radius:4px}
+  .kagit h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2)}
+  .onizle{margin:10px;height:250px;border:1px solid var(--line);border-radius:2px;background:
+    repeating-linear-gradient(#fff 0 13px,#eef2f6 13px 14px);position:relative;padding:14px 12px;font-size:10px;color:#56677a}
+  .onizle b{display:block;color:var(--navy);margin-bottom:6px;font-size:11px}
+  .onizle .damga{position:absolute;right:10px;bottom:12px;border:2px solid #9bb5d4;color:#6f8db3;border-radius:50%;
+    width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:9px;transform:rotate(-12deg)}
+  .bos{margin:10px;height:150px;border:2px dashed var(--line);border-radius:4px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:11px;text-align:center;padding:10px}
+  .bos .ik{font-size:24px}
+  .dosyalar{padding:0 10px 10px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .dosyalar a{color:var(--accent);text-decoration:none}
+  .not{max-width:1700px;margin:12px auto 0;color:#6b7a8b;font-size:11px;line-height:1.6}
+  .not code{background:#fff;border:1px solid var(--line2);padding:0 4px;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="ikili-ekran">
+
+<!-- ================================================================ 1) KABUL (çekimden önce) -->
+<div>
+<p class="cap">① Başvuru kaydından sonra açılan kart — dış kurum sevki, kabul bilgileri girilecek (düzenleme açık)</p>
+<div class="win">
+  <div class="bas">
+    <h1>☢️ Radyoloji İstemi</h1>
+    <span class="acc bekliyor">Accession kabulde verilecek</span>
+    <div class="sag">
+      <span class="btn primary">💾 Kaydet</span>
+      <span class="btn">Vazgeç</span>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="hasta"><span class="k">Hasta</span><span class="v">♀ Ayşe Yılmaz · 47 y</span></div>
+    <div><span class="k">Tetkik</span><span class="v">MRG, DİZ - SAĞ, KONTRASTSIZ</span> <span class="icd">R104040</span></div>
+    <div><span class="k">Başvuru</span><span class="v">P-000153</span> <span class="icd">01.11.2026 · Özel (Ücretli)</span></div>
+    <div><span class="k">Durum</span><span class="rz bek">Bekliyor</span> <span class="rz sevk">Sevkli</span></div>
+  </div>
+
+  <div class="akis">
+    <div class="adim ok">İstem<small>01.11 20:05</small></div>
+    <div class="adim simdi">Kabul<small>şimdi</small></div>
+    <div class="adim">Çekim<small>—</small></div>
+    <div class="adim">Rapor<small>—</small></div>
+    <div class="adim">Onay<small>—</small></div>
+    <div class="adim">Teslim<small>—</small></div>
+  </div>
+
+  <div class="govde">
+    <div>
+      <div class="blok">
+        <h4>Kabul Bilgileri <span class="ip">dış kurumdan gelen bilgiler burada girilir</span></h4>
+        <div class="form">
+          <span class="et">Accession No</span>
+          <span class="inp"><span class="ph">dış no · boşsa kurum no</span></span>
+          <span class="et">Öncelik</span>
+          <span class="seg"><span class="on">Normal</span><span>Acil</span></span>
+
+          <span class="et">İsteyen Hekim</span>
+          <span class="inp ara tam">Op. Dr. Adem Binnetoğlu <span class="icd">KBB · Kulak Burun Boğaz</span><span class="d">✕</span><span class="d">…</span></span>
+          <span class="et">İsteyen Kurum</span>
+          <span class="inp ara tam"><span class="ph">Kurum seç… (sevk eden hastane / merkez)</span><span class="d">…</span></span>
+
+          <span class="et">Ön Tanı</span>
+          <span class="inp ara tam">M23.2 <span class="icd">Menisküslerin yerleşim bozukluğu, eski yırtık…</span><span class="d">🔍</span></span>
+
+          <span class="et">Klinik Bilgi</span>
+          <span class="inp alan tam"><span class="ph">Doktor notu / istem gerekçesi…</span></span>
+
+        </div>
+      </div>
+
+      <div class="blok">
+        <h4>Çekim Öncesi Kontrol <span class="ip">3 soru · 0 yanıt</span></h4>
+        <table class="kontrol">
+          <tr><td>☐</td><td>Gebelik / gebelik şüphesi var mı?</td><td class="y">—</td></tr>
+          <tr><td>☐</td><td>Metal implant, kalp pili, koklear implant?</td><td class="y">—</td></tr>
+          <tr><td>☐</td><td>Onam formu alındı mı?</td><td class="y">—</td></tr>
+        </table>
+      </div>
+
+      <div class="blok">
+        <div class="tek">📷 <b>Henüz çekilmedi.</b> Cihaz, tekniker, seri / görüntü ve doz çekimde dolar.</div>
+      </div>
+    </div>
+
+    <div class="kagit">
+      <h4>İstem Kâğıdı</h4>
+      <div class="bos"><span class="ik">📄</span>Taranan istemi buraya sürükleyin<br>ya da tıklayıp seçin<br><small>(sevk yazısı, dış rapor da olur)</small></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ================================================================ 2) ÇEKİMDEN SONRA (görüntüleme) -->
+<div>
+<p class="cap">② Aynı kart çekimden sonra — radyolog bakar (görüntüleme kipi, kutu yok)</p>
+<div class="win">
+  <div class="bas">
+    <h1>☢️ Radyoloji İstemi</h1>
+    <span class="acc">KGM0000000045996</span>
+    <div class="sag">
+      <span class="btn">✎ Düzenle</span>
+      <span class="btn primary">📄 Rapor</span>
+      <span class="btn">⟳</span>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="hasta"><span class="k">Hasta</span><span class="v">♀ Ayşe Yılmaz · 47 y</span></div>
+    <div><span class="k">Tetkik</span><span class="v">MRG, DİZ - SAĞ, KONTRASTSIZ</span> <span class="icd">R104040</span></div>
+    <div><span class="k">Başvuru</span><span class="v">P-000153</span> <span class="icd">01.11.2026 · Özel (Ücretli)</span></div>
+    <div><span class="k">Durum</span><span class="rz cek">Çekildi</span> <span class="rz sevk">Sevkli</span></div>
+  </div>
+
+  <div class="akis">
+    <div class="adim ok">İstem<small>01.11 20:05</small></div>
+    <div class="adim ok">Kabul<small>01.11 20:09</small></div>
+    <div class="adim ok">Çekim<small>01.11 20:41</small></div>
+    <div class="adim simdi">Rapor<small>bekliyor</small></div>
+    <div class="adim">Onay<small>—</small></div>
+    <div class="adim">Teslim<small>—</small></div>
+  </div>
+
+  <div class="govde">
+    <div>
+      <div class="blok">
+        <h4>İstem</h4>
+        <div class="bilgi">
+          <span class="et">İsteyen</span><span class="d">Op. Dr. Adem Binnetoğlu · KBB</span>
+          <span class="et">Öncelik</span><span class="d">Normal</span>
+          <span class="et">Ön Tanı</span><span class="d">M23.2 · Menisküslerin yerleşim bozukluğu</span>
+          <span class="et">Accession</span><span class="d">KGM0000000045996 <span class="icd">(dış: —)</span></span>
+          <span class="et">Klinik Bilgi</span><span class="d" style="grid-column:2 / -1">Sağ diz ağrısı, 3 aydır; travma öyküsü yok. Menisküs yırtığı?</span>
+        </div>
+      </div>
+
+      <div class="blok">
+        <h4>Çekim / Görüntü</h4>
+        <div class="bilgi">
+          <span class="et">Cihaz</span><span class="d">MR-1 (1,5 T)</span>
+          <span class="et">Tekniker</span><span class="d">Mehmet Kaya</span>
+          <span class="et">Çekim</span><span class="d">01.11.2026 20:41</span>
+          <span class="et">Kontrast</span><span class="d">Verilmedi</span>
+          <span class="et">Seri / Görüntü</span><span class="d">6 seri · 412 görüntü</span>
+          <span class="et">Doz</span><span class="d icd">— (dozsuz modalite)</span>
+        </div>
+      </div>
+
+      <div class="blok">
+        <div class="tek">✓ <b>Çekim öncesi kontrol tamam</b> · 3/3 yanıt · Mehmet Kaya, 20:38 <span class="icd" style="margin-left:auto">ayrıntı ▾</span></div>
+      </div>
+    </div>
+
+    <div class="kagit">
+      <h4>İstem Kâğıdı</h4>
+      <div class="onizle"><b>SEVK / İSTEM FORMU</b>Hasta: A. Y.<br>İstenen: Sağ diz MR<br>Ön tanı: menisküs?<br>Not: travma yok, 3 aydır ağrı…<div class="damga">Op.Dr.<br>KBB</div></div>
+      <div class="dosyalar"><a>📄 istem_tarama.pdf</a><a>🖼 sevk_yazisi.jpg</a><span>＋ dosya ekle</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+
+<div class="not">
+  <b>Değişenler (v1 → v2):</b>
+  salt okunur bilgiler kutusuz (bant ve "İstem" bloğu) · girilecekler tek "Kabul Bilgileri" bloğunda, dört sütun yerine
+  etiket–değer iki çift · öncelik küçük seçim düğmesi · altı büyük akış kutucuğu yerine ince adım çizgisi,
+  araya "Kabul" adımı · çekim bölümü çekimden önce tek satır · Study UID karttan kalkar (teknik bilgi, PACS'ta) ·
+  yön ve kontrast SORULMAZ (SUT kodunun içinde: "DİZ - SAĞ, KONTRASTSIZ"; verilen kontrast çekimde girilir) ·
+  istem kâğıdı sağ sütunda önizlemeli (radyolog açmadan görür) · başlıkta accession rozeti ("kabulde verilecek" uyarısı).
+  Kaynak: <code>web/src/sayfalar/RadyolojiIstemKarti.tsx</code> (onaylanırsa).
+</div>
+</body>
+</html>

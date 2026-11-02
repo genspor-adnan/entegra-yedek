@@ -18,6 +18,46 @@ public static class BelgeUclari
     /// karar BelgeDeposu'nda, belgenin transaction'ında (MusteriRiskDeposu.BelgeKontrolAsync). Bayrak
     /// istemciden gelmez (JsonIgnore); `satis.limit_asim` aksiyonu "engelle" kipinde uyarıyla geçirir.
     /// </summary>
+    /// <summary>
+    /// BAŞVURU KAYDEDİLDİ - RADYOLOJİ (1242): radyoloji ücret satırının istemi yoksa açılır (accession şube
+    /// şablonundan), kabulden / muayeneden gelen bağsız istem satıra bağlanır; yatan başvuruda çalışmaz.
+    /// Lab istemiyle aynı kural: SESSİZ - istem açılamazsa başvuru kaydı düşmez, hata günlüğe yazılır.
+    /// Dönen: bu kayıtta açılan istemler + hasta dış kurumdan mı gönderildi (istemci kabul kartını açar).
+    /// </summary>
+    private static async Task<(IReadOnlyList<IDictionary<string, object?>> Istemler, bool DisSevk)>
+        BasvurudanRadyolojiIstemAsync(HttpContext ctx, VeriKaynagi veri, int belgeId,
+                                      IstekBaglami baglam, CancellationToken iptal)
+    {
+        try
+        {
+            var once = await veri.TekDegerAsync<int?>(
+                "select coalesce(max(id), 0) from public.radyoloji_istem where belge_id = @p0", [belgeId], iptal) ?? 0;
+            var acilan = await veri.TekDegerAsync<int?>("select public.fn_basvuru_radyoloji_istem_esitle(@p0, @p1)",
+                                                        [belgeId, baglam.KullaniciId], iptal) ?? 0;
+            if (acilan == 0) return (Array.Empty<IDictionary<string, object?>>(), false);
+            var istemler = await veri.ListeAsync("""
+                select i.id, i.accession_no as "accessionNo", coalesce(h.ad, '') as tetkik
+                  from public.radyoloji_istem i join public.hizmet h on h.id = i.hizmet_id
+                 where i.belge_id = @p0 and i.id > @p1 and i.otomatik = 1 order by i.id
+                """, [belgeId, once], OkuyucuGenisletmeleri.Sozluk, iptal);
+            // DIŞ KURUM SEVKİ (kullanıcı 01.11.2026: "dış kurumdan gönderilen hasta ise ve gelen accession, doktor
+            //   notu, istemin taranması vb. bilgilerin girilmesi gerekiyorsa başvuru kaydından sonra rad kabul ekranı
+            //   açılabilir"): gönderen dış hekim ya da geliş şekli Sevkli (basvuru.gelis_sekli 3).
+            var disSevk = await veri.TekDegerAsync<int?>("""
+                select 1 from public.belge_basvuru bb
+                  left join public.taraf_personel tp on tp.id = bb.personel_id
+                 where bb.id = @p0 and (bb.gelis_sekli = 3 or coalesce(tp.dis_hekim, 0) = 1)
+                """, [belgeId], iptal) is not null;
+            return (istemler, disSevk);
+        }
+        catch (Exception h) when (h is not OperationCanceledException)
+        {
+            ctx.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("BelgeUclari")
+               .LogError(h, "Basvurudan radyoloji istemi acilamadi (belge {Id})", belgeId);
+            return (Array.Empty<IDictionary<string, object?>>(), false);
+        }
+    }
+
     private static void LimitKontroluIste(IstekBaglami baglam, BelgeYazmaIstegi istek)
         => (istek.Secenekler ??= new()).LimitAsimYetkisi = baglam.Yetkiler.AksiyonVar("satis.limit_asim");
 
@@ -55,6 +95,9 @@ public static class BelgeUclari
             await ctx.RequestServices
                      .GetRequiredService<Servisler.LabServisi>()
                      .BasvurudanIstemTamamlaAsync(id, baglam, iptal);
+            // RADYOLOJI DE AYNI PRENSIP (1242, kullanici 01.11.2026): ucret satiri girilen radyoloji tetkikinin
+            //   istemi ve accession'i kayitta acilir.
+            var rad = await BasvurudanRadyolojiIstemAsync(ctx, veri, id, baglam, iptal);
 
             // BEKLEYEN İSTEMLERİ SERBEST BIRAK (919, kullanıcı): başvuru
             //   kaydedilince, ÜCRET SATIRI GİRİLEN tetkiklerin bekleyen istemleri
@@ -71,7 +114,9 @@ public static class BelgeUclari
                 Satirlar = kayit.Satirlar,
                 DipToplam = kayit.DipToplam,
                 Uyarilar = uyarilar,
-                IzlemeNo = baglam.IzlemeNo
+                IzlemeNo = baglam.IzlemeNo,
+                RadyolojiIstemleri = rad.Istemler,
+                DisKurumSevki = rad.DisSevk,
             });
         });
 
@@ -294,6 +339,7 @@ public static class BelgeUclari
             await ctx.RequestServices
                      .GetRequiredService<Servisler.LabServisi>()
                      .BasvurudanIstemTamamlaAsync(belgeId, baglam, iptal);
+            var rad = await BasvurudanRadyolojiIstemAsync(ctx, veri, belgeId, baglam, iptal);
 
             // Kaydedince ücret satırı girilen tetkiğin bekleyen istemini serbest
             //   bırak (919, istem-bazlı) - vazgeçilen bekleyen kalır.
@@ -307,6 +353,8 @@ public static class BelgeUclari
                 DipToplam = kayit.DipToplam,
                 Uyarilar = uyarilar,
                 IzlemeNo = baglam.IzlemeNo,
+                RadyolojiIstemleri = rad.Istemler,
+                DisKurumSevki = rad.DisSevk,
             });
         });
 
@@ -602,7 +650,12 @@ public static class BelgeUclari
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
                 istek.BelgeTarihi, istek.Taslak,
                 baglam.Yazma, iptal,
-                istek.BelgeNo, (short)(istek.Pay ?? 0));
+                istek.BelgeNo, (short)(istek.Pay ?? 0),
+                lotSecimi: (istek.Satirlar ?? new List<DonusumSatiri>())
+                    .Where(x => x.Lotlar is { Count: > 0 })
+                    .ToDictionary(x => x.SatirId,
+                                  x => (IReadOnlyList<(int SeriLotId, decimal Miktar)>)x.Lotlar!
+                                      .Select(l => (l.SeriLotId, l.Miktar)).ToList()));
 
             // KALANI TAHAKKUKA CEVIR (352): "300'u fis, 700'u tahakkuk" tek
             //   tiklamayla. Ilk donusum bitince ayni satirlarin acik kalan
@@ -672,6 +725,13 @@ public static class BelgeUclari
         });
     }
 
+    /// <summary>Dönüşüm satırında seçilen lot ve o lottan çıkacak miktar.</summary>
+    public sealed class DonusumLotu
+    {
+        public int SeriLotId { get; set; }
+        public decimal Miktar { get; set; }
+    }
+
     /// <summary>Siparis/irsaliye donusum istegi (F8). Miktar KISMI olabilir.</summary>
     public sealed class DonusumIstegi
     {
@@ -702,6 +762,13 @@ public static class BelgeUclari
     {
         public int SatirId { get; set; }
         public decimal Miktar { get; set; }
+
+        /// <summary>
+        /// LOT / SERİ SEÇİMİ (kullanıcı 02.11.2026: "satış siparişini irsaliyeye ya da faturaya dönüştürürsek lot/serino
+        /// sormalı"): izlemli stokta çıkışa dönüşümde kullanıcının seçtiği lotlar; toplamı satırın miktarına eşit
+        /// olmalı. Boşsa sunucu FIFO (en yakın SKT) dağıtır.
+        /// </summary>
+        public List<DonusumLotu>? Lotlar { get; set; }
 
         /// <summary>
         /// TUTAR BAZLI KISMI DONUSUM (352): verilirse satirdan miktar degil bu

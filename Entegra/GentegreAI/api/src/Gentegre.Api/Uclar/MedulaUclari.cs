@@ -51,13 +51,13 @@ public static partial class MedulaUclari
                        (select k.tur from public.taraf_hasta_kurum k where k.hasta_id = t.id and k.aktif = 1
                          order by case k.tur when 3 then 0 when 4 then 1 when 2 then 2 else 3 end limit 1) as kurum_tur,
                        (select public.fn_taraf_ad(x.unvan, x.ad, x.soyad)::varchar(120) as unvan from public.taraf_hasta_kurum k join public.taraf x on x.id = k.kurum_id
-                         where k.hasta_id = t.id and k.aktif = 1 order by case k.tur when 3 then 0 else 1 end limit 1) as kurum_adi
+                         where k.hasta_id = t.id and k.aktif = 1 order by case k.tur when 3 then 0 else 1 end limit 1) as kurum_adi, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.taraf t left join public.taraf_hasta th on th.id = t.id where t.id = @p0
                 """, null, [hastaId], o => new
             {
                 id = o.GetInt32(0), unvan = o.GetString(1), tckn = o.GetString(2),
                 dogumTarihi = o.IsDBNull(3) ? (DateTime?)null : o.GetDateTime(3),
-                yas = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), cinsiyet = o.GetInt32(5),
+                yas = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")), cinsiyet = o.GetInt32(5),
                 kurumTur = o.IsDBNull(6) ? (int?)null : (int)o.GetInt16(6), kurumAdi = o.Metin("kurum_adi"),
             }, iptal) ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
 
@@ -235,7 +235,7 @@ public static partial class MedulaUclari
             }, iptal);
 
             var satirlar = await b.ListeAsync("""
-                select s.id, coalesce(h.sut_kodu, ''), coalesce(h.ad, s.aciklama), s.adet, s.tutar_kdvli, s.dis_no,
+                select s.id, coalesce(public.fn_belge_satir_sut_kodu(s.id), ''), coalesce(h.ad, s.aciklama), s.adet, s.tutar_kdvli, s.dis_no,
                        coalesce(h.radyoloji, 0), i.id, i.durum, i.sonuc_kod, i.sonuc_mesaj, i.medula_sira, i.tutar, i.tetkik,
                        s.teslim_tarihi
                   from public.belge_satir s
@@ -291,7 +291,10 @@ public static partial class MedulaUclari
             }
 
             var satirlar = await b.ListeAsync("""
-                select s.id, coalesce(h.sut_kodu, ''), coalesce(h.ad, s.aciklama), s.adet, s.tutar_kdvli, s.dis_no,
+                -- 1232: yön ailesi hizmetinde SUT kodu bağlı radyoloji isteminin yön / kontrastından (fn_belge_satir_sut_kodu).
+                select s.id, coalesce(public.fn_belge_satir_sut_kodu(s.id), ''),
+                       coalesce((select ss.ad from public.skrs_sut ss where h.standart = 3 and ss.kod = public.fn_belge_satir_sut_kodu(s.id)),
+                                h.ad, s.aciklama), s.adet, s.tutar_kdvli, s.dis_no,
                        coalesce(h.radyoloji, 0), coalesce(s.teslim_tarihi, now())::date, bb.personel_id
                   from public.belge_satir s
                   left join public.hizmet h on h.id = s.hizmet_id

@@ -1,6 +1,6 @@
 import {
   type StokDurumYaniti, type StokHareketYaniti, type StokLotSatiri, type PaketIcerikSatiri,
-  type PanelYaniti,
+  type PanelYaniti, type StokUrunAgaci,
   } from '../sozlesme';
 import { istek, gonder, dosyaYukle, dosyaIndir } from '../cekirdek';
 
@@ -35,6 +35,10 @@ export const stokUclari = {
   stokHareket: (stokId: number, bas: string, bit: string, depoId?: number | null) =>
     istek<StokHareketYaniti>(`/api/kart/stok/${stokId}/hareket?bas=${bas}&bit=${bit}`
       + (depoId ? `&depoId=${depoId}` : '')),
+
+  /** Stok kartı "Ürün Ağacı / BOM" sekmesi (yalnız ERP): bu stoğu üreten ağaçlar + bileşenleri, salt okunur. */
+  stokUrunAgaclari: (stokId: number) =>
+    istek<{ agaclar: StokUrunAgaci[] }>(`/api/kart/stok/${stokId}/urun-agaci`).then(y => y.agaclar),
 
   /** Cikis belgesinde secilebilecek lotlar: stokta KALANI olanlar (114). */
   stokLotlari: (stokId: number, depoId?: number | null) =>

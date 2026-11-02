@@ -199,7 +199,8 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
     kalem: depoBelgesi ? 'miktar' : (irsaliye || stokFisi) ? 'sade' : 'tam',
     vade: !irsaliye && !depoBelgesi && !stokFisi,
     doviz: !depoBelgesi && !stokFisi,
-      disNumara: tur === 11,
+      // Alış belgelerinin numarası TEDARİKÇİNİN (02.11.2026) - BelgeTuru.DisNumaraliTurler ile aynı küme.
+      disNumara: [10, 11, 12, 109].includes(tur),
     kaydedinceKapan: depoBelgesi || stokFisi,
     kalemVarsaBaslikKilitli: depoBelgesi || stokFisi,
     // Mal DEPOYA GIRIYOR: izlemli stokta lot/seri bilgisi burada TOPLANIR

@@ -1,4 +1,4 @@
-using Gentegre.Api.Servisler;
+﻿using Gentegre.Api.Servisler;
 
 namespace Gentegre.Testler;
 
@@ -26,6 +26,21 @@ public class RaporHtmlTestleri
             "<script>alert(1)</script><span onclick=\"x()\" style=\"background-image: url(http://x); color: blue\">a</span>"
             + "<a href=\"javascript:x\">b</a><img src=x onerror=y><div style=\"width: expression(1)\">c</div>");
         Assert.Equal("<span style=\"color: blue\">a</span>b<div>c</div>", h);
+    }
+
+    [Fact]
+    public void Tablo_ve_gomulu_resim_kalir_dis_resim_duser()
+    {
+        var h = RaporHtml.Temizle(
+            "<table style=\"border-collapse: collapse; width: 100%\"><tbody><tr><td colspan=\"2\" onclick=\"x()\" "
+            + "style=\"border: 1px solid #000; padding: 4px; vertical-align: top\">A</td></tr></tbody></table>"
+            + "<img src=\"data:image/png;base64,iVBORw0KGgo=\" width=\"120\" height=\"80\" onload=\"x()\"/>"
+            + "<img src=\"https://iz.example/p.gif\"><img src=\"data:image/svg+xml;base64,PHN2Zz4=\">");
+        Assert.Equal(
+            "<table style=\"border-collapse: collapse; width: 100%\"><tbody><tr><td colspan=\"2\" "
+            + "style=\"border: 1px solid #000; padding: 4px; vertical-align: top\">A</td></tr></tbody></table>"
+            + "<img src=\"data:image/png;base64,iVBORw0KGgo=\" width=\"120\" height=\"80\">", h);
+        Assert.Equal("a\tb\nc", RaporHtml.DuzMetin("<table><tr><td>a</td><td>b</td></tr></table>c"));
     }
 
     [Fact]

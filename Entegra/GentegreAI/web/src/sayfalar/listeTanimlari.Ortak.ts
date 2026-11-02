@@ -54,6 +54,8 @@ export interface ListeTanimi {
   tarihCombo?: boolean;
   /** Combo kipinin ACILIS secimi; verilmezse 'bugun'. '' = tum tarihler. */
   tarihComboVarsayilan?: 'bugun' | 'dun' | 'son3gun' | 'son1hafta' | 'son1ay' | 'son3ay' | 'buyil' | '';
+  /** Combo'nun yanında başlangıç - bitiş tarih kutuları da (GenGrid tarihComboAralik). */
+  tarihComboAralik?: boolean;
   /**
    * Ciplerin sagina PRIM ROLU + KISI combolari koyar (kullanici, hakedis
    * satirlari). Kisi listesi secili role gore daralir.
@@ -135,6 +137,8 @@ export interface ListeTanimi {
   menuYol?: string;
   /** Mockup'ta olup backend'i henuz olmayan kart sekmeleri (or. stok: "ÜTS Bilgileri"). */
   yerTutucuSekmeler?: string[];
+  /** Yalniz ERP modunda (urunModu 1) gorunen kart sekmeleri (ör. stok "Reçete" - urun agaci; HBYS'de anlamsiz). */
+  erpSekmeleri?: string[];
   /** Mockup'taki "Genel" sekmesindeki bos "Resim" kutusu (IMAJ→DOSYA hic baglanmadi). */
   resimYerTutucu?: boolean;
   /** Verilirse (ör. islem-log > "bilgi") satir bu alaniyla "İçerik" penceresinde gosterilir. */

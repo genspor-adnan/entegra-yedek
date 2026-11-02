@@ -16,13 +16,19 @@ public static partial class KartKatalogu
         {
             new("id",            "id",              "sayi",  Yazilabilir: false),
             new("kod",           "kod",             "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Stok Kodu", Grup: "Kimlik"),
+            // SERIT SIRASI (kullanici 02.11.2026: "kısa ad ve Stok adı yer değişsin.. kategori tur un soluna
+            //   taşınsın"): Stok Kodu · Stok Adı · Kısa Ad · Kategori · Tür · Durum.
+            new("ad",            "ad",              "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Stok Adı", Grup: "Kimlik"),
             // KISA AD (552): istege bagli, aramada oncelikli. Ilacin kisa adi
             //   da buradan gelir (ilac karti yok, stok karti var).
             new("kisaAd",        "kisa_ad",         "metin", EnFazlaUzunluk: 60,
                 Baslik: "Kısa Ad", Grup: "Kimlik"),
-            new("ad",            "ad",              "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Stok Adi", Grup: "Kimlik"),
             // mockup idstrip: Stok Kodu / Stok Adi / Tur / Durum - Tur (STOKLAR.TIPI) daha once hic acilmamisti.
-            new("tipi",          "tipi",            "kod",   Zorunlu: true, KodListesi: "stok.tipi", Baslik: "Tur", Grup: "Kimlik"),
+            // KATEGORI: YALNIZ STOK DALLARI, AGAC COMBO (544) - kimlik seridinde Tur'un solunda (02.11.2026).
+            new("kategori",      "kategori",        "kod",   Zorunlu: true,
+                KodTablosu: "public.v_stok_kategori_lookup", Agac: true,
+                Baslik: "Kategori", Grup: "Kimlik"),
+            new("tipi",          "tipi",            "kod",   Zorunlu: true, KodListesi: "stok.tipi", Baslik: "Tür", Grup: "Kimlik"),
             // mockup "Genel" sekmesi 3 alt-bolume ayrilir: Tanım / Sınıflandırma · Vergi & Ana Birim · Resim
             //   (Resim - IMAJ→DOSYA - hic acilmadi, alan yok). Ayri Mali/Diger SEKMESI YOK -
             //   mockup'ta da yok, KDV/OTV/Min Stok buraya katlandi (eskiden ayri sekmelerdi).
@@ -31,9 +37,7 @@ public static partial class KartKatalogu
             //   `public.kategori` tablosunun tamami duz liste olarak
             //   geliyordu: hizmet agacinin SUT basliklari da stok kartinda
             //   secilebiliyor, hiyerarsi hic gorunmuyordu.
-            new("kategori",      "kategori",        "kod",   Zorunlu: true,
-                KodTablosu: "public.v_stok_kategori_lookup", Agac: true,
-                Baslik: "Kategori", AltGrup: "Tanım / Sınıflandırma"),
+            // KATEGORI KIMLIK SERIDINDE (02.11.2026) - tanimi yukarida, Tur'un solunda.
             new("marka",         "marka",           "kod",   KodListesi: "stok.marka",     Baslik: "Marka",     AltGrup: "Tanım / Sınıflandırma"),
             // MODEL MARKAYA BAGLI COMBO (544, kullanici: "model de combo
             //   olmalı ve markaya bağımlı olmalı, yani markanın modelleri").
@@ -54,13 +58,13 @@ public static partial class KartKatalogu
             //   Stok aktariminda (Excel) dolu geliyorlar ve gidecek yerleri yoktu.
             new("ozellik",       "ozellik",         "kod",   KodListesi: "stok.ozellik",   Baslik: "Özellik",   AltGrup: "Tanım / Sınıflandırma"),
             new("icerik",        "icerik",          "kod",   KodListesi: "stok.icerik",    Baslik: "İçerik",    AltGrup: "Tanım / Sınıflandırma"),
-            new("izleme",        "izleme",          "kod",   KodListesi: "stok.izleme", Baslik: "Izleme",       AltGrup: "Tanım / Sınıflandırma"),
+            new("izleme",        "izleme",          "kod",   KodListesi: "stok.izleme", Baslik: "İzleme",       AltGrup: "Tanım / Sınıflandırma"),
             new("bildirim",      "bildirim",        "kod",   SabitKodlar: BildirimKodlari, Baslik: "Bildirim",  AltGrup: "Tanım / Sınıflandırma"),
-            new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Urun No",             AltGrup: "Vergi & Ana Birim"),
+            new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Ürün No",             AltGrup: "Vergi & Ana Birim"),
             new("gtipKodu",      "gtip_kodu",       "metin", EnFazlaUzunluk: 30, Baslik: "GTIP Kodu",           AltGrup: "Vergi & Ana Birim"),
             new("anaBirim",      "ana_birim",       "kod",   KodListesi: "stok.ana_birim",  Baslik: "Ana Birim",AltGrup: "Vergi & Ana Birim"),
             new("kdv",           "kdv",             "kod",   Zorunlu: true, SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
-            new("otvYuzde",      "otv_yuzde",       "para", Baslik: "OTV %",  AltGrup: "Vergi & Ana Birim"),
+            new("otvYuzde",      "otv_yuzde",       "para", Baslik: "ÖTV %",  AltGrup: "Vergi & Ana Birim"),
             // FATURADAKI AD vergi bolumunun EN ALTINDA (kullanici): belgeye
             //   basilacak ad vergi/birim bilgileriyle birlikte okunuyor.
             new("faturaStokAdi", "fatura_stok_adi", "metin", EnFazlaUzunluk: 200,
@@ -71,12 +75,17 @@ public static partial class KartKatalogu
             //   faturasinda listelenmesin. Ikisi de varsayilan ISARETLI.
             new("satilan",       "satilan",         "mantik", Baslik: "Satılan", AltGrup: "Diğer",
                                                      EslesAlan: "alinan"),
-            new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer"),
-            // Satılan/Alınan'in ALTINDA (kullanici): Internet Satis + Paket ayni
-            //   satirda. PAKET (124) isaretlenince kartta "Paket" sekmesi acilir.
+            // 1. SATIR Satılan · Alınan · İnternet Satış, 2. SATIR Paket · Reuse (kullanici 02.11.2026: "internet satış
+            //   check i 1.sırada alınan check in sağına gelsin.. satılan check edilmişse internet satış görünsün..
+            //   2.sırada paket ve reuse görünsün" · "paket ve reuse yer varsa 1.satırdan devam etsin"). Tek Esles
+            //   ZINCIRI satilan -> alinan -> internetSatis -> paket -> yenidenKullanilir; satir yer bittikce sarar.
+            new("alinan",        "alinan",          "mantik", Baslik: "Alınan", AltGrup: "Diğer",
+                                                     EslesAlan: "internetSatis"),
             new("internetSatis", "internet_satis",  "mantik", Baslik: "İnternet Satış", AltGrup: "Diğer",
                                                      EslesAlan: "paket"),
-            new("paket",         "paket",           "mantik", Baslik: "Paket", AltGrup: "Diğer"),
+            // PAKET (124) isaretlenince kartta "Paket" sekmesi acilir.
+            new("paket",         "paket",           "mantik", Baslik: "Paket", AltGrup: "Diğer",
+                                                     EslesAlan: "yenidenKullanilir"),
             // Kiralik/demirbas gibi geri donup TEKRAR cikabilen kiymet; normal
             //   ticari mal tuketilir, o yuzden varsayilan isaretsiz.
             new("yenidenKullanilir", "yeniden_kullanilir", "mantik",
@@ -91,7 +100,10 @@ public static partial class KartKatalogu
             //   ayni urunun ana depodaki ve konsinye depodaki esigi ayni olmaz.
             //   Kolon veri olarak duruyor; eski degerler panel kritik listesinde
             //   depo esigi tanimlanmamis stoklar icin yedek olarak kullanilir.
-            new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, AltGrup: "Diğer"),
+            new("ozelKod",       "ozel_kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Özel Kod", AltGrup: "Diğer"),
+            // ACIKLAMA (1246): "Diğer" kutusunun EN ALTINDA, etiketsiz, 2 satir (kullanici 02.11.2026) -
+            //   cok satirli cizim >= 400 karakter esiginden; etiket/yukseklik tema.css `.kart-stok .alan-aciklama`.
+            new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 1000, Baslik: "Açıklama", AltGrup: "Diğer"),
             new("durum",         "durum",           "kod",   Zorunlu: true, SabitKodlar: DurumKodlari, Grup: "Kimlik"),
             new("subeId",        "sube_id",         "sayi",  Yazilabilir: false),
             new("eklemeTarihi",  "ekleme_tarihi",   "tarih", Yazilabilir: false)
@@ -298,6 +310,8 @@ public static partial class KartKatalogu
             //   ya da protokol yazilinca bayrak kendiliginden kalkar (DB).
             new("radyoloji", "radyoloji", "mantik", Baslik: "Radyoloji Tetkiki",
                 Grup: "Genel", AltGrup: "Detay"),
+            // YÖN ZORUNLU (1229) kartta yok (1237, kullanıcı: "ekrandan yön soramayız.. sut da nasılsa listeden seçelim"):
+            //   yön SUT kodunun kendisinde - kabul listeden yönlü hizmeti seçer.
 
             // SUT KODU AYRI ALAN DEGIL (521): katalog SKRS'den kuruldu ve
             //   hizmetin KENDI kodu SUT kodudur ("sut kodu bizdeki hizmet
@@ -320,6 +334,14 @@ public static partial class KartKatalogu
         },
         Detaylar: new[]
         {
+            // ESKİ KODLAR (1222): SKRS eşleme masasında Bakanlık koduna çevrilen / birleşen eski hizmet kodları.
+            new DetayTanimi("eskiKodlar", "public.hizmet_eski_kod", "hizmet_id", new KartAlani[]
+            {
+                new("id",      "id",       "sayi",  Yazilabilir: false),
+                new("eskiKod", "eski_kod", "metin", Yazilabilir: false, Baslik: "Eski kod"),
+                new("eskiAd",  "eski_ad",  "metin", Yazilabilir: false, Baslik: "Eski ad"),
+                new("kaynak",  "kaynak",   "metin", Yazilabilir: false, Baslik: "Kaynak"),
+            }, Sirala: "id", Baslik: "Eski kodlar", SubeKolonu: null, SaltOkunur: true),
             // Hizmette satis/alis ayrimi yok - tek fiyat listesi (stok_fiyat deseni).
             new DetayTanimi("fiyatlar", "public.hizmet_fiyat", "hizmet_id", new KartAlani[]
             {

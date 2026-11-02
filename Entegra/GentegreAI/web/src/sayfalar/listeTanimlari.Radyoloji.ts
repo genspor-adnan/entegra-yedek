@@ -66,10 +66,22 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Mamografi', filtre: { alan: 'modalite', op: 'esit', deger: 5 } },
       { ad: '⭐ Varsayılan', filtre: { alan: 'varsayilan', op: 'esit', deger: 1 } },
       { ad: '⚠ Hizmetsiz', filtre: { alan: 'hizmetsiz', op: 'esit', deger: 1 } },
-      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      // ŞABLON v3 (1216, mockup radyoloji_sablon_listesi_v3.html): biçim / giriş / kapsam süzgeçleri. Liste BÜTÜN
+      //   şablonları gösterir (kullanıcı: "şablon listesinde hepsi görünebilir"); kişisel şablon yalnız RAPOR
+      //   EKRANINDA başka hekimden gizli.
+      { ad: '▯ Tek', filtre: { alan: 'bicimKod', op: 'esit', deger: 1 }, ayracOnce: true },
+      { ad: '☰ Parçalı', filtre: { alan: 'bicimKod', op: 'esit', deger: 2 } },
+      { ad: '▦ Yapısal', filtre: { alan: 'yapisalKod', op: 'esit', deger: 1 } },
+      { ad: 'Genel', filtre: { alan: 'kapsamKod', op: 'esit', deger: 1 }, ayracOnce: true },
+      { ad: 'Kişisel', filtre: { alan: 'kapsamKod', op: 'esit', deger: 2 } },
+      { ad: '⚠ Sahibi eşlenmedi', filtre: { alan: 'kapsamKod', op: 'esit', deger: 3 } },
+      { ad: 'Eski HBYS', filtre: { alan: 'eskiHbys', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 0 }, ayracOnce: true },
       { ad: 'Tümü' },
     ],
-    kolonSirasi: ['yildiz', 'kod', 'ad', 'modaliteAdi', 'tetkik', 'bolumSayisi', 'alanSayisi', 'makroSayisi', 'surumAdi', 'kullanim30', 'durum'],
+    gizliKolonlar: ['bicimKod', 'kapsamKod', 'yapisalTur', 'yapisalKod'],
+    kolonSirasi: ['yildiz', 'kod', 'ad', 'modaliteAdi', 'bicim', 'girisAdi', 'kapsam', 'tetkik', 'alanSayisi', 'makroSayisi',
+                  'surumAdi', 'kullanim30', 'eskiHbys', 'durum'],
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonu Listesi', ic: '📄', yetkiKodu: 'radyoloji.sablon.liste',
     menuSira: 90,
@@ -158,6 +170,34 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Kritik Bulgu Listesi', ic: '🚨',
     yetkiKodu: 'radyoloji.kritik', menuSira: 30,
+  },
+  {
+    // RAPOR LİSTESİ (1215, mockup Ekranlar/Radyoloji/radyoloji_rapor_listesi.html): yazılmış raporun
+    //   arşivi - satır istemin ana raporu, kimliği istem id'si. Çift tık rapor ekranı (okuma / ek rapor
+    //   yetkiye göre). Bulgu kolonu YOK (kullanıcı); hızlı arama gizli rapor metninde de arar. Yazdır
+    //   icmallerdeki çıktı menüsü (araç çubuğunda, işaretli raporlar - yoksa seçili rapor).
+    kaynak: 'radyoloji-rapor', rota: 'radyoloji-rapor',
+    baslik: 'Radyoloji Rapor Listesi', yol: 'Radyoloji › Radyoloji Rapor Listesi',
+    aksiyonEkrani: 'radyoloji-rapor-liste',
+    kartYolu: '/radyoloji/rapor', kartBaslik: 'Radyoloji Raporu', kartIc: '📄',
+    ozelKart: true,
+    tarihAlani: 'raporTarihi',
+    aramaEkAlanlari: ['raporMetni', 'hastaTc', 'hastaNo', 'raporNo'],
+    gizliKolonlar: ['modalite', 'durum', 'istemDurum', 'hastaId', 'istekHekimId', 'raporId', 'raporMetni'],
+    kolonSirasi: ['raporTarihi', 'modaliteAdi', 'accessionNo', 'hastaAdi', 'yas', 'tetkikAdi', 'radyolog',
+                  'isteyen', 'isteyenBolum', 'odeyenKurum', 'durumAdi', 'ekRapor', 'kritik', 'eskiHbys'],
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Ön Rapor',      filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onaylı',        filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Teslim Edildi', filtre: { alan: 'istemDurum', op: 'esit', deger: 6 } },
+      { ad: 'Ek Raporlu',    filtre: { alan: 'ekRapor', op: 'buyuk', deger: 0 } },
+      { ad: 'Kritik Bulgu',  filtre: { alan: 'kritik', op: 'esit', deger: 1 } },
+      { ad: 'Eski HBYS',     filtre: { alan: 'eskiHbys', op: 'esit', deger: 1 } },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Radyoloji Rapor Listesi', ic: '📄',
+    yetkiKodu: 'radyoloji.rapor.liste', menuSira: 15,
   },
   {
     // KONSÜLTASYON TAKİBİ (318): cevap bekleyen ikinci görüşler. Cevaplanmayan

@@ -262,7 +262,7 @@ export function DisHastaKarti() {
     <div className="kaperde" onClick={kapat}>
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
         <div className="kabas">
-          <span>🦷 {h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}</span>
+          <span>🦷 {h.unvan}{(h.yasKisa || h.yas != null) ? ` · ${h.yasKisa || h.yas}` : ''}</span>
           <span className="ds-kabas-yol">{cev('Diş › Hasta Kartı')}</span>
           {plan && <span className={`rozet ${PLAN_DURUM[plan.durum]?.[1] ?? 'gri'}`}>{plan.planNo} · {PLAN_DURUM[plan.durum]?.[0]}</span>}
           {bakiye > 0 && <span className="rozet hata">bakiye {para.format(bakiye)}</span>}
@@ -307,7 +307,7 @@ export function DisHastaKarti() {
       <div className="ds-sahne">
         {/* ------------------------------------------------------ üst bilgi */}
         <div className="ds-hdr">
-          <div><label>Hasta</label><div className="ds-inp big">{h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}{h.cepTel ? ` · ${h.cepTel}` : ''}</div></div>
+          <div><label>Hasta</label><div className="ds-inp big">{h.unvan}{(h.yasKisa || h.yas != null) ? ` · ${h.yasKisa || h.yas}` : ''}{h.cepTel ? ` · ${h.cepTel}` : ''}</div></div>
           {/* TIBBI UYARILAR (kullanici): alerji (kirmizi) + kronik tani (turuncu) +
               surekli ilac (mavi) - Tibbi Ozet kaynaklari. Genel muayene
               kullanilmayan kurulumda giris buradan: "+" dugmeleri hasta on dolu

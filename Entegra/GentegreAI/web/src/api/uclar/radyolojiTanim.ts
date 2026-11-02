@@ -4,6 +4,12 @@ import { gonder, istek } from '../cekirdek';
  * RADYOLOJİ ŞABLON / PROTOKOL TANIM UÇLARI (965, mockup
  * Ekranlar/Radyoloji/radyoloji_sablon_*_v2.html · radyoloji_protokol_*.html).
  */
+/** Hazır yapılandırılmış alan paketi (1217). eslesen / uygulanmis: adına uyan şablonlar / hepsi kurulu olanlar. */
+export interface AlanPaketi {
+  id: number; kod: string; ad: string; modalite: number | null; bolge: number | null; aciklama: string;
+  alan: number; gruplar: string | null; eslesen: number; uygulanmis: number; onerilen: boolean;
+}
+
 export interface SablonOzet {
   bolumler: { sira: number; baslik: string; varsayilanMetin: string; zorunlu: number; yazdir: number; bakanlikParca: number }[];
   alanlar: { alanKod: string; alanAd: string; tip: number; hedefBolum: string }[];
@@ -68,6 +74,18 @@ export const radyolojiTanimUclari = {
   radSablonSurumleri: (id: number) => istek<SablonSurumleri>(`/api/radyoloji/sablon/${id}/surumler`),
   radSablonYeniSurum: (id: number, notu: string) => gonder<{ surum: number }>(`/api/radyoloji/sablon/${id}/surum`, { notu }),
   radSablonGeriYukle: (id: number, surum: number) => gonder<unknown>(`/api/radyoloji/sablon/${id}/geri-yukle/${surum}`, {}),
+  /** HAZIR ALAN PAKETLERİ (1217): sablonId verilirse o şablonun adına uyan paket `onerilen`. */
+  radAlanPaketleri: (sablonId?: number) =>
+    istek<{ paketler: AlanPaketi[] }>(`/api/radyoloji/alan-paketleri${sablonId ? `?sablonId=${sablonId}` : ''}`),
+  /** Paketi verilen şablonlara (boşsa desene uyan bütün şablonlara) uygular. */
+  radAlanPaketiUygula: (id: number, sablonIdler?: number[]) =>
+    gonder<{ sablon: number; alan: number }>(`/api/radyoloji/alan-paketi/${id}/uygula`, { sablonIdler: sablonIdler ?? null }),
+  /** ŞABLON METNİ (1216): bölümler biçimli (html boşsa düz metin). */
+  radSablonBolumleri: (id: number) => istek<{ bolumler: { id: number; sira: number; baslik: string; metin: string; html: string | null;
+    bakanlikParca: number; zorunlu: number; yazdir: number }[] }>(`/api/radyoloji/sablon/${id}/bolumler`),
+  /** Bölümlerin tamamını yazar (HTML sunucuda beyaz listeyle temizlenir). */
+  radSablonBolumleriYaz: (id: number, bolumler: { baslik: string; html: string; bakanlikParca: number; zorunlu: boolean; yazdir: boolean }[]) =>
+    gonder<unknown>(`/api/radyoloji/sablon/${id}/bolumler`, { bolumler }),
   radSablonKullanim: (id: number) => istek<SablonKullanim>(`/api/radyoloji/sablon/${id}/kullanim`),
   radProtokolOzet: (id: number) => istek<ProtokolOzet>(`/api/radyoloji/protokol/${id}/ozet`),
 };

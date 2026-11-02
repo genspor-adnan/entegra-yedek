@@ -12,7 +12,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
-import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni } from './bicim';
+import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni } from './bicim';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
@@ -37,6 +37,7 @@ import { DokumanGalerisi } from './DokumanGalerisi';
 import { PersonelBelgePaneli } from './kart/PersonelBelgePaneli';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
 import { StokHareketSekmesi } from './StokHareketSekmesi';
+import { StokUrunAgaciSekmesi } from './StokUrunAgaciSekmesi';
 import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
@@ -844,16 +845,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     if (gun) parcalar.push(gun.split('-').reverse().join('.'));
     const c = String((o.cinsiyet as string | number | undefined) ?? '');
     if (c === '1') parcalar.push('♂ E'); else if (c === '2') parcalar.push('♀ K');
-    if (gun) {
-      const d = new Date(gun);
-      if (!Number.isNaN(d.getTime())) {
-        const b = new Date();
-        let y = b.getFullYear() - d.getFullYear();
-        const ayFark = b.getMonth() - d.getMonth();
-        if (ayFark < 0 || (ayFark === 0 && b.getDate() < d.getDate())) y--;
-        if (y >= 0 && y < 130) parcalar.push(`${y} y`);
-      }
-    }
+    const yas = yasMetni(gun);
+    if (yas && parseInt(yas, 10) < 130) parcalar.push(yas);
     return parcalar.join('   ');
   }, [detaylar.ozluk]);
 
@@ -939,13 +932,6 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     document.querySelectorAll<HTMLElement>('.ts-bolum').forEach(b => io.observe(b));
     return () => io.disconnect();
   }, [tekSayfaKip, sekmeler]);
-  /**
-   * SEKMEYI BUYUT (kullanici: "sekmeler hizasinda saga yanasik sekmeyi
-   * maksimum yapma butonu.. ustteki kaydet butonuna kadar"): sekmenin
-   * ustundeki seritler (baglam + kimlik) gizlenir, sekme Kaydet araç
-   * cubuguna kadar uzar. Kart turu basina HATIRLANIR (tarayicida).
-   */
-  const sekmeMaksAnahtar = `kartSekmeMaks.${kaynak}`;
   // ÖZEL SEKME ROZETİ dışarıdan (KART_SEKME_ROZETI): ör. hasta "Başvurular" sayısı hasta bandının özetinden.
   const [disRozet, setDisRozet] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -956,13 +942,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     window.addEventListener(KART_SEKME_ROZETI, dinle);
     return () => window.removeEventListener(KART_SEKME_ROZETI, dinle);
   }, [kaynak, id]);
-  const [sekmeMaks, setSekmeMaks] = useState(() => {
-    try { return localStorage.getItem(sekmeMaksAnahtar) === '1' } catch { return false }
-  });
-  const sekmeMaksDegis = () => setSekmeMaks(m => {
-    try { localStorage.setItem(sekmeMaksAnahtar, m ? '0' : '1') } catch { /* sart degil */ }
-    return !m;
-  });
+  // SEKME BÜYÜTME KALDIRILDI (kullanıcı 01.11.2026: "tüm formlardaki max butonu kaldır"); kayıtlı tercih de
+  //   uygulanmaz - düğmesiz kalırsa üst bilgilere geri dönülemezdi.
+  const sekmeMaks = false;
   const kayitAnahtari = `${kaynak}:${id}`;
   const ilkSekmeAnahtari = sekmeler[0]?.anahtar ?? null;
   useEffect(() => {
@@ -1477,7 +1459,7 @@ Yine de yeni kayıt eklensin mi?`);
       )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
-        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />
+        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} karo={kaynak === 'stok'} />
       )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokDurum' && (
@@ -1486,6 +1468,10 @@ Yine de yeni kayıt eklensin mi?`);
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokHareket' && (
         <StokHareketSekmesi stokId={id as number} />
+      )}
+
+      {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokUrunAgaci' && (
+        <StokUrunAgaciSekmesi stokId={id as number} />
       )}
 
       {/* YER TUTUCU SEKME: ekranın kendi gövdesi (kart/kartOzelSekmeleri) ya da "yakında". */}
@@ -1674,11 +1660,6 @@ Yine de yeni kayıt eklensin mi?`);
               })()}
             </div>
           ))}
-          {/* SEKMEYI BUYUT: sekme hizasinda, SAGA yanasik. */}
-          <button type="button" className="katab-buyut"
-                  aria-pressed={sekmeMaks}
-                  title={sekmeMaks ? 'Üst bilgileri göster' : 'Sekmeyi büyüt (üst bilgileri gizle)'}
-                  onClick={sekmeMaksDegis}>{sekmeMaks ? '🗗' : '⛶'}</button>
         </div>
       )}
       onKapat={kapatIstendi}

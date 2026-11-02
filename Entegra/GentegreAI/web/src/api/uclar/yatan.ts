@@ -11,6 +11,8 @@ import { gonder, istek } from '../cekirdek';
 export interface YatisOzetSatiri {
   hasta: string;
   yas: number | null;
+  /** Görünen kısa yaş (1214): 45y / 1y3a / 3a5g. */
+  yasKisa?: string;
   /** 1 erkek · 2 kadın (taraf_hasta.cinsiyet). */
   cinsiyet: number;
   yatak: string;
@@ -270,7 +272,7 @@ export interface OrderOzet {
   order: {
     id: number; ad: string; tur: number; durum: number; siklik: string; sozelOrder: number; imzali: boolean;
     baslangic: string; bitis: string | null; stat: number; prn: number; hekim: string; hasta: string; yatak: string;
-    servis: string; oda: string; yas: number | null; cinsiyet: number; alerjiler: string; yatisGunu: number; tani: string;
+    servis: string; oda: string; yas: number | null; yasKisa?: string; cinsiyet: number; alerjiler: string; yatisGunu: number; tani: string;
     gunNo: number; gunToplam: number | null; toplamDoz: number; verilenDoz: number; gecikenDoz: number;
     sonraki: string | null; yuksekRisk: number; riskAnahtar: string; alerjiEslesen: string; mukerrer: number;
   };

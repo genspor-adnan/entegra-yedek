@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapor Şablonu Kartı v3 — Mockup (GenoTIP AI)</title>
+<link rel="stylesheet" href="_rad_tanim_ortak.css">
+<style>
+  .k-gen{background:#e3ecfa;color:#2f5c9e;border:1px solid #bcd2ef}
+  .k-ben{background:#fff1d6;color:#8a5a00;border:1px solid #f0d090}
+  .eski{display:inline-block;font-size:9.5px;border:1px solid var(--line);border-radius:3px;padding:0 4px;color:var(--muted);margin-left:6px;font-weight:normal;vertical-align:middle}
+  .secim{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kutu-sec{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:#fff;display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+  .kutu-sec.on{border-color:#2f6db3;background:#f2f7fe;box-shadow:0 0 0 2px rgba(47,109,179,.15)}
+  .kutu-sec small{display:block;color:var(--muted);line-height:1.45}
+  .kutu-sec .ik{font-size:20px;line-height:1}
+  .bm-arac{display:flex;flex-wrap:wrap;gap:2px;align-items:center;padding:4px;background:#f3f6fa;border:1px solid var(--line);border-radius:4px;position:sticky;top:0}
+  .bm-arac .b{min-width:24px;height:22px;display:inline-grid;place-items:center;border-radius:3px;font-size:11.5px;padding:0 5px;color:#1f2d3a}
+  .bm-arac .b:hover{background:#fff;outline:1px solid var(--line)}
+  .bm-arac .sel{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 18px 0 6px;display:inline-flex;align-items:center;font-size:11px;position:relative}
+  .bm-arac .sel::after{content:"▾";position:absolute;right:5px;color:var(--muted);font-size:9px}
+  .bm-arac .ay{width:1px;height:16px;background:var(--line);margin:0 4px}
+  .bm-arac .yeni{background:#fff6d6;outline:1px dashed #d6a400}
+  .a4e{background:#fff;border:1px solid #cfd8e3;box-shadow:0 4px 14px rgba(20,40,70,.15);padding:28px 36px;font-family:Arial;font-size:12px;line-height:1.6;max-width:640px;margin:10px auto;min-height:520px}
+  .a4e table{border-collapse:collapse;width:100%;margin:6px 0}
+  .a4e td{border:1px solid #000;padding:2px 6px}
+  .a4e .yer{background:#fff6d6;border-bottom:1px dashed #d6a400;padding:0 2px}
+  .menu{position:absolute;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 8px 24px rgba(20,40,70,.18);padding:4px;font-size:11.5px;min-width:220px;z-index:5}
+  .menu div{padding:4px 8px;border-radius:3px}
+  .menu div:hover{background:var(--sel)}
+  .menu code{float:right}
+  .bolum-ac td{background:#fbfcfd}
+  .mini-edit{border:1px solid var(--line);border-radius:3px;background:#fff;padding:6px 8px;min-height:54px;line-height:1.5}
+  .yer{background:#fff6d6;border-bottom:1px dashed #d6a400;padding:0 2px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">📝 Rapor Şablonu — DIG.05 · Alt Ekstremite Arteryel Sistem Doppler <span class="eski">eski HBYS · DIG</span><span class="sp">Esc ile kapanır</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">🆕 Yeni sürüm</span>
+    <span class="btn">⧉ Kopyala (kendime)</span>
+    <span class="btn">🌐 Genele aç</span>
+    <span class="btn">👁 Önizle</span>
+    <span class="sp"></span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+  <div class="kimlik" style="grid-template-columns:110px 1.8fr 130px 1.3fr 70px 90px">
+    <div class="fld"><label class="req">Kod</label><div class="inp">DIG.05</div></div>
+    <div class="fld"><label class="req">Şablon adı</label><div class="inp big">Alt Ekstremite Arteryel Sistem Doppler</div></div>
+    <div class="fld"><label class="req">Modalite</label><div class="inp"><span class="mod m-us">US</span>&nbsp;Ultrasonografi</div></div>
+    <div class="fld"><label>Kapsam</label><div class="inp"><span class="chip k-gen">Genel (kurum)</span>&nbsp;▾</div></div>
+    <div class="fld"><label>Sürüm</label><div class="inp">v1</div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="chip c-ok">Aktif</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sek on" data-p="genel">Genel</div>
+    <div class="sek" data-p="metin">Şablon Metni <span class="say">A4</span></div>
+    <div class="sek" data-p="bolum">Bölümler <span class="say">1 → 5</span></div>
+    <div class="sek" data-p="alan">Yapısal Form <span class="say">—</span></div>
+    <div class="sek" data-p="makro">Makrolar <span class="say">0</span></div>
+    <div class="sek" data-p="surum">Sürümler <span class="say">1</span></div>
+    <div class="sek" data-p="kul">Kullanım</div>
+  </div>
+
+  <!-- ================================================================ GENEL -->
+  <div class="panel on" id="p-genel">
+    <div class="iki-kolon">
+      <div>
+        <div class="grp"><h4>Rapor yapısı <span class="ek">şablonun rapor ekranında nasıl açılacağı</span></h4><div class="ic">
+          <div style="font-size:10.5px;color:var(--muted);margin-bottom:4px">Biçim</div>
+          <div class="secim">
+            <div class="kutu-sec on"><span class="ik">▯</span><span><b>Tek A4 metin</b>
+              <small>Tek biçimli metin (başlık, tablo, resim serbest). Eski HBYS şablonları böyle. Düzenleme: <b>Şablon Metni</b> sekmesi.</small></span></div>
+            <div class="kutu-sec"><span class="ik">☰</span><span><b>Bölümlü (parçalı)</b>
+              <small>Teknik / Bulgular / Sonuç ayrı bölümler; zorunlu bölüm, Bakanlık parçası eşlemesi. Düzenleme: <b>Bölümler</b>.</small></span></div>
+          </div>
+          <div class="bilgi" style="margin-top:8px">Tek → Bölümlü geçişte metin <b>kalın başlıklardan</b> (TEKNİK:, BULGULAR:, SONUÇ:) bölünmesi önerilir; bölünemeyen kısım Bulgular'a gider. Bölümlü → Tek: bölümler başlıklarıyla tek metne birleşir.<br>
+            Hekim rapor ekranında yine Tek / Parçalı arasında geçebilir - bu yalnız <b>açılış</b> biçimi.</div>
+          <div style="font-size:10.5px;color:var(--muted);margin:10px 0 4px">Giriş</div>
+          <div class="secim">
+            <div class="kutu-sec on"><span class="ik">✎</span><span><b>Serbest</b><small>Hekim metni yazar / düzenler.</small></span></div>
+            <div class="kutu-sec"><span class="ik">▦</span><span><b>Yapısal form</b>
+              <small>Form doldurulur, Bulgular + Sonuç formdan üretilir. Tür: <span class="inp" style="display:inline-flex;min-height:18px;padding:0 4px">BI-RADS ▾</span></small></span></div>
+          </div>
+        </div></div>
+
+        <div class="grp"><h4>Kapsam</h4><div class="ic izgara">
+          <div class="fld iki"><label>Kimin listesinde</label><div class="inp">◉ Genel (kurum) &nbsp;&nbsp; ○ Kişisel</div></div>
+          <div class="fld iki"><label>Sahibi (kişiselse)</label><div class="inp pasif">—</div></div>
+          <div class="fld tam"><div class="bilgi">Genel şablon bütün radyologların listesinde. Kişisel şablon sahibinin listesinde "★ Benim"; diğerlerinde kapalı grupta.
+            Kişiselden genele almak <b>🌐 Genele aç</b> yetkisi ister.</div></div>
+        </div></div>
+
+        <div class="grp"><h4>Tetkik ve çıktı</h4><div class="ic izgara">
+          <div class="fld iki"><label>Bağlı hizmetler (tetkik)</label><div class="inp">Alt ekstremite arteriyel doppler ✕ &nbsp; <span style="color:var(--accent)">＋ hizmet</span></div></div>
+          <div class="fld"><label>Varsayılan</label><div class="inp">☑ bu hizmetlerde ilk gelen</div></div>
+          <div class="fld"><label>Bölge</label><div class="inp">Vasküler</div></div>
+          <div class="fld tam"><label>Rapor başlığı (yazdırmada)</label><div class="inp">ALT EKSTREMİTE ARTERYEL DOPPLER USG</div></div>
+          <div class="fld tam"><label>Açıklama</label><div class="inp">Eski HBYS şablonu · DIG</div></div>
+        </div></div>
+
+        <div class="grp"><h4>Davranış</h4><div class="ic izgara">
+          <div class="fld iki"><label>Klinik bilgi</label><div class="inp">☑ istemdeki ön tanı + şikâyet dolsun</div></div>
+          <div class="fld iki"><label>Karşılaştırma</label><div class="inp">☑ önceki aynı bölge tetkiki önerilsin</div></div>
+          <div class="fld iki"><label>Kritik bulgu</label><div class="inp">☑ sonuçta kritik ifade → bildirim sor</div></div>
+          <div class="fld iki"><label>e-İmza</label><div class="inp">☐ onayda zorunlu</div></div>
+        </div></div>
+      </div>
+      <div>
+        <div class="grp"><h4>Özet</h4><div class="ic">
+          <div class="satir"><span>Biçim / giriş</span>Tek A4 · Serbest</div>
+          <div class="satir"><span>Kapsam</span><span class="chip k-gen">Genel</span></div>
+          <div class="satir"><span>Tablo / resim</span>1 tablo · 0 resim</div>
+          <div class="satir"><span>Yer tutucu</span>0</div>
+          <div class="satir"><span>Kaynak</span>Eski HBYS (HAZOLE DIG.05)</div>
+          <div class="satir"><span>Son değişiklik</span>aktarım · 01.11.2026</div>
+        </div></div>
+        <div class="uyar">⚠ Hizmete bağlı değil: rapor ekranında yalnız <b>US</b> modalitesinin genel şablonları arasında görünür.</div>
+        <div class="grp" style="margin-top:12px"><h4>Küçük önizleme</h4><div class="ic">
+          <div class="a4e" style="zoom:.42;margin:0;min-height:0">
+            <b><u>Bulgular</u>:</b><br>Bilateral CFA, SFA, DFA, PTA, ADP ve popliteal arterler açıktır.<br><br>
+            Spektral analiz değerleri tabloda verilmiştir.
+            <table><tr><td></td><td>Sağ</td><td>Sol</td></tr><tr><td>CFA</td><td></td><td></td></tr><tr><td>SFA proksimal</td><td></td><td></td></tr><tr><td>DFA</td><td></td><td></td></tr></table>
+            <b>SONUÇ:</b> …
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= ŞABLON METNİ -->
+  <div class="panel" id="p-metin">
+    <div class="iki-kolon" style="grid-template-columns:minmax(0,1fr) 300px">
+      <div>
+        <div class="bm-arac">
+          <span class="sel">Yazı tipi</span><span class="sel">Punto</span><span class="ay"></span>
+          <span class="b"><b>B</b></span><span class="b"><i>I</i></span><span class="b"><u>U</u></span><span class="b"><s>S</s></span><span class="ay"></span>
+          <span class="b" style="color:#c00000;font-weight:bold">A</span><span class="b" style="color:#e0c000">▮</span><span class="ay"></span>
+          <span class="b">⯇</span><span class="b">≡</span><span class="b">⯈</span><span class="b">☰</span><span class="ay"></span>
+          <span class="b">•≡</span><span class="b">1≡</span><span class="ay"></span>
+          <span class="b">🖼 Resim</span><span class="sel">Resim boyutu</span><span class="b">▦ Tablo ▾</span><span class="ay"></span>
+          <span class="b yeni" style="position:relative">{ } Yer tutucu ▾</span>
+          <span class="ay"></span><span class="b">⌫</span><span class="b">↶</span><span class="b">↷</span>
+        </div>
+        <div style="position:relative">
+          <div class="menu" style="left:470px;top:-2px">
+            <div>Hasta adı <code>{hasta.ad}</code></div>
+            <div>Yaş <code>{hasta.yas}</code></div>
+            <div>Cinsiyet <code>{hasta.cinsiyet}</code></div>
+            <div>Ön tanı <code>{istem.on_tani}</code></div>
+            <div>Şikâyet / klinik <code>{istem.sikayet}</code></div>
+            <div>Önceki tetkik tarihi <code>{onceki.tarih}</code></div>
+          </div>
+        </div>
+        <div class="a4e">
+          <b><u>Bulgular</u>:</b><br>
+          Bilateral CFA (common femoral arter), SFA (superfisial femoral arter), DFA (derin femoral arter), PTA (posterior tibialis arter), ADP (arteria dorsalis pedis) ve popliteal arterler açıktır.<br><br>
+          B-mod ve renkli doppler USG incelemede hemodinamik açıdan anlamlı darlığa neden olabilecek belirgin intimal kalınlaşma ya da aterom plağı saptanmamıştır.<br><br>
+          Spektral incelemede sayılan arteryel yapılarda normal trifazik karakterde akım örnekleri saptanmıştır.<br><br>
+          Spektral analiz değerleri tabloda verilmiştir. Klinik: <span class="yer">{istem.on_tani}</span><br>
+          SPECTRAL ANALİZ'DE:
+          <table>
+            <tr><td style="width:55%"></td><td>Sağ</td><td>Sol</td></tr>
+            <tr><td>CFA</td><td></td><td></td></tr><tr><td>SFA proksimal</td><td></td><td></td></tr>
+            <tr><td>SFA orta</td><td></td><td></td></tr><tr><td>SFA distal</td><td></td><td></td></tr>
+            <tr><td>DFA</td><td></td><td></td></tr><tr><td>Popliteal arter</td><td></td><td></td></tr>
+          </table>
+          <b>SONUÇ:</b> Bilateral alt ekstremite arteryel sisteminde hemodinamik açıdan anlamlı darlık saptanmamıştır.
+        </div>
+      </div>
+      <div>
+        <div class="grp"><h4>Bu sekme</h4><div class="ic" style="line-height:1.6">
+          Rapor ekranındaki <b>aynı editör</b> (biçim, resim, tablo). Kaydedilen metin raporda <b>olduğu gibi</b> açılır;
+          yer tutucular istemden dolar (<span class="yer">{istem.on_tani}</span>).<br><br>
+          Bugün kartta yalnız <b>düz</b> varsayılan metin düzenlenebiliyor - eski şablonun tablosu kartta görünmüyor ve düz metin değişince biçim siliniyor. Bu sekme bunu kaldırır: biçimli metin kartta düzenlenir.
+        </div></div>
+        <div class="grp"><h4>Bölümlüye çevir</h4><div class="ic">
+          <div class="satir"><span>Bulunan başlık</span>Bulgular · Sonuç</div>
+          <span class="btn kucuk" style="margin-top:6px">☰ Başlıklardan böl…</span>
+          <div style="color:var(--muted);font-size:10.5px;margin-top:6px">Önizleme gösterilir, onaylanınca biçim "Bölümlü" olur.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ BÖLÜMLER -->
+  <div class="panel" id="p-bolum">
+    <div class="uyar" style="margin-bottom:10px">Bu şablon şu an <b>Tek A4</b> (tek "Rapor" bölümü, Bakanlık parçası yok). Aşağıdaki tablo <b>"Başlıklardan böl"</b> sonrası hali:
+      Bakanlık'ın dört parçası hazır gelir, eski metin kalın başlıklarından bu satırlara dağıtılır.</div>
+    <div class="grp"><h4>Rapor bölümleri <span class="ek">sürükleyerek sırala · satıra tıklayınca biçimli varsayılan metin açılır</span></h4>
+      <table class="liste">
+        <tr><th></th><th>#</th><th>Başlık</th><th>Varsayılan metin</th><th class="o">Zorunlu</th><th class="o">Yazdır</th><th>Bakanlık parçası</th></tr>
+        <tr><td class="surukle">⋮⋮</td><td>1</td><td><b>Klinik bilgi</b></td><td><span class="yer">{istem.on_tani}</span> · <span class="yer">{istem.sikayet}</span></td><td class="o">—</td><td class="o">☑</td><td><span class="chip c-gri">— (istemden gider)</span></td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>2</td><td><b>Teknik</b></td><td>B-mod ve renkli doppler USG ile…</td><td class="o">—</td><td class="o">☑</td><td><span class="chip c-mavi">^1 Teknik</span></td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>3</td><td><b>Karşılaştırma</b></td><td><span class="yer">{onceki.tarih}</span> tarihli tetkik ile karşılaştırıldı. / Önceki tetkik yok.</td><td class="o">—</td><td class="o">☑</td><td><span class="chip c-mavi">^2 Karşılaştırma</span></td></tr>
+        <tr class="sec"><td class="surukle">⋮⋮</td><td>4</td><td><b>Bulgular</b></td><td>Bilateral CFA, SFA… <span class="chip c-gri">▦ tablo</span></td><td class="o">☑</td><td class="o">☑</td><td><span class="chip c-red">^3 Bulgular · zorunlu, ≥ 50 karakter</span></td></tr>
+        <tr class="bolum-ac"><td></td><td></td><td colspan="5">
+          <div class="bm-arac" style="position:static;margin-bottom:4px"><span class="b"><b>B</b></span><span class="b"><i>I</i></span><span class="b"><u>U</u></span><span class="ay"></span><span class="b">🖼 Resim</span><span class="b">▦ Tablo ▾</span><span class="b yeni">{ } Yer tutucu ▾</span></div>
+          <div class="mini-edit">Bilateral CFA, SFA, DFA, PTA, ADP ve popliteal arterler açıktır. Spektral analiz değerleri: <i>(tablo)</i></div>
+        </td></tr>
+        <tr><td class="surukle">⋮⋮</td><td>5</td><td><b>Sonuç ve öneriler</b></td><td>Anlamlı darlık saptanmamıştır.</td><td class="o">☑</td><td class="o">☑</td><td><span class="chip c-red">^4 Sonuç ve Öneriler · zorunlu</span></td></tr>
+      </table>
+      <div class="ic"><span class="btn kucuk">＋ Bölüm</span> <span class="btn kucuk">🏛 Bakanlık iskeletini kur</span> <span class="btn kucuk">⇅ Bakanlık sırasına diz</span> <span class="btn kucuk">▯ Teke birleştir</span></div>
+    </div>
+    <div class="bilgi"><b>Bakanlık Teleradyoloji (Entegrasyon Kılavuzu 3.46, OBX-5):</b> rapor gövdesi dört parça -
+      <b>^1 Teknik · ^2 Karşılaştırma · ^3 Bulgular · ^4 Sonuç ve Öneriler</b>. ^3 ve ^4 yoksa ya da Bulgular 50 karakterden kısaysa mesaj reddedilir.
+      Klinik bilgi parça değildir (istemle gider); başka başlıklar (Öneri, Not…) bir parçaya bağlanmalı yoksa gönderilmez.
+      Kural yalnız <code>radyoloji.bakanlik_profili</code> açıkken onayda zorlanır (KOŞUYOLU ve dev: kapalı).</div>
+  </div>
+
+  <!-- ========================================================= YAPISAL FORM -->
+  <div class="panel" id="p-alan">
+    <div class="bilgi">Giriş "Serbest" - yapısal form kapalı. "Yapısal form" seçilince form türü (BI-RADS …) ve alanlar burada; Bulgular + Sonuç formdan üretilir (mevcut "Yapılandırılmış alanlar" sekmesi).</div>
+  </div>
+
+  <!-- ============================================================= MAKROLAR -->
+  <div class="panel" id="p-makro">
+    <div class="grp"><h4>Makrolar <span class="ek">rapor yazarken kısayol + boşluk</span></h4>
+      <table class="liste"><tr><th>Kısayol</th><th>Ad</th><th>Metin</th><th>Hedef bölüm</th><th class="r">Kullanım</th></tr>
+        <tr><td colspan="5" style="color:var(--muted)">Makro yok.</td></tr></table>
+      <div class="ic"><span class="btn kucuk">＋ Makro</span> <span class="btn kucuk">⧉ Başka şablondan al</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================= SÜRÜMLER -->
+  <div class="panel" id="p-surum">
+    <div class="grp"><h4>Sürümler</h4>
+      <table class="liste"><tr><th>Sürüm</th><th>Tarih</th><th>Kim</th><th>Not</th><th class="r">Rapor</th><th></th></tr>
+        <tr class="sec"><td>v1 · güncel</td><td>01.11.2026</td><td>aktarım</td><td>Eski HBYS'den alındı (biçimli metin dahil)</td><td class="r">0</td><td></td></tr></table>
+      <div class="ic" style="color:var(--muted)">Sürüm biçimli metni de saklar; geri yüklemede tablo / resim geri gelir.</div>
+    </div>
+  </div>
+
+  <!-- ============================================================= KULLANIM -->
+  <div class="panel" id="p-kul">
+    <div class="grp"><h4>Kullanım · 30 gün</h4><div class="ic">
+      <div class="satir"><span>Rapor</span><b>8</b></div>
+      <div class="satir"><span>En çok kullanan</span>Dr. Radyolog A (6)</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="win"><div class="not">
+<b>NOT (mockup v3, kullanıcı 01.11.2026: "şablon kartı için de yeniden mockup yap"):</b> liste v3 (<code>radyoloji_sablon_listesi_v3.html</code>) ile birlikte.<br>
+<span class="n">1</span><b>Rapor yapısı</b> (Genel): Biçim = <b>Tek A4</b> / <b>Bölümlü</b>, Giriş = <b>Serbest</b> / <b>Yapısal form</b> (BI-RADS …). Biçim bölüm sayısından gelir, seçim değişince metin bölünür / birleşir; Giriş = <code>yapisal_tur</code>.<br>
+<span class="n">2</span><b>Kapsam</b>: Genel / Kişisel + sahibi (<code>sahip_id</code>). Kopyala (kendime) kişisel kopya açar.<br>
+<span class="n">3</span><b>Şablon Metni</b> (YENİ): rapor ekranındaki biçimli editörün aynısı + <b>Yer tutucu ▾</b> menüsü. Tek A4 şablonun asıl düzenleme yeri;
+eski HBYS şablonunun tablosu burada görünür ve düzenlenir (<code>varsayilan_html</code>). Bugünkü "düz metin değişince biçim silinir" kuralı kalkar.<br>
+<span class="n">4</span><b>Bölümler</b>: satır tıklanınca o bölümün biçimli varsayılanı açılır (bölümlü şablonlarda da tablo / resim).<br>
+<span class="n">5</span><b>Sürümler</b> biçimli metni de saklar.
+</div></div>
+
+<script>
+document.querySelectorAll('.sek').forEach(s => s.onclick = () => {
+  document.querySelectorAll('.sek').forEach(x => x.classList.toggle('on', x === s));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + s.dataset.p));
+});
+document.querySelectorAll('.secim').forEach(g => g.querySelectorAll('.kutu-sec').forEach(k => k.onclick = () =>
+  g.querySelectorAll('.kutu-sec').forEach(x => x.classList.toggle('on', x === k))));
+</script>
+</body>
+</html>

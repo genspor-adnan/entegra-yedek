@@ -311,6 +311,9 @@ table.grid th {
 }
 table.grid th.siralanir { cursor: pointer; user-select: none }
 table.grid th.siralanir:hover { color: var(--mor) }
+/* Detay tablolarında başlıktan sıralama (stok kartı Hareketler, 02.11.2026). */
+.detay-tablo th.siralanir { cursor: pointer; user-select: none }
+.detay-tablo th.siralanir:hover { color: var(--mor) }
 table.grid td { padding: 4px 14px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); white-space: nowrap }
 /* SATIR YUKSEKLIGI (uc nokta > Satır Yüksekliği): uzun listede daha cok satir
    gormek isteyen ile okunakli aralik isteyen ayni ekrani paylasiyor. Yalniz
@@ -506,6 +509,15 @@ table.grid tr.flt input {
 .hasta-serit.hs3 > .hs .k { font-size: 9.5px; line-height: 13px; text-transform: uppercase; letter-spacing: .3px }
 .hasta-serit.hs3 > .hs .v { font-size: 12px; line-height: 16px }
 .hasta-serit.hs3 > .hs .v .rozet { margin-left: 4px }
+/* İSTEM KARTI KİPİ (radyoloji istem kartı, 01.11.2026): Kimlik · Tetkik · Ödeyen Kurum · İsteyen · Uyarı · Durum. */
+.hasta-serit.hs3.hs3-istem { grid-template-columns: minmax(220px, 1.4fr) minmax(200px, 2fr) 1.2fr 1.3fr 1.3fr 0.9fr }
+/* RAPOR EKRANI: Kimlik · Tetkik · İsteyen · Kurum · Uyarı · Yazan · Onay · Durum (01.11.2026). */
+/* Durum dar (kullanıcı 01.11.2026: "rapor kartı durum az daha dar olabilir"): rozet + kilit + rapor no sığacak kadar. */
+.hasta-serit.hs3.hs3-istem.hs3-rapor { grid-template-columns: minmax(200px, 1.3fr) minmax(170px, 1.7fr) 1.1fr 1fr 1.2fr 1fr 1.1fr minmax(118px, 0.55fr) }
+/* Avatarın solunda boşluk olmasın (kullanıcı 01.11.2026). */
+/* Kimlik hücresi ortalıyordu (justify-content: center) - dar adda avatarın solunda boşluk kalıyordu. */
+.hasta-serit.hs3.hs3-istem > .hs:first-child { padding-left: 6px; justify-content: flex-start }
+.hs3-tetkik .v { font-weight: 700; color: var(--lacivert, #14315a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .hasta-serit.hs3 .avatar { width: 30px; height: 30px; flex: 0 0 30px; font-size: 11px }
 .hs3-kimlik { flex-direction: row !important; align-items: center; gap: 8px }
 .hs3-kim { display: flex; flex-direction: column; min-width: 0 }
@@ -671,6 +683,9 @@ table.grid tr.flt input {
 .kaid .alan-izgara { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 12px }
 /* Kisi idstrip'i (Kod/Unvan/Departman/Gorev, 4 sabit alan): Kod dar, Unvan onun aldigi yeri devralir. */
 .kaid .alan-izgara.kaid-kisi { grid-template-columns: 0.5fr 1.5fr 1fr 1fr }
+/* STOK SERIDI (02.11.2026): Stok Kodu · Stok Adı · Kısa Ad · Kategori · Tür · Durum - kod ve durum yarım genişlik. */
+.kaid .alan-izgara.kaid-stok { grid-template-columns: minmax(0, .5fr) minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .5fr) }
+@media (max-width: 900px) { .kaid .alan-izgara.kaid-stok { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
 /* Kimlik seridi mockup'ta etiket USTTE (.fld deseni) - sekme icindeki grid2'den farkli, dokunma. */
 .kaid .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
 .kaid .alan .etiket { align-self: flex-start; width: 100%; text-align: left; font-size: 10.5px; letter-spacing: .2px }
@@ -921,7 +936,8 @@ tr.panel-basligi .d.mini {
 .alan .ikili.esit > input { flex: 1 1 0; width: auto; min-width: 0 }
 /* Miktar +/- dugmeleri edit yuksekliginde. */
 /* Iki onay kutusu yan yana - her biri kendi adiyla (İnternet Satış | Paket). */
-.ikili-mantik { display: flex; align-items: center; gap: 18px }
+/* Sarar (02.11.2026, stok "Satılan · Alınan · İnternet Satış · Paket · Reuse"): yer varsa aynı satırda kalır. */
+.ikili-mantik { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px }
 .ikili-mantik > .alan.tip-mantik { padding: 0 }
 /* Hasta kartı İletişim: SMS / E-posta izni editlerin başladığı hizada (84px etiket kolonu + 8px boşluk, kullanıcı). */
 .ikili-mantik.alan-postaIzin { padding-left: 92px; grid-column: 1 / -1 }
@@ -2001,12 +2017,32 @@ input.skt-gecmis {
 .bm-renk:hover { background: var(--yuz) }
 .bm-renk input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100% }
 .bm-alan { outline: none; white-space: pre-wrap; word-break: break-word; overflow: auto }
+.bm-alan img { max-width: 100% }
+.bm-alan table { border-collapse: collapse; white-space: normal }
+.bm-alan td, .bm-alan th { min-width: 30px }
+.bm-dosya { position: relative; height: 24px; padding: 0 6px; display: inline-flex; align-items: center; gap: 3px; border-radius: 3px;
+            cursor: pointer; font-size: 12px }
+.bm-dosya:hover { background: var(--yuz) }
+.bm-dosya.pasif { opacity: .45; pointer-events: none }
+.bm-dosya input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100% }
+.bm-tablo { position: relative; display: inline-block }
+.bm-tablo-menu { position: absolute; top: 100%; left: 0; margin-top: 3px; z-index: 30; background: var(--yuz, #fff); padding: 6px;
+                 border: 1px solid var(--cizgi); border-radius: 6px; box-shadow: 0 8px 24px rgba(20, 40, 70, .18); min-width: 170px }
+.bm-tablo-izgara { display: grid; grid-template-columns: repeat(8, 16px); gap: 2px }
+.bm-tablo-izgara i { width: 16px; height: 16px; border: 1px solid var(--cizgi); background: #fff; cursor: pointer }
+.bm-tablo-izgara i.on { background: #d7e7fb; border-color: #2f6db3 }
+.bm-tablo-boy { font-size: 11px; color: var(--soluk); text-align: center; margin: 4px 0 }
+.bm-tablo-ayrac { height: 1px; background: var(--cizgi2); margin: 4px 0 }
+.bm-tablo-menu button { display: block; width: 100%; text-align: left; padding: 4px 8px; height: auto }
 .bm-alan[contenteditable="false"] { background: var(--yuz2) }
 .rad-bolum-metin { min-height: 3.6em; border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px; padding: 6px 8px;
                    line-height: 1.55; background: #fff; resize: vertical }
 .rad-bolum-metin.uzun { min-height: 10em }
 .rad-bolum-metin:focus { border-color: #98c2ee; box-shadow: 0 0 0 2px rgba(152, 194, 238, .35) }
 .cikti-sayfa .rapor-bolum .rapor-html { line-height: 1.65; text-align: justify }
+/* 1217: rapor ekranında yapılandırılmış alan grubu başlığı (Disk seviyeleri, Bağlar ...). */
+.rad-otomatik { display: block; font-size: 10px; color: #2e7d46; font-weight: 700 }
+.rad-alan-grup { margin: 8px 0 2px; font-size: 10.5px; font-weight: 700; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px }
 .rad-a4.kucuk { min-height: 520px; padding: 20px 22px; font-size: 11.5px; max-width: none }
 /* YAPISAL GİRİŞ (1194): ortada geniş form, sağda canlı önizleme. */
 .rad-govde.yapisal { grid-template-columns: 230px 1fr 420px; }
@@ -3294,12 +3330,21 @@ input.skt-gecmis {
 
 /* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
    zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */
-.gonderen-alani { display: flex; flex-direction: column; gap: 0 }
+/* align-items STRETCH: .alan'ın `center`ı sütun düzeninde içteki etiket + kutuyu ortalayıp daraltıyordu (Gönderen
+   kutusu Sözleşme'den 180 px kısa ve sağa kaymıştı); işaret kutunun altına (84 px etiket + 8 px aralık) hizalanır. */
+.gonderen-alani { display: flex; flex-direction: column; align-items: stretch; gap: 0 }
 .gonderen-alani .kendi-istegi {
-  display: flex; align-items: center; gap: 5px; margin-top: 3px;
+  display: flex; align-items: center; gap: 5px; margin-top: 3px; padding-left: 92px;
   font-size: 11px; color: var(--soluk); cursor: pointer;
 }
 .gonderen-alani .kendi-istegi input { margin: 0 }
+/* GÖNDEREN / DOKTOR KUTUSU ÖTEKİ ALANLARLA AYNI BOYDA (kullanıcı 01.11.2026: "gönderen edit boyunu sözleşme
+   ile aynı yap"): × ve … düğmeleri kutunun DIŞINDA 60 px yiyordu; başvuruda kutunun içine, sağ kenara alınır. */
+.basvuru-bilgi .lookup-kutu { position: relative }
+.basvuru-bilgi .lookup-kutu input { padding-right: 58px }
+.basvuru-bilgi .lookup-kutu button { position: absolute; top: 0 }
+.basvuru-bilgi .lookup-kutu button:last-of-type { right: 0 }
+.basvuru-bilgi .lookup-kutu button:nth-last-of-type(2) { right: 28px }
 
 /* Salt okunur listede CIFT TIK ile acilan satir (ör. hasta kartindaki
    "Başvuru Geçmişi"): secim yok, yalniz acilabilirlik belli olsun. */
@@ -7942,7 +7987,26 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rt-dal.on { background: #d7e7fb; color: #14315a; font-weight: 700 }
 .rt-dal i { font-style: normal; color: var(--soluk); font-size: 10.5px }
 .rt-dal.rt-bos { color: #b06d0a }
+.rt-dal.alt { padding-left: 24px }
+.rt-agac-ara { margin-top: 12px !important }
 .rt-oniz { font-size: 12px }
+/* RADYOLOJİ RAPOR LİSTESİ (1215): sağda raporun A4 belgesi küçültülmüş; çıktı menüsünde çoklu rapor. */
+.rr-oniz { font-size: 12px; display: flex; flex-direction: column; max-height: calc(100vh - 210px) }
+.rr-oniz.sonuk { padding: 16px }
+.rr-oniz-arac { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
+.rr-oniz-arac b { color: var(--yazi2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.rr-oniz-arac .sp { flex: 1 }
+.rr-kagit { overflow: auto; padding: 8px; background: var(--yuz2) }
+.rr-kagit > * { zoom: .5 }
+@media print {
+  .rr-oniz { display: none !important }
+  /* Çıktı menüsü liste başlığında; başlık yazdırmada gizli (display:none) - belge için açılır, içi görünmez kalır. */
+  .sayfabas:has(.rr-cikti) { display: block !important }
+  .rr-cikti .cm { position: static }
+  .rr-coklu { position: absolute; left: 0; top: 0; width: 100% }
+  .rr-coklu > * { position: static !important; break-after: page }
+  .rr-coklu > :last-child { break-after: auto }
+}
 .rt-oniz.sonuk { padding: 16px }
 .rt-bl { padding: 10px 12px; border-bottom: 1px solid var(--cizgi2) }
 .rt-bl h5 { margin: 0 0 6px; font-size: 10.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px }
@@ -7954,6 +8018,44 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rt-metin { line-height: 1.5 }
 .rt-kbd { border: 1px solid #b9c4d0; border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; font-family: Consolas, monospace; font-size: 11px; background: var(--yuz) }
 .rt-sekme { padding: 10px 12px }
+/* SKRS EŞLEME MASASI (1222): sağ panel adayları; 1224 sekme şeridi. */
+.es-sekmeler { display: flex; gap: 4px; margin: 0 0 8px; flex-wrap: wrap }
+.es-sekmeler button { border: 1px solid var(--cizgi); background: var(--yuz2); border-radius: 4px 4px 0 0; padding: 5px 12px;
+                      font: inherit; font-size: 12px; cursor: pointer; color: var(--yazi) }
+.es-sekmeler button.on { background: var(--yuz); font-weight: 700; color: var(--mor, #2f6db3); border-bottom-color: var(--yuz) }
+.es-panel { font-size: 12px; max-height: calc(100vh - 210px); overflow-y: auto }
+.es-panel.sonuk { padding: 16px }
+.es-aday { display: flex; gap: 8px; align-items: flex-start; padding: 6px 8px; border: 1px solid var(--cizgi2); border-radius: 4px;
+           margin-bottom: 5px; background: var(--yuz); cursor: pointer }
+.es-aday.on { border-color: #2f6db3; background: #f2f7fe }
+.es-aday-ic { flex: 1; line-height: 1.4 }
+.es-aday-ic small { display: block; color: var(--soluk); font-size: 10.5px }
+.es-aday-ic .es-dikkat { color: var(--hata); font-weight: 700 }
+.es-kod, .es-eski { font-family: Consolas, monospace; font-size: 11px }
+.es-ara { width: 100%; margin: 4px 0 6px }
+.es-karar { display: flex; gap: 6px; flex-wrap: wrap }
+.es-onizle { padding: 4px 2px; line-height: 1.6; min-width: 420px }
+/* HAZIR ALAN PAKETLERİ (1217): kart sekmesi üstü + liste penceresi. */
+.ap-cubuk { padding: 6px 0; flex-wrap: wrap }
+.ap-cubuk select { width: auto; min-width: 220px }
+.ap-liste { padding: 4px 2px; min-width: 520px }
+.ap-paket { border: 1px solid var(--cizgi); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; background: var(--yuz) }
+.ap-bas { display: flex; gap: 8px; align-items: baseline }
+.ap-aciklama { font-size: 11.5px; margin: 2px 0 6px }
+.ap-alt { display: flex; gap: 6px; align-items: center; font-size: 12px }
+/* ŞABLON METNİ (1216): biçimli şablon editörü - araç çubuğu + yer tutucu menüsü + bölümler. */
+.sm-arac { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 8px; position: sticky; top: 0; z-index: 3 }
+.sm-arac > .bm-arac { flex: 1 }
+.sm-yer { position: relative }
+.sm-yer-menu { position: absolute; right: 0; top: 100%; margin-top: 3px; z-index: 30; background: var(--yuz, #fff); padding: 4px;
+               border: 1px solid var(--cizgi); border-radius: 6px; box-shadow: 0 8px 24px rgba(20, 40, 70, .18); min-width: 260px }
+.sm-yer-menu button { display: flex; justify-content: space-between; gap: 10px; width: 100%; border: 0; background: none; text-align: left;
+                      padding: 5px 8px; border-radius: 4px; cursor: pointer; font: inherit; font-size: 12px; color: var(--yazi) }
+.sm-yer-menu button:hover { background: var(--yuz2) }
+.sm-bolum { margin-bottom: 10px }
+.sm-bolum-bas { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 12px }
+.sm-bolum-bas input[type="text"], .sm-bolum-bas > input { width: 220px; font-weight: 700 }
+.sm-bolum-bas select { width: auto }
 .rt-iki { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px }
 .rt-arac { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 11.5px }
 .rt-baslik { margin: 0 0 6px; font-size: 11px; color: var(--soluk); text-transform: uppercase }
@@ -8908,3 +9010,100 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* Son okutulan / eklenen satır vurgulu (kullanıcı satırı listede bulamıyordu). */
 .ss-grid tr.ss-son-satir td { background: var(--uyarizem); box-shadow: inset 0 1px 0 var(--uyarikenar), inset 0 -1px 0 var(--uyarikenar) }
 /* Yazdırma: Sayım Listesi A4'ü (SayimA4, CiktiMenusu) - ekran basılmaz. */
+
+/* RADYOLOJİ KABUL (1229): yönü zorunlu tetkikte seçilmemiş yön. */
+.zorunlu-bos { border-color: var(--kirmizi, #c0392b) !important; background: #fff4f2 }
+
+/* AĞAÇ SEÇİCİ (AgacCombo, kullanıcı 02.11.2026 "kategori ağaç şeklinde gelsin"): select görünümlü kutu +
+   açılır-kapanır dal paneli. Kutu .alan select ile aynı ölçüde. */
+.agcb { position: relative; grid-column: 2; min-width: 0; width: 100% }
+.agcb-kutu { display: flex; align-items: center; gap: 6px; width: 100%; height: 23px; padding: 0 6px;
+  border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz); color: var(--yazi);
+  font: inherit; font-size: 12px; text-align: left; cursor: pointer }
+.kaid .alan button[data-agcb-kutu] { font-weight: 700; font-size: 13px; color: var(--yazi2) }
+.agcb-kutu:focus { outline: 2px solid var(--mor2); border-color: var(--dugkenar) }
+.agcb-kutu:disabled { background: var(--yuz2); color: var(--soluk); cursor: default }
+.agcb-kutu.bos { color: var(--soluk); font-weight: normal }
+.agcb-metin { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.agcb-isaret { font-size: 10px; color: var(--soluk) }
+.agcb-pano { position: absolute; z-index: 60; top: calc(100% + 2px); left: 0; min-width: 100%; width: max-content;
+  max-width: 420px; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: var(--r);
+  box-shadow: var(--golge); padding: 6px }
+.agcb .agcb-ara { grid-column: auto; width: 100%; height: 24px; margin-bottom: 4px; border: 1px solid var(--cizgi);
+  border-radius: 2px; padding: 0 6px; font-weight: normal; font-size: 12px; color: var(--yazi) }
+.agcb-liste { max-height: 300px; overflow: auto }
+.agcb-dugum { display: flex; align-items: center; gap: 2px; padding: 3px 6px; border-radius: 3px; cursor: pointer;
+  font-size: 12px; font-weight: normal; color: var(--yazi); white-space: nowrap }
+.agcb-dugum:hover { background: var(--satirust) }
+.agcb-dugum.on { background: var(--mor2); color: var(--yazi2); font-weight: 700 }
+.agcb-ok { display: inline-block; width: 14px; text-align: center; color: var(--soluk); font-size: 11px }
+.agcb-bos { padding: 6px; color: var(--soluk); font-size: 11.5px }
+
+/* STOK KARTI AÇIKLAMA (kullanıcı 02.11.2026: "diğer içine alta al 2 satır yüksekliğinde olsun" · "diğer
+   editler gibi solda etiketli olsun"): Diğer kutusunun en altında, etiket solda, 2 satır. */
+.kart-stok .alan.alan-aciklama textarea { min-height: 0; height: 42px; resize: vertical }
+
+/* RESİM / DOKÜMAN KARO GÖRÜNÜMÜ (DokumanGalerisi karo, stok_karti_v2.html, 02.11.2026). */
+.dgk { padding: 2px 0 }
+.dgk-ip { margin-left: 10px; font-size: 10.5px; color: var(--soluk) }
+.dgk-arac { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 4px 0 }
+.dgk-suzgec { margin-left: auto; width: 160px; height: 24px; border: 1px solid var(--cizgi); border-radius: 2px;
+  background: var(--yuz); font-size: 12px }
+.dgk-izgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 8px 0 12px }
+.dgk-dosya { position: relative; border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); overflow: hidden;
+  cursor: pointer; user-select: none }
+.dgk-sec { position: absolute; top: 6px; left: 6px; z-index: 1; width: 15px; height: 15px; margin: 0; cursor: pointer;
+  accent-color: var(--mor) }
+.dgk-dosya:hover { border-color: var(--dugkenar) }
+.dgk-dosya.secili { border-color: var(--mor); box-shadow: 0 0 0 2px var(--mor2) }
+.dgk-dosya.vars { outline: 2px solid #e0a400; outline-offset: -1px }
+.dgk-on { height: 96px; display: flex; align-items: center; justify-content: center; font-size: 32px;
+  background: linear-gradient(135deg, #eef3f9, #dbe6f1) }
+.dgk-on.pdf { background: linear-gradient(135deg, #fbefee, #f3d9d7) }
+.dgk-on img { width: 100%; height: 100%; object-fit: cover }
+.dgk-alt { padding: 6px 8px; font-size: 11px; min-width: 0 }
+.dgk-alt b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.dgk-alt small { display: block; color: var(--soluk); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.dgk-bos { margin: 8px 0 12px; padding: 26px; text-align: center; color: var(--soluk); border: 1px dashed var(--cizgi);
+  border-radius: 6px; cursor: pointer }
+
+/* BELGE TÜR ADI (araç çubuğu başlığı, 02.11.2026): satış yeşil, alış kırmızı, büyük harf kalın. */
+.belge-tur-ad { font-weight: 700; font-size: 15px; letter-spacing: .3px }
+.belge-tur-ad.satis { color: var(--ok) }
+.belge-tur-ad.alis { color: var(--hata) }
+
+/* CARİ BAŞLIĞINDA BELGE DURUMLARI (BelgeBaslik bandDurumlari, 02.11.2026): e-Belge / Faturalama kutuları. */
+.bdk { display: flex; flex-direction: column; gap: 1px; flex: none; padding: 3px 9px; border: 1px solid var(--cizgi2);
+  border-radius: 5px; background: var(--yuz2); min-width: 110px; cursor: default }
+.bdk[title] { cursor: pointer }
+.bdk.ok { background: #eef8f1; border-color: #c4e6d0 }
+.bdk.uy { background: #fdf6e8; border-color: #f0dfb8 }
+.bdk.hata { background: #fdf0f0; border-color: #f2c9c9 }
+.bdk-e { font-size: 9.5px; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px }
+.bdk-v { display: flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; white-space: nowrap }
+.bdk-a { font-size: 10.5px; color: var(--soluk); white-space: nowrap; max-width: 190px; overflow: hidden; text-overflow: ellipsis }
+.bdk-v.bdk-kir { color: var(--hata) }
+.bdk-v.bdk-yes { color: var(--ok) }
+.bdk[title]:hover { border-color: var(--dugkenar) }
+
+/* ALIŞ İRSALİYESİ (02.11.2026): İade kutusu tarihin sağında; No ve Tarih kutusu Giriş Deposu kadar geniş
+   ("irs no ve irs tarihi edit genişliği giriş deposu kadar olsun") - depo kutusu = girdi + × + … düğmeleri. */
+.alis-irs-yan { display: flex; align-items: center; gap: 10px; min-width: 0 }
+.alis-irs-yan > :first-child { flex: none; min-width: 0 }
+.belge-hdr.dar-ust { --alis-irs-girdi: 170px }
+
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust > .alan:first-child,
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust .alis-irs-yan > .alan { grid-template-columns: 112px var(--alis-irs-girdi) }
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust > .lookup { grid-template-columns: 104px minmax(0, var(--alis-irs-girdi)) }
+/* İade kutusu tarih hücresinden taşar - yanındaki Giriş Deposu biraz sağa (kullanıcı 02.11.2026: "üst üste gelmiş"). */
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust > .alis-irs-yan + .lookup { margin-left: 26px }
+
+/* SATIŞ SİPARİŞİ TEK SATIR (02.11.2026): No · Tarih · Depo · dar Vade · dar Satış Temsilcisi - ızgara yerine akış;
+   etiket kendi genişliğinde, girdiler No/Tarih/Depo = 170px, Vade 56px, Temsilci 150px. */
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir { display: flex; flex-wrap: wrap; gap: 8px 20px }
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan,
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .lookup { flex: none; grid-template-columns: auto var(--alis-irs-girdi) }
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan:has(> input.hiza-sag) { grid-template-columns: auto 56px }
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan:has(> .lookup-kutu) { grid-template-columns: auto 150px }
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan > .etiket,
+.belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .lookup > .etiket { overflow: visible }

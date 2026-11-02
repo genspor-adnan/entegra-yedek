@@ -84,6 +84,8 @@ export interface IskontoTalebi {
   /** Onay penceresinin hasta seridi (663): 1 erkek · 2 kadin · 0 bilinmiyor. */
   cinsiyet: number;
   yas: number;
+  /** Görünen kısa yaş (1214): 45y / 1y3a / 3a5g. */
+  yasKisa?: string;
   kurum: string;
   doktor: string;
   /** Talebe giren hizmetler; `oran` KALEM BAZLI istenen yuzde (664). */

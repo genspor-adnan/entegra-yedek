@@ -11,9 +11,13 @@ public sealed record StokDurumSatiri(
     int DepoId, string DepoAdi, decimal Miktar, decimal Rezerve, decimal Kullanilabilir,
     decimal Yolda, decimal? MinStok, decimal? MaxStok, string Durum);
 
-/// <summary>Sekmenin ust seridi - dort KPI kutusu.</summary>
+/// <summary>
+/// Sekmenin ust seridi - KPI kutulari. STOK DEGERI (stok_karti_v2.html): toplam x agirlikli ortalama
+/// alis maliyeti (fn_uretim_stok_maliyeti - Stok Deger Icmali'nin varsayilan "ort" yontemiyle ayni).
+/// </summary>
 public sealed record StokDurumOzeti(
-    decimal Toplam, decimal Rezerve, decimal Kullanilabilir, decimal Yolda, int DepoSayisi);
+    decimal Toplam, decimal Rezerve, decimal Kullanilabilir, decimal Yolda, int DepoSayisi,
+    decimal BirimMaliyet = 0m, decimal Deger = 0m);
 
 public sealed record StokDurumYaniti(
     StokDurumOzeti Ozet, IReadOnlyList<StokDurumSatiri> Satirlar, string Birim);
@@ -36,6 +40,18 @@ public sealed record PaketIcerikSatiri(
     int kdv,
     decimal fiyat,
     int izleme);
+
+/// <summary>
+/// Stok kartinin "Urun Agaci / BOM" sekmesi (stok_karti_v2.html, yalniz ERP): bu stogu MAMUL olarak ureten
+/// agaclar (her surum) ve bilesenleri. Duzenleme Urun Agaci kartinda; sekme salt okunur.
+/// </summary>
+public sealed record StokAgacBileseni(
+    int Sira, int? StokId, string StokKod, string StokAd, string Tip, decimal Miktar, string Birim,
+    decimal FireYuzde, string AltAgac);
+
+public sealed record StokUrunAgaci(
+    int Id, string Kod, string Ad, string Tur, int Surum, bool Aktif, bool Varsayilan, decimal CiktiMiktar,
+    decimal MaliyetToplam, DateTime? MaliyetTarih, IReadOnlyList<StokAgacBileseni> Bilesenler);
 
 public sealed record StokLotSatiri(
     int seriLotId,
@@ -156,12 +172,22 @@ public sealed class StokDurumDeposu
             }
         }
 
+        decimal birimMaliyet;
+        await using (var komut = new NpgsqlCommand(
+            "select coalesce(public.fn_uretim_stok_maliyeti(@p0::int), 0)", baglanti))
+        {
+            komut.Parameters.AddWithValue("p0", stokId);
+            birimMaliyet = Convert.ToDecimal(await komut.ExecuteScalarAsync(iptal));
+        }
+        var toplam = satirlar.Sum(s => s.Miktar);
+
         var ozet = new StokDurumOzeti(
-            satirlar.Sum(s => s.Miktar),
+            toplam,
             satirlar.Sum(s => s.Rezerve),
             satirlar.Sum(s => s.Kullanilabilir),
             satirlar.Sum(s => s.Yolda),
-            satirlar.Count(s => s.Miktar != 0));
+            satirlar.Count(s => s.Miktar != 0),
+            birimMaliyet, Math.Round(toplam * birimMaliyet, 2));
 
         return new StokDurumYaniti(ozet, satirlar, birim);
     }
@@ -479,5 +505,53 @@ public sealed class StokDurumDeposu
                 okuyucu.IsDBNull(7) ? 0m : okuyucu.GetDecimal(7),
                 okuyucu.IsDBNull(6) ? 0 : Convert.ToInt32(okuyucu.GetValue(6))));
         return sonuc;
+    }
+
+    /// <summary>Stok kartinin Urun Agaci / BOM sekmesi: mamulu bu stok olan agaclar, varsayilan + yeni surum once.</summary>
+    public async Task<IReadOnlyList<StokUrunAgaci>> UrunAgaclariAsync(long stokId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var agaclar = new List<(int Id, string Kod, string Ad, string Tur, int Surum, bool Aktif, bool Vars,
+                                decimal Cikti, decimal Maliyet, DateTime? MTarih)>();
+        await using (var komut = baglanti.Komut("""
+            select a.id, coalesce(a.kod, ''), coalesce(a.ad, ''),
+                   case a.tur when 2 then 'Yarı Mamul' when 3 then 'Paket / Set' else 'Mamul' end,
+                   coalesce(a.surum, 1), coalesce(a.durum, 0) = 0, coalesce(a.varsayilan, 0) = 1,
+                   coalesce(a.cikti_miktar, 1), coalesce(a.maliyet_toplam, 0), a.maliyet_tarih
+              from public.urun_agaci a
+             where a.stok_id = @p0
+             order by (coalesce(a.durum, 0) = 0) desc, (coalesce(a.varsayilan, 0) = 1) desc, a.surum desc, a.id desc
+            """, null, (int)stokId))
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+                agaclar.Add((o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetString(3),
+                             Convert.ToInt32(o.GetValue(4)), o.GetBoolean(5), o.GetBoolean(6),
+                             Convert.ToDecimal(o.GetValue(7)), Convert.ToDecimal(o.GetValue(8)),
+                             o.IsDBNull(9) ? null : o.GetDateTime(9)));
+        if (agaclar.Count == 0) return Array.Empty<StokUrunAgaci>();
+
+        var bilesen = agaclar.ToDictionary(a => a.Id, _ => new List<StokAgacBileseni>());
+        await using (var komut = baglanti.Komut("""
+            select r.agac_id, coalesce(r.sira, 0), r.bilesen_stok_id, coalesce(s.kod, ''), coalesce(s.ad, ''),
+                   case r.tur when 2 then 'Sarf' when 3 then 'Ambalaj' when 4 then 'Yarı Mamul' else 'Hammadde' end,
+                   coalesce(r.miktar, 0), coalesce(k.ad, ''), coalesce(r.fire_yuzde, 0),
+                   coalesce(aa.kod || ' · v' || aa.surum, '')
+              from public.urun_agaci_satir r
+              left join public.stok s on s.id = r.bilesen_stok_id
+              left join public.kod_liste kl on kl.kod = 'stok.ana_birim'
+              left join public.kod_deger k on k.liste_id = kl.id and k.deger = coalesce(r.birim, s.ana_birim)
+              left join public.urun_agaci aa on aa.id = r.alt_agac_id
+             where r.agac_id = any(@p0)
+             order by r.agac_id, r.sira, r.id
+            """, null, agaclar.Select(a => a.Id).ToArray()))
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+                bilesen[o.GetInt32(0)].Add(new StokAgacBileseni(
+                    Convert.ToInt32(o.GetValue(1)), o.IsDBNull(2) ? null : o.GetInt32(2), o.GetString(3), o.GetString(4),
+                    o.GetString(5), Convert.ToDecimal(o.GetValue(6)), o.GetString(7),
+                    Convert.ToDecimal(o.GetValue(8)), o.GetString(9)));
+
+        return agaclar.Select(a => new StokUrunAgaci(a.Id, a.Kod, a.Ad, a.Tur, a.Surum, a.Aktif, a.Vars, a.Cikti,
+                                                     a.Maliyet, a.MTarih, bilesen[a.Id])).ToList();
     }
 }

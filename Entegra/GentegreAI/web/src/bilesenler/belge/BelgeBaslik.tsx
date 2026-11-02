@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useOturum } from '../../kimlik/OturumBaglami';
 import type { SevkiyatBilgisi, TeklifBilgisi }
   from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { GenLookup } from '../GenLookup';
 import { api } from '../../api/istemci';
 import { KodListesiModali } from '../KodListesiModali';
-import { yerelAnMetni } from '../bicim';
+import { yerelAnMetni, para } from '../bicim';
 import { TarafAlani } from './TarafAlani';
 import { CariBilgiBandi } from '../CariBilgiBandi';
 import { useCariSatiri } from '../cariSatiri';
@@ -16,6 +18,8 @@ import type { Secim } from '../../sayfalar/belgeKaydet';
 import type { BelgeYaniti } from '../../api/sozlesme';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
 import { c } from '../../dil/ceviri';
+import { KAPANMA_ETIKET } from '../../sayfalar/belgeSabitleri';
+import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
 
 /**
  * BELGE KARTI BASLIGI - TEK 4 SUTUNLU izgara (kullanici). Once satis
@@ -52,7 +56,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     basvuruMu,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, sevkiyat, fisTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
-    kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
+    kapanmaAlani, bagliSiparisAlani, odemeGenel = 0, odemeTahsil = 0, satirSayisiBaslik = 0, iade, setIade, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
     eBelgeYok, teklif, provizyonVar, faturaTipi, setFaturaTipi, senaryo, setSenaryo,
     numaraElle,
@@ -67,6 +71,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   const carili = !stokFisiMi && !depoBelgesi;
   const cariSatiri = useCariSatiri(carili && !basvuruMu ? cari?.id ?? 0 : 0);
   const bantli = carili && !!cari?.id && !!cariSatiri;
+  const git = useNavigate();
+  const { yetki } = useOturum();
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
   const teklifMi = belgeAdi === 'Teklif';
@@ -156,6 +162,108 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   const kapanmaGoster = !faturaMi && !tahakkukMu && !depoBelgesi && !stokFisiMi
                         && belgeAdi !== 'Teklif';
 
+  // DURUMLAR CARİ BAŞLIĞINDA (kullanıcı 02.11.2026: "e-belge / faturalama durumlarını cari başlığa al", mockup
+  //   Ekranlar/Satinalma/alis_faturasi_cari_baslik.html): bant varken e-Belge ve Faturalama / Kapanma bandın
+  //   sağında küçük kutular; ızgaradaki hücreleri boş kalır (yükseklik değişmez).
+  const bosHucre = <span className="alan" aria-hidden />;
+  const kapanma = KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)];
+  const kaynakNo = sonuc?.belge.kaynakBelgeNo ? String(sonuc.belge.kaynakBelgeNo) : '';
+  const kaynakTur = String(sonuc?.belge.kaynakTurAdi ?? '');
+  // ÖDEME / TAHSİLAT (mockup): genel toplam - belgeye bağlı ödeme; vade = tarih + vade günü.
+  const kalanOdeme = Math.round((odemeGenel - odemeTahsil) * 100) / 100;
+  const vadeAn = (() => { const t = new Date(tarih); if (isNaN(t.getTime())) return null;
+    t.setDate(t.getDate() + (Number(vadeGun) || 0)); return t })();
+  const gecenGun = vadeAn ? Math.floor((Date.now() - vadeAn.getTime()) / 86400000) : 0;
+  const vadeMetni = vadeAn ? `${c('vade')} ${String(vadeAn.getDate()).padStart(2, '0')}.${String(vadeAn.getMonth() + 1).padStart(2, '0')}` : '';
+  const odemeKutusu = (
+    <div className={`bdk${odemeGenel <= 0.005 ? '' : kalanOdeme <= 0.005 ? ' ok' : gecenGun > 0 ? ' hata' : odemeTahsil > 0.005 ? ' uy' : ''}`}
+         title={alisMi ? c('Ödeme sekmesi') : c('Tahsilat sekmesi')} onClick={() => setAktifSekme('tahsilat')}>
+      <span className="bdk-e">{alisMi ? c('Ödeme') : c('Tahsilat')}</span>
+      <span className="bdk-v">{odemeGenel <= 0.005 ? '—'
+        : kalanOdeme <= 0.005 ? <>{c('Kapandı')} <span className="rozet ok">✓</span></>
+        : odemeTahsil > 0.005 ? <>{c('Kısmi')} <span className="rozet uyari">%{Math.round(odemeTahsil / odemeGenel * 100)}</span></>
+        : <>{c('Açık')}{gecenGun > 0 && <span className="rozet hata">{gecenGun} {c('gün geçti')}</span>}</>}</span>
+      <span className="bdk-a">{odemeGenel <= 0.005 ? c('kalem girilince')
+        : kalanOdeme <= 0.005 ? vadeMetni : `${c('kalan')} ${para.format(kalanOdeme)}${vadeMetni ? ` · ${vadeMetni}` : ''}`}</span>
+    </div>
+  );
+  // ALIŞ İRSALİYESİ (kullanıcı 02.11.2026: "giriş deposu 1.sırada irs tarihi sağına taşı.. sipariş no kaldır"):
+  //   depo 1. satırın 4. hücresinde (e-Belge durumu cari başlığında), Sipariş No hücresi yok.
+  // SATIŞ İRSALİYESİ DE AYNI DÜZEN (kullanıcı 02.11.2026: "alış irs kartındaki edit düzenini satış irs kartına da
+  //   uygula" + "konsinye irsaliyelerine de aynı düzeni uygula"): No · Tarih (☐ İade) · Depo · Temsilci tek satır.
+  //   Konsinyede İade kutusu yok (hiç olmadı).
+  const alisIrsaliye = irsaliyeMi || konsinyeMi;
+  // SATIŞ SİPARİŞİ (kullanıcı 02.11.2026: "depo sip tarih sağına taşı, kaynak belge kaldır, vade (%75 daralt) satış
+  //   tems. soluna al" + "sip no ve sip tarihi depo edit kadar genişlikte" + "1.satırda sip no, sip tar, depo, vade,
+  //   satış tem (daralt) yer alsın.. tek satır"): TEK SATIR No · Tarih · Depo · dar Vade · dar Satış Temsilcisi
+  //   (ızgara yerine akış, tema.css .tek-satir); Kaynak Belge hücresi yok.
+  const satisSiparis = siparisMi && !alisMi && !teklifMi && !basvuruMu;
+  /** No / Tarih / Depo aynı genişlikte olan düzen (alış irsaliyesi, satış siparişi). */
+  const darUst = alisIrsaliye || satisSiparis;
+  const cariDepoHucresi = (
+      <GenLookup
+        kaynak="depo"
+        etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
+        // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
+        sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
+        alanlar={LOOKUP_DEPO}
+        deger={depo?.ad}
+        saltOkunur={kilitli}
+        onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
+      />
+  );
+  // TRANSFERDE GİRİŞ DEPOSU ÇIKIŞIN SAĞINDA (kullanıcı 02.11.2026): 1. satır Çıkış · Giriş · No · Tarih,
+  //   2. satır Teslim Eden · Teslim Alan. Talepte de Teslim Deposu İstenen Deponun sağında (kullanıcı 02.11.2026).
+  const girisDepoHucresi = (
+      <GenLookup
+        kaynak="depo"
+        etiket={talepMi ? 'Teslim Deposu' : 'Giriş Deposu'}
+        zorunlu={!talepMi}
+        sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
+        alanlar={LOOKUP_DEPO}
+        deger={girisDepo?.ad}
+        saltOkunur={baslikKilitli}
+        hata={alanHatalari.girisDepoId}
+        onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
+      />
+  );
+  const bandDurumlari = (
+    <>
+      {!eBelgeYok && (
+        <div className={`bdk${[2, 12, 52].includes(efDurum) ? ' ok' : efDurum > 0 && efSonuc === 3 ? ' hata' : efDurum > 0 ? ' uy' : ''}`}
+             title={c('e-Belge sekmesi')} onClick={() => setAktifSekme('ebelge')}>
+          <span className="bdk-e">{c('e-Belge')}</span>
+          <span className="bdk-v">
+            <span className="rozet bilgi">{konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye'
+              : [11, 12].includes(efDurum) ? 'e-Arşiv' : 'e-Fatura'}</span>
+            {[2, 12, 52].includes(efDurum) ? <span className="rozet ok">{c('Gönderildi')}</span>
+              : efDurum > 0 && efSonuc === 3 ? <span className="rozet hata">{c('Gönderim hatası')}</span>
+              : efDurum > 0 ? <span className="rozet uyari">{c('Hazır')}</span>
+              : <span className="rozet gri">{c('Taslak')}</span>}
+          </span>
+          <span className="bdk-a">{[2, 12, 52].includes(efDurum) ? c('GİB\'e iletildi') : efDurum > 0 && efSonuc === 3 ? c('yeniden gönderin')
+            : efDurum > 0 ? c('gönderime hazır') : c('henüz hazırlanmadı')}</span>
+        </div>
+      )}
+      {faturaMi ? (<>
+        <div className={`bdk${kaynakNo ? ' ok' : ''}`} title={kaynakNo ? `${kaynakTur} · ${c('Belge No')}` : undefined}>
+          <span className="bdk-e">{c('Faturalama')}</span>
+          <span className="bdk-v">{kaynakNo
+            ? <>{kaynakTur ? `${kaynakTur}` : c('Kaynak belge')} <span className="rozet gri">{kaynakNo}</span></>
+            : c('Doğrudan')}</span>
+          <span className="bdk-a">{kaynakNo ? c('kaynak belgeden') : c('sipariş / irsaliye bağı yok')}</span>
+        </div>
+        {odemeKutusu}
+      </>) : kapanmaGoster && (
+        <div className={`bdk${kapanma?.sinif === 'olumlu' ? ' ok' : kapanma?.sinif === 'uyari' ? ' uy' : ''}`}>
+          <span className="bdk-e">{irsaliyeMi ? c('Faturalama') : c('Kapanma')}</span>
+          <span className="bdk-v"><span className={`rozet ${kapanma?.sinif ?? ''}`}>{kapanma?.ad ?? '—'}</span></span>
+          <span className="bdk-a">{satirSayisiBaslik} {c('kalem')}</span>
+        </div>
+      )}
+    </>
+  );
+
   return (
   <>
 {/* BASVURUDA BASLIK SERIDI YOK (300, kullanici): kimlik hasta arama satiri
@@ -163,9 +271,15 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     Basligi bosuna cizmek kart tepesinde iki kez ayni bilgiyi gosteriyordu. */}
 {!basvuruMu && (
 <div className="belge-hdr-sar">
+  {/* CARİ BAŞLIĞI MÜŞTERİ / TEDARİKÇİ KARTIYLA AYNI (kullanıcı 02.11.2026): kimlik bandı kod · VKN · il ·
+      temsilci · DURUM. Özet şeridi YOK ("alış/satış belgelerinde özet şeride gerek yok"); bakiye bu yüzden
+      bandın sağında kalır. */}
   {bantli && (
-    <CariBilgiBandi id={cari!.id} tedarikci={alisMi} />)}
-  <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}`}>
+    <CariBilgiBandi id={cari!.id} tedarikci={alisMi} durumlu sagEk={bandDurumlari} bakiyeKutu
+                    onBakiye={() => git(`/ekstre?tur=cari&id=${cari!.id}`)}
+                    // CARİ KARTI YENİ SEKMEDE (kullanıcı 02.11.2026): yalnız cari görme yetkisi olana.
+                    onKartAc={yetki('cari', 'gor') ? () => git(alisMi ? `/tedarikci/${cari!.id}` : `/cari/${cari!.id}`) : undefined} />)}
+  <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}${darUst ? ' dar-ust' : ''}${satisSiparis ? ' tek-satir' : ''}`}>
     {/* --- 1) KIMLIK --- */}
     {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
         gezer, cari hucresinin yerini cikis deposu alir. Stok fisinde ise
@@ -246,6 +360,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* --- 1c) TAHAKKUK TEK SATIR (kullanici 26.10.2026: "Satış Tahakkuku.. başlık 1.sıra satış tem, vade, tah no,
         tah tarihi, sip no... tek satır olsun"): Temsilci ve Vade numaranin ONUNE, izgara 5 sutun (cari bantta). */}
     {tahakkukMu && <>{saticiHucresi}{vadeHucresi}</>}
+    {(transferMi || talepMi) && girisDepoHucresi}
+
     {/* --- 2) BELGE NO ---
         Alis faturasinda numara TEDARIKCININ: sayacimiz uretemez (harf
         icerebilir, bizim seriyle iliskisi yok), kullanici girer. Diger
@@ -254,36 +370,45 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         REVIZE NO - serbest kullanici editi, varsayilan bos. */}
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-        {disNumarali ? 'Tedarikçi Fatura No'
+        {disNumarali ? `Tedarikçi ${irsaliyeMi || konsinyeMi ? 'İrsaliye' : /fiş/i.test(belgeAdi) ? 'Fiş' : 'Fatura'} No`
           : teklifMi ? `${belgeSozu} No / Revize No` : `${numaraSozu} No`}
       </span>
       {(disNumarali || numaraElle) && !kilitli ? (
         <input className="one-cikan" value={belgeNo} maxLength={20}
-               placeholder={disNumarali ? 'örn. ABC2026000001234'
-                                        : '(boş bırakılırsa sistem verir)'}
+               // GELEN BELGE NO BOŞ (kullanıcı 02.11.2026: "içi boş kalsın.. örnek olmasın").
+               placeholder={disNumarali ? undefined : '(boş bırakılırsa sistem verir)'}
                onChange={e => setBelgeNo(e.target.value)} />
       ) : teklifMi ? (
         <span className="ikili">
           <input className="one-cikan"
-                 value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+                 value={gorunenBelgeNo(sonuc?.belge.belgeNo) || (sonuc?.belge.belgeNo ? '(e-Belge gönderiminde verilir)' : kilitli ? '' : '(kaydedince verilir)')}
                  readOnly />
           {/* Revize, NUMARASI OLAN teklife yazilir (kullanici): numara yokken
               revize kavrami yok - kaydedilince edit acilir. */}
           <input value={teklif.revizeNo} maxLength={20} placeholder={c('Revize')}
                  style={{ flex: '0 0 76px' }}
-                 disabled={kilitli || !String(sonuc?.belge.belgeNo ?? '')}
+                 disabled={kilitli || !gorunenBelgeNo(sonuc?.belge.belgeNo)}
                  onChange={e => teklif.setRevizeNo(e.target.value)} />
         </span>
       ) : (
         <input className="one-cikan"
-               value={String(sonuc?.belge.belgeNo ?? '') || (kilitli ? '' : '(kaydedince verilir)')}
+               value={gorunenBelgeNo(sonuc?.belge.belgeNo) || (sonuc?.belge.belgeNo ? '(e-Belge gönderiminde verilir)' : kilitli ? '' : '(kaydedince verilir)')}
                readOnly />
       )}
       {alanHatalari.belgeNo && <span className="alan-hata">{alanHatalari.belgeNo}</span>}
     </label>
 
-    {/* --- 3) TARIH --- */}
-    {tarihHucresi}
+    {/* --- 3) TARIH ---
+        ALIŞ İRSALİYESİNDE İADE KUTUSU TARİHİN SAĞINDA (kullanıcı 02.11.2026: "iade chek i irs tarihi sağına al") -
+        araç çubuğundan buraya taşındı. */}
+    {alisIrsaliye && setIade ? (
+      <div className="alis-irs-yan">
+        {tarihHucresi}
+        <label className="satir-ici" title={alisMi ? c('İade: mal tedarikçiye geri gider - stok çıkar, cari borçlanır.') : c('İade: mal geri gelir - stok girer, cari alacaklanır.')}>
+          <input type="checkbox" checked={!!iade} disabled={kilitli} onChange={e => setIade(e.target.checked)} />{c('İade')}
+        </label>
+      </div>
+    ) : tarihHucresi}
 
     {/* --- 3b) TEKLIF DURUMU (218) - tarih sagina (kullanici). */}
     {teklifMi && (
@@ -302,9 +427,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hucre cizilmez. Adres ve seri de basliktan cikti: e-Belge sekmesinde,
         XML'e giden alanlarla birlikte duruyorlar. Vergi Dairesi/VKN kartta
         gosterilmiyor - cari kartindan gelip belgeye DONDURULAN bilgi. */}
-    {!eBelgeYok ? (
-    faturaMi ? null : eBelgeHucresi
-    ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu || tahakkukMu ? null : kapanmaGoster ? kapanmaAlani : (
+    {satisSiparis ? cariDepoHucresi : alisIrsaliye ? cariDepoHucresi : !eBelgeYok ? (
+    faturaMi ? null : bantli ? bosHucre : eBelgeHucresi
+    ) : depoBelgesi || stokFisiMi || teklifMi || basvuruMu || tahakkukMu ? null : kapanmaGoster ? (bantli ? bosHucre : kapanmaAlani) : (
       /* e-Belgesi de kapanmasi da olmayan tur (tahakkuk): hucre BOS BIRAKILIR.
          Yoksa temsilci yukari, 1. satirin sonuna kayardi - kullanici temsilciyi
          her turde CARININ ALTINDA istiyor. Teklifte yer tutucuya gerek yok:
@@ -328,7 +453,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         onAc={() => setPersonelArama('eden')}
         hata={alanHatalari.teslimEdenId}
       />
-    ) : talepMi || tahakkukMu ? null : saticiHucresi}
+    ) : talepMi || tahakkukMu ? null : satisSiparis ? <>{vadeHucresi}{saticiHucresi}</> : saticiHucresi}
 
     {/* --- 6) DEPO-2 ---
         Depo belgesinde malin GITTIGI depo, stok fisinde fisin tek deposu,
@@ -346,19 +471,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         hata={alanHatalari.cikisDepoId ?? alanHatalari.girisDepoId}
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
-    ) : depoBelgesi ? (
-      <GenLookup
-        kaynak="depo"
-        etiket={talepMi ? 'Teslim Deposu' : 'Giriş Deposu'}
-        zorunlu={!talepMi}
-        sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-        alanlar={LOOKUP_DEPO}
-        deger={girisDepo?.ad}
-        saltOkunur={baslikKilitli}
-        hata={alanHatalari.girisDepoId}
-        onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-      />
-    ) : teklifMi ? (
+    ) : depoBelgesi ? null : teklifMi ? (
       /* Teklifte depo YOK (stok cikisi yapmaz, 222) - yerine 2. sira uclusu:
          Teslim Sekli (salt combo); Teklif Konusu 1. satirin basinda (bkz. 1b).
          Ikisi de kod listesinden; ETIKETE tiklaninca jenerik modalda
@@ -366,18 +479,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       <KodListeAlani etiket="Teslim Şekli" listeKod="belge.teslim_sekli"
                      deger={teklif.teslim} onDeger={teklif.setTeslim}
                      kilitli={kilitli} />
-    ) : !tahakkukMu ? (
-      <GenLookup
-        kaynak="depo"
-        etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
-        // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
-        sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
-        alanlar={LOOKUP_DEPO}
-        deger={depo?.ad}
-        saltOkunur={kilitli}
-        onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
-      />
-    ) : null}
+    ) : !tahakkukMu && !darUst ? cariDepoHucresi : null}
 
     {/* --- 7) KISI-2 (yalniz depo belgeleri) --- */}
     {depoBelgesi && (
@@ -400,8 +502,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         BASVURUDA (249) vade YOK, yerine ODEYEN KURUM: hizmeti kim odeyecek
         (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
         listelensin"). Bos birakilirsa hasta kendi oder. */}
-    {!tahakkukMu && vadeHucresi}
-    {faturaMi && !eBelgeYok && eBelgeHucresi}
+    {!tahakkukMu && !satisSiparis && vadeHucresi}
+    {faturaMi && !eBelgeYok && (bantli ? bosHucre : eBelgeHucresi)}
 
     {/* Fiyat Listesi combosu ASAGIDA, Rapor Dovizi cercevesinin saginda
         (kullanici, 218) - KalemSekmesi cizer. */}
@@ -411,8 +513,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         Kapanma burada YALNIZ e-Belgeli turlerde: e-Belgesizde 4. hucreyi zaten
         o dolduruyor (temsilci carinin altina insin diye).
         Teklifte "Bağlı Sipariş" cizilmez (kullanici) - teklif zincirin BASI. */}
-    {!depoBelgesi && !stokFisiMi && !teklifMi && !(faturaMi && !eBelgeYok) && bagliSiparisAlani}
-    {!eBelgeYok && kapanmaGoster && kapanmaAlani}
+    {!depoBelgesi && !stokFisiMi && !teklifMi && !darUst && !(faturaMi && !eBelgeYok) && bagliSiparisAlani}
+    {!eBelgeYok && kapanmaGoster && !bantli && kapanmaAlani}
   </div>
 </div>
 )}
@@ -528,6 +630,14 @@ export interface BelgeBaslikProps {
   setPersonelArama(v: 'eden' | 'alan' | null): void;
   /** Sag sutunda ture gore degisen hazir hucreler. */
   kapanmaAlani: React.ReactNode;
+  /** Cari başlığındaki Ödeme / Tahsilat kutusu: belgenin genel toplamı ve bağlı ödeme toplamı. */
+  odemeGenel?: number;
+  odemeTahsil?: number;
+  /** Kalem sayısı (Kapanma kutusunun alt satırı). */
+  satirSayisiBaslik?: number;
+  /** Alış irsaliyesinde İade kutusu başlıkta (giriş deposunun sağında). */
+  iade?: boolean;
+  setIade?(v: boolean): void;
   bagliSiparisAlani: React.ReactNode;
   // belgeTuru.ts davranis bayraklari
   alisMi: boolean;

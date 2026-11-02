@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
+import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
-import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
-import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
+import { mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
          TAHAKKUK_TURLERI, iadeTipiMi }
@@ -46,7 +46,7 @@ import { useSatirSecimi } from './belgeKarti/useSatirSecimi';
 import { useKalemAkisi } from './belgeKarti/useKalemAkisi';
 import { useKayitKapisi } from './belgeKarti/useKayitKapisi';
 import { KURUM_OSS, KURUM_SGK } from './belgeKarti/kayitKabulKodlari';
-import {
+import { gorunenBelgeNo,
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla, belgeOnizlemesi,
   kartBasligi,
   acikTahsilatTaraflara, acikBelgeTaraflara, paylasimliKurum,
@@ -694,13 +694,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * Eskiden `prim-rol-aday`di: prim rolu isaretlenmemis hekimde bolum hic
    * dolmuyordu.
    */
-  const bolumuHekimdenDoldur = async (id: number) => {
+  // GONDEREN (DIŞ HEKİM) BÖLÜMÜ (kullanıcı 01.11.2026: "doktor seçmiştim bölümü gelmedi"): gönderen modunda
+  //   seçilen kişi DIŞ hekimdir, iç hekim listesinde (basvuru-hekim) yok - bölüm hiç bulunamıyordu. Dış hekimin
+  //   bölümü kendi kaynağından (dis-hekim, kolon `departman`).
+  const bolumuHekimdenDoldur = async (id: number, disHekim = false) => {
     try {
-      const y = await api.liste('basvuru-hekim', {
+      const y = await api.liste(disHekim ? 'dis-hekim' : 'basvuru-hekim', {
         sayfa: 1, boyut: 1,
         filtre: { op: 'and', kosullar: [{ alan: 'id', op: 'esit', deger: id }] },
       });
-      const b = Number(y.satirlar[0]?.bolumId ?? 0);
+      const b = Number((disHekim ? y.satirlar[0]?.departman : y.satirlar[0]?.bolumId) ?? 0);
       if (b) setBolumId(b);
     } catch { /* bolum cozulemezse alan elle secilir */ }
   };
@@ -736,7 +739,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     //   gelis sekli "Sevkli" (3) olur. Ikisi de ACIK eylemdir - kullanici
     //   sonra ambulans/kurum aracina cevirebilir.
     setBasvuruBilgi(o => ({ ...o, gelisSekli: gelisSekliKarari(true) }));
-    void bolumuHekimdenDoldur(id);
+    void bolumuHekimdenDoldur(id, true);
   };
   // RANDEVUDAN AÇILAN YENİ BAŞVURU (17.10.2026): gönderen doktor ve bölüm kartın kendi işleyicisiyle dolar
   //   (kendi isteği / geliş şekli kuralları da çalışsın diye); yalnız ilk açılışta.
@@ -1081,6 +1084,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   // KAYDETME AKISI (dogrula -> yaz -> satirlari tazele -> kapat) kendi
   //   dosyasinda: belgeKarti/useBelgeKaydetme.
+  const kabulHedefi = useRef<string | null>(null);
+  const bekleyenRadyoloji = useRef<{ istemler: AcilanRadyolojiIstemi[]; disSevk: boolean }>({ istemler: [], disSevk: false });
+  const ekranSekmesiKabul = useContext(EkranSekmesiBaglami);
   const kesHam = belgeKaydetmeKur({
     girdiKur, satirlar, setSatirlar, taslak, yerelPara,
     kalemDegisti,
@@ -1090,6 +1096,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     // Ikisi de ASAGIDA tanimli - cagri aninda cozulsun diye sarmalandi.
     imzayiTemizle: () => imzayiTemizle(),
     onKaydedildi, kapat: (zorla?: boolean) => void kapat(zorla),
+    bekleyenRadyoloji,
+    // Dış kurum sevki: ilk istemin kartı KABUL kipinde kendi sekmesinde açılır; birden çok istem varsa ötekiler
+    //   mesajda, istem listesinden açılır. Kaydet başvuruyu KAPATIYORSA hedef kapanışa bırakılır (cik): önce gidip
+    //   sonra kapatmak, kapanan sekmenin bayat konumla komşu sekmeye dönmesiyle istem kartını kaybediyordu
+    //   (kullanıcı 01.11.2026: "sevkli işaretli idi ama açılmadı"). Kart açık kalıyorsa (ilk kayıt) hemen açılır.
+    radyolojiKabulAc: istemler => {
+      if (!istemler[0]) return;
+      kabulHedefi.current = `/radyoloji/${istemler[0].id}?kabul=1`;
+      setTimeout(() => {
+        const h = kabulHedefi.current;
+        if (!h) return;
+        kabulHedefi.current = null;
+        if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
+      }, 0);
+    },
   });
 
   /**
@@ -1354,11 +1375,40 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     ? sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')
     : sekmeAdi(cari?.unvan || '');
   useEffect(() => {
-    if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, sekmeKonumu.pathname);
+    if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikAnahtari(sekmeKonumu));
+  // ANAHTAR SORGUYLA (kullanıcı 02.11.2026: "cari seçilip sekme açıldığında ... sekme başlığında cari ad görünsün"):
+  //   yeni belgenin sekmesi `/belge/yeni?tur=15&tarafId=..` anahtarıyla tutulur (yuvaYolu); yalnız pathname yazılınca
+  //   başlık kaydedip yeniden açılana dek "Yeni Satış Faturası Kartı" kalıyordu.
   }, [sayfa, ekranSekmesi, kayitliId, sekmeBasligi]);   // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** KARTTAN SİL (02.11.2026): onay → fn_belge_sil (listedeki Sil ile aynı uç) → kart kapanır, listeler tazelenir. */
+  const belgeyiSil = async () => {
+    if (!kayitliId) return;
+    const no = gorunenBelgeNo(sonuc?.belge.belgeNo) || `#${kayitliId}`;
+    if (!await onay(`"${no}" silinecek.
+
+Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
+    try {
+      const y = await api.belgeSil(kayitliId);
+      cariHareketiDegisti();
+      onKaydedildi?.();
+      mesaj(y.mesaj || 'Belge silindi.');
+      await kapat(true);
+    } catch (h) {
+      setHata(hataMetni(h));
+    }
+  };
+
   const kapat = async (zorla = false) => {
-    const cik = () => { if (onKapat) onKapat(); else git(basvuruMu ? '/basvuru' : bilgi.liste) };
+    const cik = () => {
+      // Radyoloji kabul kartı bekliyorsa (1242): sayfa kipinde başvuru sekmesi kapanırken DOĞRUDAN istem kartına
+      //   gidilir; pencere kipinde pencere kapanır, kart kendi sekmesinde açılır.
+      const h = kabulHedefi.current;
+      kabulHedefi.current = null;
+      if (h && sayfa && ekranSekmesiKabul) { ekranSekmesiKabul.kapat(h); return }
+      if (onKapat) onKapat(); else git(basvuruMu ? '/basvuru' : bilgi.liste);
+      if (h) { if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h) }
+    };
     if (zorla || !kirli) { cik(); return }
 
     const secim = await secimSor(
@@ -1399,7 +1449,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
       baslik={kartBasligi({
         basvuruMu, turAdi: seciliTurAdi, mevcutBelge: !!mevcutBelge,
-        kayitliId, belgeNo: sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : null,
+        kayitliId, belgeNo: gorunenBelgeNo(sonuc?.belge.belgeNo) || null,
       })}
       ustBilgi={kullanici?.subeYazma === false
         ? <span className="rozet uyari">salt okuma şubesi</span>
@@ -1415,17 +1465,25 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           mevcutBelge={mevcutBelge} duzenlenebilir={duzenlenebilir}
           sonuc={sonuc} kaydediyor={kaydediyor}
           kilitli={kilitli}
-          iadeKutusu={irsaliyePilot} iade={iadeMi}
+          // İrsaliyede (alış ve satış) İade kutusu başlıkta, tarihin sağında (BelgeBaslik).
+          iadeKutusu={false} iade={iadeMi}
           setIade={v => setFaturaTipi(v ? 2 : 1)}
           siparisMi={siparisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi} alisMi={alisMi}
           basvuruMu={basvuruMu}
           eBelgeYok={eBelgeYok} kayitliId={kayitliId}
           belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
+          // TÜR ADI BÜYÜK HARF + YÖN RENGİ (kullanıcı 02.11.2026: "satış faturası label büyük harflerle bold ve yeşil..
+          //   alış faturası da aynı şekilde kırmızı"): bütün alış (kırmızı) / satış (yeşil) belgelerinde; tahakkuk,
+          //   depo belgesi, stok fişi ve başvuruda renksiz.
           baslik={sayfa ? <>
-            <b>{kartBasligi({
-              basvuruMu, turAdi: seciliTurAdi, mevcutBelge: !!mevcutBelge,
-              kayitliId, belgeNo: sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : null,
-            })}</b>
+            <b className={basvuruMu || !bilgi.cariVar || bilgi.tahakkuk || bilgi.depoBelgesi || bilgi.stokFisi ? undefined
+                          : bilgi.alis ? 'belge-tur-ad alis' : 'belge-tur-ad satis'}>
+              {basvuruMu || !bilgi.cariVar || bilgi.tahakkuk || bilgi.depoBelgesi || bilgi.stokFisi
+                ? kartBasligi({ basvuruMu, turAdi: seciliTurAdi, mevcutBelge: !!mevcutBelge,
+                                kayitliId, belgeNo: gorunenBelgeNo(sonuc?.belge.belgeNo) || null })
+                : seciliTurAdi.toLocaleUpperCase('tr')}</b>
+            {!(basvuruMu || !bilgi.cariVar || bilgi.tahakkuk || bilgi.depoBelgesi || bilgi.stokFisi) && mevcutBelge && (
+              <b>{` #${kayitliId}${gorunenBelgeNo(sonuc?.belge.belgeNo) ? ` — ${gorunenBelgeNo(sonuc?.belge.belgeNo)}` : ''}`}</b>)}
             {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
           </> : undefined}
           // TEKLİF ÇIKTISI (kullanıcı 26.10.2026): Kapat'ın solunda "Teklif" önizleme / yazdır / kaydet menüsü.
@@ -1434,6 +1492,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                            tarih={tarih} gecerlilikGun={vadeGun} konu={teklif.konu} teslim={teklif.teslim}
                            aciklama={aciklama} satirlar={satirlar} toplam={onizleme} />) : undefined}
           satirSayisi={satirlar.length}
+          onSil={yetki('belge', 'sil') ? () => void belgeyiSil() : undefined}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
           setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
@@ -1467,7 +1526,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         {sonuc && !mevcutBelge && (
         <div className="bilgi-kutusu">
           <b>{c('Belge kaydedildi.')}</b>{' '}
-          No: <b>{String(sonuc.belge.belgeNo || '(taslak — numara verilmedi)')}</b> ·
+          No: <b>{gorunenBelgeNo(sonuc.belge.belgeNo) || (sonuc.belge.belgeNo ? '(e-Belge gönderiminde verilir)' : '(taslak — numara verilmedi)')}</b> ·
           Genel toplam: <b>{para.format(Number(sonuc.belge.genelToplam))}</b> ·
           <a href="#" onClick={e => { e.preventDefault(); void kapat() }}> listede gör</a>
           {sonuc.uyarilar && sonuc.uyarilar.length > 0 && (
@@ -1558,6 +1617,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           setCariArama={arama.setCari} setSaticiArama={arama.setSatici}
           setPersonelArama={arama.setPersonel}
           kapanmaAlani={kapanmaAlani} bagliSiparisAlani={bagliSiparisAlani}
+          odemeGenel={satirlar.length > 0 ? onizleme.genel : Number(sonuc?.belge.genelToplam ?? 0)}
+          odemeTahsil={tahsilToplami(tahsilat.tahsilatlar)} satirSayisiBaslik={satirlar.length}
+          iade={iadeMi} setIade={irsaliyePilot ? (v: boolean) => setFaturaTipi(v ? 2 : 1) : undefined}
           alisMi={alisMi} irsaliyeMi={irsaliyeMi} faturaMi={faturaMi}
           siparisMi={siparisMi} konsinyeMi={konsinyeMi} tahakkukMu={tahakkukMu}
           depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} fisCikisMi={fisCikisMi}
@@ -1783,7 +1845,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             <div className="not">
               Teslim alan kişi, TC, görev, teslim zamanı, nüsha sayısı ve teslim notu
               alanları henüz şemada yok — e-İrsaliye teslim onayı akışıyla gelecek.
-              İmzalı teslim belgesi şimdilik Yorum / Medya sekmesine eklenebilir.
+              İmzalı teslim belgesi şimdilik Resim / Doküman sekmesine eklenebilir.
             </div>
           </div>
         )}
@@ -1860,10 +1922,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
         {aktifSekme === 'yorum' && (
           <div className="kagrup">
-            <h6>Yorum / Medya</h6>
+            <h6>Resim / Doküman</h6>
             {kayitliId > 0
               ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
-              : <div className="not">{c('Belge kaydedilince ek ve yorum eklenebilir.')}</div>}
+              : <div className="not">{c('Belge kaydedilince resim / doküman eklenebilir.')}</div>}
           </div>
         )}
 
@@ -1876,6 +1938,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         )}
         <BelgeKartiModallari
           kayitliId={kayitliId} tur={tur} bilgi={bilgi} basvuruMu={basvuruMu}
+          // YENİ HASTA SEKMEDE: kayıtsız yeni başvuru sekmesi kapanır, hasta kartı sekmede açılır; hasta
+          //   kaydedilince o hastayla yeni başvuru açılır (ListeKarti, ?basvuru=1). Kayıtlı başvuruda ve
+          //   sekmesiz kullanımda eski pencere davranışı.
+          yeniHastaSekmede={basvuruMu && !kayitliId && ekranSekmesiKabul ? () => {
+            const hedef = '/hasta/yeni?basvuru=1';
+            if (sayfa) ekranSekmesiKabul.kapat(hedef); else ekranSekmesiKabul.kartaGit(hedef);
+          } : undefined}
           alisMi={alisMi} irsaliyeMi={irsaliyeMi} siparisMi={siparisMi}
           stokFisiMi={stokFisiMi} depoBelgesi={depoBelgesi}
           yerelPara={yerelPara} tarih={tarih} odeyenKurumId={odeyenKurumId}
@@ -1945,8 +2014,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           // YENİ BAŞVURUDA ARAMA İPTALİ (kullanıcı 27.10.2026: "hasta seçilmediyse ya da yeni hasta kartı açılmadı
           //   iptal dendiyse yeni başvuru da iptal olsun"): hastasız yeni başvuru açık kalmaz - kendi sekmesindeyse
           //   sekme kapanır, değilse Kapat'ın yolu (listeye dönüş). Kayıtlı belge ya da hasta seçiliyse dokunulmaz.
+          // AYNI KURAL ALIŞ / SATIŞTA (kullanıcı 02.11.2026: "arama iptal edilirse alış/satış kartı da iptal olmalı"):
+          //   carili her yeni belge (fatura / fiş / sipariş / irsaliye / teklif) cari seçilmeden kalmaz. Kalem
+          //   girilmişse kapatılmaz - emek kaybolmasın.
           onAramaIptal={() => {
-            if (!basvuruMu || kayitliId || cari) return;
+            if (!(basvuruMu || bilgi.cariVar) || kayitliId || cari || satirlar.length > 0) return;
             if (sayfa && ekranSekmesi) ekranSekmesi.kapat(); else void kapat(true);
           }}
         />

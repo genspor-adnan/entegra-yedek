@@ -78,7 +78,7 @@ public static partial class DisUclari
                          where m.taraf_id = t.id order by m.muayene_tarihi desc limit 1) as son_hekim,
                        (select dm.dental_anamnez from public.dis_muayene dm where dm.hasta_id = t.id
                          order by dm.id desc limit 1) as dental_anamnez,
-                       (select count(*) from public.dis_seans s where s.hasta_id = t.id)::int as seans_sayisi
+                       (select count(*) from public.dis_seans s where s.hasta_id = t.id)::int as seans_sayisi, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.taraf t
                   left join public.taraf_hasta th on th.id = t.id
                  where t.id = @p0
@@ -88,7 +88,7 @@ public static partial class DisUclari
                 unvan = o.GetString(1),
                 cepTel = o.Metin("cep_tel"),
                 dogumTarihi = o.IsDBNull(3) ? (DateTime?)null : o.GetDateTime(3),
-                yas = o.IsDBNull(4) ? (int?)null : o.GetInt32(4),
+                yas = o.IsDBNull(4) ? (int?)null : o.GetInt32(4), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")),
                 cinsiyet = o.GetInt32(5),
                 alerji = o.Metin("alerji"), kronik = o.Metin("kronik"), ilac = o.Metin("ilac"),
                 sonMuayene = o.IsDBNull(o.GetOrdinal("son_muayene")) ? (DateTime?)null : o.GetDateTime(o.GetOrdinal("son_muayene")),

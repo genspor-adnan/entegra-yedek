@@ -28,6 +28,7 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'radyoloji.kritik': 'radyoloji',
   'radyoloji.konsultasyon': 'radyoloji',
   'radyoloji.teslim': 'radyoloji',
+  'radyoloji.rapor.liste': 'radyoloji',   // göç 1215
   'servis.is_emri': 'servis',
   // Ortak kodlu listeler (göç 1131).
   'ftr.program.liste': 'ftr.program',

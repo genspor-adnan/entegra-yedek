@@ -12,10 +12,17 @@ export const radyolojiUclari = {
     klinikBilgi?: string; onTani?: string; oncelik?: number;
     kontrast?: number; kontrastMl?: number | null;
     seriSayisi?: number | null; goruntuSayisi?: number | null;
+    /** 1229: yön (0-3) ve dış accession no (yalnız çekimden önce değişir). */
+    yon?: number | null; accessionNo?: string | null;
+    /** İsteyen hekim / kurum - yalnız isteyenGuncelle = true ise yazılır. */
+    isteyenGuncelle?: boolean; istekHekimId?: number | null; disHekimAd?: string; istekKurumId?: number | null;
   }) => gonder<{ id: number; mesaj: string }>(`/api/radyoloji/istem/${id}`, govde, 'PUT'),
   /** Yanlış açılan görüntüleme istemini sil (çekilmiş/raporlanmış silinemez). */
   radyolojiIstemSil: (id: number, muayeneden = false) =>
     istek<{ mesaj: string }>(`/api/radyoloji/istem/${id}${muayeneden ? '?muayeneden=true' : ''}`, { method: 'DELETE' }),
+  /** Çekim öncesi kontrol yanıtları (310); boş yanıt = yanıtlanmadı (kayıt silinir). */
+  radyolojiKontrolKaydet: (id: number, yanitlar: { soruId: number; yanit: string }[]) =>
+    gonder<unknown>(`/api/radyoloji/istem/${id}/kontrol`, { yanitlar }),
   radyolojiKontrol: (id: number) =>
     istek<{ sorular: { soruId: number; soru: string; yanitTipi: number; zorunlu: number;
                        yanit: string; kayitZamani: string | null; kaydeden: string }[] }>(
@@ -25,7 +32,7 @@ export const radyolojiUclari = {
   // RAPOR EKRANI (283): acilista ihtiyac duyulan HER SEY tek istekte gelir -
   //   istem, rapor, bolumler, sablonlar, makrolar, skorlar, hasta gecmisi ve
   //   kritik bulgu bildirimleri.
-  radyolojiRapor: (istemId: number) =>
+  radyolojiRapor: (istemId: number, sablonId?: number) =>
     istek<{
       istem: Record<string, unknown>;
       rapor: Record<string, unknown> | null;
@@ -40,7 +47,7 @@ export const radyolojiUclari = {
       bakanlikProfili: boolean;
       /** BI-RADS lezyonlari (1194) - yapisal formun verisi. */
       lezyonlar: Record<string, unknown>[];
-    }>(`/api/radyoloji/istem/${istemId}/rapor`),
+    }>(`/api/radyoloji/istem/${istemId}/rapor${sablonId ? `?sablon=${sablonId}` : ''}`),
 
   radyolojiRaporYaz: (istemId: number, govde: unknown) =>
     gonder<{ raporId: number; surum: string }>(`/api/radyoloji/istem/${istemId}/rapor`, govde),
@@ -57,6 +64,11 @@ export const radyolojiUclari = {
   radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string, onaylayacakId?: number, not?: string) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}&surum=${encodeURIComponent(surum)}`
       + (onaylayacakId ? `&onaylayacakId=${onaylayacakId}` : ''), { not: not ?? '' }),
+  /** RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215): bugün onaylanan, ön rapor, ek rapor (7 gün), teslim bekleyen, eski HBYS. */
+  radyolojiRaporOzet: () =>
+    istek<{ bugunOnay: number; onRapor: number; ekRapor: number; teslimBekleyen: number; eskiHbys: number }>(
+      '/api/radyoloji/rapor-ozet'),
+
   /** UZMANA GÖNDER (1199): onay yetkili, bu şubede çalışan uzmanlar + üzerlerinde bekleyen ön rapor sayısı. */
   radyolojiOnayUzmanlari: () =>
     istek<{ id: number; ad: string; bekleyen: number }[]>('/api/radyoloji/onay-uzmanlari'),

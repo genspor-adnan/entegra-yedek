@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { type StokHareketYaniti, hataMetni } from '../api/sozlesme';
-import { say4, gunMetni, bugunIso } from './bicim';
+import { type StokHareketSatiri, type StokHareketYaniti, hataMetni } from '../api/sozlesme';
+import { say4, gunMetni, tarihSaat, bugunIso } from './bicim';
 import { csvMetni, CSV_TIPI } from './csv';
 import { dosyaIndir } from './indir';
 import { c } from '../dil/ceviri';
@@ -35,6 +35,9 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
   const [depolar, setDepolar] = useState<{ id: number; ad: string }[]>([]);
   const [veri, setVeri] = useState<StokHareketYaniti | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
+  /** BAŞLIKTAN SIRALAMA (kullanıcı 02.11.2026): tık artan, ikinci tık azalan, üçüncü tık ilk (tarih) sırası.
+      Kalan sütunu sunucunun tarih sırasıyla yürüttüğü bakiyedir - sıralama onu değiştirmez. */
+  const [sira, setSira] = useState<{ alan: keyof StokHareketSatiri; yon: 1 | -1 } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,12 +71,31 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
 
   const birim = veri?.birim ? ` ${veri.birim}` : '';
 
+  const siraliSatirlar = useMemo(() => {
+    const l = [...(veri?.satirlar ?? [])];
+    if (!sira) return l;
+    const { alan, yon } = sira;
+    return l.sort((a, b) => {
+      const x = a[alan], y = b[alan];
+      const k = typeof x === 'number' && typeof y === 'number' ? x - y
+        : String(x ?? '').localeCompare(String(y ?? ''), 'tr', { numeric: true });
+      return k * yon;
+    });
+  }, [veri, sira]);
+  const sirala = (alan: keyof StokHareketSatiri) => setSira(s =>
+    !s || s.alan !== alan ? { alan, yon: 1 } : s.yon === 1 ? { alan, yon: -1 } : null);
+  const isaret = (alan: keyof StokHareketSatiri) => sira?.alan === alan ? (sira.yon === 1 ? ' ▲' : ' ▼') : '';
+  const sutunBasi = (alan: keyof StokHareketSatiri, metin: string, sinif?: string, genislik?: number) => (
+    <th className={`siralanir${sinif ? ` ${sinif}` : ''}`} style={genislik ? { width: genislik } : undefined}
+        title={c('Sırala')} onClick={() => sirala(alan)}>{metin}{isaret(alan)}</th>);
+
   return (
     <>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      <div className="kagrup">
-        <h6>{c('Son Stok Hareketleri')}</h6>
+      {/* ÇERÇEVESİZ (kullanıcı 02.11.2026: "Son Stok Hareketleri ile başlayan çerçeveyi kaldır"): sekme adı
+          zaten "Hareketler"; süzgeç şeridi ve tablo doğrudan sekmede (Stok Durumu ile aynı). */}
+      <div className="stok-hareket">
 
         <div className="hareket-serit">
           <label className="satir-ici">
@@ -97,13 +119,13 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th style={{ width: 90 }}>Tarih</th>
-                <th style={{ width: 200 }}>Belge</th>
-                <th style={{ width: 70 }}>Tür</th>
-                <th>{c('Depo / Cari')}</th>
-                <th className="hiza-sag" style={{ width: 85 }}>Giriş</th>
-                <th className="hiza-sag" style={{ width: 85 }}>Çıkış</th>
-                <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
+                {sutunBasi('tarih', c('Tarih'), undefined, 130)}
+                {sutunBasi('belgeNo', c('Belge'), undefined, 200)}
+                {sutunBasi('yon', c('Tür'), undefined, 70)}
+                {sutunBasi('depo', c('Depo / Cari'))}
+                {sutunBasi('giris', c('Giriş'), 'hiza-sag', 85)}
+                {sutunBasi('cikis', c('Çıkış'), 'hiza-sag', 85)}
+                {sutunBasi('kalan', c('Kalan'), 'hiza-sag', 90)}
               </tr>
             </thead>
             <tbody>
@@ -111,12 +133,13 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                 <td colSpan={6}><i>{c('Devir (aralıktan önce)')}</i></td>
                 <td className="hiza-sag"><b>{say4.format(Number(veri?.devir ?? 0))}</b></td>
               </tr>
-              {(veri?.satirlar ?? []).map((s, i) => (
+              {siraliSatirlar.map((s, i) => (
                 // Cift tik: hareketi ureten belgeyi ac (ekstre satirlarindaki kural).
                 <tr key={`${s.belgeId}:${i}`}
                     onDoubleClick={() => { const y = BELGE_YOLU[s.belgeTur]; if (y) git(`${y}/${s.belgeId}`) }}
                     title={c('Çift tıkla: belgeyi aç')}>
-                  <td>{gunMetni(s.tarih)}</td>
+                  {/* SAAT DE (kullanıcı 02.11.2026: "hareketlerde tarihte saat de görünsün"). */}
+                  <td>{tarihSaat(s.tarih)}</td>
                   <td>{s.belgeTurAdi} <b>{s.belgeNo}</b></td>
                   <td>
                     <span className={`rozet ${s.yon === 'giris' ? 'ok'

@@ -1,18 +1,20 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { gorunumKaydet, gorunumOku, type RadyolojiRaporDuzeni, type RadyolojiRaporGiris } from '../bilesenler/gorunum';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../bilesenler/mesaj';
-import { tarihSaat } from '../bilesenler/bicim';
+import { tarihSaat, yasMetni } from '../bilesenler/bicim';
 import { Modal } from '../bilesenler/Modal';
-import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../bilesenler/MuayeneSekmesiz';
+import { HastaSeridi } from '../bilesenler/belge/basvuru/HastaSeridi';
 import { c } from '../dil/ceviri';
 import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
-import { TEK_BASLIK, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi, yerTutucuDoldur } from './radyoloji/raporBicimi';
+import { tiradsPuani, tiradsUygula } from './radyoloji/tirads';
+import { fleischnerOnerisi, fleischnerUygula } from './radyoloji/fleischner';
+import { TEK_BASLIK, alanCumleleri, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi, yerTutucuDoldur } from './radyoloji/raporBicimi';
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
-import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml } from '../bilesenler/BicimliMetin';
+import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml, htmldenDuz } from '../bilesenler/BicimliMetin';
 import { CiktiMenusu } from '../bilesenler/cikti/CiktiMenusu';
 import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from './RadyolojiRaporCikti';
 
@@ -32,10 +34,14 @@ const htmlOf = (b: Bolum) => b.html ?? duzdenHtml(b.metin);
 interface Sablon { id: number; kod: string; ad: string; surum: number;
                    varsayilan: number; tetkigeOzel: number;
                    /** rad.modalite kodu ve yapısal form türü (1194: 1 = BI-RADS). */
-                   modalite?: number; yapisalTur?: number }
+                   modalite?: number; yapisalTur?: number;
+                   /** 1216: 1 = benim kişisel şablonum, 2 = genel (başkasının kişiseli sunucudan hiç gelmez). */
+                   kapsam?: number; bolumSayisi?: number }
 interface Makro { kisayol: string; ad: string; metin: string; hedefBolum: string }
 interface Skor { alanKod: string; alanAd: string; tip: number; secenekler: string;
-                 zorunlu: number; raporaBas: number }
+                 zorunlu: number; raporaBas: number;
+                 /** 1217: başlık, metne yazılış kalıbı ({değer}), normal kalıbı, birim, hedef bölüm. */
+                 grup?: string; kalip?: string; sifirKalip?: string; birim?: string; hedefBolum?: string }
 interface Gecmis { id: number; accessionNo: string; tetkikAdi: string; tarih: string;
                    raporlayan: string; ozet: string;
                    /** Kronolojik görünüm (27.10.2026): modalite adı, rapor durumu (0 yok, 1-3), BI-RADS. */
@@ -63,6 +69,9 @@ const birlestirHtml = (b: Bolum[]): string => b
   .filter(x => x.yazdir !== 0)
   .map(x => `<div><b>${duzdenHtml(x.baslik.toLocaleUpperCase('tr'))}:</b></div><div>${htmlOf(x)}</div>`)
   .join('<div><br></div>');
+/** Şablon iskeletini tek moda çevirir: zaten tek parçaysa (eski HBYS şablonu) olduğu gibi; biçimli bölüm varsa biçim korunur. */
+const tekeCevir = (p: Bolum[]): Bolum[] => (tekParcaMi(p) ? p
+  : tekBolum(birlestir(p), p.some(x => x.html) ? birlestirHtml(p) : undefined));
 
 /** Sunucudan gelen zaman damgasini "30.08.2026 14:05" olarak yazar. */
 function anMetni(d: unknown): string {
@@ -249,13 +258,15 @@ export function RadyolojiRapor() {
     }
     const yeniParcalar = await sablonParcalari(sId, ist);
     setParcalar(yeniParcalar);
-    setBolumler(duzenRef.current === 'tek' ? tekBolum(birlestir(yeniParcalar)) : yeniParcalar);
+    setBolumler(duzenRef.current === 'tek' ? tekeCevir(yeniParcalar) : yeniParcalar);
     setSablonId(sId);
     // Yeni şablonun BI-RADS formu varsa form (yoksa boş) hazırlanır; olmayan şablonda form durumu kalır, kullanılmaz.
     const sb = sablonlar.find(s => s.id === sId);
     if (Number(sb?.yapisalTur ?? 0) === 1 && !birads) setBiradsDurumu(durumOku(null, [], modaliteKodundan(sb?.modalite)));
-    const m = await api.radyolojiRapor(id);
+    // Makro ve yapılandırılmış alanlar YENİ şablonun (1217) - girilmiş değerler aynı kodlu alanda kalır.
+    const m = await api.radyolojiRapor(id, sId);
     setMakrolar(m.makrolar as unknown as Makro[]);
+    setSkorlar(m.skorlar as unknown as Skor[]);
   }
 
   /** Şablonun bölüm iskeleti (varsayılan metinlerle). `ist` açıkça verilir: ilk yüklemede state henüz boş. */
@@ -269,9 +280,12 @@ export function RadyolojiRapor() {
       // Yer tutucular ({istem.on_tani} ...) istemle doldurulur.
       const varsayilan = yerTutucuDoldur(String(b.varsayilanMetin ?? ''), ist).trim();
       const klinikMi = baslik.toLocaleLowerCase('tr').includes('klinik');
+      // BİÇİMLİ VARSAYILAN (1216): eski HBYS Word şablonu tablo / resim / biçimiyle gelir.
+      const html = b.varsayilanHtml ? yerTutucuDoldur(String(b.varsayilanHtml), ist) : '';
       return {
         sira: Number(b.sira ?? i + 1), baslik,
-        metin: !varsayilan && klinikMi ? klinik : varsayilan,
+        metin: html ? htmldenDuz(html) : !varsayilan && klinikMi ? klinik : varsayilan,
+        ...(html ? { html } : {}),
         yazdir: Number(b.yazdir ?? 1), zorunlu: Number(b.zorunlu ?? 0),
       };
     });
@@ -373,6 +387,35 @@ export function RadyolojiRapor() {
 
   const bolumYaz = (i: number, metin: string, html?: string) =>
     setBolumler(b => b.map((x, k) => (k === i ? { ...x, metin, html } : x)));
+
+  /**
+   * YAPILANDIRILMIŞ ALANLAR -> METİN (1217): doldurulan alanların cümleleri hedef bölümün (alanın "Bölüm"ü, yoksa
+   * Bulgular) SONUNA paragraf olarak eklenir; tek parça raporda metnin sonuna. Normal değerler normal kalıbıyla.
+   */
+  const alanlariMetneEkle = () => {
+    const satirlar = alanCumleleri(skorlar, skorDeger);
+    if (satirlar.length === 0) { mesaj(c('Doldurulmuş alan yok.')); return }
+    // Bölümsüz rapor (şablonun metni yok): cümleler tek A4 bölüm olarak açılır.
+    if (bolumler.length === 0) {
+      setBolumler(tekBolum(satirlar.join('\n'), satirlar.map(s => `<p>${duzdenHtml(s)}</p>`).join('')));
+      return;
+    }
+    const hedefAd = (skorlar.find(s => s.hedefBolum)?.hedefBolum ?? '').toLocaleLowerCase('tr');
+    const i = tekParcaMi(bolumler) ? 0
+      : Math.max(0, bolumler.findIndex(b => (hedefAd && b.baslik.toLocaleLowerCase('tr') === hedefAd) || bulguBolumuMu(b.baslik)));
+    if (i >= bolumler.length) return;
+    setBolumler(b => b.map((x, k) => (k === i
+      ? { ...x, metin: `${x.metin.trimEnd()}${x.metin.trim() ? '\n' : ''}${satirlar.join('\n')}`,
+          html: x.html === undefined ? undefined : `${x.html}${satirlar.map(s => `<p>${duzdenHtml(s)}</p>`).join('')}` }
+      : x)));
+    mesaj(`${satirlar.length} ${c('cümle')} "${bolumler[i].baslik}" ${c('bölümüne eklendi.')}`);
+  };
+
+  /** Alan değeri - TI-RADS (1218) / Fleischner (1221) paketi varsa girdiler değişince kategori / öneri yeniden hesaplanır. */
+  const alanDegistir = (kod: string, v: string) =>
+    setSkorDeger(d => fleischnerUygula(skorlar, tiradsUygula(skorlar, { ...d, [kod]: v }, kod), kod));
+  const fleischnerHesap = skorlar.some(s => s.alanKod === 'fleischner') && fleischnerOnerisi(skorlar, skorDeger) !== null;
+  const tiradsPuan = skorlar.some(s => s.alanKod === 'tirads') ? tiradsPuani(skorlar, skorDeger) : null;
 
   /** Makro metnini hedef bölüme (yoksa son dokunulan bölüme) ekler. */
   const makroEkle = (m: Makro) => {
@@ -486,49 +529,28 @@ export function RadyolojiRapor() {
   // HASTA BANDI (kullanıcı 27.10.2026: "radyoloji raporu için hasta bandı yap"): sevk / konsültasyondaki standart
   //   band - ad, yaş, kurum, dosya / protokol no, kan grubu, alerji, uyarılar. İstemde muayene yok: hastanın
   //   en son muayenesinden (yoksa hasta kaydından) okunur.
-  const bant = useMuayeneHastaBilgisi(0, 0, Number(istem?.hastaId ?? 0));
 
   if (yukleniyor) return <div className="yukleniyor">{c('Yükleniyor…')}</div>;
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!istem) return <div className="hata-kutusu">{c('İstem bulunamadı.')}</div>;
 
   const kilitli = Number(rapor?.kilit ?? 0) === 1;
-  // ONAYLAYACAK → ONAYLAYAN (1199): onaya kadar seçilen uzman + bekleme süresi, onaydan sonra imzalayan.
-  //   Başka bir uzman onayladıysa (izin / nöbet) "(X yerine)". Kendi onaylayan akışta onaylayacak hiç yok.
-  const onayBlogu = () => {
-    if (!rapor) return null;
-    const onayli = Number(rapor.durum ?? 0) === 3;
-    if (onayli) return <>
-      <div className="hbnd-b">✔ {c('Onaylayan')}</div>
-      <div><b>{String(rapor.onaylayan ?? '') || '—'}</b></div>
-      <div className="hbnd-alt">
-        {rapor.onaylayacakId && Number(rapor.onaylayacakId) !== Number(rapor.onaylayanId)
-          ? `(${String(rapor.onaylayacak)} ${c('yerine')}) ` : ''}
-        {rapor.onayTarihi ? `${saatYaz(rapor.onayTarihi)} · e-imza` : ''}</div>
-    </>;
-    return <>
-      <div className="hbnd-b">⏳ {c('Onaylayacak')}</div>
-      {String(rapor.onaylayacak ?? '')
-        ? <><div><b>{String(rapor.onaylayacak)}</b></div>
-            {rapor.onayaGonderme && <div className="hbnd-alt rad-bekliyor">{c('bekliyor')} · {sureYaz(rapor.onayaGonderme)}</div>}</>
-        : <div className="hbnd-alt">— {c('gönderirken seçilir')}</div>}
-    </>;
-  };
+  // ÇEKİMSİZ RAPOR YOK (kullanıcı 01.11.2026): sunucu da reddeder; ekran önceden uyarır, yazma düğmeleri kapalı.
+  const cekimYok = Number(istem.cekildi ?? 1) === 0;
+  // ONAYLAYACAK → ONAYLAYAN (1199): onaya kadar seçilen uzman + bekleme süresi, onaydan sonra imzalayan - hasta
+  //   bandının son hücrelerinde (HastaSeridi sonHucreler).
   const durum = RAPOR_DURUM[Number(rapor?.durum ?? 1)] ?? RAPOR_DURUM[1];
-  const yas = istem.dogumTarihi
-    ? Math.floor((Date.now() - new Date(String(istem.dogumTarihi)).getTime())
-                 / 31557600000)
-    : null;
+  const yas = yasMetni(istem.dogumTarihi);
 
   return (
     <div className="sayfa rad-rapor">
       <div className="sayfa-bas">
         {/* BAŞLIK SATIRI KALKTI (kullanıcı 27.10.2026): sekme başlığı hasta adı; accession no solda "Bu tetkik"te. */}
         <div className="sayfa-eylem">
-          <button className="d bir" disabled={kilitli || islemde} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
-          <button className="d" disabled={kilitli || islemde}
+          <button className="d bir" disabled={kilitli || islemde || cekimYok} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
+          <button className="d" disabled={kilitli || islemde || cekimYok}
                   onClick={() => void durumaGecir('on-rapor')}>➜ Uzmana Gönder</button>
-          <button className="d basari" disabled={kilitli || islemde}
+          <button className="d basari" disabled={kilitli || islemde || cekimYok}
                   onClick={() => void durumaGecir('onay')}>✍ Onayla ve İmzala</button>
           <button className="d teh" disabled={kilitli}
                   onClick={() => setKritikModal(true)}>⚠ Kritik Bulgu Bildir</button>
@@ -549,52 +571,44 @@ export function RadyolojiRapor() {
         </div>
       </div>
 
-      {/* RADYOLOJİ BANDI (kullanıcı 27.10.2026): kan grubu yok, raporun DURUMU bandın sonunda. */}
-      {bant && <MuayeneHastaBandi bilgi={bant} kanGrubuYok
-        suAnYerine={<>
-          <div className="hbnd-b">🩺 {c('İsteyen')}</div>
-          <div><b>{String(istem.isteyen ?? '') || '—'}</b></div>
-          {String(istem.isteyenBolum ?? '') && <div className="hbnd-alt">{String(istem.isteyenBolum)}</div>}
-        </>}
-        sonBlok={[
-          // YAZAN · ONAYLAYACAK/ONAYLAYAN · DURUM (kullanıcı 28.10.2026, mockup seçenek C).
-          rapor?.yazan ? <>
-            <div className="hbnd-b">✍ {c('Yazan')}</div>
-            <div><b>{String(rapor.yazan)}</b></div>
-            <div className="hbnd-alt">{Number(rapor.yazanAsistan) === 1 && <span className="rozet rad-asistan">{c('asistan')}</span>}
-              {rapor.yazmaTarihi ? ` ${saatYaz(rapor.yazmaTarihi)}` : ''}</div>
-          </> : null,
-          onayBlogu(),
-          <>
-            <div className="hbnd-b">{c('Durum')}</div>
-            <div className="hbnd-rozetler"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
-              {kilitli && <span className="rozet">🔒 {c('Kilitli')}</span>}</div>
-            {String(rapor?.raporNo ?? '') && <div className="hbnd-alt">{String(rapor?.raporNo)}</div>}
-          </>,
-        ]} />}
+      {cekimYok && (
+        <div className="uyari-serit" style={{ margin: '6px 0', padding: '7px 10px', border: '1px solid #f0c7c2', background: '#fdf1ef',
+                                              color: '#8f3d36', borderRadius: 4, display: 'flex', gap: 10, alignItems: 'center' }}>
+          ⚠ {c('Çekim bilgisi girilmeden rapor yazılamaz.')}
+          <button className="d" onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/${id}`) : git(`/radyoloji/${id}`))}>
+            ☢️ {c('İstem kartında çekim bilgisini gir')}</button>
+        </div>
+      )}
+      {/* HASTA BANDI = İSTEM KARTI BANDI (kullanıcı 01.11.2026: "rapor kartındaki hasta bandı da istem kartı gibi
+          olsun.. ama yazan/onay/durum hücreleri kalsın"): Kimlik · Tetkik · İsteyen · Kurum · Uyarı · Yazan · Onay · Durum. */}
+      <HastaSeridi tarafId={Number(istem.hastaId ?? 0) || null} kurumAdi={String(istem.odeyenKurum ?? '')}
+                   belgeId={Number(istem.belgeId ?? 0) || null} paraYok provizyonGizli durumGizli
+                   yedek={{ ad: String(istem.hastaAdi ?? ''), alt: yas }}
+                   tetkik={{ ad: String(istem.tetkikAdi ?? ''), kod: String(istem.tetkikKodu ?? '') }}
+                   isteyen={{ ad: String(istem.isteyen ?? ''), bolum: String(istem.isteyenBolum ?? '') }}
+                   sonHucreler={[
+                     { k: `✍ ${c('Yazan')}`, v: String(rapor?.yazan ?? '') || '—',
+                       alt: rapor?.yazan ? <>{Number(rapor.yazanAsistan) === 1 && <span className="rozet rad-asistan">{c('asistan')}</span>}
+                         {rapor.yazmaTarihi ? ` ${saatYaz(rapor.yazmaTarihi)}` : ''}</> : undefined },
+                     Number(rapor?.durum ?? 0) === 3
+                       ? { k: `✔ ${c('Onaylayan')}`, v: String(rapor?.onaylayan ?? '') || '—',
+                           alt: <>{rapor?.onaylayacakId && Number(rapor.onaylayacakId) !== Number(rapor.onaylayanId)
+                                   ? `(${String(rapor.onaylayacak)} ${c('yerine')}) ` : ''}
+                                 {rapor?.onayTarihi ? `${saatYaz(rapor.onayTarihi)} · e-imza` : ''}</> }
+                       : { k: `⏳ ${c('Onaylayacak')}`, v: String(rapor?.onaylayacak ?? '') || '—',
+                           alt: String(rapor?.onaylayacak ?? '') && rapor?.onayaGonderme
+                             ? <span className="rad-bekliyor">{c('bekliyor')} · {sureYaz(rapor.onayaGonderme)}</span>
+                             : c('gönderirken seçilir') },
+                     { k: c('Durum'),
+                       v: <span className="hs3-roz"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
+                            {/* Dar Durum hücresinde kilit yalnız simge (kullanıcı 01.11.2026: "kilit gelecek"). */}
+                            {kilitli && <span title={c('Kilitli - düzeltme ek raporla')} style={{ fontSize: 12 }}>🔒</span>}</span>,
+                       alt: String(rapor?.raporNo ?? '') || undefined },
+                   ]} />
       {/* UZMANA NOT (1200): ön rapor beklerken bandın altında sarı şerit - uzman raporu açınca ilk bunu görür. */}
       {Number(rapor?.durum ?? 0) === 2 && String(rapor?.onayNotu ?? '').trim() !== '' && (
         <div className="rad-onay-notu">📝 <b>{String(rapor?.yazan ?? '') || c('Gönderen')}:</b> {String(rapor?.onayNotu)}</div>
       )}
-      {/* KİMLİK ŞERİDİ KALKTI (kullanıcı 27.10.2026: "hasta bandının altındaki banttaki bilgileri soldaki önceki
-          tetkiklere taşı ve bu bandı kaldır"): tetkik ve çekim solda "Bu tetkik" düğümünde, hasta ve durum bantta.
-          Bant okunamazsa (yedek) yalnız hasta + durum şeridi kalır. */}
-      {!bant && (
-        <div className="kaid">
-          <div className="alan-izgara rad-kimlik bantsiz">
-            <label className="alan"><span className="etiket">Hasta</span>
-              <span className="deger-serit">
-                <b>{String(istem.hastaAdi ?? '')}</b>
-                {yas !== null && <span className="sonuk">{yas} y</span>}
-              </span></label>
-            <label className="alan"><span className="etiket">Durum</span>
-              <span className="deger-serit"><span className={`rozet ${durum.sinif}`}>{durum.ad}</span>
-                {kilitli && <span className="rozet">🔒 Kilitli</span>}
-              </span></label>
-          </div>
-        </div>
-      )}
-
       <div className={`rad-govde${etkinGiris === 'yapisal' ? ' yapisal' : ''}`}>
         {/* --------------------------------------------------- SOL: geçmiş --- */}
         <div className="rad-yan">
@@ -754,11 +768,19 @@ export function RadyolojiRapor() {
           <select value={sablonId ?? ''} disabled={kilitli}
                   onChange={e => { const v = Number(e.target.value); if (v > 0) void sablonUygula(v) }}>
             <option value="">— seçiniz —</option>
-            {sablonlar.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.kod ? `${s.kod} · ` : ''}{s.ad}{s.tetkigeOzel === 1 ? ' ★' : ''}
-              </option>
-            ))}
+            {/* GRUPLU (1216, mockup radyoloji_sablon_listesi_v3.html): bu tetkike bağlı · benim · genel. Başka
+                radyoloğun kişisel şablonu bu ekrana gelmez (kullanıcı: "diğer doktorlar tarafından görünmesin"). */}
+            {([['⭐ ' + c('Bu tetkike bağlı'), (s: Sablon) => s.tetkigeOzel === 1],
+               ['★ ' + c('Benim şablonlarım'), (s: Sablon) => s.tetkigeOzel !== 1 && s.kapsam === 1],
+               [c('Genel'), (s: Sablon) => s.tetkigeOzel !== 1 && s.kapsam !== 1]] as [string, (s: Sablon) => boolean][])
+              .map(([ad, f]) => { const g = sablonlar.filter(f); return g.length === 0 ? null : (
+                <optgroup key={ad} label={ad}>
+                  {g.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.ad}{s.kod ? ` · ${s.kod}` : ''}{Number(s.yapisalTur ?? 0) > 0 ? ` (${c('Yapısal')})`
+                        : Number(s.bolumSayisi ?? 0) > 1 ? ` (${c('Parçalı')})` : ''}
+                    </option>))}
+                </optgroup>) })}
           </select>
 
           <h5 style={{ marginTop: 12 }}>{c('Makrolar')}</h5>
@@ -773,22 +795,32 @@ export function RadyolojiRapor() {
 
           {skorlar.length > 0 && (
             <>
-              <h5 style={{ marginTop: 12 }}>{c('Yapılandırılmış Alanlar')}</h5>
-              {skorlar.map(s => (
-                <label className="alan" key={s.alanKod}>
-                  <span className="etiket">{s.alanAd}{s.zorunlu === 1 ? ' *' : ''}</span>
+              <h5 style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>{c('Yapılandırılmış Alanlar')}
+                <span style={{ flex: 1 }} />
+                <button type="button" className="d" disabled={kilitli} onClick={alanlariMetneEkle}
+                        title={c('Doldurulan alanları cümle olarak Bulgular bölümüne ekler')}>↧ {c('Metne ekle')}</button></h5>
+              {skorlar.map((s, i) => (<Fragment key={s.alanKod}>
+                {s.grup && s.grup !== skorlar[i - 1]?.grup && <div className="rad-alan-grup">{s.grup}</div>}
+                <label className="alan">
+                  <span className="etiket">{s.alanAd}{s.zorunlu === 1 ? ' *' : ''}
+                    {s.alanKod === 'tirads' && tiradsPuan !== null && (
+                      <small className="rad-otomatik" title={c('ACR TI-RADS: bileşen puanlarının toplamı; kategori ve öneri kendiliğinden seçilir, elle değiştirilebilir')}>
+                        {c('otomatik')} · {tiradsPuan} {c('puan')}</small>)}
+                    {s.alanKod === 'fleischner' && fleischnerHesap && (
+                      <small className="rad-otomatik" title={c('Fleischner 2017: nodül sayısı, tipi, çapı, solid komponent ve risk grubundan seçildi; elle değiştirilebilir')}>
+                        {c('otomatik')}</small>)}</span>
                   {s.secenekler ? (
                     <select value={skorDeger[s.alanKod] ?? ''} disabled={kilitli}
-                            onChange={e => setSkorDeger(d => ({ ...d, [s.alanKod]: e.target.value }))}>
+                            onChange={e => alanDegistir(s.alanKod, e.target.value)}>
                       <option value="">—</option>
                       {s.secenekler.split('|').map(x => <option key={x} value={x}>{x}</option>)}
                     </select>
                   ) : (
                     <input value={skorDeger[s.alanKod] ?? ''} readOnly={kilitli}
-                           onChange={e => setSkorDeger(d => ({ ...d, [s.alanKod]: e.target.value }))} />
+                           onChange={e => alanDegistir(s.alanKod, e.target.value)} />
                   )}
                 </label>
-              ))}
+              </Fragment>))}
             </>
           )}
 

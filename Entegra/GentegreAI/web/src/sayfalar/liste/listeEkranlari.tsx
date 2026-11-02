@@ -29,6 +29,9 @@ import { YatakPanosu } from '../../bilesenler/YatakPanosu';
 import { EmarCizelgesi } from '../../bilesenler/yatan/EmarCizelgesi';
 import { HemsireIzlem } from '../../bilesenler/yatan/HemsireIzlem';
 import { YatanIcmal } from '../../bilesenler/yatan/YatanIcmal';
+import { AlanPaketiDugmesi } from '../radyoloji/AlanPaketleri';
+import { EslemeAraclari, EslemePaneli, EslemeSekmeleri, EslemeSeridi, kaynaktanListe } from '../aktarim/EslemePanelleri';
+import { RaporListeCiktisi, RaporListeSeridi, RaporOnizlemePaneli } from '../radyoloji/RaporListePanelleri';
 import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from '../radyoloji/CihazPanelleri';
 import { GozCihazGostergesi, GozCihazOnizlemePaneli, GozCihazSolPanel,
@@ -67,6 +70,8 @@ export interface ListeEkranBaglami {
   yenile: number;
   tazele(): void;
   seciliSatir: ListeSatiri | null;
+  /** Onay kutusuyla işaretli satırlar (yüklü sayfa) - toplu çıktı (rapor listesi). */
+  isaretli: ListeSatiri[];
   git(yol: string): void;
   /** Kart açılışı (sekme düzeninde kendi sekmesinde). */
   gitKart(yol: string): void;
@@ -256,6 +261,8 @@ export function useListeEkrani(b: ListeEkranBaglami): ListeEkrani | null {
 
 export interface ListePaneli {
   ustSerit?(b: ListeEkranBaglami): ReactNode;
+  /** Araç çubuğunun sağ ucu (aksiyonlardan sonra) - ör. ekranın çıktı menüsü. */
+  basSag?(b: ListeEkranBaglami): ReactNode;
   ustPanel?(b: ListeEkranBaglami): ReactNode;
   yanPanel?(b: ListeEkranBaglami): ReactNode;
   altPanel?(b: ListeEkranBaglami): ReactNode;
@@ -263,6 +270,16 @@ export interface ListePaneli {
 
 /** Seçili satırın kaydı (id > 0) - alt panellerin ortak koşulu. */
 const kayitId = (b: ListeEkranBaglami) => b.seciliSatir && Number(b.seciliSatir.id ?? 0) > 0 ? Number(b.seciliSatir.id) : 0;
+
+/** SKRS eşleme masasının üç listesi aynı çevreyi kullanır (liste kaynak adından). */
+const eslemePaneli: ListePaneli = {
+  ustSerit: b => <>
+    <EslemeSekmeleri liste={kaynaktanListe(b.kaynak)} git={b.git} />
+    <EslemeSeridi liste={kaynaktanListe(b.kaynak)} yenile={b.yenile} onCip={b.setCip} />
+  </>,
+  yanPanel: b => <EslemePaneli liste={kaynaktanListe(b.kaynak)} satir={b.seciliSatir} yenile={b.yenile} tazele={b.tazele} />,
+  basSag: b => <EslemeAraclari liste={kaynaktanListe(b.kaynak)} isaretli={b.isaretli} tazele={b.tazele} />,
+};
 
 const PANELLER: Record<string, ListePaneli> = {
   // KULLANICILAR (mockup kullanicilar.html `.ozet` + `.sekmeler` / `.alt`): sayaçlar ARAMANIN ÜSTÜNDE;
@@ -272,6 +289,21 @@ const PANELLER: Record<string, ListePaneli> = {
     ustSerit: b => <KullaniciOzetSeridi yenile={b.yenile} onCip={b.setCip} />,
     altPanel: b => kayitId(b) ? <KullaniciAltPanel kullaniciId={kayitId(b)} saltOkunur={false} /> : undefined,
   },
+  // RADYOLOJİ RAPOR LİSTESİ (1215, mockup radyoloji_rapor_listesi.html): sayaç şeridi, sağda A4 önizleme,
+  //   araç çubuğunda icmallerdeki çıktı menüsü (işaretli raporlar, yoksa seçili rapor).
+  'radyoloji-rapor': {
+    ustSerit: b => <RaporListeSeridi yenile={b.yenile} onCip={b.setCip} />,
+    yanPanel: b => <RaporOnizlemePaneli satir={b.seciliSatir} yenile={b.yenile}
+                                        onAc={id => b.gitKart(`/radyoloji/rapor/${id}`)} />,
+    basSag: b => <RaporListeCiktisi secili={b.seciliSatir} isaretli={b.isaretli} />,
+  },
+  // SKRS EŞLEME MASASI (1222): sayaç şeridi, sağda adaylar + karar, araç çubuğunda doldur / toplu onay / uygula.
+  'aktarim-esleme-hizmet': eslemePaneli,
+  // BÖLÜM / BRANŞ SEKMELERİ (1224): aynı masa, eski serbest metin -> SKRS kodlu bölüm / SKRS branş.
+  'aktarim-esleme-bolum': eslemePaneli,
+  'aktarim-esleme-brans': eslemePaneli,
+  // ŞABLON LİSTESİ (1217): araç çubuğunda hazır alan paketleri (eşleşen / işaretli şablonlara toplu uygula).
+  'radyoloji-sablon': { basSag: b => <AlanPaketiDugmesi isaretli={b.isaretli} onUygulandi={b.tazele} /> },
   // KURUMSAL KALİTE (1059): Politika & Hedefler listesinin üstünde politika / kapsam.
   'kys-gosterge': { ustSerit: () => <KysPolitikaSeridi /> },
   // BANKA HAREKETLERİ (1157, mockup banka_hareketleri.html): üstte hesap + çek + sayaçlar, sağda karar.

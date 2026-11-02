@@ -255,6 +255,16 @@ public static partial class AksiyonKatalogu
                 AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 40),
         };
 
+        // RAPOR LISTESI (1215): yazilmis raporun arsivi. Satir kimligi istem id'si - "Raporu Ac" ve
+        //   "Istemi Ac" kritik bulgu listesindekiyle ayni isleyiciler. Yazdir ekranin kendi cikti menusunde.
+        s["radyoloji-rapor-liste"] = new AksiyonTanimi[]
+        {
+            new("radyoloji.rapor",         "📄 Raporu Aç", "radyoloji",
+                KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+            new("radyoloji.istem-ac",      "☢️ İstemi Aç", "radyoloji",
+                KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+        };
+
         // KONSULTASYON TAKIBI (318): istenen ikinci gorusler.
         s["radyoloji-konsultasyon-liste"] = new AksiyonTanimi[]
         {

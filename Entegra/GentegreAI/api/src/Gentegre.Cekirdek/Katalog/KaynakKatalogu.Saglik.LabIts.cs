@@ -111,13 +111,7 @@ public static partial class KaynakKatalogu
             //   mockup'taki gibi tek okunur birim - referans araligi ve tup
             //   hacmi kararini birlikte etkilerler.
             new("yasCinsiyet",
-                "trim(case when th.dogum_tarihi is null then '' "
-                + "when age(th.dogum_tarihi) >= interval '2 years' "
-                + "     then extract(year from age(th.dogum_tarihi))::int::text "
-                + "when age(th.dogum_tarihi) >= interval '1 month' "
-                + "     then (extract(year from age(th.dogum_tarihi))::int * 12 "
-                + "           + extract(month from age(th.dogum_tarihi))::int)::text || ' ay' "
-                + "else (current_date - th.dogum_tarihi)::text || ' g' end "
+                "trim(public.fn_yas_kisa(th.dogum_tarihi) "     // 1214: 45y / 1y3a / 3a5g
                 + "|| ' ' || case coalesce(th.cinsiyet, 0) "
                 + "               when 1 then 'E' when 2 then 'K' else '' end)",
                                                   "metin", "Yaş/C", Hizalama: "orta",

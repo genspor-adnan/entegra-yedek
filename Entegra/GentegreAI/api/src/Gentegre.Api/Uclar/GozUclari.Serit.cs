@@ -72,7 +72,7 @@ public static partial class GozUclari
                        --   Muayene kaydında oda kolonu yok; akış satırı taşıyor.
                        coalesce((select i.oda from public.goz_ziyaret_istasyon i
                                   where i.belge_id = m.belge_id and i.oda <> ''
-                                  order by i.giris desc limit 1), '') as oda
+                                  order by i.giris desc limit 1), '') as oda, public.fn_yas_kisa(th.dogum_tarihi) as yas_kisa
                   from public.goz_muayene gm
                   join public.muayene m on m.id = gm.muayene_id
                   join public.taraf t on t.id = gm.hasta_id
@@ -83,7 +83,7 @@ public static partial class GozUclari
                 """, null, [id], o => new
             {
                 hasta = o.GetString(0),
-                yas = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                yas = o.IsDBNull(1) ? (int?)null : o.GetInt32(1), yasKisa = o.GetString(o.GetOrdinal("yas_kisa")),
                 cinsiyet = (int)o.GetInt16(2),
                 hastaNo = o.GetString(3),
                 protokol = o.GetString(4),

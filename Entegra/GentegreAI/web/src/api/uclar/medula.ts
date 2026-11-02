@@ -22,7 +22,7 @@ export interface MedulaTakip {
 }
 
 export interface MedulaHastaOzeti {
-  hasta: { id: number; unvan: string; tckn: string; dogumTarihi: string | null; yas: number | null; cinsiyet: number; kurumTur: number | null; kurumAdi: string };
+  hasta: { id: number; unvan: string; tckn: string; dogumTarihi: string | null; yas: number | null; yasKisa?: string; cinsiyet: number; kurumTur: number | null; kurumAdi: string };
   takipler: MedulaTakip[];
   receteler: { id: number; receteNo: string; tarih: string; durum: number; medulaReceteNo: string; medulaSonuc: string; hekim: string; ilac: number }[];
   raporlar: { id: number; raporTuru: number; raporNo: string; icdKod: string; tani: string; baslangic: string; bitis: string | null; durum: number; medulaSonuc: string }[];

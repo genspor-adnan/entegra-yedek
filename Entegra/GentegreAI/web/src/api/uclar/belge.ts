@@ -189,7 +189,9 @@ export const belgeUclari = {
    */
   belgeDonustur: (id: number, hedefTur: number,
                   satirlar: { satirId: number; miktar: number; tutar?: number;
-                              tutarKdvli?: number }[],
+                              tutarKdvli?: number;
+                              /** İzlemli stokta seçilen lotlar (toplam = miktar); boşsa sunucu FIFO dağıtır. */
+                              lotlar?: { seriLotId: number; miktar: number }[] }[],
                   belgeTarihi?: string, taslak = false, belgeNo?: string,
                   pay = 0, kalaniTahakkuk = false) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,

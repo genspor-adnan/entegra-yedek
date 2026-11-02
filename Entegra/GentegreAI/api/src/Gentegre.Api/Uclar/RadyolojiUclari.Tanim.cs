@@ -120,22 +120,24 @@ public static partial class RadyolojiUclari
                 delete from public.radyoloji_sablon_bolum where sablon_id = @p0;
                 delete from public.radyoloji_sablon_alan  where sablon_id = @p0;
                 delete from public.radyoloji_sablon_makro where sablon_id = @p0;
-                insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, zorunlu, yazdir, bakanlik_parca, ekleyen)
-                select @p0, x.sira, x.baslik, x.varsayilan_metin, x.zorunlu, x.yazdir, x.bakanlik_parca, @p2
+                insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, zorunlu, yazdir, bakanlik_parca,
+                                                           varsayilan_html, ekleyen)
+                select @p0, x.sira, x.baslik, x.varsayilan_metin, x.zorunlu, x.yazdir, x.bakanlik_parca, x.varsayilan_html, @p2
                   from public.radyoloji_sablon_surum s,
                        jsonb_to_recordset(s.icerik -> 'bolumler') as x(sira smallint, baslik varchar, varsayilan_metin text,
-                                                                       zorunlu smallint, yazdir smallint, bakanlik_parca smallint)
+                                                                       zorunlu smallint, yazdir smallint, bakanlik_parca smallint,
+                                                                       varsayilan_html text)
                  where s.sablon_id = @p0 and s.surum = @p1;
                 insert into public.radyoloji_sablon_alan (sablon_id, sira, alan_kod, alan_ad, tip, secenekler, zorunlu, rapora_bas,
-                                                          birim, alt_sinir, ust_sinir, kalip, sifir_kalip, hedef_bolum, ekleyen)
+                                                          birim, alt_sinir, ust_sinir, kalip, sifir_kalip, hedef_bolum, grup, ekleyen)
                 select @p0, x.sira, x.alan_kod, x.alan_ad, x.tip, x.secenekler, x.zorunlu, x.rapora_bas,
                        coalesce(x.birim, ''), x.alt_sinir, x.ust_sinir, coalesce(x.kalip, ''), coalesce(x.sifir_kalip, ''),
-                       coalesce(x.hedef_bolum, ''), @p2
+                       coalesce(x.hedef_bolum, ''), coalesce(x.grup, ''), @p2
                   from public.radyoloji_sablon_surum s,
                        jsonb_to_recordset(s.icerik -> 'alanlar') as x(sira smallint, alan_kod varchar, alan_ad varchar, tip smallint,
                                                                       secenekler varchar, zorunlu smallint, rapora_bas smallint,
                                                                       birim varchar, alt_sinir numeric, ust_sinir numeric,
-                                                                      kalip varchar, sifir_kalip varchar, hedef_bolum varchar)
+                                                                      kalip varchar, sifir_kalip varchar, hedef_bolum varchar, grup varchar)
                  where s.sablon_id = @p0 and s.surum = @p1;
                 insert into public.radyoloji_sablon_makro (sablon_id, kisayol, ad, metin, hedef_bolum, ekleyen)
                 select @p0, x.kisayol, x.ad, x.metin, x.hedef_bolum, @p2
@@ -147,6 +149,128 @@ public static partial class RadyolojiUclari
                 new { geriYuklenen = surum }, iptal: iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ---------------------------------------------------- şablon metni ----
+        // ŞABLON METNİ (1216, mockup radyoloji_sablon_karti_v3.html): kartın "Şablon Metni" sekmesi bölümleri
+        //   BİÇİMLİ okur / yazar (generic detay gridi yalnız düz metin taşır). Tek bölümlü şablon = tek A4.
+        grup.MapGet("/sablon/{id:int}/bolumler", async (int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var bolumler = await b.ListeAsync("""
+                select id, sira, baslik, coalesce(varsayilan_metin, '') as metin, varsayilan_html as html,
+                       coalesce(bakanlik_parca, 0) as "bakanlikParca", zorunlu, yazdir
+                  from public.radyoloji_sablon_bolum where sablon_id = @p0 order by sira, id
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { bolumler, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // Bölümlerin TAMAMI yazılır (böl / birleştir / Bakanlık iskeleti / metin düzenleme tek yol). HTML beyaz
+        //   listeyle temizlenir (RaporHtml - rapor bölümüyle aynı kural), düz metin HTML'den çıkarılır. Şablonun
+        //   degistirme_tarihi damgalanır: eski HBYS aktarımı yeniden çalışınca kullanıcının dokunduğu şablonu ezmez.
+        grup.MapPost("/sablon/{id:int}/bolumler", async (int id, SablonBolumleriIstegi istek, BaglamCozucu cozucu,
+            VeriKaynagi veri, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            baglam.YazmaIste();
+            var liste = istek.Bolumler ?? [];
+            if (liste.Count == 0) throw GentegreHatasi.Dogrulama("En az bir bölüm gerekir.");
+            if (liste.Count > 30) throw GentegreHatasi.Dogrulama("En çok 30 bölüm.");
+            if (liste.Any(x => string.IsNullOrWhiteSpace(x.Baslik) || x.Baslik.Trim().Length > 60))
+                throw GentegreHatasi.Dogrulama("Bölüm başlığı boş olamaz (en çok 60 karakter).");
+            if (liste.Any(x => x.BakanlikParca is < 0 or > 4))
+                throw GentegreHatasi.Dogrulama("Bakanlık parçası 0-4 olmalı.");
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var var_ = await b.TekDegerAsync<int?>("select 1 from public.radyoloji_sablon where id = @p0 for update", islem, [id], iptal);
+            if (var_ is null) throw GentegreHatasi.Bulunamadi("Şablon bulunamadı.");
+            await b.CalistirAsync("delete from public.radyoloji_sablon_bolum where sablon_id = @p0", islem, [id], iptal);
+            var sira = 0;
+            foreach (var x in liste)
+            {
+                var html = Servisler.RaporHtml.Temizle(x.Html);
+                var duz = html == "" ? (x.Metin ?? "").Trim() : Servisler.RaporHtml.DuzMetin(html);
+                await b.CalistirAsync("""
+                    insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, varsayilan_html,
+                                                               bakanlik_parca, zorunlu, yazdir, ekleyen)
+                    values (@p0, @p1, @p2, @p3, nullif(@p4, ''), @p5, @p6, @p7, @p8)
+                    """, islem, [id, (short)++sira, x.Baslik.Trim(), duz, html, (short)x.BakanlikParca,
+                                 (short)(x.Zorunlu ? 1 : 0), (short)(x.Yazdir ? 1 : 0), baglam.KullaniciId], iptal);
+            }
+            await b.CalistirAsync("update public.radyoloji_sablon set degistiren = @p1, degistirme_tarihi = now() where id = @p0",
+                islem, [id, baglam.KullaniciId], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Degistir, 942, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { bolumler = string.Join(" · ", liste.Select(x => x.Baslik.Trim())) }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { izlemeNo = baglam.IzlemeNo });
+        });
+
+        // --------------------------------------------------- alan paketleri ----
+        // HAZIR YAPISAL ALAN PAKETLERİ (1217): kart "Paketten ekle" ve liste "Alan paketi uygula" bunları okur.
+        //   `eslesen` paketin desenine uyan şablonlar (bu şubede; uygulanmış olanlar işaretli).
+        grup.MapGet("/alan-paketleri", async (int? sablonId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var paketler = await b.ListeAsync("""
+                select p.id, p.kod, p.ad, p.modalite, p.bolge, p.aciklama,
+                       (select count(*) from public.radyoloji_alan_paket_alan a where a.paket_id = p.id)::int as alan,
+                       (select string_agg(distinct a.grup, ' · ') from public.radyoloji_alan_paket_alan a where a.paket_id = p.id) as gruplar,
+                       (select count(*) from public.radyoloji_sablon s
+                         where (@p0::int is null or s.sube_id = @p0) and public.fn_rad_alan_paketi_uyar(p.id, s.ad))::int as eslesen,
+                       (select count(*) from public.radyoloji_sablon s
+                         where (@p0::int is null or s.sube_id = @p0) and public.fn_rad_alan_paketi_uyar(p.id, s.ad)
+                           and not exists (select 1 from public.radyoloji_alan_paket_alan a
+                                            where a.paket_id = p.id
+                                              and not exists (select 1 from public.radyoloji_sablon_alan x
+                                                               where x.sablon_id = s.id and x.alan_kod = a.alan_kod)))::int as uygulanmis,
+                       coalesce(public.fn_rad_alan_paketi_uyar(p.id, (select s.ad from public.radyoloji_sablon s where s.id = @p1)), false) as onerilen
+                  from public.radyoloji_alan_paket p where p.durum = 1 order by p.bolge, p.ad
+                """, null, [baglam.SubeId, sablonId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { paketler, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // Uygula: verilen şablonlara (yoksa desene uyan bütün şablonlara) paketin eksik alanlarını ekler.
+        grup.MapPost("/alan-paketi/{id:int}/uygula", async (int id, PaketUygulaIstegi istek, BaglamCozucu cozucu,
+            VeriKaynagi veri, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            baglam.YazmaIste();
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var ad = await b.TekDegerAsync<string?>("select ad from public.radyoloji_alan_paket where id = @p0", islem, [id], iptal)
+                     ?? throw GentegreHatasi.Bulunamadi("Alan paketi bulunamadı.");
+            var idler = istek.SablonIdler is { Count: > 0 } l
+                ? l.Distinct().ToList()
+                : (await b.ListeAsync("""
+                      select s.id from public.radyoloji_sablon s
+                       where (@p1::int is null or s.sube_id = @p1) and public.fn_rad_alan_paketi_uyar(@p0, s.ad)
+                      """, islem, [id, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal))
+                  .Select(x => Convert.ToInt32(x["id"])).ToList();
+            if (idler.Count > 500) throw GentegreHatasi.Dogrulama("Tek seferde en çok 500 şablon.");
+            int sablon = 0, alan = 0;
+            foreach (var sid in idler)
+            {
+                var n = await b.TekDegerAsync<int?>("""
+                    select public.fn_rad_alan_paketi_uygula(@p0, s.id, @p2) from public.radyoloji_sablon s
+                     where s.id = @p1 and (@p3::int is null or s.sube_id = @p3)
+                    """, islem, [id, sid, baglam.KullaniciId, baglam.SubeId], iptal) ?? 0;
+                if (n == 0) continue;
+                sablon++; alan += n;
+                await b.CalistirAsync("update public.radyoloji_sablon set degistiren = @p1, degistirme_tarihi = now() where id = @p0",
+                    islem, [sid, baglam.KullaniciId], iptal);
+                await log.YazAsync(b, islem, LogIslemi.Degistir, 942, sid, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                    new { alanPaketi = ad, eklenenAlan = n }, iptal: iptal);
+            }
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { sablon, alan, izlemeNo = baglam.IzlemeNo });
         });
 
         // Kullanım: hekim bazında rapor / yazım süresi + yapılandırılmış alan dağılımı.
@@ -221,4 +345,7 @@ public static partial class RadyolojiUclari
         """;
 
     public sealed record SurumIstegi(string? Notu);
+    public sealed record SablonBolumuGirdisi(string Baslik, string? Html, string? Metin, int BakanlikParca, bool Zorunlu, bool Yazdir);
+    public sealed record SablonBolumleriIstegi(List<SablonBolumuGirdisi>? Bolumler);
+    public sealed record PaketUygulaIstegi(List<int>? SablonIdler);
 }

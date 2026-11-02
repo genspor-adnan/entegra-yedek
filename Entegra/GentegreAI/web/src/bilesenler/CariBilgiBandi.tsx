@@ -19,6 +19,8 @@ const STIL = `
 .cbb-kalem { border: 0; background: none; padding: 0 4px; margin-left: 4px; cursor: pointer; color: var(--soluk, #6b7a8b);
   font-size: 13px; line-height: 1; vertical-align: baseline }
 .cbb-kalem:hover, .cbb-kalem[aria-pressed="true"] { color: var(--mor, #3b5bdb) }
+.cbb-ac { cursor: pointer; display: inline-flex }
+.cbb-ad .cbb-ac:hover { text-decoration: underline }
 .cbb-alt { color: var(--soluk, #6b7a8b); font-size: 11.5px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .cbb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
 .cbb-rz { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: none }
@@ -29,7 +31,7 @@ const STIL = `
 
 const isaret = (n: number) => (n > 0.005 ? ' B' : n < -0.005 ? ' A' : '');
 
-export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, durumlu }: {
+export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, durumlu, sagEk, bakiyeKutu, onBakiye, onKartAc }: {
   id: number; tazele?: number; bakiyesiz?: boolean;
   /** Tedarikçi gözü: bakiye "borcumuz" (A = biz borçluyuz) okunur. */
   tedarikci?: boolean;
@@ -37,6 +39,14 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, d
   adYani?: ReactNode;
   /** Cari kartı: Temsilci (boşsa —) ve Durum (Aktif / Pasif) her zaman yazılır - combolar düzenlemede açılır. */
   durumlu?: boolean;
+  /** Bakiyenin SOLUNDA ek kutular (belge kartı: e-Belge / Faturalama durumu, kullanıcı 02.11.2026). */
+  sagEk?: ReactNode;
+  /** Bakiye rozet yerine KUTU (belge kartı, mockup alis_faturasi_cari_baslik.html): Borcumuz / Bakiye + vadesi geçen. */
+  bakiyeKutu?: boolean;
+  /** Bakiye kutusuna tıklanınca (ör. cari ekstresi). */
+  onBakiye?(): void;
+  /** Avatar / ünvana tıklanınca cari kartı (belge kartı, cari görme yetkisi varsa; kullanıcı 02.11.2026). */
+  onKartAc?(): void;
 }) {
   const s = useCariSatiri(id, tazele);
   if (!s) return null;
@@ -49,7 +59,8 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, d
   const ted = tedarikci ?? (Number(s.tedarikci) === 1 && Number(s.musteri) !== 1);
   const alt: [string, string][] = ([
     [c('Kod'), String(s.kod ?? '')],
-    [c('VKN / TCKN'), String(s.vkno ?? '')],
+    // "VKN / TCKN" -> "VKN" (kullanıcı 02.11.2026).
+    [c('VKN'), String(s.vkno ?? '')],
     [c('Tel'), tel],
     [c('İl'), String(s.il ?? '')],
     [c('Temsilci'), String(s.temsilci ?? '') || (durumlu ? '—' : '')],
@@ -59,16 +70,28 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, d
   return (
     <div className="cbb">
       <style>{STIL}</style>
-      <Avatar ad={ad} buyuk soluk={Number(s.durum ?? 1) !== 1} />
+      <span className={onKartAc ? 'cbb-ac' : undefined} onClick={onKartAc} title={onKartAc ? c('Cari kartını aç') : undefined}>
+        <Avatar ad={ad} buyuk soluk={Number(s.durum ?? 1) !== 1} /></span>
       <div className="cbb-govde">
-        <div className="cbb-ad" title={ad}>{ad}{adYani}</div>
+        <div className="cbb-ad" title={onKartAc ? c('Cari kartını aç') : ad}>
+          {onKartAc ? <span className="cbb-ac" onClick={onKartAc}>{ad}</span> : ad}{adYani}</div>
         <div className="cbb-alt">
           {alt.map(([e, v], i) => <span key={e}>{i > 0 ? ' · ' : ''}{e} <b>{v}</b></span>)}
           {alt.length ? ' · ' : ''}{Number(s.efatura) === 1 ? 'e-Fatura' : 'e-Arşiv'}
           {!durumlu && Number(s.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}
         </div>
       </div>
-      {!bakiyesiz && (
+      {sagEk}
+      {!bakiyesiz && bakiyeKutu && (
+        <div className={`bdk${vade > 0.005 ? ' hata' : ''}`} title={onBakiye ? c('Cari ekstresini aç') : undefined}
+             onClick={onBakiye}>
+          <span className="bdk-e">{ted ? c('Borcumuz') : c('Bakiye')}</span>
+          <span className={`bdk-v${ted ? (bakiye < -0.005 ? ' bdk-kir' : '') : (bakiye > 0.005 ? ' bdk-kir' : bakiye < -0.005 ? ' bdk-yes' : '')}`}
+                title={doviz || undefined}>{para.format(Math.abs(bakiye))}{isaret(bakiye)}</span>
+          <span className="bdk-a">{doviz || (vade > 0.005 ? `${c('vadesi geçen')} ${para.format(vade)}`
+            : !ted && risk !== null ? `${c('risk')} %${Math.round(risk)}` : c('cari bakiye'))}</span>
+        </div>)}
+      {!bakiyesiz && !bakiyeKutu && (
         <div className="cbb-rz">
           <span className={ted ? (bakiye < -0.005 ? 'kir' : '') : (bakiye > 0.005 ? 'kir' : bakiye < -0.005 ? 'yes' : '')}
                 title={doviz || undefined}>

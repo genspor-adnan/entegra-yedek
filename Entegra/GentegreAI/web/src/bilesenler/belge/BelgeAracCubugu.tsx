@@ -16,7 +16,7 @@ export function BelgeAracCubugu({
   kes, yeniBelge, kapat, setDonusum, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu, satirSayisi = 0,
+  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu, onSil,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
   belgeYenile?(): void;
@@ -24,8 +24,10 @@ export function BelgeAracCubugu({
   baslik?: React.ReactNode;
   /** Kapat'ın hemen solunda (ör. teklifte "Teklif" çıktı menüsü). */
   kapatSolu?: React.ReactNode;
-  /** Kartın kalem sayısı - kalemliyse Sil yok. */
+  /** Kartın kalem sayısı. */
   satirSayisi?: number;
+  /** Kayıtlı belgeyi sil (yetki varsa verilir). */
+  onSil?(): void;
   mevcutBelge: boolean;
   /** Kayitli belge degistirilebilir mi (135). */
   duzenlenebilir: boolean;
@@ -100,9 +102,11 @@ export function BelgeAracCubugu({
             : basvuruMu ? '💾 Kaydet (Protokol Ver)' : '💾 Kaydet'}
         </button>}
   {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
-  {/* KALEMLİ BELGEDE SİL YOK (kullanıcı 26.10.2026: "1 veya daha fazla satır varsa da sil butonu görünmesin"). */}
-  {!basvuruMu && satirSayisi === 0 && (
-    <button className="d teh" disabled title={c('Belge iptali henüz bağlanmadı (F7).')}>
+  {/* KARTTA SİL (kullanıcı 02.11.2026: "kartta da sil butonu olsun") - kayıtlı belgede, silme yetkisi olana; listedeki
+      Sil ile aynı uç (fn_belge_sil). 26.10'daki "kalemli belgede sil yok" kuralının yerini aldı. */}
+  {!basvuruMu && onSil && (
+    <button className="d teh" disabled={!kayitliId || kaydediyor} title={kayitliId ? c('Belgeyi sil') : c('Önce kaydedin.')}
+            onClick={() => onSil()}>
       🗑 Sil
     </button>
   )}
@@ -195,7 +199,7 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
                                : 'Önce siparişi kaydedin.'}
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Belge Kes
+        🧾 Belge Dönüştür
       </button>
       {!basvuruMu &&
         <button className="d" disabled title={c('Üretim emri henüz bağlanmadı.')}>🏭 Üretime Aktar</button>}
@@ -233,7 +237,7 @@ export function BelgeAracCubugu({
               title={kayitliId ? 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'
                                : 'Önce irsaliyeyi kaydedin.'}
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Belge Kes
+        🧾 Belge Dönüştür
       </button>
       <button className="d" disabled title={c('Sevk fişi yazdırma henüz bağlanmadı.')}>
         🖨️ Sevk Fişi Yazdır

@@ -471,13 +471,22 @@ export const gunNokta = (v: unknown): string => {
   return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
 };
 
-/** Dogum tarihinden YAS (tam yil). Gecersiz tarihte bos doner. */
+/**
+ * Dogum tarihinden KISA YAS (kullanici 31.10.2026): 2+ yas "45y", 1-2 yas "1y3a",
+ * 1 yas alti "3a5g"; sifir parca yazilmaz (dogdugu gun "0g"). Sunucudaki karsiligi
+ * fn_yas_kisa (1214) - ayni kural. Gecersiz / gelecek tarihte bos doner.
+ */
 export const yasMetni = (dogum: unknown): string => {
   const m = String(dogum ?? '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(m)) return '';
-  const d = new Date(m), b = new Date();
-  let y = b.getFullYear() - d.getFullYear();
-  const ay = b.getMonth() - d.getMonth();
-  if (ay < 0 || (ay === 0 && b.getDate() < d.getDate())) y--;
-  return String(y);
+  const [dy, dm, dd] = m.split('-').map(Number);
+  const b = new Date();
+  let y = b.getFullYear() - dy, a = b.getMonth() + 1 - dm, g = b.getDate() - dd;
+  if (g < 0) { a--; g += new Date(b.getFullYear(), b.getMonth(), 0).getDate(); }
+  if (a < 0) { y--; a += 12; }
+  if (y < 0) return '';
+  if (y >= 2) return `${y}y`;
+  if (y === 1) return a > 0 ? `1y${a}a` : '1y';
+  if (a === 0 && g === 0) return '0g';
+  return `${a > 0 ? `${a}a` : ''}${g > 0 ? `${g}g` : ''}`;
 };

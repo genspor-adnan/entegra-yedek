@@ -45,6 +45,9 @@ const OZLUK_TURLERI = [
 const FIRMA_GORSELLERI = ['Logo', 'Kaşe', 'İmza', 'Antet'];
 
 // Demirbaş belgeleri (10.10.2026): eski yapılandırılmış belge türleri öneri oldu.
+// Stok kartı (stok_karti_v2.html): ürün görseli, teknik föy, sertifika, kılavuz.
+const STOK_BELGELERI = ['Ürün görseli', 'Teknik föy', 'Kullanım kılavuzu', 'Prospektüs', 'Sertifika', 'Analiz sertifikası'];
+
 const DEMIRBAS_BELGELERI = [
   'Fatura / Satın Alma', 'Garanti Belgesi', 'Zimmet Tutanağı', 'Servis Raporu',
   'Kalibrasyon Kaydı', 'Kullanım Kılavuzu', 'Ruhsat / CE Belgesi', 'Fotoğraf',
@@ -87,7 +90,7 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim, karo }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
   /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
   onSayi?(n: number): void;
@@ -99,6 +102,9 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   /** GÖSTERİM KİPİ (kullanıcı 15.10.2026, muayene "Dosyalar için de edit/save modu"): yalnız sade liste -
       ad (tıkla: indir), tür, tarih; araç çubuğu ve önizleme yok. */
   gosterim?: boolean;
+  /** KARO GÖRÜNÜMÜ (stok_karti_v2.html, kullanıcı 02.11.2026 "resim/doküman sekmesini mockup gibi yap"):
+      yazılı araç düğmeleri + tür süzgeci + önizlemeli dosya kartları; ★ varsayılan resim çerçeveli. */
+  karo?: boolean;
 }) {
   const [satirlar, setSatirlar] = useState<DokumanSatiri[] | null>(null);
   const [resimUrlleri, setResimUrlleri] = useState<Record<number, string>>({});
@@ -107,6 +113,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   const [bandAcik, setBandAcik] = useState(false);
   const [secili, setSecili] = useState<Set<number>>(new Set());
   const [paylasimMesaji, setPaylasimMesaji] = useState<string | null>(null);
+  const [turSuzgec, setTurSuzgec] = useState('');
   const [duzenlenen, setDuzenlenen] = useState<{ id: number; ad: string; belgeTuru: string } | null>(null);
   // MASRAF BEYANI (768): bir beyanda birden çok fiş var ve hangi görselin
   //   hangi harcamaya ait olduğu bilinmeli. Ayrı bir bağ tablosu açmak
@@ -190,13 +197,13 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   // Resim blob URL'lerini SADECE band acikken cek (liste ucu icerik dondurmuyor, sadece
   // metadata - gereksiz indirme yapmayalim).
   useEffect(() => {
-    if (!bandAcik) return;
+    if (!bandAcik && !karo) return;
     resimler.forEach(s => {
       if (resimUrlleri[s.id]) return;
       api.dokumanIcerikUrl(s.id).then(url => setResimUrlleri(h => ({ ...h, [s.id]: url }))).catch(() => { /* onizleme yoksa sessiz gec */ });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bandAcik, satirlar]);
+  }, [bandAcik, karo, satirlar]);
 
   const dosyaSecildi = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const dosya = e.target.files?.[0];
@@ -298,6 +305,116 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
       </table>
     );
 
+  const tipler = [...new Set(satirlarim.map(x => dosyaTipiBaslik(x.contentType)))];
+  const gorunen = turSuzgec ? satirlarim.filter(x => dosyaTipiBaslik(x.contentType) === turSuzgec) : satirlarim;
+  const duzenlemePenceresi = (
+    duzenlenen && (
+        <>
+          <div className="perde" style={{ zIndex: 420 }} onClick={() => setDuzenlenen(null)} />
+          <form className="lookup-pencere" style={{ zIndex: 421, width: 'min(440px, 92vw)' }} onSubmit={e => void duzenlemeKaydet(e)}>
+            <strong>{c('Doküman Düzenle')}</strong>
+            <label className="alan">
+              <span className="etiket">Belge Türü</span>
+              <input
+                value={duzenlenen.belgeTuru}
+                onChange={e => setDuzenlenen(d => d && ({ ...d, belgeTuru: e.target.value }))}
+                list="dokuman-belge-turu-secenekleri"
+                autoFocus
+                placeholder={kartAdi === 'personelMasraf'
+                  ? 'Hangi harcamanın fişi (belge no)'
+                  : kartAdi === 'demirbas' ? 'Fatura, garanti belgesi, tutanak...'
+                  : kartAdi === 'kys-kalibrasyon' ? 'Kalibrasyon sertifikası'
+                  : kartAdi === 'kys-egitim' ? 'Katılım listesi, sertifika...'
+                  : kartAdi === 'stok' ? 'Ürün görseli, teknik föy, sertifika...'
+                  : 'İş sözleşmesi, sağlık raporu...'}
+              />
+              <datalist id="dokuman-belge-turu-secenekleri">
+                {(kartAdi === 'sube' ? FIRMA_GORSELLERI
+                  : kartAdi === 'demirbas' ? DEMIRBAS_BELGELERI
+                  : kartAdi === 'kys-egitim' ? ['Katılım listesi', 'Sertifika', 'Eğitim sunumu', 'Sınav']
+                  : kartAdi === 'personelMasraf' ? masrafBelgeNolari
+                  : kartAdi === 'stok' ? STOK_BELGELERI
+                  : OZLUK_TURLERI)
+                  .map(s => <option key={s} value={s} />)}
+              </datalist>
+            </label>
+            <label className="alan">
+              <span className="etiket">Ad</span>
+              <input value={duzenlenen.ad} onChange={e => setDuzenlenen(d => d && ({ ...d, ad: e.target.value }))} />
+            </label>
+            <div className="lookup-alt">
+              <span></span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setDuzenlenen(null)}>{c('İptal')}</button>
+                <button type="submit" disabled={!duzenlenen.ad.trim()}>Kaydet</button>
+              </div>
+            </div>
+          </form>
+        </>
+      )
+  );
+
+  // ÇERÇEVESİZ (kullanıcı 02.11.2026 "Resim / Doküman çerçeveyi kaldır"): başlıklı kutu yok - sekme adı
+  //   zaten "Resim / Doküman"; araç çubuğu ve karolar doğrudan sekmede.
+  if (karo) return (
+    <div className="dgk">
+      {!saltOkunur && (
+        <input ref={girdiRef} type="file" style={{ display: 'none' }} onChange={e => void dosyaSecildi(e)}
+          accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.xls,.xlsx,text/plain" />
+      )}
+      <div className="dgk-arac">
+        {!saltOkunur && <button type="button" className="d bir" disabled={yukleniyor} onClick={() => girdiRef.current?.click()}>
+          {yukleniyor ? '…' : '＋'} {c('Dosya ekle')}</button>}
+        {!saltOkunur && <button type="button" className="d" disabled={!seciliResimMi} title={c('Yalnız resim varsayılan olabilir')}
+                                onClick={() => void varsayilanYap()}>⭐ {c('Varsayılan yap')}</button>}
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>👁 {c('Gör')}</button>
+        {!saltOkunur && <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void duzenle(seciliSatir)}>✎ {c('Düzenle')}</button>}
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>⬇ {c('İndir')}</button>
+        <button type="button" className="d" disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>🔗 {c('Paylaş')}</button>
+        {!saltOkunur && <button type="button" className="d" disabled={secili.size === 0} title={c('Sil')} onClick={() => void seciliSil()}>🗑</button>}
+        <span className="dgk-ip">{c('★ varsayılan resim kartta görünür')}</span>
+        <select className="dgk-suzgec" value={turSuzgec} onChange={e => setTurSuzgec(e.target.value)}>
+          <option value="">{c('Tüm türler')}</option>
+          {tipler.map(t => <option key={t} value={t}>{c(t)}</option>)}
+        </select>
+      </div>
+      {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
+      {paylasimMesaji && <div style={{ margin: '0 10px 10px', wordBreak: 'break-all', fontSize: 12, color: 'var(--soluk)' }}>{paylasimMesaji}</div>}
+      {duzenlemePenceresi}
+      {satirlar === null ? <div className="bos" style={{ padding: 10 }}>{c('Yükleniyor…')}</div>
+        : satirlarim.length === 0 ? (
+          <div className="dgk-bos" onClick={() => !saltOkunur && girdiRef.current?.click()}>
+            {c('Henüz dosya yok.')}{!saltOkunur && <> {c('Eklemek için tıklayın.')}</>}</div>
+        ) : (
+        <div className="dgk-izgara">
+          {gorunen.map(s => {
+            const index = satirlarim.indexOf(s);
+            const pdf = s.contentType === 'application/pdf';
+            return (
+              <div key={s.id} className={`dgk-dosya${secili.has(s.id) ? ' secili' : ''}${s.varsayilan && resimMi(s) ? ' vars' : ''}`}
+                   title={c('Tıkla: seç · çift tıkla: aç')}
+                   onClick={e => satirTiklandi(e, s.id, index)} onDoubleClick={() => void gor(s)}>
+                {/* SEÇİM KUTUSU (kullanıcı 02.11.2026 "itemlara check ekle"): tıklama her zaman ekler / çıkarır. */}
+                <input type="checkbox" className="dgk-sec" checked={secili.has(s.id)} title={c('Seç')}
+                       onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}
+                       onChange={() => secimiDegistir(s.id, index)} />
+                <div className={`dgk-on${pdf ? ' pdf' : ''}`}>
+                  {resimMi(s) && resimUrlleri[s.id]
+                    ? <img src={resimUrlleri[s.id]} alt={s.ad} />
+                    : <span>{dosyaTipiIkon(s.contentType)}</span>}
+                </div>
+                <div className="dgk-alt">
+                  <b>{s.varsayilan && resimMi(s) ? '★ ' : ''}{s.ad}</b>
+                  <small>{[dosyaTipiBaslik(s.contentType), s.belgeTuru, tarihYaz(s.eklemeTarihi), boyutYaz(s.boyut)].filter(Boolean).join(' · ')}</small>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="kagrup">
       <h6>
@@ -330,48 +447,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
       {paylasimMesaji && <div style={{ margin: '0 10px 10px', wordBreak: 'break-all', fontSize: 12, color: 'var(--soluk)' }}>{paylasimMesaji}</div>}
 
-      {duzenlenen && (
-        <>
-          <div className="perde" style={{ zIndex: 420 }} onClick={() => setDuzenlenen(null)} />
-          <form className="lookup-pencere" style={{ zIndex: 421, width: 'min(440px, 92vw)' }} onSubmit={e => void duzenlemeKaydet(e)}>
-            <strong>{c('Doküman Düzenle')}</strong>
-            <label className="alan">
-              <span className="etiket">Belge Türü</span>
-              <input
-                value={duzenlenen.belgeTuru}
-                onChange={e => setDuzenlenen(d => d && ({ ...d, belgeTuru: e.target.value }))}
-                list="dokuman-belge-turu-secenekleri"
-                autoFocus
-                placeholder={kartAdi === 'personelMasraf'
-                  ? 'Hangi harcamanın fişi (belge no)'
-                  : kartAdi === 'demirbas' ? 'Fatura, garanti belgesi, tutanak...'
-                  : kartAdi === 'kys-kalibrasyon' ? 'Kalibrasyon sertifikası'
-                  : kartAdi === 'kys-egitim' ? 'Katılım listesi, sertifika...'
-                  : 'İş sözleşmesi, sağlık raporu...'}
-              />
-              <datalist id="dokuman-belge-turu-secenekleri">
-                {(kartAdi === 'sube' ? FIRMA_GORSELLERI
-                  : kartAdi === 'demirbas' ? DEMIRBAS_BELGELERI
-                  : kartAdi === 'kys-egitim' ? ['Katılım listesi', 'Sertifika', 'Eğitim sunumu', 'Sınav']
-                  : kartAdi === 'personelMasraf' ? masrafBelgeNolari
-                  : OZLUK_TURLERI)
-                  .map(s => <option key={s} value={s} />)}
-              </datalist>
-            </label>
-            <label className="alan">
-              <span className="etiket">Ad</span>
-              <input value={duzenlenen.ad} onChange={e => setDuzenlenen(d => d && ({ ...d, ad: e.target.value }))} />
-            </label>
-            <div className="lookup-alt">
-              <span></span>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" onClick={() => setDuzenlenen(null)}>{c('İptal')}</button>
-                <button type="submit" disabled={!duzenlenen.ad.trim()}>Kaydet</button>
-              </div>
-            </div>
-          </form>
-        </>
-      )}
+      {duzenlemePenceresi}
 
       {bandAcik && <ResimBandi resimler={resimler} resimUrlleri={resimUrlleri} />}
 

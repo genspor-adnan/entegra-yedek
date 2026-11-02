@@ -8,6 +8,7 @@ import type { SevkiyatBilgisi }
   from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { para } from '../bicim';
 import { c } from '../../dil/ceviri';
+import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
 
 /**
  * BELGE KARTI SEKMELERI - Tasiyici / e-Belge / Faturalama.
@@ -381,7 +382,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
                      disabled={!bid}
                      onChange={() => { if (bid) { capa.current = i; cevir(bid) } }} />
             </td>
-            <td><b>{String(d.belgeNo ?? '')}</b></td>
+            <td><b>{gorunenBelgeNo(d.belgeNo) || '—'}</b></td>
             <td>{String(d.belgeTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
             <td>{String(d.turAdi ?? '')}</td>
             <td className="hiza-sag">{Number(d.miktar ?? 0).toLocaleString('tr-TR')}</td>

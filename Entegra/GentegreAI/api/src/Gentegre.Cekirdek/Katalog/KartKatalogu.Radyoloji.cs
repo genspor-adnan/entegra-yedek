@@ -424,6 +424,9 @@ public static partial class KartKatalogu
                 new("baslik", "baslik", "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Başlık"),
                 // Yer tutucular: {istem.on_tani} {istem.sikayet} {hasta.yas} {hasta.cinsiyet}
                 new("varsayilanMetin", "varsayilan_metin", "metin", Baslik: "Varsayılan metin"),
+                // BİÇİMLİ VARSAYILAN (1216): eski HBYS Word şablonu (tablo / resim / biçim). Kartta düzenlenmez;
+                //   varsayılan metin elle değişince tetikleyici boşaltır (düz metin geçerli olur).
+                new("varsayilanHtml", "varsayilan_html", "metin", Yazilabilir: false, Gizli: true, Baslik: "Biçimli varsayılan"),
                 new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
                 // Kapaliysa bolum ekranda gorunur ama hasta ciktisina basilmaz.
                 new("yazdir",  "yazdir",  "mantik", Baslik: "Yazdır"),
@@ -434,18 +437,20 @@ public static partial class KartKatalogu
             {
                 new("id",       "id",       "sayi", Yazilabilir: false),
                 new("sira",     "sira",     "sayi", Baslik: "#"),
+                // GRUP (1217): rapor ekranında alan başlığı (Disk seviyeleri, Bağlar ...).
+                new("grup",     "grup",     "metin", EnFazlaUzunluk: 40, Baslik: "Grup"),
                 new("alanKod",  "alan_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 40, Baslik: "Kod"),
                 new("alanAd",   "alan_ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 80, Baslik: "Alan"),
                 new("tip",      "tip",      "kod", KodListesi: "rad.alan_tip", Baslik: "Tip"),
                 // Secenekler "|" ile ayrilir: serbest metin birakilirsa
                 //   "BIRADS 4" ile "Bi-Rads IV" iki ayri deger olur.
-                new("secenekler", "secenekler", "metin", EnFazlaUzunluk: 400, Baslik: "Seçenekler (| ile)"),
+                new("secenekler", "secenekler", "metin", EnFazlaUzunluk: 600, Baslik: "Seçenekler (| ile)"),
                 new("birim",    "birim",    "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
                 new("altSinir", "alt_sinir", "ondalik", Baslik: "Alt"),
                 new("ustSinir", "ust_sinir", "ondalik", Baslik: "Üst"),
                 new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60, Baslik: "Bölüm"),
                 new("kalip",    "kalip",    "metin", EnFazlaUzunluk: 300, Baslik: "Metne yazılış ({değer})"),
-                new("sifirKalip", "sifir_kalip", "metin", EnFazlaUzunluk: 300, Baslik: "0 / yok ise"),
+                new("sifirKalip", "sifir_kalip", "metin", EnFazlaUzunluk: 300, Baslik: "Normal / yok ise"),
                 new("zorunlu",  "zorunlu",  "mantik", Baslik: "Zorunlu"),
                 new("raporaBas", "rapora_bas", "mantik", Baslik: "Rapora bas"),
             }, Sirala: "sira, id", SubeKolonu: null, Baslik: "Yapılandırılmış alanlar", LogTabloId: 1277),

@@ -134,6 +134,7 @@ public static partial class EkranKodlari
         ("radyoloji.cihaz", "radyoloji"),                       // Radyoloji › Ayarlar › Cihazlar
         ("radyoloji.konsultasyon", "radyoloji"),                // Radyoloji › Konsültasyonlar
         ("radyoloji.kritik", "radyoloji"),                      // Radyoloji › Kritik Bulgular
+        ("radyoloji.rapor.liste", "radyoloji"),                 // Radyoloji › Rapor Listesi (1215)
         ("radyoloji.protokol", "radyoloji"),                    // Radyoloji › Ayarlar › Çekim Protokolleri
         ("radyoloji.sablon", "radyoloji"),                      // Radyoloji › Ayarlar › Rapor Şablonları
         ("radyoloji.teslim", "radyoloji"),                      // Radyoloji › Sonuç Teslim

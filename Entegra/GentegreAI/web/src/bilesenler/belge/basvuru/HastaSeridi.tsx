@@ -1,7 +1,7 @@
 import { basHarfler } from '../../basHarfler';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { api } from '../../../api/istemci';
-import { paraYaz } from '../../bicim';
+import { paraYaz, yasMetni } from '../../bicim';
 import { MUSTEHAKLIK } from './alanlar';
 import { c } from '../../../dil/ceviri';
 import { useMuayeneHastaBilgisi } from '../../MuayeneSekmesiz';
@@ -27,7 +27,8 @@ const PROVIZYON: Record<number, { ad: string; sinif: string }> = {
 export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
                               sysTakipNo, paylasimli, avans = 0,
                               kurumAdi, acikBorc, taraflar,
-                              provizyon, belgeId, protokolNo }: {
+                              provizyon, belgeId, protokolNo, isteyen, paraYok, provizyonGizli, tetkik, durumEk,
+                              sonHucreler, durumGizli, yedek }: {
   tarafId?: number | null;
   /** BELGENIN odeyen kurumu (kullanici): hastanin sigortasi degil, bu basvuruyu odeyecek kurum. */
   kurumAdi?: string;
@@ -57,6 +58,29 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   belgeId?: number | null;
   /** Basvurunun protokol (belge) numarasi - kimlik satirinda. */
   protokolNo?: string;
+  /**
+   * ISTEM KARTI KIPI (radyoloji istem karti, kullanici 01.11.2026: "hasta bandini basvuru gibi yap.. izinler
+   * yerine Isteyen adi ve bolum ekle.. acik tah ve belge olmasin"): verilirse Izinler hucresi yerine isteyen.
+   */
+  isteyen?: { ad: string; bolum: string };
+  /** Acik Tahsilat / Acik Belge hucreleri gizlenir (istem karti). */
+  paraYok?: boolean;
+  /** Provizyon / "prov. gerekmez" yazisi gizlenir - basvurunun konusu, istemde yaniltici. */
+  provizyonGizli?: boolean;
+  /** TETKIK (istem karti, kullanici 01.11.2026: "odeyen kurum soluna tetkik kutusu gelsin ve ne yapilacagi
+   *  yazsin"): kimligin sagina, ne cekilecegi + SUT kodu. */
+  tetkik?: { ad: string; kod: string };
+  /** Durum hucresinin BASINA (istem karti: istemin durumu, Sevkli, Acil rozetleri). */
+  durumEk?: ReactNode;
+  /**
+   * RAPOR EKRANI (kullanici 01.11.2026: "rapor kartindaki hasta bandi da istem karti gibi olsun.. ama yazan/onay/
+   * durum hucreleri kalsin"): bandin SONUNA eklenen hucreler (etiket + deger + alt satir).
+   */
+  sonHucreler?: { k: string; v: ReactNode; alt?: ReactNode }[];
+  /** Hastanin Durum hucresi gizlenir (rapor ekraninda durum = raporun durumu, sonHucreler'de). */
+  durumGizli?: boolean;
+  /** Hasta kaydi okunamazsa (kapsam / eski veri) kimlik hucresi bunu gosterir - "?" ve "—" kalmasin. */
+  yedek?: { ad: string; alt?: string };
 }) {
   const [h, setH] = useState<Record<string, unknown> | null>(null);
   const [kvkk, setKvkk] = useState<string | null>(null);
@@ -96,15 +120,18 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
 
   if (!tarafId) return null;
 
-  const ad = String(h?.unvan ?? '');
+  const ad = String(h?.unvan ?? '') || yedek?.ad || '';
   const cinsiyetAdi = String(h?.cinsiyetAdi ?? '');
   // İKONSUZ, "y"siz (kullanıcı 28.10.2026: "cinsiyet ikonu ve yaşı simgeleyen y harfini kaldır"): "E · 69".
   const cinsiyet = cinsiyetAdi.startsWith('E') ? 'E' : cinsiyetAdi.startsWith('K') ? 'K' : '';
   const borc = acikBorc != null ? acikBorc : Number(h?.acikBorc ?? 0);
   const dogum = String(h?.dogumTarihi ?? '').slice(0, 10);
   const yas = h?.yas != null && h.yas !== '' ? Number(h.yas) : null;
-  const kimlik2 = [[cinsiyet, yas != null ? String(yas) : ''].filter(Boolean).join(' · '),
-                   dogum ? dogum.split('-').reverse().join('.') : '',
+  // Görünen yaş doğum tarihinden kısa kural (45y / 1y3a / 3a5g); tarihsiz hastada sunucunun tam yılı.
+  const yasYazi = yasMetni(dogum) || (yas != null ? `${yas}y` : '');
+  const kimlik2 = [[cinsiyet, yasYazi].filter(Boolean).join(' · '),
+                   // Istem kartinda dogum tarihi yok (kullanici 01.11.2026: "hastanın doğ.tarihini kaldır").
+                   dogum && !isteyen ? dogum.split('-').reverse().join('.') : '',
                    // D / P önekleri yok (kullanıcı 28.10.2026): numaralar kendi biçiminden tanınıyor (H-… / P-…).
                    h?.kod ? String(h.kod) : '', protokolNo || ''].filter(Boolean).join(' · ');
 
@@ -144,31 +171,50 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   const smsIzin = Number(h?.postaIzin ?? 0) === 1, epostaIzin = Number(h?.epostaIzin ?? 0) === 1;
   const prov = provizyon ? PROVIZYON[provizyon.durum] ?? PROVIZYON[0] : null;
 
+  // ÖDEYEN KURUM + PROVIZYON (kullanici): etiket ustte, kurum + provizyon altta tek satir.
+  const kurumHucre = (
+        <span className="hs">
+          {/* Istem kartinda yalniz "Kurum" (kullanici 01.11.2026: "ödeyen kurum rename kurum"). */}
+          <span className="k">{isteyen ? c('Kurum') : c('Ödeyen Kurum')}</span>
+          <span className="v">
+            {kurumAdi || String(h?.sigortaAdi ?? '') || '—'}
+            {mustehaklik != null && mustehaklik > 0 && (
+              <span className={`rozet ${MUSTEHAKLIK[mustehaklik]?.sinif ?? ''}`}>{MUSTEHAKLIK[mustehaklik]?.ad}</span>
+            )}
+            {provizyonGizli ? null : prov
+              ? <span className={`rozet ${prov.sinif}`} title={c('Provizyon')}>
+                  {c('Prov.')} {prov.ad}{provizyon?.no && provizyon.durum !== 0 ? ` ${provizyon.no}` : ''}</span>
+              : <span className="hs3-bos" title={c('Hasta kendisi öder - provizyon alınmaz')}> · {c('prov. gerekmez')}</span>}
+          </span>
+        </span>
+  );
+
   return (
-    <div className="hasta-serit hs3">
+    <div className={`hasta-serit hs3${paraYok ? ' hs3-istem' : ''}${sonHucreler?.length ? ' hs3-rapor' : ''}`}>
       {/* KIMLIK: ad / cinsiyet · yas · dogum · dosya · protokol. */}
       <span className="hs hs3-kimlik">
         <span className="avatar">{basHarfler(ad) || '—'}</span>
         <span className="hs3-kim">
           <span className="hs3-ad">{ad || '—'}</span>
-          <span className="hs3-s2">{kimlik2 || '—'}</span>
+          <span className="hs3-s2">{kimlik2 || yedek?.alt || '—'}</span>
         </span>
       </span>
-      {/* ÖDEYEN KURUM + PROVIZYON (kullanici): etiket ustte, kurum + provizyon altta tek satir. */}
-      <span className="hs">
-        <span className="k">Ödeyen Kurum</span>
-        <span className="v">
-          {kurumAdi || String(h?.sigortaAdi ?? '') || '—'}
-          {mustehaklik != null && mustehaklik > 0 && (
-            <span className={`rozet ${MUSTEHAKLIK[mustehaklik]?.sinif ?? ''}`}>{MUSTEHAKLIK[mustehaklik]?.ad}</span>
-          )}
-          {prov
-            ? <span className={`rozet ${prov.sinif}`} title={c('Provizyon')}>
-                {c('Prov.')} {prov.ad}{provizyon?.no && provizyon.durum !== 0 ? ` ${provizyon.no}` : ''}</span>
-            : <span className="hs3-bos" title={c('Hasta kendisi öder - provizyon alınmaz')}> · {c('prov. gerekmez')}</span>}
+      {tetkik && (
+        <span className="hs hs3-tetkik" title={tetkik.ad}>
+          <span className="k">{c('Tetkik')}</span>
+          <span className="v">{tetkik.ad || '—'}</span>
+          {tetkik.kod && <span className="hs3-s2">{tetkik.kod}</span>}
         </span>
-      </span>
-      {/* IZINLER: yalniz kaydi olanlar. ? = sorulmadi / kayit yok. */}
+      )}
+      {!isteyen && kurumHucre}
+      {/* IZINLER: yalniz kaydi olanlar. ? = sorulmadi / kayit yok. Istem kartinda yerine ISTEYEN. */}
+      {isteyen ? (
+        <span className="hs">
+          <span className="k">{c('İsteyen')}</span>
+          <span className="v">{isteyen.ad || '—'}</span>
+          {isteyen.bolum && <span className="hs3-s2">{isteyen.bolum}</span>}
+        </span>
+      ) : (
       <span className="hs">
         <span className="k">{c('İzinler')}</span>
         <span className="hs3-izin">
@@ -177,18 +223,30 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
           {izin('E-posta', epostaIzin ? '✓' : '?', epostaIzin ? 'E-posta izni var' : 'E-posta izni kayıtlı değil')}
         </span>
       </span>
+      )}
+      {/* ISTEM KIPI SIRASI (kullanici 01.11.2026: "kurum ve isteyen yer değişsin"): Isteyen · Kurum. */}
+      {isteyen && kurumHucre}
       <span className="hs">
         <span className="k">{c('Uyarı')}</span>
         {uyarilar.length === 0 && bant && bant.alerji.length === 0
           ? <span className="hs3-roz"><span className="rozet olumlu">{c('Alerji: yok')}</span></span>
           : rozetler(uyarilar, '—')}
       </span>
-      <span className="hs">
+      {!durumGizli && <span className="hs">
         <span className="k">{c('Durum')}</span>
-        {rozetler(durumlar, '—')}
-      </span>
-      {/* ACIK TAHSILAT / ACIK BELGE: paylasimli kurumda iki satir (hastadan / kurumdan). */}
-      {taraflar ? (
+        {durumEk ? <span className="hs3-roz">{durumEk}{durumlar.slice(0, 1).map((x, i) =>
+          <span key={i} className={`rozet ${x.sinif}`} title={x.ipucu}>{x.ad}</span>)}</span>
+          : rozetler(durumlar, '—')}
+      </span>}
+      {sonHucreler?.map((h, i) => (
+        <span className="hs" key={`son${i}`}>
+          <span className="k">{h.k}</span>
+          <span className="v">{h.v}</span>
+          {h.alt && <span className="hs3-s2">{h.alt}</span>}
+        </span>
+      ))}
+      {/* ACIK TAHSILAT / ACIK BELGE: paylasimli kurumda iki satir (hastadan / kurumdan). Istem kartinda yok. */}
+      {paraYok ? null : taraflar ? (
         <span className="hs sag ikili-taraf">
           <span className="k">{c('Açık Tahsilat')}</span>
           <span className="taraf-satir">
@@ -205,7 +263,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
           <span className={`v ${borc > 0 ? 'teh' : borc < 0 ? 'olumlu' : ''}`}>{paraYaz(Math.abs(borc))}</span>
         </span>
       )}
-      {taraflar ? (
+      {paraYok ? null : taraflar ? (
         <span className="hs sag ikili-taraf">
           <span className="k">{c('Açık Belge')}</span>
           <span className="taraf-satir">

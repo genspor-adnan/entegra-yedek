@@ -346,13 +346,7 @@ public static partial class LabUclari
                        i.klinik_bilgi, i.tani_icd, i.hedef_bitis, i.belge_id,
                        case coalesce(th.cinsiyet, 0)
                             when 1 then 'E' when 2 then 'K' else '' end as cinsiyet,
-                       case when th.dogum_tarihi is null then ''
-                            when age(th.dogum_tarihi) >= interval '2 years'
-                                 then extract(year from age(th.dogum_tarihi))::int::text || 'y'
-                            when age(th.dogum_tarihi) >= interval '1 month'
-                                 then (extract(year from age(th.dogum_tarihi))::int * 12
-                                     + extract(month from age(th.dogum_tarihi))::int)::text || 'ay'
-                            else (current_date - th.dogum_tarihi)::text || 'g' end as yas,
+                       public.fn_yas_kisa(th.dogum_tarihi) as yas,   -- 1214: 45y / 1y3a / 3a5g
                        case when coalesce(h.vkno, '') = '' then ''
                             else left(h.vkno, greatest(length(h.vkno) - 4, 0))
                                || repeat('*', least(length(h.vkno), 4)) end as kimlik,

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu · Hasta Bandında Yazan / Onaylayan — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --ok:#2e7d46; --okbg:#e2f3e8; --warn:#8a6218; --warnbg:#fdf6e3;
+    --mor:#5b3fa6; --morbg:#efe9fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  h1{font-size:16px;color:var(--navy);margin:0 auto 4px;max-width:1420px}
+  h2{font-size:13.5px;color:var(--navy);margin:22px auto 4px;max-width:1420px}
+  .acik{color:var(--muted);margin:0 auto 10px;max-width:1420px;line-height:1.55}
+  .acik b{color:var(--ink)}
+  .durumbaslik{max-width:1420px;margin:10px auto 3px;font-size:11px;color:var(--muted);font-weight:bold;letter-spacing:.3px}
+
+  /* ---- düğme satırı (gerçek ekran) ---- */
+  .arac{max-width:1420px;margin:0 auto;display:flex;gap:6px;align-items:center;padding:6px 0}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;
+    font-size:11.5px;font-family:inherit;display:inline-flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#b23b3b;background:linear-gradient(#e2695f,#b23b3b);color:#fff;font-weight:bold}
+  .bosluk{flex:1}
+
+  /* ---- hasta bandı (MuayeneHastaBandi düzeni) ---- */
+  .bant{max-width:1420px;margin:0 auto;display:flex;align-items:stretch;background:#fff;border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 2px 8px rgba(20,40,70,.08);min-height:76px}
+  .bant>div{padding:8px 12px;border-right:1px solid var(--line2);display:flex;flex-direction:column;justify-content:center;gap:2px}
+  .bant>div:last-child{border-right:0}
+  .foto{width:62px;align-items:center;font-weight:bold;color:var(--navy);font-size:17px;background:#f3f6fa}
+  .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .alt{color:var(--muted);font-size:11px}
+  .et{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .sp{flex:1;border-right:0 !important}
+  .rz{display:inline-block;border-radius:10px;padding:1px 9px;font-size:11px;border:1px solid transparent;white-space:nowrap}
+  .rz.ok{background:var(--okbg);color:var(--ok);border-color:#bfe1cb}
+  .rz.uy{background:var(--warnbg);color:var(--warn);border-color:#ecd9a6}
+  .rz.mor{background:var(--morbg);color:var(--mor);border-color:#d8ccf3}
+  .rz.gri{background:#eceff2;color:#6b7a8b}
+  .kisi{font-weight:bold;color:var(--ink);white-space:nowrap}
+  .zaman{color:var(--muted);font-size:10.5px;white-space:nowrap}
+  .bekl{color:var(--warn);font-style:italic;white-space:nowrap}
+
+  /* ---- A: tek "Rapor" bloğu ---- */
+  .a-rapor{min-width:300px}
+  .a-satir{display:grid;grid-template-columns:78px 1fr;align-items:baseline;gap:6px;line-height:1.55}
+  .a-satir .lb{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+
+  /* ---- B: akış şeridi ---- */
+  .b-akis{min-width:430px}
+  .adim{display:flex;align-items:flex-start;gap:0;margin-top:3px}
+  .adim .ad1{display:flex;flex-direction:column;align-items:center;min-width:128px;text-align:center}
+  .nokta{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:bold;
+    border:2px solid #c3ccd6;color:#9aa7b4;background:#fff}
+  .nokta.tam{background:var(--ok);border-color:var(--ok);color:#fff}
+  .nokta.simdi{background:#fff;border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px #d7e7fb}
+  .cizgi{flex:1;height:2px;background:#c3ccd6;margin-top:8px;min-width:18px}
+  .cizgi.tam{background:var(--ok)}
+  .adim .ba{font-size:10.5px;font-weight:bold;margin-top:2px}
+  .adim .ki{font-size:10.5px;color:var(--ink)}
+  .adim .za{font-size:10px;color:var(--muted)}
+
+  /* ---- C: iki ayrı blok ---- */
+  .c-blok{min-width:170px}
+
+  .not{max-width:1420px;margin:6px auto 0;background:#fffdf4;border:1px solid #ecd9a6;border-radius:4px;padding:8px 12px;line-height:1.55;color:#5c4a1a}
+  .tablo{max-width:1420px;margin:10px auto 0;border-collapse:collapse;width:100%;background:#fff;font-size:11.5px}
+  .tablo th,.tablo td{border:1px solid var(--line2);padding:5px 8px;text-align:left;vertical-align:top}
+  .tablo th{background:var(--head)}
+</style>
+</head>
+<body>
+
+<h1>Radyoloji Raporu · Hasta bandında "Yazan / Onaylayan"</h1>
+<p class="acik">
+  İki çalışma biçimi yan yana: <b>doktor kendi yazıp onaylar</b> (Radyolog rolü) ya da <b>asistan yazar, uzman onaylar</b>
+  (Radyoloji Asistanı → "Uzmana Gönder" → Radyolog "Onayla ve İmzala"). Bant, raporun <b>kimde olduğunu</b> ve
+  <b>kimin imzalayacağını</b> rapor açılır açılmaz göstermeli. Üç seçenek, her biri dört durumda.
+  Mevcut "Durum" rozeti her seçenekte korunur ya da bloğun içine alınır.<br>
+  <b>Onaylayacak → Onaylayan</b> (kullanıcı): "Uzmana Gönder" bir uzman seçtirir; onaya kadar bantta <b>⏳ Onaylayacak: ad · bekleme süresi</b>,
+  onaydan sonra <b>✔ Onaylayan: ad · saat · e-imza</b>. Kendi onaylayan doktorda "Onaylayacak" hiç görünmez.
+</p>
+
+<div class="arac">
+  <button class="btn primary">💾 Taslak Kaydet</button><button class="btn">➜ Uzmana Gönder</button>
+  <button class="btn">✍ Onayla ve İmzala</button><button class="btn danger">⚠ Kritik Bulgu Bildir</button>
+  <button class="btn">☢️ İstem</button><span class="bosluk"></span><button class="btn">🖨️ Yazdır ▾</button><button class="btn">✖ Kapat</button>
+</div>
+
+<!-- =============================================================== A ===== -->
+<h2>A · Tek "Rapor" bloğu (Durum'un yerine, iki satır)</h2>
+<p class="acik">En az yer kaplar; "İsteyen"in yanında tek blok. Üst satır yazan, alt satır onay. Durum rozeti bloğun başlığında.</p>
+
+<div class="durumbaslik">1 · ASİSTAN YAZIYOR (taslak)</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="a-rapor">
+    <span class="et">Rapor <span class="rz gri">Taslak</span></span>
+    <div class="a-satir"><span class="lb">✍ Yazan</span><span><span class="kisi">Dr. Ali Demir</span> <span class="rz mor">asistan</span> <span class="zaman">· 28.10 14:20</span></span></div>
+    <div class="a-satir"><span class="lb">⏳ Onaylayacak</span><span class="alt">— gönderirken seçilir</span></div>
+  </div>
+</div>
+
+<div class="durumbaslik">2 · UZMAN ONAYI BEKLİYOR (ön rapor)</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="a-rapor">
+    <span class="et">Rapor <span class="rz uy">Onay bekliyor</span></span>
+    <div class="a-satir"><span class="lb">✍ Yazan</span><span><span class="kisi">Dr. Ali Demir</span> <span class="rz mor">asistan</span> <span class="zaman">· 28.10 14:35 gönderdi</span></span></div>
+    <div class="a-satir"><span class="lb">⏳ Onaylayacak</span><span><span class="kisi">Doç. Dr. Zeynep Kaya</span> <span class="bekl">· bekliyor 25 dk</span></span></div>
+  </div>
+</div>
+
+<div class="durumbaslik">3 · UZMAN ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="a-rapor">
+    <span class="et">Rapor <span class="rz ok">Onaylı · RAD-2026-000412</span></span>
+    <div class="a-satir"><span class="lb">✍ Yazan</span><span><span class="kisi">Dr. Ali Demir</span> <span class="rz mor">asistan</span> <span class="zaman">· 28.10 14:35</span></span></div>
+    <div class="a-satir"><span class="lb">✔ Onaylayan</span><span><span class="kisi">Doç. Dr. Zeynep Kaya</span> <span class="zaman">· 28.10 15:02 · e-imza</span></span></div>
+  </div>
+</div>
+
+<div class="durumbaslik">4 · DOKTOR KENDİ YAZDI, KENDİ ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="a-rapor">
+    <span class="et">Rapor <span class="rz ok">Onaylı · RAD-2026-000413</span></span>
+    <div class="a-satir"><span class="lb">✍✔ Yazan · onay</span><span><span class="kisi">Doç. Dr. Zeynep Kaya</span> <span class="zaman">· 28.10 15:10 · e-imza</span></span></div>
+  </div>
+</div>
+
+<!-- =============================================================== B ===== -->
+<h2>B · Akış şeridi (Yazıldı → Uzmana gönderildi → Onaylandı)</h2>
+<p class="acik">Raporun hangi adımda olduğu tek bakışta; her adımın altında kişi ve saat. Daha geniş yer kaplar — Uyarılar bloğu dar kalır.
+  Kendi onaylayan doktorda orta adım "atlandı" görünür.</p>
+
+<div class="durumbaslik">1 · ASİSTAN YAZIYOR</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="b-akis">
+    <div class="adim">
+      <div class="ad1"><span class="nokta simdi">1</span><span class="ba">Yazılıyor</span><span class="ki">Dr. Ali Demir</span><span class="za">asistan · 14:20</span></div>
+      <div class="cizgi"></div>
+      <div class="ad1"><span class="nokta">2</span><span class="ba" style="color:#9aa7b4">Uzmana gönderildi</span><span class="za">—</span></div>
+      <div class="cizgi"></div>
+      <div class="ad1"><span class="nokta">3</span><span class="ba" style="color:#9aa7b4">Onaylandı</span><span class="za">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="durumbaslik">2 · UZMAN ONAYI BEKLİYOR</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="b-akis">
+    <div class="adim">
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Yazıldı</span><span class="ki">Dr. Ali Demir</span><span class="za">asistan · 14:20</span></div>
+      <div class="cizgi tam"></div>
+      <div class="ad1"><span class="nokta simdi">2</span><span class="ba">Uzmana gönderildi</span><span class="za">14:35</span><span class="za" style="color:#8a6218">bekliyor · 25 dk</span></div>
+      <div class="cizgi"></div>
+      <div class="ad1"><span class="nokta">3</span><span class="ba" style="color:#9aa7b4">Onaylayacak</span><span class="ki">Doç. Dr. Zeynep Kaya</span><span class="za">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="durumbaslik">3 · UZMAN ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="b-akis">
+    <div class="adim">
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Yazıldı</span><span class="ki">Dr. Ali Demir</span><span class="za">asistan · 14:20</span></div>
+      <div class="cizgi tam"></div>
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Uzmana gönderildi</span><span class="za">14:35</span></div>
+      <div class="cizgi tam"></div>
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Onaylandı</span><span class="ki">Doç. Dr. Zeynep Kaya</span><span class="za">15:02 · e-imza</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="durumbaslik">4 · DOKTOR KENDİ YAZDI, KENDİ ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="b-akis">
+    <div class="adim">
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Yazıldı</span><span class="ki">Doç. Dr. Zeynep Kaya</span><span class="za">15:05</span></div>
+      <div class="cizgi tam" style="background:repeating-linear-gradient(90deg,#2e7d46 0 4px,transparent 4px 7px)"></div>
+      <div class="ad1"><span class="nokta" style="border-style:dashed">–</span><span class="ba" style="color:#9aa7b4">Uzmana gönderilmedi</span><span class="za">kendi onayladı</span></div>
+      <div class="cizgi tam" style="background:repeating-linear-gradient(90deg,#2e7d46 0 4px,transparent 4px 7px)"></div>
+      <div class="ad1"><span class="nokta tam">✓</span><span class="ba">Onaylandı</span><span class="ki">Doç. Dr. Zeynep Kaya</span><span class="za">15:10 · e-imza</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================== C ===== -->
+<h2>C · İki ayrı blok: "Yazan" ve "Onaylayan" (+ Durum rozeti ayrı)</h2>
+<p class="acik">Mevcut bant düzenine en yakın: İsteyen ile Durum arasına iki dar blok girer, her biri tek kişi.
+  Kendi onaylayan doktorda iki blokta aynı ad yazar.</p>
+
+<div class="durumbaslik">1 · ASİSTAN YAZIYOR</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="c-blok"><span class="et">✍ Yazan</span><span class="kisi">Dr. Ali Demir</span><span class="zaman"><span class="rz mor">asistan</span> 14:20</span></div>
+  <div class="c-blok"><span class="et">⏳ Onaylayacak</span><span class="alt">— gönderirken seçilir</span></div>
+  <div><span class="et">Durum</span><span class="rz gri">Taslak</span></div>
+</div>
+
+<div class="durumbaslik">2 · UZMAN ONAYI BEKLİYOR</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="c-blok"><span class="et">✍ Yazan</span><span class="kisi">Dr. Ali Demir</span><span class="zaman"><span class="rz mor">asistan</span> 14:35 gönderdi</span></div>
+  <div class="c-blok"><span class="et">⏳ Onaylayacak</span><span class="kisi">Doç. Dr. Zeynep Kaya</span><span class="bekl">bekliyor · 25 dk</span></div>
+  <div><span class="et">Durum</span><span class="rz uy">Onay bekliyor</span></div>
+</div>
+
+<div class="durumbaslik">3 · UZMAN ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="c-blok"><span class="et">✍ Yazan</span><span class="kisi">Dr. Ali Demir</span><span class="zaman"><span class="rz mor">asistan</span> 14:35</span></div>
+  <div class="c-blok"><span class="et">✔ Onaylayan</span><span class="kisi">Doç. Dr. Zeynep Kaya</span><span class="zaman">15:02 · e-imza</span></div>
+  <div><span class="et">Durum</span><span class="rz ok">Onaylı</span><span class="zaman">RAD-2026-000412</span></div>
+</div>
+
+<div class="durumbaslik">4 · DOKTOR KENDİ YAZDI, KENDİ ONAYLADI</div>
+<div class="bant">
+  <div class="foto">AY</div>
+  <div><span class="ad">Ayşe Yılmaz</span><span class="alt">K · 41 · 12.04.1985</span><span class="alt">D PDEMHST</span></div>
+  <div><span class="et">Alerji / Kronik</span><span class="rz ok">Alerji: yok</span></div>
+  <div><span class="et">Uyarılar</span><span class="alt">—</span></div>
+  <div class="sp"></div>
+  <div><span class="et">İsteyen</span><span class="kisi">Dr. Kemal Aydın</span><span class="alt">Kadın Doğum</span></div>
+  <div class="c-blok"><span class="et">✍ Yazan</span><span class="kisi">Doç. Dr. Zeynep Kaya</span><span class="zaman">15:05</span></div>
+  <div class="c-blok"><span class="et">✔ Onaylayan</span><span class="kisi">Doç. Dr. Zeynep Kaya</span><span class="zaman">15:10 · e-imza</span></div>
+  <div><span class="et">Durum</span><span class="rz ok">Onaylı</span><span class="zaman">RAD-2026-000413</span></div>
+</div>
+
+
+<!-- =============================================================== D ===== -->
+<h2>D · "Uzmana Gönder" penceresi (onaylayacak uzman seçimi)</h2>
+<p class="acik">Gönderirken uzman seçilir. Varsayılan: asistanın <b>bağlı olduğu uzman</b> (kadro), yoksa bu asistanın <b>son gönderdiği uzman</b>.
+  Liste yalnız onay yetkisi olan, bu şubede çalışan Radyologlar; yanında onay bekleyen iş sayısı (yükü dengelemek için).</p>
+<div style="max-width:1420px;margin:0 auto;display:flex;gap:18px;align-items:flex-start">
+  <div style="width:460px;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 8px 26px rgba(20,40,70,.2);overflow:hidden">
+    <div style="background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;font-weight:bold;font-size:13px">➜ Uzmana Gönder</div>
+    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+      <div class="alt">Ayşe Yılmaz · Mamografi (bilateral) · PDEM-ACC-3</div>
+      <label style="display:flex;flex-direction:column;gap:3px"><span class="et">Onaylayacak uzman *</span>
+        <select style="height:26px;border:1px solid var(--line);border-radius:3px;font:inherit">
+          <option>Doç. Dr. Zeynep Kaya — 3 onay bekliyor (bağlı uzman)</option>
+          <option>Dr. Murat Şen — 7 onay bekliyor</option>
+          <option>Prof. Dr. Ayten Koç — 1 onay bekliyor</option>
+        </select></label>
+      <label style="display:flex;flex-direction:column;gap:3px"><span class="et">Not (isteğe bağlı)</span>
+        <textarea rows="2" style="border:1px solid var(--line);border-radius:3px;font:inherit;resize:vertical" placeholder="ör. Sol memedeki lezyona özellikle bakar mısınız?"></textarea></label>
+      <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" checked> Uzmana bildirim gönder (mesaj kutusu)</label>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;padding:8px 14px;background:var(--head);border-top:1px solid var(--line2)">
+      <button class="btn primary">➜ Gönder</button><button class="btn">✖ Vazgeç</button>
+    </div>
+  </div>
+  <div class="not" style="margin:0;flex:1">
+    <b>Uzman listesi</b> → onay yetkisi (<code>rad.rapor_onayla</code>) olan ve şubede çalışan kişiler.<br>
+    <b>Not</b> → uzman raporu açınca bandın altında sarı şerit olarak görünür.<br>
+    <b>Bildirim</b> → uzmanın mesaj kutusuna "Ayşe Yılmaz mamografi raporu onayınızı bekliyor" + rapora bağlantı.<br>
+    <b>Başka uzman onaylarsa</b> (izin / nöbet): seçilen uzman dışındaki Radyolog da onaylayabilir; bantta
+    "✔ Onaylayan: Dr. Murat Şen <span class='alt'>(Doç. Dr. Zeynep Kaya yerine)</span>" yazar — engellemek mi, izin vermek mi? <b>Karar gerekli.</b>
+  </div>
+</div>
+
+<!-- ============================================================ notlar ===== -->
+<h2>Notlar</h2>
+<table class="tablo">
+  <tr><th style="width:200px">Konu</th><th>Öneri</th></tr>
+  <tr><td>Veri</td><td>Yazan (<code>yazan_id</code>, <code>yazma_tarihi</code>), onaylayan (<code>onaylayan_id</code>, <code>onay_tarihi</code>) ve rapor no raporda zaten var.
+    "Uzmana gönderildi" saati değişiklik logundan (<i>Ön rapor</i>) okunur — yeni kolon gerekmez.</td></tr>
+  <tr><td>"asistan" rozeti</td><td>Yazanın rolünde <code>rad.rapor_onayla</code> yoksa gösterilir (Radyoloji Asistanı). Radyolog yazdıysa rozet yok.</td></tr>
+  <tr><td>Bekleme süresi</td><td>"Uzman onayı bekleniyor · 25 dk" — ön rapora geçişten bu yana. Uzun bekleyenler istem listesinde "Onay Bekleyen" çipinde zaten.</td></tr>
+  <tr><td>Onaylayacak uzman</td><td><b>YENİ ALAN:</b> raporda "onaylayacak" (<code>onaylayacak_id</code>) — Uzmana Gönder'de yazılır, onayda
+    <code>onaylayan_id</code> ayrıca dolar. İstem listesinde "Onay Bekleyen" çipine <b>"Bana gelenler"</b> süzgeci eklenir (uzman kendi kuyruğunu görür).</td></tr>
+  <tr><td>Çıktı</td><td>A4 çıktıda imza alanı zaten onaylayanı basar; asistanın adı istenirse imzanın soluna "Raporu hazırlayan" olarak eklenebilir.</td></tr>
+</table>
+
+</body>
+</html>
