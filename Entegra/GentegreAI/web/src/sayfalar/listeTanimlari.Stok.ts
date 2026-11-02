@@ -25,7 +25,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   detay tablosu id kolonu varsayar, o yuzden bu da simdilik yer tutucu.
     // 'ÜTS Bilgileri' artik yer tutucu DEGIL - stok_uts (119) detayi olarak geliyor.
     // Sıra stok_karti_v2.html (02.11.2026): ... ÜTS · Ürün Ağacı / BOM · Stok Durumu · Hareketler · Resim / Doküman · Ek Alanlar.
-    yerTutucuSekmeler: ['Ürün Ağacı / BOM', 'Stok Durumu', 'Hareketler', 'Resim / Doküman', 'Ek Alanlar'],
+    yerTutucuSekmeler: ['Stok Durumu', 'Hareketler', 'Ürün Ağacı / BOM', 'Resim / Doküman', 'Ek Alanlar'],
+    // Ürün Ağacı / BOM Hareketler'in sağında (kullanıcı 02.11.2026).
     // ÜRÜN AĞACI / BOM YALNIZ ERP'DE (kullanıcı 02.11.2026: "sadece erp modundayken Reçete sekmesi görünmelidir";
     //   başlık "Reçete" -> "Ürün Ağacı / BOM" - HBYS'de reçete ilaç reçetesi demek).
     erpSekmeleri: ['Ürün Ağacı / BOM'],

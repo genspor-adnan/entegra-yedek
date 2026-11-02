@@ -9059,7 +9059,18 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dgk-dosya.vars { outline: 2px solid #e0a400; outline-offset: -1px }
 .dgk-on { height: 96px; display: flex; align-items: center; justify-content: center; font-size: 32px;
   background: linear-gradient(135deg, #eef3f9, #dbe6f1) }
-.dgk-on.pdf { background: linear-gradient(135deg, #fbefee, #f3d9d7) }
+/* Kart / liste görünümü seçici (02.11.2026) */
+.dgk-gorunum { display: inline-flex; margin-left: 8px; border: 1px solid var(--vurgu); border-radius: 4px; overflow: hidden }
+.dgk-gorunum button { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border: 0;
+  background: var(--yuz, #fff); color: var(--vurgu); font: inherit; font-weight: 600; cursor: pointer }
+.dgk-gorunum button + button { border-left: 1px solid var(--vurgu) }
+.dgk-gorunum button svg { fill: currentColor }
+.dgk-gorunum button:hover:not(.secili) { background: var(--yuz2) }
+.dgk-gorunum button.secili { background: var(--vurgu); color: #fff }
+.dgk-liste { margin: 0 10px 10px; width: calc(100% - 20px) }
+.dgk-liste tbody tr { cursor: pointer }
+.dgk-liste tbody tr.secili { background: var(--yuz2) }
+.dgk-liste td svg { vertical-align: middle }
 .dgk-on img { width: 100%; height: 100%; object-fit: cover }
 .dgk-alt { padding: 6px 8px; font-size: 11px; min-width: 0 }
 .dgk-alt b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }

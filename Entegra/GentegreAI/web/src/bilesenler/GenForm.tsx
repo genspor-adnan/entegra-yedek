@@ -1459,7 +1459,7 @@ Yine de yeni kayıt eklensin mi?`);
       )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:dokuman' && (
-        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} karo={kaynak === 'stok'} />
+        <DokumanGalerisi kartAdi={kaynak} kaynakId={id as number} saltOkunur={salt} />
       )}
 
       {aktif?.tur === 'ozel' && aktif.anahtar === 'ozel:stokDurum' && (

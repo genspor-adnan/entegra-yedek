@@ -1921,12 +1921,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         )}
 
         {aktifSekme === 'yorum' && (
-          <div className="kagrup">
-            <h6>Resim / Doküman</h6>
-            {kayitliId > 0
-              ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
-              : <div className="not">{c('Belge kaydedilince resim / doküman eklenebilir.')}</div>}
-          </div>
+          // Stok kartındaki galeri deseni (02.11.2026 "resim doküman sekmesi olan bütün ekranlara"): çerçevesiz.
+          kayitliId > 0
+            ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
+            : <div className="not">{c('Belge kaydedilince resim / doküman eklenebilir.')}</div>
         )}
 
         {/* Kartin ustune acilan BUTUN pencereler (cari/stok/kalem/tahsilat/

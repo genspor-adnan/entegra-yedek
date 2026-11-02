@@ -631,8 +631,9 @@ export function ListeKarti({
         sayfaBaslikYok={tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'randevu' || tanim.kaynak === 'rol'
                         || (tanim.kaynak === 'muayene' && typeof kartId === 'number')}
         // CARİ (müşteri / tedarikçi) kartında başlık satırı yok, "X Kartı #id" araç satırında Ekstre'nin
-        //   sağında (kullanıcı 25.10.2026).
-        baslikAracta={tanim.kaynak === 'cari'}
+        //   sağında (kullanıcı 25.10.2026). STOK kartında da: "Stok Kartı #id" Hatırlat'ın sağında, Kaydet ile
+        //   sekmeler arasındaki satır yok (kullanıcı 02.11.2026).
+        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.

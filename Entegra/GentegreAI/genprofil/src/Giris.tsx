@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { adresDeposu } from './vekil';
 import { ParolaGirdisi } from '@web/bilesenler/ParolaGirdisi';
+import { KURULUMLAR } from './kurulumlar';
 
 export type Baglanti = { adres: string; kod: string; parola: string };
 
@@ -39,10 +40,22 @@ export function Giris({ onBagla, hata }: {
         <h1>GenProfil</h1>
         <div className="sonuk">Kurum profili bakım aracı</div>
         {hata && <div className="gp-hata">{hata}</div>}
+        {/* KURULUM SEÇİMİ (02.11.2026): gentegreai.com müşterileri ve profil kurulumları - seçilince adres yazılır. */}
+        <label className="gp-alan">
+          <span>Kurulum</span>
+          <select value={KURULUMLAR.find(k => k.adres === adres.trim())?.ad ?? ''}
+                  onChange={e => { const k = KURULUMLAR.find(x => x.ad === e.target.value); if (k) setAdres(k.adres) }}>
+            <option value="">— adresi elle gir —</option>
+            {[...new Set(KURULUMLAR.map(k => k.grup))].map(g => (
+              <optgroup key={g} label={g}>
+                {KURULUMLAR.filter(k => k.grup === g).map(k => <option key={k.ad} value={k.ad}>{k.etiket}</option>)}
+              </optgroup>))}
+          </select>
+        </label>
         <label className="gp-alan">
           <span>Sunucu adresi</span>
           <input value={adres} onChange={e => setAdres(e.target.value)} autoFocus
-                 placeholder="http://46.36.201.170/genotipai/lab" />
+                 placeholder="https://feta.gentegreai.com/feta" />
         </label>
         <div className="sonuk gp-ipucu">
           Kurulumun kök adresi. Sonundaki <code>/api</code> gerekmez.

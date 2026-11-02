@@ -5,23 +5,16 @@ import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
 import { dosyaIndirUrl } from './indir';
 import { c } from '../dil/ceviri';
+import { DosyaTuruSimgesi, dosyaTuru } from './DosyaTuruSimgesi';
 
 const boyutYaz = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
-
-const dosyaTipiIkon = (contentType: string) => {
-  if (contentType.startsWith('image/')) return '🖼️';
-  if (contentType === 'application/pdf') return '📕';
-  if (contentType.includes('word')) return '📘';
-  if (contentType.includes('excel') || contentType.includes('spreadsheet')) return '📗';
-  if (contentType === 'text/plain') return '📄';
-  return '📎';
-};
 
 const dosyaTipiBaslik = (contentType: string) => {
   if (contentType.startsWith('image/')) return 'Resim';
   if (contentType === 'application/pdf') return 'PDF';
   if (contentType.includes('word')) return 'Word';
   if (contentType.includes('excel') || contentType.includes('spreadsheet')) return 'Excel';
+  if (contentType.includes('powerpoint') || contentType.includes('presentation')) return 'PowerPoint';
   if (contentType === 'text/plain') return 'Metin';
   return 'Dosya';
 };
@@ -90,7 +83,7 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim, karo }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim, karo = true }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
   /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
   onSayi?(n: number): void;
@@ -114,6 +107,15 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   const [secili, setSecili] = useState<Set<number>>(new Set());
   const [paylasimMesaji, setPaylasimMesaji] = useState<string | null>(null);
   const [turSuzgec, setTurSuzgec] = useState('');
+  // KART / LİSTE GÖRÜNÜMÜ (kullanıcı 02.11.2026 "seçenek ekle kart/liste görünümü olabilsin"): tercih tarayıcıda
+  //   hatırlanır (kişisel kolaylık); okunamazsa kart görünümü.
+  const [listeGorunum, setListeGorunum] = useState(() => {
+    try { return localStorage.getItem('dgk-gorunum') === 'liste' } catch { return false }
+  });
+  const gorunumSec = (liste: boolean) => {
+    setListeGorunum(liste);
+    try { localStorage.setItem('dgk-gorunum', liste ? 'liste' : 'kart') } catch { /* tercih saklanamadı */ }
+  };
   const [duzenlenen, setDuzenlenen] = useState<{ id: number; ad: string; belgeTuru: string } | null>(null);
   // MASRAF BEYANI (768): bir beyanda birden çok fiş var ve hangi görselin
   //   hangi harcamaya ait olduğu bilinmeli. Ayrı bir bağ tablosu açmak
@@ -377,6 +379,13 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
           <option value="">{c('Tüm türler')}</option>
           {tipler.map(t => <option key={t} value={t}>{c(t)}</option>)}
         </select>
+        {/* Belirgin ikili seçici (kullanıcı 02.11.2026 "liste/kart butonları daha belirgin"): simge + yazı, seçili dolu. */}
+        <span className="dgk-gorunum" role="group" aria-label={c('Görünüm')}>
+          <button type="button" className={listeGorunum ? '' : 'secili'} aria-pressed={!listeGorunum}
+                  onClick={() => gorunumSec(false)}><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1" y="1" width="5" height="5" rx="1" /><rect x="8" y="1" width="5" height="5" rx="1" /><rect x="1" y="8" width="5" height="5" rx="1" /><rect x="8" y="8" width="5" height="5" rx="1" /></svg>{c('Kart')}</button>
+          <button type="button" className={listeGorunum ? 'secili' : ''} aria-pressed={listeGorunum}
+                  onClick={() => gorunumSec(true)}><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1" y="1.5" width="2.5" height="2.5" rx=".5" /><rect x="5" y="2" width="8" height="1.6" rx=".8" /><rect x="1" y="5.75" width="2.5" height="2.5" rx=".5" /><rect x="5" y="6.2" width="8" height="1.6" rx=".8" /><rect x="1" y="10" width="2.5" height="2.5" rx=".5" /><rect x="5" y="10.5" width="8" height="1.6" rx=".8" /></svg>{c('Liste')}</button>
+        </span>
       </div>
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
       {paylasimMesaji && <div style={{ margin: '0 10px 10px', wordBreak: 'break-all', fontSize: 12, color: 'var(--soluk)' }}>{paylasimMesaji}</div>}
@@ -385,11 +394,44 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
         : satirlarim.length === 0 ? (
           <div className="dgk-bos" onClick={() => !saltOkunur && girdiRef.current?.click()}>
             {c('Henüz dosya yok.')}{!saltOkunur && <> {c('Eklemek için tıklayın.')}</>}</div>
+        ) : listeGorunum ? (
+        <table className="detay-tablo dgk-liste">
+          <thead>
+            <tr>
+              <th style={{ width: 30 }}></th>
+              <th style={{ width: 34 }}></th>
+              <th>{c('Ad')}</th>
+              <th style={{ width: 150 }}>{c('Belge Türü')}</th>
+              <th style={{ width: 90 }}>{c('Tipi')}</th>
+              <th style={{ width: 90 }}>{c('Boyut')}</th>
+              <th style={{ width: 90 }}>{c('Tarih')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {gorunen.map(s => {
+              const index = satirlarim.indexOf(s);
+              return (
+                <tr key={s.id} className={secili.has(s.id) ? 'secili' : undefined} title={c('Tıkla: seç · çift tıkla: aç')}
+                    onClick={e => satirTiklandi(e, s.id, index)} onDoubleClick={() => void gor(s)}>
+                  <td onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}>
+                    <input type="checkbox" checked={secili.has(s.id)} onChange={() => secimiDegistir(s.id, index)} />
+                  </td>
+                  <td style={{ textAlign: 'center' }}><DosyaTuruSimgesi contentType={s.contentType} ad={s.ad} boyut={18} /></td>
+                  <td>{s.varsayilan && resimMi(s) ? '★ ' : ''}{s.ad}</td>
+                  <td>{s.belgeTuru || ''}</td>
+                  <td>{dosyaTipiBaslik(s.contentType)}</td>
+                  <td>{boyutYaz(s.boyut)}</td>
+                  <td>{tarihYaz(s.eklemeTarihi)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
         ) : (
         <div className="dgk-izgara">
           {gorunen.map(s => {
             const index = satirlarim.indexOf(s);
-            const pdf = s.contentType === 'application/pdf';
+            const tur = dosyaTuru(s.contentType, s.ad);
             return (
               <div key={s.id} className={`dgk-dosya${secili.has(s.id) ? ' secili' : ''}${s.varsayilan && resimMi(s) ? ' vars' : ''}`}
                    title={c('Tıkla: seç · çift tıkla: aç')}
@@ -398,10 +440,11 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
                 <input type="checkbox" className="dgk-sec" checked={secili.has(s.id)} title={c('Seç')}
                        onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}
                        onChange={() => secimiDegistir(s.id, index)} />
-                <div className={`dgk-on${pdf ? ' pdf' : ''}`}>
+                {/* TÜRE GÖRE SİMGE (02.11.2026): resimde önizleme, diğerlerinde türün renkli kâğıt simgesi. */}
+                <div className="dgk-on" style={resimMi(s) && resimUrlleri[s.id] ? undefined : { background: tur.zemin }}>
                   {resimMi(s) && resimUrlleri[s.id]
                     ? <img src={resimUrlleri[s.id]} alt={s.ad} />
-                    : <span>{dosyaTipiIkon(s.contentType)}</span>}
+                    : <DosyaTuruSimgesi contentType={s.contentType} ad={s.ad} />}
                 </div>
                 <div className="dgk-alt">
                   <b>{s.varsayilan && resimMi(s) ? '★ ' : ''}{s.ad}</b>
@@ -472,7 +515,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
                 </td>
                 <td>{s.belgeTuru || ''}</td>
                 <td>{s.ad}{s.varsayilan && resimMi(s) && ' (varsayılan)'}</td>
-                <td style={{ textAlign: 'center' }} title={dosyaTipiBaslik(s.contentType)}>{dosyaTipiIkon(s.contentType)}</td>
+                <td style={{ textAlign: 'center' }} title={dosyaTipiBaslik(s.contentType)}><DosyaTuruSimgesi contentType={s.contentType} ad={s.ad} boyut={16} /></td>
                 <td>{boyutYaz(s.boyut)}</td>
                 <td>{tarihYaz(s.eklemeTarihi)}</td>
               </tr>
