@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz } from '../sayfalar/kabuk/cariKomutu';
+import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz, rolIslemleri } from '../sayfalar/kabuk/cariKomutu';
 import { cumleCoz, kimlikNiyetCoz } from '../sayfalar/kabuk/KomutPaleti';
 
 /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (kullanıcı 25.10.2026). */
@@ -60,5 +60,22 @@ describe('cari komutu', () => {
     expect(cariIslemHedefi(t, 'fatura', 'satis').liste).toBe('/belge');
     expect(cariIslemHedefi(t, 'kart', null).yol).toBe('/tedarikci/7');
     expect(cariIslemHedefi(m, 'ekstre', null).yol).toBe('/ekstre?tur=cari&id=7');
+  });
+});
+
+// TAHSİLAT / ÖDEME (03.11.2026): müşteriye tahsilat, tedarikçiye ödeme; komutla açıkça istenebilir.
+describe('tahsilat / ödeme komutu', () => {
+  const mus = { id: 7, ad: 'A', kod: 'K', musteri: true, tedarikci: false };
+  const ted = { id: 8, ad: 'B', kod: 'T', musteri: false, tedarikci: true };
+  it('boş kutuda role göre', () => {
+    expect(rolIslemleri(mus)).toContain('tahsilat'); expect(rolIslemleri(mus)).not.toContain('odeme');
+    expect(rolIslemleri(ted)).toContain('odeme'); expect(rolIslemleri(ted)).not.toContain('tahsilat');
+    expect(rolIslemleri({ ...mus, tedarikci: true })).toEqual(expect.arrayContaining(['tahsilat', 'odeme']));
+  });
+  it('komut ve hedef', () => {
+    expect(cariIslemCoz('tahsilat al')).toMatchObject({ islem: 'tahsilat' });
+    expect(cariIslemCoz('ödeme yap')).toMatchObject({ islem: 'odeme' });
+    expect(cariIslemHedefi(mus, 'tahsilat', null).yol).toBe('/kasa-islem/yeni?tur=21&tarafId=7&tarafUnvan=A');
+    expect(cariIslemHedefi(ted, 'odeme', null).yol).toBe('/kasa-islem/yeni?tur=31&tarafId=8&tarafUnvan=B');
   });
 });

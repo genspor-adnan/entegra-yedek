@@ -7,6 +7,7 @@ import {
 } from '../../api/uclar/masrafIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { listeSor, onay } from '../../bilesenler/mesaj';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -408,7 +409,7 @@ export function MasrafIcmali() {
                     {veri.tedarikciler.length === 0 && <tr><td colSpan={7} className="bos">Bu dönemde carili gider yok.</td></tr>}
                     {(tumTedarikci ? veri.tedarikciler : veri.tedarikciler.slice(0, 10)).map(t => (
                       <tr key={t.id} className="ac" onClick={() => detayaGit({ tedarikci: t.id })}>
-                        <td>{t.ad}</td><td>{t.anaKalem}</td><td className="sag"><b>{tl(t.tutar)}</b></td><td className="sag">{t.belge}</td>
+                        <td><KartAdi tur="tedarikci" id={t.id}>{t.ad}</KartAdi></td><td>{t.anaKalem}</td><td className="sag"><b>{tl(t.tutar)}</b></td><td className="sag">{t.belge}</td>
                         <td className="sag">{t.karsi == null ? <span className="ki-soluk">yeni</span> : tl(t.karsi)}</td>
                         <td className="orta"><DegisimRozeti d={t.degisim ?? null} yeni={t.karsi == null} ters /></td>
                         <td className="sag">%{t.pay.toLocaleString('tr-TR')}</td></tr>

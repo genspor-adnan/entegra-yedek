@@ -10,6 +10,7 @@ import { BelgeDonusumModali } from '../../bilesenler/BelgeDonusumModali';
 import { bugunIso } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { BelgeKarti } from '../BelgeKarti';
@@ -275,7 +276,7 @@ export function IrsaliyeFaturaEslesme() {
                             <td><span className="ok">{acikDetay.has(x.id) ? '▾' : '▸'}</span>
                               <span className="lnk" onClick={ev => { ev.stopPropagation(); belgeAc(x.id) }}>{x.no}</span></td>
                             <td>{tarihT(x.tarih)}</td>{yon === 'ikisi' && <td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td>}
-                            <td>{x.cari}</td><td>{x.depo}</td>
+                            <td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.cari}</KartAdi></td><td>{x.depo}</td>
                             <td className="sag">{x.kalem}</td><td className="sag"><b>{tl(x.tutar)}</b></td>
                             <td className="orta"><BekleyenRozet x={x} esik={veri.esik} /></td>
                             <td><ERozet d={x.eIrsaliye} /></td>
@@ -317,7 +318,7 @@ export function IrsaliyeFaturaEslesme() {
                           <tr>
                             <td><span className="lnk" onClick={() => belgeAc(x.irsaliyeId)}>{x.irsaliyeNo}</span></td>
                             <td>{x.faturaId ? <span className="lnk" onClick={() => belgeAc(x.faturaId!)}>{x.faturaNo}</span> : <span className="ki-soluk">—</span>}</td>
-                            <td>{x.cari}</td><td title={x.ad}>{x.kod || x.ad}</td>
+                            <td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.cari}</KartAdi></td><td title={x.ad}>{x.kod || x.ad}</td>
                             <td className="sag">{sayi(x.irsMiktar)}</td>
                             <td className={'sag' + (x.durum === 'fazla' ? ' kir' : '')}>{sayi(x.fatMiktar)}</td>
                             <td className={'sag' + (x.durum === 'kismi' || x.durum === 'fazla' ? ' kir' : ' ki-soluk')}>{sayi(x.kalan)}</td>
@@ -356,7 +357,7 @@ export function IrsaliyeFaturaEslesme() {
                           <td><input type="radio" name="ife-fatura" checked={seciliFatura === x.id} onChange={() => setSeciliFatura(x.id)} /></td>
                           <td><span className="lnk" onClick={ev => { ev.stopPropagation(); belgeAc(x.id) }}>{x.no}</span></td>
                           <td>{tarihT(x.tarih)}</td>{yon === 'ikisi' && <td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td>}
-                          <td>{x.cari}</td><td className="sag">{x.stokluKalem}</td><td className="sag">{tl(x.tutar)}</td>
+                          <td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.cari}</KartAdi></td><td className="sag">{x.stokluKalem}</td><td className="sag">{tl(x.tutar)}</td>
                           <td className="ife-oneri">
                             {x.acikIrsaliyeler.length === 0 ? <span className="ki-soluk">—</span>
                               : x.acikIrsaliyeler.slice(0, 4).map(a => (
@@ -397,7 +398,7 @@ export function IrsaliyeFaturaEslesme() {
                     {veri.cariler.length === 0 && <tr><td colSpan={8} className="bos">Bu süzgeçte irsaliye yok.</td></tr>}
                     {veri.cariler.map(x => (
                       <tr key={`${x.tarafId}:${x.yon}`} className="ac" onClick={() => degistir({ cari: String(x.tarafId) })} title="Bu cariye süz">
-                        <td>{x.cari}</td><td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td><td className="sag">{x.irsaliye}</td><td className="sag">{x.tam}</td>
+                        <td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.cari}</KartAdi></td><td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td><td className="sag">{x.irsaliye}</td><td className="sag">{x.tam}</td>
                         <td className={'sag' + (x.acik ? ' kir' : '')}>{x.acik}</td><td className="sag">{tl(x.acikTutar)}</td>
                         <td className="sag">{x.ortSure != null ? `${x.ortSure.toLocaleString('tr-TR')} gün` : '—'}</td>
                         <td className={'sag' + (x.sureAsimi ? ' kir' : '')}>{x.enEski != null ? `${x.enEski} gün` : '—'}</td>

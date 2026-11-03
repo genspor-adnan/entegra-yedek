@@ -34,10 +34,11 @@ export function avatarRengi(ad: string): string {
   return RENKLER[h % RENKLER.length];
 }
 
-export function Avatar({ ad, buyuk, soluk }: { ad: string; buyuk?: boolean; soluk?: boolean }) {
+/** `kurumsal`: müşteri / tedarikçi / kurum avatarı - unvanın ilk iki kelimesi (basHarfler.ts); verilmezse kişi kuralı. */
+export function Avatar({ ad, buyuk, soluk, kurumsal }: { ad: string; buyuk?: boolean; soluk?: boolean; kurumsal?: boolean }) {
   return (
     <span className={`gh-av${buyuk ? ' buyuk' : ''}`} style={{ background: soluk ? '#b8c2cc' : avatarRengi(ad) }}>
-      {basHarfler(ad)}
+      {basHarfler(ad, kurumsal)}
     </span>
   );
 }

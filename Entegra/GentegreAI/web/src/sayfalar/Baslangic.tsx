@@ -6,8 +6,6 @@ import type { GundemKarti } from '../api/uclar/gundem';
 
 /** Ana sayfadaki gündem kartı sınırı - tamamı Ctrl+K "bugünkü işlerim"de. */
 const GUNDEM_SINIRI = 9;
-/** Kartın alt satırı: değeri sıfır / boş olmayan ilk satır ("7 gün içinde 0,00" yerine "Vadesi geçen 125,00"). */
-const gundemOzet = (k: GundemKarti) => k.satirlar.find(s => !/^(0(,00)?|—)?$/.test(s.deger.trim())) ?? k.satirlar[0];
 import { gostergeDegeri } from '../bilesenler/GostergeIcerik';
 import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -244,11 +242,11 @@ export function Baslangic() {
           const k = BILDIRIM_KART[g.kod];
           const enEski = g.ogeler.map(ogeZamani).filter(Boolean).sort()[0];
           return (
-            <a key={g.kod} className="bsl-kart" onClick={() => setBildirimDetay(g.kod)}>
-              <span className="bsl-kart-i">{k.ic}</span>
-              <span className="bsl-kart-a">{g.ogeler.length} {c(k.ad)}</span>
-              <span className={`bsl-kart-y${g.kod === 'acil' ? ' bsl-kart-acil' : ''}`}>
-                {enEski ? `${c('en eskisi')} ${bekleme(enEski)}` : c('ayrıntı')}</span>
+            <a key={g.kod} className={`bsl-gk ton-${g.kod === 'acil' ? 'kir' : 'sar'}`} onClick={() => setBildirimDetay(g.kod)}>
+              <div className="bsl-gk-bas"><span className="bsl-gk-i">{k.ic}</span><span className="bsl-gk-a">{c(k.ad)}</span>
+                <span className="bsl-gk-s">{g.ogeler.length}</span></div>
+              <ul><li><span className={g.kod === 'acil' ? 'bsl-kart-acil' : ''}>
+                {enEski ? `${c('en eskisi')} ${bekleme(enEski)}` : c('ayrıntı')}</span></li></ul>
             </a>
           );
         });
@@ -296,28 +294,44 @@ export function Baslangic() {
    * ve bekleyen işler 8 tane gelsin"): geniş sayfada satırda 8 kart, son açılanlardan 8 ekran; dar sade
    * görünümde 4.
    */
+  /**
+   * ÜST ŞERİT (kullanıcı 03.11.2026: "ana ekranda son açılan kutular daha küçük ve bekleyen işler in altında olsun.. bekleyen
+   * işler de daha büyük (mockup gibi detay) olsun" - mockup Ekranlar/ana_sayfa_yz_komut.html "Bugün senin için"):
+   * BEKLEYEN İŞLER büyük kartlarla - gündem kartında başlık + sayı + satırlar + eylem düğmeleri; duyuru / onay / bildirim
+   * kartları aynı ızgarada. SON AÇILANLAR küçük kutular (tek satır: ikon + ad) ve yine ÜSTTE (kullanıcı 03.11.2026: "son
+   * açılanları bu haliyle tekrar bekleyen işlerin üzerine al").
+   */
   const ustSerit = (adet: 4 | 8) => (
     <>
       {sonAcilanlar.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
-        <div className={`bsl-kartlar bsl-kartlar-orta bsl-tek-sira${adet === 8 ? ' bsl-sekizli' : ''}`}>{sonAcilanlar.slice(0, adet).map(ekranKart)}</div></>}
+        <div className="bsl-son">{sonAcilanlar.slice(0, adet).map(e => (
+          <a key={e.yol} className="bsl-son-k" title={e.grup ? `${c(e.ad)} · ${c(e.grup)}` : c(e.ad)}
+             onClick={() => e.yol.startsWith(KAYITLI_ONEK)
+               ? window.dispatchEvent(new CustomEvent(PALET_GIT_OLAYI, { detail: e.yol })) : git(e.yol)}>
+            <span className="bsl-son-i"><MenuIkon ic={e.ic || '📁'} /></span><span>{c(e.ad)}</span>
+          </a>))}</div></>}
       {(bekleyenIsler.length > 0 || bildirimKartlari.length > 0 || gundem.length > 0) && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
-        <div className={`bsl-kartlar bsl-kartlar-orta${adet === 8 ? ' bsl-sekizli' : ' bsl-dortlu'}`}>{bekleyenIsler.map(i => (
-          <a key={i.yol} className={`bsl-kart${i.tikla || ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
-             onClick={() => { if (i.tikla) i.tikla(); else if (ekranVar(i.yol)) git(i.yol) }}>
-            <span className="bsl-kart-i">{i.ic}</span>
-            <span className="bsl-kart-a">{i.ad}</span>
-            <span className={`bsl-kart-y${i.acil ? ' bsl-kart-acil' : ''}`}>{i.y}</span>
-          </a>))}
-          {bildirimKartlari}
-          {gundem.slice(0, GUNDEM_SINIRI).map(k => (
-            <a key={`g${k.kod}`} className={`bsl-kart${ekranVar(k.yol.split('?')[0]) ? '' : ' bsl-kart-pasif'}`}
-               title={k.satirlar.map(x => `${x.ad} ${x.deger}`.trim()).join(' · ')}
-               onClick={() => { if (ekranVar(k.yol.split('?')[0])) git(k.yol) }}>
-              <span className="bsl-kart-i">{k.ikon}</span>
-              <span className="bsl-kart-a">{k.sayi ? `${k.sayi} ` : ''}{c(k.baslik)}</span>
-              <span className={`bsl-kart-y${k.ton === 'kir' ? ' bsl-kart-acil' : ''}`}>
-                {(() => { const s = gundemOzet(k); return s ? `${c(s.ad)} ${s.deger}`.trim() : '' })()}</span>
+        <div className="bsl-gundem">
+          {gundem.slice(0, GUNDEM_SINIRI).map(k => {
+            const acilir = ekranVar(k.yol.split('?')[0]);
+            return (
+              <div key={`g${k.kod}`} className={`bsl-gk ton-${k.ton}${acilir ? '' : ' bsl-kart-pasif'}`}
+                   onClick={() => { if (acilir) git(k.yol) }}>
+                <div className="bsl-gk-bas"><span className="bsl-gk-i">{k.ikon}</span><span className="bsl-gk-a">{c(k.baslik)}</span>
+                  {k.sayi && <span className="bsl-gk-s">{k.sayi}</span>}</div>
+                <ul>{k.satirlar.filter(x => x.ad).slice(0, 3).map((x, i) => <li key={i}><span>{c(x.ad)}</span><b>{x.deger}</b></li>)}</ul>
+                <div className="bsl-gk-ey">{k.eylemler.filter(e => ekranVar(e.yol.split('?')[0])).slice(0, 2).map(e => (
+                  <button key={e.yol} type="button" className="d" onClick={ev => { ev.stopPropagation(); git(e.yol) }}>{c(e.ad)}</button>))}</div>
+              </div>
+            );
+          })}
+          {bekleyenIsler.map(i => (
+            <a key={i.yol} className={`bsl-gk ton-${i.acil ? 'kir' : 'mav'}${i.tikla || ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
+               onClick={() => { if (i.tikla) i.tikla(); else if (ekranVar(i.yol)) git(i.yol) }}>
+              <div className="bsl-gk-bas"><span className="bsl-gk-i">{i.ic}</span><span className="bsl-gk-a">{i.ad}</span></div>
+              <ul><li><span className={i.acil ? 'bsl-kart-acil' : ''}>{i.y}</span></li></ul>
             </a>))}
+          {bildirimKartlari}
         </div></>}
       {bildirimPenceresi}
     </>

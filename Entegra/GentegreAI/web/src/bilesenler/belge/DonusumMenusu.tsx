@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { HEDEFLER } from '../BelgeDonusumModali';
+import { HEDEFLER } from './donusumHedefleri';
 import { mesaj } from '../mesaj';
 
 const HEDEF_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };

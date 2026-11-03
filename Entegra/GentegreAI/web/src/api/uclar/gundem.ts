@@ -37,5 +37,10 @@ export const gundemUclari = {
   gundem: () => istek<{ kartlar: GundemKarti[] }>('/api/gundem'),
   kayitOnerileri: (tur: KayitTuru, id: number) =>
     istek<KayitOnerileri>(`/api/gundem/kayit?tur=${tur}&id=${id}`),
+  /** Düz VKN / TCKN: numaraya kayıtlı müşteri / tedarikçi / kurum + o numaraya kesilmiş son satış belgeleri. */
+  vergiNoAra: (q: string) => istek<{
+    kayitlar: { tur: 'musteri' | 'tedarikci' | 'kurum'; id: number; ad: string; kod: string; durum: number; musteri: boolean; tedarikci: boolean }[];
+    belgeler: { id: number; tur: number; no: string; tarih: string; unvan: string; tutar: number }[] }>(
+    `/api/hizli-bul/vergi-no?q=${encodeURIComponent(q)}`),
   kayitAra: (q: string) => istek<{ kayitlar: BulunanKayit[] }>(`/api/hizli-bul/kayit-ad?q=${encodeURIComponent(q)}`),
 };

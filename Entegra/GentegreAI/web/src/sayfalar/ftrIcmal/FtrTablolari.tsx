@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { FtrIcmali } from '../../api/uclar/ftrIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { devamRozeti, dolulukRozeti, durumRozeti, ondalik, saat, vasFark, yanitRozeti, yuzde } from './ftrIcmalOrtak';
 
@@ -42,7 +43,7 @@ export function FizyoterapistTablosu({ v, secili, setSecili }: { v: FtrIcmali; s
               <Fragment key={f.id}>
                 <tr className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(f.id, e)} title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
                   <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(f.id, e)} /></td>
-                  <td><a className="ki-lnk" onClick={e => ac(f.id, e)}>{acik.includes(f.id) ? '▾' : '▸'}</a> <b>{f.ad}</b></td>
+                  <td><a className="ki-lnk" onClick={e => ac(f.id, e)}>{acik.includes(f.id) ? '▾' : '▸'}</a> <b><KartAdi tur="personel" id={f.id > 0 ? f.id : null}>{f.ad}</KartAdi></b></td>
                   <td className="sag">{f.kur}</td><td className="sag">{tire(f.aktif)}</td><td className="sag">{f.seans}</td>
                   <td className="sag">{tire(f.yarim)}</td><td className="sag">{tire(f.gelmedi)}</td>
                   <td><span className={'bo-rz ' + d.renk}>{d.ad}</span></td>

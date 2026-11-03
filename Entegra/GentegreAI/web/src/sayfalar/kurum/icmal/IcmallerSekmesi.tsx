@@ -3,6 +3,7 @@ import { api } from '../../../api/istemci';
 import { hataMetni } from '../../../api/sozlesme';
 import type { KurumIcmalKaydi, KurumIcmalSatiri } from '../../../api/uclar/kurumIcmal';
 import { para, paraYaz } from '../../../bilesenler/bicim';
+import { KartAdi } from '../../../bilesenler/KartAdi';
 import { guvenli, mesaj, onay } from '../../../bilesenler/mesaj';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 import { kayitRozeti } from './kurumIcmalOrtak';
@@ -151,7 +152,7 @@ export function IcmallerSekmesi({ seciliKurumlar, tazele, kurumlar, varsayilanKu
                 <tr className={'ac' + (sec ? ' sec' : '')} onClick={() => setAcik(a => (a === k.id ? null : k.id))}
                     onDoubleClick={() => ac(k)} title="Tıkla: satırlar · çift tık: bu kurum ve döneme geç">
                   <td><input type="checkbox" checked={sec} onClick={e => e.stopPropagation()} onChange={() => degistir(k.id)} /></td>
-                  <td><span className="ok">{acik === k.id ? '▾' : '▸'}</span><b>{k.kurum}</b></td>
+                  <td><span className="ok">{acik === k.id ? '▾' : '▸'}</span><b><KartAdi tur="kurum" id={k.kurumId}>{k.kurum}</KartAdi></b></td>
                   <td>{tarihKisa(k.donemBas)} – {tarihKisa(k.donemBit)}</td>
                   <td className="sag">{k.basvuru}</td><td className="sag">{k.satir}</td>
                   <td className="sag">{p(k.kurumPayi)}</td>

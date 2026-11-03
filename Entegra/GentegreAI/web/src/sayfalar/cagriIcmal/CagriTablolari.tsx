@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { CagriIcmali } from '../../api/uclar/cagriIcmal';
 import { secimUygula } from '../../bilesenler/listeSecimi';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { GUN_ADI, dkMetni, slaRozeti, sureMetni, yuzde } from './cagriIcmalOrtak';
 
 /** Çağrı merkezi icmalinin sekme tabloları. Rakamlar sunucudan gelir. */
@@ -80,7 +81,7 @@ export function TemsilciTablosu({ v }: { v: CagriIcmali }) {
       <tbody>
         {v.temsilciler.length === 0 && <tr><td colSpan={12} className="bos">Temsilci kaydı yok.</td></tr>}
         {v.temsilciler.map(t => (
-          <tr key={t.id}><td><b>{t.ad}</b></td><td>{t.dahili || '—'}</td><td className="sag">{s(t.gelen)}</td><td className="sag">{s(t.giden)}</td>
+          <tr key={t.id}><td><b><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></b></td><td>{t.dahili || '—'}</td><td className="sag">{s(t.gelen)}</td><td className="sag">{s(t.giden)}</td>
             <td className="sag">{sureMetni(t.konusmaSn)}</td><td className="sag">{sureMetni(t.ortGorusme)}</td><td className="sag">{sureMetni(t.ortIslemSonrasi)}</td>
             <td className="sag">{t.randevu || '—'}</td><td className="sag">{yuzde(t.donusum)}</td>
             <td className="sag">{t.geriZamaninda} / {t.geriGec} / <span className={t.geriYok ? 'kir' : ''}>{t.geriYok}</span></td>

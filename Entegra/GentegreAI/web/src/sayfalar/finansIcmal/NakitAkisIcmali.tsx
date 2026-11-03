@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { finansIcmalUclari, type NakitAkisIcmali as Veri, type NakitKalemi } from '../../api/uclar/finansIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -278,7 +279,8 @@ function GirisTablosu({ l, ac }: { l: NakitKalemi[]; ac(k: NakitKalemi): void })
         {l.length === 0 && <tr><td colSpan={8} className="bos">Beklenen giriş yok.</td></tr>}
         {l.slice(0, 1500).map((k, i) => (
           <tr key={i} className="ac" onDoubleClick={() => ac(k)}>
-            <td className={k.gecmis ? 'kir' : ''}>{tarihT(k.vade)}</td><td>{k.kaynak}</td><td>{k.taraf}</td><td>{k.belge}</td>
+            <td className={k.gecmis ? 'kir' : ''}>{tarihT(k.vade)}</td><td>{k.kaynak}</td>
+            <td><KartAdi tur={k.kolon === 'tedarikci' ? 'tedarikci' : 'musteri'} id={k.tarafId}>{k.taraf}</KartAdi></td><td>{k.belge}</td>
             <td className="sag">{tl(k.tl)}{k.doviz !== 'TL' && <span className="ki-soluk"> ({tl(k.tutar)} {k.doviz})</span>}</td>
             <td className={'sag' + ((k.gecikme ?? 0) > 7 ? ' kir' : '')}>{k.gecikme != null ? `+${k.gecikme} gün` : '—'}</td>
             <td>{!k.akista ? <span className="ki-soluk">akış dışı</span> : k.gecmis ? 'ilk dönem' : k.beklenen ? tarihT(k.beklenen) : '—'}</td>
@@ -297,7 +299,8 @@ function CikisTablosu({ l, ac }: { l: NakitKalemi[]; ac(k: NakitKalemi): void })
         {l.length === 0 && <tr><td colSpan={7} className="bos">Beklenen çıkış yok.</td></tr>}
         {l.slice(0, 1500).map((k, i) => (
           <tr key={i} className="ac" onDoubleClick={() => ac(k)}>
-            <td className={k.gecmis ? 'kir' : ''}>{tarihT(k.vade)}</td><td>{k.kaynak}</td><td>{k.taraf}</td><td>{k.belge}</td>
+            <td className={k.gecmis ? 'kir' : ''}>{tarihT(k.vade)}</td><td>{k.kaynak}</td>
+            <td><KartAdi tur={k.kolon === 'tedarikci' ? 'tedarikci' : 'musteri'} id={k.tarafId}>{k.taraf}</KartAdi></td><td>{k.belge}</td>
             <td className="sag">{tl(k.tl)}{k.doviz !== 'TL' && <span className="ki-soluk"> ({tl(k.tutar)} {k.doviz})</span>}</td>
             <td>{k.hesap || <span className="ki-soluk">—</span>}</td>
             <td>{k.esneklik === 'pazarlik' ? <span className="bo-rz ok">pazarlık edilebilir</span>

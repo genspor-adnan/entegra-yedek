@@ -125,7 +125,7 @@ export function MusteriOnizleme({ satir, yenile, tazele, git, gitKart, tedarikci
 
   return (
     <div className="pl-oniz">
-      <div className="pl-kimlik"><Avatar ad={ad} buyuk soluk={Number(satir.durum ?? 1) !== 1} />
+      <div className="pl-kimlik"><Avatar ad={ad} buyuk kurumsal soluk={Number(satir.durum ?? 1) !== 1} />
         <div><b>{ad}</b>
           <small>{[satir.kod, satir.il, satir.temsilci && `${c('Temsilci')}: ${satir.temsilci}`].filter(Boolean).join(' · ')}</small>
           <small>{Number(satir.efatura) === 1 ? 'e-Fatura' : 'e-Arşiv'}{Number(satir.durum ?? 1) !== 1 ? ` · ${c('Pasif')}` : ''}</small></div></div>

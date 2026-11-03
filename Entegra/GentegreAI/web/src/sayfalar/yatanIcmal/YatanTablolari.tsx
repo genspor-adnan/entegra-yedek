@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { YatanIcmali, YatanOzet } from '../../api/uclar/yatanIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { DURUM, beklemeRozeti, dolulukRozeti, gunMetni } from './yatanIcmalOrtak';
@@ -58,7 +59,7 @@ export function ServisTablosu({ v, secili, setSecili }: { v: YatanIcmali; secili
                 {hucreler(s.ozet, true)}
               </tr>
               {a && s.doktorlar.map(d => (
-                <tr key={d.id} className="lb-alt"><td /><td>&nbsp;&nbsp;{d.ad}</td>{hucreler(d.ozet, false)}</tr>
+                <tr key={d.id} className="lb-alt"><td /><td>&nbsp;&nbsp;<KartAdi tur="personel" id={d.id > 0 ? d.id : null}>{d.ad}</KartAdi></td>{hucreler(d.ozet, false)}</tr>
               ))}
             </Fragment>
           );

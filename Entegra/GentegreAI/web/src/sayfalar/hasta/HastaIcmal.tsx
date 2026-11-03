@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { HastaIcmali } from '../../api/uclar/hastaIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { IcmalA4 } from './icmal/IcmalA4';
 import {
@@ -82,7 +83,7 @@ export function HastaIcmal() {
 
       {veri && o && (<>
         <div className="hi-serit">
-          <div className="sel">👤 <b>{veri.hasta.ad}</b>{veri.hasta.tc && ` · TC ${veri.hasta.tc}`}{yas != null && ` · ${yas} yaş`}{cins && ` · ${cins}`}</div>
+          <div className="sel">👤 <b><KartAdi tur="hasta" id={veri.hasta.id}>{veri.hasta.ad}</KartAdi></b>{veri.hasta.tc && ` · TC ${veri.hasta.tc}`}{yas != null && ` · ${yas} yaş`}{cins && ` · ${cins}`}</div>
           {veri.hasta.dosyaNo && <div className="sel">📁 Dosya No: <b>{veri.hasta.dosyaNo}</b></div>}
           {kurumlar && <div className="sel">🏥 Kurum: <b>{kurumlar}</b></div>}
           <div className="sel">📅 Dönem:

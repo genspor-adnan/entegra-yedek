@@ -5,6 +5,7 @@ import {
 } from '../../api/uclar/teklifIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { Modal } from '../../bilesenler/Modal';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -202,7 +203,7 @@ export function TeklifIcmali() {
                     {veri.temsilciler.length === 0 && <tr><td colSpan={9} className="bos">Bu dönemde teklif yok.</td></tr>}
                     {veri.temsilciler.map(t => (
                       <tr key={t.id} className="ac" onDoubleClick={() => degistir({ temsilci: String(t.id) })}>
-                        <td className={t.id === -1 ? 'ki-soluk' : ''}>{t.ad}</td><td className="sag">{t.teklif}</td><td className="sag">{tl(t.tutar)}</td>
+                        <td className={t.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td><td className="sag">{t.teklif}</td><td className="sag">{tl(t.tutar)}</td>
                         <td className="sag">{tl(t.donen)}</td>
                         <td><DonusumCubugu y={adetKipi ? t.donusumAdet : t.donusum} dusuk={dusuk} /></td>
                         <td className="sag">{tl(t.kayip)}</td>
@@ -290,7 +291,7 @@ export function TeklifIcmali() {
                           temsilci: t.temsilci, tutar: t.tutar, iskonto: 0, gecerlilik: t.gecerlilik, revize: '', konu: '', durum: 'bekliyor',
                           durumAdi: 'bekliyor', donenTutar: 0, donenOran: 0, rakip: '', sistem: false })}>
                         <td><span className="lnk" onClick={e => { e.stopPropagation(); gz.belgeKarti(t.id) }}>{t.no}</span></td>
-                        <td>{t.cari}</td><td className={t.temsilci === '(temsilcisiz)' ? 'ki-soluk' : ''}>{t.temsilci}</td>
+                        <td><KartAdi tur={t.tedarikci && !t.musteri ? 'tedarikci' : 'musteri'} id={t.tarafId}>{t.cari}</KartAdi></td><td className={t.temsilci === '(temsilcisiz)' ? 'ki-soluk' : ''}>{t.temsilci}</td>
                         <td className="sag">{tl(t.tutar)}</td><td>{t.gecerlilik ? tarihT(t.gecerlilik) : <span className="ki-soluk">süresiz</span>}</td>
                         <td className="sag">{t.hareketsizGun} gün</td>
                         <td><span className={'bo-rz ' + (t.durum === 'bugun' || t.durum === 'yarin' ? 'kir' : 'sari')}>{t.durumAdi}</span></td></tr>))}

@@ -1,6 +1,7 @@
 import { useRef, type MouseEvent } from 'react';
 import type { AlacakYaslandirma } from '../../api/uclar/alacakYaslandirma';
 import { para } from '../../bilesenler/bicim';
+import { KartSimgesi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { DILIM_RENK, dilimYuzdeleri, yasRozeti } from './yaslandirmaOrtak';
@@ -52,7 +53,7 @@ export function KurumTablosu({ v, secili, setSecili, kurumAc }: {
             <tr key={k.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(k.id, e)}
                 title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
               <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(k.id, e)} /></td>
-              <td><a className="ki-lnk" title="Kurum icmalini aç" onClick={e => { e.stopPropagation(); kurumAc(k.id) }}>{k.ad}</a></td>
+              <td><a className="ki-lnk" title="Kurum icmalini aç" onClick={e => { e.stopPropagation(); kurumAc(k.id) }}>{k.ad}</a><KartSimgesi tur="kurum" id={k.id} /></td>
               <td>{k.turAdi}</td><td className="sag">{k.acikBelge}</td>
               <DilimHucreleri x={k} />
               <td className="sag"><b>{p(k.toplam)}</b></td><td className="sag">{tire(k.faturasiz)}</td>
@@ -94,7 +95,7 @@ export function HastaTablosu({ v, secili, setSecili, hastaAc }: {
             <tr key={h.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(h.id, e)}
                 title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
               <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(h.id, e)} /></td>
-              <td><a className="ki-lnk" title="Hasta icmalini aç" onClick={e => { e.stopPropagation(); hastaAc(h.id) }}>{h.ad}</a></td>
+              <td><a className="ki-lnk" title="Hasta icmalini aç" onClick={e => { e.stopPropagation(); hastaAc(h.id) }}>{h.ad}</a><KartSimgesi tur="hasta" id={h.id} /></td>
               <td>{h.dosyaNo || '—'}</td><td className="sag">{h.acikProtokol}</td>
               <DilimHucreleri x={h} />
               <td className="sag"><b>{p(h.toplam)}</b></td>

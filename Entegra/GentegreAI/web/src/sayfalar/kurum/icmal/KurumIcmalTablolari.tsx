@@ -1,6 +1,7 @@
 import { useRef, type MouseEvent } from 'react';
 import type { KurumIcmali } from '../../../api/uclar/kurumIcmal';
 import { para } from '../../../bilesenler/bicim';
+import { KartAdi, KartSimgesi } from '../../../bilesenler/KartAdi';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 import { icmalRozeti, provizyonRozeti, secimUygula } from './kurumIcmalOrtak';
 
@@ -48,7 +49,7 @@ export function KurumTablosu({ v, secili, setSecili }: {
             <tr key={k.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(k.id, e)}
                 title="Tıkla: yalnız bu kurum · Ctrl: ekle / çıkar · Shift: aralık">
               <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(k.id, e)} /></td>
-              <td><b>{k.ad}</b></td><td>{k.turAdi}</td><td className="sag">{k.basvuru}</td>
+              <td><b><KartAdi tur="kurum" id={k.id}>{k.ad}</KartAdi></b></td><td>{k.turAdi}</td><td className="sag">{k.basvuru}</td>
               <td className="sag">{p(k.toplam)}</td><td className="sag">{p(k.kurumPayi)}</td>
               <td className={'sag' + (k.kesinti > 0.005 ? ' kir' : '')}>{tire(k.kesinti)}</td>
               <td className="sag">{p(k.net)}</td>
@@ -88,8 +89,8 @@ export function BasvuruTablosu({ v, kurumSutunu, hastaAc }: {
               <td>{tarihKisa(b.tarih)}</td><td>{b.protokolNo}</td>
               <td>{b.hastaId
                 ? <a className="ki-lnk" title="Hasta icmalini aç" onClick={() => hastaAc(b.hastaId!)}>{b.hasta}</a>
-                : b.hasta}</td>
-              {kurumSutunu && <td>{b.kurum}</td>}
+                : b.hasta}<KartSimgesi tur="hasta" id={b.hastaId} /></td>
+              {kurumSutunu && <td><KartAdi tur="kurum" id={b.kurumId}>{b.kurum}</KartAdi></td>}
               <td>{b.provizyonNo || '—'}</td><td>{b.bolum || '—'}</td>
               <td className="sag">{p(b.toplam)}</td><td className="sag">{p(b.kurumPayi)}</td>
               <td className="sag">{p(b.hastaPayi)}</td>

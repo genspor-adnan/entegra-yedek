@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { AmeliyathaneIcmali } from '../../api/uclar/ameliyathaneIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { dkFark, dolulukRozeti, ilkVakaMetni, marjRozeti, saatMetni, sapmaRozeti, sureMetni, yuzde } from './ameliyathaneIcmalOrtak';
@@ -90,7 +91,7 @@ export function CerrahTablosu({ v }: { v: AmeliyathaneIcmali }) {
         <tbody>
           {v.cerrahlar.length === 0 && <tr><td colSpan={9} className="bos">Bu dönemde biten ameliyat yok.</td></tr>}
           {v.cerrahlar.map(c => (
-            <tr key={c.id}><td><b>{c.ad}</b></td><td>{c.brans}</td><td className="sag">{c.vaka}</td><td className="sag">{saatMetni(c.masaDk)}</td>
+            <tr key={c.id}><td><b><KartAdi tur="personel" id={c.id > 0 ? c.id : null}>{c.ad}</KartAdi></b></td><td>{c.brans}</td><td className="sag">{c.vaka}</td><td className="sag">{saatMetni(c.masaDk)}</td>
               <td><Rz r={sapmaRozeti(c.sapma)} /></td><td className="sag">{tire(c.gecIlkVaka)}</td><td className={'sag' + (c.iptal ? ' kir' : '')}>{tire(c.iptal)}</td>
               <td className="sag">{p(c.ciro)}</td><td><Rz r={marjRozeti(c.marj)} /></td></tr>
           ))}
@@ -107,7 +108,7 @@ export function CerrahTablosu({ v }: { v: AmeliyathaneIcmali }) {
         <tbody>
           {v.anestezi.length === 0 && <tr><td colSpan={4} className="bos">Anestezi uzmanı yazılmış biten ameliyat yok.</td></tr>}
           {v.anestezi.map(a => (
-            <tr key={a.id}><td><b>{a.ad}</b></td><td className="sag">{a.vaka}</td><td className="sag">{saatMetni(a.sureDk)}</td>
+            <tr key={a.id}><td><b><KartAdi tur="personel" id={a.id > 0 ? a.id : null}>{a.ad}</KartAdi></b></td><td className="sag">{a.vaka}</td><td className="sag">{saatMetni(a.sureDk)}</td>
               <td><Cubuk oran={100 * a.sureDk / enCok} /></td></tr>
           ))}
           {v.anestezi.length > 0 && (

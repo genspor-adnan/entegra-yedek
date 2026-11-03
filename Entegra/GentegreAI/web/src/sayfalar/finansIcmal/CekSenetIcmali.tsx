@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { cekSenetIcmalUclari, type CekSenetEvrak, type CekSenetIcmali as Veri } from '../../api/uclar/cekSenetIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -221,7 +222,7 @@ export function CekSenetIcmali() {
                           <td>{e.seriNo || <span className="ki-soluk">—</span>}</td>
                           {yon === 'ikisi' && <td>{e.yon === 1 ? 'Alınan' : 'Verilen'}</td>}
                           <td>{e.kesideci}{e.ucuncuKisi && <span className="ki-soluk"> (3. kişi)</span>}</td>
-                          <td>{e.cari}</td>
+                          <td><KartAdi tur={e.yon === 2 ? 'tedarikci' : 'musteri'} id={e.cariId}>{e.cari}</KartAdi></td>
                           <td>{e.banka ? `${e.banka}${e.bankaSube ? ' · ' + e.bankaSube : ''}` : <span className="ki-soluk">—</span>}</td>
                           <td className="orta">{tarihT(e.vade)}</td>
                           <td className={'sag' + (e.kalanGun < 0 ? ' kir' : '')}>{kalanMetni(e.kalanGun)}</td>
@@ -331,7 +332,7 @@ export function CekSenetIcmali() {
                       {veri.verilen.length === 0 && <tr><td colSpan={9} className="bos">Ödenecek kendi çek / senedimiz yok.</td></tr>}
                       {veri.verilen.map(e => (
                         <tr key={e.id} className={e.yetersiz || (e.durum === 10 && e.kalanGun < 0) ? 'cs-kir' : ''} style={{ cursor: 'pointer' }} onDoubleClick={() => kartAc(e)}>
-                          <td>{turAdi(e.tur)}</td><td>{e.seriNo}</td><td>{e.cari}</td>
+                          <td>{turAdi(e.tur)}</td><td>{e.seriNo}</td><td><KartAdi tur={e.yon === 2 ? 'tedarikci' : 'musteri'} id={e.cariId}>{e.cari}</KartAdi></td>
                           <td>{e.hesap ? <>{e.hesap}{e.hesapTahmini && <span className="ki-soluk" title="Evrakta hesap yok: bankası ve para birimi aynı tek hesap varsayıldı"> (varsayılan)</span>}</>
                             : <span className="ki-soluk">{e.banka || 'hesap belirsiz'}</span>}</td>
                           <td className="orta">{tarihT(e.vade)}</td>

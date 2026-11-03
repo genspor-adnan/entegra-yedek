@@ -5,6 +5,7 @@ import {
 } from '../../api/uclar/babsIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { Modal } from '../../bilesenler/Modal';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -149,7 +150,7 @@ export function BabsIcmali() {
                       <tr key={`${k}-${x.id}`} className="ac bb-det" onDoubleClick={() => gz.belgeKarti(x.id)}>
                         {yazabilir && <td />}
                         <td /><td><span className="lnk" onClick={() => gz.belgeKarti(x.id)}>{x.no}</span> · {tarihT(x.tarih)}</td>
-                        <td colSpan={2}>{x.taraf}</td><td className="sag">{YON_ADI[x.yon] ?? x.yon}</td><td className="sag">{tl(x.matrah)}</td>
+                        <td colSpan={2}><KartAdi tur={x.yon.startsWith('alis') ? 'tedarikci' : 'musteri'} id={x.tarafId > 0 ? x.tarafId : null}>{x.taraf}</KartAdi></td><td className="sag">{YON_ADI[x.yon] ?? x.yon}</td><td className="sag">{tl(x.matrah)}</td>
                         <td /><td />
                       </tr>
                     ))}
@@ -250,7 +251,7 @@ export function BabsIcmali() {
                       {veri.esikAlti.length === 0 && <tr><td colSpan={7} className="bos">Eşik altında cari yok.</td></tr>}
                       {veri.esikAlti.map(s => (
                         <tr key={satirKimligi(s)} className="ac" onDoubleClick={() => gz.cariKarti(s.tarafId, s.form === 'Ba')}>
-                          <td>{s.unvan}</td><td>{s.form}</td><td>{s.vkn ? VKN(s.vkn) : <span className="ki-soluk">(boş)</span>}</td>
+                          <td><KartAdi tur={s.form === 'Ba' ? 'tedarikci' : 'musteri'} id={s.tarafId > 0 ? s.tarafId : null}>{s.unvan}</KartAdi></td><td>{s.form}</td><td>{s.vkn ? VKN(s.vkn) : <span className="ki-soluk">(boş)</span>}</td>
                           <td className="sag">{s.belge}</td><td className="sag">{tl(s.tutar)}</td><td className="sag">{tl(s.kalan ?? 0)}</td>
                           <td>{s.yakin && <span className="bo-rz sari">eşiğe çok yakın</span>}</td></tr>
                       ))}
@@ -284,7 +285,7 @@ export function BabsIcmali() {
                   <table className="hi-tablo" style={{ marginTop: 8 }}>
                     <thead><tr><th>Yurt dışı cari (Ba / Bs dışı)</th><th>Form</th><th className="sag">Belge</th><th className="sag">Tutar</th></tr></thead>
                     <tbody>{veri.yurtDisi.map(s => (
-                      <tr key={satirKimligi(s)}><td>{s.unvan}</td><td>{s.form}</td><td className="sag">{s.belge}</td><td className="sag">{tl(s.tutar)}</td></tr>
+                      <tr key={satirKimligi(s)}><td><KartAdi tur={s.form === 'Ba' ? 'tedarikci' : 'musteri'} id={s.tarafId > 0 ? s.tarafId : null}>{s.unvan}</KartAdi></td><td>{s.form}</td><td className="sag">{s.belge}</td><td className="sag">{tl(s.tutar)}</td></tr>
                     ))}</tbody></table>
                 )}
                 <div className="ki-soluk si-not" style={{ padding: '0 10px' }}>Aynı VKN'li cariler bildirimde tek satıra toplanır (GİB VKN bazında ister).
@@ -305,7 +306,7 @@ export function BabsIcmali() {
                         const m = s.mutabakat!;
                         return (
                           <tr key={satirKimligi(s)}>
-                            <td>{s.unvan}</td><td>{s.form}</td><td className="sag">{tl(s.tutar)}</td><td className="sag">{s.belge}</td>
+                            <td><KartAdi tur={s.form === 'Ba' ? 'tedarikci' : 'musteri'} id={s.tarafId > 0 ? s.tarafId : null}>{s.unvan}</KartAdi></td><td>{s.form}</td><td className="sag">{tl(s.tutar)}</td><td className="sag">{s.belge}</td>
                             <td>{tarihT(m.gonderimAn)}{m.eposta ? ` · ${m.eposta}` : ' · çıktı'}</td>
                             <td><MutabakatRozeti s={s} />{m.yanitAn ? <span className="ki-soluk"> {tarihT(m.yanitAn)}</span> : null}</td>
                             <td className="sag">{m.carininTutari != null ? tl(m.carininTutari) : '—'}</td>

@@ -1,6 +1,7 @@
 import { useRef, type MouseEvent } from 'react';
 import type { HekimPerformansIcmali, PerformansDegeri } from '../../api/uclar/hekimPerformans';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { AY_KISA, degisimRozeti } from './performansOrtak';
 
@@ -56,7 +57,7 @@ export function HekimTablosu({ v, secili, setSecili }: {
             <tr key={h.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(h.id, e)}
                 title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
               <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(h.id, e)} /></td>
-              <td><b>{h.ad}</b></td><td>{h.bolum || '—'}</td><Degerler d={h.deger} />
+              <td><b><KartAdi tur="personel" id={h.id}>{h.ad}</KartAdi></b></td><td>{h.bolum || '—'}</td><Degerler d={h.deger} />
             </tr>
           );
         })}

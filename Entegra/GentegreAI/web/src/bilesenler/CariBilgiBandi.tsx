@@ -71,7 +71,7 @@ export function CariBilgiBandi({ id, tazele = 0, bakiyesiz, tedarikci, adYani, d
     <div className="cbb">
       <style>{STIL}</style>
       <span className={onKartAc ? 'cbb-ac' : undefined} onClick={onKartAc} title={onKartAc ? c('Cari kartını aç') : undefined}>
-        <Avatar ad={ad} buyuk soluk={Number(s.durum ?? 1) !== 1} /></span>
+        <Avatar ad={ad} buyuk kurumsal soluk={Number(s.durum ?? 1) !== 1} /></span>
       <div className="cbb-govde">
         <div className="cbb-ad" title={onKartAc ? c('Cari kartını aç') : ad}>
           {onKartAc ? <span className="cbb-ac" onClick={onKartAc}>{ad}</span> : ad}{adYani}</div>

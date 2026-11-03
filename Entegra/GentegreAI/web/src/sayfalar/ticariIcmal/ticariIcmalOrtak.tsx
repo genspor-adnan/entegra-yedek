@@ -2,6 +2,7 @@ import { useContext, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FaturasizIrsaliye, ParaTablosu } from '../../api/uclar/ticariIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { Kutucuk } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
@@ -98,7 +99,7 @@ export function ParaTablosuGorunumu({ t, satis }: { t: ParaTablosu; satis: boole
   );
 }
 
-export function FaturasizKutusu({ v, baslik, belgeAc }: { v: FaturasizIrsaliye; baslik: string; belgeAc(id: number): void }) {
+export function FaturasizKutusu({ v, baslik, belgeAc, tedarikci }: { v: FaturasizIrsaliye; baslik: string; belgeAc(id: number): void; tedarikci?: boolean }) {
   return (
     <Kutucuk baslik={baslik} not={`${v.sayi} irsaliye · ${tl(v.tutar)} ₺ · KDV hariç, açık kısım`}>
       <table className="hi-tablo"><thead><tr><th>İrsaliye</th><th>Cari</th><th>Tarih</th><th className="sag">Tutar</th><th className="orta">Gün</th></tr></thead>
@@ -106,7 +107,7 @@ export function FaturasizKutusu({ v, baslik, belgeAc }: { v: FaturasizIrsaliye; 
           {v.liste.length === 0 && <tr><td colSpan={5} className="bos">Faturası bekleyen irsaliye yok.</td></tr>}
           {v.liste.map(x => (
             <tr key={x.id} className="ac" onDoubleClick={() => belgeAc(x.id)}>
-              <td>{x.no || `#${x.id}`}</td><td>{x.cari}</td><td>{tarihT(x.tarih)}</td><td className="sag">{tl(x.tutar)}</td>
+              <td>{x.no || `#${x.id}`}</td><td><KartAdi tur={tedarikci ? 'tedarikci' : 'musteri'} id={x.cariId}>{x.cari}</KartAdi></td><td>{tarihT(x.tarih)}</td><td className="sag">{tl(x.tutar)}</td>
               <td className="orta"><span className={'bo-rz ' + (x.gun > 15 ? 'kir' : x.gun > 7 ? 'sari' : 'pas')}>{x.gun}</span></td></tr>
           ))}
           {v.sayi > v.liste.length && <tr><td colSpan={5} className="bos">… {v.sayi - v.liste.length} irsaliye daha</td></tr>}

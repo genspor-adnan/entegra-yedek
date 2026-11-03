@@ -7,7 +7,7 @@ import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 import { telefonBicimle } from '../../bilesenler/bicim';
 import { mesaj } from '../../bilesenler/mesaj';
-import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, ISLEM_SIRASI, rolAdi,
+import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, rolAdi, rolIslemleri,
          type CariRol, type SeciliCari } from './cariKomutu';
 import { paletSadelestir } from './paletMetin';
 import type { GundemKarti, KayitOnerileri, KayitTuru } from '../../api/uclar/gundem';
@@ -289,6 +289,54 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     return () => { iptal = true; window.clearTimeout(zaman) };
   }, [arama, acik, ekranlar]);
 
+  /**
+   * DÜZ VKN / TCKN (kullanıcı 03.11.2026: "prompt'a vkno girdim hiç bir bilgi gelmedi.. gelmesi gerekir"): yalnız 10-11 hane
+   * yazılınca kayıtlı cari (müşteri ve / veya tedarikçi) gelir - Enter SEÇER (öneriler + komutlar); kayıtlı değilse
+   * "izibiz'den bilgi al, yeni müşteri / tedarikçi kartı oluştur" satırları. Rol sözcüklü kalıp (cariNiyetCoz) aynen sürer.
+   */
+  const [vknOgeleri, setVknOgeleri] = useState<Oge[]>([]);
+  useEffect(() => {
+    const vkn = arama.trim();
+    if (!acik || seciliCari || !/^\d{10,11}$/.test(vkn)) { setVknOgeleri([]); return }
+    let iptal = false;
+    const zaman = window.setTimeout(() => {
+      // 10 HANE: müşteri / tedarikçi / anlaşmalı kurum (VKN). 11 HANE: bireysel müşteri (TCKN) + o TC'ye kesilmiş
+      //   faturalar; hasta / personel 11 hanesi kimlik niyetinden (aşağıda) ayrıca gelir.
+      api.vergiNoAra(vkn).then(y => {
+        if (iptal) return;
+        const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+        const etiket = vkn.length === 10 ? `VKN ${vkn}` : `TCKN ${vkn}`;
+        const l: Oge[] = [];
+        for (const k of y.kayitlar) {
+          const t = k.tur === 'kurum' ? { yol: '/kurum', ikon: '🏥', ad: 'Anlaşmalı kurum' } : KAYIT_TURU[k.tur];
+          if (!menude.has(t.yol)) continue;
+          l.push({ bolum: 'Cariler', tur: 'ekran', anahtar: `vk${k.tur}${k.id}`, ikon: t.ikon, ad: k.ad,
+            grup: [c(t.ad), etiket, k.kod, k.durum !== 1 ? c('pasif') : ''].filter(Boolean).join(' · ')
+                  + (k.tur === 'kurum' ? '' : ` · ${c('seç: öneriler, sip al, fat kes…')}`),
+            yol: `${t.yol}/${k.id}`,
+            ...(k.tur === 'kurum' ? {} : { cariSec: { id: k.id, ad: k.ad, kod: k.kod, musteri: k.tur === 'musteri',
+                                                     tedarikci: k.tur === 'tedarikci', tur: k.tur } }) });
+        }
+        for (const b of y.belgeler)
+          l.push({ bolum: 'Kayıtlar', tur: 'ekran', anahtar: `vb${b.id}`, ikon: '🧾',
+            ad: `${b.no || `#${b.id}`} — ${b.unvan}`, grup: `${etiket} · ${new Date(b.tarih).toLocaleDateString('tr-TR')} · ${b.tutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+            yol: `/belge/${b.id}` });
+        if (y.kayitlar.length === 0) {
+          const roller = (vkn.length === 10 ? ['musteri', 'tedarikci'] : ['musteri']) as ('musteri' | 'tedarikci')[];
+          for (const r of roller) if (menude.has(cariKartYolu(r)))
+            l.push({ bolum: 'İşlemler', tur: 'ekran', anahtar: `vk-yeni-${r}`, islem: true, ikon: r === 'musteri' ? '👥' : '🤝',
+              ad: `${c("izibiz'den bilgi al, yeni")} ${c(rolAdi(r))} ${c('kartı oluştur')}${vkn.length === 11 ? ` (${c('bireysel')})` : ''} — ${etiket}`,
+              grup: c('kayıtlı cari yok'), yol: `${cariKartYolu(r)}/yeni?vkno=${vkn}`, cariOlustur: { vkn, rol: r } });
+          if (vkn.length === 10 && menude.has('/kurum'))
+            l.push({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'vk-yeni-kurum', islem: true, ikon: '🏥',
+              ad: `${c('Yeni anlaşmalı kurum kartı')} — ${etiket}`, grup: c('kayıtlı kurum yok'), yol: `/kurum/yeni?vkno=${vkn}` });
+        }
+        setVknOgeleri(l);
+      }).catch(() => { if (!iptal) setVknOgeleri([]) });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(zaman) };
+  }, [arama, acik, ekranlar, seciliCari]);
+
   const [cumleKaydi, setCumleKaydi] = useState<Oge[]>([]);
   useEffect(() => {
     // Numara + niyet ('11111111110 yeni hasta') cümle komutu değil - kimlik niyeti karşılar.
@@ -463,14 +511,14 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             grup: seciliCari.kod, yol: `${t.yol}/${seciliCari.id}`, islem: true }])];
       }
       const coz = cariIslemCoz(q);
-      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem] : ISLEM_SIRASI;
+      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem] : rolIslemleri(seciliCari);
       const yon = coz === 'yok' ? null : coz.yon;
       const l = islemler.map(i => cariIslemHedefi(seciliCari, i, yon)).filter(h => menude.has(h.liste));
       return l.length
         ? [...oneriOgeleri, ...l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
                              grup: seciliCari.kod, yol: h.yol, islem: true, ikon: h.ikon }))]
         : [{ bolum: 'İşlemler', tur: 'komut', anahtar: 'ci-yok', grup: '', kod: '', aktif: false,
-             ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
+             ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · tahsilat · ödeme · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
     }
 
     // GÜNDEM NİYETİ ("bugünkü işlerim", "görevlerim", "bugün ne var"): rolün kartları - tıklanınca ilgili liste.
@@ -534,13 +582,13 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     // CARİLER: bir ekran adı yazılanla BAŞLIYORSA ekranlar önce ("kasa" yazan Kasa ekranını bekler), değilse cariler.
     const sadeQ = paletSadelestir(q);
     const ekranBasi = ekranlar.some(e => paletSadelestir(e.ad).startsWith(sadeQ));
-    return [...cariOgeleri, ...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
+    return [...cariOgeleri, ...vknOgeleri, ...kimlikOgeleri, ...cumleKaydi, ...kayitlar.filter(o => !(o.tur === 'ekran' && kimlikYollari.has(o.yol))),
             ...(ekranBasi ? [] : cariAdOgeleri),
             ...ekranEslesen.filter(o => o.bolum === 'Ekranlar'),
             ...(ekranBasi ? cariAdOgeleri : []),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
   }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, cariOgeleri, cariAdOgeleri,
-      seciliCari, ekranSayac, gundem, oneriler]);
+      seciliCari, ekranSayac, gundem, oneriler, vknOgeleri]);
 
   if (!acik) return null;
 
@@ -625,7 +673,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             placeholder={ses.dinliyor ? c('Dinliyorum… söyleyin')
               : seciliCari ? (seciliCari.tur && seciliCari.tur !== 'musteri' && seciliCari.tur !== 'tedarikci'
                   ? c('Öneriler aşağıda - Enter seçili satırı açar')
-                  : c('Komut: sip al · fat kes · irs · kart · ekstre (boş = hepsi)'))
+                  : c('Komut: sip al · fat kes · irs · tahsilat · ödeme · kart · ekstre (boş = hepsi)'))
               : c('Ekran, kayıt adı, "bugünkü işlerim" ya da numara (dosya / TC / VKN)… (Ctrl+K)')}
             value={arama}
             onChange={e => { setArama(e.target.value); setSecili(0) }}

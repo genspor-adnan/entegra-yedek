@@ -3,6 +3,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { kdvIcmalUclari, type KdvIcmali as Veri, type KdvOranTablosu, type KdvUyariSatiri } from '../../api/uclar/kdvIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -183,7 +184,7 @@ export function KdvIcmali() {
                         <tr key={`${x.belgeId}-${x.kod}`} className={'ac' + (secili === x.belgeId ? ' ti-sec' : '')}
                           onClick={() => sec(x.belgeId)} onDoubleClick={() => belgeAc(x.belgeId)}>
                           <td><span className="lnk" onClick={() => belgeAc(x.belgeId)}>{x.no}</span></td><td>{tarihT(x.tarih)}</td>
-                          <td>{x.taraf}</td><td>{x.yon === 'alis' ? 'alış' : 'satış'}</td><td title={x.kodAdi}>{x.kodAdi}</td>
+                          <td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.taraf}</KartAdi></td><td>{x.yon === 'alis' ? 'alış' : 'satış'}</td><td title={x.kodAdi}>{x.kodAdi}</td>
                           <td className="orta">{tevOran(x.oran)}</td><td className="sag">{tl(x.matrah)}</td><td className="sag">{tl(x.kdv)}</td>
                           <td className="sag">{tl(x.tevkif)}</td><td className="sag">{tl(x.odenen)}</td></tr>
                       ))}
@@ -234,7 +235,7 @@ export function KdvIcmali() {
                       {veri.iade.satirlar.map(x => (
                         <tr key={x.belgeId} className={'ac' + (secili === x.belgeId ? ' ti-sec' : '')}
                           onClick={() => sec(x.belgeId)} onDoubleClick={() => belgeAc(x.belgeId)}>
-                          <td>{x.no}</td><td>{tarihT(x.tarih)}</td><td>{x.taraf}</td><td>{x.yon === 'satis' ? 'satış iadesi' : 'alış iadesi'}</td>
+                          <td>{x.no}</td><td>{tarihT(x.tarih)}</td><td><KartAdi tur={x.yon === 'alis' ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.taraf}</KartAdi></td><td>{x.yon === 'satis' ? 'satış iadesi' : 'alış iadesi'}</td>
                           <td>{x.iadeEdilenId ? <span className="lnk" onClick={e => { e.stopPropagation(); belgeAc(x.iadeEdilenId) }}>{x.iadeEdilenNo}</span>
                             : <span className="ki-soluk">(bağsız)</span>}</td>
                           <td className="sag">{tl(x.matrah)}</td><td className="sag">{tl(x.kdv)}</td>
@@ -261,7 +262,7 @@ export function KdvIcmali() {
                       {veri.babs.satirlar.length === 0 && <tr><td colSpan={6} className="bos">Sınırı aşan taraf yok.</td></tr>}
                       {veri.babs.satirlar.map(x => (
                         <tr key={`${x.form}-${x.tarafId}-${x.vkn}`} className="ac" onDoubleClick={() => x.tarafId > 0 && gz.cariKarti(x.tarafId, x.form === 'Ba')}>
-                          <td>{x.form}</td><td>{x.taraf}</td>
+                          <td>{x.form}</td><td><KartAdi tur={x.form === 'Ba' ? 'tedarikci' : 'musteri'} id={x.tarafId > 0 ? x.tarafId : null}>{x.taraf}</KartAdi></td>
                           <td>{x.vkn ? VKN(x.vkn) : <span className="kir">(boş)</span>}</td>
                           <td className="sag">{x.belge}</td><td className="sag">{tl(x.tutar)}</td>
                           <td><span className={'bo-rz ' + (x.durum === 'tamam' ? 'ok' : 'kir')}>
@@ -322,7 +323,7 @@ export function KdvIcmali() {
                       <tbody>
                         {veri.muhasebe.fislenmemis.map(x => (
                           <tr key={x.belgeId} className="ac" onClick={() => sec(x.belgeId)} onDoubleClick={() => belgeAc(x.belgeId)}>
-                            <td>{x.no}</td><td>{tarihT(x.tarih)}</td><td>{x.taraf}</td><td>{YON_ADI[x.yon] ?? x.yon}</td><td className="sag">{tl(x.kdv)}</td></tr>
+                            <td>{x.no}</td><td>{tarihT(x.tarih)}</td><td><KartAdi tur={x.yon.startsWith('alis') ? 'tedarikci' : 'musteri'} id={x.tarafId}>{x.taraf}</KartAdi></td><td>{YON_ADI[x.yon] ?? x.yon}</td><td className="sag">{tl(x.kdv)}</td></tr>
                         ))}
                         {veri.muhasebe.fislenmemisSayi > veri.muhasebe.fislenmemis.length &&
                           <tr><td colSpan={5} className="bos">… {veri.muhasebe.fislenmemisSayi - veri.muhasebe.fislenmemis.length} belge daha</td></tr>}

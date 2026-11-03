@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { servisIcmalUclari, type TeknikServisIcmali as Veri, type ServisTeknisyenSatiri } from '../../api/uclar/servisIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -348,7 +349,7 @@ export function TeknikServisIcmali() {
                   {veri.emanetler.length === 0 && <tr><td colSpan={7} className="bos">Dışarıda emanet cihaz yok.</td></tr>}
                   {veri.emanetler.map(e => (
                     <tr key={e.id} className="ac" onDoubleClick={() => gz.emanet(e.id)}>
-                      <td>{e.no || `#${e.id}`}</td><td>{e.cihaz}</td><td>{e.taraf}</td>
+                      <td>{e.no || `#${e.id}`}</td><td>{e.cihaz}</td><td><KartAdi tur="musteri" id={e.tarafId}>{e.taraf}</KartAdi></td>
                       <td>{e.isEmriId ? <span className="lnk" onClick={() => gz.isEmri(e.isEmriId)}>{e.isEmriNo || `#${e.isEmriId}`}</span> : '—'}</td>
                       <td>{tarihT(e.veris)}</td>
                       <td className="orta"><span className={'bo-rz ' + (e.gun > 14 ? 'kir' : e.gun > 7 ? 'sari' : 'pas')}>{e.gun}</span></td>
@@ -370,7 +371,7 @@ export function TeknikServisIcmali() {
                     {veri.sozlesmeler.map(s => (
                       <tr key={s.id}>
                         <td><span className="lnk" onClick={() => gz.sozlesme(s.id)}>{s.no}</span></td>
-                        <td>{s.taraf}</td><td>{s.kapsam}</td><td>{tarihT(s.bas)}–{tarihT(s.bit)}</td>
+                        <td><KartAdi tur="musteri" id={s.tarafId}>{s.taraf}</KartAdi></td><td>{s.kapsam}</td><td>{tarihT(s.bas)}–{tarihT(s.bit)}</td>
                         <td className="sag">{tl(s.yillikBedel)}</td><td className="sag" title={`${s.gecenGun} / ${s.toplamGun} gün`}>{tl(s.gecenPay)}</td>
                         <td className="sag">{tl(s.iscilik)}{s.tarifeli > 0 && <span className="bo-rz sari" style={{ marginLeft: 4 }}
                           title="Teknisyenin maaşı ya da ziyaretin işçilik saati girilmemiş: bu ziyaretlerde personel saat maliyeti yerine tarife kullanıldı">tarife {s.tarifeli}</span>}</td>
@@ -402,7 +403,7 @@ export function TeknikServisIcmali() {
                     {veri.faturasiz.liste.map(x => (
                       <tr key={x.id} className="ac" onDoubleClick={() => gz.isEmri(x.id)}>
                         <td><span className="lnk" onClick={() => gz.isEmri(x.id)}>{x.no || `#${x.id}`}</span></td><td>{tarihT(x.kapanis)}</td>
-                        <td>{x.taraf}{x.uretici && <span className="ki-soluk"> (üretici adına)</span>}</td><td>{x.kapsam}</td>
+                        <td><KartAdi tur="musteri" id={x.tarafId}>{x.taraf}</KartAdi>{x.uretici && <span className="ki-soluk"> (üretici adına)</span>}</td><td>{x.kapsam}</td>
                         <td className="sag">{tl(x.iscilik)}</td><td className="sag">{tl(x.parca)}</td><td className="sag"><b>{tl(x.toplam)}</b></td>
                         <td className="orta"><span className={'bo-rz ' + (x.gun > 15 ? 'kir' : x.gun > 7 ? 'sari' : 'pas')}>{x.gun}</span></td></tr>
                     ))}
@@ -432,7 +433,7 @@ function TeknisyenSatiri({ t, acik, tikla, isEmriAc }: { t: ServisTeknisyenSatir
   return (
     <Fragment>
       <tr className="ac" onClick={tikla}>
-        <td className={t.id <= 0 ? 'ki-soluk' : ''}><span className="ok">{acik ? '▾' : '▸'}</span>{t.ad}</td>
+        <td className={t.id <= 0 ? 'ki-soluk' : ''}><span className="ok">{acik ? '▾' : '▸'}</span><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td>
         <td className="sag">{t.ziyaret}</td><td className="sag">{t.cozulen}</td>
         <td className="sag">{yuzde(t.ilkZiyaretCozum)}{t.ilkZiyaretSayi > 0 && <span className="ki-soluk"> ({t.ilkZiyaretSayi})</span>}</td>
         <td className="sag">{sayi(t.iscilikSaat)}</td><td className="sag">{sayi(t.yolKm)}</td>

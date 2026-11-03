@@ -8,6 +8,7 @@ import { stokIcmalUclari2 } from '../../api/uclar/stokIcmal';
 import { BelgeDonusumModali } from '../../bilesenler/BelgeDonusumModali';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { metinSor, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -352,7 +353,7 @@ export function SiparisIcmali() {
                       <tr key={s.satirId} className={'ac' + (secili.has(s.satirId) ? ' ti-sec' : '')} onClick={() => gz.belgeKarti(s.belgeId)}>
                         <td className="sec" onClick={e => e.stopPropagation()}>
                           {s.donusebilir && <input type="checkbox" checked={secili.has(s.satirId)} onChange={() => cevirSec(s.satirId)} />}</td>
-                        <td>{s.no}</td><td>{tarihT(s.tarih).slice(0, 5)}</td><td>{s.cari}</td>
+                        <td>{s.no}</td><td>{tarihT(s.tarih).slice(0, 5)}</td><td><KartAdi tur={satis ? 'musteri' : 'tedarikci'} id={s.tarafId}>{s.cari}</KartAdi></td>
                         <td>{s.kod && <span className="ki-soluk">{s.kod} </span>}{s.urun}{s.doviz != null && <DovizRozetleri l={[{ para: s.para, tutar: s.doviz }]} />}</td>
                         <td className="sag">{sayi(s.miktar)}</td><td className="sag">{sayi(s.teslim)}</td>
                         <td className="sag"><b>{sayi(s.kalan)}</b>{s.taslak > 0 && <span className="bo-rz sari" title="Taslak irsaliye / faturada; teslim sayılmaz"> taslak {sayi(s.taslak)}</span>}</td>
@@ -504,7 +505,7 @@ export function SiparisIcmali() {
                     <th className="sag">OTIF</th><th className="sag">Cari</th></tr></thead>
                     <tbody>{veri.kirilim.temsilci.map(t => (
                       <tr key={t.id} className="ac" onDoubleClick={() => degistir({ temsilci: String(t.id) })}>
-                        <td className={t.id === -1 ? 'ki-soluk' : ''}>{t.ad}</td><td className="sag">{tl(t.acikTutar)}</td>
+                        <td className={t.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td><td className="sag">{tl(t.acikTutar)}</td>
                         <td className={'sag' + (t.gecenTutar > 0 ? ' kir' : '')}>{tl(t.gecenTutar)}</td><td className="sag">{yuzde(t.otif)}</td>
                         <td className="sag">{t.cari}</td></tr>))}</tbody></table>
                   <div className="ki-soluk si-not" style={{ padding: '0 10px' }}>Çift tık: temsilciyle süz.</div>

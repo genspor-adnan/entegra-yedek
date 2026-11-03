@@ -61,7 +61,7 @@ export function cariKartGovdesi(vkn: string, rol: CariRol, g: CariGibBilgisi): K
  * aç / oluş / oluştur veya boş"). Fiiller (al, kes, aç, oluş(tur), yeni, ver) isteğe bağlı. Yön: "sat / satış" satış,
  * "alış" alış; yazılmazsa carinin rolünden (müşteriyse satış, yalnız tedarikçiyse alış).
  */
-export type CariIslem = 'siparis' | 'fatura' | 'irsaliye' | 'kart' | 'ekstre';
+export type CariIslem = 'siparis' | 'fatura' | 'irsaliye' | 'tahsilat' | 'odeme' | 'kart' | 'ekstre';
 export type CariYon = 'satis' | 'alis';
 export interface SeciliCari { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; il?: string;
   /** Ad aramasında seçilen kaydın türü (03.11.2026): kişi / personel / hastada belge komutları yok, öneriler + kart var. */
@@ -70,6 +70,8 @@ export interface SeciliCari { id: number; ad: string; kod: string; musteri: bool
 const ISLEM_SOZ: [string, CariIslem][] = [
   ['sip', 'siparis'], ['siparis', 'siparis'], ['fat', 'fatura'], ['fatura', 'fatura'],
   ['irs', 'irsaliye'], ['irsaliye', 'irsaliye'], ['kart', 'kart'], ['karti', 'kart'], ['eks', 'ekstre'], ['ekstre', 'ekstre'],
+  // TAHSİLAT / ÖDEME (kullanıcı 03.11.2026: "cari türüne müş/ted oluşuna göre tahsilat/ödeme işlemleri de gelebilir").
+  ['tah', 'tahsilat'], ['tahsilat', 'tahsilat'], ['ode', 'odeme'], ['odeme', 'odeme'],
 ];
 const FIIL = new Set(['al', 'kes', 'ac', 'olus', 'olustur', 'yeni', 'ver', 'gir', 'yap']);
 
@@ -89,13 +91,16 @@ export function cariIslemCoz(metin: string): { islem: CariIslem | null; yon: Car
   return { islem, yon };
 }
 
-export const ISLEM_SIRASI: CariIslem[] = ['siparis', 'fatura', 'irsaliye', 'kart', 'ekstre'];
+export const ISLEM_SIRASI: CariIslem[] = ['siparis', 'fatura', 'irsaliye', 'tahsilat', 'odeme', 'kart', 'ekstre'];
+/** Komut yazılmadığında (boş kutu) carinin rolüne uyan işlemler: müşteriye tahsilat, tedarikçiye ödeme; rolsüzse ikisi de. */
+export const rolIslemleri = (c: SeciliCari): CariIslem[] => ISLEM_SIRASI.filter(i =>
+  i === 'tahsilat' ? c.musteri || !c.tedarikci : i === 'odeme' ? c.tedarikci || !c.musteri : true);
 const BELGE_ROTA: Record<CariYon, Record<'siparis' | 'fatura' | 'irsaliye', string>> = {
   // Satış Faturası Listesi menüde '/belge' (yeni fatura '/belge/yeni?tur=15', BelgeYeniRota).
   satis: { siparis: '/siparis', fatura: '/belge', irsaliye: '/satis-irsaliye' },
   alis: { siparis: '/alis-siparis', fatura: '/alis-fatura', irsaliye: '/alis-irsaliye' },
 };
-const ISLEM_ADI: Record<CariIslem, string> = { siparis: 'siparişi', fatura: 'faturası', irsaliye: 'irsaliyesi', kart: '', ekstre: '' };
+const ISLEM_ADI: Record<CariIslem, string> = { siparis: 'siparişi', fatura: 'faturası', irsaliye: 'irsaliyesi', tahsilat: '', odeme: '', kart: '', ekstre: '' };
 
 /** İşlemin ekranı (liste rotası - menüde yoksa yetki yok) ve gidilecek yol. */
 export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: CariYon | null):
@@ -107,6 +112,11 @@ export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: Car
   }
   if (islem === 'ekstre')
     return { ad: 'Cari ekstresi', liste: '/ekstre', yol: `/ekstre?tur=cari&id=${c.id}`, ikon: '📄' };
+  // Kasa işlemi kartı cari dolu açılır (CariAksiyonMenusu ile aynı yol); araç (nakit / banka / POS / çek) kartta değiştirilir.
+  if (islem === 'tahsilat' || islem === 'odeme')
+    return { ad: islem === 'tahsilat' ? 'Tahsilat al' : 'Ödeme yap', liste: '/kasa-islem',
+             yol: `/kasa-islem/yeni?tur=${islem === 'tahsilat' ? 21 : 31}&tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,
+             ikon: islem === 'tahsilat' ? '💵' : '💸' };
   const liste = BELGE_ROTA[yon][islem];
   return { ad: `Yeni ${yon === 'satis' ? 'satış' : 'alış'} ${ISLEM_ADI[islem]}`, liste,
            yol: `${liste}/yeni?${liste === '/belge' ? 'tur=15&' : ''}tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,

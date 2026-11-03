@@ -1,6 +1,7 @@
 import { useRef, type MouseEvent } from 'react';
-import type { SevkEdenIcmali } from '../../api/uclar/sevkEden';
+import type { SevkEden, SevkEdenIcmali } from '../../api/uclar/sevkEden';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi, type KartTuru } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { SATIR_DURUM, odemeRozeti, sevkDegisimi, turRozeti } from './sevkOrtak';
@@ -9,6 +10,12 @@ import { SATIR_DURUM, odemeRozeti, sevkDegisimi, turRozeti } from './sevkOrtak';
 
 const p = (n: number) => para.format(n);
 const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
+// AD → KART SEKMESİ (03.11.2026): gönderenin kartı türüne göre (dış hekim / kurum / iç personel)
+const kartTuru = (t: SevkEden['tur']): KartTuru => (t === 'dis' ? 'dis-hekim' : t === 'kurum' ? 'kurum' : 'personel');
+function GonderenAdi({ v, id, ad }: { v: SevkEdenIcmali; id: number; ad: string }) {
+  const d = v.doktorlar.find(x => x.id === id);
+  return <KartAdi tur={d ? kartTuru(d.tur) : 'personel'} id={d ? id : null}>{ad}</KartAdi>;
+}
 
 /** DIŞ DOKTORLAR - tık tek, Ctrl / Shift çoklu (listeSecimi); seçim diğer sekmeleri, A4'ü ve işlemleri süzer. */
 export function DoktorTablosu({ v, secili, setSecili }: {
@@ -39,7 +46,7 @@ export function DoktorTablosu({ v, secili, setSecili }: {
             <tr key={d.id} className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(d.id, e)}
                 title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
               <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(d.id, e)} /></td>
-              <td><b>{d.ad}</b>{d.telefon && <div className="ki-soluk">{d.telefon}</div>}</td>
+              <td><b><KartAdi tur={kartTuru(d.tur)} id={d.id}>{d.ad}</KartAdi></b>{d.telefon && <div className="ki-soluk">{d.telefon}</div>}</td>
               <td><span className={'bo-rz ' + tr.renk}>{tr.ad}</span></td><td>{d.brans || '—'}</td>
               <td className="sag">{d.basvuru}</td><td className="sag"><b>{p(d.ciro)}</b></td><td className="sag">{p(d.ortBasvuru)}</td>
               <td className="sag">{d.komisyon > 0.005 ? `%${d.oran.toFixed(1).replace('.', ',')}` : '—'}</td>
@@ -68,7 +75,7 @@ export function BasvuruTablosu({ v, hastaYok }: { v: SevkEdenIcmali; hastaYok?: 
         {v.basvurular.length === 0 && <tr><td colSpan={6} className="bos">Sevkli başvuru yok.</td></tr>}
         {v.basvurular.map((b, i) => (
           <tr key={`${b.belgeId}-${b.gonderenId}-${i}`}><td>{tarihKisa(b.tarih)}</td><td>{b.protokolNo}</td>
-            {!hastaYok && <td>{b.hasta}</td>}<td>{b.gonderen}</td><td>{b.bolum || '—'}</td><td className="sag">{p(b.tutar)}</td></tr>
+            {!hastaYok && <td>{b.hasta}</td>}<td><GonderenAdi v={v} id={b.gonderenId} ad={b.gonderen} /></td><td>{b.bolum || '—'}</td><td className="sag">{p(b.tutar)}</td></tr>
         ))}
         {v.basvurular.length > 0 && (
           <tr className="top"><td colSpan={hastaYok ? 4 : 5}>{v.basvurular.length} kayıt</td>
@@ -92,7 +99,7 @@ export function OdemeTablosu({ v }: { v: SevkEdenIcmali }) {
           {v.odemeler.map(x => {
             const r = SATIR_DURUM[x.durum] ?? { ad: String(x.durum), renk: 'pas' };
             return (
-              <tr key={x.id}><td>{tarihKisa(x.tarih)}</td><td>{x.gonderen}</td><td>{x.protokolNo || '—'}</td>
+              <tr key={x.id}><td>{tarihKisa(x.tarih)}</td><td><GonderenAdi v={v} id={x.gonderenId} ad={x.gonderen} /></td><td>{x.protokolNo || '—'}</td>
                 <td className="sag">{p(x.taban)}</td><td className="sag">{x.oranTipi === 2 ? p(x.deger) : `%${x.deger}`}</td>
                 <td className="sag"><b>{p(x.tutar)}</b></td><td><span className={'bo-rz ' + r.renk}>{r.ad}</span></td>
                 <td>{x.hakedisId ? `#${x.hakedisId}` : '—'}</td></tr>

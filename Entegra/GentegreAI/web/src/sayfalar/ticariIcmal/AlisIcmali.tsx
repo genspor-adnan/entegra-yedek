@@ -3,6 +3,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { ticariIcmalUclari, type AlisIcmali as Veri, type AlisTedarikciSatiri, type AlisUrunSatiri } from '../../api/uclar/ticariIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -229,7 +230,7 @@ export function AlisIcmali() {
                       const p = f.para !== veri.yerelPara ? ` ${simge(f.para)}` : '';
                       return (
                         <tr key={f.anahtar + '|' + f.tedarikciId + '|' + f.para} className="ac" onDoubleClick={() => gz.ekstre(f.tedarikciId)}>
-                          <td>{f.kod}</td><td>{f.stokId ? <span className="lnk" onClick={() => gz.stokKarti(f.stokId)}>{f.ad}</span> : f.ad}</td><td>{f.tedarikci}</td>
+                          <td>{f.kod}</td><td>{f.stokId ? <span className="lnk" onClick={() => gz.stokKarti(f.stokId)}>{f.ad}</span> : f.ad}</td><td><KartAdi tur="tedarikci" id={f.tedarikciId}>{f.tedarikci}</KartAdi></td>
                           <td className="sag">{tl(f.ilkFiyat)}{p}</td><td>{tarihT(f.ilkTarih)}</td><td className="sag">{tl(f.sonFiyat)}{p}</td><td>{tarihT(f.sonTarih)}</td>
                           <td className={'sag ' + s}>{yuzde(f.degisim, true)}</td>
                           <td className={'sag ' + s}>{f.etki > 0 ? '+' : ''}{tl(f.etki)}</td></tr>
@@ -273,7 +274,7 @@ export function AlisIcmali() {
                     <tbody>
                       {d.sozlesmeUstu.length === 0 && <tr><td colSpan={5} className="bos">Sözleşme fiyatı üstünde alış yok (ya da sözleşme tanımlı değil).</td></tr>}
                       {d.sozlesmeUstu.map((x, i) => (
-                        <tr key={i} className="ac" onDoubleClick={() => gz.belgeKarti(x.belgeId)}><td>{x.belgeNo || `#${x.belgeId}`}</td><td>{x.cari}</td>
+                        <tr key={i} className="ac" onDoubleClick={() => gz.belgeKarti(x.belgeId)}><td>{x.belgeNo || `#${x.belgeId}`}</td><td><KartAdi tur="tedarikci" id={x.cariId}>{x.cari}</KartAdi></td>
                           <td>{x.urun}</td><td className="sag kir">{tl(x.fiyat)} {simge(x.para)}</td>
                           <td className="sag" title={x.sozlesmeNo}>{tl(x.sozlesme)} {simge(x.para)}</td></tr>))}
                     </tbody></table>
@@ -289,13 +290,13 @@ export function AlisIcmali() {
                 </Kutucuk>
               </div>
               <div className="si-iki">
-                <FaturasizKutusu v={d.irsaliye} baslik="🧾 Faturası gelmemiş alış irsaliyeleri" belgeAc={gz.belgeKarti} />
+                <FaturasizKutusu v={d.irsaliye} baslik="🧾 Faturası gelmemiş alış irsaliyeleri" belgeAc={gz.belgeKarti} tedarikci />
                 <Kutucuk baslik="⏱ Geciken siparişler" not="termin geçti, mal gelmedi">
                   <table className="hi-tablo"><thead><tr><th>Sipariş</th><th>Tedarikçi</th><th>Termin</th><th className="sag">Açık miktar</th><th className="orta">Gecikme</th></tr></thead>
                     <tbody>
                       {d.geciken.length === 0 && <tr><td colSpan={5} className="bos">Geciken sipariş yok.</td></tr>}
                       {d.geciken.map(x => (
-                        <tr key={x.id} className="ac" onDoubleClick={() => gz.belgeKarti(x.id)}><td>{x.no || `#${x.id}`}</td><td>{x.cari}</td>
+                        <tr key={x.id} className="ac" onDoubleClick={() => gz.belgeKarti(x.id)}><td>{x.no || `#${x.id}`}</td><td><KartAdi tur="tedarikci" id={x.cariId}>{x.cari}</KartAdi></td>
                           <td>{tarihT(x.termin)}</td><td className="sag">{sayi(x.acikMiktar)}</td>
                           <td className="orta"><span className={'bo-rz ' + (x.gecikme > 7 ? 'kir' : 'sari')}>{x.gecikme} gün</span></td></tr>))}
                     </tbody></table>
@@ -306,7 +307,7 @@ export function AlisIcmali() {
                   <tbody>
                     {d.gelen.length === 0 && <tr><td colSpan={6} className="bos">Kutuda kaydedilmeyi bekleyen fatura yok.</td></tr>}
                     {d.gelen.map(x => (
-                      <tr key={x.id} className="ac" onDoubleClick={() => gz.git('/gelen-belge')}><td>{x.cari}</td><td>{x.tur}</td><td>{x.no}</td><td>{tarihT(x.tarih)}</td>
+                      <tr key={x.id} className="ac" onDoubleClick={() => gz.git('/gelen-belge')}><td><KartAdi tur="tedarikci" id={x.cariId}>{x.cari}</KartAdi></td><td>{x.tur}</td><td>{x.no}</td><td>{tarihT(x.tarih)}</td>
                         <td className="sag">{tl(x.tutar)}{x.para && x.para !== 'TRY' && x.para !== 'TL' ? ` ${x.para}` : ''}</td>
                         <td className="orta"><span className={'bo-rz ' + ((x.bekleyen ?? 0) > 7 ? 'kir' : 'pas')}>{x.bekleyen ?? '—'} gün</span></td></tr>))}
                   </tbody></table>

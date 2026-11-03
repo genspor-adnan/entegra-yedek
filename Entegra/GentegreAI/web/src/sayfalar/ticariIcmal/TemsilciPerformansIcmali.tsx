@@ -5,6 +5,7 @@ import {
 } from '../../api/uclar/temsilciPerformans';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi, useKartSekmesi } from '../../bilesenler/KartAdi';
 import { Modal } from '../../bilesenler/Modal';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
@@ -51,6 +52,7 @@ export function TemsilciPerformansIcmali() {
   const { kullanici } = useOturum();
   const antet = useAntet();
   const gz = useGezinti();
+  const kartSekmesi = useKartSekmesi();
   const kip = (['ay', 'ceyrek', 'yil'].includes(arama.get('kip') ?? '') ? arama.get('kip') : 'ay') as DonemKipi;
   const tarih = arama.get('tarih') ?? bugunYerel();
   const sube = Number(arama.get('sube') ?? 0);
@@ -88,7 +90,7 @@ export function TemsilciPerformansIcmali() {
 
       <div className="hi-arac">
         <CiktiMenusu etiket="Performans İcmali" dosyaAdi={`Temsilci Performans İcmali ${veri ? donemAdi(veri) : ''}`} devre={!veri}>{a4}</CiktiMenusu>
-        <button disabled={secili <= 0} onClick={() => gz.git(`/personel/${secili}`)}
+        <button disabled={secili <= 0} onClick={() => kartSekmesi('personel', secili)}
           title={secili > 0 ? '' : 'Önce bir temsilci satırına tıklayın'}>👤 Personel kartı</button>
         <button onClick={() => gz.git('/cari')}>📋 Müşteri listesi</button>
         {veri?.hedefYetkisi && <button onClick={() => setHedefAcik(true)}>🎯 Hedef tanımla…</button>}
@@ -154,7 +156,7 @@ export function TemsilciPerformansIcmali() {
                     {veri.temsilciler.map(t => (
                       <Fragment key={t.id}>
                         <tr className={'ac' + (secili === t.id ? ' ti-sec' : '')} onClick={() => { cevir(t.id); setSecili(t.id) }}>
-                          <td className={t.id === -1 ? 'ki-soluk' : ''}><span className="ok">{acik.has(t.id) ? '▾' : '▸'}</span>{t.ad}</td>
+                          <td className={t.id === -1 ? 'ki-soluk' : ''}><span className="ok">{acik.has(t.id) ? '▾' : '▸'}</span><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td>
                           <td className="sag">{tl(t.ciro)}</td><td className={'sag' + (t.kar < 0 ? ' kir' : '')}>{tl(t.kar)}</td>
                           <td className="sag">{yuzde(t.marj)}</td><td className="sag">{tl(t.tahsilat)}</td>
                           <td className={'sag' + (t.vadesiGecen > 0.005 ? ' kir' : '')}>{tl(t.vadesiGecen)}</td>
@@ -220,7 +222,7 @@ export function TemsilciPerformansIcmali() {
                   <tbody>
                     {veri.gidisat.satirlar.length === 0 && <tr><td colSpan={9} className="bos">Satış yok.</td></tr>}
                     {veri.gidisat.satirlar.map(s => (
-                      <tr key={s.id}><td className={s.id === -1 ? 'ki-soluk' : ''}>{s.ad}</td>
+                      <tr key={s.id}><td className={s.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={s.id > 0 ? s.id : null}>{s.ad}</KartAdi></td>
                         {s.degerler.map((d, i) => <td key={i} className="sag">{tl(d)}</td>)}
                         <td className="sag">{s.gecenYil == null ? '—' : tl(s.gecenYil)}</td>
                         <td className={'sag ' + (s.degisim == null ? 'ki-soluk' : s.degisim >= 0 ? 'si-yesil' : 'kir')}>
@@ -238,7 +240,7 @@ export function TemsilciPerformansIcmali() {
                   <th className="sag">Kaybedilen (12 ay)</th><th className="sag">İlk 5 müşteri payı</th><th className="sag">Limit aşan</th></tr></thead>
                 <tbody>
                   {veri.portfoy.map(p => (
-                    <tr key={p.id}><td className={p.id === -1 ? 'ki-soluk' : ''}>{p.ad}</td><td className="sag">{p.musteri}</td><td className="sag">{p.buDonemAlan}</td>
+                    <tr key={p.id}><td className={p.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={p.id > 0 ? p.id : null}>{p.ad}</KartAdi></td><td className="sag">{p.musteri}</td><td className="sag">{p.buDonemAlan}</td>
                       <td className={'sag' + (p.almayan90 > 0 ? ' kir' : '')}>{p.almayan90}</td><td className={'sag' + (p.kaybedilen > 0 ? ' kir' : '')}>{p.kaybedilen}</td>
                       <td className="sag">{p.ilk5Pay == null ? '—' : `%${sayi(p.ilk5Pay)}`}</td><td className={'sag' + (p.limitAsan > 0 ? ' kir' : '')}>{p.limitAsan}</td></tr>
                   ))}
@@ -254,7 +256,7 @@ export function TemsilciPerformansIcmali() {
                   <th className="sag">Zamanında</th><th className="sag">Vadesi geçen</th><th className="sag">90+</th><th className="sag">Karşılıksız (12 ay)</th><th className="orta">Skor</th></tr></thead>
                 <tbody>
                   {veri.tahsilat.map(t => (
-                    <tr key={t.id}><td className={t.id === -1 ? 'ki-soluk' : ''}>{t.ad}</td><td className="sag">{tl(t.tahsilat)}</td>
+                    <tr key={t.id}><td className={t.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td><td className="sag">{tl(t.tahsilat)}</td>
                       <td className="sag">{t.ortTahsilGun == null ? '—' : `${sayi(t.ortTahsilGun)} gün`}</td>
                       <td className={'sag' + ((t.ortGecikme ?? 0) > 15 ? ' kir' : '')}>{t.ortGecikme == null ? '—' : `${sayi(t.ortGecikme)} gün`}</td>
                       <td className="sag">{t.zamaninda == null ? '—' : `%${sayi(t.zamaninda)}`}</td>
@@ -276,7 +278,7 @@ export function TemsilciPerformansIcmali() {
                 <tbody>
                   {veri.aktivite.length === 0 && <tr><td colSpan={8} className="bos">Temsilci yok.</td></tr>}
                   {veri.aktivite.map(a => (
-                    <tr key={a.id}><td>{a.ad}</td><td className="sag">{a.gorusme}</td><td className="sag">{a.toplanti}</td><td className="sag">{a.gorev}</td>
+                    <tr key={a.id}><td><KartAdi tur="personel" id={a.id > 0 ? a.id : null}>{a.ad}</KartAdi></td><td className="sag">{a.gorusme}</td><td className="sag">{a.toplanti}</td><td className="sag">{a.gorev}</td>
                       <td className="sag">{a.teklif}</td><td className="sag">{a.acikGorev}</td>
                       <td className={'sag' + (a.gecikenGorev > 0 ? ' kir' : '')}>{a.gecikenGorev}</td>
                       <td className="sag">{a.temasBasinaCiro == null ? '—' : tl(a.temasBasinaCiro)}</td></tr>
@@ -296,7 +298,7 @@ export function TemsilciPerformansIcmali() {
                   <tbody>
                     {veri.prim.satirlar.length === 0 && <tr><td colSpan={7} className="bos">Bu dönemde hakediş satırı yok.</td></tr>}
                     {veri.prim.satirlar.map(p => (
-                      <tr key={p.id}><td>{p.ad}</td><td>{p.plan || '—'}</td><td className="sag">{tl(p.taslak)}</td><td className="sag">{tl(p.kesin)}</td>
+                      <tr key={p.id}><td><KartAdi tur="personel" id={p.id > 0 ? p.id : null}>{p.ad}</KartAdi></td><td>{p.plan || '—'}</td><td className="sag">{tl(p.taslak)}</td><td className="sag">{tl(p.kesin)}</td>
                         <td className="sag">{tl(p.onayli)}</td><td className="sag">{tl(p.odendi)}</td><td className="sag"><b>{tl(p.toplam)}</b></td></tr>
                     ))}
                     <tr className="top"><td colSpan={2}>Toplam</td><td className="sag">{tl(veri.prim.toplam.taslak)}</td><td className="sag">{tl(veri.prim.toplam.kesin)}</td>

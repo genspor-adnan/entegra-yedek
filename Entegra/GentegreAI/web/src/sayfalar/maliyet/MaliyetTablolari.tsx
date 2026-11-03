@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { MaliyetIcmali } from '../../api/uclar/maliyetIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartSimgesi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { KAYNAK_ADI, marjRozeti } from './maliyetOrtak';
@@ -45,7 +46,7 @@ export function BasvuruTablosu({ v, secili, setSecili, hastaAc }: {
                   ? <span className="ok" title="Düşülen kalemler" onClick={e => { e.stopPropagation(); setAcik(a => (ac ? a.filter(x => x !== b.id) : [...a, b.id])) }}>{ac ? '▾' : '▸'}</span>
                   : <span className="ok" />}{tarihKisa(b.tarih)}</td>
                 <td>{b.protokolNo}</td>
-                <td>{b.hastaId ? <a className="ki-lnk" onClick={e => { e.stopPropagation(); hastaAc(b.hastaId) }}>{b.hasta}</a> : b.hasta}</td>
+                <td>{b.hastaId ? <a className="ki-lnk" onClick={e => { e.stopPropagation(); hastaAc(b.hastaId) }}>{b.hasta}</a> : b.hasta}<KartSimgesi tur="hasta" id={b.hastaId} /></td>
                 <td>{b.bolum || '—'}{b.hekim && ` · ${b.hekim}`}</td>
                 <td className="sag">{p(b.ciro)}</td><td className="sag">{tire(b.sarf)}</td><td className="sag">{tire(b.ilac)}</td>
                 <td className={'sag' + (b.kar < 0 ? ' kir' : '')}><b>{p(b.kar)}</b></td>

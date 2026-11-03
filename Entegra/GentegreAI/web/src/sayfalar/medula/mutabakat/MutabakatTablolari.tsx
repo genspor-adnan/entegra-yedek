@@ -1,5 +1,6 @@
 import type { MedulaMutabakati } from '../../../api/uclar/medulaMutabakat';
 import { para } from '../../../bilesenler/bicim';
+import { KartSimgesi } from '../../../bilesenler/KartAdi';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 import { huniYuzde, itirazRozeti, nedenRozeti } from './mutabakatOrtak';
 
@@ -59,7 +60,7 @@ export function FaturasizTablosu({ v, secili, setSecili, hastaAc }: {
               <td><input type="checkbox" checked={sec} disabled={!hazir} onClick={e => e.stopPropagation()}
                          onChange={() => degistir(t.belgeId)} /></td>
               <td>{tarihKisa(t.tarih)}</td><td>{t.takipNo || '—'}</td><td>{t.protokolNo}</td>
-              <td><a className="ki-lnk" title="Hasta icmalini aç" onClick={e => { e.stopPropagation(); hastaAc(t.hastaId) }}>{t.hasta}</a></td>
+              <td><a className="ki-lnk" title="Hasta icmalini aç" onClick={e => { e.stopPropagation(); hastaAc(t.hastaId) }}>{t.hasta}</a><KartSimgesi tur="hasta" id={t.hastaId} /></td>
               <td>{t.bolum || '—'}{t.hekim && ` · ${t.hekim}`}</td>
               <td className="sag">{p(t.yerelTutar)}</td>
               <td><span className={'bo-rz ' + r.renk}>{r.ad}</span></td><td className="ki-soluk">{r.yapilacak}</td>

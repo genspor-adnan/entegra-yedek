@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { IskontoGrubu, IskontoIcmali } from '../../api/uclar/iskontoIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartSimgesi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { kaynakRozeti, oranMetni } from './iskontoIcmalOrtak';
@@ -45,7 +46,7 @@ export function IskontoTablosu({ v, secili, setSecili, hastaAc }: {
                 <td><span className="ok" title="Kalemler" onClick={e => { e.stopPropagation(); setAcik(a => (ac ? a.filter(x => x !== b.belgeId) : [...a, b.belgeId])) }}>
                   {ac ? '▾' : '▸'}</span>{tarihKisa(b.tarih)}</td>
                 <td>{b.protokolNo}</td>
-                <td>{b.hastaId ? <a className="ki-lnk" onClick={e => { e.stopPropagation(); hastaAc(b.hastaId) }}>{b.hasta}</a> : b.hasta}</td>
+                <td>{b.hastaId ? <a className="ki-lnk" onClick={e => { e.stopPropagation(); hastaAc(b.hastaId) }}>{b.hasta}</a> : b.hasta}<KartSimgesi tur="hasta" id={b.hastaId} /></td>
                 <td>{b.bolum || '—'}{b.hekim && ` · ${b.hekim}`}</td><td>{b.isteyen || '—'}</td><td>{b.onaylayan || '—'}</td>
                 <td className="sag">{p(b.liste)}</td>
                 <td className={'sag' + (b.esikUstu ? ' kir' : '')} title={b.esikUstu ? `Onay eşiği %${v.ozet.esik} üstü, talep yok` : undefined}>

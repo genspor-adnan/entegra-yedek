@@ -5,6 +5,7 @@ import {
 } from '../../api/uclar/karlilikIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -289,7 +290,7 @@ export function KarlilikIcmali() {
                     {veri.temsilciler.length === 0 && <tr><td colSpan={9} className="bos">Bu dönemde satış yok.</td></tr>}
                     {veri.temsilciler.map(t => (
                       <tr key={t.id} className="ac" onDoubleClick={() => degistir({ temsilci: String(t.id) })}>
-                        <td className={t.id === -1 ? 'ki-soluk' : ''}>{t.ad}</td><td className="sag">{t.musteri}</td>
+                        <td className={t.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td><td className="sag">{t.musteri}</td>
                         <td className="sag">{tl(t.net)}</td><td className={'sag' + (t.seviye === 'zarar' ? ' kir' : '')}>{tl(t.kar)}</td>
                         <MarjHucresi marj={t.marj} seviye={t.seviye} hedef={hedef} />
                         <td className="sag">{eksi(t.iskonto)}</td><td className="sag">%{sayi(t.iskontoOran)}</td>
@@ -355,7 +356,7 @@ export function KarlilikIcmali() {
                         <tr key={i} className={'ac' + (secBelge === z.belgeId && secStok === z.stokId ? ' ti-sec' : '')}
                           onClick={() => { setSecBelge(z.belgeId); setSecStok(z.stokId) }} onDoubleClick={() => gz.belgeKarti(z.belgeId)}>
                           <td><span className="lnk" onClick={e => { e.stopPropagation(); gz.belgeKarti(z.belgeId) }}>{z.belgeNo || `#${z.belgeId}`}</span></td>
-                          <td>{tarihT(z.tarih).slice(0, 5)}</td><td>{z.cari}</td>
+                          <td>{tarihT(z.tarih).slice(0, 5)}</td><td><KartAdi tur="musteri" id={z.cariId}>{z.cari}</KartAdi></td>
                           <td className={z.temsilci === '(temsilcisiz)' ? 'ki-soluk' : ''}>{z.temsilci}</td>
                           <td><span className="lnk" onClick={e => { e.stopPropagation(); gz.stokKarti(z.stokId) }}>{z.urun}</span></td>
                           <td className="sag">{sayi(z.miktar)}</td><td className="sag kir">{tl(z.netFiyat)}</td><td className="sag">{tl(z.maliyet)}</td>
@@ -408,7 +409,7 @@ export function KarlilikIcmali() {
                     <tbody>
                       {hucre.musteriler.length === 0 && <tr><td colSpan={4} className="bos">Bu hücrede müşteri yok.</td></tr>}
                       {hucre.musteriler.map(m => (
-                        <tr key={m.id} className="ac" onDoubleClick={() => gz.ekstre(m.id)}><td>{m.ad}</td><td className="sag">{tl(m.net)}</td>
+                        <tr key={m.id} className="ac" onDoubleClick={() => gz.ekstre(m.id)}><td><KartAdi tur="musteri" id={m.id}>{m.ad}</KartAdi></td><td className="sag">{tl(m.net)}</td>
                           <td className={'sag' + (m.kar < 0 ? ' kir' : '')}>{tl(m.kar)}</td><td className="sag">{yuzde(m.marj)}</td></tr>))}
                       {hucre.musteri > hucre.musteriler.length && <tr><td colSpan={4} className="bos">… {hucre.musteri - hucre.musteriler.length} müşteri daha</td></tr>}
                     </tbody></table>

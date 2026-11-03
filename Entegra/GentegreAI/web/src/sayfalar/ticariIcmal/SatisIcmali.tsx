@@ -3,6 +3,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { ticariIcmalUclari, type SatisIcmali as Veri, type SatisMusteriSatiri } from '../../api/uclar/ticariIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -272,7 +273,7 @@ export function SatisIcmali() {
                     <th className="sag">Marj</th><th className="sag">Tahsil edilen</th></tr></thead>
                     <tbody>{veri.kirilim.temsilci.map(t => (
                       <tr key={t.id} className="ac" onDoubleClick={() => degistir({ temsilci: String(t.id) })}>
-                        <td className={t.id === -1 ? 'ki-soluk' : ''}>{t.ad}</td><td className="sag">{tl(t.net)}</td><td className="sag">{t.musteri}</td>
+                        <td className={t.id === -1 ? 'ki-soluk' : ''}><KartAdi tur="personel" id={t.id > 0 ? t.id : null}>{t.ad}</KartAdi></td><td className="sag">{tl(t.net)}</td><td className="sag">{t.musteri}</td>
                         <td className="sag">{yuzde(t.marj)}</td><td className="sag">{tl(t.tahsil)}</td></tr>))}</tbody></table>
                   <div className="ki-soluk si-not" style={{ padding: '0 10px' }}>Tahsil edilen: dönem faturalarının KDV dahil tutarından cari hareketinde
                     açık kalmayan kısım (FIFO, Cari İcmali ile aynı). Çift tık: temsilciyle süz.</div>
@@ -308,7 +309,7 @@ export function SatisIcmali() {
                     <tbody>
                       {veri.dikkat.zarar.length === 0 && <tr><td colSpan={5} className="bos">Maliyet altı satış yok.</td></tr>}
                       {veri.dikkat.zarar.map((z, i) => (
-                        <tr key={i} className="ac" onDoubleClick={() => gz.belgeKarti(z.belgeId)}><td>{z.belgeNo || `#${z.belgeId}`}</td><td>{z.cari}</td><td>{z.urun}</td>
+                        <tr key={i} className="ac" onDoubleClick={() => gz.belgeKarti(z.belgeId)}><td>{z.belgeNo || `#${z.belgeId}`}</td><td><KartAdi tur="musteri" id={z.cariId}>{z.cari}</KartAdi></td><td>{z.urun}</td>
                           <td className="sag kir">{tl(z.fiyat)}</td><td className="sag">{tl(z.maliyet)}</td></tr>))}
                     </tbody></table>
                 </Kutucuk>
@@ -317,7 +318,7 @@ export function SatisIcmali() {
                     <tbody>
                       {veri.dikkat.dusen.length === 0 && <tr><td colSpan={4} className="bos">Belirgin düşüş yok.</td></tr>}
                       {veri.dikkat.dusen.map(x => (
-                        <tr key={x.id} className="ac" onDoubleClick={() => gz.ekstre(x.id)}><td>{x.ad}</td>
+                        <tr key={x.id} className="ac" onDoubleClick={() => gz.ekstre(x.id)}><td><KartAdi tur="musteri" id={x.id}>{x.ad}</KartAdi></td>
                           <td className={'sag' + (x.kayip ? ' ki-soluk' : '')}>{tl(x.simdi)}</td><td className="sag">{tl(x.once)}</td>
                           <td className="sag kir">{x.kayip ? 'kayıp müşteri' : yuzde(x.degisim, true)}</td></tr>))}
                     </tbody></table>
@@ -331,7 +332,7 @@ export function SatisIcmali() {
                       {veri.dikkat.ebelge.length === 0 && <tr><td colSpan={4} className="bos">Dönemin bütün faturaları gönderilmiş.</td></tr>}
                       {veri.dikkat.ebelge.map(x => (
                         <tr key={x.id} className="ac" onDoubleClick={() => gz.belgeKarti(x.id)}><td>{x.no || `#${x.id}`}{x.iade && ' (iade)'}</td>
-                          <td>{x.cari}</td><td>{tarihT(x.tarih)}</td>
+                          <td><KartAdi tur="musteri" id={x.cariId}>{x.cari}</KartAdi></td><td>{tarihT(x.tarih)}</td>
                           <td><span className={'bo-rz ' + (x.durum === 'gönderim hatası' ? 'kir' : 'sari')}>{x.durum}</span></td></tr>))}
                     </tbody></table>
                 </Kutucuk>

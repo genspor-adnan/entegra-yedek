@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { RandevuDeger, RandevuIcmali } from '../../api/uclar/randevuIcmal';
 import { secimUygula } from '../../bilesenler/listeSecimi';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { dakika, dolulukRozeti, hucreYogunluk, noShowRozeti, sayi, yuzde } from './randevuIcmalOrtak';
 
@@ -61,7 +62,7 @@ export function PoliklinikTablosu({ v, secili, setSecili }: { v: RandevuIcmali; 
                 </tr>
                 {acik.includes(p.id) && p.hekimler.map(h => (
                   <tr key={h.hekim} className="lb-alt">
-                    <td /><td>{h.hekimAd} <span className="ki-soluk">{h.gun} gün{h.izin ? ` · ${h.izin} izin` : ''}</span></td><td />
+                    <td /><td><KartAdi tur="personel" id={h.hekim > 0 ? h.hekim : null}>{h.hekimAd}</KartAdi> <span className="ki-soluk">{h.gun} gün{h.izin ? ` · ${h.izin} izin` : ''}</span></td><td />
                     <DegerHucreleri d={h.deger} />
                   </tr>
                 ))}
@@ -96,7 +97,7 @@ export function HekimTablosu({ v }: { v: RandevuIcmali }) {
             const d = h.deger; const dl = dolulukRozeti(d.doluluk); const ns = noShowRozeti(d.noShow);
             return (
               <tr key={`${h.bolum}-${h.hekim}`}>
-                <td><b>{h.hekimAd}</b>{h.izin > 0 && <span className="ki-soluk"> · {h.izin} izin</span>}</td><td>{h.bolumAd}</td>
+                <td><b><KartAdi tur="personel" id={h.hekim > 0 ? h.hekim : null}>{h.hekimAd}</KartAdi></b>{h.izin > 0 && <span className="ki-soluk"> · {h.izin} izin</span>}</td><td>{h.bolumAd}</td>
                 <td className="sag">{h.gun || '—'}</td><td className="sag">{tire(d.slot)}</td><td className="sag">{sayi(d.verilen)}</td>
                 <td className="sag">{tire(d.bos)}</td><td><span className={'bo-rz ' + dl.renk}>{dl.ad}</span></td>
                 <td><span className={'bo-rz ' + ns.renk}>{ns.ad}</span></td><td className="sag">{tire(d.muayene)}</td>

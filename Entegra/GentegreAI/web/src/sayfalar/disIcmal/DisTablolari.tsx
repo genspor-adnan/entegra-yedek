@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { DisIcmali } from '../../api/uclar/disIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { dolulukRozeti, gunRozeti, marjRozeti, yuzde, yuzdeTam } from './disIcmalOrtak';
@@ -48,7 +49,7 @@ export function HekimTablosu({ v, secili, setSecili }: { v: DisIcmali; secili: n
               <Fragment key={h.id}>
                 <tr className={'ac' + (sec ? ' sec' : '')} onClick={e => tikla(h.id, e)} title="Tıkla: yalnız bu · Ctrl: ekle / çıkar · Shift: aralık">
                   <td><input type="checkbox" checked={sec} readOnly onClick={e => tikla(h.id, e)} /></td>
-                  <td><a className="ki-lnk" onClick={e => ac(h.id, e)}>{acik.includes(h.id) ? '▾' : '▸'}</a> <b>{h.ad}</b></td>
+                  <td><a className="ki-lnk" onClick={e => ac(h.id, e)}>{acik.includes(h.id) ? '▾' : '▸'}</a> <b><KartAdi tur="personel" id={h.id > 0 ? h.id : null}>{h.ad}</KartAdi></b></td>
                   <td>{h.brans || '—'}</td><td className="sag">{h.seans}</td><td className="sag">{h.hasta}</td><td className="sag">{h.islem}</td>
                   <td className="sag">{p(h.ciro)}</td><td className="sag">{tire(h.sarf)}</td><td className="sag">{tire(h.lab)}</td>
                   <td className="sag"><b>{p(h.kar)}</b></td><td><span className={'bo-rz ' + m.renk}>{m.ad}</span></td>

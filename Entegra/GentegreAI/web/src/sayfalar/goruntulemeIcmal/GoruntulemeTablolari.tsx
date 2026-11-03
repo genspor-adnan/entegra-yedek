@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { GoruntulemeIcmali } from '../../api/uclar/goruntulemeIcmal';
 import { para } from '../../bilesenler/bicim';
+import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { sure, yuzde } from '../labIcmal/labIcmalOrtak';
@@ -110,7 +111,7 @@ export function RaporlayanTablosu({ v }: { v: GoruntulemeIcmali }) {
         <tbody>
           {v.raporlayanlar.length === 0 && <tr><td colSpan={11} className="bos">Bu dönemde onaylı rapor yok.</td></tr>}
           {v.raporlayanlar.map(r => (
-            <tr key={`${r.tur}-${r.id}`}><td><b>{r.ad}</b></td>
+            <tr key={`${r.tur}-${r.id}`}><td><b><KartAdi tur={r.tur === 'ic' ? 'personel' : 'telerad-kurum'} id={r.id > 0 ? r.id : null}>{r.ad}</KartAdi></b></td>
               <td><span className={'bo-rz ' + (r.tur === 'ic' ? 'ok' : 'mavi')}>{r.tur === 'ic' ? 'İç radyolog' : 'Teleradyoloji'}</span></td>
               <td className="sag">{r.rapor}</td><td className="sag">{r.bekleyen || '—'}</td><td className="sag">{sure(r.ortSure)}</td>
               <td className="sag">{r.asan ? <span className="lb-asim">{r.asan}</span> : '—'}</td>
@@ -198,7 +199,7 @@ export function TeleradTablosu({ v }: { v: GoruntulemeIcmali }) {
             <tbody>
               {v.teleradGiden.length === 0 && <tr><td colSpan={4} className="bos">Dışarıya raporlatılan çekim yok.</td></tr>}
               {v.teleradGiden.map(g => (
-                <tr key={g.kurumId}><td>{g.ad}</td><td className="sag">{g.cekim}</td><td className="sag">{p(g.birimUcret)}</td><td className="sag">{p(g.maliyet)}</td></tr>
+                <tr key={g.kurumId}><td><KartAdi tur="telerad-kurum" id={g.kurumId > 0 ? g.kurumId : null}>{g.ad}</KartAdi></td><td className="sag">{g.cekim}</td><td className="sag">{p(g.birimUcret)}</td><td className="sag">{p(g.maliyet)}</td></tr>
               ))}
               <tr className="top"><td>Toplam</td><td className="sag">{v.ozet.giden}</td><td /><td className="sag">{p(gidenT)}</td></tr>
             </tbody>
@@ -211,7 +212,7 @@ export function TeleradTablosu({ v }: { v: GoruntulemeIcmali }) {
             <tbody>
               {v.teleradGelen.length === 0 && <tr><td colSpan={5} className="bos">Gelen teleradyoloji işi yok.</td></tr>}
               {v.teleradGelen.map(g => (
-                <tr key={g.kurumId}><td>{g.ad}</td><td className="sag">{g.cekim}</td><td className="sag">{g.raporlanan}</td>
+                <tr key={g.kurumId}><td><KartAdi tur="telerad-kurum" id={g.kurumId > 0 ? g.kurumId : null}>{g.ad}</KartAdi></td><td className="sag">{g.cekim}</td><td className="sag">{g.raporlanan}</td>
                   <td className="sag">{g.slaAsan ? <span className="lb-asim">{g.slaAsan}</span> : '—'}</td><td className="sag">{p(g.gelir)}</td></tr>
               ))}
               <tr className="top"><td>Toplam</td><td className="sag">{v.ozet.gelen}</td><td className="sag">{v.teleradGelen.reduce((t, g) => t + g.raporlanan, 0)}</td>

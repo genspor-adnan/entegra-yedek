@@ -75,6 +75,52 @@ public static class GundemUclari
             return Results.Ok(new { kayitlar = l });
         }).RequireAuthorization().WithTags("Hızlı bul");
 
+        // GET /api/hizli-bul/vergi-no?q= - Ctrl+K DÜZ VKN / TCKN (kullanıcı 03.11.2026: "prompt'a vkno girdim hiç bir bilgi
+        //   gelmedi .. 10 ise müş/ted/anlaşmalı kurum .. 11 hane hasta/personel olabilir .. 11 haneli müşteri de olabilir
+        //   bireysel .. tc no ya fatura kesmiş olabilir"). Numaraya kayıtlı müşteri / tedarikçi / kurum kartı (her rol ayrı
+        //   satır, kendi yetkisiyle; PASİF dahil - kart yeniden etkinleştirilir) + o numaraya kesilmiş SON satış belgeleri
+        //   (kartı olmayan nihai tüketici / bireysel). Hasta / personel 11 hanesi paletin kimlik niyetinde (ayrı uç).
+        yol.MapGet("/api/hizli-bul/vergi-no", async (string? q, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var no = new string((q ?? "").Where(char.IsDigit).ToArray());
+            if (no.Length is not (10 or 11) || no.Distinct().Count() == 1)
+                return Results.Ok(new { kayitlar = Array.Empty<object>(), belgeler = Array.Empty<object>() });
+            var roller = new List<string>();
+            if (baglam.Yetkiler.Var("cari", Islem.Gor)) roller.Add("musteri");
+            if (baglam.Yetkiler.Var("cari.tedarikci", Islem.Gor) || baglam.Yetkiler.Var("cari", Islem.Gor)) roller.Add("tedarikci");
+            if (baglam.Yetkiler.Var("kurum", Islem.Gor) || baglam.Yetkiler.Var("kurum.liste", Islem.Gor)) roller.Add("kurum");
+            var kapsam = baglam.Kapsam.Count > 0 ? baglam.Kapsam.ToArray() : [];
+            await using var b = await veri.AcAsync(iptal);
+            List<object> kayitlar = roller.Count == 0 ? [] : [.. await b.ListeAsync("""
+                select r.tur, t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(160), ''), coalesce(t.kod, ''),
+                       coalesce(t.durum, 1)::int, t.musteri = 1, t.tedarikci = 1
+                  from public.taraf t
+                  cross join lateral (values ('musteri', t.musteri), ('tedarikci', t.tedarikci), ('kurum', t.kurum)) r(tur, var)
+                 where regexp_replace(coalesce(t.vkno, ''), '[^0-9]', '', 'g') = @p0
+                   and r.var = 1 and r.tur = any(@p1::text[])
+                   and (cardinality(@p2::int[]) = 0 or t.id = any(@p2::int[]))
+                 order by (coalesce(t.durum, 1) = 1) desc, t.id
+                 limit 6
+                """, null, [no, roller.ToArray(), kapsam],
+                o => new { tur = o.GetString(0), id = o.GetInt32(1), ad = o.GetString(2), kod = o.GetString(3), durum = o.GetInt32(4),
+                           musteri = o.GetBoolean(5), tedarikci = o.GetBoolean(6) }, iptal)];
+            List<object> belgeler = !baglam.Yetkiler.Var("belge.satis.fatura", Islem.Gor) && !baglam.Yetkiler.Var("belge.satis", Islem.Gor) ? [] :
+                [.. await b.ListeAsync("""
+                    select b.id, b.tur::int, coalesce(b.belge_no, ''), b.belge_tarihi, coalesce(b.taraf_unvan, ''), coalesce(b.genel_toplam, 0)
+                      from public.belge b
+                     where regexp_replace(coalesce(b.taraf_vkno, ''), '[^0-9]', '', 'g') = @p0
+                       and b.tur in (14, 15, 16, 19) and b.durum <> 2 and coalesce(b.tipi, 0) <> 30
+                       and (cardinality(@p1::int[]) = 0 or b.taraf_id = any(@p1::int[]))
+                     order by b.belge_tarihi desc, b.id desc
+                     limit 3
+                    """, null, [no, kapsam],
+                    o => new { id = o.GetInt32(0), tur = o.GetInt32(1), no = o.GetString(2), tarih = o.GetDateTime(3),
+                               unvan = o.GetString(4), tutar = o.GetDecimal(5) }, iptal)];
+            return Results.Ok(new { kayitlar, belgeler });
+        }).RequireAuthorization().WithTags("Hızlı bul");
+
         // GET /api/gundem - ROL GÜNDEMİ (katman 2). Kart listesi kullanıcıyla 03.11.2026'da kararlaştırıldı. Her kart:
         //   yetki kodu (biri yeterli) + modül; ikisi de yoksa SORGUSU ÇALIŞMAZ. Boş kart (sayı 0) dönmez. Kurallar mevcut
         //   icmallerin kuralıdır (cari FIFO = CariIcmalUclari.Kume, çek açık kuralı nakit akışınki, irsaliye-fatura bağı

@@ -6802,6 +6802,32 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .bsl-surum { font-family: Consolas, monospace; font-size: 11px }
 .bsl-kart-acil { color: var(--hata) !important; font-weight: 700 }   /* bekleyen iş: gecikme / okunmamış kritik duyuru */
 .bsl-kart.bsl-kart-pasif { cursor: default }
+/* BEKLEYEN İŞLER - detaylı kart (03.11.2026, mockup ana_sayfa_yz_komut.html "Bugün senin için"): başlık + sayı + satırlar + eylem. */
+.bsl-gundem { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-bottom: 20px; text-align: left }
+.bsl-gk { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--yuz); border: 1px solid var(--cizgi);
+  border-left: 4px solid var(--vurgu); border-radius: 8px; cursor: pointer; color: inherit; text-decoration: none; min-width: 0 }
+.bsl-gk:hover { background: var(--satirust) }
+.bsl-gk.ton-kir { border-left-color: var(--hata) } .bsl-gk.ton-sar { border-left-color: #c48a1c }
+.bsl-gk.ton-yes { border-left-color: var(--ok, #2e7d46) } .bsl-gk.ton-mav { border-left-color: var(--vurgu) }
+.bsl-gk-bas { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--baslik, #14315a) }
+.bsl-gk-i { font-size: 16px; line-height: 1 }
+.bsl-gk-a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.bsl-gk-s { font-size: 17px; font-weight: 700 }
+.bsl-gk.ton-kir .bsl-gk-s { color: var(--hata) }
+.bsl-gk ul { margin: 0; padding: 0; list-style: none; font-size: 11.5px; color: var(--soluk) }
+.bsl-gk li { display: flex; gap: 6px; padding: 1px 0; min-width: 0 }
+.bsl-gk li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.bsl-gk li b { margin-left: auto; color: var(--yazi); white-space: nowrap }
+.bsl-gk-ey { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto }
+.bsl-gk-ey .d { padding: 2px 8px; font-size: 11px }
+.bsl-gk.bsl-kart-pasif { cursor: default }
+/* SON AÇILANLAR - küçük tek satır kutular. */
+.bsl-son { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px }
+.bsl-son-k { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--yuz); border: 1px solid var(--cizgi);
+  border-radius: 14px; font-size: 11.5px; cursor: pointer; color: var(--baslik, #14315a); max-width: 220px; white-space: nowrap }
+.bsl-son-k span:last-child { overflow: hidden; text-overflow: ellipsis }
+.bsl-son-k:hover { border-color: var(--vurgu); background: var(--satirust) }
+.bsl-son-i { display: inline-flex; font-size: 13px }
 .bsl-kart.bsl-kart-pasif:hover { border-color: var(--cizgi); background: var(--yuz) }
 .bsl-kutu { border: 1px solid var(--cizgi); border-radius: 6px; overflow: hidden; background: var(--yuz) }
 .bsl-kb { display: flex; align-items: center; gap: 7px; padding: 8px 12px; font-weight: 700; color: var(--yazi2);
@@ -9118,3 +9144,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan:has(> .lookup-kutu) { grid-template-columns: auto 150px }
 .belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .alan > .etiket,
 .belge-hdr-sar .alan-izgara.belge-hdr.dar-ust.tek-satir > .lookup > .etiket { overflow: visible }
+
+/* AD → KART SEKMESİ bağlantısı (KartAdi, 03.11.2026): icmallerde müşteri / tedarikçi / personel / kurum / hasta adı. */
+.lnk[role="link"] { color: #2f6db3; cursor: pointer }
+.lnk[role="link"]:hover { text-decoration: underline }
