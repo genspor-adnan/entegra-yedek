@@ -51,6 +51,12 @@ public static class BelgeTuru
     /// </summary>
     public const int KaynakTurUretimEmri = 60;
 
+    /// <summary>
+    /// URETIM FISI (1253): fisin kestigi sarf / fire / uretim girisi belgeleri fise baglanir (kaynak_tur = 61,
+    /// kaynak_id = uretim_fisi.id). Emre bagli fisin belgeleri emrin hareketlerinde fis uzerinden gorunur (v_uretim_hareket).
+    /// </summary>
+    public const int KaynakTurUretimFisi = 61;
+
     /// <summary>Stoktan talep: stok/cari ETKILEMEZ, karsilanmasi transferle olur.</summary>
     public const int Talep = 105;
 

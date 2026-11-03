@@ -9,6 +9,7 @@ import { KullaniciAyarlari, type AyarSekmesi } from '../bilesenler/KullaniciAyar
 import { useProfilResmi } from '../bilesenler/profilResmi';
 import { useSubeLogo } from '../bilesenler/subeLogo';
 import { menuSatirlariKur } from './kabuk/menuAgaci';
+import { useUretimSeviyesi } from '../bilesenler/useUretimSeviyesi';
 import { menuDuzeniUygula, MENU_DUZEN_OLAYI, type MenuDuzenSatiri } from './kabuk/menuDuzeni';
 import { YanMenu } from './kabuk/YanMenu';
 import { KomutPaleti } from './kabuk/KomutPaleti';
@@ -65,7 +66,10 @@ export function Kabuk() {
 
   // MENU AGACI (kabuk/menuAgaci): yetki + urun modu + kurum modulu suzgeci,
   //   grup/alt-grup, urune gore grup sirasi - hepsi saf fonksiyonda.
-  const kodSatirlari = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
+  // ÜRETİM SEVİYESİ (1253, uretim_basit.html ②): basit seviyede emir isteğe bağlı - kapalıysa Üretim Emiri Listesi menüde yok.
+  const uretimSv = useUretimSeviyesi();
+  const menuYetki = (kod: string) => (kod === 'uretim.liste' && uretimSv.yuklendi && uretimSv.basit && !uretimSv.emirKullan) ? false : yetki(kod);
+  const kodSatirlari = menuSatirlariKur(LISTELER, menuYetki, kullanici?.urunModu, kullanici?.moduller);
   /**
    * MENÜ DÜZENİ FARKI (979): kurumun bu şube için yaptığı değişiklikler
    * (sıra · görünen ad · ikon · gizleme) koddan kurulan ağacın ÜSTÜNE

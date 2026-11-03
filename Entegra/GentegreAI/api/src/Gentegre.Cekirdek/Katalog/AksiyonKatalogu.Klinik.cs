@@ -736,6 +736,15 @@ public static partial class AksiyonKatalogu
             new("uretim.onayla", "✔ Onayla", "uretim-emri",
                 Hedef: "araccubugu,sagtus,palet",
                 AksiyonYetkisi: "uretim.onayla", KayitGerekir: true, Sira: 50),
+            // SERBEST BIRAK (1253, uretim_emri_v2.html): onaylı emri ön kontrollerle atölyeye bırakır (durum 3);
+            //   denetimli seviyede başlatmanın ön koşulu, standartta isteğe bağlı adım.
+            new("uretim.serbest-birak", "🏁 Serbest Bırak", "uretim-emri",
+                Hedef: "araccubugu,sagtus,palet",
+                AksiyonYetkisi: "uretim.onayla", KayitGerekir: true, Sira: 52),
+            // ÜRET (1253, uretim_basit.html ②): üretilen adedi sorar, emirden üretim fişini keser (sarf + giriş + maliyet).
+            new("uretim.uret", "▶ Üret…", "uretim-emri",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Ekle, KayitGerekir: true, Sira: 53),
             new("uretim.baslat", "▶ Üretime Başlat", "uretim-emri",
                 Hedef: "araccubugu,sagtus,palet",
                 KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 55),
@@ -764,5 +773,9 @@ public static partial class AksiyonKatalogu
 
         s["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim.is_merkezi",
                                     "＋ Yeni", silHedef: null, yazdir: false);
+
+        // ÜRETİM FİŞLERİ (1253): kart ÖZEL (UretimFisiKarti) - Sil kartın içinde (taslak silinir, gerçekleşmiş fişte ters kayıt);
+        //   listedeki genel Sil kataloğa bağlı kart ister, burada yok.
+        s["uretim-fisi-liste"] = Crud("uretim-fisi", "uretim-fisi", "uretim.fis", ekleAdi: "＋ Yeni Üretim Fişi", sil: false);
     }
 }

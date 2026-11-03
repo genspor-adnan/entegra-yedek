@@ -244,6 +244,8 @@ public static class DokumanUclari
         "kys-egitim" => "kys-egitim",
         // PLANLI GİDER BELGELERİ (1177): kira sözleşmesi, artış bildirimi... kaynak_id planlı gider tanımı.
         "planliGider" => "planli-gider",
+        // ÜRETİM FİŞİ BELGELERİ (1253): kaynak_id üretim fişi.
+        "uretim-fisi" => "uretim-fisi",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -303,6 +305,7 @@ public static class DokumanUclari
         "kys-egitim" => "kys.egitim",
         "servisZiyaret" => "servis",
         "planliGider" => "finans.planli_gider",
+        "uretim-fisi" => "uretim.fis",
         _ => kartAdi
     };
 

@@ -154,6 +154,7 @@ export const LISTE_KART_KODU: Readonly<Record<string, string>> = {
   'hizmet.liste': 'hizmet',
   'uretim.urun_agaci.liste': 'uretim.urun_agaci',
   'uretim.liste': 'uretim',
+  'uretim.fis.liste': 'uretim.fis',
   'uretim.is_merkezi.liste': 'uretim.is_merkezi',
   'eczane.order.liste': 'eczane.order',
   'eczane.doz.liste': 'eczane.doz',

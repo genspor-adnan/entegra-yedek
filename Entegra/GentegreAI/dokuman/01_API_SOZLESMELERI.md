@@ -525,7 +525,42 @@ GET  /api/uretim/emri/{id}/eksik-malzeme
 **Belge türleri**: `121` sarf çıkışı · `122` üretim girişi · `123` fire. Üçü de
 carisizdir ve **fiş üretmez** (`fn_belge_fis_turu_uygun`); stok hareketi normal
 belge hattından geçer, `belge.kaynak_tur = 60` + `kaynak_id = <emir>` ile emre
-bağlanır.
+bağlanır (üretim fişinin kestikleri `kaynak_tur = 61` + `kaynak_id = <fiş>`).
+
+### 9.1a Üretim fişi ve seviye (1253)
+
+Mockuplar `Ekranlar/Uretim/uretim_fisi(.html, _v2.html)`, `uretim_basit.html`, `uretim_emri_v2.html`.
+Fiş tek adımlı gerçekleşmiş üretim kaydıdır; **Gerçekleştir** sarf (121) + fire (123) + üretim girişi (122)
+belgelerini keser (kaynak_tur 61) ve maliyeti hesaplar (IAS 2: malzeme + işçilik / gider + normal fire − yan ürün;
+anormal fire gidere). Durum: 0 ters kayıt · 1 taslak · 2 gerçekleşti (denetimlide karantina) · 3 serbest · 4 reddedildi.
+
+```http
+GET  /api/uretim/seviye                      // { seviye: basit|standart|denetimli, emirKullan } - üretimi gören okur
+PUT  /api/uretim/seviye                      // { seviye, emirKullan } - yetki ayar; alta geçiş açık emir / karantina varken 422
+GET  /api/uretim/fis/mamul/{stokId}          // mamul bandı: kod, ad, birim, izleme, kategori, varsayılan ağaç, depolar
+POST /api/uretim/fis/doldur                  // { stokId, agacId?, miktar, sarfDepoId?, maliyetYontemi? } -> satır önerisi (YAZMAZ)
+GET  /api/uretim/fis/{id}                    // fis + satirlar + operasyonlar + kontroller + belgeler + emir
+POST /api/uretim/fis                         // FisIstegi (gerceklestir, eksiyeIzin) -> { id, no, uyarilar }
+PUT  /api/uretim/fis/{id}                    // yalnız taslak; surum (xmin) uyuşmazsa 409
+POST /api/uretim/fis/{id}/gerceklestir       // { eksiyeIzin } - denetimlide eksikle kayıt yok
+POST /api/uretim/fis/{id}/ters-kayit         // { neden } - belgeler SilAsync ile geri alınır, fiş durum 0; mamul stoktan çıkmışsa 422
+DELETE /api/uretim/fis/{id}                  // yalnız taslak
+PUT  /api/uretim/fis/{id}/operasyon          // FisOperasyonIstegi[] (gerçekleşmiş fişte de)
+PUT  /api/uretim/fis/{id}/kontrol            // FisKontrolIstegi[] - sonuç değişince yapan / zaman damgası
+POST /api/uretim/fis/{id}/serbest            // { karar 1|2, gerekce, parola } - yetki uretim.fis.serbest; e-imza = parola tekrarı
+GET  /api/uretim/fis/{id}/gecmis             // islem_log (tablo 998)
+GET  /api/uretim/fis/{id}/izlenebilirlik     // girdiler / fireler / ciktilar (lot), ileri, personel
+
+POST /api/uretim/emri/{id}/uret              // { adet, tarih?, fireStokId?, fireAdet?, eksiyeIzin } - emirden fiş keser (basit "Üret…")
+GET  /api/uretim/emri/{id}/on-kontrol        // 7 kontrol: sonuc 1 uygun · 0 uygunsuz · -1 takip edilmiyor
+POST /api/uretim/emri/{id}/serbest-birak     // { gerekce?, parola? } durum 2 -> 3; denetimlide ön kontrol + parola zorunlu
+GET  /api/uretim/emri/{id}/fisler
+```
+
+Emir durum **3 = serbest bırakıldı** (429'da "planlandı", kullanılmıyordu); `baslat` 2 ya da 3'ten, denetimli seviyede
+yalnız 3'ten. Maliyet kapanışı emre bağlı fişlerin sarf / fire belgelerini ve gider satırlarını da toplar.
+Yetki: `uretim.fis` (kart), `uretim.fis.liste`, `uretim.fis.serbest`. Ayar: `referans uretim.seviye`, `uretim.emir_kullan`
+(beyaz listede DEĞİL - PUT /api/uretim/seviye kapısından yazılır).
 
 **Hesaplanan alanlar istemciden alınmaz** (§3.2): emir numarası, üretilen adet,
 rezerve/sarf edilen miktar, plan ve gerçek maliyet sunucuda yazılır.

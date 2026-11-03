@@ -399,6 +399,7 @@ public static partial class KaynakKatalogu
         // URETIM v1 (429): urun agaci (BOM), uretim emri, is merkezi.
         Ekle(UrunAgaci());
         Ekle(UretimEmri());
+        Ekle(UretimFisi());
         Ekle(IsMerkezi());
         // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
         Ekle(Dokuman());

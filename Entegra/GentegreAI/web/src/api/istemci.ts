@@ -12,6 +12,7 @@ import { konsultasyonUclari } from './uclar/konsultasyon';
 import { sevkUclari } from './uclar/sevk';
 import { sigortaUclari } from './uclar/sigorta';
 import { uretimUclari } from './uclar/uretim';
+import { uretimFisiUclari } from './uclar/uretimFisi';
 import { kartUclari } from './uclar/kart';
 import { belgeUclari } from './uclar/belge';
 import { stokUclari } from './uclar/stok';
@@ -153,6 +154,7 @@ export const api = {
   ...sevkUclari,
   ...sigortaUclari,
   ...uretimUclari,
+  ...uretimFisiUclari,
   ...kartUclari,
   ...belgeUclari,
   ...stokUclari,

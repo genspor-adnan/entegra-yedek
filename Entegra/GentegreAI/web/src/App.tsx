@@ -138,6 +138,9 @@ const IzinTalepKarti = tembel(() => import('./sayfalar/ik/IzinTalepKarti'), 'Izi
 const AvansKarti = tembel(() => import('./sayfalar/ik/AvansKarti'), 'AvansKarti');
 const MasrafKarti = tembel(() => import('./sayfalar/ik/MasrafKarti'), 'MasrafKarti');
 const StokSayimKartiSayfa = tembel(() => import('./sayfalar/stokSayim/StokSayimKarti'), 'StokSayimKartiSayfa');
+// ÜRETİM FİŞİ (1253): özel kart; /uretim-emri seviyeye göre sade iş listesi ya da generic liste.
+const UretimFisiKartiSayfa = tembel(() => import('./sayfalar/uretim/UretimFisiKarti'), 'UretimFisiKartiSayfa');
+const UretimEmriSayfasi = tembel(() => import('./sayfalar/uretim/UretimEmriSayfasi'), 'UretimEmriSayfasi');
 const BelgeTalepKarti = tembel(() => import('./sayfalar/ik/BelgeTalepKarti'), 'BelgeTalepKarti');
 const ZiyaretMobil = tembel(() => import('./sayfalar/servis/ZiyaretMobil'), 'ZiyaretMobil');
 const DisHastaKarti = tembel(() => import('./sayfalar/dis/DisHastaKarti'), 'DisHastaKarti');
@@ -263,7 +266,8 @@ function Yollar() {
           && !l.menuYol).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
-            ...(yetki(l.yetkiKodu) ? [<Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />] : []),
+            ...(yetki(l.yetkiKodu) ? [<Route key={rota} path={`/${rota}`}
+                                          element={rota === 'uretim-emri' ? <UretimEmriSayfasi tanim={l} /> : <Liste tanim={l} />} />] : []),
             // KART SEKMESİ: belge kartı da /<rota>/:id ile kendi sekmesinde açılır.
             ...((l.kartYolu || kartSekmesiVar(l)) && !l.ozelKart ? [
               <Route key={`${rota}-kart`} path={`/${rota}/:id`} element={<Liste tanim={l} />} />,
@@ -506,6 +510,7 @@ function Yollar() {
             { rota: 'recete', kart: <ReceteKartiSayfa listeYolu="/recete" /> },
             { rota: 'medula-recete', kart: <ReceteKartiSayfa listeYolu="/medula-recete" /> },
             { rota: 'stok-sayim', kart: <StokSayimKartiSayfa /> },
+            { rota: 'uretim-fisi', kart: <UretimFisiKartiSayfa /> },
             { rota: 'hasta-alerji', kart: <AlerjiKartiSayfa /> },
             { rota: 'hasta-kronik', kart: <KronikTaniKartiSayfa /> },
             { rota: 'hasta-ilac', kart: <IlacKaydiKartiSayfa /> },

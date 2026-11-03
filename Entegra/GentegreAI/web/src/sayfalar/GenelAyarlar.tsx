@@ -3,6 +3,7 @@ import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 import { BelgeYaziSekmesi } from '../bilesenler/BelgeYaziSekmesi';
+import { UretimSeviyeAyari } from './uretim/UretimSeviyeAyari';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { c } from '../dil/ceviri';
 
@@ -15,6 +16,8 @@ const SEKMELER = [
   // Belge No'nun SAGINDA (768): ikisi de "belge nasil ciksin" ayari -
   //   biri numarayi, oteki metni belirler.
   { anahtar: 'belge-yazisi', baslik: 'Belge Yazıları' },
+  // ÜRETİM SEVİYESİ (1253, mockup uretim_basit.html ③ "Kurum Profili › Üretim"): yalnız ERP'de.
+  { anahtar: 'uretim', baslik: 'Üretim' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -32,11 +35,12 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
 export function GenelAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
   const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
-  const { yetki } = useOturum();
+  const { yetki, kullanici } = useOturum();
 
   // Belge yazisi sablonlari IK yetkisine bagli: satis kullanicisi personel
   //   yazisi sablonunu duzenlememeli.
-  const sekmeler = SEKMELER.filter(s => s.anahtar !== 'belge-yazisi' || yetki('ik.belge_talep'));
+  const sekmeler = SEKMELER.filter(s => (s.anahtar !== 'belge-yazisi' || yetki('ik.belge_talep'))
+    && (s.anahtar !== 'uretim' || (kullanici?.urunModu !== 2 && (yetki('uretim') || yetki('uretim.fis')))));
 
   const alan = (anahtar: string, etiket: string,
                 ek?: Partial<Parameters<typeof AyarAlani>[0]>) => (
@@ -190,6 +194,8 @@ export function GenelAyarlar() {
         ) : aktif === 'numaralama' ? (
           // Belge / tahsilat / odeme numaralandirmasi (152) - dort grid.
           <NumaralamaSekmesi />
+        ) : aktif === 'uretim' ? (
+          <UretimSeviyeAyari />
         ) : aktif === 'belge-yazisi' ? (
           // Belge talebinde uretilen resmi yazinin sablonlari (768).
           <BelgeYaziSekmesi />

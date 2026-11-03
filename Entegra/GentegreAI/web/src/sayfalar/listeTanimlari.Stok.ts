@@ -335,6 +335,27 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ic: '🏭', yetkiKodu: 'uretim.liste',
   },
   {
+    // ÜRETİM FİŞLERİ (1253, mockup Ekranlar/Uretim/uretim_fisi.html + uretim_basit.html). Kart ÖZEL
+    //   (UretimFisiKarti): mamul bandı, gruplu kalem ızgarası (sarf · gider · fire · çıktı), seviyeye göre sekmeler.
+    //   Gerçekleşmiş fiş silinmez: Sil = ters kayıt (kartta). Durum adı seviyeye göre (2: Stoğa işlendi / Karantina).
+    kaynak: 'uretim-fisi', rota: 'uretim-fisi', baslik: 'Üretim Fişi Listesi',
+    yol: 'Üretim › Üretim Fişi Listesi',
+    kartYolu: '/uretim-fisi', kartBaslik: 'Üretim Fişi', ozelKart: true,
+    aksiyonEkrani: 'uretim-fisi-liste',
+    tarihAlani: 'bas',
+    // İlk cip TÜMÜ: kaydedilen fiş hemen listede görünsün (taslak ayrı cip).
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Taslak',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'İşlenen',   filtre: { alan: 'durum', op: 'arasinda', deger: [2, 3] } },
+      { ad: 'Karantina', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+    ],
+    toplam: ['miktar', 'toplam'],
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAd: 'Üretim Fişi Listesi', menuSira: 15,
+    ic: '🧾', yetkiKodu: 'uretim.fis.liste',
+  },
+  {
     // IS MERKEZLERI (429) - saat ucreti iscilik maliyetinin kaynagi.
     kaynak: 'is-merkezi', rota: 'is-merkezi', baslik: 'İş Merkezi Listesi',
     yol: 'Üretim › İş Merkezi Listesi',

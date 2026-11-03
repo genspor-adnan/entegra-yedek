@@ -32,7 +32,7 @@ public static partial class KartKatalogu
     //   ve stok hareketleri bu siraya bagli (bkz. db/429 basligi).
     private static readonly Dictionary<string, string> EmirDurumKodlari = new()
     {
-        ["0"] = "İptal", ["1"] = "Taslak", ["2"] = "Onaylı", ["3"] = "Planlandı",
+        ["0"] = "İptal", ["1"] = "Taslak", ["2"] = "Onaylı", ["3"] = "Serbest bırakıldı",
         ["4"] = "Üretimde", ["5"] = "Kısmi tamamlandı", ["6"] = "Tamamlandı",
         ["7"] = "Kapatıldı",
     };

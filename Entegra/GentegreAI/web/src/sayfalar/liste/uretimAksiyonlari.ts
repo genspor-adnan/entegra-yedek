@@ -127,6 +127,35 @@ export async function uretimAksiyonu(
       });
       return true;
 
+    // SERBEST BIRAK (1253): standartta onayla yeter; denetimlide ön kontrol + gerekçe + parola (e-imza) - kartın
+    //   Ön Kontroller sekmesinden imzalanır (parola düz metin kutusuna yazılmaz).
+    case 'uretim.serbest-birak': {
+      const sv = await api.uretimSeviye().catch(() => ({ seviye: 'basit', emirKullan: false }));
+      if (sv.seviye === 'denetimli') {
+        mesaj('Denetimli seviyede serbest bırakma emir kartı › Ön Kontroller sekmesinden gerekçe ve parolayla imzalanır.');
+        b.git(`/uretim-emri/${id}`);
+        return true;
+      }
+      if (!await onay('Emir atölyeye serbest bırakılsın mı? (Onaylı → Serbest bırakıldı; sonra Başlat)')) return true;
+      await guvenli(async () => { mesaj((await api.uretimEmriSerbestBirak(id)).mesaj); b.tazele() });
+      return true;
+    }
+
+    // ÜRET (1253, uretim_basit.html ②): üretilen adedi sor, emirden üretim fişini kes (sarf + giriş + maliyet).
+    case 'uretim.uret': {
+      const kalan = Math.max(0, Number(satir?.adet ?? 0) - Number(satir?.uretilenAdet ?? 0));
+      const a = await metinSor('Kaç adet üretildi?', kalan ? String(kalan) : '', 'Üretilen adet');
+      const adet = sayi(a);
+      if (Number.isNaN(adet)) return true;
+      if (adet <= 0) { mesaj('Adet sıfırdan büyük olmalı.'); return true }
+      await guvenli(async () => {
+        const y = await api.uretimEmriUret(id, { adet });
+        mesaj([y.mesaj, ...y.uyarilar].join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
     case 'uretim.baslat':
       if (!await onay('Emir üretime alınsın mı?\n\n'
                     + 'Sarf modu "tek seferde" ise bütün bileşenler ŞİMDİ '

@@ -507,6 +507,7 @@ uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();
 uygulama.UretimUclariniEkle();
+uygulama.UretimFisiUclariniEkle();
 uygulama.SigortaUclariniEkle();
 uygulama.CihazUclariniEkle();
 uygulama.LabUclariniEkle();

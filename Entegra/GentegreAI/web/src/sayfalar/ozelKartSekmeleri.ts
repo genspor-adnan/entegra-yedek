@@ -8,4 +8,6 @@ export const OZEL_KART_SEKME_YOLLARI: Record<string, string> = { '/recete': 'Re�
   '/kasa-islem': 'Yeni Kasa İşlemi',
   // RADYOLOJİ RAPORU (27.10.2026, "çalışma listesinde rapor yaz seçince yeni sekmede açılmalı"): istem başına sekme,
   //   başlık hasta adı (RadyolojiRapor).
-  '/radyoloji/rapor': 'Radyoloji Raporu' };
+  '/radyoloji/rapor': 'Radyoloji Raporu',
+  // ÜRETİM FİŞİ (1253): kart kendi sekmesinde; ilk iş mamul seçimi.
+  '/uretim-fisi': 'Yeni Üretim Fişi' };

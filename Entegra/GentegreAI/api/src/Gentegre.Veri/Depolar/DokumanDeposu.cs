@@ -64,7 +64,9 @@ public sealed class DokumanDeposu
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
               "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge",
               "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
-              "kys-egitim", "personel-belge", "planli-gider" };
+              "kys-egitim", "personel-belge", "planli-gider",
+              // ÜRETİM FİŞİ (1253): parti fotoğrafı, kalite raporu, teknik resim - kaynak_id fiş.
+              "uretim-fisi" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

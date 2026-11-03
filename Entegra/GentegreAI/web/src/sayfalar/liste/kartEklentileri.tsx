@@ -31,6 +31,7 @@ import { AlanPaketiCubugu } from '../radyoloji/AlanPaketleri';
 import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSurumSekmesi, SmsOnizleme } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 import { HastaKartBandi } from '../hasta/HastaKartBandi';
+import { EmirFislerSekmesi, EmirOnKontrolSekmesi } from '../uretim/UretimEmriPanelleri';
 
 /**
  * KART EKLENTİLERİ — ekran-özel kart parçaları KAYNAK BAŞINA tek kayıtta (refaktör 22.10.2026).
@@ -472,5 +473,16 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   },
   'kys-toplanti': {
     ekAraclar: () => d => <ToplantiAraclari deger={d} />,
+  },
+  // ------------------------------------------- Üretim emri (1253, uretim_emri_v2.html) ----
+  // Ön Kontroller (serbest bırakma ön koşulları) ve Üretim Girişleri (emre bağlı üretim fişleri).
+  'uretim-emri': {
+    ekSekmeler: b => kayitli(b.kartId) ? [
+      { anahtar: 'ozel:emir-on-kontrol', baslik: 'Ön Kontroller',
+        ciz: bg => <EmirOnKontrolSekmesi emirId={b.kartId as number} durum={Number(bg.deger.durum ?? 0)} tazele={b.tazeleKayit}
+                                         onDegisti={() => { b.kartiTazele(); b.listeyiTazele() }} /> },
+      { anahtar: 'ozel:emir-fisler', baslik: 'Üretim Girişleri',
+        ciz: () => <EmirFislerSekmesi emirId={b.kartId as number} tazele={b.tazeleKayit} /> },
+    ] : undefined,
   },
 };

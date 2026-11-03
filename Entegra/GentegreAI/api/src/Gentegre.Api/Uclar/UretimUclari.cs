@@ -28,7 +28,8 @@ public static class UretimUclari
 {
     // Durumlar (db/429): 0 iptal · 1 taslak · 2 onaylı · 3 planlandı ·
     //   4 üretimde · 5 kısmi · 6 tamamlandı · 7 kapatıldı.
-    private const short Iptal = 0, Taslak = 1, Onayli = 2,
+    // 1253: 3 = SERBEST BIRAKILDI (denetimli seviyede onay -> ön kontroller + e-imza -> başlat; 429'da "planlandı").
+    private const short Iptal = 0, Taslak = 1, Onayli = 2, SerbestBirakildi = 3,
                         Uretimde = 4, Kismi = 5, Tamamlandi = 6, Kapatildi = 7;
 
     /// <summary>
@@ -409,9 +410,14 @@ public static class UretimUclari
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var emir = await EmirOkuAsync(baglanti, islem, id, iptal, kilitle: true);
-            if (emir.Durum != Onayli)
+            if (emir.Durum is not (Onayli or SerbestBirakildi))
                 throw GentegreHatasi.IsKurali(
-                    "Yalnız Onaylı emir başlatılabilir (önce Onayla).");
+                    "Yalnız Onaylı ya da serbest bırakılmış emir başlatılabilir (önce Onayla).");
+            // DENETİMLİ SEVİYE (1253, uretim_emri_v2.html): atölyeye serbest bırakılmadan (ön kontroller + e-imza) başlatılamaz.
+            var (seviye, _) = await UretimFisiUclari.SeviyeOkuAsync(baglanti, islem, iptal);
+            if (seviye == "denetimli" && emir.Durum != SerbestBirakildi)
+                throw GentegreHatasi.IsKurali(
+                    "Denetimli seviyede emir önce atölyeye SERBEST BIRAKILMALI (ön kontroller + imza).");
 
             int? belgeId = null;
             if (emir.SarfModu == 1)
@@ -422,7 +428,7 @@ public static class UretimUclari
                 update public.uretim_emri
                    set durum = 4, gercek_bas = coalesce(gercek_bas, now()),
                        degistiren = @p1, degistirme_tarihi = now()
-                 where id = @p0 and durum = 2
+                 where id = @p0 and durum in (2, 3)
                 """, islem, [id, baglam.KullaniciId], iptal);
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali(
@@ -675,23 +681,27 @@ public static class UretimUclari
             if (kapanisVar > 0)
                 throw GentegreHatasi.IsKurali("Bu emrin maliyeti zaten kapatılmış.");
 
-            // MALZEME: sarf fişlerinin tutarı (hareket anındaki fiyat).
-            var malzeme = await baglanti.TekDegerAsync<decimal>("""
-                select coalesce(sum(bs.tutar), 0)
+            // MALZEME: sarf fişlerinin tutarı (hareket anındaki fiyat). Emre bağlı ÜRETİM FİŞLERİNİN (1253, kaynak_tur 61)
+            //   sarfı da emrin sarfıdır - fiş ters kayıtla kapanmışsa (durum 0) sayılmaz.
+            const string emirBelgeleri = """
                   from public.belge b join public.belge_satir bs on bs.belge_id = b.id
-                 where b.kaynak_tur = @p1 and b.kaynak_id = @p0 and b.tur = @p2
-                """, islem, [id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.SarfCikisi], iptal);
+                 where b.tur = @p2 and ((b.kaynak_tur = @p1 and b.kaynak_id = @p0)
+                    or (b.kaynak_tur = @p3 and b.kaynak_id in (select f.id from public.uretim_fisi f where f.emir_id = @p0 and f.durum <> 0)))
+                """;
+            var malzeme = await baglanti.TekDegerAsync<decimal>(
+                "select coalesce(sum(bs.tutar), 0)" + emirBelgeleri,
+                islem, [id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.SarfCikisi, BelgeTuru.KaynakTurUretimFisi], iptal);
 
-            // İŞÇİLİK: zaman kayıtları (tetik süre × ücret olarak yazdı).
-            var iscilik = await baglanti.TekDegerAsync<decimal>(
-                "select coalesce(sum(tutar), 0) from public.uretim_zaman where emir_id = @p0",
-                islem, [id], iptal);
+            // İŞÇİLİK: zaman kayıtları (tetik süre × ücret olarak yazdı) + emre bağlı fişlerin işçilik / gider satırları.
+            var iscilik = await baglanti.TekDegerAsync<decimal>("""
+                select coalesce((select sum(tutar) from public.uretim_zaman where emir_id = @p0), 0)
+                     + coalesce((select sum(s.tutar) from public.uretim_fisi_satir s join public.uretim_fisi f on f.id = s.fis_id
+                                  where f.emir_id = @p0 and f.durum <> 0 and s.grup = 2), 0)
+                """, islem, [id], iptal);
 
-            var fire = await baglanti.TekDegerAsync<decimal>("""
-                select coalesce(sum(bs.tutar), 0)
-                  from public.belge b join public.belge_satir bs on bs.belge_id = b.id
-                 where b.kaynak_tur = @p1 and b.kaynak_id = @p0 and b.tur = @p2
-                """, islem, [id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.FireCikisi], iptal);
+            var fire = await baglanti.TekDegerAsync<decimal>(
+                "select coalesce(sum(bs.tutar), 0)" + emirBelgeleri,
+                islem, [id, BelgeTuru.KaynakTurUretimEmri, BelgeTuru.FireCikisi, BelgeTuru.KaynakTurUretimFisi], iptal);
 
             var gugYuzde = istek?.GugYuzde ?? 0m;
             var gug = decimal.Round((malzeme + iscilik) * gugYuzde / 100, 4);

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (662 ad, 180 tanesi birden cok dosyada)
+## Fonksiyonlar (665 ad, 180 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -509,8 +509,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
 | `fn_ubl_taraf` | `182_ebelge_ubl.sql` | — |
 | `fn_uretim_emri_no` | `429_uretim_v1.sql` | — |
+| `fn_uretim_fisi_no` | `1253_uretim_fisi.sql` | — |
+| `fn_uretim_fisi_operasyon_hesapla` | `1253_uretim_fisi.sql` | — |
 | `fn_uretim_malzeme_hazirlik` | `429_uretim_v1.sql` | — |
 | `fn_uretim_stok_maliyeti` | `429_uretim_v1.sql` | — |
+| `fn_uretim_stok_son_maliyeti` | `1253_uretim_fisi.sql` | — |
 | `fn_uretim_zaman_hesapla` | `429_uretim_v1.sql` | — |
 | `fn_uretim_zaman_topla` | `429_uretim_v1.sql` | — |
 | `fn_urun_agaci_maliyet` | `429_uretim_v1.sql` | — |
@@ -671,7 +674,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (358 ad, 160 tanesi birden cok dosyada)
+## Gorunumler (358 ad, 161 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -1027,7 +1030,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_tibbi_bolum_lookup` | `1112_tibbi_bolum_lookup.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
-| `v_uretim_hareket` | `429_uretim_v1.sql` | — |
+| `v_uretim_hareket` | `1253_uretim_fisi.sql` | 429_uretim_v1.sql |
 | `v_urun_agaci_lookup` | `429_uretim_v1.sql` | — |
 | `v_yatak_lookup` | `696_yatan_lookup.sql` | — |
 | `v_yatak_panosu` | `940_personel_unvan_yalniz_onek.sql` | 695_yatan_hasta.sql |

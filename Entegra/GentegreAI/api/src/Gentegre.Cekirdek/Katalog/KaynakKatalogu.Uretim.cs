@@ -146,7 +146,7 @@ public static partial class KaynakKatalogu
                 case when e.durum between 1 and 5 and e.termin < current_date
                      then 'Gecikti'
                      else case e.durum when 0 then 'İptal' when 1 then 'Taslak'
-                                       when 2 then 'Onaylı' when 3 then 'Planlandı'
+                                       when 2 then 'Onaylı' when 3 then 'Serbest'
                                        when 4 then 'Üretimde' when 5 then 'Kısmi'
                                        when 6 then 'Tamamlandı' else 'Kapatıldı' end
                 end
@@ -164,6 +164,55 @@ public static partial class KaynakKatalogu
                                              Hizalama: "orta",
                                              Bicim: "dd.MM.yyyy HH:mm",
                                              Genislik: 130, Varsayilan: false),
+        });
+
+    /// <summary>
+    /// ÜRETİM FİŞLERİ (1253, mockup uretim_fisi.html "Liste: No · Tarih · Mamul · Miktar · Sarf / Giriş Deposu · Birim
+    /// Maliyet · Toplam · Sorumlu · Durum"). Durum adı seviyeye göre okunur: 2 basit / standartta "Stoğa işlendi",
+    /// denetimlide "Karantina" (fişin kesildiği seviye fişte saklı).
+    /// </summary>
+    private static KaynakTanimi UretimFisi() => new(
+        Ad: "uretim-fisi",
+        UrunModu: UrunModlari.Erp,
+        YetkiKodu: "uretim.fis.liste",
+        Kaynak: "public.uretim_fisi f "
+              + "  join public.stok s on s.id = f.stok_id "
+              + "  left join public.depo sd on sd.id = f.sarf_depo_id "
+              + "  left join public.depo gd on gd.id = f.giris_depo_id "
+              + "  left join public.taraf so on so.id = f.sorumlu_id "
+              + "  left join public.uretim_emri e on e.id = f.emir_id",
+        SubeKolonu: "f.sube_id",
+        VarsayilanSirala: "f.bas desc, f.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "f.id",      "sayi",  "Id", Varsayilan: false),
+            new("stokId",   "f.stok_id", "sayi",  "Stok Id", Varsayilan: false),
+            new("no",       "f.no",      "metin", "Üretim No", Genislik: 130),
+            new("bas",      "f.bas",     "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("mamulAd",  "s.kod || ' · ' || s.ad", "metin", "Mamul", Genislik: 260),
+            new("miktar",   "f.uretilen", "sayi", "Miktar", Hizalama: "sag", Bicim: "#,##0.##", Genislik: 90),
+            new("planMiktar", "f.miktar", "sayi", "Plan", Hizalama: "sag", Bicim: "#,##0.##", Genislik: 80, Varsayilan: false),
+            new("sarfDepo", "coalesce(sd.ad, '')", "metin", "Sarf Deposu", Genislik: 130),
+            new("girisDepo", "coalesce(gd.ad, '')", "metin", "Giriş Deposu", Genislik: 130),
+            new("birimMaliyet", "f.birim_maliyet", "para", "Birim Maliyet", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 120),
+            new("toplam",   "f.toplam",  "para",  "Toplam", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 120),
+            new("malzeme",  "f.malzeme", "para",  "Malzeme", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 110, Varsayilan: false),
+            new("iscilik",  "f.iscilik", "para",  "İşçilik / Gider", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 110, Varsayilan: false),
+            new("sorumlu",  "coalesce(public.fn_taraf_ad(so.unvan, so.ad, so.soyad)::varchar(120), '')", "metin", "Sorumlu",
+                                         Genislik: 150),
+            new("emirNo",   "coalesce(e.no, '')", "metin", "Üretim Emri", Hizalama: "orta", Genislik: 130, Varsayilan: false),
+            new("partiNo",  "f.parti_no", "metin", "Parti", Hizalama: "orta", Genislik: 110, Varsayilan: false),
+            new("durumAdi",
+                """
+                case f.durum when 0 then 'Ters kayıt' when 1 then 'Taslak'
+                             when 2 then case when f.seviye = 'denetimli' then 'Karantina' else 'Stoğa işlendi' end
+                             when 3 then 'Serbest' when 4 then 'Reddedildi' else '' end
+                """,                      "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 120,
+                                         Filtrelenebilir: false),
+            new("durum",    "f.durum",   "kod",   "Durum Kodu", Varsayilan: false),
+            new("aciklama", "f.aciklama", "metin", "Açıklama", Genislik: 220, Varsayilan: false),
+            new("eklemeTarihi", "f.ekleme_tarihi", "tarih", "Oluşturma", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm",
+                                         Genislik: 130, Varsayilan: false),
         });
 
     /// <summary>
