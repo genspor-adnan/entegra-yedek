@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import type { BelgeYaniti } from '../../api/sozlesme';
 import {
@@ -71,6 +72,13 @@ export function IrsaliyeFaturaEslesme() {
   const [acikDetay, setAcikDetay] = useState<Set<number>>(new Set());
   const [seciliFatura, setSeciliFatura] = useState<number | null>(null);
   const [acikBelge, setAcikBelge] = useState<number | null>(null);
+  /**
+   * BELGE KENDİ SEKMESİNDE (kullanıcı 03.11.2026: "İrsaliye-Fatura Eşleşme İcmali nde veya diğer icmaller belge açılacaksa modal
+   * değil sekme olarak açılsın"): ekstre (27.10.2026) ve finans icmallerinin deseni - sekme icmalin sağına açılır. Ekran sekmeleri
+   * kapalıysa (eski görünüm) pencere.
+   */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/belge/${id}`); else setAcikBelge(id) };
   const [kuyruk, setKuyruk] = useState<{ id: number; tur: number; yon: 'satis' | 'alis' }[]>([]);
   const [uretilen, setUretilen] = useState<{ id: number; no: string }[]>([]);
   const [isliyor, setIsliyor] = useState(false);
@@ -195,7 +203,7 @@ export function IrsaliyeFaturaEslesme() {
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && (
         <div className="bilgi-kutusu ife-tamam">{bilgi.metin}{' '}
-          {bilgi.belgeler?.map(x => <span key={x.id} className="lnk" style={{ marginRight: 8 }} onClick={() => setAcikBelge(x.id)}>{x.no}</span>)}
+          {bilgi.belgeler?.map(x => <span key={x.id} className="lnk" style={{ marginRight: 8 }} onClick={() => belgeAc(x.id)}>{x.no}</span>)}
         </div>
       )}
 
@@ -262,10 +270,10 @@ export function IrsaliyeFaturaEslesme() {
                       {faturasiz.length === 0 && <tr><td colSpan={11} className="bos">Bu süzgeçte faturası kesilmemiş irsaliye yok.</td></tr>}
                       {faturasiz.slice(0, 1000).map(x => (
                         <Fragment key={x.id}>
-                          <tr className="ac" onClick={() => detayCevir(x.id)} onDoubleClick={() => setAcikBelge(x.id)}>
+                          <tr className="ac" onClick={() => detayCevir(x.id)} onDoubleClick={() => belgeAc(x.id)}>
                             <td onClick={ev => ev.stopPropagation()}><input type="checkbox" checked={secili.has(x.id)} onChange={() => cevir(x.id)} /></td>
                             <td><span className="ok">{acikDetay.has(x.id) ? '▾' : '▸'}</span>
-                              <span className="lnk" onClick={ev => { ev.stopPropagation(); setAcikBelge(x.id) }}>{x.no}</span></td>
+                              <span className="lnk" onClick={ev => { ev.stopPropagation(); belgeAc(x.id) }}>{x.no}</span></td>
                             <td>{tarihT(x.tarih)}</td>{yon === 'ikisi' && <td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td>}
                             <td>{x.cari}</td><td>{x.depo}</td>
                             <td className="sag">{x.kalem}</td><td className="sag"><b>{tl(x.tutar)}</b></td>
@@ -307,8 +315,8 @@ export function IrsaliyeFaturaEslesme() {
                           {yon === 'ikisi' && (i === 0 || l[i - 1].yon !== x.yon) &&
                             <tr className="si-grup"><td colSpan={11}>{x.yon === 'satis' ? 'Satış (giden)' : 'Alış (gelen)'}</td></tr>}
                           <tr>
-                            <td><span className="lnk" onClick={() => setAcikBelge(x.irsaliyeId)}>{x.irsaliyeNo}</span></td>
-                            <td>{x.faturaId ? <span className="lnk" onClick={() => setAcikBelge(x.faturaId!)}>{x.faturaNo}</span> : <span className="ki-soluk">—</span>}</td>
+                            <td><span className="lnk" onClick={() => belgeAc(x.irsaliyeId)}>{x.irsaliyeNo}</span></td>
+                            <td>{x.faturaId ? <span className="lnk" onClick={() => belgeAc(x.faturaId!)}>{x.faturaNo}</span> : <span className="ki-soluk">—</span>}</td>
                             <td>{x.cari}</td><td title={x.ad}>{x.kod || x.ad}</td>
                             <td className="sag">{sayi(x.irsMiktar)}</td>
                             <td className={'sag' + (x.durum === 'fazla' ? ' kir' : '')}>{sayi(x.fatMiktar)}</td>
@@ -346,14 +354,14 @@ export function IrsaliyeFaturaEslesme() {
                       {veri.irsaliyesiz.slice(0, 1000).map(x => (
                         <tr key={x.id} className={'ac' + (seciliFatura === x.id ? ' sec' : '')} onClick={() => setSeciliFatura(x.id)}>
                           <td><input type="radio" name="ife-fatura" checked={seciliFatura === x.id} onChange={() => setSeciliFatura(x.id)} /></td>
-                          <td><span className="lnk" onClick={ev => { ev.stopPropagation(); setAcikBelge(x.id) }}>{x.no}</span></td>
+                          <td><span className="lnk" onClick={ev => { ev.stopPropagation(); belgeAc(x.id) }}>{x.no}</span></td>
                           <td>{tarihT(x.tarih)}</td>{yon === 'ikisi' && <td>{x.yon === 'satis' ? 'Satış' : 'Alış'}</td>}
                           <td>{x.cari}</td><td className="sag">{x.stokluKalem}</td><td className="sag">{tl(x.tutar)}</td>
                           <td className="ife-oneri">
                             {x.acikIrsaliyeler.length === 0 ? <span className="ki-soluk">—</span>
                               : x.acikIrsaliyeler.slice(0, 4).map(a => (
                                 <span key={a.id} style={{ marginRight: 8 }}>
-                                  <span className="lnk" onClick={ev => { ev.stopPropagation(); setAcikBelge(a.id) }}>{a.no}</span>
+                                  <span className="lnk" onClick={ev => { ev.stopPropagation(); belgeAc(a.id) }}>{a.no}</span>
                                   {` · ${kisaTl(a.tutar)} · aynı ${a.ortakKalem} kalem`}</span>))}
                             {x.acikIrsaliyeler.length > 4 && <span className="ki-soluk">… {x.acikIrsaliyeler.length - 4} irsaliye daha</span>}
                           </td>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Sayfa — YZ Komut Kutusu (Mockup)</title>
+<!--
+  Kullanıcı 03.11.2026: "prompt ekranını daha efektif nasıl kullanabiliriz? bir YZ ara yüzü gibi mi olabilir? efektif ama
+  basit.. kullanıcının rolüne göre yönlendirmesi gerek.. 'bugünkü işlerim' ... 'Demir' yazarsa Demir İnşaat (Müş), Demiral
+  Tarım (Müş), Demir Medikal (Ted), Demir Eren (Kişi), Demir Öztürk (Personel) gelse; seçince önerileri listelese ...
+  kurum içi YZ aracı/motoru kurulabilir mi?"
+  Bugün: ana sayfada "Ne açmak istiyorsunuz?" kutusu (ekran + kayıt arar), Ctrl+K paleti, ayrı YZ Rehber (871, /api/ai/rehber).
+  Öneri: TEK KUTU, ÜÇ KATMAN - 1) anlık arama (ücretsiz), 2) rol gündemi + kayıt önerileri (kural, ücretsiz),
+  3) YZ yalnız serbest soruda (kontörlü, araç çağırır, yazmaz). Mockup'ta üstteki rol / senaryo düğmeleri yalnız önizleme içindir.
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b;
+    --yz:#6d4bb8; --yzZem:#f3effb; --yzKenar:#ddd0f2; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12.5px}
+  .ust{background:linear-gradient(#34495e,#2c3e50);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 16px}
+  .ust b{font-size:14px}
+  .ust .sag{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:11.5px;opacity:.9}
+  .onizleme{max-width:1180px;margin:12px auto 0;padding:0 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;color:var(--soluk);font-size:11.5px}
+  .seg{display:inline-flex;border:1px solid var(--mavi);border-radius:4px;overflow:hidden}
+  .seg button{border:0;background:#fff;color:var(--mavi);font:inherit;font-weight:700;padding:4px 10px;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--mavi)}
+  .seg button.on{background:var(--mavi);color:#fff}
+  .sahne{max-width:1180px;margin:0 auto;padding:18px 16px 10px;text-align:center}
+  .selam{font-size:20px;color:var(--yazi2);font-weight:700;margin:8px 0 4px}
+  .alt{color:var(--soluk);margin-bottom:14px}
+
+  /* KOMUT KUTUSU */
+  .kutu{max-width:860px;margin:0 auto;position:relative;text-align:left}
+  .giris{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--cizgi);border-radius:10px;padding:10px 14px;
+    box-shadow:0 6px 20px rgba(20,40,70,.10)}
+  .giris.odak{border-color:var(--mavi);box-shadow:0 0 0 3px rgba(47,109,179,.15),0 6px 20px rgba(20,40,70,.10)}
+  .giris input{flex:1;border:0;outline:0;font:inherit;font-size:15px;color:var(--yazi);background:transparent}
+  .giris .kbd{border:1px solid var(--cizgi);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--soluk)}
+  .giris .mod{font-size:11px;border-radius:10px;padding:2px 8px;font-weight:700}
+  .mod.arama{background:#e6f0fb;color:var(--mavi)} .mod.gundem{background:#e9f6ee;color:var(--ok)} .mod.yz{background:var(--yzZem);color:var(--yz)}
+  .ipucu{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 0}
+  .ipucu span{border:1px solid var(--cizgi2);background:#fff;border-radius:14px;padding:4px 11px;cursor:pointer;color:#3a5573}
+  .ipucu span:hover{border-color:var(--mavi);color:var(--mavi)}
+  .ipucu span.yz{border-color:var(--yzKenar);color:var(--yz);background:var(--yzZem)}
+
+  .panel{max-width:860px;margin:10px auto 0;background:#fff;border:1px solid var(--cizgi);border-radius:10px;text-align:left;overflow:hidden;
+    box-shadow:0 6px 20px rgba(20,40,70,.08)}
+  .ph{padding:8px 14px;font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px;background:var(--yuz2);border-bottom:1px solid var(--cizgi2);display:flex;gap:8px;align-items:center}
+  .ph .sag{margin-left:auto;text-transform:none;letter-spacing:0}
+  .sat{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f0f3f7;cursor:pointer}
+  .sat:last-child{border-bottom:0}
+  .sat:hover,.sat.sec{background:#f2f7fd}
+  .sat .ik{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 28px}
+  .sat .ad{font-weight:700;color:var(--yazi2)} .sat .ad mark{background:#fff3c4;color:inherit;padding:0}
+  .sat .ac{color:var(--soluk);font-size:11.5px}
+  .sat .sg{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.mus{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0} .rz.ted{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .rz.kis{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6} .rz.per{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+  .rz.ekr{background:#fff;color:#5b6b7c;border-color:#d4dde6} .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9} .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .tus{font-size:11px;color:var(--soluk);border:1px solid var(--cizgi2);border-radius:4px;padding:0 5px}
+
+  /* GÜNDEM KARTLARI */
+  .gundem{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px 14px}
+  .gk{border:1px solid var(--cizgi2);border-radius:8px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:6px}
+  .gk .bas{display:flex;gap:8px;align-items:center;font-weight:700;color:var(--yazi2)}
+  .gk .bas .say{margin-left:auto;font-size:16px}
+  .gk.kir{border-left:4px solid var(--hata)} .gk.sar{border-left:4px solid var(--uyari)} .gk.yes{border-left:4px solid var(--ok)} .gk.mav{border-left:4px solid var(--mavi)}
+  .gk ul{margin:0;padding:0;list-style:none;font-size:11.5px;color:#3a4a5b}
+  .gk li{display:flex;gap:6px;padding:2px 0} .gk li b{margin-left:auto;color:var(--yazi)}
+  .gk .eylem{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:4px;padding:3px 9px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--yazi)}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3}
+  .d.yz{background:var(--yzZem);color:var(--yz);border-color:var(--yzKenar)}
+
+  /* KAYIT ÖNERİLERİ */
+  .kayit{display:grid;grid-template-columns:260px minmax(0,1fr)}
+  .kayit .sol{border-right:1px solid var(--cizgi2)}
+  .kayit .sag{padding:12px 14px}
+  .kb{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .kb .av{width:40px;height:40px;border-radius:50%;background:#2e9d5b;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .kb .ad{font-size:14px;font-weight:700;color:var(--yazi2)}
+  .kutucuk{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .kc{border:1px solid var(--cizgi2);border-radius:6px;padding:4px 10px;background:var(--yuz2);min-width:110px}
+  .kc .e{font-size:10px;color:var(--soluk);text-transform:uppercase} .kc .v{font-weight:700}
+  .kc.kir .v{color:var(--hata)} .kc.sar .v{color:var(--uyari)}
+  .oneri{border:1px solid var(--cizgi2);border-radius:8px;overflow:hidden}
+  .oneri .sat{cursor:default} .oneri .sat .sg{gap:4px}
+  .oneri .neden{font-size:11px;color:var(--soluk)}
+
+  /* YZ CEVABI */
+  .yzc{padding:12px 14px}
+  .yzc .soru{color:var(--soluk);margin-bottom:8px}
+  .yzc .cevap{border:1px solid var(--yzKenar);background:var(--yzZem);border-radius:8px;padding:10px 12px}
+  .yzc table{border-collapse:collapse;width:100%;margin:6px 0;background:#fff}
+  .yzc th,.yzc td{border:1px solid var(--cizgi2);padding:4px 8px;font-size:11.5px;text-align:left}
+  .yzc td.s{text-align:right}
+  .kaynak{font-size:10.5px;color:var(--soluk);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+  .onay{margin-top:10px;border:1px dashed var(--mavi);border-radius:8px;padding:8px 12px;background:#f6faff}
+  .onay .al{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:11.5px;margin:6px 0}
+  .onay .al span:nth-child(odd){color:var(--soluk);text-align:right}
+
+  .aciklama{max-width:1180px;margin:22px auto 30px;padding:0 16px;color:var(--soluk);font-size:11.5px;line-height:1.75}
+  .aciklama h3{color:var(--yazi2);font-size:13px;margin:16px 0 6px}
+  .katman{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0}
+  .katman div{background:#fff;border:1px solid var(--cizgi2);border-radius:8px;padding:10px 12px;color:var(--yazi)}
+  .katman div > b:first-child{display:block;color:var(--yazi2);margin-bottom:4px}
+  .katman .k3{border-color:var(--yzKenar);background:var(--yzZem)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="ust"><b>Gentegre AI</b><span style="opacity:.8">Ara ya da komut yaz… <span class="tus" style="color:#cfd8e3;border-color:#5b7088">Ctrl K</span></span>
+  <span class="sag">🔔 4 · <span id="ustRol">Muhasebe · Ayşe K.</span></span></div>
+
+<div class="onizleme">
+  <span>Önizleme — rol:</span>
+  <span class="seg" id="rolSec"><button data-r="muhasebe" class="on">Muhasebe</button><button data-r="yonetici">Yönetici</button><button data-r="satis">Satış</button><button data-r="depo">Depo</button></span>
+  <span>senaryo:</span>
+  <span class="seg" id="senSec"><button data-s="bos" class="on">Boş kutu</button><button data-s="gundem">"bugünkü işlerim"</button><button data-s="demir">"Demir"</button><button data-s="secim">Demir İnşaat seçildi</button><button data-s="yz">Serbest soru (YZ)</button><button data-s="komut">"Demir İnşaat'a fatura kes"</button></span>
+</div>
+
+<div class="sahne">
+  <div class="selam">Günaydın, <span id="ad">Ayşe</span></div>
+  <div class="alt" id="altYazi">3 Kasım Salı · bugün 4 ödeme, 2 çek vadesi, 1 kredi taksiti var</div>
+
+  <div class="kutu">
+    <div class="giris odak">
+      <span style="font-size:16px">🔍</span>
+      <input id="kutu" value="" placeholder="Bir şey yaz: kayıt adı, ekran, &quot;bugünkü işlerim&quot; ya da soru…">
+      <span class="mod arama" id="mod">Arama</span>
+      <span class="kbd">Enter</span><span title="Sesle">🎤</span>
+    </div>
+    <div class="ipucu" id="ipucu"></div>
+  </div>
+
+  <!-- 1 · BOŞ KUTU: ROL GÜNDEMİ (kutuya odaklanınca, yazmadan) -->
+  <div class="panel" id="p_bos">
+    <div class="ph">📌 Bugün senin için <span class="sag" id="gundemNot">rol: Muhasebe · kurallar DB'den, YZ kullanılmadı</span></div>
+    <div class="gundem" id="gundemKartlari"></div>
+  </div>
+
+  <!-- 2 · "bugünkü işlerim": aynı gündem, ayrıntılı + görevler -->
+  <div class="panel" id="p_gundem" hidden>
+    <div class="ph">📋 Bugünkü işlerin <span class="sag">"işlerim / görevlerim / bugün ne var" → gündem niyeti · ücretsiz</span></div>
+    <div class="gundem" id="gundemKartlari2"></div>
+    <div class="ph" style="border-top:1px solid var(--cizgi2)">✅ Görevlerin ve onay bekleyenler</div>
+    <div class="sat"><div class="ik" style="background:#fdf1e2">⏰</div><div><div class="ad">Ekim KDV beyannamesi kontrolü</div><div class="ac">Görev · son gün bugün 17:00 · atayan Mehmet T.</div></div><div class="sg"><span class="rz hata">bugün</span><span class="d">Aç</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">✍</div><div><div class="ad">2 ödeme talimatı onayınızı bekliyor</div><div class="ac">Onay Kuyruğu · toplam 186.400,00 ₺</div></div><div class="sg"><span class="d bir">Onayla…</span></div></div>
+    <div class="sat"><div class="ik" style="background:#eef1f5">💬</div><div><div class="ad">Kaan B.: "Demir Medikal ödemesi bu hafta mı?"</div><div class="ac">Mesaj · 09:12</div></div><div class="sg"><span class="d">Yanıtla</span></div></div>
+  </div>
+
+  <!-- 3 · "Demir": KAYIT + EKRAN ARAMASI (rol rozetli) -->
+  <div class="panel" id="p_demir" hidden>
+    <div class="ph">👥 Kayıtlar <span class="sag"><span class="tus">↑↓</span> seç · <span class="tus">Enter</span> öneriler · <span class="tus">Ctrl+Enter</span> kartı aç</span></div>
+    <div class="sat sec"><div class="ik" style="background:#e9f6ee">🏢</div><div><div class="ad"><mark>Demir</mark> İnşaat Taahhüt A.Ş.</div><div class="ac">Kod 120.01.044 · İstanbul · bakiye 248.300,00 B</div></div><div class="sg"><span class="rz mus">Müşteri</span><span class="rz uy">2 bekleyen irs.</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e9f6ee">🌾</div><div><div class="ad"><mark>Demir</mark>al Tarım Ltd.</div><div class="ac">Kod 120.01.087 · Konya · bakiye 12.400,00 B</div></div><div class="sg"><span class="rz mus">Müşteri</span></div></div>
+    <div class="sat"><div class="ik" style="background:#fdecec">🧪</div><div><div class="ad"><mark>Demir</mark> Medikal San. Tic.</div><div class="ac">Kod 320.02.011 · Ankara · borcumuz 96.800,00 A</div></div><div class="sg"><span class="rz ted">Tedarikçi</span><span class="rz hata">ödeme vadesi 05.11</span></div></div>
+    <div class="sat"><div class="ik" style="background:#eef1f5">👤</div><div><div class="ad"><mark>Demir</mark> Eren</div><div class="ac">Kişi · Demir İnşaat satın alma · 0532 *** 44 18</div></div><div class="sg"><span class="rz kis">Kişi</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🪪</div><div><div class="ad"><mark>Demir</mark> Öztürk</div><div class="ac">Personel · Depo sorumlusu · izin bakiyesi 9 gün</div></div><div class="sg"><span class="rz per">Personel</span></div></div>
+    <div class="ph" style="border-top:1px solid var(--cizgi2)">🗂 Ekranlar</div>
+    <div class="sat"><div class="ik" style="background:#fff;border:1px solid var(--cizgi2)">🏷</div><div><div class="ad"><mark>Demir</mark>baş Listesi</div><div class="ac">Sabit Varlıklar</div></div><div class="sg"><span class="rz ekr">Ekran</span></div></div>
+    <div class="ph" style="border-top:1px solid var(--cizgi2)">✨ Sor <span class="sag">kontörlü</span></div>
+    <div class="sat"><div class="ik" style="background:var(--yzZem)">✨</div><div><div class="ad" style="color:var(--yz)">"Demir" hakkında YZ'ye sor…</div><div class="ac">ör. "Demir İnşaat'ın son 6 aylık ödeme alışkanlığı"</div></div><div class="sg"><span class="tus">Tab</span></div></div>
+  </div>
+
+  <!-- 4 · SEÇİLEN KAYDIN ÖNERİLERİ -->
+  <div class="panel" id="p_secim" hidden>
+    <div class="ph">💡 Demir İnşaat Taahhüt A.Ş. için öneriler <span class="sag">kurallar: bekleyen belge, vade, bakiye, rol yetkisi · ücretsiz</span></div>
+    <div class="kayit">
+      <div class="sol">
+        <div class="sat sec"><div class="ik" style="background:#e9f6ee">🏢</div><div><div class="ad">Demir İnşaat</div><div class="ac">Müşteri</div></div></div>
+        <div class="sat"><div class="ik" style="background:#e9f6ee">🌾</div><div><div class="ad">Demiral Tarım</div><div class="ac">Müşteri</div></div></div>
+        <div class="sat"><div class="ik" style="background:#fdecec">🧪</div><div><div class="ad">Demir Medikal</div><div class="ac">Tedarikçi</div></div></div>
+        <div class="sat"><div class="ik" style="background:#eef1f5">👤</div><div><div class="ad">Demir Eren</div><div class="ac">Kişi</div></div></div>
+        <div class="sat"><div class="ik" style="background:#e6f0fb">🪪</div><div><div class="ad">Demir Öztürk</div><div class="ac">Personel</div></div></div>
+      </div>
+      <div class="sag" id="oneriAlan"></div>
+    </div>
+  </div>
+
+  <!-- 5 · SERBEST SORU → YZ -->
+  <div class="panel" id="p_yz" hidden>
+    <div class="ph">✨ YZ cevabı <span class="sag">1 kontör · 1,4 sn · yalnız senin yetkin olan veriden</span></div>
+    <div class="yzc">
+      <div class="soru">Soru: <b>"Bu ay vadesi geçmiş en büyük 5 alacağımız ve geçen aya göre durum?"</b></div>
+      <div class="cevap">
+        Vadesi geçmiş alacak toplamı <b>612.480,00 ₺</b> (geçen ay aynı gün 498.100,00 ₺ · <b style="color:var(--hata)">+%23</b>). En büyük beşi:
+        <table><tr><th>Cari</th><th>Vadesi geçen</th><th>En eski</th><th>Son tahsilat</th></tr>
+          <tr><td>Demir İnşaat Taahhüt A.Ş.</td><td class="s">186.200,00</td><td>42 gün</td><td>14.10</td></tr>
+          <tr><td>Kuzey Yapı Ltd.</td><td class="s">121.900,00</td><td>35 gün</td><td>02.10</td></tr>
+          <tr><td>Ege Medikal</td><td class="s">88.400,00</td><td>61 gün</td><td>—</td></tr>
+          <tr><td>Anka Otel</td><td class="s">54.000,00</td><td>18 gün</td><td>28.10</td></tr>
+          <tr><td>Demiral Tarım</td><td class="s">12.400,00</td><td>9 gün</td><td>30.10</td></tr></table>
+        Ege Medikal'den 61 gündür tahsilat yok; risk limiti aşılmış.
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="d">📄 Yaşlandırma İcmali'nde aç</span><span class="d">📞 Ege Medikal'e hatırlatma görevi oluştur…</span><span class="d">⬇ Excel</span></div>
+        <div class="kaynak"><span>Kaynak: Cari Yaşlandırma İcmali (fn_cari_yaslandirma) · 03.11.2026 09:40</span><span>Sorgu: katalog aracı, serbest SQL yok</span><span>👍 👎</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 · KOMUT: "Demir İnşaat'a fatura kes" → ÖN DOLU KART, ONAYLA -->
+  <div class="panel" id="p_komut" hidden>
+    <div class="ph">⚡ Komut anlaşıldı <span class="sag">niyet: yeni satış faturası · cari eşleşti · YAZMADAN önce onay</span></div>
+    <div class="yzc">
+      <div class="soru">Yazdığın: <b>"Demir İnşaat'a fatura kes"</b></div>
+      <div class="onay">
+        <b>Satış faturası açılacak (henüz kaydedilmedi)</b>
+        <div class="al"><span>Müşteri</span><span>Demir İnşaat Taahhüt A.Ş. (120.01.044)</span>
+          <span>Kaynak</span><span>2 bekleyen irsaliye var — <b>İR-2026-0441, İR-2026-0450</b> faturaya dönüştürülsün mü?</span>
+          <span>Depo / vade</span><span>Anadepo · 30 gün (cari kartından)</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="d bir">⇄ 2 irsaliyeyi faturaya dönüştür…</span><span class="d">📄 Boş fatura aç (müşteri seçili)</span><span class="d">Vazgeç</span></div>
+        <div class="kaynak"><span>Kart açılır, kullanıcı Kaydet der — komut kendisi hiçbir zaman kayıt atmaz.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h3>Nasıl çalışır — tek kutu, üç katman</h3>
+  <div class="katman">
+    <div><b>1 · Anlık arama (ücretsiz, YZ yok)</b>Yazarken kayıt + ekran araması: cari (müşteri / tedarikçi), kişi, personel, stok, belge no, ekran adı.
+      Her satırda <b>rol rozeti</b> ve kısa durum (bakiye, bekleyen belge, vade). Sonuçlar yalnız kullanıcının yetkili olduğu kaynaklardan
+      (liste kataloğunun yetki süzgeci — bugünkü arama kutusu da bunu yapıyor).</div>
+    <div><b>2 · Gündem ve öneriler (kural, ücretsiz)</b>"bugünkü işlerim / görevlerim / bugün ne var" bir <b>niyettir</b> (anahtar kelime + eş anlam listesi), YZ'ye gitmez.
+      Rolün gündem kartları DB fonksiyonlarından gelir: muhasebe → vadesi gelen ödemeler, çekler, kredi taksiti, kredi kartı son ödeme, tahsil edilecekler;
+      yönetici → nakit durumu, onay bekleyenler, gecikmiş tahsilat, kritik stok; satış → teklif / sipariş takibi; depo → bekleyen sevkiyat, sayım, SKT.
+      Kayıt seçilince <b>öneri kuralları</b>: müşteride bekleyen irsaliye → faturaya dönüştür, açık sipariş, vadesi geçen, yeni sipariş / fatura;
+      tedarikçide ödeme vadesi, bekleyen alış siparişi; personelde izin, avans; kişide görev / arama. Öneri yalnız yetkisi olan işlem için çıkar.</div>
+    <div class="k3"><b>3 · YZ (yalnız serbest soru, kontörlü)</b>1 ve 2 cevap bulamazsa ya da kullanıcı "✨ Sor" derse. Model veriye <b>doğrudan erişmez</b>:
+      mevcut katalog araçlarını (liste, icmal, ekstre uçları) kullanıcının yetkisiyle çağırır, cevapta <b>kaynağı</b> yazar. Serbest SQL yok.
+      <b>Yazma işi yapmaz</b>: komut ("fatura kes") ön dolu kart açar, kaydı kullanıcı yapar. Bugünkü YZ Rehber (871) ve kontör altyapısı bunun üstüne kurulur.</div>
+  </div>
+  <h3>Kurum içi YZ motoru kurulabilir mi?</h3>
+  Evet, iki yol: <b>(a) bulut modeli</b> (bugünkü bağlantı; anahtar satıcıda, kontör müşteride) — en iyi anlama, internet gerekir;
+  <b>(b) kurum içi model</b> — müşterinin sunucusunda çalışan açık kaynak bir dil modeli (GPU'lu sunucu ya da yeterli RAM'li CPU; 7–14 milyar parametreli modeller
+  Türkçe niyet ve özet için yeterli, ağır analiz için zayıf). Veri kurumdan çıkmaz — <b>KVKK / hasta verisi</b> olan HBYS kurulumlarında tercih edilebilir.
+  Mimari aynı kalır: model yalnız "niyet + araç seçimi + özet" yapar; veri, yetki ve hesap uygulamada. Kurum Profili › YZ: <i>Kapalı · Bulut · Kurum içi</i> seçimi;
+  kurum içinde kontör düşmez, günlük çağrı sınırı kalır.<br>
+  <b>Kademeli yol önerisi</b>: önce 1 + 2 (YZ'siz, hemen değer üretir, maliyet yok) → sonra 3 bulutla → isteyen kuruma kurum içi model.
+  <h3>Basit kalması için kurallar</h3>
+  Tek kutu (ayrı "asistan" ekranı yok) · yazmaya başlamadan gündem görünür · her sonuçta tek tık eylem · YZ cevabı her zaman kaynaklı ve "Aç" düğmeli ·
+  hiçbir komut onaysız kayıt atmaz · rol değişince gündem değişir, ekran değişmez · klavye: ↑↓ Enter, Tab = YZ'ye sor, Esc = kapat.
+</div>
+
+<script>
+const GUNDEM = {
+  muhasebe: { ad: 'Ayşe', rol: 'Muhasebe · Ayşe K.', alt: '3 Kasım Salı · bugün 4 ödeme, 2 çek vadesi, 1 kredi taksiti var',
+    ipucu: ['bugünkü işlerim', 'vadesi gelen ödemeler', 'bu hafta çek vadeleri', 'Demir', '✨ vadesi geçmiş en büyük 5 alacak'],
+    kart: [
+      ['kir', '💸', 'Bugün ödenecek', '4', [['Demir Medikal', '96.800,00'], ['Kuzey Lojistik', '42.150,00'], ['+2 tedarikçi', '47.450,00']], ['Ödeme Listesi', 'Talimat hazırla…']],
+      ['sar', '🧾', 'Çek / senet vadesi', '2', [['Alınan çek · Anka Otel', '25.000,00'], ['Verilen çek · Ege Kâğıt', '18.400,00']], ['Çek Listesi']],
+      ['kir', '🏦', 'Kredi taksiti', '1', [['Halkbank ticari · 12/24', '64.300,00'], ['Hesapta (Halkbank TL)', '51.900,00']], ['Kredi Listesi', '⚠ 12.400 eksik']],
+      ['sar', '💳', 'Kredi kartı son ödeme', '05.11', [['Şirket kartı ****4411', '23.880,00'], ['Asgari', '4.776,00']], ['Kart ekstresi']],
+      ['yes', '📥', 'Bugün tahsil edilecek', '6', [['Vadesi bugün', '138.000,00'], ['Vadesi geçen', '612.480,00']], ['Tahsilat Listesi', '✨ Önceliklendir']],
+      ['mav', '📊', 'Nakit durumu', '', [['Kasa + banka', '1.284.000,00'], ['7 günlük net akış', '−212.600,00']], ['Nakit Akış İcmali']]] },
+  yonetici: { ad: 'Mehmet', rol: 'Yönetici · Mehmet T.', alt: '3 Kasım Salı · 3 onay bekliyor · tahsilat hedefin %68\'inde',
+    ipucu: ['bugünkü işlerim', 'onay bekleyenler', 'bu ay satış', 'Demir', '✨ geçen aya göre kârlılık neden düştü?'],
+    kart: [
+      ['kir', '✍', 'Onayını bekleyen', '3', [['Ödeme talimatı (2)', '186.400,00'], ['İskonto %18 · Demir İnşaat', 'teklif']], ['Onay Kuyruğu']],
+      ['mav', '📊', 'Nakit ve 30 gün', '', [['Bugün kasa + banka', '1.284.000,00'], ['30 gün net', '+318.000,00']], ['Nakit Akış İcmali']],
+      ['sar', '⏳', 'Gecikmiş tahsilat', '612K', [['Vadesi geçen toplam', '612.480,00'], ['En riskli · Ege Medikal', '61 gün']], ['Yaşlandırma', '✨ Özetle']],
+      ['yes', '📈', 'Bu ay satış', '%68', [['Gerçekleşen / hedef', '2,04 / 3,00 M'], ['Geçen ay aynı gün', '1,86 M']], ['Satış İcmali']],
+      ['sar', '📦', 'Kritik stok', '7', [['Sipariş verilmesi gereken', '7 kalem'], ['SKT 30 gün içinde', '3 lot']], ['Kritik Stok İcmali']],
+      ['mav', '👥', 'Ekip', '', [['Bugün izinli', '2 kişi'], ['Geciken görev', '4']], ['Görev Listesi']]] },
+  satis: { ad: 'Kaan', rol: 'Satış · Kaan B.', alt: '3 Kasım Salı · 5 teklif cevap bekliyor · 2 sipariş sevke hazır',
+    ipucu: ['bugünkü işlerim', 'bekleyen teklifler', 'sevke hazır siparişler', 'Demir', '✨ Demir İnşaat\'a ne önerebilirim?'],
+    kart: [
+      ['sar', '📝', 'Cevap bekleyen teklif', '5', [['Demir İnşaat · 14 gün', '420.000,00'], ['+4 teklif', '310.500,00']], ['Teklif Listesi', 'Hatırlat']],
+      ['yes', '🚚', 'Sevke hazır sipariş', '2', [['Demiral Tarım', '64.200,00'], ['Anka Otel', '18.900,00']], ['İrsaliye kes…']],
+      ['kir', '🧾', 'Faturalanmamış irsaliye', '3', [['Demir İnşaat (2)', '186.200,00'], ['Kuzey Yapı', '22.000,00']], ['Faturaya dönüştür…']],
+      ['mav', '📞', 'Bugünkü aramalar', '4', [['Planlı görüşme', '3'], ['Geri arama', '1']], ['Görev Listesi']],
+      ['yes', '🎯', 'Hedef', '%61', [['Bu ay', '1,22 / 2,00 M'], ['Kalan iş günü', '19']], ['Temsilci Performans']],
+      ['sar', '⚠', 'Risk limiti dolan', '1', [['Ege Medikal', 'limit aşıldı'], ['Yeni sipariş', 'onaya düşer']], ['Cari Kartı']]] },
+  depo: { ad: 'Demir', rol: 'Depo · Demir Ö.', alt: '3 Kasım Salı · 2 sevkiyat, 1 sayım, 3 lotun SKT\'si yaklaşıyor',
+    ipucu: ['bugünkü işlerim', 'bekleyen sevkiyat', 'SKT yaklaşan', 'Demir', '✨ hangi raflar dolu?'],
+    kart: [
+      ['yes', '🚚', 'Bugün sevkiyat', '2', [['Demiral Tarım · 14 kalem', '10:00'], ['Anka Otel · 6 kalem', '14:00']], ['Toplama listesi']],
+      ['sar', '📥', 'Beklenen mal kabul', '3', [['Demir Medikal · alış sip.', 'bugün'], ['+2 tedarikçi', 'yarın']], ['Alış İrsaliyesi…']],
+      ['kir', '⏳', 'SKT yaklaşan', '3', [['L-HA55 · 18 gün', '3,6 kg'], ['+2 lot', '30 gün içinde']], ['SKT / Lot İcmali']],
+      ['mav', '🔢', 'Sayım', '1', [['Raf B-04 dönemsel', 'bugün'], ['Son fark', '−2 kalem']], ['Sayım aç']],
+      ['sar', '📦', 'Kritik stok', '7', [['Sipariş önerisi', '7 kalem'], ['Talep oluştur', '']], ['Stoktan Talep…']],
+      ['mav', '🔁', 'Transfer bekleyen', '1', [['Anadepo → Şube', '12 kalem'], ['', '']], ['Stok Transfer']]] },
+};
+const ONERI = `
+  <div class="kb"><div class="av">Dİ</div><div><div class="ad">Demir İnşaat Taahhüt A.Ş. <span class="rz mus">Müşteri</span></div><div class="ac" style="color:var(--soluk)">120.01.044 · Temsilci Kaan B. · risk limiti 500.000 · vade 30 gün</div></div></div>
+  <div class="kutucuk"><div class="kc kir"><div class="e">Bakiye</div><div class="v">248.300,00 B</div></div><div class="kc kir"><div class="e">Vadesi geçen</div><div class="v">186.200,00 · 42 gün</div></div>
+    <div class="kc sar"><div class="e">Bekleyen irsaliye</div><div class="v">2 · 186.200,00</div></div><div class="kc"><div class="e">Açık sipariş</div><div class="v">1 · 92.000,00</div></div><div class="kc"><div class="e">Son tahsilat</div><div class="v">14.10 · 60.000,00</div></div></div>
+  <div class="oneri">
+    <div class="sat"><div class="ik" style="background:#fdf1e2">⇄</div><div><div class="ad">2 irsaliye faturaya dönüştürülmeli</div><div class="neden">İR-2026-0441 (11 gün), İR-2026-0450 (4 gün) · faturalanmamış 186.200,00</div></div><div class="sg"><span class="d bir">Dönüştür…</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🚚</div><div><div class="ad">Açık sipariş SS-2026-0412 sevke hazır</div><div class="neden">stok yeterli · termin 06.11</div></div><div class="sg"><span class="d">İrsaliye kes…</span></div></div>
+    <div class="sat"><div class="ik" style="background:#fdecec">💰</div><div><div class="ad">Vadesi geçen 186.200,00 için tahsilat</div><div class="neden">42 gün · son tahsilat 14.10</div></div><div class="sg"><span class="d">Tahsilat al…</span><span class="d">Hatırlatma görevi</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e9f6ee">＋</div><div><div class="ad">Yeni işlem</div><div class="neden">müşteri seçili açılır</div></div><div class="sg"><span class="d">Sipariş</span><span class="d">Fatura</span><span class="d">Teklif</span></div></div>
+    <div class="sat"><div class="ik" style="background:#eef1f5">📄</div><div><div class="ad">Görüntüle</div><div class="neden">&nbsp;</div></div><div class="sg"><span class="d">Ekstre</span><span class="d">Cari kartı</span><span class="d yz">✨ Özetle</span></div></div>
+  </div>
+  <div style="margin-top:10px;font-size:11px;color:var(--soluk)">Başka rol örnekleri — <b>Tedarikçi</b> (Demir Medikal): ödeme vadesi 05.11 · bekleyen alış siparişi · yeni alış faturası / ödeme talimatı.
+    <b>Personel</b> (Demir Öztürk): izin gir · avans · zimmet · bordro. <b>Kişi</b> (Demir Eren): ara · görev oluştur · bağlı cari (Demir İnşaat).</div>`;
+
+const $ = s => document.querySelector(s);
+let rol = 'muhasebe', sen = 'bos';
+function kartCiz(hedef, r) {
+  $(hedef).innerHTML = GUNDEM[r].kart.map(([renk, ik, ad, say, sat, ey]) => `
+    <div class="gk ${renk}"><div class="bas">${ik} ${ad}<span class="say">${say}</span></div>
+      <ul>${sat.filter(x => x[0]).map(([a, b]) => `<li>${a}<b>${b}</b></li>`).join('')}</ul>
+      <div class="eylem">${ey.map(e => `<span class="d${e.startsWith('✨') ? ' yz' : ''}">${e}</span>`).join('')}</div></div>`).join('');
+}
+function ciz() {
+  const g = GUNDEM[rol];
+  $('#ad').textContent = g.ad; $('#ustRol').textContent = g.rol; $('#altYazi').textContent = g.alt;
+  $('#gundemNot').textContent = `rol: ${g.rol.split(' ·')[0]} · kurallar DB'den, YZ kullanılmadı`;
+  $('#ipucu').innerHTML = g.ipucu.map(x => `<span class="${x.startsWith('✨') ? 'yz' : ''}">${x}</span>`).join('');
+  kartCiz('#gundemKartlari', rol); kartCiz('#gundemKartlari2', rol);
+  $('#oneriAlan').innerHTML = ONERI;
+  const metin = { bos: '', gundem: 'bugünkü işlerim', demir: 'Demir', secim: 'Demir İnşaat', yz: 'Bu ay vadesi geçmiş en büyük 5 alacağımız ve geçen aya göre durum?', komut: "Demir İnşaat'a fatura kes" }[sen];
+  $('#kutu').value = metin;
+  const mod = { bos: ['arama', 'Arama'], gundem: ['gundem', 'Gündem'], demir: ['arama', 'Arama'], secim: ['arama', 'Kayıt'], yz: ['yz', '✨ YZ'], komut: ['gundem', 'Komut'] }[sen];
+  $('#mod').className = 'mod ' + mod[0]; $('#mod').textContent = mod[1];
+  ['bos', 'gundem', 'demir', 'secim', 'yz', 'komut'].forEach(k => $('#p_' + k).hidden = k !== sen);
+}
+document.querySelectorAll('#rolSec button').forEach(b => b.onclick = () => { rol = b.dataset.r; document.querySelectorAll('#rolSec button').forEach(x => x.classList.toggle('on', x === b)); ciz() });
+document.querySelectorAll('#senSec button').forEach(b => b.onclick = () => { sen = b.dataset.s; document.querySelectorAll('#senSec button').forEach(x => x.classList.toggle('on', x === b)); ciz() });
+document.addEventListener('click', e => {
+  const s = e.target.closest('.ipucu span'); if (!s) return;
+  const t = s.textContent;
+  const hedef = t.startsWith('✨') ? 'yz' : t === 'Demir' ? 'demir' : 'gundem';
+  document.querySelector(`#senSec button[data-s="${hedef}"]`).click();
+});
+document.addEventListener('click', e => { if (e.target.closest('#p_demir .sat.sec, #p_demir .sat:nth-of-type(2)')) document.querySelector('#senSec button[data-s="secim"]').click() });
+ciz();
+</script>
+</body>
+</html>

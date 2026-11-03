@@ -63,7 +63,9 @@ export function cariKartGovdesi(vkn: string, rol: CariRol, g: CariGibBilgisi): K
  */
 export type CariIslem = 'siparis' | 'fatura' | 'irsaliye' | 'kart' | 'ekstre';
 export type CariYon = 'satis' | 'alis';
-export interface SeciliCari { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; il?: string }
+export interface SeciliCari { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; il?: string;
+  /** Ad aramasında seçilen kaydın türü (03.11.2026): kişi / personel / hastada belge komutları yok, öneriler + kart var. */
+  tur?: 'musteri' | 'tedarikci' | 'kisi' | 'personel' | 'hasta' }
 
 const ISLEM_SOZ: [string, CariIslem][] = [
   ['sip', 'siparis'], ['siparis', 'siparis'], ['fat', 'fatura'], ['fatura', 'fatura'],

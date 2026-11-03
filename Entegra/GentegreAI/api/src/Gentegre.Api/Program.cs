@@ -464,6 +464,7 @@ uygulama.MusteriRiskIcmalUclariniEkle();
 uygulama.BankaMutabakatUclariniEkle();
 // CTRL+K VKN + MÜŞTERİ / TEDARİKÇİ KARTI: kayıtlı cari + izibiz bilgisi (25.10.2026).
 uygulama.CariVknUclariniEkle();
+uygulama.GundemUclariniEkle();   // gündem kartları + kayıt önerileri + ad ile kayıt (03.11.2026)
 // PLANLI GİDER (1177): tekrarlayan gider tanımı, dönemler, eşleştirme, taslak ödeme.
 uygulama.PlanliGiderUclariniEkle();
 uygulama.TeklifIcmalUclariniEkle();

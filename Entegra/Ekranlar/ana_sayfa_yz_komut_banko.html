@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ana Sayfa — YZ Komut Kutusu · HBYS Banko (Mockup)</title>
+<!--
+  Kullanıcı 03.11.2026: "bir de hbys kullanıcı örneğin banko için mockup yap". ERP sürümü: ana_sayfa_yz_komut.html (aynı üç katman).
+  Rakamlar ve hastalar örnektir; TC / telefon maskelidir.
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b;
+    --yz:#6d4bb8; --yzZem:#f3effb; --yzKenar:#ddd0f2; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12.5px}
+  .ust{background:linear-gradient(#34495e,#2c3e50);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 16px}
+  .ust b{font-size:14px}
+  .ust .sag{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:11.5px;opacity:.9}
+  .onizleme{max-width:1180px;margin:12px auto 0;padding:0 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;color:var(--soluk);font-size:11.5px}
+  .seg{display:inline-flex;border:1px solid var(--mavi);border-radius:4px;overflow:hidden}
+  .seg button{border:0;background:#fff;color:var(--mavi);font:inherit;font-weight:700;padding:4px 10px;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--mavi)}
+  .seg button.on{background:var(--mavi);color:#fff}
+  .sahne{max-width:1180px;margin:0 auto;padding:18px 16px 10px;text-align:center}
+  .selam{font-size:20px;color:var(--yazi2);font-weight:700;margin:8px 0 4px}
+  .alt{color:var(--soluk);margin-bottom:14px}
+
+  /* KOMUT KUTUSU */
+  .kutu{max-width:860px;margin:0 auto;position:relative;text-align:left}
+  .giris{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--cizgi);border-radius:10px;padding:10px 14px;
+    box-shadow:0 6px 20px rgba(20,40,70,.10)}
+  .giris.odak{border-color:var(--mavi);box-shadow:0 0 0 3px rgba(47,109,179,.15),0 6px 20px rgba(20,40,70,.10)}
+  .giris input{flex:1;border:0;outline:0;font:inherit;font-size:15px;color:var(--yazi);background:transparent}
+  .giris .kbd{border:1px solid var(--cizgi);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--soluk)}
+  .giris .mod{font-size:11px;border-radius:10px;padding:2px 8px;font-weight:700}
+  .mod.arama{background:#e6f0fb;color:var(--mavi)} .mod.gundem{background:#e9f6ee;color:var(--ok)} .mod.yz{background:var(--yzZem);color:var(--yz)}
+  .ipucu{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 0}
+  .ipucu span{border:1px solid var(--cizgi2);background:#fff;border-radius:14px;padding:4px 11px;cursor:pointer;color:#3a5573}
+  .ipucu span:hover{border-color:var(--mavi);color:var(--mavi)}
+  .ipucu span.yz{border-color:var(--yzKenar);color:var(--yz);background:var(--yzZem)}
+
+  .panel{max-width:860px;margin:10px auto 0;background:#fff;border:1px solid var(--cizgi);border-radius:10px;text-align:left;overflow:hidden;
+    box-shadow:0 6px 20px rgba(20,40,70,.08)}
+  .ph{padding:8px 14px;font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.4px;background:var(--yuz2);border-bottom:1px solid var(--cizgi2);display:flex;gap:8px;align-items:center}
+  .ph .sag{margin-left:auto;text-transform:none;letter-spacing:0}
+  .sat{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f0f3f7;cursor:pointer}
+  .sat:last-child{border-bottom:0}
+  .sat:hover,.sat.sec{background:#f2f7fd}
+  .sat .ik{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 28px}
+  .sat .ad{font-weight:700;color:var(--yazi2)} .sat .ad mark{background:#fff3c4;color:inherit;padding:0}
+  .sat .ac{color:var(--soluk);font-size:11.5px}
+  .sat .sg{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.mus{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0} .rz.ted{background:#fdecec;color:var(--hata);border-color:#f2c9c9}
+  .rz.kis{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6} .rz.per{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+  .rz.ekr{background:#fff;color:#5b6b7c;border-color:#d4dde6} .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf}
+  .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9} .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .tus{font-size:11px;color:var(--soluk);border:1px solid var(--cizgi2);border-radius:4px;padding:0 5px}
+
+  /* GÜNDEM KARTLARI */
+  .gundem{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px 14px}
+  .gk{border:1px solid var(--cizgi2);border-radius:8px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:6px}
+  .gk .bas{display:flex;gap:8px;align-items:center;font-weight:700;color:var(--yazi2)}
+  .gk .bas .say{margin-left:auto;font-size:16px}
+  .gk.kir{border-left:4px solid var(--hata)} .gk.sar{border-left:4px solid var(--uyari)} .gk.yes{border-left:4px solid var(--ok)} .gk.mav{border-left:4px solid var(--mavi)}
+  .gk ul{margin:0;padding:0;list-style:none;font-size:11.5px;color:#3a4a5b}
+  .gk li{display:flex;gap:6px;padding:2px 0} .gk li b{margin-left:auto;color:var(--yazi)}
+  .gk .eylem{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:4px;padding:3px 9px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--yazi)}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3}
+  .d.yz{background:var(--yzZem);color:var(--yz);border-color:var(--yzKenar)}
+
+  /* KAYIT ÖNERİLERİ */
+  .kayit{display:grid;grid-template-columns:260px minmax(0,1fr)}
+  .kayit .sol{border-right:1px solid var(--cizgi2)}
+  .kayit .sag{padding:12px 14px}
+  .kb{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .kb .av{width:40px;height:40px;border-radius:50%;background:#2e9d5b;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .kb .ad{font-size:14px;font-weight:700;color:var(--yazi2)}
+  .kutucuk{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .kc{border:1px solid var(--cizgi2);border-radius:6px;padding:4px 10px;background:var(--yuz2);min-width:110px}
+  .kc .e{font-size:10px;color:var(--soluk);text-transform:uppercase} .kc .v{font-weight:700}
+  .kc.kir .v{color:var(--hata)} .kc.sar .v{color:var(--uyari)}
+  .oneri{border:1px solid var(--cizgi2);border-radius:8px;overflow:hidden}
+  .oneri .sat{cursor:default} .oneri .sat .sg{gap:4px}
+  .oneri .neden{font-size:11px;color:var(--soluk)}
+
+  /* YZ CEVABI */
+  .yzc{padding:12px 14px}
+  .yzc .soru{color:var(--soluk);margin-bottom:8px}
+  .yzc .cevap{border:1px solid var(--yzKenar);background:var(--yzZem);border-radius:8px;padding:10px 12px}
+  .yzc table{border-collapse:collapse;width:100%;margin:6px 0;background:#fff}
+  .yzc th,.yzc td{border:1px solid var(--cizgi2);padding:4px 8px;font-size:11.5px;text-align:left}
+  .yzc td.s{text-align:right}
+  .kaynak{font-size:10.5px;color:var(--soluk);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+  .onay{margin-top:10px;border:1px dashed var(--mavi);border-radius:8px;padding:8px 12px;background:#f6faff}
+  .onay .al{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:11.5px;margin:6px 0}
+  .onay .al span:nth-child(odd){color:var(--soluk);text-align:right}
+
+  .aciklama{max-width:1180px;margin:22px auto 30px;padding:0 16px;color:var(--soluk);font-size:11.5px;line-height:1.75}
+  .aciklama h3{color:var(--yazi2);font-size:13px;margin:16px 0 6px}
+  .katman{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0}
+  .katman div{background:#fff;border:1px solid var(--cizgi2);border-radius:8px;padding:10px 12px;color:var(--yazi)}
+  .katman div > b:first-child{display:block;color:var(--yazi2);margin-bottom:4px}
+  .katman .k3{border-color:var(--yzKenar);background:var(--yzZem)}
+  [hidden]{display:none!important}
+  .rz.bilgi{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4}
+</style>
+</head>
+<body>
+
+<div class="ust"><b>GenoTIP AI</b><span style="opacity:.8">Ara ya da komut yaz… <span class="tus" style="color:#cfd8e3;border-color:#5b7088">Ctrl K</span></span>
+  <span class="sag">🔔 3 · Banko 2 · Zeynep A. · <span style="opacity:.8">oturum açık 08:02 · kasa 4.850,00 ₺</span></span></div>
+
+<div class="onizleme">
+  <span>Önizleme — senaryo:</span>
+  <span class="seg" id="senSec"><button data-s="bos" class="on">Boş kutu</button><button data-s="gundem">"bugünkü işlerim"</button><button data-s="demir">"Demir"</button><button data-s="secim">Hasta seçildi</button><button data-s="tc">TC no yazıldı</button><button data-s="komut">"Ayşe Kaya kardiyoloji yarın"</button><button data-s="yz">Serbest soru (YZ)</button></span>
+</div>
+
+<div class="sahne">
+  <div class="selam">Günaydın, Zeynep</div>
+  <div class="alt">3 Kasım Salı · Banko 2 · bugün 46 randevu (21 geldi) · sırada 4 hasta</div>
+
+  <div class="kutu">
+    <div class="giris odak">
+      <span style="font-size:16px">🔍</span>
+      <input id="kutu" value="" placeholder="Hasta adı, TC / dosya no, telefon, &quot;bugünkü işlerim&quot; ya da komut…">
+      <span class="mod arama" id="mod">Arama</span>
+      <span class="kbd">Enter</span><span title="Sesle">🎤</span>
+    </div>
+    <div class="ipucu">
+      <span data-s="gundem">bugünkü işlerim</span><span data-s="gundem">gelmeyen randevular</span><span data-s="gundem">provizyon hataları</span>
+      <span data-s="demir">Demir</span><span data-s="tc">12345678901</span><span data-s="komut">Ayşe Kaya kardiyoloji yarın</span>
+      <span class="yz" data-s="yz">✨ bugün en yoğun poliklinik hangisi?</span>
+    </div>
+  </div>
+
+  <!-- 1 · BOŞ KUTU: BANKO GÜNDEMİ -->
+  <div class="panel" id="p_bos">
+    <div class="ph">📌 Bankoda bugün <span class="sag">rol: Banko / Kayıt Kabul · kurallar DB'den, YZ kullanılmadı</span></div>
+    <div class="gundem">
+      <div class="gk mav"><div class="bas">📅 Bugünkü randevular<span class="say">46</span></div>
+        <ul><li>Geldi / başvurusu açıldı<b>21</b></li><li>Saati geçti, gelmedi<b style="color:var(--hata)">6</b></li><li>Sonraki 1 saat<b>9</b></li></ul>
+        <div class="eylem"><span class="d">Randevu Listesi</span><span class="d">Gelmeyenleri ara…</span></div></div>
+      <div class="gk sar"><div class="bas">🧍 Sırada bekleyen<span class="say">4</span></div>
+        <ul><li>En uzun bekleyen<b>14 dk</b></li><li>Randevusuz gelen<b>2</b></li></ul>
+        <div class="eylem"><span class="d bir">▶ Sıradakini çağır</span><span class="d">Sıra ekranı</span></div></div>
+      <div class="gk kir"><div class="bas">⚠ Medula provizyon<span class="say">3</span></div>
+        <ul><li>Hak sahipliği bulunamadı<b>1</b></li><li>Takip no alınamadı (zaman aşımı)<b>2</b></li></ul>
+        <div class="eylem"><span class="d">Medula Kabul</span><span class="d">Yeniden dene</span></div></div>
+      <div class="gk kir"><div class="bas">💳 Tahsil edilmemiş<span class="say">5</span></div>
+        <ul><li>Katkı payı / fark ücreti<b>1.240,00</b></li><li>Özel hasta bakiyesi<b>3.600,00</b></li></ul>
+        <div class="eylem"><span class="d">Banko & Vezne</span><span class="d">Tahsilat al…</span></div></div>
+      <div class="gk sar"><div class="bas">％ İskonto onayı<span class="say">2</span></div>
+        <ul><li>Bekleyen (yönetici onayı)<b>2</b></li><li>Reddedilen (yeniden gönder)<b>1</b></li></ul>
+        <div class="eylem"><span class="d">İskonto Onayı</span></div></div>
+      <div class="gk yes"><div class="bas">🧾 Banko oturumu<span class="say">açık</span></div>
+        <ul><li>Nakit / kart<b>4.850 / 12.300</b></li><li>Gün sonu kapanışı<b>17:30</b></li></ul>
+        <div class="eylem"><span class="d">Banko Oturumu</span><span class="d">Vezne icmali</span></div></div>
+    </div>
+  </div>
+
+  <!-- 2 · "bugünkü işlerim" -->
+  <div class="panel" id="p_gundem" hidden>
+    <div class="ph">📋 Bugünkü işlerin <span class="sag">gündem niyeti · ücretsiz</span></div>
+    <div class="sat"><div class="ik" style="background:#fdecec">📞</div><div><div class="ad">6 hasta randevusuna gelmedi</div><div class="ac">en eskisi 08:30 · Kardiyoloji 3, Dahiliye 2, KBB 1</div></div><div class="sg"><span class="d">Listeyi aç</span><span class="d">SMS hatırlat…</span></div></div>
+    <div class="sat"><div class="ik" style="background:#fdecec">⚠</div><div><div class="ad">3 provizyon hatası</div><div class="ac">Takip no alınamadı 2 · hak sahipliği yok 1 (Mehmet Y. — müstahaklık)</div></div><div class="sg"><span class="d bir">Yeniden dene</span></div></div>
+    <div class="sat"><div class="ik" style="background:#fdf1e2">🪪</div><div><div class="ad">4 hastanın MERNİS doğrulaması yok</div><div class="ac">bugün açılan kartlar · kimlik bilgisi elle girilmiş</div></div><div class="sg"><span class="d">MERNİS'ten doğrula</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🧾</div><div><div class="ad">2 başvuru faturalanmayı bekliyor</div><div class="ac">muayenesi bitti, ücret satırı eksik değil · ödeyen SGK</div></div><div class="sg"><span class="d">Başvurulara git</span></div></div>
+    <div class="sat"><div class="ik" style="background:#eef1f5">💬</div><div><div class="ad">Dr. Selin K.: "Saat 11 hastası raporunu bankodan alacak"</div><div class="ac">Mesaj · 09:12</div></div><div class="sg"><span class="d">Yanıtla</span></div></div>
+  </div>
+
+  <!-- 3 · "Demir": HASTA + KİŞİ ARAMASI -->
+  <div class="panel" id="p_demir" hidden>
+    <div class="ph">🧑 Hastalar <span class="sag"><span class="tus">↑↓</span> seç · <span class="tus">Enter</span> öneriler · <span class="tus">Ctrl+Enter</span> hasta kartı</span></div>
+    <div class="sat sec"><div class="ik" style="background:#e6f0fb">🧑</div><div><div class="ad"><mark>Demir</mark> Eren · 44 y · E</div><div class="ac">TC 123******01 · dosya 104822 · 0532 *** 44 18 · SGK</div></div><div class="sg"><span class="rz ok">bugün 10:40 randevu</span><span class="rz uy">katkı borcu 120,00</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🧑</div><div><div class="ad"><mark>Demir</mark>el Aksoy · 67 y · K</div><div class="ac">TC 456******22 · dosya 088140 · emekli SGK</div></div><div class="sg"><span class="rz bilgi">açık başvuru (Dahiliye)</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🧑</div><div><div class="ad">Ayşe <mark>Demir</mark> · 8 y · K</div><div class="ac">TC 789******14 · dosya 112903 · veli: Murat Demir</div></div><div class="sg"><span class="rz kis">son geliş 4 ay önce</span></div></div>
+    <div class="ph" style="border-top:1px solid var(--cizgi2)">🏥 Kurumlar · Personel</div>
+    <div class="sat"><div class="ik" style="background:#e9f6ee">🏢</div><div><div class="ad"><mark>Demir</mark> İnşaat A.Ş.</div><div class="ac">Anlaşmalı kurum · çalışan muayenesi %20 indirim</div></div><div class="sg"><span class="rz mus">Kurum</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🩺</div><div><div class="ad">Dr. Hakan <mark>Demir</mark></div><div class="ac">Ortopedi · bugün poliklinikte · 11 boş randevu</div></div><div class="sg"><span class="rz per">Hekim</span></div></div>
+  </div>
+
+  <!-- 4 · HASTA SEÇİLDİ -->
+  <div class="panel" id="p_secim" hidden>
+    <div class="ph">💡 Demir Eren için öneriler <span class="sag">kurallar: randevu, açık başvuru, borç, provizyon, MERNİS · ücretsiz</span></div>
+    <div class="yzc">
+      <div class="kb"><div class="av" style="background:#2f6db3">DE</div><div><div class="ad">Demir Eren · 44 y · Erkek <span class="rz per">SGK · çalışan</span></div>
+        <div class="ac" style="color:var(--soluk)">Dosya 104822 · TC 123******01 · MERNİS ✓ · alerji: penisilin ⚠</div></div></div>
+      <div class="kutucuk">
+        <div class="kc"><div class="e">Bugün</div><div class="v">10:40 Kardiyoloji</div></div><div class="kc sar"><div class="e">Katkı borcu</div><div class="v">120,00</div></div>
+        <div class="kc"><div class="e">Son başvuru</div><div class="v">12.10 · Dahiliye</div></div><div class="kc"><div class="e">Bekleyen sonuç</div><div class="v">2 lab</div></div></div>
+      <div class="oneri">
+        <div class="sat"><div class="ik" style="background:#e9f6ee">📝</div><div><div class="ad">Randevusundan başvuru aç — Kardiyoloji, Dr. Selin K., 10:40</div><div class="neden">randevu bugün · provizyon otomatik alınır · sıra no verilir</div></div><div class="sg"><span class="d bir">Başvuru aç (Enter)</span></div></div>
+        <div class="sat"><div class="ik" style="background:#fdecec">💳</div><div><div class="ad">Önceki başvurudan 120,00 katkı payı borcu</div><div class="neden">12.10 Dahiliye · tahsil edilmedi</div></div><div class="sg"><span class="d">Tahsilat al…</span></div></div>
+        <div class="sat"><div class="ik" style="background:#e6f0fb">🧪</div><div><div class="ad">2 laboratuvar sonucu hazır</div><div class="neden">Hemogram, HbA1c · 14.10 · hasta portalına da düştü</div></div><div class="sg"><span class="d">Sonuç yazdır</span></div></div>
+        <div class="sat"><div class="ik" style="background:#eef1f5">＋</div><div><div class="ad">Diğer</div><div class="neden">&nbsp;</div></div><div class="sg"><span class="d">Randevu ver</span><span class="d">Hasta kartı</span><span class="d">Geçmiş başvurular</span><span class="d">Etiket / bileklik</span></div></div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--soluk)">Başka durumlar — <b>açık başvurusu varsa</b> yeni başvuru yerine o açılır (Demirel Aksoy) · <b>provizyon hatası</b>: "Medula'da yeniden dene" ilk öneri ·
+        <b>MERNİS yok</b>: "Kimliği doğrula" · <b>yabancı uyruklu</b>: pasaport / YKN uyarısı · <b>çocuk</b>: veli bilgisi kontrolü.</div>
+    </div>
+  </div>
+
+  <!-- 5 · TC NO -->
+  <div class="panel" id="p_tc" hidden>
+    <div class="ph">🪪 Kimlik numarası <span class="sag">11 hane + algoritma ✓ · kayıtlı hasta aranır, yoksa MERNİS önerilir</span></div>
+    <div class="sat sec"><div class="ik" style="background:#e9f6ee">📝</div><div><div class="ad">Kayıtlı hasta yok — MERNİS'ten bilgileri getir, yeni hasta kartı aç</div><div class="ac">ad, soyad, doğum tarihi, cinsiyet MERNİS'ten · telefon sorulur</div></div><div class="sg"><span class="d bir">Kart aç + başvuru (Enter)</span></div></div>
+    <div class="sat"><div class="ik" style="background:#e6f0fb">🔎</div><div><div class="ad">Provizyon sorgula (müstahaklık)</div><div class="ac">SGK hak sahipliği · kart açmadan</div></div><div class="sg"><span class="d">Sorgula</span></div></div>
+    <div class="sat"><div class="ik" style="background:#eef1f5">📅</div><div><div class="ad">Bu kimliğe randevu var mı?</div><div class="ac">MHRS ve kurum randevuları</div></div><div class="sg"><span class="rz kis">yok</span></div></div>
+  </div>
+
+  <!-- 6 · KOMUT: RANDEVU -->
+  <div class="panel" id="p_komut" hidden>
+    <div class="ph">⚡ Komut anlaşıldı <span class="sag">niyet: randevu · hasta + bölüm + gün · YAZMADAN önce onay</span></div>
+    <div class="yzc">
+      <div class="soru">Yazdığın: <b>"Ayşe Kaya kardiyoloji yarın"</b></div>
+      <div class="onay">
+        <b>Randevu verilecek (henüz kaydedilmedi)</b>
+        <div class="al"><span>Hasta</span><span>Ayşe Kaya · 52 y · dosya 097331 <span class="rz uy">2 "Ayşe Kaya" var — doğum yılı 1974 seçildi, değiştir</span></span>
+          <span>Bölüm / gün</span><span>Kardiyoloji · 04.11.2026 Çarşamba</span>
+          <span>Boş saatler</span><span><span class="d">09:20 Dr. Selin K.</span> <span class="d">10:00 Dr. Selin K.</span> <span class="d">13:40 Dr. Ali R.</span> <span class="d">diğer…</span></span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="d bir">09:20 randevuyu ver + SMS…</span><span class="d">Randevu ekranında aç</span><span class="d">Vazgeç</span></div>
+        <div class="kaynak"><span>Çalışma planından (randevu uygunluğu) · komut kendisi kayıt atmaz, son tıklamayı banko görevlisi yapar.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 · YZ -->
+  <div class="panel" id="p_yz" hidden>
+    <div class="ph">✨ YZ cevabı <span class="sag">kurum içi model · hasta verisi kurumdan çıkmadı · yalnız sayısal özet</span></div>
+    <div class="yzc">
+      <div class="soru">Soru: <b>"Bugün en yoğun poliklinik hangisi, beklemeyi nasıl azaltırım?"</b></div>
+      <div class="cevap">
+        En yoğun <b>Kardiyoloji</b>: 14 randevu + 5 randevusuz, ortalama bekleme 27 dk (kurum ortalaması 12 dk).
+        <table><tr><th>Poliklinik</th><th>Randevu</th><th>Randevusuz</th><th>Ort. bekleme</th><th>Boş slot (öğleden sonra)</th></tr>
+          <tr><td>Kardiyoloji</td><td class="s">14</td><td class="s">5</td><td class="s">27 dk</td><td class="s">0</td></tr>
+          <tr><td>Dahiliye</td><td class="s">12</td><td class="s">3</td><td class="s">15 dk</td><td class="s">4</td></tr>
+          <tr><td>Ortopedi</td><td class="s">9</td><td class="s">1</td><td class="s">8 dk</td><td class="s">11</td></tr></table>
+        Öneri: randevusuz kardiyoloji hastalarına öğleden sonra Dr. Ali R. boş değil; Dahiliye'de 4 boş slot var — tansiyon kontrolü gibi işler oraya yönlendirilebilir.
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="d">📊 Poliklinik Akışı'nda aç</span><span class="d">Randevu / Poliklinik İcmali</span></div>
+        <div class="kaynak"><span>Kaynak: Poliklinik Akışı + Randevu İcmali · 09:40</span><span>Hasta adı modele gönderilmedi (yalnız sayılar)</span><span>👍 👎</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h3>Banko için ne değişir — ERP ile aynı kutu, aynı üç katman</h3>
+  <div class="katman">
+    <div><b>1 · Anlık arama</b>Hasta önce: ad, TC (ilk 3 + son 2 görünür), dosya no, telefon. Satırda <b>bugün randevusu</b>, <b>açık başvuru</b>, <b>borç</b> rozeti — banko görevlisi kartı açmadan ne yapacağını görür.
+      Kurum (anlaşmalı) ve hekim de aranır. 11 haneli numara = kimlik niyeti (bugünkü Ctrl+K deseni): kayıtlıysa kart, değilse MERNİS'ten yeni kart.</div>
+    <div><b>2 · Gündem ve öneriler</b>Banko gündemi: bugünkü randevular (gelen / gelmeyen / sonraki saat), sıra, provizyon hataları, tahsil edilmemiş, iskonto onayı, banko oturumu.
+      Hasta seçilince: randevusundan başvuru aç (ilk öneri, Enter) · açık başvurusu varsa onu aç · borç tahsili · hazır sonuç yazdır · randevu ver.
+      Kurallar bugünkü "başvuru → istem" ve "açık başvuru varsa o açılır" prensipleriyle aynı.</div>
+    <div class="k3"><b>3 · YZ — HBYS'de kurum içi tercih</b>Hasta verisi (KVKK özel nitelikli) <b>buluta gitmez</b>: HBYS kurulumunda varsayılan <i>kurum içi model</i> ya da <i>kapalı</i>.
+      Bulut seçilirse modele yalnız <b>sayısal / anonim özet</b> gider (ad, TC, tanı yok) — mevcut YZ klinik önerideki anonim bağlam kuralı. Komutlar ("randevu ver") yine onaysız kayıt atmaz.</div>
+  </div>
+  <h3>Rol farkı</h3>
+  <b>Banko</b>: hasta + randevu + tahsilat · <b>Hekim</b>: sıradaki hasta, bekleyen sonuç / konsültasyon, imza bekleyen rapor · <b>Hemşire / servis</b>: ilaç saati, vital, yatan hasta ·
+  <b>Laboratuvar</b>: numune kabul, panik değer, onay bekleyen sonuç · <b>Yönetici</b>: doluluk, bekleme süresi, provizyon / fatura hatası, gelir.
+  Rol değişince gündem kartları ve öneri kuralları değişir; kutu ve klavye aynı kalır.
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const METIN = { bos: '', gundem: 'bugünkü işlerim', demir: 'Demir', secim: 'Demir Eren', tc: '12345678901', komut: 'Ayşe Kaya kardiyoloji yarın', yz: 'Bugün en yoğun poliklinik hangisi, beklemeyi nasıl azaltırım?' };
+const MOD = { bos: ['arama', 'Arama'], gundem: ['gundem', 'Gündem'], demir: ['arama', 'Arama'], secim: ['arama', 'Hasta'], tc: ['gundem', 'Kimlik'], komut: ['gundem', 'Komut'], yz: ['yz', '✨ YZ'] };
+function sec(s) {
+  document.querySelectorAll('#senSec button').forEach(x => x.classList.toggle('on', x.dataset.s === s));
+  $('#kutu').value = METIN[s]; $('#mod').className = 'mod ' + MOD[s][0]; $('#mod').textContent = MOD[s][1];
+  Object.keys(METIN).forEach(k => $('#p_' + k).hidden = k !== s);
+}
+document.querySelectorAll('#senSec button').forEach(b => b.onclick = () => sec(b.dataset.s));
+document.querySelectorAll('.ipucu span').forEach(b => b.onclick = () => sec(b.dataset.s));
+document.addEventListener('click', e => { if (e.target.closest('#p_demir .sat.sec')) sec('secim') });
+sec('bos');
+</script>
+</body>
+
+</html>

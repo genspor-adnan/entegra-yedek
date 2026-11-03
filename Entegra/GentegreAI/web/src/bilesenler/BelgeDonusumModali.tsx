@@ -10,7 +10,7 @@ import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
 import { Modal } from './GenForm';
 import { DONUSUM_PAY_SECENEKLERI }
   from '../sayfalar/belgeKarti/dagilimKovalari';
-import { para, say4, bugunIso, sayiOku as sayi, hamSayi } from './bicim';
+import { para, say4, sayiOku as sayi, hamSayi, yerelAnMetni } from './bicim';
 import { c } from '../dil/ceviri';
 import { gorunenBelgeNo } from '../sayfalar/belgeKartiKurallari';
 import { IzlemPenceresi } from './belge/IzlemPenceresi';
@@ -101,7 +101,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     return liste.some(h => h.kod === varsayilanHedef)
       ? varsayilanHedef! : (liste[0]?.kod ?? 0);
   });
-  const [tarih, setTarih] = useState(bugunIso);
+  // TARİH + SAAT (kullanıcı 03.11.2026: "belge dönüştür ekranında belge tarihi yanında saat de olsun"): belge kartının
+  //   başlığıyla aynı - yerel an metni (datetime-local), sunucu kartta olduğu gibi okur.
+  const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
   const [belgeNo, setBelgeNo] = useState('');
   /* Taslak kutusu kaldirildi (kullanici) - donusum hep KESIN belge uretir. */
   const taslak = false;
@@ -420,7 +422,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               )}
               <label className="alan">
                 <span className="etiket">{c('Belge Tarihi')}</span>
-                <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />
+                <input type="datetime-local" value={tarih} onChange={e => setTarih(e.target.value || yerelAnMetni(new Date()))} />
               </label>
               {/* TASLAK kutusu KALKTI (kullanici): donusumden cikan belge de
                   kesindir - kart tarafinda da ayni kural. */}

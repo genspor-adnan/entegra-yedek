@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
@@ -33,6 +34,13 @@ export function EFaturaIcmal() {
   const { kullanici } = useOturum();
   const subeAdi = kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad ?? '';
   const [acikBelge, setAcikBelge] = useState<number | null>(null);
+  /**
+   * BELGE KENDİ SEKMESİNDE (kullanıcı 03.11.2026: "İrsaliye-Fatura Eşleşme İcmali nde veya diğer icmaller belge açılacaksa modal
+   * değil sekme olarak açılsın"): ekstre (27.10.2026) ve finans icmallerinin deseni - sekme icmalin sağına açılır. Ekran sekmeleri
+   * kapalıysa (eski görünüm) pencere.
+   */
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/belge/${id}`); else setAcikBelge(id) };
   const gecen = (() => { const d = new Date(); d.setMonth(d.getMonth() - 1); return ayAraligi(d.getFullYear(), d.getMonth() + 1) })();
   const bas = arama.get('bas') ?? gecen.bas;
   const bit = arama.get('bit') ?? gecen.bit;
@@ -156,7 +164,7 @@ export function EFaturaIcmal() {
             </div>
             {sekme === 'tur' && <TurTablosu v={veri} secili={seciliTur} setSecili={setSeciliTur} />}
             {sekme === 'sorunlu' && <SorunluTablosu v={veri} secili={seciliBelge} setSecili={setSeciliBelge}
-                                                    belgeAc={setAcikBelge} />}
+                                                    belgeAc={belgeAc} />}
             {sekme === 'kdv' && <KdvTablosu v={veri} />}
             {sekme === 'alici' && <AliciSeriTablosu v={veri} />}
             {sekme === 'iade' && <IadeIptalTablosu v={veri} />}

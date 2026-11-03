@@ -2,6 +2,12 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import type { BaslangicKutucugu, GostergePaneliOzet } from '../api/uclar/gosterge';
+import type { GundemKarti } from '../api/uclar/gundem';
+
+/** Ana sayfadaki gündem kartı sınırı - tamamı Ctrl+K "bugünkü işlerim"de. */
+const GUNDEM_SINIRI = 9;
+/** Kartın alt satırı: değeri sıfır / boş olmayan ilk satır ("7 gün içinde 0,00" yerine "Vadesi geçen 125,00"). */
+const gundemOzet = (k: GundemKarti) => k.satirlar.find(s => !/^(0(,00)?|—)?$/.test(s.deger.trim())) ?? k.satirlar[0];
 import { gostergeDegeri } from '../bilesenler/GostergeIcerik';
 import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -69,6 +75,12 @@ export function Baslangic() {
   const [paneller, setPaneller] = useState<GostergePaneliOzet[] | null>(null);
   const [rolKutucuklari, setRolKutucuklari] = useState<BaslangicKutucugu[] | null>(null);
   const [bekleyen, setBekleyen] = useState<Awaited<ReturnType<typeof api.baslangicBekleyen>> | null>(null);
+  /**
+   * GÜNDEM KARTLARI (kullanıcı 03.11.2026, mockup Ekranlar/ana_sayfa_yz_komut.html): rol + yetkiye göre sunucunun hesapladığı
+   * kartlar (ödeme, tahsilat, çek, kredi, faturalanmamış irsaliye, kritik stok, randevu, provizyon...). Bekleyen işler şeridinde,
+   * kırmızı önce; ana sayfada en çok GUNDEM_SINIRI kart - hepsi Ctrl+K "bugünkü işlerim"de.
+   */
+  const [gundem, setGundem] = useState<GundemKarti[]>([]);
   /** ALT MENÜ (kullanıcı 17.10.2026: "kutulardaki menülerde alt menü varsa ok ile açılabilsin, default
       kapalı"): açık alt başlıklar - anahtar "kutu/altbaşlık". */
   const [acikAlt, setAcikAlt] = useState<Set<string>>(new Set());
@@ -79,6 +91,7 @@ export function Baslangic() {
     void api.gostergeler().then(setPaneller).catch(() => setPaneller([]));
     void api.baslangic().then(setRolKutucuklari).catch(() => setRolKutucuklari([]));
     void api.baslangicBekleyen().then(setBekleyen).catch(() => setBekleyen(null));
+    void api.gundem().then(y => setGundem(y.kartlar)).catch(() => setGundem([]));
   }, [kullanici?.id, kullanici?.subeId]);
 
   /**
@@ -287,7 +300,7 @@ export function Baslangic() {
     <>
       {sonAcilanlar.length > 0 && <><div className="bsl-bolum">{c('Son açılanlar')}</div>
         <div className={`bsl-kartlar bsl-kartlar-orta bsl-tek-sira${adet === 8 ? ' bsl-sekizli' : ''}`}>{sonAcilanlar.slice(0, adet).map(ekranKart)}</div></>}
-      {(bekleyenIsler.length > 0 || bildirimKartlari.length > 0) && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
+      {(bekleyenIsler.length > 0 || bildirimKartlari.length > 0 || gundem.length > 0) && <><div className="bsl-bolum">{c('Bekleyen işler')}</div>
         <div className={`bsl-kartlar bsl-kartlar-orta${adet === 8 ? ' bsl-sekizli' : ' bsl-dortlu'}`}>{bekleyenIsler.map(i => (
           <a key={i.yol} className={`bsl-kart${i.tikla || ekranVar(i.yol) ? '' : ' bsl-kart-pasif'}`}
              onClick={() => { if (i.tikla) i.tikla(); else if (ekranVar(i.yol)) git(i.yol) }}>
@@ -296,6 +309,15 @@ export function Baslangic() {
             <span className={`bsl-kart-y${i.acil ? ' bsl-kart-acil' : ''}`}>{i.y}</span>
           </a>))}
           {bildirimKartlari}
+          {gundem.slice(0, GUNDEM_SINIRI).map(k => (
+            <a key={`g${k.kod}`} className={`bsl-kart${ekranVar(k.yol.split('?')[0]) ? '' : ' bsl-kart-pasif'}`}
+               title={k.satirlar.map(x => `${x.ad} ${x.deger}`.trim()).join(' · ')}
+               onClick={() => { if (ekranVar(k.yol.split('?')[0])) git(k.yol) }}>
+              <span className="bsl-kart-i">{k.ikon}</span>
+              <span className="bsl-kart-a">{k.sayi ? `${k.sayi} ` : ''}{c(k.baslik)}</span>
+              <span className={`bsl-kart-y${k.ton === 'kir' ? ' bsl-kart-acil' : ''}`}>
+                {(() => { const s = gundemOzet(k); return s ? `${c(s.ad)} ${s.deger}`.trim() : '' })()}</span>
+            </a>))}
         </div></>}
       {bildirimPenceresi}
     </>

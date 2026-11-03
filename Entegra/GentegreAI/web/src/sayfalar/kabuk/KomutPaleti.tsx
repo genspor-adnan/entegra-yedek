@@ -10,6 +10,27 @@ import { mesaj } from '../../bilesenler/mesaj';
 import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, ISLEM_SIRASI, rolAdi,
          type CariRol, type SeciliCari } from './cariKomutu';
 import { paletSadelestir } from './paletMetin';
+import type { GundemKarti, KayitOnerileri, KayitTuru } from '../../api/uclar/gundem';
+
+/**
+ * GÜNDEM NİYETİ (kullanıcı 03.11.2026: "bugünkü işlerim veya görevlerim neler? diye yazsa ... vadesi gelen ödemeler, çekler,
+ * kredi ... hatırlatmalar"): YZ'ye gitmez - kelime listesi. Kartları sunucu rol + yetkiye göre hesaplar (/api/gundem).
+ */
+export function gundemNiyetiMi(metin: string): boolean {
+  const s = paletSadelestir(metin).replace(/[?.!,]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!s) return false;
+  return /^(bugun(ku)? )?(islerim|isler|gorevlerim|gorevler|yapacaklarim|gundem|gundemim|ne var|neler var)( neler)?( var)?$/.test(s)
+    || /^bugun( ne var| neler var)?$/.test(s) || /^bugunku (islerim|gorevlerim)/.test(s);
+}
+
+/** Kayıt türünün kart yolu ve ikonu (ad araması / seçili kayıt çipi). */
+export const KAYIT_TURU: Record<KayitTuru, { yol: string; ikon: string; ad: string }> = {
+  musteri: { yol: '/cari', ikon: '👥', ad: 'Müşteri' },
+  tedarikci: { yol: '/tedarikci', ikon: '🤝', ad: 'Tedarikçi' },
+  kisi: { yol: '/kisi', ikon: '👤', ad: 'Kişi' },
+  personel: { yol: '/personel', ikon: '🪪', ad: 'Personel' },
+  hasta: { yol: '/hasta', ikon: '🧑', ad: 'Hasta' },
+};
 
 /**
  * KOMUT PALETİ (790) — üst şeritteki "Ara ya da komut yaz…" kutusunun karşılığı.
@@ -175,7 +196,7 @@ export function kimlikNiyetCoz(metin: string): { rakam: string; tur: 'tc' | 'tel
 
 /** Palet BÖLÜMLERİ (mockup Ekranlar/Ayarlar/ana_ekran_sekmeli_v3.html): boşta Son açılanlar +
  *  İşlemler, aramada Ekranlar + İşlemler. Klavye sırası bölüm sırasıdır. */
-type Bolum = 'Son açılanlar' | 'Kayıtlar' | 'Cariler' | 'Ekranlar' | 'İşlemler';
+type Bolum = 'Gündem' | 'Öneriler' | 'Son açılanlar' | 'Kayıtlar' | 'Cariler' | 'Ekranlar' | 'İşlemler';
 type Oge = { bolum: Bolum } & (
   | { tur: 'ekran'; anahtar: string; ad: string; grup: string; yol: string; islem?: boolean; ikon?: string;
       /** Kayıtlı hastaya YENİ BAŞVURU: açık başvurusu varsa o açılır (Liste.basvuruAc ile aynı kural). */
@@ -206,6 +227,11 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   /** SEÇİLİ CARİ (ad araması -> Enter): kutunun solunda çip; yazılan metin artık o carinin KOMUTU. */
   const [seciliCari, setSeciliCari] = useState<SeciliCari | null>(null);
   const ekranKomutlari = usePaletKomutlari();
+  /** GÜNDEM (katman 2): niyet yazılınca bir kez çekilir, palet açık kaldıkça tekrar istenmez. */
+  const [gundem, setGundem] = useState<GundemKarti[] | null>(null);
+  const [gundemYukleniyor, setGundemYukleniyor] = useState(false);
+  /** SEÇİLİ KAYDIN ÖNERİLERİ (katman 2): sunucu yalnız yetkili işlemleri döndürür. */
+  const [oneriler, setOneriler] = useState<KayitOnerileri | null>(null);
 
   useEffect(() => {
     const tus = (e: KeyboardEvent) => {
@@ -223,7 +249,20 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
 
   // Her açılışta temiz başla: önceki aramanın sonucu ekranda kalırsa kullanıcı
   //   onu yeni sorgunun cevabı sanıyor.
-  useEffect(() => { if (acik) { setArama(''); setSecili(0); setSeciliCari(null) } }, [acik]);
+  useEffect(() => { if (acik) { setArama(''); setSecili(0); setSeciliCari(null); setGundem(null) } }, [acik]);
+  useEffect(() => {
+    if (!acik || gundem !== null || gundemYukleniyor || !gundemNiyetiMi(arama)) return;
+    setGundemYukleniyor(true);
+    api.gundem().then(y => setGundem(y.kartlar)).catch(() => setGundem([])).finally(() => setGundemYukleniyor(false));
+  }, [acik, arama, gundem, gundemYukleniyor]);
+  useEffect(() => {
+    setOneriler(null);
+    if (!seciliCari) return;
+    let iptal = false;
+    const tur: KayitTuru = seciliCari.tur ?? (seciliCari.musteri ? 'musteri' : 'tedarikci');
+    api.kayitOnerileri(tur, seciliCari.id).then(y => { if (!iptal) setOneriler(y) }).catch(() => { if (!iptal) setOneriler(null) });
+    return () => { iptal = true };
+  }, [seciliCari]);
 
   const ekranlar = useMemo(() => [...paletEkranlari(satirlar), ...(ekEkranlar ?? [])], [satirlar, ekEkranlar]);
 
@@ -329,18 +368,25 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   const [cariAdOgeleri, setCariAdOgeleri] = useState<Oge[]>([]);
   useEffect(() => {
     const q = arama.trim();
-    if (!acik || seciliCari || q.length < 3 || /\d/.test(q) || cumleCoz(q)) { setCariAdOgeleri([]); return }
+    if (!acik || seciliCari || q.length < 3 || /\d/.test(q) || cumleCoz(q) || gundemNiyetiMi(q)) { setCariAdOgeleri([]); return }
     let iptal = false;
     const zaman = window.setTimeout(() => {
-      api.hizliBulCariAd(q).then(y => {
+      // AD İLE KAYIT (03.11.2026): müşteri · tedarikçi · kişi · personel · hasta - her tür kendi yetkisiyle (sunucu
+      //   süzer); kartının listesi menüde yoksa satır da gösterilmez. Enter kaydı SEÇER: öneriler + komutlar gelir.
+      api.kayitAra(q).then(y => {
         if (iptal) return;
         const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
-        if (!menude.has('/cari') && !menude.has('/tedarikci')) { setCariAdOgeleri([]); return }
-        setCariAdOgeleri((y.cariler ?? []).map<Oge>(k => ({
-          bolum: 'Cariler', tur: 'ekran', anahtar: `ca${k.id}`, ikon: k.musteri ? '👥' : '🤝', ad: k.ad,
-          grup: [k.musteri && k.tedarikci ? c('Müşteri / Tedarikçi') : k.musteri ? c('Müşteri') : c('Tedarikçi'), k.kod, k.il]
-                .filter(Boolean).join(' · ') + ` · ${c('seçip komut yazın: sip al, fat kes, irs…')}`,
-          yol: `${k.musteri ? '/cari' : '/tedarikci'}/${k.id}`, cariSec: k })));
+        setCariAdOgeleri((y.kayitlar ?? []).filter(k => menude.has(KAYIT_TURU[k.tur].yol)).map<Oge>(k => {
+          const t = KAYIT_TURU[k.tur];
+          const cariMi = k.tur === 'musteri' || k.tur === 'tedarikci';
+          return {
+            bolum: 'Cariler', tur: 'ekran', anahtar: `ca${k.tur}${k.id}`, ikon: t.ikon, ad: k.ad,
+            grup: [c(t.ad), k.kod, k.bilgi].filter(Boolean).join(' · ')
+                  + ` · ${cariMi ? c('seç: öneriler, sip al, fat kes…') : c('seç: öneriler')}`,
+            yol: `${t.yol}/${k.id}`,
+            cariSec: { id: k.id, ad: k.ad, kod: k.kod, musteri: k.tur === 'musteri', tedarikci: k.tur === 'tedarikci',
+                       il: k.bilgi, tur: k.tur } };
+        }));
       }).catch(() => { if (!iptal) setCariAdOgeleri([]) });
     }, 250);
     return () => { iptal = true; window.clearTimeout(zaman) };
@@ -396,15 +442,45 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     // SEÇİLİ CARİ: yalnız o carinin işlemleri; yazılan metin komut (boşsa hepsi).
     if (seciliCari) {
       const menude = new Set(ekranlar.map(e => e.yol.split('?')[0]));
+      // ÖNERİLER (katman 2) - boş kutuda komutların ÜSTÜNDE: özet satırı + her önerinin eylemleri.
+      const oneriOgeleri: Oge[] = q === '' && oneriler ? [
+        ...(oneriler.ozet.length ? [{ bolum: 'Öneriler' as Bolum, tur: 'komut' as const, anahtar: 'oz', kod: '', aktif: false,
+            ad: oneriler.ozet.map(o => `${c(o.etiket)}: ${o.deger}`).join(' · '), grup: '' }] : []),
+        // Carinin "Yeni işlem / Görüntüle" önerileri aşağıdaki komutlarla (sip al, fat kes, kart, ekstre) aynı - çift yazılmaz.
+        ...oneriler.oneriler.filter(o => !((!seciliCari.tur || seciliCari.tur === 'musteri' || seciliCari.tur === 'tedarikci')
+                                           && (o.kod === 'yeni' || o.kod === 'gor'))).flatMap(o => o.eylemler.filter(e => menude.has(e.yol.split('?')[0].replace(/\/(yeni|\d+)$/, '')) || e.yol.startsWith('/ekstre'))
+          .map<Oge>((e, i) => ({ bolum: 'Öneriler', tur: 'ekran', anahtar: `on${o.kod}${i}`, ikon: i === 0 ? o.ikon : '·',
+                                 ad: i === 0 ? `${c(o.ad)} — ${c(e.ad)}` : `${c(e.ad)}`, grup: i === 0 ? o.neden : '',
+                                 yol: e.yol, islem: true }))),
+      ] : [];
+      // KİŞİ / PERSONEL / HASTA: belge komutları yok - öneriler + kartı aç.
+      if (seciliCari.tur && seciliCari.tur !== 'musteri' && seciliCari.tur !== 'tedarikci') {
+        const t = KAYIT_TURU[seciliCari.tur];
+        // Sunucunun "Görüntüle" önerisi kartı zaten açıyorsa ayrıca "kartı" satırı yazılmaz.
+        const kartVar = oneriler?.oneriler.some(o => o.kod === 'gor') ?? false;
+        return [...oneriOgeleri, ...(kartVar ? [] : [
+          { bolum: 'İşlemler' as Bolum, tur: 'ekran' as const, anahtar: 'ck', ikon: t.ikon, ad: `${c(t.ad)} ${c('kartı')} — ${seciliCari.ad}`,
+            grup: seciliCari.kod, yol: `${t.yol}/${seciliCari.id}`, islem: true }])];
+      }
       const coz = cariIslemCoz(q);
       const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem] : ISLEM_SIRASI;
       const yon = coz === 'yok' ? null : coz.yon;
       const l = islemler.map(i => cariIslemHedefi(seciliCari, i, yon)).filter(h => menude.has(h.liste));
       return l.length
-        ? l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
-                             grup: seciliCari.kod, yol: h.yol, islem: true, ikon: h.ikon }))
+        ? [...oneriOgeleri, ...l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
+                             grup: seciliCari.kod, yol: h.yol, islem: true, ikon: h.ikon }))]
         : [{ bolum: 'İşlemler', tur: 'komut', anahtar: 'ci-yok', grup: '', kod: '', aktif: false,
              ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
+    }
+
+    // GÜNDEM NİYETİ ("bugünkü işlerim", "görevlerim", "bugün ne var"): rolün kartları - tıklanınca ilgili liste.
+    if (gundemNiyetiMi(q)) {
+      if (gundem === null) return [{ bolum: 'Gündem', tur: 'komut', anahtar: 'g-yuk', ad: c('Gündem hazırlanıyor…'), grup: '', kod: '', aktif: false }];
+      if (gundem.length === 0) return [{ bolum: 'Gündem', tur: 'komut', anahtar: 'g-bos', ad: c('Bugün için bekleyen iş yok'), grup: '', kod: '', aktif: false }];
+      return gundem.map<Oge>(k => ({
+        bolum: 'Gündem', tur: 'ekran', anahtar: `g${k.kod}`, ikon: k.ikon,
+        ad: `${c(k.baslik)}${k.sayi ? ` · ${k.sayi}` : ''}`,
+        grup: k.satirlar.slice(0, 2).map(s => `${c(s.ad)} ${s.deger}`.trim()).join(' · '), yol: k.yol }));
     }
 
     if (q === '') {
@@ -464,7 +540,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             ...(ekranBasi ? cariAdOgeleri : []),
             ...ekranEslesen.filter(o => o.bolum === 'İşlemler'), ...komutEslesen];
   }, [arama, ekranlar, ekranKomutlari, favoriler, sonMenuler, kayitlar, cumleKaydi, kimlikOgeleri, cariOgeleri, cariAdOgeleri,
-      seciliCari, ekranSayac]);
+      seciliCari, ekranSayac, gundem, oneriler]);
 
   if (!acik) return null;
 
@@ -538,7 +614,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
           {/* SEÇİLİ CARİ ÇİPİ: ✕ ya da boş kutuda ⌫ seçimi kaldırır. */}
           {seciliCari && (
             <span className="palet-cip" title={seciliCari.kod}>
-              {seciliCari.musteri ? '👥' : '🤝'} {seciliCari.ad}
+              {seciliCari.tur ? KAYIT_TURU[seciliCari.tur].ikon : seciliCari.musteri ? '👥' : '🤝'} {seciliCari.ad}
               <button type="button" onClick={() => { setSeciliCari(null); kutu.current?.focus() }} title={c('Seçimi kaldır')}>✕</button>
             </span>
           )}
@@ -547,8 +623,10 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             autoFocus
             className="arama"
             placeholder={ses.dinliyor ? c('Dinliyorum… söyleyin')
-              : seciliCari ? c('Komut: sip al · fat kes · irs · kart · ekstre (boş = hepsi)')
-              : c('Ekran, komut, cari adı ya da numara ara (dosya / TC / VKN)… (Ctrl+K)')}
+              : seciliCari ? (seciliCari.tur && seciliCari.tur !== 'musteri' && seciliCari.tur !== 'tedarikci'
+                  ? c('Öneriler aşağıda - Enter seçili satırı açar')
+                  : c('Komut: sip al · fat kes · irs · kart · ekstre (boş = hepsi)'))
+              : c('Ekran, kayıt adı, "bugünkü işlerim" ya da numara (dosya / TC / VKN)… (Ctrl+K)')}
             value={arama}
             onChange={e => { setArama(e.target.value); setSecili(0) }}
           />
@@ -579,7 +657,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             >
               {/* Ekran mı komut mu: ok işareti "gider", şimşek "çalıştırır". */}
               <span className={`palet-tur${o.tur === 'ekran' && o.islem && !o.ikon ? ' palet-yeni' : ''}`}>
-                {o.tur === 'ekran' ? (o.ikon ?? (o.islem ? '＋' : '↗')) : '⚡'}</span>
+                {o.tur === 'ekran' ? (o.ikon ?? (o.islem ? '＋' : '↗')) : o.anahtar === 'oz' ? 'ℹ' : '⚡'}</span>
               <span>{c(o.ad)}</span>
               <span className="grup">{o.grup}</span>
               {o.tur === 'komut' && o.kisayol && <span className="kisayol">{o.kisayol}</span>}

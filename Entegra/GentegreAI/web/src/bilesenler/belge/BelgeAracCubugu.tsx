@@ -1,3 +1,4 @@
+import { DonusumMenusu } from './DonusumMenusu';
 import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
 import { c } from '../../dil/ceviri';
 
@@ -233,12 +234,10 @@ export function BelgeAracCubugu({
         <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)}
                        onDegisti={belgeYenile} etiket="e-İrsaliye" />
       )}
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'
-                               : 'Önce irsaliyeyi kaydedin.'}
-              onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Belge Dönüştür
-      </button>
+      {/* HEDEF MENÜSÜ (kullanıcı 03.11.2026): fatura / fiş / tahakkuk - seçilen hedefle pencere açılır. */}
+      <DonusumMenusu kaynakTur={alisMi ? 10 : 14} devre={!kayitliId} devreSebep="Önce irsaliyeyi kaydedin."
+                     title="Sevk edilen satırları faturaya / fişe / tahakkuka aktar"
+                     onSec={setDonusum} />
       <button className="d" disabled title={c('Sevk fişi yazdırma henüz bağlanmadı.')}>
         🖨️ Sevk Fişi Yazdır
       </button>
