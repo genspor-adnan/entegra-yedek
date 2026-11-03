@@ -22,7 +22,7 @@ dogrulama: insan-dogrulama-bekliyor
 ## Bu ekranda neler yapabilirsiniz
 - **Kapsamı seçmek** — 👥 Müşteri / 🚚 Tedarikçi / ⇄ İkisi düğmeleri (HBYS'de yoktur, yalnız tedarikçi).
 - **Dönem ve temsilci seçmek** — "📅 Dönem" tarihleri ve "👤 Temsilci" listesi.
-- **Boş ve pasif carileri ayarlamak** — "Bakiyesi ve hareketi olmayanları gizle" ve "Pasifler dahil" kutuları.
+- **Boş ve pasif carileri ayarlamak** — "Bakiyesi sıfır olanları gizle" ve "Pasifler dahil" kutuları.
 - **Sekmeler arasında geçmek** — Cari Bazında, Yaşlandırma, Kırılımlar, Dikkat.
 - **Cari seçmek** — satıra tıklayın; Ctrl ile tek tek, Shift ile aralık seçin; başlıktaki kutu hepsini seçer. Çıktılar yalnız seçili carileri basar.
 - **Ekstreye geçmek** — satıra çift tıklayın; carinin hesap ekstresi açılır.
@@ -38,7 +38,8 @@ dogrulama: insan-dogrulama-bekliyor
 
 ## Süzgeçler
 - **Kapsam** (Müşteri / Tedarikçi / İkisi, varsayılan İkisi), **Dönem** (varsayılan yıl başı – bugün), **Temsilci**, **Pasifler dahil**.
-- "Bakiyesi ve hareketi olmayanları gizle" yalnız ekrandaki listeyi süzer (varsayılan açık).
+- "Bakiyesi sıfır olanları gizle" yalnız ekrandaki listeyi süzer (varsayılan açık): dönemde hareketi olsa da bakiyesi kapanmış cari gizlenir, döviz bakiyesi açık olan kalır.
+- Satır seçip sağ üstteki **Ekstre**ye basınca seçili (birden çoksa ilk) carinin ekstresi açılır.
 - Süzgeç değişince seçim temizlenir. Vadesi geçen net alacak varsa şeritte kırmızı uyarı çıkar.
 
 ## Özet ve sekmeler

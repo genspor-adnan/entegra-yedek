@@ -153,3 +153,27 @@ export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: Car
            yol: `${liste}/yeni?${liste === '/belge' ? 'tur=15&' : ''}tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,
            ikon: islem === 'siparis' ? '📋' : islem === 'fatura' ? '🧾' : '🚚' };
 }
+
+/** Seçili carinin palet satırı: işlemin hedefi + alt liste komutu (varsa Enter gezinmez, kutuya bunu yazar). */
+export type CariIslemSatiri = ReturnType<typeof cariIslemHedefi> & { altKomut?: string };
+
+/**
+ * SEÇİLİ CARİNİN İŞLEM SATIRLARI (palet): komut yoksa rolün işlemleri; yalnız araç yazıldıysa ("çek", "havale")
+ * rolün tahsilat / ödemesi. TAHSİLAT / ÖDEME ALT LİSTESİ: boş kutuda tek satır "Tahsilat al ▸" (alt komut "tahsilat ");
+ * komut yazılınca araçlar (nakit / havale / POS / çek / senet / plan) ayrı satır, araç da yazıldıysa yalnız o.
+ * Tanınmayan komut -> null.
+ */
+export function cariIslemSatirlari(c: SeciliCari, metin: string): CariIslemSatiri[] | null {
+  const coz = cariIslemCoz(metin);
+  if (coz === 'yok') return null;
+  const { islem, yon, arac } = coz;
+  const islemler = islem ? [islem]
+    : rolIslemleri(c).filter(i => !arac || i === 'tahsilat' || i === 'odeme');
+  return islemler.flatMap<CariIslemSatiri>(i => {
+    if (i !== 'tahsilat' && i !== 'odeme') return [cariIslemHedefi(c, i, yon)];
+    if (!arac && !islem)
+      return [{ ...cariIslemHedefi(c, i, yon), ad: i === 'tahsilat' ? 'Tahsilat al ▸' : 'Ödeme yap ▸',
+                ikon: i === 'tahsilat' ? '💵' : '💸', altKomut: i === 'tahsilat' ? 'tahsilat ' : 'ödeme ' }];
+    return KASA_ARACLARI[i].filter(a => !arac || a.arac === arac).map(a => cariIslemHedefi(c, i, yon, a.arac));
+  });
+}

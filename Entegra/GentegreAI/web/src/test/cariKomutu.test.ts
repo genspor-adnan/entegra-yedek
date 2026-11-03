@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { KASA_ARACLARI, cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz, rolIslemleri } from '../sayfalar/kabuk/cariKomutu';
+import { KASA_ARACLARI, cariIslemCoz, cariIslemSatirlari, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz, rolIslemleri } from '../sayfalar/kabuk/cariKomutu';
 import { cumleCoz, kimlikNiyetCoz } from '../sayfalar/kabuk/KomutPaleti';
 
 /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (kullanıcı 25.10.2026). */
@@ -97,4 +97,17 @@ describe('tahsilat / ödeme aracı', () => {
     expect(cariIslemHedefi(mus, 'odeme', null, 'kart').yol).toContain('tur=35');
     expect(KASA_ARACLARI.tahsilat.map(a => a.tur)).toEqual([21, 22, 25, 23, 24, 61]);
   });
+});
+
+// PALET SATIRLARI (refaktör 03.11.2026): alt liste ve araç süzgeci tek saf fonksiyonda.
+describe('cariIslemSatirlari', () => {
+  const mus = { id: 7, ad: 'A', kod: 'K', musteri: true, tedarikci: false };
+  it('boş kutuda tahsilat tek satır, alt komutlu', () => {
+    const t = cariIslemSatirlari(mus, '')!.filter(h => h.altKomut);
+    expect(t).toHaveLength(1); expect(t[0].altKomut).toBe('tahsilat ');
+  });
+  it('tahsilat yazılınca araçlar', () => expect(cariIslemSatirlari(mus, 'tahsilat ')!.map(h => h.yol.match(/tur=(\d+)/)![1]))
+    .toEqual(['21', '22', '25', '23', '24', '61']));
+  it('yalnız araç: rolün tahsilatı', () => expect(cariIslemSatirlari(mus, 'çek')!.map(h => h.yol)).toEqual([expect.stringContaining('tur=23')]));
+  it('tanınmayan komut', () => expect(cariIslemSatirlari(mus, 'zzz')).toBeNull());
 });

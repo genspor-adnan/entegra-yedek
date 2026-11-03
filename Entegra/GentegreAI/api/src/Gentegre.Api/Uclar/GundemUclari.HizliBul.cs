@@ -50,6 +50,7 @@ public static partial class GundemUclari
                            like public.fn_ara_metin(@p1) || '%') as basi
                    from public.taraf t
                   where t.{{t.Kolon}} = 1 and coalesce(t.durum, 1) = 1
+                    {{(t.Tur is "musteri" or "tedarikci" ? "and t.personel = 0" : "")}}
                     and (cardinality(@p0::int[]) = 0 or t.id = any(@p0::int[]))
                     and {{kosul}}
                   order by 8 desc, t.id desc

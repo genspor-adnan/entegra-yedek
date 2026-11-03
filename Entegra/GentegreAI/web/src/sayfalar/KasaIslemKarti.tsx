@@ -7,6 +7,8 @@ import {
   type KasaIslemTuru, type KasaIslemYaniti, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenLookup } from '../bilesenler/GenLookup';
 import { CariBilgiBandi } from '../bilesenler/CariBilgiBandi';
+import { useCariSatiri } from '../bilesenler/cariSatiri';
+import { useKartSekmesi } from '../bilesenler/KartAdi';
 import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -193,11 +195,57 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         if (y.hesapId) {
           setHesap({ id: y.hesapId, ad: y.ad ?? '', doviz: y.dovizCinsi ?? 'TL' });
           if (y.dovizCinsi) { setDoviz(y.dovizCinsi); setEkstreDovizi(y.dovizCinsi) }
+          return;
+        }
+        // TEK HESAP VARSAYILAN (kullanıcı 03.11.2026: "tahsil/ödeme edilecek hesap 1 tane ise (tek banka hesabı veya
+        //   tek pos veya tek kredi kartı) default seçilmiş olsun"): atanmış / ana hesap yoksa, o türde (şubenin, aktif)
+        //   YALNIZ BİR hesap varsa o seçilir; birden çoksa alan boş kalır, kullanıcı seçer.
+        const l = await api.liste('hesap', { sayfa: 1, boyut: 2, filtre: { op: 'and', kosullar: [
+          { alan: 'tur', op: 'esit', deger: hesapTuru }, HESAP_AKTIF ] } });
+        if (l.satirlar.length === 1) {
+          const h = l.satirlar[0], dv = String(h.dovizCinsi ?? 'TL');
+          setHesap(onceki => onceki ?? { id: Number(h.id), ad: String(h.ad ?? ''), doviz: dv });
+          setDoviz(dv); setEkstreDovizi(dv);
         }
       } catch { /* kasa bulunamadi: alan bos kalir, kullanici secer */ }
     })();
   }, [kayitId, hesap, secili?.anaHesapTuru]);
   const grup = secili?.grup ?? 'tahsilat';
+  /**
+   * TUTAR = CARİ BAKİYESİ (kullanıcı 03.11.2026: "seçince gelen ekranda tutar kısmına borç/alacak bakiye gelsin"): yeni
+   * tahsilatta carinin BORCU, ödemede ALACAĞI (bizim borcumuz) tutara yazılır - kullanıcı kısmi tutarı üstüne yazar.
+   * Yalnız tutar dışarıdan (belge, URL) gelmediyse, avans / iade değilse ve bakiye o yönde ise; bakiye yerel para (TL).
+   */
+  //   Cari satırı bilgi bandıyla ortak (useCariSatiri tek istek) - kart açma da rolü buradan okur.
+  const cariSatiri = useCariSatiri(cari?.id ?? 0);
+  const bakiyeOnerilir = kayitId === null && !belgeBagi && !avansMi && !iadeKipi && !tutar.trim();
+  /** Önerilen tutar: tahsilatta carinin borcu (+), ödemede alacağı (-); o yönde değilse null. */
+  const acikBakiye = (tahsilat: boolean) => {
+    const b = Number(cariSatiri?.bakiye ?? 0) * (tahsilat ? 1 : -1);
+    return cariSatiri && bakiyeOnerilir && b > 0.005 ? b.toFixed(2) : null;
+  };
+  const bakiyeYazildi = useRef(false);
+  useEffect(() => {
+    if (!cariSatiri || bakiyeYazildi.current || (grup !== 'tahsilat' && grup !== 'odeme')) return;
+    bakiyeYazildi.current = true;
+    const t = acikBakiye(grup === 'tahsilat');
+    if (t) setTutar(tutarMetni(t));
+  });
+  /** BANTTAN CARİ KARTI (kullanıcı 03.11.2026: "tahsilat kartında başlıkta avatar veya ada basınca sekmede cari kartı
+   *  açılsın"): yalnız tedarikçiyse tedarikçi kartı, değilse müşteri kartı - ekran sekmesinde (kart sekmesi deseni). */
+  const kartSekmesi = useKartSekmesi();
+  const cariKartiAc = () => {
+    if (!cari) return;
+    const ted = Number(cariSatiri?.tedarikci) === 1 && Number(cariSatiri?.musteri) !== 1;
+    kartSekmesi(ted ? 'tedarikci' : 'musteri', cari.id);
+  };
+  // Çek / senet kartı varsayılanlarını AÇILIŞTA okur: cari satırı (bakiye) gelene kadar en çok 1,5 sn beklenir.
+  const [bakiyeBeklendi, setBakiyeBeklendi] = useState(false);
+  useEffect(() => {
+    if (cariSatiri) { setBakiyeBeklendi(true); return }
+    const z = window.setTimeout(() => setBakiyeBeklendi(true), 1500);
+    return () => window.clearTimeout(z);
+  }, [cariSatiri]);
   // SEKME BAŞLIĞI: işlem türü + carinin ilk iki kelimesi ("Nakit Tahsilat · Zone Medikal").
   const sekmeBasligi = !modalMi && secili ? [secili.ad, cari?.unvan ? sekmeAdi(cari.unvan) : ''].filter(Boolean).join(' · ') : '';
   const baslikYolu = baslikAnahtari(konum);
@@ -244,7 +292,19 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         setCari({ id: Number(kart.tarafId), unvan: String(k.kodAd?.tarafId?.[String(kart.tarafId)] ?? '') });
     } catch { /* kiymet kaydedildi ama okunamadi: kart bos tutarla acilir, kullanici yazar */ }
     setKiymetId(yeniId);
+    otoKaydet.current = true;
   }
+  /**
+   * TEK KAYDET (kullanıcı 03.11.2026: "tahsilat kartı kaydedince kapansın"): çek / senet kartı kaydedilince kasa işlemi
+   * KENDİLİĞİNDEN kaydedilir ve sekme kapanır - ikinci bir Kaydet beklenmez. Kaydedilemezse (doğrulama / sunucu hatası)
+   * kasa adımı hatasıyla açık kalır, kullanıcı düzeltip kaydeder.
+   */
+  const otoKaydet = useRef(false);
+  useEffect(() => {
+    if (!otoKaydet.current || !kiymetId || !tutar.trim()) return;
+    otoKaydet.current = false;
+    void kaydet(false, false);
+  });
   const senetMi = kasaTurBilgisi(tur, grup).senetMi;
   // Cek/senette hesap SECILMEZ: kiymet portfoye girer (sanal hesap), para
   //   bankaya ancak tahsil edilince gecer. Doviz o yuzden basliktan gelir.
@@ -426,6 +486,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   if (!ekleyebilir && kayitId === null)
     return <div className="sahne"><div className="hata-kutusu">{cev('Kasa işlemi ekleme yetkiniz yok.')}</div></div>;
 
+  if (kiymetAdimi && cari && !bakiyeBeklendi) return <div className="sahne" />;
   if (kiymetAdimi)
     return (
       <GenForm
@@ -435,12 +496,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         baslik={tur === 24 || tur === 34 ? 'Senet' : 'Çek'}
         // CARİ BANTTA (kullanıcı 26.10.2026: "onda da üstte firma bandı olsun.. cari edit varsa kaldır"): cari
         //   bir yerden geldiyse alan çizilmez (değeri varsayılanla gider), üstte avatarlı bilgi bandı.
-        ustBaglam={() => (cari ? <CariBilgiBandi id={cari.id} /> : null)}
+        ustBaglam={() => (cari ? <CariBilgiBandi id={cari.id} onKartAc={cariKartiAc} /> : null)}
         gizliAlanlar={cari ? ['tarafId', 'yon'] : ['yon']}
         yeniKayitVarsayilanlari={{
           tur: tur === 24 || tur === 34 ? 2 : 1,
           yon: tur === 33 || tur === 34 ? 2 : 1,
           ...(cari ? { tarafId: cari.id } : {}),
+          // Bakiye çek / senet kartında da tutara (kasa adımıyla aynı kural).
+          ...(acikBakiye(tur !== 33 && tur !== 34) ? { tutar: acikBakiye(tur !== 33 && tur !== 34)! } : {}),
         }}
         // GenForm kaydedince onKapat'i da cagirir - kiymet kaydedildiyse sekme kapanmaz, kasa adimina gecilir.
         onKapat={() => { if (!kiymetKaydedildiRef.current) sayfaKapat() }}
@@ -500,7 +563,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
         ) : null}
 
         {/* CARİ BİLGİ BANDI (26.10.2026): seçili carinin avatarlı özeti - kod, VKN, tel, bakiye, vadesi geçen. */}
-        {cari && cari.id > 0 && <CariBilgiBandi id={cari.id} />}
+        {cari && cari.id > 0 && <CariBilgiBandi id={cari.id} onKartAc={cariKartiAc} />}
 
         <div className="kutu" style={{ padding: 14 }}>
           {/* TUR SERIDI KALKTI (kullanici): islem turu zaten bu karti acan

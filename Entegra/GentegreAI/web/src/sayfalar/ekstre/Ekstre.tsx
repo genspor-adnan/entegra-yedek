@@ -461,7 +461,9 @@ function ParaGrubu({ x, cari, n, bakiyeYaz, detay, kalemler, bas, secili, onSec,
         const k = detay && belgeHareketi(s) ? kalemler[s.belgeId] : undefined;
         return [
           <tr key={s.id} className={'ek-satir' + (secili?.id === s.id ? ' secili' : '') + (s.bakiyeDahil ? '' : ' haric')}
-              onClick={() => onSec(s)} onDoubleClick={() => onAc(s)} title={s.bakiyeDahil ? 'Çift tık: kaydı aç' : 'Bakiyeye dahil değil (plan / bilgi satırı)'}>
+              // TEK TIK AÇAR (kullanıcı 03.11.2026: "ekstrede işleme çift tıklayınca belge açılıyor.. tek tık haline
+              //   getir"): satır seçilir ve belgesi / işlemi açılır; işaret kutusu yalnız işaretler.
+              onClick={() => { onSec(s); onAc(s) }} title={s.bakiyeDahil ? 'Tıkla: kaydı aç' : 'Bakiyeye dahil değil (plan / bilgi satırı)'}>
             <td className="cbk"><input type="checkbox" className="grid-cb" checked={isaretli.has(s.id)}
                                        onClick={e => e.stopPropagation()} onChange={() => degistir(s.id)} /></td>
             <td>{tarihSaat(s.tarih)}</td><td>{s.belgeNo || s.islemNo}</td><td>{s.turAdi}</td><td className="ek-karsi">{s.karsi}</td>

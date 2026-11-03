@@ -151,6 +151,10 @@ export function dovizBakiyeMetni(ham: unknown): string {
   }).join(' · ');
 }
 
+/** Döviz bakiyesi metninde ("USD:120;EUR:0") sıfırdan farklı bakiye var mı. */
+export const dovizBakiyeAcik = (ham: unknown) =>
+  String(ham ?? '').split(';').some(p => Math.abs(Number(p.split(':')[1] ?? 0)) > 0.005);
+
 /** Mini çizgi grafik: son değer ilk değerden düşükse kırmızı. */
 export function Egri({ degerler, genislik = 72, yukseklik = 18, title }:
                      { degerler: number[]; genislik?: number; yukseklik?: number; title?: string }) {

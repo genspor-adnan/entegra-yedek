@@ -7,8 +7,8 @@ import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 import { telefonBicimle } from '../../bilesenler/bicim';
 import { mesaj } from '../../bilesenler/mesaj';
-import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, KASA_ARACLARI, rolAdi, rolIslemleri,
-         type CariIslem, type CariRol, type SeciliCari } from './cariKomutu';
+import { cariIslemCoz, cariIslemSatirlari, cariKartGovdesi, cariKartYolu, cariNiyetCoz, rolAdi,
+         type CariRol, type SeciliCari } from './cariKomutu';
 import { paletSadelestir } from './paletMetin';
 import type { GundemKarti, KayitOnerileri, KayitTuru } from '../../api/uclar/gundem';
 
@@ -515,31 +515,13 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
           { bolum: 'İşlemler' as Bolum, tur: 'ekran' as const, anahtar: 'ck', ikon: t.ikon, ad: `${c(t.ad)} ${c('kartı')} — ${seciliCari.ad}`,
             grup: seciliCari.kod, yol: `${t.yol}/${seciliCari.id}`, islem: true }])];
       }
-      const coz = cariIslemCoz(q);
-      const arac = coz === 'yok' ? undefined : coz.arac;
-      // Yalnız araç yazıldıysa ("çek", "havale") işlem carinin rolünden: müşteriye tahsilat, tedarikçiye ödeme.
-      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem]
-        : arac ? rolIslemleri(seciliCari).filter(i => i === 'tahsilat' || i === 'odeme') : rolIslemleri(seciliCari);
-      const yon = coz === 'yok' ? null : coz.yon;
-      const kasaIslemi = (i: CariIslem): i is 'tahsilat' | 'odeme' => i === 'tahsilat' || i === 'odeme';
-      // TAHSİLAT / ÖDEME ALT LİSTESİ: boş kutuda tek satır "Tahsilat al ▸" (Enter alt listeyi açar); komut yazılınca
-      //   araçlar (nakit / havale / POS / çek / senet / plan) ayrı satır; araç da yazıldıysa yalnız o.
-      const l = islemler.flatMap(i => {
-        if (!kasaIslemi(i)) return [{ ...cariIslemHedefi(seciliCari, i, yon), alt: undefined as string | undefined }];
-        if (!arac && coz !== 'yok' && !coz.islem) {
-          const h = cariIslemHedefi(seciliCari, i, yon);
-          return [{ ...h, ad: i === 'tahsilat' ? 'Tahsilat al ▸' : 'Ödeme yap ▸', ikon: i === 'tahsilat' ? '💵' : '💸',
-                    alt: i === 'tahsilat' ? 'tahsilat ' : 'ödeme ' }];
-        }
-        return KASA_ARACLARI[i].filter(a => !arac || a.arac === arac)
-          .map(a => ({ ...cariIslemHedefi(seciliCari, i, yon, a.arac), alt: undefined as string | undefined }));
-      }).filter(h => menude.has(h.liste));
+      const l = (cariIslemSatirlari(seciliCari, q) ?? []).filter(h => menude.has(h.liste));
       return l.length
         ? [...oneriOgeleri, ...l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
-                             grup: h.alt ? `${seciliCari.kod} · ${c('nakit, havale, POS, çek, senet, plan')}` : seciliCari.kod,
-                             yol: h.yol, islem: true, ikon: h.ikon, ...(h.alt ? { altKomut: h.alt } : {}) }))]
+                             grup: h.altKomut ? `${seciliCari.kod} · ${c('nakit, havale, POS, çek, senet, plan')}` : seciliCari.kod,
+                             yol: h.yol, islem: true, ikon: h.ikon, ...(h.altKomut ? { altKomut: h.altKomut } : {}) }))]
         : [{ bolum: 'İşlemler', tur: 'komut', anahtar: 'ci-yok', grup: '', kod: '', aktif: false,
-             ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · tahsilat · ödeme · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
+             ad: cariIslemCoz(q) === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · tahsilat · ödeme · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
     }
 
     // GÜNDEM NİYETİ ("bugünkü işlerim", "görevlerim", "bugün ne var"): rolün kartları - tıklanınca ilgili liste.

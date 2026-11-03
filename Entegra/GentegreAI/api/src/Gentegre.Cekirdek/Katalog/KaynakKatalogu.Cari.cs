@@ -68,7 +68,10 @@ public static partial class KaynakKatalogu
         //   v_cari_ozet'ten, risk limiti taraf_musteri'den. Ozeti olmayan cari
         //   (hic hareketi yok) left join'de bos kalir - kolonlar 0 / bos gosterir.
         Kaynak: "public.taraf t " + TarafKatalog.CariOzetJoin,
-        SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1)",
+        // PERSONEL CARİ LİSTESİNDE YOK (kullanıcı 03.11.2026: "müş veya tedarikçi listesine personel gelmemeli"):
+        //   Delphi aktarımı kullanıcının rehber kartını personel yaparken müşteri bayrağı da kalıyordu. Personel
+        //   kendi listesinde; kartı (id ile) ve geçmiş belgeleri etkilenmez.
+        SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1) and t.personel = 0",
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         KapsamKolonu: "t.id",
         Kolonlar: new KolonTanimi[]

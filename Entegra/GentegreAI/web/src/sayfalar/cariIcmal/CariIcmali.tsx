@@ -1,12 +1,13 @@
+import { useKartSekmesi } from '../../bilesenler/KartAdi';
+import { dovizBakiyeAcik } from '../../bilesenler/grid/satirHucre';
 import { EkstreIkon } from '../../bilesenler/EkstreIkon';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { CariIcmal as Veri, CariIcmalSatiri } from '../../api/uclar/cariIcmal';
 import { para, paraYaz } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -38,6 +39,8 @@ export function CariIcmali() {
   const temsilci = Number(arama.get('temsilci') ?? 0);
   const pasif = arama.get('pasif') === '1';
   const [sifirGizle, setSifirGizle] = useState(true);
+  /** BAKİYE YÖNÜ (kullanıcı 03.11.2026: "Tümü/Borçlu/Alacaklı filtre ekle"): görünüm süzgeci - borçlu B (+), alacaklı A (-). */
+  const [yonSuzgec, setYonSuzgec] = useState<'hepsi' | 'borclu' | 'alacakli'>('hepsi');
   const [veri, setVeri] = useState<Veri | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
@@ -61,9 +64,12 @@ export function CariIcmali() {
   }, [bas, bit, kapsam, temsilci, pasif]);
   useEffect(() => { api.dokumAntet().then(a => setAntet(a.kurum)).catch(() => setAntet(null)) }, []);
 
-  // "Bakiyesi sıfır olanları gizle" yalnız GÖRÜNÜM süzgeci: dönemde hareketi olan cari kalır.
-  const satirlar = useMemo(() => (veri?.carilar ?? []).filter(c => !sifirGizle
-    || Math.abs(c.bakiye) > 0.005 || Math.abs(c.donemBorc) > 0.005 || Math.abs(c.donemAlacak) > 0.005), [veri, sifirGizle]);
+  // "Bakiyesi sıfır olanları gizle" yalnız GÖRÜNÜM süzgeci (kullanıcı 03.11.2026: "gizle dediğimde bakiye 0 olanlar
+  //   kalıyor"): dönemde hareketi olsa da bakiyesi kapanmış cari gizlenir; TL bakiyesi sıfır ama DÖVİZ bakiyesi açık
+  //   olan (doviz "USD:120;EUR:0") kalır.
+  const satirlar = useMemo(() => (veri?.carilar ?? []).filter(c => !sifirGizle || Math.abs(c.bakiye) > 0.005
+    || dovizBakiyeAcik(c.doviz))
+    .filter(c => yonSuzgec === 'hepsi' || (yonSuzgec === 'borclu' ? c.bakiye > 0.005 : c.bakiye < -0.005)), [veri, sifirGizle, yonSuzgec]);
   const seciliSatirlar = secili.length > 0 ? satirlar.filter(c => secili.includes(c.id)) : satirlar;
   // Mektup: seçili cariler; seçim yoksa bakiyesi olanlar.
   const mektupSatirlari = secili.length > 0 ? seciliSatirlar : satirlar.filter(c => Math.abs(c.bakiye) > 0.005);
@@ -76,11 +82,10 @@ export function CariIcmali() {
   // KART KENDİ SEKMESİNDE (kullanıcı 24.10.2026: "cari bazında müşteriye tıklayınca kartı modal açıyor,
   //   sekme olarak açsın"): `?geri=` kartı eski modal desenine düşürüyordu - kaldırıldı. Yalnız
   //   tedarikçi olan cari (HBYS'de hepsi) Tedarikçi kartında açılır.
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const kartSekmesi = useKartSekmesi();
   const kartAc = (id: number) => {
     const s = veri?.carilar.find(x => x.id === id);
-    const yol = `${yalnizTed || (s && s.tedarikci && !s.musteri) ? '/tedarikci' : '/cari'}/${id}`;
-    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
+    kartSekmesi(yalnizTed || (s && s.tedarikci && !s.musteri) ? 'tedarikci' : 'musteri', id);
   };
   const kutu = (baslik: string, deg: string, alt: string, sinif = '') => (
     <div className={'hi-kutu ' + sinif}><div className="bas">{baslik}</div><div className="deg">{deg}</div><div className="alt">{alt}</div></div>
@@ -109,8 +114,13 @@ export function CariIcmali() {
           {secili.length > 0 ? `Çıktılar yalnız seçili ${secili.length} cariyi basar`
             : `Mektup: bakiyesi olan ${mektupSatirlari.length} cari (satır seçerek daraltın)`}</span>
         <span className="sp" />
+        {/* VADESİ GEÇEN NET ARAÇ ÇUBUĞUNDA (kullanıcı 03.11.2026: "rozeti ekstre butonu üstüne al"). */}
+        {o && (o.vadesiGecenAlacak - o.vadesiGecenBorc) > 0.005 && <span className="bo-rz kir">Vadesi geçen net: {paraYaz(o.vadesiGecenAlacak - o.vadesiGecenBorc)}</span>}
         <button onClick={() => git(yalnizTed ? '/tedarikci' : '/cari')}>{yalnizTed ? '🚚 Tedarikçi Listesi' : '👥 Müşteri Listesi'}</button>
-        <button onClick={() => git('/ekstre?tur=cari')}><EkstreIkon /> Ekstre</button>
+        {/* SEÇİLİ CARİNİN EKSTRESİ (kullanıcı 03.11.2026: "müş/ted işaretleyip ekstre butona basınca o carinin
+            ekstresi gelsin.. şu anda boş cari geliyor"): ilk seçili cari; seçim yoksa boş ekstre (cari seçilir). */}
+        <button title={secili.length ? 'Seçili carinin ekstresi' : undefined}
+                onClick={() => git(secili.length ? `/ekstre?tur=cari&id=${secili[0]}` : '/ekstre?tur=cari')}><EkstreIkon /> Ekstre</button>
       </div>
 
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -131,11 +141,16 @@ export function CariIcmali() {
             {(veri?.temsilciler ?? []).map(t => <option key={t.id} value={t.id}>{t.ad}</option>)}
           </select>
         </div>
-        <label className="sel"><input type="checkbox" checked={sifirGizle} onChange={e => setSifirGizle(e.target.checked)} /> Bakiyesi ve hareketi olmayanları gizle</label>
+        <label className="sel"><input type="checkbox" checked={sifirGizle} onChange={e => setSifirGizle(e.target.checked)} /> Bakiyesi sıfır olanları gizle</label>
         <label className="sel"><input type="checkbox" checked={pasif} onChange={e => degistir({ pasif: e.target.checked ? '1' : '' })} /> Pasifler dahil</label>
         <span className="sp" />
         {yukleniyor && <span className="ki-soluk">hesaplanıyor…</span>}
-        {o && (o.vadesiGecenAlacak - o.vadesiGecenBorc) > 0.005 && <span className="bo-rz kir">Vadesi geçen net: {paraYaz(o.vadesiGecenAlacak - o.vadesiGecenBorc)}</span>}
+        <div className="ci-seg">
+          {([['hepsi', 'Tümü'], ['borclu', 'Borçlu'], ['alacakli', 'Alacaklı']] as const).map(([k, ad]) => (
+            <button key={k} type="button" className={`ci-yon-${k}${yonSuzgec === k ? ' on' : ''}`}
+                    onClick={() => { setYonSuzgec(k); setSecili([]) }}>{ad}</button>
+          ))}
+        </div>
       </div>
 
       {veri && o && (<>
@@ -179,11 +194,18 @@ export function CariIcmali() {
 
 /** Cari icmaline özgü: kapsam düğmeleri, grup / ara toplam satırları, iki sütunlu kutular, A4. */
 const CARI_ICMAL_STILI = `
+.ci-tablo th.ci-sirali { cursor: pointer; user-select: none; white-space: nowrap }
+.ci-tablo th.ci-sirali:hover { color: var(--vurgu, #1f6fbf) }
 .hi-serit select, .hi-serit input[type=date] { border:1px solid var(--cizgi,#cdd6e0); border-radius:3px; font-size:12px; padding:1px 4px; }
 .ci-seg { display:flex; border:1px solid #cdd6e0; border-radius:13px; overflow:hidden; background:#fff; }
 .ci-seg button { border:0; border-right:1px solid #e3e9f0; background:none; padding:4px 12px; font-size:12px; color:#4d5d6e; cursor:pointer; }
 .ci-seg button:last-child { border-right:0; }
 .ci-seg button.on { background:linear-gradient(#4d8fd6,#2f6db3); color:#fff; font-weight:bold; }
+/* YÖN RENGİ (kullanıcı 03.11.2026): Borçlu kırmızı, Alacaklı yeşil - tablodaki bakiye renkleriyle aynı. */
+.ci-seg button.ci-yon-borclu { color:#c0392b; }
+.ci-seg button.ci-yon-alacakli { color:#2e7d46; }
+.ci-seg button.ci-yon-borclu.on { background:linear-gradient(#e0605a,#c0392b); color:#fff; }
+.ci-seg button.ci-yon-alacakli.on { background:linear-gradient(#4caf6e,#2e7d46); color:#fff; }
 .hi-tablo tr.ci-grup td { background:#f1f5fa; font-weight:bold; color:#2c4a6b; }
 .hi-tablo tr.ci-ara td { background:#f7f9fc; font-weight:bold; border-top:1px solid #cdd6e0; }
 .hi-tablo tr.ci-pasif td { color:#9aa7b4; }

@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState, type MouseEvent } from 'react';
+import { Fragment, useMemo, useRef, useState, type MouseEvent } from 'react';
 import type { CariDilim, CariIcmal, CariIcmalSatiri } from '../../api/uclar/cariIcmal';
 import { para } from '../../bilesenler/bicim';
 import { dovizBakiyeMetni } from '../../bilesenler/grid/satirHucre';
@@ -14,13 +14,60 @@ export const bakiyeMetni = (n: number) => (Math.abs(n) < 0.005 ? p(0) : `${p(Mat
 const bakiyeSinifi = (n: number) => (n > 0.005 ? 'kir' : n < -0.005 ? 'ci-yesil' : '');
 
 // ------------------------------------------------------------ cari bazında ----
+/**
+ * SIRALAMA (kullanıcı 03.11.2026: "cari icmali gride sıralama ekle"): başlığa tık sıralar, ikinci tık yönü çevirir,
+ * üçüncü tık sunucu sırasına döner. Metin önce A→Z, tutar / gün / tarih önce büyükten küçüğe. Müşteri / tedarikçi
+ * grupları ve toplam satırları yerinde kalır - sıralama grup içinde.
+ */
+type SiraAlani = 'kod' | 'ad' | 'temsilci' | 'devir' | 'donemBorc' | 'donemAlacak' | 'bakiye' | 'vadesiGecen'
+  | 'enEskiGun' | 'sonHareket' | 'riskYuzde';
+const METIN_ALAN = new Set<SiraAlani>(['kod', 'ad', 'temsilci']);
+const siraDegeri = (c: CariIcmalSatiri, a: SiraAlani): number | string => {
+  switch (a) {
+    case 'kod': return c.kod ?? '';
+    case 'ad': return c.ad ?? '';
+    case 'temsilci': return c.temsilci ?? '';
+    case 'vadesiGecen': return Math.abs(c.vadesiGecen);
+    case 'enEskiGun': return Math.abs(c.vadesiGecen) > 0.005 ? c.enEskiGun : -1;
+    case 'sonHareket': return c.sonHareket ? Date.parse(c.sonHareket) : -Infinity;
+    case 'riskYuzde': return c.riskYuzde ?? -Infinity;
+    default: return c[a];
+  }
+};
+export function siraliCariler(l: CariIcmalSatiri[], sira: { alan: SiraAlani; artan: boolean } | null): CariIcmalSatiri[] {
+  if (!sira) return l;
+  const yon = sira.artan ? 1 : -1;
+  return [...l].sort((x, y) => {
+    const a = siraDegeri(x, sira.alan), b = siraDegeri(y, sira.alan);
+    const f = typeof a === 'string' || typeof b === 'string'
+      ? String(a).localeCompare(String(b), 'tr', { numeric: true, sensitivity: 'base' })
+      : a === b ? 0 : a < b ? -1 : 1;
+    return f * yon || x.id - y.id;
+  });
+}
+
 export function CariTablosu({ satirlar, secili, setSecili, kartAc, ekstreAc }: {
   satirlar: CariIcmalSatiri[]; secili: number[]; setSecili(s: number[]): void;
   kartAc(id: number): void; ekstreAc(c: CariIcmalSatiri): void;
 }) {
   const son = useRef<number | null>(null);
   const [acik, setAcik] = useState<Set<number>>(new Set());
-  const sira = satirlar.map(c => c.id);
+  const [siralama, setSiralama] = useState<{ alan: SiraAlani; artan: boolean } | null>(null);
+  const gruplar: [CariIcmalSatiri['grup'], string][] = [['musteri', '👥 Müşteriler'], ['tedarikci', '🚚 Tedarikçiler']];
+  const grupSatirlari = useMemo(() => gruplar.map(([g, ad]) =>
+    [g, ad, siraliCariler(satirlar.filter(c => c.grup === g), siralama)] as const), [satirlar, siralama]);
+  // Shift aralık seçimi ekrandaki (sıralı) düzeni izler.
+  const sira = grupSatirlari.flatMap(([, , l]) => l.map(c => c.id));
+  const basTikla = (alan: SiraAlani) => setSiralama(o => {
+    const ilk = METIN_ALAN.has(alan);
+    if (!o || o.alan !== alan) return { alan, artan: ilk };
+    return o.artan === ilk ? { alan, artan: !ilk } : null;
+  });
+  const Th = ({ alan, ad, sag }: { alan: SiraAlani; ad: string; sag?: boolean }) => (
+    <th className={(sag ? 'sag ' : '') + 'ci-sirali'} onClick={() => basTikla(alan)} title="Sırala"
+        aria-sort={siralama?.alan === alan ? (siralama.artan ? 'ascending' : 'descending') : 'none'}>
+      {ad}{siralama?.alan === alan ? (siralama.artan ? ' ▲' : ' ▼') : ''}</th>
+  );
   const tikla = (id: number, e: MouseEvent) => {
     e.stopPropagation();
     if (e.shiftKey) window.getSelection()?.removeAllRanges();
@@ -28,7 +75,6 @@ export function CariTablosu({ satirlar, secili, setSecili, kartAc, ekstreAc }: {
     if (!e.shiftKey) son.current = id;
   };
   const hepsi = satirlar.length > 0 && satirlar.every(c => secili.includes(c.id));
-  const gruplar: [CariIcmalSatiri['grup'], string][] = [['musteri', '👥 Müşteriler'], ['tedarikci', '🚚 Tedarikçiler']];
   const t = (l: CariIcmalSatiri[], f: (c: CariIcmalSatiri) => number) => l.reduce((s, c) => s + f(c), 0);
   const ToplamSatiri = ({ l, ad, sinif }: { l: CariIcmalSatiri[]; ad: string; sinif: string }) => (
     <tr className={sinif}><td /><td colSpan={4}>{ad} ({l.length})</td>
@@ -41,14 +87,13 @@ export function CariTablosu({ satirlar, secili, setSecili, kartAc, ekstreAc }: {
     <table className="hi-tablo ci-tablo">
       <thead><tr>
         <th style={{ width: 28 }}><input type="checkbox" checked={hepsi} onChange={() => setSecili(hepsi ? [] : sira)} /></th>
-        <th>Kod</th><th>Ünvan</th><th>Tür</th><th>Temsilci</th>
-        <th className="sag">Devir</th><th className="sag">Dönem Borç</th><th className="sag">Dönem Alacak</th>
-        <th className="sag">Bakiye</th><th className="sag">Vadesi Geçen</th><th className="sag">En Eski</th>
-        <th>Son Hareket</th><th className="sag">Risk</th></tr></thead>
+        <Th alan="kod" ad="Kod" /><Th alan="ad" ad="Ünvan" /><th>Tür</th><Th alan="temsilci" ad="Temsilci" />
+        <Th alan="devir" ad="Devir" sag /><Th alan="donemBorc" ad="Dönem Borç" sag /><Th alan="donemAlacak" ad="Dönem Alacak" sag />
+        <Th alan="bakiye" ad="Bakiye" sag /><Th alan="vadesiGecen" ad="Vadesi Geçen" sag /><Th alan="enEskiGun" ad="En Eski" sag />
+        <Th alan="sonHareket" ad="Son Hareket" /><Th alan="riskYuzde" ad="Risk" sag /></tr></thead>
       <tbody>
         {satirlar.length === 0 && <tr><td colSpan={13} className="bos">Bu süzgeçte cari yok.</td></tr>}
-        {gruplar.map(([g, ad]) => {
-          const l = satirlar.filter(c => c.grup === g);
+        {grupSatirlari.map(([g, ad, l]) => {
           if (l.length === 0) return null;
           return (
             <Fragment key={g}>

@@ -13,7 +13,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni } from './bicim';
-import { useUnvanOneki } from './kart/useUnvanOneki';
+import { adSoyadUnvandan, useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
 import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
@@ -665,7 +665,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
               .filter(([a, v]) => a in gelen && v !== ilkDegerRef.current[a]))
           : {};
         yuklenenRef.current = anahtar;
-        setDeger({ ...gelen, ...kirli });
+        // TAM AD UNVANDA (kullanıcı 03.11.2026: "pers kartı açıldı ama boş geldi"; göç 1250 mevcut kayıtları onardı):
+        //   aktarılan personelde ad / soyad boş, tam ad unvanda kalmış olabilir - ad / soyad ondan önerilir (son kelime
+        //   soyad, baştaki "Dr." gibi önek atlanır). Yalnız GÖSTERİLEN değer: ilk hal boş kaldığı için Kaydet ikisini
+        //   de yazar; kaydedilmezse veri değişmez.
+        const unvandan = (kaynak === 'personel' || kaynak === 'dis-hekim') ? adSoyadUnvandan(gelen) : null;
+        setDeger({ ...gelen, ...(unvandan ?? {}), ...kirli });
         setIlkDeger(gelen);
         // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen
         //   cins/tarih "zaten cekilmis" sayilir; kullanici birini degistirirse

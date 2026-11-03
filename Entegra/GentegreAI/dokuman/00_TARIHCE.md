@@ -7,6 +7,23 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 03.11.2026 — Gündem (rol / yetki bazlı, katman 1-2), Ctrl+K kayıt / VKN / tahsilat, icmallerde ad → kart, cari icmali, personel adı (1250)
+
+Kullanıcı testleri (dev + UNIVERSE), istek istek; FETA / ZONE yayımlandı (MEDX bellek yetersizliğinden yarıda, sunucuya gitmedi; hastane bekliyor).
+
+- **Gündem (mockup `Ekranlar/ana_sayfa_yz_komut.html` / `_banko.html`, katman 1-2):** tek motor, ERP / HBYS ayrımı yok - kartı rol + yetki + açık modül belirler. `/api/gundem` (22 kart, kurallar mevcut icmallerden; vade / çek / kredi / onay / stok…), `/api/gundem/kayit` (seçilen kaydın önerileri), `/api/hizli-bul/kayit-ad` (müşteri · tedarikçi · kişi · personel · hasta, her biri kendi yetkisiyle). Palette "bugünkü işlerim" niyeti; ana sayfada Son Açılanlar küçük kutular üstte, Bekleyen İşler detaylı kartlar altta. `GundemUclari` dört parçaya bölündü (ortak · hızlı bul · kartlar · öneriler).
+- **Ctrl+K:** düz **VKN / TCKN** (10 hane müşteri / tedarikçi / kurum, 11 hane bireysel müşteri + o TC'ye kesilmiş satış belgeleri; kayıt yoksa izibiz'den bilgi alıp kart oluşturma). **Rakamlı ad** da aranır ("A2 DENT"). Seçili müşteride **Tahsilat al ▸**, tedarikçide **Ödeme yap ▸** - alt liste nakit · havale/EFT · POS (kredi kartı) · çek · senet · plan; "tah çek", "öde havale" doğrudan (`cariIslemSatirlari`, `KASA_ARACLARI`).
+- **Kasa işlemi kartı:** tutara carinin açık bakiyesi (tahsilatta borcu, ödemede alacağı; tutar dışarıdan gelmediyse, avans / iade değilse); atanmış / ana hesap yoksa o türde **tek aktif hesap** varsayılan; bantta avatar / ada tık = cari kartı sekmede; çek / senet kartı kaydedilince kasa işlemi kendiliğinden kaydedilir ve sekme kapanır (tek Kaydet).
+- **İcmallerde ad → kart sekmesi:** müşteri / tedarikçi / kişi / personel / hekim / kurum / hasta / dış hekim / telerad kurum adı kartı icmalin yanında sekmede açar (30 icmal, `bilesenler/KartAdi.tsx`; adı başka icmale geçiren yerde yanında ↗). "Sekmede aç, yoksa adrese git" tek yardımcı (`useSekmedeAc`). İrsaliye-Fatura Eşleşme ve e-Fatura icmalinde belge ekran sekmesinde.
+- **Avatar harfleri:** kişi / personel / dış doktor / hasta ad + soyad; müşteri / tedarikçi / kurum ünvanın ilk iki kelimesi (`basHarfler(ad, kurumsal)`, bütün avatarlar).
+- **Cari icmali:** başlıktan **sıralama** (grup içinde, ▲▼, üçüncü tık sunucu sırası); "Bakiyesi sıfır olanları gizle" artık dönemde hareketi olsa da bakiyesi kapanmışı gizler (döviz bakiyesi açık olan kalır); **Tümü / Borçlu / Alacaklı** süzgeci (kırmızı / yeşil); Vadesi geçen net rozeti araç çubuğunda; seçili satırla **Ekstre** o carinin ekstresi.
+- **Ekstre:** satıra tek tık kaydı açar (çift tık kalktı); para birimi grubu aç / kapa.
+- **Personel adı (1250):** Delphi aktarımı (1144) kullanıcının rehber kartını personel yaparken tam adı unvanda bırakıyordu - personel kartı boş görünüyor, Ad / Soyad zorunlu olduğundan kaydedilemiyordu (UNIVERSE 8 / 8). Ad / soyad unvandan ayrıştırıldı (son kelime soyad, "Dr." öneki atlanır); **unvan değişmez** (bu kayıtlar müşteri de, görünen ad aynı). Yedek `_yedek_1250_personel_ad`. Kart da aynı kuralla ad / soyad önerir (`adSoyadUnvandan`). Aktarım fonksiyonu düzeltilmedi.
+- **Müşteri / tedarikçi listesinde personel yok:** `cari` kaynağı `personel = 0` (aktarımda kalan müşteri bayrağı); palette personel yalnız personel olarak gelir. Kart ve belgeler etkilenmez.
+- **Satış / alış irsaliyesi:** "Belge Dönüştür ▾" hedef menüsü (`DonusumMenusu`, hedefler `donusumHedefleri.ts`; import döngüsü giderildi); dönüşüm penceresinde belge tarihi saatli.
+- **Stok / hizmet arama (alış / satış belgeleri):** tek seçim (görünen işaretli satır eklenir), Tümü / Stok / Hizmet süzgeci (hatırlanır), fiyatsızda tek "Ekle", tek sonuç kendiliğinden işaretli.
+- **Diğer:** stok kartında Ürün Ağacı Hareketler'in sağında, "Stok Kartı #id" Hatırlat'ın sağında; Resim / Doküman tür ikonları + Kart / Liste düğmesi, galeri varsayılan; ERP menüde Alış Faturası / İrsaliyesi Listesi Alış grubunda, sıra sipariş → irsaliye → fatura (`erpMenuSira`); GenProfil gentegreai.com kurulumlarını seçer (`kurulumlar.ts`); üretim mockup'ları (`Ekranlar/Uretim/`: üretim fişi v1-v2, üretim emri v2 14 sekme, basit / standart / denetimli seviye).
+
 ## 02.11.2026 — Stok kartı v2, alış / satış belge başlığı, lot dönüşümü, belge silme stok geri alma, UNIVERSE lot onarımı (1246-1249)
 
 Kullanıcı testleri (dev + UNIVERSE + KOSUYOLU), istek istek.

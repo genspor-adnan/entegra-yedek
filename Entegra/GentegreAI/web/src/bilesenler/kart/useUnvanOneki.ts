@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
+import type { Deger } from '../kartAlanCizim';
 
 /** Unvan onegi kullanan kartlar (843/844): dis hekim ve PERSONEL. */
 const ONEKLI_KARTLAR = new Set(['dis-hekim', 'personel']);
@@ -40,4 +41,13 @@ export function useUnvanOneki(kaynak: string) {
   }, [kaynak]);
 
   return { onek, setOnek, secenekler, setHam };
+}
+
+/** Ad ve soyad boşsa unvandaki tam addan ad / soyad (göç 1250 ile aynı kural); yoksa null. */
+export function adSoyadUnvandan(k: Record<string, Deger>): { ad: string; soyad: string } | null {
+  if (String(k.ad ?? '').trim() || String(k.soyad ?? '').trim()) return null;
+  const kelime = String(k.unvan ?? '').trim().split(/\s+/).filter(Boolean);
+  const ilk = kelime.findIndex(w => !/^(\p{L}{1,6}\.)+$/u.test(w));
+  const ad = ilk < 0 ? [] : kelime.slice(ilk);
+  return ad.length < 2 ? null : { ad: ad.slice(0, -1).join(' '), soyad: ad[ad.length - 1] };
 }
