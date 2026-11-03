@@ -1,9 +1,8 @@
-import { useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { para } from '../../bilesenler/bicim';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * STOK İCMALLERİNİN ORTAĞI (1173 - Stok Değer, SKT / Lot, Sayım Fark). Görünüm ve
@@ -39,9 +38,8 @@ export function useAntet() {
 
 /** Stok kartını kendi sekmesinde açar (kart sekmesi deseni). */
 export function useStokKarti() {
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const git = useNavigate();
-  return (id: number) => { const yol = `/stok/${id}`; if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+  const ac = useSekmedeAc();
+  return (id: number) => ac(`/stok/${id}`);
 }
 
 export const Kutu = ({ bas, deg, alt, sinif = '' }: { bas: string; deg: string; alt: string; sinif?: string }) => (

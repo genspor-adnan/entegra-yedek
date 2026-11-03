@@ -1,3 +1,4 @@
+import { basHarfler } from '../basHarfler';
 import type { ReactNode } from 'react';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -62,9 +63,9 @@ export function KartKimlikSeridi({
               soyadin bas harfleri. Kisi kartlarinda kimin karti oldugunu tek
               bakista gosterir - hasta seridindeki desenle ayni. */}
           {kaynak === 'dis-hekim' && (() => {
-            const bas = [String(deger.ad ?? ''), String(deger.soyad ?? '')]
-              .map(x => x.trim()[0] ?? '').join('').toLocaleUpperCase('tr');
-            return <span className="kart-avatar">{bas || '—'}</span>;
+            // Ortak kural (basHarfler.ts): kişi = ad + soyad.
+            const bas = basHarfler(`${String(deger.ad ?? '')} ${String(deger.soyad ?? '')}`.trim());
+            return <span className="kart-avatar">{bas === '?' ? '—' : bas}</span>;
           })()}
           {/* Kisi'ye ozel: Kisi Kodu dar, Unvan genis (kullanici: "kod edit yariya dussun,
               onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}

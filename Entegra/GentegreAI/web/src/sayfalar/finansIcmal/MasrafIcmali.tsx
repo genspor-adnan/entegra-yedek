@@ -1,4 +1,5 @@
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import {
@@ -9,7 +10,6 @@ import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
 import { KartAdi } from '../../bilesenler/KartAdi';
 import { listeSor, onay } from '../../bilesenler/mesaj';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -41,9 +41,8 @@ export function MasrafIcmali() {
   const { arama, degistir } = useSuzgec();
   const { kullanici } = useOturum();
   const antet = useAntet();
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const git = useNavigate();
-  const kartAc = (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+  const kartAc = useSekmedeAc();
 
   const bas = arama.get('bas') ?? yilBasi();
   const bit = arama.get('bit') ?? bugunYerel();

@@ -1,6 +1,4 @@
-import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
+import { useKartSekmesi, useSekmedeAc } from '../../bilesenler/KartAdi';
 import { tl } from '../stokIcmal/stokIcmalOrtak';
 
 /**
@@ -22,21 +20,12 @@ export const HESAP_IKON: Record<string, string> = { K: '💵', B: '🏦', P: '�
 
 /** Cari kartını kendi sekmesinde açar (kart sekmesi deseni); yalnız tedarikçi olan Tedarikçi kartında. */
 export function useCariKarti() {
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const git = useNavigate();
-  return (id: number, tedarikci = false) => {
-    if (!id) return;
-    const yol = `${tedarikci ? '/tedarikci' : '/cari'}/${id}`;
-    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
-  };
+  const kart = useKartSekmesi();
+  return (id: number, tedarikci = false) => kart(tedarikci ? 'tedarikci' : 'musteri', id);
 }
 
 /** Belge / çek kartı (kart sekmesi deseni). */
-export function useKartAc() {
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const git = useNavigate();
-  return (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
-}
+export const useKartAc = useSekmedeAc;
 
 export const FINANS_ICMAL_STILI = `
 .fi-chk { display:flex; align-items:center; gap:4px; font-size:12px; color:#4d5d6e; white-space:nowrap; }

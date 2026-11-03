@@ -67,10 +67,8 @@ function gunEtiketi(iso: string): string {
   return t.toLocaleDateString('tr-TR');
 }
 
-/** Adın baş harfleri (mockup'taki yuvarlak avatar). */
-function basHarf(ad: string): string {
-  return basHarfler(ad);   // ortak kural: ünvan atılır (basHarfler.ts)
-}
+/** Adın baş harfleri (mockup'taki yuvarlak avatar) - ortak kural, kişi: ad + soyad (basHarfler.ts). */
+const basHarf = basHarfler;
 
 /** Avatar rengi addan türetilir - aynı kişi her yerde aynı renk. */
 const RENKLER = ['#2f6db3', '#7a4fb0', '#2e7d46', '#b5731a', '#a3312f', '#0f6f7a'];

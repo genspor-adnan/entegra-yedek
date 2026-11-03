@@ -1,9 +1,9 @@
-import { useContext, type ReactNode } from 'react';
+import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FaturasizIrsaliye, ParaTablosu } from '../../api/uclar/ticariIcmal';
 import { para } from '../../bilesenler/bicim';
 import { KartAdi } from '../../bilesenler/KartAdi';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { Kutucuk } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 
@@ -57,9 +57,8 @@ export const DovizRozetleri = ({ l }: { l: { para: string; tutar: number }[] }) 
 
 /** Cari kartı, cari ekstresi ve belge kartı (kart sekmesi deseni: kendi sekmesinde). */
 export function useGezinti() {
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const git = useNavigate();
-  const kart = (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+  const kart = useSekmedeAc();
   return {
     git,
     cariKarti: (id: number, yalnizTedarikci = false) => id > 0 && kart(`${yalnizTedarikci ? '/tedarikci' : '/cari'}/${id}`),

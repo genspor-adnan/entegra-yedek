@@ -1,4 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hataMetni } from '../../api/sozlesme';
 import {
@@ -6,7 +7,6 @@ import {
 } from '../../api/uclar/uretimIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -34,7 +34,6 @@ const tutar = (n: number | null | undefined) => (n == null ? '—' : tl(n));
 export function UretimIcmali() {
   const { arama, degistir } = useSuzgec();
   const git = useNavigate();
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const { kullanici } = useOturum();
   const antet = useAntet();
   const stokKarti = useStokKarti();
@@ -73,7 +72,7 @@ export function UretimIcmali() {
       .catch(h => setHata(hataMetni(h))).finally(() => setYukleniyor(false));
   }, [bas, bit, durum, tur, sube, depo, isMerkezi, mamul, tazele]);
 
-  const kartAc = (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+  const kartAc = useSekmedeAc();
   const emirAc = (id: number) => { if (veri?.yetkiler.emir) kartAc(`/uretim-emri/${id}`) };
 
   const q = ara.trim().toLocaleLowerCase('tr');

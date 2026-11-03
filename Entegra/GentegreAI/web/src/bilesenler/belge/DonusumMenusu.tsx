@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { HEDEFLER } from './donusumHedefleri';
+import { DONUSUM_IKON, HEDEFLER } from './donusumHedefleri';
 import { mesaj } from '../mesaj';
-
-const HEDEF_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };
 
 /**
  * BELGE DÖNÜŞTÜR ▾ (kullanıcı 03.11.2026: "satış irs kartında dönüştür butona basınca alta hedef menüsü çıksın: Satış
@@ -44,7 +42,7 @@ export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title }: {
           {hedefler.map(h => (
             <button key={h.kod} type="button" className="mi" role="menuitem"
                     onClick={() => { setAcik(false); onSec(h.kod) }}>
-              {HEDEF_IKON[h.kod] ?? '⇢'} {h.ad}
+              {DONUSUM_IKON[h.kod] ?? '⇢'} {h.ad}
             </button>
           ))}
         </div>

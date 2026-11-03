@@ -1,3 +1,4 @@
+import { DONUSUM_IKON } from '../bilesenler/belge/donusumHedefleri';
 import { type ListeGirdisi, type ListeTanimi } from './listeTanimlari.Ortak';
 
 // Tip ve sabitler ORTAK modulde (dongusel import kirildi); buradan
@@ -92,7 +93,6 @@ export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
  */
 const DONUSUM_KISA_AD: Record<number, string> = {
   10: 'İrsaliye', 14: 'İrsaliye', 11: 'Fatura', 15: 'Fatura', 12: 'Fiş', 16: 'Fiş', 13: 'Tahakkuk', 17: 'Tahakkuk', 19: 'Sipariş' };
-const DONUSUM_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };
 export function donusumMenusu(kaynakTur: number | undefined,
                               hedefler: Record<number, { kod: number; ad: string }[]>): Record<string, { kod: string; ad: string }[]> {
   const h = kaynakTur ? hedefler[kaynakTur] : undefined;

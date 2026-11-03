@@ -1,11 +1,11 @@
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hataMetni } from '../../api/sozlesme';
 import { servisIcmalUclari, type TeknikServisIcmali as Veri, type ServisTeknisyenSatiri } from '../../api/uclar/servisIcmal';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
 import { KartAdi } from '../../bilesenler/KartAdi';
-import { EkranSekmesiBaglami } from '../../bilesenler/sekmeBaglami';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
@@ -29,9 +29,8 @@ const SLA_ROZET: Record<string, [string, string]> = { uygun: ['ok', 'uygun'], si
 
 /** Kart ve liste gezintisi (kart sekmesi deseni: kendi sekmesinde). */
 function useServisGezinti() {
-  const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const git = useNavigate();
-  const kart = (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+  const kart = useSekmedeAc();
   return {
     git,
     isEmri: (id: number) => id > 0 && kart(`/demirbas-is-emri/${id}`),

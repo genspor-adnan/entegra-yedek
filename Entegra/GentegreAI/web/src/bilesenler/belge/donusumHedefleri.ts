@@ -33,3 +33,6 @@ export const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
   119: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
         { kod: 17, ad: 'Satış Tahakkuku' }],
 };
+
+/** Hedef türün ikonu - kart menüsü (DonusumMenusu) ve liste menüsü (donusumMenusu) aynı ikonu gösterir. */
+export const DONUSUM_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };

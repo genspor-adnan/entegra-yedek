@@ -20,15 +20,20 @@ const YOL: Record<KartTuru, string> = {
 /** Kart yolu: tür + kimlik. */
 export const kartYolu = (tur: KartTuru, id: number) => `${YOL[tur]}/${id}`;
 
-/** Kartı ekran sekmesinde açan işlev (bileşen dışı kullanım: düğme, araç çubuğu). */
-export function useKartSekmesi() {
+/**
+ * YOLU EKRAN SEKMESİNDE AÇ (kart sekmesi deseni): ekran sekmesi varsa kartaGit (açan ekranın sağına), yoksa adrese gider.
+ * İcmallerin her birinde ayrı yazılan `if (ekranSekmesi) kartaGit(yol); else git(yol)` satırının tek yeri.
+ */
+export function useSekmedeAc() {
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const git = useNavigate();
-  return (tur: KartTuru, id: number | null | undefined) => {
-    if (!id) return;
-    const yol = kartYolu(tur, id);
-    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
-  };
+  return (yol: string) => { if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol) };
+}
+
+/** Kartı ekran sekmesinde açan işlev (bileşen dışı kullanım: düğme, araç çubuğu). */
+export function useKartSekmesi() {
+  const ac = useSekmedeAc();
+  return (tur: KartTuru, id: number | null | undefined) => { if (id) ac(kartYolu(tur, id)) };
 }
 
 export function KartAdi({ tur, id, children, title }: {
