@@ -62,6 +62,8 @@ export function CiktiMenusu({ etiket, dosyaAdi, devre, dugmeSinifi = 'hi-ana cm-
 }) {
   const [acik, setAcik] = useState(false);
   const [altAcik, setAltAcik] = useState(false);
+  /** Düğme ekranın sağ yarısında: menüler sola açılır (açılışta ölçülür). */
+  const [sagYari, setSagYari] = useState(false);
   const [onizleme, setOnizleme] = useState(false);
   const [mesgul, setMesgul] = useState('');
   const kutu = useRef<HTMLDivElement>(null);
@@ -129,10 +131,16 @@ export function CiktiMenusu({ etiket, dosyaAdi, devre, dugmeSinifi = 'hi-ana cm-
   };
 
   return (
-    <span className={'cm' + (sagda ? ' cm-sagda' : '')} ref={kutu}>
+    <span className={'cm' + (sagda || sagYari ? ' cm-sagda' : '')} ref={kutu}>
       <style>{CM_STILI}</style>
       <button type="button" className={dugmeSinifi} disabled={devre || !!mesgul} aria-haspopup="menu" aria-expanded={acik}
-              onClick={() => { setAcik(a => !a); setAltAcik(false) }}>
+              onClick={() => {
+                // SAĞDAKİ DÜĞMEDE MENÜ SOLA (kullanıcı 03.11.2026: "gönder menüsü sağa açılıyor ve ben ulaşamadım.. buton
+                //   sağ taraftaysa gönder menüsü sola açılmalı"): düğme ekranın sağ yarısındaysa menü ve Gönder alt menüsü sola.
+                const r = kutu.current?.getBoundingClientRect();
+                setSagYari(!!r && r.left + r.width / 2 > window.innerWidth / 2);
+                setAcik(a => !a); setAltAcik(false);
+              }}>
         🖨️ {etiket}{mesgul ? ' · hazırlanıyor…' : ''} <span className="cm-ok">▾</span>
       </button>
       {acik && (

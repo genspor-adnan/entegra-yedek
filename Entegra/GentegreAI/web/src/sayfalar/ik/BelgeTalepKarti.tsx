@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useKartKapat } from '../../bilesenler/useKartKapat';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
@@ -101,7 +102,8 @@ function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
   const [secilenAd, setSecilenAd] = useState(pt.personel?.ad ?? '');
   const dosyaRef = useRef<HTMLInputElement>(null);
 
-  const kapat = useCallback(() => git(pt.geri ?? '/personel-belge-talep'), [git, pt.geri]);
+  // Kaydet / Kapat sonrası sekme kapanır (useKartKapat - genel kural 03.11.2026).
+  const kapat = useKartKapat('/personel-belge-talep', pt.geri);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const yazar = yetki('ik.belge_talep', kayitId ? 'degistir' : 'ekle');
   const kilitli = ro.durum >= 3;   // reddedildi / hazırlandı / teslim / iptal
@@ -214,7 +216,7 @@ function BelgeTalepKartiIc({ param }: { param: string | undefined }) {
 
   const alt = (
     <>
-      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { await kaydet() })()}>💾 {c('Kaydet')}</button>}
+      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { if (await kaydet()) kapat() })()}>💾 {c('Kaydet')}</button>}
       {kayitId && yazar && ro.durum === 2 && (
         <button type="button" className="d tl-ok" disabled={mesgul || (yazi?.eksik.length ?? 0) > 0}
                 title={(yazi?.eksik.length ?? 0) > 0 ? c('Boş yer tutucu var') : undefined} onClick={() => void hazirla()}>✔ {c('Hazırla')}</button>

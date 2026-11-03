@@ -19,7 +19,7 @@ import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './ka
 import { useKiymetBilgisi, usePlanGerceklestirme,
          type CariSecimi, type HesapSecimi } from './kasa/useKiymetBilgisi';
 import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
-import { mesaj , metinSor } from '../bilesenler/mesaj';
+import { mesaj , metinSor, onay } from '../bilesenler/mesaj';
 import { c as cev } from '../dil/ceviri';
 
 
@@ -462,6 +462,27 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
+  /**
+   * KARTTAN SİL (kullanıcı 03.11.2026: "belgelerde/ödeme/tah kartlarında sil basarsam önce silip sonra ekranı
+   * kapatsın"): onay -> DELETE /api/kasa-islem/{id} -> listeler tazelenir, kart (sekme / modal) kapanır. Silinip
+   * silinemeyeceğine sunucu karar verir (354: fiş / iptal / dönüşüm / çek-senet izi); reddedilirse kart açık kalır.
+   */
+  async function sil() {
+    if (!kayitId) return;
+    const no = String(sonuc?.islem.islemNo ?? '') || `#${kayitId}`;
+    if (!await onay(`"${no}" silinecek.
+
+Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
+    setHata(null);
+    setCalisiyor(true);
+    try {
+      await api.kasaSil(kayitId);
+      listeleriTazele();
+      mesaj('Kayıt silindi.');
+      if (modalMi) onKapat?.(); else sayfaKapat();
+    } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
+  }
+
   /** Plandan tahsilat/odeme uretir; plan kaydi DEGISMEZ, yeni islem acilir. */
   async function gerceklestir() {
     if (!kayitId || !gercek.hesap) {
@@ -542,6 +563,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               <button className="d teh" disabled={calisiyor} onClick={() => void iptalEt()}>
                 İptal Et
               </button>
+            )}
+            {kayitId !== null && durum !== 3 && yetki('kasa_islem', 'sil') && (
+              <button className="d teh" disabled={calisiyor} onClick={() => void sil()}>🗑️ {cev('Sil')}</button>
             )}
             {/* KAPAT EN SAĞDA (kullanıcı 26.10.2026: "cari virman da kapat ve kaydet yer değiş"): Kaydet solda,
                 Kapat sonda - belge kartlarıyla aynı sıra, bütün kasa işlemi türlerinde. */}

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef } from 'react';
+import { useKartKapat } from '../bilesenler/useKartKapat';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { mesaj } from '../bilesenler/mesaj';
@@ -66,13 +67,14 @@ export function OzelKartRota({ liste, kart, sekmeli }: { liste: React.ReactNode;
 function useHastaKaydiRotasi(listeYolu: string) {
   const { id } = useParams();
   const [sorgu] = useSearchParams();
-  const git = useNavigate();
+  // Kaydet / Sil / Kapat sonrası kart sekmesi kapanır (useKartKapat - genel kural 03.11.2026); sekmesizse listeye.
+  const kapat = useKartKapat(listeYolu, sorgu.get('geri'));
   const kayit = id === 'yeni' ? 'yeni' as const : Number(id);
   return {
     gecerli: kayit === 'yeni' || kayit > 0,
     kayit,
     hastaId: Number(sorgu.get('hastaId')) || undefined,
-    kapat: () => git(sorgu.get('geri') ?? listeYolu),
+    kapat,
   };
 }
 

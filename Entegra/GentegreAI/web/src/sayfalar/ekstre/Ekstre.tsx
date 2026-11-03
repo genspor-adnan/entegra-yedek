@@ -3,7 +3,7 @@ import { CariBilgiBandi } from '../../bilesenler/CariBilgiBandi';
 import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, sekmeAdi } from '../../bilesenler/sekmeBaglami';
+import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../../bilesenler/sekmeBaglami';
 import { belgeTuruBilgisi } from '../belgeTuru';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
@@ -11,7 +11,7 @@ import type { Ekstre as Veri, EkstreHesapSecimi, EkstreParasi, EkstreSatiri, Eks
 import { para, paraYaz } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
-import { mesaj } from '../../bilesenler/mesaj';
+import { mesaj, onay } from '../../bilesenler/mesaj';
 import { TarafArama } from '../../bilesenler/TarafArama';
 import { c } from '../../dil/ceviri';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -154,9 +154,13 @@ export function Ekstre() {
    * satırı; lot / seri takipli kalem varsa kopyalanmaz - kopyada lot yeniden seçilmeli, aynı lot ikinci kez
    * düşülemez. Kopya yeni belge kartında KAYDEDİLMEMİŞ açılır (BelgeKarti kopyaId).
    */
-  const belgeyiKopyala = async () => {
+  /** İşaretli satırlar; işaret yoksa seçili satır. */
+  const secilenler = () => {
     const tum = veri?.paralar.flatMap(x => x.satirlar) ?? [];
-    const sec = isaretli.size ? tum.filter(s => isaretli.has(s.id)) : secili ? [secili] : [];
+    return isaretli.size ? tum.filter(s => isaretli.has(s.id)) : secili ? [secili] : [];
+  };
+  const belgeyiKopyala = async () => {
+    const sec = secilenler();
     if (sec.length !== 1) { mesaj(sec.length ? c('Kopyalamak için tek bir belge seçin.') : c('Önce kopyalanacak belgeyi seçin.')); return }
     const s = sec[0];
     if (!s.belgeId || s.kasaIslemId) { mesaj(c('Seçili satır bir belge değil (kasa işlemi / devir) - kopyalanamaz.')); return }
@@ -172,6 +176,41 @@ export function Ekstre() {
       // Cari de adreste: kart açılırken carisiz kalıp cari arama penceresini açmasın.
       kartaGit(`/belge/yeni?kopya=${s.belgeId}${h ? `&tarafId=${h.id}&tarafUnvan=${encodeURIComponent(h.ad)}` : ''}`);
     } catch (h) { mesaj(hataMetni(h)) }
+  };
+  /**
+   * SİL (kullanıcı 03.11.2026: "aksiyonlara Sil ekle.. seçili belge/tahsilat/ödemeyi silsin"): işaretli (yoksa seçili)
+   * satırların kaydı - kasa işlemi kasa ucuyla, belge belge ucuyla (kartlardaki Sil ile aynı uçlar). Silinip
+   * silinemeyeceğine SUNUCU karar verir (354: fiş / iptal / dönüşüm / çek-senet izi; 181: izli belge) - ilk
+   * reddedilende durulur, o ana kadar silinenler kalır. Aynı kaydı üreten birden çok satır tek silinir.
+   */
+  const kayitlariSil = async () => {
+    const kayitlar = new Map<string, EkstreSatiri>();
+    for (const s of secilenler()) {
+      if (s.kasaIslemId) kayitlar.set(`k${s.kasaIslemId}`, s);
+      else if (s.belgeId) kayitlar.set(`b${s.belgeId}`, s);
+    }
+    if (!kayitlar.size) {
+      mesaj(secilenler().length ? c('Seçili satırın silinecek bir kaydı yok (devir / açılış).') : c('Önce silinecek belge / işlemi seçin.'));
+      return;
+    }
+    const l = [...kayitlar.values()];
+    const ad = (s: EkstreSatiri) => [s.turAdi, s.belgeNo || s.islemNo].filter(Boolean).join(' ');
+    const metin = l.length === 1 ? `"${ad(l[0])}" silinecek.`
+      : `${l.length} kayıt silinecek:\n${l.slice(0, 8).map(ad).join('\n')}${l.length > 8 ? '\n…' : ''}`;
+    if (!await onay(`${metin}\n\nBu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
+    let silinen = 0;
+    try {
+      for (const s of l) {
+        if (s.kasaIslemId) await api.kasaSil(s.kasaIslemId);
+        else await api.belgeSil(s.belgeId);
+        silinen++;
+      }
+      mesaj(silinen === 1 ? c('Kayıt silindi.') : `${silinen} ${c('kayıt silindi.')}`);
+    } catch (e) {
+      mesaj((silinen ? `${silinen} ${c('kayıt silindi.')} ` : '') + `${ad(l[silinen])}: ${hataMetni(e)}`);
+    } finally {
+      if (silinen) cariHareketiDegisti();
+    }
   };
   // SEKME BAŞLIĞI HESABIN ADI (kullanıcı 26.10.2026: "ekstre sekme başlıkta cari/kasa... adın ilk 2 kelimesi").
   const sekmeBasligi = h ? sekmeAdi(h.ad) : '';
@@ -199,7 +238,8 @@ export function Ekstre() {
                 Kasa / banka / POS hesabında düğme yerinde kalır. */}
             {h && gercekTur === 'cari' && (
               <CariAksiyonMenusu id={h.id} ad={h.ad} git={kartaGit}
-                                 onAcilis={() => setDevirAcik(true)} onKopyala={() => void belgeyiKopyala()} />)}
+                                 onAcilis={() => setDevirAcik(true)} onKopyala={() => void belgeyiKopyala()}
+                                 onSil={() => void kayitlariSil()} />)}
             {h && gercekTur !== 'cari' && yetki('finans.devir', 'gor') && (
               <button type="button" className="d" onClick={() => setDevirAcik(true)}>↪️ {c('Devir / Açılış')}</button>)}
             {cari && yetki('finans.cari_icmali', 'gor') && <button type="button" className="d" onClick={() => git('/cari-icmali')}>📒 {c('Cari İcmali')}</button>}

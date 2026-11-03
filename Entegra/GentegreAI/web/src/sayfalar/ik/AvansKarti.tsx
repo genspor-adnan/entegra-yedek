@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKartKapat } from '../../bilesenler/useKartKapat';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
@@ -10,7 +11,8 @@ import { para, tarihSaat, tutarOku, bugunIso } from '../../bilesenler/bicim';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
-import { c } from '../../dil/ceviri';
+import { c } from '../../dil/ceviri';
+
 import { h } from '../../bilesenler/htmlGuvenlik';
 import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
@@ -76,7 +78,8 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
   const [odeme, setOdeme] = useState({ acik: false, hesapId: 0, nakit: false, tarih: bugunIso() });
   const dosyaRef = useRef<HTMLInputElement>(null);
 
-  const kapat = useCallback(() => git(pt.geri ?? '/personel-avans'), [git, pt.geri]);
+  // Kaydet / Kapat sonrası sekme kapanır (useKartKapat - genel kural 03.11.2026).
+  const kapat = useKartKapat('/personel-avans', pt.geri);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.avans', kayitId ? 'degistir' : 'ekle');
@@ -225,7 +228,7 @@ function AvansKartiIc({ param }: { param: string | undefined }) {
 
   const alt = (
     <>
-      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { await kaydet() })()}>💾 {c('Kaydet')}</button>}
+      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { if (await kaydet()) kapat() })()}>💾 {c('Kaydet')}</button>}
       {yazar && !kilitli && <button type="button" className="d" disabled={mesgul} onClick={() => void gonder()}>📨 {c('Onaya gönder')}</button>}
       {kayitId && ro.durum === 2 && aksiyonVar('ik.avans_ode') && <button type="button" className="d" onClick={() => setOdeme(o => ({ ...o, acik: true }))}>💳 {c('Öde')}…</button>}
       {kayitId && ro.durum === 4 && yazar && siradaki && <button type="button" className="d" disabled={mesgul} onClick={() => void kesinti()}>✂ {c('Kesinti işle')}</button>}

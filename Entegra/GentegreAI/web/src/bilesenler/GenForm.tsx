@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EkranSekmesiBaglami } from './sekmeBaglami';
+import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
 import { PersonelTalepleri } from './taleplerim/PersonelTalepleri';
 import { api, oturum } from '../api/istemci';
@@ -106,8 +106,10 @@ interface Props {
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
   seritAlanlari?: string[];
-  /** `acikKal`: kart AÇIK kalarak kaydedildi (çerçeve 💾, özetten kaydet) - çağıran kapatmaz. */
-  onKaydedildi?(id: number, acikKal?: boolean): void;
+  /** `acikKal`: kart AÇIK kalarak kaydedildi (çerçeve 💾, özetten kaydet) - çağıran kapatmaz.
+   *  `true` dönerse çağıran kayıttan sonraki yolu KENDİSİ belirledi (yeni cari devir sorusu, özel karta geçiş, sekme
+   *  zaten kapandı) - kart ayrıca onKapat çağırmaz; yoksa ardından gelen onKapat o yönlendirmeyi eziyordu. */
+  onKaydedildi?(id: number, acikKal?: boolean): boolean | void | Promise<void>;
   /** Hasta kartı: kimlik numarası kayıtlı bir hastaya aitse kaydetmek yerine O kart açılır.
       Verilmezse onKaydedildi(mevcutId) + onKapat ile aynı yola düşer. */
   onMevcutKayit?(id: number): void;
@@ -1223,9 +1225,9 @@ Yine de yeni kayıt eklensin mi?`);
       }
 
       kayitBasarili.current = true;
-      onKaydedildi?.(Number(yanit.kart.id), acikKal && !yeniMi);
+      const yolBelirlendi = onKaydedildi?.(Number(yanit.kart.id), acikKal && !yeniMi) === true;
       if (acikKal && !yeniMi) { await yukle(); return; }
-      onKapat?.();
+      if (!yolBelirlendi) onKapat?.();
       return;
     } catch (h) {
       const c = hataAyristir(h);
@@ -1252,6 +1254,8 @@ Yine de yeni kayıt eklensin mi?`);
     setHata(null);
     try {
       await api.kartSil(kaynak, id as number);
+      // Silinen kayıt açık listeden düşsün (kaydetteki tazelemenin karşılığı); sonra kart / sekme kapanır.
+      window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: kaynak }));
       onKapat?.();
     } catch (h) {
       if (h instanceof ApiHatasi) {

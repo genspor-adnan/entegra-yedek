@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useKartKapat } from '../../../bilesenler/useKartKapat';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../../../api/istemci';
 import { hataMetni } from '../../../api/sozlesme';
 import type { KysEgitimKatilimci } from '../../../api/uclar/kysEgitim';
@@ -20,12 +21,12 @@ type Kisi = Pick<KysEgitimKatilimci, 'tarafId' | 'ad' | 'birim'>;
 
 export function KysEgitimKarti() {
   const { id: param } = useParams();
-  const git = useNavigate();
   const konum = useLocation();
   const [sorgu] = useSearchParams();
   const { yetki } = useOturum();
-  const geri = (konum.state as { geri?: string } | null)?.geri ?? sorgu.get('geri') ?? '/kys-egitimler';
-  const kapat = useCallback(() => git(geri), [git, geri]);
+  const geri = (konum.state as { geri?: string } | null)?.geri ?? sorgu.get('geri');
+  // Kaydet / Sil / Kapat sonrası kart sekmesi kapanır (useKartKapat - genel kural 03.11.2026).
+  const kapat = useKartKapat('/kys-egitimler', geri);
   useEscIleKapat(kapat);
 
   const yeni = param === 'yeni';

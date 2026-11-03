@@ -1600,31 +1600,42 @@ export function ListeKarti({
           }
           // YENİ MÜŞTERİ / TEDARİKÇİ (cari_devir_girisi.html): kart kapanmaz, kayıtlı haliyle açık
           //   kalır ve bir kez "açılış bakiyesi var mı?" diye sorar (CariDevirSorusu).
+          //   `true`: yol burada belirlendi, GenForm ardından kapatmaz (kapatma bu yönlendirmeyi eziyordu - sekmede
+          //   kart kapanıyor, sekmesizde listeye düşülüyordu; 03.11.2026).
           if (kartId === 'yeni' && tanim.kaynak === 'cari' && yeniId) {
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
             setYenile(t => t + 1);
-            git(`${tanim.kartYolu}/${yeniId}?devirSor=1`, { replace: true });
-            return;
+            // Sekmede: "Yeni Müşteri Kartı" sekmesi kapanır, kayıtlı kart kendi sekmesinde açılır (yoksa boş yeni-kart
+            //   sekmesi yanında kalıyordu).
+            const hedef = `${tanim.kartYolu}/${yeniId}?devirSor=1`;
+            if (yeniSekmede) ekranSekmesi!.kapat(hedef); else git(hedef, { replace: true });
+            return true;
+          }
+          // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.
+          // ISG (741): yeni calisan kaydedince ozel karta (muayene ac / form gonder).
+          //   Sekmede de (kart sekmesi yerinde ozel karta doner) - genel "kaydet = kapat" kuralinin bilinçli istisnasi.
+          if (kartId === 'yeni' && yeniId && (tanim.kaynak === 'isg-calisan' || tanim.kaynak === 'ftr-program')) {
+            window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            const g = sorgu.get('geri');
+            if (yeniSekmede && !g) ekranSekmesi!.kapat(`/${tanim.kaynak}/${yeniId}`);
+            else git(`/${tanim.kaynak}/${yeniId}?geri=${encodeURIComponent(g ?? `/${tanim.kaynak}`)}`, { replace: true });
+            return true;
           }
           // KART KENDİ SEKMESİNDE (yeniSekmede): kaydedince sekme kapanır, KOMŞU sekmeye
           //   dönülür (liste açık değilse açılmaz - kullanıcı); açık liste tazelenir.
           if (yeniSekmede) {
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
             // BAŞVURUDAN YENİ HASTA (01.11.2026): sekme kapanır, kaydedilen hastayla yeni başvuru açılır.
-            if (basvurudanYeni && yeniId) { void basvuruyaDon(yeniId); return }
+            if (basvurudanYeni && yeniId) { void basvuruyaDon(yeniId); return true }
             ekranSekmesi!.kapat();
-            return;
+            return true;
           }
           setYenile(t => t + 1);
           setKayitSayaci(t => t + 1);
           // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat
           //   geldigi ekrana doner; kart yoluna ara gecis gereksiz gecmis birakirdi.
-          // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.
-          // ISG (741): yeni calisan kaydedince ozel karta (muayene ac / form gonder).
           // GÖZLÜK REÇETESİ (kullanıcı): muayeneden açıldıysa Kaydet göz muayene kartına döner.
-          if (tanim.kaynak === 'goz-gozluk-recete' && sorgu.get('geri')) { git(sorgu.get('geri')!, { replace: true }); return }
-          if (kartId === 'yeni' && tanim.kaynak === 'isg-calisan') { git(`/isg-calisan/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/isg-calisan')}`, { replace: true }); return }
-          if (kartId === 'yeni' && tanim.kaynak === 'ftr-program') { git(`/ftr-program/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/ftr-program')}`, { replace: true }); return }
+          if (tanim.kaynak === 'goz-gozluk-recete' && sorgu.get('geri')) { git(sorgu.get('geri')!, { replace: true }); return true }
           if (kartId === 'yeni' && !sorgu.get('geri')) {
             setOdaklaSonEklenen(t => t + 1);
             git(`${tanim.kartYolu}/${yeniId}`, { replace: true });

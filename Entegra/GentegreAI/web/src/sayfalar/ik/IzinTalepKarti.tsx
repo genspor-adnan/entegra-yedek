@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKartKapat } from '../../bilesenler/useKartKapat';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
@@ -12,7 +13,8 @@ import { tarihSaat } from '../../bilesenler/bicim';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile, gunYaz } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
-import { c } from '../../dil/ceviri';
+import { c } from '../../dil/ceviri';
+
 import { h } from '../../bilesenler/htmlGuvenlik';
 import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
@@ -92,7 +94,8 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
   const [arama, setArama] = useState<'tarafId' | 'yerineId' | null>(null);
   const [secilenAd, setSecilenAd] = useState<Record<string, string>>(pt.personel ? { tarafId: pt.personel.ad } : {});
 
-  const kapat = useCallback(() => git(pt.geri ?? '/personel-izin'), [git, pt.geri]);
+  // Kaydet / Kapat sonrası sekme kapanır (useKartKapat - genel kural 03.11.2026).
+  const kapat = useKartKapat('/personel-izin', pt.geri);
   const yaz = <K extends keyof Deger>(k: K, v: Deger[K]) => setD(o => ({ ...o, [k]: v }));
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.izin', kayitId ? 'degistir' : 'ekle');
@@ -272,7 +275,7 @@ function IzinTalepKartiIc({ param }: { param: string | undefined }) {
 
   const alt = (
     <>
-      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { await kaydet() })()}>💾 {c('Kaydet')}</button>}
+      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { if (await kaydet()) kapat() })()}>💾 {c('Kaydet')}</button>}
       {yazar && !kilitli && <button type="button" className="d" disabled={mesgul} onClick={() => void gonder()}>📨 {c('Onaya gönder')}</button>}
       {kayitId && <button type="button" className="d" onClick={yazdir}>🖨 {c('İzin formu')}</button>}
       {kayitId && yazar && <button type="button" className="d" onClick={kopyala}>⧉ {c('Kopyala')}</button>}

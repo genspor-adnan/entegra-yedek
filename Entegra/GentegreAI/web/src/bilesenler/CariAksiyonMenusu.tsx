@@ -15,7 +15,7 @@ import { BelgeIkon, KopyaIkon, type BelgeIkonTuru, type BelgeYonu } from './Belg
  * menü o zaman daha geniş (4 sütun - kullanıcı 26.10.2026: "hem tedarikçi hem müş ise aksiyon menüsü daha geniş olsun").
  * Müşteri / tedarikçi listesi önizlemesinde ve cari kartında da aynı menü (Fatura / Sipariş / Tahsilat düğmeleri yerine).
  * Her seçim kendi sekmesinde, cari dolu (ve kilitli) açılır; Açılış Fişi ekranın kendi devir penceresidir.
- * İkonlar yan menüdeki ekranların ikonları (kullanıcı 26.10.2026). Belgeyi Kopyala ekstreden (onKopyala).
+ * İkonlar yan menüdeki ekranların ikonları (kullanıcı 26.10.2026). Belgeyi Kopyala ve Sil ekstreden (onKopyala, onSil).
  */
 /** `ik`: emoji yerine SVG ikon (fatura, kopya) - adın önünde. */
 type Oge = { ad: string; ik?: React.ReactNode; yol?: string; tikla?: () => void; yetkili: boolean };
@@ -28,7 +28,7 @@ const belgeYolu = (rota: string, id: number, ad: string) =>
 const kasaYolu = (tur: number, id: number, ad: string) =>
   `/kasa-islem/yeni?tur=${tur}&tarafId=${id}&tarafUnvan=${encodeURIComponent(ad)}`;
 
-export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
+export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala, onSil }: {
   id: number; ad: string;
   /** Kart sekmesi yolu (ekranSekmesi.kartaGit ya da navigate). */
   git(yol: string): void;
@@ -36,6 +36,8 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
   onAcilis?: () => void;
   /** Belgeyi Kopyala (ekstre: seçili tek belge) - verilmezse menüde yok. */
   onKopyala?: () => void;
+  /** Sil (ekstre: seçili belge / tahsilat / ödeme) - verilmezse menüde yok. */
+  onSil?: () => void;
 }) {
   const { yetki } = useOturum();
   const [acik, setAcik] = useState(false);
@@ -102,6 +104,7 @@ export function CariAksiyonMenusu({ id, ad, git, onAcilis, onKopyala }: {
     ...(onAcilis ? [{ ad: `↪️ ${c('Açılış Fişi / Devir')}`, tikla: onAcilis, yetkili: yetki('finans.devir', 'gor') }] : []),
     { ad: `🔁 ${c('Cariler Arası Transfer')}`, yol: kasaYolu(49, id, ad), yetkili: kasa },
     ...(onKopyala ? [{ ad: c('Belgeyi Kopyala'), ik: <KopyaIkon />, tikla: onKopyala, yetkili: belge }] : []),
+    ...(onSil ? [{ ad: `🗑️ ${c('Sil')}`, tikla: onSil, yetkili: yetki('belge', 'sil') || yetki('kasa_islem', 'sil') }] : []),
   ]]);
   const gorunen = gruplar.map(([b, o]) => [b, o.filter(x => x.yetkili)] as [string, Oge[]]).filter(([, o]) => o.length);
   if (!gorunen.length) return null;

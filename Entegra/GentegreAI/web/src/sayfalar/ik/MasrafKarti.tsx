@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKartKapat } from '../../bilesenler/useKartKapat';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { devamDurumu, personelTalepDurumu } from '../../bilesenler/taleplerim/personelTalebi';
 import { api } from '../../api/istemci';
@@ -11,7 +12,8 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { useTaleplerim } from '../../bilesenler/taleplerim/taleplerimBaglami';
 import { talepleriYenile } from '../../bilesenler/taleplerim/useTaleplerimOzeti';
 import { c } from '../../dil/ceviri';
-import { h } from '../../bilesenler/htmlGuvenlik';
+import { h } from '../../bilesenler/htmlGuvenlik';
+
 import { YAZDIR_ETIKETI } from '../../bilesenler/yazdirBetigi';
 
 /**
@@ -76,7 +78,8 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
   const yeniFisRef = useRef<HTMLInputElement>(null);
   const fisHedef = useRef<string | null>(null);
 
-  const kapat = useCallback(() => git(pt.geri ?? '/personel-masraf'), [git, pt.geri]);
+  // Kaydet / Kapat sonrası sekme kapanır (useKartKapat - genel kural 03.11.2026).
+  const kapat = useKartKapat('/personel-masraf', pt.geri);
   const kilitli = ro.durum !== 0;
   const yazar = yetki('ik.masraf', kayitId ? 'degistir' : 'ekle');
   const yazB = <K extends keyof typeof bas>(k: K, v: (typeof bas)[K]) => setBas(o => ({ ...o, [k]: v }));
@@ -271,7 +274,7 @@ function MasrafKartiIc({ param }: { param: string | undefined }) {
 
   const alt = (
     <>
-      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { await kaydet() })()}>💾 {c('Kaydet')}</button>}
+      {yazar && !kilitli && <button type="button" className="d bir" disabled={mesgul} onClick={() => void calis(async () => { if (await kaydet()) kapat() })()}>💾 {c('Kaydet')}</button>}
       {yazar && !kilitli && <button type="button" className="d" disabled={mesgul} onClick={() => void gonder()}>📨 {c('Onaya gönder')}</button>}
       {kayitId && <button type="button" className="d" onClick={yazdir}>🖨 {c('Masraf formu')}</button>}
       {kayitId && yazar && <button type="button" className="d" onClick={kopyala}>⧉ {c('Yeni beyan')}</button>}
