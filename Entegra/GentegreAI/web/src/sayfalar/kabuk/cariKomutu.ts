@@ -75,20 +75,50 @@ const ISLEM_SOZ: [string, CariIslem][] = [
 ];
 const FIIL = new Set(['al', 'kes', 'ac', 'olus', 'olustur', 'yeni', 'ver', 'gir', 'yap']);
 
+/**
+ * TAHSİLAT / ÖDEME ARACI (kullanıcı 03.11.2026: "tahsilat var sadece menüde o da nakit.. havale/çek vb de gelmiş olabilir..
+ * tahsilat a subquery yapsan iyi olur"). Kasa işlemi türleri CariAksiyonMenusu ile aynı: tahsilat 21-25 + plan 61,
+ * ödeme 31-35 + plan 71. "tah çek", "öde havale", "tahsilat pos" doğrudan o aracı açar; araçsız "tahsilat" alt listeyi verir.
+ */
+export type KasaArac = 'nakit' | 'havale' | 'kart' | 'cek' | 'senet' | 'plan';
+export const KASA_ARACLARI: Record<'tahsilat' | 'odeme', { arac: KasaArac; ad: string; tur: number; ikon: string }[]> = {
+  tahsilat: [
+    { arac: 'nakit', ad: 'Nakit', tur: 21, ikon: '💵' }, { arac: 'havale', ad: 'Havale / EFT', tur: 22, ikon: '🏦' },
+    { arac: 'kart', ad: 'POS', tur: 25, ikon: '💳' }, { arac: 'cek', ad: 'Çek', tur: 23, ikon: '📃' },
+    { arac: 'senet', ad: 'Senet', tur: 24, ikon: '📜' }, { arac: 'plan', ad: 'Tahsilat Planı', tur: 61, ikon: '🗓️' },
+  ],
+  odeme: [
+    { arac: 'nakit', ad: 'Nakit', tur: 31, ikon: '💸' }, { arac: 'havale', ad: 'Havale / EFT', tur: 32, ikon: '🏦' },
+    { arac: 'kart', ad: 'Kredi Kartı', tur: 35, ikon: '💳' }, { arac: 'cek', ad: 'Çek', tur: 33, ikon: '📃' },
+    { arac: 'senet', ad: 'Senet', tur: 34, ikon: '📜' }, { arac: 'plan', ad: 'Ödeme Planı', tur: 71, ikon: '🗓️' },
+  ],
+};
+const ARAC_SOZ: [string, KasaArac][] = [
+  ['nakit', 'nakit'], ['nak', 'nakit'], ['havale', 'havale'], ['hav', 'havale'], ['eft', 'havale'], ['banka', 'havale'],
+  ['pos', 'kart'], ['kredi', 'kart'], ['kk', 'kart'], ['cek', 'cek'], ['senet', 'senet'], ['sen', 'senet'], ['plan', 'plan'],
+  ['plani', 'plan'], ['taksit', 'plan'],
+];
+
 /** "sip al" -> siparis; "sat fat kes" -> fatura/satis; "" -> null (hepsi listelenir). Tanınmayan sözcük -> 'yok'. */
-export function cariIslemCoz(metin: string): { islem: CariIslem | null; yon: CariYon | null } | 'yok' {
+export function cariIslemCoz(metin: string): { islem: CariIslem | null; yon: CariYon | null; arac?: KasaArac } | 'yok' {
   const kel = paletSadelestir(metin).split(/\s+/).map(k => k.replace(/[^a-z]/g, '')).filter(Boolean);
-  let islem: CariIslem | null = null; let yon: CariYon | null = null;
+  let islem: CariIslem | null = null; let yon: CariYon | null = null; let arac: KasaArac | undefined;
+  const kasaMi = () => islem === 'tahsilat' || islem === 'odeme';
   for (const k of kel) {
     if (k === 'sat' || k === 'satis' || k === 'satiş') { yon = 'satis'; continue }
     if (k === 'alis' || k === 'alim') { yon = 'alis'; continue }
     if (FIIL.has(k)) continue;
+    // Araç sözcüğü (çek, havale, pos…) - "kart" tahsilat / ödemeden SONRA araçtır (POS / kredi kartı), yoksa kart işlemi.
+    const ar = ARAC_SOZ.find(([s]) => k === s) ?? (k === 'kart' || k === 'karti' ? (kasaMi() ? ['kart', 'kart' as KasaArac] : undefined) : undefined);
+    if (ar) { arac = ar[1]; continue }
     // Önek: "siparisi", "faturası", "irsaliyesi", "kartı" - ilk 3 harf yeter.
     const bul = k.length >= 3 ? ISLEM_SOZ.find(([s]) => k.startsWith(s) || s.startsWith(k)) : undefined;
     if (bul) { if (!islem || islem === 'kart') islem = bul[1]; continue }
     return 'yok';
   }
-  return { islem, yon };
+  // Araç tek başına ("çek", "havale"): carinin rolüne göre tahsilat / ödeme paletin işi - burada tahsilat varsayılmaz.
+  if (arac && !kasaMi()) return islem ? 'yok' : { islem: null, yon, arac };
+  return arac ? { islem, yon, arac } : { islem, yon };
 }
 
 export const ISLEM_SIRASI: CariIslem[] = ['siparis', 'fatura', 'irsaliye', 'tahsilat', 'odeme', 'kart', 'ekstre'];
@@ -103,7 +133,7 @@ const BELGE_ROTA: Record<CariYon, Record<'siparis' | 'fatura' | 'irsaliye', stri
 const ISLEM_ADI: Record<CariIslem, string> = { siparis: 'siparişi', fatura: 'faturası', irsaliye: 'irsaliyesi', tahsilat: '', odeme: '', kart: '', ekstre: '' };
 
 /** İşlemin ekranı (liste rotası - menüde yoksa yetki yok) ve gidilecek yol. */
-export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: CariYon | null):
+export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: CariYon | null, arac?: KasaArac):
   { ad: string; liste: string; yol: string; ikon: string } {
   const yon: CariYon = yonIstenen ?? (c.musteri || !c.tedarikci ? 'satis' : 'alis');
   if (islem === 'kart') {
@@ -112,11 +142,12 @@ export function cariIslemHedefi(c: SeciliCari, islem: CariIslem, yonIstenen: Car
   }
   if (islem === 'ekstre')
     return { ad: 'Cari ekstresi', liste: '/ekstre', yol: `/ekstre?tur=cari&id=${c.id}`, ikon: '📄' };
-  // Kasa işlemi kartı cari dolu açılır (CariAksiyonMenusu ile aynı yol); araç (nakit / banka / POS / çek) kartta değiştirilir.
-  if (islem === 'tahsilat' || islem === 'odeme')
-    return { ad: islem === 'tahsilat' ? 'Tahsilat al' : 'Ödeme yap', liste: '/kasa-islem',
-             yol: `/kasa-islem/yeni?tur=${islem === 'tahsilat' ? 21 : 31}&tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,
-             ikon: islem === 'tahsilat' ? '💵' : '💸' };
+  // Kasa işlemi kartı cari dolu açılır (CariAksiyonMenusu ile aynı yol); araç verilmezse nakit.
+  if (islem === 'tahsilat' || islem === 'odeme') {
+    const a = KASA_ARACLARI[islem].find(x => x.arac === (arac ?? 'nakit'))!;
+    return { ad: `${islem === 'tahsilat' ? 'Tahsilat al' : 'Ödeme yap'} — ${a.ad}`, liste: '/kasa-islem',
+             yol: `/kasa-islem/yeni?tur=${a.tur}&tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`, ikon: a.ikon };
+  }
   const liste = BELGE_ROTA[yon][islem];
   return { ad: `Yeni ${yon === 'satis' ? 'satış' : 'alış'} ${ISLEM_ADI[islem]}`, liste,
            yol: `${liste}/yeni?${liste === '/belge' ? 'tur=15&' : ''}tarafId=${c.id}&tarafUnvan=${encodeURIComponent(c.ad)}`,

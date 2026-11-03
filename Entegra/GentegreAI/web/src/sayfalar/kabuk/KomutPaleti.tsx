@@ -7,8 +7,8 @@ import { useSesliGiris, PALET_SESLI_OLAYI } from '../../bilesenler/sesliGiris';
 import { MikrofonIkon } from '../../bilesenler/MikrofonIkon';
 import { telefonBicimle } from '../../bilesenler/bicim';
 import { mesaj } from '../../bilesenler/mesaj';
-import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, rolAdi, rolIslemleri,
-         type CariRol, type SeciliCari } from './cariKomutu';
+import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariKartYolu, cariNiyetCoz, KASA_ARACLARI, rolAdi, rolIslemleri,
+         type CariIslem, type CariRol, type SeciliCari } from './cariKomutu';
 import { paletSadelestir } from './paletMetin';
 import type { GundemKarti, KayitOnerileri, KayitTuru } from '../../api/uclar/gundem';
 
@@ -204,7 +204,9 @@ type Oge = { bolum: Bolum } & (
       /** VKN + rol (cariKomutu): Enter entegratörden bilgi alıp kartı OLUŞTURUR (kayıtlıysa uyarıp açar). */
       cariOlustur?: { vkn: string; rol: CariRol };
       /** Ad araması sonucu cari: Enter SEÇER (gezinmez) - ardından komut yazılır (sipariş / fatura / irsaliye…). */
-      cariSec?: SeciliCari }
+      cariSec?: SeciliCari;
+      /** ALT LİSTE: Enter gezinmez, kutuya bu komutu yazar ("Tahsilat al ▸" -> "tahsilat " -> nakit / havale / çek…). */
+      altKomut?: string }
   | { tur: 'komut'; anahtar: string; ad: string; grup: string; kod: string;
       aktif: boolean; kisayol?: string; pasifSebep?: string });
 
@@ -416,7 +418,10 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
   const [cariAdOgeleri, setCariAdOgeleri] = useState<Oge[]>([]);
   useEffect(() => {
     const q = arama.trim();
-    if (!acik || seciliCari || q.length < 3 || /\d/.test(q) || cumleCoz(q) || gundemNiyetiMi(q)) { setCariAdOgeleri([]); return }
+    // RAKAMLI AD DA ARANIR (kullanıcı 03.11.2026: "A2 DENT yazdım hiç birşey gelmedi"): yalnız harfsiz metin (numara
+    //   araması) ve 10-11 haneli VKN / TCKN içeren metin (VKN niyeti) atlanır.
+    if (!acik || seciliCari || q.length < 3 || !/\p{L}/u.test(q) || /(?:^|\D)\d{10,11}(?!\d)/.test(q) || cumleCoz(q)
+        || gundemNiyetiMi(q)) { setCariAdOgeleri([]); return }
     let iptal = false;
     const zaman = window.setTimeout(() => {
       // AD İLE KAYIT (03.11.2026): müşteri · tedarikçi · kişi · personel · hasta - her tür kendi yetkisiyle (sunucu
@@ -511,12 +516,28 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
             grup: seciliCari.kod, yol: `${t.yol}/${seciliCari.id}`, islem: true }])];
       }
       const coz = cariIslemCoz(q);
-      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem] : rolIslemleri(seciliCari);
+      const arac = coz === 'yok' ? undefined : coz.arac;
+      // Yalnız araç yazıldıysa ("çek", "havale") işlem carinin rolünden: müşteriye tahsilat, tedarikçiye ödeme.
+      const islemler = coz === 'yok' ? [] : coz.islem ? [coz.islem]
+        : arac ? rolIslemleri(seciliCari).filter(i => i === 'tahsilat' || i === 'odeme') : rolIslemleri(seciliCari);
       const yon = coz === 'yok' ? null : coz.yon;
-      const l = islemler.map(i => cariIslemHedefi(seciliCari, i, yon)).filter(h => menude.has(h.liste));
+      const kasaIslemi = (i: CariIslem): i is 'tahsilat' | 'odeme' => i === 'tahsilat' || i === 'odeme';
+      // TAHSİLAT / ÖDEME ALT LİSTESİ: boş kutuda tek satır "Tahsilat al ▸" (Enter alt listeyi açar); komut yazılınca
+      //   araçlar (nakit / havale / POS / çek / senet / plan) ayrı satır; araç da yazıldıysa yalnız o.
+      const l = islemler.flatMap(i => {
+        if (!kasaIslemi(i)) return [{ ...cariIslemHedefi(seciliCari, i, yon), alt: undefined as string | undefined }];
+        if (!arac && coz !== 'yok' && !coz.islem) {
+          const h = cariIslemHedefi(seciliCari, i, yon);
+          return [{ ...h, ad: i === 'tahsilat' ? 'Tahsilat al ▸' : 'Ödeme yap ▸', ikon: i === 'tahsilat' ? '💵' : '💸',
+                    alt: i === 'tahsilat' ? 'tahsilat ' : 'ödeme ' }];
+        }
+        return KASA_ARACLARI[i].filter(a => !arac || a.arac === arac)
+          .map(a => ({ ...cariIslemHedefi(seciliCari, i, yon, a.arac), alt: undefined as string | undefined }));
+      }).filter(h => menude.has(h.liste));
       return l.length
         ? [...oneriOgeleri, ...l.map<Oge>(h => ({ bolum: 'İşlemler', tur: 'ekran', anahtar: 'ci' + h.yol, ad: `${c(h.ad)} — ${seciliCari.ad}`,
-                             grup: seciliCari.kod, yol: h.yol, islem: true, ikon: h.ikon }))]
+                             grup: h.alt ? `${seciliCari.kod} · ${c('nakit, havale, POS, çek, senet, plan')}` : seciliCari.kod,
+                             yol: h.yol, islem: true, ikon: h.ikon, ...(h.alt ? { altKomut: h.alt } : {}) }))]
         : [{ bolum: 'İşlemler', tur: 'komut', anahtar: 'ci-yok', grup: '', kod: '', aktif: false,
              ad: coz === 'yok' ? c('Komut anlaşılmadı: sip al · fat kes · irs · tahsilat · ödeme · kart · ekstre') : c('Bu işleme yetkiniz yok') }];
     }
@@ -608,6 +629,10 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         if (acikId) { mesaj(c('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.')); git(`/basvuru/${acikId}`) }
         else git(o.yol);
       }, () => git(o.yol));
+      return;
+    }
+    if (o.tur === 'ekran' && o.altKomut) {
+      setArama(o.altKomut); setSecili(0); kutu.current?.focus();
       return;
     }
     if (o.tur === 'ekran' && o.cariSec) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz, rolIslemleri } from '../sayfalar/kabuk/cariKomutu';
+import { KASA_ARACLARI, cariIslemCoz, cariIslemHedefi, cariKartGovdesi, cariNiyetCoz, rolIslemleri } from '../sayfalar/kabuk/cariKomutu';
 import { cumleCoz, kimlikNiyetCoz } from '../sayfalar/kabuk/KomutPaleti';
 
 /** Ctrl+K "VKN + müşteri / tedarikçi kartı" (kullanıcı 25.10.2026). */
@@ -77,5 +77,24 @@ describe('tahsilat / ödeme komutu', () => {
     expect(cariIslemCoz('ödeme yap')).toMatchObject({ islem: 'odeme' });
     expect(cariIslemHedefi(mus, 'tahsilat', null).yol).toBe('/kasa-islem/yeni?tur=21&tarafId=7&tarafUnvan=A');
     expect(cariIslemHedefi(ted, 'odeme', null).yol).toBe('/kasa-islem/yeni?tur=31&tarafId=8&tarafUnvan=B');
+  });
+});
+
+// TAHSİLAT / ÖDEME ALT LİSTESİ (03.11.2026): araç sözcüğü (çek, havale, pos…) o kasa işlemi türünü açar.
+describe('tahsilat / ödeme aracı', () => {
+  const mus = { id: 7, ad: 'A', kod: 'K', musteri: true, tedarikci: false };
+  it('araç sözcükleri', () => {
+    expect(cariIslemCoz('tah çek')).toMatchObject({ islem: 'tahsilat', arac: 'cek' });
+    expect(cariIslemCoz('ödeme havale')).toMatchObject({ islem: 'odeme', arac: 'havale' });
+    expect(cariIslemCoz('tahsilat kart')).toMatchObject({ islem: 'tahsilat', arac: 'kart' });
+    expect(cariIslemCoz('kart')).toMatchObject({ islem: 'kart' });
+    expect(cariIslemCoz('senet')).toMatchObject({ islem: null, arac: 'senet' });
+    expect(cariIslemCoz('fat çek')).toBe('yok');
+  });
+  it('araç türü', () => {
+    expect(cariIslemHedefi(mus, 'tahsilat', null, 'cek').yol).toContain('tur=23');
+    expect(cariIslemHedefi(mus, 'tahsilat', null, 'kart').yol).toContain('tur=25');
+    expect(cariIslemHedefi(mus, 'odeme', null, 'kart').yol).toContain('tur=35');
+    expect(KASA_ARACLARI.tahsilat.map(a => a.tur)).toEqual([21, 22, 25, 23, 24, 61]);
   });
 });
