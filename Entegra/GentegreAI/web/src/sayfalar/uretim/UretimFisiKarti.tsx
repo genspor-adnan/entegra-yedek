@@ -110,6 +110,8 @@ function UretimFisiKarti({ fisId, onKapat, onStokId, onEmirId, onMiktar }: {
   const fis = kayitli?.fis ?? null;
   const durum = fis?.durum ?? 1;
   const taslak = durum === 1;
+  // 1261: Delphi'den aktarılan fiş - tek belge; Sil / ters kayıt yok, rozet gösterilir.
+  const aktarim = !!fis?.aktarimTablo;
   const salt = !taslak;                    // gerçekleşmiş fiş değişmez (ters kayıt + yeni fiş)
   const yazar = yetki('uretim.fis', fisId ? 'degistir' : 'ekle');
   const duzenlenir = yazar && !salt;
@@ -372,7 +374,7 @@ function UretimFisiKarti({ fisId, onKapat, onStokId, onEmirId, onMiktar }: {
               <button className="d yesil" disabled={mesgul} onClick={() => void kaydet(false)}>💾 {c(fisId ? 'Kaydet' : 'Taslak Kaydet')}</button>
               <button className="d bir" disabled={mesgul} onClick={() => void kaydet(true)} title={c('Sarf çıkar, mamul girer, maliyet hesaplanır')}>✔ {c('Gerçekleştir')}</button>
             </>)}
-        {fisId && durum !== 0 && yetki('uretim.fis', 'sil') && (
+        {fisId && durum !== 0 && !aktarim && yetki('uretim.fis', 'sil') && (
           taslak || !sv.denetimli
             ? <button className="d teh" disabled={mesgul} onClick={() => void sil()}
                       title={taslak ? c('Taslak silinir') : c('Kayıt silinmez: ters kayıt atılır, stok geri döner, iz kalır')}>🗑 {c('Sil')}</button>
@@ -383,6 +385,7 @@ function UretimFisiKarti({ fisId, onKapat, onStokId, onEmirId, onMiktar }: {
         {fis && (
           <span className={`rozet ${durum === 2 ? (sv.denetimli ? 'uyari' : 'ok') : durum === 3 ? 'ok' : durum === 4 || durum === 0 ? 'hata' : 'gri'}`}>
             {fisDurumAdi(durum, fis.seviye)}</span>)}
+        {aktarim && <span className="rozet gri" title={c('Delphi üretim fişinden aktarıldı: sarf ve mamul tek belgede, ters kayıt yapılamaz')}>{c('Delphi aktarımı')}</span>}
         {sv.denetimli && fisId && durum === 2 && serbestYetki && (
           <button className="d onay" onClick={() => setSerbestAcik(true)}>✔ {c('Serbest Bırak…')}</button>)}
         {ekranSekmesi ? null : <button className="d kapat-dugmesi" onClick={() => void kapatRef.current()}>✖ {c('Kapat')}</button>}

@@ -1911,6 +1911,23 @@ POST /api/kimlik/mrz-coz  {metin}        hasta Ekle ya da Değiştir
   "📷 Kimliği Okut" (`KartAracGruplari`), başvuru hasta araması (`TarafArama kimlikOkut`). Kayıtlı hasta → seçilir / açılır,
   işaretli farklar `mrzBekleyenKoy` ile karta taşınır (3 dk, tek kullanım).
 
+## 9.31 Delphi üretim fişi aktarımı (1261)
+
+Aktarım Delphi üretim fişini (FATBASLIK TUR 6: malzeme satırları eksi, mamul satırı artı, tek belge) `belge` tür 6
+"Üretim" olarak taşır; stok hareketi oradan doğru çıkar ama 1253 `uretim_fisi` listesi / reçete "Üretimler" görmezdi.
+`fn_aktarim_uretim_fisi_kur()` her tür-6 aktarım belgesine bir `uretim_fisi` başlığı + satırları kurar ve belgeyi fişe
+bağlar (`belge.kaynak_tur 61 / kaynak_id`); belge stokta olduğu gibi kalır (hareket tek hattan). Eşleme: `no` = Delphi
+FATURANO · durum 2 (belge iptal ise 0) · `seviye = 'aktarim'` (denetimli sayılmaz) · ana ürün = ilk artı satır, diğer
+artılar yan ürün · `malzeme` = Σ|sarf tutarı|, `toplam` = Delphi mamul tutarı (yeniden hesaplanmaz), `birim_maliyet` =
+tutar / miktar (Delphi BIRIMFIYAT ayrı para biriminde olabiliyor) · `sarf_belge_id = giris_belge_id` = aynı belge ·
+`agac_id` = mamulün varsayılan / tek ağacı · `aktarim_tablo = 'FATBASLIK'`, `aktarim_id` (yeni kolonlar, benzersiz).
+Mamulsüz ve taslak belge atlanır; idempotent; göç sonunda ve `fn_aktar_ek` zincirinde (`uretim_fisi`, lot defterinden
+önce) çalışır. `fn_uretim_stok_son_maliyeti` / `fn_uretim_stok_maliyeti` giriş türlerine 6 eklendi.
+
+API: aktarılan fişte `POST /fis/{id}/ters-kayit` → **422 IS_KURALI** (tek belge iki kez silinirdi; geri alma belge
+üzerinden). `GET /fis/{id}` `aktarimTablo` döner; izlenebilirlikte girdi / çıktı lotları belge satırının işaretiyle ayrılır.
+Liste kolonu `aktarim` (gizli). Web kartı "Delphi aktarımı" rozeti gösterir, Sil / Ters Kayıt düğmesini gizler.
+
 ## 9.30 Ürün ağacı (reçete) listesi ve kartı seviyeye göre (1257, 1258)
 
 Mockuplar `Ekranlar/Uretim/urun_agaci_listesi_v2.html`, `urun_agaci_karti_v2.html`. Kayıt yapısı tek; seviye (`uretim.seviye`)

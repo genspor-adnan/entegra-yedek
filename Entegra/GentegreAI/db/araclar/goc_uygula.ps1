@@ -158,7 +158,10 @@ commit;
     $Dosyalar = @([System.IO.File]::ReadAllLines($ListeDosyasi) | Where-Object { $_.Trim() -ne "" })
   }
   $Sirali = if ($Dosyalar.Count -gt 0) { $Dosyalar } else {
-    @(Get-ChildItem $Dizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3}_' } | Sort-Object Name | ForEach-Object { $_.Name })
+    # 3-4 HANELI dosyalar, SAYISAL sirayla (04.11.2026): '^\d{3}_' 1000 ve ustunu atliyordu ("0 uygulandi, 983 zaten
+    #   uygulanmis"), ad sirasi da 1000'i 999'un onune koyardi.
+    @(Get-ChildItem $Dizin -Filter "*.sql" | Where-Object { $_.Name -match '^\d{3,4}_' } |
+      Sort-Object { [int]($_.Name -replace '^(\d+)_.*', '$1') }, Name | ForEach-Object { $_.Name })
   }
   $Bilgi = @{}
   foreach ($ad in $Sirali) {

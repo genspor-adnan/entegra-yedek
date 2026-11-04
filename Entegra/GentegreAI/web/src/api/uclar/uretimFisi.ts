@@ -56,6 +56,8 @@ export interface FisBasligi {
   gerceklesmeAn: string | null; gerceklestirenAdi: string; serbestAn: string | null; serbestAdi: string; serbestGerekce: string;
   tersAn: string | null; tersAdi: string; tersNeden: string;
   aciklama: string; subeId: number; eklemeTarihi: string; ekleyenAdi: string; surum: number; girisDepoKalan: number;
+  /** 1261: Delphi'den aktarılan fiş ('FATBASLIK') - sarf ve mamul aynı belgede, ters kayıt yok. Web fişinde ''. */
+  aktarimTablo: string;
 }
 
 export interface FisBelgesi { id: number; tur: number; turAdi: string; belgeTarihi: string; belgeNo: string | null; tutar: number; depoAdi: string }

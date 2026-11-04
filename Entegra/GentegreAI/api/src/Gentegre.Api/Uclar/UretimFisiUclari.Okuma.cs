@@ -171,12 +171,17 @@ public static partial class UretimFisiUclari
 
     private sealed record Baslik(int Id, string No, short Durum, string Seviye, int StokId, int? EmirId, decimal Miktar, short Birim,
                                  int? SarfDepoId, int? GirisDepoId, int? SarfBelgeId, int? GirisBelgeId, int? FireBelgeId,
-                                 short MaliyetYontemi, bool OtomatikHesap, string PartiNo, DateTime? Bas, int SubeId, long Surum, string Aciklama);
+                                 short MaliyetYontemi, bool OtomatikHesap, string PartiNo, DateTime? Bas, int SubeId, long Surum, string Aciklama,
+                                 string AktarimTablo)
+    {
+        /// <summary>Delphi'den aktarılan fiş (1261): sarf ve giriş AYNI tür-6 belge; ters kayıt yok, lotlar satır işaretiyle ayrılır.</summary>
+        public bool Aktarim => AktarimTablo.Length > 0;
+    }
 
     private static async Task<Baslik> BaslikOkuAsync(NpgsqlConnection b, NpgsqlTransaction? t, int id, CancellationToken iptal, bool kilitle = false)
         => await b.TekAsync("""
             select id, no, durum, seviye, stok_id, emir_id, miktar, birim, sarf_depo_id, giris_depo_id, sarf_belge_id, giris_belge_id,
-                   fire_belge_id, maliyet_yontemi, otomatik_hesap, parti_no, bas, sube_id, xmin::text::bigint, aciklama
+                   fire_belge_id, maliyet_yontemi, otomatik_hesap, parti_no, bas, sube_id, xmin::text::bigint, aciklama, aktarim_tablo
               from public.uretim_fisi where id = @p0
             """ + (kilitle ? " for update" : ""), t, [id],
             o => new Baslik(o.GetInt32(0), o.GetString(1), o.GetInt16(2), o.GetString(3), o.GetInt32(4),
@@ -184,7 +189,7 @@ public static partial class UretimFisiUclari
                             o.IsDBNull(8) ? null : o.GetInt32(8), o.IsDBNull(9) ? null : o.GetInt32(9),
                             o.IsDBNull(10) ? null : o.GetInt32(10), o.IsDBNull(11) ? null : o.GetInt32(11),
                             o.IsDBNull(12) ? null : o.GetInt32(12), o.GetInt16(13), o.GetInt16(14) == 1, o.GetString(15),
-                            o.IsDBNull(16) ? null : o.GetDateTime(16), o.GetInt32(17), o.GetInt64(18), o.GetString(19)), iptal)
+                            o.IsDBNull(16) ? null : o.GetDateTime(16), o.GetInt32(17), o.GetInt64(18), o.GetString(19), o.GetString(20)), iptal)
            ?? throw GentegreHatasi.Bulunamadi("Üretim fişi bulunamadı.");
 
     private sealed record FisTam(IDictionary<string, object?> Fis, List<IDictionary<string, object?>> Satirlar,
@@ -214,6 +219,7 @@ public static partial class UretimFisiUclari
                    f.serbest_an as "serbestAn", coalesce(sk.ad, '') as "serbestAdi", f.serbest_gerekce as "serbestGerekce",
                    f.ters_an as "tersAn", coalesce(tk.ad, '') as "tersAdi", f.ters_neden as "tersNeden",
                    f.aciklama, f.sube_id as "subeId", f.ekleme_tarihi as "eklemeTarihi", coalesce(ek.ad, '') as "ekleyenAdi",
+                   f.aktarim_tablo as "aktarimTablo",
                    f.xmin::text::bigint as surum,
                    coalesce((select d.kalan from public.stok_durum d where d.stok_id = f.stok_id and d.depo_id = f.giris_depo_id), 0) as "girisDepoKalan"
               from public.uretim_fisi f

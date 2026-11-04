@@ -7,6 +7,20 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 04.11.2026 — Delphi üretim fişleri `uretim_fisi`'ne (1261); yerel ZONE profili
+
+Kullanıcı (yerel ZONE kopyası): "zone sql den üretim fişleri aktarıldı mı" → aktarılmıştı ama eski biçimde: Delphi
+FATBASLIK TUR 6 → `belge` tür 6 "Üretim" (ZONE 6.036 belge), stok hareketi doğru, yeni Üretim Fişi Listesi boş. Seçenekler
+(salt okunur eski liste / göçle dönüştürme / hareket görünümü düzeltmesi) sunuldu; karar "2 yap" → `1261_aktarim_uretim_fisi.sql`:
+`fn_aktarim_uretim_fisi_kur()` tür-6 aktarım belgesinden fiş başlığı + satır kurar, belgeyi fişe bağlar (kaynak_tur 61), eski belge
+stokta kalır; `fn_aktar_ek` zincirine `uretim_fisi` adımı; mamul maliyet fonksiyonlarına tür 6. Birim maliyet tutar / miktar (Delphi
+BIRIMFIYAT 1124 TL iken TUTAR 820 EUR). ZONE: 6.033 fiş (5.989'u reçeteye bağlı), 2 mamulsüz + 1 taslak atlandı. API: aktarılan fişe
+ters kayıt 422; kart "Delphi aktarımı" rozeti, Sil gizli. Test `AktarimUretimFisiTestleri` (paket → fiş, idempotent, maliyet).
+
+Aynı gün: yerel ZONE profili (`%LOCALAPPDATA%\GentegreYerel\zone\baslat.ps1`, web 5178 / api 5189 / docker DB ZONE) açıldı; kopya
+1192'den 1260'a çıkarılırken `db/araclar/goc_uygula.ps1` varsayılan listesinin yalnız 3 haneli dosyaları aldığı (1000+ görünmez,
+"0 uygulandı") görüldü ve düzeltildi (`^\d{3,4}_` + sayısal sıra; kur.ps1 ve sunucu goc_uygula.sh zaten doğruydu).
+
 ## 04.11.2026 — Ürün Ağacı (Reçete) listesi ve kartı seviyeye göre (1257, 1258)
 
 Kullanıcı: "ürün ağacı listesini mockup'a göre düzenle (sayı kutularını, butonları falan ekle)" · "ürün ağacı kartını mockup'a göre yap". Mockuplar `urun_agaci_listesi_v2.html`, `urun_agaci_karti_v2.html`.

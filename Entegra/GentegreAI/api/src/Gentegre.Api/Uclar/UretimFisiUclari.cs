@@ -315,6 +315,10 @@ public static partial class UretimFisiUclari
             var bas = await BaslikOkuAsync(b, null, id, iptal);
             if (bas.Durum is Taslak or TersKayit)
                 throw GentegreHatasi.IsKurali(bas.Durum == Taslak ? "Taslak fişte ters kayıt yok - fişi silin." : "Bu fiş zaten ters kayıtla kapatılmış.");
+            // 1261: Delphi'den aktarılan fiş TEK belgedir (sarf ve mamul aynı tür-6 belgede); ters kayıt o belgeyi iki kez silmeye
+            //   kalkardı. Geri alma belge üzerinden yapılır.
+            if (bas.Aktarim)
+                throw GentegreHatasi.IsKurali("Delphi'den aktarılan üretim fişi tek belgedir; ters kayıt yapılamaz. Gerekirse belgeyi stok hareketlerinden silin.");
             var (seviye, _) = await SeviyeOkuAsync(b, null, iptal);
             if (seviye == SeviyeDenetimli && string.IsNullOrWhiteSpace(istek?.Neden))
                 throw GentegreHatasi.Dogrulama("Ters kayıt gerekçesi zorunlu.", new AlanHatasi("neden", "Gerekçe yazılmalı."));
@@ -522,11 +526,14 @@ public static partial class UretimFisiUclari
                   join public.stok st on st.id = i.stok_id
                   join public.stok_seri_lot l on l.id = i.seri_lot_id
                  where i.belge_id = @p0
+                   and (@p1 = 0 or sign(coalesce((select bs.miktar from public.belge_satir bs where bs.id = i.belge_satir_id), 0)) = @p1)
                  order by st.kod, l.lot_no
                 """;
-            var girdiler = bas.SarfBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.SarfBelgeId], LotSatiri, iptal) : [];
-            var fireler = bas.FireBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.FireBelgeId], LotSatiri, iptal) : [];
-            var ciktilar = bas.GirisBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.GirisBelgeId], LotSatiri, iptal) : [];
+            // Aktarılan fişte (1261) sarf ve çıktı AYNI belgede: lot satırları belge satırının işaretiyle ayrılır (eksi sarf, artı çıktı).
+            var (sarfIsaret, girisIsaret) = bas.Aktarim ? (-1, 1) : (0, 0);
+            var girdiler = bas.SarfBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.SarfBelgeId, sarfIsaret], LotSatiri, iptal) : [];
+            var fireler = bas.FireBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.FireBelgeId, 0], LotSatiri, iptal) : [];
+            var ciktilar = bas.GirisBelgeId is > 0 ? await b.ListeAsync(lotSql, null, [bas.GirisBelgeId, girisIsaret], LotSatiri, iptal) : [];
             // İLERİ İZLEME: çıktı lotunun sonraki çıkış hareketleri (satış irsaliyesi / faturası, sarf).
             var ileri = bas.GirisBelgeId is > 0 ? await b.ListeAsync("""
                 select b.id, b.tur, t.ad, b.belge_tarihi, coalesce(b.belge_no, ''), coalesce(b.taraf_unvan, ''), i.adet, l.lot_no, l.seri_no

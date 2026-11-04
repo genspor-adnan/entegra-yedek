@@ -269,6 +269,8 @@ public static partial class KaynakKatalogu
                 """,                      "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 120,
                                          Filtrelenebilir: false),
             new("durum",    "f.durum",   "kod",   "Durum Kodu", Varsayilan: false),
+            // 1261: Delphi'den aktarılan fiş (FATBASLIK) - ters kayıt yok, kart "Delphi aktarımı" rozeti.
+            new("aktarim",  "f.aktarim_tablo", "metin", "Kaynak", Hizalama: "orta", Genislik: 90, Varsayilan: false),
             new("aciklama", "f.aciklama", "metin", "Açıklama", Genislik: 220, Varsayilan: false),
             new("eklemeTarihi", "f.ekleme_tarihi", "tarih", "Oluşturma", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm",
                                          Genislik: 130, Varsayilan: false),
