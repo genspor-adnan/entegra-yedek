@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * ALERJİ KARTI — mockup `Ekranlar/Muayene/alerji_karti.html`.
@@ -28,8 +29,6 @@ const KAYNAKLAR = [{ kod: 1, ad: 'Hasta beyanı' }, { kod: 2, ad: 'Hekim' }, { k
 /** Hızlı reaksiyon seçimi - reaksiyon metnine eklenir / çıkarılır. */
 const HIZLI_REAKSIYON = ['Döküntü', 'Ürtiker', 'Anjiyoödem', 'Bronkospazm', 'Bulantı / kusma', 'Hipotansiyon'];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 
 /** Reaksiyon metnini virgüllü parçalara böler (hızlı çipin açık/kapalı hâli). */
 const parcalar = (s: string) => s.split(',').map(x => x.trim()).filter(Boolean);
@@ -81,11 +80,11 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
         if (iptal) return;
         const k = y.kart;
         const v: Deger = {
-          hastaId: sayi(k.hastaId), tur: sayi(k.tur) || 1, etken: metin(k.etken),
-          etkenMadde: metin(k.etkenMadde), reaksiyon: metin(k.reaksiyon),
-          siddet: sayi(k.siddet) || 0, kaynak: sayi(k.kaynak) || 1,
-          dogrulandi: sayi(k.dogrulandi), aktif: sayi(k.aktif ?? 1),
-          kayitMuayeneId: k.kayitMuayeneId == null ? null : sayi(k.kayitMuayeneId),
+          hastaId: sayiya(k.hastaId), tur: sayiya(k.tur) || 1, etken: metne(k.etken),
+          etkenMadde: metne(k.etkenMadde), reaksiyon: metne(k.reaksiyon),
+          siddet: sayiya(k.siddet) || 0, kaynak: sayiya(k.kaynak) || 1,
+          dogrulandi: sayiya(k.dogrulandi), aktif: sayiya(k.aktif ?? 1),
+          kayitMuayeneId: k.kayitMuayeneId == null ? null : sayiya(k.kayitMuayeneId),
         };
         setD(v); setIlk(v); setSurum(k.surum);
         setHastaAdi(y.kodAd?.hastaId?.[String(k.hastaId ?? '')] ?? '');
@@ -103,13 +102,13 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
       try {
         const y = await api.liste('hasta-alerji', { sayfa: 1, boyut: 20,
           filtre: { alan: 'hastaId', op: 'esit', deger: d.hastaId } });
-        if (!iptal) setDigerleri(y.satirlar.filter(x => sayi(x.id) !== kayitId));
+        if (!iptal) setDigerleri(y.satirlar.filter(x => sayiya(x.id) !== kayitId));
       } catch { /* panel zorunlu değil */ }
       if (!hastaAdi) {
         try {
           const h = await api.liste('hasta', { sayfa: 1, boyut: 1,
             filtre: { alan: 'id', op: 'esit', deger: d.hastaId } });
-          if (!iptal) setHastaAdi(metin(h.satirlar[0]?.unvan ?? h.satirlar[0]?.ad));
+          if (!iptal) setHastaAdi(metne(h.satirlar[0]?.unvan ?? h.satirlar[0]?.ad));
         } catch { /* ad zorunlu değil */ }
       }
     })();
@@ -150,15 +149,15 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
   }, [d.etkenMadde]);
 
   const oneriSec = (r: ListeSatiri) => {
-    const madde = metin(r.etkenMadde);
+    const madde = metne(r.etkenMadde);
     // MADDE İLE ARANDIYSA ETKEN = MADDE (kullanıcı: "penisilin" yazıp DEVAPEN'i
     //   seçti, Etken'e DEVAPEN geldi). Alerji maddeye karşıdır; marka yalnız
     //   kullanıcı MARKA ADIYLA aradıysa yazılır. Etken madde her durumda dolar.
     const a = aramaMetni.trim().toLocaleLowerCase('tr');
-    const markaIleArandi = metin(r.ad).toLocaleLowerCase('tr').includes(a);
-    const etken = !markaIleArandi && madde ? madde : metin(r.ad);
+    const markaIleArandi = metne(r.ad).toLocaleLowerCase('tr').includes(a);
+    const etken = !markaIleArandi && madde ? madde : metne(r.ad);
     setD(o => ({ ...o, etken, etkenMadde: madde || o.etkenMadde }));
-    setAtc(metin(r.atcKod));
+    setAtc(metne(r.atcKod));
     setAramaMetni('');
     setOneriler([]);
   };
@@ -220,9 +219,9 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
             )}
             {d.kayitMuayeneId ? <span className="sonuk">{c('Muayene')} <b>#{d.kayitMuayeneId}</b>{kayitId === null ? ` ${c('içinde giriliyor')}` : ''}</span> : null}
             <span className="rk-bosluk" />
-            {digerleri.filter(x => sayi(x.aktif ?? 1) === 1).slice(0, 3).map((x, i) => (
-              <span key={i} className={`rozet ${sayi(x.siddet) >= 3 ? 'hata' : 'uyari'}`}>
-                {c('Mevcut')}: {metin(x.etken) || metin(x.etkenMadde)}
+            {digerleri.filter(x => sayiya(x.aktif ?? 1) === 1).slice(0, 3).map((x, i) => (
+              <span key={i} className={`rozet ${sayiya(x.siddet) >= 3 ? 'hata' : 'uyari'}`}>
+                {c('Mevcut')}: {metne(x.etken) || metne(x.etkenMadde)}
               </span>
             ))}
             {d.aktif === 0 && <span className="rozet gri">{c('Pasif')}</span>}
@@ -268,8 +267,8 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
                     <div className="ak-oneri" role="listbox">
                       {oneriler.map((r, i) => (
                         <button key={i} type="button" role="option" onClick={() => oneriSec(r)}>
-                          <b>{metin(r.ad)}</b>
-                          <span className="sonuk">{metin(r.etkenMadde)}{metin(r.atcKod) ? ` · ${metin(r.atcKod)}` : ''}</span>
+                          <b>{metne(r.ad)}</b>
+                          <span className="sonuk">{metne(r.etkenMadde)}{metne(r.atcKod) ? ` · ${metne(r.atcKod)}` : ''}</span>
                         </button>
                       ))}
                     </div>
@@ -365,7 +364,7 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
               <div className="rk-blk">
                 <h6>{c('Aynı etkeni taşıyan ilaçlar')}</h6>
                 <ul className="ak-liste">
-                  {ayniEtken.satirlar.map((r, i) => <li key={i}>{metin(r.ad)}</li>)}
+                  {ayniEtken.satirlar.map((r, i) => <li key={i}>{metne(r.ad)}</li>)}
                   {ayniEtken.toplam > ayniEtken.satirlar.length && (
                     <li className="sonuk">+ {ayniEtken.toplam - ayniEtken.satirlar.length} {c('ilaç daha')}</li>
                   )}
@@ -379,14 +378,14 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
                 : (
                   <ul className="ak-liste">
                     {digerleri.map((x, i) => (
-                      <li key={i} className={sayi(x.aktif ?? 1) === 1 ? '' : 'sonuk'}>
-                        {sayi(x.siddet) > 0 && (
-                          <span className={`rozet ${sayi(x.siddet) >= 3 ? 'hata' : sayi(x.siddet) === 2 ? 'uyari' : 'olumlu'}`}>
-                            {siddetAdi(sayi(x.siddet))}
+                      <li key={i} className={sayiya(x.aktif ?? 1) === 1 ? '' : 'sonuk'}>
+                        {sayiya(x.siddet) > 0 && (
+                          <span className={`rozet ${sayiya(x.siddet) >= 3 ? 'hata' : sayiya(x.siddet) === 2 ? 'uyari' : 'olumlu'}`}>
+                            {siddetAdi(sayiya(x.siddet))}
                           </span>
                         )}{' '}
-                        {metin(x.etken) || metin(x.etkenMadde)}
-                        {sayi(x.aktif ?? 1) === 1 ? '' : ` · ${c('pasif')}`}
+                        {metne(x.etken) || metne(x.etkenMadde)}
+                        {sayiya(x.aktif ?? 1) === 1 ? '' : ` · ${c('pasif')}`}
                       </li>
                     ))}
                   </ul>
@@ -402,8 +401,8 @@ export function AlerjiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, muay
           onKapat={() => setHastaSec(false)}
           onSec={r => {
             setHastaSec(false);
-            yaz('hastaId', sayi(r.id));
-            setHastaAdi(metin(r.unvan));
+            yaz('hastaId', sayiya(r.id));
+            setHastaAdi(metne(r.unvan));
           }} />
       )}
     </>

@@ -1,6 +1,6 @@
 import { useRef, type MouseEvent } from 'react';
 import type { AlacakYaslandirma } from '../../api/uclar/alacakYaslandirma';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { KartSimgesi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -9,7 +9,6 @@ import { DILIM_RENK, dilimYuzdeleri, yasRozeti } from './yaslandirmaOrtak';
 /** Alacak yaşlandırmanın sekme tabloları. Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 /** Tık tek satır, Ctrl / Shift çoklu (listeSecimi); kutu da aynı kuralla. */
 function useSecim(sira: number[], secili: number[], setSecili: (s: number[]) => void) {

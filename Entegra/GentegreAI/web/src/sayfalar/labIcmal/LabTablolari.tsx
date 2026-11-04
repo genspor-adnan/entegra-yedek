@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { LabIcmali } from '../../api/uclar/labIcmal';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 import { gun, labMarjRozeti, sure, yuzde } from './labIcmalOrtak';
@@ -8,7 +8,6 @@ import { gun, labMarjRozeti, sure, yuzde } from './labIcmalOrtak';
 /** Laboratuvar icmalinin sekme tabloları. Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 function Cubuk({ oran }: { oran: number }) {
   return <span className="lb-bar"><span style={{ width: `${Math.max(0, Math.min(100, oran))}%` }} /></span>;

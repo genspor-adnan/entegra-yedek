@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { sayiya } from './bicim';
 
 /**
  * MUAYENE UYARI BANDI (461, yeri kullanıcı isteğiyle değişti) — mockup
@@ -17,7 +18,6 @@ import { api } from '../api/istemci';
 
 type Satir = Record<string, unknown>;
 
-const sayi = (v: unknown) => Number(v ?? 0);
 
 /** "12 dk" · "1 sa 05 dk" - süre boşsa null. */
 function sure(baslangic: unknown, bitis: unknown): string | null {
@@ -49,11 +49,11 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
 
   if (!satir) return null;
 
-  const tani = sayi(satir.taniSayisi);
+  const tani = sayiya(satir.taniSayisi);
   const anaTani = String(satir.anaTani ?? '').trim();
-  const bekleyen = sayi(satir.bekleyenIstem);
+  const bekleyen = sayiya(satir.bekleyenIstem);
   const gecen = sure(satir.baslangic, satir.tamamlanma);
-  const tamamlandi = sayi(satir.durum) === 2;
+  const tamamlandi = sayiya(satir.durum) === 2;
   // `uyari` SUNUCUDA hesaplanir (panik sonuc / alerji / tanisiz / sonuc geldi)
   //   ve listede de ayni kolon gosterilir - iki yerde iki kural olmasin.
   // BANT UYARISI ALERJISIZ (kullanici: alerji bilgisi ustteki seritte zaten var).
@@ -61,8 +61,8 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
   // OZET ROZETLERI (kullanici: ozet sekmesindeki vital/ana tani/recete/karar
   //   kutulari bu banda rozet oldu). Metinler sunucudan hazir gelir.
   const vital = String(satir.sonVital ?? '').trim();
-  const ilac = sayi(satir.receteIlac);
-  const imzasiz = sayi(satir.receteImzasiz) > 0;
+  const ilac = sayiya(satir.receteIlac);
+  const imzasiz = sayiya(satir.receteImzasiz) > 0;
   const cikisHam = String(satir.cikisSekliAdi ?? '').trim().toLocaleLowerCase('tr');
   const cikis = cikisHam ? cikisHam.charAt(0).toLocaleUpperCase('tr') + cikisHam.slice(1) : '';
 

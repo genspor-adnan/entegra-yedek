@@ -5,6 +5,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj } from '../mesaj';
 import { MuayeneSablonKarti } from './MuayeneSablonKarti';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * MUAYENE ŞABLONLARI LİSTESİ — mockup `Ekranlar/Muayene/muayene_sablon_listesi.html`.
@@ -18,12 +19,10 @@ import { c } from '../../dil/ceviri';
 type Cip = 'tumu' | 'benim' | 'ortak' | 'ozel';
 type Dugum = { bolum: string | null; doktor: string | null };   // null = tümü
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 const BOLUMSUZ = 'Genel (bölümsüz)';
 const ORTAK = 'Bölüm ortak';
-const bolumAdi = (r: ListeSatiri) => metin(r.bolumAdi) || BOLUMSUZ;
-const doktorAdi = (r: ListeSatiri) => metin(r.doktorAdi) || ORTAK;
+const bolumAdi = (r: ListeSatiri) => metne(r.bolumAdi) || BOLUMSUZ;
+const doktorAdi = (r: ListeSatiri) => metne(r.doktorAdi) || ORTAK;
 /** Bölümler ada göre, bölümsüz EN SONDA; doktorlar ada göre, "Bölüm ortak" EN ÖNDE. */
 const bolumSirasi = (a: string, b: string) =>
   a === BOLUMSUZ ? 1 : b === BOLUMSUZ ? -1 : a.localeCompare(b, 'tr');
@@ -31,7 +30,7 @@ const doktorSirasi = (a: string, b: string) =>
   a === ORTAK ? -1 : b === ORTAK ? 1 : a.localeCompare(b, 'tr');
 const TUR_AD: Record<number, string> = { 1: 'Fizik muayene', 2: 'Anamnez', 3: 'Sistem sorgusu' };
 const sonKullanim = (v: unknown) => {
-  const s = metin(v);
+  const s = metne(v);
   if (!s) return '—';
   const g = Math.floor((Date.now() - new Date(s).getTime()) / 86400000);
   return g <= 0 ? c('bugün') : g === 1 ? c('dün') : g < 30 ? `${g} ${c('gün önce')}` : new Date(s).toLocaleDateString('tr-TR');
@@ -71,21 +70,21 @@ export function MuayeneSablonListesi() {
 
   const benimId = Number(kullanici?.id ?? 0);
   const cipUyar = (r: ListeSatiri) => {
-    const aktif = sayi(r.durum) === 1;
+    const aktif = sayiya(r.durum) === 1;
     switch (cip) {
-      case 'benim': return aktif && sayi(r.hekimId) === benimId;
-      case 'ortak': return aktif && sayi(r.hekimId) === 0;
-      case 'ozel': return aktif && sayi(r.hekimId) !== 0;
+      case 'benim': return aktif && sayiya(r.hekimId) === benimId;
+      case 'ortak': return aktif && sayiya(r.hekimId) === 0;
+      case 'ozel': return aktif && sayiya(r.hekimId) !== 0;
       default: return true;
     }
   };
   const arananMi = (r: ListeSatiri) => {
     const a = ara.trim().toLocaleLowerCase('tr');
-    return !a || `${metin(r.ad)} ${metin(r.kod)} ${metin(r.doktorAdi)} ${metin(r.bolumAdi)}`
+    return !a || `${metne(r.ad)} ${metne(r.kod)} ${metne(r.doktorAdi)} ${metne(r.bolumAdi)}`
       .toLocaleLowerCase('tr').includes(a);
   };
   // Ağaç sayıları cip + tür + arama süzgecinden sonra; düğüm süzgeci gride uygulanır.
-  const suzulmus = satirlar.filter(r => cipUyar(r) && (tur === null || sayi(r.tur) === tur) && arananMi(r));
+  const suzulmus = satirlar.filter(r => cipUyar(r) && (tur === null || sayiya(r.tur) === tur) && arananMi(r));
   const gorunen = suzulmus.filter(r =>
     (dugum.bolum === null || bolumAdi(r) === dugum.bolum)
     && (dugum.doktor === null || doktorAdi(r) === dugum.doktor));
@@ -114,17 +113,17 @@ export function MuayeneSablonListesi() {
     return [...m.entries()].sort(([a], [b]) => bolumSirasi(a, b))
       .map(([b, dm]) => ({ bolum: b, doktorlar: [...dm.entries()]
         .sort(([a], [z]) => doktorSirasi(a, z))
-        .map(([d, s]) => ({ doktor: d, satirlar: [...s].sort((x, y) => sayi(y.varsayilan) - sayi(x.varsayilan)
-          || sayi(x.sira) - sayi(y.sira) || metin(x.ad).localeCompare(metin(y.ad), 'tr')) })) }));
+        .map(([d, s]) => ({ doktor: d, satirlar: [...s].sort((x, y) => sayiya(y.varsayilan) - sayiya(x.varsayilan)
+          || sayiya(x.sira) - sayiya(y.sira) || metne(x.ad).localeCompare(metne(y.ad), 'tr')) })) }));
   }, [gorunen]);
 
-  const seciliSatir = satirlar.find(r => sayi(r.id) === secili) ?? null;
+  const seciliSatir = satirlar.find(r => sayiya(r.id) === secili) ?? null;
   const say = (f: (r: ListeSatiri) => boolean) => satirlar.filter(f).length;
   const cipler: { k: Cip; ad: string; n: number }[] = [
     { k: 'tumu', ad: 'Tümü', n: satirlar.length },
-    { k: 'benim', ad: 'Benim', n: say(r => sayi(r.durum) === 1 && sayi(r.hekimId) === benimId) },
-    { k: 'ortak', ad: 'Bölüm ortak', n: say(r => sayi(r.durum) === 1 && sayi(r.hekimId) === 0) },
-    { k: 'ozel', ad: 'Doktora özel', n: say(r => sayi(r.durum) === 1 && sayi(r.hekimId) !== 0) },
+    { k: 'benim', ad: 'Benim', n: say(r => sayiya(r.durum) === 1 && sayiya(r.hekimId) === benimId) },
+    { k: 'ortak', ad: 'Bölüm ortak', n: say(r => sayiya(r.durum) === 1 && sayiya(r.hekimId) === 0) },
+    { k: 'ozel', ad: 'Doktora özel', n: say(r => sayiya(r.durum) === 1 && sayiya(r.hekimId) !== 0) },
   ];
 
   const kopyala = () => guvenli(async () => {
@@ -148,8 +147,8 @@ export function MuayeneSablonListesi() {
   };
   // Yeni şablonun varsayılan bölümü: ağaçta seçili bölümün id'si.
   const yeniBolumId = dugum.bolum
-    ? sayi(satirlar.find(r => bolumAdi(r) === dugum.bolum)?.bolumId) || null : null;
-  const seciliOrtak = seciliSatir !== null && sayi(seciliSatir.hekimId) === 0 && sayi(seciliSatir.bolumId) > 0;
+    ? sayiya(satirlar.find(r => bolumAdi(r) === dugum.bolum)?.bolumId) || null : null;
+  const seciliOrtak = seciliSatir !== null && sayiya(seciliSatir.hekimId) === 0 && sayiya(seciliSatir.bolumId) > 0;
 
   return (
     <div className="ms-liste">
@@ -165,14 +164,14 @@ export function MuayeneSablonListesi() {
             <div className="arac-cubugu">
               <button type="button" className="d bir" onClick={() => setKart('yeni')}><span>＋ {c('Yeni şablon')}</span></button>
               <button type="button" className="d" disabled={secili === null} onClick={() => secili !== null && setKart(secili)}
-                      title={secili !== null && !yonetici && sayi(seciliSatir?.hekimId) !== benimId
+                      title={secili !== null && !yonetici && sayiya(seciliSatir?.hekimId) !== benimId
                         ? c('Başkasının şablonu: görüntülenir; "Kopyala (bana)" ile uyarlayın') : ''}>
-                <span>{secili !== null && !yonetici && sayi(seciliSatir?.hekimId) !== benimId ? `👁 ${c('Görüntüle')}` : `✎ ${c('Düzenle')}`}</span></button>
+                <span>{secili !== null && !yonetici && sayiya(seciliSatir?.hekimId) !== benimId ? `👁 ${c('Görüntüle')}` : `✎ ${c('Düzenle')}`}</span></button>
               <button type="button" className="d" disabled={secili === null} onClick={() => void kopyala()}
                       title={c('Seçili şablonu kendi şablonunuz olarak çoğaltır')}><span>⧉ {c('Kopyala (bana)')}</span></button>
               {/* Bölüm varsayılanı şablon YÖNETİCİSİNİN işi (929). */}
               {yonetici && (
-                <button type="button" className="d" disabled={!seciliOrtak || sayi(seciliSatir?.varsayilan) === 1 || sayi(seciliSatir?.durum) !== 1}
+                <button type="button" className="d" disabled={!seciliOrtak || sayiya(seciliSatir?.varsayilan) === 1 || sayiya(seciliSatir?.durum) !== 1}
                         title={c('Yalnız bölüm ortak ve aktif şablon')} onClick={() => void varsayilanYap()}>
                   <span>⭐ {c('Bölüm varsayılanı yap')}</span></button>
               )}
@@ -240,19 +239,19 @@ export function MuayeneSablonListesi() {
                   <tr key={`d-${g.bolum}-${dk.doktor}`} className="ms-g2"><td colSpan={8}>
                     {dk.doktor === ORTAK ? '👥' : '👨‍⚕️'} {dk.doktor} · {dk.satirlar.length}</td></tr>,
                   ...dk.satirlar.map(r => {
-                    const id = sayi(r.id);
-                    const aktif = sayi(r.durum) === 1;
+                    const id = sayiya(r.id);
+                    const aktif = sayiya(r.durum) === 1;
                     return (
                       <tr key={id} className={`tiklanir${secili === id ? ' secili' : ''}${aktif ? '' : ' ms-pasif'}`}
                           onClick={() => setSecili(id)} onDoubleClick={() => setKart(id)} title={c('Çift tık: kartı aç')}>
-                        <td className="ms-ad">{sayi(r.varsayilan) === 1 && <span className="ms-yildiz" title={c('Bölüm varsayılanı')}>⭐ </span>}
-                          {secili === id ? <b>{metin(r.ad)}</b> : metin(r.ad)}</td>
-                        <td className="hiza-orta">{metin(r.kod)}</td>
-                        <td className="hiza-orta"><span className={`rozet ${sayi(r.tur) === 1 ? 'mavi' : 'gri'}`}>{TUR_AD[sayi(r.tur)] ?? ''}</span></td>
-                        <td className="hiza-orta">{sayi(r.hekimId) === 0 ? c('Bölüm ortak') : c('Doktora özel')}</td>
-                        <td className="hiza-orta">{sayi(r.alanSayisi)}</td>
+                        <td className="ms-ad">{sayiya(r.varsayilan) === 1 && <span className="ms-yildiz" title={c('Bölüm varsayılanı')}>⭐ </span>}
+                          {secili === id ? <b>{metne(r.ad)}</b> : metne(r.ad)}</td>
+                        <td className="hiza-orta">{metne(r.kod)}</td>
+                        <td className="hiza-orta"><span className={`rozet ${sayiya(r.tur) === 1 ? 'mavi' : 'gri'}`}>{TUR_AD[sayiya(r.tur)] ?? ''}</span></td>
+                        <td className="hiza-orta">{sayiya(r.hekimId) === 0 ? c('Bölüm ortak') : c('Doktora özel')}</td>
+                        <td className="hiza-orta">{sayiya(r.alanSayisi)}</td>
                         <td className="hiza-orta">
-                          <span className="ms-kullanim"><i style={{ width: Math.min(60, sayi(r.kullanim30) / 3) }} />{sayi(r.kullanim30)}</span>
+                          <span className="ms-kullanim"><i style={{ width: Math.min(60, sayiya(r.kullanim30) / 3) }} />{sayiya(r.kullanim30)}</span>
                         </td>
                         <td className="hiza-orta">{sonKullanim(r.sonKullanim)}</td>
                         <td className="hiza-orta"><span className={`rozet ${aktif ? 'olumlu' : 'gri'}`}>{aktif ? c('Aktif') : c('Pasif')}</span></td>
@@ -271,19 +270,19 @@ export function MuayeneSablonListesi() {
             <>
               <div className="rk-blk">
                 <h6>{c('Seçili şablon')}</h6>
-                <div className="ms-onz-ad">{sayi(seciliSatir.varsayilan) === 1 && '⭐ '}{metin(seciliSatir.ad)}</div>
+                <div className="ms-onz-ad">{sayiya(seciliSatir.varsayilan) === 1 && '⭐ '}{metne(seciliSatir.ad)}</div>
                 <div className="rk-kv">
                   <span>{c('Bölüm')}</span><span>{bolumAdi(seciliSatir)}</span>
-                  <span>{c('Kapsam')}</span><span>{sayi(seciliSatir.hekimId) === 0 ? c('Bölüm ortak') : `${c('Doktora özel')} · ${metin(seciliSatir.doktorAdi)}`}</span>
-                  <span>{c('Tür')}</span><span>{TUR_AD[sayi(seciliSatir.tur)] ?? ''}</span>
-                  <span>{c('Kullanım')}</span><span>{sayi(seciliSatir.kullanim30)} {c('muayene / 30 gün')}</span>
-                  {sayi(seciliSatir.kaynakSablonId) > 0 && (<><span>{c('Kopyası')}</span><span>#{sayi(seciliSatir.kaynakSablonId)}</span></>)}
+                  <span>{c('Kapsam')}</span><span>{sayiya(seciliSatir.hekimId) === 0 ? c('Bölüm ortak') : `${c('Doktora özel')} · ${metne(seciliSatir.doktorAdi)}`}</span>
+                  <span>{c('Tür')}</span><span>{TUR_AD[sayiya(seciliSatir.tur)] ?? ''}</span>
+                  <span>{c('Kullanım')}</span><span>{sayiya(seciliSatir.kullanim30)} {c('muayene / 30 gün')}</span>
+                  {sayiya(seciliSatir.kaynakSablonId) > 0 && (<><span>{c('Kopyası')}</span><span>#{sayiya(seciliSatir.kaynakSablonId)}</span></>)}
                 </div>
               </div>
               <div className="rk-blk">
                 <h6>{c('Alanlar')} ({alanlar.length})</h6>
-                {[...alanlar].sort((a, b) => sayi(a.sira) - sayi(b.sira)).slice(0, 12).map((a, i) => (
-                  <div key={i} className="ms-alan">{metin(a.ad)}<span className="sonuk">{metin(a.grup)}</span></div>
+                {[...alanlar].sort((a, b) => sayiya(a.sira) - sayiya(b.sira)).slice(0, 12).map((a, i) => (
+                  <div key={i} className="ms-alan">{metne(a.ad)}<span className="sonuk">{metne(a.grup)}</span></div>
                 ))}
                 {alanlar.length > 12 && <div className="sonuk">… {alanlar.length - 12} {c('alan daha')}</div>}
               </div>
@@ -293,7 +292,7 @@ export function MuayeneSablonListesi() {
         </div>
       </div>
       <div className="ms-durum">
-        <span>{satirlar.length} {c('şablon')} · {new Set(satirlar.map(bolumAdi)).size} {c('bölüm')} · {new Set(satirlar.filter(r => sayi(r.hekimId)).map(r => sayi(r.hekimId))).size} {c('doktor')}</span>
+        <span>{satirlar.length} {c('şablon')} · {new Set(satirlar.map(bolumAdi)).size} {c('bölüm')} · {new Set(satirlar.filter(r => sayiya(r.hekimId)).map(r => sayiya(r.hekimId))).size} {c('doktor')}</span>
         <span className="sonuk">{c('Çift tık = şablon kartı · Gruplama: Bölüm › Doktor')}</span>
       </div>
 

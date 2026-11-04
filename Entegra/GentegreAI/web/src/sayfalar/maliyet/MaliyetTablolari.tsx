@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { MaliyetIcmali } from '../../api/uclar/maliyetIcmal';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { KartSimgesi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -9,7 +9,6 @@ import { KAYNAK_ADI, marjRozeti } from './maliyetOrtak';
 /** Hasta başı maliyet icmalinin sekme tabloları. Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 /** BAŞVURULAR - en düşük marj üstte; tık / Ctrl / Shift seçim (A4), ▸ kalemler. */
 export function BasvuruTablosu({ v, secili, setSecili, hastaAc }: {

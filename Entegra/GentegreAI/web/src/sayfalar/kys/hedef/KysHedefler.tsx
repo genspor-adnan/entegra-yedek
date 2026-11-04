@@ -9,6 +9,7 @@ import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
 import { dofAcmaYolu } from '../../liste/kysOlayRiskAksiyonlari';
 import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
+import { h as kacis } from '../../../bilesenler/htmlGuvenlik';
 
 /**
  * KURUMSAL KALİTE — POLİTİKA & HEDEFLER (1063, mockup Ekranlar/Kalite2/hedefler.html).
@@ -212,8 +213,6 @@ function DegerGir({ satirlar, ay, onKapat }: {
   );
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 
 /** A4: politika + kapsam + hedef tablosu (panolara asılan / denetimde gösterilen sayfa). */
 async function yazdir(satirlar: ListeSatiri[], aylar: string[]) {

@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react';
+import { metne } from '../bicim';
 
 /** Çalışma şablonu / istisna kartlarının ortak parçaları (mockup Ekranlar/Randevu). */
 export const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 export const SLOTLAR = [10, 15, 20, 30, 45, 60];
 export const KANALLAR: [string, string][] = [['B', 'Banko / telefon'], ['P', 'Hasta portalı'], ['C', 'Çağrı merkezi']];
 
-export const metin = (v: unknown) => String(v ?? '').trim();
+export const metin = metne;
 export const sayi = (v: unknown) => Number(v ?? 0) || 0;
 export const gun10 = (v: unknown) => metin(v).slice(0, 10);
 export const isoGun = (d: Date) =>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { c } from '../dil/ceviri';
+import { metne } from './bicim';
 
 /**
  * MUAYENE › BUGÜNKÜ SONUÇLAR (461) — mockup `muayene_karti.html` sağ
@@ -17,7 +18,6 @@ import { c } from '../dil/ceviri';
 
 type Satir = Record<string, unknown>;
 
-const metin = (v: unknown) => String(v ?? '').trim();
 
 const BAYRAK_OK: Record<string, string> = { LL: '↓↓', HH: '↑↑', L: '↓', H: '↑', N: '' };
 
@@ -84,19 +84,19 @@ export function MuayeneSonucOzeti({ muayeneId }: { muayeneId: number }) {
           </thead>
           <tbody>
             {sirali.slice(0, 12).map((s, i) => {
-              const b = metin(s.bayrak).toUpperCase();
+              const b = metne(s.bayrak).toUpperCase();
               return (
                 <tr key={i}>
-                  <td title={metin(s.yorum)}>{metin(s.ad) || metin(s.kod)}</td>
+                  <td title={metne(s.yorum)}>{metne(s.ad) || metne(s.kod)}</td>
                   <td className="sag">
                     {/* Kultur/genetik sonucu METIN olabilir ("Klebsiella…"):
                         dar kolonda tasmasin diye kirpilir, tamami baslikta. */}
-                    <span className="sonuc-deger" title={metin(s.deger)}>
-                      {metin(s.deger) || '—'}
+                    <span className="sonuc-deger" title={metne(s.deger)}>
+                      {metne(s.deger) || '—'}
                     </span>
-                    {metin(s.birim) ? <span className="sonuk"> {metin(s.birim)}</span> : null}
+                    {metne(s.birim) ? <span className="sonuk"> {metne(s.birim)}</span> : null}
                   </td>
-                  <td className="sonuk">{metin(s.referansMetin) || '—'}</td>
+                  <td className="sonuk">{metne(s.referansMetin) || '—'}</td>
                   <td className="orta">
                     {Number(s.panik ?? 0) === 1
                       ? <span className="rozet hata">PANİK</span>

@@ -6,7 +6,7 @@ import { KaynakArama } from './KaynakArama';
 import { ReceteKarti } from './recete/ReceteKarti';
 import type { SablonTercihleri } from '../api/uclar/liste';
 import { guvenli, mesaj, onay } from './mesaj';
-import { tarihSaat, para } from './bicim';
+import { tarihSaat, para, sayiya, metne } from './bicim';
 import { c } from '../dil/ceviri';
 import { KipCercevesi } from './KipCercevesi';
 import { Modal } from './Modal';
@@ -41,8 +41,6 @@ export interface SekmeVerisi {
   gecmis: Satir[];
 }
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 
 // Reçete türü / durum / kullanım adları artık SUNUCUDA (recete-satir listesi).
 
@@ -132,10 +130,10 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, o
     tazele();
   });
 
-  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayi(b.id) - sayi(a.id));
-  const varsayilan = receteler.find(r => sayi(r.durum) === 1) ?? receteler[0];
-  const gosterilen = receteler.find(r => sayi(r.id) === secilenId) ?? varsayilan;
-  const taslakGosteriliyor = sayi(gosterilen?.durum) === 1;
+  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayiya(b.id) - sayiya(a.id));
+  const varsayilan = receteler.find(r => sayiya(r.durum) === 1) ?? receteler[0];
+  const gosterilen = receteler.find(r => sayiya(r.id) === secilenId) ?? varsayilan;
+  const taslakGosteriliyor = sayiya(gosterilen?.durum) === 1;
 
   // Taslak gösteriliyorsa istek ReceteKarti'ye geçer (aramayı o açar);
   //   taslak yoksa (reçete yok ya da hepsi imzalı) burada açılır.
@@ -184,20 +182,20 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tazele, ilacAra, o
       {receteler.length > 1 && (
         <div className="muayene-arac rk-secici">
           {receteler.map(r => (
-            <button key={sayi(r.id)} type="button"
-                    className={`d${sayi(r.id) === sayi(gosterilen?.id) ? ' bir' : ''}`}
-                    onClick={() => setSecilenId(sayi(r.id))}>
-              {metin(r.receteNo) || `#${sayi(r.id)}`} · {sayi(r.durum) === 1 ? c('Taslak')
-                : sayi(r.durum) === 4 ? c('İptal') : c('İmzalı')}
+            <button key={sayiya(r.id)} type="button"
+                    className={`d${sayiya(r.id) === sayiya(gosterilen?.id) ? ' bir' : ''}`}
+                    onClick={() => setSecilenId(sayiya(r.id))}>
+              {metne(r.receteNo) || `#${sayiya(r.id)}`} · {sayiya(r.durum) === 1 ? c('Taslak')
+                : sayiya(r.durum) === 4 ? c('İptal') : c('İmzalı')}
             </button>
           ))}
         </div>
       )}
 
       {gosterilen ? (
-        <ReceteKarti key={sayi(gosterilen.id)} receteId={sayi(gosterilen.id)} gomulu
+        <ReceteKarti key={sayiya(gosterilen.id)} receteId={sayiya(gosterilen.id)} gomulu
           ilacAra={ilacAra && taslakGosteriliyor} onIlacAraTamam={onIlacAraTamam}
-          ekAraclar={sayi(gosterilen.durum) === 1 ? sablonSecici : null}
+          ekAraclar={sayiya(gosterilen.durum) === 1 ? sablonSecici : null}
           onKapat={() => { setSecilenId(null); tazele() }}
           onDegisti={tazele} kaydetRef={kaydetRef} />
       ) : (
@@ -255,12 +253,12 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
             <table className="fm-goster fm-tablo">
               <thead><tr><th>{c('Hedef')}</th><th>{c('Soru')}</th><th>{c('Aciliyet')}</th><th>{c('Durum')}</th></tr></thead>
               <tbody>{liste.map(k => {
-                const d = sayi(k.durum);
+                const d = sayiya(k.durum);
                 return (
-                  <tr key={sayi(k.id)}>
-                    <td>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</td>
-                    <td>{metin(k.soru).slice(0, 120) || '—'}</td>
-                    <td>{KONS_ACIL[sayi(k.aciliyet)] ?? ''}</td>
+                  <tr key={sayiya(k.id)}>
+                    <td>{metne(k.bolum) || '—'}{metne(k.hekim) && <span className="sonuk"> · {metne(k.hekim)}</span>}</td>
+                    <td>{metne(k.soru).slice(0, 120) || '—'}</td>
+                    <td>{KONS_ACIL[sayiya(k.aciliyet)] ?? ''}</td>
                     <td><span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span></td>
                   </tr>
                 );
@@ -271,9 +269,9 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
             onAc={ac} onDegisti={onDegisti}
             kolonlar={['Hedef', 'Soru', 'Aciliyet', 'Durum']}
             hucreler={k => {
-              const d = sayi(k.durum);
-              return [<>{metin(k.bolum) || '—'}{metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}</>,
-                      metin(k.soru) || '—', KONS_ACIL[sayi(k.aciliyet)] ?? '',
+              const d = sayiya(k.durum);
+              return [<>{metne(k.bolum) || '—'}{metne(k.hekim) && <span className="sonuk"> · {metne(k.hekim)}</span>}</>,
+                      metne(k.soru) || '—', KONS_ACIL[sayiya(k.aciliyet)] ?? '',
                       <span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span>];
             }} />
         </KipCercevesi>
@@ -319,22 +317,22 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
             </thead>
             <tbody>
               {veri?.konsultasyonlar.map(k => {
-                const yanit = metin(k.yanit) || metin(k.retGerekce);
-                const d = sayi(k.durum);
+                const yanit = metne(k.yanit) || metne(k.retGerekce);
+                const d = sayiya(k.durum);
                 return (
-                  <tr key={sayi(k.id)}>
-                    <td>{metin(k.bolum) || '—'}
-                      {metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}
+                  <tr key={sayiya(k.id)}>
+                    <td>{metne(k.bolum) || '—'}
+                      {metne(k.hekim) && <span className="sonuk"> · {metne(k.hekim)}</span>}
                     </td>
-                    <td>{metin(k.soru) || <span className="sonuk">—</span>}
-                      {sayi(k.aciliyet) > 1 && <span className="rozet hata"> {KONS_ACIL[sayi(k.aciliyet)]}</span>}
+                    <td>{metne(k.soru) || <span className="sonuk">—</span>}
+                      {sayiya(k.aciliyet) > 1 && <span className="rozet hata"> {KONS_ACIL[sayiya(k.aciliyet)]}</span>}
                     </td>
                     <td className="hiza-orta">{k.tarih ? tarihSaat(k.tarih) : '—'}</td>
                     <td>
                       {yanit ? yanit.slice(0, 120) : <span className="sonuk">bekliyor</span>}
-                      {metin(k.anaTani) && (
+                      {metne(k.anaTani) && (
                         <span className="rozet olumlu" title={c('Konsültasyon tanısı')}>
-                          {metin(k.anaTani)}
+                          {metne(k.anaTani)}
                         </span>
                       )}
                     </td>
@@ -345,7 +343,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
                     </td>
                     <td>
                       <button type="button" className="d"
-                              onClick={() => ac(sayi(k.id))}>Aç</button>
+                              onClick={() => ac(sayiya(k.id))}>Aç</button>
                     </td>
                   </tr>
                 );
@@ -380,14 +378,14 @@ export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve, onDegisti }:
     <table className={tikla ? 'detay-tablo secilebilir' : 'fm-goster fm-tablo'}>
       <thead><tr><th>{c('Tür')}</th><th>{c('Nereye')}</th><th>{c('Neden')}</th><th>{c('Durum')}</th>{tikla && <th />}</tr></thead>
       <tbody>{liste.map(s => {
-        const d = sayi(s.durum);
+        const d = sayiya(s.durum);
         return (
-          <tr key={sayi(s.id)} style={tikla ? { cursor: 'pointer' } : undefined} onClick={tikla ? () => onAc(sayi(s.id)) : undefined}>
-            <td>{c(SEVK_TUR[sayi(s.tur)] ?? '')}</td>
-            <td>{metin(s.nereye) || '—'}</td>
-            <td>{c(SEVK_NEDEN[sayi(s.neden)] ?? '')}</td>
+          <tr key={sayiya(s.id)} style={tikla ? { cursor: 'pointer' } : undefined} onClick={tikla ? () => onAc(sayiya(s.id)) : undefined}>
+            <td>{c(SEVK_TUR[sayiya(s.tur)] ?? '')}</td>
+            <td>{metne(s.nereye) || '—'}</td>
+            <td>{c(SEVK_NEDEN[sayiya(s.neden)] ?? '')}</td>
             <td><span className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span></td>
-            {tikla && <td><button type="button" className="d" onClick={e => { e.stopPropagation(); onAc(sayi(s.id)) }}>
+            {tikla && <td><button type="button" className="d" onClick={e => { e.stopPropagation(); onAc(sayiya(s.id)) }}>
               {d === 1 ? '✎ ' + c('Düzenle') : c('Aç')}</button></td>}
           </tr>
         );
@@ -400,8 +398,8 @@ export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve, onDegisti }:
       <CerceveTablosu kaynak="sevk" satirlar={liste} yeniAdi="Yeni Sevk" onYeni={onIste} onAc={onAc} onDegisti={onDegisti}
         kolonlar={['Tür', 'Nereye', 'Neden', 'Durum']}
         hucreler={s => {
-          const d = sayi(s.durum);
-          return [c(SEVK_TUR[sayi(s.tur)] ?? ''), metin(s.nereye) || '—', c(SEVK_NEDEN[sayi(s.neden)] ?? ''),
+          const d = sayiya(s.durum);
+          return [c(SEVK_TUR[sayiya(s.tur)] ?? ''), metne(s.nereye) || '—', c(SEVK_NEDEN[sayiya(s.neden)] ?? ''),
                   <span className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span>];
         }} />
     </KipCercevesi>
@@ -420,7 +418,7 @@ export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve, onDegisti }:
 export function MuayeneUcretSekmesi({ veri, hata }:
   { veri: SekmeVerisi | null; hata: string | null }) {
   const git = useNavigate();
-  const toplam = (veri?.islemler ?? []).reduce((t, s) => t + sayi(s.tutar), 0);
+  const toplam = (veri?.islemler ?? []).reduce((t, s) => t + sayiya(s.tutar), 0);
   return (
     <Kabuk hata={hata} veri={veri}>
       <div className="kagrup">
@@ -445,18 +443,18 @@ export function MuayeneUcretSekmesi({ veri, hata }:
             </thead>
             <tbody>
               {veri?.islemler.map(s => (
-                <tr key={sayi(s.id)}>
-                  <td>{metin(s.kod) || '—'}</td>
-                  <td>{metin(s.ad)}
-                    {metin(s.aciklama) && <span className="sonuk"> · {metin(s.aciklama)}</span>}
+                <tr key={sayiya(s.id)}>
+                  <td>{metne(s.kod) || '—'}</td>
+                  <td>{metne(s.ad)}
+                    {metne(s.aciklama) && <span className="sonuk"> · {metne(s.aciklama)}</span>}
                   </td>
-                  <td className="hiza-sag">{sayi(s.adet).toLocaleString('tr-TR')}</td>
-                  <td className="hiza-sag">{para.format(sayi(s.birimFiyat))}</td>
+                  <td className="hiza-sag">{sayiya(s.adet).toLocaleString('tr-TR')}</td>
+                  <td className="hiza-sag">{para.format(sayiya(s.birimFiyat))}</td>
                   <td className="hiza-sag">
-                    {sayi(s.iskonto) > 0 ? `%${sayi(s.iskonto)}` : '—'}
+                    {sayiya(s.iskonto) > 0 ? `%${sayiya(s.iskonto)}` : '—'}
                   </td>
-                  <td className="hiza-orta">%{sayi(s.kdv)}</td>
-                  <td className="hiza-sag"><b>{para.format(sayi(s.tutar))}</b></td>
+                  <td className="hiza-orta">%{sayiya(s.kdv)}</td>
+                  <td className="hiza-sag"><b>{para.format(sayiya(s.tutar))}</b></td>
                 </tr>
               ))}
             </tbody>
@@ -569,19 +567,19 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
                 </thead>
                 <tbody>
                   {veri?.gecmis.map(g => (
-                    <tr key={sayi(g.id)}>
+                    <tr key={sayiya(g.id)}>
                       <td className="hiza-orta">{g.tarih ? tarihSaat(g.tarih) : '—'}</td>
-                      <td>{metin(g.hekim) || '—'}
-                        {metin(g.bolum) && <span className="sonuk"> · {metin(g.bolum)}</span>}
+                      <td>{metne(g.hekim) || '—'}
+                        {metne(g.bolum) && <span className="sonuk"> · {metne(g.bolum)}</span>}
                       </td>
-                      <td>{metin(g.tanilar) || <span className="sonuk">—</span>}</td>
-                      <td>{metin(g.ozet) || <span className="sonuk">—</span>}</td>
+                      <td>{metne(g.tanilar) || <span className="sonuk">—</span>}</td>
+                      <td>{metne(g.ozet) || <span className="sonuk">—</span>}</td>
                       <td className="hiza-orta" style={{ whiteSpace: 'nowrap' }}>
                         <button type="button" className="d ikon-dugme" title={c('Muayeneyi aç')}
-                                onClick={() => git(`/muayene/${sayi(g.id)}`)}>📂</button>
+                                onClick={() => git(`/muayene/${sayiya(g.id)}`)}>📂</button>
                         <button type="button" className="d ikon-dugme"
                                 title={c('Anamnez ve tanıları bu muayeneye kopyala')}
-                                onClick={() => setKopyaKaynak(sayi(g.id))}>↺</button>
+                                onClick={() => setKopyaKaynak(sayiya(g.id))}>↺</button>
                       </td>
                     </tr>
                   ))}
@@ -611,8 +609,8 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
 
 /** Muayenede gösterilen reçete: açık taslak, yoksa en son reçete (sekmeyle aynı kural). */
 export function gosterilenRecete(veri: SekmeVerisi | null) {
-  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayi(b.id) - sayi(a.id));
-  return receteler.find(r => sayi(r.durum) === 1) ?? receteler[0];
+  const receteler = [...(veri?.receteler ?? [])].sort((a, b) => sayiya(b.id) - sayiya(a.id));
+  return receteler.find(r => sayiya(r.durum) === 1) ?? receteler[0];
 }
 
 /**
@@ -621,9 +619,9 @@ export function gosterilenRecete(veri: SekmeVerisi | null) {
  */
 export function ReceteGosterim({ veri }: { veri: SekmeVerisi | null }) {
   const r = gosterilenRecete(veri);
-  const satirlar = r ? (veri?.receteSatirlari ?? []).filter(s => sayi(s.receteId) === sayi(r.id)) : [];
+  const satirlar = r ? (veri?.receteSatirlari ?? []).filter(s => sayiya(s.receteId) === sayiya(r.id)) : [];
   if (!r || satirlar.length === 0) return <div className="fm-bos">{c('Reçete yazılmadı')}</div>;
-  const imzali = sayi(r.durum) !== 1;
+  const imzali = sayiya(r.durum) !== 1;
   return (
     <>
       <table className="fm-goster fm-tablo">
@@ -631,14 +629,14 @@ export function ReceteGosterim({ veri }: { veri: SekmeVerisi | null }) {
         <tbody>
           {satirlar.map((s, i) => (
             <tr key={i}>
-              <td>{metin(s.ilac)}</td>
-              <td>{[metin(s.periyot), metin(s.doz)].filter(Boolean).join(' × ') || '—'}</td>
-              <td className="hiza-orta">{sayi(s.kutu) || '—'}</td>
+              <td>{metne(s.ilac)}</td>
+              <td>{[metne(s.periyot), metne(s.doz)].filter(Boolean).join(' × ') || '—'}</td>
+              <td className="hiza-orta">{sayiya(s.kutu) || '—'}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="fm-bos">{metin(r.receteNo)} · {imzali ? c('imzalı') : c('taslak · imzasız')}</div>
+      <div className="fm-bos">{metne(r.receteNo)} · {imzali ? c('imzalı') : c('taslak · imzasız')}</div>
     </>
   );
 }
@@ -662,7 +660,7 @@ function CerceveTablosu({ kaynak, satirlar, kolonlar, hucreler, yeniAdi, onYeni,
   onDegisti?(): void;
 }) {
   const [secili, setSecili] = useState<Set<number>>(new Set());
-  const idler = satirlar.map(s => sayi(s.id));
+  const idler = satirlar.map(s => sayiya(s.id));
   // Liste değişince artık olmayan seçimler düşer.
   useEffect(() => { setSecili(o => new Set([...o].filter(i => idler.includes(i)))) },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -698,7 +696,7 @@ function CerceveTablosu({ kaynak, satirlar, kolonlar, hucreler, yeniAdi, onYeni,
             {kolonlar.map(k => <th key={k}>{c(k)}</th>)}
           </tr></thead>
           <tbody>{satirlar.map(s => {
-            const id = sayi(s.id);
+            const id = sayiya(s.id);
             return (
               <tr key={id} className={secili.has(id) ? 'secili' : undefined} style={{ cursor: 'pointer' }}
                   onClick={() => degistir(id)} onDoubleClick={() => onAc(id)}>

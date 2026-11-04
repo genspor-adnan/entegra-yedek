@@ -7,6 +7,7 @@ import { guvenli, mesaj } from '../mesaj';
 import { c } from '../../dil/ceviri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { KaynakArama } from '../KaynakArama';
+import { sayiya, metne } from '../bicim';
 
 /**
  * MUAYENE ŞABLONU KARTI — mockup `Ekranlar/Muayene/muayene_sablon_karti.html`.
@@ -129,11 +130,9 @@ function SecenekDuzenleyici({ satir, salt, onDegis }: {
 }
 type Sekme = typeof SEKMELER[number];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 const zaman = (v: unknown) => {
-  const d = new Date(metin(v));
-  return Number.isNaN(d.getTime()) ? metin(v) : d.toLocaleString('tr-TR', {
+  const d = new Date(metne(v));
+  return Number.isNaN(d.getTime()) ? metne(v) : d.toLocaleString('tr-TR', {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 /** Lookup adının başındaki SKRS kodunu atar ("157 - İç Hastalıkları"). */
@@ -190,14 +189,14 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
     const y = await api.kartOku('muayene-sablon', kid);
     const k = y.kart;
     const v: Deger = {
-      kod: metin(k.kod), ad: metin(k.ad), tur: sayi(k.tur) || 1, aciklama: metin(k.aciklama),
-      sira: sayi(k.sira), durum: sayi(k.durum ?? 1),
-      bolumId: k.bolumId == null || sayi(k.bolumId) === 0 ? null : sayi(k.bolumId),
-      hekimId: k.hekimId == null || sayi(k.hekimId) === 0 ? null : sayi(k.hekimId),
+      kod: metne(k.kod), ad: metne(k.ad), tur: sayiya(k.tur) || 1, aciklama: metne(k.aciklama),
+      sira: sayiya(k.sira), durum: sayiya(k.durum ?? 1),
+      bolumId: k.bolumId == null || sayiya(k.bolumId) === 0 ? null : sayiya(k.bolumId),
+      hekimId: k.hekimId == null || sayiya(k.hekimId) === 0 ? null : sayiya(k.hekimId),
     };
     setKayitId(kid); setD(v); setIlk(v); setSurum(k.surum);
-    setEk({ varsayilan: sayi(k.varsayilan) === 1,
-            kaynakSablonId: k.kaynakSablonId ? sayi(k.kaynakSablonId) : null });
+    setEk({ varsayilan: sayiya(k.varsayilan) === 1,
+            kaynakSablonId: k.kaynakSablonId ? sayiya(k.kaynakSablonId) : null });
     setAlanlar(bosDetay((y.detaylar?.alanlar ?? []) as Parameters<typeof bosDetay>[0]));
     setTercih(Object.fromEntries(TERCIHLER.map(t =>
       [t.ad, bosDetay((y.detaylar?.[t.ad] ?? []) as Parameters<typeof bosDetay>[0])])) as Record<TercihAd, DetayDurumu>);
@@ -258,7 +257,7 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
       let yeniId = kayitId;
       if (kayitId === null) {
         const y = await api.kartEkle('muayene-sablon', { kart: govde(v), detaylar });
-        yeniId = sayi(y.kart.id);
+        yeniId = sayiya(y.kart.id);
       } else {
         const once = ilk ? govde(ilk) : {};
         const fark = Object.fromEntries(Object.entries(govde(v)).filter(([k, x]) => once[k] !== x));
@@ -304,25 +303,25 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
   /** Arama penceresinden seçilen satırı ilgili tercih detayına ekler (aynı tanı ikinci kez eklenmez). */
   const aramadanEkle = (r: Record<string, unknown>) => {
     if (arama === 'icd') {
-      const kod = metin(r.kod);
-      setTercih(o => o.tanilar.guncel.some(x => metin(x.icdKod) === kod) ? o : ({ ...o, tanilar: { ...o.tanilar,
-        guncel: [...o.tanilar.guncel, { sira: o.tanilar.guncel.length + 1, icdKod: kod, taniAd: metin(r.ad), aciklama: '' }] } }));
+      const kod = metne(r.kod);
+      setTercih(o => o.tanilar.guncel.some(x => metne(x.icdKod) === kod) ? o : ({ ...o, tanilar: { ...o.tanilar,
+        guncel: [...o.tanilar.guncel, { sira: o.tanilar.guncel.length + 1, icdKod: kod, taniAd: metne(r.ad), aciklama: '' }] } }));
     } else if (arama === 'ilac') {
       const grup = receteGrup.trim() || c('Genel');
       setTercih(o => ({ ...o, receteler: { ...o.receteler, guncel: [...o.receteler.guncel, {
-        grup, sira: o.receteler.guncel.filter(x => metin(x.grup) === grup).length + 1,
-        ilacBarkod: metin(r.barkod), ilacAd: metin(r.ad), doz: '', periyot: '', kullanimSekli: 1,
+        grup, sira: o.receteler.guncel.filter(x => metne(x.grup) === grup).length + 1,
+        ilacBarkod: metne(r.barkod), ilacAd: metne(r.ad), doz: '', periyot: '', kullanimSekli: 1,
         sureGun: 0, kutu: 1, icdKod: '', aciklama: '' }] } }));
     }
   };
   const alanSayisi = alanlar.guncel.length;
-  const normalEksik = alanlar.guncel.filter(a => !metin(a.normalMetni)).length;
+  const normalEksik = alanlar.guncel.filter(a => !metne(a.normalMetni)).length;
 
   // Önizleme: sistem gruplu alanlar, normal metniyle.
   const gruplu = useMemo(() => {
     const m = new Map<string, Record<string, unknown>[]>();
-    [...alanlar.guncel].sort((a, b) => sayi(a.sira) - sayi(b.sira)).forEach(a => {
-      const g = metin(a.grup) || 'Genel';
+    [...alanlar.guncel].sort((a, b) => sayiya(a.sira) - sayiya(b.sira)).forEach(a => {
+      const g = metne(a.grup) || 'Genel';
       m.set(g, [...(m.get(g) ?? []), a as Record<string, unknown>]);
     });
     return [...m.entries()];
@@ -506,7 +505,7 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
                     <input id="ms-recete-grup" list="ms-recete-gruplar" value={receteGrup} maxLength={80}
                            placeholder={c('ör. Üst solunum yolu enfeksiyonu')} onChange={e => setReceteGrup(e.target.value)} />
                     <datalist id="ms-recete-gruplar">
-                      {[...new Set(tercih.receteler.guncel.map(x => metin(x.grup)).filter(Boolean))].map(g => <option key={g} value={g} />)}
+                      {[...new Set(tercih.receteler.guncel.map(x => metne(x.grup)).filter(Boolean))].map(g => <option key={g} value={g} />)}
                     </datalist>
                     <button type="button" className="d bir" onClick={() => setArama('ilac')}>＋ {c('İlaç ekle')}</button>
                   </div>
@@ -532,12 +531,12 @@ export function MuayeneSablonKarti({ id, varsayilanBolum, onKapat, onDegisti }: 
                     <tr key={`g-${grup}`} className="ms-grup"><td colSpan={4}>{grup}</td></tr>,
                     ...satirlar.map((a, i) => (
                       <tr key={`${grup}-${i}`}>
-                        <td>{metin(a.ad)}{sayi(a.zorunlu) === 1 && <span className="ak-zor"> *</span>}</td>
-                        <td className="hiza-orta">{metin(a.normalMetni) ? '☑' : '☐'}</td>
-                        <td>{metin(a.normalMetni) || <span className="sonuk">—</span>}
+                        <td>{metne(a.ad)}{sayiya(a.zorunlu) === 1 && <span className="ak-zor"> *</span>}</td>
+                        <td className="hiza-orta">{metne(a.normalMetni) ? '☑' : '☐'}</td>
+                        <td>{metne(a.normalMetni) || <span className="sonuk">—</span>}
                           {secenekOku(a.secenekler).length > 0 && (
                             <span className="sonuk"> · {secenekOku(a.secenekler).join(' / ')}</span>)}</td>
-                        <td>{sayi(a.tarafSorulur) === 1 ? c('Sağ / Sol / Bilateral') : ''}</td>
+                        <td>{sayiya(a.tarafSorulur) === 1 ? c('Sağ / Sol / Bilateral') : ''}</td>
                       </tr>
                     )),
                   ])}

@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, type MouseEvent } from 'react';
 import type { DisIcmali } from '../../api/uclar/disIcmal';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -9,7 +9,6 @@ import { dolulukRozeti, gunRozeti, marjRozeti, yuzde, yuzdeTam } from './disIcma
 /** Diş icmalinin sekme tabloları. Rakamlar ve toplamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 function Cubuk({ oran }: { oran: number }) {
   return <span className="lb-bar"><span style={{ width: `${Math.max(0, Math.min(100, oran))}%` }} /></span>;

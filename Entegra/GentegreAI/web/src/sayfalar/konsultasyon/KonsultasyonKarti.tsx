@@ -5,7 +5,7 @@ import type { KonsultasyonOnizleme } from '../../api/uclar/konsultasyon';
 import type { SekmeParcalari } from '../../bilesenler/kartSekmeleri';
 import type { Deger } from '../../bilesenler/kartAlanCizim';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
-import { tarihSaat } from '../../bilesenler/bicim';
+import { tarihSaat, sayiya } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../../bilesenler/MuayeneSekmesiz';
 import { KonsAkis, KonsAlinti, KONS_ACILIYET, KONS_KARSILAMA } from './KonsultasyonPanelleri';
@@ -22,7 +22,6 @@ import { KonsultasyonIslemPenceresi, type KonsIslem } from './KonsultasyonIslemP
  * Terim "yanıtla"dır (kullanıcı: "üstlenme yerine yanıtlama").
  */
 
-const sayi = (v: unknown) => Number(v ?? 0);
 /** Aciliyetin kısa adı (küçük düğme; tam adı ipucunda). */
 const KONS_ACILIYET_KISA: Record<number, string> = { 1: 'Rutin', 2: 'Acil', 3: 'Çok acil' };
 
@@ -33,7 +32,7 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
   bantYok?: boolean;
 }) {
   const git = useNavigate();
-  const durum = sayi(deger.durum);
+  const durum = sayiya(deger.durum);
   const yeni = kartId === 'yeni';
   const duzenlenir = yeni || durum === 6 || durum === 1;
   const [v, setV] = useState<KonsultasyonOnizleme | null>(null);
@@ -47,7 +46,7 @@ export function KonsultasyonIstekGovdesi({ kartId, deger, parcalar, bantYok }: {
   }, [kartId, yeni, durum, tazele]);
 
   const soru = String(deger.soru ?? '');
-  const aciliyet = sayi(deger.aciliyet) || 1;
+  const aciliyet = sayiya(deger.aciliyet) || 1;
   const gonder = () => {
     if (!soru.trim()) { mesaj(c('Soru / istek notu zorunlu.')); return }
     if (!deger.hedefBolumId) { mesaj(c('Karşılayan bölümü seçin.')); return }

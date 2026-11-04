@@ -7,6 +7,7 @@ import type { Deger } from '../../../bilesenler/kartAlanCizim';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
 import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
+import { h as kacis } from '../../../bilesenler/htmlGuvenlik';
 
 /**
  * KURUMSAL KALİTE — YGG & KARARLAR (1064, mockup Ekranlar/Kalite2/toplanti_kararlar.html).
@@ -113,8 +114,6 @@ export function ToplantiAraclari({ deger }: { deger: Record<string, Deger> }) {
   return <button type="button" className="d" onClick={() => void tutanakYazdir(Number(deger.id))}>🖨️ {c('Toplantı Tutanağı')}</button>;
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 
 /** A4 toplantı tutanağı: künye, katılımcılar, gündem, kararlar, imza. */
 export async function tutanakYazdir(id: number) {

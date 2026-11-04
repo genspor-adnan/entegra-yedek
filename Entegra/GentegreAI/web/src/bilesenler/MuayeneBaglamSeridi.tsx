@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { c, ilacAdi } from '../dil/ceviri';
 import { HastaKayitPenceresi } from './HastaKayitPenceresi';
+import { metne } from './bicim';
 
 /**
  * MUAYENE BAĞLAM ŞERİDİ (461) — mockup `Ekranlar/Muayene/muayene_karti.html`
@@ -18,7 +19,6 @@ import { HastaKayitPenceresi } from './HastaKayitPenceresi';
 
 type Satir = Record<string, unknown>;
 
-const metin = (v: unknown) => String(v ?? '').trim();
 
 /**
  * ŞERİTTE KISA AD (kullanıcı: "alerji/kronik ve ilaçlar çok yer kaplıyor"):
@@ -72,7 +72,7 @@ export function MuayeneBaslikNumaralari({ muayeneId }: { muayeneId: number }) {
       filtre: { alan: 'id', op: 'esit', deger: muayeneId } })
       .then(y => {
         const r = (y.satirlar?.[0] ?? null) as Satir | null;
-        if (!iptal) setNo(r ? { dosya: metin(r.dosyaNo), protokol: metin(r.protokolNo) } : null);
+        if (!iptal) setNo(r ? { dosya: metne(r.dosyaNo), protokol: metne(r.protokolNo) } : null);
       }).catch(() => { /* baslik zorunlu degil */ });
     return () => { iptal = true };
   }, [muayeneId]);
@@ -136,7 +136,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
 
   if (!(muayeneId > 0)) return null;
 
-  const hastaAdi = metin(ust?.hastaAdi);
+  const hastaAdi = metne(ust?.hastaAdi);
   const hastaIdSerit = Number(ust?.tarafId ?? 0);
   /** Kutuyu tiklanir yapar (fare + klavye). */
   const tikla = (tur: 'alerji' | 'ilac') => hastaIdSerit > 0 ? {
@@ -146,10 +146,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPencere(tur) }
     },
   } : {};
-  const bolum = metin(ust?.bolumAdi);
-  const hekim = metin(ust?.hekimAdi);
-  const cinsiyet = metin(ust?.cinsiyetKisa);
-  const yas = metin(ust?.yasMetni);
+  const bolum = metne(ust?.bolumAdi);
+  const hekim = metne(ust?.hekimAdi);
+  const cinsiyet = metne(ust?.cinsiyetKisa);
+  const yas = metne(ust?.yasMetni);
   // Muayenenin gun icindeki penceresi: "06.09.2026 15:24 – 15:49 · 25 dk".
   //   Bitis bossa muayene SURUYOR - gecen sure yine yazilir.
   const bas = ZAMAN(ust?.baslangic, true);
@@ -198,10 +198,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
                     {yuklendi ? 'Alerji: yok' : 'Alerji: …'}
                   </span>)
             : alerji.slice(0, SERIT_ROZET).map((a, i) => {
-                const ad = metin(a.etken) || metin(a.etkenMadde) || 'Alerji';
+                const ad = metne(a.etken) || metne(a.etkenMadde) || 'Alerji';
                 return (
                   <span key={i} className="rozet hata"
-                        title={`${ad} · ${metin(a.turAdi)} · ${metin(a.reaksiyon)}`}>
+                        title={`${ad} · ${metne(a.turAdi)} · ${metne(a.reaksiyon)}`}>
                     {kisaAd(ad)}
                   </span>
                 );
@@ -211,8 +211,8 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               Alerjilerle birlikte en çok SERIT_ROZET rozet; fazlası "+n". */}
           {kronik.slice(0, Math.max(0, SERIT_ROZET - Math.min(alerji.length, SERIT_ROZET)))
             .map((k, i) => (
-              <span key={`k${i}`} className="rozet uyari" title={metin(k.taniAd) || metin(k.icdKod)}>
-                {metin(k.taniAd) || metin(k.icdKod)}
+              <span key={`k${i}`} className="rozet uyari" title={metne(k.taniAd) || metne(k.icdKod)}>
+                {metne(k.taniAd) || metne(k.icdKod)}
               </span>
             ))}
           {(() => {
@@ -220,8 +220,8 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               + Math.max(0, kronik.length - Math.max(0, SERIT_ROZET - Math.min(alerji.length, SERIT_ROZET)));
             return gizli > 0 && (
               <span className="rozet gri kb-fazla"
-                    title={[...alerji.map(a => metin(a.etken) || metin(a.etkenMadde)),
-                            ...kronik.map(k => metin(k.taniAd) || metin(k.icdKod))].join('\n')}>
+                    title={[...alerji.map(a => metne(a.etken) || metne(a.etkenMadde)),
+                            ...kronik.map(k => metne(k.taniAd) || metne(k.icdKod))].join('\n')}>
                 +{gizli}
               </span>
             );
@@ -242,17 +242,17 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               <>
                 {/* KISA AD, DOZSUZ (kullanıcı: özet): tam ad + doz + etken ipucunda. */}
                 {ilac.slice(0, SERIT_ROZET).map((x, i) => {
-                  const ad = ilacAdi(metin(x.ilacAd));
+                  const ad = ilacAdi(metne(x.ilacAd));
                   return (
                     <span key={i} className="rozet mavi kb-ilac"
-                          title={[ad, metin(x.doz), ilacAdi(metin(x.etkenMadde))].filter(Boolean).join(' · ')}>
+                          title={[ad, metne(x.doz), ilacAdi(metne(x.etkenMadde))].filter(Boolean).join(' · ')}>
                       {kisaAd(ad)}
                     </span>
                   );
                 })}
                 {ilac.length > SERIT_ROZET && (
                   <span className="rozet gri kb-fazla"
-                        title={ilac.slice(SERIT_ROZET).map(x => ilacAdi(metin(x.ilacAd))).join('\n')}>
+                        title={ilac.slice(SERIT_ROZET).map(x => ilacAdi(metne(x.ilacAd))).join('\n')}>
                     +{ilac.length - SERIT_ROZET}
                   </span>
                 )}

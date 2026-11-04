@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useRef, useState, type MouseEvent } from 'react';
 import type { CariDilim, CariIcmal, CariIcmalSatiri } from '../../api/uclar/cariIcmal';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { dovizBakiyeMetni } from '../../bilesenler/grid/satirHucre';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -8,7 +8,6 @@ import { tarihKisa } from '../hasta/icmal/icmalOrtak';
 /** Cari İcmalinin sekme tabloları. Rakamlar sunucudan gelir; burada yalnız gösterim. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 /** Bakiye: + borç (B), - alacak (A) - mutlak değerle. */
 export const bakiyeMetni = (n: number) => (Math.abs(n) < 0.005 ? p(0) : `${p(Math.abs(n))} ${n > 0 ? 'B' : 'A'}`);
 const bakiyeSinifi = (n: number) => (n > 0.005 ? 'kir' : n < -0.005 ? 'ci-yesil' : '');

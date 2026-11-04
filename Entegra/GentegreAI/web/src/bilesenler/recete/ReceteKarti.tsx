@@ -6,6 +6,7 @@ import { GenGrid } from '../GenGrid';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * REÇETE KARTI — mockup `Ekranlar/Muayene/recete_karti.html`.
@@ -39,10 +40,8 @@ export const KULLANIM_SEKILLERI: { kod: number; ad: string }[] = [
   { kod: 7, ad: 'Rektal' },
 ];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 const zaman = (v: unknown) => {
-  const s = metin(v);
+  const s = metne(v);
   if (!s) return '';
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? s : d.toLocaleString('tr-TR', {
@@ -102,17 +101,17 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
       setKart(y.kart);
       setSurum(y.kart.surum);
       setKodAd(y.kodAd ?? {});
-      setTur(sayi(y.kart.tur));
-      setAciklama(metin(y.kart.aciklama));
-      const muayeneId = sayi(y.kart.muayeneId);
-      const hastaId = sayi(y.kart.hastaId);
+      setTur(sayiya(y.kart.tur));
+      setAciklama(metne(y.kart.aciklama));
+      const muayeneId = sayiya(y.kart.muayeneId);
+      const hastaId = sayiya(y.kart.hastaId);
       const [m, a, i, s] = await Promise.all([
         api.liste('muayene', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: muayeneId } })
            .then(r => r.satirlar[0] ?? null).catch(() => null),
         api.liste('hasta-alerji', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
-           .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => null),
+           .then(r => r.satirlar.filter(x => sayiya(x.aktif ?? 1) === 1)).catch(() => null),
         api.liste('hasta-ilac', { sayfa: 1, boyut: 20, filtre: { alan: 'hastaId', op: 'esit', deger: hastaId } })
-           .then(r => r.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)).catch(() => []),
+           .then(r => r.satirlar.filter(x => sayiya(x.aktif ?? 1) === 1)).catch(() => []),
         api.liste('recete-satir', { sayfa: 1, boyut: 200, filtre: { alan: 'receteId', op: 'esit', deger: receteId } })
            .then(r => r.satirlar).catch(() => []),
       ]);
@@ -124,7 +123,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
   useEffect(() => { void yukle() }, [yukle, tazele]);
   useEffect(() => {
     if (!ilacAra || !kart) return;
-    if (sayi(kart.durum) === 1) setAramaAcik(true);
+    if (sayiya(kart.durum) === 1) setAramaAcik(true);
     onIlacAraTamam?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ilacAra, kart]);
@@ -144,13 +143,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     );
   }
 
-  const durum = sayi(kart.durum);
+  const durum = sayiya(kart.durum);
   const taslak = durum === 1;
-  const muayeneId = sayi(kart.muayeneId);
-  const degisti = taslak && (tur !== sayi(kart.tur) || aciklama !== metin(kart.aciklama));
-  const receteNo = metin(kart.receteNo);
-  const uyarilar = satirlar.filter(s => metin(s.uyari) !== '');
-  const toplamKutu = satirlar.reduce((t, s) => t + sayi(s.kutu), 0);
+  const muayeneId = sayiya(kart.muayeneId);
+  const degisti = taslak && (tur !== sayiya(kart.tur) || aciklama !== metne(kart.aciklama));
+  const receteNo = metne(kart.receteNo);
+  const uyarilar = satirlar.filter(s => metne(s.uyari) !== '');
+  const toplamKutu = satirlar.reduce((t, s) => t + sayiya(s.kutu), 0);
   const duzenlenecek = isaretli[0] ?? secili;
 
   const kaydet = () => guvenli(async () => {
@@ -214,7 +213,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
   const ilacCikar = () => guvenli(async () => {
     if (isaretli.length === 0) return;
     if (!await onay(`${isaretli.length} ilaç reçeteden çıkarılacak. Onaylıyor musunuz?`)) return;
-    for (const s of isaretli) await api.receteIlacSil(receteId, sayi(s.id));
+    for (const s of isaretli) await api.receteIlacSil(receteId, sayiya(s.id));
     yenile();
   });
 
@@ -226,18 +225,18 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
     yenile();
   });
 
-  const hastaAdi = metin(muayene?.hastaAdi) || (kodAd.hastaId?.[String(kart.hastaId ?? '')] ?? '');
+  const hastaAdi = metne(muayene?.hastaAdi) || (kodAd.hastaId?.[String(kart.hastaId ?? '')] ?? '');
   const d = DURUM[durum] ?? DURUM[1];
-  const turAdi = TURLER.find(t => t.kod === sayi(kart.tur))?.ad ?? 'Normal';
+  const turAdi = TURLER.find(t => t.kod === sayiya(kart.tur))?.ad ?? 'Normal';
 
   const kimlik = (
           <div className="rk-kimlik">
             <b className="rk-ad">{hastaAdi || '—'}</b>
-            {metin(muayene?.protokolNo) && <span className="sonuk">{c('Protokol')} {metin(muayene?.protokolNo)}</span>}
+            {metne(muayene?.protokolNo) && <span className="sonuk">{c('Protokol')} {metne(muayene?.protokolNo)}</span>}
             <span className="sonuk">
               {c('Muayene')} <b>#{muayeneId}</b>
-              {metin(muayene?.bolumAdi) && ` · ${metin(muayene?.bolumAdi)}`}
-              {metin(muayene?.hekimAdi) && ` · ${metin(muayene?.hekimAdi)}`}
+              {metne(muayene?.bolumAdi) && ` · ${metne(muayene?.bolumAdi)}`}
+              {metne(muayene?.hekimAdi) && ` · ${metne(muayene?.hekimAdi)}`}
             </span>
             <span className="sonuk">{zaman(muayene?.baslangic)}</span>
             <span className="rk-bosluk" />
@@ -245,8 +244,8 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
             <span className="rozet gri">{turAdi} {c('reçete')}</span>
             {alerjiHata && <span className="rozet uyari" title={c('Alerji listesi okunamadı - kartı yenileyin')}>⚠ {c('Alerji: ?')}</span>}
             {alerjiler.slice(0, 3).map((a, i) => (
-              <span key={i} className="rozet hata" title={metin(a.etkenMadde)}>
-                ⚠ {c('Alerji')}: {metin(a.etken) || metin(a.etkenMadde)}
+              <span key={i} className="rozet hata" title={metne(a.etkenMadde)}>
+                ⚠ {c('Alerji')}: {metne(a.etken) || metne(a.etkenMadde)}
               </span>
             ))}
           </div>
@@ -289,12 +288,12 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
           {taslak && aktifIlac.length > 0 && (
             <select className="recete-sablon" value="" aria-label={c('Kullandığı ilaçlardan ekle')}
                     onChange={e => {
-                      const x = aktifIlac.find(a => metin(a.barkod) === e.target.value);
-                      if (x) void ilacEkle(metin(x.barkod), metin(x.ilacAd));
+                      const x = aktifIlac.find(a => metne(a.barkod) === e.target.value);
+                      if (x) void ilacEkle(metne(x.barkod), metne(x.ilacAd));
                     }}>
               <option value="">💊 {c('Kullandığı ilaçlardan…')}</option>
-              {aktifIlac.filter(a => metin(a.barkod)).map((a, i) => (
-                <option key={i} value={metin(a.barkod)}>{metin(a.ilacAd)}</option>
+              {aktifIlac.filter(a => metne(a.barkod)).map((a, i) => (
+                <option key={i} value={metne(a.barkod)}>{metne(a.ilacAd)}</option>
               ))}
             </select>
           )}
@@ -400,7 +399,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
               <div className="rk-bant hata">
                 <b>⚠ {c('Alerji / etkileşim uyarısı')}</b>
                 {uyarilar.map((s, i) => (
-                  <div key={i}><b>{metin(s.ilac)}</b> — {metin(s.uyari)}</div>
+                  <div key={i}><b>{metne(s.ilac)}</b> — {metne(s.uyari)}</div>
                 ))}
                 <div className="sonuk">{c('Hekim gerekçeyle geçti; gerekçe reçete satırında kalır.')}</div>
               </div>
@@ -414,7 +413,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
                 {aktifIlac.length === 0 && <span className="rozet olumlu">{c('Aktif ilaç: yok')}</span>}
                 {aktifIlac.map((x, i) => (
                   <span key={i} className="rozet mavi">
-                    {metin(x.ilacAd)}{metin(x.doz) ? ` · ${metin(x.doz)}` : ''}
+                    {metne(x.ilacAd)}{metne(x.doz) ? ` · ${metne(x.doz)}` : ''}
                   </span>
                 ))}
               </div>
@@ -425,7 +424,7 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
                 <span>{c('Reçete no')}</span><span>{receteNo || '—'}</span>
                 <span>{c('İmza')}</span><span>{zaman(kart.imzaZamani) || c('— (imzalanmadı)')}</span>
                 <span>{c('Medula gönderim')}</span><span>{zaman(kart.medulaGonderim) || '—'}</span>
-                <span>{c('Medula sonucu')}</span><span>{metin(kart.medulaSonuc) || c('Medula kapısı açık değil')}</span>
+                <span>{c('Medula sonucu')}</span><span>{metne(kart.medulaSonuc) || c('Medula kapısı açık değil')}</span>
               </div>
               <p className="not">{c('Bu alanları düğmeler yazar; elle "imzalı" yapılamaz.')}</p>
             </div>
@@ -446,13 +445,13 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
             // Sekmede: üstte hasta bandı (hasta adı / alerji bantta), altında reçetenin kendi rozetleri.
             ustSerit={sayfa ? (
               <>
-                {bantCiz?.(muayeneId, sayi(kart.hastaId))}
+                {bantCiz?.(muayeneId, sayiya(kart.hastaId))}
                 <div className="rk-kimlik">
                   {/* Muayene no sağında tarih, bölüm, hekim (kullanıcı 15.10.2026). */}
                   <span className="sonuk">{c('Muayene')} <b>#{muayeneId}</b>
                     {zaman(muayene?.baslangic) && ` · ${zaman(muayene?.baslangic)}`}
-                    {metin(muayene?.bolumAdi) && ` · ${metin(muayene?.bolumAdi)}`}
-                    {metin(muayene?.hekimAdi) && ` · ${metin(muayene?.hekimAdi)}`}</span>
+                    {metne(muayene?.bolumAdi) && ` · ${metne(muayene?.bolumAdi)}`}
+                    {metne(muayene?.hekimAdi) && ` · ${metne(muayene?.hekimAdi)}`}</span>
                   <span className="rk-bosluk" />
                   <span className={`rozet ${d.sinif}`}>{d.ad}</span>
                   <span className="rozet gri">{turAdi} {c('reçete')}</span>
@@ -522,27 +521,27 @@ export function ReceteKarti({ receteId, onKapat, onDegisti, gomulu, ekAraclar, i
 function ReceteSatirPenceresi({ receteId, satir, onKapat, onKaydedildi }: {
   receteId: number; satir: ListeSatiri; onKapat(): void; onKaydedildi(): void;
 }) {
-  const [doz, setDoz] = useState(metin(satir.doz));
-  const [periyot, setPeriyot] = useState(metin(satir.periyot));
-  const [kullanim, setKullanim] = useState(sayi(satir.kullanimSekli));
-  const [sure, setSure] = useState(sayi(satir.sureGun));
-  const [kutu, setKutu] = useState(Math.max(1, sayi(satir.kutu)));
-  const [tarif, setTarif] = useState(metin(satir.aciklama));
+  const [doz, setDoz] = useState(metne(satir.doz));
+  const [periyot, setPeriyot] = useState(metne(satir.periyot));
+  const [kullanim, setKullanim] = useState(sayiya(satir.kullanimSekli));
+  const [sure, setSure] = useState(sayiya(satir.sureGun));
+  const [kutu, setKutu] = useState(Math.max(1, sayiya(satir.kutu)));
+  const [tarif, setTarif] = useState(metne(satir.aciklama));
 
   const kaydet = () => guvenli(async () => {
-    await api.receteSatirGuncelle(receteId, sayi(satir.id), {
+    await api.receteSatirGuncelle(receteId, sayiya(satir.id), {
       doz, periyot, kullanimSekli: kullanim, sureGun: sure, kutu, aciklama: tarif });
     onKaydedildi();
   });
 
   return (
-    <Modal baslik={`${c('İlaç')} — ${metin(satir.ilac)}`} dar enUst buyutmeYok onKapat={onKapat}
+    <Modal baslik={`${c('İlaç')} — ${metne(satir.ilac)}`} dar enUst buyutmeYok onKapat={onKapat}
            alt={<>
              <button type="button" className="d bir" onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
              <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
            </>}>
       <div className="rk-satir">
-        <p className="sonuk">{metin(satir.barkod)}{metin(satir.etkenMadde) ? ` · ${metin(satir.etkenMadde)}` : ''}</p>
+        <p className="sonuk">{metne(satir.barkod)}{metne(satir.etkenMadde) ? ` · ${metne(satir.etkenMadde)}` : ''}</p>
         <label>{c('Doz')}<input value={doz} maxLength={20} onChange={e => setDoz(e.target.value)} placeholder="1x1" /></label>
         <label>{c('Periyot')}<input value={periyot} maxLength={20} onChange={e => setPeriyot(e.target.value)} placeholder="3x1" /></label>
         <label>{c('Kullanım')}

@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * KULLANILAN İLAÇ KARTI — mockup `Ekranlar/Muayene/kullanilan_ilac_karti.html`.
@@ -21,9 +22,7 @@ const KAYNAKLAR = [{ kod: 1, ad: 'Reçete' }, { kod: 2, ad: 'Hasta beyanı' }, {
 const UYUMLAR = [{ kod: 1, ad: 'Düzenli', sinif: 'u1' }, { kod: 2, ad: 'Aralıklı', sinif: 'u2' },
                  { kod: 3, ad: 'Bırakmış', sinif: 'u3' }];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
-const gun = (v: unknown) => metin(v).slice(0, 10);
+const gun = (v: unknown) => metne(v).slice(0, 10);
 const bugun = () => new Date().toISOString().slice(0, 10);
 const kucuk = (s: string) => s.toLocaleLowerCase('tr');
 
@@ -69,10 +68,10 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
         if (iptal) return;
         const k = y.kart;
         const v: Deger = {
-          hastaId: sayi(k.hastaId), ilacBarkod: metin(k.ilacBarkod), ilacAd: metin(k.ilacAd),
-          etkenMadde: metin(k.etkenMadde), doz: metin(k.doz), periyot: metin(k.periyot),
-          baslangic: gun(k.baslangic), bitis: gun(k.bitis), kaynak: sayi(k.kaynak) || 2,
-          uyum: sayi(k.uyum) || 1, aktif: sayi(k.aktif ?? 1),
+          hastaId: sayiya(k.hastaId), ilacBarkod: metne(k.ilacBarkod), ilacAd: metne(k.ilacAd),
+          etkenMadde: metne(k.etkenMadde), doz: metne(k.doz), periyot: metne(k.periyot),
+          baslangic: gun(k.baslangic), bitis: gun(k.bitis), kaynak: sayiya(k.kaynak) || 2,
+          uyum: sayiya(k.uyum) || 1, aktif: sayiya(k.aktif ?? 1),
         };
         setD(v); setIlk(v); setSurum(k.surum);
         if (!hastaAdi) setHastaAdi(y.kodAd?.hastaId?.[String(k.hastaId ?? '')] ?? '');
@@ -88,12 +87,12 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
     let iptal = false;
     const f = { alan: 'hastaId', op: 'esit' as const, deger: d.hastaId };
     void api.liste('hasta-ilac', { sayfa: 1, boyut: 30, filtre: f })
-      .then(y => { if (!iptal) setDigerleri(y.satirlar.filter(x => sayi(x.id) !== kayitId)) }).catch(() => {});
+      .then(y => { if (!iptal) setDigerleri(y.satirlar.filter(x => sayiya(x.id) !== kayitId)) }).catch(() => {});
     void api.liste('hasta-alerji', { sayfa: 1, boyut: 30, filtre: f })
-      .then(y => { if (!iptal) setAlerjiler(y.satirlar.filter(x => sayi(x.aktif ?? 1) === 1)) }).catch(() => {});
+      .then(y => { if (!iptal) setAlerjiler(y.satirlar.filter(x => sayiya(x.aktif ?? 1) === 1)) }).catch(() => {});
     if (!hastaAdi)
       void api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: d.hastaId } })
-        .then(h => { if (!iptal) setHastaAdi(metin(h.satirlar[0]?.unvan)) }).catch(() => {});
+        .then(h => { if (!iptal) setHastaAdi(metne(h.satirlar[0]?.unvan)) }).catch(() => {});
     return () => { iptal = true };
   }, [d.hastaId, kayitId]);
 
@@ -115,8 +114,8 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
   }, [arama]);
 
   const ilacSec = (r: ListeSatiri) => {
-    setD(o => ({ ...o, ilacBarkod: metin(r.barkod), ilacAd: metin(r.ad), etkenMadde: metin(r.etkenMadde) }));
-    setAtc(metin(r.atcKod));
+    setD(o => ({ ...o, ilacBarkod: metne(r.barkod), ilacAd: metne(r.ad), etkenMadde: metne(r.etkenMadde) }));
+    setAtc(metne(r.atcKod));
     setArama(''); setOneriler([]);
   };
 
@@ -124,7 +123,7 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
   const madde = kucuk(d.etkenMadde);
   const cakisan = madde
     ? alerjiler.filter(a => {
-        const m = kucuk(metin(a.etkenMadde) || metin(a.etken));
+        const m = kucuk(metne(a.etkenMadde) || metne(a.etken));
         return m.length >= 3 && (madde.includes(m) || m.includes(madde));
       })
     : [];
@@ -171,10 +170,10 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
             )}
             <span className="rk-bosluk" />
             {alerjiler.slice(0, 3).map((a, i) => (
-              <span key={`a${i}`} className="rozet hata">{c('Alerji')}: {metin(a.etken) || metin(a.etkenMadde)}</span>
+              <span key={`a${i}`} className="rozet hata">{c('Alerji')}: {metne(a.etken) || metne(a.etkenMadde)}</span>
             ))}
-            {digerleri.filter(x => sayi(x.aktif ?? 1) === 1).slice(0, 2).map((x, i) => (
-              <span key={`i${i}`} className="rozet mavi">{c('Aktif')}: {metin(x.ilacAd)}</span>
+            {digerleri.filter(x => sayiya(x.aktif ?? 1) === 1).slice(0, 2).map((x, i) => (
+              <span key={`i${i}`} className="rozet mavi">{c('Aktif')}: {metne(x.ilacAd)}</span>
             ))}
           </div>
         )}
@@ -206,8 +205,8 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
                     <div className="ak-oneri" role="listbox">
                       {oneriler.map((r, i) => (
                         <button key={i} type="button" role="option" onClick={() => ilacSec(r)}>
-                          <b>{metin(r.ad)}</b>
-                          <span className="sonuk">{metin(r.etkenMadde)}{metin(r.atcKod) ? ` · ${metin(r.atcKod)}` : ''}</span>
+                          <b>{metne(r.ad)}</b>
+                          <span className="sonuk">{metne(r.etkenMadde)}{metne(r.atcKod) ? ` · ${metne(r.atcKod)}` : ''}</span>
                         </button>
                       ))}
                     </div>
@@ -289,7 +288,7 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
                 : cakisan.length > 0 ? (
                   <div className="rk-bant hata">
                     <b>⚠ {d.etkenMadde}</b>
-                    {cakisan.map((a, i) => <div key={i}>{c('Alerji')}: {metin(a.etken) || metin(a.etkenMadde)}</div>)}
+                    {cakisan.map((a, i) => <div key={i}>{c('Alerji')}: {metne(a.etken) || metne(a.etkenMadde)}</div>)}
                     <div className="sonuk">{c('Kayıt engellenmez; hekim bilgilendirilir.')}</div>
                   </div>
                 ) : <span className="rozet olumlu">{d.etkenMadde}: {c('hasta alerjileriyle çakışma yok')}</span>}
@@ -299,11 +298,11 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
               {digerleri.length === 0 ? <span className="rozet olumlu">{c('Başka ilaç yok')}</span> : (
                 <ul className="ak-liste">
                   {digerleri.map((x, i) => {
-                    const aktif = sayi(x.aktif ?? 1) === 1;
+                    const aktif = sayiya(x.aktif ?? 1) === 1;
                     return (
                       <li key={i} className={aktif ? '' : 'sonuk'}>
                         <span className={`rozet ${aktif ? 'mavi' : 'gri'}`}>{aktif ? c('Aktif') : c('Bıraktı')}</span>{' '}
-                        {metin(x.ilacAd)}{metin(x.doz) ? ` · ${metin(x.doz)}` : ''}
+                        {metne(x.ilacAd)}{metne(x.doz) ? ` · ${metne(x.doz)}` : ''}
                       </li>
                     );
                   })}
@@ -317,7 +316,7 @@ export function IlacKaydiKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, o
       {hastaSec && (
         <KaynakArama kaynak="hasta" baslik={c('Hasta seç')} kodAlani="kod" adAlani="unvan"
           onKapat={() => setHastaSec(false)}
-          onSec={r => { setHastaSec(false); yaz('hastaId', sayi(r.id)); setHastaAdi(metin(r.unvan)) }} />
+          onSec={r => { setHastaSec(false); yaz('hastaId', sayiya(r.id)); setHastaAdi(metne(r.unvan)) }} />
       )}
     </>
   );

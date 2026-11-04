@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { h as kacis } from '../../bilesenler/htmlGuvenlik';
 
 /**
  * KURUMSAL KALİTE (1067) kalibrasyon liste aksiyonları - mockup
@@ -20,8 +21,6 @@ export async function kysKalibrasyonAksiyonu(kod: string, _satir: ListeSatiri | 
   return false;
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 const tarih = (s: unknown) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? ''));
   return m ? `${m[3]}.${m[2]}.${m[1]}` : '';

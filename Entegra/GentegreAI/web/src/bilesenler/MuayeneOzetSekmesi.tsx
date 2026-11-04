@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { tarihSaat } from './bicim';
+import { tarihSaat, sayiya } from './bicim';
 import { c, ilacAdi } from '../dil/ceviri';
 import { Modal } from './Modal';
 import { KendimeNotPenceresi, useKendimeNotVar } from './KendimeNot';
@@ -22,7 +22,6 @@ import type { SekmeVerisi } from './MuayeneSekmeleri';
  */
 type Satir = Record<string, unknown>;
 const m = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 
 /** Kontrol listesinden tetiklenen, sekme dışında yaşayan eylemler (kart
     penceresinin state'i: istem sepeti, ICD araması, reçete ilaç araması). */
@@ -69,14 +68,14 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
     // EKRANDAKI satirlar (kaydedilmemis degisiklik dahil - kullanici: "yazdiklarim
     //   ozete yansimadi"); metin sunucuda ayni kuralla derlenir, YAZILMAZ.
     const satirlar = (baglam.detaySatirlari('bulgular') as Satir[])
-      .filter(r => sayi(r.sablonAlanId) > 0)
+      .filter(r => sayiya(r.sablonAlanId) > 0)
       .map(r => ({
-        sablonAlanId: sayi(r.sablonAlanId),
-        normal: r.normal === true || sayi(r.normal) === 1,
+        sablonAlanId: sayiya(r.sablonAlanId),
+        normal: r.normal === true || sayiya(r.normal) === 1,
         degerMetin: m(r.degerMetin) || null,
         degerSayi: r.degerSayi === null || r.degerSayi === undefined || r.degerSayi === ''
           ? null : Number(r.degerSayi),
-        taraf: r.taraf === null || r.taraf === undefined || r.taraf === '' ? null : sayi(r.taraf),
+        taraf: r.taraf === null || r.taraf === undefined || r.taraf === '' ? null : sayiya(r.taraf),
       }));
     void api.muayeneBulguMetniOnizle(muayeneId, satirlar)
       .then(y => { if (!iptal) setBulguMetni(y.metin) }).catch(() => {});
@@ -94,25 +93,25 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
   // VİTAL: detay satırları sunucuda "zaman desc" sıralı - ilk satır son ölçüm.
   const v = baglam.detaySatirlari('vitaller')[0] as Satir | undefined;
   const vitalMetin = v ? [
-    sayi(v.sistolik) > 0 ? `TA ${m(v.sistolik)}/${m(v.diyastolik)} mmHg` : '',
-    sayi(v.nabiz) > 0 ? `Nabız ${m(v.nabiz)}/dk` : '',
-    sayi(v.spo2) > 0 ? `SpO₂ %${m(v.spo2)}` : '',
+    sayiya(v.sistolik) > 0 ? `TA ${m(v.sistolik)}/${m(v.diyastolik)} mmHg` : '',
+    sayiya(v.nabiz) > 0 ? `Nabız ${m(v.nabiz)}/dk` : '',
+    sayiya(v.spo2) > 0 ? `SpO₂ %${m(v.spo2)}` : '',
     m(v.ates) ? `Ateş ${m(v.ates).replace('.', ',')} °C` : '',
-    sayi(v.solunum) > 0 ? `SS ${m(v.solunum)}/dk` : '',
+    sayiya(v.solunum) > 0 ? `SS ${m(v.solunum)}/dk` : '',
     m(v.agriVas) ? `VAS ${m(v.agriVas)}/10` : '',
     m(v.bki) ? `BKİ ${m(v.bki).replace('.', ',')}` : '',
   ].filter(Boolean).join(' · ') : '';
 
   // TANI: tür 1 = ana tanı (sunucunun ux_tani_ana kuralıyla aynı kod).
   const tanilar = baglam.detaySatirlari('tanilar') as Satir[];
-  const ana = tanilar.find(t => sayi(t.tur) === 1);
+  const ana = tanilar.find(t => sayiya(t.tur) === 1);
 
-  const bekleyenLab = (sonuc?.istemler ?? []).filter(i => ![5, 9].includes(sayi(i.durum ?? 1)));
+  const bekleyenLab = (sonuc?.istemler ?? []).filter(i => ![5, 9].includes(sayiya(i.durum ?? 1)));
   const bekleyenRad = (sonuc?.radyoloji ?? []).filter(r => !r.onayTarihi);
   // ANORMAL SONUÇ: yalnız bayraklı (H/L/HH/LL) ya da panik - normal değerler
   //   özete yazılmaz, sekmede duruyor.
   const anormal = (sonuc?.sonuclar ?? []).filter(s =>
-    m(s.deger) && (sayi(s.panik) === 1 || ['H', 'L', 'HH', 'LL'].includes(m(s.bayrak))));
+    m(s.deger) && (sayiya(s.panik) === 1 || ['H', 'L', 'HH', 'LL'].includes(m(s.bayrak))));
 
   const ilaclar = (sekme?.receteSatirlari ?? []) as Satir[];
 
@@ -222,8 +221,8 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
                 {t === ana && <span className="rozet mavi moz-r">{c('Ana')}</span>}</span>)))}
             {anormal.length > 0 && bolum(c('Tetkik'), anormal.map((s, i) => (
               <span key={i}>{i > 0 ? ' · ' : ''}
-                <span className={sayi(s.panik) === 1 ? 'moz-panik' : ''}>
-                  {m(s.ad)} {m(s.deger)} {m(s.birim)} ({sayi(s.panik) === 1 ? c('panik') : m(s.bayrak)})</span></span>)))}
+                <span className={sayiya(s.panik) === 1 ? 'moz-panik' : ''}>
+                  {m(s.ad)} {m(s.deger)} {m(s.birim)} ({sayiya(s.panik) === 1 ? c('panik') : m(s.bayrak)})</span></span>)))}
             {ilaclar.length > 0 && bolum(c('Tedavi'),
               ilaclar.map(r => ilacAdi(m(r.ilac))).join(' · '))}
             {m(d.karar) && bolum(c('Değerlendirme / Sonuç'), m(d.karar))}
@@ -284,9 +283,9 @@ export function MuayeneOzetSekmesi({ baglam, muayeneId, sekme, tazele, eylemler,
               {bekleyenLab.length + bekleyenRad.length === 0 && <li className="not">{c('Bekleyen istem yok.')}</li>}
               {bekleyenLab.map((i, n) => (
                 <li key={`l${n}`}>
-                  {sayi(i.oncelik) === 3 && <span className="rozet hata">{c('Acil')}</span>}
+                  {sayiya(i.oncelik) === 3 && <span className="rozet hata">{c('Acil')}</span>}
                   {c('Lab')} {m(i.istemNo)}
-                  <span className="moz-sp not">{sayi(i.onayli)}/{sayi(i.tetkik)} {c('onaylı')}</span>
+                  <span className="moz-sp not">{sayiya(i.onayli)}/{sayiya(i.tetkik)} {c('onaylı')}</span>
                 </li>
               ))}
               {bekleyenRad.map((r, n) => (

@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { tarihSaat, tarihYaz } from '../bicim';
 import { YAZDIR_ETIKETI } from '../yazdirBetigi';
+import { h as kacis } from '../htmlGuvenlik';
 
 /**
  * PERSONEL KARTI "BELGELER" SEKMESİ (1135-1137, mockup Ekranlar/IK/personel_belge_takibi.html (1)).
@@ -347,7 +348,6 @@ function Hareketler({ personelId }: { personelId: number }) {
   );
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
 /** Mockup "Özlük dosyası kontrol listesi": belge listesi imza alanıyla yazdırılır (yeni pencere). */
 function kontrolListesi(ad: string, durumlar: Satir[]) {

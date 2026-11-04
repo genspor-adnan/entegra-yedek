@@ -1,6 +1,6 @@
 import { useRef, type MouseEvent } from 'react';
 import type { HekimPerformansIcmali, PerformansDegeri } from '../../api/uclar/hekimPerformans';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { KartAdi } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { AY_KISA, degisimRozeti } from './performansOrtak';
@@ -8,7 +8,6 @@ import { AY_KISA, degisimRozeti } from './performansOrtak';
 /** Hekim performans icmalinin sekme tabloları. Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 /** Ortak değer sütunları (hekim ve bölüm tablosu aynı sırada). */
 const BASLIKLAR = ['Başvuru', 'Hizmet', 'Ciro', 'Kurum %', 'Hasta Payı', 'İskonto', 'Tahsil', 'Hakediş', 'Değişim'];

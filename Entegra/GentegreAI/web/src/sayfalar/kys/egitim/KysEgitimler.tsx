@@ -6,6 +6,7 @@ import { guvenli, mesaj } from '../../../bilesenler/mesaj';
 import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
 import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
+import { h as kacis } from '../../../bilesenler/htmlGuvenlik';
 
 /**
  * KURUMSAL KALİTE — EĞİTİM & YETKİNLİK (1065, mockup Ekranlar/Kalite2/egitim.html).
@@ -109,8 +110,6 @@ export function KysEgitimler() {
   );
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 
 /** A4 yıllık eğitim planı: bu yılın eğitimleri + zorunlu eğitim tanımları. */
 async function yillikPlan(egitimler: ListeSatiri[]) {

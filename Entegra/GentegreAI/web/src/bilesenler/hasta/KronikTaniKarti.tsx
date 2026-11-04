@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * KRONİK TANI KARTI — mockup `Ekranlar/Muayene/kronik_tani_karti.html`.
@@ -25,9 +26,7 @@ const DURUMLAR = [
 const KAYNAKLAR = [{ kod: 1, ad: 'Hekim' }, { kod: 2, ad: 'Hasta beyanı' }, { kod: 3, ad: 'e-Nabız' },
                    { kod: 4, ad: 'Dış kurum' }];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
-const gun = (v: unknown) => metin(v).slice(0, 10);
+const gun = (v: unknown) => metne(v).slice(0, 10);
 const bugun = () => new Date().toISOString().slice(0, 10);
 
 interface Deger {
@@ -70,12 +69,12 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
       const y = await api.kartOku('hasta-kronik', kid);
       const k = y.kart;
       const v: Deger = {
-        hastaId: sayi(k.hastaId), icdKod: metin(k.icdKod), taniAd: metin(k.taniAd),
+        hastaId: sayiya(k.hastaId), icdKod: metne(k.icdKod), taniAd: metne(k.taniAd),
         baslangic: gun(k.baslangic), bitis: gun(k.bitis),
-        takipHekimId: k.takipHekimId == null ? null : sayi(k.takipHekimId),
-        durum: sayi(k.durum) || 1, kaynak: sayi(k.kaynak) || 1,
-        kayitMuayeneId: k.kayitMuayeneId == null ? null : sayi(k.kayitMuayeneId),
-        notMetni: metin(k.notMetni),
+        takipHekimId: k.takipHekimId == null ? null : sayiya(k.takipHekimId),
+        durum: sayiya(k.durum) || 1, kaynak: sayiya(k.kaynak) || 1,
+        kayitMuayeneId: k.kayitMuayeneId == null ? null : sayiya(k.kayitMuayeneId),
+        notMetni: metne(k.notMetni),
       };
       setKayitId(kid); setD(v); setIlk(v); setSurum(k.surum);
       if (!hastaAdi) setHastaAdi(y.kodAd?.hastaId?.[String(k.hastaId ?? '')] ?? '');
@@ -97,10 +96,10 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
     if (!(d.hastaId > 0)) { setDigerleri([]); return }
     let iptal = false;
     void api.liste('hasta-kronik', { sayfa: 1, boyut: 30, filtre: { alan: 'hastaId', op: 'esit', deger: d.hastaId } })
-      .then(y => { if (!iptal) setDigerleri(y.satirlar.filter(x => sayi(x.id) !== kayitId)) }).catch(() => {});
+      .then(y => { if (!iptal) setDigerleri(y.satirlar.filter(x => sayiya(x.id) !== kayitId)) }).catch(() => {});
     if (!hastaAdi)
       void api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: d.hastaId } })
-        .then(h => { if (!iptal) setHastaAdi(metin(h.satirlar[0]?.unvan)) }).catch(() => {});
+        .then(h => { if (!iptal) setHastaAdi(metne(h.satirlar[0]?.unvan)) }).catch(() => {});
     return () => { iptal = true };
   }, [d.hastaId, kayitId]);
 
@@ -119,16 +118,16 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
   }, [arama]);
 
   const icdSec = async (r: ListeSatiri) => {
-    const kod = metin(r.kod);
+    const kod = metne(r.kod);
     setArama(''); setOneriler([]);
     // MUKERRER: yeni kayitta ayni kod gecmise alinmamis bir kayitta varsa ona gec.
     const mevcut = kayitId === null
-      ? digerleri.find(x => metin(x.icdKod) === kod && sayi(x.durum) !== 3) : undefined;
+      ? digerleri.find(x => metne(x.icdKod) === kod && sayiya(x.durum) !== 3) : undefined;
     if (mevcut && await onay(`${kod} bu hastada zaten kayıtlı. Mevcut kayıt açılsın mı?`)) {
-      await oku(sayi(mevcut.id));
+      await oku(sayiya(mevcut.id));
       return;
     }
-    setD(o => ({ ...o, icdKod: kod, taniAd: metin(r.ad) }));
+    setD(o => ({ ...o, icdKod: kod, taniAd: metne(r.ad) }));
   };
 
   const govde = (v: Deger): Record<string, unknown> => ({
@@ -176,9 +175,9 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
             )}
             {d.kayitMuayeneId ? <span className="sonuk">{c('Muayene')} <b>#{d.kayitMuayeneId}</b></span> : null}
             <span className="rk-bosluk" />
-            {digerleri.filter(x => sayi(x.durum) !== 3).slice(0, 3).map((x, i) => (
-              <span key={i} className={`rozet ${durumRozet(sayi(x.durum))}`}>
-                {c('Mevcut')}: {metin(x.icdKod)} {metin(x.taniAd)}
+            {digerleri.filter(x => sayiya(x.durum) !== 3).slice(0, 3).map((x, i) => (
+              <span key={i} className={`rozet ${durumRozet(sayiya(x.durum))}`}>
+                {c('Mevcut')}: {metne(x.icdKod)} {metne(x.taniAd)}
               </span>
             ))}
           </div>
@@ -211,7 +210,7 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
                     <div className="ak-oneri" role="listbox">
                       {oneriler.map((r, i) => (
                         <button key={i} type="button" role="option" onClick={() => void icdSec(r)}>
-                          <b>{metin(r.kod)}</b> {metin(r.ad)}
+                          <b>{metne(r.kod)}</b> {metne(r.ad)}
                         </button>
                       ))}
                     </div>
@@ -283,9 +282,9 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
               {digerleri.length === 0 ? <span className="rozet olumlu">{c('Başka kronik tanı yok')}</span> : (
                 <ul className="ak-liste">
                   {digerleri.map((x, i) => (
-                    <li key={i} className={sayi(x.durum) === 3 ? 'sonuk' : ''}>
-                      <span className={`rozet ${durumRozet(sayi(x.durum))}`}>{durumAdi(sayi(x.durum))}</span>{' '}
-                      {metin(x.icdKod)} {metin(x.taniAd)}
+                    <li key={i} className={sayiya(x.durum) === 3 ? 'sonuk' : ''}>
+                      <span className={`rozet ${durumRozet(sayiya(x.durum))}`}>{durumAdi(sayiya(x.durum))}</span>{' '}
+                      {metne(x.icdKod)} {metne(x.taniAd)}
                     </li>
                   ))}
                 </ul>
@@ -298,7 +297,7 @@ export function KronikTaniKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
       {hastaSec && (
         <KaynakArama kaynak="hasta" baslik={c('Hasta seç')} kodAlani="kod" adAlani="unvan"
           onKapat={() => setHastaSec(false)}
-          onSec={r => { setHastaSec(false); yaz('hastaId', sayi(r.id)); setHastaAdi(metin(r.unvan)) }} />
+          onSec={r => { setHastaSec(false); yaz('hastaId', sayiya(r.id)); setHastaAdi(metne(r.unvan)) }} />
       )}
     </>
   );

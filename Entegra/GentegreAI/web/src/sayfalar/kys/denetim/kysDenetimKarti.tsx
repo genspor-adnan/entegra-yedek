@@ -7,6 +7,7 @@ import { useOturum } from '../../../kimlik/OturumBaglami';
 import type { Deger } from '../../../bilesenler/kartAlanCizim';
 import { c } from '../../../dil/ceviri';
 import { dofAcmaYolu } from '../../liste/kysOlayRiskAksiyonlari';
+import { h as kacis } from '../../../bilesenler/htmlGuvenlik';
 
 /**
  * KURUMSAL KALİTE — İÇ DENETİM KARTI ekleri (1061, mockup
@@ -48,8 +49,6 @@ export function BulguDofHucresi({ satir, doflar }: { satir: Record<string, unkno
   return <button type="button" className="d mini" onClick={ac}>🛠️ {c('DÖF Aç')}</button>;
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 const tarih = (s: unknown) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? ''));
   return m ? `${m[3]}.${m[2]}.${m[1]}` : '';

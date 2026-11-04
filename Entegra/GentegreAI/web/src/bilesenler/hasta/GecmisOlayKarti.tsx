@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { sayiya, metne } from '../bicim';
 
 /**
  * GEÇMİŞ OLAY KARTI — mockup `Ekranlar/Muayene/gecmis_olay_karti.html`.
@@ -37,9 +38,7 @@ const OLAY_ETIKETI: Record<number, string> = {
 const KAYNAKLAR = [{ kod: 1, ad: 'Hekim' }, { kod: 2, ad: 'Hasta beyanı' }, { kod: 3, ad: 'e-Nabız' },
                    { kod: 4, ad: 'Dış kurum' }];
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
-const gun = (v: unknown) => metin(v).slice(0, 10);
+const gun = (v: unknown) => metne(v).slice(0, 10);
 /** 1 Ocak tarihi "yalnız yıl" girişidir: yalnız yıl gösterilir. */
 export const olayTarihi = (v: unknown) => {
   const s = gun(v);
@@ -90,8 +89,8 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
       const y = await api.kartOku('hasta-gecmis', kid);
       const k = y.kart;
       const v: Deger = {
-        hastaId: sayi(k.hastaId), tur: sayi(k.tur) || 1, ad: metin(k.ad), kod: metin(k.kod),
-        tarih: gun(k.tarih), kurum: metin(k.kurum), notMetni: metin(k.notMetni), kaynak: sayi(k.kaynak) || 2,
+        hastaId: sayiya(k.hastaId), tur: sayiya(k.tur) || 1, ad: metne(k.ad), kod: metne(k.kod),
+        tarih: gun(k.tarih), kurum: metne(k.kurum), notMetni: metne(k.notMetni), kaynak: sayiya(k.kaynak) || 2,
       };
       setKayitId(kid); setD(v); setIlk(v); setSurum(k.surum); setArama('');
       setYalnizYil(v.tarih.endsWith('-01-01'));
@@ -113,7 +112,7 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
       }).catch(() => {});
     if (!hastaAdi)
       void api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: d.hastaId } })
-        .then(h => { if (!iptal) setHastaAdi(metin(h.satirlar[0]?.unvan)) }).catch(() => {});
+        .then(h => { if (!iptal) setHastaAdi(metne(h.satirlar[0]?.unvan)) }).catch(() => {});
     return () => { iptal = true };
   }, [d.hastaId, tazele]);
 
@@ -137,8 +136,8 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
 
   const oneriSec = (r: ListeSatiri) => {
     // Aşıda SKRS kodu varsa o (e-Nabız aşı kaydıyla karşılaştırılan kod).
-    const kod = d.tur === 4 ? (metin(r.skrsKod) || metin(r.kod)) : metin(r.kod);
-    setD(o => ({ ...o, ad: metin(r.ad), kod }));
+    const kod = d.tur === 4 ? (metne(r.skrsKod) || metne(r.kod)) : metne(r.kod);
+    setD(o => ({ ...o, ad: metne(r.ad), kod }));
     setArama(''); setOneriler([]);
   };
 
@@ -184,7 +183,7 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
 
   const tur = turBul(d.tur);
   const katalogVar = d.tur === 1 || d.tur === 2 || d.tur === 4;
-  const gorunen = suzgec ? olaylar.filter(o => sayi(o.tur) === suzgec) : olaylar;
+  const gorunen = suzgec ? olaylar.filter(o => sayiya(o.tur) === suzgec) : olaylar;
   const yilDegeri = d.tarih ? d.tarih.slice(0, 4) : '';
 
   return (
@@ -244,8 +243,8 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
                     <div className="ak-oneri" role="listbox">
                       {oneriler.map((r, i) => (
                         <button key={i} type="button" role="option" onClick={() => oneriSec(r)}>
-                          <b>{metin(r.ad)}</b>
-                          <span className="sonuk">{d.tur === 4 ? (metin(r.skrsKod) || metin(r.kod)) : `SUT ${metin(r.kod)}`}</span>
+                          <b>{metne(r.ad)}</b>
+                          <span className="sonuk">{d.tur === 4 ? (metne(r.skrsKod) || metne(r.kod)) : `SUT ${metne(r.kod)}`}</span>
                         </button>
                       ))}
                     </div>
@@ -306,7 +305,7 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
               <h6>{c('Hastanın geçmişi')}</h6>
               <div className="go-filtre">
                 <button type="button" className={suzgec === 0 ? 'on' : ''} onClick={() => setSuzgec(0)}>{c('Tümü')}</button>
-                {TURLER.filter(t => olaylar.some(o => sayi(o.tur) === t.kod)).map(t => (
+                {TURLER.filter(t => olaylar.some(o => sayiya(o.tur) === t.kod)).map(t => (
                   <button key={t.kod} type="button" className={suzgec === t.kod ? 'on' : ''}
                           onClick={() => setSuzgec(t.kod)}>{t.ad}</button>
                 ))}
@@ -314,14 +313,14 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
               {gorunen.length === 0 ? <span className="sonuk">{c('Kayıtlı olay yok.')}</span> : (
                 <ul className="go-cizgi">
                   {gorunen.map(o => {
-                    const t = turBul(sayi(o.tur));
-                    const secili = sayi(o.id) === kayitId;
+                    const t = turBul(sayiya(o.tur));
+                    const secili = sayiya(o.id) === kayitId;
                     return (
-                      <li key={sayi(o.id)} style={{ ['--go-renk' as string]: t.renk }} className={secili ? 'secili' : ''}>
-                        <button type="button" onClick={() => void oku(sayi(o.id))}
+                      <li key={sayiya(o.id)} style={{ ['--go-renk' as string]: t.renk }} className={secili ? 'secili' : ''}>
+                        <button type="button" onClick={() => void oku(sayiya(o.id))}
                                 title={c('Bu olayı aç')}>
                           <span className="go-yil-etiket">{olayTarihi(o.tarih) || '—'}</span>
-                          <span>{metin(o.ad)} <span className="sonuk">· {t.ad}{metin(o.kurum) ? ` · ${metin(o.kurum)}` : ''}</span></span>
+                          <span>{metne(o.ad)} <span className="sonuk">· {t.ad}{metne(o.kurum) ? ` · ${metne(o.kurum)}` : ''}</span></span>
                         </button>
                       </li>
                     );
@@ -336,7 +335,7 @@ export function GecmisOlayKarti({ id, hastaId: ilkHasta, hastaAdi: ilkHastaAdi, 
       {hastaSec && (
         <KaynakArama kaynak="hasta" baslik={c('Hasta seç')} kodAlani="kod" adAlani="unvan"
           onKapat={() => setHastaSec(false)}
-          onSec={r => { setHastaSec(false); yaz('hastaId', sayi(r.id)); setHastaAdi(metin(r.unvan)) }} />
+          onSec={r => { setHastaSec(false); yaz('hastaId', sayiya(r.id)); setHastaAdi(metne(r.unvan)) }} />
       )}
     </>
   );

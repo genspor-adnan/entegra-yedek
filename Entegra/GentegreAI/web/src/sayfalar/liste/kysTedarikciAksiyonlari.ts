@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { h as kacis } from '../../bilesenler/htmlGuvenlik';
 
 /** DÖF kaynak türü (1048 sözleşmesi): 8 tedarikçi. kaynakId = tedarikçinin taraf id'si. */
 const KAYNAK_TEDARIKCI = 8;
@@ -39,8 +40,6 @@ export async function kysTedarikciAksiyonu(kod: string, satir: ListeSatiri | nul
   return true;
 }
 
-const kacis = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, ch =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
 const tarih = (s: unknown) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? ''));
   return m ? `${m[3]}.${m[2]}.${m[1]}` : '';

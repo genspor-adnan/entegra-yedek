@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { tarihSaat } from './bicim';
+import { tarihSaat, sayiya, metne } from './bicim';
 import { c } from '../dil/ceviri';
 
 /**
@@ -19,8 +19,6 @@ import { c } from '../dil/ceviri';
 
 type Satir = Record<string, unknown>;
 
-const metin = (v: unknown) => String(v ?? '').trim();
-const sayi = (v: unknown) => Number(v ?? 0);
 
 const DURUM: Record<number, string> = {
   0: 'Eksik Alan', 1: 'Bekliyor', 2: 'Gönderiliyor', 3: 'Gönderildi',
@@ -58,17 +56,17 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (!paket) return <div className="kagrup"><div className="bos">{c('Paket okunuyor…')}</div></div>;
 
-  const durum = sayi(paket.durum);
-  const eksikSayisi = alanlar.filter(a => sayi(a.gecerli) === 0).length;
+  const durum = sayiya(paket.durum);
+  const eksikSayisi = alanlar.filter(a => sayiya(a.gecerli) === 0).length;
 
   return (
     <div className="enabiz-detay">
       <div className="kagrup">
         <h6>
-          {metin(paket.paketNo) || 'Paket'} — {metin(paket.turAdi)}
-          <span className="sonuk"> · USS {metin(paket.ussPaket)}
-            {metin(paket.ussSurum) ? ` (sürüm ${metin(paket.ussSurum)})` : ''}
-            {' · '}{ISLEM[sayi(paket.islem)] ?? '—'}</span>
+          {metne(paket.paketNo) || 'Paket'} — {metne(paket.turAdi)}
+          <span className="sonuk"> · USS {metne(paket.ussPaket)}
+            {metne(paket.ussSurum) ? ` (sürüm ${metne(paket.ussSurum)})` : ''}
+            {' · '}{ISLEM[sayiya(paket.islem)] ?? '—'}</span>
           <span className={durumSinifi(durum)} style={{ marginLeft: 6 }}>
             {DURUM[durum] ?? '—'}
           </span>
@@ -81,18 +79,18 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
           </tr></thead>
           <tbody>
             {alanlar.map((a, i) => {
-              const gecerli = sayi(a.gecerli) === 1;
+              const gecerli = sayiya(a.gecerli) === 1;
               return (
                 <tr key={i} className={gecerli ? undefined : 'eksik'}>
                   <td className="orta">{gecerli ? '✔' : '⚠'}</td>
-                  <td><b>{metin(a.ussAlan)}</b>
-                    {!gecerli && metin(a.sorun) && (
-                      <div className="sonuk">{metin(a.sorun)}</div>
+                  <td><b>{metne(a.ussAlan)}</b>
+                    {!gecerli && metne(a.sorun) && (
+                      <div className="sonuk">{metne(a.sorun)}</div>
                     )}
                   </td>
-                  <td>{metin(a.deger) || <span className="sonuk">(boş)</span>}</td>
-                  <td className="sonuk">{metin(a.kaynakAlan) || '—'}</td>
-                  <td className="sonuk">{metin(a.skrsListe) || '—'}</td>
+                  <td>{metne(a.deger) || <span className="sonuk">(boş)</span>}</td>
+                  <td className="sonuk">{metne(a.kaynakAlan) || '—'}</td>
+                  <td className="sonuk">{metne(a.skrsListe) || '—'}</td>
                 </tr>
               );
             })}
@@ -112,7 +110,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
 
       <div className="kagrup">
         <h6>Gönderim denemeleri
-          <span className="sonuk"> · {sayi(paket.deneme)} deneme</span>
+          <span className="sonuk"> · {sayiya(paket.deneme)} deneme</span>
         </h6>
 
         <table className="detay-tablo">
@@ -125,12 +123,12 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
               <tr key={i}>
                 <td>{tarihSaat(d.zaman)}</td>
                 <td className="orta">
-                  <span className={sayi(d.sonuc) === 1 ? 'rozet olumlu' : 'rozet hata'}>
-                    {sayi(d.sonuc) === 1 ? 'Başarılı' : `Hata ${sayi(d.httpKod) || ''}`}
+                  <span className={sayiya(d.sonuc) === 1 ? 'rozet olumlu' : 'rozet hata'}>
+                    {sayiya(d.sonuc) === 1 ? 'Başarılı' : `Hata ${sayiya(d.httpKod) || ''}`}
                   </span>
                 </td>
-                <td>{metin(d.ussKod) && <b>{metin(d.ussKod)} </b>}{metin(d.ussMesaj) || '—'}</td>
-                <td className="sag">{sayi(d.sureMs)} ms</td>
+                <td>{metne(d.ussKod) && <b>{metne(d.ussKod)} </b>}{metne(d.ussMesaj) || '—'}</td>
+                <td className="sag">{sayiya(d.sureMs)} ms</td>
               </tr>
             ))}
             {denemeler.length === 0 && (
@@ -144,16 +142,16 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
             cevabı beş kez almaktır. */}
         {durum === 4 && (
           <div className="not">
-            <b>{metin(paket.hataKodu) || 'Hata'}</b> — {metin(paket.hataMesaj) || '—'}
-            {sayi(paket.hataSinifi) > 0 && (
-              <> · {HATA_SINIFI[sayi(paket.hataSinifi)]}</>
+            <b>{metne(paket.hataKodu) || 'Hata'}</b> — {metne(paket.hataMesaj) || '—'}
+            {sayiya(paket.hataSinifi) > 0 && (
+              <> · {HATA_SINIFI[sayiya(paket.hataSinifi)]}</>
             )}
           </div>
         )}
         <div className="not sonuk">
           Olay {tarihSaat(paket.olayTarihi)} · üretim {tarihSaat(paket.uretimTarihi)}
           {paket.sonTarih ? <> · süre sınırı {tarihSaat(paket.sonTarih)}</> : null}
-          {metin(paket.ussPaketId) ? <> · USS paket id {metin(paket.ussPaketId)}</> : null}
+          {metne(paket.ussPaketId) ? <> · USS paket id {metne(paket.ussPaketId)}</> : null}
         </div>
       </div>
     </div>

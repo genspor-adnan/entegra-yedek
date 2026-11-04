@@ -1,6 +1,6 @@
 import { useRef, type MouseEvent } from 'react';
 import type { SevkEden, SevkEdenIcmali } from '../../api/uclar/sevkEden';
-import { para } from '../../bilesenler/bicim';
+import { para, tire } from '../../bilesenler/bicim';
 import { KartAdi, type KartTuru } from '../../bilesenler/KartAdi';
 import { secimUygula } from '../../bilesenler/listeSecimi';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -9,7 +9,6 @@ import { SATIR_DURUM, odemeRozeti, sevkDegisimi, turRozeti } from './sevkOrtak';
 /** Sevk eden icmalinin sekme tabloları. Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 // AD → KART SEKMESİ (03.11.2026): gönderenin kartı türüne göre (dış hekim / kurum / iç personel)
 const kartTuru = (t: SevkEden['tur']): KartTuru => (t === 'dis' ? 'dis-hekim' : t === 'kurum' ? 'kurum' : 'personel');
 function GonderenAdi({ v, id, ad }: { v: SevkEdenIcmali; id: number; ad: string }) {

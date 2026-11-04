@@ -1,6 +1,6 @@
 import { useRef, type MouseEvent } from 'react';
 import type { KurumIcmali } from '../../../api/uclar/kurumIcmal';
-import { para } from '../../../bilesenler/bicim';
+import { para, tire } from '../../../bilesenler/bicim';
 import { KartAdi, KartSimgesi } from '../../../bilesenler/KartAdi';
 import { tarihKisa } from '../../hasta/icmal/icmalOrtak';
 import { icmalRozeti, provizyonRozeti, secimUygula } from './kurumIcmalOrtak';
@@ -8,7 +8,6 @@ import { icmalRozeti, provizyonRozeti, secimUygula } from './kurumIcmalOrtak';
 /** Kurum icmalinin sekme tabloları (KurumIcmal). Rakamlar sunucudan gelir. */
 
 const p = (n: number) => para.format(n);
-const tire = (n: number) => (Math.abs(n) > 0.005 ? p(n) : '—');
 
 /**
  * DÖNEMDEKİ KURUMLAR - soldaki onay kutusu (kullanıcı) diğer sekmeleri süzer;

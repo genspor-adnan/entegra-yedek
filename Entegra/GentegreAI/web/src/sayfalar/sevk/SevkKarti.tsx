@@ -6,6 +6,7 @@ import type { Deger } from '../../bilesenler/kartAlanCizim';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { c } from '../../dil/ceviri';
 import { MuayeneHastaBandi, useMuayeneHastaBilgisi } from '../../bilesenler/MuayeneSekmesiz';
+import { sayiya } from '../../bilesenler/bicim';
 
 /**
  * SEVK KARTI (1110) - mockup Ekranlar/Muayene/sevk_karti_v2.html (sade, tek panel).
@@ -21,7 +22,6 @@ const ULASIM: Record<number, string> = { 1: 'Kendi', 2: 'Ambulans', 3: '112' };
 export const SEVK_DURUM: Record<number, string> = { 1: 'Taslak', 2: 'Gönderildi', 3: 'Sonuç döndü', 9: 'Gönderilemedi', 0: 'İptal' };
 export const sevkDurumSinif = (d: number) => d === 1 ? 'uyari' : d === 2 ? 'mavi' : d === 3 ? 'olumlu' : d === 9 ? 'hata' : 'gri';
 
-const sayi = (v: unknown) => Number(v ?? 0);
 /** Kartın yazdığı alanlar (gönderden önce kaydedilir). */
 const YAZILAN = ['tur', 'tesisKodu', 'tesisAd', 'klinikId', 'hedefBolumId', 'neden', 'ulasim', 'notu'] as const;
 
@@ -33,7 +33,7 @@ export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi, bantYok
   bantYok?: boolean;
 }) {
   const id = kartId === 'yeni' ? null : kartId;
-  const durum = sayi(deger.durum) || 1;
+  const durum = sayiya(deger.durum) || 1;
   const duzenlenir = durum === 1;
   const [ozet, setOzet] = useState<SevkOzet | null>(null);
   const [gonderiyor, setGonderiyor] = useState(false);
@@ -47,8 +47,8 @@ export function SevkKartGovdesi({ kartId, deger, parcalar, onGonderildi, bantYok
   const alanlar = parcalar?.altGrupAlanlari('Sevk') ?? [];
   const kodlar = (ad: string) => Object.entries(alanlar.find(a => a.ad === ad)?.kodlar ?? {});
   const yaz = (ad: string, v: Deger) => { if (duzenlenir) parcalar?.alanDegistir(ad, v) };
-  const tur = sayi(deger.tur) || 1;
-  const ulasim = sayi(deger.ulasim) || 1;
+  const tur = sayiya(deger.tur) || 1;
+  const ulasim = sayiya(deger.ulasim) || 1;
   const notu = String(deger.notu ?? '');
 
   const gonder = () => {
