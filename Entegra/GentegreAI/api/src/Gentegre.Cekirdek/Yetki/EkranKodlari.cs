@@ -603,5 +603,7 @@ public static partial class EkranKodlari
     {
         "basvuru.pos_aksiyon", "basvuru.sgk_katilim_payi",
         "basvuru.sgk_katilim_kodlari", "basvuru.iskonto_onay_esik",
+        // Kimliği okut - MRZ (1255), Hasta sekmesi.
+        "kayit.kimlik_okutma", "kayit.suresi_dolmus_belge", "kayit.ocr_esik",
     };
 }

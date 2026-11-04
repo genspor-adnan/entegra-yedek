@@ -55,6 +55,31 @@ export function KayitKabulAyarlar() {
 
       {!yukleniyor && aktif === 'hasta' && (
         <>
+          {/* KİMLİĞİ OKUT - MRZ (1255, mockup kimlik_mrz_okut.html ④): okutma yolu, süresi dolmuş belge, OCR eşiği.
+              Açıklamalar "?" ikonunda (public.help). */}
+          <div className="kagrup">
+            <h6>{c('Kimlik okutma (MRZ)')}</h6>
+            <div className="alan-izgara ayar-formu">
+              <AyarAlani anahtar="kayit.kimlik_okutma" etiket={c('Kimlik okutma')} tip="secenek"
+                         secenekler={[
+                           { deger: '0', ad: c('Kapalı') },
+                           { deger: '1', ad: c('Kamera') },
+                           { deger: '2', ad: c('Tarayıcı / dosya') },
+                           { deger: '3', ad: c('Kamera ve tarayıcı') },
+                         ]}
+                         ayarlar={ayarlar} onYaz={yaz} />
+              <AyarAlani anahtar="kayit.suresi_dolmus_belge" etiket={c('Süresi dolmuş belge')} tip="secenek"
+                         secenekler={[
+                           { deger: '0', ad: c('Uyar (kayıt engellenmez)') },
+                           { deger: '1', ad: c('Engelle') },
+                         ]}
+                         ayarlar={ayarlar} onYaz={yaz} />
+              <AyarAlani anahtar="kayit.ocr_esik" etiket={c('OCR güven eşiği (%)')} ayarlar={ayarlar} onYaz={yaz} />
+            </div>
+            <div className="not" style={{ padding: '0 10px 10px' }}>
+              {c('Hasta kartındaki ve başvuru hasta aramasındaki "Kimliği Okut" düğmesi kimlik kartının arka yüzündeki / pasaportun alt kenarındaki MRZ bölgesini okur. Görüntü sunucuya gitmez (OCR tarayıcıda); kontrol haneleri ve T.C. algoritması sunucuda denetlenir, okutma işlem loguna yazılır. MRZ okuyucu cihaz (klavye gibi metin verir) her ayarda çalışır.')}
+            </div>
+          </div>
           {/* NUMARALANDIRMA GRIDI BURADAN KALDIRILDI (kullanici): hasta
               belgelerinin butun numaralari 634'te TEK GRIDDE toplandi -
               Genel Ayarlar › Numaralama › Hasta Belgeleri. Ayni tabloyu iki

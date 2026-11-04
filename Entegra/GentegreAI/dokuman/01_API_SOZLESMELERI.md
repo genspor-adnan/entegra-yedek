@@ -1878,6 +1878,36 @@ POST /api/kimlik/giris-kodu/kullan  anonim   {kod}          -> GirisYaniti (kod 
 - `genel.hesap_askida = 1` (referans): doğru parolada 403 "Hesabınız askıda"; `/yenile` de 403.
 - Web `?giris=<kod>` görürse `kullan` ile oturum açar ve parametreyi adres çubuğundan siler.
 
+## 9.29 Kimliği okut - MRZ (1255)
+
+Mockup `Ekranlar/Kayıt Kabul/kimlik_mrz_okut.html`. Kimlik kartı arkası (TD1 3×30) / pasaport (TD3 2×44) makinece okunur
+bölge: OCR **tarayıcıda** (tesseract.js, `web/ocr.ts` işçi + çekirdeği `ocr/` altından sunar - CDN CSP ile kapalı; dil
+verisi `public/ocr/eng.traineddata.gz`), görüntü sunucuya **gitmez**. Sunucuya yalnız 2-3 satır metin gider.
+
+```
+POST /api/kimlik/mrz-coz  {metin}        hasta Ekle ya da Değiştir
+  → {gecerli, hatalar[], satirlar[], bicim TD1|TD2|TD3, belgeKodu, belgeTuru 1 kimlik·2 pasaport·3 diğer, duzenleyenUlke,
+     belgeNo, belgeNoTamam, dogumTarihi, dogumTamam, cinsiyet '1'|'2'|'', sonKullanma, sonKullanmaTamam, suresiDolmus,
+     engellendi, uyruk (ISO3), uyrukAdi, uyrukKod (SKRS hasta.uyruk), kimlikNo (doğrulanmış TCKN | ''), soyad, ad (ASCII),
+     bilesikTamam, kimlikBicimi, uyarilar[], eslesen{id, kod, ad, soyad, kimlikNo, durum, dogumTarihi, cinsiyet, uyruk,
+     pasaportNo, belgeTuru, belgeSeriNo, belgeSonKullanma, sonBasvuru} | null}
+```
+
+- Çözücü `Gentegre.Cekirdek.Kimlik.MrzCozucu` (saf, xUnit ICAO 9303 numuneleri): ICAO 7-3-1 kontrol haneleri (belge no,
+  doğum, son kullanma, isteğe bağlı, bileşik); TD1 satır 2 isteğe bağlı alandaki 11 hane T.C. algoritmasından geçmezse
+  hata. `gecerli=false` 200 ile döner (alanlar yine gelir, ekran kırmızı çizer) - 400 yalnız biçimsiz istek.
+- Eşleşme: TCKN → `taraf.vkno` (hasta=1); pasaport → `taraf_hasta.pasaport_no`. Uyruk: ISO3 → Türkçe ad → `kod_deger`
+  (hasta.uyruk) ad ile; bulunamazsa `uyrukKod` null, kullanıcı seçer. Ad / soyad Türkçe'ye GERİ ÇEVRİLMEZ; web TCKN varsa
+  MERNİS'ten gerçek harfleri sessizce alır (`/api/mernis/getir`), yoksa ASCII kalır ve kullanıcı uyarılır.
+- Ayarlar (Kayıt Kabul Ayarları › Hasta, `kayit_kabul.ayar`): `kayit.kimlik_okutma` 0 kapalı · 1 kamera · 2 tarayıcı / dosya ·
+  3 ikisi (0 → 422, düğme yok); `kayit.suresi_dolmus_belge` 0 uyar · 1 engelle (`engellendi`); `kayit.ocr_esik` % (web OCR
+  güveni altındaysa aktarmaz).
+- Hasta kartı özlük (`taraf_hasta`): `belgeTuru`, `belgeSeriNo`, `belgeSonKullanma` (1255). Karta yazma kartın normal
+  POST / PUT'udur - MRZ için ayrı yazma ucu yok. Log 953 `{islem:'mrz', bicim, gecerli, kimlikNo, belgeNo, eslesenId}`.
+- Web: `KimlikOkutPenceresi` (kamera / dosya / metin yapıştır - okuyucu cihaz klavye gibi yazar), hasta kartı araç grubu
+  "📷 Kimliği Okut" (`KartAracGruplari`), başvuru hasta araması (`TarafArama kimlikOkut`). Kayıtlı hasta → seçilir / açılır,
+  işaretli farklar `mrzBekleyenKoy` ile karta taşınır (3 dk, tek kullanım).
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

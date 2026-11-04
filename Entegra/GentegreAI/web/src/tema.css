@@ -9148,3 +9148,30 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* AD → KART SEKMESİ bağlantısı (KartAdi, 03.11.2026): icmallerde müşteri / tedarikçi / personel / kurum / hasta adı. */
 .lnk[role="link"] { color: #2f6db3; cursor: pointer }
 .lnk[role="link"]:hover { text-decoration: underline }
+
+/* ===================================================================== KİMLİĞİ OKUT - MRZ (1255, mockup kimlik_mrz_okut.html ②) */
+.mrz-adim { display: flex; border-bottom: 1px solid var(--cizgi2); background: #fbfcfe }
+.mrz-adim .a { flex: 1; padding: 6px 10px 6px 22px; position: relative; color: var(--soluk); font-weight: 700; font-size: 11.5px; border-right: 1px solid var(--cizgi2); white-space: nowrap }
+.mrz-adim .a::before { content: ""; position: absolute; left: 8px; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: #c9d3de }
+.mrz-adim .a.bitti { color: var(--ok) } .mrz-adim .a.bitti::before { background: var(--ok) }
+.mrz-adim .a.simdi { color: var(--uyari); background: #fdf6e8 } .mrz-adim .a.simdi::before { background: var(--uyari) }
+.mrz-kip { display: flex; gap: 6px; align-items: center; padding: 8px 10px 0 }
+.mrz-iki { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; padding: 10px }
+@media (max-width: 900px) { .mrz-iki { grid-template-columns: 1fr } }
+.mrz-kamera { border: 1px solid var(--cizgi2); border-radius: 6px; background: #1b2430; color: #c9d3de; height: 300px; position: relative; overflow: hidden }
+.mrz-kamera video { width: 100%; height: 100%; object-fit: cover; display: block }
+.mrz-kamera .kart { position: absolute; left: 11%; top: 19%; width: 78%; height: 62%; border: 2px dashed #7fb2e8; border-radius: 8px; background: rgba(255,255,255,.04); pointer-events: none }
+.mrz-kamera .kart .mrzbant { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; border: 2px solid #4aa36a; border-radius: 4px; background: rgba(74,163,106,.12) }
+.mrz-kamera .kart .mrzbant::after { content: "MRZ bölgesi"; position: absolute; left: 6px; top: -18px; font-size: 10.5px; color: #9fd4b1 }
+.mrz-kamera .ipucu { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 11px; color: #d6e2ee; text-shadow: 0 1px 2px #000 }
+.mrz-dosya, .mrz-metin { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--cizgi2); border-radius: 6px; background: var(--yuz2) }
+.mrz-metin textarea { font-family: Consolas, "Courier New", monospace; font-size: 13px; letter-spacing: 1.5px; line-height: 1.6; width: 100%; box-sizing: border-box; resize: vertical }
+.mrz-metin .d { align-self: flex-end }
+.mrz-ham { font-family: Consolas, "Courier New", monospace; font-size: 13px; letter-spacing: 1.5px; background: #f7f9fc; border: 1px solid var(--cizgi2); border-radius: 4px; padding: 8px 10px; line-height: 1.7; margin: 0 0 6px; white-space: pre; overflow-x: auto }
+.mrz-ham.ok { border-color: var(--okkenar); background: #f3faf5 } .mrz-ham.hata { border-color: #f2c9c9; background: #fdf3f3 }
+.kbas { font-weight: 700; color: var(--yazi2); margin: 8px 0 6px; font-size: 12px }
+.mrz-tablo { border-collapse: collapse; width: 100%; border: 1px solid var(--cizgi2) }
+.mrz-tablo th { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2); text-align: left; padding: 5px 8px; font-size: 11px; color: #3a5573; white-space: nowrap }
+.mrz-tablo td { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6; padding: 4px 8px; font-size: 11.5px }
+.mrz-tablo td.sl { color: var(--soluk) } .mrz-tablo tr.fark td { background: #fdf6e8 } .mrz-tablo td.bozuk { color: var(--hata); text-decoration: underline wavy }
+.mrz-iki .bilgi-kutusu, .mrz-iki .uyari-kutusu, .mrz-iki .hata-kutusu { margin-top: 8px; padding: 6px 10px; font-size: 11.5px }

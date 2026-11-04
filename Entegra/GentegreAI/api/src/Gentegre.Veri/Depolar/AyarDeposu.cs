@@ -131,6 +131,9 @@ public sealed class AyarDeposu
         //   SAHIBI muaf (imzayi kendisinden isteyemez). Ayar beyaz listede
         //   degildi: kural vardi ama orani yalnizca SQL ile degistirilebiliyordu.
         "basvuru.iskonto_onay_esik",
+        // KİMLİĞİ OKUT - MRZ (1255): 0 kapalı · 1 kamera · 2 tarayıcı / dosya · 3 ikisi; süresi dolmuş belge
+        //   0 uyar · 1 engelle; OCR güven eşiği %.
+        "kayit.kimlik_okutma", "kayit.suresi_dolmus_belge", "kayit.ocr_esik",
         // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
         //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
         "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
@@ -215,6 +218,10 @@ public sealed class AyarDeposu
         ["basvuru.pos_aksiyon"] = 0,
         ["basvuru.sgk_katilim_payi"] = 100,
         ["basvuru.iskonto_onay_esik"] = 10,
+        // MRZ (1255): okutma açık (kamera + tarayıcı), süresi dolmuş belge yalnız uyarır, OCR eşiği %90.
+        ["kayit.kimlik_okutma"] = 3,
+        ["kayit.suresi_dolmus_belge"] = 0,
+        ["kayit.ocr_esik"] = 90,
         ["guvenlik.jwt_dakika"] = 30,
         ["guvenlik.refresh_gun"] = 30,
         ["guvenlik.parola_min_uzunluk"] = 8,
@@ -245,6 +252,9 @@ public sealed class AyarDeposu
         // 0 = kural kapali (her iskonto dogrudan), 100 = hicbir iskonto onay
         //   istemez anlamina gelir; ikisi de mesru ama arasi normal kullanim.
         ["basvuru.iskonto_onay_esik"] = (0, 100),
+        ["kayit.kimlik_okutma"] = (0, 3),             // kapalı / kamera / tarayıcı / ikisi
+        ["kayit.suresi_dolmus_belge"] = (0, 1),       // uyar / engelle
+        ["kayit.ocr_esik"] = (50, 100),
         ["efatura.senaryo"] = (1, 8),                // 1 Temel / 2 Ticari / 8 Ilac
         ["belge.satis.vade_gun"] = (0, 3650),
         ["belge.alis.vade_gun"] = (0, 3650),

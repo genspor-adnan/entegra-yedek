@@ -109,6 +109,14 @@ public static partial class KartKatalogu
                 //   kodudur - ayri eslestirme tablosu yok (kullanici karari).
                 new("pasaportNo",  "pasaport_no",  "metin", EnFazlaUzunluk: 20,
                     Baslik: "Pasaport No"),
+                // KİMLİK BELGESİ (1255, MRZ mockup): tür · seri no · geçerlilik. "Kimliği Okut" doldurur, elle de
+                //   girilir. Geçerliliği dolmuş belge kimlik seridinde uyarı rozeti (kayit.suresi_dolmus_belge).
+                new("belgeTuru",   "belge_turu",   "kod",   Baslik: "Kimlik Belgesi",
+                    SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Kimlik Kartı", ["2"] = "Pasaport", ["3"] = "Diğer (ikamet, sürücü belgesi)" }),
+                new("belgeSeriNo", "belge_seri_no", "metin", EnFazlaUzunluk: 20, Baslik: "Belge Seri No",
+                    Ipucu: "Kimlik kartı seri no (A12B34567) ya da pasaport no - MRZ okutmadan dolar."),
+                new("belgeSonKullanma", "belge_son_kullanma", "tarih", Baslik: "Belge Geçerlilik"),
                 new("medeniHal",   "medeni_hal",   "kod",   KodListesi: "hasta.medeni_hal",
                     Baslik: "Medeni Hal"),
                 new("anaAdi",      "ana_adi",      "metin", EnFazlaUzunluk: 60, Baslik: "Ana Adı"),

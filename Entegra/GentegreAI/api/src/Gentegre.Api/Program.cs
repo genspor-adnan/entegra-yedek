@@ -496,6 +496,7 @@ uygulama.EFaturaUclariniEkle();
 uygulama.EFaturaIcmalUclariniEkle();
 uygulama.CeviriUclariniEkle();
 uygulama.MernisUclariniEkle();     // MERNİS / KPS - hasta kartında kimlikten getir / doğrula (19.10.2026)
+uygulama.MrzUclariniEkle();        // Kimliği okut - MRZ çözümü, kayıtlı hasta eşleşmesi (1255, 04.11.2026)
 uygulama.HizliBulUclariniEkle();   // Ctrl+K kayıt numarasıyla açma (16.10.2026)
 uygulama.DokumanIcerikUcunuEkle();
 uygulama.ReferansUclariniEkle();

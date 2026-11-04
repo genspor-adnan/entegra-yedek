@@ -398,7 +398,10 @@ public sealed partial class KartDeposu
             stokId: tanim.Ad == "stok" ? (int)id : null,
             iptal: iptal);
 
-        foreach (var detay in tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+        // SALT OKUNUR DETAY (görünüm) SİLİNMEZ (04.11.2026): personel / hasta kartının "Belge Durumu" detayı
+        //   `v_personel_belge_durum` görünümüdür - "cannot delete from view" ile hasta kartı hiç silinemiyordu.
+        //   Yedeğe yine girer (üstte), yalnız DELETE atlanır.
+        foreach (var detay in (tanim.Detaylar ?? Array.Empty<DetayTanimi>()).Where(d => !d.SaltOkunur))
         {
             await using var komut = baglanti.Komut(
                 $"delete from {detay.Tablo} where {detay.UstKolon} = @p0", islem,

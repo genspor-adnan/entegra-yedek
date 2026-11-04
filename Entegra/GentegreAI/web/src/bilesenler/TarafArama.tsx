@@ -3,6 +3,10 @@ import { api } from '../api/istemci';
 import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenForm } from './GenForm';
 import { aramaSirala } from './aramaSirasi';
+import { ayarSayi } from '../api/ayarlar';
+import { c } from '../dil/ceviri';
+import { KimlikOkutPenceresi } from './kimlik/KimlikOkutPenceresi';
+import { mrzBekleyenKoy } from './kimlik/mrzAktarim';
 
 interface TarafSatiri {
   kaynak: string;
@@ -170,6 +174,12 @@ interface Props {
   onYeni?(aranan: string): void;
   /** "＋ Yeni" kartının ön değerleri (alış belgesinde tedarikçi, satışta müşteri rolü işaretli gelsin). */
   yeniVarsayilanlari?: Record<string, string | number | boolean>;
+  /**
+   * KİMLİĞİ OKUT (1255, mockup kimlik_mrz_okut.html ①): başvurunun hasta aramasında "📷 Kimliği Okut" düğmesi.
+   * Okunan kimlikle kayıtlı hasta varsa SEÇİLİR (onSec); yoksa yeni hasta kartı alanlar dolu açılır (paket bekler,
+   * HastaKimlikAraclari açılışta uygular). Yalnız tek kaynaklı hasta aramasında; ayar kapalıysa düğme yok.
+   */
+  kimlikOkut?: boolean;
 }
 
 /**
@@ -183,7 +193,11 @@ interface Props {
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kartYok = false, ekFiltre, onYeni, yeniVarsayilanlari,
                              yerTutucu, baslangicMetni, baslangicYeni,
                              cokluSecim = false, onSecCoklu, secimDenetimi,
-                             onKapat, onSec }: Props) {
+                             onKapat, onSec, kimlikOkut = false }: Props) {
+  /** Kimliği Okut penceresi (1255) ve ayar kapısı (kayit.kimlik_okutma > 0). */
+  const [okutAcik, setOkutAcik] = useState(false);
+  const [okutmaAcik, setOkutmaAcik] = useState(false);
+  useEffect(() => { if (kimlikOkut) void ayarSayi('kayit.kimlik_okutma', 3).then(v => setOkutmaAcik(v > 0)) }, [kimlikOkut]);
   /**
    * HASTA DUZENI (kullanici): yalniz hasta aranirken kolonlar kayit kabulun
    * ihtiyaci olan bilgiler olur - Dosya No, Ad Soyad, Cinsiyet, Yas, Telefon,
@@ -451,6 +465,10 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
                 onClick={() => onYeni ? onYeni(arama) : setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
                 ＋ Yeni
               </button>
+              {kimlikOkut && hastaDuzeni && okutmaAcik && (
+                <button type="button" className="d" title={c('Kimlik kartı / pasaport MRZ\'sinden hastayı bul ya da yeni kart aç')}
+                        onClick={() => setOkutAcik(true)}>📷 {c('Kimliği Okut')}</button>
+              )}
               <button type="button" className="d" disabled={!satirlar[secili]}
                 onClick={() => satirlar[secili] && setKartAcik({ kaynak: satirlar[secili].kaynak, id: satirlar[secili].id })}>
                 ✎ Düzenle
@@ -493,6 +511,19 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
         </div>
 
         {hata && <div className="hata-kutusu">{hata}</div>}
+
+        {okutAcik && (
+          <KimlikOkutPenceresi
+            onKapat={() => setOkutAcik(false)}
+            // Kayıt yok: yeni hasta kartı dolu açılır - paket 'yeni' kart için bekler.
+            onAktar={p => { setOkutAcik(false); mrzBekleyenKoy(p, 'yeni');
+                            if (onYeni) onYeni(p.adSoyad); else setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' }) }}
+            // Kayıtlı hasta: seçilir; farklar varsa kart açılınca uygulanmak üzere bekler (3 dk).
+            onHastaAc={(hastaId, p, adSoyad) => { setOkutAcik(false);
+                        if (Object.keys(p.kart).length || Object.keys(p.ozluk).length) mrzBekleyenKoy(p, hastaId);
+                        onSec({ kaynak: 'hasta', id: hastaId, unvan: adSoyad }) }}
+          />
+        )}
 
         <div className="lookup-liste">
           <table>

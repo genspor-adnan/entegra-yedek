@@ -239,6 +239,8 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
         //   tedarikci/kurum bu pencerede cikmamali. Kaynak 'hasta' sunucuda
         //   grup = 101 ile suzuluyor; "＋ Yeni" de hasta karti acar.
         kaynaklar={basvuruMu ? ['hasta'] : ['cari']}
+        // KİMLİĞİ OKUT (1255): başvuruda hasta MRZ'den bulunur / yeni kart dolu açılır.
+        kimlikOkut={basvuruMu}
         // ALIŞTA TEDARİKÇİ, SATIŞTA MÜŞTERİ (kullanıcı 02.11.2026, genel kural - fatura / fiş / sipariş /
         //   irsaliye / teklif / konsinye): aramaya yalnız o roldeki cariler gelir; "＋ Yeni" de o rolle açılır.
         //   Tahakkuk her iki rolde de kesilebildiği için süzülmez.

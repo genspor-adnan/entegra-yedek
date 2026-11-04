@@ -55,6 +55,8 @@ export const kimlikUclari = {
       '/api/mernis/getir', { kimlikNo }),
   mernisDogrula: (govde: { kimlikNo: string; ad: string; soyad: string; dogumYili: number }) =>
     gonder<{ dogru: boolean | null; ulasilamadi: boolean }>('/api/mernis/dogrula', govde),
+  /** KİMLİĞİ OKUT - MRZ (1255): 2-3 satır metin → alanlar, kontrol haneleri, kayıtlı hasta eşleşmesi. Görüntü gitmez. */
+  mrzCoz: (metin: string) => gonder<MrzSonucu>('/api/kimlik/mrz-coz', { metin }),
   /** Cümle komutu ("Ercan Temel başvuru kartı aç"): hastanın o modüldeki EN SON kaydı. */
   hizliBulSon: (ad: string, modul: string) =>
     istek<{ sonuc: { tur: string; id: number; altId: number; ad: string; bilgi: string } | null }>(
@@ -163,6 +165,28 @@ export interface AcikOturum {
 /** Kullanici Ayarlari > Guvenlik (669): giris denemesi. */
 export interface GirisDenemesi {
   tarih: string; basarili: boolean; sebep: string; ip: string; istemci: string;
+}
+
+/** MRZ çözümü (1255). `gecerli` değilse yalnız `hatalar` + `satirlar` anlamlı; alanlar yine döner (kırmızı çizim). */
+export interface MrzSonucu {
+  gecerli: boolean; hatalar: string[]; satirlar: string[];
+  bicim?: string; belgeKodu?: string; belgeTuru?: number; duzenleyenUlke?: string;
+  belgeNo?: string; belgeNoTamam?: boolean;
+  dogumTarihi?: string | null; dogumTamam?: boolean;
+  /** Kart kod listesi hasta.cinsiyet: '1' Erkek · '2' Kadın · ''. */
+  cinsiyet?: string;
+  sonKullanma?: string | null; sonKullanmaTamam?: boolean; suresiDolmus?: boolean; engellendi?: boolean;
+  uyruk?: string; uyrukAdi?: string | null; uyrukKod?: string | null;
+  kimlikNo?: string; soyad?: string; ad?: string; bilesikTamam?: boolean;
+  kimlikBicimi?: string; uyarilar?: string[];
+  eslesen?: MrzEslesen | null;
+}
+
+/** MRZ'deki numarayla kayıtlı hasta (taraf + taraf_hasta). */
+export interface MrzEslesen {
+  id: number; kod: string; ad: string; soyad: string; kimlikNo: string; durum: number;
+  dogumTarihi: string | null; cinsiyet: number | null; uyruk: number | null; pasaportNo: string | null;
+  belgeTuru: number | null; belgeSeriNo: string | null; belgeSonKullanma: string | null; sonBasvuru: string | null;
 }
 
 export interface CariVknKaydi { id: number; ad: string; kod: string; musteri: boolean; tedarikci: boolean; durum: number }

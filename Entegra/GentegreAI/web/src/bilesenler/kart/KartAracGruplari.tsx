@@ -1,5 +1,8 @@
 import { EkstreIkon } from '../EkstreIkon';
-import { useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { ayarSayi } from '../../api/ayarlar';
+import { KimlikOkutPenceresi } from '../kimlik/KimlikOkutPenceresi';
+import { aktarimiUygula, mrzBekleyenAl, mrzBekleyenKoy, type MrzAktarim } from '../kimlik/mrzAktarim';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni, type KartMetaYaniti } from '../../api/sozlesme';
@@ -81,11 +84,28 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
   const { yetki: oturumYetki } = useOturum();
   const { deger, id, setHata } = b;
   const [mernisYuk, setMernisYuk] = useState(false);
+  const git = useNavigate();
+  /** Kimliği Okut penceresi (1255). */
+  const [okutAcik, setOkutAcik] = useState(false);
+  /** kayit.kimlik_okutma: 0 kapalı → düğme yok. */
+  const [okutmaAcik, setOkutmaAcik] = useState(false);
+  useEffect(() => { void ayarSayi('kayit.kimlik_okutma', 3).then(v => setOkutmaAcik(v > 0)) }, []);
 
-  /** MERNİS'TEN GETİR (19.10.2026): kart alanları + özlük (doğum, cinsiyet, anne / baba adı, doğum yeri). */
-  const mernisGetir = async () => {
-    const tc = String(deger.vkno ?? '').trim();
-    if (!/^\d{11}$/.test(tc)) { setHata(c('Önce 11 haneli kimlik no girin.')); return }
+  /** Özlük detayı güncel[0]'a yazar (doğum, cinsiyet, uyruk, belge…) - MERNİS ve MRZ aynı yoldan. */
+  const ozlukYaz = (degisiklik: Record<string, unknown>) =>
+    b.setDetaylar(t => {
+      const d = t.ozluk ?? bosDetay();
+      const yeni = { ...(d.guncel[0] ?? {}), ...degisiklik } as Satir;
+      return { ...t, ozluk: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
+    });
+
+  /**
+   * MERNİS'TEN GETİR (19.10.2026): kart alanları + özlük (doğum, cinsiyet, anne / baba adı, doğum yeri).
+   * `sessiz`: MRZ aktarımından sonra gerçek harfler için çağrılır - kanal yoksa hata göstermez, false döner.
+   */
+  const mernisGetir = async (sessiz = false, kimlikNo?: string): Promise<boolean> => {
+    const tc = (kimlikNo ?? String(deger.vkno ?? '')).trim();
+    if (!/^\d{11}$/.test(tc)) { if (!sessiz) setHata(c('Önce 11 haneli kimlik no girin.')); return false }
     setMernisYuk(true); setHata(null);
     try {
       const k = await api.mernisGetir(tc);
@@ -99,12 +119,46 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
                        dogumYeri: dolu(k.dogumYeri, s0.dogumYeri) };
         return { ...t, ozluk: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
       });
+      if (sessiz) return true;
       const sgkNotu = k.kanal === 'sgk' ? ' ' + c('SGK anne / baba adı ve doğum yerini vermez - bunları elle girin.') : '';
       await bilgiMesaji((k.simulasyon
         ? `${c('SİMÜLASYON verisi getirildi')} (${k.aciklama}) - ${c('gerçek kişi değildir. Kaydetmeden önce kontrol edin.')}`
         : `${k.aciklama}: ${c('kimlik bilgileri getirildi. Kaydetmeden önce kontrol edin.')}`) + sgkNotu);
-    } catch (h) { setHata(hataMetni(h)) } finally { setMernisYuk(false) }
+      return true;
+    } catch (h) { if (!sessiz) setHata(hataMetni(h)); return false } finally { setMernisYuk(false) }
   };
+
+  /**
+   * MRZ AKTARIMI (1255, mockup kimlik_mrz_okut.html ①): işaretli alanlar karta / özlüğe yazılır. T.C. vatandaşında
+   * ad / soyad MRZ'de büyük ASCII'dir - MERNİS kanalı varsa gerçek harfler sessizce alınır, yoksa kullanıcı düzeltir
+   * ("doğrulanmadı" notu). Türkçe'ye geri çevirme TAHMİN EDİLMEZ.
+   */
+  const mrzUygula = async (p: MrzAktarim) => {
+    aktarimiUygula({ alanDegistir: b.alanDegistir, ozlukYaz }, p);
+    const adVar = 'ad' in p.kart || 'soyad' in p.kart;
+    let mernis = false;
+    if (p.kimlikNo && adVar) mernis = await mernisGetir(true, p.kimlikNo);
+    await bilgiMesaji(mernis
+      ? c('Kimlik MRZ ile okundu, ad / soyad MERNİS\'ten gerçek harflerle alındı. Kaydetmeden önce kontrol edin.')
+      : adVar
+        ? c('Kimlik MRZ ile okundu. Ad / soyad MRZ\'de büyük ASCII harflerle gelir (Ş→S, İ→I) - MERNİS doğrulaması yapılamadı, harfleri kontrol edip düzeltin.')
+        : c('Kimlik MRZ ile okundu. Kaydetmeden önce kontrol edin.'));
+  };
+
+  // Başvuru aramasından "Yeni Hasta (dolu)" ya da "Hastayı Aç": paket bu kart için bekliyorsa açılışta uygulanır.
+  const kartHazir = b.yeniMi || Object.keys(deger).length > 0;
+  useEffect(() => {
+    if (!kartHazir || b.salt) return;
+    const p = mrzBekleyenAl(id);
+    if (p) void mrzUygula(p);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kartHazir, id]);
+
+  const ozluk = (b.detaylar.ozluk?.guncel[0] ?? {}) as Record<string, unknown>;
+  // Belge geçerliliği dolmuş: kimlik alanında uyarı rozeti (mockup ②; kayıt engellenmez).
+  const belgeSkt = String(ozluk.belgeSonKullanma ?? '').slice(0, 10);
+  const belgeDolmus = !!belgeSkt && belgeSkt < new Date().toISOString().slice(0, 10);
+  const uyrukAdlari = b.meta.detaylar.find(d => d.ad === 'ozluk')?.alanlar.find(a => a.ad === 'uyruk')?.kodlar ?? undefined;
   /** MÜSTEHAKLIK SORGUSU (MEDULA): kayıtlı hastada; sonuç mesajla. */
   const mustehaklikSorgula = async () => {
     if (typeof id !== 'number') return;
@@ -137,17 +191,40 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
     <>
       {!b.salt && (
         <>
+          {/* KİMLİĞİ OKUT (1255): kimlik kartı / pasaport MRZ'si kameradan, tarayıcıdan ya da okuyucu cihazdan.
+              Elle giriş olduğu gibi kalır - okutma kısayoldur. Kapalı kurulumda (kayit.kimlik_okutma=0) yok. */}
+          {okutmaAcik && (
+            <button className="d" type="button" disabled={mernisYuk}
+                    title={c('Kimlik kartı / pasaport MRZ\'sini kameradan ya da tarayıcıdan okur; kimlik no, ad / soyad, doğum, cinsiyet, uyruk, belge no dolar')}
+                    onClick={() => setOkutAcik(true)}>
+              📷 {c('Kimliği Okut')}
+            </button>
+          )}
           <button className="d" type="button" disabled={mernisYuk}
                   title={c('Kimlik nodan ad, soyad, doğum tarihi / yeri, cinsiyet ve anne / baba adını getirir')}
                   onClick={() => void mernisGetir()}>
             🆔 {mernisYuk ? c('Getiriliyor…') : c('MERNİS\'ten getir')}
           </button>
+          {okutAcik && (
+            <KimlikOkutPenceresi
+              mevcut={{ id, degerler: { kart: deger as Record<string, unknown>, ozluk } }}
+              uyrukAdlari={uyrukAdlari}
+              onKapat={() => setOkutAcik(false)}
+              onAktar={p => { setOkutAcik(false); void mrzUygula(p) }}
+              // Bu kimlikle kayıtlı BAŞKA hasta: o kart açılır, işaretli farklar oraya taşınır (paket bekler).
+              onHastaAc={(hastaId, p) => { setOkutAcik(false); mrzBekleyenKoy(p, hastaId); git(`/hasta/${hastaId}`) }}
+            />
+          )}
           <button className="d" type="button" disabled={mernisYuk}
                   title={c('Kimlik no, ad, soyad ve doğum yılını NVİ kayıtlarıyla doğrular')}
                   onClick={() => void mernisDogrula()}>
             ✔ {c('Kimliği doğrula')}
           </button>
         </>
+      )}
+      {belgeDolmus && (
+        <span className="rozet uyari" style={{ alignSelf: 'center' }}
+              title={c('Kimlik belgesinin geçerliliği dolmuş - hastadan güncel belge isteyin')}>⚠ {c('Belge süresi dolmuş')}</span>
       )}
       {!b.yeniMi && (
         <>

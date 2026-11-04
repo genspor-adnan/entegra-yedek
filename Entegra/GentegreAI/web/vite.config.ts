@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'node:child_process'
 import { cspEklentisi } from './csp.ts'
+import { ocrDosyalari } from './ocr.ts'
 
 /**
  * UYGULAMA SÜRÜMÜ DERLEMEDE ÜRETİLİR (kullanıcı 17.10.2026: "projenin versiyonunu ekle"). Biçim
@@ -31,7 +32,8 @@ if (process.env.VITEST) process.env.TZ = 'Europe/Istanbul'
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   // CSP (K61): yalnız `build`'de index.html'e meta etiketi; dev sunucusu etkilenmez.
-  plugins: [react(), cspEklentisi()],
+  // OCR (1255): tesseract.js işçisi / çekirdeği `ocr/` altından - CDN CSP ile kapalı.
+  plugins: [react(), cspEklentisi(), ocrDosyalari()],
   define: { __SURUM__: JSON.stringify(surum) },
   // 500 kB uyarisi STDERR'e yaziliyor, PowerShell bunu hata sayip yayinla.ps1'i
   //   durduruyordu. Paket tek parca (SPA, tamami girişte gerekiyor) - siniri
