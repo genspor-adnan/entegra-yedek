@@ -219,7 +219,7 @@ export function MuayeneDikte({ hedefler, degerOku, onYaz, onKapat }: {
         setHizmetIpucu(false);
         const ad = hedefRef.current;
         setMetinler(m => ({ ...m,
-          [ad]: sozluNoktalama(`${m[ad] ?? ''} ${son}`).replace(/[ 	]+/g, ' ').trimStart() }));
+          [ad]: sozluNoktalama(`${m[ad] ?? ''} ${son}`).replace(/[ \t]+/g, ' ').trimStart() }));
       }
       setGecici(ara);
     };

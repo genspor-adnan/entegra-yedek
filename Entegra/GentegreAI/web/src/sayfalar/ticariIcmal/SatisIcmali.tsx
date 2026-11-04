@@ -10,6 +10,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { ayAdi, ayBasi, DegisimRozeti, DovizRozetleri, EkranA4, eksi, FaturasizKutusu, hazirDonem, kisa, ParaTablosuGorunumu, sayi, simge, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from './ticariIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * SATIŞ İCMALİ `/satis-icmali` - mockup Ekranlar/İcmal/satis_icmali.html (kararlar 25.10.2026).
@@ -61,7 +62,7 @@ export function SatisIcmali() {
     || m.temsilci.toLocaleLowerCase('tr').includes(q)), [veri, q]);
   const urunler = useMemo(() => (veri?.urunler ?? []).filter(u => !q || u.kod.toLocaleLowerCase('tr').includes(q)
     || u.ad.toLocaleLowerCase('tr').includes(q) || u.kategori.toLocaleLowerCase('tr').includes(q)), [veri, q]);
-  const cevir = (k: string) => setAcik(a => { const n = new Set(a); n.has(k) ? n.delete(k) : n.add(k); return n });
+  const cevir = (k: string) => setAcik(a => kumeCevir(a, k));
   const o = veri?.ozet;
   const pb = veri?.para ?? '';
   const karsiAdi = karsi === 'od' ? 'Önceki dönem' : 'Geçen yıl';

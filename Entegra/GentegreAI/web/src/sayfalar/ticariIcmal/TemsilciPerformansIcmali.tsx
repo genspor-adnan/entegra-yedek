@@ -13,6 +13,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { EkranA4, eksi, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from './ticariIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * TEMSİLCİ PERFORMANS İCMALİ `/temsilci-performans` - mockup Ekranlar/İcmal/temsilci_performans_icmali.html
@@ -75,7 +76,7 @@ export function TemsilciPerformansIcmali() {
     temsilciPerformansUclari.temsilciPerformans(q).then(setVeri).catch(h => setHata(hataMetni(h))).finally(() => setYukleniyor(false));
   }, [kip, tarih, sube, iadeDus, tazele]);
 
-  const cevir = (id: number) => setAcik(a => { const n = new Set(a); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setAcik(a => kumeCevir(a, id));
   const o = veri?.ozet;
   const subeAdi = sube ? veri?.secim.subeler.find(s => s.id === sube)?.ad ?? '' : 'Tümü';
   const kipYazi = `KDV hariç${iadeDus ? ' · iadeler düşülmüş' : ' · iadeler düşülmemiş'}`;

@@ -44,11 +44,11 @@ export function DoktorIstemModal({ belgeId, veri, onKapat, onTamam }: {
 
   // Satıra tıklamak ANINDA seçer/kaldırır.
   const tikla = (k: string) => setSecili(s => {
-    const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n;
+    const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n;
   });
   const grupTikla = (tur: BekleyenIstem['tur'], ac: boolean) => setSecili(s => {
     const n = new Set(s);
-    for (const x of grupSatirlari(tur)) { const k = anahtar(x); ac ? n.add(k) : n.delete(k); }
+    for (const x of grupSatirlari(tur)) { const k = anahtar(x); if (ac) n.add(k); else n.delete(k); }
     return n;
   });
 

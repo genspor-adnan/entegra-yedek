@@ -12,6 +12,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { ayAdi, ayBasi, DovizRozetleri, EkranA4, eksi, hazirDonem, kisa, sayi, simge, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from './ticariIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * KÂRLILIK İCMALİ `/karlilik-icmali` - mockup Ekranlar/İcmal/karlilik_icmali.html (kararlar 25.10.2026).
@@ -96,7 +97,7 @@ export function KarlilikIcmali() {
     || m.temsilci.toLocaleLowerCase('tr').includes(q)), [veri, q]);
   const urunler = useMemo(() => (veri?.urunler ?? []).filter(u => !q || u.kod.toLocaleLowerCase('tr').includes(q)
     || u.ad.toLocaleLowerCase('tr').includes(q) || u.kategori.toLocaleLowerCase('tr').includes(q)), [veri, q]);
-  const cevir = (k: string) => setAcik(a => { const n = new Set(a); n.has(k) ? n.delete(k) : n.add(k); return n });
+  const cevir = (k: string) => setAcik(a => kumeCevir(a, k));
   const o = veri?.ozet;
   const pb = veri?.para ?? '';
   const hedef = veri?.hedefMarj ?? 15;

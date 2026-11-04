@@ -9,6 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 import {
   IZLEME_ADI, kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useStokKarti, useSuzgec,
 } from './stokIcmalOrtak';
@@ -124,7 +125,7 @@ export function StokSayimFarkIcmali() {
                   {veri.sayimlar.length === 0 && <tr><td colSpan={12} className="bos">Bu dönemde {acikDahil ? '' : 'kapanan '}sayım yok.{!acikDahil && ' (Açık sayımları görmek için "Açıklar dahil".)'}</td></tr>}
                   {veri.sayimlar.map(y => (
                     <Fragment key={y.id}>
-                      <tr className="ac" onClick={() => setAcik(a => { const n = new Set(a); n.has(y.id) ? n.delete(y.id) : n.add(y.id); return n })}>
+                      <tr className="ac" onClick={() => setAcik(a => kumeCevir(a, y.id))}>
                         <td><span className="ok">{y.farkVar ? (acik.has(y.id) ? '▾' : '▸') : ''}</span><span className="lnk" onClick={e => { e.stopPropagation(); sayimAc(y.id) }}>{y.no}</span></td>
                         <td>{tarihT(y.tarih)}</td><td>{y.depo}</td><td>{y.kapsam}</td>
                         <td>{y.durum === 1 ? <span className="bo-rz ok">Kapandı</span> : <span className="bo-rz mavi">Açık</span>}</td>

@@ -263,7 +263,7 @@ export function IstemSepetiModal({ muayeneId, hastaId, baslangicSekme = 'lab', o
   const ekleCikar = (r: ListeSatiri, tur: KalemTur) => {
     const k = kalemYap(r, tur);
     const a = anahtar(k);
-    setSepet(s => { const n = new Map(s); n.has(a) ? n.delete(a) : n.set(a, k); return n });
+    setSepet(s => { const n = new Map(s); if (n.has(a)) n.delete(a); else n.set(a, k); return n });
   };
 
   const istemAc = async () => {

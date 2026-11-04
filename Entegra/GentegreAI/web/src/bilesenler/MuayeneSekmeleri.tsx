@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -270,9 +270,9 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik, onIste, onAc, c
             kolonlar={['Hedef', 'Soru', 'Aciliyet', 'Durum']}
             hucreler={k => {
               const d = sayiya(k.durum);
-              return [<>{metne(k.bolum) || '—'}{metne(k.hekim) && <span className="sonuk"> · {metne(k.hekim)}</span>}</>,
+              return [<Fragment key="bolum">{metne(k.bolum) || '—'}{metne(k.hekim) && <span className="sonuk"> · {metne(k.hekim)}</span>}</Fragment>,
                       metne(k.soru) || '—', KONS_ACIL[sayiya(k.aciliyet)] ?? '',
-                      <span className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span>];
+                      <span key="durum" className={`rozet ${d === 3 || d === 4 ? 'olumlu' : d === 9 || d === 0 ? 'gri' : 'uyari'}`}>{c(KONS_DURUM[d] ?? '')}</span>];
             }} />
         </KipCercevesi>
       </Kabuk>
@@ -400,7 +400,7 @@ export function MuayeneSevkCercevesi({ veri, onIste, onAc, cerceve, onDegisti }:
         hucreler={s => {
           const d = sayiya(s.durum);
           return [c(SEVK_TUR[sayiya(s.tur)] ?? ''), metne(s.nereye) || '—', c(SEVK_NEDEN[sayiya(s.neden)] ?? ''),
-                  <span className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span>];
+                  <span key="durum" className={`rozet ${sevkSinif(d)}`}>{c(SEVK_DURUM[d] ?? '')}</span>];
         }} />
     </KipCercevesi>
   );

@@ -651,7 +651,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     secimiTemizle: () => secimiUygula(new Set()),
     secimiTersineCevir: () => {
       const yeni = new Set(secili);
-      sayfaIdleri().forEach(id => { yeni.has(id) ? yeni.delete(id) : yeni.add(id) });
+      sayfaIdleri().forEach(id => { if (yeni.has(id)) yeni.delete(id); else yeni.add(id); });
       secimiUygula(yeni);
     },
     sayfaBoyuSec: n => { setAyarBoyut(n); setSayfa(1) },

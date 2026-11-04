@@ -9,6 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 import {
   ayYil, Cubuk, isiRengi, IZLEME_ADI, kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl,
   useAntet, useStokKarti, useSuzgec,
@@ -58,7 +59,7 @@ export function StokDegerIcmali() {
   const enBuyuk = Math.max(1, ...(veri?.stoklar ?? []).map(s => s.tutar));
   const yontemAdi = YONTEM.find(y => y[0] === yontem)?.[1] ?? '';
   const dikkatSayi = veri ? veri.dikkat.eksi.length + veri.dikkat.maliyetsiz.length + veri.dikkat.lotUyumsuz.length : null;
-  const cevir = (id: number) => setAcik(a => { const n = new Set(a); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setAcik(a => kumeCevir(a, id));
   const degisim = o ? o.deger - o.oncekiDeger : 0;
 
   return (

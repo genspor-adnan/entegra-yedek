@@ -12,6 +12,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
 import { stil as icmalStili } from '../hasta/icmal/icmalStil';
 import { SAYIM_A4_STILI, SayimA4 } from './SayimA4';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * STOK SAYIM KARTI (1169, sade sürüm - mockup Ekranlar/Stok/stok_sayim_karti_ver2.html).
@@ -210,7 +211,7 @@ function StokSayimKarti({ sayimId, onKapat }: { sayimId: number; onKapat(): void
     return r;
   }, [cizilen]);
   const [acikGrup, setAcikGrup] = useState<Set<number>>(() => new Set());
-  const grupCevir = (stokId: number) => setAcikGrup(a => { const n = new Set(a); n.has(stokId) ? n.delete(stokId) : n.add(stokId); return n });
+  const grupCevir = (stokId: number) => setAcikGrup(a => kumeCevir(a, stokId));
 
   useEffect(() => {
     if (!sonSatir) return;

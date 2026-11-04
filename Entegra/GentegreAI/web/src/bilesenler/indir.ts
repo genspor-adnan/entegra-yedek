@@ -56,7 +56,7 @@ const TIP_UZANTI: Record<string, string> = {
 };
 
 export function dokumanDosyaAdi(ad: string, contentType?: string | null): string {
-  const temiz = (ad || 'dokuman').replace(/[\/:*?"<>|]/g, '-').trim() || 'dokuman';
+  const temiz = (ad || 'dokuman').replace(/[/:*?"<>|]/g, '-').trim() || 'dokuman';
   // Zaten uzantisi varsa dokunma: kullanicinin yazdigi ".pdf" ikinci kez
   //   eklenmemeli ("rapor.pdf.pdf").
   if (/\.[a-z0-9]{2,5}$/i.test(temiz)) return temiz;

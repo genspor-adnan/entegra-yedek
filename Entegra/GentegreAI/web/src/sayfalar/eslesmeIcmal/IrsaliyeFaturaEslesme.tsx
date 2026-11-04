@@ -17,6 +17,7 @@ import { BelgeKarti } from '../BelgeKarti';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * İRSALİYE-FATURA EŞLEŞME İCMALİ `/irsaliye-fatura-eslesme` - mockup
@@ -101,8 +102,8 @@ export function IrsaliyeFaturaEslesme() {
   const seciliCariler = [...new Set(seciliIrs.map(x => x.tarafId))];
   const seciliTutar = seciliIrs.reduce((t, x) => t + x.tutar, 0);
   const toplamKalem = faturasiz.reduce((t, x) => t + x.kalem, 0);
-  const cevir = (id: number) => setSecili(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n });
-  const detayCevir = (id: number) => setAcikDetay(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setSecili(s => kumeCevir(s, id));
+  const detayCevir = (id: number) => setAcikDetay(s => kumeCevir(s, id));
   const fatura = useMemo(() => veri?.irsaliyesiz.find(x => x.id === seciliFatura) ?? null, [veri, seciliFatura]);
 
   // ------------------------------------------------------------ Faturala --

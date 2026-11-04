@@ -53,7 +53,7 @@ export function useGridSecimi(opts: {
 
   const satirSecimiDegistir = (id: string, index: number) => {
     const yeni = new Set(secili);
-    yeni.has(id) ? yeni.delete(id) : yeni.add(id);
+    if (yeni.has(id)) yeni.delete(id); else yeni.add(id);
     secimiUygula(yeni);
     ankorRef.current = index;
   };
@@ -88,7 +88,7 @@ export function useGridSecimi(opts: {
     }
     if (e.ctrlKey || e.metaKey) {
       const yeni = new Set(secili);
-      yeni.has(id) ? yeni.delete(id) : yeni.add(id);
+      if (yeni.has(id)) yeni.delete(id); else yeni.add(id);
       secimiUygula(yeni);
       ankorRef.current = index;
       return;

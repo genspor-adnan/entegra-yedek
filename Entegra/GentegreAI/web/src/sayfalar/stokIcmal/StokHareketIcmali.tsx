@@ -10,6 +10,7 @@ import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { isiRengi, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useStokKarti, useSuzgec } from './stokIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * STOK HAREKET İCMALİ `/stok-hareket-icmali` (1174) - mockup Ekranlar/Stok/stok_hareket_icmali.html.
@@ -59,7 +60,7 @@ export function StokHareketIcmali() {
   // TRANSFER SÜTUNU yalnız tek depoda: tüm depolarda toplamı sıfırdır.
   const transferVar = depo > 0 && (veri?.stoklar.some(s => s.transferGiren || s.transferCikan) ?? false);
   const f = (n: number) => (tutarMi ? tl(n) : sayi(n));
-  const cevir = (id: number) => setAcik(a => { const n = new Set(a); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setAcik(a => kumeCevir(a, id));
   const ekstreAc = (id: number) => { degistir({ stok: String(id) }); setSekme('eks') };
   const kolonSayisi = 4 + giris.length + cikis.length + (transferVar ? 2 : 0) + 2;
   const donemAdi = (t: string) => veri?.donemTuru === 'ay'

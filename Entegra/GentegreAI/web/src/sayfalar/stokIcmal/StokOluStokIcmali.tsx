@@ -10,6 +10,7 @@ import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { ayYil, Cubuk, isiRengi, kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useStokKarti, useSuzgec } from './stokIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * ÖLÜ STOK / DEVİR HIZI İCMALİ `/stok-olu-stok-icmali` (1174) - mockup Ekranlar/Stok/stok_olu_stok_icmali.html.
@@ -63,7 +64,7 @@ export function StokOluStokIcmali() {
     return siralama === 'tutar' ? l : [...l].sort((a, b) => siralama === 'devir' ? b.devir - a.devir : (b.devirGun ?? 1e9) - (a.devirGun ?? 1e9));
   }, [veri, ara, siralama]); // eslint-disable-line react-hooks/exhaustive-deps
   const o = veri?.ozet;
-  const cevir = (id: number) => setAcik(a => { const n = new Set(a); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setAcik(a => kumeCevir(a, id));
   const mxTrend = Math.max(1, ...(veri?.trend ?? []).map(t => t.olu));
 
   return (

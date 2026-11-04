@@ -46,13 +46,13 @@ export async function sterilAksiyonu(kod: string, satir: ListeSatiri | null | un
   }
   if (kod.startsWith('steril.birim-')) {
     const islem = kod.slice('steril.birim-'.length) as 'kirli' | 'yikama' | 'sayim' | 'paketle' | 'yaglama' | 'ariza';
-    let sayilan: number | undefined, toplam: number | undefined, eksik: string | undefined, notu: string | undefined;
+    let sayilan: number | undefined, eksik: string | undefined, notu: string | undefined;
     if (islem === 'sayim') {
       const s = await metinSor('Sayılan alet adedi (boş = tam)', '', 'Sayılan'); if (s === null) return true;
       if (s.trim() !== '') { sayilan = Number(s); const e = await metinSor('Eksik / hasarlı alet', '', 'Eksik'); if (e === null) return true; eksik = e; }
     }
     if (islem === 'ariza') { const n = await metinSor('Arıza / bakım açıklaması', '', 'Açıklama'); if (n === null) return true; notu = n; }
-    await guvenli(async () => { const y = await api.sterilBirimOlay({ birimId: id, islem, sayilan, toplam, eksik, notu }); mesaj(y.mesaj); b.tazele() });
+    await guvenli(async () => { const y = await api.sterilBirimOlay({ birimId: id, islem, sayilan, eksik, notu }); mesaj(y.mesaj); b.tazele() });
     return true;
   }
   if (kod === 'steril.geri-cagirma-ac') { b.git(`/steril-izleme?geriCagirma=${id}`); return true }

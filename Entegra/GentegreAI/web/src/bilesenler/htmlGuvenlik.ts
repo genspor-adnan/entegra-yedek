@@ -24,6 +24,7 @@ export function htmlTemizle(html: string): string {
   belge.querySelectorAll('*').forEach(e => {
     for (const a of Array.from(e.attributes)) {
       const ad = a.name.toLowerCase();
+      // eslint-disable-next-line no-control-regex -- kontrol karakterleri bilerek: `java\u0000script:` kaçışı
       const deger = a.value.replace(/[\s\u0000-\u001f]/g, '').toLowerCase();
       if (ad.startsWith('on')) e.removeAttribute(a.name);
       else if (['href', 'src', 'action', 'formaction', 'xlink:href', 'data'].includes(ad)

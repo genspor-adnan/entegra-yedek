@@ -73,7 +73,7 @@ export function Kategoriler() {
 
   const ac = (id: number) => setAcik(s => {
     const y = new Set(s);
-    y.has(id) ? y.delete(id) : y.add(id);
+    if (y.has(id)) y.delete(id); else y.add(id);
     return y;
   });
 

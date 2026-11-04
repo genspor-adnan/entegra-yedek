@@ -9,6 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useStokKarti, useSuzgec } from './stokIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * KRİTİK STOK İCMALİ `/stok-kritik-stok-icmali` (1174) - mockup Ekranlar/Stok/stok_kritik_stok_icmali.html.
@@ -76,7 +77,7 @@ export function StokKritikStokIcmali() {
   const seciliKalemler = kritikler.filter(x => secili.has(anahtar(x)) && mk(x) > 0);
   const seciliTutar = seciliKalemler.reduce((t, x) => t + mk(x) * x.fiyat, 0);
   const seciliDepolar = [...new Set(seciliKalemler.map(x => x.depoId))];
-  const cevir = (k: string, set: typeof setSecili) => set(s => { const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n });
+  const cevir = (k: string, set: typeof setSecili) => set(s => kumeCevir(s, k));
 
   const talepAc = async () => {
     if (seciliDepolar.length !== 1) { setHata('Talep depo başına açılır: tek depodaki kalemleri seçin (üstten depo seçebilirsiniz).'); return }

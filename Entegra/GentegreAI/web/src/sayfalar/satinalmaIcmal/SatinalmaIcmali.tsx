@@ -13,6 +13,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { ayBasi, EkranA4, hazirDonem, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, useGezinti, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * SATINALMA SÜREÇ İCMALİ `/satinalma-icmali` - mockup Ekranlar/İcmal/satinalma_icmali.html (kararlar 25.10.2026).
@@ -83,7 +84,7 @@ export function SatinalmaIcmali() {
     && (!q || [b.no, b.konu, b.kimde, b.talepEden].some(x => x.toLocaleLowerCase('tr').includes(q)))), [veri, asamaSuz, q]);
   const tedarikciler = useMemo(() => (veri?.tedarikciler ?? []).filter(t => !q || t.ad.toLocaleLowerCase('tr').includes(q)), [veri, q]);
   const fiyatlar = useMemo(() => (veri?.fiyat.satirlar ?? []).filter(f => !q || [f.kod, f.ad, f.tedarikci].some(x => x.toLocaleLowerCase('tr').includes(q))), [veri, q]);
-  const cevir = (id: number) => setAcik(a => { const n = new Set(a); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setAcik(a => kumeCevir(a, id));
 
   /** Belgeyi kendi sekmesinde açar (kart sekmesi deseni). Sipariş ve fatura belge kartıdır. */
   const belgeAc = (b: BekleyenSatiri) => {

@@ -137,7 +137,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
   const isaretDegistir = (r: Satir) => setIsaretli(m => {
     const n = new Map(m);
     const k = kodu(r);
-    n.has(k) ? n.delete(k) : n.set(k, r);
+    if (n.has(k)) n.delete(k); else n.set(k, r);
     return n;
   });
 
@@ -343,7 +343,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                     onChange={e => setIsaretli(m => {
                       const n = new Map(m);
                       for (const r of satirlar)
-                        e.target.checked ? n.set(kodu(r), r) : n.delete(kodu(r));
+                        if (e.target.checked) n.set(kodu(r), r); else n.delete(kodu(r));
                       return n;
                     })} />
                 </th>
@@ -361,7 +361,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
                 <tr key={i} className={`tiklanir${isa ? ' isaretli' : ''}${ekli ? ' eklendi' : ''}`}
                     aria-selected={isa || undefined}
                     onMouseDown={e => { if (acikKalir && e.shiftKey) e.preventDefault() }}
-                    onClick={e => { acikKalir ? satirTikla(e, i, r) : void sec(r) }}
+                    onClick={e => { if (acikKalir) satirTikla(e, i, r); else void sec(r) }}
                     onDoubleClick={() => { if (acikKalir) void sec(r) }}>
                   {acikKalir && (
                     <td className="hiza-orta">

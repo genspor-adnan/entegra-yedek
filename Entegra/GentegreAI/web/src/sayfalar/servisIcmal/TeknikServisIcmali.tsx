@@ -12,6 +12,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { ayBasi, EkranA4, hazirDonem, kisa, sayi, tarihT, TICARI_ICMAL_STILI, tl, yuzde } from '../ticariIcmal/ticariIcmalOrtak';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * TEKNİK SERVİS İCMALİ `/teknik-servis-icmali` - mockup Ekranlar/İcmal/teknik_servis_icmali.html
@@ -78,7 +79,7 @@ export function TeknikServisIcmali() {
   }, [bas, bit, sube, teknisyen, musteri, mm, kapsam, sahiplikQ]);
 
   const o = veri?.ozet;
-  const cevir = (k: number) => setAcik(a => { const n = new Set(a); n.has(k) ? n.delete(k) : n.add(k); return n });
+  const cevir = (k: number) => setAcik(a => kumeCevir(a, k));
   const sahiplikAdi = veri ? (veri.sahiplik === 1 ? 'İç servis' : veri.sahiplik === 2 ? 'Dış servis' : 'İç + dış servis') : '';
   const subeAdi = sube ? veri?.secim.subeler.find(s => s.id === sube)?.ad ?? '' : 'Tümü';
   const emanetGeciken = useMemo(() => (veri?.emanetler ?? []).filter(e => e.gun > 7 || e.iadeBekleniyor).length, [veri]);

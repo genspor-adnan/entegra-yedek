@@ -10,6 +10,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { Cubuk, isiRengi, kisaTl, Kutu, Kutucuk, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 
 /**
  * ÇEK / SENET İCMALİ `/cek-senet-icmali` - mockup Ekranlar/İcmal/cek_senet_icmali.html.
@@ -105,7 +106,7 @@ export function CekSenetIcmali() {
   const listeToplami = veri ? veri.toplam[yon] : { adet: 0, tutar: 0 };
   const seciliEvrak = (veri?.alinan ?? []).filter(e => secili.has(e.id));
   const seciliTutar = seciliEvrak.reduce((s, e) => s + e.deger, 0);
-  const cevir = (id: number) => setSecili(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n });
+  const cevir = (id: number) => setSecili(s => kumeCevir(s, id));
 
   /** Tahsile ver / ciro: icmal kayıt yazmaz, seçilen türün listesindeki işlem akışına gider. */
   const listeyeGit = () => git(seciliEvrak.length > 0 && seciliEvrak.every(e => e.tur === 2) ? '/senet' : tur === 2 ? '/senet' : '/cek');

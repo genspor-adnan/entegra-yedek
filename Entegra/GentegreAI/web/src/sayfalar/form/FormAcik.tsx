@@ -124,7 +124,7 @@ export function FormAcik() {
   const b = bolumler[adim];
   const hesap = skorHesapla(ot.tanim, cevap);
   return (
-    <Kabuk kurum={kurum} alt={<span>{bolumler.map((x, i) => <span key={x.kod} className={i === adim ? 'fm-adim-on' : ''}>{i + 1} {x.ad}{i < bolumler.length - 1 || true ? ' · ' : ''}</span>)}<span className={adim === ozetAdimi ? 'fm-adim-on' : ''}>{bolumler.length + 1} Onay</span></span>}>
+    <Kabuk kurum={kurum} alt={<span>{bolumler.map((x, i) => <span key={x.kod} className={i === adim ? 'fm-adim-on' : ''}>{i + 1} {x.ad}{' · '}</span>)}<span className={adim === ozetAdimi ? 'fm-adim-on' : ''}>{bolumler.length + 1} Onay</span></span>}>
       <div className="fm-adim-cubuk">
         {bolumler.map((x, i) => <i key={x.kod} className={i < adim ? 'ok' : i === adim ? 'on' : ''} />)}
         <i className={adim === ozetAdimi ? 'on' : ''} />

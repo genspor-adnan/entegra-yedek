@@ -189,7 +189,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
     if (tekSecim) return m.has(isaretAnahtari(r)) ? new Map() : new Map([[isaretAnahtari(r), r]]);
     const n = new Map(m);
     const k = isaretAnahtari(r);
-    n.has(k) ? n.delete(k) : n.set(k, r);
+    if (n.has(k)) n.delete(k); else n.set(k, r);
     return n;
   });
   /** Shift ile aralık seçiminin başlangıç satırı (son düz / Ctrl tık). */

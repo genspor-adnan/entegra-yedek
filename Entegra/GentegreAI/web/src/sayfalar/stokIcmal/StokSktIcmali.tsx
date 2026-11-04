@@ -9,6 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
+import { kumeCevir } from '../../bilesenler/kume';
 import {
   ayYil, Cubuk, IZLEME_ADI, kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl,
   useAntet, useStokKarti, useSuzgec,
@@ -164,7 +165,7 @@ export function StokSktIcmali() {
                 <tbody>
                   {stoklar.slice(0, 1000).map(s => (
                     <Fragment key={s.stokId}>
-                      <tr className="ac" onClick={() => setAcik(a => { const n = new Set(a); n.has(s.stokId) ? n.delete(s.stokId) : n.add(s.stokId); return n })}>
+                      <tr className="ac" onClick={() => setAcik(a => kumeCevir(a, s.stokId))}>
                         <td><span className="ok">{acik.has(s.stokId) ? '▾' : '▸'}</span><span className="lnk" onClick={e => { e.stopPropagation(); kartAc(s.stokId) }}>{s.kod}</span> · {s.ad}</td>
                         <td><span className="bo-rz mavi">{IZLEME_ADI[s.izleme] ?? '—'}</span></td>
                         <td className="sag">{s.lot}</td><td className="sag">{sayi(s.toplam)}</td>
