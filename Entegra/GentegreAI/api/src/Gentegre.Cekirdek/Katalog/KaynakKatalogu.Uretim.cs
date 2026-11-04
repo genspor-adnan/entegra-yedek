@@ -55,6 +55,17 @@ public static partial class KaynakKatalogu
                 "(select count(*) from public.urun_agaci_operasyon x where x.agac_id = a.id)",
                                                "sayi",  "Opr.", Hizalama: "orta",
                                                Genislik: 70, Filtrelenebilir: false),
+            // ÜRETİLEBİLİR (1257, basit seviye): mevcut stokla kaç mamul çıkar - "Malzeme eksik" cipi 0'ı süzer.
+            //   Standart / denetimli gizler (web, uretimListeSeviye).
+            new("uretilebilir", "public.fn_urun_agaci_uretilebilir(a.id)", "sayi", "Üretilebilir",
+                                               Hizalama: "sag", Bicim: "#,##0.##", Genislik: 100),
+            // Cip anahtarları (gizli): maliyeti eski (> 30 gün / hiç), açık emir sayısı.
+            new("maliyetEski",
+                "case when a.maliyet_tarih is null or a.maliyet_tarih < now() - interval '30 days' then 1 else 0 end",
+                                               "mantik", "Maliyeti Eski", Varsayilan: false),
+            new("acikEmir",
+                "(select count(*) from public.uretim_emri e where e.agac_id = a.id and e.durum between 1 and 5)",
+                                               "sayi", "Açık Emir", Hizalama: "orta", Genislik: 80, Varsayilan: false),
             new("maliyetMalzeme", "a.maliyet_malzeme", "para", "Malzeme Maliyeti",
                                                Hizalama: "sag", Bicim: "#,##0.00",
                                                Genislik: 130),
@@ -72,6 +83,14 @@ public static partial class KaynakKatalogu
                                                Genislik: 90),
             new("mamulDepo", "coalesce(md.ad, '')", "metin", "Mamul Deposu",
                                                Genislik: 150, Varsayilan: false),
+            // ONAY AKIŞI (1257, denetimli): Taslak · Onayda · Onaylı · Kilitli; ECN no + yürürlük. Diğer seviyeler gizler.
+            new("onayAdi",
+                "case a.onay_durum when 1 then 'Onayda' when 2 then 'Onaylı' when 3 then 'Kilitli' else 'Taslak' end",
+                                               "metin", "Onay", Hizalama: "orta", Bicim: "rozet", Genislik: 90,
+                                               Filtrelenebilir: false),
+            new("onayDurum", "a.onay_durum", "kod", "Onay Kodu", Varsayilan: false),
+            new("ecnNo",     "coalesce(a.ecn_no, '')", "metin", "ECN", Genislik: 110),
+            new("yururluk",  "a.yururluk", "tarih", "Yürürlük", Hizalama: "orta", Bicim: "dd.MM.yyyy", Genislik: 100),
             new("durumAdi",
                 "case a.durum when 1 then 'Pasif' else 'Aktif' end",
                                                "metin", "Durum", Hizalama: "orta",
@@ -102,6 +121,8 @@ public static partial class KaynakKatalogu
             new("id",     "e.id",   "sayi",  "Id", Varsayilan: false),
             // Fire aksiyonu mamul kartini bilmeli (mamul firesi emre islenir).
             new("stokId", "e.stok_id", "sayi", "Stok Id", Varsayilan: false),
+            // Reçete kartının "Üretimler" sekmesi bu kimlikle süzer (1258).
+            new("agacId", "e.agac_id", "sayi", "Ağaç Id", Varsayilan: false),
             new("no",     "e.no",   "metin", "Emir No", Genislik: 140),
             new("turAdi",
                 "case e.tur when 1 then 'Siparişe' when 3 then 'Fason' "
@@ -227,6 +248,7 @@ public static partial class KaynakKatalogu
             new("emirNo",   "coalesce(e.no, '')", "metin", "Üretim Emri", Hizalama: "orta", Genislik: 130),
             // Emre bağlı cipi (emirId > 0) ve sağ tuş "Üretim Emrini / Sarf Fişini / Üretim Girişini Aç" için kimlikler.
             new("emirId",   "coalesce(f.emir_id, 0)", "kod", "Emir Id", Varsayilan: false),
+            new("agacId",   "coalesce(f.agac_id, 0)", "kod", "Ağaç Id", Varsayilan: false),   // reçete kartı "Üretimler" (1258)
             new("sarfBelgeId",  "coalesce(f.sarf_belge_id, 0)",  "kod", "Sarf Belge Id",  Varsayilan: false),
             new("girisBelgeId", "coalesce(f.giris_belge_id, 0)", "kod", "Giriş Belge Id", Varsayilan: false),
             new("partiNo",  "f.parti_no", "metin", "Parti", Hizalama: "orta", Genislik: 110),

@@ -8,14 +8,25 @@ import type { UretimSeviyesi, UretimSeviyeYaniti } from '../api/uclar/uretimFisi
  * "ne gösterilsin" sorularını da cevaplar (`standartVe`, `denetimli`).
  */
 let onbellek: Promise<UretimSeviyeYaniti> | null = null;
+/** Çözülmüş son değer - hook olmayan yerler (kart eklentileri) için anlık okuma. */
+let sonDeger: UretimSeviyeYaniti | null = null;
 const VARSAYILAN: UretimSeviyeYaniti = { seviye: 'basit', emirKullan: false };
 
 function oku(): Promise<UretimSeviyeYaniti> {
-  onbellek ??= api.uretimSeviye().catch(() => { onbellek = null; return VARSAYILAN });
+  onbellek ??= api.uretimSeviye().then(d => { sonDeger = d; return d }).catch(() => { onbellek = null; return VARSAYILAN });
   return onbellek;
 }
 
-export function uretimSeviyesiOnbellegiTemizle() { onbellek = null }
+export function uretimSeviyesiOnbellegiTemizle() { onbellek = null; sonDeger = null }
+
+/**
+ * ANLIK SEVİYE (1258): kart eklentileri hook çağıramaz (render içinde kaynağa göre dallanan düz fonksiyonlar). Üretim
+ * listesi / kartı açılmadan önce hook en az bir kez okumuş olur; okunmamışsa 'basit' döner ve okumayı tetikler.
+ */
+export function uretimSeviyesiAnlik(): UretimSeviyesi {
+  if (!sonDeger) void oku();
+  return sonDeger?.seviye ?? 'basit';
+}
 
 /**
  * `etkin=false` istek atmaz (Liste.tsx her listede çağırır; üretim dışı listede /api/uretim/seviye'ye gidilmez) -

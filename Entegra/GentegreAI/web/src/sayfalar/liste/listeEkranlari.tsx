@@ -10,7 +10,7 @@ import { KysOlayPaneli } from '../kys/olay/KysOlayPaneli';
 import { KysRiskPaneli } from '../kys/risk/KysRiskPaneli';
 import { MusteriGostergesi, MusteriOnizleme, TedarikciGostergesi } from './MusteriPanelleri';
 import { KasaGostergesi, KasaOnizleme } from '../kasa/KasaPanelleri';
-import { UretimEmirGostergesi, UretimFisiGostergesi } from '../uretim/UretimGostergeleri';
+import { UretimEmirGostergesi, UretimFisiGostergesi, UrunAgaciGostergesi } from '../uretim/UretimGostergeleri';
 import { KonsultasyonOnizlemePaneli, KonsultasyonUstPanel, useKonsultasyonSuzgeci } from '../konsultasyon/KonsultasyonPanelleri';
 import { SevkOnizlemePaneli, SevkUstPanel, useSevkSuzgeci } from '../sevk/SevkPanelleri';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../../bilesenler/LabDetayPaneli';
@@ -344,6 +344,8 @@ const PANELLER: Record<string, ListePaneli> = {
   //   e-imza pencereleri (serbest bırak / ters kayıt) - seviyeye göre kutu kümesi bileşenin içinde.
   'uretim-emri': { ustPanel: b => <UretimEmirGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} tazele={b.tazele} /> },
   'uretim-fisi': { ustPanel: b => <UretimFisiGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} tazele={b.tazele} /> },
+  // Reçete listesi (1257, mockup urun_agaci_listesi_v2.html): özet kutuları + pasif / onay pencereleri.
+  'urun-agaci': { ustPanel: b => <UrunAgaciGostergesi yenile={b.yenile} cipIndeks={b.cipIndeks} onCip={b.setCip} tazele={b.tazele} /> },
   // eMAR (698): üstte TEK HASTANIN gün çizelgesi, altta servis genelindeki doz kuyruğu.
   'order-uygulama': { ustPanel: b => <EmarCizelgesi yenile={b.yenile} onDegisti={b.tazele} /> },
   // HEMŞİRE İZLEMİ (699): üstte nöbet ekranı (ölçüm girişi + eğri + sıvı + risk), altta ölçüm satırları.

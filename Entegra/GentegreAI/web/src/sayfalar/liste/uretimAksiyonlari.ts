@@ -1,7 +1,7 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
-import { UE_ISLEM_OLAYI, UF_ISLEM_OLAYI, type UretimIslemOlayi } from '../uretim/uretimListeSeviye';
+import { UA_ISLEM_OLAYI, UE_ISLEM_OLAYI, UF_ISLEM_OLAYI, type UretimIslemOlayi } from '../uretim/uretimListeSeviye';
 
 /**
  * ÜRETİM AKSİYONLARI (429) — ürün ağacı ve üretim emri.
@@ -98,6 +98,42 @@ export async function uretimAksiyonu(
         mesaj(y.mesaj);
         b.git(`/uretim-emri/${y.id}`);
       });
+      return true;
+    }
+
+    // REÇETE LİSTESİ (1257, mockup urun_agaci_listesi_v2.html). "Üret…" ve "Üretim Fişi Kes" fiş kartını mamul + adet dolu
+    //   açar (fiş kartı reçeteyi mamulden bulur, malzemeyi doldurur); emir yok. Pasif / onay pencereleri üst panelde (olay).
+    case 'urun-agaci.uret':
+      // Basit "Üret…": tek adımlı pencere (mockup ②) üst panelde / kartta açılır.
+      window.dispatchEvent(new CustomEvent<UretimIslemOlayi>(UA_ISLEM_OLAYI, { detail: { id, islem: 'uret', satir: satir ?? undefined } }));
+      return true;
+    case 'urun-agaci.fis-kes': {
+      const stokId = Number(satir?.stokId ?? 0);
+      if (!stokId) { mesaj('Bu reçetenin mamul kartı okunamadı.'); return true }
+      const a = await metinSor('Kaç adet üretildi / üretilecek?', String(satir?.ciktiMiktar ?? 1), 'Üretim adedi');
+      const adet = sayi(a);
+      if (Number.isNaN(adet)) return true;
+      if (adet <= 0) { mesaj('Adet sıfırdan büyük olmalı.'); return true }
+      (b.gitKart ?? b.git)(`/uretim-fisi/yeni?stokId=${stokId}&miktar=${adet}`);
+      return true;
+    }
+    case 'urun-agaci.kopyala':
+      await guvenli(async () => {
+        const y = await api.uretimAgacKopyala(id);
+        mesaj(y.mesaj);
+        (b.gitKart ?? b.git)(`/urun-agaci/${y.id}`);
+      });
+      return true;
+    case 'urun-agaci.pasif':
+    case 'urun-agaci.onaya-gonder':
+    case 'urun-agaci.onayla':
+      window.dispatchEvent(new CustomEvent<UretimIslemOlayi>(UA_ISLEM_OLAYI,
+        { detail: { id, islem: kod.slice('urun-agaci.'.length) as UretimIslemOlayi['islem'], satir: satir ?? undefined } }));
+      return true;
+    case 'urun-agaci.mamul-ac': {
+      const stokId = Number(satir?.stokId ?? 0);
+      if (!stokId) { mesaj('Bu reçetenin mamul kartı okunamadı.'); return true }
+      (b.gitKart ?? b.git)(`/stok/${stokId}`);
       return true;
     }
 

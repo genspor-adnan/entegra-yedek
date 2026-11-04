@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (665 ad, 180 tanesi birden cok dosyada)
+## Fonksiyonlar (669 ad, 180 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -516,7 +516,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_uretim_stok_son_maliyeti` | `1253_uretim_fisi.sql` | — |
 | `fn_uretim_zaman_hesapla` | `429_uretim_v1.sql` | — |
 | `fn_uretim_zaman_topla` | `429_uretim_v1.sql` | — |
+| `fn_urun_agaci_kilit_denetle` | `1258_urun_agaci_kontrol_listesi.sql` | — |
 | `fn_urun_agaci_maliyet` | `429_uretim_v1.sql` | — |
+| `fn_urun_agaci_uretilebilir` | `1257_urun_agaci_recete_listesi.sql` | — |
 | `fn_urun_modu` | `489_urun_modu_profilden.sql` | — |
 | `fn_uts_hesap` | `338_entegrasyon_baz_sube.sql` | 223_uts_sema.sql, 227_baz_sube.sql, 337_entegrasyon_uts_ebelge.sql |
 | `fn_veri_kaynagi_delphi` | `1089_aktarim_salt_okunur.sql` | — |
@@ -670,6 +672,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
+| `tg_urun_agaci_baslik_kilit` | `1258_urun_agaci_kontrol_listesi.sql` | — |
+| `tg_urun_agaci_detay_kilit` | `1258_urun_agaci_kontrol_listesi.sql` | — |
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |

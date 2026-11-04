@@ -261,6 +261,23 @@ public static partial class UretimFisiUclari
             e.Opr == 0 ? -1 : gun == 0 ? 0 : e.PlanSaat <= kapasite ? 1 : 0));
         // 7 ortam / hat temizliği - izlenmiyor
         k.Add(new("ortam", "Ortam / hat temizliği", "ortam izleme kaydı bu sürümde izlenmiyor", -1));
+        // 8+ REÇETENİN ÖN KONTROLLERİ (1258, urun_agaci_kontrol tur 1): otomatik kodu yukarıdaki bir kontrole bağlıysa onun
+        //   sonucu; elle olanlar "takip edilmiyor" (-1) - imzasız bir satıra uydurma "uygun" yazılmaz, listede görünür.
+        if (e.AgacId is > 0)
+        {
+            var recete = await b.ListeAsync("""
+                select ad, olcut, otomatik, zorunlu from public.urun_agaci_kontrol where agac_id = @p0 and tur = 1 order by sira, id
+                """, t, [e.AgacId], o => new { Ad = o.GetString(0), Olcut = o.GetString(1), Otomatik = o.GetString(2), Zorunlu = o.GetInt16(3) }, iptal);
+            var n = 0;
+            foreach (var r in recete)
+            {
+                var bagli = r.Otomatik.Length > 0 ? k.FirstOrDefault(x => x.Kod == r.Otomatik) : null;
+                if (bagli is not null && bagli.Ad == r.Ad) continue;          // aynı kontrol zaten listede
+                var sonuc = bagli?.Sonuc ?? -1;
+                if (sonuc == 0 && r.Zorunlu == 0) sonuc = -1;                 // zorunlu değilse engellemez
+                k.Add(new($"recete{++n}", r.Ad, (r.Olcut.Length > 0 ? r.Olcut + " · " : "") + (bagli is null ? "reçete kontrolü - elle doğrulanır" : bagli.Kural), sonuc));
+            }
+        }
         return new OnKontrolSonucu(k, k.All(x => x.Sonuc != 0));
     }
 

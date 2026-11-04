@@ -24,7 +24,7 @@ namespace Gentegre.Api.Uclar;
 /// emrin kendi satırlarına yazılır; ağaç sonradan değişse açık emir
 /// etkilenmez. "Ağaçtan Yenile" yalnız Taslak/Onaylı emirde çalışır.</para>
 /// </summary>
-public static class UretimUclari
+public static partial class UretimUclari
 {
     // Durumlar (db/429): 0 iptal · 1 taslak · 2 onaylı · 3 planlandı ·
     //   4 üretimde · 5 kısmi · 6 tamamlandı · 7 kapatıldı.
@@ -62,6 +62,7 @@ public static class UretimUclari
     public static void UretimUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/uretim").WithTags("Üretim").RequireAuthorization();
+        ReceteUclari(grup);   // 1257: özet, kopyala, pasife al, onay akışı
 
         // ------------------------------------------------------------- ağaç ---
 
@@ -232,6 +233,9 @@ public static class UretimUclari
             //   yoksa emir açılmaz - "hangi tarifle üreteceğiz" sorusu cevapsız
             //   bir emir, malzemesiz bir emirdir.
             var agac = await AgacBulAsync(baglanti, islem, istek.AgacId, istek.StokId, iptal);
+            // DENETİMLİ (1257): yalnız onaylı / yürürlükteki reçeteden emir açılır - taslak ya da onaydaki tarifle üretim
+            //   başlamasın. Basit / standartta onay akışı yok, kontrol yapılmaz.
+            await ReceteOnayliMiAsync(baglanti, islem, agac.Id, iptal);
 
             var no = await baglanti.TekDegerAsync<string>(
                 "select public.fn_uretim_emri_no(@p0, current_date)", islem,

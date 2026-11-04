@@ -1001,8 +1001,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
    * icin ek anahtar tutabiliyor (kampanya urun satirinda secilen urunun adi);
    * bunlar katalogda alan olmadigindan sunucu "Bilinmeyen alan" der.
    */
+  // SALT OKUNUR DETAY ALANLARI GİTMEZ (1259): hesap kolonları (reçete bileşeninde kod / ad / birim / tutar) gridde
+  //   gösterim içindir; sunucu K39 gereği yazılamayan alanı 400 ile reddediyordu ("bilesenKod alani degistirilemez").
   const detayAlanlari = (m: typeof meta, ad: string) =>
-    m?.detaylar.find(d => d.ad === ad)?.alanlar.map(a => a.ad);
+    m?.detaylar.find(d => d.ad === ad)?.alanlar.filter(a => a.yazilabilir !== false).map(a => a.ad);
 
   // Govde ve "degisti mi" karari saf fonksiyonlarda (kartDegisim.ts).
   const degisenAlanlar = useCallback(
@@ -1841,6 +1843,25 @@ Yine de yeni kayıt eklensin mi?`);
           onKapat={() => setAramaAlani(null)}
           onSec={satir => {
             aramaYaz(aramaAlani, String(satir.id), String(satir.ad ?? satir.kod ?? ''));
+          }}
+        />
+      )}
+      {/* STOK (kullanıcı 04.11.2026, ürün ağacı kartı "mamul seçemedim… jenerik stok listesi gelmeli"): kart
+          alanındaki `AramaKaynagi: "stok"` (ürün ağacı / üretim emri mamulü, satınalma, eczane…) için dal YOKTU -
+          tıklanınca hiçbir pencere açılmıyordu. Belgedeki stok arama penceresi, yalnız stok, tek seçim. */}
+      {aramaAlani?.kaynak === 'stok' && (
+        <StokAramaPenceresi
+          etkin
+          yalnizStok
+          tekSecim
+          onKapat={() => setAramaAlani(null)}
+          onSec={satir => {
+            aramaYaz(aramaAlani, String(satir.id), `${String(satir.kod ?? '')} ${String(satir.ad ?? '')}`.trim());
+            // REÇETE (kullanıcı 04.11.2026): mamul seçilince Ağaç Adı / Ağaç Kodu boşsa stok adı / kodu oraya da yazılır.
+            if (kaynak === 'urun-agaci' && aramaAlani.alan === 'stokId') {
+              if (!String(deger.ad ?? '').trim() && satir.ad) alanDegistir('ad', String(satir.ad));
+              if (!String(deger.kod ?? '').trim() && satir.kod) alanDegistir('kod', String(satir.kod).slice(0, 25));
+            }
           }}
         />
       )}

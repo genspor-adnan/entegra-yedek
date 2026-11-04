@@ -32,6 +32,9 @@ import { KayitSonraDolar, SablonKullanimSekmesi, SablonOnizlemeSekmesi, SablonSu
 import { CihazDozSekmesi, CihazHaftaKapasite, CihazKapasite, CihazKullanimSekmesi } from '../radyoloji/CihazPanelleri';
 import { HastaKartBandi } from '../hasta/HastaKartBandi';
 import { EmirFislerSekmesi, EmirOnKontrolSekmesi } from '../uretim/UretimEmriPanelleri';
+import { ReceteBaslikEk, ReceteKartAraclari, ReceteMaliyetOzeti, ReceteMaliyetSekmesi, ReceteOnayRozetleri, ReceteSurumlerSekmesi, ReceteUretimlerSekmesi } from '../uretim/UrunAgaciPanelleri';
+import { receteKartUyarlamasi } from '../uretim/uretimListeSeviye';
+import { uretimSeviyesiAnlik } from '../../bilesenler/useUretimSeviyesi';
 
 /**
  * KART EKLENTİLERİ — ekran-özel kart parçaları KAYNAK BAŞINA tek kayıtta (refaktör 22.10.2026).
@@ -82,6 +85,18 @@ export interface KartEklentisi {
   yanPanel?(b: KartEklentiBaglami): GenFormProps['yanPanel'];
   /** Kayıtlı kartta sekme rozeti sayısı - açılışta ve her kayıt / tazelemede okunur. */
   rozetYukle?(id: number): Promise<number>;
+  /** Bu ekranda çizilmeyecek alanlar (liste tanımındaki `gizliKartAlanlari`nın üstüne) - seviyeye göre değişen kartlar (1258). */
+  gizliAlanlar?(b: KartEklentiBaglami): string[] | undefined;
+  /** Bu ekranda açılmayacak sekmeler (liste tanımındaki `gizliKartSekmeleri`nin üstüne). */
+  gizliSekmeler?(b: KartEklentiBaglami): string[] | undefined;
+  /** Sil düğmesi çizilmez (denetimli reçete: silme yerine Pasife Al). */
+  silYok?(b: KartEklentiBaglami): boolean;
+  /** Araç çubuğunda Kapat'ın hemen solu (Hatırlat'ın sağı) - ör. reçete onay rozetleri. */
+  kapatSolu?(b: KartEklentiBaglami): GenFormProps['kapatSolu'];
+  /** Sekmesi açılmayacak detaylar (kartOzellestirme'nin üstüne) - seviyeye göre. */
+  gizliDetaylar?(b: KartEklentiBaglami): string[] | undefined;
+  /** Detay seçenekleri (kartOzellestirme'nin üstüne) - seviyeye göre gizlenen bileşen kolonları. */
+  detaySecenekleri?(b: KartEklentiBaglami): GenFormProps['detaySecenekleri'];
 }
 
 const kayitli = (id: KartEklentiBaglami['kartId']): id is number => typeof id === 'number';
@@ -484,5 +499,43 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
       { anahtar: 'ozel:emir-fisler', baslik: 'Üretim Girişleri',
         ciz: () => <EmirFislerSekmesi emirId={b.kartId as number} tazele={b.tazeleKayit} /> },
     ] : undefined,
+  },
+  // ------------------------------- Ürün ağacı (reçete) kartı (1258, urun_agaci_karti_v2.html) ----
+  // Seviyeye göre: basit = kimlik + Bileşenler + Maliyet + Üretimler, "Üret…"; standart = sürüm / rota / Sürümler / emir;
+  //   denetimli = onay şeridi, Kontrol Listesi (katalog detayı), Değişiklik Geçmişi (ECN), onay düğmeleri. Seviye anlık
+  //   okunur (useUretimSeviyesi önbelleği) - eklenti hook çağıramaz.
+  'urun-agaci': {
+    gizliAlanlar: () => receteKartUyarlamasi(uretimSeviyesiAnlik()).gizliAlanlar,
+    gizliSekmeler: () => receteKartUyarlamasi(uretimSeviyesiAnlik()).gizliSekmeler,
+    // Denetimli: Sil yok (Pasife Al…); bileşen gridinde seviyeye göre kolon.
+    silYok: () => uretimSeviyesiAnlik() === 'denetimli',
+    gizliDetaylar: () => receteKartUyarlamasi(uretimSeviyesiAnlik()).gizliDetaylar,
+    // Bileşen kimliği gridde gizli (kod · ad · birim hesap kolonları gösterir), satır penceresinde durur.
+    detaySecenekleri: () => ({ bilesenler: { gizli: receteKartUyarlamasi(uretimSeviyesiAnlik()).bilesenGizli, gridGizli: ['bilesenStokId'] } }),
+    // Başlık: "RC-0001 v3 · Onaylı" (mockup başlık satırı).
+    baslikEk: b => kayitli(b.kartId) ? d => <ReceteBaslikEk deger={d} /> : undefined,
+    // Bileşenler sekmesinde maliyet özeti GRİDİN ÜSTÜNDE (kullanıcı 04.11.2026: "gridle alttaki sayı kutuyu yer değiş").
+    sekmeSarmalayici: b => kayitli(b.kartId)
+      ? (baslik, icerik, d) => baslik !== 'Bileşenler' ? icerik : <><ReceteMaliyetOzeti agacId={b.kartId as number} deger={d} tazele={b.tazeleKayit} />{icerik}</>
+      : undefined,
+    // ONAY DURUMU ARAÇ ÇUBUĞUNDA, Hatırlat'ın sağında (kullanıcı 04.11.2026: "butonlar ile sekmeler arasındaki
+    //   labelları hatırlat butonu sağına al ve o bölgeyi kaldır") - şerit bölgesi yok.
+    kapatSolu: b => kayitli(b.kartId) && uretimSeviyesiAnlik() === 'denetimli'
+      ? <ReceteOnayRozetleri agacId={b.kartId as number} tazele={b.tazeleKayit} /> : undefined,
+    ekSekmeler: b => kayitli(b.kartId) ? [
+      // Maliyet: mockup tablosu (kalem · tutar · pay) + Hesapla - grup sekmesinin yerine (gizliSekmeler 'Maliyet').
+      { anahtar: 'ozel:recete-maliyet', baslik: 'Maliyet',
+        ciz: bg => <ReceteMaliyetSekmesi agacId={b.kartId as number} deger={bg.deger} aksiyon={b.aksiyon} /> },
+      { anahtar: 'ozel:recete-uretimler', baslik: 'Üretimler',
+        ciz: () => <ReceteUretimlerSekmesi agacId={b.kartId as number} tazele={b.tazeleKayit} /> },
+      ...(uretimSeviyesiAnlik() !== 'basit' ? [
+        { anahtar: 'ozel:recete-surumler', baslik: 'Sürümler',
+          ciz: () => <ReceteSurumlerSekmesi agacId={b.kartId as number} tazele={b.tazeleKayit} git={b.git} ecn={false} /> }] : []),
+      ...(uretimSeviyesiAnlik() === 'denetimli' ? [
+        { anahtar: 'ozel:recete-ecn', baslik: 'Değişiklik Geçmişi (ECN)',
+          ciz: () => <ReceteSurumlerSekmesi agacId={b.kartId as number} tazele={b.tazeleKayit} git={b.git} ecn /> }] : []),
+    ] : undefined,
+    ekAraclar: b => kayitli(b.kartId)
+      ? d => <ReceteKartAraclari deger={d} aksiyon={b.aksiyon} yetki={b.yetki} onDegisti={() => { b.kartiTazele(); b.listeyiTazele() }} /> : undefined,
   },
 };

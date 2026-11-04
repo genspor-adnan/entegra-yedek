@@ -722,6 +722,31 @@ public static partial class AksiyonKatalogu
             new("urun-agaci.emir-ac", "🏭 Üretim Emri Aç", "urun-agaci",
                 Hedef: "araccubugu,sagtus,palet",
                 KaynakKodu: "uretim", Islem: Islem.Ekle, KayitGerekir: true, Sira: 70),
+            // 1257 (mockup urun_agaci_listesi_v2.html): seviyeye göre görünen küme web'de (uretimListeSeviye). Basit:
+            //   "Üret…" reçeteden tek adımda üretim fişi; standart: Üretim Fişi Kes / Kopyala; denetimli: onay akışı,
+            //   Sil yerine Pasife Al… Tümü katalogda - yetki kuralı tek, görünüm kuralı web.
+            new("urun-agaci.uret", "🏭 Üret…", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Ekle, KayitGerekir: true, Sira: 35),
+            new("urun-agaci.fis-kes", "🧾 Üretim Fişi Kes", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Ekle, KayitGerekir: true, Sira: 71),
+            new("urun-agaci.kopyala", "⧉ Kopyala", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim", Islem: Islem.Ekle, KayitGerekir: true, Sira: 51),
+            new("urun-agaci.pasif", "⊘ Pasife Al…", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 32),
+            new("urun-agaci.onaya-gonder", "✍ Onaya Gönder…", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 80),
+            new("urun-agaci.onayla", "✔ Onayla / Reddet…", "urun-agaci",
+                Hedef: "araccubugu,sagtus,palet",
+                AksiyonYetkisi: "uretim.recete.onay", KayitGerekir: true, Sira: 81),
+            // Üretim yetkisine bağlı (UretimTestleri kuralı); stok kartının kendi yetkisi kart açılınca sorulur.
+            new("urun-agaci.mamul-ac", "📦 Mamul Kartını Aç", "urun-agaci",
+                Hedef: "sagtus,palet",
+                KaynakKodu: "uretim", Islem: Islem.Gor, KayitGerekir: true, Sira: 90),
         ];
 
         s["uretim-emri-liste"] =

@@ -67,6 +67,40 @@ public sealed class MrzCozucuTestleri
     }
 
     [Fact]
+    public void Tc_kimlik_karti_gercek_duzen_kimlik_no_satir_1_istege_bagli_alanda()
+    {
+        // Gerçek T.C. kimlik kartı: belge no + kontrol + '<' + T.C. kimlik no satır 1'de; satır 2 isteğe bağlı alan boş.
+        var s = MrzCozucu.Coz("""
+            I<TURA10B305679<98765400166<<<
+            9001011M3012316TUR<<<<<<<<<<<0
+            YILMAZ<<AHMET<<<<<<<<<<<<<<<<<
+            """, Bugun);
+        Assert.NotNull(s);
+        Assert.True(s.Gecerli, string.Join(" | ", s.Hatalar));
+        Assert.Equal("A10B30567", s.BelgeNo);
+        Assert.Equal("98765400166", s.KimlikNo);
+    }
+
+    [Fact]
+    public void Ocr_bozulmasi_onarilir_dolgu_koşusu_O_0_ve_E_6()
+    {
+        // Gerçek kart denemesinden (04.11.2026) görülen bozulma deseni: dolgu '<' koşuları C/L/K, '0' 'O', '6' 'E',
+        //   satırlar 32-33 karaktere uzamış, ad önüne 'C' sızmış.
+        var s = MrzCozucu.Coz("""
+            I<TURA1OB3O5679<987654OO166<<<
+            9001011M3012316TURC<CLCC<C<<<<<<O
+            YILMAZ<<CAHMETCCCLCLLLLLLLLLLLLK
+            """, Bugun);
+        Assert.NotNull(s);
+        Assert.True(s.Gecerli, string.Join(" | ", s.Hatalar));
+        Assert.Equal("A10B30567", s.BelgeNo);
+        Assert.Equal("98765400166", s.KimlikNo);
+        Assert.Equal(new DateOnly(1990, 1, 1), s.DogumTarihi);
+        Assert.Equal("YILMAZ", s.Soyad);
+        Assert.Equal("AHMET", s.Ad);
+    }
+
+    [Fact]
     public void Td3_pasaport_icao_numunesi_cozulur()
     {
         var s = MrzCozucu.Coz("""

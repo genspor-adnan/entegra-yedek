@@ -45,6 +45,13 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   // HASTA KARTI v5 (kullanıcı 24.10.2026): etiketli kimlik şeridi yok - Kimlik No / Ad / Soyad / Dosya No /
   //   Durum Genel sekmesinin "Kimlik" kutusunda (kartSekmeleri), üstte isim bandı (kartEklentileri).
   hasta: { seritAlanlari: [] },
+  // ----------------------------- ürün ağacı (reçete) kartı v2 (1259, mockup urun_agaci_karti_v2.html) ----
+  // Sekme sırası mockup: Bileşenler · Operasyonlar · Maliyet · Kontrol Listesi · Sürümler · Değişiklik Geçmişi ·
+  //   Üretimler · Ekler. "Tanım" sekmesi yok (alanlar kimlik şeridinde).
+  'urun-agaci': {
+    sekmeSirasi: ['Bileşenler', 'Operasyonlar / Rota', 'Maliyet', 'Kontrol Listesi', 'Sürümler', 'Değişiklik Geçmişi (ECN)',
+                  'Üretimler', 'Resim / Doküman'],
+  },
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html sırası; Finansal / Belgeler / CRM kart eklentisinin sekmeleri.
   cari: {

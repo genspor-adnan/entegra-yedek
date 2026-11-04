@@ -129,7 +129,7 @@ export function UretimIcmali() {
             📝 Eksik hammadde için talep aç{eksikler.length ? ` (${eksikler.length})` : ''}</button>
         )}
         <span className="sp" />
-        <button onClick={() => git('/urun-agaci')}>🌳 Ürün Ağacı Listesi</button>
+        <button onClick={() => git('/urun-agaci')}>🌳 Ürün Ağacı (Reçete) Listesi</button>
         <button onClick={() => git('/is-merkezi')}>⚙ İş Merkezi Listesi</button>
         <button onClick={() => git('/stok-kritik-stok-icmali')}>⚠ Kritik Stok İcmali</button>
       </div>

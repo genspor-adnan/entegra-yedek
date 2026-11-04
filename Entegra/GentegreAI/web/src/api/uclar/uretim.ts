@@ -3,6 +3,21 @@ import {
   } from '../sozlesme';
 import { istek, gonder } from '../cekirdek';
 
+/** Reçete listesi üst şeridi (1257). */
+export interface AgacOzeti {
+  recete: number; aktif: number; pasif: number; bos: number; maliyetEski: number; acikEmirde: number; acikEmir: number;
+  malzemeEksik: number; buAyUretilen: number; buAyFis: number; onayBekleyen: number; onayBekleyenGun: number;
+}
+
+/** Reçetenin bir sürümü (1258, Sürümler / Değişiklik Geçmişi). */
+export interface AgacSurumu {
+  id: number; surum: number; durum: number; varsayilan: number; onayDurum: number; ecnNo: string; yururluk: string | null;
+  onayTarihi: string | null; onayGerekce: string; onayaGonderme: string | null; maliyet: number; degisme: string | null;
+  hazirlayan: string; onaylayan: string; degistiren: string; acikEmir: number; bilesen: number; operasyon: number; kontrol: number; notlar: string;
+  /** Mevcut stokla üretilebilecek miktar (null = bileşeni yok). */
+  uretilebilir: number | null;
+}
+
 /** Uretim ve urun agaci. */
 export const uretimUclari = {
   // ---------------------------------------------------------------- URETIM
@@ -15,6 +30,18 @@ export const uretimUclari = {
   uretimYeniSurum: (agacId: number) =>
     gonder<{ id: number; kod: string; surum: number; mesaj: string }>(
       `/api/uretim/agac/${agacId}/yeni-surum`, {}),
+
+  /** REÇETE LİSTESİ / KARTI (1257/1258, mockup urun_agaci_listesi_v2.html): özet şeridi, kopya, pasife alma, onay akışı, sürümler. */
+  uretimAgacOzet: () => istek<{ ozet: AgacOzeti }>('/api/uretim/agac/ozet'),
+  uretimAgacKopyala: (agacId: number) =>
+    gonder<{ id: number; kod: string; mesaj: string }>(`/api/uretim/agac/${agacId}/kopyala`, {}),
+  uretimAgacPasif: (agacId: number, gerekce: string, parola?: string) =>
+    gonder<{ id: number; mesaj: string }>(`/api/uretim/agac/${agacId}/pasif`, { gerekce, parola }),
+  uretimAgacOnayaGonder: (agacId: number, gerekce: string) =>
+    gonder<{ id: number; mesaj: string }>(`/api/uretim/agac/${agacId}/onaya-gonder`, { gerekce }),
+  uretimAgacOnayla: (agacId: number, karar: 1 | 2, gerekce: string, parola: string) =>
+    gonder<{ id: number; karar: number; ecn?: string; mesaj: string }>(`/api/uretim/agac/${agacId}/onayla`, { karar, gerekce, parola }),
+  uretimAgacSurumler: (agacId: number) => istek<{ surumler: AgacSurumu[] }>(`/api/uretim/agac/${agacId}/surumler`),
 
   /** Ters agac: bilesen hangi mamullerde geciyor (fiyat degisim etkisi). */
   uretimNeredeKullaniliyor: (stokId: number) =>

@@ -141,6 +141,16 @@ public static partial class UretimFisiUclari
                 """, t, [fisId, ++ks, k.Ad.Trim(), k.Kriter ?? "", k.Sonuc is 1 or 2 ? k.Sonuc : (short)0,
                          k.Sonuc == 0 ? null : kullaniciId, k.Sonuc == 0 ? null : Saat.Simdi, k.Notu ?? "", kullaniciId], iptal);
         }
+        // REÇETENİN KALİTE KONTROLLERİ (1258, urun_agaci_kontrol tur 2): ekran kontrol göndermediyse fişe kopyalanır (sonuç
+        //   bekliyor). Reçete sonradan değişse karantinadaki fiş kendi listesiyle biter.
+        if (ks == 0 && istek.AgacId is > 0)
+            await b.CalistirAsync("""
+                insert into public.uretim_fisi_kontrol (fis_id, sira, ad, kriter, sonuc, notu, ekleyen)
+                select @p0, row_number() over (order by k.sira, k.id), k.ad,
+                       k.olcut || case when k.orneklem <> '' then ' · örneklem ' || k.orneklem else '' end, 0,
+                       case when k.ret_islem <> '' then 'ret: ' || k.ret_islem else '' end, @p2
+                  from public.urun_agaci_kontrol k where k.agac_id = @p1 and k.tur = 2
+                """, t, [fisId, istek.AgacId, kullaniciId], iptal);
     }
 
     private static async Task OperasyonlariYazAsync(NpgsqlConnection b, NpgsqlTransaction t, int fisId, FisOperasyonIstegi[] satirlar,

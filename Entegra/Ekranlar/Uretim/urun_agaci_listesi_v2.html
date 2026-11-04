@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ürün Ağacı (Reçete) Listesi — seviyeye göre — Mockup (Gentegre AI · Üretim)</title>
+<!--
+  Kullanıcı 04.11.2026: "Ürün Ağacı Listesi rename her yerde Ürün Ağacı (Reçete) Listesi" · "yeni üretim emri ve üretim
+  fişi durumuna göre ürün ağacı liste ve kartı için yeni mockup yap".
+  v1: urun_agaci_listesi.html (429). Bu sürüm: üretim seviyesi (uretim_basit.html ③, uretim_emri_listesi_v2.html,
+  uretim_fisi_listesi.html ile AYNI çerçeve) - veri yapısı ve katalog TEK, seviye yalnız görüneni değiştirir.
+  Basit: "reçete" = mamul + malzeme listesi + "Üret…" (üretim fişini doğrudan keser; emir yok).
+  Standart: sürüm / alternatif / rota / maliyet, "Üretim Emri Aç".
+  Denetimli: reçete ONAY AKIŞI (taslak → onayda → onaylı → kilitli; e-imza, ECN no, yürürlük), kontrol listesi
+  (emrin ön kontrolleri + fişin kalite kontrolleri reçeteden gelir), onaysız reçeteden emir / fiş açılmaz.
+-->
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --mor:#6a3fb5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--navy);margin:22px auto 6px;max-width:1400px} h2:first-of-type{margin-top:0}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;position:relative}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.mor{border-color:#6a3fb5;background:linear-gradient(#8a63cc,#6a3fb5);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .chip.sari{border-color:#f2ddbf;color:#8a6218;background:#fdf6e3}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.eski td{color:var(--muted)}
+  .dg tr.top td{background:#fbfcfe;font-weight:bold;border-top:1px solid var(--line)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .bag{color:var(--accent);text-decoration:underline dotted}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .norm{max-width:1400px;margin:0 auto 10px;background:#fff;border:1px solid #cfe0f4;border-left:4px solid var(--accent);border-radius:4px;padding:8px 12px;line-height:1.9}
+  .seviye{display:inline-flex;align-items:center;margin-left:8px}
+  .seviye button{border:1px solid var(--accent);background:#fff;color:var(--accent);font:inherit;font-weight:700;padding:3px 10px;cursor:pointer}
+  .seviye button+button{border-left:0} .seviye button:first-of-type{border-radius:4px 0 0 4px} .seviye button:last-of-type{border-radius:0 4px 4px 0}
+  .seviye button.on{background:var(--accent);color:#fff}
+  body[data-seviye="basit"] .y-standart:not(.y-basit),body[data-seviye="basit"] .y-denetimli:not(.y-basit){display:none!important}
+  body[data-seviye="standart"] .y-basit:not(.y-standart),body[data-seviye="standart"] .y-denetimli:not(.y-standart){display:none!important}
+  body[data-seviye="denetimli"] .y-basit:not(.y-denetimli),body[data-seviye="denetimli"] .y-standart:not(.y-denetimli){display:none!important}
+  .g-basit,.g-standart,.g-denetimli{display:none}
+  body[data-seviye="basit"] .g-basit,body[data-seviye="standart"] .g-standart,body[data-seviye="denetimli"] .g-denetimli{display:inline}
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px 10px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .oz{border:1px solid var(--line2);border-radius:5px;padding:5px 10px;background:#fff}
+  .oz .e{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px} .oz .v{font-size:13px;font-weight:700} .oz .a{font-size:10.5px;color:var(--muted)}
+  .oz.uy{background:#fdf6e8;border-color:#f0dfb8} .oz.mor{background:#f5f0fc;border-color:#ddd0f2} .oz.kir{background:#fdecec;border-color:#f3c4bf}
+  .sagtus{position:absolute;right:40px;top:300px;width:250px;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(20,40,70,.18);font-size:11.5px}
+  .sagtus div{padding:5px 12px} .sagtus div.ayr{border-top:1px solid var(--line2);padding:0;margin:3px 0} .sagtus div.pas{color:#9aa7b4}
+  table.kural{border-collapse:collapse;width:100%} table.kural th,table.kural td{border:1px solid var(--line2);padding:5px 8px;font-size:11.5px;vertical-align:top;text-align:left}
+  table.kural th{background:#f4f7fb;color:#3a5573}
+</style>
+</head>
+<body data-seviye="standart">
+
+<div class="norm">
+  <b>Ürün Ağacı (Reçete) Listesi — seviyeye göre görünüm.</b> Üretim emri / fişi listeleriyle aynı çerçeve: arama · cipler · özet kutuları · grid · durum çubuğu.
+  Reçete <b>kayıt yapısı tek</b>; Basit'te "mamul + malzeme + Üret…", Standart'ta sürüm / rota / maliyet, Denetimli'de onay akışı + kontrol listesi.
+  <span class="seviye"><span class="sonuk" style="margin-right:6px">Önizleme:</span>
+    <button type="button" data-s="basit">Basit</button><button type="button" data-s="standart" class="on">Standart</button><button type="button" data-s="denetimli">Denetimli</button></span>
+</div>
+
+<h2>① Liste</h2>
+<div class="win">
+  <div class="title">🌳 Ürün Ağacı (Reçete) Listesi <span class="sp">Üretim › Ürün Ağacı (Reçete) Listesi · <span class="g-basit">Basit seviye</span><span class="g-standart">Standart seviye</span><span class="g-denetimli">Denetimli seviye</span></span></div>
+  <div class="toolbar">
+    <span class="btn primary">＋ Yeni Reçete</span>
+    <span class="btn">✎ Düzenle</span>
+    <span class="btn y-standart y-denetimli" title="Kopya + sıradaki sürüm no; eski sürüm pasifleşir, açık emirler kendi sürümünde kalır">⧉ Yeni Sürüm</span>
+    <span class="btn y-basit" title="Aynı reçeteden kopya (örn. farklı renk)">⧉ Kopyala</span>
+    <span class="btn danger y-basit y-standart" title="Emirde / fişte kullanılmış reçete silinmez, pasife alınır">🗑 Sil</span>
+    <span class="btn y-denetimli" title="Onaylı / kilitli reçete silinmez; gerekçeyle pasife alınır (e-imza)">⊘ Pasife Al…</span>
+    <span class="sepv"></span>
+    <span class="btn ok y-basit" title="Seçili reçeteden ÜRETİM FİŞİ keser: adet sor, malzemeler reçeteden, stoğa işle">🏭 Üret…</span>
+    <span class="btn ok y-standart y-denetimli" title="Seçili reçeteden üretim emri açar (varsayılan sürüm)">📋 Üretim Emri Aç</span>
+    <span class="btn y-standart y-denetimli" title="Seçili reçeteden tek adımlı üretim fişi (emirsiz)">🧾 Üretim Fişi Kes</span>
+    <span class="btn y-standart y-denetimli">🧮 Maliyet Hesapla</span>
+    <span class="btn y-standart y-denetimli">🔎 Nerede Kullanılıyor</span>
+    <span class="btn mor y-denetimli" title="Taslak reçeteyi onaya gönderir; onaylayan e-imza ile Onaylı yapar, ECN no verilir">✍ Onaya Gönder…</span>
+    <span class="sepv"></span>
+    <span class="btn">🖨 Yazdır ▾</span>
+    <span class="sp"></span>
+    <span class="btn y-standart y-denetimli">🏭 Üretim Emirleri</span><span class="btn">🧾 Üretim Fişleri</span><span class="btn y-standart y-denetimli">📊 Üretim İcmali</span>
+  </div>
+  <div class="arama">
+    <span class="kutu">🔍 Reçete kodu / adı, mamul kodu / adı, bileşen…</span>
+    <span class="chip on">Aktif</span><span class="chip">Pasif</span><span class="chip">Tümü</span>
+    <span class="sepv y-standart y-denetimli"></span>
+    <span class="chip y-standart y-denetimli">Mamul</span><span class="chip y-standart y-denetimli">Yarı Mamul</span><span class="chip y-standart y-denetimli">Paket / Set</span>
+    <span class="sepv y-denetimli"></span>
+    <span class="chip sari y-denetimli">Onay bekleyen <b>2</b></span><span class="chip y-denetimli">Onaylı</span><span class="chip y-denetimli">Kilitli</span><span class="chip y-denetimli">Taslak</span>
+    <span class="sp"></span><span class="chip y-standart y-denetimli">🌳 Kategori ▾</span><span class="chip y-standart y-denetimli">Maliyeti eski (&gt; 30 gün)</span>
+  </div>
+  <div class="ozet">
+    <div class="oz"><div class="e">Reçete</div><div class="v">14</div><div class="a">12 aktif · 2 pasif</div></div>
+    <div class="oz uy"><div class="e">Boş reçete</div><div class="v">1</div><div class="a">bileşeni yok - üretilemez</div></div>
+    <div class="oz uy y-standart y-denetimli"><div class="e">Maliyeti eski</div><div class="v">3</div><div class="a">son hesap &gt; 30 gün</div></div>
+    <div class="oz mor y-standart y-denetimli"><div class="e">Açık emirde</div><div class="v">5</div><div class="a">reçete · 7 emir</div></div>
+    <div class="oz y-basit"><div class="e">Bu ay üretilen</div><div class="v">181</div><div class="a">6 reçeteden · 7 fiş</div></div>
+    <div class="oz kir y-denetimli"><div class="e">Onay bekleyen</div><div class="v">2</div><div class="a">1'i 3 gündür</div></div>
+    <div class="oz y-basit"><div class="e">Malzeme eksik</div><div class="v">2</div><div class="a">reçete - bugün üretilemez</div></div>
+  </div>
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th style="width:26px"></th><th>Kod</th><th>Reçete Adı</th><th>Mamul (Stok)</th>
+        <th class="orta y-standart y-denetimli">Tür</th>
+        <th class="sag">Çıktı</th>
+        <th class="orta y-standart y-denetimli">Sürüm</th>
+        <th class="orta">Bileşen</th>
+        <th class="orta y-standart y-denetimli">Opr.</th>
+        <th class="sag">Malzeme</th>
+        <th class="sag y-standart y-denetimli">İşçilik</th>
+        <th class="sag">Toplam</th>
+        <th class="orta y-standart y-denetimli">Son Hesap</th>
+        <th class="orta y-basit">Üretilebilir</th>
+        <th class="orta y-standart y-denetimli">Varsayılan</th>
+        <th class="orta y-denetimli">Onay</th>
+        <th class="y-denetimli">ECN / Yürürlük</th>
+        <th class="orta">Durum</th>
+      </tr></thead>
+      <tbody>
+        <tr class="sel"><td>▸</td><td>RC-0001</td><td>Ahşap Sandalye Klasik</td><td>MAM-1001 · Sandalye Klasik Ceviz</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Mamul</span></td><td class="sag">1 Adet</td><td class="orta y-standart y-denetimli">v3</td><td class="orta">9</td><td class="orta y-standart y-denetimli">5</td>
+          <td class="sag">1.240,00</td><td class="sag y-standart y-denetimli">385,00</td><td class="sag"><b>1.625,00</b></td><td class="orta y-standart y-denetimli">01.09.2026</td>
+          <td class="orta y-basit"><span class="rz ok">✔ 42 adet</span></td><td class="orta y-standart y-denetimli">✔</td>
+          <td class="orta y-denetimli"><span class="rz ok">Onaylı</span></td><td class="y-denetimli">ECN-2026-014 · 01.09.2026</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="eski y-standart y-denetimli"><td></td><td>RC-0001</td><td>Ahşap Sandalye Klasik</td><td>MAM-1001 · Sandalye Klasik Ceviz</td>
+          <td class="orta"><span class="rz mavi">Mamul</span></td><td class="sag">1 Adet</td><td class="orta">v2</td><td class="orta">9</td><td class="orta">5</td>
+          <td class="sag">1.180,00</td><td class="sag">385,00</td><td class="sag">1.565,00</td><td class="orta">10.06.2026</td>
+          <td class="orta"></td><td class="orta y-denetimli"><span class="rz pas">Kilitli</span></td><td class="y-denetimli">ECN-2026-009 · 10.06.2026</td><td class="orta"><span class="rz pas">Eski sürüm</span></td></tr>
+        <tr><td></td><td>RC-0002</td><td>Sandalye İskeleti</td><td>YM-2001 · Sandalye İskeleti Ceviz</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mor">Yarı Mamul</span></td><td class="sag">1 Adet</td><td class="orta y-standart y-denetimli">v1</td><td class="orta">4</td><td class="orta y-standart y-denetimli">3</td>
+          <td class="sag">620,00</td><td class="sag y-standart y-denetimli">210,00</td><td class="sag">830,00</td><td class="orta y-standart y-denetimli">01.09.2026</td>
+          <td class="orta y-basit"><span class="rz ok">✔ 120 adet</span></td><td class="orta y-standart y-denetimli">✔</td>
+          <td class="orta y-denetimli"><span class="rz ok">Onaylı</span></td><td class="y-denetimli">ECN-2026-011</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td></td><td>RC-0003</td><td>Masa 160x80 Meşe</td><td>MAM-1002 · Yemek Masası 160 Meşe</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Mamul</span></td><td class="sag">1 Adet</td><td class="orta y-standart y-denetimli">v1</td><td class="orta">7</td><td class="orta y-standart y-denetimli">4</td>
+          <td class="sag">3.410,00</td><td class="sag y-standart y-denetimli">740,00</td><td class="sag">4.150,00</td><td class="orta y-standart y-denetimli"><span class="rz sari">02.08.2026</span></td>
+          <td class="orta y-basit"><span class="rz kir">✖ meşe tabla yok</span></td><td class="orta y-standart y-denetimli">✔</td>
+          <td class="orta y-denetimli"><span class="rz sari">Onayda</span></td><td class="y-denetimli">ECN-2026-017 · bekliyor 3 gün</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td></td><td>RC-0004</td><td>Yemek Grubu Seti (1 masa + 6 sandalye)</td><td>SET-3001 · Yemek Grubu Meşe/Ceviz</td>
+          <td class="orta y-standart y-denetimli"><span class="rz sari">Paket / Set</span></td><td class="sag">1 Set</td><td class="orta y-standart y-denetimli">v1</td><td class="orta">2</td><td class="orta y-standart y-denetimli">1</td>
+          <td class="sag">13.900,00</td><td class="sag y-standart y-denetimli">120,00</td><td class="sag">14.020,00</td><td class="orta y-standart y-denetimli">01.09.2026</td>
+          <td class="orta y-basit"><span class="rz ok">✔ 6 set</span></td><td class="orta y-standart y-denetimli">✔</td>
+          <td class="orta y-denetimli"><span class="rz ok">Onaylı</span></td><td class="y-denetimli">ECN-2026-012</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td></td><td>RC-0005</td><td>Cila Karışımı 5 Lt</td><td>YM-2010 · Cila Karışımı</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mor">Yarı Mamul</span></td><td class="sag">5 Lt</td><td class="orta y-standart y-denetimli">v2</td><td class="orta">3</td><td class="orta y-standart y-denetimli">1</td>
+          <td class="sag">410,00</td><td class="sag y-standart y-denetimli">40,00</td><td class="sag">450,00</td><td class="orta y-standart y-denetimli">01.09.2026</td>
+          <td class="orta y-basit"><span class="rz ok">✔ 30 Lt</span></td><td class="orta y-standart y-denetimli">✔</td>
+          <td class="orta y-denetimli"><span class="rz ok">Onaylı</span></td><td class="y-denetimli">ECN-2026-010</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td></td><td>RC-0007</td><td>Tabure Ceviz</td><td>MAM-1005 · Tabure Ceviz</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Mamul</span></td><td class="sag">1 Adet</td><td class="orta y-standart y-denetimli">v1</td><td class="orta"><span class="rz kir">0</span></td><td class="orta y-standart y-denetimli">0</td>
+          <td class="sag">—</td><td class="sag y-standart y-denetimli">—</td><td class="sag">—</td><td class="orta y-standart y-denetimli">—</td>
+          <td class="orta y-basit"><span class="rz kir">✖ boş reçete</span></td><td class="orta y-standart y-denetimli"></td>
+          <td class="orta y-denetimli"><span class="rz">Taslak</span></td><td class="y-denetimli">—</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="top"><td></td><td colspan="3">Toplam · 6 reçete</td><td class="y-standart y-denetimli"></td><td></td><td class="y-standart y-denetimli"></td><td class="orta">34</td><td class="orta y-standart y-denetimli">19</td>
+          <td class="sag">19.580,00</td><td class="sag y-standart y-denetimli">1.880,00</td><td class="sag">21.460,00</td><td class="y-standart y-denetimli"></td><td class="y-basit"></td><td class="y-standart y-denetimli"></td><td class="y-denetimli"></td><td class="y-denetimli"></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="statusbar"><span>6 reçete · 5 aktif</span><span>Seçili: RC-0001 <span class="y-standart y-denetimli">v3</span> · 2 açık emir</span><span class="sp y-standart y-denetimli">Maliyet kaynağı: ağırlıklı ortalama · son hesap 01.09.2026</span></div>
+
+  <div class="sagtus">
+    <div><b>RC-0001 · Ahşap Sandalye Klasik</b></div>
+    <div class="ayr"></div>
+    <div class="y-basit">🏭 Üret… <span class="sonuk">(fiş keser)</span></div>
+    <div class="y-standart y-denetimli">📋 Üretim Emri Aç</div>
+    <div class="y-standart y-denetimli">🧾 Üretim Fişi Kes</div>
+    <div class="y-standart y-denetimli">🔎 Nerede Kullanılıyor</div>
+    <div class="y-standart y-denetimli">🧮 Maliyet Hesapla</div>
+    <div class="y-standart y-denetimli">⧉ Yeni Sürüm</div>
+    <div class="y-basit">⧉ Kopyala</div>
+    <div class="ayr"></div>
+    <div>📦 Mamul Kartını Aç</div>
+    <div class="y-standart y-denetimli">📜 Bu Reçetenin Emirleri</div>
+    <div>🧾 Bu Reçetenin Fişleri</div>
+    <div class="y-denetimli ayr"></div>
+    <div class="y-denetimli">✍ Onaya Gönder…</div>
+    <div class="y-denetimli pas">🔒 Kilitle <span class="sonuk">(onaylı reçete)</span></div>
+    <div class="y-denetimli">🕘 Değişiklik Geçmişi (ECN)</div>
+  </div>
+</div>
+
+<h2>② Seviyeye göre ne değişir</h2>
+<div class="win" style="padding:10px 12px">
+  <table class="kural">
+    <thead><tr><th style="width:170px">Konu</th><th>Basit</th><th>Standart</th><th>Denetimli</th></tr></thead>
+    <tbody>
+      <tr><td>Kolonlar</td><td>Kod · Reçete Adı · Mamul · Çıktı · Bileşen · Malzeme · Toplam · <b>Üretilebilir</b> (stok yetiyor mu, kaç adet) · Durum</td><td>+ Tür · Sürüm · Opr. · İşçilik · Son Hesap · Varsayılan</td><td>+ <b>Onay</b> (Taslak / Onayda / Onaylı / Kilitli) · ECN no · Yürürlük</td></tr>
+      <tr><td>Cipler</td><td>Aktif · Pasif · Tümü</td><td>+ Mamul · Yarı Mamul · Paket / Set · Maliyeti eski</td><td>+ Onay bekleyen · Onaylı · Kilitli · Taslak</td></tr>
+      <tr><td>Özet kutuları</td><td>Reçete · Boş reçete · Bu ay üretilen · Malzeme eksik</td><td>Reçete · Boş reçete · Maliyeti eski · Açık emirde</td><td>+ Onay bekleyen (kaç gündür)</td></tr>
+      <tr><td>Araç çubuğu</td><td>Yeni · Düzenle · Kopyala · Sil · <b>Üret…</b> (üretim fişini doğrudan keser: adet sor → fiş) · Yazdır</td><td>Yeni · Düzenle · Yeni Sürüm · Sil · <b>Üretim Emri Aç</b> · Üretim Fişi Kes · Maliyet Hesapla · Nerede Kullanılıyor</td><td>Sil yerine <b>Pasife Al…</b> (gerekçe + e-imza) · <b>Onaya Gönder…</b>; onaysız reçeteden emir / fiş açılmaz (422)</td></tr>
+      <tr><td>Üretim emri / fişi bağı</td><td>Emir yok; "Üret…" = `uretim_basit.html` fişi, malzeme reçeteden, "Malzeme eksik" uyarısı fişte</td><td>Emir reçetenin VARSAYILAN sürümünü taşır (`agac_surum`); fiş emre bağlı ya da emirsiz</td><td>Emrin <b>ön kontrol listesi</b> ve fişin <b>kalite kontrol listesi</b> reçeteden gelir (kart ③ Kontrol Listesi sekmesi); reçete sürümü değişince açık emir eski sürümde kalır</td></tr>
+      <tr><td>Silme</td><td colspan="2">Emirde / fişte kullanılmış reçete silinmez (`SilmeEngeli`), pasife alınır; kullanılmamış taslak silinir</td><td>Onaylı / kilitli reçete hiç silinmez; pasife alma e-imzalı, ECN'e yazılır</td></tr>
+      <tr><td>Yetki</td><td colspan="3">`uretim.urun_agaci.liste` Gör / Ekle / Değiştir / Sil; denetimlide aksiyon yetkisi <code>uretim.recete.onay</code> (onaylayan ≠ hazırlayan, dört göz)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="not">
+  <b>Uygulama notu (sonra):</b> seviye uyarlaması `uretimListeSeviye.ts`'ye üçüncü kaynak olarak eklenir (gizli kolon / cip / aksiyon - aynı desen); "Üretilebilir" ve "Malzeme eksik"
+  kolonu / kutusu <code>fn_uretim_malzeme_hazirlik</code>'in reçete sürümü (emirsiz, 1 çıktı için) - yeni fonksiyon. Denetimli onay akışı için <code>urun_agaci.onay_durum / onaylayan / onay_tarihi / ecn_no / yururluk</code>
+  ve kontrol listesi tablosu (kart ③) yeni göç. Reçete adı her yerde "Ürün Ağacı (Reçete)" (1256).
+</div>
+
+<script>
+// Seviye önizleme: üstteki seçici body[data-seviye]'yi değiştirir; y-basit / y-standart / y-denetimli sınıfları görünürlüğü belirler.
+document.querySelectorAll('.seviye button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.body.dataset.seviye = b.dataset.s;
+    document.querySelectorAll('.seviye button').forEach(function (x) { x.classList.toggle('on', x === b) });
+  });
+});
+</script>
+</body>
+</html>

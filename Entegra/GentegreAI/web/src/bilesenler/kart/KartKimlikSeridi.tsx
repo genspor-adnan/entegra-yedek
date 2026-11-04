@@ -329,6 +329,8 @@ export function KartKimlikSeridi({
                             + (kaynak === 'radyoloji-cihaz' ? ' kaid-radcihaz' : '')
                             // STOK (kullanıcı 02.11.2026): Stok Kodu ve Durum yarım genişlikte.
                             + (kaynak === 'stok' ? ' kaid-stok' : '')
+                            // REÇETE (kullanıcı 04.11.2026): Ağaç Kodu, Çıktı Miktarı, Durum yarım genişlik.
+                            + (kaynak === 'urun-agaci' ? ' kaid-recete' : '')
                             // ORDER (968 mockup): ilaç / hizmet geniş.
                             + (kaynak === 'yatis-order' ? ' kaid-order' : '')
                             // GÖZ MUAYENESİ (970 mockup): hasta geniş.

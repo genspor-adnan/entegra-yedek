@@ -28,7 +28,7 @@ dogrulama: insan-dogrulama-bekliyor
 - **Maliyeti karşılaştırmak** — "Maliyet" sekmesi: malzeme, işçilik, GÜG, fason, toplam, birim, plan birim ve sapma; kapanan emirde kapanış tarihi.
 - **İş merkezi doluluğuna bakmak** — "İş Merkezi Yükü" sekmesi: önümüzdeki 4 haftanın plan saati / kapasite oranı; hücreye tıklayınca o haftanın operasyonları altta listelenir.
 - **Eksik hammaddeyi görmek ve talep açmak** — "Malzeme İhtiyacı" sekmesi: kalan ihtiyaç, rezerve, eldeki, yoldaki, eksik ve ilk gereken tarih. Satırdaki "Talep aç" ya da araç çubuğundaki "📝 Eksik hammadde için talep aç" depo başına TASLAK satınalma talebi açar (onaya siz gönderirsiniz); `satinalma.talep` ekleme yetkisi gerekir.
-- **İlgili ekranlara geçmek** — "🌳 Ürün Ağacı Listesi", "⚙ İş Merkezi Listesi", "⚠ Kritik Stok İcmali"; bileşen ve mamul adına tıklayınca stok kartı açılır.
+- **İlgili ekranlara geçmek** — "🌳 Ürün Ağacı (Reçete) Listesi", "⚙ İş Merkezi Listesi", "⚠ Kritik Stok İcmali"; bileşen ve mamul adına tıklayınca stok kartı açılır.
 - **Çıktı almak** — "🖨️ Üretim İcmali ▾" menüsünden Baskı Önizleme, Yazıcıya Yazdır ya da Gönder › PDF / Word / Excel / HTML; "🖨 Önizleme (A4)" sekmesi aynı belgeyi ekranda gösterir.
 
 ## Ekrana giriş

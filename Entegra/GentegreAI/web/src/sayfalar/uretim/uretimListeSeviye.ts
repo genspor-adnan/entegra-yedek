@@ -23,9 +23,69 @@ export interface ListeUyarlamasi {
 /** Liste aksiyonundan üst paneldeki pencereye (ImzaPenceresi) geçiş olayları - KONS_ISLEM_OLAYI deseni. */
 export const UE_ISLEM_OLAYI = 'gentegre-uretim-emir-islem';
 export const UF_ISLEM_OLAYI = 'gentegre-uretim-fis-islem';
-export interface UretimIslemOlayi { id: number; islem: 'serbest' | 'ters'; satir?: Record<string, unknown> }
+/** Reçete listesi / kartı (1257): pasife al · onaya gönder · onayla pencereleri. */
+export const UA_ISLEM_OLAYI = 'gentegre-urun-agaci-islem';
+export interface UretimIslemOlayi { id: number; islem: 'serbest' | 'ters' | 'pasif' | 'onaya-gonder' | 'onayla' | 'uret'; satir?: Record<string, unknown> }
 
-const URETIM_LISTELERI = ['uretim-emri', 'uretim-fisi'];
+const URETIM_LISTELERI = ['uretim-emri', 'uretim-fisi', 'urun-agaci'];
+
+/** Reçete listesi cipleri (mockup urun_agaci_listesi_v2.html ②). */
+const AGAC_CIPLERI: Record<UretimSeviyesi, ListeCipleri> = {
+  basit: [
+    { ad: 'Aktif', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+    { ad: 'Pasif', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+    { ad: 'Malzeme eksik', filtre: { alan: 'uretilebilir', op: 'esit', deger: 0 } },
+    { ad: 'Tümü' },
+  ],
+  standart: [
+    { ad: 'Aktif',          filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+    { ad: 'Pasif',          filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+    { ad: 'Mamul',          filtre: { alan: 'tur',   op: 'esit', deger: 1 } },
+    { ad: 'Yarı Mamul',     filtre: { alan: 'tur',   op: 'esit', deger: 2 } },
+    { ad: 'Paket / Set',    filtre: { alan: 'tur',   op: 'esit', deger: 3 } },
+    { ad: 'Maliyeti eski',  filtre: { alan: 'maliyetEski', op: 'esit', deger: 1 } },
+    { ad: 'Açık emirde',    filtre: { alan: 'acikEmir', op: 'buyuk', deger: 0 } },
+    { ad: 'Tümü' },
+  ],
+  denetimli: [
+    { ad: 'Aktif',          filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+    { ad: 'Pasif',          filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+    { ad: 'Mamul',          filtre: { alan: 'tur',   op: 'esit', deger: 1 } },
+    { ad: 'Yarı Mamul',     filtre: { alan: 'tur',   op: 'esit', deger: 2 } },
+    { ad: 'Onay bekleyen',  filtre: { alan: 'onayDurum', op: 'esit', deger: 1 } },
+    { ad: 'Onaylı',         filtre: { alan: 'onayDurum', op: 'esit', deger: 2 } },
+    { ad: 'Kilitli',        filtre: { alan: 'onayDurum', op: 'esit', deger: 3 } },
+    { ad: 'Taslak',         filtre: { alan: 'onayDurum', op: 'esit', deger: 0 } },
+    { ad: 'Maliyeti eski',  filtre: { alan: 'maliyetEski', op: 'esit', deger: 1 } },
+    { ad: 'Açık emirde',    filtre: { alan: 'acikEmir', op: 'buyuk', deger: 0 } },
+    { ad: 'Tümü' },
+  ],
+};
+export const AGAC_VARSAYILAN_CIPLER = AGAC_CIPLERI.standart;
+
+/**
+ * REÇETE KARTI seviye uyarlaması (1258, mockup urun_agaci_karti_v2.html ③): gizli alanlar ve gizli sekmeler. Kart
+ * eklentisi (kartEklentileri) hook çağıramaz - anlık seviyeyle çalışır.
+ */
+export function receteKartUyarlamasi(seviye: UretimSeviyesi): {
+  gizliAlanlar: string[]; gizliSekmeler: string[]; gizliDetaylar: string[]; bilesenGizli: string[];
+} {
+  const onay = ['onayDurum', 'ecnNo', 'yururluk', 'partiBuyuklugu', 'rafOmruAy', 'pasifNeden'];
+  // "Maliyet" GRUP sekmesi her seviyede gizli: yerine kart eklentisinin Maliyet sekmesi (tablo + Hesapla, mockup).
+  // Bileşen satırı (mockup ③): basit Malzeme · Miktar · Birim · Fire · Birim maliyet · Tutar · Stokta; standart + Tip ·
+  //   Net gerekli · Depo · Opr. · Alt ağaç · Alternatif; denetimli + Kritik.
+  if (seviye === 'basit') return {
+    gizliAlanlar: ['tur', 'agacSurum', 'varsayilan', 'alternatifAd', 'gecerliBas', 'gecerliBit', 'sarfDepoId', 'mamulDepoId', 'fireDepoId',
+                   'tavsiyeSatisKatsayi', 'maliyetGug', ...onay],
+    gizliSekmeler: ['Maliyet', 'Sürümler', 'Değişiklik Geçmişi (ECN)', 'Ekler / Çizim', 'Resim / Doküman'],
+    gizliDetaylar: ['operasyonlar', 'kontroller'],
+    bilesenGizli: ['tur', 'netGerekli', 'altAgacId', 'operasyonSira', 'depoId', 'alternatifGrup', 'kritik'],
+  };
+  if (seviye === 'standart') return {
+    gizliAlanlar: onay, gizliSekmeler: ['Maliyet', 'Değişiklik Geçmişi (ECN)'], gizliDetaylar: ['kontroller'], bilesenGizli: ['stokta', 'kritik'],
+  };
+  return { gizliAlanlar: [], gizliSekmeler: ['Maliyet'], gizliDetaylar: [], bilesenGizli: ['stokta'] };
+}
 
 const EMIR_CIPLERI = (denetimli: boolean): ListeCipleri => [
   { ad: 'Açık',       filtre: { alan: 'durum',   op: 'arasinda', deger: [1, 5] } },
@@ -98,6 +158,27 @@ export function uretimListeUyarlamasi(kaynak: string, seviye: UretimSeviyesi): L
     };
     // Denetimli: Sil yerine gerekçeli Ters Kayıt (taslağı da o siler).
     return { gizliKolonlar: [], cipler: FIS_CIPLERI.denetimli, gizliAksiyonlar: ['uretim-fisi.sil'] };
+  }
+  if (kaynak === 'urun-agaci') {
+    // REÇETE (1257, mockup urun_agaci_listesi_v2.html ②): basit = mamul + malzeme + Üret… (fiş); standart = sürüm / rota /
+    //   maliyet + emir; denetimli = onay akışı, Sil yerine Pasife Al…
+    const onay = ['onayAdi', 'ecnNo', 'yururluk'];
+    if (seviye === 'basit') return {
+      gizliKolonlar: ['turAdi', 'surum', 'operasyonSayisi', 'maliyetIscilik', 'maliyetTarih', 'varsayilan', 'acikEmir', ...onay],
+      cipler: AGAC_CIPLERI.basit,
+      gizliAksiyonlar: ['urun-agaci.yeni-surum', 'urun-agaci.emir-ac', 'urun-agaci.fis-kes', 'urun-agaci.maliyet', 'urun-agaci.nerede',
+                        'urun-agaci.pasif', 'urun-agaci.onaya-gonder', 'urun-agaci.onayla'],
+    };
+    if (seviye === 'standart') return {
+      gizliKolonlar: ['uretilebilir', ...onay],
+      cipler: AGAC_CIPLERI.standart,
+      gizliAksiyonlar: ['urun-agaci.uret', 'urun-agaci.pasif', 'urun-agaci.onaya-gonder', 'urun-agaci.onayla'],
+    };
+    return {
+      gizliKolonlar: ['uretilebilir'],
+      cipler: AGAC_CIPLERI.denetimli,
+      gizliAksiyonlar: ['urun-agaci.uret', 'urun-agaci.sil'],
+    };
   }
   return null;
 }

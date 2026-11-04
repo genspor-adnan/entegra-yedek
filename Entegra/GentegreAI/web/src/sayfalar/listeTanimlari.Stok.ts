@@ -1,5 +1,5 @@
 import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
-import { EMIR_VARSAYILAN_CIPLER, FIS_VARSAYILAN_CIPLER } from './uretim/uretimListeSeviye';
+import { AGAC_VARSAYILAN_CIPLER, EMIR_VARSAYILAN_CIPLER, FIS_VARSAYILAN_CIPLER } from './uretim/uretimListeSeviye';
 
 /**
  * Stok, hizmet ve üretim listeleri.
@@ -298,20 +298,19 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   Ayni kod birden cok SURUMLE listelenir: eski surum silinmez, pasiflesir
     //   (acik emirler kendi surumunde yasar). Bu yuzden varsayilan sirama
     //   kod + surum, cipler de surum degil DURUM uzerinden.
-    kaynak: 'urun-agaci', rota: 'urun-agaci', baslik: 'Ürün Ağacı Listesi',
-    yol: 'Üretim › Ürün Ağacı Listesi',
-    kartYolu: '/urun-agaci', kartBaslik: 'Ürün Ağacı',
+    // "Ürün Ağacı (Reçete) Listesi" (kullanıcı 04.11.2026): KOBİ kullanıcısı "reçete" der, BOM demez.
+    kaynak: 'urun-agaci', rota: 'urun-agaci', baslik: 'Ürün Ağacı (Reçete) Listesi',
+    yol: 'Üretim › Ürün Ağacı (Reçete) Listesi',
+    kartYolu: '/urun-agaci', kartBaslik: 'Ürün Ağacı (Reçete)',
     aksiyonEkrani: 'urun-agaci-liste',
-    cipler: [
-      { ad: 'Aktif',      filtre: { alan: 'durum', op: 'esit', deger: 0 } },
-      { ad: 'Mamul',      filtre: { alan: 'tur',   op: 'esit', deger: 1 } },
-      { ad: 'Yarı Mamul', filtre: { alan: 'tur',   op: 'esit', deger: 2 } },
-      { ad: 'Tümü' },
-    ],
+    // Cipler seviyeye göre (1257, uretimListeSeviye): burası standart kümesi, seviye yüklenince değişir.
+    cipler: AGAC_VARSAYILAN_CIPLER,
     toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'Ürün Ağacı Listesi', menuSira: 20,
+    menuGrup: 'Üretim', menuAd: 'Ürün Ağacı (Reçete) Listesi', menuSira: 20,
     ic: '🌳', yetkiKodu: 'uretim.urun_agaci.liste',
+    // EKLER / ÇİZİM (mockup urun_agaci_karti_v2.html): teknik çizim, montaj talimatı - stok kartındaki galeri deseni.
+    yerTutucuSekmeler: ['Resim / Doküman'], resimYerTutucu: true,
   },
   {
     // URETIM EMIRLERI (429).

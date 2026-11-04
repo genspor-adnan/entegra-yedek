@@ -1769,7 +1769,34 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           }}
         />
       )}
-      {tarafAlani && tarafAlani.aramaKaynagi !== 'hizmet' && tarafAramaAcik && (
+      {/* STOK (kullanıcı 04.11.2026 "jenerik stok listesi gelmeli"): ürün ağacı bileşenleri, üretim emri / fişi
+          malzemesi gibi `AramaKaynagi: "stok"` detaylarında belgedeki stok arama penceresi - taraf penceresi değil.
+          Pencere AÇIK KALIR, her seçim yeni satır (bir reçeteye on malzeme tek pencereyle girilir). */}
+      {tarafAlani?.aramaKaynagi === 'stok' && tarafAramaAcik && (
+        <StokAramaPenceresi
+          etkin
+          yalnizStok
+          onKapat={() => setTarafAramaAcik(false)}
+          onSec={secilen => {
+            const satir: Satir = {};
+            alanlar.forEach(a => { satir[a.ad] = a.tip === 'mantik' ? 0 : '' });
+            satir[tarafAlani.ad] = String(secilen.id);
+            // KOD / AD / BİRİM salt okunur hücrelerde kayıttan önce de görünsün (reçete bileşeni: bilesenKod · bilesenAd ·
+            //   birimAdi - gridde kimlik gizli, bunlar boş kalınca eklenen satır "görünmüyor"du). Ad kalıbıyla eşlenir.
+            alanlar.forEach(a => {
+              if (a.yazilabilir) return;
+              if (/kod$/i.test(a.ad)) satir[a.ad] = String(secilen.kod ?? '');
+              else if (/birim(adi)?$/i.test(a.ad)) satir[a.ad] = String(secilen.birimAdi ?? secilen.anaBirimAdi ?? secilen.birim ?? '');
+              else if (/(ad|adi)$/i.test(a.ad)) satir[a.ad] = String(secilen.ad ?? '');
+            });
+            // Sıra ve miktar: ekleyen kullanıcı miktarı yazar; sıra sondaki + 1.
+            if ('sira' in satir) satir.sira = String(durum.guncel.length + 1);
+            if ('miktar' in satir && !satir.miktar) satir.miktar = '1';
+            onDegis({ ...durum, guncel: [...durum.guncel, satir] });
+          }}
+        />
+      )}
+      {tarafAlani && tarafAlani.aramaKaynagi !== 'hizmet' && tarafAlani.aramaKaynagi !== 'stok' && tarafAramaAcik && (
         <TarafArama
           acik
           cokluSecim

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { EmirOzeti, FisOzeti } from '../../api/uclar/uretimFisi';
+import type { AgacOzeti } from '../../api/uclar/uretim';
 import { ImzaPenceresi } from '../../bilesenler/ImzaPenceresi';
 import { mesaj } from '../../bilesenler/mesaj';
 import { para, sayi } from '../../bilesenler/bicim';
 import { useUretimSeviyesi } from '../../bilesenler/useUretimSeviyesi';
 import { c } from '../../dil/ceviri';
 import { FisSerbestPenceresi } from './UretimFisiPanelleri';
-import { UE_ISLEM_OLAYI, UF_ISLEM_OLAYI, cipIndeksi, uretimListeUyarlamasi, type UretimIslemOlayi } from './uretimListeSeviye';
+import { ReceteIslemPenceresi } from './UrunAgaciPanelleri';
+import { UA_ISLEM_OLAYI, UE_ISLEM_OLAYI, UF_ISLEM_OLAYI, cipIndeksi, uretimListeUyarlamasi, type UretimIslemOlayi } from './uretimListeSeviye';
 
 /**
  * ÜRETİM LİSTELERİNİN ÜST PANELİ (1254, mockup `.ozet` kutuları): sayaçlar kurum genelini sayar, kutuya tıklamak listeyi
@@ -117,6 +119,45 @@ export function UretimFisiGostergesi({ yenile, cipIndeks, onCip, tazele }: { yen
           aciklama={c('Sarf, fire ve üretim girişi belgeleri geri alınır; fiş silinmez, "Ters kayıt" durumuyla kalır. Mamul stoktan çıkmışsa sunucu reddeder.')}
           onKapat={() => setIslem(null)}
           onImzala={async gerekce => { const y = await api.uretimFisTersKayit(islem.id, gerekce); mesaj(y.mesaj); setIslem(null); tazele() }} />)}
+    </>
+  );
+}
+
+/**
+ * REÇETE LİSTESİ ÜST ŞERİDİ (1257, mockup urun_agaci_listesi_v2.html `.ozet`): seviyeye göre kutular - basit: Reçete ·
+ * Boş reçete · Bu ay üretilen · Malzeme eksik; standart: Reçete · Boş · Maliyeti eski · Açık emirde; denetimli: + Onay
+ * bekleyen. Pasife Al / Onaya Gönder / Onayla pencereleri de burada (liste aksiyonu olay atar).
+ */
+export function UrunAgaciGostergesi({ yenile, cipIndeks, onCip, tazele }: { yenile: number; cipIndeks?: number; onCip(i: number): void; tazele(): void }) {
+  const sv = useUretimSeviyesi();
+  const [g, setG] = useState<AgacOzeti | null>(null);
+  const [islem, setIslem] = useIslemOlayi(UA_ISLEM_OLAYI);
+  useEffect(() => { api.uretimAgacOzet().then(y => setG(y.ozet)).catch(() => setG(null)) }, [yenile]);
+  const cipler = uretimListeUyarlamasi('urun-agaci', sv.seviye)?.cipler ?? [];
+  const cip = (ad: string) => cipIndeksi(cipler, ad);
+  const tumu = cip('Tümü') ?? 0;
+  const kutular: Kutu[] = [
+    { cip: cip('Aktif'), deger: g ? sayi.format(g.recete) : '…', ad: 'Reçete', ek: g ? `${g.aktif} ${c('aktif')} · ${g.pasif} ${c('pasif')}` : undefined },
+    { cip: null, deger: g ? sayi.format(g.bos) : '…', ad: 'Boş reçete', ek: c('bileşeni yok - üretilemez'), sinif: g?.bos ? 'uyari' : undefined },
+    ...(sv.basit
+      ? [{ cip: null, deger: g ? sayi.format(g.buAyUretilen) : '…', ad: 'Bu ay üretilen', ek: g ? `${g.buAyFis} ${c('fiş')}` : undefined } as Kutu,
+         { cip: cip('Malzeme eksik'), deger: g ? sayi.format(g.malzemeEksik) : '…', ad: 'Malzeme eksik', ek: c('reçete - bugün üretilemez'),
+           sinif: g?.malzemeEksik ? 'uyari' : undefined } as Kutu]
+      : [{ cip: cip('Maliyeti eski'), deger: g ? sayi.format(g.maliyetEski) : '…', ad: 'Maliyeti eski', ek: c('son hesap > 30 gün'),
+           sinif: g?.maliyetEski ? 'uyari' : undefined } as Kutu,
+         { cip: cip('Açık emirde'), deger: g ? sayi.format(g.acikEmirde) : '…', ad: 'Açık emirde', ek: g ? `${c('reçete')} · ${g.acikEmir} ${c('emir')}` : undefined } as Kutu]),
+    ...(sv.denetimli
+      ? [{ cip: cip('Onay bekleyen'), deger: g ? sayi.format(g.onayBekleyen) : '…', ad: 'Onay bekleyen',
+           ek: g?.onayBekleyen ? `${c('en eski')} ${g.onayBekleyenGun} ${c('gün')}` : undefined, sinif: g?.onayBekleyen ? 'kirmizi' : undefined } as Kutu]
+      : []),
+  ];
+  const kod = String(islem?.satir?.kod ?? '');
+  return (
+    <>
+      <Kutular kutular={kutular} cipIndeks={cipIndeks} onCip={onCip} tumu={tumu} />
+      {islem && (islem.islem === 'pasif' || islem.islem === 'onaya-gonder' || islem.islem === 'onayla' || islem.islem === 'uret') && (
+        <ReceteIslemPenceresi islem={islem.islem} id={islem.id} kod={kod} onayDurum={Number(islem.satir?.onayDurum ?? 0)} satir={islem.satir}
+                              onKapat={() => setIslem(null)} onBitti={() => { setIslem(null); tazele() }} />)}
     </>
   );
 }

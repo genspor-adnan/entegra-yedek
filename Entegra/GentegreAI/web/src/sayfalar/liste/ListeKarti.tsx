@@ -565,7 +565,7 @@ export function ListeKarti({
         sayfaKipi={yeniSekmede}
         // HASTA KARTI: Sil ve Hesap İcmali kartta yok (kullanıcı 14.10.2026) - listede durur.
         // ACİL YATAK KARTI: Sil kartta yok (mockup) - listede durur.
-        silYok={tanim.kaynak === 'hasta' || tanim.kaynak === 'acilYatak'}
+        silYok={tanim.kaynak === 'hasta' || tanim.kaynak === 'acilYatak' || !!eklenti?.silYok?.(eb)}
         onYuklendi={yeniSekmede ? d => {
           // SEKME BAŞLIĞI = kaydın adı: unvan, ad + soyad, sonra kaynakların ortak ad alanları;
           //   hiçbiri yoksa "Randevu Kartı #30" (kart adı + kayıt no).
@@ -633,7 +633,8 @@ export function ListeKarti({
         // CARİ (müşteri / tedarikçi) kartında başlık satırı yok, "X Kartı #id" araç satırında Ekstre'nin
         //   sağında (kullanıcı 25.10.2026). STOK kartında da: "Stok Kartı #id" Hatırlat'ın sağında, Kaydet ile
         //   sekmeler arasındaki satır yok (kullanıcı 02.11.2026).
-        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok'}
+        // REÇETE de (kullanıcı 04.11.2026): "Ürün Ağacı (Reçete) Kartı" + kod / onay rozeti Hatırlat'ın sağında, başlık satırı yok.
+        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
@@ -1121,7 +1122,8 @@ export function ListeKarti({
         // SURUM YERINE DOSYA + PROTOKOL NO (kullanici): numaralar hasta
         //   kutusundan basliga tasindi, teknik surum rozeti muayenede gizli.
         // Sürüm rozeti yok (kullanıcı): muayene + göz kartları; yerinde No / Prt / hekim rozetleri.
-        surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak'].includes(tanim.kaynak)}
+        // Reçete (1259): başlıkta kod + sürüm rozeti var; xmin damgası kafa karıştırıyordu.
+        surumGizli={['muayene', 'goz-muayene', 'goz-gozluk-recete', 'goz-goruntuleme', 'acilYatak', 'urun-agaci'].includes(tanim.kaynak)}
         baslikEk={eklenti?.baslikEk?.(eb)}
         // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
         //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
@@ -1158,7 +1160,11 @@ export function ListeKarti({
           ? { ...kartOzel.detaySecenekleri,
               raporlar: { ...kartOzel.detaySecenekleri?.raporlar,
                           satirAc: s => setRaporModal({ muayeneId: Number(kartId), tur: Number(s.tur ?? 1), rapor: s }) } }
-          : kartOzel.detaySecenekleri}
+          : eklenti?.detaySecenekleri
+            // Seviyeye göre değişen detay kolonları (reçete bileşenleri, 1259) - kartOzel'in üstüne.
+            ? { ...kartOzel.detaySecenekleri, ...Object.fromEntries(Object.entries(eklenti.detaySecenekleri(eb) ?? {})
+                  .map(([ad, s]) => [ad, { ...kartOzel.detaySecenekleri?.[ad], ...s }])) }
+            : kartOzel.detaySecenekleri}
         sekmeSirasi={kartOzel.sekmeSirasi}
         // MOCKUP EK SEKMELERI (muayene_karti.html): e-Recete · Sevk /
         //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek
@@ -1365,7 +1371,7 @@ export function ListeKarti({
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum TANI sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
-        gizliDetaylar={[...(kartOzel.gizliDetaylar ?? []), ...(tanim.gizliDetaylar ?? [])]}
+        gizliDetaylar={[...(kartOzel.gizliDetaylar ?? []), ...(tanim.gizliDetaylar ?? []), ...(eklenti?.gizliDetaylar?.(eb) ?? [])]}
         detayGrupta={tanim.kaynak === 'muayene' && kartOzel.detayGrupta?.tanilar
           ? { ...kartOzel.detayGrupta,
               // TANI ＋ = ICD arama (grid başlığında, düzenle/sil ile aynı bar).
@@ -1420,7 +1426,7 @@ export function ListeKarti({
                     onClick={() => duzenDegis('sekmeli')}>▤ {c('Sekmeli')}</button>
             <button type="button" className={muayeneDuzeni === 'sekmesiz' ? 'on' : ''}
                     onClick={() => duzenDegis('sekmesiz')}>☰ {c('Sekmesiz')}</button>
-          </span>) : undefined}
+          </span>) : eklenti?.kapatSolu?.(eb)}
         // ACİL YATAK (mockup araç çubuğu): taşı · temizliğe al · kullanım dışı / kullanıma aç · etiket.
         ekAraclar={eklenti?.ekAraclar ? eklenti.ekAraclar(eb) : kartId !== 'yeni' && tanim.kaynak === 'radyoloji-cihaz'
           ? () => (
@@ -1568,9 +1574,11 @@ export function ListeKarti({
           : undefined}
         baslik={kartAdi(tanim)}
         // ERP'YE ÖZGÜ SEKMELER (ör. stok "Reçete") yalnız ERP modunda (urunModu 1).
-        yerTutucuSekmeler={tanim.yerTutucuSekmeler?.filter(x => !(tanim.erpSekmeleri?.includes(x) && kullanici?.urunModu !== 1))}
-        gizliAlanlar={tanim.gizliKartAlanlari}
-        gizliSekmeler={tanim.gizliKartSekmeleri}
+        yerTutucuSekmeler={tanim.yerTutucuSekmeler?.filter(x => !(tanim.erpSekmeleri?.includes(x) && kullanici?.urunModu !== 1)
+                                                                && !eklenti?.gizliSekmeler?.(eb)?.includes(x))}
+        // Seviyeye göre değişen kartlar (1258, reçete) eklentiden ek gizli alan / sekme verir.
+        gizliAlanlar={eklenti?.gizliAlanlar ? [...(tanim.gizliKartAlanlari ?? []), ...(eklenti.gizliAlanlar(eb) ?? [])] : tanim.gizliKartAlanlari}
+        gizliSekmeler={eklenti?.gizliSekmeler ? [...(tanim.gizliKartSekmeleri ?? []), ...(eklenti.gizliSekmeler(eb) ?? [])] : tanim.gizliKartSekmeleri}
         zorunluAlanlar={tanim.zorunluKartAlanlari}
         resimYerTutucu={tanim.resimYerTutucu}
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani

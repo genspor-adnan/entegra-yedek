@@ -51,6 +51,6 @@ Ekran ve kayıt yapısı tektir; seviye yalnız görüneni ve zorunlulukları de
 - **Üretim emrine bağlı fiş:** emrin üretilen / fire sayaçları, satırların sarf edileni ve gerçek maliyeti fişten güncellenir; emir dolunca Tamamlandı; ters kayıt sayaçları geri alır. Emir kartında "Üretim Girişleri" sekmesi fişleri listeler.
 
 ## Sık sorulanlar
-- **"Bu mamul için aktif ürün ağacı yok"** - Ürün Ağacı Listesi'nden ağaç tanımlayın ya da "＋ Malzeme" ile satırları elle ekleyin.
+- **"Bu mamul için aktif ürün ağacı yok"** - Ürün Ağacı (Reçete) Listesi'nden ağaç tanımlayın ya da "＋ Malzeme" ile satırları elle ekleyin.
 - **"Depodaki lotlar miktarı karşılamıyor"** - izlemli malzemede seçili depoda yeterli lot yok; lot seçin, depoyu ya da miktarı değiştirin.
 - **"Gerçekleşmiş fiş değiştirilemez"** - düzeltme Ters Kayıt + yeni fiş ile yapılır; kayıt bütünlüğü (ISO 13485 §4.2.5 / Part 11) korunur.

@@ -9175,3 +9175,18 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mrz-tablo td { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6; padding: 4px 8px; font-size: 11.5px }
 .mrz-tablo td.sl { color: var(--soluk) } .mrz-tablo tr.fark td { background: #fdf6e8 } .mrz-tablo td.bozuk { color: var(--hata); text-decoration: underline wavy }
 .mrz-iki .bilgi-kutusu, .mrz-iki .uyari-kutusu, .mrz-iki .hata-kutusu { margin-top: 8px; padding: 6px 10px; font-size: 11.5px }
+
+/* REÇETE KARTI kimlik ızgarası (kullanıcı 04.11.2026): 12 sütunlu dense ızgara - Ağaç Kodu / Çıktı / Durum dar (1),
+   Ağaç Adı / Mamul / Not geniş (3), kalanlar 2. Kutular hücreyi doldurur, hücre arası boşluk kalmaz. */
+.kaid .alan-izgara.kaid-recete { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-flow: dense }
+.kaid .alan-izgara.kaid-recete > .alan { grid-column: span 2 }
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="kod"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="ciktiMiktar"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="durum"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="agacSurum"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="varsayilan"]) { grid-column: span 1 }
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="ad"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="stokId"]),
+.kaid .alan-izgara.kaid-recete > .alan:has([data-alan="notlar"]) { grid-column: span 3 }
+@media (max-width: 900px) { .kaid .alan-izgara.kaid-recete { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+  .kaid .alan-izgara.kaid-recete > .alan, .kaid .alan-izgara.kaid-recete > .alan:has([data-alan]) { grid-column: span 2 } }

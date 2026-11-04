@@ -248,6 +248,7 @@ export function alanCizici(b: AlanCizimBaglami) {
         <span className="ikili" key={a.ad}>
           <input
             readOnly
+            data-alan={a.ad}
             value={secilenAdlar[a.ad]
                    ?? (deger[a.ad] ? (a.kodlar?.[String(deger[a.ad])] ?? '') : '')}
             placeholder="— seçiniz —"
@@ -296,6 +297,8 @@ export function alanCizici(b: AlanCizimBaglami) {
         return (
           <select
             key={a.ad}
+            // data-alan: ekrana özel genişlik kuralları alanı adıyla bulur (reçete kartı kaid-recete).
+            data-alan={a.ad}
             value={String(deger[a.ad] ?? '')}
             disabled={salt || !a.yazilabilir || ustBos}
             onChange={e => alanDegistir(a.ad, e.target.value)}

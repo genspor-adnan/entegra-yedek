@@ -57,11 +57,115 @@ public static class MrzCozucu
         if (satirlar.Count == 3) { bicim = "TD1"; uzunluk = 30; }
         else if (satirlar[0].StartsWith('P') || enUzun > 36) { bicim = "TD3"; uzunluk = 44; }
         else { bicim = "TD2"; uzunluk = 36; }
-        if (enUzun > uzunluk) return null;
-        // OCR satır sonundaki dolgu '<' karakterlerini düşürebilir - sağdan tamamlanır.
-        var s = satirlar.Select(x => x.PadRight(uzunluk, '<')).ToList();
+        // OCR ONARIMI (gerçek kart denemesi 04.11.2026): dolgu '<' koşuları C/L/K olarak, '0' 'O', '6' 'E' okunuyordu;
+        //   koşular uzayıp satır 33-35 karaktere çıkıyordu. Önce koşu / uzunluk, sonra alan türüne göre karakter.
+        var s = satirlar.Select(x => UzunlukOnar(DolguOnar(x), uzunluk)).ToList();
+        if (s.Any(x => x.Length != uzunluk)) return null;
+        s = bicim == "TD1" ? Td1Onar(s) : Td2Td3Onar(s, uzunluk);
 
         return bicim == "TD1" ? Td1(s, gun) : Td2Td3(s, bicim, uzunluk, gun);
+    }
+
+    // ------------------------------------------------------------ OCR onarımı --
+    // Tesseract'ın genel İngilizce modeli OCR-B'nin '<' işaretini bilmez: dolgu koşuları "CLCC", "LLLLK" gibi okunur.
+    // Üç ve daha uzun [<CLK] koşusu dolgudur: ad / numara alanında sesli harfsiz böyle bir dizi gerçekçi değil,
+    // sayısal alanda zaten olamaz. Yazılı / cihazdan gelen geçerli MRZ'de zararsız (koşular zaten '<').
+    private static string DolguOnar(string satir)
+        => System.Text.RegularExpressions.Regex.Replace(satir, "[<CLK]{3,}", m => new string('<', m.Value.Length));
+
+    /// <summary>Uzunsa en uzun '&lt;' koşusundan kısaltır (OCR koşuyu uzatır), kısaysa sağdan '&lt;' ile tamamlar.</summary>
+    private static string UzunlukOnar(string satir, int hedef)
+    {
+        while (satir.Length > hedef)
+        {
+            var enUzun = System.Text.RegularExpressions.Regex.Matches(satir, "<+").MaxBy(m => m.Length);
+            if (enUzun is null || enUzun.Length < 2) break;
+            satir = satir.Remove(enUzun.Index, 1);
+        }
+        return satir.PadRight(hedef, '<');
+    }
+
+    private static char Rakam(char c) => c switch
+    {
+        'O' or 'Q' or 'D' => '0', 'I' or 'L' => '1', 'Z' => '2', 'S' => '5', 'G' or 'E' => '6', 'B' => '8', 'A' => '4', 'T' => '7',
+        _ => c,
+    };
+
+    private static char Harf(char c) => c switch
+    {
+        '0' => 'O', '1' => 'I', '2' => 'Z', '5' => 'S', '6' => 'G', '8' => 'B', '4' => 'A', '7' => 'T',
+        _ => c,
+    };
+
+    private static string Rakamlar(string s) => new(s.Select(c => c == '<' ? c : Rakam(c)).ToArray());
+    private static string Harfler(string s) => new(s.Select(c => c == '<' ? c : Harf(c)).ToArray());
+
+    /// <summary>
+    /// Alfasayısal belge no. T.C. kimlik kartı serisi sabit yapıdadır (harf · 2 rakam · harf · 5 rakam, "A12B34567") -
+    /// konuma göre kesin çevrim. Diğer ülkelerde kontrol hanesi karar verir: en az değişiklikle, yalnız O/0 · I/1 ·
+    /// S/5 · B/8 ikilileri (geniş küme tek haneli kontrolü yanlış adaya da uydurabilirdi).
+    /// </summary>
+    private static string BelgeNoOnar(string alan, char kontrol, string ulke)
+    {
+        if (ulke == "TUR" && alan.Length == 9 && !alan.Contains('<'))
+        {
+            var d = alan.ToCharArray();
+            for (var i = 0; i < 9; i++) d[i] = i is 0 or 3 ? Harf(d[i]) : Rakam(d[i]);
+            return new string(d);
+        }
+        if (!char.IsAsciiDigit(kontrol) || Kontrol(alan, kontrol)) return alan;
+        var konumlar = alan.Select((c, i) => (c, i)).Where(x => x.c is 'O' or '0' or 'I' or '1' or 'S' or '5' or 'B' or '8')
+                           .Select(x => x.i).Take(8).ToList();
+        foreach (var maske in Enumerable.Range(1, (1 << konumlar.Count) - 1).OrderBy(m => System.Numerics.BitOperations.PopCount((uint)m)))
+        {
+            var d = alan.ToCharArray();
+            for (var k = 0; k < konumlar.Count; k++)
+                if ((maske & (1 << k)) != 0) { var c = d[konumlar[k]]; d[konumlar[k]] = char.IsAsciiDigit(c) ? Harf(c) : Rakam(c); }
+            var aday = new string(d);
+            if (Kontrol(aday, kontrol)) return aday;
+        }
+        return alan;
+    }
+
+    /// <summary>İsteğe bağlı alan: ağırlıkla rakamsa (T.C. kimlik no) harf benzerleri rakama çevrilir.</summary>
+    private static string IstegeBagliOnar(string alan)
+    {
+        var dolu = alan.Trim('<');
+        if (dolu.Length < 9) return alan;
+        return dolu.Count(char.IsAsciiDigit) * 100 / dolu.Length >= 60 ? Rakamlar(alan) : alan;
+    }
+
+    private static List<string> Td1Onar(List<string> s)
+    {
+        var l1 = s[0].ToCharArray(); var l2 = s[1].ToCharArray();
+        // Satır 1: belge kodu + ülke harf; belge no kontrol haneli; isteğe bağlı alan.
+        for (var i = 0; i < 5; i++) l1[i] = Harf(l1[i]);
+        var belgeNo = BelgeNoOnar(s[0][5..14], Rakam(s[0][14]), Ulke(new string(l1, 2, 3)));
+        belgeNo.CopyTo(0, l1, 5, 9);
+        if (l1[14] != '<') l1[14] = Rakam(l1[14]);
+        IstegeBagliOnar(s[0][15..30]).CopyTo(0, l1, 15, 15);
+        // Satır 2: doğum + kontrol, cinsiyet, SKT + kontrol rakam; uyruk harf; isteğe bağlı; bileşik rakam.
+        for (var i = 0; i < 7; i++) l2[i] = Rakam(l2[i]);
+        for (var i = 8; i < 15; i++) l2[i] = Rakam(l2[i]);
+        for (var i = 15; i < 18; i++) l2[i] = Harf(l2[i]);
+        IstegeBagliOnar(s[1][18..29]).CopyTo(0, l2, 18, 11);
+        l2[29] = Rakam(l2[29]);
+        return [new string(l1), new string(l2), Harfler(s[2])];
+    }
+
+    private static List<string> Td2Td3Onar(List<string> s, int uzunluk)
+    {
+        var l2 = s[1].ToCharArray();
+        for (var i = 10; i < 13; i++) l2[i] = Harf(l2[i]);
+        var belgeNo = BelgeNoOnar(s[1][..9], Rakam(s[1][9]), Ulke(new string(l2, 10, 3)));
+        belgeNo.CopyTo(0, l2, 0, 9);
+        l2[9] = Rakam(l2[9]);
+        for (var i = 13; i < 20; i++) l2[i] = Rakam(l2[i]);
+        for (var i = 21; i < 28; i++) l2[i] = Rakam(l2[i]);
+        if (uzunluk == 44) { if (l2[42] != '<') l2[42] = Rakam(l2[42]); l2[43] = Rakam(l2[43]); }
+        else l2[35] = Rakam(l2[35]);
+        // Satır 1: belge kodu + ülke + adlar hep harf.
+        return [Harfler(s[0]), new string(l2)];
     }
 
     // ---------------------------------------------------------------- TD1 --

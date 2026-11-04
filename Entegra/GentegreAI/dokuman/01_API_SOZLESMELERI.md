@@ -1894,8 +1894,11 @@ POST /api/kimlik/mrz-coz  {metin}        hasta Ekle ya da Değiştir
 ```
 
 - Çözücü `Gentegre.Cekirdek.Kimlik.MrzCozucu` (saf, xUnit ICAO 9303 numuneleri): ICAO 7-3-1 kontrol haneleri (belge no,
-  doğum, son kullanma, isteğe bağlı, bileşik); TD1 satır 2 isteğe bağlı alandaki 11 hane T.C. algoritmasından geçmezse
-  hata. `gecerli=false` 200 ile döner (alanlar yine gelir, ekran kırmızı çizer) - 400 yalnız biçimsiz istek.
+  doğum, son kullanma, isteğe bağlı, bileşik); T.C. kimlik no TD1 satır 1 ya da 2 isteğe bağlı alanında (T.C. kartında
+  satır 1), algoritmadan geçmezse hata. **OCR onarımı** çözmeden önce: `[<CLK]{3,}` koşusu dolgu, uzun satır en uzun `<`
+  koşusundan kısalır, alan türüne göre harf↔rakam, T.C. belge no sabit yapı (harf·2 rakam·harf·5 rakam), diğer ülkede
+  kontrol hanesine en az değişiklik. `gecerli=false` 200 ile döner (alanlar yine gelir, ekran kırmızı çizer) - 400 yalnız
+  biçimsiz istek.
 - Eşleşme: TCKN → `taraf.vkno` (hasta=1); pasaport → `taraf_hasta.pasaport_no`. Uyruk: ISO3 → Türkçe ad → `kod_deger`
   (hasta.uyruk) ad ile; bulunamazsa `uyrukKod` null, kullanıcı seçer. Ad / soyad Türkçe'ye GERİ ÇEVRİLMEZ; web TCKN varsa
   MERNİS'ten gerçek harfleri sessizce alır (`/api/mernis/getir`), yoksa ASCII kalır ve kullanıcı uyarılır.
@@ -1907,6 +1910,34 @@ POST /api/kimlik/mrz-coz  {metin}        hasta Ekle ya da Değiştir
 - Web: `KimlikOkutPenceresi` (kamera / dosya / metin yapıştır - okuyucu cihaz klavye gibi yazar), hasta kartı araç grubu
   "📷 Kimliği Okut" (`KartAracGruplari`), başvuru hasta araması (`TarafArama kimlikOkut`). Kayıtlı hasta → seçilir / açılır,
   işaretli farklar `mrzBekleyenKoy` ile karta taşınır (3 dk, tek kullanım).
+
+## 9.30 Ürün ağacı (reçete) listesi ve kartı seviyeye göre (1257, 1258)
+
+Mockuplar `Ekranlar/Uretim/urun_agaci_listesi_v2.html`, `urun_agaci_karti_v2.html`. Kayıt yapısı tek; seviye (`uretim.seviye`)
+görüneni değiştirir (web `uretimListeSeviye.ts`, kart eklentisi `urun-agaci`). Reçete adı her yerde "Ürün Ağacı (Reçete)" (1256).
+
+```
+GET  /api/uretim/agac/ozet                       uretim Gör    {recete, aktif, pasif, bos, maliyetEski, acikEmirde, acikEmir, malzemeEksik,
+                                                                buAyUretilen, buAyFis, onayBekleyen, onayBekleyenGun}
+GET  /api/uretim/agac/{id}/surumler              uretim Gör    aynı kodun sürümleri: onayDurum, ecnNo, yururluk, hazirlayan, onaylayan, acikEmir, maliyet…
+POST /api/uretim/agac/{id}/kopyala               uretim Ekle   kod-K (…-K2), sürüm 1, taslak; bileşen + operasyon kopyalanır
+POST /api/uretim/agac/{id}/pasif  {gerekce, parola?}  uretim Değiştir   durum 1; denetimlide gerekçe zorunlu, onaylı reçetede e-imza
+POST /api/uretim/agac/{id}/onaya-gonder {gerekce}  uretim Değiştir   taslak → onayda (boş reçete gönderilmez)
+POST /api/uretim/agac/{id}/onayla {karar 1|2, gerekce, parola}  aksiyon uretim.recete.onay - e-imza; dört göz (onaya gönderen onaylayamaz)
+```
+
+- **Onay akışı (denetimli):** `urun_agaci.onay_durum` 0 taslak · 1 onayda · 2 onaylı / yürürlükte · 3 kilitli. Onayda `ECN-YYYY-NNN`,
+  `yururluk` bugün, sürüm varsayılan olur, aynı kodun önceki onaylı sürümü kilitlenir; ret taslağa döndürür. Onaylı / kilitli
+  reçetenin bileşen · operasyon · kontrol satırları ve kimlik alanları değiştirilemez (tetikleyici P0001 → 422); değişiklik
+  `yeni-surum`. Denetimlide onaysız reçeteden `POST /api/uretim/emri` 422.
+- **Kontrol listesi** `urun_agaci_kontrol` (kart detayı "Kontrol Listesi", tür 1 ön kontrol · 2 kalite): emrin ön kontrol
+  listesine (`/emri/{id}/on-kontrol`) tür-1 satırlar eklenir (otomatik koda bağlıysa onun sonucu, elle olan -1); fiş kesilirken
+  ekran kontrol göndermediyse tür-2 satırlar `uretim_fisi_kontrol`e kopyalanır.
+- **Liste kolonları** `uretilebilir` (`fn_urun_agaci_uretilebilir`, basit), `onayAdi` / `ecnNo` / `yururluk` (denetimli), gizli
+  `maliyetEski` / `acikEmir` / `onayDurum` / `agacId` (emir ve fiş listelerinde de - kartın "Üretimler" sekmesi). Aksiyonlar
+  `urun-agaci.uret` (basit, fiş kartı `?stokId&miktar`), `.fis-kes`, `.kopyala`, `.pasif`, `.onaya-gonder`, `.onayla`, `.mamul-ac`.
+- Kart alanı `surum` → `agacSurum` (kart yanıtının eşzamanlılık damgası `surum` ile çakışıyordu); `onayDurum`, `ecnNo`, `yururluk`,
+  `pasifNeden` salt okunur; `partiBuyuklugu`, `rafOmruAy` (denetimli).
 
 ## 10. Sürümleme
 

@@ -76,7 +76,7 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["tur"] = (short)1,
-            ["surum"] = (short)1,
+            ["agacSurum"] = (short)1,
             ["ciktiMiktar"] = 1m,
             ["durum"] = (short)0,
         },
@@ -104,29 +104,46 @@ public static partial class KartKatalogu
                 Baslik: "Tür", Grup: "Kimlik"),
             new("ciktiMiktar", "cikti_miktar", "sayi",
                 Baslik: "Çıktı Miktarı", Grup: "Kimlik"),
-            new("surum", "surum", "sayi", Baslik: "Sürüm", Grup: "Kimlik"),
+            // AD "agacSurum" (1258): kart yanıtının eşzamanlılık damgası da `surum` - aynı adla ekranda sürüm kutusu
+            //   xmin'i gösteriyordu ("1322679"). Yeni sürüm ucu numarayı kendisi verir; kartta salt okunur.
+            new("agacSurum", "surum", "sayi", Yazilabilir: false, Baslik: "Sürüm", Grup: "Kimlik"),
             new("varsayilan", "varsayilan", "mantik",
                 Baslik: "Varsayılan", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: AgacDurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
 
             // ---------------------------------------------------------- tanım
-            new("alternatifAd", "alternatif_ad", "metin", EnFazlaUzunluk: 100,
-                Baslik: "Alternatif Adı", Grup: "Tanım"),
+            // KİMLİK ŞERİDİNDE (1259, mockup urun_agaci_karti_v2.html): mockup'ta "Tanım" sekmesi yok - geçerlilik,
+            //   depolar, katsayı ve not başlık ızgarasında; sekmeler Bileşenler'den başlar. Basit seviyede web gizler.
             new("gecerliBas", "gecerli_bas", "tarih",
-                Baslik: "Geçerlilik Başlangıç", Grup: "Tanım"),
+                Baslik: "Geçerlilik Başlangıç", Grup: "Kimlik"),
             new("gecerliBit", "gecerli_bit", "tarih",
-                Baslik: "Geçerlilik Bitiş", Grup: "Tanım"),
+                Baslik: "Geçerlilik Bitiş", Grup: "Kimlik"),
             new("sarfDepoId", "sarf_depo_id", "kod", KodTablosu: "public.v_depo_lookup",
-                Baslik: "Sarf Deposu (bileşen çıkış)", Grup: "Tanım"),
+                Baslik: "Sarf Deposu (bileşen çıkış)", Grup: "Kimlik"),
             new("mamulDepoId", "mamul_depo_id", "kod", KodTablosu: "public.v_depo_lookup",
-                Baslik: "Mamul Deposu (üretim giriş)", Grup: "Tanım"),
+                Baslik: "Mamul Deposu (üretim giriş)", Grup: "Kimlik"),
             new("fireDepoId", "fire_depo_id", "kod", KodTablosu: "public.v_depo_lookup",
-                Baslik: "Fire Deposu", Grup: "Tanım"),
+                Baslik: "Fire Deposu", Grup: "Kimlik"),
             new("tavsiyeSatisKatsayi", "tavsiye_satis_katsayi", "sayi",
-                Baslik: "Tavsiye Satış Katsayısı", Grup: "Tanım"),
-            new("notlar", "notlar", "metin", EnFazlaUzunluk: 500,
-                Baslik: "Not", Grup: "Tanım"),
+                Baslik: "Tavsiye Satış Katsayısı", Grup: "Kimlik"),
+            // ONAY AKIŞI (1257/1258, denetimli - mockup urun_agaci_karti_v2.html): uçlardan yazılır, kartta salt okunur.
+            //   Web basit / standartta gizler (uretimListeSeviye kartAlanlari).
+            new("onayDurum", "onay_durum", "kod", Yazilabilir: false, Baslik: "Onay",
+                SabitKodlar: new Dictionary<string, string>
+                { ["0"] = "Taslak", ["1"] = "Onayda", ["2"] = "Onaylı", ["3"] = "Kilitli" }, Grup: "Kimlik"),
+            new("ecnNo", "ecn_no", "metin", Yazilabilir: false, EnFazlaUzunluk: 30, Baslik: "ECN No", Grup: "Kimlik"),
+            new("yururluk", "yururluk", "tarih", Yazilabilir: false, Baslik: "Yürürlük", Grup: "Kimlik"),
+            new("partiBuyuklugu", "parti_buyuklugu", "sayi", Baslik: "Parti Büyüklüğü (std.)", Grup: "Kimlik",
+                Ipucu: "Standart parti adedi - kalite örneklemi ve planlama bu adede göre."),
+            new("rafOmruAy", "raf_omru_ay", "sayi", Baslik: "Raf Ömrü (ay)", Grup: "Kimlik"),
+            new("alternatifAd", "alternatif_ad", "metin", EnFazlaUzunluk: 100,
+                Baslik: "Alternatif Adı", Grup: "Kimlik"),
+            new("pasifNeden", "pasif_neden", "metin", Yazilabilir: false, EnFazlaUzunluk: 300, Baslik: "Pasife Alma Nedeni", Grup: "Kimlik"),
+            // TEK SATIR (kullanıcı 04.11.2026 "notlar alanı tek satır yükseklikte olsun"): 400 ve üstü uzunluk web'de
+            //   çok satırlı kutu çizer; reçete notu kısa - 300 (kolon 500 kalır).
+            new("notlar", "notlar", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Not", Grup: "Kimlik"),
 
             // -------------------------------------------------------- maliyet
             new("maliyetMalzeme", "maliyet_malzeme", "para", Yazilabilir: false,
@@ -149,9 +166,33 @@ public static partial class KartKatalogu
                 new("bilesenStokId", "bilesen_stok_id", "kod", Zorunlu: true,
                     KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok",
                     Baslik: "Bileşen"),
+                // GÖRÜNEN KOD · AD · BİRİM (1259, mockup "HM-0101 · Ceviz Kereste 40x60 · Metre"): stok lookup'ı büyük,
+                //   grid kimliği çözemiyordu ("4297"). Web gridde kimliği gizler, bu üçünü gösterir.
+                new("bilesenKod", "(select x.kod from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                    "metin", Yazilabilir: false, Baslik: "Kod"),
+                new("bilesenAd", "(select x.ad from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                    "metin", Yazilabilir: false, Baslik: "Bileşen Adı"),
+                new("birimAdi", "(select kd.ad from public.stok x join public.kod_liste kl on kl.kod = 'stok.ana_birim' "
+                                + "join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = x.ana_birim and kd.dil = 0 "
+                                + "where x.id = urun_agaci_satir.bilesen_stok_id limit 1)",
+                    "metin", Yazilabilir: false, Baslik: "Birim"),
                 new("tur", "tur", "kod", SabitKodlar: BilesenTurKodlari, Baslik: "Tip"),
                 new("miktar", "miktar", "sayi", Baslik: "Miktar"),
                 new("fireYuzde", "fire_yuzde", "sayi", Baslik: "Fire %"),
+                // HESAP KOLONLARI (1259, mockup bileşen satırı): net gerekli, stoktaki (sarf deposu, yoksa hepsi),
+                //   birim maliyet (son / ortalama - fn_uretim_stok_son_maliyeti) ve tutar. Salt okunur, kayda gitmez.
+                new("netGerekli", "round(urun_agaci_satir.miktar * (1 + coalesce(urun_agaci_satir.fire_yuzde, 0) / 100), 4)",
+                    "sayi", Yazilabilir: false, Baslik: "Net Gerekli"),
+                new("stokta", "(select coalesce(sum(d.kalan - coalesce(d.rezerve, 0)), 0) from public.stok_durum d "
+                              + "where d.stok_id = urun_agaci_satir.bilesen_stok_id and (urun_agaci_satir.depo_id is null or d.depo_id = urun_agaci_satir.depo_id))",
+                    "sayi", Yazilabilir: false, Baslik: "Stokta"),
+                new("birimMaliyet", "coalesce(public.fn_uretim_stok_son_maliyeti(urun_agaci_satir.bilesen_stok_id), 0)",
+                    "para", Yazilabilir: false, Baslik: "Birim Maliyet"),
+                new("tutar", "round(urun_agaci_satir.miktar * (1 + coalesce(urun_agaci_satir.fire_yuzde, 0) / 100) "
+                             + "* coalesce(public.fn_uretim_stok_son_maliyeti(urun_agaci_satir.bilesen_stok_id), 0), 2)",
+                    "para", Yazilabilir: false, Baslik: "Tutar"),
+                // KRİTİK (1259, denetimli): lot / kalite takibi zorunlu bileşen.
+                new("kritik", "kritik", "mantik", Baslik: "Kritik"),
                 // Yarı mamulün KENDİ ağacı: emirde ya stoktan karşılanır ya da
                 //   alt emir açılır. Boşsa satır sıradan bir stok kalemidir.
                 new("altAgacId", "alt_agac_id", "kod",
@@ -179,6 +220,10 @@ public static partial class KartKatalogu
                 // Boş (0) bırakılırsa iş merkezinin ücreti kullanılır - ücreti
                 //   iki yerde tutmamak için satıra kopyalanmaz.
                 new("saatUcreti", "saat_ucreti", "para", Baslik: "Saat Ücreti"),
+                // İŞÇİLİK / ADET (1259, mockup): birim süre × saat ücreti (ücret boşsa iş merkezinin ücreti).
+                new("iscilikAdet", "round(coalesce(urun_agaci_operasyon.birim_sure_dk, 0) / 60.0 * coalesce(nullif(urun_agaci_operasyon.saat_ucreti, 0), "
+                                   + "(select im.saat_ucreti from public.is_merkezi im where im.id = urun_agaci_operasyon.is_merkezi_id), 0), 2)",
+                    "para", Yazilabilir: false, Baslik: "İşçilik / adet"),
                 new("kaliteKontrol", "kalite_kontrol", "mantik", Baslik: "KK"),
                 new("fason", "fason", "mantik", Baslik: "Fason"),
                 new("fasonTarafId", "fason_taraf_id", "kod",
@@ -188,6 +233,26 @@ public static partial class KartKatalogu
                     Baslik: "Açıklama"),
             }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Operasyonlar / Rota",
                LogTabloId: 992),
+
+            // KONTROL LİSTESİ (1258, denetimli): tür 1 ön kontrol (emir serbest bırakma öncesi), 2 kalite kontrolü
+            //   (fiş karantina → serbest). Emir / fişe kopyalanır. Basit / standart sekmeyi gizler (web).
+            new("kontroller", "public.urun_agaci_kontrol", "agac_id", new KartAlani[]
+            {
+                new("id",       "id",        "sayi",  Yazilabilir: false),
+                new("tur",      "tur",       "kod",   Zorunlu: true, Baslik: "Tür",
+                    SabitKodlar: new Dictionary<string, string> { ["1"] = "Ön kontrol (emir)", ["2"] = "Kalite (fiş)" }),
+                new("sira",     "sira",      "sayi",  Baslik: "Sıra"),
+                new("ad",       "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 150, Baslik: "Kontrol"),
+                new("olcut",    "olcut",     "metin", EnFazlaUzunluk: 300, Baslik: "Ölçüt / nasıl doğrulanır"),
+                new("orneklem", "orneklem",  "metin", EnFazlaUzunluk: 40, Baslik: "Örneklem"),
+                new("zorunlu",  "zorunlu",   "mantik", Baslik: "Zorunlu"),
+                new("otomatik", "otomatik",  "kod",   Baslik: "Otomatik",
+                    SabitKodlar: new Dictionary<string, string>
+                    { [""] = "Elle", ["malzeme"] = "Malzeme hazırlığı", ["agac"] = "Reçete onaylı", ["rota"] = "Rota / iş merkezi",
+                      ["kapasite"] = "Kapasite", ["ekipman"] = "Ekipman kalibrasyonu", ["personel"] = "Personel yetkinliği", ["ortam"] = "Ortam" }),
+                new("retIslem", "ret_islem", "metin", EnFazlaUzunluk: 150, Baslik: "Ret halinde"),
+                new("aciklama", "aciklama",  "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+            }, SubeKolonu: null, Sirala: "tur, sira, id", Baslik: "Kontrol Listesi", LogTabloId: 998),
         });
 
     /// <summary>
@@ -301,6 +366,16 @@ public static partial class KartKatalogu
                 new("bilesenStokId", "bilesen_stok_id", "kod", Zorunlu: true,
                     KodTablosu: "public.v_stok_lookup", AramaKaynagi: "stok",
                     Baslik: "Bileşen"),
+                // GÖRÜNEN KOD · AD · BİRİM (1259, mockup "HM-0101 · Ceviz Kereste 40x60 · Metre"): stok lookup'ı büyük,
+                //   grid kimliği çözemiyordu ("4297"). Web gridde kimliği gizler, bu üçünü gösterir.
+                new("bilesenKod", "(select x.kod from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                    "metin", Yazilabilir: false, Baslik: "Kod"),
+                new("bilesenAd", "(select x.ad from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                    "metin", Yazilabilir: false, Baslik: "Bileşen Adı"),
+                new("birimAdi", "(select kd.ad from public.stok x join public.kod_liste kl on kl.kod = 'stok.ana_birim' "
+                                + "join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = x.ana_birim and kd.dil = 0 "
+                                + "where x.id = urun_agaci_satir.bilesen_stok_id limit 1)",
+                    "metin", Yazilabilir: false, Baslik: "Birim"),
                 new("tur", "tur", "kod", SabitKodlar: BilesenTurKodlari, Baslik: "Tip"),
                 new("operasyonSira", "operasyon_sira", "sayi", Baslik: "Opr."),
                 new("birimIhtiyac", "birim_ihtiyac", "sayi", Baslik: "Birim İhtiyaç"),

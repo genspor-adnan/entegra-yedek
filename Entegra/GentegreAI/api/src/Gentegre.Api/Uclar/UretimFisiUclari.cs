@@ -572,7 +572,7 @@ public static partial class UretimFisiUclari
     }
 
     /// <summary>E-imza: parola tekrarı (Part 11 §11.200 - bilinen bileşen). Yanlışsa 400; hesabın kilit sayacına dokunmaz.</summary>
-    private static async Task ParolaDogrulaAsync(KullaniciDeposu kullanicilar, int kullaniciId, string? parola, CancellationToken iptal)
+    internal static async Task ParolaDogrulaAsync(KullaniciDeposu kullanicilar, int kullaniciId, string? parola, CancellationToken iptal)
     {
         if (string.IsNullOrEmpty(parola))
             throw GentegreHatasi.Dogrulama("İmza için parolanızı yazın.", new AlanHatasi("parola", "Parola gerekli."));
