@@ -161,6 +161,8 @@ public sealed class GebeIzlemTestleri(VeritabaniOlgusu olgu)
                     """, [izlemId, r], CancellationToken.None);
 
             var s = await uretici.UretAsync("GEBE_IZLEM", izlemId, 1, CancellationToken.None);
+
+            Assert.NotNull(s);
             Assert.True(s.PaketId > 0);
 
             var harita = (await veri.ListeAsync("""

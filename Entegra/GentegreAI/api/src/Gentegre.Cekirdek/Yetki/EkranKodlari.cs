@@ -103,7 +103,7 @@ public static partial class EkranKodlari
         foreach (var (yeni, eski) in AyniGrupEkranlari)
         {
             if (KendiKapisi.Contains(yeni)) continue;
-            if (!d.TryGetValue(eski, out var l)) d[eski] = l = [];
+            if (!d.TryGetValue(eski, out var l)) { l = new List<string>(); d[eski] = l; }
             l.Add(yeni);
         }
         return d.ToDictionary(x => x.Key, x => x.Value.ToArray(), StringComparer.Ordinal);

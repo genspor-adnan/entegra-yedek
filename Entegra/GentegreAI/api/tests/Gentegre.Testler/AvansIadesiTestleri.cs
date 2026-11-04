@@ -1,4 +1,4 @@
-using Gentegre.Veri;
+﻿using Gentegre.Veri;
 using Npgsql;
 
 namespace Gentegre.Testler;
@@ -51,7 +51,7 @@ public sealed class AvansIadesiTestleri(VeritabaniOlgusu olgu)
             + "        current_date, @p1, @p2, @p2, 2, @p0, @p3) returning id",
             t, [avansId, tarafId, tutar, sube, tur], CancellationToken.None);
 
-    private static Task<List<IDictionary<string, object>>> AvansSatiriAsync(
+    private static Task<List<IDictionary<string, object?>>> AvansSatiriAsync(
         NpgsqlConnection b, NpgsqlTransaction t, int avansId)
         => b.ListeAsync(
             "select a.kullanilan, a.iade, a.kalan, a.durum_adi "

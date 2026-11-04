@@ -126,6 +126,7 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
         {
             var id = await UygulaAsync(veri, hastaId, asiId, belgeId, 2);
             var s = await uretici.UretAsync("ASI", id, 1, CancellationToken.None);
+            Assert.NotNull(s);
             Assert.True(s.PaketId > 0);
 
             var alanlar = await veri.ListeAsync("""
@@ -149,6 +150,7 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
 
             // AYNI İÇERİK → AYNI PAKET: ikinci üretim yeni satır açmaz.
             var s2 = await uretici.UretAsync("ASI", id, 1, CancellationToken.None);
+            Assert.NotNull(s2);
             Assert.Equal(s.PaketId, s2.PaketId);
         }
         finally { await TemizleAsync(veri, asiId, belgeId); }
@@ -172,6 +174,8 @@ public sealed class AsiPaketiTestleri(VeritabaniOlgusu olgu)
             var id = await UygulaAsync(veri, hastaId, asiId, belgeId, 1);
 
             var s = await uretici.UretAsync("ASI", id, 1, CancellationToken.None);
+
+            Assert.NotNull(s);
             Assert.Contains(s.Eksikler,
                 e => e.Contains("ASI", StringComparison.Ordinal));
 

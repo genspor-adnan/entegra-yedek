@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -463,7 +463,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             """, tx, [eTur, senaryo, kullanici], o => o.GetString(0).Trim().ToUpperInvariant(), iptal)
             is var l ? l.Distinct().ToList() : [];
 
-    private static async Task<string> SeriBulAsync(NpgsqlConnection b, NpgsqlTransaction tx, short eTur, int senaryo,
+    private static async Task<string> SeriBulAsync(NpgsqlConnection b, NpgsqlTransaction? tx, short eTur, int senaryo,
                                                    int kullanici, bool ikinci, string? haric, CancellationToken iptal)
     {
         var liste = (await SeriListesiAsync(b, tx, eTur, senaryo, kullanici, iptal)).Where(s => s != haric).ToList();

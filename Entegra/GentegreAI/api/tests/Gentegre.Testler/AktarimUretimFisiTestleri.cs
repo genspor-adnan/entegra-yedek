@@ -1,6 +1,8 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using Gentegre.Veri;
 using Npgsql;
+
+using static Gentegre.Testler.AktarimTestYardimcisi;
 
 namespace Gentegre.Testler;
 
@@ -13,16 +15,6 @@ namespace Gentegre.Testler;
 public sealed class AktarimUretimFisiTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
-
-    private static async Task<JsonObject> AktarAsync(NpgsqlConnection b, NpgsqlTransaction t, string fn, string paket)
-        => (JsonObject)JsonNode.Parse(await b.TekDegerAsync<string>(
-               $"select public.{fn}(@p0::jsonb)::text", t, [paket], CancellationToken.None) ?? "{}")!;
-
-    private static async Task<JsonObject> KurAsync(NpgsqlConnection b, NpgsqlTransaction t)
-        => (JsonObject)JsonNode.Parse(await b.TekDegerAsync<string>(
-               "select public.fn_aktarim_uretim_fisi_kur()::text", t, [], CancellationToken.None) ?? "{}")!;
-
-    private static int Sayi(JsonObject o, string k) => o[k]?.GetValue<int>() ?? 0;
 
     private const string Stoklar = """
         {"U": {"STOKLAR": [
@@ -73,7 +65,7 @@ public sealed class AktarimUretimFisiTestleri(VeritabaniOlgusu olgu) : IClassFix
             "select count(*) from public.belge where tur = 6 and aktarim_tablo = 'FATBASLIK' and aktarim_id between 990006101 and 990006103",
             t, [], ct));
 
-        var ilk = await KurAsync(b, t);
+        var ilk = await CalistirAsync(b, t, "fn_aktarim_uretim_fisi_kur");
         // Paket dışı (gerçek kurulumdan kalan) belgeler de sayılabilir; bu paketin kayıtları satır bazında doğrulanır.
         Assert.True(Sayi(ilk, "fis_eklenen") >= 1);
         Assert.True(Sayi(ilk, "mamulsuz_atlanan") >= 1);
@@ -117,7 +109,7 @@ public sealed class AktarimUretimFisiTestleri(VeritabaniOlgusu olgu) : IClassFix
 
         // İkinci çağrı: bu paket için hiçbir şey yazmaz.
         var once = await b.TekDegerAsync<long>("select count(*) from public.uretim_fisi where aktarim_tablo = 'FATBASLIK'", t, [], ct);
-        var iki = await KurAsync(b, t);
+        var iki = await CalistirAsync(b, t, "fn_aktarim_uretim_fisi_kur");
         Assert.Equal(0, Sayi(iki, "fis_eklenen"));
         Assert.Equal(once, await b.TekDegerAsync<long>("select count(*) from public.uretim_fisi where aktarim_tablo = 'FATBASLIK'", t, [], ct));
 

@@ -1,4 +1,4 @@
-using Gentegre.Veri;
+﻿using Gentegre.Veri;
 using Npgsql;
 
 namespace Gentegre.Testler;
@@ -64,7 +64,7 @@ public sealed class HastaAvansTestleri(VeritabaniOlgusu olgu)
             """, t, [islemId, satirId, pay, tutar], CancellationToken.None);
     }
 
-    private static async Task<IDictionary<string, object>?> AvansSatiriAsync(
+    private static async Task<IDictionary<string, object?>?> AvansSatiriAsync(
         NpgsqlConnection b, NpgsqlTransaction t, int islemId)
     {
         var satirlar = await b.ListeAsync("""

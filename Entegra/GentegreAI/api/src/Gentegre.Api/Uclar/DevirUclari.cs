@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -267,7 +267,7 @@ public static class DevirUclari
                   from unnest(@p0::text[]) x(m)
                   join public.hesap h on h.tur = @p1 and (h.kod = x.m or upper(h.ad) = upper(x.m))
                    and (@p2 = 0 or h.sube_id in (0, @p2))
-                """, null, [metin, harf, sube], o => (g.Key, o.GetString(0), o.GetInt32(1), o.GetString(2), o.GetString(3),
+                """, null, [metin, harf, sube], o => (g.Key ?? "", o.GetString(0), o.GetInt32(1), o.GetString(2), o.GetString(3),
                     o.GetBoolean(4), o.IsDBNull(5) ? (DateTime?)null : o.GetDateTime(5), o.GetString(6)), iptal));
         }
         var cariHarita = cariEs.GroupBy(e => e.m).ToDictionary(g => g.Key, g => g.ToList());

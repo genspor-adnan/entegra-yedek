@@ -2,6 +2,8 @@
 using Gentegre.Veri;
 using Npgsql;
 
+using static Gentegre.Testler.AktarimTestYardimcisi;
+
 namespace Gentegre.Testler;
 
 /// <summary>
@@ -14,12 +16,6 @@ namespace Gentegre.Testler;
 public sealed class AktarimEkTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
-
-    private static async Task<JsonObject> CalistirAsync(NpgsqlConnection b, NpgsqlTransaction t, string fn)
-        => (JsonObject)JsonNode.Parse(await b.TekDegerAsync<string>(
-               $"select public.{fn}()::text", t, [], CancellationToken.None) ?? "{}")!;
-
-    private static int Sayi(JsonObject o, string k) => o[k]?.GetValue<int>() ?? 0;
 
     private static Task CariAsync(NpgsqlConnection b, NpgsqlTransaction t, int id, string kod) =>
         b.TekDegerAsync<string>("select public.fn_aktar_cari(@p0::jsonb)::text", t,

@@ -2,6 +2,8 @@
 using Gentegre.Veri;
 using Npgsql;
 
+using static Gentegre.Testler.AktarimTestYardimcisi;
+
 namespace Gentegre.Testler;
 
 /// <summary>
@@ -14,12 +16,6 @@ namespace Gentegre.Testler;
 public sealed class AktarimKasaTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
-
-    private static async Task<JsonObject> AktarAsync(NpgsqlConnection b, NpgsqlTransaction t, string fn, string paket)
-        => (JsonObject)JsonNode.Parse(await b.TekDegerAsync<string>(
-               $"select public.{fn}(@p0::jsonb)::text", t, [paket], CancellationToken.None) ?? "{}")!;
-
-    private static int Sayi(JsonObject o, string k) => o[k]?.GetValue<int>() ?? 0;
 
     // Cari satırı (Tanımsız Cari'ye), kasadan nakit tahsilat (cari), masraf ödemesi (cari yok).
     private const string Kasa = """

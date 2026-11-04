@@ -396,7 +396,7 @@ public sealed class TeleradyolojiKartTestleri
     {
         // Satirlari tetik yaziyor (tg_telerad_atama_izi); elle satir eklemek
         //   "kim atadi" sorusunun cevabini uydurulabilir kilardi.
-        var detay = Kart().Detaylar.FirstOrDefault(d => d.Ad == "atamalar");
+        var detay = Kart().Detaylar?.FirstOrDefault(d => d.Ad == "atamalar");
         Assert.NotNull(detay);
         Assert.True(detay!.SaltOkunur);
         Assert.Equal("public.telerad_atama", detay.Tablo);

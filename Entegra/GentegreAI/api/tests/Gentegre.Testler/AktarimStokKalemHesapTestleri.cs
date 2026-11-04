@@ -2,6 +2,8 @@
 using Gentegre.Veri;
 using Npgsql;
 
+using static Gentegre.Testler.AktarimTestYardimcisi;
+
 namespace Gentegre.Testler;
 
 /// <summary>
@@ -15,12 +17,6 @@ namespace Gentegre.Testler;
 public sealed class AktarimStokKalemHesapTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private readonly VeritabaniOlgusu _olgu = olgu;
-
-    private static async Task<JsonObject> AktarAsync(NpgsqlConnection b, NpgsqlTransaction t, string fn, string paket)
-        => (JsonObject)JsonNode.Parse(await b.TekDegerAsync<string>(
-               $"select public.{fn}(@p0::jsonb)::text", t, [paket], CancellationToken.None) ?? "{}")!;
-
-    private static int Sayi(JsonObject o, string k) => o[k]?.GetValue<int>() ?? 0;
 
     [VtFact]
     public async Task Doviz_Delphi_sembolu_ISO_olur_ayni_gun_tek_satir()
