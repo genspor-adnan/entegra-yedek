@@ -47,7 +47,7 @@ export function UretimSeviyeAyari() {
       const y = await api.uretimSeviyeYaz(s, e);
       setSeviye(y.seviye); setEmirKullan(y.emirKullan);
       uretimSeviyesiOnbellegiTemizle();
-      setBilgi(c('Üretim seviyesi kaydedildi. Açık üretim ekranları yeniden açılınca yeni düzeni gösterir.'));
+      setBilgi(c('Üretim seviyesi kaydedildi. Menü hemen güncellenir; açık üretim ekranları yeniden açılınca yeni düzeni gösterir.'));
       setTimeout(() => setBilgi(''), 4000);
     } catch (h) { setHata(hataMetni(h)) } finally { setMesgul(false) }
   };

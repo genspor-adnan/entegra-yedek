@@ -21,6 +21,13 @@ Yan not: `goc_uygula.ps1` dev DB'de 1135–1140, 1152–1157, 1164–1168 dosyal
 1135 kendi işleminde geri alındı, zarar yok) - yerel kopyalara tek dosya `-Dosyalar` ile uygulandı; UNIVERSE'te bekleyen
 1192 (sipariş aktarım fonksiyonu, stg boş → veri değişmedi) de bu vesileyle uygulandı.
 
+Devam (aynı gün): "üretim emir listesi menüye çıkmadı" - ayar kaydedilince `uretimSeviyesiOnbellegiTemizle` önbelleği düşürüyor
+ama Kabuk'un `useUretimSeviyesi` durumu eski değerde kalıyordu (yalnız sayfa yenileme düzeltiyordu). Hook'a dinleyici kümesi:
+önbellek düşünce açık hook'lar yeniden okur, menü anında güncellenir. "Üretim Sorumlusu rolüne uretim.ayar ver" → 1263
+(`erp_uretim` Gör + Değiştir, varsa dokunmaz) + `StandartRolUclari` erp_uretim şablonuna `uretim.ayar` (kopya kaynağı `ayar`
+olduğu için `Y("uretim")` kapsamıyordu). Yerel ZONE / UNIVERSE kopyalarında erp_uretim rolü yok; "Standart rolleri kur" ile
+açılırsa şablondan gelir.
+
 ## 04.11.2026 — Kod kalitesi refaktoru (web + api), davranış değişmeden
 
 Kullanıcı: "tüm projeyi refaktor yap" → kapsam GentegreAI (web + api) kod kalitesi, küçük test edilmiş commit'ler.

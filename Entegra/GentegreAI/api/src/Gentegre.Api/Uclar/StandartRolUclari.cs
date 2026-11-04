@@ -701,7 +701,10 @@ public static class StandartRolUclari
         new("erp_uretim", "Üretim Sorumlusu",
             "İş emri, reçete, üretim girişi ve sarf; depo hareketleriyle birlikte.",
             ["erp"],
-            K(Y("uretim"), Y("stok"), Y("depo"), T("belge"), T("hizmet"), T("demirbas"))),
+            K(Y("uretim"), Y("stok"), Y("depo"), T("belge"), T("hizmet"), T("demirbas"),
+              // ÜRETİM AYARLARI (1262/1263, kullanıcı 04.11.2026): seviye ve "emir kullan" üretimin kendi kararı;
+              //   kopya kaynağı `ayar` olduğu için Y("uretim") kapsamaz, açıkça verilir (Gör + Değiştir).
+              new Kural("uretim.ayar", Degistir: true))),
         new("erp_servis", "Teknik Servis Sorumlusu",
             "Servis kaydı, cihaz ve sözleşme takibi; müşteri ve stok görür. "
             + "Demirbaş onarımının teknik imzası bu roldedir.",
