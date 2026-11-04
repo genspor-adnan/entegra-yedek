@@ -61,6 +61,7 @@ const TeklifIcmali = tembel(() => import('./sayfalar/ticariIcmal/TeklifIcmali'),
 const TemsilciPerformansIcmali = tembel(() => import('./sayfalar/ticariIcmal/TemsilciPerformansIcmali'), 'TemsilciPerformansIcmali');
 const TeknikServisIcmali = tembel(() => import('./sayfalar/servisIcmal/TeknikServisIcmali'), 'TeknikServisIcmali');
 const UretimIcmali = tembel(() => import('./sayfalar/uretimIcmal/UretimIcmali'), 'UretimIcmali');
+const UretimAyarlar = tembel(() => import('./sayfalar/uretim/UretimAyarlar'), 'UretimAyarlar');
 const MasrafIcmali = tembel(() => import('./sayfalar/finansIcmal/MasrafIcmali'), 'MasrafIcmali');
 const MusteriRiskIcmali = tembel(() => import('./sayfalar/finansIcmal/MusteriRiskIcmali'), 'MusteriRiskIcmali');
 const DovizPozisyonIcmali = tembel(() => import('./sayfalar/finansIcmal/DovizPozisyonIcmali'), 'DovizPozisyonIcmali');
@@ -310,6 +311,8 @@ function Yollar() {
         {/* Sabit Varlıklar (1007) */}
         {yetki('demirbas.zimmet') && <Route path="/demirbas-zimmet" element={<DemirbasZimmet />} />}
         {yetki('demirbas.ayar') && <Route path="/demirbas-ayarlar" element={<DemirbasAyarlar />} />}
+        {/* Üretim Ayarları (1262): seviye + emir kullan; eskiden Genel Ayarlar › Üretim sekmesiydi. */}
+        {(yetki('uretim.ayar') || yetki('ayar')) && <Route path="/uretim-ayarlar" element={<UretimAyarlar />} />}
         {/* HASTA İCMALİ (10.10.2026): hasta listesinden "🧾 Hesap İcmali". */}
         {yetki('hasta') && yetki('belge') && <Route path="/hasta-icmal/:hastaId" element={<HastaIcmal />} />}
         {yetki('kurum.icmal_ozet') && <Route path="/kurum-icmali" element={<KurumIcmal />} />}

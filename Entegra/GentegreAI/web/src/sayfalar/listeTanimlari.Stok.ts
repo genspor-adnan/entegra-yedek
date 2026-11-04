@@ -363,6 +363,15 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ic: '⚙️', yetkiKodu: 'uretim.is_merkezi.liste',
   },
   {
+    // ÜRETİM AYARLARI (1262): seviye (basit / standart / denetimli) + "Üretim emri kullan". Kullanıcı 04.11.2026:
+    //   Genel Ayarlar › Üretim sekmesi buraya taşındı - modülün ayarı kendi grubunda (kasa / stok / demirbaş deseni).
+    kaynak: 'uretim-ayarlar', rota: 'uretim-ayarlar', ozelSayfa: true,
+    baslik: 'Üretim Ayarları', yol: 'Üretim › Ayarlar › Üretim Ayarları',
+    modul: 'uretim',
+    menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'Üretim Ayarları', menuSira: 95,
+    ic: '🛠️', yetkiKodu: 'uretim.ayar',
+  },
+  {
     // ÜRETİM İCMALİ (1176, mockup Ekranlar/İcmal/uretim_icmali.html).
     kaynak: 'uretim-icmali', rota: 'uretim-icmali', ozelSayfa: true,
     baslik: 'Üretim İcmali', yol: 'Üretim › İcmaller › Üretim İcmali',

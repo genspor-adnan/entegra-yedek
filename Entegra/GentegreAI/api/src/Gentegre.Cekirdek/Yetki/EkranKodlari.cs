@@ -52,6 +52,7 @@ public static partial class EkranKodlari
         ["medula.kabul"]       = "medula.provizyon",  // Kayıt Kabul › Medula Kabul
         ["demirbas.ayar"]      = "ayar",              // Sabit Varlıklar › Ayarlar › Demirbaş (1007)
         ["patoloji.dislab"]    = "lab.dislab",        // Patoloji › Dış Laboratuvarlar (Lab ile ORTAK kart, 1104)
+        ["uretim.ayar"]        = "ayar",              // Üretim › Ayarlar › Üretim Ayarları (1262; seviye / emir kullan)
     };
 
     /// <summary>
@@ -485,6 +486,8 @@ public static partial class EkranKodlari
         // Sabit Varlıklar (1007): Zimmet / Hareketler kendi uçlarında
         //   (DemirbasZimmetUclari), demirbaş kartının kapısını açmaz.
         "demirbas.zimmet", "demirbas.ayar",
+        // Üretim Ayarları (1262): yalnız /api/uretim/seviye kapısı; genel `ayar` kapısını açmaz.
+        "uretim.ayar",
         // Vezne İcmali (1016): kendi ucu (VezneIcmalUclari) kendi koduna bakar.
         "banko.vezne_icmal",
         // Medula Mutabakat İcmali (1017): /api/medula/mutabakat kendi koduna bakar.

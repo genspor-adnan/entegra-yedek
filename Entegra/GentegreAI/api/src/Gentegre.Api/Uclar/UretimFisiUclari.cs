@@ -88,12 +88,12 @@ public static partial class UretimFisiUclari
         // ------------------------------------------------------------ seviye ---
 
         // GET /api/uretim/seviye - ekranın hangi seviyede çizileceği. Üretimi gören herkes okur (ayar yetkisi
-        //   gerekmez: Genel Ayarlar listesi "ayar" ister, fiş kartı açan atölye kullanıcısı o yetkiye sahip değil).
+        //   gerekmez: fiş kartı açan atölye kullanıcısı o yetkiye sahip değil). `uretim.ayar` Üretim Ayarları sayfası (1262).
         grup.MapGet("/seviye", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             if (!baglam.Yetkiler.Var("uretim", Islem.Gor) && !baglam.Yetkiler.Var("uretim.fis", Islem.Gor)
-                && !baglam.Yetkiler.Var("ayar", Islem.Gor))
+                && !baglam.Yetkiler.Var("uretim.ayar", Islem.Gor) && !baglam.Yetkiler.Var("ayar", Islem.Gor))
                 throw GentegreHatasi.Yasak();
             await using var b = await veri.AcAsync(iptal);
             var (seviye, emirKullan) = await SeviyeOkuAsync(b, null, iptal);
@@ -106,7 +106,9 @@ public static partial class UretimFisiUclari
                                       HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("ayar", Islem.Degistir);
+            // Üretim › Ayarlar › Üretim Ayarları (uretim.ayar, 1262) ya da genel ayar yetkisi.
+            if (!baglam.Yetkiler.Var("uretim.ayar", Islem.Degistir) && !baglam.Yetkiler.Var("ayar", Islem.Degistir))
+                throw GentegreHatasi.Yasak();
             var yeni = (istek.Seviye ?? "").Trim().ToLowerInvariant();
             if (yeni is not (SeviyeBasit or SeviyeStandart or SeviyeDenetimli))
                 throw GentegreHatasi.Dogrulama("Seviye basit, standart ya da denetimli olmalı.",

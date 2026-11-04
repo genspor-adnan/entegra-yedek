@@ -536,7 +536,7 @@ anormal fire gidere). Durum: 0 ters kayıt · 1 taslak · 2 gerçekleşti (denet
 
 ```http
 GET  /api/uretim/seviye                      // { seviye: basit|standart|denetimli, emirKullan } - üretimi gören okur
-PUT  /api/uretim/seviye                      // { seviye, emirKullan } - yetki ayar; alta geçiş açık emir / karantina varken 422
+PUT  /api/uretim/seviye                      // { seviye, emirKullan } - yetki uretim.ayar ya da ayar (Değiştir); alta geçiş açık emir / karantina varken 422
 GET  /api/uretim/fis/mamul/{stokId}          // mamul bandı: kod, ad, birim, izleme, kategori, varsayılan ağaç, depolar
 POST /api/uretim/fis/doldur                  // { stokId, agacId?, miktar, sarfDepoId?, maliyetYontemi? } -> satır önerisi (YAZMAZ)
 GET  /api/uretim/fis/{id}                    // fis + satirlar + operasyonlar + kontroller + belgeler + emir
@@ -568,7 +568,9 @@ ters kayıt), `.ters-kayit` (gerekçeli), `.gerceklestir`, `.serbest` (e-imza), 
 Emir durum **3 = serbest bırakıldı** (429'da "planlandı", kullanılmıyordu); `baslat` 2 ya da 3'ten, denetimli seviyede
 yalnız 3'ten. Maliyet kapanışı emre bağlı fişlerin sarf / fire belgelerini ve gider satırlarını da toplar.
 Yetki: `uretim.fis` (kart), `uretim.fis.liste`, `uretim.fis.serbest`. Ayar: `referans uretim.seviye`, `uretim.emir_kullan`
-(beyaz listede DEĞİL - PUT /api/uretim/seviye kapısından yazılır).
+(beyaz listede DEĞİL - PUT /api/uretim/seviye kapısından yazılır). Ayar ekranı **Üretim › Ayarlar › Üretim Ayarları**
+(`/uretim-ayarlar`, ekran kodu `uretim.ayar` - 1262; `ayar`dan kopyalanır, genel ayar kapısını açmaz). 1253–1261 arasında
+Genel Ayarlar › Üretim sekmesiydi.
 
 **Hesaplanan alanlar istemciden alınmaz** (§3.2): emir numarası, üretilen adet,
 rezerve/sarf edilen miktar, plan ve gerçek maliyet sunucuda yazılır.

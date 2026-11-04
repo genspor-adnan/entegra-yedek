@@ -57,6 +57,10 @@ public sealed class EkranKoduBolmeTestleri
         Assert.False(Set("dis_doktor").Var("personel", Islem.Gor));
         Assert.False(Set("eczane.miad").Var("stok", Islem.Gor));
         Assert.False(Set("kayit_kabul.ayar").Var("ayar", Islem.Degistir));
+        // Üretim Ayarları (1262): kendi kapısı, genel ayarları açmaz; kopya kaynağı `ayar`.
+        Assert.False(Set("uretim.ayar").Var("ayar", Islem.Degistir));
+        Assert.True(Set("uretim.ayar").Var("uretim.ayar", Islem.Degistir));
+        Assert.Equal("ayar", EkranKodlari.KopyaKaynagi("uretim.ayar"));
         Assert.Equal("dis_doktor", KaynakKatalogu.Bul("dis-hekim")!.YetkiKodu);
         Assert.Equal("eczane.miad", KaynakKatalogu.Bul("eczaneMiad")!.YetkiKodu);
     }

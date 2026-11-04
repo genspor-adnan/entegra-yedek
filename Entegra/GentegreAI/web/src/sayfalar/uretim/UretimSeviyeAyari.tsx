@@ -8,7 +8,8 @@ import { c } from '../../dil/ceviri';
 
 /**
  * ÜRETİM SEVİYESİ AYARI (1253, mockup uretim_basit.html ③ "Kurum Profili › Üretim"). Kurum profili ekranı bu üründe
- * GenProfil'de olduğu için ayar Genel Ayarlar › Üretim sekmesinde. Üç kart + "Üretim emri kullan" + karşılaştırma tablosu.
+ * GenProfil'de olduğu için ayar önce Genel Ayarlar › Üretim sekmesindeydi; 04.11.2026'dan beri Üretim › Ayarlar ›
+ * Üretim Ayarları sayfasında (UretimAyarlar, 1262). Üç kart + "Üretim emri kullan" + karşılaştırma tablosu.
  * Alta geçiş sunucuda kapılı: açık emir ya da karantinadaki fiş varken denetimliden inilmez.
  */
 const SEVIYELER: { kod: UretimSeviyesi; ad: string; alt: string; aciklama: string }[] = [

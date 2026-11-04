@@ -7,6 +7,20 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 04.11.2026 — Üretim Ayarları kendi menüsünde (1262)
+
+Kullanıcı: "Genel Ayarlar altındaki Üretim sekmesini Üretim modülünde ayarlar altına 'Üretim Ayarları' olarak taşı".
+Soru öncesinde: ZONE kopyasında Üretim Emiri Listesi menüde yoktu - tasarım gereği (basit seviye + "Üretim emri kullan"
+kapalı, `Kabuk.tsx menuYetki`); ayar Genel Ayarlar'ın bir sekmesindeydi ve genel `ayar` yetkisi istiyordu.
+Taşıma: `Üretim › Ayarlar › Üretim Ayarları` (`/uretim-ayarlar`, `UretimAyarlar.tsx` 1253'teki `UretimSeviyeAyari`'ni sarar);
+menü kodu = yetki kodu ilkesiyle yeni ekran kodu `uretim.ayar` (1262: `ayar`dan kopya - kimse yetki kazanmaz / kaybetmez,
+`rol.yetki_surumu` artar, rehber ekranı `uretim-ayarlar`, help metni); `EkranKodlari` Kopya + KendiKapisi (genel ayarı açmaz);
+`PUT /api/uretim/seviye` `uretim.ayar` ya da `ayar` Değiştir. Genel Ayarlar'dan Üretim sekmesi kalktı. Üretim Sorumlusu gibi
+rollerde `ayar` yoktu, dolayısıyla `uretim.ayar` da yok - istenirse matristen verilir.
+Yan not: `goc_uygula.ps1` dev DB'de 1135–1140, 1152–1157, 1164–1168 dosyalarını defterde görmedi (önceden elle uygulanmış;
+1135 kendi işleminde geri alındı, zarar yok) - yerel kopyalara tek dosya `-Dosyalar` ile uygulandı; UNIVERSE'te bekleyen
+1192 (sipariş aktarım fonksiyonu, stg boş → veri değişmedi) de bu vesileyle uygulandı.
+
 ## 04.11.2026 — Kod kalitesi refaktoru (web + api), davranış değişmeden
 
 Kullanıcı: "tüm projeyi refaktor yap" → kapsam GentegreAI (web + api) kod kalitesi, küçük test edilmiş commit'ler.

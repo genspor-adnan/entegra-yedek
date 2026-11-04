@@ -19,7 +19,7 @@ dogrulama: insan-dogrulama-bekliyor
 ## Amaç
 "Bugün 20 sandalye yaptık" demenin kaydıdır. Üretim emri (planlı, çok adımlı) kullanmayan ya da emrin kısmi girişini tek fişle yapan atölye için: mamulü ve miktarı yazın, malzemeler ürün ağacından gelir, **Kaydet / Gerçekleştir** ile sarf deposundan malzeme düşer, mamul giriş deposuna girer, birim maliyet hesaplanır. Listede kesilen fişler, kartta kalemler ve maliyet görünür.
 
-## Üretim seviyesi (Genel Ayarlar › Üretim)
+## Üretim seviyesi (Üretim › Ayarlar › Üretim Ayarları)
 Ekran ve kayıt yapısı tektir; seviye yalnız görüneni ve zorunlulukları değiştirir.
 - **Basit (KOBİ):** tek ekran; Tarih · Miktar · Depo · Açıklama; fire tek alan, işçilik / gider tek tutar; lot kolonu yalnız izlemli stokta; **Kaydet** hem kaydeder hem stoğa işler. Üretim emri isteğe bağlıdır ("Üretim emri kullan" kapalıysa menüde yalnız bu ekran vardır; açıksa Üretim Emirleri sade iş listesidir ve **▶ Üret…** düğmesi bu fişi arka planda keser).
 - **Standart:** Başlama / Bitiş, Giriş Deposu, İş Merkezi, Sorumlu; ＋ Yan ürün / ＋ Gider / ＋ Fire; normal / anormal fire; plan ve sapma kolonları; Son maliyet / Ortalama seçimi; Operasyon / Personel ve Maliyet sekmeleri. **Taslak Kaydet** ve **Gerçekleştir** ayrı düğmelerdir.
@@ -41,7 +41,7 @@ Ekran ve kayıt yapısı tektir; seviye yalnız görüneni ve zorunlulukları de
 ## Ekrana giriş
 - Sol menü **Üretim › Üretim Fişi Listesi** (`/uretim-fisi`); kart `/uretim-fisi/{id}`, yeni `/uretim-fisi/yeni?stokId=…`.
 - Yetki: `uretim.fis.liste` (liste, Gör), `uretim.fis` (kart: Gör / Ekle / Değiştir / Sil), `uretim.fis.serbest` (kalite serbest bırakma / ret). Üretim yetkisi (`uretim`) olan roller kurulumla aynı hakları alır.
-- Seviye: Genel Ayarlar › Üretim (`ayar` yetkisi); alta geçiş açık emir ya da kalite bekleyen fiş varken engellenir.
+- Seviye: Üretim › Ayarlar › Üretim Ayarları (`/uretim-ayarlar`; `uretim.ayar` ya da genel `ayar` yetkisi); alta geçiş açık emir ya da kalite bekleyen fiş varken engellenir.
 
 ## Rakamlar nereden gelir
 - **Sarf birim maliyeti:** "Ortalama" = stoğun ağırlıklı ortalama alış maliyeti (giriş hareketlerinden); "Son maliyet" = en son giriş fiyatı. Otomatik hesap açıkken gerçekleştirme anında okunur; elle girilen değer korunur.
