@@ -9174,7 +9174,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mrz-tablo th { background: linear-gradient(#f4f7fb, #e7eef6); border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2); text-align: left; padding: 5px 8px; font-size: 11px; color: #3a5573; white-space: nowrap }
 .mrz-tablo td { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6; padding: 4px 8px; font-size: 11.5px }
 .mrz-tablo td.sl { color: var(--soluk) } .mrz-tablo tr.fark td { background: #fdf6e8 } .mrz-tablo td.bozuk { color: var(--hata); text-decoration: underline wavy }
-.mrz-iki .bilgi-kutusu, .mrz-iki .uyari-kutusu, .mrz-iki .hata-kutusu { margin-top: 8px; padding: 6px 10px; font-size: 11.5px }
+/* KENDI ADI (768 kurali): global bilgi/uyari/hata kutularini `.mrz-iki` altinda ezmek onlari iki anlamli yapardi
+   (temaSinifCakismasi testi yakaladi) - MRZ kutulari kendi adini tasir. */
+.mrz-iki .mrz-kutu { margin-top: 8px; padding: 6px 10px; font-size: 11.5px }
 
 /* REÇETE KARTI kimlik ızgarası (kullanıcı 04.11.2026): 12 sütunlu dense ızgara - Ağaç Kodu / Çıktı / Durum dar (1),
    Ağaç Adı / Mamul / Not geniş (3), kalanlar 2. Kutular hücreyi doldurur, hücre arası boşluk kalmaz. */

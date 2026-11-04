@@ -7,6 +7,18 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 04.11.2026 — Kod kalitesi refaktoru (web + api), davranış değişmeden
+
+Kullanıcı: "tüm projeyi refaktor yap" → kapsam GentegreAI (web + api) kod kalitesi, küçük test edilmiş commit'ler.
+API: 9 nullable derleme uyarısı sıfırlandı; 7 aktarım test dosyasındaki aynı `AktarAsync` / `Sayi` kopyaları
+`AktarimTestYardimcisi`'ne. Web: 13 dosyadaki `const sayi`, 12 dosyadaki `const metin`, 11 icmal tablosundaki `const tire`
+ve 8 KYS dosyasındaki `kacis` kopyaları `bicim.ts` (`sayiya`, `metne`, `tire`) ve `htmlGuvenlik.h`'ye; 16 ekrandaki
+"new Set + has ? delete : add" satırı `kume.ts kumeCevir`'e; oxlint'in eslint-kategori uyarıları (29 kullanılmayan ifade,
+jsx-key, kontrol regex, gereksiz kaçış, sabit koşul, hiç atanmayan değişken) sıfır. React Compiler kuralları
+(set-state-in-effect 356, only-export-components 204, exhaustive-deps 50…) davranışa dokunduğu için BİLEREK bırakıldı.
+`temaSinifCakismasi` testi 55976d7'den (MRZ) beri kırıktı: `.mrz-iki .bilgi/uyari/hata-kutusu` global kutuları iki anlamlı
+yapıyordu → kendi adı `.mrz-kutu` (768 kuralı). Sonuç: API 938 test, web 1078 test, tsc temiz.
+
 ## 04.11.2026 — Delphi üretim fişleri `uretim_fisi`'ne (1261); yerel ZONE profili
 
 Kullanıcı (yerel ZONE kopyası): "zone sql den üretim fişleri aktarıldı mı" → aktarılmıştı ama eski biçimde: Delphi

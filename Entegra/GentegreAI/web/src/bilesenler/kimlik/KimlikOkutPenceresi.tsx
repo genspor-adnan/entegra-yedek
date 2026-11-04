@@ -185,7 +185,7 @@ export function KimlikOkutPenceresi({ onKapat, mevcut, onAktar, onHastaAc, uyruk
         <button type="button" className={`d${kip === 'metin' ? ' bir' : ''}`} onClick={() => setKip('metin')}>⌨ {c('MRZ metnini yapıştır')}</button>
         {guven != null && guven > 0 && <span className="rozet gri" style={{ marginLeft: 'auto' }}>{c('OCR güveni')} %{guven}</span>}
       </div>
-      {hata && <div className="hata-kutusu" style={{ margin: '0 10px' }}>{hata}</div>}
+      {hata && <div className="hata-kutusu mrz-kutu" style={{ margin: '0 10px' }}>{hata}</div>}
       <div className="mrz-iki">
         <div>
           {kip === 'kamera' && (
@@ -215,8 +215,8 @@ export function KimlikOkutPenceresi({ onKapat, mevcut, onAktar, onHastaAc, uyruk
               <pre className={`mrz-ham${sonuc && !sonuc.gecerli ? ' hata' : sonuc?.gecerli ? ' ok' : ''}`}>{satirlar.join('\n')}</pre>
             </>
           )}
-          {sonuc && !sonuc.gecerli && <div className="uyari-kutusu">{sonuc.hatalar.join(' ')} {c('Yeniden okutun.')}</div>}
-          {sonuc?.uyarilar?.map(u => <div key={u} className={sonuc.engellendi ? 'hata-kutusu' : 'uyari-kutusu'}>⚠ {u}</div>)}
+          {sonuc && !sonuc.gecerli && <div className="uyari-kutusu mrz-kutu">{sonuc.hatalar.join(' ')} {c('Yeniden okutun.')}</div>}
+          {sonuc?.uyarilar?.map(u => <div key={u} className={`${sonuc.engellendi ? 'hata-kutusu' : 'uyari-kutusu'} mrz-kutu`}>⚠ {u}</div>)}
         </div>
         <div>
           {sonuc && (
@@ -242,12 +242,12 @@ export function KimlikOkutPenceresi({ onKapat, mevcut, onAktar, onHastaAc, uyruk
                 </tbody>
               </table>
               {baskaHasta && (
-                <div className="bilgi-kutusu">ℹ {c('Bu kimlikle kayıtlı hasta var')}: <b>{eslesen!.ad} {eslesen!.soyad} · {eslesen!.kod}</b>
+                <div className="bilgi-kutusu mrz-kutu">ℹ {c('Bu kimlikle kayıtlı hasta var')}: <b>{eslesen!.ad} {eslesen!.soyad} · {eslesen!.kod}</b>
                   {eslesen!.sonBasvuru ? ` · ${c('son başvuru')} ${String(eslesen!.sonBasvuru).slice(8, 10)}.${String(eslesen!.sonBasvuru).slice(5, 7)}.${String(eslesen!.sonBasvuru).slice(0, 4)}` : ''}.
                   {' '}{c('"Hastayı Aç" kartı açar; işaretli farklar karta yazılır, kaydetmeden önce kontrol edilir.')}</div>
               )}
               {!baskaHasta && !mevcut && sonuc.gecerli && (
-                <div className="bilgi-kutusu">ℹ {c('Bu numarayla kayıtlı hasta yok - "Yeni Hasta" kartı alanlar dolu açılır. Ad / soyad MRZ\'de büyük ASCII gelir; T.C. vatandaşında MERNİS gerçek harfleri getirir.')}</div>
+                <div className="bilgi-kutusu mrz-kutu">ℹ {c('Bu numarayla kayıtlı hasta yok - "Yeni Hasta" kartı alanlar dolu açılır. Ad / soyad MRZ\'de büyük ASCII gelir; T.C. vatandaşında MERNİS gerçek harfleri getirir.')}</div>
               )}
             </>
           )}
