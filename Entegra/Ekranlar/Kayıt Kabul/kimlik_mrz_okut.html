@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kimliği Okut (MRZ) — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<!--
+  Kullanıcı 03.11.2026: "kimlikte mrz kodu ne demek? ondan hasta kimlik kaydı nasıl yapılır" -> "mockup hazırla".
+  MRZ (Machine Readable Zone, ICAO 9303): kimlik kartı arkası TD-1 (3 × 30 karakter), pasaport TD-3 (2 × 44). Alanlar sabit
+  konumda, her sayısal alanın ardında 7-3-1 ağırlıklı KONTROL HANESİ; ad / soyad ASCII'ye indirgenmiş (Ş→S, İ→I...).
+  Akış: kamera / tarayıcı -> OCR (OCR-B) -> MRZ ayrıştır -> kontrol haneleri -> TC no ile hasta ara -> yoksa yeni hasta kartı
+  alanlar dolu; ad / soyad gerçek harflerle MERNİS / KPS doğrulamasından (hasta kartında zaten var).
+  Veri yapısı değişmez: hasta kartına yalnız kimlik belge no + son kullanma alanları eklenir (taraf.belge_seri_no,
+  belge_son_kullanma - 1254 ile); okutma kaydı ISLEMLOG'a düşer ("MRZ ile okundu").
+-->
+<style>
+  :root{ --zem:#eef1f5; --yuz:#fff; --yuz2:#f3f6fa; --cizgi:#cdd6e0; --cizgi2:#e3e9f0; --yazi:#1f2d3a; --yazi2:#14315a;
+    --soluk:#6b7a8b; --mavi:#2f6db3; --mavi2:#d7e7fb; --ok:#2e7d46; --uyari:#a9791a; --hata:#b23b3b; --mor:#6a3fb5; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zem);color:var(--yazi);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:16px}
+  h2{font-size:13px;color:var(--yazi2);margin:24px 0 6px} h2:first-child{margin-top:0}
+  .not{color:var(--soluk);font-size:11px;margin:0 0 8px;line-height:1.5;max-width:1200px}
+  .norm{max-width:1200px;background:#fff;border:1px solid #cfe0f4;border-left:4px solid var(--mavi);border-radius:4px;padding:8px 12px;line-height:1.9;margin-bottom:6px}
+  .rz{display:inline-block;padding:0 7px;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid;white-space:nowrap}
+  .rz.bilgi{background:#e6f0fb;color:var(--mavi);border-color:#cfe0f4} .rz.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.uy{background:#fdf1e2;color:var(--uyari);border-color:#f2ddbf} .rz.hata{background:#fdecec;color:var(--hata);border-color:#f2c9c9} .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .d{border:1px solid var(--cizgi);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap;display:inline-block}
+  .d.bir{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3} .d.yesil{background:linear-gradient(#4aa36a,#2e7d46);color:#fff;border-color:#2e7d46}
+  .d.pas{opacity:.45}
+  .sayfa{background:var(--yuz);border:1px solid var(--cizgi);border-radius:4px;overflow:hidden;max-width:1200px}
+  .bas{padding:10px 14px;border-bottom:1px solid var(--cizgi2);background:var(--yuz2);display:flex;gap:8px;align-items:center}
+  .bas b{font-size:13px;color:var(--yazi2)}
+  .sp{flex:1}
+  /* kimlik alanı satırı (hasta kartı) */
+  .al{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:8px}
+  .al .et{font-size:11px;color:var(--soluk);text-align:right} .al .et.z::after{content:" *";color:var(--hata)}
+  .inp{border:1px solid var(--cizgi);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff;white-space:nowrap;overflow:hidden}
+  .inp.ro{background:#f6f8fb;color:var(--soluk)} .inp.yeni{background:#eef8f1;border-color:#9fd4b1}
+  .iz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;padding:12px 14px}
+  .ikili{display:flex;gap:6px;align-items:center} .ikili .inp{flex:1}
+  /* okutma penceresi */
+  .pencere{width:980px;margin:14px auto;border:1px solid var(--cizgi);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.18);background:#fff;overflow:hidden}
+  .pbas{padding:8px 12px;font-weight:700;color:var(--yazi2);border-bottom:1px solid var(--cizgi2);background:var(--yuz2);display:flex;align-items:center;gap:8px}
+  .palt{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;border-top:1px solid var(--cizgi2);background:var(--yuz2)}
+  .iki{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;padding:12px}
+  .kamera{border:1px solid var(--cizgi2);border-radius:6px;background:#1b2430;color:#c9d3de;height:300px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .kamera .kart{width:78%;height:62%;border:2px dashed #7fb2e8;border-radius:8px;position:relative;background:rgba(255,255,255,.04)}
+  .kamera .kart .mrzbant{position:absolute;left:4%;right:4%;bottom:6%;height:34%;border:2px solid #4aa36a;border-radius:4px;background:rgba(74,163,106,.12)}
+  .kamera .kart .mrzbant::after{content:"MRZ bölgesi — 3 satır okunuyor";position:absolute;left:6px;top:-18px;font-size:10.5px;color:#9fd4b1}
+  .kamera .ipucu{position:absolute;left:10px;bottom:8px;font-size:10.5px;color:#9fb3c8}
+  .kamera .durum{position:absolute;right:10px;top:8px}
+  .ham{font-family:Consolas,"Courier New",monospace;font-size:13px;letter-spacing:1.5px;background:#f7f9fc;border:1px solid var(--cizgi2);border-radius:4px;padding:8px 10px;line-height:1.7;margin-top:8px;white-space:pre}
+  .ham .ok{color:var(--ok)} .ham .hata{color:var(--hata);text-decoration:underline wavy}
+  table{border-collapse:collapse;width:100%}
+  .dg{border:1px solid var(--cizgi2)}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--cizgi);border-right:1px solid var(--cizgi2);text-align:left;padding:5px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--cizgi2);border-right:1px solid #eef2f6;padding:4px 8px;font-size:11.5px}
+  .dg td.sl{color:var(--soluk)} .dg tr.fark td{background:#fdf6e8}
+  .bilgi{margin:8px 0 0;padding:6px 10px;border:1px solid #cfe0f4;background:#f3f8fe;color:#2c4a6b;border-radius:4px;font-size:11.5px}
+  .uyari{margin:8px 0 0;padding:6px 10px;border:1px solid #f2c9c9;background:#fdf0f0;color:var(--hata);border-radius:4px;font-size:11.5px}
+  .adim{display:flex;border-bottom:1px solid var(--cizgi2);background:#fbfcfe}
+  .adim .a{flex:1;padding:6px 10px 6px 22px;position:relative;color:var(--soluk);font-weight:700;font-size:11.5px;border-right:1px solid var(--cizgi2)}
+  .adim .a::before{content:"";position:absolute;left:8px;top:11px;width:8px;height:8px;border-radius:50%;background:#c9d3de}
+  .adim .a.bitti{color:var(--ok)} .adim .a.bitti::before{background:var(--ok)}
+  .adim .a.simdi{color:var(--uyari);background:#fdf6e8} .adim .a.simdi::before{background:var(--uyari)}
+  .kbas{font-weight:700;color:var(--yazi2);margin:0 0 6px}
+  .aciklama{max-width:1200px;margin-top:16px;color:var(--soluk);font-size:11px;line-height:1.75}
+  .aciklama b{color:var(--yazi)} .aciklama code{background:#f2f6fa;border:1px solid var(--cizgi2);border-radius:3px;padding:0 4px}
+  .kucuk td,.kucuk th{font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="norm">
+  <b>Kimliği okut (MRZ) — hasta kimlik kaydının kameradan / tarayıcıdan dolması.</b>
+  Dayanak: <span class="rz bilgi">ICAO 9303</span> MRZ alan düzeni ve kontrol haneleri (TD-1 kimlik kartı 3×30, TD-3 pasaport 2×44) ·
+  <span class="rz bilgi">T.C. Kimlik Kartı</span> arka yüz MRZ (satır 2'de TC kimlik no) ·
+  <span class="rz bilgi">KPS / MERNİS</span> ad-soyadın gerçek harflerle doğrulanması (MRZ ASCII'dir: Ş→S, İ→I, Ğ→G) ·
+  <span class="rz bilgi">KVKK</span> kimlik görüntüsü SAKLANMAZ, yalnız çözülen alanlar; okutma ISLEMLOG'a yazılır.
+</div>
+
+<!-- ============================================================== ① HASTA KARTI - DÜĞME -->
+<h2>① Hasta kartı / başvuru — kimlik numarasının yanında "📷 Kimliği Okut"</h2>
+<p class="not">Yeni hasta kartı ve başvurudaki hasta arama kutusu. Düğme kamera penceresini açar; okuma bitince TC no ile mevcut hasta aranır, yoksa alanlar dolu yeni kart gelir. Elle giriş olduğu gibi kalır - okutma kısayoldur, zorunluluk değil.</p>
+<div class="sayfa">
+  <div class="bas"><b>👤 Yeni Hasta Kartı</b><span class="rz gri">Kimlik</span><span class="sp"></span><span class="d yesil">💾 Kaydet</span><span class="d">✖ Kapat</span></div>
+  <div class="iz">
+    <div class="al"><span class="et z">Kimlik No</span><span class="ikili"><span class="inp">12345678901</span><span class="d bir" title="Kimlik kartı / pasaport MRZ'sini kameradan ya da tarayıcıdan okur">📷 Kimliği Okut</span><span class="d" title="KPS'den ad-soyad, doğum tarihi, anne-baba adı getirir">🪪 MERNİS</span></span></div>
+    <div class="al"><span class="et z">Ad</span><span class="inp yeni">AHMET</span></div>
+    <div class="al"><span class="et z">Soyad</span><span class="inp yeni">YILMAZ</span></div>
+    <div class="al"><span class="et">Doğum Tarihi</span><span class="inp yeni">01.01.1990</span></div>
+    <div class="al"><span class="et">Cinsiyet</span><span class="inp yeni">Erkek</span></div>
+    <div class="al"><span class="et">Uyruk</span><span class="inp yeni">Türkiye (TUR)</span></div>
+    <div class="al"><span class="et">Kimlik Belgesi</span><span class="inp yeni">T.C. Kimlik Kartı · A12B34567</span></div>
+    <div class="al"><span class="et">Belge Geçerlilik</span><span class="inp yeni">31.12.2030</span></div>
+    <div class="al"><span class="et">Kaynak</span><span class="inp ro">📷 MRZ ile okundu · 03.11.2026 14:22 · Banko 2 <span class="rz ok" style="margin-left:6px">MERNİS doğrulandı</span></span></div>
+  </div>
+  <div class="not" style="padding:0 14px 10px">Yeşil alanlar okutmadan geldi; kullanıcı değiştirebilir. Ad / soyad MRZ'de büyük ASCII gelir (<code>YILMAZ&lt;&lt;AHMET</code>); kaydetmeden önce MERNİS'ten gerçek harfler ("Şule" ↔ "SULE") alınır - MERNİS kapalıysa kullanıcı düzeltir, "doğrulanmadı" rozeti kalır.</div>
+</div>
+
+<!-- ============================================================== ② OKUTMA PENCERESİ -->
+<h2>② Okutma penceresi — kamera / tarayıcı, ham MRZ, çözülen alanlar, doğrulama</h2>
+<p class="not">Sol: kamera görüntüsü, kartın arka yüzü çerçeveye alınır; MRZ bölgesi yeşil bantla bulunur ve OCR-B ile okunur (tarayıcıda, görüntü sunucuya gitmez). Sağ: ham satırlar (kontrol hanesi tutmayan karakter kırmızı), çözülen alanlar, mevcut kayıt karşılaştırması.</p>
+<div class="pencere">
+  <div class="pbas">📷 Kimliği Okut <span class="rz bilgi">T.C. Kimlik Kartı (TD-1)</span><span class="sp"></span>
+    <span class="d">📁 Dosyadan / tarayıcıdan</span><span class="d">⌨ MRZ metnini yapıştır</span><span class="d">✖</span></div>
+  <div class="adim"><span class="a bitti">1 Kartı göster</span><span class="a bitti">2 MRZ okundu</span><span class="a bitti">3 Kontrol haneleri</span><span class="a simdi">4 Hasta eşleşmesi</span><span class="a">5 Karta aktar</span></div>
+  <div class="iki">
+    <div>
+      <div class="kamera">
+        <div class="durum"><span class="rz ok">3 / 3 satır okundu</span></div>
+        <div class="kart"><div class="mrzbant"></div></div>
+        <div class="ipucu">Kartın ARKA yüzünü çerçeveye tutun · ışık yansıması varsa hafif eğin · okuma otomatik</div>
+      </div>
+      <div class="kbas" style="margin-top:10px">Ham MRZ <span class="rz gri" style="margin-left:4px">OCR güveni %97</span></div>
+      <div class="ham">I&lt;TURA12B34567<span class="ok">&lt;3</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+900101<span class="ok">5</span>M301231<span class="ok">4</span>TUR12345678901&lt;<span class="ok">4</span>
+YILMAZ&lt;&lt;AHMET&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+      <div class="not" style="margin-top:6px">Yeşil = kontrol hanesi tuttu. Tutmayan alan kırmızı çizilir ve "yeniden okut" istenir; TC kimlik no ayrıca 10-11. hane algoritmasından geçer. Görüntü saklanmaz.</div>
+    </div>
+    <div>
+      <div class="kbas">Çözülen alanlar</div>
+      <table class="dg kucuk">
+        <thead><tr><th>Alan</th><th>MRZ</th><th>Kayıtlı hasta</th><th>Sonuç</th></tr></thead>
+        <tbody>
+          <tr><td>Kimlik No</td><td><b>12345678901</b></td><td>12345678901</td><td><span class="rz ok">Mevcut hasta #4812</span></td></tr>
+          <tr><td>Soyad</td><td>YILMAZ</td><td>Yılmaz</td><td><span class="rz ok">Aynı</span></td></tr>
+          <tr><td>Ad</td><td>AHMET</td><td>Ahmet</td><td><span class="rz ok">Aynı</span></td></tr>
+          <tr class="fark"><td>Doğum Tarihi</td><td>01.01.1990</td><td>01.10.1990</td><td><span class="rz uy">Farklı → MRZ al</span></td></tr>
+          <tr><td>Cinsiyet</td><td>Erkek</td><td>Erkek</td><td><span class="rz ok">Aynı</span></td></tr>
+          <tr><td>Uyruk</td><td>TUR</td><td>—</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+          <tr><td>Belge No</td><td>A12B34567</td><td>—</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+          <tr><td>Belge Geçerlilik</td><td>31.12.2030</td><td>—</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi">ℹ Bu kimlik numarasıyla kayıtlı hasta var: <b>Ahmet YILMAZ · #4812 · son başvuru 12.09.2026</b>. "Hastayı Aç" kartı açar; farklı alanlar (sarı) tek tek onaylanıp güncellenir. Kayıt yoksa "Yeni Hasta" alanları dolu açılır.</div>
+      <div class="uyari" style="display:none">⚠ Belge geçerliliği 31.12.2024'te dolmuş - kayıt engellenmez, kimlik alanına uyarı rozeti düşer.</div>
+    </div>
+  </div>
+  <div class="palt"><span class="d">↺ Yeniden Okut</span><span class="sp"></span><span class="d">Vazgeç</span><span class="d">＋ Yeni Hasta (dolu)</span><span class="d bir">👤 Hastayı Aç ve Farkları Uygula</span></div>
+</div>
+
+<!-- ============================================================== ③ PASAPORT -->
+<h2>③ Pasaport (TD-3) — yabancı hasta</h2>
+<p class="not">2 satır × 44 karakter; TC kimlik no YOK. Kimlik biçimi ayarı (<code>kimlikBicimi</code>) pasaport / serbest ise kimlik no kutusuna pasaport no yazılır, uyruk MRZ'den gelir, kimlik türü "Pasaport". Hasta eşleşmesi pasaport no + uyruk + doğum tarihiyle.</p>
+<div class="pencere" style="margin-top:0">
+  <div class="pbas">📷 Kimliği Okut <span class="rz bilgi">Pasaport (TD-3)</span><span class="sp"></span><span class="d">✖</span></div>
+  <div class="iki">
+    <div>
+      <div class="ham">P&lt;DEUMUSTERMANN&lt;&lt;ERIKA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+C01X00T47<span class="ok">8</span>DEU640812<span class="ok">5</span>F270222<span class="ok">6</span>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<span class="ok">4</span></div>
+      <div class="not" style="margin-top:6px">Satır 1: belge tipi P, düzenleyen ülke, SOYAD&lt;&lt;AD. Satır 2: pasaport no + kontrol, uyruk, doğum + kontrol, cinsiyet, SKT + kontrol, isteğe bağlı alan, bileşik kontrol.</div>
+    </div>
+    <div>
+      <table class="dg kucuk">
+        <thead><tr><th>Alan</th><th>MRZ</th><th>Sonuç</th></tr></thead>
+        <tbody>
+          <tr><td>Kimlik Türü</td><td>Pasaport</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+          <tr><td>Pasaport No</td><td><b>C01X00T47</b></td><td><span class="rz gri">Kayıt yok → Yeni hasta</span></td></tr>
+          <tr><td>Soyad / Ad</td><td>MUSTERMANN / ERIKA</td><td><span class="rz uy">MERNİS yok - elle kontrol</span></td></tr>
+          <tr><td>Uyruk</td><td>DEU (Almanya)</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+          <tr><td>Doğum / Cinsiyet</td><td>12.08.1964 · Kadın</td><td><span class="rz bilgi">Dolacak</span></td></tr>
+          <tr><td>Belge Geçerlilik</td><td>22.02.2027</td><td><span class="rz ok">Geçerli</span></td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi">ℹ TC kimlik algoritması ve MERNİS uygulanmaz (TR dışı); kimlik biçimi "serbest" olmalı - değilse kayıt "kimlik biçimi pasaporta izin vermiyor" der (666 kuralı).</div>
+    </div>
+  </div>
+  <div class="palt"><span class="d">↺ Yeniden Okut</span><span class="sp"></span><span class="d">Vazgeç</span><span class="d bir">＋ Yeni Hasta (dolu)</span></div>
+</div>
+
+<!-- ============================================================== ④ KURALLAR -->
+<h2>④ Kurallar ve yapı</h2>
+<div class="sayfa">
+  <table class="dg kucuk">
+    <thead><tr><th>Konu</th><th>Karar</th></tr></thead>
+    <tbody>
+      <tr><td>Nerede çözülür</td><td>OCR <b>tarayıcıda</b> (tesseract.js, OCR-B eğitimi) - kimlik görüntüsü sunucuya ve diske gitmez (KVKK). Alan ayrıştırma + kontrol hanesi + TC algoritması <b>sunucuda</b> (<code>POST /api/kimlik/mrz-coz</code>, yalnız 2-3 satır metin) - istemci kuralı bilmez.</td></tr>
+      <tr><td>Giriş yolları</td><td>Kamera (banko) · tarayıcı / dosya · MRZ okuyucu cihaz (klavye gibi metin verir) · metin yapıştır. Hepsi aynı çözücüye düşer.</td></tr>
+      <tr><td>Kontrol haneleri</td><td>ICAO 7-3-1 ağırlıklı mod 10; TD-1'de belge no, doğum, SKT ve bileşik; TD-3'te pasaport no, doğum, SKT, isteğe bağlı alan ve bileşik. Tutmayan alan kırmızı, karta aktarılmaz; "yeniden okut".</td></tr>
+      <tr><td>Hasta eşleşmesi</td><td>TC no (TD-1 satır 2 konum 19-29) ile; pasaportta pasaport no + uyruk. Varsa farklar tablosu (sarı) - kullanıcı "MRZ al" / "kayıtlıyı koru" seçer; yoksa yeni hasta kartı dolu açılır (kaydetmeden önce onay).</td></tr>
+      <tr><td>Ad / soyad harfleri</td><td>MRZ ASCII büyük harf. TR uyruklu: MERNİS doğrulaması gerçek yazımı getirir (mevcut "MERNİS'ten getir" akışı). Yabancı: MRZ yazımı kalır, kullanıcı düzeltir. Türkçe'ye geri çevirme <b>tahmin edilmez</b> (SULE Şule mi Sule mi bilinemez).</td></tr>
+      <tr><td>Hasta kartına eklenen alanlar</td><td><code>kimlik_turu</code> (var), <b>belge seri no</b>, <b>belge geçerlilik</b>, <b>uyruk</b> (var), kaynak damgası (ISLEMLOG bilgi: "mrz", cihaz, OCR güveni). Görüntü saklanmaz; ham MRZ saklanmaz.</td></tr>
+      <tr><td>Süresi dolmuş belge</td><td>Engellemez (acil hasta), kimlik alanına uyarı rozeti; kurum isterse ayarla "engelle".</td></tr>
+      <tr><td>Yetki</td><td>Hasta kartı Ekle / Değiştir yetkisi yeter; ayrı yetki yok. Okutma logu hasta kartı değişiklik logudur.</td></tr>
+      <tr><td>Ayar (Kayıt Kabul Ayarları)</td><td>"Kimlik okutma: kapalı · kamera · tarayıcı · ikisi" · "Süresi dolmuş belge: uyar / engelle" · OCR eşik güveni (varsayılan %90, altı "yeniden okut").</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="aciklama">
+  <b>MRZ nedir:</b> kimlik kartı arka yüzündeki / pasaport alt kenarındaki, makinece okunmak için OCR-B yazı tipiyle basılmış <code>&lt;</code> dolgulu 2-3 satır. TD-1 (kimlik kartı):
+  satır 1 belge tipi + ülke + belge no + kontrol; satır 2 doğum (YYAAGG) + kontrol, cinsiyet, SKT + kontrol, uyruk, <b>TC kimlik no</b> (isteğe bağlı alan), bileşik kontrol; satır 3 SOYAD&lt;&lt;AD.<br>
+  <b>Uygulama adımları (sonra):</b> 1254 göçü (hasta kartına belge no / geçerlilik, ayarlar), <code>MrzCozucu</code> (Cekirdek, saf - xUnit ile ICAO örnekleri), <code>/api/kimlik/mrz-coz</code>, web <code>KimlikOkutPenceresi</code> (tesseract.js OCR-B + kamera / dosya / yapıştır), hasta kartı ve başvuru arama kutusuna düğme, Kayıt Kabul Ayarları satırları.
+</div>
+</body>
+</html>

@@ -553,9 +553,17 @@ GET  /api/uretim/fis/{id}/izlenebilirlik     // girdiler / fireler / ciktilar (l
 
 POST /api/uretim/emri/{id}/uret              // { adet, tarih?, fireStokId?, fireAdet?, eksiyeIzin } - emirden fiş keser (basit "Üret…")
 GET  /api/uretim/emri/{id}/on-kontrol        // 7 kontrol: sonuc 1 uygun · 0 uygunsuz · -1 takip edilmiyor
-POST /api/uretim/emri/{id}/serbest-birak     // { gerekce?, parola? } durum 2 -> 3; denetimlide ön kontrol + parola zorunlu
+POST /api/uretim/emri/{id}/serbest-birak     // { gerekce?, parola? } durum 2 -> 3; denetimlide ön kontrol + parola zorunlu; on_kontrol özeti emre yazılır (1254)
 GET  /api/uretim/emri/{id}/fisler
+GET  /api/uretim/emri/ozet                   // liste üst paneli (1254): acik, taslak, onayli, serbest, uretimde, plan, uretilen, geciken(+No/Gun), malzemeEksik, malzemeHazirlik, karantinaParti/Adet
+GET  /api/uretim/fis/ozet?bas=&bit=          // liste üst paneli (1254): dönem (varsayılan bu ay) fis, uretilen, mamul, yanUrun, malzeme, iscilik, toplam, tersKayit, reddedilen; taslak + karantina dönemsiz
 ```
+
+**Listeler seviyeye göre (1254, `uretim_emri_listesi_v2.html` / `uretim_fisi_listesi.html`):** katalog bütün kolonları
+döner (`uretim-emri`: kaliteOnayli, karantinaAdet, onKontrol, sonFisNo; `uretim-fisi`: planMiktar, emirNo, partiNo,
+kalite "uygun / toplam" | "ret", emirId / sarfBelgeId / girisBelgeId); web `uretimListeSeviye.ts` seviyeye göre kolon,
+cip ve araç düğmesi gizler (yetki değil, görünüm). Fiş liste aksiyonları: `uretim-fisi.sil` (taslak siler, gerçekleşmişte
+ters kayıt), `.ters-kayit` (gerekçeli), `.gerceklestir`, `.serbest` (e-imza), `.sarf-ac` / `.giris-ac` / `.emir-ac`.
 
 Emir durum **3 = serbest bırakıldı** (429'da "planlandı", kullanılmıyordu); `baslat` 2 ya da 3'ten, denetimli seviyede
 yalnız 3'ten. Maliyet kapanışı emre bağlı fişlerin sarf / fire belgelerini ve gider satırlarını da toplar.

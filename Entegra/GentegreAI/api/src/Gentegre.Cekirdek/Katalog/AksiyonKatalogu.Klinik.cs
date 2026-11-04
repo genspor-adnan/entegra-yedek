@@ -774,8 +774,34 @@ public static partial class AksiyonKatalogu
         s["is-merkezi-liste"] = Crud("is-merkezi", "is-merkezi", "uretim.is_merkezi",
                                     "＋ Yeni", silHedef: null, yazdir: false);
 
-        // ÜRETİM FİŞLERİ (1253): kart ÖZEL (UretimFisiKarti) - Sil kartın içinde (taslak silinir, gerçekleşmiş fişte ters kayıt);
-        //   listedeki genel Sil kataloğa bağlı kart ister, burada yok.
-        s["uretim-fisi-liste"] = Crud("uretim-fisi", "uretim-fisi", "uretim.fis", ekleAdi: "＋ Yeni Üretim Fişi", sil: false);
+        // ÜRETİM FİŞLERİ (1253 / 1254, uretim_fisi_listesi.html): kart ÖZEL (UretimFisiKarti); liste aksiyonları fişin kendi
+        //   uçlarına gider (uretimAksiyonlari.ts), genel CRUD silmesi yok. Hangisinin hangi seviyede görüneceğini web
+        //   seviyeden seçer (basit / standart: Sil = taslağı siler, gerçekleşmişte ters kayıt; denetimli: gerekçeli Ters Kayıt
+        //   ve e-imzalı Serbest Bırak). Yapılamayacak adım gizlenmez - sunucu sebebini söyler.
+        s["uretim-fisi-liste"] =
+        [
+            .. Crud("uretim-fisi", "uretim-fisi", "uretim.fis", ekleAdi: "＋ Yeni Üretim Fişi", sil: false),
+            new("uretim-fisi.sil", "🗑 Sil", "uretim-fisi",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Sil, KayitGerekir: true, Sira: 30),
+            new("uretim-fisi.ters-kayit", "↺ Ters Kayıt…", "uretim-fisi",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Sil, KayitGerekir: true, Sira: 31),
+            new("uretim-fisi.gerceklestir", "✔ Gerçekleştir", "uretim-fisi",
+                Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+            new("uretim-fisi.serbest", "🏁 Serbest Bırak…", "uretim-fisi",
+                Hedef: "araccubugu,sagtus,palet",
+                AksiyonYetkisi: "uretim.fis.serbest", KayitGerekir: true, Sira: 42),
+            new("uretim-fisi.sarf-ac", "🧾 Sarf Fişini Aç", "uretim-fisi",
+                Hedef: "sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 60),
+            new("uretim-fisi.giris-ac", "📦 Üretim Girişini Aç", "uretim-fisi",
+                Hedef: "sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 61),
+            new("uretim-fisi.emir-ac", "🏭 Üretim Emrini Aç", "uretim-fisi",
+                Hedef: "sagtus,palet",
+                KaynakKodu: "uretim.fis", Islem: Islem.Gor, KayitGerekir: true, Sira: 62),
+        ];
     }
 }

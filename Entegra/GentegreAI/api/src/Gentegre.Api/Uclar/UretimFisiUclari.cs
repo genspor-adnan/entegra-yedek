@@ -552,6 +552,7 @@ public static partial class UretimFisiUclari
             return Results.Ok(new { girdiler, fireler, ciktilar, ileri, personel, izlemeNo = baglam.IzlemeNo });
         });
 
+        OzetUclari(grup);
         EmirUclari(grup);
     }
 

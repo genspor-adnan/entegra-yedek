@@ -1,4 +1,5 @@
 import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { EMIR_VARSAYILAN_CIPLER, FIS_VARSAYILAN_CIPLER } from './uretim/uretimListeSeviye';
 
 /**
  * Stok, hizmet ve üretim listeleri.
@@ -322,13 +323,9 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/uretim-emri', kartBaslik: 'Üretim Emri',
     aksiyonEkrani: 'uretim-emri-liste',
     tarihAlani: 'termin',
-    cipler: [
-      { ad: 'Taslak',      filtre: { alan: 'durum',   op: 'esit', deger: 1 } },
-      { ad: 'Onaylı',      filtre: { alan: 'durum',   op: 'esit', deger: 2 } },
-      { ad: 'Üretimde',    filtre: { alan: 'durum',   op: 'esit', deger: 4 } },
-      { ad: 'Geciken',     filtre: { alan: 'gecikti', op: 'esit', deger: 1 } },
-      { ad: 'Tümü' },
-    ],
+    // SEVİYEYE GÖRE (1254, uretim_emri_listesi_v2.html): cipler / kolonlar / araç düğmeleri uretimListeSeviye.ts'ten;
+    //   buradaki standart küme seviye yüklenene kadar çizilir. Üst panel (özet kutuları) listeEkranlari PANELLER'de.
+    cipler: EMIR_VARSAYILAN_CIPLER,
     toplam: ['adet', 'uretilenAdet', 'gercekToplam'],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAd: 'Üretim Emiri Listesi', menuSira: 10,
@@ -343,13 +340,9 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/uretim-fisi', kartBaslik: 'Üretim Fişi', ozelKart: true,
     aksiyonEkrani: 'uretim-fisi-liste',
     tarihAlani: 'bas',
-    // İlk cip TÜMÜ: kaydedilen fiş hemen listede görünsün (taslak ayrı cip).
-    cipler: [
-      { ad: 'Tümü' },
-      { ad: 'Taslak',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'İşlenen',   filtre: { alan: 'durum', op: 'arasinda', deger: [2, 3] } },
-      { ad: 'Karantina', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-    ],
+    // İlk cip TÜMÜ: kaydedilen fiş hemen listede görünsün (taslak ayrı cip). Seviyeye göre küme (denetimlide
+    //   Kalite bekleyen / Serbest / Reddedilen) uretimListeSeviye.ts'ten (1254).
+    cipler: FIS_VARSAYILAN_CIPLER,
     toplam: ['miktar', 'toplam'],
     modul: 'uretim',
     menuGrup: 'Üretim', menuAd: 'Üretim Fişi Listesi', menuSira: 15,

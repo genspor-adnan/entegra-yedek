@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim Emirleri — Seviyeye Göre Liste — Mockup (Gentegre AI · Üretim)</title>
+<!--
+  Kullanıcı 04.11.2026: "seviye duyarlı mockup yap" (fiş listesinden sonra emir listesi). v1 = uretim_emri_listesi.html
+  (standart), basit iş listesi uretim_basit.html ②, denetimli emir kartı uretim_emri_v2.html. Bu dosya üçünü TEK listede
+  birleştirir: üstteki seçici seviyeyi değiştirir, kolon / cip / araç çubuğu / özet ona göre açılır-kapanır.
+  Veri yapısı tek (uretim_emri); seviye yalnız görüneni değiştirir. Durum 3 = serbest bırakıldı (1253).
+-->
+<style>
+  :root{ --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --mor:#6a3fb5; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;position:relative}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.mor{border-color:#6a3fb5;background:linear-gradient(#8a63cc,#6a3fb5);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px} .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .chip.sari{border-color:#f2ddbf;color:#8a6218;background:#fdf6e3} .chip.kir{border-color:#f3c4bf;color:#b3261e;background:#fbe9e7}
+  .chk{display:inline-flex;gap:5px;align-items:center;color:var(--ink);font-size:11.5px}
+  .chk i{width:13px;height:13px;border:1px solid #8ea3ba;border-radius:2px;display:inline-block;background:#fff}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)} .dg tr.bitti td{color:var(--muted)}
+  .dg tr.top td{background:#fbfcfe;font-weight:bold;border-top:1px solid var(--line)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .bar{display:inline-block;width:100px;height:8px;border-radius:4px;background:#e6edf5;vertical-align:middle;margin-right:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--ok)} .bar.s i{background:#c69214} .bar.m i{background:#9aa7b4}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb} .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5} .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf} .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .bag{color:var(--accent);text-decoration:underline dotted}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px 10px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .oz{border:1px solid var(--line2);border-radius:5px;padding:5px 10px;background:#fff}
+  .oz .e{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px} .oz .v{font-size:13px;font-weight:700} .oz .a{font-size:10.5px;color:var(--muted)}
+  .oz.uy{background:#fdf6e8;border-color:#f0dfb8} .oz.mor{background:#f5f0fc;border-color:#ddd0f2} .oz.kir{background:#fbe9e7;border-color:#f3c4bf}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65} .not b{color:var(--ink)} .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .norm{max-width:1400px;margin:0 auto 10px;background:#fff;border:1px solid #cfe0f4;border-left:4px solid var(--accent);border-radius:4px;padding:8px 12px;line-height:1.9}
+  .seviye{display:inline-flex;align-items:center;margin-left:8px}
+  .seviye button{border:1px solid var(--accent);background:#fff;color:var(--accent);font:inherit;font-weight:700;padding:3px 10px;cursor:pointer}
+  .seviye button+button{border-left:0} .seviye button:first-of-type{border-radius:4px 0 0 4px} .seviye button:last-of-type{border-radius:0 4px 4px 0}
+  .seviye button.on{background:var(--accent);color:#fff}
+  body[data-seviye="basit"] .y-standart:not(.y-basit),body[data-seviye="basit"] .y-denetimli:not(.y-basit){display:none!important}
+  body[data-seviye="standart"] .y-basit:not(.y-standart),body[data-seviye="standart"] .y-denetimli:not(.y-standart){display:none!important}
+  body[data-seviye="denetimli"] .y-basit:not(.y-denetimli),body[data-seviye="denetimli"] .y-standart:not(.y-denetimli){display:none!important}
+  .g-basit,.g-standart,.g-denetimli{display:none}
+  body[data-seviye="basit"] .g-basit,body[data-seviye="standart"] .g-standart,body[data-seviye="denetimli"] .g-denetimli{display:inline}
+  .sagtus{position:absolute;right:40px;top:290px;width:250px;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(20,40,70,.18);font-size:11.5px}
+  .sagtus div{padding:5px 12px} .sagtus div.ayr{border-top:1px solid var(--line2);padding:0;margin:3px 0}
+  .uretmodal{position:absolute;right:300px;top:260px;width:420px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.18)}
+  .uretmodal .mb{padding:8px 12px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--line2);background:var(--head)}
+  .uretmodal .mi{padding:10px 12px;display:grid;gap:7px}
+  .uretmodal .al{display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;gap:8px}
+  .uretmodal .al .et{font-size:11px;color:var(--muted);text-align:right}
+  .uretmodal .inp{border:1px solid var(--line);border-radius:2px;height:23px;padding:0 6px;display:flex;align-items:center;background:#fff}
+  .uretmodal .ma{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;border-top:1px solid var(--line2)}
+  .uyari{margin:6px 0 0;padding:6px 10px;border:1px solid #f2c9c9;background:#fdf0f0;color:var(--kirmizi);border-radius:4px;font-size:11.5px}
+</style>
+</head>
+<body data-seviye="standart">
+
+<div class="norm">
+  <b>Üretim Emirleri — seviyeye göre liste.</b> Basit: iş listesi (ne · kaç adet · ne zamana · malzeme · üretilen · <b>Üret…</b>), onay / rezerv / maliyet yok.
+  Standart: v1 listesi (tür, ağaç, kaynak, aktif operasyon, malzeme hazırlık, maliyet; Onayla → Başlat → Mamul Girişi → Kapat).
+  Denetimli: + Serbest bırakma adımı (ön kontrol sayacı), karantina / kalite onaylı adet, OEE, e-imzalı aksiyonlar.
+  <span class="seviye"><span class="sonuk" style="margin-right:6px">Önizleme:</span>
+    <button type="button" data-s="basit">Basit</button><button type="button" data-s="standart" class="on">Standart</button><button type="button" data-s="denetimli">Denetimli</button></span>
+</div>
+
+<div class="win">
+  <div class="title">🏭 <span class="g-basit">Üretim Emirleri · iş listesi</span><span class="g-standart">Üretim Emiri Listesi</span><span class="g-denetimli">Üretim Emiri Listesi</span>
+    <span class="sp">Üretim › Üretim Emirleri · <span class="g-basit">Basit seviye</span><span class="g-standart">Standart seviye</span><span class="g-denetimli">Denetimli seviye</span></span></div>
+
+  <div class="toolbar">
+    <span class="btn primary">＋ Yeni Emir</span>
+    <span class="btn y-standart y-denetimli">✎ Düzenle</span>
+    <span class="btn y-standart y-denetimli">⧉ Kopyala</span>
+    <span class="sepv"></span>
+    <span class="btn ok y-standart y-denetimli">✔ Onayla</span>
+    <span class="btn y-denetimli" title="Ön kontroller + e-imza; başlatmanın ön koşulu">🏁 Serbest Bırak…</span>
+    <span class="btn y-standart y-denetimli">▶ Üretime Başlat</span>
+    <span class="btn mor" title="Üretilen adedi sor, üretim fişini kes">▶ Üret…</span>
+    <span class="btn y-standart y-denetimli">📦 Mamul Girişi</span>
+    <span class="btn y-standart y-denetimli">🧮 Maliyet Kapat</span>
+    <span class="btn y-standart y-denetimli">🔒 Kapat</span>
+    <span class="sepv y-standart y-denetimli"></span>
+    <span class="btn y-standart y-denetimli">📊 Planlama</span>
+    <span class="btn">🖨 <span class="g-basit">İş listesi yazdır</span><span class="g-standart">Yazdır ▾</span><span class="g-denetimli">Yazdır ▾</span></span>
+    <span class="sp"></span>
+    <span class="btn">🧾 Üretim Fişleri</span><span class="btn y-standart y-denetimli">🌳 Ürün Ağaçları</span><span class="btn y-standart y-denetimli">📊 Üretim İcmali</span>
+  </div>
+
+  <div class="arama">
+    <span class="kutu">🔍 Emir no, mamul, sipariş, müşteri / not…</span>
+    <span class="chk y-basit"><i></i> Tamamlananları göster</span>
+    <span class="chip on y-standart y-denetimli">Açık</span><span class="chip y-standart y-denetimli">Taslak</span><span class="chip y-standart y-denetimli">Onaylı</span>
+    <span class="chip y-denetimli">Serbest</span><span class="chip y-standart y-denetimli">Üretimde</span><span class="chip y-standart y-denetimli">Tamamlandı</span><span class="chip y-standart y-denetimli">Tümü</span>
+    <span class="chip kir">⚠ Geciken <b>1</b></span>
+    <span class="chip sari y-denetimli">🛑 Karantinada parti <b>2</b></span>
+    <span class="chip sari y-standart y-denetimli">Malzeme eksik <b>1</b></span>
+    <span class="sp"></span>
+    <span class="chip y-standart y-denetimli">📅 Termin: Bu ay ▾</span><span class="chip y-standart y-denetimli">⚙ İş Merkezi ▾</span>
+  </div>
+
+  <div class="ozet y-standart y-denetimli">
+    <div class="oz"><div class="e">Açık emir</div><div class="v">5</div><div class="a">2 üretimde · 1 onaylı · 1 serbest · 1 taslak</div></div>
+    <div class="oz mor"><div class="e">Plan / üretilen</div><div class="v">216 / 95</div><div class="a">%44</div></div>
+    <div class="oz kir"><div class="e">Termini geçen</div><div class="v">1</div><div class="a">UE-2026/000139 · 6 gün</div></div>
+    <div class="oz y-denetimli uy"><div class="e">Karantina</div><div class="v">2 parti · 45 ad.</div><div class="a">kalite onayı bekliyor</div></div>
+    <div class="oz y-standart"><div class="e">Malzeme hazırlık</div><div class="v">%86</div><div class="a">1 emirde eksik</div></div>
+    <div class="oz y-denetimli"><div class="e">OEE (ay)</div><div class="v">%78,8</div><div class="a">hedef %80 · duruş 3,8 saat</div></div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th style="width:26px" class="y-standart y-denetimli"></th>
+        <th><span class="g-basit">Ürün</span><span class="g-standart">Emir No</span><span class="g-denetimli">Emir No</span></th>
+        <th class="orta y-standart y-denetimli">Tür</th>
+        <th class="y-standart y-denetimli">Mamul</th>
+        <th class="sag"><span class="g-basit">Miktar</span><span class="g-standart">Adet</span><span class="g-denetimli">Plan</span></th>
+        <th class="sag y-standart y-denetimli">Üretilen</th>
+        <th style="width:150px"><span class="g-basit">Üretilen</span><span class="g-standart">İlerleme</span><span class="g-denetimli">İlerleme</span></th>
+        <th class="sag y-denetimli">Kalite onaylı</th>
+        <th class="y-standart y-denetimli">Ağaç / Sürüm</th>
+        <th><span class="g-basit">Termin</span><span class="g-standart">Kaynak</span><span class="g-denetimli">Kaynak</span></th>
+        <th class="y-basit">Müşteri / not</th>
+        <th class="orta y-standart y-denetimli">Termin</th>
+        <th class="y-standart y-denetimli">Aktif Operasyon</th>
+        <th class="orta y-denetimli">Ön kontrol</th>
+        <th>Malzeme</th>
+        <th class="sag y-standart y-denetimli">Maliyet</th>
+        <th class="orta y-standart y-denetimli">Durum</th>
+        <th class="y-basit" style="width:110px"></th>
+      </tr></thead>
+      <tbody>
+        <!-- 1 üretimde -->
+        <tr class="sel">
+          <td class="y-standart y-denetimli">▸</td>
+          <td><b><span class="g-basit">SANDALYE KLASİK CEVİZ</span><span class="g-standart">UE-2026/000142</span><span class="g-denetimli">UE-2026/000142</span></b></td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Siparişe</span></td>
+          <td class="y-standart y-denetimli">SND-KLS-CV · SANDALYE KLASİK CEVİZ</td>
+          <td class="sag">60</td><td class="sag y-standart y-denetimli">36</td>
+          <td><span class="bar"><i style="width:60%"></i></span><span class="sonuk y-basit">36 / 60</span><span class="sonuk y-standart y-denetimli">%60</span></td>
+          <td class="sag y-denetimli">24 <span class="rz sari">12 karantina</span></td>
+          <td class="y-standart y-denetimli">BOM-0001 v3 🔒</td>
+          <td><span class="g-basit">06.11.2026</span><span class="g-standart"><span class="bag">SS-2026/000891</span> · Deniz Mobilya</span><span class="g-denetimli"><span class="bag">SS-2026/000891</span> · Deniz Mobilya</span></td>
+          <td class="y-basit">Deniz Mobilya</td>
+          <td class="orta y-standart y-denetimli">06.11.2026</td>
+          <td class="y-standart y-denetimli">40 Döşeme · Atölye</td>
+          <td class="orta y-denetimli"><span class="rz ok">7/7 ✍</span></td>
+          <td><span class="rz ok">Yeterli</span></td>
+          <td class="sag y-standart y-denetimli">61.400</td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Üretimde</span></td>
+          <td class="y-basit"><span class="btn mor" style="display:inline-flex;padding:3px 8px">▶ Üret…</span></td>
+        </tr>
+        <!-- 2 serbest bırakıldı (denetimli) / onaylı -->
+        <tr>
+          <td class="y-standart y-denetimli"></td>
+          <td><span class="g-basit"><b>YEMEK MASASI 160 CEVİZ</b></span><span class="g-standart">UE-2026/000144</span><span class="g-denetimli">UE-2026/000144</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Siparişe</span></td>
+          <td class="y-standart y-denetimli">YM-160-CV · YEMEK MASASI 160 CEVİZ</td>
+          <td class="sag">12</td><td class="sag y-standart y-denetimli">0</td>
+          <td><span class="bar m"><i style="width:0%"></i></span><span class="sonuk y-basit">0 / 12</span><span class="sonuk y-standart y-denetimli">%0</span></td>
+          <td class="sag y-denetimli sonuk">—</td>
+          <td class="y-standart y-denetimli">BOM-0003 v1 🔒</td>
+          <td><span class="g-basit">08.11.2026</span><span class="g-standart"><span class="bag">SS-2026/000902</span> · Ev Dekor</span><span class="g-denetimli"><span class="bag">SS-2026/000902</span> · Ev Dekor</span></td>
+          <td class="y-basit">Ev Dekor Ltd.</td>
+          <td class="orta y-standart y-denetimli">08.11.2026</td>
+          <td class="y-standart y-denetimli sonuk">—</td>
+          <td class="orta y-denetimli"><span class="rz ok">7/7 ✍</span></td>
+          <td><span class="rz ok">Yeterli</span></td>
+          <td class="sag y-standart y-denetimli sonuk">plan 58.300</td>
+          <td class="orta y-standart y-denetimli"><span class="rz sari y-standart">Onaylı</span><span class="rz mor y-denetimli">Serbest</span></td>
+          <td class="y-basit"><span class="btn mor" style="display:inline-flex;padding:3px 8px">▶ Üret…</span></td>
+        </tr>
+        <!-- 3 onaylı, ön kontrol eksik, malzeme eksik -->
+        <tr>
+          <td class="y-standart y-denetimli"></td>
+          <td><span class="g-basit"><b>TABURE MEŞE</b></span><span class="g-standart">UE-2026/000146</span><span class="g-denetimli">UE-2026/000146</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz">Stoğa</span></td>
+          <td class="y-standart y-denetimli">TB-MS · TABURE MEŞE</td>
+          <td class="sag">30</td><td class="sag y-standart y-denetimli">0</td>
+          <td><span class="bar m"><i style="width:0%"></i></span><span class="sonuk y-basit">0 / 30</span><span class="sonuk y-standart y-denetimli">%0</span></td>
+          <td class="sag y-denetimli sonuk">—</td>
+          <td class="y-standart y-denetimli">BOM-0004 v1</td>
+          <td><span class="g-basit">12.11.2026</span><span class="g-standart">Min. stok</span><span class="g-denetimli">Min. stok</span></td>
+          <td class="y-basit sonuk">stok için</td>
+          <td class="orta y-standart y-denetimli">12.11.2026</td>
+          <td class="y-standart y-denetimli sonuk">—</td>
+          <td class="orta y-denetimli"><span class="rz kir">5/7</span></td>
+          <td><span class="rz sari">1 kalem eksik</span></td>
+          <td class="sag y-standart y-denetimli sonuk">plan 12.400</td>
+          <td class="orta y-standart y-denetimli"><span class="rz sari">Onaylı</span></td>
+          <td class="y-basit"><span class="btn mor" style="display:inline-flex;padding:3px 8px">▶ Üret…</span></td>
+        </tr>
+        <!-- 4 geciken fason -->
+        <tr>
+          <td class="y-standart y-denetimli"></td>
+          <td><span class="g-basit"><b>SANDALYE KLASİK CEVİZ</b> <span class="rz mor">fason</span></span><span class="g-standart">UE-2026/000139</span><span class="g-denetimli">UE-2026/000139</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz mor">Fason</span></td>
+          <td class="y-standart y-denetimli">SND-KLS-CV · SANDALYE KLASİK CEVİZ</td>
+          <td class="sag">30</td><td class="sag y-standart y-denetimli">18</td>
+          <td><span class="bar s"><i style="width:60%"></i></span><span class="sonuk y-basit">18 / 30</span><span class="sonuk y-standart y-denetimli">%60</span></td>
+          <td class="sag y-denetimli">18</td>
+          <td class="y-standart y-denetimli">BOM-0006 v1 🔒</td>
+          <td><span class="g-basit"><span class="rz kir">29.10.2026</span></span><span class="g-standart"><span class="bag">SS-2026/000877</span> · Deniz Mobilya</span><span class="g-denetimli"><span class="bag">SS-2026/000877</span> · Deniz Mobilya</span></td>
+          <td class="y-basit">Deniz Mobilya</td>
+          <td class="orta y-standart y-denetimli"><span class="rz kir">29.10.2026</span></td>
+          <td class="y-standart y-denetimli">30 Kaplama · Fason Öztürk <span class="rz sari">12 dışarıda</span></td>
+          <td class="orta y-denetimli"><span class="rz ok">7/7 ✍</span></td>
+          <td><span class="rz ok">Yeterli</span></td>
+          <td class="sag y-standart y-denetimli">33.100 <span class="rz sari">fason</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz kir">Gecikti</span></td>
+          <td class="y-basit"><span class="btn mor" style="display:inline-flex;padding:3px 8px">▶ Üret…</span></td>
+        </tr>
+        <!-- 5 taslak -->
+        <tr>
+          <td class="y-standart y-denetimli"></td>
+          <td><span class="g-basit"><b>YEMEK GRUBU MEŞE / CEVİZ</b></span><span class="g-standart">UE-2026/000147</span><span class="g-denetimli">UE-2026/000147</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz mavi">Siparişe</span></td>
+          <td class="y-standart y-denetimli">SET-3001 · YEMEK GRUBU MEŞE / CEVİZ</td>
+          <td class="sag">4</td><td class="sag y-standart y-denetimli">0</td>
+          <td><span class="bar m"><i style="width:0%"></i></span><span class="sonuk y-basit">0 / 4</span><span class="sonuk y-standart y-denetimli">%0</span></td>
+          <td class="sag y-denetimli sonuk">—</td>
+          <td class="y-standart y-denetimli">BOM-0004 v1</td>
+          <td><span class="g-basit">20.11.2026</span><span class="g-standart"><span class="bag">SS-2026/000910</span> · Yıldız Otel</span><span class="g-denetimli"><span class="bag">SS-2026/000910</span> · Yıldız Otel</span></td>
+          <td class="y-basit">Yıldız Otel</td>
+          <td class="orta y-standart y-denetimli">20.11.2026</td>
+          <td class="y-standart y-denetimli sonuk">—</td>
+          <td class="orta y-denetimli"><span class="rz pas">—</span></td>
+          <td><span class="rz kir">%0 · rezerve yok</span></td>
+          <td class="sag y-standart y-denetimli sonuk">—</td>
+          <td class="orta y-standart y-denetimli"><span class="rz pas">Taslak</span></td>
+          <td class="y-basit"><span class="btn mor" style="display:inline-flex;padding:3px 8px">▶ Üret…</span></td>
+        </tr>
+        <!-- 6 tamamlandı -->
+        <tr class="bitti">
+          <td class="y-standart y-denetimli"></td>
+          <td><span class="g-basit">SANDALYE İSKELETİ CEVİZ</span><span class="g-standart">UE-2026/000143</span><span class="g-denetimli">UE-2026/000143</span></td>
+          <td class="orta y-standart y-denetimli"><span class="rz">Alt emir</span></td>
+          <td class="y-standart y-denetimli">YM-2001 · SANDALYE İSKELETİ CEVİZ</td>
+          <td class="sag">80</td><td class="sag y-standart y-denetimli">80</td>
+          <td><span class="bar"><i style="width:100%"></i></span><span class="sonuk y-basit">80 / 80</span><span class="sonuk y-standart y-denetimli">%100</span></td>
+          <td class="sag y-denetimli">80</td>
+          <td class="y-standart y-denetimli">BOM-0002 v1 🔒</td>
+          <td><span class="g-basit">30.10.2026</span><span class="g-standart"><span class="bag">UE-2026/000142</span> (ana emir)</span><span class="g-denetimli"><span class="bag">UE-2026/000142</span> (ana emir)</span></td>
+          <td class="y-basit sonuk">ana emir için</td>
+          <td class="orta y-standart y-denetimli">30.10.2026</td>
+          <td class="y-standart y-denetimli sonuk">—</td>
+          <td class="orta y-denetimli"><span class="rz ok">7/7 ✍</span></td>
+          <td class="sonuk">—</td>
+          <td class="sag y-standart y-denetimli">66.900</td>
+          <td class="orta y-standart y-denetimli"><span class="rz ok">Tamamlandı</span></td>
+          <td class="y-basit"><span class="rz ok">Tamamlandı</span></td>
+        </tr>
+        <tr class="top y-standart y-denetimli"><td></td><td colspan="3">Toplam (açık emirler)</td><td class="sag">216</td><td class="sag">95</td><td></td><td class="sag y-denetimli">122</td><td colspan="5"></td><td class="y-denetimli"></td><td></td><td class="sag">94.500</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="statusbar">
+    <span class="y-basit">4 açık iş · 1 gecikmiş</span><span class="y-standart y-denetimli">6 emir · 2 üretimde · 1 gecikmiş · 1 seçili</span>
+    <span>Seçili: <b>UE-2026/000142</b> · 36 / 60 <span class="y-denetimli">· 24 serbest, 12 karantina (UF-2026/000148)</span> <span class="y-standart y-denetimli">· son fiş UF-2026/000148 ↗</span></span>
+    <span class="sp"><span class="g-basit">Ürün adına tıkla: emir kartı · Üret…: fiş keser</span><span class="g-standart">Termin sıralı · gecikenler kırmızı · çift tık kart</span><span class="g-denetimli">Termin sıralı · 🔒 ağaç / rota kilitli · ✍ e-imzalı serbest bırakma</span></span>
+  </div>
+
+  <!-- sağ tuş menüsü -->
+  <div class="sagtus y-standart y-denetimli">
+    <div>📂 Kartı Aç</div>
+    <div class="ayr"></div>
+    <div>🔒 Malzeme Rezerve</div><div>⚠ Eksik Malzeme</div>
+    <div>✔ Onayla</div><div class="y-denetimli">🏁 Serbest Bırak… <span class="sonuk">(ön kontrol + imza)</span></div>
+    <div>▶ Üretime Başlat</div><div>▶ Üret… <span class="sonuk">(fiş)</span></div><div>📤 Malzeme Sarf Fişi</div><div>📦 Mamul Girişi</div><div>🔥 Fire / Ret</div>
+    <div class="ayr"></div>
+    <div>↻ Ağaçtan Yenile <span class="sonuk">(taslak / onaylı)</span></div>
+    <div>🧮 Maliyet Kapat</div><div>🔒 Emri Kapat</div><div>✖ İptal Et</div>
+    <div class="ayr"></div>
+    <div>🧾 Üretim Fişleri <span class="sonuk">(emre bağlı)</span></div><div class="y-denetimli">🖨 DHR Raporu</div>
+  </div>
+
+  <!-- basit: Üret… penceresi -->
+  <div class="uretmodal y-basit">
+    <div class="mb">▶ Üret — SANDALYE KLASİK CEVİZ</div>
+    <div class="mi">
+      <div class="al"><span class="et">Kaç adet üretildi?</span><span class="inp" style="font-weight:700;justify-content:flex-end">20</span></div>
+      <div class="al"><span class="et">Tarih</span><span class="inp">04.11.2026</span></div>
+      <div class="al"><span class="et">Fire</span><span class="inp">KONTRPLAK OTURAK · 1 adet</span></div>
+      <div class="sonuk" style="font-size:11px">Malzemeler ürün ağacından Atölye deposundan düşülecek. Kalan 4 adet emirde açık kalır.</div>
+      <div class="uyari">⚠ Ceviz kereste 0,15 m³ eksik — ☐ yine de üret (stok eksiye düşer)</div>
+    </div>
+    <div class="ma"><span class="btn">Vazgeç</span><span class="btn ok">✔ Üret ve fişi oluştur</span></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Basit</b> (uretim_basit.html ②): kolonlar Ürün · Miktar · Termin · Müşteri / not · Malzeme · Üretilen (çubuk + n / N) · ▶ Üret…; "Tamamlananları göster" kutusu; durum kolonu yok (bitenler soluk). Onay / rezerv / başlat / maliyet kapat yok - <b>Üret…</b> fişi keser, emir dolunca kapanır.
+  "Üretim emri kullan" kapalıysa bu ekran menüde görünmez.<br>
+  <b>Standart</b> (uretim_emri_listesi.html v1 ile aynı): Tür · Mamul · Adet · Üretilen · İlerleme · Ağaç / Sürüm · Kaynak · Termin · Aktif Operasyon · Malzeme · Maliyet · Durum; cipler Açık / Taslak / Onaylı / Üretimde / Tamamlandı / Tümü + Geciken + Malzeme eksik;
+  araç çubuğu Onayla → Üretime Başlat → Mamul Girişi / Üret… → Maliyet Kapat → Kapat; özet kutuları (açık emir, plan / üretilen, termini geçen, malzeme hazırlık).<br>
+  <b>Denetimli</b> (uretim_emri_v2.html): + <b>Serbest</b> durumu (Onaylı → Serbest bırakıldı → Üretimde), <b>Ön kontrol</b> kolonu (geçen / 7, ✍ imzalı), <b>Kalite onaylı</b> kolonu (serbest adet + karantinadaki parti rozeti), "Karantinada parti" cipi,
+  OEE özet kutusu, ağaç / rota kilidi 🔒, Serbest Bırak… düğmesi (e-imza); Yazdır ▾ içinde DHR raporu. Takip edilmeyen ön kontroller (kalibrasyon, personel yetkinliği, ortam) sayaca girmez, kartta "takip edilmiyor" yazar.<br>
+  <b>Ortak:</b> termin sıralı, gecikenler kırmızı, durum çubuğunda seçili emrin özeti ve son fiş bağı; Üretim Fişleri düğmesi listeye emre bağlı süzgeçle gider. Veri yapısı tek; seviye yalnız görüneni değiştirir.
+</div>
+<script>
+document.querySelectorAll('.seviye button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.body.dataset.seviye = b.dataset.s;
+    document.querySelectorAll('.seviye button').forEach(function (x) { x.classList.toggle('on', x === b) });
+  });
+});
+</script>
+</body>
+</html>

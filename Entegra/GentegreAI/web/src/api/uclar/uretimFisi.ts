@@ -93,7 +93,22 @@ export interface FisIstegi {
 
 export interface OnKontrol { kod: string; ad: string; kural: string; sonuc: number }
 
+/** Emir listesi özet şeridi (1254, GET /api/uretim/emri/ozet) - kurum geneli, şubeye süzülü. */
+export interface EmirOzeti {
+  acik: number; taslak: number; onayli: number; serbest: number; uretimde: number;
+  plan: number; uretilen: number; geciken: number; gecikenNo: string | null; gecikenGun: number | null;
+  malzemeEksik: number; malzemeHazirlik: number; karantinaParti: number; karantinaAdet: number;
+}
+
+/** Fiş listesi özet şeridi (1254, GET /api/uretim/fis/ozet) - dönem bu ay; karantina / taslak dönemden bağımsız. */
+export interface FisOzeti {
+  fis: number; taslak: number; tersKayit: number; uretilen: number; mamul: number; yanUrun: number;
+  malzeme: number; iscilik: number; toplam: number; karantinaParti: number; karantinaAdet: number; reddedilen: number;
+}
+
 export const uretimFisiUclari = {
+  uretimEmirOzet: () => istek<{ ozet: EmirOzeti }>('/api/uretim/emri/ozet').then(y => y.ozet),
+  uretimFisOzet: () => istek<{ ozet: FisOzeti; bas: string; bit: string }>('/api/uretim/fis/ozet'),
   uretimSeviye: () => istek<UretimSeviyeYaniti>('/api/uretim/seviye'),
   uretimSeviyeYaz: (seviye: UretimSeviyesi, emirKullan: boolean) =>
     gonder<UretimSeviyeYaniti>('/api/uretim/seviye', { seviye, emirKullan }, 'PUT'),

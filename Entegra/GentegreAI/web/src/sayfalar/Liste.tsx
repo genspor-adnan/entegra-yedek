@@ -119,6 +119,7 @@ import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { BELGE_KARTI_KAYNAKLARI, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
+import { useUretimListeUyarlamasi } from './uretim/uretimListeSeviye';
 import { donusumMenusu, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
   from './listeTanimlari';
 
@@ -435,7 +436,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    * bos gorunuyordu. Boyle bir acilista suzgecsiz SON cip ("Tümü") secilir -
    * son cipin filtresi yoksa, yani gercekten hepsini gosteriyorsa.
    */
-  const cipler = tanim.cipler;
+  // ÜRETİM LİSTELERİ SEVİYEYE GÖRE (1254): cip kümesi, gizli kolonlar ve araç düğmeleri üretim seviyesinden
+  //   (basit / standart / denetimli). Üretim dışı listede null - tanım olduğu gibi.
+  const uretimUyarlama = useUretimListeUyarlamasi(tanim.kaynak);
+  const cipler = uretimUyarlama?.cipler ?? tanim.cipler;
   const suzgecsizCip = cipler && cipler.length > 1 && !cipler[cipler.length - 1].filtre
     ? cipler.length - 1 : null;
   // PORTALDA DA SUZGECSIZ CIP (796 V2): cip setleri KURUM ICI kuyruklardir
@@ -568,8 +572,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       liste.push('efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'senaryo', 'efaturaKodu');
     // Basvurudan kesilen faturalarin e-Belge ozeti yalniz basvuru / siparis (19) listesinde.
     if (tanim.kaynak === 'belge' && tanim.yeniBelgeTuru !== 19) liste.push('faturaEBelgeDurum');
+    if (uretimUyarlama) liste.push(...uretimUyarlama.gizliKolonlar);
     return liste;
-  }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur]);
+  }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur, uretimUyarlama]);
 
   const klasorluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (tanim.kaynak !== 'dokuman' || klasorSecim.tur === 'tum') return temel;
@@ -756,6 +761,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await uretimAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
+        gitKart,
       })) return;
 
       if (await sigortaAksiyonu(kod, satir, {
@@ -1146,7 +1152,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       geriYolu={sorgu.get('geri') ?? undefined}
       onGeri={() => git(sorgu.get('geri')!)}
       toplam={tanim.toplam}
-      cipler={tanim.cipler}
+      cipler={cipler}
+      gizliAksiyonlar={uretimUyarlama?.gizliAksiyonlar}
       kodSuzgeci={tanim.kodSuzgeci}
       // Combo ve soldaki bolum agaci AYNI degeri paylasir (492).
       kodSuzgecDeger={tanim.kodSuzgeci ? agacSecim.bolum : undefined}

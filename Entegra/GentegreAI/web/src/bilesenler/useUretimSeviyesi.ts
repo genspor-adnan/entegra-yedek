@@ -17,13 +17,18 @@ function oku(): Promise<UretimSeviyeYaniti> {
 
 export function uretimSeviyesiOnbellegiTemizle() { onbellek = null }
 
-export function useUretimSeviyesi() {
+/**
+ * `etkin=false` istek atmaz (Liste.tsx her listede çağırır; üretim dışı listede /api/uretim/seviye'ye gidilmez) -
+ * değer varsayılan kalır, `yuklendi` false.
+ */
+export function useUretimSeviyesi(etkin = true) {
   const [deger, setDeger] = useState<UretimSeviyeYaniti | null>(null);
   useEffect(() => {
+    if (!etkin) return;
     let iptal = false;
     void oku().then(d => { if (!iptal) setDeger(d) });
     return () => { iptal = true };
-  }, []);
+  }, [etkin]);
   const seviye: UretimSeviyesi = deger?.seviye ?? 'basit';
   return {
     yuklendi: deger !== null,

@@ -8,7 +8,6 @@ import {
 } from '../../api/uclar/uretimFisi';
 import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
 import { IzlemPenceresi } from '../../bilesenler/belge/IzlemPenceresi';
-import { ImzaPenceresi } from '../../bilesenler/ImzaPenceresi';
 import { StokAramaPenceresi } from '../../bilesenler/StokAramaPenceresi';
 import { useSekmedeAc } from '../../bilesenler/KartAdi';
 import { mesaj, metinSor, onay } from '../../bilesenler/mesaj';
@@ -20,7 +19,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
 import type { IzlemSatiri } from '../belgeSatir';
 import { GRUP_AD, VARSAYILAN_KONTROLLER, anGirdi, bosSatir, eksikMi, enCokUretilir, izlemeAd, mk, satirTutar, tl } from './uretimFisiYardimci';
-import { DenetimIziPaneli, IzlenebilirlikPaneli, MaliyetPaneli } from './UretimFisiPanelleri';
+import { DenetimIziPaneli, FisSerbestPenceresi, IzlenebilirlikPaneli, MaliyetPaneli } from './UretimFisiPanelleri';
 import { UF_STILI } from './uretimStil';
 
 /**
@@ -672,20 +671,8 @@ function UretimFisiKarti({ fisId, onKapat, onStokId, onEmirId, onMiktar }: {
           onKapat={() => setIzlemSatiri(null)}
           onKaydet={l => { satirDegis(izlemSatiri, { izlemler: l.map(izlemDen) }); setIzlemSatiri(null) }} />)}
       {serbestAcik && fisId && (
-        <SerbestPenceresi fisId={fisId} kontrolTamam={kontroller.length > 0 && kontroller.every(k => k.sonuc === 1)}
+        <FisSerbestPenceresi fisId={fisId} kontrolTamam={kontroller.length > 0 && kontroller.every(k => k.sonuc === 1)}
           onKapat={() => setSerbestAcik(false)} onBitti={() => { setSerbestAcik(false); tazele(); void yukle() }} />)}
     </div>
-  );
-}
-
-/** KALİTE SERBEST BIRAKMA / RET (e-imza, uretim_fisi_v2.html Kalite › imza kutusu): ortak ImzaPenceresi + sunucu çağrısı. */
-function SerbestPenceresi({ fisId, kontrolTamam, onKapat, onBitti }: { fisId: number; kontrolTamam: boolean; onKapat(): void; onBitti(): void }) {
-  return (
-    <ImzaPenceresi baslik={c('Kalite kararı — e-imza')} onKapat={onKapat}
-      kararlar={[{ deger: 1, ad: `${c('Serbest bırak')}${kontrolTamam ? '' : ` (${c('kontroller tamam değil')})`}`, disabled: !kontrolTamam },
-                 { deger: 2, ad: c('Reddet / uygunsuzluk'), tehlike: true }]}
-      onaylaMetni={k => (k === 1 ? `✔ ${c('İmzala ve serbest bırak')}` : `⛔ ${c('İmzala ve reddet')}`)}
-      aciklama={c('İmza kaydı: ad, zaman, anlam ("kalite serbest bırakma" / "ret"), gerekçe - değiştirilemez (21 CFR Part 11 §11.50).')}
-      onImzala={async (gerekce, parola, karar) => { const y = await api.uretimFisSerbest(fisId, karar as 1 | 2, gerekce, parola); mesaj(y.mesaj); onBitti() }} />
   );
 }

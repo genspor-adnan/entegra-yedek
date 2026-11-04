@@ -199,6 +199,10 @@ interface Props {
       Ayni kaynak farkli ekranlarda kullaniliyor: Satis Faturalari'nda tur/turAdi
       gereksiz (hepsi ayni tur), Siparisler'de gerekli. */
   gizliKolonlar?: string[];
+  /** Bu EKRANDA cizilmeyecek aksiyon kodlari (1254): aksiyon katalogda var ve yetki de var, ama ekranin
+      KIPI onu anlamsiz kiliyor (uretim seviyesi basit/standartta e-imzali "Serbest Birak"). Yetki kurali
+      DEGIL - yetkisiz aksiyon zaten sunucudan gelmez; bu yalniz gorunum. */
+  gizliAksiyonlar?: string[];
   /** Ekrana ozel kolon basligi (bkz. useKolonTercihi). */
   kolonBasliklari?: Record<string, string>;
   /** Ekrana ozel kolon genisligi, px (bkz. useKolonTercihi). */
@@ -276,7 +280,7 @@ const COKLU_AKSIYONLAR = new Set(['gelen.kabul', 'gelen.red', 'gelen.aktar']);
 export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
-                          gizliKolonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi, altSecenekler,
+                          gizliKolonlar, gizliAksiyonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi, altSecenekler,
                           tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan, tarihComboAralik,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
@@ -487,9 +491,12 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   //   secimde ustteki butonlar aktarma kabul ret calisabilmeli"): tek kayit yokken
   //   sunucu bunlari "Once bir kayit secin" diye pasif doner; isi coklu isleyici
   //   (gelenCokluAksiyonu) yapar, uygun olmayan belgeyi o atlar.
-  const aksiyonlar = useMemo(() => (secili.size > 1
-    ? aksiyonlarHam.map(a => COKLU_AKSIYONLAR.has(a.kod) ? { ...a, aktif: true, pasifSebep: undefined } : a)
-    : aksiyonlarHam), [aksiyonlarHam, secili]);
+  const aksiyonlar = useMemo(() => {
+    const gorunen = gizliAksiyonlar?.length ? aksiyonlarHam.filter(a => !gizliAksiyonlar.includes(a.kod)) : aksiyonlarHam;
+    return secili.size > 1
+      ? gorunen.map(a => COKLU_AKSIYONLAR.has(a.kod) ? { ...a, aktif: true, pasifSebep: undefined } : a)
+      : gorunen;
+  }, [aksiyonlarHam, secili, gizliAksiyonlar]);
 
   const aksiyonCalistir = (kod: string) => {
     // CSV disariya CIKMAZ: veri (satirlar, kolonlar, filtre) burada, disarida degil.

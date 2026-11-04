@@ -136,6 +136,26 @@ public static partial class KaynakKatalogu
             new("malzemeHazir", "public.fn_uretim_malzeme_hazirlik(e.id)",
                                              "sayi",  "Malz. %", Hizalama: "sag",
                                              Genislik: 85, Filtrelenebilir: false),
+            // SEVİYEYE GÖRE KOLONLAR (1254, uretim_emri_listesi_v2.html) - varsayılan görünür, web standartta gizler:
+            //   kalite onaylı = serbest bırakılmış fiş çıktıları (standartta gerçekleşen = serbest); karantina = denetimli
+            //   fişlerde kalite kararı bekleyen adet; ön kontrol özeti serbest bırakma anında emre yazılır (on_kontrol).
+            new("kaliteOnayli",
+                "coalesce((select sum(f.uretilen) from public.uretim_fisi f where f.emir_id = e.id "
+                + "and (f.durum = 3 or (f.durum = 2 and f.seviye <> 'denetimli'))), 0)",
+                                             "sayi",  "Kalite Onaylı", Hizalama: "sag",
+                                             Bicim: "#,##0.##", Genislik: 100, Filtrelenebilir: false),
+            new("karantinaAdet",
+                "coalesce((select sum(f.uretilen) from public.uretim_fisi f where f.emir_id = e.id "
+                + "and f.durum = 2 and f.seviye = 'denetimli'), 0)",
+                                             "sayi",  "Karantina", Hizalama: "sag",
+                                             Bicim: "#,##0.##", Genislik: 90, Filtrelenebilir: false),
+            new("onKontrol", "e.on_kontrol",  "metin", "Ön Kontrol", Hizalama: "orta",
+                                             Bicim: "rozet", Genislik: 95, Filtrelenebilir: false),
+            new("sonFisNo",
+                "coalesce((select f.no from public.uretim_fisi f where f.emir_id = e.id and f.durum > 0 "
+                + "order by f.bas desc, f.id desc limit 1), '')",
+                                             "metin", "Son Fiş", Hizalama: "orta", Genislik: 130,
+                                             Varsayilan: false, Filtrelenebilir: false),
             new("gercekToplam", "e.gercek_toplam", "para", "Maliyet", Hizalama: "sag",
                                              Bicim: "#,##0.00", Genislik: 120),
             new("planToplam",   "e.plan_toplam",   "para", "Plan Maliyet",
@@ -170,6 +190,10 @@ public static partial class KaynakKatalogu
     /// ÜRETİM FİŞLERİ (1253, mockup uretim_fisi.html "Liste: No · Tarih · Mamul · Miktar · Sarf / Giriş Deposu · Birim
     /// Maliyet · Toplam · Sorumlu · Durum"). Durum adı seviyeye göre okunur: 2 basit / standartta "Stoğa işlendi",
     /// denetimlide "Karantina" (fişin kesildiği seviye fişte saklı).
+    ///
+    /// SEVİYEYE GÖRE GÖRÜNÜM (1254, uretim_fisi_listesi.html): plan / giriş deposu / sorumlu / emir kolonları standartta,
+    /// parti ve kalite kolonu denetimlide - hepsi varsayılan görünür gelir, web seviyeye göre gizler
+    /// (uretimListeSeviye.ts). Kalite = fiş kontrol listesinde uygun / toplam; reddedilen fişte "ret".
     /// </summary>
     private static KaynakTanimi UretimFisi() => new(
         Ad: "uretim-fisi",
@@ -191,7 +215,7 @@ public static partial class KaynakKatalogu
             new("bas",      "f.bas",     "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("mamulAd",  "s.kod || ' · ' || s.ad", "metin", "Mamul", Genislik: 260),
             new("miktar",   "f.uretilen", "sayi", "Miktar", Hizalama: "sag", Bicim: "#,##0.##", Genislik: 90),
-            new("planMiktar", "f.miktar", "sayi", "Plan", Hizalama: "sag", Bicim: "#,##0.##", Genislik: 80, Varsayilan: false),
+            new("planMiktar", "f.miktar", "sayi", "Plan", Hizalama: "sag", Bicim: "#,##0.##", Genislik: 80),
             new("sarfDepo", "coalesce(sd.ad, '')", "metin", "Sarf Deposu", Genislik: 130),
             new("girisDepo", "coalesce(gd.ad, '')", "metin", "Giriş Deposu", Genislik: 130),
             new("birimMaliyet", "f.birim_maliyet", "para", "Birim Maliyet", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 120),
@@ -200,8 +224,21 @@ public static partial class KaynakKatalogu
             new("iscilik",  "f.iscilik", "para",  "İşçilik / Gider", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 110, Varsayilan: false),
             new("sorumlu",  "coalesce(public.fn_taraf_ad(so.unvan, so.ad, so.soyad)::varchar(120), '')", "metin", "Sorumlu",
                                          Genislik: 150),
-            new("emirNo",   "coalesce(e.no, '')", "metin", "Üretim Emri", Hizalama: "orta", Genislik: 130, Varsayilan: false),
-            new("partiNo",  "f.parti_no", "metin", "Parti", Hizalama: "orta", Genislik: 110, Varsayilan: false),
+            new("emirNo",   "coalesce(e.no, '')", "metin", "Üretim Emri", Hizalama: "orta", Genislik: 130),
+            // Emre bağlı cipi (emirId > 0) ve sağ tuş "Üretim Emrini / Sarf Fişini / Üretim Girişini Aç" için kimlikler.
+            new("emirId",   "coalesce(f.emir_id, 0)", "kod", "Emir Id", Varsayilan: false),
+            new("sarfBelgeId",  "coalesce(f.sarf_belge_id, 0)",  "kod", "Sarf Belge Id",  Varsayilan: false),
+            new("girisBelgeId", "coalesce(f.giris_belge_id, 0)", "kod", "Giriş Belge Id", Varsayilan: false),
+            new("partiNo",  "f.parti_no", "metin", "Parti", Hizalama: "orta", Genislik: 110),
+            new("kalite",
+                """
+                case when f.durum = 4 then 'ret'
+                     when exists (select 1 from public.uretim_fisi_kontrol k where k.fis_id = f.id)
+                     then (select count(*) filter (where k.sonuc = 1) || ' / ' || count(*)
+                             from public.uretim_fisi_kontrol k where k.fis_id = f.id)
+                     else '' end
+                """,                      "metin", "Kalite", Hizalama: "orta", Bicim: "rozet", Genislik: 80,
+                                         Siralanabilir: false, Filtrelenebilir: false),
             new("durumAdi",
                 """
                 case f.durum when 0 then 'Ters kayıt' when 1 then 'Taslak'

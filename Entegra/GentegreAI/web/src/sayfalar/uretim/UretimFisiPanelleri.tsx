@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { FisBelgesi } from '../../api/uclar/uretimFisi';
 import { useSekmedeAc } from '../../bilesenler/KartAdi';
+import { ImzaPenceresi } from '../../bilesenler/ImzaPenceresi';
+import { mesaj } from '../../bilesenler/mesaj';
 import { tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { mk, tl } from './uretimFisiYardimci';
@@ -75,5 +77,18 @@ export function DenetimIziPaneli({ fisId }: { fisId: number }) {
         <tbody>{(gecmis ?? []).map((g, i) => <tr key={i}><td>{tarihSaat(g.tarih)}</td><td>{g.kullanici}</td><td>{g.islemTipi === 1 ? c('Oluşturdu') : g.islemTipi === 0 ? c('Sildi') : c('Değiştirdi')}</td><td className="sl kucuk uf-bilgi">{g.bilgi}</td></tr>)}
           {gecmis && gecmis.length === 0 && <tr><td colSpan={4} className="sl bos">{c('Kayıt yok.')}</td></tr>}</tbody></table>
     </div>
+  );
+}
+
+/** KALİTE SERBEST BIRAKMA / RET (e-imza, uretim_fisi_v2.html Kalite › imza kutusu): ortak ImzaPenceresi + sunucu çağrısı.
+ *  Kart ve liste üst paneli (UretimGostergeleri) aynı pencereyi kullanır. */
+export function FisSerbestPenceresi({ fisId, kontrolTamam, onKapat, onBitti }: { fisId: number; kontrolTamam: boolean; onKapat(): void; onBitti(): void }) {
+  return (
+    <ImzaPenceresi baslik={c('Kalite kararı — e-imza')} onKapat={onKapat}
+      kararlar={[{ deger: 1, ad: `${c('Serbest bırak')}${kontrolTamam ? '' : ` (${c('kontroller tamam değil')})`}`, disabled: !kontrolTamam },
+                 { deger: 2, ad: c('Reddet / uygunsuzluk'), tehlike: true }]}
+      onaylaMetni={k => (k === 1 ? `✔ ${c('İmzala ve serbest bırak')}` : `⛔ ${c('İmzala ve reddet')}`)}
+      aciklama={c('İmza kaydı: ad, zaman, anlam ("kalite serbest bırakma" / "ret"), gerekçe - değiştirilemez (21 CFR Part 11 §11.50).')}
+      onImzala={async (gerekce, parola, karar) => { const y = await api.uretimFisSerbest(fisId, karar as 1 | 2, gerekce, parola); mesaj(y.mesaj); onBitti() }} />
   );
 }

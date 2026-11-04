@@ -137,8 +137,10 @@ public static partial class UretimFisiUclari
                     throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.", new AlanHatasi("gerekce", "Gerekçe yazılmalı."));
                 await ParolaDogrulaAsync(kullanicilar, baglam.KullaniciId, istek.Parola, iptal);
             }
-            await b.CalistirAsync("update public.uretim_emri set durum = 3, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 2",
-                t, [id, baglam.KullaniciId], iptal);
+            // Liste kolonu (1254): ön kontrol özeti serbest bırakma anında emre yazılır ("7/7 ✍"); satır başına yeniden hesaplanmaz.
+            var ozet = k.Kontroller.Count(x => x.Sonuc == 1) + "/" + k.Kontroller.Count + (seviye == SeviyeDenetimli ? " ✍" : "");
+            await b.CalistirAsync("update public.uretim_emri set durum = 3, on_kontrol = @p2, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 2",
+                t, [id, baglam.KullaniciId, ozet], iptal);
             await log.YazAsync(b, t, LogIslemi.Degistir, LogEmir, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { durum = 3, durumAdi = "Serbest bırakıldı", eImza = seviye == SeviyeDenetimli, anlam = "atölyeye serbest bırakıldı",
                       gerekce = istek?.Gerekce ?? "", onKontrol = k.Kontroller.Count(x => x.Sonuc == 1) + "/" + k.Kontroller.Count }, iptal: iptal);

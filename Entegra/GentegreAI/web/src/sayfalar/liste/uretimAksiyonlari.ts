@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
+import { UE_ISLEM_OLAYI, UF_ISLEM_OLAYI, type UretimIslemOlayi } from '../uretim/uretimListeSeviye';
 
 /**
  * ÜRETİM AKSİYONLARI (429) — ürün ağacı ve üretim emri.
@@ -16,6 +17,8 @@ import type { ListeSatiri } from '../../api/sozlesme';
 export interface UretimBaglam {
   tazele(): void;
   git(yol: string): void;
+  /** Kartı ekran sekmesinde açar (belge / emir bağları); yoksa git. */
+  gitKart?(yol: string): void;
 }
 
 /** "12,5" -> 12.5. Türkçe klavyede ondalık ayırıcı virgüldür. */
@@ -29,10 +32,12 @@ export async function uretimAksiyonu(
   satir: ListeSatiri | null | undefined,
   b: UretimBaglam,
 ): Promise<boolean> {
-  if (!kod.startsWith('uretim.') && !kod.startsWith('urun-agaci.')) return false;
+  if (!kod.startsWith('uretim.') && !kod.startsWith('urun-agaci.') && !kod.startsWith('uretim-fisi.')) return false;
   // Crud() uretim-emri.yeni / .duzenle / .sil uretir - onlar Liste'nin kendi
-  //   kart akisi, burada ele alinmaz.
-  if (kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('.sil')) return false;
+  //   kart akisi, burada ele alinmaz. Fişin Sil'i ise fişin kendi ucuna gider (aşağıda).
+  if (kod.endsWith('.yeni') || kod.endsWith('.duzenle')) return false;
+  if (kod.startsWith('uretim-fisi.')) return uretimFisiAksiyonu(kod, satir, b);
+  if (kod.endsWith('.sil')) return false;
 
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir kayıt seçin.'); return true }
@@ -127,13 +132,12 @@ export async function uretimAksiyonu(
       });
       return true;
 
-    // SERBEST BIRAK (1253): standartta onayla yeter; denetimlide ön kontrol + gerekçe + parola (e-imza) - kartın
-    //   Ön Kontroller sekmesinden imzalanır (parola düz metin kutusuna yazılmaz).
+    // SERBEST BIRAK (1253 / 1254): denetimlide ön kontrol + gerekçe + parola (e-imza) - pencere listenin üst
+    //   panelinde (UretimEmirGostergesi), aksiyon olayla açar; standartta onay yeter.
     case 'uretim.serbest-birak': {
       const sv = await api.uretimSeviye().catch(() => ({ seviye: 'basit', emirKullan: false }));
       if (sv.seviye === 'denetimli') {
-        mesaj('Denetimli seviyede serbest bırakma emir kartı › Ön Kontroller sekmesinden gerekçe ve parolayla imzalanır.');
-        b.git(`/uretim-emri/${id}`);
+        window.dispatchEvent(new CustomEvent<UretimIslemOlayi>(UE_ISLEM_OLAYI, { detail: { id, islem: 'serbest' } }));
         return true;
       }
       if (!await onay('Emir atölyeye serbest bırakılsın mı? (Onaylı → Serbest bırakıldı; sonra Başlat)')) return true;
@@ -243,6 +247,76 @@ export async function uretimAksiyonu(
         mesaj((await api.uretimEmriIptal(id, neden.trim())).mesaj);
         b.tazele();
       });
+      return true;
+    }
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * ÜRETİM FİŞİ LİSTE AKSİYONLARI (1254, uretim_fisi_listesi.html). Hangisinin hangi seviyede çizildiğini
+ * uretimListeSeviye.ts seçer; burada hepsi çalışır. E-imza isteyenler (Serbest Bırak, gerekçeli Ters Kayıt) pencereyi
+ * listenin üst panelinde açar (UretimFisiGostergesi) - aksiyon olay atar.
+ */
+async function uretimFisiAksiyonu(kod: string, satir: ListeSatiri | null | undefined, b: UretimBaglam): Promise<boolean> {
+  const id = Number(satir?.id ?? 0);
+  if (!id) { mesaj('Önce bir fiş seçin.'); return true }
+  const durum = Number(satir?.durum ?? -1);
+  const ac = (yol: string) => (b.gitKart ?? b.git)(yol);
+  const olay = (islem: UretimIslemOlayi['islem']) =>
+    window.dispatchEvent(new CustomEvent<UretimIslemOlayi>(UF_ISLEM_OLAYI, { detail: { id, islem, satir: satir ?? undefined } }));
+
+  switch (kod) {
+    // SİL (basit / standart): taslak silinir; gerçekleşmiş fiş SİLİNMEZ - ters kayıt (belgeler geri alınır, iz kalır).
+    case 'uretim-fisi.sil':
+      if (durum === 1) {
+        if (!await onay('Taslak fiş silinsin mi?')) return true;
+        await guvenli(async () => { await api.uretimFisSil(id); mesaj('Taslak silindi.'); b.tazele() });
+        return true;
+      }
+      if (durum === 0) { mesaj('Bu fiş zaten ters kayıtla kapatılmış.'); return true }
+      if (!await onay('Gerçekleşmiş fiş silinmez; ters kayıt atılır: sarf, fire ve üretim girişi belgeleri geri alınır, '
+                    + 'fiş "Ters kayıt" durumuyla kalır. Devam edilsin mi?')) return true;
+      await guvenli(async () => { mesaj((await api.uretimFisTersKayit(id, 'Listeden silme')).mesaj); b.tazele() });
+      return true;
+
+    // TERS KAYIT (denetimli): gerekçe zorunlu - pencere üst panelde. Taslak için ters kayıt yok, düz silme.
+    case 'uretim-fisi.ters-kayit':
+      if (durum === 1) {
+        if (!await onay('Taslak fiş silinsin mi?')) return true;
+        await guvenli(async () => { await api.uretimFisSil(id); mesaj('Taslak silindi.'); b.tazele() });
+        return true;
+      }
+      olay('ters');
+      return true;
+
+    case 'uretim-fisi.gerceklestir':
+      // Koşul ("yalnız taslak") sunucuda; eksik malzeme 422'si guvenli() ile ekrana düşer.
+      await guvenli(async () => {
+        const y = await api.uretimFisGerceklestir(id);
+        mesaj([y.mesaj, ...y.uyarilar].join('\n'));
+        b.tazele();
+      });
+      return true;
+
+    case 'uretim-fisi.serbest':
+      olay('serbest');
+      return true;
+
+    case 'uretim-fisi.sarf-ac':
+    case 'uretim-fisi.giris-ac': {
+      const belgeId = Number(satir?.[kod === 'uretim-fisi.sarf-ac' ? 'sarfBelgeId' : 'girisBelgeId'] ?? 0);
+      if (!belgeId) { mesaj(durum === 1 ? 'Fiş henüz gerçekleşmedi - belgesi yok.' : 'Bu fişte o belge yok.'); return true }
+      ac(`/belge/${belgeId}`);
+      return true;
+    }
+
+    case 'uretim-fisi.emir-ac': {
+      const emirId = Number(satir?.emirId ?? 0);
+      if (!emirId) { mesaj('Fiş bir üretim emrine bağlı değil (elle kesilmiş).'); return true }
+      ac(`/uretim-emri/${emirId}`);
       return true;
     }
 
