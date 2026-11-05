@@ -14,23 +14,60 @@ public sealed record Degisiklik(char Islem, object[] Anahtar);
 /// "\x.." onaltılık, metindeki 0x00 atılır - PG kabul etmez).
 /// Kimlik listeleri SAYI olarak metne gömülür (parametre sınırı 2100); bileşik / sayı
 /// olmayan anahtar parametreyle gider.
+///
+/// DEPO DB'Sİ (1265): e-Belge tabloları (EBELGE, EBELGEMESAJ) ana DB'de synonym, aslı
+/// &lt;ANA&gt;_GENDEPO'da; CT synonym üzerinden çalışmaz. Bu tablolar ikinci bağlantıyla
+/// okunur (<paramref name="depoBaglanti"/>); CT versiyonu depo DB'sinin kendi sayacıdır.
 /// </summary>
-public sealed class DelphiOkuyucu(string baglanti)
+public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
 {
     private const int InParcasi = 1000;
+    private static readonly HashSet<string> DepoTablolar = new(StringComparer.OrdinalIgnoreCase) { "EBELGE", "EBELGEMESAJ" };
     private readonly Dictionary<string, string[]> _pk = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string>> _kolon = new(StringComparer.OrdinalIgnoreCase);
+    private bool? _depoVar;
+
+    public static bool DepoTablosu(string tablo) => DepoTablolar.Contains(tablo);
+
+    /// <summary>
+    /// Depo DB'si var ve CT açık mı (bir kez denenir, sonuç saklanır; <see cref="DepoyuYenidenDene"/> sıfırlar).
+    /// Yoksa e-Belge grubu atlanır - eski kurulumda GENDEPO hiç olmayabilir.
+    /// </summary>
+    public async Task<bool> DepoVarAsync(CancellationToken iptal)
+    {
+        if (_depoVar is { } v) return v;
+        if (string.IsNullOrWhiteSpace(depoBaglanti)) return (_depoVar = false).Value;
+        try
+        {
+            await using var b = new SqlConnection(depoBaglanti);
+            await b.OpenAsync(iptal);
+            await using var k = Komut(b, "SELECT CHANGE_TRACKING_CURRENT_VERSION()");
+            _depoVar = await k.ExecuteScalarAsync(iptal) is long;
+        }
+        catch (SqlException) { _depoVar = false; }
+        catch (InvalidOperationException) { _depoVar = false; }
+        return _depoVar.Value;
+    }
+
+    public void DepoyuYenidenDene() => _depoVar = null;
 
     /// <summary>
     /// Bağlantı açılışı geçici hatada yeniden denenir (1 sn, 2 sn, 4 sn, 8 sn). Dayanıklılık
     /// testinde (500 bin satırlık tam yükleme) SQL Browser örnek adını bir kez çözemedi
     /// (error 26) ve tur baştan başladı - tam yüklemede bu, dakikalarca işin kaybı demek.
     /// </summary>
-    private async Task<SqlConnection> AcAsync(CancellationToken iptal)
+    private Task<SqlConnection> AcAsync(CancellationToken iptal) => AcAsync(false, iptal);
+
+    /// <summary>Tablonun veritabanına göre bağlantı (depo tablosu -> depo bağlantısı).</summary>
+    private Task<SqlConnection> AcAsync(string tablo, CancellationToken iptal) => AcAsync(DepoTablosu(tablo), iptal);
+
+    private async Task<SqlConnection> AcAsync(bool depo, CancellationToken iptal)
     {
+        if (depo && string.IsNullOrWhiteSpace(depoBaglanti))
+            throw new InvalidOperationException("Depo veritabanı bağlantısı yok (DepoBaglanti).");
         for (var deneme = 1; ; deneme++)
         {
-            var b = new SqlConnection(baglanti);
+            var b = new SqlConnection(depo ? depoBaglanti : baglanti);
             try
             {
                 await b.OpenAsync(iptal);
@@ -52,18 +89,23 @@ public sealed class DelphiOkuyucu(string baglanti)
         return k;
     }
 
-    public async Task<long> GuncelVersiyonAsync(CancellationToken iptal)
+    public Task<long> GuncelVersiyonAsync(CancellationToken iptal) => GuncelVersiyonAsync(false, iptal);
+
+    /// <summary>Ana ya da depo DB'sinin CT versiyonu - iki ayrı sayaç.</summary>
+    public async Task<long> GuncelVersiyonAsync(bool depo, CancellationToken iptal)
     {
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(depo, iptal);
         await using var k = Komut(b, "SELECT CHANGE_TRACKING_CURRENT_VERSION()");
         return await k.ExecuteScalarAsync(iptal) is long v ? v
-             : throw new InvalidOperationException("Veritabanında Change Tracking kapalı (sp_Aktarim_Hazirla @Ac=1).");
+             : throw new InvalidOperationException(depo
+                 ? "Depo veritabanında Change Tracking kapalı (sp_Aktarim_Depo_Hazirla @Ac=1)."
+                 : "Veritabanında Change Tracking kapalı (sp_Aktarim_Hazirla @Ac=1).");
     }
 
     /// <summary>Bu versiyondan eskisinden değişiklik okunamaz (saklama süresi doldu) -> tam eşitleme.</summary>
     public async Task<long> EnAzVersiyonAsync(string tablo, CancellationToken iptal)
     {
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await using var k = Komut(b, "SELECT CHANGE_TRACKING_MIN_VALID_VERSION(OBJECT_ID(@t))", new SqlParameter("@t", "dbo." + tablo));
         return await k.ExecuteScalarAsync(iptal) is long v ? v
              : throw new InvalidOperationException($"{tablo} tablosunda Change Tracking kapalı.");
@@ -72,7 +114,7 @@ public sealed class DelphiOkuyucu(string baglanti)
     public async Task<string[]> AnahtarAsync(string tablo, CancellationToken iptal)
     {
         if (_pk.TryGetValue(tablo, out var v)) return v;
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await using var k = Komut(b, """
             SELECT c.name FROM sys.indexes i
               JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
@@ -90,7 +132,7 @@ public sealed class DelphiOkuyucu(string baglanti)
     public async Task<Dictionary<string, string>> KolonlarAsync(string tablo, IEnumerable<string> istenen, CancellationToken iptal)
     {
         if (_kolon.TryGetValue(tablo, out var v)) return v;
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await using var k = Komut(b, "SELECT name FROM sys.columns WHERE object_id = OBJECT_ID(@t)", new SqlParameter("@t", "dbo." + tablo));
         var var = new Dictionary<string, string>(StringComparer.Ordinal);
         await using (var r = await k.ExecuteReaderAsync(iptal))
@@ -104,7 +146,7 @@ public sealed class DelphiOkuyucu(string baglanti)
     public async Task<List<Degisiklik>> DegisikliklerAsync(string tablo, long versiyon, CancellationToken iptal)
     {
         var pk = await AnahtarAsync(tablo, iptal);
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await using var k = Komut(b,
             $"SELECT CT.SYS_CHANGE_OPERATION, {string.Join(", ", pk.Select(p => "CT.[" + p + "]"))} " +
             $"FROM CHANGETABLE(CHANGES dbo.[{tablo}], @v) CT", new SqlParameter("@v", versiyon));
@@ -170,7 +212,7 @@ public sealed class DelphiOkuyucu(string baglanti)
     /// <summary>Kök tam yükleme: kimlikler (süzgeç + sıra).</summary>
     public async Task<List<long>> KimliklerAsync(string tablo, string? nerede, string? sira, SqlParameter[] p, CancellationToken iptal)
     {
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await using var k = Komut(b, $"SELECT [ID] FROM dbo.[{tablo}]" + (nerede is null ? "" : " WHERE " + nerede) +
                                      " ORDER BY " + (sira ?? "[ID]"), p);
         var l = new List<long>();
@@ -179,11 +221,11 @@ public sealed class DelphiOkuyucu(string baglanti)
         return l;
     }
 
-    /// <summary>Alt satır kimliklerinden kök kimlikleri (Toplamlar.UstSorgu).</summary>
-    public async Task<HashSet<long>> UstlerAsync(string sorgu, IReadOnlyCollection<long> idler, CancellationToken iptal)
+    /// <summary>Alt satır kimliklerinden kök kimlikleri (Toplamlar.UstSorgu); <paramref name="tablo"/> alt tablo (bağlantı seçimi).</summary>
+    public async Task<HashSet<long>> UstlerAsync(string tablo, string sorgu, IReadOnlyCollection<long> idler, CancellationToken iptal)
     {
         var s = new HashSet<long>();
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         foreach (var parca in idler.Chunk(InParcasi))
         {
             await using var k = Komut(b, string.Format(CultureInfo.InvariantCulture, sorgu, Liste(parca)));
@@ -200,7 +242,7 @@ public sealed class DelphiOkuyucu(string baglanti)
     {
         var l = new List<JsonObject>();
         if (idler.Count == 0) return l;
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         foreach (var parca in idler.Chunk(InParcasi))
             await OkuAsync(b, Secim(tablo, kolonlar) + " WHERE " + string.Format(CultureInfo.InvariantCulture, filtre, Liste(parca)),
                            kolonlar, l, [], iptal);
@@ -212,23 +254,28 @@ public sealed class DelphiOkuyucu(string baglanti)
                                                   SqlParameter[] p, CancellationToken iptal)
     {
         var l = new List<JsonObject>();
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(tablo, iptal);
         await OkuAsync(b, Secim(tablo, kolonlar) + (nerede is null ? "" : " WHERE " + nerede), kolonlar, l, p, iptal);
         return l;
     }
 
-    /// <summary>Anahtar değerleriyle satırlar (tek sayısal anahtar -> IN, yoksa VALUES + parametre).</summary>
+    /// <summary>
+    /// Anahtar değerleriyle satırlar (tek sayısal anahtar -> IN, yoksa VALUES + parametre).
+    /// <paramref name="ekFiltre"/>: kesit süzgeci (Grup.Filtre) - dışında kalan satır dönmez.
+    /// </summary>
     public async Task<List<JsonObject>> AnahtarlaAsync(string tablo, Dictionary<string, string> kolonlar,
-                                                       IReadOnlyList<object[]> anahtarlar, CancellationToken iptal)
+                                                       IReadOnlyList<object[]> anahtarlar, CancellationToken iptal,
+                                                       string? ekFiltre = null)
     {
         var pk = await AnahtarAsync(tablo, iptal);
         var l = new List<JsonObject>();
         if (anahtarlar.Count == 0) return l;
-        await using var b = await AcAsync(iptal);
+        var ek = ekFiltre is null ? "" : " AND (" + ekFiltre + ")";
+        await using var b = await AcAsync(tablo, iptal);
         if (pk.Length == 1 && anahtarlar.All(a => Sayisal(a[0])))
         {
             foreach (var parca in anahtarlar.Select(a => Convert.ToInt64(a[0], CultureInfo.InvariantCulture)).Chunk(InParcasi))
-                await OkuAsync(b, Secim(tablo, kolonlar) + $" WHERE t.[{pk[0]}] IN ({Liste(parca)})", kolonlar, l, [], iptal);
+                await OkuAsync(b, Secim(tablo, kolonlar) + $" WHERE t.[{pk[0]}] IN ({Liste(parca)})" + ek, kolonlar, l, [], iptal);
             return l;
         }
         foreach (var parca in anahtarlar.Chunk(Math.Max(1, 2000 / pk.Length)))
@@ -242,7 +289,8 @@ public sealed class DelphiOkuyucu(string baglanti)
             })) + ")");
             var sql = Secim(tablo, kolonlar) +
                       $" JOIN (VALUES {string.Join(", ", satirlar)}) k({string.Join(", ", pk.Select((_, i) => "k" + i))})" +
-                      $" ON {string.Join(" AND ", pk.Select((c, i) => $"t.[{c}] = k.k{i}"))}";
+                      $" ON {string.Join(" AND ", pk.Select((c, i) => $"t.[{c}] = k.k{i}"))}" +
+                      (ekFiltre is null ? "" : " WHERE (" + ekFiltre + ")");
             await OkuAsync(b, sql, kolonlar, l, [.. p], iptal);
         }
         return l;

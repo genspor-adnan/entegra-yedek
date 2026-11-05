@@ -183,6 +183,9 @@ export interface ListeTanimi {
       (Fiyat Listeleri HBYS'de Kurumlar & Sigorta, ERP'de Satış). Alt grup ERP'de
       düşer - hedef grubun kendi kırılımı yok. */
   erpMenuGrup?: string;
+  /** ERP grubunda ALT KIRILIM (1270, Fatura Ayarları: HBYS'de Kurumlar & Sigorta › Ayarlar, ERP'de Satış › Ayarlar).
+      Verilmezse ERP'de alt grup düşer (eski davranış). */
+  erpMenuAltGrup?: string;
   /** ERP grubundaki sıra (erpMenuGrup ile): ekran ERP'de başka gruba taşınınca oradaki yeri; verilmezse menuSira. */
   erpMenuSira?: number;
   /** Cip seridine "Σ Ekstre" dugmesi ekler: secili satirin ekstresi AYNI

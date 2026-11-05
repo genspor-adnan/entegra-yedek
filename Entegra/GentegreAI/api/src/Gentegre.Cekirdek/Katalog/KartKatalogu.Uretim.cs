@@ -368,13 +368,13 @@ public static partial class KartKatalogu
                     Baslik: "Bileşen"),
                 // GÖRÜNEN KOD · AD · BİRİM (1259, mockup "HM-0101 · Ceviz Kereste 40x60 · Metre"): stok lookup'ı büyük,
                 //   grid kimliği çözemiyordu ("4297"). Web gridde kimliği gizler, bu üçünü gösterir.
-                new("bilesenKod", "(select x.kod from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                new("bilesenKod", "(select x.kod from public.stok x where x.id = uretim_emri_satir.bilesen_stok_id)",
                     "metin", Yazilabilir: false, Baslik: "Kod"),
-                new("bilesenAd", "(select x.ad from public.stok x where x.id = urun_agaci_satir.bilesen_stok_id)",
+                new("bilesenAd", "(select x.ad from public.stok x where x.id = uretim_emri_satir.bilesen_stok_id)",
                     "metin", Yazilabilir: false, Baslik: "Bileşen Adı"),
                 new("birimAdi", "(select kd.ad from public.stok x join public.kod_liste kl on kl.kod = 'stok.ana_birim' "
                                 + "join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = x.ana_birim and kd.dil = 0 "
-                                + "where x.id = urun_agaci_satir.bilesen_stok_id limit 1)",
+                                + "where x.id = uretim_emri_satir.bilesen_stok_id limit 1)",
                     "metin", Yazilabilir: false, Baslik: "Birim"),
                 new("tur", "tur", "kod", SabitKodlar: BilesenTurKodlari, Baslik: "Tip"),
                 new("operasyonSira", "operasyon_sira", "sayi", Baslik: "Opr."),
@@ -435,7 +435,12 @@ public static partial class KartKatalogu
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("tarafId", "taraf_id", "kod",
                     KodTablosu: "public.v_personel_lookup", Baslik: "Personel"),
-                new("operasyonId", "operasyon_id", "sayi", Baslik: "Operasyon (Id)"),
+                // OPERASYON SEÇİCİ (1264): ham kimlik yerine emrin operasyonları. ust_id = emir;
+                //   UstBilgisi haritayı açar, kart `ustSuzgec` ile kendi emrine daraltır
+                //   (kartEklentileri 'uretim-emri'). Satırda emir alanı yok, bu yüzden BagliAlan değil.
+                new("operasyonId", "operasyon_id", "kod",
+                    KodTablosu: "public.v_uretim_operasyon_lookup", UstBilgisi: true,
+                    Baslik: "Operasyon"),
                 new("bas", "bas", "tarih", Baslik: "Başlangıç"),
                 new("bit", "bit", "tarih", Baslik: "Bitiş"),
                 new("sureSaat", "sure_saat", "sayi", Baslik: "Süre (saat)"),

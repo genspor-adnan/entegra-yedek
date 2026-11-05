@@ -35,6 +35,7 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi } from '../api/sozlesme';
 import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
+import { TARAF_DUZENLERI } from '../bilesenler/tarafDuzenleri';
 import { TarafArama } from '../bilesenler/TarafArama';
 
 import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
@@ -550,7 +551,16 @@ export function Kabuk() {
                   yerTutucu={c('Personel ara (ad, sicil, kimlik no, telefon)…')}
                   onKapat={() => setKisiArama(null)}
                   onSec={p => { const yol = kisiArama; setKisiArama(null); if (yol) kartaGit(`${yol}/${p.id}`) }} />
-      <KayitArama acik={!!kayitliListe} baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
+      {/* KAYITLI MÜŞTERİ / TEDARİKÇİ / KİŞİ KARTI (kullanıcı 05.11.2026: "gelen arama eski tipti sadece grid"): düzeni
+          olan taraf kaynakları (tarafDuzenleri: cari, kisi, personel) belge kartıyla AYNI aramayı açar - çipler, önizleme;
+          listenin sabit süzgeci (müşteri / tedarikçi) ek koşul olarak geçer. Öteki kartlar GenGrid'li KayitArama'da kalır. */}
+      <TarafArama acik={!!kayitliListe && kayitliListe.kaynak in TARAF_DUZENLERI} kaynaklar={[kayitliListe?.kaynak ?? 'cari']} kartYok
+                  ekFiltre={kayitliListe?.sabitFiltre}
+                  yerTutucu={kayitliListe ? `${kartAdi(kayitliListe)} ara…` : undefined}
+                  onKapat={() => setKayitliListe(null)}
+                  onSec={p => { const l = kayitliListe; setKayitliListe(null); if (l) kartaGit(`${kartSekmeYolu(l)}/${p.id}`) }} />
+      <KayitArama acik={!!kayitliListe && !(kayitliListe.kaynak in TARAF_DUZENLERI)}
+                  baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
                   kaynak={kayitliListe?.kaynak ?? ''} sabitFiltre={kayitliListe?.sabitFiltre}
                   onKapat={() => setKayitliListe(null)}
                   onSec={id => { if (kayitliListe) kartaGit(`${kartSekmeYolu(kayitliListe)}/${id}`) }} />

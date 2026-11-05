@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 //  GENTEGRE AKTARIM AJANI - Delphi (MSSQL) -> Gentegre AI, tek yön (dokuman/18 §11)
 //
 //  Müşteri sunucusunda çalışır, yalnız DIŞARI HTTPS açar. Change Tracking'den
@@ -36,7 +36,7 @@ if (args.Contains("--tek-tur") || args.Contains("--mutabakat"))
                                                    .AddProvider(new DosyaGunlugu(gunlukKlasoru)));
     var gunluk = fabrika.CreateLogger("Ajan");
     using var api = new ApiIstemci(ayar, gunluk);
-    var aktarici = new Aktarici(new DelphiOkuyucu(ayar.GercekBaglanti), api, ayar, gunluk);
+    var aktarici = new Aktarici(new DelphiOkuyucu(ayar.GercekBaglanti, ayar.GercekDepoBaglanti), api, ayar, gunluk);
     if (args.Contains("--mutabakat"))
     {
         var m = await aktarici.MutabakatAsync(CancellationToken.None);

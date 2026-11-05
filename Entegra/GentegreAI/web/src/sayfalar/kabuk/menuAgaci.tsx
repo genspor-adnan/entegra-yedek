@@ -376,7 +376,9 @@ export function menuSatirlariKur(
       grup: grupAdi(l) ? cm(grupAdi(l)!) : undefined,
       grupHam: grupAdi(l),
       adHam: l.menuAd,
-      altGrup: l.menuAltGrup && !erpGrubu(l) ? cm(l.menuAltGrup) : undefined,
+      altGrup: erpGrubu(l)
+        ? ((l as { erpMenuAltGrup?: string }).erpMenuAltGrup ? cm((l as { erpMenuAltGrup?: string }).erpMenuAltGrup!) : undefined)
+        : l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
       sira: (erpGrubu(l) ? (l as { erpMenuSira?: number }).erpMenuSira : undefined) ?? l.menuSira,
       kaynak: l.kaynak,
       yetkiKodu: l.yetkiKodu,

@@ -1,4 +1,4 @@
-# 18 — Delphi ERP → Gentegre AI Anlık Veri Aktarımı (Plan, 13.10.2026)
+﻿# 18 — Delphi ERP → Gentegre AI Anlık Veri Aktarımı (Plan, 13.10.2026)
 
 Kullanıcı: "delphi erp den gentegreai e data anında veri transferi için plan hazırla".
 
@@ -174,12 +174,15 @@ toplamın tamamı gider.
 | 0 | döviz kuru | DOVIZ | doviz_kur | 013 |
 | 0 | masraf merkezi, proje | SRMMERKEZI, PROJELER | masraf_merkezi, proje | 080 |
 | 1 | **cari** | REHBER + REHBERBILGI + REHBERILETISIM | taraf, taraf_adres, taraf_musteri/tedarikci/kisi | 003, 018 |
+| 1 | **şube / firma** (05.11.2026, 1268) | REHBER ID<0 + REHBERBILGI + REHBERILETISIM (aynı adım) | sube, aktarim_sube_esleme | — |
 | 2 | **stok** | STOKLAR + STOKBARKOD + STOKFIYAT + STOKSERILOT | stok, stok_barkod, stok_fiyat, stok_seri_lot | 013 |
 | 2 | hizmet / masraf | MASRAFGELIR + FIYATLAR | hizmet, masraf, *_fiyat, goc_kalem_eslesme | 013 |
 | 2 | kasa / banka hesabı | KASALAR, BANKAHESAPLAR, KREDIKARTI, POS, KREDILER | hesap, kredi | 080 |
 | 3 | **belge** | FATBASLIK + FATURA | belge, belge_satir | 014 |
 | 3 | mali hareket | KASA | mali_hareket | 014 |
 | 3 | stok hareketi | STOKIZLEME | stok_izleme | 014 |
+| 4 | **e-belge geçmişi** (05.11.2026, 1265) | GENDEPO.EBELGE + EBELGEMESAJ (depo DB'si, ayrı CT sayacı) | e_belge, e_belge_mesaj | 1146 |
+| 4 | **e-belge XSLT şablonları** (05.11.2026, 1266) | DOKUMLER (GRUBU='XSLT' kesiti, ajan süzgeçle okur) | dokuman (ebelge-xslt), dokuman_icerik | — |
 
 **Aktarılmaz:** KULLANICI / ROLLER / YETKI* (güvenlik web'de yönetilir),
 GENINI (ayar), SAYAC (web'de belge kesilmez), STOKDURUM (türetilmiş - web'de

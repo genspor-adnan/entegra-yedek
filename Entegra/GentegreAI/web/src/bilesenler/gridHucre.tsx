@@ -320,9 +320,19 @@ export function rozetHucre(deger: unknown, kolon: KolonMeta) {
     const [skor, seviye] = String(deger ?? '').split('|');
     return skor ? <span className={`risk-skor s${seviye || 0}`}>{skor}</span> : null;
   }
-  if (kolon.bicim !== 'rozet') return null;
+  if (!kolon.bicim?.startsWith('rozet')) return null;
   const metin = String(deger ?? '').trim();
   if (metin === '') return null;
+  // KOLONA ÖZEL RENK (kullanıcı 05.11.2026, seri bilgileri gridi: "efatura / earşiv yeşil olsun, amaç farklılık"):
+  //   Bicim "rozet:olumlu" = her değer o sınıf; "rozet:e-Arşiv=olumlu;e-SMM=mavi" = değere göre. Sözlük rengi
+  //   belge listesinde hazırlandı (mavi) / gönderildi (✓ yeşil) ayrımını taşıdığı için global değiştirilmez.
+  const ozel = kolon.bicim.includes(':') ? kolon.bicim.slice(kolon.bicim.indexOf(':') + 1) : '';
+  if (ozel) {
+    const sinif = ozel.includes('=')
+      ? ozel.split(';').map(x => x.split('=')).find(([k]) => k.trim() === metin)?.[1]?.trim()
+      : ozel;
+    if (sinif) return <span className={`rozet ${sinif}`}>{c(metin, 'kod')}</span>;
+  }
   // COKLU ROZET (11.10.2026): " · " ile birlesik deger ("Başvuru · P-000161")
   //   her parca ayri rozet - belge tipi ve numara ayri okunur.
   if (metin.includes(' · '))

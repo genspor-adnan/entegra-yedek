@@ -1,4 +1,4 @@
-# Delphi → Gentegre AI aktarımı — kurulum rehberi
+﻿# Delphi → Gentegre AI aktarımı — kurulum rehberi
 
 Tek yön, anlık aktarım (plan: `18_DELPHI_ANLIK_AKTARIM_PLANI.md`, sözleşme `01` §9.19).
 Delphi ERP asıl sistemdir; web aktarılan veriyi gösterir, değiştirmez.
@@ -55,8 +55,12 @@ Ajan paketindeki betik, yönetici (Windows oturumu `-E` ya da `sa`) ile:
 sqlcmd -I -f 65001 -S .\SQLEXPRESS -d BILIM -E -i mssql_hazirla.sql -v PAROLA="<güçlü parola>"
 ```
 
-- Change Tracking'i veritabanında ve aktarılan 25 tabloda açar (saklama 7 gün), salt okur
+- Change Tracking'i veritabanında ve aktarılan 30 tabloda açar (saklama 7 gün; Update_SQL_222 ile DOKUMLER - e-Belge XSLT
+  şablonları - da listede), salt okur
   `gentegre_aktarim_okur` rolünü ve **`gentegre_aktarim`** girişini kurar (SELECT + VIEW CHANGE TRACKING; yazamaz).
+- **Depo DB'si** (`<DB>_GENDEPO`, 05.11.2026): e-Belge geçmişi (EBELGE / EBELGEMESAJ) için `sp_Aktarim_Depo_Hazirla @Ac = 1`
+  (Update_SQL_221) - depo DB'sinde CT'yi açar, aynı girişe salt okur yetki verir. Yordam ya da depo DB'si yoksa betik uyarır,
+  e-Belge adımı atlanır (ajan günlüğünde bir uyarı), geri kalanı çalışır.
 - `-I` şart (Delphi veritabanında filtreli indeksler var, `QUOTED_IDENTIFIER` kapalıyken reddedilir).
 - Yeniden çalıştırılabilir; ikinci çalıştırmada yalnız parola değişir.
 - Delphi'ye etkisi: değişen satırın anahtarı ve versiyonu tutulur (hafif). SNAPSHOT yalıtımı açılmaz.
@@ -71,6 +75,7 @@ sqlcmd -I -f 65001 -S .\SQLEXPRESS -d BILIM -E -i mssql_hazirla.sql -v PAROLA="<
    | `ApiAdres` | Kurulumun web adresi, sonunda `/`: ör. ERP kurulumu `https://46.36.201.170/gentegreai/` (ajan `api/aktarim/...` ekler) |
    | `Anahtar` | 1.4'te üretilen anahtar |
    | `MssqlBaglanti` | `Server=.\SQLEXPRESS;Database=BILIM;User Id=gentegre_aktarim;Password=...;TrustServerCertificate=True;Application Name=GentegreAktarim` |
+   | `DepoBaglanti` | Boş bırakın: ana bağlantının veritabanı + `_GENDEPO` kullanılır (e-Belge geçmişi). Depo DB'si başka adda / sunucudaysa tam bağlantı dizesi |
    | `YoklamaSn` / `NabizSn` | 5 / 60 (değiştirmeyin) |
    | `PaketMb` | 20 — sunucudaki nginx gövde sınırı 25 MB; ajan 413 alırsa sayfayı kendisi yarılar |
    | `MutabakatSaati` | 3 (gece mutabakatı; -1 kapalı) |
@@ -86,7 +91,8 @@ Büyük veritabanında ilk kurulumu mesai dışında yapın.
 
 ## 4. Doğrulama
 
-1. Web: **Yönetim › Platform › Aktarım Durumu** — ajan "Çalışıyor", 13 adım "Güncel", açık hata 0.
+1. Web: **Yönetim › Platform › Aktarım Durumu** — ajan "Çalışıyor", 15 adım "Güncel" (14: e-Belge, depo DB'si yoksa
+   "hiç gelmedi" kalır; 15: XSLT şablonları), açık hata 0.
 2. Delphi'de bir carinin adını değiştirin → web'de birkaç saniyede görünür (ölçülen: 2-5 sn); geri alın.
 3. Mutabakat (elle): `GentegreAktarimAjani.exe --mutabakat --ayar C:\GentegreAktarim\ajan.json`
    → "Mutabakat" paneli: tablolar "Eşit". "Kural gereği" sütunu hata değildir: makine olmayan

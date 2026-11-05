@@ -1,4 +1,4 @@
-namespace Gentegre.Aktarim.Ajan;
+﻿namespace Gentegre.Aktarim.Ajan;
 
 /// <summary>
 /// Yoklama döngüsü: her <c>YoklamaSn</c>'de Delphi'nin CT versiyonuna bakar; değişmediyse
@@ -9,12 +9,12 @@ public sealed class AktarimIscisi(Ayarlar ayar, ILogger<AktarimIscisi> gunluk) :
 {
     protected override async Task ExecuteAsync(CancellationToken iptal)
     {
-        var delphi = new DelphiOkuyucu(ayar.GercekBaglanti);
+        var delphi = new DelphiOkuyucu(ayar.GercekBaglanti, ayar.GercekDepoBaglanti);
         using var api = new ApiIstemci(ayar, gunluk);
         var aktarici = new Aktarici(delphi, api, ayar, gunluk);
         gunluk.LogInformation("Aktarım ajanı başladı: {Api}", ayar.ApiAdres);
 
-        long sonVersiyon = -1;
+        long sonVersiyon = -1, sonVersiyonDepo = -1;
         var sonNabiz = DateTime.MinValue;
         var sonMutabakat = DateTime.MinValue;
         var bekle = TimeSpan.FromSeconds(30);
@@ -24,13 +24,19 @@ public sealed class AktarimIscisi(Ayarlar ayar, ILogger<AktarimIscisi> gunluk) :
             try
             {
                 var guncel = await delphi.GuncelVersiyonAsync(iptal);
-                if (guncel != sonVersiyon || DateTime.UtcNow - sonNabiz > TimeSpan.FromSeconds(ayar.NabizSn))
+                // Depo DB'si (e-Belge, 1265) ayrı sayaç: o da değişince tur. Nabızda depo yeniden denenir
+                //   (GENDEPO sonradan kurulmuş olabilir).
+                var nabiz = DateTime.UtcNow - sonNabiz > TimeSpan.FromSeconds(ayar.NabizSn);
+                if (nabiz) delphi.DepoyuYenidenDene();
+                var guncelDepo = await delphi.DepoVarAsync(iptal) ? await delphi.GuncelVersiyonAsync(true, iptal) : -1L;
+                if (guncel != sonVersiyon || guncelDepo != sonVersiyonDepo || nabiz)
                 {
                     var s = await aktarici.TurAsync(iptal);
                     sonNabiz = DateTime.UtcNow;
                     if (s.Hata is null)
                     {
                         sonVersiyon = s.Versiyon;
+                        sonVersiyonDepo = guncelDepo;
                         bekle = TimeSpan.FromSeconds(30);
                         if (!s.DegisiklikYok)
                             gunluk.LogInformation("Tur: versiyon {V}, {P} paket, {K} kök, {S} silme", s.Versiyon, s.Paket, s.Kok, s.Silinen);

@@ -183,6 +183,7 @@ const LabKkGrafik = tembel(() => import('./sayfalar/LabKkGrafik'), 'LabKkGrafik'
 const LabEtiket = tembel(() => import('./sayfalar/LabEtiket'), 'LabEtiket');
 const SatisAyarlar = tembel(() => import('./sayfalar/BelgeAyarlar'), 'SatisAyarlar');
 const AlisAyarlar = tembel(() => import('./sayfalar/BelgeAyarlar'), 'AlisAyarlar');
+const FaturaAyarlari = tembel(() => import('./sayfalar/FaturaAyarlari'), 'FaturaAyarlari');
 const IskontoOnaylari = tembel(() => import('./sayfalar/IskontoOnaylari'), 'IskontoOnaylari');
 const Dokumler = tembel(() => import('./sayfalar/Dokumler'), 'Dokumler');
 
@@ -411,6 +412,7 @@ function Yollar() {
         {/* MENÜ DÜZENİ (979) yalnız GenProfil'de - web rotası kaldırıldı (10.10.2026). */}
         {yetki('belge.satis.ayar') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
         {yetki('belge.alis.ayar') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
+        {(yetki('satis.fatura_ayar') || yetki('sube')) && <Route path="/fatura-ayarlar" element={<FaturaAyarlari />} />}
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
         {yetki('uts.sorgu') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
         {/* Radyoloji panosu (320): liste degil - sayac/doluluk/uyari ekrani. */}

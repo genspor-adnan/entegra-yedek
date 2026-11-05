@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 --  GENTEGRE AKTARIM AJANI - MSSQL HAZIRLIĞI (müşteri sunucusunda, bir kez)
 --
 --  sqlcmd -I -f 65001 -S .\SQLEXPRESS -d <VERITABANI> -E -i mssql_hazirla.sql -v PAROLA="<güçlü parola>"
@@ -30,6 +30,13 @@ IF DATABASE_PRINCIPAL_ID('gentegre_aktarim') IS NULL
 
 IF IS_ROLEMEMBER('gentegre_aktarim_okur', 'gentegre_aktarim') = 0
   ALTER ROLE gentegre_aktarim_okur ADD MEMBER gentegre_aktarim;
+
+-- DEPO DB (<DB>_GENDEPO): e-Belge geçmişi (EBELGE / EBELGEMESAJ) için CT + ajan kullanıcısı (Update_SQL_221, 1265).
+--   Yordam yoksa (Delphi güncellemesi 221'den eski) ya da depo DB'si yoksa e-Belge adımı aktarılmaz; ajan uyarır.
+IF OBJECT_ID('dbo.sp_Aktarim_Depo_Hazirla') IS NOT NULL
+  EXEC dbo.sp_Aktarim_Depo_Hazirla @Ac = 1;
+ELSE
+  PRINT 'UYARI: dbo.sp_Aktarim_Depo_Hazirla yok (Update_SQL_221) - e-Belge geçmişi (EBELGE) aktarılmayacak.';
 
 EXEC dbo.sp_Aktarim_Durum;
 PRINT 'Hazır: gentegre_aktarim girişi salt okur (gentegre_aktarim_okur).';

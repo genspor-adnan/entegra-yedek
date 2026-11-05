@@ -214,9 +214,11 @@ public static partial class KartKatalogu
             //   subenin kimligi + KENDI adresi. ebelge_kimlik kodu artik
             //   ekranda yok, trigger ust_sube_id'den turetir (1 kendi / 3
             //   baz kimlik + sube adresi) - eski "2" kayitlari korunur.
+            // 1272: v_sube_baz_lookup'taki "Kendisi" (id 0) fk_sube_ust'u patlatiyordu - ust_sube_id NULL'lanabilir
+            //   FK; bos secenek ("—") = kendisi. Tetik 0'i da NULL'a cevirir.
             new("ustSubeId",    "ust_sube_id",   "kod",
-                KodTablosu: "public.v_sube_baz_lookup",
-                Baslik: "Baz Alınacak Şube", Grup: "e-Belge", AltGrup: "Gönderici"),
+                KodTablosu: "public.v_sube_ust_lookup",
+                Baslik: "Baz Alınacak Şube (boş = kendisi)", Grup: "e-Belge", AltGrup: "Gönderici"),
             new("ebelgeKimlik", "ebelge_kimlik", "kod", KodListesi: "sube.ebelge_kimlik",
                 Baslik: "Gönderici Kimliği", Grup: "e-Belge", AltGrup: "Gönderici",
                 Gizli: true),

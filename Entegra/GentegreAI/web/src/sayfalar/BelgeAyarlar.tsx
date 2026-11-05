@@ -1,15 +1,12 @@
-import { useState } from 'react';
-import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
-import { EBelgeAyarlari } from './eBelgeAyarlari';
 import { c } from '../dil/ceviri';
 
 /**
  * SATIS / ALIS BELGE AYARLARI (Yönetim › Ayarlar › Satış|Alış Belgeleri).
  *
- * Iki ekran ayni bilesenden cizilir: fark yalnizca YON (satis / alis) ve
- * satista fazladan e-Belge sekmesi. e-Belge yalniz GIDEN belgede anlamlidir -
- * alis faturasini GIB'e biz gondermeyiz, tedarikciden geliriz.
+ * Iki ekran ayni bilesenden cizilir: fark yalnizca YON (satis / alis).
+ * e-BELGE SEKMESİ KALKTI (1270/1271, kullanıcı 05.11.2026): şube özeti gridi Satış › Ayarlar › Fatura Ayarları ›
+ * Genel'in altına taşındı (MukellefOzeti); e-Belge kurulumu tek ekranda.
  *
  * Ayarlar `public.referans` tablosunda; anahtarlar yon onekiyle ayrilir
  * (`belge.satis.*` / `belge.alis.*`) - ayni ayarin iki yonde farkli degeri
@@ -18,11 +15,6 @@ import { c } from '../dil/ceviri';
  */
 export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
   const satisMi = yon === 'satis';
-  const sekmeler = satisMi
-    ? [{ anahtar: 'genel', baslik: 'Genel' }, { anahtar: 'ebelge', baslik: 'e-Belge' }]
-    : [{ anahtar: 'genel', baslik: 'Genel' }];
-
-  const [aktif, setAktif] = useState('genel');
   const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
 
   const alan = (anahtar: string, etiket: string,
@@ -41,23 +33,19 @@ export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
         </div>
       </div>
 
-      <AyarSekmeSeridi sekmeler={sekmeler} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
-
       <div className="sahne">
         {hata && <div className="hata-kutusu">{hata}</div>}
         {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
-        {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : aktif === 'genel' ? (
+        {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
           <div className="kagrup">
             <h6>{c('Belge Girişi')}</h6>
             <div className="alan-izgara tek-sutun ayar-formu">
               {alan(`belge.${yon}.vade_gun`, 'Varsayılan vade (gün)', { tip: 'sayi' })}
-              {alan(`belge.${yon}.varsayilan_seri`, 'Varsayılan seri', { tip: 'metin' })}
+              {/* "Varsayılan seri" KALKTI (1271, kullanıcı 05.11.2026): sunucuda okunmuyordu. Seri belge kaydında
+                  şubeden (Fatura Ayarları › Genel › Varsayılan Seri), e-Belge'de Seri Bilgileri kuralından gelir. */}
             </div>
           </div>
-        ) : (
-          // Delphi'deki "Opsiyonlar > Fatura > E-Belge" sekmesinin karsiligi.
-          <EBelgeAyarlari />
         )}
       </div>
     </>

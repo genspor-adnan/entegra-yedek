@@ -508,11 +508,14 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         await using var b = await veri.AcAsync(iptal);
         var v = await GorunumVerisiAsync(b, belgeId, iptal);
         var xslt = await XsltAsync(b, v.ETur, iptal, zorunlu: false);
-        var ubl = UblUretici.Uret(v, await NotlarAsync(b, v, iptal), xslt);
+        // Aktarılan e-belgede Delphi'nin gönderdiği UBL (1265); yoksa belge verisinden üretilir.
+        var ubl = v.AktarimUbl != "" ? v.AktarimUbl : UblUretici.Uret(v, await NotlarAsync(b, v, iptal), xslt);
         string html;
         try { html = xslt.Length > 0 ? Donustur(ubl, xslt) : SadeHtml(v); }
         catch (Exception h) when (h is XsltException or XmlException) { html = SadeHtml(v); }
         if (filigran && !EFaturaKodlari.Gonderildi(v.EfaturaDurum)) html = FiligranEkle(html, v.Irsaliye ? "TASLAK İRSALİYE" : "TASLAK FATURA");
+        // AKTARILAN BELGE (e_belge kaydı yok): görüntü belge verisinden üretildi, GİB'e giden aslı değil - her zaman işaretli.
+        if (v.EBelgeId == 0) html = FiligranEkle(html, "AKTARILAN BELGE · GÖRÜNTÜ");
         return (html, DosyaAdi(v));
     }
 
@@ -520,15 +523,31 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     {
         await using var b = await veri.AcAsync(iptal);
         var v = await GorunumVerisiAsync(b, belgeId, iptal);
+        // UBL'in aslı yok (ETTN bilinmiyor); yeniden üretilen XML "gönderilen" sanılmasın.
+        if (v.EBelgeId == 0)
+            throw GentegreHatasi.IsKurali("Eski programdan aktarılan belgenin e-Belge XML'i bu sistemde yok; görüntü için Önizle / PDF kullanın.");
+        if (v.AktarimUbl != "") return (v.AktarimUbl, DosyaAdi(v));
         var xslt = await XsltAsync(b, v.ETur, iptal, zorunlu: false);
         return (UblUretici.Uret(v, await NotlarAsync(b, v, iptal), xslt), DosyaAdi(v));
     }
 
+    /// <summary>
+    /// Görünüm verisi. AKTARILAN BELGE (kullanıcı 05.11.2026, ZONE #26315 "gönderilmiş fatura, baskı önizleme
+    /// göremedim, önce hazırla yapın diyor"): Delphi'den gelen belgelerde efatura_durum "gönderildi" ama e_belge
+    /// kaydı (ETTN / UBL) yok - 9.826 belge. Hazırlanmamış sanılıp engellenmek yerine belge verisinden görüntü
+    /// üretilir: e-Belge no = belge no, ETTN boş; HTML "AKTARILAN BELGE" filigranı taşır, XML verilmez.
+    /// </summary>
     private static async Task<EFaturaVerisi> GorunumVerisiAsync(NpgsqlConnection b, int belgeId, CancellationToken iptal)
     {
         var v = await EFaturaVerisi.OkuAsync(b, null, belgeId, iptal);
-        if (v.EfaturaDurum == 0 || v.EBelgeId == 0)
+        if (v.EfaturaDurum == 0)
             throw GentegreHatasi.IsKurali($"Önce \"Hazırla\" ile {EFaturaKodlari.BosAdi(v.Tur)} oluşturun.");
+        if (v.EBelgeId == 0)
+        {
+            if (!EFaturaKodlari.Gonderildi(v.EfaturaDurum))
+                throw GentegreHatasi.IsKurali($"Önce \"Hazırla\" ile {EFaturaKodlari.BosAdi(v.Tur)} oluşturun.");
+            v.EBelgeNo = v.BelgeNo;
+        }
         v.ETur = EFaturaKodlari.ETur(v.EfaturaDurum);
         v.Hesapla();
         return v;

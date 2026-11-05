@@ -316,7 +316,7 @@ public sealed partial class KartDeposu
             "public.v_ameliyat_salon_lookup", "public.v_acil_yatak_lookup",
             "public.v_klinik_gosterge_lookup", "public.v_klinik_olgu_lookup",
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
-            "public.v_sube_baz_lookup",
+            "public.v_sube_baz_lookup", "public.v_sube_ust_lookup",   // 1272: e-Belge baz şube ("Kendisi" yok)
             // Randevu (243): hasta secimi.
             "public.v_hasta_lookup",
             // Anlasmali kurum (249): hasta policesinde odeyen, kurum sozlesmesi
@@ -442,6 +442,8 @@ public sealed partial class KartDeposu
             //   ve DEPO - uretim karti sarf/mamul/fire deposunu secer.
             "public.v_is_merkezi_lookup", "public.v_urun_agaci_lookup",
             "public.v_uretim_emri_lookup", "public.v_depo_lookup",
+            // Zaman satirinin operasyonu (1264): ust_id = emir, kart kendi emrine suzer.
+            "public.v_uretim_operasyon_lookup",
             // Sigorta v1 (430): saglayici, kurum hesabi ve entegrasyon hesabi.
             "public.v_sigorta_saglayici_lookup", "public.v_sigorta_hesap_lookup",
             "public.v_entegrasyon_hesap_lookup",

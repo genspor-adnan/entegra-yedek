@@ -7,6 +7,9 @@ import { ayarSayi } from '../api/ayarlar';
 import { c } from '../dil/ceviri';
 import { KimlikOkutPenceresi } from './kimlik/KimlikOkutPenceresi';
 import { mrzBekleyenKoy } from './kimlik/mrzAktarim';
+import { ekOnbellegiTemizle } from './cariArama';
+import { TARAF_DUZENLERI } from './tarafDuzenleri';
+import { type TarafBaglam, duzenKosulu, onizlemeOku, onizlemeYaz } from './tarafDuzeni';
 
 interface TarafSatiri {
   kaynak: string;
@@ -34,6 +37,8 @@ interface TarafSatiri {
   /** Son/Sik siralama anahtarlari - sunucudan gelir, ekranda gorunmez. */
   aramaSonTarih?: unknown;
   aramaSay?: unknown;
+  /** Ham liste satırı - cari düzeni (TarafAramaCari) kolonlarını buradan çizer. */
+  ham: ListeSatiri;
 }
 
 /**
@@ -53,6 +58,9 @@ const KAYNAK_EK_ARAMA: Record<string, string[]> = {
   personel: ['rolAdi', 'departmanAdi', 'gorev', 'vknoHam'],
   // HASTA KİMLİK NO İLE (kullanıcı 16.10.2026): ham TCKN'de - maskeli kolonla aranmaz.
   hasta: ['vknoHam'],
+  // MÜŞTERİ / TEDARİKÇİ (mockup taraf_arama.html, 05.11.2026): ilgili kişi, fatura ünvanı ve il de aranır;
+  //   vergi / kimlik no ARANMAZ (kullanıcı).
+  cari: ['ilgiliKisi', 'faturaUnvan', 'il'],
 };
 
 const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
@@ -109,6 +117,7 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   //   gosterilmez, yalniz birlesik siralamada kullanilir.
   aramaSonTarih: s.aramaSonTarih,
   aramaSay: s.aramaSay,
+  ham: s,
 });
 
 interface Props {
@@ -218,6 +227,14 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
    * Kaynak profile gore ic hekim ya da dis hekim dondurur (578) - ekran ayni.
    */
   const hekimDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'basvuru-hekim';
+  /**
+   * KAYNAĞA ÖZEL DÜZEN (mockup Ekranlar/taraf_arama.html, kullanıcı 05.11.2026; tarafDuzenleri.ts: cari, personel,
+   * kisi): geniş pencere, sunucuya giden çipler, seçim süzgeçleri, kaynağın kolonları ve sağda açılır / kapanır
+   * önizleme. Yalnız TEK kaynaklı aramada; karma aramada (cari + personel) genel taraf düzeni kalır.
+   * Alış belgesinde (ekFiltre tedarikci) cari kolonları tedarikçi gözüyle okunur: Borcumuz / Vadesi Geçen Ödeme / Son Alım.
+   */
+  const duzen = kaynaklar.length === 1 ? TARAF_DUZENLERI[kaynaklar[0]] : undefined;
+  const baglam: TarafBaglam = { tedarikci: ekFiltre?.alan === 'tedarikci', musteri: ekFiltre?.alan === 'musteri' };
 
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
@@ -240,6 +257,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
   const [kartAcik, setKartAcik] = useState<{ kaynak: string; id: number | 'yeni' } | null>(null);
   const zamanlayici = useRef<number | undefined>(undefined);
   const kutu = useRef<HTMLInputElement | null>(null);
+  // Düzenli arama: işaretli çipler, seçim süzgeçleri (alan -> değer), önizleme paneli (tercih tarayıcıda).
+  const [cipler, setCipler] = useState<Set<string>>(() => new Set<string>());
+  const [secimler, setSecimler] = useState<Record<string, string>>({});
+  const [onizleme, setOnizleme] = useState<boolean>(onizlemeOku);
+  const onizlemeDegis = () => setOnizleme(v => { onizlemeYaz(!v); return !v });
+  const cipDegis = (kod: string) => setCipler(k => { const y = new Set(k); if (y.has(kod)) y.delete(kod); else y.add(kod); return y });
 
   const ara = useCallback(async (metin: string, gorunumSecimi: 'tum' | 'son' | 'sik' = 'tum') => {
     setYukleniyor(true);
@@ -259,7 +282,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           ? { op: 'or' as const, kosullar: [
               { alan: 'kod', op: 'icerir' as const, deger: metin.trim() },
               { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
-              ...(KAYNAK_EK_ARAMA[k] ?? []).map(alan =>
+              ...[...(KAYNAK_EK_ARAMA[k] ?? []), ...(duzen?.ekArama ?? [])].map(alan =>
                 ({ alan, op: 'icerir' as const, deger: metin.trim() })),
               ...(rakamlar.length >= 4
                 ? [{ alan: 'telefonHam', op: 'icerir' as const, deger: rakamlar }]
@@ -268,9 +291,13 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           : undefined;
         // Cagiranin sabit kosulu (ör. "pasif ve vefat hastalar gelmesin") metin
         //   filtresiyle AND'lenir.
-        return ekFiltre
-          ? (filtre ? { op: 'and' as const, kosullar: [ekFiltre, filtre] } : ekFiltre)
-          : filtre;
+        // Düzenli aramada sabit koşul + çipler + seçimler de sunucu koşuludur (tarafDuzeni.duzenKosulu).
+        const sabitler = [ekFiltre,
+                          duzen ? duzenKosulu(duzen, baglam, cipler, secimler) : undefined,
+                          filtre].filter((x): x is Kosul => !!x);
+        return sabitler.length === 0 ? undefined
+          : sabitler.length === 1 ? sabitler[0]
+          : { op: 'and' as const, kosullar: sabitler };
       };
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunumParam = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
@@ -281,7 +308,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
       //   calismiyor gibi gorunuyordu. Hangi kaynagin dustugu de yazilir:
       //   "hicbir sey bulunamadi" ile "o liste okunamadi" ayri seylerdir.
       const sonuclar = await Promise.allSettled(
-        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: filtreOlustur(k),
+        kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: duzen ? 50 : 20, filtre: filtreOlustur(k),
                                           gorunum: gorunumParam })));
       const dusenler = kaynaklar.filter((_, i) => sonuclar[i].status === 'rejected');
       if (dusenler.length === kaynaklar.length) {
@@ -307,7 +334,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
       setYukleniyor(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kaynaklar.join(','), ekFiltre]);
+  }, [kaynaklar.join(','), ekFiltre, duzen, cipler, secimler, baglam.tedarikci]);
 
   useEffect(() => {
     if (!acik) return;
@@ -331,6 +358,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
     setKartAcik(null);
     setIsaretli([]);
     setUyari(null);
+    setCipler(new Set<string>());
+    setSecimler({});
+    ekOnbellegiTemizle();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acik]);
 
@@ -446,12 +476,21 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
     );
   }
 
+  // Seçim süzgeci seçenekleri yüklü satırlardan (+ seçili değer): ayrı bir lookup isteği yok.
+  const secenekler = (alan: string): string[] => {
+    const k = new Set<string>(satirlar.map(x => String(x.ham[alan] ?? '').trim()).filter(Boolean));
+    const secili = secimler[alan]; if (secili) k.add(secili);
+    return [...k].sort((a, b) => a.localeCompare(b, 'tr'));
+  };
+  const odak = satirlar[secili]?.ham;
+
   return (
     <>
       {/* z-index inline: kart modali (.kaperde) 320'de - GenLookup'in .perde/.lookup-pencere
           varsayilan z-index'i (20/21) bunun ICINDE acilinca modalin ARKASINDA kalirdi. */}
       <div className="perde" onClick={onKapat} style={{ zIndex: 400 }} />
-      <div className="lookup-pencere taraf-arama" onKeyDown={tus} style={{ width: 'min(880px, 92vw)', zIndex: 401 }}>
+      <div className={`lookup-pencere taraf-arama${duzen ? ' duzenli' : ''}`} onKeyDown={tus}
+           style={{ width: duzen ? duzen.genislik : 'min(880px, 92vw)', zIndex: 401 }}>
         {/* Ust arac cubugu (cari-liste ile ayni desen): Yeni/Duzenle sadece tek-kaynakli
             aramada (kaynaklar.length===1) - kullanici hangi TIP olusturulacagini secemez.
             HEKIM ARAMASINDA IKISI DE YOK (kullanici): `basvuru-hekim` bir KART
@@ -463,7 +502,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
             <>
               <button type="button" className="d"
                 onClick={() => onYeni ? onYeni(arama) : setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
-                ＋ Yeni
+                {duzen ? duzen.yeniEtiketi(baglam) : '＋ Yeni'}
               </button>
               {kimlikOkut && hastaDuzeni && okutmaAcik && (
                 <button type="button" className="d" title={c('Kimlik kartı / pasaport MRZ\'sinden hastayı bul ya da yeni kart aç')}
@@ -482,6 +521,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
               : satirlar[secili] && sec(satirlar[secili]))}>
             {cokluSecim ? `Seç (${isaretli.length})` : 'Seç'}
           </button>
+          {/* Düzenin ek düğmeleri Seç'in SAĞINDA (cari: Ekstre; kullanıcı 05.11.2026); alt çubukta düğme yok, Kapat yeter. */}
+          {duzen?.EkDugmeler && <duzen.EkDugmeler s={odak} />}
           {/* Kapat SAGA yaslanir (kullanici): kart modallerindeki duzenin ayni. */}
           <button type="button" className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
                   onClick={onKapat}>✖ Kapat</button>
@@ -508,6 +549,30 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
             <button type="button" className={`ikon-liste ${gorunum === 'sik' ? 'on' : ''}`}
                     title="Sık Aranan" onClick={() => setGorunum('sik')}>⭐</button>
           </div>
+          {duzen && (
+            <>
+              {duzen.secimler.map(sc => (
+                <label key={sc.alan} className="ta-secim">{sc.etiket}:
+                  <select value={secimler[sc.alan] ?? ''} onChange={e => setSecimler(v => ({ ...v, [sc.alan]: e.target.value }))}>
+                    <option value="">Tümü</option>
+                    {secenekler(sc.alan).map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                </label>
+              ))}
+              {/* Çipler seçim combolarının SAĞINDA, ayraçla, aynı satırda (kullanıcı 05.11.2026). */}
+              {duzen.cipler(baglam).length > 0 && (
+                <>
+                  <span className="durumseg-ayrac ta-ayrac" />
+                  <span className="ta-cipler">
+                    {duzen.cipler(baglam).map(x => (
+                      <button key={x.kod} type="button" className={`cip ${cipler.has(x.kod) ? 'on' : ''}`} title={x.ipucu}
+                              onClick={() => cipDegis(x.kod)}>{x.ad}</button>
+                    ))}
+                  </span>
+                </>
+              )}
+            </>
+          )}
         </div>
 
         {hata && <div className="hata-kutusu">{hata}</div>}
@@ -525,12 +590,16 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           />
         )}
 
+        <div className={duzen ? `ta-govde${onizleme ? '' : ' kapali'}` : undefined}
+             style={duzen ? undefined : { display: 'contents' }}>
         <div className="lookup-liste">
           <table>
             <thead>
               <tr>
                 <th className="check"></th>
-                {hastaDuzeni ? (
+                {duzen ? (
+                  <duzen.Basliklar b={baglam} />
+                ) : hastaDuzeni ? (
                   // Genislikler ACIK: 'dar' sinifiyla telefon ve tarih
                   //   kirpiliyordu ("+90 5336…", "29.08.2…").
                   <>
@@ -576,7 +645,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
               {satirlar.map((satir, i) => (
                 <tr
                   key={`${satir.kaynak}-${satir.id}`}
-                  className={i === secili ? 'secili' : ''}
+                  className={[i === secili ? 'secili' : '', duzen ? duzen.satirSinifi(satir.ham, baglam) : '']
+                    .filter(Boolean).join(' ')}
                   onDoubleClick={() => sec(satir)}
                   // COKLU KIPTE TEK TIK ISARETLER (kullanici): kutucugu
                   //   tutturmaya calismak yerine satirin herhangi bir yeri.
@@ -588,7 +658,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
                              ? isaretli.some(x => anahtar(x) === anahtar(satir))
                              : i === secili} />
                   </td>
-                  {hastaDuzeni ? (
+                  {duzen ? (
+                    <duzen.Hucreler s={satir.ham} b={baglam} />
+                  ) : hastaDuzeni ? (
                     <>
                       <td>{satir.kod}</td>
                       <td>{satir.unvan}</td>
@@ -627,12 +699,19 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
               {/* Genel duzende kolon sayisi 7: isaret · Tip · Kod · Unvan ·
                   Bağlı Kurum · Bölüm · Görev. */}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : hekimDuzeni ? 4 : 7}
+                <tr><td colSpan={duzen ? duzen.kolonSayisi : hastaDuzeni ? 9 : disHekimDuzeni ? 6 : hekimDuzeni ? 4 : 7}
                         className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>
           {yukleniyor && <div className="yukleniyor">Araniyor…</div>}
+        </div>
+        {/* Önizleme aç / kapa düğmesi PANELİN ÜSTÜNDE (kullanıcı 05.11.2026); kapalıyken sağda ince şerit. */}
+        {duzen && (onizleme
+          ? <duzen.Onizleme s={odak} b={baglam} onKapat={onizlemeDegis} />
+          : <button type="button" className="ta-on-serit" title="Önizlemeyi aç" onClick={onizlemeDegis}>
+              ◧<span>Önizleme</span>
+            </button>)}
         </div>
 
         {(uyari || isaretli.length > 0) && (
@@ -647,7 +726,17 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
         )}
         <div className="lookup-alt">
           <span>
-            {cokluSecim
+            {duzen ? (
+              <>
+                <b>{satirlar.length}</b> kayıt{satirlar.length >= 50 ? ' (ilk 50 - aramayı daraltın)' : ''}
+                {duzen.lejant.length > 0 && (
+                  <span className="ta-lgnd">
+                    {duzen.lejant.map(l => <span key={l.ad}><i className="ta-sw" style={{ background: l.renk }} />{l.ad}</span>)}
+                  </span>
+                )}
+                <span className="ta-kis">↑↓ gez · Enter seç · Esc kapat</span>
+              </>
+            ) : cokluSecim
               ? '↑↓ gez · tık/Enter işaretle · Seç ile hepsini ekle · Esc kapat'
               : '↑↓ gez · çift tık/Enter seç · Esc kapat'}
           </span>

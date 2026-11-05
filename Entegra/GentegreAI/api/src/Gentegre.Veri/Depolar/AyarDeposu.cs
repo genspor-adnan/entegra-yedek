@@ -63,6 +63,8 @@ public sealed class AyarDeposu
         //   hedef süresi boşsa ekran hedef sütununu boş bırakır. `Varsayilan`
         //   sözlüğüne konmadı: fire katı ondalıklı, hedef sürelerin varsayılanı "yok".
         "satis.hedef_marj", "muhasebe.babs_sinir",
+        // CARİ İCMALİ KÜÇÜK BAKİYE (1269): eşik (TL, boş = 0,10) ve kuruş farkı kapatma kalemleri (masraf / hizmet no).
+        "cari.icmal_esik", "cari.kurus_gider_id", "cari.kurus_gelir_id",
         "satinalma.hedef_gun_onay", "satinalma.hedef_gun_teklif", "satinalma.hedef_gun_siparis",
         "satinalma.hedef_gun_kabul", "satinalma.hedef_gun_odeme",
         "servis.tekrar_ariza_gun",
@@ -151,8 +153,9 @@ public sealed class AyarDeposu
         "guvenlik.kilit_dakika",
         // Belge girisi - yon bazli (155). Delphi'deki Opsiyonlar > Fatura'nin
         //   karsiligi; ayni ayarin satis ve alista farkli degeri olabilir.
-        "belge.satis.vade_gun", "belge.satis.varsayilan_seri",
-        "belge.alis.vade_gun",  "belge.alis.varsayilan_seri",
+        // belge.<yon>.varsayilan_seri KALKTI (1271): hiçbir yerde okunmuyordu; seri şubeden (sube.ebelge_seri) ve GİB kuralından gelir.
+        "belge.satis.vade_gun",
+        "belge.alis.vade_gun",
         // e-Belge: ANA SALTER de (179) sube kaydina tasindi - "e-Fatura Mükellefi"
         //   kutusu. Burada yalniz belge turu basina DAVRANIS ayarlari kaldi
         //   (servis adresleri, sabit notlar, gelen belge alma).
@@ -171,8 +174,6 @@ public sealed class AyarDeposu
     private static readonly Dictionary<string, int> MetinAyar = new()
     {
         ["genel.varsayilan_doviz"] = 5,
-        ["belge.satis.varsayilan_seri"] = 10,
-        ["belge.alis.varsayilan_seri"] = 10,
         ["efatura.uretim_url"] = 250,
         ["efatura.test_url"] = 250,
         ["efatura.sabit_notlar"] = 1000,

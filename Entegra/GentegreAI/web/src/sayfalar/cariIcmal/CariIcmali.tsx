@@ -14,6 +14,7 @@ import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { bugunYerel } from '../yaslandirma/yaslandirmaOrtak';
 import { CariIcmalA4, MutabakatMektuplari } from './CariIcmalA4';
 import { CariTablosu, DikkatSekmesi, KirilimSekmesi, YaslandirmaSekmesi } from './CariIcmalTablolari';
+import { KurusKapatModali } from './KurusKapatModali';
 
 /**
  * CARİ İCMALİ `/cari-icmali` — mockup Ekranlar/İcmal/cari_icmali.html (kullanıcı 23.10.2026:
@@ -38,7 +39,10 @@ export function CariIcmali() {
   const kapsam = arama.get('kapsam') ?? 'hepsi';
   const temsilci = Number(arama.get('temsilci') ?? 0);
   const pasif = arama.get('pasif') === '1';
-  const [sifirGizle, setSifirGizle] = useState(true);
+  // Bakiyesi sıfır olanlar HER ZAMAN gizli (kullanıcı 05.11.2026: ayrı kutuya gerek kalmadı; eşik kutusu yeter).
+  /** KÜÇÜK BAKİYE (1269, kullanıcı 05.11.2026): eşik altındakiler gizli, dipte tek satır; "göster" ile açılır. */
+  const [kucukGizle, setKucukGizle] = useState(true);
+  const [kurusModal, setKurusModal] = useState(false);
   /** BAKİYE YÖNÜ (kullanıcı 03.11.2026: "Tümü/Borçlu/Alacaklı filtre ekle"): görünüm süzgeci - borçlu B (+), alacaklı A (-). */
   const [yonSuzgec, setYonSuzgec] = useState<'hepsi' | 'borclu' | 'alacakli'>('hepsi');
   const [veri, setVeri] = useState<Veri | null>(null);
@@ -67,9 +71,26 @@ export function CariIcmali() {
   // "Bakiyesi sıfır olanları gizle" yalnız GÖRÜNÜM süzgeci (kullanıcı 03.11.2026: "gizle dediğimde bakiye 0 olanlar
   //   kalıyor"): dönemde hareketi olsa da bakiyesi kapanmış cari gizlenir; TL bakiyesi sıfır ama DÖVİZ bakiyesi açık
   //   olan (doviz "USD:120;EUR:0") kalır.
-  const satirlar = useMemo(() => (veri?.carilar ?? []).filter(c => !sifirGizle || Math.abs(c.bakiye) > 0.005
-    || dovizBakiyeAcik(c.doviz))
-    .filter(c => yonSuzgec === 'hepsi' || (yonSuzgec === 'borclu' ? c.bakiye > 0.005 : c.bakiye < -0.005)), [veri, sifirGizle, yonSuzgec]);
+  const esik = veri?.kucuk.esik ?? 0.1;
+  // Döviz bakiyesi açık olan (TL dışı) küçük sayılmaz; sunucunun doviz dizisi TL'yi de taşır ("TL:0.03"), o atlanır.
+  const dovizliMi = (ham: string) => String(ham ?? '').split(';').some(x => {
+    const [kod, deger] = x.split(':');
+    return !!kod && kod !== 'TL' && kod !== 'TRY' && Math.abs(Number(deger ?? 0)) > 0.005;
+  });
+  const kucukMu = (c: CariIcmalSatiri) => Math.abs(c.bakiye) > 0.005 && Math.abs(c.bakiye) < esik && !dovizliMi(c.doviz);
+  const satirlar = useMemo(() => (veri?.carilar ?? []).filter(c => Math.abs(c.bakiye) > 0.005 || dovizBakiyeAcik(c.doviz))
+    .filter(c => !kucukGizle || !kucukMu(c))
+    .filter(c => yonSuzgec === 'hepsi' || (yonSuzgec === 'borclu' ? c.bakiye > 0.005 : c.bakiye < -0.005)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [veri, kucukGizle, yonSuzgec, esik]);
+  const kucukler = useMemo(() => (veri?.carilar ?? []).filter(kucukMu), [veri, esik]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const yenile = () => {
+    const q = new URLSearchParams({ bas, bit, kapsam });
+    if (temsilci) q.set('temsilci', String(temsilci));
+    if (pasif) q.set('pasif', '1');
+    setYukleniyor(true);
+    api.cariIcmal(q).then(setVeri).catch(h => setHata(hataMetni(h))).finally(() => setYukleniyor(false));
+  };
   const seciliSatirlar = secili.length > 0 ? satirlar.filter(c => secili.includes(c.id)) : satirlar;
   // Mektup: seçili cariler; seçim yoksa bakiyesi olanlar.
   const mektupSatirlari = secili.length > 0 ? seciliSatirlar : satirlar.filter(c => Math.abs(c.bakiye) > 0.005);
@@ -141,7 +162,8 @@ export function CariIcmali() {
             {(veri?.temsilciler ?? []).map(t => <option key={t.id} value={t.id}>{t.ad}</option>)}
           </select>
         </div>
-        <label className="sel"><input type="checkbox" checked={sifirGizle} onChange={e => setSifirGizle(e.target.checked)} /> Bakiyesi sıfır olanları gizle</label>
+        <label className="sel" title={`Mutlak bakiyesi ${para.format(esik)} TL altındakiler (Genel Ayarlar › cari.icmal_esik)`}>
+          <input type="checkbox" checked={kucukGizle} onChange={e => setKucukGizle(e.target.checked)} /> Küçük bakiyeleri gizle (&lt; {para.format(esik)})</label>
         <label className="sel"><input type="checkbox" checked={pasif} onChange={e => degistir({ pasif: e.target.checked ? '1' : '' })} /> Pasifler dahil</label>
         <span className="sp" />
         {yukleniyor && <span className="ki-soluk">hesaplanıyor…</span>}
@@ -181,6 +203,16 @@ export function CariIcmali() {
                 Tutarlar hareketin kendi kuruyla TL karşılığı; satırın ▸ işareti kendi para birimini ve yaşlandırmayı açar.
                 Personel cari hesapları kapsam dışı. Toplam bakiye: {para.format(satirlar.reduce((s, c) => s + c.bakiye, 0))}
               </div>
+              {kucukler.length > 0 && (
+                <div className="ci-kucuk">
+                  <span>🪙 <b>{kucukler.length}</b> cari {para.format(esik)} TL altında (toplam {paraYaz(kucukler.reduce((s, c) => s + c.bakiye, 0))}
+                    {' · '}{kucukler.filter(c => c.bakiye > 0).length} borçlu, {kucukler.filter(c => c.bakiye < 0).length} alacaklı){kucukGizle ? ' - listede gizli' : ''}.</span>
+                  <button type="button" onClick={() => setKucukGizle(g => !g)}>{kucukGizle ? 'Göster' : 'Gizle'}</button>
+                  {veri.kucuk.kapatabilir && (
+                    <button type="button" className="d bir" title="Eşik altındaki her cariye kuruş farkı kasa işlemi yazar (gider / gelir kalemi)"
+                            onClick={() => setKurusModal(true)}>Kuruş farklarını kapat…</button>)}
+                </div>
+              )}
             </>}
             {sekme === 'yas' && <YaslandirmaSekmesi v={veri} />}
             {sekme === 'kir' && <KirilimSekmesi v={veri} />}
@@ -188,12 +220,28 @@ export function CariIcmali() {
           </div>
         </div>
       </>)}
+      {veri && kurusModal && (
+        <KurusKapatModali v={veri} kucukler={kucukler} kapsam={kapsam} temsilci={temsilci}
+                          onKapat={() => setKurusModal(false)}
+                          onTamam={() => { setKurusModal(false); yenile() }} />
+      )}
     </div>
   );
 }
 
 /** Cari icmaline özgü: kapsam düğmeleri, grup / ara toplam satırları, iki sütunlu kutular, A4. */
 const CARI_ICMAL_STILI = `
+.ci-kucuk { display:flex; align-items:center; gap:10px; margin:6px 0 2px; padding:6px 10px; border:1px solid #edd38b; background:#fff8e1; border-radius:4px; font-size:12px; color:#7a5407 }
+.ci-kucuk button { font-size:11.5px }
+.kk-alan { display:grid; grid-template-columns:150px 1fr; gap:8px 10px; align-items:center; margin-bottom:8px }
+.kk-alan label { color:var(--soluk,#6b7a8b); font-size:12px }
+.kk-alan input[type=text], .kk-alan input[type=number], .kk-alan input[type=date] { border:1px solid var(--cizgi,#cdd6e0); border-radius:3px; padding:4px 6px; font-size:12.5px }
+.kk-ozet { margin:8px 0; padding:8px 10px; background:var(--yuz2,#f3f6fa); border-radius:4px; font-size:12px }
+.kk-liste { max-height:220px; overflow:auto; border:1px solid var(--cizgi,#cdd6e0); border-radius:3px; margin-top:6px }
+.kk-liste table { width:100%; border-collapse:collapse; font-size:11.5px }
+.kk-liste td, .kk-liste th { padding:3px 8px; border-bottom:1px solid var(--cizgi2,#e3e9f0); white-space:nowrap }
+.kk-liste th { text-align:left; color:var(--soluk); font-size:10.5px; position:sticky; top:0; background:#fff }
+.kk-liste td.sag, .kk-liste th.sag { text-align:right }
 .ci-tablo th.ci-sirali { cursor: pointer; user-select: none; white-space: nowrap }
 .ci-tablo th.ci-sirali:hover { color: var(--vurgu, #1f6fbf) }
 .hi-serit select, .hi-serit input[type=date] { border:1px solid var(--cizgi,#cdd6e0); border-radius:3px; font-size:12px; padding:1px 4px; }

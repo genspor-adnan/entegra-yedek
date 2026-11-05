@@ -503,6 +503,17 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Satış', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 90,
     ic: '🧾', yetkiKodu: 'belge.satis.ayar',
   },
+  {
+    // FATURA AYARLARI (1270, kullanıcı 05.11.2026): şube kartının e-Belge sekmesi buraya taşındı - üstte şube
+    //   seçimi, altında o şubenin e-Belge kimliği + seri / XSLT / tür ayarları (FaturaAyarlari.tsx).
+    //   HBYS'de Satış grubu gizli (hastane hastaya / kuruma fatura keser, Kurumlar & Sigorta'da): orada
+    //   Kurumlar & Sigorta › Ayarlar, ERP'de Satış › Ayarlar (erpMenuGrup + erpMenuAltGrup).
+    kaynak: 'fatura-ayarlar', rota: 'fatura-ayarlar', ozelSayfa: true,
+    baslik: 'Fatura Ayarları', yol: 'Satış › Ayarlar › Fatura Ayarları',
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Fatura Ayarları', menuSira: 95,
+    erpMenuGrup: 'Satış', erpMenuAltGrup: 'Ayarlar', erpMenuSira: 91,
+    ic: '📨', yetkiKodu: 'satis.fatura_ayar',
+  },
   // İK AYARLARI EKRANI KALDIRILDI (kullanici: "İK Ayarlarinda bolum ve gorevi
   //   kaldir"). Ekranin TEK icerigi `taraf.departman` ve `taraf.gorev` kod
   //   listeleriydi; ikisi de "Yönetim › Bölüm / Görev" ekranindaki GERCEK

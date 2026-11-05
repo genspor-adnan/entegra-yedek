@@ -1,4 +1,4 @@
-import { basHarfler } from '../basHarfler';
+﻿import { basHarfler } from '../basHarfler';
 import type { ReactNode } from 'react';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
@@ -331,6 +331,8 @@ export function KartKimlikSeridi({
                             + (kaynak === 'stok' ? ' kaid-stok' : '')
                             // REÇETE (kullanıcı 04.11.2026): Ağaç Kodu, Çıktı Miktarı, Durum yarım genişlik.
                             + (kaynak === 'urun-agaci' ? ' kaid-recete' : '')
+                            // ÜRETİM EMRİ (kullanıcı 05.11.2026): Mamul / Ürün Ağacı geniş, kalan altı dar (tema.css kaid-emir).
+                            + (kaynak === 'uretim-emri' ? ' kaid-emir' : '')
                             // ORDER (968 mockup): ilaç / hizmet geniş.
                             + (kaynak === 'yatis-order' ? ' kaid-order' : '')
                             // GÖZ MUAYENESİ (970 mockup): hasta geniş.

@@ -120,10 +120,13 @@ export function sekmeleriKur(secenek: {
    * mockup'taki sirayi kullanir - hekimin is akisi budur.
    */
   sekmeSirasi?: string[];
+  /** Sekme BAŞLIĞI yeniden adlandırma (1270 Fatura Ayarları: katalog grubu "e-Belge" ekranda "Genel").
+      Anahtar değişmez; yalnız görünen ad. */
+  sekmeBasliklari?: Record<string, string>;
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
-          gizliDetaylar, ekSekmeler, sekmeSirasi,
+          gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari,
           detaySatirlari = () => [] } = secenek;
   // HESAP (1157, mockup banka_hareketleri.html): banka sözleşmesi / API onay formu.
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap';
@@ -341,6 +344,7 @@ export function sekmeleriKur(secenek: {
     s.sort((a, b) => yer(a.baslik) - yer(b.baslik));
   }
 
+  if (sekmeBasliklari) return s.map(x => sekmeBasliklari[x.baslik] ? { ...x, baslik: sekmeBasliklari[x.baslik] } : x);
   return s;
 }
 

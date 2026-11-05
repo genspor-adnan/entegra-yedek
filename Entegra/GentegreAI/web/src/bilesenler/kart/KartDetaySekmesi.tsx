@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
@@ -33,6 +33,7 @@ export interface KartDetaySekmesiOzellikleri {
                                       salt?: boolean; ekleGizli?: boolean;
                                       /** YALNIZ gridde gizli - modalde durur. */
                                       gridGizli?: string[];
+                                      ustSuzgec?: Record<string, string>;
                                       satirAc?(satir: Record<string, unknown>): void }>;
   satirKategori: { id: number; agac: number[]; ad: string } | null;
   setSatirKategori(v: { id: number; agac: number[]; ad: string } | null): void;
@@ -253,17 +254,23 @@ export function KartDetaySekmesi({
           //   tarifeyle sinirlanir - SGK sozlesmesine Özel tarifesi secmek
           //   sessiz yanlis fiyatlandirmadir. Kurum turu ayri bir 1:1 detayda
           //   (`kurumRolu`) durdugu icin satirdan degil BURADAN gecer.
-          ustSuzgec={kaynak === 'kurum' && aktif.detay.ad === 'sozlesmeler'
-            ? (() => {
-                const tur = Number(detaylar.kurumRolu?.guncel[0]?.tur ?? 0);
-                const tarife = kurumTarifeTipi(tur);
-                // SUT LISTESI HER ZAMAN SUT TARIFESI (3, kullanici): kurum
-                //   turunden bagimsiz - alanin tanimi zaten "SGK'nin odedigi
-                //   bedel". Fiyat listesi ise kurum turune gore daralir.
-                return { ...(tarife ? { fiyatListesiId: String(tarife) } : {}),
-                         sgkFiyatListesiId: '3' };
-              })()
-            : undefined}
+          // EKRANIN DIS SUZGECI (1264): detaySecenekleri[ad].ustSuzgec - üretim emri zaman
+          //   satırının operasyonu kendi emrine daralır. Kurum özel kuralı üstüne yazılır.
+          ustSuzgec={(() => {
+            const dis = detaySecenekleri?.[aktif.detay.ad]?.ustSuzgec;
+            const kurum = kaynak === 'kurum' && aktif.detay.ad === 'sozlesmeler'
+              ? (() => {
+                  const tur = Number(detaylar.kurumRolu?.guncel[0]?.tur ?? 0);
+                  const tarife = kurumTarifeTipi(tur);
+                  // SUT LISTESI HER ZAMAN SUT TARIFESI (3, kullanici): kurum
+                  //   turunden bagimsiz - alanin tanimi zaten "SGK'nin odedigi
+                  //   bedel". Fiyat listesi ise kurum turune gore daralir.
+                  return { ...(tarife ? { fiyatListesiId: String(tarife) } : {}),
+                           sgkFiyatListesiId: '3' };
+                })()
+              : undefined;
+            return dis || kurum ? { ...dis, ...kurum } : undefined;
+          })()}
           // SUZGEC SUNUCUDA yalniz SAYFALI detayda (526); sayfasiz detaylar
           //   bugunku istemci suzmesini surdurur.
           onSuzgec={aktif.detay.sayfaBoyu

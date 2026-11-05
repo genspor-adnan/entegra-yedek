@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
@@ -60,7 +60,7 @@ interface Props {
    */
   onBasvuruAc?(tarafId: number, unvan: string): void;
   /** Bir GRUP sekmesinin icerigini sarmalar - ekran o sekmeye alt sekme cubugu
-      ya da ek bolum ekleyebilir (Firma Bilgileri'nde e-Belge sekmesi: Genel /
+      ya da ek bolum ekleyebilir (Fatura Ayarları'nda e-Belge sekmesi: Genel /
       Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
   sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode,
                     deger: Record<string, Deger>,
@@ -195,6 +195,9 @@ interface Props {
                                       salt?: boolean; ekleGizli?: boolean;
                                       /** YALNIZ gridde gizli - modalde durur. */
                                       gridGizli?: string[];
+                                      /** DIŞ SÜZGEÇ (1264): alan adı -> lookup `ust_id` değeri; satır combosu kartın
+                                       *  başka bir yerindeki değere (ör. emrin kendisi) göre daralır. */
+                                      ustSuzgec?: Record<string, string>;
                                       /** Satır ✎ / çift tık: genel satır penceresi yerine ekranın penceresi. */
                                       satirAc?(satir: Record<string, unknown>): void }>;
   /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
@@ -221,6 +224,8 @@ interface Props {
   }[];
   /** Sekme sirasi (basliklara gore) - mockup sirasi. */
   sekmeSirasi?: string[];
+  /** Sekme başlığı yeniden adlandırma (1270: "e-Belge" → "Genel"); anahtar ve sekmeSarmalayici başlığı değişmez. */
+  sekmeBasliklari?: Record<string, string>;
   /**
    * DİKEY AŞAMALI GEZİNTİ (göz kartı v4): sekmeler üstte yatay değil SOLDA, aşama
    * başlıkları altında gruplu. Başlığı `null` olan grup başlıksız (Özet gibi tek öğe).
@@ -271,6 +276,11 @@ interface Props {
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
+  /** YALNIZ BU SEKMELER (1270, Fatura Ayarları: şube kartının yalnız e-Belge sekmesi). Diğer alan grupları ve
+      detaylar gizli sayılır; değerleri yine okunur ve kaydedilir (satırın tamamı). */
+  yalnizSekmeler?: string[];
+  /** "⏰ Hatırlat" düğmesi çizilmez (1270 Fatura Ayarları: ayar ekranında kayda bağlı hatırlatma anlamsız). */
+  hatirlatYok?: boolean;
   /**
    * DISARIDAN TAZELEME: sayi degisince kart sunucudan YENIDEN okunur. Ekranin
    * kendi dugmeleri (tani ekle, sablon uygula, tumu normal...) sunucuda satir
@@ -347,10 +357,10 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar: gizliDetaylarHam, ekSekmeler, sekmeSirasi, sekmeBasliklari, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
-                          gizliAlanlar, gizliSekmeler, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
+                          gizliAlanlar, gizliSekmeler: gizliSekmelerHam, yalnizSekmeler, hatirlatYok, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
   const { kullanici } = useOturum();
   // İÇERİĞE GÖRE SABİT (kullanıcı 16.10.2026: "hizmet ara ekranında yazdıklarım gitti.. belli aralıklarla
   //   refresh oluyor"): çağıranlar bu nesneleri çizimde yeniden kuruyor (URL'den gelen randevu saati /
@@ -870,6 +880,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
 
   
 /** Mikrobiyoloji katalog kartlari - serit duzeni mockup'la ayni (dort sutun). */
+  // YALNIZ BU SEKMELER (1270): listede olmayan her grup gizli, her detay gizli sayılır.
+  const gizliSekmeler = useMemo(() => yalnizSekmeler
+    ? [...new Set([...(gizliSekmelerHam ?? []), ...gruplar.map(([ad]) => ad).filter(ad => !yalnizSekmeler.includes(ad))])]
+    : gizliSekmelerHam, [gizliSekmelerHam, yalnizSekmeler, gruplar]);
+  const gizliDetaylar = useMemo(() => yalnizSekmeler
+    ? [...new Set([...(gizliDetaylarHam ?? []), ...(meta?.detaylar ?? []).map(d => d.ad).filter(ad => !yalnizSekmeler.includes(ad))])]
+    : gizliDetaylarHam, [gizliDetaylarHam, yalnizSekmeler, meta]);
 
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
@@ -878,14 +895,14 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
                          gizliDetaylar,
                          ekSekmeler: ekSekmeler?.map(e => ({ anahtar: e.anahtar,
                                                              baslik: e.baslik, yenideDe: e.yenideDe })),
-                         sekmeSirasi,
+                         sekmeSirasi, sekmeBasliklari,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
                          //   isaret degisince sekme ANINDA gorunur/kaybolur.
                          detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
      gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, ekSekmeler,
-     sekmeSirasi, detaylar]);
+     sekmeSirasi, sekmeBasliklari, detaylar]);
   // TAM EŞLEŞME ÖNCE, sonra baş eşleşmesi: "Tanı" "Tanılar"ı değil "Tanı"yı açmalı.
   const sekmeyeGitBaslik = (b: string) => {
     const s = sekmeler.find(x => x.baslik === b) ?? sekmeler.find(x => x.baslik.startsWith(b));
@@ -1694,7 +1711,7 @@ Yine de yeni kayıt eklensin mi?`);
           {!yeniMi && ekAraclar?.(deger)}
           {/* KAYITTAN HIZLI HATIRLATMA (1139, mockup kisisel_hatirlatici.html (4)): her kayıtlı kartta.
               Bağlı kayıt = kartın rotası (adres çubuğu /<rota>/<id>; değilse kaynak adı) + id. */}
-          {!yeniMi && Number(id) > 0 && (() => {
+          {!yeniMi && !hatirlatYok && Number(id) > 0 && (() => {
             const yol = window.location.pathname.replace(/^\/+/, '');
             const rota = yol.endsWith(`/${id}`) ? yol.slice(0, -String(id).length - 1) : kaynak;
             const ad = String(deger.unvan || [deger.ad, deger.soyad].filter(Boolean).join(' ') || deger.baslik

@@ -5,9 +5,6 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { ListeSatiri } from '../api/sozlesme';
 import { GenForm } from '../bilesenler/GenForm';
-import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
-import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
-import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 import { c } from '../dil/ceviri';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../bilesenler/sekmeBaglami';
 
@@ -18,23 +15,8 @@ import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../bilesenler
 //   tiklanacak bir sey varmis izlenimi veriyordu. Sayfa dogrudan sube
 //   listesidir.
 
-/**
- * Sube kartinin e-Belge sekmesindeki ALT sekmeler (kullanici). Genel = kartin
- * kendi alanlari; digerleri Ayarlar'dan tasinan bolumler.
- *
- * TUR SEKMELERI MUKELLEFIYETE BAGLI (172): `mukellefAlani` isaretli degilse
- * sekme hic cizilmez - mukellefi olmadigimiz turun servis adresini ve sabit
- * notunu doldurmak ise yaramiyor, ekrani kalabaliklastiriyordu.
- */
-const EBELGE_ALT = [
-  { anahtar: 'genel',     baslik: 'Genel' },
-  { anahtar: 'seri',      baslik: 'Seri Bilgileri' },
-  { anahtar: 'xslt',      baslik: 'XSLT' },
-  { anahtar: 'efatura',   baslik: 'e-Fatura',        mukellefAlani: 'efaturaMukellef' },
-  { anahtar: 'earsiv',    baslik: 'e-Arşiv Fatura',  mukellefAlani: 'earsivMukellef' },
-  { anahtar: 'eirsaliye', baslik: 'e-İrsaliye',      mukellefAlani: 'eirsaliyeMukellef' },
-  { anahtar: 'esmm',      baslik: 'e-SMM',           mukellefAlani: 'esmmMukellef' },
-] as const;
+// e-BELGE SEKMESİ KARTTAN ÇIKTI (1270, kullanıcı 05.11.2026): Satış › Ayarlar › Fatura Ayarları
+//   (FaturaAyarlari.tsx + bilesenler/ebelge/EBelgeSekmesi.tsx). Alanlar katalogda kalır, kart gizler.
 
 /** Kart seridinde kalan alanlar: ünvan, kısa ad, durum. Kimligin geri kalani
     kartin "Kimlik" sekmesinde - serit karti TANIMLAR, doldurmaz. */
@@ -212,8 +194,6 @@ export function SubeKarti() {
   const id: number | 'yeni' = ham === 'yeni' ? 'yeni' : Number(ham);
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   const git = useNavigate();
-  /** e-Belge sekmesinin acik alt sekmesi (kart her acildiginda Genel'den baslar). */
-  const [ebelgeAlt, setEbelgeAlt] = useState<string>('genel');
   /** Sekme başlığı = şubenin kısa adı (yüklenince); yeni kayıtta "Yeni Şube". */
   const [ad, setAd] = useState('');
   useEffect(() => {
@@ -221,51 +201,11 @@ export function SubeKarti() {
   }, [ekranSekmesi, id, ham, ad]);
   const kapat = () => { if (ekranSekmesi) ekranSekmesi.kapat(); else git('/sube') };
 
-  /**
-   * Kartin "e-Belge" sekmesine ALT SEKME cubugu takar (kullanici): Genel /
-   * Seri Bilgileri / XSLT / tur ayarlari. Genel kartin kendi alanlaridir
-   * (gonderici, mukellef hesabi, test ortami, mukellefiyet); digerleri
-   * Ayarlar ekranindan tasinan bolumler.
-   *
-   * YENI kayitta yalniz Genel calisir: seri/XSLT/tur ayarlari kartin id'sine
-   * bagli olmasa da, once subenin kaydedilmesi akisi anlasilir kiliyor.
-   */
-  const ebelgeSekmesi = (sekmeBasligi: string, icerik: React.ReactNode,
-                         deger: Record<string, unknown>) => {
-    if (sekmeBasligi !== 'e-Belge') return icerik;
-    // Mukellefiyet bayragi kartin GUNCEL degerinden okunur: kutu isaretlenince
-    //   sekme kaydetmeyi beklemeden gorunur.
-    const gorunur = EBELGE_ALT.filter(
-      b => !('mukellefAlani' in b) || Boolean(deger[b.mukellefAlani]));
-    // Acik sekme gizlendiyse Genel'e don - yoksa bos icerik kalirdi.
-    const acik = gorunur.some(b => b.anahtar === ebelgeAlt) ? ebelgeAlt : 'genel';
-    return (
-      <>
-        {/* Alt bolumler BUTON gorunumunde (kullanici) - sekme cizgisi ana
-            sekmelerle karisiyordu. */}
-        <div style={{ display: 'flex', gap: 6, margin: '-6px 0 8px' }}>
-          {gorunur.map(b => (
-            <button key={b.anahtar} type="button"
-                    className={`d${b.anahtar === acik ? ' bir' : ''}`}
-                    onClick={() => setEbelgeAlt(b.anahtar)}>
-              {b.baslik}
-            </button>
-          ))}
-        </div>
-        {acik === 'genel' && icerik}
-        {acik === 'seri' && <SeriKurallari />}
-        {acik === 'xslt' && <XsltSablonlari />}
-        {(['efatura', 'earsiv', 'eirsaliye', 'esmm'] as EBelgeTuru[]).includes(acik as EBelgeTuru)
-          && <TurAyarlari tur={acik as EBelgeTuru} />}
-      </>
-    );
-  };
-
   return (
     <GenForm key={String(id)} kaynak="sube" id={id} sayfaKipi
              baslik={id === 'yeni' ? 'Yeni Şube' : 'Firma / Şube'}
              seritAlanlari={SERIT_ALANLARI}
-             sekmeSarmalayici={ebelgeSekmesi}
+             gizliSekmeler={['e-Belge']}
              onYuklendi={d => setAd(String(d.ad || d.unvan || ''))}
              onKapat={kapat}
              onKaydedildi={() => { window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: SUBE_KAYNAGI })); kapat() }} />

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Gentegre.Veri;
 using Npgsql;
 
@@ -51,7 +51,9 @@ public sealed class GocUygulayiciTestleri : IAsyncLifetime
         if (_yonetim is not null)
         {
             NpgsqlConnection.ClearAllPools();
-            try { await _yonetim.CalistirAsync($"drop database if exists {_db} with (force)", null); } catch { }
+            // Sessiz catch 72 artık DB biriktirdi (04.11.2026): düşmezse SEBEBİ görünsün.
+            try { await _yonetim.CalistirAsync($"drop database if exists {_db} with (force)", null); }
+            catch (Exception h) { Console.Error.WriteLine($"[GocUygulayiciTestleri] {_db} düşürülemedi: {h.Message}"); }
             await _yonetim.DisposeAsync();
         }
         try { Directory.Delete(_dizin, true); } catch { }

@@ -172,6 +172,10 @@ export function GenelAyarlar() {
                 {/* CARİ KOD GRUBU (1191, 26.10.2026): Delphi kod grubu gibi - kod boş bırakılınca grubun sıradaki kodu. */}
                 {alan('cari.kod_grubu_musteri', 'Müşteri kodu grubu: kod boş bırakılırsa grubun sıradaki kodu verilir, ör. 120.01 → 120.01.605 (boş = kayıt no)')}
                 {alan('cari.kod_grubu_tedarikci', 'Tedarikçi kodu grubu: kod boş bırakılırsa grubun sıradaki kodu verilir, ör. 320.01 → 320.01.305 (boş = kayıt no)')}
+                {/* KÜÇÜK BAKİYE (1269, 05.11.2026): Cari İcmali eşik altını gizler; "Kuruş farklarını kapat" bu kalemlere yazar. */}
+                {alan('cari.icmal_esik', 'Cari İcmali: küçük bakiye eşiği, TL — altı gizlenir, dipte sayılır (boş = 0,10)')}
+                {alan('cari.kurus_gider_id', 'Kuruş farkı kapatma: gider kalemi (masraf) no — borçlu cari silinirken (boş = kapatmada seçilir)')}
+                {alan('cari.kurus_gelir_id', 'Kuruş farkı kapatma: gelir kalemi (hizmet) no — alacaklı cari silinirken (boş = kapatmada seçilir)')}
               </div>
             </div>
 

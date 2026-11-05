@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek;
+﻿using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Npgsql;
@@ -112,6 +112,11 @@ public sealed class EFaturaVerisi
     public string Uuid { get; set; } = "";
     public string EBelgeNo { get; set; } = "";
     public string AliciAlias { get; set; } = "";
+    /// <summary>
+    /// AKTARILAN e-BELGE (1265): Delphi'nin gönderdiği UBL olduğu gibi (zipli ise açılmış). Görünüm ve XML
+    /// indirme yeniden üretilen UBL yerine bunu kullanır - GİB'e giden asıl belge budur.
+    /// </summary>
+    public string AktarimUbl { get; set; } = "";
 
     public List<EFaturaSatiri> Satirlar { get; } = [];
     public List<(string No, DateTime Tarih)> IadeReferanslari { get; } = [];
@@ -280,6 +285,26 @@ public sealed class EFaturaVerisi
     }
 
     // -------------------------------------------------------------- okuma ----
+    /// <summary>Delphi EBELGE.UBL_XML_ZIP = SQL Server COMPRESS (gzip); bozuksa boş.</summary>
+    private static string GzipAc(byte[] zip)
+    {
+        try
+        {
+            using var g = new System.IO.Compression.GZipStream(new MemoryStream(zip), System.IO.Compression.CompressionMode.Decompress);
+            using var r = new StreamReader(g, System.Text.Encoding.Unicode, detectEncodingFromByteOrderMarks: true);
+            var m = r.ReadToEnd();
+            // COMPRESS nvarchar'ı UTF-16LE sıkıştırır; UTF-8 kaynak da olabilir (Delphi WideMemo) - XML başlığıyla doğrulanır.
+            if (!m.Contains("<Invoice", StringComparison.Ordinal) && !m.Contains("<DespatchAdvice", StringComparison.Ordinal))
+            {
+                using var g2 = new System.IO.Compression.GZipStream(new MemoryStream(zip), System.IO.Compression.CompressionMode.Decompress);
+                using var r2 = new StreamReader(g2, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                m = r2.ReadToEnd();
+            }
+            return m.Trim();
+        }
+        catch (Exception h) when (h is InvalidDataException or IOException) { return ""; }
+    }
+
     public static async Task<EFaturaVerisi> OkuAsync(NpgsqlConnection b, NpgsqlTransaction? tx,
                                                      int belgeId, CancellationToken iptal)
     {
@@ -377,9 +402,11 @@ public sealed class EFaturaVerisi
             TasiyiciUnvan = v.TasiyiciUnvan, TasiyiciVkno = v.TasiyiciVkno,
         };
 
-        // Son giden e_belge kaydı.
+        // Son giden e_belge kaydı. Aktarılan satırda (aktarim_kaynak 1) Delphi'nin UBL'i de okunur (1265).
         await using (var k = b.Komut("""
-            select id, belge_turu, coalesce(uuid, '') uuid, coalesce(belge_no, '') belge_no, coalesce(alici_alias, '') alias
+            select id, belge_turu, coalesce(uuid, '') uuid, coalesce(belge_no, '') belge_no, coalesce(alici_alias, '') alias,
+                   case when aktarim_kaynak = 1 then coalesce(ubl_xml, '') else '' end ubl,
+                   case when aktarim_kaynak = 1 then ubl_xml_zip end ubl_zip
               from public.e_belge where belge_id = @p0 and yon = 1 order by id desc limit 1
             """, tx, belgeId))
         await using (var o = await k.ExecuteReaderAsync(iptal))
@@ -387,6 +414,8 @@ public sealed class EFaturaVerisi
             {
                 veri.EBelgeId = o.GetInt64(0); veri.ETur = o.GetInt16(1); veri.Uuid = o.GetString(2);
                 veri.EBelgeNo = o.GetString(3); veri.AliciAlias = o.GetString(4);
+                veri.AktarimUbl = o.GetString(5);
+                if (veri.AktarimUbl == "" && !o.IsDBNull(6)) veri.AktarimUbl = GzipAc((byte[])o.GetValue(6));
             }
 
         // Kod adları (istisna / tevkifat / ihraç kayıtlı).

@@ -1,4 +1,4 @@
-namespace Gentegre.Aktarim.Ajan;
+﻿namespace Gentegre.Aktarim.Ajan;
 
 /// <summary>
 /// Kök tabloya bağlı alt tablo. Sunucu (fn_aktar_*) pakette olmayan alt satırı SİLER:
@@ -18,9 +18,28 @@ public sealed record AltTablo(string Tablo, string UstSorgu, string AltFiltre)
 /// <param name="Tarih">Hareket tablosu: tam yüklemede bu kolon &gt;= hareket_baslangic.</param>
 /// <param name="TamSira">Tam yüklemede kök sırası (bağlı kişi üst cariden sonra gelsin).</param>
 /// <param name="Sayfa">Paket başına kök sayısı.</param>
-public sealed record Grup(int Sira, string Kok, AltTablo[] Altlar, string? Tarih = null, string? TamSira = null, int Sayfa = 500)
+/// <param name="Depo">
+/// Tablolar DEPO veritabanında (&lt;ANA&gt;_GENDEPO; 1265): ikinci bağlantıyla okunur, CT versiyonu
+/// depo DB'sinin kendi sayacıdır. Depo DB'si yoksa / CT kapalıysa grup atlanır (ajan uyarır).
+/// </param>
+/// <param name="Filtre">
+/// Kök tablonun yalnız bir KESİTİ aktarılır (1266: DOKUMLER'in GRUBU='XSLT' satırları): tam yükleme, artımlı
+/// okuma ve mutabakat listesi bu WHERE ile daralır. CT'den gelen ama kesit dışı kalan anahtar "silinmiş" sayılır
+/// (sunucuda karşılığı yoksa zararsız D).
+/// </param>
+public sealed record Grup(int Sira, string Kok, AltTablo[] Altlar, string? Tarih = null, string? TamSira = null, int Sayfa = 500,
+                          bool Depo = false, string? Filtre = null)
 {
     public IEnumerable<string> Tablolar => Altlar.Select(a => a.Tablo).Prepend(Kok);
+
+    /// <summary>Tarih sınırı + kesit süzgeci birleşik WHERE (ikisi de yoksa null).</summary>
+    public string? Nerede(bool tarihli)
+    {
+        var p = new List<string>();
+        if (tarihli && Tarih is not null) p.Add($"[{Tarih}] >= @bas");
+        if (Filtre is not null) p.Add("(" + Filtre + ")");
+        return p.Count == 0 ? null : string.Join(" AND ", p);
+    }
 }
 
 public static class Toplamlar
@@ -68,5 +87,10 @@ public static class Toplamlar
             AltTablo.Basit("STOKIZLEME", "BASLIKID"),
         ], Tarih: "FATURATARIH", Sayfa: 200),
         new(13, "KASA", [], Tarih: "ISLEMTARIHI", Sayfa: 2000),
+        // e-BELGE GEÇMİŞİ (1265): depo DB'sinden; UBL (zipli) satır başına birkaç KB - sayfa küçük.
+        //   Tam yüklemede EKLEMETARIHI >= hareket_baslangic; belgesi web'de olmayanı sunucu atlar.
+        new(14, "EBELGE", [AltTablo.Basit("EBELGEMESAJ", "EBELGEID")], Tarih: "EKLEMETARIHI", Sayfa: 200, Depo: true),
+        // e-BELGE XSLT ŞABLONLARI (1266): DOKUMLER'in yalnız XSLT kesiti; içerik büyük (100 KB - 1 MB), sayfa küçük.
+        new(15, "DOKUMLER", [], Sayfa: 10, Filtre: "[GRUBU] = 'XSLT'"),
     ];
 }

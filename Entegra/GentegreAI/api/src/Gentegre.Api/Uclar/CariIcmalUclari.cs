@@ -3,6 +3,7 @@ using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -26,6 +27,23 @@ public static class CariIcmalUclari
 {
     /// <summary>Ekran kodu (1154) - haklarını kasa.finans'tan kopyalar.</summary>
     private const string Kod = "finans.cari_icmali";
+    /// <summary>Kuruş farkı kapatma aksiyonu (1269).</summary>
+    private const string AksiyonKurusKapat = "finans.kurus_kapat";
+    /// <summary>Kasa işlem türleri (1269): 60 gider (müşteri borcu silinir), 62 gelir (cari alacağı silinir).</summary>
+    private const int TurKurusGider = 60, TurKurusGelir = 62;
+    private const decimal VarsayilanEsik = 0.10m;
+
+    public sealed record KurusKapatIstegi(decimal? Esik, DateTime? Tarih, int? GiderId, int? GelirId, string? Aciklama,
+                                          string? Kapsam, int? Temsilci, int[]? TarafIdler);
+
+    /// <summary>Kuruş sınırı: 0,005 &lt; |bakiye| &lt; eşik (eşiğe eşit olan küçük sayılmaz).</summary>
+    private static bool Kucuk(decimal bakiye, decimal esik) => Math.Abs(bakiye) > 0.005m && Math.Abs(bakiye) < esik;
+
+    private static async Task<decimal> EsikAsync(Npgsql.NpgsqlConnection b, CancellationToken iptal)
+    {
+        var e = await AyarDeposu.OndalikAsync(b, null, "cari.icmal_esik", iptal);
+        return e is > 0 ? e.Value : VarsayilanEsik;
+    }
 
     private const string Satis = "15, 16, 17";
     private const string Alis = "11, 12, 13";
@@ -314,11 +332,26 @@ public static class CariIcmalUclari
             var temsilciler = carilar.Where(c => c.TemsilciId > 0).GroupBy(c => c.TemsilciId)
                 .Select(g => new { id = g.Key, ad = g.First().Temsilci }).OrderBy(x => x.ad).ToList();
 
+            // KÜÇÜK BAKİYE (1269, kullanıcı 05.11.2026): eşik altındakiler sayılır; ekran gizler, dipte tek satır yazar.
+            var esik = await EsikAsync(b, iptal);
+            var kucukler = carilar.Where(c => Kucuk(c.Bakiye, esik)).ToList();
+            var giderId = (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gider_id", iptal) ?? 0);
+            var gelirId = (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gelir_id", iptal) ?? 0);
+            var kucuk = new
+            {
+                esik, cari = kucukler.Count, toplam = kucukler.Sum(c => c.Bakiye),
+                borclu = kucukler.Count(c => c.Bakiye > 0), alacakli = kucukler.Count(c => c.Bakiye < 0),
+                giderId, gelirId,
+                giderAdi = giderId > 0 ? await b.TekDegerAsync<string>("select coalesce(kod || ' ', '') || ad from public.masraf where id = @p0", null, [giderId], iptal) ?? "" : "",
+                gelirAdi = gelirId > 0 ? await b.TekDegerAsync<string>("select coalesce(kod || ' ', '') || ad from public.hizmet where id = @p0", null, [gelirId], iptal) ?? "" : "",
+                kapatabilir = baglam.Yetkiler.AksiyonVar(AksiyonKurusKapat) && baglam.SubeYazma,
+            };
+
             return Results.Ok(new
             {
                 bas = baslangic, bit = bitis, sadeceTedarikci,
                 kapsam = kapsamKod switch { 1 => "musteri", 2 => "tedarikci", _ => "hepsi" },
-                ozet, yaslandirma, nakit, kirilim, dikkat, temsilciler,
+                ozet, yaslandirma, nakit, kirilim, dikkat, temsilciler, kucuk,
                 carilar = carilar.Select(c => new
                 {
                     c.Id, c.Kod, c.Ad, c.Musteri, c.Tedarikci, c.Durum, c.Temsilci, c.Kategori, c.Il,
@@ -328,6 +361,73 @@ public static class CariIcmalUclari
                 }),
                 izlemeNo = baglam.IzlemeNo,
             });
+        });
+
+        // ====================================================== KURUŞ FARKI KAPAT (1269) ===
+        // Eşik altındaki her cariye bir kasa işlemi: borçluysa 60 (cari alacak + gider), alacaklıysa 62 (cari borç +
+        //   gelir). Normal kasa işlemi: fişli, loglu, ekstrede görünür, iptal edilebilir. Her cari kendi işleminde
+        //   (KasaDeposu.KaydetAsync); biri düşerse öncekiler kalır, sonuç sayar.
+        grup.MapPost("/kurus-kapat", async (KurusKapatIstegi istek, VeriKaynagi veri, KasaDeposu kasa, BaglamCozucu cozucu,
+                                            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste(Kod, Islem.Gor);
+            baglam.AksiyonIste(AksiyonKurusKapat);
+            baglam.YazmaIste();
+            if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak();
+
+            await using var b = await veri.AcAsync(iptal);
+            var esik = istek.Esik is > 0 ? istek.Esik.Value : await EsikAsync(b, iptal);
+            if (esik > 10) throw GentegreHatasi.Dogrulama("Kuruş eşiği 10 TL'den büyük olamaz.", new AlanHatasi("esik", "En fazla 10."));
+            var tarih = (istek.Tarih ?? Saat.Bugun).Date;
+            if (tarih > Saat.Bugun.Date) throw GentegreHatasi.Dogrulama("İleri tarihli kapatma yazılamaz.", new AlanHatasi("tarih", "Bugünden ileri olamaz."));
+            var aciklama = (istek.Aciklama ?? "").Trim();
+            if (aciklama.Length == 0) aciklama = "Kuruş farkı kapatma";
+            if (aciklama.Length > 200) throw GentegreHatasi.Dogrulama("Açıklama en fazla 200 karakter.");
+
+            var sadeceTedarikci = await b.TekDegerAsync<int>("select public.fn_urun_modu(0)::int", null, [], iptal) == 2;
+            var kapsamKod = sadeceTedarikci ? 2 : istek.Kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 };
+            var bugun = Saat.Bugun.Date;
+            object?[] p = [new DateTime(bugun.Year, 1, 1), bugun, kapsamKod, istek.Temsilci ?? 0, baglam.Kapsam.ToArray(), 0];
+            var secim = istek.TarafIdler is { Length: > 0 } ids ? ids.ToHashSet() : null;
+            var hedef = (await CarilarAsync(b, p, iptal))
+                .Where(c => Kucuk(c.Bakiye, esik) && (secim is null || secim.Contains(c.Id))).ToList();
+            if (hedef.Count == 0) throw GentegreHatasi.IsKurali("Eşik altında kapatılacak cari yok.");
+
+            var giderId = istek.GiderId ?? (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gider_id", iptal) ?? 0);
+            var gelirId = istek.GelirId ?? (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gelir_id", iptal) ?? 0);
+            if (hedef.Any(c => c.Bakiye > 0) && (giderId <= 0
+                || await b.TekDegerAsync<int?>("select id from public.masraf where id = @p0", null, [giderId], iptal) is null))
+                throw GentegreHatasi.Dogrulama("Borçlu cariler için gider kalemi (masraf) seçilmeli.", new AlanHatasi("giderId", "Zorunlu."));
+            if (hedef.Any(c => c.Bakiye < 0) && (gelirId <= 0
+                || await b.TekDegerAsync<int?>("select id from public.hizmet where id = @p0", null, [gelirId], iptal) is null))
+                throw GentegreHatasi.Dogrulama("Alacaklı cariler için gelir kalemi (hizmet) seçilmeli.", new AlanHatasi("gelirId", "Zorunlu."));
+
+            var yazilan = 0; decimal toplam = 0; var hatalar = new List<string>();
+            foreach (var c in hedef)
+            {
+                var tutar = Math.Abs(Math.Round(c.Bakiye, 2));
+                var islem = new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    ["tur"] = c.Bakiye > 0 ? TurKurusGider : TurKurusGelir,
+                    ["islemTarihi"] = tarih.AddHours(12),
+                    ["tarafId"] = c.Id,
+                    ["tutar"] = tutar,
+                    ["dovizCinsi"] = "TL",
+                    ["dovizKuru"] = 1m,
+                    ["yerelTutar"] = tutar,
+                    ["aciklama"] = aciklama,
+                    ["girisKaynak"] = 1,
+                };
+                if (c.Bakiye > 0) islem["masrafId"] = giderId; else islem["hizmetId"] = gelirId;
+                try
+                {
+                    await kasa.KaydetAsync(islem, null, new KasaSecenekleri(), baglam.Yazma, iptal);
+                    yazilan++; toplam += c.Bakiye;
+                }
+                catch (GentegreHatasi h) { hatalar.Add($"{c.Kod} {c.Ad}: {h.Message}"); }
+            }
+            return Results.Ok(new { yazilan, toplam, hata = hatalar.Count, hatalar = hatalar.Take(10), izlemeNo = baglam.IzlemeNo });
         });
     }
 }

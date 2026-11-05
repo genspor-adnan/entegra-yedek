@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react';
+﻿import type { ComponentProps } from 'react';
 import type { GenForm } from '../../bilesenler/GenForm';
 import type { ListeTanimi } from '../listeTanimlari';
 import { api } from '../../api/istemci';
@@ -492,6 +492,11 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   // ------------------------------------------- Üretim emri (1253, uretim_emri_v2.html) ----
   // Ön Kontroller (serbest bırakma ön koşulları) ve Üretim Girişleri (emre bağlı üretim fişleri).
   'uretim-emri': {
+    // BASİTTE "Personel / Zaman" YOK (kullanıcı 04.11.2026): basit seviyede işçilik zaman kaydıyla takip
+    //   edilmez, boş sekme durmasın. Standart / denetimli: işçilik maliyeti bu satırlardan doğar (429).
+    gizliDetaylar: () => uretimSeviyesiAnlik() === 'basit' ? ['zaman'] : undefined,
+    // Zaman satırının operasyon seçicisi KENDİ EMRİNE daralır (1264: v_uretim_operasyon_lookup.ust_id = emir).
+    detaySecenekleri: b => kayitli(b.kartId) ? { zaman: { ustSuzgec: { operasyonId: String(b.kartId) } } } : undefined,
     ekSekmeler: b => kayitli(b.kartId) ? [
       { anahtar: 'ozel:emir-on-kontrol', baslik: 'Ön Kontroller',
         ciz: bg => <EmirOnKontrolSekmesi emirId={b.kartId as number} durum={Number(bg.deger.durum ?? 0)} tazele={b.tazeleKayit}

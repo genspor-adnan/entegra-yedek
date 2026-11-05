@@ -169,7 +169,8 @@ public static partial class KaynakKatalogu
                 case e.belge_turu when 1 then 'e-Fatura' when 2 then 'e-Arşiv'
                                   when 7 then 'e-İrsaliye' else '' end
                 """,                           "metin", "e-Belge Türü",
-                                               Hizalama: "orta", Bicim: "rozet", Genislik: SeriKolonEni),
+                                               // e-Arşiv yeşil, e-Fatura sözlükten mavi (kullanıcı 05.11.2026: "amaç farklılık").
+                                               Hizalama: "orta", Bicim: "rozet:e-Arşiv=olumlu", Genislik: SeriKolonEni),
             new("seri",      "e.seri",         "metin", "Seri", Hizalama: "orta", Genislik: SeriKolonEni),
             // 0 = farketmez: senaryo ayrimi olmayan kural her senaryoda gecerli.
             new("senaryo",   """

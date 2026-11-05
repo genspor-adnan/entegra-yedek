@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
 
 namespace Gentegre.Aktarim.Ajan;
 
@@ -16,6 +17,12 @@ public sealed class Ayarlar
     public string AnahtarSifreli { get; set; } = "";
     public string MssqlBaglanti { get; set; } = "";
     public string MssqlBaglantiSifreli { get; set; } = "";
+    /// <summary>
+    /// DEPO veritabanı bağlantısı (e-Belge geçmişi EBELGE / EBELGEMESAJ, 1265). Boşsa ana bağlantının
+    /// veritabanı + "_GENDEPO" (Delphi ULog adlandırma kuralı); depo DB'si yoksa e-Belge adımı atlanır.
+    /// </summary>
+    public string DepoBaglanti { get; set; } = "";
+    public string DepoBaglantiSifreli { get; set; } = "";
     public int YoklamaSn { get; set; } = 5;
     public int NabizSn { get; set; } = 60;
     public int PaketMb { get; set; } = 20;   // sunucu nginx client_max_body_size 25m
@@ -28,6 +35,22 @@ public sealed class Ayarlar
 
     public string GercekAnahtar => Coz(Anahtar, AnahtarSifreli);
     public string GercekBaglanti => Coz(MssqlBaglanti, MssqlBaglantiSifreli);
+
+    /// <summary>Depo bağlantısı: ayarlanmışsa o, yoksa ana bağlantıdan türetilir (&lt;DB&gt;_GENDEPO).</summary>
+    public string GercekDepoBaglanti
+    {
+        get
+        {
+            var d = Coz(DepoBaglanti, DepoBaglantiSifreli);
+            if (d != "") return d;
+            var ana = GercekBaglanti;
+            if (ana == "") return "";
+            var b = new SqlConnectionStringBuilder(ana);
+            if (b.InitialCatalog == "") return "";
+            b.InitialCatalog += "_GENDEPO";
+            return b.ConnectionString;
+        }
+    }
 
     public static Ayarlar Oku(string yol)
     {
@@ -48,6 +71,7 @@ public sealed class Ayarlar
         var n = 0;
         if (a.Anahtar != "") { a.AnahtarSifreli = Sifre(a.Anahtar); a.Anahtar = ""; n++; }
         if (a.MssqlBaglanti != "") { a.MssqlBaglantiSifreli = Sifre(a.MssqlBaglanti); a.MssqlBaglanti = ""; n++; }
+        if (a.DepoBaglanti != "") { a.DepoBaglantiSifreli = Sifre(a.DepoBaglanti); a.DepoBaglanti = ""; n++; }
         File.WriteAllText(yol, JsonSerializer.Serialize(a, Secenek));
         return n;
     }

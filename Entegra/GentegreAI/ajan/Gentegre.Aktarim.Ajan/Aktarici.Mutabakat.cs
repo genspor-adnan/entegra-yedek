@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json.Nodes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -33,9 +33,10 @@ public sealed partial class Aktarici
         var baslangic = DateTime.ParseExact(durum["hareket_baslangic"]?.GetValue<string>() ?? "1900-01-01", "yyyy-MM-dd",
                                             CultureInfo.InvariantCulture);
         var sonuc = new List<MutabakatSonucu>();
-        foreach (var g in Toplamlar.Gruplar.Where(g => !MutabakatDisi.Contains(g.Kok)))
+        var depoVar = await delphi.DepoVarAsync(iptal);
+        foreach (var g in Toplamlar.Gruplar.Where(g => !MutabakatDisi.Contains(g.Kok) && (!g.Depo || depoVar)))
         {
-            string? nerede = g.Tarih is null ? null : $"[{g.Tarih}] >= @bas";
+            var nerede = g.Nerede(tarihli: true);
             SqlParameter[] p = g.Tarih is null ? [] : [new SqlParameter("@bas", baslangic)];
             var idler = await delphi.KimliklerAsync(g.Kok, nerede, null, p, iptal);
 

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taraf Arama — Müşteri/Tedarikçi · Dış Hekim · Personel · Anlaşmalı Kurum (Mockup)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz _ortak/ekran.css, web/src/tema.css, rehber_arama.html) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+    --s-risk:#f7cfcf; --s-risk-t:#7d1f1f;   /* risk aşıldı / anlaşma bitti   */
+    --s-vade:#f6d9c0; --s-vade-t:#8a4a12;   /* vadesi geçen / 30 gün içinde  */
+    --s-aday:#fbe6ae; --s-aday-t:#7a5407;   /* aday / izinde                 */
+    --s-pas:#dcdcdc;  --s-pas-t:#7a7a7a;    /* pasif / ayrılmış              */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+
+  /* mockup görünüm seçici */
+  .secici{max-width:1480px;margin:0 auto 10px;display:flex;gap:4px;align-items:center}
+  .secici b{font-size:11px;color:var(--muted);margin-right:6px}
+  .secici span{padding:5px 12px;border:1px solid var(--line);border-radius:3px;background:linear-gradient(#fff,#eef3f8);font-size:11.5px;cursor:pointer}
+  .secici span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+
+  /* ARKA PLAN: çağıran ekran soluk */
+  .arka{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;position:relative;min-height:900px}
+  .arka .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .arka .ust b{font-size:13.5px}.arka .ust .yol{opacity:.75;font-size:11px}
+  .arka .govde{padding:12px;opacity:.45;filter:grayscale(.3)}
+  .arka .baslik{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px}
+  .arka .alan{border:1px solid var(--line2);border-radius:3px;padding:4px 7px;background:#fbfcfe}
+  .arka .alan .e{font-size:10px;color:var(--muted)}.arka .alan .d{font-size:12px;min-height:15px}
+  .arka .alan.hedef{grid-column:span 2;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .arka .kalem{border:1px solid var(--line2);border-radius:3px;height:560px;background:repeating-linear-gradient(#fff 0 26px,#f6f8fb 26px 27px)}
+  .perde{position:absolute;inset:0;background:rgba(20,40,70,.35)}
+
+  /* PENCERE */
+  .pen{position:absolute;left:50%;top:38px;transform:translateX(-50%);width:min(1180px,96%);background:var(--card);
+    border:1px solid #9fb3c8;border-radius:5px;box-shadow:0 14px 40px rgba(10,30,60,.35);overflow:hidden;display:none;flex-direction:column}
+  .pen.on{display:flex}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px;display:flex;gap:6px;align-items:center}
+  .title .kip{display:flex;gap:2px;background:rgba(255,255,255,.12);border-radius:3px;padding:2px}
+  .title .kip span{padding:2px 8px;border-radius:2px;font-size:10.5px;cursor:pointer;opacity:.8}
+  .title .kip span.on{background:#fff;color:var(--navy);opacity:1;font-weight:bold}
+  .title .x{margin-left:8px;opacity:.8;cursor:pointer;font-weight:normal}
+
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ipucu{margin-left:auto;font-size:10.5px;color:var(--muted);font-style:italic}
+
+  /* arama satırı */
+  .ara{display:flex;gap:6px;padding:8px 10px;align-items:center;border-bottom:1px solid var(--line2);background:#fbfcfe;flex-wrap:wrap}
+  .kutu{flex:1 1 340px;display:flex;align-items:center;border:1px solid var(--accent);box-shadow:0 0 0 2px #d7e7fb;border-radius:3px;background:#fff;padding:0 6px;height:30px}
+  .kutu .ic{color:var(--muted);margin-right:6px;font-size:14px}
+  .kutu input{border:0;outline:0;flex:1;font:inherit;font-size:13px;background:transparent}
+  .kutu .temizle{color:var(--muted);cursor:pointer;padding:0 4px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg span{padding:5px 9px;font-size:11.5px;background:linear-gradient(#fff,#eef3f8);border-right:1px solid var(--line);cursor:pointer}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .cipler{display:flex;gap:4px;padding:0 10px 7px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 9px;font-size:11px;color:var(--muted);cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+  .cip.on{background:#e7f0fb;border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip .n{background:#e3e9f0;border-radius:8px;padding:0 5px;font-size:10px;color:var(--ink);font-weight:normal}
+  .cip.on .n{background:#c6dcf5}
+  .sec{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 7px;font-size:11px;display:inline-flex;gap:5px;align-items:center}
+  .sec b{font-weight:normal;color:var(--muted)}
+  .cipler .sag{margin-left:auto;display:flex;gap:4px}
+
+  /* gövde: liste + önizleme */
+  .govde2{display:grid;grid-template-columns:1fr 292px;min-height:0}
+  .pen.panel-kapali .govde2{grid-template-columns:1fr}
+  .pen.panel-kapali > .govde2 > .on{display:none}
+  .pen.panel-kapali .dg{border-right:0}
+  .panel-tus{margin-left:auto}
+  .ipucu + .panel-tus, .toolbar .ipucu{margin-left:auto}
+  .toolbar .ipucu ~ .panel-tus{margin-left:8px}
+  .dg{overflow:auto;max-height:540px;border-right:1px solid var(--line2)}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{position:sticky;top:0;background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap;cursor:default}
+  .dg td.ad{min-width:230px;white-space:normal;line-height:1.25}
+  .dg td.ad small{display:block;color:var(--muted);font-size:10px}
+  .dg .c{text-align:center}.dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tr.s-risk td{background:var(--s-risk);color:var(--s-risk-t)}
+  .dg tr.s-vade td{background:var(--s-vade);color:var(--s-vade-t)}
+  .dg tr.s-aday td{background:var(--s-aday);color:var(--s-aday-t)}
+  .dg tr.s-aday-gri td{background:#e4e7eb;color:#6b7a8b}   /* müş/ted: aday gri (05.11.2026) */
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg tr.foc td{background:var(--sel)!important;color:var(--ink)!important;box-shadow:inset 0 0 0 1px var(--selbd)}
+  .dg tr:hover td{filter:brightness(.97)}
+  .roz{display:inline-block;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:bold;border:1px solid transparent}
+  .roz.mus{background:#e3f0ff;color:#1c4374;border-color:#b7d3f3}
+  .roz.ted{background:#e9f5ec;color:#245e36;border-color:#b9dcc4}
+  .roz.iki{background:#f0eaf8;color:#4a2f73;border-color:#d4c3ea}
+  .roz.aday{background:#fff5d6;color:#7a5407;border-color:#edd38b}
+  .roz.gri{background:#eef1f5;color:#56687a;border-color:#cdd6e0}
+  .roz.sgk{background:#e3f0ff;color:#1c4374;border-color:#b7d3f3}
+  .roz.ozel{background:#f0eaf8;color:#4a2f73;border-color:#d4c3ea}
+  .roz.firma{background:#e9f5ec;color:#245e36;border-color:#b9dcc4}
+  .borc{color:var(--kir);font-weight:bold}.alacak{color:var(--ok);font-weight:bold}
+  .risk{display:inline-block;width:46px;height:8px;border:1px solid #b9c6d4;border-radius:2px;vertical-align:middle;background:#fff;position:relative;margin-right:4px}
+  .risk i{position:absolute;left:0;top:0;bottom:0;background:#4d8fd6}
+  .risk.u i{background:#e0a030}.risk.k i{background:#d9534f}
+  .ef{color:#1f6fbe;font-weight:bold;font-size:10px}
+  .nokta{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle;margin-right:4px}
+  .nokta.y{background:#3fa35b}.nokta.s{background:#e0a030}.nokta.g{background:#b0b8c2}.nokta.k{background:#d9534f}
+  .mini{display:inline-block;height:9px;width:60px;vertical-align:middle;background:linear-gradient(90deg,#9cc4ee 0,#9cc4ee 30%,#4d8fd6 30%,#4d8fd6 55%,#2f6db3 55%,#2f6db3 70%,#9cc4ee 70%);border-radius:2px;opacity:.8}
+
+  /* önizleme */
+  .on{padding:8px 10px;background:#f8fafc;font-size:11.5px;overflow:auto;max-height:540px}
+  .on h4{margin:0 0 2px;font-size:13px;color:var(--navy)}
+  .on .kod{color:var(--muted);font-size:10.5px;margin-bottom:6px}
+  .on .blok{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 8px;margin-bottom:6px}
+  .on .blok h5{margin:0 0 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .on .sat{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+  .on .sat span:first-child{color:var(--muted)}
+  .on .sat .r{font-family:"Segoe UI",Tahoma}
+  .on .uyar{border:1px solid #edd38b;background:#fff8e1;color:#7a5407;border-radius:3px;padding:4px 7px;font-size:10.5px;margin-bottom:6px}
+  .on .uyar.kir{border-color:#e9b1ad;background:#fdecea;color:#7d1f1f}
+  .on .uyar.yes{border-color:#b9dcc4;background:#eef8f0;color:#245e36}
+  .on .belge{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;font-size:10.5px}
+  .on .belge .t{color:var(--muted)}
+  .on .foto{width:54px;height:66px;border:1px solid var(--line);border-radius:3px;background:linear-gradient(#e9eef4,#d6dee8);float:right;margin:0 0 6px 8px;display:flex;align-items:center;justify-content:center;color:#8a9bb0;font-size:22px}
+  .on .kapsam{display:flex;gap:4px;flex-wrap:wrap}
+  .on .kapsam span{border:1px solid #b9dcc4;background:#eef8f0;color:#245e36;border-radius:10px;padding:1px 7px;font-size:10px}
+  .on .kapsam span.yok{border-color:#e3e9f0;background:#f3f6fa;color:#9aa8b6;text-decoration:line-through}
+
+  /* alt çubuk */
+  .alt{display:flex;align-items:center;gap:8px;padding:6px 10px;border-top:1px solid var(--line);background:var(--head);flex-wrap:wrap}
+  .alt .say{color:var(--muted);font-size:11px}
+  .alt .kis{color:var(--muted);font-size:10.5px;margin-left:8px}
+  .alt kbd,.notlar kbd{border:1px solid #b9c6d4;border-bottom-width:2px;border-radius:3px;padding:0 4px;font-size:10px;background:#fff;font-family:inherit}
+  .alt .sag{margin-left:auto;display:flex;gap:6px}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);align-items:center;margin-left:12px}
+  .sw{width:18px;height:10px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:4px}
+
+  /* tasarım notları */
+  .notlar{max-width:1480px;margin:14px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;display:none}
+  .notlar.on{display:block}
+  .notlar h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .notlar ol{margin:0;padding-left:18px}.notlar li{margin:3px 0}
+  .notlar code{background:#f3f6fa;border:1px solid var(--line2);border-radius:2px;padding:0 3px;font-size:10.5px}
+  .ortak{max-width:1480px;margin:10px auto 0;background:#fbfcfe;border:1px dashed var(--line);border-radius:4px;padding:8px 14px;font-size:11.5px}
+  .ortak h3{margin:0 0 4px;font-size:12px;color:var(--navy)}
+  .ortak ul{margin:0;padding-left:18px}.ortak li{margin:2px 0}
+</style>
+</head>
+<body>
+
+<div class="secici"><b>GÖRÜNÜM</b>
+  <span class="on" data-g="cari">Müşteri / Tedarikçi</span>
+  <span data-g="hekim">Dış Hekim</span>
+  <span data-g="personel">Personel</span>
+  <span data-g="kurum">Anlaşmalı Kurum</span>
+  <span data-g="hasta">Hasta</span>
+  <span data-g="ichekim">İç Hekim</span>
+  <span data-g="kisi">İlgili Kişi</span>
+</div>
+
+<div class="arka">
+  <div class="ust"><b id="arkaBaslik">Satış Faturası</b><span class="yol" id="arkaYol">Belgeler › Satış › Yeni</span></div>
+  <div class="govde">
+    <div class="baslik" id="arkaAlanlar">
+      <div class="alan hedef"><div class="e">Müşteri *</div><div class="d" style="color:var(--muted)">Seçiniz…</div></div>
+      <div class="alan"><div class="e">Belge No</div><div class="d">SF-2026-000187</div></div>
+      <div class="alan"><div class="e">Tarih</div><div class="d">05.11.2026</div></div>
+      <div class="alan"><div class="e">Vade</div><div class="d">—</div></div>
+      <div class="alan"><div class="e">Depo</div><div class="d">Merkez</div></div>
+    </div>
+    <div class="kalem"></div>
+  </div>
+  <div class="perde"></div>
+
+  <!-- ================= 1) MÜŞTERİ / TEDARİKÇİ ================= -->
+  <div class="pen on" data-pen="cari">
+    <div class="title"><span class="dot"></span><span id="cariBaslik">Müşteri Ara</span>
+      <span class="sp"><span style="opacity:.7">belge:</span>
+        <span class="kip" id="cariKip">
+          <span class="on" data-kip="mus">Satış · Müşteri</span>
+          <span data-kip="ted">Alış · Tedarikçi</span>
+          <span data-kip="tum">Tahakkuk / Ödeme · Tümü</span>
+        </span>
+        <span class="x" title="Vazgeç (Esc) - yeni belgede cari seçilmezse belge de kapanır">✕</span>
+      </span>
+    </div>
+    <div class="toolbar">
+      <span class="btn" id="cariYeni">＋ Yeni Müşteri</span><span class="btn">✎ Düzenle</span><span class="btn">📄 Ekstre</span>
+      <span class="sepv"></span><span class="btn" title="Kolon seçimi / sıralama kullanıcı tercihinde saklanır">⚙ Kolonlar</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input id="cariQ" value="kar" placeholder="Kod · ünvan · telefon · ilgili kişi · il…"><span class="temizle">✕</span></div>
+      <div class="seg"><span class="on">☰ Tümü</span><span title="Bu kullanıcının son seçtikleri">🕓 Son</span><span title="En çok seçilenler">⭐ Sık</span></div>
+      <span class="sec"><b>Grup:</b> Tümü ▾</span><span class="sec"><b>İl:</b> Tümü ▾</span><span class="sec"><b>Temsilci:</b> Tümü ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip">Aday <span class="n">14</span></span>
+      <span class="cip">Bakiyeli <span class="n">41</span></span><span class="cip">Vadesi geçen <span class="n">7</span></span><span class="cip">Risk sınırında <span class="n">2</span></span>
+      <span class="cip">e-Fatura <span class="n">63</span></span><span class="cip">Dövizli <span class="n">5</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th>Tip</th><th>Kod</th><th style="width:34%">Ünvan</th><th>İl / İlçe</th><th>Telefon</th><th>İlgili Kişi</th><th>Grup</th><th>Temsilci</th><th class="r">Bakiye</th><th class="r">Vadesi Geçen</th><th>Risk</th><th class="c">Son Satış</th><th class="c">e-F</th></tr></thead>
+        <tbody id="cariTb">
+          <tr data-rol="mus"><td><span class="roz mus">Müşteri</span></td><td>120.01.0042</td><td class="ad"><b>KARDELEN MEDİKAL SAN. TİC. LTD. ŞTİ.</b><small>fatura: Kardelen Medikal Sanayi ve Ticaret Limited Şirketi</small></td><td>İstanbul / Kadıköy</td><td>0216 555 44 32</td><td>Ayşe Karaca</td><td>Bayi</td><td>M. Demir</td><td class="r borc">184.250,00 B</td><td class="r">0,00</td><td><span class="risk"><i style="width:38%"></i></span>%38</td><td class="c">3 gün</td><td class="c"><span class="ef">e-F</span></td></tr>
+          <tr data-rol="mus" class="foc"><td><span class="roz mus">Müşteri</span></td><td>120.01.0119</td><td class="ad"><b>KARADENİZ ECZA DEPOSU A.Ş.</b></td><td>Trabzon / Ortahisar</td><td>0462 322 10 10</td><td>Hakan Yılmaz</td><td>Ecza Deposu</td><td>M. Demir</td><td class="r borc">612.900,00 B</td><td class="r">0,00</td><td><span class="risk u"><i style="width:76%"></i></span>%76</td><td class="c">bugün</td><td class="c"><span class="ef">e-F</span></td></tr>
+          <tr data-rol="mus" class="s-vade"><td><span class="roz mus">Müşteri</span></td><td>120.01.0203</td><td class="ad"><b>KARTAL ÖZEL HASTANESİ</b></td><td>İstanbul / Kartal</td><td>0216 488 00 00</td><td>Satınalma Md.</td><td>Hastane</td><td>S. Aksoy</td><td class="r borc">97.400,00 B</td><td class="r borc">42.100,00</td><td><span class="risk"><i style="width:19%"></i></span>%19</td><td class="c">41 gün</td><td class="c"><span class="ef">e-F</span></td></tr>
+          <tr data-rol="mus" class="s-risk"><td><span class="roz mus">Müşteri</span></td><td>120.01.0088</td><td class="ad"><b>KARAMAN SAĞLIK HİZMETLERİ LTD.</b></td><td>Karaman / Merkez</td><td>0338 212 55 66</td><td>Emre Can</td><td>Poliklinik</td><td>S. Aksoy</td><td class="r borc">258.000,00 B</td><td class="r borc">118.300,00</td><td><span class="risk k"><i style="width:100%"></i></span>%103</td><td class="c">12 gün</td><td class="c"></td></tr>
+          <tr data-rol="iki"><td><span class="roz iki">Müş./Ted.</span></td><td>120.02.0007</td><td class="ad"><b>KARYA TIBBİ CİHAZLAR A.Ş.</b></td><td>Ankara / Çankaya</td><td>0312 440 23 23</td><td>Zeynep Kurt</td><td>Üretici</td><td>—</td><td class="r alacak">36.720,00 A</td><td class="r">0,00</td><td><span class="risk"><i style="width:4%"></i></span>%4</td><td class="c">8 gün</td><td class="c"><span class="ef">e-F</span></td></tr>
+          <tr data-rol="mus" class="s-aday-gri"><td><span class="roz aday">Aday</span></td><td>—</td><td class="ad"><b>KARACA AİLE SAĞLIĞI MERKEZİ</b><small>CRM fırsatı F-2026-031 · teklif aşamasında</small></td><td>Bursa / Nilüfer</td><td>0532 611 70 70</td><td>Dr. Elif Karaca</td><td>—</td><td>M. Demir</td><td class="r">—</td><td class="r">—</td><td>—</td><td class="c">—</td><td class="c"></td></tr>
+          <tr data-rol="ted"><td><span class="roz ted">Tedarikçi</span></td><td>320.01.0015</td><td class="ad"><b>KARTEK ELEKTRONİK SAN. A.Ş.</b></td><td>İzmir / Bornova</td><td>0232 388 44 00</td><td>Murat Kar</td><td>Yedek Parça</td><td>—</td><td class="r alacak">74.300,00 A</td><td class="r">0,00</td><td>—</td><td class="c">—</td><td class="c"><span class="ef">e-F</span></td></tr>
+          <tr data-rol="ted"><td><span class="roz ted">Tedarikçi</span></td><td>320.01.0031</td><td class="ad"><b>KARAKAYA LOJİSTİK LTD. ŞTİ.</b></td><td>Kocaeli / Gebze</td><td>0262 751 20 20</td><td>Selim Karakaya</td><td>Nakliye</td><td>—</td><td class="r">0,00</td><td class="r">0,00</td><td>—</td><td class="c">—</td><td class="c"></td></tr>
+          <tr data-rol="mus"><td><span class="roz mus">Müşteri</span></td><td>120.01.0260</td><td class="ad"><b>Karabulut, Mehmet</b><small>şahıs · perakende</small></td><td>İstanbul / Ataşehir</td><td>0533 207 18 18</td><td>—</td><td>Perakende</td><td>—</td><td class="r">0,00</td><td class="r">0,00</td><td>—</td><td class="c">63 gün</td><td class="c"></td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <h4>KARADENİZ ECZA DEPOSU A.Ş.</h4>
+        <div class="kod">120.01.0119 · <span class="roz mus">Müşteri</span> · Ecza Deposu · <span class="ef">e-Fatura</span></div>
+        <div class="uyar">⚠ Risk limitinin <b>%76</b>'sında. Bu belgeyle sınır aşılırsa kayıtta onay istenir.</div>
+        <div class="blok"><h5>İletişim</h5>
+          <div class="sat"><span>Adres</span><span style="text-align:right">Değirmendere Mah. 14 Sk. No:3<br>Ortahisar / Trabzon</span></div>
+          <div class="sat"><span>Telefon</span><span>0462 322 10 10</span></div>
+          <div class="sat"><span>E-posta</span><span>muhasebe@karadenizecza.com</span></div>
+          <div class="sat"><span>İlgili kişi</span><span>Hakan Yılmaz · 0532 444 12 12</span></div>
+                  </div>
+        <div class="blok"><h5>Hesap</h5>
+          <div class="sat"><span>Bakiye</span><span class="r borc">612.900,00 ₺ Borç</span></div>
+          <div class="sat"><span>Vadesi geçen</span><span class="r">0,00 ₺</span></div>
+          <div class="sat"><span>Risk limiti</span><span class="r">800.000,00 ₺ <span class="risk u" style="width:60px"><i style="width:76%"></i></span></span></div>
+          <div class="sat"><span>Son tahsilat</span><span>28.10.2026 · 150.000,00</span></div>
+        </div>
+        <div class="blok"><h5>Satış koşulları (belgeye geçer)</h5>
+          <div class="sat"><span>Fiyat listesi</span><span>Ecza Deposu 2026</span></div>
+          <div class="sat"><span>Ödeme vadesi</span><span>60 gün</span></div>
+          <div class="sat"><span>Para birimi</span><span>TRY</span></div>
+          <div class="sat"><span>Temsilci</span><span>Mehmet Demir</span></div>
+          <div class="sat"><span>Sevk adresi</span><span>Varsayılan (1 / 3)</span></div>
+        </div>
+        <div class="blok"><h5>Son belgeler</h5>
+          <div class="belge">
+            <span class="t">05.11</span><span>Satış Faturası SF-000181</span><span class="r">48.200,00</span>
+            <span class="t">28.10</span><span>Tahsilat · Havale</span><span class="r alacak">150.000,00</span>
+            <span class="t">21.10</span><span>Sipariş SP-000412 (açık)</span><span class="r">33.900,00</span>
+            <span class="t">14.10</span><span>İrsaliye SI-000377</span><span class="r">—</span>
+          </div>
+        </div>
+        <div class="blok"><h5>Not</h5><div style="color:var(--uyari)">Sevkiyat yalnız Salı-Perşembe. Soğuk zincir ürünlerde ayrı irsaliye.</div></div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>8</b> kayıt · "kar" · 118 aktif müşteri içinde</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-risk)"></span>risk aşıldı</span><span><span class="sw" style="background:var(--s-vade)"></span>vadesi geçen</span><span><span class="sw" style="background:#e4e7eb"></span>aday</span></span>
+      <span class="kis"><kbd>↑</kbd><kbd>↓</kbd> gez · <kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç · <kbd>F3</kbd> aramaya dön · <kbd>Ctrl+N</kbd> yeni</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 2) DIŞ HEKİM ================= -->
+  <div class="pen" data-pen="hekim">
+    <div class="title"><span class="dot"></span>Dış Hekim Ara
+      <span class="sp"><span style="opacity:.7">dış istem kabulü · istemi gönderen hekim</span><span class="x">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn">＋ Yeni Dış Hekim</span><span class="btn">✎ Düzenle</span><span class="btn">🏥 Kurumu Aç</span>
+      <span class="sepv"></span><span class="btn">📨 Portal daveti gönder</span>
+      <span class="ipucu">Diploma / tescil no ile tam eşleşme en üstte</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="öz" placeholder="Ad soyad · diploma / tescil no · kurum · branş · telefon · il…"><span class="temizle">✕</span></div>
+      <div class="seg"><span>☰ Tümü</span><span class="on">🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Branş:</b> Tümü ▾</span><span class="sec"><b>Kurum:</b> Tümü ▾</span><span class="sec"><b>İl:</b> Tümü ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Aktif <span class="n">412</span></span><span class="cip">Pasif <span class="n">37</span></span>
+      <span class="cip">Bu ay istem gönderen <span class="n">86</span></span><span class="cip">Anlaşmalı kurumda <span class="n">240</span></span>
+      <span class="cip">Serbest (kurumsuz) <span class="n">58</span></span><span class="cip">Portal kullanıcısı <span class="n">131</span></span><span class="cip">Tescil no eksik <span class="n">12</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th style="width:26%">Hekim</th><th>Branş</th><th>Kurum</th><th>Diploma / Tescil</th><th>İl</th><th>Cep</th><th class="c">Bu Ay</th><th class="c">Toplam</th><th class="c">Son İstem</th><th>Eğilim</th><th>Sonuç Kanalı</th><th class="c">Portal</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td class="ad"><b>Prof. Dr. Ahmet ÖZKAN</b><small>uzman · 1998 mezunu</small></td><td>İç Hastalıkları</td><td>Özel Anadolu Hastanesi</td><td>1041-6612</td><td>İstanbul</td><td>0532 118 20 20</td><td class="c"><b>23</b></td><td class="c">1.287</td><td class="c">dün</td><td><span class="mini"></span></td><td>Portal + e-posta</td><td class="c"><span class="nokta y"></span>var</td></tr>
+          <tr><td class="ad"><b>Dr. Özge DEMİRCİ</b></td><td>Pediatri</td><td>Özge Çocuk Kliniği</td><td>1120-9043</td><td>İstanbul</td><td>0533 744 10 10</td><td class="c"><b>9</b></td><td class="c">214</td><td class="c">3 gün</td><td><span class="mini"></span></td><td>WhatsApp PDF</td><td class="c"><span class="nokta g"></span>yok</td></tr>
+          <tr><td class="ad"><b>Uzm. Dr. Mehmet ÖZTÜRK</b><small>aynı adda 2 kayıt - tescil no ile ayırt edin</small></td><td>Kadın Doğum</td><td>Medikal Park Göztepe</td><td>1087-2231</td><td>İstanbul</td><td>0542 300 45 45</td><td class="c">4</td><td class="c">96</td><td class="c">11 gün</td><td><span class="mini"></span></td><td>e-posta</td><td class="c"><span class="nokta y"></span>var</td></tr>
+          <tr><td class="ad"><b>Uzm. Dr. Mehmet ÖZTÜRK</b></td><td>Ortopedi</td><td>Serbest</td><td>1133-5180</td><td>Kocaeli</td><td>0530 902 11 11</td><td class="c">0</td><td class="c">12</td><td class="c">7 ay</td><td><span class="mini" style="opacity:.3"></span></td><td>Telefon</td><td class="c"><span class="nokta g"></span>yok</td></tr>
+          <tr class="s-vade"><td class="ad"><b>Dr. Selin ÖZER</b><small>tescil no doğrulanmadı</small></td><td>Dermatoloji</td><td>Özer Polikliniği</td><td class="borc">—</td><td>Bursa</td><td>0535 616 70 70</td><td class="c">2</td><td class="c">31</td><td class="c">5 gün</td><td><span class="mini"></span></td><td>Portal</td><td class="c"><span class="nokta y"></span>var</td></tr>
+          <tr class="s-pas"><td class="ad"><b>Dr. Hakan ÖZGÜR</b><small>pasif: emekli (2025)</small></td><td>Göğüs Hast.</td><td>—</td><td>0912-0071</td><td>Ankara</td><td>—</td><td class="c">0</td><td class="c">640</td><td class="c">1 yıl</td><td></td><td>—</td><td class="c"><span class="nokta g"></span>yok</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <h4>Prof. Dr. Ahmet ÖZKAN</h4>
+        <div class="kod">İç Hastalıkları · Özel Anadolu Hastanesi · tescil 1041-6612</div>
+        <div class="uyar yes">✓ Kurum anlaşması aktif (Anadolu Hastanesi · 2026). Fiyat listesi ve sonuç kanalı kurumdan gelir.</div>
+        <div class="blok"><h5>İletişim</h5>
+          <div class="sat"><span>Cep</span><span>0532 118 20 20</span></div>
+          <div class="sat"><span>E-posta</span><span>aozkan@anadoluhast.com</span></div>
+          <div class="sat"><span>Kurum</span><span>Özel Anadolu Hastanesi</span></div>
+          <div class="sat"><span>Sekreter</span><span>Ayşe T. · 0216 400 10 10 /214</span></div>
+        </div>
+        <div class="blok"><h5>İstem profili</h5>
+          <div class="sat"><span>Bu ay / toplam</span><span>23 / 1.287</span></div>
+          <div class="sat"><span>En sık</span><span>Hemogram, TSH, HbA1c</span></div>
+          <div class="sat"><span>Ort. sonuç süresi</span><span>1,4 gün</span></div>
+          <div class="sat"><span>Kritik değer bildirimi</span><span>SMS + telefon</span></div>
+        </div>
+        <div class="blok"><h5>Sonuç teslimi</h5>
+          <div class="sat"><span>Kanal</span><span>Portal + e-posta</span></div>
+          <div class="sat"><span>Rapor dili</span><span>Türkçe</span></div>
+          <div class="sat"><span>Portal</span><span><span class="nokta y"></span>aktif · son giriş dün</span></div>
+        </div>
+        <div class="blok"><h5>Son istemler</h5>
+          <div class="belge">
+            <span class="t">04.11</span><span>Lab · 6 tetkik · M. Yıldız</span><span class="r">sonuçlandı</span>
+            <span class="t">03.11</span><span>Lab · 3 tetkik · A. Kaya</span><span class="r">çalışılıyor</span>
+            <span class="t">30.10</span><span>Patoloji · 1 vaka</span><span class="r">rapor hazır</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>6</b> kayıt · "öz" · son seçilenler önce</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-vade)"></span>tescil no eksik / doğrulanmadı</span><span><span class="sw" style="background:var(--s-pas)"></span>pasif</span></span>
+      <span class="kis"><kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 3) PERSONEL ================= -->
+  <div class="pen" data-pen="personel">
+    <div class="title"><span class="dot"></span>Personel Ara
+      <span class="sp"><span style="opacity:.7">izin talebi · talep eden</span>
+        <span class="kip" id="perKip"><span class="on">Tek seçim</span><span>Çoklu (görev atama)</span></span>
+        <span class="x">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn pasif" title="Çağıran ekran kart düğmelerini kapattı (kartYok): izin talebinde yeni personel açılmaz">＋ Yeni Personel</span>
+      <span class="btn pasif">✎ Düzenle</span>
+      <span class="sepv"></span><span class="btn">🪪 Kimlik No ile</span><span class="btn">🗓 Bugünkü vardiya</span>
+      <span class="ipucu">"kardiyo" yazınca bölümün personeli de gelir</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="hemş kardiyo" placeholder="Ad soyad · sicil · rol · bölüm · görev · kimlik no · telefon…"><span class="temizle">✕</span></div>
+      <div class="seg"><span class="on">☰ Tümü</span><span>🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Bölüm:</b> Tümü ▾</span><span class="sec"><b>Rol:</b> Tümü ▾</span><span class="sec"><b>Şube:</b> Merkez ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Çalışan <span class="n">341</span></span><span class="cip">İzinde <span class="n">14</span></span><span class="cip">Ayrılmış <span class="n">52</span></span>
+      <span class="cip">Hekim <span class="n">64</span></span><span class="cip">Hemşire <span class="n">118</span></span><span class="cip">Teknisyen <span class="n">39</span></span><span class="cip">İdari <span class="n">73</span></span>
+      <span class="cip">Bugün vardiyada <span class="n">126</span></span><span class="cip">Kimlik no eksik <span class="n">3</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th class="c" style="width:26px">☐</th><th>Sicil</th><th style="width:24%">Ad Soyad</th><th>Rol</th><th>Bölüm</th><th>Görev</th><th>Kimlik No</th><th>Cep</th><th>Bugün</th><th>Yönetici</th><th class="c">İşe Giriş</th><th class="c">Kalan İzin</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td class="c">☐</td><td>P-0418</td><td class="ad"><b>Ayşe KARDEŞ</b></td><td>Hemşire</td><td>Kardiyoloji</td><td>Servis sorumlu hemşiresi</td><td>1**4 5** 6**2</td><td>0532 201 10 10</td><td><span class="nokta y"></span>08-16</td><td>Dr. N. Aydın</td><td class="c">03.2019</td><td class="c">11 g</td></tr>
+          <tr><td class="c">☐</td><td>P-0522</td><td class="ad"><b>Burcu YILMAZ</b></td><td>Hemşire</td><td>Kardiyoloji</td><td>Servis hemşiresi</td><td>2**1 8** 3**7</td><td>0533 410 55 55</td><td><span class="nokta y"></span>16-24</td><td>A. Kardeş</td><td class="c">07.2022</td><td class="c">4 g</td></tr>
+          <tr class="s-aday"><td class="c">☐</td><td>P-0377</td><td class="ad"><b>Cem DURAN</b><small>yıllık izin 03-10.11</small></td><td>Hemşire</td><td>Kardiyoloji</td><td>Servis hemşiresi</td><td>3**7 2** 9**0</td><td>0535 118 40 40</td><td><span class="nokta s"></span>izinde</td><td>A. Kardeş</td><td class="c">01.2021</td><td class="c">0 g</td></tr>
+          <tr><td class="c">☐</td><td>P-0601</td><td class="ad"><b>Derya KAYA</b></td><td>Hemşire</td><td>Kardiyoloji YBÜ</td><td>Yoğun bakım hemşiresi</td><td>4**2 0** 1**5</td><td>0542 777 12 12</td><td><span class="nokta g"></span>off</td><td>Dr. N. Aydın</td><td class="c">11.2023</td><td class="c">14 g</td></tr>
+          <tr><td class="c">☐</td><td>P-0290</td><td class="ad"><b>Elif KARDEŞOĞLU</b></td><td>Hekim</td><td>Kardiyoloji</td><td>Uzman hekim</td><td>5**0 3** 7**8</td><td>0530 220 90 90</td><td><span class="nokta y"></span>poliklinik</td><td>Dr. N. Aydın</td><td class="c">09.2017</td><td class="c">20 g</td></tr>
+          <tr class="s-pas"><td class="c">☐</td><td>P-0150</td><td class="ad"><b>Fatma KARDEŞ</b><small>ayrıldı 31.08.2026</small></td><td>Hemşire</td><td>Kardiyoloji</td><td>—</td><td>6**9 1** 4**3</td><td>—</td><td><span class="nokta g"></span>—</td><td>—</td><td class="c">05.2015</td><td class="c">—</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <div class="foto">👤</div>
+        <h4>Ayşe KARDEŞ</h4>
+        <div class="kod">P-0418 · Hemşire · Kardiyoloji · Servis sorumlu hemşiresi</div>
+        <div class="blok"><h5>Bugün</h5>
+          <div class="sat"><span>Vardiya</span><span><span class="nokta y"></span>08:00-16:00 · Kardiyoloji Servis</span></div>
+          <div class="sat"><span>Durum</span><span>Çalışıyor</span></div>
+          <div class="sat"><span>Yönetici</span><span>Dr. Nihat Aydın</span></div>
+        </div>
+        <div class="blok"><h5>İletişim</h5>
+          <div class="sat"><span>Cep</span><span>0532 201 10 10</span></div>
+          <div class="sat"><span>Dahili</span><span>2214</span></div>
+          <div class="sat"><span>E-posta</span><span>a.kardes@hastane.com</span></div>
+        </div>
+        <div class="blok"><h5>İzin (bu ekrana geçer)</h5>
+          <div class="sat"><span>Kalan yıllık</span><span>11 gün</span></div>
+          <div class="sat"><span>Son izin</span><span>14-18.07.2026 · yıllık</span></div>
+          <div class="sat"><span>Bekleyen talep</span><span>yok</span></div>
+        </div>
+        <div class="blok"><h5>Yetkinlik / sertifika</h5>
+          <div class="kapsam"><span>Kardiyoloji YBÜ</span><span>İleri Yaşam Desteği</span><span>Kan transfüzyonu</span><span class="yok">Diyaliz</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>6</b> kayıt · "hemş kardiyo" (rol + bölüm eşleşmesi)</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-aday)"></span>izinde</span><span><span class="sw" style="background:var(--s-pas)"></span>ayrılmış</span></span>
+      <span class="kis"><kbd>Boşluk</kbd> işaretle (çoklu) · <kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 4) ANLAŞMALI KURUM ================= -->
+  <div class="pen" data-pen="kurum">
+    <div class="title"><span class="dot"></span>Anlaşmalı Kurum Ara
+      <span class="sp"><span style="opacity:.7">başvuru kaydı · ödeyici kurum</span><span class="x">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn">＋ Yeni Kurum</span><span class="btn">✎ Düzenle</span><span class="btn">📑 Sözleşmeyi Aç</span>
+      <span class="sepv"></span><span class="btn">🔎 Hastanın kayıtlı kurumları</span><span class="btn">🧾 Provizyon sorgula</span>
+      <span class="ipucu">Hastanın son başvurusundaki kurum en üstte</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="" placeholder="Kurum adı · kod · sözleşme no · tür (SGK / özel sigorta / firma)…"><span class="temizle">✕</span></div>
+      <div class="seg"><span>☰ Tümü</span><span class="on">🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Tür:</b> Tümü ▾</span><span class="sec"><b>Kapsam:</b> Ayaktan ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Aktif sözleşme <span class="n">47</span></span><span class="cip">30 gün içinde bitiyor <span class="n">3</span></span><span class="cip">Süresi dolmuş <span class="n">9</span></span>
+      <span class="cip">SGK <span class="n">1</span></span><span class="cip">Özel sigorta <span class="n">22</span></span><span class="cip">Firma / kurum <span class="n">19</span></span><span class="cip">Vakıf / dernek <span class="n">5</span></span>
+      <span class="cip">Provizyon zorunlu <span class="n">24</span></span><span class="cip">Bu hastada kayıtlı <span class="n">2</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th>Tür</th><th>Kod</th><th style="width:26%">Kurum</th><th>Sözleşme No</th><th class="c">Başlangıç</th><th class="c">Bitiş</th><th>Fiyat Listesi</th><th class="r">İndirim</th><th class="r">Katılım Payı</th><th class="c">Provizyon</th><th>Kapsam</th><th class="c">Bu Ay Başvuru</th><th class="c">Bu Hasta</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td><span class="roz sgk">SGK</span></td><td>K-001</td><td class="ad"><b>SGK - Genel Sağlık Sigortası</b><small>Medula · SUT 2026</small></td><td>MEDULA</td><td class="c">01.01.2026</td><td class="c">—</td><td>SUT 2026</td><td class="r">—</td><td class="r">%20 (fark)</td><td class="c"><span class="nokta y"></span>Medula</td><td>Ayaktan · Yatan · Lab · Rad</td><td class="c">3.412</td><td class="c"><span class="nokta y"></span>müstahak</td></tr>
+          <tr><td><span class="roz ozel">Özel Sig.</span></td><td>K-014</td><td class="ad"><b>Allianz Sigorta A.Ş.</b><small>TSS · ağ: Platin</small></td><td>ALZ-2026-07</td><td class="c">01.03.2026</td><td class="c">28.02.2027</td><td>Allianz 2026</td><td class="r">%12</td><td class="r">%0</td><td class="c"><span class="nokta y"></span>online</td><td>Ayaktan · Yatan · Lab · Rad</td><td class="c">188</td><td class="c"><span class="nokta y"></span>poliçe var</td></tr>
+          <tr><td><span class="roz ozel">Özel Sig.</span></td><td>K-019</td><td class="ad"><b>Axa Sigorta A.Ş.</b></td><td>AXA-2025-11</td><td class="c">15.11.2025</td><td class="c">14.11.2026</td><td>Axa 2025</td><td class="r">%10</td><td class="r">%10</td><td class="c"><span class="nokta y"></span>online</td><td>Ayaktan · Lab · Rad</td><td class="c">96</td><td class="c">—</td></tr>
+          <tr class="s-vade"><td><span class="roz firma">Firma</span></td><td>K-032</td><td class="ad"><b>Kartal Tersanesi A.Ş. - personel</b><small>sözleşme 20.11.2026'da bitiyor · yenileme teklifte</small></td><td>KT-2025-3</td><td class="c">21.11.2025</td><td class="c borc">20.11.2026</td><td>Kurumsal B</td><td class="r">%25</td><td class="r">%0</td><td class="c"><span class="nokta s"></span>sevk kâğıdı</td><td>Ayaktan · Lab</td><td class="c">41</td><td class="c">—</td></tr>
+          <tr><td><span class="roz firma">Firma</span></td><td>K-040</td><td class="ad"><b>Güneş Vakfı</b></td><td>GV-2026-1</td><td class="c">01.01.2026</td><td class="c">31.12.2026</td><td>Vakıf 2026</td><td class="r">%40</td><td class="r">%0</td><td class="c"><span class="nokta g"></span>yok</td><td>Ayaktan</td><td class="c">12</td><td class="c">—</td></tr>
+          <tr class="s-risk"><td><span class="roz ozel">Özel Sig.</span></td><td>K-008</td><td class="ad"><b>Mapfre Sigorta A.Ş.</b><small>sözleşme bitti 30.06.2026 - seçilemez</small></td><td>MPF-2025-02</td><td class="c">01.07.2025</td><td class="c borc">30.06.2026</td><td>Mapfre 2025</td><td class="r">%8</td><td class="r">%15</td><td class="c"><span class="nokta y"></span>online</td><td>Ayaktan · Yatan</td><td class="c">0</td><td class="c">—</td></tr>
+          <tr class="s-pas"><td><span class="roz gri">Kamu</span></td><td>K-003</td><td class="ad"><b>Yeşil Kart (eski)</b><small>pasif · GSS'ye devredildi</small></td><td>—</td><td class="c">—</td><td class="c">—</td><td>—</td><td class="r">—</td><td class="r">—</td><td class="c">—</td><td>—</td><td class="c">0</td><td class="c">—</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <h4>Allianz Sigorta A.Ş.</h4>
+        <div class="kod">K-014 · <span class="roz ozel">Özel Sigorta</span> · TSS · ağ: Platin</div>
+        <div class="uyar yes">✓ Bu hastada poliçe kayıtlı: 8821-004 · geçerli 31.05.2027'ye kadar.</div>
+        <div class="blok"><h5>Sözleşme (başvuruya geçer)</h5>
+          <div class="sat"><span>No / dönem</span><span>ALZ-2026-07 · 01.03.2026 - 28.02.2027</span></div>
+          <div class="sat"><span>Fiyat listesi</span><span>Allianz 2026</span></div>
+          <div class="sat"><span>İndirim</span><span>%12 (liste üzerinden)</span></div>
+          <div class="sat"><span>Katılım payı</span><span>%0 · muayene limit 1.500 ₺</span></div>
+          <div class="sat"><span>Provizyon</span><span><span class="nokta y"></span>online zorunlu · kayıtta alınır</span></div>
+        </div>
+        <div class="blok"><h5>Kapsam</h5>
+          <div class="kapsam"><span>Ayaktan</span><span>Yatan</span><span>Lab</span><span>Radyoloji</span><span>Fizik tedavi</span><span class="yok">Diş</span><span class="yok">Estetik</span></div>
+        </div>
+        <div class="blok"><h5>Gerekli belgeler</h5>
+          <div class="sat"><span>Kimlik</span><span>T.C. kimlik kartı</span></div>
+          <div class="sat"><span>Poliçe</span><span>Poliçe no + sigortalı no</span></div>
+          <div class="sat"><span>Yatan</span><span>Ön onay formu (48 saat)</span></div>
+        </div>
+        <div class="blok"><h5>Kurum iletişim</h5>
+          <div class="sat"><span>Provizyon hattı</span><span>0850 222 00 00</span></div>
+          <div class="sat"><span>Yetkili</span><span>Kurumsal Sağlık · Esra B.</span></div>
+          <div class="sat"><span>Fatura kesimi</span><span>Aylık icmal · 15'inde</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>7</b> kurum · hastanın kayıtlı kurumları ve son seçilenler önce</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-risk)"></span>süresi dolmuş (seçilemez)</span><span><span class="sw" style="background:var(--s-vade)"></span>30 gün içinde bitiyor</span><span><span class="sw" style="background:var(--s-pas)"></span>pasif</span></span>
+      <span class="kis"><kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 5) HASTA ================= -->
+  <div class="pen" data-pen="hasta">
+    <div class="title"><span class="dot"></span>Hasta Ara
+      <span class="sp"><span style="opacity:.7">kayıt kabul · başvuru</span><span class="x" title="Vazgeç - yeni başvuruda hasta seçilmezse başvuru da kapanır">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn ok">＋ Yeni Hasta Kaydı</span><span class="btn">📷 Kimliği Okut</span><span class="btn">🪪 MERNİS'ten Getir</span>
+      <span class="sepv"></span><span class="btn">✎ Hasta Kartı</span><span class="btn">🔀 Mükerrer Birleştir</span>
+      <span class="ipucu">11 hane yazılırsa T.C. ile tam eşleşme; bulunamazsa MERNİS'ten getir önerilir</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="yıldız 1985" placeholder="T.C. kimlik no · dosya no · ad soyad · telefon · doğum yılı / tarihi · anne adı · pasaport…"><span class="temizle">✕</span></div>
+      <div class="seg"><span class="on">☰ Tümü</span><span>🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Cinsiyet:</b> Tümü ▾</span><span class="sec"><b>Kurum:</b> Tümü ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Aktif <span class="n">48.212</span></span><span class="cip">Aday (ön kayıt) <span class="n">36</span></span><span class="cip">Bugün başvuran <span class="n">412</span></span>
+      <span class="cip">Yatan <span class="n">88</span></span><span class="cip">Borçlu <span class="n">1.204</span></span><span class="cip">Kimliği doğrulanmamış <span class="n">231</span></span><span class="cip">Mükerrer şüphesi <span class="n">19</span></span><span class="cip">Vefat <span class="n">—</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th>Dosya No</th><th style="width:22%">Hasta</th><th>T.C. Kimlik</th><th class="c">Doğum</th><th class="c">Yaş</th><th class="c">C</th><th>Anne Adı</th><th>Cep</th><th>Kurum</th><th class="c">Son Başvuru</th><th>Son Bölüm</th><th class="c">Uyarı</th><th class="r">Bakiye</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td>2019-004812</td><td class="ad"><b>Mehmet YILDIZ</b><small>MERNİS doğrulandı · 12.03.2026</small></td><td>1**4 5** 6**2</td><td class="c">14.06.1985</td><td class="c">41y</td><td class="c">E</td><td>Fatma</td><td>0532 118 40 40</td><td><span class="roz sgk">SGK</span></td><td class="c">dün</td><td>Kardiyoloji</td><td class="c" title="İlaç alerjisi: penisilin">⚠</td><td class="r">0,00</td></tr>
+          <tr class="s-aday"><td>2019-004812 ≈</td><td class="ad"><b>Mehmet YILDIZ</b><small>mükerrer şüphesi: aynı ad + doğum tarihi · T.C. boş</small></td><td>—</td><td class="c">14.06.1985</td><td class="c">41y</td><td class="c">E</td><td>—</td><td>0532 118 40 40</td><td>—</td><td class="c">2023</td><td>Acil</td><td class="c"></td><td class="r">0,00</td></tr>
+          <tr><td>2024-011207</td><td class="ad"><b>Mehmet Ali YILDIZ</b></td><td>2**7 1** 0**9</td><td class="c">02.11.1985</td><td class="c">41y</td><td class="c">E</td><td>Ayşe</td><td>0542 300 12 12</td><td><span class="roz ozel">Allianz</span></td><td class="c">3 ay</td><td>Ortopedi</td><td class="c"></td><td class="r">0,00</td></tr>
+          <tr class="s-vade"><td>2021-007733</td><td class="ad"><b>Zeynep YILDIZ</b></td><td>3**0 8** 4**1</td><td class="c">21.09.1985</td><td class="c">41y</td><td class="c">K</td><td>Hatice</td><td>0535 616 70 70</td><td><span class="roz sgk">SGK</span></td><td class="c">12 gün</td><td>Kadın Doğum</td><td class="c" title="Gebe · 24. hafta">🤰</td><td class="r borc">1.840,00</td></tr>
+          <tr><td>—</td><td class="ad"><b>Yıldız KARA</b><small>aday · randevudan ön kayıt · 04.11.2026</small></td><td>—</td><td class="c">1985</td><td class="c">~41y</td><td class="c">K</td><td>—</td><td>0533 744 10 10</td><td>—</td><td class="c">—</td><td>—</td><td class="c"></td><td class="r">—</td></tr>
+          <tr><td>2016-002110</td><td class="ad"><b>Hasan YILDIZ</b><small>bebek: 3a5g · anne 2021-007733</small></td><td>4**1 2** 8**6</td><td class="c">28.07.2026</td><td class="c">3a5g</td><td class="c">E</td><td>Zeynep</td><td>(anne)</td><td><span class="roz sgk">SGK</span></td><td class="c">bugün</td><td>Pediatri</td><td class="c" title="Yatan · Yenidoğan">🛏</td><td class="r">0,00</td></tr>
+          <tr class="s-pas"><td>2010-000871</td><td class="ad"><b>Ali YILDIZ</b><small>vefat 02.02.2024</small></td><td>5**3 9** 2**4</td><td class="c">01.01.1985</td><td class="c">—</td><td class="c">E</td><td>Emine</td><td>—</td><td>—</td><td class="c">2024</td><td>Yoğun Bakım</td><td class="c">✝</td><td class="r">0,00</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <div class="foto">👤</div>
+        <h4>Mehmet YILDIZ</h4>
+        <div class="kod">2019-004812 · 41y · Erkek · A Rh+ · <span class="roz sgk">SGK</span></div>
+        <div class="uyar kir">⚠ İlaç alerjisi: <b>penisilin</b>. Hasta kartında 2 kritik uyarı.</div>
+        <div class="uyar">≈ Benzer kayıt var (aynı ad + doğum tarihi, T.C. boş). Kayıttan önce "Mükerrer Birleştir" önerilir.</div>
+        <div class="blok"><h5>Kimlik</h5>
+          <div class="sat"><span>T.C.</span><span>1**4 5** 6**2 · <span class="nokta y"></span>MERNİS doğrulandı</span></div>
+          <div class="sat"><span>Doğum</span><span>14.06.1985 · İstanbul</span></div>
+          <div class="sat"><span>Anne / Baba</span><span>Fatma / Hüseyin</span></div>
+        </div>
+        <div class="blok"><h5>Müstahaklık (başvuruya geçer)</h5>
+          <div class="sat"><span>Kurum</span><span>SGK · GSS</span></div>
+          <div class="sat"><span>Medula</span><span><span class="nokta y"></span>müstahak · dün sorgulandı</span></div>
+          <div class="sat"><span>Ek sigorta</span><span>yok</span></div>
+        </div>
+        <div class="blok"><h5>İletişim</h5>
+          <div class="sat"><span>Cep</span><span>0532 118 40 40 · SMS izni var</span></div>
+          <div class="sat"><span>Adres</span><span style="text-align:right">Ataşehir / İstanbul</span></div>
+          <div class="sat"><span>Yakını</span><span>Fatma Yıldız (eş) · 0532 118 41 41</span></div>
+        </div>
+        <div class="blok"><h5>Son başvurular</h5>
+          <div class="belge">
+            <span class="t">04.11</span><span>Kardiyoloji · Dr. N. Aydın</span><span class="r">tamamlandı</span>
+            <span class="t">21.10</span><span>Lab · dış istem</span><span class="r">sonuçlandı</span>
+            <span class="t">02.09</span><span>Acil · Dr. S. Kurt</span><span class="r">taburcu</span>
+          </div>
+        </div>
+        <div class="blok"><h5>Açık işler</h5>
+          <div class="sat"><span>Randevu</span><span>12.11 · Kardiyoloji kontrol</span></div>
+          <div class="sat"><span>Bakiye</span><span class="r">0,00 ₺</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>7</b> kayıt · "yıldız 1985" (ad + doğum yılı)</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-aday)"></span>mükerrer şüphesi / aday</span><span><span class="sw" style="background:var(--s-vade)"></span>borçlu</span><span><span class="sw" style="background:var(--s-pas)"></span>vefat</span></span>
+      <span class="kis"><kbd>Enter</kbd> seç · <kbd>Ctrl+N</kbd> yeni hasta · <kbd>F2</kbd> kimliği okut · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 6) İÇ HEKİM ================= -->
+  <div class="pen" data-pen="ichekim">
+    <div class="title"><span class="dot"></span>Hekim Ara
+      <span class="sp"><span style="opacity:.7">başvuru kaydı · muayene hekimi</span>
+        <span class="kip" id="hekimKip"><span class="on">Bugün çalışan</span><span>Tüm hekimler</span></span>
+        <span class="x">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn">🗓 Çalışma planı</span><span class="btn">📋 Bekleyen listesi</span><span class="btn">🔁 Dış hekimleri de göster</span>
+      <span class="ipucu">"kardiyo" yazınca bölümün hekimleri gelir · kapasite dolu hekim seçilince uyarı</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="kardiyo" placeholder="Hekim adı · bölüm · ünvan · oda…"><span class="temizle">✕</span></div>
+      <div class="seg"><span class="on">☰ Tümü</span><span>🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Bölüm:</b> Kardiyoloji ▾</span><span class="sec"><b>Şube:</b> Merkez ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Bugün poliklinikte <span class="n">38</span></span><span class="cip">Şu an müsait <span class="n">11</span></span><span class="cip">Kapasitesi dolu <span class="n">6</span></span>
+      <span class="cip">Nöbetçi <span class="n">4</span></span><span class="cip">Konsültasyon alır <span class="n">29</span></span><span class="cip">İzinde <span class="n">5</span></span><span class="cip">Ameliyatta <span class="n">7</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th style="width:24%">Hekim</th><th>Bölüm</th><th>Ünvan</th><th>Oda</th><th>Bugün</th><th class="c">Bekleyen</th><th>Doluluk</th><th class="c">Sonraki Boş</th><th class="c">Konsültasyon</th><th class="c">Ort. Süre</th><th>Durum</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td class="ad"><b>Dr. Nihat AYDIN</b></td><td>Kardiyoloji</td><td>Uzm. Dr.</td><td>P-204</td><td>08:30-16:30</td><td class="c"><b>4</b></td><td><span class="risk u"><i style="width:70%"></i></span>28/40</td><td class="c">11:20</td><td class="c"><span class="nokta y"></span></td><td class="c">12 dk</td><td><span class="nokta y"></span>Poliklinikte</td></tr>
+          <tr><td class="ad"><b>Prof. Dr. Elif KARDEŞOĞLU</b></td><td>Kardiyoloji</td><td>Prof. Dr.</td><td>P-206</td><td>09:00-13:00</td><td class="c">2</td><td><span class="risk"><i style="width:45%"></i></span>9/20</td><td class="c">10:40</td><td class="c"><span class="nokta y"></span></td><td class="c">18 dk</td><td><span class="nokta y"></span>Poliklinikte</td></tr>
+          <tr class="s-risk"><td class="ad"><b>Doç. Dr. Serkan KURT</b><small>kapasite dolu - fazladan kayıt için hekim onayı</small></td><td>Kardiyoloji</td><td>Doç. Dr.</td><td>P-208</td><td>08:30-12:30</td><td class="c"><b>9</b></td><td><span class="risk k"><i style="width:100%"></i></span>30/30</td><td class="c">—</td><td class="c"><span class="nokta y"></span></td><td class="c">10 dk</td><td><span class="nokta k"></span>Dolu</td></tr>
+          <tr><td class="ad"><b>Dr. Burak TAN</b></td><td>Kardiyoloji</td><td>Uzm. Dr.</td><td>—</td><td>Anjiyo 08-14</td><td class="c">—</td><td>—</td><td class="c">14:30</td><td class="c"><span class="nokta g"></span></td><td class="c">—</td><td><span class="nokta s"></span>İşlemde</td></tr>
+          <tr><td class="ad"><b>Dr. Ayşe ÖZDEMİR</b><small>nöbet: acil kardiyoloji</small></td><td>Kardiyoloji</td><td>Asist. Dr.</td><td>Acil</td><td>Nöbet 08-08</td><td class="c">1</td><td>—</td><td class="c">şimdi</td><td class="c"><span class="nokta y"></span></td><td class="c">—</td><td><span class="nokta y"></span>Nöbetçi</td></tr>
+          <tr class="s-aday"><td class="ad"><b>Dr. Can YILMAZ</b><small>yıllık izin 03-10.11 · randevular Dr. Aydın'a aktarıldı</small></td><td>Kardiyoloji</td><td>Uzm. Dr.</td><td>P-210</td><td>—</td><td class="c">—</td><td>—</td><td class="c">11.11</td><td class="c"><span class="nokta g"></span></td><td class="c">—</td><td><span class="nokta s"></span>İzinde</td></tr>
+          <tr><td class="ad"><b>Dr. Hakan ÖZGÜR</b><small><span class="roz gri">Dış</span> Özel Anadolu H. · konsültan</small></td><td>Kardiyoloji</td><td>Prof. Dr.</td><td>—</td><td>Çağrı üzerine</td><td class="c">—</td><td>—</td><td class="c">—</td><td class="c"><span class="nokta y"></span></td><td class="c">—</td><td><span class="nokta g"></span>Dış hekim</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <div class="foto">🩺</div>
+        <h4>Dr. Nihat AYDIN</h4>
+        <div class="kod">Uzm. Dr. · Kardiyoloji · P-204 · dahili 2204</div>
+        <div class="uyar">⚠ Doluluk <b>28/40</b>. Sonraki boş slot 11:20; sırasız kayıt bekleme süresini uzatır.</div>
+        <div class="blok"><h5>Bugün</h5>
+          <div class="sat"><span>Poliklinik</span><span>08:30-16:30 · P-204</span></div>
+          <div class="sat"><span>Bekleyen / muayenede</span><span>4 / 1 (2019-004812)</span></div>
+          <div class="sat"><span>Öğle arası</span><span>12:30-13:30</span></div>
+          <div class="sat"><span>Ort. muayene</span><span>12 dk</span></div>
+        </div>
+        <div class="blok"><h5>Kabul kuralları (kayıtta uygulanır)</h5>
+          <div class="sat"><span>Kapasite</span><span>40 / gün · randevusuz 8</span></div>
+          <div class="sat"><span>Konsültasyon</span><span><span class="nokta y"></span>alır · servis + acil</span></div>
+          <div class="sat"><span>Kurum kısıtı</span><span>yok</span></div>
+          <div class="sat"><span>Fark ücreti</span><span>Uzman tarifesi</span></div>
+        </div>
+        <div class="blok"><h5>Bu hafta</h5>
+          <div class="belge">
+            <span class="t">Çar</span><span>Poliklinik 08:30-16:30</span><span class="r">31/40</span>
+            <span class="t">Per</span><span>Anjiyo · poliklinik yok</span><span class="r">—</span>
+            <span class="t">Cum</span><span>Poliklinik 08:30-12:30</span><span class="r">6/20</span>
+          </div>
+        </div>
+        <div class="blok"><h5>Bu hastayla</h5>
+          <div class="sat"><span>Son muayene</span><span>04.11.2026 (dün)</span></div>
+          <div class="sat"><span>Kontrol randevusu</span><span>12.11 · 10:00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>7</b> hekim · "kardiyo" (bölüm eşleşmesi) · bugün çalışanlar</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-risk)"></span>kapasite dolu</span><span><span class="sw" style="background:var(--s-aday)"></span>izinde</span></span>
+      <span class="kis"><kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+
+  <!-- ================= 7) İLGİLİ KİŞİ ================= -->
+  <div class="pen" data-pen="kisi">
+    <div class="title"><span class="dot"></span>İlgili Kişi Ara
+      <span class="sp"><span style="opacity:.7">CRM görüşme kaydı · muhatap</span>
+        <span class="kip" id="kisiKip"><span class="on">Bu carinin kişileri</span><span>Tüm kişiler</span></span>
+        <span class="x">✕</span></span>
+    </div>
+    <div class="toolbar">
+      <span class="btn">＋ Yeni Kişi</span><span class="btn">✎ Düzenle</span><span class="btn">🏢 Bağlı Cariyi Aç</span>
+      <span class="sepv"></span><span class="btn">📇 Kartvizit tara</span><span class="btn">📱 Rehbere aktar</span>
+      <span class="ipucu">Bağlı cari seçili geldiyse önce onun kişileri; "Tüm kişiler" ile genişler</span>
+    </div>
+    <div class="ara">
+      <div class="kutu"><span class="ic">⌕</span><input value="satın" placeholder="Ad soyad · bağlı kurum · görev · bölüm · cep · e-posta…"><span class="temizle">✕</span></div>
+      <div class="seg"><span class="on">☰ Tümü</span><span>🕓 Son</span><span>⭐ Sık</span></div>
+      <span class="sec"><b>Bağlı cari:</b> Kardelen Medikal ▾</span><span class="sec"><b>Görev:</b> Tümü ▾</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Aktif <span class="n">6</span></span><span class="cip">Karar verici <span class="n">2</span></span><span class="cip">KVKK izinli <span class="n">4</span></span>
+      <span class="cip">90+ gün temassız <span class="n">1</span></span><span class="cip">Ayrılmış <span class="n">1</span></span><span class="cip">Doğum günü bu ay <span class="n">1</span></span>
+    </div>
+    <div class="govde2">
+      <div class="dg"><table>
+        <thead><tr><th style="width:22%">Ad Soyad</th><th>Bağlı Kurum</th><th>Görev</th><th>Bölüm</th><th>Cep</th><th>E-posta</th><th class="c">Karar</th><th class="c">KVKK</th><th class="c">Son Temas</th><th>Kanal</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr class="foc"><td class="ad"><b>Ayşe KARACA</b></td><td>Kardelen Medikal</td><td>Satınalma Müdürü</td><td>Satınalma</td><td>0532 444 12 12</td><td>akaraca@kardelen.com</td><td class="c">★</td><td class="c"><span class="nokta y"></span>var</td><td class="c">3 gün</td><td>Telefon</td><td>Teklif bekliyor</td></tr>
+          <tr><td class="ad"><b>Burak ŞEN</b></td><td>Kardelen Medikal</td><td>Satınalma Uzmanı</td><td>Satınalma</td><td>0533 700 20 20</td><td>bsen@kardelen.com</td><td class="c"></td><td class="c"><span class="nokta y"></span>var</td><td class="c">dün</td><td>E-posta</td><td>Sipariş takibi</td></tr>
+          <tr class="s-vade"><td class="ad"><b>Cemal ARSLAN</b><small>112 gündür temas yok</small></td><td>Kardelen Medikal</td><td>Genel Müdür</td><td>Yönetim</td><td>0532 100 00 01</td><td>carslan@kardelen.com</td><td class="c">★</td><td class="c"><span class="nokta y"></span>var</td><td class="c">112 gün</td><td>Ziyaret</td><td>Yıl sonu görüşmesi</td></tr>
+          <tr class="s-risk"><td class="ad"><b>Deniz KAYA</b><small>KVKK izni yok - pazarlama iletişimi yapılamaz</small></td><td>Kardelen Medikal</td><td>Depo Sorumlusu</td><td>Lojistik</td><td>0535 212 34 34</td><td>—</td><td class="c"></td><td class="c"><span class="nokta k"></span>yok</td><td class="c">1 ay</td><td>Telefon</td><td>Sevk saatleri</td></tr>
+          <tr><td class="ad"><b>Elif DOĞAN</b><small>doğum günü 18.11</small></td><td>Kardelen Medikal</td><td>Muhasebe</td><td>Finans</td><td>0542 611 70 70</td><td>edogan@kardelen.com</td><td class="c"></td><td class="c"><span class="nokta y"></span>var</td><td class="c">2 hafta</td><td>E-posta</td><td>Mutabakat</td></tr>
+          <tr class="s-pas"><td class="ad"><b>Fikret UYSAL</b><small>ayrıldı 06.2026 · yeni: Medikal Park</small></td><td>Kardelen Medikal</td><td>Satınalma Müdürü</td><td>Satınalma</td><td>—</td><td>—</td><td class="c"></td><td class="c">—</td><td class="c">5 ay</td><td>—</td><td>—</td></tr>
+        </tbody></table></div>
+      <div class="on">
+        <div class="foto">👤</div>
+        <h4>Ayşe KARACA</h4>
+        <div class="kod">Satınalma Müdürü · Kardelen Medikal San. Tic. Ltd. · <b>★ karar verici</b></div>
+        <div class="uyar yes">✓ KVKK açık rızası var (12.01.2026) · SMS + e-posta + arama</div>
+        <div class="blok"><h5>İletişim</h5>
+          <div class="sat"><span>Cep</span><span>0532 444 12 12</span></div>
+          <div class="sat"><span>İş</span><span>0216 555 44 32 / 118</span></div>
+          <div class="sat"><span>E-posta</span><span>akaraca@kardelen.com</span></div>
+          <div class="sat"><span>Tercih</span><span>Telefon · 10:00-12:00</span></div>
+        </div>
+        <div class="blok"><h5>Son temaslar</h5>
+          <div class="belge">
+            <span class="t">02.11</span><span>Telefon · teklif sunuldu</span><span class="r">M. Demir</span>
+            <span class="t">20.10</span><span>Ziyaret · ürün tanıtımı</span><span class="r">M. Demir</span>
+            <span class="t">03.10</span><span>E-posta · fiyat listesi</span><span class="r">S. Aksoy</span>
+          </div>
+        </div>
+        <div class="blok"><h5>Açık işler</h5>
+          <div class="sat"><span>Fırsat</span><span>F-2026-044 · 420.000 ₺ · teklif</span></div>
+          <div class="sat"><span>Hatırlatma</span><span>07.11 · teklif dönüşü</span></div>
+        </div>
+        <div class="blok"><h5>Not</h5><div style="color:var(--uyari)">Fiyat görüşmesini GM ile birlikte yapmayı tercih ediyor.</div></div>
+      </div>
+    </div>
+    <div class="alt">
+      <span class="say"><b>6</b> kişi · "satın" (görev eşleşmesi) · Kardelen Medikal</span>
+      <span class="lgnd"><span><span class="sw" style="background:var(--s-risk)"></span>KVKK izni yok</span><span><span class="sw" style="background:var(--s-vade)"></span>90+ gün temassız</span><span><span class="sw" style="background:var(--s-pas)"></span>ayrılmış</span></span>
+      <span class="kis"><kbd>Enter</kbd> seç · <kbd>Esc</kbd> vazgeç</span>
+      <span class="sag"><span class="btn">Vazgeç</span><span class="btn ok">Seç ▸</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="ortak">
+  <h3>Ortak çatı — TarafArama tek bileşen, görünüm kaynağa göre</h3>
+  <ul>
+    <li>Pencere, arama kutusu, ☰ Tümü / 🕓 Son / ⭐ Sık, çipler, grid + sağ önizleme, alt çubuk ve klavye (↑↓ Enter Esc F3) her görünümde aynı. Kaynağa göre değişen: başlık, araç düğmeleri, çipler, kolonlar, satır renkleri, önizleme blokları, seçim engeli.</li>
+    <li>Kolon ve önizleme içeriği sunucu metasından gelir; yetkisi olmayan kolon (bakiye, kimlik no, kalan izin) hiç gönderilmez, istemcide gizleme yok. Kimlik ve vergi no maskeli gösterilir, arama ham kolonda yapılır.</li>
+    <li><b>Sağ önizleme paneli açılır / kapanır</b> (araç çubuğundaki ◨ Önizleme, <kbd>F4</kbd>): kapalıyken grid tüm genişliği alır, tercih kullanıcıda saklanır; dar ekranda varsayılan kapalı.</li>
+    <li>Yazdıkça arama (300 ms), açılışta kutu odakta, çağıran ekrandan gelen metin hazır. Enter odaktaki satırı seçer; seçim engeli (pasif / süresi dolmuş / zaten ekli) metin olarak pencerede gösterilir, pencere kapanmaz.</li>
+    <li>Son / Sık bu kullanıcının seçim geçmişidir (sunucu <code>aramaSonTarih</code> / <code>aramaSay</code>); hangi görünümün varsayılan açılacağı kullanıcı tercihinde saklanır.</li>
+    <li>900 px altı: önizleme paneli gizlenir, satıra dokununca alt çekmece olarak açılır; grid ilk 4-5 kolona iner.</li>
+  </ul>
+</div>
+
+<div class="notlar on" data-not="cari">
+  <h3>Müşteri / Tedarikçi — tasarım notları <small style="color:#2e7d46;font-weight:normal">· uygulandı 05.11.2026 (TarafArama cari düzeni)</small></h3>
+  <ol>
+    <li><b>Rol kuralı (02.11.2026):</b> satış belgesinde yalnız müşteri, alış belgesinde yalnız tedarikçi; "＋ Yeni" o rolle açılır. Tahakkuk / ödeme / kasa: iki rol birden. Başlıktaki kip anahtarı mockup içindir, gerçekte belge türünden gelir.</li>
+    <li><b>İptal = belge kapanır:</b> yeni belgede cari seçilmeden kapatılırsa boş belge de kapanır; mevcut belgede yalnız pencere kapanır.</li>
+    <li><b>Arama alanları:</b> kod, ünvan, fatura ünvanı, telefon (ham rakam), ilgili kişi, il. Vergi / kimlik no aramada ve kolonlarda YOK (kullanıcı 05.11.2026).</li>
+    <li><b>Çipler sayılı:</b> aday / bakiyeli / vadesi geçen / risk sınırında / e-Fatura / dövizli.</li>
+    <li><b>Satır renkleri:</b> risk aşıldı (kırmızı), vadesi geçen (turuncu), aday (gri). Pasif cari listeye HİÇ gelmez (kullanıcı 05.11.2026; Aktif / Pasif çipi yok). Risk aşılmış cari seçilir, belge kaydında onay akışına düşer.</li>
+    <li><b>Önizleme:</b> belgeye geçecek koşullar (fiyat listesi, vade, para birimi, temsilci, sevk adresi) seçmeden önce görünür.</li>
+    <li><b>Aday:</b> seçilince "Aday müşteriye çevrilsin mi?" - evet: kod verilir, kart açılır, sonra belgeye düşer.</li>
+    <li><b>Şube:</b> cari şubeye bağlı değil; tüm şubelerin carileri gelir, belge aktif şubeye kesilir.</li>
+    <li><b>Yok:</b> vergi/kimlik no kolonu ve araması, Kimliği Okut, MERNİS'ten Getir (kullanıcı 05.11.2026) - bunlar hasta aramasına özgü.</li>
+  </ol>
+</div>
+<div class="notlar" data-not="hekim">
+  <h3>Dış Hekim — tasarım notları</h3>
+  <ol>
+    <li><b>Bağlam:</b> dış istem kabulü (lab / patoloji / radyoloji), hasta kartı "gönderen hekim", sonuç dağıtımı. Kaynak <code>dis-hekim</code> (305): branş, kurum, istem sayısı sunucudan.</li>
+    <li><b>Varsayılan görünüm 🕓 Son:</b> kabul bankosu aynı 10-20 hekimle çalışır; tam liste 400+ kayıt.</li>
+    <li><b>Aynı adlı hekim</b> sık (Mehmet Öztürk ×2): kolonlarda branş + kurum + tescil no yan yana; önizlemede sekreter telefonu. Diploma / tescil no tam eşleşmesi en üstte.</li>
+    <li><b>Tescil no eksik / doğrulanmadı</b> turuncu: seçilir ama istem kaydında "hekim bilgisi eksik" uyarısı; "Tescil no eksik" çipi temizlik için.</li>
+    <li><b>Eğilim kolonu:</b> son 6 ayın istem sayısı mini çubuk; portal kullanıcısı mı, sonuç kanalı ne (portal / e-posta / WhatsApp PDF / telefon) - sonuç dağıtımı bu bilgiyle kurulur.</li>
+    <li><b>Kurumu Aç:</b> hekim anlaşmalı kurumdaysa fiyat listesi ve sonuç kanalı kurum sözleşmesinden gelir; önizlemedeki yeşil bant bunu söyler.</li>
+    <li><b>Portal daveti:</b> portal hesabı olmayan hekime tek tıkla davet e-postası (dış hekim portalı).</li>
+  </ol>
+</div>
+<div class="notlar" data-not="personel">
+  <h3>Personel — tasarım notları <small style="color:#2e7d46;font-weight:normal">· uygulandı 05.11.2026 (TarafArama personel düzeni; kimlik no kolonu yok)</small></h3>
+  <ol>
+    <li><b>Arama alanları (08.10.2026):</b> ad soyad, sicil, rol, bölüm, görev, ham kimlik no, telefon. "hemş kardiyo" iki kelimeyi ayrı alanlarda eşler (rol + bölüm).</li>
+    <li><b>Kart düğmeleri çağırana bağlı</b> (<code>kartYok</code>): izin talebinde Yeni / Düzenle kapalı (soluk gösterildi); İK ekranlarında açık.</li>
+    <li><b>Çoklu kip</b> (görev atama, vardiya, eğitim katılımcısı): kutucuklu işaretleme, arama değişse de işaretler korunur, "Seç" hepsini verir. Tek kipte kutucuk kolonu yok.</li>
+    <li><b>Bugün kolonu:</b> vardiya saati / izinde / off - çalışma planından. "Bugün vardiyada" çipi nöbet devri ve acil görevlendirmede.</li>
+    <li><b>Satır renkleri:</b> izinde sarı, ayrılmış gri (varsayılan gizli; geçmiş kayıt için çiple açılır). Ayrılmış personel izin / görev için seçilemez, rapor / geçmiş için seçilir (çağıran belirler).</li>
+    <li><b>Önizleme:</b> fotoğraf, bugünkü durum, yönetici, kalan izin (izin ekranına geçer), yetkinlik / sertifika rozetleri (görev atamada "diyaliz sertifikası yok" uyarısı buradan).</li>
+    <li><b>Şube süzgeci</b> varsayılan aktif şube; personel şubeli olduğu için carideki "tüm şubeler" kuralı burada tersine.</li>
+    <li><b>Kimlik no</b> maskeli; yetkisi olmayan kullanıcıya kolon hiç gelmez.</li>
+  </ol>
+</div>
+<div class="notlar" data-not="kurum">
+  <h3>Anlaşmalı Kurum — tasarım notları</h3>
+  <ol>
+    <li><b>Bağlam:</b> başvuru kaydında ödeyici kurum (SGK / özel sigorta / firma / vakıf), yatış, fatura kurum değişikliği. Kurum kartının <code>sozlesmeler</code> detayı (fiyat listesi, SGK fiyat listesi) buradan okunur.</li>
+    <li><b>Sıralama:</b> hastada kayıtlı kurumlar (poliçe / personel listesi) en üstte, sonra son seçilenler. "Bu Hasta" kolonu: müstahak / poliçe var / —.</li>
+    <li><b>Seçim engeli:</b> süresi dolmuş sözleşme kırmızı ve seçilemez ("sözleşme 30.06.2026'da bitti - Sözleşmeyi Aç"); 30 gün içinde bitecek turuncu, seçilir, uyarı verir.</li>
+    <li><b>Kapsam süzgeci:</b> çağıran ekran kapsamı verir (ayaktan / yatan / lab / rad / diş); kapsam dışı kurum listede soluk ve seçilemez - yatışta "yalnız ayaktan" anlaşmalı firma seçilemesin.</li>
+    <li><b>Provizyon:</b> zorunluysa seçim sonrası kayıt akışı provizyon adımına düşer (Medula / online / sevk kâğıdı). "Provizyon sorgula" düğmesi pencereden çıkmadan kontrol.</li>
+    <li><b>Önizleme "başvuruya geçer":</b> fiyat listesi, indirim, katılım payı, provizyon kuralı, gerekli belgeler - bankocu kayıttan önce görür.</li>
+    <li><b>SGK tek satır</b> (Medula), süresiz; SUT fiyat listesi dönemle değişir, kolon güncel dönemi gösterir.</li>
+    <li><b>Yeni Kurum</b> yalnız kurum tanımlama yetkisi olanda; bankoda düğme gelmez (aksiyon yetkisi).</li>
+  </ol>
+</div>
+<div class="notlar" data-not="hasta">
+  <h3>Hasta — tasarım notları</h3>
+  <ol>
+    <li><b>Bağlam:</b> başvuru kaydı, randevu, istem kabulü, yatış, vezne. Kaynak <code>hasta</code> (grup 101): kolonlar taraf değil hasta bilgisi (cinsiyet, yaş kısa 45y / 1y3a / 3a5g, son başvuru + bölüm).</li>
+    <li><b>Tek kutu, çok anahtar:</b> 11 hane = T.C. tam eşleşme (ham kolon, 300); "yıldız 1985" = ad + doğum yılı; 10 hane rakam = telefon; dosya no; anne adı; pasaport. Kayıt kabul şeridinden yazılan metin pencereye hazır gelir, sonuç tek satırsa doğrudan seçilir.</li>
+    <li><b>Bulunamayınca</b> "＋ Yeni Hasta Kaydı" ve "MERNİS'ten Getir" öne çıkar (yeşil); 📷 Kimliği Okut (1255) MRZ ile kayıtlıyı seçer, yoksa dolu kart açar. <kbd>F2</kbd> kimliği okut.</li>
+    <li><b>Mükerrer şüphesi</b> sarı: aynı ad + doğum tarihi (veya aynı telefon) olan ikinci kayıt "≈" ile listelenir; önizlemede birleştirme önerisi. Seçim engellenmez, uyarı verir.</li>
+    <li><b>Uyarı kolonu</b> kritik bilgileri ikonla taşır: alerji ⚠, gebe 🤰, yatan 🛏, izolasyon, vefat ✝. Vefat etmiş hasta gri, yeni başvuru için seçilemez (rapor / geçmiş için seçilir, çağıran belirler).</li>
+    <li><b>Müstahaklık bloğu</b> "başvuruya geçer": kurum, Medula durumu (son sorgu), ek sigorta - anlaşmalı kurum araması bu bilgiyle ön dolu açılır.</li>
+    <li><b>Aday hasta</b> (266): randevudan ön kayıt, dosya no yok; seçilince tam kayıt istenir. Bebek satırı anne dosyasına bağlı ("(anne)" telefonu).</li>
+    <li><b>İptal = başvuru kapanır</b> (27.10.2026): yeni başvuruda hasta seçilmeden kapatılırsa boş başvuru da kapanır.</li>
+    <li><b>Yetki:</b> T.C. maskeli; bakiye kolonu vezne yetkisine, uyarı ikonlarının açılımı klinik yetkiye bağlı - yetkisizde kolon gelmez.</li>
+  </ol>
+</div>
+<div class="notlar" data-not="ichekim">
+  <h3>İç Hekim — tasarım notları</h3>
+  <ol>
+    <li><b>Bağlam:</b> başvuru kaydında muayene hekimi, randevu, konsültasyon isteği, sevk. Kaynak <code>basvuru-hekim</code> (583): bölüm + bugünkü başvuru sayısı sunucudan; <code>disMi</code> ile dış hekim de aynı listede gelebilir ("Dış hekimleri de göster").</li>
+    <li><b>Varsayılan "Bugün çalışan"</b> (718 çalışma planı): izinli / poliklinik günü olmayan hekim listede yok; "Tüm hekimler" kipi sevk / geçmiş kayıt için. "kardiyo" yazınca bölüm eşleşmesiyle hekimler gelir (kullanıcı: "hem doktor hem bölüm aransın").</li>
+    <li><b>Doluluk kolonu</b> kapasite çubuğu (randevulu + randevusuz / günlük kapasite); dolu hekim kırmızı, seçilince "fazladan kayıt için hekim onayı" akışı. "Sonraki boş" slotu kayıt saatini önerir.</li>
+    <li><b>Durum</b> anlık: poliklinikte / işlemde (anjiyo, ameliyat) / nöbetçi / izinde / dış hekim. İzindeki hekimin randevuları kime aktarıldı satır altında yazar.</li>
+    <li><b>Konsültasyon kolonu</b> konsültasyon isteği bağlamında süzgeçtir ("Konsültasyon alır" çipi); başvuruda bilgi amaçlı.</li>
+    <li><b>Önizleme "kabul kuralları":</b> kapasite, randevusuz kota, kurum kısıtı (yalnız SGK almayan hekim), fark ücreti tarifesi - bankocu kayıttan önce görür; "Bu hastayla" bloğu son muayene ve kontrol randevusunu gösterir (yanlış hekime kayıt azalır).</li>
+    <li><b>Şube süzgeci</b> aktif şube; hekim şubeli.</li>
+  </ol>
+</div>
+<div class="notlar" data-not="kisi">
+  <h3>İlgili Kişi — tasarım notları <small style="color:#2e7d46;font-weight:normal">· uygulandı 05.11.2026 (TarafArama kisi düzeni; KVKK / karar verici / son temas şemada yok)</small></h3>
+  <ol>
+    <li><b>Bağlam:</b> CRM görüşme / ziyaret kaydı muhatabı, teklif-sipariş "ilgili kişi" alanı, hatırlatma, cari kartı ilgili kişiler sekmesi. Kaynak <code>kisi</code>: bağlı cari, görev, bölüm, cep, e-posta.</li>
+    <li><b>Bağlı cari daraltması:</b> çağıran ekranda cari seçiliyse pencere "Bu carinin kişileri" kipinde açılır; "Tüm kişiler" ile serbest arama (sunucu <code>bagId</code> süzgeci).</li>
+    <li><b>Satır renkleri</b> rehber_arama ile aynı: KVKK izni yok kırmızı (pazarlama iletişimi engellenir, seçilir ama kanal kısıtlı), 90+ gün temassız turuncu, ayrılmış gri (yeni kurumu satır altında).</li>
+    <li><b>Karar verici ★</b> ve <b>KVKK</b> kolonları CRM süzgeçleri; "Doğum günü bu ay" çipi kutlama / ziyaret planı için.</li>
+    <li><b>Önizleme:</b> iletişim tercihi (kanal + saat), son temaslar (kim, ne zaman), açık fırsat / hatırlatma - görüşme kaydından önce bağlam.</li>
+    <li><b>Kartvizit tara / Rehbere aktar:</b> saha satışının mobil akışı; masaüstünde dosya seçimiyle.</li>
+    <li>Personel kaynağı ile birlikte açıldığı yerler var (ödeme: cari + personel); orada kolon kümesi ortak taraf kolonlarına iner (Tip / Kod / Ünvan / Bağlı Kurum / Görev-Rol / Bölüm).</li>
+  </ol>
+</div>
+
+<script>
+  const ARKA = {
+    cari:     ['Satış Faturası', 'Belgeler › Satış › Yeni', 'Müşteri *', 'Belge No|SF-2026-000187', 'Tarih|05.11.2026', 'Vade|—', 'Depo|Merkez'],
+    hekim:    ['Dış İstem Kabulü', 'Laboratuvar › Dış İstem › Yeni', 'Gönderen Hekim *', 'Kurum|—', 'Tarih|05.11.2026', 'Hasta|Mehmet Yıldız', 'Numune|—'],
+    personel: ['İzin Talebi', 'İK › İzin › Yeni', 'Personel *', 'İzin Türü|Yıllık', 'Başlangıç|—', 'Bitiş|—', 'Gün|—'],
+    kurum:    ['Başvuru Kaydı', 'Kayıt Kabul › Başvuru › Yeni', 'Ödeyici Kurum *', 'Hasta|Mehmet Yıldız', 'Tarih|05.11.2026', 'Bölüm|Kardiyoloji', 'Hekim|Dr. N. Aydın'],
+    hasta:    ['Başvuru Kaydı', 'Kayıt Kabul › Başvuru › Yeni', 'Hasta *', 'Tarih|05.11.2026', 'Kurum|—', 'Bölüm|—', 'Hekim|—'],
+    ichekim:  ['Başvuru Kaydı', 'Kayıt Kabul › Başvuru › Yeni', 'Hekim *', 'Hasta|Mehmet Yıldız', 'Tarih|05.11.2026', 'Kurum|SGK', 'Bölüm|Kardiyoloji'],
+    kisi:     ['Görüşme Kaydı', 'CRM › Görüşmeler › Yeni', 'Muhatap *', 'Cari|Kardelen Medikal', 'Tarih|05.11.2026', 'Kanal|Telefon', 'Temsilci|M. Demir'],
+  };
+  const secici = document.querySelector('.secici');
+  secici.addEventListener('click', e => {
+    const s = e.target.closest('span[data-g]'); if (!s) return;
+    const g = s.dataset.g;
+    secici.querySelectorAll('span').forEach(x => x.classList.toggle('on', x === s));
+    document.querySelectorAll('.pen').forEach(p => p.classList.toggle('on', p.dataset.pen === g));
+    document.querySelectorAll('.notlar').forEach(n => n.classList.toggle('on', n.dataset.not === g));
+    const a = ARKA[g];
+    document.getElementById('arkaBaslik').textContent = a[0];
+    document.getElementById('arkaYol').textContent = a[1];
+    const al = document.getElementById('arkaAlanlar');
+    al.innerHTML = '<div class="alan hedef"><div class="e">' + a[2] + '</div><div class="d" style="color:var(--muted)">Seçiniz…</div></div>' +
+      a.slice(3).map(x => { const [e, d] = x.split('|'); return '<div class="alan"><div class="e">' + e + '</div><div class="d">' + d + '</div></div>'; }).join('');
+  });
+
+  // Müşteri/Tedarikçi kip anahtarı
+  const kip = document.getElementById('cariKip'), tb = document.getElementById('cariTb');
+  kip.addEventListener('click', e => {
+    const s = e.target.closest('span[data-kip]'); if (!s) return;
+    kip.querySelectorAll('span').forEach(x => x.classList.toggle('on', x === s));
+    const k = s.dataset.kip;
+    document.getElementById('cariBaslik').textContent = k === 'mus' ? 'Müşteri Ara' : k === 'ted' ? 'Tedarikçi Ara' : 'Müşteri / Tedarikçi Ara';
+    document.getElementById('cariYeni').textContent = k === 'mus' ? '＋ Yeni Müşteri' : k === 'ted' ? '＋ Yeni Tedarikçi' : '＋ Yeni Cari';
+    document.getElementById('cariQ').placeholder = (k === 'mus' ? 'Müşteri' : k === 'ted' ? 'Tedarikçi' : 'Müşteri / tedarikçi') + ' ara: kod · ünvan · telefon · ilgili kişi · il…';
+    tb.querySelectorAll('tr').forEach(tr => { const r = tr.dataset.rol; tr.style.display = k === 'tum' || r === 'iki' || r === k ? '' : 'none'; });
+  });
+  // Sağ önizleme paneli aç/kapa (her pencerede; tercih kullanıcıda saklanır)
+  document.querySelectorAll('.pen').forEach(pen => {
+    const t = document.createElement('span'); t.className = 'btn panel-tus'; t.title = 'Önizleme panelini aç / kapat (F4)';
+    const ciz = () => { t.textContent = pen.classList.contains('panel-kapali') ? '◧ Önizleme' : '◨ Önizleme'; };
+    t.addEventListener('click', () => { pen.classList.toggle('panel-kapali'); ciz(); });
+    pen.querySelector('.toolbar').appendChild(t); ciz();
+  });
+  // Satır odağı (tüm gridler)
+  document.querySelectorAll('.dg tbody').forEach(b => b.addEventListener('click', e => {
+    const tr = e.target.closest('tr'); if (!tr) return;
+    b.querySelectorAll('tr').forEach(x => x.classList.remove('foc')); tr.classList.add('foc');
+  }));
+</script>
+</body>
+</html>

@@ -41,8 +41,20 @@ export type CariIcmal = {
   };
   temsilciler: { id: number; ad: string }[];
   carilar: CariIcmalSatiri[];
+  /** KÜÇÜK BAKİYE (1269): eşik altındakiler sayılır; ekran gizler. Kalem no'ları Genel Ayarlar'dan (0 = seçilmemiş). */
+  kucuk: { esik: number; cari: number; toplam: number; borclu: number; alacakli: number;
+           giderId: number; gelirId: number; giderAdi: string; gelirAdi: string; kapatabilir: boolean };
 };
+
+export type KurusKapatIstegi = {
+  esik?: number; tarih?: string; giderId?: number; gelirId?: number; aciklama?: string;
+  kapsam?: string; temsilci?: number; tarafIdler?: number[];
+};
+export type KurusKapatSonucu = { yazilan: number; toplam: number; hata: number; hatalar: string[] };
 
 export const cariIcmalUclari = {
   cariIcmal: (q: URLSearchParams) => istek<CariIcmal>(`/api/cari-icmali?${q}`),
+  /** Kuruş farklarını kapat (1269): eşik altındaki her cariye kasa işlemi (60 gider / 62 gelir). */
+  kurusKapat: (govde: KurusKapatIstegi) => istek<KurusKapatSonucu>('/api/cari-icmali/kurus-kapat',
+    { method: 'POST', body: JSON.stringify(govde) }),
 };

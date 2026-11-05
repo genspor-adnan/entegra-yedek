@@ -592,9 +592,7 @@ public static partial class EkranKodlari
         ["demirbas.amortisman_omur"]    = "demirbas.ayar",
         ["demirbas.parca_depo"]         = "demirbas.ayar",
         ["belge.satis.vade_gun"]        = "belge.satis.ayar",
-        ["belge.satis.varsayilan_seri"] = "belge.satis.ayar",
         ["belge.alis.vade_gun"]         = "belge.alis.ayar",
-        ["belge.alis.varsayilan_seri"]  = "belge.alis.ayar",
     };
 
     /// <summary>

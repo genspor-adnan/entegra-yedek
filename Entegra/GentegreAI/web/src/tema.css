@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Gentegre AI — tasarim dili
    Kaynak: Ekranlar/cari_karti.html (Delphi-mavi kart mockup'lari) — UYGULAMA GENELI TEMA.
    Renkler, fontlar ve bilesen desenleri oradan birebir alindi (20.08.2026'da
@@ -9192,3 +9192,90 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kaid .alan-izgara.kaid-recete > .alan:has([data-alan="notlar"]) { grid-column: span 3 }
 @media (max-width: 900px) { .kaid .alan-izgara.kaid-recete { grid-template-columns: repeat(4, minmax(0, 1fr)) }
   .kaid .alan-izgara.kaid-recete > .alan, .kaid .alan-izgara.kaid-recete > .alan:has([data-alan]) { grid-column: span 2 } }
+/* ÜRETİM EMRİ KARTI kimlik ızgarası (kullanıcı 05.11.2026): Mamul / Ürün Ağacı geniş (6), Emir No / Durum / Termin dar (3),
+   Sürüm / Emir Adedi / Üretilen daha dar (2) - sekiz alan tek satırda 27 sütun. */
+.kaid .alan-izgara.kaid-emir { grid-template-columns: repeat(27, minmax(0, 1fr)); grid-auto-flow: dense }
+.kaid .alan-izgara.kaid-emir > .alan { grid-column: span 3 }
+.kaid .alan-izgara.kaid-emir > .alan:has([data-alan="agacSurum"]),
+.kaid .alan-izgara.kaid-emir > .alan:has([data-alan="adet"]),
+.kaid .alan-izgara.kaid-emir > .alan:has([data-alan="uretilenAdet"]) { grid-column: span 2 }
+.kaid .alan-izgara.kaid-emir > .alan:has([data-alan="stokId"]),
+.kaid .alan-izgara.kaid-emir > .alan:has([data-alan="agacId"]) { grid-column: span 6 }
+@media (max-width: 900px) { .kaid .alan-izgara.kaid-emir { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+  .kaid .alan-izgara.kaid-emir > .alan, .kaid .alan-izgara.kaid-emir > .alan:has([data-alan]) { grid-column: span 2 } }
+
+/* ================================================================================================
+   DÜZENLİ TARAF ARAMASI (TarafArama + tarafDuzenleri: cari / personel / kisi; mockup Ekranlar/taraf_arama.html,
+   kullanıcı 05.11.2026): geniş pencere, sunucu çipleri, seçim süzgeçleri, sağda açılır / kapanır önizleme.
+   Satır renkleri: s-risk kırmızı / s-vade turuncu / s-gri (aday, izinde); pasif kayıt listeye hiç gelmez.
+   ================================================================================================ */
+.taraf-arama.duzenli .lookup-liste table { table-layout: auto }
+.taraf-arama.duzenli .lookup-liste th, .taraf-arama.duzenli .lookup-liste td { padding: 5px 6px; font-size: 11px }
+.taraf-arama.duzenli .lookup-liste th { white-space: nowrap }
+.taraf-arama.duzenli .lookup-liste th.ad { min-width: 200px }
+.taraf-arama.duzenli .lookup-liste td.ad { white-space: normal; min-width: 200px; max-width: 320px; line-height: 1.25 }
+.taraf-arama.duzenli .lookup-liste td.ad small { display: block; color: var(--soluk); font-size: 10px; font-weight: normal }
+/* Uzun hücreler kırpılır (auto tablo düzeninde td max-width güvenilmez, iç blok güvenilir). */
+.ta-kirp { display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ta-kirp.dar { max-width: 118px }
+.taraf-arama.duzenli .lookup-liste .gh-risk .yol { width: 44px }
+/* Önizleme açıkken İlgili Kişi / Temsilci kolonları gizli - panelde yazılı, grid panele yer açar. */
+.ta-govde:not(.kapali) .ta-g2 { display: none }
+.taraf-arama.duzenli .lookup-liste th.hiza-sag, .taraf-arama.duzenli .lookup-liste td.hiza-sag { text-align: right }
+.taraf-arama.duzenli .lookup-liste th.hiza-orta, .taraf-arama.duzenli .lookup-liste td.hiza-orta { text-align: center }
+.ta-ayrac { height: 22px; margin: 0 4px }
+.ta-cipler { display: inline-flex; flex-wrap: wrap; gap: 4px }
+.ta-secim { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--soluk); white-space: nowrap }
+.ta-secim select { height: 24px; max-width: 170px; font-size: 11px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); color: var(--yazi) }
+.ta-govde { display: grid; grid-template-columns: minmax(0, 1fr) 292px; min-height: 0 }
+.ta-govde.kapali { grid-template-columns: minmax(0, 1fr) 24px }
+/* Kapalı panel şeridi: dikey "Önizleme" yazılı ince düğme. */
+.ta-on-serit { border: 1px solid var(--cizgi); border-left: 0; border-radius: 0 3px 3px 0; background: var(--yuz2); color: var(--soluk);
+  cursor: pointer; padding: 8px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px }
+.ta-on-serit:hover { background: var(--mor2); color: var(--yazi) }
+.ta-on-serit span { writing-mode: vertical-rl; font-size: 10.5px; letter-spacing: .3px }
+.ta-on-bas { display: flex; justify-content: space-between; align-items: center; margin: -2px 0 6px; font-size: 10px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--soluk) }
+.ta-on-bas button { border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); color: var(--soluk); cursor: pointer;
+  width: 22px; height: 20px; padding: 0; font-size: 12px; line-height: 1 }
+.ta-on-bas button:hover { background: var(--mor2); color: var(--yazi) }
+.ta-govde .lookup-liste { max-height: 56vh }
+.ta-govde .lookup-liste { border-radius: 3px 0 0 3px; border-right: 0 }
+.ta-on { max-height: 56vh; overflow: auto; border: 1px solid var(--cizgi); border-radius: 0 3px 3px 0; background: var(--yuz2); padding: 8px 10px; font-size: 11.5px }
+.ta-on h4 { margin: 0 0 2px; font-size: 13px; color: var(--lacivert, #14315a) }
+.ta-on .ta-kod { color: var(--soluk); font-size: 10.5px; margin-bottom: 6px }
+.ta-blok { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); padding: 6px 8px; margin-bottom: 6px }
+.ta-blok h5 { margin: 0 0 4px; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--soluk) }
+.ta-sat { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0 }
+.ta-sat > span:first-child { color: var(--soluk); flex: none }
+.ta-sat > span:last-child { text-align: right; min-width: 0; overflow-wrap: anywhere }
+.ta-not { color: var(--uyari, #8a6218); white-space: pre-wrap }
+.ta-uyar { border: 1px solid #edd38b; background: #fff8e1; color: #7a5407; border-radius: 3px; padding: 4px 7px; font-size: 10.5px; margin-bottom: 6px }
+.ta-uyar.kir { border-color: #e9b1ad; background: #fdecea; color: #7d1f1f }
+.ta-belge { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 8px; font-size: 10.5px }
+.ta-belge .t { color: var(--soluk) }
+.ta-belge .kirp { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ta-roz { display: inline-block; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: bold; border: 1px solid var(--cizgi); background: var(--yuz2); color: var(--soluk); white-space: nowrap }
+.ta-roz.mus { background: #e3f0ff; color: #1c4374; border-color: #b7d3f3 }
+.ta-roz.ted { background: #e9f5ec; color: #245e36; border-color: #b9dcc4 }
+.ta-roz.iki { background: #f0eaf8; color: #4a2f73; border-color: #d4c3ea }
+.ta-roz.aday { background: #fff5d6; color: #7a5407; border-color: #edd38b }
+.ta-ef { color: #1f6fbe; font-weight: bold; font-size: 10px }
+.ta-borc { color: #b3261e; font-weight: bold }
+.ta-alacak { color: #2e7d46; font-weight: bold }
+.taraf-arama.duzenli .lookup-liste tbody tr.s-risk td { background: #f7cfcf; color: #7d1f1f }
+.taraf-arama.duzenli .lookup-liste tbody tr.s-vade td { background: #f6d9c0; color: #8a4a12 }
+.taraf-arama.duzenli .lookup-liste tbody tr.s-gri td { background: #e4e7eb; color: #6b7a8b }
+.ta-nokta { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 5px; background: #b0b8c2 }
+.ta-nokta.y { background: #3fa35b } .ta-nokta.s { background: #e0a030 } .ta-nokta.k { background: #d9534f } .ta-nokta.g { background: #9aa3ad }
+/* Odaktaki satır renkli satırların üstünde de belli olsun (aynı özgüllükte sonra yazıldı). */
+.taraf-arama.duzenli .lookup-liste tbody tr.secili td { background: var(--mor2); color: var(--yazi); box-shadow: inset 0 1px 0 var(--mor), inset 0 -1px 0 var(--mor) }
+.ta-lgnd { display: inline-flex; gap: 10px; margin-left: 12px; flex-wrap: wrap }
+.ta-sw { width: 16px; height: 9px; border: 1px solid #b9c6d4; border-radius: 2px; display: inline-block; vertical-align: -1px; margin-right: 4px }
+.ta-kis { margin-left: 12px }
+@media (max-width: 900px) {
+  .ta-govde, .ta-govde.kapali { grid-template-columns: minmax(0, 1fr) }
+  .ta-on, .ta-on-serit { display: none }
+  .ta-govde .lookup-liste { border-radius: 3px; border-right: 1px solid var(--cizgi) }
+  .ta-lgnd, .ta-kis { display: none }
+}

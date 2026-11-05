@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Gentegre.Cekirdek.Katalog;
 
 namespace Gentegre.Testler;
@@ -104,6 +104,40 @@ public sealed class KatalogSemaTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
             }
         }
         Assert.True(hatalar.Count == 0, "Kartın yazdığı kolon tabloda yok - kaydet / satır ekle 500 verir:\n  "
+            + string.Join("\n  ", hatalar));
+    }
+
+    /// <summary>
+    /// GERÇEK VAKA (04.11.2026, ZONE izleme 01M6M1Y4F6NWW61E9ESEWG92NK): üretim emri kartının
+    /// "malzeme" detayındaki hesap kolonları ürün ağacından kopyalanırken
+    /// `urun_agaci_satir.` ön eki kalmıştı - "missing FROM-clause entry", kart hiç açılmıyordu.
+    /// Yukarıdaki kolon testi yalnız düz kolon adlarına bakar; ifade kolonlarını ancak
+    /// sorguyu çalıştırmak yakalar. Kartın ve her detayın okuma SQL'i `where false` ile koşar.
+    /// </summary>
+    [VtFact]
+    public async Task Her_kartin_ve_detayin_okuma_SQL_i_calisir()
+    {
+        if (!_olgu.Baglandi(nameof(Her_kartin_ve_detayin_okuma_SQL_i_calisir))) return;
+        var veri = _olgu.Gerekli();
+        var hatalar = new List<string>();
+        foreach (var kart in KartKatalogu.Tumu.OrderBy(k => k.Ad))
+        {
+            // KartDeposu.OkuAsync ile aynı seçim: alan ifadeleri + xmin.
+            var secim = string.Join(", ", kart.Alanlar.Select((a, i) => $"{YerTutucusuz(a.Kolon)} as k{i}"));
+            var kosul = kart.SabitKosul is { } sk ? $" and ({YerTutucusuz(sk)})" : "";
+            if (await Calisir(veri, $"select {secim}, xmin::text from {kart.Tablo} where false{kosul}") is { } h)
+                hatalar.Add($"kart {kart.Ad}: {h}");
+
+            // KartDeposu.DetaySayfasiAsync ile aynı seçim + sıralama.
+            foreach (var d in kart.Detaylar ?? [])
+            {
+                var ds = string.Join(", ", d.Alanlar.Select((a, i) => $"{YerTutucusuz(a.Kolon)} as k{i}"));
+                var sql = $"select {ds} from {d.Tablo} where {d.UstKolon} = 0 and false order by {YerTutucusuz(d.Sirala)}";
+                if (await Calisir(veri, sql) is { } dh)
+                    hatalar.Add($"kart {kart.Ad} › detay {d.Ad}: {dh}");
+            }
+        }
+        Assert.True(hatalar.Count == 0, "Kart / detay okuma SQL'i çalışmıyor - kart açılmaz (500):\n  "
             + string.Join("\n  ", hatalar));
     }
 

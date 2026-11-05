@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
 using Microsoft.Data.SqlClient;
@@ -36,6 +36,16 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
         _paket = _kok = _silinen = 0;
         var durum = await api.DurumAsync(iptal);
         var guncel = await delphi.GuncelVersiyonAsync(iptal);
+        // DEPO DB'Sİ (1265): e-Belge grubu kendi CT sayacıyla; depo yoksa grup atlanır (bir kez uyarılır).
+        var depoVar = await delphi.DepoVarAsync(iptal);
+        var guncelDepo = depoVar ? await delphi.GuncelVersiyonAsync(true, iptal) : -1L;
+        if (!depoVar && !_depoUyarildi)
+        {
+            _depoUyarildi = true;
+            gunluk.LogWarning("Depo veritabanı (<DB>_GENDEPO) açılamadı ya da Change Tracking kapalı - e-Belge geçmişi (EBELGE) aktarılmıyor; sp_Aktarim_Depo_Hazirla @Ac=1");
+        }
+        long Guncel(Grup g) => g.Depo ? guncelDepo : guncel;
+        var gruplar = Toplamlar.Gruplar.Where(g => !g.Depo || depoVar).ToList();
 
         var sunucu = new Dictionary<string, long>(StringComparer.Ordinal);
         foreach (var t in durum["tablolar"]?.AsArray() ?? [])
@@ -45,15 +55,16 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
                                             CultureInfo.InvariantCulture);
         Uyumluluk(durum);
 
-        if (Toplamlar.Gruplar.SelectMany(g => g.Tablolar).All(t => sunucu.TryGetValue(t, out var v) && v >= guncel))
+        if (gruplar.All(g => g.Tablolar.All(t => sunucu.TryGetValue(t, out var v) && v >= Guncel(g))))
             return new TurSonucu(guncel, 0, 0, 0, null, true);
 
-        var ilerleyen = new List<string>();
+        var ilerleyen = new List<(string Tablo, long Versiyon)>();
         string? hata = null;
-        foreach (var g in Toplamlar.Gruplar)
+        foreach (var g in gruplar)
         {
             var tablolar = g.Tablolar.ToArray();
-            if (tablolar.All(t => sunucu.TryGetValue(t, out var v) && v >= guncel)) continue;
+            var gGuncel = Guncel(g);
+            if (tablolar.All(t => sunucu.TryGetValue(t, out var v) && v >= gGuncel)) continue;
 
             string? tamSebep = null;
             foreach (var t in tablolar)
@@ -67,17 +78,19 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
                 ? await TamAsync(g, kol, baslangic, tamSebep, iptal)
                 : await ArtimliAsync(g, kol, sunucu, iptal);
             if (hata is not null) break;
-            ilerleyen.AddRange(tablolar.Where(t => !sunucu.TryGetValue(t, out var v) || v < guncel));
+            ilerleyen.AddRange(tablolar.Where(t => !sunucu.TryGetValue(t, out var v) || v < gGuncel).Select(t => (t, gGuncel)));
         }
 
         if (ilerleyen.Count > 0)
         {
             var v = new JsonObject();
-            foreach (var t in ilerleyen) v[t] = guncel;
+            foreach (var (t, ver) in ilerleyen) v[t] = ver;
             await GonderAsync(new JsonObject { ["V"] = v }, iptal);
         }
         return new TurSonucu(guncel, _paket, _kok, _silinen, hata, false);
     }
+
+    private bool _depoUyarildi;
 
     /// <summary>Grubun tablolarında okunacak kolonlar (sunucunun stg listesi ∩ Delphi).</summary>
     private async Task<Dictionary<string, Dictionary<string, string>>> KolonlarAsync(Grup g, JsonObject kolonlar, CancellationToken iptal)
@@ -97,7 +110,7 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
                                          string sebep, CancellationToken iptal)
     {
         gunluk.LogInformation("{Kok}: tam yükleme ({Sebep})", g.Kok, sebep);
-        string? nerede = g.Tarih is null ? null : $"[{g.Tarih}] >= @bas";
+        var nerede = g.Nerede(tarihli: true);
         SqlParameter[] p = g.Tarih is null ? [] : [new SqlParameter("@bas", baslangic)];
 
         if (g.Altlar.Length == 0)
@@ -129,7 +142,7 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
             {
                 var deg = await delphi.DegisikliklerAsync(alt.Tablo, sunucu[alt.Tablo], iptal);
                 var degisen = deg.Where(d => d.Islem != 'D').Select(d => Convert.ToInt64(d.Anahtar[0], CultureInfo.InvariantCulture)).ToList();
-                kokler.UnionWith(await delphi.UstlerAsync(alt.UstSorgu, degisen, iptal));
+                kokler.UnionWith(await delphi.UstlerAsync(alt.Tablo, alt.UstSorgu, degisen, iptal));
                 var silinen = deg.Where(d => d.Islem == 'D').Select(d => JsonValue.Create(Convert.ToInt64(d.Anahtar[0], CultureInfo.InvariantCulture))).ToArray();
                 if (silinen.Length > 0) silinenAlt[alt.Tablo] = new JsonArray(silinen);
             }
@@ -160,8 +173,8 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
             }, iptal);
         }
 
-        // Tekil tablo: değişen satırlar; Delphi'de bulunmayan = silinmiş.
-        var satirlar = await delphi.AnahtarlaAsync(g.Kok, kol[g.Kok], adaylar, iptal);
+        // Tekil tablo: değişen satırlar; Delphi'de bulunmayan (ya da kesit dışına çıkan) = silinmiş.
+        var satirlar = await delphi.AnahtarlaAsync(g.Kok, kol[g.Kok], adaylar, iptal, g.Filtre);
         var pk = await delphi.AnahtarAsync(g.Kok, iptal);
         var bulundu = satirlar.Select(s => Kimlik(pk, s)).ToHashSet();
         silinecek.AddRange(adaylar.Where(a => !bulundu.Contains(Kimlik(a))));

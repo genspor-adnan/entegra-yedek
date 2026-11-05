@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (671 ad, 182 tanesi birden cok dosyada)
+## Fonksiyonlar (675 ad, 186 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -14,9 +14,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
 | `fn_aktar_belge` | `1188_aktarim_tahakkuk_aciklama.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql, 1142_aktarim_cari_doviz.sql |
-| `fn_aktar_cari` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktar_cari` | `1268_aktarim_sube_firma.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktar_ebelge` | `1265_aktarim_ebelge.sql` | — |
 | `fn_aktar_ebelge_alias` | `1185_aktarim_ebelge_alias.sql` | — |
 | `fn_aktar_ek` | `1261_aktarim_uretim_fisi.sql` | 1149_aktarim_ek_toplu.sql, 1171_aktarim_ek_kategori.sql, 1172_aktarim_lot_defteri.sql, 1192_aktarim_siparis.sql |
 | `fn_aktar_ek_cek` | `1147_aktarim_ek_cek.sql` | — |
@@ -43,7 +44,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_recete` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_stok` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_stok_durum` | `1084_aktarim_belge.sql` | — |
-| `fn_aktarim_adimlari` | `1086_aktarim_paket.sql` | — |
+| `fn_aktar_xslt` | `1266_aktarim_xslt.sql` | — |
+| `fn_aktarim_adimlari` | `1266_aktarim_xslt.sql` | 1086_aktarim_paket.sql, 1265_aktarim_ebelge.sql |
 | `fn_aktarim_ajan_bul` | `1086_aktarim_paket.sql` | — |
 | `fn_aktarim_ajan_ekle` | `1086_aktarim_paket.sql` | — |
 | `fn_aktarim_bakiye_mutabakat` | `1096_aktarim_bakiye_mutabakat.sql` | — |
@@ -63,12 +65,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_oncesi_bosalt` | `1170_aktarim_oncesi_bosalt.sql` | — |
 | `fn_aktarim_salt_okunur` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
+| `fn_aktarim_sube_isle` | `1268_aktarim_sube_firma.sql` | — |
 | `fn_aktarim_tarih` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktarim_transfer_varis_tamamla` | `1248_aktarim_transfer_lot_varis.sql` | — |
 | `fn_aktarim_uretim_fisi_kur` | `1261_aktarim_uretim_fisi.sql` | — |
 | `fn_aktarim_ust` | `1087_aktarim_ust.sql` | — |
 | `fn_aktarim_web_id` | `1082_aktarim_stok_kalem_hesap.sql` | 1081_aktarim_cari_depo.sql |
-| `fn_aktarim_web_kimlikleri` | `1091_aktarim_mutabakat.sql` | — |
+| `fn_aktarim_web_kimlikleri` | `1266_aktarim_xslt.sql` | 1091_aktarim_mutabakat.sql, 1265_aktarim_ebelge.sql |
+| `fn_aktarim_xslt_turu` | `1266_aktarim_xslt.sql` | — |
 | `fn_aktarim_zaman` | `1081_aktarim_cari_depo.sql` | — |
 | `fn_ameliyat_no_uret` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_not_imza_kilidi` | `719_ameliyathane_acil_akis.sql` | — |
@@ -124,7 +128,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_satir_sut_kodu` | `1232_skrs_yon_ailesi.sql` | — |
 | `fn_belge_satir_tahsil_tazele` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 471_dagilim_kapanma_tahsil.sql, 478_pay_kolonlari_dusur.sql |
 | `fn_belge_sil` | `217_belge_sil_stok_guard.sql` | 181_belge_sil.sql |
-| `fn_belge_silinebilir` | `226_uts_belge_guard.sql` | 181_belge_sil.sql |
+| `fn_belge_silinebilir` | `1267_satirli_belge_silinemez.sql` | 181_belge_sil.sql, 226_uts_belge_guard.sql |
 | `fn_belge_talep_yazi` | `940_personel_unvan_yalniz_onek.sql` | 768_belge_talep_yazisi.sql, 770_belge_talep_yazisi_para_bicimi.sql |
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
@@ -489,7 +493,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_stok_sayim_satir_uret` | `1169_stok_sayim.sql` | — |
 | `fn_sube_depo_subeleri` | `227_baz_sube.sql` | 173_sube_depo.sql, 174_merkez_depo_kullan.sql |
 | `fn_sube_ebelge_hazir` | `169_sube_ebelge_kimlik.sql` | — |
-| `fn_sube_ebelge_kimlik_turet` | `228_ebelge_baz_kimlik.sql` | — |
+| `fn_sube_ebelge_kimlik_turet` | `1272_ust_sube_kendisi_null.sql` | 228_ebelge_baz_kimlik.sql |
 | `fn_sube_gorsel` | `193_firma_kase.sql` | — |
 | `fn_sube_mali` | `192_mali_ayarlar.sql` | — |
 | `fn_sube_merkez_id` | `169_sube_ebelge_kimlik.sql` | — |
@@ -680,7 +684,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (358 ad, 161 tanesi birden cok dosyada)
+## Gorunumler (360 ad, 161 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -1023,6 +1027,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_sube_antet` | `1166_sube_logo_turu_bos.sql` | 772_sube_antet_ve_logo.sql |
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |
 | `v_sube_lookup` | `718_hekim_calisma_plani.sql` | — |
+| `v_sube_ust_lookup` | `1272_ust_sube_kendisi_null.sql` | — |
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `v_taraf_avans` | `780_avans_iadesi.sql` | 322_avans_mahsup.sql |
 | `v_taraf_cihaz` | `940_personel_unvan_yalniz_onek.sql` | 773_teknik_servis.sql |
@@ -1037,6 +1042,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `1253_uretim_fisi.sql` | 429_uretim_v1.sql |
+| `v_uretim_operasyon_lookup` | `1264_uretim_operasyon_lookup.sql` | — |
 | `v_urun_agaci_lookup` | `429_uretim_v1.sql` | — |
 | `v_yatak_lookup` | `696_yatan_lookup.sql` | — |
 | `v_yatak_panosu` | `940_personel_unvan_yalniz_onek.sql` | 695_yatan_hasta.sql |

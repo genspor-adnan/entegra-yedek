@@ -1,4 +1,4 @@
-# Gentegre AI — Çalışma Tarihçesi
+﻿# Gentegre AI — Çalışma Tarihçesi
 
 Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın kendisi
 `GentegreAI/db/`, sözleşmeler `GentegreAI/dokuman/01_API_SOZLESMELERI.md`,
@@ -6,6 +6,230 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 `Ekranlar/gentegre_ai_uygulama_plani.html` dosyalarındadır.
 
 ---
+
+## 05.11.2026 — Baz Alınacak Şube "Kendisi" fk_sube_ust hatası (1272)
+
+Kullanıcı: Fatura Ayarları'nda Kaydet → "Bağlantılı kayıt bulunamadı ... (fk_sube_ust)". Combo `v_sube_baz_lookup`'tan
+besleniyordu; oradaki "Kendisi" satırı id 0 (depo_baz_sube_id için doğru, o kolon NOT NULL default 0), ama
+`sube.ust_sube_id` NULL'lanabilir FK - 0 reddediliyordu. Tetik (fn_sube_ebelge_kimlik_turet) artık 0 / kendi id'sini
+NULL'a çevirir; alan yeni `v_sube_ust_lookup` görünümünü kullanır (yalnız aktif şubeler, boş "—" = kendisi), başlık
+"Baz Alınacak Şube (boş = kendisi)". Depo baz şubesi görünümü aynen.
+- Seri Bilgileri gridinde e-Arşiv rozeti yeşil, e-Fatura mavi (kullanıcı: "amaç farklılık"): kolon `Bicim`
+  "rozet:<sınıf>" ya da "rozet:deger=sınıf;..." ile kendi rengini söyler; sözlük rengi (belge listesinde hazırlandı
+  mavi / ✓ gönderildi yeşil) aynen.
+- Aynı düzeltmede: Fatura Ayarları kaydedince kart yeniden okunur (GenForm key'e kayıt sayacı); `onKaydedildi`
+  true dönünce GenForm kendi tazelemesini atladığından ilk değer eskide kalıyor, ikinci değişiklik ("—"ye dönüş)
+  "değişmedi" sayılıp yazılmıyordu.
+
+---
+
+## 05.11.2026 — Ölü ayar kaldırıldı: belge.<yon>.varsayilan_seri (1271)
+
+Fatura Ayarları incelemesinde (kullanıcı: "Varsayılan Seri kullanılıyor mu?") görüldü: Satış / Alış Belgeleri
+ayarındaki "Varsayılan seri" 155'ten beri hiçbir yerde okunmuyordu. Seri iki yerden gelir: belge kaydında boşsa
+şubenin serisi (`sube.ebelge_seri`, Fatura Ayarları › Genel), e-Belge hazırlanırken GİB serisi (`ebelge_seri`
+kuralları). Ayar + yardım satırı silindi, beyaz liste / ekran kodu eşlemesi ve ekran alanı kaldırıldı.
+`sube.efatura_alias` ve `sube.ebelge_seri` KULLANILIYOR (belge gönderici alias'ı / seri yedeği) - dokunulmadı.
+- Aynı gün: Satış Belgeleri › e-Belge sekmesi KALKTI; şube özeti gridi (şube · ünvan · VKN · entegratör · e-Fatura
+  mükellefi · ortam) ve "e-Belge kapalı" uyarısı Fatura Ayarları › Genel'in altına taşındı (`MukellefOzeti`,
+  kart kaydedilince tazelenir). `eBelgeAyarlari.tsx` silindi.
+
+---
+
+## 05.11.2026 — Fatura Ayarları ekranı: şube kartının e-Belge sekmesi Satış › Ayarlar'a (1270)
+
+Kullanıcı: "firma/şube bilgilerinde e-belge sekmesini satış ana menüsü altında ayarlar altına 'Fatura Ayarları'
+menüsü olarak taşı.. Baz Alınacak Şube combosu da ekle".
+- Yeni ekran `/fatura-ayarlar` (`FaturaAyarlari.tsx`): OTURUMUN AKTİF ŞUBESİNİ düzenler (kullanıcı: "üstteki
+  şubeyi kaldır.. hangi şube olarak girdiysek onun ayarı yapılsın"; başlıkta şube adı, üst çubuktan şube değişince
+  kart yeniden okunur; Sil ve Hatırlat düğmeleri yok - GenForm `hatirlatYok`). İçerik aynı `sube` kartının YALNIZ
+  e-Belge sekmesi, "Genel" adıyla (GenForm `sekmeBasliklari`) + Seri Bilgileri / XSLT / e-Fatura / e-Arşiv /
+  e-İrsaliye / e-SMM GERÇEK SEKMELER (`ekSekmeler`; kullanıcı: "butonları sekme haline getir"; tür sekmesi
+  mükellefiyet kutusuna bağlı, `MukellefIzle`). Kaydet sayfayı kapatmaz (ayar ekranı).
+- GenForm `yalnizSekmeler`: listede olmayan gruplar ve detaylar gizli sayılır, satırın tamamı yine okunur / yazılır.
+- Şube kartında e-Belge sekmesi artık çizilmez (`gizliSekmeler`); alanlar katalogda, veri aynı satırda.
+- Gönderici › **Baz Alınacak Şube** ekran seçimi değil veridir (`sube.ust_sube_id`): şube e-Belge'yi hangi şubenin
+  VKN / alias'ıyla gönderir; boş = kendi kimliği.
+- Menü: ERP'de Satış › Ayarlar › Fatura Ayarları, HBYS'de Kurumlar & Sigorta › Ayarlar (Satış grubu HBYS'de gizli;
+  yeni `erpMenuAltGrup` ile ERP'de alt kırılım korunur). Ekran kodu `satis.fatura_ayar`, `sube` hakkı olan rollere
+  aynı haklarla verildi; yazma yetkisi yine `sube`. Rehber kataloğu + yardım metinleri yeni yere yönlendirildi.
+
+---
+
+## 05.11.2026 — Cari İcmali: küçük bakiye eşiği + kuruş farkı kapatma (1269)
+
+Kullanıcı: "Cari İcmali'nde 10 kuruştan küçük bakiyeli kayıtlar var, kalabalık oluyor, ne yapılabilir?" → "1 ve 2".
+Sebep incelemesi (ZONE 120.01.570 / .143 / .450): hesap doğru, Delphi'de girilmiş tahsilat ile fatura arasında 1-2 kuruş
+fark (dekont tutarı); 75 cari eşik altında, toplam -0,16 TL.
+- **Eşik** `cari.icmal_esik` (varsayılan 0,10; Genel Ayarlar › İcmal Eşikleri): sunucu eşik altındakileri sayar
+  (`kucuk`: cari, toplam, borçlu / alacaklı, kalem ayarları, yetki); ekranda "Küçük bakiyeleri gizle" (varsayılan açık; "Bakiyesi sıfır olanları gizle" kutusu kalktı, sıfır hep gizli)
+  ve dipte sarı şerit "N cari eşik altında, toplam X · Göster". Bakiye, ekstre, mutabakat aynen.
+- **Kuruş farkı kapatma**: kasa işlem türleri 60 Kuruş Farkı Gideri (cari alacak + masraf borç) ve 62 Kuruş Farkı
+  Geliri (cari borç + hizmet alacak) - hesapsız, fişli, cari ekstresinde. `POST /api/cari-icmali/kurus-kapat`
+  (yetki `finans.kurus_kapat`, Cari İcmali'ni değiştirebilen rollere açık) eşik altındaki her cariye `KasaDeposu`
+  ile bir işlem yazar (log, iptal edilebilir); biri düşerse ötekiler kalır, sonuç sayar. Ekranda "Kuruş farklarını
+  kapat…" onay penceresi: eşik, tarih, gider / gelir kalemi (varsayılanları `cari.kurus_gider_id` /
+  `cari.kurus_gelir_id`), açıklama, liste + toplam.
+- Test `KurusFarkiTestleri` (60 / 62 bacak üretimi ve bakiye sıfırlama). Göç 6 yerel DB'ye uygulandı.
+
+---
+
+## 05.11.2026 — Şube / firma bilgisi REHBER ID<0'dan (1268)
+
+Kullanıcı: "şube/firma bilgileri rehberde ID<0'da, aktarımlarda şube bilgisi için kullan". Delphi'de kurumun firma /
+şubeleri REHBER'de negatif kimlikle (-1 merkez; bütün SUBEID'ler bu kimlik), vergi / mersis / sicil REHBERBILGI (YERI 2),
+adres / il / telefon / e-posta varsayılan REHBERILETISIM'in REHBERBILGI'si (YERI 1). Cari adımı bunları atlıyordu; web
+şubesi kurulum tohumuyla (Merkez, demo VKN 4840847211) kalıyor, e-Belge göndericisi (v_ebelge_gonderici) yanlış kimlik
+taşıyordu (ZONE / UNIVERSE yerel profilleri).
+- **1268**: `sube` tablosuna aktarım kimliği; `fn_aktarim_sube_isle(p)` paketteki REHBER ID<0 satırlarını şubeye yazar -
+  -1 ilk gelişte web'in aktarımsız varsayılan şubesine BAĞLANIR (belgeler zaten ona düşmüştü), başka negatif kimlik yeni
+  şube; alanlar her pakette yenilenir, kısa ad yalnız yer tutucuysa değişir; alias / entegratör / mükellefiyet
+  dokunulmaz; `aktarim_sube_esleme` dolar (fn_aktarim_sube(-1) artık bağlı şube). `fn_aktar_cari` sarmalandı
+  (1081 gövdesi `fn_aktar_cari_1081`), sonuca 'sube' sayısı.
+- Test `AktarimSubeTestleri`; aktarım testleri 9/9. Yerel UNIVERSE ve ZONE'a tek seferlik uygulandı (goc_al ile stg ->
+  fn_aktarim_sube_isle): UNİVERSE MEDİKAL (VKN 8920322635, Davutpaşa, mersis, sicil, adres, tel, e-posta) ve ZONE
+  ELEKTRİK (VKN 9990802081, Uluçınar, Dilovası / Kocaeli); aynı yolla FETA (merkez + Kadıköy / GOPP / Kartal / İzmir /
+  Beylikdüzü şubeleri yeni açıldı) ve MEDX (merkez). Ajan tarafında değişiklik yok: negatif REHBER satırları zaten
+  paketle geliyor. TUZAK: stg.rehber'de `r` adlı kolon var - `to_jsonb(r)` takma adla çakışır, `to_jsonb(x.*)` kullan.
+
+---
+
+## 05.11.2026 — e-Belge XSLT şablonları ajanla (1266, Update_SQL_222); satırlı belge silinemez (1267)
+
+Kullanıcı: "xslt dosya/larını da aktar". Delphi şablonu DOKUMLER'de (GRUBU 'XSLT', içerik SQL kolonu; RAPORID giden 2 /
+12 / 32 / 52, gelen 1 / 11 / 31 / 51 = e-Fatura / e-Arşiv / e-SMM / e-İrsaliye), varsayılan GENINI'de (DOKUMLER.ID;
+GENINI'nin PK'sı yok, aktarılamaz). Web şablonu dokuman deposunda (kaynak 'ebelge-xslt', kaynak_id tür 1/2/7/8, yon).
+- **1266** `fn_aktar_xslt(jsonb)` 15. adım: `stg.dokumler`, `fn_aktarim_xslt_turu` (RAPORID -> tür, yön), içerik
+  dokuman_icerik'e (sha256 BÜYÜK hex, dedup), dokuman satırı DOKUMLER kimliğiyle; XSLT olmayan / bilinmeyen RAPORID /
+  boş içerik atlanır (varsa web kaydı silinir), D siler. Varsayılan kuralı: (tür, yön) için web'de varsayılan yoksa
+  Delphi VARSAYILAN = 1, yoksa en küçük kimlik; web'de seçilen korunur. Mutabakat DOKUMLER kimliğiyle.
+- **Update_SQL_222**: `sp_Aktarim_Hazirla` listesine DOKUMLER (216 gövdesi aynı). Ajan: `Grup.Filtre` (kesit WHERE:
+  tam yükleme, artımlı okuma `AnahtarlaAsync(ekFiltre)`, mutabakat listesi) - DOKUMLER yalnız `[GRUBU] = 'XSLT'`;
+  kesit dışına çıkan anahtar D gider. Sayfa 10 (şablon 100 KB - 1 MB).
+- **1267** `fn_belge_silinebilir`: satırı olan belge silinemez (kullanıcı: "satırları dolu olan fatura silinemez" ->
+  "bu kurallar tüm belgeler için geçerli") - önce satırlar silinir. Hazırlanmış / gönderilmiş e-Belgenin satırının
+  değişmemesi / silinmemesi zaten `BelgeDeposu.GuncelleAsync` ve `fn_belge_silinebilir` (181 / 226) kilidi; teyit edildi.
+- Test `AktarimXsltTestleri` (tür / yön / varsayılan / içerik güncelleme / atlanan / D; satırlı belge silinemez);
+  aktarım testleri 4/4. Uçtan uca: UNIVERSE DOKUMLER'deki 2 XSLT klona geldi (ajan --tek-tur). Göçler 4 yerel DB + klon;
+  dev MSSQL UNIVERSE'te Update_SQL_222 + DOKUMLER CT açık. Ajan paketi yeniden üretildi (yayin/ajan).
+
+---
+
+## 05.11.2026 — e-Belge geçmişi ajanla sürekli aktarılıyor (1265, Update_SQL_221, ajan 0.2.0)
+
+Kullanıcı: "ebelge aktarımını yap". Durum: EBELGE / EBELGEMESAJ (GENDEPO) yalnız Delphi kapanırken bir kerelik
+`aktar_ek.ps1` ile taşınıyordu; Delphi'yi kullanmaya devam eden kurumda (ZONE) e_belge hiç dolmuyordu. Yerel MSSQL ZONE
+kopyası eski (26315 orada 2022 no'lu, e-fatura 0) - kaynak müşterideki canlı Delphi, ona yalnız ajan ulaşıyor.
+- **1265** `fn_aktar_ebelge(jsonb)`: paket U/D, toplam = EBELGE + bütün EBELGEMESAJ (EBELGEID); eşleme 1146 ile aynı
+  (151 -> 1, 150 -> 2; durum 2 -> 2/12). Belgesi web'de olmayan EBELGE yazılmaz ('belgesiz' - gece mutabakatı yeniden
+  yollar); web'in kendi UUID'sine dokunulmaz; pakette olmayan mesaj silinir; D e-belgeyi mesajlarıyla siler; zipli UBL
+  (bytea) olduğu gibi. `fn_aktarim_adimlari` 14. adım, `fn_aktarim_web_kimlikleri` EBELGE (mutabakat).
+- **Update_SQL_221** `sp_Aktarim_Depo_Hazirla @Ac`: depo DB'sinde (`<DB>_GENDEPO`, ULog kuralı) CT'yi açar, EBELGE /
+  EBELGEMESAJ'a `gentegre_aktarim_okur` + ajan kullanıcısı. CHANGETABLE synonym üzerinden çalışmadığı için ayrı DB'de
+  ayrı sayaç. `mssql_hazirla.sql` sp varsa çağırır, yoksa uyarır.
+- **Ajan 0.2.0**: `DepoBaglanti` ayarı (boşsa ana bağlantı + `_GENDEPO`); `DelphiOkuyucu` tabloya göre bağlantı seçer
+  (EBELGE, EBELGEMESAJ -> depo), `DepoVarAsync` (depo yok / CT kapalı -> grup atlanır, bir uyarı; nabızda yeniden denenir);
+  `Grup.Depo` ile tur iki CT sayacını ayrı izler (`V` tablo başına kendi sayacı); mutabakat depo gruplarını depo varsa alır.
+- **Sunucu görünümü**: aktarılan e_belge satırındaki Delphi UBL'i (zipli ise gzip açılır - COMPRESS) Önizle / PDF / XML
+  için olduğu gibi kullanılır (`EFaturaVerisi.AktarimUbl`); e_belge olmayan eski kayıt için 05.11 "AKTARILAN BELGE"
+  görüntüsü sürer.
+- Test `AktarimEbelgeTestleri` (belgeli / belgesiz / tekrar / mesaj toplamı / D / mutabakat); AktarimPaket + EFaturaGovde
+  ile 13 test geçti. Uçtan uca: dev MSSQL UNIVERSE (+ UNIVERSE_GENDEPO, CT açıldı) -> klon gentegre_ai_aktarim (API 5190)
+  ajan --tek-tur. Göç 4 yerel DB + klon; dokuman/18 §11.1, dokuman/19 §2-4 güncel.
+- SIRADA (kullanıcı): ZONE'a Delphi güncellemesi (Update_SQL_221) + müşteri sunucusunda `sp_Aktarim_Depo_Hazirla @Ac = 1`
+  (ya da mssql_hazirla.sql yeniden) + yeni ajan (yayinla_ajan.ps1 çıktısı) + sunucu API yayını; ilk turda EBELGE tam
+  yüklemesi hareket başlangıcından itibaren gelir.
+
+---
+
+## 05.11.2026 — Aktarılan gönderilmiş e-Fatura önizlenemiyordu (ZONE #26315)
+
+Kullanıcı: "gönderilmiş fatura, baskı önizleme göremedim, önce hazırla yapın diyor, eski programdan gelmişti". Delphi'den
+aktarılan belgelerde `efatura_durum` gönderildi (2 / 12 / 52) ama `e_belge` kaydı (ETTN, UBL) yok - ZONE'da 9.826 belge,
+`e_belge` boş; EBELGE tablosu aktarılmıyor. `EFaturaServisi.GorunumVerisiAsync` e_belge yokluğunu "hazırlanmamış" sayıp
+engelliyordu.
+- Gönderilmiş + e_belge'siz belgede görüntü belge verisinden üretilir (e-Belge no = belge no, ETTN boş); HTML / PDF /
+  Önizle "AKTARILAN BELGE · GÖRÜNTÜ" filigranıyla çıkar. XML verilmez ("aslı bu sistemde yok").
+- Hazırlanmamış (efatura_durum 0) belgede davranış aynı: önce Hazırla.
+- EFaturaGovde testleri (11) geçti; ZONE / UNIVERSE yerel API kopyaları yeniden yayınlandı. Kalıcı çözüm: EBELGE (XML)
+  aktarımı - ayrı iş.
+
+## 05.11.2026 — Taraf arama mockup'ı (7 görünüm) ve müşteri / tedarikçi araması mockup'a göre
+
+Kullanıcı: "müşteri/tedarikçi arama ekranı için mockup yap" → "taraf aramayı çeşitlendirmeli" (müş/ted, dış doktor, personel,
+anlaşmalı kurum, hasta, iç doktor, ilgili kişi) → "müş / ted aramayı mockup'a göre yap".
+- **Mockup** `Ekranlar/taraf_arama.html`: tek dosya, üstte görünüm seçici; her görünümde ortak çatı (tek kutu, ☰/🕓/⭐, sayılı
+  çipler, grid + sağ önizleme, alt çubuk, klavye) ve kaynağa özel kolon / çip / önizleme / seçim engeli; her görünümün altında
+  tasarım notları. Koddaki taraf kaynakları (cari, hasta, personel, basvuru-hekim, dis-hekim, kurum, kisi) tamamlandı.
+  Kullanıcı düzeltmeleri: müş/ted'de VKNO kolonu ve araması yok, Kimliği Okut / MERNİS düğmeleri yok (hastaya özgü); sağ
+  panel açılır / kapanır.
+- **Uygulama** (`TarafArama` cari düzeni, yalnız tek kaynaklı `cari` aramasında - `TarafAramaCari.tsx` bileşenler,
+  `cariArama.ts` kurallar):
+  - Pencere 1280 px; araç çubuğu ＋ Yeni Müşteri / Tedarikçi (rol kipine göre), Düzenle, 📄 Ekstre (yeni tarayıcı sekmesi -
+    uygulama sekmesine gitmek arkadaki belge kartını düşürürdü), ◨ Önizleme aç / kapa (tercih `localStorage`, dar ekranda
+    varsayılan kapalı); Seç / Vazgeç alt çubukta.
+  - Çipler SUNUCU koşulu (Aday / Bakiyeli / Vadesi geçen / Risk sınırında %70+ / e-Fatura / Dövizli); İl ve Temsilci süzgeci (seçenekler yüklü satırlardan); sayfa 50.
+  - Arama alanları: kod, ünvan, fatura ünvanı, ilgili kişi, il, telefon (ham) - vergi / kimlik no ARANMAZ.
+  - Kolonlar: Tip rozeti, Kod, Ünvan (+ farklıysa fatura ünvanı), İl / İlçe, Telefon, İlgili Kişi, Temsilci (ikisi önizleme
+    açıkken gizli), Bakiye B/A, Vadesi Geçen, Risk çubuğu, Son Satış, e-F. Alış belgesinde tedarikçi gözü: Borcumuz /
+    vadesi geçen ödeme / Son Alım, risk kolonu yok.
+  - Satır renkleri: aday GRİ › risk aşıldı › vadesi geçen. PASİF CARİ LİSTEYE HİÇ GELMEZ (kullanıcı: "pasifler aramaya
+    gelmesin, adaylar da gri olsun" - Aktif / Pasif çipi yok, `durum = 1` sabit koşul).
+  - Önizleme: iletişim, hesap (bakiye, vadesi geçen, risk limiti + çubuk, döviz, son tahsilat), belgeye geçecek koşullar
+    (fiyat listesi, vade günü - kart okunarak, id başına bir kez, 250 ms gecikmeyle), son 4 belge (belge listesi), not.
+    Kart / belge yetkisi yoksa blok sessizce çizilmez. "."/"-" gibi aktarım dolguları boş sayılır.
+- **Ortak çatı** (kullanıcı: "personel ve ilgili aramayı da bu standartlara göre yap"): kaynağa özel olan `TarafDuzeni`
+  nesnesinde (`tarafDuzeni.ts` tip + koşul kurucu, `tarafDuzenleri.ts` kaynak → düzen: cari / personel / kisi); TarafArama
+  yalnız tek kaynaklı aramada düzeni uygular, karma aramada genel taraf düzeni kalır. Her düzende: `durum = 1` sabit koşul
+  (pasif gelmez), sunucuya giden çipler, yüklü satırlardan beslenen seçim süzgeçleri (combo), kolonlar, satır rengi,
+  lejant, sağda açılır / kapanır önizleme (düğme panelin üstünde, kapalıyken dikey şerit; tercih `tarafArama.onizleme`),
+  araç çubuğu Yeni · Düzenle · Seç · [düzenin ek düğmeleri], sağda Kapat; alt çubukta düğme yok.
+  - **Personel** (`TarafAramaPersonel.tsx`): Sicil, Ad Soyad (+ eksik bilgi), Rol, Bölüm, Görev, Cep, Bugün (v_personel_durum
+    noktası: çalışıyor / izinde / raporlu / deneme), Yönetici, İşe Giriş, Kalan İzin; çipler İzinde / Raporlu / Deneme
+    süresinde / Onayda talep / Eksik bilgi / Doğum günü bu ay; Bölüm ve Rol combosu; önizleme bugün · iletişim · çalışma
+    (işe giriş, kıdem, yıllık izin kalan / hak, onayda talep). KİMLİK NO KOLONDA YOK (kullanıcı: "kimlik no olmasın"); ham
+    kimlik no ile arama 08.10 isteği gereği sürüyor. Raporlu turuncu, izinde gri.
+  - **İlgili kişi** (`TarafAramaKisi.tsx`): Ad Soyad (+ kod), Bağlı Kurum, Görev, Cep, Telefon, E-posta, Eklendi; Bağlı cari
+    ve Görev combosu; arama bağlı cari / görevde de; önizleme iletişim · kayıt. Mockup'taki KVKK / karar verici / son temas
+    kolonları şemada yok.
+  - e-F kolon başlığı "e-Fat" (kullanıcı).
+- Menüdeki "Kayıtlı Müşteri / Tedarikçi / Kişi Kartı" da aynı aramayı açar (kullanıcı: "gelen arama eski tipti sadece grid"):
+  Kabuk, düzeni olan kaynaklarda (tarafDuzenleri) GenGrid'li KayitArama yerine TarafArama; listenin sabit süzgeci ek koşul.
+  Öteki kartlar eskisi gibi.
+- Doğrulama: tsc + oxlint temiz; Playwright (Edge) ile satış faturası (müşteri) ve alış (tedarikçi) aramaları açıldı,
+  çip / önizleme / pasif engeli kontrol edildi, konsol hatasız. API değişikliği yok.
+
+## 05.11.2026 — Üretim emri kartı kimlik şeridi genişlikleri
+
+Kullanıcı: "mamul ve ürün ağacı geniş; emir no, sürüm, emir adedi, üretilen, durum, termin dar". Reçete kartı deseni
+(`kaid-recete`): `KartKimlikSeridi` `uretim-emri` için `kaid-emir`, `tema.css` 27 sütunlu dense ızgara - Mamul / Ürün Ağacı
+6, Emir No / Durum / Termin 3, Sürüm / Emir Adedi / Üretilen 2 ("biraz daha dar"); sekiz alan tek satır. 900 px altında 4 sütun / her alan 2 (reçete kuralıyla aynı).
+
+## 04.11.2026 — Üretim emri "Personel / Zaman": basitte gizli, operasyon seçici (1264)
+
+Kullanıcı: "normalde bir üretim emrinde personel-zaman sekmesi olur mu, yoksa eski Delphi'den mi?" → ikisi de: sektör
+standardı (SAP confirmation / Odoo time tracking: operasyon · personel · süre · adet · duruş) ve Delphi'de de var
+(`UIsEmriPersonelZaman`, `IsEmriPersonelZamanSihirbaz`). 429 kararı: işçilik maliyeti YALNIZ bu satırlardan (süre × ücret).
+Karar "basitte gizle, operasyon lookup yap":
+- Kart eklentisi `uretim-emri`: `gizliDetaylar` basit seviyede `['zaman']` (boş sekme durmasın; standart / denetimli aynen).
+- **1264** `v_uretim_operasyon_lookup` ("sıra. ad · iş merkezi", `ust_id` = emir, durum süzülmez - bitmiş operasyona geç
+  giriş olabilir); beyaz listeye eklendi; katalogda `operasyonId` artık `kod` + `UstBilgisi` ("Operasyon (Id)" ham sayı idi).
+- Kartın dış süzgeci genelleşti: `detaySecenekleri[ad].ustSuzgec` (GenForm / KartDetaySekmesi) - eklenti zaman detayına
+  `{ operasyonId: emirId }` verir, satır combosu yalnız kendi emrinin operasyonlarını listeler. Kurum sözleşmesi özel kuralı
+  (587) aynı yerde üstüne yazılır. Lookup bütün emirlerin operasyonlarını taşır (kart metası), süzme istemcide.
+- Doğrulama: tsc temiz; KatalogSema + KatalogButunluk + Üretim test sınıfları 29 test geçti; göç 4 yerel DB'ye uygulandı;
+  UNIVERSE / ZONE API kopyaları yeniden yayınlandı.
+
+## 04.11.2026 — Üretim emri kartı açılmıyordu (ZONE izleme 01M6M1Y4F6NWW61E9ESEWG92NK)
+
+Kullanıcı: "üretim emiri kartı hata: Beklenmeyen bir hata oluştu… (izleme: 01M6M1Y4F6NWW61E9ESEWG92NK)". ZONE `hata_log`:
+`GET /api/kart/uretim-emri/1` → `42P01: missing FROM-clause entry for table "urun_agaci_satir"`. 1259'da üretim emri kartının
+`malzeme` detayına (tablo `uretim_emri_satir`) eklenen Kod / Bileşen Adı / Birim hesap kolonları ürün ağacı detayından kopyalanmış,
+`urun_agaci_satir.` ön eki kalmıştı; satırı olan her emirde kart 500 veriyordu. Düzeltme `uretim_emri_satir.`.
+Neden testten kaçtı: `KatalogSemaTestleri` kart / detay için yalnız düz kolon adlarına bakıyordu (ifade kolonları atlanır), liste
+kaynakları içinse SQL'i gerçekten koşuyordu. Yeni `Her_kartin_ve_detayin_okuma_SQL_i_calisir`: her kartın ve detayının
+`KartDeposu` ile aynı okuma seçimi `where false` ile test DB'de koşar (eski alias'ın test DB'de aynı hatayı verdiği doğrulandı).
+Yerel UNIVERSE (5186) ve ZONE (5189) API kopyaları hatalı derlemeyi taşıyordu; tek Release yayını ikisine kopyalanıp yeniden başlatıldı.
 
 ## 04.11.2026 — Üretim Ayarları kendi menüsünde (1262)
 
