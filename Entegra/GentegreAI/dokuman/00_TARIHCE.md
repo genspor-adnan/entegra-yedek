@@ -7,6 +7,16 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 05.11.2026 — Depo: günün işleri commit + push (e3665c5, pg-migration)
+
+Bugünkü GentegreAI işleri tek commit'te `origin/pg-migration`'a gönderildi: taraf aramaları düzenli yapı
+(cari / personel / kişi, mockup `Ekranlar/taraf_arama.html`), aktarım 1265-1268 (e-belge, XSLT, şube/firma;
+ajan 0.2.0, Delphi `Update_SQL_221/222`), satırlı belge silinemez (1267), Cari İcmali küçük bakiye + kuruş farkı
+kapatma (1269), Fatura Ayarları ekranı (1270-1272), seri gridi rozet rengi. Delphi tarafı ve diğer oturumların
+değişiklikleri commit DIŞINDA bırakıldı (45 dosya, ayrı commit bekliyor).
+
+---
+
 ## 05.11.2026 — Baz Alınacak Şube "Kendisi" fk_sube_ust hatası (1272)
 
 Kullanıcı: Fatura Ayarları'nda Kaydet → "Bağlantılı kayıt bulunamadı ... (fk_sube_ust)". Combo `v_sube_baz_lookup`'tan
