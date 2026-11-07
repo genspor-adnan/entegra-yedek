@@ -671,13 +671,11 @@ public sealed partial class BelgeDeposu
             //   kart yolu karşılığı. Karışık belgede (irsaliyeden + yeni satır) belgenin tamamı yazılır, uyarılır.
             if (cariEtkiler && !cariAtla)
             {
-                var (kaynakli, toplam, hepsiCariYazdi) = await KaynakCariDurumuAsync(baglanti, islem, belgeId, iptal);
-                if (kaynakli > 0 && hepsiCariYazdi)
-                {
-                    if (kaynakli == toplam) cariAtla = true;
-                    else uyarilar.Add("Belgede irsaliyeden gelen ve yeni satırlar karışık: cari hareketi belgenin tamamı için "
-                                    + "yazıldı; irsaliyenin payı cari ekstresinde iki kez görünebilir.");
-                }
+                var (cariYazan, toplam) = await KaynakCariDurumuAsync(baglanti, islem, belgeId, iptal);
+                if (cariYazan > 0 && cariYazan == toplam) cariAtla = true;
+                else if (cariYazan > 0)
+                    uyarilar.Add($"Belgede irsaliyeden gelen ({cariYazan}) ve diğer ({toplam - cariYazan}) satırlar karışık: "
+                               + "cari hareketi belgenin tamamı için yazıldı; irsaliyenin payı cari ekstresinde iki kez görünebilir.");
             }
 
             if (stokEtkiler)

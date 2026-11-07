@@ -48,7 +48,11 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
             if (await k.ExecuteScalarAsync(iptal) is long v) { _depoVar = true; return v; }
             _depoVar = false; return null;
         }
-        catch (SqlException) { _depoVar = false; return null; }
+        // KALICI HATA (inceleme 07.11.2026): yalnız DB yok (4060) / giriş reddi (18456) / nesne yok (208) depoyu "yok"
+        //   sayar; geçici zaman aşımı / ağ hatası (-2, 53, 40...) bir sonraki yoklamada yeniden denenir - eskiden tek
+        //   zaman aşımı e-Belge grubunu nabıza kadar sessizce düşürüyordu.
+        catch (SqlException ex) when (ex.Number is 4060 or 18456 or 208) { _depoVar = false; return null; }
+        catch (SqlException) { return null; }
         catch (InvalidOperationException) { _depoVar = false; return null; }
     }
 

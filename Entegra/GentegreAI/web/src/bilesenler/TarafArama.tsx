@@ -280,7 +280,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
           ? { op: 'or' as const, kosullar: [
               { alan: 'kod', op: 'icerir' as const, deger: metin.trim() },
               { alan: 'unvan', op: 'icerir' as const, deger: metin.trim() },
-              ...(duzen?.ekArama ?? KAYNAK_EK_ARAMA[k] ?? []).map(alan =>
+              // Çok kaynaklı aramada (cari + kişi) da düzenin ek alanları (inceleme 07.11.2026: cari ilgili kişi /
+              //   fatura ünvanı / il araması çok kaynaklıda kaybolmuştu).
+              ...(duzen?.ekArama ?? TARAF_DUZENLERI[k]?.ekArama ?? KAYNAK_EK_ARAMA[k] ?? []).map(alan =>
                 ({ alan, op: 'icerir' as const, deger: metin.trim() })),
               ...(rakamlar.length >= 4
                 ? [{ alan: 'telefonHam', op: 'icerir' as const, deger: rakamlar }]

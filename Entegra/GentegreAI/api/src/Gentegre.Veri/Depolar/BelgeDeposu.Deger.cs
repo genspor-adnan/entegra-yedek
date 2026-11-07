@@ -358,15 +358,20 @@ public sealed partial class BelgeDeposu
             -- KAYNAĞIN LOTLARI (kullanıcı 07.11.2026 "lotlar aynen taşınır, tekrar sorulmaz"): stok düşürmeyen
             --   (irsaliyeden gelen, stok_durum_degis 0, kaynak_tur 30) satırın lot satırı yoktur - kaynak irsaliye
             --   satırının lotları onun adına gösterilir. Kısmi aktarımda kaynağın tamamı görünür (bilgi amaçlı).
-            select coalesce(h.id, i.belge_satir_id) as "satirId", i.seri_lot_id as "seriLotId",
+            --   İki dal UNION ALL (inceleme: OR iki tarafı birden tarıyordu) - ikisi de indeksle gider.
+            select i.belge_satir_id as "satirId", i.seri_lot_id as "seriLotId",
                    i.lot_no as "lotNo", i.seri_no as "seriNo",
                    i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
-                   i.durum, i.adet as "miktar", i.kalan
+                   i.durum, i.adet as "miktar", i.kalan, i.id as sira
               from public.v_belge_satir_izlem i
-              left join public.belge_satir h on h.belge_id = @p0 and h.kaynak_tur = 30 and h.kaynak_id = i.belge_satir_id
-                                             and coalesce(h.stok_durum_degis, 0) = 0
-             where i.belge_id = @p0 or h.id is not null
-             order by 1, i.id
+             where i.belge_id = @p0
+            union all
+            select h.id as "satirId", i.seri_lot_id, i.lot_no, i.seri_no, i.uretim_tarihi, i.son_kullanma_tarihi,
+                   i.durum, i.adet, i.kalan, i.id
+              from public.belge_satir h
+              join public.v_belge_satir_izlem i on i.belge_satir_id = h.kaynak_id
+             where h.belge_id = @p0 and h.kaynak_tur = 30 and coalesce(h.stok_durum_degis, 0) = 0
+             order by 1, sira
             """, baglanti))
         {
             komut.Parameters.AddWithValue("p0", belgeId);

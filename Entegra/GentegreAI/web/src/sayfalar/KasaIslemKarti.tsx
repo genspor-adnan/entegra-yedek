@@ -408,7 +408,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
    * onlara kayar - kullanıcı hiç dokunmadan "kirli" görünmesin. Belge kartındaki `kirli` deseni.
    */
   const imzaTaban = useRef<string | null>(null);
-  const imzaHazirAni = useRef(0);
+  /** Kullanıcı karta DOKUNDU mu (tık / tuş / değişiklik): dokunana dek taban açılış dolumlarını izler, sonra donar
+      (inceleme 07.11.2026: 2 sn'lik pencere kullanıcının ilk saniyedeki değişikliğini de tabana yazıyordu). */
+  const dokundu = useRef(false);
   const girdi = (): KasaGirdisi => ({
     tur, grup, tarih, planTarihi, cari, karsiCari, hesap, karsiHesap,
     tutar, doviz: anaDoviz, ekstreDovizi, kur, karsiTutar, masrafTutar,
@@ -432,7 +434,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     const pay = Math.floor(toplam / taksitSayisi);
     const ilk = new Date(planTarihi + 'T00:00:00');
     return Array.from({ length: taksitSayisi }, (_, i) => {
-      const v = new Date(ilk); v.setMonth(v.getMonth() + i * Math.max(1, taksitAralikAy));
+      // AY SONU TAŞMAZ (inceleme 07.11.2026): 31.01 + 1 ay = 28.02 (setMonth 03.03 yapıyordu) - gün, hedef ayın son
+      //   gününe kırpılır.
+      const ay = ilk.getMonth() + i * Math.max(1, taksitAralikAy);
+      const sonGun = new Date(ilk.getFullYear(), ay + 1, 0).getDate();
+      const v = new Date(ilk.getFullYear(), ay, Math.min(ilk.getDate(), sonGun));
       const kurus = i === taksitSayisi - 1 ? toplam - pay * (taksitSayisi - 1) : pay;
       return { vade: bugunIso(v), tutar: kurus / 100 };
     });
@@ -598,9 +604,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
   const hazir = turler.length > 0 && (kayitId === null || sonuc !== null);
   useEffect(() => {
     if (!hazir) return;
-    const simdi = Date.now();
-    if (imzaTaban.current === null) { imzaTaban.current = imza; imzaHazirAni.current = simdi; return }
-    if (simdi - imzaHazirAni.current < 2000) imzaTaban.current = imza;   // açılış dolumu
+    if (imzaTaban.current === null || !dokundu.current) imzaTaban.current = imza;   // açılış dolumları (kasa, kur, bakiye)
   }, [hazir, imza]);
   const kirli = hazir && !kilitli && imzaTaban.current !== null && imza !== imzaTaban.current;
   const kirliRef = useRef(false);
@@ -670,7 +674,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
   const dugmeler = <>{eylemler}{kapatDugmesi}</>;
 
   const govdeIcerik = (
-      <div className={modalMi ? '' : 'sahne'}>
+      <div className={modalMi ? '' : 'sahne'} onPointerDownCapture={() => { dokundu.current = true }}
+           onKeyDownCapture={() => { dokundu.current = true }}>
         {hata && <div className="hata-kutusu">{hata}</div>}
         {sonuc?.uyarilar?.length ? (
           <ul className="uyari-liste">{sonuc.uyarilar.map((u, i) => <li key={i}>{u}</li>)}</ul>

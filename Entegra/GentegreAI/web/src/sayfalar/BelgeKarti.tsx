@@ -1839,7 +1839,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
                            basvuruMu={basvuruMu}
                            // ERP SADE: sipariş + fatura + fiş (kullanıcı 07.11.2026 "fiş / fatura kartında da"); başvuru DEĞİL -
                            //   bkz. siparis-basvuru-ayrimi.
-                           sade={sadeTahsilat}
+                           sade={sadeTahsilat} urunModu={kullanici?.urunModu}
                            tahsilatGir={sadeTahsilat ? k => void siparisTahsilatGir(k) : undefined}
                            sekmedeAc={sadeTahsilat ? kasaIslemSekmede : undefined}
                            secili={tahsilat.seciliTahsilatlar}

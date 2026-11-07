@@ -3,7 +3,6 @@ import type { AvansDurumu } from '../avansDurumu';
 import { mesaj, paraSor } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import { type BelgeYaniti, URUN_GENOTIP } from '../../api/sozlesme';
-import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -16,7 +15,9 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc,
                                   iadeAc, avansAl, avansIadeAc, avans, kayitSart,
-                                  yerelPara = 'TL', sade, tahsilatGir, sekmedeAc }: {
+                                  yerelPara = 'TL', sade, tahsilatGir, sekmedeAc, urunModu }: {
+  /** Ürün kipi (1 ERP · 2 HBYS): Banko sütunu yalnız HBYS. Verilmezse HBYS görünümü (eski; testler). */
+  urunModu?: number;
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
   /** SİPARİŞ KARTI (kullanıcı 07.11.2026 "tahsilat sekmesinde butonları sil, sadece Tahsilat Gir"): araç çubuğunda
@@ -125,11 +126,9 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
  * Kimligi NEGATIF (gorunumun ikinci dali): silme yolu bununla ayirt edilir.
  */
 const avansMi = (k: Record<string, unknown>) => Number(k.avansKullanim ?? 0) === 1;
-// BANKO SÜTUNU YALNIZ HBYS (kullanıcı 07.11.2026 "ERP'de banko sütunu görünmez"): banko oturumu HBYS kavramı.
-//   Sağlayıcısız çizimde (testler) oturum yok -> HBYS varsayılır (eski görünüm). Hook her çizimde çağrılır, sıra sabit.
-let oturumKullanici: { urunModu?: number } | null = null;
-try { oturumKullanici = useOturum().kullanici } catch { oturumKullanici = null }   // eslint-disable-line react-hooks/rules-of-hooks
-const bankoVar = !oturumKullanici || oturumKullanici.urunModu === URUN_GENOTIP;
+// BANKO SÜTUNU YALNIZ HBYS (kullanıcı 07.11.2026 "ERP'de banko sütunu görünmez"): banko oturumu HBYS kavramı. Kip
+//   çağırandan (BelgeKarti) prop ile gelir; verilmezse HBYS görünümü (eski; testler).
+const bankoVar = urunModu === undefined || urunModu === URUN_GENOTIP;
 const idler = tahsilatlar.map(k => Number(k.id ?? 0)).filter(Boolean);
 const hepsi = idler.length > 0 && secili.length === idler.length;
 const cevir = (id: number) =>

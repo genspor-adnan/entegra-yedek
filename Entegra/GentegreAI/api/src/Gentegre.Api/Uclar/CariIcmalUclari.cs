@@ -57,7 +57,9 @@ public static class CariIcmalUclari
     private static async Task<decimal> EsikAsync(Npgsql.NpgsqlConnection b, CancellationToken iptal)
     {
         var e = await AyarDeposu.OndalikAsync(b, null, "cari.icmal_esik", iptal);
-        return e is > 0 ? e.Value : VarsayilanEsik;
+        // ÜST SINIR 10 TL (inceleme 07.11.2026): cari.icmal_esik icmalde "küçük" işaretleme eşiğidir; kuruş farkı
+        //   KAPATMA (60/62 kasa işlemi) bundan büyük bakiyeleri silemez - eski istek alanındaki `esik > 10` reddinin karşılığı.
+        return Math.Min(e is > 0 ? e.Value : VarsayilanEsik, 10m);
     }
 
     /// <summary>Kuruş farkı kalemleri (Genel Ayarlar): gider masraf no, gelir hizmet no; 0 = seçilmemiş.</summary>

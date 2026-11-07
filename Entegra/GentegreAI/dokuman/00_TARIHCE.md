@@ -121,6 +121,13 @@ HBYS'de 1-2. aşama palette (tahsilat → kimden). Mockup `Ekranlar/AI/ai_rezerv
     bütün satırlar cari yazmış kaynağa bağlıysa `cariAtla` (`KaynakCariDurumuAsync`), karışıksa uyarı. İstemci: açık
     satırlar `izlemler` ile gelir (`AcikSatirlarAsync`), `siparisSatirlari` irsaliye kaynağında `stokDurumDegis 0` +
     lotları aktarılan miktar kadar kopyalar (`lotlariBol`); kart gridinde görünür.
+- **Kod incelemesi (aabb454..920837e) düzeltmeleri:** karttan satırlı silme türetilmiş belge varsa reddeder (1267'nin
+  ikinci kuralı korunur); kuruş kapatma eşiği 10 TL'yi aşamaz (`EsikAsync` üst sınır); kaynak lot okuması UNION ALL
+  (indeks); cariAtla sayımı "cari yazmış kaynağa bağlı satır" (karışık kaynakta da uyarı); ajan depo yoklaması geçici
+  SQL hatasında depoyu "yok" saymaz (yalnız 4060/18456/208); çok kaynaklı taraf aramasında carinin ek alanları geri;
+  aktarma penceresinde istemci toplamı kaldırıldı (para hesabı tek yer); Tahsilat sekmesi ürün kipini prop alır
+  (try/catch'li hook yok); taksit vadesi ay sonunda taşmaz (31.01 + 1 ay = 28.02); kasa kartı kirli tabanı kullanıcı
+  dokunana dek açılış dolumlarını izler (2 sn penceresi kalktı).
 - Sipariş kartında teslim tarihi **saatsiz** (kullanıcı: "başvuruda kalsın"): kalem gridi gün (`gunMetni`), kalem
   penceresi ve Termin modalı `type=date` (00:00 yazılır). Başvurunun işlem zamanı saatli (datetime-local) aynen.
 - Belge kartı gridleri (`.detay-tablo`) varsayılan **dar** (kullanıcı: "tüm belgelerde grid satırlar default dar"):

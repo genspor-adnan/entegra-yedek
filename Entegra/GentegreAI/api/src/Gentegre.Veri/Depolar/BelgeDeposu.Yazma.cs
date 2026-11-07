@@ -320,31 +320,31 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
-    /// Belgenin satırlarından kaçı cari borçlandırmış bir kaynağa (irsaliye) bağlı: (kaynaklı, toplam, hepsi cari yazdı mı).
+    /// Belgenin satırlarından kaçı CARİ YAZMIŞ bir kaynağa (irsaliye) bağlı: (cariYazanKaynakli, toplam). Sipariş
+    /// kaynaklı satır cari yazmamıştır, sayılmaz (inceleme 07.11.2026: karışık kaynakta da doğru sayım).
     /// </summary>
-    private async Task<(int Kaynakli, int Toplam, bool HepsiCariYazdi)> KaynakCariDurumuAsync(
+    private async Task<(int CariYazanKaynakli, int Toplam)> KaynakCariDurumuAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction islem, int belgeId, CancellationToken iptal)
     {
-        int toplam = 0, kaynakli = 0; var turler = new List<int>();
+        var toplam = 0; var turBasina = new Dictionary<int, int>();
         await using (var komut = baglanti.Komut("""
-            select count(*)::int as toplam,
-                   count(*) filter (where s.kaynak_tur = 30 and coalesce(s.kaynak_id, 0) > 0 and kb.id is not null)::int as kaynakli,
-                   coalesce(array_agg(distinct kb.tur) filter (where kb.id is not null), '{}')::int[] as turler
+            select kb.tur, count(*)::int as adet
               from public.belge_satir s
               left join public.belge_satir ks on s.kaynak_tur = 30 and ks.id = s.kaynak_id
               left join public.belge kb on kb.id = ks.belge_id
              where s.belge_id = @p0
+             group by kb.tur
             """, islem, belgeId))
         await using (var o = await komut.ExecuteReaderAsync(iptal))
-            if (await o.ReadAsync(iptal))
+            while (await o.ReadAsync(iptal))
             {
-                toplam = Convert.ToInt32(o["toplam"]); kaynakli = Convert.ToInt32(o["kaynakli"]);
-                turler = ((int[])o["turler"]).ToList();
+                var adet = Convert.ToInt32(o["adet"]); toplam += adet;
+                if (o["tur"] is not DBNull) turBasina[Convert.ToInt32(o["tur"])] = adet;
             }
-        var hepsi = turler.Count > 0;
-        foreach (var t in turler)
-            if (!(await TurEtkileriAsync(baglanti, islem, t, iptal)).Cari) hepsi = false;
-        return (kaynakli, toplam, hepsi);
+        var cariYazan = 0;
+        foreach (var (t, adet) in turBasina)
+            if ((await TurEtkileriAsync(baglanti, islem, t, iptal)).Cari) cariYazan += adet;
+        return (cariYazan, toplam);
     }
 
     private async Task SatirEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,

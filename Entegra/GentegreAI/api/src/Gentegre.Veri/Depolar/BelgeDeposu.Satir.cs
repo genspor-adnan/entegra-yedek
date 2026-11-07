@@ -406,8 +406,21 @@ public sealed partial class BelgeDeposu
             }
 
             if (satirlarla)
+            {
+                // 1267'NİN DİĞER KURALI KORUNUR (inceleme 07.11.2026): satırları önce silmek "bu belgeden dönüştürülmüş
+                //   belge var" denetimini (ks.belge_id = p_belge_id - boş kalırdı) boşa çıkarıyordu; türetilmiş belgenin
+                //   kaynak bağı sahipsiz kalır, kapatma zinciri kopardı. Burada aynı denetim satırlar silinmeden yapılır.
+                await using (var turetilmis = baglanti.Komut("""
+                    select count(*) from public.belge_satir h
+                     where h.kaynak_tur = 30
+                       and h.kaynak_id in (select id from public.belge_satir where belge_id = @p0)
+                    """, islem, belgeId))
+                    if (Convert.ToInt32(await turetilmis.ExecuteScalarAsync(iptal)) > 0)
+                        throw GentegreHatasi.IsKurali(
+                            "Bu belgeden dönüştürülmüş / aktarılmış belge var; önce o belgeyi silin.");
                 await using (var satirSil = baglanti.Komut("delete from public.belge_satir where belge_id = @p0", islem, belgeId))
                     await satirSil.ExecuteNonQueryAsync(iptal);
+            }
             await using var komut = baglanti.Komut(
                 "select public.fn_belge_sil(@p0, @p1)", islem,
                 belgeId, baglam.KullaniciId);

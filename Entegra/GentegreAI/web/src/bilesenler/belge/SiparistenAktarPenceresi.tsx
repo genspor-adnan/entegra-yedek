@@ -62,7 +62,7 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, kartta, onSec, 
     .filter(r => secili[r.satirId] !== undefined)
     .map(r => ({ ...r, secilenMiktar: secili[r.satirId] }));
   const gecersiz = secilenler.find(r => sayi(r.secilenMiktar) <= 0 || sayi(r.secilenMiktar) > kalan(r));
-  const toplam = secilenler.reduce((t, r) => t + sayi(r.secilenMiktar) * Number(r.birimFiyat) * (100 - Number(r.iskonto ?? 0)) / 100, 0);
+  // Önizleme toplamı YOK (inceleme 07.11.2026): para hesabı tek yerde (fn_belge_diptoplam / BelgeHesap); kart zaten gösterir.
 
   const teklifMi = siparisTuru === 18;
   const irsaliyeMi = siparisTuru === 14 || siparisTuru === 10;
@@ -100,7 +100,6 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, kartta, onSec, 
           </button>
           <button className="d" onClick={() => { setSiparis(null); setSatirlar([]) }}>‹ {c(`Başka ${kaynakAdi.toLocaleLowerCase('tr-TR')}`)}</button>
           <span className="ayrac" />
-          <span className="kapt">{c('Toplam')}: {para.format(toplam)}</span>
           <button className="d kapat-dugmesi" onClick={onKapat}>✖ {c('Kapat')}</button>
         </>
       }
