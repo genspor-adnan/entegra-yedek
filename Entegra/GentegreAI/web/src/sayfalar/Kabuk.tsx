@@ -1,6 +1,7 @@
 import { basHarfler as basHarfHesapla } from '../bilesenler/basHarfler';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
+import type { ListeSatiri } from '../api/sozlesme';
 import { hataMetni } from '../api/sozlesme';
 import { mesaj } from '../bilesenler/mesaj';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
@@ -35,12 +36,15 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi } from '../api/sozlesme';
 import { AiRehberPaneli, YARDIM_AC_OLAYI } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
-import { TARAF_DUZENLERI } from '../bilesenler/tarafDuzenleri';
+import { tarafDuzeniVar } from '../bilesenler/tarafDuzenleri';
 import { TarafArama } from '../bilesenler/TarafArama';
 
 import { kartAdi, kartSekmeYolu, kartSekmesiVar, yeniSekmeBasligi, type ListeGirdisi } from './listeTanimlari.Ortak';
 import { OZEL_KART_SEKME_YOLLARI } from './ozelKartSekmeleri';
 import { KayitArama } from '../bilesenler/KayitArama';
+import { Modal } from '../bilesenler/Modal';
+import { KASA_ARACLARI, type KasaArac } from './kabuk/cariKomutu';
+import { AKIS_OLAYI, type AkisSonucu, PLAN_TURLERI, akisBasligi, akisCoz, akisKartYolu, akisTarafSuzgeci } from './kabuk/paletNiyet';
 import { StokAramaPenceresi } from '../bilesenler/StokAramaPenceresi';
 
 /** Komut paletinde "Kayıtlı ... Kartı" - yol değil, arama penceresini açar: `#kayitli:<kart yolu>`. */
@@ -214,6 +218,16 @@ export function Kabuk() {
   const [kayitliArama, setKayitliArama] = useState<'hasta' | 'basvuru' | 'muayene' | null>(null);
   /** Genel "Kayıtlı X Kartı" araması (listenin kendi kaynağı ve kolonları). */
   const [kayitliListe, setKayitliListe] = useState<ListeGirdisi | null>(null);
+  /**
+   * REZERVE KELİME AKIŞI (paletNiyet, kullanıcı 06.11.2026): 1 palet seçeneği -> 2 arama penceresi -> 3 tür modalı
+   * (sekme açılmadan) -> 4 kart sekmede ön dolu. Her aşamada Kapat / Esc akışı iptal eder.
+   */
+  const [akis, setAkis] = useState<AkisSonucu | null>(null);
+  const [akisSecilen, setAkisSecilen] = useState<{ id: number; unvan: string; satir?: ListeSatiri } | null>(null);
+  /** Arama penceresi seçimden sonra kendi onKapat'ını da çağırır; o kapanış iptal sayılmasın. */
+  const akisSecildi = useRef(false);
+  /** Tür modalında klavye: ↑↓ gez, Enter / 1-6 seç (kullanıcı 06.11.2026: "ok tuşuyla hareket edemedim"). */
+  const [akisTurSecili, setAkisTurSecili] = useState(0);
   /** Kayıtlı personel kartı araması: kart yolu (/personel). */
   const [kisiArama, setKisiArama] = useState<string | null>(null);
   /** "Kayıtlı Stok / Hizmet Kartı": belgedeki genel stok arama penceresi (kart açma kipi). */
@@ -317,8 +331,32 @@ export function Kabuk() {
    * (kullanıcı 16.10.2026: "aramada kayıtlı muayene kartı seçip açtım, son açılanlara girmedi") -
    * rota değişimi yalnız menü ekranını yazıyordu. Başlangıç'taki son açılan kartı da buradan açar.
    */
+  /** Akışın son adımı: kart kendi sekmesinde ön dolu açılır (tutar = açık borç / cümledeki tutar). */
+  const akisKartAc = (a: AkisSonucu, p: { id: number; unvan: string; satir?: ListeSatiri }) => {
+    setAkis(null); setAkisSecilen(null);
+    kartaGit(akisKartYolu(a, p));
+  };
+  /** Arama penceresinden seçim: kasa işleminde tür bilinmiyorsa 3. aşama (tür modalı), yoksa kart. */
+  const akisSecim = (p: { id: number; unvan: string; satir?: ListeSatiri }) => {
+    const a = akis; if (!a) return;
+    akisSecildi.current = true;
+    const kasa = a.islem === 'tahsilat' || a.islem === 'odeme';
+    if ((kasa && !a.arac) || (a.islem === 'plan' && !a.tur)) { setAkisTurSecili(0); setAkisSecilen(p); return }
+    akisKartAc(a, p);
+  };
+  const akisIptal = () => { setAkis(null); setAkisSecilen(null) };
+  // Başka ekrandan başlatılan akış (Kasa İşlemi Listesi "＋ Tahsilat" / "－ Ödeme").
+  useEffect(() => {
+    const dinle = (e: Event) => { setAkisSecilen(null); setAkis((e as CustomEvent<AkisSonucu>).detail) };
+    window.addEventListener(AKIS_OLAYI, dinle);
+    return () => window.removeEventListener(AKIS_OLAYI, dinle);
+  }, []);
+  /** Pencere kapanışı: seçimle kapandıysa akış sürer (tür modalı), kullanıcı kapattıysa iptal. */
+  const akisPencereKapandi = () => { if (akisSecildi.current) { akisSecildi.current = false; return } akisIptal() };
   const paletGit = (yol: string) => {
     if (yol === HATIRLATMA_YENI) { hatirlatmaPenceresiAc(); return }
+    const a = akisCoz(yol);
+    if (a) { setAkisSecilen(null); setAkis(a); return }
     if (!yol.startsWith(KAYITLI_ONEK)) { kartaGit(yol); return }
     tercih.sonKaydet(yol);
     const kartYol = yol.slice(KAYITLI_ONEK.length);
@@ -538,8 +576,68 @@ export function Kabuk() {
       <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
                    sonMenuler={tercih.sonMenuler} ekranSayac={tercih.ekranSayac} acik={paletAcik}
                    onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
-                   git={paletGit}
+                   git={paletGit} urunModu={kullanici?.urunModu}
                    ekEkranlar={panelEkranlari} />
+      {/* REZERVE KELİME AKIŞI, 2. aşama: jenerik arama penceresi (cari: TarafArama cari düzeni; hasta: hasta düzeni;
+          kurum: kayıt araması). Kapat = akış iptal. */}
+      {akis && !akisSecilen && akis.kimden !== 'kurum' && (
+        <TarafArama acik kaynaklar={[akis.kimden === 'hasta' ? 'hasta' : 'cari']} kartYok
+                    ekFiltre={akisTarafSuzgeci(akis)} yerTutucu={akisBasligi(akis)}
+                    onKapat={akisPencereKapandi}
+                    onSec={p => {
+                      if (akis.kimden !== 'hasta') { akisSecim(p); return }
+                      // HBYS hasta: tahsilat açık başvurunun kartından (hızlı tahsilat); açık başvuru yoksa hasta kartı.
+                      const a = akis; akisIptal();
+                      void api.liste('belge', { sayfa: 1, boyut: 1,
+                        sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
+                        filtre: { op: 'and', kosullar: [
+                          { alan: 'tarafId', op: 'esit', deger: p.id }, { alan: 'tur', op: 'esit', deger: 19 },
+                          { alan: 'tipi', op: 'esit', deger: 30 }, { alan: 'tamamlanma', op: 'kucuk', deger: 100 }] },
+                      }).then(y => {
+                        const id = Number(y.satirlar[0]?.id ?? 0);
+                        if (id) kartaGit(`/basvuru/${id}`);
+                        else { mesaj(c('Hastanın açık başvurusu yok; hasta kartı açıldı.')); kartaGit(`/hasta/${p.id}`) }
+                        void a;
+                      }, () => kartaGit(`/hasta/${p.id}`));
+                    }} />
+      )}
+      {akis && !akisSecilen && akis.kimden === 'kurum' && (
+        <KayitArama acik baslik={akisBasligi(akis)} kaynak="kurum"
+                    onKapat={akisPencereKapandi}
+                    onSec={id => akisSecim({ id, unvan: '' })} />
+      )}
+      {/* 3. aşama: tahsilat / ödeme TÜRÜ (alt alta), sekme açılmadan; Vazgeç / Esc iptal. */}
+      {akis && akisSecilen && (
+        <Modal baslik={akis.islem === 'plan' ? c('Plan türü') : akis.islem === 'odeme' ? c('Ödeme türü') : c('Tahsilat türü')} dar enUst onKapat={akisIptal}
+               alt={<button type="button" className="d" onClick={akisIptal}>{c('Vazgeç')}</button>}>
+          {(() => {
+            // Plan: tahsilat / ödeme planı (61 / 71); kasa: araçlar.
+            const turler: { ad: string; ikon: string; arac?: KasaArac; tur?: number }[] = akis.islem === 'plan'
+              ? PLAN_TURLERI : KASA_ARACLARI[akis.islem === 'odeme' ? 'odeme' : 'tahsilat'];
+            const sec = (i: number) => akisKartAc({ ...akis, arac: turler[i].arac, tur: turler[i].tur }, akisSecilen);
+            return (
+              <div tabIndex={0} autoFocus ref={el => el?.focus()} style={{ outline: 'none' }}
+                   onKeyDown={e => {
+                     if (e.key === 'ArrowDown') { e.preventDefault(); setAkisTurSecili(i => Math.min(i + 1, turler.length - 1)) }
+                     else if (e.key === 'ArrowUp') { e.preventDefault(); setAkisTurSecili(i => Math.max(i - 1, 0)) }
+                     else if (e.key === 'Enter') { e.preventDefault(); sec(akisTurSecili) }
+                     else if (/^[1-9]$/.test(e.key) && Number(e.key) <= turler.length) { e.preventDefault(); sec(Number(e.key) - 1) }
+                   }}>
+                <div className="not" style={{ marginBottom: 8 }}>{akisSecilen.unvan || c('Seçilen cari')} · {c('↑↓ gez · Enter seç · 1-6')}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {turler.map((t, i) => (
+                    <button key={t.arac ?? t.tur} type="button" className={`d${i === akisTurSecili ? ' bir' : ''}`} tabIndex={-1}
+                            style={{ textAlign: 'left', padding: '8px 12px', fontSize: 13 }}
+                            onMouseEnter={() => setAkisTurSecili(i)} onClick={() => sec(i)}>
+                      <span style={{ display: 'inline-block', width: 16, opacity: .6 }}>{i + 1}</span> {t.ikon} {t.ad}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </Modal>
+      )}
       {/* KAYITLI HASTA KARTI (Ctrl+K): genel hasta arama -> kart kendi sekmesinde. */}
       {stokArama && (
         <StokAramaPenceresi etkin kartAc yalnizStok={stokArama === 'stok'} yalnizHizmet={stokArama === 'hizmet'}
@@ -554,12 +652,12 @@ export function Kabuk() {
       {/* KAYITLI MÜŞTERİ / TEDARİKÇİ / KİŞİ KARTI (kullanıcı 05.11.2026: "gelen arama eski tipti sadece grid"): düzeni
           olan taraf kaynakları (tarafDuzenleri: cari, kisi, personel) belge kartıyla AYNI aramayı açar - çipler, önizleme;
           listenin sabit süzgeci (müşteri / tedarikçi) ek koşul olarak geçer. Öteki kartlar GenGrid'li KayitArama'da kalır. */}
-      <TarafArama acik={!!kayitliListe && kayitliListe.kaynak in TARAF_DUZENLERI} kaynaklar={[kayitliListe?.kaynak ?? 'cari']} kartYok
+      <TarafArama acik={!!kayitliListe && tarafDuzeniVar(kayitliListe.kaynak)} kaynaklar={[kayitliListe?.kaynak ?? 'cari']} kartYok
                   ekFiltre={kayitliListe?.sabitFiltre}
                   yerTutucu={kayitliListe ? `${kartAdi(kayitliListe)} ara…` : undefined}
                   onKapat={() => setKayitliListe(null)}
                   onSec={p => { const l = kayitliListe; setKayitliListe(null); if (l) kartaGit(`${kartSekmeYolu(l)}/${p.id}`) }} />
-      <KayitArama acik={!!kayitliListe && !(kayitliListe.kaynak in TARAF_DUZENLERI)}
+      <KayitArama acik={!!kayitliListe && !tarafDuzeniVar(kayitliListe.kaynak)}
                   baslik={kayitliListe ? `Kayıtlı ${kartAdi(kayitliListe)}` : ''}
                   kaynak={kayitliListe?.kaynak ?? ''} sabitFiltre={kayitliListe?.sabitFiltre}
                   onKapat={() => setKayitliListe(null)}

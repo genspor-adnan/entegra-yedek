@@ -204,7 +204,7 @@ public static class ListeUclari
                     await profil.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal))
                 .Select(k => new KolonMeta(k.Ad, k.Baslik, k.Tip, k.Hizalama, k.Bicim,
                                            k.Varsayilan, k.Siralanabilir, k.Filtrelenebilir, k.Genislik,
-                                           k.SadeceGrupToplami, k.Kodlar))
+                                           k.SadeceGrupToplami, k.Kodlar, k.RozetSiniflari))
                 .ToList();
 
             return Results.Ok(new { kaynak = tanim.Ad, kolonlar });

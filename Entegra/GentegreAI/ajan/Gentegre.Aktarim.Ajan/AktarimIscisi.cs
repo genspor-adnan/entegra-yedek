@@ -1,4 +1,4 @@
-﻿namespace Gentegre.Aktarim.Ajan;
+namespace Gentegre.Aktarim.Ajan;
 
 /// <summary>
 /// Yoklama döngüsü: her <c>YoklamaSn</c>'de Delphi'nin CT versiyonuna bakar; değişmediyse
@@ -23,12 +23,12 @@ public sealed class AktarimIscisi(Ayarlar ayar, ILogger<AktarimIscisi> gunluk) :
             var gecikme = TimeSpan.FromSeconds(ayar.YoklamaSn);
             try
             {
-                var guncel = await delphi.GuncelVersiyonAsync(iptal);
+                var guncel = await delphi.GuncelVersiyonAsync(false, iptal);
                 // Depo DB'si (e-Belge, 1265) ayrı sayaç: o da değişince tur. Nabızda depo yeniden denenir
                 //   (GENDEPO sonradan kurulmuş olabilir).
                 var nabiz = DateTime.UtcNow - sonNabiz > TimeSpan.FromSeconds(ayar.NabizSn);
                 if (nabiz) delphi.DepoyuYenidenDene();
-                var guncelDepo = await delphi.DepoVarAsync(iptal) ? await delphi.GuncelVersiyonAsync(true, iptal) : -1L;
+                var guncelDepo = await delphi.DepoVersiyonAsync(iptal) ?? -1L;
                 if (guncel != sonVersiyon || guncelDepo != sonVersiyonDepo || nabiz)
                 {
                     var s = await aktarici.TurAsync(iptal);

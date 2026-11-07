@@ -165,6 +165,11 @@ export function useEkranSekmeleri({ satirlar, konum, navTuru, outlet, git, ekBas
     // Dışarıdan history.pushState edilen adreslerin key'i hep 'default' - adres de anahtarda.
     const yuvaAnahtari = `${konum.key}|${konum.pathname}${konum.search}`;
     let anahtar = yuvalar.current.get(yuvaAnahtari);
+    // REPLACE = AYNI SEKME (07.11.2026): kart kendi adresini güncelliyor (yeni belgede cari seçilince ?tarafId=…
+    //   yazılır) - sorgu değişti diye yeni yuva açılmaz, kirli olsa da aynı yuvada kalır.
+    if (!anahtar && navTuru === NavigationType.Replace && bulunan.ust && sonAktif.current?.startsWith(bulunan.anahtar + '#')
+        && sekmeler.find(s => s.anahtar === sonAktif.current)?.konum.pathname === konum.pathname)
+      anahtar = sonAktif.current;
     if (!anahtar) {
       anahtar = !bulunan.ust ? ekstreYuvasiSec(bulunan.anahtar, ekKimlik, sekmeler, sonAktif.current)
         : kartYuvasiSec(bulunan.anahtar, yuvaYolu(konum), sekmeler, sonAktif.current, kirliMi)

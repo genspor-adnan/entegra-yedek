@@ -12,7 +12,7 @@ import { c } from '../../dil/ceviri';
  * çizildiği bir bakışta okunur.
  */
 export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
-                                    irsaliyeMi, tur, senaryo, setSenaryo, senaryoBaslikta,
+                                    irsaliyeMi, tur, basvuruMu, senaryo, setSenaryo, senaryoBaslikta,
                                     faturalama, belgeYenile }: {
   aktifSekme: string;
   kilitli: boolean;
@@ -20,6 +20,9 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   belge?: Record<string, unknown>;
   irsaliyeMi: boolean;
   tur: number;
+  /** BAŞVURU (HBYS, tur 19 ile aynı!): Belgeye Dönüşüm sekmesi başvuruda hızlı düğmeleriyle AYNEN kalır
+      (kullanıcı 07.11.2026 "sipariş kartında yapılanlar başvuru kartını etkilemesin"). */
+  basvuruMu?: boolean;
   senaryo: number;
   setSenaryo(v: number): void;
   /** Faturada senaryo başlıkta seçilir - sekmede yok. */
@@ -39,7 +42,13 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
                      belgeYenile={belgeYenile} />
     );
   }
-  if (aktifSekme === 'fatura') return <FaturalamaSekmesi {...faturalama} />;
+  // İRSALİYE + SİPARİŞ (kullanıcı 07.11.2026 "irsaliye deseni sipariş için de, başvuru aynen"): hızlı düğmeler yok,
+  //   hedef menüsü sekmede, Tür'e tıklayınca belge sekmede. BAŞVURU DA tur 19 - `basvuruMu` ile ayrılır, sade DEĞİL.
+  const siparisMi = (tur === 9 || tur === 19) && !basvuruMu;
+  const sade = irsaliyeMi || siparisMi;
+  if (aktifSekme === 'fatura') return (
+    <FaturalamaSekmesi {...faturalama} hizliYok={sade}
+                       kaynakTur={irsaliyeMi ? (tur === 10 || tur === 109 ? 10 : 14) : siparisMi ? tur : undefined} />);
   if (aktifSekme === 'imza') {
     return (
       <div className="kagrup">

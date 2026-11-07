@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import { mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
+import { akisBaslat } from '../kabuk/paletNiyet';
 
 /**
  * KASA / BANKA LISTE AKSIYONLARI (147-152).
@@ -62,14 +63,14 @@ export async function kasaAksiyonu(
   }
 
   switch (kod) {
-    // Tahsilat/odeme dugmeleri ARAC (nakit/banka/pos/cek/senet) menusu acar;
-    //   secilen aracin kodu "kasa.yeni.<tur>" olarak geri gelir ve kart MODAL
-    //   olarak acilir (liste arkada kalsin, kullanici listeden kopmasin).
-    case 'kasa.tahsilat.yeni': b.setKasaTuru(21); return true;
-    case 'kasa.odeme.yeni':    b.setKasaTuru(31); return true;
+    // TAHSİLAT / ÖDEME (kullanıcı 06.11.2026): alt menü yok - jenerik müşteri / tedarikçi araması, sonra tür modalı,
+    //   sonra kart kendi sekmesinde (paletNiyet akışı, Kabuk yürütür).
+    case 'kasa.tahsilat.yeni': akisBaslat({ islem: 'tahsilat', kimden: 'cari' }); return true;
+    case 'kasa.odeme.yeni':    akisBaslat({ islem: 'odeme', kimden: 'cari' }); return true;
     case 'kasa.virman.yeni':   b.setKasaTuru(41); return true;
     case 'kasa.doviz.yeni':    b.setKasaTuru(45); return true;
-    case 'kasa.plan.yeni':     b.setKasaTuru(61); return true;
+    // PLAN (kullanıcı 06.11.2026 "plan basınca da jenerik müş/ted arama gelsin"): cari -> tahsilat / ödeme planı -> kart.
+    case 'kasa.plan.yeni':     akisBaslat({ islem: 'plan', kimden: 'cari' }); return true;
 
     // Dugmenin kendisi ARAC menusunu acar (nakit/banka/POS); secim
     //   "avans.yeni.<tur>" olarak yukarida ele alinir. Menu gelmezse (eski

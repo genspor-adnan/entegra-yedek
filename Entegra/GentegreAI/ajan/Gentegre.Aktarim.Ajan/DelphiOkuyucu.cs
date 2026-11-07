@@ -22,7 +22,9 @@ public sealed record Degisiklik(char Islem, object[] Anahtar);
 public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
 {
     private const int InParcasi = 1000;
-    private static readonly HashSet<string> DepoTablolar = new(StringComparer.OrdinalIgnoreCase) { "EBELGE", "EBELGEMESAJ" };
+    // Depo tabloları Toplamlar'daki grup tanımından (Depo: true) - iki yerde yazılmaz.
+    private static readonly HashSet<string> DepoTablolar =
+        new(Toplamlar.Gruplar.Where(g => g.Depo).SelectMany(g => g.Tablolar), StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string[]> _pk = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string>> _kolon = new(StringComparer.OrdinalIgnoreCase);
     private bool? _depoVar;
@@ -30,23 +32,24 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
     public static bool DepoTablosu(string tablo) => DepoTablolar.Contains(tablo);
 
     /// <summary>
-    /// Depo DB'si var ve CT açık mı (bir kez denenir, sonuç saklanır; <see cref="DepoyuYenidenDene"/> sıfırlar).
-    /// Yoksa e-Belge grubu atlanır - eski kurulumda GENDEPO hiç olmayabilir.
+    /// Depo DB'sinin CT versiyonu; depo yoksa ya da CT kapalıysa null (eski kurulumda GENDEPO hiç olmayabilir).
+    /// Olumsuz sonuç saklanır - her yoklamada yeniden denenmez; <see cref="DepoyuYenidenDene"/> (nabız) sıfırlar.
+    /// Yoklama kısa zaman aşımıyla (5 sn): sunucu ulaşılamazsa 5 sn'lik döngü dakikada 15 sn asılı kalmasın.
     /// </summary>
-    public async Task<bool> DepoVarAsync(CancellationToken iptal)
+    public async Task<long?> DepoVersiyonAsync(CancellationToken iptal)
     {
-        if (_depoVar is { } v) return v;
-        if (string.IsNullOrWhiteSpace(depoBaglanti)) return (_depoVar = false).Value;
+        if (_depoVar == false || string.IsNullOrWhiteSpace(depoBaglanti)) return null;
         try
         {
-            await using var b = new SqlConnection(depoBaglanti);
+            var cs = new SqlConnectionStringBuilder(depoBaglanti) { ConnectTimeout = 5 }.ConnectionString;
+            await using var b = new SqlConnection(cs);
             await b.OpenAsync(iptal);
             await using var k = Komut(b, "SELECT CHANGE_TRACKING_CURRENT_VERSION()");
-            _depoVar = await k.ExecuteScalarAsync(iptal) is long;
+            if (await k.ExecuteScalarAsync(iptal) is long v) { _depoVar = true; return v; }
+            _depoVar = false; return null;
         }
-        catch (SqlException) { _depoVar = false; }
-        catch (InvalidOperationException) { _depoVar = false; }
-        return _depoVar.Value;
+        catch (SqlException) { _depoVar = false; return null; }
+        catch (InvalidOperationException) { _depoVar = false; return null; }
     }
 
     public void DepoyuYenidenDene() => _depoVar = null;
@@ -56,8 +59,6 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
     /// testinde (500 bin satırlık tam yükleme) SQL Browser örnek adını bir kez çözemedi
     /// (error 26) ve tur baştan başladı - tam yüklemede bu, dakikalarca işin kaybı demek.
     /// </summary>
-    private Task<SqlConnection> AcAsync(CancellationToken iptal) => AcAsync(false, iptal);
-
     /// <summary>Tablonun veritabanına göre bağlantı (depo tablosu -> depo bağlantısı).</summary>
     private Task<SqlConnection> AcAsync(string tablo, CancellationToken iptal) => AcAsync(DepoTablosu(tablo), iptal);
 
@@ -88,8 +89,6 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
         k.Parameters.AddRange(p);
         return k;
     }
-
-    public Task<long> GuncelVersiyonAsync(CancellationToken iptal) => GuncelVersiyonAsync(false, iptal);
 
     /// <summary>Ana ya da depo DB'sinin CT versiyonu - iki ayrı sayaç.</summary>
     public async Task<long> GuncelVersiyonAsync(bool depo, CancellationToken iptal)
@@ -170,7 +169,7 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
     public async Task<List<(long Id, decimal Tutar)>> CariBakiyeleriAsync(DateTime bas, IReadOnlyCollection<int> disi, CancellationToken iptal)
     {
         var haric = disi.Count == 0 ? "" : $" AND K.TUR NOT IN ({string.Join(",", disi.Select(x => x.ToString(CultureInfo.InvariantCulture)))})";
-        await using var b = await AcAsync(iptal);
+        await using var b = await AcAsync(false, iptal);
         await using var k = Komut(b, $"""
             SELECT x.REHBERID, CAST(SUM(x.t) AS decimal(19, 2)) FROM (
               SELECT K.REHBERID, CASE WHEN ISNULL(K.KUR, 'TL') IN ('TL', '') OR ISNULL(K.DOVIZ_TUTARI, 0) = 0
@@ -270,12 +269,12 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
         var pk = await AnahtarAsync(tablo, iptal);
         var l = new List<JsonObject>();
         if (anahtarlar.Count == 0) return l;
-        var ek = ekFiltre is null ? "" : " AND (" + ekFiltre + ")";
+        var ek = ekFiltre is null ? "" : " (" + ekFiltre + ")";   // IN dalında AND, VALUES dalında WHERE ile
         await using var b = await AcAsync(tablo, iptal);
         if (pk.Length == 1 && anahtarlar.All(a => Sayisal(a[0])))
         {
             foreach (var parca in anahtarlar.Select(a => Convert.ToInt64(a[0], CultureInfo.InvariantCulture)).Chunk(InParcasi))
-                await OkuAsync(b, Secim(tablo, kolonlar) + $" WHERE t.[{pk[0]}] IN ({Liste(parca)})" + ek, kolonlar, l, [], iptal);
+                await OkuAsync(b, Secim(tablo, kolonlar) + $" WHERE t.[{pk[0]}] IN ({Liste(parca)})" + (ek == "" ? "" : " AND" + ek), kolonlar, l, [], iptal);
             return l;
         }
         foreach (var parca in anahtarlar.Chunk(Math.Max(1, 2000 / pk.Length)))
@@ -290,7 +289,7 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
             var sql = Secim(tablo, kolonlar) +
                       $" JOIN (VALUES {string.Join(", ", satirlar)}) k({string.Join(", ", pk.Select((_, i) => "k" + i))})" +
                       $" ON {string.Join(" AND ", pk.Select((c, i) => $"t.[{c}] = k.k{i}"))}" +
-                      (ekFiltre is null ? "" : " WHERE (" + ekFiltre + ")");
+                      (ek == "" ? "" : " WHERE" + ek);
             await OkuAsync(b, sql, kolonlar, l, [.. p], iptal);
         }
         return l;

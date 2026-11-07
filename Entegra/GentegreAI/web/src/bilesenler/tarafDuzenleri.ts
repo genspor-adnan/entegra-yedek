@@ -1,5 +1,5 @@
-import { AKTIF_KOSULU, cariCipleri, cariSatirSinifi } from './cariArama';
-import { CariBasliklar, CariEkDugmeler, CariHucreler, CariOnizleme } from './TarafAramaCari';
+import { cariCipleri, cariSatirSinifi } from './cariArama';
+import { CariBasliklar, CariHucreler, CariOnizleme } from './TarafAramaCari';
 import { KisiBasliklar, KisiHucreler, KisiOnizleme } from './TarafAramaKisi';
 import { PersonelBasliklar, PersonelHucreler, PersonelOnizleme } from './TarafAramaPersonel';
 import { type TarafDuzeni, sayiya } from './tarafDuzeni';
@@ -11,7 +11,6 @@ import { type TarafDuzeni, sayiya } from './tarafDuzeni';
 export const TARAF_DUZENLERI: Record<string, TarafDuzeni> = {
   cari: {
     genislik: 'min(1280px, 96vw)',
-    sabitKosul: AKTIF_KOSULU,
     cipler: cariCipleri,
     secimler: [{ alan: 'il', etiket: 'İl' }, { alan: 'temsilci', etiket: 'Temsilci' }],
     // İlgili kişi, fatura ünvanı ve il de aranır; vergi / kimlik no ARANMAZ (kullanıcı 05.11.2026).
@@ -21,13 +20,12 @@ export const TARAF_DUZENLERI: Record<string, TarafDuzeni> = {
     Basliklar: CariBasliklar,
     Hucreler: CariHucreler,
     Onizleme: CariOnizleme,
-    EkDugmeler: CariEkDugmeler,
+    // 📄 Ekstre düğmesi KALKTI (kullanıcı 07.11.2026); ekstre cari kartından / listeden.
     satirSinifi: cariSatirSinifi,
     lejant: [{ renk: '#f7cfcf', ad: 'risk aşıldı' }, { renk: '#f6d9c0', ad: 'vadesi geçen' }, { renk: '#e4e7eb', ad: 'aday' }],
   },
   personel: {
     genislik: 'min(1180px, 96vw)',
-    sabitKosul: AKTIF_KOSULU,
     cipler: () => [
       { kod: 'izinde',   ad: 'İzinde',            kosul: { alan: 'bugunKod', op: 'esit', deger: 2 } },
       { kod: 'raporlu',  ad: 'Raporlu',           kosul: { alan: 'bugunKod', op: 'esit', deger: 3 } },
@@ -38,8 +36,9 @@ export const TARAF_DUZENLERI: Record<string, TarafDuzeni> = {
       { kod: 'dogum',    ad: 'Doğum günü bu ay',  kosul: { alan: 'dogumBuAy', op: 'esit', deger: 1 } },
     ],
     secimler: [{ alan: 'departmanAdi', etiket: 'Bölüm' }, { alan: 'rolAdi', etiket: 'Rol' }],
-    // Rol / bölüm / görev / ham kimlik no (08.10.2026 isteği) TarafArama.KAYNAK_EK_ARAMA'da; burada ek yok.
-    ekArama: [],
+    // Rol / bölüm / görev / ham kimlik no (08.10.2026 isteği): ad soyad (unvan) ve sicil (kod) ortak filtrede, telefon
+    //   rakam girilince telefonHam ile; maskeli vkno ile aramak "123 45" yazanı bulamazdı - HAM kimlik no.
+    ekArama: ['rolAdi', 'departmanAdi', 'gorev', 'vknoHam'],
     kolonSayisi: 11,
     yeniEtiketi: () => '＋ Yeni Personel',
     Basliklar: PersonelBasliklar,
@@ -51,8 +50,6 @@ export const TARAF_DUZENLERI: Record<string, TarafDuzeni> = {
   },
   kisi: {
     genislik: 'min(1080px, 96vw)',
-    sabitKosul: AKTIF_KOSULU,
-    cipler: () => [],
     secimler: [{ alan: 'bagliCari', etiket: 'Bağlı cari' }, { alan: 'gorev', etiket: 'Görev' }],
     ekArama: ['bagliCari', 'gorev'],
     kolonSayisi: 8,
@@ -60,7 +57,8 @@ export const TARAF_DUZENLERI: Record<string, TarafDuzeni> = {
     Basliklar: KisiBasliklar,
     Hucreler: KisiHucreler,
     Onizleme: KisiOnizleme,
-    satirSinifi: () => '',
-    lejant: [],
   },
 };
+
+/** Kaynağın düzenli (çipli, önizlemeli) araması var mı - Kabuk hangi arama penceresini açacağını buna göre seçer. */
+export const tarafDuzeniVar = (kaynak: string | undefined): boolean => !!kaynak && kaynak in TARAF_DUZENLERI;

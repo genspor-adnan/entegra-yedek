@@ -134,9 +134,10 @@ export const belgeUclari = {
   hizmetUygunluk: (hizmetId: number, tarafId: number) =>
     istek<{ mesaj: string; istisna?: boolean }>(`/api/belge/hizmet-uygunluk?hizmetId=${hizmetId}&tarafId=${tarafId}`),
 
-  /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). */
-  belgeSil: (id: number) =>
-    istek<{ mesaj: string }>(`/api/belge/${id}`, { method: 'DELETE' }),
+  /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). `satirlarla`: karttan silme - satırlar da
+      aynı işlemde silinir (1267 "satırlı belge silinemez" kuralı yalnız listeden silmede). */
+  belgeSil: (id: number, satirlarla = false) =>
+    istek<{ mesaj: string }>(`/api/belge/${id}${satirlarla ? '?satirlarla=1' : ''}`, { method: 'DELETE' }),
 
   /** Carinin GIB e-Fatura kaydini sorar, bayragi gunceller (183). */
   cariEBelgeMukellef: (id: number) =>

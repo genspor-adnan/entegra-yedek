@@ -1,4 +1,4 @@
-﻿# 18 — Delphi ERP → Gentegre AI Anlık Veri Aktarımı (Plan, 13.10.2026)
+# 18 — Delphi ERP → Gentegre AI Anlık Veri Aktarımı (Plan, 13.10.2026)
 
 Kullanıcı: "delphi erp den gentegreai e data anında veri transferi için plan hazırla".
 

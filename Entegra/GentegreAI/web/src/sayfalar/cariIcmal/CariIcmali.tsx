@@ -57,40 +57,30 @@ export function CariIcmali() {
     for (const [k, v] of Object.entries(d)) { if (v && v !== '0' && v !== 'hepsi') yeni.set(k, v); else yeni.delete(k) }
     setArama(yeni, { replace: true });
     setSecili([]);
+    setHata(''); setYukleniyor(true);
   }, [arama, setArama]);
 
-  useEffect(() => {
-    setHata(''); setYukleniyor(true);
+  // Tek yükleme yolu: ölçüt değişince (efekt) ve kuruş kapatma sonrası (olay). "Yükleniyor" bayrağı olay
+  //   işleyicilerinde kalkar (degistir / onTamam) - efekt içinde eşzamanlı setState yok.
+  const yukle = useCallback(() => {
     const q = new URLSearchParams({ bas, bit, kapsam });
     if (temsilci) q.set('temsilci', String(temsilci));
     if (pasif) q.set('pasif', '1');
     api.cariIcmal(q).then(setVeri).catch(h => setHata(hataMetni(h))).finally(() => setYukleniyor(false));
   }, [bas, bit, kapsam, temsilci, pasif]);
+  useEffect(() => { yukle() }, [yukle]);
   useEffect(() => { api.dokumAntet().then(a => setAntet(a.kurum)).catch(() => setAntet(null)) }, []);
 
   // "Bakiyesi sıfır olanları gizle" yalnız GÖRÜNÜM süzgeci (kullanıcı 03.11.2026: "gizle dediğimde bakiye 0 olanlar
   //   kalıyor"): dönemde hareketi olsa da bakiyesi kapanmış cari gizlenir; TL bakiyesi sıfır ama DÖVİZ bakiyesi açık
   //   olan (doviz "USD:120;EUR:0") kalır.
+  // KÜÇÜK BAKİYE bayrağı sunucudan (c.kucuk: eşik altı ve döviz bakiyesi yok) - kural tek yerde.
   const esik = veri?.kucuk.esik ?? 0.1;
-  // Döviz bakiyesi açık olan (TL dışı) küçük sayılmaz; sunucunun doviz dizisi TL'yi de taşır ("TL:0.03"), o atlanır.
-  const dovizliMi = (ham: string) => String(ham ?? '').split(';').some(x => {
-    const [kod, deger] = x.split(':');
-    return !!kod && kod !== 'TL' && kod !== 'TRY' && Math.abs(Number(deger ?? 0)) > 0.005;
-  });
-  const kucukMu = (c: CariIcmalSatiri) => Math.abs(c.bakiye) > 0.005 && Math.abs(c.bakiye) < esik && !dovizliMi(c.doviz);
   const satirlar = useMemo(() => (veri?.carilar ?? []).filter(c => Math.abs(c.bakiye) > 0.005 || dovizBakiyeAcik(c.doviz))
-    .filter(c => !kucukGizle || !kucukMu(c))
+    .filter(c => !kucukGizle || !c.kucuk)
     .filter(c => yonSuzgec === 'hepsi' || (yonSuzgec === 'borclu' ? c.bakiye > 0.005 : c.bakiye < -0.005)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [veri, kucukGizle, yonSuzgec, esik]);
-  const kucukler = useMemo(() => (veri?.carilar ?? []).filter(kucukMu), [veri, esik]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const yenile = () => {
-    const q = new URLSearchParams({ bas, bit, kapsam });
-    if (temsilci) q.set('temsilci', String(temsilci));
-    if (pasif) q.set('pasif', '1');
-    setYukleniyor(true);
-    api.cariIcmal(q).then(setVeri).catch(h => setHata(hataMetni(h))).finally(() => setYukleniyor(false));
-  };
+    [veri, kucukGizle, yonSuzgec]);
+  const kucukler = useMemo(() => (veri?.carilar ?? []).filter(c => c.kucuk), [veri]);
   const seciliSatirlar = secili.length > 0 ? satirlar.filter(c => secili.includes(c.id)) : satirlar;
   // Mektup: seçili cariler; seçim yoksa bakiyesi olanlar.
   const mektupSatirlari = secili.length > 0 ? seciliSatirlar : satirlar.filter(c => Math.abs(c.bakiye) > 0.005);
@@ -223,7 +213,7 @@ export function CariIcmali() {
       {veri && kurusModal && (
         <KurusKapatModali v={veri} kucukler={kucukler} kapsam={kapsam} temsilci={temsilci}
                           onKapat={() => setKurusModal(false)}
-                          onTamam={() => { setKurusModal(false); yenile() }} />
+                          onTamam={() => { setKurusModal(false); setHata(''); setYukleniyor(true); yukle() }} />
       )}
     </div>
   );

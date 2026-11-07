@@ -88,7 +88,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
       try {
         const s = await api.belgeAcikSatirlar(belgeId);
         setSatirlar(s);
-        setSecili(Object.fromEntries(s.map(x => [x.satirId, true])));
+        // SATIR SEÇİMİ KULLANICIDA (07.11.2026: "dönüştür her şeyi dönüştürdü, oysa satır ve adet seçmem gerekir"):
+        //   hiçbiri seçili gelmez; başlıktaki kutu tümünü seçer. Miktar kalan miktarla dolu, değiştirilir.
+        setSecili(Object.fromEntries(s.map(x => [x.satirId, false])));
         setMiktarlar(Object.fromEntries(s.map(x => [x.satirId, String(x.kalanMiktar)])));
       } catch (h) {
         setHata(hataMetni(h));
@@ -404,7 +406,11 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               <table className="detay-tablo">
                 <thead>
                   <tr>
-                    <th style={{ width: 34 }} />
+                    <th style={{ width: 34 }}>
+                      <input type="checkbox" title={c('Tümünü seç / kaldır')}
+                             checked={satirlar.length > 0 && satirlar.every(s => secili[s.satirId])}
+                             onChange={e => setSecili(Object.fromEntries(satirlar.map(x => [x.satirId, e.target.checked])))} />
+                    </th>
                     <th>{c('Stok / Açıklama')}</th>
                     <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
                     <th className="hiza-sag" style={{ width: 90 }}>{c('Dönüşen')}</th>

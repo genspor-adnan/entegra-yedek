@@ -1,9 +1,183 @@
-﻿# Gentegre AI — Çalışma Tarihçesi
+# Gentegre AI — Çalışma Tarihçesi
 
 Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın kendisi
 `GentegreAI/db/`, sözleşmeler `GentegreAI/dokuman/01_API_SOZLESMELERI.md`,
 ürün planı `Ekranlar/gentegre_ai_proje_dosyasi.html` ve
 `Ekranlar/gentegre_ai_uygulama_plani.html` dosyalarındadır.
+
+---
+
+## 06.11.2026 — Komut paleti: rezerve kelimeler ve tahsilat akışı (paletNiyet)
+
+Kullanıcı: "prompt için rezerve kelimeler olması lazım: sipariş, yeni sipariş, fatura kes, tahsilat, tahsil et, ödeme…
+tahsilat yazınca yeni tahsilat kartı, kayıtlı tahsilat kartı, tahsilat/ödeme icmali gelsin", sonra "prompt'u basit tutalım":
+palette yalnız 1. aşama; 2 jenerik müşteri araması; 3 tahsilat tipi (sekme açılmadan); 4 kayıt; her aşamada iptal;
+HBYS'de 1-2. aşama palette (tahsilat → kimden). Mockup `Ekranlar/AI/ai_rezerve_kelimeler.html`.
+- `web/src/sayfalar/kabuk/paletNiyet.ts`: sözlük (tahsilat, ödeme, sipariş, fatura, irsaliye, stok, müşteri, tedarikçi;
+  eş anlamlılar, Türkçe ek toleransı) + `niyetCoz` (cümledeki araç "nakit" ve tutar "5.000,50" alınır; tanınmayan sözcük
+  varsa niyet değil). Seçenekler yalnız menüde olan ekranlara (yetki = menü). HBYS listesi ayrı (`hbys`).
+- Palet (`KomutPaleti`): rezerve kelime eşleşince iş seçenekleri "İşlemler" altında en üstte; "Yeni …" seçimi akışı
+  `/__akis?…` yoluyla Kabuk'a verir. HBYS "Yeni tahsilat" → palette 1b **Kimden** (hasta / anlaşmalı kurum / diğer cari,
+  alt alta; ⌫ geri, Esc iptal).
+- Kabuk: akış durumu → 2. aşama jenerik arama penceresi (cari: TarafArama cari düzeni, müşteri / tedarikçi süzgeci;
+  hasta: hasta düzeni; kurum: kayıt araması) → 3. aşama **tür modalı** (nakit / havale / POS / çek / senet / plan, alt alta;
+  ↑↓ gez · Enter / 1-6 seç · Vazgeç) → 4. kart kendi sekmesinde ön dolu (`/kasa-islem/yeni?tur=&tarafId=&tutar=`). Tutar: cümledeki, yoksa ERP kuralı
+  carinin açık borcu (tahsilat bakiye > 0, ödeme alacak). Araç cümlede yazıldıysa tür modalı atlanır. Belgeler (sipariş /
+  fatura / irsaliye) cariKomutu yollarıyla doğrudan kart. Pencere seçimle kapanınca akış sürer (`akisSecildi`), kullanıcı
+  kapatınca iptal.
+- HBYS hasta yolu: seçilen hastanın açık başvurusu açılır (hasta payı tahsilatı başvuru kartından); açık başvuru yoksa
+  hasta kartı + mesaj. Kurum: kasa işlemi tarafı kurum. Sigorta yolu ve HBYS Satınalma siparişi (ayrı rota) bu sürümde yok.
+- `TarafArama.onSec` seçime ham satırı (`satir`) ekler (bakiye / roller). Test `paletNiyet.test.ts`.
+- Kasa İşlemi Listesi "＋ Tahsilat" / "－ Ödeme" (kullanıcı: "alta gelen menüleri kaldır, jenerik müş/ted arama açılsın
+  sonra tür ve sekme"): araç alt menüsü kalktı (`KASA_ARAC_MENUSU`'nden), düğme aynı akışı başlatır (`akisBaslat` olayı,
+  Kabuk dinler). Avans alt menüsü duruyor. Düğme renkleri: Tahsilat yeşil, Ödeme kırmızı (aksiyon kataloğu `Bicim`).
+- "📅 Plan" da aynı yol (kullanıcı): cari araması (müşteri + tedarikçi) → tür modalı "Tahsilat Planı (61) / Ödeme Planı
+  (71)" → plan kartı sekmede. Plan kartında **TAKSİT** (kullanıcı: "taksit sistemi de ekle"): taksit sayısı + aralık (ay)
+  + ilk vade; toplam tutar eşit bölünür (kuruş farkı son taksitte), önizleme tablosu; Planı Kaydet her taksiti ayrı plan
+  kaydı yazar ("Taksit i/N" açıklamalı) - vade listesi / gerçekleştirme / iptal aynen. Tek taksit = eski davranış.
+
+## 07.11.2026 — Taksit düzenleme, karttan satırlı silme, dönüşümde satır seçimi
+
+- Plan kartı: Bilgiler üstte, Taksitler altta (kullanıcı). İlk vade / taksit sayısı / aralık alanları yarı genişlik.
+  Taksitler başlığında **✎ Düzenle**: hesaplanan satırların kopyası düzenlenir (vade + tutar), ↑↓ aynı sütunda satır
+  gezer, toplam tutara eşit olmalı (fark kırmızı, kayıt engellenir); sayı / aralık / ilk vade değişince kopya düşer,
+  "Hesaplanana dön" ile geri. `KasaIslemKarti.taksitDuzen`.
+- **Karttan silme satırlarıyla** (kullanıcı: satırları ekranda silip "Belgeyi sil" dedi, 1267 "satırlı belge silinemez"
+  ile "satırsız belge kaydedilemez" arasında kilitlendi): `DELETE /api/belge/{id}?satirlarla=1` satırları aynı işlemde
+  önce siler (satır tetikleri çalışır), sonra `fn_belge_sil`. Kart düğmesi bu yolu kullanır, onay metni satır sayısını
+  söyler; listeden silme strict kalır. `BelgeDeposu.SilAsync(satirlarla)`.
+- Dönüşüm modalı (kullanıcı: "dönüştür her şeyi dönüştürdü, oysa satır ve adet seçmem gerekir"): satırlar seçili GELMEZ,
+  başlıkta tümünü seç kutusu; miktar kalanla dolu, değiştirilir. `BelgeDonusumModali`.
+- İrsaliye kartı: "e-İrsaliye ▾" menü düğmesi **"İrsaliye İşlem"** (kullanıcı; fatura kartındaki "Fatura İşlem" kalıbı).
+  Araç çubuğu + e-Belge sekmesi; ipucu "e-İrsaliye işlemleri".
+- İrsaliye kartı "Belgeye Dönüşüm" sekmesi (kullanıcı): Fiş / Fatura / Kurum Tahakkuk / Hasta Tahakkuk / Adet-Tutar /
+  Fatura İşlem düğmeleri kalktı (`FaturalamaSekmesi.hizliYok`, yalnız `irsaliyeMi`); sekme "Türetilen belgeler" listesi
+  kalktı; ✎ / 🗑 ve seçim kutuları da yok (kullanıcı). Tür'e tıklama (ya da çift tık) türetilen belgeyi KENDİ
+  SEKMESİNDE açar (`sekmedeAc` → `/belge/{id}`, kartaGit). Tarih sütunu saatli (`tarihSaat`). Dönüşüm araç çubuğundaki
+  hedef menüsünden. **Başvuru kartında aynen kalır** (kullanıcı).
+  Belge No sütununda e-Belge bekleyen faturanın "0"ı olduğu gibi yazılır ("—" değil; kullanıcı "oraya 0 yaz").
+- Belge kartı sekme başlığı **tür önekli** (kullanıcı: "Fat-Akana Mühendislik, İrs-Terme Ticaret"): `belgeKisaAdi`
+  ilk 3 harf + "-" + cari adı ilk 2 kelime; yabancı dilde çevirinin ilk 3 harfi ("Inv-", "Del-"; `c(belgeKisaAdi)`).
+  1274: Fiş / Konsinye / Transfer / Tahakkuk etiket çevirileri (EN + DE) sözlüğe. Başvuruda yalnız hasta adı (değişmedi).
+- İrsaliye kartı: araç çubuğundaki "Belge Dönüştür" hedef menüsü ve "Siparişten Aktar" düğmesi **Belgeye Dönüşüm
+  sekmesine** taşındı (kullanıcı; `FaturalamaSekmesi.kaynakTur`). Araç çubuğunda İrsaliye İşlem + Sevk Fişi Yazdır kaldı.
+- **Siparişten Aktar çalışır** (kullanıcı: "yeni kart açıp siparişten buraya aktarmak isterim"): sekmede ilk düğme
+  (sıra: Siparişten Aktar, Belge Dönüştür). `SiparistenAktarPenceresi`: 1) sipariş seç (jenerik belge listesi, tür 19/9,
+  carisi belli kartta o cari), 2) açık satırlar + miktar (tümünü seç, varsayılan kalan) → karta `kaynakSatirId`'li satır
+  (`siparisSatirlari`, iadeyle aynı mekanizma). Kayıtta kaynak_tur 30 yazılır, siparişin kapatılan miktarı tetikle ilerler,
+  belge siparişin dönüşüm listesinde görünür. Kayıtsız kartta da çalışır; carisiz kartta cari siparişten gelir.
+- Müşteri / tedarikçi arama penceresi: 📄 Ekstre düğmesi kalktı (kullanıcı).
+- **Sipariş kartı aynı desen** (kullanıcı: "irsaliye deseni sipariş için de, başvuru aynen kalsın"): araç çubuğundaki
+  "İrsaliyeye Dönüştür" / "Belge Dönüştür" kalktı; Belgeye Dönüşüm sekmesinde hedef menüsü (irsaliye / fatura / fiş /
+  tahakkuk), hızlı düğmeler / ✎ / 🗑 / seçim yok, Tür'e tıklama belgeyi sekmede açar. Satış siparişinde **⇩ Tekliften
+  Aktar** (kullanıcı; aynı pencere, kaynak tür 18, yalnız KABUL = 3 teklifler; alış siparişinde yok) - fişteki gibi
+  **Kalemler sekmesinde Sil'in sağında**, aynı ⇩ ikon (`AktarMenusu` tek seçenekte düz düğme; `SIPARIS_AKTAR`).
+- **Sipariş kartı Tahsilat sekmesi sade** (kullanıcı: "butonları sil, sadece Tahsilat Gir; kaydedip tür sorup tahsilat
+  sekmesi açsın, tutar gelsin; check'ler kalksın; Tür'e tıklayınca sekme"): `TahsilatSekmesi.sade` - araç çubuğunda
+  yalnız "💵 Tahsilat Gir" (alışta Ödeme Gir) + kalan; `BelgeKarti.siparisTahsilatGir`: kaydet (kayıtsızsa `kes(false)`,
+  kalem değiştiyse `kayitSart`) → tür modalı (Kabuk akış deseni: alt alta, ↑↓ Enter 1-6, KASA_ARACLARI) → kasa kartı
+  KENDİ SEKMESİNDE `/kasa-islem/yeni?tur&tarafId&tarafUnvan&tutar=<kalan>&belgeId`. Gridde seçim kutusu / ✎ / 🗑 yok;
+  Tür bağlantısı ve çift tık `/kasa-islem/{id}` sekmede. **Başvuru ve fatura aynen** (`siparisMi && !basvuruMu`).
+- Kasa işlem kartı: **Tahsilat Dağıtımı paneli yalnız HBYS** (kullanıcı: "erp modunda olmaz") - `urunModu ===
+  URUN_GENOTIP`; ERP'de belgeye bağlı tahsilat bütün olarak bağlanır, dağıtım yazılmaz (`dagitim` boş kalır).
+- Kasa işlem kartı sayfa düzeni: **Kaydet / Kesinleştir / İptal / Sil başlığın SOLUNDA** (kullanıcı: "kaydet butonu
+  sola yanaş"; belge kartıyla aynı), Kapat en sağda; modalde alt şerit aynen (`eylemler` + `kapatDugmesi`).
+- Tahsilat sekmesi gridi: **Banko sütunu yalnız HBYS** (kullanıcı: "ERP'de görünmez"; `bankoVar`, colSpan'lar düşer).
+- Kasa işlem kartı **kayıtsız değişiklik uyarısı** (kullanıcı: "tutar değiştim, kapat dedim, uyarmadı"): girdi imzası
+  (`girdi()` JSON) kart hazır olunca alınır, açılış dolumları (varsayılan kasa / kur / bakiye) ilk 2 sn içinde tabana
+  sayılır; Kapat / sekme × / modal kapat kirliyse Kaydet · İptal · Geri Dön sorar (belge kartıyla aynı metin,
+  `kapatIste`, `kapatmaIsleyicisi`). Doğrulandı: dokunmadan kapat sorusuz, tutar değişince soru.
+- Dönüşüm menüsü düğmesi ikonu "⇨ Belge Dönüştür ▾" (kullanıcı: sağa ok; Aktar'ın ⇩'u ile aynı aile).
+- Kasa işlem kartı: "İptal Et" düğmesi kalktı (ters kayıt ucu `POST /iptal` duruyor - liste / API); gerçekleşmişte de
+  "Kaydet" (eski "Değişiklikleri Kaydet"). Sipariş Tahsilat sekmesinde "Kalan" etiketi düğmeyle dikey ortalı.
+- **Yeni belge sekmesi yenilemede cari kaybediyordu** (kullanıcı: "açık belge sekmesine dönünce müşteri seçme ekranı
+  geldi, kapat deyince sekme kapandı"): F5 / geliştirme sunucusu yenilemesinde sekme adresinden (`/belge/yeni?tur=15`)
+  yeniden kurulan kartta cari yoktu → açılış araması → iptal kuralı kartı kapatıyordu. Cari seçilince `?tarafId=&tarafUnvan=`
+  replace ile adrese işlenir (`BelgeKarti`), `EkranSekmeleri` Replace gezinmesinde aynı yuvayı korur (kirli olsa da).
+  Doğrulandı: F5 sonrası sekme "Fat-1" carili açılıyor, arama çıkmıyor. Kalemler yenilemede yine kaybolur (kaydet).
+- Dönüşüm sekmesinde Tür bağlantısı türün liste yoluyla açar (`/satis-fisi/{id}`, `/satis-irsaliye/{id}`…;
+  `/belge/{id}` yalnız satış faturası listesiydi, fiş için boş "Kart" sekmesi açılıyordu).
+- **Bütün Sil düğmeleri sorar** (kullanıcı): tarama (`api.*Sil` / `kartSil` çağrıları, 2000 karakter içinde `onay`
+  yoksa) sorusuz silenler: jenerik kart Sil (`GenForm.sil` - en önemlisi), belge kartı kalem 🗑 (`useSatirSecimi`),
+  detay tablo 🗑/× (yalnız KAYITLI satırda - `GenDetayTablo.satirSil`), üretim fişi satır ✖, duyuru eki ✕, mesaj Sil,
+  servis parçası, profil resmi kaldır. Hepsine "… silinecek. Onaylıyor musunuz?" eklendi. Kalan sorusuzlar kasıtlı:
+  toplu kayıt içindeki satır silmeleri (kod listesi, masraf), boş taslak temizliği, aday hasta birleştirme, izlem
+  penceresi × (kaydedilmemiş yardımcı satır).
+- İrsaliye kartı "Siparişten Aktar" da Kalemler sekmesine (Sil'in sağı, ayraç) taşındı, ikon 📋 (kullanıcı: "ikonu da
+  değiş"); dönüşüm sekmesindeki düğme ve `FaturalamaSekmesi.siparistenAktar / aktarEtiketi` kaldırıldı. Üç kart aynı yer:
+  fiş "⇩ Aktar ▾" (menü), sipariş "⇩ Tekliften Aktar", irsaliye "📋 Siparişten Aktar" (`IRSALIYE_AKTAR`).
+- Belge kartı Resim / Doküman sekmesi **kayıtsız kartta da açık** (kullanıcı: "'Belge kaydedilince eklenebilir' notu
+  kalksın, ekleme düğmesi görünsün; dosya seçilip ekle denince önce belge kaydedilsin sonra dosya ona eklensin"):
+  `DokumanGalerisi.kaynakIdSagla` - kaynakId 0 iken dosya seçilince kart `kes(false)` ile kaydedilir (açık kalır), dönen
+  id ile yüklenir; kayıt düşerse yükleme yok (hata kartta). Kayıtsızda liste sunucuya sorulmaz.
+- Sade Tahsilat sekmesi **fatura ve fiş kartında da** (kullanıcı): `sadeTahsilat = !basvuruMu && (siparisMi || faturaMi)` -
+  "💵 Tahsilat Gir" (alışta Ödeme Gir) + kalan, tür modalı, kasa kartı sekmede; seçim / ✎ / 🗑 yok. Başvuru aynen.
+- **İrsaliyeden fiş / faturaya lotlar aynen taşınır, tekrar sorulmaz** (kullanıcı). İki yol:
+  · Dönüşüm penceresi zaten sormuyordu (lot yalnız siparişten) ve `DonusturAsync` stoğu tekrar düşürmüyordu; eksik olan
+    hedef satırda lotun GÖRÜNMEMESİydi - okuma (`BelgeDeposu.Deger`) stok düşürmeyen (stok_durum_degis 0, kaynak_tur 30)
+    satırda lotları kaynak irsaliye satırından gösterir (kısmi aktarımda kaynağın tamamı, bilgi amaçlı).
+  · Kart yolu (İrsaliyeden Aktar) **stoğu ve cariyi ikinci kez yazıyordu** (gizli hata): `SatirEkleAsync` kaynak satır stok
+    düşürmüşse `stok_durum_degis` 0 yazar (`KaynakStokDusurduMuAsync`), `IzlemYazAsync` o satırda lot istemez; kayıtta
+    bütün satırlar cari yazmış kaynağa bağlıysa `cariAtla` (`KaynakCariDurumuAsync`), karışıksa uyarı. İstemci: açık
+    satırlar `izlemler` ile gelir (`AcikSatirlarAsync`), `siparisSatirlari` irsaliye kaynağında `stokDurumDegis 0` +
+    lotları aktarılan miktar kadar kopyalar (`lotlariBol`); kart gridinde görünür.
+- Sipariş kartında teslim tarihi **saatsiz** (kullanıcı: "başvuruda kalsın"): kalem gridi gün (`gunMetni`), kalem
+  penceresi ve Termin modalı `type=date` (00:00 yazılır). Başvurunun işlem zamanı saatli (datetime-local) aynen.
+- Belge kartı gridleri (`.detay-tablo`) varsayılan **dar** (kullanıcı: "tüm belgelerde grid satırlar default dar"):
+  hücre dikey dolgusu 5 → 2px; Görünüm > Yoğunluk sıkışık 1px, ferah 5px (eski). Liste gridleri (`table.grid`) değişmedi.
+- Sipariş kartı: araç çubuğundaki pasif "🏭 Üretime Aktar" Belgeye Dönüşüm sekmesindeki **Belge Dönüştür menüsünün en
+  üstüne** taşındı, altında ayraç (`DonusumMenusu.ustMadde`). Hâlâ bağlı değil (tıklayınca "Üretim emri henüz
+  bağlanmadı"); altyapı hazır: `uretim_emri.kaynak_belge_id / kaynak_satir_id`, emir açma ucu kabul ediyor.
+- Belgeye Dönüşüm sekmesi alttan kırpılma (kullanıcı): `.kagrup` overflow:hidden açılır menüyü (Belge Dönüştür ▾ /
+  Fatura İşlem ▾) boş listede kesiyordu; grup `kagrup tasar` (overflow visible, köşeler h6'da).
+- **Fiş kartı "⇩ Aktar ▾"** (kullanıcı: "alta menü Siparişten / İrsaliyeden, satırları içe alsın"): önce araç
+  çubuğundaydı, sonra (kullanıcı) **Kalemler sekmesinde Sil'in sağında, ayraçla** (`AktarMenusu.tsx`,
+  `KalemSekmesi.aktarAc`); seçim `SiparistenAktarPenceresi`ni kaynak türüyle
+  açar (satış fişi 19 / 14, alış fişi 9 / 10) - sipariş ya da irsaliyenin açık satırları fişe kaynak bağıyla gelir.
+  `useBelgeAramalari.siparis` artık kaynak türü (number | null), tek pencere üç kart için.
+- Aktarma penceresi **ikinci kez aynı kaynağı vermez** (kullanıcı: "aynı siparişten 2 defa aktarım yapabiliyorum"):
+  kayıt öncesi sunucu kalanı bilmez; karttaki kaynak bağlı satırların miktarı (`kartta`) kalandan düşülür, sıfıra inen
+  satır listelenmez ("tamamı zaten bu kartta"). Kayıttan sonra kalan zaten sunucudan gelir.
+- **Sunucu: kaynak aşımı** (kullanıcı: "faturaya aktarıldıysa fişe aktaramam, tersi de"): kart kayıt yolu
+  (`BelgeDeposu.KaynakAsimKontrolAsync`, satırlar yazılıp kapatma tetiği çalıştıktan sonra) kaynak satırın kapatılanı
+  miktarını aşıyorsa 422 IS_KURALI "Kaynak satır zaten başka belgeye aktarılmış… zaten 000061 belgesinde" - işlem geri
+  alınır. Hedef türünden bağımsız (fatura + fiş + irsaliye aynı sayaç: `fn_belge_satir_kapatma_tazele`). Dönüşüm
+  penceresi yolu zaten denetliyordu. Doğrulandı: 2. fiş reddedildi, 1. silinince kaynak yeniden açıldı.
+  Başvuru (HBYS) değişmedi: `BelgeErpSekmeleri` başvuruda DA çizilir (Belgeye Dönüşüm oradan), ayrım `basvuruMu`
+  prop'uyla - `tur === 19` tek başına başvuruyu da yakalar (kullanıcı notu: "sipariş kartında yapılanlar başvuru
+  kartını etkilemesin"; bellek `siparis-basvuru-ayrimi`).
+
+---
+
+## 05.11.2026 — Refaktör: günün değişiklikleri (yeniden kullanım / sadeleştirme / verimlilik / derinlik)
+
+Dört açıdan inceleme (`/simplify`), bulgular uygulandı:
+- **Taraf araması:** `tarafDuzeni` yardımcıları bicim'den (`sayiya` NaN korumalı, `gunNokta`); koşul birleştirme
+  `filtreBirlestir`; cari ek arama alanları tek listede (`duzen.ekArama`; önce iki listeden çift gönderiliyordu);
+  `AKTIF_KOSULU` düzen koşulunda sabit (`sabitKosul` alanı kalktı), `cipler` / `satirSinifi` / `lejant` isteğe bağlı;
+  önizleme çerçevesi (başlık + kapat + "Satır seçin") TarafArama'da bir kez, düzenler yalnız içerik (`Onizleme({s,b})`);
+  ortak parçalar `TarafAramaOrtak.tsx` (Sat, Bos, yoksaTire, IletisimBlok, OnizlemeBasligi); `tarafDuzeniVar()` Kabuk'ta;
+  sayfa boyu sabiti.
+- **GenForm / sekmeler:** `yalnizSekmeler` artık `sekmeleriKur` içinde beyaz liste (GenForm'daki türev gizli listeler
+  kalktı); ek sekmelere `kosulAlani` (detay sekmesiyle aynı kural) - Fatura Ayarları tür sekmeleri bununla,
+  `MukellefIzle` gözcüsü silindi; kart açık kalıyorsa (onKaydedildi true) GenForm kaydettikten sonra kendisi yeniden
+  okur - Fatura Ayarları'ndaki remount kalktı. `EBelgeSekmesi` sabit nesneler.
+- **Cari İcmali:** küçük bakiye kuralı TEK yerde, sunucuda (`Kucuk(c, esik)`: eşik altı + döviz bakiyesi yok), satırda
+  `kucuk` bayrağı; istemcideki `kucukMu` / `dovizliMi` kalktı; `kucuk` yanıtı sadeleşti (sayılar istemcide), kalem adları
+  yalnız kapatma yetkisi varsa okunur; POST `tarafIdler` zorunlu (önizlenen küme yazılır, eşik girişi kalktı);
+  `KapsamAsync` / `KalemlerAsync` yardımcıları; `yukle` tek yol.
+- **Grid rozet rengi:** "rozet:…" biçim-DSL'i yerine kolon özelliği `RozetSiniflari` (KolonTanimi → KolonMeta →
+  `rozetSiniflari`), `bicim === 'rozet'` eşitliği geri.
+- **Menü ERP yeri:** `erpMenuGrup` / `erpMenuAltGrup` / `erpMenuSira` → tek `erp: { grup, altGrup?, sira? }` nesnesi,
+  cast'siz çözüm (5 tanım taşındı).
+- **Ajan:** `DepoVarAsync` + depo `GuncelVersiyonAsync` → tek `DepoVersiyonAsync` (null = depo yok; 5 sn bağlantı zaman
+  aşımı), depo tabloları `Toplamlar.Gruplar`dan, `Nerede()` parametresiz, `AnahtarlaAsync` süzgeç cümlesi tek,
+  gereksiz overload'lar kalktı.
+- **Diğer:** `GzipAc` tek açma; 1273: kuruş farkı türleri kendi grubunda (`kurusfarki`, karta "Kuruş Farkı" etiketi) +
+  `e_belge_mesaj(e_belge_id)` indeksi; günün commit'inde eklenen 18 BOM geri alındı.
+- Atlananlar (davranış / kapsam): 1264 üretim operasyonu lookup'ının sunucuda emre daraltılması (generic lookup yükleyici),
+  `KartDetaySekmesi` iç içe IIFE (kozmetik, geniş bileşen), kuruş kapatmada tek bağlantı / savepoint (kasıtlı cari başına
+  işlem), `TurAsync`'e sayaç geçirme, `EFaturaVerisi.OkuAsync`'in ithal belgede zip'i her çağrıda açması.
 
 ---
 

@@ -1,4 +1,4 @@
-﻿# Delphi → Gentegre AI aktarımı — kurulum rehberi
+# Delphi → Gentegre AI aktarımı — kurulum rehberi
 
 Tek yön, anlık aktarım (plan: `18_DELPHI_ANLIK_AKTARIM_PLANI.md`, sözleşme `01` §9.19).
 Delphi ERP asıl sistemdir; web aktarılan veriyi gösterir, değiştirmez.

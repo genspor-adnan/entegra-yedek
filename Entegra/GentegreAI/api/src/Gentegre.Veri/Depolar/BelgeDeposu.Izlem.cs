@@ -57,7 +57,9 @@ public sealed partial class BelgeDeposu
         //   istemenin anlami yok: henuz fiziki hareket yok. Irsaliyeden turetilen
         //   faturada da stok TEKRAR dusmez - lot da tekrar dusmemeli
         //   (stokDurumDegis satir bazinda 0 gelir).
-        if (!turStokEtkiler || JsonSayi(satir, "stokDurumDegis", 1) == 0) return;
+        //   `turStokEtkiler` artık SATIR bazında gelir (Yazma: tür etkiler && stok_durum_degis 1) - kaynağı irsaliye
+        //   olan satırda 0 (07.11.2026), lot yazılmaz, lotlar okumada kaynaktan gelir.
+        if (!turStokEtkiler) return;
 
         // CIKIS ve TRANSFER: lot girilmez, mevcut lotlardan SECILIR.
         //   Fark tuketimin sonucunda: cikista mal gider (yeni satirin kalani 0),

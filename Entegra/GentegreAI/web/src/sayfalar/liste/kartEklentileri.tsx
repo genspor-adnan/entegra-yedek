@@ -1,4 +1,4 @@
-﻿import type { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import type { GenForm } from '../../bilesenler/GenForm';
 import type { ListeTanimi } from '../listeTanimlari';
 import { api } from '../../api/istemci';

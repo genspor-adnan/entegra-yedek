@@ -29,6 +29,10 @@ public sealed record KolonTanimi(
     //   konur. Ayni harita kart metasinda da kullanilir; iki yerde
     //   yazilmamasi icin buraya REFERANS verilir, kopyalanmaz.
     IReadOnlyDictionary<string, string>? Kodlar = null,
+    // ROZET RENGİ DEĞERE GÖRE (05.11.2026, seri bilgileri gridi: "e-Arşiv yeşil olsun, amaç farklılık"):
+    //   değer -> CSS sınıfı (olumlu / uyari / hata / mavi / gri...). Verilmeyen değer istemcinin ortak sözlüğünden
+    //   renklenir; sözlük belge listesinde "hazırlandı / gönderildi" ayrımını taşıdığı için orada değiştirilmez.
+    IReadOnlyDictionary<string, string>? RozetSiniflari = null,
     /// <summary>
     /// URUN MODU SUZGECI (542, kullanici: "erp modunda tarife kolonu ve icerde
     /// tipi gorunmesin"). 0 tum kurulumlar · 1 yalniz Gentegre AI (ERP) ·

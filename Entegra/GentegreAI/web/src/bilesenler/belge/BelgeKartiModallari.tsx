@@ -11,13 +11,15 @@ import { KalemPenceresi } from './KalemPenceresi';
 import { TerminModali } from './TerminModali';
 import { KalemRolModali } from '../prim/KalemRolModali';
 import { IadeSatirPenceresi } from './IadeSatirPenceresi';
+import { SiparistenAktarPenceresi } from './SiparistenAktarPenceresi';
+import { hamSayi } from '../bicim';
 import { BelgeTahsilatModallari } from './BelgeTahsilatModallari';
 import { PosSecModali } from '../banko/PosSecModali';
 import { HesapSecModali } from './HesapSecModali';
 import { IskontoTalepModali } from './IskontoTalepModali';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
-import { iadeSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
+import { iadeSatirlari, siparisSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
 import type { useBelgeTahsilat, HizliTahsilatEki } from '../../sayfalar/belgeTahsilat';
 import type { ParaSecimi } from '../mesaj';
 import { BelgeKarti } from '../../sayfalar/BelgeKarti';
@@ -115,6 +117,9 @@ export interface BelgeKartiModalProps {
   kalemKaydet(satir: SatirDurumu): void;
   iadeArama: boolean;
   setIadeArama: Ayarla<boolean>;
+  /** Kaynaktan aktar penceresi: açık kaynak belge türü (null kapalı). */
+  siparisArama?: number | null;
+  setSiparisArama?: Ayarla<number | null>;
 
   /* ---- tahsilat ---- */
   tahsilat: ReturnType<typeof useBelgeTahsilat>;
@@ -184,7 +189,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     saticiArama, setSaticiArama, setSatici,
     personelArama, setPersonelArama, setTeslimEden, setTeslimAlan,
     satirlar, setSatirlar, stokArama, setStokArama, aramaEklenen, setAramaEklenen,
-    stokSecildi, kalem, setKalem, kalemKaydet, iadeArama, setIadeArama,
+    stokSecildi, kalem, setKalem, kalemKaydet, iadeArama, setIadeArama, siparisArama, setSiparisArama,
     tahsilat, tahsilatTutariSor, posSonrasi, hizliTahsilat,
     hesapSecim, setHesapSecim, hesapSecimIade, setHesapSecimIade,
     hesapSecimPara, setHesapSecimPara, iadeYaz, kalemSeridi,
@@ -364,6 +369,28 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
             const yeniler = iadeSatirlari(secilenler, sonAnahtar(satirlar));
             setSatirlar(s => [...s, ...yeniler]);
             setIadeArama(false);
+          }}
+        />
+      )}
+
+      {/* SİPARİŞTEN / TEKLİFTEN AKTAR (kullanıcı 07.11.2026): kaynak belge seç -> açık satırlardan satır / miktar
+             seç -> karta kaynak bağlı satır. İrsaliye kartı siparişten (19 / 9), sipariş kartı KABUL tekliften (18).
+             Carisiz yeni kartta cari kaynaktan gelir. */}
+      {siparisArama && (
+        <SiparistenAktarPenceresi
+          siparisTuru={siparisArama}
+          tarafId={cari?.id}
+          // Kartta bekleyen kaynak satırlar: aynı kaynak ikinci kez açılınca kalan düşer (kaydedilmemiş olsa da).
+          kartta={satirlar.reduce<Record<number, number>>((t, s) => {
+            if (s.kaynakSatirId) t[s.kaynakSatirId] = (t[s.kaynakSatirId] ?? 0) + hamSayi(s.adet);
+            return t;
+          }, {})}
+          onKapat={() => setSiparisArama?.(null)}
+          onSec={(siparis, secilenler) => {
+            if (!cari && siparis.tarafId) setCari({ id: Number(siparis.tarafId), unvan: String(siparis.tarafUnvan ?? '') });
+            const yeniler = siparisSatirlari(secilenler, sonAnahtar(satirlar));
+            setSatirlar(s => [...s, ...yeniler]);
+            setSiparisArama?.(null);
           }}
         />
       )}

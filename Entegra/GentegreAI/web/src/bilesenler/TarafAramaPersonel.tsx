@@ -1,7 +1,6 @@
 import type { ListeSatiri } from '../api/sozlesme';
 import { sayi } from './bicim';
-import { c } from '../dil/ceviri';
-import { OnizlemeBasligi } from './TarafAramaCari';
+import { Bos, IletisimBlok, Sat, yoksaTire } from './TarafAramaOrtak';
 import { metin, sayiya, tarihYaz } from './tarafDuzeni';
 
 /**
@@ -40,33 +39,30 @@ export function PersonelHucreler({ s }: { s: ListeSatiri }) {
   const kalan = s.kalanIzin == null || s.kalanIzin === '' ? '' : `${sayi.format(sayiya(s.kalanIzin))} g`;
   return (
     <>
-      <td>{metin(s.kod) || <span className="gh-sonuk">—</span>}</td>
+      <td>{yoksaTire(s.kod)}</td>
       <td className="ad">
         <b>{metin(s.unvan)}</b>
         {metin(s.eksik) && <small>eksik: {metin(s.eksik)}</small>}
       </td>
-      <td><span className="ta-kirp dar">{metin(s.rolAdi) || <span className="gh-sonuk">—</span>}</span></td>
-      <td><span className="ta-kirp">{metin(s.departmanAdi) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="ta-g2"><span className="ta-kirp">{metin(s.gorev) || <span className="gh-sonuk">—</span>}</span></td>
-      <td><span className="ta-kirp dar">{metin(s.cepTel) || metin(s.telefon) || <span className="gh-sonuk">—</span>}</span></td>
+      <td><span className="ta-kirp dar">{yoksaTire(s.rolAdi)}</span></td>
+      <td><span className="ta-kirp">{yoksaTire(s.departmanAdi)}</span></td>
+      <td className="ta-g2"><span className="ta-kirp">{yoksaTire(s.gorev)}</span></td>
+      <td><span className="ta-kirp dar">{metin(s.cepTel) || metin(s.telefon) || <Bos />}</span></td>
       <td><BugunNoktasi s={s} /><span className="ta-kirp" style={{ display: 'inline-block', verticalAlign: 'middle' }}>{metin(s.bugun) || 'Çalışıyor'}</span></td>
-      <td className="ta-g2"><span className="ta-kirp">{metin(s.yoneticiAdi) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="hiza-orta ta-g2">{tarihYaz(s.iseGirisTarihi) || <span className="gh-sonuk">—</span>}</td>
-      <td className="hiza-orta">{kalan || <span className="gh-sonuk">—</span>}</td>
+      <td className="ta-g2"><span className="ta-kirp">{yoksaTire(s.yoneticiAdi)}</span></td>
+      <td className="hiza-orta ta-g2">{tarihYaz(s.iseGirisTarihi) || <Bos />}</td>
+      <td className="hiza-orta">{kalan || <Bos />}</td>
     </>
   );
 }
 
-export function PersonelOnizleme({ s, onKapat }: { s: ListeSatiri | undefined; onKapat(): void }) {
-  if (!s) return <div className="ta-on"><OnizlemeBasligi onKapat={onKapat} /><div className="gh-sonuk">{c('Satır seçin')}</div></div>;
+export function PersonelOnizleme({ s }: { s: ListeSatiri }) {
   const k = sayiya(s.bugunKod);
   const kalan = s.kalanIzin == null || s.kalanIzin === '' ? '' : sayi.format(sayiya(s.kalanIzin));
   const hak = s.hakToplam == null || s.hakToplam === '' ? '' : sayi.format(sayiya(s.hakToplam));
   const talep = sayiya(s.onaydaTalep);
-  const iletisimVar = metin(s.cepTel) || metin(s.telefon) || metin(s.eposta);
   return (
-    <div className="ta-on">
-      <OnizlemeBasligi onKapat={onKapat} />
+    <>
       <h4>{metin(s.unvan)}</h4>
       <div className="ta-kod">
         {[metin(s.kod), metin(s.rolAdi), metin(s.departmanAdi), metin(s.gorev)].filter(Boolean).join(' · ')}
@@ -78,23 +74,18 @@ export function PersonelOnizleme({ s, onKapat }: { s: ListeSatiri | undefined; o
       {sayiya(s.dogumBugun) === 1 && <div className="ta-uyar">🎂 Doğum günü bugün</div>}
 
       <div className="ta-blok"><h5>Bugün</h5>
-        <div className="ta-sat"><span>Durum</span><span><BugunNoktasi s={s} />{metin(s.bugun) || 'Çalışıyor'}</span></div>
-        {metin(s.yoneticiAdi) && <div className="ta-sat"><span>Yönetici</span><span>{metin(s.yoneticiAdi)}</span></div>}
+        <Sat etiket="Durum" v={<><BugunNoktasi s={s} />{metin(s.bugun) || 'Çalışıyor'}</>} />
+        <Sat etiket="Yönetici" v={metin(s.yoneticiAdi)} />
       </div>
 
-      <div className="ta-blok"><h5>İletişim</h5>
-        {metin(s.cepTel) && <div className="ta-sat"><span>Cep</span><span>{metin(s.cepTel)}</span></div>}
-        {metin(s.telefon) && <div className="ta-sat"><span>Telefon</span><span>{metin(s.telefon)}</span></div>}
-        {metin(s.eposta) && <div className="ta-sat"><span>E-posta</span><span>{metin(s.eposta)}</span></div>}
-        {!iletisimVar && <div className="gh-sonuk">—</div>}
-      </div>
+      <IletisimBlok s={s} />
 
       <div className="ta-blok"><h5>Çalışma</h5>
-        {tarihYaz(s.iseGirisTarihi) && <div className="ta-sat"><span>İşe giriş</span><span>{tarihYaz(s.iseGirisTarihi)}</span></div>}
-        {metin(s.kidem) && <div className="ta-sat"><span>Kıdem</span><span>{metin(s.kidem)}</span></div>}
-        {(kalan || hak) && <div className="ta-sat"><span>Yıllık izin</span><span>{kalan || '0'} / {hak || '—'} gün</span></div>}
-        <div className="ta-sat"><span>Onayda talep</span><span className={talep > 0 ? 'ta-borc' : ''}>{talep > 0 ? sayi.format(talep) : 'yok'}</span></div>
+        <Sat etiket="İşe giriş" v={tarihYaz(s.iseGirisTarihi)} />
+        <Sat etiket="Kıdem" v={metin(s.kidem)} />
+        {(kalan || hak) && <Sat etiket="Yıllık izin" v={`${kalan || '0'} / ${hak || '—'} gün`} />}
+        <Sat etiket="Onayda talep" v={talep > 0 ? sayi.format(talep) : 'yok'} sinif={talep > 0 ? 'ta-borc' : undefined} />
       </div>
-    </div>
+    </>
   );
 }

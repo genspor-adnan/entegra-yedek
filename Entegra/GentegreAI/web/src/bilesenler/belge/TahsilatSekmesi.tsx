@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { AvansDurumu } from '../avansDurumu';
 import { mesaj, paraSor } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
-import type { BelgeYaniti } from '../../api/sozlesme';
+import { type BelgeYaniti, URUN_GENOTIP } from '../../api/sozlesme';
+import { useOturum } from '../../kimlik/OturumBaglami';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -15,9 +16,17 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc,
                                   iadeAc, avansAl, avansIadeAc, avans, kayitSart,
-                                  yerelPara = 'TL' }: {
+                                  yerelPara = 'TL', sade, tahsilatGir, sekmedeAc }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
+  /** SİPARİŞ KARTI (kullanıcı 07.11.2026 "tahsilat sekmesinde butonları sil, sadece Tahsilat Gir"): araç çubuğunda
+      yalnız "Tahsilat Gir" (kaydet → tür sor → kasa kartı sekmede, tutar = kalan), gridde seçim kutusu / ✎ / 🗑 yok,
+      Tür'e tıklayınca kasa kartı sekmede. Başvuru ve fatura AYNEN (sade verilmez). */
+  sade?: boolean;
+  /** sade: "Tahsilat Gir" - kalan tutarla. */
+  tahsilatGir?(kalan: number): void;
+  /** sade: mevcut kasa işlemini KENDİ SEKMESİNDE açar (Tür'e tıklama). */
+  sekmedeAc?(kasaIslemId: number): void;
   sonuc: BelgeYaniti | null;
   tahsilatlar: Record<string, unknown>[];
   kayitliId: number;
@@ -116,6 +125,11 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
  * Kimligi NEGATIF (gorunumun ikinci dali): silme yolu bununla ayirt edilir.
  */
 const avansMi = (k: Record<string, unknown>) => Number(k.avansKullanim ?? 0) === 1;
+// BANKO SÜTUNU YALNIZ HBYS (kullanıcı 07.11.2026 "ERP'de banko sütunu görünmez"): banko oturumu HBYS kavramı.
+//   Sağlayıcısız çizimde (testler) oturum yok -> HBYS varsayılır (eski görünüm). Hook her çizimde çağrılır, sıra sabit.
+let oturumKullanici: { urunModu?: number } | null = null;
+try { oturumKullanici = useOturum().kullanici } catch { oturumKullanici = null }   // eslint-disable-line react-hooks/rules-of-hooks
+const bankoVar = !oturumKullanici || oturumKullanici.urunModu === URUN_GENOTIP;
 const idler = tahsilatlar.map(k => Number(k.id ?? 0)).filter(Boolean);
 const hepsi = idler.length > 0 && secili.length === idler.length;
 const cevir = (id: number) =>
@@ -268,6 +282,16 @@ return (
     {/* Tahsilat araclari: Nakit 21 / Banka 22 / POS 25 - hepsi ayni
         modali (kasa karti) cari + tutar onyuklu acar. Cek/Senet kasa
         planinin F5 fazinda (cek_senet tablosu) baglanacak. */}
+    {sade ? (
+      <div className="katoolbar" style={{ margin: 10 }}>
+        <button className="d bir" title={c('Siparişi kaydeder, tahsilat türünü sorar, kasa kartını kalan tutarla açar')}
+                onClick={() => tahsilatGir?.(kalan)}>
+          💵 {c(alisMi ? 'Ödeme Gir' : 'Tahsilat Gir')}
+        </button>
+        {/* Düğmeyle dikey ortalı (kullanıcı 07.11.2026). */}
+        {kalan > 0 && <span className="kapt" style={{ alignSelf: 'center', marginLeft: 6 }}>{c('Kalan')}: {para.format(kalan)}</span>}
+      </div>
+    ) : (
     <div className="katoolbar" style={{ margin: 10 }}>
       {/* Tahsilat ARACI adiyla: yanindaki POS / Cek-Senet ile ayni
           dizide - bu dugme NAKIT tahsilat (tur 21) acar. */}
@@ -491,20 +515,22 @@ return (
               onClick={() => { void tahsilatSil(secili) }}>🗑</button>
       {secili.length > 1 && <span className="kapt">{secili.length} işlem seçili</span>}
     </div>
+    )}
     <table className="detay-tablo">
       <thead>
         <tr>
+          {!sade && (
           <th className="check">
             <input type="checkbox" checked={hepsi} disabled={!idler.length}
                    title={c('Tümünü seç')}
                    onChange={() => setSecili(hepsi ? [] : idler)} />
-          </th>
+          </th>)}
           <th style={{ width: 140 }}>Tarih / Saat</th>
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
           <th>{c('Kasa / Banka')}</th>
           {/* BANKO (kullanıcı 09.10.2026): tahsilatın alındığı banko oturumu. */}
-          <th style={{ width: 140 }}>{c('Banko')}</th>
+          {bankoVar && <th style={{ width: 140 }}>{c('Banko')}</th>}
           {/* DOVIZ SUTUNU yalniz dovizli tahsilat varsa (kullanici: "döviz
               tahsilat olursa tutar soluna alınan döviz de gelsin"): "Tutar"
               kolonu YEREL KARSILIKTIR, hastanin verdigi 100 USD orada hic
@@ -522,6 +548,7 @@ return (
             "kurumun payi belgelendi mi" sorusu listenin basinda cevaplanir. */}
         {(kurumBelgeleri ?? []).map(kb => (
           <tr key={`kb-${kb.id}`} className="kurum-belge" style={{ userSelect: 'none' }}>
+            {!sade && (
             <td className="check">
               {/* IKON BELGENIN TARAFINA GORE (kullanici tahakkuku ikiye ayirdi):
                   hastaya kesilen 👤, kuruma kesilen 🏛️. Ikisi de TAHSILAT
@@ -530,12 +557,12 @@ return (
                     title={kb.hastaMi ? 'Hastaya kesilen belge - tahsilat değildir'
                                       : 'Kuruma kesilen belge - tahsilat değildir'}>
                 {kb.hastaMi ? '👤' : '🏛️'}</span>
-            </td>
+            </td>)}
             <td>{tarihSaat(kb.tarih)}</td>
             <td>{kb.belgeNo}</td>
             <td>{kb.turAdi}</td>
             <td>{kb.cari || <span className="sonuk">—</span>}</td>
-            <td className="sonuk">—</td>
+            {bankoVar && <td className="sonuk">—</td>}
             {dovizliTahsilatVar && <td className="hiza-sag sonuk">—</td>}
             <td className="hiza-sag">{para.format(kb.tutar)}</td>
           </tr>
@@ -549,22 +576,26 @@ return (
           return (
           <tr key={i} className={kid && secili.includes(kid) ? 'secili' : ''}
               style={{ userSelect: 'none' }}
-              onClick={e => satirTikla(e, i, kid)}
-              onDoubleClick={() => { if (kid > 0) tahsilatAcKart(kid) }}>
+              onClick={e => { if (!sade) satirTikla(e, i, kid) }}
+              onDoubleClick={() => { if (kid > 0) { if (sade) sekmedeAc?.(kid); else tahsilatAcKart(kid) } }}>
+            {!sade && (
             <td className="check" onClick={e => e.stopPropagation()}>
               <input type="checkbox" checked={!!kid && secili.includes(kid)} disabled={!kid}
                      title={avansSatiri
                        ? 'Avans kullanımı: seçip 🗑 ile geri alabilirsiniz (tutar avansa döner).'
                        : undefined}
                      onChange={() => { if (kid) { capa.current = i; cevir(kid) } }} />
-            </td>
+            </td>)}
             {/* Tarih + saat: ayni gun birden fazla tahsilat olunca
                 sira ancak saatle anlasiliyordu. */}
             <td>{tarihSaat(k.islemTarihi)}</td>
             <td>{String(k.islemNo ?? '')}</td>
-            <td>{String(k.turAdi ?? '')}</td>
+            <td>{sade && kid > 0
+              ? <a href={`/kasa-islem/${kid}`} title={c('Kasa işlemini yeni sekmede aç')}
+                   onClick={e => { e.preventDefault(); e.stopPropagation(); sekmedeAc?.(kid) }}>{String(k.turAdi ?? '')}</a>
+              : String(k.turAdi ?? '')}</td>
             <td>{String(k.hesapAdi ?? '') || <span className="sonuk">—</span>}</td>
-            <td>{String(k.banko ?? '') || <span className="sonuk">—</span>}</td>
+            {bankoVar && <td>{String(k.banko ?? '') || <span className="sonuk">—</span>}</td>}
             {/* TUTAR ARTIK GRIDDE DUZENLENMIYOR (kullanici): tutar tahsilat
                 aracina basildigi anda MODALDE soruluyor (acik borc onyuklu,
                 Enter kaydediyor). Iki ayri duzenleme yolu -hucre ici ve
@@ -588,7 +619,7 @@ return (
           );
         })}
         {tahsilatlar.length === 0 && (kurumBelgeleri ?? []).length === 0 && (
-          <tr><td colSpan={dovizliTahsilatVar ? 8 : 7} className="bos">
+          <tr><td colSpan={(dovizliTahsilatVar ? 8 : 7) - (sade ? 1 : 0) - (bankoVar ? 0 : 1)} className="bos">
             {kayitliId > 0
               ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
               : 'Önce belgeyi kaydedin.'}
@@ -597,7 +628,7 @@ return (
       </tbody>
       <tfoot>
         <tr className="genel">
-          <td colSpan={dovizliTahsilatVar ? 7 : 6} className="hiza-sag">
+          <td colSpan={(dovizliTahsilatVar ? 7 : 6) - (sade ? 1 : 0) - (bankoVar ? 0 : 1)} className="hiza-sag">
             {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
           </td>
           <td className="hiza-sag">

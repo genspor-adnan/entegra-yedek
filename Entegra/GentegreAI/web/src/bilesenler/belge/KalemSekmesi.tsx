@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { mesaj } from '../mesaj';
-import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
+import { para, say4, tarihSaat, gunMetni, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, seriSutunuVar, tarihSutunuVar, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
@@ -10,6 +10,7 @@ import {
 import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import type { BelgeYaniti, IskontoTalebi } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
+import { AktarMenusu, type AktarSecenegi } from './AktarMenusu';
 
 /**
  * KALEMLER SEKMESI - satir gridi (izlemli kalemlerde lot master-detail) ve
@@ -21,6 +22,7 @@ import { c } from '../../dil/ceviri';
  */
 export function KalemSekmesi(p: KalemSekmesiProps) {
   const {
+    aktarAc, aktarSecenekleri,
     satirlar, seciliSatirlar, setSeciliSatirlar, acikLotlar, setAcikLotlar,
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
@@ -207,9 +209,15 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                                   + 'önce iskonto onayını kaldırın.'
                   : seciliSatirlar.size === 0 ? 'Önce satır seçin'
                   : `Seçili ${seciliSatirlar.size} satırı sil`}
-            onClick={seciliSil}>
+            onClick={() => void seciliSil()}>
       🗑
     </button>
+    {aktarAc && aktarSecenekleri && aktarSecenekleri.length > 0 && (
+      <>
+        <span className="ayrac" />
+        <AktarMenusu secenekler={aktarSecenekleri} onSec={aktarAc} />
+      </>
+    )}
     {/* AYRAC (kullanici): SATIR duzenleme dugmeleri (ekle/duzenle/sil) ile
         SATIRIN EKLERI (prim rolleri, dagilim, iskonto onayi) ayri isler -
         yan yana dizilince hepsi tek kume gibi okunuyordu. */}
@@ -550,10 +558,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
             </td>
             {aciklamaVar && <td className="sonuk">{r.aciklama}</td>}
+            {/* SİPARİŞTE SAATSİZ (kullanıcı 07.11.2026: "teslim tarihinde saati kaldır, başvuruda kalsın"):
+                termin gün bilgisidir; başvurunun işlem zamanı (tarihSolda) saatli. */}
             {bilgi.siparis && !tarihSolda && (
               <td className="hiza-orta">
                 {r.teslimTarihi
-                  ? tarihSaat(r.teslimTarihi)
+                  ? gunMetni(r.teslimTarihi)
                   : <span className="sonuk">—</span>}
               </td>
             )}
@@ -1018,6 +1028,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 }
 
 export interface KalemSekmesiProps {
+  /** "⇩ Aktar" (kullanıcı 07.11.2026: Sil'in sağında, ayraçla): fişte Siparişten / İrsaliyeden menüsü, satış siparişinde
+      "Tekliften Aktar" düğmesi - kaynak türüyle aktarma penceresini açar, satırlar karta kaynak bağıyla gelir. */
+  aktarAc?(kaynakTur: number): void;
+  aktarSecenekleri?: AktarSecenegi[];
   /**
    * KAYDEDILMEMIS satirlarin dagilim onizlemesi (594) - satir anahtari -> kovalar.
    * Kayitli satirin kendi `dagilim`i onceliklidir.
@@ -1041,7 +1055,7 @@ export interface KalemSekmesiProps {
   talepMi: boolean;
   setStokArama(v: boolean): void;
   setKalem(v: SatirDurumu | null): void;
-  seciliSil(): void;
+  seciliSil(): void | Promise<void>;
   /** Satir tiklama (Shift ile aralik secimi kartta yonetiliyor). */
   satirTikla(sira: number, e: React.MouseEvent): void;
   /** Son tiklanan satirin SIRASI - Shift araligi bunun uzerinden hesaplanir. */

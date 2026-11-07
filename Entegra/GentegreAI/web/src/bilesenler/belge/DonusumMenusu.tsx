@@ -7,12 +7,15 @@ import { mesaj } from '../mesaj';
  * Faturası / Satış Fişi / Satış Tahakkuku"). Hedefler dönüşüm penceresinin listesinden (HEDEFLER) - liste ekranındaki
  * menüyle aynı; seçilen hedef pencereyi ÖN SEÇİLİ açar. Menü düğmenin altında açılır, dışarı tık / Esc kapatır.
  */
-export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title }: {
+export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title, ustMadde }: {
   kaynakTur: number;
   devre?: boolean;
   devreSebep?: string;
   onSec(hedefTur: number): void;
   title?: string;
+  /** EN ÜSTTE ek madde + altında ayraç (kullanıcı 07.11.2026: sipariş kartında "🏭 Üretime Aktar"). `pasif` ise
+      tıklanınca sebep mesajla söylenir. */
+  ustMadde?: { ad: string; ikon?: string; pasif?: boolean; sebep?: string; onClick?(): void };
 }) {
   const [acik, setAcik] = useState(false);
   const kok = useRef<HTMLSpanElement>(null);
@@ -35,10 +38,24 @@ export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title }: {
                 if (devre) { mesaj(devreSebep || 'Önce belgeyi kaydedin.'); return }
                 setAcik(a => !a);
               }}>
-        🧾 Belge Dönüştür ▾
+        {/* İKON SAĞA OK (kullanıcı 07.11.2026) - Aktar'ın ⇩'u ile aynı aile. */}
+        ⇨ Belge Dönüştür ▾
       </button>
       {acik && (
         <div className="dugme-menu-liste" role="menu">
+          {ustMadde && (
+            <>
+              <button type="button" className={'mi' + (ustMadde.pasif ? ' pasif' : '')} role="menuitem"
+                      title={ustMadde.pasif ? ustMadde.sebep : undefined}
+                      onClick={() => {
+                        if (ustMadde.pasif) { mesaj(ustMadde.sebep || 'Henüz bağlanmadı.'); return }
+                        setAcik(false); ustMadde.onClick?.();
+                      }}>
+                {ustMadde.ikon ?? ''} {ustMadde.ad}
+              </button>
+              <div className="menu-ayrac" />
+            </>
+          )}
           {hedefler.map(h => (
             <button key={h.kod} type="button" className="mi" role="menuitem"
                     onClick={() => { setAcik(false); onSec(h.kod) }}>

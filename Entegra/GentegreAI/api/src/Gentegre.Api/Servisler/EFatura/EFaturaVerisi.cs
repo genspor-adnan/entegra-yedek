@@ -1,4 +1,4 @@
-﻿using Gentegre.Cekirdek;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Npgsql;
@@ -290,17 +290,16 @@ public sealed class EFaturaVerisi
     {
         try
         {
+            // Bir kez açılır; kodlama baytlar üzerinde denenir (iki kez açmak yerine).
             using var g = new System.IO.Compression.GZipStream(new MemoryStream(zip), System.IO.Compression.CompressionMode.Decompress);
-            using var r = new StreamReader(g, System.Text.Encoding.Unicode, detectEncodingFromByteOrderMarks: true);
-            var m = r.ReadToEnd();
+            using var ham = new MemoryStream();
+            g.CopyTo(ham);
+            var bayt = ham.ToArray();
             // COMPRESS nvarchar'ı UTF-16LE sıkıştırır; UTF-8 kaynak da olabilir (Delphi WideMemo) - XML başlığıyla doğrulanır.
+            var m = System.Text.Encoding.Unicode.GetString(bayt);
             if (!m.Contains("<Invoice", StringComparison.Ordinal) && !m.Contains("<DespatchAdvice", StringComparison.Ordinal))
-            {
-                using var g2 = new System.IO.Compression.GZipStream(new MemoryStream(zip), System.IO.Compression.CompressionMode.Decompress);
-                using var r2 = new StreamReader(g2, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-                m = r2.ReadToEnd();
-            }
-            return m.Trim();
+                m = System.Text.Encoding.UTF8.GetString(bayt);
+            return m.Trim().TrimStart('\uFEFF');
         }
         catch (Exception h) when (h is InvalidDataException or IOException) { return ""; }
     }

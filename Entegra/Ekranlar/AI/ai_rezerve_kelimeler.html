@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre — Komut Paleti: Rezerve Kelimeler ve Adımlı Akış (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --ok:#2e7d46; --okzem:#e6f4ea; --uyari:#b5731a; --uyarizem:#fff4e0; --hata:#b23b3b;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:12px}
+  h1.bas{max-width:1480px;margin:0 auto 10px;font-size:15px;color:var(--navy)}
+  .sahne{max-width:1480px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .sahne.bes{grid-template-columns:repeat(5,1fr);gap:10px}
+  .sahne.bes .ekran{min-height:560px;padding:10px 8px 14px}
+  .turler.tek{grid-template-columns:1fr}
+  .sahne.bes .sat{font-size:12px;padding:6px 9px}
+  .ekran{background:#2a3b4f;border-radius:8px;padding:12px 10px 16px;min-height:600px}
+  .ekran .ad{color:#c8d4e2;font-size:11px;margin-bottom:8px;letter-spacing:.3px}
+  .palet{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.35);overflow:hidden}
+  .ara{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
+  .ara input{flex:1;border:0;outline:0;font:inherit;font-size:13.5px;min-width:0}
+  .ara kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:10.5px;color:var(--muted)}
+  .adim{display:flex;gap:6px;padding:7px 11px;border-bottom:1px solid var(--line2);background:#fafbfd;font-size:11px;color:var(--muted);align-items:center}
+  .adim span{border:1px solid var(--line);border-radius:10px;padding:1px 8px;background:#fff}
+  .adim span.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:600}
+  .adim span.ok{background:var(--okzem);border-color:#bfe0c8;color:var(--ok)}
+  .adim i{color:#b3bfcc;font-style:normal}
+  .grup{padding:7px 11px 3px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .sat{display:flex;align-items:center;gap:9px;padding:7px 11px;font-size:12.5px}
+  .sat.on{background:var(--sel)}
+  .sat .y{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+  .sat .ik{width:20px;text-align:center}
+  .sat.ai{color:var(--ai)}
+  .sat.sonuk{color:#9aa8b8}
+  .rez{display:inline-block;border:1px solid var(--aiKenar);background:var(--aiZem);color:var(--ai);border-radius:10px;padding:0 7px;font-size:10.5px;font-weight:600}
+  .ipucu{margin:6px 11px 10px;border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:8px;padding:7px 9px;font-size:11.5px;color:#4a3a78;line-height:1.5}
+  .dip{display:flex;gap:10px;padding:7px 11px;border-top:1px solid var(--line2);font-size:11px;color:var(--muted);background:#fafbfd;flex-wrap:wrap}
+  .dip kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:10px}
+  /* tür seçimi kartları */
+  .turler{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 11px}
+  .tur{border:1px solid var(--line);border-radius:8px;padding:8px 9px;display:flex;gap:8px;align-items:center;font-size:12px}
+  .tur.on{border-color:var(--selbd);background:var(--sel)}
+  .tur .k{font-size:10.5px;color:var(--muted);display:block}
+  .tur kbd{margin-left:auto;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;color:var(--muted)}
+  /* müşteri seçimi */
+  table.mini{width:100%;border-collapse:collapse;font-size:11.5px}
+  .mini th{background:var(--head);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600;color:#3a5573;font-size:10.5px}
+  .mini td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .mini tr.on td{background:var(--sel)}
+  .mini td.sag,.mini th.sag{text-align:right}
+  .mini .kir{color:var(--hata);font-weight:600}
+  .cipler{display:flex;gap:5px;padding:6px 11px;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:1px 8px;font-size:11px;color:#33475c;background:#fff}
+  .cip.on{background:var(--sel);border-color:var(--selbd)}
+  /* kart önizleme */
+  .kart{margin:8px 11px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .kart .kb{background:linear-gradient(#1f3f6b,#14315a);color:#fff;padding:6px 10px;font-weight:600;font-size:12px;display:flex;gap:8px}
+  .kart .kb span{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .kart .ic{padding:8px 10px;display:grid;grid-template-columns:96px 1fr;gap:5px 8px;font-size:11.5px}
+  .kart .ic span:nth-child(odd){color:var(--muted)}
+  .kart .ic .dolu{color:var(--ok)}
+  .kart .ic .bos{color:var(--uyari);font-style:italic}
+  .d{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:4px 10px;color:#33465c;font-size:11.5px;font-family:inherit}
+  .d.bir{background:linear-gradient(#3f7fc7,#2f6db3);border-color:#2a62a2;color:#fff;font-weight:600}
+  /* 3. adım: jenerik arama penceresi */
+  .pencere{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.35);overflow:hidden;font-size:11.5px}
+  .pb{background:linear-gradient(#1f3f6b,#14315a);color:#fff;padding:6px 10px;font-weight:600;display:flex;gap:8px;align-items:center}
+  .pb span{font-weight:400;opacity:.85;font-size:10.5px}.pb i{margin-left:auto;font-style:normal}
+  .pt{display:flex;gap:6px;padding:6px 9px;border-bottom:1px solid var(--line2);align-items:center}
+  .pa{display:flex;gap:5px;padding:6px 9px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .pa input{border:1px solid var(--line);border-radius:14px;padding:3px 8px;font:inherit;width:110px}
+  .pg{display:grid;grid-template-columns:1fr 150px;gap:6px;padding:6px 9px}
+  .on2{border:1px solid var(--line2);border-radius:6px;padding:7px 8px;background:#fafbfd;font-size:11px}
+  .on2 b{display:block;font-size:10px;color:#7b8ea3;letter-spacing:.3px;margin-bottom:4px}
+  .pd{padding:6px 9px;border-top:1px solid var(--line2);font-size:10.5px;color:var(--muted);background:#fafbfd}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;margin:0 3px 0 6px}
+  .roz{border:1px solid var(--selbd);background:var(--sel);border-radius:9px;padding:0 6px;font-size:10px;color:#2b4d7a}
+  .ipucu2{margin-top:10px;border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:8px;padding:7px 9px;font-size:11.5px;color:#4a3a78;line-height:1.5}
+  .ipucu2 code{font-family:Consolas,monospace;font-size:10.5px}
+  /* 4. adım: uygulama kabuğu + kart sekmesi */
+  .kabuk{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:11.5px}
+  .kabuk .ust{background:linear-gradient(#1f3f6b,#14315a);color:#fff;padding:6px 10px;display:flex;gap:10px;align-items:center}
+  .kabuk .ara2{margin-left:auto;background:rgba(255,255,255,.14);border-radius:6px;padding:3px 8px;font-size:10.5px}
+  .kabuk .ara2 kbd{border:1px solid rgba(255,255,255,.4);border-radius:3px;padding:0 4px;font-size:9.5px}
+  .kabuk .sekmeler{display:flex;gap:2px;padding:4px 8px 0;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .kabuk .sekmeler span{padding:5px 10px;background:#f3f6fa;border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;font-size:11px;color:var(--muted)}
+  .kabuk .sekmeler span.on{background:#fff;color:var(--navy);font-weight:600}
+  .kabuk .sekmeler i{font-style:normal;margin-left:6px;color:#9aa8b8}
+  .kart2{margin:8px}
+  .kart2 .kb{background:linear-gradient(#1f3f6b,#14315a);color:#fff;padding:6px 10px;font-weight:600;display:flex;gap:8px;border-radius:6px 6px 0 0}
+  .kart2 .kb span{margin-left:auto;font-weight:400;opacity:.85;font-size:10.5px}
+  .tb2{display:flex;gap:6px;padding:6px 8px;border:1px solid var(--line);border-top:0;background:#fafbfd}
+  .ic2{border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;padding:8px 10px;display:grid;grid-template-columns:86px 1fr;gap:6px 8px}
+  .ic2 span:nth-child(odd){color:var(--muted)}
+  .ic2 .dolu{color:var(--ok)}.ic2 .dolu i{color:var(--muted);font-size:10.5px}
+  .ic2 .bos{color:var(--uyari);border:1px solid var(--selbd);border-radius:4px;padding:2px 6px;background:#fff}
+  .ic2 .bos i{color:var(--muted);font-style:italic}
+  .notlar{max-width:1480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 20px;line-height:1.6}
+  .notlar h2{margin:0 0 8px;font-size:15px;color:var(--navy)}
+  .notlar h3{margin:14px 0 6px;font-size:13px;color:var(--ai)}
+  .notlar ul,.notlar ol{padding-left:20px;margin:4px 0}
+  .notlar table{border-collapse:collapse;font-size:12px;margin:6px 0;width:100%}
+  .notlar td,.notlar th{border:1px solid var(--line2);padding:5px 9px;text-align:left;vertical-align:top}
+  .notlar th{background:var(--head)}
+  .notlar code{font-family:Consolas,monospace;font-size:11.5px;background:#f6f8fb;border:1px solid var(--line2);border-radius:4px;padding:0 5px}
+  .notlar pre{background:#f6f8fb;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;font-size:11.5px;overflow:auto}
+</style>
+</head>
+<body>
+
+<h1 class="bas">Rezerve kelimeler: "tahsilat" yazınca iş akışı başlar — tür → müşteri → kart (öneri 6'nın devamı)</h1>
+<div class="sahne">
+
+  <!-- 1 -->
+  <div class="ekran">
+    <div class="ad">1 · "tahsilat" — rezerve kelime tanındı, iş seçenekleri üstte</div>
+    <div class="palet">
+      <div class="ara">🔍 <input value="tahsilat"><kbd>Esc</kbd></div>
+      <div class="grup">İşlemler <span class="rez">rezerve: tahsilat</span></div>
+      <div class="sat on"><span class="ik">💵</span> Yeni tahsilat <span class="y">tür → müşteri → kart</span></div>
+      <div class="sat"><span class="ik">📂</span> Kayıtlı tahsilat kartı <span class="y">son 30 gün · ara</span></div>
+      <div class="sat"><span class="ik">📊</span> Tahsilat / Ödeme İcmali <span class="y">Finans</span></div>
+      <div class="sat"><span class="ik">📋</span> Kasa İşlemleri — tahsilatlar <span class="y">süzgeçli liste</span></div>
+      <div class="grup">Ekranlar</div>
+      <div class="sat"><span class="ik">🏷️</span> Tahsilat Türü Listesi <span class="y">Finans › Ayarlar</span></div>
+      <div class="sat ai"><span class="ik">✨</span> “tahsilat” için asistana sor <span class="y">Tab</span></div>
+      <div class="ipucu">Rezerve kelime yazıldığında <b>iş seçenekleri</b> ekran eşleşmelerinin üstüne çıkar. "tahsil", "tahsil et", "para al" aynı kelimeye bağlı.</div>
+      <div class="dip"><span><kbd>Enter</kbd> seç</span><span><kbd>↑</kbd><kbd>↓</kbd> gez</span><span><kbd>Tab</kbd> asistan</span></div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="ekran">
+    <div class="ad">2 · Yeni tahsilat — tür sorulur (kullanıcının yetkili olduğu türler)</div>
+    <div class="palet">
+      <div class="ara">💵 <input value="Yeni tahsilat › tür"><kbd>Esc</kbd></div>
+      <div class="adim"><span class="on">1 Tür</span><i>›</i><span>2 Müşteri</span><i>›</i><span>3 Kart</span></div>
+      <div class="turler">
+        <div class="tur on">💵 <div>Nakit<span class="k">kasa</span></div><kbd>1</kbd></div>
+        <div class="tur">🏦 <div>Havale / EFT<span class="k">banka hesabı sorulur</span></div><kbd>2</kbd></div>
+        <div class="tur">💳 <div>Kredi kartı / POS<span class="k">POS cihazı</span></div><kbd>3</kbd></div>
+        <div class="tur">📄 <div>Çek<span class="k">çek bilgileri kartta</span></div><kbd>4</kbd></div>
+        <div class="tur">📝 <div>Senet<span class="k"></span></div><kbd>5</kbd></div>
+        <div class="tur">🎟 <div>Kupon ile<span class="k">kupon seçimi</span></div><kbd>6</kbd></div>
+      </div>
+      <div class="ipucu">Tür listesi <code>kasa_islem_turu</code>'ndan (grup tahsilat, aktif, rol yetkisi). Tek tür yetkiliyse bu adım atlanır. "nakit tahsilat" yazılmışsa tür zaten seçilmiş gelir.</div>
+      <div class="dip"><span><kbd>1-6</kbd> hızlı seçim</span><span><kbd>Enter</kbd> ileri</span><span><kbd>←</kbd> geri</span></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="ekran">
+    <div class="ad">3 · Palet KAPANIR — jenerik müşteri arama penceresi (TarafArama, cari düzeni)</div>
+    <div class="pencere">
+      <div class="pb">👥 Müşteri Kartı Ara <span>Yeni tahsilat › Nakit › müşteri seç</span><i>✕</i></div>
+      <div class="pt"><span class="d bir">Seç</span><span class="d">📄 Ekstre</span><span class="not" style="margin-left:auto">Esc: tahsilat iptal</span></div>
+      <div class="pa">🔍 <input value="aloe"><span class="cip">İl: Tümü</span><span class="cip">Temsilci: Tümü</span><span class="cip on">Bakiyeli</span><span class="cip">Vadesi geçen</span><span class="cip">Aday</span></div>
+      <div class="pg">
+        <table class="mini">
+          <thead><tr><th>Tip</th><th>Kod</th><th>Ünvan</th><th>İl</th><th class="sag">Bakiye</th><th class="sag">Vadesi geçen</th></tr></thead>
+          <tbody>
+            <tr class="on"><td><span class="roz">Müşteri</span></td><td>120.01.143</td><td>ALOEPLANT SAĞLIK HİZ. SAN. TİC.</td><td>İstanbul</td><td class="sag kir">184.250,00 B</td><td class="sag kir">92.400,00</td></tr>
+            <tr><td><span class="roz">Müşteri</span></td><td>120.01.001</td><td>ALOEPLANT ANKARA ŞUBE</td><td>Ankara</td><td class="sag">12.300,00 B</td><td class="sag">0,00</td></tr>
+            <tr><td><span class="roz">Müş./Ted.</span></td><td>120.02.019</td><td>ALO ECZANE</td><td>Ankara</td><td class="sag">0,00</td><td class="sag">0,00</td></tr>
+          </tbody>
+        </table>
+        <div class="on2"><b>ÖNİZLEME</b><div>ALOEPLANT SAĞLIK HİZ.</div><div class="not">120.01.143 · Müşteri · e-Fatura</div><div class="not" style="margin-top:6px"><b>Açık borç 184.250,00</b> · vadesi geçen 92.400,00 · son tahsilat 12.09.2026</div></div>
+      </div>
+      <div class="pd">3 kayıt · <span class="sw" style="background:#f7cfcf"></span>risk aşıldı <span class="sw" style="background:#f6d9c0"></span>vadesi geçen · ↑↓ gez · Enter seç · Esc kapat</div>
+    </div>
+    <div class="ipucu2">Aynı arama penceresi (menüdeki "Kayıtlı Müşteri Kartı" ile aynı bileşen); üst başlıkta akış bağlamı yazar. <b>Bakiyeli</b> çipi tahsilat akışında varsayılan açık. Seç → pencere kapanır, 4. adım.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="ekran">
+    <div class="ad">4 · Tahsilat kartı kendi EKRAN SEKMESİNDE açılır, ön dolu</div>
+    <div class="kabuk">
+      <div class="ust">☰ <b>Gentegre AI</b> <span class="ara2">🔍 Ara ya da komut yaz… <kbd>Ctrl K</kbd></span></div>
+      <div class="sekmeler"><span>🏠</span><span>📊 Cari İcmali <i>×</i></span><span class="on">💵 Tahsilat — ALOEPLANT <i>×</i></span><span>＋</span></div>
+      <div class="kart2">
+        <div class="kb">💵 Kasa İşlemi — Nakit Tahsilat <span>yeni · makbuz no kaydedince</span></div>
+        <div class="tb2"><span class="d bir">Kaydet</span><span class="d">Kaydet ve yeni</span><span class="d" style="margin-left:auto">✕ Kapat</span></div>
+        <div class="ic2">
+          <span>İşlem türü</span><span class="dolu">Nakit Tahsilat (21)</span>
+          <span>Cari</span><span class="dolu">ALOEPLANT SAĞLIK HİZ. SAN. TİC. (120.01.143) <i>bakiye 184.250,00 B</i></span>
+          <span>Kasa</span><span class="dolu">Merkez Kasa</span>
+          <span>Tarih</span><span class="dolu">06.11.2026 11:42</span>
+          <span>Tutar</span><span class="dolu" style="border:1px solid var(--selbd);border-radius:4px;padding:2px 6px;background:#fff">184.250,00 <i>açık borç (bakiye) · seçili, üstüne yazılır</i></span>
+          <span>Açıklama</span><span class="bos">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="ipucu2">Kart sekmesi deseni (kartlar kendi sekmesinde, Kaydet = kapat). Palet yalnız ön doldurdu: <code>/kasa-islem/yeni?tur=21&amp;tarafId=143</code>. Tutar <b>carinin açık borcuyla</b> (bakiye 184.250,00 B) dolu gelir, odak üzerinde, seçili: farklı tutar yazılırsa üstüne yazılır. "aloeplant'tan 5000 tahsilat" yazılsaydı 5.000 gelirdi.</div>
+  </div>
+</div>
+
+<h1 class="bas">HBYS'de aynı kelime, beş aşama: tahsilat → kimden → tahsilat tipi (palet) → jenerik hasta / müşteri araması (palet kapanır) → tahsilat sekmesi</h1>
+<div class="sahne bes">
+
+  <!-- H1 -->
+  <div class="ekran">
+    <div class="ad">H1 · "tahsilat" (HBYS)</div>
+    <div class="palet">
+      <div class="ara">🔍 <input value="tahsilat"><kbd>Esc</kbd></div>
+      <div class="grup">İşlemler <span class="rez">HBYS</span></div>
+      <div class="sat on"><span class="ik">💵</span> Yeni tahsilat <span class="y">kimden → tip</span></div>
+      <div class="sat"><span class="ik">🏦</span> Banko: bekleyen hasta payları <span class="y">71</span></div>
+      <div class="sat"><span class="ik">🏛️</span> Kurum tahsilatı <span class="y">Kurumlar</span></div>
+      <div class="sat"><span class="ik">📂</span> Kayıtlı tahsilat kartı</div>
+      <div class="sat"><span class="ik">📊</span> Tahsilat / Ödeme İcmali</div>
+      <div class="sat ai"><span class="ik">✨</span> Asistana sor <span class="y">Tab</span></div>
+      <div class="dip"><span><kbd>Enter</kbd> seç</span></div>
+    </div>
+  </div>
+
+  <!-- H2 -->
+  <div class="ekran">
+    <div class="ad">H2 · Kimden? (palet)</div>
+    <div class="palet">
+      <div class="ara">💵 <input value="Yeni tahsilat › kimden"><kbd>Esc</kbd></div>
+      <div class="adim"><span class="on">1 Kimden</span><i>›</i><span>2 Tip</span><i>›</i><span>3 Kayıt</span><i>›</i><span>4 Kart</span></div>
+      <div class="turler tek">
+        <div class="tur on">🧑 <div>Hasta<span class="k">hasta payı · banko</span></div><kbd>1</kbd></div>
+        <div class="tur">🏛️ <div>Anlaşmalı kurum<span class="k">kurum faturası / hakediş</span></div><kbd>2</kbd></div>
+        <div class="tur">🛡️ <div>Sigorta şirketi<span class="k">poliçe · provizyon</span></div><kbd>3</kbd></div>
+        <div class="tur">👥 <div>Diğer cari<span class="k">müşteri / firma</span></div><kbd>4</kbd></div>
+      </div>
+      <div class="ipucu">Rolün tek yolu varsa (banko → yalnız hasta) bu adım atlanır.</div>
+      <div class="dip"><span><kbd>1-4</kbd></span><span><kbd>←</kbd> geri</span></div>
+    </div>
+  </div>
+
+  <!-- H3 -->
+  <div class="ekran">
+    <div class="ad">H3 · Tahsilat tipi (palet)</div>
+    <div class="palet">
+      <div class="ara">💵 <input value="Yeni tahsilat › Hasta › tip"><kbd>Esc</kbd></div>
+      <div class="adim"><span class="ok">✓ Hasta</span><i>›</i><span class="on">2 Tip</span><i>›</i><span>3 Kayıt</span><i>›</i><span>4 Kart</span></div>
+      <div class="turler tek">
+        <div class="tur on">💵 <div>Nakit<span class="k">banko kasası</span></div><kbd>1</kbd></div>
+        <div class="tur">💳 <div>Kredi kartı / POS<span class="k">POS cihazı</span></div><kbd>2</kbd></div>
+        <div class="tur">🏦 <div>Havale / EFT<span class="k">banka hesabı</span></div><kbd>3</kbd></div>
+        <div class="tur">🎟 <div>Kupon / avans<span class="k">hasta avansı</span></div><kbd>4</kbd></div>
+      </div>
+      <div class="ipucu">Tipler banko tahsilat türleri (rol yetkisi); "kimden"e göre liste değişir (kurum → havale / çek).</div>
+      <div class="dip"><span><kbd>1-4</kbd></span><span><kbd>Enter</kbd> ileri</span></div>
+    </div>
+  </div>
+
+  <!-- H4 -->
+  <div class="ekran">
+    <div class="ad">H4 · Palet KAPANIR — jenerik hasta araması</div>
+    <div class="pencere">
+      <div class="pb" style="background:linear-gradient(#2a6a5a,#1d4f43)">🧑 Hasta Ara <span>Yeni tahsilat › Hasta › Nakit</span><i>✕</i></div>
+      <div class="pt"><span class="d bir">Seç</span><span class="d">🪪 Kimliği okut</span><span class="not" style="margin-left:auto">Esc: iptal</span></div>
+      <div class="pa">🔍 <input value="ayşe kar"><span class="cip on">Açık borcu olan</span><span class="cip">Bugün başvuran</span><span class="cip">Tümü</span></div>
+      <table class="mini">
+        <thead><tr><th>Hasta</th><th>Doğum</th><th>Açık başvuru</th><th class="sag">Pay</th></tr></thead>
+        <tbody>
+          <tr class="on"><td>Ayşe KARA · P-000161</td><td>14.03.1978</td><td>03.11 Dahiliye</td><td class="sag kir">340,00</td></tr>
+          <tr><td>Ayşe KARABULUT · P-004210</td><td>02.07.1991</td><td>—</td><td class="sag">0,00</td></tr>
+          <tr><td>Ayşegül KARACA · P-001877</td><td>19.11.1965</td><td>05.11 Göz</td><td class="sag kir">1.250,00</td></tr>
+        </tbody>
+      </table>
+      <div class="pd">3 kayıt · "Açık borcu olan" çipi akışta varsayılan · Enter seç · Esc kapat</div>
+    </div>
+    <div class="ipucu2">Aynı hasta arama penceresi (TCKN / ad / protokol); kimden = kurum ise kurum araması, sigorta ise şirket listesi, diğer cari ise müşteri araması açılır.</div>
+  </div>
+
+  <!-- H5 -->
+  <div class="ekran">
+    <div class="ad">H5 · Tahsilat sekmesi — banko hasta payı, ön dolu</div>
+    <div class="kabuk">
+      <div class="ust">☰ <b>GenoTIP AI</b> <span class="ara2">🔍 Ara… <kbd>Ctrl K</kbd></span></div>
+      <div class="sekmeler"><span>🏠</span><span>🏦 Banko <i>×</i></span><span class="on">💵 Tahsilat — Ayşe KARA <i>×</i></span><span>＋</span></div>
+      <div class="kart2">
+        <div class="kb" style="background:linear-gradient(#2a6a5a,#1d4f43)">🏦 Hasta Payı Tahsilatı <span>yeni</span></div>
+        <div class="tb2"><span class="d bir">Tahsil et</span><span class="d">Yazdır</span><span class="d" style="margin-left:auto">✕</span></div>
+        <div class="ic2">
+          <span>Hasta</span><span class="dolu">Ayşe KARA (P-000161)</span>
+          <span>Başvuru</span><span class="dolu">03.11 · Dahiliye · Dr. Demir</span>
+          <span>Kalemler</span><span class="dolu">Muayene farkı 240 · USG payı 100</span>
+          <span>Tip</span><span class="dolu">Nakit · Banko Kasası 1</span>
+          <span>Tutar</span><span class="dolu" style="border:1px solid var(--selbd);border-radius:4px;padding:2px 6px;background:#fff">340,00 <i>açık başvuru tutarı</i></span>
+          <span>Makbuz</span><span class="bos">— kaydedince</span>
+        </div>
+      </div>
+    </div>
+    <div class="ipucu2">Tutar <b>seçilen başvurunun açık hasta payıyla</b> dolu gelir (kalemlerin toplamı); kısmi tahsilatta üstüne yazılır. Kurum yolunda Kurum Tahsilatı (seçili açık faturaların toplamı), sigorta yolunda Sigorta Tahsilatı, diğer cari yolunda Kasa İşlemi (açık borç) sekmesi açılır. Kayıt ekranın kendi düğmesiyle.</div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — rezerve kelimeler ve adımlı akış</h2>
+  <p>Kullanıcı (06.11.2026): <i>"prompt için rezerve kelimeler olması lazım: sipariş, yeni sipariş, fatura kes, tahsilat, tahsil et, ödeme…
+  'tahsilat' yazınca yeni tahsilat kartı, kayıtlı tahsilat kartı, tahsilat/ödeme icmali listeye gelsin; yeni tahsilat seçilirse tür sorulur,
+  sonra müşteri seçimi, sonra tahsilat ekranı."</i> Palette bugün üç niyet kalıbı var (hasta/başvuru cümlesi, kimlik/telefon, gündem); rezerve
+  kelimeler bunların genel hali: <b>sözlük + adımlı akış</b>.</p>
+
+  <h3>Rezerve kelime sözlüğü (ilk küme)</h3>
+  <table>
+    <tr><th>Kelime / eş anlamlılar</th><th>İş seçenekleri (sırayla)</th><th>Adımlar ("yeni …" seçilince)</th><th>Yetki</th></tr>
+    <tr><td><b>tahsilat</b> · tahsil · tahsil et · para al · makbuz <span class="rez">ERP</span></td><td>Yeni tahsilat · Kayıtlı tahsilat kartı · Tahsilat / Ödeme İcmali · Kasa işlemleri (tahsilat süzgeçli)</td><td>tür (tahsilat grubu) → müşteri → Kasa İşlemi kartı</td><td>kasa.finans ekle</td></tr>
+    <tr><td><b>tahsilat</b> · aynı eş anlamlılar <span class="rez">HBYS</span></td><td>Yeni tahsilat · Banko: bekleyen hasta payları · Kurum tahsilatı · Kayıtlı tahsilat · İcmal</td><td><b>kimden</b> (hasta / anlaşmalı kurum / sigorta / diğer cari) → kayıt (hasta + açık başvuru · kurum + açık fatura · şirket + poliçe) → tür → ilgili kart (Banko tahsilatı / Kurum tahsilatı / Sigorta tahsilatı / Kasa İşlemi)</td><td>banko.tahsilat · kurum.tahsilat · sigorta.tahsilat · kasa.finans</td></tr>
+    <tr><td><b>ödeme</b> <span class="rez">HBYS</span></td><td>Yeni ödeme · Hasta iadesi · Hekim hakediş ödemesi · Tedarikçi ödemesi</td><td>kime (hasta iade / dış hekim / tedarikçi / sigorta) → kayıt → tür → kart</td><td>ilgili ekran ekle</td></tr>
+    <tr><td><b>ödeme</b> · öde · ödeme yap · tediye</td><td>Yeni ödeme · Kayıtlı ödeme kartı · Tahsilat / Ödeme İcmali · Vadesi gelen ödemeler</td><td>tür (ödeme grubu) → tedarikçi → kart</td><td>kasa.finans ekle</td></tr>
+    <tr><td><b>sipariş</b> · yeni sipariş · sipariş aç</td><td>Yeni satış siparişi · Yeni alış siparişi · Kayıtlı sipariş · Sipariş listesi · Bekleyen siparişler</td><td>yön (satış / alış; "alış siparişi" yazıldıysa atlanır) → cari → Belge kartı (tür 11 / 12)</td><td>belge.satis.siparis / belge.alis.siparis ekle</td></tr>
+    <tr><td><b>fatura kes</b> · fatura · faturala · yeni fatura</td><td>Yeni satış faturası · Kayıtlı fatura · Siparişten faturala · e-Fatura İcmali</td><td>müşteri → (açık sipariş / irsaliye varsa "bundan faturala?" sorusu) → Belge kartı (tür 15)</td><td>belge.satis.fatura ekle</td></tr>
+    <tr><td><b>irsaliye</b> · sevk · sevk et · teslim</td><td>Yeni satış irsaliyesi · Siparişten sevk · Kayıtlı irsaliye</td><td>müşteri → sipariş seçimi (isteğe bağlı) → kart (tür 13)</td><td>belge.satis.irsaliye ekle</td></tr>
+    <tr><td><b>teklif</b> · fiyat ver · proforma</td><td>Yeni teklif · Kayıtlı teklif · Teklif listesi</td><td>müşteri / aday → kart (tür 10)</td><td>belge.satis ekle</td></tr>
+    <tr><td><b>çek</b> · senet · çek al</td><td>Çek al (tahsilat) · Çek ver (ödeme) · Portföy · Bugün vadesi gelenler</td><td>yön → cari → kart (tür 23 / 24)</td><td>kasa.finans ekle</td></tr>
+    <tr><td><b>stok</b> · ürün · stok kartı</td><td>Yeni stok kartı · Kayıtlı stok · Kritik stok · Stok hareketleri</td><td>— (kart doğrudan)</td><td>stok ekle</td></tr>
+    <tr><td><b>müşteri</b> · cari · tedarikçi · kişi</td><td>Yeni müşteri kartı · Kayıtlı müşteri kartı · Müşteri listesi · Cari İcmali</td><td>— (VKN / telefon yazılmışsa mevcut kimlik niyeti çalışır)</td><td>cari ekle</td></tr>
+    <tr><td><b>randevu</b> · hasta · başvuru · kabul (HBYS)</td><td>Yeni randevu · Yeni başvuru · Kayıtlı … · listeler</td><td>hasta → (bölüm / hekim) → kart; mevcut cümle niyeti ("Ayşe Kara randevu aç") korunur</td><td>ilgili ekran ekle</td></tr>
+    <tr><td><b>görev</b> · hatırlat · not</td><td>Yeni görev · Hatırlatma · Görevlerim</td><td>başlık metni paletten alınır</td><td>gorev ekle</td></tr>
+  </table>
+
+  <h3>Çözümleme kuralları</h3>
+  <ul>
+    <li>Sözlük <b>sunucuda</b> (<code>palet_niyet</code> tablosu: kelime, eş anlamlılar, iş seçenekleri, adımlar, yetki kodu, ürün modu); istemci
+      yüklemede alır. Yönetici Genel Ayarlar'dan eş anlamlı ekleyebilir ("para al" → tahsilat). Delphi'den gelen kullanıcıların alışık olduğu
+      sözcükler ("tediye", "kasa fişi") eş anlamlıya girer.</li>
+    <li>Eşleşme <b>sadeleştirilmiş metinle</b> (paletSadelestir: küçük harf, Türkçe karakter, ek): "tahsilatı", "tahsilatlar", "tahsil ettim" aynı kelime.
+      Kelime başta ya da tek başına olmalı; "tahsilat türü listesi" ekran eşleşmesidir, rezerve değil (uzun eşleşme kazanır).</li>
+    <li>Cümlede <b>parametre</b> varsa adımlar atlanır: "nakit tahsilat" (tür dolu), "aloeplant'tan 5000 tahsilat" (müşteri eşleşmesi tekse +
+      tutar dolu), "alış siparişi" (yön dolu). Eşleşme çoksa ilgili adım listeyle sorulur.</li>
+    <li>Her iş seçeneği bir <b>aksiyon kataloğu</b> kaydıdır (F0-07): yetkisi olmayan seçenek çizilmez; menüde olmayan ekran (kurum profili) gelmez.</li>
+    <li><b>Palet yalnız 1-2. adımda açık</b> (kullanıcı 06.11.2026): iş seçimi ve tür seçimi palette; 3. adımda palet kapanır, <b>jenerik taraf arama
+      penceresi</b> açılır (menüdeki "Kayıtlı Müşteri Kartı" ile aynı bileşen, başlıkta akış bağlamı); 4. adımda kart <b>kendi ekran sekmesinde</b>
+      ön dolu açılır (<code>/kasa-islem/yeni?tur=21&amp;tarafId=143</code>), kayıt kartta. Arama penceresinde Esc = akış iptal. HBYS satırında aynı
+      ilke: 1-2 palette, hasta araması jenerik pencere, banko / kurum / sigorta tahsilat ekranı sekmede.</li>
+    <li>Rezerve kelime eşleşmesi varken asistan satırı yine en altta; eşleşme yoksa öneri 6'daki asistan akışı.</li>
+    <li>Sesli giriş aynı yoldan: "tahsilat" söylenince aynı liste.</li>
+    <li><b>Tutar ön dolumu</b> (kullanıcı 06.11.2026): ERP'de carinin <b>açık borcu</b> (bakiye), HBYS'de seçilen <b>başvurunun açık tutarı</b>
+      (hasta payı kalemleri toplamı); kurum tahsilatında seçili açık faturaların toplamı. Alan seçili gelir, farklı tutar üstüne yazılır; cümlede
+      tutar varsa ("5000 tahsilat") o gelir. Bakiye sıfır / alacaklıysa alan boş, uyarı rozeti ("carinin açık borcu yok").</li>
+    <li><b>Ürün modu dallanması</b> (kullanıcı 06.11.2026: "HBYS'de tahsilat yazılırsa hasta / dış kurum / sigorta önce bilinmeli"): sözlük kaydı
+      ERP ve HBYS için ayrı adım zinciri taşır; HBYS'de ilk adım <i>kimden</i>, seçime göre kayıt araması ve hedef kart değişir. Rolün tek
+      tahsilat yolu varsa (banko → yalnız hasta) adım atlanır. Aynı kural "ödeme", "fatura kes" (hasta / kurum faturası) ve "randevu" için.</li>
+  </ul>
+
+  <h3>Sözlük kaydı (örnek)</h3>
+<pre>{
+  "kelime": "tahsilat",
+  "esAnlam": ["tahsil", "tahsil et", "para al", "makbuz"],
+  "urunModu": 0,
+  "secenekler": [
+    { "ad": "Yeni tahsilat", "ikon": "💵", "yetki": "kasa.finans:ekle",
+      "adimlar": [
+        { "tip": "tur",   "kaynak": "kasa-islem-turu", "suzgec": { "grup": "tahsilat", "aktif": 1 }, "param": "tur" },
+        { "tip": "taraf", "duzen": "cari", "rol": "musteri", "cip": "bakiyeli", "param": "tarafId" }
+      ],
+      "hedef": "/kasa-islem/yeni" },
+    { "ad": "Kayıtlı tahsilat kartı", "ikon": "📂", "yetki": "kasa.finans:gor", "hedef": "/kasa-islem?grup=tahsilat&amp;ara=1" },
+    { "ad": "Tahsilat / Ödeme İcmali", "ikon": "📊", "yetki": "finans.tahsilat_icmali", "hedef": "/tahsilat-icmali" },
+    { "ad": "Kasa İşlemleri — tahsilatlar", "ikon": "📋", "yetki": "kasa.finans:gor", "hedef": "/kasa-islem?grup=tahsilat" }
+  ]
+}</pre>
+</div>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
@@ -212,6 +212,8 @@ interface Props {
     anahtar: string; baslik: string;
     /** Yeni (kaydedilmemiş) kayıtta da açılsın (965: şablon Önizleme / Sürümler / Kullanım). */
     yenideDe?: boolean;
+    /** Koşullu sekme: bu alan (ya da "detay.alan=deger") sağlanmıyorsa çizilmez - detay `kosulAlani` kuralı. */
+    kosulAlani?: string;
     /** Sekme adının yanındaki sayı rozeti; `hata` kırmızı (belge türü "Personel durumu"). */
     rozet?: { metin: string; hata?: boolean };
     /**
@@ -357,10 +359,10 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar: gizliDetaylarHam, ekSekmeler, sekmeSirasi, sekmeBasliklari, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
-                          gizliAlanlar, gizliSekmeler: gizliSekmelerHam, yalnizSekmeler, hatirlatYok, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
+                          gizliAlanlar, gizliSekmeler, yalnizSekmeler, hatirlatYok, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
   const { kullanici } = useOturum();
   // İÇERİĞE GÖRE SABİT (kullanıcı 16.10.2026: "hizmet ara ekranında yazdıklarım gitti.. belli aralıklarla
   //   refresh oluyor"): çağıranlar bu nesneleri çizimde yeniden kuruyor (URL'den gelen randevu saati /
@@ -880,29 +882,21 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
 
   
 /** Mikrobiyoloji katalog kartlari - serit duzeni mockup'la ayni (dort sutun). */
-  // YALNIZ BU SEKMELER (1270): listede olmayan her grup gizli, her detay gizli sayılır.
-  const gizliSekmeler = useMemo(() => yalnizSekmeler
-    ? [...new Set([...(gizliSekmelerHam ?? []), ...gruplar.map(([ad]) => ad).filter(ad => !yalnizSekmeler.includes(ad))])]
-    : gizliSekmelerHam, [gizliSekmelerHam, yalnizSekmeler, gruplar]);
-  const gizliDetaylar = useMemo(() => yalnizSekmeler
-    ? [...new Set([...(gizliDetaylarHam ?? []), ...(meta?.detaylar ?? []).map(d => d.ad).filter(ad => !yalnizSekmeler.includes(ad))])]
-    : gizliDetaylarHam, [gizliDetaylarHam, yalnizSekmeler, meta]);
-
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
                          yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
                          gizliDetaylar,
-                         ekSekmeler: ekSekmeler?.map(e => ({ anahtar: e.anahtar,
-                                                             baslik: e.baslik, yenideDe: e.yenideDe })),
-                         sekmeSirasi, sekmeBasliklari,
+                         ekSekmeler: ekSekmeler?.map(e => ({ anahtar: e.anahtar, baslik: e.baslik,
+                                                             yenideDe: e.yenideDe, kosulAlani: e.kosulAlani })),
+                         sekmeSirasi, sekmeBasliklari, yalnizSekmeler,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
                          //   isaret degisince sekme ANINDA gorunur/kaybolur.
                          detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
      gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, ekSekmeler,
-     sekmeSirasi, sekmeBasliklari, detaylar]);
+     sekmeSirasi, sekmeBasliklari, yalnizSekmeler, detaylar]);
   // TAM EŞLEŞME ÖNCE, sonra baş eşleşmesi: "Tanı" "Tanılar"ı değil "Tanı"yı açmalı.
   const sekmeyeGitBaslik = (b: string) => {
     const s = sekmeler.find(x => x.baslik === b) ?? sekmeler.find(x => x.baslik.startsWith(b));
@@ -1245,7 +1239,9 @@ Yine de yeni kayıt eklensin mi?`);
 
       kayitBasarili.current = true;
       const yolBelirlendi = onKaydedildi?.(Number(yanit.kart.id), acikKal && !yeniMi) === true;
-      if (acikKal && !yeniMi) { await yukle(); return; }
+      // Kart AÇIK KALIYORSA (hekim özette kalır / onKaydedildi true = sayfa yerinde kalır, 1270 Fatura
+      //   Ayarları) sunucudan yeniden okunur: ilk değer tazelenmezse ikinci değişiklik "değişmedi" sayılırdı.
+      if ((acikKal || yolBelirlendi) && !yeniMi) { await yukle(); return; }
       if (!yolBelirlendi) onKapat?.();
       return;
     } catch (h) {
@@ -1270,6 +1266,10 @@ Yine de yeni kayıt eklensin mi?`);
   }
 
   async function sil() {
+    // ONAY (kullanıcı 07.11.2026 "bütün sil butonları silmeden önce uyarı vermeli"): jenerik kart Sil'i sormadan siliyordu.
+    if (!await onaySor(`${c(baslik ?? 'Kayıt')} silinecek.
+
+Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     setHata(null);
     try {
       await api.kartSil(kaynak, id as number);

@@ -113,7 +113,10 @@ export function sekmeleriKur(secenek: {
    * cerceve yalnizca sekmeyi acar. Yeni kayitta acilmaz - hepsi kaydedilmis
    * bir muayeneye baglidir.
    */
-  ekSekmeler?: { anahtar: string; baslik: string; yenideDe?: boolean }[];
+  ekSekmeler?: { anahtar: string; baslik: string; yenideDe?: boolean; kosulAlani?: string }[];
+  /** YALNIZ BU SEKMELER (1270, Fatura Ayarları: şube kartının yalnız e-Belge sekmesi): listede olmayan alan
+      grubu ve detay sekmesi açılmaz (ek sekmeler listeden bağımsız). Değerler yine okunur ve kaydedilir. */
+  yalnizSekmeler?: string[];
   /**
    * SEKME SIRASI (basliklara gore): listede adi gecen sekmeler bu sirayla
    * one alinir, kalanlar arkalarinda dogal sirasinda kalir. Muayene karti
@@ -126,7 +129,7 @@ export function sekmeleriKur(secenek: {
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
-          gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari,
+          gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari, yalnizSekmeler,
           detaySatirlari = () => [] } = secenek;
   // HESAP (1157, mockup banka_hareketleri.html): banka sözleşmesi / API onay formu.
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap';
@@ -141,6 +144,7 @@ export function sekmeleriKur(secenek: {
     .filter(([ad, alanlar]) => ad !== KIMLIK_GRUP || (!!seritAlanlari && alanlar.length > 0))
     // Ekrana ozel sekme gizleme (ör. Aday kartinda "Fatura Bilgileri").
     .filter(([ad]) => !gizliSekmeler?.includes(ad))
+    .filter(([ad]) => !yalnizSekmeler || yalnizSekmeler.includes(ad))
     .filter(([ad]) => !(kaynak === 'hasta' && ad === 'İletişim'))
     .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
   // DOKUMAN (419): mockup sirasi Surumler - Baglantilar - Onay Akisi -
@@ -184,6 +188,7 @@ export function sekmeleriKur(secenek: {
   meta?.detaylar.forEach(d => {
     // Bir grup sekmesine gomulen ya da baska yerde cizilen detay sekme almaz.
     if (detayGrupta?.[d.ad] || gizliDetaylar?.includes(d.ad)) return;
+    if (yalnizSekmeler && !yalnizSekmeler.includes(d.baslik) && !yalnizSekmeler.includes(d.ad)) return;
     // KOSULLU sekme (ör. stok "Paket"): ilgili kutu isaretli degilse sekme
     //   hic acilmaz - bos sekme "burada doldurulacak bir sey var" izlenimi
     //   verir. Kutu isaretlenince ANINDA gorunur (deger state'i degisir).
@@ -333,8 +338,11 @@ export function sekmeleriKur(secenek: {
   // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
   //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
   //   Yeni kayıtta yalnız `yenideDe` işaretli olanlar (kayda bağlı olmayanlar).
-  (ekSekmeler ?? []).filter(e => !yeniMi || e.yenideDe).forEach(e =>
-    s.push({ tur: 'ozel', anahtar: e.anahtar, baslik: e.baslik }));
+  //   KOŞULLU ek sekme (1270, Fatura Ayarları tür sekmeleri): detay sekmesiyle aynı kural - alan işaretli
+ //   değilse çizilmez, işaretlenince anında görünür.
+  (ekSekmeler ?? []).filter(e => (!yeniMi || e.yenideDe)
+                                 && (!e.kosulAlani || sekmeKosuluSaglandi(e.kosulAlani, deger, detaySatirlari)))
+    .forEach(e => s.push({ tur: 'ozel', anahtar: e.anahtar, baslik: e.baslik }));
 
   if (sekmeSirasi?.length) {
     const yer = (b: string) => {

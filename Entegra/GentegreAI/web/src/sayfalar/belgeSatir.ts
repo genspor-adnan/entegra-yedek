@@ -101,6 +101,8 @@ export interface SatirDurumu {
    * bu bagdan hesaplanir (132) - kolon degil, tureme.
    */
   kaynakSatirId?: number;
+  /** 0 = bu satır stoğu DÜŞÜRMEZ (kaynağı irsaliye; İrsaliyeden Aktar, 07.11.2026). Sunucu da kaynağa bakıp 0 yazar. */
+  stokDurumDegis?: number;
   /**
    * Kalemi fiyatlayan KAMPANYA SATIRI (274) - denetim izi. Kampanya kurali
    * sonradan degistirilse ya da silinse bile belgede hangi kuralin uygulandigi

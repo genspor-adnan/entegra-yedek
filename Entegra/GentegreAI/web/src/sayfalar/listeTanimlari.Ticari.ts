@@ -413,7 +413,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // ALIS FATURASININ ALTINDA (kullanici 11.10.2026): Stok & Hizmet - iki urunde de acik.
     // ERP'DE ALIŞ GRUBUNDA (kullanıcı 02.11.2026: "erp için kodda alış grubuna taşı"); sıra Satış'taki gibi
     //   sipariş → irsaliye 40 → fatura 41. HBYS'de Stok & Hizmet'te kalır (sırası değişmez).
-    menuGrup: 'Stok & Hizmet', erpMenuGrup: 'Alış', erpMenuSira: 40, menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '@b:irsaliye:a', yetkiKodu: 'belge.alis.irsaliye',
+    menuGrup: 'Stok & Hizmet', erp: { grup: 'Alış', sira: 40 }, menuSira: 66, menuAd: 'Alış İrsaliyesi Listesi', ic: '@b:irsaliye:a', yetkiKodu: 'belge.alis.irsaliye',
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturası Listesi',
@@ -438,7 +438,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       ...GELEN_SEKMELERI,
     ],
     // ERP'DE ALIŞ GRUBUNDA (kullanıcı 02.11.2026) - HBYS'de Stok & Hizmet.
-    menuGrup: 'Stok & Hizmet', erpMenuGrup: 'Alış', erpMenuSira: 41, menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@b:fatura:a',
+    menuGrup: 'Stok & Hizmet', erp: { grup: 'Alış', sira: 41 }, menuSira: 65, menuAd: 'Alış Faturası Listesi', ic: '@b:fatura:a',
     yetkiKodu: 'belge.alis_fatura',   // 1003: Alış grubundan ayrı kod
   },
   {

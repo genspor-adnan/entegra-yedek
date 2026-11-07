@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre — Komut Paleti + Asistan (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --ok:#2e7d46; --okzem:#e6f4ea; --uyari:#b5731a; --hata:#b23b3b;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:12px}
+  h1.bas{max-width:1480px;margin:0 auto 10px;font-size:15px;color:var(--navy)}
+  .sahne{max-width:1480px;margin:0 auto 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .ekran{background:#2a3b4f;border-radius:8px;padding:14px 12px 18px;position:relative;min-height:560px}
+  .ekran .ad{color:#c8d4e2;font-size:11px;margin-bottom:8px;letter-spacing:.3px}
+  .palet{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.35);overflow:hidden}
+  .ara{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .ara input{flex:1;border:0;outline:0;font:inherit;font-size:14px}
+  .ara kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:10.5px;color:var(--muted)}
+  .grup{padding:7px 12px 3px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .sat{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:12.5px}
+  .sat.on{background:var(--sel)}
+  .sat .y{margin-left:auto;font-size:11px;color:var(--muted)}
+  .sat.ai{color:var(--ai)}
+  .sat.ai .y{color:var(--ai)}
+  .sat .ik{width:20px;text-align:center}
+  .cevap{margin:8px 12px 12px;border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:10px;padding:10px 12px;line-height:1.55}
+  .cevap .kim{font-size:10.5px;color:#4a3a78;margin-bottom:5px;display:flex;gap:8px}
+  .cevap .kim .r{margin-left:auto;opacity:.8}
+  .cevap ol{margin:4px 0;padding-left:18px}
+  .cevap li{margin:2px 0}
+  .ekranlar{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .ekranlar span{border:1px solid var(--selbd);background:#fff;border-radius:12px;padding:2px 9px;font-size:11.5px;color:#2b4d7a}
+  .alt{display:flex;gap:6px;align-items:center;margin-top:8px}
+  .d{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:4px 10px;color:#33465c;font-size:11.5px;font-family:inherit}
+  .d.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .not{font-size:11px;color:var(--muted)}
+  table.mini{width:100%;border-collapse:collapse;font-size:11.5px;margin:6px 0;background:#fff;border-radius:6px}
+  .mini th{background:var(--head);text-align:left;padding:4px 7px;border-bottom:1px solid var(--line);font-weight:600;color:#3a5573;font-size:10.5px}
+  .mini td{padding:4px 7px;border-bottom:1px solid var(--line2)}
+  .mini td.sag,.mini th.sag{text-align:right}
+  .bekle{display:flex;gap:8px;align-items:center;padding:8px 12px;color:var(--ai);font-size:12px}
+  .bekle i{width:14px;height:14px;border:2px solid var(--aiKenar);border-top-color:var(--ai);border-radius:50%;display:inline-block}
+  .dip{display:flex;gap:10px;padding:7px 12px;border-top:1px solid var(--line2);font-size:11px;color:var(--muted);background:#fafbfd}
+  .dip kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:10px}
+  .dip .sag{margin-left:auto}
+  .notlar{max-width:1480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 20px;line-height:1.6}
+  .notlar h2{margin:0 0 8px;font-size:15px;color:var(--navy)}
+  .notlar h3{margin:14px 0 6px;font-size:13px;color:var(--ai)}
+  .notlar ul,.notlar ol{padding-left:20px;margin:4px 0}
+  .notlar table{border-collapse:collapse;font-size:12px;margin:6px 0}
+  .notlar td,.notlar th{border:1px solid var(--line2);padding:5px 9px;text-align:left;vertical-align:top}
+  .notlar th{background:var(--head)}
+</style>
+</head>
+<body>
+
+<h1 class="bas">Ctrl K paleti: ekran / kayıt bulur, bulamazsa asistana sorar (öneri 6)</h1>
+<div class="sahne">
+
+  <!-- 1: yazarken -->
+  <div class="ekran">
+    <div class="ad">1 · Yazarken — ekran ve kayıt eşleşmesi önde, asistan satırı altta</div>
+    <div class="palet">
+      <div class="ara">🔍 <input value="fatura ayar"><kbd>Esc</kbd></div>
+      <div class="grup">Ekranlar</div>
+      <div class="sat on"><span class="ik">📨</span> Fatura Ayarları <span class="y">Satış › Ayarlar</span></div>
+      <div class="sat"><span class="ik">🧾</span> Satış Belgeleri <span class="y">Satış › Ayarlar</span></div>
+      <div class="grup">Son açılanlar</div>
+      <div class="sat"><span class="ik">📊</span> Cari İcmali <span class="y">Finans</span></div>
+      <div class="sat ai"><span class="ik">✨</span> “fatura ayar” için asistana sor <span class="y">Tab</span></div>
+      <div class="dip"><span><kbd>↑</kbd><kbd>↓</kbd> gez</span><span><kbd>Enter</kbd> aç</span><span><kbd>Tab</kbd> asistan</span><span class="sag">@hasta, @cari ile kayıt ara</span></div>
+    </div>
+  </div>
+
+  <!-- 2: eşleşme yok -> soru -->
+  <div class="ekran">
+    <div class="ad">2 · Eşleşme yok ya da cümle yazıldı — asistan cevabı palette</div>
+    <div class="palet">
+      <div class="ara">🔍 <input value="e-arşiv faturası neden gönderilmedi"><kbd>Esc</kbd></div>
+      <div class="sat ai on"><span class="ik">✨</span> Asistana sor: “e-arşiv faturası neden gönderilmedi” <span class="y">Enter</span></div>
+      <div class="cevap">
+        <div class="kim">✨ Gentegre AI · yardım belgesi + ekran bağlamı (Satış Faturası #26315) <span class="r">1,2 sn · 180 jeton</span></div>
+        Belge <b>hazırlandı, gönderilmedi</b> (durum 1). Gönderim için:
+        <ol><li>Satış Faturası kartında <b>e-Belge › Gönder</b>.</li>
+            <li>Gönder düğmesi pasifse alıcının alias'ı boş: Müşteri kartı › Adres / Fatura Bilgisi › e-Belge Ayarları.</li>
+            <li>Toplu gönderim: <b>e-Fatura İcmali › Bekleyenler</b>.</li></ol>
+        <div class="ekranlar"><span>📄 Satış Faturası #26315</span><span>🏢 ALOEPLANT kartı</span><span>📊 e-Fatura İcmali</span></div>
+        <div class="alt"><button class="d ai">💬 Sohbette devam</button><button class="d">👍</button><button class="d">👎</button><span class="not">kaynak: yardım belgesi · ekran: Satış Faturası</span></div>
+      </div>
+      <div class="dip"><span><kbd>Enter</kbd> ilk ekranı aç</span><span><kbd>Tab</kbd> ekranlar arasında</span><span class="sag">Cevap ekran bağlamı + yardım belgesinden; kayıt verisi gönderilmedi</span></div>
+    </div>
+  </div>
+
+  <!-- 3: veri sorusu -> liste sorgusu -->
+  <div class="ekran">
+    <div class="ad">3 · Veri sorusu — liste sorgusu aracı palette çalışır, sonuç küçük tablo</div>
+    <div class="palet">
+      <div class="ara">🔍 <input value="bugün vadesi gelen çekler"><kbd>Esc</kbd></div>
+      <div class="sat ai on"><span class="ik">✨</span> Asistana sor: “bugün vadesi gelen çekler” <span class="y">çalışıyor…</span></div>
+      <div class="bekle"><i></i> Çek / Senet listesi · vade = 06.11.2026 · yön = alınan</div>
+      <div class="cevap">
+        <div class="kim">✨ <code>liste_sorgusu</code> cek_senet · 2 koşul <span class="r">41 ms · 3 satır</span></div>
+        <table class="mini">
+          <thead><tr><th>Cari</th><th>Banka</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>BİMED TEKNOLOJİ</td><td>Ziraat</td><td class="sag">42.500,00</td><td>Portföyde</td></tr>
+            <tr><td>ÇİTLEKÇİ GIDA</td><td>İş Bankası</td><td class="sag">18.000,00</td><td>Tahsilde</td></tr>
+            <tr><td>EVO SPORTİF</td><td>Garanti</td><td class="sag">7.250,00</td><td>Portföyde</td></tr>
+          </tbody>
+        </table>
+        <div class="alt"><button class="d">📋 Listede aç</button><button class="d">⭐ Kayıtlı arama</button><button class="d ai">💬 Sohbette devam</button><span class="not">toplam 67.750,00 ₺</span></div>
+      </div>
+      <div class="dip"><span><kbd>Enter</kbd> listede aç</span><span class="sag">yetki süzgeci: Finans › Çek / Senet görme</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — komut paleti + asistan (öneri 6)</h2>
+  <ul>
+    <li>Palet davranışı değişmez: ekran / kayıt / aksiyon eşleşmesi <b>önce ve üstte</b>. Asistan satırı her zaman son satır; <kbd>Tab</kbd> ile seçilir.
+      Eşleşme yoksa ya da girdi cümleyse (boşluklu, 3+ kelime, soru eki) asistan satırı <b>seçili</b> gelir, <kbd>Enter</kbd> sorar.</li>
+    <li>Cevap palette çizilir (Yapay Zeka ekranına gitmeden): rehber cevabı (adımlar + yetkili ekran çipleri) ya da liste sorgusu sonucu (küçük tablo).
+      "Sohbette devam" aynı soruyu Yapay Zeka ekranında yeni sohbet olarak açar; 👍/👎 geri bildirimi buradan da gider.</li>
+    <li>Sunucu ucu aynı: <code>POST /api/ai/rehber</code> (bağlam = açık ekran) ve <code>liste_sorgusu</code>; palet için yeni uç yok. Sohbet kaydı
+      "palet" kaynaklı olarak işaretlenir (günlükte ayrı sayılır).</li>
+    <li>Kontör: yalnız model çağrısında düşer. Ekran eşleşmesi ve katalog cevabı (kaynak 1-3) kontörsüz.</li>
+    <li>HBYS'de palet soruları da hasta verisini taşımaz: cevap ekran bağlamı + yardım belgesinden; veri sorusu liste sorgusuyla, yetki süzgecinden.</li>
+    <li>Klavye: <kbd>↑</kbd><kbd>↓</kbd> gez, <kbd>Enter</kbd> seçili satır, <kbd>Tab</kbd> asistan / ekran çipleri arasında, <kbd>Esc</kbd> kapat; sesli giriş 🎤 mevcut dikte bileşeni.</li>
+  </ul>
+</div>
+
+</body>
+</html>

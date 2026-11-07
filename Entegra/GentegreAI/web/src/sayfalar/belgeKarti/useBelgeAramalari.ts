@@ -16,6 +16,8 @@ export function useBelgeAramalari(acilistaCariArama: boolean) {
   const [eklenen, setEklenen] = useState({ sayi: 0, son: '' });
   /** Iade satiri secimi: onceki belgeden satir getirir. */
   const [iade, setIade] = useState(false);
+  /** Kaynaktan aktar penceresi (07.11.2026): açık kaynak belge TÜRÜ (19/9 sipariş, 18 teklif, 14/10 irsaliye); null kapalı. */
+  const [siparis, setSiparis] = useState<number | null>(null);
   /** Cari/hasta arama penceresi - yeni kartta acilista da acilabilir. */
   const [cari, setCari] = useState(acilistaCariArama);
   /** Hasta aramasina tasinan metin (kart ustundeki kutudan gelir). */
@@ -29,7 +31,7 @@ export function useBelgeAramalari(acilistaCariArama: boolean) {
   const [satici, setSatici] = useState(false);
 
   return { personel, setPersonel, stok, setStok, eklenen, setEklenen,
-           iade, setIade, cari, setCari, hastaMetni, setHastaMetni,
+           iade, setIade, siparis, setSiparis, cari, setCari, hastaMetni, setHastaMetni,
            hastaYeni, setHastaYeni, hastaKartId, setHastaKartId,
            istem, setIstem, satici, setSatici };
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { SatirDurumu } from '../belgeSatir';
-import { mesaj } from '../../bilesenler/mesaj';
+import { mesaj, onay } from '../../bilesenler/mesaj';
 
 /**
  * KALEM GRİDİNDE SATIR SEÇİMİ VE SİLME.
@@ -36,7 +36,7 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
   };
 
   /** Seçili satırları siler - grid salt görünüm olduğu için satır içi silme yok. */
-  const seciliSil = () => {
+  const seciliSil = async () => {
     if (seciliSatirlar.size === 0) return;
     // ONAYLI (KİLİTLİ) SATIR SİLİNMEZ (681): düğme zaten kapalı ama silme
     //   başka yollardan da çağrılabiliyor (kısayol, toplu seçim) - sunucu
@@ -51,6 +51,9 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
       void mesaj('Belgeye dönüşmüş ücret satırı silinemez - önce oluşan belgeyi (Belgeye Dönüşüm) silin.');
       return;
     }
+    // ONAY (kullanıcı 07.11.2026 "bütün sil butonları silmeden önce uyarı vermeli").
+    const n = seciliSatirlar.size;
+    if (!await onay(n === 1 ? 'Seçili satır silinecek. Onaylıyor musunuz?' : `Seçili ${n} satır silinecek. Onaylıyor musunuz?`, true)) return;
     // PAKET satırı silinince İÇERİĞİ de gider - yoksa sahipsiz içerik
     //   satırları belgede kalırdı.
     setSatirlar(s => s.filter(x =>

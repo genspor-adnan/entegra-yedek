@@ -10,6 +10,7 @@ import { TEMA_ADI, TEMA_IKON, temaUygula, type Tema } from './tema';
 /** Pencerenin sekmeleri - avatar menüsü hangi sekmede açılacağını söylüyor. */
 export type AyarSekmesi = 'hesap' | 'gorunum' | 'guvenlik' | 'bildirim';
 import { tarihSaat } from './bicim';
+import { onay } from './mesaj';
 import { cihazAdi } from './cihazAdi';
 import { DILLER } from './diller';
 import { Bayrak } from './Bayrak';
@@ -92,6 +93,7 @@ export function KullaniciAyarlari({ ayar, tema, setTema, c, ilkSekme }: {
   };
   const resimKaldir = async () => {
     if (!kullanici) return;
+    if (!await onay(c('Profil resmi kaldırılacak. Onaylıyor musunuz?'), true)) return;
     setResimIslem(c('Kaldırılıyor…'));
     try { await profilResmiSil(kullanici.id); setResimIslem('') }
     catch (h) { setResimIslem(hataMetni(h)) }

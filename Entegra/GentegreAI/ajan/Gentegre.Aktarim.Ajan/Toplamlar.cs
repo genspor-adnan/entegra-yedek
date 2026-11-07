@@ -1,4 +1,4 @@
-﻿namespace Gentegre.Aktarim.Ajan;
+namespace Gentegre.Aktarim.Ajan;
 
 /// <summary>
 /// Kök tabloya bağlı alt tablo. Sunucu (fn_aktar_*) pakette olmayan alt satırı SİLER:
@@ -33,10 +33,10 @@ public sealed record Grup(int Sira, string Kok, AltTablo[] Altlar, string? Tarih
     public IEnumerable<string> Tablolar => Altlar.Select(a => a.Tablo).Prepend(Kok);
 
     /// <summary>Tarih sınırı + kesit süzgeci birleşik WHERE (ikisi de yoksa null).</summary>
-    public string? Nerede(bool tarihli)
+    public string? Nerede()
     {
         var p = new List<string>();
-        if (tarihli && Tarih is not null) p.Add($"[{Tarih}] >= @bas");
+        if (Tarih is not null) p.Add($"[{Tarih}] >= @bas");
         if (Filtre is not null) p.Add("(" + Filtre + ")");
         return p.Count == 0 ? null : string.Join(" AND ", p);
     }

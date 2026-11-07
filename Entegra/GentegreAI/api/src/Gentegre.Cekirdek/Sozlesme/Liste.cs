@@ -111,4 +111,6 @@ public sealed record KolonMeta(
     /// liste SQL'i ayni haritayi kullaniyor); istemcinin ayni listeyi ikinci
     /// kez yazmasi iki yerin ayrilmasina davetiyeydi.
     /// </summary>
-    IReadOnlyDictionary<string, string>? Kodlar = null);
+    IReadOnlyDictionary<string, string>? Kodlar = null,
+    /// <summary>Rozet kolonunda değer -> CSS sınıfı (kolona özel renk); yoksa istemci sözlüğü.</summary>
+    IReadOnlyDictionary<string, string>? RozetSiniflari = null);

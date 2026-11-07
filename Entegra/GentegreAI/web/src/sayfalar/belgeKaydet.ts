@@ -368,6 +368,8 @@ return {
     //   miktar bu bagdan turetilir, ayni kalem iki kez iade edilemez (132).
     kaynakTur: s.kaynakSatirId ? 30 : undefined,
     kaynakId: s.kaynakSatirId,
+    // Kaynağı irsaliye olan satır stoğu tekrar düşürmez (07.11.2026); sunucu kaynağa bakıp zaten 0 yazar, istemci de söyler.
+    stokDurumDegis: s.stokDurumDegis,
     // Kalemi fiyatlayan kampanya kurali (274): kampanya satiri sonradan
     //   degistirilse bile belgede HANGI kuralin uygulandigi kalir.
     kampanyaSatirId: s.kampanyaSatirId ?? null,

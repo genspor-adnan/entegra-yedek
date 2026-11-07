@@ -1,6 +1,5 @@
 import type { ListeSatiri } from '../api/sozlesme';
-import { c } from '../dil/ceviri';
-import { OnizlemeBasligi } from './TarafAramaCari';
+import { Bos, IletisimBlok, Sat, yoksaTire } from './TarafAramaOrtak';
 import { metin, tarihYaz } from './tarafDuzeni';
 
 /**
@@ -27,37 +26,29 @@ export function KisiHucreler({ s }: { s: ListeSatiri }) {
   return (
     <>
       <td className="ad"><b>{metin(s.unvan)}</b>{metin(s.kod) && <small>{metin(s.kod)}</small>}</td>
-      <td><span className="ta-kirp">{metin(s.bagliCari) || <span className="gh-sonuk">—</span>}</span></td>
-      <td><span className="ta-kirp">{metin(s.gorev) || <span className="gh-sonuk">—</span>}</span></td>
-      <td><span className="ta-kirp dar">{metin(s.cepTel) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="ta-g2"><span className="ta-kirp dar">{metin(s.telefon) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="ta-g2"><span className="ta-kirp">{metin(s.eposta) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="hiza-orta ta-g2">{tarihYaz(s.eklemeTarihi) || <span className="gh-sonuk">—</span>}</td>
+      <td><span className="ta-kirp">{yoksaTire(s.bagliCari)}</span></td>
+      <td><span className="ta-kirp">{yoksaTire(s.gorev)}</span></td>
+      <td><span className="ta-kirp dar">{yoksaTire(s.cepTel)}</span></td>
+      <td className="ta-g2"><span className="ta-kirp dar">{yoksaTire(s.telefon)}</span></td>
+      <td className="ta-g2"><span className="ta-kirp">{yoksaTire(s.eposta)}</span></td>
+      <td className="hiza-orta ta-g2">{tarihYaz(s.eklemeTarihi) || <Bos />}</td>
     </>
   );
 }
 
-export function KisiOnizleme({ s, onKapat }: { s: ListeSatiri | undefined; onKapat(): void }) {
-  if (!s) return <div className="ta-on"><OnizlemeBasligi onKapat={onKapat} /><div className="gh-sonuk">{c('Satır seçin')}</div></div>;
-  const iletisimVar = metin(s.cepTel) || metin(s.telefon) || metin(s.eposta);
+export function KisiOnizleme({ s }: { s: ListeSatiri }) {
   return (
-    <div className="ta-on">
-      <OnizlemeBasligi onKapat={onKapat} />
+    <>
       <h4>{metin(s.unvan)}</h4>
       <div className="ta-kod">{[metin(s.gorev), metin(s.bagliCari)].filter(Boolean).join(' · ')}</div>
 
-      <div className="ta-blok"><h5>İletişim</h5>
-        {metin(s.cepTel) && <div className="ta-sat"><span>Cep</span><span>{metin(s.cepTel)}</span></div>}
-        {metin(s.telefon) && <div className="ta-sat"><span>Telefon</span><span>{metin(s.telefon)}</span></div>}
-        {metin(s.eposta) && <div className="ta-sat"><span>E-posta</span><span>{metin(s.eposta)}</span></div>}
-        {!iletisimVar && <div className="gh-sonuk">—</div>}
-      </div>
+      <IletisimBlok s={s} />
 
       <div className="ta-blok"><h5>Kayıt</h5>
-        {metin(s.bagliCari) && <div className="ta-sat"><span>Bağlı cari</span><span>{metin(s.bagliCari)}</span></div>}
-        {metin(s.kod) && <div className="ta-sat"><span>Kişi kodu</span><span>{metin(s.kod)}</span></div>}
-        {tarihYaz(s.eklemeTarihi) && <div className="ta-sat"><span>Eklendi</span><span>{tarihYaz(s.eklemeTarihi)}</span></div>}
+        <Sat etiket="Bağlı cari" v={metin(s.bagliCari)} />
+        <Sat etiket="Kişi kodu" v={metin(s.kod)} />
+        <Sat etiket="Eklendi" v={tarihYaz(s.eklemeTarihi)} />
       </div>
-    </div>
+    </>
   );
 }

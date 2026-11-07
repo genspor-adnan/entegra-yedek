@@ -1,4 +1,4 @@
-﻿-- =============================================================================
+-- =============================================================================
 --  GENTEGRE AKTARIM AJANI - MSSQL HAZIRLIĞI (müşteri sunucusunda, bir kez)
 --
 --  sqlcmd -I -f 65001 -S .\SQLEXPRESS -d <VERITABANI> -E -i mssql_hazirla.sql -v PAROLA="<güçlü parola>"

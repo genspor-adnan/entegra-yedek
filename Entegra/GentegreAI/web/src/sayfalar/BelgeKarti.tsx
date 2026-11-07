@@ -22,6 +22,8 @@ import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
 import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
 import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
+import { FIS_AKTAR, IRSALIYE_AKTAR, SIPARIS_AKTAR } from '../bilesenler/belge/AktarMenusu';
+import { KASA_ARACLARI } from './kabuk/cariKomutu';
 import {
   BasvuruSekmesi, ProvizyonSekmesi, OncekiBasvurular, HastaSeridi,
 } from '../bilesenler/belge/BasvuruSekmesi';
@@ -645,6 +647,41 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     await paraRef.current.satirlariTazele();
   };
 
+
+  /**
+   * SİPARİŞ "TAHSİLAT GİR" (kullanıcı 07.11.2026): siparişi kaydet → tahsilat türünü sor (Kabuk tür modalı deseni) →
+   * kasa kartı KENDİ SEKMESİNDE, cari + tutar (kalan) + belge bağı ön yüklü. Başvuru / fatura eski yol (tahsilatAc).
+   */
+  const [siparisTahsilat, setSiparisTahsilat] = useState<{ belgeId: number; kalan: number } | null>(null);
+  const [siparisTahsilatSecili, setSiparisTahsilatSecili] = useState(0);
+  const siparisTahsilatGir = async (kalan: number) => {
+    let id = kayitliId;
+    if (id) { if (kalemDegisti && !(await kayitSart())) return }
+    else {
+      if (satirlar.filter(s => s.stokId || s.hizmetId).length === 0) {
+        setHata('Tahsilat belgeye bağlanır: önce en az bir kalem ekleyin.'); return;
+      }
+      id = await kes(false);
+      if (!id) return;
+    }
+    setSiparisTahsilatSecili(0);
+    setSiparisTahsilat({ belgeId: id, kalan });
+  };
+  const siparisTahsilatTuru = (tur: number) => {
+    if (!siparisTahsilat || !cari) return;
+    const q = new URLSearchParams({ tur: String(tur), tarafId: String(cari.id), tarafUnvan: cari.unvan,
+                                    belgeId: String(siparisTahsilat.belgeId) });
+    if (siparisTahsilat.kalan > 0) q.set('tutar', siparisTahsilat.kalan.toFixed(2));
+    setSiparisTahsilat(null);
+    const h = `/kasa-islem/yeni?${q.toString()}`;
+    if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
+  };
+  /** Sade Tahsilat sekmesi (Tahsilat Gir + liste): ERP belgeleri - sipariş, fatura, fiş; başvuru asla. */
+  const sadeTahsilat = !basvuruMu && (siparisMi || faturaMi);
+  const kasaIslemSekmede = (kid: number) => {
+    const h = `/kasa-islem/${kid}`;
+    if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
+  };
 
   const tahsilatAc = async (tahsilatTuru = 21) => {
     if (kayitliId) {
@@ -1359,6 +1396,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   // Sekmenin KENDİ adresi (arka sekmede dondurulmuş) - tarayıcının o anki adresi değil.
   const sekmeKonumu = useLocation();
+  // CARİ ADRESE YAZILIR (kullanıcı 07.11.2026: "açık belge sekmesine dönünce müşteri seçme ekranı geldi, kapat deyince
+  //   sekme kapandı"): yeni kart sayfa yenilenince (F5 / geliştirme sunucusu) sekme adresinden yeniden kurulur; adreste
+  //   cari yoksa açılış araması çıkıyor ve iptali kartı kapatıyordu. Cari seçilince ?tarafId=&tarafUnvan= replace ile
+  //   adrese işlenir (yuva aynı kalır - EkranSekmeleri Replace kuralı); yenilemede cari geri gelir.
+  useEffect(() => {
+    if (!sayfa || belgeId || kayitliId || !cari?.id) return;
+    if (!sekmeKonumu.pathname.endsWith('/yeni')) return;
+    const q = new URLSearchParams(sekmeKonumu.search);
+    if (Number(q.get('tarafId')) === cari.id) return;
+    q.set('tarafId', String(cari.id)); q.set('tarafUnvan', cari.unvan);
+    git(`${sekmeKonumu.pathname}?${q.toString()}`, { replace: true });
+  }, [sayfa, belgeId, kayitliId, cari?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
   const kapatRef = useRef<() => void>(() => {});
   kapatRef.current = () => void kapat();
   const kirliRef = useRef(false);
@@ -1371,9 +1420,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   // ERP BELGESİNDE YALNIZ CARİ (kullanıcı 26.10.2026: "sekme başlıkta numara olmasın sadece müşteri adı ilk 2
   //   kelime olsun") - yeni belgede de cari seçilince. BAŞVURU DA YALNIZ HASTA ADI (kullanıcı 28.10.2026: "başvuru
   //   kartı sekme başlıkta hasta adı olsun") - protokol no araç çubuğundaki başlıkta.
+  // TÜR ÖNEKİ (kullanıcı 07.11.2026: "sekme başlığına belge türünün ilk 3 harfi ve tire: Fat-Akana Mühendislik,
+  //   İrs-Terme Ticaret"): kısa adın ilk 3 harfi (Fat / İrs / Fiş / Sip / Tek / Tah / Kon / Tra / Tal). Başvuruda yok.
+  //   YABANCI DİLDE çevirinin ilk 3 harfi (kullanıcı: "örnek Inv-"): c('Fatura') = Invoice -> Inv, Delivery note -> Del.
   const sekmeBasligi = basvuruMu
     ? sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')
-    : sekmeAdi(cari?.unvan || '');
+    : (cari?.unvan ? `${c(belgeKisaAdi(tur)).slice(0, 3)}-${sekmeAdi(cari.unvan)}` : '');
   useEffect(() => {
     if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikAnahtari(sekmeKonumu));
   // ANAHTAR SORGUYLA (kullanıcı 02.11.2026: "cari seçilip sekme açıldığında ... sekme başlığında cari ad görünsün"):
@@ -1381,15 +1433,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   başlık kaydedip yeniden açılana dek "Yeni Satış Faturası Kartı" kalıyordu.
   }, [sayfa, ekranSekmesi, kayitliId, sekmeBasligi]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** KARTTAN SİL (02.11.2026): onay → fn_belge_sil (listedeki Sil ile aynı uç) → kart kapanır, listeler tazelenir. */
+  /** KARTTAN SİL (02.11.2026): onay → fn_belge_sil (listedeki Sil ile aynı uç) → kart kapanır, listeler tazelenir.
+      SATIRLARIYLA (07.11.2026): karttan silmede satırlar da silinir - ekranda satırları silip "Belgeyi sil" diyen
+      kullanıcı "satırlı belge silinemez" / "satırsız belge kaydedilemez" arasında kilitleniyordu. */
   const belgeyiSil = async () => {
     if (!kayitliId) return;
     const no = gorunenBelgeNo(sonuc?.belge.belgeNo) || `#${kayitliId}`;
-    if (!await onay(`"${no}" silinecek.
+    const satirSayisi = sonuc?.satirlar?.length ?? 0;
+    if (!await onay(`"${no}"${satirSayisi > 0 ? ` ${satirSayisi} satırıyla birlikte` : ''} silinecek.
 
 Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     try {
-      const y = await api.belgeSil(kayitliId);
+      const y = await api.belgeSil(kayitliId, true);
       cariHareketiDegisti();
       onKaydedildi?.();
       mesaj(y.mesaj || 'Belge silindi.');
@@ -1494,7 +1549,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           satirSayisi={satirlar.length}
           onSil={yetki('belge', 'sil') ? () => void belgeyiSil() : undefined}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
-          setDonusum={donusumler.setHedefTur} setTerminAcik={setTerminAcik}
+          setTerminAcik={setTerminAcik}
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
           rezerveDegistir={rezerveDegistir}
           hastaVar={!!cari?.id}
@@ -1628,6 +1683,13 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         />
         {aktifSekme === 'kalem' && (
           <KalemSekmesi
+            // "⇩ Aktar" (kullanıcı 07.11.2026): Kalemler sekmesinde Sil'in sağında. Fiş: Siparişten / İrsaliyeden menüsü;
+            //   satış siparişi (başvuru DEĞİL): "Tekliften Aktar" düğmesi. Satırlar SiparistenAktarPenceresi'nden kaynak
+            //   bağıyla gelir. İrsaliyenin Siparişten Aktar'ı Belgeye Dönüşüm sekmesinde.
+            aktarAc={!kilitli ? k => arama.setSiparis(k) : undefined}
+            aktarSecenekleri={tur === 16 || tur === 12 ? FIS_AKTAR(alisMi)
+                              : siparisMi && !basvuruMu && !alisMi ? SIPARIS_AKTAR
+                              : irsaliyeMi ? IRSALIYE_AKTAR(alisMi) : undefined}
             satirlar={satirlar}
             dagilimOnizleme={dagilimOnizleme}
             seciliSatirlar={seciliSatirlar} setSeciliSatirlar={setSeciliSatirlar}
@@ -1697,11 +1759,42 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           />
         )}
 
+        {/* SİPARİŞ TAHSİLAT TÜRÜ (kullanıcı 07.11.2026): Kabuk'taki akış modalının aynısı - alt alta, ↑↓ Enter 1-6. */}
+        {siparisTahsilat && (() => {
+          const turler = KASA_ARACLARI[alisMi ? 'odeme' : 'tahsilat'];
+          const sec = (i: number) => siparisTahsilatTuru(turler[i].tur);
+          return (
+            <Modal baslik={alisMi ? c('Ödeme türü') : c('Tahsilat türü')} dar enUst onKapat={() => setSiparisTahsilat(null)}
+                   alt={<button type="button" className="d" onClick={() => setSiparisTahsilat(null)}>{c('Vazgeç')}</button>}>
+              <div tabIndex={0} autoFocus ref={el => el?.focus()} style={{ outline: 'none' }}
+                   onKeyDown={e => {
+                     if (e.key === 'ArrowDown') { e.preventDefault(); setSiparisTahsilatSecili(i => Math.min(i + 1, turler.length - 1)) }
+                     else if (e.key === 'ArrowUp') { e.preventDefault(); setSiparisTahsilatSecili(i => Math.max(i - 1, 0)) }
+                     else if (e.key === 'Enter') { e.preventDefault(); sec(siparisTahsilatSecili) }
+                     else if (/^[1-9]$/.test(e.key) && Number(e.key) <= turler.length) { e.preventDefault(); sec(Number(e.key) - 1) }
+                   }}>
+                <div className="not" style={{ marginBottom: 8 }}>
+                  {cari?.unvan}{siparisTahsilat.kalan > 0 ? ` · ${c('kalan')} ${para.format(siparisTahsilat.kalan)}` : ''} · {c('↑↓ gez · Enter seç · 1-6')}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {turler.map((t, i) => (
+                    <button key={t.tur} type="button" className={`d${i === siparisTahsilatSecili ? ' bir' : ''}`} tabIndex={-1}
+                            style={{ textAlign: 'left', padding: '8px 12px', fontSize: 13 }}
+                            onMouseEnter={() => setSiparisTahsilatSecili(i)} onClick={() => sec(i)}>
+                      <span style={{ display: 'inline-block', width: 16, opacity: .6 }}>{i + 1}</span> {t.ikon} {t.ad}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Modal>
+          );
+        })()}
+
         {/* ERP SEKMELERI (tasiyici · e-Belge · faturalama · imza) tek
             bilesende: dordu de ayni kumeden beslenir ve basvuruda cizilmez. */}
         <BelgeErpSekmeleri
           aktifSekme={aktifSekme} kilitli={kilitli} sevkiyat={sevkiyat}
-          belge={sonuc?.belge} irsaliyeMi={irsaliyeMi} tur={tur}
+          belge={sonuc?.belge} irsaliyeMi={irsaliyeMi} tur={tur} basvuruMu={basvuruMu}
           senaryo={senaryo} setSenaryo={setSenaryo} senaryoBaslikta={faturaMi}
           belgeYenile={() => { if (kayitliId) api.belgeOku(kayitliId).then(setSonuc).catch(() => {}) }}
           faturalama={{
@@ -1710,6 +1803,15 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             setDonusum: donusumler.setHedefTur,
             teklifMi, teklifDurum: teklif.durum,
             donusumAc: donusumler.ac,
+            // SİPARİŞTEN AKTAR (irsaliye) / TEKLİFTEN AKTAR (satış siparişi, 07.11.2026): kayıtsız kartta da çalışır -
+            //   satırlar karta gelir, kayıtta bağlanır. Alış siparişinin teklifi yok.
+            // İRSALİYE: türetilen belge (fatura / fiş) KENDİ SEKMESİNDE (kullanıcı 07.11.2026 "tür'e tıklayınca yeni sekmede").
+            // YOL TÜRÜN LİSTESİNDEN (07.11.2026): kayıtlı belge `/<liste>/{id}` ile açılır (`/belge/{id}` yalnız satış
+            //   faturasının listesi; fiş `/satis-fisi/{id}`, irsaliye `/satis-irsaliye/{id}` - yoksa boş "Kart" sekmesi).
+            sekmedeAc: (id: number, hedefTur: number) => {
+              const h = `${belgeTuruBilgisi(hedefTur).liste}/${id}`;
+              if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
+            },
             // SILME SONRASI SERIT ANINDA (kullanici: "ücret/tahsilat ve dönüşüm
             //   değiştiği an üstteki açık tahsilat ve belge tutarları da anında
             //   güncellenmeli"): belge silinince kovalarin KAPATILAN sayaci
@@ -1735,6 +1837,11 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilat.tahsilatlar}
                            kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc}
                            basvuruMu={basvuruMu}
+                           // ERP SADE: sipariş + fatura + fiş (kullanıcı 07.11.2026 "fiş / fatura kartında da"); başvuru DEĞİL -
+                           //   bkz. siparis-basvuru-ayrimi.
+                           sade={sadeTahsilat}
+                           tahsilatGir={sadeTahsilat ? k => void siparisTahsilatGir(k) : undefined}
+                           sekmedeAc={sadeTahsilat ? kasaIslemSekmede : undefined}
                            secili={tahsilat.seciliTahsilatlar}
                            setSecili={tahsilat.setSeciliTahsilatlar}
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}
@@ -1922,9 +2029,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
 
         {aktifSekme === 'yorum' && (
           // Stok kartındaki galeri deseni (02.11.2026 "resim doküman sekmesi olan bütün ekranlara"): çerçevesiz.
-          kayitliId > 0
-            ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
-            : <div className="not">{c('Belge kaydedilince resim / doküman eklenebilir.')}</div>
+          // KAYITSIZ KARTTA DA (kullanıcı 07.11.2026): "Belge kaydedilince eklenebilir" notu yerine galeri; dosya seçilince
+          //   önce belge kaydedilir (kes(false), kart açık kalır), sonra dosya ona eklenir. Kilitli belgede salt okunur.
+          <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={kilitli}
+                           kaynakIdSagla={() => kes(false)} />
         )}
 
         {/* Kartin ustune acilan BUTUN pencereler (cari/stok/kalem/tahsilat/
@@ -1977,6 +2085,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           stokSecildi={stokSecildi}
           kalem={kalem} setKalem={setKalem} kalemKaydet={kalemKaydet}
           iadeArama={arama.iade} setIadeArama={arama.setIade}
+          siparisArama={arama.siparis} setSiparisArama={arama.setSiparis}
           tahsilat={tahsilat} tahsilatTutariSor={tahsilatTutariSor}
           posSonrasi={posSonrasi}
           hesapSecim={hesapSecim} setHesapSecim={setHesapSecim}

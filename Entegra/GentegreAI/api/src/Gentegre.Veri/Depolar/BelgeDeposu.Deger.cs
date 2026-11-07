@@ -355,13 +355,18 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             -- seriLotId: CIKIS belgesi duzenlenirken sunucu lotu bununla bulur (LottanDusAsync,
             --   0 = "lot secimi gecersiz"); okumada eksikti, kayitli irsaliye hic kaydedilemiyordu.
-            select i.belge_satir_id as "satirId", i.seri_lot_id as "seriLotId",
+            -- KAYNAĞIN LOTLARI (kullanıcı 07.11.2026 "lotlar aynen taşınır, tekrar sorulmaz"): stok düşürmeyen
+            --   (irsaliyeden gelen, stok_durum_degis 0, kaynak_tur 30) satırın lot satırı yoktur - kaynak irsaliye
+            --   satırının lotları onun adına gösterilir. Kısmi aktarımda kaynağın tamamı görünür (bilgi amaçlı).
+            select coalesce(h.id, i.belge_satir_id) as "satirId", i.seri_lot_id as "seriLotId",
                    i.lot_no as "lotNo", i.seri_no as "seriNo",
                    i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
                    i.durum, i.adet as "miktar", i.kalan
               from public.v_belge_satir_izlem i
-             where i.belge_id = @p0
-             order by i.belge_satir_id, i.id
+              left join public.belge_satir h on h.belge_id = @p0 and h.kaynak_tur = 30 and h.kaynak_id = i.belge_satir_id
+                                             and coalesce(h.stok_durum_degis, 0) = 0
+             where i.belge_id = @p0 or h.id is not null
+             order by 1, i.id
             """, baglanti))
         {
             komut.Parameters.AddWithValue("p0", belgeId);

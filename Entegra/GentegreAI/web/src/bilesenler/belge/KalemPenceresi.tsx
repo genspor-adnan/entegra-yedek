@@ -735,12 +735,21 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 ISLEM ZAMANI - "islem ne zaman yapildi". SAATLI ve BOS OLMAZ
                 (kullanici): temizlenirse o anki zaman geri yazilir; ayni gun
                 icindeki sira ancak saatle anlasiliyor. */}
-            {siparisMi && (
+            {siparisMi && basvuruMu && (
               <label className="alan">
                 <span className="etiket zorunlu-isaret">Tarih</span>
                 <input type="datetime-local" value={r.teslimTarihi ?? ''} onKeyDown={tus}
                        onChange={e => degis('teslimTarihi',
                                             e.target.value || yerelAnMetni(new Date()))} />
+              </label>
+            )}
+            {/* SİPARİŞTE SAATSİZ TERMİN (kullanıcı 07.11.2026): gün seçilir, saat 00:00 yazılır (başvuru saatli kalır). */}
+            {siparisMi && !basvuruMu && (
+              <label className="alan">
+                <span className="etiket zorunlu-isaret">{c('Teslim Tarihi')}</span>
+                <input type="date" value={(r.teslimTarihi ?? '').slice(0, 10)} onKeyDown={tus}
+                       onChange={e => degis('teslimTarihi',
+                                            e.target.value ? `${e.target.value}T00:00` : yerelAnMetni(new Date()))} />
               </label>
             )}
 

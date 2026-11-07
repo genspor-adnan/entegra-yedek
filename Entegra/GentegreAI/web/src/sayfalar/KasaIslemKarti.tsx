@@ -19,7 +19,8 @@ import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './ka
 import { useKiymetBilgisi, usePlanGerceklestirme,
          type CariSecimi, type HesapSecimi } from './kasa/useKiymetBilgisi';
 import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
-import { mesaj , metinSor, onay } from '../bilesenler/mesaj';
+import { URUN_GENOTIP } from '../api/sozlesme/kimlik';
+import { mesaj, onay, secimSor } from '../bilesenler/mesaj';
 import { c as cev } from '../dil/ceviri';
 
 
@@ -44,6 +45,8 @@ const GRUP_ADI: Record<string, string> = {
   tahsilat: 'Tahsilat', odeme: 'Ödeme', virman: 'Virman', doviz: 'Döviz', plan: 'Plan',
   // Cek/senet turleri (23/24/33/34 + portfoy islemleri) ayni gruptan gelir.
   ceksenet: 'Çek / Senet', kredi: 'Kredi', kupon: 'Kupon', kurfarki: 'Kur Farkı',
+  // Kuruş farkı kapatma türleri (1269 / 1273): kur farkıyla karışmasın.
+  kurusfarki: 'Kuruş Farkı',
 };
 
 
@@ -129,6 +132,16 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   //   toISOString() UTC verir, aksam saatlerinde bir sonraki gunu yazardi.
   const [tarih, setTarih] = useState(yerelAnMetni(new Date()));
   const [planTarihi, setPlanTarihi] = useState('');
+  /**
+   * TAKSİT (kullanıcı 06.11.2026 "tahsilat planı … taksit sistemi de ekle"): yeni planda toplam tutar N eşit
+   * taksite bölünür, ilk vade + i × aralık (ay) ile N plan kaydı yazılır (her biri normal plan: vade listesi,
+   * gerçekleştirme, iptal). Kuruş farkı son taksitte. Tek taksit = bugünkü davranış.
+   */
+  const [taksitSayisi, setTaksitSayisi] = useState(1);
+  const [taksitAralikAy, setTaksitAralikAy] = useState(1);
+  /** TAKSİT DÜZENLEME (kullanıcı 07.11.2026 "üstte kalem olsun, taksit tarih ve tutarlarını değiştireyim, ↑↓ ile gezeyim"):
+      kalem açıkken hesaplanan satırların kopyası düzenlenir; sayı / aralık / tutar / ilk vade değişince kopya düşer. */
+  const [taksitDuzen, setTaksitDuzen] = useState<{ vade: string; tutar: string }[] | null>(null);
   // Belgeden gelen cari/tutar onyuklenir - kullanici ayni bilgiyi ikinci kez
   //   girmesin (URL parametreleri tam sayfa acilista ayni isi gorur).
   const [cari, setCari] = useState<CariSecimi | null>(() => {
@@ -388,6 +401,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const caprazKur = donusum && sayi(karsiTutar) > 0 ? yerelOnizleme / sayi(karsiTutar) : 0;
 
   /** Kart durumunu saf govde/dogrulama fonksiyonlarina veren tek nesne. */
+  /**
+   * KAYITSIZ DEĞİŞİKLİK (kullanıcı 07.11.2026: "tutar değiştim ve kapat dedim, uyarmalı - oysa uyarmadı"): kartın
+   * girdi imzası (girdi() JSON'u). Taban, kart HAZIR olduktan (türler + kayıt okundu) sonra alınır; açılıştaki
+   * kendiliğinden dolumlar (varsayılan kasa, kur, cari bakiyesi) hazır anından sonraki 2 sn içinde gelirse taban
+   * onlara kayar - kullanıcı hiç dokunmadan "kirli" görünmesin. Belge kartındaki `kirli` deseni.
+   */
+  const imzaTaban = useRef<string | null>(null);
+  const imzaHazirAni = useRef(0);
   const girdi = (): KasaGirdisi => ({
     tur, grup, tarih, planTarihi, cari, karsiCari, hesap, karsiHesap,
     tutar, doviz: anaDoviz, ekstreDovizi, kur, karsiTutar, masrafTutar,
@@ -403,12 +424,62 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     iadeMi,
   });
 
+  /** Taksit önizlemesi: [vade, tutar] satırları; toplam tutar / vade boşsa ya da tek taksitse boş. */
+  const taksitHesap = (() => {
+    if (!planMi || kayitId !== null || taksitSayisi < 2 || !planTarihi) return [] as { vade: string; tutar: number }[];
+    const toplam = Math.round(hamSayi(tutar) * 100);
+    if (!(toplam > 0)) return [];
+    const pay = Math.floor(toplam / taksitSayisi);
+    const ilk = new Date(planTarihi + 'T00:00:00');
+    return Array.from({ length: taksitSayisi }, (_, i) => {
+      const v = new Date(ilk); v.setMonth(v.getMonth() + i * Math.max(1, taksitAralikAy));
+      const kurus = i === taksitSayisi - 1 ? toplam - pay * (taksitSayisi - 1) : pay;
+      return { vade: bugunIso(v), tutar: kurus / 100 };
+    });
+  })();
+  /** Kaydedilecek taksitler: düzenlenmiş kopya varsa o (sayı ve ilk vade uyuyorsa), yoksa hesap. */
+  const taksitler = taksitDuzen && taksitDuzen.length === taksitHesap.length
+    ? taksitDuzen.map(t => ({ vade: t.vade, tutar: hamSayi(t.tutar) }))
+    : taksitHesap;
+  const taksitToplamFarki = taksitler.length > 1
+    ? Math.round((taksitler.reduce((a, t) => a + t.tutar, 0) - hamSayi(tutar)) * 100) / 100 : 0;
+  /** Düzenleme tablosunda ↑↓: aynı sütunda önceki / sonraki satırın girdisine odak. */
+  const taksitTus = (e: React.KeyboardEvent<HTMLInputElement>, i: number, sutun: string) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const hedef = document.querySelector<HTMLInputElement>(`[data-taksit="${sutun}-${i + (e.key === 'ArrowDown' ? 1 : -1)}"]`);
+    hedef?.focus(); hedef?.select();
+  };
+
   async function kaydet(taslak: boolean, plan = planMi) {
     setHata(null);
     setAlanHatalari({});
 
     const hatalar = kasaDogrula(girdi(), plan);
     if (Object.keys(hatalar).length) { setAlanHatalari(hatalar); return }
+
+    // TAKSİTLİ PLAN: N ayrı plan kaydı (sırayla; biri düşerse öncekiler kalır, sayı bildirilir).
+    if (taksitler.length > 1) {
+      if (taksitler.some(t => !t.vade || !(t.tutar > 0))) { setHata('Her taksitin vadesi ve tutarı dolu olmalı.'); return }
+      if (Math.abs(taksitToplamFarki) > 0.005) { setHata(`Taksit toplamı tutara eşit değil (fark ${para.format(taksitToplamFarki)}).`); return }
+      setCalisiyor(true);
+      let yazilan = 0;
+      try {
+        for (const [i, t] of taksitler.entries()) {
+          const g = { ...girdi(), planTarihi: t.vade, tutar: tutarMetni(String(t.tutar)),
+                      aciklama: `${aciklama ? aciklama + ' · ' : ''}Taksit ${i + 1}/${taksitler.length}` };
+          await api.kasaEkle(kasaGovdesi(g, taslak, plan));
+          yazilan++;
+        }
+        mesaj(`${yazilan} taksit planı kaydedildi (ilk vade ${taksitler[0].vade.split('-').reverse().join('.')}).`);
+        listeleriTazele();
+        if (modalMi) onKapat?.(); else sayfaKapat('/plan-vade');
+      } catch (h) {
+        hataYaz(h);
+        if (yazilan > 0) mesaj(`${yazilan}/${taksitler.length} taksit kaydedildi; kalanı yazılamadı.`);
+      } finally { setCalisiyor(false) }
+      return;
+    }
 
     setCalisiyor(true);
     try {
@@ -447,19 +518,6 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       if (modalMi) onKapat?.(); else sayfaKapat();
     }
     catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
-  }
-
-  async function iptalEt() {
-    if (!kayitId) return;
-    const sebep = await metinSor('İptal sebebi:', '');
-    if (!sebep) return;
-    setHata(null);
-    setCalisiyor(true);
-    try {
-      await api.kasaIptal(kayitId, sebep);
-      yaniti(await api.kasaOku(kayitId));
-      listeleriTazele();
-    } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
 
   /**
@@ -536,8 +594,44 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
                   : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
                   : 'Tahsil Edilen Hesap';
 
-  /** Baslik cubugu dugmeleri - hem sayfa hem modal duzeninde AYNI. */
-  const dugmeler = (
+  const imza = JSON.stringify(girdi());
+  const hazir = turler.length > 0 && (kayitId === null || sonuc !== null);
+  useEffect(() => {
+    if (!hazir) return;
+    const simdi = Date.now();
+    if (imzaTaban.current === null) { imzaTaban.current = imza; imzaHazirAni.current = simdi; return }
+    if (simdi - imzaHazirAni.current < 2000) imzaTaban.current = imza;   // açılış dolumu
+  }, [hazir, imza]);
+  const kirli = hazir && !kilitli && imzaTaban.current !== null && imza !== imzaTaban.current;
+  const kirliRef = useRef(false);
+  kirliRef.current = kirli;
+  /** Kapat isteği: kirliyse Kaydet / İptal / Geri Dön sorulur (belge kartıyla aynı metin ve sıra). */
+  const kapatIste = async () => {
+    const cik = () => { if (modalMi) onKapat?.(); else sayfaKapat(planMi ? '/plan-vade' : '/kasa-islem') };
+    if (!kirliRef.current) { cik(); return }
+    const secim = await secimSor(
+      'Bu kartta kaydedilmemiş değişiklikler var. Ne yapmak istiyorsunuz?',
+      [
+        { kod: 'kaydet', ad: '💾 Kaydet', sinif: 'bir' },
+        { kod: 'iptal',  ad: '✖ İptal (kaydetme)', sinif: 'teh' },
+        { kod: 'geri',   ad: '↩ Geri Dön' },
+      ], 'geri');
+    if (secim === 'geri') return;
+    if (secim === 'iptal') { imzaTaban.current = imza; cik(); return }
+    await kaydet(false, planMi);   // başarılıysa kendisi kapatır; hata varsa kart açık kalır
+  };
+  const kapatIsteRef = useRef(kapatIste);
+  kapatIsteRef.current = kapatIste;
+  // Sekmenin × / Alt+W'si de aynı soruyu sorsun; kirliyken aynı sekmede başka kart açılmasın.
+  useEffect(() => {
+    if (modalMi || !ekranSekmesi) return;
+    ekranSekmesi.kapatmaIsleyicisi(() => void kapatIsteRef.current(), () => kirliRef.current);
+    return () => ekranSekmesi.kapatmaIsleyicisi(null);
+  }, [modalMi, ekranSekmesi]);
+
+  /** Baslik cubugu EYLEM dugmeleri (Kaydet / Kesinleştir / İptal / Sil) - sayfa düzeninde SOLDA (kullanıcı 07.11.2026
+      "tahsilatta kaydet butonu sola yanaş"; belge kartıyla aynı sıra), modalde alt şeritte. Kapat ayrı: hep en sağda. */
+  const eylemler = (
           <>
             {/* TASLAK KAYDET KALKTI (kullanici): kasa islemi kaydedilince
                 kesindir - belge kartindaki kuralla ayni. Taslak (durum 0)
@@ -552,32 +646,28 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
                             ? 'Değişiklikler kaydedilir; muhasebe fişi yeniden yazılır (fiş no korunur).'
                             : undefined}
                           onClick={() => void kaydet(false, false)}>
-                    {calisiyor ? 'Kaydediliyor…'
-                     : durum === 2 ? 'Değişiklikleri Kaydet' : 'Kaydet'}
+                    {/* Gerçekleşmişte de "Kaydet" (kullanıcı 07.11.2026); ipucu fişin yeniden yazılacağını söyler. */}
+                    {calisiyor ? 'Kaydediliyor…' : 'Kaydet'}
                   </button>
             )}
             {kayitId !== null && durum === 0 && (
               <button className="d bir" disabled={calisiyor} onClick={() => void kesinlestir()}>{cev('Kesinleştir')}</button>
             )}
-            {durum === 2 && (
-              <button className="d teh" disabled={calisiyor} onClick={() => void iptalEt()}>
-                İptal Et
-              </button>
-            )}
+            {/* "İptal Et" KALKTI (kullanıcı 07.11.2026): ters kayıtla iptal yerine Sil (sunucu izin verirse) kullanılıyor;
+                uç (POST /iptal, api.kasaIptal) duruyor - liste aksiyonu / API için. */}
             {kayitId !== null && durum !== 3 && yetki('kasa_islem', 'sil') && (
               <button className="d teh" disabled={calisiyor} onClick={() => void sil()}>🗑️ {cev('Sil')}</button>
             )}
-            {/* KAPAT EN SAĞDA (kullanıcı 26.10.2026: "cari virman da kapat ve kaydet yer değiş"): Kaydet solda,
-                Kapat sonda - belge kartlarıyla aynı sıra, bütün kasa işlemi türlerinde. */}
-            {modalMi
-              ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ {cev('Kapat')}</button>
-              : ekranSekmesi
-                ? <button className="d kapat-dugmesi" onClick={() => sayfaKapat()}>✖ {cev('Kapat')}</button>
-                : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
-                  Listeye Dön
-                </button>}
           </>
   );
+  {/* KAPAT EN SAĞDA (kullanıcı 26.10.2026: "cari virman da kapat ve kaydet yer değiş"): Kaydet solda,
+      Kapat sonda - belge kartlarıyla aynı sıra, bütün kasa işlemi türlerinde. */}
+  const kapatDugmesi = modalMi || ekranSekmesi
+    ? <button className="d kapat-dugmesi" onClick={() => void kapatIste()}>✖ {cev('Kapat')}</button>
+    : <button className="d" onClick={() => void kapatIste()}>
+        Listeye Dön
+      </button>;
+  const dugmeler = <>{eylemler}{kapatDugmesi}</>;
 
   const govdeIcerik = (
       <div className={modalMi ? '' : 'sahne'}>
@@ -809,11 +899,27 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             <div className="alan-izgara">
               {planMi && (
                 <label className="alan">
-                  <span className="etiket">{cev('Vade *')}</span>
-                  <input type="date" value={planTarihi} disabled={kilitli || durum === 1}
-                         onChange={e => setPlanTarihi(e.target.value)} />
+                  <span className="etiket">{cev(taksitSayisi > 1 ? 'İlk vade *' : 'Vade *')}</span>
+                  <input type="date" value={planTarihi} disabled={kilitli || durum === 1} style={{ maxWidth: '50%', minWidth: 150 }}
+                         onChange={e => { setTaksitDuzen(null); setPlanTarihi(e.target.value) }} />
                   {alanHatalari.planTarihi && <span className="alan-hata">{alanHatalari.planTarihi}</span>}
                 </label>
+              )}
+              {planMi && kayitId === null && (
+                <>
+                  <label className="alan">
+                    <span className="etiket">{cev('Taksit sayısı')}</span>
+                    <input type="number" min={1} max={120} value={taksitSayisi} disabled={kilitli} style={{ maxWidth: '50%' }}
+                           onChange={e => { setTaksitDuzen(null); setTaksitSayisi(Math.max(1, Math.min(120, Number(e.target.value) || 1))) }} />
+                  </label>
+                  {taksitSayisi > 1 && (
+                    <label className="alan">
+                      <span className="etiket">{cev('Taksit aralığı (ay)')}</span>
+                      <input type="number" min={1} max={12} value={taksitAralikAy} disabled={kilitli} style={{ maxWidth: '50%' }}
+                             onChange={e => { setTaksitDuzen(null); setTaksitAralikAy(Math.max(1, Math.min(12, Number(e.target.value) || 1))) }} />
+                    </label>
+                  )}
+                </>
               )}
 
               {/* Kur ve TL karsiligi BASLIKTA, tutarin altinda (kullanici) -
@@ -923,13 +1029,49 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           {/* TAHSILAT DAGITIMI (321): yalniz belgeye BAGLI tahsilatta - serbest
               kasa hareketinin dagitacagi satir yoktur. Prim "tahsil edildikce"
               hesaplandigi icin dagitim gercek veri olmali. */}
-          {belgeBagi > 0 && !kilitli && (
+          {/* ERP'DE YOK (kullanıcı 07.11.2026 "erp modunda tahsilat kartında tahsilat dağıtımı olmaz"): dağıtım prim
+              (tahsil edildikçe) içindir - HBYS. ERP'de tahsilat belgeye bütün olarak bağlanır. */}
+          {belgeBagi > 0 && !kilitli && kullanici?.urunModu === URUN_GENOTIP && (
             <TahsilatDagitimi
               belgeId={belgeBagi}
               kasaIslemId={kayitId}
               tutar={sayi(tutar) || 0}
               onDegisti={setDagitim}
             />
+          )}
+
+          {taksitler.length > 1 && (
+            <div className="kagrup" style={{ marginTop: 14 }}>
+              <h6 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {cev('Taksitler')} · {taksitler.length} · {cev('toplam')} {para.format(hamSayi(tutar))}
+                <button type="button" className={`d${taksitDuzen ? ' bir' : ''}`} style={{ marginLeft: 'auto', padding: '2px 8px' }}
+                        title={taksitDuzen ? cev('Hesaplanan taksitlere dön') : cev('Taksit tarih ve tutarlarını düzenle')}
+                        onClick={() => setTaksitDuzen(taksitDuzen ? null : taksitHesap.map(t => ({ vade: t.vade, tutar: tutarMetni(String(t.tutar)) })))}>
+                  ✎ {taksitDuzen ? cev('Hesaplanana dön') : cev('Düzenle')}
+                </button>
+              </h6>
+              <table className="grid" style={{ fontSize: 12 }}>
+                <thead><tr><th style={{ width: 40 }}>#</th><th>{cev('Vade')}</th><th style={{ textAlign: 'right' }}>{cev('Tutar')}</th></tr></thead>
+                <tbody>
+                  {taksitDuzen
+                    ? taksitDuzen.map((t, i) => (
+                        <tr key={i}><td>{i + 1}</td>
+                          <td><input type="date" value={t.vade} data-taksit={`vade-${i}`} style={{ maxWidth: 170 }}
+                                     onKeyDown={e => taksitTus(e, i, 'vade')}
+                                     onChange={e => setTaksitDuzen(d => d!.map((x, k) => k === i ? { ...x, vade: e.target.value } : x))} /></td>
+                          <td style={{ textAlign: 'right' }}>
+                            <input className="hiza-sag" value={t.tutar} data-taksit={`tutar-${i}`} style={{ maxWidth: 140 }}
+                                   onKeyDown={e => taksitTus(e, i, 'tutar')}
+                                   onChange={e => setTaksitDuzen(d => d!.map((x, k) => k === i ? { ...x, tutar: e.target.value } : x))} /></td></tr>))
+                    : taksitler.map((t, i) => (
+                        <tr key={i}><td>{i + 1}</td><td>{t.vade.split('-').reverse().join('.')}</td>
+                          <td style={{ textAlign: 'right' }}>{para.format(t.tutar)}</td></tr>))}
+                </tbody>
+              </table>
+              {taksitDuzen && Math.abs(taksitToplamFarki) > 0.005 && (
+                <div className="alan-hata">{cev('Taksit toplamı tutardan farklı')}: {para.format(taksitToplamFarki)}</div>)}
+              <div className="not">{cev(taksitDuzen ? '↑↓ satırlar arasında gezer; toplam tutara eşit olmalı.' : 'Her taksit ayrı plan kaydı olur (vade listesi, gerçekleştirme, iptal); kuruş farkı son taksitte.')}</div>
+            </div>
           )}
 
           {sonuc?.fis && <FisOnizleme fis={sonuc.fis} />}
@@ -959,7 +1101,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
               {KASA_DURUM[durum] ?? durum}
             </span>
           : undefined}
-        onKapat={onKapat}
+        onKapat={() => void kapatIste()}
         alt={dugmeler}
       >
         {govdeIcerik}
@@ -970,6 +1112,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     <>
       <div className="sayfabas">
         <div className="basrow">
+          {eylemler}
           <h1>{iadeKipi ? 'Avans İadesi'
                : avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}</h1>
           <span className="yol">
@@ -982,7 +1125,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             </span>
           )}
           {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
-          <div className="sag">{dugmeler}</div>
+          <div className="sag">{kapatDugmesi}</div>
         </div>
       </div>
       {govdeIcerik}

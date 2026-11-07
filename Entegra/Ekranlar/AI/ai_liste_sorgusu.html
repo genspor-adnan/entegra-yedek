@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre Yapay Zeka — Liste Sorgusu Aracı (Mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --head2:#e7eef5;
+    --btnfrom:#fff; --btnto:#eef2f7; --ok:#2e7d46; --okzem:#e6f4ea; --uyari:#b5731a; --uyarizem:#fff4e0; --hata:#b23b3b; --hatazem:#fdecec;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:12px}
+  .win{max-width:1480px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:6px;
+    box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden;display:flex;flex-direction:column;min-height:860px}
+  .title{background:linear-gradient(#4b3a86,#372a63);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:600}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#b9a4ec}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#f4f7fb);flex-wrap:wrap}
+  .tb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:6px;padding:6px 11px;color:#33465c}
+  .tb.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .ayr{width:1px;height:22px;background:var(--line);margin:0 3px}
+  .wrap{flex:1;display:flex;min-height:0}
+  .sol{width:250px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;display:flex;flex-direction:column}
+  .bs{padding:8px 10px;border-bottom:1px solid var(--line2);background:var(--head2);font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .yeni{margin:9px 10px;border:1px solid #5f42a8;background:linear-gradient(#7d5cc9,#5f42a8);color:#fff;border-radius:7px;padding:9px;text-align:center;font-weight:600}
+  .gec{padding:2px 6px 10px}
+  .gs{padding:8px 9px;border-radius:6px;margin-bottom:2px;font-size:12px;color:#33475c}
+  .gs.on{background:var(--aiZem);color:var(--ai);font-weight:600}
+  .gs .zt{display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:1px}
+  .oner{padding:8px 10px 12px;border-top:1px solid var(--line2);margin-top:auto}
+  .ok2{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px 10px;font-size:11.5px;color:#33475c;margin-bottom:6px;font-family:inherit}
+  .ok2 b{color:var(--ai)}
+  .orta{flex:1;min-width:0;display:flex;flex-direction:column;background:#fbfcfe}
+  .akis{flex:1;overflow:auto;padding:16px 18px 8px}
+  .msj{display:flex;gap:11px;margin-bottom:16px;max-width:980px}
+  .msj .av{width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;background:#e5ecf5;color:#3a5573}
+  .msj.ai .av{background:linear-gradient(#7d5cc9,#5f42a8);color:#fff}
+  .msj .gv{flex:1;min-width:0}
+  .msj .kim{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .msj .kim b{color:var(--ink);font-weight:600;font-size:12px}
+  .balon{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 13px;line-height:1.6}
+  .msj.ben .balon{background:var(--sel);border-color:var(--selbd)}
+  .balon p{margin:0 0 8px}.balon p:last-child{margin:0}
+  /* SORGU TASLAĞI KARTI */
+  .sorgu{border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:10px;padding:10px 12px;margin:8px 0}
+  .sorgu .ust{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .sorgu .ust b{color:var(--ai)}
+  .sorgu .roz{font-size:10.5px;border:1px solid var(--aiKenar);background:#fff;border-radius:10px;padding:1px 8px;color:var(--ai)}
+  .sorgu .sat{display:grid;grid-template-columns:92px 1fr;gap:6px 10px;align-items:start;font-size:12px}
+  .sorgu .sat > span:first-child{color:var(--muted);padding-top:3px}
+  .cipler{display:flex;flex-wrap:wrap;gap:5px}
+  .cip{border:1px solid var(--selbd);background:#fff;border-radius:12px;padding:2px 9px;font-size:11.5px;color:#2b4d7a;display:inline-flex;align-items:center;gap:5px}
+  .cip i{font-style:normal;color:#9aa8b8;cursor:pointer}
+  .cip.ek{border-style:dashed;color:var(--muted)}
+  .cip.yeni{background:#fff8e1;border-color:#edd38b;color:#7a5407}
+  .cip.kaldi{background:#f1f3f6;color:#9aa8b8;text-decoration:line-through}
+  .sorgu .dug{display:flex;gap:6px;margin-top:10px;align-items:center}
+  .d{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:5px 11px;color:#33465c;font-size:12px;font-family:inherit}
+  .d.bir{background:linear-gradient(#3f7fc7,#2f6db3);border-color:#2a62a2;color:#fff;font-weight:600}
+  .d.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .not{font-size:11px;color:var(--muted)}
+  /* ARAÇ ÇAĞRISI */
+  .arac{border:1px solid var(--line2);background:#f6f8fb;border-radius:8px;padding:8px 11px;margin:8px 0;font-size:11.5px;color:var(--muted)}
+  .arac .ust{display:flex;align-items:center;gap:8px;color:#3a5573}
+  .arac code{font-family:Consolas,monospace;font-size:11px;background:#fff;border:1px solid var(--line2);border-radius:4px;padding:1px 6px;color:var(--ai)}
+  .arac .sure{margin-left:auto;font-size:10.5px}
+  /* SONUÇ TABLOSU */
+  table.grid{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;background:#fff}
+  .grid th{background:var(--head);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-weight:600;color:#3a5573;font-size:11px}
+  .grid td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  .grid td.sag,.grid th.sag{text-align:right}
+  .grid .kir{color:var(--hata);font-weight:600}
+  .grid .uy{color:var(--uyari)}
+  .grid a{color:var(--accent);text-decoration:none}
+  .alt{display:flex;gap:6px;align-items:center;margin-top:8px}
+  .alt .not{margin-left:auto}
+  .uyari{border:1px solid #edd38b;background:#fff8e1;color:#7a5407;border-radius:8px;padding:8px 11px;margin:8px 0;font-size:12px}
+  .hata{border:1px solid #f1b8b8;background:var(--hatazem);color:var(--hata);border-radius:8px;padding:8px 11px;margin:8px 0;font-size:12px}
+  /* GİRİŞ */
+  .giris{border-top:1px solid var(--line);padding:10px 14px;background:#fff}
+  .giris .kutu{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+  .giris input{flex:1;border:0;outline:0;font:inherit;font-size:13px}
+  .giris .alt{margin-top:6px;font-size:11px;color:var(--muted)}
+  .giris .alt .sag{margin-left:auto}
+  /* SAĞ */
+  .sag2{width:300px;flex:none;border-left:1px solid var(--line);background:#f7f9fc;display:flex;flex-direction:column;overflow:auto}
+  .kart{margin:10px 10px 0;border:1px solid var(--line2);background:#fff;border-radius:8px;padding:9px 11px;font-size:12px}
+  .kart h6{margin:0 0 6px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kart .sat{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line2)}
+  .kart .sat:last-child{border:0}
+  .kart .sat b{font-weight:600}
+  .kart .kaynak{display:flex;align-items:center;gap:6px;padding:3px 0}
+  .kart .kaynak .y{margin-left:auto;font-size:10.5px;color:var(--muted)}
+  .kart .kaynak .y.yok{color:var(--hata)}
+  .kural{margin:10px;border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:8px;padding:9px 11px;font-size:11.5px;color:#4a3a78;line-height:1.5}
+  .kural b{display:block;color:var(--ai);margin-bottom:3px}
+  /* NOTLAR */
+  .notlar{max-width:1480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 20px;line-height:1.6}
+  .notlar h2{margin:0 0 8px;font-size:15px;color:var(--navy)}
+  .notlar h3{margin:14px 0 6px;font-size:13px;color:var(--ai)}
+  .notlar pre{background:#f6f8fb;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;font-size:11.5px;overflow:auto}
+  .notlar ol,.notlar ul{padding-left:20px;margin:4px 0}
+  .notlar li{margin:3px 0}
+  .notlar table{border-collapse:collapse;font-size:12px;margin:6px 0}
+  .notlar td,.notlar th{border:1px solid var(--line2);padding:5px 9px;text-align:left;vertical-align:top}
+  .notlar th{background:var(--head)}
+  kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:10.5px;background:#fff}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title"><span class="dot"></span> Gentegre Yapay Zeka — Liste Sorgusu
+    <span class="sp">İletişim &amp; AI › Yapay Zeka &nbsp;·&nbsp; Şube: Merkez &nbsp;·&nbsp; Model: claude-haiku-5-5 &nbsp;·&nbsp; Kontör: 1.240</span></div>
+  <div class="toolbar">
+    <div class="tb ai">✨ Yeni sohbet</div>
+    <div class="tb">📎 Bağlam: Cari İcmali ekranı</div>
+    <div class="ayr"></div>
+    <div class="tb">⚙ İzinli fonksiyonlar</div>
+    <div class="tb">📜 AI günlüğü</div>
+    <span class="not" style="margin-left:auto">Model veritabanına bağlanmaz; liste sorgusunu JSON olarak önerir, sunucu kataloğu ve yetkiyle çalıştırır.</span>
+  </div>
+
+  <div class="wrap">
+    <!-- SOL -->
+    <div class="sol">
+      <div class="yeni">＋ Yeni sohbet</div>
+      <div class="bs">Sohbet geçmişi</div>
+      <div class="gec">
+        <div class="gs on">Tahsilatı geciken İstanbul müşterileri<span class="zt">bugün 14:02 · 3 sorgu</span></div>
+        <div class="gs">Kritik stok — Ankara deposu<span class="zt">dün · 1 sorgu</span></div>
+        <div class="gs">Bu hafta vadesi gelen ödemeler<span class="zt">03.11 · 2 sorgu</span></div>
+        <div class="gs">Ekim satış faturaları (e-Arşiv)<span class="zt">01.11</span></div>
+      </div>
+      <div class="oner">
+        <div class="bs" style="margin:0 -10px 8px;border-top:1px solid var(--line2)">Hazır sorular</div>
+        <button class="ok2">👥 <b>Vadesi geçen</b> cariler, temsilciye göre</button>
+        <button class="ok2">📦 <b>Kritik stok</b> — minimumun altındakiler</button>
+        <button class="ok2">🧾 <b>Bu ay</b> gönderilmemiş e-Faturalar</button>
+        <button class="ok2">💵 <b>Bugün</b> vadesi gelen çek / senet</button>
+        <button class="ok2">🕒 <b>30 gündür</b> hareketi olmayan müşteriler</button>
+      </div>
+    </div>
+
+    <!-- ORTA -->
+    <div class="orta">
+      <div class="akis">
+
+        <div class="msj ben">
+          <div class="av">S</div>
+          <div class="gv">
+            <div class="kim"><b>Sistem Yöneticisi</b> 14:02</div>
+            <div class="balon"><p>Bu ay tahsilatı geciken İstanbul'daki müşteriler kim? Bakiyesi büyükten küçüğe.</p></div>
+          </div>
+        </div>
+
+        <div class="msj ai">
+          <div class="av">✨</div>
+          <div class="gv">
+            <div class="kim"><b>Gentegre AI</b> 14:02 <span class="not">· sorgu taslağı · 412 jeton</span></div>
+            <div class="balon">
+              <p>Sorunu <b>Müşteri Listesi</b> üzerinde bir süzgece çevirdim. Çalıştırmadan önce koşulları düzenleyebilirsin.</p>
+
+              <div class="sorgu">
+                <div class="ust">🔎 <b>Sorgu taslağı</b> <span class="roz">kaynak: cari</span> <span class="roz">kapsam: Merkez</span>
+                  <span class="not" style="margin-left:auto">Katalogdaki alanlar · değerler parametre</span></div>
+                <div class="sat">
+                  <span>Liste</span><span><b>Müşteri Listesi</b> <span class="not">(Cari &amp; CRM › Müşteri Listesi)</span></span>
+                  <span>Koşullar</span>
+                  <span class="cipler">
+                    <span class="cip">Müşteri = evet <i>×</i></span>
+                    <span class="cip">İl = İstanbul <i>×</i></span>
+                    <span class="cip">Vadesi geçen &gt; 0 <i>×</i></span>
+                    <span class="cip">Son tahsilat &lt; 01.11.2026 <i>×</i></span>
+                    <span class="cip">Durum = aktif <i>×</i></span>
+                    <span class="cip ek">＋ koşul</span>
+                  </span>
+                  <span>Sıralama</span><span class="cipler"><span class="cip">Bakiye ↓</span></span>
+                  <span>Kolonlar</span><span class="cipler">
+                    <span class="cip">Kod</span><span class="cip">Ünvan</span><span class="cip">Temsilci</span><span class="cip">Bakiye</span>
+                    <span class="cip">Vadesi geçen</span><span class="cip">Son tahsilat</span><span class="cip ek">＋ kolon</span></span>
+                </div>
+                <div class="dug">
+                  <button class="d bir">▶ Çalıştır</button>
+                  <button class="d">✎ Düzenle</button>
+                  <button class="d">📋 Listede aç</button>
+                  <span class="not" style="margin-left:auto">"Bu ay" → son tahsilat 01.11'den önce olarak yorumlandı; farklıysa söyle.</span>
+                </div>
+              </div>
+
+              <div class="arac">
+                <div class="ust">🧩 <code>liste_sorgusu</code> cari · 5 koşul · 1 sıralama <span class="sure">38 ms · 14 satır · yetki süzgeci: şube Merkez, müşteri görme</span></div>
+              </div>
+
+              <table class="grid">
+                <thead><tr><th>Kod</th><th>Ünvan</th><th>Temsilci</th><th class="sag">Bakiye</th><th class="sag">Vadesi geçen</th><th>Son tahsilat</th></tr></thead>
+                <tbody>
+                  <tr><td>120.01.143</td><td><a href="#">ALOEPLANT SAĞLIK HİZ. SAN. TİC. LTD.</a></td><td>M. Akman</td><td class="sag kir">184.250,00</td><td class="sag kir">92.400,00</td><td class="uy">12.09.2026</td></tr>
+                  <tr><td>120.01.450</td><td><a href="#">BİMED TEKNOLOJİ</a></td><td>M. Akman</td><td class="sag kir">61.730,10</td><td class="sag kir">61.730,10</td><td class="uy">30.08.2026</td></tr>
+                  <tr><td>120.01.570</td><td><a href="#">DOĞU MEDİKAL A.Ş.</a></td><td>S. Yıldız</td><td class="sag">24.410,09</td><td class="sag kir">24.410,09</td><td>28.10.2026</td></tr>
+                  <tr><td>120.01.036</td><td><a href="#">TEKGÜL İMPLANT VE MEDİKAL</a></td><td>—</td><td class="sag">9.870,00</td><td class="sag kir">9.870,00</td><td>15.10.2026</td></tr>
+                  <tr><td colspan="6" class="not">… 10 satır daha · toplam vadesi geçen <b>412.618,40 ₺</b> · 14 cari</td></tr>
+                </tbody>
+              </table>
+              <div class="alt">
+                <button class="d">📋 Listede aç (süzgeçli)</button>
+                <button class="d">📊 Excel'e aktar</button>
+                <button class="d">⭐ Kayıtlı arama olarak sakla</button>
+                <button class="d">✉ Hatırlatma e-postası taslağı</button>
+                <span class="not">Tıklanan ünvan cari kartını açar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msj ben">
+          <div class="av">S</div>
+          <div class="gv">
+            <div class="kim"><b>Sistem Yöneticisi</b> 14:04</div>
+            <div class="balon"><p>Yalnız 10.000 üstü olsun, temsilcisi olmayanları da çıkar.</p></div>
+          </div>
+        </div>
+
+        <div class="msj ai">
+          <div class="av">✨</div>
+          <div class="gv">
+            <div class="kim"><b>Gentegre AI</b> 14:04 <span class="not">· taslak güncellendi · 156 jeton</span></div>
+            <div class="balon">
+              <div class="sorgu">
+                <div class="ust">🔎 <b>Sorgu taslağı v2</b> <span class="roz">kaynak: cari</span>
+                  <span class="not" style="margin-left:auto">önceki koşullar korundu, iki değişiklik</span></div>
+                <div class="sat">
+                  <span>Koşullar</span>
+                  <span class="cipler">
+                    <span class="cip">Müşteri = evet</span><span class="cip">İl = İstanbul</span>
+                    <span class="cip yeni">Vadesi geçen &gt; 10.000 <i>×</i></span>
+                    <span class="cip">Son tahsilat &lt; 01.11.2026</span><span class="cip">Durum = aktif</span>
+                    <span class="cip yeni">Temsilci ≠ boş <i>×</i></span>
+                  </span>
+                </div>
+                <div class="dug"><button class="d bir">▶ Çalıştır</button><button class="d">✎ Düzenle</button>
+                  <span class="not" style="margin-left:auto">2 cari · 246.000,10 ₺ vadesi geçen</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msj ben">
+          <div class="av">S</div>
+          <div class="gv">
+            <div class="kim"><b>Sistem Yöneticisi</b> 14:06</div>
+            <div class="balon"><p>Personelin maaşlarını da listele.</p></div>
+          </div>
+        </div>
+
+        <div class="msj ai">
+          <div class="av">✨</div>
+          <div class="gv">
+            <div class="kim"><b>Gentegre AI</b> 14:06 <span class="not">· yetki süzgeci</span></div>
+            <div class="balon">
+              <div class="hata">🔒 <b>Bu sorguyu çalıştıramam.</b> Personel Listesi (ik.personel) ve <i>maaş</i> alanı bu rolde görünmüyor;
+                sunucu kataloğu alanı döndürmediği için sorgu kurulmadı. Yetkiyi <b>Yönetim › Roller</b>'den İK sorumlusu verir.</div>
+              <p class="not">İsteği günlüğe yazdım (AI günlüğü › reddedilen sorgular).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="giris">
+        <div class="kutu">🔎 <input placeholder="Sor: “Ankara deposunda minimumun altındaki ürünler”, “bu hafta vadesi gelen ödemeler”…">
+          <button class="d">🎤</button><button class="d ai">Gönder</button></div>
+        <div class="alt"><span>@ ile liste seç (ör. <kbd>@stok</kbd>), <kbd>Ctrl K</kbd> paletinden de sorulur</span>
+          <span class="sag">Yazan işlem yapılmaz — liste sorgusu okur, taslak üretir; onayı sen verirsin</span></div>
+      </div>
+    </div>
+
+    <!-- SAĞ -->
+    <div class="sag2">
+      <div class="kart">
+        <h6>Bu sohbette kullanılabilen listeler</h6>
+        <div class="kaynak">👥 Müşteri Listesi <span class="y">cari · görme</span></div>
+        <div class="kaynak">🏭 Tedarikçi Listesi <span class="y">cari · görme</span></div>
+        <div class="kaynak">📦 Stok Listesi <span class="y">stok · görme</span></div>
+        <div class="kaynak">🧾 Satış Faturaları <span class="y">belge · görme</span></div>
+        <div class="kaynak">💵 Kasa İşlemleri <span class="y">kasa_islem · görme</span></div>
+        <div class="kaynak">📄 Çek / Senet <span class="y">cek_senet · görme</span></div>
+        <div class="kaynak" style="color:#9aa8b8">👤 Personel Listesi <span class="y yok">yetki yok</span></div>
+        <div class="not" style="margin-top:6px">Rolün görebildiği kaynaklar; kolonlar da yetkiyle süzülür (katalog).</div>
+      </div>
+      <div class="kart">
+        <h6>Bağlam</h6>
+        <div class="sat"><span>Ekran</span><b>Cari İcmali</b></div>
+        <div class="sat"><span>Şube</span><b>Merkez</b></div>
+        <div class="sat"><span>Dönem</span><b>01.01 – 05.11.2026</b></div>
+        <div class="sat"><span>Rol</span><b>Yönetici</b></div>
+        <div class="not" style="margin-top:6px">Ekran bağlamı sunucuda doğrulanır; dönem ve kapsam sorguya varsayılan olur.</div>
+      </div>
+      <div class="kart">
+        <h6>Bu sohbet</h6>
+        <div class="sat"><span>Sorgu</span><b>3 · 2 çalıştı</b></div>
+        <div class="sat"><span>Jeton</span><b>568 giriş · 214 çıkış</b></div>
+        <div class="sat"><span>Kontör</span><b>1.240 → 1.236</b></div>
+        <div class="sat"><span>Reddedilen</span><b style="color:var(--hata)">1 (yetki)</b></div>
+      </div>
+      <div class="kural"><b>Kural</b>
+        Model SQL yazmaz, veriye dokunmaz. Yalnız <i>kaynak + koşul + sıralama + kolon</i> JSON'u önerir;
+        sunucu bunu katalogdaki alan beyaz listesi ve kullanıcının yetkisiyle doğrular, değerleri parametre bağlar,
+        listeyi çalıştırır. Reddedilen sorgu ve her çalıştırma günlüğe yazılır.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — liste sorgusu aracı (öneri 2)</h2>
+  <p>Bugünkü Yapay Zeka ekranında 4 sabit araç var; serbest soru rehber cevabına düşüyor. Bu araç, modeli <b>liste
+  süzgeci üreticisi</b> yapar: her liste kaynağı zaten sunucuda katalogla süzülüyor (KaynakKatalogu: alan beyaz
+  listesi, parametreli değer, yetki süzgeci, şube kapsamı). Model aynı sözleşmeyi (§2 liste isteği) üretir, yeni bir
+  SQL yolu açılmaz.</p>
+
+  <h3>Akış</h3>
+  <ol>
+    <li>Kullanıcı soruyu yazar (metin, dikte ya da <kbd>Ctrl K</kbd> paletinden; <code>@kaynak</code> ile liste sabitlenebilir).</li>
+    <li>Sunucu modele <b>yalnız</b> kullanıcının görebildiği kaynakların kataloğunu (ad, başlık, alanlar, tipler, kod sözlükleri) ve
+      ekran bağlamını (dönem, şube, açık kayıt) verir. Satır verisi gönderilmez.</li>
+    <li>Model <code>liste_sorgusu</code> aracını JSON ile çağırır (aşağıdaki şema). Serbest metin yorum isteğe bağlı.</li>
+    <li>Sunucu doğrular: kaynak katalogda ve yetkili mi, her alan beyaz listede mi, operatör tipe uygun mu, değer parse ediliyor mu.
+      Biri düşerse <b>sorgu çalışmaz</b>, model düzeltme için bir kez daha çağrılır; yine düşerse kullanıcıya "düzenle" ile verilir.</li>
+    <li>Ekran <b>sorgu taslağı kartını</b> çizer (çipler düzenlenebilir). "Çalıştır" normal liste ucunu (<code>POST /api/liste/{kaynak}</code>)
+      çağırır — yetki, şube kapsamı, sayfalama, kolon süzme orada. Sonuç tablo olarak akışa iner.</li>
+    <li>Takip sorusu taslağı <b>günceller</b> (fark çipleri sarı). Sonuçtan: listede aç (aynı süzgeçle liste ekranı), Excel, kayıtlı arama,
+      taslak (hatırlatma e-postası / görev) — yazan işlem yine onaylı taslak.</li>
+  </ol>
+
+  <h3>Araç şeması (modelin ürettiği)</h3>
+<pre>{
+  "arac": "liste_sorgusu",
+  "kaynak": "cari",                           // katalogdaki Ad; rol görmüyorsa 403 → sorgu kurulmaz
+  "kosullar": [                               // Kosul sözleşmesi (§2.3) ile birebir
+    { "alan": "musteri",      "op": "esit",      "deger": 1 },
+    { "alan": "il",           "op": "esit",      "deger": "İstanbul" },
+    { "alan": "vadesiGecen",  "op": "buyuk",     "deger": 0 },
+    { "alan": "sonTahsilat",  "op": "kucuk",     "deger": "2026-11-01" },
+    { "alan": "durum",        "op": "esit",      "deger": 1 }
+  ],
+  "sirala": [{ "alan": "bakiye", "yon": "desc" }],
+  "kolonlar": ["kod", "unvan", "temsilci", "bakiye", "vadesiGecen", "sonTahsilat"],
+  "boyut": 50,
+  "aciklama": "Bu ay = son tahsilat 1 Kasım'dan önce"   // kullanıcıya gösterilen yorum notu
+}</pre>
+
+  <h3>Kurallar</h3>
+  <ul>
+    <li><b>Yetki modele güvenilmez:</b> katalog zaten yetkisiz kolonu döndürmez; sunucu her çalıştırmada yeniden süzer. Model
+      yetkisiz alan üretirse sorgu reddedilir, kullanıcıya hangi yetkinin eksik olduğu söylenir (örnek: personel maaşı).</li>
+    <li><b>Değer her zaman parametre;</b> model metni hiçbir yerde SQL'e girmez. Tarih / sayı / kod değerleri tipine göre parse edilir;
+      kod alanlarında sözlük etiketi (ör. "Ticari") koda çevrilir.</li>
+    <li><b>Şube kapsamı ve dönem</b> ekran bağlamından varsayılan gelir; model dışına çıkamaz (sunucu kapsamı zorlar).</li>
+    <li><b>Günlük:</b> her sorgu (kaynak, koşul sayısı, satır, süre, jeton) ve her ret <code>ai_arac_log</code>'a; AI günlüğünde
+      "reddedilen sorgular" sekmesi bilgi tabanı / yetki eksiğini gösterir.</li>
+    <li><b>Kontör:</b> model çağrısı başına düşer; sorguyu çalıştırmak düşürmez (normal liste ucu).</li>
+    <li><b>Bağlamsal panelde</b> aynı araç, kart ekranında açık kayda daraltılmış olarak: "bu carinin açık belgeleri" → kaynak belge,
+      koşul tarafId = açık kayıt.</li>
+  </ul>
+
+  <h3>Sunucu / istemci işi</h3>
+  <table>
+    <tr><th>Katman</th><th>İş</th></tr>
+    <tr><td>db</td><td><code>ai_arac</code>'a <code>liste_sorgusu</code> (yazar 0, yetki yok — kaynak yetkisi çalıştırmada bakılır); <code>ai_arac_log</code>'a ret sebebi kolonu.</td></tr>
+    <tr><td>api</td><td>Model çağrısına araç tanımı + izinli katalog özeti; JSON doğrulayıcı (kaynak, alan, op, tip); <code>POST /api/ai/{sohbet}/sor</code> yanıtına <code>sorguTaslagi</code>; çalıştırma mevcut liste ucu.</td></tr>
+    <tr><td>web</td><td>Sorgu taslağı kartı (çip düzenleme = Kosul düzenleyici, GenGrid süzgeç bileşeni yeniden kullanılır), sonuç tablosu (gridHucre ile), "Listede aç" = liste rotası + süzgeç parametresi, kayıtlı arama (mevcut kullanıcı_arama).</td></tr>
+  </table>
+</div>
+
+</body>
+</html>

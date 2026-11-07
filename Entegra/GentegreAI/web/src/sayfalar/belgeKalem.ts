@@ -1,5 +1,6 @@
 import { type SatirDurumu, bosSatir } from './belgeSatir';
 import type { IadeSatiri } from '../bilesenler/belge/IadeSatirPenceresi';
+import type { SiparisSatiri } from '../bilesenler/belge/SiparistenAktarPenceresi';
 import { hamSayi } from '../bilesenler/bicim';
 import { matraha } from './belgeKarti/kdvModu';
 
@@ -223,6 +224,53 @@ export function paketIcerigiUygula(
  * belgelerinden secilir - fiyat/iskonto/KDV kaynaktan gelir ve kaynak satir
  * bagi (kaynakSatirId) korunur; iade edilen miktar o bagdan hesaplanir.
  */
+/**
+ * SİPARİŞTEN AKTARILAN satırlar (07.11.2026): kaynak bağı `kaynakSatirId` (kaydedilince kaynak_tur 30) - iadeyle aynı
+ * mekanizma; sunucu siparişin kapatılan miktarını tetikle ilerletir. Fiyat / iskonto / KDV siparişten.
+ */
+const IRSALIYE_KAYNAK = new Set([10, 14, 109, 119]);
+/** Kaynak lotlarını aktarılan miktara göre böler (sırayla, kalan miktar kadar). */
+function lotlariBol(r: SiparisSatiri, miktar: number): SatirDurumu['izlemler'] {
+  let kalan = miktar;
+  const sonuc: SatirDurumu['izlemler'] = [];
+  for (const z of r.izlemler ?? []) {
+    if (kalan <= 0) break;
+    const alinan = Math.min(Number(z.miktar) || 0, kalan);
+    if (alinan <= 0) continue;
+    kalan -= alinan;
+    sonuc.push({ seriLotId: z.seriLotId ?? undefined, lotNo: String(z.lotNo ?? ''), seriNo: String(z.seriNo ?? ''),
+                 uretimTarihi: String(z.uretimTarihi ?? '').slice(0, 10), sonKullanmaTarihi: String(z.sonKullanmaTarihi ?? '').slice(0, 10),
+                 durum: Number(z.durum ?? 0), miktar: String(alinan) });
+  }
+  return sonuc;
+}
+
+export function siparisSatirlari(
+  secilenler: readonly SiparisSatiri[], baslangicAnahtar: number,
+): SatirDurumu[] {
+  let anahtar = baslangicAnahtar;
+  return secilenler.map(r => ({
+    ...bosSatir(++anahtar),
+    // İRSALİYEDEN (kullanıcı 07.11.2026 "lotlar aynen taşınır, tekrar sorulmaz"): kaynak stoğu zaten düşürdü - bu
+    //   satır düşürmez (stokDurumDegis 0), lotlar kaynaktan aktarılan miktar kadar kopyalanır.
+    ...(IRSALIYE_KAYNAK.has(Number(r.belgeTur))
+      ? { stokDurumDegis: 0, izlemler: lotlariBol(r, hamSayi(r.secilenMiktar)) } : {}),
+    satirTur: Number(r.satirTur) || (r.hizmetId ? 2 : 1),
+    stokId: r.stokId ?? null,
+    hizmetId: r.hizmetId ?? null,
+    stokKodu: String(r.kalemKodu ?? r.stokKodu ?? ''),
+    stokAdi: String(r.kalemAdi ?? r.stokAdi ?? r.aciklama ?? ''),
+    adet: String(r.secilenMiktar),
+    birimFiyat: String(r.birimFiyat),
+    dovizFiyat: String(r.birimFiyat),
+    iskonto: String(r.iskonto ?? 0),
+    kdv: String(r.kdv ?? 0),
+    izleme: Number(r.izleme ?? 0),
+    kaynakSatirId: r.satirId,
+    aciklama: String(r.aciklama ?? ''),
+  }));
+}
+
 export function iadeSatirlari(
   secilenler: readonly IadeSatiri[], baslangicAnahtar: number,
 ): SatirDurumu[] {

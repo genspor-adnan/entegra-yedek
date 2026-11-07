@@ -646,6 +646,11 @@ public sealed partial class BelgeDeposu
             await SatirEkleAsync(baglanti, islem, belgeId, sira, satir, belge, baglam,
                                  etki.Stok, uyarilar, iptal);
         }
+        // KAYNAK AŞIMI (kullanıcı 07.11.2026: "satış faturasına aktarıldıysa fişe aktaramam, tersi de"): karttan
+        //   kaynak bağıyla gelen satırlar (Siparişten / İrsaliyeden / Tekliften Aktar) kapatma tetiğini çalıştırdı;
+        //   kaynak satırın kapatılanı miktarını aştıysa aynı mal iki belgeye (fatura + fiş) gitmiş demektir - işlem
+        //   geri alınır. Dönüşüm penceresi bunu kendi yolunda zaten denetliyordu (DonusturAsync); kart yolu denetimsizdi.
+        await KaynakAsimKontrolAsync(baglanti, islem, belgeId, iptal);
 
         // ------------------------------------------------------------ 5) toplamlar ----
         // Tutarlar dip toplam formulunden gelir - Delphi ile birebir dogrulanmis
@@ -661,6 +666,19 @@ public sealed partial class BelgeDeposu
         if (!secenekler.Taslak)
         {
             var (stokEtkiler, cariEtkiler) = etki;
+            // KAYNAK CARİYİ ZATEN YAZDIYSA (kullanıcı 07.11.2026, İrsaliyeden Aktar): bütün satırlar cari borçlandırmış
+            //   bir kaynağa (irsaliye) bağlıysa fatura / fiş cariyi ikinci kez yazmaz - DonusturAsync'teki cariAtla'nın
+            //   kart yolu karşılığı. Karışık belgede (irsaliyeden + yeni satır) belgenin tamamı yazılır, uyarılır.
+            if (cariEtkiler && !cariAtla)
+            {
+                var (kaynakli, toplam, hepsiCariYazdi) = await KaynakCariDurumuAsync(baglanti, islem, belgeId, iptal);
+                if (kaynakli > 0 && hepsiCariYazdi)
+                {
+                    if (kaynakli == toplam) cariAtla = true;
+                    else uyarilar.Add("Belgede irsaliyeden gelen ve yeni satırlar karışık: cari hareketi belgenin tamamı için "
+                                    + "yazıldı; irsaliyenin payı cari ekstresinde iki kez görünebilir.");
+                }
+            }
 
             if (stokEtkiler)
                 await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"),

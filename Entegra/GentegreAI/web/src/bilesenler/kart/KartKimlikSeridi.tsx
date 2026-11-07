@@ -1,4 +1,4 @@
-﻿import { basHarfler } from '../basHarfler';
+import { basHarfler } from '../basHarfler';
 import type { ReactNode } from 'react';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';

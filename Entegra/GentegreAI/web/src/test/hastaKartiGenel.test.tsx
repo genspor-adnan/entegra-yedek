@@ -28,6 +28,8 @@ vi.mock('../api/istemci', () => ({
     aramaIsaretle: () => Promise.resolve({}),
     dokumanlar: () => Promise.resolve({ satirlar: [] }),
     kartKullanicisi: () => Promise.resolve(null),
+    // KartAracGruplari kimlik okutma ayarını okur (ayarSayi): mock'ta yoksa 'api.ayarlar is not a function' (yayın kapısı).
+    ayarlar: () => Promise.resolve([]),
   },
 }));
 

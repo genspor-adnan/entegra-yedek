@@ -83,8 +83,12 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
  * gridde artık aksiyon sütunu yok. Seçim: tek tık = tek seçim, Ctrl/Cmd+tık = ekle/çıkar,
  * Shift+tık = aralık, checkbox tıklaması = her zaman ekle/çıkar.
  */
-export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim, karo = true }: {
+export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIstegi = 0, onYeniAlindi, gosterim, karo = true,
+                                  kaynakIdSagla }: {
   kartAdi: string; kaynakId: number; saltOkunur: boolean;
+  /** KAYITSIZ KART (kullanıcı 07.11.2026: "dosya seçilip ekle denince önce belge kaydedilsin, sonra dosya ona eklensin"):
+      kaynakId 0 iken dosya seçilince çağrılır; kart kaydedilir, dönen id ile yüklenir (0 = kayıt düştü, yükleme yapılmaz). */
+  kaynakIdSagla?(): Promise<number>;
   /** Yüklenince / değişince dosya sayısı (muayene sekmesiz: bölüm görünürlüğü ve menü davranışı). */
   onSayi?(n: number): void;
   /** Artınca "＋" basılmış gibi dosya seçme penceresi açılır (muayene sol menü "Dosyalar", dosya yokken). */
@@ -163,6 +167,8 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
   };
 
   const yenile = () => {
+    // Kayıtsız kart (kaynakId 0): sunucuya sorulmaz, liste boş - "＋" dosya seçince kart kaydedilir (kaynakIdSagla).
+    if (!kaynakId) { setSatirlar([]); return }
     api.dokumanlar(kartAdi, kaynakId)
       .then(setSatirlar)
       .catch(h => setHata(hataMetni(h)));
@@ -214,7 +220,10 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur, onSayi, yeniIst
     setYukleniyor(true);
     setHata(null);
     try {
-      await calistir(() => api.dokumanYukle(kartAdi, kaynakId, dosya, false));
+      let id = kaynakId;
+      if (!id && kaynakIdSagla) { id = await kaynakIdSagla(); if (!id) return }
+      if (!id) { setHata('Önce kaydı kaydedin.'); return }
+      await calistir(() => api.dokumanYukle(kartAdi, id, dosya, false));
     } finally {
       setYukleniyor(false);
     }

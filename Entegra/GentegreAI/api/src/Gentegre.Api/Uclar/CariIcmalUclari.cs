@@ -33,16 +33,46 @@ public static class CariIcmalUclari
     private const int TurKurusGider = 60, TurKurusGelir = 62;
     private const decimal VarsayilanEsik = 0.10m;
 
-    public sealed record KurusKapatIstegi(decimal? Esik, DateTime? Tarih, int? GiderId, int? GelirId, string? Aciklama,
+    /// <summary>Ekranda önizlenen cariler (TarafIdler) kapatılır; eşik ve küçük kuralı sunucuda, tek yerde.</summary>
+    public sealed record KurusKapatIstegi(DateTime? Tarih, int? GiderId, int? GelirId, string? Aciklama,
                                           string? Kapsam, int? Temsilci, int[]? TarafIdler);
 
-    /// <summary>Kuruş sınırı: 0,005 &lt; |bakiye| &lt; eşik (eşiğe eşit olan küçük sayılmaz).</summary>
-    private static bool Kucuk(decimal bakiye, decimal esik) => Math.Abs(bakiye) > 0.005m && Math.Abs(bakiye) < esik;
+    /// <summary>
+    /// KÜÇÜK BAKİYE kuralı (tek yer, sunucu): 0,005 &lt; |TL bakiye| &lt; eşik ve açık DÖVİZ bakiyesi yok - döviz
+    /// bakiyesi açık cari "kuruş" değildir. Satırda `kucuk` bayrağı olarak gider; ekran süzer, kapatma bunu yazar.
+    /// </summary>
+    private static bool Kucuk(Cari c, decimal esik) =>
+        Math.Abs(c.Bakiye) > 0.005m && Math.Abs(c.Bakiye) < esik && !DovizAcik(c.Doviz);
+
+    /// <summary>"USD:120;TL:0.03" dizisinde TL dışı sıfırdan farklı bakiye var mı.</summary>
+    private static bool DovizAcik(string doviz) => doviz.Split(';', StringSplitOptions.RemoveEmptyEntries).Any(p =>
+    {
+        var i = p.IndexOf(':');
+        if (i <= 0) return false;
+        var kod = p[..i];
+        return kod is not ("TL" or "TRY")
+            && decimal.TryParse(p[(i + 1)..], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var v) && Math.Abs(v) > 0.005m;
+    });
 
     private static async Task<decimal> EsikAsync(Npgsql.NpgsqlConnection b, CancellationToken iptal)
     {
         var e = await AyarDeposu.OndalikAsync(b, null, "cari.icmal_esik", iptal);
         return e is > 0 ? e.Value : VarsayilanEsik;
+    }
+
+    /// <summary>Kuruş farkı kalemleri (Genel Ayarlar): gider masraf no, gelir hizmet no; 0 = seçilmemiş.</summary>
+    private static async Task<(int Gider, int Gelir)> KalemlerAsync(Npgsql.NpgsqlConnection b, CancellationToken iptal) =>
+        ((int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gider_id", iptal) ?? 0),
+         (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gelir_id", iptal) ?? 0));
+
+    /// <summary>
+    /// HBYS'DE YALNIZ TEDARİKÇİ (kullanıcı 23.10.2026): müşteri tarafı orada hasta ve anlaşmalı kurumdur - kendi
+    /// icmalleri var. Kapsam sunucuda sabitlenir: (sadeceTedarikci, kapsamKod 0 hepsi / 1 müşteri / 2 tedarikçi).
+    /// </summary>
+    private static async Task<(bool SadeceTedarikci, int KapsamKod)> KapsamAsync(Npgsql.NpgsqlConnection b, string? kapsam, CancellationToken iptal)
+    {
+        var sadeceTedarikci = await b.TekDegerAsync<int>("select public.fn_urun_modu(0)::int", null, [], iptal) == 2;
+        return (sadeceTedarikci, sadeceTedarikci ? 2 : kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 });
     }
 
     private const string Satis = "15, 16, 17";
@@ -210,11 +240,7 @@ public static class CariIcmalUclari
             var baslangic = (bas ?? new DateTime(bitis.Year, 1, 1)).Date;
             if (baslangic > bitis) throw GentegreHatasi.Dogrulama("Başlangıç tarihi bitişten sonra olamaz.");
             await using var b = await veri.AcAsync(iptal);
-            // HBYS'DE YALNIZ TEDARİKÇİ (kullanıcı 23.10.2026: "hbys de tedarikçiler için
-            //   kullanılabilir"): müşteri tarafı orada hasta ve anlaşmalı kurumdur - kendi
-            //   icmalleri var (Alacak Yaşlandırma, Kurum İcmali). Kapsam sunucuda sabitlenir.
-            var sadeceTedarikci = await b.TekDegerAsync<int>("select public.fn_urun_modu(0)::int", null, [], iptal) == 2;
-            var kapsamKod = sadeceTedarikci ? 2 : kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 };
+            var (sadeceTedarikci, kapsamKod) = await KapsamAsync(b, kapsam, iptal);
             object?[] p = [baslangic, bitis, kapsamKod, temsilci ?? 0, baglam.Kapsam.ToArray(), pasif ?? 0];
 
             var carilar = await CarilarAsync(b, p, iptal);
@@ -332,19 +358,19 @@ public static class CariIcmalUclari
             var temsilciler = carilar.Where(c => c.TemsilciId > 0).GroupBy(c => c.TemsilciId)
                 .Select(g => new { id = g.Key, ad = g.First().Temsilci }).OrderBy(x => x.ad).ToList();
 
-            // KÜÇÜK BAKİYE (1269, kullanıcı 05.11.2026): eşik altındakiler sayılır; ekran gizler, dipte tek satır yazar.
+            // KÜÇÜK BAKİYE (1269, kullanıcı 05.11.2026): satırda `kucuk` bayrağı (kural tek yerde, Kucuk); ekran
+            //   gizler ve dipte sayar. Kalem adları yalnız kapatma düğmesi çizilecekse okunur (pencere ön dolum).
             var esik = await EsikAsync(b, iptal);
-            var kucukler = carilar.Where(c => Kucuk(c.Bakiye, esik)).ToList();
-            var giderId = (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gider_id", iptal) ?? 0);
-            var gelirId = (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gelir_id", iptal) ?? 0);
+            var kapatabilir = baglam.Yetkiler.AksiyonVar(AksiyonKurusKapat) && baglam.SubeYazma;
+            var (giderId, gelirId) = kapatabilir ? await KalemlerAsync(b, iptal) : (0, 0);
+            var kalemAdi = async (string tablo, int id) => id > 0
+                ? await b.TekDegerAsync<string>($"select coalesce(kod || ' ', '') || ad from public.{tablo} where id = @p0", null, [id], iptal) ?? ""
+                : "";
             var kucuk = new
             {
-                esik, cari = kucukler.Count, toplam = kucukler.Sum(c => c.Bakiye),
-                borclu = kucukler.Count(c => c.Bakiye > 0), alacakli = kucukler.Count(c => c.Bakiye < 0),
-                giderId, gelirId,
-                giderAdi = giderId > 0 ? await b.TekDegerAsync<string>("select coalesce(kod || ' ', '') || ad from public.masraf where id = @p0", null, [giderId], iptal) ?? "" : "",
-                gelirAdi = gelirId > 0 ? await b.TekDegerAsync<string>("select coalesce(kod || ' ', '') || ad from public.hizmet where id = @p0", null, [gelirId], iptal) ?? "" : "",
-                kapatabilir = baglam.Yetkiler.AksiyonVar(AksiyonKurusKapat) && baglam.SubeYazma,
+                esik, giderId, gelirId,
+                giderAdi = await kalemAdi("masraf", giderId), gelirAdi = await kalemAdi("hizmet", gelirId),
+                kapatabilir,
             };
 
             return Results.Ok(new
@@ -358,14 +384,16 @@ public static class CariIcmalUclari
                     c.Devir, c.DonemBorc, c.DonemAlacak, c.Bakiye, c.VadesiGecen, c.EnEskiGun,
                     c.SonHareket, c.SonTahsilat, c.RiskLimiti, c.RiskYuzde, c.Doviz, c.Grup,
                     c.Gelmemis, c.D30, c.D60, c.D90, c.D90p,
+                    kucuk = Kucuk(c, esik),
                 }),
                 izlemeNo = baglam.IzlemeNo,
             });
         });
 
         // ====================================================== KURUŞ FARKI KAPAT (1269) ===
-        // Eşik altındaki her cariye bir kasa işlemi: borçluysa 60 (cari alacak + gider), alacaklıysa 62 (cari borç +
-        //   gelir). Normal kasa işlemi: fişli, loglu, ekstrede görünür, iptal edilebilir. Her cari kendi işleminde
+        // Ekranda önizlenen carilere (TarafIdler) bir kasa işlemi: borçluysa 60 (cari alacak + gider), alacaklıysa
+        //   62 (cari borç + gelir). Küçük kuralı GET ile aynı (Kucuk) - önizleme ile yazılan küme aynı hesaptır.
+        //   Normal kasa işlemi: fişli, loglu, ekstrede görünür, iptal edilebilir. Her cari kendi işleminde
         //   (KasaDeposu.KaydetAsync); biri düşerse öncekiler kalır, sonuç sayar.
         grup.MapPost("/kurus-kapat", async (KurusKapatIstegi istek, VeriKaynagi veri, KasaDeposu kasa, BaglamCozucu cozucu,
                                             HttpContext ctx, CancellationToken iptal) =>
@@ -377,25 +405,25 @@ public static class CariIcmalUclari
             if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak();
 
             await using var b = await veri.AcAsync(iptal);
-            var esik = istek.Esik is > 0 ? istek.Esik.Value : await EsikAsync(b, iptal);
-            if (esik > 10) throw GentegreHatasi.Dogrulama("Kuruş eşiği 10 TL'den büyük olamaz.", new AlanHatasi("esik", "En fazla 10."));
-            var tarih = (istek.Tarih ?? Saat.Bugun).Date;
-            if (tarih > Saat.Bugun.Date) throw GentegreHatasi.Dogrulama("İleri tarihli kapatma yazılamaz.", new AlanHatasi("tarih", "Bugünden ileri olamaz."));
+            var bugun = Saat.Bugun.Date;
+            var tarih = (istek.Tarih ?? bugun).Date;
+            if (tarih > bugun) throw GentegreHatasi.Dogrulama("İleri tarihli kapatma yazılamaz.", new AlanHatasi("tarih", "Bugünden ileri olamaz."));
+            if (istek.TarafIdler is not { Length: > 0 }) throw GentegreHatasi.Dogrulama("Kapatılacak cari seçilmedi.", new AlanHatasi("tarafIdler", "Zorunlu."));
             var aciklama = (istek.Aciklama ?? "").Trim();
             if (aciklama.Length == 0) aciklama = "Kuruş farkı kapatma";
             if (aciklama.Length > 200) throw GentegreHatasi.Dogrulama("Açıklama en fazla 200 karakter.");
 
-            var sadeceTedarikci = await b.TekDegerAsync<int>("select public.fn_urun_modu(0)::int", null, [], iptal) == 2;
-            var kapsamKod = sadeceTedarikci ? 2 : istek.Kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 };
-            var bugun = Saat.Bugun.Date;
+            var (_, kapsamKod) = await KapsamAsync(b, istek.Kapsam, iptal);
             object?[] p = [new DateTime(bugun.Year, 1, 1), bugun, kapsamKod, istek.Temsilci ?? 0, baglam.Kapsam.ToArray(), 0];
-            var secim = istek.TarafIdler is { Length: > 0 } ids ? ids.ToHashSet() : null;
-            var hedef = (await CarilarAsync(b, p, iptal))
-                .Where(c => Kucuk(c.Bakiye, esik) && (secim is null || secim.Contains(c.Id))).ToList();
+            var esik = await EsikAsync(b, iptal);
+            var secim = istek.TarafIdler.ToHashSet();
+            // Seçim ekranın önizlediği küme; bakiye bu arada değiştiyse (artık küçük değil) o cari yazılmaz.
+            var hedef = (await CarilarAsync(b, p, iptal)).Where(c => secim.Contains(c.Id) && Kucuk(c, esik)).ToList();
             if (hedef.Count == 0) throw GentegreHatasi.IsKurali("Eşik altında kapatılacak cari yok.");
 
-            var giderId = istek.GiderId ?? (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gider_id", iptal) ?? 0);
-            var gelirId = istek.GelirId ?? (int)(await AyarDeposu.OndalikAsync(b, null, "cari.kurus_gelir_id", iptal) ?? 0);
+            var (ayarGider, ayarGelir) = await KalemlerAsync(b, iptal);
+            var giderId = istek.GiderId ?? ayarGider;
+            var gelirId = istek.GelirId ?? ayarGelir;
             if (hedef.Any(c => c.Bakiye > 0) && (giderId <= 0
                 || await b.TekDegerAsync<int?>("select id from public.masraf where id = @p0", null, [giderId], iptal) is null))
                 throw GentegreHatasi.Dogrulama("Borçlu cariler için gider kalemi (masraf) seçilmeli.", new AlanHatasi("giderId", "Zorunlu."));

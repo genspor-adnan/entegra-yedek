@@ -1,4 +1,3 @@
-import { DonusumMenusu } from './DonusumMenusu';
 import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
 import { c } from '../../dil/ceviri';
 
@@ -14,7 +13,7 @@ export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade,
   siparisMi, irsaliyeMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
-  kes, yeniBelge, kapat, setDonusum, setTerminAcik,
+  kes, yeniBelge, kapat, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
   basvuruIptalGorunur, belgeYenile, baslik, kapatSolu, onSil,
@@ -53,8 +52,6 @@ export function BelgeAracCubugu({
   kes(kapatilsin?: boolean): Promise<number>;
   yeniBelge(): void;
   kapat(): void;
-  /** Donusum modalini acar; deger = ON SECILI hedef tur (0 = ilk hedef). */
-  setDonusum(v: number | null): void;
   /** Termin (teslim tarihi) modalini acar - 140. */
   setTerminAcik(v: boolean): void;
   /** Sipariste rezerve edilmis satir var mi (142). */
@@ -113,6 +110,8 @@ export function BelgeAracCubugu({
   )}
 
   <span className="ayrac" />
+
+  {/* Fiş "⇩ Aktar ▾" Kalemler sekmesinde, Sil'in sağında (kullanıcı 07.11.2026) - KalemSekmesi.aktarAc. */}
 
   {/* ---------------------------------------------------- BASVURU ---- */}
   {/* Basvuru da tur 19'dur (satis siparisi), ama arac cubugu HBYS mockupunun
@@ -189,21 +188,9 @@ export function BelgeAracCubugu({
               onClick={() => void rezerveDegistir(!rezerveVar)}>
         {rezerveCalisiyor ? '⏳ İşleniyor…' : rezerveVar ? '🔓 Rezervi Kaldır' : '🔒 Rezervasyon Yap'}
       </button>
-      {/* Dugmeler modali ON SECILI hedefle acar; modaldaki combodan fis ya da
-          tahakkuka cevrilebilir (kullanici). */}
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Seçili satırları irsaliyeye aktar' : 'Önce siparişi kaydedin.'}
-              onClick={() => setDonusum(alisMi ? 10 : 14)}>
-        🚚 İrsaliyeye Dönüştür
-      </button>
-      <button className="d" disabled={!kayitliId}
-              title={kayitliId ? 'Seçili satırları faturaya / fişe / tahakkuka aktar'
-                               : 'Önce siparişi kaydedin.'}
-              onClick={() => setDonusum(alisMi ? 11 : 15)}>
-        🧾 Belge Dönüştür
-      </button>
-      {!basvuruMu &&
-        <button className="d" disabled title={c('Üretim emri henüz bağlanmadı.')}>🏭 Üretime Aktar</button>}
+      {/* "İrsaliyeye Dönüştür" / "Belge Dönüştür" BELGEYE DÖNÜŞÜM SEKMESİNDE (kullanıcı 07.11.2026: irsaliye deseni
+          siparişte de) - hedef menüsü (irsaliye / fatura / fiş / tahakkuk) oradan açılır. */}
+      {/* "Üretime Aktar" Belgeye Dönüşüm sekmesindeki Belge Dönüştür menüsünün en üstünde (kullanıcı 07.11.2026). */}
       <span className="ayrac" />
       {/* ON ODEME dugmesi kalkti (kullanici): avans/on odeme artik siparisin
           kendi Tahsilat sekmesinden giriliyor - fatura kartiyla ayni yer,
@@ -232,19 +219,12 @@ export function BelgeAracCubugu({
           satis irsaliyesi; alis irsaliyesi gelen kutusundan gelir. */}
       {!eBelgeYok && !alisMi && (
         <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)}
-                       onDegisti={belgeYenile} etiket="e-İrsaliye" />
+                       onDegisti={belgeYenile} etiket="İrsaliye İşlem" />
       )}
-      {/* HEDEF MENÜSÜ (kullanıcı 03.11.2026): fatura / fiş / tahakkuk - seçilen hedefle pencere açılır. */}
-      <DonusumMenusu kaynakTur={alisMi ? 10 : 14} devre={!kayitliId} devreSebep="Önce irsaliyeyi kaydedin."
-                     title="Sevk edilen satırları faturaya / fişe / tahakkuka aktar"
-                     onSec={setDonusum} />
+      {/* HEDEF MENÜSÜ ("Belge Dönüştür") ve "Siparişten Aktar" BELGEYE DÖNÜŞÜM SEKMESİNDE (kullanıcı 07.11.2026) -
+          FaturalamaSekmesi hizliYok. */}
       <button className="d" disabled title={c('Sevk fişi yazdırma henüz bağlanmadı.')}>
         🖨️ Sevk Fişi Yazdır
-      </button>
-      <span className="ayrac" />
-      <button className="d" disabled
-              title="Siparişten aktarım için Siparişler listesinden ilgili siparişi açıp Dönüştür deyin.">
-        📋 Siparişten Aktar
       </button>
       {/* GIB DURUM SORGULA kaldirildi (kullanici): gonderim ucu baglanana kadar
           arac cubugunda yer kapliyordu; durum e-Belge sekmesinde zaten yazili.

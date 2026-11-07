@@ -11,6 +11,8 @@ export type CariIcmalSatiri = {
   /** Bakiyenin yönüyle: yalnız müşteri / yalnız tedarikçi / ikisi birden ise borçlu → musteri. */
   grup: 'musteri' | 'tedarikci';
   gelmemis: number; d30: number; d60: number; d90: number; d90p: number;
+  /** KÜÇÜK BAKİYE (1269): |bakiye| eşiğin altında ve döviz bakiyesi yok - kural sunucuda (tek yer). */
+  kucuk: boolean;
 };
 export type CariDilim = { ad: string; tutar: number; cari: number; enBuyuk: string; enBuyukTutar: number };
 export type CariIcmal = {
@@ -41,14 +43,15 @@ export type CariIcmal = {
   };
   temsilciler: { id: number; ad: string }[];
   carilar: CariIcmalSatiri[];
-  /** KÜÇÜK BAKİYE (1269): eşik altındakiler sayılır; ekran gizler. Kalem no'ları Genel Ayarlar'dan (0 = seçilmemiş). */
-  kucuk: { esik: number; cari: number; toplam: number; borclu: number; alacakli: number;
-           giderId: number; gelirId: number; giderAdi: string; gelirAdi: string; kapatabilir: boolean };
+  /** KÜÇÜK BAKİYE (1269): eşik (TL) ve kapatma penceresinin ön dolumu - kalem no'ları Genel Ayarlar'dan (0 = seçilmemiş). */
+  kucuk: { esik: number; giderId: number; gelirId: number; giderAdi: string; gelirAdi: string; kapatabilir: boolean };
 };
 
 export type KurusKapatIstegi = {
-  esik?: number; tarih?: string; giderId?: number; gelirId?: number; aciklama?: string;
-  kapsam?: string; temsilci?: number; tarafIdler?: number[];
+  tarih?: string; giderId?: number; gelirId?: number; aciklama?: string;
+  kapsam?: string; temsilci?: number;
+  /** Ekranda önizlenen cariler; sunucu aynı küçük kuralıyla yeniden denetler. */
+  tarafIdler: number[];
 };
 export type KurusKapatSonucu = { yazilan: number; toplam: number; hata: number; hatalar: string[] };
 

@@ -170,7 +170,8 @@ public static partial class KaynakKatalogu
                                   when 7 then 'e-İrsaliye' else '' end
                 """,                           "metin", "e-Belge Türü",
                                                // e-Arşiv yeşil, e-Fatura sözlükten mavi (kullanıcı 05.11.2026: "amaç farklılık").
-                                               Hizalama: "orta", Bicim: "rozet:e-Arşiv=olumlu", Genislik: SeriKolonEni),
+                                               Hizalama: "orta", Bicim: "rozet", Genislik: SeriKolonEni,
+                                               RozetSiniflari: new Dictionary<string, string> { ["e-Arşiv"] = "olumlu" }),
             new("seri",      "e.seri",         "metin", "Seri", Hizalama: "orta", Genislik: SeriKolonEni),
             // 0 = farketmez: senaryo ayrimi olmayan kural her senaryoda gecerli.
             new("senaryo",   """

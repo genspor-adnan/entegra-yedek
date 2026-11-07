@@ -201,7 +201,11 @@ export function DuyuruKarti({ id, onKapat, onKaydet }: { id?: number; onKapat():
               <div className="tl-ekler">
                 {ekler.map(f => (
                   <span key={f.id} className="tl-ek">📎 {f.ad}
-                    <button type="button" className="cl-bag sonuk" onClick={() => void guvenli(async () => { setEkler(await api.dokumanSil('duyuru', id!, f.id)) })}> ✕</button></span>
+                    <button type="button" className="cl-bag sonuk" title={c('Eki sil')}
+                            onClick={() => void guvenli(async () => {
+                              if (!await onay(`"${f.ad}" eki silinecek. Onaylıyor musunuz?`, true)) return;
+                              setEkler(await api.dokumanSil('duyuru', id!, f.id));
+                            })}> ✕</button></span>
                 ))}
                 {yeniEk.map((f, i) => (
                   <span key={`y${i}`} className="tl-ek">📎 {f.name}

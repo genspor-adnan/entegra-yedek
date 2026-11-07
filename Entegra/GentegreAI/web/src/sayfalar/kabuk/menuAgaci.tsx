@@ -366,20 +366,19 @@ export function menuSatirlariKur(
     && (!l.urunModu || modUyar(l.urunModu, urunModu))
     // MODUL suzmesi (359): kurum profilinde kapali modulun menusu cizilmez.
     && modulAcikMi(l, moduller));
-  const erpGrubu = (l: (typeof listeler)[number]) =>
-    urunModu !== 2 ? (l as { erpMenuGrup?: string }).erpMenuGrup : undefined;
-  const grupAdi = (l: (typeof listeler)[number]) => erpGrubu(l) ?? l.menuGrup;
+  // ERP'DE BAŞKA GRUP (`erp`): grup, alt grup ve sıra bir kerede çözülür; HBYS'de ve erp verilmemişse menü alanları.
+  const yeri = (l: (typeof listeler)[number]) => urunModu !== 2 && l.erp
+    ? { grup: l.erp.grup, altGrup: l.erp.altGrup, sira: l.erp.sira ?? l.menuSira }
+    : { grup: l.menuGrup, altGrup: l.menuAltGrup, sira: l.menuSira };
   const ogeler: MenuOgesi[] =
-    yetkiliListeler.map(l => ({
+    yetkiliListeler.map(l => ({ l, y: yeri(l) })).map(({ l, y }) => ({
       yol: l.menuYol ?? `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
       rz: l.ozelSayfa ? 'ayar' : 'liste',
-      grup: grupAdi(l) ? cm(grupAdi(l)!) : undefined,
-      grupHam: grupAdi(l),
+      grup: y.grup ? cm(y.grup) : undefined,
+      grupHam: y.grup,
       adHam: l.menuAd,
-      altGrup: erpGrubu(l)
-        ? ((l as { erpMenuAltGrup?: string }).erpMenuAltGrup ? cm((l as { erpMenuAltGrup?: string }).erpMenuAltGrup!) : undefined)
-        : l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
-      sira: (erpGrubu(l) ? (l as { erpMenuSira?: number }).erpMenuSira : undefined) ?? l.menuSira,
+      altGrup: y.altGrup ? cm(y.altGrup) : undefined,
+      sira: y.sira,
       kaynak: l.kaynak,
       yetkiKodu: l.yetkiKodu,
       modul: l.modul,

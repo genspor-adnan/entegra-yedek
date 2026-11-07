@@ -235,7 +235,8 @@ public sealed class AktarimUcTestleri(ApiSunucuOlgusu api)
             var durum = await h.GetFromJsonAsync<JsonElement>("/api/aktarim/durum");
             Assert.Contains(durum.GetProperty("tablolar").EnumerateArray(),
                 x => x.GetProperty("tablo").GetString() == "DEPOLAR" && x.GetProperty("versiyon").GetInt64() == versiyon);
-            Assert.Equal(13, durum.GetProperty("adimlar").GetArrayLength());
+            // 1265 EBELGE + 1266 XSLT adımları eklendi (13 -> 15).
+            Assert.Equal(15, durum.GetProperty("adimlar").GetArrayLength());
         }
         finally
         {

@@ -1,6 +1,7 @@
 import { api } from '../api/istemci';
-import type { Kosul, ListeSatiri } from '../api/sozlesme';
-import { type CipTanimi, type TarafBaglam, metin, sayiya } from './tarafDuzeni';
+import type { ListeSatiri } from '../api/sozlesme';
+import { type CipTanimi, type TarafBaglam, metin, sayiya, tarihYaz } from './tarafDuzeni';
+export { AKTIF_KOSULU } from './tarafDuzeni';
 
 /**
  * MÜŞTERİ / TEDARİKÇİ ARAMASI - cari düzeninin kuralları (mockup Ekranlar/taraf_arama.html, kullanıcı 05.11.2026).
@@ -21,8 +22,6 @@ export function cariCipleri(b: TarafBaglam): CipTanimi[] {
   ];
 }
 
-/** PASİF KAYIT HİÇ GELMEZ (kullanıcı 05.11.2026: "pasifler aramaya gelmesin") - cari, personel, kişi için ortak. */
-export const AKTIF_KOSULU: Kosul = { alan: 'durum', op: 'esit', deger: 1 };
 
 /** Satır rengi: aday (gri) › risk aşıldı › vadesi geçen (mockup lejantı). */
 export function cariSatirSinifi(s: ListeSatiri, b: TarafBaglam): string {
@@ -46,10 +45,7 @@ const ekOnbellek = new Map<string, Promise<CariEk>>();
 export function ekOnbellegiTemizle() { ekOnbellek.clear() }
 
 /** ISO tarih -> "gg.aa" (önizlemedeki son belgeler). */
-const gunAy = (v: unknown): string => {
-  const m = String(v ?? '').slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().slice(0, 2).join('.') : '';
-};
+const gunAy = (v: unknown): string => tarihYaz(v).slice(0, 5);
 
 export function cariEkGetir(id: number, tedarikci: boolean): Promise<CariEk> {
   const anahtar = `${id}:${tedarikci ? 't' : 'm'}`;

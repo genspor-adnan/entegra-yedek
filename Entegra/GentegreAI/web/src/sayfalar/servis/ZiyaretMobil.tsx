@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { ZiyaretDetayi } from '../../api/uclar/servis';
-import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { ImzaTuvali } from '../../bilesenler/ImzaTuvali';
 import { c } from '../../dil/ceviri';
 
@@ -135,6 +135,7 @@ export function ZiyaretMobil() {
   });
 
   const parcaSil = (parcaId: number) => guvenli(async () => {
+    if (!await onay('Parça satırı silinecek. Onaylıyor musunuz?', true)) return;
     await api.servisParcaSil(parcaId);
     await tazele();
   });

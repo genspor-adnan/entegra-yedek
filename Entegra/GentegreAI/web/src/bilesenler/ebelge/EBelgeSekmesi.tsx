@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { MukellefIzle } from './MukellefIzle';
 import { MukellefOzeti } from './MukellefOzeti';
 import { EBELGE_TURLERI } from './ebelgeTurleri';
 import { SeriKurallari } from './SeriKurallari';
@@ -11,28 +9,21 @@ import { TurAyarlari } from './TurAyarlari';
  *
  * Kullanıcı 05.11.2026: "genel, seri bilgileri vb butonları sekme haline getir" - eskiden şube kartının e-Belge
  * sekmesi içinde buton görünümlü alt bölümlerdi; şimdi GenForm'un KENDİ sekmeleri: Genel (kartın e-Belge alan
- * grubu, başlığı "Genel" olarak yeniden adlandırılır) · Seri Bilgileri · XSLT · e-Fatura · e-Arşiv Fatura ·
- * e-İrsaliye · e-SMM (ekSekmeler).
+ * grubu, `sekmeBasliklari` ile "Genel") · Seri Bilgileri · XSLT · e-Fatura · e-Arşiv Fatura · e-İrsaliye · e-SMM.
  *
- * TÜR SEKMELERİ MÜKELLEFİYETE BAĞLI (172): kutusu işaretli değilse sekme çizilmez - mükellefi olmadığımız türün
- * servis adresini doldurmak işe yaramıyor. Bayrak kartın GÜNCEL değerinden okunur (MukellefIzle, Genel sekmesi
- * çizilirken): kutu işaretlenince sekme kaydetmeyi beklemeden belirir.
+ * TÜR SEKMELERİ MÜKELLEFİYETE BAĞLI (172): ek sekmenin `kosulAlani`'sı kartın mükellefiyet kutusu - GenForm
+ * detay sekmeleriyle aynı kuralla çizer / gizler, kutu işaretlenince kaydetmeyi beklemeden belirir.
  */
+export const EBELGE_EK_SEKMELERI = [
+  { anahtar: 'ozel:ebelge-seri', baslik: 'Seri Bilgileri', ciz: () => <SeriKurallari /> },
+  { anahtar: 'ozel:ebelge-xslt', baslik: 'XSLT',           ciz: () => <XsltSablonlari /> },
+  ...EBELGE_TURLERI.map(t => ({ anahtar: `ozel:ebelge-${t.tur}`, baslik: t.baslik, kosulAlani: t.mukellefAlani,
+                                 ciz: () => <TurAyarlari tur={t.tur} /> })),
+];
 
-/** GenForm için `ekSekmeler` + `sekmeSarmalayici` + `sekmeBasliklari` üretir. */
-/** @param tazele kart kaydedilince artar; Genel altındaki şube özeti yeniden okunur. */
-export function useEBelgeSekmeleri(tazele = 0) {
-  const [imza, setImza] = useState('0000');
-  const ekSekmeler = [
-    { anahtar: 'ozel:ebelge-seri', baslik: 'Seri Bilgileri', ciz: () => <SeriKurallari /> },
-    { anahtar: 'ozel:ebelge-xslt', baslik: 'XSLT',           ciz: () => <XsltSablonlari /> },
-    ...EBELGE_TURLERI.filter((_, i) => imza[i] === '1')
-             .map(t => ({ anahtar: `ozel:ebelge-${t.tur}`, baslik: t.baslik, ciz: () => <TurAyarlari tur={t.tur} /> })),
-  ];
-  const sekmeSarmalayici = (sekmeBasligi: string, icerik: React.ReactNode, deger: Record<string, unknown>) =>
-    (sekmeBasligi === 'e-Belge' || sekmeBasligi === 'Genel')
-      // Genel: kartın e-Belge alanları + altında şubelerin e-Belge durumu (Satış Belgeleri › e-Belge'den taşındı).
-      ? <><MukellefIzle deger={deger} onDegis={setImza} />{icerik}<MukellefOzeti tazele={tazele} /></>
-      : icerik;
-  return { ekSekmeler, sekmeSarmalayici, sekmeBasliklari: { 'e-Belge': 'Genel' } as Record<string, string> };
-}
+export const EBELGE_SEKME_BASLIKLARI: Record<string, string> = { 'e-Belge': 'Genel' };
+
+/** Genel sekmesi: kartın e-Belge alanları + altında şubelerin e-Belge durumu (Satış Belgeleri › e-Belge'den taşındı). */
+export const ebelgeSekmeSarmalayici = (tazele: number) =>
+  (sekmeBasligi: string, icerik: React.ReactNode) =>
+    sekmeBasligi === 'Genel' ? <>{icerik}<MukellefOzeti tazele={tazele} /></> : icerik;

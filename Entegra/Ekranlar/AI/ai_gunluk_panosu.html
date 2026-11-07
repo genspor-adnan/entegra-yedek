@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre — AI Günlüğü ve Geri Bildirim Panosu (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --head2:#e7eef5; --ok:#2e7d46; --okzem:#e6f4ea; --uyari:#b5731a; --uyarizem:#fff4e0; --hata:#b23b3b; --hatazem:#fdecec;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:12px}
+  .win{max-width:1480px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden}
+  .title{background:linear-gradient(#4b3a86,#372a63);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:600}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#f4f7fb);flex-wrap:wrap}
+  .tb{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:6px 11px;color:#33465c}
+  .tb.on{background:var(--sel);border-color:var(--selbd);font-weight:600}
+  .sel{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:5px 9px;background:#fff}
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line)}
+  .kpi > div{padding:10px 14px;border-right:1px solid var(--line2)}
+  .kpi > div:last-child{border:0}
+  .kpi .e{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .kpi .v{font-size:19px;font-weight:700;color:var(--navy);margin:2px 0}
+  .kpi .v.kir{color:var(--hata)}.kpi .v.ok{color:var(--ok)}.kpi .v.ai{color:var(--ai)}
+  .kpi .a{font-size:11px;color:var(--muted)}
+  .sekmeler{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);background:#fafbfd}
+  .sekme{padding:8px 12px;color:var(--muted);border-bottom:2px solid transparent}
+  .sekme.on{color:var(--navy);border-color:var(--accent);font-weight:600}
+  .sekme b{background:var(--hatazem);color:var(--hata);border-radius:9px;padding:0 6px;font-size:10.5px;margin-left:4px}
+  .govde{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:12px}
+  .kutu{border:1px solid var(--line2);border-radius:6px;background:#fff}
+  .kutu h6{margin:0;padding:7px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11px;color:#3a5573;display:flex;align-items:center;gap:8px}
+  .kutu h6 .sag{margin-left:auto;font-weight:400;color:var(--muted)}
+  table.grid{width:100%;border-collapse:collapse;font-size:12px}
+  .grid th{background:#fafbfd;text-align:left;padding:5px 9px;border-bottom:1px solid var(--line2);font-weight:600;color:#3a5573;font-size:10.5px}
+  .grid td{padding:5px 9px;border-bottom:1px solid var(--line2);vertical-align:top}
+  .grid td.sag,.grid th.sag{text-align:right}
+  .grid tr:hover td{background:#f7f9fc}
+  .roz{display:inline-block;border-radius:10px;padding:1px 8px;font-size:10.5px;font-weight:600}
+  .roz.kir{background:var(--hatazem);color:var(--hata)}.roz.sari{background:var(--uyarizem);color:var(--uyari)}
+  .roz.ok{background:var(--okzem);color:var(--ok)}.roz.gri{background:#f1f3f6;color:var(--muted)}.roz.ai{background:var(--aiZem);color:var(--ai)}
+  .cubuk{display:inline-block;height:8px;background:var(--aiKenar);border-radius:4px;vertical-align:middle}
+  .cubuk i{display:block;height:100%;background:var(--ai);border-radius:4px}
+  .cubuk.kir i{background:var(--hata)}
+  .d{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:3px 9px;color:#33465c;font-size:11px;font-family:inherit}
+  .d.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .not{font-size:11px;color:var(--muted)}
+  .ic{padding:9px 10px}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line2);font-size:12px}
+  .liste li:last-child{border:0}
+  .liste .sag{margin-left:auto}
+  .notlar{max-width:1480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 20px;line-height:1.6}
+  .notlar h2{margin:0 0 8px;font-size:15px;color:var(--navy)}
+  .notlar h3{margin:14px 0 6px;font-size:13px;color:var(--ai)}
+  .notlar ul{padding-left:20px;margin:4px 0}
+  .notlar table{border-collapse:collapse;font-size:12px;margin:6px 0}
+  .notlar td,.notlar th{border:1px solid var(--line2);padding:5px 9px;text-align:left;vertical-align:top}
+  .notlar th{background:var(--head)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📜 AI Günlüğü ve Geri Bildirim <span class="sp">Yönetim › Yapay Zeka › Günlük &nbsp;·&nbsp; yetki: ai.gunluk</span></div>
+  <div class="toolbar">
+    <div class="sel">📅 <b>Son 7 gün</b> ▾</div><div class="sel">🏢 Şube: Tümü ▾</div><div class="sel">👥 Rol: Tümü ▾</div><div class="sel">Kaynak: Hepsi ▾</div>
+    <div class="tb" style="margin-left:auto">📊 Excel</div><div class="tb">↻ Yenile</div>
+  </div>
+  <div class="kpi">
+    <div><div class="e">Soru</div><div class="v">412</div><div class="a">panel 268 · sohbet 91 · palet 53</div></div>
+    <div><div class="e">Model çağrısı</div><div class="v ai">187</div><div class="a">%45 · 142 k jeton · 94 kontör</div></div>
+    <div><div class="e">Katalogdan cevap</div><div class="v ok">225</div><div class="a">%55 kontörsüz</div></div>
+    <div><div class="e">👎 oranı</div><div class="v kir">%11</div><div class="a">46 olumsuz · 203 olumlu</div></div>
+    <div><div class="e">Reddedilen sorgu</div><div class="v kir">19</div><div class="a">yetki 14 · kapsam 5</div></div>
+    <div><div class="e">Cevapsız ekran</div><div class="v">23</div><div class="a">yardım belgesi olmayan ekran</div></div>
+  </div>
+  <div class="sekmeler">
+    <span class="sekme on">Özet</span><span class="sekme">Olumsuz geri bildirim <b>46</b></span><span class="sekme">Reddedilen sorgular <b>19</b></span>
+    <span class="sekme">Cevapsız ekranlar <b>23</b></span><span class="sekme">Sorgular</span><span class="sekme">Taslaklar</span><span class="sekme">Kontör</span>
+  </div>
+
+  <div class="govde">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="kutu">
+        <h6>👎 En çok olumsuz alan sorular <span class="sag">benzer sorular gruplandı · son 7 gün</span></h6>
+        <table class="grid">
+          <thead><tr><th>Soru (grup)</th><th>Ekran</th><th class="sag">Sor.</th><th class="sag">👎</th><th>Cevap kaynağı</th><th>Sebep (etiket)</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>“e-Arşiv neden gönderilmedi”</td><td>Satış Faturası</td><td class="sag">31</td><td class="sag"><span class="roz kir">12</span></td><td><span class="roz gri">rehber kataloğu</span></td><td>eksik adım (alias)</td><td><button class="d">Yardım belgesi yaz</button></td></tr>
+            <tr><td>“hasta payı nasıl iade edilir”</td><td>Banko</td><td class="sag">18</td><td class="sag"><span class="roz kir">9</span></td><td><span class="roz gri">eşleşme yok</span></td><td>belge yok</td><td><button class="d">Yardım belgesi yaz</button></td></tr>
+            <tr><td>“kuruş farkı nereden kapatılır”</td><td>Cari İcmali</td><td class="sag">7</td><td class="sag"><span class="roz sari">4</span></td><td><span class="roz ai">yapay zeka</span></td><td>yeni özellik, belge yok</td><td><button class="d">Yardım belgesi yaz</button></td></tr>
+            <tr><td>“randevu iptal SMS gitmedi”</td><td>Randevu Listesi</td><td class="sag">9</td><td class="sag"><span class="roz sari">3</span></td><td><span class="roz ok">yardım belgesi</span></td><td>belge eski (1097 öncesi)</td><td><button class="d">Belgeyi güncelle</button></td></tr>
+            <tr><td>“bu listeyi excel'e nasıl alırım”</td><td>çeşitli</td><td class="sag">14</td><td class="sag"><span class="roz sari">3</span></td><td><span class="roz ok">yardım belgesi</span></td><td>cevap doğru, düğme görünmüyor</td><td><button class="d">UI notu</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="kutu">
+        <h6>🔒 Reddedilen sorgular <span class="sag">yetki / kapsam · kullanıcıya hangi yetkinin eksik olduğu söylendi</span></h6>
+        <table class="grid">
+          <thead><tr><th>Zaman</th><th>Kullanıcı · Rol</th><th>Soru</th><th>Kaynak / alan</th><th>Sebep</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>06.11 14:06</td><td>S. Yılmaz · Satış</td><td>“personelin maaşları”</td><td>personel · maas</td><td><span class="roz kir">yetki yok</span></td><td><button class="d">Rolü aç</button></td></tr>
+            <tr><td>06.11 11:40</td><td>A. Kaya · Banko</td><td>“Ankara şubesinin tahsilatı”</td><td>kasa_islem · şube 3</td><td><span class="roz sari">kapsam dışı</span></td><td><button class="d">Kapsamı aç</button></td></tr>
+            <tr><td>05.11 17:12</td><td>M. Akman · Satış</td><td>“rakip firmanın fiyatları”</td><td>—</td><td><span class="roz gri">katalogda yok</span></td><td></td></tr>
+            <tr><td>05.11 09:05</td><td>D. Demir · Hekim</td><td>“tüm hastaların TCKN listesi”</td><td>hasta · vkno</td><td><span class="roz kir">alan yetkisi yok</span></td><td><button class="d">İncele</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="kutu">
+        <h6>📕 Bilgi tabanı eksikleri <span class="sag">soru alıp yardım belgesi olmayan ekranlar</span></h6>
+        <div class="ic">
+          <ul class="liste">
+            <li>🏦 Banko <span class="not">18 soru</span><span class="sag"><span class="cubuk kir" style="width:90px"><i style="width:100%"></i></span> <button class="d ai">Belge üret</button></span></li>
+            <li>🧾 Satış Faturası › e-Belge <span class="not">14</span><span class="sag"><span class="cubuk kir" style="width:90px"><i style="width:78%"></i></span> <button class="d ai">Belge üret</button></span></li>
+            <li>📊 Cari İcmali <span class="not">9</span><span class="sag"><span class="cubuk" style="width:90px"><i style="width:50%"></i></span> <button class="d ai">Belge üret</button></span></li>
+            <li>🧪 Lab Sonuç Onayı <span class="not">7</span><span class="sag"><span class="cubuk" style="width:90px"><i style="width:39%"></i></span> <button class="d ai">Belge üret</button></span></li>
+            <li>📨 Fatura Ayarları <span class="not">5</span><span class="sag"><span class="cubuk" style="width:90px"><i style="width:28%"></i></span> <button class="d ai">Belge üret</button></span></li>
+          </ul>
+          <div class="not" style="margin-top:8px">"Belge üret": Ekranlar/prompt/02 yönergesiyle katalog + testlerden taslak yardım belgesi; yönetici onaylayınca <code>help</code>'e indekslenir.</div>
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>📈 Kaynak dağılımı ve kontör <span class="sag">son 7 gün</span></h6>
+        <div class="ic">
+          <ul class="liste">
+            <li>Ekran eşleşmesi / katalog <span class="sag"><span class="cubuk" style="width:120px"><i style="width:55%"></i></span> 225</span></li>
+            <li>Yardım belgesi <span class="sag"><span class="cubuk" style="width:120px"><i style="width:22%"></i></span> 89</span></li>
+            <li>Yapay zeka (model) <span class="sag"><span class="cubuk" style="width:120px"><i style="width:19%"></i></span> 77</span></li>
+            <li>Liste sorgusu aracı <span class="sag"><span class="cubuk" style="width:120px"><i style="width:10%"></i></span> 41</span></li>
+            <li>Eşleşme yok <span class="sag"><span class="cubuk kir" style="width:120px"><i style="width:8%"></i></span> 23</span></li>
+          </ul>
+          <div class="not" style="margin-top:8px">Kontör: 94 kullanıldı · kalan 1.146 · günlük ort. 13 · tükenme tahmini 88 gün. Model: claude-haiku-5-5 · ort. 760 jeton / çağrı.</div>
+        </div>
+      </div>
+      <div class="kutu">
+        <h6>📝 Taslaklar <span class="sag">asistanın ürettiği, kullanıcının karar verdiği</span></h6>
+        <div class="ic">
+          <ul class="liste">
+            <li>Görev taslağı <span class="sag">12 · onay 9 · ret 3</span></li>
+            <li>Hatırlatma e-postası <span class="sag">8 · onay 8</span></li>
+            <li>Satış siparişi (kartta açıldı) <span class="sag">5 · kaydedildi 4</span></li>
+            <li>Randevu (kartta açıldı) <span class="sag">11 · kaydedildi 10</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — AI günlüğü ve geri bildirim panosu (öneri 7)</h2>
+  <p>Bugün 👍/👎 ve araç çağrıları kaydediliyor (<code>ai_mesaj.geri_bildirim</code>, <code>ai_arac_log</code>) ama okunmuyor. Pano, bu kayıtları
+  yöneticinin üç kararına çevirir: <b>hangi ekrana yardım belgesi yazılacak</b>, <b>hangi yetki / kapsam eksiği gerçek</b>, <b>kontör nereye gidiyor</b>.</p>
+  <h3>Veri</h3>
+  <table>
+    <tr><th>Kutu</th><th>Kaynak</th><th>Not</th></tr>
+    <tr><td>Olumsuz sorular</td><td>ai_mesaj (rol 1 + sonraki cevabın geri_bildirim = 2), gruplama: normalize metin + ekran</td><td>Soru metni MASKELİ saklanıyor (PiiMaske); pano maskeli metni gösterir. "Sebep" etiketi yönetici seçer (sözlük).</td></tr>
+    <tr><td>Reddedilen sorgular</td><td>ai_arac_log + yeni <code>ret_sebebi</code> (yetki / kapsam / katalogda yok / alan yetkisi)</td><td>"Rolü aç" Yönetim › Roller › yetki matrisine gider; hekimin TCKN listesi gibi istekler işaretlenip incelemeye düşer.</td></tr>
+    <tr><td>Cevapsız ekranlar</td><td>ai_mesaj.veri.kaynak = 0 (eşleşme yok) ∪ help'te belgesi olmayan rotalar; sayı = o rotadan gelen soru</td><td>"Belge üret" = Ekranlar/prompt/02 yönergesiyle taslak; onaysız indekslenmez.</td></tr>
+    <tr><td>Kaynak dağılımı / kontör</td><td>ai_mesaj.veri.kaynak, ai_mesaj.token, kontör hareketi</td><td>Tükenme tahmini son 7 gün ortalamasından.</td></tr>
+    <tr><td>Taslaklar</td><td>ai_taslak (tip, durum) + kartta açılanların kayıt sonucu (kaynakKayit)</td><td>Onay oranı düşen taslak türü, modelin alan doldurmasının zayıf olduğunu gösterir.</td></tr>
+  </table>
+  <h3>Kurallar</h3>
+  <ul>
+    <li>Yetki <code>ai.gunluk</code> (yeni ekran kodu, yönetici rolüne). Kullanıcı adı yalnız bu yetkiyle görünür; hekim / banko rollerine pano açılmaz.</li>
+    <li>Soru metinleri maskeli; hasta kimliği, TCKN, telefon panoda da yoktur.</li>
+    <li>Pano haftalık e-posta özeti olarak da gidebilir (mevcut hatırlatma işçisi): "3 ekran yardım belgesi bekliyor, 👎 oranı %11".</li>
+  </ul>
+</div>
+
+</body>
+</html>

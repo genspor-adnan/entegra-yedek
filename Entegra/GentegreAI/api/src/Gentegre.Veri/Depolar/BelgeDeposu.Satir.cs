@@ -211,8 +211,31 @@ public sealed partial class BelgeDeposu
             belgeId);
 
         var liste = new List<IDictionary<string, object?>>();
-        await using var o = await komut.ExecuteReaderAsync(iptal);
-        while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal)) liste.Add(o.Sozluk());
+        // KAYNAK LOTLARI (07.11.2026): İrsaliyeden Aktar kaynak satırın lotlarını karta taşır (tekrar sorulmaz).
+        var idler = liste.Select(s => Convert.ToInt32(s["satirId"])).ToArray();
+        if (idler.Length > 0)
+        {
+            await using var lotKomut = baglanti.Komut("""
+                select i.belge_satir_id as sid, i.seri_lot_id as "seriLotId", i.lot_no as "lotNo", i.seri_no as "seriNo",
+                       i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
+                       i.durum, i.adet as "miktar"
+                  from public.v_belge_satir_izlem i
+                 where i.belge_satir_id = any(@p0)
+                 order by i.belge_satir_id, i.id
+                """, null, idler);
+            var lotlar = new Dictionary<int, List<IDictionary<string, object?>>>();
+            await using (var o = await lotKomut.ExecuteReaderAsync(iptal))
+                while (await o.ReadAsync(iptal))
+                {
+                    var k = o.Sozluk(); var sid = Convert.ToInt32(k["sid"]); k.Remove("sid");
+                    if (!lotlar.TryGetValue(sid, out var l)) lotlar[sid] = l = new List<IDictionary<string, object?>>();
+                    l.Add(k);
+                }
+            foreach (var s in liste)
+                if (lotlar.TryGetValue(Convert.ToInt32(s["satirId"]), out var l)) s["izlemler"] = l;
+        }
         return liste;
     }
 
@@ -333,8 +356,11 @@ public sealed partial class BelgeDeposu
     /// e-Belge hazirlanmis/gonderilmis, kasa islemi bagli ya da baska belgeye
     /// donusturulmus belge SILINMEZ; onlarda "İptal Et" kullanilir.
     /// </summary>
+    /// <param name="satirlarla">KARTTAN SİL (kullanıcı 07.11.2026: satırları ekranda silip "Belgeyi sil" dedi; 1267 kuralı
+    /// "satırları olan belge silinemez", kaydet ise "satır olmayan belge kaydedilemez" - kilitlenme): true ise satırlar
+    /// aynı işlemde önce silinir (satır tetikleri - kapatma / kilit - yine çalışır), sonra belge. Listeden silme strict.</param>
     public async Task<string> SilAsync(int belgeId, YazmaBaglami baglam,
-                                       CancellationToken iptal = default)
+                                       CancellationToken iptal = default, bool satirlarla = false)
         => await IsKuraliCevirAsync(async () =>
         {
             await using var baglanti = await _veri.AcAsync(iptal);
@@ -379,6 +405,9 @@ public sealed partial class BelgeDeposu
                 }
             }
 
+            if (satirlarla)
+                await using (var satirSil = baglanti.Komut("delete from public.belge_satir where belge_id = @p0", islem, belgeId))
+                    await satirSil.ExecuteNonQueryAsync(iptal);
             await using var komut = baglanti.Komut(
                 "select public.fn_belge_sil(@p0, @p1)", islem,
                 belgeId, baglam.KullaniciId);

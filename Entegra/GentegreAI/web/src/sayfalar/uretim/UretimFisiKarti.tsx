@@ -538,7 +538,7 @@ function UretimFisiKarti({ fisId, onKapat, onStokId, onEmirId, onMiktar }: {
                                                   : <span className={`rz ${s.fireTuru === 2 ? 'hata' : 'gri'}`}>{s.fireTuru === 2 ? c('Anormal') : c('Normal')}</span>)
                             : s.planMiktar ? (s.miktar - s.planMiktar === 0 ? '0' : `${s.miktar > s.planMiktar ? '+' : ''}${mk(s.miktar - s.planMiktar)}`) : ''}</td>}
                         <td>{duzenlenir ? <input value={s.aciklama} onChange={e => satirDegis(i, { aciklama: e.target.value })} /> : s.aciklama}</td>
-                        {duzenlenir && <td className="or">{!s.anaUrun && <button type="button" className="x" title={c('Satırı kaldır')} onClick={() => satirSil(i)}>✖</button>}</td>}
+                        {duzenlenir && <td className="or">{!s.anaUrun && <button type="button" className="x" title={c('Satırı kaldır')} onClick={() => void (async () => { if (await onay(c('Satır kaldırılacak. Onaylıyor musunuz?'))) satirSil(i) })()}>✖</button>}</td>}
                       </tr>),
                 ];
               })}

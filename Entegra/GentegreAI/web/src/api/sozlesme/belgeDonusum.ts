@@ -39,6 +39,9 @@ export interface AcikSatir {
   tutarKalan?: number;
   /** Stok izleme türü (0 yok · >0 lot/seri) ve lotların okunacağı çıkış deposu (dönüşümde lot seçimi, 02.11.2026). */
   izleme?: number | null;
+  /** Kaynak satırın LOTLARI (07.11.2026): İrsaliyeden Aktar karta aynen taşır, tekrar sormaz. */
+  izlemler?: { seriLotId?: number | null; lotNo?: string | null; seriNo?: string | null; uretimTarihi?: string | null;
+               sonKullanmaTarihi?: string | null; durum?: number | null; miktar: number }[];
   cikisDepoId?: number | null;
   birim: number;
   birimFiyat: number;

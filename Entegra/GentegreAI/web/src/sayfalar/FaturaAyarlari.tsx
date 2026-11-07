@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { GenForm } from '../bilesenler/GenForm';
-import { useEBelgeSekmeleri } from '../bilesenler/ebelge/EBelgeSekmesi';
+import { EBELGE_EK_SEKMELERI, EBELGE_SEKME_BASLIKLARI, ebelgeSekmeSarmalayici } from '../bilesenler/ebelge/EBelgeSekmesi';
 import { EkranSekmesiBaglami } from '../bilesenler/sekmeBaglami';
 import { c } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -23,7 +23,6 @@ export function FaturaAyarlari() {
   const subeId = kullanici?.subeId ?? 0;
   const sube = kullanici?.subeler.find(s => s.id === subeId);
   const [tazele, setTazele] = useState(0);
-  const ebelge = useEBelgeSekmeleri(tazele);
   const kapat = () => ekranSekmesi?.kapat();
 
   return (
@@ -32,29 +31,26 @@ export function FaturaAyarlari() {
         <div className="basrow">
           <h1>{c('Fatura Ayarları')}</h1>
           <span className="yol">{c('Satış › Ayarlar › Fatura Ayarları')}</span>
-          {sube && <span className="fa-sube">🏢 {sube.ad}</span>}
+          {sube && <span style={{ marginLeft: 'auto', fontSize: 12.5, color: 'var(--soluk, #6b7a8b)' }}>🏢 {sube.ad}</span>}
         </div>
       </div>
       <div className="sahne">
         {subeId > 0 ? (
-          // key = şube + kayıt sayacı: üst çubuktan şube değişince ya da kaydedince kart yeniden okunur
-          //   (onKaydedildi true dönünce GenForm kendi tazelemesini atlıyor; ilk değer eskide kalıp ikinci kayıt
-          //   "değişmedi" sayılıyordu - "—"ye dönüş yazılmıyordu).
-          <GenForm key={`${subeId}-${tazele}`} kaynak="sube" id={subeId} sayfaKipi sayfaBaslikYok silYok hatirlatYok
-                   seritAlanlari={[]} yalnizSekmeler={['e-Belge']}
-                   ekSekmeler={ebelge.ekSekmeler} sekmeSarmalayici={ebelge.sekmeSarmalayici}
-                   sekmeBasliklari={ebelge.sekmeBasliklari}
+          // key = şube: üst çubuktan şube değişince kart o şubeyle yeniden okunur. Kayıttan sonra GenForm
+          //   kendisi yeniden okur (onKaydedildi true = sayfa yerinde); tazele yalnız şube özetini yeniler.
+          <GenForm key={String(subeId)} kaynak="sube" id={subeId} sayfaKipi sayfaBaslikYok silYok hatirlatYok
+                   seritAlanlari={SERIT_YOK}
+                   ekSekmeler={EBELGE_EK_SEKMELERI} sekmeSarmalayici={ebelgeSekmeSarmalayici(tazele)}
+                   sekmeBasliklari={EBELGE_SEKME_BASLIKLARI} yalnizSekmeler={YALNIZ_EBELGE}
                    onKapat={kapat}
                    onKaydedildi={() => { setTazele(t => t + 1); return true }} />
         ) : <div className="bilgi-kutusu">{c('Aktif şube yok; üst çubuktan şube seçin.')}</div>}
       </div>
-      <style>{STIL}</style>
     </>
   );
 }
 
-const STIL = `
-.fa-sube { margin-left:auto; font-size:12.5px; color:var(--soluk,#6b7a8b) }
-`;
+const YALNIZ_EBELGE = ['e-Belge'];
+const SERIT_YOK: string[] = [];
 
 export default FaturaAyarlari;

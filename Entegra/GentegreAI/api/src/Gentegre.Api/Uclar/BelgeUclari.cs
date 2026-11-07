@@ -593,8 +593,10 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Sil);
             await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Sil, iptal);
 
+            // ?satirlarla=1: karttan silme - satırlar aynı işlemde önce silinir (BelgeDeposu.SilAsync).
+            var satirlarla = ctx.Request.Query["satirlarla"].ToString() == "1";
             var mesaj = await depo.SilAsync(id,
-                baglam.Yazma, iptal);
+                baglam.Yazma, iptal, satirlarla);
             return Results.Ok(new { mesaj, izlemeNo = baglam.IzlemeNo });
         });
 

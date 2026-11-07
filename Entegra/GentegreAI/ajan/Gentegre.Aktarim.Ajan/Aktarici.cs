@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
 using Microsoft.Data.SqlClient;
@@ -35,10 +35,11 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
     {
         _paket = _kok = _silinen = 0;
         var durum = await api.DurumAsync(iptal);
-        var guncel = await delphi.GuncelVersiyonAsync(iptal);
-        // DEPO DB'Sİ (1265): e-Belge grubu kendi CT sayacıyla; depo yoksa grup atlanır (bir kez uyarılır).
-        var depoVar = await delphi.DepoVarAsync(iptal);
-        var guncelDepo = depoVar ? await delphi.GuncelVersiyonAsync(true, iptal) : -1L;
+        var guncel = await delphi.GuncelVersiyonAsync(false, iptal);
+        // DEPO DB'Sİ (1265): e-Belge grubu kendi CT sayacıyla; depo yoksa (null) grup atlanır (bir kez uyarılır).
+        var depoVersiyon = await delphi.DepoVersiyonAsync(iptal);
+        var depoVar = depoVersiyon is not null;
+        var guncelDepo = depoVersiyon ?? -1L;
         if (!depoVar && !_depoUyarildi)
         {
             _depoUyarildi = true;
@@ -110,7 +111,7 @@ public sealed partial class Aktarici(DelphiOkuyucu delphi, ApiIstemci api, Ayarl
                                          string sebep, CancellationToken iptal)
     {
         gunluk.LogInformation("{Kok}: tam yükleme ({Sebep})", g.Kok, sebep);
-        var nerede = g.Nerede(tarihli: true);
+        var nerede = g.Nerede();
         SqlParameter[] p = g.Tarih is null ? [] : [new SqlParameter("@bas", baslangic)];
 
         if (g.Altlar.Length == 0)

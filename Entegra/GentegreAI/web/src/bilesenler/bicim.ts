@@ -495,8 +495,8 @@ export const yasMetni = (dogum: unknown): string => {
 // SUNUCU / JSON DEGERINI COZME (04.11.2026 refaktor): asagidaki uc yardimci 13 + 12 + 11
 //   dosyada birebir ayni yerel kopyaydi. Bicimleme DEGIL, deger cozme / kisa gosterim.
 // ---------------------------------------------------------------------------
-/** null / undefined -> 0; "12" -> 12 (JSON sayisi ya da sayi metni). */
-export const sayiya = (v: unknown) => Number(v ?? 0);
+/** null / undefined -> 0; "12" -> 12 (JSON sayisi ya da sayi metni); sayi olmayan metin -> 0 (NaN yok). */
+export const sayiya = (v: unknown) => { const n = Number(v ?? 0); return Number.isFinite(n) ? n : 0 };
 /** null / undefined -> ''; kenar bosluklari kirpar. */
 export const metne = (v: unknown) => String(v ?? '').trim();
 /** Icmal tablolari: sifira yakin tutar '—', degilse para bicimi. */

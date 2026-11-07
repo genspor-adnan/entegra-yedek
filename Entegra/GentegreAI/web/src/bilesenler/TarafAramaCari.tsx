@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { ListeSatiri } from '../api/sozlesme';
 import { para, sayi } from './bicim';
-import { c } from '../dil/ceviri';
 import { type CariEk, cariEkGetir } from './cariArama';
+import { Bos, IletisimBlok, Sat, yoksaTire } from './TarafAramaOrtak';
 import { type TarafBaglam, metin, sayiya, tarihYaz } from './tarafDuzeni';
 
 /**
@@ -29,7 +29,7 @@ function Bakiye({ v }: { v: unknown }) {
 }
 
 function RiskCubugu({ s, genis }: { s: ListeSatiri; genis?: boolean }) {
-  if (s.riskYuzde == null || s.riskYuzde === '') return <span className="gh-sonuk">—</span>;
+  if (s.riskYuzde == null || s.riskYuzde === '') return <Bos />;
   const n = sayiya(s.riskYuzde);
   const sinif = n > 100 ? 'kir' : n >= 70 ? 'sari' : '';
   return (
@@ -41,7 +41,7 @@ function RiskCubugu({ s, genis }: { s: ListeSatiri; genis?: boolean }) {
 }
 
 function Gun({ v }: { v: unknown }) {
-  if (v == null || v === '') return <span className="gh-sonuk">—</span>;
+  if (v == null || v === '') return <Bos />;
   const n = sayiya(v);
   if (n <= 0) return <>bugün</>;
   return <span className={`gh-gun${n >= 90 ? ' kir' : n >= 30 ? ' sari' : ''}`}>{sayi.format(n)} gün</span>;
@@ -74,15 +74,15 @@ export function CariHucreler({ s, b }: { s: ListeSatiri; b: TarafBaglam }) {
   return (
     <>
       <td><TipRozeti s={s} /></td>
-      <td>{metin(s.kod) || <span className="gh-sonuk">—</span>}</td>
+      <td>{yoksaTire(s.kod)}</td>
       <td className="ad">
         <b>{unvan}</b>
         {fatura && fatura.toLocaleLowerCase('tr') !== unvan.toLocaleLowerCase('tr') && <small>fatura: {fatura}</small>}
       </td>
-      <td><span className="ta-kirp">{yer || <span className="gh-sonuk">—</span>}</span></td>
-      <td><span className="ta-kirp dar">{metin(s.telefon) || metin(s.cepTel) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="ta-g2"><span className="ta-kirp">{metin(s.ilgiliKisi) || <span className="gh-sonuk">—</span>}</span></td>
-      <td className="ta-g2"><span className="ta-kirp">{metin(s.temsilci) || <span className="gh-sonuk">—</span>}</span></td>
+      <td><span className="ta-kirp">{yer || <Bos />}</span></td>
+      <td><span className="ta-kirp dar">{metin(s.telefon) || metin(s.cepTel) || <Bos />}</span></td>
+      <td className="ta-g2"><span className="ta-kirp">{yoksaTire(s.ilgiliKisi)}</span></td>
+      <td className="ta-g2"><span className="ta-kirp">{yoksaTire(s.temsilci)}</span></td>
       <td className="hiza-sag"><Bakiye v={b.tedarikci ? -sayiya(s.bakiye) : s.bakiye} /></td>
       <td className="hiza-sag">{vade > 0 ? <span className="ta-borc">{para.format(vade)}</span> : para.format(0)}</td>
       {!b.tedarikci && <td><RiskCubugu s={s} /></td>}
@@ -92,29 +92,11 @@ export function CariHucreler({ s, b }: { s: ListeSatiri; b: TarafBaglam }) {
   );
 }
 
-/** Ekstre YENİ TARAYICI SEKMESİNDE: pencere modal, uygulama sekmesine gitmek arkadaki belge kartını düşürürdü. */
-export function CariEkDugmeler({ s }: { s: ListeSatiri | undefined }) {
-  return (
-    <button type="button" className="d" disabled={!s} title="Cari ekstresi (yeni sekmede)"
-            onClick={() => s && window.open(`${import.meta.env.BASE_URL}ekstre?tur=cari&id=${s.id}`, '_blank')}>
-      📄 Ekstre
-    </button>
-  );
-}
-
-/** Panel başlığı + kapat düğmesi (düzenler ortak). */
-export function OnizlemeBasligi({ onKapat }: { onKapat(): void }) {
-  return (
-    <div className="ta-on-bas"><span>{c('Önizleme')}</span>
-      <button type="button" title="Önizlemeyi kapat" onClick={onKapat}>◨</button></div>
-  );
-}
-
-export function CariOnizleme({ s, b, onKapat }: { s: ListeSatiri | undefined; b: TarafBaglam; onKapat(): void }) {
+export function CariOnizleme({ s, b }: { s: ListeSatiri; b: TarafBaglam }) {
   const tedarikci = b.tedarikci;
   // Okunan ek bilgi id ile birlikte tutulur: satır değişince eski carinin notu bir an bile görünmez.
   const [ekDurum, setEkDurum] = useState<{ id: number; ek: CariEk } | null>(null);
-  const id = s ? Number(s.id) : 0;
+  const id = Number(s.id);
   useEffect(() => {
     if (!(id > 0)) return;
     let iptal = false;
@@ -126,16 +108,13 @@ export function CariOnizleme({ s, b, onKapat }: { s: ListeSatiri | undefined; b:
   }, [id, tedarikci]);
   const ek = ekDurum?.id === id ? ekDurum.ek : null;
 
-  if (!s) return <div className="ta-on"><OnizlemeBasligi onKapat={onKapat} /><div className="gh-sonuk">{c('Satır seçin')}</div></div>;
   const risk = s.riskYuzde == null || s.riskYuzde === '' ? null : sayiya(s.riskYuzde);
   const bakiye = tedarikci ? -sayiya(s.bakiye) : sayiya(s.bakiye);
   const vade = sayiya(tedarikci ? s.vadesiGecenOdeme : s.vadesiGecen);
   const adres = [metin(s.adres), [metin(s.ilce), metin(s.il)].filter(Boolean).join(' / ')].filter(Boolean);
   const sonTarih = tarihYaz(tedarikci ? s.sonOdeme : s.sonTahsilat);
-  const iletisimVar = adres.length > 0 || metin(s.telefon) || metin(s.cepTel) || metin(s.eposta) || metin(s.ilgiliKisi);
   return (
-    <div className="ta-on">
-      <OnizlemeBasligi onKapat={onKapat} />
+    <>
       <h4>{metin(s.unvan)}</h4>
       <div className="ta-kod">
         {metin(s.kod)}{metin(s.kod) && ' · '}<TipRozeti s={s} />
@@ -146,34 +125,22 @@ export function CariOnizleme({ s, b, onKapat }: { s: ListeSatiri | undefined; b:
       {risk !== null && risk >= 70 && risk <= 100 && (
         <div className="ta-uyar">⚠ Risk limitinin %{sayi.format(risk)}'inde. Bu belgeyle sınır aşılırsa kayıtta onay istenir.</div>)}
 
-      <div className="ta-blok"><h5>İletişim</h5>
-        {adres.length > 0 && (
-          <div className="ta-sat"><span>Adres</span>
-            <span>{adres.map((x, i) => <span key={i}>{i > 0 && <br />}{x}</span>)}</span></div>)}
-        {metin(s.telefon) && <div className="ta-sat"><span>Telefon</span><span>{metin(s.telefon)}</span></div>}
-        {metin(s.cepTel) && <div className="ta-sat"><span>Cep</span><span>{metin(s.cepTel)}</span></div>}
-        {metin(s.eposta) && <div className="ta-sat"><span>E-posta</span><span>{metin(s.eposta)}</span></div>}
-        {metin(s.ilgiliKisi) && <div className="ta-sat"><span>İlgili kişi</span><span>{metin(s.ilgiliKisi)}</span></div>}
-        {!iletisimVar && <div className="gh-sonuk">—</div>}
-      </div>
+      <IletisimBlok s={s} adres={adres} ilgiliKisi />
 
       <div className="ta-blok"><h5>Hesap</h5>
-        <div className="ta-sat"><span>{tedarikci ? 'Borcumuz' : 'Bakiye'}</span><span><Bakiye v={bakiye} /></span></div>
-        <div className="ta-sat"><span>Vadesi geçen</span>
-          <span className={vade > 0 ? 'ta-borc' : ''}>{para.format(vade)}</span></div>
+        <Sat etiket={tedarikci ? 'Borcumuz' : 'Bakiye'} v={<Bakiye v={bakiye} />} />
+        <Sat etiket="Vadesi geçen" v={para.format(vade)} sinif={vade > 0 ? 'ta-borc' : undefined} />
         {!tedarikci && sayiya(s.riskLimiti) > 0 && (
-          <div className="ta-sat"><span>Risk limiti</span>
-            <span>{para.format(sayiya(s.riskLimiti))}<RiskCubugu s={s} genis /></span></div>)}
-        {metin(s.dovizBakiye) && <div className="ta-sat"><span>Döviz</span><span>{metin(s.dovizBakiye)}</span></div>}
-        {sonTarih && (
-          <div className="ta-sat"><span>{tedarikci ? 'Son ödeme' : 'Son tahsilat'}</span><span>{sonTarih}</span></div>)}
+          <Sat etiket="Risk limiti" v={<>{para.format(sayiya(s.riskLimiti))}<RiskCubugu s={s} genis /></>} />)}
+        <Sat etiket="Döviz" v={metin(s.dovizBakiye)} />
+        <Sat etiket={tedarikci ? 'Son ödeme' : 'Son tahsilat'} v={sonTarih} />
       </div>
 
       {ek && !ek.kartYok && (ek.fiyatListesi || ek.vadeGun || metin(s.temsilci)) && (
         <div className="ta-blok"><h5>{tedarikci ? 'Alış koşulları (belgeye geçer)' : 'Satış koşulları (belgeye geçer)'}</h5>
-          {ek.fiyatListesi && <div className="ta-sat"><span>Fiyat listesi</span><span>{ek.fiyatListesi}</span></div>}
-          {ek.vadeGun && <div className="ta-sat"><span>Ödeme vadesi</span><span>{ek.vadeGun} gün</span></div>}
-          {metin(s.temsilci) && <div className="ta-sat"><span>Temsilci</span><span>{metin(s.temsilci)}</span></div>}
+          <Sat etiket="Fiyat listesi" v={ek.fiyatListesi} />
+          <Sat etiket="Ödeme vadesi" v={ek.vadeGun ? `${ek.vadeGun} gün` : ''} />
+          <Sat etiket="Temsilci" v={metin(s.temsilci)} />
         </div>)}
 
       {ek && !ek.belgeYok && ek.belgeler.length > 0 && (
@@ -189,6 +156,6 @@ export function CariOnizleme({ s, b, onKapat }: { s: ListeSatiri | undefined; b:
         </div>)}
 
       {ek && ek.notlar && <div className="ta-blok"><h5>Not</h5><div className="ta-not">{ek.notlar}</div></div>}
-    </div>
+    </>
   );
 }

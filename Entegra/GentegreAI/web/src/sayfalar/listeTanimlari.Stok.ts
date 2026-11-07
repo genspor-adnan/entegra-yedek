@@ -122,7 +122,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   (kullanici): fiyat listesi de stok/hizmetin tanim ekrani - Yonetim
     //   altinda ararken bulunmuyordu.
     menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Fiyat Listeleri',
-    ic: '🏷️', yetkiKodu: 'fiyat_listesi.liste', menuSira: 91, erpMenuGrup: 'Satış',
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi.liste', menuSira: 91, erp: { grup: 'Satış' },
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde

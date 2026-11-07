@@ -267,6 +267,86 @@ public sealed partial class BelgeDeposu
         return belgeId;
     }
 
+    /// <summary>
+    /// Bu belgenin kaynak bağlı (kaynak_tur 30) satırlarının kaynaklarında kapatılan miktar, kaynak miktarını
+    /// aşıyorsa iş kuralı hatası: aynı sipariş / irsaliye satırı birden çok belgeye (fatura + fiş) aktarılmış.
+    /// Tetik (fn_belge_satir_kapatma_tazele) kapatılanı yazdıktan SONRA çağrılır; hata işlemi geri alır.
+    /// </summary>
+    private static async Task KaynakAsimKontrolAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+                                                     int belgeId, CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut("""
+            select coalesce(nullif(st.ad, ''), nullif(hz.ad, ''), nullif(ks.aciklama, ''), '#' || ks.id::text) as ad,
+                   coalesce(nullif(kb.belge_no, ''), '#' || kb.id::text)                 as kaynak_no,
+                   ks.miktar, coalesce(ks.kapatilan_miktar, 0)                           as kapatilan,
+                   coalesce((select string_agg(coalesce(nullif(hb.belge_no, ''), '#' || hb.id::text), ', ')
+                               from public.belge_satir h
+                               join public.belge hb on hb.id = h.belge_id
+                              where h.kaynak_tur = 30 and h.kaynak_id = ks.id and h.belge_id <> @p0), '') as digerleri
+              from public.belge_satir s
+              join public.belge_satir ks on ks.id = s.kaynak_id
+              join public.belge kb on kb.id = ks.belge_id
+              left join public.stok st on st.id = ks.stok_id
+              left join public.hizmet hz on hz.id = ks.hizmet_id
+             where s.belge_id = @p0 and s.kaynak_tur = 30
+               and coalesce(ks.kapatilan_miktar, 0) > ks.miktar + 0.0001
+             limit 3
+            """, islem, belgeId);
+        var asanlar = new List<string>();
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+            {
+                var digerleri = Convert.ToString(o["digerleri"]) ?? "";
+                asanlar.Add($"{o["ad"]} ({o["kaynak_no"]}: miktar {Convert.ToDecimal(o["miktar"]):0.####}, "
+                          + $"aktarılan {Convert.ToDecimal(o["kapatilan"]):0.####}"
+                          + (digerleri.Length > 0 ? $"; zaten {digerleri} belgesinde" : "") + ")");
+            }
+        if (asanlar.Count > 0)
+            throw GentegreHatasi.IsKurali(
+                "Kaynak satır zaten başka belgeye aktarılmış, kalanı aşıyor: " + string.Join(" · ", asanlar));
+    }
+
+    /// <summary>Kaynak satır (belge_satir.id) stok düşürmüş bir belgede mi (irsaliye)? stok_durum_degis=1 + türü stok etkiler.</summary>
+    private async Task<bool> KaynakStokDusurduMuAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+                                                       int kaynakSatirId, CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut("""
+            select kb.tur from public.belge_satir ks join public.belge kb on kb.id = ks.belge_id
+             where ks.id = @p0 and coalesce(ks.stok_durum_degis, 0) = 1
+            """, islem, kaynakSatirId);
+        var r = await komut.ExecuteScalarAsync(iptal);
+        if (r is null or DBNull) return false;
+        return (await TurEtkileriAsync(baglanti, islem, Convert.ToInt32(r), iptal)).Stok;
+    }
+
+    /// <summary>
+    /// Belgenin satırlarından kaçı cari borçlandırmış bir kaynağa (irsaliye) bağlı: (kaynaklı, toplam, hepsi cari yazdı mı).
+    /// </summary>
+    private async Task<(int Kaynakli, int Toplam, bool HepsiCariYazdi)> KaynakCariDurumuAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem, int belgeId, CancellationToken iptal)
+    {
+        int toplam = 0, kaynakli = 0; var turler = new List<int>();
+        await using (var komut = baglanti.Komut("""
+            select count(*)::int as toplam,
+                   count(*) filter (where s.kaynak_tur = 30 and coalesce(s.kaynak_id, 0) > 0 and kb.id is not null)::int as kaynakli,
+                   coalesce(array_agg(distinct kb.tur) filter (where kb.id is not null), '{}')::int[] as turler
+              from public.belge_satir s
+              left join public.belge_satir ks on s.kaynak_tur = 30 and ks.id = s.kaynak_id
+              left join public.belge kb on kb.id = ks.belge_id
+             where s.belge_id = @p0
+            """, islem, belgeId))
+        await using (var o = await komut.ExecuteReaderAsync(iptal))
+            if (await o.ReadAsync(iptal))
+            {
+                toplam = Convert.ToInt32(o["toplam"]); kaynakli = Convert.ToInt32(o["kaynakli"]);
+                turler = ((int[])o["turler"]).ToList();
+            }
+        var hepsi = turler.Count > 0;
+        foreach (var t in turler)
+            if (!(await TurEtkileriAsync(baglanti, islem, t, iptal)).Cari) hepsi = false;
+        return (kaynakli, toplam, hepsi);
+    }
+
     private async Task SatirEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int sira, Dictionary<string, JsonElement> satir,
         IDictionary<string, object?> belge, YazmaBaglami baglam, bool turStokEtkiler,
@@ -276,6 +356,14 @@ public sealed partial class BelgeDeposu
         var stokId   = JsonSayiNull(satir, "stokId");
         var hizmetId = JsonSayiNull(satir, "hizmetId");
         var masrafId = JsonSayiNull(satir, "masrafId");
+        // KAYNAK STOĞU ZATEN DÜŞÜRDÜYSE (kullanıcı 07.11.2026 "irsaliyeden fiş / faturaya aktarımda lotlar aynen taşınır,
+        //   tekrar sorulmaz"): kart yolundan (İrsaliyeden Aktar) gelen satır kaynak bağıyla (kaynak_tur 30) stok düşürmüş
+        //   bir irsaliye satırına bağlıysa hedef tekrar düşürmez, lot sorulmaz - DonusturAsync'teki kuralın kart karşılığı.
+        //   Lotlar okumada kaynaktan gelir (Deger.cs).
+        var stokDegis = turStokEtkiler ? (int)JsonSayi(satir, "stokDurumDegis", 1) : 0;
+        if (stokDegis == 1 && (int)JsonSayi(satir, "kaynakTur", 0) == 30 && JsonSayi(satir, "kaynakId", 0) > 0
+            && await KaynakStokDusurduMuAsync(baglanti, islem, (int)JsonSayi(satir, "kaynakId", 0), iptal))
+            stokDegis = 0;
 
         // §4/3: uc bagdan yalniz BIRI dolu olabilir (veritabani check ile de zorlar).
         var bagAdedi = (stokId is not null ? 1 : 0) + (hizmetId is not null ? 1 : 0) +
@@ -402,7 +490,7 @@ public sealed partial class BelgeDeposu
             JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId"),
             JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId"),
             (short)JsonSayi(satir, "izleme", 0), JsonMetin(satir, "izlemeKodu"),
-            (short)(turStokEtkiler ? JsonSayi(satir, "stokDurumDegis", 1) : 0),
+            (short)stokDegis,
             (int)JsonSayi(satir, "kaynakTur", 0), JsonSayi(satir, "kaynakId", 0),
             JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
             JsonTarih(satir, "teslimTarihi"),
@@ -432,7 +520,7 @@ public sealed partial class BelgeDeposu
         //   gibi ana birimde tutulur; "2 kutu" degil "24 adet" dagitilir (143).
         if (stokId is { } sid)
             await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
-                                Sayi(belge, "tur"), miktar, satir, belge, turStokEtkiler,
+                                Sayi(belge, "tur"), miktar, satir, belge, turStokEtkiler && stokDegis == 1,
                                 uyarilar, iptal);
     }
 

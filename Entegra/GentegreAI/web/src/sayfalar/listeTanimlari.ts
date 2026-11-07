@@ -103,29 +103,16 @@ export function donusumMenusu(kaynakTur: number | undefined,
   })) };
 }
 
+// TAHSİLAT / ÖDEME ALT MENÜSÜ KALKTI (kullanıcı 06.11.2026: "Kasa İşlemi Listesi'nde tahsilat/ödeme seçilince alta gelen
+//   menüleri kaldır, jenerik müş/ted arama açılsın sonra tahsilat/ödeme türü ve sekmesi"): düğme paletNiyet akışını
+//   başlatır (arama penceresi -> tür modalı -> kart sekmesi). Avans menüsü duruyor.
 export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
-  'kasa.tahsilat.yeni': [
-    { kod: 'kasa.yeni.21', ad: '💵 Nakit' },
-    { kod: 'kasa.yeni.22', ad: '🏦 Banka' },
-    { kod: 'kasa.yeni.25', ad: '📟 POS' },
-    // Cek/senet ayri turlerdir (23/24) ve portfoyde ayri izlenir; belge
-    //   kartinin Tahsilat sekmesinde de ayni iki dugme var.
-    { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
-    { kod: 'kasa.yeni.24', ad: '📜 Senet' },
-  ],
   // HASTA AVANSI (779): avans da nakit/banka/POS ile alinir - arac secimi
   //   tahsilatla ayni, ayrilan tek sey damga.
   'avans.yeni': [
     { kod: 'avans.yeni.21', ad: '💵 Nakit' },
     { kod: 'avans.yeni.22', ad: '🏦 Banka' },
     { kod: 'avans.yeni.25', ad: '📟 POS' },
-  ],
-  'kasa.odeme.yeni': [
-    { kod: 'kasa.yeni.31', ad: '💵 Nakit' },
-    { kod: 'kasa.yeni.32', ad: '🏦 Banka' },
-    { kod: 'kasa.yeni.35', ad: '💳 POS / Kredi Kartı' },
-    { kod: 'kasa.yeni.33', ad: '🧾 Çek' },
-    { kod: 'kasa.yeni.34', ad: '📜 Senet' },
   ],
 };
 

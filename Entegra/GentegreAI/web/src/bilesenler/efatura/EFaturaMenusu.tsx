@@ -125,7 +125,8 @@ export function EFaturaMenusu({ belgeId, belgeIdler, devre, devreSebep, onDegist
   return (
     <span className="dugme-menu efm" ref={kok}>
       <button type="button" className={'d bir' + (devre || (idler.length === 0 && !onceKaydet) ? ' efm-pasif' : '')}
-              title={devre ? devreSebep : etiket === 'Fatura İşlem' ? 'e-Fatura / e-Arşiv işlemleri' : `${etiket} işlemleri`}
+              title={devre ? devreSebep : etiket === 'Fatura İşlem' ? 'e-Fatura / e-Arşiv işlemleri'
+                     : etiket === 'İrsaliye İşlem' ? 'e-İrsaliye işlemleri' : `${etiket} işlemleri`}
               onClick={e => void ac(e)}>
         <img src={efaturaIkon} alt="" width={16} height={16} className="efm-dugme-ikon" /> {etiket}{coklu ? ` (${idler.length})` : ''} ▾
       </button>

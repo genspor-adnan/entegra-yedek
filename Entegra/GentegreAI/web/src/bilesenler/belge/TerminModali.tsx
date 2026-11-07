@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import { type BelgeYaniti, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
-import { hamSayi , tarihSaat } from '../bicim';
+import { hamSayi, gunMetni } from '../bicim';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -75,9 +75,9 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
           <div className="alan-izgara" style={{ margin: 10 }}>
             <label className="alan">
               <span className="etiket">{c('Hepsine Uygula')}</span>
-              {/* 368: kolon SAATLI - toplu uygulamada da saat girilebilir. */}
-              <input type="datetime-local" value={toplu}
-                     onChange={e => hepsineUygula(e.target.value)} />
+              {/* SAATSİZ (kullanıcı 07.11.2026): termin gün bilgisi; 00:00 yazılır. */}
+              <input type="date" value={toplu.slice(0, 10)}
+                     onChange={e => hepsineUygula(e.target.value ? `${e.target.value}T00:00` : '')} />
             </label>
             <span className="alan-notu">
               Tarih girince tüm satırlara yazılır; sonra tek tek değiştirebilirsiniz.
@@ -104,11 +104,11 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
                     {(hamSayi(s.adet)).toLocaleString('tr-TR')}
                   </td>
                   <td className="hiza-orta sonuk">
-                    {s.teslimTarihi ? tarihSaat(s.teslimTarihi) : '—'}
+                    {s.teslimTarihi ? gunMetni(s.teslimTarihi) : '—'}
                   </td>
                   <td className="hiza-orta">
-                    <input type="datetime-local" value={tarihler[s.satirId!] ?? ''}
-                           onChange={e => setTarihler(t => ({ ...t, [s.satirId!]: e.target.value }))} />
+                    <input type="date" value={(tarihler[s.satirId!] ?? '').slice(0, 10)}
+                           onChange={e => setTarihler(t => ({ ...t, [s.satirId!]: e.target.value ? `${e.target.value}T00:00` : '' }))} />
                   </td>
                 </tr>
               ))}

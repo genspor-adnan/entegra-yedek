@@ -1,12 +1,13 @@
 import { EFaturaBilgileri } from '../efatura/EFaturaBilgileri';
 import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
+import { DonusumMenusu } from './DonusumMenusu';
 import { useRef, useState } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { TESLIM_SEKLI, SENARYO_SECENEK, eBelgeTipi } from '../../sayfalar/belgeSabitleri';
 import type { BelgeYaniti } from '../../api/sozlesme';
 import type { SevkiyatBilgisi }
   from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
-import { para } from '../bicim';
+import { para, tarihSaat } from '../bicim';
 import { c } from '../../dil/ceviri';
 import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
 
@@ -122,7 +123,7 @@ export function EBelgeSekmesi({
       {/* e-FATURA MENUSU (11.10.2026): Delphi e-Fatura menusu - eski pasif
           "henuz baglanmadi" dugmelerinin yerine. */}
       {faturaMi && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} />}
-      {tur === 14 && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} etiket="e-İrsaliye" />}
+      {tur === 14 && belgeId > 0 && <EFaturaMenusu belgeId={belgeId} onDegisti={belgeYenile} etiket="İrsaliye İşlem" />}
     </h6>
     {/* Mockup'ta (.grid2) her alan KENDI SATIRINDA: etiket solda, deger
         sagda. Uc sutuna yayilinca sira okunmuyordu. */}
@@ -188,8 +189,17 @@ export function EBelgeSekmesi({
 
 export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi, kurumPayliMi,
                                     teklifDurum, donusumAc, donusumSil,
-                                    hizliDonustur, olcu = 'adet', setOlcu, donusumYenile }: {
+                                    hizliDonustur, olcu = 'adet', setOlcu, donusumYenile, hizliYok, sekmedeAc, kaynakTur }: {
   donusumler: Record<string, unknown>[];
+  /** İRSALİYE (kullanıcı 07.11.2026): Fiş / Fatura / Kurum-Hasta Tahakkuk / Adet-Tutar / Fatura İşlem / ✎ / 🗑 ve seçim
+      kutusu YOK; sekme yalnız türetilmiş belge listesi, Tür'e tıklayınca belge YENİ SEKMEDE (sekmedeAc). Dönüşüm araç
+      çubuğundaki hedef menüsünden. */
+  hizliYok?: boolean;
+  /** Türetilmiş belgeyi kendi sekmesinde açar (hizliYok ile); `tur` yol için (türün liste rotası). */
+  sekmedeAc?(id: number, tur: number): void;
+  /** hizliYok: "Belge Dönüştür" hedef menüsünün kaynak türü (10 alış / 14 satış irsaliyesi) - araç çubuğundan taşındı. */
+  kaynakTur?: number;
+
   kayitliId: number;
   /** Donusum modalini acar; 0 = hedefi modal secsin (ilk hedef). */
   setDonusum(v: number | null): void;
@@ -264,16 +274,38 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   };
 
   return (
-  <div className="kagrup">
+  // `tasar`: açılır menüler (Belge Dönüştür ▾ / Fatura İşlem ▾) grubun altından taşabilsin - kagrup overflow:hidden,
+  //   boş listede menü alttan kırpılıyordu (kullanıcı 07.11.2026).
+  <div className="kagrup tasar">
     <h6>
       {/* Baslik degil ETIKET (kullanici): saginda duran Fiş / Fatura /
           Tahakkuk dugmelerini niteler - "hangi belgeyi keseyim". */}
-      {teklifMi ? 'Sipariş' : 'Belge seç :'}
+      {teklifMi ? 'Sipariş' : hizliYok ? c('Türetilen belgeler') : 'Belge seç :'}
+
+      {/* İRSALİYE (kullanıcı 07.11.2026 "belgeye dönüştür ve siparişten aktar butonlarını sekmeye taşı"): hedef
+          menüsü seçilen türle dönüşüm penceresini açar (satır / adet seçimi orada). Siparişten Aktar henüz bağlı
+          değil - yol Siparişler listesinden. */}
+      {hizliYok && kaynakTur && (
+        <>
+          {/* "Siparişten / Tekliften Aktar" Kalemler sekmesinde (kullanıcı 07.11.2026, KalemSekmesi.aktarSecenekleri). */}
+          <DonusumMenusu kaynakTur={kaynakTur} devre={!kayitliId}
+                         devreSebep={kaynakTur === 9 || kaynakTur === 19 ? 'Önce siparişi kaydedin.' : 'Önce irsaliyeyi kaydedin.'}
+                         title={kaynakTur === 9 || kaynakTur === 19
+                           ? 'Satırları irsaliyeye / faturaya / fişe / tahakkuka aktar'
+                           : 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'}
+                         // ÜRETİME AKTAR menünün EN ÜSTÜNDE + ayraç (kullanıcı 07.11.2026); yalnız sipariş. Üretim emri
+                         //   bağlantısı henüz yok (uretim_emri.kaynak_belge_id hazır) - pasif, sebep söylenir.
+                         ustMadde={kaynakTur === 9 || kaynakTur === 19
+                           ? { ad: 'Üretime Aktar', ikon: '🏭', pasif: true, sebep: 'Üretim emri henüz bağlanmadı.' }
+                           : undefined}
+                         onSec={setDonusum} />
+        </>
+      )}
 
       {/* HIZLI DONUSUM (kullanici): modal ACMADAN hedef belgeyi uretir ve
           alttaki listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.
           Ayrintili secim (satir/tutar/kismi) yine "Faturaya Dönüştür"de. */}
-      {kayitliId > 0 && !teklifMi && (
+      {kayitliId > 0 && !teklifMi && !hizliYok && (
         <>
           <button type="button" className="d bir" disabled={donusumKapali}
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
@@ -314,7 +346,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
       {/* DONUSUM OLCUSU (kullanici): varsayilan ADET - satirin kalan miktari
           cevrilir. TUTAR olcusunde fis/faturada TAHSIL EDILEN kadar,
           tahakkukta kalanin tamami cevrilir (352). */}
-      {kayitliId > 0 && !teklifMi && (
+      {kayitliId > 0 && !teklifMi && !hizliYok && (
         <span className="seg olcu" title={c('Hızlı dönüşümün ölçüsü')}>
           <span className={`s${olcu === 'adet' ? ' on' : ''}`}
                 onClick={() => setOlcu?.('adet')}>Adet</span>
@@ -324,6 +356,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
       )}
       {/* Secili satir islemleri donusum dugmesinin SAGINDA (kullanici):
           yalniz ikon, secim yoksa pasif. Duzenleme TEK satirda calisir. */}
+      {!hizliYok && (<>
       <button type="button" className="d bir" disabled={!tekSecili}
               title={!secili.length ? 'Önce satır seçin'
                      : secili.length > 1 ? 'Düzenleme için tek satır seçin'
@@ -333,10 +366,11 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
               title={eKilitli ? 'e-Fatura hazırlanmış / gönderilmiş fatura silinemez'
                      : secili.length ? 'Seçili belgeleri sil' : 'Önce satır seçin'}
               onClick={() => { void donusumSil?.(secili).then(() => setSecili([])) }}>🗑</button>
+      </>)}
       {/* e-FATURA (kullanici 11.10.2026: "bu sekmedeyken hastanın faturasını
           gönderebileyim.. e-Fatura butonu olacak"): secili TEK fatura icin
           Delphi e-Fatura menusu. Fiş / tahakkuk e-Fatura degildir. */}
-      {kayitliId > 0 && !teklifMi && (
+      {kayitliId > 0 && !teklifMi && !hizliYok && (
         <EFaturaMenusu belgeId={tekFatura} devre={!tekFatura}
                        devreSebep={faturalar.length === 0 ? 'Bu başvurudan henüz fatura kesilmemiş; önce "Fatura" ile fatura oluşturun.'
                                    : secili.length > 1 ? 'e-Fatura için listeden tek bir fatura seçin.'
@@ -351,13 +385,14 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
     <table className="detay-tablo">
       <thead>
         <tr>
+          {!hizliYok && (
           <th className="check">
             <input type="checkbox" checked={hepsi} disabled={!idler.length}
                    title={c('Tümünü seç')}
                    onChange={() => setSecili(hepsi ? [] : idler)} />
-          </th>
+          </th>)}
           <th style={{ width: 160 }}>Belge No</th>
-          <th style={{ width: 100 }}>Tarih</th>
+          <th style={{ width: 130 }}>Tarih</th>
           <th>Tür</th>
           <th className="hiza-sag" style={{ width: 100 }}>Miktar</th>
           <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
@@ -375,16 +410,23 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           <tr key={i} className={bid && secili.includes(bid) ? 'secili' : ''}
               /* Shift+tik metin secmesin - aralik secimi okunmaz oluyordu. */
               style={{ userSelect: 'none' }}
-              onClick={e => satirTikla(e, i, bid)}
-              onDoubleClick={() => bid && donusumAc?.(bid)}>
+              onClick={e => { if (!hizliYok) satirTikla(e, i, bid) }}
+              onDoubleClick={() => { if (!bid) return; if (hizliYok) sekmedeAc?.(bid, Number(d.tur ?? 0)); else donusumAc?.(bid) }}>
+            {!hizliYok && (
             <td className="check" onClick={e => e.stopPropagation()}>
               <input type="checkbox" checked={!!bid && secili.includes(bid)}
                      disabled={!bid}
                      onChange={() => { if (bid) { capa.current = i; cevir(bid) } }} />
-            </td>
-            <td><b>{gorunenBelgeNo(d.belgeNo) || '—'}</b></td>
-            <td>{String(d.belgeTarihi ?? '').slice(0, 10).split('-').reverse().join('.')}</td>
-            <td>{String(d.turAdi ?? '')}</td>
+            </td>)}
+            {/* "0" OLDUĞU GİBİ (kullanıcı 07.11.2026): e-Belge bekleyen faturanın numarası henüz yok - Delphi gibi 0 yazılır,
+                "—" yerine (— "kayıt yok" sanılıyordu). */}
+            <td><b>{String(d.belgeNo ?? '').trim() === '0' ? '0' : (gorunenBelgeNo(d.belgeNo) || '—')}</b></td>
+            {/* SAAT DE (kullanıcı 07.11.2026): fiş / fatura kesim anı. */}
+            <td>{tarihSaat(d.belgeTarihi)}</td>
+            <td>{hizliYok && bid
+              ? <a href={`/belge/${bid}`} title={c('Belgeyi kendi sekmesinde aç')}
+                   onClick={e => { e.preventDefault(); e.stopPropagation(); sekmedeAc?.(bid, Number(d.tur ?? 0)) }}>{String(d.turAdi ?? '')}</a>
+              : String(d.turAdi ?? '')}</td>
             <td className="hiza-sag">{Number(d.miktar ?? 0).toLocaleString('tr-TR')}</td>
             <td className="hiza-sag">{para.format(Number(d.tutar ?? 0))}</td>
             <td>{eBelgeTuru(Number(d.efaturaDurum ?? 0), Number(d.tur ?? 0))}</td>

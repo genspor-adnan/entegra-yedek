@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { guvenli, mesaj as bilgiMesaji } from '../bilesenler/mesaj';
+import { guvenli, mesaj as bilgiMesaji, onay } from '../bilesenler/mesaj';
 import { Modal } from '../bilesenler/Modal';
 import { c as cev } from '../dil/ceviri';
 
@@ -393,6 +393,7 @@ export function Mesajlar() {
                       {m.durum === 1 && m.gonderenId === benId && (
                         <span className="islem" title="Sil"
                               onClick={() => void guvenli(async () => {
+                                if (!await onay('Mesaj silinecek. Onaylıyor musunuz?', true)) return;
                                 await api.mesajSil(m.id);
                                 if (secili !== null) await akisYukle(secili);
                               })}>🗑</span>

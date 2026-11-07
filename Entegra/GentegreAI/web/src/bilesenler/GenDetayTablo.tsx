@@ -5,7 +5,7 @@ import { grupluSecenekler } from './grupluSecenek';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { mesaj } from './mesaj';
+import { mesaj, onay } from './mesaj';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { TarafArama } from './TarafArama';
 import { tarafSecimEngeli } from './tarafSecimEngeli';
@@ -679,8 +679,11 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     onDegis({ ...durum, guncel, silinen });
   };
 
-  const satirSil = (satirIndeks: number) => {
+  // ONAY (kullanıcı 07.11.2026 "bütün sil butonları silmeden önce uyarı vermeli"): kayıtlı satır (id'li) kayıtta
+  //   DB'den silinir - sorulur; henüz kaydedilmemiş satır sorusuz kalkar.
+  const satirSil = async (satirIndeks: number) => {
     const satir = durum.guncel[satirIndeks];
+    if (satir.id != null && !await onay('Satır silinecek. Onaylıyor musunuz?', true)) return;
     const guncel = durum.guncel.filter((_, i) => i !== satirIndeks);
     const silinen = satir.id != null ? [...durum.silinen, satir.id] : durum.silinen;
     onDegis({ ...durum, guncel, silinen });
@@ -1490,7 +1493,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <td className="hiza-orta">
                   <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
                           title={ikonlu ? 'Satırı sil' : undefined}
-                          onClick={() => satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
+                          onClick={() => void satirSil(i)}>{ikonlu ? '🗑' : '×'}</button>
                 </td>
               )}
             </tr>

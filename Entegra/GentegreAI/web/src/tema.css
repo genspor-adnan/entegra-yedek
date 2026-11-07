@@ -1,4 +1,4 @@
-﻿/* ============================================================================
+/* ============================================================================
    Gentegre AI — tasarim dili
    Kaynak: Ekranlar/cari_karti.html (Delphi-mavi kart mockup'lari) — UYGULAMA GENELI TEMA.
    Renkler, fontlar ve bilesen desenleri oradan birebir alindi (20.08.2026'da
@@ -355,6 +355,8 @@ table.grid tfoot td {
 :root[data-yogunluk="sikisik"] table.grid th { padding-top: 3px; padding-bottom: 3px }
 :root[data-yogunluk="ferah"] table.grid td { padding-top: 8px; padding-bottom: 8px }
 :root[data-yogunluk="ferah"] table.grid th { padding-top: 8px; padding-bottom: 8px }
+:root[data-yogunluk="sikisik"] .detay-tablo td { padding-top: 1px; padding-bottom: 1px }
+:root[data-yogunluk="ferah"] .detay-tablo td { padding-top: 5px; padding-bottom: 5px }
 
 table.grid th.cbk, table.grid td.cbk { width: 34px; padding: 4px; text-align: center; white-space: nowrap }
 .grid-cb { width: 14px; height: 14px; accent-color: var(--mor); cursor: pointer; vertical-align: middle }
@@ -757,6 +759,9 @@ table.grid tr.flt input {
 
 /* ---------------------------------------------------------------- kart ---- */
 .kagrup { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem); margin-bottom: 12px; overflow: hidden }
+/* TAŞAN GRUP: içindeki açılır menü (dugme-menu-liste) grubun altından çıkabilir; köşeler h6 ile korunur. */
+.kagrup.tasar { overflow: visible }
+.kagrup.tasar > h6 { border-radius: var(--r) var(--r) 0 0 }
 .kagrup > h6 {
   margin: 0; padding: 6px 10px; font-size: 11px; color: var(--yazi2);
   background: linear-gradient(var(--serit3), var(--serit4)); border-bottom: 1px solid var(--cizgi2);
@@ -1110,7 +1115,9 @@ input.skt-gecmis {
   background: linear-gradient(var(--serit1), var(--serit2)); border-bottom: 1px solid var(--cizgi);
   border-right: 1px solid var(--cizgi2);
 }
-.detay-tablo td { padding: 5px 7px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6 }
+/* VARSAYILAN DAR (kullanıcı 07.11.2026: "tüm belgelerde grid satırlar default dar olsun"): belge kartı gridleri
+   (kalemler, dönüşüm, tahsilat, hareketler…) 5px → 2px dikey dolgu; Görünüm > Yoğunluk "ferah" eski genişliği verir. */
+.detay-tablo td { padding: 2px 7px; border-bottom: 1px solid var(--cizgi2); border-right: 1px solid #eef2f6 }
 .detay-tablo tbody tr.secili td { background: var(--mor2) }
 /* Arama penceresinde ISARETLI (coklu secim) satir: imlec satirindan ayri,
    daha acik ton + sol serit - ikisi ayni anda gorunebilir. */
@@ -1506,6 +1513,8 @@ input.skt-gecmis {
    "boyle bir sey yok" izlenimi verirdi; title sebebini soyluyor. */
 .dugme-menu-liste .mi:disabled { opacity: .45; cursor: default }
 .dugme-menu-liste .mi:disabled:hover { background: transparent; color: inherit }
+/* Pasif ama TIKLANABİLİR madde (sebep mesajla söylenir; "Üretime Aktar"). */
+.dugme-menu-liste .mi.pasif { opacity: .45 }
 /* Menu ogesinin sagindaki tutar (avans toplami). */
 .dugme-menu-liste .mi-tutar { float: right; margin-left: 12px; opacity: .75 }
 /* TAHSILAT GRUBU MENULERI KIRPILMASIN (781): .kagrup varsayilan olarak

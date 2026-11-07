@@ -573,9 +573,10 @@ public static partial class AksiyonKatalogu
         //   odeme ayni ekrandir ama kullanicinin kafasinda ayri islemdir.
         s["kasa-liste"] = new AksiyonTanimi[]
         {
-            new("kasa.tahsilat.yeni", "＋ Tahsilat", "kasa", Kisayol: "Ctrl+N",
+            // RENK (kullanici 06.11.2026): tahsilat yesil, odeme kirmizi - yon dugmeden okunsun (Bicim = CSS sinifi).
+            new("kasa.tahsilat.yeni", "＋ Tahsilat", "kasa", Kisayol: "Ctrl+N", Bicim: "yesil",
                 KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
-            new("kasa.odeme.yeni",    "－ Ödeme",    "kasa",
+            new("kasa.odeme.yeni",    "－ Ödeme",    "kasa", Bicim: "teh",
                 KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 20),
             new("kasa.virman.yeni",   "⇄ Virman",    "kasa",
                 KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 22),

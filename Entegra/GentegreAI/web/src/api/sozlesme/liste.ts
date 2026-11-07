@@ -114,4 +114,6 @@ export interface KolonMeta {
   sadeceGrupToplami?: boolean;
   /** Kod kolonunun deger-etiket sozlugu (492) - ust serit suzgec combosu. */
   kodlar?: Record<string, string> | null;
+  /** Rozet kolonunda değer -> CSS sınıfı (kolona özel renk); yoksa ortak sözlük (gridHucre ROZET_SINIFI). */
+  rozetSiniflari?: Record<string, string> | null;
 }

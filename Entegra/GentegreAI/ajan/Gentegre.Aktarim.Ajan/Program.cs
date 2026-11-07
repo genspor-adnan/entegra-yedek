@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 //  GENTEGRE AKTARIM AJANI - Delphi (MSSQL) -> Gentegre AI, tek yön (dokuman/18 §11)
 //
 //  Müşteri sunucusunda çalışır, yalnız DIŞARI HTTPS açar. Change Tracking'den

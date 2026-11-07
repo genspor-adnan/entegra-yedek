@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gentegre Yapay Zeka — Kart İçi Asistan + Taslak (Mockup)</title>
+<style>
+  :root{
+    --card:#fff; --line:#d2dae3; --line2:#e6ebf1; --ink:#1f2d3a; --muted:#6b7a8b;
+    --navy:#14315a; --accent:#2f6db3; --sel:#dcebfb; --selbd:#9cc4ee; --head:#f1f5f9; --head2:#e7eef5;
+    --ok:#2e7d46; --okzem:#e6f4ea; --uyari:#b5731a; --uyarizem:#fff4e0; --hata:#b23b3b; --hatazem:#fdecec;
+    --ai:#6d4bb8; --aiZem:#f1ecfb; --aiKenar:#ddd0f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe4ea;color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:12px}
+  h1.bas{max-width:1480px;margin:0 auto 10px;font-size:15px;color:var(--navy)}
+  .win{max-width:1480px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);border-radius:6px;
+    box-shadow:0 8px 26px rgba(20,40,70,.16);overflow:hidden;display:flex;flex-direction:column;min-height:760px;position:relative}
+  .title{background:linear-gradient(#1f3f6b,#14315a);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:600}
+  .title .sp{margin-left:auto;font-weight:400;opacity:.85;font-size:11px}
+  .title.hbys{background:linear-gradient(#2a6a5a,#1d4f43)}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#f4f7fb)}
+  .tb{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:6px 11px;color:#33465c}
+  .tb.bir{background:linear-gradient(#3f7fc7,#2f6db3);border-color:#2a62a2;color:#fff;font-weight:600}
+  .serit{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .serit label{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+  .serit .v{border:1px solid var(--line);border-radius:4px;padding:5px 8px;background:#fff}
+  .sekmeler{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);background:#fafbfd}
+  .sekme{padding:8px 12px;color:var(--muted);border-bottom:2px solid transparent}
+  .sekme.on{color:var(--navy);border-color:var(--accent);font-weight:600}
+  .govde{flex:1;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;opacity:.55}
+  .kutu{border:1px solid var(--line2);border-radius:6px}
+  .kutu h6{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11px;color:#3a5573}
+  .kutu .ic{padding:8px 10px;display:grid;grid-template-columns:110px 1fr;gap:6px 8px;font-size:12px}
+  .kutu .ic span:nth-child(odd){color:var(--muted)}
+  /* PANEL */
+  .panel{position:absolute;right:14px;bottom:14px;width:430px;max-height:88%;background:#fff;border:1px solid var(--aiKenar);
+    border-radius:12px;box-shadow:0 12px 36px rgba(60,40,120,.28);display:flex;flex-direction:column;overflow:hidden}
+  .panel .ust{display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(#7d5cc9,#5f42a8);color:#fff;font-weight:600}
+  .panel .ust .k{margin-left:auto;opacity:.85;font-weight:400;font-size:11px}
+  .baglam{padding:7px 12px;background:var(--aiZem);border-bottom:1px solid var(--aiKenar);font-size:11.5px;color:#4a3a78;display:flex;gap:8px;align-items:center}
+  .baglam b{color:var(--ai)}
+  .baglam .roz{margin-left:auto;font-size:10.5px;border:1px solid var(--aiKenar);background:#fff;border-radius:10px;padding:1px 8px}
+  .icerik{padding:10px 12px;overflow:auto;flex:1}
+  .oneri{display:flex;gap:8px;align-items:flex-start;border:1px solid #edd38b;background:#fff8e1;border-radius:8px;padding:7px 9px;margin-bottom:6px;font-size:11.5px;color:#7a5407}
+  .oneri.kir{border-color:#f1b8b8;background:var(--hatazem);color:var(--hata)}
+  .oneri.ok{border-color:#bfe0c8;background:var(--okzem);color:var(--ok)}
+  .oneri a{margin-left:auto;white-space:nowrap;color:inherit;text-decoration:underline}
+  .bolum{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3;margin:10px 0 6px}
+  .arac{display:flex;flex-wrap:wrap;gap:6px}
+  .arac button{border:1px solid var(--aiKenar);background:#fff;color:var(--ai);border-radius:14px;padding:4px 10px;font-size:11.5px;font-family:inherit}
+  .soru{border:1px solid var(--line2);background:#f8f9fb;border-radius:8px;padding:6px 9px;font-size:11.5px;color:#33475c;margin-bottom:5px}
+  .cevap{border:1px solid var(--line);border-radius:10px;padding:9px 11px;line-height:1.55;margin-top:6px;font-size:12px}
+  .cevap .kim{font-size:10.5px;color:var(--muted);margin-bottom:4px}
+  table.mini{width:100%;border-collapse:collapse;font-size:11.5px;margin:6px 0}
+  .mini th{background:var(--head);text-align:left;padding:4px 7px;border-bottom:1px solid var(--line);font-weight:600;color:#3a5573;font-size:10.5px}
+  .mini td{padding:4px 7px;border-bottom:1px solid var(--line2)}
+  .mini td.sag,.mini th.sag{text-align:right}
+  .mini .kir{color:var(--hata);font-weight:600}
+  /* TASLAK KARTI */
+  .taslak{border:1px solid var(--aiKenar);background:var(--aiZem);border-radius:10px;padding:9px 11px;margin-top:8px}
+  .taslak .ust{display:flex;align-items:center;gap:8px;margin-bottom:6px;background:none;color:var(--ai);padding:0}
+  .taslak .ust .d{margin-left:auto}
+  .alanlar{display:grid;grid-template-columns:110px 1fr;gap:4px 8px;font-size:11.5px;background:#fff;border:1px solid var(--aiKenar);border-radius:6px;padding:7px 9px}
+  .alanlar span:nth-child(odd){color:var(--muted)}
+  .alanlar .eksik{color:var(--hata);font-style:italic}
+  .alanlar .kay{color:#7a5407}
+  .taslak .not{font-size:11px;color:#4a3a78;margin-top:6px}
+  .d{border:1px solid var(--line);background:linear-gradient(#fff,#eef2f7);border-radius:6px;padding:4px 10px;color:#33465c;font-size:11.5px;font-family:inherit}
+  .d.bir{background:linear-gradient(#3f7fc7,#2f6db3);border-color:#2a62a2;color:#fff;font-weight:600}
+  .d.ai{background:linear-gradient(#7d5cc9,#5f42a8);border-color:#5f42a8;color:#fff;font-weight:600}
+  .dugmeler{display:flex;gap:6px;margin-top:8px;align-items:center}
+  .dugmeler .not{margin-left:auto}
+  .not{font-size:11px;color:var(--muted)}
+  .giris{border-top:1px solid var(--line2);padding:8px 10px;display:flex;gap:6px;align-items:center}
+  .giris input{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit}
+  .notlar{max-width:1480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px 20px;line-height:1.6}
+  .notlar h2{margin:0 0 8px;font-size:15px;color:var(--navy)}
+  .notlar h3{margin:14px 0 6px;font-size:13px;color:var(--ai)}
+  .notlar ul,.notlar ol{padding-left:20px;margin:4px 0}
+  .notlar table{border-collapse:collapse;font-size:12px;margin:6px 0}
+  .notlar td,.notlar th{border:1px solid var(--line2);padding:5px 9px;text-align:left;vertical-align:top}
+  .notlar th{background:var(--head)}
+  .notlar pre{background:#f6f8fb;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;font-size:11.5px;overflow:auto}
+</style>
+</head>
+<body>
+
+<h1 class="bas">A) ERP — Müşteri kartında asistan: bağlam araçları + satın alma / sipariş taslağı</h1>
+<div class="win">
+  <div class="title">🏢 Müşteri Kartı — ALOEPLANT SAĞLIK HİZ. SAN. TİC. LTD. <span class="sp">120.01.143 · Cari &amp; CRM › Müşteri Listesi</span></div>
+  <div class="toolbar"><div class="tb bir">Kaydet</div><div class="tb">Sil</div><div class="tb">⏰ Hatırlat</div><div class="tb">📄 Ekstre</div><div class="tb">＋ Satış Faturası</div><div class="tb" style="margin-left:auto">✕ Kapat</div></div>
+  <div class="serit"><div><label>Ünvan</label><div class="v">ALOEPLANT SAĞLIK HİZMETLERİ VE ÜRÜNLERİ SANAYİ TİC. LTD.</div></div>
+    <div><label>Kod</label><div class="v">120.01.143</div></div><div><label>Durum</label><div class="v">Aktif</div></div></div>
+  <div class="sekmeler"><span class="sekme on">Kimlik</span><span class="sekme">Adres / Fatura Bilgisi</span><span class="sekme">Satış Koşulları</span><span class="sekme">İlgili Kişiler</span><span class="sekme">Belgeler</span><span class="sekme">Notlar</span></div>
+  <div class="govde">
+    <div class="kutu"><h6>Firma Kimliği</h6><div class="ic"><span>Vergi no</span><span>4840847211</span><span>Vergi dairesi</span><span>Çankaya</span><span>Temsilci</span><span>M. Akman</span><span>Kategori</span><span>Medikal</span></div></div>
+    <div class="kutu"><h6>Hesap</h6><div class="ic"><span>Bakiye</span><span>184.250,00 B</span><span>Risk limiti</span><span>150.000,00</span><span>Vade</span><span>45 gün</span><span>Fiyat listesi</span><span>Bayi 2026</span></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="ust">✨ Yapay Zekâya Sor <span class="k">Bu kart hakkında · ◨ ✕</span></div>
+    <div class="baglam">📍 <span><b>Müşteri kartı</b> · ALOEPLANT · bakiye ve belgeler bağlamda</span><span class="roz">sunucu doğruladı</span></div>
+    <div class="icerik">
+      <div class="oneri kir">⚠ <span><b>Risk limiti aşılmış</b> (%123). Yeni satış belgesinde onay istenir.</span><a href="#">Limiti aç</a></div>
+      <div class="oneri">⏳ <span><b>3 vadesi geçen fatura</b>, en eskisi 54 gün (92.400 ₺).</span><a href="#">Belgeleri gör</a></div>
+      <div class="oneri ok">✓ <span>e-Fatura mükellefi; alias doğrulandı 02.11.</span></div>
+
+      <div class="bolum">Bu kart için sor</div>
+      <div class="arac">
+        <button>📄 Açık belgeleri</button><button>💵 Son tahsilatları</button><button>📦 En çok aldığı ürünler</button>
+        <button>✉ Hatırlatma e-postası yaz</button><button>🛒 Son siparişi tekrarla</button>
+      </div>
+
+      <div class="soru" style="margin-top:10px">👤 Son siparişini tekrarla, miktarları aynı; teslim 15 gün sonra.</div>
+      <div class="cevap">
+        <div class="kim">✨ Gentegre AI · <code>belge_oku</code> 26315 · <code>stok_fiyat</code> 3 kalem · 380 jeton</div>
+        Son siparişi <b>SİP-2026-0412</b> (12.10.2026, 3 kalem). Fiyatlar müşterinin listesinden (Bayi 2026) <b>güncellendi</b>; bir ürün bugün stokta yok.
+        <table class="mini">
+          <thead><tr><th>Ürün</th><th class="sag">Miktar</th><th class="sag">Eski fiyat</th><th class="sag">Bugün</th></tr></thead>
+          <tbody>
+            <tr><td>Aloe Vera Jel 250 ml</td><td class="sag">120</td><td class="sag">84,00</td><td class="sag">88,50</td></tr>
+            <tr><td>Nemlendirici Krem 100 ml</td><td class="sag">60</td><td class="sag">142,00</td><td class="sag">142,00</td></tr>
+            <tr><td>Güneş Losyonu 200 ml</td><td class="sag">40</td><td class="sag">96,00</td><td class="sag kir">stok yok (12)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="taslak">
+          <div class="ust">📝 <b>Satış Siparişi taslağı</b> <span class="not">· kaydedilmedi</span><button class="d">✎ Alanları düzenle</button></div>
+          <div class="alanlar">
+            <span>Müşteri</span><span>ALOEPLANT SAĞLIK HİZ. (120.01.143)</span>
+            <span>Belge tarihi</span><span>06.11.2026</span>
+            <span>Teslim tarihi</span><span class="kay">21.11.2026 <i>(15 gün)</i></span>
+            <span>Depo</span><span class="eksik">seçilmedi — zorunlu</span>
+            <span>Fiyat listesi</span><span>Bayi 2026</span>
+            <span>Satırlar</span><span>3 kalem · 21.590,00 ₺ + KDV</span>
+            <span>Uyarı</span><span class="kay">Güneş Losyonu için 12 adet stok; 40 yazıldı, kartta değiştir.</span>
+          </div>
+          <div class="not">Taslak <b>Satış Siparişi kartını dolu açar</b>; kayıt kartın kendi Kaydet'iyle olur (doğrulama, numara, risk onayı orada).</div>
+          <div class="dugmeler">
+            <button class="d bir">📋 Kartta aç (dolu)</button><button class="d">💾 Taslak olarak sakla</button><button class="d">✕ Vazgeç</button>
+            <span class="not">Yazan işlem yok</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="giris"><input placeholder="Bu kart hakkında sor… (@belge, @stok ile kaynak seç)"><button class="d">🎤</button><button class="d ai">Gönder</button></div>
+  </div>
+</div>
+
+<h1 class="bas">B) HBYS — Hasta kartında asistan: bekleyen işler + randevu taslağı</h1>
+<div class="win" style="min-height:700px">
+  <div class="title hbys">🧑‍⚕️ Hasta Kartı — Ayşe KARA <span class="sp">P-000161 · 48 y · Kadın · Kayıt Kabul › Hasta Listesi</span></div>
+  <div class="toolbar"><div class="tb bir">Kaydet</div><div class="tb">＋ Başvuru</div><div class="tb">📅 Randevu</div><div class="tb">🧪 Lab</div><div class="tb">🩻 Radyoloji</div><div class="tb" style="margin-left:auto">✕ Kapat</div></div>
+  <div class="sekmeler"><span class="sekme on">Genel</span><span class="sekme">Adres / Fatura Bilgisi</span><span class="sekme">Yakınlar</span><span class="sekme">Başvurular</span><span class="sekme">Sonuçlar</span><span class="sekme">Reçeteler</span></div>
+  <div class="govde">
+    <div class="kutu"><h6>Kimlik</h6><div class="ic"><span>TCKN</span><span>•••••••4218</span><span>Doğum</span><span>14.03.1978</span><span>Telefon</span><span>0532 ••• 12 35</span><span>Sigorta</span><span>SGK</span></div></div>
+    <div class="kutu"><h6>Son başvuru</h6><div class="ic"><span>Tarih</span><span>03.11.2026</span><span>Bölüm</span><span>Dahiliye · Dr. Ş. Demir</span><span>Durum</span><span>Muayene tamam</span><span>İstem</span><span>Lab (6) · USG</span></div></div>
+  </div>
+
+  <div class="panel" style="bottom:14px">
+    <div class="ust">✨ Yapay Zekâya Sor <span class="k">Bu hasta hakkında · ◨ ✕</span></div>
+    <div class="baglam">📍 <span><b>Hasta kartı</b> · P-000161 · yalnız kayıt kimliği gönderildi</span><span class="roz">klinik öneri yok</span></div>
+    <div class="icerik">
+      <div class="oneri kir">🧪 <span><b>2 sonuç onay bekliyor</b> (Hemogram, CRP) — 03.11 başvurusu.</span><a href="#">Sonuçları aç</a></div>
+      <div class="oneri">🩻 <span>USG istemi <b>randevusuz</b>; cihaz planına alınmadı.</span><a href="#">Randevu ver</a></div>
+      <div class="oneri">💳 <span>Başvuruda <b>340 ₺ hasta payı</b> tahsil edilmedi.</span><a href="#">Banko'ya git</a></div>
+
+      <div class="bolum">Bu hasta için sor</div>
+      <div class="arac">
+        <button>📅 Randevu geçmişi</button><button>🧪 Bekleyen sonuçlar</button><button>💊 Aktif reçeteler</button>
+        <button>📨 e-Nabız durumu</button><button>🗓 Kontrol randevusu planla</button>
+      </div>
+
+      <div class="soru" style="margin-top:10px">👤 Dr. Demir'e 2 hafta sonra kontrol randevusu, sabah.</div>
+      <div class="cevap">
+        <div class="kim">✨ Gentegre AI · <code>uygun_saatler</code> Dahiliye / Dr. Ş. Demir · 20.11 · 210 jeton</div>
+        20.11.2026 sabahı Dr. Demir'de üç boşluk var: <b>09:20</b>, 09:40, 10:00. Hastanın tercih ettiği kanal: SMS.
+        <div class="taslak">
+          <div class="ust">📝 <b>Randevu taslağı</b> <span class="not">· kaydedilmedi</span><button class="d">✎ Düzenle</button></div>
+          <div class="alanlar">
+            <span>Hasta</span><span>Ayşe KARA (P-000161)</span>
+            <span>Bölüm / Hekim</span><span>Dahiliye · Dr. Ş. Demir</span>
+            <span>Tarih / Saat</span><span class="kay">20.11.2026 · 09:20</span>
+            <span>Tür</span><span>Kontrol (ücretsiz, 10 gün kuralı dışında — <span class="eksik">SGK: ücretli olabilir</span>)</span>
+            <span>Bildirim</span><span>SMS · randevu + 1 gün önce hatırlatma</span>
+          </div>
+          <div class="not">Kayıt <b>Randevu kartında</b>, çalışma planı ve SKRS kuralları orada doğrulanır; asistan saat önerir, yazmaz.</div>
+          <div class="dugmeler"><button class="d bir">📅 Randevu kartında aç</button><button class="d">Başka saat</button><button class="d">✕ Vazgeç</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="giris"><input placeholder="Bu hasta hakkında sor…"><button class="d">🎤</button><button class="d ai">Gönder</button></div>
+  </div>
+</div>
+
+<div class="notlar">
+  <h2>Tasarım notları — kart içi asistan (öneri 3 + 4)</h2>
+  <p>Sağ alttaki panel (871) bugün rehberdir: ekranı tanır, adım anlatır. Bu mockup paneli <b>kayda bağlı asistan</b> yapar:
+  açık kaydın özetini okuyan bağlam araçları, kayda özgü öneri rozetleri (449 mekanizması) ve <b>taslak kartı</b>.
+  Taslak hiçbir zaman kaydı kendisi yazmaz; ilgili kartı dolu açar, kayıt kartın kendi Kaydet'iyle olur (doğrulama, numara,
+  risk / SKRS kuralları değişmez).</p>
+
+  <h3>Bağlam araçları (panel "Bu kart için sor" çipleri)</h3>
+  <table>
+    <tr><th>Kart</th><th>Araç</th><th>Okuduğu</th><th>Yetki</th></tr>
+    <tr><td>cari</td><td>acik_belgeler · son_tahsilatlar · en_cok_alinan · son_siparis</td><td>belge / kasa_islem / belge_satir, tarafId = açık kayıt</td><td>belge.satis / kasa.finans görme</td></tr>
+    <tr><td>hasta</td><td>bekleyen_sonuclar · randevu_gecmisi · aktif_receteler · enabiz_durumu · uygun_saatler</td><td>lab_istem, randevu, recete, enabiz_kuyruk; hasta = açık kayıt</td><td>ilgili ekran görme; klinik öneri KAPALI (yalnız durum)</td></tr>
+    <tr><td>stok</td><td>hareketler · tedarikci_fiyatlari · kritik_sube</td><td>stok_hareket, alis belge satırı</td><td>stok görme</td></tr>
+  </table>
+  <p>Her araç, mevcut katalog sorgusunun açık kayda daraltılmış halidir (liste_sorgusu + sabit koşul). Modele kayıt içeriği
+  <b>araç sonucu olarak</b> gider, kart alanlarının tamamı gitmez; hasta kartında kimlik maskeli.</p>
+
+  <h3>Taslak kartı sözleşmesi</h3>
+<pre>{
+  "tip": "belge_taslagi",              // belge_taslagi | randevu_taslagi | cari_taslagi | gorev | metin
+  "kaynak": "belge", "tur": 11,        // satış siparişi
+  "alanlar": { "tarafId": 143, "belgeTarihi": "2026-11-06", "teslimTarihi": "2026-11-21", "fiyatListesiId": 7 },
+  "satirlar": [{ "stokId": 501, "miktar": 120, "fiyat": 88.5 }, ...],
+  "eksik": ["depoId"],                 // zorunlu olup doldurulamayanlar - kartta kırmızı
+  "uyarilar": ["Güneş Losyonu: stok 12, istenen 40"],
+  "kaynakKayit": { "kaynak": "belge", "id": 26315 }   // nereden türetildi (günlük)
+}</pre>
+  <ul>
+    <li><b>Kartta aç (dolu):</b> GenForm `ilkDeger` + detay satırlarıyla açılır; kullanıcı eksikleri tamamlar, Kaydet normal yoldan.</li>
+    <li><b>Taslak olarak sakla:</b> mevcut `ai_taslak` (tip genişler); Yapay Zeka ekranı › Taslaklar listesinde bekler, onay orada da verilebilir.</li>
+    <li><b>Alan adları sunucu metasından:</b> taslak yalnız katalogda olan alanı taşır; bilinmeyen alan düşer, günlüğe yazılır.</li>
+    <li><b>Yazma yetkisi</b> kartta sorulur (ekle hakkı yoksa "Kartta aç" düğmesi çizilmez, taslak yine saklanabilir).</li>
+    <li>HBYS'de randevu taslağı çalışma planı / SKRS kurallarını kartta görür; asistan yalnız uygun saat önerir (mevcut uygun saat servisi).</li>
+  </ul>
+</div>
+
+</body>
+</html>
