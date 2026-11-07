@@ -60,6 +60,7 @@ public static partial class EkranKodlari
         ("belge.alis.tahakkuk", "belge.alis"),                  // Alış › Tahakkuklar
         ("belge.satis.acik_satir", "belge.satis"),              // Satış › Açık Satırlar
         ("belge.satis.ayar", "belge.satis"),                    // Satış › Ayarlar › Satış Belgeleri
+        ("belge.satis.konsinye", "belge.satis"),                // Satış › Satış Konsinyeler (1275)
         ("belge.satis.fatura", "belge.satis"),                  // Satış › Satış Faturaları
         ("belge.satis.fis", "belge.satis"),                     // Satış › Satış Fişleri
         ("belge.satis.irsaliye", "belge.satis"),                // Satış › Satış İrsaliyeleri

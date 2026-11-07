@@ -48,7 +48,8 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   const sade = irsaliyeMi || siparisMi;
   if (aktifSekme === 'fatura') return (
     <FaturalamaSekmesi {...faturalama} hizliYok={sade}
-                       kaynakTur={irsaliyeMi ? (tur === 10 || tur === 109 ? 10 : 14) : siparisMi ? tur : undefined} />);
+                       // Konsinye (109 / 119) kendi hedef listesini kullanır (HEDEFLER'de var) - 10 / 14'e indirgenmez.
+                       kaynakTur={irsaliyeMi || siparisMi ? tur : undefined} />);
   if (aktifSekme === 'imza') {
     return (
       <div className="kagrup">

@@ -30,7 +30,9 @@ export const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
         { kod: 17, ad: 'Satış Tahakkuku' }],
   109: [{ kod: 11, ad: 'Alış Faturası' }, { kod: 12, ad: 'Alış Fişi' },
         { kod: 13, ad: 'Alış Tahakkuku' }],
-  119: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
+  // SATIŞ KONSİNYE -> SATIŞ İRSALİYESİ (kullanıcı 07.11.2026): bırakılan malın satılan kısmı kesin irsaliyeye; menüde
+  //   en üstte, ayraçla (DonusumMenusu.ustHedef). Stok konsinyede zaten düştü - hedef tekrar düşürmez.
+  119: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
         { kod: 17, ad: 'Satış Tahakkuku' }],
 };
 

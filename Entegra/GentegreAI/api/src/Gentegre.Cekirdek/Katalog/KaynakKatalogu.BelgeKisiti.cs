@@ -70,6 +70,7 @@ public static partial class KaynakKatalogu
         ["belge.satis.fis"]        = ([16], false),        // Fişler
         ["belge.satis.tahakkuk"]   = ([17], false),        // Tahakkuklar
         ["belge.satis.acik_satir"] = ([19], true),         // Açık Satırlar (siparişin kartı)
+        ["belge.satis.konsinye"]   = ([119], false),       // Satış Konsinyeler (1275)
         // Alış
         ["belge.alis"]             = ([9], false),         // Siparişler
         ["belge.alis.irsaliye"]    = ([10], false),

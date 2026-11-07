@@ -128,6 +128,18 @@ HBYS'de 1-2. aşama palette (tahsilat → kimden). Mockup `Ekranlar/AI/ai_rezerv
   aktarma penceresinde istemci toplamı kaldırıldı (para hesabı tek yer); Tahsilat sekmesi ürün kipini prop alır
   (try/catch'li hook yok); taksit vadesi ay sonunda taşmaz (31.01 + 1 ay = 28.02); kasa kartı kirli tabanı kullanıcı
   dokunana dek açılış dolumlarını izler (2 sn penceresi kalktı).
+- Fatura kartı (satış 15 / alış 11) Kalemler sekmesinde de fişteki "⇩ Aktar ▾" (Siparişten / İrsaliyeden) - aynı
+  `FIS_AKTAR`; irsaliyeden gelen satırda stok / cari tekrar yazılmaz, lotlar taşınır (yukarıdaki kural).
+- **Satış Konsinye Listesi ERP'de de** (kullanıcı: "göremedim"): yalnız HBYS + menüde gizliydi (eski karar: tıbbi
+  malzeme akışı), yetkisi geniş `belge.satis`. Artık Satış › Satış Konsinye Listesi (sıra 55, alış karşılığı gibi),
+  kendi kodu `belge.satis.konsinye` (1275: `belge.satis`in rol yetkileri kopyalanır, sürüm artar; EkranKodlari /
+  BelgeKisiti [119] / AyniGrup). GenProfil matrisinde ayrı satır.
+- Konsinye kartlarında (109 / 119) başlık alanları "Konsinye No" / "Konsinye Tarihi" (dış numaralı alışta "Tedarikçi
+  Konsinye No"); eskiden "İrsaliye" yazıyordu (kullanıcı). e-Belge rozeti "e-İrsaliye (konsinye)" aynen.
+- Satış konsinye kartı Belge Dönüştür menüsü: en üstte **Satış İrsaliyesi** + ayraç, altında fatura / fiş / tahakkuk
+  (kullanıcı). `HEDEFLER[119]`e 14 eklendi, `DonusumMenusu.ustHedef`; konsinye kartı kendi hedef listesini kullanır
+  (eskiden 14'e indirgeniyordu). Konsinyeden irsaliyeye dönüşümde stok tekrar düşmez (kaynak düşürdü).
+- Menü: "Tahakkuk Listesi" → "Satış Tahakkuk Listesi" / "Alış Tahakkuk Listesi" (kullanıcı); EN / DE çevirileri 1276.
 - Sipariş kartında teslim tarihi **saatsiz** (kullanıcı: "başvuruda kalsın"): kalem gridi gün (`gunMetni`), kalem
   penceresi ve Termin modalı `type=date` (00:00 yazılır). Başvurunun işlem zamanı saatli (datetime-local) aynen.
 - Belge kartı gridleri (`.detay-tablo`) varsayılan **dar** (kullanıcı: "tüm belgelerde grid satırlar default dar"):

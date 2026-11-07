@@ -7,7 +7,7 @@ import { mesaj } from '../mesaj';
  * Faturası / Satış Fişi / Satış Tahakkuku"). Hedefler dönüşüm penceresinin listesinden (HEDEFLER) - liste ekranındaki
  * menüyle aynı; seçilen hedef pencereyi ÖN SEÇİLİ açar. Menü düğmenin altında açılır, dışarı tık / Esc kapatır.
  */
-export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title, ustMadde }: {
+export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title, ustMadde, ustHedef }: {
   kaynakTur: number;
   devre?: boolean;
   devreSebep?: string;
@@ -16,10 +16,14 @@ export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title, ustM
   /** EN ÜSTTE ek madde + altında ayraç (kullanıcı 07.11.2026: sipariş kartında "🏭 Üretime Aktar"). `pasif` ise
       tıklanınca sebep mesajla söylenir. */
   ustMadde?: { ad: string; ikon?: string; pasif?: boolean; sebep?: string; onClick?(): void };
+  /** Hedef listesinden biri EN ÜSTTE + ayraç (kullanıcı 07.11.2026: satış konsinyede Satış İrsaliyesi). */
+  ustHedef?: number;
 }) {
   const [acik, setAcik] = useState(false);
   const kok = useRef<HTMLSpanElement>(null);
-  const hedefler = HEDEFLER[kaynakTur] ?? [];
+  const tumHedefler = HEDEFLER[kaynakTur] ?? [];
+  const ustteki = ustHedef ? tumHedefler.find(h => h.kod === ustHedef) : undefined;
+  const hedefler = ustteki ? tumHedefler.filter(h => h.kod !== ustHedef) : tumHedefler;
 
   useEffect(() => {
     if (!acik) return;
@@ -52,6 +56,15 @@ export function DonusumMenusu({ kaynakTur, devre, devreSebep, onSec, title, ustM
                         setAcik(false); ustMadde.onClick?.();
                       }}>
                 {ustMadde.ikon ?? ''} {ustMadde.ad}
+              </button>
+              <div className="menu-ayrac" />
+            </>
+          )}
+          {ustteki && (
+            <>
+              <button type="button" className="mi" role="menuitem"
+                      onClick={() => { setAcik(false); onSec(ustteki.kod) }}>
+                {DONUSUM_IKON[ustteki.kod] ?? '⇢'} {ustteki.ad}
               </button>
               <div className="menu-ayrac" />
             </>

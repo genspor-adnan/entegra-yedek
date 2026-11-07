@@ -298,6 +298,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
                          ustMadde={kaynakTur === 9 || kaynakTur === 19
                            ? { ad: 'Üretime Aktar', ikon: '🏭', pasif: true, sebep: 'Üretim emri henüz bağlanmadı.' }
                            : undefined}
+                         // Satış konsinye: Satış İrsaliyesi en üstte + ayraç (kullanıcı 07.11.2026).
+                         ustHedef={kaynakTur === 119 ? 14 : undefined}
                          onSec={setDonusum} />
         </>
       )}

@@ -91,6 +91,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   //   Bayrak KARTTAN gelir (tur === 30); katalog adi degisse de kirilmaz.
   const belgeSozu = depoBelgesi || stokFisiMi ? belgeAdi
                   : basvuruMu ? 'Başvuru'
+                  // KONSİNYE (kullanıcı 07.11.2026 "konsinye kartlardaki İrsaliye -> Konsinye"): "Konsinye No / Tarihi".
+                  : konsinyeMi ? 'Konsinye'
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
                   : tahakkukMu ? 'Tahakkuk'
                   : belgeAdi !== 'Belge' ? belgeAdi : 'Fatura';
@@ -370,7 +372,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         REVIZE NO - serbest kullanici editi, varsayilan bos. */}
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-        {disNumarali ? `Tedarikçi ${irsaliyeMi || konsinyeMi ? 'İrsaliye' : /fiş/i.test(belgeAdi) ? 'Fiş' : 'Fatura'} No`
+        {disNumarali ? `Tedarikçi ${konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : /fiş/i.test(belgeAdi) ? 'Fiş' : 'Fatura'} No`
           : teklifMi ? `${belgeSozu} No / Revize No` : `${numaraSozu} No`}
       </span>
       {(disNumarali || numaraElle) && !kilitli ? (

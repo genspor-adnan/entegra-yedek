@@ -67,7 +67,7 @@ public static partial class EkranKodlari
         ["belge"]            = ["belge.kurum_fatura", "belge.alis_fatura",
                                 "belge.satis", "belge.satis.siparis", "belge.satis.irsaliye",
                                 "belge.satis.fatura", "belge.satis.fis", "belge.satis.tahakkuk",
-                                "belge.satis.acik_satir",
+                                "belge.satis.acik_satir", "belge.satis.konsinye",
                                 "belge.alis", "belge.alis.irsaliye", "belge.alis.fis",
                                 "belge.alis.tahakkuk", "belge.alis.konsinye",
                                 "belge.stok", "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis"],
@@ -466,7 +466,7 @@ public static partial class EkranKodlari
         // Satış / Alış / Stok (1004 aşama 2): belge ekranı kendi türüyle,
         //   tek türlü kaynaklar (irsaliye, açık satır, stok fişleri) kendi kodu.
         "belge.satis.siparis", "belge.satis.irsaliye", "belge.satis.fatura", "belge.satis.fis",
-        "belge.satis.tahakkuk", "belge.satis.acik_satir", "belge.satis.ayar",
+        "belge.satis.tahakkuk", "belge.satis.acik_satir", "belge.satis.ayar", "belge.satis.konsinye",
         "belge.alis.irsaliye", "belge.alis.fis", "belge.alis.tahakkuk", "belge.alis.konsinye",
         "belge.alis.ayar",
         "belge.stok.transfer", "belge.stok.giris", "belge.stok.cikis",

@@ -350,7 +350,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Satış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '@b:tahakkuk:s', yetkiKodu: 'belge.satis.tahakkuk',
+    // Menü adı türlü (kullanıcı 07.11.2026 "tahakkuk listesi önüne türe göre Alış ve Satış"); çeviri 1276.
+    menuGrup: 'Satış', menuSira: 60, menuAd: 'Satış Tahakkuk Listesi', ic: '@b:tahakkuk:s', yetkiKodu: 'belge.satis.tahakkuk',
   },
   {
     // SATIS KONSINYE (tur 119 Giden Konsinye): musteriye BIRAKILAN mal.
@@ -368,9 +369,9 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
     ],
-    // Yalniz HBYS (kullanici): konsinye takibi tibbi malzeme/implant akisinda
-    //   kullaniliyor, ERP kurulumunda menude yer kaplamasin.
-    urunModu: 2, menuAd: 'Satış Konsinye Listesi', menuGizli: true, ic: '@b:konsinye:s', yetkiKodu: 'belge.satis',
+    // HER İKİ KİPTE (kullanıcı 07.11.2026 "satış konsinye listesi göremedim"): önce yalnız HBYS + menüde gizliydi;
+    //   ERP'de de Satış › Satış Konsinye Listesi (alış karşılığıyla aynı sıra). Kendi yetki kodu (1275).
+    menuGrup: 'Satış', menuSira: 55, menuAd: 'Satış Konsinye Listesi', ic: '@b:konsinye:s', yetkiKodu: 'belge.satis.konsinye',
   },
   // ------------------------------------------------------------- ALIS ----
   //  Satis tarafinin birebir karsiligi: ayni 'belge' kaynagi, ayni kart, yalniz
@@ -460,7 +461,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Alış', menuSira: 60, menuAd: 'Tahakkuk Listesi', ic: '@b:tahakkuk:a', yetkiKodu: 'belge.alis.tahakkuk',
+    menuGrup: 'Alış', menuSira: 60, menuAd: 'Alış Tahakkuk Listesi', ic: '@b:tahakkuk:a', yetkiKodu: 'belge.alis.tahakkuk',
   },
   {
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinye Listesi',

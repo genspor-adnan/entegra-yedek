@@ -1687,7 +1687,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             //   satış siparişi (başvuru DEĞİL): "Tekliften Aktar" düğmesi. Satırlar SiparistenAktarPenceresi'nden kaynak
             //   bağıyla gelir. İrsaliyenin Siparişten Aktar'ı Belgeye Dönüşüm sekmesinde.
             aktarAc={!kilitli ? k => arama.setSiparis(k) : undefined}
-            aktarSecenekleri={tur === 16 || tur === 12 ? FIS_AKTAR(alisMi)
+            // FATURA DA (kullanıcı 07.11.2026 "satış fat kalemler sekmesine de fişle aynı Aktar"): 15 satış / 11 alış faturası.
+            aktarSecenekleri={tur === 16 || tur === 12 || tur === 15 || tur === 11 ? FIS_AKTAR(alisMi)
                               : siparisMi && !basvuruMu && !alisMi ? SIPARIS_AKTAR
                               : irsaliyeMi ? IRSALIYE_AKTAR(alisMi) : undefined}
             satirlar={satirlar}
