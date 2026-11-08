@@ -458,7 +458,12 @@ public sealed partial class BelgeDeposu
             // KDV DAHIL birim fiyat (371) - ekranda gosterilen ve hastaya
             //   soylenen rakam; matrah bundan turetilir.
             "birim_fiyat_kdvli", "iskonto", "iskonto2", "iskonto_kilit", "kdv",
-            "otv_yuzde", "otv_miktar", "kdv_muafiyeti", "tutar",
+            "otv_yuzde", "otv_miktar", "kdv_muafiyeti",
+            // SATIR TEVKİFATI (08.11.2026, kullanıcı: "fatura tipi tevkifatlıysa fiyat sorma ekranına o kalem için
+            //   Tevkifat Oranı ekle"): GİB tevkifat KODU (601.. / 8xx) kalem penceresinden; oran koddan
+            //   (fn_tevkifat_orani) - istemci oran göndermezse aşağıda doldurulur. e-Fatura (EFaturaVerisi) ve dip
+            //   toplam (fn_belge_diptoplam, 1278) satır oranını okur.
+            "tevkifat_kodu", "tevkifat_orani", "tutar",
             // KDV dahil satir tutari (372) - belge toplaminin dayanagi.
             "tutar_kdvli",
             "doviz_cinsi", "doviz_birim_fiyat", "doviz_tutari", "doviz_kuru",
@@ -485,7 +490,8 @@ public sealed partial class BelgeDeposu
             birimFiyat, birimFiyatKdvli, iskonto, iskonto2,
             (short)JsonSayi(satir, "iskontoKilit", 0), (short)kdv,
             (short)JsonSayi(satir, "otvYuzde", 0), JsonOndalik(satir, "otvMiktar", 0),
-            (short)JsonSayi(satir, "kdvMuafiyeti", 0), tutar, tutarKdvli,
+            (short)JsonSayi(satir, "kdvMuafiyeti", 0),
+            JsonMetin(satir, "tevkifatKodu"), JsonOndalik(satir, "tevkifatOran", 0), tutar, tutarKdvli,
             dovizCinsi, dovizBirimFiyat, dovizTutar, kur,
             JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId"),
             JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId"),
@@ -508,6 +514,14 @@ public sealed partial class BelgeDeposu
         int satirId;
         await using (var komut = Komut(baglanti, islem, sql, parametreler))
             satirId = Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
+
+        // Tevkifat oranı KODDAN (kural tek yerde: fn_tevkifat_orani "(n/10)" sonekini okur). İstemci yalnız kodu
+        //   seçer; oran burada dolar ki satır tek başına (e-Fatura, dip toplam, KDV icmali) doğru okunsun.
+        if (JsonMetin(satir, "tevkifatKodu").Length > 0 && JsonOndalik(satir, "tevkifatOran", 0) <= 0)
+            await using (var oranKomut = baglanti.Komut(
+                "update public.belge_satir set tevkifat_orani = public.fn_tevkifat_orani(tevkifat_kodu) where id = @p0",
+                islem, satirId))
+                await oranKomut.ExecuteNonQueryAsync(iptal);
 
         // ODEME DAGILIMI (470/472): bes kova ayri tabloda. Kural SUNUCUDA -
         //   istemci acik kova gondermediyse dagilim sozlesmenin listelerinden

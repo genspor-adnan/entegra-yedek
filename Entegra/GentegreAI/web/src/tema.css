@@ -1424,14 +1424,17 @@ input.skt-gecmis {
 
 .tam-ekran-bilgi { display: grid; place-items: center; min-height: 100vh; color: var(--soluk) }
 .yukleniyor-satir { padding: 24px; text-align: center; color: var(--soluk) }
-.dip-toplam { max-width: 400px; margin-left: auto }
+.dip-toplam { max-width: 340px; margin-left: auto }   /* 400 → 340 (kullanıcı 08.11.2026: "toplam gridi genişliği biraz azalsın") */
 /* Kalem gridinin ALTI: doviz kutusu solda, dip toplam sagda - ayni hizada. */
 .grid-alt-serit { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between }
 .grid-alt-serit > .kagrup { margin: 0 }
-.grid-alt-serit > .dip-toplam { flex: 0 0 400px; margin-left: auto }   /* sol kutu yoksa da SAĞA yanaşık (kullanıcı 08.11.2026) */
+.grid-alt-serit > .dip-toplam { flex: 0 0 340px; margin-left: auto }   /* sol kutu yoksa da SAĞA yanaşık (kullanıcı 08.11.2026) */
 .dip-tablo thead th { padding: 4px 10px; font-size: 11px; color: var(--soluk); font-weight: 600 }
 .dip-tablo { width: 100%; border-collapse: collapse; font-size: 12px }
 .dip-tablo td { padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
+/* SAĞDAKİ TUTARLAR kalın ve 1 punto büyük (kullanıcı 08.11.2026: "sağdaki toplam rakamlar bold ve 1 punto büyük olsun");
+   dövizli ikinci (soluk) kolon normal kalır. */
+.dip-tablo td.hiza-sag:not(.sonuk) { font-weight: 700; font-size: 13px }
 .dip-tablo tr.genel td { font-weight: 700; border-top: 2px solid var(--cizgi); border-bottom: 0 }
 .dip-toplam .not { color: var(--soluk); font-size: 11px; margin-top: 6px }
 .satir-ici { display: flex; align-items: center; gap: 6px; font-size: 12px }

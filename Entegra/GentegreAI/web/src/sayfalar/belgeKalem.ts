@@ -33,6 +33,7 @@ export function stokSecimindenKalem(
     // Stok LOT/SERI izlemli mi - kalem penceresi buna gore izlem ekranini
     //   acar (db/114).
     izleme: hizmet ? 0 : Number(sec.izleme ?? 0),
+    tibbi: !hizmet && Number(sec.tibbi ?? 0) === 1,
     // Ambalaj (143): kalem ANA BIRIMLE acilir; kullanici pencerede kutu/koli
     //   secerse carpan oradan gelir.
     birim: hizmet ? 0 : Number(sec.anaBirimKod ?? 0),

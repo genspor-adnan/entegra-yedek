@@ -137,7 +137,7 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
           tarihEnGec, kayitliTarih, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
           odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli,
-          muayeneAcik } = g;
+          muayeneAcik, faturaMi, alisMi, faturaTipi } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -196,6 +196,16 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   //   hizmetler muayene sirasinda eklenir. Diger turlerde bos belge anlamsiz.
   if (!basvuruMu && satirlar.filter(s => s.stokId || s.hizmetId).length === 0)
     return { genel: 'En az bir satırda stok ya da hizmet seçilmeli.' };
+
+  // TEVKİFATLI SATIŞ FATURASI (kullanıcı 08.11.2026: "hazırla veya kaydet dediğimde bu kontroller yapılmalı"):
+  //   KDV'li her kalemde tevkifat oranı (GİB kodu) seçilmiş olmalı - kalem penceresi "Tevkifat Oranı". Aynı
+  //   kural sunucuda e-Fatura hazırlamada (EFaturaVerisi.Eksikler); burada kayıt anında, kalem adlarıyla.
+  if (faturaMi && !alisMi && faturaTipi === 22) {
+    const oransiz = satirlar.filter(s => (s.stokId || s.hizmetId) && hamSayi(s.kdv) > 0 && !s.tevkifatKodu);
+    if (oransiz.length > 0)
+      return { genel: `Tevkifatlı faturada tevkifat oranı seçilmemiş kalem var: ${oransiz.slice(0, 5).map(s => s.stokAdi).join(', ')}`
+                      + ' (kalemi açıp Tevkifat Oranı seçin).' };
+  }
 
   // ODEYEN KURUM ZORUNLU (kullanici): basvuruda "kim odeyecek" bastan bellidir -
   //   hasta kendi odese bile bunun KARSILIGI olan kurum secilir ("Özel (Hasta
@@ -363,6 +373,8 @@ return {
     // Stok fisi vergi dogurmaz: stok kartindan gelen KDV/iskonto sifirlanir
     //   (yoksa dip toplam vergili cikip muhasebe matrahini sisirir).
     kdv: stokFisiMi ? 0 : hamSayi(s.kdv),
+    // Satır tevkifat kodu (08.11.2026) - oran sunucuda koddan (fn_tevkifat_orani).
+    tevkifatKodu: s.tevkifatKodu || undefined,
     aciklama: s.aciklama,
     // IADE satiri kaynak fatura satirina baglanir (kaynak_tur 30): iade edilen
     //   miktar bu bagdan turetilir, ayni kalem iki kez iade edilemez (132).

@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
-import { mesaj } from '../../bilesenler/mesaj';
+import { mesaj, listeSor } from '../../bilesenler/mesaj';
+import { hamSayi } from '../../bilesenler/bicim';
 import { cariHareketiDegisti } from '../../bilesenler/sekmeBaglami';
 import { hataAyristir, type AcilanRadyolojiIstemi, type BelgeYaniti } from '../../api/sozlesme';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from '../belgeKaydet';
@@ -25,6 +26,9 @@ export interface BelgeKaydetmeBaglami {
   /** Gridde KAYDEDILMEMIS satir degisikligi var mi (ekleme ya da SILME). */
   kalemDegisti: boolean;
   setKalemDegisti(v: boolean): void;
+  /** KDV istisna nedeni (başlık combosu, 08.11.2026): kayıtta belge_efatura.istisna_kodu'na yazılır; boşsa sorulur. */
+  istisnaKodu: number;
+  setIstisnaKodu(v: number): void;
   /** Ilk basvuru kaydinda protokol alinir; kart acik kalir. */
   setAcilanId(id: number): void;
   imzayiTemizle(): void;
@@ -94,6 +98,33 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
         && (b.sonuc?.satirlar?.length ?? 0) > 0)
       return b.etkinBelgeId ?? 0;
 
+    // KDV İSTİSNA NEDENİ KAYITTA SORULUR (kullanıcı 08.11.2026: "tipi KDV istisna yaptı ama istisna nedeni sormadı..
+    //   kaydet dediğimde onu da sormalı"; Delphi TamIskontoNedeniSor): satış faturasında tipi KDV İstisna (24) /
+    //   İhraç Kayıtlı (9) ya da %0 KDV'li kalem varsa ve belgenin e-Fatura Bilgileri'nde istisna kodu yoksa GİB
+    //   listesinden seçtirilir (İhraç Kayıtlı 701-704, diğerleri 3xx). Vazgeçilirse kayıt YAPILMAZ. İhracatta (26 /
+    //   senaryo 3) sorulmaz - sunucu 301 varsayar. Seçim kayıttan sonra belge_efatura.istisna_kodu'na yazılır
+    //   (başlığın öbür alanları korunarak); e-Fatura hazırlama bu kodu ister (EFaturaVerisi.Eksikler).
+    // Başlıktaki "İstisna Nedeni" combosu esas (BelgeBaslik, Vade'nin sağı); boşsa burada sorulur ve comboya yazılır.
+    let istisnaKodu = 0;
+    if (!otomatik && girdi.faturaMi && !girdi.alisMi && !b.basvuruMu
+        && girdi.faturaTipi !== 26 && girdi.senaryo !== 3
+        && (girdi.faturaTipi === 24 || girdi.faturaTipi === 9 || dolu.some(s => hamSayi(s.kdv) === 0))) {
+      istisnaKodu = b.istisnaKodu;
+      if (!istisnaKodu) {
+        const kodlar = await api.efaturaKodlari().catch(() => null);
+        const liste = (girdi.faturaTipi === 9 ? kodlar?.ihracKayitli : kodlar?.istisna) ?? [];
+        if (liste.length > 0) {
+          const sec = await listeSor(
+            girdi.faturaTipi === 9 ? 'İhraç kayıtlı fatura: KDV istisna nedeni (701-704) seçin:'
+                                   : 'Belgede KDV\'si sıfır kalem var: KDV istisna nedeni (GİB kodu) seçin:',
+            liste.map(x => ({ kod: String(x.deger), ad: x.ad })), '', 'İstisna Nedeni');
+          if (sec === null || !Number(sec)) { b.setHata('KDV istisna nedeni seçilmeden kaydedilmedi.'); return 0 }
+          istisnaKodu = Number(sec);
+          b.setIstisnaKodu(istisnaKodu);
+        }
+      }
+    }
+
     b.setKaydediyor(true);
     try {
       const govde = belgeGovdesi(girdi, dolu, b.taslak);
@@ -107,6 +138,16 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
         ? await api.belgeGuncelle(mevcutId, govde)
         : await api.belgeEkle(govde);
       b.setSonuc(yanit);
+      if (istisnaKodu > 0) {
+        // Başlığın öbür e-Fatura alanları (tevkifat, SGK, kamu IBAN) korunur: PUT bütün başlığı yazar.
+        const yeniId = Number(yanit.belge.id ?? 0);
+        try {
+          const bilgi = await api.efaturaBilgi(yeniId);
+          await api.efaturaBilgiKaydet(yeniId, { baslik: { ...bilgi.baslik, istisnaKodu }, satirlar: [] });
+        } catch {
+          mesaj('KDV istisna nedeni yazılamadı; e-Belge sekmesi › e-Fatura Bilgileri\'nden seçin.');
+        }
+      }
       // SUNUCU UYARILARI (ör. "Belge tarihi 7 günden eski", 23.10.2026): kayıt yapıldı ama
       //   kullanıcı bilmeli - kart Kaydet'le kapandığı için karttaki listede kalmaz, mesajla.
       if (!otomatik && yanit.uyarilar?.length) mesaj(yanit.uyarilar.join('\n'));

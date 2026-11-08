@@ -223,6 +223,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   /** Rezervasyon (142) islemi surerken dugme bekler. */
   const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
   const [aktifSekme, setAktifSekme] = useState('kalem');
+  /** Başlığı görüntüleme kipine alma sinyali (BelgeBaslik.baslikKapatAnahtari): "+" kalem ekleme açılınca artar. */
+  const [baslikKapat, setBaslikKapat] = useState(0);
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
   /* SATIR SECIMI VE SILME kendi kancasinda (useSatirSecimi): grid davranisi
      (duz tik / Ctrl / Shift) ve kilitli satir korumasi orada. */
@@ -267,6 +269,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const [senaryo, setSenaryo] = useState(0);
   /** FATURA TIPI (130): faturanin cinsi - belge.tipi alaninda tutulur. */
   const [faturaTipi, setFaturaTipi] = useState(1);
+  /** KDV İSTİSNA NEDENİ (belge_efatura.istisna_kodu, 08.11.2026): başlıkta Vade'nin sağında; kayıtta yazılır,
+   *  boşsa Kaydet sorar (useBelgeKaydetme). Kayıtlı belgede e-Fatura Bilgileri'nden yüklenir. */
+  const [istisnaKodu, setIstisnaKodu] = useState(0);
   /** IADE mi - kalem secimi "onceki alinanlar"dan yapilir (132/133). */
   // IADE yalniz iadesi OLAN turlerde anlamli (301): siparis/basvuru turunde
   //   (19) iade yok - orada tipi baska bir sey anlatir. Sunucu ayni karari
@@ -516,6 +521,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * Satış (1) ve Genel Ayarlar efatura.senaryo. Kayıtlı belgede dokunulmaz - belgenin kendi değeri esas.
    */
   const cariVarsayilanId = faturaMi && !alisMi && !basvuruMu && !kayitliId ? cari?.id ?? 0 : 0;
+  // Kayıtlı satış faturasının istisna kodu (e-Fatura Bilgileri başlığı) başlık combosuna.
+  const istisnaYukleId = faturaMi && !alisMi && !basvuruMu ? kayitliId : 0;
+  useEffect(() => {
+    if (!(istisnaYukleId > 0)) return;
+    let iptal = false;
+    void api.efaturaBilgi(istisnaYukleId).then(x => { if (!iptal) setIstisnaKodu(Number(x.baslik?.istisnaKodu ?? 0)) }, () => undefined);
+    return () => { iptal = true };
+  }, [istisnaYukleId]);
+  /** Carinin kartındaki senaryo (0 = yok): doluysa kalem kuralı senaryoya dokunmaz (Delphi UFaturaWizard ile aynı). */
+  const cariSenaryoRef = useRef(0);
   useEffect(() => {
     if (!(cariVarsayilanId > 0)) return;
     let iptal = false;
@@ -524,10 +539,41 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       const ayarSenaryo = await ayarSayi('efatura.senaryo', 1);
       if (iptal) return;
       setFaturaTipi(Number(k?.varsayilanFaturaTipi ?? 0) || 1);
-      setSenaryo(Number(k?.varsayilanSenaryo ?? 0) || ayarSenaryo);
+      cariSenaryoRef.current = Number(k?.varsayilanSenaryo ?? 0);
+      setSenaryo(cariSenaryoRef.current || ayarSenaryo);
     })();
     return () => { iptal = true };
   }, [cariVarsayilanId]);
+
+  /**
+   * SATIŞ FATURASINDA KALEMDEN TÜREYEN TİP / SENARYO (kullanıcı 08.11.2026: "0 KDV'li satır varsa uyarı verip
+   * fatura tipini KDV İstisna'ya çevir; satırlarda tıbbi ürün varsa senaryoyu İlaç / Tıbbi Cihaz yapıyoruz"):
+   * Delphi UFaturaWizard'daki kuralın web karşılığı (tipi yalnız Satış'tan (1) çevrilir; cari kartında senaryo
+   * seçiliyse senaryoya dokunulmaz; tıbbi = stok.bildirim 2 "ÜTS" ya da ilaç kartına bağlı).
+   * - %0 KDV'li satır + tipi Satış (1) → tipi 24 (KDV İstisna).
+   * - `tibbi` satır + senaryo 8 değil + cari senaryosu yok → senaryo 8.
+   * Yalnız KALEM DEĞİŞİNCE bakılır (kalemDegisti): kayıtlı belgeyi açmak belgenin kendi değerine dokunmaz; kullanıcı
+   * geçişten sonra combodan geri alırsa bir sonraki kalem değişikliğine kadar zorlanmaz (bağımlılık satırlar).
+   * Tek mesaj, ikisi birden olabilir. Kilitli belgede hiçbir şey yapılmaz.
+   */
+  const kalemKuraliRef = useRef({ faturaTipi, senaryo });
+  kalemKuraliRef.current = { faturaTipi, senaryo };
+  useEffect(() => {
+    if (!faturaMi || alisMi || basvuruMu || kilitli || !kalemDegisti) return;
+    const { faturaTipi: tip, senaryo: sen } = kalemKuraliRef.current;
+    const notlar: string[] = [];
+    const sifirKdv = satirlar.some(r => (r.stokId || r.hizmetId) && Number(r.kdv) === 0);
+    if (sifirKdv && tip === 1) {
+      setFaturaTipi(24);
+      notlar.push(c('Belgede %0 KDV\'li satır var: fatura tipi KDV İstisna yapıldı.'));
+    }
+    if (satirlar.some(r => r.tibbi) && sen !== 8 && !cariSenaryoRef.current) {
+      setSenaryo(8);
+      notlar.push(c('Satırlarda tıbbi ürün var: senaryo İlaç / Tıbbi Cihaz yapıldı.'));
+    }
+    if (notlar.length) mesaj(notlar.join('\n'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [satirlar]);
 
   // RANDEVU BAĞI (17.10.2026): yeni başvuru ilk kez kaydedilince randevu ona bağlanır ve Geldi olur.
   const randevuBaglandi = useRef(false);
@@ -1130,6 +1176,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     etkinBelgeId: etkinBelgeId ?? null, duzenlenebilir, basvuruMu,
     sonuc, setSonuc, setHata, setAlanHatalari, setKaydediyor,
     setKalemDegisti, setAcilanId,
+    istisnaKodu, setIstisnaKodu,
     // Ikisi de ASAGIDA tanimli - cagri aninda cozulsun diye sarmalandi.
     imzayiTemizle: () => imzayiTemizle(),
     onKaydedildi, kapat: (zorla?: boolean) => void kapat(zorla),
@@ -1654,7 +1701,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
           kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
-          yeniMi={!mevcutBelge}
+          yeniMi={!mevcutBelge} baslikKapatAnahtari={baslikKapat}
           belgeNo={belgeNo} setBelgeNo={setBelgeNo}
           tarih={tarih} setTarih={setTarih}
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
@@ -1669,6 +1716,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           fisTipi={fisTipi} setFisTipi={setFisTipi}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           senaryo={senaryo} setSenaryo={setSenaryo}
+          istisnaKodu={istisnaKodu} setIstisnaKodu={setIstisnaKodu}
           satirlar={satirlar} donusumler={donusumler.liste}
           setCariArama={arama.setCari} setSaticiArama={arama.setSatici}
           setPersonelArama={arama.setPersonel}
@@ -1700,7 +1748,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             sonuc={kalemDegisti ? null : sonuc}
             transferBaslikEksigi={transferBaslikEksigi}
             depoBelgesi={depoBelgesi} stokFisiMi={stokFisiMi} talepMi={talepMi}
-            setStokArama={iadeMi ? arama.setIade : ucretEklemeAc}
+            setStokArama={v => { if (v) setBaslikKapat(n => n + 1); (iadeMi ? arama.setIade : ucretEklemeAc)(v) }}
             setKalem={setKalem} seciliSil={seciliSil}
             // PRIM ROLLERI (324): prim HBYS kavrami (hekim hakedisi) -
             //   ERP modunda dugme hic cizilmez.
@@ -2046,6 +2094,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         )}
         <BelgeKartiModallari
           kayitliId={kayitliId} tur={tur} bilgi={bilgi} basvuruMu={basvuruMu}
+          tevkifatli={faturaMi && faturaTipi === 22}
           // YENİ HASTA SEKMEDE: kayıtsız yeni başvuru sekmesi kapanır, hasta kartı sekmede açılır; hasta
           //   kaydedilince o hastayla yeni başvuru açılır (ListeKarti, ?basvuru=1). Kayıtlı başvuruda ve
           //   sekmesiz kullanımda eski pencere davranışı.

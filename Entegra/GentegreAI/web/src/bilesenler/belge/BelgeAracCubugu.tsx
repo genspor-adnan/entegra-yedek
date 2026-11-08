@@ -1,4 +1,3 @@
-import { EFaturaMenusu } from '../efatura/EFaturaMenusu';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -12,11 +11,11 @@ import { c } from '../../dil/ceviri';
 export function BelgeAracCubugu({
   mevcutBelge, duzenlenebilir, sonuc, kaydediyor, kilitli,
   iadeKutusu, iade, setIade,
-  siparisMi, irsaliyeMi, alisMi, basvuruMu, eBelgeYok, kayitliId,
+  siparisMi, irsaliyeMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
   hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
-  basvuruIptalGorunur, belgeYenile, baslik, kapatSolu, onSil,
+  basvuruIptalGorunur, baslik, kapatSolu, onSil,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
   belgeYenile?(): void;
@@ -214,13 +213,8 @@ export function BelgeAracCubugu({
     <>
       {/* Konsinyede e-Belge YOK: mal birakma GIB'e gitmez, faturasi
           satildikca ayri kesilir. */}
-      {/* e-İRSALİYE MENUSU (kullanici 11.10.2026): e-Fatura menusuyle ayni maddeler
-          (Hazirla / Onizle / Gonder / Kaydet / Seri / Geri Al / Mesajlar) - yalniz
-          satis irsaliyesi; alis irsaliyesi gelen kutusundan gelir. */}
-      {!eBelgeYok && !alisMi && (
-        <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)}
-                       onDegisti={belgeYenile} etiket="İrsaliye İşlem" />
-      )}
+      {/* e-İRSALİYE MENÜSÜ DE ARAÇ ÇUBUĞUNDAN KALKTI (kullanıcı 08.11.2026: "irsaliye kartında da 2 tane İrsaliye
+          İşlem var, üst başlıktakini kaldır"): tek menü e-Belge sekmesinde (BelgeSekmeleri, tur 14). */}
       {/* HEDEF MENÜSÜ ("Belge Dönüştür") ve "Siparişten Aktar" BELGEYE DÖNÜŞÜM SEKMESİNDE (kullanıcı 07.11.2026) -
           FaturalamaSekmesi hizliYok. */}
       <button className="d" disabled title={c('Sevk fişi yazdırma henüz bağlanmadı.')}>
@@ -237,11 +231,8 @@ export function BelgeAracCubugu({
   {/* e-Belge olmayan turlerde (fis/konsinye/tahakkuk) gonderim dugmeleri YOK. */}
   {!siparisMi && !irsaliyeMi && !eBelgeYok && (
     <>
-      {/* e-FATURA MENUSU (11.10.2026, Delphi e-Fatura menusu) - yalniz satis faturasi. */}
-      {!alisMi && (
-        // Kayıtsız belgede tıklayınca önce kaydedilir (kart açık kalır), menü sonra açılır.
-        <EFaturaMenusu belgeId={kayitliId} onceKaydet={() => kes(false)} onDegisti={belgeYenile} />
-      )}
+      {/* e-FATURA MENÜSÜ ARAÇ ÇUBUĞUNDAN KALKTI (kullanıcı 08.11.2026: "fatura kartında 2 tane Fatura İşlem var,
+          üst başlıktakini kaldır"): tek menü e-Belge sekmesinde (BelgeSekmeleri), kayıtlı belgede. */}
       {/* TAHSILAT ve IADE dugmeleri arac cubugundan KALKTI (kullanici):
           tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /
           Senet dugmeleriyle, arac aracina gore), iade ise faturanin TIPI -

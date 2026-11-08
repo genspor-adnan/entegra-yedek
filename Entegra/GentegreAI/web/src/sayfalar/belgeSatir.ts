@@ -72,6 +72,14 @@ export interface SatirDurumu {
   izlemeKodu: string;
   /** Stok kartindaki izleme turu: 0 yok · 1 Seri · 2 Lot · 3 SKT · 5 Lot+SKT · 6 Seri+Lot. */
   izleme: number;
+  /** Tıbbi ürün (ÜTS bildirimli stok ya da ilaç kartına bağlı) - satış faturasında senaryo İlaç / Tıbbi Cihaz'a çekilir
+   *  (08.11.2026). Arama satırından ve kayıtlı satırdan gelir; kaydedilmez. */
+  tibbi?: boolean;
+  /** SATIR TEVKİFATI (08.11.2026): GİB tevkifat kodu (belge_satir.tevkifat_kodu, "601" gibi) - tevkifatlı (22)
+   *  faturada kalem penceresi "Tevkifat Oranı" kutusundan. Oran (belge_satir.tevkifat_orani) KODDAN sunucuda yazılır;
+   *  istemci göndermez, yalnız okur. */
+  tevkifatKodu?: string;
+  tevkifatOran?: number;
   /**
    * Satirin TESLIM (termin) tarihi - siparislerde (140). Bos = termin
    * verilmemis. Odeme vadesiyle (baslikta `vadeGun`) ilgisi yok: bu malin ne
@@ -350,6 +358,9 @@ export function yanittanSatirlar(
     // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca kullanici
     //   hangi lottan kac adet girdigini gormeli.
     izleme: Number(r.izleme ?? 0),
+    tibbi: r.tibbi === true || Number(r.tibbi ?? 0) === 1,
+    tevkifatKodu: String(r.tevkifatKodu ?? ''),
+    tevkifatOran: Number(r.tevkifatOrani ?? 0),
     izlemler: ((r.izlemler ?? []) as Record<string, unknown>[]).map(z => ({
       // seriLotId: cikista sunucu lotu bununla bulur. `kalan` BILEREK yok - kayitli
       //   secimin kalani lot penceresinde depodaki stoktan + bu belgenin dusumunden kurulur.

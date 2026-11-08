@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kayıtlı Belge Aç — Satış / Alış belge listesi SEKMESİ (Mockup)</title>
+<style>
+  /* Gentegre AI ekran dili (bkz taraf_arama.html, web/src/tema.css) */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46; --uyari:#8a6218; --kir:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+
+  .secici{max-width:1480px;margin:0 auto 10px;display:flex;gap:4px;align-items:center}
+  .secici b{font-size:11px;color:var(--muted);margin-right:6px}
+  .secici span{padding:5px 12px;border:1px solid var(--line);border-radius:3px;background:linear-gradient(#fff,#eef3f8);font-size:11.5px;cursor:pointer}
+  .secici span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .not{max-width:1480px;margin:0 auto 10px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .not b{color:var(--ink)}
+
+  /* ARKA PLAN: çağıran belge kartı soluk */
+  .arka{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;position:relative;min-height:760px}
+  .arka .ust{background:linear-gradient(#2b5c95,#1c4374);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13px}
+  .arka .ust b{font-size:13.5px}.arka .ust .yol{opacity:.75;font-size:11px}
+  .arka .arac{display:flex;gap:4px;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .arka .arac .b{border:1px solid var(--line);border-radius:3px;padding:4px 9px;font-size:11.5px;background:linear-gradient(#fbfcfe,#e7edf4)}
+  .arka .arac .b.ok{background:linear-gradient(#4fae68,#2e7d46);color:#fff;border-color:#2e7d46;font-weight:bold}
+  .arka .arac .b.hedef{border-color:var(--accent);box-shadow:0 0 0 2px #d7e7fb;background:linear-gradient(#f3f8ff,#dfeafa);color:var(--navy);font-weight:bold}
+  .arka .arac .ad{margin-left:8px;color:var(--muted);font-weight:bold;letter-spacing:.3px}
+  .arka .govde{padding:12px;opacity:.42;filter:grayscale(.3)}
+  .arka .bant{display:flex;gap:10px;align-items:center;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;margin-bottom:8px}
+  .arka .av{width:34px;height:34px;border-radius:50%;background:#dfeafa;display:grid;place-items:center;font-weight:bold;color:var(--navy)}
+  .arka .baslik{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .arka .alan{border:1px solid var(--line2);border-radius:3px;padding:4px 7px;background:#fbfcfe}
+  .arka .alan .e{font-size:10px;color:var(--muted)}.arka .alan .d{font-size:12px;min-height:15px}
+  .arka .kalem{border:1px solid var(--line2);border-radius:3px;height:480px;background:repeating-linear-gradient(#fff 0 26px,#f6f8fb 26px 27px)}
+  .sekmeler{display:flex;align-items:center;gap:2px;background:#dfe6ee;border-bottom:1px solid var(--line);padding:6px 8px 0}
+  .sk{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;background:linear-gradient(#f3f6fa,#e6ecf3);font-size:12px;color:var(--muted);white-space:nowrap}
+  .sk.on{background:#fff;color:var(--ink);font-weight:bold;position:relative;top:1px}
+  .sk i{font-style:normal;opacity:.6;margin-left:4px}
+  .sk.ev{padding:6px 10px}.sk.arti{border:0;background:none;font-size:15px;color:var(--navy)}
+  .sk.sag{margin-left:auto;border:0;background:none;font-size:11px}
+
+  /* PENCERE */
+  .pen{position:static;width:auto;background:var(--card);border:0;border-radius:0;box-shadow:none;overflow:hidden;display:none;flex-direction:column}
+  .pen.on{display:flex}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .rozet{font-weight:normal;font-size:10.5px;background:rgba(255,255,255,.16);border-radius:3px;padding:1px 7px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .x{margin-left:10px;opacity:.8;cursor:pointer;font-weight:normal}
+
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ipucu{margin-left:auto;font-size:10.5px;color:var(--muted);font-style:italic}
+
+  .ara{display:flex;gap:6px;padding:8px 10px;align-items:center;border-bottom:1px solid var(--line2);background:#fbfcfe;flex-wrap:wrap}
+  .kutu{flex:1 1 300px;display:flex;align-items:center;border:1px solid var(--accent);box-shadow:0 0 0 2px #d7e7fb;border-radius:3px;background:#fff;padding:0 6px;height:30px}
+  .kutu .ic{color:var(--muted);margin-right:6px;font-size:14px}
+  .kutu input{border:0;outline:0;flex:1;font:inherit;font-size:13px;background:transparent}
+  .alanf{display:flex;flex-direction:column;gap:2px;font-size:10.5px;color:var(--muted)}
+  .alanf > span{padding-left:2px}
+  .alanf input,.alanf select{border:1px solid var(--line);border-radius:3px;height:28px;padding:0 7px;font:inherit;font-size:12px;color:var(--ink);background:#fff;outline:0}
+  .alanf input:focus{border-color:var(--accent);box-shadow:0 0 0 2px #d7e7fb}
+  .alanf input.sag{text-align:right}
+  .alanf.dar input{width:130px}
+  .alanf.tarih,.alanf.tutar,.alanf.cari{flex-direction:row;flex-wrap:wrap;align-items:flex-end;column-gap:4px}
+  .alanf.tarih > span,.alanf.tutar > span,.alanf.cari > span{width:100%}
+  .alanf.tarih input{width:128px}.alanf.tarih select{height:28px}
+  .alanf.tarih i,.alanf.tutar i{font-style:normal;color:var(--muted);height:28px;line-height:28px}
+  .alanf.tutar input{width:96px}
+  .alanf.cari{position:relative}.alanf.cari input{width:250px;padding-right:24px}
+  .alanf.cari .ara-ic{position:absolute;right:7px;bottom:6px;font-weight:normal;font-size:12px;color:var(--muted)}
+  .alanf.serbest input{width:170px}
+  .ara .seg{align-self:flex-end}
+  .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg span{padding:5px 9px;font-size:11.5px;background:linear-gradient(#fff,#eef3f8);border-right:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sec{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:4px 7px;font-size:11px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .sec b{font-weight:normal;color:var(--muted)}
+  .cipler{display:flex;gap:4px;padding:0 10px 7px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center}
+  .cip{border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 9px;font-size:11px;color:var(--muted);cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+  .cip.on{background:#e7f0fb;border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip .n{background:#e3e9f0;border-radius:8px;padding:0 5px;font-size:10px;color:var(--ink);font-weight:normal}
+  .cip.on .n{background:#c6dcf5}
+  .cipler .sag{margin-left:auto;display:flex;gap:4px;align-items:center;font-size:11px;color:var(--muted)}
+
+  .govde2{display:grid;grid-template-columns:1fr 300px;min-height:0}
+  .pen.panel-kapali .govde2{grid-template-columns:1fr}
+  .pen.panel-kapali .panel{display:none}
+  .liste{overflow:auto;max-height:560px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{position:sticky;top:0;background:linear-gradient(var(--head),var(--head2));border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+  td{padding:6px 8px;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:middle}
+  td.sag,th.sag{text-align:right}
+  tr.sec td{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
+  tr:hover td{background:#f3f8ff}
+  tr.sec:hover td{background:var(--sel)}
+  .tur{display:inline-block;border-radius:3px;padding:1px 6px;font-size:10.5px;font-weight:bold;background:#e8eef5;color:var(--navy)}
+  .tur.fat{background:#dfeafa}.tur.irs{background:#e4f3e7;color:#1e5a30}.tur.sip{background:#fbe6ae;color:#7a5407}.tur.tek{background:#f1e4f7;color:#5b2d78}.tur.fis{background:#eee}
+  .ebelge{display:inline-block;border-radius:9px;padding:0 7px;font-size:10px;font-weight:bold}
+  .ebelge.g{background:#d9f0dd;color:#1e5a30}.ebelge.h{background:#fde9c4;color:#8a6218}.ebelge.t{background:#e3e9f0;color:#5a6a7b}.ebelge.r{background:#f7cfcf;color:#7d1f1f}
+  .kap{font-size:10.5px;color:var(--muted)}
+  .kap b{color:var(--ink);font-weight:600}
+  .cari small{display:block;color:var(--muted);font-size:10.5px}
+  .alt{display:flex;align-items:center;gap:10px;padding:6px 10px;border-top:1px solid var(--line);background:var(--head);font-size:11px;color:var(--muted)}
+  .alt .sayfa{display:inline-flex;gap:2px}
+  .alt .sayfa span{border:1px solid var(--line);border-radius:3px;padding:1px 7px;background:#fff}
+  .alt .sayfa span.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .alt .sag{margin-left:auto;display:flex;gap:6px}
+
+  /* sağ panel: önizleme */
+  .panel{border-left:1px solid var(--line);background:#fbfcfe;padding:10px;font-size:11.5px;overflow:auto;max-height:560px}
+  .panel h6{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .panel .kart{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px;margin-bottom:8px}
+  .panel .kart .b{font-weight:bold;font-size:12.5px}
+  .panel .kart .m{color:var(--muted);font-size:11px;margin-top:2px}
+  .panel .kv{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:11.5px}
+  .panel .kv span:nth-child(even){text-align:right;font-variant-numeric:tabular-nums}
+  .panel .kv .top{font-weight:bold;font-size:12.5px;border-top:1px solid var(--line2);padding-top:3px;margin-top:2px}
+  .panel .kl{border-top:1px dashed var(--line2);padding:3px 0;display:flex;justify-content:space-between;gap:8px}
+  .panel .kl span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .panel .iz{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .panel .ac{display:flex;gap:4px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="secici">
+  <b>GÖRÜNÜM</b>
+  <span class="on" data-g="satis">Satış belgeleri sekmesi</span>
+  <span data-g="alis">Alış belgeleri sekmesi</span>
+  <span data-g="dar">Önizleme paneli kapalı</span>
+</div>
+<div class="not">
+  <b>Kayıtlı Belge Aç</b> — belge kartı araç çubuğundaki <b>📂 Aç</b> (Ctrl+O) düğmesi <b>kendi sekmesinde</b> açılır (pencere değil).
+  Müşteri / tedarikçi listesi DEĞİL,
+  <b>belge listesi</b>: satış kartından açılınca satış belgeleri (fatura · irsaliye · sipariş · teklif · fiş), alış kartından
+  açılınca alış belgeleri. Arama alanları: <b>Belge No · Tarih aralığı (hızlı seçimli) · Cari · Tutar aralığı · Metin</b>;
+  tür süzgeci açık kartın türüyle başlar ("Tümü" ile öbür türlere geçilir). Çift tık / Enter belgeyi
+  <b>yeni sekmede</b> açar; liste sekmesi yerinde kalır, başka belge için geri dönülür. Sağ panel seçili belgenin özeti - liste
+  sunucudan (KaynakKatalogu belge listesi, sayfalı), sütunlar / renkler katalogdan.
+</div>
+
+<div class="arka">
+  <!-- UYGULAMA SEKME ŞERİDİ (kullanıcı: "bu arama/listeleme ekranı sekme olarak gelmeli"): pencere değil, kart gibi
+       kendi sekmesi. Belge kartındaki 📂 Aç bu sekmeyi açar (zaten açıksa ona geçer); listeden seçilen belge yeni sekmede
+       açılır, liste sekmesi yerinde kalır (başka belge açmak için geri dönülür). -->
+  <div class="sekmeler">
+    <span class="sk ev">🏠</span>
+    <span class="sk">🧾 Satış Faturası Kartı <i>×</i></span>
+    <span class="sk on">📂 <b id="skAd">Satış Belgeleri</b> <i>×</i></span>
+    <span class="sk arti">＋</span>
+    <span class="sk sag">3 / 8</span>
+  </div>
+
+  <!-- ===================== PENCERE ===================== -->
+  <div class="pen on" id="pen">
+    <div class="title">📂 Kayıtlı Belge Aç <span class="rozet" id="rozet">Satış belgeleri</span>
+      <span class="sp">↑↓ gez · Enter yeni sekmede açar · liste sekmesi yerinde kalır</span></div>
+
+    <div class="toolbar">
+      <span class="btn ok">📂 Aç (Enter) — yeni sekmede</span>
+      <span class="btn">👁 Önizleme</span>
+      <span class="sepv"></span>
+      <span class="btn">🖨️ Yazdır</span>
+      <span class="btn">⇩ Dışa Aktar</span>
+      <span class="ipucu">Liste sunucu sayfalı (50) · sıralama sütun başlığından · süzgeçler kullanıcıya hatırlanır</span>
+      <span class="btn">✕ Sekmeyi Kapat</span>
+    </div>
+
+    <!-- ARAMA ALANLARI (kullanıcı): belge no · tarih aralığı · cari · tutar aralığı - ayrı kutular, Enter listeler. -->
+    <div class="ara">
+      <div class="seg" id="turSeg">
+        <span>Tümü</span><span class="on">Fatura</span><span>İrsaliye</span><span>Sipariş</span><span>Teklif</span><span>Fiş</span>
+      </div>
+      <label class="alanf dar"><span>Belge No</span><input placeholder="GEN2026… / 412" value=""></label>
+      <label class="alanf tarih"><span>Tarih</span><input type="date" value="2026-10-09"><i>–</i><input type="date" value="2026-11-08">
+        <select><option>Son 30 gün</option><option>Bugün</option><option>Bu hafta</option><option>Bu ay</option><option>Geçen ay</option><option>Bu yıl</option><option>Serbest</option></select></label>
+      <label class="alanf cari"><span id="lbCari">Müşteri</span><input placeholder="Ad ya da kod yaz, listeden seç…" value=""><b class="ara-ic">🔍</b></label>
+      <label class="alanf tutar"><span>Tutar</span><input placeholder="en az" class="sag"><i>–</i><input placeholder="en çok" class="sag"></label>
+      <label class="alanf serbest"><span>Metin</span><input placeholder="açıklama / stok adı…" value=""></label>
+      <span class="btn ok" style="align-self:flex-end">🔍 Listele (Enter)</span>
+      <span class="btn" style="align-self:flex-end" title="Tüm süzgeçleri temizle">↺</span>
+    </div>
+    <div class="cipler">
+      <span class="cip on">Son açılanlar <span class="n">8</span></span>
+      <span class="cip">Açık (kapanmamış) <span class="n">23</span></span>
+      <span class="cip" id="cipEb">e-Fatura gönderilmemiş <span class="n">5</span></span>
+      <span class="cip">Taslak <span class="n">2</span></span>
+      <span class="cip">Bugün <span class="n">6</span></span>
+      <span class="cip">Benim kaydettiklerim <span class="n">41</span></span>
+      <span class="sag">Sıralama: <span class="sec">Tarih ↓</span></span>
+    </div>
+
+    <div class="govde2">
+      <div class="liste">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Tür</th><th>Belge No</th><th id="thCari">Müşteri</th><th class="sag">Tutar</th><th>e-Belge</th><th>Durum</th><th>Kaydeden</th>
+          </tr></thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+
+      <div class="panel" id="panel">
+        <h6>Seçili belge</h6>
+        <div class="kart">
+          <div class="b" id="pNo">Satış Faturası · GEN2026000000409</div>
+          <div class="m">07.11.2026 16:42 · Kaydeden: Sistem Yöneticisi</div>
+        </div>
+        <div class="kart">
+          <div class="b" id="pCari">ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.</div>
+          <div class="m">120.01.001 · ANKARA · vade 30 gün (07.12.2026)</div>
+        </div>
+        <div class="kart">
+          <h6>Kalemler (3)</h6>
+          <div class="kl"><span>TORAKOLOMBER POSTERİOR ROD-ROD KONNEKTÖR</span><span>2 × 2.500,00</span></div>
+          <div class="kl"><span>PEDİKÜL VİDASI 6.5×45</span><span>6 × 1.800,00</span></div>
+          <div class="kl"><span>SET KİRASI</span><span>1 × 4.000,00</span></div>
+        </div>
+        <div class="kart">
+          <div class="kv">
+            <span>Ara Toplam</span><span>19.800,00</span>
+            <span>KDV%10</span><span>1.580,00</span>
+            <span>KDV%20</span><span>800,00</span>
+            <span class="top">Genel Toplam</span><span class="top">22.180,00</span>
+          </div>
+        </div>
+        <div class="kart">
+          <h6>Durum</h6>
+          <div class="iz">e-Fatura <b>gönderildi</b> (GİB kabul 07.11 17:05) · Tahsilat <b>açık</b> 22.180,00 · Sipariş GEN2026-S-118'den aktarıldı</div>
+        </div>
+        <div class="ac"><span class="btn ok">📂 Aç</span><span class="btn">🖨️ Yazdır</span></div>
+      </div>
+    </div>
+
+    <div class="alt">
+      <span><b>61</b> belge · sayfa 1 / 2</span>
+      <span class="sayfa"><span>‹</span><span class="on">1</span><span>2</span><span>›</span></span>
+      <span>Toplam (sayfa): <b>412.930,50</b></span>
+      <span class="sag">Seçili: <b>GEN2026000000409</b> · Enter açar</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SATIS = [
+    ['08.11.2026 14:20','fat','Fatura','GEN2026000000412','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','120.01.001','22.180,00','t','Taslak','Açık · tahsilat yok','Sistem Yöneticisi',false],
+    ['07.11.2026 16:42','fat','Fatura','GEN2026000000409','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','120.01.001','22.180,00','g','Gönderildi','Açık · 22.180,00','Sistem Yöneticisi',true],
+    ['07.11.2026 11:05','irs','İrsaliye','IRS2026000000221','BİMED TEKNOLOJİ SAĞLIK A.Ş.','120.01.014','9.420,00','g','e-İrsaliye','Faturalandı','Ayşe K.',false],
+    ['06.11.2026 17:30','fat','Fatura','GEN2026000000408','ÖZEL ANKARA HASTANESİ','120.02.003','148.600,00','h','Hazır','Açık · 148.600,00','Sistem Yöneticisi',false],
+    ['06.11.2026 10:12','sip','Sipariş','SIP2026000000118','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','120.01.001','19.800,00','-','—','Faturalandı','Mehmet T.',false],
+    ['05.11.2026 15:48','fat','Fatura','GEN2026000000407','MEDİKAL DÜNYA LTD.','120.01.027','3.250,00','r','Reddedildi','Açık · 3.250,00','Ayşe K.',false],
+    ['05.11.2026 09:20','tek','Teklif','TEK2026000000061','ÖZEL ANKARA HASTANESİ','120.02.003','212.000,00','-','—','Bekliyor','Mehmet T.',false],
+    ['04.11.2026 13:02','fat','Fatura','GEN2026000000406','BİMED TEKNOLOJİ SAĞLIK A.Ş.','120.01.014','9.420,00','g','Gönderildi','Kapandı','Sistem Yöneticisi',false],
+    ['03.11.2026 16:10','fis','Fiş','FIS2026000000088','PERAKENDE MÜŞTERİ','120.09.001','640,00','g','e-Arşiv','Kapandı','Ayşe K.',false],
+    ['31.10.2026 11:40','fat','Fatura','GEN2026000000401','ÖZEL ANKARA HASTANESİ','120.02.003','76.300,00','g','Gönderildi','Kapandı','Sistem Yöneticisi',false],
+  ];
+  const ALIS = [
+    ['08.11.2026 10:05','fat','Fatura','DEF2026000000531','ORTOPEDİ İTHALAT A.Ş.','320.01.002','184.500,00','-','—','Açık · 184.500,00','Mehmet T.',true],
+    ['07.11.2026 15:22','irs','İrsaliye','TDK-7781','ORTOPEDİ İTHALAT A.Ş.','320.01.002','184.500,00','-','—','Faturalandı','Depo · Ali R.',false],
+    ['06.11.2026 09:48','sip','Sipariş','SAL2026000000074','3B CATERİNG LTD.','320.04.011','12.400,00','-','—','Kısmen teslim','Mehmet T.',false],
+    ['05.11.2026 14:15','fat','Fatura','ABC2026000001120','MEDİKAL SARF TEDARİK','320.01.019','27.880,00','-','—','Kapandı','Ayşe K.',false],
+    ['04.11.2026 11:30','fat','Fatura','KRG2026000000077','KARGO LOJİSTİK A.Ş.','320.07.001','1.980,00','-','—','Kapandı','Ayşe K.',false],
+    ['03.11.2026 16:55','fis','Fiş','AFS2026000000019','KIRTASİYE MARKET','320.09.003','415,00','-','—','Kapandı','Ayşe K.',false],
+  ];
+  const EB = {g:'ebelge g', h:'ebelge h', t:'ebelge t', r:'ebelge r'};
+  function ciz(d) {
+    const tb = document.getElementById('tb'); tb.innerHTML = '';
+    d.forEach(r => {
+      const tr = document.createElement('tr'); if (r[11]) tr.className = 'sec';
+      const eb = r[7] === '-' ? '<span class="kap">—</span>' : `<span class="${EB[r[7]]}">${r[8]}</span>`;
+      tr.innerHTML = `<td>${r[0]}</td><td><span class="tur ${r[1]}">${r[2]}</span></td><td><b>${r[3]}</b></td>
+        <td class="cari">${r[4]}<small>${r[5]}</small></td><td class="sag"><b>${r[6]}</b></td><td>${eb}</td>
+        <td class="kap">${r[9].replace(/^(\S+)/, '<b>$1</b>')}</td><td class="kap">${r[10]}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+  function gorunum(g) {
+    document.querySelectorAll('.secici span').forEach(s => s.classList.toggle('on', s.dataset.g === g));
+    const pen = document.getElementById('pen');
+    pen.classList.toggle('panel-kapali', g === 'dar');
+    const alis = g === 'alis';
+    document.getElementById('rozet').textContent = alis ? 'Alış belgeleri' : 'Satış belgeleri';
+    document.getElementById('thCari').textContent = alis ? 'Tedarikçi' : 'Müşteri';
+    document.getElementById('lbCari').textContent = alis ? 'Tedarikçi' : 'Müşteri';
+    document.getElementById('skAd').textContent = alis ? 'Alış Belgeleri' : 'Satış Belgeleri';
+    document.getElementById('cipEb').style.display = alis ? 'none' : '';
+    document.getElementById('pNo').textContent = alis ? 'Alış Faturası · DEF2026000000531' : 'Satış Faturası · GEN2026000000409';
+    document.getElementById('pCari').textContent = alis ? 'ORTOPEDİ İTHALAT A.Ş.' : 'ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.';
+    ciz(alis ? ALIS : SATIS);
+  }
+  document.querySelectorAll('.secici span').forEach(s => s.onclick = () => gorunum(s.dataset.g));
+  document.querySelectorAll('#turSeg span').forEach(s => s.onclick = () => { document.querySelectorAll('#turSeg span').forEach(x => x.classList.remove('on')); s.classList.add('on') });
+  gorunum('satis');
+</script>
+</body>
+</html>

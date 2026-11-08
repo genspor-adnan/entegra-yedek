@@ -48,6 +48,8 @@ export interface BelgeKartiModalProps {
   kayitliId: number;
   tur: number;
   bilgi: BelgeTuruBilgisi;
+  /** Fatura tipi Tevkifatlı (22): kalem penceresi Tevkifat Oranı sorar (08.11.2026). */
+  tevkifatli?: boolean;
   basvuruMu: boolean;
   alisMi: boolean;
   irsaliyeMi: boolean;
@@ -452,6 +454,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
         <KalemPenceresi
           // SIFIR FIYAT ONAYI: fiyatin anlamli oldugu belgelerde (transfer / stok fisi disi).
           sifirFiyatSor={!depoBelgesi && !stokFisiMi}
+          tevkifatli={p.tevkifatli}
           satir={kalem}
           transferMi={bilgi.kalem === 'miktar'}
           siparisMi={siparisMi}

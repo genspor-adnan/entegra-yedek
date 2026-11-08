@@ -90,6 +90,16 @@ public static partial class KaynakKatalogu
                 "when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else 'Yok' end",
                                             "metin", "İzleme",   Hizalama: "orta"),
             new("izleme",    "s.izleme",    "sayi",  "İzleme Kodu", Hizalama: "orta", Varsayilan: false),
+            // TIBBİ ÜRÜN (gizli, kullanıcı 08.11.2026: "satırlarda tıbbi ürün varsa senaryoyu İlaç / Tıbbi Cihaz
+            //   yapıyoruz"): Delphi UFaturaWizard kuralı (STOKLAR.BILDIRIM = 2 = ÜTS bildirimli ürün) + web'in ilaç
+            //   kartına bağlı stoku (ilac.stok_id - GİB "ILAC" kimliği aynı senaryoda). Belge kartı kalem eklenince
+            //   bunu okur ve satış faturasının senaryosunu 8'e çeker. Kayıtlı satırda aynı bayrak
+            //   BelgeDeposu.Deger (satır okuma) ile gelir - iki kaynak aynı kuralı taşır.
+            new("tibbi",
+                "(coalesce(s.bildirim, 0) = 2" +
+                " or exists (select 1 from public.ilac i where i.stok_id = s.id))::int",
+                                            "mantik", "Tıbbi", Hizalama: "orta", Varsayilan: false,
+                                            Siralanabilir: false, Filtrelenebilir: false),
             // PAKET (124): belge kalemi secimde bunu okur ve paketi ICERIGIYLE
             //   birlikte ekler.
             new("paket",     "s.paket",     "mantik","Paket",     Hizalama: "orta", Varsayilan: false),

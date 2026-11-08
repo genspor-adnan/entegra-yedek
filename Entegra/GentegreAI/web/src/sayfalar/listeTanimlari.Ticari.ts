@@ -69,7 +69,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   revizyon/onay akisi ileride; ilk surum ekle/ac/sil.
     kaynak: 'belge', rota: 'teklif', baslik: 'Satış Teklifi Listesi', yol: 'Satis › Satış Teklifi Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     aksiyonEkrani: 'teklif-liste', yeniBelgeTuru: 18,
     // Teklif yalniz Gentegre AI (ERP) modunda (kullanici).
     urunModu: 1,
@@ -106,7 +106,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 19, urunModu: 1,
     // TARİH ARALIĞI (kullanıcı 02.11.2026: "satış sip listesine tarih aralığı (başl-bitiş) filtre ekle"): hazır
     //   aralık combosu + başlangıç - bitiş kutuları.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     // Menude "Satis Siparisleri" seciliyse liste de yalniz SATIS siparisi (19)
     //   gostersin; tur kolonlari o yuzden gereksiz (alis siparisi ayri ekran).
     sabitFiltre: { op: 'and', kosullar: [
@@ -136,7 +136,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     // TARIH ARALIGI (kullanici 11.10.2026): faturalardaki hazir aralik combosu, acilista tum tarihler.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
@@ -152,7 +152,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ebelgeMenusu: 'E-İrsaliye',
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 14 },
     // TARIH ARALIGI (kullanici 11.10.2026): faturalardaki hazir aralik combosu, acilista tum tarihler.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yeniBelgeTuru: 14,
     toplam: ['genelToplam'],
     cipler: SATIS_IRSALIYE_CIPLERI,
@@ -170,19 +170,21 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kaybediyordu) ve baslik menu adiyla ayni olmali.
     kaynak: 'belge', baslik: 'Satış Faturası Listesi', yol: 'Satis › Satış Faturası Listesi',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
-    // TARIH ARALIGI (kullanici 11.10.2026: "alış ve satış faturalarına tarih aralığı ekle"):
-    //   hazir aralik combosu, acilista tum tarihler.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    // TARİH: yalnız BAŞLAMA - BİTİŞ kutuları (kullanıcı 08.11.2026: "Tüm Tarihler combosunu kaldır", sonra
+    //   "başlama-bitiş tarih filtresi ekle"); açılışta boş = sınır yok. 11.10'daki hazır aralık combosu kalktı.
+    tarihAlani: 'belgeTarihi',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     // ALICI GRUBU e-Belge'nin yerinde (kullanici 11.10.2026: "e-belge sütununu gizle
     //   onun yerine Alıcı Grubu ekle (Hasta/Kurum/Firma)"); e-Fatura / e-Arşiv ayrimi
     //   Senaryo kolonunda zaten var.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan', 'aliciGrubu'],
-    // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
-    kolonBasliklari: { tarafUnvan: 'Alıcı' },
+    // ALICI ADI (kullanici 11.10.2026 "cari rename Alıcı" · 08.11.2026 "Alıcı rename Alıcı Adı").
+    kolonBasliklari: { tarafUnvan: 'Alıcı Adı' },
     // Tur / Belge Turu kolonlari bu ekranda ayni degeri tekrarliyor (hepsi
     //   satis faturasi) - iade ayrimi cip seridinde zaten var.
-    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum', 'efaturaDurum'],
+    // HASTA kolonu ERP satış faturasında yok (kullanıcı 08.11.2026: "arama editinde hasta kelimesini kaldır"):
+    //   gizli kolon aramaya ve "Ara: …" ipucuna girmez. HBYS ikizinde (aşağıda) kalır.
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum', 'efaturaDurum', 'hastaAdi'],
     // Yalniz SATIS FATURASI (15). 16 "Satis Fisi" ayri ekran; iade ise ayri tur
     //   degil, belge.tipi = 2 - cipler onu kullanir.
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
@@ -219,16 +221,16 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     kaynak: 'belge', rota: 'fatura', baslik: 'Satış Faturası Listesi',
     yol: 'Kurumlar & Sigorta › Satış Faturası Listesi',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
-    // TARIH ARALIGI (kullanici 11.10.2026: "alış ve satış faturalarına tarih aralığı ekle"):
-    //   hazir aralik combosu, acilista tum tarihler.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    // TARİH: yalnız BAŞLAMA - BİTİŞ kutuları (kullanıcı 08.11.2026: "Tüm Tarihler combosunu kaldır", sonra
+    //   "başlama-bitiş tarih filtresi ekle"); açılışta boş = sınır yok. 11.10'daki hazır aralık combosu kalktı.
+    tarihAlani: 'belgeTarihi',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     // ALICI GRUBU e-Belge'nin yerinde (kullanici 11.10.2026: "e-belge sütununu gizle
     //   onun yerine Alıcı Grubu ekle (Hasta/Kurum/Firma)"); e-Fatura / e-Arşiv ayrimi
     //   Senaryo kolonunda zaten var.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan', 'aliciGrubu'],
-    // ALICI (kullanici 11.10.2026: "satış faturalarında cari rename Alıcı").
-    kolonBasliklari: { tarafUnvan: 'Alıcı' },
+    // ALICI ADI (kullanici 11.10.2026 "cari rename Alıcı" · 08.11.2026 "Alıcı rename Alıcı Adı"). Hasta kolonu burada kalır.
+    kolonBasliklari: { tarafUnvan: 'Alıcı Adı' },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum', 'efaturaDurum'],
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
@@ -326,7 +328,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   (kasa_islem_turu.fis_mi = 1), belge fisleme F7'de baglanacak.
     kaynak: 'belge', rota: 'satis-fisi', baslik: 'Satış Fişi Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Satis › Satış Fişi Listesi', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 16,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 16 },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -345,7 +347,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   etkilemez.
     kaynak: 'belge', rota: 'tahakkuk', baslik: 'Satış Tahakkuku Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Satis › Tahakkuk Listesi', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 17,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -358,7 +360,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   Stok ve cari etkiler; satildikca faturaya donusur (F8 zinciri).
     kaynak: 'belge', rota: 'satis-konsinye', baslik: 'Satış Konsinye Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Satis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 119,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 119 },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -379,7 +381,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'belge', rota: 'alis-siparis', baslik: 'Alış Siparişi Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Alis › Sipariş Listesi', aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 9,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 9 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -397,7 +399,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alis › İrsaliyeler', aksiyonEkrani: 'irsaliye-liste', yeniBelgeTuru: 10,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 10 },
     // TARIH ARALIGI (kullanici 11.10.2026): satis irsaliyesiyle ayni, acilista tum tarihler.
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     // ILGISIZ KOLONLAR GIZLI (kullanici 11.10.2026): alis irsaliyesi giden e-Belge degil
     //   (gelen e-Irsaliye kendi sekmesinde), senaryo/tipi fatura kavrami, hasta HBYS faturasi.
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum',
@@ -445,7 +447,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişi Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Alis › Fişler', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 12,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -456,7 +458,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // ALIS tarafi: alis tahakkuku (13) - tedarikciye borc.
     kaynak: 'belge', rota: 'borc-tahakkuk', baslik: 'Alış Tahakkuku Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Alis › Tahakkuk Listesi', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -466,7 +468,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinye Listesi',
     // BAŞLAMA - BİTİŞ TARİH SÜZGECİ (kullanıcı 02.11.2026: "tüm alım/satım belgelerine").
-    tarihAlani: 'belgeTarihi', tarihCombo: true, tarihComboVarsayilan: '', tarihComboAralik: true,
+    tarihAlani: 'belgeTarihi',  // başlama - bitiş kutuları, açılışta boş (08.11.2026, satış faturası deseni)
     yol: 'Alis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 109,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 109 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],

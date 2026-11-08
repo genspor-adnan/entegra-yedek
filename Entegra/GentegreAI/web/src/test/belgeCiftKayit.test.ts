@@ -19,6 +19,7 @@ function baglam(o: { etkinBelgeId: number | null; duzenlenebilir: boolean; sonuc
     sonuc: o.sonucId ? ({ belge: { id: o.sonucId } } as never) : null,
     setSonuc: vi.fn(), setHata: vi.fn(), setAlanHatalari: vi.fn(), setKaydediyor: vi.fn(),
     kalemDegisti: false, setKalemDegisti: vi.fn(), setAcilanId, imzayiTemizle: vi.fn(), kapat: vi.fn(),
+    istisnaKodu: 0, setIstisnaKodu: vi.fn(),
   };
   return { kes: belgeKaydetmeKur(b), setAcilanId };
 }

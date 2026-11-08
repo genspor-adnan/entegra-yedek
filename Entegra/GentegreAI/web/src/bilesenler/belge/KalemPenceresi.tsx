@@ -27,6 +27,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                          basvuruMu, sifirFiyatSor, ustSerit, tarifeTipi = 0, rota = 0,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
+                         tevkifatli = false,
                          onKapat, onKaydet }: {
   satir: SatirDurumu;
   /** Mal DEPOYA giriyor: izlemli stokta fiyattan sonra lot GIRIS ekrani acilir. */
@@ -79,9 +80,24 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   anaBirimAdi?: string;
   /** Kur bu tarihten okunur (belge tarihi) - bugunun kuru degil. */
   belgeTarihi: string;
+  /** Fatura tipi TEVKİFATLI (22): KDV satırının altında "Tevkifat Oranı" (GİB tevkifat kodu) sorulur (08.11.2026). */
+  tevkifatli?: boolean;
   onKapat(): void;
   onKaydet(r: SatirDurumu): void;
 }) {
+  /**
+   * TEVKİFAT KODLARI (kullanıcı 08.11.2026: "fatura tipi tevkifatlı ise fiyat sorma ekranına o kalem için Tevkifat
+   * Oranı ekle"): GİB listesi (belge.tevkifat, "601 - Yapım İşleri (4/10)") - oran kodun içindedir, ayrı oran
+   * kutusu GİB'in reddedeceği kod/oran uyumsuzluğu doğururdu. Yalnız tevkifatlı faturada yüklenir; seçim satıra
+   * `tevkifatKodu` yazar, oranı sunucu koddan hesaplar. Kodsuz kalem e-Fatura hazırlamada durdurulur.
+   */
+  const [tevkifatKodlari, setTevkifatKodlari] = useState<{ deger: number; ad: string }[]>([]);
+  useEffect(() => {
+    if (!tevkifatli) return;
+    let iptal = false;
+    void api.efaturaKodlari().then(k => { if (!iptal) setTevkifatKodlari(k.tevkifat) }, () => undefined);
+    return () => { iptal = true };
+  }, [tevkifatli]);
   // `lotEkrani` gecici bayrak - satira yazilmaz, yalniz lot ekraninin ilk acilisini belirler.
   const [r, setR] = useState<SatirDurumu>(() => { const { lotEkrani: _, ...x } = satir; return x });
   /**
@@ -717,6 +733,21 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                   <option value="1">{c('Dahil')}</option>
                 </select>
               </span>
+            </label>
+            )}
+
+            {/* TEVKİFAT ORANI (08.11.2026): yalnız tevkifatlı (22) faturada, KDV'nin altında. Liste GİB kodu + oranı
+                birlikte söyler; seçilmeden de kaydedilir ama e-Fatura hazırlanmaz (sunucu uyarır). */}
+            {tevkifatli && !transferMi && !vergisiz && !basvuruMu && (
+            <label className="alan">
+              <span className="etiket">{c('Tevkifat Oranı')}</span>
+              <select value={r.tevkifatKodu ?? ''} onKeyDown={tus}
+                      onChange={e => { const kod = e.target.value; setR(x => ({ ...x, tevkifatKodu: kod, tevkifatOran: 0 })) }}>
+                <option value="">{c('Seçin…')}</option>
+                {r.tevkifatKodu && !tevkifatKodlari.some(k => String(k.deger) === r.tevkifatKodu)
+                  && <option value={r.tevkifatKodu}>{r.tevkifatKodu}</option>}
+                {tevkifatKodlari.map(k => <option key={k.deger} value={String(k.deger)}>{k.ad}</option>)}
+              </select>
             </label>
             )}
 

@@ -35,6 +35,12 @@ public sealed class EFaturaSatiri
     public string TevkifatAdi { get; set; } = "";
     public decimal TevkifatOran { get; set; }
     public decimal Tevkifat { get; set; }
+    /// <summary>
+    /// SATIRIN KENDİ tevkifat kodu / oranı girildi mi (kalem penceresi "Tevkifat Oranı" ya da Delphi aktarımındaki
+    /// KDVMUHAFIYETI oranı). Başlık kodundan düşen oran SAYILMAZ: tevkifatlı faturada her KDV'li kalem için
+    /// kullanıcı oranı seçmiş olmalı (kullanıcı 08.11.2026: "oran girilmediyse uyarı ver, hazırlama").
+    /// </summary>
+    public bool TevkifatGirildi { get; set; }
     // ihracat (belge_efatura_satir)
     public string Gtip { get; init; } = "";
     public string TeslimSarti { get; init; } = "";
@@ -205,6 +211,13 @@ public sealed class EFaturaVerisi
         {
             case 22 when TevkifatKodu == 0 && Satirlar.All(s => s.TevkifatKodu.Length == 0):
                 e.Add("Tevkifatlı faturada tevkifat kodu seçilmemiş: e-Fatura Bilgileri.");
+                break;
+            // ORANSIZ KALEM (08.11.2026): başlık kodundan düşen oranla hazırlamak YOK - kullanıcı her KDV'li
+            //   kalemde oranı (kodu) seçmiş olmalı; eksik kalemler adıyla söylenir.
+            case 22 when Satirlar.Any(s => s.KdvOran > 0 && !s.TevkifatGirildi):
+                e.Add("Tevkifatlı faturada tevkifat oranı girilmemiş kalem var: "
+                      + string.Join(", ", Satirlar.Where(s => s.KdvOran > 0 && !s.TevkifatGirildi).Select(s => s.Ad).Take(5))
+                      + " (kalem penceresi › Tevkifat Oranı).");
                 break;
             case 22 when Tevkifat <= 0:
                 e.Add("Tevkifat tutarı sıfır: tevkifat yalnız KDV'li kalemlere uygulanır.");
@@ -483,12 +496,17 @@ public sealed class EFaturaVerisi
             //   başlığı ezer; oran KODDAN (elle girilen oran koda uymazsa GİB reddeder).
             if (veri.Tipi == 22 && kdv > 0)
             {
+                // SATIR ORANI (08.11.2026): kalem penceresinden (tevkifat_orani) ya da Delphi aktarımından
+                //   (kdv_muafiyeti 20..100 = FATURA.KDVMUHAFIYETI tevkifat oranı). Yoksa başlık kodunun oranı.
+                var muafiyetOran = Convert.ToInt32(s["muafiyet"]) is var mo and (20 or 30 or 40 or 50 or 70 or 90 or 100) ? mo : 0;
+                var satirOran = D("tev_oran") > 0 ? D("tev_oran") : muafiyetOran;
+                satir.TevkifatGirildi = satirOran > 0 || ((string)s["tev_kod"]!).Length > 0;
                 var kod = (string)s["tev_kod"]! is { Length: > 0 } sk ? sk
                           : veri.TevkifatKodu > 0 ? veri.TevkifatKodu.ToString() : "";
                 if (kod.Length > 0)
                 {
                     var adi = Ad("belge.tevkifat", int.Parse(kod));
-                    var oranT = D("tev_oran") > 0 ? D("tev_oran") : TevkifatOrani(adi);
+                    var oranT = satirOran > 0 ? satirOran : TevkifatOrani(adi);
                     satir.TevkifatKodu = kod; satir.TevkifatAdi = adi; satir.TevkifatOran = oranT;
                     satir.Tevkifat = Math.Round(kdv * oranT / 100m, 2, MidpointRounding.AwayFromZero);
                 }

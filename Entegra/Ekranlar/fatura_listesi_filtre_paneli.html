@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satış Faturaları listesi — Detaylı Ara paneli (varsayılan kapalı) (Mockup)</title>
+<style>
+  /* Gentegre AI ekran dili (web/src/tema.css, fatura_satis_listesi.html) - MEVCUT LİSTEYE EK, ikinci liste yok */
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --ok:#2e7d46;
+    --b-tas:#c9def6; --b-tas-t:#10305c; --b-bek:#fbe6ae; --b-bek-t:#7a5407;
+    --b-ok:#bee8cb; --b-ok-t:#134a29; --b-gec:#f7cfcf; --b-gec-t:#7d1f1f; --b-ipt:#dcdcdc; --b-ipt-t:#7a7a7a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .secici{max-width:1480px;margin:0 auto 10px;display:flex;gap:4px;align-items:center}
+  .secici b{font-size:11px;color:var(--muted);margin-right:6px}
+  .secici span{padding:5px 12px;border:1px solid var(--line);border-radius:3px;background:linear-gradient(#fff,#eef3f8);font-size:11.5px;cursor:pointer}
+  .secici span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .not{max-width:1480px;margin:0 auto 10px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .not b{color:var(--ink)}
+
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .sekmeler{display:flex;align-items:center;gap:2px;background:#dfe6ee;border-bottom:1px solid var(--line);padding:6px 8px 0}
+  .sk{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;background:linear-gradient(#f3f6fa,#e6ecf3);font-size:12px;color:var(--muted);white-space:nowrap}
+  .sk.on{background:#fff;color:var(--ink);font-weight:bold;position:relative;top:1px}
+  .sk i{font-style:normal;opacity:.6;margin-left:4px}.sk.arti{border:0;background:none;font-size:15px;color:var(--navy)}
+
+  /* MEVCUT araç çubuğu (web Liste ekranı) + yeni "Filtreler" düğmesi */
+  .toolbar{display:flex;gap:4px;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:default}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.kir{color:#b3261e}
+  .btn.filtre{border-color:var(--selbd);background:linear-gradient(#f3f8ff,#dfeafa);color:var(--navy);font-weight:bold;position:relative}
+  .btn.filtre.acik{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .btn.filtre .say{background:#e2b83a;color:#3b2d00;border-radius:9px;padding:0 6px;font-size:10px;margin-left:2px}
+  .btn.filtre.acik .say{background:#fff;color:var(--navy)}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .kutu{display:flex;align-items:center;border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 6px;height:28px;width:300px}
+  .kutu .ic{color:var(--muted);margin-right:6px}
+  .kutu input{border:0;outline:0;flex:1;font:inherit;font-size:12px;background:transparent}
+  .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg span{padding:5px 9px;font-size:11px;background:linear-gradient(#fff,#eef3f8);border-right:1px solid var(--line)}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .toolbar .sag{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .baslik{font-weight:bold;color:var(--muted);letter-spacing:.3px;margin-left:6px}
+
+  /* FİLTRE PANELİ - açılır/kapanır */
+  .fpanel{border-bottom:1px solid var(--line);background:linear-gradient(#fbfcfe,#f3f7fb);padding:10px 12px 8px;display:none}
+  .fpanel.acik{display:block}
+  .fizgara{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 10px}
+  .f{display:flex;flex-direction:column;gap:3px;font-size:10.5px;color:var(--muted);min-width:0}
+  .f > span{padding-left:2px}
+  .f input,.f select{border:1px solid var(--line);border-radius:3px;height:28px;padding:0 7px;font:inherit;font-size:12px;color:var(--ink);background:#fff;outline:0;width:100%;min-width:0}
+  .f input:focus{border-color:var(--accent);box-shadow:0 0 0 2px #d7e7fb}
+  .f .ikili{display:flex;gap:4px;align-items:center}
+  .f .ikili i{font-style:normal;color:var(--muted)}
+  .f input.sag{text-align:right}
+  .f.genis{grid-column:span 2}
+  .f.cari{position:relative}.f.cari input{padding-right:24px}
+  .f.cari b{position:absolute;right:7px;bottom:6px;font-weight:normal;color:var(--muted)}
+  .f.dolu input,.f.dolu select{border-color:#e2b83a;background:#fffdf3}
+  .fdugmeler{display:flex;gap:4px;align-items:center;margin-top:9px}
+  .fdugmeler .ipucu{margin-left:auto;font-size:10.5px;color:var(--muted);font-style:italic}
+
+  /* ETKİN FİLTRE ÇİPLERİ - panel kapalıyken de görünür */
+  .cipler{display:flex;gap:4px;padding:6px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center;font-size:11px;color:var(--muted)}
+  .cip{border:1px solid var(--selbd);background:#e7f0fb;border-radius:12px;padding:2px 6px 2px 9px;font-size:11px;color:var(--navy);display:inline-flex;gap:5px;align-items:center}
+  .cip b{font-weight:600}.cip i{font-style:normal;opacity:.6;cursor:pointer}
+  .cip.sil{border-color:var(--line);background:#fff;color:var(--muted)}
+  .cipler .sag{margin-left:auto}
+
+  /* MEVCUT grid */
+  .dg{margin:10px;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 6px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 6px;font-size:11.5px;white-space:nowrap}
+  td.r,th.r{text-align:right}td.c,th.c{text-align:center}
+  tr.b-tas td{background:var(--b-tas);color:var(--b-tas-t)}tr.b-bek td{background:var(--b-bek);color:var(--b-bek-t)}
+  tr.b-ok td{background:var(--b-ok);color:var(--b-ok-t)}tr.b-gec td{background:var(--b-gec);color:var(--b-gec-t)}
+  tr.b-ipt td{background:var(--b-ipt);color:var(--b-ipt-t)}
+  tr.sec td{box-shadow:inset 0 0 0 1px var(--selbd)}
+  tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .alt{display:flex;align-items:center;gap:10px;padding:6px 12px 10px;font-size:11px;color:var(--muted)}
+  .alt .sayfa{display:inline-flex;gap:2px}.alt .sayfa span{border:1px solid var(--line);border-radius:3px;padding:1px 7px;background:#fff}
+  .alt .sayfa span.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="secici"><b>GÖRÜNÜM</b>
+  <span data-g="acik">Detaylı Ara paneli AÇIK</span><span class="on" data-g="kapali">Panel KAPALI (varsayılan, çipler kalır)</span><span data-g="bos">Süzgeç yok (bugünkü liste)</span></div>
+<div class="not">
+  <b>Tek liste</b> (kullanıcı 08.11.2026: "ikinci bir liste olmasın, şu anki listeye ekler yaparak tek liste olsun; filtre kriterleri
+  açılır/kapanır panel olabilir"). Mevcut Satış Faturaları listesine yalnız <b>🔎 Detaylı Ara ▾</b> düğmesi (etkin süzgeç sayısı rozeti)
+  ve altına açılır panel eklenir - <b>varsayılan KAPALI</b>, kullanıcı açarsa açık kalır (hatırlanır): <b>Belge No · Tarih aralığı (hızlı seçimli) · Müşteri · Tutar aralığı · Fatura Tipi · e-Belge ·
+  Kapanma · Depo · Kaydeden · Metin</b>. Uygula listeyi sunucudan yeniler (KaynakKatalogu süzgeçleri, parametreli); etkin süzgeçler
+  panel kapalıyken de <b>çip</b> olarak görünür, × ile tek tek kalkar. Panel durumu ve son süzgeçler kullanıcıya hatırlanır
+  (Son / Sık aramalar aynı yerden). Grid, sayfalama, toplam satırı, Yeni/Düzenle/Sil olduğu gibi.
+</div>
+
+<div class="win">
+  <div class="sekmeler"><span class="sk">🏠</span><span class="sk on">🧾 Satış Faturaları <i>×</i></span><span class="sk">Satış Faturası Kartı <i>×</i></span><span class="sk arti">＋</span></div>
+
+  <div class="toolbar">
+    <span class="btn ok">➕ Yeni</span><span class="btn">✎ Düzenle</span><span class="btn kir">🗑 Sil</span>
+    <span class="sepv"></span>
+    <span class="btn">🔄 Dönüşüm</span><span class="btn">✉ Belge Zarfları</span><span class="btn">⟳ e-Fatura Güncelle</span>
+    <span class="sepv"></span>
+    <span class="btn">🖨️ Yazdır</span><span class="btn">📤 Aktar</span>
+    <span class="baslik">SATIŞ FATURALARI</span>
+    <span class="sag">
+      <div class="seg"><span class="on">Tüm</span><span>Son</span><span>Sık</span></div>
+      <div class="kutu"><span class="ic">🔍</span><input placeholder="Hızlı ara: belge no, cari, tutar…" value=""></div>
+      <span class="btn filtre" id="fdugme">🔎 Detaylı Ara <span class="say" id="fsay">4</span> <span id="fok">▴</span></span>
+      <span class="btn">☰</span>
+    </span>
+  </div>
+
+  <!-- ================= FİLTRE PANELİ ================= -->
+  <div class="fpanel" id="fpanel">
+    <div class="fizgara">
+      <label class="f"><span>Belge No</span><input placeholder="GEN2026… / 412" value=""></label>
+      <label class="f genis dolu"><span>Fatura Tarihi</span>
+        <div class="ikili"><input type="date" value="2026-10-09"><i>–</i><input type="date" value="2026-11-08">
+          <select style="width:124px"><option>Son 30 gün</option><option>Bugün</option><option>Bu hafta</option><option>Bu ay</option><option>Geçen ay</option><option>Bu yıl</option><option>Serbest</option></select></div></label>
+      <label class="f genis cari dolu"><span>Müşteri</span><input value="ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ. · 120.01.001"><b>🔍</b></label>
+      <label class="f dolu"><span>Tutar (Genel Toplam)</span><div class="ikili"><input class="sag" placeholder="en az" value="1.000,00"><i>–</i><input class="sag" placeholder="en çok"></div></label>
+
+      <label class="f"><span>Fatura Tipi</span><select><option>(tümü)</option><option>Satış</option><option>İade</option><option>Tevkifatlı</option><option>KDV İstisna</option><option>İhracat</option></select></label>
+      <label class="f dolu"><span>e-Belge</span><select><option>(tümü)</option><option selected>Gönderilmemiş</option><option>Hazır</option><option>Gönderildi</option><option>Kabul</option><option>Red</option><option>e-Arşiv</option></select></label>
+      <label class="f"><span>Kapanma / Tahsilat</span><select><option>(tümü)</option><option>Açık</option><option>Kısmen</option><option>Kapandı</option><option>Vadesi geçen</option></select></label>
+      <label class="f"><span>Depo</span><select><option>(tümü)</option><option>Anadepo</option><option>Şube Deposu</option></select></label>
+      <label class="f"><span>Kaydeden</span><select><option>(tümü)</option><option>Ben</option><option>Sistem Yöneticisi</option><option>Ayşe K.</option></select></label>
+      <label class="f"><span>Metin (açıklama / stok)</span><input placeholder="…"></label>
+    </div>
+    <div class="fdugmeler">
+      <span class="btn ok">🔎 Uygula (Enter)</span>
+      <span class="btn">↺ Temizle</span>
+      <span class="btn">💾 Aramayı Kaydet</span>
+      <span class="btn">▾ Kayıtlı: Vadesi geçenler · Kasım e-Arşiv</span>
+      <span class="ipucu">Etkin süzgeçler sarı kenarlı · panel kapalıyken çiplerde · durum kullanıcıya hatırlanır</span>
+    </div>
+  </div>
+
+  <!-- ================= ETKİN FİLTRE ÇİPLERİ ================= -->
+  <div class="cipler" id="cipler">
+    <span>Süzgeç:</span>
+    <span class="cip"><b>Tarih</b> 09.10 – 08.11.2026 <i>×</i></span>
+    <span class="cip"><b>Müşteri</b> ALOEPLANT SAĞLIK <i>×</i></span>
+    <span class="cip"><b>Tutar</b> ≥ 1.000,00 <i>×</i></span>
+    <span class="cip"><b>e-Belge</b> Gönderilmemiş <i>×</i></span>
+    <span class="cip sil">tümünü kaldır</span>
+    <span class="sag"><b>7</b> belge · 61 içinden</span>
+  </div>
+
+  <!-- ================= MEVCUT GRİD ================= -->
+  <div class="dg">
+    <table>
+      <thead><tr><th class="c">☐</th><th>Tarih</th><th>Fatura No</th><th>Müşteri</th><th>Tipi</th><th>Senaryo</th><th>e-Belge</th><th class="r">Matrah</th><th class="r">KDV</th><th class="r">Genel Toplam</th><th>Kapanma</th><th>Kaydeden</th></tr></thead>
+      <tbody id="tb"></tbody>
+      <tfoot><tr><td colspan="7" class="r">TOPLAM (7 belge)</td><td class="r">96.540,00</td><td class="r">10.290,00</td><td class="r">106.830,00</td><td colspan="2"></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="alt"><span>sayfa 1 / 1 · 50 satır</span><span class="sayfa"><span>‹</span><span class="on">1</span><span>›</span></span>
+    <span style="margin-left:auto">Çift tık kartı sekmede açar · Enter seçiliyi açar</span></div>
+</div>
+
+<script>
+  const SATIR = [
+    ['b-tas','08.11.2026','—','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','KDV İstisna','İlaç / Tıbbi Cihaz','Taslak','1.800,00','0,00','1.800,00','Açık','Sistem Yöneticisi',true],
+    ['b-bek','07.11.2026','GEN2026000000409','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Hazır','19.800,00','2.380,00','22.180,00','Açık','Sistem Yöneticisi',false],
+    ['b-bek','04.11.2026','GEN2026000000406','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Hazır','9.420,00','942,00','10.362,00','Açık','Ayşe K.',false],
+    ['b-tas','28.10.2026','—','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Tevkifatlı','Ticari','Taslak','12.000,00','2.400,00','14.400,00','Açık','Mehmet T.',false],
+    ['b-bek','21.10.2026','GEN2026000000388','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Hazır','31.500,00','3.150,00','34.650,00','Kısmen','Sistem Yöneticisi',false],
+    ['b-gec','14.10.2026','GEN2026000000371','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Red','18.020,00','1.418,00','19.438,00','Açık · vadesi geçti','Ayşe K.',false],
+    ['b-bek','10.10.2026','GEN2026000000365','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Hazır','4.000,00','0,00','4.000,00','Açık','Mehmet T.',false],
+  ];
+  const BOS = [
+    ['b-tas','08.11.2026','—','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','KDV İstisna','İlaç / Tıbbi Cihaz','Taslak','1.800,00','0,00','1.800,00','Açık','Sistem Yöneticisi',true],
+    ['b-ok','08.11.2026','GEN2026000000412','BİMED TEKNOLOJİ SAĞLIK A.Ş.','Satış','Temel','Kabul','22.180,00','2.218,00','24.398,00','Kapandı','Sistem Yöneticisi',false],
+    ['b-bek','07.11.2026','GEN2026000000409','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Hazır','19.800,00','2.380,00','22.180,00','Açık','Sistem Yöneticisi',false],
+    ['b-ok','06.11.2026','GEN2026000000408','ÖZEL ANKARA HASTANESİ','Satış','Kamu','Kabul','135.090,00','13.510,00','148.600,00','Açık','Sistem Yöneticisi',false],
+    ['b-ipt','05.11.2026','GEN2026000000407','MEDİKAL DÜNYA LTD.','Satış','Temel','İptal','3.250,00','325,00','3.575,00','—','Ayşe K.',false],
+    ['b-ok','03.11.2026','GEN2026000000404','PERAKENDE MÜŞTERİ','Satış','e-Arşiv','e-Arşiv','581,82','58,18','640,00','Kapandı','Ayşe K.',false],
+    ['b-gec','14.10.2026','GEN2026000000371','ALOEPLANT SAĞLIK HİZ. LTD. ŞTİ.','Satış','Temel','Red','18.020,00','1.418,00','19.438,00','Açık · vadesi geçti','Ayşe K.',false],
+    ['b-ok','09.10.2026','GEN2026000000360','KARDELEN ECZANESİ','Satış','Temel','Kabul','7.400,00','740,00','8.140,00','Kapandı','Mehmet T.',false],
+  ];
+  function ciz(d){const tb=document.getElementById('tb');tb.innerHTML='';d.forEach(r=>{const tr=document.createElement('tr');tr.className=r[0]+(r[12]?' sec':'');
+    tr.innerHTML=`<td class="c">☐</td><td>${r[1]}</td><td><b>${r[2]}</b></td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td class="r">${r[7]}</td><td class="r">${r[8]}</td><td class="r"><b>${r[9]}</b></td><td>${r[10]}</td><td>${r[11]}</td>`;tb.appendChild(tr)})}
+  function gorunum(g){
+    document.querySelectorAll('.secici span').forEach(s=>s.classList.toggle('on',s.dataset.g===g));
+    const acik=g==='acik', bos=g==='bos';
+    document.getElementById('fpanel').classList.toggle('acik',acik);
+    document.getElementById('fdugme').classList.toggle('acik',acik);
+    document.getElementById('fok').textContent=acik?'▴':'▾';
+    document.getElementById('fsay').style.display=bos?'none':'';
+    document.getElementById('cipler').style.display=bos?'none':'';
+    ciz(bos?BOS:SATIR);
+    document.querySelector('tfoot td').textContent=bos?'TOPLAM (61 belge · sayfa 1)':'TOPLAM (7 belge)';
+  }
+  document.querySelectorAll('.secici span').forEach(s=>s.onclick=()=>gorunum(s.dataset.g));
+  document.getElementById('fdugme').onclick=()=>gorunum(document.getElementById('fpanel').classList.contains('acik')?'kapali':'acik');
+  gorunum('kapali');
+</script>
+</body>
+</html>

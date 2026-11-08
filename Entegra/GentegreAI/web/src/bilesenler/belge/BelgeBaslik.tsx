@@ -59,8 +59,34 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     kapanmaAlani, bagliSiparisAlani, odemeGenel = 0, odemeTahsil = 0, satirSayisiBaslik = 0, iade, setIade, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
     eBelgeYok, teklif, provizyonVar, faturaTipi, setFaturaTipi, senaryo, setSenaryo,
-    numaraElle,
+    numaraElle, istisnaKodu = 0, setIstisnaKodu,
   } = p;
+
+  /**
+   * İSTİSNA NEDENİ BAŞLIKTA, VADE'NİN SAĞINDA (kullanıcı 08.11.2026: "bu combo istisna olduğunda görünecek"):
+   * satış faturasında tipi KDV İstisna (24) iken GİB istisna kodu combosu (3xx). Değer belge_efatura.istisna_kodu -
+   * kart kayıttan sonra yazar (useBelgeKaydetme); boşsa Kaydet listeden sorar (İhraç Kayıtlı / %0 KDV'li kalem
+   * durumlarında da sorar - combo yalnız istisna tipinde).
+   */
+  const istisnaGoster = faturaMi && !alisMi && !!setIstisnaKodu && faturaTipi === 24;
+  const [istisnaKodlari, setIstisnaKodlari] = useState<{ istisna: { deger: number; ad: string }[]; ihracKayitli: { deger: number; ad: string }[] } | null>(null);
+  useEffect(() => {
+    if (!istisnaGoster || istisnaKodlari) return;
+    let iptal = false;
+    void api.efaturaKodlari().then(k => { if (!iptal) setIstisnaKodlari({ istisna: k.istisna, ihracKayitli: k.ihracKayitli }) }, () => undefined);
+    return () => { iptal = true };
+  }, [istisnaGoster, istisnaKodlari]);
+  const istisnaListesi = (faturaTipi === 9 ? istisnaKodlari?.ihracKayitli : istisnaKodlari?.istisna) ?? [];
+  const istisnaHucresi = (
+    <label className="alan">
+      <span className="etiket">{c('İstisna Nedeni')}</span>
+      <select value={istisnaKodu || ''} disabled={kilitli} onChange={e => setIstisnaKodu?.(Number(e.target.value) || 0)}>
+        <option value="">{c('Seçin…')}</option>
+        {istisnaKodu > 0 && !istisnaListesi.some(k => k.deger === istisnaKodu) && <option value={istisnaKodu}>{istisnaKodu}</option>}
+        {istisnaListesi.map(k => <option key={k.deger} value={k.deger}>{k.ad}</option>)}
+      </select>
+    </label>
+  );
 
   /**
    * CARİ BİLGİ BANDI (kullanıcı 26.10.2026: "satış/alış belgelere de firma bilgi bandı uygula... cari ad editi
@@ -91,6 +117,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   /** Kart YENİ açıldı (sabit): yeni belgenin düzenleme kipi "yazıyorsun" çizgisi almaz - ilk kayıttan sonra da (inceleme). */
   const [yeniAcildi] = useState(!!p.yeniMi);
   const kipli = carili && !basvuruMu;
+  // KALEM EKLEME başlığı kapatır (kullanıcı): "+" ile kalem penceresi açılınca düzenleme biter, bilgi okunur kalır.
+  useEffect(() => { if (p.baslikKapatAnahtari) setBaslikDuzenle(false) }, [p.baslikKapatAnahtari]);
   const gosterKipi = kipli && (kilitli || !baslikDuzenle);
   /** ✎ - tek düğme, iki yuva (cari bandının sonu / bantsızken ızgaranın sağ üstü). */
   const kalemDugmesi = (ek = '') => (
@@ -535,7 +563,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         (kullanici: "basvuruda vade yerine Ödeyen Kurum olsun ve taraf_kurum
         listelensin"). Bos birakilirsa hasta kendi oder. */}
     {!tahakkukMu && !satisSiparis && vadeHucresi}
-    {faturaMi && !eBelgeYok && (bantli ? bosHucre : eBelgeHucresi)}
+    {/* Bantlı faturada Vade'nin sağı boştu: istisna gerekiyorsa İstisna Nedeni oraya (08.11.2026). */}
+    {faturaMi && !eBelgeYok && (bantli ? (istisnaGoster ? istisnaHucresi : bosHucre) : eBelgeHucresi)}
 
     {/* Fiyat Listesi combosu ASAGIDA, Rapor Dovizi cercevesinin saginda
         (kullanici, 218) - KalemSekmesi cizer. */}
@@ -583,7 +612,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     .map(x => (
     <div key={x.anahtar}
          className={`kat${x.anahtar === aktifSekme ? ' on' : ''}`}
-         onClick={() => setAktifSekme(x.anahtar)}>
+         // SEKME SEÇİMİ başlığı görüntüleme kipine alır (kullanıcı 08.11.2026) - alt bölüme geçince başlık okunur.
+         onClick={() => { setBaslikDuzenle(false); setAktifSekme(x.anahtar) }}>
       {/* BASVURUDA kalem sekmesi "Ücretlendirme" (kullanici): hastaya yazilan
           islem/tetkik ucretleri - "kalem" ERP sozu, kayit kabulde karsiligi yok. */}
       {x.anahtar === 'tahsilat' && alisMi ? 'Ödeme'
@@ -611,6 +641,12 @@ export interface BelgeBaslikProps {
   baslikKilitli: boolean;
   /** Kart YENİ belge olarak açıldı (kayıtlı belge yok): fatura başlığı düzenleme kipinde başlar (bkz. baslikDuzenle). */
   yeniMi?: boolean;
+  /**
+   * Her artışta başlık GÖRÜNTÜLEME kipine döner (kullanıcı 08.11.2026: "başlık edit moddaysa ve +ekleme butona
+   * basılırsa view moda geçmeli"): BelgeKarti kalem ekleme penceresi açılınca artırır. Sekme tıklaması başlığın
+   * kendi içinde (katab).
+   */
+  baslikKapatAnahtari?: number;
   belgeAdi: string;
   belgeNo: string;
   setBelgeNo(v: string): void;
@@ -657,6 +693,9 @@ export interface BelgeBaslikProps {
   setFaturaTipi(v: number): void;
   senaryo: number;
   setSenaryo(v: number): void;
+  /** KDV istisna nedeni (belge_efatura.istisna_kodu) - başlıkta Vade'nin sağında, yalnız gerektiğinde (08.11.2026). */
+  istisnaKodu?: number;
+  setIstisnaKodu?(v: number): void;
   satirlar: SatirDurumu[];
   donusumler: Record<string, unknown>[];
   /** Secim modallarini acan tetikleyiciler (kartta yasiyor). */

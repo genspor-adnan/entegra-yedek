@@ -235,6 +235,8 @@ public sealed partial class BelgeDeposu
                    s.birim_fiyat as "birimFiyat",
                    s.birim_fiyat_kdvli as "birimFiyatKdvli",
                    s.iskonto, s.iskonto2, s.kdv,
+                   -- Satır tevkifatı (08.11.2026): kalem penceresi kodu gösterir, Tevkifat Oranı kutusu.
+                   coalesce(s.tevkifat_kodu, '') as "tevkifatKodu", coalesce(s.tevkifat_orani, 0) as "tevkifatOrani",
                    -- ONAYLI ISKONTO KILIDI (662): satirda kilit ikonu cizilsin
                    --   ve duzenleme once burada engellensin - tetige kadar
                    --   gitmek kullaniciya hatayi kaydetme aninda gosterirdi.
@@ -248,6 +250,11 @@ public sealed partial class BelgeDeposu
                    --   kayitli satirda gelmiyordu; kalem penceresi satiri lotsuz saniyor, Lot / Seri kutusu
                    --   da lot ekrani da acilmiyordu. Yeni kalemde arama satirindan geliyor - ayni kaynak.
                    coalesce(st.izleme, 0) as "izleme",
+                   -- TIBBİ ÜRÜN (08.11.2026): ÜTS bildirimli (stok.bildirim = 2, Delphi UFaturaWizard kuralı) ya da
+                   --   ilaç kartına bağlı stok - belge kartı senaryoyu İlaç / Tıbbi Cihaz'a (8) çekmek için okur.
+                   --   Arama satırındaki `tibbi` ile aynı kural (KaynakKatalogu.Stok).
+                   (coalesce(st.bildirim, 0) = 2
+                    or exists (select 1 from public.ilac i where i.stok_id = st.id)) as "tibbi",
                    -- Kart satiri KOD ve AD gosterir; id'yi ekranda kimse okuyamaz.
                    --   Satir hizmet ya da masraf olabilir: kod/ad hangisi doluysa
                    --   ondan gelir (hizmet satirinda stok bos, kart bos gorunuyordu).

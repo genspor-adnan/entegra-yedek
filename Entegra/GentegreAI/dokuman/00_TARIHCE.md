@@ -80,9 +80,63 @@ Görüntülemede iki satır yanaşık (row-gap 0, kutu 18px; kullanıcı "alt sa
 8. ✎ tek `kalemDugmesi` (iki yuva) + tek `.kalem-dugme` CSS (kişi bandı dahil).
 9. `kartKaydedildi` işaretlemeyi beklemez; liste yalnız pencere hâlâ açıksa (`acikRef`) tazelenir.
 10. `bb-duzenle` çizgisi sabit `yeniAcildi`den: yeni belge ilk kayıttan sonra da çizgi almaz.
+
+Sonra (kullanıcı: "başlık edit moddaysa ve alt sekmelerden biri seçilirse veya +ekleme butona basılırsa view moda
+geçmeli"): sekme tıklaması (`katab`) `setBaslikDuzenle(false)`; "+" kalem ekleme BelgeKarti'de `baslikKapat` sayacını
+artırır → `BelgeBaslik.baslikKapatAnahtari` etkisi görüntüleme kipine alır. Doğrulama: yeni faturada Tahsilat sekmesi →
+görüntüleme; ✎ → düzenleme; "+" → görüntüleme + stok arama açık.
 `CariBilgiBandi` alt satırı etiketsiz (kullanıcı: "kod vkn il gibi labelleri kaldır, aktif ve e-faturayı rozet yap"):
 yalnız değerler · ile, "Temsilci" öneki kalır; Durum (Aktif yeşil / Pasif gri) ve e-Fatura / e-Arşiv `.rozet` - tüm cari
 bantlarında (müşteri/tedarikçi kartı, belge kartları).
+
+### Aynı gün — Satış faturasında kalemden türeyen tip / senaryo, satır tevkifatı (1278)
+
+Kullanıcı: "satış faturasında 0 KDV'li satır varsa uyarı verip fatura tipini KDV İstisna'ya çevir; satırlarda tıbbi ürün
+varsa senaryoyu İlaç / Tıbbi Cihaz yapıyoruz" (tıbbi ürün tespiti Delphi `UFaturaWizard` kuralı: `STOKLAR.BILDIRIM = 2`
+ÜTS bildirimli; cari kartında senaryo seçiliyse dokunulmaz).
+
+- **Satır `tibbi` bayrağı**: stok arama kaynağı (`KaynakKatalogu.Stok`, gizli kolon) ve kayıtlı satır okuma
+  (`BelgeDeposu.Deger`) aynı kuralı taşır: `stok.bildirim = 2` ya da ilaç kartına bağlı (`ilac.stok_id`).
+  `SatirDurumu.tibbi` (kaydedilmez).
+- **BelgeKarti etkisi** (yalnız satış faturası, kalem değişince, kilitsiz): %0 KDV'li satır + tipi Satış (1) → tipi 24
+  (KDV İstisna); `tibbi` satır + senaryo ≠ 8 + carinin kendi senaryosu yok (`cariSenaryoRef`) → senaryo 8. Tek `mesaj`
+  (ikisi birden olabilir). Kullanıcı combodan geri alırsa bir sonraki kalem değişikliğine kadar zorlanmaz.
+- **Satır tevkifatı** (kullanıcı: "fatura tipi tevkifatlı ise fiyat sorma ekranına o kalem için Tevkifat Oranı ekle..
+  hazırla veya kaydet dediğimde bu kontroller yapılmalı"): kalem penceresinde tipi 22 iken KDV'nin altında
+  **Tevkifat Oranı** kutusu - liste GİB tevkifat kodları (`belge.tevkifat`, "601 - Yapım İşleri (4/10)"); ayrı serbest
+  oran YOK, oran kodun içinde (kod/oran uyumsuzluğunu GİB reddeder). Seçim `belge_satir.tevkifat_kodu`'na yazılır,
+  oranı sunucu koddan doldurur (`fn_tevkifat_orani`, `BelgeDeposu.Yazma`). Kontroller:
+  - **Kaydet** (`belgeDogrula`): tevkifatlı satış faturasında KDV'li ve kodsuz kalem varsa kalem adlarıyla durdurur.
+  - **e-Fatura hazırla** (`EFaturaVerisi.Eksikler`): `TevkifatGirildi` (satırın kendi kodu/oranı ya da Delphi
+    aktarımındaki `kdv_muafiyeti` 20..100 oranı) yoksa durdurur; başlık kodundan düşen oran sayılmaz. Başlık kodu
+    (e-Fatura Bilgileri › Tevkifat Kodu = tevkifat nedeni) zorunluluğu eskisi gibi sürer.
+  - **1278** `fn_belge_diptoplam` Tevkifat (tur 7) satırı artık `coalesce(tevkifat_orani, kdv_muafiyeti ∈ {20..100})`
+    okur (eskiden yalnız Delphi mirası `kdv_muafiyeti`); 4/10 etiketi eklendi. Yerel 4 DB'ye uygulandı; sunucu yayınla
+    gider.
+
+- **KDV istisna nedeni** (kullanıcı: "tipi KDV istisna yaptı ama istisna nedeni sormadı.. kaydet dediğimde onu da
+  sormalı" · "istisna nedeni başlıkta vade sağında görünsün"): başlıkta Vade'nin sağındaki boş hücreye **İstisna
+  Nedeni** combosu (GİB 3xx) - yalnız satış faturasında tipi KDV İstisna (24) iken (kullanıcı: "combo istisna olduğunda
+  görünecek"). Değer `belge_efatura.istisna_kodu`: kayıtlı belgede e-Fatura Bilgileri'nden yüklenir, Kaydet
+  belgeyi yazdıktan sonra başlığı (öbür alanlar korunarak) PUT eder. Combo boşsa Kaydet `listeSor` ile sorar (tipi 24 / İhraç Kayıtlı 701-704 /
+  %0 KDV'li kalem; Delphi `TamIskontoNedeniSor`); vazgeçilirse kayıt yapılmaz.
+- **Dip toplam** (kullanıcı): etiketler "KDV%10" / "KDV Toplam" (1278 içinde, yayınlanmamıştı); sağdaki tutarlar kalın
+  13px (`.dip-tablo td.hiza-sag:not(.sonuk)`), kutu 400 → 340px.
+- Yerel ZONE / UNIVERSE API'leri yeniden yayınlandı (satır `tibbi`, tevkifat yazımı, hazırla kuralı oradaydı eksik).
+- Fatura / irsaliye kartı araç çubuğundaki ikinci "Fatura İşlem ▾" / "İrsaliye İşlem ▾" kaldırıldı (kullanıcı); tek
+  menü e-Belge sekmesinde.
+- Satış Faturası Listesi (kullanıcı): ERP tanımında `hastaAdi` gizli (arama ipucu "Ara: …"dan "Hasta" düştü); her iki
+  tanımda `tarafUnvan` başlığı "Alıcı Adı"; "Tüm Tarihler" combosu kalktı, yerine yalnız başlama - bitiş tarih kutuları (`tarihAlani`, açılışta boş) - aynı desen
+  Ticari tanımlardaki 14 belge listesine (alış/satış fatura, irsaliye, sipariş, fiş, konsinye, teklif, talep, tahakkuk…).
+- Mockuplar (uygulama bekliyor): `Ekranlar/fatura_listesi_filtre_paneli.html` - mevcut listeye "🔎 Detaylı Ara ▾" açılır
+  paneli (varsayılan kapalı; belge no · tarih aralığı · müşteri · tutar aralığı · tip · e-Belge · kapanma · depo · kaydeden;
+  etkin süzgeç çipleri). `Ekranlar/belge_ac_penceresi.html` ilk taslak (ayrı sekme) - kullanıcı tek liste istedi, geçersiz.
+
+Doğrulama (5173, Playwright): 0 KDV + ÜTS bildirimli test stoku eklenince tip 24 / senaryo 8 + tek mesaj; tevkifatlı
+faturada Tevkifat Oranı kutusu GİB listesiyle geldi, kodsuz Kaydet durdu, kod seçilince kaydedildi (satır 601 / 40,00),
+dip toplamda "KDV%10 Tevkifat(4/10)"; başlık kodlu ama satırı oransız belgede hazırla "tevkifat oranı girilmemiş kalem
+var" ile durdu. Test belgesi ve stoku silindi. İstisna: %0 KDV'li kalemle tip 24 oldu, başlık combosundan 301 seçilince liste sorulmadı
+(DB 301); combo boş bırakılınca Kaydet listeden sordu (302).
 
 ### Aynı gün — Kişi listesi sütunları
 
