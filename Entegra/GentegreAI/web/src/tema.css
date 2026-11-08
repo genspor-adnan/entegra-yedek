@@ -1424,11 +1424,15 @@ input.skt-gecmis {
 
 .tam-ekran-bilgi { display: grid; place-items: center; min-height: 100vh; color: var(--soluk) }
 .yukleniyor-satir { padding: 24px; text-align: center; color: var(--soluk) }
-.dip-toplam { max-width: 340px; margin-left: auto }   /* 400 → 340 (kullanıcı 08.11.2026: "toplam gridi genişliği biraz azalsın") */
+.dip-toplam { max-width: 340px; margin-left: auto }
+/* Dip toplam kutusu 400 -> 340 px (kullanıcı, "toplam gridi genişliği biraz azalsın"). Yorum bu kuralın ALTINDA ve
+   tarihsiz: temaSinifCakismasi testi yorumları seçiciye katıyor - üstteki yorum `.dip-toplam`ı global saymaz, satır
+   sonundaki tarih noktaları da bir sonraki kuralı "kap içinde" sayar. */
 /* Kalem gridinin ALTI: doviz kutusu solda, dip toplam sagda - ayni hizada. */
 .grid-alt-serit { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between }
 .grid-alt-serit > .kagrup { margin: 0 }
-.grid-alt-serit > .dip-toplam { flex: 0 0 340px; margin-left: auto }   /* sol kutu yoksa da SAĞA yanaşık (kullanıcı 08.11.2026) */
+/* Sol kutu yoksa da dip toplam SAĞA yanaşık (kullanıcı 08.11.2026). */
+.grid-alt-serit > .dip-toplam { flex: 0 0 340px; margin-left: auto }
 .dip-tablo thead th { padding: 4px 10px; font-size: 11px; color: var(--soluk); font-weight: 600 }
 .dip-tablo { width: 100%; border-collapse: collapse; font-size: 12px }
 .dip-tablo td { padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
