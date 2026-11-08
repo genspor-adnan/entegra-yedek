@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fatura Kartı — Başlık: Görüntüleme / Düzenleme kipi (mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .win{max-width:1240px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .toolbar .tur{font-weight:bold;color:var(--navy);letter-spacing:.6px;margin-left:8px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center;cursor:pointer;user-select:none;white-space:nowrap}
+  .btn.ok{background:linear-gradient(#3f9a5c,#2e7d46);color:#fff;border-color:#276b3b}
+  .btn.teh{background:linear-gradient(#e36a6a,#cf4f4f);color:#fff;border-color:#b84343}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .right{margin-left:auto}
+
+  /* ---------- CARİ BANDI (bugünkü) ---------- */
+  .bant{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px 8px;
+        background:linear-gradient(#ffffff,#f6f9fc)}
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:bold;color:#fff;
+          background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15)}
+  .kim{min-width:0}
+  .ad{font-size:15px;color:var(--navy);font-weight:bold;line-height:1.15;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .ad .kod{font-size:11px;color:var(--muted);font-weight:normal}
+  .alt{margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11.5px}
+  .alt > * + *::before{content:"·";color:#b7c2cd;margin-right:6px}
+  .ef{border-radius:3px;padding:0 6px;font-size:10.5px;font-weight:bold;background:#e3edf8;color:#2a5f9c;border:1px solid #c2d6ec}
+  .ef::before{content:none !important}
+  .sag{display:flex;gap:8px;align-items:center}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 10px;min-width:118px}
+  .kutu small{display:block;font-size:9.5px;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+  .kutu b{display:block;font-size:13px;color:var(--navy);margin-top:2px}
+  .kutu i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px}
+  .ik{width:30px;height:30px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(var(--btnfrom),var(--btnto));display:grid;place-items:center;font-size:14px;cursor:pointer}
+  .ik.kalem{border-color:#98c2ee;background:linear-gradient(#f3f8ff,#dfeafa);color:var(--accent)}
+  .ik.kalem.acik{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .ik.kalem.kilit{opacity:.45;pointer-events:none}
+
+  /* ---------- BAŞLIK ALANLARI: aynı 4 sütunlu ızgara, iki kip ---------- */
+  .alanlar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 18px;padding:6px 14px 10px;border-bottom:1px solid var(--line2)}
+  .alanlar.gizli{display:none}
+  .fld{display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;min-width:0}
+  .fld label{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+  .fld label.req::after{content:" *";color:var(--req)}
+  /* görüntüleme hücresi: kutusuz, değer koyu; düzenleme kutusuyla aynı yükseklik ve hiza -> kip değişince hiçbir şey kaymaz */
+  .goster .deg{height:24px;display:flex;align-items:center;padding:0 6px;font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border-radius:3px}
+  .goster .deg:hover{background:#f3f8ff}
+  .goster .deg.bos{color:#aab4bf;font-weight:normal}
+  .goster .deg.sag{justify-content:flex-end}
+  .goster .deg.gec{color:#b23b3b}
+  .goster .deg.iade{color:#b23b3b}
+  .goster .deg small{color:var(--muted);font-weight:normal;margin-left:6px}
+  .goster .deg.no{font-family:Consolas,monospace;color:var(--navy);letter-spacing:.3px}
+  .duzenle{background:linear-gradient(#fbfcfe,#eef4fa);border-left:3px solid var(--accent)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 6px;font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+  .inp.ro{background:#f4f6f9;color:#55657a}
+  .inp.sag{justify-content:flex-end}
+  .inp .ph{color:#aab4bf}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .grup{display:flex;gap:4px;min-width:0}
+  .grup .inp{flex:1}
+  .grup .ik{height:24px;width:24px;font-size:11px}
+
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{background:var(--line);border-radius:8px;padding:0 6px;font-size:10px;margin-left:4px}
+  .govde{padding:10px 12px;color:var(--muted);font-size:11.5px;min-height:40px}
+  .aciklama{max-width:1240px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<h2><b>1</b> — Kayıtlı fatura: GÖRÜNTÜLEME kipi — alanlar düzenleme ızgarasıyla aynı yerde, kutusuz <span class="ipucu">✎ ya da bir değere tıkla → düzenleme</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div><div class="btn teh">🗑 Sil</div><span class="tur">SATIŞ FATURASI</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+
+  <div class="bant">
+    <div class="avatar">GU</div>
+    <div class="kim">
+      <div class="ad">Gülcan Ulu <span class="kod">120.01.073</span></div>
+      <div class="alt"><span>VKN 241******24</span><span>İL İZMİR</span><span>Temsilci Sistem Yöneticisi</span><span>Durum Aktif</span><span class="ef">e-Fatura</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu"><small>Faturalama</small><b>Doğrudan</b><i>sipariş / irsaliye bağı yok</i></div>
+      <div class="kutu"><small>Tahsilat</small><b>Açık</b><i>kalan 12.450,00</i></div>
+      <div class="kutu"><small>Bakiye</small><b>38.900,00</b><i>cari bakiye</i></div>
+      <div class="ik kalem" id="k1" title="Başlık alanlarını düzenle" onclick="kip(1)">✎</div>
+    </div>
+  </div>
+
+  <!-- GÖRÜNTÜLEME -->
+  <div class="alanlar goster" id="g1" onclick="kip(1)">
+    <div class="fld"><label>Fatura Tipi</label><div class="deg">Satış</div></div>
+    <div class="fld"><label>Fatura No</label><div class="deg no">SF-2026-000184</div></div>
+    <div class="fld"><label>Fatura Tarihi</label><div class="deg">08.11.2026 17:46</div></div>
+    <div class="fld"><label>Sipariş No</label><div class="deg bos">—</div></div>
+    <div class="fld"><label>Satış Temsilcisi</label><div class="deg">Sistem Yöneticisi</div></div>
+    <div class="fld"><label>Çıkış Deposu</label><div class="deg">Anadepo</div></div>
+    <div class="fld"><label>Vade (gün)</label><div class="deg sag">30 <small>08.12.2026</small></div></div>
+    <div class="fld"><label>Fiyat Listesi</label><div class="deg">Standart</div></div>
+  </div>
+  <!-- DÜZENLEME -->
+  <div class="alanlar duzenle gizli" id="e1">
+    <div class="fld"><label>Fatura Tipi</label><div class="inp combo">Satış</div></div>
+    <div class="fld"><label>Fatura No</label><div class="inp ro">SF-2026-000184</div></div>
+    <div class="fld"><label class="req">Fatura Tarihi</label><div class="inp">08.11.2026 17:46 &nbsp;📅</div></div>
+    <div class="fld"><label>Sipariş No</label><div class="inp ro">—</div></div>
+    <div class="fld"><label>Satış Temsilcisi</label><div class="grup"><div class="inp">Sistem Yöneticisi</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Çıkış Deposu</label><div class="grup"><div class="inp">Anadepo</div><div class="ik">×</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Vade (gün)</label><div class="inp sag">30</div></div>
+    <div class="fld"><label>Fiyat Listesi</label><div class="inp combo">Standart</div></div>
+  </div>
+
+  <div class="tabs"><div class="tab active">Kalemler <span class="b">3</span></div><div class="tab">Tahsilat</div><div class="tab">e-Belge</div><div class="tab">Belgeye Dönüşüm</div><div class="tab">Resim / Doküman</div></div>
+  <div class="govde">Kalemler gridi (değişmez)</div>
+</div>
+<p class="aciklama">
+  <b>Görüntüleme kipi</b> düzenleme ızgarasının birebir kopyası: aynı 4 sütun, aynı etiket sırası ve genişliği, aynı satır yüksekliği - yalnız kutu
+  yerine düz koyu değer (çizgi yok; üzerine gelince hafif mavi zemin). ✎ ya da herhangi bir değere tıklayınca kutular gelir, <u>hiçbir şey yer değiştirmez</u>. Boş değer soluk "—";
+  Vade yanında hesaplanan tarih küçük; Fatura No mono. Düzenlemede sol mavi çizgi "yazıyorsun" der.
+</p>
+
+<h2><b>2</b> — Yeni fatura: düzenleme kipi AÇIK gelir</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div><div class="btn teh pas">🗑 Sil</div><span class="tur">SATIŞ FATURASI</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant">
+    <div class="avatar">GU</div>
+    <div class="kim">
+      <div class="ad">Gülcan Ulu <span class="kod">120.01.073</span></div>
+      <div class="alt"><span>VKN 241******24</span><span>İL İZMİR</span><span>Temsilci —</span><span>Durum Aktif</span><span class="ef">e-Fatura</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu"><small>Faturalama</small><b>Doğrudan</b><i>sipariş / irsaliye bağı yok</i></div>
+      <div class="kutu"><small>Tahsilat</small><b>—</b><i>kalem girilince</i></div>
+      <div class="kutu"><small>Bakiye</small><b>38.900,00</b><i>cari bakiye</i></div>
+      <div class="ik kalem acik" id="k2" onclick="kip(2)">✎</div>
+    </div>
+  </div>
+  <div class="alanlar goster gizli" id="g2" onclick="kip(2)">
+    <div class="fld"><label>Fatura Tipi</label><div class="deg">Satış</div></div>
+    <div class="fld"><label>Fatura No</label><div class="deg bos">kaydedince verilir</div></div>
+    <div class="fld"><label>Fatura Tarihi</label><div class="deg">08.11.2026 17:46</div></div>
+    <div class="fld"><label>Sipariş No</label><div class="deg bos">—</div></div>
+    <div class="fld"><label>Satış Temsilcisi</label><div class="deg">Sistem Yöneticisi</div></div>
+    <div class="fld"><label>Çıkış Deposu</label><div class="deg">Anadepo</div></div>
+    <div class="fld"><label>Vade (gün)</label><div class="deg sag">30 <small>08.12.2026</small></div></div>
+    <div class="fld"><label>Fiyat Listesi</label><div class="deg bos">—</div></div>
+  </div>
+  <div class="alanlar duzenle" id="e2">
+    <div class="fld"><label>Fatura Tipi</label><div class="inp combo">Satış</div></div>
+    <div class="fld"><label>Fatura No</label><div class="inp ro"><span class="ph">(kaydedince verilir)</span></div></div>
+    <div class="fld"><label class="req">Fatura Tarihi</label><div class="inp">08.11.2026 17:46 &nbsp;📅</div></div>
+    <div class="fld"><label>Sipariş No</label><div class="inp ro">—</div></div>
+    <div class="fld"><label>Satış Temsilcisi</label><div class="grup"><div class="inp">Sistem Yöneticisi</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Çıkış Deposu</label><div class="grup"><div class="inp">Anadepo</div><div class="ik">×</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Vade (gün)</label><div class="inp sag">30</div></div>
+    <div class="fld"><label>Fiyat Listesi</label><div class="inp combo"><span class="ph">Seçiniz…</span></div></div>
+  </div>
+  <div class="tabs"><div class="tab active">Kalemler <span class="b">0</span></div><div class="tab">Tahsilat</div><div class="tab">Resim / Doküman</div></div>
+  <div class="govde">Kalem yok — “ + ” ile ekleyin.</div>
+</div>
+<p class="aciklama">
+  <b>Yeni belgede</b> düzenleme kipi açık; Kaydet kipi KAPATMAZ (seri giriş), kart yeniden açılınca görüntüleme kipi gelir. ✎ ile istenirse hemen
+  görüntülemeye geçilip aynı hizada değerler okunur.
+</p>
+
+<h2><b>3</b> — Kilitli fatura (e-Fatura gönderildi): yalnız görüntüleme, ✎ pasif</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok pas">💾 Kaydet</div><div class="btn teh pas">🗑 Sil</div><span class="tur">SATIŞ FATURASI</span>
+    <span class="ef" style="margin-left:8px;padding:3px 8px">🔒 e-Fatura gönderildi · 07.11.2026 14:20</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant">
+    <div class="avatar" style="background:linear-gradient(135deg,#6b7a8b,#3d4b5a)">AM</div>
+    <div class="kim">
+      <div class="ad">Akana Mühendislik Ltd. Şti. <span class="kod">120.01.012</span></div>
+      <div class="alt"><span>VKN 0310******1</span><span>İL ANKARA</span><span>Temsilci Ayşe Kaya</span><span>Durum Aktif</span><span class="ef">e-Fatura</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu"><small>Faturalama</small><b>Siparişten</b><i>SS-2026-000090</i></div>
+      <div class="kutu"><small>Tahsilat</small><b>Kapandı</b><i>0,00 kalan</i></div>
+      <div class="kutu"><small>Bakiye</small><b>-1.250,00</b><i>cari bakiye</i></div>
+      <div class="ik kalem kilit" title="e-Belge gönderilmiş fatura düzenlenemez">✎</div>
+    </div>
+  </div>
+  <div class="alanlar goster" style="cursor:default">
+    <div class="fld"><label>Fatura Tipi</label><div class="deg iade" style="cursor:default">İade</div></div>
+    <div class="fld"><label>Fatura No</label><div class="deg no" style="cursor:default">SF-2026-000171</div></div>
+    <div class="fld"><label>Fatura Tarihi</label><div class="deg" style="cursor:default">07.11.2026 13:05</div></div>
+    <div class="fld"><label>Sipariş No</label><div class="deg no" style="cursor:default">SS-2026-000090</div></div>
+    <div class="fld"><label>Satış Temsilcisi</label><div class="deg" style="cursor:default">Ayşe Kaya</div></div>
+    <div class="fld"><label>Çıkış Deposu</label><div class="deg" style="cursor:default">Anadepo</div></div>
+    <div class="fld"><label>Vade (gün)</label><div class="deg sag gec" style="cursor:default">0 <small style="color:#b23b3b">07.11.2026 · 1 gün geçti</small></div></div>
+    <div class="fld"><label>Fiyat Listesi</label><div class="deg" style="cursor:default">Bayi</div></div>
+  </div>
+  <div class="tabs"><div class="tab active">Kalemler <span class="b">5</span></div><div class="tab">Tahsilat</div><div class="tab">e-Belge</div><div class="tab">Belgeye Dönüşüm</div></div>
+  <div class="govde">…</div>
+</div>
+<p class="aciklama">
+  <b>Kilitli belge</b> (e-Belge gönderildi / dönem kapalı / yetki yok): değerler aynı ızgarada okunur, tıklanınca açılmaz, ✎ soluk. Aynı desen alış
+  faturası, fiş ve irsaliyede; alan listesi belge türünün bugünkü başlık alanları.
+</p>
+
+<script>
+  function kip(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n), k = document.getElementById('k'+n);
+    var duzenle = !g.classList.contains('gizli');
+    g.classList.toggle('gizli', duzenle); e.classList.toggle('gizli', !duzenle); k.classList.toggle('acik', duzenle);
+  }
+</script>
+</body>
+</html>

@@ -80,6 +80,19 @@ public static class KisiUclari
             return Results.Ok(liste);
         });
 
+        // Kisiyi bu cariden TÜMDEN KALDIR (bag_id=null + kişi-cari geçmişi silinir; kişi kaydı kalır) -
+        //   İlgili Kişiler "Kaldır" düğmesi (08.11.2026). "Ayrıldı" = /kopar (geçmiş kalır).
+        grup.MapPost("/{kisiId:long}/kaldir", async (
+            long tarafId, long kisiId, BaglamCozucu cozucu, KisiDeposu depo,
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("cari", Islem.Degistir);
+            await EkranSatirKurali.KartAsync("cari", baglam, erisim, null, tarafId, Islem.Degistir, iptal);
+            var liste = await depo.KaldirAsync(tarafId, kisiId, baglam.Yazma, iptal);
+            return Results.Ok(liste);
+        });
+
         grup.MapDelete("/{kisiId:long}", async (
             long tarafId, long kisiId, BaglamCozucu cozucu, KisiDeposu depo,
             KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>

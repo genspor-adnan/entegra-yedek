@@ -76,6 +76,28 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
 
   /** Teklif (216): katalog adi 'Teklif' - durum combosu ve sekme adi degisir. */
   const teklifMi = belgeAdi === 'Teklif';
+  /**
+   * FATURA BAŞLIĞI GÖRÜNTÜLEME / DÜZENLEME KİPİ (mockup Ekranlar/fatura_basligi_bant.html, kullanıcı 08.11.2026:
+   * "fatura başlığını edit / display mode", "çip düzeni edit moda yakın olsun", "üstte 4 altta 4"): aynı 4 sütunlu
+   * ızgara iki kipte de durur - görüntülemede kutular kaybolur, değer düz koyu metin (CSS .bb-goster); ✎ ya da
+   * ızgaraya tıklamak düzenlemeye alır. YENİ belgede düzenleme açık başlar, Kaydet kapatmaz (seri giriş); kayıtlı
+   * belge görüntüleme kipinde açılır; KİLİTLİ belgede (e-Belge gönderildi, yetki yok) hep görüntüleme, ✎ pasif.
+   * Önce yalnız faturada, sonra TÜM ALIŞ / SATIŞ belgelerinde (kullanıcı 08.11.2026: "bu müşteri bandı ve fatura
+   * başlığı desenini tüm alış/satış belgelere uygula"): carili türler - fatura, fiş, irsaliye, sipariş, teklif, konsinye,
+   * tahakkuk. Depo belgesi / stok fişi (carisiz) ve başvuru ESKİSİ GİBİ. Cari bandı henüz yoksa (cari seçilmemiş) ✎
+   * ızgaranın sağ üstünde durur (kayıtlı belgede).
+   */
+  const [baslikDuzenle, setBaslikDuzenle] = useState(!!p.yeniMi);
+  /** Kart YENİ açıldı (sabit): yeni belgenin düzenleme kipi "yazıyorsun" çizgisi almaz - ilk kayıttan sonra da (inceleme). */
+  const [yeniAcildi] = useState(!!p.yeniMi);
+  const kipli = carili && !basvuruMu;
+  const gosterKipi = kipli && (kilitli || !baslikDuzenle);
+  /** ✎ - tek düğme, iki yuva (cari bandının sonu / bantsızken ızgaranın sağ üstü). */
+  const kalemDugmesi = (ek = '') => (
+    <button type="button" className={`d ik kalem-dugme${ek}${gosterKipi ? '' : ' acik'}`} disabled={kilitli}
+            title={kilitli ? c('Kilitli belge - başlık düzenlenemez') : gosterKipi ? c('Başlık alanlarını düzenle') : c('Düzenlemeyi kapat')}
+            onClick={() => setBaslikDuzenle(v => !v)}>✎</button>
+  );
   const efDurum = Number(sonuc?.belge.efaturaDurum ?? 0);
   const efSonuc = Number(sonuc?.belge.efaturaSonuc ?? 0);
 
@@ -272,16 +294,24 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     ve hasta bandinda, tarih/bolum/hekim/odeyen kurum ise Basvuru sekmesinde.
     Basligi bosuna cizmek kart tepesinde iki kez ayni bilgiyi gosteriyordu. */}
 {!basvuruMu && (
-<div className="belge-hdr-sar">
+<div className={`belge-hdr-sar${!bantli && kipli && sonuc ? ' kalemli' : ''}`}>
+  {!bantli && kipli && sonuc && kalemDugmesi(' bb-kalem-serbest')}
   {/* CARİ BAŞLIĞI MÜŞTERİ / TEDARİKÇİ KARTIYLA AYNI (kullanıcı 02.11.2026): kimlik bandı kod · VKN · il ·
       temsilci · DURUM. Özet şeridi YOK ("alış/satış belgelerinde özet şeride gerek yok"); bakiye bu yüzden
       bandın sağında kalır. */}
   {bantli && (
-    <CariBilgiBandi id={cari!.id} tedarikci={alisMi} durumlu sagEk={bandDurumlari} bakiyeKutu
+    <CariBilgiBandi id={cari!.id} tedarikci={alisMi} durumlu bakiyeKutu sagEk={bandDurumlari}
+                    sonEk={kipli ? kalemDugmesi() : undefined}
                     onBakiye={() => git(`/ekstre?tur=cari&id=${cari!.id}`)}
                     // CARİ KARTI YENİ SEKMEDE (kullanıcı 02.11.2026): yalnız cari görme yetkisi olana.
                     onKartAc={yetki('cari', 'gor') ? () => git(alisMi ? `/tedarikci/${cari!.id}` : `/cari/${cari!.id}`) : undefined} />)}
-  <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}${darUst ? ' dar-ust' : ''}${satisSiparis ? ' tek-satir' : ''}`}>
+  {/* GÖRÜNTÜLEME KİPİNDE ızgara `inert` (fare + klavye + odak kapalı; inceleme: yalnız fare kesiliyordu, Tab ile
+      yazılabiliyordu); tıklama sarmalayıcıda yakalanır ve (kilitli değilse) düzenlemeye geçirir. */}
+  <div className={gosterKipi ? 'bb-goster-sar' : undefined}
+       onMouseDown={gosterKipi && !kilitli ? () => setBaslikDuzenle(true) : undefined}>
+  <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}${darUst ? ' dar-ust' : ''}${satisSiparis ? ' tek-satir' : ''}`
+                  + (gosterKipi ? ' bb-goster' : kipli && !yeniAcildi ? ' bb-duzenle' : '')}
+       inert={gosterKipi || undefined}>
     {/* --- 1) KIMLIK --- */}
     {/* Transferde/talepte CARI YOK: mal firmanin kendi depolari arasinda
         gezer, cari hucresinin yerini cikis deposu alir. Stok fisinde ise
@@ -518,6 +548,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {!depoBelgesi && !stokFisiMi && !teklifMi && !darUst && !(faturaMi && !eBelgeYok) && bagliSiparisAlani}
     {!eBelgeYok && kapanmaGoster && !bantli && kapanmaAlani}
   </div>
+  </div>
 </div>
 )}
 
@@ -578,6 +609,8 @@ export interface BelgeBaslikProps {
   kilitli: boolean;
   /** Kalem girildikten sonra baslikta kilitlenen alanlar (depo, tip, tarih). */
   baslikKilitli: boolean;
+  /** Kart YENİ belge olarak açıldı (kayıtlı belge yok): fatura başlığı düzenleme kipinde başlar (bkz. baslikDuzenle). */
+  yeniMi?: boolean;
   belgeAdi: string;
   belgeNo: string;
   setBelgeNo(v: string): void;

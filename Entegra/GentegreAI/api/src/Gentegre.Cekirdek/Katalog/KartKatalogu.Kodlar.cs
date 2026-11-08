@@ -76,7 +76,8 @@ public static partial class KartKatalogu
 
     // TARAF.ROL (kisi_karti.html/kisi_listesi.html "KARAR/ETKİ/MUHS/KULL/TEKN") - GENINI
     //   karsiligi yok, mockup'a ozel sabit liste (040_kisi_rol.sql).
-    private static readonly Dictionary<string, string> KisiRolKodlari =
+    /// <summary>Kişinin carideki rolü - kart combosu VE kişi listesi (KaynakKatalogu.Cari) aynı sözlüğü okur.</summary>
+    internal static readonly Dictionary<string, string> KisiRolKodlari =
         new() { ["1"] = "Karar Verici", ["2"] = "Etkileyen", ["3"] = "Kullanıcı", ["4"] = "Mali/Muhasebe", ["5"] = "Teknik" };
 
     // taraf_personel.CINSIYET - GENINI karsiligi yok, yeni tablo (046_personel_kart.sql).

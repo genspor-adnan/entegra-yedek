@@ -46,7 +46,8 @@ const adli = gruplanmis.filter(([b]) => b);
 // check'i de KALDIRILDI (kullanici) - artik ayri "Kişi Kartı" + "İlgili Kişiler"
 // akisi var, cari uzerinde dogrudan kisi bayragi degistirmek gereksiz/kafa karistirici.
 const gizli = kaynak === 'cari' ? new Set(['ad', 'soyad', 'musteri', 'tedarikci', 'kisi'])
-  : kaynak === 'kisi' ? new Set(['kisi'])
+  // kisi: "kod" salt okunur, avatarlı BANTTA gösterilir (KartKimlikSeridi) - gövdede tekrar çizilmez.
+  : kaynak === 'kisi' ? new Set(['kisi', 'kod'])
   // Personel: "unvan" ad+soyad'dan Kaydet'te turetiliyor, ayrica gosterilmez/
   //   duzenlenmez (kullanici: "ad soyad kullan"); "personel" bayragi Kisi'nin
   //   "kisi" bayragiyla ayni sebeple gizli. "vkno"/"gorev" de gizli - normal

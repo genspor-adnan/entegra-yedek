@@ -3,25 +3,30 @@ import { api } from '../api/istemci';
 import { telefonBicimle } from './bicim';
 import type { KisiKaydi } from '../api/sozlesme';
 import { TarafArama } from './TarafArama';
-import { GenForm } from './GenForm';
+import { KartAdi } from './KartAdi';
+import { onay as onaySor } from './mesaj';
 import { c } from '../dil/ceviri';
 
 /**
  * Cari kartı Genel sekmesi > İlgili Kişiler (mockup: cari_karti.html). Sade salt-okunur
- * liste + ust satirda 3 buton (kullanici: "arama/liste-grup-analiz/aksiyon-sec-uygula/
- * bağ-kopar KALDIRILACAK, Kişi Ekle yanina Düzenle ve Sil EKLENECEK" - GenGrid'in tam
- * araç çubuğu bu kucuk gomulu alan icin fazla agir kaldi, sade tabloya donuldu).
+ * liste + üst satırda iki düğme (kullanıcı 08.11.2026: "Düzenle ve sil butonları kaldır..
+ * Kişi ekle butonu sağına Kaldır butonu ekle.. bu kişinin müşteri ile bağını kaldırsın").
  *
- * Satira tiklamak SECER (Duzenle/Sil o secime uygulanir). "Sil" kisiyi VERİTABANINDAN
- * SİLMEZ - sadece bu cariden KOPARIR (bag_id=null, kullanıcı: "sadece satırdan silecek").
+ * UNVAN sütunu görünen ad (sunucu `fn_taraf_ad(unvan, ad, soyad)`: "Av. Ali Kaya" - kişi kartı
+ * 1277'den beri ünvan önek + ad / soyad) ve TIKLANINCA KART SEKMEDE açılır (KartAdi; kart
+ * sekmesi deseni - gömülü GenForm düzenlemesi kaldırıldı). Sağında ROL (kullanıcı: "unvan sağına
+ * rol kolonu"), sonra BÖLÜM/GÖREV tek sütun ("Satınalma / Depo Sorumlusu"). E-posta yok, Durum dar.
+ *
+ * Satıra tıklamak SEÇER (Kaldır / Ayrıldı o seçime uygulanır). İkisi de kişi kaydını SİLMEZ:
+ *  · KALDIR (/kaldir) yanlış eklenen kişi içindir - bağ VE bu kişi-cari geçmişi silinir, satır bir daha gelmez.
+ *  · AYRILDI (/kopar, Durum combosuyla aynı) - bağ kopar, dönem kapanır, satır "Ayrıldı" olarak tarihçede kalır.
  */
 export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOkunur: boolean }) {
   const [satirlar, setSatirlar] = useState<KisiKaydi[] | null>(null);
-  const [departmanlar, setDepartmanlar] = useState<Record<string, string>>({});
+  const [roller, setRoller] = useState<Record<string, string>>({});
   const [seciliId, setSeciliId] = useState<number | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [kisiEkleAcik, setKisiEkleAcik] = useState(false);
-  const [duzenlenenId, setDuzenlenenId] = useState<number | null>(null);
 
   const yenile = () => {
     api.kisiler(tarafId).then(setSatirlar).catch(h => setHata(h instanceof Error ? h.message : String(h)));
@@ -30,9 +35,9 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
   useEffect(() => {
     yenile();
     api.kartAlanlari('kisi').then(m => {
-      const alan = m.alanlar.find(a => a.ad === 'departman');
-      if (alan?.kodlar) setDepartmanlar(alan.kodlar);
-    }).catch(() => { /* departman etiketsiz de calisir - kod gorunur */ });
+      const alan = m.alanlar.find(a => a.ad === 'rol');
+      if (alan?.kodlar) setRoller(alan.kodlar);
+    }).catch(() => { /* rol etiketsiz de calisir - kod gorunur */ });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tarafId]);
 
@@ -48,18 +53,34 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
     }
   };
 
-  const kopar = async () => {
-    if (seciliId === null) return;
+  /**
+   * İKİ DÜĞME (kullanıcı 08.11.2026: "kaldır dersem - yanlışlıkla eklenmiş olabilir - tümden bağını koparsın;
+   * Ayrıldı dersem durum Ayrıldı olsun"):
+   *  · KALDIR  = sunucu /kaldir: bağ + kişi-cari geçmişi silinir, satır gridden düşer ve bir daha gelmez.
+   *  · AYRILDI = sunucu /kopar: bağ kopar, dönem kapanır, satır "Ayrıldı" olarak tarihçede kalır (Durum combosu ile aynı).
+   * Kişi kaydı ikisinde de silinmez. Sil düğmeleri gibi önce sorulur.
+   */
+  const kaldir = async () => {
+    const k = satirlar?.find(x => x.id === seciliId);
+    if (!k) return;
+    if (!await onaySor(`"${k.unvan}" bu cariden tümden kaldırılsın mı? Geçmiş bağı da silinir; kişi kaydı durur.`)) return;
     setHata(null);
     const onceki = satirlar;
-    setSatirlar(s => s?.filter(k => k.id !== seciliId) ?? s);
+    setSatirlar(s => s?.filter(x => x.id !== k.id) ?? s);
     setSeciliId(null);
     try {
-      await api.kisiKopar(tarafId, seciliId);
+      setSatirlar(await api.kisiKaldir(tarafId, k.id));
     } catch (h) {
       setSatirlar(onceki ?? null);
       setHata(h instanceof Error ? h.message : String(h));
     }
+  };
+  const ayrildi = async () => {
+    const k = satirlar?.find(x => x.id === seciliId);
+    if (!k || !k.bagli) return;
+    if (!await onaySor(`"${k.unvan}" bu cariden ayrıldı olarak işaretlensin mi?`)) return;
+    setHata(null);
+    await durumDegis(k, false);
   };
 
   // Durum burada SEÇİLEBİLİR (kullanıcı: "seçilebilsin burada"). "Ayrıldı" seçilirse
@@ -79,17 +100,6 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
     }
   };
 
-  if (duzenlenenId !== null) {
-    return (
-      <GenForm
-        kaynak="kisi"
-        id={duzenlenenId}
-        onKapat={() => { setDuzenlenenId(null); yenile() }}
-        onKaydedildi={() => { setDuzenlenenId(null); yenile() }}
-      />
-    );
-  }
-
   return (
     <div className="kagrup">
       <h6>
@@ -99,12 +109,13 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
             <button type="button" className="d bir" onClick={() => setKisiEkleAcik(true)}>
               🔗 Kişi Ekle
             </button>
-            <button type="button" className="d" disabled={seciliId === null}
-              onClick={() => seciliId !== null && setDuzenlenenId(seciliId)}>
-              ✎ Düzenle
+            <button type="button" className="d teh" disabled={seciliId === null} onClick={() => void kaldir()}
+                    title={c('Yanlış eklenen kişiyi bu cariden tümden kaldır (kayıt silinmez)')}>
+              {c('Kaldır')}
             </button>
-            <button type="button" className="d teh" disabled={seciliId === null} onClick={() => void kopar()}>
-              Sil
+            <button type="button" className="d" disabled={!satirlar?.find(x => x.id === seciliId)?.bagli}
+                    onClick={() => void ayrildi()} title={c('Kişi bu cariden ayrıldı - bağ kopar, tarihçede kalır')}>
+              {c('Ayrıldı')}
             </button>
           </>
         )}
@@ -113,12 +124,15 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
       <table className="detay-tablo">
         <thead>
           <tr>
-            <th>Unvan</th>
-            <th>Bölüm</th>
-            <th>Görev</th>
-            <th>Telefon</th>
-            <th>E-posta</th>
-            <th>Durum</th>
+            {/* GENİŞLİKLER (kullanıcı: "unvan az genişlesin bölüm/görev daralsın", sonra "Not durum solunda, unvan
+                ve telefon daralt"): Unvan 26%, Bölüm/Görev 20%, Telefon 120px, Not kalan genişlik. */}
+            <th style={{ width: '26%' }}>Unvan</th>
+            <th style={{ width: 120 }}>Rol</th>
+            <th style={{ width: '20%' }}>Bölüm/Görev</th>
+            <th style={{ width: 120 }}>Telefon</th>
+            <th>Not</th>
+            {/* DURUM DAR (kullanıcı: "%50 daraltılabilir"): iki değerli küçük combo, tam sütun boş kalıyordu. */}
+            <th style={{ width: 90 }}>Durum</th>
           </tr>
         </thead>
         <tbody>
@@ -128,14 +142,13 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
             <tr key={k.id}
               className={k.id === seciliId ? 'secili' : ''}
               onClick={() => setSeciliId(k.id)}
-              onDoubleClick={() => setDuzenlenenId(k.id)}
               style={{ cursor: 'pointer' }}
             >
-              <td>{k.unvan}</td>
-              <td>{k.departman != null ? (departmanlar[String(k.departman)] ?? k.departman) : ''}</td>
-              <td>{k.gorevAdi ?? k.gorev ?? ''}</td>
+              <td><KartAdi tur="kisi" id={k.id}>{k.unvan}</KartAdi></td>
+              <td>{k.rol != null ? (roller[String(k.rol)] ?? k.rol) : ''}</td>
+              <td>{[k.departmanAdi, k.gorevAdi ?? k.gorev].filter(Boolean).join(' / ')}</td>
               <td>{telefonBicimle(k.telefon)}</td>
-              <td>{k.eposta ?? ''}</td>
+              <td title={k.notlar ?? undefined} style={{ maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.notlar ?? ''}</td>
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                 <select
                   className={`rozet-sec ${k.bagli ? 'ok' : 'hata'}`}

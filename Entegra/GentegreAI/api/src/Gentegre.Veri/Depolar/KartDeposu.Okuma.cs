@@ -234,6 +234,21 @@ public sealed partial class KartDeposu
     }
 
     /// <summary>
+    /// Kaydın GÖRÜNEN ADI: taraf tabanlı kartlarda fn_taraf_ad(unvan, ad, soyad) (940/1277 kuralı - listeyle aynı);
+    /// diğer tablolarda null. Arama penceresi yeni kaydı bu adla seçer (inceleme 08.11.2026: istemci kuralı
+    /// yeniden yazıyordu, fn_taraf_ad'dan sapıyordu).
+    /// </summary>
+    public async Task<string?> GorunenAdAsync(KartTanimi tanim, long id, CancellationToken iptal)
+    {
+        if (!string.Equals(tanim.Tablo, "public.taraf", StringComparison.OrdinalIgnoreCase)) return null;
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut(
+            "select public.fn_taraf_ad(unvan, ad, soyad)::varchar(120) from public.taraf where id = @p0", null, id);
+        var sonuc = await komut.ExecuteScalarAsync(iptal);
+        return sonuc is string s && s.Trim() != "" ? s : null;
+    }
+
+    /// <summary>
     /// Kartta KULLANILAN kod degerlerinin adlarini cozer (API §3.1 "kodAd").
     /// Sabit listeler katalogda, digerleri kod_liste / kod_deger tablosunda.
     /// </summary>

@@ -255,6 +255,9 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
   const [kartAcik, setKartAcik] = useState<{ kaynak: string; id: number | 'yeni' } | null>(null);
   const zamanlayici = useRef<number | undefined>(undefined);
   const kutu = useRef<HTMLInputElement | null>(null);
+  /** `acik` prop'unun güncel değeri - onSec sonrası pencere kapandıysa boşuna liste sorgusu atılmasın. */
+  const acikRef = useRef(acik);
+  acikRef.current = acik;
   // Düzenli arama: işaretli çipler, seçim süzgeçleri (alan -> değer), önizleme paneli (tercih tarayıcıda).
   const [cipler, setCipler] = useState<Set<string>>(() => new Set<string>());
   const [secimler, setSecimler] = useState<Record<string, string>>({});
@@ -438,11 +441,17 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, kar
     try {
       const y = await api.kartOku(kaynak, id);
       const kart = y.kart as Record<string, unknown>;
-      // Cari/kisi kartinda ad alani "unvan"; bos donerse aramaya duseriz.
-      const unvan = String(kart.unvan ?? kart.ad ?? '').trim();
+      // GÖRÜNEN AD SUNUCUDAN (`gorunenAd` = fn_taraf_ad(unvan, ad, soyad); 940/1277): kişi ve personelde unvan
+      //   YALNIZ önek ya da boş, ad / soyad ayrı - eskiden yalnız `unvan` okunuyordu, kişi 1277 ile öneğe geçince
+      //   yeni kişi ne seçiliyor ne Son Aranan'a işleniyordu (kullanıcı 08.11.2026). Kural istemcide yeniden
+      //   yazılmaz (inceleme): taraf olmayan kartlarda `unvan` / `ad` alanı.
+      const unvan = String(y.gorunenAd ?? kart.unvan ?? kart.ad ?? '').trim();
       if (unvan === '') { void ara(arama); return }
-      // Listeden secmekle ayni: kayit "Son / Sik Aranan" sayacina islensin.
-      void api.aramaIsaretle(kaynak, id);
+      // Listeden secmekle ayni: kayit "Son / Sik Aranan" sayacina islensin (beklenmez - secim gecikmesin);
+      //   bittiginde pencere HÂLÂ açıksa (çağıran kapatmadıysa - İlgili Kişiler) liste aynı görünümle tazelenir ki
+      //   yeni kayıt Son Aranan'ın başında / aramada hemen görünsün (kullanıcı 08.11.2026).
+      void api.aramaIsaretle(kaynak, id).catch(() => undefined)
+        .then(() => { if (acikRef.current) void ara(arama, gorunum) });
       onSec({ kaynak, id, unvan });
     } catch {
       // Kayit olustu ama okunamadi: kullaniciyi bos birakma, aramaya don.

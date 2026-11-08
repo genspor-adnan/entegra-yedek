@@ -348,7 +348,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={v => setDeger(d => ({ ...d, [a.ad]: v }))}
         />
-      ) : ((a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400)
+      ) : ((a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400 && !a.tekSatir)
            // JSON alani (cihaz olcum eslemesi, time-out teyitleri): metin
            //   olarak tasinir ve COK SATIRLI yazilir - tek satirlik kutuda
            //   sus parantezlerinin arasinda ne oldugu gorunmuyordu.

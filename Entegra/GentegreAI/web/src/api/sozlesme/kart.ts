@@ -15,6 +15,8 @@ export interface KartYaniti {
    */
   detayToplam?: Record<string, number>;
   kodAd?: Record<string, Record<string, string>>;
+  /** Kaydın görünen adı (taraf kartları: fn_taraf_ad) - arama penceresi yeni kaydı bununla seçer. */
+  gorunenAd?: string | null;
   yetki: KartYetkisi;
   /** Dış kaynak (1089): "Delphi" ise kayıt Delphi ERP'den aktarılır, salt okunur (yetki zaten kapalı gelir). */
   disKaynak?: string | null;
@@ -33,10 +35,15 @@ export interface KisiKaydi {
   bagli: boolean;
   /** Listeden seçilen görevin adı (taraf.gorev_id, 1182) - salt okunur; yoksa serbest `gorev`. */
   gorevAdi?: string | null;
+  /** Carideki rolü (taraf.rol, kart kataloğu KisiRolKodlari) ve bölüm adı - İlgili Kişiler gridi (08.11.2026). */
+  rol?: number | null;
+  departmanAdi?: string | null;
+  /** Kişi kartındaki tek satır Not (taraf.notlar) - gridde Durum'un solunda (08.11.2026). */
+  notlar?: string | null;
 }
 
 /** Kisi YAZMA istegi = kaydin sunucunun urettigi alanlari cikarilmis hali. */
-export type KisiIstegi = Omit<KisiKaydi, 'id' | 'bagli' | 'aktif' | 'gorevAdi'> & { aktif?: boolean };
+export type KisiIstegi = Omit<KisiKaydi, 'id' | 'bagli' | 'aktif' | 'gorevAdi' | 'rol' | 'departmanAdi' | 'notlar'> & { aktif?: boolean };
 
 export interface YetkiSatiri {
   yetkiId: number;
@@ -174,6 +181,8 @@ export interface KartAlanMeta {
    * kurali anlik uygular ki kullanici kaydetmeyi beklemesin.
    */
   dogrulama?: string | null;
+  /** Uzun metin kolonu ama EKRANDA TEK SATIR (notlar 1000): textarea eşiği uygulanmaz. */
+  tekSatir?: boolean;
 }
 
 /**

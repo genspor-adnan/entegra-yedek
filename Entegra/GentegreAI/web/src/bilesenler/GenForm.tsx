@@ -13,7 +13,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni } from './bicim';
-import { adSoyadUnvandan, useUnvanOneki } from './kart/useUnvanOneki';
+import { adSoyadUnvandan, ONEKLI_KARTLAR, useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
 import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
@@ -652,7 +652,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
         // UNVAN ONEKI (844): personelde de ad/soyadin onunde saklanir -
         //   "Uzm.Dr. Ali Yildirim". Ham unvan hook'a verilir, hook bilinen
         //   onegi ayirip comboya koyar.
-        if (kaynak === 'dis-hekim' || kaynak === 'personel')
+        if (ONEKLI_KARTLAR.has(kaynak))
           unvanOneki.setHam(String(k.kart.unvan ?? '').trim());
         // SECILI kodun adi listede yoksa EKLE: kod tablolari yalniz AKTIF
         //   satirlari gonderir; kayitta pasiflesmis bir deger (or. pasif
@@ -683,7 +683,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
         //   aktarılan personelde ad / soyad boş, tam ad unvanda kalmış olabilir - ad / soyad ondan önerilir (son kelime
         //   soyad, baştaki "Dr." gibi önek atlanır). Yalnız GÖSTERİLEN değer: ilk hal boş kaldığı için Kaydet ikisini
         //   de yazar; kaydedilmezse veri değişmez.
-        const unvandan = (kaynak === 'personel' || kaynak === 'dis-hekim') ? adSoyadUnvandan(gelen) : null;
+        const unvandan = ONEKLI_KARTLAR.has(kaynak) ? adSoyadUnvandan(gelen) : null;
         setDeger({ ...gelen, ...(unvandan ?? {}), ...kirli });
         setIlkDeger(gelen);
         // KAYITLI kur tarihseldir - acilista bugunun kuruyla EZILMEMELI. Yuklenen

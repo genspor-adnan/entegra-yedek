@@ -80,6 +80,12 @@ public sealed record KartAlani(
     //   ("Satış Müdürü" -> "satis-muduru") ve benzersiz olana dek -2, -3 eklenir.
     string? SlugKaynak = null,
     /// <summary>
+    /// TEK SATIR METİN (08.11.2026): uzun kolon (notlar 1000) ama ekranda tek satırlık kutu - arayüz uzunluk
+    /// eşiğiyle (400+) textarea'ya geçmesin. Sahte kısa EnFazlaUzunluk vermek eski uzun değeri kaydedilemez
+    /// yapıyordu (inceleme).
+    /// </summary>
+    bool TekSatir = false,
+    /// <summary>
     /// URUN MODU SUZGECI (542, kullanici: "erp modunda tarife kolonu ve icerde
     /// tipi gorunmesin"). 0 tum kurulumlar · 1 yalniz Gentegre AI (ERP) ·
     /// 2 yalniz GenoTIP AI (HBYS). `AksiyonTanimi.UrunModu` ile AYNI dil.

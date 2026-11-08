@@ -7,6 +7,120 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
+
+Kullanıcı: "kişi kartında kişi kodu kaldır.. unvan kısa ve combo olsun.. personel gibi Av., Dr., Prof.Dr. gibi
+unvanlar gelsin.. sağına Ad ve Soyad editleri ekle.. Unvan(serbest) editi de kaldır" · "kişi koduna arka planda ID
+ataması yap.. ad soyad baş harfler + Id".
+
+- **Katalog** (`KartKatalogu.Cari.cs` Kisi): `kod` ve `gorev` ("Unvan (serbest)") alanları karttan çıktı; `unvan`
+  zorunlu değil (önek), `ad` (zorunlu, 50) ve `soyad` (60) Kimlik grubunda. 20.08.2026'daki "kişide tek Unvan" kararı
+  geri alındı; görünen ad her yerde zaten `fn_taraf_ad(unvan, ad, soyad)` (940).
+- **Şerit** (`KartKimlikSeridi` kisi dalı, `.kaid-kisi` 0.5fr + 4×1fr): Ünvan combosu (`hekim.unvan` listesi,
+  `useUnvanOneki` - `ONEKLI_KARTLAR` artık dışa açık ve kişiyi içerir) · Ad · Soyad · **Bağlı Cari** · **Rol**
+  (kullanıcı: "soyadın sağına rol taşı", "bağlı cariyi soyadın sağına al.. 7 sütun olsun" - ikisi Genel'den Kimlik
+  grubuna) · Bölüm · Görev; sütunlar 0.45 / 0.8 / 0.8 / 1.1 / 0.7 / 0.8 / 0.8, Genel'de yalnız Durum kaldı. Kaydetme
+  `kartGovdesi` ile personeldeki gibi `unvan = önek`; GenForm okuma/öneri yolları da aynı küme üzerinden.
+- **Göç 1277:** `Av.` hekim.unvan listesine · mevcut kişilerde (ad+soyad boş) tam ad unvandan ayrıştırılır, unvan öneke
+  iner (1250'den farkı: kişi başka kartın adı değil; yoksa fn_taraf_ad "else unvan" eski adı gösterirdi) · `fn_kisi_kod`
+  + `tr_taraf_kisi_kod` (BEFORE INSERT/UPDATE): kod boşsa ad+soyad baş harfleri + id ("Ali Kaya" #4298 → AK4298; "-" /
+  rakam / noktalı önek kelimeleri sayılmaz) · mevcutta boş ya da aktarım varsayılanı çıplak id (kendi id'si veya
+  `aktarim_id`) olan kodlar da çevrildi, elle verilmiş kod dokunulmadı · yedek `_yedek_1277_kisi` · onarım
+  `set local gentegre.aktarim = '1'` ile (Delphi kaynaklı satırda salt-okunur tetiği). Dev/test/yerel ZONE/UNIVERSE
+  uygulandı (dev 81, ZONE 10, UNIVERSE 2 kişi).
+- Doğrulama (5173, Playwright): şerit etiketleri Ünvan · Ad * · Soyad · Bölüm · Görev; combo 9 önek + Av.; yeni kişi
+  "Av. Deneme Ali Yılmaz" → kod `DAY60288`, unvan `Av.`, görünen ad `Av. Deneme Ali Yılmaz` (test satırı silindi).
+
+### Aynı gün — Kişi kartı avatarlı başlık bandı (mockup → web)
+
+Kullanıcı: "kişi için avatarlı başlık bandı mockup tasarla" → `Ekranlar/kisi_karti_avatar_bant.html` (3 hal) → "başlıktaki
+bilgiler bandda görünsün.. Edit (kalem) basılırsa edit bandı görünür altta.. ilk girişte başlık boş, alttaki editler aktif"
+→ "uygula". `KartKimlikSeridi` kisi dalı: üstte SALT BİLGİ BANDI (`.kisi-bant`: baş harf avatarı + durum noktası, ünvan
+öneki rozeti, ad soyad, kişi kodu, rol rozeti · Bölüm/Görev · bağlı cari `KartAdi` linki · not; sağda cep `tel:` ve
+e-posta `mailto:`, durum rozeti, ✎). Düzenleme şeridi (7 alan) ✎ ile açılır / kapanır: yeni kartta açık, kayıtlı kartta
+kapalı, ad boş yüklenen eski kayıtta kendiliğinden açık. Şeritte yazılan anında banta yansır (aynı `deger`). Kişi kodu
+katalogda salt okunur gizli alan olarak geri geldi (`Yazilabilir:false`, KartGrupSekmesi gizli) - bantta okunur.
+Sonra (kullanıcı): **Not + Durum** da Kimlik grubuna, şeridin 2. sırası (Not ilk 6 sütun, Durum Görev'in altında; CSS
+`nth-child(8/9)` grid-column) - yalnız ✎ açıkken görünür; Genel'de adsız alan kalmadı.
+
+### Aynı gün — Fatura başlığı görüntüleme / düzenleme kipi (yalnız mockup)
+
+`Ekranlar/fatura_basligi_bant.html` (kullanıcı: "fatura başlığını edit / display mode olarak tasarım mockup yap"): cari bandı
+altında başlık alanları ÇİP (Tip · No · Tarih · Vade gün + tarih · Depo · Fiyat listesi · Sipariş), sağda Faturalama /
+Tahsilat / Bakiye kutuları + ✎; ✎ bugünkü 2 satırlık alan düzenini bandın altında açar. Üç hal: kayıtlı (şerit kapalı), yeni
+(şerit açık, çipler varsayılanla dolu), kilitli e-Fatura (✎ pasif). Sonra (kullanıcı: "çip düzeni edit moda yakın",
+"üstte 4 altta 4", "edit çizgileri görünmesin") görüntüleme kipi düzenleme ızgarasının birebir kopyası oldu: kutusuz düz
+koyu değer, aynı etiket / satır hizası.
+
+**Uygulandı (kullanıcı "fatura için mockup'ı uygula")** - yalnız web, yalnız FATURA (`faturaMi && !basvuruMu`):
+`BelgeBaslik` `baslikDuzenle` durumu (yeni kartta açık - `yeniMi` prop'u BelgeKarti'den `!mevcutBelge`; kayıtlıda kapalı;
+`kilitli` belgede hep görüntüleme). Aynı `.belge-hdr` ızgarası iki kipte: `.bb-goster` CSS kutuları şeffaflaştırır, düğme /
+takvim / combo okunu gizler, pointer-events kapatır; ızgaraya mousedown düzenlemeye geçirir (capture, combo açılmaz).
+Kayıtlı belgede düzenleme `.bb-duzenle` (sol mavi çizgi). ✎ cari bandının en sağında (`CariBilgiBandi.sonEk` yeni slot,
+bakiyenin sağı), kilitlide pasif. Doğrulama 5173: yeni satış faturası düzenleme açık → ✎ görüntüleme → ızgara tık düzenleme.
+Görüntülemede sayı (Vade gün) sola yanaşık (kullanıcı). Sonra (kullanıcı: "bu müşteri bandı ve fatura başlığı desenini tüm
+alış/satış belgelere uygula") kip TÜM CARİLİ türlerde (`kipli = carili && !basvuruMu`: fatura, fiş, irsaliye, sipariş,
+teklif, konsinye, tahakkuk); depo belgesi / stok fişi ve başvuru eskisi gibi. Cari bandı yoksa ✎ ızgaranın sağ üstünde
+(`.bb-kalem-serbest`, yalnız kayıtlı belgede). Doğrulama: irsaliye, teklif, alış fişi yeni kartlarında ✎ görüntülemeye aldı.
+Görüntülemede iki satır yanaşık (row-gap 0, kutu 18px; kullanıcı "alt satır üste yanaşabilir mi").
+- **Dip toplam hep sağda** (kullanıcı: "toplamlar gridi her zaman sağa yanaşık olmalı"): `.grid-alt-serit` flex
+  space-between tek çocukla (döviz kutusu olmayan alış fişi / alış siparişi) kutuyu sola atıyordu; `.dip-toplam`
+  `margin-left:auto`. Ölçüm: 4 türde sağ kenar aynı.
+
+### Aynı gün — Kod incelemesi düzeltmeleri (10 bulgu, çalışma ağacı)
+
+1. Kişi şeridi 2. sıra `nth-child` yerine `.alan-notlar` / `.alan-durum` (yetkisiz alan düşünce kaymasın).
+2. Arama penceresi yeni kaydın adını SUNUCUDAN alır: `KartYaniti.GorunenAd` (`KartDeposu.GorunenAdAsync`, taraf tabanlı
+   kartlarda `fn_taraf_ad`); istemcideki ad birleştirme kuralı silindi.
+3. Belge başlığı görüntüleme kipi `inert` (klavye / odak da kapalı); tıklama sarmalayıcıda.
+4. `notlar` 1000 + yeni `KartAlani.TekSatir` bayrağı (meta `tekSatir`, kartAlanCizim textarea eşiğini atlar) - sahte 399 yok.
+5. `KisiDeposu.KaldirAsync` hiçbir satır değişmediyse log yazmaz, `Bulunamadi` döner.
+6. Kişi listesi Rol sütunu `Kodlar: KartKatalogu.KisiRolKodlari` (internal) - SQL `case` kopyası silindi.
+7. IlgiliKisiler üst yorumu Kaldır / Ayrıldı farkını doğru anlatır.
+8. ✎ tek `kalemDugmesi` (iki yuva) + tek `.kalem-dugme` CSS (kişi bandı dahil).
+9. `kartKaydedildi` işaretlemeyi beklemez; liste yalnız pencere hâlâ açıksa (`acikRef`) tazelenir.
+10. `bb-duzenle` çizgisi sabit `yeniAcildi`den: yeni belge ilk kayıttan sonra da çizgi almaz.
+`CariBilgiBandi` alt satırı etiketsiz (kullanıcı: "kod vkn il gibi labelleri kaldır, aktif ve e-faturayı rozet yap"):
+yalnız değerler · ile, "Temsilci" öneki kalır; Durum (Aktif yeşil / Pasif gri) ve e-Fatura / e-Arşiv `.rozet` - tüm cari
+bantlarında (müşteri/tedarikçi kartı, belge kartları).
+
+### Aynı gün — Kişi listesi sütunları
+
+- `KaynakKatalogu.Cari.cs` kisi: **Rol** sütunu Unvan'ın sağında (taraf.rol → KisiRolKodlari sözlüğü SQL `case`),
+  **Bölüm/Görev** tek sütun (`concat_ws(' / ', departman adı, görev)`); ayrı `departman` / `gorev` sütunları gizli
+  (Varsayilan:false) kaldı - kişi arama penceresinin görev süzgeci / ek araması / önizlemesi `gorev`u okur (kullanıcı:
+  "unvan sağına rol kolonu ekle.. bölüm ve görev kolonlarını Bölüm/Görev olarak birleştir").
+
+### Aynı gün — Kişi arama penceresinde yeni kayıt ve müşteri/tedarikçi İlgili Kişiler gridi
+
+- **TarafArama** `kartKaydedildi`: yeni kaydın adı artık `fn_taraf_ad` kuralıyla (önek + ad + soyad) okunur - kişi 1277
+  ile öneğe geçince boş `unvan` "okunamadı" sayılıp yeni kişi ne seçiliyor ne Son Aranan'a işleniyordu (kullanıcı: "yeni
+  kişi eklediysem son seçilenler olarak hemen o gelmeli"). İşaretleme (`aramaIsaretle`) beklenir, sonra seçim, pencere
+  açık kaldıysa liste aynı görünümle tazelenir.
+- **İlgili Kişiler** (`IlgiliKisiler.tsx`, kullanıcı): Unvan sütunu görünen ad (sunucu `KisiDeposu.ListeleAsync`
+  `fn_taraf_ad`), tıklanınca kişi kartı sekmede (`KartAdi`); E-posta sütunu kalktı, Durum dar (90px); Düzenle / Sil ve
+  gömülü GenForm düzenlemesi kalktı; "Kişi Ekle" sağında **Kaldır** (onaylı; yalnız bağı koparır, satır "Ayrıldı" kalır).
+  Sonra (kullanıcı, aynı istek kişi listesi için de): Unvan sağında **Rol** (KisiKaydi.rol, etiket kart kataloğunun `rol`
+  kodlarından), **Bölüm/Görev** tek sütun (KisiKaydi.departmanAdi + görev); Unvan %34 / Bölüm-Görev %22, kişi listesinde
+  Unvan 240 / Bölüm-Görev 160.
+- **Kişi kartı Not** (kullanıcı: "durum soluna tek satır Not alanı"): `notlar` kolonu (EnFazlaUzunluk 399 - 400 ve üstü
+  textarea olurdu) Genel'de Durum'un solunda. Aynı Not İlgili Kişiler gridinde Durum'un solunda (KisiKaydi.notlar, tek
+  satır kırpılır, tam metin title'da); Unvan %26, Telefon 120px.
+- **Kaldır / Ayrıldı** (kullanıcı: "kaldır butona bastım ama hâlâ görünüyor" → "kaldır dersem tümden bağını koparsın,
+  Ayrıldı dersem durum Ayrıldı olsun"): yeni uç `POST /api/kart/cari/{id}/kisiler/{kisiId}/kaldir`
+  (`KisiDeposu.KaldirAsync`: bag_id boşalır + bu kişi-cari çiftinin `taraf_gecmis` dönemleri silinir, satır listeye bir
+  daha gelmez; kişi kaydı durur, log "kaldır; N geçmiş dönemi silindi"). **Ayrıldı** düğmesi `/kopar` (dönem kapanır,
+  satır "Ayrıldı" kalır). İkisi de onay sorar. Hızlı-ekle yolu (`EkleAsync`) artık kod = id yazmaz, tetik verir.
+
+### Aynı gün — ERP kurulumlarında HBYS tohum bölüm / görev temizliği (veri, göç yok)
+
+Kullanıcı: "erp aktarım oluyorsa hbys ye ait bölüm ve görevler olamaz". 560/562 (departman: SKRS klinikleri + üst
+başlıklar, `kod` dolu ya da `ustbirim_id` dolu - 43 satır) ve 570 (personel_gorev 1-59: kurum kadrosu + başlıklar)
+tohumu yerel ZONE ve sunucu FETA / ZONE / MEDX'te silindi; Delphi aktarımının kodsuz-üstsüz bölüm / görevleri kaldı
+(FETA'da yoktu, listeler boş). Önce bağ sayımı (taraf/personel/rol: 0; yalnız 6 `muayene_sablon.bolum_id` null yapıldı),
+yedek `_yedek_departman_hbys_20261108` / `_yedek_personel_gorev_hbys_20261108`, çocuk-önce silme. Kalıcı kural göç
+olarak yazılmadı (seed göçleri yeniden çalışmaz); yeni ERP kurulumunda aynı betik.
+
 ## 06.11.2026 — Komut paleti: rezerve kelimeler ve tahsilat akışı (paletNiyet)
 
 Kullanıcı: "prompt için rezerve kelimeler olması lazım: sipariş, yeni sipariş, fatura kes, tahsilat, tahsil et, ödeme…

@@ -684,7 +684,44 @@ table.grid tr.flt input {
 /* Mockup idstrip'i (Kod/Ad/Tur/Durum) TEK SATIRDA - genis min-width sarmaya zorluyordu. */
 .kaid .alan-izgara { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 12px }
 /* Kisi idstrip'i (Kod/Unvan/Departman/Gorev, 4 sabit alan): Kod dar, Unvan onun aldigi yeri devralir. */
-.kaid .alan-izgara.kaid-kisi { grid-template-columns: 0.5fr 1.5fr 1fr 1fr }
+/* KİŞİ ŞERİDİ (1277): 7 sütun - Ünvan yarım · Ad · Soyad · Bağlı Cari · Rol · Bölüm · Görev (kullanıcı: hepsi dar).
+   Avatarlı bandın ALTINDA, ✎ ile açılır (08.11.2026). */
+.kaid .alan-izgara.kaid-kisi { grid-template-columns: 0.45fr 0.8fr 0.8fr 1.1fr 0.7fr 0.8fr 0.8fr;
+  margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--cizgi, #dde3ea) }
+/* 2. sıra: Not ilk 6 sütunu kaplar, Durum son sütun (Görev'in altında). Alan SINIFIYLA (kartAlanCizim `alan-<ad>`),
+   sırayla değil - yetkisiz alan düşünce sayı değişir (inceleme). */
+.kaid .alan-izgara.kaid-kisi > .alan-notlar { grid-column: 1 / 7 }
+.kaid .alan-izgara.kaid-kisi > .alan-durum { grid-column: 7 / 8 }
+/* ✎ KALEM DÜĞMESİ - tek kural (kişi bandı, belge başlığı; inceleme: üç kopya vardı). */
+.kalem-dugme { width: 28px; height: 28px; padding: 0; justify-content: center; align-self: center;
+  border-color: #98c2ee; background: linear-gradient(#f3f8ff, #dfeafa); color: #2f6db3 }
+.kalem-dugme.acik { background: linear-gradient(#3b7cc4, #2f6db3); color: #fff; border-color: #2a5f9c }
+.kalem-dugme:disabled { opacity: .45 }
+/* KİŞİ BANDI (mockup kisi_karti_avatar_bant.html): avatar · ad satırı + alt bilgi · sağda hızlı düğmeler, durum, ✎. */
+.kaid .kisi-ust { flex: 1 1 100%; width: 100%; min-width: 0 }
+.kaid .kisi-bant { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 2px 0 4px }
+.kaid .kisi-avatar { width: 46px; height: 46px; flex-basis: 46px; font-size: 16px; position: relative; letter-spacing: .5px;
+  background: linear-gradient(135deg, #3b7cc4, #14315a); box-shadow: inset 0 0 0 2px rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.15) }
+.kaid .kisi-avatar.pasif { background: linear-gradient(135deg, #9aa6b2, #6b7a8b) }
+.kaid .kisi-bant.bos .kisi-avatar { background: #dfe6ee; color: #8a98a8; box-shadow: none }
+.kaid .kisi-avatar .nokta { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border-radius: 50%; background: #2e7d46; border: 2px solid #fff }
+.kaid .kisi-avatar .nokta.pasif { background: #9aa6b2 }
+.kaid .kisi-bant .kim { min-width: 0 }
+.kaid .kisi-bant .ad { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: 16px; font-weight: 700; color: var(--lacivert, #14315a); line-height: 1.15 }
+.kaid .kisi-bant.bos .ad .metin { color: #9aa6b2; font-weight: 400 }
+.kaid .kisi-bant .ad .onek { font-size: 11.5px; font-weight: 400; color: var(--soluk, #6b7a8b); border: 1px solid var(--cizgi, #cdd6e0); border-radius: 3px; padding: 0 5px; background: #fff }
+.kaid .kisi-bant .ad .kod { font-size: 11px; font-weight: 400; color: var(--soluk, #6b7a8b); font-family: Consolas, monospace }
+.kaid .kisi-bant .alt { margin-top: 3px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--soluk, #6b7a8b); font-size: 11.5px }
+.kaid .kisi-bant .alt > * + *::before { content: "·"; color: #b7c2cd; margin-right: 6px }
+.kaid .kisi-bant .alt .rol { border-radius: 10px; padding: 1px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .3px; background: #e4efdc; color: #2e5a1f; border: 1px solid #c6ddb8 }
+.kaid .kisi-bant .alt .rol::before { content: none }
+.kaid .kisi-bant .alt .not { font-style: italic; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.kaid .kisi-bant .alt .ipucu { color: #aab4bf }
+.kaid .kisi-bant .sag { display: flex; gap: 6px; align-items: center }
+.kaid .kisi-bant .sag a.d { text-decoration: none }
+.kaid .kisi-bant .sag .ik { width: 30px; padding: 0; justify-content: center }
+.kaid .kisi-bant .durum { border-radius: 3px; padding: 3px 9px; font-size: 11px; font-weight: 700; background: #dff3e4; color: #2e7d46; border: 1px solid #bfe3c9 }
+.kaid .kisi-bant .durum.pas { background: #eceff2; color: #6b7a8b; border-color: #d5dbe2 }
 /* STOK SERIDI (02.11.2026): Stok Kodu · Stok Adı · Kısa Ad · Kategori · Tür · Durum - kod ve durum yarım genişlik. */
 .kaid .alan-izgara.kaid-stok { grid-template-columns: minmax(0, .5fr) minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .5fr) }
 @media (max-width: 900px) { .kaid .alan-izgara.kaid-stok { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
@@ -1391,7 +1428,7 @@ input.skt-gecmis {
 /* Kalem gridinin ALTI: doviz kutusu solda, dip toplam sagda - ayni hizada. */
 .grid-alt-serit { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between }
 .grid-alt-serit > .kagrup { margin: 0 }
-.grid-alt-serit > .dip-toplam { flex: 0 0 400px }
+.grid-alt-serit > .dip-toplam { flex: 0 0 400px; margin-left: auto }   /* sol kutu yoksa da SAĞA yanaşık (kullanıcı 08.11.2026) */
 .dip-tablo thead th { padding: 4px 10px; font-size: 11px; color: var(--soluk); font-weight: 600 }
 .dip-tablo { width: 100%; border-collapse: collapse; font-size: 12px }
 .dip-tablo td { padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
@@ -1415,6 +1452,31 @@ input.skt-gecmis {
   background: linear-gradient(var(--dugh1), var(--serit1)); border-bottom: 1px solid var(--cizgi);
 }
 .belge-hdr-sar .alan-izgara { margin: 0 }
+/* FATURA BAŞLIĞI GÖRÜNTÜLEME KİPİ (08.11.2026, mockup fatura_basligi_bant.html): aynı ızgara, kutusuz düz koyu değer;
+   düğmeler (…, ×, takvim) gizli; üzerine gelince hafif mavi zemin (tıklanabilir ipucu). Kayıtlı belgede düzenleme kipi
+   sol mavi çizgiyle "yazıyorsun" der. ✎ bantta, e-Belge rozetlerinin sağında. */
+.belge-hdr.bb-goster { cursor: pointer; row-gap: 0 }
+/* Görüntülemede iki satır birbirine YANAŞIK (kullanıcı: "alt satır üste yanaşabilir mi"): kutu yüksekliği 18px, satır boşluğu yok. */
+.belge-hdr-sar .alan-izgara.belge-hdr.bb-goster .alan input,
+.belge-hdr-sar .alan-izgara.belge-hdr.bb-goster .alan select,
+.belge-hdr-sar .alan-izgara.belge-hdr.bb-goster .lookup input { height: 18px }
+.belge-hdr.bb-goster .alan input, .belge-hdr.bb-goster .alan select, .belge-hdr.bb-goster .alan textarea,
+.belge-hdr.bb-goster .lookup-kutu, .belge-hdr.bb-goster .lookup input {
+  border-color: transparent !important; background: transparent !important; box-shadow: none !important;
+  color: var(--metin, #1f2d3a) !important; font-weight: 600; opacity: 1 !important; pointer-events: none;
+  appearance: none; -webkit-appearance: none; padding-left: 4px; text-overflow: ellipsis }
+.belge-hdr.bb-goster .alan input::placeholder { color: #aab4bf; font-weight: 400 }
+/* Görüntülemede sayı da SOLA yanaşık (kullanıcı: "vade günü sağa yanaşık olmuş, sola olsun") - metin sütunuyla hizalı. */
+.belge-hdr.bb-goster .alan input.hiza-sag { text-align: left }
+.belge-hdr.bb-goster .alan input::-webkit-calendar-picker-indicator { display: none }
+.belge-hdr.bb-goster .alan button, .belge-hdr.bb-goster .lookup button, .belge-hdr.bb-goster .kla-combo::after { display: none }
+.belge-hdr.bb-goster .alan:hover > *:not(.etiket) { background: #f3f8ff !important; border-radius: 3px }
+.belge-hdr.bb-duzenle { border-left: 3px solid var(--vurgu, #2f6db3); padding-left: 10px; margin-left: -13px !important;
+  background: linear-gradient(#fbfcfe, #eef4fa); border-radius: 0 4px 4px 0 }
+/* Bantsız belgede (cari seçilmemiş) ✎ ızgaranın sağ üstünde; ızgara sağdan yer bırakır. */
+.belge-hdr-sar { position: relative }
+.belge-hdr-sar.kalemli .belge-hdr { padding-right: 40px }
+.bb-kalem-serbest { position: absolute; right: 14px; top: 12px }
 /* Sekme cubugu baslik seridinin hemen altinda, grid'in ustunde. */
 .kagov > .katab { margin: 0 -14px 10px }
 /* Baslikta etiket EDITIN USTUNDE (mockup .fld deseni) - alan-izgara'nin

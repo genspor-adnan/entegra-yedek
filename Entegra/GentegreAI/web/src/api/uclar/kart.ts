@@ -44,6 +44,9 @@ export const kartUclari = {
     gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/bagla`, {}),
   kisiKopar: (tarafId: number, kisiId: number) =>
     gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/kopar`, {}),
+  /** Tümden kaldır: bağ + kişi-cari geçmişi silinir, listede "Ayrıldı" olarak da kalmaz (kişi kaydı durur). */
+  kisiKaldir: (tarafId: number, kisiId: number) =>
+    gonder<KisiKaydi[]>(`/api/kart/cari/${tarafId}/kisiler/${kisiId}/kaldir`, {}),
 
   // ------------------------------------------------------- rol > yetkiler ----
   rolYetkileri: (rolId: number) => istek<YetkiSatiri[]>(`/api/kart/rol/${rolId}/yetkiler`),

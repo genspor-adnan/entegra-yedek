@@ -120,6 +120,7 @@ public static class KartUclari
                 Detaylar = detay.Satirlar,
                 DetayToplam = detay.Toplam.Count > 0 ? detay.Toplam : null,
                 KodAd = await depo.KodAdAsync(tanim, kart.Kart, iptal),
+                GorunenAd = await depo.GorunenAdAsync(tanim, id, iptal),
                 Yetki = new KartYetkisi
                 {
                     Duzenle = !delphi && baglam.Yetkiler.Var(tanim.YetkiKodu, Islem.Degistir),
@@ -579,7 +580,8 @@ public static class KartUclari
             //   bagimsiz cekiliyor (`/alanlar`), "yeni mi" bilgisi orada yok.
             alan.YalnizYeniKayitta,
             alan.Ipucu,
-            alan.ZorunluMuafAlan);
+            alan.ZorunluMuafAlan,
+            alan.TekSatir);
 
 
     /// <summary>

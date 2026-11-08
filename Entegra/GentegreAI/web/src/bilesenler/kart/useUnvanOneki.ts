@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { Deger } from '../kartAlanCizim';
 
-/** Unvan onegi kullanan kartlar (843/844): dis hekim ve PERSONEL. */
-const ONEKLI_KARTLAR = new Set(['dis-hekim', 'personel']);
+/** Unvan onegi kullanan kartlar (843/844): dis hekim, PERSONEL ve KİŞİ (1277, kullanıcı 08.11.2026). */
+export const ONEKLI_KARTLAR = new Set(['dis-hekim', 'personel', 'kisi']);
 
 /**
  * HEKIM UNVAN ONEKI (dis hekim ve personel karti): "Op.Dr." gibi onek AYRI

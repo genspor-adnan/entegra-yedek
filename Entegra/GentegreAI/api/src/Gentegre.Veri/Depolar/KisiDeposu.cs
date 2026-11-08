@@ -8,7 +8,9 @@ namespace Gentegre.Veri.Depolar;
 /// bu cariye HALEN bagli mi (false ise gecmiste bagliydi, "Ayrıldı" - taraf_gecmis'ten).
 /// </summary>
 public sealed record KisiKaydi(long Id, string Unvan, string? Telefon, string? Eposta, bool Aktif,
-    string? Gorev, short? Departman, bool Bagli, string? GorevAdi = null);
+    string? Gorev, short? Departman, bool Bagli, string? GorevAdi = null,
+    /// <summary>Kişinin carideki rolü (taraf.rol, KisiRolKodlari) ve bölüm adı - İlgili Kişiler gridi (08.11.2026).</summary>
+    short? Rol = null, string? DepartmanAdi = null, string? Notlar = null);
 
 /// <summary>
 /// Cari kartındaki "İlgili Kişiler" — ayrı bir tablo DEĞİL, semadaki tasarıma uyularak
@@ -45,15 +47,21 @@ public sealed class KisiDeposu
         await using var komut = baglanti.Komut("""
             -- CEP ÖNCELİKLİ (kullanıcı 25.10.2026, kart 485: "hangisi varsa o gelsin, cep öncelikli" - Delphi'den
             --   gelen kişinin numarası cep_tel'de, gridde telefon boş görünüyordu). Düzenleme gösterilen kolona yazar.
-            select id, unvan, coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
+            -- GÖRÜNEN AD (1277, kullanıcı 08.11.2026 "Unvan alanına Unvan+Ad+Soyad gelsin"): kişi kartında unvan artık
+            --   yalnız önek, ad / soyad ayrı - fn_taraf_ad ikisini birleştirir ("Av. Ali Kaya").
+            select id, public.fn_taraf_ad(unvan, ad, soyad)::varchar(120) as unvan,
+                   coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
                    eposta, durum, gorev, departman, true as bagli,
-                   (select g.ad from public.personel_gorev g where g.id = taraf.gorev_id) as gorev_adi
+                   (select g.ad from public.personel_gorev g where g.id = taraf.gorev_id) as gorev_adi,
+                   rol, (select d.ad from public.departman d where d.id = taraf.departman) as departman_adi, notlar
               from public.taraf
              where bag_id = @p0 and kisi = 1
             union all
-            select id, unvan, coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
+            select id, public.fn_taraf_ad(unvan, ad, soyad)::varchar(120) as unvan,
+                   coalesce(nullif(btrim(cep_tel), ''), nullif(btrim(telefon), '')) as telefon,
                    eposta, durum, gorev, departman, false as bagli,
-                   (select g.ad from public.personel_gorev g where g.id = t.gorev_id) as gorev_adi
+                   (select g.ad from public.personel_gorev g where g.id = t.gorev_id) as gorev_adi,
+                   rol, (select d.ad from public.departman d where d.id = t.departman) as departman_adi, notlar
               from public.taraf t
              where kisi = 1
                and (bag_id is null or bag_id <> @p0)
@@ -75,7 +83,10 @@ public sealed class KisiDeposu
                 okuyucu.IsDBNull(5) ? null : okuyucu.GetString(5),
                 okuyucu.IsDBNull(6) ? null : okuyucu.GetInt16(6),
                 okuyucu.GetBoolean(7),
-                okuyucu.IsDBNull(8) ? null : okuyucu.GetString(8)));
+                okuyucu.IsDBNull(8) ? null : okuyucu.GetString(8),
+                okuyucu.IsDBNull(9) ? null : okuyucu.GetInt16(9),
+                okuyucu.IsDBNull(10) ? null : okuyucu.GetString(10),
+                okuyucu.IsDBNull(11) ? null : okuyucu.GetString(11)));
         return sonuc;
     }
 
@@ -161,15 +172,8 @@ public sealed class KisiDeposu
             yeniId = Convert.ToInt64(await komut.ExecuteScalarAsync(iptal));
         }
 
-        // Kod verilmedi (bu hizli-ekle akisinda kod hic sorulmuyor) - ID numarasi kod
-        // olarak atanir (kullanici: "kod verilmediyse ID no atasın").
-        await using (var kodKomut = new NpgsqlCommand(
-            "update public.taraf set kod = @p0 where id = @p1", baglanti, islem))
-        {
-            kodKomut.Parameters.AddWithValue("p0", yeniId.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            kodKomut.Parameters.AddWithValue("p1", yeniId);
-            await kodKomut.ExecuteNonQueryAsync(iptal);
-        }
+        // Kod verilmedi (bu hizli-ekle akisinda kod hic sorulmuyor): eskiden ID numarasi kod olarak atanirdi;
+        //   1277'den beri DB tetigi (tr_taraf_kisi_kod) bos kodu bas harfler + id ile doldurur - burada yazilmaz.
 
         await GecmisAcAsync(baglanti, islem, yeniId, tarafId, baglam.KullaniciId, iptal);
 
@@ -329,6 +333,49 @@ public sealed class KisiDeposu
         await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, KartTabloId.Cari, kisiId,
             baglam.KullaniciId, baglam.SubeId, baglam.Ip,
             new Dictionary<string, object?> { ["bag_id"] = $"{tarafId} -> (kopar)" },
+            ustTabloId: KartTabloId.Cari, ustKayitId: tarafId, tarafId: (int)kisiId, iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return await ListeleAsync(tarafId, iptal);
+    }
+
+    /// <summary>
+    /// Kisiyi bu cariden TÜMDEN KALDIR (kullanıcı 08.11.2026: "kaldır dersem - yanlışlıkla eklenmiş olabilir -
+    /// tümden bağını koparsın; Ayrıldı dersem durum Ayrıldı olsun"): bag_id boşalır VE bu kişi-cari çiftinin
+    /// taraf_gecmis dönemleri silinir - liste onu "Ayrıldı" olarak da göstermez. KoparAsync (Ayrıldı) dönemi kapatır,
+    /// tarihçe kalır. Kişi kaydı silinmez.
+    /// </summary>
+    public async Task<IReadOnlyList<KisiKaydi>> KaldirAsync(long tarafId, long kisiId,
+        YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        int etkilenen;
+        await using (var komut = new NpgsqlCommand(
+            "update public.taraf set bag_id = null, degistiren = @p0 " +
+            "where id = @p1 and bag_id = @p2 and kisi = 1", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", baglam.KullaniciId);
+            komut.Parameters.AddWithValue("p1", kisiId);
+            komut.Parameters.AddWithValue("p2", tarafId);
+            etkilenen = await komut.ExecuteNonQueryAsync(iptal);   // zaten kopmuş (Ayrıldı) kişi de kaldırılabilir
+        }
+        int silinen;
+        await using (var komut = new NpgsqlCommand(
+            "delete from public.taraf_gecmis where kisi_id = @p0 and cari_id = @p1", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", kisiId);
+            komut.Parameters.AddWithValue("p1", tarafId);
+            silinen = await komut.ExecuteNonQueryAsync(iptal);
+        }
+        // HİÇBİR ŞEY DEĞİŞMEDİYSE (çift tıklama, başka kullanıcı önce kaldırdı) log YAZILMAZ, çağıran bilir
+        //   (inceleme 08.11.2026; CLAUDE.md: değişiklik yoksa log satırı yok).
+        if (etkilenen == 0 && silinen == 0) throw GentegreHatasi.Bulunamadi("Kişi bu cariye bağlı değil.");
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, KartTabloId.Cari, kisiId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, object?> { ["bag_id"] = $"{tarafId} -> (kaldır; {silinen} geçmiş dönemi silindi)" },
             ustTabloId: KartTabloId.Cari, ustKayitId: tarafId, tarafId: (int)kisiId, iptal: iptal);
 
         await islem.CommitAsync(iptal);

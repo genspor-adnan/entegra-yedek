@@ -2,6 +2,7 @@ import { telefonAlaniMi } from '../alanBicim';
 import { telefonBicimle } from '../bicim';
 import { detayFarki, type DetayDurumu } from '../GenDetayTablo';
 import type { Deger } from '../kartAlanCizim';
+import { ONEKLI_KARTLAR } from './useUnvanOneki';
 import type { KartMetaYaniti } from '../../api/sozlesme';
 
 /**
@@ -55,11 +56,11 @@ export function kartGovdesiKur(g: {
         })),
   };
 
-  // PERSONEL / DIS DOKTOR: unvan YALNIZ ONEK (940, kullanici: "personelde
-  //   unvan tam adi tutmasin, sadece Dr. veya Prof.Dr. gibi olsun"). Unvansiz
-  //   kiside BOS gonderilir - eski tam ad kalmasin; gorunen ad sunucuda
+  // PERSONEL / DIS DOKTOR / KİŞİ: unvan YALNIZ ONEK (940, kullanici: "personelde
+  //   unvan tam adi tutmasin, sadece Dr. veya Prof.Dr. gibi olsun"; kişi 1277).
+  //   Unvansiz kiside BOS gonderilir - eski tam ad kalmasin; gorunen ad sunucuda
   //   fn_taraf_ad(unvan, ad, soyad).
-  if (kaynak === 'personel' || kaynak === 'dis-hekim') {
+  if (ONEKLI_KARTLAR.has(kaynak)) {
     govde.kart.unvan = unvanOneki;
   } else if (personelGibiKart || kaynak === 'hasta-aday') {
     // HASTA: unvan TAM AD - DB'de NOT NULL, ad+soyad'dan birlestirilir.

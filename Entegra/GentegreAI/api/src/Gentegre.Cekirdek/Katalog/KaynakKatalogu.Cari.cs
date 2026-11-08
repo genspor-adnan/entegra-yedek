@@ -206,16 +206,24 @@ public static partial class KaynakKatalogu
             //   icerir" filtresi (cari ile ORTAK arama mantigi) bu kolonu arar, yoksa
             //   "Bilinmeyen alan: kod" 400 hatasi.
             new("kod",          "t.kod",           "metin", "Kisi Kodu",     Varsayilan: false),
-            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan"),
+            new("unvan",        "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",         "metin", "Unvan", Genislik: 240),
+            // ROL UNVANIN SAĞINDA (kullanıcı 08.11.2026): kart kataloğunun KisiRolKodlari sözlüğü (tek yer; inceleme).
+            new("rol",          "t.rol",           "kod",   "Rol",           Genislik: 110, Kodlar: KartKatalogu.KisiRolKodlari),
             // Gizli - GenGrid "gengrid olmali" (cari kartinda gomulu İlgili Kişiler) sabitFiltre
             //   "bagId = @tarafId" burayla calisir; kendi kolonu gorunmez, sadece filtrelenir.
             new("bagId",        "t.bag_id",        "sayi",  "Bagli Cari Id", Varsayilan: false, Filtrelenebilir: true),
             new("bagliCari",    "(select public.fn_taraf_ad(c.unvan, c.ad, c.soyad)::varchar(120) as unvan from public.taraf c where c.id = t.bag_id)",
                                                     "metin", "Cari (Firma)", Genislik: 180),
-            new("departman",    "t.departman",     "kod",   "Bölüm"),
+            // BÖLÜM/GÖREV TEK SÜTUN (kullanıcı 08.11.2026: "bölüm ve görev kolonlarını Bölüm/Görev olarak birleştir").
+            //   Ayrı `departman` / `gorev` kolonları GİZLİ kalır: kişi arama penceresi (tarafDuzenleri kisi) görev
+            //   süzgeci ve ek aramayı `gorev` ile yapar, önizleme de onu gösterir.
+            new("bolumGorev",   "concat_ws(' / ', (select d.ad from public.departman d where d.id = t.departman), " +
+                                "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), nullif(t.gorev, '')))::varchar(160)",
+                                "metin", "Bölüm/Görev", Genislik: 160),
+            new("departman",    "t.departman",     "kod",   "Bölüm",         Varsayilan: false),
             // Listeden seçilen görev (gorev_id, 1182) önce, yoksa serbest metin.
             new("gorev",        "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), nullif(t.gorev, ''))::varchar(100)",
-                                "metin", "Görev"),
+                                "metin", "Görev",         Varsayilan: false),
             new("cepTel",       "t.cep_tel",       "metin", "Cep Telefonu"),
             new("telefon",      "t.telefon",       "metin", "Telefon",       Varsayilan: false),
             new("eposta",       "t.eposta",        "metin", "E-posta"),

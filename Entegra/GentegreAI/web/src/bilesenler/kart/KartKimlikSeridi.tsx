@@ -1,11 +1,12 @@
 import { basHarfler } from '../basHarfler';
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
 import { type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { TekKayit } from '../TekKayit';
 import type { useUnvanOneki } from './useUnvanOneki';
 import { c } from '../../dil/ceviri';
+import { KartAdi } from '../KartAdi';
 
 /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
@@ -50,6 +51,15 @@ export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
   seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk,
 }: KartKimlikSeridiOzellikleri) {
+  /**
+   * KİŞİ BANDI (mockup Ekranlar/kisi_karti_avatar_bant.html, kullanıcı 08.11.2026: "başlıktaki bilgiler bandda
+   * görünsün.. Edit (kalem) basılırsa edit bandı görünür altta.. ilk girişte başlık boş, alttaki editler aktif"):
+   * düzenleme şeridi YENİ kartta açık gelir, kayıtlı kartta kapalı; ✎ açar / kapatır. Kayıtlı kartta ad boş yüklenirse
+   * (eski kayıt) şerit kendiliğinden açılır - kullanıcı neyi dolduracağını görsün.
+   */
+  const [seritAcik, setSeritAcik] = useState(yeniMi);
+  const adBos = !String(deger.ad ?? '').trim() && !String(deger.soyad ?? '').trim();
+  useEffect(() => { if (kaynak === 'kisi' && !yeniMi && adBos && deger.id) setSeritAcik(true) }, [kaynak, yeniMi, adBos, deger.id]);
   // CARİ ETİKETLERİ (kullanıcı 25.10.2026: "kod rename Müşteri Kodu ve Unvan rename Müşteri Ünvanı"): aynı 'cari'
   //   kartı Müşteri ve Tedarikçi listesinden açılır - etiket hangi ekrandan açıldıysa o rolle.
   const kimlikAlanlari = kaynak !== 'cari' ? kimlikAlanlariHam : (() => {
@@ -130,7 +140,75 @@ export function KartKimlikSeridi({
               {renderAlanListesi((meta?.alanlar ?? []).filter(a => a.ad === 'temsilci'))}
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
             </div>
-          ) : personelGibiKart ? (
+          ) : kaynak === 'kisi' ? (() => {
+            /* KİŞİ (1277 + avatarlı bant 08.11.2026): üstte SALT BİLGİ BANDI - avatar (ad+soyad baş harfleri), ünvan
+               öneki rozeti, ad soyad, kişi kodu, rol · Bölüm/Görev · bağlı cari (sekmede açar) · not; sağda cep,
+               e-posta, durum ve ✎. Altında DÜZENLEME ŞERİDİ (kalemle): Ünvan (yarım, hekim.unvan combosu) · Ad · Soyad ·
+               Bağlı Cari · Rol · Bölüm · Görev. Kod kartta yazılmaz (DB tetiği baş harf + id), bantta okunur. */
+            const m = (k: string) => String(deger[k] ?? '').trim();
+            const etiket = (alan: string) => {
+              const v = m(alan); if (!v) return '';
+              return meta?.alanlar.find(a => a.ad === alan)?.kodlar?.[v] ?? v;
+            };
+            const ad = [m('ad'), m('soyad')].filter(Boolean).join(' ');
+            const bolumGorev = [etiket('departman'), etiket('gorevId')].filter(Boolean).join(' / ');
+            const bagId = Number(deger.bagId) || 0;
+            const aktif = m('durum') === '' || m('durum') === '1';
+            const tel = m('cepTel') || m('telefon');
+            const eposta = m('eposta');
+            // .kaid yatay akar: bant + şerit tek BLOK sarmalda ki şerit bandın ALTINA insin.
+            return (
+              <div className="kisi-ust">
+                <div className={`kisi-bant${ad ? '' : ' bos'}`}>
+                  <span className={`kart-avatar kisi-avatar${aktif ? '' : ' pasif'}`}>
+                    {ad ? basHarfler(ad) : '?'}
+                    {ad && <i className={`nokta${aktif ? '' : ' pasif'}`} />}
+                  </span>
+                  <div className="kim">
+                    <div className="ad">
+                      {unvanOneki.onek && <span className="onek">{unvanOneki.onek}</span>}
+                      <span className="metin">{ad || c('Yeni Kişi')}</span>
+                      {m('kod') && <span className="kod">{m('kod')}</span>}
+                    </div>
+                    <div className="alt">
+                      {etiket('rol') && <span className="rol">{etiket('rol')}</span>}
+                      {bolumGorev && <span>{bolumGorev}</span>}
+                      {bagId > 0 && <KartAdi tur="musteri" id={bagId}>{etiket('bagId') || `#${bagId}`} ↗</KartAdi>}
+                      {m('notlar') && <span className="not" title={m('notlar')}>{m('notlar')}</span>}
+                      {!ad && yeniMi && <span className="ipucu">{c('Ad / soyad yazıldıkça burada belirir; kod kaydedince gelir')}</span>}
+                    </div>
+                  </div>
+                  <div className="sag">
+                    {tel && <a className="d" href={`tel:${tel.replace(/\s/g, '')}`} onClick={e => e.stopPropagation()}>📱 {tel}</a>}
+                    {eposta && <a className="d ik" href={`mailto:${eposta}`} title={eposta} onClick={e => e.stopPropagation()}>✉</a>}
+                    <span className={`durum${aktif ? '' : ' pas'}`}>● {aktif ? c('Aktif') : c('Pasif')}</span>
+                    {!salt && (
+                      <button type="button" className={`d ik kalem-dugme${seritAcik ? ' acik' : ''}`}
+                              title={c('Kimlik bilgilerini düzenle')} onClick={() => setSeritAcik(v => !v)}>✎</button>
+                    )}
+                  </div>
+                </div>
+                {seritAcik && (
+                  <div className="alan-izgara kaid-kisi">
+                    <label className="alan tip-kod">
+                      <span className="etiket">{c('Ünvan')}</span>
+                      <select value={unvanOneki.onek} disabled={salt}
+                              onChange={e => unvanOneki.setOnek(e.target.value)}>
+                        <option value="">—</option>
+                        {unvanOneki.secenekler.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </label>
+                    {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'ad'))}
+                    {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'soyad'))}
+                    {renderAlanListesi(kimlikAlanlari.filter(a => !['unvan', 'ad', 'soyad', 'notlar', 'durum'].includes(a.ad)))}
+                    {/* 2. SIRA (kullanıcı 08.11.2026): Not geniş, Durum son sütunda - yalnız düzenleme kipinde. */}
+                    {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'notlar'))}
+                    {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+                  </div>
+                )}
+              </div>
+            );
+          })() : personelGibiKart ? (
             /* PERSONELDE 6 SUTUN (847): Ünvan YARIM (kisa deger - "Prof.Dr."
                tam sutunda bos yer birakiyordu), sonuna Ana Rol eklendi. */
             <div className="alan-izgara"
@@ -311,7 +389,7 @@ export function KartKimlikSeridi({
               </div>
             );
           })() : (
-            <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
+            <div className={'alan-izgara'
                             + (kaynak === 'randevu' ? ' kaid-randevu' : '')
                             + (kaynak === 'prim-plani' ? ' kaid-prim' : '')
                             + (kaynak === 'kampanya' ? ' kaid-kampanya' : '')

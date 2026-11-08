@@ -289,31 +289,37 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["kisi"] = (short)1, ["durum"] = (short)1 },
         Alanlar: new KartAlani[]
         {
-            // Ad/Soyad DEGIL, Cari ile ayni desen: "Unvan" tek goruntulenen alan. Ad/Soyad
-            //   ayrimi BILEREK yapilmadi - kullanici bunu ileride IK (personel) ve hasta
-            //   kartlarina sakladi, kisi kartinda degil (038_kisi_karti_unvan_geri_al.sql).
-            // idstrip sirasi kullanici tarafindan belirlendi: Kod, Unvan, Departman, Gorev.
-            //   Durum idstrip'ten CIKARILDI (kullanici sonradan Durum'suz istedi) - Is
-            //   Bilgileri kutusuna tasindi (Bagli Cari ile birlikte).
+            // KİŞİ = PERSONEL GİBİ (kullanıcı 08.11.2026, göç 1277): Ünvan YALNIZ önek combosu ("Av.", "Dr.",
+            //   hekim.unvan listesi), Ad / Soyad ayrı; görünen ad fn_taraf_ad(unvan, ad, soyad). 2026-08-20'deki
+            //   "tek Unvan" kararı böylece geri alındı. KİŞİ KODU kartta YOK - DB tetiği boş kodu ad+soyad baş
+            //   harfleri + id ile doldurur (tr_taraf_kisi_kod); listede / aramada görünür.
+            // idstrip: Ünvan, Ad, Soyad, Bağlı Cari, Rol, Bölüm, Görev · 2. sıra Not, Durum (KartKimlikSeridi).
             new("id",        "id",         "sayi",  Yazilabilir: false),
             // YeniKayitVarsayilanlari'ndaki "kisi"=1 buraya yazilabilsin diye (alan
             //   tanimsizsa EkleAsync kolonu atlar, DB varsayilanina - 0/false - duser,
             //   sonra SabitKosul "kisi = 1" yeni kaydi bulamaz -> "Nullable ... value" hatasi).
             //   UI'da gorunmez (gizli Set, GenForm.tsx).
             new("kisi",      "kisi",       "mantik", Baslik: "Kisi"),
-            new("kod",       "kod",        "metin", EnFazlaUzunluk: 20, Baslik: "Kisi Kodu", Grup: "Kimlik"),
-            new("unvan",     "unvan",      "metin", Zorunlu: true, EnFazlaUzunluk: 120, Baslik: "Unvan", Grup: "Kimlik"),
+            // KOD SALT OKUNUR, karta değil BANTA yazılır (avatarlı başlık bandı 08.11.2026; tetik üretir). UI'da gizli
+            //   alan (KartGrupSekmesi gizli), KartKimlikSeridi bantta gösterir.
+            new("kod",       "kod",        "metin", Yazilabilir: false, Baslik: "Kişi Kodu"),
+            new("unvan",     "unvan",      "metin", EnFazlaUzunluk: 120, Baslik: "Ünvan", Grup: "Kimlik"),
+            new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 50, Baslik: "Ad",    Grup: "Kimlik"),
+            new("soyad",     "soyad",      "metin", EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
+            // BAĞLI CARİ ve ROL ŞERİTTE, SOYADIN SAĞINDA (kullanıcı 08.11.2026: "soyadın sağına rol taşı", "bağlı
+            //   cariyi soyadın sağına al.. 7 sütun olsun"): Ünvan · Ad · Soyad · Bağlı Cari · Rol · Bölüm · Görev.
+            new("bagId",     "bag_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Bagli Cari", Grup: "Kimlik"),
+            new("rol",       "rol",        "kod",   SabitKodlar: KisiRolKodlari, Baslik: "Rol", Grup: "Kimlik"),
             new("departman", "departman",  "kod",   KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
             // GÖREV LİSTEDEN (kullanıcı 25.10.2026: "bölüm ve görev listesinin de migrate olması gerekir"): Delphi
             //   cari kişi görevi bir listeydi (GENINI -2205, 1182 ile personel_gorev'e taşındı). Serbest metin
-            //   personel kartındaki gibi "Unvan (serbest)" olarak kalır - eski kayıtların yazısı kaybolmasın.
+            //   "Unvan (serbest)" alanı karttan KALDIRILDI (kullanıcı 08.11.2026); kolon durur, yazısı silinmez.
             new("gorevId",   "gorev_id",   "kod",   KodTablosu: "public.v_gorev_lookup", Baslik: "Görev", Grup: "Kimlik"),
-            new("gorev",     "gorev",      "metin", EnFazlaUzunluk: 100, Baslik: "Unvan (serbest)", Grup: "Kimlik"),
-            // "Is Bilgileri" kutu basligi IPTAL edildi (kullanici) - Bagli Cari/Rol/Durum
-            //   AltGrup'suz (adsiz) duz alan olarak kaliyor, idstrip'in hemen altinda.
-            new("bagId",     "bag_id",     "kod",   KodTablosu: "public.v_cari_lookup", Baslik: "Bagli Cari"),
-            new("rol",       "rol",        "kod",   SabitKodlar: KisiRolKodlari, Baslik: "Rol"),
-            new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum"),
+            // NOT + DURUM da KİMLİK ŞERİDİNDE, 2. SIRA (kullanıcı 08.11.2026: "not ve durumu da başlık editlerin altına
+            //   2. sıra olarak taşı.. edit moddayken görünsün"). NOT TEK SATIR (TekSatir): kolon 1000, ekranda tek kutu
+            //   (inceleme: sahte 399 sınırı eski uzun notu kaydedilemez yapardı). KartKimlikSeridi ayrı satırda çizer.
+            new("notlar",    "notlar",     "metin", EnFazlaUzunluk: 1000, TekSatir: true, Baslik: "Not", Grup: "Kimlik"),
+            new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             new("telefon",   "telefon",    "metin", EnFazlaUzunluk: 30,  Baslik: "Telefon",         AltGrup: "İletişim"),
             new("cepTel",    "cep_tel",    "metin", EnFazlaUzunluk: 30,  Baslik: "Cep Telefonu",    AltGrup: "İletişim"),
             new("eposta",    "eposta",     "metin", EnFazlaUzunluk: 120, Baslik: "E-posta",         AltGrup: "İletişim"),

@@ -11,6 +11,11 @@ public sealed class KartYaniti
     /// seridini buna gore cizer. Sayfasiz detaylar burada YER ALMAZ.</summary>
     public IDictionary<string, int>? DetayToplam { get; set; }
     public IDictionary<string, IDictionary<string, string>>? KodAd { get; set; }
+    /// <summary>
+    /// Kaydın GÖRÜNEN ADI (taraf tabanlı kartlar: fn_taraf_ad(unvan, ad, soyad)) - arama penceresi yeni kaydı
+    /// seçerken listeyle aynı adı kullanır, istemci kuralı yeniden yazmaz (inceleme 08.11.2026). Diğer kartlarda null.
+    /// </summary>
+    public string? GorunenAd { get; set; }
     public KartYetkisi Yetki { get; set; } = new();
     /// <summary>
     /// Kaydın dış kaynağı (1089): "Delphi" ise satır Delphi ERP'den aktarılır, web'de
@@ -108,7 +113,9 @@ public sealed record KartAlanMeta(
     /// <summary>Kilitli alanin yaninda gosterilen kisa aciklama.</summary>
     string? Ipucu = null,
     /// <summary>Bu alan DOLUYSA zorunluluk kalkar (randevu: cihaz seçiliyse doktor zorunlu değil).</summary>
-    string? ZorunluMuafAlan = null);
+    string? ZorunluMuafAlan = null,
+    /// <summary>Uzun metin kolonu ama EKRANDA TEK SATIR (notlar): arayüz textarea'ya geçmez.</summary>
+    bool TekSatir = false);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

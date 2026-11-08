@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Kişi Kartı — Avatarlı Başlık Bandı (mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .win{max-width:1180px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center;cursor:pointer;user-select:none}
+  .btn.pri{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .btn.teh{background:linear-gradient(#e36a6a,#cf4f4f);color:#fff;border-color:#b84343}
+  .right{margin-left:auto}
+
+  /* ---------- BANT (salt bilgi) ---------- */
+  .bant{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:10px 14px;
+        background:linear-gradient(#ffffff,#f3f7fb);border-bottom:1px solid var(--line2)}
+  .avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:19px;font-weight:bold;color:#fff;
+          background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15);
+          position:relative;letter-spacing:.5px}
+  .avatar.bos{background:#dfe6ee;color:#8a98a8}
+  .avatar .nokta{position:absolute;right:1px;bottom:1px;width:12px;height:12px;border-radius:50%;background:var(--ok);border:2px solid #fff}
+  .avatar .nokta.pasif{background:#9aa6b2}
+  .kim{min-width:0}
+  .ad{font-size:17px;color:var(--navy);font-weight:bold;line-height:1.15;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .ad .onek{font-size:12px;color:var(--muted);font-weight:normal;border:1px solid var(--line);border-radius:3px;padding:0 5px;background:#fff}
+  .ad .kod{font-size:11px;color:var(--muted);font-weight:normal;font-family:Consolas,monospace}
+  .ad.bos{color:#9aa6b2;font-weight:normal}
+  .alt{margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11.5px}
+  .alt .ayr{color:#b7c2cd}
+  .rol{border-radius:10px;padding:1px 8px;font-size:10.5px;font-weight:bold;letter-spacing:.3px;background:#e4efdc;color:#2e5a1f;border:1px solid #c6ddb8}
+  .lnk{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+  .sag{display:flex;gap:6px;align-items:center}
+  .ik{width:30px;height:30px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(var(--btnfrom),var(--btnto));display:grid;place-items:center;font-size:14px;cursor:pointer}
+  .ik.kalem{border-color:#98c2ee;background:linear-gradient(#f3f8ff,#dfeafa);color:var(--accent)}
+  .ik.kalem.acik{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .durum{border-radius:3px;padding:3px 9px;font-size:11px;font-weight:bold;background:#dff3e4;color:var(--ok);border:1px solid #bfe3c9;margin-left:6px}
+  .durum.pas{background:#eceff2;color:#6b7a8b;border-color:#d5dbe2}
+  .not{font-size:11px;color:var(--muted);font-style:italic;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- DÜZENLEME ŞERİDİ (kalem ile açılır) ---------- */
+  .idstrip{display:grid;gap:8px;padding:8px 12px 9px;background:linear-gradient(#fbfcfe,#eef4fa);border-bottom:1px solid var(--line2);
+           grid-template-columns:.45fr .8fr .8fr 1.1fr .7fr .8fr .8fr;border-left:3px solid var(--accent)}
+  .idstrip.gizli{display:none}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+  .inp.ro{background:#f4f6f9;color:#55657a}
+  .inp.odak{border-color:var(--accent);box-shadow:0 0 0 2px rgba(47,109,179,.18)}
+  .inp .ph{color:#aab4bf}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{background:var(--line);border-radius:8px;padding:0 6px;font-size:10px;margin-left:4px}
+  .govde{padding:10px 12px;color:var(--muted);font-size:11.5px;min-height:46px}
+  .aciklama{max-width:1180px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.5}
+  .aciklama b{color:var(--ink)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+</style>
+</head>
+<body>
+
+<h2><b>1</b> — Kayıtlı kart açılışı: bilgiler BANTTA, düzenleme şeridi kapalı <span class="ipucu">(✎ kaleme tıkla → şerit açılır / kapanır)</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn pri">💾 Kaydet</div><div class="btn teh">Sil</div><div class="btn">⏰ Hatırlat</div>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+
+  <div class="bant">
+    <div class="avatar">MU<span class="nokta"></span></div>
+    <div class="kim">
+      <div class="ad"><span class="onek">Av.</span>Murat Ulu <span class="kod">MU3337</span></div>
+      <div class="alt">
+        <span class="rol">KARAR VERİCİ</span>
+        <span class="ayr">·</span><span>Satınalma / Depo Sorumlusu</span>
+        <span class="ayr">·</span><a class="lnk" href="#">Gülcan Ulu ↗</a>
+        <span class="ayr">·</span><span class="not" title="Not">Fiyat listesini her ay ister, Cuma arama</span>
+      </div>
+    </div>
+    <div class="sag">
+      <div class="btn" title="Ara">📱 0532 123 45 67</div>
+      <div class="ik" title="murat@ulu.com">✉</div>
+      <span class="durum">● Aktif</span>
+      <div class="ik kalem" id="kalem1" title="Kimlik bilgilerini düzenle" onclick="toggle('serit1','kalem1')">✎</div>
+    </div>
+  </div>
+
+  <div class="idstrip gizli" id="serit1">
+    <div class="fld"><label>Ünvan</label><div class="inp combo">Av.</div></div>
+    <div class="fld"><label class="req">Ad</label><div class="inp">Murat</div></div>
+    <div class="fld"><label>Soyad</label><div class="inp">Ulu</div></div>
+    <div class="fld"><label>Bağlı Cari</label><div class="inp ro">Gülcan Ulu</div></div>
+    <div class="fld"><label>Rol</label><div class="inp combo">Karar Verici</div></div>
+    <div class="fld"><label>Bölüm</label><div class="inp combo">Satınalma</div></div>
+    <div class="fld"><label>Görev</label><div class="inp combo">Depo Sorumlusu</div></div>
+  </div>
+
+  <div class="tabs"><div class="tab active">Genel</div><div class="tab">Geçmiş <span class="b">0</span></div><div class="tab">Resim / Doküman</div></div>
+  <div class="govde">Not · Durum · İletişim · Adres · Resim kutuları (değişmez)</div>
+</div>
+<p class="aciklama">
+  <b>Kural:</b> kart açılışında bilgi varsa bant dolu, şerit <u>kapalı</u>. ✎ kaleme basınca şerit bandın altında açılır (kalem mavi dolu);
+  şeritte yazılan anında banta yansır (aynı alanlar, tek değer). Kaydet şeridi kapatmaz, ikinci ✎ kapatır. Avatar = baş harfler
+  (fotoğraf varsa o); kişi kodu bantta soluk; bağlı cari linki sekmede açar.
+</p>
+
+<h2><b>2</b> — Yeni kayıt: bant BOŞ, şerit açık ve Ad odakta</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn pri">💾 Kaydet</div><div class="btn">⏰ Hatırlat</div>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant">
+    <div class="avatar bos">?</div>
+    <div class="kim">
+      <div class="ad bos">Yeni Kişi</div>
+      <div class="alt"><span style="color:#aab4bf">Ad / soyad yazıldıkça baş harfler ve ad burada belirir; kod kaydedince gelir</span></div>
+    </div>
+    <div class="sag">
+      <span class="durum">● Aktif</span>
+      <div class="ik kalem acik" title="Yeni kayıtta şerit açık gelir" id="kalem2" onclick="toggle('serit2','kalem2')">✎</div>
+    </div>
+  </div>
+  <div class="idstrip" id="serit2">
+    <div class="fld"><label>Ünvan</label><div class="inp combo"><span class="ph">—</span></div></div>
+    <div class="fld"><label class="req">Ad</label><div class="inp odak"><span class="ph">Ad</span></div></div>
+    <div class="fld"><label>Soyad</label><div class="inp"><span class="ph">Soyad</span></div></div>
+    <div class="fld"><label>Bağlı Cari</label><div class="inp ro">Gülcan Ulu</div></div>
+    <div class="fld"><label>Rol</label><div class="inp combo"><span class="ph">—</span></div></div>
+    <div class="fld"><label>Bölüm</label><div class="inp combo"><span class="ph">—</span></div></div>
+    <div class="fld"><label>Görev</label><div class="inp combo"><span class="ph">—</span></div></div>
+  </div>
+  <div class="tabs"><div class="tab active">Genel</div><div class="tab">Resim / Doküman</div></div>
+  <div class="govde">Not · Durum · İletişim · Adres · Resim kutuları</div>
+</div>
+<p class="aciklama">
+  <b>Yeni kartta</b> (cari kartından "Kişi Ekle → Yeni Kişi" ile açıldıysa Bağlı Cari dolu gelir) şerit açık, kalem "açık" halde.
+  Kullanıcı yazdıkça bant canlanır: "Mu" → avatar <b>M</b>, "Murat Ulu" → <b>MU</b> + ad. Kayıttan sonra kod (MU3337) banta düşer, şerit açık kalır.
+</p>
+
+<h2><b>3</b> — Kayıtlı kartta ✎ açılmış hali (şerit + bant birlikte)</h2>
+<div class="win">
+  <div class="bant">
+    <div class="avatar" style="background:linear-gradient(135deg,#9aa6b2,#6b7a8b)">AK<span class="nokta pasif"></span></div>
+    <div class="kim">
+      <div class="ad" style="color:#55657a"><span class="onek">Dr.</span>Ayşe Kaya <span class="kod">AK4105</span></div>
+      <div class="alt"><span class="rol">KULLANICI</span><span class="ayr">·</span><span>Muhasebe</span><span class="ayr">·</span><a class="lnk" href="#">Akana Mühendislik ↗</a></div>
+    </div>
+    <div class="sag"><span class="durum pas">● Pasif</span><div class="ik kalem acik" id="kalem3" onclick="toggle('serit3','kalem3')">✎</div></div>
+  </div>
+  <div class="idstrip" id="serit3">
+    <div class="fld"><label>Ünvan</label><div class="inp combo">Dr.</div></div>
+    <div class="fld"><label class="req">Ad</label><div class="inp">Ayşe</div></div>
+    <div class="fld"><label>Soyad</label><div class="inp">Kaya</div></div>
+    <div class="fld"><label>Bağlı Cari</label><div class="inp ro">Akana Mühendislik</div></div>
+    <div class="fld"><label>Rol</label><div class="inp combo">Kullanıcı</div></div>
+    <div class="fld"><label>Bölüm</label><div class="inp combo">Muhasebe</div></div>
+    <div class="fld"><label>Görev</label><div class="inp combo">—</div></div>
+  </div>
+  <div class="tabs"><div class="tab active">Genel</div><div class="tab">Geçmiş <span class="b">2</span></div><div class="tab">Resim / Doküman</div></div>
+  <div class="govde">…</div>
+</div>
+
+<script>
+  function toggle(seritId, kalemId){
+    var s = document.getElementById(seritId), k = document.getElementById(kalemId);
+    s.classList.toggle('gizli'); k.classList.toggle('acik', !s.classList.contains('gizli'));
+  }
+</script>
+</body>
+</html>

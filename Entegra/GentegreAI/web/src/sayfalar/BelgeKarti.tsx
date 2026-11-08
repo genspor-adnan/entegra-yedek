@@ -1654,6 +1654,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
           kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
+          yeniMi={!mevcutBelge}
           belgeNo={belgeNo} setBelgeNo={setBelgeNo}
           tarih={tarih} setTarih={setTarih}
           tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
