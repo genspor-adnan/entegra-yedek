@@ -7,3 +7,6 @@ api/src/Gentegre.Api/gizli/
 api/TestResults/
 api/**/TestResults/
 yayin/ajan/
+
+# npm (vitest/playwright yardimcilari) - depo disi
+node_modules/
