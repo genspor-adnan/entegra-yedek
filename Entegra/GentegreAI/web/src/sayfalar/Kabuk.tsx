@@ -245,12 +245,17 @@ export function Kabuk() {
     //   getirme olmalı"): kartı sekmede açılan HER liste için iki işlem; yalnız listesi menüsünde olan
     //   (yetkili) kullanıcıya. Aynı kart yolunu paylaşan listelerden ilki. Boş palette yalnız son
     //   açılan / favori listelerinkiler ve hasta-başvuru görünür (KomutPaleti), tamamı aramada.
+    // "KAYITLI ... KARTI" ALIŞ / SATIŞ BELGELERİNDE YOK (kullanıcı 08.11.2026: "prompt menüdeki kayıtlı belge kartı
+    //   olanları kaldır.. alış/satış belge olanlar"): kayıtlı fatura / irsaliye / sipariş... listesinden açılır (yakında
+    //   Detaylı Ara); palette yalnız "Yeni". Başvuru (kaynak belge ama SABIT_ARAMA), hasta, stok, personel, cari kalır.
     ...kartListeleri.filter(l => menudeVar(listeYolu(l))).flatMap(l => {
       const yol = kartSekmeYolu(l), kart = kartAdi(l);
       return [
         { yol: `${yol}/yeni`, ad: yeniSekmeBasligi(l), grup: l.menuGrup ?? '', islem: true, listeYol: listeYolu(l), sabit: !!SABIT_ARAMA[yol] },
-        { yol: `${KAYITLI_ONEK}${yol}`, ad: `Kayıtlı ${kart}`, grup: l.menuGrup ?? '', islem: true, ikon: '📂',
-          listeYol: listeYolu(l), sabit: !!SABIT_ARAMA[yol] },
+        ...(l.kaynak === 'belge' && !SABIT_ARAMA[yol] ? [] : [
+          { yol: `${KAYITLI_ONEK}${yol}`, ad: `Kayıtlı ${kart}`, grup: l.menuGrup ?? '', islem: true, ikon: '📂',
+            listeYol: listeYolu(l), sabit: !!SABIT_ARAMA[yol] },
+        ]),
       ];
     }),
   ], [paneller, menudeVar]);

@@ -153,7 +153,9 @@ export function Baslangic() {
       const kartYol = yol.slice(KAYITLI_ONEK.length);
       const l = LISTELER.find(x => kartSekmesiVar(x) && kartSekmeYolu(x) === kartYol);
       const menude = ekranlar.find(e => e.yol.split('?')[0] === `/${l?.rota ?? l?.kaynak}`);
-      return l && menude ? { yol, ad: `Kayıtlı ${kartAdi(l)}`, ic: '📂', grup: menude.grup } : undefined;
+      // Alış / satış belge kartlarının "Kayıtlı" işlemi palette yok (08.11.2026; başvuru kalır) - son açılanlardaki eski
+      //   kayıt da çizilmez.
+      return l && menude && !(l.kaynak === 'belge' && l.rota !== 'basvuru') ? { yol, ad: `Kayıtlı ${kartAdi(l)}`, ic: '📂', grup: menude.grup } : undefined;
     }
     return ekranlar.find(e => e.yol === yol || e.yol.split('?')[0] === yol.split('?')[0]);
   };

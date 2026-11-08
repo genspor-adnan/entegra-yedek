@@ -128,6 +128,9 @@ varsa senaryoyu İlaç / Tıbbi Cihaz yapıyoruz" (tıbbi ürün tespiti Delphi 
 - Satış Faturası Listesi (kullanıcı): ERP tanımında `hastaAdi` gizli (arama ipucu "Ara: …"dan "Hasta" düştü); her iki
   tanımda `tarafUnvan` başlığı "Alıcı Adı"; "Tüm Tarihler" combosu kalktı, yerine yalnız başlama - bitiş tarih kutuları (`tarihAlani`, açılışta boş) - aynı desen
   Ticari tanımlardaki 14 belge listesine (alış/satış fatura, irsaliye, sipariş, fiş, konsinye, teklif, talep, tahakkuk…).
+- Komut paleti (Ctrl+K) ve başlangıç son açılanlar: alış / satış belge kartlarının "Kayıtlı … Kartı" işlemi kalktı
+  (kullanıcı; kayıtlı belge listesinden açılır); başvuru / hasta / stok / personel / cari "Kayıtlı" aramaları kalır
+  (`Kabuk`, `Baslangic`).
 - Mockuplar (uygulama bekliyor): `Ekranlar/fatura_listesi_filtre_paneli.html` - mevcut listeye "🔎 Detaylı Ara ▾" açılır
   paneli (varsayılan kapalı; belge no · tarih aralığı · müşteri · tutar aralığı · tip · e-Belge · kapanma · depo · kaydeden;
   etkin süzgeç çipleri). `Ekranlar/belge_ac_penceresi.html` ilk taslak (ayrı sekme) - kullanıcı tek liste istedi, geçersiz.
