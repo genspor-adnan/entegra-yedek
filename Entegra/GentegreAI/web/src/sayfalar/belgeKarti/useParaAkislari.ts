@@ -1,4 +1,4 @@
-﻿import { useRef } from 'react';
+import { useRef } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type BelgeYaniti } from '../../api/sozlesme';
 import { mesaj, metinSor, onay, paraSor, type ParaSecimi } from '../../bilesenler/mesaj';

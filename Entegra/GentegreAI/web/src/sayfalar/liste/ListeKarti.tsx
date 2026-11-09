@@ -1,4 +1,4 @@
-﻿import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
+import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';

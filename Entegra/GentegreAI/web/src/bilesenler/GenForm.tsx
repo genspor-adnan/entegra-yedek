@@ -1,4 +1,4 @@
-﻿import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';

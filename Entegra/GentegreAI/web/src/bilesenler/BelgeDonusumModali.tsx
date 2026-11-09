@@ -1,4 +1,4 @@
-﻿import {
+import {
   kdvCarpan,
   payKalan as hesapPayKalan,
   payKalanDahil as hesapPayKalanDahil,

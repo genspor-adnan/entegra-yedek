@@ -1,4 +1,4 @@
-﻿# Gentegre AI — Çalışma Tarihçesi
+# Gentegre AI — Çalışma Tarihçesi
 
 Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın kendisi
 `GentegreAI/db/`, sözleşmeler `GentegreAI/dokuman/01_API_SOZLESMELERI.md`,

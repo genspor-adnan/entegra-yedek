@@ -1,4 +1,4 @@
-﻿import {
+import {
   type BelgeYaniti,
   type AcikSatir,
   type EBelgeMesaji,

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using System.Xml.Linq;
 using Gentegre.Api.Servisler.EFatura;
 using Xunit;

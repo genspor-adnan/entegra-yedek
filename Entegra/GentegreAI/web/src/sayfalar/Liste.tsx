@@ -1,4 +1,4 @@
-﻿import { EkstreIkon } from '../bilesenler/EkstreIkon';
+import { EkstreIkon } from '../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../bilesenler/sekmeBaglami';

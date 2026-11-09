@@ -1,4 +1,4 @@
-﻿import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 import { AGAC_VARSAYILAN_CIPLER, EMIR_VARSAYILAN_CIPLER, FIS_VARSAYILAN_CIPLER } from './uretim/uretimListeSeviye';
 
 /**

@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { type AcikSatir, type Kosul, type ListeSatiri, hataMetni } from '../../api/sozlesme';
@@ -159,10 +159,10 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
     <Modal baslik={baslik} onKapat={onKapat} enUst ekSinif="kaynak-aktar"
       alt={
         <>
-          <span className="ka-ozet">
+          <span className="kay-ozet">
             <span>{c('Seçili satır')}: <b>{sepet.length}</b></span>
             <span>{c('Belge')}: <b>{sepetBelgeler.length}</b></span>
-            {lotSoracak > 0 && <span className="ka-lot">◆ {lotSoracak} {c('satır lot soracak')}</span>}
+            {lotSoracak > 0 && <span className="kay-lot">◆ {lotSoracak} {c('satır lot soracak')}</span>}
           </span>
           <button className="d bir" disabled={sepet.length === 0 || gecersiz}
                   title={gecersiz ? c('Miktar 0 ile kalan arasında olmalı.') : ''} onClick={aktar}>
@@ -172,19 +172,19 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
         </>
       }
     >
-      <div className="ka-bolme">
+      <div className="kay-bolme">
         {/* SOL: carinin kaynak belgeleri */}
-        <div className="ka-sol">
-          <div className="ka-arama">
+        <div className="kay-sol">
+          <div className="kay-arama">
             <input value={arama} onChange={e => setArama(e.target.value)} autoFocus
                    placeholder={c('Belge no, açıklama…')} />
           </div>
-          <div className="ka-cipler">
+          <div className="kay-cipler">
             {([['acik', 'Açık'], ['kismi', 'Kısmen aktarılmış'], ['tumu', 'Tümü']] as [Cip, string][]).map(([k, ad]) => (
               <button key={k} type="button" className={`cip${cip === k ? ' on' : ''}`} onClick={() => setCip(k)}>{c(ad)}</button>
             ))}
           </div>
-          <div className="ka-belgeler">
+          <div className="kay-belgeler">
             {listeHata && <div className="hata-kutusu">{listeHata}</div>}
             {belgeler === null && <div className="yukleniyor">{c('Yükleniyor…')}</div>}
             {belgeler !== null && gorunenler.length === 0 && (
@@ -197,57 +197,57 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
               const acikSayi = satirlar ? satirlar.filter(r => kalan(r) > 0).length : null;
               const sec = belgedeSecili(id);
               return (
-                <div key={id} className={`ka-belge${acikId === id ? ' sec' : ''}${kapali ? ' kapali' : ''}`}
-                     onClick={() => setAcikId(id)} data-testid="ka-belge">
-                  <div className="ka-no">{belgeNo(b)}</div>
-                  <div className="ka-tar">{gunNokta(b.belgeTarihi)}</div>
-                  <div className="ka-ack">
+                <div key={id} className={`kay-belge${acikId === id ? ' sec' : ''}${kapali ? ' kapali' : ''}`}
+                     onClick={() => setAcikId(id)} data-testid="kay-belge">
+                  <div className="kay-no">{belgeNo(b)}</div>
+                  <div className="kay-tar">{gunNokta(b.belgeTarihi)}</div>
+                  <div className="kay-ack">
                     <span className={`rozet ${kapali ? 'gri' : Number(b.kapanmaDurum ?? 0) === 1 ? 'uyari' : 'ok'}`}>
                       {String(b.kapanmaAdi ?? (kapali ? 'Kapandı' : Number(b.kapanmaDurum ?? 0) === 1 ? 'Kısmi' : 'Açık'))}
                     </span>
                     {acikSayi !== null && <span className="sonuk">{acikSayi}/{satirlar!.length} {c('satır açık')}</span>}
                     {!tarafId && <span className="sonuk">{String(b.tarafUnvan ?? '')}</span>}
                   </div>
-                  <div className="ka-alt">
+                  <div className="kay-alt">
                     <span className="sonuk">{String(b.aciklama ?? b.teklifKonusu ?? '')}</span>
-                    <span className="ka-tutar">{para.format(Number(b.genelToplam ?? 0))}</span>
+                    <span className="kay-tutar">{para.format(Number(b.genelToplam ?? 0))}</span>
                   </div>
-                  {sec > 0 && <span className="ka-secili">✔ {sec} {c('seçili')}</span>}
+                  {sec > 0 && <span className="kay-secili">✔ {sec} {c('seçili')}</span>}
                 </div>
               );
             })}
           </div>
-          <div className="ka-sol-alt sonuk">{belgeler ? `${gorunenler.length} ${c('belge')}` : ''}</div>
+          <div className="kay-sol-alt sonuk">{belgeler ? `${gorunenler.length} ${c('belge')}` : ''}</div>
         </div>
 
         {/* SAĞ: seçili belgenin açık satırları */}
-        <div className="ka-sag">
+        <div className="kay-sag">
           {hata && <div className="hata-kutusu">{hata}</div>}
           {!acikBelge && (
-            <div className="ka-bos">
+            <div className="kay-bos">
               <b>{c(`Soldan bir ${adlar.ad.toLocaleLowerCase('tr-TR')} seçin`)}</b>
               {c('Satırları burada görünür; birden çok belgeden satır toplayabilirsiniz.')}
             </div>
           )}
           {acikBelge && (
             <>
-              <div className="ka-baslik">
+              <div className="kay-baslik">
                 <div><label>{adlar.ad} No</label><b>{belgeNo(acikBelge)}</b></div>
                 <div><label>{c('Tarih')}</label><b>{gunNokta(acikBelge.belgeTarihi)}</b></div>
                 <div><label>{c('Cari')}</label><b>{String(acikBelge.tarafUnvan ?? '')}</b></div>
                 <div><label>{c('Belge Toplamı')}</label><b>{para.format(Number(acikBelge.genelToplam ?? 0))}</b></div>
               </div>
-              <div className="ka-arac">
+              <div className="kay-arac">
                 <button type="button" className="d" disabled={!acikSatirlar?.some(r => kalan(r) > 0)}
                         onClick={() => belgeninHepsi(acikId!, true)}>☑ {c('Tümünü seç (kalanların hepsi)')}</button>
                 <button type="button" className="d" disabled={belgedeSecili(acikId!) === 0}
                         onClick={() => belgeninHepsi(acikId!, false)}>☐ {c('Bu belgenin seçimini kaldır')}</button>
                 <span className="sonuk">{c(`Fiyat, iskonto ve KDV ${adlar.den} gelir; miktar kalana kadar değiştirilebilir.`)}</span>
-                <span className="rozet mor ka-sag-rozet">
+                <span className="rozet mor kay-sag-rozet">
                   {adlar.irsaliyeMi ? c('Lotlar aynen taşınır') : c('Lot takipli satırlar aktarım sonrası sorulur')}
                 </span>
               </div>
-              <div className="ka-grid">
+              <div className="kay-grid">
                 <table className="detay-tablo secilebilir">
                   <thead>
                     <tr>
@@ -292,7 +292,7 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
                           <td className="hiza-sag"><b>{kl.toLocaleString('tr-TR')}</b></td>
                           <td className="hiza-sag">{para.format(Number(r.birimFiyat))}</td>
                           <td className="hiza-sag" onClick={e => e.stopPropagation()}>
-                            <input className={`hiza-sag ka-miktar${hatali ? ' hata' : ''}`} disabled={!isaretli}
+                            <input className={`hiza-sag kay-miktar${hatali ? ' hata' : ''}`} disabled={!isaretli}
                                    value={isaretli ? s.miktar : kl > 0 ? String(kl) : ''}
                                    title={hatali ? `0 – ${kl}` : ''}
                                    onChange={e => setSecim(x => ({ ...x, [r.satirId]: { belgeId: acikId!, miktar: e.target.value } }))} />
@@ -318,13 +318,13 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
       </div>
 
       {/* SEPET: farklı belgelerden toplananlar */}
-      <div className="ka-sepet">
-        <button type="button" className="ka-sepet-baslik" onClick={() => setSepetAcik(a => !a)}>
+      <div className="kay-sepet">
+        <button type="button" className="kay-sepet-baslik" onClick={() => setSepetAcik(a => !a)}>
           {sepetAcik ? '▾' : '▸'} {c('Aktarılacaklar')} <span className="rozet mor">{sepet.length}</span>
           <span className="sonuk">— {c('farklı belgelerden seçilen satırlar burada birikir')}</span>
         </button>
         {sepetAcik && (
-          <table className="detay-tablo ka-sepet-tablo">
+          <table className="detay-tablo kay-sepet-tablo">
             <thead>
               <tr>
                 <th style={{ width: 150 }}>{c('Kaynak')}</th><th style={{ width: 100 }}>Kod</th><th>{c('Stok / Hizmet')}</th>
@@ -350,7 +350,7 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
                     )}
                   </td>
                   <td className="hiza-orta">
-                    <button type="button" className="ka-sil" title={c('Sepetten çıkar')}
+                    <button type="button" className="kay-sil" title={c('Sepetten çıkar')}
                             onClick={() => setSecim(s => { const y = { ...s }; delete y[x.r.satirId]; return y })}>✕</button>
                   </td>
                 </tr>

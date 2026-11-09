@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import type { DetayDurumu } from '../detayDurumu';
 import { GenGrid } from '../GenGrid';

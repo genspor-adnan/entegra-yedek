@@ -1,4 +1,4 @@
-﻿/* ============================================================================
+/* ============================================================================
    Gentegre AI — tasarim dili
    Kaynak: Ekranlar/cari_karti.html (Delphi-mavi kart mockup'lari) — UYGULAMA GENELI TEMA.
    Renkler, fontlar ve bilesen desenleri oradan birebir alindi (20.08.2026'da
@@ -9441,54 +9441,54 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* ---- KAYNAKTAN AKTAR penceresi (09.11.2026, mockup Ekranlar/ERP/kaynaktan_aktar.html): sol carinin belgeleri,
         sağ seçili belgenin satırları, altta sepet. ---- */
 .kawin.genis.kaynak-aktar { width: min(1180px, 96vw) }
-.kaynak-aktar .ka-bolme { display: grid; grid-template-columns: 380px minmax(0, 1fr); min-height: 420px;
+.kaynak-aktar .kay-bolme { display: grid; grid-template-columns: 380px minmax(0, 1fr); min-height: 420px;
   border: 1px solid var(--cizgi); border-radius: 4px; overflow: hidden; background: var(--yuz) }
-.kaynak-aktar .ka-sol { border-right: 1px solid var(--cizgi); display: flex; flex-direction: column; background: var(--yuz2); min-height: 0 }
-.kaynak-aktar .ka-arama { padding: 8px; border-bottom: 1px solid var(--cizgi2) }
-.kaynak-aktar .ka-arama input { width: 100%; height: 26px; border: 1px solid var(--cizgi); border-radius: 3px; padding: 0 8px; font: inherit }
-.kaynak-aktar .ka-cipler { display: flex; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap }
-.kaynak-aktar .ka-cipler .cip { cursor: pointer; font: inherit; font-size: 11px; height: 20px; padding: 0 9px }
-.kaynak-aktar .ka-belgeler { flex: 1; overflow: auto; max-height: 440px; background: var(--yuz) }
-.kaynak-aktar .ka-belge { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 10px;
+.kaynak-aktar .kay-sol { border-right: 1px solid var(--cizgi); display: flex; flex-direction: column; background: var(--yuz2); min-height: 0 }
+.kaynak-aktar .kay-arama { padding: 8px; border-bottom: 1px solid var(--cizgi2) }
+.kaynak-aktar .kay-arama input { width: 100%; height: 26px; border: 1px solid var(--cizgi); border-radius: 3px; padding: 0 8px; font: inherit }
+.kaynak-aktar .kay-cipler { display: flex; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap }
+.kaynak-aktar .kay-cipler .cip { cursor: pointer; font: inherit; font-size: 11px; height: 20px; padding: 0 9px }
+.kaynak-aktar .kay-belgeler { flex: 1; overflow: auto; max-height: 440px; background: var(--yuz) }
+.kaynak-aktar .kay-belge { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 10px;
   border-bottom: 1px solid var(--cizgi2); cursor: pointer; position: relative }
-.kaynak-aktar .ka-belge:hover { background: var(--yuz2) }
-.kaynak-aktar .ka-belge.sec { background: var(--mor2); box-shadow: inset 3px 0 0 var(--mor) }
-.kaynak-aktar .ka-belge.kapali .ka-no { color: var(--soluk) }
-.kaynak-aktar .ka-no { font-weight: 700; color: var(--lacivert, #14315a) }
-.kaynak-aktar .ka-tar { color: var(--soluk); font-size: 11px; text-align: right }
-.kaynak-aktar .ka-ack { grid-column: 1 / 3; display: flex; gap: 8px; align-items: center; font-size: 11px }
-.kaynak-aktar .ka-alt { grid-column: 1 / 3; display: flex; justify-content: space-between; font-size: 11px; gap: 8px }
-.kaynak-aktar .ka-tutar { white-space: nowrap; font-variant-numeric: tabular-nums }
-.kaynak-aktar .ka-secili { position: absolute; right: 10px; top: 26px; font-size: 10.5px; color: var(--ok); font-weight: 700 }
-.kaynak-aktar .ka-sol-alt { padding: 5px 10px; border-top: 1px solid var(--cizgi2); font-size: 11px }
-.kaynak-aktar .ka-sag { display: flex; flex-direction: column; min-width: 0; min-height: 0 }
-.kaynak-aktar .ka-bos { padding: 40px; text-align: center; color: var(--soluk) }
-.kaynak-aktar .ka-bos b { display: block; color: var(--lacivert, #14315a); font-size: 13px; margin-bottom: 6px }
-.kaynak-aktar .ka-baslik { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 14px; padding: 10px 12px;
+.kaynak-aktar .kay-belge:hover { background: var(--yuz2) }
+.kaynak-aktar .kay-belge.sec { background: var(--mor2); box-shadow: inset 3px 0 0 var(--mor) }
+.kaynak-aktar .kay-belge.kapali .ka-no { color: var(--soluk) }
+.kaynak-aktar .kay-no { font-weight: 700; color: var(--lacivert, #14315a) }
+.kaynak-aktar .kay-tar { color: var(--soluk); font-size: 11px; text-align: right }
+.kaynak-aktar .kay-ack { grid-column: 1 / 3; display: flex; gap: 8px; align-items: center; font-size: 11px }
+.kaynak-aktar .kay-alt { grid-column: 1 / 3; display: flex; justify-content: space-between; font-size: 11px; gap: 8px }
+.kaynak-aktar .kay-tutar { white-space: nowrap; font-variant-numeric: tabular-nums }
+.kaynak-aktar .kay-secili { position: absolute; right: 10px; top: 26px; font-size: 10.5px; color: var(--ok); font-weight: 700 }
+.kaynak-aktar .kay-sol-alt { padding: 5px 10px; border-top: 1px solid var(--cizgi2); font-size: 11px }
+.kaynak-aktar .kay-sag { display: flex; flex-direction: column; min-width: 0; min-height: 0 }
+.kaynak-aktar .kay-bos { padding: 40px; text-align: center; color: var(--soluk) }
+.kaynak-aktar .kay-bos b { display: block; color: var(--lacivert, #14315a); font-size: 13px; margin-bottom: 6px }
+.kaynak-aktar .kay-baslik { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 14px; padding: 10px 12px;
   border-bottom: 1px solid var(--cizgi2); background: var(--yuz2) }
-.kaynak-aktar .ka-baslik label { display: block; font-size: 10.5px; color: var(--soluk) }
-.kaynak-aktar .ka-baslik b { color: var(--lacivert, #14315a) }
-.kaynak-aktar .ka-arac { display: flex; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); align-items: center;
+.kaynak-aktar .kay-baslik label { display: block; font-size: 10.5px; color: var(--soluk) }
+.kaynak-aktar .kay-baslik b { color: var(--lacivert, #14315a) }
+.kaynak-aktar .kay-arac { display: flex; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); align-items: center;
   font-size: 11px; flex-wrap: wrap }
-.kaynak-aktar .ka-arac .d { padding: 2px 8px; font-size: 11px }
-.kaynak-aktar .ka-sag-rozet { margin-left: auto }
-.kaynak-aktar .ka-grid { flex: 1; overflow: auto; max-height: 360px; position: relative }
-.kaynak-aktar .ka-grid thead th { position: sticky; top: 0; z-index: 1 }
-.kaynak-aktar .ka-grid tr.kapali td { color: var(--soluk); background: var(--yuz2) }
-.kaynak-aktar .ka-miktar { width: 80px; height: 22px; border: 1px solid var(--cizgi); border-radius: 2px; padding: 0 5px; font: inherit }
-.kaynak-aktar .ka-miktar:disabled { background: var(--yuz2); color: var(--soluk) }
-.kaynak-aktar .ka-miktar.hata { border-color: var(--hata); background: var(--hatazem) }
-.kaynak-aktar .ka-sepet { margin-top: 8px; border: 1px solid var(--cizgi); border-radius: 4px; background: var(--yuz2); overflow: hidden }
-.kaynak-aktar .ka-sepet-baslik { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 12px; border: 0;
+.kaynak-aktar .kay-arac .d { padding: 2px 8px; font-size: 11px }
+.kaynak-aktar .kay-sag-rozet { margin-left: auto }
+.kaynak-aktar .kay-grid { flex: 1; overflow: auto; max-height: 360px; position: relative }
+.kaynak-aktar .kay-grid thead th { position: sticky; top: 0; z-index: 1 }
+.kaynak-aktar .kay-grid tr.kapali td { color: var(--soluk); background: var(--yuz2) }
+.kaynak-aktar .kay-miktar { width: 80px; height: 22px; border: 1px solid var(--cizgi); border-radius: 2px; padding: 0 5px; font: inherit }
+.kaynak-aktar .kay-miktar:disabled { background: var(--yuz2); color: var(--soluk) }
+.kaynak-aktar .kay-miktar.hata { border-color: var(--hata); background: var(--hatazem) }
+.kaynak-aktar .kay-sepet { margin-top: 8px; border: 1px solid var(--cizgi); border-radius: 4px; background: var(--yuz2); overflow: hidden }
+.kaynak-aktar .kay-sepet-baslik { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 12px; border: 0;
   background: transparent; font: inherit; font-weight: 700; color: var(--lacivert, #14315a); cursor: pointer; text-align: left }
-.kaynak-aktar .ka-sepet-baslik .sonuk { font-weight: 400 }
-.kaynak-aktar .ka-sepet-tablo { background: var(--yuz) }
-.kaynak-aktar .ka-sil { border: 0; background: transparent; color: var(--hata); cursor: pointer; font-size: 13px }
-.kaynak-aktar .ka-ozet { display: flex; gap: 14px; margin-right: auto; font-size: 11.5px; color: var(--soluk) }
-.kaynak-aktar .ka-ozet b { color: var(--lacivert, #14315a) }
-.kaynak-aktar .ka-lot { color: var(--mor); font-weight: 700 }
+.kaynak-aktar .kay-sepet-baslik .sonuk { font-weight: 400 }
+.kaynak-aktar .kay-sepet-tablo { background: var(--yuz) }
+.kaynak-aktar .kay-sil { border: 0; background: transparent; color: var(--hata); cursor: pointer; font-size: 13px }
+.kaynak-aktar .kay-ozet { display: flex; gap: 14px; margin-right: auto; font-size: 11.5px; color: var(--soluk) }
+.kaynak-aktar .kay-ozet b { color: var(--lacivert, #14315a) }
+.kaynak-aktar .kay-lot { color: var(--mor); font-weight: 700 }
 @media (max-width: 900px) {
-  .kaynak-aktar .ka-bolme { grid-template-columns: 1fr }
-  .kaynak-aktar .ka-sol { border-right: 0; border-bottom: 1px solid var(--cizgi) }
-  .kaynak-aktar .ka-belgeler { max-height: 200px }
+  .kaynak-aktar .kay-bolme { grid-template-columns: 1fr }
+  .kaynak-aktar .kay-sol { border-right: 0; border-bottom: 1px solid var(--cizgi) }
+  .kaynak-aktar .kay-belgeler { max-height: 200px }
 }

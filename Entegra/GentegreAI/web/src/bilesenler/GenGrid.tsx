@@ -1,4 +1,4 @@
-﻿import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';

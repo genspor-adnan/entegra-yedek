@@ -1,4 +1,4 @@
-﻿import { Fragment } from 'react';
+import { Fragment } from 'react';
 import { c } from '../../dil/ceviri';
 import { bicimle } from '../bicim';
 import { durumRozeti, ikonHucre, rozetHucre, yuzdeRozeti } from '../gridHucre';

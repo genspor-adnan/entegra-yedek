@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { isValidElement } from 'react';
 import { kartAracGrubu, kartSagAraclari, type KartAracBaglami } from '../bilesenler/kart/KartAracGruplari';
 

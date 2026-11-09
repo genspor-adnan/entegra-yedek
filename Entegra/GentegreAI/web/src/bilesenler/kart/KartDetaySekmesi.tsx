@@ -1,4 +1,4 @@
-﻿import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
