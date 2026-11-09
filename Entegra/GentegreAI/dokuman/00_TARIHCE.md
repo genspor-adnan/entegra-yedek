@@ -1,4 +1,4 @@
-# Gentegre AI — Çalışma Tarihçesi
+﻿# Gentegre AI — Çalışma Tarihçesi
 
 Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın kendisi
 `GentegreAI/db/`, sözleşmeler `GentegreAI/dokuman/01_API_SOZLESMELERI.md`,
@@ -6,6 +6,147 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 `Ekranlar/gentegre_ai_uygulama_plani.html` dosyalarındadır.
 
 ---
+
+## 09.11.2026 — MEDX yayını (1274-1278), ağaç combo dal/yaprak tıklaması, fiş menü adları (1279)
+
+Kullanıcı: "medx e yayınlama yapıyordun yarım kaldı devam et" · "kategori ağacında altında item varsa tıkladığımda
+açılmalı ve combo kapanmamalı, yaprak ise seçilmeli ve kapanmalı" · "Giriş Fişi / Çıkış Fişi hem menüde hem sekme
+başlığında … Listesi olsun".
+
+- **MEDX yayını:** 1273 → 1278, göç öncesi yedek sunucuda. Kalite kapısında `EFaturaGovdeTestleri` kırmızıydı:
+  08.11 satır tevkifatı kuralı (`TevkifatGirildi`) test yardımcısında doldurulmuyordu; yardımcı üretim kuralıyla
+  (satırda kod ya da oran var) düzeltildi. Yayını arka planda koşturma tuzağı: PowerShell 5.1'de `*>&1` akış
+  yönlendirmesi vitest'in stderr satırını hata kaydına çevirip betiği öldürüyor - yönlendirmesiz + `Start-Transcript`.
+- **AgacCombo (stok kategori):** altı olan düğüme tıklamak dalı açar/kapar, pano açık kalır; yaprak seçer ve kapatır.
+  Alan `<label>` içinde çizildiğinden pano tıklaması label üzerinden kutu düğmesine iletilip panoyu kapatıyordu -
+  panoda `preventDefault`. Test: `agacCombo.test.tsx`.
+- **Göç 1279:** "Giriş Fişi Listesi" / "Çıkış Fişi Listesi" menü (= sekme) adı; EN/DE çevirisi sözlüğe
+  (1276 kalıbı), eski ad çevirileri dokunulmadı.
+- **Lot ÜRT / SKT bir gün geri (kullanıcı + müşteri, giriş fişi #10300):** kolon timestamptz; girilen gün şube
+  gece yarısı UTC'ye çevrilip saklanıyor (09.11 İstanbul = 08.11 21:00Z), okumada ham UTC an dönünce istemci
+  `slice(0,10)` ile 08.11 gösteriyordu. Okuma uçları (belge kalem lotları, depo lot listesi, sayım, icmal,
+  eczane, radyoloji, üretim fişi) `::date` ile oturum dilimindeki günü verir; yazma değişmedi. Test
+  `LotTarihGunTestleri` (depo + HTTP JSON). Kayıtlı veri doğru (an doğru), yalnız gösterim düzeldi.
+- **Sağ tuş / grid menüsü kaydırmada kapanmıyor (kullanıcı: "kaydırma çubuğundan hareket ettirince sağ tıklanan
+  bölüm kapanıyor, tüm ekranlarda"):** `GenSagTus` ve `GridMenu`'deki capture `scroll` kapatıcısı kaldırıldı;
+  menü sabit konumlu kalır, yalnız menü DIŞINA tıklama ve Esc kapatır. Test `sagTusKaydirma.test.tsx`.
+- **Giriş / çıkış fişi başlığı görüntüleme / düzenleme kipinde (kullanıcı):** `BelgeBaslik` kipli kümesine stok
+  fişi eklendi (`kipli = carili || stokFisiMi`); cari bandı olmadığından ✎ ızgaranın sağ üstünde, kilit ölçütü
+  fişin başlık kilidi (`baslikKilitli` - kalem varsa). Depo belgesi (transfer / talep) eskisi gibi.
+- **Göç 1280 - Delphi fiyat adları → fiyat listesi (kullanıcı: "universe DB den fiyat listesi ve fiyatlar migrate
+  olmadı mı"):** aktarım STOKFIYAT'ı `stok_fiyat`a taşıyordu (5.324 satır, tam) ama web satış / alış fiyatını
+  `fiyat_listesi` üzerinden alır; liste hiç kurulmamıştı (Fiyat Listeleri ekranı boş, cariye liste seçilemiyor,
+  fiyat yalnız kart düşüşüyle). `fn_aktar_fiyat_listesi()`: her satış / alış fiyat adı bir liste (ad 1180'in
+  -1007/-1008 kod listesinden, yoksa stg.genini, yoksa "Fiyat N"), maliyet adları (-1/-2) atlanır, satırlar
+  yazım İmport, döviz başına satır, KDV hariç, yönün varsayılanı yoksa ilk ad varsayılan; idempotent (liste
+  `aciklama` damgası + çakışmada dokunma). Göç sonunda bir kez çalışır, aktar_ek.ps1 de çağırır. UNIVERSE:
+  Satış (varsayılan) 1.046 + Bayi 1.043 satır; Alış adında pozitif fiyat yok, liste açılmadı. Test
+  `FiyatListesiAktarimTestleri`.
+- **Stok kartı Fiyatlar sekmesi = fiyat listesi satırları (kullanıcı: "yeni stok kartı oluşturduğumda fiyatlar
+  sekmesinde aktif alış/satış fiyatlarına göre satırlar gelmeli" · "fiyatlar sekmesini gengrid yap, fiyat adı
+  sütunu id yerine anlaşılır olsun"):** eski `stok_fiyat` detayı (Delphi fiyat adı kodu) kalktı; detay artık
+  `fiyat_listesi_satir` (stok_id), liste seçimi yönüyle adlı yeni görünümden (1281 `v_fiyat_listesi_kalem_lookup`:
+  "Satış · Perakende"), Yön / KDV salt okunur türetilmiş sütun, grid kipi (salt görünüm + modal düzenleme).
+  Üç yeni katalog seçeneği (DetayTanimi → KartDetayMeta): `YeniKartSatirSql` (yeni kartta sekmeye hazır gelen
+  satırlar - her AKTİF liste bir ön satır, `ilk` boş kalır), `BosAtlaAlani` (fiyatı boş/0 bırakılan ön satır ne
+  yazılır ne "kaydedilmemiş değişiklik" sayılır - istemci `detayFarki` + sunucu `DetayUygulaAsync` sigortası),
+  `GridKipi`. Karttan girilen satır yazım 1 (manuel). Testler: `StokFiyatSekmesiTestleri` (meta ön satırlar,
+  pasif liste gelmez, boş satır yazılmaz), `detayFarkiBosAtla.test.ts`.
+- **Fiyat modalı varsayılanları + anında kayıt (kullanıcı: "durum default aktif, birim karttaki birim, kdv
+  listedeki durum; fiyatları girip kaydet dediğimde stok kartının kaydet butonuna gerek kalmadan kaydedilmeli"):**
+  `GenDetayTablo` modal açılışta ekran kuralını alan '' ile çağırır (boş alana varsayılan, dolu ezilmez);
+  `KartDetaySekmesi` stok Fiyatlar kuralı: durum Aktif, birim kartın ana birimi, döviz TL, liste seçilince Yön / KDV
+  listeden (listeler `/api/liste/fiyat-listesi` ile bir kez okunur). Katalog `AnindaKaydet` (DetayTanimi →
+  KartDetayMeta): kayıtlı kartta modal Tamam / sil kartı hemen kaydeder (GenForm: durum güncellenince `kaydet(true)`,
+  kart açık kalır ve yeniden okunur; yeni kartta kart kaydıyla gider; boş ön satır fark üretmezse kaydetmez).
+  Tarayıcıda doğrulandı: modal varsayılanları, Yön/KDV, PUT sonrası DB satırı (yazım 1).
+- **Kampanya listesinde sağ tuş menüsü yok (kullanıcı):** liste tanımı bayrağı `sagTusYok` (Ortak ListeTanimi →
+  Liste → GenGrid → GridTablo): aksiyon ekranı durur (araç çubuğu, palet), satırda sağ tık menü açılmaz, tarayıcı
+  menüsü kalır. Kampanya listesinde açık; diğer listeler etkilenmedi (stok listesinde doğrulandı).
+- **Siparişten Aktar'da lot sorulur, İrsaliyeden Aktar'da lotlar aynen geçer (kullanıcı):** `lotSorulacakSatirlar`
+  (belgeKalem.ts): aktarılan satırlardan izlemli stok, hedef belge stok oynatıyor (giriş/çıkış izlemi), stok
+  düşürmeyen değil ve lotu yoksa - BelgeKartiModallari kuyrukla IzlemPenceresi'ni sırayla açar (çıkış kipi =
+  belgenin yönü, depo = kartın deposu; Kapat = satır lotsuz kalır, kayıtta sunucu uyarır). İrsaliye kaynağında
+  lotlar zaten `siparisSatirlari`/`lotlariBol` ile kopyalanıp `stokDurumDegis 0` geliyordu - sorulmaz. Test
+  `aktarimLotSor.test.ts`.
+- **Fiyat listesi kartı: Hatırlat yok, ✎ başlığın sağ üst köşesinde çerçevesiz (kullanıcı):** liste tanımı
+  `kartHatirlatYok` (ListeKarti → GenForm hatirlatYok). Başlık kipli şerit (`KartKimlikSeridi` KIPLI_SERITLER,
+  `bs-kalem`) zaten vardı; ✎ akıştan çıkarılıp şeridin sağ üst köşesine konumlandı (`.kaid-kipli` relative,
+  ızgara sağdan 30px pay). Tarayıcıda doğrulandı: Hatırlat yok, ✎ köşede, tıklayınca düzenleme açılır.
+- **Belge Dönüştür "tutar kalmadı" engeli (kullanıcı: teklif listesinde sağ tık → "Belgeye dönüşecek tutar kalmadı",
+  dönüştürülemiyor):** modal açık ölçüyü hep KDV dahil tutardan (pay kovaları) hesaplıyordu; miktar kipinde
+  (teklif → sipariş, sipariş → irsaliye) fiyatsız / kovası boş satırlar dönüştürülemiyordu. Artık ölçü tutar kipinde
+  tutar, miktar kipinde kalan miktar; mesaj da buna göre ("miktar kalmadı"), "başvurunun ücretleri" metni yalnız
+  başvuruda (kart yolu da). Test `belgeDonusumTeklif.test.tsx` (UNIVERSE teklif satırları + 0 TL satır).
+  Not: yerel UNIVERSE'teki tek teklif/sipariş verisiyle hata yeniden üretilemedi; fiyatsız satır senaryosu
+  ZONE'da yaygın (63 sipariş satırı 0 TL).
+- **Dövizli liste fiyatı kur 1 kalıyordu (kullanıcı, satış teklifi #10302: "euro birim fiyatlı ürün ekledim, TL
+  karşılığı aynı euro karşılığı gelmiş"):** liste fiyatı EUR gelince satıra `fiyatDovizi` yazılıyor ama kur yalnız
+  kalem penceresi açılınca (useEffect) çekiliyordu; hızlı ekleme (Enter) pencereyi atlayınca yerel birim fiyat döviz
+  tutarına eşit, `doviz_kuru 1` kaydediliyordu. Bütün belge kartları aynı yolu kullanır (stokSeciminiCoz) - UNIVERSE'te
+  2 teklif + 1 sipariş (6 satır) böyle kaydedilmiş, fatura/irsaliye yok. Düzeltme: `stokSeciminiCoz` fiyat dövizi
+  yerel paradan farklıysa `dovizKur` (belge tarihi, alışta alış kuru) ile kuru çekip `dovizKuruUygula` (yerel = döviz
+  × kur) uygular; `useKalemAkisi`/BelgeKarti belge tarihini geçirir. Yanlış kaydedilmiş satırlar karttan satır
+  penceresi açılıp kaydedilince düzelir. Test `dovizListeFiyatiKur.test.ts`.
+- **Satış teklifi listesi "◐ Durumu Değiştir" (kullanıcı: "kart açılmadan durumu değiştirebilelim"):** aksiyon
+  kataloğu `teklif-liste` → `belge.teklif-durum` (belge değiştir yetkisi); istemci seçim penceresi (Hazırlanıyor /
+  Sunuldu / Kabul / Red / İptal, mevcut durum seçili); uç `POST /api/belge/{id}/teklif-durum` → `TeklifDurumGuncelleAsync`
+  (yalnız tür 18, iptal belgede yok, şube kapısı, değişiklik logu "eski -> yeni"), liste tazelenir.
+- **Stok kartı görüntüleme kipinde kategori görünmüyordu:** `.kaid-goster` genel "button gizle" kuralı ağaç combo
+  kutusunu (bir `<button>`) da siliyordu - `[data-agcb-kutu]` düz metin olarak çizilir.
+- **Stok kartı tek kalem, tüm kart (kullanıcı: "Tanım / Sınıflandırma, Vergi & Ana Birim, Diğer de view/edit; ayrı
+  kalem değil, başlıktaki kalemle hepsi; kaleme basmadan edit moda geçilemesin"):** kip GenForm'da (`kipliAcik`,
+  `KIPLI_GOVDE_KARTLAR` = stok); şerit ✎'i dışarıdan yönetilir (`seritAcikDis` / `onSeritAcik`), gövde grupları
+  `govdeGoster` ile `.kagrup-goster` + inert (kutular düz metin, tıklayarak açılmaz). Yeni kart düzenlemede başlar;
+  dışarıdan yönetilen kipte sekme değişimi kipi KAPATMAZ (yalnız ✎) - yeni kartta ilk sekme atamaları düzenlemeyi
+  düşürüyordu. Tarayıcıda doğrulandı (5173): kayıtlı kart 3 bölüm salt görünüm + inert, ✎ hepsini açar; yeni kart
+  düzenlemede; Ürün No " AB 12 3 " -> "AB123", GTIP yapıştırma "12 34 " -> "1234".
+- **Ürün No / GTIP Kodu boşluk içeremez (kullanıcı):** yeni biçim kuralı `bosluksuz` (KimlikDogrulama, DegerCevirici
+  sunucuda reddeder; istemci kutuda yazarken / yapıştırırken boşluğu siler, `bicimHatasi` son kapı). Stok kataloğunda
+  iki alana bağlandı.
+- **Listelerden satır sağ tık menüsü kaldırıldı (kullanıcı):** `GridTablo.SAG_TUS_MENUSU = false` tek anahtar
+  (GenGrid de ona bakar); araç çubuğu ve komut paleti durur, tarayıcı menüsü kalır. Kampanya'ya özel `sagTusYok`
+  bayrağı duruyor (geri açılırsa yine geçerli).
+- **Raf Ömrü görüntüleme kipinde "5 Yıl" bitişik (kullanıcı):** `.kagrup-goster .ikili` kutuları içeriğe göre daralır
+  (field-sizing), aralık 4 px.
+- **Teklif kartı "Geçmiş" sekmesi (kullanıcı: "durum/revizyon vb değişimleri orada tutsak"; karar: şimdilik yalnız
+  teklif, revizyon sonra):** yeni tablo yok - `GET /api/belge/{id}/gecmis` belgenin `islem_log` satırlarını (kendi +
+  üst=belge satır logları, kullanıcı adı, dönüşüm hedef belge no) ham verir; `TeklifGecmisi.gecmisOlayi` metne çevirir
+  (oluşturuldu / kaydedildi / Durum değişti "Hazırlanıyor → Sunuldu" / Siparişe dönüştürüldü No … / Termin / Kalem
+  eklendi-silindi). SEKMELER `teklif` bayrağı (`teklifGecmis`, BelgeBaslik süzgeci). Okuma kapısı GET /{id} ile aynı.
+  Test `teklifGecmisi.test.ts`. Sözleşme §9'a uç eklendi. Revizyon (R1/R2, `belge_revizyon` jsonb) teklif gönderme
+  akışıyla birlikte ele alınacak.
+- **"e-Belge Durum" (siparişten kesilen faturaların özeti, `faturaEBelgeDurum`) yalnız başvuru listesinde
+  (kullanıcı):** Liste.tsx gizleme kuralı tür 19 + `basvuruSuzgeci` ile daraltıldı; ERP Satış Siparişi listesinden kalktı.
+- **Belge listelerinde Kaynak / Hedef hücresi tıklanınca o belge yeni sekmede (kullanıcı):** `belge` ve `irsaliye`
+  kaynaklarına gizli `kaynakTur` / `hedefTur` (+ irsaliyeye `kaynakId` / `hedefId`) kolonları; GenGrid/GridTablo
+  `baglantiKolonlar` (kolon → tıklama; dolu hücre bağlantı gibi çizilir, satır seçimine gitmez); Liste.tsx türden
+  kart rotasını bulur (`belgeTuruRotasi`: türün liste tanımı, bu listenin kendisi öncelikli, başvuru listesi hariç),
+  rota yoksa eski modal kart. Hedef birden çok belgeyse ilki (en küçük id) açılır. Rota adayı App.tsx'teki
+  süzgeçle aynı kapılardan geçer (`rotaKayitli`: yetki/kart yetkisi, ürün modu, modül, menuYol) - kayıtsız rotaya
+  gitmek /panel'e düşürüyordu.
+- **Belge listelerinde Cari hücresi tıklanınca cari kartı yeni sekmede; Satış Siparişi listesinde başlık "Müşteri"
+  (kullanıcı):** gizli `tarafHasta` kolonu (belge + irsaliye); alış belgesinde /tedarikci, satışta taraf hasta ise
+  /hasta, değilse /cari (biri kurulumda yoksa öteki; hiçbiri yoksa bağlantı çizilmez). Sipariş listesi
+  `kolonBasliklari: { tarafUnvan: 'Müşteri' }`.
+- **Kaynaktan Aktar penceresi yeniden (kullanıcı: "şu anki çok genel.. o cariye ait aktarılmamış siparişleri ve
+  içeriklerini görüp seçebilmem lazım"; mockup `Ekranlar/ERP/kaynaktan_aktar.html`):** `SiparistenAktarPenceresi`
+  tek pencere iki bölme - solda carinin kaynak belgeleri (çip açık / kısmen aktarılmış / tümü, no-açıklama araması,
+  kapanma rozeti, yüklenince "x/y satır açık", "✔ n seçili"), sağda tıklanan belgenin açık satırları (kutucuk,
+  "Bu Belgeye" miktarı, kartta bekleyen rozeti, Lot/Seri rozeti, "Tümünü seç / seçimi kaldır"), altta **Aktarılacaklar**
+  sepeti (birden çok belgeden toplanır, ✕ ile çıkar). `onSec(kaynaklar[], satirlar[])` - carisiz kartın carisi ilk
+  kaynaktan; lot sorma / irsaliye aynen taşıma kuralları değişmedi. Saf yardımcılar `kaynakListeSuzgeci` /
+  `kaynakAramaUyar` / `kaynakAdlari` (test `kaynaktanAktar.test.ts`). CSS `.kaynak-aktar` (tema.css sonu).
+- **Hizmet kartı başlık + Genel grupları görüntüleme / düzenleme kipi (kullanıcı; mockup
+  `Ekranlar/Stok/hizmet_karti_baslik_kip.html`):** stok deseni (`KIPLI_SERITLER` hizmet → `kaid-hizmet`,
+  `KIPLI_GOVDE_KARTLAR` + hizmet): tek ✎ şeridi ve Detay / Kodlar gruplarını birlikte çevirir, kayıtlı kart
+  görüntülemede açılır, avatar hizmet adının baş harfleri (`StokAvatar` kaynakId'siz). Kimlik sırası Kod · Hizmet Adı ·
+  Kısa Ad · Kategori · Durum (katalog). **Fiyatlar sekmesi stokla aynı:** katalog detayı `fiyat_listesi_satir`
+  (hizmet_id; eski `hizmet_fiyat` detayı ve salt okunur `HizmetListeFiyatlari` kaldırıldı) - aktif listeler yeni kartta
+  ön satır, fiyatsız yazılmaz, grid kipi + anında kayıt, birim kartın birimi. Kartta Hatırlat yok
+  (`kartHatirlatYok`); "Hizmet Kartı #id" bandı kalktı, başlık Sil'in sağında araç satırında (`baslikAracta`, sürüm
+  rozeti çizilmez - yalnız ipucu). Test `HizmetFiyatSekmesiTestleri`.
+
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
 

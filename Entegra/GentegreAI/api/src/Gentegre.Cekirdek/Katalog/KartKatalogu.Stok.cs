@@ -60,8 +60,11 @@ public static partial class KartKatalogu
             new("icerik",        "icerik",          "kod",   KodListesi: "stok.icerik",    Baslik: "İçerik",    AltGrup: "Tanım / Sınıflandırma"),
             new("izleme",        "izleme",          "kod",   KodListesi: "stok.izleme", Baslik: "İzleme",       AltGrup: "Tanım / Sınıflandırma"),
             new("bildirim",      "bildirim",        "kod",   SabitKodlar: BildirimKodlari, Baslik: "Bildirim",  AltGrup: "Tanım / Sınıflandırma"),
-            new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Ürün No",             AltGrup: "Vergi & Ana Birim"),
-            new("gtipKodu",      "gtip_kodu",       "metin", EnFazlaUzunluk: 30, Baslik: "GTIP Kodu",           AltGrup: "Vergi & Ana Birim"),
+            // BOŞLUKSUZ (kullanıcı 09.11.2026: "ürün no, gtip kodu alanlarında başta, sonda ve ortada boşluk olamaz").
+            new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Ürün No",             AltGrup: "Vergi & Ana Birim",
+                Dogrulama: KimlikDogrulama.BosluksuzTuru),
+            new("gtipKodu",      "gtip_kodu",       "metin", EnFazlaUzunluk: 30, Baslik: "GTIP Kodu",           AltGrup: "Vergi & Ana Birim",
+                Dogrulama: KimlikDogrulama.BosluksuzTuru),
             new("anaBirim",      "ana_birim",       "kod",   KodListesi: "stok.ana_birim",  Baslik: "Ana Birim",AltGrup: "Vergi & Ana Birim"),
             new("kdv",           "kdv",             "kod",   Zorunlu: true, SabitKodlar: KdvKodlari, Baslik: "KDV %", AltGrup: "Vergi & Ana Birim"),
             new("otvYuzde",      "otv_yuzde",       "para", Baslik: "ÖTV %",  AltGrup: "Vergi & Ana Birim"),
@@ -135,16 +138,45 @@ public static partial class KartKatalogu
                 new("durum",           "durum",            "kod", SabitKodlar: DurumKodlari)
             }, Sirala: "carpan, id", SubeKolonu: null, LogTabloId: 347, Baslik: "Ambalaj Birimleri"),
 
-            new DetayTanimi("fiyatlar", "public.stok_fiyat", "stok_id", new KartAlani[]
+            // FİYATLAR = FİYAT LİSTESİ SATIRLARI (kullanıcı 09.11.2026: "yeni stok kartı oluşturduğumda fiyatlar
+            //   sekmesinde aktif alış/satış fiyatlarına göre satırlar gelmeli" · "fiyatlar sekmesini gengrid yap,
+            //   fiyat adı sütunu id yerine anlaşılır olsun"). Eski `stok_fiyat` detayı (Delphi FIYATADI kodu) kalktı:
+            //   web fiyatı fiyat_listesi'nden alır (204), aktarım verisi 1280 ile listeye dönüştü. Yeni kartta her
+            //   AKTİF liste bir ön satır (fiyat boş); fiyat girilmeyen satır yazılmaz (BosAtlaAlani). Liste adı yönüyle
+            //   (v_fiyat_listesi_kalem_lookup: "Satış · Perakende"); KDV dahil/hariç listenin özelliği, salt okunur.
+            new DetayTanimi("fiyatlar", "public.fiyat_listesi_satir", "stok_id", new KartAlani[]
             {
-                new("id",          "id",           "sayi", Yazilabilir: false),
-                new("fiyatAdi",    "fiyat_adi",    "kod"),
-                new("birim",       "birim",        "kod", KodListesi: "stok.ana_birim", Baslik: "Birim"),
-                new("fiyat",       "fiyat",        "para", Zorunlu: true),
-                new("dovizCinsi",  "doviz_cinsi",  "kod"),
-                new("satis",       "satis",        "mantik")
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 346),  // stok_fiyatta sube_id YOK
-                                                                   // (GENINI -11110: Stok Fiyat)
+                new("id",         "id",          "sayi", Yazilabilir: false),
+                new("listeId",    "liste_id",    "kod",  Zorunlu: true, KodTablosu: "public.v_fiyat_listesi_kalem_lookup",
+                    Baslik: "Fiyat Listesi"),
+                new("yonAdi",
+                    "(select case l.yon when 1 then 'Alış' else 'Satış' end from public.fiyat_listesi l " +
+                    "  where l.id = fiyat_listesi_satir.liste_id)",
+                    "metin", Yazilabilir: false, Baslik: "Yön"),
+                new("fiyat",      "fiyat",       "para", Zorunlu: true, Baslik: "Fiyat"),
+                new("dovizCinsi", "doviz_cinsi", "kod",  SabitKodlar: DovizKodlari, Baslik: "Döviz"),
+                new("birim",      "birim",       "kod",  KodListesi: "stok.ana_birim", Baslik: "Birim"),
+                new("kdvDahilAdi",
+                    "(select case l.kdv_dahil when 1 then 'Dahil' else 'Hariç' end from public.fiyat_listesi l " +
+                    "  where l.id = fiyat_listesi_satir.liste_id)",
+                    "metin", Yazilabilir: false, Baslik: "KDV"),
+                new("durum",      "durum",       "kod",  SabitKodlar: DurumKodlari, Baslik: "Durum"),
+            }, Sirala: "(select l.yon from public.fiyat_listesi l where l.id = fiyat_listesi_satir.liste_id) desc, liste_id, id",
+               SubeKolonu: null, LogTabloId: 924, Baslik: "Fiyatlar",
+               // Karttan girilen fiyat MANUEL (yazım 1) - liste kartındaki "Oluşma" sütunu doğru okunsun.
+               YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["yazim"] = (short)1 },
+               BosAtlaAlani: "fiyat", GridKipi: true, AnindaKaydet: true,
+               YeniKartSatirSql: """
+                   select l.id as "listeId",
+                          case l.yon when 1 then 'Alış' else 'Satış' end as "yonAdi",
+                          case l.kdv_dahil when 1 then 'Dahil' else 'Hariç' end as "kdvDahilAdi",
+                          'TL' as "dovizCinsi", 1 as durum
+                     from public.fiyat_listesi l
+                    where l.durum = 1
+                      and (l.baslangic is null or l.baslangic <= current_date)
+                      and (l.bitis is null or l.bitis >= current_date)
+                    order by l.yon desc, l.varsayilan desc, l.ad
+                   """),
 
             // PAKET ICERIGI (124) - yalniz paket isaretliyse acilir. Kod
             //   secilir, ad otomatik gorunur; birim ve adet elle girilir.
@@ -245,12 +277,14 @@ public static partial class KartKatalogu
             // STANDART BASLIK SERIDI (kullanici): Kod / Ad / Durum kartin ust
             //   seridinde her sekmede sabit durur (fiyat listesi kartiyla ayni).
             new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Kimlik"),
+            // SIRA: Kod · Hizmet Adı · Kısa Ad · Kategori · Durum (mockup hizmet_karti_baslik_kip.html, 09.11.2026 -
+            //   stok şeridiyle aynı dizilim; kısa ad resmi adın SAĞINDA).
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
+                Baslik: "Hizmet Adı", Grup: "Kimlik"),
             // KISA AD (549): resmi adin yaninda, gunluk kullanilan ad.
             //   Zorunlu DEGIL - bos birakilirsa arama yalniz resmi ada bakar.
             new("kisaAd",   "kisa_ad",  "metin", EnFazlaUzunluk: 60,
                 Baslik: "Kısa Ad", Grup: "Kimlik"),
-            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
-                Baslik: "Hizmet Adı", Grup: "Kimlik"),
             // KATEGORI ADIN SAGINDA, UST SERITTE (kullanici): hizmetin hangi
             //   dalda oldugu kartin her sekmesinde gorunsun - Genel sekmesinin
             //   icine gomulunce, fiyat ya da protokol sekmesindeyken "bu neyin
@@ -342,15 +376,43 @@ public static partial class KartKatalogu
                 new("eskiAd",  "eski_ad",  "metin", Yazilabilir: false, Baslik: "Eski ad"),
                 new("kaynak",  "kaynak",   "metin", Yazilabilir: false, Baslik: "Kaynak"),
             }, Sirala: "id", Baslik: "Eski kodlar", SubeKolonu: null, SaltOkunur: true),
-            // Hizmette satis/alis ayrimi yok - tek fiyat listesi (stok_fiyat deseni).
-            new DetayTanimi("fiyatlar", "public.hizmet_fiyat", "hizmet_id", new KartAlani[]
+            // FİYATLAR = FİYAT LİSTESİ SATIRLARI (09.11.2026, stok kartıyla AYNI desen; mockup hizmet_karti_baslik_kip
+            //   "Fiyatlar sekmesi stok kartıyla aynı"): eski hizmet_fiyat tablosu fiyatlamada kullanılmıyor
+            //   (fn_fiyat_listesi_fiyat hizmet_id ile fiyat_listesi_satir'ı okur), kart artık doğrudan oraya yazar.
+            //   Yeni kartta her AKTİF liste bir ön satır (fiyat boş), fiyatsız satır yazılmaz (BosAtlaAlani);
+            //   grid kipi + anında kayıt. Birim listesi hizmetin birimleri (hizmet.birim).
+            new DetayTanimi("fiyatlar", "public.fiyat_listesi_satir", "hizmet_id", new KartAlani[]
             {
                 new("id",         "id",          "sayi", Yazilabilir: false),
-                new("fiyatAdi",   "fiyat_adi",   "kod",  Baslik: "Fiyat Adı"),
+                new("listeId",    "liste_id",    "kod",  Zorunlu: true, KodTablosu: "public.v_fiyat_listesi_kalem_lookup",
+                    Baslik: "Fiyat Listesi"),
+                new("yonAdi",
+                    "(select case l.yon when 1 then 'Alış' else 'Satış' end from public.fiyat_listesi l " +
+                    "  where l.id = fiyat_listesi_satir.liste_id)",
+                    "metin", Yazilabilir: false, Baslik: "Yön"),
                 new("fiyat",      "fiyat",       "para", Zorunlu: true, Baslik: "Fiyat"),
-                new("dovizCinsi", "doviz_cinsi", "kod",  Baslik: "Döviz"),
-                new("kdvDurum",   "kdv_durum",   "kod",  Baslik: "KDV Durumu")
-            }, Sirala: "fiyat_adi, id", SubeKolonu: null, LogTabloId: 922, Baslik: "Fiyatlar"),
+                new("dovizCinsi", "doviz_cinsi", "kod",  SabitKodlar: DovizKodlari, Baslik: "Döviz"),
+                new("birim",      "birim",       "kod",  KodListesi: "hizmet.birim", Baslik: "Birim"),
+                new("kdvDahilAdi",
+                    "(select case l.kdv_dahil when 1 then 'Dahil' else 'Hariç' end from public.fiyat_listesi l " +
+                    "  where l.id = fiyat_listesi_satir.liste_id)",
+                    "metin", Yazilabilir: false, Baslik: "KDV"),
+                new("durum",      "durum",       "kod",  SabitKodlar: DurumKodlari, Baslik: "Durum"),
+            }, Sirala: "(select l.yon from public.fiyat_listesi l where l.id = fiyat_listesi_satir.liste_id) desc, liste_id, id",
+               SubeKolonu: null, LogTabloId: 924, Baslik: "Fiyatlar",
+               YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["yazim"] = (short)1 },
+               BosAtlaAlani: "fiyat", GridKipi: true, AnindaKaydet: true,
+               YeniKartSatirSql: """
+                   select l.id as "listeId",
+                          case l.yon when 1 then 'Alış' else 'Satış' end as "yonAdi",
+                          case l.kdv_dahil when 1 then 'Dahil' else 'Hariç' end as "kdvDahilAdi",
+                          'TL' as "dovizCinsi", 1 as durum
+                     from public.fiyat_listesi l
+                    where l.durum = 1
+                      and (l.baslangic is null or l.baslangic <= current_date)
+                      and (l.bitis is null or l.bitis >= current_date)
+                    order by l.yon desc, l.varsayilan desc, l.ad
+                   """),
 
             // RADYOLOJI PROTOKOLU (283, 1:1): tetkigin NASIL cekilecegi -
             //   sure, kontrast, seri tarifi, hasta hazirligi ve ozel uyari.

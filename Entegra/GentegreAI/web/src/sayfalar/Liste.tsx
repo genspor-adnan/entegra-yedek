@@ -1,4 +1,4 @@
-import { EkstreIkon } from '../bilesenler/EkstreIkon';
+﻿import { EkstreIkon } from '../bilesenler/EkstreIkon';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../bilesenler/sekmeBaglami';
@@ -12,7 +12,7 @@ import { kartOzellestirme } from './liste/kartOzellestirme';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import { useMuayeneSekmeVerisi } from '../bilesenler/MuayeneSekmeleri';
 import {
-  type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni,
+  type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni, modUyar,
 } from '../api/sozlesme';
 import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
@@ -120,8 +120,9 @@ import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
 import { BELGE_KARTI_KAYNAKLARI, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
 import { useUretimListeUyarlamasi } from './uretim/uretimListeSeviye';
-import { donusumMenusu, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
+import { donusumMenusu, KASA_ARAC_MENUSU, LISTELER, modulAcikMi, type ListeTanimi }
   from './listeTanimlari';
+import { kartKodu } from '../kimlik/listeKartKodlari';
 
 /**
  * Şu anki ekranın uygulama içi yolu (taban yolu atılmış + sorgu) - açılan
@@ -189,6 +190,40 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   /** BELGE KARTI KENDİ SEKMESİNDE (başvuru, hasta deseni): kart yolu liste rotası. */
   const belgeSekmeYolu = ekranSekmesi && !tanim.kartYolu && kartSekmesiVar(tanim)
     && BELGE_KARTI_KAYNAKLARI.includes(tanim.kaynak) ? kartSekmeYolu(tanim) : null;
+  /**
+   * KAYNAK / HEDEF HÜCRESİ -> O BELGE YENİ SEKMEDE (kullanıcı 09.11.2026): belge türünden kart rotası
+   * bulunur (türün liste tanımı: sipariş /siparis, fatura /fatura ...); rota yoksa (tür bu modda listelenmiyor)
+   * eski modal kart. Başvuru listesi (19) ile sipariş listesi aynı türü taşır - bu listenin kendisi öncelikli.
+   */
+  const belgeTuruRotasi = (tur: number): string | null => {
+    if (tanim.yeniBelgeTuru === tur && belgeSekmeYolu) return belgeSekmeYolu;
+    // Rota yalnız BU KURULUMDA var olan listeden: ürün modu (ERP / HBYS) uymayan ve yetkisi olmayan listenin
+    //   rotası App'te kayıtlı değil - oraya gitmek /panel'e düşürüyordu. Başvuru listesi son çare (HBYS'de 19 odur).
+    const uygun = (l: (typeof LISTELER)[number]) => l.yeniBelgeTuru === tur && BELGE_KARTI_KAYNAKLARI.includes(l.kaynak)
+      && !l.kartYolu && !l.ozelSayfa && rotaKayitli(l);
+    const aday = LISTELER.find(l => uygun(l) && !l.basvuruSuzgeci) ?? LISTELER.find(uygun);
+    return aday ? kartSekmeYolu(aday) : null;
+  };
+  /** Listenin kart rotası BU KURULUMDA kayıtlı mı - App.tsx'teki rota süzgecinin aynısı (yetki, ürün modu, modül). */
+  const rotaKayitli = (l: (typeof LISTELER)[number]) => kartSekmesiVar(l) && !l.ozelKart && !l.menuYol
+    && (yetki(l.yetkiKodu) || yetki(kartKodu(l.yetkiKodu)))
+    && modUyar(l.urunModu, kullanici?.urunModu) && modulAcikMi(l, kullanici?.moduller);
+  /**
+   * Cari hücresinin kart rotası: alış belgesinde /tedarikci; satışta taraf HASTA ise /hasta, değilse /cari
+   * (biri kurulumda yoksa öteki). Hiçbiri kayıtlı değilse null - bağlantı çizilmez, /panel'e düşmesin.
+   */
+  const cariKartRotasi = ekranSekmesi && BELGE_KARTI_KAYNAKLARI.includes(tanim.kaynak) ? (satir: ListeSatiri): string | null => {
+    const alis = [9, 10, 11, 12, 13].includes(tanim.yeniBelgeTuru ?? 0);
+    const var_ = (yol: string) => LISTELER.some(l => kartSekmeYolu(l) === yol && rotaKayitli(l));
+    const sira = alis ? ['/tedarikci'] : Number(satir.tarafHasta ?? 0) === 1 ? ['/hasta', '/cari'] : ['/cari', '/hasta'];
+    for (const yol of sira) if (var_(yol)) return yol;
+    return null;
+  } : null;
+  const belgeBaglantisiAc = (id: number, tur: number) => {
+    if (!id) return;
+    const rota = ekranSekmesi ? belgeTuruRotasi(tur) : null;
+    if (rota) gitKart(`${rota}/${id}`); else setAcikBelgeId(id);
+  };
   // BAŞKA SEKMEDE kayıt eklendi (ör. "Yeni Hasta Kartı" sekmesi kaydedip kapandı): tazele.
   useEffect(() => {
     const tazele = (e: Event) => { if ((e as CustomEvent<string>).detail === tanim.kaynak) setYenile(t => t + 1) };
@@ -570,8 +605,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     const EBELGE_TURLERI = [10, 11, 14, 15];
     if (tanim.kaynak === 'belge' && !EBELGE_TURLERI.includes(tanim.yeniBelgeTuru ?? 0))
       liste.push('efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'senaryo', 'efaturaKodu');
-    // Basvurudan kesilen faturalarin e-Belge ozeti yalniz basvuru / siparis (19) listesinde.
-    if (tanim.kaynak === 'belge' && tanim.yeniBelgeTuru !== 19) liste.push('faturaEBelgeDurum');
+    // Basvurudan kesilen faturalarin e-Belge ozeti YALNIZ BASVURU listesinde (kullanıcı 09.11.2026: "bu sütun
+    //   başvuruda kalsın ama satış sipariş listesinden kaldır") - ERP sipariş listesi de tür 19 ama orada kafa karıştırıyordu.
+    if (tanim.kaynak === 'belge' && !(tanim.yeniBelgeTuru === 19 && tanim.basvuruSuzgeci)) liste.push('faturaEBelgeDurum');
     if (uretimUyarlama) liste.push(...uretimUyarlama.gizliKolonlar);
     return liste;
   }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur, uretimUyarlama]);
@@ -1176,6 +1212,18 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       basSag={cariEkstre.basSag ?? panel?.basSag?.(ekranBaglami)}
       onKapat={ekranSekmesi ? () => ekranSekmesi.kapat() : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
+      sagTusYok={tanim.sagTusYok}
+      baglantiKolonlar={BELGE_KARTI_KAYNAKLARI.includes(tanim.kaynak) ? {
+        kaynak: s => belgeBaglantisiAc(Number(s.kaynakId ?? 0), Number(s.kaynakTur ?? 0)),
+        hedef:  s => belgeBaglantisiAc(Number(s.hedefId ?? 0), Number(s.hedefTur ?? 0)),
+        // CARİ HÜCRESİ -> CARİ KARTI YENİ SEKMEDE (kullanıcı 09.11.2026, satış siparişi "Müşteri"): alışta
+        //   tedarikçi kartı; satışta müşteri kartı, o yoksa (HBYS: alıcı hasta) hasta kartı. Rota bu kurulumda
+        //   kayıtlı değilse (ürün modu / yetki) bağlantı hiç çizilmez - /panel'e düşmesin.
+        ...(cariKartRotasi ? { tarafUnvan: (s: ListeSatiri) => {
+          const id = Number(s.tarafId ?? 0); const rota = cariKartRotasi(s);
+          if (id && rota) gitKart(`${rota}/${id}`);
+        } } : {}),
+      } : undefined}
       aracCubuguAltSatir={tanim.aracCubuguAltSatir}
       ebelgeMenusu={tanim.ebelgeMenusu}
       onEBelgeDegisti={() => setYenile(t => t + 1)}

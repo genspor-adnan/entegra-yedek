@@ -477,6 +477,9 @@ Kabul ölçütü (F1-10): satış temsilcisi rolüyle maliyet alanı ağ yanıt�
 ```http
 GET  /api/log?tabloId=71&kayitId=4865           // kart geçmişi (islem_log)
 POST /api/log/{id}/geriAl                        // silinen kaydı dirilt
+GET  /api/belge/{id}/gecmis                      // belgenin islem_log geçmişi (teklif kartı "Geçmiş", 09.11.2026):
+                                                 //   { kayitlar: [{ id, tarih, kullanici, islemTipi, tabloId, bilgi, hedefBelgeNo }] }
+POST /api/belge/{id}/teklif-durum  { durum }     // teklif akış durumu listeden (1..5), log "eski -> yeni"
 ```
 
 **Giden e-Fatura / e-Arşiv (1033, Delphi e-Fatura menüsü):** `EFaturaUclari` + `Servisler/EFatura`.

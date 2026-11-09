@@ -48,7 +48,8 @@ export function kartGovdesiKur(g: {
     kart,
     detaylar: Object.fromEntries(
       Object.entries(detaylar)
-        .map(([ad, durum]) => [ad, detayFarki(durum, detayAlanlari(meta, ad))])
+        .map(([ad, durum]) => [ad, detayFarki(durum, detayAlanlari(meta, ad),
+                                              meta?.detaylar.find(d => d.ad === ad)?.bosAtlaAlani)])
         .filter(([, fark]) => {
           const f = fark as ReturnType<typeof detayFarki>;
           return (f.eklenen?.length ?? 0) + (f.degisen?.length ?? 0)

@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+﻿import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * Satış, alış, kasa ve banka listeleri.
@@ -64,7 +64,7 @@ const gelenSuzgec = (tasnif: number, turler: number[]) => ({
 
 export const TICARI_LISTELERI: ListeGirdisi[] = [
   {
-    // SATIS TEKLIFI (216, Ekranlar/teklif_listesi.html): belge turu 18 -
+    // SATIS TEKLIFI (216, Ekranlar/Teklif/teklif_listesi.html): belge turu 18 -
     //   stok/cari/fis ETKILEMEZ, kalem/toplam altyapisi belgeden. Mockup'taki
     //   revizyon/onay akisi ileride; ilk surum ekle/ac/sil.
     kaynak: 'belge', rota: 'teklif', baslik: 'Satış Teklifi Listesi', yol: 'Satis › Satış Teklifi Listesi',
@@ -116,6 +116,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ] },
     // e-Fatura durumu SIPARISTE anlamsiz (siparis e-Belge degil).
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
+    // "Cari" -> "Müşteri" (kullanıcı 09.11.2026); hücre tıklanınca müşteri kartı yeni sekmede (Liste.baglantiKolonlar).
+    kolonBasliklari: { tarafUnvan: 'Müşteri' },
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },

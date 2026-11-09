@@ -142,7 +142,6 @@ type
     GridFatViewKUR: TcxGridDBColumn;
     GridFatListeTviewSAYFASAY: TcxGridDBColumn;
     GridFatListeTviewBASLIK: TcxGridDBColumn;
-    N7: TMenuItem;
     ExceldenBelgeEkle2: TMenuItem;
     OpenDialog1: TOpenDialog;
     SQLExcel: TMemo;
@@ -162,22 +161,12 @@ type
     JvTimer1: TJvTimer;
     GridFatListeTviewISEMRIDURUM: TcxGridDBColumn;
     ExceldenBelgeEkle: TMenuItem;
-    N9: TMenuItem;
-    TahsilOdemeMenu: TMenuItem;
-    Nakit1: TMenuItem;
-    HavaleEFT1: TMenuItem;
-    ek1: TMenuItem;
-    Senet1: TMenuItem;
-    POSMenu: TMenuItem;
-    N10: TMenuItem;
-    ahsilatPlanla1: TMenuItem;
     frxSIPARISDETAY: TfrxDBDataset;
     SIPARIS: TFDQuery;
     frxSIPARIS: TfrxDBDataset;
     GridFatListeTviewYAZDIRILDI: TcxGridDBColumn;
     HizliGirisTus: TToolButton;
     GridFatListeTviewDOVIZKUR: TcxGridDBColumn;
-    KrediKartiMenu: TMenuItem;
     KonsinyesiniOlusturMenu: TMenuItem;
     GridFatListeTviewORTKAR: TcxGridDBColumn;
     PopupFatGiris: TPopupMenu;
@@ -320,7 +309,6 @@ type
     procedure BtnBelgeZarfiClick(Sender: TObject);
     procedure JvTimer1Timer(Sender: TObject);
     procedure ExceldenBelgeEkleClick(Sender: TObject);
-    procedure Nakit1Click(Sender: TObject);
     procedure HizliGirisTusClick(Sender: TObject);
     procedure AlSat1Click(Sender: TObject);
     procedure BtnDonusumClick(Sender: TObject);
@@ -541,15 +529,9 @@ begin
   End;
   if gf.FMenuTur = 0 then begin //Giren faturalar görünecek
     Caption := 'Alış Belgeleri Listesi';
-    TahsilOdemeMenu.Caption := 'Ödeme Yap';
-    TahsilOdemeMenu.tag := 10;
-    KrediKartiMenu.Visible:=True;
     //GridFatListeTviewDURUM.Caption := 'Ödeme Durumu';
   end else begin
     Caption := 'Satış Belgeleri Listesi';
-    TahsilOdemeMenu.Caption := 'Tahsil Et';
-    TahsilOdemeMenu.tag := 0;
-    KrediKartiMenu.Visible:=False;
     //GridFatListeTviewDURUM.Caption := 'Tahsilat Durumu';
   end;
 
@@ -2189,49 +2171,6 @@ begin
   TarihDegisti;
 end;
 
-procedure TFaturalarDlg.Nakit1Click(Sender: TObject);
-var Tur, ID : Integer;
-    HesapTuru : Char;
-    DateSaat:TDateTime;
-begin
-   if TMenuItem(Sender).Tag=35 then
-      Tur:=35
-   else if (TMenuItem(Sender).Tag=25)and(TahsilOdemeMenu.tag=10)then
-       Tur:=125 //Bir tahsil pos bir de ?deme pos var. bu ?deme pos ise 125 olmal?
-   else
-       Tur := TMenuItem(Sender).Tag + TahsilOdemeMenu.tag; //Ödemeler için 10 daha ekleriz.
-   case Tur of
-    21,31 : HesapTuru := 'K';
-    22,32 : HesapTuru := 'B';
-    35 : HesapTuru := 'V';
-    25,125    : HesapTuru := 'P';
-   else
-    HesapTuru := '-';
-   end;
-   case Tur of
-     9,19: ID := Tablo.SiparisSihirbazBaslat('E', Tur,0, -1, FATBASLIK.Fields[0].AsInteger);
-     10,11,12,14,15,16 : ID := Tablo.FaturaSihirbazBaslat('E', Tur,-1, -1, FATBASLIK.Fields[0].AsInteger);
-     13,17 : ID := Tablo.TahakkukSihirbaziBaslat('E', Tur,1, -1, FATBASLIK.Fields[0].AsInteger, Tablo.GENINI.BugunTrhSaat);
-     23 : ID := Tablo.CekSihirbazBaslat('E', Tur,1, 0, -99, FATBASLIK.Fields[0].AsInteger,-1, Tablo.GENINI.BugunTrhSaat, '');
-     33 : begin
-      Tablo.TablodanSorguAc(1,'Select * from CEKLER Where TUR=23 and DURUM=1 and isnull(CIROLU,0) <> 1 ');
-      if Tablo.Query1.RecordCount > 0 then begin
-         DateSaat:=StrToDateTime(FormatDateTime('dd'+FormatSettings.DateSeparator+'mm'+FormatSettings.DateSeparator+'yyyy hh:nn:ss', Tablo.GENINI.BugunTrhSaat));
-         Tablo.CiroEdileceklerBaslat('R',1,Tur,0,-1,FATBASLIK.Fields[0].AsInteger,-1,DateSaat,'');
-      end
-      else
-         Tablo.CekSihirbazBaslat('E', Tur, 1, 0, -99, FATBASLIK.Fields[0].AsInteger,-1, Tablo.GENINI.BugunTrhSaat, '');
-     end;
-     21,22,25,31,32,35,125 : ID := Tablo.NakitSihirbazBaslat(HesapTuru,'E', Tur,0, -1, FATBASLIK.FieldByName('REHBERID').AsInteger, Tablo.GENINI.BugunTrhSaat, '-1',False,-1,-1,-1,-1,FATBASLIK.FieldByName('ID').AsInteger);
-     61,71  : begin
-                DateSaat:=Tablo.GENINI.BugunTrhSaat;
-                ID := Tablo.KasaSihirbazBaslat('E', -1, Tur, 0, FATBASLIK.Fields[0].AsInteger, DateSaat, DateSaat,0,0,'','');
-              end;
-   end;
-   //if ID > 0 then
-   //   PageControlSekmeChange(Self);
-end;
-
 procedure TFaturalarDlg.pmBelgeDonusturPopup(Sender: TObject);
 var
   gf : TFaturaGorevFrame;
@@ -2336,7 +2275,8 @@ begin
         MenueFatura.Caption := 'e-İrsaliye'
       else
         MenueFatura.Caption := 'e-Fatura';
-      MenueFatura.Visible := (EFaturaKullanimda > 0) and
+      MenueFatura.Visible := Tablo.YetkiVarmi(241105, YetkiTur_Gorme) and
+        (EFaturaKullanimda > 0) and
         ((LTur <> EBelgeTuruEIrsaliye) or EIrsaliyeKullanimda);
       if MenueFatura.Visible then
         if LTur = 11 then begin

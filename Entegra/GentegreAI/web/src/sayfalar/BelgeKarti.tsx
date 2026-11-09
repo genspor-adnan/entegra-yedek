@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
@@ -21,6 +21,7 @@ import { useAvansDurumu } from '../bilesenler/avansDurumu';
 import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
 import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
 import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
+import { TeklifGecmisi } from '../bilesenler/belge/TeklifGecmisi';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 import { FIS_AKTAR, IRSALIYE_AKTAR, SIPARIS_AKTAR } from '../bilesenler/belge/AktarMenusu';
 import { KASA_ARACLARI } from './kabuk/cariKomutu';
@@ -223,6 +224,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   /** Rezervasyon (142) islemi surerken dugme bekler. */
   const [rezerveCalisiyor, setRezerveCalisiyor] = useState(false);
   const [aktifSekme, setAktifSekme] = useState('kalem');
+  /**
+   * BAŞVURU SEKMESİ DÜZENLEME / GÖRÜNTÜLEME KİPİ (kullanıcı 09.11.2026: "başvuru sekmesindeki editleri kalem
+   * ekleyerek edit/view mod olsun; yeni açılışta edit, sonraki açılışlar view; başka sekmeye geçince view"):
+   * fatura başlığındaki ✎ deseninin (BelgeBaslik.baslikDuzenle) başvuru karşılığı. Durum BURADA tutulur - sekme
+   * bileşeni sekme değişince unmount olur, kendi state'i sıfırlanırdı. Yeni belge düzenlemede açılır; kayıtlı belge
+   * görüntülemede. Eksik alan doğrulaması başvuru sekmesine dönerken düzenlemeyi AÇAR (kırmızı alan doldurulacak).
+   */
+  const [basvuruDuzenle, setBasvuruDuzenle] = useState(!belgeId);
+  /** Başvuru sekmesine eksik alan için dönüş: sekme + düzenleme kipi birlikte. */
+  const basvuruyaDon = () => { setBasvuruDuzenle(true); setAktifSekme('basvuru') };
   /** Başlığı görüntüleme kipine alma sinyali (BelgeBaslik.baslikKapatAnahtari): "+" kalem ekleme açılınca artar. */
   const [baslikKapat, setBaslikKapat] = useState(0);
   /** Grid satir secimi (kirmizi Sil dugmesi bunlari siler). */
@@ -1096,6 +1107,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     cariId: cari?.id ?? null, odeyenKurumId, fiyatListesiId, kampanyaId,
     basvuruBilgi, alisMi: bilgi.alis, sifirFiyatSor: !depoBelgesi && !stokFisiMi,
     izlemliBelge: bilgi.girisIzlemi || bilgi.cikisIzlemi,
+    belgeTarihi: tarih,
   });
 
   /*
@@ -1242,7 +1254,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       satirlariTazele: (id?: number) => paraRef.current.satirlariTazele(id),
       // Dogrulama duserse eksik alanlarin oldugu sekmeye don ve SOYLE.
       kayitBasarisiz: () => {
-        if (basvuruMu) setAktifSekme('basvuru');
+        if (basvuruMu) basvuruyaDon();
         mesaj('Belge kaydedilemedi - kırmızı işaretli zorunlu alanları tamamlayın.');
       },
     });
@@ -1280,7 +1292,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     kesHam, kayitliId, kalemDegisti, kirliMi: () => kirli, basvuruMu,
     kurumTahakkukuOtomatik,
     satirlariTazele: id => paraRef.current.satirlariTazele(id),
-    onEksikAlan: () => { if (basvuruMu) setAktifSekme('basvuru') },
+    onEksikAlan: () => { if (basvuruMu) basvuruyaDon() },
     aramaAc: ac => arama.setStok(ac),
   });
   akisRef.current.kes = kes;
@@ -1314,7 +1326,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     setBasvuruBilgi({});
     // "Yeni" de bir YENI KAYITTIR: ilk sekme yine Başvuru olsun (kullanici) -
     //   ucretlendirmede kalmak, hastasi secilmemis karta islem ekletirdi.
-    if (basvuruMu) setAktifSekme('basvuru');
+    if (basvuruMu) basvuruyaDon();
   }
 
   /**
@@ -1698,7 +1710,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           /* Sekme degisince onceki hata kutusu TEMIZLENIR: kalemsiz kartta
              Tahsilat'a basip hata alan kullanici, sekme degistirince ayni
              kutuyu gorunce hatanin o sekmeden geldigini saniyordu. */
-          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
+          // SEKME DEĞİŞİNCE başvuru sekmesi görüntüleme kipine döner (basvuruDuzenle).
+          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setBasvuruDuzenle(false); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
           kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
           yeniMi={!mevcutBelge} baslikKapatAnahtari={baslikKapat}
@@ -2015,6 +2028,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             belgeId={kayitliId}
             degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
             kilitli={kilitli}
+            duzenle={basvuruDuzenle} setDuzenle={setBasvuruDuzenle}
             tarih={tarih} setTarih={setTarih}
             tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
             tarihHatasi={alanHatalari.belgeTarihi}
@@ -2077,6 +2091,11 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           <OncekiBasvurular tarafId={cari?.id} haricBelgeId={kayitliId || undefined} />
         )}
 
+        {aktifSekme === 'teklifGecmis' && teklifMi && (
+          // TEKLİF GEÇMİŞİ (kullanıcı 09.11.2026): islem_log olay akışı - kayıt, durum, dönüşüm, kalem değişimleri.
+          <TeklifGecmisi belgeId={kayitliId} />
+        )}
+
         {aktifSekme === 'yorum' && (
           // Stok kartındaki galeri deseni (02.11.2026 "resim doküman sekmesi olan bütün ekranlara"): çerçevesiz.
           // KAYITSIZ KARTTA DA (kullanıcı 07.11.2026): "Belge kaydedilince eklenebilir" notu yerine galeri; dosya seçilince
@@ -2093,7 +2112,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             onKapat={() => setDoktorModal(false)} onTamam={() => void doktorIstemBitti()} />
         )}
         <BelgeKartiModallari
-          kayitliId={kayitliId} tur={tur} bilgi={bilgi} basvuruMu={basvuruMu}
+          kayitliId={kayitliId} tur={tur} turAdi={seciliTurAdi} bilgi={bilgi} basvuruMu={basvuruMu}
           tevkifatli={faturaMi && faturaTipi === 22}
           // YENİ HASTA SEKMEDE: kayıtsız yeni başvuru sekmesi kapanır, hasta kartı sekmede açılır; hasta
           //   kaydedilince o hastayla yeni başvuru açılır (ListeKarti, ?basvuru=1). Kayıtlı başvuruda ve

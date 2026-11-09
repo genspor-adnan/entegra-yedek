@@ -43,6 +43,13 @@ export interface KalemGirdisi {
   brutMetni: string;
   girisIzlemi: boolean;
   cikisIzlemi: boolean;
+  /**
+   * Pencere FİYATSIZ açıldı (kullanıcı 09.11.2026: "sıfır için fiyat sordu ama kilitliydi giriş editi"):
+   * başvuruda liste / sözleşme fiyatı yoksa üst kutu açılır ki kullanıcı fiyatı yazabilsin - kilit
+   * "listeden gelen fiyat değiştirilmesin" içindir, gelmeyen fiyat için anlamsız. Açılış anında
+   * belirlenir; yazdıkça kutu kilitlenmesin.
+   */
+  fiyatsizAcildi?: boolean;
 }
 
 export interface KalemDurumu {
@@ -89,7 +96,7 @@ export interface KalemDurumu {
  * türeyen her şey. Yukarıdan aşağı okunur.
  */
 export function kalemDurumu(g: KalemGirdisi): KalemDurumu {
-  const { r, tarifeTipi, basvuruMu, yerelPara, kdvDahil, brutMetni } = g;
+  const { r, tarifeTipi, basvuruMu, yerelPara, kdvDahil, brutMetni, fiyatsizAcildi = false } = g;
 
   const dovizli = r.fiyatDovizi !== yerelPara && r.fiyatDovizi !== '';
   const adet = hamSayi(r.adet);
@@ -132,7 +139,9 @@ export function kalemDurumu(g: KalemGirdisi): KalemDurumu {
   const kurumRotasi = etkinRota > 0 && etkinRota !== 1;
   // Başvuruda üst kutu TÜM rollere kapalı: indirim ISKONTO satırından
   //   yapılır - orada oran olarak kayda geçer ve onaya tabidir (661/662).
-  const fiyatKilitli = sgkKilitli || basvuruMu;
+  //   İstisna: listede fiyat YOKSA (pencere 0 ile açıldı) kutu açık - sıfır
+  //   onayında "Hayır" diyen kullanıcı fiyatı yazabilmeli.
+  const fiyatKilitli = sgkKilitli || (basvuruMu && !fiyatsizAcildi);
   const katkiVar = katkiliTarife && hamSayi(r.katkiTutar ?? '0') > 0;
   const katkiTutari = satirTutari(adet, hamSayi(r.katkiTutar ?? '0'),
                                   r.iskonto, r.iskonto2);

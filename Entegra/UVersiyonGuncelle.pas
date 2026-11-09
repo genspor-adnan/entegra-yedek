@@ -4,7 +4,7 @@
 interface
 
 const
-  KomutNo  = 34032; // 17733;
+  KomutNo  = 34047; // 17733;
 
 var
   // SmallInt DEGIL: komut numaralari 32767'yi asti (32953...), SmallInt'e atarken

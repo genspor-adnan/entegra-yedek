@@ -294,10 +294,9 @@ object bankaHesapGirisdlg: TbankaHesapGirisdlg
       object ceDovizTutar: TcxCurrencyEdit
         Left = 8
         Top = 68
-        Properties.DecimalPlaces = 2
-        Properties.DisplayFormat = '#,##0.00'
-        Properties.ReadOnly = True
-        Style.Color = clBtnFace
+        Properties.DecimalPlaces = 4
+        Properties.DisplayFormat = '#,##0.0000'
+        Properties.OnChange = ceDovizTutarPropertiesChange
         TabOrder = 2
         Width = 121
       end

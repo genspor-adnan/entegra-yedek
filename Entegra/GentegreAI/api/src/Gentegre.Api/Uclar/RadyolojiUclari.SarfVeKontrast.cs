@@ -84,7 +84,7 @@ public static partial class RadyolojiUclari
             var lotlar = await baglanti.ListeAsync("""
                 select l.stok_id as "stokId", sl.lot_no as "lotNo", sl.seri_no as "seriNo",
                        l.seri_lot_id as "seriLotId",
-                       sl.son_kullanma_tarihi as "sonKullanmaTarihi", l.kalan
+                       sl.son_kullanma_tarihi::date as "sonKullanmaTarihi", l.kalan
                   from public.stok_lot_durum l
                   join public.stok_seri_lot sl on sl.id = l.seri_lot_id
                  where l.depo_id = @p1 and l.kalan > 0

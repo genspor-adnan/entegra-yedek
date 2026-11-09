@@ -1,4 +1,4 @@
-import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
+﻿import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
 import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
@@ -566,6 +566,7 @@ export function ListeKarti({
         // HASTA KARTI: Sil ve Hesap İcmali kartta yok (kullanıcı 14.10.2026) - listede durur.
         // ACİL YATAK KARTI: Sil kartta yok (mockup) - listede durur.
         silYok={tanim.kaynak === 'hasta' || tanim.kaynak === 'acilYatak' || !!eklenti?.silYok?.(eb)}
+        hatirlatYok={!!tanim.kartHatirlatYok}
         onYuklendi={yeniSekmede ? d => {
           // SEKME BAŞLIĞI = kaydın adı: unvan, ad + soyad, sonra kaynakların ortak ad alanları;
           //   hiçbiri yoksa "Randevu Kartı #30" (kart adı + kayıt no).
@@ -634,7 +635,8 @@ export function ListeKarti({
         //   sağında (kullanıcı 25.10.2026). STOK kartında da: "Stok Kartı #id" Hatırlat'ın sağında, Kaydet ile
         //   sekmeler arasındaki satır yok (kullanıcı 02.11.2026).
         // REÇETE de (kullanıcı 04.11.2026): "Ürün Ağacı (Reçete) Kartı" + kod / onay rozeti Hatırlat'ın sağında, başlık satırı yok.
-        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci'}
+        // Hizmet de (kullanıcı 09.11.2026: "hizmet kartı ve Id olan bandı kaldır.. sil butonu sağına taşı").
+        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.

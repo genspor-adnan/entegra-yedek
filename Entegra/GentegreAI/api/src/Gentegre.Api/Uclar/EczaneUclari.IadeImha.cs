@@ -62,7 +62,7 @@ public static partial class EczaneUclari
                        i.ambalaj_acik as "ambalajAcik", i.sulandirildi,
                        i.soguk_zincir_bozuk as "sogukZincirBozuk",
                        coalesce(s.izleme, 0) as izleme,
-                       (select l.son_kullanma_tarihi from public.stok_seri_lot l
+                       (select l.son_kullanma_tarihi::date from public.stok_seri_lot l
                          where l.id = i.seri_lot_id) as skt
                   from public.eczane_iade i
                   left join public.stok s on s.id = i.stok_id

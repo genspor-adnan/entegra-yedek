@@ -139,7 +139,15 @@ public sealed record KartDetayMeta(
     /// kart yaniti 4 MB'a cikiyor ve ekran donuyordu; deger verilince kartla
     /// yalniz ILK SAYFA gelir, gerisi `/detay/{ad}` ucundan istenir.
     /// </summary>
-    int SayfaBoyu = 0);
+    int SayfaBoyu = 0,
+    /// <summary>YENİ kartta sekmeye hazır gelen satırlar (DetayTanimi.YeniKartSatirSql) - id'siz, alan adlı.</summary>
+    IReadOnlyList<IReadOnlyDictionary<string, object?>>? YeniSatirlar = null,
+    /// <summary>Eklenen satırda bu alan boş / 0 ise satır yazılmaz ve değişiklik sayılmaz.</summary>
+    string? BosAtlaAlani = null,
+    /// <summary>Sekme grid kipinde (salt görünüm + modal düzenleme + ikonlu başlık).</summary>
+    bool GridKipi = false,
+    /// <summary>Kayıtlı kartta sekmedeki satır değişikliği kartın kaydını hemen tetikler.</summary>
+    bool AnindaKaydet = false);
 
 public sealed class KartMetaYaniti
 {

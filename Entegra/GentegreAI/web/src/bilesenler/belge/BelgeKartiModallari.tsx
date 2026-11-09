@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { api } from '../../api/istemci';
 import type { BelgeYaniti } from '../../api/sozlesme';
@@ -12,6 +12,7 @@ import { TerminModali } from './TerminModali';
 import { KalemRolModali } from '../prim/KalemRolModali';
 import { IadeSatirPenceresi } from './IadeSatirPenceresi';
 import { SiparistenAktarPenceresi } from './SiparistenAktarPenceresi';
+import { IzlemPenceresi } from './IzlemPenceresi';
 import { hamSayi } from '../bicim';
 import { BelgeTahsilatModallari } from './BelgeTahsilatModallari';
 import { PosSecModali } from '../banko/PosSecModali';
@@ -19,7 +20,7 @@ import { HesapSecModali } from './HesapSecModali';
 import { IskontoTalepModali } from './IskontoTalepModali';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
-import { iadeSatirlari, siparisSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
+import { iadeSatirlari, lotSorulacakSatirlar, siparisSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
 import type { useBelgeTahsilat, HizliTahsilatEki } from '../../sayfalar/belgeTahsilat';
 import type { ParaSecimi } from '../mesaj';
 import { BelgeKarti } from '../../sayfalar/BelgeKarti';
@@ -47,6 +48,8 @@ export interface BelgeKartiModalProps {
   /* ---- belge kimligi / turu ---- */
   kayitliId: number;
   tur: number;
+  /** Kartın tür adı ("Satış Faturası") - Kaynaktan Aktar başlığında hedef. */
+  turAdi?: string;
   bilgi: BelgeTuruBilgisi;
   /** Fatura tipi Tevkifatlı (22): kalem penceresi Tevkifat Oranı sorar (08.11.2026). */
   tevkifatli?: boolean;
@@ -182,7 +185,7 @@ export interface BelgeKartiModalProps {
 
 export function BelgeKartiModallari(p: BelgeKartiModalProps) {
   const {
-    kayitliId, tur, bilgi, basvuruMu, alisMi, irsaliyeMi, siparisMi, stokFisiMi,
+    kayitliId, tur, turAdi, bilgi, basvuruMu, alisMi, irsaliyeMi, siparisMi, stokFisiMi,
     depoBelgesi, yerelPara, tarih, fiyatListesiId, sgkBaglami, tarifeTipi, rota, bolumId,
     depo, sonuc, setSonuc,
     cari, setCari, cariArama, setCariArama,
@@ -221,6 +224,15 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     return () => { iptal = true };
   }, [basvuruMu, cari?.id]);
   useEffect(() => { if (!hesapSecim) setPosAtlandi(false) }, [hesapSecim]);
+
+  // AKTARIM SONRASI LOT KUYRUĞU (kullanıcı 09.11.2026): siparişten aktarılan izlemli stok satırları için
+  //   IzlemPenceresi sırayla açılır (satır anahtarları). Kapat = o satır lotsuz kalır (kayıtta sunucu uyarır).
+  const [lotKuyrugu, setLotKuyrugu] = useState<number[]>([]);
+  useEffect(() => {
+    // Sıradaki satır bu arada silindiyse atla.
+    if (lotKuyrugu.length > 0 && !satirlar.some(s => s.anahtar === lotKuyrugu[0]))
+      setLotKuyrugu(k => k.slice(1));
+  }, [lotKuyrugu, satirlar]);
   useEffect(() => {
     if (!(basvuruMu && cariArama && hastaAramaYeni && p.yeniHastaSekmede)) return;
     setCariArama(false); setHastaAramaMetni(''); setHastaAramaYeni(false);
@@ -382,20 +394,50 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
         <SiparistenAktarPenceresi
           siparisTuru={siparisArama}
           tarafId={cari?.id}
+          cariUnvan={cari?.unvan}
+          hedefAdi={turAdi ?? bilgi.ad}
           // Kartta bekleyen kaynak satırlar: aynı kaynak ikinci kez açılınca kalan düşer (kaydedilmemiş olsa da).
           kartta={satirlar.reduce<Record<number, number>>((t, s) => {
             if (s.kaynakSatirId) t[s.kaynakSatirId] = (t[s.kaynakSatirId] ?? 0) + hamSayi(s.adet);
             return t;
           }, {})}
           onKapat={() => setSiparisArama?.(null)}
-          onSec={(siparis, secilenler) => {
-            if (!cari && siparis.tarafId) setCari({ id: Number(siparis.tarafId), unvan: String(siparis.tarafUnvan ?? '') });
+          onSec={(kaynaklar, secilenler) => {
+            // Birden çok kaynak belge olabilir (sepet); carisiz kartın carisi ilkinden.
+            const ilk = kaynaklar[0];
+            if (!cari && ilk?.tarafId) setCari({ id: Number(ilk.tarafId), unvan: String(ilk.tarafUnvan ?? '') });
             const yeniler = siparisSatirlari(secilenler, sonAnahtar(satirlar));
             setSatirlar(s => [...s, ...yeniler]);
             setSiparisArama?.(null);
+            // LOT SOR (kullanıcı 09.11.2026): siparişten gelen izlemli satırlar lotsuz - sırayla sorulur;
+            //   irsaliyeden gelenler lotlarıyla geldi, sorulmaz.
+            const sorulacak = lotSorulacakSatirlar(yeniler, bilgi);
+            if (sorulacak.length > 0) setLotKuyrugu(sorulacak);
           }}
         />
       )}
+
+      {lotKuyrugu.length > 0 && (() => {
+        const s = satirlar.find(x => x.anahtar === lotKuyrugu[0]);
+        if (!s) return null;
+        return (
+          <IzlemPenceresi
+            key={s.anahtar}
+            stokAdi={s.stokAdi}
+            stokId={s.stokId}
+            depoId={depo?.id ?? null}
+            cikis={bilgi.cikisIzlemi}
+            izleme={s.izleme}
+            miktar={hamSayi(s.adet)}
+            satirlar={s.izlemler}
+            onKapat={() => setLotKuyrugu(k => k.slice(1))}
+            onKaydet={izlemler => {
+              setSatirlar(ss => ss.map(x => x.anahtar === s.anahtar ? { ...x, izlemler } : x));
+              setLotKuyrugu(k => k.slice(1));
+            }}
+          />
+        );
+      })()}
 
       {/* 1) Stok/hizmet arama - satir eklemenin BASLANGICI. Secim yapilinca
              kapanmaz; kalem penceresi ustune acilir, o kapaninca buraya donulur
@@ -431,9 +473,10 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           zatenVarMi={r => satirlar.some(s => r.tip === 'hizmet'
             ? s.hizmetId === Number(r.id)
             : s.stokId === Number(r.id))}
-          // TEK SEÇİM (kullanıcı 02.11.2026): alış / satış belgesinde yalnız işaretli tek satır eklenir.
-          //   Başvuruda çoklu seçim kalır (hizmetler toplu işaretlenip eklenir).
-          tekSecim={!basvuruMu}
+          // TEK SEÇİM (kullanıcı 02.11.2026 alış/satış, 09.11.2026 başvuru: "aynı anda 1'den fazla satır
+          //   seçilemesin"): her belge türünde yalnız işaretli tek satır eklenir; Ctrl/Shift çoklu seçim,
+          //   "tümünü seç" ve "Seçilenleri Ekle" yok.
+          tekSecim
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
           // HIZLI EKLEME (786): kalem penceresi acilmadan gride dustugu icin
           //   sayaci BURASI artirir - pencere yoluyla eklemede sayaci kalem

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (675 ad, 186 tanesi birden cok dosyada)
+## Fonksiyonlar (678 ad, 186 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -32,6 +32,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktar_ek_siparis` | `1192_aktarim_siparis.sql` | — |
 | `fn_aktar_ek_teklif` | `1148_aktarim_ek_teklif_hesap_demirbas.sql` | — |
 | `fn_aktar_ek_uretim_fisi` | `1261_aktarim_uretim_fisi.sql` | — |
+| `fn_aktar_fiyat_listesi` | `1280_aktarim_fiyat_listesi.sql` | — |
 | `fn_aktar_hesap` | `1082_aktarim_stok_kalem_hesap.sql` | — |
 | `fn_aktar_is_merkezi` | `1083_aktarim_recete.sql` | — |
 | `fn_aktar_kalem` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -101,7 +102,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_basvuru_radyoloji_istem_esitle` | `1243_sevkli_accession_kabulde.sql` | 1242_basvuru_radyoloji_istem_esitle.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
 | `fn_belge_cikis_mi` | `1172_aktarim_lot_defteri.sql` | 1084_aktarim_belge.sql |
-| `fn_belge_diptoplam` | `372_diptoplam_kdvli.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql |
+| `fn_belge_diptoplam` | `1278_diptoplam_tevkifat_orani.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql, 372_diptoplam_kdvli.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
 | `fn_belge_fis_geri_al` | `190_belge_fisle.sql` | — |
 | `fn_belge_fis_turu_uygun` | `1167_stok_fisi_fislenmez.sql` | 280_taahhut_belgesi_fislenmez.sql, 281_tahakkuk_fislenmez.sql, 429_uretim_v1.sql |
@@ -306,6 +307,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kategori_ust_zinciri` | `558_prim_kategori_alt_agac.sql` | — |
 | `fn_kdv_cevir` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kimlik_kurali` | `916_kimlik_kurali_default_serbest.sql` | 679_kimlik_bicimi.sql |
+| `fn_kisi_kod` | `1277_kisi_ad_soyad_kod.sql` | — |
 | `fn_klinik_donem_araligi` | `713_klinik_kalite_motor.sql` | — |
 | `fn_klinik_donem_hesapla` | `713_klinik_kalite_motor.sql` | — |
 | `fn_klinik_gosterge_donem_hesapla` | `711_klinik_kalite.sql` | — |
@@ -671,6 +673,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
+| `tg_taraf_kisi_kod` | `1277_kisi_ad_soyad_kod.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 369_primli_calisma_sekli.sql |
 | `tg_telerad_atama_izi` | `802_telerad_atama_nedeni.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_bakanlik_dogrula` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
@@ -684,7 +687,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (360 ad, 161 tanesi birden cok dosyada)
+## Gorunumler (361 ad, 161 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -782,6 +785,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
 | `v_firsat_liste` | `940_personel_unvan_yalniz_onek.sql` | 121_firsat.sql |
 | `v_fiyat_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_kalem_lookup` | `1281_fiyat_listesi_kalem_lookup.sql` | — |
 | `v_fiyat_listesi_kullanim` | `539_turetilmis_liste_sokuldu.sql` | 204_cari_fiyat_listesi.sql |
 | `v_fiyat_listesi_lookup` | `201_fiyat_listesi.sql` | — |
 | `v_fiyat_listesi_satir` | `539_turetilmis_liste_sokuldu.sql` | 201_fiyat_listesi.sql, 507_fiyat_satir_gorunum_kdv_kategori.sql |

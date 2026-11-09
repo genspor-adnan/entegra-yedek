@@ -555,7 +555,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
 
 
   const modalAc = (i: number | 'yeni') => {
-    setTaslak(i === 'yeni' ? bosSatir() : { ...durum.guncel[i] });
+    // AÇILIŞ KURALI (kullanıcı 09.11.2026, stok Fiyatlar): ekran kuralı alan adı '' ile bir kez çağrılır -
+    //   boş kalan alanlara varsayılan koyar (durum Aktif, birim kartın ana birimi, döviz TL). Dolu alanı ezmez.
+    const t = i === 'yeni' ? bosSatir() : { ...durum.guncel[i] };
+    setTaslak({ ...t, ...(taslakKural?.('', undefined, t) ?? {}) });
     setModalSatir(i);
   };
 

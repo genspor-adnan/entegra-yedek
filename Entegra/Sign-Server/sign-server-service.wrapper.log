@@ -1,0 +1,21 @@
+2026-10-06 15:24:36,548 DEBUG - Starting WinSW in console mode
+2026-10-06 15:24:37,780 DEBUG - Starting WinSW in console mode
+2026-10-06 15:24:37,819 INFO  - Installing service 'GenSigner (GenSigner)'...
+2026-10-06 15:24:37,870 INFO  - Service 'GenSigner (GenSigner)' was installed successfully.
+2026-10-06 15:24:38,455 DEBUG - Starting WinSW in console mode
+2026-10-06 15:24:39,320 DEBUG - Starting WinSW in console mode
+2026-10-06 15:24:39,361 INFO  - Starting service 'GenSigner (GenSigner)'...
+2026-10-06 15:24:39,846 DEBUG - Starting WinSW in service mode
+2026-10-06 15:24:39,880 INFO  - Service 'GenSigner (GenSigner)' started successfully.
+2026-10-06 15:24:40,007 INFO  - Starting C:\Users\HP\Entegra\Entegra\Sign-Server\jre\bin\java.exe -Dquarkus.http.host=0.0.0.0 -jar "C:\Users\HP\Entegra\Entegra\Sign-Server\quarkus-app\quarkus-run.jar"
+2026-10-06 15:24:40,038 INFO  - Started process 13404
+2026-10-06 15:24:40,053 DEBUG - Forwarding logs of the process System.Diagnostics.Process (java) to WinSW.RollingLogAppender
+2026-10-06 15:42:12,717 INFO  - Stopping GenSigner
+2026-10-06 15:42:12,719 DEBUG - ProcessKill 13404
+2026-10-06 15:42:12,730 DEBUG - Stopping process 13404...
+2026-10-06 15:42:13,036 DEBUG - Process 13404 canceled with code 130.
+2026-10-06 15:42:13,051 INFO  - Finished GenSigner
+2026-10-06 15:42:18,193 DEBUG - Starting WinSW in service mode
+2026-10-06 15:42:18,566 INFO  - Starting C:\Users\HP\Entegra\Entegra\Sign-Server\jre\bin\java.exe -Dquarkus.http.host=0.0.0.0 -jar "C:\Users\HP\Entegra\Entegra\Sign-Server\quarkus-app\quarkus-run.jar"
+2026-10-06 15:42:18,628 INFO  - Started process 16404
+2026-10-06 15:42:18,659 DEBUG - Forwarding logs of the process System.Diagnostics.Process (java) to WinSW.RollingLogAppender

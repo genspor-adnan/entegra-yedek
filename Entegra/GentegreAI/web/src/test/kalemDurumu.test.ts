@@ -65,6 +65,18 @@ describe('kalem durumu', () => {
     expect(kalemDurumu(girdi({})).fiyatKilitli).toBe(false);
   });
 
+  it('başvuruda pencere fiyatsız açıldıysa kutu açık (sıfır onayında Hayır deyince yazılabilsin)', () => {
+    expect(kalemDurumu(girdi({ birimFiyat: '0' }, { basvuruMu: true, fiyatsizAcildi: true }))
+      .fiyatKilitli).toBe(false);
+    // Yazdıkça kilitlenmez: açılış bayrağı geçerli, güncel fiyat değil.
+    expect(kalemDurumu(girdi({ birimFiyat: '150' }, { basvuruMu: true, fiyatsizAcildi: true }))
+      .fiyatKilitli).toBe(false);
+    // Saf SGK'da fiyat SUT'tan gelir: fiyatsız açılsa da kilit kalkmaz.
+    expect(kalemDurumu(girdi({ birimFiyat: '0', rota: 5, sgkGerekli: true },
+                             { basvuruMu: true, tarifeTipi: 3, fiyatsizAcildi: true }))
+      .fiyatKilitli).toBe(true);
+  });
+
   it('kurum rotası: özel (1) ve rotasız hariç hepsi', () => {
     expect(kalemDurumu(girdi({ rota: 0 })).kurumRotasi).toBe(false);
     expect(kalemDurumu(girdi({ rota: 1 })).kurumRotasi).toBe(false);

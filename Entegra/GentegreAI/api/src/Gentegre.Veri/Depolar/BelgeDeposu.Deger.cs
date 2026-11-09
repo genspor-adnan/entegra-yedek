@@ -366,14 +366,17 @@ public sealed partial class BelgeDeposu
             --   (irsaliyeden gelen, stok_durum_degis 0, kaynak_tur 30) satırın lot satırı yoktur - kaynak irsaliye
             --   satırının lotları onun adına gösterilir. Kısmi aktarımda kaynağın tamamı görünür (bilgi amaçlı).
             --   İki dal UNION ALL (inceleme: OR iki tarafı birden tarıyordu) - ikisi de indeksle gider.
+            -- ÜRT / SKT GÜN OLARAK (kullanıcı 09.11.2026 "ürt ve skt 1 gün önceye gelmişti"): kolon timestamptz,
+            --   girilen gün şube gece yarısı UTC'ye çevrilip saklanır (08.11 21:00Z); ham UTC metni istemcide
+            --   slice(0,10) ile bir gün geri okunuyordu. ::date oturum (şube) dilimindeki günü verir.
             select i.belge_satir_id as "satirId", i.seri_lot_id as "seriLotId",
                    i.lot_no as "lotNo", i.seri_no as "seriNo",
-                   i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
+                   i.uretim_tarihi::date as "uretimTarihi", i.son_kullanma_tarihi::date as "sonKullanmaTarihi",
                    i.durum, i.adet as "miktar", i.kalan, i.id as sira
               from public.v_belge_satir_izlem i
              where i.belge_id = @p0
             union all
-            select h.id as "satirId", i.seri_lot_id, i.lot_no, i.seri_no, i.uretim_tarihi, i.son_kullanma_tarihi,
+            select h.id as "satirId", i.seri_lot_id, i.lot_no, i.seri_no, i.uretim_tarihi::date, i.son_kullanma_tarihi::date,
                    i.durum, i.adet, i.kalan, i.id
               from public.belge_satir h
               join public.v_belge_satir_izlem i on i.belge_satir_id = h.kaynak_id

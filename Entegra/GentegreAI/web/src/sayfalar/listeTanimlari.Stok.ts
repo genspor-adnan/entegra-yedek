@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
+﻿import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 import { AGAC_VARSAYILAN_CIPLER, EMIR_VARSAYILAN_CIPLER, FIS_VARSAYILAN_CIPLER } from './uretim/uretimListeSeviye';
 
 /**
@@ -43,6 +43,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   generic GenForm ile acilir, aksiyonlar hizmet-liste Crud'undan gelir.
     kaynak: 'hizmet', baslik: 'Hizmet Listesi', yol: 'Stok › Hizmet Listesi', kartYolu: '/hizmet',
     aksiyonEkrani: 'hizmet-liste', cipler: DURUM_CIPLERI,
+    // Kartta Hatırlat yok (kullanıcı 09.11.2026); başlık kipli şerit + ✎ (KIPLI_SERITLER / KIPLI_GOVDE_KARTLAR).
+    kartHatirlatYok: true,
     // Ciplerin sagina KATEGORI AGACI combosu (kullanici): secilen dal alt
     //   agaciyla birlikte suzer.
     kategoriSuzgeci: 2,
@@ -108,6 +110,9 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     //   satirlari yeniden yazar; MANUEL girilen satirlar korunur.
     kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Yönetim › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
+    // KART (kullanıcı 09.11.2026: "fiyat liste kartında hatırlat butonu kaldır, yerine edit moda geçirmek için
+    //   kalem ekle"): Hatırlat yok; başlık kipli şerit (KartKimlikSeridi KIPLI_SERITLER), ✎ başlığın sağ üst köşesinde.
+    kartHatirlatYok: true,
     // KOLON SIRASI (kullanici): Liste Adı · Tarife · Başlama · Bitiş · Yön ·
     //   KDV · Durum · Satır · Varsayılan.
     //
@@ -218,6 +223,8 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // GIRIS FISI (3) / CIKIS FISI (4): irsaliye gibi stok oynatan ama CARISIZ
     //   belgeler - fire, sarf, imha, sayim farki. Muhasebe fisi URETIRLER
     //   (kasa_islem_turu.fis_mi=1, F7'de baglanacak). TIPI fisin sebebidir.
+    // MENÜ ADI = LİSTE ADI (kullanıcı 09.11.2026): menüde ve sekme başlığında "Giriş Fişi Listesi" /
+    //   "Çıkış Fişi Listesi" (tahakkuk listeleriyle aynı kalıp, 1276); EN/DE çevirisi 1279.
     kaynak: 'giris-fis', baslik: 'Giriş Fişi Listesi', yol: 'Stok › Giriş Fişi',
     aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 3,
     toplam: ['genelToplam'],
@@ -226,7 +233,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fire',          filtre: { alan: 'tipi', op: 'esit', deger: 1 } },
       { ad: 'Sayım Fazlası', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi', ic: '📗', yetkiKodu: 'belge.stok.giris',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Giriş Fişi Listesi', ic: '📗', yetkiKodu: 'belge.stok.giris',
     menuSira: 50,
   },
   {
@@ -239,7 +246,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'İmha',         filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
       { ad: 'Sayım Eksiği', filtre: { alan: 'tipi', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi', ic: '📕', yetkiKodu: 'belge.stok.cikis',
+    menuGrup: 'Stok & Hizmet', menuAd: 'Çıkış Fişi Listesi', ic: '📕', yetkiKodu: 'belge.stok.cikis',
     menuSira: 60,
   },
   {

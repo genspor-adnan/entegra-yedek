@@ -1,4 +1,4 @@
-import {
+﻿import {
   kdvCarpan,
   payKalan as hesapPayKalan,
   payKalanDahil as hesapPayKalanDahil,
@@ -181,7 +181,14 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
     () => satirlar.reduce((t, s) => t + payKalanDahil(s), 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [satirlar, pay]);
-  const donusecekYok = !yukleniyor && satirlar.length > 0 && acikToplam < 0.01;
+  /**
+   * MİKTAR KİPİNDE ÖLÇÜ KALAN MİKTARDIR (kullanıcı 09.11.2026: teklif -> sipariş "Belgeye dönüşecek tutar kalmadı"
+   * ile dönüştürülemiyordu): fiyatsız (0 TL) ya da tutarı kovalara yazılmamış satır miktarla yine dönüşür; tutar
+   * yalnız tutar kipinde (fiş / fatura / tahakkuk) ölçüdür.
+   */
+  const acikMiktar = useMemo(() => satirlar.reduce((t, s) => t + Number(s.kalanMiktar ?? 0), 0), [satirlar]);
+  const donusecekYok = !yukleniyor && satirlar.length > 0
+    && (tutarMod ? acikToplam < 0.01 : acikMiktar <= 0);
 
   /**
    * ONIZLEME FIYATI: pay secilince satirin birim fiyati DEGISIR - hedef belge
@@ -293,7 +300,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
         <>
           <button className="d bir"
                   disabled={calisiyor || satirlar.length === 0 || donusecekYok}
-                  title={donusecekYok ? 'Belgeye dönüşecek tutar kalmadı' : undefined}
+                  title={donusecekYok ? (tutarMod ? 'Belgeye dönüşecek tutar kalmadı' : 'Belgeye dönüşecek miktar kalmadı') : undefined}
                   onClick={() => void donustur()}>
             {calisiyor ? 'Dönüştürülüyor…' : sonuc ? '⇢ Kalanı Dönüştür' : '⇢ Dönüştür'}
           </button>
@@ -325,8 +332,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
           acilmasin - sebebi yazsin. */}
       {donusecekYok && !sonuc && (
         <div className="uyari">
-          Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri zaten
-          belgeye çevrilmiş.
+          {tutarMod
+            ? 'Belgeye dönüşecek tutar kalmadı — satırların açık tutarı zaten belgeye çevrilmiş.'
+            : 'Belgeye dönüşecek miktar kalmadı — satırların tamamı zaten belgeye çevrilmiş.'}
         </div>
       )}
 

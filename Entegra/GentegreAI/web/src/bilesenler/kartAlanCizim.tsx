@@ -390,7 +390,8 @@ export function alanCizici(b: AlanCizimBaglami) {
           //   saklamak, kullaniciyi kart kapandiktan sonra geri getiriyordu.
           //   Kural alanin metasindan geliyor - ekran alan adi bilmiyor.
           onChange={e => {
-            const v = e.target.value;
+            // BOŞLUKSUZ ALAN (kullanıcı 09.11.2026): boşluk yazılamaz / yapıştırılamaz - anında silinir.
+            const v = a.dogrulama === 'bosluksuz' ? e.target.value.replace(/\s+/g, '') : e.target.value;
             setDeger(d => ({ ...d, [a.ad]: v }));
             if (a.dogrulama) setAlanHatalari(h => {
               const hata = bicimHatasi(a.dogrulama, v);

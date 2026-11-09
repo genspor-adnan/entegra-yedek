@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { c } from '../dil/ceviri';
 
 /**
@@ -76,19 +76,20 @@ export function AgacCombo({ kodlar, kodUst, deger, onDegis, disabled, zorunlu, a
   }, [ara, kodlar, ust]);
 
   const sec = (k: string) => { onDegis(k); setAcik(false); setAra('') };
+  const acKapa = (k: string) => setGenis(g => { const n = new Set(g); if (n.has(k)) n.delete(k); else n.add(k); return n });
 
+  // DAL / YAPRAK (kullanıcı 09.11.2026): altı olan düğüme tıklamak dalı açar-kapar, pano AÇIK kalır;
+  //   yalnız yaprak tıklanınca seçilir ve pano kapanır.
   const dal = (k: string, derinlik: number): React.ReactNode => {
     if (aramaKumesi && !aramaKumesi.has(k)) return null;
     const alt = cocuklar.get(k) ?? [];
     const acikDal = aramaKumesi ? true : genis.has(k);
     return (
       <div key={k}>
-        <div className={`agcb-dugum${k === deger ? ' on' : ''}`} style={{ paddingLeft: 6 + derinlik * 16 }}
-             onClick={() => sec(k)}>
-          <span className="agcb-ok" onClick={e => {
-            e.stopPropagation();
-            if (alt.length) setGenis(g => { const n = new Set(g); if (n.has(k)) n.delete(k); else n.add(k); return n });
-          }}>{alt.length ? (acikDal ? '▾' : '▸') : ''}</span>
+        <div className={`agcb-dugum${k === deger ? ' on' : ''}${alt.length ? ' dal' : ''}`}
+             style={{ paddingLeft: 6 + derinlik * 16 }}
+             onClick={() => alt.length ? acKapa(k) : sec(k)}>
+          <span className="agcb-ok">{alt.length ? (acikDal ? '▾' : '▸') : ''}</span>
           <span>{alt.length ? '📁' : '📄'} {c(kodlar[k], 'kod')}</span>
         </div>
         {acikDal && alt.map(x => dal(x, derinlik + 1))}
@@ -106,7 +107,9 @@ export function AgacCombo({ kodlar, kodUst, deger, onDegis, disabled, zorunlu, a
         <span className="agcb-isaret">▾</span>
       </button>
       {acik && !disabled && (
-        <div className="agcb-pano">
+        // preventDefault: alan bir <label> içinde çizilir; pano içindeki tıklama label üzerinden kutu
+        //   düğmesine iletilip panoyu kapatıyordu (dal tıklaması açık kalmalı - 09.11.2026).
+        <div className="agcb-pano" onClick={e => e.preventDefault()}>
           <input className="agcb-ara" autoFocus placeholder={c('Ara…')} value={ara} onChange={e => setAra(e.target.value)} />
           <div className="agcb-liste">
             {!zorunlu && <div className={`agcb-dugum${deger ? '' : ' on'}`} onClick={() => sec('')}>

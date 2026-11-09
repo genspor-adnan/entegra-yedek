@@ -22,7 +22,7 @@ object BankalarListeFrame: TBankalarListeFrame
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
-    ButtonWidth = 96
+    ButtonWidth = 115
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -45,7 +45,6 @@ object BankalarListeFrame: TBankalarListeFrame
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -258,7 +257,6 @@ object BankalarListeFrame: TBankalarListeFrame
     end
   end
   object PageControlSekme: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 230
     Width = 1106
@@ -267,6 +265,7 @@ object BankalarListeFrame: TBankalarListeFrame
     TabOrder = 4
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnChange = PageControlSekmeChange
     ClientRectBottom = 304
     ClientRectLeft = 4
@@ -731,6 +730,7 @@ object BankalarListeFrame: TBankalarListeFrame
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
+    ExplicitWidth = 8
   end
   object SqlMemo: TMemo
     Left = 137
@@ -1060,7 +1060,6 @@ object BankalarListeFrame: TBankalarListeFrame
       'DEVIR = 0,'
       'BORC=SUM(K.BORC),ALACAK=SUM(K.ALACAK)'
       'FROM KASA K'
-      
       'WHERE HESAPID=:Prm1 AND year(ISLEMTARIHI)=year(getdate())'
       'and HESAPTURU='#39'B'#39
       'UNION ALL'
@@ -1069,7 +1068,8 @@ object BankalarListeFrame: TBankalarListeFrame
       'BORC=0,ALACAK=0'
       'FROM KASA K'
       
-      'WHERE HESAPID=:Prm2 AND year(ISLEMTARIHI)>=year(getdate()) AND TUR<=2'
+        'WHERE HESAPID=:Prm2 AND year(ISLEMTARIHI)>=year(getdate()) AND T' +
+        'UR<=2'
       'and HESAPTURU='#39'B'#39
       ') AS X'
       '')

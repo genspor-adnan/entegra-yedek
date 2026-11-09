@@ -47,6 +47,60 @@ public sealed partial class BelgeDeposu
     /// guncellenir - baska belgenin satir kimligi gonderilirse sessizce atlanmaz,
     /// 404 verir.
     /// </summary>
+    /// <summary>
+    /// TEKLİF DURUMU (kullanıcı 09.11.2026: "satış teklif listesine Durumu Değiştir butonu ekle, kart açılmadan
+    /// durumu değiştirebilelim"): yalnız teklif (18) belgesinde `teklif_durum` (1 Hazırlanıyor · 2 Sunuldu ·
+    /// 3 Kabul · 4 Red · 5 İptal). Tutar / stok / cari etkilenmez; değişiklik logu eski -> yeni ile yazılır.
+    /// Aynı duruma getirmek hata değil, yazmaz (0 döner).
+    /// </summary>
+    public async Task<(int Eski, int Yeni)> TeklifDurumGuncelleAsync(
+        int belgeId, int yeniDurum, YazmaBaglami baglam, CancellationToken iptal = default)
+    {
+        if (yeniDurum is < 1 or > 5)
+            throw GentegreHatasi.Dogrulama("Teklif durumu 1-5 arası olmalı.",
+                new AlanHatasi("durum", "Geçersiz teklif durumu."));
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+        IDictionary<string, object?> belge;
+        await using (var komut = new NpgsqlCommand(
+            "select id, tur, durum, sube_id, taraf_id, belge_no, coalesce(teklif_durum, 1) as teklif_durum " +
+            "from public.belge where id = @p0 for update", baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("p0", belgeId);
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi();
+            belge = o.Sozluk();
+        }
+        if (baglam.SubeId is { } sube && belge["sube_id"] is { } bs && Convert.ToInt32(bs) != sube)
+            throw GentegreHatasi.Bulunamadi();
+        if (Convert.ToInt32(belge["tur"]) != 18)
+            throw GentegreHatasi.IsKurali("Teklif durumu yalnız satış teklifinde değiştirilir.");
+        if (Convert.ToInt32(belge["durum"]) == 2)
+            throw GentegreHatasi.IsKurali("İptal edilmiş teklifin durumu değiştirilemez.");
+
+        var eski = Convert.ToInt32(belge["teklif_durum"]);
+        if (eski == yeniDurum) { await islem.CommitAsync(iptal); return (eski, eski); }
+
+        await using (var komut = baglanti.Komut(
+            "update public.belge set teklif_durum = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0",
+            islem, belgeId, (short)yeniDurum, baglam.KullaniciId))
+            await komut.ExecuteNonQueryAsync(iptal);
+
+        await _log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloBelge, belgeId,
+            baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+            new Dictionary<string, string>
+            {
+                ["aksiyon"] = "teklif-durum",
+                ["teklifDurum"] = $"{eski.ToString(CultureInfo.InvariantCulture)} -> {yeniDurum.ToString(CultureInfo.InvariantCulture)}",
+            },
+            tarafId: SayiNull(belge, "taraf_id"), iptal: iptal);
+
+        await islem.CommitAsync(iptal);
+        return (eski, yeniDurum);
+    }
+
     public async Task<int> TerminGuncelleAsync(
         int belgeId, IReadOnlyList<(int SatirId, DateTime? Tarih)> satirlar,
         YazmaBaglami baglam, CancellationToken iptal = default)
@@ -219,7 +273,7 @@ public sealed partial class BelgeDeposu
         {
             await using var lotKomut = baglanti.Komut("""
                 select i.belge_satir_id as sid, i.seri_lot_id as "seriLotId", i.lot_no as "lotNo", i.seri_no as "seriNo",
-                       i.uretim_tarihi as "uretimTarihi", i.son_kullanma_tarihi as "sonKullanmaTarihi",
+                       i.uretim_tarihi::date as "uretimTarihi", i.son_kullanma_tarihi::date as "sonKullanmaTarihi",
                        i.durum, i.adet as "miktar"
                   from public.v_belge_satir_izlem i
                  where i.belge_satir_id = any(@p0)

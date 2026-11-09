@@ -132,17 +132,21 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
-        Top = 285
+        Top = 282
         Width = 1104
-        Height = 325
+        Height = 328
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
         object PanelAlt: TPanel
           Left = 1
-          Top = 159
+          Top = 162
           Width = 1102
           Height = 165
           Align = alBottom
@@ -811,7 +815,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           Left = 1
           Top = 25
           Width = 1102
-          Height = 134
+          Height = 137
           Align = alClient
           PopupMenu = PopupMenuFatura
           TabOrder = 1
@@ -1684,7 +1688,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       end
       object PageUst: TcxPageControl
         Left = 0
-        Top = 105
+        Top = 102
         Width = 1104
         Height = 180
         Align = alTop
@@ -1700,6 +1704,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 11
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2614,12 +2622,17 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 19
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
             Width = 1096
             Height = 149
             Align = alClient
+            PopupMenu = PopupEkAlanlar
             TabOrder = 0
           end
         end
@@ -2629,6 +2642,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Left = 3
         Top = 73
         Width = 1098
+        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -2778,6 +2792,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = DetayEkrPage
       OnExitPage = DetayEkrExitPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3009,6 +3025,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = PlanlamaEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar4: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3191,6 +3209,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -3251,6 +3271,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 554
         AnchorX = 1110
       end
       object GridYorum: TcxGrid
@@ -3609,6 +3630,11 @@ object FaturaWizardDlg: TFaturaWizardDlg
     object N5: TMenuItem
       Caption = '-'
     end
+    object IthalatBilgileriniDzenleMenu: TMenuItem
+      Caption = #304'thalat Bilgilerini D'#252'zenle'
+      ImageIndex = 7
+      OnClick = IthalatBilgileriniDzenleMenuClick
+    end
     object IhracatBilgileriMenu: TMenuItem
       Caption = #304'hracat Bilgilerini D'#252'zenle'
       ImageIndex = 7
@@ -3774,6 +3800,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
     BeforeOpen = FATURABeforeOpen
     AfterOpen = FATURAAfterOpen
     BeforeClose = FATURABeforeClose
+    BeforeInsert = FATURABeforeInsert
     AfterInsert = FATURAAfterInsert
     BeforeEdit = FATURABeforeEdit
     BeforePost = FATURABeforePost
@@ -4846,6 +4873,16 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'Tipini '#304'ade Yap'
       ImageIndex = 0
       OnClick = MenuTipiIadeClick
+    end
+  end
+  object PopupEkAlanlar: TPopupMenu
+    Images = Tablo.PNGImageList2
+    Left = 641
+    Top = 82
+    object MenuEkAlanCariSec: TMenuItem
+      Caption = 'Bu Cari '#304#231'in Alanlar'#305' Se'#231
+      ImageIndex = 7
+      OnClick = MenuEkAlanCariSecClick
     end
   end
   object FATURA: TFDQuery

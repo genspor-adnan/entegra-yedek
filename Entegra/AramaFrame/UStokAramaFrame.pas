@@ -1,7 +1,7 @@
-﻿unit UStokAramaFrame;
+﻿unit  UStokAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
-{ Tarih :   07/12/2010 10:46:01 }
+{ Tarih  :  07/12/2010 10:46:01 }
 interface
 
 uses

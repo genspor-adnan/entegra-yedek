@@ -132,18 +132,19 @@ export function GridMenu({ konum, ogeler, onKapat }: {
 
   useEffect(() => {
     if (!konum) return;
-    // Menu SAYFA kaydirilinca kapanir (konumu sabit, yerinde asili kalirdi) ama
-    //   KENDI icinde kaydirilinca KAPANMAZ: capture fazindaki dinleyici menunun
-    //   kendi scroll'unu da yakaliyor ve kullanici kolon listesine inemiyordu.
+    // KAYDIRMA KAPATMAZ (kullanıcı 09.11.2026, sağ tuş menüsüyle aynı kural - GenSagTus): eskiden sayfa
+    //   kaydırılınca kapanıyordu; kaydırma çubuğundan hareket ettirmek menüyü düşürüyordu. Menü sabit konumlu,
+    //   yalnız menü DIŞINA tıklama ya da Esc kapatır (kendi içinde kaydırma zaten serbestti).
     const kapat = (e: Event) => {
       if (e.target instanceof Node && menuRef.current?.contains(e.target)) return;
       onKapat();
     };
+    const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onKapat() } };
     window.addEventListener('click', kapat);
-    window.addEventListener('scroll', kapat, true);
+    window.addEventListener('keydown', tus, true);
     return () => {
       window.removeEventListener('click', kapat);
-      window.removeEventListener('scroll', kapat, true);
+      window.removeEventListener('keydown', tus, true);
     };
   }, [konum, onKapat]);
 

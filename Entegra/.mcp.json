@@ -2,7 +2,7 @@
   "mcpServers": {
     "mssql-bilim": {
       "command": "cmd",
-      "args": ["/c","npx","-y","@executeautomation/database-server","--sqlserver","--server","localhost\\SQLEXPRESS","--database","BILIM","--user","sa","--password","FETAGEN","--trustServerCertificate","true"]
+      "args": ["/c","npx","-y","@executeautomation/database-server","--sqlserver","--server","localhost\\SQLEXPRESS","--database","UNIVERSE","--user","sa","--password","FETAGEN","--trustServerCertificate","true"]
     }
   }
 }

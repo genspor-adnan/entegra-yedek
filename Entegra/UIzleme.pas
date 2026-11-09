@@ -123,9 +123,8 @@ type
     FBeklenenUrunNo : string;
     FBeklemeZamani  : TDateTime;
     FEskiBaslik     : string;
-    // Ayni lot no farkli tarih: lot arama durumu (LotKartiSec)
+    // Lot no tanimi arama durumu (LotKartiSec)
     FLotAraniyor    : Boolean;
-    FLotYeniIstendi : Boolean;
     FLotBekleyen    : string;
     FRafHesapliyor  : Boolean;   // SKT<->URT raf omru hesabi (TabIzlemTarihChange)
     function  RafOmruSor: Boolean;
@@ -143,20 +142,20 @@ type
     function AdaydanDoldur(const AYontem: string): Boolean;
     procedure SecimJsonUret;
     function BuSeriNoKullanilmismiKontrolu(IzlemNo:string) : Boolean;
-    { --- Ayni lot no, farkli SKT/URT ----------------------------------------
-      Musteri ayni lot numarasini farkli tarihlerle girebiliyor; her tarih
-      STOKSERILOT'ta ayri tanimdir. Lot yazilip hucreden cikilinca (Tab)
-      o lot no'lu tanimlar listelenir: biri secilir (SERILOTID baglanir) ya da
-      "Yeni" ile ayni lot no icin yeni tanim istenir (SERILOTID = -1, karti
-      kayitta sp_Prog_Izleme_Yaz_Json tarihle arar/acar - Update_SQL_215). }
+    { --- Bir lotun tek SKT/URT'si olur (04.11.2026, Update_SQL_220) ---------
+      Lot yazilip hucreden cikilinca (Tab) ya da kayitta o lot no'lu tanim
+      aranir; varsa satir ona baglanir ve tarihler tanimdan gelir. Girilen
+      tarih tanimdakinden farkliysa uyarilir, kayit engellenir. }
     function  LotIzlemiMi: Boolean;
     function  LotKartiSec(ATarihleEslestir: Boolean): Boolean;
-    function  LotTarihUyumu: Boolean;
+    function  LotTarihUyumu(AKayitta: Boolean): Boolean;
     procedure LotKartiBagla(AId: Integer);
-    procedure LotYeniTanimClick(Sender: TObject);
     procedure TabIzlemLOTNOChange(Sender: TField);
     procedure TabIzlemTarihChange(Sender: TField);
     procedure WMLotAra(var Msg: TMessage); message WM_USER + 471;
+    procedure GridFatIzlemViewEditKeyPress(Sender: TcxCustomGridTableView;
+      AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Char);
+    function IzlemNoBosluksuz: Boolean;
     { Private declarations }
     procedure SayiGetir;
   public
@@ -496,6 +495,14 @@ procedure TIzlemeDlg.KaydetTusClick(Sender: TObject);
 begin
   if TabIzlem.State in [dsEdit,dsInsert] then
      TabIzlem.Post;
+  // ARA ile suzulmus liste: secim gecici tabloda tam ama TabIzlem yalniz arananlari
+  //   tasiyor; kontrol ve SecimJsonUret TabIzlem'i gezdigi icin arama disinda kalan
+  //   secili lotlar kaydedilmiyordu. Kaydetmeden once tam liste acilir.
+  if Trim(TabIzlem.SQL.Text) <> 'select * from '+TabloAdi then begin
+     TabIzlem.Close;
+     TabIzlem.SQL.Text := 'select * from '+TabloAdi;
+     TabIzlem.Open;
+  end;
   if (KaydetTus.Enabled)and(CikisMiktarKontrolEt) then begin
      Tablo.TablodanSorguAc(2,'select sum(KALAN) from '+TabloAdi+' where SEC=1');
      KALAN := Tablo.Query2.Fields[0].AsFloat;
@@ -621,6 +628,9 @@ begin
 end;
 
 procedure TIzlemeDlg.GridFatIzlemViewSECPropertiesChange(Sender: TObject);
+var
+  LSecili: Boolean;
+  LDurum: Double;
 begin
         if IzlemTur in [izl_SeriNo, izl_Karekod, izl_SeriNo_LotNo] then begin
            if TabIzlem.FieldByName('SEC').AsBoolean then
@@ -628,11 +638,36 @@ begin
            else
               TabIzlem.FieldByName('KALAN').AsFloat := 0.0;
            TabIzlem.Post;
+           Exit;
         end;
+        // LOT: Sec isaretlenince adet = durumdaki miktar, kalan (gerekli - secilen)
+        //   miktari asmadan (cift tik ile ayni kural). Kalan bitmisse isaret kalkar.
+        //   Durumda miktar yoksa (giris belgesi vb.) adete dokunulmaz.
+        //   Editor degeri Sender'dan okunur: OnChange'de alan henuz yazilmamis olabilir;
+        //   KalanMiktar (SayiGetir) bu satiri icermez - satir henuz SEC=1 post edilmedi.
+        LDurum := TabIzlem.FieldByName('DURUM').AsFloat;
+        if LDurum <= 0.0000001 then
+           Exit;
+        LSecili := (not VarIsNull(TcxCustomEdit(Sender).EditValue)) and (TcxCustomEdit(Sender).EditValue = True);
+        if LSecili and (KalanMiktar <= 0.0000001) then begin
+           // editor geri alinir (ImmediatePost isareti yazmasin); OnChange yeniden
+           //   gelir, isaretsiz dalda adet 0 yazilir.
+           TcxCustomEdit(Sender).EditValue := False;
+           ShowMessage('Gerekli miktar tamamlandı; bu lottan seçilecek miktar kalmadı.');
+           Exit;
+        end;
+        if TabIzlem.State = dsBrowse then
+           TabIzlem.Edit;
+        TabIzlem.FieldByName('SEC').AsBoolean := LSecili;
+        if LSecili then
+           TabIzlem.FieldByName('KALAN').AsFloat := Min(LDurum, KalanMiktar)
+        else
+           TabIzlem.FieldByName('KALAN').AsFloat := 0;
+        TabIzlem.Post;
 end;
 
 procedure TIzlemeDlg.cxLabel1DblClick(Sender: TObject);
-var Adet : Variant;
+var   Adet : Variant;
 begin
    Adet := '0';
    if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi,TGirdiDenetimleri.Create.Edit(BGYeni_bilgi_girisi,@Adet)) <> mrOk then
@@ -644,7 +679,7 @@ begin
 end;
 
 /// RAFOMRU_BIRIM kodunun stok kartindaki adi (GENINI -2707: Gun/Ay/Yil/Saat/Dakika).
-function TIzlemeDlg.RafOmruBirimAdi: string;
+function  TIzlemeDlg.RafOmruBirimAdi: string;
 begin
   Tablo.TablodanSorguAc(1, 'select ANAHTAR from GENINI where BOLUM=' +
     IntToStr(Ops_StokKart_ZamanBirimi) + ' and DIL=-1 and DEGER=' + IntToStr(RafOmruBirim));
@@ -739,7 +774,7 @@ end;
 procedure TIzlemeDlg.EditAraPropertiesEditValueChanged(Sender: TObject);
 begin
   TabIzlem.Close;
-  TabIzlem.SQL.Text := 'select * from '+TabloAdi+' where (SERINO like '''+VarToStr(EditAra.EditValue)+'%'') or (LOTNO like '''+VarToStr(EditAra.EditValue)+'%'')' ;
+  TabIzlem.SQL.Text := 'select * from '+TabloAdi+' where (SERINO like ''%'+VarToStr(EditAra.EditValue)+'%'') or (LOTNO like ''%'+VarToStr(EditAra.EditValue)+'%'')' ;
   TabIzlem.Open;
 end;
 
@@ -1427,17 +1462,15 @@ begin
 
 end;
 // ============================================================
-// Ayni lot no, farkli SKT/URT (17.10.2026)
-//   Musteri ayni lot numarasini farkli SKT/URT ile girebiliyor. Her tarih
-//   STOKSERILOT'ta ayri tanimdir; eskiden lot no ile ilk bulunan karta
-//   baglaniyor, tarih farki ya kaybediliyor ya da kayit reddediliyordu.
-//   Simdi:
-//     - lot yazilip hucreden cikilinca (Tab) bu lot no'lu tanimlar aranir;
-//     - yoksa yeni lottur (kayitta SP acar);
-//     - varsa listelenir: biri secilir (SERILOTID + tarihleri gelir) ya da
-//       "Yeni" ile ayni lot no icin YENI tanim istenir (SERILOTID = -1).
-//   SERILOTID -1 / 0 olan satiri sp_Prog_Izleme_Yaz_Json lot no + SKT/URT
-//   ile arar, bulamazsa yeni kart acar (Update_SQL_215).
+// Bir lotun tek SKT/URT'si olur (04.11.2026)
+//   17.10.2026'da ayni lot no farkli tarihle ayri tanim olarak acilabiliyordu
+//   (Update_SQL_215); kullanici karariyla geri alindi (Update_SQL_220):
+//     - lot yazilip hucreden cikilinca (Tab) ya da kayitta bu lot no'lu
+//       tanim aranir; yoksa yeni lottur (kayitta SP acar);
+//     - varsa satir o tanima baglanir, SKT/URT tanimdan gelir;
+//     - girilen tarih tanimdakinden farkliysa uyarilir, kayit engellenir.
+//   215 doneminde ayni lot no ile birden fazla tanim acilmis olabilir:
+//   o durumda tarihle eslesen alinir, yoksa listeden secilir.
 //   Yalniz lot izleminde (lot, lot+SKT) ve lot yazilabilirken (giris).
 // ============================================================
 function TIzlemeDlg.LotIzlemiMi: Boolean;
@@ -1452,9 +1485,9 @@ end;
 function LotTarihi(AField: TField): TDateTime;
 begin
   if AField.IsNull or (AField.AsDateTime <= EncodeDate(1990, 1, 1)) then
-    Result := 0
+     Result := 0
   else
-    Result := DateOf(AField.AsDateTime);
+     Result := DateOf(AField.AsDateTime);
 end;
 
 procedure TIzlemeDlg.LotKartiBagla(AId: Integer);
@@ -1467,19 +1500,13 @@ begin
     TabIzlem.FieldByName('URT').AsDateTime := Tablo.Query1.FieldByName('URT').AsDateTime;
 end;
 
-procedure TIzlemeDlg.LotYeniTanimClick(Sender: TObject);
-begin
-  FLotYeniIstendi := True;
-  TForm(TComponent(Sender).Owner).ModalResult := mrCancel;
-end;
-
-// ATarihleEslestir: kayit (BeforePost) aninda cagrilir; girilen tarih
-//   tanimlardan biriyle birebir tutuyorsa sormadan ona baglanir (barkoddan
-//   lot + SKT okutuldugunda pencere acilmasin).
+// Satiri bu lot no'lu tanima baglar (yalniz SERILOTID; tarih karsilastirmasi
+//   LotTarihUyumu'nda). ATarihleEslestir: kayit (BeforePost) aninda birden
+//   fazla tanim varsa girilen tarihle eslesen sormadan alinir.
 function TIzlemeDlg.LotKartiSec(ATarihleEslestir: Boolean): Boolean;
 var
   Lot, Kosul, Alan: string;
-  Id: Integer;
+  Id, Sayi: Integer;
   Tarih: TDateTime;
   St: TStringList;
 begin
@@ -1490,8 +1517,6 @@ begin
   if Lot = '' then
      Exit;
   Id := TabIzlem.FieldByName('SERILOTID').AsInteger;
-  if Id = -1 then          // yeni tanim zaten istendi
-     Exit;
   Kosul := ' from STOKSERILOT where STOKID=' + IntToStr(StokID) +
            ' and LOTNO=N&LOT and isnull(SERINO,'''')=''''';
   // Satir zaten bu lot no'lu bir tanima bagli
@@ -1499,11 +1524,19 @@ begin
        'select ID' + Kosul + ' and ID=' + IntToStr(Id), ['&LOT'], [Lot]) then
     Exit;
 
-  if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID' + Kosul, ['&LOT'], [Lot]) then begin
+  Sayi := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+            'select count(*)' + Kosul, ['&LOT'], [Lot], True)), 0);
+  if Sayi = 0 then begin
     TabIzlem.FieldByName('SERILOTID').AsInteger := 0;   // yeni lot, kayitta acilir
     Exit;
   end;
+  if Sayi = 1 then begin
+    TabIzlem.FieldByName('SERILOTID').AsInteger := StrToIntDef(VarToStr(
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'select ID' + Kosul, ['&LOT'], [Lot], True)), 0);
+    Exit;
+  end;
 
+  // 215 doneminden kalan birden fazla tanim
   if ATarihleEslestir then begin
     if IzlemTur = izl_LotNo then Alan := 'URT' else Alan := 'SKT';
     Tarih := LotTarihi(TabIzlem.FieldByName(Alan));
@@ -1512,17 +1545,16 @@ begin
               'select top 1 ID' + Kosul + ' and cast(' + Alan + ' as date)=&TRH order by ID',
               ['&LOT', '&TRH'], [Lot, FormatDateTime('yyyymmdd', Tarih)], True)), 0);
       if Id > 0 then begin
-        LotKartiBagla(Id);
+        TabIzlem.FieldByName('SERILOTID').AsInteger := Id;
         Exit;
       end;
     end;
   end;
 
-  FLotYeniIstendi := False;
   St := TStringList.Create;
   try
     if Tablo.ListedenBilgiGetir(
-         'Bu lot no daha önce tanımlanmış: birini seçin ya da farklı tarihle "Yeni" tanım açın',
+         'Bu lot no birden fazla tarihle tanımlanmış: kullanılacak tanımı seçin',
          'select SSL.ID, SSL.LOTNO as [Lot No],' +
          ' case when SSL.SKT > ''19900101'' then SSL.SKT end as [Son Kul. Tarihi],' +
          ' case when SSL.URT > ''19900101'' then SSL.URT end as [Üretim Tarihi],' +
@@ -1530,10 +1562,8 @@ begin
          ' from STOKSERILOT SSL where SSL.STOKID=' + IntToStr(StokID) +
          ' and SSL.LOTNO=N' + QuotedStr(Lot) + ' and isnull(SSL.SERINO,'''')=''''' +
          ' order by SSL.SKT, SSL.ID',
-         St, [], 'IzlemeLotSec', TNotifyEvent(nil), Tablo.FDCnn, LotYeniTanimClick) then
-      LotKartiBagla(StrToInt(St[0]))
-    else if FLotYeniIstendi then
-      TabIzlem.FieldByName('SERILOTID').AsInteger := -1
+         St, [], 'IzlemeLotSec', TNotifyEvent(nil), Tablo.FDCnn) then
+      TabIzlem.FieldByName('SERILOTID').AsInteger := StrToInt(St[0])
     else
       Result := False;
   finally
@@ -1541,48 +1571,57 @@ begin
   end;
 end;
 
-// Secilmis tanimin tarihi ile satirdaki tarih farkliysa sorar:
-//   Evet  = bu tarihle ayni lot no icin yeni tanim (SERILOTID -1)
-//   Hayir = tanimdaki tarih kullanilir
-// Lot izleminde gorunen tarih karsilastirilir (lot+SKT: SKT, lot: URT);
-//   digeri raf omru ile hesaplanmis olabilir.
-function TIzlemeDlg.LotTarihUyumu: Boolean;
+// Bir lotun tek SKT/URT'si olur. Lot izleminde gorunen tarih karsilastirilir
+//   (lot+SKT: SKT, lot: URT); digeri raf omru ile hesaplanmis olabilir.
+//   - Tanima bagli satir: tarih bossa / ayniysa tarihler tanimdan alinir;
+//     farkliysa uyarilir, tanimdaki tarih yazilir, kayitta (AKayitta) engellenir.
+//   - Yeni lot (tanim yok): ayni ekranda ayni lot no baska tarihle girilmisse
+//     engellenir (SP ikisi icin ayri kart acardi).
+function TIzlemeDlg.LotTarihUyumu(AKayitta: Boolean): Boolean;
 var
-  Alan, AlanAdi: string;
+  Alan, AlanAdi, Lot: string;
   Kart, Satir: TDateTime;
 begin
   Result := True;
-  if not LotIzlemiMi or (TabIzlem.FieldByName('SERILOTID').AsInteger <= 0) then
+  if not LotIzlemiMi then
+    Exit;
+  Lot := Trim(TabIzlem.FieldByName('LOTNO').AsString);
+  if Lot = '' then
     Exit;
   if IzlemTur = izl_LotNo then begin
     Alan := 'URT'; AlanAdi := 'üretim';
   end else begin
     Alan := 'SKT'; AlanAdi := 'son kullanma';
   end;
+  Satir := LotTarihi(TabIzlem.FieldByName(Alan));
+
+  if TabIzlem.FieldByName('SERILOTID').AsInteger <= 0 then begin
+    if AKayitta and (Satir > 0) and Veritabani.VeriVarMi(Tablo.FDCnn,
+         'select ID from ' + TabloAdi + ' where ID<>' + IntToStr(TabIzlem.FieldByName('ID').AsInteger) +
+         ' and LOTNO=N&LOT and ' + Alan + '>''19900101'' and cast(' + Alan + ' as date)<>&TRH',
+         ['&LOT', '&TRH'], [Lot, FormatDateTime('yyyymmdd', Satir)]) then begin
+      ShowMessage('Bu ekranda ' + Lot + ' lot no başka bir ' + AlanAdi + ' tarihiyle girilmiş. ' +
+                  'Bir lotun tek SKT/ÜRT''si olabilir.');
+      Result := False;
+    end;
+    Exit;
+  end;
+
   Tablo.TablodanSorguAc(1, 'select SKT, URT from STOKSERILOT where ID=' +
     TabIzlem.FieldByName('SERILOTID').AsString);
   if Tablo.Query1.IsEmpty then
     Exit;
-  Kart  := LotTarihi(Tablo.Query1.FieldByName(Alan));
-  Satir := LotTarihi(TabIzlem.FieldByName(Alan));
-  if (Kart = 0) or (Satir = Kart) then
-    Exit;
-  if Satir = 0 then begin
+  Kart := LotTarihi(Tablo.Query1.FieldByName(Alan));
+  if (Kart = 0) or (Satir = 0) or (Satir = Kart) then begin
     LotKartiBagla(TabIzlem.FieldByName('SERILOTID').AsInteger);
     Exit;
   end;
-  case Application.MessageBox(PChar('Seçilen lot tanımındaki ' +
-         AlanAdi + ' tarihi ' +
-         FormatDateTime('dd.mm.yyyy', Kart) + ', girilen ' +
-         FormatDateTime('dd.mm.yyyy', Satir) + '.' + #13#10#13#10 +
-         'Evet: aynı lot no için bu tarihle YENİ tanım açılsın' + #13#10 +
-         'Hayır: tanımdaki tarih kullanılsın'),
-         PChar('Lot tarihi farklı'), MB_YESNOCANCEL or MB_ICONQUESTION) of
-    ID_YES: TabIzlem.FieldByName('SERILOTID').AsInteger := -1;
-    ID_NO : LotKartiBagla(TabIzlem.FieldByName('SERILOTID').AsInteger);
-  else
-    Result := False;
-  end;
+  ShowMessage(Lot + ' lot no daha önce ' + AlanAdi + ' tarihi ' +
+              FormatDateTime('dd.mm.yyyy', Kart) + ' ile girilmiş (girilen ' +
+              FormatDateTime('dd.mm.yyyy', Satir) + ').' + #13#10 +
+              'Bir lotun tek SKT/ÜRT''si olabilir; tanımdaki tarih yazıldı.');
+  LotKartiBagla(TabIzlem.FieldByName('SERILOTID').AsInteger);
+  Result := not AKayitta;
 end;
 
 // Lot hucresinden cikilinca (grid degeri alana yazinca) arama ertelenir:
@@ -1594,9 +1633,6 @@ begin
   if not (GridFatIzlemView.Controller.EditingController.IsEditing and
           (GridFatIzlemView.Controller.EditingController.EditingItem = GridFatIzlemViewLOTNO)) then
     Exit;   // barkod / toplu giris / lot ver: kontrol kayitta (BeforePost)
-  // Baska lot yazildiysa eski "yeni tanim" secimi gecersiz
-  if TabIzlem.FieldByName('SERILOTID').AsInteger = -1 then
-    TabIzlem.FieldByName('SERILOTID').AsInteger := 0;
   FLotBekleyen := Trim(Sender.AsString);
   if FLotBekleyen <> '' then
     PostMessage(Handle, WM_USER + 471, 0, 0);
@@ -1638,10 +1674,45 @@ begin
     Exit;
   FLotAraniyor := True;
   try
-    LotKartiSec(False);   // vazgecilirse kayitta yeniden sorulur
+    if LotKartiSec(False) then   // vazgecilirse kayitta yeniden sorulur
+      LotTarihUyumu(False);
   finally
     FLotAraniyor := False;
   end;
+end;
+
+// Yeni girilen lot / seri no'da bosluk olmasin: bas/son bosluk kirpilir,
+//   ortada bosluk varsa uyarilir (yapistirma / barkod okutma tusu atlatir).
+//   Karekod ham veri tasidigi icin yalniz kirpilir.
+function TIzlemeDlg.IzlemNoBosluksuz: Boolean;
+  function Kontrol(const AAlan, AAd: string; AOrta: Boolean): Boolean;
+  var D: string;
+  begin
+    Result := True;
+    D := TabIzlem.FieldByName(AAlan).AsString;
+    if D <> Trim(D) then begin
+      D := Trim(D);
+      TabIzlem.FieldByName(AAlan).AsString := D;
+    end;
+    if AOrta and (Pos(' ', D) > 0) then begin
+      ShowMessage(AAd + ' içinde boşluk olamaz: "' + D + '"');
+      Result := False;
+    end;
+  end;
+begin
+  Result := True;
+  if GridFatIzlemViewLOTNO.Options.Editing and (TabIzlem.FindField('LOTNO') <> nil) then
+    Result := Kontrol('LOTNO', 'Lot no', True);
+  if Result and GridFatIzlemViewSERINO.Options.Editing and (TabIzlem.FindField('SERINO') <> nil) then
+    Result := Kontrol('SERINO', 'Seri no', IzlemTur <> izl_Karekod);
+end;
+
+procedure TIzlemeDlg.GridFatIzlemViewEditKeyPress(Sender: TcxCustomGridTableView;
+  AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Char);
+begin
+  if (Key = ' ') and ((AItem = GridFatIzlemViewLOTNO) or
+     ((AItem = GridFatIzlemViewSERINO) and (IzlemTur <> izl_Karekod))) then
+    Key := #0;
 end;
 
 procedure TIzlemeDlg.TabIzlemBeforeDelete(DataSet: TDataSet);
@@ -1660,11 +1731,10 @@ var Fark : Real;
     Skt, Urt : TDateTime;
     function LotNoKontrolu : boolean;
     begin
-         // Lot izleminde (lot / lot+SKT) ayni lot no farkli tarihlerle ayri
-         //   tanimdir: tanim secilmemisse burada sorulur, secilmisse tarihi
-         //   tanimla karsilastirilir (LotKartiSec / LotTarihUyumu).
+         // Lot izleminde (lot / lot+SKT) bir lotun tek SKT/URT'si olur:
+         //   tanima baglanir, tarih farkliysa engellenir (LotKartiSec / LotTarihUyumu).
          if LotIzlemiMi then begin
-            Result := LotKartiSec(True) and LotTarihUyumu;
+            Result := LotKartiSec(True) and LotTarihUyumu(True);
             Exit;
          end;
          Result := True;
@@ -1711,6 +1781,8 @@ var Fark : Real;
              Result := Say=1;
     end;
 begin
+   if not IzlemNoBosluksuz then
+      Abort;
    // Kullanicinin hicbir sey girmedigi satir: grid odagi biraktiginda (ornegin
    // Raf Omru etiketine tiklaninca) otomatik acilmis satiri post etmeye
    // calisir. "Izlem bilgisini giriniz" demek yaniltici; sessizce iptal
@@ -1833,6 +1905,8 @@ begin
   Tablo.GridAyarRestore('GridFatIzlemGridi', GridFatIzlemView);
   // Dusey kaydirma cubugu: tema dokunmatik/gizlenen cubuk kullanmasin, klasik cubuk
   GridFatIzlem.LookAndFeel.ScrollbarMode := sbmClassic;
+  // Lot / seri no'ya bosluk yazilamasin
+  GridFatIzlemView.OnEditKeyPress := GridFatIzlemViewEditKeyPress;
 end;
 
 function TIzlemeDlg.AdaydanDoldur(const AYontem: string) : Boolean;
@@ -1982,8 +2056,7 @@ begin
           LSatir := TJSONObject.Create
             .AddPair('kaynakIzlemId', TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
             .AddPair('izlemId',       TJSONNumber.Create(TabIzlem.FieldByName('IZLEMID').AsInteger))
-            // -1 = "ayni lot no icin yeni tanim" (LotKartiSec); SP'ye 0 gider,
-            //   kart lot no + SKT/URT ile aranir, yoksa acilir.
+            // 0 = tanim yok: SP lot no ile arar, yoksa acar
             .AddPair('serilotId',     TJSONNumber.Create(Max(0, TabIzlem.FieldByName('SERILOTID').AsInteger)))
             .AddPair('adet',          TJSONNumber.Create(LAdet));
           // Tanimlayici alanlar HER ZAMAN gonderilir: kart yoksa (giriste yeni

@@ -148,6 +148,20 @@ export function sgkBedeliUygula(satir: SatirDurumu, f: KalemFiyati): SatirDurumu
   };
 }
 
+/**
+ * DÖVİZLİ FİYATA KUR İŞLE (kullanıcı 09.11.2026, satış teklifi #10302: "euro birim fiyatlı ürün ekledim ama TL
+ * karşılığı düzgün hesaplanmamış, aynı euro karşılığı gelmiş"): liste fiyatı yabancı parada gelince satıra
+ * `fiyatDovizi` yazılıyor ama kur 1 kalıyordu; kur yalnız kalem penceresi açılınca çekiliyordu, hızlı ekleme
+ * (Enter) pencereyi atladığı için yerel birim fiyat döviz tutarına eşit kaydediliyordu. Yerel fiyat = döviz
+ * fiyatı × kur (kalemDurumu ile aynı yuvarlama); kur 0 / yoksa satır dokunulmadan döner.
+ */
+export function dovizKuruUygula(satir: SatirDurumu, kur: number | null | undefined): SatirDurumu {
+  const k = Number(kur ?? 0);
+  const dovizFiyat = hamSayi(satir.dovizFiyat);
+  if (!(k > 0) || !(dovizFiyat > 0)) return satir;
+  return { ...satir, kur: String(k), birimFiyat: String(Math.round(dovizFiyat * k * 100) / 100) };
+}
+
 /** Kampanyali fiyati BELGE SATIRINA isler. Fiyat cozulemezse satir aynen doner. */
 export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirDurumu {
   // SGK bedeli tarife fiyatindan BAGIMSIZ islenir: tarife listede yoksa da
@@ -270,6 +284,23 @@ export function siparisSatirlari(
     kaynakSatirId: r.satirId,
     aciklama: String(r.aciklama ?? ''),
   }));
+}
+
+/**
+ * AKTARIMDAN SONRA LOT SORULACAK SATIRLAR (kullanıcı 09.11.2026: "tahakkuk/irsaliye/fiş/fatura içinde iken siparişten
+ * aktar yaparsak ve ürünlerin lot gibi takipleri varsa sormalıdır"). Sipariş stok oynatmaz, lotu yoktur; hedef belge
+ * stok oynatıyorsa (giriş ya da çıkış izlemi) izlemli stok satırı lotsuz kaydedilemez - kaynaktan lot gelmediyse
+ * (irsaliyeden aktarımda gelir, "aynen geçer") kullanıcıya sırayla sorulur. Stok düşürmeyen satır (kaynağı irsaliye,
+ * stokDurumDegis 0) sorulmaz.
+ */
+export function lotSorulacakSatirlar(
+  yeniler: readonly SatirDurumu[], bilgi: { girisIzlemi: boolean; cikisIzlemi: boolean },
+): number[] {
+  if (!bilgi.girisIzlemi && !bilgi.cikisIzlemi) return [];
+  return yeniler
+    .filter(s => s.satirTur === 1 && Number(s.izleme) > 0 && !!s.stokId
+                 && Number(s.stokDurumDegis ?? 1) !== 0 && (s.izlemler?.length ?? 0) === 0)
+    .map(s => s.anahtar);
 }
 
 export function iadeSatirlari(

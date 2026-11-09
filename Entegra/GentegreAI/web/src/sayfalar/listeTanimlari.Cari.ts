@@ -335,6 +335,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   secilir.
     kaynak: 'kampanya', baslik: 'Kampanya Listesi', yol: 'Stok & Hizmet › Kampanya Listesi',
     kartYolu: '/kampanya', aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    // SAĞ TUŞ MENÜSÜ YOK (kullanıcı 09.11.2026: "kampanya listesi üzerinde fare sağ tuş menüyü kaldır").
+    sagTusYok: true,
     // Menude FIYAT LISTELERININ (27) hemen ardinda (kullanici): kampanya
     //   fiyat listesi uzerine isleyen bir kural - ikisi yan yana okunur,
     //   Yonetim altinda ararken bulunmuyordu.

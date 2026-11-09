@@ -162,7 +162,7 @@ public static partial class StokIcmalUclari
             var lotlar = t == bugun
                 ? await b.ListeAsync(Suzgec + """
                     select ld.stok_id, ld.depo_id, coalesce(nullif(l.lot_no, ''), nullif(l.seri_no, ''), '') as lot,
-                           l.son_kullanma_tarihi, ld.kalan
+                           l.son_kullanma_tarihi::date, ld.kalan
                       from public.stok_lot_durum ld
                       join dp on dp.id = ld.depo_id
                       join st on st.id = ld.stok_id
@@ -288,7 +288,7 @@ public static partial class StokIcmalUclari
                 lot as (
                     select ld.stok_id, ld.depo_id, ld.seri_lot_id, ld.kalan,
                            coalesce(nullif(l.lot_no, ''), nullif(l.seri_no, ''), '') as lot,
-                           l.uretim_tarihi, l.son_kullanma_tarihi as skt
+                           l.uretim_tarihi::date, l.son_kullanma_tarihi::date as skt
                       from public.stok_lot_durum ld
                       join dp on dp.id = ld.depo_id
                       join st on st.id = ld.stok_id
@@ -298,7 +298,7 @@ public static partial class StokIcmalUclari
                 -- FEFO: aynı stok-depoda SON 90 GÜNDE çıkışı olan en geç SKT'li lot (tükenmiş olsa da).
                 --   Bu lottan daha erken SKT'li lot hâlâ duruyorsa "önce bunu çıkar".
                 fe as (
-                    select i.stok_id, i.depo_id, max(l.son_kullanma_tarihi) as max_skt
+                    select i.stok_id, i.depo_id, max(l.son_kullanma_tarihi)::date as max_skt
                       from public.stok_izleme i
                       join public.stok_seri_lot l on l.id = i.seri_lot_id
                      where i.ekleme_tarihi > @p0::date - 90

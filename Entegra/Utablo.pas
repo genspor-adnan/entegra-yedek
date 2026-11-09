@@ -684,7 +684,8 @@ type
     function IzlemBildirimSayisi(Tur, FatBasId, FatSatirId:Integer; BelgeTarih:TDateTime):Integer;
     // Fatura/irsaliye SILME on-kontrolu (server-side SP). ASatirID>0 tek satir; =0 AFatBasID
     //   altindaki tum satirlar (biri engelliyse toptan False). True=silinebilir. Engelde uyari gosterir.
-    function FaturaSilinebilirMi(AFatBasID, ASatirID: Integer; AKilitKaldirildi: Boolean = False): Boolean;
+    function FaturaSilinebilirMi(AFatBasID, ASatirID: Integer; AKilitKaldirildi: Boolean = False;
+      AEBelgeNoKontrol: Boolean = True): Boolean;
     // Siparis SILME on-kontrolu (server-side sp_Prog_Siparis_Silinebilir_Mi). ASatirID>0 tek
     //   SIPARISDETAY; =0 ASiparisID altindaki tum satirlar. True=silinebilir. Donusumde uyari.
     function SiparisSilinebilirMi(ASiparisID, ASatirID: Integer): Boolean;
@@ -774,7 +775,10 @@ type
     // ListedenBilgiGetir ile son secilen satirin degeri, alan (SQL alias) adiyla; kolon
     //   sirasindan bagimsiz. Yalniz son secimi tutar - secimden hemen sonra okuyun.
     property SonSecim[const AAlan: string]: string read SonSecimGetir;
-    function ListedenCokluSecim(Baslik, Komut: string; RepositoryList: array of TcxEditRepositoryItem; CaptionList: array of string): TStringList;
+    function ListedenCokluSecim(Baslik, Komut: string; RepositoryList: array of TcxEditRepositoryItem; CaptionList: array of string): TStringList; overload;
+    // ASecili: acilista isaretli gelecek ilk-kolon degerleri (nil olabilir). Sonuc ASonuc'a
+    //   yazilir; iptalde False (bos secim ile iptal ayrilir).
+    function ListedenCokluSecim(Baslik, Komut: string; RepositoryList: array of TcxEditRepositoryItem; CaptionList: array of string; ASecili, ASonuc: TStrings): Boolean; overload;
     function HizliGirisListedenBilgiGetir(Baslik:string; Komut: String; Sonuc: TStringList; ShowCaptions:Boolean; VisibilityList: array of Boolean; RepositoryList: array of TcxEditRepositoryItem ): Boolean;
     procedure NavTusGoruntule(Dts: TDataSource; EkleTus, SilTus, KaydetTus, IptalTus: TToolButton);
     function GetInetFile(const fileURL, filename: String): Boolean;
@@ -5123,15 +5127,16 @@ begin
   ApiSilCagir('sp_Api_Teklif_Sil_Json', TeklifID);
 end;
 
-function TTablo.FaturaSilinebilirMi(AFatBasID, ASatirID: Integer; AKilitKaldirildi: Boolean): Boolean;
+function TTablo.FaturaSilinebilirMi(AFatBasID, ASatirID: Integer; AKilitKaldirildi: Boolean;
+  AEBelgeNoKontrol: Boolean): Boolean;
 // BIRLESIK silme on-kontrolu (TUM fatura silme noktalari bunu cagirir):
 //   1) KILIT: app-side KilitKontrolEt (MODUL kilit + devir; genel, mesajli, tum modullerde ortak).
 //   2) Icerik (SP): EBELGE(islem goren)/KULLANIM/IZLEME/UTSBILDIRIM/DONUSUM tek result-set.
 //   AKilitKaldirildi=True -> e-belge engelini atla (wizard admin override). StokCikisYeterliMi deseni.
 var
   Q: TFDQuery;
-  LNeden: string;
-  LTur: Integer;
+  LNeden, LFatNo: string;
+  LTur, LEDurum: Integer;
   LTarih: TDateTime;
 begin
   Result := True;
@@ -5141,20 +5146,39 @@ begin
   try
     Q.Connection := FDCnn;
     if ASatirID > 0 then
-      Q.SQL.Text := 'select FB.TUR, FB.FATURATARIH from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID where F.ID=' + IntToStr(ASatirID)
+      Q.SQL.Text := 'select FB.TUR, FB.FATURATARIH, FB.FATURANO, FB.EFATURADURUM from FATURA F inner join FATBASLIK FB on FB.ID=F.FATBASID where F.ID=' + IntToStr(ASatirID)
     else
-      Q.SQL.Text := 'select TUR, FATURATARIH from FATBASLIK where ID=' + IntToStr(AFatBasID);
+      Q.SQL.Text := 'select TUR, FATURATARIH, FATURANO, EFATURADURUM from FATBASLIK where ID=' + IntToStr(AFatBasID);
     if AktifVeriMotor = vmPG then
       Q.SQL.Text := PgSqlCevir(Q.SQL.Text);
     Q.Open;
     if Q.Eof then Exit(True);   // belge yok -> serbest
     LTur := Q.FieldByName('TUR').AsInteger;
     LTarih := Q.FieldByName('FATURATARIH').AsDateTime;
+    LFatNo := Trim(Q.FieldByName('FATURANO').AsString);
+    LEDurum := Q.FieldByName('EFATURADURUM').AsInteger;
   finally
     Q.Free;
   end;
   if KilitKontrolEt(2, LTur, LTarih, 2) then
     Exit(False);
+
+  // e-Belge no verilmis giden fatura/irsaliye ve satiri silinmez: belge
+  //   silinirse no bosa gider, satir silinirse hazirlanan e-belge ile fatura
+  //   ayrisir. Once "Hazırı Geri Al" (no '0' olur), sonra silinir.
+  //   e-Belge no = SERI(3)+YIL(4)+9 hane; kagit belgenin elle no'suna bakilmaz.
+  //   AEBelgeNoKontrol=False: silme degil duzenleme kontrolu (FaturaSatirSilmeKontrolu).
+  if AEBelgeNoKontrol and (not AKilitKaldirildi) and
+     (((LTur = 15) and (EFaturaKullanimda > 0)) or ((LTur = 14) and EIrsaliyeKullanimda)) and
+     (Length(LFatNo) = 16) and (StrToInt64Def(Copy(LFatNo, 4, 13), -1) > 0) then begin
+    if LEDurum in [2, 12, 52] then
+      UyariGoster(Uyari, Islemgorenfaturadadegisiklikyapilmaz)
+    else
+      UyariGoster(Uyari, 'e-Belge no verilmiş (' + LFatNo + ') ' +
+        IfThen(ASatirID > 0, 'belgeden satır', 'belge') + ' silinemez.' + #13#10 +
+        'Önce "Hazırı Geri Al" yapın, sonra silin.');
+    Exit(False);
+  end;
 
   // 2) Icerik kontrolleri (server-side SP).
   Q := TFDQuery.Create(nil);
@@ -5195,7 +5219,8 @@ end;
 function TTablo.FaturaSatirSilmeKontrolu(FatTur : integer; FatTarih : TDateTime; TabFatura: TFDQuery):boolean;
 begin
    // TEK satir kontrolu -> server-side SP. FatTur/FatTarih artik SP icinde FATBASLIK'tan turetilir.
-   Result := FaturaSilinebilirMi(0, TabFatura.FieldByName('ID').AsInteger);
+   // Cift-tik ADET duzenleme kontrolu: e-belge no engeli silmeye ozgu, burada yok.
+   Result := FaturaSilinebilirMi(0, TabFatura.FieldByName('ID').AsInteger, False, False);
 end;
 
 function TTablo.SiparisSilinebilirMi(ASiparisID, ASatirID: Integer): Boolean;
@@ -10864,11 +10889,15 @@ begin
 end;
 
 function TTablo.ListedenCokluSecim(Baslik,Komut:string;RepositoryList:array of TcxEditRepositoryItem;CaptionList:array of string):TStringList;
+begin
+  Result := TStringList.Create;
+  ListedenCokluSecim(Baslik, Komut, RepositoryList, CaptionList, nil, Result);
+end;
+
+function TTablo.ListedenCokluSecim(Baslik, Komut: string; RepositoryList: array of TcxEditRepositoryItem; CaptionList: array of string; ASecili, ASonuc: TStrings): Boolean;
 var
   i: SmallInt;
-  Key: Word;
   Col:TcxGridDBColumn;
-  Sonuclar:TStringList;
 begin
   try
     Application.CreateForm(TCokluSecimDlg, CokluSecimDlg);
@@ -10886,17 +10915,26 @@ begin
         Col.Options.Editing := False;
     end;
     CokluSecimDlg.cxGrid1DBTableView1.ApplyBestFit(nil);
+    // Onceki secimi isaretle (mnSe1Click ile ayni yol: SEC bagsiz kolon, odakli kayit).
+    if (ASecili <> nil) and (ASecili.Count > 0) and CokluSecimDlg.ADOQuery1.Active then begin
+       CokluSecimDlg.ADOQuery1.First;
+       while not CokluSecimDlg.ADOQuery1.Eof do begin
+          CokluSecimDlg.cxGrid1DBTableView1SEC.EditValue :=
+            ASecili.IndexOf(CokluSecimDlg.ADOQuery1.Fields[0].AsString) >= 0;
+          CokluSecimDlg.ADOQuery1.Next;
+       end;
+       CokluSecimDlg.ADOQuery1.First;
+    end;
     CokluSecimDlg.ShowModal;
-    Sonuclar := TStringList.Create;
-    if CokluSecimDlg.ModalResult = mrOk then begin
+    Result := CokluSecimDlg.ModalResult = mrOk;
+    if Result and (ASonuc <> nil) then begin
        CokluSecimDlg.ADOQuery1.First;
        while not CokluSecimDlg.ADOQuery1.Eof do begin
           if CokluSecimDlg.cxGrid1DBTableView1SEC.EditValue = True then
-             Sonuclar.Add(CokluSecimDlg.ADOQuery1.Fields[0].AsString);
+             ASonuc.Add(CokluSecimDlg.ADOQuery1.Fields[0].AsString);
           CokluSecimDlg.ADOQuery1.Next;
        end;
     end;
-    Result:=Sonuclar;
   finally
     FreeAndNil(CokluSecimDlg);
   end;

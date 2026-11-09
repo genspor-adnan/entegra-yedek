@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Stok Kartı — Kimlik Şeridi: Görüntüleme / Düzenleme kipi (mockup)</title>
+<!--
+  Kullanıcı 09.11.2026: "stok kartı başlığı için edit/view modlar olacak şekilde mockup yap".
+  Fatura başlığı (fatura_basligi_bant.html, 08.11.2026) ve başvuru sekmesi (09.11.2026) ✎ deseninin stok kartı
+  kimlik şeridine (stok_karti_v2.html .kaid) uygulanması.
+
+  Kararlar (başvuru sekmesinde verilenler burada da geçerli):
+   * Yeni kart DÜZENLEME kipinde açılır; kayıtlı kart GÖRÜNTÜLEME kipinde açılır.
+   * Düzenlemeye geçişin TEK yolu ✎ (kullanıcı 09.11.2026: "fare ile tıklayınca edit moda geçmesin, sadece kaleme
+     basınca geçsin") - şeride tıklamak kipi değiştirmez; görüntülemede şerit inert.
+   * Sekme değişince (Genel → Fiyatlar vb.) şerit görüntüleme kipine döner.
+   * ✎ ÇERÇEVESİZ, şeridin sağ ucunda (başvuru "Başvuru Bilgileri" etiketi yanındaki ile aynı); düzenlemede vurgu rengi.
+   * Kilitli kart (düzenleme yetkisi yok): hep görüntüleme, ✎ pasif.
+   * Kaydet kipi KAPATMAZ (seri giriş; fatura ile aynı).
+   * Solda avatar (44px daire): varsayılan resim, yoksa baş harfler; kipten bağımsız (kullanıcı 09.11.2026 "avatar da ekle").
+   * Aynı 6 sütunlu ızgara iki kipte de durur: görüntülemede kutu kaybolur, değer düz koyu metin; hiçbir şey kaymaz.
+-->
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --warn:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .sayfa{max-width:1280px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .bas h1{margin:0;font-size:15px;color:var(--navy)}
+  .bas .yol{font-size:11px;color:var(--muted)}
+  .sag{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;user-select:none}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+
+  /* ---------- KİMLİK ŞERİDİ: Stok Kodu (½) · Stok Adı · Kısa Ad · Kategori · Tür · Durum (½) · ✎ ---------- */
+  .kaid-sar{position:relative;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .kaid{display:grid;grid-template-columns:44px minmax(0,.5fr) minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.5fr) 26px;
+        gap:10px;padding:10px 12px;align-items:end}
+  /* AVATAR (kullanıcı 09.11.2026 "avatar da ekle"): kişi kartı bandı ile aynı boy (44px). Varsayılan resim (Resim / Doküman ★)
+     varsa o; yoksa stok adının baş harfleri mavi daire üstünde. İki kipte de aynı yerde, tıklanınca büyük önizleme. */
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:#fff;align-self:center;
+          background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15);cursor:pointer;user-select:none}
+  .avatar.harf{font-size:15px;font-weight:bold}
+  .avatar.pasif{background:linear-gradient(135deg,#6b7a8b,#3d4b5a)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;position:relative}
+  .inp.big{font-weight:bold;color:var(--navy)}
+  .inp.ro{background:#f7f9fb;color:var(--muted)}
+  .inp .ph{color:#aab4bf}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .agac::before{content:"🗂";font-size:11px}
+  /* görüntüleme hücresi: kutusuz, değer koyu; düzenleme kutusuyla AYNI yükseklik ve hiza - kip değişince hiçbir şey kaymaz.
+     Tıklanabilir DEĞİL (başvuru kararı): imleç ok, hover zemini yok. */
+  .goster .deg{height:24px;display:flex;align-items:center;gap:6px;padding:0 7px;font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+  .goster .deg.big{color:var(--navy);font-weight:bold;font-size:12.5px}
+  .goster .deg.bos{color:#aab4bf;font-weight:normal}
+  .goster .deg .rz{font-weight:bold}
+  /* kayıtlı kartta düzenleme: sol mavi çizgi "yazıyorsun" der (fatura ile aynı); yeni kartta çizgi yok */
+  .duzenle.yazili{border-left:3px solid var(--accent);padding-left:9px;background:linear-gradient(#fbfcfe,#eef4fa)}
+  .gizli{display:none}
+  /* ✎ ÇERÇEVESİZ (başvuru .bs-kalem ile aynı) */
+  .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px;user-select:none}
+  .kalem:hover{color:var(--accent);background:#e9f1fb}
+  .kalem.acik{color:var(--accent)}
+  .kalem.kilit{opacity:.45;pointer-events:none}
+
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;user-select:none}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .govde{padding:12px 14px;color:var(--muted);font-size:11.5px;min-height:44px}
+  .aciklama{max-width:1280px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.55}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<h2><b>1</b> — Kayıtlı stok: GÖRÜNTÜLEME kipi — şerit düzenleme ızgarasıyla aynı yerde, kutusuz <span class="ipucu">yalnız ✎ → düzenleme (şeride tıklamak kipi değiştirmez)</span></h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>📦 Stok Listesi</span><span class="on">📦 Parasetamol 500 mg ×</span></div>
+  <div class="bas">
+    <h1>📦 Stok Kartı</h1><span class="yol">Stok &amp; Hizmet › Stok Listesi › STK-00412</span>
+    <div class="sag"><span class="btn primary">💾 Kaydet</span><span class="btn">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <!-- GÖRÜNTÜLEME -->
+    <div class="kaid goster" id="g1">
+      <div class="avatar" title="Varsayılan resim · büyüt">💊</div>
+      <div class="fld"><label>Stok Kodu</label><div class="deg big">STK-00412</div></div>
+      <div class="fld"><label>Stok Adı</label><div class="deg big">Parasetamol 500 mg 20 Tablet</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg">Parol 500</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 İlaç › Analjezik</div></div>
+      <div class="fld"><label>Tür</label><div class="deg">Ticari Mal</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
+      <div class="kalem" id="k1" title="Kimlik alanlarını düzenle" onclick="kip(1)">✎</div>
+    </div>
+    <!-- DÜZENLEME (kayıtlı kart: sol mavi çizgi) -->
+    <div class="kaid duzenle yazili gizli" id="e1">
+      <div class="avatar" title="Varsayılan resim · büyüt">💊</div>
+      <div class="fld"><label class="req">Stok Kodu</label><div class="inp big">STK-00412</div></div>
+      <div class="fld"><label class="req">Stok Adı</label><div class="inp big">Parasetamol 500 mg 20 Tablet</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="inp">Parol 500</div></div>
+      <div class="fld"><label class="req">Kategori</label><div class="inp combo agac">İlaç › Analjezik</div></div>
+      <div class="fld"><label class="req">Tür</label><div class="inp combo">Ticari Mal</div></div>
+      <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+      <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(1)">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sekme(1)">Genel</div><div class="tab" onclick="sekme(1)">Ambalaj Birimleri <span class="b">3</span></div>
+    <div class="tab" onclick="sekme(1)">Fiyatlar <span class="b">4</span></div><div class="tab" onclick="sekme(1)">ÜTS Bilgileri</div>
+    <div class="tab" onclick="sekme(1)">Stok Durumu</div><div class="tab" onclick="sekme(1)">Hareketler</div>
+    <div class="tab" onclick="sekme(1)">Resim / Doküman <span class="b">4</span></div><div class="tab" onclick="sekme(1)">Ek Alanlar <span class="b">3</span></div>
+  </div>
+  <div class="govde">Genel sekmesi (değişmez: Tanım / Sınıflandırma · Vergi &amp; Ana Birim · Diğer · Resim · Açıklama). Bir sekmeye tıklamak şeridi görüntüleme kipine döndürür.</div>
+</div>
+<p class="aciklama">
+  <b>Görüntüleme kipi</b> düzenleme şeridinin birebir kopyası: aynı 6 sütun (kod ve durum yarım), aynı etiket sırası, aynı satır yüksekliği - yalnız kutu yerine
+  düz koyu değer; Stok Kodu ve Stok Adı kalın lacivert, Durum rozet, Kategori ağaç yolu. Solda <b>avatar</b> (kişi kartı bandıyla aynı 44px daire):
+  varsayılan resim (Resim / Doküman ★) varsa o, yoksa stok adının baş harfleri; iki kipte de aynı yerde, kipten etkilenmez, tıklanınca büyük önizleme. Kutusuz hücrelere tıklamak <u>hiçbir şey yapmaz</u>; düzenlemeye
+  geçişin tek yolu şeridin sağ ucundaki çerçevesiz ✎ (başvuru sekmesi kararı). Düzenlemede ✎ mavi, kayıtlı kartta sol mavi çizgi "yazıyorsun" der.
+  Zorunlu yıldızı yalnız düzenlemede görünür. Kaydet kipi kapatmaz; başka sekmeye geçmek kapatır.
+</p>
+
+<h2><b>2</b> — Yeni stok: düzenleme kipi AÇIK gelir</h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>📦 Stok Listesi</span><span class="on">📦 Yeni Stok ×</span></div>
+  <div class="bas">
+    <h1>📦 Stok Kartı</h1><span class="yol">Stok &amp; Hizmet › Stok Listesi › Yeni</span>
+    <div class="sag"><span class="btn primary">💾 Kaydet</span><span class="btn pas">🗑 Sil</span><span class="btn pas">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <div class="kaid goster gizli" id="g2">
+      <div class="avatar harf" title="Resim yok - baş harfler">EN</div>
+      <div class="fld"><label>Stok Kodu</label><div class="deg bos">kaydedince verilir</div></div>
+      <div class="fld"><label>Stok Adı</label><div class="deg big">Eldiven Nitril M</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg bos">—</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 Sarf › Koruyucu</div></div>
+      <div class="fld"><label>Tür</label><div class="deg">Sarf Malzeme</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
+      <div class="kalem" title="Kimlik alanlarını düzenle" onclick="kip(2)">✎</div>
+    </div>
+    <!-- yeni kartta çizgi YOK (yazili sınıfı yok) -->
+    <div class="kaid duzenle" id="e2">
+      <div class="avatar harf" title="Resim yok - baş harfler">EN</div>
+      <div class="fld"><label class="req">Stok Kodu</label><div class="inp ro"><span class="ph">(kaydedince verilir)</span></div></div>
+      <div class="fld"><label class="req">Stok Adı</label><div class="inp big">Eldiven Nitril M</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="inp"><span class="ph">Kısa ad…</span></div></div>
+      <div class="fld"><label class="req">Kategori</label><div class="inp combo agac">Sarf › Koruyucu</div></div>
+      <div class="fld"><label class="req">Tür</label><div class="inp combo">Sarf Malzeme</div></div>
+      <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+      <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(2)">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sekme(2)">Genel</div><div class="tab" onclick="sekme(2)">Ambalaj Birimleri <span class="b">0</span></div>
+    <div class="tab" onclick="sekme(2)">Fiyatlar <span class="b">0</span></div><div class="tab" onclick="sekme(2)">ÜTS Bilgileri</div>
+    <div class="tab" onclick="sekme(2)">Resim / Doküman <span class="b">0</span></div><div class="tab" onclick="sekme(2)">Ek Alanlar</div>
+  </div>
+  <div class="govde">Genel sekmesi — yeni kartta Stok Durumu / Hareketler sekmeleri kayıttan sonra gelir.</div>
+</div>
+<p class="aciklama">
+  <b>Yeni kartta</b> düzenleme kipi açık; sol mavi çizgi yok (zaten yazılıyor). Kaydet kipi KAPATMAZ - kod verilip kart aynı sekmede kalır, kullanıcı
+  ambalaj / fiyat girmeye devam eder. ✎ ile istenirse görüntülemeye geçilip aynı hizada değerler okunur; kart yeniden açılınca görüntüleme gelir.
+</p>
+
+<h2><b>3</b> — Kilitli stok (düzenleme yetkisi yok / pasif kart): yalnız görüntüleme, ✎ pasif</h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>📦 Stok Listesi</span><span class="on">📦 Serum Fizyolojik 500 ml ×</span></div>
+  <div class="bas">
+    <h1>📦 Stok Kartı</h1><span class="yol">Stok &amp; Hizmet › Stok Listesi › STK-00077</span>
+    <span class="rz s" style="margin-left:8px;padding:3px 8px">🔒 Düzenleme yetkisi yok</span>
+    <div class="sag"><span class="btn primary pas">💾 Kaydet</span><span class="btn pas">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <div class="kaid goster">
+      <div class="avatar pasif" title="Varsayılan resim · büyüt">💧</div>
+      <div class="fld"><label>Stok Kodu</label><div class="deg big">STK-00077</div></div>
+      <div class="fld"><label>Stok Adı</label><div class="deg big">Serum Fizyolojik %0.9 500 ml</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg">SF 500</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 İlaç › Serum</div></div>
+      <div class="fld"><label>Tür</label><div class="deg">Ticari Mal</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz gri">Pasif</span></div></div>
+      <div class="kalem kilit" title="Kilitli kart - kimlik alanları düzenlenemez">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">Genel</div><div class="tab">Ambalaj Birimleri <span class="b">2</span></div><div class="tab">Fiyatlar <span class="b">1</span></div>
+    <div class="tab">Stok Durumu</div><div class="tab">Hareketler</div><div class="tab">Resim / Doküman <span class="b">1</span></div>
+  </div>
+  <div class="govde">Sekme içerikleri de salt okunur.</div>
+</div>
+<p class="aciklama">
+  <b>Kilitli kart</b> (stok düzenleme yetkisi yok): avatar gri tonda (pasif), değerler aynı şeritte okunur, ✎ soluk ve tıklanmaz. Pasif stok görüntülemede gri rozetle
+  ayrışır; yetkili kullanıcı pasif kartı ✎ ile yine düzenleyebilir (kilit yetkiden gelir, durumdan değil).
+</p>
+
+<script>
+  // ✎: iki ızgaradan birini gösterir. Şeride tıklamak kipi DEĞİŞTİRMEZ (yalnız ✎).
+  function kip(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n);
+    var duzenle = !g.classList.contains('gizli');       // şu an görüntülemedeyse düzenlemeye geç
+    g.classList.toggle('gizli', duzenle); e.classList.toggle('gizli', !duzenle);
+  }
+  // Sekme seçimi: şerit görüntüleme kipine döner.
+  function sekme(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n);
+    g.classList.remove('gizli'); e.classList.add('gizli');
+  }
+</script>
+</body>
+</html>

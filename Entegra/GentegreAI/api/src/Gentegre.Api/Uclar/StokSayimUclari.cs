@@ -142,7 +142,7 @@ public static class StokSayimUclari
                                   where kl.kod = 'stok.ana_birim' and kd.deger = s.ana_birim), '') as birim,
                        ss.seri_lot_id as "seriLotId",
                        coalesce(nullif(l.lot_no, ''), nullif(l.seri_no, ''), '') as lot,
-                       l.son_kullanma_tarihi as skt,
+                       l.son_kullanma_tarihi::date as skt,
                        -- İZLEME ADI (kullanıcı 24.10.2026: "sayım kalemlerine İzleme ekle") - stok listesiyle aynı ifade.
                        case s.izleme when 1 then 'Seri No' when 2 then 'Lot No' when 3 then 'SKT'
                             when 4 then 'Karekod' when 5 then 'Lot No + SKT' when 6 then 'Seri + Lot' else '' end as "izlemeAdi",
@@ -366,7 +366,7 @@ public static class StokSayimUclari
             var farklar = await baglanti.ListeAsync("""
                 select ss.stok_id, ss.seri_lot_id, ss.sayilan - ss.sistem as fark, ss.birim_maliyet,
                        s.izleme, coalesce(l.lot_no, ''), coalesce(l.seri_no, ''),
-                       l.uretim_tarihi, l.son_kullanma_tarihi, s.ad
+                       l.uretim_tarihi::date, l.son_kullanma_tarihi::date, s.ad
                   from public.stok_sayim_satir ss
                   join public.stok s on s.id = ss.stok_id
                   left join public.stok_seri_lot l on l.id = ss.seri_lot_id

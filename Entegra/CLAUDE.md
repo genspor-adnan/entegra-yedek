@@ -17,7 +17,7 @@ They share the repository and the domain rules, **not code**. An unqualified "th
 
 - Toolchain: **Embarcadero RAD Studio 37.0 (Delphi 13.1)**, VCL framework, Win32 target.
 - Components: **DevExpress (cx*, dx*)**, FastReport, JVCL (Jv*), FireDAC for new data access, ADO in legacy code paths.
-- Database: **Microsoft SQL Server** (60+ tables). Active project DB is `DESKTOP-HL3J3AS\SQLEXPRESS` / **`BILIM`** (sa / FETAGEN — local dev only). `sql_calistir.ps1` is configured for this DB (`$database = "BILIM"`).
+- Database: **Microsoft SQL Server** (60+ tables). Active project DB is `DESKTOP-HL3J3AS\SQLEXPRESS` / **`UNIVERSE`** (formerly `BILIM`, deleted) (sa / FETAGEN — local dev only). `sql_calistir.ps1` is configured for this DB (`$database = "UNIVERSE"`).
 - Three program entry points: `Gentegre.dpr` (modern, actively developed), `entegra.dpr` (legacy), `Rehber.dpr` (standalone address-book module).
 
 ## Repository layout quirk
@@ -171,7 +171,7 @@ Deploying Turkish-containing SQL with `sqlcmd` requires `-f 65001` (a UTF-8 BOM 
 - `sql_calistir.ps1` + `sql_calistir.sql` — ad-hoc SQL runner against the local SQL Server, writes results to `sql_sonuc.txt`. Edit the `.sql` and re-run when you need to inspect DB state.
 - `refactor_references.ps1`, `refactor_missing_item.ps1`, `rollback.ps1` — refactoring helpers for the central component registry / `Utablo` items.
 - `tmp_query_*.ps1` — disposable experiments; safe to ignore. The `.claudeignore` excludes `tmp_*.ps1` from indexing.
-- `.mcp.json` registers the **`mssql-bilim`** MCP server (`@executeautomation/database-server` against `localhost\SQLEXPRESS` / `BILIM`) — use it, or plain `sqlcmd`, for read-only DB inspection on the dev machine. ODBC Driver 18 rejects the self-signed cert, so `sqlcmd` needs `-C` (trust cert). GENDEPO is reached from `BILIM` through the `ISLEMLOG` / `LOGCOZUM` / `SNAPSHOT` synonyms (physical DB is `BILIM_GENDEPO`; `sa` cannot open it directly).
+- `.mcp.json` registers the **`mssql-bilim`** MCP server (`@executeautomation/database-server` against `localhost\SQLEXPRESS` / `UNIVERSE`; the server keeps its old `bilim` name) — use it, or plain `sqlcmd`, for read-only DB inspection on the dev machine. ODBC Driver 18 rejects the self-signed cert, so `sqlcmd` needs `-C` (trust cert). GENDEPO is reached from `UNIVERSE` through the `ISLEMLOG` / `LOGCOZUM` / `SNAPSHOT` synonyms (physical DB is `UNIVERSE_GENDEPO`; `sa` cannot open it directly).
 
 `.claudeignore` also excludes build artifacts (`*.dcu`, `*.exe`, `*.dll`, `*.bpl`, `*.res`, `*.map`, `*.identcache`, …), media (`*.bmp`, `*.png`, `*.jpg`, `*.wav`, `*.pdf`, `*.doc`, `*.xls`), the `3dparty/` vendored libraries, and archive backups (`*.rar`, `*.zip`). Don't try to read these blobs; if a `.dfm` reads as binary, it starts with `TPF0` — convert it with `../convert_dfm.py` before editing.
 

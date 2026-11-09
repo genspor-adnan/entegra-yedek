@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Hizmet Kartı — Kimlik Şeridi: Görüntüleme / Düzenleme kipi (mockup)</title>
+<!--
+  Kullanıcı 09.11.2026: "hizmet kartı için de başlık (edit/view olan) mockup yap".
+  Stok kartı kimlik şeridi deseninin (stok_karti_baslik_kip.html, 09.11.2026) hizmet kartına uygulanması.
+
+  Stoktan FARKLAR:
+   * Hizmetin "Tür" alanı yok: şerit 5 alan - Kod (+SUT rozeti) · Hizmet Adı · Kısa Ad · Kategori · Durum (½) · ✎.
+   * Avatar hizmette RESİM değil SİMGE: kategorinin simgesi (Laboratuvar 🧪, Radyoloji 🩻, Muayene 🩺, Bakım 🔧…),
+     yoksa hizmet adının baş harfleri. Pasif kartta gri.
+   * Kayıtlı hizmette kodun yanında kaynak rozeti: SUT eşlemesi varsa "SUT 530.010" (SKRS eşleme masası, 1222/1223).
+     Düzenlemede de görünür, salt okunur (eşleme Fiyatlar / Kodlar'dan değil, eşleme masasından değişir).
+   * Paket / Panel ya da Radyoloji işaretli hizmette şeridin altındaki sekmelere "Paket İçeriği" / "Radyoloji Protokolü" eklenir
+     (zaten böyle; şerit kipi bundan etkilenmez).
+
+  Stokla AYNI kararlar (başvuru sekmesinde verilenler):
+   * Yeni kart DÜZENLEME kipinde açılır; kayıtlı kart GÖRÜNTÜLEME kipinde açılır.
+   * Düzenlemeye geçişin TEK yolu ✎ - şeride tıklamak kipi değiştirmez; görüntülemede şerit inert.
+   * Tek ✎ bütün kartı çevirir: şerit + Genel sekmesindeki Detay / Kodlar grupları birlikte kip değiştirir (stok 09.11.2026
+     kararı: "ayrı ayrı kalem ekleme.. başlıktaki kalemle hepsi mod değişsin").
+   * Sekme değişince (Genel → Fiyatlar vb.) şerit görüntüleme kipine döner.
+   * ✎ ÇERÇEVESİZ, şeridin sağ ucunda; düzenlemede vurgu rengi. Kilitli kart: hep görüntüleme, ✎ pasif.
+   * Kaydet kipi KAPATMAZ (seri giriş). Aynı ızgara iki kipte de durur; görüntülemede kutu kaybolur, değer düz koyu metin.
+-->
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --warn:#b5731a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .sayfa{max-width:1280px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .bas h1{margin:0;font-size:15px;color:var(--navy)}
+  .bas .yol{font-size:11px;color:var(--muted)}
+  .sag{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;user-select:none}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.m{background:#f1ebfa;color:#6a3fb0;border-color:#dccdf2}
+
+  /* ---------- KİMLİK ŞERİDİ: avatar · Kod (+SUT rozeti) · Hizmet Adı · Kısa Ad · Kategori · Durum (½) · ✎ ---------- */
+  .kaid-sar{position:relative;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .kaid{display:grid;grid-template-columns:44px minmax(0,.9fr) minmax(0,1.7fr) minmax(0,.9fr) minmax(0,1.3fr) minmax(0,.5fr) 26px;
+        gap:10px;padding:10px 12px;align-items:end}
+  /* AVATAR: hizmette resim değil kategori SİMGESİ (44px daire, stok/kişi kartıyla aynı boy); yoksa baş harfler. */
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:#fff;align-self:center;
+          background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15);cursor:default;user-select:none}
+  .avatar.harf{font-size:15px;font-weight:bold}
+  .avatar.pasif{background:linear-gradient(135deg,#6b7a8b,#3d4b5a)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;position:relative}
+  .inp.big{font-weight:bold;color:var(--navy)}
+  .inp.ro{background:#f7f9fb;color:var(--muted)}
+  .inp .ph{color:#aab4bf}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .agac::before{content:"🗂";font-size:11px}
+  .goster .deg{height:24px;display:flex;align-items:center;gap:6px;padding:0 7px;font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+  .goster .deg.big{color:var(--navy);font-weight:bold;font-size:12.5px}
+  .goster .deg.bos{color:#aab4bf;font-weight:normal}
+  .duzenle.yazili{border-left:3px solid var(--accent);padding-left:9px;background:linear-gradient(#fbfcfe,#eef4fa)}
+  .gizli{display:none !important}
+  .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px;user-select:none}
+  .kalem:hover{color:var(--accent);background:#e9f1fb}
+  .kalem.acik{color:var(--accent)}
+  .kalem.kilit{opacity:.45;pointer-events:none}
+
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;user-select:none}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+
+  /* GENEL sekmesi grupları: ŞERİTLE BİRLİKTE kip değiştirir (tek ✎). */
+  .govde{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;overflow:hidden}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2)}
+  .grp .ic{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px;padding:10px}
+  .grp .ic .fld.genis{grid-column:1/-1}
+  .onay{display:flex;align-items:center;gap:6px;height:24px}
+  .onay i{width:13px;height:13px;border:1px solid var(--line);border-radius:2px;background:#fff;display:inline-block;font-style:normal;font-size:10px;line-height:11px;text-align:center}
+  .onay i.ok{background:var(--accent);border-color:var(--accent);color:#fff}
+  .goster .onay{font-weight:600}
+  .not{grid-column:1/-1;color:var(--muted);font-size:11.5px;padding:2px 2px 0}
+  .aciklama{max-width:1280px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.55}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<h2><b>1</b> — Kayıtlı hizmet: GÖRÜNTÜLEME kipi <span class="ipucu">yalnız ✎ → düzenleme; şerit ve Genel sekmesi grupları birlikte döner</span></h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>🛠️ Hizmet Listesi</span><span class="on">🛠️ Hemogram (Tam Kan Sayımı) ×</span></div>
+  <div class="bas">
+    <h1>🛠️ Hizmet Kartı</h1><span class="yol">Stok › Hizmet Listesi › HZM-00120</span>
+    <div class="sag"><span class="btn primary">💾 Kaydet</span><span class="btn">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <!-- GÖRÜNTÜLEME -->
+    <div class="kaid goster" id="g1">
+      <div class="avatar" title="Kategori: Laboratuvar">🧪</div>
+      <div class="fld"><label>Kod</label><div class="deg big">HZM-00120 <span class="rz m" title="SUT eşlemesi (SKRS eşleme masası)">SUT 900.520</span></div></div>
+      <div class="fld"><label>Hizmet Adı</label><div class="deg big">Hemogram (Tam Kan Sayımı)</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg">Hemogram</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 Laboratuvar › Hematoloji</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
+      <div class="kalem" title="Kartı düzenle" onclick="kip(1)">✎</div>
+    </div>
+    <!-- DÜZENLEME (kayıtlı kart: sol mavi çizgi) -->
+    <div class="kaid duzenle yazili gizli" id="e1">
+      <div class="avatar" title="Kategori: Laboratuvar">🧪</div>
+      <div class="fld"><label>Kod</label><div class="inp big">HZM-00120 <span class="rz m">SUT 900.520</span></div></div>
+      <div class="fld"><label class="req">Hizmet Adı</label><div class="inp big">Hemogram (Tam Kan Sayımı)</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="inp">Hemogram</div></div>
+      <div class="fld"><label class="req">Kategori</label><div class="inp combo agac">Laboratuvar › Hematoloji</div></div>
+      <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+      <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(1)">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sekme(1)">Genel</div><div class="tab" onclick="sekme(1)">Fiyatlar <span class="b">3</span></div>
+    <div class="tab" onclick="sekme(1)">Eski Kodlar <span class="b">2</span></div><div class="tab" onclick="sekme(1)">Lab Parametreleri <span class="b">18</span></div>
+    <div class="tab" onclick="sekme(1)">Resim / Doküman <span class="b">1</span></div><div class="tab" onclick="sekme(1)">Ek Alanlar</div>
+  </div>
+
+  <!-- GENEL: görüntüleme -->
+  <div class="govde goster" id="gg1">
+    <div class="grp"><h4>Detay</h4><div class="ic">
+      <div class="fld"><label>KDV %</label><div class="deg">%10</div></div>
+      <div class="fld"><label>Birim</label><div class="deg">Adet</div></div>
+      <div class="fld"><label>Cinsiyet</label><div class="deg">Hepsi</div></div>
+      <div class="fld"><label>Yaş Aralığı</label><div class="deg">0 – 120</div></div>
+      <div class="fld"><label>Paket / Panel</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld"><label>Radyoloji Tetkiki</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld genis"><label>Açıklama</label><div class="deg">EDTA'lı mor kapaklı tüp, 2 ml</div></div>
+    </div></div>
+    <div class="grp"><h4>Kodlar</h4><div class="ic">
+      <div class="fld"><label>HUV Kodu</label><div class="deg">900.520</div></div>
+      <div class="fld"><label>LOINC</label><div class="deg">58410-2</div></div>
+      <div class="fld"><label>Muhasebe Kodu</label><div class="deg">600.01.004</div></div>
+      <div class="fld"><label>Özel Kod</label><div class="deg bos">—</div></div>
+      <div class="fld"><label>Barkod</label><div class="deg bos">—</div></div>
+    </div></div>
+    <div class="not">Görüntülemede gruplar da kutusuz: değer düz koyu metin, onay kutuları salt işaret. Tıklamak kip değiştirmez.</div>
+  </div>
+  <!-- GENEL: düzenleme -->
+  <div class="govde duzenle gizli" id="ge1">
+    <div class="grp"><h4>Detay</h4><div class="ic">
+      <div class="fld"><label>KDV %</label><div class="inp combo">%10</div></div>
+      <div class="fld"><label>Birim</label><div class="inp combo">Adet</div></div>
+      <div class="fld"><label>Cinsiyet</label><div class="inp combo">Hepsi</div></div>
+      <div class="fld"><label>En Küçük / En Büyük Yaş</label><div style="display:flex;gap:6px"><div class="inp" style="flex:1">0</div><div class="inp" style="flex:1">120</div></div></div>
+      <div class="fld"><label>Paket / Panel</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld"><label>Radyoloji Tetkiki</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld genis"><label>Açıklama</label><div class="inp">EDTA'lı mor kapaklı tüp, 2 ml</div></div>
+    </div></div>
+    <div class="grp"><h4>Kodlar</h4><div class="ic">
+      <div class="fld"><label>HUV Kodu</label><div class="inp">900.520</div></div>
+      <div class="fld"><label>LOINC</label><div class="inp">58410-2</div></div>
+      <div class="fld"><label>Muhasebe Kodu</label><div class="inp">600.01.004</div></div>
+      <div class="fld"><label>Özel Kod</label><div class="inp"><span class="ph">Özel kod…</span></div></div>
+      <div class="fld"><label>Barkod</label><div class="inp"><span class="ph">Barkod…</span></div></div>
+    </div></div>
+    <div class="not">Düzenlemede kutular geri gelir; Paket / Panel işaretlenirse "Paket İçeriği", Radyoloji Tetkiki işaretlenirse "Radyoloji Protokolü" sekmesi eklenir.</div>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Görüntüleme kipi</b> düzenleme şeridinin birebir kopyası: avatar · Kod (+SUT rozeti) · Hizmet Adı · Kısa Ad · Kategori · Durum (½) - stoktan farkı
+  <b>Tür</b> sütununun olmaması ve avatarın kategori <b>simgesi</b> olması (Laboratuvar 🧪, Radyoloji 🩻, Muayene 🩺, Bakım 🔧; yoksa baş harfler).
+  Kodun yanındaki mor <b>SUT</b> rozeti SKRS eşleme masasından gelir, her iki kipte salt okunur. ✎ şeridin sağ ucunda, çerçevesiz; tek ✎ şeridi ve Genel
+  sekmesindeki Detay / Kodlar gruplarını birlikte çevirir. Kaydet kipi kapatmaz; başka sekmeye geçmek kapatır.
+</p>
+
+<h2><b>2</b> — Yeni hizmet: düzenleme kipi AÇIK gelir</h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>🛠️ Hizmet Listesi</span><span class="on">🛠️ Yeni Hizmet ×</span></div>
+  <div class="bas">
+    <h1>🛠️ Hizmet Kartı</h1><span class="yol">Stok › Hizmet Listesi › Yeni</span>
+    <div class="sag"><span class="btn primary">💾 Kaydet</span><span class="btn pas">🗑 Sil</span><span class="btn pas">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <div class="kaid goster gizli" id="g2">
+      <div class="avatar harf" title="Kategori seçilmedi - baş harfler">KB</div>
+      <div class="fld"><label>Kod</label><div class="deg bos">kaydedince verilir</div></div>
+      <div class="fld"><label>Hizmet Adı</label><div class="deg big">Klima Bakım Hizmeti</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg bos">—</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 Teknik Servis › Bakım</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
+      <div class="kalem" title="Kartı düzenle" onclick="kip(2)">✎</div>
+    </div>
+    <!-- yeni kartta çizgi YOK -->
+    <div class="kaid duzenle" id="e2">
+      <div class="avatar harf" title="Kategori seçilmedi - baş harfler">KB</div>
+      <div class="fld"><label>Kod</label><div class="inp ro"><span class="ph">(kaydedince verilir)</span></div></div>
+      <div class="fld"><label class="req">Hizmet Adı</label><div class="inp big">Klima Bakım Hizmeti</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="inp"><span class="ph">Kısa ad…</span></div></div>
+      <div class="fld"><label class="req">Kategori</label><div class="inp combo agac">Teknik Servis › Bakım</div></div>
+      <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+      <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(2)">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sekme(2)">Genel</div><div class="tab" onclick="sekme(2)">Fiyatlar <span class="b">2</span></div>
+    <div class="tab" onclick="sekme(2)">Resim / Doküman <span class="b">0</span></div><div class="tab" onclick="sekme(2)">Ek Alanlar</div>
+  </div>
+  <div class="govde goster gizli" id="gg2">
+    <div class="grp"><h4>Detay</h4><div class="ic">
+      <div class="fld"><label>KDV %</label><div class="deg">%20</div></div>
+      <div class="fld"><label>Birim</label><div class="deg">Saat</div></div>
+      <div class="fld"><label>Cinsiyet</label><div class="deg">Hepsi</div></div>
+      <div class="fld genis"><label>Açıklama</label><div class="deg bos">—</div></div>
+    </div></div>
+    <div class="grp"><h4>Kodlar</h4><div class="ic">
+      <div class="fld"><label>Muhasebe Kodu</label><div class="deg">600.02.011</div></div>
+      <div class="fld"><label>Özel Kod</label><div class="deg bos">—</div></div>
+      <div class="fld"><label>Barkod</label><div class="deg bos">—</div></div>
+    </div></div>
+  </div>
+  <div class="govde duzenle" id="ge2">
+    <div class="grp"><h4>Detay</h4><div class="ic">
+      <div class="fld"><label>KDV %</label><div class="inp combo">%20</div></div>
+      <div class="fld"><label>Birim</label><div class="inp combo">Saat</div></div>
+      <div class="fld"><label>Cinsiyet</label><div class="inp combo">Hepsi</div></div>
+      <div class="fld"><label>En Küçük / En Büyük Yaş</label><div style="display:flex;gap:6px"><div class="inp" style="flex:1"><span class="ph">—</span></div><div class="inp" style="flex:1"><span class="ph">—</span></div></div></div>
+      <div class="fld"><label>Paket / Panel</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld"><label>Radyoloji Tetkiki</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld genis"><label>Açıklama</label><div class="inp"><span class="ph">Açıklama…</span></div></div>
+    </div></div>
+    <div class="grp"><h4>Kodlar</h4><div class="ic">
+      <div class="fld"><label>HUV Kodu</label><div class="inp"><span class="ph">—</span></div></div>
+      <div class="fld"><label>LOINC</label><div class="inp"><span class="ph">—</span></div></div>
+      <div class="fld"><label>Muhasebe Kodu</label><div class="inp">600.02.011</div></div>
+      <div class="fld"><label>Özel Kod</label><div class="inp"><span class="ph">Özel kod…</span></div></div>
+      <div class="fld"><label>Barkod</label><div class="inp"><span class="ph">Barkod…</span></div></div>
+    </div></div>
+    <div class="not">Fiyatlar sekmesi stok kartıyla aynı desen: aktif alış/satış fiyat listelerine göre satırlar hazır gelir (birim = kartın birimi, KDV = listenin durumu), anında kaydedilir.</div>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Yeni kartta</b> düzenleme açık; sol mavi çizgi yok. Kaydet kipi kapatmaz: kod verilir, kart aynı sekmede kalır, kullanıcı fiyat / kod girmeye devam eder.
+  Kategori seçilince avatar baş harflerden kategorinin simgesine döner.
+</p>
+
+<h2><b>3</b> — Kilitli hizmet (düzenleme yetkisi yok / pasif kart): yalnız görüntüleme, ✎ pasif</h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>🛠️ Hizmet Listesi</span><span class="on">🛠️ Akciğer Grafisi (PA) ×</span></div>
+  <div class="bas">
+    <h1>🛠️ Hizmet Kartı</h1><span class="yol">Stok › Hizmet Listesi › HZM-00034</span>
+    <span class="rz s" style="margin-left:8px;padding:3px 8px">🔒 Düzenleme yetkisi yok</span>
+    <div class="sag"><span class="btn primary pas">💾 Kaydet</span><span class="btn pas">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">✖ Kapat</span></div>
+  </div>
+  <div class="kaid-sar">
+    <div class="kaid goster">
+      <div class="avatar pasif" title="Kategori: Radyoloji · pasif">🩻</div>
+      <div class="fld"><label>Kod</label><div class="deg big">HZM-00034 <span class="rz m">SUT 801.470</span></div></div>
+      <div class="fld"><label>Hizmet Adı</label><div class="deg big">Akciğer Grafisi (PA)</div></div>
+      <div class="fld"><label>Kısa Ad</label><div class="deg">PA Akciğer</div></div>
+      <div class="fld"><label>Kategori</label><div class="deg">🗂 Radyoloji › Direkt Grafi</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz gri">Pasif</span></div></div>
+      <div class="kalem kilit" title="Kilitli kart - düzenlenemez">✎</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active">Genel</div><div class="tab">Fiyatlar <span class="b">1</span></div><div class="tab">Radyoloji Protokolü</div>
+    <div class="tab">Eski Kodlar <span class="b">1</span></div><div class="tab">Resim / Doküman</div>
+  </div>
+  <div class="govde goster">
+    <div class="grp"><h4>Detay</h4><div class="ic">
+      <div class="fld"><label>KDV %</label><div class="deg">%10</div></div>
+      <div class="fld"><label>Birim</label><div class="deg">Adet</div></div>
+      <div class="fld"><label>Cinsiyet</label><div class="deg">Hepsi</div></div>
+      <div class="fld"><label>Yaş Aralığı</label><div class="deg">0 – 120</div></div>
+      <div class="fld"><label>Paket / Panel</label><div class="onay"><i></i> Hayır</div></div>
+      <div class="fld"><label>Radyoloji Tetkiki</label><div class="onay"><i class="ok">✓</i> Evet</div></div>
+    </div></div>
+    <div class="grp"><h4>Kodlar</h4><div class="ic">
+      <div class="fld"><label>HUV Kodu</label><div class="deg">801.470</div></div>
+      <div class="fld"><label>LOINC</label><div class="deg bos">—</div></div>
+      <div class="fld"><label>Muhasebe Kodu</label><div class="deg">600.01.021</div></div>
+    </div></div>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Kilitli kart</b>: avatar gri, değerler aynı şeritte okunur, ✎ soluk ve tıklanmaz; sekme içerikleri de salt okunur. Pasif hizmet gri rozetle ayrışır;
+  yetkili kullanıcı pasif kartı ✎ ile yine düzenler (kilit yetkiden gelir, durumdan değil).
+</p>
+
+<script>
+  // ✎: şerit + Genel sekmesi grupları BİRLİKTE kip değiştirir. Şeride / gruba tıklamak kipi DEĞİŞTİRMEZ.
+  function kip(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n);
+    var gg = document.getElementById('gg'+n), ge = document.getElementById('ge'+n);
+    var duzenle = !g.classList.contains('gizli');
+    g.classList.toggle('gizli', duzenle); e.classList.toggle('gizli', !duzenle);
+    if (gg && ge) { gg.classList.toggle('gizli', duzenle); ge.classList.toggle('gizli', !duzenle); }
+  }
+  // Sekme seçimi: görüntüleme kipine döner.
+  function sekme(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n);
+    var gg = document.getElementById('gg'+n), ge = document.getElementById('ge'+n);
+    g.classList.remove('gizli'); e.classList.add('gizli');
+    if (gg && ge) { gg.classList.remove('gizli'); ge.classList.add('gizli'); }
+  }
+</script>
+</body>
+</html>

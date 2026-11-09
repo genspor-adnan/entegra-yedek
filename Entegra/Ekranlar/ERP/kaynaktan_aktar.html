@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaynaktan Aktar — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#a9791a;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  .not{max-width:1180px;margin:0 auto 10px;background:#fffbe8;border:1px solid #eeddb4;border-radius:4px;padding:8px 12px;font-size:11.5px;color:#6a5313}
+  .not b{color:#4c3a05}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px;}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.9;font-size:11px}
+  .title .x{margin-left:10px;opacity:.8;font-weight:normal}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.ok[disabled]{opacity:.5;cursor:default}
+  .btn.sm{padding:2px 7px;font-size:11px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .inp .ph{color:#9aa8b7}
+  .combo{position:relative;padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:bold;border:1px solid transparent}
+  .chip.acik{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}.chip.kismi{background:#fdf6e3;color:var(--warn);border-color:#eeddb4}
+  .chip.lot{background:#f1ebfa;color:#6a3fb0;border-color:#dccdf2}.chip.seri{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .chip.yok{background:#f1f3f6;color:#7b8794;border-color:#dfe5ec}
+
+  /* kaynak türü sekmeleri */
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);align-items:flex-end}
+  .tab{padding:7px 14px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .tabs .hint{margin-left:auto;padding:0 6px 6px;font-size:11px;color:var(--muted)}
+
+  /* iki bölme */
+  .split{display:grid;grid-template-columns:400px 1fr;min-height:470px}
+  .left{border-right:1px solid var(--line);display:flex;flex-direction:column;background:#fbfcfd}
+  .right{display:flex;flex-direction:column}
+  .bar{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap;background:#fff}
+  .bar .inp{flex:1;min-width:120px}
+  .cips{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line2);background:#fff;flex-wrap:wrap}
+  .cip{padding:2px 9px;border:1px solid var(--line);border-radius:11px;font-size:10.5px;background:#fff;cursor:pointer;color:var(--muted)}
+  .cip.on{background:#e6f0fb;border-color:#98c2ee;color:#1c4374;font-weight:bold}
+  .lst{flex:1;overflow:auto}
+  .doc{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 10px;border-bottom:1px solid var(--line2);cursor:pointer;position:relative}
+  .doc:hover{background:#f2f7fd}
+  .doc.sel{background:var(--sel);box-shadow:inset 3px 0 0 #2f6db3}
+  .doc .no{font-weight:bold;color:var(--navy)}
+  .doc .tar{color:var(--muted);font-size:11px;text-align:right}
+  .doc .ack{font-size:11px;color:#3a5573;grid-column:1/3;display:flex;gap:8px;align-items:center}
+  .doc .bar2{flex:1;height:5px;background:#e3e9f0;border-radius:3px;overflow:hidden;max-width:140px}
+  .doc .bar2 i{display:block;height:100%;background:linear-gradient(90deg,#4fae68,#2e7d46)}
+  .doc .cnt{font-size:10.5px;color:var(--muted)}
+  .doc .sep{position:absolute;right:10px;top:26px;font-size:10px;color:#2e7d46;font-weight:bold}
+  .lfoot{padding:6px 10px;border-top:1px solid var(--line2);font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center;background:#fff}
+  .lfoot label{display:flex;gap:4px;align-items:center;cursor:pointer}
+
+  .dochead{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px;padding:10px 12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:1px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .v{font-weight:bold;color:var(--navy);font-size:12px}
+  .dg{flex:1;overflow:auto}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold;position:sticky;top:0}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 7px;font-size:11.5px;vertical-align:middle}
+  .dg tr.on td{background:#eef6ee}
+  .dg tr.kapali td{color:#9aa8b7;background:#fafbfc}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg .c{text-align:center}.amt{text-align:right;font-family:"Segoe UI",Tahoma;white-space:nowrap}
+  .dg .bold{font-weight:bold}
+  .mik{width:76px;height:22px;border:1px solid var(--line);border-radius:2px;text-align:right;padding:0 5px;font-size:12px;font-family:"Segoe UI",Tahoma}
+  .mik:disabled{background:#f3f5f8;color:#9aa8b7}
+  .mik.hata{border-color:var(--req);background:#fff4f4}
+  .ikaz{font-size:10.5px;color:var(--req);display:block}
+  .kod{color:var(--muted);font-size:11px}
+  .rtool{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--line2);align-items:center;background:#fff;font-size:11px;color:var(--muted)}
+  .rtool .sp{margin-left:auto;display:flex;gap:6px}
+
+  /* sepet + alt bant */
+  .sepet{border-top:1px solid var(--line);background:var(--head)}
+  .sepet .sh{display:flex;align-items:center;gap:8px;padding:6px 12px;font-weight:bold;color:var(--navy);cursor:pointer}
+  .sepet .sh .b{background:#2f6db3;color:#fff;border-radius:9px;padding:0 7px;font-size:10.5px}
+  .sepet table{border-collapse:collapse;width:100%;background:#fff}
+  .sepet td,.sepet th{padding:4px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;text-align:left}
+  .sepet th{background:#eef2f7;color:#3a5573;font-size:11px}
+  .foot{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line);background:#fff}
+  .foot .sum{display:flex;gap:16px;font-size:11.5px;color:#3a5573}
+  .foot .sum b{color:var(--navy)}
+  .foot .sp{margin-left:auto;display:flex;gap:6px}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  .empty b{display:block;color:var(--navy);font-size:13px;margin-bottom:6px}
+  .akis{max-width:1180px;margin:14px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 16px;font-size:11.5px}
+  .akis h3{margin:0 0 8px;font-size:12.5px;color:var(--navy)}
+  .akis ol{margin:0;padding-left:18px}.akis li{margin:3px 0}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — Kaynaktan Aktar penceresi (tek pencere, iki bölme).</b> Bugünkü akış iki ayrı pencere: önce jenerik belge
+listesinden kaynak seçiliyor, sonra satırlar. Yeni tasarımda sol bölme <b>bu carinin açık kaynak belgeleri</b> (kalan ilerleme
+çubuğuyla), sağ bölme <b>seçili belgenin satırları</b>; birden çok belgeden satır toplanabilir (alttaki <b>Aktarılacaklar</b> sepeti).
+Fatura / fiş / tahakkuk / irsaliye kartlarındaki "⇩ Aktar ▾" bu pencereyi kaynak türü seçili açar.</div>
+
+<div class="win">
+  <div class="title"><span class="dot"></span> Kaynaktan Aktar <span class="sp">Hedef: <b>Satış İrsaliyesi (yeni)</b> · Cari: <b>Medikal Plus A.Ş.</b></span><span class="x">✕</span></div>
+
+  <div class="tabs">
+    <div class="tab active" data-tur="siparis">Siparişten <span class="b">3</span></div>
+    <div class="tab" data-tur="irsaliye">İrsaliyeden <span class="b">2</span></div>
+    <div class="tab" data-tur="teklif">Tekliften <span class="b">1</span></div>
+    <div class="hint">Sayı = carinin açık (tam kapanmamış) belgesi. İrsaliye kartında yalnız <b>Siparişten</b> sekmesi vardır; İrsaliyeden/Tekliften sekmeleri fiş · fatura · tahakkuk / sipariş kartında görünür (burada hepsi örnek için açık).</div>
+  </div>
+
+  <div class="split">
+    <!-- SOL: kaynak belgeler -->
+    <div class="left">
+      <div class="bar">
+        <div class="inp" style="flex:1">🔍 <span class="ph">Belge no, açıklama, stok adı…</span></div>
+        <div class="inp combo" style="width:118px">Son 90 gün</div>
+      </div>
+      <div class="cips">
+        <span class="cip on">Açık</span><span class="cip">Kısmen aktarılmış</span><span class="cip">Tümü</span>
+        <span class="cip" style="margin-left:auto" title="Carinin dışındaki belgeleri de göster (yetkiyle)">Tüm cariler</span>
+      </div>
+      <div class="lst" id="lst"></div>
+      <div class="lfoot"><label><input type="checkbox"> Yalnız stoğu olan satırları getir</label><span style="margin-left:auto" id="lsay"></span></div>
+    </div>
+
+    <!-- SAĞ: seçili belgenin satırları -->
+    <div class="right">
+      <div id="sag"></div>
+    </div>
+  </div>
+
+  <!-- SEPET: birden çok belgeden toplananlar -->
+  <div class="sepet">
+    <div class="sh" onclick="document.getElementById('sepetGov').style.display = document.getElementById('sepetGov').style.display==='none'?'':'none'">
+      ▾ Aktarılacaklar <span class="b" id="sepetSayi">0</span> <span style="font-weight:normal;color:var(--muted)">— farklı belgelerden seçilen satırlar burada birikir; kaynak numarası satırda saklanır</span>
+    </div>
+    <div id="sepetGov"><table><thead><tr><th style="width:140px">Kaynak</th><th style="width:100px">Kod</th><th>Stok / Hizmet</th><th class="amt" style="width:90px">Miktar</th><th class="amt" style="width:100px">Br. Fiyat</th><th class="amt" style="width:110px">Tutar</th><th style="width:90px">İzlem</th><th style="width:40px"></th></tr></thead><tbody id="sepetTb"></tbody></table></div>
+  </div>
+
+  <div class="foot">
+    <div class="sum"><span>Seçili satır: <b id="sSat">0</b></span><span>Belge: <b id="sBel">0</b></span><span>Toplam: <b id="sTut">0,00 ₺</b></span><span id="sLot" style="color:#6a3fb0"></span></div>
+    <div class="sp">
+      <button class="btn">Vazgeç</button>
+      <button class="btn ok" id="aktar" disabled>✔ Seçilenleri Aktar</button>
+    </div>
+  </div>
+</div>
+
+<div class="akis">
+  <h3>Davranış notları</h3>
+  <ol>
+    <li><b>Sol liste bu carinin belgeleri.</b> Her belgede kalan ilerleme çubuğu + "3/5 satır açık". Tamamen kapanmış belge yalnız "Tümü" çipinde, gri. Belge no ya da <b>stok adı</b> ile aranır (hangi siparişte olduğu bilinmeyen ürün için).</li>
+    <li><b>Belgeye tıklamak sağda satırlarını açar</b>, seçimleri bozmaz; başka belgeye geçince önceki seçimler sepette kalır. Sol satırda yeşil "2 seçili" rozeti görünür.</li>
+    <li><b>Satır: kutucuk + "Bu Belgeye" miktarı</b> (varsayılan kalan). Kalan = sipariş − dönüşen − <i>bu kartta bekleyen</i>. Kalanı 0 olan satır gri ve seçilemez. Aşım kırmızı, Aktar kapanır.</li>
+    <li><b>"Tümünü seç / Kalanların hepsi"</b> sağ araç çubuğunda; "Sıfırla" seçimleri siler. Fiyat / iskonto / KDV kaynaktan gelir, burada değişmez (kartta değişir).</li>
+    <li><b>İzlem rozeti:</b> Lot / Seri takipli ürün morla işaretli. Siparişten aktarımda kaydırma sonrası <b>lot sorulur</b> (sıra penceresi); irsaliyeden aktarımda lot <b>aynen taşınır</b>, sorulmaz (07.11.2026 kuralı). Alt bantta "3 satır lot soracak" özeti.</li>
+    <li><b>Tekliften:</b> yalnız durumu <b>Kabul</b> olan teklifler listelenir; alış siparişinde sekme yok. İrsaliyeden: yalnız fiş/fatura/tahakkukta.</li>
+    <li><b>Karışık kaynak uyarısı:</b> sepette hem cari yazmış irsaliye hem sipariş satırı varsa Aktar öncesi sarı uyarı ("cari hareketi yalnız sipariş satırları için yazılır").</li>
+    <li><b>Aktar:</b> sepettekiler karta <code>kaynakSatirId</code> ile satır olur; kayıtta sunucu çift aktarımı denetler (422 IS_KURALI). Pencere kapanır, kart satır gridine odaklanır.</li>
+  </ol>
+</div>
+
+<script>
+const VERI = {
+  siparis: {
+    ad: 'Sipariş', belgeler: [
+      { id: 1, no: 'SS-2026-000418', tarih: '02.11.2026', vade: '15.11.2026', aciklama: 'Kasım sevkiyatı', toplam: 48600, oran: 0.35, acik: '4/5 satır açık', satirlar: [
+        { kod: 'MED-1040', ad: 'Steril Eldiven M (100lü)', birim: 'Kutu', miktar: 200, donusen: 50, kartta: 0, fiyat: 185, izlem: 'lot' },
+        { kod: 'MED-2210', ad: 'Cerrahi Maske 3 Katlı', birim: 'Kutu', miktar: 500, donusen: 0, kartta: 0, fiyat: 42.5, izlem: '' },
+        { kod: 'CHZ-0771', ad: 'İnfüzyon Pompası IP-200', birim: 'Adet', miktar: 2, donusen: 0, kartta: 1, fiyat: 12400, izlem: 'seri' },
+        { kod: 'MED-3302', ad: 'Serum Seti', birim: 'Adet', miktar: 1000, donusen: 1000, kartta: 0, fiyat: 6.2, izlem: 'lot' },
+        { kod: 'HZM-0009', ad: 'Kurulum ve Eğitim Hizmeti', birim: 'Saat', miktar: 8, donusen: 0, kartta: 0, fiyat: 950, izlem: '' },
+      ]},
+      { id: 2, no: 'SS-2026-000402', tarih: '21.10.2026', vade: '05.11.2026', aciklama: '', toplam: 9120, oran: 0.6, acik: '1/3 satır açık', satirlar: [
+        { kod: 'MED-2210', ad: 'Cerrahi Maske 3 Katlı', birim: 'Kutu', miktar: 120, donusen: 120, kartta: 0, fiyat: 42.5, izlem: '' },
+        { kod: 'MED-1040', ad: 'Steril Eldiven M (100lü)', birim: 'Kutu', miktar: 20, donusen: 20, kartta: 0, fiyat: 185, izlem: 'lot' },
+        { kod: 'MED-4410', ad: 'Alkol Bazlı El Dezenfektanı 1L', birim: 'Adet', miktar: 60, donusen: 0, kartta: 0, fiyat: 61, izlem: 'lot' },
+      ]},
+      { id: 3, no: 'SS-2026-000377', tarih: '30.09.2026', vade: '14.10.2026', aciklama: 'Yıllık anlaşma 3. parti', toplam: 15800, oran: 0, acik: '2/2 satır açık', satirlar: [
+        { kod: 'CHZ-0120', ad: 'Tansiyon Aleti Dijital', birim: 'Adet', miktar: 40, donusen: 0, kartta: 0, fiyat: 320, izlem: 'seri' },
+        { kod: 'MED-5001', ad: 'Pamuk 1 kg', birim: 'Adet', miktar: 100, donusen: 0, kartta: 0, fiyat: 30, izlem: '' },
+      ]},
+    ]},
+  irsaliye: {
+    ad: 'İrsaliye', belgeler: [
+      { id: 11, no: 'Sİ-2026-000091', tarih: '05.11.2026', vade: '—', aciklama: 'Sevk: 34 ABC 145', toplam: 21250, oran: 0, acik: '3/3 satır açık', satirlar: [
+        { kod: 'MED-1040', ad: 'Steril Eldiven M (100lü)', birim: 'Kutu', miktar: 50, donusen: 0, kartta: 0, fiyat: 185, izlem: 'lot', lot: 'L2409-17 · SKT 09.2028' },
+        { kod: 'MED-2210', ad: 'Cerrahi Maske 3 Katlı', birim: 'Kutu', miktar: 200, donusen: 0, kartta: 0, fiyat: 42.5, izlem: '' },
+        { kod: 'MED-3302', ad: 'Serum Seti', birim: 'Adet', miktar: 600, donusen: 0, kartta: 0, fiyat: 6.2, izlem: 'lot', lot: 'L2410-02 · SKT 10.2029' },
+      ]},
+      { id: 12, no: 'Sİ-2026-000084', tarih: '28.10.2026', vade: '—', aciklama: '', toplam: 3720, oran: 0.5, acik: '1/2 satır açık', satirlar: [
+        { kod: 'MED-4410', ad: 'Alkol Bazlı El Dezenfektanı 1L', birim: 'Adet', miktar: 60, donusen: 60, kartta: 0, fiyat: 61, izlem: 'lot', lot: 'L2408-33' },
+        { kod: 'MED-5001', ad: 'Pamuk 1 kg', birim: 'Adet', miktar: 2, donusen: 0, kartta: 0, fiyat: 30, izlem: '' },
+      ]},
+    ]},
+  teklif: {
+    ad: 'Teklif', belgeler: [
+      { id: 21, no: 'TK-2026-000057 · R1', tarih: '12.10.2026', vade: '30.11.2026', aciklama: 'Kabul 20.10.2026', toplam: 66400, oran: 0.2, acik: '3/3 satır açık', satirlar: [
+        { kod: 'CHZ-0771', ad: 'İnfüzyon Pompası IP-200', birim: 'Adet', miktar: 5, donusen: 1, kartta: 0, fiyat: 12400, izlem: 'seri' },
+        { kod: 'HZM-0009', ad: 'Kurulum ve Eğitim Hizmeti', birim: 'Saat', miktar: 16, donusen: 0, kartta: 0, fiyat: 950, izlem: '' },
+        { kod: 'HZM-0012', ad: 'Yıllık Bakım Sözleşmesi', birim: 'Yıl', miktar: 1, donusen: 0, kartta: 0, fiyat: 4800, izlem: '' },
+      ]},
+    ]},
+};
+let tur = 'siparis', secBelge = null;
+const sepet = {}; // anahtar: tur:belgeId:idx -> {mik}
+const para = n => n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+const kalan = s => Math.max(0, s.miktar - s.donusen - s.kartta);
+const k = (b, i) => `${tur}:${b.id}:${i}`;
+
+function cizSol() {
+  const bl = VERI[tur].belgeler;
+  document.getElementById('lst').innerHTML = bl.map(b => {
+    const sec = Object.keys(sepet).filter(x => x.startsWith(`${tur}:${b.id}:`)).length;
+    return `<div class="doc ${secBelge === b.id ? 'sel' : ''}" onclick="secimBelge(${b.id})">
+      <div class="no">${b.no}</div><div class="tar">${b.tarih}</div>
+      <div class="ack"><span class="bar2"><i style="width:${b.oran * 100}%"></i></span><span class="cnt">%${Math.round(b.oran * 100)} aktarıldı · ${b.acik}</span></div>
+      <div class="cnt" style="grid-column:1/3">${b.aciklama || '&nbsp;'} <span style="float:right">${para(b.toplam)}</span></div>
+      ${sec ? `<span class="sep">✔ ${sec} seçili</span>` : ''}</div>`;
+  }).join('');
+  document.getElementById('lsay').textContent = `${bl.length} belge`;
+}
+function secimBelge(id) { secBelge = id; cizSol(); cizSag(); }
+function cizSag() {
+  const b = VERI[tur].belgeler.find(x => x.id === secBelge);
+  const sag = document.getElementById('sag');
+  if (!b) { sag.innerHTML = `<div class="empty"><b>Soldan bir ${VERI[tur].ad.toLowerCase()} seçin</b>Satırları burada görünür; birden çok belgeden satır toplayabilirsiniz.</div>`; return; }
+  const irs = tur === 'irsaliye';
+  sag.innerHTML = `
+    <div class="dochead">
+      <div class="fld"><label>${VERI[tur].ad} No</label><span class="v">${b.no}</span></div>
+      <div class="fld"><label>Tarih</label><span class="v">${b.tarih}</span></div>
+      <div class="fld"><label>${tur === 'teklif' ? 'Geçerlilik' : tur === 'irsaliye' ? 'Sevk' : 'Termin'}</label><span class="v">${b.vade}</span></div>
+      <div class="fld"><label>Belge Toplamı</label><span class="v">${para(b.toplam)}</span></div>
+    </div>
+    <div class="rtool">
+      <button class="btn sm" onclick="hepsi(true)">☑ Tümünü seç (kalanların hepsi)</button>
+      <button class="btn sm" onclick="hepsi(false)">☐ Bu belgenin seçimini kaldır</button>
+      <span>Fiyat, iskonto ve KDV ${VERI[tur].ad.toLowerCase()}den gelir; miktar kalana kadar değiştirilebilir.</span>
+      <span class="sp">${irs ? '<span class="chip lot">Lotlar aynen taşınır</span>' : '<span class="chip lot">Lot takipli satırlar aktarım sonrası sorulur</span>'}</span>
+    </div>
+    <div class="dg"><table><thead><tr>
+      <th class="c" style="width:28px"></th><th style="width:96px">Kod</th><th>Stok / Hizmet</th><th style="width:60px">Birim</th>
+      <th class="amt" style="width:76px">Miktar</th><th class="amt" style="width:76px">Dönüşen</th><th class="amt" style="width:76px">Kalan</th>
+      <th class="amt" style="width:90px">Br. Fiyat</th><th class="amt" style="width:96px">Bu Belgeye</th><th style="width:${irs ? 170 : 90}px">İzlem</th></tr></thead><tbody>
+      ${b.satirlar.map((s, i) => {
+        const kl = kalan(s), key = k(b, i), on = sepet[key], mik = on ? on.mik : kl, hata = on && (on.mik <= 0 || on.mik > kl);
+        return `<tr class="${kl === 0 ? 'kapali' : ''} ${on ? 'on' : ''}">
+          <td class="c"><input type="checkbox" ${on ? 'checked' : ''} ${kl === 0 ? 'disabled' : ''} onchange="isaretle('${key}', ${kl}, this.checked)"></td>
+          <td class="kod">${s.kod}</td><td>${s.ad}${s.kartta ? ` <span class="chip yok" title="Bu kartta kaydedilmemiş ${s.kartta} ${s.birim} var; kalandan düşüldü">kartta ${s.kartta}</span>` : ''}</td><td>${s.birim}</td>
+          <td class="amt">${s.miktar.toLocaleString('tr-TR')}</td><td class="amt">${s.donusen.toLocaleString('tr-TR')}</td><td class="amt bold">${kl.toLocaleString('tr-TR')}</td>
+          <td class="amt">${para(s.fiyat)}</td>
+          <td class="amt"><input class="mik ${hata ? 'hata' : ''}" value="${kl === 0 ? '' : mik}" ${kl === 0 || !on ? 'disabled' : ''} oninput="miktar('${key}', this.value)">${hata ? '<span class="ikaz">0 – ' + kl + ' arası</span>' : ''}</td>
+          <td>${s.izlem === 'lot' ? '<span class="chip lot">Lot</span>' : s.izlem === 'seri' ? '<span class="chip seri">Seri</span>' : '<span class="chip yok">—</span>'}${s.lot ? ` <span class="kod">${s.lot}</span>` : ''}</td>
+        </tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+function isaretle(key, kl, on) { if (on) sepet[key] = { mik: kl }; else delete sepet[key]; yenile(); }
+function miktar(key, v) { if (sepet[key]) { sepet[key].mik = Number(String(v).replace(',', '.')) || 0; cizSepet(); } }
+function hepsi(on) {
+  const b = VERI[tur].belgeler.find(x => x.id === secBelge); if (!b) return;
+  b.satirlar.forEach((s, i) => { const kl = kalan(s); if (on && kl > 0) sepet[k(b, i)] = { mik: kl }; if (!on) delete sepet[k(b, i)]; });
+  yenile();
+}
+function sil(key) { delete sepet[key]; yenile(); }
+function cizSepet() {
+  const tb = document.getElementById('sepetTb'); let tut = 0, lotSor = 0; const belgeler = new Set(); let karisik = { irs: false, sip: false };
+  const satirlar = Object.keys(sepet).map(key => {
+    const [t, bid, i] = key.split(':'); const b = VERI[t].belgeler.find(x => x.id === Number(bid)); const s = b.satirlar[Number(i)];
+    const m = sepet[key].mik, tutar = m * s.fiyat; tut += tutar; belgeler.add(key.split(':').slice(0, 2).join(':'));
+    if (t !== 'irsaliye' && s.izlem === 'lot') lotSor++; if (t === 'irsaliye') karisik.irs = true; else karisik.sip = true;
+    return `<tr><td><b>${VERI[t].ad}</b> ${b.no}</td><td class="kod">${s.kod}</td><td>${s.ad}</td><td class="amt">${m.toLocaleString('tr-TR')} ${s.birim}</td><td class="amt">${para(s.fiyat)}</td><td class="amt bold">${para(tutar)}</td>
+      <td>${s.izlem === 'lot' ? (t === 'irsaliye' ? `<span class="chip lot">Lot</span> <span class="kod">${s.lot || ''}</span>` : '<span class="chip lot">Lot sorulacak</span>') : s.izlem === 'seri' ? '<span class="chip seri">Seri</span>' : ''}</td>
+      <td class="c"><span style="cursor:pointer;color:#b23b3b" onclick="sil('${key}')" title="Sepetten çıkar">✕</span></td></tr>`;
+  });
+  tb.innerHTML = satirlar.join('') || '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:10px">Henüz satır seçilmedi.</td></tr>';
+  if (karisik.irs && karisik.sip) tb.innerHTML += '<tr><td colspan="8" style="background:#fdf6e3;color:#6a5313">⚠ Karışık kaynak: irsaliye satırları için cari hareketi yazılmaz (kaynağı yazmış), sipariş satırları için yazılır.</td></tr>';
+  document.getElementById('sepetSayi').textContent = satirlar.length;
+  document.getElementById('sSat').textContent = satirlar.length; document.getElementById('sBel').textContent = belgeler.size;
+  document.getElementById('sTut').textContent = para(tut);
+  document.getElementById('sLot').textContent = lotSor ? `◆ ${lotSor} satır lot soracak` : '';
+  const hatali = Object.keys(sepet).some(key => { const [t, bid, i] = key.split(':'); const s = VERI[t].belgeler.find(x => x.id === Number(bid)).satirlar[Number(i)]; return sepet[key].mik <= 0 || sepet[key].mik > kalan(s); });
+  const a = document.getElementById('aktar'); a.disabled = !satirlar.length || hatali;
+  a.textContent = `✔ Seçilenleri Aktar${satirlar.length ? ` (${satirlar.length})` : ''}`;
+}
+function yenile() { cizSol(); cizSag(); cizSepet(); }
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active');
+  tur = t.dataset.tur; secBelge = null; yenile();
+}));
+// açılış: ilk sipariş seçili, iki satır işaretli (örnek)
+secBelge = 1; sepet['siparis:1:0'] = { mik: 150 }; sepet['siparis:1:1'] = { mik: 500 };
+yenile();
+</script>
+</body>
+</html>

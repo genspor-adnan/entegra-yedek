@@ -1,0 +1,74 @@
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2026-10-06 15:24:41,350 INFO  [istanbul.hale.TokenMonitorService] (main) Initializing TokenMonitorService (IAIK based) with 14 libraries
+[INFO] ipkcs11wrapper 1.0.9 buildNumber ffeb68b1 built at 2024-07-20T09:03:09Z
+[INFO] This product (ipkcs11wrapper) includes software (IAIK PKCS#11 wrapper version 1.6.8)
+developed by Stiftung SIC which is licensed under "IAIK PKCS#11 Wrapper License"- 
+A copy of this license is downloadable under 
+https://jce.iaik.tugraz.at/products/core-crypto-toolkits/pkcs11-wrapper/#License.
+All other parts are licensed under Apache License, version 2.
+[INFO] PKCS11oModule.loadWrapperFromJar: copy file natives/windows/win-x86_64/release/pkcs11wrapper.dll to a temporary file
+[INFO] PKCS11Module.getInstance: pkcs11ModulePath=C:\Windows\System32\akisp11.dll
+[INFO] C_Initialize: flags=0x00000002
+2026-10-06 15:24:41,431 WARN  [istanbul.hale.TokenMonitorService] (main) PKCS11 initialization failed with CKR_ARGUMENTS_BAD for C:\Windows\System32\akisp11.dll. Retrying without args...
+[INFO] PKCS11Module.getInstance: pkcs11ModulePath=C:\Windows\System32\eTPKCS11.dll
+[INFO] C_Initialize: flags=0x00000002
+2026-10-06 15:24:41,461 INFO  [istanbul.hale.TokenMonitorService] (main) Polling started for 2 libraries
+2026-10-06 15:24:41,591 INFO  [io.quarkus] (main) sign-server 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.35.2) started in 1.409s. Listening on: http://0.0.0.0:51919
+2026-10-06 15:24:41,591 INFO  [io.quarkus] (main) Profile prod activated. 
+2026-10-06 15:24:41,591 INFO  [io.quarkus] (main) Installed features: [cdi, rest, rest-jackson, smallrye-context-propagation, smallrye-openapi, swagger-ui, vertx]
+2026-10-06 15:27:28,385 INFO  [istanbul.hale.filters.GlobalLoggingRequestFilter] (executor-thread-1) [GLOBAL] Received request fbf7529b-63e9-468e-9383-9eba0d99d5b3: GET http://localhost:51919/api/sign/certificates
+2026-10-06 15:27:28,535 INFO  [istanbul.hale.filters.GlobalHeaderResponseFilter] (executor-thread-1) [GLOBAL] Request fbf7529b-63e9-468e-9383-9eba0d99d5b3 processed in 146,86 ms
+[INFO] C_OpenSession: slotID=1, flags=0x00000004, sessionHandle=1
+2026-10-06 15:27:51,673 INFO  [istanbul.hale.TokenMonitorService] (pool-5-thread-1) Token inserted on akisp11 slot 1 with 1 certificates
+2026-10-06 15:27:58,944 INFO  [istanbul.hale.filters.GlobalLoggingRequestFilter] (executor-thread-1) [GLOBAL] Received request 76dadcd9-0c6d-45ed-a084-3e8db958fd72: GET http://localhost:51919/api/sign/certificates
+2026-10-06 15:27:59,137 INFO  [istanbul.hale.filters.GlobalHeaderResponseFilter] (executor-thread-1) [GLOBAL] Request 76dadcd9-0c6d-45ed-a084-3e8db958fd72 processed in 196,00 ms
+2026-10-06 15:36:01,175 INFO  [istanbul.hale.filters.GlobalLoggingRequestFilter] (executor-thread-1) [GLOBAL] Received request 800e8dfb-6664-4e65-9a1f-3ec716d4b53b: POST http://localhost:51919/api/sign/document
+[INFO] PKCS11Module.getInstance: pkcs11ModulePath=C:\Windows\System32\akisp11.dll
+[INFO] C_Initialize: flags=0x00000002
+2026-10-06 15:36:01,270 WARN  [istanbul.hale.signer.token.Ipkcs11SignatureToken] (executor-thread-1) PKCS11 initialization failed with CKR_ARGUMENTS_BAD. Retrying without args...
+2026-10-06 15:36:01,280 WARN  [istanbul.hale.filters.InternalServerErrorMapper] (executor-thread-1) Signing failed: Failed to create DSS token for library akisp11 slot 1: jakarta.ws.rs.InternalServerErrorException: Signing failed: Failed to create DSS token for library akisp11 slot 1
+	at istanbul.hale.SigningResource.signDocument(SigningResource.java:104)
+	at istanbul.hale.SigningResource_ClientProxy.signDocument(Unknown Source)
+	at istanbul.hale.SigningResource$quarkusrestinvoker$signDocument_23a981ae2e3c7601767e5e134e6186c7422c6855.invoke(Unknown Source)
+	at org.jboss.resteasy.reactive.server.handlers.InvocationHandler.handle(InvocationHandler.java:29)
+	at io.quarkus.resteasy.reactive.server.runtime.QuarkusResteasyReactiveRequestContext.invokeHandler(QuarkusResteasyReactiveRequestContext.java:190)
+	at org.jboss.resteasy.reactive.common.core.AbstractResteasyReactiveContext.run(AbstractResteasyReactiveContext.java:147)
+	at io.quarkus.vertx.core.runtime.VertxCoreRecorder$15.runWith(VertxCoreRecorder.java:677)
+	at org.jboss.threads.EnhancedQueueExecutor$Task.doRunWith(EnhancedQueueExecutor.java:2651)
+	at org.jboss.threads.EnhancedQueueExecutor$Task.run(EnhancedQueueExecutor.java:2630)
+	at org.jboss.threads.EnhancedQueueExecutor.runThreadBody(EnhancedQueueExecutor.java:1622)
+	at org.jboss.threads.EnhancedQueueExecutor$ThreadBody.run(EnhancedQueueExecutor.java:1589)
+	at org.jboss.threads.DelegatingRunnable.run(DelegatingRunnable.java:11)
+	at org.jboss.threads.ThreadLocalResettingRunnable.run(ThreadLocalResettingRunnable.java:11)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Unknown Source)
+
+2026-10-06 15:36:01,287 INFO  [istanbul.hale.filters.GlobalHeaderResponseFilter] (executor-thread-1) [GLOBAL] Request 800e8dfb-6664-4e65-9a1f-3ec716d4b53b processed in 113,06 ms
+2026-10-06 15:41:42,589 INFO  [istanbul.hale.filters.GlobalLoggingRequestFilter] (executor-thread-1) [GLOBAL] Received request 4b720b1b-8220-435a-8270-042fc98e562e: POST http://localhost:51919/api/sign/document
+[INFO] PKCS11Module.getInstance: pkcs11ModulePath=C:\Windows\System32\akisp11.dll
+[INFO] C_Initialize: flags=0x00000002
+2026-10-06 15:41:42,630 WARN  [istanbul.hale.signer.token.Ipkcs11SignatureToken] (executor-thread-1) PKCS11 initialization failed with CKR_ARGUMENTS_BAD. Retrying without args...
+2026-10-06 15:41:42,630 WARN  [istanbul.hale.filters.InternalServerErrorMapper] (executor-thread-1) Signing failed: Failed to create DSS token for library akisp11 slot 1: jakarta.ws.rs.InternalServerErrorException: Signing failed: Failed to create DSS token for library akisp11 slot 1
+	at istanbul.hale.SigningResource.signDocument(SigningResource.java:104)
+	at istanbul.hale.SigningResource_ClientProxy.signDocument(Unknown Source)
+	at istanbul.hale.SigningResource$quarkusrestinvoker$signDocument_23a981ae2e3c7601767e5e134e6186c7422c6855.invoke(Unknown Source)
+	at org.jboss.resteasy.reactive.server.handlers.InvocationHandler.handle(InvocationHandler.java:29)
+	at io.quarkus.resteasy.reactive.server.runtime.QuarkusResteasyReactiveRequestContext.invokeHandler(QuarkusResteasyReactiveRequestContext.java:190)
+	at org.jboss.resteasy.reactive.common.core.AbstractResteasyReactiveContext.run(AbstractResteasyReactiveContext.java:147)
+	at io.quarkus.vertx.core.runtime.VertxCoreRecorder$15.runWith(VertxCoreRecorder.java:677)
+	at org.jboss.threads.EnhancedQueueExecutor$Task.doRunWith(EnhancedQueueExecutor.java:2651)
+	at org.jboss.threads.EnhancedQueueExecutor$Task.run(EnhancedQueueExecutor.java:2630)
+	at org.jboss.threads.EnhancedQueueExecutor.runThreadBody(EnhancedQueueExecutor.java:1622)
+	at org.jboss.threads.EnhancedQueueExecutor$ThreadBody.run(EnhancedQueueExecutor.java:1589)
+	at org.jboss.threads.DelegatingRunnable.run(DelegatingRunnable.java:11)
+	at org.jboss.threads.ThreadLocalResettingRunnable.run(ThreadLocalResettingRunnable.java:11)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Unknown Source)
+
+2026-10-06 15:41:42,630 INFO  [istanbul.hale.filters.GlobalHeaderResponseFilter] (executor-thread-1) [GLOBAL] Request 4b720b1b-8220-435a-8270-042fc98e562e processed in 46,59 ms
+2026-10-06 15:42:12,813 INFO  [istanbul.hale.TokenMonitorService] (main) Finalized PKCS11Module for akisp11
+2026-10-06 15:42:12,931 INFO  [istanbul.hale.TokenMonitorService] (main) Finalized PKCS11Module for eTPKCS11
+2026-10-06 15:42:12,973 INFO  [io.quarkus] (main) sign-server stopped in 0.234s

@@ -194,6 +194,11 @@ public static class DegerCevirici
         if (alan.Dogrulama == KimlikDogrulama.IbanTuru && KimlikDogrulama.IbanHata(deger) is { } ibanHata)
             throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {ibanHata}",
                 new AlanHatasi(alanYolu, ibanHata));
+        // BOŞLUKSUZ (kullanıcı 09.11.2026): kod alanı (ürün no, GTIP) boşluk içeremez - ekran yazarken siler,
+        //   doğrudan API çağrısı burada durur.
+        if (alan.Dogrulama == KimlikDogrulama.BosluksuzTuru && KimlikDogrulama.BosluksuzHata(deger) is { } bosHata)
+            throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {bosHata}",
+                new AlanHatasi(alanYolu, bosHata));
     }
 
     /// <summary>jsonb alanina yazilacak metin gercekten JSON mu.</summary>

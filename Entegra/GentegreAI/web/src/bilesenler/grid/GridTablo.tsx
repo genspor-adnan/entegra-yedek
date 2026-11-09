@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+﻿import { Fragment } from 'react';
 import { c } from '../../dil/ceviri';
 import { bicimle } from '../bicim';
 import { durumRozeti, ikonHucre, rozetHucre, yuzdeRozeti } from '../gridHucre';
@@ -13,6 +13,9 @@ import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
  * Yalniz CIZIM: veri cekme, sayfalama ve secim mantigi GenGrid'de kalir; burasi
  * gelen satirlari mockup duzenine gore basar.
  */
+/** Satır sağ tık menüsü TÜM listelerde kapalı (kullanıcı 09.11.2026). Geri açmak: true. */
+export const SAG_TUS_MENUSU = false;
+
 export function GridTablo(p: GridTabloProps) {
   const {
     bosEk,
@@ -20,8 +23,8 @@ export function GridTablo(p: GridTabloProps) {
     toplamSeridiVar, sayfa, sonSayfa, secili, sayfaIdleri, secimiUygula,
     satirSecimiDegistir, hepsiSecili, hepsiRef, satirTiklandi, satirTiklaninca,
     satirSinifi, setSeciliSatir, setSagTusKonumu, siraIsareti, siralamaDegistir,
-    filtreAcik, filtreSatiriDegisti, gridMenuKonum, setGridMenuKonum, aksiyonEkrani,
-    agacAlani, agacDegistir,
+    filtreAcik, filtreSatiriDegisti, gridMenuKonum, setGridMenuKonum, aksiyonEkrani, sagTusYok,
+    agacAlani, agacDegistir, baglantiKolonlar,
   } = p;
   return (
 <table className={`grid boy-${satirBoyu ?? 'normal'}`}>
@@ -126,7 +129,9 @@ export function GridTablo(p: GridTabloProps) {
           onClick={e => satirTiklandi(e, id, i)}
           onDoubleClick={() => satirTiklaninca(satir)}
           onContextMenu={e => {
-            if (!aksiyonEkrani) return;
+            // SAĞ TIK MENÜSÜ KAPALI (kullanıcı 09.11.2026: "listelerden sağ tık menüleri kaldır"): araç çubuğu ve
+            //   komut paleti durur; tarayıcı menüsü kalır. `sagTusYok` tanımı ve GenGrid'deki şart tek kapı (SAG_TUS_MENUSU).
+            if (!aksiyonEkrani || sagTusYok || !SAG_TUS_MENUSU) return;
             e.preventDefault();
             setSeciliSatir(satir);
             setSagTusKonumu({ x: e.clientX, y: e.clientY });
@@ -147,12 +152,15 @@ export function GridTablo(p: GridTabloProps) {
             //   kalsin, agac yalniz bu hucrenin icinde yasasin.
             const agacHucresi = !!agacAlani && ki === 0;
             const derinlik = Number(satir.__derinlik ?? 0);
+            const baglanti = baglantiKolonlar?.[k.ad];
+            const bagli = !!baglanti && String(satir[k.ad] ?? '').trim() !== '';
             return (
-            <td key={k.ad} className={`hiza-${k.hizalama}`}
+            <td key={k.ad} className={`hiza-${k.hizalama}${bagli ? ' hucre-baglanti' : ''}`}
               style={k.genislik ? {
                 maxWidth: k.genislik, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               } : undefined}
-              title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
+              title={bagli ? `${String(satir[k.ad] ?? '')} — yeni sekmede aç` : k.genislik ? String(satir[k.ad] ?? '') : undefined}
+              onClick={bagli ? e => { e.stopPropagation(); baglanti!(satir) } : undefined}
             >
               {agacHucresi ? (
                 <span className="agac-hucre"
@@ -273,6 +281,13 @@ export interface GridTabloProps {
   setGridMenuKonum(k: { x: number; y: number } | null): void;
   /** Aksiyon ekrani tanimliysa sag tus menusu acilir. */
   aksiyonEkrani?: string;
+  /** Sağ tuş menüsü kapalı (liste tanımı `sagTusYok`): tarayıcının kendi menüsü kalır. */
+  sagTusYok?: boolean;
+  /**
+   * BAĞLANTI HÜCRELERİ (kullanıcı 09.11.2026: "kaynak ve hedefe tıklandığında oradaki belgeyi yeni sekmede
+   * açsın"): kolon adı -> tıklama işleyicisi. Dolu hücre bağlantı gibi çizilir, tıklama satır seçimine gitmez.
+   */
+  baglantiKolonlar?: Record<string, (satir: ListeSatiri) => void>;
   /**
    * AGAC KIPI: doluysa ilk kolon girintili cizilir ve cocugu olan satirda
    * +/- dugmesi cikar. Deger, hiyerarsiyi tasiyan ALAN ADIDIR (bolumde

@@ -1596,6 +1596,13 @@ begin
          .DateTimePicker('ÜRT',@URT).DateTimePicker('SKT',@SKT)) <> mrOk then
         Abort;
 
+   // Lot no'da bosluk olmasin: bas/son kirpilir, ortada bosluk uyarilir
+   Lot := Trim(VarToStr(Lot));
+   if Pos(' ', VarToStr(Lot)) > 0 then begin
+      ShowMessage('Lot no içinde boşluk olamaz: "' + VarToStr(Lot) + '"');
+      Abort;
+   end;
+
    RafOmruSure := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_SURE', STOKLAR.FieldByName('ID').AsInteger), 0);
    RafOmruBirim := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_BIRIM', STOKLAR.FieldByName('ID').AsInteger), 0);
    if RafOmruBirim = 0 then
@@ -1610,6 +1617,26 @@ begin
       else if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiSKT, SKT) and
          (not SeriLotTarihDegisti(EskiURT, URT)) then
          URT := SeriLotRafOmruEkle(VarToDateTime(SKT), -RafOmruSure, RafOmruBirim);
+   end;
+
+   // Bir lotun tek SKT/URT'si olur (Update_SQL_220): lot no baska bir tanimda
+   //   varsa (farkli tarihli de olsa) ikinci kart olusmasin.
+   //   Seri no'lu kartin kimligi seri no'dur, burada degismez -> bakilmaz.
+   //   Lot no degismediyse bakilmaz (215'ten kalan ikiz tanimin tarihi duzeltilebilsin).
+   if (TabSeriLotDurum.FieldByName('SERINO').AsString = '') and
+      (VarToStr(Lot) <> TabSeriLotDurum.FieldByName('LOTNO').AsString) then begin
+      Tablo.TablodanSorguAc(1, 'select top 1 ID, SKT, URT from STOKSERILOT where STOKID=' +
+         STOKLAR.FieldByName('ID').AsString +
+         ' and ID<>' + TabSeriLotDurum.FieldByName('SERILOTID').AsString +
+         ' and isnull(SERINO,'''')='''' and LOTNO=N' + QuotedStr(VarToStr(Lot)));
+      if not Tablo.Query1.IsEmpty then begin
+         ShowMessage('Bu lot no ile başka bir tanım zaten var (ID ' +
+            Tablo.Query1.FieldByName('ID').AsString + ', SKT ' +
+            FormatDateTime('dd.mm.yyyy', Tablo.Query1.FieldByName('SKT').AsDateTime) + ', ÜRT ' +
+            FormatDateTime('dd.mm.yyyy', Tablo.Query1.FieldByName('URT').AsDateTime) + ').' + #13#10 +
+            'Bir lotun tek SKT/ÜRT''si olabilir.');
+         Abort;
+      end;
    end;
 
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKSERILOT set LOTNO=&LNO, URT=&URT, SKT=&SKT '+

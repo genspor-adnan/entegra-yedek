@@ -323,8 +323,26 @@ public sealed partial class KartDeposu
 
     // "public.kategori" gibi kendi tablosu olan secim kaynaklari - katalogda SABIT
     //   (kullanicidan gelmez), yine de savunma amacli whitelist'e karsi dogrulanir.
+    /// <summary>
+    /// YENİ KART ÖN SATIRLARI (DetayTanimi.YeniKartSatirSql): katalogdaki parametresiz SQL çalışır, satırlar alan
+    /// adlı sözlük olarak döner (id yok - istemci eklenen satır sayar). SQL yalnız katalogdan gelir.
+    /// </summary>
+    public async Task<IReadOnlyList<IReadOnlyDictionary<string, object?>>> YeniKartSatirlariAsync(
+        DetayTanimi detay, CancellationToken iptal = default)
+    {
+        if (string.IsNullOrWhiteSpace(detay.YeniKartSatirSql)) return Array.Empty<IReadOnlyDictionary<string, object?>>();
+        var liste = new List<IReadOnlyDictionary<string, object?>>();
+        await using var b = await _veri.AcAsync(iptal);
+        await using var komut = b.Komut(detay.YeniKartSatirSql, null);
+        await using var o = await komut.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal)) liste.Add((IReadOnlyDictionary<string, object?>)o.Sozluk());
+        return liste;
+    }
+
     private static readonly HashSet<string> KodTablosuBeyazListe =
         new(StringComparer.Ordinal) {
+            // FİYAT LİSTESİ - KALEM KARTINDAN (1281): stok kartı Fiyatlar sekmesinde liste seçimi, yönüyle.
+            "public.v_fiyat_listesi_kalem_lookup",
             // Klinik Kalite (711/712): gosterge donem kartindaki gosterge combosu,
             //   gosterge kartindaki (salt okunur) olgu combosu.
             // Ameliyathane (715) / Acil servis (716) secim kaynaklari.

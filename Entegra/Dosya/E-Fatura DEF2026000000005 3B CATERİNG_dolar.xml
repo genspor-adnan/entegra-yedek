@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TEMELFATURA</cbc:ProfileID>
+<cbc:ID>DEF2026000000005</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>BEDDB80F-50CA-42A9-A619-2E00BD1EE923</cbc:UUID>
+<cbc:IssueDate>2026-10-13</cbc:IssueDate>
+<cbc:IssueTime>11:33:09</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>Yalnız YüzOn ABD Doları</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:Note>EFATURANOTU</cbc:Note>
+<cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="TCKN">12345678901</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>aaaaaa</cbc:StreetName>
+<cbc:CitySubdivisionName>üsküdar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>çankaya</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Person>
+<cbc:FirstName>Proimtech Sağlık Ürünleri</cbc:FirstName>
+<cbc:FamilyName>A.Ş.</cbc:FamilyName>
+</cac:Person>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">0011584289</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>3B CATERİNG ORGANİZASYON TİCARET LİMİTED ŞİRKETİ</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>.</cbc:StreetName>
+<cbc:CitySubdivisionName>.</cbc:CitySubdivisionName>
+<cbc:CityName>.</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>SARIGAZİ</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>3B CATERİNG ORGANİZASYON TİCARET LİMİTED ŞİRKETİ</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:PricingExchangeRate>
+<cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+<cbc:TargetCurrencyCode>TRY</cbc:TargetCurrencyCode>
+<cbc:CalculationRate>49.216</cbc:CalculationRate>
+<cbc:Date>2026-10-13</cbc:Date>
+</cac:PricingExchangeRate>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="USD">10.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="USD">100.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="USD">10.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="USD">100.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="USD">100.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="USD">110.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="USD">110.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="USD">100.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="USD">10.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="USD">100.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="USD">10.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>FUAR,TANITIM ORGANİZASYON</cbc:Name>
+<cac:BuyersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:ManufacturersItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="USD">100.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

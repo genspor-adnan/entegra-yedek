@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using System.Xml.Linq;
 using Gentegre.Api.Servisler.EFatura;
 using Xunit;
@@ -43,6 +43,7 @@ public class EFaturaGovdeTestleri
             Net = net, KdvOran = kdv, Kdv = k, IstisnaKodu = istisna, IstisnaAdi = istisna > 0 ? $"{istisna} - neden" : "",
             TevkifatKodu = tevKod, TevkifatAdi = tevKod.Length > 0 ? $"{tevKod} - Hizmet ({tevOran / 10}/10)" : "",
             TevkifatOran = tevOran, Tevkifat = Math.Round(k * tevOran / 100m, 2),
+            TevkifatGirildi = tevKod.Length > 0 || tevOran > 0,   // satırın kendi oranı (08.11.2026 kuralı)
             Gtip = "300490000019", TeslimSarti = "FOB", TasimaSekli = 4, KapCinsi = "BX", KapNo = "1", KapAdet = 2,
         };
     }

@@ -296,6 +296,43 @@ public static class BelgeUclari
             });
         });
 
+        // GET /api/belge/{id}/gecmis - belgenin islem_log geçmişi (kullanıcı 09.11.2026: teklif kartına "Geçmiş"
+        //   sekmesi, durum / revizyon değişimleri orada dursun). Ham log + kullanıcı adı; metni istemci kurar
+        //   (TeklifGecmisi.gecmisOlayi). Belgenin kendi logları + satır logları (üst = belge). Okuma kapısı
+        //   GET /{id} ile aynı: belge gör yetkisi, şube, belge türü.
+        grup.MapGet("/{id:int}/gecmis", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            if (baglam.SubeId is not null &&
+                kayit.Belge.TryGetValue("subeId", out var gSube) && gSube is not null &&
+                Convert.ToInt32(gSube) != baglam.SubeId.Value)
+                throw GentegreHatasi.Bulunamadi();
+            BelgeTuruIste(baglam, kayit.Belge);
+
+            await using var b = await veri.AcAsync(iptal);
+            var kayitlar = await b.ListeAsync("""
+                select g.id, g.tarih, coalesce(k.ad, ''), g.islem_tipi, g.tablo_id,
+                       coalesce(g.bilgi::text, '{}'),
+                       -- Dönüşüm logundaki hedef belgenin numarası (hedefBelgeId) - "Siparişe dönüştürüldü: 000012".
+                       coalesce((select bb.belge_no from public.belge bb
+                                  where bb.id = nullif(g.bilgi ->> 'hedefBelgeId', '')::bigint), '')
+                  from public.islem_log g
+                  left join public.v_kullanici_lookup k on k.id = g.kullanici_id
+                 where (g.tablo_id = 30 and g.kayit_id = @p0)
+                    or (g.ust_tablo_id = 30 and g.ust_kayit_id = @p0)
+                 order by g.tarih desc, g.id desc
+                 limit 300
+                """, null, [id], o => new
+                {
+                    id = o.GetInt64(0), tarih = o.GetDateTime(1), kullanici = o.GetString(2),
+                    islemTipi = (int)o.GetInt16(3), tabloId = o.GetInt32(4), bilgi = o.GetString(5), hedefBelgeNo = o.GetString(6),
+                }, iptal);
+            return Results.Ok(new { kayitlar, izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/belge/{id}/acik-satirlar - donusturulmeyi bekleyen satirlar
         grup.MapGet("/{id:int}/acik-satirlar", async (
             int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
@@ -631,6 +668,29 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/teklif-durum - teklif akış durumu listeden (kart açılmadan)
+        grup.MapPost("/{id:int}/teklif-durum", async (
+            int id, TeklifDurumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
+            VeriKaynagi veri, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            // Durum tutar / stok / cari etkilemez: belgeyi DEGISTIRME yetkisi yeterli (termin ile aynı).
+            baglam.YetkiIste("belge", Islem.Degistir);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
+
+            var (eski, yeni) = await depo.TeklifDurumGuncelleAsync(id, istek?.Durum ?? 0, baglam.Yazma, iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge,
+                Satirlar = kayit.Satirlar,
+                DipToplam = kayit.DipToplam,
+                Uyarilar = eski == yeni ? new[] { "Teklif zaten bu durumda." } : Array.Empty<string>(),
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/donustur - siparis -> irsaliye -> fatura
         grup.MapPost("/{id:int}/donustur", async (
             int id, DonusumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -860,6 +920,12 @@ public static class BelgeUclari
     public sealed class TerminIstegi
     {
         public List<TerminSatiri>? Satirlar { get; set; }
+    }
+
+    /// <summary>Teklif durumu isteği: 1 Hazırlanıyor · 2 Sunuldu · 3 Kabul · 4 Red · 5 İptal.</summary>
+    public sealed class TeklifDurumIstegi
+    {
+        public int Durum { get; set; }
     }
 
     public sealed class TerminSatiri

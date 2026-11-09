@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type BelgeYaniti } from '../../api/sozlesme';
 import { mesaj, metinSor, onay, paraSor, type ParaSecimi } from '../../bilesenler/mesaj';
@@ -264,9 +264,11 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
 
       if (gonderilecek.length === 0) {
         // ACIK TUTAR YOKSA SEBEBI SOYLE (kullanici): "0 ise Belgeye
-        //   dönüşecek tutar kalmadı uyarısı versin".
-        mesaj('Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri '
-              + 'zaten belgeye çevrilmiş.');
+        //   dönüşecek tutar kalmadı uyarısı versin". ERP belgesinde (başvuru değil) ölçü miktardır - metin
+        //   "başvurunun ücretleri" demesin (kullanıcı 09.11.2026).
+        mesaj(basvuruMu
+          ? 'Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri zaten belgeye çevrilmiş.'
+          : 'Belgeye dönüşecek kalan yok — satırların tamamı zaten belgeye çevrilmiş.');
         return;
       }
 

@@ -433,6 +433,10 @@ public static class KartUclari
                 .Concat(ustGorevleri.Values).Concat(listeUstGorevleri.Values)
                 .Concat(grupGorevleri.Values));
             var tabloSecenekleri = tabloGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
+            var onSatirlar = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>(StringComparer.Ordinal);
+            foreach (var d in tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+                if (d.YeniKartSatirSql is not null)
+                    onSatirlar[d.Ad] = await depo.YeniKartSatirlariAsync(d, iptal);
             var listeSecenekleri = listeGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var ustHaritalari = ustGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var listeUstHaritalari = listeUstGorevleri
@@ -497,7 +501,12 @@ public static class KartUclari
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                     .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur,
                         d.Alanlar.Select(MetaOptions).ToList(), d.KosulAlani, d.TekSatir,
-                                       d.SayfaBoyu))
+                                       d.SayfaBoyu,
+                                       // YENİ KART ÖN SATIRLARI (YeniKartSatirSql): katalog SQL'i her meta
+                                       //   isteğinde koşar - aktif liste değişince satırlar da değişir.
+                                       YeniSatirlar: onSatirlar.TryGetValue(d.Ad, out var os) ? os : null,
+                                       BosAtlaAlani: d.BosAtlaAlani, GridKipi: d.GridKipi,
+                                       AnindaKaydet: d.AnindaKaydet))
                     .ToList(),
                 Yetki = new KartYetkisi
                 {

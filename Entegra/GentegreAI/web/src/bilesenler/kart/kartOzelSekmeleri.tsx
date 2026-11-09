@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import type { DetayDurumu } from '../detayDurumu';
 import { GenGrid } from '../GenGrid';
-import { HizmetListeFiyatlari } from '../HizmetListeFiyatlari';
 import { PaketSekmesi } from '../PaketSekmesi';
 import { HekimGonderimOzeti } from '../radyoloji/HekimGonderimOzeti';
 import { KontrolListesi } from '../radyoloji/KontrolListesi';
@@ -86,16 +85,8 @@ const OZEL_DETAYLAR: Record<string, Record<string, (b: OzelDetayBaglami) => Reac
       <PaketSekmesi meta={b.detay} durum={b.durum} saltOkunur={b.salt || b.detay.saltOkunur} onDegis={b.onDegis} />
     ),
   },
-  // Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
-  //   (kullanici: "bu hizmete ait tum fiyatlar gelsin"; kartin kendi
-  //   hizmet_fiyat gridi kaldirildi).
-  hizmet: {
-    fiyatlar: b => b.yeniMi
-      ? <div className="not" style={{ marginTop: 12 }}>
-          Fiyatlar kart kaydedildikten sonra fiyat listelerinden gelir.
-        </div>
-      : <HizmetListeFiyatlari hizmetId={b.id as number} />,
-  },
+  // Hizmet > Fiyatlar ÖZEL SEKME DEĞİL (09.11.2026): katalog detayı fiyat_listesi_satir (hizmet_id) - stok kartıyla
+  //   aynı grid kipi / ön satır / anında kayıt deseni (eski salt okunur HizmetListeFiyatlari kaldırıldı).
 };
 
 /** kaynak -> yer tutucu sekme başlığı -> gövde ("yakında" yerine). */

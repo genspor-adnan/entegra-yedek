@@ -113,7 +113,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
                                  bolumHatasi, personelHatasi, turHatasi,
-                                 kendiIstegi, onKendiIstegi }: {
+                                 kendiIstegi, onKendiIstegi, duzenle = true, setDuzenle }: {
   bilgi: BasvuruBilgi;
   /** Kaydedilmiş başvurunun belge id'si (istek kağıdı taraması istem kartına taşındı - kullanılmıyor). */
   belgeId?: number;
@@ -144,6 +144,14 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   onPersonelSec?(id: number, ad: string): void;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
+  /**
+   * DÜZENLEME / GÖRÜNTÜLEME KİPİ (kullanıcı 09.11.2026; fatura başlığı ✎ deseninin başvuru karşılığı, durum
+   * BelgeKarti.basvuruDuzenle'de): görüntülemede alanlar kutusuz düz metin ve `inert`; "Başvuru Bilgileri"
+   * etiketinin sağındaki çerçevesiz ✎ ya da ızgaraya tıklamak düzenlemeye alır. Kilitli belgede hep görüntüleme,
+   * ✎ pasif. Verilmezse eski davranış (hep düzenleme).
+   */
+  duzenle?: boolean;
+  setDuzenle?(v: boolean): void;
   /** Belgeye bagli randevu varsa ozeti (tarih · kaynak) - salt okunur. */
   randevuBilgi?: string;
   /**
@@ -239,13 +247,29 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   //   "istem taraması/bilgisinin başvuru kabulde olmasına gerek yok.. istemde olması daha makul.. doktor oradan
   //   bakar"): tarama radyoloji istem kartının "İstem Kâğıdı / Dış Kurum Belgeleri" bölümünde.
 
+  const gosterKipi = kilitli || !duzenle;
+
   return (
-    <div className="kagrup basvuru-bilgi">
-      <h6>{c('Başvuru Bilgileri')}</h6>
+    <div className={`kagrup basvuru-bilgi${gosterKipi ? ' bs-goster' : ''}`}>
+      <h6>
+        {c('Başvuru Bilgileri')}
+        {/* ✎ ÇERÇEVESİZ (kullanıcı): etiketin hemen sağında, düğme çerçevesi yok; düzenlemede vurgu rengi. */}
+        {setDuzenle && (
+          <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={kilitli}
+                  data-testid="basvuru-kalem"
+                  title={kilitli ? c('Kilitli belge - başvuru bilgileri düzenlenemez')
+                         : gosterKipi ? c('Başvuru bilgilerini düzenle') : c('Düzenlemeyi kapat')}
+                  onClick={() => setDuzenle(!duzenle)}>✎</button>
+        )}
+      </h6>
       {/* PROTOKOL NO BURADA YOK (kullanici): kartin BASLIK seridinde zaten
           "Protokol No" hucresi var - ayni salt okunur numarayi iki yerde
           gostermek sekmede bos yer harciyordu. */}
-      <div className="alan-izgara uc-sutun">
+      {/* GÖRÜNTÜLEME KİPİNDE ızgara `inert` (fare + klavye + odak kapalı). Fatura başlığından FARKI (kullanıcı
+          09.11.2026: "fare ile tıklayınca edit moda geçmesin, sadece kaleme basınca geçsin"): ızgaraya tıklamak
+          düzenlemeye ALMAZ, tek yol ✎. */}
+      <div className={gosterKipi ? 'bs-goster-sar' : undefined}>
+      <div className="alan-izgara uc-sutun" inert={gosterKipi || undefined}>
         {/* ILK SATIR (kullanici): Bölüm · Gönderen · Ödeyen Kurum · Başvuru
             Tarihi. Kayit kabul memurunun sirasiyla sordugu dort alan; tur,
             gelis sekli ve oda arkaya duser. */}
@@ -512,6 +536,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                     placeholder="örn. Tansiyon takibi; son tetkik sonuçları ile geldi."
                     onChange={e => setAciklama?.(e.target.value)} />
         </label>
+      </div>
       </div>
     </div>
   );

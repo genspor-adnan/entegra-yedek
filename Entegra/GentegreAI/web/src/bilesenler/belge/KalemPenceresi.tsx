@@ -100,6 +100,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   }, [tevkifatli]);
   // `lotEkrani` gecici bayrak - satira yazilmaz, yalniz lot ekraninin ilk acilisini belirler.
   const [r, setR] = useState<SatirDurumu>(() => { const { lotEkrani: _, ...x } = satir; return x });
+  // FİYATSIZ AÇILDI (kalemDurumu.fiyatsizAcildi): açılış anındaki satırdan, bir kez.
+  const [fiyatsizAcildi] = useState(() => hamSayi(satir.birimFiyat ?? '') <= 0
+                                       && hamSayi(satir.dovizFiyat ?? '') <= 0);
   /**
    * KDV GIRIS MODU (kullanici): fiyat kutusuna BRUT mu MATRAH mi yaziliyor.
    * Varsayilan FIYAT LISTESINDEN gelir (`satir.kdvDahil` - fiyat cozulurken
@@ -243,7 +246,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    */
   const d = kalemDurumu({
     r, rota, tarifeTipi, basvuruMu: !!basvuruMu, yerelPara, kdvDahil,
-    brutMetni, girisIzlemi, cikisIzlemi,
+    brutMetni, girisIzlemi, cikisIzlemi, fiyatsizAcildi,
   });
   // Kalan JSX'in dogrudan okudugu alanlar - alt bilesenler `d`yi butun alir.
   const { dovizli, adet, etkinRota, sgkKilitli, anaBirimMiktar, kur, fiyat,

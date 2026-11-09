@@ -91,6 +91,10 @@ export function bicimHatasi(dogrulama: string | null | undefined,
                             deger: string): string | null {
   if (!dogrulama) return null;
 
+  // BOŞLUKSUZ (kullanıcı 09.11.2026, stok ürün no / GTIP): kutu yazarken boşluğu zaten siler (kartAlanCizim);
+  //   burası yapıştırma / dış kaynak için son kapı - sunucu (DegerCevirici) aynı kuralı uygular.
+  if (dogrulama === 'bosluksuz') return /\s/.test(deger ?? '') ? 'Boşluk içeremez (başta, sonda, ortada).' : null;
+
   // ÖZEL DESEN: yurt dışı kurulumunda pasaport / yerel kimlik biçimi.
   if (dogrulama.startsWith('desen:')) {
     const metin = (deger ?? '').trim();

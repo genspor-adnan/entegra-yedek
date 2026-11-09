@@ -194,6 +194,8 @@ export const SEKMELER: {
   irsaliye?: boolean; faturaYok?: boolean; faturaMi?: boolean;
   /** YALNIZ BASVURUDA cizilir (298): kayit kabul akisina ozel sekmeler. */
   basvuru?: boolean;
+  /** YALNIZ TEKLİFTE (kullanıcı 09.11.2026): Geçmiş sekmesi - durum / dönüşüm / kayıt olayları. */
+  teklif?: boolean;
 }[] = [
   // BASVURU (298, Ekranlar/kayit_kabul_basvuru.html): kabul bilgileri
   //   Ücretlendirme'nin SOLUNDA - once "kim, neden, hangi klinige geldi",
@@ -220,6 +222,9 @@ export const SEKMELER: {
   { anahtar: 'yorum',    baslik: 'Resim / Doküman' },
   // Gecmis EN SONDA: hastanin oykusu, gunluk kabul akisinin disinda.
   { anahtar: 'gecmis',    baslik: 'Önceki Başvurular', basvuru: true },
+  // TEKLİF GEÇMİŞİ (kullanıcı 09.11.2026: "satış teklifine Geçmiş sekmesi, durum/revizyon değişimleri orada"):
+  //   islem_log'dan olay akışı; şimdilik yalnız teklifte, revizyon (R1/R2) ileride aynı sekmeye gelir.
+  { anahtar: 'teklifGecmis', baslik: 'Geçmiş', teklif: true },
 ];
 
 /** Teklif durumu (218) - belge.teklif_durum kod uzayi. */

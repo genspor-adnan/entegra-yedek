@@ -173,6 +173,7 @@ type
     procedure cbDovizTipiPropertiesChange(Sender: TObject);
     procedure ceTutarPropertiesChange(Sender: TObject);
     procedure ceKurPropertiesChange(Sender: TObject);
+    procedure ceDovizTutarPropertiesChange(Sender: TObject);
     procedure btnF5KaydetClick(Sender: TObject);
     procedure btnF8DevamClick(Sender: TObject);
     procedure miSatirSilClick(Sender: TObject);
@@ -1128,6 +1129,30 @@ procedure TbankaHesapGirisdlg.ceKurPropertiesChange(Sender: TObject);
 begin
   if FOtoHesapla then Exit;
   HesaplaDovizTutar;
+end;
+
+procedure TbankaHesapGirisdlg.ceDovizTutarPropertiesChange(Sender: TObject);
+// Döviz tutarı elle girilirse kur geri hesaplanır (HesaplaDovizTutar'ın tersi):
+//   FBankaDovizi = CariDoviz → Kur = Tutar / DovizTutar
+//   FBankaDovizi ≠ CariDoviz → Kur = DovizTutar / Tutar
+var
+  DovizTutar: Double;
+begin
+  if FOtoHesapla then Exit;
+  // yazma sirasinda Value henuz guncellenmemis olabilir; EditingValue bos/null gelebilir
+  if VarIsNull(ceDovizTutar.EditingValue) or (VarToStr(ceDovizTutar.EditingValue) = '') then Exit;
+  DovizTutar := ceDovizTutar.EditingValue;
+  // sifir/bos doviz tutari kuru sifirlamasin
+  if (DovizTutar = 0) or (ceTutar.Value = 0) then Exit;
+  FOtoHesapla := True;
+  try
+    if FBankaDovizi = CariDoviz then
+      ceKur.Value := ceTutar.Value / DovizTutar
+    else
+      ceKur.Value := DovizTutar / ceTutar.Value;
+  finally
+    FOtoHesapla := False;
+  end;
 end;
 
 procedure TbankaHesapGirisdlg.HesaplaDovizTutar;

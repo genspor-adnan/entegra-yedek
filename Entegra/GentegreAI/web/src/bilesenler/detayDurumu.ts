@@ -28,8 +28,16 @@ export const bosDetay = (satirlar: Satir[] = []): DetayDurumu => ({
  * sunucuya gidince "Bilinmeyen alan" hatasi veriyordu.
  */
 export function detayFarki(durum: DetayDurumu,
-                           izinliAlanlar?: readonly string[]): DetayFarki {
+                           izinliAlanlar?: readonly string[],
+                           bosAtlaAlani?: string | null): DetayFarki {
   const izinli = izinliAlanlar ? new Set([...izinliAlanlar, 'id']) : null;
+  // BOŞ SATIR ATLANIR (bosAtlaAlani, kullanıcı 09.11.2026): yeni kartın ön satırlarından (stok Fiyatlar:
+  //   her aktif liste) fiyat girilmeyenler ne gönderilir ne "kaydedilmemiş değişiklik" sayılır.
+  const bosMu = (s: Satir) => {
+    if (!bosAtlaAlani) return false;
+    const v = s[bosAtlaAlani];
+    return v === undefined || v === null || v === '' || Number(v) === 0;
+  };
   const suz = (s: Satir): Satir => (izinli
     ? Object.fromEntries(Object.entries(s).filter(([k]) => izinli.has(k))) as Satir
     : s);
@@ -38,7 +46,7 @@ export function detayFarki(durum: DetayDurumu,
   //   "birim bos birakilamaz" gibi hatalara yol aciyordu. Gonderilmeyince
   //   veritabani varsayilani devreye girer.
   const eklenen = durum.guncel
-    .filter(s => s.id === undefined || s.id === null)
+    .filter(s => (s.id === undefined || s.id === null) && !bosMu(s))
     .map(s => Object.fromEntries(
       Object.entries(suz(s)).filter(([, v]) => v !== '' && v !== null && v !== undefined)) as Satir);
 

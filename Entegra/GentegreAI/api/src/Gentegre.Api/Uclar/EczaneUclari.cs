@@ -314,7 +314,7 @@ public static partial class EczaneUclari
                 select z.durum, z.hazirlayan_id as "hazirlayanId",
                        z.kontrol_eden_id as "kontrolEdenId", z.stok_id as "stokId",
                        z.seri_lot_id as "seriLotId",
-                       (select l.son_kullanma_tarihi from public.stok_seri_lot l
+                       (select l.son_kullanma_tarihi::date from public.stok_seri_lot l
                         where l.id = z.seri_lot_id) as skt
                   from public.eczane_doz z where z.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)

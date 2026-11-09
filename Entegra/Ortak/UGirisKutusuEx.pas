@@ -9,17 +9,22 @@ uses
   JvButton, JvNavigationPane,UTouchKeyboardWindow, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxCore,
   cxDateUtils, dxSkinsCore, dxSkinLiquidSky, dxSkinLondonLiquidSky, cxMaskEdit,
-  cxDropDownEdit, cxCalendar, cxSpinEdit, cxTimeEdit, System.ImageList, FireDAC.Comp.Client;
+  cxDropDownEdit, cxCalendar, cxSpinEdit, cxTimeEdit, System.ImageList, FireDAC.Comp.Client,
+  cxButtonEdit;
 
 type
 
   TComboSelectionChanged = reference to procedure(AForm: TForm);
 
+  // ButtonEdit secimi: ADeger mevcut degeri tasir; secim yapilirsa yeni deger
+  //   ve gorunen metin doldurulup True donulur.
+  TButtonEditSec = reference to function(var ADeger: Variant; var AMetin: string): Boolean;
+
   TGirdiDenetimi = class;
 
   TGirdiDenetimleri = class;
 
-  TDenetimTürü = (dtBilinmeyen,dtEdit,dtMemo,dtRichEdit, dtComboBox,dtDateTimePicker,dtImageComboBox, dtCurrencyEdit);
+  TDenetimTürü = (dtBilinmeyen,dtEdit,dtMemo,dtRichEdit, dtComboBox,dtDateTimePicker,dtImageComboBox, dtCurrencyEdit, dtButtonEdit);
 
   TGirisKutusuEx = class(TForm)
     GridPaneli: TGridPanel;
@@ -160,6 +165,25 @@ type
     property IndexiKullan : Boolean read FIndexiKullan write FIndexiKullan;
   end;
 
+  // Elle yazilamayan, butonla (ya da cift tikla) secim listesi acan alan.
+  //   Delete / Backspace degeri temizler.
+  TButtonEditDenetimi = class(TGirdiDenetimi)
+  private
+    FDeger: Variant;
+    FMetin: string;
+    FSec: TButtonEditSec;
+    procedure Sec;
+    procedure ButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure DblClick(Sender: TObject);
+    procedure KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  public
+    constructor Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant;
+      const ABaşlangıçMetni: string; ASec: TButtonEditSec);reintroduce;
+    function Hazırla(AGirisKutusu: TGirisKutusuEx;
+      AEvSahibi: TGridPanel): TGirdiDenetimi; override;
+    procedure DeğişkeneAktar; override;
+  end;
+
   TGirdiDenetimleri = class(TObject)
   private
     FGirdiDenetimleri : TObjectList;
@@ -180,6 +204,8 @@ type
     function ImageComboBox(ABaşlık: string;ABaşlangıçDeğeri: PVariant;
         ABağlantı: TFDConnection; AListeSql: string;AIndexiKullan: Boolean = False;
         AImageList: TCustomImageList = nil) : TGirdiDenetimleri;
+    function ButtonEdit(ABaşlık: string; ABaşlangıçDeğeri: PVariant;
+        const ABaşlangıçMetni: string; ASec: TButtonEditSec): TGirdiDenetimleri;
     property GirdiDenetimleri : TObjectList read FGirdiDenetimleri;
   end;
 
@@ -906,6 +932,100 @@ begin
   Result := Self;
   FGirdiDenetimleri.Add(__ImageComboBox(ABaşlık,ABaşlangıçDeğeri,
     ABağlantı, AListeSql, AIndexiKullan, AImageList));
+end;
+
+function TGirdiDenetimleri.ButtonEdit(ABaşlık: string; ABaşlangıçDeğeri: PVariant;
+  const ABaşlangıçMetni: string; ASec: TButtonEditSec): TGirdiDenetimleri;
+begin
+  Result := Self;
+  FGirdiDenetimleri.Add(TButtonEditDenetimi.Create(ABaşlık, ABaşlangıçDeğeri,
+    ABaşlangıçMetni, ASec));
+end;
+
+{ TButtonEditDenetimi }
+
+constructor TButtonEditDenetimi.Create(ABaşlık: string; ABaşlangıçDeğeri: PVariant;
+  const ABaşlangıçMetni: string; ASec: TButtonEditSec);
+begin
+  inherited Create(ABaşlık, ABaşlangıçDeğeri);
+  FDenetimTürü := dtButtonEdit;
+  FSec := ASec;
+  FMetin := ABaşlangıçMetni;
+  if Assigned(FVariant) then
+    FDeger := FVariant^
+  else
+    FDeger := Null;
+end;
+
+procedure TButtonEditDenetimi.DeğişkeneAktar;
+begin
+  FVariant^ := FDeger;
+end;
+
+procedure TButtonEditDenetimi.Sec;
+var
+  LDeger: Variant;
+  LMetin: string;
+begin
+  if not Assigned(FSec) then
+    Exit;
+  LDeger := FDeger;
+  LMetin := FMetin;
+  if FSec(LDeger, LMetin) then begin
+    FDeger := LDeger;
+    FMetin := LMetin;
+    TcxButtonEdit(FGirdiBileşeni).Text := FMetin;
+  end;
+end;
+
+procedure TButtonEditDenetimi.ButtonClick(Sender: TObject; AButtonIndex: Integer);
+begin
+  Sec;
+end;
+
+procedure TButtonEditDenetimi.DblClick(Sender: TObject);
+begin
+  Sec;
+end;
+
+procedure TButtonEditDenetimi.KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_DELETE, VK_BACK: begin
+      FDeger := Null;
+      FMetin := '';
+      TcxButtonEdit(FGirdiBileşeni).Text := '';
+      Key := 0;
+    end;
+    VK_RETURN, VK_F4: begin
+      Sec;
+      Key := 0;
+    end;
+  end;
+end;
+
+function TButtonEditDenetimi.Hazırla(AGirisKutusu: TGirisKutusuEx;
+  AEvSahibi: TGridPanel): TGirdiDenetimi;
+begin
+  inherited Hazırla(AGirisKutusu,AEvSahibi);
+  Result := Self;
+  FGirdiBileşeni := TcxButtonEdit.Create(AGirisKutusu);
+  with TcxButtonEdit(FGirdiBileşeni) do begin
+    Parent := AEvSahibi;
+    Align := alLeft;
+    Width := 210;
+    Name := 'Denetim' + IntToStr(AGirisKutusu.FDenetimSay);
+    AGirisKutusu.FDenetimSay := AGirisKutusu.FDenetimSay + 1;
+    // Yazi ile girilmez, yalniz listeden secilir
+    Properties.ViewStyle := vsHideCursor;
+    Properties.OnButtonClick := ButtonClick;
+    OnDblClick := DblClick;
+    OnKeyDown := KeyDown;
+    Text := FMetin;
+  end;
+  AEvSahibi.ControlCollection.Controls[1,AEvSahibi.RowCollection.Count - 1] := FGirdiBileşeni;
+  AEvSahibi.Realign;
+  AEvSahibi.Invalidate;
 end;
 
 end.

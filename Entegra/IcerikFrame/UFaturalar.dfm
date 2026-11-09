@@ -1509,7 +1509,7 @@
   object pmBelgeDonustur: TPopupMenu
     Images = Tablo.PNGImageList1
     OnPopup = pmBelgeDonusturPopup
-    Left = 61
+    Left = 93
     Top = 38
     object infoMenu: TMenuItem
       Caption = 'info'
@@ -1522,6 +1522,7 @@
     object MenueFatura: TMenuItem
       Caption = 'e-Fatura'
       ImageIndex = 30
+      Visible = False
       object MenuCariKaydıOlustur: TMenuItem
         Tag = 2
         Caption = 'Cari Kayd'#305' Olu'#351'tur'
@@ -1631,6 +1632,12 @@
       object N19: TMenuItem
         Caption = '-'
         GroupIndex = 1
+      end
+      object IptalIsaretleMenu: TMenuItem
+        Caption = #304'ptal '#304#351'aretle'
+        GroupIndex = 1
+        ImageIndex = 49
+        OnClick = IptalIsaretleMenuClick
       end
       object rnEletirme1: TMenuItem
         Tag = 2
@@ -1744,15 +1751,6 @@
     object N6: TMenuItem
       Caption = '-'
     end
-    object IptalIsaretleMenu: TMenuItem
-      Caption = #304'ptal '#304#351'aretle'
-      ImageIndex = 49
-      OnClick = IptalIsaretleMenuClick
-    end
-    object N7: TMenuItem
-      Caption = '-'
-      Visible = False
-    end
     object ExceldenBelgeEkle: TMenuItem
       Caption = 'Excelden Belge Al-1'
       ImageIndex = 48
@@ -1771,6 +1769,7 @@
     object IadeAl: TMenuItem
       Caption = #304'ade Al'
       ImageIndex = 17
+      Visible = False
       object Fatura1: TMenuItem
         Tag = 2
         Caption = 'Fatura ile'
@@ -1782,58 +1781,6 @@
         Caption = 'Gider Pusulas'#305' ile'
         ImageIndex = 19
         OnClick = Fatura1Click
-      end
-    end
-    object N9: TMenuItem
-      Caption = '-'
-    end
-    object TahsilOdemeMenu: TMenuItem
-      Caption = 'Tahsil Et'
-      ImageIndex = 3
-      object Nakit1: TMenuItem
-        Tag = 21
-        Caption = 'Nakit'
-        ImageIndex = 3
-        OnClick = Nakit1Click
-      end
-      object HavaleEFT1: TMenuItem
-        Tag = 22
-        Caption = 'Havale/EFT'
-        ImageIndex = 5
-        OnClick = Nakit1Click
-      end
-      object POSMenu: TMenuItem
-        Tag = 25
-        Caption = 'POS'
-        ImageIndex = 3
-        OnClick = Nakit1Click
-      end
-      object KrediKartiMenu: TMenuItem
-        Tag = 35
-        Caption = 'Kredi Kart'#305
-        ImageIndex = 3
-        OnClick = Nakit1Click
-      end
-      object ek1: TMenuItem
-        Tag = 23
-        Caption = #199'ek'
-        ImageIndex = 34
-        OnClick = Nakit1Click
-      end
-      object Senet1: TMenuItem
-        Tag = 24
-        Caption = 'Senet'
-        ImageIndex = 34
-        OnClick = Nakit1Click
-      end
-      object N10: TMenuItem
-        Caption = '-'
-      end
-      object ahsilatPlanla1: TMenuItem
-        Tag = 61
-        Caption = 'Tahsilat Planla'
-        ImageIndex = 43
-        OnClick = Nakit1Click
       end
     end
   end

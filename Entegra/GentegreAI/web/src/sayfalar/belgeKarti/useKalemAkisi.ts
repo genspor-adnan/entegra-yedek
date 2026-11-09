@@ -23,7 +23,7 @@ export function useKalemAkisi({
   satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
   yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
   cariId, odeyenKurumId, fiyatListesiId, kampanyaId, basvuruBilgi, alisMi, sifirFiyatSor = false,
-  izlemliBelge = false,
+  izlemliBelge = false, belgeTarihi,
 }: {
   satirlar: SatirDurumu[];
   setSatirlar: (f: (s: SatirDurumu[]) => SatirDurumu[]) => void;
@@ -44,6 +44,8 @@ export function useKalemAkisi({
   sifirFiyatSor?: boolean;
   /** Belge lot/seri toplar ya da seçtirir (giriş / çıkış izlemi): izlemli stok hızlı eklenmez. */
   izlemliBelge?: boolean;
+  /** Belge tarihi: dövizli liste fiyatının kuru bu günden çekilir (stokSeciminiCoz). */
+  belgeTarihi?: string;
 }) {
   /**
    * STOK / HİZMET SEÇİLDİ (arama penceresinden): kalem penceresini açar.
@@ -140,7 +142,7 @@ export function useKalemAkisi({
     }
     const yeni = await stokSeciminiCoz(sec, {
       satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
-      fiyatListesiId, kampanyaId, basvuruBilgi,
+      fiyatListesiId, kampanyaId, basvuruBilgi, belgeTarihi, alisMi,
     });
     if (uygunlukNotu) yeni.uygunlukNotu = uygunlukNotu;
     // FIYATI SIFIR UCRET HIZLI EKLENMEZ (kullanici 12.10.2026: "ücret sıfırsa fiyat

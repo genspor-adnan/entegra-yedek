@@ -109,6 +109,11 @@ export interface ListeTanimi {
   /** Yeni / Düzenle / Yazdır başlık satırında; diğer araç düğmeleri ALTINDA
       ayrı satırda sağa yaslı. */
   aracCubuguAltSatir?: boolean;
+  /** SAĞ TUŞ MENÜSÜ YOK (kullanıcı 09.11.2026, kampanya listesi): aksiyon ekranı dursun (araç çubuğu, palet),
+      satırda sağ tık menü açmasın. */
+  sagTusYok?: boolean;
+  /** Kartta "⏰ Hatırlat" düğmesi yok (GenForm hatirlatYok). */
+  kartHatirlatYok?: boolean;
   /** e-Belge menusu KUTUSUNUN basligi ("E-Fatura" / "E-İrsaliye"). Verilmezse
       kutu cizilmez. Ekran adi ayirt etmiyor: 'belge-liste' satis fisi /
       tahakkuk / alis faturasi listelerinde de kullaniliyor. */

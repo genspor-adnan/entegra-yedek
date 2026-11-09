@@ -49,6 +49,21 @@ public static class KimlikDogrulama
     public const string IbanTuru = "iban";
 
     /// <summary>
+    /// BOŞLUKSUZ METİN (kullanıcı 09.11.2026, stok kartı: "ürün no, gtip kodu alanlarında başta, sonda ve ortada
+    /// boşluk olamaz"): kod niteliğindeki alan hiç boşluk içermez - ekran yazarken siler, sunucu reddeder.
+    /// </summary>
+    public const string BosluksuzTuru = "bosluksuz";
+
+    /// <summary>Boşluk (her türlü whitespace) içeriyorsa mesaj, yoksa null. Boş değer geçerli.</summary>
+    public static string? BosluksuzHata(object? deger)
+    {
+        var s = deger?.ToString() ?? "";
+        if (s.Length == 0) return null;
+        foreach (var c in s) if (char.IsWhiteSpace(c)) return "boşluk içeremez (başta, sonda, ortada).";
+        return null;
+    }
+
+    /// <summary>
     /// IBAN: boşluklar atılır, 2 harf ülke + 2 hane kontrol + 11-30 alfasayısal; TR ise 26 hane.
     /// ISO 13616 mod-97: ilk dört karakter sona alınır, harfler 10-35 olur, kalan 1 olmalı. Boş geçerli.
     /// </summary>

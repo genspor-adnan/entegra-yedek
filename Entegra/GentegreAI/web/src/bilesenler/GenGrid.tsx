@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';
@@ -13,7 +13,7 @@ import { paletKomutlariAyarla, paletKomutlariTemizle }
   from '../sayfalar/kabuk/paletKomutlari';
 import { Modal } from './Modal';
 import { LogTablosu, GORUNUMLER } from './gridHucre';
-import { GridTablo } from './grid/GridTablo';
+import { GridTablo, SAG_TUS_MENUSU } from './grid/GridTablo';
 import { agacDiz } from './grid/agacDizim';
 import { TARIH_ON_AYARLAR, tarihAraligi, type TarihOnAyar }
   from '../sayfalar/liste/tarihAralik';
@@ -46,6 +46,10 @@ interface Props {
   onSatirAc?(satir: ListeSatiri): void;
   /** Aksiyon katalogu ekrani ("cari-liste"); verilirse arac cubugu + sag tus + palet gelir. */
   aksiyonEkrani?: string;
+  /** Sağ tuş menüsü çizilmez (araç çubuğu ve palet durur) - liste tanımı `sagTusYok`. */
+  sagTusYok?: boolean;
+  /** Bağlantı hücreleri: kolon adı -> tıklama (GridTablo.baglantiKolonlar). */
+  baglantiKolonlar?: Record<string, (satir: ListeSatiri) => void>;
   /** Sağ tık "⏰ Hatırlat" (1139): satır kartının rotası ve adı - verilirse seçili kayda bağlı hatırlatma açılır. */
   hatirlatKarti?: { yol: string; baslik?: string };
   /**
@@ -278,7 +282,7 @@ function KatlaOku({ yon }: { yon: 'sol' | 'sag' }) {
 const COKLU_AKSIYONLAR = new Set(['gelen.kabul', 'gelen.red', 'gelen.aktar']);
 
 export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
-                          aksiyonEkrani, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
+                          aksiyonEkrani, sagTusYok, baglantiKolonlar, hatirlatKarti, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, gizliAksiyonlar, kolonBasliklari, kolonGenislikleri, kolonSirasi, altSecenekler,
                           tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan, tarihComboAralik,
@@ -1042,6 +1046,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 filtreAcik={filtreAcik} filtreSatiriDegisti={filtreSatiriDegisti}
                 gridMenuKonum={gridMenuKonum} setGridMenuKonum={setGridMenuKonum}
                 aksiyonEkrani={aksiyonEkrani}
+                sagTusYok={sagTusYok}
+                baglantiKolonlar={baglantiKolonlar}
               />
             </div>
             {yukleniyor && <div className="yukleniyor">{cev('Yukleniyor…')}</div>}
@@ -1082,7 +1088,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       <GridMenu konum={gridMenuKonum} ogeler={menuOgeleri}
                 onKapat={() => setGridMenuKonum(null)} />
 
-      {aksiyonEkrani && (
+      {aksiyonEkrani && !sagTusYok && SAG_TUS_MENUSU && (
         <>
           <GenSagTus
             aksiyonlar={aksiyonlar}

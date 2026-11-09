@@ -110,20 +110,25 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
    * belge görüntüleme kipinde açılır; KİLİTLİ belgede (e-Belge gönderildi, yetki yok) hep görüntüleme, ✎ pasif.
    * Önce yalnız faturada, sonra TÜM ALIŞ / SATIŞ belgelerinde (kullanıcı 08.11.2026: "bu müşteri bandı ve fatura
    * başlığı desenini tüm alış/satış belgelere uygula"): carili türler - fatura, fiş, irsaliye, sipariş, teklif, konsinye,
-   * tahakkuk. Depo belgesi / stok fişi (carisiz) ve başvuru ESKİSİ GİBİ. Cari bandı henüz yoksa (cari seçilmemiş) ✎
+   * tahakkuk. Depo belgesi (transfer / talep) ve başvuru ESKİSİ GİBİ. Cari bandı henüz yoksa (cari seçilmemiş) ✎
    * ızgaranın sağ üstünde durur (kayıtlı belgede).
+   * STOK FİŞİ DE KİPLİ (kullanıcı 09.11.2026: "giriş/çıkış fişi kartında başlığı da view/edit moda getir"): cari
+   * bandı yok, ✎ ızgaranın sağ üstünde; kilit ölçütü fişin kendi başlık kilidi (`baslikKilitli` - kalem varsa
+   * başlık kilitlenir), ✎ o zaman pasif.
    */
   const [baslikDuzenle, setBaslikDuzenle] = useState(!!p.yeniMi);
   /** Kart YENİ açıldı (sabit): yeni belgenin düzenleme kipi "yazıyorsun" çizgisi almaz - ilk kayıttan sonra da (inceleme). */
   const [yeniAcildi] = useState(!!p.yeniMi);
-  const kipli = carili && !basvuruMu;
+  const kipli = (carili || stokFisiMi) && !basvuruMu;
+  /** Kipin kilit ölçütü: stok fişinde başlık kilidi (kalem varsa), carili belgede belge kilidi. */
+  const kipKilidi = stokFisiMi ? baslikKilitli : kilitli;
   // KALEM EKLEME başlığı kapatır (kullanıcı): "+" ile kalem penceresi açılınca düzenleme biter, bilgi okunur kalır.
   useEffect(() => { if (p.baslikKapatAnahtari) setBaslikDuzenle(false) }, [p.baslikKapatAnahtari]);
-  const gosterKipi = kipli && (kilitli || !baslikDuzenle);
+  const gosterKipi = kipli && (kipKilidi || !baslikDuzenle);
   /** ✎ - tek düğme, iki yuva (cari bandının sonu / bantsızken ızgaranın sağ üstü). */
   const kalemDugmesi = (ek = '') => (
-    <button type="button" className={`d ik kalem-dugme${ek}${gosterKipi ? '' : ' acik'}`} disabled={kilitli}
-            title={kilitli ? c('Kilitli belge - başlık düzenlenemez') : gosterKipi ? c('Başlık alanlarını düzenle') : c('Düzenlemeyi kapat')}
+    <button type="button" className={`d ik kalem-dugme${ek}${gosterKipi ? '' : ' acik'}`} disabled={kipKilidi}
+            title={kipKilidi ? c('Kilitli belge - başlık düzenlenemez') : gosterKipi ? c('Başlık alanlarını düzenle') : c('Düzenlemeyi kapat')}
             onClick={() => setBaslikDuzenle(v => !v)}>✎</button>
   );
   const efDurum = Number(sonuc?.belge.efaturaDurum ?? 0);
@@ -336,7 +341,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   {/* GÖRÜNTÜLEME KİPİNDE ızgara `inert` (fare + klavye + odak kapalı; inceleme: yalnız fare kesiliyordu, Tab ile
       yazılabiliyordu); tıklama sarmalayıcıda yakalanır ve (kilitli değilse) düzenlemeye geçirir. */}
   <div className={gosterKipi ? 'bb-goster-sar' : undefined}
-       onMouseDown={gosterKipi && !kilitli ? () => setBaslikDuzenle(true) : undefined}>
+       onMouseDown={gosterKipi && !kipKilidi ? () => setBaslikDuzenle(true) : undefined}>
   <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}${darUst ? ' dar-ust' : ''}${satisSiparis ? ' tek-satir' : ''}`
                   + (gosterKipi ? ' bb-goster' : kipli && !yeniAcildi ? ' bb-duzenle' : '')}
        inert={gosterKipi || undefined}>
@@ -588,6 +593,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   {SEKMELER
     // Basvuruya ozel sekmeler (298) yalniz basvuruda; diger turlerde cizilmez.
     .filter(x => (!x.basvuru || basvuruMu)
+              && (!x.teklif || teklifMi)
               && (!x.irsaliye || irsaliyeMi)
               && (!x.faturaYok || !(faturaMi || tahakkukMu))
               // Tahsilat: fatura/fis, tahakkuk VE SIPARIS (kullanici) - siparis

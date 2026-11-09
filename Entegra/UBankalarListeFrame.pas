@@ -719,7 +719,7 @@ begin
      raise Exception.Create(Yetkisiz_Islem);
 end;
 
-procedure TBankalarListeFrame.BankaHizliGirisTusClick(Sender: TObject);
+procedure  TBankalarListeFrame.BankaHizliGirisTusClick(Sender: TObject);
 begin
    if not Assigned(bankaHesapGirisdlg) then
       bankaHesapGirisdlg := TbankaHesapGirisdlg.Create(Application);

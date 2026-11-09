@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
@@ -14,7 +14,7 @@ import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni } from './bicim';
 import { adSoyadUnvandan, ONEKLI_KARTLAR, useUnvanOneki } from './kart/useUnvanOneki';
-import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
+import { KIPLI_GOVDE_KARTLAR, KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
 import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
 import { kartGovdesiKur } from './kart/kartGovdesi';
@@ -476,7 +476,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     if (typeof id !== 'number' || detaySayfaYuk) return;
     const durum = detaylar[ad];
     if (durum) {
-      const fark = detayFarki(durum);
+      const fark = detayFarki(durum, undefined, meta?.detaylar.find(d => d.ad === ad)?.bosAtlaAlani);
       if (fark.eklenen || fark.degisen || fark.silinen) {
         const devam = await onaySor(
           'Bu sayfada kaydedilmemiş satır değişiklikleri var. '
@@ -639,6 +639,13 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
             && !(baslangic[m.acilistaTarafSecimi] as Deger | undefined))
           setTarafSecimAcik(true);
         setSurum(undefined);
+        // YENİ KART ÖN SATIRLARI (kullanıcı 09.11.2026): katalogun verdiği satırlar (stok Fiyatlar: aktif
+        //   listeler) EKLENECEK satır olarak gelir - `ilk` boş kalır ki kaydedilince fark olarak gitsin;
+        //   boş bırakılanlar bosAtlaAlani kuralıyla elenir, değişiklik sayılmaz.
+        m.detaylar.forEach(d => {
+          if (d.yeniSatirlar?.length)
+            bosDetaylar[d.ad] = { ilk: [], guncel: d.yeniSatirlar.map(s => ({ ...s })) as Satir[], silinen: [] };
+        });
         setDetaylar(bosDetaylar);
       } else {
         const k = await api.kartOku(kaynak, id as number);
@@ -1032,13 +1039,33 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     if (kartDegistiMi(meta?.alanlar, deger, ilkDeger)) return true;
 
     return Object.entries(detaylar).some(([ad, durum]) => {
-      const fark = detayFarki(durum, detayAlanlari(meta, ad));
+      const fark = detayFarki(durum, detayAlanlari(meta, ad), meta?.detaylar.find(d => d.ad === ad)?.bosAtlaAlani);
       return (fark.eklenen?.length ?? 0) + (fark.degisen?.length ?? 0)
            + (fark.silinen?.length ?? 0) > 0;
     });
   }, [meta, deger, ilkDeger, detaylar]);
 
+  // TEK KALEM, TÜM KART (kullanıcı 09.11.2026, stok): şeridin ✎'i hem şeridi hem gövde gruplarını açar/kapatır;
+  //   yeni kart düzenlemede başlar. Kaleme basmadan düzenlemeye geçilemez (ızgaralar inert).
+  const kipliGovde = KIPLI_GOVDE_KARTLAR.has(kaynak);
+  const [kipliAcik, setKipliAcik] = useState(yeniMi);
   const kayitBasarili = useRef(false);
+  // ANINDA KAYIT (katalog detay.anindaKaydet, kullanıcı 09.11.2026 stok Fiyatlar): sekme satırı değişince
+  //   bayrak kalkar; durum güncellendikten SONRA (bir sonraki render) kart açık kalarak kaydedilir. Yeni kartta
+  //   kaydedilmez - kart kaydıyla gider. Boş ön satır (bosAtlaAlani) fark üretmediyse de kaydedilmez.
+  const anindaKaydetRef = useRef<string | null>(null);
+  useEffect(() => {
+    const ad = anindaKaydetRef.current;
+    if (!ad) return;
+    anindaKaydetRef.current = null;
+    if (yeniMi || kaydediyor || salt) return;
+    const durum = detaylar[ad];
+    if (!durum) return;
+    const fark = detayFarki(durum, detayAlanlari(meta, ad), meta?.detaylar.find(d => d.ad === ad)?.bosAtlaAlani);
+    if (!fark.eklenen && !fark.degisen && !fark.silinen) return;
+    void kaydet(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detaylar]);
   const disKaydetRef = useRef<() => Promise<boolean>>(async () => true);
   disKaydetRef.current = async () => {
     if (yeniMi || !kaydedilmemisDegisiklikVar) return true;
@@ -1348,6 +1375,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           setAramaAlani={setAramaAlani} secilenAdlar={secilenAdlar}
           detayGrupta={detayGrupta} detayIzgara={detayIzgara}
           sekmeSarmalayici={sekmeSarmalayici}
+          govdeGoster={kipliGovde && !salt && !kipliAcik}
         />
       )}
 
@@ -1376,6 +1404,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           satirKategorileri={satirKategorileri}
           setSeciliSatirlar={setSeciliSatirlar}
           sekmeSarmalayici={sekmeSarmalayici}
+          onAnindaKaydet={ad => { anindaKaydetRef.current = ad }}
         />
         );
         // BELGELER (1135-1137, kullanici "tek olsun" + "mockup gibi"): durum ozeti /
@@ -1581,7 +1610,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         )}
         {kimlikAlanlari.length > 0 && (
           <KartKimlikSeridi
-            yeniMi={yeniMi}
+            yeniMi={yeniMi} aktifSekme={aktifSekme}
             kaynak={kaynak} deger={deger} meta={meta} salt={salt}
             detaylar={detaylar} setDetaylar={setDetaylar}
             kimlikAlanlari={kimlikAlanlari}
@@ -1589,6 +1618,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             seritSarmalayici={seritSarmalayici}
             personelGibiKart={personelGibiKart} dogumYasMetni={dogumYasMetni}
             unvanOneki={unvanOneki}
+            seritAcikDis={kipliGovde ? kipliAcik : undefined}
+            onSeritAcik={kipliGovde ? setKipliAcik : undefined}
             anaRolEk={kaynak !== 'personel' ? undefined
               : yeniMi
               ? <KartKullaniciRolu kartId={0} saltOkunur={salt}

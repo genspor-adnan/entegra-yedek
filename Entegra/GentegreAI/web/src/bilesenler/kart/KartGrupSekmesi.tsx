@@ -37,7 +37,7 @@ export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
     aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
     detaylar, setDetaylar, alanHatalari, gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-    aramaAc, secilenAdlar, altBaslik: altBaslikEki,
+    aramaAc, secilenAdlar, altBaslik: altBaslikEki, govdeGoster = false,
   } = p;
 const gruplanmis = altGruplaVar(aktif.alanlar);
 const adli = gruplanmis.filter(([b]) => b);
@@ -293,12 +293,14 @@ const adliBlok = (
             : undefined;
           // KURUM TURU seridin bir hucresi (484): Tanımlama kutusuna DEGIL
           //   kimlik seridine cizilir - kullanici temsilci ile yer degistirdi.
+          // GÖVDE GÖRÜNTÜLEME KİPİ (kullanıcı 09.11.2026, stok): şeridin ✎'i kapalıyken gruplar da salt görünüm -
+          //   kutular düz metin (CSS .kagrup-goster), ızgara inert (tıklayarak düzenlemeye geçilemez).
           return (
-            <div className="kagrup" key={altBaslik}>
+            <div className={`kagrup${govdeGoster ? ' kagrup-goster' : ''}`} key={altBaslik}>
               <h6 className={altBaslikEki?.tikla ? 'katlanir-bas' : undefined} onClick={altBaslikEki?.tikla}>
                 {c(altBaslik)}{altBaslikEki?.ek && <span className="katlanir-sag">{altBaslikEki.ek}</span>}</h6>
               {altBaslikEki?.ic}
-              <div className="alan-izgara tek-sutun">
+              <div className="alan-izgara tek-sutun" inert={govdeGoster || undefined}>
                 {ciftliAlanlar.map((cift, i) => cift.length > 0 && (
                   <div className="adres-satir" key={i}>{renderAlanListesi(cift)}</div>
                 ))}
@@ -829,4 +831,6 @@ export interface KartGrupSekmesiProps {
   secilenAdlar?: Record<string, string>;
   /** Alt grup başlığının ekran eki (tıklama + simge; ör. muayene anamnez 💾). */
   altBaslik?: AltGrupBaslik;
+  /** Gövde grupları görüntüleme kipinde (şeridin ✎'i kapalı) - KIPLI_GOVDE_KARTLAR. */
+  govdeGoster?: boolean;
 }

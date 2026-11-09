@@ -1,5 +1,5 @@
-import { basHarfler } from '../basHarfler';
-import { type ReactNode, useEffect, useState } from 'react';
+﻿import { basHarfler } from '../basHarfler';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
 import { type DetayDurumu, bosDetay } from '../GenDetayTablo';
@@ -7,12 +7,29 @@ import { TekKayit } from '../TekKayit';
 import type { useUnvanOneki } from './useUnvanOneki';
 import { c } from '../../dil/ceviri';
 import { KartAdi } from '../KartAdi';
+import { StokAvatar } from './StokAvatar';
 
 /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
 
 /** Mikro katalog kartlari: serit tek satira sigsin diye dar yerlesim. */
 const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiyotik']);
+
+/**
+ * GÖRÜNTÜLEME / DÜZENLEME KİPLİ ŞERİTLER (mockup Ekranlar/Stok/stok_karti_baslik_kip.html; kullanıcı 09.11.2026
+ * "stok kartı başlığı edit/view", "fiyat listeleri kartı başlığını da"): aynı ızgara iki kipte de durur, görüntülemede
+ * kutular kaybolur (CSS .kaid-goster) ve ızgara `inert`. Yeni kart düzenlemede, kayıtlı kart görüntülemede açılır;
+ * tek geçiş yolu ✎ (ızgaraya tıklamak kipi değiştirmez - başvuru kararı); sekme değişince görüntülemeye döner;
+ * salt okunur kartta hep görüntüleme, ✎ pasif. Değer: ızgaranın kaynağa özel sütun sınıfı (tema.css).
+ */
+const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat' };
+/**
+ * TEK KALEM, TÜM KART (kullanıcı 09.11.2026, stok kartı: "Tanım / Sınıflandırma, Vergi & Ana Birim, Diğer bölümleri
+ * de view/edit mod yap.. ayrı ayrı kalem ekleme, başlıktaki kalemle hepsi mod değişsin.. kaleme basmadan edit moda
+ * geçilemesin"): bu kaynaklarda şeridin ✎'i gövde gruplarını da yönetir - kip GenForm'da tutulur
+ * (seritAcikDis / onSeritAcik), KartGrupSekmesi `govdeGoster` ile gruplara uygular.
+ */
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -37,6 +54,11 @@ export interface KartKimlikSeridiOzellikleri {
    * kart alani degil - bu yuzden hazir bilesen olarak disaridan gelir.
    */
   anaRolEk?: ReactNode;
+  /** Kartın aktif sekmesi - değişince kipli şerit (KIPLI_SERITLER) görüntüleme kipine döner. */
+  aktifSekme?: string | null;
+  /** Kip DIŞARIDAN (GenForm) yönetilir: ✎ tüm kartı açar/kapatır (KIPLI_GOVDE_KARTLAR). */
+  seritAcikDis?: boolean;
+  onSeritAcik?(acik: boolean): void;
 }
 
 /**
@@ -49,7 +71,8 @@ export interface KartKimlikSeridiOzellikleri {
  */
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
-  seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk,
+  seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk, aktifSekme,
+  seritAcikDis, onSeritAcik,
 }: KartKimlikSeridiOzellikleri) {
   /**
    * KİŞİ BANDI (mockup Ekranlar/kisi_karti_avatar_bant.html, kullanıcı 08.11.2026: "başlıktaki bilgiler bandda
@@ -57,9 +80,27 @@ export function KartKimlikSeridi({
    * düzenleme şeridi YENİ kartta açık gelir, kayıtlı kartta kapalı; ✎ açar / kapatır. Kayıtlı kartta ad boş yüklenirse
    * (eski kayıt) şerit kendiliğinden açılır - kullanıcı neyi dolduracağını görsün.
    */
-  const [seritAcik, setSeritAcik] = useState(yeniMi);
+  const [seritAcikIc, setSeritAcikIc] = useState(yeniMi);
+  // Dışarıdan yönetiliyorsa (stok: tek kalem tüm kart) o değer geçerli; değilse şeridin kendi durumu.
+  const seritAcik = seritAcikDis ?? seritAcikIc;
+  const setSeritAcik = (f: boolean | ((v: boolean) => boolean)) => {
+    const yeni = typeof f === 'function' ? f(seritAcik) : f;
+    setSeritAcikIc(yeni); onSeritAcik?.(yeni);
+  };
   const adBos = !String(deger.ad ?? '').trim() && !String(deger.soyad ?? '').trim();
   useEffect(() => { if (kaynak === 'kisi' && !yeniMi && adBos && deger.id) setSeritAcik(true) }, [kaynak, yeniMi, adBos, deger.id]);
+  // SEKME DEĞİŞİNCE kipli şerit görüntülemeye döner. İlk sekme mount'tan SONRA effect ile verilir (GenForm) - o ilk
+  //   atama "değişim" sayılmasın, yoksa yeni kart açılır açılmaz kapanırdı.
+  const oncekiSekme = useRef(aktifSekme);
+  useEffect(() => {
+    // DIŞARIDAN YÖNETİLEN KİPTE (tüm kart tek kalem, stok) sekme değişimi kapatmaz: kip kartın tamamına ait,
+    //   yalnız ✎ değiştirir (kullanıcı 09.11.2026: "kaleme basmadan edit moda geçilemesin" - tersi de: kalem
+    //   basılmadan kapanmasın). Yeni kartta ilk sekme atamaları düzenlemeyi düşürüyordu.
+    if (onSeritAcik) { oncekiSekme.current = aktifSekme; return }
+    if (oncekiSekme.current != null && aktifSekme !== oncekiSekme.current) setSeritAcik(false);
+    oncekiSekme.current = aktifSekme;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aktifSekme]);
   // CARİ ETİKETLERİ (kullanıcı 25.10.2026: "kod rename Müşteri Kodu ve Unvan rename Müşteri Ünvanı"): aynı 'cari'
   //   kartı Müşteri ve Tedarikçi listesinden açılır - etiket hangi ekrandan açıldıysa o rolle.
   const kimlikAlanlari = kaynak !== 'cari' ? kimlikAlanlariHam : (() => {
@@ -386,6 +427,27 @@ export function KartKimlikSeridi({
                   />
                 )}
                 {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+              </div>
+            );
+          })() : KIPLI_SERITLER[kaynak] ? (() => {
+            const gosterKipi = salt || !seritAcik;
+            // Durum kodu: boş ya da 1 aktif (kişi bandı ile aynı okuma); pasif stok avatarı gri.
+            const d = String(deger.durum ?? '').trim();
+            const pasif = d !== '' && d !== '1';
+            return (
+              <div className={`kaid-kipli${gosterKipi ? ' kaid-goster' : ''}`} data-testid="kimlik-kipli">
+                {kaynak === 'stok' && (
+                  <StokAvatar kaynakId={Number(deger.id) || undefined} ad={String(deger.ad ?? '')} pasif={pasif} />
+                )}
+                {/* HİZMET (mockup hizmet_karti_baslik_kip.html, 09.11.2026): resim yok, hizmet adının baş harfleri. */}
+                {kaynak === 'hizmet' && <StokAvatar ad={String(deger.ad ?? '')} pasif={pasif} />}
+                <div className={`alan-izgara ${KIPLI_SERITLER[kaynak]}`} inert={gosterKipi || undefined}>
+                  {renderAlanListesi(kimlikAlanlari)}
+                </div>
+                <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={salt}
+                        data-testid="kimlik-kalem"
+                        title={salt ? c('Düzenleme yetkisi yok') : gosterKipi ? c('Kimlik alanlarını düzenle') : c('Düzenlemeyi kapat')}
+                        onClick={() => setSeritAcik(v => !v)}>✎</button>
               </div>
             );
           })() : (

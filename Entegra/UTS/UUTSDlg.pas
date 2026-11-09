@@ -355,6 +355,45 @@ var i, ID, FatBasId	: integer;
     //TSnc : TSonuc;
     TS : TcxCustomGridRecord;
     gGtc	: TcxCustomGridTableController;
+
+    function Deger(ASatir: TcxCustomGridRecord; const AAlan: string): string;
+    begin
+      Result := Trim(VarToStr(ASatir.Values[GridSorguView.GetColumnByFieldName(AAlan).Index]));
+    end;
+
+    // numeric adet ('5,00' gibi) StrToInt'te patlamasin diye tam sayiya cevrilir
+    function AdetDeger(ASatir: TcxCustomGridRecord; const AAlan: string): string;
+    var V: Variant;
+    begin
+      Result := '';
+      V := ASatir.Values[GridSorguView.GetColumnByFieldName(AAlan).Index];
+      if not VarIsNull(V) and not VarIsEmpty(V) and (Trim(VarToStr(V)) <> '') then
+         Result := IntToStr(Round(Double(V)));
+    end;
+
+    // UTS tarihi bos/1900 ise stoktaki tarih; o da yoksa 1990-01-01
+    function TarihDeger(ASatir: TcxCustomGridRecord; const AAlan, AYedekAlan: string): string;
+      function Oku(const AAd: string; out ATarih: TDateTime): Boolean;
+      var V: Variant;
+      begin
+        Result := False;
+        V := ASatir.Values[GridSorguView.GetColumnByFieldName(AAd).Index];
+        if VarIsNull(V) or VarIsEmpty(V) or (Trim(VarToStr(V)) = '') then Exit;
+        try
+          ATarih := VarToDateTime(V);
+        except
+          Exit;
+        end;
+        Result := ATarih > EncodeDate(1901, 1, 1);
+      end;
+    var T: TDateTime;
+    begin
+      if Oku(AAlan, T) or Oku(AYedekAlan, T) then
+         Result := FormatDateTime('yyyy-mm-dd', T)
+      else
+         Result := '1990-01-01';
+    end;
+
 begin
    if (DateFisTarihi.Text='')or(EditFisNo.Text='') then begin
        Showmessage('Fiş tarihi ve no dolu olmalı!');
@@ -366,29 +405,35 @@ begin
    for i := 0 to gGtc.SelectedRecordCount - 1 do begin
        TS:= gGtc.SelectedRecords[i];
        //combodan adet seçilmişse
-       if (ComboFisAdet.ItemIndex=0)or(TS.Values[GridSorguView.GetColumnByFieldName('GELENADET').Index]=null) then
-          ADT := TS.Values[GridSorguView.GetColumnByFieldName('ADET').Index]
+       if (ComboFisAdet.ItemIndex=0)or(Deger(TS, 'GELENADET')='') then
+          ADT := AdetDeger(TS, 'ADET')
        else begin
-          ADT := TS.Values[GridSorguView.GetColumnByFieldName('GELENADET').Index];
-          if TS.Values[GridSorguView.GetColumnByFieldName('ASKIADET').Index]=null then
-             ASKI:='0'
-          else
-             ASKI := TS.Values[GridSorguView.GetColumnByFieldName('ASKIADET').Index];
+          ADT := AdetDeger(TS, 'GELENADET');
+          ASKI := Deger(TS, 'ASKIADET');
           ADT:= IntToStr(StrToIntDef(ADT,0) - StrToIntDef(ASKI,0)); //Askıdaki ürünler artık verilmiştir, bizim depoda değildir..
        end;
+       if StrToIntDef(ADT,0) <= 0 then  // adet yoksa (UTS'de 0 / hepsi askida) satir atlanir
+          Continue;
        //if ADT <> '' then begin//eğer ÜTS'den bilgi gelmiş ise belge kaydederiz
           ID := 0;
           BNO := EditFisNo.Text;
           BZA := FormatDateTime('yyyy-mm-dd hh:nn', DateFisTarihi.Date);
-          KRM := TS.Values[GridSorguView.GetColumnByFieldName('KURUM_UTS_NO').Index]; //üreten/ithal eden kurum
-          UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
-          LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
-          SNO := TS.Values[GridSorguView.GetColumnByFieldName('SERINO').Index];
-          SKT := FormatDateTime('yyyy-mm-dd', TS.Values[GridSorguView.GetColumnByFieldName('GELENSKT').Index]);
-          URT := FormatDateTime('yyyy-mm-dd', TS.Values[GridSorguView.GetColumnByFieldName('GELENURT').Index]);
-          FYT := TS.Values[GridSorguView.GetColumnByFieldName('FIYAT').Index];
+          // Null kolon (kurum UTS no, seri no...) string'e atanirken variant hatasi veriyordu
+          KRM := Deger(TS, 'KURUM_UTS_NO'); //üreten/ithal eden kurum
+          UNO := Deger(TS, 'URUNNO');
+          LNO := Deger(TS, 'LOTNO');
+          SNO := Deger(TS, 'SERINO');
+          // UTS sorgulanmamis/cevap gelmemis satirda GELENSKT bos ya da 1900: stoktaki SKT/URT kullanilir
+          SKT := TarihDeger(TS, 'GELENSKT', 'SKT');
+          URT := TarihDeger(TS, 'GELENURT', 'URT');
+          FYT := Deger(TS, 'FIYAT');
+          if FYT = '' then FYT := '0';
           FatBasId := BelgeKaydet(ID,ID,KRM,BNO,BZA,UNO,LNO,SNO,ADT,SKT,URT,FYT);
       // end;
+  end;
+  if FatBasId = 0 then begin
+     ShowMessage('Fişe yazılacak adedi olan satır yok!');
+     exit;
   end;
   //fiş oluştu. şimdi de adetleri izleme tablosuna göre düzenleyelim ve tutarı da adetle birim fiyatı çarparak bulalım.
   //if TcxLabel(Sender).Tag=3 then // giriş fişi eklendi tipini 17 sayım fazlası yapalım
@@ -404,13 +449,25 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
     var
        // s,KRM,BNO,UNO,LNO,SNO,BZA,ADT,JSON : string;
         //TSnc : TSonuc;
-        Tarih,AskiSorguAdresi : string;
+        Tarih,AskiSorguAdresi,TekilSorguAdresi : string;
         TMU : TM_Urun;
+        TMA : TM_Urun_Off;
         u : TUrunSonuc;
         aski : TAskiSonuc;
         TS : TcxCustomGridRecord;
         gGtc	: TcxCustomGridTableController;
-        i,j,n,Adet, TUR, ID, YERID, SayBasari, SayHata: integer;
+        i,j,n,Adet,GelenAdet, TUR, ID, YERID, SayBasari, SayHata: integer;
+        HamUno : string;
+        // UTS urun no'yu 14 haneye tamamlar (yalniz rakamsa); UUTSKontrol ile ayni
+        function UnoNorm(const AUrunNo: string): string;
+        var k: Integer;
+        begin
+          Result := Trim(AUrunNo);
+          for k := 1 to Length(Result) do
+            if not CharInSet(Result[k], ['0'..'9']) then Exit;
+          while (Result <> '') and (Length(Result) < 14) do
+            Result := '0' + Result;
+        end;
     begin
      SayBasari:=0; SayHata:=0;
      gGtc := GridSorguView.DataController.Controller;
@@ -420,8 +477,18 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
         BekletmeDlg.cxProgressBar1.Properties.Max:=gGtc.SelectedRecordCount;
         BekletmeDlg.Show;
 
+     // 51'in adresi (ayrintiliTekilUrun) liste ekrani icindir; cevabi adet/kullanilabilirAdet
+     //   doner, TUrunSonuc (ADT/SKT/URT) okuyamaz -> adet 0 geliyordu. Adet icin tekil urun
+     //   sorgusu (45), aski icin verme/askidakiler (52) kullanilir; tanim eski kalmissa
+     //   (Update_SQL_181 uygulanmamis) dogru adrese dusulur (UUTSKontrol ile ayni).
+     Tablo.TablodanSorguAc(1,'select ADRESSORGU from  UTS_BILDIRIM_TUR where ID=45');
+     TekilSorguAdresi:=Trim(Tablo.Query1.Fields[0].Asstring);
+     if (TekilSorguAdresi = '') or (Pos('ayrintiliTekilUrun', TekilSorguAdresi) > 0) then
+        TekilSorguAdresi := '/UTS/uh/rest/tekilUrun/sorgula';
      Tablo.TablodanSorguAc(1,'select ADRESSORGU from  UTS_BILDIRIM_TUR where ID=52');
-     AskiSorguAdresi:=Tablo.Query1.Fields[0].Asstring;
+     AskiSorguAdresi:=Trim(Tablo.Query1.Fields[0].Asstring);
+     if (AskiSorguAdresi = '') or (Pos('ayrintiliTekilUrun', AskiSorguAdresi) > 0) then
+        AskiSorguAdresi := '/UTS/uh/rest/bildirim/verme/askidakiler/offset';
 
      Tarih :=FormatDateTime('yyyy-mm-dd hh:nn', Tablo.GENINI.BugunTrhSaat);
      for i := 0 to gGtc.SelectedRecordCount - 1 do begin
@@ -431,17 +498,38 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
         TS:= gGtc.SelectedRecords[i];
         ID := StrToInt(TS.Values[GridSorguView.GetColumnByFieldName('ID').Index]);
         TMU := TM_Urun.Create;
-        TMU.UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
-        TMU.LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
+        HamUno := Trim(VarToStr(TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index]));
+        TMU.UNO := UnoNorm(HamUno);
+        TMU.LNO := VarToStr(TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index]);
+        TMU.SNO := VarToStr(TS.Values[GridSorguView.GetColumnByFieldName('SERINO').Index]);
         //ürün adeti,SKT,ÜRT sorgula
-        u := TUrunSonuc(utsTalkMC(TabBildirimTur.FieldByName('ADRESSORGU').AsString, TMU, TUrunSonuc));
-        n := length(u.SNC);
+        // utsTalkMC istek nesnesini varsayilan olarak siler (killReq=True); TMU ikinci
+        //   denemede ve aski sorgusunda yine okundugu icin silinmez (killReq=False), sonda serbest
+        try
+          u := TUrunSonuc(utsTalkMC(TekilSorguAdresi, TMU, TUrunSonuc, False));
+          n := 0;
+          if u <> nil then
+             n := length(u.SNC);
+          if (n = 0) and (TMU.UNO <> HamUno) then begin   // tamamlanmis no bulunmadiysa ham haliyle dene
+             TMU.UNO := HamUno;
+             FreeAndNil(u);
+             u := TUrunSonuc(utsTalkMC(TekilSorguAdresi, TMU, TUrunSonuc, False));
+             if u <> nil then
+                n := length(u.SNC);
+          end;
+          if n > 0 then begin
+             TMA := TM_Urun_Off.Create;
+             TMA.UNO := TMU.UNO;
+             TMA.LNO := TMU.LNO;
+             TMA.SNO := TMU.SNO;
+          end;
+        finally
+          TMU.Free;
+        end;
         if n > 0 then begin
            //ürünün askıdaki sayısını sorgula
-           TMU := TM_Urun.Create;
-           TMU.UNO := TS.Values[GridSorguView.GetColumnByFieldName('URUNNO').Index];
-           TMU.LNO := TS.Values[GridSorguView.GetColumnByFieldName('LOTNO').Index];
-           aski := TAskiSonuc(utsTalkMC(AskiSorguAdresi, TMU, TAskiSonuc));
+           TMA.ADT := 100;
+           aski := TAskiSonuc(utsTalkMC(AskiSorguAdresi, TMA, TAskiSonuc));
         //24.10.2023    n := length(aski.SNC);
 
            Adet := 0;
@@ -457,7 +545,11 @@ procedure TUTSDlg.LabelUTSAdetSorgulaClick(Sender: TObject);
                  Adet := Adet + aski.SNC.LST[j].ADT;
       //24.10.2023           Adet := Adet + aski.SNC[j].ADT;
            inc(SayBasari);
-           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+IntToStr(u.SNC[0].ADT)+',ASKIADET='+IntToStr(Adet)+
+           // lot birden fazla kalem donebilir: hepsinin adedi toplanir
+           GelenAdet := 0;
+           for j := 0 to length(u.SNC)-1 do
+              GelenAdet := GelenAdet + u.SNC[j].ADT;
+           Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update UTSENVANTER set GELENADET='+IntToStr(GelenAdet)+',ASKIADET='+IntToStr(Adet)+
             ', GELENSKT='''+u.SNC[0].SKT+''',GELENURT='''+u.SNC[0].URT+''',TARIH='''+Tarih+''' '+
             ' where ID='+ IntToStr(ID),[],[]);
         end else inc(SayHata)
@@ -2345,14 +2437,14 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
            GirisDepoId := DepoId;
         end;
 
-        // Ayni lot no farkli SKT ile ayri tanimdir (Update_SQL_215): seri no'suz
-        //   lotta SKT de tutmali; yoksa asagida bu SKT ile yeni tanim acilir.
-        //   SKT bos/gecersizse eskisi gibi yalniz lot no ile aranir.
+        // Bir lotun tek SKT/URT'si olur (Update_SQL_220): yalniz lot no ile aranir.
+        //   215 doneminden ayni lot no ile birden fazla tanim kalmissa SKT'si
+        //   tutan one alinir.
         SktKosul := '';
         if (SNO = '') and (SKT <> '') and (SKT <> '1990-01-01') then
-          SktKosul := ' and (TRY_CAST('''+SKT+''' as date) is null or cast(SKT as date)=TRY_CAST('''+SKT+''' as date)) ';
+          SktKosul := 'case when cast(SKT as date)=TRY_CAST('''+SKT+''' as date) then 0 else 1 end, ';
         Tablo.TablodanSorguAc(5, 'select '+DbUst(1)+'ID from STOKSERILOT where STOKID='+IntToStr(StokID)+
-          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' '+SktKosul+' order by ID '+DbSinir(1));
+          ' and SERINO='''+SNO+''' and LOTNO='''+LNO+''' order by '+SktKosul+'ID '+DbSinir(1));
         if not Tablo.Query5.IsEmpty then
            SeriLotId := Tablo.Query5.Fields[0].AsInteger
         else begin

@@ -1,4 +1,4 @@
-import {
+﻿import {
   type BelgeYaniti,
   type AcikSatir,
   type EBelgeMesaji,
@@ -7,6 +7,21 @@ import {
 import { istek, gonder } from '../cekirdek';
 
 /** Belge, kurum profili, gelen belge kutusu. */
+/** islem_log satırı - /api/belge/{id}/gecmis (ham; TeklifGecmisi.gecmisOlayi metne çevirir). */
+export interface BelgeGecmisKaydi {
+  id: number;
+  tarih: string;
+  kullanici: string;
+  /** 1 ekle · 2 değiştir · 3 sil (Delphi ULog kodları). */
+  islemTipi: number;
+  /** 30 belge; başka değer satır / alt kayıt logu. */
+  tabloId: number;
+  /** jsonb metni: aksiyon (teklif-durum / donustur / termin), satirAdedi, teklifDurum "1 -> 2", hedefTur … */
+  bilgi: string;
+  hedefBelgeNo: string;
+}
+
+
 export const belgeUclari = {
   // -------------------------------------------------------------- belge ----
   // ----------------------------------------------------- kurum profili ----
@@ -183,6 +198,14 @@ export const belgeUclari = {
   /** Termin (teslim tarihi) guncelleme - 140. Tarih null = termin kaldirildi. */
   belgeTermin: (id: number, satirlar: { satirId: number; teslimTarihi: string | null }[]) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/termin`, { satirlar }),
+
+  /** Teklif akış durumu (listeden, kart açılmadan): 1 Hazırlanıyor · 2 Sunuldu · 3 Kabul · 4 Red · 5 İptal. */
+  belgeTeklifDurum: (id: number, durum: number) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/teklif-durum`, { durum }),
+
+  /** Belgenin işlem geçmişi (islem_log; teklif kartı "Geçmiş" sekmesi). Metin istemcide kurulur. */
+  belgeGecmis: (id: number) =>
+    istek<{ kayitlar: BelgeGecmisKaydi[] }>(`/api/belge/${id}/gecmis`).then(y => y.kayitlar),
 
   /**
    * Belge donusumu. `pay` (289): 0/bos tum satir · 1 yalniz HASTA payi ·

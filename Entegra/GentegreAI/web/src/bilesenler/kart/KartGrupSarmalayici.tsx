@@ -56,6 +56,8 @@ export interface KartGrupSarmalayiciOzellikleri {
                     parcalar?: SekmeParcalari): ReactNode;
   /** Kartı KAPATMADAN kaydeder (çerçeve 💾'si). */
   kaydetKal?(): void;
+  /** Gövde grupları görüntüleme kipinde (stok: şeridin ✎'i kapalı). */
+  govdeGoster?: boolean;
 }
 
 /**
@@ -72,7 +74,7 @@ export function KartGrupSarmalayici({
   aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart,
   deger, setDeger, alanDegistir, detaylar, setDetaylar, alanHatalari,
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici, kaydetKal,
+  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici, kaydetKal, govdeGoster,
 }: KartGrupSarmalayiciOzellikleri) {
         const grupCiz = (sekme: typeof aktif, altBaslik?: AltGrupBaslik) => (
         <KartGrupSekmesi
@@ -85,6 +87,7 @@ export function KartGrupSarmalayici({
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
           aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
           secilenAdlar={secilenAdlar} altBaslik={altBaslik}
+          govdeGoster={govdeGoster}
         />
         );
         const govde = grupCiz(aktif);

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Onay Mekanizması (İç + Dış) — Mockup</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--selbd:#98c2ee;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b07a12;--grpbg:#fbfcfd;--ext:#7a4fb0;--extbg:#f3eefb;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px;}
+  h1{font-size:16px;margin:0 0 4px;color:var(--navy)} h2{font-size:13px;margin:22px 0 8px;color:var(--navy);display:flex;gap:8px;align-items:center}
+  h2 .no{background:var(--navy);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+  .lead{color:var(--muted);margin:0 0 10px;max-width:980px;line-height:1.45}
+  .win{max-width:980px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;}
+  .title{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(#2f5d93,#1f4573);color:#fff;font-weight:bold;font-size:12.5px}
+  .title .dot{width:8px;height:8px;border-radius:50%;background:#9cc4f2}
+  .title .right{margin-left:auto;font-weight:normal;font-size:11px;opacity:.9}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.pri{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .btn.ok{background:linear-gradient(#3f9a5e,#2e7d46);color:#fff;border-color:#276b3b}
+  .btn.danger{background:linear-gradient(#d35c5c,#b23b3b);color:#fff;border-color:#9a2f2f}
+  .btn.ext{background:linear-gradient(#9a74cf,#7a4fb0);color:#fff;border-color:#64409a}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .sepv{width:1px;background:var(--line);margin:2px 3px}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:12px;background:linear-gradient(#fff,#f5f8fb);border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)}.fld .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:23px;padding:0 6px;font-size:12px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+  .inp.big{height:26px;font-weight:bold;font-size:13px;color:var(--navy)}
+  .combo{position:relative;padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .tabs{display:flex;gap:2px;padding:6px 10px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:6px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f6f8fb;color:var(--muted);font-size:11.5px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold;margin-bottom:-1px;border-bottom:1px solid #fff}
+  .pane{padding:12px}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{background:var(--head);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:#3a4a5c;font-weight:bold;font-size:10.5px}
+  td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+  tr.sel td{background:var(--sel)}
+  .r{text-align:right}
+  .tag{display:inline-block;border-radius:10px;padding:1px 8px;font-size:10.5px;font-weight:bold;border:1px solid transparent;white-space:nowrap}
+  .tag.ic{background:#e6eef8;color:#2f5d93;border-color:#c5d7ee}
+  .tag.dis{background:var(--extbg);color:var(--ext);border-color:#d9cbee}
+  .tag.ok{background:#e4f3e8;color:var(--ok);border-color:#bfe0c8}
+  .tag.wait{background:#fff5df;color:var(--warn);border-color:#f1dca6}
+  .tag.red{background:#fbe6e6;color:var(--req);border-color:#f0c3c3}
+  .tag.gri{background:#eef1f5;color:var(--muted);border-color:#dde3ea}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px;overflow:hidden}
+  .grp>h6{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11px;color:#3a4a5c;display:flex;align-items:center;gap:8px}
+  .grp>h6 .kalem{margin-left:auto;color:var(--muted);font-weight:normal}
+  .grp .body{padding:10px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .note{background:#f3f7fb;border:1px solid #d8e4f1;color:#3a4a5c;padding:8px 10px;border-radius:3px;font-size:11.5px;margin-bottom:10px}
+  .note b{color:var(--navy)}
+  .warn{background:#fff8e8;border:1px solid #f1dca6;color:#6b4d0a;padding:8px 10px;border-radius:3px;font-size:11.5px;margin-bottom:10px}
+  /* zaman cizelgesi */
+  .tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line)}
+  .tl li{position:relative;padding:0 0 12px 14px}
+  .tl li::before{content:"";position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--line)}
+  .tl li.ok::before{background:var(--ok);border-color:var(--ok)} .tl li.wait::before{background:#fff;border-color:var(--warn)} .tl li.red::before{background:var(--req);border-color:var(--req)} .tl li.dis::before{border-color:var(--ext)}
+  .tl .t{font-size:10.5px;color:var(--muted)} .tl .k{font-weight:bold}
+  .tl .box{margin-top:4px;background:#fff;border:1px solid var(--line2);border-radius:3px;padding:6px 8px;font-size:11px}
+  /* dis onay sayfasi */
+  .ext-page{max-width:560px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;box-shadow:0 6px 22px rgba(20,40,70,.14)}
+  .ext-page .brand{padding:12px 16px;background:linear-gradient(#2f5d93,#1f4573);color:#fff;display:flex;align-items:center;gap:10px}
+  .ext-page .brand .logo{width:30px;height:30px;border-radius:6px;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:bold}
+  .ext-page .body{padding:16px}
+  .ext-page h3{margin:0 0 4px;font-size:14px;color:var(--navy)} .ext-page .sub{color:var(--muted);font-size:11.5px;margin-bottom:12px}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:4px 10px;font-size:12px;margin-bottom:12px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .chk{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:#3a4a5c;margin:8px 0}
+  .chk .bx{width:14px;height:14px;border:1px solid var(--line);border-radius:2px;background:#fff;flex:none;margin-top:1px}
+  .area{border:1px solid var(--line);border-radius:2px;background:#fff;min-height:54px;padding:6px;color:var(--muted);font-size:11.5px}
+  .sig{border:1px dashed var(--line);border-radius:3px;height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:#fbfcfd}
+  .foot{padding:10px 16px;border-top:1px solid var(--line2);background:#fbfcfd;font-size:10.5px;color:var(--muted)}
+  .mail{max-width:560px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:14px 16px;font-size:12px;line-height:1.5}
+  .mail .from{color:var(--muted);font-size:11px;margin-bottom:8px}
+  .mail .cta{display:inline-block;margin:8px 0;background:#2f6db3;color:#fff;padding:7px 14px;border-radius:3px;font-weight:bold}
+  .model{max-width:980px;margin:16px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;color:#3a4a5c}
+  .model code{background:#f3f6fa;border:1px solid #e3e9f0;border-radius:2px;padding:0 4px;font-size:11px}
+  .model ul{margin:6px 0 0 16px;padding:0} .model li{margin:3px 0}
+  .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+  .flow .st{border:1px solid var(--line);border-radius:14px;padding:4px 10px;background:#fff;font-size:11px}
+  .flow .st.dis{border-color:#d9cbee;background:var(--extbg);color:var(--ext)} .flow .st.ic{border-color:#c5d7ee;background:#e6eef8;color:#2f5d93}
+  .flow .ar{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<h1>Onay Mekanizması — İç ve Dış Onaylar Tek Zincirde</h1>
+<p class="lead">
+  Teklifte <b>basamaklı akış yok</b> (kullanıcı kararı 09.11.2026): teklifi hazırlayan kişi <b>onaylayacak kişiyi kendisi seçer</b> ve
+  "Onaya Sun" der; onaylayan Onayımdakiler kutusunda görür, Onayla / Reddet / Bilgi iste. Bu, mevcut onay motorunun <b>akışsız tek basamak</b>
+  kullanımıdır (vekâlet, süre, gelen kutusu, log aynen çalışır). İç onaydan sonra teklif müşteriye gider; <b>dış onay</b> (müşterinin yetkilisi)
+  oturumsuz tek kullanımlık bağlantıyla ya da portal kutusuyla karar verir. Kanıt (kim, ne zaman, IP, kanal, kabul metni) aynı
+  <code>onay_adim</code> satırına yazılır. Aynı dış onay deseni sözleşme, sipariş onayı, tedarikçi fiyat onayı için tekrar kullanılır.
+</p>
+
+<div class="flow">
+  <span class="st">Hazırlayan: <b>Onaya Sun</b> <small>(onaylayanı seçer)</small></span><span class="ar">→</span>
+  <span class="st ic">① İç: Seçilen onaylayan <small>(Onayımdakiler)</small></span><span class="ar">→</span>
+  <span class="st">Teklif durumu: <b>Sunuldu</b> + müşteriye gönder</span><span class="ar">→</span>
+  <span class="st dis">② Dış: Müşteri yetkilisi <small>(e-posta bağlantısı · 7 gün)</small></span><span class="ar">→</span>
+  <span class="st">Kabul / Red / Revizyon iste → R2</span>
+</div>
+
+<!-- ================================================================ 1) ONAYA SUN -->
+<h2><span class="no">1</span> "Onaya Sun" penceresi — hazırlayan onaylayanı seçer</h2>
+<p class="lead">Teklif kartının araç çubuğundan açılır. Akış tanımı, eşik, basamak yok: tek onaylayan (kullanıcı), isteğe bağlı not ve son tarih. Onaylayan kişi
+<b>Onayımdakiler</b> kutusunda görür; vekâleti varsa vekile düşer. Gönderince teklif <i>Onayda</i> durumuna geçer, kalemler kilitlenir. Dış onay ayarları
+(kanal, geçerlilik, OTP, metin) ise kurum geneli tek yerden - "Dış Onay Ayarları" sekmesi burada bilgi için gösterilir.</p>
+<div class="win" style="max-width:720px">
+  <div class="title"><span class="dot"></span> Onaya Sun — Satış Teklifi 000000002 · R1 <span class="right">46.199,78 TL · Granit Bilgisayar</span></div>
+  <div class="tabs" data-grp="sun"><span class="tab active" data-t="ic">İç Onay</span><span class="tab" data-t="dis">Dış Onay Ayarları</span><span class="tab" data-t="sablon">Bildirim Şablonları</span></div>
+  <div class="pane" data-pane="sun:ic">
+    <div class="hdr" style="grid-template-columns:1fr 1fr;padding:0 0 10px;background:none;border:0">
+      <div class="fld"><label class="req">Onaylayacak kişi</label><div class="inp combo">S. Kaya — Satış Müdürü</div></div>
+      <div class="fld"><label>Son tarih</label><div class="inp">11.11.2026 <small style="color:var(--muted);margin-left:6px">(2 iş günü)</small></div></div>
+      <div class="fld" style="grid-column:1/3"><label>Not (onaylayana)</label><div class="area" style="color:var(--ink)">Bayi fiyatı uygulandı, iskonto %12. Müşteri 15 Kasım'a kadar karar verecek.</div></div>
+      <div class="fld"><label>Bildirim</label><div class="inp">Uygulama içi + e-posta</div></div>
+      <div class="fld"><label>Onaylanınca</label><div class="inp combo">Müşteriye otomatik gönder (dış onay bağlantısı)</div></div>
+    </div>
+    <div class="note"><b>Vekâlet:</b> S. Kaya 10-12 Kasım izinli → onay <b>A. Yılmaz</b>'a düşer (onay_vekalet). Onaylayan "Bilgi iste" derse teklif hazırlayana döner, kalem kilidi açılır.</div>
+    <div class="toolbar" style="border:0;background:transparent;padding:0;gap:6px"><span class="btn pri">✍️ Onaya Sun</span><span class="btn ghost">Vazgeç</span></div>
+  </div>
+  <div class="pane" data-pane="sun:dis" style="display:none">
+    <div class="hdr" style="grid-template-columns:1fr 1fr;padding:0;background:none;border:0">
+      <div class="fld"><label>Varsayılan kanal</label><div class="inp combo">E-posta bağlantısı (yedek SMS)</div></div>
+      <div class="fld"><label>Geçerlilik</label><div class="inp">7 gün</div></div>
+      <div class="fld"><label>Hatırlatma</label><div class="inp">Son 2 gün kala · 1 kez</div></div>
+      <div class="fld"><label>Doğrulama</label><div class="inp combo">E-posta OTP · yedek VKN/TCKN son 4</div></div>
+      <div class="fld"><label>Yanlış deneme</label><div class="inp">5 → bağlantı kapanır</div></div>
+      <div class="fld"><label>Süre dolunca</label><div class="inp combo">Hazırlayana düşer (sözlü onay / yeniden gönder)</div></div>
+      <div class="fld"><label>Seçenekler</label><div class="inp">Onayla · Reddet · Revizyon iste</div></div>
+      <div class="fld"><label>İmza</label><div class="inp combo">Çizim (ops.)</div></div>
+      <div class="fld" style="grid-column:1/3"><label>Onay metni (sürümlü)</label><div class="area" style="min-height:40px;color:var(--ink)">"Teklifi, şartları ve KVKK aydınlatma metnini okudum; kararımın kurumum adına bağlayıcı olduğunu kabul ediyorum." · v3 · 01.10.2026</div></div>
+    </div>
+    <div class="note" style="margin:8px 0 0">Kurum geneli ayar (Yönetim › Ayarlar); teklif başına değişmez. Kanıt PDF'i belgenin <b>Resim / Doküman</b> sekmesine eklenir.</div>
+  </div>
+  <div class="pane" data-pane="sun:sablon" style="display:none">
+    <table>
+      <thead><tr><th>Olay</th><th>Kanal</th><th>Kime</th><th>Şablon</th></tr></thead>
+      <tbody>
+        <tr><td>Onaya sunuldu</td><td>Uygulama içi + e-posta</td><td>Seçilen onaylayan</td><td>"{hazirlayan} teklif {belgeNo} için onayınızı istiyor ({toplam})"</td></tr>
+        <tr><td>İç karar verildi</td><td>Uygulama içi</td><td>Hazırlayan</td><td>"Teklif {belgeNo} {karar}: {not}"</td></tr>
+        <tr><td>Müşteriye gönderildi</td><td>E-posta / SMS</td><td>Müşteri yetkilisi</td><td>"Teklif {belgeNo} ({rev}) — onayınız bekleniyor" + bağlantı</td></tr>
+        <tr><td>Doğrulama kodu</td><td>E-posta / SMS</td><td>Müşteri yetkilisi</td><td>"Doğrulama kodunuz: {otp} (10 dk)"</td></tr>
+        <tr><td>Hatırlatma</td><td>E-posta</td><td>Müşteri yetkilisi</td><td>"Teklif {belgeNo} için son 2 gün"</td></tr>
+        <tr><td>Dış karar verildi</td><td>Uygulama içi + e-posta</td><td>Hazırlayan</td><td>"{cari} teklifi {karar}: {not}"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================================================================ 2) TEKLIF KARTI ONAY SEKMESI -->
+<h2><span class="no">2</span> Teklif Kartı — "Onay" sekmesi (Geçmiş'in yanında)</h2>
+<p class="lead">Onayın durumu kartın içinde okunur; aksiyonlar araç çubuğunda. "Onaya Sun" seçilen kişiye tek iç onay açar; onaylanınca "Müşteriye Gönder" dış onayı açar (bağlantı üretir, e-posta/SMS atar; ayarda "otomatik" ise kendiliğinden). Geçmiş sekmesi her kararı ayrıca log olarak gösterir.</p>
+<div class="win">
+  <div class="title"><span class="dot"></span> Satış Teklifi — 000000002 · R1 <span class="right">Durum: Sunuldu · İç onay tamam · Müşteride</span></div>
+  <div class="toolbar">
+    <span class="btn pri">💾 Kaydet</span><span class="btn">🗑 Sil</span><span class="sepv"></span>
+    <span class="btn">✍️ Onaya Sun</span><span class="btn ext">📨 Müşteriye Gönder (dış onay)</span><span class="btn">⟳ Hatırlat</span><span class="btn">✎ Revize Et (R2)</span><span class="btn">⇢ Siparişe Dönüştür</span>
+    <span class="btn ghost" style="margin-left:auto">✖ Kapat</span>
+  </div>
+  <div class="tabs" data-grp="teklif"><span class="tab" data-t="kalem">Kalemler <small>3</small></span><span class="tab" data-t="donusum">Belgeye Dönüşüm</span><span class="tab" data-t="dokuman">Resim / Doküman</span><span class="tab active" data-t="onay">Onay <small>●</small></span><span class="tab" data-t="gecmis">Geçmiş</span></div>
+  <div class="pane" data-pane="teklif:kalem" style="display:none">
+    <table>
+      <thead><tr><th>#</th><th>Ürün / Hizmet</th><th class="r">Miktar</th><th>Birim</th><th class="r">Br. Fiyat</th><th class="r">İsk.%</th><th class="r">KDV</th><th class="r">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Cihaz X-200</td><td class="r">5</td><td>Adet</td><td class="r">8.339,96</td><td class="r">12</td><td class="r">%10</td><td class="r">36.695,82</td></tr>
+        <tr><td>2</td><td>Kurulum hizmeti</td><td class="r">1</td><td>Adet</td><td class="r">150,00</td><td class="r">—</td><td class="r">%10</td><td class="r">150,00</td></tr>
+        <tr><td>3</td><td>Eğitim</td><td class="r">1</td><td>Adet</td><td class="r">150,00</td><td class="r">—</td><td class="r">%10</td><td class="r">150,00</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="7" class="r"><b>Genel toplam (KDV dahil)</b></td><td class="r"><b>46.199,78</b></td></tr></tfoot>
+    </table>
+    <div class="warn" style="margin-top:10px">Teklif <b>onayda / müşteride</b> iken kalemler kilitlidir; değişiklik için <b>✎ Revize Et (R2)</b> - yeni revizyon açılır, eski revizyon ve kararı Geçmiş'te kalır.</div>
+  </div>
+  <div class="pane" data-pane="teklif:donusum" style="display:none">
+    <div class="note">Siparişe dönüşüm yalnız <b>Kabul</b> durumunda (dış basamak onaylandığında) açılır. Şu an: <span class="tag wait">Müşteri onayı bekleniyor</span></div>
+    <table><thead><tr><th>Hedef</th><th>Belge No</th><th>Tarih</th><th class="r">Tutar</th><th>Durum</th></tr></thead>
+      <tbody><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px">Henüz dönüşüm yok</td></tr></tbody></table>
+  </div>
+  <div class="pane" data-pane="teklif:dokuman" style="display:none">
+    <table><thead><tr><th>Dosya</th><th>Tür</th><th>Kaynak</th><th>Tarih</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Teklif_000000002_R1.pdf</td><td>PDF</td><td>Müşteriye gönderim (otomatik)</td><td>09.11.2026 14:06</td><td><span class="btn" style="display:inline-flex">👁 Aç</span></td></tr>
+        <tr><td>Onay_Kaniti_000000002_R1.pdf</td><td>PDF</td><td>Dış karar (otomatik, karar sonrası)</td><td>—</td><td><span class="tag gri">bekliyor</span></td></tr>
+        <tr><td>teknik_sartname.docx</td><td>DOCX</td><td>Kullanıcı yükledi</td><td>09.11.2026 10:02</td><td><span class="btn" style="display:inline-flex">👁 Aç</span></td></tr>
+      </tbody></table>
+  </div>
+  <div class="pane" data-pane="teklif:onay">
+    <div class="two">
+      <div class="grp">
+        <h6>Onay <span class="kalem">onaya sunan: M. Yıldız · 09.11.2026 10:12</span></h6>
+        <div class="body">
+          <ul class="tl">
+            <li class="ok"><div class="t">09.11.2026 10:12</div><div class="k">Onaya sunuldu — onaylayan: <b>S. Kaya</b> (Satış Müdürü)</div><div class="box">Not: "Bayi fiyatı uygulandı, iskonto %12." · son tarih 11.11.2026</div></li>
+            <li class="ok"><div class="t">09.11.2026 10:40 · <span class="tag ic">İç</span></div><div class="k">İç onay — <span class="tag ok">Onaylandı</span></div><div class="box">Karar veren: S. Kaya · "İskonto %12 uygun, bayi fiyatı." · teklif durumu → <b>Sunuldu</b></div></li>
+            <li class="wait dis"><div class="t">09.11.2026 14:06 · <span class="tag dis">Dış</span></div><div class="k">Müşteri onayı — <span class="tag wait">Bekliyor</span> <small>· son: 16.11.2026</small></div>
+              <div class="box">Kime: Granit Bilgisayar · <b>Ayşe Demir</b> (Onay yetkilisi) · ayse@granit.com.tr<br>
+              Kanal: e-posta bağlantısı · gönderildi 14:06 · <b>açıldı 15:22</b> (IP 88.x.x.x) · hatırlatma 14.11'de<br>
+              <span class="btn" style="display:inline-flex;margin-top:4px">⟳ Yeniden Gönder</span> <span class="btn" style="display:inline-flex;margin-top:4px">👤 Yetkiliyi Değiştir</span> <span class="btn" style="display:inline-flex;margin-top:4px">📞 Sözlü Onay Kaydet</span></div></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><h6>Dış onay bağlantısı</h6><div class="body">
+          <div class="kv"><div>Bağlantı</div><div>https://…/onay/<code>k7Qm…3f</code> <span class="tag gri">tek kullanımlık</span></div>
+          <div>Geçerlilik</div><div>16.11.2026 23:59 (7 gün)</div>
+          <div>Doğrulama</div><div>E-posta OTP (6 hane) · yedek: VKN son 4</div>
+          <div>Görünen</div><div>Teklif PDF (R1) · kalemler · toplam · şartlar</div>
+          <div>Seçenekler</div><div>Onayla · Reddet · Revizyon iste (not zorunlu)</div></div>
+          <div class="note" style="margin:0"><b>Kanıt:</b> karar anında ad-soyad, onay metni sürümü, IP, tarayıcı, zaman ve jeton kimliği <code>onay_adim</code> + <code>onay_dis_kanit</code>'a yazılır; PDF özeti belgenin dokümanlarına eklenir.</div>
+        </div></div>
+        <div class="grp"><h6>Portal kullanıcısı varsa</h6><div class="body">Aynı kişi portal hesabıyla girerse karar <b>Portal › Onayımdakiler</b> kutusuna düşer (iç kutunun dar sürümü: yalnız kendi kurumunun kayıtları, hasta/kalem gizliliği korunur). Bağlantı ve portal aynı basamağı kapatır; hangisi önce karar verirse o geçerli.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pane" data-pane="teklif:gecmis" style="display:none">
+    <table>
+      <thead><tr><th style="width:140px">Tarih</th><th style="width:150px">Kullanıcı</th><th style="width:220px">Olay</th><th>Ayrıntı</th></tr></thead>
+      <tbody>
+        <tr><td>09.11.2026 15:22</td><td><span class="tag dis">Dış</span> Ayşe Demir</td><td><b>Bağlantı açıldı</b></td><td>IP 88.x.x.x · tarayıcı Chrome · henüz karar yok</td></tr>
+        <tr><td>09.11.2026 14:06</td><td>Sistem</td><td><b>Müşteriye gönderildi</b></td><td>E-posta ayse@granit.com.tr · jeton k7Qm…3f · son 16.11.2026</td></tr>
+        <tr><td>09.11.2026 14:05</td><td>Sistem</td><td><b>Durum değişti</b></td><td>Hazırlanıyor → Sunuldu (iç zincir tamamlandı)</td></tr>
+        <tr><td>09.11.2026 10:40</td><td>S. Kaya</td><td><b>Onaylandı</b></td><td>İç onay · "İskonto %12 uygun, bayi fiyatı."</td></tr>
+        <tr><td>09.11.2026 10:12</td><td>M. Yıldız</td><td><b>Onaya sunuldu</b></td><td>Onaylayan: S. Kaya · son 11.11.2026 · "Bayi fiyatı uygulandı, iskonto %12."</td></tr>
+        <tr><td>09.11.2026 09:58</td><td>M. Yıldız</td><td><b>Kaydedildi</b></td><td>3 kalem</td></tr>
+        <tr><td>09.11.2026 09:46</td><td>M. Yıldız</td><td><b>Teklif oluşturuldu</b></td><td>No 000000002 · 3 kalem</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:10px">Bugünkü Geçmiş sekmesiyle aynı kaynak (<code>islem_log</code>); onay olayları (gönderildi · açıldı · karar) aynı loga düşer, ayrı tablo gerekmez.</div>
+  </div>
+</div>
+
+<!-- ================================================================ 3) ONAYIMDAKILER (IC) -->
+<h2><span class="no">3</span> Onayımdakiler (iç kutu) — teklif satırı</h2>
+<p class="lead">Mevcut ekran; yalnız yeni kaynak türü gelir. Teklifte basamak yok: "Kime" sütunu seçilen onaylayanı gösterir. "Onayla / Reddet / Bilgi İste" aynı; satırdan kart açılır. Müşteride bekleyenler hazırlayana <b>bilgi satırı</b> olarak görünür (karar müşteride).</p>
+<div class="win">
+  <div class="title"><span class="dot"></span> Onayımdakiler <span class="right">S. Kaya · Satış müdürü · 3 bekleyen</span></div>
+  <div class="toolbar"><span class="btn ok">✔ Onayla</span><span class="btn danger">✖ Reddet</span><span class="btn">❓ Bilgi İste</span><span class="sepv"></span><span class="btn">Tümü</span><span class="btn">Teklif</span><span class="btn">Satınalma</span><span class="btn">İzin</span></div>
+  <div class="pane">
+    <table>
+      <thead><tr><th>Kayıt</th><th>Kim istedi</th><th>Kime / Basamak</th><th>Tutar</th><th>Not</th><th>Bekliyor</th><th>Son</th><th>Dış durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td>Satış Teklifi 000000003 · Granit Bilgisayar</td><td>M. Yıldız</td><td>S. Kaya (seçildi)</td><td class="r">128.400,00 TL</td><td>"İskonto %15, yıl sonu kampanyası"</td><td>4 saat</td><td>11.11</td><td>—</td></tr>
+        <tr><td>Satış Teklifi 000000002 · Granit Bilgisayar</td><td>M. Yıldız</td><td>Müşteri yetkilisi (dış)</td><td class="r">41.999,80 TL</td><td></td><td>1 gün</td><td>16.11</td><td><span class="tag dis">Müşteride · açıldı</span></td></tr>
+        <tr><td>Satınalma Talebi 2026-0417 · Depo</td><td>E. Arslan</td><td>1/2 Birim sorumlusu</td><td class="r">18.750,00 TL</td><td></td><td>2 gün</td><td>10.11</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================================================================ 4) DIS ONAY SAYFASI -->
+<h2><span class="no">4</span> Dış onay sayfası — müşterinin gördüğü (oturumsuz, bağlantıdan)</h2>
+<p class="lead">Portal davet sayfasıyla aynı güvenlik: bağlantı tek başına yetmez, <b>iki parçalı doğrulama</b> (e-posta/SMS OTP ya da VKN/TCKN son 4). Beş yanlış denemede bağlantı kapanır; sebep söylenmez. Telefonda tek sütun.</p>
+<div class="ext-page">
+  <div class="brand"><div class="logo">U</div><div><div style="font-weight:bold">UNİVERSE MEDİKAL</div><div style="font-size:10.5px;opacity:.85">Teklif onayı · güvenli bağlantı</div></div><div style="margin-left:auto;font-size:10.5px;opacity:.85">TR · EN</div></div>
+  <div class="body">
+    <h3>Sayın Ayşe Demir,</h3>
+    <div class="sub">Granit Bilgisayar Ltd. Şti. adına <b>000000002 (R1)</b> numaralı teklifi inceleyip karar verebilirsiniz. Bağlantı <b>16.11.2026</b> tarihine kadar geçerlidir.</div>
+    <div class="kv">
+      <div>Teklif</div><div>000000002 · R1 · 09.11.2026</div>
+      <div>Geçerlilik</div><div>25.11.2026</div>
+      <div>Kalem</div><div>3 kalem — <u>PDF'i görüntüle</u></div>
+      <div>Genel toplam</div><div><b>46.199,78 TL</b> (KDV dahil)</div>
+      <div>Şartlar</div><div>Teslim 10 iş günü · Ödeme 30 gün vade · <u>Şartları oku</u></div>
+    </div>
+    <div class="grp"><h6>Doğrulama</h6><div class="body">
+      <div class="two"><div class="fld"><label>E-postanıza gelen 6 haneli kod</label><div class="inp">• • • • • •</div></div><div class="fld"><label>ya da VKN son 4 hane</label><div class="inp"></div></div></div>
+    </div></div>
+    <div class="grp"><h6>Kararınız</h6><div class="body">
+      <div class="toolbar" style="border:0;background:transparent;padding:0 0 8px;gap:8px"><span class="btn ok">✔ Teklifi Onaylıyorum</span><span class="btn">✎ Revizyon İstiyorum</span><span class="btn danger">✖ Reddediyorum</span></div>
+      <div class="fld"><label>Not (revizyon / ret için zorunlu)</label><div class="area">Ör. 2. kalemin adedini 30'a indirin, teslim 7 güne çekilsin…</div></div>
+      <div class="two" style="margin-top:8px"><div class="fld"><label class="req">Ad Soyad</label><div class="inp">Ayşe Demir</div></div><div class="fld"><label>Ünvan</label><div class="inp">Satınalma Müdürü</div></div></div>
+      <div class="sig" style="margin-top:8px">İmza (parmak / fare) — e-imza zorunlu basamakta sertifika ile</div>
+      <div class="chk"><span class="bx"></span><span>Teklifi, şartları ve <u>KVKK aydınlatma metnini</u> okudum; verdiğim kararın kurumum adına bağlayıcı olduğunu kabul ediyorum.</span></div>
+      <span class="btn pri" style="display:inline-flex">Kararı Gönder</span>
+    </div></div>
+  </div>
+  <div class="foot">Kararınız 09.11.2026 15:40'ta, IP 88.x.x.x üzerinden kayıt altına alınır ve size PDF özeti e-posta ile iletilir. Soru için: M. Yıldız · 0312 …</div>
+</div>
+
+<!-- ================================================================ 5) BILDIRIM -->
+<h2><span class="no">5</span> Bildirim — e-posta / SMS şablonu</h2>
+<div class="mail">
+  <div class="from">Kimden: UNİVERSE MEDİKAL &lt;onay@…&gt; · Kime: ayse@granit.com.tr · Konu: Teklif 000000002 (R1) — onayınız bekleniyor</div>
+  Sayın Ayşe Demir,<br>Granit Bilgisayar Ltd. Şti. için hazırladığımız <b>000000002</b> numaralı teklif onayınızı bekliyor. Teklif <b>46.199,78 TL</b> (KDV dahil), geçerlilik 25.11.2026.<br>
+  <span class="cta">Teklifi İncele ve Karar Ver</span><br>
+  Bağlantı 16.11.2026'ya kadar geçerlidir ve yalnızca size özeldir. Doğrulama kodunuz ayrı bir e-posta ile gelir.<br>
+  <small style="color:#6b7a8b">SMS sürümü: "UNİVERSE: 000000002 no'lu teklif onayınızı bekliyor (46.199,78 TL). Karar: https://…/o/k7Qm3f · 16.11'e kadar."</small>
+</div>
+
+<div class="model">
+  <b>Veri modeli (ek, mevcut motor üstüne):</b>
+  <ul>
+    <li><b>Teklifte akış tanımı yok:</b> "Onaya Sun" motora <b>akışsız tek basamak</b> açar - <code>onay.akis_id</code> boş, tek <code>onay_adim</code> (sahip_turu 2 kullanıcı, atanan = seçilen kişi, termin = son tarih, gerekçe = not). Motor (vekâlet, süre, Onayımdakiler, log) aynen çalışır; "Bilgi iste" teklifi hazırlayana geri verir.</li>
+    <li><b>Dış onay</b> ikinci bir <code>onay_adim</code> (sahip_turu <b>4 Dış taraf</b>): <code>kanal</code> (1 portal · 2 e-posta bağlantısı · 3 SMS bağlantısı · 4 elden/sözlü), <code>dis_kime</code> (1 carinin onay yetkilisi · 2 belgedeki e-posta · 3 portal kullanıcısı), <code>karar_secenekleri</code> (onayla/reddet/revizyon), <code>dogrulama</code> (otp_eposta · otp_sms · kimlik_son4). Ayarlar kurum geneli (<code>genel_ayar</code>), teklif başına değişmez.</li>
+    <li><code>onay_adim</code>: <code>dis_taraf_kisi_id</code>, <code>dis_eposta</code>, <code>dis_telefon</code>, <code>karar</code> (revizyon isteği ayrı değer), <code>revizyon_notu</code>.</li>
+    <li><b>Yeni</b> <code>onay_dis_baglanti</code>: adım · jeton (hash) · kanal · gönderim/açılma/son geçerlilik · deneme sayısı · durum. <b>Yeni</b> <code>onay_dis_kanit</code>: adım · ad-soyad · ünvan · onay metni sürümü · IP · tarayıcı · zaman · imza görseli / e-imza referansı.</li>
+    <li>Kaynak türü <b>Satış Teklifi</b> motora eklenir (uçta durum eşlemesi, 742 kuralı): onaya sunuldu → <code>teklif_durum</code> 1 + "onayda" bayrağı (kalemler kilitli), iç onay → 2 Sunuldu (+ müşteriye gönder), dış Onayla → 3 Kabul, Reddet → 4 Red; revizyon isteği <code>belge_revizyon</code> (jsonb anlık kopya) + <code>revizyon_no</code> açar — Geçmiş sekmesi planıyla aynı tablo. İleride basamaklı akış istenirse aynı motor: "Onaya Sun" yerine akış kodu verilir.</li>
+    <li>Dış uçlar oturumsuz: <code>GET/POST /api/onay/dis/{jeton}</code> (durum · OTP gönder · karar); portal için <code>portal.onay</code> yetkisi ve dar kaynak (kurumun kendi kayıtları).</li>
+    <li>İç bildirim mevcut <code>OnayBildirimi</code>; dış bildirim e-posta/SMS şablonları akış kartının "Bildirim Şablonları" sekmesinden (metin_makro).</li>
+  </ul>
+  <b>Kurallar:</b> dış basamak sözlü onayla da kapanabilir (iç kullanıcı "Sözlü Onay Kaydet" + gerekçe, log'a düşer); bağlantı ve portal aynı basamağı kapatır; süre dolunca basamak <i>süresi doldu</i> olur ve akış tanımına göre hatırlatır ya da iç kullanıcıya düşer; revizyon isteğinde kalemler kilitlenmez, yeni revizyon üzerinde çalışılır, eski revizyon ve kararı Geçmiş'te kalır.
+</div>
+
+
+<script>
+  // Sekmeler çalışır: her pencerede data-grp'li sekme çubuğu, data-pane="grp:ad" panellerini açıp kapatır.
+  document.querySelectorAll('.tabs[data-grp]').forEach(function (bar) {
+    var grp = bar.getAttribute('data-grp');
+    bar.querySelectorAll('.tab[data-t]').forEach(function (tab) {
+      tab.style.cursor = 'pointer';
+      tab.addEventListener('click', function () {
+        bar.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var hedef = grp + ':' + tab.getAttribute('data-t');
+        document.querySelectorAll('.pane[data-pane^="' + grp + ':"]').forEach(function (pane) {
+          pane.style.display = pane.getAttribute('data-pane') === hedef ? '' : 'none';
+        });
+      });
+    });
+  });
+</script>
+</body>
+</html>

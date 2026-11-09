@@ -2952,10 +2952,24 @@ begin
      Abort;
   end;
 
-  if (TekUrunNo)and(EditURUNNO.Text<>'') then begin
-     Tablo.TablodanSorguAc(1,'Select ID from STOKLAR Where ID <> '+inttostr(StokID)+' and URUNNO='''+EditURUNNO.Text+''' ');
+  // Urun no: bas/son bosluk kirpilir, icinde bosluk varsa kayit engellenir (UTS/barkod eslesmesi bozulur)
+  if TabStok.FindField('URUNNO')<>nil then begin
+     var UrunNo := Trim(TabStok.FieldByName('URUNNO').AsString);
+     if UrunNo <> TabStok.FieldByName('URUNNO').AsString then
+        TabStok.FieldByName('URUNNO').AsString := UrunNo;
+     if (Pos(' ', UrunNo) > 0) or (Pos(#9, UrunNo) > 0) or (Pos(#160, UrunNo) > 0) or
+        (Pos(#13, UrunNo) > 0) or (Pos(#10, UrunNo) > 0) then begin
+        Application.MessageBox(pchar('Ürün No içinde boşluk olamaz.'),'U Y A R I',MB_OK);
+        if EditURUNNO.Visible and EditURUNNO.CanFocus then
+           EditURUNNO.SetFocus;
+        Abort;
+     end;
+  end;
+
+  if (TekUrunNo)and(TabStok.FindField('URUNNO')<>nil)and(TabStok.FieldByName('URUNNO').AsString<>'') then begin
+     Tablo.TablodanSorguAc(1,'Select ID from STOKLAR Where ID <> '+inttostr(StokID)+' and URUNNO='''+TabStok.FieldByName('URUNNO').AsString+''' ');
      if not Tablo.Query1.IsEmpty then begin
-        Application.MessageBox(pchar(EditURUNNO.Text + STUrun_once_girilmis),PChar(Uyari),MB_OK);
+        Application.MessageBox(pchar(TabStok.FieldByName('URUNNO').AsString + STUrun_once_girilmis),PChar(Uyari),MB_OK);
         Abort;
      end;
   end;

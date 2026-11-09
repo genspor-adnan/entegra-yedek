@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type AksiyonYaniti, hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
@@ -146,12 +146,20 @@ interface SagTusProps extends CalistirProps {
 
 /** Sag tus menusu — ayni katalogdan, yalniz "sagtus" hedefli aksiyonlar. */
 export function GenSagTus({ aksiyonlar, calistir, konum, onKapat, ek }: SagTusProps) {
+  const menuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!konum) return;
-    const kapat = () => onKapat();
-    window.addEventListener('click', kapat);
-    window.addEventListener('scroll', kapat, true);
-    return () => { window.removeEventListener('click', kapat); window.removeEventListener('scroll', kapat, true) };
+    // KAYDIRMA KAPATMAZ (kullanıcı 09.11.2026: "kaydırma çubuğundan hareket ettirince sağ tık menüsü
+    //   kapanıyor" - tüm listelerde). Menü sabit konumlu (position: fixed), liste altında kayar; menü
+    //   DIŞINA tıklama ya da Esc kapatır. Kaydırma çubuğu tıklaması click üretmez, menü açık kalır.
+    const disari = (e: MouseEvent) => {
+      if (e.target instanceof Node && menuRef.current?.contains(e.target)) return;
+      onKapat();
+    };
+    const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onKapat() } };
+    window.addEventListener('click', disari);
+    window.addEventListener('keydown', tus, true);
+    return () => { window.removeEventListener('click', disari); window.removeEventListener('keydown', tus, true) };
   }, [konum, onKapat]);
 
   if (!konum) return null;
@@ -160,7 +168,7 @@ export function GenSagTus({ aksiyonlar, calistir, konum, onKapat, ek }: SagTusPr
   if (gorunen.length === 0 && !ek?.length) return null;
 
   return (
-    <div className="sag-tus" style={{ left: konum.x, top: konum.y }}>
+    <div ref={menuRef} className="sag-tus" style={{ left: konum.x, top: konum.y }}>
       {gorunen.map(a => (
         <button
           key={a.kod}

@@ -19,7 +19,6 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
   OnShow = FormShow
   TextHeight = 16
   object PageYetkilDetay: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 674
     Top = 0
     Width = 546
@@ -28,6 +27,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     TabOrder = 0
     Properties.ActivePage = cxTabSheet1
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     ClientRectBottom = 598
     ClientRectLeft = 4
     ClientRectRight = 542
@@ -35,6 +35,10 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     object cxTabSheet1: TcxTabSheet
       Caption = 'Rol'#252'n Yetkileri'
       ImageIndex = 29
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelRol: TPanel
         Left = 0
         Top = 33
@@ -211,6 +215,10 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
             object TabSheetSecim: TcxTabSheet
               Caption = 'Se'#231'im'
               ImageIndex = 19
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object RadioGroupSecim: TcxDBRadioGroup
                 Left = 0
                 Top = 0
@@ -247,6 +255,10 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
             object TabSheetDemirbas: TcxTabSheet
               Caption = 'Demirba'#351' Kategori'
               ImageIndex = 12
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object RadioGroupDemirbas: TcxDBRadioGroup
                 Left = 0
                 Top = 0
@@ -336,7 +348,6 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     Control = PageOrganizasyon
   end
   object PageKullan: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 393
     Top = 0
     Width = 273
@@ -345,6 +356,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     TabOrder = 2
     Properties.ActivePage = cxTabSheet2
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     ClientRectBottom = 598
     ClientRectLeft = 4
     ClientRectRight = 269
@@ -352,6 +364,10 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     object cxTabSheet2: TcxTabSheet
       Caption = 'Roldeki Kullan'#305'c'#305'lar'
       ImageIndex = 35
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar3: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -456,7 +472,6 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     Control = PageKullan
   end
   object PageOrganizasyon: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 385
@@ -465,6 +480,7 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     TabOrder = 4
     Properties.ActivePage = cxTabSheet3
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     ClientRectBottom = 598
     ClientRectLeft = 4
     ClientRectRight = 381
@@ -472,6 +488,10 @@ object KullaniciYetkiDlg: TKullaniciYetkiDlg
     object cxTabSheet3: TcxTabSheet
       Caption = 'Organizasyon / Roller'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3

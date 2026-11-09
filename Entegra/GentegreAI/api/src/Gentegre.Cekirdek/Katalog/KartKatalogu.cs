@@ -197,7 +197,22 @@ public sealed record DetayTanimi(
     //   "ben dis hekimim" kutusu isaretlettirmek, ayni tabloyu paylasan iki
     //   kart arasindaki farki kullanicinin sorumluluguna atmak olurdu.
     //   ANAHTAR DB KOLONU (alan adi degil) - dogrudan insert'e girer.
-    IReadOnlyDictionary<string, object?>? YeniSatirVarsayilanlari = null
+    IReadOnlyDictionary<string, object?>? YeniSatirVarsayilanlari = null,
+    // YENİ KARTTA ÖN SATIRLAR (kullanıcı 09.11.2026: "yeni stok kartı oluşturduğumda fiyatlar sekmesinde
+    //   aktif alış/satış fiyatlarına göre satırlar gelmeli"): KATALOGDA yazılı, parametresiz SQL; kolon
+    //   adları detay ALAN adlarıdır (çift tırnaklı alias). Meta ile yeni karta satır olarak gider, kullanıcı
+    //   boşları doldurur. İstekten SQL gelmez - yalnız bu ifade çalışır.
+    string? YeniKartSatirSql = null,
+    // BOŞ SATIR ATLANIR: eklenen satırda bu alan boş / 0 ise satır YAZILMAZ ve "değişiklik" sayılmaz -
+    //   ön satırlardan doldurulmayanlar sessizce düşer (fiyat girilmeyen liste satırı açılmaz).
+    string? BosAtlaAlani = null,
+    // GRID KİPİ (kullanıcı: "fiyatlar sekmesini gengrid yap"): sekme liste gridi gibi çizilir - salt
+    //   görünüm, modal düzenleme, ikonlu başlık, kolon menüsü. Ekrana özel koşul yerine katalogdan.
+    bool GridKipi = false,
+    // ANINDA KAYIT (kullanıcı 09.11.2026: "fiyatları girip kaydet dediğimde stok kartının kaydet butonuna gerek
+    //   kalmadan kaydedilmeli"): KAYITLI kartta bu sekmedeki satır değişikliği (modal Kaydet / sil) kartın
+    //   kaydını hemen tetikler. Yeni kartta kart kaydıyla gider.
+    bool AnindaKaydet = false
 )
 {
     public string Etiket => Baslik ?? (Ad.Length > 0 ? char.ToUpperInvariant(Ad[0]) + Ad[1..] : Ad);

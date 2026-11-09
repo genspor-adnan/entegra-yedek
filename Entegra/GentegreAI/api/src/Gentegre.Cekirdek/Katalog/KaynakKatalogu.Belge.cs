@@ -149,6 +149,9 @@ public static partial class KaynakKatalogu
             new("belgeTarihi",   "b.belge_tarihi",   "tarih", "Tarih",       Hizalama: "orta",
                                                                 Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
+            // CARİ HÜCRESİ -> KART (09.11.2026): taraf hasta ise hasta kartı, değilse müşteri/tedarikçi kartı.
+            new("tarafHasta",    "coalesce((select t.hasta from public.taraf t where t.id = b.taraf_id), 0)",
+                                                      "sayi", "Taraf Hasta", Varsayilan: false),
             new("tarafUnvan",    "b.taraf_unvan",    "metin", "Cari",        Genislik: 260),
             // KAYNAK / HEDEF: donusum zincirinin iki ucu (irsaliye listesindeki
             //   ile ayni). Kaynak baslik bagindan; hedef SATIR bagindan turer -
@@ -510,6 +513,16 @@ public static partial class KaynakKatalogu
                 "            join public.belge hb on hb.id = hs.belge_id " +
                 "           where ks.belge_id = b.id and hb.durum <> 2), 0)",
                                                       "sayi", "Hedef Id", Varsayilan: false),
+            // KAYNAK / HEDEF TÜRÜ (kullanıcı 09.11.2026: "kaynak ve hedefe tıklandığında oradaki belgeyi yeni
+            //   sekmede açsın"): istemci türden kart rotasını bulur (fatura, irsaliye, sipariş...). Hedef türü,
+            //   hedefId ile AYNI belgenin (en küçük id) türü.
+            new("kaynakTur",     "coalesce(kb.tur, 0)",      "sayi", "Kaynak Tür", Varsayilan: false),
+            new("hedefTur",
+                "coalesce((select hb.tur from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "           where ks.belge_id = b.id and hb.durum <> 2 order by hs.belge_id limit 1), 0)",
+                                                      "sayi", "Hedef Tür", Varsayilan: false),
             // DURUM EN SONDA (kullanici 11.10.2026: "Durum sütununu da sona al").
             new("durumAdi",
                 """
@@ -621,6 +634,26 @@ public static partial class KaynakKatalogu
                                                       "metin", "Hedef",     Genislik: 190,
                                                       Siralanabilir: false, Filtrelenebilir: false),
             new("kaynakBelgeNo", "kb.belge_no",      "metin", "Kaynak Belge No", Varsayilan: false),
+            // KAYNAK / HEDEF KİMLİĞİ + TÜRÜ (kullanıcı 09.11.2026): hücreye tıklayınca o belge yeni sekmede
+            //   açılır - `belge` kaynağıyla aynı tanım.
+            new("kaynakId",      "coalesce(b.kaynak_id, 0)", "sayi", "Kaynak Id", Varsayilan: false),
+            new("kaynakTur",     "coalesce(kb.tur, 0)",      "sayi", "Kaynak Tür", Varsayilan: false),
+            new("tarafId",       "b.taraf_id",       "sayi",  "Cari Id",     Varsayilan: false),
+            // CARİ HÜCRESİ -> KART (09.11.2026): taraf hasta ise hasta kartı, değilse müşteri/tedarikçi kartı.
+            new("tarafHasta",    "coalesce((select t.hasta from public.taraf t where t.id = b.taraf_id), 0)",
+                                                      "sayi", "Taraf Hasta", Varsayilan: false),
+            new("hedefId",
+                "coalesce((select min(hs.belge_id) from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "           where ks.belge_id = b.id and hb.durum <> 2), 0)",
+                                                      "sayi", "Hedef Id", Varsayilan: false),
+            new("hedefTur",
+                "coalesce((select hb.tur from public.belge_satir hs " +
+                "            join public.belge_satir ks on ks.id = hs.kaynak_id and hs.kaynak_tur = 30 " +
+                "            join public.belge hb on hb.id = hs.belge_id " +
+                "           where ks.belge_id = b.id and hb.durum <> 2 order by hs.belge_id limit 1), 0)",
+                                                      "sayi", "Hedef Tür", Varsayilan: false),
             // Plaka ve sofor tek kolonda: mockup "07 ABC 145 / Hasan Celik" gosteriyor.
             new("aracSofor",
                 "case when btrim(sv.arac_plaka || sv.sofor_ad) = '' then '' " +

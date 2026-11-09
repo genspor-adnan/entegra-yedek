@@ -2,6 +2,7 @@ import { api } from '../../api/istemci';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { UtsBelgeBildirimYaniti } from '../../api/istemci';
+import { TEKLIF_DURUMLARI } from '../belgeSabitleri';
 
 /**
  * BELGE VE KART AKSIYONLARI (belge · cari · aday · stok · hesap).
@@ -332,6 +333,24 @@ Bu işlem geri alınamaz. `
           if (y.gelen.il) satirlar.push(`${y.gelen.adres} ${y.gelen.ilce} / ${y.gelen.il}`);
         }
         mesaj(satirlar.join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
+    // DURUMU DEĞİŞTİR (kullanıcı 09.11.2026: "satış teklif listesine Durumu Değiştir butonu ekle, kart açılmadan
+    //   durumu değiştirebilelim"): seçim penceresi mevcut durumla açılır, sunucu yazar + loglar, liste tazelenir.
+    case 'belge.teklif-durum': {
+      if (!satir) return true;
+      const simdiki = String(satir.teklifDurum ?? 1);
+      const secim = await listeSor(
+        `${String(satir.belgeNo ?? '')} · ${String(satir.tarafUnvan ?? '')}
+Teklif durumu:`,
+        Object.entries(TEKLIF_DURUMLARI).map(([kod, ad]) => ({ kod, ad })), simdiki, 'Durum');
+      if (secim === null || secim === simdiki) return true;
+      await guvenli(async () => {
+        const y = await api.belgeTeklifDurum(Number(satir.id), Number(secim));
+        if (y.uyarilar?.length) mesaj(y.uyarilar.join('\n'));
         b.tazele();
       });
       return true;

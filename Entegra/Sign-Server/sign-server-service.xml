@@ -1,0 +1,10 @@
+<service>
+  <id>GenSigner</id>
+  <name>GenSigner</name>
+  <description>GenSigner Service</description>
+  <!-- %BASE% is a special WinSW variable that resolves to the directory where the executable is located -->
+  <executable>%BASE%\jre\bin\java.exe</executable>
+  <arguments>-Dquarkus.http.host=0.0.0.0 -jar "%BASE%\quarkus-app\quarkus-run.jar"</arguments>
+  <log mode="roll"></log>
+  <onfailure action="restart" delay="10 sec"/>
+</service>

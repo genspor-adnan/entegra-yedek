@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import { type ReactNode, useEffect, useState } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
@@ -39,6 +39,8 @@ export interface KartDetaySekmesiOzellikleri {
   setSatirKategori(v: { id: number; agac: number[]; ad: string } | null): void;
   satirKategorileri?: Set<number>;
   setSeciliSatirlar(v: ReadonlySet<number>): void;
+  /** ANINDA KAYIT (katalog anindaKaydet): kayıtlı kartta sekme satırı değişince GenForm kartı hemen kaydeder. */
+  onAnindaKaydet?(ad: string): void;
   /** Ekran sekmenin altina kendi panelini ekleyebilir (muayene sonuclari). */
   sekmeSarmalayici?(baslik: string, icerik: ReactNode,
                     deger: Record<string, Deger>, izgaraCiz?: undefined, parcalar?: undefined,
@@ -58,8 +60,46 @@ export function KartDetaySekmesi({
   detaylar, setDetaylar, detaySayfa, detayToplam, detaySayfaYuk,
   detaySayfaDegis, detaySuzgecUygula, detaySecenekleri,
   satirKategori, setSatirKategori, satirKategorileri,
-  setSeciliSatirlar, sekmeSarmalayici,
+  setSeciliSatirlar, sekmeSarmalayici, onAnindaKaydet,
 }: KartDetaySekmesiOzellikleri) {
+  // STOK FİYATLAR (kullanıcı 09.11.2026): liste seçilince Yön / KDV listeden gelsin - listeler bir kez okunur.
+  // Hizmet kartı da aynı desen (09.11.2026): fiyat_listesi_satir detayı, birim kartın birimi.
+  const stokFiyatMi = (kaynak === 'stok' || kaynak === 'hizmet') && aktif.tur === 'detay' && aktif.detay.ad === 'fiyatlar';
+  const [listeBilgi, setListeBilgi] = useState<Record<string, { yonAdi: string; kdvDahilAdi: string }>>({});
+  useEffect(() => {
+    if (!stokFiyatMi) return;
+    let iptal = false;
+    void api.liste('fiyat-listesi', { sayfa: 1, boyut: 500 }).then(y => {
+      if (iptal) return;
+      const m: Record<string, { yonAdi: string; kdvDahilAdi: string }> = {};
+      for (const s of y.satirlar) {
+        const yon = s.yon, kdv = s.kdvDahil;
+        m[String(s.id)] = {
+          yonAdi: typeof yon === 'string' && isNaN(Number(yon)) ? yon : Number(yon) === 1 ? 'Alış' : 'Satış',
+          kdvDahilAdi: typeof kdv === 'string' && isNaN(Number(kdv)) ? kdv : Number(kdv) === 1 ? 'Dahil' : 'Hariç',
+        };
+      }
+      setListeBilgi(m);
+    }).catch(() => { /* bilgi amaçlı - okunamazsa sütun kayıtta sunucudan dolar */ });
+    return () => { iptal = true };
+  }, [stokFiyatMi]);
+  /**
+   * Stok Fiyatlar modal kuralı: açılışta (alan '') durum Aktif, birim kartın ana birimi, döviz TL;
+   * liste değişince Yön / KDV listenin bilgisi. Dolu alan ezilmez.
+   */
+  const stokFiyatKurali = (alan: string, v: unknown, taslak: Record<string, unknown>) => {
+    const ek: Record<string, unknown> = {};
+    if (alan === '') {
+      if (taslak.durum === '' || taslak.durum === undefined || taslak.durum === null) ek.durum = 1;
+      const kartBirimi = deger.anaBirim ?? deger.birim;
+      if (!taslak.birim && kartBirimi) ek.birim = kartBirimi;
+      if (!taslak.dovizCinsi) ek.dovizCinsi = 'TL';
+    }
+    const listeId = alan === 'listeId' ? v : taslak.listeId;
+    const b = listeId ? listeBilgi[String(listeId)] : undefined;
+    if (b && (alan === 'listeId' || !taslak.yonAdi)) { ek.yonAdi = b.yonAdi; ek.kdvDahilAdi = b.kdvDahilAdi }
+    return Object.keys(ek).length ? ek : null;
+  };
         /**
          * GRID KIPI: satir ici duzenleme yerine SECIM KUTUSU + ust satirda
          * ekle/duzenle/sil + grid menusu (kolonlar / CSV) - liste
@@ -72,6 +112,8 @@ export function KartDetaySekmesi({
          */
         const ayar = detaySecenekleri?.[aktif.detay.ad];
         const gridKipi = ayar?.gridKipi
+          // KATALOGDAN (DetayTanimi.GridKipi, kullanıcı: "fiyatlar sekmesini gengrid yap").
+          || !!aktif.detay.gridKipi
           || (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
           || kaynak === 'prim-plani'
           // DOKUMAN (419, kullanici: "gridleri gengrid readonly yap"): tum
@@ -139,13 +181,17 @@ export function KartDetaySekmesi({
           silGizli={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
           saltOkunur={salt || aktif.detay.saltOkunur || !!ayar?.salt}
           hatalar={alanHatalari}
-          onDegis={yeni => setDetaylar(t => ({
-            ...t,
-            [aktif.detay.ad]:
-              kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-                && Number(deger.tarifeTipi) === 2
-                ? ttbFiyatTuret(yeni) : yeni,
-          }))}
+          onDegis={yeni => {
+            setDetaylar(t => ({
+              ...t,
+              [aktif.detay.ad]:
+                kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+                  && Number(deger.tarifeTipi) === 2
+                  ? ttbFiyatTuret(yeni) : yeni,
+            }));
+            // ANINDA KAYIT (katalog): kayıtlı kartta modal Kaydet / sil kartı hemen yazar (GenForm karar verir).
+            if (aktif.detay.anindaKaydet) onAnindaKaydet?.(aktif.detay.ad);
+          }}
           // Fiyat listesi satirlari SALT GORUNUM + modal duzenleme: satir ici
           //   kipte her satir stok (5.000+) ve hizmet (3.700+) lookup'unu ayri
           //   <select> olarak cizer - 1.438 satirlik listede ~12 MILYON DOM
@@ -312,6 +358,7 @@ export function KartDetaySekmesi({
             : undefined}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? ((alan, v, taslak) => fiyatSatirKurali(alan, v, taslak, deger))
+            : stokFiyatMi ? stokFiyatKurali
             : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
           cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'

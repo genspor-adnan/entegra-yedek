@@ -207,6 +207,14 @@ export interface KartDetayMeta {
   tekSatir?: boolean;
   /** Sayfa boyu (525); 0/bos ise detay tek seferde gelir. */
   sayfaBoyu?: number;
+  /** YENİ kartta sekmeye hazır gelen satırlar (id'siz) - katalog YeniKartSatirSql. */
+  yeniSatirlar?: Record<string, unknown>[] | null;
+  /** Eklenen satırda bu alan boş / 0 ise satır gönderilmez ve değişiklik sayılmaz. */
+  bosAtlaAlani?: string | null;
+  /** Sekme grid kipinde (salt görünüm + modal düzenleme + ikonlu başlık). */
+  gridKipi?: boolean;
+  /** Kayıtlı kartta sekmedeki satır değişikliği kartın kaydını hemen tetikler. */
+  anindaKaydet?: boolean;
 }
 
 /** Sayfali detayin bir sayfasi (525). */

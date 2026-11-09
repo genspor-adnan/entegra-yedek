@@ -456,8 +456,8 @@ begin
    // Log diff icin eski degerleri sakla (dialog Subesi/Departman/Gorev'i EZER).
    LOldSube  := TabRol.FieldByName('SUBEID').AsString;
    LOldDep   := TabRol.FieldByName('DEPARTMAN').AsString;
-   LOldGorev := TabRol.FieldByName('GOREVID').AsString;
-   LOldTY    := IntToStr(TabRol.FieldByName('TY').AsInteger);
+   LOldGorev  := TabRol.FieldByName('GOREVID').AsString;
+   LOldTY     := IntToStr(Ord(TabRol.FieldByName('TY').AsBoolean));   // TY bit -> TBooleanField, AsInteger desteklemez
 //   bilgi := TabRol.FieldByName('ROL').AsString;
    if TabRol.FieldByName('TY').AsBoolean then
      TamYetki := 1

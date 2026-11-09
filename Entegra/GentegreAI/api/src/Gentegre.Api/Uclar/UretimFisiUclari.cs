@@ -518,7 +518,7 @@ public static partial class UretimFisiUclari
             await using var b = await veri.AcAsync(iptal);
             var bas = await BaslikOkuAsync(b, null, id, iptal);
             const string lotSql = """
-                select i.belge_id, st.kod, st.ad, l.lot_no, l.seri_no, l.son_kullanma_tarihi, i.adet,
+                select i.belge_id, st.kod, st.ad, l.lot_no, l.seri_no, l.son_kullanma_tarihi::date, i.adet,
                        coalesce((select tb.unvan from public.taraf tb
                                    join public.belge_satir gs on gs.belge_id = i.belge_id and gs.stok_id = i.stok_id
                                    join public.belge gb on gb.id = (select x.belge_id from public.belge_satir x where x.id = (

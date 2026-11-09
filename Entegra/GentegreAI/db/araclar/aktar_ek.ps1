@@ -167,5 +167,9 @@ Psql "select public.fn_aktar_kisi_listeleri()" | ForEach-Object { Write-Host $_ 
 # E-BELGE AYARLARI (1185): REHBERALIAS 151/150/141 -> taraf efatura / alias / e-arsiv e-posta / e-irsaliye.
 Adim "public.fn_aktar_ebelge_alias()"
 Psql "select public.fn_aktar_ebelge_alias()" | ForEach-Object { Write-Host $_ }
+# FIYAT LISTELERI (1280): Delphi fiyat adlari (stok_fiyat / hizmet_fiyat, fiyat > 0) -> fiyat_listesi + satir;
+#   adlar 1180'in kurdugu -1007/-1008 kod listelerinden. Idempotent, var olan satiri ezmez.
+Adim "public.fn_aktar_fiyat_listesi()"
+Psql "select public.fn_aktar_fiyat_listesi()" | ForEach-Object { Write-Host $_ }
 Write-Host ""
 Write-Host "Bitti." -ForegroundColor Green

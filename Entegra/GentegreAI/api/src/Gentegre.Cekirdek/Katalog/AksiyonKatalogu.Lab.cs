@@ -649,6 +649,10 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
             new("belge.sil",  "🗑 Sil",         "belge", Kisayol: "Del",
                 KaynakKodu: "belge", Islem: Islem.Sil, KayitGerekir: true, Sira: 25),
+            // DURUMU DEĞİŞTİR (kullanıcı 09.11.2026): kart açılmadan teklif akış durumu (Hazırlanıyor / Sunuldu /
+            //   Kabul / Red / İptal). Belgeyi değiştirme yetkisi; uç POST /api/belge/{id}/teklif-durum.
+            new("belge.teklif-durum", "◐ Durumu Değiştir", "belge",
+                KaynakKodu: "belge", Islem: Islem.Degistir, KayitGerekir: true, Sira: 28),
             // Teklif -> siparis (KABUL sartiyla; istemci ve sunucu dogrular).
             new("belge.donustur", "⇢ Siparişe Dönüştür", "belge",
                 AksiyonYetkisi: "belge.donustur", KayitGerekir: true, Sira: 30),

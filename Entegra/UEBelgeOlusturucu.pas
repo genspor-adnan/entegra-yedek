@@ -4111,105 +4111,82 @@ end;
 function SonrakiSiraNo(AID, ATur: Integer; const ASeri: string;
   AYil: Integer; out ASeq: Int64): Boolean;
 var
-  LAdet, LBaslangic, LGonderilmisAdet: Integer;
-  LIlkBosluk, LSonraki: Int64;
-  LSeriYil, LBelgeTuruList: string;
-  LStartStr, LSecim: Variant;
+  LSonGonderilen, LIlkBos: Int64;
+  LSeriYil, LKSql, LBelgeTuruList: string;
+  LStartStr: Variant;
   LCtrls: TGirdiDenetimleri;
-  LSecenekler: TStringList;
+
+  // ABas'tan baslayip hazirlanmis (FATBASLIK'ta kullanilan) no'lari atlayarak
+  // ilk bos sira no.
+  function IlkBosNo(ABas: Int64): Int64;
+  begin
+    Tablo.TablodanSorguAc(1, LKSql +
+      'select BOS=min(C.X) from (select X=' + IntToStr(ABas) +
+      ' union all select N+1 from K where N>=' + IntToStr(ABas) + ') C ' +
+      'where not exists (select 1 from K where K.N=C.X)');
+    Result := Tablo.Query1.FieldByName('BOS').AsLargeInt;
+    Tablo.Query1.Close;
+  end;
+
 begin
   Result := False;
   ASeq := 0;
   LSeriYil := ASeri + IntToStr(AYil);
 
-  // Mevcut (gonderilmis veya olusturulmus, sifirlanmamis) numaralari oku.
-  // ILKBOSLUK: serideki ilk bos numara. SONRAKI: en buyuk numara + 1.
-  // Hic gonderilmis belge yoksa ve bu iki aday farkliysa kullanici secer.
-  if AktifVeriMotor = vmPG then
-    Tablo.TablodanSorguAc(1,
-      'with K as (select cast(right(FATURANO,9) as bigint) as N, EFATURADURUM ' +
-      'from FATBASLIK where ID<>' + IntToStr(AID) +
-      ' and TUR=' + IntToStr(ATur) +
-      ' and length(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
-      ' and right(FATURANO,9) ~ ''^[0-9]+$'') ' +
-      'select (select count(*) from K) as ADET, ' +
-      '(select count(*) from K where EFATURADURUM in (2,12,52)) as GONDERILMIS, ' +
-      'coalesce(coalesce(' +
-      '(select min(K.N+1) from K where K.N<(select max(N) from K) ' +
-      'and not exists (select 1 from K K2 where K2.N=K.N+1)), ' +
-      '(select case when min(N)>1 then min(N)-1 end from K), ' +
-      '(select max(N)+1 from K)),1) as ILKBOSLUK, ' +
-      'coalesce((select max(N)+1 from K),1) as SONRAKI')
-  else
-    Tablo.TablodanSorguAc(1,
-      'with K as (select try_convert(bigint,right(FATURANO,9)) as N, EFATURADURUM ' +
-      'from FATBASLIK where ID<>' + IntToStr(AID) +
-      ' and TUR=' + IntToStr(ATur) +
-      ' and len(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
-      ' and try_convert(bigint,right(FATURANO,9)) is not null) ' +
-      'select ADET=(select count(*) from K), ' +
-      'GONDERILMIS=(select count(*) from K where EFATURADURUM in (2,12,52)), ' +
-      'ILKBOSLUK=isnull(coalesce(' +
-      '(select min(K.N+1) from K where K.N<(select max(N) from K) ' +
-      'and not exists (select 1 from K K2 where K2.N=K.N+1)), ' +
-      '(select case when min(N)>1 then min(N)-1 end from K), ' +
-      '(select max(N)+1 from K)),1), ' +
-      'SONRAKI=isnull((select max(N)+1 from K),1)');
-  LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
-  LGonderilmisAdet := Tablo.Query1.FieldByName('GONDERILMIS').AsInteger;
-  LIlkBosluk := Tablo.Query1.FieldByName('ILKBOSLUK').AsLargeInt;
-  LSonraki := Tablo.Query1.FieldByName('SONRAKI').AsLargeInt;
-  // Varsayilan: en son numaradan 1 fazlasi (SONRAKI = max+1). Boslugu OTOMATIK
-  // doldurmaz; bosluk doldurma yalnizca (gonderilmis belge yoksa) diyalogla secilir.
-  ASeq := LSonraki;
+  // Kural: bu seri+yilda GONDERILMIS (EFATURADURUM 2/12/52) son no bulunur;
+  // ondan sonraki no'dan baslanir, hazirlanmis (gonderilmemis) belgede
+  // kullanilan no'lar atlanarak ilk bos no verilir. Gonderilmis fatura yoksa
+  // giden EBELGE kayitlarina bakilir; orada da yoksa baslangic no kullaniciya
+  // sorulur (ayni atlama kurali uygulanir).
+  LKSql :=
+    'with K as (select N=try_convert(bigint,right(FATURANO,9)), EFATURADURUM ' +
+    'from FATBASLIK where ID<>' + IntToStr(AID) +
+    ' and TUR=' + IntToStr(ATur) +
+    ' and len(FATURANO)=16 and FATURANO like ''' + LSeriYil + '%''' +
+    ' and try_convert(bigint,right(FATURANO,9)) is not null) ';
+
+  Tablo.TablodanSorguAc(1, LKSql +
+    'select SONGONDERILEN=isnull((select max(N) from K where EFATURADURUM in (2,12,52)),0), ' +
+    'ILKHAZIR=isnull((select min(N) from K),0)');
+  LSonGonderilen := Tablo.Query1.FieldByName('SONGONDERILEN').AsLargeInt;
+  LIlkBos := Tablo.Query1.FieldByName('ILKHAZIR').AsLargeInt;
   Tablo.Query1.Close;
 
-  if (LAdet > 0) and (LGonderilmisAdet = 0) and (LIlkBosluk <> LSonraki) then begin
-    LSecenekler := TStringList.Create;
-    try
-      LSecenekler.Add(IntToStr(LSonraki));    // varsayilan: en son numaradan +1 (append)
-      LSecenekler.Add(IntToStr(LIlkBosluk));  // alternatif: ilk bos numarayi doldur
-      LSecim := IntToStr(LSonraki);
-      LCtrls := TGirdiDenetimleri.Create.ComboBox('Belge sira no seciniz:', @LSecim,
-        LSecenekler, csDropDownList);
-      if TGirisKutusuEx.BilgiAlEx('Belge No Secimi - ' + LSeriYil, LCtrls) <> mrOk then
-        Exit;
-      ASeq := StrToInt64Def(VarToStrDef(LSecim, ''), 0);
-      if (ASeq <> LIlkBosluk) and (ASeq <> LSonraki) then begin
-        ShowMessage('Gecerli bir belge sira no seciniz.');
-        Exit;
-      end;
-    finally
-      LSecenekler.Free;
-    end;
-  end;
-
-  if LAdet = 0 then begin
+  // Gonderilmis fatura yoksa giden e-belge kayitlarina da bakilir (fatura
+  // silinmis / baska yerden gonderilmis olabilir). EBELGE.DURUM: 1 olustu,
+  // 2+ gonderildi.
+  if LSonGonderilen <= 0 then begin
     if ATur = EBelgeTuruEIrsaliye then
       LBelgeTuruList := '140,141'
     else
       LBelgeTuruList := '150,151';
     Tablo.TablodanSorguAc(1,
-      'select ADET=count(*) from ' + DepoTablo('EBELGE') + ' where YON=1' +
+      'select SONGONDERILEN=isnull(max(try_convert(bigint,right(BELGENO,9))),0) from ' +
+      DepoTablo('EBELGE') + ' where YON=1 and DURUM>=2' +
       ' and BELGETURU in (' + LBelgeTuruList + ')' +
-      ' and len(BELGENO)=16 and BELGENO like ''' + ASeri + '%''');
-    LAdet := Tablo.Query1.FieldByName('ADET').AsInteger;
+      ' and len(BELGENO)=16 and BELGENO like ''' + LSeriYil + '%''');
+    LSonGonderilen := Tablo.Query1.FieldByName('SONGONDERILEN').AsLargeInt;
     Tablo.Query1.Close;
+  end;
 
-    if LAdet = 0 then begin
-      LStartStr := '1';
-      LCtrls := TGirdiDenetimleri.Create.Edit(
-        'Baslangic numarasi (max 9 hane):', @LStartStr);
-      if TGirisKutusuEx.BilgiAlEx('Baslangic No - ' + ASeri, LCtrls) <> mrOk then
-        Exit;
-      LBaslangic := StrToIntDef(VarToStrDef(LStartStr, '0'), 0);
-      if LBaslangic <= 0 then begin
-        ShowMessage('Gecerli bir baslangic numarasi giriniz.');
-        Exit;
-      end;
-      ASeq := LBaslangic;
-    end else
-      ASeq := 1;
+  if LSonGonderilen > 0 then
+    ASeq := IlkBosNo(LSonGonderilen + 1)
+  else begin
+    // Gonderilmis belge yok: oneri hazirlanmis ilk no'dan (yoksa 1'den)
+    // baslayan ilk bos no.
+    if LIlkBos <= 0 then
+      LIlkBos := 1;
+    LStartStr := IntToStr(IlkBosNo(LIlkBos));
+    LCtrls := TGirdiDenetimleri.Create.Edit(
+      'Bu yil gonderilmis belge yok. Baslangic numarasi (max 9 hane):', @LStartStr);
+    if TGirisKutusuEx.BilgiAlEx('Baslangic No - ' + LSeriYil, LCtrls) <> mrOk then
+      Exit;
+    ASeq := StrToInt64Def(VarToStrDef(LStartStr, '0'), 0);
+    if ASeq <= 0 then begin
+      ShowMessage('Gecerli bir baslangic numarasi giriniz.');
+      Exit;
+    end;
+    ASeq := IlkBosNo(ASeq);
   end;
 
   if (ASeq <= 0) or (ASeq > 999999999) then begin
@@ -4328,6 +4305,67 @@ begin
       ShowMessage('Gonderilmis belge uzerinde islem yapilamaz.');
 end;
 
+// KDV tutari 0 olan satir (bedelsiz/%100 iskonto, fiyat 0, %0 KDV) varsa GIB
+//   muafiyet kodu ister (KDVMuafiyetKodNeden). Istisna nedeni (PLANID) bossa
+//   hata yerine wizard'daki (TFaturaWizardDlg.TamIskontoNedeniSor) gibi sorulur,
+//   varsayilan 351; secilen kod FATBASLIK.PLANID'e yazilir. Fatura tipi
+//   degismez (bedelsiz teslim KDV istisnasi degil, SATIS + 351).
+//   Wizard'dan gecmeyen belgeler icin (irsaliyeden donusum vb.).
+//   False = kullanici vazgecti.
+function IstisnaNedeniSor(AConnection: TFDConnection; const ABaslik: TEBelgeBaslik;
+  const ASatirlar: TEBelgeSatirlar; out AYazildi: Boolean): Boolean;
+var
+  LSifirVar: Boolean;
+  LListe: TStringList;
+  LSecim: Variant;
+  LKod: Integer;
+begin
+  Result := True;
+  AYazildi := False;
+  if (ABaslik.Tur <> EBelgeTuruEFatura) or (KDVIstisnaKodu(ABaslik) <> '') then
+    Exit;
+  LSifirVar := False;
+  for var LS in ASatirlar do
+    if SatirKDVBrut(LS) < 0.001 then begin
+      LSifirVar := True;
+      Break;
+    end;
+  if not LSifirVar then
+    Exit;
+
+  LListe := TStringList.Create;
+  try
+    Tablo.TablodanSorguAc(1,
+      'select ANAHTAR from GENINI where BOLUM=' + IntToStr(Ops_KDVIstisnaNedeni) +
+      ' and DIL=-1 order by SIRA, ANAHTAR');
+    while not Tablo.Query1.Eof do begin
+      if Trim(Tablo.Query1.FieldByName('ANAHTAR').AsString) <> '' then
+        LListe.Add(Trim(Tablo.Query1.FieldByName('ANAHTAR').AsString));
+      Tablo.Query1.Next;
+    end;
+    Tablo.Query1.Close;
+    if LListe.IndexOf('351 - İstisna olmayan diğer') < 0 then
+      LListe.Add('351 - İstisna olmayan diğer');
+
+    LSecim := '351 - İstisna olmayan diğer';
+    if TGirisKutusuEx.BilgiAlEx('KDV İstisna Nedeni (KDV''si 0 olan satır var)',
+      TGirdiDenetimleri.Create.ComboBox('İstisna Nedeni', @LSecim, LListe,
+        csDropDownList)) <> mrOk then
+      Exit(False);
+  finally
+    LListe.Free;
+  end;
+
+  LKod := StrToIntDef(Copy(Trim(VarToStr(LSecim)), 1, 3), 0);
+  if LKod <= 0 then begin
+    ShowMessage('%0 KDV / muafiyetli satır için istisna nedeni seçmelisiniz.');
+    Exit(False);
+  end;
+  Veritabani.BasitKomutÇalıştır(AConnection,
+    'UPDATE FATBASLIK SET PLANID=&K WHERE ID=&ID', ['&K', '&ID'], [LKod, ABaslik.ID]);
+  AYazildi := True;
+end;
+
 // 16 karakterlik belge no: SERI(3) + YIL(4) + 9 haneli sira numarasi.
 function BelgeNoUret(const ASeri: string; AYil: Integer; ASiraNo: Int64): string;
 var
@@ -4354,6 +4392,7 @@ var
   LOnSatirlar: TEBelgeSatirlar;
   LOnSevkHata: string;
   LSeriler: TArray<string>;
+  LIstisnaYazildi: Boolean;
 begin
   Result := False;
   if not MenuBaslikOku(AConnection, AFatBaslikID, LBaslik) then
@@ -4375,6 +4414,16 @@ begin
     // alias islemleri yapilmadan ONCE calistir. Boylece validasyon basarisiz
     // olursa fatura numarasi tuketilmez / alias bosa olusturulmaz.
     VerileriOku(LBaslik.ID, LOnBaslik, LOnSatirlar);
+    // Bedelsiz / KDV'si 0 satir + istisna nedeni bos: sor, PLANID'e yaz, yeniden oku.
+    //   Tevkifat (22, PLANID tevkifat nedeni), KDV Istisna (24) ve ihracat kendi
+    //   nedenini ister; 351 onlara uymaz, eski kontroller gecerli.
+    if not (LOnBaslik.Tipi in [22, 24]) and (LOnBaslik.Senaryo <> 3) and
+       (KDVIstisnaKodu(LOnBaslik) = '') then begin
+      if not IstisnaNedeniSor(AConnection, LOnBaslik, LOnSatirlar, LIstisnaYazildi) then
+        Exit;
+      if LIstisnaYazildi then
+        VerileriOku(LBaslik.ID, LOnBaslik, LOnSatirlar);
+    end;
     if (LOnBaslik.Tipi = 22) or SatirlardaTevkifatVar(LOnSatirlar) then
       TevkifatNedeniKontrolEt(LOnBaslik, LOnSatirlar);
     TamIskontoNedeniKontrolEt(LOnBaslik, LOnSatirlar);

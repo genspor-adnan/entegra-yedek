@@ -15,6 +15,20 @@ namespace Gentegre.Veri.Depolar;
 public sealed partial class KartDeposu
 {
 
+    /// <summary>Satırda alan yok, null, boş metin ya da sayısal 0 ise "boş".</summary>
+    private static bool BosDeger(Dictionary<string, JsonElement> satir, string alan)
+    {
+        if (!satir.TryGetValue(alan, out var e)) return true;
+        return e.ValueKind switch
+        {
+            JsonValueKind.Null or JsonValueKind.Undefined => true,
+            JsonValueKind.String => string.IsNullOrWhiteSpace(e.GetString())
+                                    || (decimal.TryParse(e.GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) && d == 0),
+            JsonValueKind.Number => e.TryGetDecimal(out var n) && n == 0,
+            _ => false,
+        };
+    }
+
     // ========================================================== detay farki ====
     private async Task<Dictionary<string, List<Dictionary<string, string>>>> DetayUygulaAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         KartTanimi tanim, long ustId, Dictionary<string, DetayFarki> farklar,
@@ -30,6 +44,9 @@ public sealed partial class KartDeposu
 
             foreach (var satir in fark.Eklenen ?? new List<Dictionary<string, JsonElement>>())
             {
+                // BOŞ SATIR ATLANIR (BosAtlaAlani): yeni kartın ön satırlarından doldurulmayan (fiyat 0 / boş)
+                //   yazılmaz - zorunlu alan hatası da üretmez. İstemci de aynı kuralla elemiş olur; burası sigorta.
+                if (detay.BosAtlaAlani is { } bosAlan && BosDeger(satir, bosAlan)) continue;
                 var degerler = DetayDegerleri(detay, satir, yeni: true, baglam.KimlikKurali,
                                               baglam.ZamanDilimi);
                 var kolonlar = new List<string> { detay.UstKolon, "ekleyen" };

@@ -653,3 +653,43 @@ describe('tahsilat tutari MODALDE sorulur (kullanici)', () => {
     expect(document.querySelector('.tiklanir-tutar')).toBeNull();
   });
 });
+
+/**
+ * BAŞVURU BİLGİLERİ DÜZENLEME / GÖRÜNTÜLEME KİPİ (kullanıcı 09.11.2026: "başvuru sekmesindeki editleri kalem
+ * ekleyerek edit/view mod olsun; yeni açılışta edit modda, sonraki açılışlar view modda; başka sekmeye geçince de
+ * view moda geçsin"). Durum BelgeKarti.basvuruDuzenle'de; grup .bs-goster sınıfını görüntülemede alır.
+ */
+describe('başvuru bilgileri edit/view kipi', () => {
+  const grup = () => document.querySelector('.basvuru-bilgi');
+
+  it('yeni başvuru DÜZENLEME kipinde açılır, ✎ açık', async () => {
+    ciz();
+    await waitFor(() => expect(grup()).toBeTruthy());
+    expect(grup()!.classList.contains('bs-goster')).toBe(false);
+    expect(screen.getByTestId('basvuru-kalem').classList.contains('acik')).toBe(true);
+  });
+
+  it('kayıtlı başvuru GÖRÜNTÜLEME kipinde açılır; ✎ düzenlemeye alır, sekme değişince geri döner', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(screen.getByText('Ödeyen Kurum')).toBeInTheDocument());
+    await act(async () => { (await sekme('Başvuru')).click() });
+    await waitFor(() => expect(grup()).toBeTruthy());
+    expect(grup()!.classList.contains('bs-goster')).toBe(true);
+    expect(grup()!.querySelector('.alan-izgara')!.hasAttribute('inert')).toBe(true);
+
+    // Izgaraya TIKLAMAK düzenlemeye almaz (kullanıcı: "sadece kaleme basınca geçsin").
+    await act(async () => { fireEvent.mouseDown(grup()!.querySelector('.bs-goster-sar')!) });
+    expect(grup()!.classList.contains('bs-goster')).toBe(true);
+
+    // ✎ → düzenleme
+    await act(async () => { screen.getByTestId('basvuru-kalem').click() });
+    expect(grup()!.classList.contains('bs-goster')).toBe(false);
+    expect(grup()!.querySelector('.alan-izgara')!.hasAttribute('inert')).toBe(false);
+
+    // Başka sekmeye geçip dönünce yine görüntüleme.
+    await act(async () => { (await sekme('Ücretlendirme')).click() });
+    await act(async () => { (await sekme('Başvuru')).click() });
+    await waitFor(() => expect(grup()).toBeTruthy());
+    expect(grup()!.classList.contains('bs-goster')).toBe(true);
+  });
+});

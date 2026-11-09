@@ -435,10 +435,10 @@ public sealed class StokDurumDeposu
             select ld.seri_lot_id, l.lot_no, l.seri_no,
                    case when l.uretim_tarihi in (timestamp '1899-12-31 00:00',
                                                  timestamp '1990-01-01 00:00')
-                        then null else l.uretim_tarihi end,
+                        then null else l.uretim_tarihi::date end,   -- gün (şube dilimi), bkz. BelgeDeposu.Deger
                    case when l.son_kullanma_tarihi in (timestamp '1899-12-31 00:00',
                                                        timestamp '1990-01-01 00:00')
-                        then null else l.son_kullanma_tarihi end,
+                        then null else l.son_kullanma_tarihi::date end,
                    ld.kalan, ld.depo_id, coalesce(d.ad, '')
               from public.stok_lot_durum ld
               join public.stok_seri_lot l on l.id = ld.seri_lot_id
