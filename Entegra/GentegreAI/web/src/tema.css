@@ -830,10 +830,11 @@ table.grid tr.flt input {
   border-top: 1px solid var(--cizgi2); background: var(--yuz2);
 }
 
-/* ---------------------------------------------------------------- kart ---- */
 /* BAĞLANTI HÜCRESİ (liste kaynak / hedef, 09.11.2026): tıklanınca o belge yeni sekmede açılır. */
 td.hucre-baglanti { color: var(--mor); cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px }
 td.hucre-baglanti:hover { color: var(--lacivert, #14315a); text-decoration-style: solid }
+
+/* ---------------------------------------------------------------- kart ---- */
 .kagrup { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem); margin-bottom: 12px; overflow: hidden }
 /* GÖVDE GRUBU GÖRÜNTÜLEME KİPİ (kullanıcı 09.11.2026, stok kartı: şeridin ✎'i tüm kartı yönetir): kimlik şeridinin
    .kaid-goster kuralının grup karşılığı - kutu kaybolur, değer düz koyu metin; düğmeler gizli, ağaç combo düz metin. */
@@ -9447,7 +9448,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kaynak-aktar .ka-arama input { width: 100%; height: 26px; border: 1px solid var(--cizgi); border-radius: 3px; padding: 0 8px; font: inherit }
 .kaynak-aktar .ka-cipler { display: flex; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap }
 .kaynak-aktar .ka-cipler .cip { cursor: pointer; font: inherit; font-size: 11px; height: 20px; padding: 0 9px }
-.kaynak-aktar .ka-liste { flex: 1; overflow: auto; max-height: 440px; background: var(--yuz) }
+.kaynak-aktar .ka-belgeler { flex: 1; overflow: auto; max-height: 440px; background: var(--yuz) }
 .kaynak-aktar .ka-belge { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 10px;
   border-bottom: 1px solid var(--cizgi2); cursor: pointer; position: relative }
 .kaynak-aktar .ka-belge:hover { background: var(--yuz2) }
@@ -9489,5 +9490,5 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 @media (max-width: 900px) {
   .kaynak-aktar .ka-bolme { grid-template-columns: 1fr }
   .kaynak-aktar .ka-sol { border-right: 0; border-bottom: 1px solid var(--cizgi) }
-  .kaynak-aktar .ka-liste { max-height: 200px }
+  .kaynak-aktar .ka-belgeler { max-height: 200px }
 }

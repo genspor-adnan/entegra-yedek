@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { type AcikSatir, type Kosul, type ListeSatiri, hataMetni } from '../../api/sozlesme';
@@ -184,7 +184,7 @@ export function SiparistenAktarPenceresi({ siparisTuru, tarafId, cariUnvan, hede
               <button key={k} type="button" className={`cip${cip === k ? ' on' : ''}`} onClick={() => setCip(k)}>{c(ad)}</button>
             ))}
           </div>
-          <div className="ka-liste">
+          <div className="ka-belgeler">
             {listeHata && <div className="hata-kutusu">{listeHata}</div>}
             {belgeler === null && <div className="yukleniyor">{c('Yükleniyor…')}</div>}
             {belgeler !== null && gorunenler.length === 0 && (

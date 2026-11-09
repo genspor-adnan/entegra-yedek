@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 import { isValidElement } from 'react';
 import { kartAracGrubu, kartSagAraclari, type KartAracBaglami } from '../bilesenler/kart/KartAracGruplari';
 
@@ -37,10 +37,12 @@ describe('kartAracGrubu', () => {
 describe('karta özel sekme gövdeleri ve başlık parçaları (refaktör 23.10.2026)', () => {
   it('özel detay / yer tutucu / ozel: sekme yalnız kendi kaynağında', async () => {
     const { ozelDetayGovdesi, ozelYerTutucuGovdesi, ozelSekmeGovdesi } = await import('../bilesenler/kart/kartOzelSekmeleri');
-    for (const [k, d] of [['dis-hekim', 'hekim'], ['stok', 'uts'], ['stok', 'paket'], ['hizmet', 'fiyatlar']])
+    // hizmet.fiyatlar artık katalog detayı (09.11.2026, fiyat_listesi_satir) - özel gövdesi yok.
+    for (const [k, d] of [['dis-hekim', 'hekim'], ['stok', 'uts'], ['stok', 'paket']])
       expect(ozelDetayGovdesi(k, d), `${k}.${d}`).toBeTypeOf('function');
     expect(ozelDetayGovdesi('cari', 'uts')).toBeUndefined();
     expect(ozelDetayGovdesi('stok', 'barkodlar')).toBeUndefined();
+    expect(ozelDetayGovdesi('hizmet', 'fiyatlar')).toBeUndefined();
     for (const [k, s] of [['radyoloji-istem', 'Kontrol Listesi'], ['dis-hekim', 'Gönderim Geçmişi'], ['banko', 'Oturumlar']])
       expect(ozelYerTutucuGovdesi(k, s), `${k}.${s}`).toBeTypeOf('function');
     expect(ozelYerTutucuGovdesi('banko', 'Kontrol Listesi')).toBeUndefined();
