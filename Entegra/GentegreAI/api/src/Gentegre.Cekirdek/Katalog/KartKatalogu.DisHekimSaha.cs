@@ -65,7 +65,8 @@ public static partial class KartKatalogu
             new("hekimId",    "hekim_id",    "kod",   Zorunlu: true, KodTablosu: "public.v_dis_hekim_lookup",
                 AramaKaynagi: "dis-hekim", Baslik: "Dış Doktor", Grup: "Kimlik"),
             // TEMSİLCİ boş bırakılırsa tetik şube temsilcisini yazar (1287).
-            new("temsilciId", "temsilci_id", "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Temsilci", Grup: "Kimlik"),
+            //   Combo yalnız SAHA ROLÜ olanlar + temsilcilik yapmış personel (1295 v_saha_temsilci_lookup; kullanıcı).
+            new("temsilciId", "temsilci_id", "kod",   KodTablosu: "public.v_saha_temsilci_lookup", Baslik: "Temsilci", Grup: "Kimlik"),
             new("tarih",      "tarih",       "zaman", Zorunlu: true, Baslik: "Tarih / Saat", Grup: "Kimlik"),
             // ŞERİT (mockup §2; kullanıcı 10.11.2026 "sonuç combosu durumun sağına"): Dış Doktor · Temsilci · Tarih / Saat ·
             //   Tür · Süre · Durum · Sonuç.

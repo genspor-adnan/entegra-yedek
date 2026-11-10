@@ -148,7 +148,7 @@ public static partial class KartKatalogu
             {
                 new("id",         "id",          "sayi",   Yazilabilir: false),
                 new("subeId",     "sube_id",     "kod",    Zorunlu: true, KodTablosu: "public.sube", Baslik: "Şube"),
-                new("temsilciId", "temsilci_id", "kod",    Zorunlu: true, KodTablosu: "public.v_personel_lookup",
+                new("temsilciId", "temsilci_id", "kod",    Zorunlu: true, KodTablosu: "public.v_saha_temsilci_lookup",
                     Baslik: "Temsilci"),
                 new("baslangic",  "baslangic",   "tarih",  Zorunlu: true, Baslik: "Başlangıç"),
                 new("bitis",      "bitis",       "tarih",  Baslik: "Bitiş"),
