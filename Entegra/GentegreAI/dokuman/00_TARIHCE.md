@@ -236,6 +236,12 @@ başlığında … Listesi olsun".
   sürükle-bırak taşıma, öneri kesik çerçeve ✓ onayla / ✖ kaldır, Planı Üret (gün başı, ilçe grupla), temsilci seçimi.
   Uçlar `GET /api/dis-hekim/plan`, `POST /plan/uret`, `/ziyaret/{id}/tasi|onayla|iptal`, `POST /planla`. Test
   `DisHekimPlanTestleri`. Not: `taraf.durum` varsayılanı 0 - test fikstürleri aktif hekimi açıkça yazmalı.
+- **Saha Performansı (adım d; mockup §6; göç 1292):** özel sayfa `/saha-performans` (`dis_doktor.performans`), dönem ×
+  şube; sekmeler **Temsilciler** (hekim · aktif hekim · ziyaret · plan uyumu · gönderim / önceki / değişim · tutar ·
+  yeni / kaybedilen hekim · açık / termini geçen talep · prim), **Doktorlar** (gönderim trendi, modalite, son gönderim /
+  ziyaret, çipler Yükselen / Düşen / 60 gün sessiz / Yeni / Ziyaret edilmeyen), **Şubeler**, **Talepler** (tür × durum,
+  ortalama kapanma, en çok sorumlu). Uç `GET /api/dis-hekim/performans?bas&bit&sube` (`SahaPerformansUclari`): gönderim
+  = radyoloji istemi, temsilci = başvurunun `satici_id`'si, prim = hakediş satırları rol 1 / 10. Test `SahaPerformansTestleri`.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

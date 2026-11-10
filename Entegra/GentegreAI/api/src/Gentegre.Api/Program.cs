@@ -483,6 +483,7 @@ uygulama.DuyuruUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
 // DIS DOKTOR SAHA (1289): talep kapat / goreve cevir, ziyaret gordum.
 uygulama.DisHekimUclariniEkle();
+uygulama.SahaPerformansUclariniEkle();   // Saha Performansı (1292): temsilci / doktor / şube / talep
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 // PORTAL HESABI (819): dis hekim / kurum / hasta erisimi - ayri yetki.

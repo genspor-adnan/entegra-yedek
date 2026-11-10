@@ -252,6 +252,13 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     menuSira: 25, urunModu: 2,
   },
   {
+    // SAHA PERFORMANSI (1292, mockup §6): yönetim - temsilci / doktor / şube / talep; dönem × şube. Özel sayfa.
+    kaynak: 'saha-performans', rota: 'saha-performans', ozelSayfa: true,
+    baslik: 'Saha Performansı', yol: 'Kurumlar & Sigorta › Saha Performansı',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Saha Performansı', ic: '📈', yetkiKodu: 'dis_doktor.performans',
+    menuSira: 26, urunModu: 2,
+  },
+  {
     kaynak: 'proje', baslik: 'Proje Listesi', yol: 'CRM › Proje Listesi', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [
