@@ -760,7 +760,18 @@ table.grid tr.flt input {
 .kaid .alan-izgara.kaid-hizmet { grid-template-columns: minmax(0, .9fr) minmax(0, 1.7fr) minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, .5fr) }
 .kaid .kaid-goster .alan-izgara.kaid-hizmet > .alan-kod input, .kaid .kaid-goster .alan-izgara.kaid-hizmet > .alan-ad input {
   color: var(--lacivert, #14315a) !important; font-weight: 700 }
-@media (max-width: 900px) { .kaid .alan-izgara.kaid-stok, .kaid .alan-izgara.kaid-hizmet { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+/* ONAY AKIŞI ŞERİDİ (mockup Ekranlar/Onay/onay_akis_karti.html, 10.11.2026): Akış Kodu · Adı · Hangi Kayıt · Karar Ölçüsü · Aktif. */
+.kaid .alan-izgara.kaid-onayakis { grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .5fr) }
+.kaid .kaid-goster .alan-izgara.kaid-onayakis > .alan-kod input, .kaid .kaid-goster .alan-izgara.kaid-onayakis > .alan-ad input {
+  color: var(--lacivert, #14315a) !important; font-weight: 700 }
+@media (max-width: 900px) { .kaid .alan-izgara.kaid-stok, .kaid .alan-izgara.kaid-hizmet, .kaid .alan-izgara.kaid-onayakis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+/* Zincir önizlemesi (Basamaklar sekmesinin altı). */
+.oak-oniz { margin-top: 10px; border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz2) }
+.oak-oniz-bas { display: flex; gap: 12px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap; font-size: 11.5px }
+.oak-oniz-bas label { display: inline-flex; gap: 6px; align-items: center; color: var(--soluk) }
+.oak-oniz-bas input { height: 22px; border: 1px solid var(--cizgi); border-radius: 2px; padding: 0 6px; font: inherit }
+.oak-zincir { padding: 8px 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0 }
+.oak-adim { display: inline-flex; align-items: center }
 /* Kimlik seridi mockup'ta etiket USTTE (.fld deseni) - sekme icindeki grid2'den farkli, dokunma. */
 .kaid .alan { display: flex; flex-direction: column; align-items: stretch; gap: 2px }
 .kaid .alan .etiket { align-self: flex-start; width: 100%; text-align: left; font-size: 10.5px; letter-spacing: .2px }

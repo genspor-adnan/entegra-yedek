@@ -78,7 +78,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // 'kaynak' teklifte anlamsiz (zincirin BASI); belge durum rozeti (Pasif)
     //   yerine teklif akisinin "Durumu" kolonu gosterilir (kullanici).
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'kapanmaAdi', 'kapanmaDurum',
-                    'kaynak', 'durumAdi', 'durum', 'tipi', 'belgeSeri', 'tarafId'],
+                    'kaynak', 'durumAdi', 'durum', 'tipi', 'belgeSeri', 'tarafId',
+                    // Hasta sütunu teklifte anlamsız (kullanıcı 10.11.2026).
+                    'hastaAdi'],
+    // "Cari" -> "Müşteri" (kullanıcı 10.11.2026); hücre tıklanınca müşteri kartı yeni sekmede (Liste.baglantiKolonlar).
+    kolonBasliklari: { tarafUnvan: 'Müşteri' },
     // Sira (kullanici): Satış Temsilcisi | Durumu | Belge No en solda.
     //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
     //   'belge' kaynagini fatura/siparis listeleriyle paylasiyor - Durumu ve

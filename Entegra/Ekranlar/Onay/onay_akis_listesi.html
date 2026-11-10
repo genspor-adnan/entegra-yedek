@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Onay Akışı Listesi — Mockup</title>
+<!--
+  Kullanıcı 10.11.2026: "onay akış listesi ve kartı için mockup var mı? yoksa yap".
+  Kaynak: web ürünündeki onay motoru (738 onay_akis / onay_akis_adim, 742 Onay Akışı Listesi + kartı, 741 vekâlet).
+  Ayarlar/onay_akis_ayarlari.html eşik/bayrak KURALINI anlatır; bu dosya LİSTE EKRANININ kendisidir
+  (Onay › Onay Akışı Listesi). Kart: onay_akis_karti.html.
+
+  Kararlar:
+   * Satır = bir akış tanımı (kurumun imza düzeni). Akış KAYIT TÜRÜNE bağlanır (satınalma talebi, izin, teklif…),
+     tek kayda değil.
+   * "Her Kayıtta" = eşiksiz taban basamağı sayısı. 0 ise küçük tutarlı kayıt hiç imza görmeden geçer - sarı uyarı
+     rozeti + "Taban basamağı yok" çipi bunu ortaya çıkarır.
+   * Yürüyen / Geciken: bu akışla açılmış, karar bekleyen onaylar ve süresi dolanlar. Geciken > 0 kırmızı.
+   * Satır çift tık = kart yeni sekmede (kart sekmesi deseni). Sağ tuş menüsü yok (09.11.2026 kararı).
+   * Araç çubuğu: Yeni Akış · Kopyala (aynı basamakları yeni türe) · Pasife Al · Onayımdakiler'e git.
+-->
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#d7e7fb;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b5731a;--mor:#6a3fb0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .not{max-width:1380px;margin:0 auto 10px;background:#fffbe8;border:1px solid #eeddb4;border-radius:4px;padding:8px 12px;font-size:11.5px;color:#6a5313}
+  .not b{color:#4c3a05}
+  .sayfa{max-width:1380px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .bas{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .bas h1{margin:0;font-size:15px;color:var(--navy)}
+  .bas .yol{font-size:11px;color:var(--muted)}
+  .sag{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;user-select:none}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .bar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;min-width:0}
+  .inp .ph{color:#aab4bf}
+  .combo{position:relative;padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .cips{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  .cip{padding:2px 10px;border:1px solid var(--line);border-radius:11px;font-size:11px;background:#fff;color:var(--muted);cursor:pointer}
+  .cip.on{background:var(--mor);border-color:var(--mor);color:#fff;font-weight:bold}
+  .cips .sp{margin-left:auto;font-size:11px;color:var(--muted)}
+  .dg{overflow:auto}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;vertical-align:middle}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.sec td{background:var(--sel)}
+  .dg tr.pasif td{color:#8a97a5;background:#fafbfc}
+  .c{text-align:center}.r{text-align:right;font-variant-numeric:tabular-nums}
+  .kod{font-family:Consolas,monospace;font-size:11px;color:var(--navy)}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.k{background:#fde8e8;color:#9b2c2c;border-color:#f3c5c5}
+  .rz.m{background:#f1ebfa;color:var(--mor);border-color:#dccdf2}
+  .zincir{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
+  .zincir i{font-style:normal;display:inline-block;padding:0 6px;height:18px;line-height:17px;border-radius:9px;font-size:10px;background:#e6eef7;color:#2b4f7c;border:1px solid #cddcee}
+  .zincir i.esik{background:#fff6e0;border-color:#efd9a0;color:#7a5407}
+  .zincir i.bayrak{background:#f1ebfa;border-color:#dccdf2;color:var(--mor)}
+  .zincir i.bilgi{background:#f3f5f7;border-color:#dfe5ec;color:#6b7a8b;border-style:dashed}
+  .zincir b{color:#9aa8b7;font-weight:normal}
+  .alt{display:flex;gap:14px;padding:6px 12px;border-top:1px solid var(--line2);font-size:11px;color:var(--muted);align-items:center}
+  .alt .sp{margin-left:auto}
+  .aciklama{max-width:1380px;margin:6px auto 0;color:var(--muted);font-size:11px;line-height:1.55}
+  .aciklama b{color:var(--ink)}
+  .lgd{display:flex;gap:12px;padding:6px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--line2);background:#fbfcfd;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — Onay Akışı Listesi</b> (Onay › Onay Akışı Listesi; kaynak <code>onay-akis</code>). Her satır kurumun bir imza
+düzeni: hangi <b>kayıt türüne</b> bağlı, basamak zinciri, kaç kayıtta yürüyor, kaçı gecikmiş. Satıra çift tıklayınca kart yeni sekmede
+(<a href="onay_akis_karti.html">onay_akis_karti.html</a>). Eşik / bayrak kuralının mantığı Ayarlar/onay_akis_ayarlari.html'de.</div>
+
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>✍️ Onayımdakiler</span><span class="on">🧭 Onay Akışı Listesi</span></div>
+  <div class="bas">
+    <h1>🧭 Onay Akışı Listesi</h1><span class="yol">Onay › Onay Akışı Listesi</span>
+    <div class="sag">
+      <span class="btn primary">➕ Yeni Akış</span>
+      <span class="btn">⧉ Kopyala</span>
+      <span class="btn">⏸ Pasife Al</span>
+      <span class="btn">✍️ Onayımdakiler</span>
+      <span class="btn">⋮</span>
+    </div>
+  </div>
+
+  <div class="bar">
+    <div class="inp" style="width:260px">🔍 <span class="ph">Akış kodu, adı, kayıt türü…</span></div>
+    <div class="inp combo" style="width:170px">Kayıt türü: (tümü)</div>
+    <div class="inp combo" style="width:150px">Şube: Merkez</div>
+    <div class="cips" style="flex:1">
+      <span class="cip on">Aktif</span><span class="cip">Taban basamağı yok</span><span class="cip">Gecikmesi olan</span><span class="cip">Tümü</span>
+      <span class="sp">8 akış · 3 kayıt türünde yürüyen onay var</span>
+    </div>
+  </div>
+  <div class="lgd">
+    <span><span class="zincir"><i>Birim Sorumlusu</i></span> her kayıtta</span>
+    <span><span class="zincir"><i class="esik">Mali İşler ≥ 50.000</i></span> eşik aşılınca</span>
+    <span><span class="zincir"><i class="bayrak">Üst Yönetim ⚑ bütçe aşımı</i></span> bayrak varsa</span>
+    <span><span class="zincir"><i class="bilgi">Muhasebe ⓘ</i></span> yalnız bilgilendirme</span>
+  </div>
+
+  <div class="dg"><table>
+    <thead><tr>
+      <th class="c" style="width:28px"><input type="checkbox"></th>
+      <th style="width:150px">Akış Kodu</th><th style="width:200px">Adı</th><th style="width:150px">Kayıt Türü</th>
+      <th style="width:110px">Karar Ölçüsü</th><th>Basamaklar</th>
+      <th class="c" style="width:80px">Her Kayıtta</th><th class="r" style="width:76px">Yürüyen</th><th class="r" style="width:76px">Geciken</th>
+      <th style="width:92px">Son Kullanım</th><th class="c" style="width:70px">Durum</th>
+    </tr></thead>
+    <tbody>
+      <tr class="sec">
+        <td class="c"><input type="checkbox" checked></td>
+        <td class="kod">satinalma.talep</td><td><b>Satınalma Talebi Onayı</b></td><td>Satınalma Talebi</td><td>Tutar (TL)</td>
+        <td><span class="zincir"><i>Birim Sorumlusu</i><b>›</b><i>Satınalma</i><b>›</b><i class="esik">Mali İşler ≥ 50.000</i><b>›</b><i class="bayrak">Mali İşler ⚑ bütçe</i><b>›</b><i class="esik">Üst Yönetim ≥ 250.000</i><b>›</b><i class="bayrak">Üst Yön. ⚑ aşım</i></span></td>
+        <td class="c">2</td><td class="r">14</td><td class="r" style="color:#9b2c2c;font-weight:bold">3</td><td>09.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">personel.izin</td><td><b>Yıllık İzin Onayı</b></td><td>Personel İzni</td><td>Gün</td>
+        <td><span class="zincir"><i>Birim Sorumlusu</i><b>›</b><i class="esik">İK ≥ 5 gün</i><b>›</b><i class="esik">Başhekim / Müdür ≥ 15 gün</i><b>›</b><i class="bilgi">Bordro ⓘ</i></span></td>
+        <td class="c">1</td><td class="r">6</td><td class="r">0</td><td>08.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">demirbas.onarim</td><td><b>Masraflı Onarım Onayı</b></td><td>Demirbaş İş Emri</td><td>Maliyet (TL)</td>
+        <td><span class="zincir"><i>Biyomedikal</i><b>›</b><i class="esik">Mali İşler ≥ 20.000</i><b>›</b><i class="esik">Üst Yönetim ≥ 100.000</i><b>›</b><i class="bayrak">Satınalma ⚑ garanti dışı</i></span></td>
+        <td class="c">1</td><td class="r">2</td><td class="r">0</td><td>03.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">personel.avans</td><td><b>Personel Avansı Onayı</b></td><td>Personel Avansı</td><td>Tutar (TL)</td>
+        <td><span class="zincir"><i>Birim Sorumlusu</i><b>›</b><i class="esik">İK ≥ 1 maaş</i><b>›</b><i class="esik">Mali İşler ≥ 2 maaş</i><b>›</b><i class="esik">Üst Yönetim ≥ 3 maaş</i><b>›</b><i class="bilgi">Bordro ⓘ</i></span></td>
+        <td class="c">1</td><td class="r">1</td><td class="r" style="color:#9b2c2c;font-weight:bold">1</td><td>05.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">belge.iskonto</td><td><b>İskonto Onayı</b> <span class="rz s" title="Eşiksiz basamak yok: eşiğin altındaki iskonto imzasız geçer">⚠ taban yok</span></td><td>Belge (başvuru / satış)</td><td>İskonto Oranı (%)</td>
+        <td><span class="zincir"><i class="esik">Banko Sorumlusu ≥ %10</i><b>›</b><i class="esik">Müdür ≥ %20</i><b>›</b><i class="esik">Başhekim ≥ %35</i><b>›</b><i class="bilgi">Mali İşler ⓘ</i></span></td>
+        <td class="c" style="color:var(--warn);font-weight:bold">0</td><td class="r">9</td><td class="r">0</td><td>09.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">teklif.satis</td><td><b>Satış Teklifi Onayı</b> <span class="rz m" title="Hazırlayan onaylayanı seçer (Teklif/onay_mekanizmasi.html)">seçilen onaylayan</span></td><td>Satış Teklifi</td><td>Tutar (TL)</td>
+        <td><span class="zincir"><i>Hazırlayanın seçtiği onaylayan</i><b>›</b><i class="esik">Genel Müdür ≥ 500.000</i><b>›</b><i class="bilgi">Müşteri (dış onay) ⓘ</i></span></td>
+        <td class="c">1</td><td class="r">4</td><td class="r">0</td><td>09.11.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr>
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">dokuman.1</td><td><b>İnceleme + Onay</b></td><td>Doküman</td><td>—</td>
+        <td><span class="zincir"><i>Kalite (inceleme)</i><b>›</b><i>Doküman sahibi müdür</i></span></td>
+        <td class="c">2</td><td class="r">0</td><td class="r">0</td><td>21.10.2026</td><td class="c"><span class="rz g">Aktif</span></td>
+      </tr>
+      <tr class="pasif">
+        <td class="c"><input type="checkbox"></td>
+        <td class="kod">satinalma.talep.v1</td><td>Satınalma Talebi Onayı (eski)</td><td>Satınalma Talebi</td><td>Tutar (TL)</td>
+        <td><span class="zincir"><i>Birim Sorumlusu</i><b>›</b><i class="esik">Müdür ≥ 25.000</i></span></td>
+        <td class="c">1</td><td class="r">0</td><td class="r">0</td><td>12.06.2026</td><td class="c"><span class="rz gri">Pasif</span></td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="alt">
+    <span>8 kayıt</span><span>Seçili: <b>satinalma.talep</b></span>
+    <span class="sp">Çift tık = kart yeni sekmede · sağ tuş menüsü yok · sütunlar ⋮ menüsünden</span>
+  </div>
+</div>
+
+<p class="aciklama">
+  <b>Basamaklar sütunu</b> akışın zincirini tek bakışta verir: düz rozet her kayıtta, sarı <b>≥ eşik</b> ölçü aşılınca, mor <b>⚑ bayrak</b> çağıranın
+  bildirdiği durum varsa, kesikli <b>ⓘ</b> karar beklemeyen bilgilendirme. <b>Her Kayıtta</b> = eşiksiz taban basamağı sayısı; 0 ise satırda sarı
+  "taban yok" rozeti (küçük tutarlı kayıt imzasız geçer). <b>Yürüyen / Geciken</b> bu akışla açık onaylar - Geciken kırmızı, tıklanınca
+  Onayımdakiler o akışa süzülmüş açılır. Pasif akış gri; yürüyen onayı olan akış pasife alınamaz (uyarı). <b>Kopyala</b> basamakları yeni
+  bir koda kopyalar (ör. aynı zinciri başka kayıt türüne bağlamak). Teklif satırı 09.11.2026 kararını taşır: ilk basamak "hazırlayanın
+  seçtiği onaylayan" (kart sahibi türü 4), son basamak dış onay bilgilendirme.
+</p>
+</body>
+</html>

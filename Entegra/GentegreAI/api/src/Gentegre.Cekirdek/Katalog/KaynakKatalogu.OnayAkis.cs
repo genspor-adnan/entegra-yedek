@@ -23,13 +23,23 @@ public static partial class KaynakKatalogu
             new("id", "v.id", "sayi", "Id", Varsayilan: false),
             new("kod", "v.kod", "metin", "Akış Kodu", Genislik: 170),
             new("ad", "v.ad", "metin", "Adı", Genislik: 230),
-            new("kaynakTurAdi",
-                "case v.kaynak_tur when 1241 then 'Satınalma Talebi' else 'Bilinmiyor' end",
+            // KAYIT TÜRÜ ADI kart kataloğundaki tek listeden (OnKaynakTuruKodlari): sabit CASE yalnız satınalmayı
+            //   biliyordu, öbür yedi akış "Bilinmiyor" görünüyordu (10.11.2026).
+            new("kaynakTurAdi", KaynakTuruAdiIfade("v.kaynak_tur"),
                 "metin", "Hangi Kayıt", Genislik: 170, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("kaynakTur", "v.kaynak_tur", "sayi", "Kayıt Türü", Varsayilan: false),
             new("olcuAdi", "v.olcu_adi", "metin", "Karar Ölçüsü", Genislik: 140),
-            new("basamak", "v.basamak", "sayi", "Basamak", Hizalama: "sag", Genislik: 90),
+            // BASAMAK ZİNCİRİ (mockup Ekranlar/Onay/onay_akis_listesi.html): aktif basamaklar sırayla, koşulu
+            //   yanında - "Birim Sorumlusu › Mali İşler ≥ 50.000 › Mali İşler ⚑ bütçe › Muhasebe ⓘ".
+            new("basamaklar",
+                "coalesce((select string_agg(d.ad" +
+                "   || case when coalesce(d.esik_alt, 0) > 0 then ' ≥ ' || trim(to_char(d.esik_alt, 'FM999G999G999G990D##'))" +
+                "           when d.bayrak <> '' then ' ⚑ ' || d.bayrak else '' end" +
+                "   || case when d.karar_turu = 1 then ' ⓘ' else '' end, ' › ' order by d.sira, d.id)" +
+                "   from public.onay_akis_adim d where d.akis_id = v.id and d.aktif = 1), '')",
+                "metin", "Basamaklar", Genislik: 420, Siralanabilir: false, Filtrelenebilir: false),
+            new("basamak", "v.basamak", "sayi", "Basamak", Hizalama: "sag", Genislik: 90, Varsayilan: false),
             // TABAN BASAMAK SIFIRSA küçük kayıt hiç imzasız geçer - listede
             //   görünmeli, kart açmadan.
             new("tabanBasamak", "v.taban_basamak", "sayi", "Her Kayıtta",
@@ -42,4 +52,12 @@ public static partial class KaynakKatalogu
             new("aciklama", "v.aciklama", "metin", "Açıklama", Genislik: 280,
                 Varsayilan: false),
         });
+
+    /// <summary>kaynak_tur -> ad; kart kataloğundaki tek sözlükten CASE üretir (yeni tür = tek yer).</summary>
+    private static string KaynakTuruAdiIfade(string kolon)
+    {
+        var dallar = string.Concat(KartKatalogu.OnKaynakTuruKodlari
+            .Select(k => $" when {k.Key} then '{k.Value.Replace("'", "''")}'"));
+        return $"case {kolon}{dallar} else 'Tür ' || {kolon}::text end";
+    }
 }

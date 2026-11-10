@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Onay Akışı Kartı — Mockup</title>
+<!--
+  Kullanıcı 10.11.2026: "onay akış listesi ve kartı için mockup var mı? yoksa yap". Liste: onay_akis_listesi.html.
+  Kart = onay_akis (738) + basamaklar (onay_akis_adim). Desen: kipli kimlik şeridi (stok/hizmet kartıyla aynı: kayıtlı kart
+  görüntülemede açılır, tek ✎ şeridi ve grupları çevirir, kaleme basmadan düzenlenemez), başlık bandı yok (başlık Sil'in
+  sağında), Hatırlat yok.
+
+  Sekmeler:
+   1 Basamaklar  - grid kipi (seç + Ekle/Düzenle/Sil, ↑↓ sıra); satır = basamak: Sıra · Basamak Adı · Kime Düşer (Rol /
+                   Kullanıcı / Âmir / Hazırlayan seçer) · Rol-Kişi · Koşul (eşik ≥ ölçü · bayrak · her kayıtta) · Karar
+                   (onay-ret / bilgilendirme) · Süre (gün) · e-İmza · Aktif. Altında ZİNCİR ÖNİZLEMESİ: örnek ölçü girilince
+                   hangi basamakların doğacağı anında gösterilir (kuralı denemek için).
+   2 Yürüyen Onaylar - bu akışla açık onaylar (hangi kayıt, hangi basamakta, kimde, kaç gündür). Geciken kırmızı.
+   3 Geçmiş      - akış tanımındaki değişiklikler (islem_log) + karara bağlanan onayların özeti.
+  Basamak düzenleme penceresi (modal) sayfanın altında.
+-->
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#d7e7fb;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b5731a;--mor:#6a3fb0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .sayfa{max-width:1280px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .arac{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .arac .baslik{font-weight:bold;color:var(--navy);margin-left:6px}
+  .arac .sag{margin-left:auto;display:flex;gap:4px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;user-select:none}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .btn.sm{padding:2px 8px;font-size:11px}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.k{background:#fde8e8;color:#9b2c2c;border-color:#f3c5c5}
+  .rz.m{background:#f1ebfa;color:var(--mor);border-color:#dccdf2}
+
+  /* KİMLİK ŞERİDİ: avatar · Akış Kodu · Adı · Hangi Kayıt · Karar Ölçüsü · Durum · ✎ */
+  .kaid-sar{position:relative;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .kaid{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1.7fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.5fr) 26px;gap:10px;padding:10px 12px;align-items:end}
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:#fff;align-self:center;background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15);user-select:none}
+  .avatar.pasif{background:linear-gradient(135deg,#6b7a8b,#3d4b5a)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;position:relative}
+  .inp.big{font-weight:bold;color:var(--navy)}
+  .inp.ro{background:#f7f9fb;color:var(--muted)}
+  .inp .ph{color:#aab4bf}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .goster .deg{height:24px;display:flex;align-items:center;gap:6px;padding:0 7px;font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .goster .deg.big{color:var(--navy);font-weight:bold;font-size:12.5px}
+  .goster .deg.bos{color:#aab4bf;font-weight:normal}
+  .duzenle.yazili{border-left:3px solid var(--accent);padding-left:9px;background:linear-gradient(#fbfcfe,#eef4fa)}
+  .gizli{display:none !important}
+  .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px;user-select:none}
+  .kalem:hover{color:var(--accent);background:#e9f1fb}
+  .kalem.acik{color:var(--accent)}
+  .kalem.kilit{opacity:.45;pointer-events:none}
+
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;user-select:none}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:12px}.pane.active{display:block}
+
+  /* grid kipi */
+  .gbar{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .gbar .sp{margin-left:auto;display:flex;gap:6px}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;vertical-align:middle}
+  .dg tr:hover td{background:#f2f7fd}.dg tr.sec td{background:var(--sel)}.dg tr.pasif td{color:#8a97a5;background:#fafbfc}
+  .c{text-align:center}.r{text-align:right;font-variant-numeric:tabular-nums}
+  .kosul{display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+  .kosul i{font-style:normal;padding:0 6px;height:18px;line-height:17px;border-radius:9px;font-size:10px;background:#e6eef7;color:#2b4f7c;border:1px solid #cddcee}
+  .kosul i.esik{background:#fff6e0;border-color:#efd9a0;color:#7a5407}
+  .kosul i.bayrak{background:#f1ebfa;border-color:#dccdf2;color:var(--mor)}
+  .kosul i.bilgi{background:#f3f5f7;border-color:#dfe5ec;color:#6b7a8b;border-style:dashed}
+  .onay{display:inline-flex;align-items:center;gap:5px}
+  .onay i{width:13px;height:13px;border:1px solid var(--line);border-radius:2px;background:#fff;display:inline-block;font-style:normal;font-size:10px;line-height:11px;text-align:center}
+  .onay i.ok{background:var(--accent);border-color:var(--accent);color:#fff}
+  .sira{display:inline-flex;gap:2px}.sira span{border:1px solid var(--line);border-radius:2px;width:16px;height:16px;font-size:9px;line-height:14px;text-align:center;color:var(--muted);cursor:pointer;background:#fff}
+
+  /* zincir önizleme */
+  .oniz{margin-top:10px;border:1px solid var(--line2);border-radius:4px;background:#fbfcfd}
+  .oniz h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);display:flex;gap:10px;align-items:center}
+  .oniz h4 .inp{height:22px;width:110px;font-weight:normal}
+  .oniz .ic{padding:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .adim{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:120px;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff}
+  .adim b{font-size:11.5px;color:var(--navy)}
+  .adim small{font-size:10px;color:var(--muted)}
+  .adim.yok{opacity:.4;border-style:dashed}
+  .adim.bilgi{border-style:dashed;background:#f7f9fb}
+  .ok-ok{color:#9aa8b7;font-size:16px}
+
+  /* genel bölümler (Açıklama) */
+  .govde{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 12px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;overflow:hidden}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2)}
+  .grp .ic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:10px}
+  .grp .fld.genis{grid-column:1/-1}
+  .ozet{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:16px;color:var(--navy)}
+  .kutu b.k{color:#9b2c2c}
+
+  /* modal */
+  .modal{max-width:760px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.18);overflow:hidden}
+  .modal .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;font-weight:bold;font-size:13px;display:flex}
+  .modal .title .x{margin-left:auto;font-weight:normal;opacity:.8}
+  .modal .alt{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--line);background:var(--head)}
+  .modal .alt .sp{margin-left:auto}
+  .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;padding:12px}
+  .mgrid .fld.genis{grid-column:1/-1}
+  .secim{display:flex;gap:4px}
+  .secim span{flex:1;text-align:center;border:1px solid var(--line);border-radius:3px;padding:4px 6px;font-size:11px;color:var(--muted);cursor:pointer;background:#fff}
+  .secim span.on{background:#e6f0fb;border-color:#98c2ee;color:#1c4374;font-weight:bold}
+  .aciklama{max-width:1280px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.55}
+  .aciklama b{color:var(--ink)}
+  .not{max-width:1280px;margin:0 auto 10px;background:#fffbe8;border:1px solid #eeddb4;border-radius:4px;padding:8px 12px;font-size:11.5px;color:#6a5313}
+  .not b{color:#4c3a05}
+  .lst table{width:100%}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — Onay Akışı Kartı</b> (kaynak <code>onay-akis</code>, tablo onay_akis + onay_akis_adim). Stok / hizmet kartıyla aynı kipli
+şerit: kayıtlı kart görüntülemede açılır, tek ✎ şeridi ve Açıklama grubunu çevirir. Basamaklar sekmesi grid kipinde; altındaki
+<b>zincir önizlemesi</b> örnek ölçüyle hangi basamakların doğacağını gösterir. Liste: <a href="onay_akis_listesi.html">onay_akis_listesi.html</a>.</div>
+
+<h2><b>1</b> — Kayıtlı akış: GÖRÜNTÜLEME kipi <span class="ipucu">✎ → düzenleme; sekmeler ve kip çalışır</span></h2>
+<div class="sayfa">
+  <div class="ekransekme"><span>🏠</span><span>🧭 Onay Akışı Listesi</span><span class="on">🧭 Satınalma Talebi Onayı ×</span></div>
+  <div class="arac">
+    <span class="btn primary">💾 Kaydet</span><span class="btn danger">🗑 Sil</span>
+    <span class="baslik">Onay Akışı Kartı #1</span>
+    <span class="rz g">Aktif</span><span class="rz k" title="3 geciken onay">⏰ 3 geciken</span>
+    <div class="sag"><span class="btn">⧉ Kopyala</span><span class="btn">✍️ Yürüyenleri Aç</span><span class="btn">✖ Kapat</span></div>
+  </div>
+
+  <div class="kaid-sar">
+    <div class="kaid goster" id="g1">
+      <div class="avatar" title="Kayıt türü: Satınalma Talebi">🛒</div>
+      <div class="fld"><label>Akış Kodu</label><div class="deg big">satinalma.talep</div></div>
+      <div class="fld"><label>Adı</label><div class="deg big">Satınalma Talebi Onayı</div></div>
+      <div class="fld"><label>Hangi Kayıt</label><div class="deg">Satınalma Talebi</div></div>
+      <div class="fld"><label>Karar Ölçüsü</label><div class="deg">Tutar (TL)</div></div>
+      <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
+      <div class="kalem" title="Kartı düzenle" onclick="kip(1)">✎</div>
+    </div>
+    <div class="kaid duzenle yazili gizli" id="e1">
+      <div class="avatar" title="Kayıt türü: Satınalma Talebi">🛒</div>
+      <div class="fld"><label class="req">Akış Kodu</label><div class="inp big">satinalma.talep</div></div>
+      <div class="fld"><label class="req">Adı</label><div class="inp big">Satınalma Talebi Onayı</div></div>
+      <div class="fld"><label class="req">Hangi Kayıt</label><div class="inp combo ro" title="Yürüyen onayı olan akışta kayıt türü değişmez">Satınalma Talebi</div></div>
+      <div class="fld"><label>Karar Ölçüsü</label><div class="inp">Tutar (TL)</div></div>
+      <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
+      <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(1)">✎</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="basamak" onclick="sekme(this)">Basamaklar <span class="b">6</span></div>
+    <div class="tab" data-t="yuruyen" onclick="sekme(this)">Yürüyen Onaylar <span class="b">14</span></div>
+    <div class="tab" data-t="gecmis" onclick="sekme(this)">Geçmiş</div>
+  </div>
+
+  <!-- BASAMAKLAR -->
+  <div class="pane active" data-p="basamak">
+    <div class="gbar">
+      <span class="btn sm primary">➕ Ekle</span><span class="btn sm">✎ Düzenle</span><span class="btn sm">🗑 Sil</span>
+      <span class="btn sm" title="Seçili basamağı yukarı/aşağı">↑</span><span class="btn sm">↓</span>
+      <span>Basamaklar sıra ile yürür; koşulu tutmayan basamak o kayıtta hiç doğmaz. Eşik kuralın yanında durur, koda gömülü değil.</span>
+      <span class="sp"><span class="btn sm">⋮</span></span>
+    </div>
+    <div class="dg"><table>
+      <thead><tr>
+        <th class="c" style="width:28px"></th><th class="c" style="width:44px">Sıra</th><th style="width:190px">Basamak Adı</th>
+        <th style="width:110px">Kime Düşer</th><th style="width:150px">Rol / Kişi</th><th>Koşul</th>
+        <th style="width:130px">Karar</th><th class="r" style="width:76px">Süre (gün)</th><th class="c" style="width:60px">e-İmza</th><th class="c" style="width:56px">Aktif</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="c"><input type="checkbox"></td><td class="c">1</td><td><b>Birim Sorumlusu</b></td><td>Rol</td><td>Birim sorumlusu</td><td><span class="kosul"><i>her kayıtta</i></span></td><td>Onay / ret</td><td class="r">3</td><td class="c">—</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr class="sec"><td class="c"><input type="checkbox" checked></td><td class="c">2</td><td><b>Satınalma</b></td><td>Rol</td><td>Satınalma</td><td><span class="kosul"><i>her kayıtta</i></span></td><td>Onay / ret</td><td class="r">3</td><td class="c">—</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr><td class="c"><input type="checkbox"></td><td class="c">3</td><td><b>Mali İşler</b></td><td>Rol</td><td>Mali işler</td><td><span class="kosul"><i class="esik">Tutar ≥ 50.000</i></span></td><td>Onay / ret</td><td class="r">3</td><td class="c">—</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr><td class="c"><input type="checkbox"></td><td class="c">4</td><td><b>Mali İşler (bütçe)</b></td><td>Rol</td><td>Mali işler</td><td><span class="kosul"><i class="bayrak">⚑ bütçe</i></span></td><td>Onay / ret</td><td class="r">3</td><td class="c">—</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr><td class="c"><input type="checkbox"></td><td class="c">5</td><td><b>Üst Yönetim</b></td><td>Rol</td><td>Üst yönetim</td><td><span class="kosul"><i class="esik">Tutar ≥ 250.000</i></span></td><td>Onay / ret</td><td class="r">5</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr><td class="c"><input type="checkbox"></td><td class="c">6</td><td><b>Üst Yönetim (bütçe aşımı)</b></td><td>Rol</td><td>Üst yönetim</td><td><span class="kosul"><i class="bayrak">⚑ bütçe aşıldı</i></span></td><td>Onay / ret</td><td class="r">5</td><td class="c"><span class="onay"><i class="ok">✓</i></span></td><td class="c"><span class="onay"><i class="ok">✓</i></span></td></tr>
+        <tr class="pasif"><td class="c"><input type="checkbox"></td><td class="c">7</td><td>Muhasebe</td><td>Rol</td><td>Mali işler</td><td><span class="kosul"><i class="bilgi">her kayıtta</i></span></td><td>Yalnız bilgilendirme</td><td class="r">—</td><td class="c">—</td><td class="c"><span class="onay"><i></i></span></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="oniz">
+      <h4>Zincir önizlemesi <span style="font-weight:normal;color:var(--muted)">— örnek ölçü:</span><div class="inp" id="olcu" style="font-weight:bold">80.000</div>
+        <span class="secim" style="width:230px"><span class="on" onclick="bayrak(this)">⚑ bütçe</span><span onclick="bayrak(this)">⚑ bütçe aşıldı</span></span>
+        <span style="font-weight:normal;color:var(--muted);margin-left:auto">yalnız deneme - kaydedilmez</span></h4>
+      <div class="ic" id="zincir"></div>
+    </div>
+  </div>
+
+  <!-- YÜRÜYEN ONAYLAR -->
+  <div class="pane" data-p="yuruyen">
+    <div class="ozet">
+      <div class="kutu"><small>Yürüyen</small><b>14</b></div>
+      <div class="kutu"><small>Geciken</small><b class="k">3</b></div>
+      <div class="kutu"><small>Ort. karar süresi (30 gün)</small><b>1,8 gün</b></div>
+      <div class="kutu"><small>Bu ay karara bağlanan</small><b>41</b> <small>37 onay · 4 ret</small></div>
+    </div>
+    <div class="dg lst"><table>
+      <thead><tr><th style="width:110px">Kayıt No</th><th>Konu</th><th style="width:140px">Talep Eden</th><th class="r" style="width:100px">Tutar (TL)</th><th style="width:170px">Basamak</th><th style="width:150px">Kimde</th><th class="r" style="width:80px">Gün</th><th style="width:90px">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>ST-2026-000212</td><td>Ultrason jeli 200 kutu</td><td>Ayşe Kaya · Radyoloji</td><td class="r">12.400,00</td><td>2 / 2 · Satınalma</td><td>Satınalma rolü (3 kişi)</td><td class="r" style="color:#9b2c2c;font-weight:bold">5</td><td><span class="rz k">Gecikti</span></td></tr>
+        <tr><td>ST-2026-000215</td><td>İnfüzyon pompası 2 adet</td><td>Mehmet Can · Yoğun Bakım</td><td class="r">86.000,00</td><td>3 / 3 · Mali İşler</td><td>Selin Aydın</td><td class="r">1</td><td><span class="rz s">Bekliyor</span></td></tr>
+        <tr><td>ST-2026-000216</td><td>Yıllık sarf anlaşması</td><td>Hasan Yıldız · Satınalma</td><td class="r">310.000,00</td><td>5 / 6 · Üst Yönetim</td><td>Dr. Ali Demir (vekil: Z. Kurt)</td><td class="r" style="color:#9b2c2c;font-weight:bold">7</td><td><span class="rz k">Gecikti</span></td></tr>
+        <tr><td>ST-2026-000218</td><td>Laboratuvar kiti</td><td>Elif Şahin · Laboratuvar</td><td class="r">4.750,00</td><td>1 / 2 · Birim Sorumlusu</td><td>Dr. Elif Şahin</td><td class="r">0</td><td><span class="rz s">Bekliyor</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="aciklama" style="margin-top:8px">Onayımdakiler listesinin bu akışa süzülmüş hâli; satır çift tık = kaydın kartı yeni sekmede. "Kimde" vekâlet varsa gösterir.</p>
+  </div>
+
+  <!-- GEÇMİŞ -->
+  <div class="pane" data-p="gecmis">
+    <div class="dg lst"><table>
+      <thead><tr><th style="width:130px">Tarih</th><th style="width:150px">Kullanıcı</th><th style="width:200px">Olay</th><th>Ayrıntı</th></tr></thead>
+      <tbody>
+        <tr><td>09.11.2026 14:20</td><td>admin</td><td><b>Basamak değişti</b></td><td>Üst Yönetim: eşik 200.000 → 250.000</td></tr>
+        <tr><td>02.11.2026 09:05</td><td>admin</td><td><b>Basamak eklendi</b></td><td>Mali İşler (bütçe) · ⚑ bütçe</td></tr>
+        <tr><td>21.10.2026 16:40</td><td>s.aydin</td><td><b>Basamak pasife alındı</b></td><td>Muhasebe (bilgilendirme)</td></tr>
+        <tr><td>14.10.2026 11:12</td><td>admin</td><td><b>Akış oluşturuldu</b></td><td>satinalma.talep · 5 basamak · Satınalma Talebi</td></tr>
+      </tbody>
+    </table></div>
+    <p class="aciklama" style="margin-top:8px">islem_log'dan (akış + basamak kayıtları). Teklif kartındaki Geçmiş sekmesiyle aynı bileşen.</p>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Şerit</b>: avatar kayıt türünün simgesi (🛒 satınalma, 🏖 izin, 🔧 iş emri, 📄 teklif), Akış Kodu ve Adı kalın lacivert, Durum rozet. Yürüyen onayı
+  olan akışta <b>Hangi Kayıt</b> salt okunur (tür değişirse açık onaylar yetim kalır). Araç satırında "Onay Akışı Kartı #1" + Aktif + geciken rozeti;
+  başlık bandı ve Hatırlat yok. <b>Basamaklar</b> grid kipi: Ekle / Düzenle modal açar (aşağıda), ↑↓ sırayı değiştirir, eşik ölçünün adıyla yazılır
+  ("Tutar ≥ 50.000"). <b>Zincir önizlemesi</b> girilen ölçü ve bayraklarla hangi basamakların doğacağını anında gösterir - kuralı kaydetmeden denemek için.
+</p>
+
+<h2><b>2</b> — Basamak düzenleme penceresi (Ekle / Düzenle)</h2>
+<div class="modal">
+  <div class="title">Basamak — Mali İşler <span class="x">✕</span></div>
+  <div class="mgrid">
+    <div class="fld"><label class="req">Sıra</label><div class="inp">3</div></div>
+    <div class="fld genis" style="grid-column:2/-1"><label class="req">Basamak Adı</label><div class="inp">Mali İşler</div></div>
+    <div class="fld genis"><label class="req">Kime Düşer</label>
+      <div class="secim"><span class="on">Rol</span><span>Kullanıcı</span><span>Âmir (kadrodan)</span><span>Hazırlayan seçer</span></div></div>
+    <div class="fld genis" style="grid-column:1/3"><label class="req">Rol</label><div class="inp combo">Mali işler</div></div>
+    <div class="fld"><label>Kullanıcı</label><div class="inp ro"><span class="ph">— (rol seçili)</span></div></div>
+    <div class="fld genis"><label>Koşul</label>
+      <div class="secim"><span>Her kayıtta</span><span class="on">Ölçü eşiği</span><span>Bayrak</span></div></div>
+    <div class="fld"><label class="req">Eşik (≥) · Tutar (TL)</label><div class="inp">50.000,00</div></div>
+    <div class="fld"><label>Bayrak Koşulu</label><div class="inp ro"><span class="ph">— (eşik seçili)</span></div></div>
+    <div class="fld"><label class="req">Karar Türü</label><div class="inp combo">Onay / ret</div></div>
+    <div class="fld"><label>Süre (gün)</label><div class="inp">3</div></div>
+    <div class="fld"><label>e-İmza zorunlu</label><div class="onay" style="height:24px"><i></i> Hayır</div></div>
+    <div class="fld"><label>Aktif</label><div class="onay" style="height:24px"><i class="ok">✓</i> Evet</div></div>
+    <div class="fld genis"><label>Açıklama</label><div class="inp"><span class="ph">Basamak ne zaman doğar, kim bakar…</span></div></div>
+  </div>
+  <div class="alt"><span style="font-size:11px;color:var(--muted)">Süre dolunca kimse otomatik onaylanmaz; yalnız hatırlatma ve gecikme raporu.</span>
+    <span class="sp"></span><span class="btn">Vazgeç</span><span class="btn primary">💾 Kaydet</span></div>
+</div>
+<p class="aciklama">
+  <b>Kime Düşer</b> dört seçenek: Rol (rolü taşıyan herkesin kutusuna düşer, ilk karar bağlar) · Kullanıcı (tek kişi) · Âmir (kadro ağacından, henüz
+  çözülmüyor - pasif) · <b>Hazırlayan seçer</b> (teklif kararı 09.11.2026: hazırlayan onaya sunarken onaylayanı seçer). <b>Koşul</b> üç biçim: her
+  kayıtta · ölçü eşiği (akışın Karar Ölçüsü adıyla etiketlenir) · bayrak (çağıranın bildirdiği durum: bütçe, garanti dışı…). Kaydet modalı kapatır,
+  grid anında kaydedilir (stok Fiyatlar deseni), kart Kaydet'ine gerek yok.
+</p>
+
+<script>
+  var BASAMAK = [
+    {ad:'Birim Sorumlusu', k:'her'}, {ad:'Satınalma', k:'her'},
+    {ad:'Mali İşler', k:'esik', e:50000}, {ad:'Mali İşler (bütçe)', k:'bayrak', b:'bütçe'},
+    {ad:'Üst Yönetim', k:'esik', e:250000}, {ad:'Üst Yönetim (bütçe aşımı)', k:'bayrak', b:'bütçe aşıldı'},
+    {ad:'Muhasebe', k:'bilgi', pasif:true},
+  ];
+  var bayraklar = {'bütçe':true,'bütçe aşıldı':false};
+  function zincirCiz(){
+    var olcu = parseFloat((document.getElementById('olcu').textContent||'0').replace(/\./g,'').replace(',','.'))||0;
+    var h = []; var sayac = 0;
+    BASAMAK.forEach(function(b){
+      if (b.pasif) return;
+      var dogar = b.k==='her' || (b.k==='esik' && olcu>=b.e) || (b.k==='bayrak' && bayraklar[b.b]);
+      var neden = b.k==='her' ? 'her kayıtta' : b.k==='esik' ? ('≥ '+b.e.toLocaleString('tr-TR')) : ('⚑ '+b.b);
+      if (dogar) sayac++;
+      h.push('<div class="adim'+(dogar?'':' yok')+'"><b>'+(dogar?(sayac+'. '):'')+b.ad+'</b><small>'+neden+(dogar?'':' · doğmaz')+'</small></div>');
+      h.push('<span class="ok-ok">›</span>');
+    });
+    h.pop();
+    h.push('<div class="adim bilgi"><b>Karar</b><small>'+sayac+' imza</small></div>');
+    document.getElementById('zincir').innerHTML = h.join('');
+  }
+  function bayrak(el){ el.classList.toggle('on'); bayraklar[el.textContent.replace('⚑','').trim()] = el.classList.contains('on'); zincirCiz(); }
+  document.getElementById('olcu').addEventListener('click', function(){
+    var v = prompt('Örnek ölçü (Tutar TL):', this.textContent); if (v!==null){ this.textContent = v; zincirCiz(); }
+  });
+  function kip(n){ var g=document.getElementById('g'+n), e=document.getElementById('e'+n); var d=!g.classList.contains('gizli'); g.classList.toggle('gizli',d); e.classList.toggle('gizli',!d); }
+  function sekme(t){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x===t)});
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('active', p.dataset.p===t.dataset.t)});
+    document.getElementById('g1').classList.remove('gizli'); document.getElementById('e1').classList.add('gizli');
+  }
+  zincirCiz();
+</script>
+</body>
+</html>

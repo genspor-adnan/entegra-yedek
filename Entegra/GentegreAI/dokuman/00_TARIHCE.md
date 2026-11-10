@@ -147,6 +147,22 @@ başlığında … Listesi olsun".
   (`kartHatirlatYok`); "Hizmet Kartı #id" bandı kalktı, başlık Sil'in sağında araç satırında (`baslikAracta`, sürüm
   rozeti çizilmez - yalnız ipucu). Test `HizmetFiyatSekmesiTestleri`.
 
+### 10.11.2026
+
+- **Onay Akışı listesi + kartı mockup'a göre (kullanıcı; `Ekranlar/Onay/onay_akis_listesi.html`, `onay_akis_karti.html`):**
+  liste `onayAkis` kaynağına **Basamaklar** zinciri sütunu (aktif basamaklar sırayla; ≥ eşik / ⚑ bayrak / ⓘ
+  bilgilendirme; eşik 0 koşulsuz) ve kayıt türü adı artık tek sözlükten (`KartKatalogu.OnKaynakTuruKodlari`,
+  `KaynakTuruAdiIfade` - eskiden yalnız satınalma biliniyor, diğerleri "Bilinmiyor"); `basamak` sayısı gizli.
+  Kart: kimlik alanları (Kod · Adı · Hangi Kayıt · Karar Ölçüsü · Aktif) `Kimlik` grubuna, kipli şerit
+  (`KIPLI_SERITLER` onayAkis → `kaid-onayakis`, `KIPLI_GOVDE_KARTLAR`), avatar kayıt türü simgesi, başlık araç
+  satırında (`baslikAracta`), Hatırlat yok; Açıklama Genel'de. Basamaklar detayı grid kipi + anında kayıt; altında
+  **zincir önizlemesi** (`AkisZincirOnizleme`: ölçü + bayraklarla `onayAkisDene` kuru çalıştırması, kayıt üretmez).
+  Ek sekmeler (kartEklentileri `onayAkis`): **Yürüyen Onaylar** (Onayımdakiler akış koduna süzülmüş) ve **Geçmiş**
+  (`islem-log` 1295 kart + 1296 basamak; kaynağa gizli ham `tabloId` / `ustTabloKod` kolonları). Sahip türü 4
+  "Kayıt sahibi" kataloğa eklendi (motor zaten çözüyordu). "Hazırlayan seçer" türü motorda YOK - teklif onayı için
+  ayrı iş. Test `onayAkisPanelleri.test.ts`.
+- **Satış Teklifi Listesi:** Hasta sütunu gizlendi, "Cari" → "Müşteri" (kullanıcı).
+
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
 

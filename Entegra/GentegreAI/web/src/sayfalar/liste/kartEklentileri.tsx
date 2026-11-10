@@ -34,6 +34,7 @@ import { HastaKartBandi } from '../hasta/HastaKartBandi';
 import { EmirFislerSekmesi, EmirOnKontrolSekmesi } from '../uretim/UretimEmriPanelleri';
 import { ReceteBaslikEk, ReceteKartAraclari, ReceteMaliyetOzeti, ReceteMaliyetSekmesi, ReceteOnayRozetleri, ReceteSurumlerSekmesi, ReceteUretimlerSekmesi } from '../uretim/UrunAgaciPanelleri';
 import { receteKartUyarlamasi } from '../uretim/uretimListeSeviye';
+import { AkisGecmisSekmesi, AkisZincirOnizleme, YuruyenOnaylarSekmesi } from '../../bilesenler/onay/OnayAkisPanelleri';
 import { uretimSeviyesiAnlik } from '../../bilesenler/useUretimSeviyesi';
 
 /**
@@ -115,6 +116,22 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   //   çubuğunda bu cariyle dolu Aksiyon ▾ menüsü. Ekstre sekme DEĞİL
   //   (kullanıcı 23.10.2026): üstteki "Σ Ekstre" Kasa › Cari Ekstre'yi açar.
   //   Tedarikçi kartı da aynı kaynak (`cari`) - özet onda da geçerli.
+  // ------------------------------------- Onay Akışı Kartı (mockup Ekranlar/Onay/onay_akis_karti.html, 10.11.2026) ----
+  // Basamaklar sekmesinin altında zincir önizlemesi ("Akışı Dene" kuru çalıştırması); kayıtlı akışta Yürüyen Onaylar
+  //   (Onayımdakiler akış koduna süzülmüş) ve Geçmiş (islem_log 1295 + 1296) sekmeleri.
+  onayAkis: {
+    sekmeSarmalayici: b => kayitli(b.kartId)
+      ? (baslik, icerik, d, _izgara, _parcalar, detay) => baslik === 'Basamaklar'
+          ? <>{icerik}<AkisZincirOnizleme akisId={b.kartId as number} olcuAdi={String(d.olcuAdi ?? '')}
+                                          tanimliBasamak={detay?.satirlar.length ?? 0} /></>
+          : icerik
+      : undefined,
+    ekSekmeler: b => kayitli(b.kartId) ? [
+      { anahtar: 'ozel:onay-yuruyen', baslik: 'Yürüyen Onaylar', ciz: bg => <YuruyenOnaylarSekmesi akisKod={String(bg.deger.kod ?? '')} /> },
+      { anahtar: 'ozel:onay-gecmis', baslik: 'Geçmiş', ciz: () => <AkisGecmisSekmesi akisId={b.kartId as number} /> },
+    ] : undefined,
+  },
+
   cari: {
     seritSarmalayici: b => kayitli(b.kartId)
       // FİRMA BİLGİ BANDI (CariKimlikBandi): bakiye rozetleri yok - özet şeridinde var. Yeni kartta band yok.

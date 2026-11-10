@@ -61,6 +61,8 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
     yol: 'Onay › Onay Akışı Listesi',
     kartYolu: '/onay-akis', kartBaslik: 'Onay Akışı',
     aksiyonEkrani: 'onay-akis-liste',
+    // Mockup Ekranlar/Onay/onay_akis_*.html (10.11.2026): kartta Hatırlat yok, kipli şerit + ✎.
+    kartHatirlatYok: true,
     cipler: [
       { ad: 'Aktif',   filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       // İMZASIZ GEÇEN AKIŞ: taban basamağı olmayan akışta küçük tutarlı

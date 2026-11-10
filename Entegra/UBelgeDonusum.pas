@@ -511,14 +511,19 @@ begin
     if FYS.PanelMiktar.Enabled = False then
        FYS.PanelMiktar.Enabled := True;
     //if Kur = CariDoviz then
-    TLFiyat:=FYS.EditBirimFiyat.EditValue;
-    //else
+    KDV:=FYS.AKDV;
     DovizFiyat:=FYS.EditDovizBirimFiyat.EditValue;
+    TLFiyat:=FYS.EditBirimFiyat.EditValue;
+    if FYS.CheckKDV.Checked then begin//kdv dahil işaretli
+       TLFiyat := TLFiyat / (1+(KDV/100));
+       DovizFiyat := DovizFiyat / (1+(KDV/100));
+    end;
+    //else
+
+
     ProjeID := FYS.EditProje.Tag;
     Kur:=FYS.ComboKur.EditValue;
-    KDV:=FYS.AKDV;
     Adet:=FYS.EditMiktar.EditValue;
-    KDV := FYS.AKDV;
     KurDegeri := FYS.EditKurDegeri.EditValue;
     Isk1 := FYS.EditIsk1.EditValue;
     Isk2 := FYS.EditIsk2.EditValue;

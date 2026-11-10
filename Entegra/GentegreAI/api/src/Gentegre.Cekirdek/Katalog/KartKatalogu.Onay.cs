@@ -20,7 +20,7 @@ public static partial class KartKatalogu
     /// Yeni tür eklemek = `OnayUclari.KayitDurumYazAsync`e bir dal + buraya
     /// bir satır. İkisi birlikte gider; biri eksikse akış yarım kalır.
     /// </summary>
-    private static readonly Dictionary<string, string> OnKaynakTuruKodlari = new()
+    internal static readonly Dictionary<string, string> OnKaynakTuruKodlari = new()
     {
         ["1241"] = "Satınalma Talebi",
         ["904"] = "Personel İzni",
@@ -39,6 +39,8 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> OnSahipTuruKodlari = new()
     {
         ["1"] = "Rol", ["2"] = "Kullanıcı", ["3"] = "Âmir (henüz yok)",
+        // 4 (758): kaydın sahibi (dokümanda sahip alanı) - motor sahipTarafId'den çözer (OnayMotoru).
+        ["4"] = "Kayıt sahibi",
     };
 
     /// <summary>
@@ -75,18 +77,20 @@ public static partial class KartKatalogu
         SubeKolonu: null,
         Alanlar: new KartAlani[]
         {
-            new("kod", "kod", "metin", Zorunlu: true, Baslik: "Akış Kodu", Grup: "Akış",
+            // KİMLİK ŞERİDİ (mockup Ekranlar/Onay/onay_akis_karti.html, 10.11.2026): Akış Kodu · Adı · Hangi Kayıt ·
+            //   Karar Ölçüsü · Durum üst şeritte (kipli: kayıtlı kart görüntülemede, ✎ ile düzenleme); Açıklama Genel'de.
+            new("kod", "kod", "metin", Zorunlu: true, Baslik: "Akış Kodu", Grup: "Kimlik",
                 EnFazlaUzunluk: 40),
-            new("ad", "ad", "metin", Zorunlu: true, Baslik: "Adı", Grup: "Akış",
+            new("ad", "ad", "metin", Zorunlu: true, Baslik: "Adı", Grup: "Kimlik",
                 EnFazlaUzunluk: 120),
             new("kaynakTur", "kaynak_tur", "kod", Zorunlu: true, Baslik: "Hangi Kayıt",
-                Grup: "Akış", SabitKodlar: OnKaynakTuruKodlari),
+                Grup: "Kimlik", SabitKodlar: OnKaynakTuruKodlari),
             // ÖLÇÜ ADI ekranda görünür: aynı sayı tutar da olabilir gün de.
             //   Tek "Tutar" başlığı koysaydık izin akışında "14 TL" yazardı.
-            new("olcuAdi", "olcu_adi", "metin", Baslik: "Karar Ölçüsü", Grup: "Akış",
+            new("olcuAdi", "olcu_adi", "metin", Baslik: "Karar Ölçüsü", Grup: "Kimlik",
                 EnFazlaUzunluk: 40),
-            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Akış"),
-            new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Akış",
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Genel",
                 EnFazlaUzunluk: 400),
         },
         Detaylar: new DetayTanimi[]
@@ -120,7 +124,8 @@ public static partial class KartKatalogu
                 new("eImzaZorunlu", "e_imza_zorunlu", "mantik", Baslik: "e-İmza"),
                 new("aktif", "aktif", "mantik", Baslik: "Aktif"),
             }, Sirala: "sira, id", Baslik: "Basamaklar",
-               SubeKolonu: null, LogTabloId: 1296,
+               // GRİD KİPİ + ANINDA KAYIT (10.11.2026 mockup): basamak modalla düzenlenir, kaydedilince hemen yazılır.
+               SubeKolonu: null, LogTabloId: 1296, GridKipi: true, AnindaKaydet: true,
                YeniSatirVarsayilanlari: new Dictionary<string, object?>
                {
                    ["sahip_turu"] = 1, ["rol"] = 1, ["karar_turu"] = 0,

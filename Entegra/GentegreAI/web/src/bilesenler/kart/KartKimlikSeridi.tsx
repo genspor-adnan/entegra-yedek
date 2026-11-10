@@ -22,14 +22,16 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
  * tek geçiş yolu ✎ (ızgaraya tıklamak kipi değiştirmez - başvuru kararı); sekme değişince görüntülemeye döner;
  * salt okunur kartta hep görüntüleme, ✎ pasif. Değer: ızgaranın kaynağa özel sütun sınıfı (tema.css).
  */
-const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat' };
+const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat', onayAkis: 'kaid-onayakis' };
+/** Onay akışı avatarı: kayıt türünün simgesi (mockup onay_akis_karti.html). */
+const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', '1224': '🔧', '1257': '💰', '1256': '🏷', '976': '📄', '1312': '🧾', '1314': '📑' };
 /**
  * TEK KALEM, TÜM KART (kullanıcı 09.11.2026, stok kartı: "Tanım / Sınıflandırma, Vergi & Ana Birim, Diğer bölümleri
  * de view/edit mod yap.. ayrı ayrı kalem ekleme, başlıktaki kalemle hepsi mod değişsin.. kaleme basmadan edit moda
  * geçilemesin"): bu kaynaklarda şeridin ✎'i gövde gruplarını da yönetir - kip GenForm'da tutulur
  * (seritAcikDis / onSeritAcik), KartGrupSekmesi `govdeGoster` ile gruplara uygular.
  */
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet']);
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -441,6 +443,12 @@ export function KartKimlikSeridi({
                 )}
                 {/* HİZMET (mockup hizmet_karti_baslik_kip.html, 09.11.2026): resim yok, hizmet adının baş harfleri. */}
                 {kaynak === 'hizmet' && <StokAvatar ad={String(deger.ad ?? '')} pasif={pasif} />}
+                {kaynak === 'onayAkis' && (
+                  <span className={`kart-avatar stok-avatar${Number(deger.aktif ?? 1) === 0 ? ' pasif' : ''}`}
+                        title={c('Kayıt türü')} data-testid="onay-avatar">
+                    {ONAY_TUR_SIMGE[String(deger.kaynakTur ?? '')] ?? '🧭'}
+                  </span>
+                )}
                 <div className={`alan-izgara ${KIPLI_SERITLER[kaynak]}`} inert={gosterKipi || undefined}>
                   {renderAlanListesi(kimlikAlanlari)}
                 </div>

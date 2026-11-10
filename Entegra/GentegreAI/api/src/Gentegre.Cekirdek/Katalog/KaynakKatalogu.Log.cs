@@ -68,6 +68,10 @@ public static partial class KaynakKatalogu
             new("kullanici",  "public.fn_taraf_ad(k.unvan, k.ad, k.soyad)::varchar(120)",                       "metin", "Kullanıcı"),
             new("ip",         "l.ip",                          "metin", "IP"),
             new("ustTabloId", TabloAdiIfade("l.ust_tablo_id"), "metin", "Ust Tablo", Varsayilan: false),
+            // HAM TABLO KODLARI (10.11.2026): kart geçmişi sekmesi (onay akışı) kendi kaydını ve alt kayıtlarını
+            //   tablo koduyla süzer - adlı sütun süzülemez.
+            new("tabloId",      "l.tablo_id",                    "sayi",  "Tablo Kodu", Varsayilan: false),
+            new("ustTabloKod",  "l.ust_tablo_id",                "sayi",  "Ust Tablo Kodu", Varsayilan: false),
             new("ustKayitId", "l.ust_kayit_id",                "sayi",  "Ust Kayit", Varsayilan: false),
             new("subeId",     "l.sube_id",                     "sayi",  "Sube",      Varsayilan: false),
             // Satir "Icerik" gorunumunde gosterilir (GenGrid icerikAlani) - grid kolonu

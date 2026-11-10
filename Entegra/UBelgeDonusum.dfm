@@ -260,15 +260,11 @@ object BelgeDonusumDlg: TBelgeDonusumDlg
       object cxTabSheet4: TcxTabSheet
         Caption = 'Seri / Lot'
         ImageIndex = 19
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridSeriLotHareket: TcxGrid
           Left = 0
           Top = 0
           Width = 262
-          Height = 471
+          Height = 470
           Align = alClient
           TabOrder = 0
           LevelTabs.CaptionAlignment = taLeftJustify

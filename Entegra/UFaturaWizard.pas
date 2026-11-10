@@ -3059,8 +3059,8 @@ begin
       begin
         cbStokDepo.DataBinding.DataField := 'GIRISDEPO';
         BaslikPaneli.Enabled := False;
-        EditButtonSevkAdresi.Visible:=False;
-        lblSevkAdresi.Visible:=False;
+        //EditButtonSevkAdresi.Visible:=False;
+        //lblSevkAdresi.Visible:=False;
        // LabelMasrafMerkezi.Caption := MasrafMerkeziPrj;
         //GridFaturaViewMASRAFAD.Caption := MasrafAdi;
         ComboFIYAT_LISTESI.RepositoryItem := Tablo.RepFiyatAdlariAlis;
@@ -3072,8 +3072,8 @@ begin
 //        if Tur = 119 then //Giden konsinye ise konsinye deposuna atal?m
 //           cbStokDepo2.DataBinding.DataField := 'GIRISDEPO';
         BaslikPaneli.Enabled := True;
-        EditButtonSevkAdresi.Visible:= True;
-        lblSevkAdresi.Visible:= True;
+        //EditButtonSevkAdresi.Visible:= True;
+        //lblSevkAdresi.Visible:= True;
         if GridFaturaViewMALIYET <> nil then begin
             GridFaturaViewEKMALIYET.Visible := False;
             GridFaturaViewMALIYET.Visible := False;
