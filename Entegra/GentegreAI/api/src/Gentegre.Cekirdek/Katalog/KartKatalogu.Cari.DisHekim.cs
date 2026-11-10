@@ -132,6 +132,24 @@ public static partial class KartKatalogu
                {
                    ["dis_hekim"] = (short)1,
                }),
+            // ŞUBE TEMSİLCİLERİ (1287, mockup Ekranlar/Radyoloji/dis_doktor_temsilciler.html §1; kullanıcı 10.11.2026:
+            //   "her şubenin pazarlama / satış temsilcisi aynı doktora temsilci olabilir"): şube başına bir aktif
+            //   temsilci, tarihli devir. Şeritteki Temsilci (taraf.temsilci) VARSAYILAN - şube satırı yoksa o.
+            //   sube_id KULLANICININ SEÇTİĞİ şubedir, oturumun değil: SubeKolonu null.
+            new DetayTanimi("temsilciler", "public.dis_hekim_temsilci", "hekim_id", new KartAlani[]
+            {
+                new("id",         "id",          "sayi",   Yazilabilir: false),
+                new("subeId",     "sube_id",     "kod",    Zorunlu: true, KodTablosu: "public.sube", Baslik: "Şube"),
+                new("temsilciId", "temsilci_id", "kod",    Zorunlu: true, KodTablosu: "public.v_personel_lookup",
+                    Baslik: "Temsilci"),
+                new("baslangic",  "baslangic",   "tarih",  Zorunlu: true, Baslik: "Başlangıç"),
+                new("bitis",      "bitis",       "tarih",  Baslik: "Bitiş"),
+                new("aktif",      "aktif",       "mantik", Baslik: "Aktif"),
+                new("aciklama",   "aciklama",    "metin",  EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, Sirala: "aktif desc, sube_id, baslangic desc",
+               SubeKolonu: null, LogTabloId: 1780, Baslik: "Temsilciler",
+               YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+               BosAtlaAlani: "temsilciId", GridKipi: true, AnindaKaydet: true),
 
             // ADRES (kullanici: "alta grid olarak da adres gelsin"): bir hekimin
             //   MUAYENEHANESI ve calistigi HASTANE(ler) ayri satirlardir - tek

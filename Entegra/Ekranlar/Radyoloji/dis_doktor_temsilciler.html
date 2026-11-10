@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dış Doktor — Şube Temsilcileri ve Temsilci Primi — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;margin:22px auto 8px;max-width:1180px;color:var(--navy)}
+  h2 b{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:0 8px;margin-right:6px}
+  h2 .ipucu{font-weight:normal;color:var(--muted);font-size:11px;margin-left:8px}
+  .not{max-width:1180px;margin:0 auto 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;
+    padding:8px 11px;font-size:11.5px;line-height:1.55;color:#2c4a6b}
+  .not code{background:#fff;border:1px solid #cfe0f5;border-radius:2px;padding:0 4px;font-size:11px}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#c98c8c;color:#9d3434}
+  .btn.sp{margin-left:auto}
+  .baslikad{margin-left:auto;font-weight:bold;color:var(--navy);font-size:12.5px}
+  /* kimlik şeridi (kişi bandı deseni) */
+  .band{display:flex;gap:12px;align-items:center;padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:bold;color:#fff;
+    background:linear-gradient(135deg,#3b7cc4,#14315a);flex:none}
+  .band .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .band .alt{font-size:11px;color:var(--muted);margin-top:2px}
+  .band .sag{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px}
+  .idstrip{display:grid;grid-template-columns:.7fr 1fr 1fr 1fr 1fr .6fr;gap:10px;padding:8px 12px;background:#fbfcfd;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .deg{font-weight:bold;font-size:12.5px;color:#1f2d3a;height:22px;display:flex;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;font-size:12px;display:flex;align-items:center}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .ph{color:#aab4bf}
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{padding:10px 12px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .grp h4 .tag{float:right;font-weight:normal;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line2);border-radius:9px;padding:0 7px;margin-left:6px}
+  .araclar{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center}
+  .araclar .ipucu{margin-left:auto;color:var(--muted);font-size:11px}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap;background:#fff}
+  tr.secili td{background:#eef4fc}
+  tr.pasif td{color:var(--muted)}
+  td.inp-h{padding:2px 4px}
+  td .inp{height:24px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#eef1f5;color:#5b6b7c}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.gri{background:#eef1f5;color:#6b7a8b}
+  .rz.rol{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.tem{background:#fff3e0;color:#9a5b00;border-color:#f0d3a0}
+  .rz.sb{background:#efe4fa;color:#6a3fa0;border-color:#d8c3ef}
+  .rz.vars{background:#f3f6fa;color:#3a5573;border-color:#cdd6e0;border-style:dashed}
+  .uyari{margin:10px 0 0;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .bilgi{margin:10px 0 0;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;padding:7px 9px;font-size:11px;color:#2c4a6b;line-height:1.55}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .akis{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;padding:8px 10px;background:#fff;border:1px solid var(--line2);border-radius:3px;line-height:1.6}
+  .akis .kutu{border:1px solid var(--line);border-radius:3px;padding:3px 8px;background:#fbfcfd}
+  .akis .kutu b{color:#2c4a6b}
+  .akis .ok{color:#8fa3b6;font-weight:bold}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  .kural{max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .kural h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kural ul{margin:0 0 8px 18px;padding:0}
+  .kural code{background:#f3f6fa;border:1px solid var(--line2);border-radius:2px;padding:0 4px;font-size:11px}
+  .sema td{white-space:normal}
+  .gizli{display:none !important}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — Dış Doktor: Şube Temsilcileri + Temsilci Primi</b> (kullanıcı 10.11.2026: "her şubenin pazarlama / satış
+temsilcisi aynı doktora temsilci olabilir… aynı işlem farklı şubede farklı oran"). Dış doktor TEK listedir; temsilci ilişkisi
+<b>şube başına</b> ayrı satırdır (<code>dis_hekim_temsilci</code>). Oranlar zaten şube bazlı prim planında; prim rolüne
+<b>10 Temsilci</b> eklenir, hakediş hekimin o şubedeki temsilcisine türer. Kartın kalanı <code>dis_doktor_karti.html</code> ile aynı.</div>
+
+<!-- ===================================================================== 1 ===== -->
+<h2><b>1</b> — Dış Doktor Kartı: <u>Temsilciler</u> sekmesi <span class="ipucu">şube başına bir aktif temsilci · varsayılan şeritte</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span>🩺 Dış Doktor Listesi</span><span class="on">🩺 Dr. Ahmet AKSOY ×</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span><span class="btn">✖ Kapat</span><span class="btn">🗑 Sil</span>
+    <span class="btn">📨 Hatırlat</span><span class="btn">📊 Gönderim Geçmişi</span>
+    <span class="baslikad">Dış Doktor Kartı #4120</span>
+  </div>
+
+  <div class="band">
+    <div class="avatar">AA</div>
+    <div>
+      <div class="ad">Dr. Ahmet AKSOY <span class="rz ok">Aktif</span> <span class="rz rol">Gönderen</span></div>
+      <div class="alt">Radyoloji · Acıbadem Kozyatağı · Tescil 1234-56 · Son gönderim 08.11.2026 · 14 istem / 30 gün</div>
+    </div>
+    <div class="sag">
+      <span class="rz vars" title="taraf.temsilci — şube satırı yoksa bu kişi">Varsayılan temsilci: <b>Mehmet KURT</b></span>
+      <div class="kalem" title="Kartı düzenle">✎</div>
+    </div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label>Kod</label><div class="deg">DH-0412</div></div>
+    <div class="fld"><label>Ad / Soyad</label><div class="deg">Ahmet AKSOY</div></div>
+    <div class="fld"><label>Bölüm</label><div class="deg">Radyoloji</div></div>
+    <div class="fld"><label>Kurum</label><div class="deg">Acıbadem Kozyatağı</div></div>
+    <div class="fld"><label>Varsayılan Temsilci <span class="sonuk">(taraf.temsilci)</span></label><div class="deg">Mehmet KURT</div></div>
+    <div class="fld"><label>Durum</label><div class="deg"><span class="rz ok">Aktif</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab" data-t="genel" onclick="sekme(this)">📋 Genel</div>
+    <div class="tab" data-t="hekim" onclick="sekme(this)">🩺 Hekim Bilgisi</div>
+    <div class="tab active" data-t="temsilci" onclick="sekme(this)">🤝 Temsilciler <span class="b">3</span></div>
+    <div class="tab" data-t="gonderim" onclick="sekme(this)">📊 Gönderim Geçmişi</div>
+    <div class="tab" data-t="prim" onclick="sekme(this)">💰 Prim</div>
+    <div class="tab" data-t="not" onclick="sekme(this)">📝 Not / Belge</div>
+  </div>
+
+  <!-- TEMSİLCİLER -->
+  <div class="pane" id="p-temsilci">
+    <div class="grp">
+      <h4>Şube Temsilcileri <span class="tag">dis_hekim_temsilci (hekim_id · sube_id · temsilci_id)</span>
+        <span class="mini">grid kipi · anında kayıt</span></h4>
+      <div class="araclar">
+        <span class="btn">＋ Satır Ekle</span><span class="btn teh">− Satır Sil</span>
+        <span class="ipucu">Şube başına <b>tek aktif</b> temsilci · bitiş dolunca satır pasif sayılır</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:36px" class="orta">#</th>
+          <th style="width:200px">Şube</th>
+          <th style="width:240px">Temsilci (personel)</th>
+          <th style="width:110px" class="orta">Başlangıç</th>
+          <th style="width:110px" class="orta">Bitiş</th>
+          <th style="width:80px" class="orta">Aktif</th>
+          <th>Not</th>
+          <th style="width:120px" class="orta">Son 30 gün istem</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="orta sonuk">1</td>
+            <td><span class="rz sb">Koşuyolu</span></td>
+            <td>Ahmet YILDIZ <span class="sonuk">· Pazarlama</span></td>
+            <td class="orta">01.03.2026</td><td class="orta">—</td>
+            <td class="orta">☑</td>
+            <td>Haftalık ziyaret, çarşamba</td>
+            <td class="orta">9</td>
+          </tr>
+          <tr class="secili">
+            <td class="orta sonuk">2</td>
+            <td><span class="rz sb">Kadıköy</span></td>
+            <td>Ayşe DEMİR <span class="sonuk">· Satış</span></td>
+            <td class="orta">15.06.2026</td><td class="orta">—</td>
+            <td class="orta">☑</td>
+            <td></td>
+            <td class="orta">5</td>
+          </tr>
+          <tr class="pasif">
+            <td class="orta sonuk">3</td>
+            <td><span class="rz sb">Kadıköy</span></td>
+            <td>Mehmet KURT <span class="sonuk">· Pazarlama</span></td>
+            <td class="orta">01.01.2026</td><td class="orta">14.06.2026</td>
+            <td class="orta">☐</td>
+            <td>Ayşe'ye devredildi</td>
+            <td class="orta">0</td>
+          </tr>
+          <!-- yeni satır: düzenleme kipi -->
+          <tr>
+            <td class="orta sonuk">4</td>
+            <td class="inp-h"><div class="inp combo"><span class="ph">Şube seçiniz…</span></div></td>
+            <td class="inp-h"><div class="inp combo"><span class="ph">Personel ara…</span></div></td>
+            <td class="inp-h"><div class="inp">10.11.2026</div></td>
+            <td class="inp-h"><div class="inp"><span class="ph">—</span></div></td>
+            <td class="orta">☑</td>
+            <td class="inp-h"><div class="inp"><span class="ph"></span></div></td>
+            <td class="orta sonuk">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="uyari">⚠ <b>Kural:</b> aynı şubede tarihleri çakışan iki aktif satır kaydedilemez (sunucu 422: "Kadıköy için 15.06.2026'dan beri Ayşe DEMİR tanımlı").
+        Şubesi tanımsız olan şubeden gelen başvuruda <b>Varsayılan Temsilci</b> (şeritteki) kullanılır; o da boşsa temsilci yazılmaz.</div>
+      <div class="bilgi">ℹ Başvuru / istem kaydedilince <b>gönderen hekim + oturum şubesi</b> → o şubenin aktif temsilcisi belgeye <code>satici_id</code> olarak
+        otomatik yazılır (kullanıcı değiştirebilir). Temsilci Performansı ve Satış Temsilcisi listeleri buradan beslenir.</div>
+    </div>
+  </div>
+
+  <!-- PRİM (dış doktorun gözüyle) -->
+  <div class="pane gizli" id="p-prim">
+    <div class="grp">
+      <h4>Bu Hekim İçin Geçerli Plan Satırları <span class="tag">fn_prim_plan_satiri · şube özgüllüğü</span></h4>
+      <table>
+        <thead><tr><th>Rol</th><th>Şube</th><th>Kapsam</th><th>Plan</th><th class="sag">Oran</th><th>Kime</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rz rol">Gönderen</span></td><td><span class="rz sb">Koşuyolu</span></td><td>MR (kategori)</td><td>GND-KSY-2026</td><td class="sag">%20</td><td>Dr. Ahmet AKSOY</td></tr>
+          <tr><td><span class="rz rol">Gönderen</span></td><td><span class="rz sb">Kadıköy</span></td><td>MR (kategori)</td><td>GND-KDK-2026</td><td class="sag">%15</td><td>Dr. Ahmet AKSOY</td></tr>
+          <tr><td><span class="rz rol">Gönderen</span></td><td><span class="rz gri">Tümü</span></td><td>Liste (hepsi)</td><td>GND-GENEL</td><td class="sag">%10</td><td>Dr. Ahmet AKSOY</td></tr>
+          <tr><td><span class="rz tem">Temsilci</span></td><td><span class="rz sb">Koşuyolu</span></td><td>Liste (hepsi)</td><td>TEM-KSY-2026</td><td class="sag">%3</td><td>Ahmet YILDIZ <span class="sonuk">(Koşuyolu temsilcisi)</span></td></tr>
+          <tr><td><span class="rz tem">Temsilci</span></td><td><span class="rz sb">Kadıköy</span></td><td>MR (kategori)</td><td>TEM-KDK-MR</td><td class="sag">%4</td><td>Ayşe DEMİR <span class="sonuk">(Kadıköy temsilcisi)</span></td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi">ℹ Aynı işlem, farklı şube, farklı oran: planın <b>Şube</b> alanı. Şubeli plan genel planı <b>ezer</b> (özgüllük sırasına şube eklenir - bugün eşit sayılıp önceliğe düşüyor).</div>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-genel"><div class="grp"><h4>Genel</h4><div class="iz"><div class="fld tam sonuk">dis_doktor_karti.html ile aynı (İletişim · Adres)</div></div></div></div>
+  <div class="pane gizli" id="p-hekim"><div class="grp"><h4>Hekim Bilgisi</h4><div class="iz"><div class="fld tam sonuk">dis_doktor_karti.html ile aynı</div></div></div></div>
+  <div class="pane gizli" id="p-gonderim"><div class="grp"><h4>Gönderim Geçmişi</h4><div class="iz"><div class="fld tam sonuk">dis_doktor_karti.html ile aynı; yeni kolon: <b>Temsilci</b> (o başvurunun satici_id'si)</div></div></div></div>
+  <div class="pane gizli" id="p-not"><div class="grp"><h4>Not / Belge</h4><div class="iz"><div class="fld tam sonuk">dis_doktor_karti.html ile aynı</div></div></div></div>
+</div>
+
+<!-- ===================================================================== 2 ===== -->
+<h2><b>2</b> — Başvuru kaydında temsilci otomatik <span class="ipucu">hasta kabul · gönderen hekim seçilince</span></h2>
+<div class="win">
+  <div class="toolbar"><span class="btn primary">💾 Kaydet</span><span class="btn">✖ Kapat</span><span class="baslikad">Başvuru — Koşuyolu Şubesi</span></div>
+  <div class="idstrip" style="grid-template-columns:1.2fr 1fr 1fr 1fr">
+    <div class="fld"><label class="req">Hasta</label><div class="inp">Zeynep KAYA · 1984</div></div>
+    <div class="fld"><label class="req">Gönderen Hekim</label><div class="inp combo">Dr. Ahmet AKSOY</div></div>
+    <div class="fld"><label>Gönderen Kurum</label><div class="inp combo"><span class="ph">— (kendi adına)</span></div></div>
+    <div class="fld"><label>Temsilci <span class="sonuk">(otomatik · şubeye göre)</span></label><div class="inp combo">Ahmet YILDIZ</div></div>
+  </div>
+  <div class="pane">
+    <div class="akis">
+      <span class="kutu"><b>Gönderen</b> Dr. Ahmet AKSOY</span><span class="ok">+</span>
+      <span class="kutu"><b>Oturum şubesi</b> Koşuyolu</span><span class="ok">→</span>
+      <span class="kutu"><b>dis_hekim_temsilci</b> (Koşuyolu, aktif, tarih içinde)</span><span class="ok">→</span>
+      <span class="kutu"><b>belge.satici_id</b> = Ahmet YILDIZ</span>
+      <span class="sonuk">· satır yoksa taraf.temsilci (Mehmet KURT) · o da yoksa boş</span>
+    </div>
+    <div class="bilgi">Aynı hekim Kadıköy'den kayıt açılınca temsilci <b>Ayşe DEMİR</b> olur. Kullanıcı kutudan değiştirebilir; değişiklik işlem günlüğüne düşer.
+      Gönderen kurum doluysa (kurum adına gelen iş) gönderen primi doğmaz (825) ama temsilci yine yazılır - temsilci primi plan ayarına bağlıdır (bkz. 3).</div>
+  </div>
+</div>
+
+<!-- ===================================================================== 3 ===== -->
+<h2><b>3</b> — Prim planı: <u>Temsilci</u> rolü (10) <span class="ipucu">prim_plani_karti.html başlığı · rol combosunda yeni değer</span></h2>
+<div class="win">
+  <div class="toolbar"><span class="btn primary">💾 Kaydet</span><span class="btn">✖ Kapat</span><span class="baslikad">Prim Planı — TEM-KSY-2026</span></div>
+  <div class="idstrip" style="grid-template-columns:.8fr 1.4fr .9fr .9fr .9fr .9fr">
+    <div class="fld"><label class="req">Kod</label><div class="inp">TEM-KSY-2026</div></div>
+    <div class="fld"><label class="req">Ad</label><div class="inp">Koşuyolu temsilci primi</div></div>
+    <div class="fld"><label class="req">Prim Rolü</label><div class="inp combo"><span class="rz tem">Temsilci</span></div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Koşuyolu</div></div>
+    <div class="fld"><label>Ödeyen Tipi</label><div class="inp combo">Tümü</div></div>
+    <div class="fld"><label class="req">Başlangıç</label><div class="inp">01.01.2026</div></div>
+  </div>
+  <div class="pane">
+    <div class="ikili">
+      <div class="grp">
+        <h4>Prim Satırları <span class="tag">prim_plani_satir</span></h4>
+        <table>
+          <thead><tr><th>Kapsam</th><th>Hedef</th><th>Belge</th><th class="sag">Oran</th><th class="sag">Alt / Üst</th></tr></thead>
+          <tbody>
+            <tr><td>Liste</td><td><span class="rz gri">Hepsi</span></td><td><span class="rz gri">Hepsi</span></td><td class="sag">%3</td><td class="sag">—</td></tr>
+            <tr><td>Kategori</td><td>MR</td><td><span class="rz gri">Hepsi</span></td><td class="sag">%4</td><td class="sag">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grp">
+        <h4>Taraflar <span class="tag">prim_plani_taraf · boş = roldeki herkes</span></h4>
+        <table>
+          <thead><tr><th>Kişi</th><th>Rol</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td>Ahmet YILDIZ</td><td><span class="rz tem">Temsilci</span></td><td>Koşuyolu pazarlama</td></tr>
+          </tbody>
+        </table>
+        <div class="bilgi">Temsilci rolü <code>taraf_prim_rol</code>'de işaretlenir (personel; dış hekime verilmez). Rol tanımlı değilse plan hakediş üretmez - mevcut kuralla aynı.</div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Hakediş satırı nasıl doğar <span class="tag">fn_prim_rol / hakedis_satir.rol = 10</span></h4>
+      <div class="akis" style="margin:10px">
+        <span class="kutu"><b>Başvuru kalemi</b> Lomber MR · Koşuyolu · 2.400 ₺</span><span class="ok">→</span>
+        <span class="kutu"><b>Gönderen</b> Dr. AKSOY · rol 1 · plan GND-KSY-2026 · %20 = 480 ₺</span><span class="ok">+</span>
+        <span class="kutu"><b>Temsilci</b> = belge.satici_id (Ahmet YILDIZ) · rol 10 · plan TEM-KSY-2026 · MR %4 = 96 ₺</span>
+      </div>
+      <table style="margin:0 10px 10px;width:calc(100% - 20px)">
+        <thead><tr><th>Tarih</th><th>Kalem</th><th>Rol</th><th>Kime</th><th>Şube</th><th>Plan</th><th class="sag">Taban</th><th class="sag">Oran</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>10.11.2026</td><td>Z. KAYA · Lomber MR</td><td><span class="rz rol">Gönderen</span></td><td>Dr. Ahmet AKSOY</td><td><span class="rz sb">Koşuyolu</span></td><td>GND-KSY-2026</td><td class="sag">2.400,00</td><td class="sag">%20</td><td class="sag">480,00</td></tr>
+          <tr><td>10.11.2026</td><td>Z. KAYA · Lomber MR</td><td><span class="rz tem">Temsilci</span></td><td>Ahmet YILDIZ</td><td><span class="rz sb">Koşuyolu</span></td><td>TEM-KSY-2026</td><td class="sag">2.400,00</td><td class="sag">%4</td><td class="sag">96,00</td></tr>
+          <tr><td>11.11.2026</td><td>B. ARSLAN · Beyin MR</td><td><span class="rz rol">Gönderen</span></td><td>Dr. Ahmet AKSOY</td><td><span class="rz sb">Kadıköy</span></td><td>GND-KDK-2026</td><td class="sag">2.400,00</td><td class="sag">%15</td><td class="sag">360,00</td></tr>
+          <tr><td>11.11.2026</td><td>B. ARSLAN · Beyin MR</td><td><span class="rz tem">Temsilci</span></td><td>Ayşe DEMİR</td><td><span class="rz sb">Kadıköy</span></td><td>TEM-KDK-MR</td><td class="sag">2.400,00</td><td class="sag">%4</td><td class="sag">96,00</td></tr>
+        </tbody>
+      </table>
+      <div class="uyari" style="margin:0 10px 10px">Temsilci hakedişi <b>belgedeki temsilciden</b> (satici_id) türer, kayıt anındaki şube eşlemesinden değil: sonradan temsilci değişse geçmiş hakediş oynamaz. Satici boşsa temsilci satırı doğmaz.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 4 ===== -->
+<h2><b>4</b> — Veri modeli ve kurallar</h2>
+<div class="kural">
+  <h3>Yeni tablo <code>dis_hekim_temsilci</code></h3>
+  <table class="sema">
+    <thead><tr><th>Kolon</th><th>Tip</th><th>Açıklama</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>serial</td><td></td></tr>
+      <tr><td>hekim_id</td><td>int → taraf (dis_hekim = 1)</td><td>Dış doktor</td></tr>
+      <tr><td>sube_id</td><td>int → sube</td><td>Hangi şubenin temsilcisi</td></tr>
+      <tr><td>temsilci_id</td><td>int → taraf (personel = 1)</td><td>Pazarlama / satış temsilcisi</td></tr>
+      <tr><td>baslangic · bitis</td><td>date · date null</td><td>Devir tarihçesi; bitiş boş = sürüyor</td></tr>
+      <tr><td>aktif</td><td>smallint</td><td>1 / 0</td></tr>
+      <tr><td>aciklama</td><td>varchar(200)</td><td></td></tr>
+      <tr><td colspan="3"><b>Kısıt:</b> aynı hekim + şube için tarih aralıkları çakışan iki aktif satır olamaz (exclusion / tetik, 422). <b>Log:</b> yeni LogTabloId. Kart detayı: dış doktor kartı <code>temsilciler</code> (GridKipi + AnindaKaydet).</td></tr>
+    </tbody>
+  </table>
+  <h3>Çözümleme <code>fn_dis_hekim_temsilci(hekim_id, sube_id, tarih)</code></h3>
+  <ul>
+    <li>Şube satırı (aktif, tarih içinde) → temsilci_id; yoksa <code>taraf.temsilci</code>; o da yoksa null.</li>
+    <li>Başvuru / istem kaydında (BelgeDeposu / istem ucu) <code>belge.satici_id</code> boşsa bununla doldurulur; dolu bırakılan değer korunur.</li>
+    <li>Kullanıcı başvuru başlığında Temsilci'yi değiştirebilir (TarafArama personel) - mevcut satış temsilcisi alanı.</li>
+  </ul>
+  <h3>Prim</h3>
+  <ul>
+    <li><code>prim.rol</code> kod listesine <b>10 Temsilci</b>; <code>taraf_prim_rol</code> tetiği: 10 yalnız personele (dış hekime değil).</li>
+    <li>Hakediş rol türetimi (<code>fn_prim_rol</code> / kalem rol listesi): kalemin belgesinde <code>satici_id</code> doluysa rol 10 = satici_id. Gönderen (1) aynen.</li>
+    <li><code>fn_prim_plan_satiri</code> özgüllük sırasına <code>sube_id</code> eklenir: şubeli plan genel planı ezer (bugün eşit; yeni göç, davranış değişikliği yalnız iki planın çakıştığı yerde).</li>
+    <li>Oran farkı için ek alan YOK: "aynı işlem · Koşuyolu %20 / Kadıköy %15" = iki şube planı (ya da tek planda şube satırı değil - plan başlığı şubelidir).</li>
+  </ul>
+  <h3>Listeler</h3>
+  <ul>
+    <li>Dış Doktor Listesi: yeni gizli-varsayılan sütun <b>Temsilciler</b> ("Koşuyolu: A. Yıldız · Kadıköy: A. Demir", string_agg) + çip "Şubemde temsilcisi yok".</li>
+    <li>Temsilci Performansı: başvurular şube + temsilci bazında (zaten satici_id okuyor); temsilci primi hakediş satırlarından (rol 10).</li>
+  </ul>
+</div>
+
+<script>
+  function sekme(t){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x===t)});
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('gizli', p.id !== 'p-' + t.dataset.t)});
+  }
+</script>
+</body>
+</html>

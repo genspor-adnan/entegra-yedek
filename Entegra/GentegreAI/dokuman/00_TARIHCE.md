@@ -204,6 +204,14 @@ başlığında … Listesi olsun".
   işlemde siler (`?satirlarla` parametresi ve `BelgeTuru.DogrudanSilinir` kümesi kaldırıldı). Korumalar sürer: e-Belge
   hazır / gönderilmiş, iptal edilmiş, dönüştürülmüş belge, bağlı kasa işlemi, ÜTS bildirimi; başka kaydın kullandığı
   satır (radyoloji istemi, hakediş...) FK ile. Liste onayı her türde "satırlarıyla birlikte silinecek".
+- **Dış doktor şube temsilcileri + temsilci primi (kullanıcı: "her şubenin pazarlama / satış temsilcisi aynı doktora
+  temsilci olabilir… farklı şubede farklı oran"; mockup `Ekranlar/Radyoloji/dis_doktor_temsilciler.html`; göç 1287-1288,
+  adım a):** `dis_hekim_temsilci` (hekim × şube × temsilci, tarihli, şube başına tek aktif - tetik 422), dış doktor
+  kartında **Temsilciler** grid sekmesi (anında kayıt, log 1780), listede "Şube Temsilcileri" sütunu; `taraf.temsilci`
+  varsayılan. `fn_dis_hekim_temsilci(hekim, şube, tarih)`; radyoloji / lab istemine dış hekim yazılınca başvurunun boş
+  `satici_id`'si o şubenin temsilcisiyle dolar. Prim rolü **10 Temsilci** (`prim.rol`, `v_prim_rol_lookup`): belgenin
+  satici_id'si kalemlere rol 10 (kaynak 2; `fn_temsilci_rolu_tazele`, satır + satici tetikleri; 1288 rad rol tazeleme
+  rol 10'a dokunmaz). `fn_prim_plan_satiri` özgüllüğüne şube: şubeli plan genel planı ezer. Test `SubeTemsilcisiTestleri`.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

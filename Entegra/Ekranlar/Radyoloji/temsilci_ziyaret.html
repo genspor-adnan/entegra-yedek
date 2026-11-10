@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temsilci — Ziyaret, Talep, Planlama, Rota — Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;margin:22px auto 8px;max-width:1180px;color:var(--navy)}
+  h2 b{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:0 8px;margin-right:6px}
+  h2 .ipucu{font-weight:normal;color:var(--muted);font-size:11px;margin-left:8px}
+  .not{max-width:1180px;margin:0 auto 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;
+    padding:8px 11px;font-size:11.5px;line-height:1.55;color:#2c4a6b}
+  .not code,.kural code{background:#fff;border:1px solid #cfe0f5;border-radius:2px;padding:0 4px;font-size:11px}
+  .win{max-width:1180px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#c98c8c;color:#9d3434}
+  .btn.sp{margin-left:auto}
+  .baslikad{margin-left:auto;font-weight:bold;color:var(--navy);font-size:12.5px}
+  .cipler{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#f7f9fc;color:#3a5573}
+  .cip.on{background:#2f6db3;color:#fff;border-color:#2f6db3}
+  .arama{margin-left:auto;border:1px solid var(--line);border-radius:12px;padding:3px 10px;width:220px;color:#aab4bf;background:#fff}
+  .idstrip{display:grid;gap:10px;padding:8px 12px;background:#fbfcfd;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .deg{font-weight:bold;font-size:12.5px;color:#1f2d3a;height:22px;display:flex;align-items:center}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;font-size:12px;display:flex;align-items:center}
+  .inp.ro{background:#f6f8fb;color:var(--muted)}
+  .alan{border:1px solid var(--line);border-radius:2px;background:#fff;padding:6px 7px;font-size:12px;min-height:60px;line-height:1.5}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .ph{color:#aab4bf}
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{padding:10px 12px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .tag{float:right;font-weight:normal;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line2);border-radius:9px;padding:0 7px;margin-left:6px}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .araclar{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center}
+  .araclar .ipucu{margin-left:auto;color:var(--muted);font-size:11px}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1} .iz .iki{grid-column:span 2}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap;background:#fff;vertical-align:top}
+  td.sar{white-space:normal}
+  tr.secili td{background:#eef4fc}
+  tr.gecik td{background:#fff6f6}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#eef1f5;color:#5b6b7c}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.uy{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sb{background:#efe4fa;color:#6a3fa0;border-color:#d8c3ef}
+  .rz.tur{background:#f3f6fa;color:#3a5573}
+  .uyari{margin:10px 0 0;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .bilgi{margin:10px 0 0;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;padding:7px 9px;font-size:11px;color:#2c4a6b;line-height:1.55}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ucte{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+  /* özet kutuları */
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;padding:8px 10px}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:16px;color:var(--navy)}
+  .kutu.kir b{color:#9d3434}
+  /* haftalık takvim */
+  .hafta{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px}
+  .gun{border:1px solid var(--line2);border-radius:4px;background:#fff;min-height:220px}
+  .gun h5{margin:0;padding:6px 8px;font-size:11.5px;background:#f3f6fa;border-bottom:1px solid var(--line2);color:var(--navy)}
+  .gun h5 small{color:var(--muted);font-weight:normal;margin-left:4px}
+  .gun.bugun h5{background:#e3ecfa}
+  .zk{margin:6px;border:1px solid var(--line);border-left:4px solid #2f6db3;border-radius:3px;padding:5px 7px;font-size:11px;background:#fbfcfd;line-height:1.4}
+  .zk.yapildi{border-left-color:#2e7d46;opacity:.8}
+  .zk.gecik{border-left-color:#9d3434;background:#fff6f6}
+  .zk.oneri{border-style:dashed;border-left-style:solid;border-left-color:#9a5b00;background:#fffaf2}
+  .zk b{color:var(--navy)}
+  .zk .s{color:var(--muted);font-size:10.5px}
+  .bos{color:#aab4bf;text-align:center;padding:12px 0;font-size:11px}
+  /* rota */
+  .rota{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:10px}
+  .durak{display:flex;gap:10px;align-items:flex-start;padding:7px 8px;border-bottom:1px solid var(--line2);background:#fff}
+  .durak .no{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:bold;font-size:11px;flex:none}
+  .durak .no.sube{background:#6a3fa0}
+  .durak .ic{flex:1;line-height:1.45}
+  .durak .ic b{color:var(--navy)}
+  .durak .sag{text-align:right;color:var(--muted);font-size:10.5px;white-space:nowrap}
+  .harita{border:1px dashed var(--line);border-radius:4px;background:repeating-linear-gradient(45deg,#f7f9fc,#f7f9fc 10px,#eef2f7 10px,#eef2f7 20px);min-height:300px;display:grid;place-items:center;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.6}
+  .pin{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:3px;padding:2px 6px;margin:2px;font-size:10.5px}
+  .kural{max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .kural h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kural ul{margin:0 0 8px 18px;padding:0}
+  .sema td{white-space:normal}
+  .gizli{display:none !important}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — Temsilci: Ziyaret Notları · Doktorun Talepleri · Ziyaret Planlama · Rota · Yönetim Performansı</b> (kullanıcı 10.11.2026).
+<code>dis_doktor_temsilciler.html</code>'ün devamı: temsilci şubesinin dış doktorlarını ziyaret eder, notu ve doktorun taleplerini yazar; haftalık
+plan hekimin <b>ziyaret sıklığından</b> üretilir; gün için <b>rota</b> adres / ilçeye göre sıralanır. Mevcut desenler: hatırlatma (hatirlatma),
+görev (gorev), servis ziyareti (servis_ziyaret) - aynı kalıp, dış doktora bağlı.</div>
+
+<!-- ===================================================================== 1 ===== -->
+<h2><b>1</b> — Temsilci Paneli <span class="ipucu">Satış › Temsilci Paneli · kendi şubesi, kendi hekimleri · günün işi</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span class="on">🤝 Temsilci Paneli ×</span></div>
+  <div class="toolbar">
+    <span class="btn primary">＋ Ziyaret</span><span class="btn">📅 Haftalık Plan</span><span class="btn">🗺 Bugünün Rotası</span>
+    <span class="btn">📋 Açık Talepler</span><span class="btn">🖨 Yazdır</span>
+    <span class="baslikad">Ahmet YILDIZ · Koşuyolu · Pazartesi 10.11.2026</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu"><small>Bugün planlı ziyaret</small><b>6</b> <span class="sonuk">· 2 yapıldı</span></div>
+    <div class="kutu kir"><small>Geciken ziyaret</small><b>3</b> <span class="sonuk">· sıklığı aşılan hekim</span></div>
+    <div class="kutu kir"><small>Açık talep</small><b>7</b> <span class="sonuk">· 2 termini geçti</span></div>
+    <div class="kutu"><small>Bu ay gönderim</small><b>142</b> <span class="sonuk">· geçen ay 128</span></div>
+    <div class="kutu"><small>Hekimlerim</small><b>38</b> <span class="sonuk">· 4'ü 60 gündür gönderim yok</span></div>
+  </div>
+  <div class="cipler">
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Geciken</span><span class="cip">Gönderimi düşen</span><span class="cip">Talebi açık</span><span class="cip">Tümü</span>
+    <span class="arama">🔍 hekim / kurum / ilçe…</span>
+  </div>
+  <table>
+    <thead><tr>
+      <th style="width:60px" class="orta">Saat</th><th style="width:230px">Dış Doktor</th><th style="width:190px">Kurum · İlçe</th>
+      <th style="width:90px" class="orta">Tür</th><th style="width:110px" class="orta">Son ziyaret</th><th style="width:90px" class="orta">Sıklık</th>
+      <th style="width:90px" class="orta">30 gün ist.</th><th>Konu / Açık talep</th><th style="width:100px" class="orta">Durum</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="orta">09:00</td><td>Dr. Ahmet AKSOY <span class="rz mavi">Radyoloji</span></td><td>Acıbadem Kozyatağı · Kadıköy</td><td class="orta"><span class="rz tur">Planlı</span></td><td class="orta">13.10.2026</td><td class="orta">4 hafta</td><td class="orta">9</td><td class="sar">MR rapor süresi talebi açık</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+      <tr><td class="orta">10:00</td><td>Dr. Selin ARI <span class="rz mavi">Ortopedi</span></td><td>Özel Göztepe Hast. · Kadıköy</td><td class="orta"><span class="rz tur">Planlı</span></td><td class="orta">06.10.2026</td><td class="orta">4 hafta</td><td class="orta">4</td><td class="sar">Diz MR protokolü - eğitim istedi</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+      <tr class="secili"><td class="orta">11:30</td><td>Dr. Kerem ÖZ <span class="rz mavi">Nöroloji</span></td><td>Muayenehane · Üsküdar</td><td class="orta"><span class="rz tur">Planlı</span></td><td class="orta">29.09.2026</td><td class="orta">4 hafta</td><td class="orta">2 <span class="rz hata">↓</span></td><td class="sar">Gönderim düştü - sebep?</td><td class="orta"><span class="rz uy">Bekliyor</span></td></tr>
+      <tr class="gecik"><td class="orta">13:30</td><td>Dr. Leyla TAN <span class="rz mavi">Dahiliye</span></td><td>Üsküdar Tıp Merkezi · Üsküdar</td><td class="orta"><span class="rz tur">Geciken</span></td><td class="orta">25.08.2026</td><td class="orta">4 hafta</td><td class="orta">6</td><td class="sar">Randevu önceliği talebi termini geçti</td><td class="orta"><span class="rz hata">Gecikti</span></td></tr>
+      <tr><td class="orta">15:00</td><td>Dr. Murat EREN <span class="rz mavi">KBB</span></td><td>Muayenehane · Ataşehir</td><td class="orta"><span class="rz tur">Planlı</span></td><td class="orta">13.10.2026</td><td class="orta">4 hafta</td><td class="orta">3</td><td class="sar"></td><td class="orta"><span class="rz uy">Bekliyor</span></td></tr>
+      <tr><td class="orta">16:00</td><td>Dr. Hande SU <span class="rz mavi">Kadın Doğum</span></td><td>Ataşehir Kadın Sağlığı · Ataşehir</td><td class="orta"><span class="rz tur">Tanışma</span></td><td class="orta">—</td><td class="orta">—</td><td class="orta">0</td><td class="sar">Yeni hekim - broşür + fiyat listesi</td><td class="orta"><span class="rz uy">Bekliyor</span></td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi" style="margin:10px 12px 12px">Çift tık = ziyaret kartı (2). Satır sağ tuş: Ziyaret kartını aç · Dış Doktor kartı · Telefon ziyareti yaz · Ertele · Rotaya ekle.
+    "Geciken" = son ziyaret + sıklık &lt; bugün. "Gönderimi düşen" = son 30 gün istem, önceki 30 günün yarısından az.</div>
+</div>
+
+<!-- ===================================================================== 2 ===== -->
+<h2><b>2</b> — Ziyaret Kartı <span class="ipucu">dis_hekim_ziyaret · not + doktorun talepleri + sonraki ziyaret</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span><span class="btn">✖ Kapat</span><span class="btn">🗑 Sil</span>
+    <span class="btn">🩺 Dış Doktor Kartı</span><span class="btn">📨 Hatırlat</span><span class="btn">📞 Telefon Ziyareti</span>
+    <span class="baslikad">Ziyaret #2041 · Dr. Kerem ÖZ</span>
+  </div>
+  <div class="idstrip" style="grid-template-columns:1.4fr 1fr .8fr .8fr .8fr .8fr">
+    <div class="fld"><label class="req">Dış Doktor</label><div class="inp combo">Dr. Kerem ÖZ · Nöroloji · Üsküdar</div></div>
+    <div class="fld"><label>Temsilci</label><div class="inp ro">Ahmet YILDIZ · Koşuyolu</div></div>
+    <div class="fld"><label class="req">Tarih / Saat</label><div class="inp">10.11.2026 11:30</div></div>
+    <div class="fld"><label class="req">Tür</label><div class="inp combo">Yüz yüze</div></div>
+    <div class="fld"><label class="req">Sonuç</label><div class="inp combo">Görüşüldü</div></div>
+    <div class="fld"><label>Süre</label><div class="inp">25 dk</div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-t="z-not" onclick="sekme(this,'z')">📝 Görüşme Notu</div>
+    <div class="tab" data-t="z-talep" onclick="sekme(this,'z')">📋 Doktorun Talepleri <span class="b">3</span></div>
+    <div class="tab" data-t="z-gecmis" onclick="sekme(this,'z')">🕘 Önceki Ziyaretler <span class="b">7</span></div>
+    <div class="tab" data-t="z-gonderim" onclick="sekme(this,'z')">📊 Gönderim</div>
+  </div>
+
+  <div class="pane" id="p-z-not">
+    <div class="ikili">
+      <div class="grp">
+        <h4>Görüşme Notu <span class="tag">serbest metin · dikte</span></h4>
+        <div class="iz" style="grid-template-columns:1fr">
+          <div class="fld"><label>Not</label><div class="alan">Son 1 ayda gönderim düştü; sebebi komşu merkezin MR'da %10 indirimi. Rapor süremizin (24 saat) avantajını anlattı, kabul etti.
+            Beyin MR'da kontrastlı protokolün raporda ayrıca belirtilmesini istiyor. Kasım'da 2 hasta söz verdi.</div></div>
+          <div class="fld"><label>Görüşülen konular</label><div class="inp" style="height:auto;padding:4px 7px;flex-wrap:wrap;gap:4px"><span class="rz tur">Rapor süresi</span><span class="rz tur">Fiyat / rakip</span><span class="rz tur">Protokol</span><span class="rz mavi">+ konu</span></div></div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Sonraki Adım <span class="tag">hatirlatma + plan</span></h4>
+        <div class="iz" style="grid-template-columns:1fr 1fr">
+          <div class="fld"><label>Sonraki ziyaret</label><div class="inp">08.12.2026</div></div>
+          <div class="fld"><label>Sıklık (hekim kartı)</label><div class="inp combo">4 haftada bir</div></div>
+          <div class="fld iki"><label>Hatırlatma</label><div class="inp combo">1 gün önce · bana · bildirim + e-posta</div></div>
+          <div class="fld iki"><label>Bırakılan materyal</label><div class="inp">Fiyat listesi 2026 · MR protokol broşürü</div></div>
+          <div class="fld"><label>Memnuniyet</label><div class="inp combo">😐 Orta</div></div>
+          <div class="fld"><label>Rakip baskısı</label><div class="inp combo">Var - fiyat</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-z-talep">
+    <div class="grp">
+      <h4>Doktorun Talepleri <span class="tag">dis_hekim_talep · ziyaretten doğar, kapanana dek açık</span><span class="mini">grid kipi</span></h4>
+      <div class="araclar">
+        <span class="btn">＋ Talep</span><span class="btn teh">− Sil</span><span class="btn">✔ Kapat</span><span class="btn">➜ Göreve Çevir</span>
+        <span class="ipucu">Talep = doktorun bizden istediği; sorumlu kurumdaki kişi, termin takip edilir</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:36px" class="orta">#</th><th style="width:130px">Tür</th><th>Talep</th><th style="width:80px" class="orta">Öncelik</th>
+          <th style="width:160px">Sorumlu</th><th style="width:100px" class="orta">Termin</th><th style="width:100px" class="orta">Durum</th><th style="width:220px">Sonuç / Yanıt</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="orta sonuk">1</td><td><span class="rz tur">Rapor</span></td><td class="sar">Beyin MR kontrastlı protokol raporda ayrı başlıkla yazılsın</td><td class="orta"><span class="rz uy">Yüksek</span></td><td>Dr. Ece YALÇIN · Radyolog</td><td class="orta">20.11.2026</td><td class="orta"><span class="rz uy">Açık</span></td><td class="sar"></td></tr>
+          <tr><td class="orta sonuk">2</td><td><span class="rz tur">Randevu</span></td><td class="sar">Acil hastalarına aynı gün MR slotu</td><td class="orta"><span class="rz hata">Acil</span></td><td>Banko · Koşuyolu</td><td class="orta">12.11.2026</td><td class="orta"><span class="rz uy">Açık</span></td><td class="sar"></td></tr>
+          <tr><td class="orta sonuk">3</td><td><span class="rz tur">Fiyat</span></td><td class="sar">Beyin MR için hasta fiyatı rakiple eşitlensin (%10)</td><td class="orta"><span class="rz uy">Yüksek</span></td><td>Satış Müdürü</td><td class="orta">17.11.2026</td><td class="orta"><span class="rz mavi">Onayda</span></td><td class="sar">İskonto talebi #318 açıldı (onay akışı)</td></tr>
+          <tr><td class="orta sonuk">4</td><td><span class="rz tur">Eğitim</span></td><td class="sar">Diz MR protokolleri sunumu (Dr. ARI ile ortak)</td><td class="orta"><span class="rz tur">Normal</span></td><td>Dr. Ece YALÇIN</td><td class="orta">30.11.2026</td><td class="orta"><span class="rz ok">Kapandı</span></td><td class="sar">05.11 yapıldı</td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi">Tür listesi (kod listesi <code>dis_hekim.talep_turu</code>): Rapor · Randevu · Fiyat · Protokol · Eğitim · Materyal · Sonuç erişimi (portal) · Diğer.
+        "Göreve Çevir" sorumluya görev (gorev) açar; "Fiyat" türü istenirse iskonto talebine (onay akışı) bağlanır. Termini geçen talep temsilci panelinde kırmızı.</div>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-z-gecmis">
+    <div class="grp"><h4>Önceki Ziyaretler</h4>
+      <table>
+        <thead><tr><th>Tarih</th><th>Tür</th><th>Sonuç</th><th>Temsilci</th><th>Not (özet)</th><th class="orta">Talep</th></tr></thead>
+        <tbody>
+          <tr><td>29.09.2026</td><td>Yüz yüze</td><td><span class="rz ok">Görüşüldü</span></td><td>Ahmet YILDIZ</td><td class="sar">Yeni cihaz (3T MR) tanıtıldı, broşür bırakıldı</td><td class="orta">1</td></tr>
+          <tr><td>15.09.2026</td><td>Telefon</td><td><span class="rz ok">Görüşüldü</span></td><td>Ahmet YILDIZ</td><td class="sar">Rapor gecikmesi şikâyeti - çözüldü</td><td class="orta">1</td></tr>
+          <tr><td>01.09.2026</td><td>Yüz yüze</td><td><span class="rz uy">Görüşülemedi</span></td><td>Ahmet YILDIZ</td><td class="sar">Ameliyatta, sekreterle görüşüldü</td><td class="orta">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pane gizli" id="p-z-gonderim">
+    <div class="grp"><h4>Gönderim (son 6 ay) <span class="tag">radyoloji_istem.istek_hekim_id · şube</span></h4>
+      <table><thead><tr><th>Ay</th><th class="sag">İstem</th><th class="sag">MR</th><th class="sag">BT</th><th class="sag">Tutar</th><th class="sag">Gönderen primi</th></tr></thead>
+        <tbody><tr><td>Ekim 2026</td><td class="sag">2</td><td class="sag">2</td><td class="sag">0</td><td class="sag">4.800</td><td class="sag">960</td></tr>
+               <tr><td>Eylül 2026</td><td class="sag">7</td><td class="sag">5</td><td class="sag">2</td><td class="sag">14.900</td><td class="sag">2.980</td></tr>
+               <tr><td>Ağustos 2026</td><td class="sag">6</td><td class="sag">4</td><td class="sag">2</td><td class="sag">12.600</td><td class="sag">2.520</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 3 ===== -->
+<h2><b>3</b> — Ziyaret Planlama <span class="ipucu">haftalık takvim · sıklıktan üretilir · sürükle-bırak</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <span class="btn">◀</span><span class="btn">10 – 14 Kasım 2026</span><span class="btn">▶</span><span class="btn">Bugün</span>
+    <span class="btn primary">⚙ Planı Üret</span><span class="btn">＋ Ziyaret</span><span class="btn">🗺 Günün Rotası</span><span class="btn">🖨 Yazdır</span>
+    <span class="baslikad">Ahmet YILDIZ · Koşuyolu</span>
+  </div>
+  <div class="cipler">
+    <span class="sonuk">Üretim ölçütü:</span>
+    <span class="cip on">Sıklığı dolan</span><span class="cip">Gönderimi düşen (öne al)</span><span class="cip">Açık talebi olan (öne al)</span><span class="cip">Yeni hekim (tanışma)</span>
+    <span class="sonuk" style="margin-left:10px">Gün başı en çok</span><span class="cip">6 ziyaret</span>
+    <span class="sonuk">· aynı gün aynı ilçe</span><span class="cip on">Grupla</span>
+  </div>
+  <div class="hafta">
+    <div class="gun bugun"><h5>Pzt 10.11 <small>6 ziyaret · Kadıköy / Üsküdar / Ataşehir</small></h5>
+      <div class="zk yapildi"><b>09:00 Dr. AKSOY</b> · Kadıköy<div class="s">Planlı · yapıldı</div></div>
+      <div class="zk yapildi"><b>10:00 Dr. ARI</b> · Kadıköy<div class="s">Planlı · yapıldı</div></div>
+      <div class="zk"><b>11:30 Dr. ÖZ</b> · Üsküdar<div class="s">Gönderim düştü ↓</div></div>
+      <div class="zk gecik"><b>13:30 Dr. TAN</b> · Üsküdar<div class="s">Geciken · talep termini geçti</div></div>
+      <div class="zk"><b>15:00 Dr. EREN</b> · Ataşehir</div>
+      <div class="zk"><b>16:00 Dr. SU</b> · Ataşehir<div class="s">Tanışma</div></div>
+    </div>
+    <div class="gun"><h5>Sal 11.11 <small>4 ziyaret · Maltepe / Kartal</small></h5>
+      <div class="zk"><b>09:30 Dr. YILMAZ</b> · Maltepe</div>
+      <div class="zk"><b>11:00 Dr. KOÇ</b> · Maltepe<div class="s">Açık talep: portal erişimi</div></div>
+      <div class="zk"><b>14:00 Dr. ŞEN</b> · Kartal</div>
+      <div class="zk oneri"><b>15:30 Dr. ALP</b> · Kartal<div class="s">Öneri: sıklık doldu (6 hf) · onayla / ertele</div></div>
+    </div>
+    <div class="gun"><h5>Çar 12.11 <small>Ofis · raporlama</small></h5>
+      <div class="zk"><b>10:00 Dr. DEMİRCİ</b> · Telefon<div class="s">Rapor süresi takibi</div></div>
+      <div class="bos">sürükle-bırak ile ziyaret ekle</div>
+    </div>
+    <div class="gun"><h5>Per 13.11 <small>5 ziyaret · Ümraniye</small></h5>
+      <div class="zk"><b>09:00 Dr. KARA</b> · Ümraniye</div>
+      <div class="zk"><b>10:30 Dr. ÇETİN</b> · Ümraniye</div>
+      <div class="zk"><b>13:00 Dr. BULUT</b> · Ümraniye</div>
+      <div class="zk oneri"><b>14:30 Dr. ACAR</b> · Ümraniye<div class="s">Öneri: 60 gündür gönderim yok</div></div>
+      <div class="zk oneri"><b>16:00 Dr. GÜL</b> · Ümraniye<div class="s">Öneri: yeni hekim</div></div>
+    </div>
+    <div class="gun"><h5>Cum 14.11 <small>3 ziyaret · Kadıköy</small></h5>
+      <div class="zk"><b>10:00 Dr. ÖZTÜRK</b> · Kadıköy</div>
+      <div class="zk"><b>11:30 Dr. AYDIN</b> · Kadıköy<div class="s">Eğitim sunumu (Dr. YALÇIN ile)</div></div>
+      <div class="zk"><b>14:00 Acıbadem Kozyatağı</b> · 3 hekim<div class="s">Kurum ziyareti</div></div>
+    </div>
+  </div>
+  <div class="bilgi" style="margin:0 12px 12px">"Planı Üret": hekim kartındaki <b>ziyaret sıklığı</b> + son ziyaret tarihi → vadesi dolanlar, aynı ilçe aynı güne, gün başı sınır; sonuç <b>öneri</b> (kesik çerçeve) olarak gelir, temsilci onaylar / erteler.
+    Önceliklendirme: açık talebi olan ve gönderimi düşen hekimler öne. Sabit randevular (eğitim, kurum ziyareti) korunur. Yönetici görünümü: şubenin tüm temsilcileri yan yana.</div>
+</div>
+
+<!-- ===================================================================== 4 ===== -->
+<h2><b>4</b> — Rota Oluşturma <span class="ipucu">günün ziyaretleri · şubeden başlar · ilçe / adres sırası · harita bağlantısı</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <span class="btn">◀</span><span class="btn">Pzt 10.11.2026</span><span class="btn">▶</span>
+    <span class="btn primary">🗺 Rotayı Oluştur</span><span class="btn">↕ Sırayı Düzenle</span><span class="btn">📍 Haritada Aç</span><span class="btn">📱 Telefona Gönder</span><span class="btn">🖨 Yazdır</span>
+    <span class="baslikad">Rota · Ahmet YILDIZ · 6 durak · ~62 km · 2 s 10 dk yol</span>
+  </div>
+  <div class="idstrip" style="grid-template-columns:1fr 1fr 1fr 1fr">
+    <div class="fld"><label>Başlangıç</label><div class="inp combo">Koşuyolu Şubesi (08:30)</div></div>
+    <div class="fld"><label>Bitiş</label><div class="inp combo">Koşuyolu Şubesi</div></div>
+    <div class="fld"><label>Sıralama</label><div class="inp combo">En kısa yol (ilçe gruplu)</div></div>
+    <div class="fld"><label>Ziyaret süresi varsayılanı</label><div class="inp">30 dk</div></div>
+  </div>
+  <div class="rota">
+    <div class="grp" style="margin:0">
+      <h4>Duraklar <span class="tag">temsilci_rota · temsilci_rota_durak (sira, planlanan_saat, mesafe_km, sure_dk)</span></h4>
+      <div class="durak"><div class="no sube">Ş</div><div class="ic"><b>Koşuyolu Şubesi</b><br><span class="sonuk">Koşuyolu Mah. · Kadıköy · çıkış 08:30</span></div><div class="sag">0 km</div></div>
+      <div class="durak"><div class="no">1</div><div class="ic"><b>Dr. Ahmet AKSOY</b> · Acıbadem Kozyatağı<br><span class="sonuk">İnönü Cad. 45 · Kadıköy · 09:00 – 09:30 · ☎ 0532 …</span></div><div class="sag">4,2 km<br>12 dk</div></div>
+      <div class="durak"><div class="no">2</div><div class="ic"><b>Dr. Selin ARI</b> · Özel Göztepe Hastanesi<br><span class="sonuk">Fahrettin Kerim Gökay Cad. · Kadıköy · 10:00 – 10:30</span></div><div class="sag">3,1 km<br>10 dk</div></div>
+      <div class="durak"><div class="no">3</div><div class="ic"><b>Dr. Kerem ÖZ</b> · Muayenehane<br><span class="sonuk">Altunizade · Üsküdar · 11:30 – 12:00 · <span class="rz hata">↓ gönderim</span></span></div><div class="sag">7,8 km<br>20 dk</div></div>
+      <div class="durak"><div class="no">4</div><div class="ic"><b>Dr. Leyla TAN</b> · Üsküdar Tıp Merkezi<br><span class="sonuk">Mimar Sinan Mah. · Üsküdar · 13:30 – 14:00 · <span class="rz hata">geciken</span></span></div><div class="sag">2,4 km<br>9 dk · öğle</div></div>
+      <div class="durak"><div class="no">5</div><div class="ic"><b>Dr. Murat EREN</b> · Muayenehane<br><span class="sonuk">Barbaros Mah. · Ataşehir · 15:00 – 15:30</span></div><div class="sag">11,6 km<br>25 dk</div></div>
+      <div class="durak"><div class="no">6</div><div class="ic"><b>Dr. Hande SU</b> · Ataşehir Kadın Sağlığı<br><span class="sonuk">Atatürk Mah. · Ataşehir · 16:00 – 16:30 · tanışma</span></div><div class="sag">2,0 km<br>8 dk</div></div>
+      <div class="durak"><div class="no sube">Ş</div><div class="ic"><b>Koşuyolu Şubesi</b> · dönüş<br><span class="sonuk">~17:10</span></div><div class="sag">9,5 km<br>22 dk</div></div>
+      <div class="uyari" style="margin:10px">Adresi koordinatsız hekim (<b>Dr. SU</b>) sıralamada ilçe sonuna düşer; kartta "Haritada doğrula" ile konum alınır. Mesafe / süre dış servis (OSRM / Google) ile; servis yoksa ilçe + sıra elle.</div>
+    </div>
+    <div>
+      <div class="harita">🗺<br><b>Harita</b> (yer tutucu)<br>Şube + 6 durak, sıralı çizgi<br><br>
+        <span class="pin">Ş Koşuyolu</span><span class="pin">1 Kadıköy</span><span class="pin">2 Kadıköy</span><span class="pin">3 Üsküdar</span><span class="pin">4 Üsküdar</span><span class="pin">5 Ataşehir</span><span class="pin">6 Ataşehir</span><br>
+        <small>"Haritada Aç" = Google Maps çok duraklı yol tarifi bağlantısı; "Telefona Gönder" = aynı bağlantı SMS / WhatsApp</small></div>
+      <div class="grp" style="margin-top:12px"><h4>Rota Özeti</h4>
+        <table><tbody>
+          <tr><td>Durak</td><td class="sag">6</td></tr><tr><td>Toplam yol</td><td class="sag">~62 km · 2 s 10 dk</td></tr>
+          <tr><td>Ziyaret süresi</td><td class="sag">3 s 00 dk</td></tr><tr><td>Öğle</td><td class="sag">12:00 – 13:30</td></tr>
+          <tr><td>Bitiş</td><td class="sag">~17:10</td></tr>
+          <tr><td>Durum</td><td class="sag"><span class="rz ok">2 / 6 yapıldı</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 5 ===== -->
+<h2><b>5</b> — Dış Doktor kartına eklenen sekmeler ve veri modeli</h2>
+<div class="kural">
+  <h3>Dış Doktor Kartı</h3>
+  <ul>
+    <li><b>Ziyaretler</b> sekmesi: bu hekime yapılan ziyaretler (tarih · tür · sonuç · temsilci · not özeti · talep sayısı); "＋ Ziyaret" kartı bu hekimle açar.</li>
+    <li><b>Talepler</b> sekmesi: açık / kapalı talepler (2'deki grid); termin geçen kırmızı.</li>
+    <li>Hekim Bilgisi'ne: <b>Ziyaret sıklığı</b> (2 hf · 4 hf · 6 hf · 3 ay · yok), <b>Tercih edilen gün / saat</b>, <b>Konum</b> (enlem / boylam, "Haritada doğrula"), <b>İlçe</b> (adresten).</li>
+  </ul>
+  <h3>Tablolar</h3>
+  <table class="sema">
+    <thead><tr><th>Tablo</th><th>Kolonlar</th><th>Not</th></tr></thead>
+    <tbody>
+      <tr><td><code>dis_hekim_ziyaret</code></td><td>id, hekim_id, temsilci_id, sube_id, tarih (timestamptz), tur (1 yüz yüze · 2 telefon · 3 kurum · 4 tanışma), sonuc (1 görüşüldü · 2 görüşülemedi · 3 ertelendi), sure_dk, not, konular (kod listesi, virgüllü), memnuniyet, rakip, materyal, sonraki_tarih, plan_id?, durum (0 planlı · 1 yapıldı · 2 iptal)</td><td>Log tablo id yeni; hatırlatma (hatirlatma) sonraki_tarih'ten üretilir</td></tr>
+      <tr><td><code>dis_hekim_talep</code></td><td>id, hekim_id, ziyaret_id?, tur (kod listesi dis_hekim.talep_turu), talep, oncelik, sorumlu_id, termin, durum (1 açık · 2 onayda · 3 kapandı · 4 ret), sonuc, gorev_id?, iskonto_talep_id?</td><td>"Göreve Çevir" gorev; Fiyat türü iskonto talebi (onay akışı)</td></tr>
+      <tr><td><code>dis_hekim_ziyaret_plan</code></td><td>id, temsilci_id, sube_id, hafta_baslangic, uretim_olcutu, durum</td><td>Planı Üret çıktısı; satırları ziyaret (durum 0 planlı, oneri = 1)</td></tr>
+      <tr><td><code>temsilci_rota</code> · <code>temsilci_rota_durak</code></td><td>rota: id, temsilci_id, tarih, baslangic (şube / adres), bitis, toplam_km, toplam_dk, durum · durak: rota_id, sira, ziyaret_id, planlanan_saat, mesafe_km, sure_dk, yapildi</td><td>Mesafe dış servisten; yoksa boş</td></tr>
+      <tr><td><code>taraf_personel</code> (dış hekim)</td><td>+ ziyaret_sikligi_hafta, tercih_gun, tercih_saat, enlem, boylam</td><td>Mevcut tabloya kolon</td></tr>
+    </tbody>
+  </table>
+  <h3>Kurallar</h3>
+  <ul>
+    <li>Temsilci yalnız <b>kendi şubesinin</b> hekimlerini görür (dis_hekim_temsilci); yönetici şubenin hepsini, satış müdürü tüm şubeleri.</li>
+    <li>Ziyaret kaydı hekimin <b>son ziyaret</b> tarihini günceller; "geciken" = son ziyaret + sıklık &lt; bugün.</li>
+    <li>Talep kapanınca doktora bilgi (SMS / e-posta şablonu, isteğe bağlı); termin geçen talep sorumluya zil.</li>
+    <li>Planı Üret yalnız <b>öneri</b> yazar; temsilci onaylamadan takvime kesin düşmez. Yapılmayan planlı ziyaret ertesi haftaya "geciken" olarak taşınır.</li>
+    <li>Rota günlüktür; "Rotayı Oluştur" o günün planlı ziyaretlerinden kurar, elle sıra değişince km / süre yeniden hesaplanır.</li>
+    <li>Menü: Satış › <b>Temsilci Paneli</b> · <b>Ziyaret Listesi</b> · <b>Doktor Talepleri</b> · <b>Ziyaret Planı</b> · <b>Rota</b>; yetkiler <code>satis.temsilci</code>, <code>satis.ziyaret</code>, <code>satis.talep</code>.</li>
+  </ul>
+</div>
+
+<!-- ===================================================================== 6 ===== -->
+<h2><b>6</b> — Yönetim: Temsilci ve Doktor Performansı <span class="ipucu">Satış › Performans · şube / dönem süzgeçli · satış müdürü ve yönetim</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span class="on">📈 Saha Performansı ×</span></div>
+  <div class="toolbar">
+    <span class="btn">📅 Ekim 2026</span><span class="btn">◀</span><span class="btn">▶</span>
+    <span class="btn">Şube: Tümü ▾</span><span class="btn">Karşılaştır: Önceki dönem ▾</span>
+    <span class="btn">🖨 Yazdır</span><span class="btn">⬇ Excel</span>
+    <span class="baslikad">Saha Performansı · Ekim 2026 · 3 şube · 5 temsilci · 118 dış doktor</span>
+  </div>
+  <div class="ozet">
+    <div class="kutu"><small>Gönderim (istem)</small><b>1.284</b> <span class="sonuk">· geçen ay 1.190 <span class="rz ok">+8%</span></span></div>
+    <div class="kutu"><small>Gönderim tutarı</small><b>2,41 M₺</b> <span class="sonuk">· <span class="rz ok">+6%</span></span></div>
+    <div class="kutu"><small>Ziyaret</small><b>212</b> <span class="sonuk">· plan uyumu %86</span></div>
+    <div class="kutu kir"><small>Gönderimi düşen hekim</small><b>14</b> <span class="sonuk">· 60 gün sessiz 9</span></div>
+    <div class="kutu"><small>Ödenecek prim</small><b>188.400 ₺</b> <span class="sonuk">· gönderen 162.9 K · temsilci 25.5 K</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-t="y-tem" onclick="sekme(this,'y')">🤝 Temsilciler</div>
+    <div class="tab" data-t="y-dr" onclick="sekme(this,'y')">🩺 Doktorlar</div>
+    <div class="tab" data-t="y-sube" onclick="sekme(this,'y')">🏥 Şubeler</div>
+    <div class="tab" data-t="y-talep" onclick="sekme(this,'y')">📋 Talepler</div>
+  </div>
+
+  <div class="pane" id="p-y-tem">
+    <div class="grp" style="margin:0">
+      <h4>Temsilci Performansı <span class="tag">v_temsilci_performans · dönem × şube × temsilci</span><span class="mini">çift tık = temsilci paneli (1)</span></h4>
+      <table>
+        <thead><tr>
+          <th>Temsilci</th><th>Şube</th><th class="sag">Hekim</th><th class="sag">Aktif hekim*</th>
+          <th class="sag">Ziyaret</th><th class="sag">Plan uyumu</th><th class="sag">Gönderim</th><th class="sag">Önceki</th><th class="sag">Değişim</th>
+          <th class="sag">Tutar</th><th class="sag">Yeni hekim</th><th class="sag">Kaybedilen**</th><th class="sag">Açık talep</th><th class="sag">Termini geçen</th><th class="sag">Prim</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Ahmet YILDIZ</td><td><span class="rz sb">Koşuyolu</span></td><td class="sag">38</td><td class="sag">31</td><td class="sag">52</td><td class="sag">%91</td><td class="sag">412</td><td class="sag">366</td><td class="sag"><span class="rz ok">+13%</span></td><td class="sag">784.200</td><td class="sag">3</td><td class="sag">1</td><td class="sag">7</td><td class="sag"><span class="rz hata">2</span></td><td class="sag">7.840</td></tr>
+          <tr><td>Ayşe DEMİR</td><td><span class="rz sb">Kadıköy</span></td><td class="sag">29</td><td class="sag">24</td><td class="sag">44</td><td class="sag">%88</td><td class="sag">351</td><td class="sag">340</td><td class="sag"><span class="rz tur">+3%</span></td><td class="sag">655.900</td><td class="sag">2</td><td class="sag">2</td><td class="sag">4</td><td class="sag">0</td><td class="sag">6.560</td></tr>
+          <tr><td>Burak CAN</td><td><span class="rz sb">Kadıköy</span></td><td class="sag">22</td><td class="sag">15</td><td class="sag">31</td><td class="sag">%72</td><td class="sag">188</td><td class="sag">231</td><td class="sag"><span class="rz hata">−19%</span></td><td class="sag">352.100</td><td class="sag">0</td><td class="sag">4</td><td class="sag">6</td><td class="sag"><span class="rz hata">3</span></td><td class="sag">3.520</td></tr>
+          <tr><td>Elif KAYA</td><td><span class="rz sb">Ataşehir</span></td><td class="sag">19</td><td class="sag">17</td><td class="sag">47</td><td class="sag">%94</td><td class="sag">221</td><td class="sag">164</td><td class="sag"><span class="rz ok">+35%</span></td><td class="sag">410.800</td><td class="sag">5</td><td class="sag">0</td><td class="sag">3</td><td class="sag">0</td><td class="sag">4.110</td></tr>
+          <tr><td>Mehmet KURT</td><td><span class="rz sb">Ataşehir</span></td><td class="sag">10</td><td class="sag">7</td><td class="sag">38</td><td class="sag">%80</td><td class="sag">112</td><td class="sag">89</td><td class="sag"><span class="rz ok">+26%</span></td><td class="sag">207.400</td><td class="sag">2</td><td class="sag">1</td><td class="sag">2</td><td class="sag">0</td><td class="sag">2.070</td></tr>
+          <tr><td><b>Toplam</b></td><td></td><td class="sag"><b>118</b></td><td class="sag"><b>94</b></td><td class="sag"><b>212</b></td><td class="sag"><b>%86</b></td><td class="sag"><b>1.284</b></td><td class="sag"><b>1.190</b></td><td class="sag"><b>+8%</b></td><td class="sag"><b>2.410.400</b></td><td class="sag"><b>12</b></td><td class="sag"><b>8</b></td><td class="sag"><b>22</b></td><td class="sag"><b>5</b></td><td class="sag"><b>24.100</b></td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi" style="margin:10px">* Aktif hekim = dönemde en az 1 gönderim. ** Kaybedilen = önceki 3 ayda gönderimi olup bu dönem sıfır. Plan uyumu = yapılan / planlanan ziyaret.
+        Prim = temsilci rolü (10) hakediş satırları (dis_doktor_temsilciler.html §3). Satır çift tık: temsilcinin paneli; sağ tuş: hekim listesi, ziyaretleri, talepleri.</div>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-y-dr">
+    <div class="grp" style="margin:0">
+      <h4>Doktor Performansı <span class="tag">v_dis_hekim_performans · dönem × hekim (× şube kırılımı)</span><span class="mini">çift tık = dış doktor kartı</span></h4>
+      <div class="cipler" style="border-top:0">
+        <span class="cip on">Tümü</span><span class="cip">Yükselen</span><span class="cip">Düşen</span><span class="cip">60 gün sessiz</span><span class="cip">Yeni (3 ay)</span><span class="cip">Ziyaret edilmeyen</span><span class="cip">İlk 20</span>
+        <span class="arama">🔍 hekim / kurum / temsilci…</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Dış Doktor</th><th>Branş</th><th>Kurum</th><th>Şube / Temsilci</th>
+          <th class="sag">Gönderim</th><th class="sag">Önceki</th><th class="sag">Değişim</th><th class="sag">Tutar</th><th class="sag">MR / BT / US</th>
+          <th class="orta">Son gönderim</th><th class="orta">Son ziyaret</th><th class="sag">Ziyaret (3 ay)</th><th class="sag">Açık talep</th><th class="sag">Gönderen primi</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Dr. Ahmet AKSOY</td><td>Radyoloji</td><td>Acıbadem Kozyatağı</td><td><span class="rz sb">Koşuyolu</span> A. Yıldız · <span class="rz sb">Kadıköy</span> A. Demir</td><td class="sag">41</td><td class="sag">36</td><td class="sag"><span class="rz ok">+14%</span></td><td class="sag">92.400</td><td class="sag">28 / 9 / 4</td><td class="orta">08.11</td><td class="orta">10.11</td><td class="sag">3</td><td class="sag">1</td><td class="sag">16.380</td></tr>
+          <tr><td>Dr. Selin ARI</td><td>Ortopedi</td><td>Özel Göztepe Hast.</td><td><span class="rz sb">Koşuyolu</span> A. Yıldız</td><td class="sag">27</td><td class="sag">25</td><td class="sag"><span class="rz tur">+8%</span></td><td class="sag">61.200</td><td class="sag">22 / 3 / 2</td><td class="orta">07.11</td><td class="orta">10.11</td><td class="sag">3</td><td class="sag">0</td><td class="sag">11.020</td></tr>
+          <tr class="gecik"><td>Dr. Kerem ÖZ</td><td>Nöroloji</td><td>Muayenehane</td><td><span class="rz sb">Koşuyolu</span> A. Yıldız</td><td class="sag">2</td><td class="sag">7</td><td class="sag"><span class="rz hata">−71%</span></td><td class="sag">4.800</td><td class="sag">2 / 0 / 0</td><td class="orta">21.10</td><td class="orta">10.11</td><td class="sag">3</td><td class="sag">3</td><td class="sag">960</td></tr>
+          <tr class="gecik"><td>Dr. Leyla TAN</td><td>Dahiliye</td><td>Üsküdar Tıp Merkezi</td><td><span class="rz sb">Koşuyolu</span> A. Yıldız</td><td class="sag">6</td><td class="sag">9</td><td class="sag"><span class="rz hata">−33%</span></td><td class="sag">9.100</td><td class="sag">1 / 2 / 3</td><td class="orta">30.10</td><td class="orta"><span class="rz hata">25.08</span></td><td class="sag">1</td><td class="sag">1</td><td class="sag">910</td></tr>
+          <tr><td>Dr. Can YILMAZ</td><td>Üroloji</td><td>Maltepe Üniv. Hast.</td><td><span class="rz sb">Kadıköy</span> B. Can</td><td class="sag">0</td><td class="sag">5</td><td class="sag"><span class="rz hata">sessiz 64 g</span></td><td class="sag">0</td><td class="sag">— </td><td class="orta">07.09</td><td class="orta"><span class="rz hata">—</span></td><td class="sag">0</td><td class="sag">0</td><td class="sag">0</td></tr>
+          <tr><td>Dr. Hande SU</td><td>Kadın Doğum</td><td>Ataşehir Kadın Sağlığı</td><td><span class="rz sb">Koşuyolu</span> A. Yıldız</td><td class="sag">3</td><td class="sag">0</td><td class="sag"><span class="rz ok">yeni</span></td><td class="sag">5.400</td><td class="sag">0 / 0 / 3</td><td class="orta">12.11</td><td class="orta">10.11</td><td class="sag">1</td><td class="sag">1</td><td class="sag">540</td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi" style="margin:10px">Birden çok şubeye gönderen hekim tek satır, şube / temsilci sütununda kırılım; "Şubeye göre aç" ile şube satırlarına açılır (oranlar şube planından).
+        Kırmızı satır: gönderimi düşen ya da ziyaret edilmeyen (son ziyaret + sıklık geçmiş). Sağ tuş: Ziyaret planla · Temsilciye not · Talepleri aç.</div>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-y-sube">
+    <div class="grp" style="margin:0">
+      <h4>Şube Kırılımı <span class="tag">aynı ölçütler şube toplamı · temsilci sayısı</span></h4>
+      <table>
+        <thead><tr><th>Şube</th><th class="sag">Temsilci</th><th class="sag">Hekim</th><th class="sag">Aktif hekim</th><th class="sag">Ziyaret</th><th class="sag">Plan uyumu</th><th class="sag">Gönderim</th><th class="sag">Değişim</th><th class="sag">Tutar</th><th class="sag">Hekim başı gönderim</th><th class="sag">Gönderen primi</th><th class="sag">Temsilci primi</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rz sb">Koşuyolu</span></td><td class="sag">1</td><td class="sag">38</td><td class="sag">31</td><td class="sag">52</td><td class="sag">%91</td><td class="sag">412</td><td class="sag"><span class="rz ok">+13%</span></td><td class="sag">784.200</td><td class="sag">13,3</td><td class="sag">61.400</td><td class="sag">7.840</td></tr>
+          <tr><td><span class="rz sb">Kadıköy</span></td><td class="sag">2</td><td class="sag">51</td><td class="sag">39</td><td class="sag">75</td><td class="sag">%81</td><td class="sag">539</td><td class="sag"><span class="rz hata">−6%</span></td><td class="sag">1.008.000</td><td class="sag">13,8</td><td class="sag">68.900</td><td class="sag">10.080</td></tr>
+          <tr><td><span class="rz sb">Ataşehir</span></td><td class="sag">2</td><td class="sag">29</td><td class="sag">24</td><td class="sag">85</td><td class="sag">%88</td><td class="sag">333</td><td class="sag"><span class="rz ok">+31%</span></td><td class="sag">618.200</td><td class="sag">13,9</td><td class="sag">32.600</td><td class="sag">6.180</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pane gizli" id="p-y-talep">
+    <div class="grp" style="margin:0">
+      <h4>Doktor Talepleri <span class="tag">dis_hekim_talep · tür × durum · termini geçen</span></h4>
+      <table>
+        <thead><tr><th>Tür</th><th class="sag">Açık</th><th class="sag">Onayda</th><th class="sag">Termini geçen</th><th class="sag">Bu dönem kapanan</th><th class="sag">Ort. kapanma (gün)</th><th>En çok</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rz tur">Rapor</span></td><td class="sag">6</td><td class="sag">0</td><td class="sag"><span class="rz hata">2</span></td><td class="sag">9</td><td class="sag">6,4</td><td>Dr. YALÇIN (radyolog) · 5</td></tr>
+          <tr><td><span class="rz tur">Randevu</span></td><td class="sag">4</td><td class="sag">0</td><td class="sag"><span class="rz hata">1</span></td><td class="sag">11</td><td class="sag">2,1</td><td>Banko Koşuyolu · 3</td></tr>
+          <tr><td><span class="rz tur">Fiyat</span></td><td class="sag">3</td><td class="sag">2</td><td class="sag">0</td><td class="sag">4</td><td class="sag">9,8</td><td>Satış Müdürü · 5 (iskonto talebi)</td></tr>
+          <tr><td><span class="rz tur">Eğitim</span></td><td class="sag">2</td><td class="sag">0</td><td class="sag">0</td><td class="sag">3</td><td class="sag">14,0</td><td>Dr. YALÇIN · 2</td></tr>
+          <tr><td><span class="rz tur">Materyal</span></td><td class="sag">5</td><td class="sag">0</td><td class="sag"><span class="rz hata">2</span></td><td class="sag">8</td><td class="sag">3,5</td><td>Pazarlama · 5</td></tr>
+        </tbody>
+      </table>
+      <div class="bilgi" style="margin:10px">Satır çift tık: o türün açık talep listesi (sorumlu · termin · hekim · temsilci). Termini geçen talep sorumlusuna ve satış müdürüne zilde düşer.</div>
+    </div>
+  </div>
+</div>
+
+<div class="kural" style="margin-top:12px">
+  <h3>Performans ölçütleri (kaynak)</h3>
+  <ul>
+    <li><b>Gönderim</b>: <code>radyoloji_istem.istek_hekim_id</code> (+ lab / diğer istem türleri), kabul edilen istem; <b>tutar</b> = istemin ücret satırları (<code>belge_satir</code>), iptal hariç; <b>şube</b> = başvurunun şubesi.</li>
+    <li><b>Temsilci</b> = başvurunun <code>satici_id</code>'si (kayıt anındaki şube temsilcisi); temsilci değişse geçmiş dönem oynamaz.</li>
+    <li><b>Ziyaret / plan uyumu / talep</b>: <code>dis_hekim_ziyaret</code>, <code>dis_hekim_ziyaret_plan</code>, <code>dis_hekim_talep</code>.</li>
+    <li><b>Prim</b>: <code>hakedis_satir</code> rol 1 (gönderen) ve rol 10 (temsilci), dönem = hakediş dönemi.</li>
+    <li>Görünümler <code>v_temsilci_performans</code>, <code>v_dis_hekim_performans</code> (dönem parametreli fonksiyon); mevcut Temsilci Performansı ucu (ERP satış) ile aynı kalıp, saha ölçütleri eklenir.</li>
+    <li>Yetki: <code>satis.performans</code> (yönetim, satış müdürü); temsilci yalnız kendi satırını görür (Temsilci Paneli özet kutuları).</li>
+  </ul>
+</div>
+
+<script>
+  function sekme(t, onek){
+    var kok = t.parentElement;
+    kok.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x===t)});
+    var win = kok.parentElement;
+    win.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('gizli', p.id !== 'p-' + t.dataset.t)});
+  }
+</script>
+</body>
+</html>

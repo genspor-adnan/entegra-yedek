@@ -534,6 +534,14 @@ public static partial class KaynakKatalogu
             new("temsilci",
                 "(select public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) as unvan from public.taraf p where p.id = t.temsilci)",
                                         "metin", "Temsilci", Genislik: 160),
+            // ŞUBE TEMSİLCİLERİ (1287): "Koşuyolu: A. Yıldız · Kadıköy: A. Demir" - aktif satırlar.
+            new("temsilciler",
+                "(select string_agg(s.ad || ': ' || public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), ' · ' order by s.ad)"
+                + "   from public.dis_hekim_temsilci d join public.sube s on s.id = d.sube_id"
+                + "   join public.taraf p on p.id = d.temsilci_id"
+                + "  where d.hekim_id = t.id and coalesce(d.aktif, 1) = 1"
+                + "    and d.baslangic <= current_date and (d.bitis is null or d.bitis >= current_date))",
+                                        "metin", "Şube Temsilcileri", Genislik: 260, Filtrelenebilir: false),
             new("durum",    "t.durum",  "kod",   "Durum", Hizalama: "orta"),
         });
 

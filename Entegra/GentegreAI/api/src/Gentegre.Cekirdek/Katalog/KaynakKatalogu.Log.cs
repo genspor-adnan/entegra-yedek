@@ -124,6 +124,7 @@ public static partial class KaynakKatalogu
             when 1259 then 'Randevu'
             when 1260 then 'İzin Hakedişi'
             when 1261 then 'Hekim Bilgisi'
+            when 1780 then 'Şube Temsilcisi'
             when 1262 then 'Resmî Tatil'
             when 1257 then 'Personel Avansı'
             when 1258 then 'Avans Kesintisi'
