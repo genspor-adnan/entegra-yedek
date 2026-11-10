@@ -9536,3 +9536,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kart-dis-hekim-ziyaret :has(> .kagrup > .alan-izgara > .alan-notu) > .kagrup { margin-bottom: 0 }
 .kart-dis-hekim-ziyaret .kagrup .alan-notu, .kart-dis-hekim-ziyaret .kagrup .alan-konular { grid-column: 1 / -1 }
 .kart-dis-hekim-ziyaret .kagrup .alan-notu textarea { min-height: 150px }
+/* Seçimli rozetler (KonuRozetleri, 1294): kod listesi değerleri; tıkla = seç / bırak; "＋ liste" kod listesi penceresi. */
+.konu-rozetler { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 24px }
+.konu-rozet { cursor: pointer; border: 1px solid var(--cizgi); background: var(--yuz2); color: var(--yazi2); font: inherit; font-size: 11px; padding: 2px 9px; border-radius: 11px }
+.konu-rozet.secili { background: #2f6db3; color: #fff; border-color: #2f6db3 }
+.konu-rozet.ekle { border-style: dashed; color: var(--soluk); background: transparent }
+.konu-rozet:disabled { cursor: default }
+.kart-dis-hekim-ziyaret .kagrup .alan-konular { grid-column: 1 / -1 }

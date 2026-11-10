@@ -26,6 +26,7 @@ public static partial class KaynakKatalogu
             new("sonucAd",     "z.sonuc_ad",      "metin", "Sonuç", Hizalama: "orta", Genislik: 130, Bicim: "rozet", Filtrelenebilir: false),
             new("sureDk",      "z.sure_dk",       "sayi",  "Süre (dk)", Hizalama: "sag", Genislik: 90, Varsayilan: false),
             new("notu",        "left(z.notu, 200)", "metin", "Not", Genislik: 320, Filtrelenebilir: false),
+            new("konularAd",   "z.konular_ad",    "metin", "Konular", Genislik: 200, Filtrelenebilir: false),
             new("talepSayisi", "z.talep_sayisi",  "sayi",  "Talep", Hizalama: "sag", Genislik: 70, Filtrelenebilir: false),
             new("acikTalep",   "z.acik_talep",    "sayi",  "Açık Talep", Hizalama: "sag", Genislik: 90),
             new("sonrakiTarih","z.sonraki_tarih", "tarih", "Sonraki", Hizalama: "orta", Genislik: 100),

@@ -60,6 +60,7 @@ import { randevuTercihiYaz } from './randevuTercihi';
 import { HASTA_ILE_YENI, yeniKartVarsayilanlari } from './kartVarsayilanlari';
 import { KART_EKLENTILERI, type KartEklentiBaglami } from './kartEklentileri';
 import { api } from '../../api/istemci';
+import { KonuRozetleri } from '../../bilesenler/kart/KonuRozetleri';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import { kartAdi, kartSekmesiVar } from '../listeTanimlari.Ortak';
@@ -636,7 +637,7 @@ export function ListeKarti({
         //   sekmeler arasındaki satır yok (kullanıcı 02.11.2026).
         // REÇETE de (kullanıcı 04.11.2026): "Ürün Ağacı (Reçete) Kartı" + kod / onay rozeti Hatırlat'ın sağında, başlık satırı yok.
         // Hizmet de (kullanıcı 09.11.2026: "hizmet kartı ve Id olan bandı kaldır.. sil butonu sağına taşı").
-        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis'}
+        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis' || tanim.kaynak === 'dis-hekim-ziyaret'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
@@ -785,6 +786,11 @@ export function ListeKarti({
                              ses={ad === 'sikayet' || ad === 'hikaye'} />
               // KONTROL İHTİYACI (kullanıcı 15.10.2026): gün kutusunun solunda Yok / Var; gün yalnız Var'da.
               : ad === 'kontrolOnerisiGun' ? <KontrolGunGirdisi deger={d} yaz={yaz} salt={salt} />
+              : undefined
+          // ZİYARET KARTI (1294, kullanıcı): görüşülen konular seçimli rozet - kod listesi dis_hekim.konu, değer virgüllü kod.
+          : tanim.kaynak === 'dis-hekim-ziyaret'
+          ? (ad, d, yaz, salt) => ad === 'konular'
+              ? <KonuRozetleri listeKod="dis_hekim.konu" baslik="Görüşülen Konular" deger={d} yaz={yaz} salt={salt} />
               : undefined
           : undefined}
         alanIpucu={muayeneKarti

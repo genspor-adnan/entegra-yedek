@@ -87,9 +87,10 @@ public static partial class KartKatalogu
                 + "   from public.taraf_personel p where p.id = dis_hekim_ziyaret.hekim_id)",
                 "metin", Yazilabilir: false, Baslik: "Sıklık (hekim kartı)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             new("hatirlat",   "hatirlat",    "mantik", Baslik: "Hatırlat (1 gün önce, temsilciye)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
-            new("materyal",   "materyal",    "metin", EnFazlaUzunluk: 300, Baslik: "Bırakılan materyal", Grup: "Görüşme", AltGrup: "Sonraki Adım", TekSatir: true),
+            // KOD LİSTESİ (1294, kullanıcı): etikete tıklayınca liste düzenlenir (kartAlanCizim listeDuzenle).
+            new("materyal",   "materyal",    "kod",   KodListesi: "dis_hekim.materyal", Baslik: "Bırakılan materyal", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             new("memnuniyet", "memnuniyet",  "kod",   SabitKodlar: MemnuniyetKodlari, Baslik: "Memnuniyet", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
-            new("rakip",      "rakip",       "metin", EnFazlaUzunluk: 200, Baslik: "Rakip baskısı", Grup: "Görüşme", AltGrup: "Sonraki Adım", TekSatir: true),
+            new("rakip",      "rakip",       "kod",   KodListesi: "dis_hekim.rakip", Baslik: "Rakip baskısı", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             new("hatirlatmaId", "hatirlatma_id", "sayi", Yazilabilir: false, Baslik: "Hatırlatma No", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
 
             // MOBİL DAMGA (eski HBYS BASTARIH / BITTARIH / BASYERXY): telefondan dolar, masaüstünde okunur.
