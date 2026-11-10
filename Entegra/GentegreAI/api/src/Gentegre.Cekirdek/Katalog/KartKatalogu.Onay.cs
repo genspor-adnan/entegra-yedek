@@ -82,7 +82,9 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             // KİMLİK ŞERİDİ (mockup Ekranlar/Onay/onay_akis_karti.html, 10.11.2026): Akış Kodu · Adı · Hangi Kayıt ·
-            //   Karar Ölçüsü · Durum üst şeritte (kipli: kayıtlı kart görüntülemede, ✎ ile düzenleme); Açıklama Genel'de.
+            //   Karar Ölçüsü · Durum üst şeritte (kipli: kayıtlı kart görüntülemede, ✎ ile düzenleme). Açıklama da
+            //   şeritte, başlığın altında TEK UZUN SATIR (kullanıcı 10.11.2026; tema.css kaid-onayakis .alan-aciklama) -
+            //   Genel sekmesi kalmaz, kart Basamaklar ile açılır.
             new("kod", "kod", "metin", Zorunlu: true, Baslik: "Akış Kodu", Grup: "Kimlik",
                 EnFazlaUzunluk: 40),
             new("ad", "ad", "metin", Zorunlu: true, Baslik: "Adı", Grup: "Kimlik",
@@ -94,7 +96,7 @@ public static partial class KartKatalogu
             new("olcuAdi", "olcu_adi", "metin", Baslik: "Karar Ölçüsü", Grup: "Kimlik",
                 EnFazlaUzunluk: 40),
             new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
-            new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Genel",
+            new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Kimlik",
                 EnFazlaUzunluk: 400),
         },
         Detaylar: new DetayTanimi[]

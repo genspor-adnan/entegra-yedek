@@ -185,6 +185,8 @@ başlığında … Listesi olsun".
   listeden silmede de `satirlarla` davranır (stok / lot geri alma + dönüştürülmüş belge denetimi aynen), silme logu
   tablo 30. Ticari belgelerde kural değişmedi. Liste onayı "satırlarıyla birlikte silinecek" der. Test
   `StokBelgesiSilTestleri`.
+- **Onay akışı kartı:** Açıklama Genel sekmesinden kimlik şeridine, başlığın altına tek uzun satır olarak taşındı
+  (kullanıcı; `Grup: Kimlik` + `kaid-onayakis .alan-aciklama` tam genişlik). Genel sekmesi kalmadı, kart Basamaklar ile açılır.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

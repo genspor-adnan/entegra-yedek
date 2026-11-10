@@ -63,6 +63,8 @@
   .goster .deg.bos{color:#aab4bf;font-weight:normal}
   .duzenle.yazili{border-left:3px solid var(--accent);padding-left:9px;background:linear-gradient(#fbfcfe,#eef4fa)}
   .gizli{display:none !important}
+  /* Açıklama başlığın altında tek uzun satır (kullanıcı 10.11.2026) - avatar sütunu atlanır, kalem sütununa kadar. */
+  .kaid .fld.aciklama{grid-column:2/-2}
   .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px;user-select:none}
   .kalem:hover{color:var(--accent);background:#e9f1fb}
   .kalem.acik{color:var(--accent)}
@@ -138,7 +140,7 @@
 <body>
 
 <div class="not"><b>Mockup — Onay Akışı Kartı</b> (kaynak <code>onay-akis</code>, tablo onay_akis + onay_akis_adim). Stok / hizmet kartıyla aynı kipli
-şerit: kayıtlı kart görüntülemede açılır, tek ✎ şeridi ve Açıklama grubunu çevirir. Basamaklar sekmesi grid kipinde; altındaki
+şerit: kayıtlı kart görüntülemede açılır, tek ✎ şeridi çevirir; Açıklama şeritte, başlığın altında tek uzun satır (Genel sekmesi yok). Basamaklar sekmesi grid kipinde; altındaki
 <b>zincir önizlemesi</b> örnek ölçüyle hangi basamakların doğacağını gösterir. Liste: <a href="onay_akis_listesi.html">onay_akis_listesi.html</a>.</div>
 
 <h2><b>1</b> — Kayıtlı akış: GÖRÜNTÜLEME kipi <span class="ipucu">✎ → düzenleme; sekmeler ve kip çalışır</span></h2>
@@ -160,6 +162,7 @@
       <div class="fld"><label>Karar Ölçüsü</label><div class="deg">Tutar (TL)</div></div>
       <div class="fld"><label>Durum</label><div class="deg"><span class="rz g">Aktif</span></div></div>
       <div class="kalem" title="Kartı düzenle" onclick="kip(1)">✎</div>
+      <div class="fld aciklama"><label>Açıklama</label><div class="deg">Satınalma talebi birim sorumlusundan başlar; tutar eşiğine göre satınalma, mali işler ve üst yönetim basamakları eklenir.</div></div>
     </div>
     <div class="kaid duzenle yazili gizli" id="e1">
       <div class="avatar" title="Kayıt türü: Satınalma Talebi">🛒</div>
@@ -169,6 +172,7 @@
       <div class="fld"><label>Karar Ölçüsü</label><div class="inp">Tutar (TL)</div></div>
       <div class="fld"><label class="req">Durum</label><div class="inp combo">Aktif</div></div>
       <div class="kalem acik" title="Düzenlemeyi kapat" onclick="kip(1)">✎</div>
+      <div class="fld aciklama"><label>Açıklama</label><div class="inp">Satınalma talebi birim sorumlusundan başlar; tutar eşiğine göre satınalma, mali işler ve üst yönetim basamakları eklenir.</div></div>
     </div>
   </div>
 

@@ -762,6 +762,9 @@ table.grid tr.flt input {
   color: var(--lacivert, #14315a) !important; font-weight: 700 }
 /* ONAY AKIŞI ŞERİDİ (mockup Ekranlar/Onay/onay_akis_karti.html, 10.11.2026): Akış Kodu · Adı · Hangi Kayıt · Karar Ölçüsü · Aktif. */
 .kaid .alan-izgara.kaid-onayakis { grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .5fr) }
+/* Açıklama başlığın altında tek uzun satır (kullanıcı 10.11.2026: "genel sekmedeki açıklamayı başlık altına taşı"). */
+.kaid .alan-izgara.kaid-onayakis > .alan-aciklama { grid-column: 1 / -1 }
+.kaid .alan-izgara.kaid-onayakis > .alan-aciklama input { font-weight: 400; font-size: 12px }
 .kaid .kaid-goster .alan-izgara.kaid-onayakis > .alan-kod input, .kaid .kaid-goster .alan-izgara.kaid-onayakis > .alan-ad input {
   color: var(--lacivert, #14315a) !important; font-weight: 700 }
 @media (max-width: 900px) { .kaid .alan-izgara.kaid-stok, .kaid .alan-izgara.kaid-hizmet, .kaid .alan-izgara.kaid-onayakis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
