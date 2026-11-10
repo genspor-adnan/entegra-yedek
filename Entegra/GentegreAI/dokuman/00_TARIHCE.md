@@ -172,6 +172,12 @@ başlığında … Listesi olsun".
   yeniden sunumda eski zincir kapanır. Kart: araç çubuğunda Onaya Sun / Geri Çek, **Onay** sekmesi (zincir), Geçmiş
   olayları; liste: Onaylayan sütunu, Onayda / Onaylandı / Düzeltme-Ret çipleri. `GET /api/onay/yetkili/{aksiyon}`
   onaylayan listesi. Testler `TeklifIcOnayTestleri` (uçtan uca), `teklifOnay.test.ts`.
+- **Doküman Onay Kuyruğu kaldırıldı (kullanıcı: "buna artık gerek var mı?"; göç 1283):** 758'den beri kuyruk da
+  Onayımdakiler de aynı görünümü (`v_onay_bekleyen`, kaynak 976) ve aynı karar ucunu (`/api/onay/kayit/976/{surumId}/karar`)
+  kullanıyordu; kutu üst kümeydi (Bilgi İste, Sözlü, Zincir). Onayımdakiler'e **Doküman** çipi ve "Kayda Git" için
+  976 köprüsü (gizli `dokumanId` kolonu → `/dokuman/{id}`) eklendi; `dokuman-onay` kaynağı, `dokuman-onay-liste`
+  aksiyonları, liste girdisi, `dokumanOnayKarar` ucu, mockup `dokuman_onay_kuyrugu.html` silindi. DB: `dokuman.onayla`
+  ekran yetkisi + rol bağları düştü (karar yetkisi `dokuman.onay` kalır), rehber satırı pasif, menü çevirisi silindi.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

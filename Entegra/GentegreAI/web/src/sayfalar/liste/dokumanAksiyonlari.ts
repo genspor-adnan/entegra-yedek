@@ -4,10 +4,8 @@ import { dokumanDosyaAdi, dosyaIndirUrl } from '../../bilesenler/indir';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
- * DOKUMAN AKSIYONLARI (419) - surum ve onay dongusu.
- *
- * Onay kuyrugunda satir = ADIM, dokuman degil: ayni dokuman iki adimda iki
- * farkli kisiyi bekliyor olabilir ve herkes yalniz kendi adimini gormeli.
+ * DOKUMAN AKSIYONLARI (419) - surum dongusu. Onay KARARI burada degil:
+ * doküman onayı Onayımdakiler'de (kaynak 976), ayrı kuyruk ekranı 1283'te kalktı.
  *
  * RET dokumani TASLAGA dondurur; hazirlayan duzeltip yeni surum acar.
  * Reddedilen surumu yeniden onaya gondermek, neyin degistigini gorunmez
@@ -223,45 +221,6 @@ Kod: ${y.kod}`);
     return true;
   }
 
-  if (kod !== 'dokuman.onay' && kod !== 'dokuman.ret') return false;
-
-  // KARAR ARTIK SURUME VERILIR (758): omurga kaydi `kaynak_tur 976 +
-  //   kaynak_id = surum.id` ile bagliyor. Eski `onayId` gecmiyor.
-  const surumId = Number(satir?.surumId ?? 0);
-  if (!surumId) { mesaj('Önce bir onay adımı seçin.'); return true }
-  const ad = String(satir?.dokumanAd ?? '');
-  const surumNo = Number(satir?.surumNo ?? 0);
-  const etiket = surumNo > 0 ? `"${ad}" v${surumNo}` : `"${ad}"`;
-
-  if (kod === 'dokuman.onay') {
-    if (!await onay(`${etiket} onaylansın mı?
-
-`
-                  + 'Son basamaksa sürüm yayınlanır ve önceki sürüm arşive düşer.'))
-      return true;
-    await guvenli(async () => {
-      const y = await api.dokumanOnayKarar(surumId, 1);
-      // ZINCIR BITTI MI: omurga "yurudu mu / bitti mi" cevabini veriyor,
-      //   kullaniciya hangisinin oldugunu soylemek gerekiyor - "onaylandi"
-      //   demek, arkada iki imza daha varken belgeyi yayinda sanmaya yol acar.
-      mesaj(y.zincirDurum === 0
-        ? `${y.basamak}. basamak (${y.adim}) onaylandı; sıra sonraki basamakta.`
-        : 'Onay tamamlandı; sürüm yayınlandı ve önceki sürüm arşive düştü.');
-      b.tazele();
-    });
-    return true;
-  }
-
-  // RET GEREKÇESİ ZORUNLU: hazırlayan neyi düzelteceğini bilmeli.
-  const gerekce = await metinSor(`${etiket} neden reddediliyor?`, '', 'Gerekçe');
-  if (gerekce === null) return true;
-  if (!gerekce.trim()) { mesaj('Ret gerekçesi zorunlu.'); return true }
-
-  await guvenli(async () => {
-    await api.dokumanOnayKarar(surumId, 2, gerekce.trim());
-    mesaj('Sürüm reddedildi. Varsa önceki yayın sürümü yürürlükte kalır; '
-        + 'hazırlayan düzeltip yeni sürüm açar.');
-    b.tazele();
-  });
-  return true;
+  // Onay / ret kararı Onayımdakiler'den verilir (1283; kaynak 976, karar ucu omurgada).
+  return false;
 }

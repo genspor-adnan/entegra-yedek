@@ -195,15 +195,6 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Doküman', menuSira: 10, menuAd: 'Doküman Listesi', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman.liste',
   },
   {
-    // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
-    //   iki adimda iki farkli kisiyi bekliyor olabilir.
-    kaynak: 'dokuman-onay', rota: 'dokuman-onay', baslik: 'Doküman Onay Kuyruğu',
-    yol: 'Doküman › Onay Kuyruğu',
-    aksiyonEkrani: 'dokuman-onay-liste',
-    tarihAlani: 'baslama',
-    menuGrup: 'Doküman', menuSira: 20, menuAd: 'Onay Kuyruğu', modul: 'dokuman', ic: '✅', yetkiKodu: 'dokuman.onayla',
-  },
-  {
     // DOKUMAN KATEGORILERI (419/431) - agac yapili; surumlu mu, hangi akis,
     //   hangi gizlilik. Stok/hizmet kategorisiyle ayni desen.
     kaynak: 'dokuman-kategori', modul: 'dokuman', rota: 'dokuman-kategori',

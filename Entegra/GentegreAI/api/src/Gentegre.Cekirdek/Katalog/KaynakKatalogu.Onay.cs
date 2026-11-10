@@ -31,6 +31,12 @@ public static partial class KaynakKatalogu
             new("onayId", "v.onay_id", "sayi", "Onay", Varsayilan: false),
             new("kaynakTur", "v.kaynak_tur", "sayi", "Kayıt Türü", Varsayilan: false),
             new("kaynakId", "v.kaynak_id", "sayi", "Kayıt Id", Varsayilan: false),
+            // DOKÜMAN (976, 1283): kutu kaynak_id SÜRÜM id'sidir, "Kayda Git" doküman kartını
+            //   ister - ayrı doküman onay kuyruğu kaldırılınca bu köprü buraya geldi.
+            new("dokumanId",
+                "(select s.dokuman_id from public.dokuman_surum s"
+                + " where v.kaynak_tur = 976 and s.id = v.kaynak_id)",
+                "sayi", "Doküman Id", Varsayilan: false),
             // TÜR ROZETİ HER AKIŞ İÇİN: kutu beş modülü birden taşıyor ve
             //   "Diğer" yazan bir rozet, karar verecek kişiye önüne düşen
             //   şeyin ne olduğunu söylemez. Yeni akış eklenince buraya da

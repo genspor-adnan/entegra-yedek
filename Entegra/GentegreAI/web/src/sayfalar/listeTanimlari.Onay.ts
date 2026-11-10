@@ -30,6 +30,8 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       { ad: 'Bilgi istendi', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Satınalma',     filtre: { alan: 'kaynakTur', op: 'esit', deger: 1241 } },
       { ad: 'Teklif',        filtre: { alan: 'kaynakTur', op: 'esit', deger: 30 } },
+      // DOKÜMAN (976): ayrı "Doküman Onay Kuyruğu" ekranı 1283'te kaldırıldı - aynı görünüm, aynı karar ucu.
+      { ad: 'Doküman',       filtre: { alan: 'kaynakTur', op: 'esit', deger: 976 } },
       { ad: 'Tümü' },
     ],
     // YÖNETİM GRUBUNUN BAŞINDA (menuSira 1). Onay kuyruğu günlük iştir,

@@ -157,6 +157,13 @@ export async function onayAksiyonu(
 
   // -------------------------------------------------------- kayda git --
   if (kod === 'onay-kutusu.kayda-git') {
+    // DOKÜMAN (976, 1283): kutu kaynakId sürüm id'si; kart doküman id ister (gizli `dokumanId`).
+    if (kaynakTur === 976) {
+      const dokumanId = Number(satir?.dokumanId ?? 0);
+      if (!dokumanId) { mesaj('Sürümün dokümanı bulunamadı.'); return true }
+      b.git?.(`/dokuman/${dokumanId}`);
+      return true;
+    }
     const yol = KAYIT_YOLU[kaynakTur];
     if (!yol) {
       mesaj(`Bu kayıt türünün ekranı tanımlı değil (tür ${kaynakTur}).`);

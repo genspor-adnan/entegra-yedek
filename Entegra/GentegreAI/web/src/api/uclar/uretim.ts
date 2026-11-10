@@ -171,20 +171,6 @@ export const uretimUclari = {
              basamaklar: { sira: number; ad: string; rol: number }[] }>(
       `/api/dokuman-yonetim/surum/${surumId}/onaya-gonder`, {}),
 
-  /**
-   * Onay adimi karari (758): artik OMURGA ucundan, kaynak_tur 976 ve
-   * kaynak_id SURUM id'si. Dokumanin kendi karar ucu kaldirildi - iki yol
-   * olsaydi biri zinciri yurutur, oteki dogrudan surumu yayinlardi.
-   *
-   * Son basamak onaylaninca surum YAYINLANIR, onceki yayin arsive duser
-   * (`fn_dokuman_onay_sonuc`).
-   */
-  dokumanOnayKarar: (surumId: number, karar: number, not?: string) =>
-    gonder<{ zincirDurum: number; kayitDurum: number | null;
-             basamak: number; adim: string; sonrakiBasamak: number | null }>(
-      `/api/onay/kayit/976/${surumId}/karar`,
-      { karar: karar === 1 ? 'onayla' : 'reddet', gerekce: not }),
-
   /** e-Nabiz paketini KAYNAKTAN yeniden uretir (415): paket satirini elle
       duzeltmek, gonderilen veriyle kayittaki veriyi ayirirdi. */
   enabizYenidenUret: (paketId: number) =>

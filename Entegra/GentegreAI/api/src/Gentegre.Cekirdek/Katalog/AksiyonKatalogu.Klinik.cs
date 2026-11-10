@@ -548,23 +548,6 @@ public static partial class AksiyonKatalogu
         //   "Yazdır" dugmesi acilir menusunde CSV Kaydet de var (GenGrid ekler).
         s["cikti-liste"] = [Yazdir()];
 
-        // DOKUMAN ONAY KUYRUGU (419): satir = ADIM. Karar iki secenek -
-        //   onay ya da ret; ret dokumani TASLAGA dondurur, hazirlayan
-        //   duzeltip yeni surum acar (reddedilen surumu yeniden onaya
-        //   gondermek, neyin degistigini gorunmez kilardi).
-        s["dokuman-onay-liste"] =
-        [
-            new("dokuman.onay", "✔ Onayla", "dokuman-onay",
-                Hedef: "araccubugu,sagtus,palet",
-                KaynakKodu: "dokuman.onayla", Islem: Islem.Degistir, KayitGerekir: true,
-                Sira: 10),
-            new("dokuman.ret", "✖ Reddet", "dokuman-onay",
-                Hedef: "araccubugu,sagtus,palet",
-                KaynakKodu: "dokuman.onayla", Islem: Islem.Degistir, KayitGerekir: true,
-                Sira: 20),
-            Yazdir(),
-        ];
-
         // DOKUMAN LISTESI (419) - mockup dokuman_listesi.html dugmeleri.
         //   YUKLE ve SABLONDAN URET burada YOK: ikisi de dosya secimi ve
         //   kaynak belirlemesi ister, kart galerisinden yurur. Buraya

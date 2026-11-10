@@ -447,7 +447,7 @@ public static class StandartRolUclari
               T("cari"), T("kurum"), T("hizmet"), T("fiyat_listesi"), T("masraf"),
               T("masraf_merkezi"),
               // Kalite ve dokuman: idari sureclerin sahibi.
-              T("klinik_kalite"), T("klinik_kalite.donem"), Y("dokuman.onayla"),
+              T("klinik_kalite"), T("klinik_kalite.donem"),
               // Yatak ve doluluk SAYILARI - hasta kaydi degil.
               T("yatan.yatak"), T("acil.yatak"), T("ameliyathane.salon"))),
         new("bashekim", "Başhekim",
@@ -475,7 +475,7 @@ public static class StandartRolUclari
                // Birim amiri basamagi.
                T("ik.izin"), T("ik.avans"), T("ik.masraf"),
                A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir"),
-               T("dokuman.onayla"), A("dokuman.onay")])),
+               A("dokuman.onay")])),
         new("bashekim_yardimcisi", "Başhekim Yardımcısı",
             "Başhekimin ekranları; kurum çapında imza yok - prim onayı ve kalite dönemini kesinleştirme başhekimde kalır.",
             ["tip_merkezi", "hastane"],
@@ -525,10 +525,9 @@ public static class StandartRolUclari
         new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Hepsi,
             K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false), new("portal.%", false))),
         new("kalite", "Kalite Sorumlusu", "Hepsi kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Hepsi,
-            K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"),
-              // KUYRUGU GORMEK KARAR VERMEK DEGIL: `dokuman.onayla`
-              //   ekrandir (tur 0), karar `dokuman.onay` aksiyonudur -
-              //   kalite rolu kuyrugu goruyor ama imzalayamiyordu.
+            K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"),
+              // Dokuman onayi Onayimdakiler'den (1283; ayri kuyruk ekrani ve
+              //   `dokuman.onayla` ekran yetkisi kalkti), karar `dokuman.onay`.
               A("dokuman.onay"), T("islem_log"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"), T("yatan"))),
         // TELERADYOLOJI IDARI (797): kurum tanimi, sozlesme, donem faturasi -
         //   isin klinik tarafi degil TICARI tarafi. Muhasebe rolune eklendi

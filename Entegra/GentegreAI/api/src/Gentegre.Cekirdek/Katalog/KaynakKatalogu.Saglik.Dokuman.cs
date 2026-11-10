@@ -1,7 +1,8 @@
 ﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
-/// DOKÜMAN LİSTELERİ — doküman, kategori, klasör, onay kuyruğu.
+/// DOKÜMAN LİSTELERİ — doküman, kategori, klasör. (Onay kuyruğu 1283'te kaldırıldı:
+/// doküman onayı Onayımdakiler'de, kaynak 976.)
 ///
 /// KaynakKatalogu.Saglik.cs dosyasindan ayrildi: tek dosyada 1183 satiri buluyordu ve
 /// bir kart tanimi otekine karisiyordu. Kod degismedi, yalniz yer
@@ -116,7 +117,7 @@ public static partial class KaynakKatalogu
                                             Varsayilan: false),
             new("surumlu",   "d.surumlu",   "mantik","Sürümlü", Hizalama: "orta",
                                             Genislik: 90, Varsayilan: false),
-            // Bekleyen onay: "onay kuyrugu" cipinin dayanagi.
+            // Bekleyen onay: "Onay bekliyor" cipinin dayanagi.
             new("onaydaSurum",
                 "(select count(*) from public.dokuman_surum s "
                 + "where s.dokuman_id = d.id and s.durum = 2)",
@@ -197,55 +198,5 @@ public static partial class KaynakKatalogu
             new("aktif",    "k.aktif",    "mantik","Aktif", Hizalama: "orta", Genislik: 80),
             new("sira",     "k.sira",     "sayi",  "Sıra", Hizalama: "orta", Genislik: 70,
                                           Varsayilan: false)
-        });
-
-    /// <summary>
-    /// ONAY KUYRUĞU (419 · 758'de omurgaya taşındı) — bekleyen onay adımları.
-    ///
-    /// Satır = ADIM, doküman değil: aynı doküman iki adımda iki farklı kişiyi
-    /// bekliyor olabilir ve herkes yalnız kendi adımını görmeli.
-    ///
-    /// KAYNAK ARTIK OMURGA (`v_onay_bekleyen`, kaynak_tur 976): doküman kendi
-    /// `dokuman_onay` tablolarını bıraktı. O görünüm zaten YALNIZ SIRASI GELEN
-    /// basamağı döndürür (745) - eski sorgudaki `a.sira = o.guncel_adim`
-    /// koşulunun karşılığı orada.
-    ///
-    /// `surumId` KOLONU ŞART: karar ucu artık sürüm id ile çağrılıyor
-    /// (`/api/onay/kayit/976/{surumId}/karar`), eski `onayId` ile değil.
-    /// </summary>
-    private static KaynakTanimi DokumanOnayKuyrugu() => new(
-        Ad: "dokuman-onay",
-        YetkiKodu: "dokuman.onayla",
-        Kaynak: "public.v_onay_bekleyen v "
-              + "  join public.dokuman_surum s on s.id = v.kaynak_id "
-              + "  join public.dokuman d on d.id = s.dokuman_id "
-              + "  left join public.dokuman_kategori t on t.id = d.kategori_id "
-              + "  left join public.v_kullanici_lookup u on u.id = v.atanan_kullanici_id",
-        SabitKosul: "v.kaynak_tur = 976",
-        SubeKolonu: null,
-        VarsayilanSirala: "v.baslama asc, v.sira asc",
-        Kolonlar: new KolonTanimi[]
-        {
-            new("id",        "v.adim_id",   "sayi",  "Id", Varsayilan: false),
-            new("onayId",    "v.onay_id",   "sayi",  "Onay Id", Varsayilan: false),
-            new("surumId",   "s.id",        "sayi",  "Sürüm Id", Varsayilan: false),
-            new("dokumanId", "d.id",        "sayi",  "Doküman Id", Varsayilan: false),
-            new("dokumanAd", "d.ad",        "metin", "Doküman", Genislik: 280),
-            new("kod",       "d.kod",       "metin", "Kod", Hizalama: "orta", Genislik: 110),
-            new("turAdi",    "coalesce(t.ad, '')", "metin", "Tür", Genislik: 150),
-            new("surumNo",   "coalesce(s.surum_no, 0)", "sayi", "Sürüm", Hizalama: "orta",
-                                            Genislik: 70),
-            new("adimAd",    "v.adim_ad",   "metin", "Adım", Hizalama: "orta", Genislik: 120),
-            new("atananAdi", "coalesce(u.ad, '')", "metin", "Atanan", Genislik: 160),
-            new("baslama",   "v.baslama",   "tarih", "Başlama", Hizalama: "orta",
-                                            Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
-            // BEKLEME GUNU: onay kuyrugunda gecikeni one cikarmanin tek yolu.
-            new("beklemeGun",
-                "greatest(0, (extract(epoch from now() - v.baslama) / 86400)::int)",
-                                            "sayi",  "Bekleme (gün)", Hizalama: "sag",
-                                            Genislik: 110),
-            // TERMİN / GECİKME omurgadan geliyor - eski kuyrukta yoktu.
-            new("gecikmeGun", "v.gecikme_gun", "sayi", "Gecikme (gün)", Hizalama: "sag",
-                                            Genislik: 110)
         });
 }

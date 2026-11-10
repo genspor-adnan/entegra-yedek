@@ -83,11 +83,11 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
                     'hastaAdi'],
     // "Cari" -> "Müşteri" (kullanıcı 10.11.2026); hücre tıklanınca müşteri kartı yeni sekmede (Liste.baglantiKolonlar).
     kolonBasliklari: { tarafUnvan: 'Müşteri' },
-    // Sira (kullanici): Satış Temsilcisi | Durumu | Belge No en solda.
+    // Sira (kullanici 10.11.2026): Belge No | Tarih | Müşteri | Satış Tem. | Durumu, sonra diğerleri.
     //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
     //   'belge' kaynagini fatura/siparis listeleriyle paylasiyor - Durumu ve
     //   Temsilci onsuz hic cikmazdi.
-    kolonSirasi: ['saticiAdi', 'teklifKonusu', 'teklifDurumAdi', 'teklifOnaylayan', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
+    kolonSirasi: ['belgeNo', 'belgeTarihi', 'tarafUnvan', 'saticiAdi', 'teklifDurumAdi', 'teklifOnaylayan', 'teklifKonusu'],
     toplam: ['genelToplam'],
     // Durum cipleri (kullanici): arama editinin altinda Tumu + teklif akisi.
     cipler: [

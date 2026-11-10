@@ -67,7 +67,7 @@ Sorunlar:
 | 📦 Stok & Hizmet | Stoklar · Hizmetler · Stoktan Talep · Stok Transfer · Giriş / Çıkış Fişi · Alış Faturaları · Dökümler | İTS / ÜTS · Ayarlar (Kategoriler, Kampanyalar, Stok Ayarları, Tedarikçiler) |
 | ⚖️ Muhasebe | Muhasebe Fişleri · e-Belge · Dökümler | Ayarlar: Hesap Planı · Masraf Merkezleri |
 | 👥 İK & Prim | Personel · Bölüm / Görev · Hakedişler · Prim Planları · Dökümler | — |
-| 🧭 Yönetim | Ayarlar Dizini · Dökümler & İstatistik · Kurum Profili · Firma / Şubeler | Güvenlik (Roller, Kullanıcılar, Giriş Kayıtları, İşlem Günlüğü) · Platform (Bildirim Şablonları, Bildirim Kuyruğu, Zamanlanmış İşler, Onam Metinleri, Onam Kayıtları) · Doküman (Dokümanlar, Onay Kuyruğu, Kategoriler · Klasörler) · Veri (İçeri Alma, Dışarı Aktarma) |
+| 🧭 Yönetim | Ayarlar Dizini · Dökümler & İstatistik · Kurum Profili · Firma / Şubeler | Güvenlik (Roller, Kullanıcılar, Giriş Kayıtları, İşlem Günlüğü) · Platform (Bildirim Şablonları, Bildirim Kuyruğu, Zamanlanmış İşler, Onam Metinleri, Onam Kayıtları) · Doküman (Dokümanlar, Kategoriler · Klasörler) · Veri (İçeri Alma, Dışarı Aktarma) |
 
 Sıra hasta akışı: Randevu → Kayıt Kabul → Muayene → Lab → Radyoloji → Kurumlar → e-Nabız;
 sonra para, malzeme, muhasebe, İK; Yönetim en sonda.

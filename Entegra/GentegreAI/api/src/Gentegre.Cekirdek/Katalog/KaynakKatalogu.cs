@@ -405,11 +405,11 @@ public static partial class KaynakKatalogu
         Ekle(UretimEmri());
         Ekle(UretimFisi());
         Ekle(IsMerkezi());
-        // Dokuman v1 (419): kaynak ustu liste + katalog + onay kuyrugu.
+        // Dokuman v1 (419): kaynak ustu liste + katalog. Onay kuyrugu 1283'te
+        //   kalkti - dokuman onayi Onayimdakiler'de (kaynak 976).
         Ekle(Dokuman());
         Ekle(DokumanKategori());
         Ekle(DokumanKlasor());
-        Ekle(DokumanOnayKuyrugu());
         // LAB v1 (433/434): istem + tetkik katalogu, panel, numune, sonuc,
         //   cihaz test eslemesi.
         Ekle(LabIstem());
