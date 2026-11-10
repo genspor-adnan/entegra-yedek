@@ -364,6 +364,20 @@ public static class StandartRolUclari
         //   Sorumlusu da ekle"): telefonla randevu alan ekip. Ajan randevu ve
         //   hasta kaydi acar; HASTANIN PARASINI GORMEZ (belge/kasa yetkisi
         //   yok) - telefonda borc konusmak bankonun isidir.
+        // SAHA (1287-1294, kullanıcı 10.11.2026: "saha temsilci ve saha sorumlu ekle"): dış doktor ziyaret / talep / vade /
+        //   plan ekranları. Temsilci performansı ve prim planını görmez; sorumlu Saha Performansı + prim planı görür,
+        //   şube temsilcisi atar (dış doktor kartı), talebi kapatır.
+        new("saha_temsilci", "Müşteri Temsilcisi (Saha)",
+            "Dış doktor ziyaretleri, doktor talepleri, ziyaret vadesi ve haftalık plan; dış doktor kartını düzenler, silmez.",
+            Klinik,
+            K(T("dis_doktor.liste"), Y("dis_doktor"), Y("dis_doktor.ziyaret"), Y("dis_doktor.talep"),
+              Y("dis_doktor.vade"), Y("dis_doktor.plan"), T("kurum"), Y("gorev"))),
+        new("saha_sorumlu", "Müşteri Temsilci Sorumlusu (Saha)",
+            "Temsilcinin ekranları + silme, şube temsilcisi atama, Saha Performansı, prim planı görme.",
+            Klinik,
+            K(T("dis_doktor.liste"), H("dis_doktor"), H("dis_doktor.ziyaret"), H("dis_doktor.talep"),
+              H("dis_doktor.vade"), H("dis_doktor.plan"), T("dis_doktor.performans"), T("kurum"), Y("gorev"),
+              T("prim"), T("prim.plan"))),
         new("cagri_ajani", "Çağrı Merkezi Ajanı",
             "Telefonla randevu alma/değiştirme, hasta ve aday kaydı, hekim uygunluğu.",
             Klinik,
