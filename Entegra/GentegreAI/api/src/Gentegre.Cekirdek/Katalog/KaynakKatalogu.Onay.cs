@@ -44,6 +44,8 @@ public static partial class KaynakKatalogu
                 " when 976  then 'Doküman'" +
                 " when 1312 then 'Masraf Beyanı'" +
                 " when 1314 then 'Belge Talebi'" +
+                // Satış teklifi iç onayı (1282) - kullanıcı 10.11.2026: kutuda "Diğer" görünüyordu.
+                " when 30   then 'Satış Teklifi'" +
                 " else 'Diğer' end",
                 "metin", "Tür", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
                 Filtrelenebilir: false),

@@ -29,6 +29,7 @@ export const ONAY_LISTELERI: ListeGirdisi[] = [
       //   kimsenin kutusunda "iş" gibi görünmezse orada unutulur.
       { ad: 'Bilgi istendi', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Satınalma',     filtre: { alan: 'kaynakTur', op: 'esit', deger: 1241 } },
+      { ad: 'Teklif',        filtre: { alan: 'kaynakTur', op: 'esit', deger: 30 } },
       { ad: 'Tümü' },
     ],
     // YÖNETİM GRUBUNUN BAŞINDA (menuSira 1). Onay kuyruğu günlük iştir,

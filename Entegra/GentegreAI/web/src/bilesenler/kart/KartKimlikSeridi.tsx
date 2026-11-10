@@ -24,7 +24,7 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
  */
 const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat', onayAkis: 'kaid-onayakis' };
 /** Onay akışı avatarı: kayıt türünün simgesi (mockup onay_akis_karti.html). */
-const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', '1224': '🔧', '1257': '💰', '1256': '🏷', '976': '📄', '1312': '🧾', '1314': '📑' };
+const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', '1224': '🔧', '1257': '💰', '1256': '🏷', '976': '📄', '1312': '🧾', '1314': '📑', '30': '📝' };
 /**
  * TEK KALEM, TÜM KART (kullanıcı 09.11.2026, stok kartı: "Tanım / Sınıflandırma, Vergi & Ana Birim, Diğer bölümleri
  * de view/edit mod yap.. ayrı ayrı kalem ekleme, başlıktaki kalemle hepsi mod değişsin.. kaleme basmadan edit moda
