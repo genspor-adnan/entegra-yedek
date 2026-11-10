@@ -134,6 +134,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
             title={kipKilidi ? c('Kilitli belge - başlık düzenlenemez') : gosterKipi ? c('Başlık alanlarını düzenle') : c('Düzenlemeyi kapat')}
             onClick={() => setBaslikDuzenle(v => !v)}>✎</button>
   );
+  /** Bantsız serbest ✎ çizilsin mi: kipli ve bantsız; carili belgede kayıtlıysa, fiş / depo belgesinde hep. */
+  const serbestKalem = !bantli && kipli && (!!sonuc || stokFisiMi || depoBelgesi);
   const efDurum = Number(sonuc?.belge.efaturaDurum ?? 0);
   const efSonuc = Number(sonuc?.belge.efaturaSonuc ?? 0);
 
@@ -330,8 +332,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     ve hasta bandinda, tarih/bolum/hekim/odeyen kurum ise Basvuru sekmesinde.
     Basligi bosuna cizmek kart tepesinde iki kez ayni bilgiyi gosteriyordu. */}
 {!basvuruMu && (
-<div className={`belge-hdr-sar${!bantli && kipli && sonuc ? ' kalemli' : ''}`}>
-  {!bantli && kipli && sonuc && kalemDugmesi(' bb-kalem-serbest')}
+<div className={`belge-hdr-sar${serbestKalem ? ' kalemli' : ''}`}>
+  {/* SERBEST ✎ (bantsız): carili belgede yalnız KAYITLI belgede (cari bandı gelince oraya taşınır); stok fişi ve depo
+      belgesinde (transfer / talep) YENİ belgede de (kullanıcı 10.11.2026: "başlıkların sağ üst köşesine çerçevesiz
+      kalem ekle, edit/view mode için") - "+" kalem ekleme başlığı görüntülemeye alınca geri açmanın yolu bu. */}
+  {serbestKalem && kalemDugmesi(' bb-kalem-serbest')}
   {/* CARİ BAŞLIĞI MÜŞTERİ / TEDARİKÇİ KARTIYLA AYNI (kullanıcı 02.11.2026): kimlik bandı kod · VKN · il ·
       temsilci · DURUM. Özet şeridi YOK ("alış/satış belgelerinde özet şeride gerek yok"); bakiye bu yüzden
       bandın sağında kalır. */}
