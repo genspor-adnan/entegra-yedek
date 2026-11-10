@@ -11,10 +11,18 @@ export interface DisHekimBaglam {
   git?(yol: string): void;
 }
 
+const OZEL_KODLAR = new Set([
+  'dis-hekim-ziyaret.goruldu', 'dis-hekim-ziyaret.hekim-karti',
+  'dis-hekim-talep.kapat', 'dis-hekim-talep.ret', 'dis-hekim-talep.goreve-cevir',
+  'dis-hekim-vade.planla', 'dis-hekim-vade.ziyaret-yaz', 'dis-hekim-vade.hekim-karti', 'dis-hekim-vade.plan',
+]);
+
 export async function disHekimAksiyonu(
   kod: string, satir: ListeSatiri | null | undefined, b: DisHekimBaglam,
 ): Promise<boolean> {
-  if (!kod.startsWith('dis-hekim-ziyaret.') && !kod.startsWith('dis-hekim-talep.') && !kod.startsWith('dis-hekim-vade.')) return false;
+  // YALNIZ KENDİ KODLARI: Crud'un yeni / duzenle / sil kodları jenerik akışta kalır (kullanıcı 10.11.2026:
+  //   "+ Ziyaret'e basınca ziyaret seçin diyor" - önek eşleşmesi yeni kaydı da yutuyordu).
+  if (!OZEL_KODLAR.has(kod)) return false;
   if (kod === 'dis-hekim-vade.plan') { b.git?.('/dis-hekim-plan'); return true }
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir satır seçin.'); return true }
