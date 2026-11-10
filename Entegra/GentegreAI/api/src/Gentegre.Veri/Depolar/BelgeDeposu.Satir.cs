@@ -447,6 +447,7 @@ public sealed partial class BelgeDeposu
             //   geri gelmiyordu (UNIVERSE: silinen satış irsaliyesinin lotu 0'da kaldı). Düzenlemedeki geri alma
             //   (StokDurumGeriAlAsync) burada da çalışır; silme engellenirse (fn_belge_silinebilir) aynı işlem
             //   geri alınır. Yalnız KESİN (durum 0) ve stok etkileyen türde - taslak ve sipariş stoğa yazmaz.
+            var belgeTuru = 0;
             await using (var bilgi = baglanti.Komut(
                 "select tur, coalesce(tipi, 0), coalesce(durum, 0) from public.belge where id = @p0", islem, belgeId))
             await using (var o = await bilgi.ExecuteReaderAsync(iptal))
@@ -457,10 +458,15 @@ public sealed partial class BelgeDeposu
                     var tipi = Convert.ToInt32(o.GetValue(1));
                     var durum = Convert.ToInt32(o.GetValue(2));
                     await o.CloseAsync();
+                    belgeTuru = tur;
                     if (durum == 0 && await StokEtkilerMiAsync(baglanti, islem, tur, iptal))
                         await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
                 }
             }
+
+            // İÇ STOK BELGELERİ (giriş / çıkış fişi, transfer, stoktan talep) LİSTEDEN DE SATIRLARIYLA SİLİNİR
+            //   (kullanıcı 10.11.2026: "direkt silebilsin.. gerekirse logdan geri alırız"; BelgeTuru.DogrudanSilinir, 1284).
+            if (!satirlarla && BelgeTuru.DogrudanSilinir(belgeTuru)) satirlarla = true;
 
             if (satirlarla)
             {

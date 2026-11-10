@@ -150,7 +150,8 @@ export const belgeUclari = {
     istek<{ mesaj: string; istisna?: boolean }>(`/api/belge/hizmet-uygunluk?hizmetId=${hizmetId}&tarafId=${tarafId}`),
 
   /** Belgeyi siler (181). Izli belgede sunucu 422 doner (sebep mesajda). `satirlarla`: karttan silme - satırlar da
-      aynı işlemde silinir (1267 "satırlı belge silinemez" kuralı yalnız listeden silmede). */
+      aynı işlemde silinir (1267 "satırlı belge silinemez" kuralı yalnız listeden silmede; giriş / çıkış fişi, transfer
+      ve stoktan talep listeden de satırlarıyla silinir - sunucu karar verir, 1284). */
   belgeSil: (id: number, satirlarla = false) =>
     istek<{ mesaj: string }>(`/api/belge/${id}${satirlarla ? '?satirlarla=1' : ''}`, { method: 'DELETE' }),
 

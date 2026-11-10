@@ -131,6 +131,17 @@ public static class BelgeTuru
 
     public static bool TalepMi(int tur) => tur == Talep;
 
+    /// <summary>
+    /// SATIRLARIYLA DOĞRUDAN SİLİNEN TÜRLER (kullanıcı 10.11.2026: "Stoktan Talep - Stok Transferleri - Giriş - Çıkış
+    /// Fişinde silmek isteyince içeriden satırları silmemizi istiyor. direkt silebilsin.. gerekirse logdan geri alırız").
+    /// 1267 kuralı (satırlı belge silinmez, önce satırlar) carili / e-Belgeli ticari belgeler için kalır; bu dört tür
+    /// carisiz, parasız, e-Belgesiz iç stok belgesidir - listeden Sil satırları da aynı işlemde götürür
+    /// (BelgeDeposu.SilAsync satirlarla), silme logu (tablo 30) ile geri alınabilir. fn_belge_silinebilir 1284.
+    /// </summary>
+    private static readonly HashSet<int> DogrudanSilinenTurler = new() { 3, 4, Transfer, Talep };
+
+    public static bool DogrudanSilinir(int tur) => DogrudanSilinenTurler.Contains(tur);
+
     public static bool StokFisiMi(int tur) => StokFisleri.Contains(tur);
 
     public static bool DisNumarali(int tur) => DisNumaraliTurler.Contains(tur);

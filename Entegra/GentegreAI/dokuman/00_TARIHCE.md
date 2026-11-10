@@ -178,6 +178,13 @@ başlığında … Listesi olsun".
   976 köprüsü (gizli `dokumanId` kolonu → `/dokuman/{id}`) eklendi; `dokuman-onay` kaynağı, `dokuman-onay-liste`
   aksiyonları, liste girdisi, `dokumanOnayKarar` ucu, mockup `dokuman_onay_kuyrugu.html` silindi. DB: `dokuman.onayla`
   ekran yetkisi + rol bağları düştü (karar yetkisi `dokuman.onay` kalır), rehber satırı pasif, menü çevirisi silindi.
+- **Satış Teklifi Listesi sütun sırası (kullanıcı):** Belge No · Tarih · Müşteri · Satış Tem. · Durumu · Onaylayan · Konusu.
+- **İç stok belgeleri listeden satırlarıyla silinir (kullanıcı: "Stoktan Talep - Stok Transferleri - Giriş - Çıkış Fişinde
+  ... direkt silebilsin.. gerekirse logdan geri alırız"; göç 1284):** 1267 "satırlı belge silinemez" kuralı giriş / çıkış
+  fişi (3/4), transfer (20) ve stoktan talep (105) için kalktı - `BelgeTuru.DogrudanSilinir`, `BelgeDeposu.SilAsync`
+  listeden silmede de `satirlarla` davranır (stok / lot geri alma + dönüştürülmüş belge denetimi aynen), silme logu
+  tablo 30. Ticari belgelerde kural değişmedi. Liste onayı "satırlarıyla birlikte silinecek" der. Test
+  `StokBelgesiSilTestleri`.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
