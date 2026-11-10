@@ -4,6 +4,8 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { HaftalikPlan, PlanZiyareti } from '../api/uclar/disHekim';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
+import { GenLookup } from '../bilesenler/GenLookup';
+import { Modal } from '../bilesenler/Modal';
 import { c as cev } from '../dil/ceviri';
 
 /**
@@ -34,6 +36,11 @@ export function DisHekimPlan() {
   const [grupla, setGrupla] = useState(true);
   const [hedef, setHedef] = useState<number | null>(null);
   const [surukle, setSurukle] = useState<PlanZiyareti | null>(null);
+  // ELLE EKLE (kullanıcı 10.11.2026: "plana dış dr ekleyebilmem lazım, Planı Üret dışında"): gün başlığındaki ＋,
+  //   dış doktor araması + saat; POST /planla ile planlı (durum 0, öneri değil) ziyaret.
+  const [ekleGun, setEkleGun] = useState<number | null>(null);
+  const [ekleHekim, setEkleHekim] = useState<{ id: number; ad: string } | null>(null);
+  const [ekleSaat, setEkleSaat] = useState('10:00');
 
   useEffect(() => {
     void (async () => {
@@ -64,6 +71,15 @@ export function DisHekimPlan() {
     if (isoGun(yeni) === isoGun(eski)) return;
     const z = surukle; setSurukle(null);
     void guvenli(async () => { await api.disHekimZiyaretTasi(z.id, `${isoGun(yeni)}T${String(yeni.getHours()).padStart(2, '0')}:${String(yeni.getMinutes()).padStart(2, '0')}:00`); tazele() });
+  };
+
+  const ekle = () => {
+    if (ekleGun === null || !ekleHekim) { mesaj('Dış doktor seçin.'); return }
+    const gun = isoGun(gunTarihi(ekleGun));
+    void guvenli(async () => {
+      const y = await api.disHekimPlanla({ hekimId: ekleHekim.id, tarih: `${gun}T${ekleSaat || '10:00'}:00`, temsilciId: temsilci });
+      mesaj(y.mesaj); setEkleGun(null); setEkleHekim(null); tazele();
+    });
   };
 
   const ziyaretler = veri?.ziyaretler ?? [];
@@ -126,7 +142,9 @@ export function DisHekimPlan() {
                    onDragOver={e => { if (surukle) { e.preventDefault(); setHedef(i) } }}
                    onDragLeave={() => setHedef(h => h === i ? null : h)}
                    onDrop={e => { e.preventDefault(); birak(i) }}>
-                <h5>{ad} {gunTarihi(i).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}<small>{liste.length} {cev('ziyaret')}{ilceler ? ` · ${ilceler}` : ''}</small></h5>
+                <h5>{ad} {gunTarihi(i).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}<small>{liste.length} {cev('ziyaret')}{ilceler ? ` · ${ilceler}` : ''}</small>
+                  <button type="button" className="bs-kalem" title={cev('Bu güne dış doktor ekle')} data-testid={`plan-ekle-${i}`}
+                          onClick={() => { setEkleGun(i); setEkleHekim(null) }}>＋</button></h5>
                 <div className="dhp-govde">
                   {liste.map(z => (
                     <div key={z.id}
@@ -153,6 +171,25 @@ export function DisHekimPlan() {
           })}
         </div>
       </div>
+      {ekleGun !== null && (
+        <Modal baslik={`${cev('Plana Ekle')} — ${GUNLER[ekleGun]} ${gunTarihi(ekleGun).toLocaleDateString('tr-TR')}`} onKapat={() => setEkleGun(null)} enUst dar
+          alt={<>
+            <button className="d bir" disabled={!ekleHekim} onClick={ekle}>📅 {cev('Planla')}</button>
+            <button className="d kapat-dugmesi" onClick={() => setEkleGun(null)}>✖ {cev('Vazgeç')}</button>
+          </>}>
+          <div className="alan-izgara" data-testid="plan-ekle">
+            <GenLookup kaynak="dis-hekim" etiket={cev('Dış Doktor')} zorunlu
+                       alanlar={[{ ad: 'unvan', baslik: 'Dış Doktor', genis: true }, { ad: 'kurum', baslik: 'Kurum' }, { ad: 'departmanAdi', baslik: 'Bölüm' }]}
+                       deger={ekleHekim?.ad}
+                       onSec={x => setEkleHekim(x ? { id: Number(x.id), ad: String(x.unvan ?? '') } : null)} />
+            <label className="alan">
+              <span className="etiket">{cev('Saat')}</span>
+              <input type="time" value={ekleSaat} onChange={e => setEkleSaat(e.target.value)} />
+            </label>
+          </div>
+          <div className="not" style={{ marginTop: 8 }}>{cev('Planlı ziyaret temsilciye yazılır; yapılınca karttan "Yapıldı" olarak kaydedilir.')}</div>
+        </Modal>
+      )}
     </div>
   );
 }
