@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../api/istemci';
 import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { c } from '../dil/ceviri';
@@ -123,8 +124,10 @@ export function GenLookup({
 
       {hata && <span className="alan-hata">{hata}</span>}
 
-      {acik && (
-        <>
+      {/* PENCERE PORTALDA (kullanıcı 10.11.2026: modal içindeki depo / dış doktor araması aşağıda açılıp kırpılıyordu):
+          .kawin transform taşıdığından fixed pencere modale göre konumlanıyordu; body'ye çizilir, en üst modalın üstünde. */}
+      {acik && createPortal(
+        <div className="lookup-portal">
           <div className="perde" onClick={() => setAcik(false)} />
           {/* Pencere duzeni CARI/STOK ARAMASIYLA AYNI (kullanici): sol ustte
               Seç, sag ustte Kapat, arama kutusu oval, satir basinda isaret
@@ -194,8 +197,8 @@ export function GenLookup({
               <span>↑↓ gez · Enter seç · Esc kapat</span>
             </div>
           </div>
-        </>
-      )}
+        </div>,
+        document.body)}
     </div>
   );
 }
