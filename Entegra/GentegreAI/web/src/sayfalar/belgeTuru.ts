@@ -202,7 +202,12 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
       // Alış belgelerinin numarası TEDARİKÇİNİN (02.11.2026) - BelgeTuru.DisNumaraliTurler ile aynı küme.
       disNumara: [10, 11, 12, 109].includes(tur),
     kaydedinceKapan: depoBelgesi || stokFisi,
-    kalemVarsaBaslikKilitli: depoBelgesi || stokFisi,
+    // DEPO BELGESİNDE KİLİT YOK (kullanıcı 10.11.2026: "satır eklendikten sonra da depo / teslim eden-alan
+    //   değişebilsin"): satırlar depo taşımaz (belge_satir depo kolonları boş), stok yazımı başlıktaki depoya
+    //   düşer ve kayıtta eski etki geri alınıp yeniden yazılır. Tek risk lot/seri: çıkış deposu değişince seçili
+    //   lotlar yeni depoda olmayabilir - BelgeKarti uyarır ve lot seçimlerini boşaltır, sunucu lot düşümünü depoda
+    //   koşullu yapar (eksiye düşmez, 422). Stok fişi ESKİSİ GİBİ kilitli.
+    kalemVarsaBaslikKilitli: stokFisi,
     // Mal DEPOYA GIRIYOR: izlemli stokta lot/seri bilgisi burada TOPLANIR
     //   (alis irsaliyesi/faturasi, konsinye giris, giris fisi). Cikista lot
     //   girilmez SECILIR - mevcut stoktan, ayri ekran.

@@ -195,6 +195,23 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   // TEKLIF BASLIGI (218) demet halinde: durum, revize no, konu, teslim.
   const teklif = useTeklifBilgisi();
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
+  /**
+   * ÇIKIŞ DEPOSU DEĞİŞİNCE LOT UYARISI (kullanıcı 10.11.2026, transfer / talep başlığı satır varken de açık):
+   * satırlardaki lot/seri seçimleri ESKİ çıkış deposunun bakiyesinden yapılmıştı; yeni depoda o lotlar olmayabilir.
+   * Kullanıcı onaylarsa seçimler boşaltılır - kaydetmeden önce o kalemlerin lotu yeniden seçilir (sunucu çıkışta lot
+   * ister, depoda kalanı yetmeyen lotu 422 ile reddeder). Vazgeçerse depo değişmez.
+   */
+  const depoDegistir = (d: { id: number; ad: string } | null) => {
+    const lotlu = satirlar.filter(s => (s.izlemler?.length ?? 0) > 0);
+    if (!d || d.id === depo?.id || lotlu.length === 0 || !bilgi.depoBelgesi) { setDepo(d); return }
+    void (async () => {
+      if (!await onay(`Çıkış deposu değişiyor. ${lotlu.length} kalemin lot / seri seçimi eski depoya göre yapılmıştı; `
+                    + 'seçimler boşaltılacak ve kaydetmeden önce o kalemlerde lot yeniden seçmeniz gerekecek.'
+                    + '\n\nDevam edilsin mi?')) return;
+      setSatirlar(sl => sl.map(s => (s.izlemler?.length ?? 0) > 0 ? { ...s, izlemler: [] } : s));
+      setDepo(d);
+    })();
+  };
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Transferde sorumluluk devri: teslim EDEN (asagida, irsaliyeyle ortak) ve
@@ -1744,7 +1761,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           numaraElle={protokolElle}
           teklif={teklif}
           cari={cari} satici={satici}
-          depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
+          depo={depo} setDepo={depoDegistir} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
           sevkiyat={sevkiyat}
           fisTipi={fisTipi} setFisTipi={setFisTipi}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}

@@ -191,6 +191,10 @@ başlığında … Listesi olsun".
   (`BelgeBaslik` kipli, kilit `baslikKilitli`); ✎ sağ üstte **çerçevesiz** (`.bb-kalem-serbest` = `.bs-kalem`) - stok
   fişinde de. "+" kalem ekleme ve sekme değişimi başlığı görüntülemeye alır (zaten vardı). Lookup penceresinde satırın
   her yeri seçer (işaret kutusu hücresi tıkı yutuyordu).
+- **Transfer / talep başlığı satır varken de düzenlenir (kullanıcı: "kilidi kaldır lot uyarısıyla"):**
+  `kalemVarsaBaslikKilitli` yalnız stok fişinde kaldı. Güvenli çünkü satırlar depo taşımaz (başlık depo esas) ve kayıt
+  eski stok etkisini geri alıp yeniden yazar. Çıkış deposu değişince lotlu kalemler için onay + lot seçimleri boşalır
+  (`BelgeKarti.depoDegistir`); sunucu lot düşümü zaten depoda koşullu (eksiye düşmez, 422). Teslim Eden / Alan serbest.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
