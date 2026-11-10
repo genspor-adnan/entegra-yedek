@@ -75,6 +75,13 @@ public sealed class TeklifIcOnayTestleri(ApiSunucuOlgusu api)
         var e = await haz.PostAsJsonAsync($"/api/belge/{belgeId}/teklif-durum", new { durum = 2 });
         Assert.Equal(HttpStatusCode.UnprocessableEntity, e.StatusCode);
 
+        // Onay sekmesi: kim sundu, kime düştü (adıyla).
+        var zincir = await haz.GetFromJsonAsync<JsonElement>($"/api/onay/kayit/30/{belgeId}");
+        Assert.False(string.IsNullOrEmpty(zincir.GetProperty("onay").GetProperty("baslatanAd").GetString()));
+        var adim = zincir.GetProperty("adimlar").EnumerateArray().First();
+        Assert.Equal(onyId, adim.GetProperty("atananId").GetInt32());
+        Assert.False(string.IsNullOrEmpty(adim.GetProperty("atananAd").GetString()));
+
         // Onaylayanın kutusunda görünür (akış kodu, kayıt no).
         var kutu = await ony.GetFromJsonAsync<JsonElement>("/api/onay/kutum");
         var satir = kutu.GetProperty("satirlar").EnumerateArray()

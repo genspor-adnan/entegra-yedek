@@ -104,7 +104,8 @@ export function OnayaSunPenceresi({ belgeId, belgeNo, cariUnvan, onKapat, onTama
 
 /** Teklif kartı "Onay" sekmesi: motordaki zincir (onay + basamaklar). */
 export function TeklifOnaySekmesi({ belgeId, teklifDurum, tazele }: { belgeId: number; teklifDurum: number; tazele: number }) {
-  const [veri, setVeri] = useState<{ onay: { id: number; durum: number } | null; adimlar: OnayAdimi[] } | null>(null);
+  const [veri, setVeri] = useState<{ onay: { id: number; durum: number; baslama?: string; baslatanAd?: string | null } | null;
+                                      adimlar: OnayAdimi[] } | null>(null);
   const [adlar, setAdlar] = useState<Record<number, string>>({});
   const [hata, setHata] = useState<string | null>(null);
 
@@ -131,11 +132,19 @@ export function TeklifOnaySekmesi({ belgeId, teklifDurum, tazele }: { belgeId: n
         <span className="sonuk">{c('Teklif durumu')}:</span> <span className={`rozet ${teklifDurum === 7 || teklifDurum === 3 ? 'ok' : teklifDurum === 6 || teklifDurum === 8 ? 'uyari' : teklifDurum === 9 || teklifDurum === 4 ? 'hata' : 'gri'}`}>{durumAd}</span>
       </div>
       {!veri.onay && <div className="bilgi-kutusu">{c('Bu teklif henüz onaya sunulmadı. Araç çubuğundan "Onaya Sun".')}</div>}
-      {veri.onay && (
-        <table className="detay-tablo">
+      {veri.onay && (() => {
+        const bekleyen = veri.adimlar.find(a => a.durum === 0 || a.durum === 3);
+        const kime = (a: OnayAdimi) => a.atananAd || (a.atananId ? adlar[a.atananId] ?? `#${a.atananId}` : '');
+        return (<>
+          {/* KİM SUNDU / KİMDE (kullanıcı 10.11.2026: "kime onaya gönderdiğimi göremedim") */}
+          <div className="bilgi-kutusu" data-testid="teklif-onay-ozet" style={{ marginBottom: 8 }}>
+            <b>{c('Onaya sunan')}:</b> {veri.onay.baslatanAd || '—'}{veri.onay.baslama ? ` · ${zaman(veri.onay.baslama)}` : ''}
+            {bekleyen && <> &nbsp;·&nbsp; <b>{c('Onay bekleyen')}:</b> {kime(bekleyen) || c('(rol basamağı)')}{bekleyen.termin ? ` · ${c('son')} ${zaman(bekleyen.termin).slice(0, 10)}` : ''}</>}
+          </div>
+          <table className="detay-tablo">
           <thead>
-            <tr><th style={{ width: 40 }}>#</th><th>{c('Basamak')}</th><th style={{ width: 130 }}>{c('Durum')}</th>
-                <th style={{ width: 180 }}>{c('Karar veren')}</th><th style={{ width: 140 }}>{c('Zaman')}</th><th style={{ width: 120 }}>{c('Son tarih')}</th><th>{c('Not')}</th></tr>
+            <tr><th style={{ width: 40 }}>#</th><th>{c('Basamak')}</th><th style={{ width: 170 }}>{c('Kime')}</th><th style={{ width: 130 }}>{c('Durum')}</th>
+                <th style={{ width: 170 }}>{c('Karar veren')}</th><th style={{ width: 140 }}>{c('Zaman')}</th><th style={{ width: 110 }}>{c('Son tarih')}</th><th>{c('Not')}</th></tr>
           </thead>
           <tbody>
             {veri.adimlar.map(a => {
@@ -143,8 +152,9 @@ export function TeklifOnaySekmesi({ belgeId, teklifDurum, tazele }: { belgeId: n
               return (
                 <tr key={a.id}>
                   <td>{a.sira}</td><td>{a.ad}</td>
+                  <td>{kime(a) || '—'}</td>
                   <td><span className={`rozet ${d.sinif}`}>{c(d.ad)}</span></td>
-                  <td>{a.kararVerenId ? adlar[a.kararVerenId] ?? `#${a.kararVerenId}` : '—'}</td>
+                  <td>{a.kararVerenId ? a.kararVerenAd || adlar[a.kararVerenId] || `#${a.kararVerenId}` : '—'}</td>
                   <td>{zaman(a.kararZamani)}</td>
                   <td>{a.termin ? zaman(a.termin).slice(0, 10) : '—'}</td>
                   <td>{a.gerekce || ''}</td>
@@ -152,8 +162,9 @@ export function TeklifOnaySekmesi({ belgeId, teklifDurum, tazele }: { belgeId: n
               );
             })}
           </tbody>
-        </table>
-      )}
+          </table>
+        </>);
+      })()}
       <div className="not" style={{ marginTop: 8 }}>
         {c('Müşteriye sunum onaya bağlı değil: Onaylandı sonrası "Müşteriye Sun" (PDF / yazdır) ve müşteri cevabı "Durumu Değiştir" ile işlenir.')}
       </div>

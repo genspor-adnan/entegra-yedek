@@ -39,7 +39,12 @@ export interface OnayAdimi {
   ad: string;
   rol: number;
   durum: number;
+  sahipTuru?: number;
+  /** Basamağın atandığı kullanıcı (rol basamağında boş) - adıyla. */
+  atananId?: number | null;
+  atananAd?: string | null;
   kararVerenId: number | null;
+  kararVerenAd?: string | null;
   kararZamani: string | null;
   gerekce: string;
   yaziliSon: string | null;
@@ -81,7 +86,8 @@ export const onayUclari = {
   onayZinciri: (kaynakTur: number, kaynakId: number) =>
     istek<{
       onay: { id: number; durum: number; olcu: number; akisKod: string;
-              akisAd: string; olcuAdi: string } | null;
+              akisAd: string; olcuAdi: string; baslama?: string;
+              baslatanId?: number; baslatanAd?: string | null } | null;
       adimlar: OnayAdimi[];
     }>(`/api/onay/kayit/${kaynakTur}/${kaynakId}`),
 

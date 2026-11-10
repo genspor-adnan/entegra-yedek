@@ -103,11 +103,17 @@ public static class OnayUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // KİM SUNDU / KİME DÜŞTÜ (kullanıcı 10.11.2026 teklif 10305: "kime onaya gönderdiğimi göremedim"):
+            //   başlatan ve basamağın atananı / karar vereni ADIYLA döner (taraf_kullanici.id = taraf.id).
             var n = await baglanti.TekAsync("""
                 select o.id, o.durum, o.olcu, o.bayraklar, o.baslama, o.bitis,
-                       k.kod as "akisKod", k.ad as "akisAd", k.olcu_adi as "olcuAdi"
+                       k.kod as "akisKod", k.ad as "akisAd", k.olcu_adi as "olcuAdi",
+                       o.baslatan_id as "baslatanId",
+                       coalesce(nullif(trim(public.fn_taraf_ad(bt.unvan, bt.ad, bt.soyad)::varchar(120)), ''), bk.kod) as "baslatanAd"
                   from public.onay o
                   left join public.onay_akis k on k.id = o.akis_id
+                  left join public.taraf_kullanici bk on bk.id = o.baslatan_id
+                  left join public.taraf bt on bt.id = bk.id
                  where o.kaynak_tur = @p0 and o.kaynak_id = @p1
                  order by o.id desc limit 1
                 """, null, [kaynakTur, kaynakId], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -117,10 +123,19 @@ public static class OnayUclari
                                         izlemeNo = baglam.IzlemeNo });
 
             var adimlar = await baglanti.ListeAsync("""
-                select a.id, a.sira, a.ad, a.rol, a.durum,
-                       a.karar_veren_id as "kararVerenId", a.karar_zamani as "kararZamani",
+                select a.id, a.sira, a.ad, a.rol, a.durum, a.sahip_turu as "sahipTuru",
+                       a.atanan_kullanici_id as "atananId",
+                       coalesce(nullif(trim(public.fn_taraf_ad(at.unvan, at.ad, at.soyad)::varchar(120)), ''), ak.kod) as "atananAd",
+                       a.karar_veren_id as "kararVerenId",
+                       coalesce(nullif(trim(public.fn_taraf_ad(kt.unvan, kt.ad, kt.soyad)::varchar(120)), ''), kk.kod) as "kararVerenAd",
+                       a.karar_zamani as "kararZamani",
                        a.gerekce, a.yazili_son as "yaziliSon", a.termin
-                  from public.onay_adim a where a.onay_id = @p0 order by a.sira
+                  from public.onay_adim a
+                  left join public.taraf_kullanici ak on ak.id = a.atanan_kullanici_id
+                  left join public.taraf at on at.id = ak.id
+                  left join public.taraf_kullanici kk on kk.id = a.karar_veren_id
+                  left join public.taraf kt on kt.id = kk.id
+                 where a.onay_id = @p0 order by a.sira
                 """, null, [Convert.ToInt64(n["id"])], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { onay = n, adimlar, izlemeNo = baglam.IzlemeNo });

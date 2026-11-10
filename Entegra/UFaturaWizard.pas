@@ -5549,7 +5549,7 @@ begin
         KalanAdet := StrToFloatDef(Tablo.SonSecim['Kalan'],1)
      else
         KalanAdet := StrToFloatDef(Tablo.SonSecim['Adet'],1);
-     DepoIade := StrToIntDef(Tablo.SonSecim['DepoID'],0);
+     //10.11.2026 DepoIade := StrToIntDef(Tablo.SonSecim['DepoID'],0);
      var LIadeBelgeNo: string := Tablo.SonSecim['BelgeNo'];
      var LIadeBelgeTarih: string := Tablo.SonSecim['Tarih'];
      //iade olan depoya bakalım konsinye giriş veya ıçıkış olamaz
@@ -5565,15 +5565,15 @@ begin
                 FreeAndNil(St2);
              end;
          TabFatbaslik.Edit;
-         TabFatbaslik.FieldByName('GIRISDEPO').AsInteger := DepoIade;
+         //10.11.2026  TabFatbaslik.FieldByName('GIRISDEPO').AsInteger := DepoIade;
          cbStokDepo.Enabled := False;
          end;
-     end
-     else
+     end;
+     {//10.11.2026 else
          if (TabFatbaslik.FieldByName('GIRISDEPO').AsInteger <> DepoIade)and(not DepoIade in [5,7]) then begin
             ShowMessage(SFarkli_isim_var);
             Abort;
-         end;
+         end; }
 
 
      Tablo.TablodanSorguAc(7,'select * from FATURA where YERI in (416,417) and YERID='+IntToStr(FatSatirID));
