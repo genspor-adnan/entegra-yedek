@@ -195,6 +195,10 @@ başlığında … Listesi olsun".
   `kalemVarsaBaslikKilitli` yalnız stok fişinde kaldı. Güvenli çünkü satırlar depo taşımaz (başlık depo esas) ve kayıt
   eski stok etkisini geri alıp yeniden yazar. Çıkış deposu değişince lotlu kalemler için onay + lot seçimleri boşalır
   (`BelgeKarti.depoDegistir`); sunucu lot düşümü zaten depoda koşullu (eksiye düşmez, 422). Teslim Eden / Alan serbest.
+- **Alış / satış faturası satırlarıyla silinir (kullanıcı: "listesinde ve kart içinden faturayı silebilmeliyim"; göç
+  1285):** 1284 istisnası 11 / 15'e genişledi (`BelgeTuru.DogrudanSilinenTurler`, `fn_belge_silinebilir`). e-Belge
+  hazır / gönderilmiş, iptal, dönüştürülmüş, kasa işlemi bağlı, ÜTS bildirimli fatura yine silinmez. Diğer ticari
+  belgelerde (irsaliye, sipariş, teklif, fiş, tahakkuk) 1267 kuralı sürer. Test `StokBelgesiSilTestleri`.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

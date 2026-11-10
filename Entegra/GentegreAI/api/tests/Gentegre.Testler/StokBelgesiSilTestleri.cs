@@ -17,7 +17,7 @@ public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
 
     private async Task<HttpClient> IstemciAsync(TestDunyasi d)
     {
-        var rol = await d.RolAsync("stksil", "belge:gedk", "belge.stok.giris:gedk", "belge.satis:gedk");
+        var rol = await d.RolAsync("stksil", "belge:gedk", "belge.stok.giris:gedk", "belge.satis:gedk", "belge.satis.fatura:gedk");
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
@@ -69,6 +69,43 @@ public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
         Assert.Equal(0m, await api.Veri.TekDegerAsync<decimal>(
             "select kalan from public.stok_durum where stok_id = @p0 and depo_id = @p1", [stok, depo]));
         // Geri almanın dayanağı: silme logu (tam satır, DELETE'ten önce).
+        Assert.True(await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.islem_log where tablo_id = @p0 and kayit_id = @p1", [LogBelge, belgeId]) > 0);
+    }
+
+    [VtFact]
+    public async Task Satis_faturasi_satirli_iken_listeden_silinir_cari_hareketi_gider()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var istemci = await IstemciAsync(d);
+
+        var tarafId = await api.Veri.TekDegerAsync<int>(
+            "insert into public.taraf (unvan, musteri, sube_id) values (@p0, 1, @p1) returning id",
+            [d.Onek + " Müşteri", Merkez]);
+        d.Temizle($"delete from public.taraf where id = {tarafId}");
+        var belgeId = await api.Veri.TekDegerAsync<int>("""
+            insert into public.belge (tur, belge_tarihi, taraf_id, durum, sube_id, belge_no, genel_toplam)
+            values (15, now(), @p0, 0, @p1, @p2, 100) returning id
+            """, [tarafId, Merkez, d.Onek]);
+        d.Temizle($"delete from public.islem_log where tablo_id = {LogBelge} and kayit_id = {belgeId}");
+        d.Temizle($"delete from public.mali_hareket where belge_id = {belgeId}");
+        d.Temizle($"delete from public.belge_satir where belge_id = {belgeId}");
+        d.Temizle($"delete from public.belge where id = {belgeId}");
+        await api.Veri.CalistirAsync("""
+            insert into public.belge_satir (belge_id, sira, tur, aciklama, miktar, adet, birim_fiyat, tutar, sube_id)
+            values (@p0, 1, 3, 'serbest kalem', 1, 1, 100, 100, @p1)
+            """, [belgeId, Merkez]);
+        await api.Veri.CalistirAsync("""
+            insert into public.mali_hareket (belge_id, taraf_id, tur, borc, alacak, islem_tarihi, sube_id)
+            values (@p0, @p1, 15, 100, 0, now(), @p2)
+            """, [belgeId, tarafId, Merkez]);
+
+        var y = await istemci.DeleteAsync($"/api/belge/{belgeId}");
+        Assert.True(y.IsSuccessStatusCode, $"{(int)y.StatusCode} {await y.Content.ReadAsStringAsync()}");
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.belge where id = @p0", [belgeId]));
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.mali_hareket where belge_id = @p0", [belgeId]));
         Assert.True(await api.Veri.TekDegerAsync<int>(
             "select count(*)::int from public.islem_log where tablo_id = @p0 and kayit_id = @p1", [LogBelge, belgeId]) > 0);
     }

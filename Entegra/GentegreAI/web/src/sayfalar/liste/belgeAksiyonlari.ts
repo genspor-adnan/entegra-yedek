@@ -299,9 +299,9 @@ Giriş yapamaz, açık oturumları kapanır. `
     case 'belge.sil': {
       if (!satir) return true;
       const no = String(satir.belgeNo ?? satir.id);
-      // İÇ STOK BELGESİ (3 giriş / 4 çıkış fişi, 20 transfer, 105 stoktan talep): satırlarıyla silinir, silme
-      //   logundan geri alınabilir (kullanıcı 10.11.2026; sunucu BelgeTuru.DogrudanSilinir).
-      const satirlariyla = [3, 4, 20, 105].includes(Number(satir.tur ?? 0));
+      // İÇ STOK BELGESİ (3 giriş / 4 çıkış fişi, 20 transfer, 105 stoktan talep) ve FATURA (11 alış / 15 satış,
+      //   1285): satırlarıyla silinir, silme logundan geri alınabilir (kullanıcı 10.11.2026; BelgeTuru.DogrudanSilinir).
+      const satirlariyla = [3, 4, 20, 105, 11, 15].includes(Number(satir.tur ?? 0));
       if (!await onay(satirlariyla
                     ? `"${no}" satırlarıyla birlikte silinecek (silme logundan geri alınabilir).\n\nOnaylıyor musunuz?`
                     : `"${no}" silinecek.\n\nBu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return true;
