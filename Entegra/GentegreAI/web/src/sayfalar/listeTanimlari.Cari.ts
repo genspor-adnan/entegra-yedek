@@ -228,6 +228,30 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     menuSira: 23, urunModu: 2,
   },
   {
+    // ZIYARET VADESI (1290, mockup §1 / §3 ölçütleri): hekim × şube × temsilci; geciken, gönderimi düşen, sessiz,
+    //   açık talepli. Satır = hekim (kart yok); "Ziyaret Planla" planlı ziyaret açar. Yalnız HBYS.
+    kaynak: 'dis-hekim-vade', baslik: 'Ziyaret Vadesi', yol: 'Kurumlar & Sigorta › Ziyaret Vadesi',
+    aksiyonEkrani: 'dis-hekim-vade-liste', kartHatirlatYok: true, sagTusYok: false,
+    cipler: [
+      { ad: 'Geciken',          filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
+      { ad: 'Gönderimi düşen',  filtre: { alan: 'gonderimDusen', op: 'esit', deger: 1 } },
+      { ad: '60 gün sessiz',    filtre: { alan: 'sessizGun', op: 'buyukEsit', deger: 60 } },
+      { ad: 'Açık talebi var',  filtre: { alan: 'acikTalep', op: 'buyuk', deger: 0 } },
+      { ad: 'Yeni hekim',       filtre: { alan: 'yeniHekim', op: 'esit', deger: 1 } },
+      { ad: 'Sıklığı tanımsız', filtre: { alan: 'siklikHafta', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Ziyaret Vadesi', ic: '⏰', yetkiKodu: 'dis_doktor.vade',
+    menuSira: 24, urunModu: 2,
+  },
+  {
+    // HAFTALIK ZIYARET PLANI (1290, mockup §3): özel sayfa - takvim, Planı Üret, sürükle-bırak. ROTA (§4) YAPILMADI.
+    kaynak: 'dis-hekim-plan', rota: 'dis-hekim-plan', ozelSayfa: true,
+    baslik: 'Ziyaret Planı', yol: 'Kurumlar & Sigorta › Ziyaret Planı',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Ziyaret Planı', ic: '🗓', yetkiKodu: 'dis_doktor.plan',
+    menuSira: 25, urunModu: 2,
+  },
+  {
     kaynak: 'proje', baslik: 'Proje Listesi', yol: 'CRM › Proje Listesi', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [

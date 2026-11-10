@@ -227,6 +227,15 @@ başlığında … Listesi olsun".
   BH/H8 pasif), 1.055 eksik dış doktor (adres / ilçe taraf_adres'e, ZIYARETSURESI ay×4 → sıklık), 6.376 ziyaret
   (sonuç nottan: asistan / kabul etmedi / görüşülemedi; tanışma → tür 4; mobil damga), şube temsilcisi = son ziyaretçi
   (1.192 satır) ve `taraf.temsilci`. Hatırlatma açılmaz. İdempotent (aktarim_kaynak 2 / ZIYARET).
+- **Ziyaret planı (adım c; mockup §3; göç 1290-1291) - ROTA (§4) kullanıcı kararıyla YAPILMADI:** `dis_hekim_ziyaret.oneri`,
+  `v_dis_hekim_ziyaret_vade` (hekim × şube × temsilci: sıklık, son ziyaret, vade, gecikme, planlı, açık talep, son 30 /
+  önceki 30 gün gönderim → düşen, sessiz gün, yeni hekim), `fn_dis_hekim_plan_uret` (vadesi dolan + planı olmayan hekime
+  haftaya ÖNERİ ziyaret; açık talep / gönderim düşüşü öne, aynı ilçe aynı güne, gün başı sınır). Listeler **Ziyaret Vadesi**
+  (`dis_doktor.vade`; çipler Geciken / Gönderimi düşen / 60 gün sessiz / Açık talebi var / Yeni / Sıklığı tanımsız;
+  aksiyon Ziyaret Planla) ve özel sayfa **Ziyaret Planı** (`/dis-hekim-plan`, `dis_doktor.plan`): 5 gün sütunu,
+  sürükle-bırak taşıma, öneri kesik çerçeve ✓ onayla / ✖ kaldır, Planı Üret (gün başı, ilçe grupla), temsilci seçimi.
+  Uçlar `GET /api/dis-hekim/plan`, `POST /plan/uret`, `/ziyaret/{id}/tasi|onayla|iptal`, `POST /planla`. Test
+  `DisHekimPlanTestleri`. Not: `taraf.durum` varsayılanı 0 - test fikstürleri aktif hekimi açıkça yazmalı.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

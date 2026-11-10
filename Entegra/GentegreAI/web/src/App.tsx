@@ -130,6 +130,7 @@ const GozBeklemeEkrani = tembel(() => import('./sayfalar/goz/GozBeklemeEkrani'),
 const GozUniteGunOzeti = tembel(() => import('./sayfalar/goz/GozUniteGunOzeti'), 'GozUniteGunOzeti');
 const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi');
 const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
+const DisHekimPlan = tembel(() => import('./sayfalar/DisHekimPlan'), 'DisHekimPlan');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
 const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
 const Hatirlatmalarim = tembel(() => import('./sayfalar/Hatirlatmalarim'), 'Hatirlatmalarim');
@@ -470,6 +471,10 @@ function Yollar() {
             "kimde bos kapasite var" sorusu zaman ekseninde gorulur. */}
         {yetki('servis.cizelge') && (
           <Route path="/servis-cizelge" element={<ServisCizelge />} />
+        )}
+        {/* Dış doktor haftalık ziyaret planı (1290): takvim + Planı Üret + sürükle-bırak - liste satır çizer, takvim çizmez. */}
+        {yetki('dis_doktor.plan') && (
+          <Route path="/dis-hekim-plan" element={<DisHekimPlan />} />
         )}
         {yetki('ariza.talep') && (
           <Route path="/ariza-bildir" element={<ArizaBildir />} />

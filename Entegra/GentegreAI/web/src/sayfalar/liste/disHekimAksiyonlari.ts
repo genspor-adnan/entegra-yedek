@@ -14,9 +14,34 @@ export interface DisHekimBaglam {
 export async function disHekimAksiyonu(
   kod: string, satir: ListeSatiri | null | undefined, b: DisHekimBaglam,
 ): Promise<boolean> {
-  if (!kod.startsWith('dis-hekim-ziyaret.') && !kod.startsWith('dis-hekim-talep.')) return false;
+  if (!kod.startsWith('dis-hekim-ziyaret.') && !kod.startsWith('dis-hekim-talep.') && !kod.startsWith('dis-hekim-vade.')) return false;
+  if (kod === 'dis-hekim-vade.plan') { b.git?.('/dis-hekim-plan'); return true }
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir satır seçin.'); return true }
+
+  // ========================================================== VADE ==
+  if (kod.startsWith('dis-hekim-vade.')) {
+    const hekimId = Number(satir?.hekimId ?? id);
+    const hekimAd = String(satir?.hekimAd ?? '');
+    if (kod === 'dis-hekim-vade.hekim-karti') { b.git?.(`/dis-hekim/${hekimId}`); return true }
+    if (kod === 'dis-hekim-vade.ziyaret-yaz') { b.git?.(`/dis-hekim-ziyaret/yeni?hekimId=${hekimId}`); return true }
+    if (kod === 'dis-hekim-vade.planla') {
+      const varsayilan = new Date(); varsayilan.setDate(varsayilan.getDate() + 1);
+      const t = await metinSor(`${hekimAd} için planlı ziyaret tarihi (gg.aa.yyyy ss:dd):`,
+                               varsayilan.toLocaleDateString('tr-TR') + ' 10:00', 'Tarih');
+      if (t === null) return true;
+      const m = t.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/);
+      if (!m) { mesaj('Tarih biçimi: gg.aa.yyyy ss:dd'); return true }
+      const iso = `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}T${(m[4] ?? '10').padStart(2, '0')}:${m[5] ?? '00'}:00`;
+      await guvenli(async () => {
+        const y = await api.disHekimPlanla({ hekimId, tarih: iso, temsilciId: Number(satir?.temsilciId ?? 0) || undefined });
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+    return false;
+  }
 
   // ======================================================== ZİYARET ==
   if (kod === 'dis-hekim-ziyaret.goruldu') {

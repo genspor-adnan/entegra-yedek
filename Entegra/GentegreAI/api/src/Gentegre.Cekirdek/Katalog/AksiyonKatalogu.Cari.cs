@@ -164,6 +164,21 @@ public static partial class AksiyonKatalogu
             new("dis-hekim-ziyaret.hekim-karti", "🩺 Dış Doktor Kartı", "dis-hekim", Hedef: "sagtus,palet",
                 KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 16),
         ];
+        // ZIYARET VADESI (1290): satir = hekim; "Ziyaret Planla" planli (durum 0) ziyaret acar.
+        s["dis-hekim-vade-liste"] =
+        [
+            new("dis-hekim-vade.planla", "📅 Ziyaret Planla", "dis-hekim",
+                KaynakKodu: "dis_doktor.ziyaret", Islem: Islem.Ekle, KayitGerekir: true, Sira: 10, Bicim: "bir",
+                Ipucu: "Seçilen güne planlı ziyaret açar"),
+            new("dis-hekim-vade.ziyaret-yaz", "＋ Ziyaret Yaz", "dis-hekim",
+                KaynakKodu: "dis_doktor.ziyaret", Islem: Islem.Ekle, KayitGerekir: true, Sira: 11,
+                Ipucu: "Yapılan ziyareti hemen kaydet (ziyaret kartı)"),
+            new("dis-hekim-vade.hekim-karti", "🩺 Dış Doktor Kartı", "dis-hekim", Hedef: "sagtus,palet",
+                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+            new("dis-hekim-vade.plan", "🗓 Haftalık Plan", "dis-hekim", Hedef: "araccubugu,palet",
+                KaynakKodu: "dis_doktor.plan", Islem: Islem.Gor, Sira: 30),
+            Yazdir(),
+        ];
         s["dis-hekim-talep-liste"] =
         [
             .. Crud("dis-hekim-talep", "dis-hekim", "dis_doktor.talep", ekleAdi: "＋ Talep"),

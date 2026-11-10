@@ -253,6 +253,7 @@ public static partial class KaynakKatalogu
         // DIS DOKTOR SAHA (1289): ziyaretler + doktor talepleri.
         Ekle(DisHekimZiyaret());
         Ekle(DisHekimTalep());
+        Ekle(DisHekimVade());
         Ekle(BasvuruHekim());
         Ekle(Kurum());
         Ekle(Departman());

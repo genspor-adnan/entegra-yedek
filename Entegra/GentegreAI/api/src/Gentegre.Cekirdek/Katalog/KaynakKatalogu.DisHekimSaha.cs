@@ -43,6 +43,44 @@ public static partial class KaynakKatalogu
             new("gorulduId",   "z.goruldu_id",    "sayi",  "Gören Id", Varsayilan: false),
         ]);
 
+    /// <summary>
+    /// ZİYARET VADESİ (1290, mockup §1 "Temsilci Paneli" ve §3 "Planı Üret" ölçütleri): hekim × şube × temsilci; sıklık,
+    /// son ziyaret, vade, gecikme, planlı ziyaret, açık talep, gönderim düşüşü, sessiz gün. Buradan "Ziyaret Planla".
+    /// Satır kimliği hekim id'dir (görünümde id yok) - kart açılmaz, aksiyonlar hekimId okur.
+    /// </summary>
+    private static KaynakTanimi DisHekimVade() => new(
+        Ad: "dis-hekim-vade",
+        YetkiKodu: "dis_doktor.vade",
+        Kaynak: "public.v_dis_hekim_ziyaret_vade v",
+        SubeKolonu: "v.sube_id",
+        VarsayilanSirala: "v.gecikme_gun desc, v.vade_tarihi nulls last, v.hekim_ad",
+        Kolonlar:
+        [
+            new("id",            "v.hekim_id",       "sayi",  "Id", Varsayilan: false),
+            new("hekimId",       "v.hekim_id",       "sayi",  "Doktor Id", Varsayilan: false),
+            new("hekimAd",       "v.hekim_ad",       "metin", "Dış Doktor", Genislik: 220),
+            new("hekimKurum",    "v.hekim_kurum",    "metin", "Kurum", Genislik: 170),
+            new("hekimIlce",     "v.hekim_ilce",     "metin", "İlçe", Genislik: 100),
+            new("temsilciAd",    "v.temsilci_ad",    "metin", "Temsilci", Genislik: 150),
+            new("subeAd",        "v.sube_ad",        "metin", "Şube", Genislik: 110, Varsayilan: false),
+            new("siklikHafta",   "v.siklik_hafta",   "sayi",  "Sıklık (hf)", Hizalama: "sag", Genislik: 90),
+            new("sonZiyaret",    "v.son_ziyaret",    "tarih", "Son Ziyaret", Hizalama: "orta", Genislik: 110),
+            new("vadeTarihi",    "v.vade_tarihi",    "tarih", "Vade", Hizalama: "orta", Genislik: 100),
+            new("gecikmeGun",    "v.gecikme_gun",    "sayi",  "Gecikme (gün)", Hizalama: "sag", Genislik: 100),
+            new("planliTarih",   "v.planli_tarih",   "tarih", "Planlı", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 120),
+            new("planliZiyaretId", "v.planli_ziyaret_id", "sayi", "Planlı Ziyaret Id", Varsayilan: false),
+            new("acikTalep",     "v.acik_talep",     "sayi",  "Açık Talep", Hizalama: "sag", Genislik: 90),
+            new("son30Istem",    "v.son30_istem",    "sayi",  "30 gün ist.", Hizalama: "sag", Genislik: 90),
+            new("onceki30Istem", "v.onceki30_istem", "sayi",  "Önceki 30", Hizalama: "sag", Genislik: 90, Varsayilan: false),
+            new("gonderimDusen", "v.gonderim_dusen", "mantik", "Gönderim ↓", Hizalama: "orta", Genislik: 90),
+            new("sessizGun",     "v.sessiz_gun",     "sayi",  "Sessiz (gün)", Hizalama: "sag", Genislik: 100),
+            new("yeniHekim",     "v.yeni_hekim",     "mantik", "Yeni", Hizalama: "orta", Genislik: 60, Varsayilan: false),
+            new("satirRengi",    "case when v.gecikme_gun > 0 then 'kritik' when v.gonderim_dusen = 1 then 'uyari' else '' end",
+                "metin", "Satır Rengi", Varsayilan: false, Filtrelenebilir: false),
+            new("temsilciId",    "v.temsilci_id",    "sayi",  "Temsilci Id", Varsayilan: false),
+            new("subeId",        "v.sube_id",        "sayi",  "Şube Id", Varsayilan: false),
+        ]);
+
     private static KaynakTanimi DisHekimTalep() => new(
         Ad: "dis-hekim-talep",
         YetkiKodu: "dis_doktor.talep",
