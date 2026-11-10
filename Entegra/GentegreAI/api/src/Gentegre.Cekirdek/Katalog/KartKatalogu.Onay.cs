@@ -96,8 +96,9 @@ public static partial class KartKatalogu
             new("olcuAdi", "olcu_adi", "metin", Baslik: "Karar Ölçüsü", Grup: "Kimlik",
                 EnFazlaUzunluk: 40),
             new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+            // TEK SATIR (kullanıcı 10.11.2026): 400 karakter normalde textarea çizdirir, şeritte tek satır yüksekliği.
             new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Kimlik",
-                EnFazlaUzunluk: 400),
+                EnFazlaUzunluk: 400, TekSatir: true),
         },
         Detaylar: new DetayTanimi[]
         {
