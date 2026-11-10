@@ -87,12 +87,16 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   kolonSirasi ayni zamanda ZORUNLU gorunurluk: kayitli kolon secimi
     //   'belge' kaynagini fatura/siparis listeleriyle paylasiyor - Durumu ve
     //   Temsilci onsuz hic cikmazdi.
-    kolonSirasi: ['saticiAdi', 'teklifKonusu', 'teklifDurumAdi', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
+    kolonSirasi: ['saticiAdi', 'teklifKonusu', 'teklifDurumAdi', 'teklifOnaylayan', 'belgeNo', 'belgeTarihi', 'tarafUnvan'],
     toplam: ['genelToplam'],
     // Durum cipleri (kullanici): arama editinin altinda Tumu + teklif akisi.
     cipler: [
       { ad: 'Tümü' },
       { ad: 'Hazırlanıyor', filtre: { alan: 'teklifDurum', op: 'esit', deger: 1 } },
+      // İç onay (1282): onayda / onaylandı / düzeltme istendi (8) + reddedildi (9) tek çipte.
+      { ad: 'Onayda',       filtre: { alan: 'teklifDurum', op: 'esit', deger: 6 } },
+      { ad: 'Onaylandı',    filtre: { alan: 'teklifDurum', op: 'esit', deger: 7 } },
+      { ad: 'Düzeltme / Ret', filtre: { alan: 'teklifDurum', op: 'icinde', deger: [8, 9] } },
       { ad: 'Sunuldu',      filtre: { alan: 'teklifDurum', op: 'esit', deger: 2 } },
       { ad: 'Kabul',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 3 } },
       { ad: 'Red',          filtre: { alan: 'teklifDurum', op: 'esit', deger: 4 } },

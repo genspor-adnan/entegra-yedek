@@ -484,10 +484,20 @@ public static partial class KaynakKatalogu
                 """
                 case coalesce(b.teklif_durum, 1)
                      when 1 then 'Hazırlanıyor' when 2 then 'Sunuldu' when 3 then 'Kabul'
-                     when 4 then 'Red' when 5 then 'İptal' else '' end
+                     when 4 then 'Red' when 5 then 'İptal'
+                     when 6 then 'Onayda' when 7 then 'Onaylandı' when 8 then 'Düzeltme istendi'
+                     when 9 then 'Reddedildi' else '' end
                 """,                            "metin", "Durumu", Hizalama: "orta",
-                                                 Bicim: "rozet", Genislik: 110,
+                                                 Bicim: "rozet", Genislik: 120,
                                                  Filtrelenebilir: false),
+            // TEKLİF ONAYLAYANI (1282, mockup teklif_ic_onay.html liste): son onay kaydının seçilen onaylayanı.
+            new("teklifOnaylayan",
+                "(select coalesce(nullif(trim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), k.kod) " +
+                "   from public.onay o join public.onay_adim a on a.onay_id = o.id " +
+                "   left join public.taraf_kullanici k on k.id = a.atanan_kullanici_id " +
+                "   left join public.taraf t on t.id = k.id " +
+                "  where o.kaynak_tur = 30 and o.kaynak_id = b.id order by o.id desc, a.sira desc limit 1)",
+                "metin", "Onaylayan", Genislik: 150, Varsayilan: false, Siralanabilir: false, Filtrelenebilir: false),
             new("vadeGun",       "b.vade_gun",       "sayi",  "Vade",        Hizalama: "sag", Genislik: 80,
                                                                 Varsayilan: false),
             new("aciklama",      "b.aciklama",       "metin", "Açıklama",    Genislik: 240, Varsayilan: false),

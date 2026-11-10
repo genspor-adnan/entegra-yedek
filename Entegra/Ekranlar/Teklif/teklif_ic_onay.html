@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Satış Teklifi — Yalnız İç Onay (mockup)</title>
+<!--
+  Kullanıcı 10.11.2026: "satış teklifi için dış onay olmayan sadece iç onay olan mockup hazırla".
+  onay_mekanizmasi.html'nin (iç + dış) DIŞ ONAYSIZ sürümü: müşteri tarafı yok (bağlantı, OTP, portal, kanıt PDF yok).
+  Teklif kurum içinde onaylanır, sonra müşteriye KLASİK yolla (PDF / e-posta / yazdır) sunulur; müşterinin cevabı
+  teklif durumuna ELLE işlenir (Kabul / Red / Revizyon) - bugünkü "Durumu Değiştir" aksiyonu.
+
+  Kararlar:
+   * Basamaklı akış YOK (09.11.2026): hazırlayan onaylayanı seçer, "Onaya Sun" der. Motorun akışsız tek basamağı
+     (onay.akis_id boş, tek onay_adim; vekâlet / süre / Onayımdakiler / log aynen).
+   * İç karar üç yönlü: Onayla · Reddet · Düzeltme iste (not zorunlu). Düzeltme → teklif hazırlayana döner, kalem kilidi
+     açılır, aynı revizyon üzerinde düzeltilir ve yeniden sunulur (yeni revizyon AÇILMAZ; R2 müşteri revizyon isterse).
+   * Onayda iken kalemler kilitli. Onaylanınca durum "Onaylandı" - müşteriye gönderim ayrı ve isteğe bağlı adım
+     ("Sunuldu" durumu), zincire bağlı değil.
+   * Teklif durum sırası: Hazırlanıyor → Onayda → Onaylandı | Reddedildi | Düzeltme istendi → Sunuldu → Kabul | Red | Revizyon (R2).
+   * Siparişe dönüşüm yalnız Kabul'de (değişmedi).
+-->
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;
+    --sel:#d7e7fb;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b07a12;--mor:#6a3fb0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h1{font-size:16px;margin:0 0 4px;color:var(--navy)}
+  h2{font-size:13px;margin:22px 0 8px;color:var(--navy);display:flex;gap:8px;align-items:center}
+  h2 .no{background:var(--navy);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+  .lead{color:var(--muted);margin:0 0 10px;max-width:980px;line-height:1.45}
+  .win{max-width:980px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(#2f5d93,#1f4573);color:#fff;font-weight:bold;font-size:12.5px}
+  .title .dot{width:8px;height:8px;border-radius:50%;background:#9cc4f2}
+  .title .right{margin-left:auto;font-weight:normal;font-size:11px;opacity:.9}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:inline-flex;gap:5px;align-items:center}
+  .btn.pri{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c;font-weight:bold}
+  .btn.ok{background:linear-gradient(#4fae68,#2e7d46);color:#fff;border-color:#2e7d46;font-weight:bold}
+  .btn.danger{background:linear-gradient(#d9534f,#b83b37);color:#fff;border-color:#a3312f;font-weight:bold}
+  .btn.ghost{background:transparent}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab small{background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:5px;font-weight:bold}
+  .pane{padding:12px}
+  .hdr{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted)} .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;position:relative}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .area{border:1px solid var(--line);border-radius:2px;background:#fff;min-height:54px;padding:6px;font-size:11.5px}
+  .area.ph{color:var(--muted)}
+  .note{background:#f3f7fc;border:1px solid #d6e3f3;border-radius:3px;padding:7px 10px;font-size:11.5px;color:#2f4a68;margin:10px 0}
+  .warn{background:#fdf6e3;border:1px solid #eeddb4;border-radius:3px;padding:7px 10px;font-size:11.5px;color:#6a5313}
+  .tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .tag.ok{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0} .tag.wait{background:#fdf6e3;color:var(--warn);border-color:#eeddb4}
+  .tag.red{background:#fde8e8;color:#9b2c2c;border-color:#f3c5c5} .tag.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .tag.ic{background:#e6eef8;color:#2f5d93;border-color:#c5d7ee} .tag.mor{background:#f1ebfa;color:var(--mor);border-color:#dccdf2}
+  table{border-collapse:collapse;width:100%} th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;vertical-align:top}
+  tr.sel td{background:var(--sel)} .r{text-align:right;font-variant-numeric:tabular-nums}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;overflow:hidden;margin-bottom:10px}
+  .grp h6{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);display:flex;gap:8px;align-items:center}
+  .grp h6 .kalem{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .body{padding:10px}
+  .tl{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--line2)}
+  .tl li{position:relative;padding:0 0 12px 12px}
+  .tl li::before{content:"";position:absolute;left:-21px;top:3px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--line)}
+  .tl li.ok::before{background:var(--ok);border-color:var(--ok)} .tl li.wait::before{border-color:var(--warn)} .tl li.red::before{background:var(--req);border-color:var(--req)}
+  .tl li.dis{opacity:.55}
+  .tl .t{font-size:10.5px;color:var(--muted)} .tl .k{font-weight:bold}
+  .tl .box{margin-top:4px;background:#fff;border:1px solid var(--line2);border-radius:3px;padding:6px 8px;font-size:11px}
+  .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+  .flow .st{border:1px solid var(--line);border-radius:14px;padding:4px 10px;background:#fff;font-size:11px}
+  .flow .st.ic{border-color:#c5d7ee;background:#e6eef8;color:#2f5d93} .flow .st.son{border-style:dashed;color:var(--muted)}
+  .flow .ar{color:var(--muted)}
+  .model{max-width:980px;margin:16px auto 0;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;color:#3a4a5c}
+  .model code{background:#f3f6fa;border:1px solid #e3e9f0;border-radius:2px;padding:0 4px;font-size:11px}
+  .model ul{margin:6px 0 0 16px;padding:0} .model li{margin:3px 0}
+  .karar{max-width:620px;margin:0 auto}
+  .secim{display:flex;gap:6px}
+  .secim span{flex:1;text-align:center;border:1px solid var(--line);border-radius:3px;padding:7px 6px;font-size:11.5px;color:var(--muted);background:#fff}
+  .secim span.on{background:#e9f6ee;border-color:#2e7d46;color:#2e7d46;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Satış Teklifi — Yalnız İç Onay</h1>
+<p class="lead">
+  Dış (müşteri) onayı <b>yok</b>: teklif kurum içinde onaylanır, müşteriye bugünkü yolla sunulur (PDF / e-posta / yazdır); müşterinin cevabı
+  teklif durumuna <b>elle</b> işlenir (Kabul · Red · Revizyon → R2). Basamaklı akış yok (09.11.2026): hazırlayan <b>onaylayanı seçer</b> ve
+  "Onaya Sun" der; onaylayan Onayımdakiler kutusunda <b>Onayla / Reddet / Düzeltme iste</b>. Motorun akışsız tek basamağı - vekâlet, süre, kutu, log aynen.
+</p>
+<div class="flow">
+  <span class="st">Hazırlanıyor</span><span class="ar">→</span>
+  <span class="st">Hazırlayan: <b>Onaya Sun</b> <small>(onaylayanı seçer)</small></span><span class="ar">→</span>
+  <span class="st ic">Onayda · seçilen onaylayan <small>(Onayımdakiler)</small></span><span class="ar">→</span>
+  <span class="st"><b>Onaylandı</b> · Reddedildi · Düzeltme istendi</span><span class="ar">→</span>
+  <span class="st son">Sunuldu <small>(müşteriye gönderim, isteğe bağlı)</small></span><span class="ar">→</span>
+  <span class="st son">Kabul · Red · Revizyon (R2) <small>elle</small></span>
+</div>
+
+<!-- ================================================================ 1) ONAYA SUN -->
+<h2><span class="no">1</span> "Onaya Sun" penceresi — hazırlayan onaylayanı seçer</h2>
+<p class="lead">Teklif kartının araç çubuğundan. Tek onaylayan (kullanıcı), son tarih, not. Gönderince teklif <b>Onayda</b> olur, kalemler kilitlenir;
+onaylayanın vekâleti varsa vekile düşer. Dış onay ayarı / şablonu / bağlantısı yok.</p>
+<div class="win" style="max-width:680px">
+  <div class="title"><span class="dot"></span> Onaya Sun — Satış Teklifi 000000002 · R1 <span class="right">46.199,78 TL · Granit Bilgisayar</span></div>
+  <div class="pane">
+    <div class="hdr">
+      <div class="fld"><label class="req">Onaylayacak kişi</label><div class="inp combo">S. Kaya — Satış Müdürü</div></div>
+      <div class="fld"><label>Son tarih</label><div class="inp">11.11.2026 <small style="color:var(--muted);margin-left:6px">(2 iş günü)</small></div></div>
+      <div class="fld" style="grid-column:1/3"><label>Not (onaylayana)</label><div class="area">Bayi fiyatı uygulandı, iskonto %12. Müşteri 15 Kasım'a kadar karar verecek.</div></div>
+      <div class="fld"><label>Bildirim</label><div class="inp combo">Uygulama içi + e-posta</div></div>
+      <div class="fld"><label>Onaylanınca</label><div class="inp combo">Durum "Onaylandı" · PDF hazırla (gönderim elle)</div></div>
+    </div>
+    <div class="note"><b>Vekâlet:</b> S. Kaya 10-12 Kasım izinli → onay <b>A. Yılmaz</b>'a düşer (onay_vekalet). Son tarih geçerse kimse otomatik onaylamaz; hazırlayana hatırlatma düşer.</div>
+    <div class="toolbar" style="border:0;background:transparent;padding:0;gap:6px"><span class="btn pri">✍️ Onaya Sun</span><span class="btn ghost">Vazgeç</span></div>
+  </div>
+</div>
+
+<!-- ================================================================ 2) KARAR PENCERESI -->
+<h2><span class="no">2</span> Karar penceresi — onaylayanın gördüğü (Onayımdakiler satırından ya da teklif kartından)</h2>
+<p class="lead">Üç yönlü: <b>Onayla</b> · <b>Reddet</b> (not zorunlu) · <b>Düzeltme iste</b> (not zorunlu; teklif hazırlayana döner, kalem kilidi açılır, aynı revizyonda düzeltilip yeniden sunulur).
+Kalemler ve toplam pencerede özet görünür; tam kart tek tıkla yeni sekmede.</p>
+<div class="win karar">
+  <div class="title"><span class="dot"></span> Teklif Onayı — 000000002 · R1 <span class="right">Granit Bilgisayar · 46.199,78 TL</span></div>
+  <div class="pane">
+    <div class="hdr" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:8px">
+      <div class="fld"><label>Hazırlayan</label><div class="inp">M. Yıldız · 09.11.2026 10:12</div></div>
+      <div class="fld"><label>Son tarih</label><div class="inp">11.11.2026 <span class="tag wait" style="margin-left:6px">1 gün</span></div></div>
+      <div class="fld"><label>İskonto / Marj</label><div class="inp">%12 · marj %18,4</div></div>
+    </div>
+    <div class="note" style="margin:0 0 8px"><b>Hazırlayanın notu:</b> "Bayi fiyatı uygulandı, iskonto %12. Müşteri 15 Kasım'a kadar karar verecek."</div>
+    <table style="margin-bottom:10px">
+      <thead><tr><th>#</th><th>Ürün / Hizmet</th><th class="r">Miktar</th><th class="r">Br. Fiyat</th><th class="r">İsk.%</th><th class="r">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Cihaz X-200</td><td class="r">5</td><td class="r">8.339,96</td><td class="r">12</td><td class="r">36.695,82</td></tr>
+        <tr><td>2</td><td>Kurulum hizmeti</td><td class="r">1</td><td class="r">150,00</td><td class="r">—</td><td class="r">150,00</td></tr>
+        <tr><td>3</td><td>Eğitim</td><td class="r">1</td><td class="r">150,00</td><td class="r">—</td><td class="r">150,00</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="5" class="r"><b>Genel toplam (KDV dahil)</b></td><td class="r"><b>46.199,78</b></td></tr></tfoot>
+    </table>
+    <div class="fld" style="margin-bottom:8px"><label>Kararınız</label>
+      <div class="secim"><span class="on">✔ Onayla</span><span>✎ Düzeltme iste</span><span>✖ Reddet</span></div></div>
+    <div class="fld"><label>Not <small>(düzeltme / ret için zorunlu)</small></label><div class="area ph">Ör. 1. kalemde iskonto %10'u geçmesin…</div></div>
+    <div class="toolbar" style="border:0;background:transparent;padding:10px 0 0;gap:6px">
+      <span class="btn ok">✔ Kararı Kaydet</span><span class="btn">📄 Kartı Aç</span><span class="btn ghost" style="margin-left:auto">Vazgeç</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ 3) TEKLIF KARTI ONAY SEKMESI -->
+<h2><span class="no">3</span> Teklif Kartı — "Onay" sekmesi (Geçmiş'in yanında) <span style="font-weight:normal;color:var(--muted);font-size:11px;margin-left:6px">sekmeler çalışır</span></h2>
+<p class="lead">Araç çubuğu: <b>Onaya Sun</b> (Hazırlanıyor / Düzeltme istendi iken), <b>Geri Çek</b> (Onayda iken, hazırlayan), <b>Müşteriye Sun</b> (Onaylandı iken: PDF / e-posta / yazdır, durum Sunuldu),
+<b>Durumu Değiştir</b> (müşteri cevabı: Kabul / Red / Revizyon), <b>Revize Et (R2)</b>, <b>Siparişe Dönüştür</b> (yalnız Kabul). Onayda / Onaylandı / Sunuldu iken kalemler kilitli.</p>
+<div class="win">
+  <div class="title"><span class="dot"></span> Satış Teklifi — 000000002 · R1 <span class="right">Durum: <b>Onaylandı</b> · iç onay tamam · müşteriye sunulmadı</span></div>
+  <div class="toolbar">
+    <span class="btn pri">💾 Kaydet</span><span class="btn">🗑 Sil</span><span class="sepv"></span>
+    <span class="btn pas">✍️ Onaya Sun</span><span class="btn">📨 Müşteriye Sun</span><span class="btn">◐ Durumu Değiştir</span><span class="btn">✎ Revize Et (R2)</span><span class="btn pas">⇢ Siparişe Dönüştür</span>
+    <span class="btn ghost" style="margin-left:auto">✖ Kapat</span>
+  </div>
+  <div class="tabs" data-grp="teklif">
+    <span class="tab" data-t="kalem">Kalemler <small>3</small></span><span class="tab" data-t="donusum">Belgeye Dönüşüm</span>
+    <span class="tab active" data-t="onay">Onay</span><span class="tab" data-t="gecmis">Geçmiş</span>
+  </div>
+
+  <div class="pane" data-pane="teklif:kalem" style="display:none">
+    <table>
+      <thead><tr><th>#</th><th>Ürün / Hizmet</th><th class="r">Miktar</th><th>Birim</th><th class="r">Br. Fiyat</th><th class="r">İsk.%</th><th class="r">KDV</th><th class="r">Tutar</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Cihaz X-200</td><td class="r">5</td><td>Adet</td><td class="r">8.339,96</td><td class="r">12</td><td class="r">%10</td><td class="r">36.695,82</td></tr>
+        <tr><td>2</td><td>Kurulum hizmeti</td><td class="r">1</td><td>Adet</td><td class="r">150,00</td><td class="r">—</td><td class="r">%10</td><td class="r">150,00</td></tr>
+        <tr><td>3</td><td>Eğitim</td><td class="r">1</td><td>Adet</td><td class="r">150,00</td><td class="r">—</td><td class="r">%10</td><td class="r">150,00</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="7" class="r"><b>Genel toplam (KDV dahil)</b></td><td class="r"><b>46.199,78</b></td></tr></tfoot>
+    </table>
+    <div class="warn" style="margin-top:10px">Teklif <b>Onayda / Onaylandı / Sunuldu</b> iken kalemler kilitlidir. Düzeltme için: Onayda ise <b>Geri Çek</b>; onaylandıysa <b>✎ Revize Et (R2)</b> - yeni revizyon açılır, eski revizyon ve kararı Geçmiş'te kalır.</div>
+  </div>
+
+  <div class="pane" data-pane="teklif:donusum" style="display:none">
+    <div class="note">Siparişe dönüşüm yalnız <b>Kabul</b> durumunda. Şu an: <span class="tag ok">Onaylandı</span> → müşteriye sunulunca ve müşteri kabul edince (Durumu Değiştir → Kabul) açılır.</div>
+    <table><thead><tr><th>Hedef</th><th>Belge No</th><th>Tarih</th><th class="r">Tutar</th><th>Durum</th></tr></thead>
+      <tbody><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px">Henüz dönüşüm yok</td></tr></tbody></table>
+  </div>
+
+  <div class="pane" data-pane="teklif:onay">
+    <div class="two">
+      <div class="grp">
+        <h6>İç onay <span class="kalem">onaya sunan: M. Yıldız · 09.11.2026 10:12</span></h6>
+        <div class="body">
+          <ul class="tl">
+            <li class="ok"><div class="t">09.11.2026 10:12</div><div class="k">Onaya sunuldu — onaylayan: <b>S. Kaya</b> (Satış Müdürü)</div>
+              <div class="box">Not: "Bayi fiyatı uygulandı, iskonto %12." · son tarih 11.11.2026 · bildirim: uygulama içi + e-posta</div></li>
+            <li class="ok"><div class="t">09.11.2026 10:40 · <span class="tag ic">İç</span></div><div class="k">Karar — <span class="tag ok">Onaylandı</span></div>
+              <div class="box">Karar veren: S. Kaya · "İskonto %12 uygun, bayi fiyatı." · 28 dk içinde</div></li>
+            <li class="wait dis"><div class="t">—</div><div class="k">Müşteriye sunum <span class="tag gri">henüz değil</span></div>
+              <div class="box">📨 Müşteriye Sun: PDF (R1) üretir, e-posta / yazdır; durum <b>Sunuldu</b>. Müşteri cevabı <b>Durumu Değiştir</b> ile işlenir.</div></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><h6>Özet</h6><div class="body">
+          <div class="hdr" style="grid-template-columns:120px 1fr;gap:4px 10px;font-size:12px">
+            <div style="color:var(--muted)">Durum</div><div><span class="tag ok">Onaylandı</span></div>
+            <div style="color:var(--muted)">Onaylayan</div><div>S. Kaya (Satış Müdürü)</div>
+            <div style="color:var(--muted)">Karar süresi</div><div>28 dk (son tarih 11.11.2026)</div>
+            <div style="color:var(--muted)">Kalem kilidi</div><div>Açık değil - Revize Et (R2) ile</div>
+            <div style="color:var(--muted)">Sonraki adım</div><div>Müşteriye Sun → Sunuldu</div>
+          </div>
+        </div></div>
+        <div class="grp"><h6>Düzeltme istendiğinde</h6><div class="body" style="font-size:11.5px;color:#3a4a5c">
+          Onaylayan <b>Düzeltme iste</b> derse: durum <span class="tag wait">Düzeltme istendi</span>, kalem kilidi açılır, hazırlayana bildirim + not; hazırlayan düzeltir ve
+          <b>yeniden Onaya Sun</b> der (aynı R1, yeni onay kaydı; eski karar Geçmiş'te). Yeni revizyon (R2) yalnız müşteri revizyon isterse açılır.
+        </div></div>
+        <div class="grp"><h6>Reddedildiğinde</h6><div class="body" style="font-size:11.5px;color:#3a4a5c">
+          Durum <span class="tag red">Reddedildi</span>, kalem kilidi açık; hazırlayan düzeltip yeniden sunabilir ya da teklifi <b>Kaybedildi</b> durumuna çeker. Siparişe dönüşüm kapalı.
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" data-pane="teklif:gecmis" style="display:none">
+    <table>
+      <thead><tr><th style="width:140px">Tarih</th><th style="width:150px">Kullanıcı</th><th style="width:220px">Olay</th><th>Ayrıntı</th></tr></thead>
+      <tbody>
+        <tr><td>09.11.2026 10:40</td><td>S. Kaya</td><td><b>Onaylandı</b></td><td>İç onay · "İskonto %12 uygun, bayi fiyatı."</td></tr>
+        <tr><td>09.11.2026 10:40</td><td>Sistem</td><td><b>Durum değişti</b></td><td>Onayda → Onaylandı</td></tr>
+        <tr><td>09.11.2026 10:12</td><td>M. Yıldız</td><td><b>Onaya sunuldu</b></td><td>Onaylayan: S. Kaya · son 11.11.2026 · "Bayi fiyatı uygulandı, iskonto %12."</td></tr>
+        <tr><td>09.11.2026 10:12</td><td>Sistem</td><td><b>Durum değişti</b></td><td>Hazırlanıyor → Onayda · kalemler kilitlendi</td></tr>
+        <tr><td>09.11.2026 09:58</td><td>M. Yıldız</td><td><b>Kaydedildi</b></td><td>3 kalem</td></tr>
+        <tr><td>09.11.2026 09:46</td><td>M. Yıldız</td><td><b>Teklif oluşturuldu</b></td><td>No 000000002 · 3 kalem</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:10px">Bugünkü Geçmiş sekmesi (<code>islem_log</code>); onay olayları aynı loga düşer. Dış kanal olayı (gönderildi / açıldı) yok.</div>
+  </div>
+</div>
+
+<!-- ================================================================ 4) ONAYIMDAKILER -->
+<h2><span class="no">4</span> Onayımdakiler (iç kutu) — teklif satırı</h2>
+<p class="lead">Mevcut ekran; yalnız yeni kaynak türü (Satış Teklifi) gelir. Basamak yok: "Kime" sütunu seçilen onaylayanı gösterir. Araç çubuğunda <b>Düzeltme İste</b> ("Bilgi İste"nin teklifteki adı). "Dış durum" sütunu yok.</p>
+<div class="win">
+  <div class="title"><span class="dot"></span> Onayımdakiler <span class="right">S. Kaya · Satış müdürü · 3 bekleyen</span></div>
+  <div class="toolbar"><span class="btn ok">✔ Onayla</span><span class="btn danger">✖ Reddet</span><span class="btn">✎ Düzeltme İste</span><span class="sepv"></span><span class="btn">Tümü</span><span class="btn">Teklif</span><span class="btn">Satınalma</span><span class="btn">İzin</span></div>
+  <div class="pane" style="padding:0">
+    <table>
+      <thead><tr><th>Kayıt</th><th>Kim istedi</th><th>Kime</th><th class="r">Tutar</th><th>Not</th><th>Bekliyor</th><th>Son</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td>Satış Teklifi 000000003 · R1 · Granit Bilgisayar</td><td>M. Yıldız</td><td>S. Kaya (seçildi)</td><td class="r">128.400,00 TL</td><td>"İskonto %15, yıl sonu kampanyası"</td><td>4 saat</td><td>11.11</td><td><span class="tag wait">Bekliyor</span></td></tr>
+        <tr><td>Satış Teklifi 000000005 · R2 · Medikal Plus</td><td>E. Arslan</td><td>S. Kaya (seçildi)</td><td class="r">41.999,80 TL</td><td>"R2: müşteri adet düşürdü"</td><td>1 gün</td><td>10.11</td><td><span class="tag wait">Bekliyor</span></td></tr>
+        <tr><td>Satınalma Talebi 2026-0417 · Depo</td><td>E. Arslan</td><td>1/2 Birim sorumlusu</td><td class="r">18.750,00 TL</td><td></td><td>2 gün</td><td>10.11</td><td><span class="tag wait">Bekliyor</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================================================================ 5) TEKLIF LISTESI -->
+<h2><span class="no">5</span> Satış Teklifi Listesi — Durumu sütunu ve çipler</h2>
+<p class="lead">Durum rozetleri iç onayı da taşır; "Onayımda" çipi oturum kullanıcısına düşenleri süzer. Sağ tuş menüsü yok; "Durumu Değiştir" düğmesi yalnız müşteri cevabı durumlarını (Sunuldu / Kabul / Red / Revizyon) açar - Onayda / Onaylandı elle değiştirilemez.</p>
+<div class="win">
+  <div class="title"><span class="dot"></span> Satış Teklifi Listesi <span class="right">Satış › Satış Teklifi Listesi</span></div>
+  <div class="toolbar">
+    <span class="btn pri">➕ Yeni Teklif</span><span class="btn">◐ Durumu Değiştir</span><span class="btn">✎ Revize Et</span><span class="btn">⇢ Belgeye Dönüştür</span><span class="sepv"></span>
+    <span class="tag gri">Açık</span><span class="tag ic">Onayımda <b>2</b></span><span class="tag wait">Onayda</span><span class="tag ok">Onaylandı</span><span class="tag gri">Sunuldu</span><span class="tag ok">Kabul</span><span class="tag gri">Tümü</span>
+  </div>
+  <div class="pane" style="padding:0">
+    <table>
+      <thead><tr><th>Belge No</th><th>Durumu</th><th>Onaylayan</th><th>Tarih</th><th>Müşteri</th><th>Satış Temsilcisi</th><th>Konu</th><th class="r">Genel Toplam</th><th>Geçerlilik</th></tr></thead>
+      <tbody>
+        <tr><td>000000005 · R2</td><td><span class="tag wait">Onayda</span></td><td>S. Kaya</td><td>10.11.2026</td><td>Medikal Plus A.Ş.</td><td>E. Arslan</td><td>Yıllık sarf</td><td class="r">41.999,80</td><td>30.11.2026</td></tr>
+        <tr><td>000000004</td><td><span class="tag wait">Düzeltme istendi</span></td><td>S. Kaya</td><td>09.11.2026</td><td>Granit Bilgisayar</td><td>M. Yıldız</td><td>Cihaz + kurulum</td><td class="r">128.400,00</td><td>25.11.2026</td></tr>
+        <tr><td>000000003</td><td><span class="tag ok">Onaylandı</span></td><td>S. Kaya</td><td>09.11.2026</td><td>Granit Bilgisayar</td><td>M. Yıldız</td><td>Kampanya</td><td class="r">128.400,00</td><td>25.11.2026</td></tr>
+        <tr><td>000000002 · R1</td><td><span class="tag gri">Sunuldu</span></td><td>S. Kaya</td><td>09.11.2026</td><td>Granit Bilgisayar</td><td>M. Yıldız</td><td>X-200</td><td class="r">46.199,78</td><td>25.11.2026</td></tr>
+        <tr><td>000000001</td><td><span class="tag ok">Kabul</span></td><td>A. Yılmaz</td><td>02.11.2026</td><td>Medikal Plus A.Ş.</td><td>E. Arslan</td><td>Eldiven yıllık</td><td class="r">86.000,00</td><td>—</td></tr>
+        <tr><td>000000000</td><td><span class="tag red">Reddedildi</span></td><td>S. Kaya</td><td>28.10.2026</td><td>Deneme Ltd.</td><td>M. Yıldız</td><td>—</td><td class="r">9.120,00</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="model">
+  <b>Veri modeli (mevcut motor üstüne, dış onay tablosu yok):</b>
+  <ul>
+    <li><b>Akış tanımı yok:</b> "Onaya Sun" motora <b>akışsız tek basamak</b> açar - <code>onay.akis_id</code> boş, tek <code>onay_adim</code> (sahip_turu 2 kullanıcı, atanan = seçilen kişi, termin = son tarih). Vekâlet, gelen kutusu, hatırlatma, log aynen.</li>
+    <li><b>Teklif durumu</b> (<code>belge.teklif_durum</code>, bugünkü kodlar + 3 yeni): Hazırlanıyor · <b>Onayda</b> · <b>Onaylandı</b> · <b>Düzeltme istendi</b> · Reddedildi · Sunuldu · Kabul · Red · Revizyon · Kaybedildi. Onayda/Onaylandı/Düzeltme istendi/Reddedildi yalnız motor yazar; "Durumu Değiştir" bunları listelemez.</li>
+    <li><b>Kalem kilidi:</b> Onayda · Onaylandı · Sunuldu durumlarında satır/başlık düzenleme kapalı (sunucu 422 IS_KURALI); Düzeltme istendi / Reddedildi açar.</li>
+    <li><b>Uçlar:</b> <code>POST /api/belge/{id}/onaya-sun</code> {onaylayanId, sonTarih, not} · karar bugünkü <code>onay-kutusu.onayla/reddet/bilgi-iste</code> (teklifte "bilgi iste" = düzeltme iste) · <code>POST /api/belge/{id}/geri-cek</code> (hazırlayan, Onayda iken).</li>
+    <li><b>Onaylayan sütunu</b> teklif listesinde: son onay kaydının atananı (<code>v_belge</code>'ye alt sorgu). Onayımdakiler satırında "Kime" = seçilen kişi.</li>
+    <li><b>Dış onay yok:</b> bağlantı, OTP, portal kutusu, kanıt PDF, dış şablonlar bu sürümde kapsam dışı; ileride onay_mekanizmasi.html'deki dış basamak aynı onay kaydına 2. adım olarak eklenebilir.</li>
+  </ul>
+</div>
+
+<script>
+  document.querySelectorAll('.tabs').forEach(function(tabs){
+    var grp = tabs.dataset.grp;
+    tabs.querySelectorAll('.tab').forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('active', x === t); });
+        document.querySelectorAll('[data-pane^="' + grp + ':"]').forEach(function(p){ p.style.display = p.dataset.pane === grp + ':' + t.dataset.t ? '' : 'none'; });
+      });
+    });
+  });
+</script>
+</body>
+</html>

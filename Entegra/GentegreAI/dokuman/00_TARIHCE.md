@@ -162,6 +162,16 @@ başlığında … Listesi olsun".
   "Kayıt sahibi" kataloğa eklendi (motor zaten çözüyordu). "Hazırlayan seçer" türü motorda YOK - teklif onayı için
   ayrı iş. Test `onayAkisPanelleri.test.ts`.
 - **Satış Teklifi Listesi:** Hasta sütunu gizlendi, "Cari" → "Müşteri" (kullanıcı).
+- **Teklif iç onayı (kullanıcı; mockup `Ekranlar/Teklif/teklif_ic_onay.html`, göç 1282):** dış (müşteri) onayı yok.
+  Hazırlayan onaylayanı seçip **Onaya Sun** der (`POST /api/belge/{id}/onaya-sun` {onaylayanId, sonTarih, not}); motorun
+  `teklif.satis` akışı tek basamak, yeni sahip türü **5 "Hazırlayan seçer"** (`OnayMotoru.BaslatAsync secilenKullaniciId`
+  / `sonTarih`). Teklif durumu 6 Onayda · 7 Onaylandı · 8 Düzeltme istendi · 9 Reddedildi (yalnız motor yazar; "Durumu
+  Değiştir" 1-5 ile sınırlı, onaydayken kapalı). Onayda / Onaylandı iken kart kilitli (`GuncelleIcAsync` 422); **Geri
+  Çek** (`/onay-geri-cek`) zinciri iptal eder, Hazırlanıyor'a döner. Karar Onayımdakiler'den (`v_onay_kutusu` kaynak 30
+  dalı; yetki `belge.teklif_onay`, erp_satis / ust_yonetim / yonetici); "bilgi iste" = düzeltme (8, kilit açılır),
+  yeniden sunumda eski zincir kapanır. Kart: araç çubuğunda Onaya Sun / Geri Çek, **Onay** sekmesi (zincir), Geçmiş
+  olayları; liste: Onaylayan sütunu, Onayda / Onaylandı / Düzeltme-Ret çipleri. `GET /api/onay/yetkili/{aksiyon}`
+  onaylayan listesi. Testler `TeklifIcOnayTestleri` (uçtan uca), `teklifOnay.test.ts`.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

@@ -72,7 +72,10 @@ public sealed class OnayMotoru
         NpgsqlConnection baglanti, NpgsqlTransaction? islem,
         string akisKodu, long kaynakId, decimal olcu,
         IEnumerable<string> bayraklar, IstekBaglami baglam,
-        CancellationToken iptal = default, int? sahipTarafId = null)
+        CancellationToken iptal = default, int? sahipTarafId = null,
+        // HAZIRLAYAN SEÇER (sahip türü 5, 1282 teklif): basamak sunan kişinin seçtiği kullanıcıya düşer;
+        //   son tarih verildiyse o basamağın termini sure_gun yerine bu tarihtir.
+        int? secilenKullaniciId = null, DateTime? sonTarih = null)
     {
         var bayrakMetni = string.Join(",", bayraklar.Where(b => !string.IsNullOrWhiteSpace(b)));
 
@@ -163,21 +166,27 @@ public sealed class OnayMotoru
             //   sahip alanı boş olabilir) ve o basamağı yetkisi olan herkes
             //   imzalayabilir. Âmirde ise bağ TANIMLI OLMALIYDI: eksikse
             //   imza kimseye düşmeden zincir beklerdi.
+            if (a.SahipTuru == 5 && secilenKullaniciId is null)
+                throw GentegreHatasi.IsKurali(
+                    $"\"{a.Ad}\" basamağı için onaylayacak kişi seçilmeli.");
             var atanan = a.SahipTuru switch
             {
                 3 => amirId,
                 4 => sahipTarafId,
+                5 => secilenKullaniciId,
                 _ => a.KullaniciId,
             };
+            var terminOverride = a.SahipTuru == 5 ? sonTarih : null;
 
             await baglanti.CalistirAsync("""
                 insert into public.onay_adim (onay_id, sira, ad, sahip_turu, rol,
                                               atanan_kullanici_id, durum, termin, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, 0,
-                        case when @p6 > 0 then now() + (@p6 || ' days')::interval end, @p7)
+                        coalesce(@p8::timestamptz,
+                                 case when @p6 > 0 then now() + (@p6 || ' days')::interval end), @p7)
                 """, islem,
                 [onayId, a.Sira, a.Ad, a.SahipTuru, a.Rol, atanan,
-                 a.SureGun, baglam.KullaniciId], iptal);
+                 a.SureGun, baglam.KullaniciId, terminOverride], iptal);
         }
 
         return await DurumAsync(baglanti, islem, onayId.Value, iptal);

@@ -676,7 +676,9 @@ public static class StandartRolUclari
             K(Y("cari"), Y("taraf"), Y("aday"), Y("firsat"), Y("belge"), Y("belge_satir"),
               H("e_belge"), A("belge.kesinlestir"), A("belge.donustur"), A("ebelge.%"),
               T("stok"), T("hizmet"), T("fiyat_listesi"), T("depo"), T("kasa_islem"),
-              T("mali_hareket"), A("basvuru.iskonto"))),
+              T("mali_hareket"), A("basvuru.iskonto"),
+              // TEKLİF İÇ ONAYI (1282): satış sorumlusu seçilen onaylayan olabilir.
+              A("belge.teklif_onay"))),
         // TIPLER GENISLETILDI (831): `satinalma` modulu matriste YALNIZ
         //   hastanede acik; rol ise yalniz "erp" tipinde oneriliyordu - yani
         //   modulun acik oldugu tek kurumda Satinalma Sorumlusu hic

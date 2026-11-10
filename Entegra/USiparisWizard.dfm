@@ -1030,8 +1030,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
                   Style.Font.Name = 'Trebuchet MS'
                   Style.Font.Style = []
                   Style.IsFontAssigned = True
-                  OnClick = LabelBaslikClick
                   Transparent = True
+                  OnClick = LabelBaslikClick
                 end
                 object Label24: TcxLabel
                   Left = 1

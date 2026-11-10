@@ -224,12 +224,18 @@ export const SEKMELER: {
   { anahtar: 'gecmis',    baslik: 'Önceki Başvurular', basvuru: true },
   // TEKLİF GEÇMİŞİ (kullanıcı 09.11.2026: "satış teklifine Geçmiş sekmesi, durum/revizyon değişimleri orada"):
   //   islem_log'dan olay akışı; şimdilik yalnız teklifte, revizyon (R1/R2) ileride aynı sekmeye gelir.
+  { anahtar: 'teklifOnay', baslik: 'Onay', teklif: true },
   { anahtar: 'teklifGecmis', baslik: 'Geçmiş', teklif: true },
 ];
 
 /** Teklif durumu (218) - belge.teklif_durum kod uzayi. */
 export const TEKLIF_DURUMLARI: Record<string, string> = {
   '1': 'Hazırlanıyor', '2': 'Sunuldu', '3': 'Kabul', '4': 'Red', '5': 'İptal',
+  // İÇ ONAY (1282, mockup Teklif/teklif_ic_onay.html): yalnız onay motoru yazar, elle seçilemez.
+  '6': 'Onayda', '7': 'Onaylandı', '8': 'Düzeltme istendi', '9': 'Reddedildi',
 };
+/** "Durumu Değiştir" ile elle seçilebilen durumlar (müşteri cevabı); 6-9 motorun. */
+export const TEKLIF_DURUM_ELLE: Record<string, string> = Object.fromEntries(
+  Object.entries(TEKLIF_DURUMLARI).filter(([k]) => Number(k) <= 5));
 
 // sayiOku / tutarMetni de bicim.ts'e tasindi (yukaridaki nota bakin).

@@ -480,6 +480,13 @@ POST /api/log/{id}/geriAl                        // silinen kaydı dirilt
 GET  /api/belge/{id}/gecmis                      // belgenin islem_log geçmişi (teklif kartı "Geçmiş", 09.11.2026):
                                                  //   { kayitlar: [{ id, tarih, kullanici, islemTipi, tabloId, bilgi, hedefBelgeNo }] }
 POST /api/belge/{id}/teklif-durum  { durum }     // teklif akış durumu listeden (1..5), log "eski -> yeni"
+POST /api/belge/{id}/onaya-sun { onaylayanId, sonTarih?, not? }   // TEKLİF İÇ ONAYI (1282): motorun teklif.satis akışı seçilen
+                                                 //   kişiye açılır, teklif_durum 6 Onayda; açık zincir kapatılıp yenisi açılır.
+                                                 //   Yetki: belge Değiştir + tür izni. 422: teklif değil / iptal / zaten onayda-onaylandı.
+POST /api/belge/{id}/onay-geri-cek               // onaydaki teklifi hazırlayan geri çeker: zincir iptal, teklif_durum 1
+GET  /api/onay/yetkili/{aksiyon}                 // [{ id, ad }] aksiyon yetkisini taşıyan aktif kullanıcılar (onaylayan seçimi)
+POST /api/onay/kayit/30/{belgeId}/karar          // onayla -> 7 Onaylandı · reddet -> 9 · bilgi-iste -> 8 Düzeltme istendi (kilit açılır)
+                                                 //   Onayda (6) / Onaylandı (7) iken belge PUT ve teklif-durum 422.
 ```
 
 **Giden e-Fatura / e-Arşiv (1033, Delphi e-Fatura menüsü):** `EFaturaUclari` + `Servisler/EFatura`.

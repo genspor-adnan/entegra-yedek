@@ -82,6 +82,9 @@ public sealed partial class BelgeDeposu
 
         var eski = Convert.ToInt32(belge["teklif_durum"]);
         if (eski == yeniDurum) { await islem.CommitAsync(iptal); return (eski, eski); }
+        // ONAYDAKİ TEKLİF (1282): durum elle değişmez - onaylayan karar verir ya da hazırlayan geri çeker.
+        if (eski == 6)
+            throw GentegreHatasi.IsKurali("Teklif onayda; durumu elle değiştirilemez. Önce \"Geri Çek\".");
 
         await using (var komut = baglanti.Komut(
             "update public.belge set teklif_durum = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0",

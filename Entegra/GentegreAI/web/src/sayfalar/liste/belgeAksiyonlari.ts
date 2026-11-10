@@ -2,7 +2,7 @@ import { api } from '../../api/istemci';
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { UtsBelgeBildirimYaniti } from '../../api/istemci';
-import { TEKLIF_DURUMLARI } from '../belgeSabitleri';
+import { TEKLIF_DURUM_ELLE } from '../belgeSabitleri';
 
 /**
  * BELGE VE KART AKSIYONLARI (belge · cari · aday · stok · hesap).
@@ -343,10 +343,12 @@ Bu işlem geri alınamaz. `
     case 'belge.teklif-durum': {
       if (!satir) return true;
       const simdiki = String(satir.teklifDurum ?? 1);
+      // ONAYDAKİ teklif elle değişmez (1282): onaylayan karar verir ya da hazırlayan karttan geri çeker.
+      if (simdiki === '6') { mesaj('Teklif onayda; durumu elle değiştirilemez. Karttan "Geri Çek" ya da onaylayanın kararını bekleyin.'); return true }
       const secim = await listeSor(
         `${String(satir.belgeNo ?? '')} · ${String(satir.tarafUnvan ?? '')}
 Teklif durumu:`,
-        Object.entries(TEKLIF_DURUMLARI).map(([kod, ad]) => ({ kod, ad })), simdiki, 'Durum');
+        Object.entries(TEKLIF_DURUM_ELLE).map(([kod, ad]) => ({ kod, ad })), simdiki, 'Durum');
       if (secim === null || secim === simdiki) return true;
       await guvenli(async () => {
         const y = await api.belgeTeklifDurum(Number(satir.id), Number(secim));

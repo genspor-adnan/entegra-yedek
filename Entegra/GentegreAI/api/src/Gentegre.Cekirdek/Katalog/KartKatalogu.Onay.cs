@@ -33,6 +33,8 @@ public static partial class KartKatalogu
         ["976"] = "Doküman Sürümü",
         ["1312"] = "Masraf Beyanı",
         ["1314"] = "Belge Talebi",
+        // 30 = belge (satış teklifi, 1282): akış `teklif.satis`, tek basamak "hazırlayan seçer".
+        ["30"] = "Satış Teklifi",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>
@@ -41,6 +43,8 @@ public static partial class KartKatalogu
         ["1"] = "Rol", ["2"] = "Kullanıcı", ["3"] = "Âmir (henüz yok)",
         // 4 (758): kaydın sahibi (dokümanda sahip alanı) - motor sahipTarafId'den çözer (OnayMotoru).
         ["4"] = "Kayıt sahibi",
+        // 5 (1282, teklif): onaya sunan kişi basamağın sahibini kendisi seçer (BaslatAsync secilenKullaniciId).
+        ["5"] = "Hazırlayan seçer",
     };
 
     /// <summary>

@@ -44,6 +44,9 @@ export function gecmisOlayi(k: BelgeGecmisKaydi): GecmisOlayi {
              ayrinti: [no, kalem].filter(Boolean).join(' · ') };
   }
   if (aksiyon === 'termin') return { baslik: 'Termin güncellendi', ayrinti: b.yeniTermin ? `${b.yeniTermin}` : kalem };
+  // İç onay (1282): sunma / geri çekme belge loguna düşer; kararlar onay loguna (Onay sekmesi).
+  if (aksiyon === 'onaya-sun') return { baslik: 'Onaya sunuldu', ayrinti: [b.sonTarih ? `son ${b.sonTarih}` : '', b.not ? `"${b.not}"` : ''].filter(Boolean).join(' · ') };
+  if (aksiyon === 'onay-geri-cek') return { baslik: 'Onaydan geri çekildi', ayrinti: '' };
   if (k.islemTipi === 1) return { baslik: 'Teklif oluşturuldu', ayrinti: [b.belgeNo ? `No ${b.belgeNo}` : '', kalem].filter(Boolean).join(' · ') };
   if (k.islemTipi === 3) return { baslik: 'Teklif silindi', ayrinti: b.belgeNo ? `No ${b.belgeNo}` : '' };
   return { baslik: 'Kaydedildi', ayrinti: kalem };

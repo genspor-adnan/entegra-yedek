@@ -1543,8 +1543,8 @@ begin
       cbStokDepo.DataBinding.DataField := 'GIRISDEPO';
       //LabelDepo.Caption := 'Giriş Deposu';
       BaslikPaneli.Enabled := False;
-      btnSevkAdresi.Visible:=False;
-      lblSevkAdresi.Visible:=False;
+      //btnSevkAdresi.Visible:=False;
+      //lblSevkAdresi.Visible:=False;
       ComboFIYAT_LISTESI.RepositoryItem := Tablo.RepFiyatAdlariAlis;
       LabelMasrafMerkezi.Caption := 'Masraf Merkezi';
       GridFaturaViewMASRAFAD.Caption := MasrafAdi;
@@ -1556,8 +1556,8 @@ begin
       cbStokDepo.DataBinding.DataField := 'CIKISDEPO';
       //LabelDepo.Caption := 'Çıkış Deposu';
       BaslikPaneli.Enabled := True;
-      btnSevkAdresi.Visible:=true;
-      lblSevkAdresi.Visible:=true;
+      //btnSevkAdresi.Visible:=true;
+      //lblSevkAdresi.Visible:=true;
       ComboFIYAT_LISTESI.RepositoryItem := Tablo.RepFiyatAdlari;
       LabelMasrafMerkezi.Caption := 'Gelir Merkezi';
       GridFaturaViewMASRAFAD.Caption := GelirAdi;

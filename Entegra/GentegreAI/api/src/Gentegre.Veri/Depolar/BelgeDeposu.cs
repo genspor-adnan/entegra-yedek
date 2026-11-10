@@ -189,13 +189,13 @@ public sealed partial class BelgeDeposu
         CancellationToken iptal)
     {
         // --------------------------------------------------- 1) kilit kontrolu ----
-        int tur, tipi, eskiDurum, efaturaDurum, kapanma;
+        int tur, tipi, eskiDurum, efaturaDurum, kapanma, teklifDurum;
         DateTime belgeTarihi;
         string belgeNo, belgeSeri;
         await using (var komut = new NpgsqlCommand("""
             select tur, coalesce(tipi, 0), durum, coalesce(efatura_durum, 0),
                    coalesce(kapanma_durum, 0), belge_tarihi,
-                   coalesce(belge_no, ''), coalesce(belge_seri, '')
+                   coalesce(belge_no, ''), coalesce(belge_seri, ''), coalesce(teklif_durum, 1)
               from public.belge where id = @p0 for update
             """, baglanti, islem))
         {
@@ -206,7 +206,14 @@ public sealed partial class BelgeDeposu
             tur = o.GetInt32(0); tipi = o.GetInt32(1); eskiDurum = o.GetInt32(2);
             efaturaDurum = o.GetInt32(3); kapanma = o.GetInt32(4);
             belgeTarihi = o.GetDateTime(5); belgeNo = o.GetString(6); belgeSeri = o.GetString(7);
+            teklifDurum = o.GetInt32(8);
         }
+        // TEKLİF İÇ ONAYI KİLİDİ (1282): onayda ya da onaylanmış teklif değiştirilemez - onaylanan metin
+        //   değişirse imza anlamını yitirir. Hazırlayan "Geri Çek" ile açar; onaylandıysa yeni revizyon.
+        if (tur == 18 && teklifDurum is 6 or 7)
+            throw GentegreHatasi.IsKurali(teklifDurum == 6
+                ? "Teklif onayda - kalemler kilitli. Değiştirmek için önce \"Geri Çek\"."
+                : "Teklif onaylandı - kalemler kilitli. Değişiklik için yeni revizyon açın (Durumu Değiştir ile Hazırlanıyor'a da alınabilir).");
 
         var duzenlemeGun = await AyarDeposu.SayiAsync(baglanti, islem, "belge.duzenleme_gun", iptal);
         if (duzenlemeGun == 0)

@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
-import { mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { guvenli, mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -22,6 +22,7 @@ import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
 import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
 import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
 import { TeklifGecmisi } from '../bilesenler/belge/TeklifGecmisi';
+import { OnayaSunPenceresi, TEKLIF_ONAY_KILIDI, TeklifOnaySekmesi, teklifOnayDugmesi } from '../bilesenler/belge/TeklifOnay';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 import { FIS_AKTAR, IRSALIYE_AKTAR, SIPARIS_AKTAR } from '../bilesenler/belge/AktarMenusu';
 import { KASA_ARACLARI } from './kabuk/cariKomutu';
@@ -344,8 +345,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const basvuruDegistiremez = tur === 19 && kullanici?.urunModu === URUN_GENOTIP
                               && !!belgeId && !yetki('belge', 'degistir');
+  // TEKLİF İÇ ONAYI (1282): onayda / onaylanmış teklif kilitli (sunucu da 422); Geri Çek açar.
+  const teklifOnayKilidi = tur === 18 && TEKLIF_ONAY_KILIDI.has(Number(teklif.durum) || 1);
   const duzenlenebilir = mevcutBelge && !!sonuc && !eBelgeGonderildi
-                         && (!faturalandi || siparisTuru) && !basvuruDegistiremez;
+                         && (!faturalandi || siparisTuru) && !basvuruDegistiremez && !teklifOnayKilidi;
+  const [onayaSunAcik, setOnayaSunAcik] = useState(false);
+  const [onayTazele, setOnayTazele] = useState(0);
+  /** Onay ucu yanıtını karta işler: başlık + durum tazelenir, Onay sekmesi yeniden okur. */
+  const onayYanitiUygula = (y: BelgeYaniti) => {
+    setSonuc(y);
+    teklif.setDurum(String(y.belge.teklifDurum ?? 1));
+    setOnayTazele(t => t + 1);
+  };
   const kilitli = (mevcutBelge && !duzenlenebilir) || (!mevcutBelge && !!sonuc);
   // Turun EKRAN DAVRANISI tek yerden gelir (belgeTuru.ts): hangi alan cizilir,
   //   kalem satiri nasil gorunur, kayittan sonra ne olur. Eskiden bu kararlar
@@ -1601,10 +1612,19 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma şubesi</span>}
           </> : undefined}
           // TEKLİF ÇIKTISI (kullanıcı 26.10.2026): Kapat'ın solunda "Teklif" önizleme / yazdır / kaydet menüsü.
-          kapatSolu={teklifMi && cari?.id ? (
+          kapatSolu={teklifMi && cari?.id ? (<>
+            {/* İÇ ONAY DÜĞMESİ (1282): Hazırlanıyor / Düzeltme istendi / Reddedildi -> Onaya Sun; Onayda -> Geri Çek. */}
+            {(() => {
+              const d = teklifOnayDugmesi(Number(teklif.durum) || 1, !!kayitliId);
+              if (d === 'onaya-sun') return <button type="button" className="d bir" onClick={() => setOnayaSunAcik(true)}>✍️ {c('Onaya Sun')}</button>;
+              if (d === 'geri-cek') return (
+                <button type="button" className="d" title={c('Onaydaki teklifi geri çek - kalemler açılır')}
+                        onClick={() => void guvenli(async () => { onayYanitiUygula(await api.belgeOnayGeriCek(kayitliId)) })}>↩ {c('Geri Çek')}</button>);
+              return null;
+            })()}
             <TeklifCiktisi cariId={cari.id} belgeNo={String(sonuc?.belge.belgeNo ?? '')} revizeNo={teklif.revizeNo}
                            tarih={tarih} gecerlilikGun={vadeGun} konu={teklif.konu} teslim={teklif.teslim}
-                           aciklama={aciklama} satirlar={satirlar} toplam={onizleme} />) : undefined}
+                           aciklama={aciklama} satirlar={satirlar} toplam={onizleme} /></>) : undefined}
           satirSayisi={satirlar.length}
           onSil={yetki('belge', 'sil') ? () => void belgeyiSil() : undefined}
           kes={kes} yeniBelge={yeniBelge} kapat={kapat}
@@ -2091,6 +2111,15 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           <OncekiBasvurular tarafId={cari?.id} haricBelgeId={kayitliId || undefined} />
         )}
 
+        {aktifSekme === 'teklifOnay' && teklifMi && (
+          // TEKLİF İÇ ONAYI (1282): motordaki zincir - basamak, karar veren, zaman, not.
+          <TeklifOnaySekmesi belgeId={kayitliId} teklifDurum={Number(teklif.durum) || 1} tazele={onayTazele} />
+        )}
+        {onayaSunAcik && kayitliId > 0 && (
+          <OnayaSunPenceresi belgeId={kayitliId} belgeNo={String(sonuc?.belge.belgeNo ?? '')} cariUnvan={cari?.unvan ?? ''}
+                             onKapat={() => setOnayaSunAcik(false)}
+                             onTamam={y => { setOnayaSunAcik(false); onayYanitiUygula(y); mesaj(c('Teklif onaya sunuldu.')) }} />
+        )}
         {aktifSekme === 'teklifGecmis' && teklifMi && (
           // TEKLİF GEÇMİŞİ (kullanıcı 09.11.2026): islem_log olay akışı - kayıt, durum, dönüşüm, kalem değişimleri.
           <TeklifGecmisi belgeId={kayitliId} />

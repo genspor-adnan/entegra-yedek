@@ -120,6 +120,8 @@ public sealed class OnayBildirimi
                                                 'Masraf #' || o.kaynak_id::text)
                         when 1314 then coalesce(nullif(bt.talep_no, ''),
                                                 'Belge #' || o.kaynak_id::text)
+                        when 30   then coalesce(nullif(b30.belge_no, ''),
+                                                'Teklif #' || o.kaynak_id::text)
                         else '#' || o.kaynak_id::text end as "kayitNo"
               from public.onay o
               left join public.onay_akis k on k.id = o.akis_id
@@ -133,6 +135,8 @@ public sealed class OnayBildirimi
                      on o.kaynak_tur = 1257 and av.id = o.kaynak_id
               left join public.iskonto_talep isk
                      on o.kaynak_tur = 1256 and isk.id = o.kaynak_id
+              left join public.belge b30
+                     on o.kaynak_tur = 30 and b30.id = o.kaynak_id
               left join public.belge ib on ib.id = isk.belge_id
               left join public.dokuman_surum ds
                      on o.kaynak_tur = 976 and ds.id = o.kaynak_id
@@ -379,6 +383,7 @@ public sealed class OnayBildirimi
             _ => "ik.masraf_onay_ust",
         },
         "personel.belge_talep" => "ik.belge_talep_onay",
+        "teklif.satis" => "belge.teklif_onay",
         "belge.iskonto" => rol switch
         {
             1 => "belge.iskonto_onay_birim",

@@ -944,7 +944,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_akis_lookup` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_onay_basamak_sahibi` | `789_yonetici_basamak_yetkileri.sql` | — |
 | `v_onay_bekleyen` | `745_onay_sirasi_gelen.sql` | 738_onay_omurgasi.sql |
-| `v_onay_kutusu` | `940_personel_unvan_yalniz_onek.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql, 758_dokuman_onay_omurga.sql, 764_masraf_beyani.sql, 765_personel_belge_talebi.sql |
+| `v_onay_kutusu` | `1282_teklif_ic_onay.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql, 758_dokuman_onay_omurga.sql, 764_masraf_beyani.sql, 765_personel_belge_talebi.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_onay_sozlu` | `940_personel_unvan_yalniz_onek.sql` | 763_sozlu_onay_takibi.sql |
 | `v_onay_vekalet` | `940_personel_unvan_yalniz_onek.sql` | 746_onay_bildirim_vekalet.sql |
 | `v_pat_boya_lookup` | `1104_patoloji.sql` | — |

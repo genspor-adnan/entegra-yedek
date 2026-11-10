@@ -202,6 +202,11 @@ export const belgeUclari = {
   /** Teklif akış durumu (listeden, kart açılmadan): 1 Hazırlanıyor · 2 Sunuldu · 3 Kabul · 4 Red · 5 İptal. */
   belgeTeklifDurum: (id: number, durum: number) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/teklif-durum`, { durum }),
+  /** Teklif iç onayı (1282): seçilen onaylayana sun / onaydaki teklifi geri çek. */
+  belgeOnayaSun: (id: number, g: { onaylayanId: number; sonTarih: string | null; not: string }) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/onaya-sun`, g),
+  belgeOnayGeriCek: (id: number) =>
+    gonder<BelgeYaniti>(`/api/belge/${id}/onay-geri-cek`, {}),
 
   /** Belgenin işlem geçmişi (islem_log; teklif kartı "Geçmiş" sekmesi). Metin istemcide kurulur. */
   belgeGecmis: (id: number) =>

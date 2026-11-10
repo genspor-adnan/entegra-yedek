@@ -73,6 +73,9 @@ export const onayUclari = {
 
   /** Kullanıcının bekleyen onayları (kişiye atanan + rol basamakları). */
   onayKutum: () => istek<{ satirlar: OnayKutuSatiri[] }>('/api/onay/kutum'),
+  /** Bir aksiyon yetkisini taşıyan kullanıcılar (1282: teklif "Onaya Sun" onaylayan listesi). */
+  onayYetkiliKullanicilar: (aksiyon: string) =>
+    istek<{ id: number; ad: string }[]>(`/api/onay/yetkili/${encodeURIComponent(aksiyon)}`),
 
   /** Bir kaydın zinciri - verilmiş imzalar dahil. */
   onayZinciri: (kaynakTur: number, kaynakId: number) =>

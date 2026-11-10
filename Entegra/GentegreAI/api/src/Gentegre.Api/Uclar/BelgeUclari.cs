@@ -691,6 +691,100 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/onaya-sun - TEKLİF İÇ ONAYI (1282, mockup Ekranlar/Teklif/teklif_ic_onay.html):
+        //   hazırlayan onaylayanı seçer; motorun `teklif.satis` akışı (tek basamak, sahip türü 5) seçilen kişiye
+        //   açılır, teklif_durum 6 Onayda. Yeniden sunumda (düzeltme / ret sonrası) açık zincir kapatılıp yenisi
+        //   açılır - onaylayan değiştirilebilsin. Belgeyi DEĞİŞTİRME yetkisi yeter (durum değiştirmekle aynı).
+        grup.MapPost("/{id:int}/onaya-sun", async (
+            int id, TeklifOnayIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri,
+            KayitErisimi erisim, OnayMotoru onay, OnayBildirimi haber, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
+            if (istek is null || istek.OnaylayanId <= 0)
+                throw GentegreHatasi.Dogrulama("Onaylayacak kişi seçilmeli.", new AlanHatasi("onaylayanId", "zorunlu"));
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var b = await baglanti.TekAsync("""
+                select tur, durum, coalesce(teklif_durum, 1) as "teklifDurum", coalesce(genel_toplam, 0) as "toplam",
+                       coalesce(belge_no, '') as "belgeNo", taraf_id as "tarafId"
+                  from public.belge where id = @p0 for update
+                """, islem, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            if (Convert.ToInt32(b["tur"]) != 18) throw GentegreHatasi.IsKurali("Onaya yalnız satış teklifi sunulur.");
+            if (Convert.ToInt32(b["durum"]) == 2) throw GentegreHatasi.IsKurali("İptal edilmiş teklif onaya sunulamaz.");
+            var eskiDurum = Convert.ToInt32(b["teklifDurum"]);
+            if (eskiDurum is 6 or 7)
+                throw GentegreHatasi.IsKurali(eskiDurum == 6 ? "Teklif zaten onayda." : "Teklif zaten onaylandı.");
+
+            // Açık zincir (düzeltme istendi / eski deneme) kapatılır; yeni zincir seçilen kişiyle açılır.
+            await OnayMotoru.IptalAsync(baglanti, islem, 30, id, "Yeniden onaya sunuldu", iptal);
+            await onay.BaslatAsync(baglanti, islem, "teklif.satis", id, Convert.ToDecimal(b["toplam"]), [], baglam, iptal,
+                                   secilenKullaniciId: istek.OnaylayanId, sonTarih: istek.SonTarih);
+            if (!string.IsNullOrWhiteSpace(istek.Not))
+                await baglanti.CalistirAsync("""
+                    update public.onay_adim a set gerekce = @p1
+                     where a.durum = 0 and a.onay_id = (select id from public.onay where kaynak_tur = 30 and kaynak_id = @p0 and durum = 0)
+                    """, islem, [id, istek.Not.Trim()], iptal);
+            await baglanti.CalistirAsync(
+                "update public.belge set teklif_durum = 6, degistiren = @p1, degistirme_tarihi = now() where id = @p0",
+                islem, [id, baglam.KullaniciId], iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, 30, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { aksiyon = "onaya-sun", onaylayanId = istek.OnaylayanId, sonTarih = istek.SonTarih?.ToString("yyyy-MM-dd"),
+                      not = istek.Not, teklifDurum = $"{eskiDurum} -> 6" }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+
+            int bildirim;
+            try
+            {
+                var onayId = await OnayMotoru.AcikOnayIdAsync(baglanti, null, 30, id, iptal);
+                bildirim = onayId is null ? 0
+                    : await haber.SiradakiniBildirAsync(baglanti, onayId.Value, baglam.KullaniciId, baglam.SubeId, iptal);
+            }
+            catch (Exception) { bildirim = -1; }
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge, Satirlar = kayit.Satirlar, DipToplam = kayit.DipToplam,
+                Uyarilar = bildirim < 0 ? new[] { "Onaya sunuldu; bildirim gönderilemedi." } : Array.Empty<string>(),
+                IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // POST /api/belge/{id}/onay-geri-cek - onaydaki teklifi hazırlayan geri çeker: zincir iptal, durum Hazırlanıyor.
+        grup.MapPost("/{id:int}/onay-geri-cek", async (
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, KayitErisimi erisim, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+            await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Degistir, iptal);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var durum = await baglanti.TekDegerAsync<int?>(
+                "select coalesce(teklif_durum, 1) from public.belge where id = @p0 and tur = 18 for update", islem, [id], iptal)
+                ?? throw GentegreHatasi.Bulunamadi();
+            if (durum != 6) throw GentegreHatasi.IsKurali("Teklif onayda değil; geri çekilecek zincir yok.");
+            await OnayMotoru.IptalAsync(baglanti, islem, 30, id, "Hazırlayan geri çekti", iptal);
+            await baglanti.CalistirAsync(
+                "update public.belge set teklif_durum = 1, degistiren = @p1, degistirme_tarihi = now() where id = @p0",
+                islem, [id, baglam.KullaniciId], iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, 30, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { aksiyon = "onay-geri-cek", teklifDurum = "6 -> 1" }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+
+            var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
+            return Results.Ok(new BelgeYaniti
+            {
+                Belge = kayit.Belge, Satirlar = kayit.Satirlar, DipToplam = kayit.DipToplam,
+                Uyarilar = Array.Empty<string>(), IzlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // POST /api/belge/{id}/donustur - siparis -> irsaliye -> fatura
         grup.MapPost("/{id:int}/donustur", async (
             int id, DonusumIstegi istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -926,6 +1020,14 @@ public static class BelgeUclari
     public sealed class TeklifDurumIstegi
     {
         public int Durum { get; set; }
+    }
+
+    /// <summary>Teklif iç onayı (1282): seçilen onaylayan, isteğe bağlı son tarih ve not.</summary>
+    public sealed class TeklifOnayIstegi
+    {
+        public int OnaylayanId { get; set; }
+        public DateTime? SonTarih { get; set; }
+        public string? Not { get; set; }
     }
 
     public sealed class TerminSatiri

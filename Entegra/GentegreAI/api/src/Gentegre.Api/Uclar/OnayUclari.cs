@@ -135,6 +135,31 @@ public static class OnayUclari
         //   ZİNCİR KURMAYLA AYNI METOT (`SecilenAdimlarAsync`): ikisi ayrı
         //   yazılsaydı deneme ekranı gerçekte kurulacaktan başka bir şey
         //   gösterebilirdi ve kimse farkı görmezdi.
+        // GET /api/onay/yetkili/{aksiyon} - bir aksiyon yetkisini taşıyan aktif kullanıcılar (1282: teklifte
+        //   "Onaya Sun" penceresinin onaylayan listesi). Bildirim alıcılarıyla AYNI sorgu (OnayBildirimi.AlicilarAsync
+        //   mantığı): rolünde ya da ek rollerinde yetki `gor = 1`.
+        grup.MapGet("/yetkili/{aksiyon}", async (
+            string aksiyon, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            await cozucu.CozAsync(ctx, iptal);
+            if (!System.Text.RegularExpressions.Regex.IsMatch(aksiyon, "^[a-z0-9_.-]{3,60}$"))
+                throw GentegreHatasi.Dogrulama("Geçersiz aksiyon kodu.", new AlanHatasi("aksiyon", "kod"));
+            await using var baglanti = await veri.AcAsync(iptal);
+            var liste = await baglanti.ListeAsync("""
+                select distinct k.id,
+                       coalesce(nullif(trim(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)), ''), k.kod) as ad
+                  from public.taraf_kullanici k
+                  left join public.taraf t on t.id = k.id
+                  join public.rol_yetki ry
+                    on ry.rol_id = k.rol_id
+                    or ry.rol_id in (select kr.rol_id from public.kullanici_rol kr where kr.kullanici_id = k.id)
+                  join public.yetki y on y.id = ry.yetki_id
+                 where k.aktif = 1 and y.tur = 1 and y.kod = @p0 and coalesce(ry.gor, 0) = 1
+                 order by 2
+                """, null, [aksiyon], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(liste.Select(x => new { id = Convert.ToInt32(x["id"]), ad = x["ad"] as string ?? "" }));
+        });
+
         grup.MapPost("/akis/{akisId:int}/dene", async (
             int akisId, AkisDenemeIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
@@ -252,6 +277,16 @@ public static class OnayUclari
             // KAYDIN DURUMU: akışa göre. Zincir bitmediyse kayda dokunulmaz.
             var kayitDurum = await KayitDurumYazAsync(baglanti, islem, akisKod,
                 kaynakId, sonuc.ZincirDurum, istek.Gerekce, baglam, iptal);
+            // TEKLİF: "bilgi iste" = DÜZELTME İSTE (1282) - zincir yürümeye devam eder ama teklif hazırlayana döner,
+            //   kalem kilidi açılır (teklif_durum 8); hazırlayan düzeltip yeniden sunar.
+            if (akisKod == "teklif.satis" && kararKodu == Servisler.OnayMotoru.BilgiIstendi)
+            {
+                await baglanti.CalistirAsync("""
+                    update public.belge set teklif_durum = 8, degistiren = @p1, degistirme_tarihi = now()
+                     where id = @p0 and tur = 18
+                    """, islem, [(int)kaynakId, baglam.KullaniciId], iptal);
+                kayitDurum = 8;
+            }
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogOnay,
                 sonuc.OnayId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -437,6 +472,8 @@ public static class OnayUclari
         },
         // BELGE TALEBİ (765): tek basamak İK.
         "personel.belge_talep" => "ik.belge_talep_onay",
+        // TEKLİF İÇ ONAYI (1282): seçilen kişiye atanmış tek basamak; atanan denetimi motorda, yetki burada.
+        "teklif.satis" => "belge.teklif_onay",
         "personel.avans" => rol switch
         {
             0 => "ik.avans_onay_amir",
@@ -489,6 +526,17 @@ public static class OnayUclari
 
         switch (akisKod)
         {
+            // SATIŞ TEKLİFİ (1282): 7 Onaylandı · 9 Reddedildi; düzeltme isteği (zincir yürüyor) karar ucunda 8 yazar.
+            case "teklif.satis":
+                short teklifDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                  ? (short)7 : (short)9;
+                await baglanti.CalistirAsync("""
+                    update public.belge
+                       set teklif_durum = @p1, degistiren = @p2, degistirme_tarihi = now()
+                     where id = @p0 and tur = 18
+                    """, islem, [(int)kaynakId, teklifDurum, baglam.KullaniciId], iptal);
+                return teklifDurum;
+
             case "satinalma.talep":
                 // 2 onaylandı · 3 reddedildi (satinalma_talep.durum).
                 short yeni = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi

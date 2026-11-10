@@ -23,6 +23,8 @@ export interface OnayBaglam {
 /** kaynak_tur (= islem_log.tablo_id) -> kaydın kendi ekranı. */
 const KAYIT_YOLU: Record<number, string> = {
   1241: '/satinalma-talep',
+  // Satış teklifi (1282): kaynak_tur 30 = belge, kart teklif listesinin rotasında.
+  30: '/teklif',
 };
 
 const ROL_ADI: Record<number, string> = {
