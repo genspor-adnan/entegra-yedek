@@ -242,6 +242,18 @@ başlığında … Listesi olsun".
   ziyaret, çipler Yükselen / Düşen / 60 gün sessiz / Yeni / Ziyaret edilmeyen), **Şubeler**, **Talepler** (tür × durum,
   ortalama kapanma, en çok sorumlu). Uç `GET /api/dis-hekim/performans?bas&bit&sube` (`SahaPerformansUclari`): gönderim
   = radyoloji istemi, temsilci = başvurunun `satici_id`'si, prim = hakediş satırları rol 1 / 10. Test `SahaPerformansTestleri`.
+- **Rol kapsamı - temsilci yalnız kendi hekim / ziyaretlerini görür (kullanıcı: "temsilci sadece kendi doktorlarını ve
+  kendi ziyaretlerini görecek, sorumlu ve yönetici hepsini"):** yeni `RolKapsami` (Cekirdek/Katalog): kaynak ve kart
+  tanımına `RolKosullari` (rol kodu → `{kullanici}` yer tutuculu SQL koşulu). Kural kullanıcının ROL KÜMESİNE bakar:
+  kuralı olmayan (geniş) bir rolü varsa (yönetici, `saha_sorumlu`…) kısıt hiç eklenmez; bütün rolleri kurallı ise koşullar
+  OR'lanır. Portal kapsamından farkı: kuralsız kaynak AÇIK kalır (iç kullanıcı). Bağlama `RolKodlari`
+  (`KullaniciDeposu.RolKodlariAsync`, fn_kullanici_rolleri ⋈ rol). Uygulama: liste (`ListeUclari` ekran koşuluyla AND),
+  kart GET / PUT (`KartDeposu.OkuAsync rolKosulu` - liste daralıp kart serbest kalmasın), plan sayfası (dar kapsamda
+  temsilci seçimi yalnız kendisi, Planı Üret kendisine). Kurallı kaynaklar (`saha_temsilci`): `dis-hekim` /
+  dış doktor kartı (`RolKapsami.BenimHekimim`: aktif tarih-içi `dis_hekim_temsilci` satırı YA DA `taraf.temsilci`),
+  `dis-hekim-ziyaret` / kartı (`temsilci_id`), `dis-hekim-vade`, `dis-hekim-talep` / kartı (ziyaretin temsilcisi, yoksa
+  `fn_dis_hekim_temsilci`). Test `RolKapsamiTestleri` (temsilci A h2 / z2'yi listede görmez, kartı 404; sorumlu hepsini).
+  Not: KOSUYOLU `ed/rc/bg` hesapları parola-değişmeli kilitte - canlı doğrulama ilk girişten sonra.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)
