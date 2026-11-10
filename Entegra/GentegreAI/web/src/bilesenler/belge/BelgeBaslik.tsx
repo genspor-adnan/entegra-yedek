@@ -115,19 +115,22 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
    * STOK FİŞİ DE KİPLİ (kullanıcı 09.11.2026: "giriş/çıkış fişi kartında başlığı da view/edit moda getir"): cari
    * bandı yok, ✎ ızgaranın sağ üstünde; kilit ölçütü fişin kendi başlık kilidi (`baslikKilitli` - kalem varsa
    * başlık kilitlenir), ✎ o zaman pasif.
+   * DEPO BELGESİ DE KİPLİ (kullanıcı 10.11.2026: "transfer kartı ve stoktan talep kartlarının başlıklarını view/edit
+   * moda geçir", "sağ üstte çerçevesiz kalem olsun"): stok fişiyle aynı - bantsız, ✎ sağ üstte çerçevesiz
+   * (.bb-kalem-serbest = .bs-kalem deseni), kilit ölçütü `baslikKilitli`. Başvuru ESKİSİ GİBİ.
    */
   const [baslikDuzenle, setBaslikDuzenle] = useState(!!p.yeniMi);
   /** Kart YENİ açıldı (sabit): yeni belgenin düzenleme kipi "yazıyorsun" çizgisi almaz - ilk kayıttan sonra da (inceleme). */
   const [yeniAcildi] = useState(!!p.yeniMi);
-  const kipli = (carili || stokFisiMi) && !basvuruMu;
-  /** Kipin kilit ölçütü: stok fişinde başlık kilidi (kalem varsa), carili belgede belge kilidi. */
-  const kipKilidi = stokFisiMi ? baslikKilitli : kilitli;
+  const kipli = (carili || stokFisiMi || depoBelgesi) && !basvuruMu;
+  /** Kipin kilit ölçütü: stok fişi / depo belgesinde başlık kilidi (kalem varsa), carili belgede belge kilidi. */
+  const kipKilidi = stokFisiMi || depoBelgesi ? baslikKilitli : kilitli;
   // KALEM EKLEME başlığı kapatır (kullanıcı): "+" ile kalem penceresi açılınca düzenleme biter, bilgi okunur kalır.
   useEffect(() => { if (p.baslikKapatAnahtari) setBaslikDuzenle(false) }, [p.baslikKapatAnahtari]);
   const gosterKipi = kipli && (kipKilidi || !baslikDuzenle);
   /** ✎ - tek düğme, iki yuva (cari bandının sonu / bantsızken ızgaranın sağ üstü). */
   const kalemDugmesi = (ek = '') => (
-    <button type="button" className={`d ik kalem-dugme${ek}${gosterKipi ? '' : ' acik'}`} disabled={kipKilidi}
+    <button type="button" className={`${ek ? 'bs-kalem' : 'd ik kalem-dugme'}${ek}${gosterKipi ? '' : ' acik'}`} disabled={kipKilidi}
             title={kipKilidi ? c('Kilitli belge - başlık düzenlenemez') : gosterKipi ? c('Başlık alanlarını düzenle') : c('Düzenlemeyi kapat')}
             onClick={() => setBaslikDuzenle(v => !v)}>✎</button>
   );

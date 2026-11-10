@@ -187,6 +187,10 @@ başlığında … Listesi olsun".
   `StokBelgesiSilTestleri`.
 - **Onay akışı kartı:** Açıklama Genel sekmesinden kimlik şeridine, başlığın altına tek uzun satır olarak taşındı
   (kullanıcı; `Grup: Kimlik` + `kaid-onayakis .alan-aciklama` tam genişlik). Genel sekmesi kalmadı, kart Basamaklar ile açılır.
+- **Transfer / Stoktan Talep kartı başlığı görüntüleme / düzenleme kipinde (kullanıcı):** stok fişiyle aynı desen
+  (`BelgeBaslik` kipli, kilit `baslikKilitli`); ✎ sağ üstte **çerçevesiz** (`.bb-kalem-serbest` = `.bs-kalem`) - stok
+  fişinde de. "+" kalem ekleme ve sekme değişimi başlığı görüntülemeye alır (zaten vardı). Lookup penceresinde satırın
+  her yeri seçer (işaret kutusu hücresi tıkı yutuyordu).
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

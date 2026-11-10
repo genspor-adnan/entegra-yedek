@@ -1559,7 +1559,8 @@ input.skt-gecmis {
 /* Bantsız belgede (cari seçilmemiş) ✎ ızgaranın sağ üstünde; ızgara sağdan yer bırakır. */
 .belge-hdr-sar { position: relative }
 .belge-hdr-sar.kalemli .belge-hdr { padding-right: 40px }
-.bb-kalem-serbest { position: absolute; right: 14px; top: 12px }
+/* Bantsız belgede (stok fişi, transfer, talep) ✎ sağ üstte ÇERÇEVESİZ (kullanıcı 10.11.2026), kimlik şeridindeki .bs-kalem gibi. */
+.bb-kalem-serbest { position: absolute; right: 10px; top: 8px; height: 24px; width: 26px; font-size: 14px }
 /* Sekme cubugu baslik seridinin hemen altinda, grid'in ustunde. */
 .kagov > .katab { margin: 0 -14px 10px }
 /* Baslikta etiket EDITIN USTUNDE (mockup .fld deseni) - alan-izgara'nin
