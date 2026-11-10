@@ -28,7 +28,7 @@ public sealed class ListeDeposu
         var gorunur = kolonlar.Select(k => k.Ad).ToHashSet(StringComparer.Ordinal);
         SorguUretici Uretici() => portalTuru > 0
             ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
-                  { HekimId = hekimId, TetkikRolleri = tetkikRolleri,
+                  { HekimId = hekimId, TetkikRolleri = tetkikRolleri, KullaniciId = kullaniciId,
                     BelgeKumeleri = belgeKumeleri, EkranKosulu = ekranKosulu, GorunurAlanlar = gorunur }
             // TEST YETKI KISITI (889) de ayni sekilde UC SORGUYA da girer.
             : new SorguUretici(kaynak)

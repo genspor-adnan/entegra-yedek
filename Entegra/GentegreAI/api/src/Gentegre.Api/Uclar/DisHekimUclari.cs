@@ -27,11 +27,12 @@ public static class DisHekimUclari
         var grup = yol.MapGroup("/api/dis-hekim").WithTags("Dış Doktor").RequireAuthorization();
 
         // ------------------------------------------------ talep kapat / ret --
-        grup.MapPost("/talep/{id:int}/kapat", async (int id, TalepKapatIstegi istek, VeriKaynagi veri,
+        grup.MapPost("/talep/{id:int}/kapat", async (int id, TalepKapatIstegi istek, VeriKaynagi veri, KartDeposu kart,
             BaglamCozucu cozucu, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.talep", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimTalepAdi, baglam, id, iptal);
             if (istek.Durum is not (3 or 4))
                 throw GentegreHatasi.Dogrulama("Durum 3 (Kapandı) ya da 4 (Ret) olmalı.", new AlanHatasi("durum", "Geçersiz."));
 
@@ -54,11 +55,12 @@ public static class DisHekimUclari
         // ------------------------------------------------ göreve çevir --
         //   Talep kurumdaki bir kişinin işidir: gorev kaydı açılır (sorumlu, termin, hekim taraf olarak), talep
         //   kaydı göreve bağlanır. İkinci çağrı aynı görevi döndürür - iki görev açılmaz.
-        grup.MapPost("/talep/{id:int}/goreve-cevir", async (int id, GoreveCevirIstegi? istek, VeriKaynagi veri,
+        grup.MapPost("/talep/{id:int}/goreve-cevir", async (int id, GoreveCevirIstegi? istek, VeriKaynagi veri, KartDeposu kart,
             BaglamCozucu cozucu, LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.talep", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimTalepAdi, baglam, id, iptal);
 
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
@@ -95,7 +97,7 @@ public static class DisHekimUclari
 
         // ================================================ HAFTALIK PLAN (1290, mockup §3) ==
         //   Temsilci: oturum kullanıcısı (dis_hekim_temsilci'de temsilciyse) ya da seçilen; yönetici hepsini görür.
-        grup.MapGet("/plan", async (DateOnly? hafta, int? temsilciId, VeriKaynagi veri, BaglamCozucu cozucu,
+        grup.MapGet("/plan", async (DateOnly? hafta, int? temsilciId, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -113,7 +115,7 @@ public static class DisHekimUclari
                  order by 2
                 """, null, [baglam.SubeId], o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
             // ROL KAPSAMI: saha temsilcisi yalnız kendisini görür (RolKapsami); sorumlu / yönetici seçer.
-            var dar = RolKapsami.Dar(KaynakKatalogu.Bul("dis-hekim-ziyaret")?.RolKosullari, baglam.RolKodlari);
+            var dar = baglam.DarKapsam(KaynakKatalogu.DisHekimZiyaretTanimi.RolKosullari);
             if (dar) temsilciler = temsilciler.Where(x => x.id == baglam.KullaniciId).ToList();
             var secili = dar ? baglam.KullaniciId
                 : temsilciId ?? (temsilciler.Any(x => x.id == baglam.KullaniciId) ? baglam.KullaniciId : (temsilciler.FirstOrDefault()?.id ?? 0));
@@ -134,12 +136,12 @@ public static class DisHekimUclari
             return Results.Ok(new { haftaBas = bas, temsilciId = secili, temsilciler, ziyaretler, vade, izlemeNo = baglam.IzlemeNo });
         });
 
-        grup.MapPost("/plan/uret", async (PlanUretIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+        grup.MapPost("/plan/uret", async (PlanUretIstegi istek, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Ekle);
-            var temsilci = RolKapsami.Dar(KaynakKatalogu.Bul("dis-hekim-ziyaret")?.RolKosullari, baglam.RolKodlari)
+            var temsilci = baglam.DarKapsam(KaynakKatalogu.DisHekimZiyaretTanimi.RolKosullari)
                 ? baglam.KullaniciId : istek.TemsilciId ?? baglam.KullaniciId;
             if (baglam.SubeId is null) throw GentegreHatasi.IsKurali("Plan üretmek için şube seçili olmalı.");
             await using var b = await veri.AcAsync(iptal);
@@ -150,11 +152,12 @@ public static class DisHekimUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
-        grup.MapPost("/ziyaret/{id:int}/tasi", async (int id, TasiIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
+        grup.MapPost("/ziyaret/{id:int}/tasi", async (int id, TasiIstegi istek, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu,
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimZiyaretAdi, baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var sayi = await b.CalistirAsync(
@@ -167,11 +170,12 @@ public static class DisHekimUclari
             return Results.Ok(new { mesaj = "Ziyaret taşındı.", izlemeNo = baglam.IzlemeNo });
         });
 
-        grup.MapPost("/ziyaret/{id:int}/onayla", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+        grup.MapPost("/ziyaret/{id:int}/onayla", async (int id, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimZiyaretAdi, baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
             var sayi = await b.CalistirAsync(
                 "update public.dis_hekim_ziyaret set oneri = 0, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and oneri = 1",
@@ -179,11 +183,12 @@ public static class DisHekimUclari
             return Results.Ok(new { mesaj = sayi > 0 ? "Öneri plana alındı." : "Zaten planda.", izlemeNo = baglam.IzlemeNo });
         });
 
-        grup.MapPost("/ziyaret/{id:int}/iptal", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, LogDeposu log,
+        grup.MapPost("/ziyaret/{id:int}/iptal", async (int id, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimZiyaretAdi, baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             // ÖNERİ SİLİNİR (hiç olmamış gibi), kullanıcının planı İPTAL olur (iz kalır).
@@ -200,26 +205,31 @@ public static class DisHekimUclari
         });
 
         // Vade listesinden tek hekime planlı ziyaret.
-        grup.MapPost("/planla", async (PlanlaIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+        grup.MapPost("/planla", async (PlanlaIstegi istek, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Ekle);
             if (baglam.SubeId is null) throw GentegreHatasi.IsKurali("Şube seçili olmalı.");
+            // ROL KAPSAMI: dar kapsamlı temsilci yalnız KENDİ hekimine, KENDİ adına planlar (/plan/uret ile aynı).
+            var dar = baglam.DarKapsam(KaynakKatalogu.DisHekimZiyaretTanimi.RolKosullari);
+            if (dar) await RolKapsamKapisi.IsteAsync(kart, "dis-hekim", baglam, istek.HekimId, iptal);
+            var temsilci = dar ? baglam.KullaniciId : istek.TemsilciId;
             await using var b = await veri.AcAsync(iptal);
             var id = await b.TekDegerAsync<int>("""
                 insert into public.dis_hekim_ziyaret (hekim_id, temsilci_id, sube_id, tarih, tur, amac, sonuc, durum, oneri, hatirlat, notu, ekleyen)
                 values (@p0, @p1, @p2, @p3, 1, 1, 0, 0, 0, 0, '', @p4) returning id
-                """, null, [istek.HekimId, istek.TemsilciId, baglam.SubeId.Value, istek.Tarih, baglam.KullaniciId], iptal);
+                """, null, [istek.HekimId, temsilci, baglam.SubeId.Value, istek.Tarih, baglam.KullaniciId], iptal);
             return Results.Ok(new { id, mesaj = "Ziyaret planlandı.", izlemeNo = baglam.IzlemeNo });
         });
 
         // ------------------------------------------------ ziyaret gördüm (yönetici) --
-        grup.MapPost("/ziyaret/{id:int}/goruldu", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, LogDeposu log,
+        grup.MapPost("/ziyaret/{id:int}/goruldu", async (int id, VeriKaynagi veri, KartDeposu kart, BaglamCozucu cozucu, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Degistir);
+            await RolKapsamKapisi.IsteAsync(kart, KartKatalogu.DisHekimZiyaretAdi, baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var sayi = await b.CalistirAsync("""

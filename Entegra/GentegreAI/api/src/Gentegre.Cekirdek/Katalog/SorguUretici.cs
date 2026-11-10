@@ -289,7 +289,9 @@ public sealed partial class SorguUretici
                        + $"{Ekle((TetkikRolleri ?? Array.Empty<int>()).ToArray())}, 'gor')");
 
         if (EkranKosulu is { Length: > 0 } ek)
-            parcalar.Add("(" + ek + ")");
+            // ROL KAPSAMI (RolKapsami) ayni kanaldan gelir: `{kullanici}` PARAMETREYLE baglanir (SabitKosul gibi).
+            parcalar.Add("(" + (ek.Contains(RolKapsami.Kullanici)
+                                 ? ek.Replace(RolKapsami.Kullanici, Ekle(KullaniciId ?? 0)) : ek) + ")");
 
         // BELGE TURU KISITI (998): `belge` kaynagi cok turludur (basvuru,
         //   satis, alis, stok fisi). 998'de menu kodlari bolundu ama kaynak

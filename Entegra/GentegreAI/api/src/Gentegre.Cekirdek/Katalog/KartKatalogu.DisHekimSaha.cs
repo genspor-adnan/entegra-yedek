@@ -7,6 +7,10 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KartKatalogu
 {
+    /// <summary>Ziyaret kartının adı (RolKapsamKapisi / DisHekimUclari buna bakar - metin tekrarı yok).</summary>
+    public const string DisHekimZiyaretAdi = "dis-hekim-ziyaret";
+    public const string DisHekimTalepAdi = "dis-hekim-talep";
+
     internal static readonly Dictionary<string, string> ZiyaretDurumKodlari = new()
     {
         ["0"] = "Planlı", ["1"] = "Yapıldı", ["2"] = "İptal",
@@ -140,10 +144,11 @@ public static partial class KartKatalogu
         Tablo: "public.dis_hekim_talep",
         LogTabloId: 1782,
         SubeKolonu: "sube_id",
+        // Talep: bağlı ziyaret benimse YA DA hekim benimse (BenimHekimim - hekim kartıyla AYNI tanım, şube-bağımsız).
         RolKosullari: new Dictionary<string, string>
         {
-            [RolKapsami.SahaTemsilci] = "coalesce((select z.temsilci_id from public.dis_hekim_ziyaret z where z.id = dis_hekim_talep.ziyaret_id),"
-                + " public.fn_dis_hekim_temsilci(dis_hekim_talep.hekim_id, dis_hekim_talep.sube_id, current_date)) = {kullanici}",
+            [RolKapsami.SahaTemsilci] = "exists (select 1 from public.dis_hekim_ziyaret z where z.id = dis_hekim_talep.ziyaret_id and z.temsilci_id = {kullanici})"
+                + " or " + RolKapsami.BenimHekimim("dis_hekim_talep.hekim_id"),
         },
         Alanlar: TalepAlanlari(hekimli: true),
         YeniKayitVarsayilanlari: new Dictionary<string, object?>

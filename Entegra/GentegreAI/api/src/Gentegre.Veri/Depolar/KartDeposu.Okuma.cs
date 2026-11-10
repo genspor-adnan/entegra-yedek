@@ -20,11 +20,11 @@ public sealed partial class KartDeposu
     public async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         KartTanimi tanim, long id, IReadOnlyList<KartAlani> alanlar,
         IReadOnlyList<int>? kapsam, CancellationToken iptal = default,
-        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null)
+        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null, int rolKullanici = 0)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         var sonuc = await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal,
-                                   portalTuru, portalKullanici, rolKosulu);
+                                   portalTuru, portalKullanici, rolKosulu, rolKullanici);
         // SIR İSTEMCİYE GİTMEZ (K28): dolu şifreli alan yalnız maske olarak döner (ekran "kayıtlı" gösterir).
         if (sonuc is { } k)
             foreach (var alan in tanim.Alanlar.Where(a => a.Sifreli))
@@ -37,10 +37,27 @@ public sealed partial class KartDeposu
         return sonuc;
     }
 
+    /// <summary>
+    /// ROL KAPSAMI KAPISI (RolKapsami): kayıt kullanıcının rol koşulunda mı? Yazan uçlar (PUT / DELETE / aksiyon /
+    /// detay) GÜNCELLEMEDEN ÖNCE sorar - liste daralıp yazma serbest kalırsa kapsam yalnız görünüm süsü olur.
+    /// Koşul yoksa (geniş rol) true.
+    /// </summary>
+    public async Task<bool> KapsamdaMiAsync(KartTanimi tanim, long id, string? rolKosulu, int kullanici,
+                                            CancellationToken iptal = default)
+    {
+        if (string.IsNullOrWhiteSpace(rolKosulu)) return true;
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var sql = $"select exists (select 1 from {tanim.Tablo} where {tanim.IdKolonu} = @p0 and ("
+                + rolKosulu.Replace(RolKapsami.Kullanici, "@rk") + "))";
+        await using var komut = baglanti.Komut(sql, null, id);
+        komut.Parameters.AddWithValue("rk", kullanici);
+        return await komut.ExecuteScalarAsync(iptal) is true;
+    }
+
     private async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem, KartTanimi tanim, long id,
         IReadOnlyList<KartAlani> alanlar, IReadOnlyList<int>? kapsam, CancellationToken iptal,
-        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null)
+        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null, int rolKullanici = 0)
     {
         var secim = string.Join(", ", alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
         var sql = new StringBuilder()
@@ -64,12 +81,13 @@ public sealed partial class KartDeposu
                  : " and (" + kosul.Replace("{kullanici}", "@pk") + ")";
         }
         // ROL KAPSAMI (RolKapsami): liste daraldı, kart da daralır - id bilen temsilci başkasının ziyaretini açamaz.
-        //   Koşul kullanıcı id'si gömülü (int) gelir.
-        if (!string.IsNullOrWhiteSpace(rolKosulu)) sql += " and (" + rolKosulu + ")";
+        //   `{kullanici}` @rk parametresiyle bağlanır (portal @pk ile aynı desen).
+        if (!string.IsNullOrWhiteSpace(rolKosulu)) sql += " and (" + rolKosulu.Replace(RolKapsami.Kullanici, "@rk") + ")";
 
         await using var komut = baglanti.Komut(sql, islem,
             id);
         if (portalTuru > 0) komut.Parameters.AddWithValue("pk", portalKullanici);
+        if (!string.IsNullOrWhiteSpace(rolKosulu)) komut.Parameters.AddWithValue("rk", rolKullanici);
         if (kapsam is { Count: > 0 } && tanim.KapsamKolonu is not null)
             komut.Parameters.AddWithValue("p1", kapsam.ToArray());
 

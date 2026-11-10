@@ -101,7 +101,7 @@ public static class KartUclari
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
                                            baglam.PortalTuru, baglam.PortalKimlik,
                                            // ROL KAPSAMI (RolKapsami): liste daraldıysa kart da - temsilci başkasının kaydını açamaz.
-                                           RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId))
+                                           baglam.RolKosulu(tanim.RolKosullari), baglam.KullaniciId)
                        ?? throw GentegreHatasi.Bulunamadi();
 
             // KULLANICI_ARAMA karsiligi: kart her acilista upsert (Son/Sik Aranan).
@@ -162,6 +162,8 @@ public static class KartUclari
             await CariVknUclari.VknMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
             // MUAYENE ŞABLONU (929): doktor yalnız KENDİ şablonunu açar.
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, null, iptal);
+            // ROL KAPSAMI: dar kapsamlı temsilci ziyareti kendi adına açar.
+            RolKapsamKapisi.YazmaKurali(tanim, baglam, degerler, yeni: true);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
                 baglam.Yazma, iptal);
 
@@ -251,6 +253,10 @@ public static class KartUclari
             await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
             await CariVknUclari.VknMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, degerler, veri, id, iptal);
+            // ROL KAPSAMI (RolKapsami): kapsam dışı kayıt GÜNCELLENMEDEN "bulunamadı" - sonraki okumada 404
+            //   vermek yetmez, satır çoktan değişmiş olurdu.
+            await RolKapsamKapisi.IsteAsync(depo, tanim, baglam, id, iptal);
+            RolKapsamKapisi.YazmaKurali(tanim, baglam, degerler, yeni: false);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
                 okunabilir, baglam.Yazma, iptal);
@@ -281,7 +287,7 @@ public static class KartUclari
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
                                            baglam.PortalTuru, baglam.PortalKimlik,
-                                           RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId))
+                                           baglam.RolKosulu(tanim.RolKosullari), baglam.KullaniciId)
                        ?? throw GentegreHatasi.Bulunamadi();
             var govde = new Dictionary<string, object?>(kart.Kart, StringComparer.Ordinal)
             {
@@ -321,6 +327,8 @@ public static class KartUclari
             baglam.YazmaIste();
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, null, id, Islem.Sil, iptal);
             await MuayeneSablonUclari.YazmaKuraliAsync(tanim, baglam, null, veri, id, iptal);
+            // ROL KAPSAMI (RolKapsami): kapsam dışı kayıt silinmez - "bulunamadı".
+            await RolKapsamKapisi.IsteAsync(depo, tanim, baglam, id, iptal);
 
             // Silme logu kartin TAM halini saklar - alan yetkisiyle kirpilmis
             // kume degil, butun alanlar okunur ("Geri Al" eksik satir diriltmesin).
@@ -349,6 +357,8 @@ public static class KartUclari
             //   yetkisi olan kullanıcı da açamaz. Yetki tablosu değişmez.
             baglam.MenuAcikIste(kaynak);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            // ROL KAPSAMI (RolKapsami): kapsam dışı kartın detayı da yok.
+            await RolKapsamKapisi.IsteAsync(depo, tanim, baglam, id, iptal);
 
             var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                 .FirstOrDefault(d => string.Equals(d.Ad, ad, StringComparison.Ordinal))

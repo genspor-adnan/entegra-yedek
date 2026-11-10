@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Gentegre.Cekirdek.Katalog;
+using System.Globalization;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -28,6 +29,12 @@ public sealed class IstekBaglami
     public IReadOnlyList<int> RolIdleri { get; init; } = Array.Empty<int>();
     /// <summary>Etkili rol KODLARI (RolKapsami): "yalnız kendi kayıtları" kuralı rol koduyla seçilir.</summary>
     public IReadOnlyList<string> RolKodlari { get; init; } = Array.Empty<string>();
+
+    /// <summary>ROL KAPSAMI (RolKapsami): bu kuralların kullanıcıya düşen koşulu (`{kullanici}` yer tutuculu) ya da null (geniş).</summary>
+    public string? RolKosulu(IReadOnlyDictionary<string, string>? kurallar) => RolKapsami.Kosul(kurallar, RolKodlari);
+
+    /// <summary>Kullanıcı bu kurallarda DAR kapsamda mı (yalnız kendi kayıtları)?</summary>
+    public bool DarKapsam(IReadOnlyDictionary<string, string>? kurallar) => RolKapsami.Dar(kurallar, RolKodlari);
     public int? SubeId { get; init; }
     /// <summary>
     /// Aktif subede yazma hakki (rol_sube.yazma). 0 ise sube salt okunur.
@@ -203,7 +210,6 @@ public sealed class BaglamCozucu
         var rolId = roller.FirstOrDefault(r => r.Ana).RolId;
 
         var yetkiler = await _yetkiCozucu.CozAsync(kullaniciId, iptal);
-        var rolKodlari = await _kullanicilar.RolKodlariAsync(kullaniciId, iptal);
         var kapsam = await _kullanicilar.KapsamAsync(kullaniciId, iptal);
         var portalTuru = await _kullanicilar.PortalTuruAsync(kullaniciId, iptal);
         // KAPSAM KIMLIGI (819): kurum portalinda hesap KISININ, kapsam
@@ -231,7 +237,7 @@ public sealed class BaglamCozucu
             KullaniciId = kullaniciId,
             RolId = rolId,
             RolIdleri = roller.Select(r => r.RolId).Distinct().ToArray(),
-            RolKodlari = rolKodlari,
+            RolKodlari = roller.Select(r => r.Kod).Distinct().ToArray(),
             SubeId = subeId,
             SubeYazma = subeId is { } sid && subeler.Any(s => s.Id == sid && s.Yazma),
             Yetkiler = yetkiler,

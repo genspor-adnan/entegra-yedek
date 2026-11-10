@@ -254,6 +254,20 @@ başlığında … Listesi olsun".
   `dis-hekim-ziyaret` / kartı (`temsilci_id`), `dis-hekim-vade`, `dis-hekim-talep` / kartı (ziyaretin temsilcisi, yoksa
   `fn_dis_hekim_temsilci`). Test `RolKapsamiTestleri` (temsilci A h2 / z2'yi listede görmez, kartı 404; sorumlu hepsini).
   Not: KOSUYOLU `ed/rc/bg` hesapları parola-değişmeli kilitte - canlı doğrulama ilk girişten sonra.
+- **Rol kapsamı code review düzeltmeleri (20e1705; göç 1296):** (1) PUT kapsam kontrolünü yazdıktan SONRA
+  yapıyordu (satır değişiyor, sonra 404) - `RolKapsamKapisi.IsteAsync` (`KartDeposu.KapsamdaMiAsync`) güncellemeden
+  ÖNCE; aynı kapı DELETE, kart detay GET ve saha aksiyon uçlarında (`tasi / onayla / iptal / goruldu`, talep
+  `kapat / goreve-cevir`). (2) `/planla` dar kapsamda temsilciyi kendisine zorlar + hekim kapsam kontrolü; ziyaret
+  kartı yazarken `temsilciId` kendisi (`RolKapsamKapisi.YazmaKurali`, POST/PUT). (3) `{kullanici}` artık SQL'e
+  gömülmez: liste `SorguUretici.EkranKosulu` parametre, kart `@rk` (OKUBENI "değerler parametre"). (4) Rol kodu tek
+  sorgudan: `RolleriAsync` `(RolId, Ana, Kod)` döner, `RolKodlariAsync` kaldırıldı. (5) `BenimHekimim(hekimId)`
+  tek tanım, şube-bağımsız (herhangi şubede aktif `dis_hekim_temsilci` YA DA `taraf.temsilci`); talep / vade
+  kuralları da "benim ziyaretim VEYA benim hekimim". (6) **1296:** `saha_temsilci` / `saha_sorumlu` her kurulumda
+  sistem rolü (`sistem = 1`; kod değişmez / silinmez) - yoksa şablon yetkileri + şube satırlarıyla açılır, varsa
+  yetkilerine dokunulmaz. (7) Test sistem rolünü kullanır (rol açıp silmez; sızan `tz*` test kullanıcıları ve rolleri
+  test DB'den elle temizlendi), yazma kapısı senaryoları eklendi. (8) Plan uçları `KaynakKatalogu.DisHekimZiyaretTanimi`
+  / `KartKatalogu.DisHekimZiyaretAdi` ile (ad metni tekrarı yok). Not: `CagriTestleri.Sla_kuyruk` gece yarısı
+  ±5 dk pencerede düşer (`baslama >= current_date`, `now() - 5 dk` dünkü gün) - koddan bağımsız, saat sınırı.
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

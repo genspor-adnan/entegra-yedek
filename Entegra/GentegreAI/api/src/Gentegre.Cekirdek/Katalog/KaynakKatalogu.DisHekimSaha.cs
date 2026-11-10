@@ -6,6 +6,9 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KaynakKatalogu
 {
+    /// <summary>Ziyaret kaynağının tanımı - plan uçları "dar kapsam mı" sorusunu bunun kurallarıyla sorar (ad metniyle değil).</summary>
+    public static KaynakTanimi DisHekimZiyaretTanimi { get; } = DisHekimZiyaret();
+
     private static KaynakTanimi DisHekimZiyaret() => new(
         Ad: "dis-hekim-ziyaret",
         YetkiKodu: "dis_doktor.ziyaret",
@@ -55,7 +58,8 @@ public static partial class KaynakKatalogu
         YetkiKodu: "dis_doktor.vade",
         Kaynak: "public.v_dis_hekim_ziyaret_vade v",
         SubeKolonu: "v.sube_id",
-        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "v.temsilci_id = {kullanici}" },
+        // Vade: satırın temsilcisi benim YA DA hekim benim (BenimHekimim, şube-bağımsız - hekim listesiyle aynı küme).
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "v.temsilci_id = {kullanici} or " + RolKapsami.BenimHekimim("v.hekim_id") },
         VarsayilanSirala: "v.gecikme_gun desc, v.vade_tarihi nulls last, v.hekim_ad",
         Kolonlar:
         [
@@ -89,7 +93,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "dis_doktor.talep",
         Kaynak: "public.v_dis_hekim_talep t",
         SubeKolonu: "t.sube_id",
-        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "t.temsilci_id = {kullanici}" },
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "t.temsilci_id = {kullanici} or " + RolKapsami.BenimHekimim("t.hekim_id") },
         VarsayilanSirala: "case when t.durum in (1, 2) then 0 else 1 end, t.termin nulls last, t.id desc",
         Kolonlar:
         [

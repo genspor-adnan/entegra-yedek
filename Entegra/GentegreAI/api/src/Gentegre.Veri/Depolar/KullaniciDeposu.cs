@@ -504,17 +504,12 @@ public sealed class KullaniciDeposu
     /// haliyle. Hesap pasifse bos doner - fn_kullanici_rolleri aktif = 1 ister.
     /// Istek baglami bunu her istekte okur; token'daki rol yalniz ipucudur.
     /// </summary>
-    public Task<List<(int RolId, bool Ana)>> RolleriAsync(int kullaniciId,
+    /// <summary>Etkili roller: id, ana mı, KOD (RolKapsami rol kuralını kodla seçer) - tek sorgu, her istekte çalışır.</summary>
+    public Task<List<(int RolId, bool Ana, string Kod)>> RolleriAsync(int kullaniciId,
         CancellationToken iptal = default)
         => _veri.ListeAsync(
-            "select rol_id, ana from public.fn_kullanici_rolleri(@p0) order by ana desc, rol_id",
-            new object?[] { kullaniciId }, o => (o.GetInt32(0), o.GetInt16(1) == 1), iptal);
-
-    /// <summary>ETKİLİ ROL KODLARI (RolKapsami): ana + ek rollerin kodları - kaynak / kart rol kuralı bununla seçilir.</summary>
-    public Task<List<string>> RolKodlariAsync(int kullaniciId, CancellationToken iptal = default)
-        => _veri.ListeAsync(
-            "select r.kod from public.fn_kullanici_rolleri(@p0) k join public.rol r on r.id = k.rol_id order by k.ana desc, r.kod",
-            new object?[] { kullaniciId }, o => o.GetString(0), iptal);
+            "select k.rol_id, k.ana, r.kod from public.fn_kullanici_rolleri(@p0) k join public.rol r on r.id = k.rol_id order by k.ana desc, k.rol_id",
+            new object?[] { kullaniciId }, o => (o.GetInt32(0), o.GetInt16(1) == 1, o.GetString(2)), iptal);
 
     /// <summary>
     /// ZORUNLU PAROLA DEGISIMI (denetim #4): hesap parola degistirmek zorunda

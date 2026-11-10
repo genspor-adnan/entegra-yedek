@@ -64,7 +64,7 @@ public static class ListeUclari
                 // ROL KAPSAMI (RolKapsami): saha temsilcisi yalnız kendi hekim / ziyaretlerini görür; geniş rol daralmaz.
                 RolKapsami.Birlestir(
                     EkranKodlari.Kisit(tanim.Ad, k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul,
-                    RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId)));
+                    baglam.RolKosulu(tanim.RolKosullari)));
 
             return Results.Ok(yanit);
         });

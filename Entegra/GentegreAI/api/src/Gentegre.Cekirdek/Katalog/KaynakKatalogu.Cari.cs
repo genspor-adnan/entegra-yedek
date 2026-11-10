@@ -477,7 +477,7 @@ public static partial class KaynakKatalogu
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         SubeKolonu: null,
         // SAHA TEMSİLCİSİ yalnız KENDİ hekimleri (RolKapsami; kullanıcı 10.11.2026).
-        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = RolKapsami.BenimHekimim("t.id", "t.temsilci") },
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = RolKapsami.BenimHekimim("t.id") },
         Kolonlar: new KolonTanimi[]
         {
             new("id",       "t.id",     "sayi",  "Id", Varsayilan: false),

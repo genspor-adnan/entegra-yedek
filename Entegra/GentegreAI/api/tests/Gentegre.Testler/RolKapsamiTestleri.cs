@@ -15,29 +15,11 @@ public sealed class RolKapsamiTestleri(ApiSunucuOlgusu api)
 {
     private const int Merkez = 1;
 
-    /// <summary>Kodu SABİT rol (RolKapsami kodla eşleşir): varsa kullanılır, yoksa açılır ve testin sonunda silinir.</summary>
-    private async Task<int> SabitRolAsync(TestDunyasi d, string kod, string ad, params string[] yetkiler)
+    /// <summary>Sistem rolü (göç 1296): kurulumla gelir, test açmaz / silmez - rol kodu RolKapsami'nin baktığı koddur.</summary>
+    private async Task<int> SistemRolAsync(string kod)
     {
-        // Var olan rol (kurulumdan ya da yarım kalmış bir koşudan) kullanılır; hakları her koşuda tamamlanır.
-        var mevcut = await api.Veri.TekDegerAsync<int>("select coalesce((select id from public.rol where kod = @p0), 0)", [kod]);
-        var id = mevcut > 0 ? mevcut
-            : await api.Veri.TekDegerAsync<int>("insert into public.rol (kod, ad) values (@p0, @p1) returning id", [kod, ad]);
-        if (mevcut == 0)
-        {
-            // Temizlik SIRASI: önce kullanıcılar (TestDunyasi), sonra bağlar, en son rol - rol silinemezse hakları da silmeyelim.
-            d.Temizle($"delete from public.rol where id = {id} and not exists (select 1 from public.taraf_kullanici k where k.rol_id = {id})");
-            d.Temizle($"delete from public.rol_yetki where rol_id = {id} and not exists (select 1 from public.rol r where r.id = {id})");
-        }
-        foreach (var y in yetkiler)
-        {
-            var (ykod, islem) = y.Contains(':') ? (y[..y.IndexOf(':')], y[(y.IndexOf(':') + 1)..]) : (y, "g");
-            var eklenen = await api.Veri.CalistirAsync("""
-                insert into public.rol_yetki (rol_id, yetki_id, gor, ekle, degistir, sil)
-                select @p0, y.id, 1, @p2, @p3, @p4 from public.yetki y where y.kod = @p1
-                on conflict (rol_id, yetki_id) do update set gor = 1, ekle = excluded.ekle, degistir = excluded.degistir, sil = excluded.sil
-                """, [id, ykod, (short)(islem.Contains('e') ? 1 : 0), (short)(islem.Contains('d') ? 1 : 0), (short)(islem.Contains('k') ? 1 : 0)]);
-            Assert.True(eklenen == 1, $"yetki bulunamadı: {ykod}");
-        }
+        var id = await api.Veri.TekDegerAsync<int>("select coalesce((select id from public.rol where kod = @p0 and sistem = 1), 0)", [kod]);
+        Assert.True(id > 0, $"sistem rolü yok (göç 1296 uygulanmamış): {kod}");
         return id;
     }
 
@@ -66,10 +48,8 @@ public sealed class RolKapsamiTestleri(ApiSunucuOlgusu api)
     public async Task Temsilci_yalniz_kendi_hekim_ve_ziyaretlerini_gorur_sorumlu_hepsini()
     {
         await using var d = new TestDunyasi(api.Veri);
-        var temsilciRol = await SabitRolAsync(d, "saha_temsilci", "Müşteri Temsilcisi (Saha)",
-            "dis_doktor.liste", "dis_doktor:ged", "dis_doktor.ziyaret:ged");
-        var sorumluRol = await SabitRolAsync(d, "saha_sorumlu", "Müşteri Temsilci Sorumlusu (Saha)",
-            "dis_doktor.liste", "dis_doktor:gedk", "dis_doktor.ziyaret:gedk");
+        var temsilciRol = await SistemRolAsync("saha_temsilci");
+        var sorumluRol = await SistemRolAsync("saha_sorumlu");
 
         var (aId, aKod) = await d.KullaniciAsync(temsilciRol, Merkez);
         var (bId, bKod) = await d.KullaniciAsync(temsilciRol, Merkez);
@@ -103,6 +83,25 @@ public sealed class RolKapsamiTestleri(ApiSunucuOlgusu api)
         Assert.Equal(HttpStatusCode.OK, (await a.GetAsync($"/api/kart/dis-hekim-ziyaret/{z1}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await a.GetAsync($"/api/kart/dis-hekim-ziyaret/{z2}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await a.GetAsync($"/api/kart/dis-hekim/{h2}")).StatusCode);
+
+        // YAZMA KAPISI: başkasının ziyareti güncellenmez / taşınmaz / iptal edilmez (satır DEĞİŞMEZ).
+        var z2Oncesi = await api.Veri.TekDegerAsync<DateTime>("select tarih from public.dis_hekim_ziyaret where id = @p0", [z2]);
+        var z1Kart = await (await a.GetAsync($"/api/kart/dis-hekim-ziyaret/{z1}")).Content.ReadFromJsonAsync<JsonElement>();
+        var surum = (z1Kart.TryGetProperty("surum", out var sv) ? sv : z1Kart.GetProperty("kart").GetProperty("surum")).GetString();
+        var put = await a.PutAsJsonAsync($"/api/kart/dis-hekim-ziyaret/{z2}", new { surum, kart = new { notu = "sızma" } });
+        Assert.Equal(HttpStatusCode.NotFound, put.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await a.PostAsJsonAsync($"/api/dis-hekim/ziyaret/{z2}/tasi", new { tarih = DateTime.Now.AddDays(1) })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await a.PostAsync($"/api/dis-hekim/ziyaret/{z2}/iptal", null)).StatusCode);
+        // Silme: temsilcide sil hakkı yok (403 yetki kapısı önce); hakkı olsa da kapsam dışı 404 - ikisi de satırı korur.
+        Assert.Contains((await a.DeleteAsync($"/api/kart/dis-hekim-ziyaret/{z2}")).StatusCode, new[] { HttpStatusCode.NotFound, HttpStatusCode.Forbidden });
+        Assert.Equal(z2Oncesi, await api.Veri.TekDegerAsync<DateTime>("select tarih from public.dis_hekim_ziyaret where id = @p0", [z2]));
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>("select count(*) from public.dis_hekim_ziyaret where id = @p0 and durum = 1", [z2]));
+        // /planla: temsilci B'nin hekimine planlayamaz; kendi hekimine B adına plansa da temsilci KENDİSİ olur.
+        Assert.Equal(HttpStatusCode.NotFound, (await a.PostAsJsonAsync("/api/dis-hekim/planla", new { hekimId = h2, tarih = DateTime.Now.AddDays(2), temsilciId = bId })).StatusCode);
+        var planla = await a.PostAsJsonAsync("/api/dis-hekim/planla", new { hekimId = h1, tarih = DateTime.Now.AddDays(2), temsilciId = bId });
+        Assert.True(planla.IsSuccessStatusCode, await planla.Content.ReadAsStringAsync());
+        var z3 = (await planla.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt32();
+        Assert.Equal(aId, await api.Veri.TekDegerAsync<int>("select temsilci_id from public.dis_hekim_ziyaret where id = @p0", [z3]));
 
         // Sorumlu: hepsi.
         var sHekimler = await ListeIdleriAsync(s, "dis-hekim");
