@@ -9529,3 +9529,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dhp-bos { color: #aab4bf; text-align: center; padding: 12px 0; font-size: 11px }
 .dhp-uret { display: inline-flex; gap: 8px; align-items: center; font-size: 11.5px; color: var(--soluk) }
 .dhp-uret input[type=number] { width: 52px; height: 24px }
+
+/* ZİYARET KARTI GÖRÜŞME SEKMESİ (mockup temsilci_ziyaret.html §2; kullanıcı 10.11.2026): "Görüşme Notu" solda geniş,
+   "Sonraki Adım" sağda; iki kutu yan yana (kutuların sarmalayıcısı :has ile ızgara). Not alanı kutuyu boydan boya doldurur. */
+.kart-dis-hekim-ziyaret :has(> .kagrup > .alan-izgara > .alan-notu) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; align-items: start }
+.kart-dis-hekim-ziyaret :has(> .kagrup > .alan-izgara > .alan-notu) > .kagrup { margin-bottom: 0 }
+.kart-dis-hekim-ziyaret .kagrup .alan-notu, .kart-dis-hekim-ziyaret .kagrup .alan-konular { grid-column: 1 / -1 }
+.kart-dis-hekim-ziyaret .kagrup .alan-notu textarea { min-height: 150px }

@@ -67,21 +67,30 @@ public static partial class KartKatalogu
             // TEMSİLCİ boş bırakılırsa tetik şube temsilcisini yazar (1287).
             new("temsilciId", "temsilci_id", "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Temsilci", Grup: "Kimlik"),
             new("tarih",      "tarih",       "zaman", Zorunlu: true, Baslik: "Tarih / Saat", Grup: "Kimlik"),
+            // ŞERİT (mockup §2; kullanıcı 10.11.2026 "sonuç combosu durumun sağına"): Dış Doktor · Temsilci · Tarih / Saat ·
+            //   Tür · Süre · Durum · Sonuç.
             new("tur",        "tur",         "kod",   Zorunlu: true, KodListesi: "dis_hekim.ziyaret_turu", Baslik: "Tür", Grup: "Kimlik"),
+            new("sureDk",     "sure_dk",     "sayi",  Baslik: "Süre (dk)", Grup: "Kimlik"),
             new("durum",      "durum",       "kod",   SabitKodlar: ZiyaretDurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
+            new("sonuc",      "sonuc",       "kod",   KodListesi: "dis_hekim.ziyaret_sonucu", Baslik: "Sonuç", Grup: "Kimlik"),
 
-            new("amac",       "amac",        "kod",   KodListesi: "dis_hekim.ziyaret_amaci", Baslik: "Amaç", Grup: "Görüşme"),
-            new("sonuc",      "sonuc",       "kod",   KodListesi: "dis_hekim.ziyaret_sonucu", Baslik: "Sonuç", Grup: "Görüşme"),
-            new("sureDk",     "sure_dk",     "sayi",  Baslik: "Süre (dk)", Grup: "Görüşme"),
-            new("memnuniyet", "memnuniyet",  "kod",   SabitKodlar: MemnuniyetKodlari, Baslik: "Memnuniyet", Grup: "Görüşme"),
-            new("notu",       "notu",        "metin", EnFazlaUzunluk: 4000, Baslik: "Görüşme Notu", Grup: "Görüşme"),
-            new("konular",    "konular",     "metin", EnFazlaUzunluk: 300, Baslik: "Görüşülen Konular", Grup: "Görüşme"),
-            new("rakip",      "rakip",       "metin", EnFazlaUzunluk: 200, Baslik: "Rakip Baskısı", Grup: "Görüşme"),
-            new("materyal",   "materyal",    "metin", EnFazlaUzunluk: 300, Baslik: "Bırakılan Materyal", Grup: "Görüşme"),
+            // GÖRÜŞME SEKMESİ (kullanıcı 10.11.2026: "görüşme sekmesini mockup gibi yap", "sonraki adımı sağa al"):
+            //   solda "Görüşme Notu" kutusu (amaç, not, konular), sağda "Sonraki Adım" (sonraki ziyaret, sıklık, hatırlat,
+            //   materyal, memnuniyet, rakip). İki kutu yan yana (tema.css .kart-dis-hekim-ziyaret).
+            new("amac",       "amac",        "kod",   KodListesi: "dis_hekim.ziyaret_amaci", Baslik: "Amaç", Grup: "Görüşme", AltGrup: "Görüşme Notu"),
+            new("notu",       "notu",        "metin", EnFazlaUzunluk: 4000, Baslik: "Not", Grup: "Görüşme", AltGrup: "Görüşme Notu"),
+            new("konular",    "konular",     "metin", EnFazlaUzunluk: 300, Baslik: "Görüşülen konular", Grup: "Görüşme", AltGrup: "Görüşme Notu", TekSatir: true),
 
-            new("sonrakiTarih", "sonraki_tarih", "tarih", Baslik: "Sonraki Ziyaret", Grup: "Sonraki Adım"),
-            new("hatirlat",   "hatirlat",    "mantik", Baslik: "Hatırlat", Grup: "Sonraki Adım"),
-            new("hatirlatmaId", "hatirlatma_id", "sayi", Yazilabilir: false, Baslik: "Hatırlatma No", Grup: "Sonraki Adım"),
+            new("sonrakiTarih", "sonraki_tarih", "tarih", Baslik: "Sonraki ziyaret", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
+            new("siklikAdi",
+                "(select case coalesce(p.ziyaret_sikligi_hafta, 0) when 0 then 'Planlanmaz' else p.ziyaret_sikligi_hafta::text || ' haftada bir' end"
+                + "   from public.taraf_personel p where p.id = dis_hekim_ziyaret.hekim_id)",
+                "metin", Yazilabilir: false, Baslik: "Sıklık (hekim kartı)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
+            new("hatirlat",   "hatirlat",    "mantik", Baslik: "Hatırlat (1 gün önce, temsilciye)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
+            new("materyal",   "materyal",    "metin", EnFazlaUzunluk: 300, Baslik: "Bırakılan materyal", Grup: "Görüşme", AltGrup: "Sonraki Adım", TekSatir: true),
+            new("memnuniyet", "memnuniyet",  "kod",   SabitKodlar: MemnuniyetKodlari, Baslik: "Memnuniyet", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
+            new("rakip",      "rakip",       "metin", EnFazlaUzunluk: 200, Baslik: "Rakip baskısı", Grup: "Görüşme", AltGrup: "Sonraki Adım", TekSatir: true),
+            new("hatirlatmaId", "hatirlatma_id", "sayi", Yazilabilir: false, Baslik: "Hatırlatma No", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
 
             // MOBİL DAMGA (eski HBYS BASTARIH / BITTARIH / BASYERXY): telefondan dolar, masaüstünde okunur.
             new("basZamani",  "bas_zamani",  "zaman",   Baslik: "Başlangıç", Grup: "Mobil"),
