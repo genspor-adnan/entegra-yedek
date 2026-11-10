@@ -153,6 +153,30 @@ public static partial class AksiyonKatalogu
                 Ipucu: "Dışarıdan giriş icin PAROLASIZ hesap acar - kisi ilk giriste kendi parolasini koyar"),
         ];
         // Dis doktor (305): kendi yetkisiyle (1003, eskiden `personel`), kendi kart adiyla.
+        // DIS DOKTOR SAHA (1289, mockup temsilci_ziyaret.html): ziyaretler ve doktor talepleri.
+        s["dis-hekim-ziyaret-liste"] =
+        [
+            .. Crud("dis-hekim-ziyaret", "dis-hekim", "dis_doktor.ziyaret", ekleAdi: "＋ Ziyaret"),
+            // YONETICI GORDU (eski HBYS ZIYARETGORULDUMOBIL): notu okuyan yonetici isaretler.
+            new("dis-hekim-ziyaret.goruldu", "👁 Gördüm", "dis-hekim",
+                KaynakKodu: "dis_doktor.ziyaret", Islem: Islem.Degistir, KayitGerekir: true, Sira: 15,
+                Ipucu: "Ziyaret notunu okudum (yönetici)"),
+            new("dis-hekim-ziyaret.hekim-karti", "🩺 Dış Doktor Kartı", "dis-hekim", Hedef: "sagtus,palet",
+                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 16),
+        ];
+        s["dis-hekim-talep-liste"] =
+        [
+            .. Crud("dis-hekim-talep", "dis-hekim", "dis_doktor.talep", ekleAdi: "＋ Talep"),
+            new("dis-hekim-talep.kapat", "✔ Kapat", "dis-hekim",
+                KaynakKodu: "dis_doktor.talep", Islem: Islem.Degistir, KayitGerekir: true, Sira: 15, Bicim: "onay",
+                Ipucu: "Talep karşılandı; sonuç yazılır"),
+            new("dis-hekim-talep.ret", "✖ Ret", "dis-hekim",
+                KaynakKodu: "dis_doktor.talep", Islem: Islem.Degistir, KayitGerekir: true, Sira: 16, Bicim: "tehlike"),
+            new("dis-hekim-talep.goreve-cevir", "➜ Göreve Çevir", "dis-hekim",
+                KaynakKodu: "dis_doktor.talep", Islem: Islem.Degistir, KayitGerekir: true, Sira: 17,
+                Ipucu: "Sorumluya görev açar, talep göreve bağlanır"),
+        ];
+
         s["dis-hekim-liste"] =
         [
             .. Crud("dis-hekim", "dis-hekim", "dis_doktor"),

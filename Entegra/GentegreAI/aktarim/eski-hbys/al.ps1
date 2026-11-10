@@ -69,8 +69,10 @@ $KAPSAM = [ordered]@{
   # yılın hareketleri (çapa: başvuru)
   "GELISLER"   = " WHERE $gelisKosul"
   "KIMLIK"     = " WHERE ID IN (SELECT KIMLIKID FROM dbo.GELISLER WHERE $gelisKosul)"
-  "DOKTORLAR"  = " WHERE ID IN (SELECT GONDOKTORID FROM dbo.GELISLER WHERE $gelisKosul) OR ID IN (SELECT DOKTORID FROM dbo.GELISLER WHERE $gelisKosul)"
+  "DOKTORLAR"  = " WHERE ID IN (SELECT GONDOKTORID FROM dbo.GELISLER WHERE $gelisKosul) OR ID IN (SELECT DOKTORID FROM dbo.GELISLER WHERE $gelisKosul) OR ID IN (SELECT DID FROM dbo.ZIYARET WHERE DID IS NOT NULL)"
   "PARA"       = " WHERE GELISID IN $gelisIdler"
+  # ZİYARET (10.11.2026, temsilci ziyaretleri aktarımı): tamamı - yıl süzgeci yok, 2021'den beri 6.381 kayıt.
+  "ZIYARET"    = ""
   "TAHSILAT"   = " WHERE GELISID IN $gelisIdler"
   "FATBASLIK"  = " WHERE GELISID IN $gelisIdler"
   "FATURA"     = " WHERE FATBASID IN (SELECT ID FROM dbo.FATBASLIK WHERE GELISID IN $gelisIdler)"

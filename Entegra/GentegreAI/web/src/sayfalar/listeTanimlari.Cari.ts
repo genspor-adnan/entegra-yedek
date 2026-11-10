@@ -195,6 +195,39 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
   },
   {
+    // DIS DOKTOR ZIYARETLERI (1289, mockup Ekranlar/Radyoloji/temsilci_ziyaret.html §1-2): temsilcinin görüşme notu,
+    //   doktorun talepleri, sonraki ziyaret. Yalnız HBYS (dış doktor kavramı). Kart jenerik (dis-hekim-ziyaret).
+    kaynak: 'dis-hekim-ziyaret', baslik: 'Dış Doktor Ziyaretleri', yol: 'Kurumlar & Sigorta › Dış Doktor Ziyaretleri',
+    kartYolu: '/dis-hekim-ziyaret', kartBaslik: 'Ziyaret',
+    aksiyonEkrani: 'dis-hekim-ziyaret-liste',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Planlı',      filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Yapıldı',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Açık talebi var', filtre: { alan: 'acikTalep', op: 'buyuk', deger: 0 } },
+      { ad: 'Görülmedi',   filtre: { alan: 'goruldu', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktor Ziyaretleri', ic: '🤝', yetkiKodu: 'dis_doktor.ziyaret',
+    menuSira: 22, urunModu: 2,
+  },
+  {
+    // DOKTOR TALEPLERI (1289, §2 "Doktorun Talepleri"): kurumun karşılaması gereken istekler; termini geçen kırmızı.
+    kaynak: 'dis-hekim-talep', baslik: 'Doktor Talepleri', yol: 'Kurumlar & Sigorta › Doktor Talepleri',
+    kartYolu: '/dis-hekim-talep', kartBaslik: 'Doktor Talebi',
+    aksiyonEkrani: 'dis-hekim-talep-liste',
+    tarihAlani: 'termin',
+    cipler: [
+      { ad: 'Açık',        filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Onayda',      filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Termini geçen', filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
+      { ad: 'Kapandı',     filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Doktor Talepleri', ic: '📋', yetkiKodu: 'dis_doktor.talep',
+    menuSira: 23, urunModu: 2,
+  },
+  {
     kaynak: 'proje', baslik: 'Proje Listesi', yol: 'CRM › Proje Listesi', kartYolu: '/proje',
     aksiyonEkrani: 'proje-liste',
     cipler: [

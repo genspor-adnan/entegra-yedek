@@ -310,6 +310,9 @@ public static partial class KartKatalogu
         Ekle(Hasta());
         Ekle(HastaAday());
         Ekle(DisHekim());
+        // DIS DOKTOR SAHA (1289): ziyaret + talep kartlari.
+        Ekle(DisHekimZiyaret());
+        Ekle(DisHekimTalep());
         Ekle(Kurum());
         Ekle(Departman());
         Ekle(Kampanya());

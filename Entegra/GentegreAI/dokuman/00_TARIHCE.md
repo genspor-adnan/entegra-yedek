@@ -212,6 +212,21 @@ başlığında … Listesi olsun".
   `satici_id`'si o şubenin temsilcisiyle dolar. Prim rolü **10 Temsilci** (`prim.rol`, `v_prim_rol_lookup`): belgenin
   satici_id'si kalemlere rol 10 (kaynak 2; `fn_temsilci_rolu_tazele`, satır + satici tetikleri; 1288 rad rol tazeleme
   rol 10'a dokunmaz). `fn_prim_plan_satiri` özgüllüğüne şube: şubeli plan genel planı ezer. Test `SubeTemsilcisiTestleri`.
+- **Dış doktor ziyaretleri + doktor talepleri (adım b; mockup `Ekranlar/Radyoloji/temsilci_ziyaret.html` §1-2, §5-6; göç 1289):**
+  `dis_hekim_ziyaret` (tür · amaç · sonuç · not · konular · memnuniyet · rakip · materyal · sonraki ziyaret; mobil damga
+  başlangıç / bitiş zamanı + konum; yönetici gördü), `dis_hekim_ziyaret_yorum`, `dis_hekim_talep` (tür · öncelik · sorumlu
+  · termin · durum · sonuç · görev bağı). Kod listeleri `dis_hekim.*`. Temsilci boşsa şube temsilcisi (tetik); yapılan
+  ziyaretin sonraki tarihi temsilciye `hatirlatma` açar (bir kez). Dış doktor kartına **Ziyaretler** (salt okunur) ve
+  **Talepler** sekmeleri + Hekim Bilgisi'ne ziyaret sıklığı / tercih gün-saat / konum. Listeler Kurumlar & Sigorta ›
+  Dış Doktor Ziyaretleri (`dis_doktor.ziyaret`) ve Doktor Talepleri (`dis_doktor.talep`; termini geçen kırmızı). Uçlar
+  `POST /api/dis-hekim/talep/{id}/kapat` {durum 3|4, sonuc}, `/goreve-cevir` (gorev açar, ikinci çağrı aynı görevi
+  döndürür), `/ziyaret/{id}/goruldu`. Eski HBYS'den ekstralar: amaç (TURU), görüldü / yorum (GORULDUMOBIL /
+  YORUMMOBIL), mobil damga. Test `DisHekimZiyaretTestleri`. Rota (adım c) kullanıcı kararıyla ERTELENDİ.
+- **Eski ziyaretlerin aktarımı (KOSUYOLU; kullanıcı: "eski ziyaretleri de aktar"):** `aktarim/eski-hbys/ziyaret.sql`
+  (al.ps1 kapsamına ZIYARET + ziyaret edilen DOKTORLAR eklendi): 5 temsilci personel (KULLAN kodu ED/RC/BG aktif,
+  BH/H8 pasif), 1.055 eksik dış doktor (adres / ilçe taraf_adres'e, ZIYARETSURESI ay×4 → sıklık), 6.376 ziyaret
+  (sonuç nottan: asistan / kabul etmedi / görüşülemedi; tanışma → tür 4; mobil damga), şube temsilcisi = son ziyaretçi
+  (1.192 satır) ve `taraf.temsilci`. Hatırlatma açılmaz. İdempotent (aktarim_kaynak 2 / ZIYARET).
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

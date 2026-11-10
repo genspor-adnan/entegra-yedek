@@ -481,6 +481,8 @@ uygulama.DemoUclariniEkle();
 // DUYURULAR (957): zil > Duyurular, yayinla, yonetim listesi.
 uygulama.DuyuruUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
+// DIS DOKTOR SAHA (1289): talep kapat / goreve cevir, ziyaret gordum.
+uygulama.DisHekimUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 // PORTAL HESABI (819): dis hekim / kurum / hasta erisimi - ayri yetki.

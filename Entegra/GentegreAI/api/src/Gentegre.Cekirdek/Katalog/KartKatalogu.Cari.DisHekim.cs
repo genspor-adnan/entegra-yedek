@@ -118,6 +118,14 @@ public static partial class KartKatalogu
                 //   serbest" ayrimini tasir, yeni kolon gerekmedi.
                 new("calismaSekli", "calisma_sekli", "kod",
                     SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
+                // SAHA (1289, temsilci_ziyaret.html §5): ziyaret sıklığı plan üretir (adım c); tercih gün / saat ve
+                //   konum rota için. Eski HBYS ZIYARETSURESI (ay) sıklığa, adres ilçesi rotaya.
+                new("ziyaretSikligiHafta", "ziyaret_sikligi_hafta", "kod",
+                    SabitKodlar: ZiyaretSikligiKodlari, Baslik: "Ziyaret Sıklığı"),
+                new("tercihGun",  "tercih_gun",  "kod", SabitKodlar: HaftaGunuKodlari, Baslik: "Tercih Günü"),
+                new("tercihSaat", "tercih_saat", "metin", EnFazlaUzunluk: 5, Baslik: "Tercih Saati"),
+                new("enlem",  "enlem",  "ondalik", Baslik: "Enlem"),
+                new("boylam", "boylam", "ondalik", Baslik: "Boylam"),
             // SubeKolonu VARSAYILAN: taraf_personel.sube_id NOT NULL - detay
             //   satiri oturumun subesiyle yazilir (null verilirse insert
             //   "subeId bos birakilamaz" ile patlar).
@@ -150,6 +158,34 @@ public static partial class KartKatalogu
                SubeKolonu: null, LogTabloId: 1780, Baslik: "Temsilciler",
                YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
                BosAtlaAlani: "temsilciId", GridKipi: true, AnindaKaydet: true),
+            // ZİYARETLER (1289): bu hekime yapılan ziyaretler, salt okunur - kayıt ziyaret kartından.
+            new DetayTanimi("ziyaretler", "public.dis_hekim_ziyaret", "hekim_id", new KartAlani[]
+            {
+                new("id",     "id",     "sayi",  Yazilabilir: false),
+                new("tarih",  "tarih",  "zaman", Yazilabilir: false, Baslik: "Tarih"),
+                new("turAd",
+                    "(select d.ad from public.kod_liste l join public.kod_deger d on d.liste_id = l.id "
+                    + " where l.kod = 'dis_hekim.ziyaret_turu' and d.deger = dis_hekim_ziyaret.tur)",
+                    "metin", Yazilabilir: false, Baslik: "Tür"),
+                new("sonucAd",
+                    "(case dis_hekim_ziyaret.durum when 0 then 'Planlı' when 2 then 'İptal' else coalesce("
+                    + "(select d.ad from public.kod_liste l join public.kod_deger d on d.liste_id = l.id "
+                    + "  where l.kod = 'dis_hekim.ziyaret_sonucu' and d.deger = dis_hekim_ziyaret.sonuc), 'Yapıldı') end)",
+                    "metin", Yazilabilir: false, Baslik: "Sonuç"),
+                new("temsilciAd",
+                    "(select public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120) from public.taraf p where p.id = dis_hekim_ziyaret.temsilci_id)",
+                    "metin", Yazilabilir: false, Baslik: "Temsilci"),
+                new("notOzet", "left(dis_hekim_ziyaret.notu, 160)", "metin", Yazilabilir: false, Baslik: "Not"),
+                new("talepSayisi", "(select count(*) from public.dis_hekim_talep t where t.ziyaret_id = dis_hekim_ziyaret.id)",
+                    "sayi", Yazilabilir: false, Baslik: "Talep"),
+            }, Sirala: "tarih desc", SubeKolonu: "sube_id", LogTabloId: 1781, Baslik: "Ziyaretler", SaltOkunur: true,
+               SayfaBoyu: 50),
+            // TALEPLER (1289): hekimin açık / kapalı talepleri; satır burada da açılır (ziyaretsiz talep).
+            new DetayTanimi("talepler", "public.dis_hekim_talep", "hekim_id", TalepAlanlari(hekimli: false),
+                Sirala: "case when durum in (1, 2) then 0 else 1 end, termin nulls last, id desc",
+                SubeKolonu: "sube_id", LogTabloId: 1782, Baslik: "Talepler",
+                YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1, ["oncelik"] = (short)1, ["tur"] = (short)9 },
+                BosAtlaAlani: "talep", GridKipi: true, AnindaKaydet: true),
 
             // ADRES (kullanici: "alta grid olarak da adres gelsin"): bir hekimin
             //   MUAYENEHANESI ve calistigi HASTANE(ler) ayri satirlardir - tek

@@ -52,6 +52,7 @@ import { onayAksiyonu } from './liste/onayAksiyonlari';
 import { izinAksiyonu } from './liste/izinAksiyonlari';
 import { personelTalepSecenekleri } from '../bilesenler/taleplerim/personelTalebi';
 import { servisAksiyonu } from './liste/servisAksiyonlari';
+import { disHekimAksiyonu } from './liste/disHekimAksiyonlari';
 import { arizaAksiyonu } from './liste/arizaAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
 import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
@@ -725,6 +726,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   imzasiz ziyaret kapanmaz, acik emanetle teslim edilmez; ekran
       //   yalnizca soruyu sorar ve reddi gosterir.
       if (await servisAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      // DIS DOKTOR SAHA (1289): talep kapat / ret / göreve çevir, ziyaret gördüm. Kurallar uçta.
+      if (await disHekimAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;

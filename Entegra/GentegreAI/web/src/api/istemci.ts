@@ -96,6 +96,7 @@ import { demoUclari } from './uclar/demo';
 import { radyolojiTanimUclari } from './uclar/radyolojiTanim';
 import { aktarimEslemeUclari } from './uclar/aktarimEsleme';
 import { servisUclari } from './uclar/servis';
+import { disHekimUclari } from './uclar/disHekim';
 import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
 import { kasaUclari } from './uclar/kasa';
@@ -145,6 +146,7 @@ export const api = {
   ...radyolojiTanimUclari,
   ...aktarimEslemeUclari,
   ...servisUclari,
+  ...disHekimUclari,
   ...arizaUclari,
   ...basvuruIstemUclari,
   ...listeUclari,

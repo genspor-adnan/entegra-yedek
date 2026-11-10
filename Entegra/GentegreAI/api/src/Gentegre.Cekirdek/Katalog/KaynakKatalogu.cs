@@ -250,6 +250,9 @@ public static partial class KaynakKatalogu
         Ekle(Personel());
         Ekle(Hasta());
         Ekle(DisHekim());
+        // DIS DOKTOR SAHA (1289): ziyaretler + doktor talepleri.
+        Ekle(DisHekimZiyaret());
+        Ekle(DisHekimTalep());
         Ekle(BasvuruHekim());
         Ekle(Kurum());
         Ekle(Departman());
