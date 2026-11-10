@@ -349,6 +349,8 @@ public sealed partial class KartDeposu
             "public.v_ameliyat_salon_lookup", "public.v_acil_yatak_lookup",
             "public.v_klinik_gosterge_lookup", "public.v_klinik_olgu_lookup",
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
+            // Saha temsilcisi (1295): ziyaret karti + dis doktor Temsilciler sekmesi. Beyaz listeye eklenmeyince yeni ziyaret 500 verdi.
+            "public.v_saha_temsilci_lookup",
             "public.v_sube_baz_lookup", "public.v_sube_ust_lookup",   // 1272: e-Belge baz şube ("Kendisi" yok)
             // Randevu (243): hasta secimi.
             "public.v_hasta_lookup",
