@@ -199,6 +199,11 @@ başlığında … Listesi olsun".
   1285):** 1284 istisnası 11 / 15'e genişledi (`BelgeTuru.DogrudanSilinenTurler`, `fn_belge_silinebilir`). e-Belge
   hazır / gönderilmiş, iptal, dönüştürülmüş, kasa işlemi bağlı, ÜTS bildirimli fatura yine silinmez. Diğer ticari
   belgelerde (irsaliye, sipariş, teklif, fiş, tahakkuk) 1267 kuralı sürer. Test `StokBelgesiSilTestleri`.
+- **Silme deseni HER belgede aynı (kullanıcı: "bütün alış/satış belgeleri için artık silme deseni böyle"; göç 1286):**
+  1267 "satırları olan belge silinemez" kuralı tamamen kalktı; `DELETE /api/belge/{id}` her türde satırları aynı
+  işlemde siler (`?satirlarla` parametresi ve `BelgeTuru.DogrudanSilinir` kümesi kaldırıldı). Korumalar sürer: e-Belge
+  hazır / gönderilmiş, iptal edilmiş, dönüştürülmüş belge, bağlı kasa işlemi, ÜTS bildirimi; başka kaydın kullandığı
+  satır (radyoloji istemi, hakediş...) FK ile. Liste onayı her türde "satırlarıyla birlikte silinecek".
 
 
 ## 08.11.2026 — Kişi kartı personel gibi: Ünvan önek combosu, Ad / Soyad, otomatik kişi kodu (1277)

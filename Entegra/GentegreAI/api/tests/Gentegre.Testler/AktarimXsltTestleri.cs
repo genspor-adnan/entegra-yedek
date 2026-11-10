@@ -92,11 +92,12 @@ public sealed class AktarimXsltTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
     private sealed record DokumanSatiri(int Id, int KaynakId, short Yon, short Varsayilan, string BelgeTuru, string Hash,
                                         int Boyut, string ContentType, string Icerik);
 
-    /// <summary>1267: satırı olan belge (her tür) silinemez; satırsız silinebilir.</summary>
+    /// <summary>1267 satır kuralı 1286'da kalktı: satırı olan belge de silinebilir (satırlar belgeyle gider);
+    /// e-Belge / iptal / dönüşüm / kasa / ÜTS korumaları sürer.</summary>
     [VtFact]
-    public async Task Satirli_belge_silinemez()
+    public async Task Satirli_belge_silinebilir()
     {
-        if (!_olgu.Baglandi(nameof(Satirli_belge_silinemez))) return;
+        if (!_olgu.Baglandi(nameof(Satirli_belge_silinebilir))) return;
         await using var b = await _olgu.Gerekli().AcAsync(CancellationToken.None);
         await using var t = await b.BeginTransactionAsync();
         var ct = CancellationToken.None;
@@ -105,7 +106,7 @@ public sealed class AktarimXsltTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
             "update public.aktarim_ayar set deger = '2026-01-01' where anahtar = 'hareket_baslangic'", t, [], ct);
         await FnAsync(b, t, "fn_aktar_cari",
             "{\"U\": {\"REHBER\": [{\"id\": 990007201, \"kod\": \"AKT-XS-CARI\", \"firma\": \"Satırlı Belge Carisi\", \"durum\": 1}]}}");
-        // Sipariş (tur 19): fatura değil - kural yine de geçerli (kullanıcı: "tüm belgeler").
+        // Sipariş (tur 19): desen her türde aynı (kullanıcı 10.11.2026: "bütün alış/satış belgeleri").
         await FnAsync(b, t, "fn_aktar_belge",
             "{\"U\": {\"FATBASLIK\": [{\"id\": 990007301, \"tur\": 19, \"tipi\": 1, \"rehberid\": 990007201, \"faturatarih\": \"2026-06-01T10:00:00\","
             + " \"faturano\": \"SB-1\", \"fatura_tutari\": 100}],"
@@ -114,10 +115,6 @@ public sealed class AktarimXsltTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
         var belgeId = await b.TekDegerAsync<int>(
             "select id from public.belge where aktarim_kaynak = 1 and aktarim_tablo = 'FATBASLIK' and aktarim_id = 990007301", t, [], ct);
         Assert.True(await b.TekDegerAsync<long>("select count(*) from public.belge_satir where belge_id = @p0", t, [belgeId], ct) > 0);
-        Assert.Contains("Satırları olan belge silinemez",
-            await b.TekDegerAsync<string>("select public.fn_belge_silinebilir(@p0)", t, [belgeId], ct));
-
-        await b.CalistirAsync("delete from public.belge_satir where belge_id = @p0", t, [belgeId], ct);
         Assert.Equal("", await b.TekDegerAsync<string>("select public.fn_belge_silinebilir(@p0)", t, [belgeId], ct));
     }
 }

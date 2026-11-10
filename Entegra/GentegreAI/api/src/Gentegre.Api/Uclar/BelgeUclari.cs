@@ -619,7 +619,7 @@ public static class BelgeUclari
             });
         });
 
-        // DELETE /api/belge/{id} - belgeyi sil (181). Kesin/izli belgede
+        // DELETE /api/belge/{id} - belgeyi SATIRLARIYLA sil (181 · 1286). Kesin/izli belgede
         //   IPTAL kullanilir; on-kosullar veritabaninda (fn_belge_silinebilir),
         //   arayuz ve uc AYNI cevabi alsin diye.
         grup.MapDelete("/{id:int}", async (
@@ -630,10 +630,7 @@ public static class BelgeUclari
             baglam.YetkiIste("belge", Islem.Sil);
             await BelgeYazmaIsteAsync(baglam, veri, erisim, id, null, Islem.Sil, iptal);
 
-            // ?satirlarla=1: karttan silme - satırlar aynı işlemde önce silinir (BelgeDeposu.SilAsync).
-            var satirlarla = ctx.Request.Query["satirlarla"].ToString() == "1";
-            var mesaj = await depo.SilAsync(id,
-                baglam.Yazma, iptal, satirlarla);
+            var mesaj = await depo.SilAsync(id, baglam.Yazma, iptal);
             return Results.Ok(new { mesaj, izlemeNo = baglam.IzlemeNo });
         });
 

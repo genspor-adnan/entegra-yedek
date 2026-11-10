@@ -131,18 +131,9 @@ public static class BelgeTuru
 
     public static bool TalepMi(int tur) => tur == Talep;
 
-    /// <summary>
-    /// SATIRLARIYLA DOĞRUDAN SİLİNEN TÜRLER (kullanıcı 10.11.2026: "Stoktan Talep - Stok Transferleri - Giriş - Çıkış
-    /// Fişinde silmek isteyince içeriden satırları silmemizi istiyor. direkt silebilsin.. gerekirse logdan geri alırız").
-    /// 1267 kuralı (satırlı belge silinmez, önce satırlar) carili / e-Belgeli ticari belgeler için kalır; bu dört tür
-    /// carisiz, parasız, e-Belgesiz iç stok belgesidir - listeden Sil satırları da aynı işlemde götürür
-    /// (BelgeDeposu.SilAsync satirlarla), silme logu (tablo 30) ile geri alınabilir. fn_belge_silinebilir 1284.
-    /// </summary>
-    /// ALIŞ / SATIŞ FATURASI DA (kullanıcı 10.11.2026: "alış/satış faturası listesinde ve kart içinden faturayı
-    /// silebilmeliyim", 1285): e-Belge / iptal / dönüşüm / kasa / ÜTS korumaları fn_belge_silinebilir'de sürer.
-    private static readonly HashSet<int> DogrudanSilinenTurler = new() { 3, 4, Transfer, Talep, 11, SatisFaturasi };
-
-    public static bool DogrudanSilinir(int tur) => DogrudanSilinenTurler.Contains(tur);
+    // SİLME DESENİ (kullanıcı 10.11.2026, 1284 → 1285 → 1286 "bütün alış/satış belgeleri için artık silme deseni
+    //   böyle"): HER belge satırlarıyla silinir (BelgeDeposu.SilAsync); 1267'nin "önce satırları silin" kuralı kalktı.
+    //   Tür kümesi tutulmuyor. Korumalar fn_belge_silinebilir'de: e-Belge hazır / gönderilmiş, iptal, dönüşüm, kasa, ÜTS.
 
     public static bool StokFisiMi(int tur) => StokFisleri.Contains(tur);
 

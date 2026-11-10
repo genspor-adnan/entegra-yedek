@@ -1,13 +1,12 @@
-using System.Net;
 using System.Net.Http.Json;
 using Gentegre.Veri;
 
 namespace Gentegre.Testler;
 
 /// <summary>
-/// İÇ STOK BELGESİ LİSTEDEN SATIRLARIYLA SİLİNİR (1284, kullanıcı 10.11.2026: "Giriş - Çıkış Fişinde ... direkt
-/// silebilsin.. gerekirse logdan geri alırız"): giriş fişi satırlı iken DELETE (satirlarla=0) başarılı, satırlar
-/// gider, stok bakiyesi geri alınır, silme logu yazılır. Ticari belgede (teklif) 1267 kuralı aynen: 422.
+/// BELGE SATIRLARIYLA SİLİNİR (1284 iç stok belgeleri → 1285 fatura → 1286 HER TÜR; kullanıcı 10.11.2026: "bütün
+/// alış/satış belgeleri için artık silme deseni böyle"): DELETE satırları aynı işlemde götürür, stok bakiyesi / cari
+/// hareketi geri alınır, silme logu yazılır. Teklif de satırlı iken silinir (1267 kuralı kalktı).
 /// </summary>
 [Collection(ApiKoleksiyonu.Ad)]
 public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
@@ -58,7 +57,7 @@ public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
             values (@p0, 1, 1, @p1, 5, 5, 10, 50, @p2)
             """, [belgeId, stok, Merkez]);
 
-        // Listeden silme: satirlarla İSTENMEZ - sunucu türe bakıp satırları kendisi götürür.
+        // Listeden silme: satırlar sunucuda aynı işlemde gider.
         var y = await istemci.DeleteAsync($"/api/belge/{belgeId}");
         Assert.True(y.IsSuccessStatusCode, $"{(int)y.StatusCode} {await y.Content.ReadAsStringAsync()}");
 
@@ -111,7 +110,7 @@ public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
     }
 
     [VtFact]
-    public async Task Ticari_belgede_satirli_silme_kurali_kalir()
+    public async Task Teklif_de_satirli_iken_silinir()
     {
         await using var d = new TestDunyasi(api.Veri);
         var istemci = await IstemciAsync(d);
@@ -133,8 +132,10 @@ public sealed class StokBelgesiSilTestleri(ApiSunucuOlgusu api)
             """, [belgeId, Merkez]);
 
         var y = await istemci.DeleteAsync($"/api/belge/{belgeId}");
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, y.StatusCode);
-        Assert.Equal(1, await api.Veri.TekDegerAsync<int>(
+        Assert.True(y.IsSuccessStatusCode, $"{(int)y.StatusCode} {await y.Content.ReadAsStringAsync()}");
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
             "select count(*)::int from public.belge where id = @p0", [belgeId]));
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public.belge_satir where belge_id = @p0", [belgeId]));
     }
 }

@@ -1531,7 +1531,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
 Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     try {
-      const y = await api.belgeSil(kayitliId, true);
+      const y = await api.belgeSil(kayitliId);
       cariHareketiDegisti();
       onKaydedildi?.();
       mesaj(y.mesaj || 'Belge silindi.');

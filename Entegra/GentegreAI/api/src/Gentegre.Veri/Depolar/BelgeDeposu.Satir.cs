@@ -409,15 +409,17 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
-    /// Belgeyi siler (181). On-kosul saglanmazsa IS KURALI hatasi doner -
+    /// Belgeyi SATIRLARIYLA siler (181 · 1286). On-kosul saglanmazsa IS KURALI hatasi doner -
     /// e-Belge hazirlanmis/gonderilmis, kasa islemi bagli ya da baska belgeye
     /// donusturulmus belge SILINMEZ; onlarda "İptal Et" kullanilir.
+    ///
+    /// SATIRLAR AYNI İŞLEMDE (07.11.2026 karttan, 10.11.2026 her yerden - kullanıcı: "bütün alış/satış belgeleri için
+    /// artık silme deseni böyle"; 1267'nin "önce satırları silin" kuralı kalktı): satır tetikleri (kapatma / kilit)
+    /// yine çalışır, stok / lot / cari etkisi geri alınır, silme logu (tablo 30) tam satırla DELETE'ten önce yazılır -
+    /// geri alma oradan. Başka kaydın kullandığı satır (radyoloji istemi, hakediş...) FK ile korunur.
     /// </summary>
-    /// <param name="satirlarla">KARTTAN SİL (kullanıcı 07.11.2026: satırları ekranda silip "Belgeyi sil" dedi; 1267 kuralı
-    /// "satırları olan belge silinemez", kaydet ise "satır olmayan belge kaydedilemez" - kilitlenme): true ise satırlar
-    /// aynı işlemde önce silinir (satır tetikleri - kapatma / kilit - yine çalışır), sonra belge. Listeden silme strict.</param>
     public async Task<string> SilAsync(int belgeId, YazmaBaglami baglam,
-                                       CancellationToken iptal = default, bool satirlarla = false)
+                                       CancellationToken iptal = default)
         => await IsKuraliCevirAsync(async () =>
         {
             await using var baglanti = await _veri.AcAsync(iptal);
@@ -447,7 +449,6 @@ public sealed partial class BelgeDeposu
             //   geri gelmiyordu (UNIVERSE: silinen satış irsaliyesinin lotu 0'da kaldı). Düzenlemedeki geri alma
             //   (StokDurumGeriAlAsync) burada da çalışır; silme engellenirse (fn_belge_silinebilir) aynı işlem
             //   geri alınır. Yalnız KESİN (durum 0) ve stok etkileyen türde - taslak ve sipariş stoğa yazmaz.
-            var belgeTuru = 0;
             await using (var bilgi = baglanti.Komut(
                 "select tur, coalesce(tipi, 0), coalesce(durum, 0) from public.belge where id = @p0", islem, belgeId))
             await using (var o = await bilgi.ExecuteReaderAsync(iptal))
@@ -458,17 +459,11 @@ public sealed partial class BelgeDeposu
                     var tipi = Convert.ToInt32(o.GetValue(1));
                     var durum = Convert.ToInt32(o.GetValue(2));
                     await o.CloseAsync();
-                    belgeTuru = tur;
                     if (durum == 0 && await StokEtkilerMiAsync(baglanti, islem, tur, iptal))
                         await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
                 }
             }
 
-            // İÇ STOK BELGELERİ (giriş / çıkış fişi, transfer, stoktan talep) LİSTEDEN DE SATIRLARIYLA SİLİNİR
-            //   (kullanıcı 10.11.2026: "direkt silebilsin.. gerekirse logdan geri alırız"; BelgeTuru.DogrudanSilinir, 1284).
-            if (!satirlarla && BelgeTuru.DogrudanSilinir(belgeTuru)) satirlarla = true;
-
-            if (satirlarla)
             {
                 // 1267'NİN DİĞER KURALI KORUNUR (inceleme 07.11.2026): satırları önce silmek "bu belgeden dönüştürülmüş
                 //   belge var" denetimini (ks.belge_id = p_belge_id - boş kalırdı) boşa çıkarıyordu; türetilmiş belgenin
