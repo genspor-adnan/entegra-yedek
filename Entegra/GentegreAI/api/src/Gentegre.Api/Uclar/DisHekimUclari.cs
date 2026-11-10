@@ -1,4 +1,5 @@
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -111,7 +112,11 @@ public static class DisHekimUclari
                    and (@p0 is null or t.sube_id = @p0 or exists (select 1 from public.dis_hekim_temsilci d where d.temsilci_id = t.id and d.sube_id = @p0))
                  order by 2
                 """, null, [baglam.SubeId], o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
-            var secili = temsilciId ?? (temsilciler.Any(x => x.id == baglam.KullaniciId) ? baglam.KullaniciId : (temsilciler.FirstOrDefault()?.id ?? 0));
+            // ROL KAPSAMI: saha temsilcisi yalnız kendisini görür (RolKapsami); sorumlu / yönetici seçer.
+            var dar = RolKapsami.Dar(KaynakKatalogu.Bul("dis-hekim-ziyaret")?.RolKosullari, baglam.RolKodlari);
+            if (dar) temsilciler = temsilciler.Where(x => x.id == baglam.KullaniciId).ToList();
+            var secili = dar ? baglam.KullaniciId
+                : temsilciId ?? (temsilciler.Any(x => x.id == baglam.KullaniciId) ? baglam.KullaniciId : (temsilciler.FirstOrDefault()?.id ?? 0));
             var ziyaretler = await b.ListeAsync("""
                 select z.id, z.tarih, z.hekim_id, z.hekim_ad, z.hekim_ilce, z.hekim_kurum, z.durum, z.oneri, z.sonuc_ad,
                        z.acik_talep, z.notu, z.amac_ad, z.tur_ad
@@ -134,7 +139,8 @@ public static class DisHekimUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.ziyaret", Islem.Ekle);
-            var temsilci = istek.TemsilciId ?? baglam.KullaniciId;
+            var temsilci = RolKapsami.Dar(KaynakKatalogu.Bul("dis-hekim-ziyaret")?.RolKosullari, baglam.RolKodlari)
+                ? baglam.KullaniciId : istek.TemsilciId ?? baglam.KullaniciId;
             if (baglam.SubeId is null) throw GentegreHatasi.IsKurali("Plan üretmek için şube seçili olmalı.");
             await using var b = await veri.AcAsync(iptal);
             var sayi = await b.TekDegerAsync<int>(

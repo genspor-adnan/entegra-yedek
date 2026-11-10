@@ -270,6 +270,8 @@ public sealed record KartTanimi(
     /// Kosulu olmayan kart portal roluNE KAPALIDIR.
     /// </summary>
     IReadOnlyDictionary<short, string>? PortalKosullari = null,
+    /// <summary>ROL KAPSAMI (RolKapsami): rol kodu -> kart okuma kosulu ({kullanici}); listeyle AYNI kural, kart serbest kalmasin.</summary>
+    IReadOnlyDictionary<string, string>? RolKosullari = null,
     IReadOnlyDictionary<string, object?>? YeniKayitVarsayilanlari = null,
     // YENI kayitta acilir acilmaz taraf (cari) secim ekrani acilsin mi - deger,
     //   secimin yazilacagi alan adidir ("tarafId"). Belge kartindaki desenin

@@ -59,6 +59,8 @@ public static partial class KartKatalogu
         Tablo: "public.dis_hekim_ziyaret",
         LogTabloId: 1781,
         SubeKolonu: "sube_id",
+        // SAHA TEMSİLCİSİ yalnız kendi ziyaretini açar (RolKapsami; listeyle aynı kural).
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "dis_hekim_ziyaret.temsilci_id = {kullanici}" },
         Alanlar: new KartAlani[]
         {
             new("id",         "id",          "sayi",  Yazilabilir: false),
@@ -138,6 +140,11 @@ public static partial class KartKatalogu
         Tablo: "public.dis_hekim_talep",
         LogTabloId: 1782,
         SubeKolonu: "sube_id",
+        RolKosullari: new Dictionary<string, string>
+        {
+            [RolKapsami.SahaTemsilci] = "coalesce((select z.temsilci_id from public.dis_hekim_ziyaret z where z.id = dis_hekim_talep.ziyaret_id),"
+                + " public.fn_dis_hekim_temsilci(dis_hekim_talep.hekim_id, dis_hekim_talep.sube_id, current_date)) = {kullanici}",
+        },
         Alanlar: TalepAlanlari(hekimli: true),
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

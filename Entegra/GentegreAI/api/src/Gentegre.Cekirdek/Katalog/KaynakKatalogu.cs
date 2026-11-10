@@ -174,6 +174,11 @@ public sealed record KaynakTanimi(
     /// "hic gosterme" olmali.
     /// </summary>
     IReadOnlyDictionary<short, string>? PortalKosullari = null,
+    /// <summary>
+    /// ROL KAPSAMI (RolKapsami): rol kodu -> SQL kosulu ({kullanici} yer tutuculu). Kullanicinin BUTUN rolleri
+    /// kuralli ise uygulanir; kuralsiz (genis) rolu olan daralmaz. Kuralsiz kaynak ACIK kalir (portaldan farki).
+    /// </summary>
+    IReadOnlyDictionary<string, string>? RolKosullari = null,
     // GRUPLU LISTE (ekstreler): satirlar bu kolonun degerine gore obeklenir, her
     //   obegin sonuna ARA TOPLAM satiri gelir (or. "dovizCinsi": once TL
     //   hareketleri ve toplami, sonra USD...). Grup toplamlari sunucuda, butun

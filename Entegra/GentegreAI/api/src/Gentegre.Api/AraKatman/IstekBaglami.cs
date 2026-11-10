@@ -26,6 +26,8 @@ public sealed class IstekBaglami
     /// gormuyordu.
     /// </summary>
     public IReadOnlyList<int> RolIdleri { get; init; } = Array.Empty<int>();
+    /// <summary>Etkili rol KODLARI (RolKapsami): "yalnız kendi kayıtları" kuralı rol koduyla seçilir.</summary>
+    public IReadOnlyList<string> RolKodlari { get; init; } = Array.Empty<string>();
     public int? SubeId { get; init; }
     /// <summary>
     /// Aktif subede yazma hakki (rol_sube.yazma). 0 ise sube salt okunur.
@@ -201,6 +203,7 @@ public sealed class BaglamCozucu
         var rolId = roller.FirstOrDefault(r => r.Ana).RolId;
 
         var yetkiler = await _yetkiCozucu.CozAsync(kullaniciId, iptal);
+        var rolKodlari = await _kullanicilar.RolKodlariAsync(kullaniciId, iptal);
         var kapsam = await _kullanicilar.KapsamAsync(kullaniciId, iptal);
         var portalTuru = await _kullanicilar.PortalTuruAsync(kullaniciId, iptal);
         // KAPSAM KIMLIGI (819): kurum portalinda hesap KISININ, kapsam
@@ -228,6 +231,7 @@ public sealed class BaglamCozucu
             KullaniciId = kullaniciId,
             RolId = rolId,
             RolIdleri = roller.Select(r => r.RolId).Distinct().ToArray(),
+            RolKodlari = rolKodlari,
             SubeId = subeId,
             SubeYazma = subeId is { } sid && subeler.Any(s => s.Id == sid && s.Yazma),
             Yetkiler = yetkiler,

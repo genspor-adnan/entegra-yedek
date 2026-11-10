@@ -12,6 +12,7 @@ public static partial class KaynakKatalogu
         Kaynak: "public.v_dis_hekim_ziyaret z",
         SubeKolonu: "z.sube_id",
         VarsayilanSirala: "z.tarih desc",
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "z.temsilci_id = {kullanici}" },
         Kolonlar:
         [
             new("id",          "z.id",            "sayi",  "Id", Varsayilan: false),
@@ -54,6 +55,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "dis_doktor.vade",
         Kaynak: "public.v_dis_hekim_ziyaret_vade v",
         SubeKolonu: "v.sube_id",
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "v.temsilci_id = {kullanici}" },
         VarsayilanSirala: "v.gecikme_gun desc, v.vade_tarihi nulls last, v.hekim_ad",
         Kolonlar:
         [
@@ -87,6 +89,7 @@ public static partial class KaynakKatalogu
         YetkiKodu: "dis_doktor.talep",
         Kaynak: "public.v_dis_hekim_talep t",
         SubeKolonu: "t.sube_id",
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = "t.temsilci_id = {kullanici}" },
         VarsayilanSirala: "case when t.durum in (1, 2) then 0 else 1 end, t.termin nulls last, t.id desc",
         Kolonlar:
         [

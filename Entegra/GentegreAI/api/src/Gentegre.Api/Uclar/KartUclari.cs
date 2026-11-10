@@ -99,7 +99,9 @@ public static class KartUclari
             // PORTAL (795): dis kurum / dis doktor / hasta yalniz KENDI kaydini
             //   acabilir; baskasinin karti "bulunamadi" doner.
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
-                                           baglam.PortalTuru, baglam.PortalKimlik)
+                                           baglam.PortalTuru, baglam.PortalKimlik,
+                                           // ROL KAPSAMI (RolKapsami): liste daraldıysa kart da - temsilci başkasının kaydını açamaz.
+                                           RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId))
                        ?? throw GentegreHatasi.Bulunamadi();
 
             // KULLANICI_ARAMA karsiligi: kart her acilista upsert (Son/Sik Aranan).
@@ -278,7 +280,8 @@ public static class KartUclari
                     .LogError(h, "Lab istem {Id}: dis kurum ucretlendirmesi yapilamadi.", id); }
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
-                                           baglam.PortalTuru, baglam.PortalKimlik)
+                                           baglam.PortalTuru, baglam.PortalKimlik,
+                                           RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId))
                        ?? throw GentegreHatasi.Bulunamadi();
             var govde = new Dictionary<string, object?>(kart.Kart, StringComparer.Ordinal)
             {

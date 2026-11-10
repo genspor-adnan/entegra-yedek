@@ -510,6 +510,12 @@ public sealed class KullaniciDeposu
             "select rol_id, ana from public.fn_kullanici_rolleri(@p0) order by ana desc, rol_id",
             new object?[] { kullaniciId }, o => (o.GetInt32(0), o.GetInt16(1) == 1), iptal);
 
+    /// <summary>ETKİLİ ROL KODLARI (RolKapsami): ana + ek rollerin kodları - kaynak / kart rol kuralı bununla seçilir.</summary>
+    public Task<List<string>> RolKodlariAsync(int kullaniciId, CancellationToken iptal = default)
+        => _veri.ListeAsync(
+            "select r.kod from public.fn_kullanici_rolleri(@p0) k join public.rol r on r.id = k.rol_id order by k.ana desc, r.kod",
+            new object?[] { kullaniciId }, o => o.GetString(0), iptal);
+
     /// <summary>
     /// ZORUNLU PAROLA DEGISIMI (denetim #4): hesap parola degistirmek zorunda
     /// mi, ya da hic aktif degil mi. Istek basina okunur - bayrak token

@@ -34,6 +34,8 @@ public static partial class KartKatalogu
         //   duzenlenmemeli (orada departman/gorev zorunlu).
         SabitKosul: "personel = 1 and exists (select 1 from public.taraf_personel p "
                   + "where p.id = taraf.id and p.dis_hekim = 1)",
+        // SAHA TEMSİLCİSİ yalnız kendi hekiminin kartını açar (RolKapsami).
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = RolKapsami.BenimHekimim("taraf.id", "taraf.temsilci") },
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["personel"] = (short)1,

@@ -20,11 +20,11 @@ public sealed partial class KartDeposu
     public async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         KartTanimi tanim, long id, IReadOnlyList<KartAlani> alanlar,
         IReadOnlyList<int>? kapsam, CancellationToken iptal = default,
-        short portalTuru = 0, int portalKullanici = 0)
+        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         var sonuc = await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal,
-                                   portalTuru, portalKullanici);
+                                   portalTuru, portalKullanici, rolKosulu);
         // SIR İSTEMCİYE GİTMEZ (K28): dolu şifreli alan yalnız maske olarak döner (ekran "kayıtlı" gösterir).
         if (sonuc is { } k)
             foreach (var alan in tanim.Alanlar.Where(a => a.Sifreli))
@@ -40,7 +40,7 @@ public sealed partial class KartDeposu
     private async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem, KartTanimi tanim, long id,
         IReadOnlyList<KartAlani> alanlar, IReadOnlyList<int>? kapsam, CancellationToken iptal,
-        short portalTuru = 0, int portalKullanici = 0)
+        short portalTuru = 0, int portalKullanici = 0, string? rolKosulu = null)
     {
         var secim = string.Join(", ", alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
         var sql = new StringBuilder()
@@ -63,6 +63,9 @@ public sealed partial class KartDeposu
             sql += kosul is null ? " and false"
                  : " and (" + kosul.Replace("{kullanici}", "@pk") + ")";
         }
+        // ROL KAPSAMI (RolKapsami): liste daraldı, kart da daralır - id bilen temsilci başkasının ziyaretini açamaz.
+        //   Koşul kullanıcı id'si gömülü (int) gelir.
+        if (!string.IsNullOrWhiteSpace(rolKosulu)) sql += " and (" + rolKosulu + ")";
 
         await using var komut = baglanti.Komut(sql, islem,
             id);

@@ -61,7 +61,10 @@ public static class ListeUclari
                 BelgeKumeleri(tanim, baglam),
                 // EKRAN SATIR KISITI (1003): `cari` kaynağına yalnız
                 //   `cari.tedarikci` ile gelen kullanıcı müşteri satırı görmez.
-                EkranKodlari.Kisit(tanim.Ad, k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul);
+                // ROL KAPSAMI (RolKapsami): saha temsilcisi yalnız kendi hekim / ziyaretlerini görür; geniş rol daralmaz.
+                RolKapsami.Birlestir(
+                    EkranKodlari.Kisit(tanim.Ad, k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul,
+                    RolKapsami.Kosul(tanim.RolKosullari, baglam.RolKodlari, baglam.KullaniciId)));
 
             return Results.Ok(yanit);
         });
