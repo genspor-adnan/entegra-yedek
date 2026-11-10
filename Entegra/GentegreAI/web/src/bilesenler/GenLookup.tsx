@@ -173,11 +173,11 @@ export function GenLookup({
                       onMouseEnter={() => setSecili(i)}
                       onClick={() => sec(satir)}
                     >
-                      {/* Isaret kutusu SECILI SATIRI gosterir; tikla = sec
-                          (cari aramasindaki davranisin aynisi). */}
-                      <td className="hiza-orta" onClick={e => e.stopPropagation()}>
-                        <input type="checkbox" checked={i === secili} readOnly
-                               onChange={() => sec(satir)} />
+                      {/* Isaret kutusu SECILI SATIRI gosterir. Hucrenin kendisi olayi YUTMAZ: satirin
+                          neresine tiklanirsa tiklansin secilir (kullanici 10.11.2026, transfer depo secimi:
+                          kutunun yanindaki bosluga tiklamak hic bir sey yapmiyordu). Tik satira kabarir. */}
+                      <td className="hiza-orta">
+                        <input type="checkbox" checked={i === secili} readOnly tabIndex={-1} />
                       </td>
                       {alanlar.map(a => <td key={a.ad}>{String(satir[a.ad] ?? '')}</td>)}
                     </tr>
