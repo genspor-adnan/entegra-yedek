@@ -281,10 +281,10 @@ hiç eşleşmez. O yüzden bu ekranın en önemli uyarısı "Teletıp'a gidemez:
     <tr><td>Başvuru + istem aç</td><td>mevcut başvuru akışı (tetkik seçimi modalite + açıklamadan önerilir), kayıtta study_uid yazılır</td><td><span class="rz ok">var akış</span></td></tr>
     <tr><td>Önizleme</td><td>ilk görüntü WADO vekili (<code>/api/dicom/wado</code>) + istemcide cornerstone küçük render ya da sunucuda JPEG (<code>contentType=image/jpeg</code> ClearCanvas destekler)</td><td><span class="rz uy">seçim</span></td></tr>
     <tr><td>Geçmiş</td><td><code>islem_log</code> tablo 1784 "pacs_calisma" (açıldı / bağlandı / bağ kaldırıldı / yanlış hasta bildirimi)</td><td><span class="rz uy">ek log id</span></td></tr>
-    <tr><td>Teletıp ORM (istem / güncelleme / iptal)</td><td><code>telerad_istek</code> kuyruğu + <code>OrmUretici</code> (ORU ile aynı altyapı: MllpIstemci, Bakanlık profili 2.3.1); kabulde NW, randevu değişince XO, iptalde CA</td><td><span class="rz hata">yok</span></td></tr>
+    <tr><td>Teletıp ORM (istem / güncelleme / iptal)</td><td><code>telerad_istek</code> kuyruğu + <code>OrmUretici</code> (ORU ile aynı altyapı, Bakanlık profili 2.3.1) → Mirth K1; kabulde NW, randevu değişince XO, iptalde CA</td><td><span class="rz hata">yok</span></td></tr>
     <tr><td>Teletıp ORU (rapor)</td><td><code>OruUretici</code> Bakanlık profili + <code>TeleradTeslimServisi</code> (809-814)</td><td><span class="rz ok">var</span></td></tr>
     <tr><td>Gönderim öncesi eksik</td><td><code>fn_telerad_bakanlik_eksik</code> (812) + DICOM etiket kontrolü (PatientID = TCKN, accession eşit)</td><td><span class="rz uy">DICOM kısmı yok</span></td></tr>
-    <tr><td>KOS üret + XDS gönder</td><td><code>KosUretici</code> (fo-dicom, Key Object Selection: çalışmanın tüm SOP referansları, InstitutionName SKRS, RetrieveLocationUID) + <code>XdsGonderici</code> (ITI-41 Provide&amp;Register, MTOM SOAP) - Bakanlık MakeKOS / SendKOS Java örneğinin C# karşılığı</td><td><span class="rz hata">yok</span></td></tr>
+    <tr><td>KOS üret + XDS gönder</td><td><code>KosUretici</code> (fo-dicom, Key Object Selection: çalışmanın tüm SOP referansları, InstitutionName SKRS, RetrieveLocationUID) → Mirth K2: Bakanlık'ın MakeKOS / SendKOS Java paketi Mirth'e kütüphane olarak eklenir (Mirth Java çalıştırır, C#'a çevirmeye gerek yok)</td><td><span class="rz hata">yok</span></td></tr>
     <tr><td>Public WADO</td><td>ClearCanvas WADO (1000) önüne HTTPS reverse proxy, statik IP, Teletıp sertifikası; <code>contentType=application/dicom</code> ve <code>image/jpeg</code> ikisi de; 7/24 izleme (<code>/api/saglik</code> gibi)</td><td><span class="rz hata">yok</span></td></tr>
     <tr><td>Doz RDSR</td><td>cihazdan gelen SR (modalite SR, RDSR şablonu) PACS'a düşünce DICOM-Send TLS ile TELETIP_MGA'ya iletilir</td><td><span class="rz hata">yok</span></td></tr>
     <tr><td>Teletıp durum sorgusu</td><td>kılavuz 6.1 / 6.2 / 6.6 / 6.9 servisleri: eşleşmeyen istem, eşleşmeyen görüntü, accession listesi durum, günlük gönderim</td><td><span class="rz hata">yok</span></td></tr>
@@ -296,7 +296,15 @@ hiç eşleşmez. O yüzden bu ekranın en önemli uyarısı "Teletıp'a gidemez:
     <li><b>Çoklu istem tek çekim (5.4):</b> her istem ayrı accession ile ORM; aynı TCKN, aynı hekim, aynı modalite, OBR-36 kabul saatleri arası ≤ 40 dk ise tek KOS hepsini kapatır.</li>
     <li><b>HL7 zorunlular:</b> PID-3 dosya no, PID-4 TCKN (yabancı: pasaport + PID-26 ülke), PV1-19 e-Nabız başvuru ref (101 paketiyle aynı), PV1-20 SGK/OTHER, ORC-12 / OBR-16 hekim TCKN, ORC-21 <code>Kurum^^SKRS\S\şube\S\MedulaTesis</code>, OBR-4 <code>SUT^ad^SUT^LOINC^ad^LNC</code>, OBR-20 SYS takip no, OBR-21 hastane ref, OBR-24 Kayıtlı Yöntem, OBR-36, DG1 ICD10 A/F, ORU OBX-16 radyolog TCKN. UTF8, 2.3.1.</li>
     <li><b>Ağ:</b> HL7 gönderen IP + SKRS önceden Teleradyoloji birimine bildirilir; WADO için statik public IP, Bakanlık DNS + sertifika kurar. Kurum ayarı <code>telerad_kurum</code> (skrs_kodu, msh_uygulama = e-Nabız firma kodu, wado_adres).</li>
-    <li><b>Sıra:</b> ① MWL (etiket disiplini) → ② ORM → ③ KOS + XDS → ④ public WADO (jpeg) → ⑤ RDSR → ⑥ durum sorguları. ORU zaten var. Her adım kurumda <code>bakanlik_gonderim = 1</code> ise çalışır; özel merkez kapalıysa ekran Teletıp sütununu gizler.</li>
+    <li><b>Mirth Connect 4.5.2 (kullanıcı 11.11.2026: "teletıp gönderimlerde mirth connect kullanmak istiyorum", "mirth 4.5.2 kullanacağız"; ayrıntılı tasarım <a href="teletip_mirth.html">teletip_mirth.html</a>):</b> Bakanlık'a giden her şey
+      Mirth üzerinden. Mesajın İÇERİĞİ Gentegre'de üretilir (OruUretici / OrmUretici, Bakanlık profili, eksik kontrolü); Mirth taşır, kuyruklar,
+      yeniden dener, arşivler. Kanallar: <b>K1 HL7</b> (Gentegre MLLP → Mirth → Teletıp TCP-LLP, ACK hedeften geri döner),
+      <b>K2 KOS</b> (Gentegre "çalışma hazır" HTTP → Mirth, Bakanlık MakeKOS/SendKOS jar'ı Mirth içinde → XDS Provide&amp;Register),
+      <b>K3 Doz</b> (ClearCanvas SR'yi Mirth DICOM dinleyicisine yönlendirir → DICOM-TLS TELETIP_MGA), <b>K4 durum</b> (Mirth sonuçları
+      Gentegre <code>/api/teletip/durum</code> ucuna yazar). MWL ve public WADO Mirth DIŞI (cihaz↔Gentegre, Bakanlık↔PACS).</li>
+    <li><b>Sıra:</b> ① MWL (yazıldı, 1301) → ② Mirth kurulumu + K1 (ORU, mevcut kuyruğun hedefi Mirth) → ③ ORM üretici + K1 → ④ K2 KOS
+      → ⑤ public WADO (jpeg) → ⑥ K3 doz → ⑦ durum sorguları. Her adım kurumda <code>bakanlik_gonderim = 1</code> ise çalışır; özel merkez
+      kapalıysa ekran Teletıp sütununu gizler.</li>
     <li>Kılavuz sürümü: sitede 3.43 (31.05.2022); kodda 3.46'ya atıf var. Güncel sürüm teletip@saglik.gov.tr'den istenir.</li>
   </ul>
   <h3>Kurallar</h3>

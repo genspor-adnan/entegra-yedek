@@ -51,6 +51,8 @@ kurucu.Services.Configure<GuvenlikAyarlari>(kurucu.Configuration.GetSection("Guv
 kurucu.Services.Configure<DicomAyarlari>(kurucu.Configuration.GetSection("Dicom"));
 kurucu.Services.AddHttpClient("dicom", c => c.Timeout = TimeSpan.FromSeconds(60));
 kurucu.Services.AddSingleton<DicomKaynagi>();
+// MWL (1301): cihazların çalışma listesi - accession / TCKN cihaza istemden gider (Teletıp eşleşmesinin ön şartı).
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.MwlSunucusu>();
 
 var baglantiDizesi = kurucu.Configuration.GetConnectionString("Gentegre")
     ?? throw new InvalidOperationException("ConnectionStrings:Gentegre tanimli degil.");

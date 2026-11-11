@@ -259,6 +259,25 @@ başlığında … Listesi olsun".
 - **Mockup `Ekranlar/Radyoloji/pacs_goruntuleri.html`:** PACS Çalışmaları listesi (canlı C-FIND, eşleşme sırası
   study_uid → accession → PatientID → ad+doğum) ve çalışma kartı (eşleşme, seriler, önizleme, geçmiş, etiketler).
 
+### 11.11.2026 - Teletıp hedefi: MWL (1301) + Mirth Connect tasarımı
+
+Kullanıcı: "amacımız Sağlık Bakanlığı'nın istediği şekilde Teletıp'a verileri görüntülemek"; "MWL ile başla"; "ben teletıp
+gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
+
+- **Kılavuz okundu** (teletip.saglik.gov.tr: Entegrasyon Kılavuzu 3.43, XDS 1.15): dört kanal - HL7 2.3.1 ORM/ORU (TCP-LLP),
+  KOS (XDS-I.b RAD-68), public WADO (DICOM + jpeg, Bakanlık bizden çeker), RDSR (TLS TELETIP_MGA). Eşleşme § 5.2:
+  DICOM accession == HL7 accession ŞART + PatientID/OtherPatientIDs == TCKN (ya da SKRS + dosya no).
+- **MWL (db/1301, `MwlSunucusu`):** cihaz çalışma listesini bizden C-FIND ile çeker; `fn_radyoloji_mwl` kuralı DB'de
+  (bekleyen + mwl_istendi + accession dolu + PACS'a bağlanmamış; cihaz AE `radyoloji_cihaz.ae_title` ile tanınır, modalite /
+  şube / atanmış cihaz süzer). PatientID = geçerli TCKN, yoksa dosya no; OtherPatientIDs = dosya no. Karakter seti
+  ISO_IR 148 (varsayılan) / ISO_IR 192 / ASCII. Tanınmayan AE ve yabancı çağrılan AE reddedilir. İlk görüş izi
+  `radyoloji_pacs_olay` (olay 1). Ayar `Dicom:MwlPort` (0 = kapalı), arka plan kapalıysa açılmaz. StudyInstanceUID
+  önceden üretilmez (eşleşme accession ile). Testler `MwlCeviriciTestleri` (18); dev DB'de cihaz gibi uçtan uca denendi.
+- **Mirth Connect 4.5.2 tasarımı** (`Ekranlar/Radyoloji/teletip_mirth.html`): içerik Gentegre'de, taşıma Mirth'te.
+  K1 HL7 (ACK hedeften döner), K2 KOS (Bakanlık MakeKOS/SendKOS jar'ı Mirth içinde), K3 doz, K4 durum → Gentegre.
+  MWL ve public WADO Mirth dışı. Ekranlar: mimari, pano (Mirth REST istatistikleri), gönderim listesi, gönderim kartı
+  (mesaj izi), kurum ayarı, istem kartı Teletıp şeridi. PACS mockup'ına Teletıp sütunu / kart bloğu eklendi.
+
 ### 10.11.2026
 
 - **Onay Akışı listesi + kartı mockup'a göre (kullanıcı; `Ekranlar/Onay/onay_akis_listesi.html`, `onay_akis_karti.html`):**

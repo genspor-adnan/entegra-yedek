@@ -31,6 +31,16 @@ public sealed class DicomAyarlari
     public int JetonDakika { get; set; } = 240;
     /// <summary>C-FIND zaman aşımı.</summary>
     public int ZamanAsimiSn { get; set; } = 20;
+
+    // ---------------------------------------------------------------- MWL sunucusu (1301, MwlSunucusu)
+    /// <summary>Modality Worklist dinleme portu; 0 = kapalı. Cihazlar bu porta C-FIND (worklist) gönderir.</summary>
+    public int MwlPort { get; set; }
+    /// <summary>MWL sunucusunun AE başlığı (cihazda "worklist server" olarak girilir); boş = her çağrılan AE kabul.</summary>
+    public string MwlAe { get; set; } = "GENTEGRE";
+    /// <summary>true: radyoloji cihaz kartında olmayan AE'ler de liste alır (yalnız modalite süzgeci). Varsayılan kapalı.</summary>
+    public bool MwlBilinmeyenAe { get; set; }
+    /// <summary>"ISO_IR 148" (Latin-5 Türkçe, varsayılan), "ISO_IR 192" (UTF-8) ya da "ASCII" (Türkçe harf indirgenir).</summary>
+    public string MwlKarakterSeti { get; set; } = "ISO_IR 148";
 }
 
 /// <summary>

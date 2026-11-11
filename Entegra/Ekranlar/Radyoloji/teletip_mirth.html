@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teletıp Gönderimi (Mirth Connect) — Mockup (GenoTIP AI)</title>
+<style>
+  :root{ --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+         --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;margin:22px auto 8px;max-width:1240px;color:var(--navy)}
+  h2 b{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:0 8px;margin-right:6px}
+  h2 .ipucu{font-weight:normal;color:var(--muted);font-size:11px;margin-left:8px}
+  .not{max-width:1240px;margin:0 auto 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 11px;font-size:11.5px;line-height:1.55;color:#2c4a6b}
+  .not code,.kural code{background:#fff;border:1px solid #cfe0f5;border-radius:2px;padding:0 4px;font-size:11px}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#c98c8c;color:#9d3434}
+  .baslikad{margin-left:auto;font-weight:bold;color:var(--navy);font-size:12.5px}
+  .combo{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 20px 0 7px;font-size:12px;display:flex;align-items:center;position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;font-size:12px;display:flex;align-items:center}
+  .ph{color:#aab4bf}
+  .cipler{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#f7f9fc;color:#3a5573}
+  .cip.on{background:#2f6db3;color:#fff;border-color:#2f6db3}
+  .arama{margin-left:auto;border:1px solid var(--line);border-radius:12px;padding:3px 10px;width:240px;color:#aab4bf;background:#fff}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;padding:8px 10px}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:16px;color:var(--navy)}
+  .kutu.kir b{color:#9d3434} .kutu.ok b{color:#2e7d46} .kutu.sari b{color:#9a5b00}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap;background:#fff;vertical-align:top}
+  td.sar{white-space:normal}
+  tr.secili td{background:#eef4fc}
+  tr.uyari td{background:#fffaf2}
+  tr.hata td{background:#fff6f6}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#eef1f5;color:#5b6b7c}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.uy{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mod{background:#eaf1fb;color:#1f4f8f;border-color:#c5d6ee;font-weight:bold}
+  .satirarac{display:inline-flex;gap:3px}
+  .satirarac span{border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 6px;font-size:10.5px;color:var(--accent)}
+  .bilgi{margin:10px 12px 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;padding:7px 9px;font-size:11px;color:#2c4a6b;line-height:1.55}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .kural{max-width:1240px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .kural h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kural ul{margin:0 0 8px 18px;padding:0}
+  .kural table td{white-space:normal}
+  /* kart */
+  .idstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:8px 12px;background:#fbfcfd;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .deg{font-weight:bold;font-size:12.5px;color:#1f2d3a;height:22px;display:flex;align-items:center;gap:6px}
+  .govde{display:grid;grid-template-columns:minmax(0,1.4fr) 420px;gap:12px;padding:10px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b;display:flex;align-items:center;gap:6px}
+  .grp h4 .tag{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line2);border-radius:9px;padding:0 7px}
+  .grp .ic{padding:8px 10px}
+  .esl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .esk{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px;line-height:1.5}
+  .esk b{color:var(--navy)} .esk .s{color:var(--muted);font-size:10.5px}
+  .esk .d{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .seri{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);background:#fff}
+  .seri .kr{width:64px;height:64px;border-radius:3px;background:radial-gradient(circle at 45% 40%,#9fb3c8,#2b3a4b 70%);border:1px solid #333;flex:none;display:grid;place-items:center;color:#dfe7f0;font-size:10px}
+  .seri .kr.us{background:radial-gradient(ellipse at 50% 70%,#cfd8e3,#3b4a5a 65%)}
+  .seri .kr.cr{background:linear-gradient(#e9eef3,#7f8d9c)}
+  .seri .ic{flex:1;line-height:1.4} .seri .ic b{color:var(--navy)}
+  .seri .ic .s{color:var(--muted);font-size:10.5px}
+  .onizle{border:1px solid #2b3a4b;border-radius:4px;background:#0b1118;height:300px;display:grid;place-items:center;color:#9fb3c8;position:relative;overflow:hidden}
+  .onizle .im{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 48% 45%,#c9d6e2 0,#7d93a8 35%,#22303f 72%,#0b1118 100%)}
+  .onizle .k{position:absolute;left:8px;top:6px;font-size:10.5px} .onizle .k2{position:absolute;right:8px;bottom:6px;font-size:10.5px}
+  .etiket td{font-family:Consolas,monospace;font-size:11px}
+  .gizli{display:none}
+
+  /* teletip_mirth ek */
+  .mim{display:grid;grid-template-columns:1fr 150px 1fr 160px 1fr 160px 1fr;gap:8px;align-items:center;padding:14px 12px}
+  .mim .sut{display:flex;flex-direction:column;gap:8px}
+  .dk{border:1px solid var(--line);border-radius:6px;padding:9px 10px;background:#fff;line-height:1.4}
+  .dk b{display:block;color:var(--navy)} .dk small{color:var(--muted);font-size:10.5px}
+  .dk.gen{border-color:#2f6db3;background:#eef4fc} .dk.mirth{border-color:#9a5b00;background:#fff7e8} .dk.bak{border-color:#9d3434;background:#fbf0f0}
+  .dk.bak2{border-style:dashed} .dk.wado{border-style:dashed}
+  .ok-sut{display:flex;flex-direction:column;gap:6px} .ok{font-size:10.5px;color:#3a5573;border-bottom:1px dashed var(--line);padding-bottom:3px}
+  .ok small{color:var(--muted)}
+  .kirmizi{color:#9d3434}
+  .hl7{margin:0;font-family:Consolas,monospace;font-size:10.5px;white-space:pre-wrap;word-break:break-all;background:#0f1a26;color:#cfe0f5;border-radius:3px;padding:8px}
+  .asama div{display:flex;gap:6px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line2)} .asama small{margin-left:auto;color:var(--muted)}
+  .form{display:grid;grid-template-columns:170px 1fr;gap:6px 10px;align-items:center} .form label{color:var(--muted);font-size:11px}
+  .serit{display:flex;gap:6px;align-items:center;padding:8px 12px;background:#fbfcfd;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .adim{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#f4f6f9;color:#5b6b7c}
+  .serit .adim.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb} .serit .adim.uy{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .serit .adim.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3} .serit .ayrac{color:var(--muted)}
+  .kural ol{margin:0 0 8px 18px;padding:0}
+  @media (max-width:900px){.mim{grid-template-columns:1fr}.govde{grid-template-columns:1fr !important}}
+</style>
+</head>
+<body>
+<div class="not"><b>Mockup — Teletıp Gönderimi (Mirth Connect üzerinden)</b> (kullanıcı 11.11.2026: "ben teletıp gönderimlerde mirth connect kullanmak istiyorum" →
+"mirth'e göre mockup yeniden tasarla"). Hedef: Sağlık Bakanlığı Teleradyoloji (Teletıp) radyoloji verisini kılavuzdaki gibi görsün - istem (HL7 ORM),
+rapor (HL7 ORU), görüntü manifesti (KOS / XDS-I.b), doz (RDSR) ve görüntünün kendisi (Bakanlık WADO ile bizden çeker).<br>
+<b>İş bölümü:</b> mesajın <b>içeriğini Gentegre üretir</b> (Bakanlık profili, eksik kontrolü, accession / TCKN kuralı); <b>Mirth taşır</b> - kuyruk,
+yeniden deneme, ACK, arşiv, Bakanlık bağlantısı. Gentegre Teletıp'a doğrudan bağlanmaz; Bakanlık'ta tanıtılan IP Mirth sunucusunun IP'sidir.
+Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>3</b> gönderim listesi · <b>4</b> gönderim kartı (mesaj izi) ·
+<b>5</b> kurum Teletıp / Mirth ayarı (Mirth Connect 4.5.2) · <b>6</b> radyoloji istem / PACS kartındaki Teletıp şeridi · <b>7</b> kurallar.</div>
+
+<!-- ===================================================================== 1 ===== -->
+<h2><b>1</b> — Mimari <span class="ipucu">kim kime ne gönderir · Mirth kanalları K1-K4</span></h2>
+<div class="win">
+  <div class="mim">
+    <div class="sut">
+      <div class="dk cihaz"><b>Modalite cihazları</b><small>BT · MR · US · CR · MG</small></div>
+      <div class="dk pacs"><b>PACS (ClearCanvas)</b><small>C-STORE 104 · WADO 1000</small></div>
+    </div>
+    <div class="ok-sut">
+      <div class="ok">⇄ <b>MWL</b> C-FIND<br><small>accession · TCKN · SUT</small></div>
+      <div class="ok">→ görüntü C-STORE</div>
+      <div class="ok">→ <b>RDSR</b> SR yönlendirme</div>
+    </div>
+    <div class="sut">
+      <div class="dk gen"><b>Gentegre AI</b><small>istem · rapor · kuyruk (telerad_istek)<br>OrmUretici · OruUretici · eksik kontrolü<br>MWL sunucusu (1301)</small></div>
+      <div class="dk wado"><b>HTTPS WADO vekili</b><small>public statik IP · Teletıp sertifikası<br>DICOM + image/jpeg · 7/24</small></div>
+    </div>
+    <div class="ok-sut">
+      <div class="ok">→ <b>K1</b> MLLP (ORM/ORU)<br><small>ACK geri döner</small></div>
+      <div class="ok">→ <b>K2</b> HTTP "çalışma hazır"</div>
+      <div class="ok">← <b>K4</b> HTTP durum</div>
+    </div>
+    <div class="sut">
+      <div class="dk mirth"><b>Mirth Connect 4.5.2</b><small>K1 TELETIP_HL7 · K2 TELETIP_KOS<br>K3 TELETIP_DOZ · K4 TELETIP_DURUM<br>kuyruk · yeniden deneme · arşiv</small></div>
+    </div>
+    <div class="ok-sut">
+      <div class="ok">→ HL7 TCP-LLP</div>
+      <div class="ok">→ XDS Provide&amp;Register</div>
+      <div class="ok">→ DICOM-TLS 443</div>
+      <div class="ok">⇠ sorgu servisleri 6.x</div>
+    </div>
+    <div class="sut">
+      <div class="dk bak"><b>Teletıp (Bakanlık)</b><small>HL7 alıcı · XDS repository<br>MGA (TELETIP_MGA) · web görüntüleyici</small></div>
+      <div class="dk bak2"><small>Bakanlık görüntüleyicisi görüntüyü <b>bizim WADO'dan</b> çeker (RAD-55)</small></div>
+    </div>
+  </div>
+  <div class="bilgi">Mirth dışı iki hat: <b>MWL</b> (cihaz ↔ Gentegre; Mirth cihaza çalışma listesi sunamaz) ve <b>WADO</b> (Bakanlık ↔ bizim PACS; vekil sunucu).
+    Gentegre ile Mirth arası iç ağ; Mirth ile Bakanlık arası Bakanlık'a bildirilen statik IP. Mirth çökse Gentegre kuyruğu bekler (K1 ACK gelmez → tekrar).</div>
+</div>
+
+<!-- ===================================================================== 2 ===== -->
+<h2><b>2</b> — Teletıp Panosu <span class="ipucu">Radyoloji › Teletıp Gönderimi › Pano · yetki <code>radyoloji.teletip</code> · radyoloji sorumlusu, bilgi işlem</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span class="on">🏛 Teletıp Panosu ×</span><span>🏛 Teletıp Gönderimleri</span></div>
+  <div class="toolbar">
+    <span class="btn">◀</span><span class="inp">11.11.2026</span><span class="btn">▶</span><span class="btn">Bugün</span>
+    <span class="combo" style="width:170px">Kurum: KOŞUYOLU (SKRS 148)</span>
+    <span class="btn">🔄 Yenile</span><span class="btn">🧪 Bağlantı Testi</span><span class="btn">🔁 Hatalıları Yeniden Gönder</span>
+    <span class="baslikad">Mirth 4.5.2 · 10.0.0.12:8443 <span class="rz ok">çalışıyor</span> · Teletıp HL7 <span class="rz ok">bağlı</span> · WADO <span class="rz uy">son Bakanlık çağrısı 3 sa önce</span></span>
+  </div>
+  <div class="ozet" style="grid-template-columns:repeat(6,1fr)">
+    <div class="kutu"><small>Bugün istem (ORM)</small><b>42</b> <span class="sonuk">· 41 AA</span></div>
+    <div class="kutu ok"><small>Görüntü eşleşti (KOS)</small><b>37</b> <span class="sonuk">· %90</span></div>
+    <div class="kutu"><small>Rapor (ORU)</small><b>29</b> <span class="sonuk">· 29 AA</span></div>
+    <div class="kutu sari"><small>Kuyrukta bekleyen</small><b>4</b> <span class="sonuk">· en eski 12 dk</span></div>
+    <div class="kutu kir"><small>Hatalı (insan bakmalı)</small><b>3</b> <span class="sonuk">· AE / KOS ret</span></div>
+    <div class="kutu kir"><small>Gidemez (eksik)</small><b>2</b> <span class="sonuk">· LOINC · hekim TCKN</span></div>
+  </div>
+  <table>
+    <thead><tr><th style="width:190px">Mirth kanalı</th><th style="width:90px" class="orta">Durum</th><th class="sag" style="width:70px">Alınan</th><th class="sag" style="width:70px">Süzülen</th>
+      <th class="sag" style="width:70px">Kuyruk</th><th class="sag" style="width:70px">Gönderilen</th><th class="sag" style="width:70px">Hatalı</th><th>Son olay</th><th style="width:120px"></th></tr></thead>
+    <tbody>
+      <tr><td><b>K1</b> TELETIP_HL7 <span class="sonuk">· ORM/ORU</span></td><td class="orta"><span class="rz ok">STARTED</span></td><td class="sag">71</td><td class="sag">0</td><td class="sag">1</td><td class="sag">69</td><td class="sag">1</td>
+        <td class="sar">10:53 ORU R-000022 → ACK AA · 10:41 ORM R-000031 → <span class="kirmizi">AE 0278 PV1-19 boş</span></td><td><span class="satirarac"><span>mesajlar</span><span>durdur</span></span></td></tr>
+      <tr><td><b>K2</b> TELETIP_KOS <span class="sonuk">· XDS-I.b</span></td><td class="orta"><span class="rz ok">STARTED</span></td><td class="sag">39</td><td class="sag">0</td><td class="sag">2</td><td class="sag">37</td><td class="sag">2</td>
+        <td class="sar">10:07 GDEMO005 → kayıt ✓ eşleşme ✓ · 09:58 CR 1.2.840… → <span class="kirmizi">eşleşme başarısız (accession farklı)</span></td><td><span class="satirarac"><span>mesajlar</span><span>durdur</span></span></td></tr>
+      <tr><td><b>K3</b> TELETIP_DOZ <span class="sonuk">· RDSR → MGA</span></td><td class="orta"><span class="rz ok">STARTED</span></td><td class="sag">11</td><td class="sag">3</td><td class="sag">1</td><td class="sag">7</td><td class="sag">0</td>
+        <td class="sar">09:44 BT doz SR → TELETIP_MGA ✓ · 3 süzüldü (MR/US doz SR'si yok)</td><td><span class="satirarac"><span>mesajlar</span><span>durdur</span></span></td></tr>
+      <tr><td><b>K4</b> TELETIP_DURUM <span class="sonuk">· Mirth → Gentegre</span></td><td class="orta"><span class="rz ok">STARTED</span></td><td class="sag">117</td><td class="sag">0</td><td class="sag">0</td><td class="sag">117</td><td class="sag">0</td>
+        <td class="sar">her K1/K2/K3 sonucu <code>/api/teletip/durum</code> ucuna yazıldı</td><td><span class="satirarac"><span>mesajlar</span></span></td></tr>
+      <tr><td><b>Sorgu</b> 6.1 / 6.2 / 6.6 <span class="sonuk">· günlük</span></td><td class="orta"><span class="rz">zamanlı</span></td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td>
+        <td class="sar">06:00 Bakanlık'ta eşleşmeyen istem: 2 · eşleşmeyen görüntü: 1 · bizde ✓ Bakanlık'ta yok: 0</td><td><span class="satirarac"><span>şimdi sor</span></span></td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi">Sayılar Mirth REST API'den (<code>/api/channels/statuses</code>, <code>/api/channels/{id}/statistics</code>) - Gentegre okur, kullanıcı Mirth
+    yönetici ekranına gitmeden kanal sağlığını görür. "durdur" yalnız sistem yöneticisinde; Mirth'e gelişmiş müdahale (kanal düzenleme) Mirth
+    Administrator'dan. Kırmızı satır: AE/AR ya da XDS hatası - Mirth otomatik tekrar ETMEZ (aynı mesaj yine reddedilir), insan düzeltir ve yeniden gönderir.</div>
+</div>
+
+<!-- ===================================================================== 3 ===== -->
+<h2><b>3</b> — Teletıp Gönderimleri (liste) <span class="ipucu">istem başına tek satır · dört aşama · süzgeç: hatalı / bekleyen / gidemez</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span>🏛 Teletıp Panosu</span><span class="on">🏛 Teletıp Gönderimleri ×</span></div>
+  <div class="toolbar">
+    <span class="inp">11.11.2026</span><span class="sonuk">–</span><span class="inp">11.11.2026</span>
+    <span class="combo" style="width:110px">Modalite: Tümü</span><span class="combo" style="width:130px">Aşama: Tümü</span>
+    <span class="btn primary">🔍 Listele</span><span class="btn">🔁 Seçilileri Yeniden Gönder</span><span class="btn">📤 Excel</span>
+  </div>
+  <div class="cipler">
+    <span class="cip">Tümü 44</span><span class="cip on">Sorunlu 5</span><span class="cip">Kuyrukta 4</span><span class="cip">Gidemez 2</span><span class="cip">Tamam 33</span>
+    <span class="arama">🔍 hasta / TCKN / accession / Mirth mesaj no…</span>
+  </div>
+  <table>
+    <thead><tr><th style="width:95px">Kabul</th><th style="width:110px">Accession</th><th style="width:190px">Hasta <span class="sonuk">· TCKN</span></th><th>Tetkik <span class="sonuk">· SUT / LOINC</span></th>
+      <th style="width:96px" class="orta">ORM</th><th style="width:96px" class="orta">KOS</th><th style="width:96px" class="orta">ORU</th><th style="width:80px" class="orta">Doz</th><th style="width:200px">Sorun</th></tr></thead>
+    <tbody>
+      <tr class="hata"><td>10:41</td><td>R-000031</td><td>KAYA^MERVE <span class="sonuk">· 3••••••••12</span></td><td class="sar">Beyin BT kontrastsız <span class="sonuk">· 804490 / 24725-4</span></td>
+        <td class="orta"><span class="rz hata">AE 0278</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">—</span></td>
+        <td class="sar">PV1-19 boş: e-Nabız başvuru referansı yok → e-Nabız 101 gönder, sonra yeniden</td></tr>
+      <tr class="hata"><td>09:58</td><td>R-000027</td><td>DEMİR^MEHMET <span class="sonuk">· 1••••••••84</span></td><td class="sar">Akciğer PA <span class="sonuk">· 801720 / 36572-6</span></td>
+        <td class="orta"><span class="rz ok">AA</span></td><td class="orta"><span class="rz hata">eşleşmedi</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">yok</span></td>
+        <td class="sar">DICOM accession "46050" ≠ R-000027 (cihaz MWL kullanmamış) → PACS'ta düzelt, KOS yeniden</td></tr>
+      <tr class="uyari"><td>10:12</td><td>R-000029</td><td>ÖZ^ELİF <span class="sonuk">· 2••••••••06</span></td><td class="sar">Batın USG <span class="sonuk">· 803330 / —</span></td>
+        <td class="orta"><span class="rz hata">gidemez</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">—</span></td>
+        <td class="sar">LOINC eşlemesi yok (hizmet kartı) - LOINC'siz tetkik Bakanlık'ta "gönderilmemiş" sayılır</td></tr>
+      <tr class="uyari"><td>10:30</td><td>R-000030</td><td>ARSLAN^CAN <span class="sonuk">· 4••••••••50</span></td><td class="sar">Lomber MR <span class="sonuk">· 804280 / 24967-2</span></td>
+        <td class="orta"><span class="rz ok">AA</span></td><td class="orta"><span class="rz uy">kuyrukta</span></td><td class="orta"><span class="rz">—</span></td><td class="orta"><span class="rz">—</span></td>
+        <td class="sar">Mirth K2 kuyruğunda 12 dk (XDS zaman aşımı, 3/10 deneme)</td></tr>
+      <tr><td>09:27</td><td>GDEMO005</td><td>DEMO^GENTEGRE <span class="sonuk">· 7••••••••62</span></td><td class="sar">Beyin MR <span class="sonuk">· 803360 / 24590-2</span></td>
+        <td class="orta"><span class="rz ok">AA</span></td><td class="orta"><span class="rz ok">eşleşti</span></td><td class="orta"><span class="rz ok">AA</span></td><td class="orta"><span class="rz">— MR</span></td>
+        <td class="sonuk">tamam · Bakanlık görüntüyü 10:41'de çekti</td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi">Satır = bir radyoloji istemi. Aşama rozetleri Gentegre'nin kendi kaydından (<code>teletip_gonderim</code>; Mirth K4 ile güncellenir), Mirth
+    çalışmıyorsa bile liste açılır. TCKN maskeli (KVKK) - kartta yetkiyle açılır. "gidemez" = Gentegre göndermeden durdurdu
+    (<code>fn_telerad_bakanlik_eksik</code>); Mirth'e hiç gitmedi.</div>
+</div>
+
+<!-- ===================================================================== 4 ===== -->
+<h2><b>4</b> — Teletıp Gönderim Kartı <span class="ipucu">bir istemin tüm Bakanlık mesajları · Gentegre → Mirth → Teletıp izi</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏛 Teletıp Gönderimleri</span><span class="on">🏛 R-000027 · DEMİR^MEHMET ×</span></div>
+  <div class="toolbar">
+    <span class="btn">📄 İstem Kartı</span><span class="btn">🗄 PACS Çalışması</span><span class="btn">🔁 KOS Yeniden Gönder</span><span class="btn">✖ Teletıp'ta İptal (ORM CA)</span>
+    <span class="btn">🔗 Mirth'te Aç</span>
+    <span class="baslikad">R-000027 · Akciğer PA · <span class="rz hata">KOS eşleşmedi</span></span>
+  </div>
+  <div class="govde" style="grid-template-columns:minmax(0,1fr) 380px">
+    <div>
+      <div class="grp"><h4>Mesaj izi <span class="tag">zaman sırasıyla</span></h4>
+        <table><thead><tr><th style="width:62px">Saat</th><th style="width:80px">Kanal</th><th style="width:150px">Adım</th><th>Sonuç</th><th style="width:96px">Mirth no</th><th style="width:90px"></th></tr></thead><tbody>
+          <tr><td>09:27:04</td><td>Gentegre</td><td>ORM NW üretildi</td><td>eksik kontrolü ✓ · accession R-000027 · SYS takip ✓ · LOINC ✓</td><td>—</td><td><span class="satirarac"><span>HL7</span></span></td></tr>
+          <tr><td>09:27:04</td><td>K1</td><td>Mirth aldı</td><td>MLLP 10.0.0.12:6661</td><td>#18842</td><td><span class="satirarac"><span>ham</span></span></td></tr>
+          <tr><td>09:27:05</td><td>K1</td><td>Teletıp'a iletildi</td><td><span class="rz ok">ACK AA</span> · MSA-2 MSG000018842</td><td>#18842</td><td><span class="satirarac"><span>ACK</span></span></td></tr>
+          <tr><td>09:31:40</td><td>Cihaz</td><td>MWL sorgusu</td><td><span class="rz uy">görmedi</span> · RTG1 listeyi çekmedi (cihaz MWL kapalı?)</td><td>—</td><td></td></tr>
+          <tr><td>09:52:12</td><td>PACS</td><td>çalışma geldi</td><td>accession "46050" · PatientID 1••••••••84 · 1 görüntü</td><td>—</td><td><span class="satirarac"><span>etiket</span></span></td></tr>
+          <tr class="hata"><td>09:58:30</td><td>K2</td><td>KOS gönderildi</td><td>XDS kayıt ✓ · <b>istem ile eşleşme başarısız</b> (Bakanlık: accession farklı)</td><td>#4410</td><td><span class="satirarac"><span>KOS</span><span>yanıt</span></span></td></tr>
+        </tbody></table>
+      </div>
+      <div class="grp"><h4>HL7 mesajı <span class="tag">ORM^O01 · 2.3.1 · UTF8 · Gentegre üretti</span></h4>
+        <div class="ic"><pre class="hl7">MSH|^~\&amp;|GENTEGRE|KOSUYOLU|TELERADYOLOJI|TELERADYOLOJI|20261111092704||ORM^O01|MSG000018842|P|2.3.1|||||UTF8
+PID||148-H-000091|H-000091^^HBYS|1••••••••84^^^TC|DEMİR^MEHMET||19620304|M
+PV1||O|12^Radyoloji|||||||||||||||||ENB-77812^^^^^^^^12&amp;Radyoloji&amp;HBYS|SGK|...
+ORC|NW|R-000027^HBYS|||SC||1^once^^20261111092700||20261111092704|...|2••••••••31^GÜNEŞ^ÖMER^^^Uz.Dr.|...|KOŞUYOLU^^148\S\1\S\34123456
+OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest PA^LNC|...|R-000027||SYS-7A3F…|ENB-77812|||CR|...|20261111092700</pre></div>
+      </div>
+    </div>
+    <div>
+      <div class="grp"><h4>Ne yapmalı</h4>
+        <div class="ic" style="line-height:1.6">
+          <span class="rz hata">KOS eşleşmedi</span><br>
+          Bakanlık kuralı (kılavuz 5.2): DICOM accession = HL7 accession şart.<br>
+          Cihaz accession'ı "46050" yazmış; MWL'den gelseydi R-000027 olurdu.<br><br>
+          <b>1.</b> PACS'ta çalışmanın accession'ını R-000027 yap (ClearCanvas → Study → Edit).<br>
+          <b>2.</b> "KOS Yeniden Gönder".<br>
+          <b>3.</b> Kalıcı çözüm: RTG1 cihazında worklist sunucusu = GENTEGRE (port 11112) - <a href="#">cihaz kartı</a>.
+        </div>
+      </div>
+      <div class="grp"><h4>Aşamalar</h4>
+        <div class="ic asama">
+          <div><span class="rz ok">✓</span> ORM istem <small>09:27 AA</small></div>
+          <div><span class="rz uy">!</span> MWL <small>cihaz sormadı</small></div>
+          <div><span class="rz ok">✓</span> Görüntü PACS'ta <small>09:52</small></div>
+          <div><span class="rz hata">✖</span> KOS eşleşme <small>09:58</small></div>
+          <div><span class="rz">·</span> Rapor ORU <small>rapor bekliyor</small></div>
+          <div><span class="rz">·</span> Doz <small>CR - gönderilmez</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 5 ===== -->
+<h2><b>5</b> — Kurum Teletıp / Mirth Ayarı <span class="ipucu">Tanımlar › Teleradyoloji Kurumu › Bakanlık · yalnız sistem yöneticisi</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>⚙ Teleradyoloji Kurumları</span><span class="on">⚙ Sağlık Bakanlığı Teletıp ×</span></div>
+  <div class="toolbar"><span class="btn primary">💾 Kaydet</span><span class="btn">🧪 Mirth Bağlantı Testi</span><span class="btn">🧪 HL7 Örnek Mesaj (doğrulama)</span><span class="btn">🧪 WADO Dış Erişim Testi</span>
+    <span class="baslikad">bakanlik_gonderim = 1</span></div>
+  <div class="govde" style="grid-template-columns:1fr 1fr">
+    <div class="grp"><h4>Kurum kimliği <span class="tag">Bakanlık'a bildirilen</span></h4>
+      <div class="ic form">
+        <label>SKRS kurum kodu</label><span class="inp">148</span>
+        <label>MEDULA tesis kodu</label><span class="inp">34123456</span>
+        <label>Şube no</label><span class="inp">1</span>
+        <label>MSH-3 firma uygulama kodu</label><span class="inp">GENTEGRE <span class="sonuk">(e-Nabız'da kayıtlı olduğu gibi)</span></span>
+        <label>Karakter seti</label><span class="combo">UTF8</span>
+        <label>Gönderim</label><span class="combo">Açık - istem kabulde, rapor onayda</span>
+      </div>
+    </div>
+    <div class="grp"><h4>Mirth Connect <span class="tag">Gentegre → Mirth</span></h4>
+      <div class="ic form">
+        <label>K1 HL7 (MLLP)</label><span class="inp">10.0.0.12 : 6661</span>
+        <label>K2 KOS (HTTP)</label><span class="inp">http://10.0.0.12:8082/kos</span>
+        <label>Mirth REST (pano)</label><span class="inp">https://10.0.0.12:8443/api · kullanıcı gentegre_izleme</span>
+        <label>K4 durum ucu (Mirth → biz)</label><span class="inp">/api/teletip/durum · jeton ●●●●●●</span>
+        <label>ACK bekleme</label><span class="inp">30 sn</span>
+        <label>Durum</label><span><span class="rz ok">K1 ✓</span> <span class="rz ok">K2 ✓</span> <span class="rz ok">REST ✓</span> <span class="sonuk">son test 10:02</span></span>
+      </div>
+    </div>
+    <div class="grp"><h4>Bakanlık uçları <span class="tag">Mirth kanallarında tanımlı · burada yalnız görüntülenir</span></h4>
+      <div class="ic form">
+        <label>Teletıp HL7</label><span class="inp sonuk">Bakanlık'ın verdiği IP : port (K1 hedefi)</span>
+        <label>XDS repository</label><span class="inp sonuk">Provide&amp;Register uç adresi (K2 hedefi)</span>
+        <label>Doz MGA</label><span class="inp">dicom.teletip.saglik.gov.tr : 443 · TELETIP_MGA (TLS)</span>
+        <label>Mirth çıkış IP'si</label><span class="inp">85.xx.xx.12 <span class="rz ok">Bakanlık'ta tanımlı</span></span>
+      </div>
+    </div>
+    <div class="grp"><h4>WADO (Bakanlık görüntüyü buradan çeker)</h4>
+      <div class="ic form">
+        <label>Dış adres</label><span class="inp">https://kosuyolu.teletip.saglik.gov.tr:35004/DCM/WADO</span>
+        <label>İç hedef</label><span class="inp">http://10.0.0.20:1000/WADO/SERVERAE (ClearCanvas)</span>
+        <label>Biçimler</label><span><span class="rz ok">application/dicom</span> <span class="rz ok">image/jpeg</span></span>
+        <label>Retrieve Location UID</label><span class="inp">KOS'a yazılır (bu WADO'yu sunan kurum)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 6 ===== -->
+<h2><b>6</b> — İstem kartı / PACS kartındaki Teletıp şeridi <span class="ipucu">her radyoloji istem kartının üstünde · tıklayınca 4 açılır</span></h2>
+<div class="win">
+  <div class="serit">
+    <b>🏛 Teletıp</b>
+    <span class="adim ok">ORM ✓ 09:27</span><span class="ayrac">›</span>
+    <span class="adim uy">MWL ! cihaz sormadı</span><span class="ayrac">›</span>
+    <span class="adim ok">PACS ✓ 09:52</span><span class="ayrac">›</span>
+    <span class="adim hata">KOS ✖ accession farklı</span><span class="ayrac">›</span>
+    <span class="adim">ORU · rapor bekliyor</span>
+    <span class="btn" style="margin-left:auto">ayrıntı</span>
+  </div>
+  <div class="bilgi">Teletıp kapalı kurumda (özel merkez, <code>bakanlik_gonderim = 0</code>) şerit hiç çizilmez. PACS Çalışmaları ekranındaki (pacs_goruntuleri.html)
+    "Teletıp" sütunu da bu aşamalardan özetlenir.</div>
+</div>
+
+<!-- ===================================================================== 7 ===== -->
+<h2><b>7</b> — Kurallar ve sıra</h2>
+<div class="kural">
+  <h3>İş bölümü</h3>
+  <table style="margin-bottom:8px">
+    <tr><th style="width:230px">İş</th><th style="width:120px">Kimde</th><th>Not</th></tr>
+    <tr><td>HL7 ORM / ORU içeriği</td><td>Gentegre</td><td>Bakanlık profili (2.3.1, ORU 4 parça base64), <code>fn_telerad_bakanlik_eksik</code>; kural tek yerde - Mirth'te dönüştürücü yazılmaz</td></tr>
+    <tr><td>HL7 taşıma, ACK, tekrar, arşiv</td><td>Mirth K1</td><td>Kaynak "Respond from: destination" - Teletıp ACK'i Gentegre'ye aynen döner; AE/AR'de otomatik tekrar yok</td></tr>
+    <tr><td>KOS üretimi + XDS gönderimi</td><td>Mirth K2</td><td>Bakanlık MakeKOS / SendKOS jar'ı Mirth <code>custom-lib</code>'e; Gentegre yalnız {studyUid, accession, skrs} gönderir</td></tr>
+    <tr><td>Doz RDSR</td><td>Mirth K3</td><td>ClearCanvas SR (SOP Class X-Ray Radiation Dose SR) için auto-route → Mirth DICOM dinleyici → TLS TELETIP_MGA</td></tr>
+    <tr><td>Gönderim durumu</td><td>Mirth K4 → Gentegre</td><td>her hedef sonucunda HTTP POST; Gentegre <code>teletip_gonderim</code> aşamalarını yazar, ekranlar buradan okur</td></tr>
+    <tr><td>MWL</td><td>Gentegre</td><td>1301 MwlSunucusu - Mirth dışı</td></tr>
+    <tr><td>Public WADO</td><td>vekil (IIS/nginx)</td><td>Mirth dışı; Bakanlık doğrudan çeker</td></tr>
+    <tr><td>Sorgu servisleri 6.x</td><td>Gentegre</td><td>günlük zamanlı iş; sonucu panoya</td></tr>
+  </table>
+  <h3>Sıra</h3>
+  <ol>
+    <li><b>MWL</b> - yazıldı (1301), commit bekliyor.</li>
+    <li><b>Mirth kurulumu + K1 ORU:</b> mevcut ORU kuyruğunun hedefi Mirth; ACK zinciri uçtan uca.</li>
+    <li><b>ORM üretici</b> (NW / XO / CA) + K1; <code>teletip_gonderim</code> tablosu + K4 + ekran 3/4/6.</li>
+    <li><b>K2 KOS</b> (Bakanlık jar'ı) + yeniden gönder.</li>
+    <li><b>Public WADO</b> + Bakanlık'a IP bildirimi (kurumun işi, biz test ederiz).</li>
+    <li><b>K3 doz</b>, sonra <b>sorgu servisleri</b> ve pano (ekran 2).</li>
+  </ol>
+  <h3>Açık karar</h3>
+  <ul>
+    <li><b>Mirth sürümü (karar, kullanıcı 11.11.2026: "mirth 4.5.2 kullanacağız"):</b> Mirth Connect <b>4.5.2</b> - son açık kaynak sürüm (4.6+ NextGen ticari).
+      Sürüm sabit; Mirth güncellemesi kendiliğinden yapılmaz. Java 17, varsayılan Derby yerine kurumun PostgreSQL'i (mesaj arşivi).</li>
+    <li><b>Kurulum yeri:</b> müşteri sunucusunda (Bakanlık IP'si müşterinin) - Mirth her kurumda ayrı; merkezi tek Mirth Bakanlık'ın "IP başına SKRS" kuralına takılır.</li>
+  </ul>
+</div>
+
+</body>
+</html>
