@@ -325,6 +325,17 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     radyoloji / telerad / başvuru / DICOM / MWL / ORM paketleri 159/159. Uçtan uca: test DB kuyruk satırı → servis →
     Mirth K1 → benzetim AA; başvuru referansı boş satır göndermeden gidemez. Dev demo istem bugün gidemez: kurum SKRS,
     firma kodu, SUT kodu, LOINC, SYS takip (e-Nabız 101) eksik. 1301-1302 dev, test, UNIVERSE, KOSUYOLU DB'lerinde.
+- **ORU kılavuz biçimine düzeltildi (db/1303; kullanıcı: "ORU'yu da kılavuz biçimine düzelt"):** `OruUretici` Bakanlık
+  profili kılavuz 3.43 Tablo 9-10 / 20-21 (31.05.2022 güncellemesi) biçiminde: PID-2 `SKRS-dosya`, PID-3 `dosya^^HBYS`,
+  PID-4 `TCKN^^^TC`, PV1-2 hasta sınıfı, PV1-19 `ziyaret^^^^^^^^birim&ad&HBYS` (birim yoksa yalnız ziyaret no), PV1-20
+  SGK/OTHER, PV1-50 Medula takip, PV1-51 V, **ORC-1 SN** (eski NW), ORC-2 `acc^HBYS`, ORC-3 `acc^RBS`, ORC-7 / OBR-27 /
+  OBR-36 randevu-kabul zamanı, ORC-17 birim, **ORC-21 `Kurum^^SKRS\S\şube\S\MEDULA`** (teleradyolojide
+  "B adı^^A-SKRS…B-tesis": rapor biz, istem gönderen kurum), OBR-2 / OBR-3 ekli. Kurum profili (2.5) çıktısı DEĞİŞMEDİ.
+  MSH-5/6 Bakanlık varsayılanı TELERADYOLOJI (Tablo 8). `OruCozumleyici` ORC-21'den SKRS'yi üçüncü bileşenden okur
+  (eski tek-bileşen biçim de çalışır). Teslim sorgusu kendi kurum adımızı, MEDULA tesis kodumuzu ve `teletip.sube_no`'yu
+  verir. 1303: ORM veri fonksiyonu SUT'u ORU ile aynı yoldan çözer (`fn_hizmet_sut_kodu` + `skrs_sut`), modalite
+  `fn_rad_modalite_kod`. Testler: ORU / çözümleyici / MLLP / ORM / telerad / Teletıp ORM 153/153; K1 üzerinden ORU AA,
+  geri çözüm accession / SKRS / TCKN / dosya doğru. 1303 dev, test, UNIVERSE, KOSUYOLU'da.
 
 ### 10.11.2026
 

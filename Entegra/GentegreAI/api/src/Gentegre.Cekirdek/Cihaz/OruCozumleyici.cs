@@ -124,8 +124,13 @@ public static class OruCozumleyici
             Parca(Kacissiz(Alan(obr, 3)), 0),
             Parca(Kacissiz(Alan(obr, 2)), 0));
 
-        // SKRS: ORC-21 (kurum kodu) ya da OBR-15'teki `12345&&SKRS` biçimi.
-        var skrs = Parca(Kacissiz(Alan(orc, 21)), 0);
+        // SKRS: ORC-21 ya da OBR-15'teki `12345&&SKRS` biçimi. ORC-21 kılavuz biçiminde
+        //   "Kurum adı^^SKRS\S\şube\S\MEDULA" - SKRS ÜÇÜNCÜ bileşenin ilk parçası (kaçışlar çözülmeden ayrılır);
+        //   eski / sade gönderenlerde alan yalnız SKRS'dir (tek bileşen).
+        var orc21 = Alan(orc, 21);
+        var skrs = Parca(orc21, 2) is { Length: > 0 } ucuncu
+            ? Kacissiz(ucuncu).Split('^')[0].Trim()
+            : Parca(Kacissiz(orc21), 0);
         if (skrs.Length == 0)
         {
             var kaynak = Alan(obr, 15);

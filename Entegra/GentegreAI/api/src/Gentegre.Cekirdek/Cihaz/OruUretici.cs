@@ -78,6 +78,22 @@ public sealed record OruVerisi
     public string RadyologAd { get; init; } = "";
     /// <summary>Hazır OBX-17 gövdesi: <c>IV^Ioheksol^300</c>.</summary>
     public string KontrastObx17 { get; init; } = "";
+
+    // ---- Bakanlık kılavuz biçimi (3.43 Tablo 9-10, 20-21; ORM ile aynı ortak bölümler) ----
+    /// <summary>ORC-21: raporu gönderen kurumun adı ("B Hastanesi^^A-SKRS\S\şube\S\B-MEDULA tesis").</summary>
+    public string KurumAdi { get; init; } = "";
+    public string KurumKisaAdi { get; init; } = "";
+    public string SubeNo { get; init; } = "1";
+    /// <summary>ORC-21 son bileşeni: raporu gönderenin MEDULA tesis kodu.</summary>
+    public string MedulaTesisKodu { get; init; } = "";
+    /// <summary>PV1-2: E acil · I yatan · O ayaktan.</summary>
+    public string HastaSinifi { get; init; } = "O";
+    public string BirimId { get; init; } = "";
+    /// <summary>PV1-20 SGK / OTHER; SGK ise PV1-50 Medula takip.</summary>
+    public bool Sgk { get; init; }
+    public string MedulaTakipNo { get; init; } = "";
+    /// <summary>ORC-7 / OBR-27 / OBR-36: randevu ya da çekim kabul zamanı (yoksa çekim zamanı).</summary>
+    public DateTime? PlanlananZaman { get; init; }
     /// <summary>Ek rapor (addendum) ise durum C (correction), değilse F.</summary>
     public bool Duzeltme { get; init; }
 
@@ -127,29 +143,70 @@ public static class OruUretici
 
         // ALANLAR DİZİ İNDEKSİYLE: "kaç virgül saydım" yöntemi PID-3 ile
         //   PID-4'ü kaydırıyordu; numara kılavuzda yazan numaradır.
+        var bakanlik = v.Profil == Hl7Profili.Bakanlik;
+        var ziyaretNo = v.HastaneReferans.Length > 0 ? v.HastaneReferans : v.BasvuruNo;
+        var planlanan = v.PlanlananZaman ?? v.CekimZamani;
         var pid = Bos(9);
-        pid[3] = K(v.HastaDosyaNo);      // hastane dosya numarası
-        pid[4] = K(v.HastaTckn);         // TCKN
         pid[5] = Ad(v.HastaSoyad, v.HastaAd);
         pid[7] = v.DogumTarihi is { } d ? d.ToString("yyyyMMdd") : "";
         pid[8] = K(v.Cinsiyet);
+        if (bakanlik)
+        {
+            // Kılavuz Tablo 9 (ORM ile ortak): PID-2 "SKRS-dosya", PID-3 "dosya^^HBYS", PID-4 "TCKN^^^TC".
+            pid[2] = v.KurumSkrs.Length > 0 && v.HastaDosyaNo.Length > 0 ? $"{K(v.KurumSkrs)}-{K(v.HastaDosyaNo)}" : K(v.HastaDosyaNo);
+            pid[3] = v.HastaDosyaNo.Length > 0 ? $"{K(v.HastaDosyaNo)}^^HBYS" : "";
+            pid[4] = v.HastaTckn.Length > 0 ? $"{K(v.HastaTckn)}^^^TC" : "";
+        }
+        else
+        {
+            pid[3] = K(v.HastaDosyaNo);      // hastane dosya numarası
+            pid[4] = K(v.HastaTckn);         // TCKN
+        }
         Segment(s, "PID", pid);
 
         // PV1-19 (Visit No): Bakanlık e-Nabız'daki hastane başvuru referansını
         //   bekliyor, boş geçilirse 0278 hatası dönüyor.
-        var pv1 = Bos(20);
-        pv1[2] = "O";
+        var pv1 = Bos(bakanlik ? 52 : 20);
+        pv1[2] = bakanlik ? K(v.HastaSinifi.Length > 0 ? v.HastaSinifi : "O") : "O";
         pv1[3] = K(v.Bolum);
-        pv1[19] = K(v.HastaneReferans.Length > 0 ? v.HastaneReferans : v.BasvuruNo);
+        if (bakanlik)
+        {
+            // Tablo 10: "VisitNo^^^^^^^^BirimId&BirimAdı&HBYS", PV1-20 SGK/OTHER, PV1-50 Medula takip, PV1-51 V.
+            pv1[3] = v.BirimId.Length == 0 && v.Bolum.Length == 0 ? "" : $"{K(v.BirimId)}^^^{K(v.Bolum)}";
+            pv1[19] = ziyaretNo.Length == 0 ? ""
+                    : v.BirimId.Length == 0 && v.Bolum.Length == 0 ? K(ziyaretNo)      // birim yoksa yalnız ziyaret no
+                    : $"{K(ziyaretNo)}^^^^^^^^{K(v.BirimId)}&{K(v.Bolum)}&HBYS";
+            pv1[20] = v.Sgk ? "SGK" : "OTHER";
+            pv1[50] = v.Sgk ? K(v.MedulaTakipNo) : "";
+            pv1[51] = "V";
+        }
+        else pv1[19] = K(ziyaretNo);
         Segment(s, "PV1", pv1);
 
         var orc = Bos(22);
-        orc[1] = "NW";
-        orc[2] = K(v.AccessionNo);
-        orc[5] = "SC";
-        orc[9] = v.IstemZamani is { } io ? Z(io) : "";
-        orc[12] = Kisi(v.IsteyenHekimTckn, v.IsteyenHekimSoyad, v.IsteyenHekimAd);
-        orc[21] = K(v.KurumSkrs);        // kurum SKRS kodu - eşleştirme anahtarı
+        if (bakanlik)
+        {
+            // Tablo 20 (3.43 - 31.05.2022 güncellemesi): ORC-1 SN, ORC-2 acc^HBYS, ORC-3 acc^RBS,
+            //   ORC-21 "Kurum adı^^SKRS\S\şube\S\MEDULA tesis" - ayraç kaçışsız (ORM ile aynı).
+            orc[1] = "SN";
+            orc[2] = $"{K(v.AccessionNo)}^HBYS";
+            orc[3] = $"{K(v.AccessionNo)}^RBS";
+            orc[7] = planlanan is { } p7 ? $"1^once^^{Z(p7)}" : "";
+            orc[9] = Z(v.Zaman);
+            orc[12] = Kisi(v.IsteyenHekimTckn, v.IsteyenHekimSoyad, v.IsteyenHekimAd);
+            orc[17] = v.BirimId.Length == 0 && v.Bolum.Length == 0 ? ""
+                    : $"{K(v.BirimId)}^{K(v.Bolum)}^{K(v.KurumKisaAdi)}".TrimEnd('^');
+            orc[21] = $@"{K(v.KurumAdi)}^^{K(v.KurumSkrs)}\S\{K(v.SubeNo)}\S\{K(v.MedulaTesisKodu)}";
+        }
+        else
+        {
+            orc[1] = "NW";
+            orc[2] = K(v.AccessionNo);
+            orc[5] = "SC";
+            orc[9] = v.IstemZamani is { } io ? Z(io) : "";
+            orc[12] = Kisi(v.IsteyenHekimTckn, v.IsteyenHekimSoyad, v.IsteyenHekimAd);
+            orc[21] = K(v.KurumSkrs);        // kurum SKRS kodu - eşleştirme anahtarı
+        }
         Segment(s, "ORC", orc);
 
         Segment(s, "OBR", ObrAlanlari(v));
@@ -181,9 +238,10 @@ public static class OruUretici
     private static string[] ObrAlanlari(OruVerisi v)
     {
         var a = Bos(37);
+        var bakanlik = v.Profil == Hl7Profili.Bakanlik;
         a[1] = "1";
-        a[2] = K(v.AccessionNo);
-        a[3] = K(v.AccessionNo);
+        a[2] = bakanlik ? $"{K(v.AccessionNo)}^HBYS" : K(v.AccessionNo);    // Tablo 21
+        a[3] = bakanlik ? $"{K(v.AccessionNo)}^RBS" : K(v.AccessionNo);
         // OBR-4: resmî SUT kodu + (varsa) LOINC. Kılavuz tür alanında yalnız
         //   SUT ya da LNC kabul ediyor; LOINC yoksa parça hiç yazılmaz.
         a[4] = v.Loinc.Length > 0
@@ -205,10 +263,11 @@ public static class OruUretici
         a[20] = K(v.SysTakipNo);
         a[21] = K(v.HastaneReferans);
         a[24] = K(v.ModaliteKodu);
-        a[27] = v.CekimZamani is { } cz ? $"1^once^^{Z(cz)}" : "";
+        var planlanan = v.PlanlananZaman ?? v.CekimZamani;   // Tablo 21: randevu / çekim kabul zamanı
+        a[27] = planlanan is { } cz ? $"1^once^^{Z(cz)}" : "";
         if (v.TeknisyenId.Length > 0)
             a[34] = $"{K(v.TeknisyenId)}&{K(v.TeknisyenSoyad)}&{K(v.TeknisyenAd)}";
-        a[36] = v.CekimZamani is { } rz ? Z(rz) : "";
+        a[36] = planlanan is { } rz ? Z(rz) : "";
         return a;
     }
 

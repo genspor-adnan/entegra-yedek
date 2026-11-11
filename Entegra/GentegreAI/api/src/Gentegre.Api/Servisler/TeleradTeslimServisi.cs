@@ -141,10 +141,11 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
             Profil = bakanlikMi ? Hl7Profili.Bakanlik : Hl7Profili.Kurum,
             GonderenUygulama = M("mshUygulama").Length > 0 ? M("mshUygulama") : "GENTEGRE",
             GonderenTesis = M("mshTesis").Length > 0 ? M("mshTesis") : M("subeAdi"),
+            // Kılavuz 3.43 Tablo 8: MSH-5 / MSH-6 = TELERADYOLOJI (örnek mesajlardaki "TELETIP" eski).
             AliciUygulama = M("aliciUygulama").Length > 0 ? M("aliciUygulama")
-                          : bakanlikMi ? "TELETIP" : "HBYS",
+                          : bakanlikMi ? "TELERADYOLOJI" : "HBYS",
             AliciTesis = M("aliciTesis").Length > 0 ? M("aliciTesis")
-                       : bakanlikMi ? "TELETIP" : M("kurumAdi"),
+                       : bakanlikMi ? "TELERADYOLOJI" : M("kurumAdi"),
             Zaman = Saat.Simdi,
             KontrolNo = kontrolNo,
             Encoding = S("mshEncoding") == 2 ? "Windows1254" : "UTF8",
@@ -179,6 +180,11 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
             // OBR-15: raporu BİZ yazdık; istemi açan kurum başkası. Kendi SKRS
             //   kodumuz yazılmazsa rapor karşı tarafın istemine oturmaz.
             HizmetVerenSkrs = bakanlikMi ? M("bizimSkrs") : "",
+            // ORC-21 (Tablo 20 **): rapor B'den (biz), istem A'dan → "B adı^^A-SKRS\S\şube\S\B-MEDULA tesis".
+            KurumAdi = M("bizimKurumAdi"),
+            KurumKisaAdi = M("subeAdi"),
+            MedulaTesisKodu = M("bizimTesis"),
+            SubeNo = M("teletipSubeNo").Length > 0 ? M("teletipSubeNo") : "1",
             ModaliteKodu = M("modaliteKodu"),
             TeknisyenId = M("teknisyenId"),
             TeknisyenSoyad = M("teknisyenSoyad"),
@@ -286,6 +292,12 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
                -- BİZİM SKRS kodumuz (OBR-15): hizmeti veren kurum biziz.
                coalesce((select r.deger from public.referans r
                           where r.anahtar = 'kurum.skrs_kodu'), '') as "bizimSkrs",
+               -- ORC-21 (1303): raporu gönderen biz - kurum adı ve MEDULA tesis kodumuz.
+               coalesce(nullif(sb.unvan, ''), sb.ad, '') as "bizimKurumAdi",
+               coalesce((select kp.tesis_kodu from public.kurum_profil kp
+                          where kp.sube_id in (i.sube_id, 0) and coalesce(kp.tesis_kodu, '') <> ''
+                          order by (kp.sube_id = i.sube_id) desc limit 1), '') as "bizimTesis",
+               coalesce((select r.deger from public.referans r where r.anahtar = 'teletip.sube_no'), '1') as "teletipSubeNo",
 
                coalesce(i.dis_erisim_no, '')        as "accessionNo",
                -- PID-3: hastanin GONDEREN KURUMDAKI dosya numarasi (816).

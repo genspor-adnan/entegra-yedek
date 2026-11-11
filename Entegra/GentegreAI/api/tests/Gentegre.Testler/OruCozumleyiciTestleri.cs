@@ -125,6 +125,16 @@ public sealed class OruCozumleyiciTestleri
         Assert.Equal("Bulgu metni", g.RaporBulgular);
     }
 
+    [Theory]
+    [InlineData(@"Bartın Devlet Hastanesi^^148\S\1\S\11740001", "148")]   // kılavuz 3.43 biçimi
+    [InlineData(@"B Hastanesi^^1234\S\1\S\98765432", "1234")]               // A istemi, B raporu: A'nın SKRS'si
+    [InlineData("12345", "12345")]                                           // eski / sade gönderen
+    public void Orc21_kilavuz_ve_sade_bicim(string orc21, string beklenen)
+    {
+        var m = Basit().Replace("OBR|", $"ORC|SN|A5^HBYS|A5^RBS||||||||||||||||||{orc21}\rOBR|");
+        Assert.Equal(beklenen, OruCozumleyici.Coz(m).GonderenSkrs);
+    }
+
     [Fact]
     public void Orc21_yoksa_obr15ten_skrs()
     {

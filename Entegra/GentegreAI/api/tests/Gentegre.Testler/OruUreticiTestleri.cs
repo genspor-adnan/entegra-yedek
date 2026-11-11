@@ -25,6 +25,7 @@ public sealed class OruUreticiTestleri
         DogumTarihi = new DateTime(1980, 1, 5), Cinsiyet = "M",
         HastaneReferans = "REF-99", SysTakipNo = "SYS-77",
         KurumSkrs = "12345", AccessionNo = "ACC-1",
+        KurumAdi = "Test Hastanesi", MedulaTesisKodu = "11740001",
         IsteyenHekimTckn = "98765432101", IsteyenHekimSoyad = "VELİ", IsteyenHekimAd = "ALİ",
         SutKodu = "801950", SutAdi = "Lumbo-sakral radyografi",
         Loinc = "24972-2", LoincAdi = "Lumbar vertebra XR",
@@ -84,22 +85,47 @@ public sealed class OruUreticiTestleri
     public void Hasta_alanlari_dogru_numarada()
     {
         var m = OruUretici.Uret(Ornek());
-        Assert.Equal("P-4501", Alan(m, "PID", 3));
-        Assert.Equal("12345678901", Alan(m, "PID", 4));      // TCKN
+        // Kılavuz Tablo 9: PID-2 "SKRS-dosya", PID-3 "dosya^^HBYS", PID-4 "TCKN^^^TC".
+        Assert.Equal("12345-P-4501", Alan(m, "PID", 2));
+        Assert.Equal("P-4501^^HBYS", Alan(m, "PID", 3));
+        Assert.Equal("12345678901^^^TC", Alan(m, "PID", 4));
         Assert.Equal("TAŞ^AHMET", Alan(m, "PID", 5));
         Assert.Equal("19800105", Alan(m, "PID", 7));
         Assert.Equal("M", Alan(m, "PID", 8));
         // PV1-19 boş geçilirse 0278 hatası dönüyor.
         Assert.Equal("REF-99", Alan(m, "PV1", 19));
+        Assert.Equal("OTHER", Alan(m, "PV1", 20));
+        Assert.Equal("V", Alan(m, "PV1", 51));
+        // Birim varsa Tablo 10 biçimi.
+        var b = OruUretici.Uret(Ornek() with { BirimId = "12", Bolum = "Radyoloji", Sgk = true, MedulaTakipNo = "MT1" });
+        Assert.Equal("REF-99^^^^^^^^12&Radyoloji&HBYS", Alan(b, "PV1", 19));
+        Assert.Equal("SGK", Alan(b, "PV1", 20));
+        Assert.Equal("MT1", Alan(b, "PV1", 50));
+    }
+
+    [Fact]
+    public void Kurum_profili_kimlik_alanlari_degismedi()
+    {
+        var m = OruUretici.Uret(Ornek(Hl7Profili.Kurum));
+        Assert.Equal("P-4501", Alan(m, "PID", 3));
+        Assert.Equal("12345678901", Alan(m, "PID", 4));
+        Assert.Equal("NW", Alan(m, "ORC", 1));
+        Assert.Equal("ACC-1", Alan(m, "ORC", 2));
+        Assert.Equal("12345", Alan(m, "ORC", 21));
     }
 
     [Fact]
     public void Istem_alanlari_dogru_numarada()
     {
         var m = OruUretici.Uret(Ornek());
-        Assert.Equal("ACC-1", Alan(m, "ORC", 2));
+        // Tablo 20 (3.43): ORC-1 SN, ORC-2 acc^HBYS, ORC-3 acc^RBS, ORC-21 "Kurum^^SKRS\S\şube\S\MEDULA".
+        Assert.Equal("SN", Alan(m, "ORC", 1));
+        Assert.Equal("ACC-1^HBYS", Alan(m, "ORC", 2));
+        Assert.Equal("ACC-1^RBS", Alan(m, "ORC", 3));
         Assert.Equal("98765432101^VELİ^ALİ", Alan(m, "ORC", 12));   // hekim TCKN
-        Assert.Equal("12345", Alan(m, "ORC", 21));                  // kurum SKRS
+        Assert.Equal(@"Test Hastanesi^^12345\S\1\S\11740001", Alan(m, "ORC", 21));
+        Assert.Equal("ACC-1^HBYS", Alan(m, "OBR", 2));
+        Assert.Equal("ACC-1^RBS", Alan(m, "OBR", 3));
         Assert.Equal("ACC-1", Alan(m, "OBR", 18));
         Assert.Equal("SYS-77", Alan(m, "OBR", 20));
         Assert.Equal("REF-99", Alan(m, "OBR", 21));
