@@ -97,7 +97,7 @@ public static class TeletipUclari
             if (xds.Length > 0 && !Uri.TryCreate(xds, UriKind.Absolute, out _))
                 hatalar.Add(new AlanHatasi("xdsAdres", "Tam adres olmalı (ör. http://10.0.0.12:8082/kos/)."));
             if (oid.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(oid, @"^[0-2](\.[0-9]+)+$"))
-                hatalar.Add(new AlanHatasi("xdsHastaOid", "OID biçiminde olmalı (ör. 2.16.792.1.2.1.1.5.2.1.1)."));
+                hatalar.Add(new AlanHatasi("xdsHastaOid", "OID biçiminde olmalı (Bakanlık: 1.3.6.1.4.1.21367.13.20.3000)."));
             if (skrs.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(skrs, "^[0-9]{1,10}$"))
                 hatalar.Add(new AlanHatasi("kurumSkrs", "Yalnız rakam (SKRS kurum kodu)."));
             if (tesis.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(tesis, "^[0-9]{8}$"))

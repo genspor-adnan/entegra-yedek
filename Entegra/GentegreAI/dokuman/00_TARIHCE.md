@@ -468,6 +468,29 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     görmez), `teletip.xds_adres = http://127.0.0.1:8082/kos/`; 5 KOS (satır 8-12) → Mirth K2 → benzetim: 5/5 OK.
   * Ayrıca: ClearCanvas WADO bu PACS'ta JPEG vermiyor (400, yalnız DICOM) - Bakanlık WADO'su JPEG ister; "dışa açık WADO"
     adımında çözülmeli.
+- **KOS / XDS Bakanlık paketleriyle hizalandı (db/1312; kullanıcı: "SendKOS ve MakeKOS paketlerini indir, karşılaştır"):**
+  teletip.saglik.gov.tr'den MakeKOS v2.0 kaynağı + v2.1 jar ve SendKOS v15 kaynağı indirildi (yalnız kaynak okundu,
+  çalıştırılmadı). Farklar ve yapılanlar:
+  * **Hasta OID'i yanlıştı:** tahmin 2.16.792.1.2.1.1.5.2.1.1; Bakanlık (SendKOS + kılavuz 1.15 Şekil 16)
+    `TCKN^^^&1.3.6.1.4.1.21367.13.20.3000&ISO`. `XdsZarfi.VarsayilanHastaOid`; 1312 ayarı yalnız eski tahminde
+    duruyorsa düzeltir (4 DB'de uygulandı).
+  * **ebRIM kodları şablona birebir** (`submit_image_document.xml`): classCode `DEMO-Eval` (1.3.6.1.4.1.21367.100.1),
+    confidentiality `N`, formatCode KOS SOP Class (şema UUID'i a09d5840-**386c-46f2-b5ad-9c3699a4309d** - bizdeki UUID
+    hatalıydı), healthcareFacility `Hospital Setting` / practiceSetting `General Medicine` (Connect-a-thon), typeCode ve
+    contentTypeCode `34117-2` (LOINC), belge ve kümede author sınıflandırması (authorPerson / authorRole SC), belge adı
+    "Manifest", languageCode en-US, serviceStartTime 14 hane, PID-7 saatli. **eventCodeList (modalite) kaldırıldı**
+    (şablonda yok). sourceId sabit `1.3.6.1.4.1.21367.2010.1.2.108` (şablondaki; önceden RetrieveLocationUID idi).
+    Belge / küme kimlikleri `urn:uuid:` ve ExtrinsicObject ile MTOM `Document` aynı kimlikte; ExtrinsicObject önce.
+  * **KOS (MakeKOS ile):** zaten uyumlu - SOP class, KO, seri 999 / örnek 1, Manifest 113030, DCMR 2010, SEPARATE,
+    InstitutionName `Ad^^^SKRS<kod>^^^FK<firma>`, DeviceSerialNumber, RetrieveLocationUID `...2017.10.26.<SKRS>`,
+    seride SeriesDescription + Modality + Icon Image (YBR_FULL_422, 8 bit, OB JPEG, aspect 1). Eklenen: Referenced SOP'ta
+    InstanceNumber ve NumberOfFrames her zaman (MakeKOS gibi), boş Referenced Performed Procedure Step Sequence.
+    MakeKOS ikonu 64 piksele küçültüyor; kılavuz ≤128 dediği için bizimki 128 kaldı.
+  * Bakanlık adresleri (kurum ayarına girilecek, Mirth K2 hedefi `teletip_xds_url`): canlı
+    `https://xdagw.teletip.saglik.gov.tr/WCFServices/TeletipXDSService.svc` (kılavuz), beta
+    `http://betaxdsrepository.teletip.saglik.gov.tr/axis2/services/xdsrepositoryb` (SendKOS).
+  * Doğrulama: `TeletipKosTestleri` şablon değerleri + kimlik eşleşmesi; Teletıp / ORM / ORU / MWL 178/178. KOSUYOLU
+    KOS satırı 8 yeniden kuyrukta → Mirth K2 → benzetim OK, saklanan gövdede yeni kodlar ve OID.
 
 ### 10.11.2026
 

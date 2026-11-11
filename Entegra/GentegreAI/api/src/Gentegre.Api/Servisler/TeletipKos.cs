@@ -13,8 +13,8 @@ namespace Gentegre.Api.Servisler;
 // TELETIP KOS (K2) - kullanıcı 11.11.2026: "KOS gönderimini (K2) yap". Teleradyoloji XDS Entegrasyon Kılavuzu 1.15:
 //   § 2.1 KOS dokümanı (Tablo 2 - Hiyerarşik SOP Örnek Referans Makrosu), § 2.2 RAD-68 (ITI-41 Provide & Register,
 //   SOAP 1.2 + MTOM/XOP), Tablo 3 yanıtları. KOS ve zarf Gentegre'de üretilir; Mirth K2 (TELETIP_KOS) yalnız taşır.
-//   ebRIM metadata kodları kılavuzda metin olarak YOK (örnek gövde resim) - IHE XDS-I.b standart değerleri kullanıldı,
-//   Bakanlık KOS doğrulama servisiyle / SendKOS kaynağıyla karşılaştırılmalı (bkz. tarihçe).
+//   ebRIM metadata kodları kılavuzda metin olarak YOK (örnek gövde resim) - 11.11.2026'da Bakanlık SendKOS v15
+//   (submit_image_document.xml) ve MakeKOS v2.0 kaynağıyla karşılaştırılıp onlara hizalandı (bkz. tarihçe).
 // =====================================================================================================================
 
 /// <summary>PACS'tan okunan çalışma yapısı (C-FIND study / series / image).</summary>
@@ -78,6 +78,7 @@ public static class KosUretici
         d.AddOrUpdate(DicomTag.ValueType, "CONTAINER");
         d.AddOrUpdate(new DicomSequence(DicomTag.ConceptNameCodeSequence, Kod("113030", "DCM", "Manifest")));
         d.AddOrUpdate(DicomTag.ContinuityOfContent, "SEPARATE");
+        d.AddOrUpdate(new DicomSequence(DicomTag.ReferencedPerformedProcedureStepSequence)); // MakeKOS: boş (Tip 2)
         d.AddOrUpdate(new DicomSequence(DicomTag.ContentTemplateSequence, new DicomDataset
         {
             { DicomTag.MappingResource, "DCMR" }, { DicomTag.TemplateIdentifier, "2010" },
@@ -93,8 +94,9 @@ public static class KosUretici
                 var r = new DicomDataset().NotValidated();
                 r.AddOrUpdate(DicomTag.ReferencedSOPClassUID, g.SopClassUid);
                 r.AddOrUpdate(DicomTag.ReferencedSOPInstanceUID, g.SopInstanceUid);
-                if (g.No > 0) r.AddOrUpdate(DicomTag.InstanceNumber, g.No.ToString(CultureInfo.InvariantCulture));
-                if (g.Kare > 1) r.AddOrUpdate(DicomTag.NumberOfFrames, g.Kare.ToString(CultureInfo.InvariantCulture));
+                // MakeKOS v2.0 refSOP: InstanceNumber (yoksa boş) + NumberOfFrames (tek karede 0) her zaman yazılır.
+                r.AddOrUpdate(DicomTag.InstanceNumber, g.No > 0 ? g.No.ToString(CultureInfo.InvariantCulture) : "");
+                r.AddOrUpdate(DicomTag.NumberOfFrames, Math.Max(g.Kare, 0).ToString(CultureInfo.InvariantCulture));
                 sopListesi.Add(r);
                 // İçerik ağacı: her referans bir IMAGE öğesi (KOS'un SR gövdesi).
                 var ic = new DicomDataset().NotValidated();
@@ -414,12 +416,16 @@ public static class JpegKodlayici
 
 /// <summary>
 /// RAD-68 / ITI-41 ZARFI: SOAP 1.2 + MTOM/XOP (multipart/related). ebRIM: SubmissionSet (RegistryPackage) + DocumentEntry
-/// (ExtrinsicObject, mimeType application/dicom, formatCode = KOS SOP Class) + HasMember. Kodlar IHE XDS-I.b standardı;
-/// Bakanlık profiline özgü değerler kılavuzda metin olarak yok - doğrulama servisiyle karşılaştırılmalı.
+/// (ExtrinsicObject, mimeType application/dicom, formatCode = KOS SOP Class) + HasMember. Kodlar Bakanlık SendKOS v15
+/// şablonundan birebir (kılavuzda metin olarak yok).
 /// </summary>
 public static class XdsZarfi
 {
     public const string Eylem = "urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b";
+    /// <summary>XDSSubmissionSet.sourceId - Bakanlık şablonundaki sabit değer (SendKOS submit_image_document.xml).</summary>
+    public const string KaynakKimligi = "1.3.6.1.4.1.21367.2010.1.2.108";
+    /// <summary>Hasta kimliği atama otoritesi - kılavuz 1.15 Şekil 16 + SendKOS: "TCKN^^^&amp;1.3.6.1.4.1.21367.13.20.3000&amp;ISO".</summary>
+    public const string VarsayilanHastaOid = "1.3.6.1.4.1.21367.13.20.3000";
 
     public sealed record Zarf(string IcerikTuru, byte[] Govde, string SoapXml);
 
@@ -431,7 +437,6 @@ public static class XdsZarfi
                    rim = "urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", xop = "http://www.w3.org/2004/08/xop/include";
         var zaman = simdiUtc.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hasta = $"{(v.HastaTckn.Length == 11 ? v.HastaTckn : v.HastaDosyaNo)}^^^&{hastaOid}&ISO";
-        var kaynak = KosUretici.RetrieveLocationUid(k.Skrs);
         XElement Slot(string ad, params string[] degerler) =>
             new(rim + "Slot", new XAttribute("name", ad), new XElement(rim + "ValueList", degerler.Select(x => new XElement(rim + "Value", x))));
         XElement Ad(string metin) => new(rim + "Name", new XElement(rim + "LocalizedString", new XAttribute("value", metin)));
@@ -445,37 +450,50 @@ public static class XdsZarfi
                 new XAttribute("value", deger), new XAttribute("id", "urn:uuid:" + Guid.NewGuid()),
                 new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExternalIdentifier"), Ad(ad));
 
-        var belge = new XElement(rim + "ExtrinsicObject", new XAttribute("id", "Document01"), new XAttribute("mimeType", "application/dicom"),
+        // KODLAR BAKANLIK ŞABLONUNDAN (11.11.2026 karşılaştırma: teletip.saglik.gov.tr SendKOS v15 kaynağı,
+        //   submit_image_document.xml - Bakanlık'ın kendi test deposuna gönderdiği gövde). classCode / healthcareFacility /
+        //   practiceSetting / typeCode / contentTypeCode IHE Connect-a-thon değerleri; yazar (author) sınıflandırması;
+        //   eventCodeList YOK; sourceId sabit. Belge ve küme kimlikleri urn:uuid (şablon gibi).
+        var belgeId = "urn:uuid:" + Guid.NewGuid();
+        var kumeId = "urn:uuid:" + Guid.NewGuid();
+        XElement Yazar(string sema, string nesne) =>
+            new(rim + "Classification", new XAttribute("classificationScheme", sema), new XAttribute("classifiedObject", nesne),
+                new XAttribute("nodeRepresentation", ""), new XAttribute("id", "urn:uuid:" + Guid.NewGuid()),
+                new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification"),
+                Slot("authorPerson", "GENTEGRE+AUTOPUBLISH"), Slot("authorRole", "SC"));
+        var belge = new XElement(rim + "ExtrinsicObject", new XAttribute("id", belgeId), new XAttribute("mimeType", "application/dicom"),
             new XAttribute("objectType", "urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1"),
-            Slot("creationTime", zaman), Slot("languageCode", "tr-TR"), Slot("sourcePatientId", hasta),
+            Slot("languageCode", "en-US"),
+            Slot("serviceStartTime", (v.PlanlananZaman ?? simdiUtc).ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)),
+            Slot("creationTime", zaman), Slot("sourcePatientId", hasta),
             Slot("sourcePatientInfo", $"PID-3|{hasta}", $"PID-5|{v.HastaSoyad}^{v.HastaAd}",
-                 $"PID-7|{v.DogumTarihi?.ToString("yyyyMMdd", CultureInfo.InvariantCulture) ?? ""}", $"PID-8|{v.Cinsiyet}"),
-            Slot("serviceStartTime", (v.PlanlananZaman ?? simdiUtc).ToString("yyyyMMddHHmm", CultureInfo.InvariantCulture)),
-            Ad("KOS Manifest"),
-            Sinif("urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Document01", "IMAGES", "1.3.6.1.4.1.19376.1.2.6.1", "Images"),
-            Sinif("urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f", "Document01", "N", "2.16.840.1.113883.5.25", "Normal"),
-            Sinif("urn:uuid:a09d5840-386f-4d2a-8b3b-a6ad3f0ab6b3", "Document01", KosUretici.KosSopClass, "1.2.840.10008.2.6.1", "Key Object Selection Document"),
-            Sinif("urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1", "Document01", "HOSPITAL", "1.3.6.1.4.1.21367.2017.10.26", "Hospital"),
-            Sinif("urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead", "Document01", "RADIOLOGY", "1.3.6.1.4.1.21367.2017.10.26", "Radiology"),
-            Sinif("urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "Document01", v.Loinc.FirstOrDefault()?.Kod is { Length: > 0 } l ? l : "18748-4", "2.16.840.1.113883.6.1",
-                  v.Loinc.FirstOrDefault()?.Ad is { Length: > 0 } la ? la : "Diagnostic imaging study"),
-            Sinif("urn:uuid:2c6b8cb7-8b2a-4051-b291-b1ae6a575ef4", "Document01", modalite, "1.2.840.10008.2.16.4", modalite),
-            Dis("urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427", "Document01", hasta, "XDSDocumentEntry.patientId"),
-            Dis("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab", "Document01", kosSopUid, "XDSDocumentEntry.uniqueId"));
+                 $"PID-7|{v.DogumTarihi?.ToString("yyyyMMdd", CultureInfo.InvariantCulture) ?? ""}000000", $"PID-8|{v.Cinsiyet}"),
+            Ad("Manifest"),
+            Yazar("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d", belgeId),
+            Sinif("urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", belgeId, "DEMO-Eval", "1.3.6.1.4.1.21367.100.1", "Evaluation"),
+            Sinif("urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f", belgeId, "N", "2.16.840.1.113883.5.25", "Normal"),
+            Sinif("urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d", belgeId, KosUretici.KosSopClass, "1.2.840.10008.2.6.1", "Key Object Selection Document"),
+            Sinif("urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1", belgeId, "Hospital Setting", "Connect-a-thon healthcareFacilityTypeCodes", "Hospital Setting"),
+            Sinif("urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead", belgeId, "General Medicine", "Connect-a-thon practiceSettingCodes", "General Medicine"),
+            Sinif("urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", belgeId, "34117-2", "2.16.840.1.113883.6.1", "History And Physical Note"),
+            Dis("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab", belgeId, kosSopUid, "XDSDocumentEntry.uniqueId"),
+            Dis("urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427", belgeId, hasta, "XDSDocumentEntry.patientId"));
+        _ = modalite; // şablonda eventCodeList yok - imza çağıranlar için korunuyor
 
-        var kume = new XElement(rim + "RegistryPackage", new XAttribute("id", "SubmissionSet01"),
+        var kume = new XElement(rim + "RegistryPackage", new XAttribute("id", kumeId),
             new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage"),
-            Slot("submissionTime", zaman), Ad($"KOS {v.AccessionNo}"),
-            Sinif("urn:uuid:aa543740-bdda-424e-8c96-df4873be8500", "SubmissionSet01", "IMAGES", "1.3.6.1.4.1.19376.1.2.6.1", "Images"),
-            Dis("urn:uuid:96fdda7c-d067-4183-912e-bf5ee74998a8", "SubmissionSet01", "2.25." + new System.Numerics.BigInteger(Guid.NewGuid().ToByteArray(), true), "XDSSubmissionSet.uniqueId"),
-            Dis("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832", "SubmissionSet01", kaynak, "XDSSubmissionSet.sourceId"),
-            Dis("urn:uuid:6b5aea1a-874d-4603-a4bc-96a0a7b38446", "SubmissionSet01", hasta, "XDSSubmissionSet.patientId"));
+            Slot("submissionTime", zaman), Ad("Software"),
+            Yazar("urn:uuid:a7058bb9-b4e4-4307-ba5b-e3f0ab85e12d", kumeId),
+            Sinif("urn:uuid:aa543740-bdda-424e-8c96-df4873be8500", kumeId, "34117-2", "2.16.840.1.113883.6.1", "History and Physical"),
+            Dis("urn:uuid:96fdda7c-d067-4183-912e-bf5ee74998a8", kumeId, "2.25." + new System.Numerics.BigInteger(Guid.NewGuid().ToByteArray(), true), "XDSSubmissionSet.uniqueId"),
+            Dis("urn:uuid:6b5aea1a-874d-4603-a4bc-96a0a7b38446", kumeId, hasta, "XDSSubmissionSet.patientId"),
+            Dis("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832", kumeId, KaynakKimligi, "XDSSubmissionSet.sourceId"));
         var siniflama = new XElement(rim + "Classification", new XAttribute("id", "urn:uuid:" + Guid.NewGuid()),
-            new XAttribute("classifiedObject", "SubmissionSet01"), new XAttribute("classificationNode", "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd"),
+            new XAttribute("classifiedObject", kumeId), new XAttribute("classificationNode", "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd"),
             new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification"));
         var iliski = new XElement(rim + "Association", new XAttribute("id", "urn:uuid:" + Guid.NewGuid()),
             new XAttribute("associationType", "urn:oasis:names:tc:ebxml-regrep:AssociationType:HasMember"),
-            new XAttribute("sourceObject", "SubmissionSet01"), new XAttribute("targetObject", "Document01"),
+            new XAttribute("sourceObject", kumeId), new XAttribute("targetObject", belgeId),
             new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Association"),
             Slot("SubmissionSetStatus", "Original"));
 
@@ -489,8 +507,8 @@ public static class XdsZarfi
             new XElement(soap + "Body",
                 new XElement(xds + "ProvideAndRegisterDocumentSetRequest", new XAttribute(XNamespace.Xmlns + "xds", xds),
                     new XElement(lcm + "SubmitObjectsRequest", new XAttribute(XNamespace.Xmlns + "lcm", lcm), new XAttribute(XNamespace.Xmlns + "rim", rim),
-                        new XElement(rim + "RegistryObjectList", kume, belge, siniflama, iliski)),
-                    new XElement(xds + "Document", new XAttribute("id", "Document01"),
+                        new XElement(rim + "RegistryObjectList", belge, kume, siniflama, iliski)),
+                    new XElement(xds + "Document", new XAttribute("id", belgeId),
                         new XElement(xop + "Include", new XAttribute(XNamespace.Xmlns + "xop", xop), new XAttribute("href", "cid:kos@gentegre")))))));
         var soapXml = zarf.ToString(SaveOptions.DisableFormatting);
 

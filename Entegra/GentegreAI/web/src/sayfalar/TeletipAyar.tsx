@@ -92,7 +92,7 @@ export function TeletipAyar() {
             </div>
             {kutu('hl7Adres', 'Mirth K1 (HL7) adresi', 'host:port - Mirth TELETIP_HL7 dinleyicisi; Bakanlık\'a Mirth bağlanır', { genislik: 220, yerTutucu: '10.0.0.12:6661' })}
             {kutu('xdsAdres', 'Mirth K2 (KOS) adresi', 'Mirth TELETIP_KOS - sonda / olmalı (…/kos/)', { genislik: 260, yerTutucu: 'http://10.0.0.12:8082/kos/' })}
-            {kutu('xdsHastaOid', 'XDS hasta OID', 'TCKN^^^&OID&ISO - Bakanlık KOS doğrulamasıyla teyit edin', { genislik: 220 })}
+            {kutu('xdsHastaOid', 'XDS hasta OID', 'TCKN^^^&OID&ISO - Bakanlık: 1.3.6.1.4.1.21367.13.20.3000', { genislik: 220 })}
             <label htmlFor="tta-encoding">{c('Karakter seti (MSH-18)')}</label>
             <div>
               <select id="tta-encoding" value={f.encoding} onChange={e => ata('encoding', e.target.value)}>

@@ -47,6 +47,9 @@ public sealed class TeletipKosTestleri
         Assert.Equal(2, seriler[0].GetSequence(DicomTag.ReferencedSOPSequence).Items.Count);
         // Çok kare: Number of Frames zorunlu.
         Assert.Equal("96", seriler[1].GetSequence(DicomTag.ReferencedSOPSequence).Items[0].GetString(DicomTag.NumberOfFrames));
+        // MakeKOS v2.0: tek karede de NumberOfFrames ve InstanceNumber yazılır; RPPS boş dizi.
+        Assert.Equal("1", seriler[0].GetSequence(DicomTag.ReferencedSOPSequence).Items[0].GetString(DicomTag.NumberOfFrames));
+        Assert.True(d.Contains(DicomTag.ReferencedPerformedProcedureStepSequence));
         Assert.Equal(3, d.GetSequence(DicomTag.ContentSequence).Items.Count);
         // Part 10 olarak yazılıp okunabiliyor.
         var geri = DicomFile.Open(new MemoryStream(KosUretici.Baytlar(f))).Dataset;
@@ -144,7 +147,20 @@ public sealed class TeletipKosTestleri
         Assert.Contains("mimeType=\"application/dicom\"", z.SoapXml);
         Assert.Contains("href=\"cid:kos@gentegre\"", z.SoapXml);
         Assert.Contains("78221082662^^^&amp;2.16.792.1&amp;ISO", z.SoapXml);
-        Assert.Contains("1.3.6.1.4.1.21367.2017.10.26.148", z.SoapXml);        // sourceId
+        // Bakanlık SendKOS v15 şablonu (submit_image_document.xml) birebir.
+        Assert.Contains($"value=\"{XdsZarfi.KaynakKimligi}\"", z.SoapXml);         // sourceId sabit
+        Assert.Contains("nodeRepresentation=\"DEMO-Eval\"", z.SoapXml);              // classCode
+        Assert.Contains("urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d", z.SoapXml);   // formatCode şeması
+        Assert.Contains("nodeRepresentation=\"Hospital Setting\"", z.SoapXml);
+        Assert.Contains("nodeRepresentation=\"General Medicine\"", z.SoapXml);
+        Assert.Contains("name=\"authorPerson\"", z.SoapXml);
+        Assert.DoesNotContain("2c6b8cb7-8b2a-4051-b291-b1ae6a575ef4", z.SoapXml);     // eventCodeList yok
+        // Belge kimliği ExtrinsicObject ile Document ekinde aynı.
+        var x = System.Xml.Linq.XDocument.Parse(z.SoapXml);
+        var eo = x.Descendants().First(e => e.Name.LocalName == "ExtrinsicObject").Attribute("id")!.Value;
+        Assert.StartsWith("urn:uuid:", eo);
+        Assert.Equal(eo, x.Descendants().First(e => e.Name.LocalName == "Document").Attribute("id")!.Value);
+        Assert.Equal("1.3.6.1.4.1.21367.13.20.3000", XdsZarfi.VarsayilanHastaOid);
         var govde = Encoding.Latin1.GetString(z.Govde);
         Assert.Contains("Content-Type: application/dicom", govde);
         Assert.Contains("Content-ID: <kos@gentegre>", govde);

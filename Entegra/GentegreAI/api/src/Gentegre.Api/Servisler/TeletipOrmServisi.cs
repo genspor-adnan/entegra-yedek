@@ -107,7 +107,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         if (satir.Kanal == 2)
         {
             var xdsAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_adres", "", iptal);
-            var hastaOid = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_hasta_oid", "2.16.792.1.2.1.1.5.2.1.1", iptal);
+            var hastaOid = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_hasta_oid", XdsZarfi.VarsayilanHastaOid, iptal);
             return await KosGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, xdsAdres, hastaOid, iptal);
         }
 
