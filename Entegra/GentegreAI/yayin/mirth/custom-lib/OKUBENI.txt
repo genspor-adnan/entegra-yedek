@@ -1,0 +1,1 @@
+# Mirth custom-lib: Bakanlik MakeKOS / SendKOS jar paketleri buraya (K2). Jar dosyalari depoya alinmaz.

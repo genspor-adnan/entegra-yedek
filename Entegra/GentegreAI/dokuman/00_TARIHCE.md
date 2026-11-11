@@ -277,6 +277,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   K1 HL7 (ACK hedeften döner), K2 KOS (Bakanlık MakeKOS/SendKOS jar'ı Mirth içinde), K3 doz, K4 durum → Gentegre.
   MWL ve public WADO Mirth dışı. Ekranlar: mimari, pano (Mirth REST istatistikleri), gönderim listesi, gönderim kartı
   (mesaj izi), kurum ayarı, istem kartı Teletıp şeridi. PACS mockup'ına Teletıp sütunu / kart bloğu eklendi.
+- **Mirth 4.5.2 kuruldu (dev, kullanıcı: "bitince mirth kuruluma başla"):** `yayin/mirth/mirth-baslat.ps1` -
+  `nextgenhealthcare/connect:4.5.2` konteyneri `gentegre-mirth` (8443 Administrator/REST, 8080, kanal portları 6661 K1 /
+  8082 K2 / 4104 K3), mesaj arşivi gentegre-pg18 içinde `mirthdb` (rol `mirth`). Parolalar ilk çalıştırmada üretilir,
+  `yayin/mirth/gizli/mirth.env` (depo dışı); varsayılan admin/admin ilk açılışta REST ile değiştirilir. Betik
+  tekrar çalıştırılabilir. Kanallar henüz yok (sıradaki adım K1).
 
 ### 10.11.2026
 

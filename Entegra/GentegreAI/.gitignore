@@ -10,3 +10,6 @@ yayin/ajan/
 
 # npm (vitest/playwright yardimcilari) - depo disi
 node_modules/
+
+# Mirth Connect yerel parolalari (yayin/mirth/mirth-baslat.ps1 uretir) - depo disi
+yayin/mirth/gizli/
