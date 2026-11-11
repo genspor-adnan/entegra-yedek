@@ -554,6 +554,20 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     uzlaştırma (Reconcile) kuyruğuna aldı - yerel PACS'ta bekleyen bir uzlaştırma kaydı kaldı.
   * Açık: Bakanlık MGA'sına gerçek TLS denenmedi (dcm4che2 "aes" TLS_RSA_WITH_AES_128_CBC_SHA önerir; sunucu kabul
     etmezse Mirth yerine Gentegre'den fo-dicom TLS gerekebilir). SR doğrulama: betaygsadmin.teletip.saglik.gov.tr/SRValidasyon.
+- **Teletıp kuyruğu dış kurumun teleradyoloji işini almaz (db/1315; 12.11.2026, kullanıcı: "yap"):** Radyoloji ›
+  Teleradyoloji menüsü incelenirken bulundu. Teletıp tetikleri (ORM 1302, ORU 1309, KOS 1310, doz 1314) bütün radyoloji
+  istemlerine bakıyordu; dış kurumun gönderip bizim okuduğumuz iş (telerad_istek.yon = 1) de aynı istem / rapor
+  tablolarını kullanıyor → istem ve rapor Bakanlık'a bizim kurum kodlarımızla gidebilir, rapor iki kez gidebilirdi
+  (Teslim Kuyruğu hedef 2 + Teletıp ORU). Kural: dış kurum işinin Bakanlık bildirimi YALNIZ Teslim Kuyruğu'ndan;
+  bizim istemimizi dışarıya okutmak (yon 2) Teletıp'a gitmeye devam eder.
+  * `fn_teletip_dis_is` (üç bağ: radyoloji_istem.telerad_istek_id, telerad_istek.radyoloji_istem_id, telerad_istek.rapor_id),
+    `tg_teletip_gonderim_dis_is` BEFORE INSERT (tek kapı - dış işin satırı açılmaz), bağ sonradan kurulunca bekleyen
+    satırlar (0 / 3 / 5) "atlandı" (`tg_telerad_istek_teletip_atla`, `tg_radyoloji_istem_telerad_atla`); işçi göndermeden
+    önce yeniden bakar (`TeletipOrmServisi.DeneAsync`). Gönderilmiş satır geri alınamaz, dokunulmaz.
+  * 4 DB: etkilenen satır 0 (KOSUYOLU'da teleradyoloji işi yok; dev'de 5 iş var, Teletıp kapalı).
+  * Test: `TeletipOrmKuyruguTestleri.Dis_kurum_teleradyoloji_isi_Teletipe_girmez` (açılışta bağlı → satır yok, sonradan
+    bağlanan → atlandı, yon 2 → gider). Teletıp + Telerad 116/116. Tam pakette ilgisiz iki düşüş: CagriTestleri SLA
+    (ayrı koşuda geçiyor) ve SahaPlanTopluTestleri.Plan_ozet... (gece yarısından sonra düşüyor - TR / UTC gün sınırı).
 
 ### 10.11.2026
 

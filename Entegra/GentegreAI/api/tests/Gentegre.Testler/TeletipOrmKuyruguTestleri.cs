@@ -23,7 +23,7 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
     private static readonly CancellationToken Iptal = CancellationToken.None;
 
     private static async Task<int> IstemAsync(NpgsqlConnection b, NpgsqlTransaction t, string accession, bool aktif = true,
-                                              bool accessionBekliyor = false)
+                                              bool accessionBekliyor = false, int? teleradIstekId = null)
     {
         await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.aktif'", t, [aktif ? "1" : "0"], Iptal);
         var sube = await b.TekDegerAsync<int>("select id from public.sube where aktif = 1 order by id limit 1", t, [], Iptal);
@@ -38,9 +38,9 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
             t, ["TT" + Guid.NewGuid().ToString("N")[..8], sube], Iptal);
         return await b.TekDegerAsync<int>("""
             insert into public.radyoloji_istem (sube_id, hasta_id, hizmet_id, modalite, accession_no, durum, istek_hekim_id, on_tani,
-                                                accession_bekliyor)
-            values (@p0, @p1, @p2, 1, @p3, 1, @p4, 'R51 Baş ağrısı', @p5) returning id
-            """, t, [sube, hasta, hizmet, accession, hekim, (short)(accessionBekliyor ? 1 : 0)], Iptal);
+                                                accession_bekliyor, telerad_istek_id)
+            values (@p0, @p1, @p2, 1, @p3, 1, @p4, 'R51 Baş ağrısı', @p5, @p6) returning id
+            """, t, [sube, hasta, hizmet, accession, hekim, (short)(accessionBekliyor ? 1 : 0), teleradIstekId], Iptal);
     }
 
     private static Task<List<(short Emir, short Durum, string Acc, bool Veri)>> SatirlarAsync(NpgsqlConnection b, NpgsqlTransaction t, int istem) =>
@@ -48,6 +48,50 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
             t, [istem], o => (o.GetInt16(0), o.GetInt16(1), o.GetString(2), o.GetBoolean(3)), Iptal);
 
     private static string Acc() => "TT-" + Guid.NewGuid().ToString("N")[..10];
+
+    /// <summary>Teleradyoloji kurumu + isteği (yon 1 = dış kurum gönderir biz okuruz, 2 = biz dışarıya okuturuz).</summary>
+    private static async Task<int> TeleradIstekAsync(NpgsqlConnection b, NpgsqlTransaction t, short yon)
+    {
+        var sube = await b.TekDegerAsync<int>("select id from public.sube where aktif = 1 order by id limit 1", t, [], Iptal);
+        var taraf = await b.TekDegerAsync<int>(
+            "insert into public.taraf (unvan, kod, sube_id) values ('TT TELERAD KURUM', @p1, @p0) returning id",
+            t, [sube, "TK" + Guid.NewGuid().ToString("N")[..8]], Iptal);
+        var kurum = await b.TekDegerAsync<int>("insert into public.telerad_kurum (taraf_id, yon) values (@p0, @p1) returning id", t, [taraf, yon], Iptal);
+        return await b.TekDegerAsync<int>("insert into public.telerad_istek (kurum_id, yon) values (@p0, @p1) returning id", t, [kurum, yon], Iptal);
+    }
+
+    [VtFact]
+    public async Task Dis_kurum_teleradyoloji_isi_Teletipe_girmez()
+    {
+        if (!olgu.Baglandi(nameof(Dis_kurum_teleradyoloji_isi_Teletipe_girmez))) return;
+        await using var b = await olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+        // 1) İstem açılırken dış işe bağlı (radyoloji_istem.telerad_istek_id): satır hiç açılmaz.
+        var gelen = await TeleradIstekAsync(b, t, 1);
+        var disIstem = await IstemAsync(b, t, Acc(), teleradIstekId: gelen);
+        Assert.Empty(await SatirlarAsync(b, t, disIstem));
+        Assert.True(await b.TekDegerAsync<bool>("select public.fn_teletip_dis_is(@p0)", t, [disIstem], Iptal));
+        // Sonradan gelen rapor / XO / KOS denemeleri de açılmaz (tek kapı BEFORE INSERT).
+        await b.CalistirAsync("select public.fn_teletip_orm_kuyrukla(@p0, 'X', 2::smallint, 0, 0)", t, [disIstem], Iptal);
+        Assert.Empty(await SatirlarAsync(b, t, disIstem));
+
+        // 2) Önce bizim istemimiz gibi açıldı (NW kuyrukta), bağ SONRA kuruldu: bekleyen satır atlanır.
+        var sonradan = await IstemAsync(b, t, Acc());
+        Assert.Equal((short)0, Assert.Single(await SatirlarAsync(b, t, sonradan)).Durum);
+        var gelen2 = await TeleradIstekAsync(b, t, 1);
+        await b.CalistirAsync("update public.telerad_istek set radyoloji_istem_id = @p1 where id = @p0", t, [gelen2, sonradan], Iptal);
+        var s = Assert.Single(await SatirlarAsync(b, t, sonradan));
+        Assert.Equal((short)4, s.Durum);
+        Assert.Contains("Teslim Kuyruğu", await b.TekDegerAsync<string>(
+            "select hata_metni from public.teletip_gonderim where istem_id = @p0", t, [sonradan], Iptal) ?? "");
+
+        // 3) Bizim istemimizi dışarıya okutmak (yon 2) bizim istemimizdir: Teletıp'a gitmeye devam eder.
+        var giden = await TeleradIstekAsync(b, t, 2);
+        var bizim = await IstemAsync(b, t, Acc(), teleradIstekId: giden);
+        Assert.Equal((short)0, Assert.Single(await SatirlarAsync(b, t, bizim)).Durum);
+        Assert.False(await b.TekDegerAsync<bool>("select public.fn_teletip_dis_is(@p0)", t, [bizim], Iptal));
+        await t.RollbackAsync();
+    }
 
     [VtFact]
     public async Task Kapaliyken_kuyruga_bir_sey_girmez()

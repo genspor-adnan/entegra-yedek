@@ -81,6 +81,12 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         }, iptal);
         if (satir is null) return new(id, -1, "", "Satır bulunamadı ya da başka bir deneme sürüyor.");
         if (satir.Durum is 1 or 4) return new(id, satir.Durum, "", "Satır zaten sonuçlanmış.");
+        // 1315: dış kurumun teleradyoloji işi Teletıp'tan gitmez (Bakanlık bildirimi Teleradyoloji › Teslim Kuyruğu'ndan).
+        // Satır açıldıktan sonra bağ kurulmuş olabilir - göndermeden hemen önce yeniden bakılır.
+        if (satir.IstemId is int disIstem
+            && await b.TekDegerAsync<bool>("select public.fn_teletip_dis_is(@p0)", islem, [disIstem], iptal))
+            return await YazAsync(b, islem, id, 4, satir.Deneme, "",
+                "Dış kurumun teleradyoloji işi - Bakanlık bildirimi Teleradyoloji › Teslim Kuyruğu'ndan (1315).", "", "", iptal);
 
         var adres = await AyarDeposu.MetinAsync(b, islem, "teletip.hl7_adres", "", iptal);
         var firma = await AyarDeposu.MetinAsync(b, islem, "teletip.firma_kodu", "", iptal);

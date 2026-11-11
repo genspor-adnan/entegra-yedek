@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (702 ad, 191 tanesi birden cok dosyada)
+## Fonksiyonlar (707 ad, 191 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -520,6 +520,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_teletip_aktif` | `1302_teletip_orm_kuyrugu.sql` | — |
+| `fn_teletip_dis_is` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
+| `fn_teletip_dis_is_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `fn_teletip_doz_verisi` | `1314_teletip_doz.sql` | — |
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
@@ -670,6 +672,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_guncelle` | `1243_sevkli_accession_kabulde.sql` | 287_radyoloji_accession_tetik.sql |
 | `tg_radyoloji_istem_hazirla` | `1243_sevkli_accession_kabulde.sql` | 287_radyoloji_accession_tetik.sql |
 | `tg_radyoloji_istem_hizmet` | `459_radyoloji_istem_hizmet_kontrolu.sql` | — |
+| `tg_radyoloji_istem_telerad_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_radyoloji_istem_teletip` | `1302_teletip_orm_kuyrugu.sql` | — |
 | `tg_radyoloji_istem_teletip_kos` | `1310_teletip_kos.sql` | — |
 | `tg_radyoloji_istem_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
@@ -700,8 +703,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_bakanlik_dogrula` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
 | `tg_telerad_istek` | `799_telerad_durum_damgalari.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
+| `tg_telerad_istek_teletip_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
+| `tg_teletip_gonderim_dis_is` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_teletip_gonderim_doz` | `1314_teletip_doz.sql` | — |
 | `tg_temsilci_rolu_belge` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_temsilci_rolu_satir` | `1287_dis_hekim_sube_temsilci.sql` | — |
