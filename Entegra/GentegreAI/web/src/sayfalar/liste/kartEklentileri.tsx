@@ -25,6 +25,7 @@ import { DofAraclari, dofBaslikEk } from '../kys/dof/kysDofKarti';
 import { DenetimAraclari } from '../kys/denetim/kysDenetimKarti';
 import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
 import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
+import { PacsBaglantiSekmesi } from '../../bilesenler/kart/PacsBaglantiSekmesi';
 import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
 import { SablonMetniSekmesi } from '../radyoloji/SablonMetniSekmesi';
 import { AlanPaketiCubugu } from '../radyoloji/AlanPaketleri';
@@ -219,6 +220,11 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   // Mockup entegrasyon_hesaplari.html kart altı kutuları: test / canlı ayrımı ve hesap çözüm zinciri
   //   kartın kendisinde yazılı - kullanıcı belgeye çıkmadan görsün.
   'entegrasyon-hesap': {
+    // PACS (1316, mockup entegrasyon_pacs.html): yalnız kod = PACS satırında; yeni kayıtta da (önce doldur, sonra kaydet).
+    ekSekmeler: b => [
+      { anahtar: 'ozel:pacs', baslik: 'PACS Bağlantısı', yenideDe: true, kosulAlani: 'kod=PACS',
+        ciz: e => <PacsBaglantiSekmesi e={e} kartId={kayitli(b.kartId) ? b.kartId : null} /> },
+    ],
     sekmeSarmalayici: () => (baslik, icerik) => baslik !== 'Genel' ? icerik : (
       <>
         {icerik}

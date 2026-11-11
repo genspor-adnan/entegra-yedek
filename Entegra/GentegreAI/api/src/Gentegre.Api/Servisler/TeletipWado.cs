@@ -264,7 +264,9 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
             return Hata(400, "windowCenter ile windowWidth birlikte ve sayı olarak verilmeli.");
 
         // Erişim kuralı: yalnız KOS'u Bakanlık'a başarıyla gitmiş çalışma; nesne o çalışmada olmalı.
-        if (!await CalismaAcikMiAsync(st, iptal)) return Hata(404, "Nesne bulunamadı.");
+        var sube = await CalismaSubesiAsync(st, iptal);
+        if (sube is null) return Hata(404, "Nesne bulunamadı.");
+        using var kapsam = DicomAyarDeposu.SubeIcin(sube);             // 1316: KOS'u gönderen şubenin PACS'ı
         HashSet<string> nesneler;
         try { nesneler = await NesnelerAsync(st, iptal); }
         catch (Exception h) when (h is not OperationCanceledException || !iptal.IsCancellationRequested)
@@ -302,13 +304,14 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
 
     private static WadoYaniti Hata(int kod, string mesaj) => new(kod, "text/plain; charset=utf-8", [], mesaj);
 
-    private async Task<bool> CalismaAcikMiAsync(string st, CancellationToken iptal)
+    /// <summary>KOS'u başarıyla gitmiş çalışmanın şubesi (0 = kurum geneli); gitmemişse null.</summary>
+    private async Task<int?> CalismaSubesiAsync(string st, CancellationToken iptal)
     {
-        if (bellek.TryGetValue("tt-wado-izin:" + st, out bool acik)) return acik;
-        acik = await veri.TekDegerAsync<bool>(
-            "select exists(select 1 from public.teletip_gonderim where kanal = 2 and durum = 1 and study_uid = @p0)", [st], iptal);
-        bellek.Set("tt-wado-izin:" + st, acik, TimeSpan.FromMinutes(1));
-        return acik;
+        if (bellek.TryGetValue("tt-wado-izin:" + st, out int? sube)) return sube;
+        sube = await veri.TekDegerAsync<int?>(
+            "select max(sube_id) from public.teletip_gonderim where kanal = 2 and durum = 1 and study_uid = @p0", [st], iptal);
+        bellek.Set("tt-wado-izin:" + st, sube, TimeSpan.FromMinutes(1));
+        return sube;
     }
 
     private async Task<HashSet<string>> NesnelerAsync(string st, CancellationToken iptal)

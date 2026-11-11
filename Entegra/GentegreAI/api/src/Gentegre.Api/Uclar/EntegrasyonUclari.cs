@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -232,9 +233,31 @@ public static class EntegrasyonUclari
         // ---------------------------------------------------- bağlantı sına --
         // Kimlik ve adres doğru mu: servise en ucuz çağrı yapılır, sonuç
         //   kayda yazılır (son_kullanim / son_sonuc) - kullanıcı ekranda görür.
+        // ------------------------------------------- PACS dinleyicileri (1316) --
+        // PACS kartındaki salt okunur blok: sunucunun DİNLEDİĞİ portlar kurulumda (appsettings › Dicom / TeletipWado);
+        //   port değişimi yeniden başlatma ister, sertifika parolası ortamda - ekranda yalnız durum gösterilir.
+        grup.MapGet("/pacs/dinleyiciler", async (BaglamCozucu cozucu, DicomAyarDeposu depo,
+            Microsoft.Extensions.Options.IOptions<TeletipWadoAyarlari> wado, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+            var d = depo.Dosya; var w = wado.Value;
+            return Results.Ok(new
+            {
+                mwlPort = d.MwlPort, mwlAe = d.MwlAe, mwlKarakterSeti = d.MwlKarakterSeti, mwlBilinmeyenAe = d.MwlBilinmeyenAe,
+                wadoPort = w.Port, wadoHttps = w.SertifikaYolu.Length > 0, wadoYol = w.Yol, wadoIzinliIpler = w.IzinliIpler,
+                // Satır yokken geçerli olan dosya ayarı - "ilk açılışta dosyadaki değerlerle öner" için.
+                dosya = new { sunucu = d.Sunucu, port = d.Port, bizimAe = d.BizimAe, pacsAe = d.SunucuAe, wadoUrl = d.WadoUrl,
+                              goruntuleyiciUrl = d.GoruntuleyiciUrl, jetonDakika = d.JetonDakika, zamanAsimiSn = d.ZamanAsimiSn, aktif = d.Aktif },
+                // Oturumun şubesi için (şube satırı ya da kurum geneli satır var mı).
+                ekrandan = depo.EkrandanMi(baglam.SubeId ?? 0),
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         grup.MapPost("/{id:int}/sina", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
-            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // YAZMA YETKİSİ (K16): sınama `son_kullanim / son_sonuc` YAZAR - Gör yetkisi
@@ -246,6 +269,25 @@ public static class EntegrasyonUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var hesap = await HesapOkuAsync(baglanti, id, iptal);
+
+            // PACS (1316): KAYITLI satırın ayarıyla (önbellekteki değil) C-ECHO → C-FIND → WADO → görüntüleyici.
+            if (string.Equals(hesap.Kod, "PACS", StringComparison.OrdinalIgnoreCase))
+            {
+                var p = await baglanti.TekAsync(
+                    "select kullanici_adi, uygulama_kodu, url, ayarlar::text from public.entegrasyon_hesap where id = @p0", null, [id],
+                    o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.IsDBNull(3) ? "{}" : o.GetString(3) }, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Hesap bulunamadı.");
+                var ayar = DicomAyarDeposu.Coz(dicomDepo.Dosya, p[0], p[1], p[2], p[3]);
+                var adimlar = await dicom.SinaAsync(ayar, iptal);
+                var tamam = adimlar.Count > 0 && adimlar.All(x => x.Tamam);
+                string Kisa(string ad) => ad.Split(' ')[0];
+                var ozet = string.Join(" · ", adimlar.Select(x => $"{Kisa(x.Ad)} {(x.Tamam ? "✓" : "✖")}"));
+                var ilkHata = adimlar.FirstOrDefault(x => !x.Tamam);
+                var pacsMesaj = ilkHata is null ? ozet : $"{ozet} - {Kisa(ilkHata.Ad)}: {ilkHata.Ayrinti}";
+                await SonucYazAsync(baglanti, id, pacsMesaj, iptal);
+                dicomDepo.Gecersiz();
+                return Results.Ok(new { basarili = tamam, mesaj = pacsMesaj, adimlar });
+            }
 
             // SINAMA SERVISE GORE (340): SKRS'de gerçek kod listesi çağrısı
             //   yapılır; öteki servislerde SKRS SOAP gövdesi göndermek anlamsız

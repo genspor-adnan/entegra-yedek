@@ -28,17 +28,20 @@ public static class DicomUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Gor);
-            if (!dicom.Ayar.Aktif) throw GentegreHatasi.IsKurali("DICOM sunucusu tanımlı değil (Dicom:Aktif).");
-
             var uid = (studyUid ?? "").Trim();
             var acc = (accession ?? "").Trim();
+            // ŞUBE (1316): istemin şubesinin PACS'ı; istem yoksa oturumun şubesi.
+            int? sube = baglam.SubeId;
             if (istemId is > 0)
             {
-                var k = await veri.TekAsync("select coalesce(study_uid, '') as uid, coalesce(accession_no, '') as acc from public.radyoloji_istem where id = @p0",
+                var k = await veri.TekAsync("select coalesce(study_uid, '') as uid, coalesce(accession_no, '') as acc, coalesce(sube_id, 0) as sube from public.radyoloji_istem where id = @p0",
                     [istemId.Value], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
                 if (uid.Length == 0) uid = Convert.ToString(k["uid"]) ?? "";
                 if (acc.Length == 0) acc = Convert.ToString(k["acc"]) ?? "";
+                if (Convert.ToInt32(k["sube"]) > 0) sube = Convert.ToInt32(k["sube"]);
             }
+            using var kapsam = DicomAyarDeposu.SubeIcin(sube);
+            if (!dicom.Ayar.Aktif) throw GentegreHatasi.IsKurali("PACS bağlantısı tanımlı değil (Ayarlar › Entegrasyon › PACS).");
             if (uid.Length == 0 && acc.Length > 0)
             {
                 uid = await dicom.AccessionIleStudyAsync(acc, iptal) ?? "";
@@ -64,6 +67,7 @@ public static class DicomUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Gor);
+            using var kapsam = DicomAyarDeposu.SubeIcin(baglam.SubeId);
             if (!dicom.Ayar.Aktif) return Results.Ok(new { aktif = false, calismalar = Array.Empty<object>(), izlemeNo = baglam.IzlemeNo });
             var h = await veri.TekAsync(
                 "select coalesce(ad,'') as ad, coalesce(soyad,'') as soyad, coalesce(unvan,'') as unvan, coalesce(kod,'') as kod, coalesce(vkno,'') as vkno from public.taraf where id = @p0 and hasta = 1",
@@ -108,7 +112,9 @@ public static class DicomUclari
         // ------------------------------------------------ OHIF dicomjson manifesti (jetonlu, anonim) --
         grup.MapGet("/manifest/{studyUid}", async (string studyUid, string? t, DicomKaynagi dicom, HttpContext ctx, CancellationToken iptal) =>
         {
-            if (!dicom.Ayar.Aktif || !dicom.JetonGecerli(studyUid, t)) return Results.Unauthorized();
+            if (!dicom.JetonGecerli(studyUid, t, out var jetonSube)) return Results.Unauthorized();
+            using var kapsam = DicomAyarDeposu.SubeIcin(jetonSube);   // şube jetonda (1316)
+            if (!dicom.Ayar.Aktif) return Results.Unauthorized();
             var kok = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
             var m = await dicom.ManifestAsync(studyUid, $"{kok}/api/dicom/wado", t!, iptal);
             // DICOM anahtar adları OLDUĞU GİBİ (StudyInstanceUID…): varsayılan camelCase OHIF'in beklediği adları bozar.
@@ -120,7 +126,9 @@ public static class DicomUclari
         grup.MapGet("/wado", async (string studyUID, string seriesUID, string objectUID, string? t, DicomKaynagi dicom,
             HttpContext ctx, CancellationToken iptal) =>
         {
-            if (!dicom.Ayar.Aktif || !dicom.JetonGecerli(studyUID, t)) { ctx.Response.StatusCode = 401; return; }
+            if (!dicom.JetonGecerli(studyUID, t, out var jetonSube)) { ctx.Response.StatusCode = 401; return; }
+            using var kapsam = DicomAyarDeposu.SubeIcin(jetonSube);
+            if (!dicom.Ayar.Aktif) { ctx.Response.StatusCode = 401; return; }
             using var yanit = await dicom.WadoAsync(studyUID, seriesUID, objectUID, iptal);
             if (!yanit.IsSuccessStatusCode) { ctx.Response.StatusCode = (int)yanit.StatusCode; return; }
             ctx.Response.ContentType = "application/dicom";

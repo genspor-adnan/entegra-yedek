@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PACS (DICOM) Hesabı — Ayarlar › Genel › Entegrasyon — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .bas{max-width:1180px;margin:0 auto 12px;color:var(--navy)}
+  .bas h1{font-size:16px;margin:0 0 4px}
+  .bas p{margin:0;color:var(--muted);line-height:1.6;font-size:12px}
+  .win{max-width:1180px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;
+    box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .no{background:rgba(255,255,255,.18);border-radius:3px;padding:0 6px;font-size:11px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);
+    align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  tr.yeni td{background:#f3fbf5}
+  .orta{text-align:center} .sonuk{color:var(--muted)} .yesil{color:var(--ok)} .kirmizi{color:#9d3434}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.test{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .rz.canli{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.kod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.yeni{background:#2e7d46;color:#fff;border-color:#2e7d46;font-weight:bold}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .kart{max-width:980px}
+  .idstrip{display:grid;grid-template-columns:1.3fr 1.3fr 1fr 1fr .6fr;gap:10px;
+    padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;height:26px}
+  .ipucu{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .grp.salt h4{background:linear-gradient(#f7f7f7,#eef0f2);color:#5b6b7c}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .tam{grid-column:1 / -1}
+  .iz .yari{grid-column:span 2}
+  .test{margin:0 12px 12px;border:1px solid #bfe3cb;background:#f5fbf7;border-radius:3px;font-size:11.5px}
+  .test h5{margin:0;padding:6px 10px;border-bottom:1px solid #d6eedd;color:#2e7d46;font-size:12px}
+  .test table td{border-right:none;padding:4px 10px}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;
+    padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .zincir{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;
+    padding:8px 10px;background:#fff;border:1px solid var(--line2);border-radius:3px;margin:0 12px 12px;line-height:1.6}
+  .zincir .kutu{border:1px solid var(--line);border-radius:3px;padding:3px 8px;background:#fbfcfd}
+  .zincir .kutu b{color:#2c4a6b}
+  .zincir .ok{color:#8fa3b6;font-weight:bold}
+  .not{padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;background:#fff;
+    border-top:1px solid var(--line2)}
+  .not b{color:#3d6294}
+  .maprow{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;
+    border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  ol.kural{margin:0;padding:10px 12px 10px 30px;line-height:1.7;font-size:11.5px}
+</style>
+</head>
+<body>
+
+<div class="bas">
+  <h1>PACS (DICOM) bağlantısı entegrasyon ekranına taşınıyor</h1>
+  <p>Bugün ClearCanvas ayarları API'nin <code>appsettings.json</code> › <code>Dicom</code> bölümünde; değiştirmek için dosya düzenleyip API'yi yeniden
+    başlatmak gerekiyor. Yeni hâli: <b>Ayarlar › Genel › Entegrasyon</b> listesinde <b>PACS</b> kodlu bir hesap. Bağlantı alanları ekrandan değişir ve
+    <b>yeniden başlatma gerekmez</b>; yalnız sunucunun dinlediği portlar (MWL, dışa açık WADO) kurulumda kalır ve kartta salt okunur gösterilir.</p>
+</div>
+
+<!-- ==================================================== 1 · LİSTE ======== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">1</span> Genel Ayarlar
+    <span class="sp">Yönetim › Ayarlar › Genel · yetki: entegrasyon</span>
+  </div>
+  <div class="tabs">
+    <div class="tab">Genel</div><div class="tab">Güvenlik</div><div class="tab active">Entegrasyon</div><div class="tab">Belge No</div>
+  </div>
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div><div class="btn">✎ Düzenle</div><div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div>
+    <div class="ara">🔎 Ara… (kod, ad, kullanıcı)</div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Entegrasyon</th><th>Ad</th><th>Şube</th><th class="orta">Ortam</th><th>Kullanıcı</th><th class="orta">Şifre</th>
+          <th>Uygulama Kodu</th><th class="orta">Aktif</th><th>Son Kullanım</th><th>Son Sonuç</th></tr>
+    </thead>
+    <tbody>
+      <tr class="sel yeni">
+        <td><span class="rz kod">PACS</span> PACS (DICOM) <span class="rz yeni">YENİ</span></td>
+        <td>ClearCanvas - Merkez</td><td class="sonuk">Tümü</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td>GENTEGRE <span class="sonuk">(bizim AE)</span></td>
+        <td class="orta sonuk">—</td><td>SERVERAE <span class="sonuk">(PACS AE)</span></td>
+        <td class="orta">✔</td><td class="sonuk">12.11.2026 00:41</td>
+        <td class="yesil">C-ECHO ✓ · C-FIND ✓ · WADO ✓</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">ENABIZ</span> e-Nabız / USS</td><td>e-Nabız / USS</td><td class="sonuk">Tümü</td>
+        <td class="orta"><span class="rz test">TEST</span></td><td class="sonuk">—</td><td class="orta">✔</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">11.11.2026 16:02</td><td class="sonuk">Bağlantı doğrulandı</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">MEDULA</span> Medula (SGK)</td><td>Medula (SGK)</td><td class="sonuk">Tümü</td>
+        <td class="orta"><span class="rz test">TEST</span></td><td>tesis_kullanici</td><td class="orta">✔</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td class="sonuk">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="statusbar"><span>13 kayıt</span><span>Seçili: ClearCanvas - Merkez</span></div>
+  <div class="not">
+    Liste aynı kalır; PACS satırında <b>Kullanıcı</b> sütunu bizim AE başlığını, <b>Uygulama Kodu</b> sütunu PACS'ın AE başlığını gösterir
+    (aynı kart, farklı anlam — servis tablosu §4). PACS'ta şifre yoktur; DICOM kimliği AE başlıklarıdır.
+  </div>
+</div>
+
+<!-- ==================================================== 2 · KART ========= -->
+<div class="win kart">
+  <div class="title"><span class="dot"></span> <span class="no">2</span> Entegrasyon Hesabı
+    <span class="sp">PACS · Tümü · CANLI</span>
+  </div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div><div class="btn">🗑 Sil</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Entegrasyon</label><div class="inp combo">PACS (DICOM)</div></div>
+    <div class="fld"><label>Ad</label><div class="inp">ClearCanvas - Merkez</div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Tümü</div>
+      <div class="ipucu">şubenin ayrı PACS'ı varsa o şubeye ikinci satır</div></div>
+    <div class="fld"><label>PACS ürünü</label><div class="inp combo">ClearCanvas ImageServer</div>
+      <div class="ipucu">yalnız bilgi + varsayılan adres önerisi</div></div>
+    <div class="fld"><label>Aktif</label><div class="chk"><input type="checkbox" checked> Aktif</div></div>
+  </div>
+
+  <div class="grp">
+    <h4>DICOM bağlantısı <span class="mini">sorgu (C-FIND) · çalışma listesi, KOS, doz</span></h4>
+    <div class="iz">
+      <div class="fld"><label class="req">Sunucu</label><div class="inp">127.0.0.1</div>
+        <div class="ipucu">IP ya da ad</div></div>
+      <div class="fld"><label class="req">Port</label><div class="inp">104</div></div>
+      <div class="fld"><label class="req">PACS AE başlığı</label><div class="inp">SERVERAE</div>
+        <div class="ipucu">KOS'ta Retrieve AE Title da bu</div></div>
+      <div class="fld"><label class="req">Bizim AE başlığı</label><div class="inp">GENTEGRE</div>
+        <div class="ipucu">PACS'ta bu AE tanımlı olmalı</div></div>
+      <div class="fld"><label>Zaman aşımı (sn)</label><div class="inp">20</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Görüntü erişimi <span class="mini">WADO-URI · OHIF görüntüleyici</span></h4>
+    <div class="iz">
+      <div class="fld yari"><label class="req">WADO adresi</label><div class="inp">http://127.0.0.1:1000/WADO/SERVERAE</div>
+        <div class="ipucu">ClearCanvas: http://&lt;sunucu&gt;:1000/WADO/&lt;PACS AE&gt; — DICOM indirme (görüntüleyici, KOS ikonu, dışa açık WADO, doz)</div></div>
+      <div class="fld yari"><label>Görüntüleyici (OHIF) adresi</label><div class="inp">http://localhost:3001</div>
+        <div class="ipucu">boş = "🖼 Görüntüle" düğmesi gizlenir</div></div>
+      <div class="fld"><label>Görüntüleyici erişim süresi (dk)</label><div class="inp">240</div>
+        <div class="ipucu">çalışma bağlantısındaki jetonun ömrü</div></div>
+    </div>
+  </div>
+
+  <div class="grp salt">
+    <h4>Sunucu dinleyicileri <span class="mini" style="color:#7b8794">kurulumda · salt okunur</span></h4>
+    <div class="iz">
+      <div class="fld"><label>MWL portu</label><div class="inp ro">kapalı (0)</div></div>
+      <div class="fld"><label>MWL AE</label><div class="inp ro">GENTEGRE</div></div>
+      <div class="fld"><label>MWL karakter seti</label><div class="inp ro">ISO_IR 148 (Türkçe)</div></div>
+      <div class="fld"><label>Tanımsız cihaza MWL</label><div class="inp ro">hayır</div></div>
+      <div class="fld"><label>Dışa açık WADO (Teletıp)</label><div class="inp ro">kapalı</div></div>
+      <div class="fld"><label>Dışa açık WADO HTTPS</label><div class="inp ro">— (sertifika yok)</div></div>
+      <div class="fld yari"><label>IP izin listesi</label><div class="inp ro">— (herkes)</div></div>
+    </div>
+  </div>
+  <div class="uyari">
+    <b>Bu alanlar burada değişmez.</b> Port açmak işletim sistemi / güvenlik duvarı işi; değişince API'nin yeniden başlaması gerekir ve
+    sertifika parolası güvenlik gereği yalnız sunucu ortamında durur. Değer kurulumda <code>appsettings</code> › <code>Dicom</code> (MWL) ve
+    <code>TeletipWado</code> bölümünden okunup burada gösterilir.
+  </div>
+
+  <div class="test">
+    <h5>🔌 Bağlantı testi — 12.11.2026 00:41 · 1,2 sn</h5>
+    <table>
+      <tr><td class="yesil">✓</td><td><b>C-ECHO</b> 127.0.0.1:104 GENTEGRE → SERVERAE</td><td class="sonuk">18 ms</td></tr>
+      <tr><td class="yesil">✓</td><td><b>C-FIND</b> son 1 günün çalışmaları</td><td class="sonuk">7 çalışma</td></tr>
+      <tr><td class="yesil">✓</td><td><b>WADO</b> bir görüntü (application/dicom)</td><td class="sonuk">34 KB · 41 ms</td></tr>
+      <tr><td class="yesil">✓</td><td><b>Görüntüleyici</b> http://localhost:3001 yanıt veriyor</td><td class="sonuk">200</td></tr>
+    </table>
+  </div>
+  <div class="test" style="border-color:#efc3c3;background:#fdf5f5">
+    <h5 style="color:#9d3434;border-color:#f3d6d6">🔌 Örnek hata — yanlış AE başlığı</h5>
+    <table>
+      <tr><td class="kirmizi">✖</td><td><b>C-ECHO</b> ilişki reddedildi: <i>Called AE not recognized</i></td>
+          <td class="sonuk">PACS AE başlığını kontrol edin; ClearCanvas'ta Bizim AE "Device" olarak tanımlı mı?</td></tr>
+      <tr><td class="sonuk">–</td><td class="sonuk">C-FIND / WADO denenmedi</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="zincir">
+    <span class="sonuk">Ayar çözümü:</span>
+    <span class="kutu"><b>1.</b> şubenin PACS satırı</span><span class="ok">→</span>
+    <span class="kutu"><b>2.</b> kurum geneli PACS satırı (şube boş)</span><span class="ok">→</span>
+    <span class="kutu"><b>3.</b> appsettings › Dicom <span class="sonuk">(satır yoksa - eski kurulumlar bozulmaz)</span></span>
+  </div>
+
+  <div class="maprow">
+    <span><b>Tablo:</b> entegrasyon_hesap (kod = PACS)</span>
+    <span><b>kullanici_adi:</b> bizim AE</span><span><b>uygulama_kodu:</b> PACS AE</span>
+    <span><b>url:</b> WADO adresi</span>
+    <span><b>ayarlar (jsonb):</b> sunucu · port · zamanAsimiSn · goruntuleyiciUrl · jetonDakika · urun</span>
+    <span><b>Uç:</b> /api/entegrasyon/{id}/sina (PACS: C-ECHO + C-FIND + WADO + görüntüleyici)</span>
+  </div>
+</div>
+
+<!-- ==================================================== 3 · KURALLAR ===== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">3</span> Kurallar</div>
+  <ol class="kural">
+    <li><b>Kaydet birkaç saniyede geçerli</b> — DICOM sorguları, WADO ve görüntüleyici her istekte ayarı okur (bellekte; PACS satırları değişince ≤ 5 sn'de yeniden yüklenir, sınama hemen yükler); API yeniden başlatılmaz.</li>
+    <li><b>Kaydettikten sonra sına</b> — test KAYITLI ayarla çalışır; sonucu satırın "Son Sonuç" alanına yazılır ve listede görünür (yanlış AE başlığı bütün radyoloji ekranlarını PACS'sız bırakır - kaydedip hemen sınayın).</li>
+    <li><b>Şube başına PACS</b> — şubenin kendi PACS satırı varsa o şubenin çalışma listesi / KOS / doz o PACS'a gider; yoksa kurum geneli satır.</li>
+    <li><b>Satır yoksa eski davranış</b> — kurulum dosyasındaki <code>Dicom</code> bölümü kullanılır; mevcut kurulumlar güncellemeden sonra bozulmaz. Boş PACS kartında "↓ Dosyadaki değerleri al" düğmesi alanları dosyadan doldurur.</li>
+    <li><b>Portlar ekranda değişmez</b> — MWL ve dışa açık WADO dinleyicileri kurulumda; kartta yalnız durumları görünür.</li>
+    <li><b>Yetki</b> — mevcut <code>entegrasyon</code> yetkisi; ekstra yetki yok. Değişiklik ISLEMLOG'a alan alan yazılır.</li>
+  </ol>
+</div>
+
+<!-- ==================================================== 4 · SERVİS ======= -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">4</span> Servise göre alan kullanımı <span class="sp">(entegrasyon_hesaplari.html tablosuna eklenecek satır)</span></div>
+  <table>
+    <thead><tr><th>Entegrasyon</th><th>Kullanıcı Adı</th><th>Şifre / Token</th><th>Uygulama Kodu</th><th>Kurum / Tesis Kodu</th><th>Adres (url)</th><th>Aksiyon</th></tr></thead>
+    <tbody>
+      <tr><td><span class="rz kod">PACS</span> PACS (DICOM)</td><td>bizim AE başlığı</td><td class="sonuk">— (DICOM'da yok)</td>
+          <td>PACS AE başlığı</td><td class="sonuk">—</td><td>WADO adresi</td><td>Bağlantıyı Sına (C-ECHO + C-FIND + WADO)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

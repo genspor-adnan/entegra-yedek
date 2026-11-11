@@ -106,6 +106,9 @@ public static partial class KartKatalogu
             //   bunu kullanir. Kullanici adi = Client ID, sifre = Client Secret (bankanin
             //   gelistirici portalindan). Listede olmayan kod kartta EBELGE'ye dusuyordu.
             ["GARANTI"] = "Garanti BBVA API (banka hareketleri)",
+            // PACS (1316, mockup Ekranlar/Ayarlar/entegrasyon_pacs.html): ClearCanvas vb. DICOM arşivi. Kullanıcı adı =
+            //   bizim AE, Uygulama kodu = PACS AE, Canlı adres = WADO; sunucu / port / görüntüleyici `ayarlar` içinde.
+            ["PACS"] = "PACS (DICOM görüntü arşivi)",
         };
 
     /// <summary>
@@ -115,7 +118,7 @@ public static partial class KartKatalogu
     /// hem kart metasi hem kaydetme kurali bunu okur.
     /// </summary>
     public static readonly IReadOnlySet<string> SaglikEntegrasyonlari =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA", "KPS" };
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA", "KPS", "PACS" };
 
     /// <summary>Urun moduna gore gecerli entegrasyon kodlari (342).</summary>
     /// Mod 3 ("ikisi") saglik kodlarini da icerir (492).

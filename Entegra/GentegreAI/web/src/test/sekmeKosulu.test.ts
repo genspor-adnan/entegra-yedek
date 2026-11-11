@@ -22,6 +22,14 @@ describe('kartin kendi alanina bakan kosul', () => {
   });
 });
 
+describe('kartin kendi alanina esitlik kosulu (kod=PACS, 1316)', () => {
+  it('yalniz deger esitse acilir', () => {
+    expect(sekmeKosuluSaglandi('kod=PACS', { kod: 'PACS' }, yok)).toBe(true);
+    expect(sekmeKosuluSaglandi('kod=PACS', { kod: 'SKRS' }, yok)).toBe(false);
+    expect(sekmeKosuluSaglandi('kod=PACS', {}, yok)).toBe(false);
+  });
+});
+
 describe('DETAY alanina bakan kosul (ozluk.calismaSekli=3)', () => {
   const ozluk = (v: unknown) => (ad: string) =>
     (ad === 'ozluk' ? [{ id: 1, calismaSekli: v }] : []);

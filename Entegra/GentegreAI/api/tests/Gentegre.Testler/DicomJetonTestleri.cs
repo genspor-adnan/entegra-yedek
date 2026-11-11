@@ -10,7 +10,9 @@ namespace Gentegre.Testler;
 public sealed class DicomJetonTestleri
 {
     private static DicomKaynagi Kaynak() => new(
-        Options.Create(new DicomAyarlari { Aktif = true, JetonDakika = 60 }),
+        // 1316: ayar depodan; satır okunmaz (veri null) - DB'ye gitmeyen yol (JetonUret dakika verilmezse dosya ayarı).
+        new DicomAyarDeposu(Options.Create(new DicomAyarlari { Aktif = true, JetonDakika = 60 }), null!,
+                            Microsoft.Extensions.Logging.Abstractions.NullLogger<DicomAyarDeposu>.Instance),
         Options.Create(new GuvenlikAyarlari { ImzaAnahtari = "test-imza-anahtari-0123456789abcdef-uzun" }),
         new BosHttp());
 

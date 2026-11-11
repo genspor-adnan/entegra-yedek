@@ -48,54 +48,157 @@ public sealed class DicomAyarlari
 /// imzalı bağlantı jetonu. Kimlik: OHIF'in görüntü yükleyicisi JWT başlığı gönderemez; bu yüzden manifest ve
 /// WADO uçları anonim ama <c>t=</c> jetonlu - jeton çalışma UID'sine bağlı, süreli, HMAC(imza anahtarı).
 /// </summary>
-public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<GuvenlikAyarlari> guvenlik, IHttpClientFactory http) : IWadoPacs
+public sealed class DicomKaynagi(DicomAyarDeposu depo, IOptions<GuvenlikAyarlari> guvenlik, IHttpClientFactory http) : IWadoPacs
 {
-    public DicomAyarlari Ayar => ayar.Value;
+    /// <summary>Geçerli PACS ayarı - şube kapsamına göre (1316: entegrasyon ekranı → dosya).</summary>
+    public DicomAyarlari Ayar => depo.Gecerli();
 
     // ---------------------------------------------------------------- jeton ----
+    // Jeton ŞUBEYİ de taşır (1316): manifest / WADO uçları anonim (OHIF başlık gönderemez), hangi şubenin PACS'ına
+    //   gidileceği jetondan okunur. Biçim "son.şube.imza"; eski "son.imza" jetonları kurum geneli sayılır.
     public string JetonUret(string studyUid, int? dakika = null)
     {
         var son = DateTimeOffset.UtcNow.AddMinutes(dakika ?? Ayar.JetonDakika).ToUnixTimeSeconds();
-        return $"{son}.{Imza(studyUid, son)}";
+        var sube = DicomAyarDeposu.Kapsam ?? 0;
+        return $"{son}.{sube}.{Imza(studyUid, son, sube)}";
     }
 
-    public bool JetonGecerli(string studyUid, string? jeton)
+    public bool JetonGecerli(string studyUid, string? jeton) => JetonGecerli(studyUid, jeton, out _);
+
+    public bool JetonGecerli(string studyUid, string? jeton, out int? sube)
     {
+        sube = null;
         if (string.IsNullOrWhiteSpace(jeton)) return false;
-        var nokta = jeton.IndexOf('.');
-        if (nokta <= 0) return false;
-        if (!long.TryParse(jeton[..nokta], NumberStyles.Integer, CultureInfo.InvariantCulture, out var son)) return false;
+        var p = jeton.Split('.');
+        if (p.Length is not (2 or 3)) return false;
+        if (!long.TryParse(p[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var son)) return false;
         if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() > son) return false;
-        var beklenen = Imza(studyUid, son);
-        var gelen = jeton[(nokta + 1)..];
-        return CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(beklenen), Encoding.ASCII.GetBytes(gelen));
+        var s = 0;
+        if (p.Length == 3 && !int.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out s)) return false;
+        var beklenen = p.Length == 3 ? Imza(studyUid, son, s) : Imza(studyUid, son, null);
+        var tamam = CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(beklenen), Encoding.ASCII.GetBytes(p[^1]));
+        if (tamam && s > 0) sube = s;
+        return tamam;
     }
 
-    private string Imza(string studyUid, long son)
+    private string Imza(string studyUid, long son, int? sube)
     {
         var anahtar = Encoding.UTF8.GetBytes(guvenlik.Value.ImzaAnahtari + "|dicom");
-        var veri = Encoding.UTF8.GetBytes($"{studyUid}|{son}");
+        var veri = Encoding.UTF8.GetBytes(sube is null ? $"{studyUid}|{son}" : $"{studyUid}|{son}|{sube}");
         var h = HMACSHA256.HashData(anahtar, veri);
         return Convert.ToBase64String(h).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
     // ---------------------------------------------------------------- C-FIND ----
-    private IDicomClient Istemci()
-        => DicomClientFactory.Create(Ayar.Sunucu, Ayar.Port, false, Ayar.BizimAe, Ayar.SunucuAe);
+    private static IDicomClient Istemci(DicomAyarlari a)
+        => DicomClientFactory.Create(a.Sunucu, a.Port, false, a.BizimAe, a.SunucuAe);
 
-    private async Task<List<DicomDataset>> SorgulaAsync(DicomCFindRequest istek, CancellationToken iptal)
+    private Task<List<DicomDataset>> SorgulaAsync(DicomCFindRequest istek, CancellationToken iptal) => SorgulaAsync(istek, iptal, Ayar);
+
+    private static async Task<List<DicomDataset>> SorgulaAsync(DicomCFindRequest istek, CancellationToken iptal, DicomAyarlari a)
     {
         var sonuc = new List<DicomDataset>();
         istek.OnResponseReceived += (_, yanit) =>
         {
             if (yanit.Status == DicomStatus.Pending && yanit.HasDataset) sonuc.Add(yanit.Dataset);
         };
-        var istemci = Istemci();
+        var istemci = Istemci(a);
         await istemci.AddRequestAsync(istek);
         using var zaman = CancellationTokenSource.CreateLinkedTokenSource(iptal);
-        zaman.CancelAfter(TimeSpan.FromSeconds(Math.Max(5, Ayar.ZamanAsimiSn)));
+        zaman.CancelAfter(TimeSpan.FromSeconds(Math.Max(5, a.ZamanAsimiSn)));
         await istemci.SendAsync(zaman.Token);
         return sonuc;
+    }
+
+    /// <summary>Bağlantı testinin bir adımı (entegrasyon ekranı › PACS kartı).</summary>
+    public sealed record SinamaAdimi(string Ad, bool Tamam, string Ayrinti, long Ms);
+
+    /// <summary>
+    /// PACS BAĞLANTI TESTİ (1316): verilen ayarla sırayla C-ECHO → C-FIND (son 1 günün çalışmaları; boşsa son 30 gün) →
+    /// WADO (bulunan ilk görüntü, application/dicom) → görüntüleyici adresi. Bir adım düşerse sonrakiler denenmez
+    /// (görüntüleyici hariç - PACS'tan bağımsız). Kayıt değiştirmez.
+    /// </summary>
+    public async Task<List<SinamaAdimi>> SinaAsync(DicomAyarlari a, CancellationToken iptal)
+    {
+        var adimlar = new List<SinamaAdimi>();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        async Task<bool> Adim(string ad, Func<Task<string>> is_)
+        {
+            sw.Restart();
+            try { var ayr = await is_(); adimlar.Add(new(ad, true, ayr, sw.ElapsedMilliseconds)); return true; }
+            catch (Exception h) when (h is not OperationCanceledException || !iptal.IsCancellationRequested)
+            {
+                var m = h is OperationCanceledException ? $"zaman aşımı ({Math.Max(5, a.ZamanAsimiSn)} sn) - sunucu / port / güvenlik duvarı" : h.Message;
+                // Ham DICOM / ağ hatasına kullanıcının yapacağı işi ekle.
+                if (m.Contains("Association rejected", StringComparison.OrdinalIgnoreCase))
+                    m += $" → PACS bağlantıyı reddetti: PACS AE başlığını ({a.SunucuAe}) ve PACS'ta bizim AE'nin ({a.BizimAe}) tanımlı olduğunu kontrol edin.";
+                else if (h is System.Net.Sockets.SocketException || m.Contains("refused", StringComparison.OrdinalIgnoreCase)
+                         || m.Contains("reddedildi", StringComparison.OrdinalIgnoreCase))
+                    m += $" → {a.Sunucu}:{a.Port} adresinde DICOM servisi yok: sunucu / port / güvenlik duvarı.";
+                adimlar.Add(new(ad, false, m, sw.ElapsedMilliseconds));
+                return false;
+            }
+        }
+        var echoTamam = await Adim($"C-ECHO {a.Sunucu}:{a.Port} {a.BizimAe} → {a.SunucuAe}", async () =>
+        {
+            var istemci = Istemci(a);
+            DicomStatus? durum = null;
+            var e = new DicomCEchoRequest();
+            e.OnResponseReceived += (_, y) => durum = y.Status;
+            await istemci.AddRequestAsync(e);
+            using var z = CancellationTokenSource.CreateLinkedTokenSource(iptal);
+            z.CancelAfter(TimeSpan.FromSeconds(Math.Max(5, a.ZamanAsimiSn)));
+            await istemci.SendAsync(z.Token);
+            if (durum != DicomStatus.Success) throw new InvalidOperationException($"PACS yanıtı: {durum?.ToString() ?? "yok"}");
+            return "yanıt verdi";
+        });
+        (string Study, string Seri, string Sop)? ornek = null;
+        if (echoTamam && await Adim("C-FIND çalışma sorgusu", async () =>
+            {
+                // Yalnız StudyDate aralığı: CreateStudyQuery(studyDateTime) StudyTime aralığı da koyuyor (00:00-00:00) ve
+                //   hiçbir çalışma eşleşmiyordu. Tüm arşiv sorgulanmaz (büyük PACS'ta ağır) - en çok 1 yıl.
+                foreach (var gun in new[] { 1, 30, 365 })
+                {
+                    var q = DicomCFindRequest.CreateStudyQuery();
+                    q.Dataset.AddOrUpdate(DicomTag.StudyDate,
+                        $"{DateTime.Today.AddDays(-gun):yyyyMMdd}-{DateTime.Today.AddDays(1):yyyyMMdd}");
+                    var calismalar = await SorgulaAsync(q, iptal, a);
+                    if (calismalar.Count == 0) continue;
+                    foreach (var c in calismalar.Take(5))
+                    {
+                        var st = c.GetSingleValueOrDefault(DicomTag.StudyInstanceUID, "");
+                        foreach (var s in await SorgulaAsync(DicomCFindRequest.CreateSeriesQuery(st), iptal, a))
+                        {
+                            var se = s.GetSingleValueOrDefault(DicomTag.SeriesInstanceUID, "");
+                            var g = (await SorgulaAsync(DicomCFindRequest.CreateImageQuery(st, se), iptal, a)).FirstOrDefault();
+                            if (g?.GetSingleValueOrDefault(DicomTag.SOPInstanceUID, "") is { Length: > 0 } sop) { ornek = (st, se, sop); break; }
+                        }
+                        if (ornek is not null) break;
+                    }
+                    return $"son {gun} günde {calismalar.Count} çalışma";
+                }
+                return "sorgu çalıştı, son 1 yılda çalışma yok";
+            }) && ornek is { } o)
+        {
+            await Adim("WADO görüntü (application/dicom)", async () =>
+            {
+                using var y = await WadoAsync(a, o.Study, o.Seri, o.Sop, iptal);
+                if (!y.IsSuccessStatusCode) throw new InvalidOperationException($"HTTP {(int)y.StatusCode} - {a.WadoUrl}");
+                var b = await y.Content.ReadAsByteArrayAsync(iptal);
+                return $"{b.Length / 1024} KB";
+            });
+        }
+        else if (echoTamam && adimlar.Count > 1 && adimlar[^1].Tamam)
+            adimlar.Add(new("WADO görüntü (application/dicom)", true, "denenmedi - PACS'ta örnek görüntü yok", 0));
+        if (!string.IsNullOrWhiteSpace(a.GoruntuleyiciUrl))
+            await Adim($"Görüntüleyici {a.GoruntuleyiciUrl}", async () =>
+            {
+                var istemci = http.CreateClient("dicom");
+                using var y = await istemci.GetAsync(a.GoruntuleyiciUrl, HttpCompletionOption.ResponseHeadersRead, iptal);
+                if ((int)y.StatusCode >= 500) throw new InvalidOperationException($"HTTP {(int)y.StatusCode}");
+                return $"HTTP {(int)y.StatusCode}";
+            });
+        return adimlar;
     }
 
     /// <summary>Accession numarasından çalışma UID'si (ilk eşleşen).</summary>
@@ -253,10 +356,13 @@ public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<Guvenlik
 
     // ---------------------------------------------------------------- WADO vekili ----
     /// <summary>ClearCanvas WADO-URI'den DICOM nesnesini çeker (application/dicom).</summary>
-    public async Task<HttpResponseMessage> WadoAsync(string studyUid, string seriesUid, string objectUid, CancellationToken iptal)
+    public Task<HttpResponseMessage> WadoAsync(string studyUid, string seriesUid, string objectUid, CancellationToken iptal)
+        => WadoAsync(Ayar, studyUid, seriesUid, objectUid, iptal);
+
+    private async Task<HttpResponseMessage> WadoAsync(DicomAyarlari a, string studyUid, string seriesUid, string objectUid, CancellationToken iptal)
     {
         var istemci = http.CreateClient("dicom");
-        var url = $"{Ayar.WadoUrl}?requestType=WADO&studyUID={Uri.EscapeDataString(studyUid)}&seriesUID={Uri.EscapeDataString(seriesUid)}"
+        var url = $"{a.WadoUrl}?requestType=WADO&studyUID={Uri.EscapeDataString(studyUid)}&seriesUID={Uri.EscapeDataString(seriesUid)}"
                 + $"&objectUID={Uri.EscapeDataString(objectUid)}&contentType=application%2Fdicom";
         return await istemci.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, iptal);
     }

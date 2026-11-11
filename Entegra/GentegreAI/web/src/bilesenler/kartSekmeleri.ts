@@ -34,7 +34,12 @@ export function sekmeKosuluSaglandi(
   detaySatirlari: (detayAd: string) => Record<string, unknown>[],
 ): boolean {
   const nokta = kosul.indexOf('.');
-  if (nokta < 0) return !!deger[kosul];
+  if (nokta < 0) {
+    // "alan=deger" (1316): kartın kendi alanına göre sekme (entegrasyon hesabı kod=PACS → PACS Bağlantısı).
+    const esit = kosul.indexOf('=');
+    if (esit > 0) return String(deger[kosul.slice(0, esit)] ?? '') === kosul.slice(esit + 1);
+    return !!deger[kosul];
+  }
 
   const detayAd = kosul.slice(0, nokta);
   const [alan, beklenen] = kosul.slice(nokta + 1).split('=');

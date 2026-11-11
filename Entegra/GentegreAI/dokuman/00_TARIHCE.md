@@ -568,6 +568,33 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Test: `TeletipOrmKuyruguTestleri.Dis_kurum_teleradyoloji_isi_Teletipe_girmez` (açılışta bağlı → satır yok, sonradan
     bağlanan → atlandı, yon 2 → gider). Teletıp + Telerad 116/116. Tam pakette ilgisiz iki düşüş: CagriTestleri SLA
     (ayrı koşuda geçiyor) ve SahaPlanTopluTestleri.Plan_ozet... (gece yarısından sonra düşüyor - TR / UTC gün sınırı).
+- **PACS (DICOM) bağlantısı entegrasyon ekranında (12.11.2026; kullanıcı: "clearcanvas a bağlantı ayarları için entegrasyon
+  ekranına baktım göremedim" → mockup `Ekranlar/Ayarlar/entegrasyon_pacs.html` → "başla"):** ayarlar yalnız
+  appsettings › Dicom'daydı (dosya + yeniden başlatma).
+  * Entegrasyon kodu **PACS** (sağlık kodları arasında - ERP kurulumunda görünmez). Alan eşlemesi: kullanıcı adı = bizim AE,
+    uygulama kodu = PACS AE, canlı adres = WADO; `ayarlar` jsonb = sunucu · port · zamanAsimiSn · goruntuleyiciUrl ·
+    jetonDakika · urun. DB değişikliği yok (kod listesi kodda).
+  * `Servisler/DicomAyarDeposu.cs`: çözüm şube satırı → kurum geneli satır → dosya (satır yoksa eski davranış). Bellekte;
+    5 sn'den eski anlık görüntü arka planda PACS satırlarının xmin imzasıyla karşılaştırılır - kayıttan birkaç saniye
+    sonra geçerli, yeniden başlatma yok. MWL / dışa açık WADO dinleyicileri daima dosyadan (port = yeniden başlatma).
+    Şube kapsamı AsyncLocal (`DicomAyarDeposu.SubeIcin`): DICOM uçları istemin / oturumun şubesi, Teletıp işçisi satırın
+    şubesi, dışa açık WADO KOS satırının şubesi. **Görüntüleyici jetonu şubeyi taşır** (`son.şube.imza`, imzalı; eski
+    `son.imza` kurum geneli) - anonim manifest / WADO uçları doğru şubenin PACS'ına gider.
+  * `DicomKaynagi.SinaAsync`: C-ECHO → C-FIND (son 1 / 30 / 365 gün; yalnız StudyDate aralığı - fo-dicom'un tarih-saat
+    aralığı StudyTime 00:00-00:00 da koyup hiçbir şeyi eşleştirmiyordu) → WADO (bulunan ilk görüntü) → görüntüleyici;
+    KAYITLI satırın ayarıyla. Hata metnine yapılacak iş eklenir (Association rejected → AE başlıkları; bağlantı reddi /
+    zaman aşımı → sunucu / port / güvenlik duvarı). `/api/entegrasyon/{id}/sina` PACS için adım listesi döner;
+    `/api/entegrasyon/pacs/dinleyiciler` (salt okunur dinleyiciler + dosya değerleri).
+  * Web: kartta koşullu **PACS Bağlantısı** sekmesi (`kosulAlani` artık kartın kendi alanında `alan=deger` de alır:
+    `kod=PACS`) - DICOM bağlantısı, görüntü erişimi (ClearCanvas varsayılan WADO önerisi), salt okunur dinleyiciler,
+    adım adım bağlantı testi, "↓ Dosyadaki değerleri al". `PacsBaglantiSekmesi.tsx` (CSS öneki `pcs-`).
+  * Mockup'tan sapma: "Kaydet sınanmamışsa sorar" yapılmadı (kartta kayıt öncesi kanca yok) - "kaydettikten sonra sına"
+    olarak mockup'a işlendi.
+  * Doğrulama: `PacsAyarTestleri` (satır → ayar, şube önceliği DB'li, şubeli jeton değiştirilemez), `DicomJetonTestleri`
+    yeni kurucuya uyarlandı, web `sekmeKosulu` 9/9; tam paket 1066 geçti (düşen tek test önceki saha gün-sınırı testi).
+    Dev'de PACS hesabı (id 22, kurum geneli, dosyadaki değerlerle) kart ucundan açıldı: sınama C-ECHO / C-FIND (5 çalışma) /
+    WADO 34 KB / görüntüleyici ✓; yanlış PACS AE ile C-ECHO reddi ve ipucu; görüntüleyici manifesti şubeli jetonla 200,
+    şubesi değiştirilmiş jeton 401.
 
 ### 10.11.2026
 

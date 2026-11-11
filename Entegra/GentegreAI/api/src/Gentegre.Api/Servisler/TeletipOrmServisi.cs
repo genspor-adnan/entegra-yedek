@@ -67,7 +67,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         await using var b = await veri.AcAsync(iptal);
         await using var islem = await b.BeginTransactionAsync(iptal);
         var satir = await b.TekAsync("""
-            select id, istem_id, kanal, emir, durum, deneme_no, veri::text as veri, accession_no, rapor_id
+            select id, istem_id, kanal, emir, durum, deneme_no, veri::text as veri, accession_no, rapor_id, sube_id
               from public.teletip_gonderim where id = @p0 for update skip locked
             """, islem, [id], o => new
         {
@@ -78,9 +78,11 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             Durum = Convert.ToInt16(o.GetValue(o.GetOrdinal("durum"))),
             Deneme = o.Sayi("deneme_no"),
             Veri = o.Metin("veri"),
+            Sube = o.Sayi("sube_id"),
         }, iptal);
         if (satir is null) return new(id, -1, "", "Satır bulunamadı ya da başka bir deneme sürüyor.");
         if (satir.Durum is 1 or 4) return new(id, satir.Durum, "", "Satır zaten sonuçlanmış.");
+        using var pacsKapsami = DicomAyarDeposu.SubeIcin(satir.Sube);   // 1316: KOS / doz şubenin PACS'ından
         // 1315: dış kurumun teleradyoloji işi Teletıp'tan gitmez (Bakanlık bildirimi Teleradyoloji › Teslim Kuyruğu'ndan).
         // Satır açıldıktan sonra bağ kurulmuş olabilir - göndermeden hemen önce yeniden bakılır.
         if (satir.IstemId is int disIstem
