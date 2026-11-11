@@ -124,7 +124,7 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
     <div class="ok-sut">
       <div class="ok">⇄ <b>MWL</b> C-FIND<br><small>accession · TCKN · SUT</small></div>
       <div class="ok">→ görüntü C-STORE</div>
-      <div class="ok">→ <b>RDSR</b> SR yönlendirme</div>
+      <div class="ok">→ <b>RDSR</b> cihazdan PACS'a (Gentegre C-FIND + WADO ile alır)</div>
     </div>
     <div class="sut">
       <div class="dk gen"><b>Gentegre AI</b><small>istem · rapor · kuyruk (telerad_istek)<br>OrmUretici · OruUretici · eksik kontrolü<br>MWL sunucusu (1301)</small></div>
@@ -365,7 +365,7 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
     <tr><td>HL7 ORM / ORU içeriği</td><td>Gentegre</td><td>Bakanlık profili (2.3.1, ORU 4 parça base64), <code>fn_telerad_bakanlik_eksik</code>; kural tek yerde - Mirth'te dönüştürücü yazılmaz</td></tr>
     <tr><td>HL7 taşıma, ACK, tekrar, arşiv</td><td>Mirth K1</td><td>Kaynak "Respond from: destination" - Teletıp ACK'i Gentegre'ye aynen döner; AE/AR'de otomatik tekrar yok</td></tr>
     <tr><td>KOS üretimi + XDS gönderimi</td><td>Mirth K2</td><td>Bakanlık MakeKOS / SendKOS jar'ı Mirth <code>custom-lib</code>'e; Gentegre yalnız {studyUid, accession, skrs} gönderir</td></tr>
-    <tr><td>Doz RDSR</td><td>Mirth K3</td><td>ClearCanvas SR (SOP Class X-Ray Radiation Dose SR) için auto-route → Mirth DICOM dinleyici → TLS TELETIP_MGA</td></tr>
+    <tr><td>Doz RDSR</td><td>Mirth K3</td><td>KOS başarıyla gidince (BT / röntgen / MG / XA / RF / BMD) Gentegre RDSR'yi PACS'tan alır, künyeyi KOS'la aynı yapar, BT'de DLP / CTDIvol &gt; 0 denetler → HTTP Mirth K3 (4104 /doz/) → DICOM Sender TLS TELETIP_MGA; C-STORE-RSP (0000H / 0110H + SR1xx) Gentegre'ye döner. İçerik ve Irradiation Event UID değişmez.</td></tr>
     <tr><td>Gönderim durumu</td><td>Mirth K4 → Gentegre</td><td>her hedef sonucunda HTTP POST; Gentegre <code>teletip_gonderim</code> aşamalarını yazar, ekranlar buradan okur</td></tr>
     <tr><td>MWL</td><td>Gentegre</td><td>1301 MwlSunucusu - Mirth dışı</td></tr>
     <tr><td>Public WADO</td><td>Gentegre API ayrı portu (TeletipWado:Port, Bakanlık sertifikası)</td><td>Mirth dışı; Bakanlık doğrudan çeker</td></tr>

@@ -93,7 +93,9 @@ public static class TeletipUclari
             var skrs = T(istek.KurumSkrs); var tesis = T(istek.MedulaTesisKodu); var sube = T(istek.SubeNo);
             var firma = T(istek.FirmaKodu); var adres = T(istek.Hl7Adres);
             var kodlama = T(istek.Encoding) is "Windows1254" ? "Windows1254" : "UTF8";
-            var xds = T(istek.XdsAdres); var oid = T(istek.XdsHastaOid);
+            var xds = T(istek.XdsAdres); var oid = T(istek.XdsHastaOid); var doz = T(istek.DozAdres);
+            if (doz.Length > 0 && !Uri.TryCreate(doz, UriKind.Absolute, out _))
+                hatalar.Add(new AlanHatasi("dozAdres", "Tam adres olmalı (ör. http://10.0.0.12:4104/doz/)."));
             if (xds.Length > 0 && !Uri.TryCreate(xds, UriKind.Absolute, out _))
                 hatalar.Add(new AlanHatasi("xdsAdres", "Tam adres olmalı (ör. http://10.0.0.12:8082/kos/)."));
             if (oid.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(oid, @"^[0-2](\.[0-9]+)+$"))
@@ -125,6 +127,7 @@ public static class TeletipUclari
                 ("teletip.firma_kodu", firma, "metin"), ("teletip.encoding", kodlama, "metin"),
                 ("teletip.sube_no", sube, "metin"), ("kurum.skrs_kodu", skrs, "metin"),
                 ("teletip.xds_adres", xds, "metin"), ("teletip.xds_hasta_oid", oid, "metin"),
+                ("teletip.doz_adres", doz, "metin"),
             })
                 await b.CalistirAsync("""
                     insert into public.referans (anahtar, deger, tip, kapsam, degistiren, degistirme_tarihi)
@@ -160,7 +163,7 @@ public static class TeletipUclari
                 with p as (select public.fn_sube_zaman_dilimi(@p1) as tz),
                      g as (select coalesce(@p0::date, (now() at time zone p.tz)::date) as gun, p.tz from p),
                      t as (select x.* from public.teletip_gonderim x, g
-                            where (x.ekleme_tarihi at time zone g.tz)::date = g.gun and x.kanal in (1, 2))
+                            where (x.ekleme_tarihi at time zone g.tz)::date = g.gun and x.kanal in (1, 2, 3))
                 select (select gun from g) as gun,
                        (select count(*) from t where kanal = 1 and emir = 1)                     as "nwToplam",
                        (select count(*) from t where kanal = 1 and emir = 1 and durum = 1)       as "nwGonderildi",
@@ -170,6 +173,8 @@ public static class TeletipUclari
                        (select count(*) from t where kanal = 1 and emir = 4 and durum = 1)       as "oruGonderildi",
                        (select count(*) from t where kanal = 2)                                  as "kosToplam",
                        (select count(*) from t where kanal = 2 and durum = 1)                    as "kosGonderildi",
+                       (select count(*) from t where kanal = 3)                                  as "dozToplam",
+                       (select count(*) from t where kanal = 3 and durum = 1)                    as "dozGonderildi",
                        (select count(*) from t where durum = 2)                    as reddedildi,
                        (select count(*) from t where durum = 3)                    as gidemez,
                        (select count(*) from public.teletip_gonderim where durum in (0, 5)) as kuyrukta,
@@ -266,7 +271,7 @@ public static class TeletipUclari
     /// <summary>PUT /api/teletip/ayar gövdesi.</summary>
     public sealed record TeletipAyarIstegi(bool Aktif, string? KurumSkrs, string? MedulaTesisKodu, string? SubeNo,
                                            string? FirmaKodu, string? Encoding, string? Hl7Adres,
-                                           string? XdsAdres = null, string? XdsHastaOid = null);
+                                           string? XdsAdres = null, string? XdsHastaOid = null, string? DozAdres = null);
 
     /// <summary>Ayar ekranı verisi: DB ayarları + şube bazlı tesis kodları + Mirth (yalnız görüntü) + test değeri uyarıları.</summary>
     private static async Task<object> AyarOkuAsync(VeriKaynagi veri, MirthIzleme mirth, CancellationToken iptal)
@@ -294,6 +299,7 @@ public static class TeletipUclari
             aktif, kurumSkrs = skrs, medulaTesisKodu = tesis, subeNo = await R("teletip.sube_no", "1"), firmaKodu = firma,
             encoding = await R("teletip.encoding", "UTF8"), hl7Adres = await R("teletip.hl7_adres", ""),
             xdsAdres = await R("teletip.xds_adres", ""), xdsHastaOid = await R("teletip.xds_hasta_oid", ""),
+            dozAdres = await R("teletip.doz_adres", ""),
             subeTesisleri, uyarilar,
             mirth = new { url = m.Url, kullanici = m.Kullanici, parolaTanimli = m.ParolaTanimli, sertifikaDogrula = m.SertifikaDogrula,
                           harita = await mirth.TeletipHaritasiAsync(iptal) },

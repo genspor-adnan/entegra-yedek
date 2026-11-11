@@ -278,6 +278,29 @@ public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<Guvenlik
         return sonuc;
     }
 
+    /// <summary>
+    /// TELETIP DOZ (1314): çalışmadaki X-Ray Radiation Dose SR nesneleri (SOP Class 1.2.840.10008.5.1.4.1.1.88.67) -
+    /// (seriesUID, sopUID). Cihaz RDSR üretmiyorsa boş.
+    /// </summary>
+    public async Task<List<(string Seri, string Sop)>> DozRaporlariAsync(string studyUid, CancellationToken iptal)
+    {
+        var sonuc = new List<(string, string)>();
+        foreach (var s in await SorgulaAsync(DicomCFindRequest.CreateSeriesQuery(studyUid), iptal))
+        {
+            var seriesUid = s.GetSingleValueOrDefault(DicomTag.SeriesInstanceUID, "");
+            if (seriesUid.Length == 0) continue;
+            var modalite = s.GetSingleValueOrDefault(DicomTag.Modality, "");
+            if (modalite.Length > 0 && modalite != "SR" && modalite != "KO" && modalite != "OT") continue;   // doz SR'si SR serisinde
+            var istek = DicomCFindRequest.CreateImageQuery(studyUid, seriesUid);
+            istek.Dataset.AddOrUpdate(DicomTag.SOPClassUID, string.Empty);
+            foreach (var g in await SorgulaAsync(istek, iptal))
+                if (g.GetSingleValueOrDefault(DicomTag.SOPClassUID, "") == DozUretici.RdsrSopClass
+                    && g.GetSingleValueOrDefault(DicomTag.SOPInstanceUID, "") is { Length: > 0 } sop)
+                    sonuc.Add((seriesUid, sop));
+        }
+        return sonuc;
+    }
+
     /// <summary>KOS'ta Retrieve AE Title olarak yazılan PACS AE başlığı.</summary>
     public string PacsAe => Ayar.SunucuAe;
 

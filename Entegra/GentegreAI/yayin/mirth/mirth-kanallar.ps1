@@ -3,6 +3,8 @@
 #   .\mirth-kanallar.ps1                                  -> dev: K1 hedefi benzetim (127.0.0.1:6671), benzetim kanalı da yüklenir
 #   .\mirth-kanallar.ps1 -TeletipHost 1.2.3.4 -TeletipPort 5555 -TeletipXdsUrl https://.../xds/ -BenzetimYok
 #                                                         -> gerçek Bakanlık HL7 alıcısı + XDS deposu (K1 + K2)
+#   .\mirth-kanallar.ps1 ... -MgaHost dicom.teletip.saglik.gov.tr -MgaPort 443 -DozTls aes -DozGuvenDeposu /opt/java/openjdk/lib/security/cacerts
+#                                                         -> K3 doz (RDSR) gerçek MGA'ya TLS ile (dev: TELETIP_MGA_SIMULATOR 127.0.0.1:11112, TLS yok)
 #   .\mirth-kanallar.ps1 -Uretmeden                       -> kanallar\*.xml olduğu gibi yüklenir (konteynerde üretilmez)
 #
 # Kanal XML'i elle yazılmaz: kanal-uret.js Mirth'in kendi model sınıflarıyla konteyner içinde üretir (Rhino), çıktı
@@ -10,6 +12,8 @@
 # Teletıp adresi kanalda değil Mirth "configuration map"te (teletip_hl7_host / teletip_hl7_port) - kurum başına değişir.
 param([string]$TeletipHost = '127.0.0.1', [string]$TeletipPort = '6671',
       [string]$TeletipXdsUrl = 'http://127.0.0.1:8083/xds/', [switch]$BenzetimYok, [switch]$Uretmeden,
+      [string]$MgaHost = '127.0.0.1', [string]$MgaPort = '11112', [string]$MgaAe = 'TELETIP_MGA', [string]$BizimAe = 'GENTEGRE',
+      [ValidateSet('notls', 'aes', '3des', 'without')][string]$DozTls = 'notls', [string]$DozGuvenDeposu = '', [string]$DozGuvenParola = 'changeit',
       [string]$Ad = 'gentegre-mirth', [string]$Api = 'https://localhost:8443/api')
 
 $ErrorActionPreference = 'Stop'
@@ -22,7 +26,7 @@ if (-not $Uretmeden) {
     $klasorler = (docker exec $Ad sh -c 'cd /opt/connect; ls -d server-lib/*/ extensions/*/') -split "`n" |
                  Where-Object { $_.Trim() } | ForEach-Object { $_.Trim() + '*' }
     $cp = (@('server-lib/*') + $klasorler) -join ':'
-    docker exec $Ad sh -c "rm -rf /tmp/kanallar; cd /opt/connect; java -cp '$cp' org.mozilla.javascript.tools.shell.Main /tmp/kanal-uret.js"
+    docker exec $Ad sh -c "rm -rf /tmp/kanallar; cd /opt/connect; java -Ddoz.tls=$DozTls '-Ddoz.guven=$DozGuvenDeposu' '-Ddoz.guvenParola=$DozGuvenParola' -cp '$cp' org.mozilla.javascript.tools.shell.Main /tmp/kanal-uret.js"
     if ($LASTEXITCODE -ne 0) { throw 'Kanal üretimi başarısız (kanal-uret.js).' }
     New-Item -ItemType Directory -Force $kanalKlasoru | Out-Null
     docker cp "${Ad}:/tmp/kanallar/." $kanalKlasoru | Out-Null
@@ -68,12 +72,16 @@ if (-not $harita.DocumentElement) { $harita.LoadXml('<map/>') }
 Anahtar 'teletip_hl7_host' $TeletipHost 'K1 hedefi: Teletip HL7 alicisi (dev: TELETIP_SIMULATOR 127.0.0.1)'
 Anahtar 'teletip_hl7_port' $TeletipPort 'K1 hedefi portu (dev: 6671)'
 Anahtar 'teletip_xds_url' $TeletipXdsUrl 'K2 hedefi: Teletip XDS deposu RAD-68 (dev: TELETIP_XDS_SIMULATOR http://127.0.0.1:8083/xds/ - sondaki / şart, Jetty /xds -> /xds/ 302 verir, POST gövdesi kaybolur)'
+Anahtar 'teletip_mga_host' $MgaHost 'K3 hedefi: Teletip MGA doz alicisi (Bakanlik dicom.teletip.saglik.gov.tr, TLS; dev: TELETIP_MGA_SIMULATOR 127.0.0.1)'
+Anahtar 'teletip_mga_port' $MgaPort 'K3 hedefi portu (Bakanlik 443; dev 11112)'
+Anahtar 'teletip_mga_ae' $MgaAe 'K3 Called AE (Bakanlik TELETIP_MGA)'
+Anahtar 'teletip_mga_bizim_ae' $BizimAe 'K3 Calling AE (kurumun AE basligi)'
 Cagir '/server/configurationMap' 'Put' $harita.OuterXml | Out-Null
-Write-Host "Configuration map: teletip_hl7 = ${TeletipHost}:${TeletipPort}, teletip_xds_url = $TeletipXdsUrl"
+Write-Host "Configuration map: teletip_hl7 = ${TeletipHost}:${TeletipPort}, teletip_xds_url = $TeletipXdsUrl, teletip_mga = ${MgaHost}:${MgaPort} $MgaAe (TLS $DozTls)"
 
 # ---- 4) kanalları yükle (sabit kimlik: varsa güncelle) ve deploy et
-$dosyalar = @('TELETIP_HL7.xml', 'TELETIP_KOS.xml')
-if (-not $BenzetimYok) { $dosyalar = @('TELETIP_SIMULATOR.xml', 'TELETIP_XDS_SIMULATOR.xml') + $dosyalar }
+$dosyalar = @('TELETIP_HL7.xml', 'TELETIP_KOS.xml', 'TELETIP_DOZ.xml')
+if (-not $BenzetimYok) { $dosyalar = @('TELETIP_SIMULATOR.xml', 'TELETIP_XDS_SIMULATOR.xml', 'TELETIP_MGA_SIMULATOR.xml') + $dosyalar }
 foreach ($d in $dosyalar) {
     $xml = [IO.File]::ReadAllText((Join-Path $kanalKlasoru $d), [Text.Encoding]::UTF8)
     $id = ([xml]$xml).channel.id
@@ -86,7 +94,7 @@ foreach ($d in $dosyalar) {
     Write-Host ("{0,-20} {1} ve deploy edildi ({2})" -f ([xml]$xml).channel.name, $(if ($var) { 'güncellendi' } else { 'yüklendi' }), $id)
 }
 if ($BenzetimYok) {
-    foreach ($simId in @('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6699', '6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6698')) {
+    foreach ($simId in @('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6699', '6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6698', '6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6697')) {
         try { Cagir "/channels/$simId/_undeploy" 'Post' | Out-Null; Cagir "/channels/$simId" 'Delete' | Out-Null; Write-Host "Benzetim kanalı kaldırıldı ($simId)." } catch { }
     }
 }

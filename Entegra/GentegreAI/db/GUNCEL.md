@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (686 ad, 186 tanesi birden cok dosyada)
+## Fonksiyonlar (702 ad, 191 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -160,6 +160,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_depo_kural_kontrol` | `093_depo_kurallar.sql` | — |
 | `fn_depo_varsayilan_tek` | `090_depo_varsayilan.sql` | — |
 | `fn_dis_hekim_kurumu` | `827_lab_istem_kurumu.sql` | — |
+| `fn_dis_hekim_plan_uret` | `1299_plan_uret_hekim_secimi.sql` | 1290_dis_hekim_ziyaret_plani.sql |
 | `fn_dis_hekim_temsilci` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_dis_icon_iyilesme` | `875_dis_ortodonti_icon.sql` | — |
 | `fn_dis_icon_karmasiklik` | `875_dis_ortodonti_icon.sql` | — |
@@ -444,7 +445,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_rad_rol_tazele` | `1288_rad_rol_temsilci_haric.sql` | 326_radyoloji_prim_rol.sql, 332_prim_zamani.sql, 825_gonderen_primi_kendi_adina.sql |
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_accession_ver` | `1229_radyoloji_yon_accession.sql` | — |
+| `fn_radyoloji_dicom_modalite` | `1301_radyoloji_mwl.sql` | — |
 | `fn_radyoloji_istem_sil` | `920_muayene_istem_sil.sql` | — |
+| `fn_radyoloji_modalite_dicomdan` | `1301_radyoloji_mwl.sql` | — |
+| `fn_radyoloji_mwl` | `1301_radyoloji_mwl.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `1206_radyoloji_onay_kritik_dolu.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql |
 | `fn_radyoloji_sablon_bolum_html_bosalt` | `1216_radyoloji_sablon_bolum_html.sql` | — |
@@ -507,7 +511,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_taraf_kod_uret` | `1191_cari_kod_grubu.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
-| `fn_telerad_bakanlik_eksik` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
+| `fn_telerad_bakanlik_eksik` | `1306_telerad_eksik_medula_tesis.sql` | 812_bakanlik_kurum_enabiz_accession.sql |
 | `fn_telerad_fatura_rol` | `808_dis_hekim_raporlayan.sql` | 807_telerad_hakedis_bagi.sql |
 | `fn_telerad_gelen_istek` | `817_telerad_gelen_oru.sql` | — |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
@@ -515,6 +519,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
+| `fn_teletip_aktif` | `1302_teletip_orm_kuyrugu.sql` | — |
+| `fn_teletip_doz_verisi` | `1314_teletip_doz.sql` | — |
+| `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
+| `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
+| `fn_teletip_orm_verisi` | `1305_teletip_hastane_referansi.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql |
+| `fn_teletip_oru_verisi` | `1309_teletip_oru_kuyrugu.sql` | — |
 | `fn_temsilci_rolu_tazele` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
@@ -575,7 +585,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_calisma_istisna_onay` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 945_calisma_karti_kurallari.sql |
 | `tg_calisma_sablon_cakisma` | `945_calisma_karti_kurallari.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
-| `tg_dis_hekim_temsilci_dogrula` | `1287_dis_hekim_sube_temsilci.sql` | — |
+| `tg_dis_hekim_talep_hazirla` | `1297_saha_ziyaret_erp_musteri.sql` | 1289_dis_hekim_ziyaret_talep.sql |
+| `tg_dis_hekim_temsilci_dogrula` | `1297_saha_ziyaret_erp_musteri.sql` | 1287_dis_hekim_sube_temsilci.sql |
+| `tg_dis_hekim_ziyaret_hazirla` | `1289_dis_hekim_ziyaret_talep.sql` | — |
 | `tg_dis_lab_isemri_bag` | `709_dis_numara_tetikleri.sql` | — |
 | `tg_dis_lab_isemri_no` | `709_dis_numara_tetikleri.sql` | — |
 | `tg_dis_plan_no` | `709_dis_numara_tetikleri.sql` | — |
@@ -658,10 +670,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_guncelle` | `1243_sevkli_accession_kabulde.sql` | 287_radyoloji_accession_tetik.sql |
 | `tg_radyoloji_istem_hazirla` | `1243_sevkli_accession_kabulde.sql` | 287_radyoloji_accession_tetik.sql |
 | `tg_radyoloji_istem_hizmet` | `459_radyoloji_istem_hizmet_kontrolu.sql` | — |
+| `tg_radyoloji_istem_teletip` | `1302_teletip_orm_kuyrugu.sql` | — |
+| `tg_radyoloji_istem_teletip_kos` | `1310_teletip_kos.sql` | — |
 | `tg_radyoloji_istem_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `tg_radyoloji_istem_yon` | `1230_radyoloji_hizmet_sabit_yon.sql` | — |
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
+| `tg_radyoloji_rapor_teletip` | `1309_teletip_oru_kuyrugu.sql` | — |
 | `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
 | `tg_randevu_durum_geri` | `1122_randevu_geri_al_kurali.sql` | — |
 | `tg_randevu_izin_kontrol` | `1119_randevu_erteleme.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
@@ -687,6 +702,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
+| `tg_teletip_gonderim_doz` | `1314_teletip_doz.sql` | — |
 | `tg_temsilci_rolu_belge` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_temsilci_rolu_satir` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_urun_agaci_baslik_kilit` | `1258_urun_agaci_kontrol_listesi.sql` | — |
@@ -695,7 +711,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (361 ad, 161 tanesi birden cok dosyada)
+## Gorunumler (367 ad, 164 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -762,6 +778,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_dis_gunluk_akis` | `940_personel_unvan_yalniz_onek.sql` | 706_dis_modulu.sql |
 | `v_dis_hasta` | `940_personel_unvan_yalniz_onek.sql` | 706_dis_modulu.sql |
 | `v_dis_hekim_lookup` | `940_personel_unvan_yalniz_onek.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql, 309_dis_hekim_kurum_taraf_bag.sql |
+| `v_dis_hekim_talep` | `1289_dis_hekim_ziyaret_talep.sql` | — |
+| `v_dis_hekim_ziyaret` | `1294_ziyaret_materyal_rakip_kod_listesi.sql` | 1289_dis_hekim_ziyaret_talep.sql, 1291_dis_hekim_ziyaret_oneri_gorunum.sql |
+| `v_dis_hekim_ziyaret_vade` | `1300_ziyaret_sirasi_kip.sql` | 1290_dis_hekim_ziyaret_plani.sql, 1297_saha_ziyaret_erp_musteri.sql |
 | `v_dis_icon_skor` | `940_personel_unvan_yalniz_onek.sql` | 875_dis_ortodonti_icon.sql |
 | `v_dis_islem_lookup` | `706_dis_modulu.sql` | — |
 | `v_dis_lab_isemri` | `1119_randevu_erteleme.sql` | 706_dis_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
@@ -1001,6 +1020,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_resmi_tatil` | `751_dini_bayram_ve_yerel_tatil.sql` | 749_resmi_tatil.sql, 750_tatil_duzeltmeleri.sql |
 | `v_rol_agac_lookup` | `847_rol_agac_lookup.sql` | — |
 | `v_rol_lookup` | `425_dokuman_erisim.sql` | — |
+| `v_saha_hedef_lookup` | `1297_saha_ziyaret_erp_musteri.sql` | — |
+| `v_saha_temsilci_lookup` | `1295_saha_temsilci_lookup.sql` | — |
 | `v_satinalma_kabul` | `736_kabul_its_bildirim.sql` | 733_mal_kabul_satir.sql, 734_kabul_karekod.sql |
 | `v_satinalma_talep_onay` | `739_onay_gelen_kutusu.sql` | — |
 | `v_servis_cagri` | `940_personel_unvan_yalniz_onek.sql` | 773_teknik_servis.sql, 774_teknik_servis_modulu.sql |
@@ -1050,6 +1071,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_telerad_kurum_lookup` | `940_personel_unvan_yalniz_onek.sql` | 798_telerad_kart.sql |
 | `v_telerad_nobetci` | `940_personel_unvan_yalniz_onek.sql` | 801_telerad_nobet_ve_atama_kurali.sql |
 | `v_telerad_teslim` | `940_personel_unvan_yalniz_onek.sql` | 814_telerad_teslim_kuyrugu.sql |
+| `v_teletip_istem` | `1314_teletip_doz.sql` | 1304_teletip_ekranlari.sql, 1309_teletip_oru_kuyrugu.sql, 1310_teletip_kos.sql |
 | `v_tibbi_bolum_lookup` | `1112_tibbi_bolum_lookup.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |

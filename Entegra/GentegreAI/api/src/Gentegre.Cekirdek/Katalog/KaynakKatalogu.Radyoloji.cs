@@ -190,6 +190,9 @@ public static partial class KaynakKatalogu
             // KOS (1310): görüntü manifesti XDS'e (K2) - PACS çalışması bağlanınca, istem kabul edildikten sonra gider.
             new("kos",         string.Format(TeletipDurumMetni, "t.kos_durum"), "metin", "Görüntü (KOS)", Hizalama: "orta",
                                                                           Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
+            // DOZ (1314): RDSR (K3) - KOS başarıyla gidince, iyonlaştırıcı modalitede.
+            new("doz",         string.Format(TeletipDurumMetni, "t.doz_durum"), "metin", "Doz (RDSR)", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 100, RozetSiniflari: TeletipDurumRozet),
             new("genel",       "case t.genel_durum when 3 then 'sorunlu' when 2 then 'kuyrukta' when 1 then 'tamam' else 'atlandı' end",
                                                   "metin", "Genel",      Hizalama: "orta", Bicim: "rozet", Genislik: 90,
                                                                           RozetSiniflari: TeletipDurumRozet),

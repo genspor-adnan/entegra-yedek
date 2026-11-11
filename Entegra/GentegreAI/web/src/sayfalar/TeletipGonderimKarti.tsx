@@ -131,13 +131,13 @@ export function TeletipGonderimKarti() {
           </div>
           {satir && (
             <div className="ttk-blok">
-              <h4>{satir.kanal === 2 ? c('XDS isteği (SOAP gövdesi)') : c('HL7 mesajı')} <span className="ttk-ip">· {mesajKisaAdi(satir.kanal, satir.emir)} · {satir.kanal === 2 ? 'RAD-68 / ITI-41 · KOS eki gösterilmez' : `${satir.emir === 4 ? 'ORU^R01' : 'ORM^O01'} · 2.3.1`}</span></h4>
+              <h4>{satir.kanal === 2 ? c('XDS isteği (SOAP gövdesi)') : satir.kanal === 3 ? c('Doz raporu (RDSR) özeti') : c('HL7 mesajı')} <span className="ttk-ip">· {mesajKisaAdi(satir.kanal, satir.emir)} · {satir.kanal === 2 ? 'RAD-68 / ITI-41 · KOS eki gösterilmez' : satir.kanal === 3 ? 'C-STORE → TELETIP_MGA · SR ikilisi gösterilmez' : `${satir.emir === 4 ? 'ORU^R01' : 'ORM^O01'} · 2.3.1`}</span></h4>
               <div className="ttk-ic">
                 {ham?.mesaj ? <pre className="ttk-hl7">{ham.mesaj}</pre>
                   : <div className="ttk-soluk">{satir.durum === 3 ? c('Mesaj gönderilmedi: eksik alanlar var (sağdaki "Ne yapmalı").')
                     : c('Bu satır için henüz gönderilmiş mesaj yok.')}</div>}
                 {ham?.yanit && <>
-                  <div className="ttk-k" style={{ marginTop: 8 }}>{satir.kanal === 2 ? c('Teletıp yanıtı (RegistryResponse)') : c('Teletıp yanıtı (ACK)')}</div>
+                  <div className="ttk-k" style={{ marginTop: 8 }}>{satir.kanal === 2 ? c('Teletıp yanıtı (RegistryResponse)') : satir.kanal === 3 ? c('MGA yanıtı (C-STORE-RSP, Mirth K3)') : c('Teletıp yanıtı (ACK)')}</div>
                   <pre className="ttk-hl7 ttk-ack">{ham.yanit}</pre>
                 </>}
               </div>

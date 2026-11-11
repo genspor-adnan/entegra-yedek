@@ -104,6 +104,11 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             KontrolNo = $"TT{id}-{satir.Deneme + 1}",
         };
 
+        if (satir.Kanal == 3)
+        {
+            var dozAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.doz_adres", "", iptal);
+            return await DozGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, dozAdres, iptal);
+        }
         if (satir.Kanal == 2)
         {
             var xdsAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_adres", "", iptal);
@@ -214,6 +219,110 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, deneme + 1 >= AzamiDeneme ? (short)2 : (short)5, deneme, "",
                                   "Mirth K2'ye ulaşılamadı: " + h.Message, zarf.SoapXml, "", iptal, kontrolNo: kosSop, sonraki: Geri(deneme + 1));
         }
+    }
+
+    /// <summary>
+    /// DOZ (1314, Mirth K3): çalışmanın RDSR'leri PACS'tan → künye KOS'la aynı (DozUretici.Kunye) → denetim → her RDSR
+    /// Mirth K3'e HTTP (gövde DICOM Part 10) → Mirth DICOM Sender → TELETIP_MGA; yanıt C-STORE-RSP durumu. Cihaz RDSR'yi
+    /// geç yollayabilir: PACS'ta yoksa birkaç kez tekrar, sonra "gidemez" (cihaz RDSR üretmiyor olabilir).
+    /// </summary>
+    private async Task<TeletipDenemeSonucu> DozGonderAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction islem, long id, int deneme,
+        int? istemId, OrmVerisi v, string dozAdres, CancellationToken iptal)
+    {
+        if (dicom is null || httpFabrika is null)
+            return await YazAsync(b, islem, id, 5, deneme, "", "DICOM / HTTP bileşeni yok (servis yapılandırması).", "", "", iptal);
+        if (istemId is not int iid)
+            return await YazAsync(b, islem, id, 4, deneme, "", "İstem yok (silinmiş).", "", "", iptal);
+        var kosJson = await b.TekDegerAsync<string>("select public.fn_teletip_kos_verisi(@p0)::text", islem, [iid], iptal) ?? "{}";
+        var dozJson = await b.TekDegerAsync<string>("select public.fn_teletip_doz_verisi(@p0)::text", islem, [iid], iptal) ?? "{}";
+        using var kj = JsonDocument.Parse(kosJson); using var dj = JsonDocument.Parse(dozJson);
+        string K(string ad) => kj.RootElement.TryGetProperty(ad, out var e) ? e.ToString() : "";
+        double? D(string ad) => dj.RootElement.TryGetProperty(ad, out var e) && e.ValueKind == JsonValueKind.Number ? e.GetDouble() : null;
+        var studyUid = await b.TekDegerAsync<string>("select study_uid from public.teletip_gonderim where id = @p0", islem, [id], iptal) ?? "";
+        if (studyUid.Length == 0) studyUid = K("StudyUid");
+        if (studyUid.Length == 0)
+            return await YazAsync(b, islem, id, 3, deneme, "", "İstemin PACS çalışması (study_uid) bağlı değil.", "", "", iptal);
+
+        List<(string Seri, string Sop)> raporlar;
+        try { raporlar = await dicom.DozRaporlariAsync(studyUid, iptal); }
+        catch (Exception h) when (h is not OperationCanceledException || !iptal.IsCancellationRequested)
+        {
+            return await YazAsync(b, islem, id, 5, deneme, "", "PACS sorgusu başarısız: " + h.Message, "", "", iptal, sonraki: Geri(deneme + 1));
+        }
+        if (raporlar.Count == 0)
+        {
+            // Cihaz RDSR'yi çekimden sonra yollar; birkaç saat beklenir (1, 2, 5, 10, 30 dk, sonra saatlik), sonra gidemez.
+            var son = deneme + 1 >= 8;
+            return await YazAsync(b, islem, id, son ? (short)3 : (short)5, deneme, "",
+                "PACS'ta bu çalışmanın doz raporu (RDSR, X-Ray Radiation Dose SR) yok" + (son ? " - cihaz RDSR üretmiyor ya da PACS'a yollamıyor olabilir." : " - bekleniyor."),
+                "", "", iptal, sonraki: Geri(deneme + 1));
+        }
+
+        var kurum = new KosKurum(v.KurumAdi, v.KurumSkrs, v.FirmaKodu, dicom.PacsAe, K("CihazSeriNo"));
+        var eksikKurum = OrmUretici.Denetle(v with { Emir = OrmEmri.Iptal });
+        if (kurum.CihazSeriNo.Length == 0) eksikKurum.Add("Cihazın Teletıp seri numarası yok (DeviceSerialNumber) - radyoloji cihaz kartına STM seri no girilmeli.");
+        if (kurum.FirmaKodu.Length == 0) eksikKurum.Add("Firma kodu yok (InstitutionName FK).");
+        if (eksikKurum.Count > 0)
+            return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", eksikKurum.Distinct()), "", "", iptal);
+        if (dozAdres.Length == 0)
+            return await YazAsync(b, islem, id, 5, deneme, "", "Teletıp doz adresi (teletip.doz_adres, Mirth K3) tanımlı değil.", "", "", iptal,
+                                  sonraki: TimeSpan.FromMinutes(30));
+
+        var mesajlar = new List<string>(); var uyarilar = new List<string>(); var sonSop = "";
+        foreach (var (seri, sop) in raporlar)
+        {
+            FellowOakDicom.DicomDataset hazir;
+            try
+            {
+                using var y = await dicom.WadoAsync(studyUid, seri, sop, iptal);
+                if (!y.IsSuccessStatusCode)
+                    return await YazAsync(b, islem, id, 5, deneme, "", $"RDSR PACS'tan alınamadı (WADO HTTP {(int)y.StatusCode}).", "", "", iptal, sonraki: Geri(deneme + 1));
+                var dosya = await FellowOakDicom.DicomFile.OpenAsync(new MemoryStream(await y.Content.ReadAsByteArrayAsync(iptal)));
+                hazir = DozUretici.Kunye(dosya.Dataset, v, kurum, studyUid, D("BoyCm"), D("KiloKg"));
+            }
+            catch (Exception h) when (h is HttpRequestException or FellowOakDicom.DicomFileException || (h is TaskCanceledException && !iptal.IsCancellationRequested))
+            {
+                return await YazAsync(b, islem, id, 5, deneme, "", "RDSR PACS'tan alınamadı: " + h.Message, "", "", iptal, sonraki: Geri(deneme + 1));
+            }
+            var ozet = DozUretici.Ozet(hazir);
+            var (hatalar, uyari) = DozUretici.Denetle(hazir, ozet);
+            var metin = DozUretici.MesajMetni(hazir, ozet);
+            if (hatalar.Count > 0)
+                return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", hatalar), metin, "", iptal, kontrolNo: sop);
+            uyarilar.AddRange(uyari);
+            mesajlar.Add(metin);
+            sonSop = sop;
+
+            var baytlar = KosUretici.Baytlar(new FellowOakDicom.DicomFile(hazir));
+            string govde; int httpKod;
+            try
+            {
+                var istemci = httpFabrika.CreateClient("teletip-xds");
+                using var icerik = new ByteArrayContent(baytlar);
+                icerik.Headers.TryAddWithoutValidation("Content-Type", "application/dicom");
+                using var istek = new HttpRequestMessage(HttpMethod.Post, dozAdres) { Content = icerik };
+                istek.Headers.TryAddWithoutValidation("X-Gentegre-Content-Type", "application/dicom");
+                using var y = await istemci.SendAsync(istek, iptal);
+                govde = await y.Content.ReadAsStringAsync(iptal); httpKod = (int)y.StatusCode;
+            }
+            catch (Exception h) when (h is HttpRequestException or TaskCanceledException)
+            {
+                return await YazAsync(b, islem, id, deneme + 1 >= AzamiDeneme ? (short)2 : (short)5, deneme, "",
+                                      "Mirth K3'e ulaşılamadı: " + h.Message, string.Join("\n\n", mesajlar), "", iptal, kontrolNo: sop, sonraki: Geri(deneme + 1));
+            }
+            var sonuc = DozYaniti.Coz(govde);
+            if (sonuc.Durum != 1)
+            {
+                var durum = sonuc.Durum == 5 && deneme + 1 >= AzamiDeneme ? (short)2 : sonuc.Durum;
+                return await YazAsync(b, islem, id, durum, deneme, sonuc.Ack,
+                                      (sonuc.Durum == 5 ? $"HTTP {httpKod}: " : "") + sonuc.Aciklama, string.Join("\n\n", mesajlar),
+                                      govde.Length > 4000 ? govde[..4000] : govde, iptal, kontrolNo: sop, sonraki: Geri(deneme + 1));
+            }
+            if (sonuc.Ack != "0000" && sonuc.Aciklama.Length > 0) uyarilar.Add($"MGA uyarısı 0x{sonuc.Ack}: {sonuc.Aciklama}");
+        }
+        return await YazAsync(b, islem, id, 1, deneme, "0000",
+                              (raporlar.Count > 1 ? $"{raporlar.Count} doz raporu gönderildi. " : "") + string.Join(" · ", uyarilar.Distinct()),
+                              string.Join("\n\n", mesajlar), "", iptal, kontrolNo: sonSop);
     }
 
     /// <summary>Artan aralık: 1, 2, 5, 10, 30 dk, sonra saatlik.</summary>

@@ -519,6 +519,41 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     test sertifikası silindi, deneme sayaç satırları silindi.
   * Kurumun işi (kılavuz § 4.2): public port yönlendirmesi, statik iç / dış IP'yi teletip@saglik.gov.tr'ye bildirmek,
     Bakanlık DNS + sertifikası (.pfx), 7/24 açık. KOS'taki RetrieveLocationUID SKRS'si WADO'yu sunan kurumun kodu.
+- **Teletıp doz verisi (RDSR, Mirth K3) (db/1314; kullanıcı: "doz RDSR (K3) adımını yap"):** XDS Kılavuzu 1.15 § 3
+  (Tablo 5 künye, Tablo 6 C-STORE-RSP) + Teleradyoloji Kılavuzu 3.43 § 4.3: X-Ray Radiation Dose SR
+  (1.2.840.10008.5.1.4.1.1.88.67, TID 10001 / 10011) DICOM C-STORE, TLS, dicom.teletip.saglik.gov.tr:443, AE TELETIP_MGA.
+  * 1314: `teletip_gonderim` kanal 3 = DOZ (kanal yorumu düzeltildi: 1 HL7 K1, 2 KOS K2, 3 DOZ K3). Tetik
+    `tg_teletip_gonderim_doz`: KOS satırı başarıya (durum 1) geçince, istem modalitesi iyonlaştırıcıysa (CT, CR, MG, XA,
+    RF, BMD) aynı çalışma için tek doz satırı (gönderilmiş / bekleyen varsa açılmaz - kılavuz: tekrar gönderimde Event
+    UID değişmemeli). `fn_teletip_doz_verisi` (modalite + son 1 yılın muayene vital boy / kilosu). Ayar `teletip.doz_adres`
+    (Mirth K3). `v_teletip_istem.doz_durum`. 4 DB'de uygulandı.
+  * `Servisler/TeletipDoz.cs`: **DozUretici.Kunye** - RDSR'nin künyesi KOS'la aynı (Accession, PatientName, PatientID TCKN
+    + OtherPatientIDs dosya no, cinsiyet, doğum tarihi, InstitutionName `Ad^^^SKRS..^^^FK..`, DeviceSerialNumber STM seri
+    no, StudyInstanceUID), başlıkta yoksa boy / kilo bizim ölçümden; **içerik ağacı ve SOP / Irradiation Event UID'leri
+    değişmez**. **Ozet** (olay sayısı, toplam DLP, en büyük CTDIvol, kVp / mA / mAs / rotasyon / uzunluk / pitch / tarama
+    tipi, DAP) + **Denetle** (SR111 / SR112 alanları, YYYYMMDD tarih, BT'de DLP / CTDIvol boş ya da sıfırsa GÖNDERİLMEZ;
+    sıfır dozlu lokalizer ve boy / kilo eksikliği uyarı). **DozYaniti** - K3 yanıtı (DURUM / KOD / YORUM / MESAJ): 0000 →
+    gönderildi, Bxxx uyarı → gönderildi + uyarı, diğer kod → reddedildi + SR110..SR117 Türkçe açıklama, kodsuz hata →
+    ulaşmadı (tekrar). `DicomKaynagi.DozRaporlariAsync` (SR serilerinde SOP Class 88.67). Akış `TeletipOrmServisi`
+    kanal 3: PACS'ta RDSR yoksa saatlik tekrara kadar bekler, 8 denemede "gidemez (cihaz RDSR üretmiyor olabilir)".
+    Saklanan mesaj okunur özet (SR ikilisi değil).
+  * Mirth: **K3 TELETIP_DOZ** - HTTP 4104 `/doz/` (konteynerde zaten açık port), süzgeç: gövde DICOM Part 10 değilse
+    (DICM yok) gönderilmez (dcm4che DICOM olmayan dosyayı atlayıp "successfully sent" diyordu - denendi); hedef DICOM
+    Sender `${teletip_mga_host}:${teletip_mga_port}` Called AE `${teletip_mga_ae}`, Calling `${teletip_mga_bizim_ae}`;
+    yanıt dönüştürücüsü C-STORE-RSP durumunu / Error Comment'i satır metnine çevirir (kaynak yanıtı `doz_yanit`).
+    TLS kanal üretiminde (`mirth-kanallar.ps1 -DozTls aes -DozGuvenDeposu /opt/java/openjdk/lib/security/cacerts`,
+    -MgaHost / -MgaPort / -MgaAe / -BizimAe) - Mirth tls alanında ${} çözmez. **TELETIP_MGA_SIMULATOR** (dev, DICOM
+    11112, AE TELETIP_MGA; hep 0000 döner).
+  * Ekranlar: liste "Doz (RDSR)" sütunu, kart (RDSR özeti + MGA yanıtı), şerit / son olaylar "DOZ", pano "Doz (RDSR)"
+    kutusu + kanal görevleri, Teletıp Ayarları'nda "Mirth K3 (doz) adresi". Mockup §1 / §7 güncellendi.
+  * Doğrulama: `TeletipDozTestleri` (künye + Event UID korunur + cihaz boyu ezilmez, özet değerleri, DLP 0 → hata, yanıt
+    Tablo 6 6 durum, tetik: BT'de tek satır / MR'de yok / ikinci KOS başarısında ikinci satır yok); tam paket 1063 geçti,
+    2 atlandı. Uçtan uca KOSUYOLU: örnek BT RDSR (TID 10011) yerel ClearCanvas'a demo BT çalışmasına (istem 545) C-STORE
+    → doz satırı → C-FIND SR + WADO → künye (KGM… accession, TCKN, SKRS999999 / FKGENTEGRE-TEST, TEST-STM-BT) → Mirth K3
+    → MGA benzetimi: 0000, uyarılar satırda. İlk örnek bilerek farklı hasta künyesiyle gidince ClearCanvas onu
+    uzlaştırma (Reconcile) kuyruğuna aldı - yerel PACS'ta bekleyen bir uzlaştırma kaydı kaldı.
+  * Açık: Bakanlık MGA'sına gerçek TLS denenmedi (dcm4che2 "aes" TLS_RSA_WITH_AES_128_CBC_SHA önerir; sunucu kabul
+    etmezse Mirth yerine Gentegre'den fo-dicom TLS gerekebilir). SR doğrulama: betaygsadmin.teletip.saglik.gov.tr/SRValidasyon.
 
 ### 10.11.2026
 

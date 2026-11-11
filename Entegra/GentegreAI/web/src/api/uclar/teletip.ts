@@ -18,7 +18,8 @@ export interface TeletipIstemOzet {
 export interface TeletipPano {
   aktif: boolean; hl7Adres: string;
   ozet: { gun: string; nwToplam: number; nwGonderildi: number; xoCaToplam: number; xoCaGonderildi: number; oruToplam: number; oruGonderildi: number; reddedildi: number;
-          gidemez: number; kuyrukta: number; enEskiDk: number; sorunluToplam: number; kosToplam: number; kosGonderildi: number };
+          gidemez: number; kuyrukta: number; enEskiDk: number; sorunluToplam: number; kosToplam: number; kosGonderildi: number;
+          dozToplam: number; dozGonderildi: number };
   sonOlaylar: { id: number; istemId: number | null; accessionNo: string; kanal: number; emir: number; durum: number; ackKodu: string;
                 hata: string; zaman: string; hastaAdi: string }[];
   mirth: { tanimli: boolean; erisilebilir: boolean; hata: string; surum: string;
@@ -32,7 +33,7 @@ export interface TeletipPano {
 /** Kurum Teletıp ayarları (mockup §5). Mirth bölümü yalnız görüntü. */
 export interface TeletipAyar {
   aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string; encoding: string; hl7Adres: string;
-  xdsAdres: string; xdsHastaOid: string;
+  xdsAdres: string; xdsHastaOid: string; dozAdres: string;
   subeTesisleri: { subeId: number; subeAdi: string; tesisKodu: string }[];
   uyarilar: string[];
   mirth: { url: string; kullanici: string; parolaTanimli: boolean; sertifikaDogrula: boolean; harita: Record<string, string> };
@@ -41,7 +42,7 @@ export interface TeletipAyar {
 export const teletipUclari = {
   teletipAyar: () => istek<TeletipAyar>('/api/teletip/ayar'),
   teletipAyarKaydet: (g: { aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string;
-                           encoding: string; hl7Adres: string; xdsAdres: string; xdsHastaOid: string }) => gonder<TeletipAyar>('/api/teletip/ayar', g, 'PUT'),
+                           encoding: string; hl7Adres: string; xdsAdres: string; xdsHastaOid: string; dozAdres: string }) => gonder<TeletipAyar>('/api/teletip/ayar', g, 'PUT'),
   teletipPano: (gun?: string) => istek<TeletipPano>(`/api/teletip/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
   /** Teletıp HL7 hedefine (Mirth K1) TCP + Mirth REST girişi; mesaj göndermez. */
   teletipBaglantiTesti: () => gonder<{
@@ -73,5 +74,6 @@ export const TELETIP_DURUM: Record<number, { ad: string; sinif: string }> = {
 export const TELETIP_EMIR: Record<number, string> = { 1: 'NW', 2: 'XO', 3: 'CA', 4: 'ORU' };
 export const TELETIP_EMIR_ADI: Record<number, string> = { 1: 'Yeni istem', 2: 'Güncelleme', 3: 'İptal', 4: 'Rapor' };
 /** Satırın kısa adı: kanal 2 = KOS (görüntü manifesti, 1310), kanal 1 = HL7 emri. */
-export const mesajKisaAdi = (kanal: number, emir: number) => kanal === 2 ? 'KOS' : TELETIP_EMIR[emir] ?? String(emir);
-export const mesajUzunAdi = (kanal: number, emir: number) => kanal === 2 ? 'Görüntü manifesti' : TELETIP_EMIR_ADI[emir] ?? '';
+export const mesajKisaAdi = (kanal: number, emir: number) => kanal === 2 ? 'KOS' : kanal === 3 ? 'DOZ' : TELETIP_EMIR[emir] ?? String(emir);
+export const mesajUzunAdi = (kanal: number, emir: number) =>
+  kanal === 2 ? 'Görüntü manifesti' : kanal === 3 ? 'Radyasyon doz raporu (RDSR)' : TELETIP_EMIR_ADI[emir] ?? '';

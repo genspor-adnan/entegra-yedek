@@ -11,7 +11,7 @@
 #   8080  Mirth web başlangıç sayfası (Administrator indirme)
 #   6661  K1 TELETIP_HL7 - Gentegre MLLP ile ORM/ORU gönderir
 #   8082  K2 TELETIP_KOS - Gentegre "çalışma hazır" HTTP
-#   4104  K3 TELETIP_DOZ - ClearCanvas RDSR'yi DICOM ile yönlendirir
+#   4104  K3 TELETIP_DOZ - Gentegre RDSR'yi HTTP ile verir (/doz/), Mirth DICOM Sender TLS ile TELETIP_MGA'ya
 #
 # Pano kullanıcısı gentegre_izleme da açılır (Gentegre API: Mirth__Url, Mirth__Kullanici, Mirth__Parola).
 # Parolalar ilk çalıştırmada üretilir ve gizli\mirth.env'e yazılır (depo dışı, .gitignore). Mirth'in varsayılan

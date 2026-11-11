@@ -234,6 +234,94 @@ var simXdsKolon = new java.util.ArrayList();
 simXdsKolon.add(new Kolon('SONUC', KolonTipi.STRING, 'sonuc'));
 simXds.getProperties().setMetaDataColumns(simXdsKolon);
 
+// ------------------------------------------------------------------ K3 TELETIP_DOZ (1314)
+// Gentegre RDSR'yi (künyesi KOS'la aynı yapılmış X-Ray Radiation Dose SR, DICOM Part 10) HTTP ile gönderir (4104 /doz/);
+// Mirth gövdeyi bayt (Base64) alır, DICOM Sender ile ${teletip_mga_host}:${teletip_mga_port} Called AE
+// ${teletip_mga_ae}'ye C-STORE yapar (Bakanlık: dicom.teletip.saglik.gov.tr:443 TELETIP_MGA, TLS). C-STORE-RSP durumu
+// (Tablo 6: 0000H, 0110H + SR110..SR117 Error Comment) yanıt dönüştürücüsünde satır satır metne çevrilir ve kaynak
+// yanıtı "doz_yanit" olarak Gentegre'ye döner: DURUM / KOD / YORUM / MESAJ. Kuyruk kapalı - tekrar Gentegre'de.
+// TLS ayarı (tls / trustStore) betik parametresi: Mirth bu alanlarda ${} değişkeni çözmez.
+var DOZ_TLS = String(java.lang.System.getProperty('doz.tls', 'notls'));
+var DOZ_GUVEN = String(java.lang.System.getProperty('doz.guven', ''));
+var DOZ_GUVEN_PAROLA = String(java.lang.System.getProperty('doz.guvenParola', ''));
+var k3 = kanal('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6603', 'TELETIP_DOZ',
+  'K3 - Gentegre -> Teletip MGA doz verisi (RDSR, X-Ray Radiation Dose SR) DICOM C-STORE. Kunye Gentegre\'de KOS ile ayni ' +
+  'yapilir; Mirth govdeyi bayt olarak alip ${teletip_mga_host}:${teletip_mga_port} ${teletip_mga_ae}\'ye gonderir, ' +
+  'C-STORE-RSP durum + Error Comment Gentegre\'ye doner.');
+k3.setSourceConnector(kaynak(httpDinleyici(4104, '/doz', 'doz_yanit', 'text/plain'), [], 'HTTP Listener'));
+// Süzgeç: gövde DICOM Part 10 değilse (128 bayt önsöz + "DICM") gönderilmez - dcm4che DICOM olmayan dosyayı sessizce
+// atlayıp "successfully sent" diyordu (yanlış başarı).
+var k3Suzgec = new Filter();
+var k3Kural = new Packages.com.mirth.connect.plugins.javascriptrule.JavaScriptRule();
+k3Kural.setSequenceNumber(0); k3Kural.setName('DICOM Part 10 mi'); k3Kural.setEnabled(true);
+k3Kural.setScript(
+  "var b = org.apache.commons.codec.binary.Base64.decodeBase64(String(connectorMessage.getRawData()));\n" +
+  "var tamam = b != null && b.length > 132 && b[128] == 68 && b[129] == 73 && b[130] == 67 && b[131] == 77;\n" +
+  "if (!tamam) responseMap.put('doz_yanit', ResponseFactory.getSentResponse('DURUM=ERROR\\nKOD=\\nYORUM=\\nMESAJ=Govde DICOM Part 10 degil (DICM yok) - gonderilmedi.'));\n" +
+  "return tamam;\n");
+var k3Kurallar = new java.util.ArrayList(); k3Kurallar.add(k3Kural);
+k3Suzgec.setElements(k3Kurallar);
+k3.getSourceConnector().setFilter(k3Suzgec);
+var k3Ozellik = new Packages.com.mirth.connect.connectors.dimse.DICOMDispatcherProperties();
+k3Ozellik.setHost('${teletip_mga_host}');
+k3Ozellik.setPort('${teletip_mga_port}');
+k3Ozellik.setApplicationEntity('${teletip_mga_ae}');
+k3Ozellik.setLocalApplicationEntity('${teletip_mga_bizim_ae}');
+k3Ozellik.setTemplate('${message.rawData}');
+k3Ozellik.setRspTo('120');
+k3Ozellik.setTls(DOZ_TLS);
+if (DOZ_GUVEN.length > 0) { k3Ozellik.setTrustStore(DOZ_GUVEN); k3Ozellik.setTrustStorePW(DOZ_GUVEN_PAROLA); }
+k3Ozellik.getDestinationConnectorProperties().setQueueEnabled(false);
+var k3Hedef = hedef(1, 'Teletip MGA', 'DICOM Sender', k3Ozellik);
+// DICOM Sender: durum 0 -> SENT "DICOM message successfully sent"; uyarı -> SENT "... warning status code: 0x...";
+// hata -> ERROR "Error status code received from DICOM server: 0x...". Yanıt verisi C-STORE-RSP komut kümesi (XML);
+// Error Comment (0000,0902) oradan okunur.
+k3Hedef.setResponseTransformer(donusturucu([{ ad: 'C-STORE-RSP -> Gentegre', betik:
+  "var ham = String(msg == null ? '' : msg);\n" +
+  "var mesaj = String(responseStatusMessage == null ? '' : responseStatusMessage);\n" +
+  "var hata = String(responseErrorMessage == null ? '' : responseErrorMessage);\n" +
+  "var kod = ((mesaj + ' ' + hata).match(/0x([0-9A-Fa-f]{1,4})/) || [])[1] || '';\n" +
+  "var x = ham.match(/tag00000900[^>]*>([^<]*)</); if (kod == '' && x) kod = Number(x[1]).toString(16);\n" +
+  "var y = ham.match(/tag00000902[^>]*>([^<]*)</); var yorum = y ? y[1] : '';\n" +
+  "if (kod == '' && String(responseStatus) == 'SENT') kod = '0';\n" +
+  "while (kod.length > 0 && kod.length < 4) kod = '0' + kod;\n" +
+  "var metin = 'DURUM=' + responseStatus + '\\nKOD=' + kod.toUpperCase() + '\\nYORUM=' + yorum.replace(/[\\r\\n]+/g, ' ') +\n" +
+  "  '\\nMESAJ=' + (mesaj + (hata.length > 0 ? ' ' + hata : '')).replace(/[\\r\\n]+/g, ' ');\n" +
+  "responseMap.put('doz_yanit', ResponseFactory.getSentResponse(metin));\n" +
+  "channelMap.put('kod', kod);\n" }]));
+k3.getDestinationConnectors().add(k3Hedef);
+k3.setNextMetaDataId(2);
+var k3Kolon = new java.util.ArrayList();
+k3Kolon.add(new Kolon('KOD', KolonTipi.STRING, 'kod'));
+k3.getProperties().setMetaDataColumns(k3Kolon);
+k3.getProperties().setMessageStorageMode(Packages.com.mirth.connect.model.MessageStorageMode.PRODUCTION);
+
+// ------------------------------------------------------------------ TELETIP_MGA_SIMULATOR (dev, 1314)
+// MGA alıcısı benzetimi: DICOM Listener 11112 (konteyner içi), AE TELETIP_MGA, TLS yok. Gelen SR'yi arşivler; Mirth
+// DICOM dinleyicisi C-STORE'a hep başarı (0000H) döner - Tablo 6 hata kodlarını Gentegre'nin kendi denetimi ve
+// DozYaniti testleri karşılar. Üretimde dağıtılmaz.
+var simMga = kanal('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6697', 'TELETIP_MGA_SIMULATOR',
+  'YALNIZ DEV/TEST - Teletip MGA (doz RDSR) DICOM alicisi benzetimi (11112, AE TELETIP_MGA, konteyner ici). Uretimde dagitilmaz.');
+var simMgaKaynak = new Packages.com.mirth.connect.connectors.dimse.DICOMReceiverProperties();
+simMgaKaynak.getListenerConnectorProperties().setPort('11112');
+simMgaKaynak.setApplicationEntity('TELETIP_MGA');
+var simMgaBag = new Connector();
+simMgaBag.setMetaDataId(0); simMgaBag.setName('sourceConnector'); simMgaBag.setMode(Connector.Mode.SOURCE);
+simMgaBag.setTransportName('DICOM Listener'); simMgaBag.setProperties(simMgaKaynak); simMgaBag.setEnabled(true);
+var dicomDonusturucu = new Transformer();
+dicomDonusturucu.setInboundDataType('DICOM'); dicomDonusturucu.setOutboundDataType('DICOM');
+dicomDonusturucu.setInboundProperties(new Packages.com.mirth.connect.plugins.datatypes.dicom.DICOMDataTypeProperties());
+dicomDonusturucu.setOutboundProperties(new Packages.com.mirth.connect.plugins.datatypes.dicom.DICOMDataTypeProperties());
+dicomDonusturucu.setElements(new java.util.ArrayList());
+simMgaBag.setTransformer(dicomDonusturucu); simMgaBag.setFilter(new Filter());
+simMga.setSourceConnector(simMgaBag);
+var simMgaHedef = new Packages.com.mirth.connect.connectors.js.JavaScriptDispatcherProperties();
+simMgaHedef.setScript('// Benzetim: RDSR yalniz arsivlenir.\nreturn;');
+var simMgaH = hedef(1, 'Arsiv', 'JavaScript Writer', simMgaHedef);
+simMgaH.setTransformer(dicomDonusturucu);
+simMga.getDestinationConnectors().add(simMgaH);
+simMga.setNextMetaDataId(2);
+
 new java.io.File('/tmp/kanallar').mkdirs();
 function yaz(c, dosya) {
   var w = new java.io.OutputStreamWriter(new java.io.FileOutputStream('/tmp/kanallar/' + dosya), 'UTF-8');
@@ -244,3 +332,5 @@ yaz(k1, 'TELETIP_HL7.xml');
 yaz(sim, 'TELETIP_SIMULATOR.xml');
 yaz(k2, 'TELETIP_KOS.xml');
 yaz(simXds, 'TELETIP_XDS_SIMULATOR.xml');
+yaz(k3, 'TELETIP_DOZ.xml');
+yaz(simMga, 'TELETIP_MGA_SIMULATOR.xml');
