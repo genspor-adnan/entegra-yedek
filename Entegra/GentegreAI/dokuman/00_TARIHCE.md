@@ -385,6 +385,24 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
 - **KOSUYOLU test MEDULA tesis kodu (kullanıcı: "KOSUYOLU'ya test Medula tesis kodu gir"):** `kurum_profil.tesis_kodu`
   (şube 0) = `99999999` - TEST değeri, gerçek kod bilinmiyor; Bakanlık bağlantısından önce değiştirilmeli. Bekleyen XO
   (satır 6, istem 545) yeniden kuyruğa alındı, işçi gönderdi: AA, ORC-21 `Merkez^^999999…1…99999999`. (DB verisi; kod değişmedi.)
+- **Teletıp Panosu (db/1307; kullanıcı: "Mirth panosunu yap", mockup teletip_mirth.html §2):**
+  * Radyoloji › **Teletıp Panosu** (`/teletip-pano`, özel sayfa, yetki `radyoloji.teletip.pano` - ekran başına bir kod;
+    `radyoloji.teletip` olan rollere aynı haklarla): gün seçici, günün özeti (istem NW / kabul, güncelleme-iptal / kabul,
+    kuyrukta + en eski kaç dk, reddedildi, gidemez, tüm günlerin sorunlusu), Mirth kanalları (durum, alınan, süzülen,
+    kuyruk, gönderilen, hatalı, görev), son 10 olay (çift tık Teletıp kartı); 60 sn'de bir tazelenir.
+    "Bağlantı Testi" (Teletıp HL7 = Mirth K1'e TCP + Mirth REST girişi; mesaj göndermez), "Sorunluları Yeniden Gönder"
+    (reddedildi / gidemez / ulaşmadı satırlarını şimdi dener).
+  * API: `GET /api/teletip/pano`, `POST /baglanti-testi`, `POST /yeniden-gonder-toplu`; `MirthIzleme` (Servisler) Mirth
+    REST'e oturumla bağlanır, `/channels/statuses` XML'ini okur, 401'de yeniden girer; yalnız okur (kanal durdur /
+    başlat Mirth Administrator'da). Ayar bölümü `Mirth` (Url, Kullanici, SertifikaDogrula, ZamanAsimiSn); parola
+    YALNIZ ortam değişkeni `Mirth__Parola` (depoda yok). Kendinden imzalı sertifika istisnası yalnız Mirth:Url ana
+    bilgisayarına. Mirth erişilemezse DB bölümü yine çizilir.
+  * Mirth: pano kullanıcısı `gentegre_izleme` (mirth-baslat.ps1 açar; parola gizli/mirth.env MIRTH_IZLEME_PAROLA;
+    4.5.2 açık sürümde rol yok - ayrı kullanıcı ayrı kapatılabilsin diye). 5180 ve 5187 `Mirth__Url` + `Mirth__Parola`
+    ile yeniden başlatıldı.
+  * Doğrulama: web tsc + 1133 vitest; API katalog / yetki / menü / Teletıp 118/118; tarayıcıda (5173 → 5180, dev'de
+    Teletıp geçici açık) bağlantı testi "✓ Teletıp HL7 127.0.0.1:6661 · ✓ Mirth 4.5.2 · 2 kanal", Mirth kanalları gerçek
+    sayaçlarla, 2 gidemez olay; dev ayarları ve test satırları geri alındı.
 
 ### 10.11.2026
 

@@ -14,7 +14,26 @@ export interface TeletipIstemOzet {
   id: number; accessionNo: string; durum: number; hastaId: number; hastaAdi: string; tetkikAdi: string; modalite: string; kabul: string;
 }
 
+/** Teletıp panosu (mockup §2): günün özeti, son olaylar, Mirth kanal durumları. */
+export interface TeletipPano {
+  aktif: boolean; hl7Adres: string;
+  ozet: { gun: string; nwToplam: number; nwGonderildi: number; xoCaToplam: number; xoCaGonderildi: number; reddedildi: number;
+          gidemez: number; kuyrukta: number; enEskiDk: number; sorunluToplam: number };
+  sonOlaylar: { id: number; istemId: number | null; accessionNo: string; emir: number; durum: number; ackKodu: string;
+                hata: string; zaman: string; hastaAdi: string }[];
+  mirth: { tanimli: boolean; erisilebilir: boolean; hata: string; surum: string;
+           kanallar: { id: string; ad: string; durum: string; alinan: number; suzulen: number; kuyruk: number; gonderilen: number; hatali: number }[] };
+}
+
 export const teletipUclari = {
+  teletipPano: (gun?: string) => istek<TeletipPano>(`/api/teletip/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
+  /** Teletıp HL7 hedefine (Mirth K1) TCP + Mirth REST girişi; mesaj göndermez. */
+  teletipBaglantiTesti: () => gonder<{
+    hl7: { adres: string; acik: boolean; hata: string; sureMs: number };
+    mirth: { tanimli: boolean; erisilebilir: boolean; hata: string; surum: string; kanalSayisi: number };
+  }>('/api/teletip/baglanti-testi', {}),
+  /** Reddedilen / gidemez / ulaşmadı satırlarını şimdi yeniden dener. */
+  teletipTopluGonder: () => gonder<{ denenen: number; gonderilen: number; sorunluKalan: number }>('/api/teletip/yeniden-gonder-toplu', {}),
   /** İstemin Teletıp mesaj izi (şerit + kart). `aktif` false ise kurumda Teletıp kapalı. */
   teletipIstem: (istemId: number) =>
     istek<{ aktif: boolean; istem: TeletipIstemOzet | null; satirlar: TeletipSatir[]; detayYetkisi: boolean }>(`/api/teletip/istem/${istemId}`),

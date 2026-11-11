@@ -199,6 +199,9 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradTeslimServisi>();
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeslimKuyrukIscisi>();
 // Teletıp ORM (1302): radyoloji istemi -> HL7 ORM^O01 -> Mirth K1 -> Teletıp; teletip.aktif kapalıyken işçi boş döner.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeletipOrmServisi>();
+// Mirth panosu (Teletıp): REST istatistikleri; parola ortam değişkeninden (Mirth__Parola), depoda yok.
+kurucu.Services.Configure<Gentegre.Api.Servisler.MirthAyarlari>(kurucu.Configuration.GetSection("Mirth"));
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MirthIzleme>();
 // Teletip:Isci (11.11.2026): arka plan kapalı kopyada (müşteri DB'si, SMS / e-posta gitmesin) YALNIZ Teletıp kuyruğu
 //   çalışsın diye ayrı anahtar. Gönderimi zaten teletip.aktif ve teletip.hl7_adres (Mirth K1) yönetir.
 if (arkaPlanAcik || kurucu.Configuration.GetValue<bool>("Teletip:Isci"))

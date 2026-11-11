@@ -13,6 +13,7 @@
 #   8082  K2 TELETIP_KOS - Gentegre "çalışma hazır" HTTP
 #   4104  K3 TELETIP_DOZ - ClearCanvas RDSR'yi DICOM ile yönlendirir
 #
+# Pano kullanıcısı gentegre_izleme da açılır (Gentegre API: Mirth__Url, Mirth__Kullanici, Mirth__Parola).
 # Parolalar ilk çalıştırmada üretilir ve gizli\mirth.env'e yazılır (depo dışı, .gitignore). Mirth'in varsayılan
 # admin/admin parolası ilk açılışta REST ile değiştirilir; yeni parola aynı dosyada.
 param([switch]$Durdur, [string]$Ad = 'gentegre-mirth', [string]$PgKonteyner = 'gentegre-pg18', [int]$PgPort = 5434)
@@ -35,6 +36,10 @@ if (-not (Test-Path $envDosya)) {
         "MIRTH_ADMIN_PAROLA=$(YeniParola)"
     ) | Set-Content -Encoding ascii $envDosya
     Write-Host "Parolalar üretildi: $envDosya"
+}
+# Eski kurulumda sonradan eklenen anahtarlar (pano kullanıcısı, 11.11.2026) eksikse tamamlanır.
+if (-not (Select-String -Path $envDosya -Pattern '^MIRTH_IZLEME_PAROLA=' -Quiet)) {
+    Add-Content -Encoding ascii $envDosya "MIRTH_IZLEME_PAROLA=$(YeniParola)"
 }
 $deger = @{}
 Get-Content $envDosya | ForEach-Object { $k, $v = $_ -split '=', 2; if ($k) { $deger[$k] = $v } }
@@ -92,4 +97,25 @@ try {
 } catch {
     Write-Host "Mirth admin parolası zaten değiştirilmiş (admin/admin geçmiyor)."
 }
+
+# ---- pano kullanıcısı gentegre_izleme (Gentegre Teletıp panosu kanal durumlarını okur; API ortam değişkeni Mirth__Parola)
+#   Mirth 4.5.2 açık sürümünde rol yok - ayrı kullanıcı, parolası admin'den bağımsız değiştirilebilsin / kapatılabilsin.
+$oturum = $null
+Invoke-WebRequest "$api/users/_login" -Method Post -Headers $basliklar -UseBasicParsing -SessionVariable oturum `
+    -Body @{ username = 'admin'; password = $deger['MIRTH_ADMIN_PAROLA'] } | Out-Null
+$izlemeVar = $true
+try { Invoke-WebRequest "$api/users/gentegre_izleme" -Headers $basliklar -UseBasicParsing -WebSession $oturum | Out-Null }
+catch { $izlemeVar = $false }
+if (-not $izlemeVar) {
+    $xml = '<user><username>gentegre_izleme</username><firstName>Gentegre</firstName><lastName>Izleme</lastName>' +
+           '<organization>Gentegre AI - Teletip panosu</organization><email></email><phoneNumber></phoneNumber>' +
+           '<description>Yalniz Gentegre Teletip panosu okur (kanal durumlari).</description><industry></industry></user>'
+    Invoke-WebRequest "$api/users" -Method Post -Headers $basliklar -UseBasicParsing -WebSession $oturum `
+        -ContentType 'application/xml' -Body $xml | Out-Null
+}
+[xml]$izleme = (Invoke-WebRequest "$api/users/gentegre_izleme" -Headers ($basliklar + @{ Accept = 'application/xml' }) `
+    -UseBasicParsing -WebSession $oturum).Content
+Invoke-WebRequest "$api/users/$($izleme.user.id)/password" -Method Put -Headers $basliklar -UseBasicParsing -WebSession $oturum `
+    -ContentType 'text/plain' -Body $deger['MIRTH_IZLEME_PAROLA'] | Out-Null
+Write-Host "Mirth pano kullanıcısı gentegre_izleme hazır (parola gizli\mirth.env: MIRTH_IZLEME_PAROLA)."
 Write-Host "Mirth hazır: https://localhost:8443 (Administrator / REST /api), kullanıcı admin, parola gizli\mirth.env"
