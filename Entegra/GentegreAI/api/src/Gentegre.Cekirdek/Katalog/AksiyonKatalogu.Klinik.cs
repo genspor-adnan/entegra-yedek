@@ -227,6 +227,10 @@ public static partial class AksiyonKatalogu
             // SARF (320): cekimde kullanilan kontrast/malzeme stoktan duser.
             //   Cekim isaretlenince kendiliginden acilir; buton atlanmis ya
             //   da sonradan duzeltilecek dusum icin.
+            // GÖRÜNTÜLE (11.11.2026): PACS'taki çalışma OHIF'te açılır (DicomUclari /goruntule - study_uid ya da accession).
+            new("radyoloji.goruntule", "🖼 Görüntüle", "radyoloji", Hedef: "araccubugu,sagtus,palet",
+                KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 13,
+                Ipucu: "Çekilen görüntüleri DICOM görüntüleyicide (OHIF) açar"),
             new("radyoloji.sarf",     "🧪 Sarf Düş", "radyoloji",
                 KaynakKodu: "stok", Islem: Islem.Degistir,
                 KayitGerekir: true, Sira: 35),

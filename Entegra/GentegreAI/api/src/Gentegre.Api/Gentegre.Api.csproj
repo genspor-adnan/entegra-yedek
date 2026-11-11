@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="fo-dicom" Version="5.2.6" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -15,8 +16,7 @@
   <ItemGroup>
     <!-- YARDIM BELGELERİ (871): dokuman/yardim/*.md çıktıya yardim/ olarak kopyalanır;
          YardimDizini çalışma anında oradan okur (yayında da gelsin). -->
-    <Content Include="..\..\..\dokuman\yardim\*.md" Link="yardim\%(Filename)%(Extension)"
-             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\..\dokuman\yardim\*.md" Link="yardim\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

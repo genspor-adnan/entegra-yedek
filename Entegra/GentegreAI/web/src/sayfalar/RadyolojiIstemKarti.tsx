@@ -229,6 +229,12 @@ export function RadyolojiIstemKarti() {
           : M(k, 'accessionNo') && <span className="rik-acc">{M(k, 'accessionNo')}{N(k, 'accessionDis') === 1 ? ' · dış' : ''}</span>}
         <div className="rik-sag">
           {<>
+            {/* GÖRÜNTÜLE (11.11.2026): PACS'taki çalışma OHIF'te (yeni sekme); study_uid yoksa accession ile aranır. */}
+            {cekildi && yetki('radyoloji', 'gor') &&
+              <button className="d" title="DICOM görüntüleyici (OHIF)" onClick={() => void guvenli(async () => {
+                const y = await api.dicomGoruntule({ istemId });
+                window.open(y.url, '_blank', 'noopener');
+              })}>🖼 Görüntüle</button>}
             {/* RAPOR (kullanıcı 27.10.2026): raporu kendi sekmesinde açar; rapor ekranındaki "İstem" buraya döner. */}
             {yetki('radyoloji', 'gor') &&
               <button className="d bir" onClick={() => {

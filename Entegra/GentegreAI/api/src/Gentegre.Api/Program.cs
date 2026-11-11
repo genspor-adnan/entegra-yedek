@@ -47,6 +47,10 @@ CultureInfo.DefaultThreadCurrentUICulture = kultur;
 
 // ------------------------------------------------------------------ ayarlar ----
 kurucu.Services.Configure<GuvenlikAyarlari>(kurucu.Configuration.GetSection("Guvenlik"));
+// DICOM / OHIF (kullanıcı 11.11.2026): ClearCanvas C-FIND + WADO vekili + dicomjson manifesti (DicomKaynagi).
+kurucu.Services.Configure<DicomAyarlari>(kurucu.Configuration.GetSection("Dicom"));
+kurucu.Services.AddHttpClient("dicom", c => c.Timeout = TimeSpan.FromSeconds(60));
+kurucu.Services.AddSingleton<DicomKaynagi>();
 
 var baglantiDizesi = kurucu.Configuration.GetConnectionString("Gentegre")
     ?? throw new InvalidOperationException("ConnectionStrings:Gentegre tanimli degil.");
@@ -483,7 +487,8 @@ uygulama.DuyuruUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
 // DIS DOKTOR SAHA (1289): talep kapat / goreve cevir, ziyaret gordum.
 uygulama.DisHekimUclariniEkle();
-uygulama.SahaPerformansUclariniEkle();   // Saha Performansı (1292): temsilci / doktor / şube / talep
+uygulama.SahaPerformansUclariniEkle();
+uygulama.DicomUclariniEkle();            // DICOM / OHIF (11.11.2026): ClearCanvas manifesti + WADO vekili   // Saha Performansı (1292): temsilci / doktor / şube / talep
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 // PORTAL HESABI (819): dis hekim / kurum / hasta erisimi - ayri yetki.

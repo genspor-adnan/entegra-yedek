@@ -31,6 +31,15 @@ export async function radyolojiAksiyonu(
   satir: ListeSatiri | null | undefined,
   b: RadyolojiBaglam,
 ): Promise<boolean> {
+  // GÖRÜNTÜLE (11.11.2026): PACS'taki çalışma OHIF'te yeni sekmede - adres sunucudan (jetonlu manifest).
+  if (kod === 'radyoloji.goruntule') {
+    if (!satir) return true;
+    await guvenli(async () => {
+      const y = await api.dicomGoruntule({ istemId: Number(satir.istemId ?? satir.id) });
+      window.open(y.url, '_blank', 'noopener');
+    });
+    return true;
+  }
   // SARF DUSUMU (320): cekim tamamlaninca protokoldeki malzeme onerilir.
   //   Ayri aksiyon olarak da cagrilabilir - cekim sirasinda atlanmis ya da
   //   sonradan duzeltilmesi gereken dusum icin.

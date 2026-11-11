@@ -221,6 +221,20 @@ başlığında … Listesi olsun".
   /plan` `siradakiler` artık bütün hedefler + `planli_ziyaret_id / planli_tarih`), ilçe combosu + en yoğun 6 rozet,
   ölçüt Hepsi / Planlı, satırda durum rozeti; sürükle-bıraktan sonra mesaj yok; çekmece iç sınıfları `dhp-` öneki
   (genel `ust / liste / alt / ic / d` ile çakışıp ölçüt çipleri eziliyordu).
+- **DICOM görüntüleme: ClearCanvas ImageServer + OHIF (kullanıcı: "localhost/ImageServer'a ClearCanvas kurdum, OHIF'i
+  indir ve projeye entegre et"):** ClearCanvas DICOM 104 (AE `SERVERAE`, AcceptAnyDevice), WADO-URI 1000
+  (`/WADO/SERVERAE?requestType=WADO&studyUID&seriesUID&objectUID`), web arayüzü /ImageServer giriş ister (DICOMweb yok).
+  OHIF v3 hazır imaj (`ohif/app:latest`, 117 MB, varlıklar kök yoldan) ayrı nginx konteynerinde: `yayin/ohif/ohif-baslat.ps1`
+  (3001) + `app-config.js` (veri kaynağı **dicomjson**, çalışma listesi kapalı). API (`fo-dicom` 5.2.6; `DicomKaynagi`,
+  `DicomUclari`, appsettings `Dicom`): `GET /api/dicom/goruntule?istemId|studyUid|accession` (oturum + radyoloji
+  yetkisi; `radyoloji_istem.study_uid` yoksa accession ile C-FIND, bulunan UID isteme yazılır) → OHIF adresi
+  `{OHIF}/viewer/dicomjson?url={API}/api/dicom/manifest/{uid}?t=…`; `GET /manifest/{uid}` (anonim + jeton) C-FIND
+  çalışma / seri / görüntü → dicomjson (DICOM anahtar adları olduğu gibi; SOPClassUID açıkça istenir, InstanceNumber
+  yoksa sıra); `GET /wado` (anonim + jeton) ClearCanvas WADO vekili (application/dicom; tarayıcı PACS'a doğrudan
+  gitmez). Jeton: HMAC(imza anahtarı) · çalışma UID · süre (240 dk) - OHIF yükleyicisi JWT taşıyamadığı için.
+  Web: radyoloji istem kartında ve listesinde **🖼 Görüntüle** (`radyoloji.goruntule`, yeni sekme). Doğrulama: örnek
+  XA (96 kare) C-STORE → manifest → vekil → OHIF'te seri açıldı. Testler `DicomJetonTestleri`. CORS'a 3001 eklendi.
+  Sunucu yayınında: OHIF konteyneri + `Dicom` ayarları (müşteri PACS adresi) + `GoruntuleyiciUrl` dış adres gerekir.
 
 ### 10.11.2026
 
