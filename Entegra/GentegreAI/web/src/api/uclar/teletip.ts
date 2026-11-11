@@ -23,6 +23,10 @@ export interface TeletipPano {
                 hata: string; zaman: string; hastaAdi: string }[];
   mirth: { tanimli: boolean; erisilebilir: boolean; hata: string; surum: string;
            kanallar: { id: string; ad: string; durum: string; alinan: number; suzulen: number; kuyruk: number; gonderilen: number; hatali: number }[] };
+  /** Dışa açık WADO (1313): API'nin ayrı portu; sayaç gün + IP + çalışma bazında. */
+  wado: { acik: boolean; port: number; https: boolean; yol: string; ipSiniri: boolean;
+          sayac: { bugunIstek: number; bugunHata: number; haftaIstek: number; haftaCalisma: number; haftaIp: number; sonErisim: string | null };
+          sonHatalar: { ip: string; studyUid: string; hata: string; zaman: string }[] };
 }
 
 /** Kurum Teletıp ayarları (mockup §5). Mirth bölümü yalnız görüntü. */

@@ -118,6 +118,29 @@ export function TeletipPano() {
         <div className="ttp-not">{c('Hatalı = Teletıp\'ın AE / AR yanıtı ya da ulaşılamayan hedef. Mirth otomatik tekrar etmez; tekrar Gentegre kuyruğundadır.')}</div>
       </div>
 
+      <div className="ttp-blok" data-testid="teletip-pano-wado">
+        <h4>{c('Dışa açık WADO')} <span className="ttp-ip">· {c("Bakanlık görüntüleyicisi KOS'taki görüntüleri buradan çeker (DICOM + JPEG) · son 7 gün")}</span></h4>
+        {!v.wado.acik
+          ? <div className="ttp-ic ttp-soluk">{c('Kapalı - API ayarı TeletipWado:Port tanımlı değil. Bakanlık public port + statik IP + DNS + sertifika ister (kılavuz § 4.2).')}</div>
+          : <div className="ttp-ic">
+            <div className="ttp-wado">
+              <span>{c('Port')} <code>{v.wado.port}</code> <code>{v.wado.yol}</code></span>
+              {v.wado.https ? <span className="rozet olumlu">HTTPS</span> : <span className="rozet uyari">{c('HTTP - sertifika yok')}</span>}
+              {v.wado.ipSiniri ? <span className="rozet gri">{c('IP izin listesi')}</span> : null}
+              <span>{c('Bugün')} <b>{v.wado.sayac.bugunIstek}</b> {c('istek')}{v.wado.sayac.bugunHata > 0 ? <> · <b className="ttp-kirmizi">{v.wado.sayac.bugunHata}</b> {c('hata')}</> : null}</span>
+              <span>{c('7 gün')} <b>{v.wado.sayac.haftaIstek}</b> {c('istek')} · {v.wado.sayac.haftaCalisma} {c('çalışma')} · {v.wado.sayac.haftaIp} IP</span>
+              <span className="ttp-soluk">{c('Son erişim')}: {v.wado.sayac.sonErisim ? tarihSaat(v.wado.sayac.sonErisim) : '–'}</span>
+            </div>
+            {v.wado.sonHatalar.length > 0 && <table className="ttp-tablo">
+              <thead><tr><th>{c('Zaman')}</th><th>IP</th><th>{c('Çalışma')}</th><th>{c('Son hata')}</th></tr></thead>
+              <tbody>{v.wado.sonHatalar.map((h, i) => (
+                <tr key={i}><td>{tarihSaat(h.zaman)}</td><td>{h.ip}</td><td className="ttp-soluk">{h.studyUid}</td><td className="ttp-kirmizi">{h.hata}</td></tr>
+              ))}</tbody>
+            </table>}
+          </div>}
+        <div className="ttp-not">{c("Yalnız KOS'u Bakanlık'a başarıyla gitmiş çalışmaların nesneleri verilir; diğer her istek 404.")}</div>
+      </div>
+
       <div className="ttp-blok">
         <h4>{c('Son olaylar')} <span className="ttp-ip">· {c('çift tık: Teletıp kartı')}</span></h4>
         {v.sonOlaylar.length === 0 ? <div className="ttp-ic ttp-soluk">{c('Henüz gönderim yok.')}</div>
@@ -157,6 +180,8 @@ const TTP_STIL = `
 .ttp .ttp-sag code{font-weight:normal;background:#eef4fc;border:1px solid #cfe0f5;border-radius:3px;padding:0 5px}
 .ttp .ttp-test{margin:8px 18px 0;padding:6px 10px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;font-size:12px}
 .ttp .ttp-test.ttp-hata{border-color:#efc3c3;background:#fbf0f0;color:#9d3434}
+.ttp .ttp-wado{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px;padding:2px 0 6px}
+.ttp .ttp-wado code{background:#eef4fc;border:1px solid #cfe0f5;border-radius:3px;padding:0 5px}
 .ttp .ttp-ozet{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;padding:10px 18px}
 @media (max-width:1000px){.ttp .ttp-ozet{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ttp .ttp-kutu{border:1px solid #e3e9f0;border-radius:4px;background:#fbfcfd;padding:8px 10px}

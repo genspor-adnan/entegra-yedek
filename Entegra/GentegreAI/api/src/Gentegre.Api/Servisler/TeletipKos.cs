@@ -183,9 +183,8 @@ public static class KosUretici
 }
 
 /// <summary>
-/// KÜÇÜK RESİM: DICOM görüntüden ≤128×128 gri ölçek → YBR_FULL_422 temel (baseline) JPEG. Sıkıştırmasız MONOCHROME1/2
-/// (8/16 bit) ve RGB desteklenir; pencere (WindowCenter/Width) varsa o, yoksa min-max. Sıkıştırılmış transfer söz
-/// dizimi codec ister (fo-dicom çekirdeğinde yok) → null (seri ikonsuz gider, uyarı yazılır).
+/// KÜÇÜK RESİM: DICOM görüntüden ≤128×128 YBR_FULL_422 temel JPEG (KOS Icon Image). Pikseller
+/// <see cref="DicomGoruntuCizici"/>'den (dışa açık WADO ile aynı çizici); okunamayan görüntüde null (seri ikonsuz gider).
 /// </summary>
 public static class KucukResimUretici
 {
@@ -193,63 +192,8 @@ public static class KucukResimUretici
     {
         try
         {
-            if (d.InternalTransferSyntax.IsEncapsulated) return null;
-            var p = DicomPixelData.Create(d);
-            int w = p.Width, h = p.Height;
-            if (w <= 0 || h <= 0) return null;
-            var foto = d.GetSingleValueOrDefault(DicomTag.PhotometricInterpretation, "MONOCHROME2");
-            var ham = p.GetFrame(0).Data;
-            var deger = new double[w * h];
-            if (foto.StartsWith("MONOCHROME", StringComparison.Ordinal))
-            {
-                var isaretli = p.PixelRepresentation == PixelRepresentation.Signed;
-                var egim = d.GetSingleValueOrDefault(DicomTag.RescaleSlope, 1.0);
-                var kesisim = d.GetSingleValueOrDefault(DicomTag.RescaleIntercept, 0.0);
-                for (var i = 0; i < w * h; i++)
-                {
-                    double x = p.BitsAllocated == 16
-                        ? (isaretli ? BitConverter.ToInt16(ham, i * 2) : BitConverter.ToUInt16(ham, i * 2))
-                        : ham[i];
-                    deger[i] = x * egim + kesisim;
-                }
-            }
-            else if (foto == "RGB" && p.BitsAllocated == 8)
-            {
-                var duzlemsel = d.GetSingleValueOrDefault(DicomTag.PlanarConfiguration, (ushort)0) == 1;
-                for (var i = 0; i < w * h; i++)
-                {
-                    int r = duzlemsel ? ham[i] : ham[i * 3], g = duzlemsel ? ham[w * h + i] : ham[i * 3 + 1],
-                        b = duzlemsel ? ham[2 * w * h + i] : ham[i * 3 + 2];
-                    deger[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-                }
-            }
-            else return null;
-
-            double alt, ust;
-            if (d.TryGetValues<double>(DicomTag.WindowCenter, out var wc) && wc.Length > 0
-                && d.TryGetValues<double>(DicomTag.WindowWidth, out var ww) && ww.Length > 0 && ww[0] > 1)
-            { alt = wc[0] - ww[0] / 2; ust = wc[0] + ww[0] / 2; }
-            else { alt = deger.Min(); ust = deger.Max(); }
-            if (ust <= alt) ust = alt + 1;
-            var ters = foto == "MONOCHROME1";
-
-            var olcek = Math.Min(1.0, (double)enFazla / Math.Max(w, h));
-            int kw = Math.Max(1, (int)Math.Round(w * olcek)), kh = Math.Max(1, (int)Math.Round(h * olcek));
-            kw += kw % 2;                       // 4:2:2 - genişlik çift
-            var gri = new byte[kw * kh];
-            for (var y = 0; y < kh; y++)
-                for (var x = 0; x < kw; x++)
-                {
-                    // Kutu ortalaması (kaba ama hızlı): hedef pikselin kapsadığı kaynak alan.
-                    int x0 = x * w / kw, x1 = Math.Max(x0 + 1, (x + 1) * w / kw), y0 = y * h / kh, y1 = Math.Max(y0 + 1, (y + 1) * h / kh);
-                    double t = 0; int n = 0;
-                    for (var yy = y0; yy < Math.Min(y1, h); yy++)
-                        for (var xx = x0; xx < Math.Min(x1, w); xx++) { t += deger[yy * w + xx]; n++; }
-                    var v = n > 0 ? t / n : alt;
-                    var g8 = (int)Math.Round(Math.Clamp((v - alt) / (ust - alt), 0, 1) * 255);
-                    gri[y * kw + x] = (byte)(ters ? 255 - g8 : g8);
-                }
-            return new KucukResim(JpegKodlayici.Gri422(gri, kw, kh), kh, kw);
+            var c = DicomGoruntuCizici.Ciz(d, new CizimIstegi(Satir: enFazla, Sutun: enFazla, Kalite: 75, CiftGenislik: true));
+            return new KucukResim(c.Jpeg, c.Satir, c.Sutun);
         }
         catch (Exception) { return null; }
     }
@@ -331,8 +275,28 @@ public static class JpegKodlayici
         return taban.Select(q => Math.Clamp((q * s + 50) / 100, 1, 255)).ToArray();
     }
 
-    public static byte[] Gri422(byte[] gri, int w, int h, int kalite = 75)
+    /// <summary>Gri ölçek → YCbCr 4:2:2 (Cb = Cr = 128).</summary>
+    public static byte[] Gri422(byte[] gri, int w, int h, int kalite = 75) => Kodla422(gri, null, null, w, h, kalite);
+
+    /// <summary>RGB (piksel başına 3 bayt, sıralı) → YCbCr 4:2:2 (JFIF dönüşümü).</summary>
+    public static byte[] Rgb422(byte[] rgb, int w, int h, int kalite = 75)
     {
+        var yy = new byte[w * h]; var cb = new byte[w * h]; var cr = new byte[w * h];
+        for (var i = 0; i < w * h; i++)
+        {
+            double r = rgb[i * 3], g = rgb[i * 3 + 1], b = rgb[i * 3 + 2];
+            yy[i] = Bayt(0.299 * r + 0.587 * g + 0.114 * b);
+            cb[i] = Bayt(128 - 0.168736 * r - 0.331264 * g + 0.5 * b);
+            cr[i] = Bayt(128 + 0.5 * r - 0.418688 * g - 0.081312 * b);
+        }
+        return Kodla422(yy, cb, cr, w, h, kalite);
+    }
+
+    private static byte Bayt(double x) => (byte)Math.Clamp((int)Math.Round(x), 0, 255);
+
+    private static byte[] Kodla422(byte[] gri, byte[]? cbd, byte[]? crd, int w, int h, int kalite)
+    {
+        kalite = Math.Clamp(kalite, 1, 100);
         var lq = Nicele(LumQ, kalite); var kq = Nicele(KroQ, kalite);
         var (dcLk, dcLu) = Tablo(DcLumBits, DcLumVal); var (acLk, acLu) = Tablo(AcLumBits, AcLumVal);
         var (dcKk, dcKu) = Tablo(DcKroBits, DcKroVal); var (acKk, acKu) = Tablo(AcKroBits, AcKroVal);
@@ -365,26 +329,54 @@ public static class JpegKodlayici
                     }
                     dcY = Kodla(y, blok, lq, dcY, dcLk, dcLu, acLk, acLu);
                 }
-                Array.Clear(blok);                         // Cb = Cr = 128 → seviye kaydırmadan sonra 0
-                dcCb = Kodla(y, blok, kq, dcCb, dcKk, dcKu, acKk, acKu);
-                dcCr = Kodla(y, blok, kq, dcCr, dcKk, dcKu, acKk, acKu);
+                if (cbd is null || crd is null)
+                {
+                    Array.Clear(blok);                     // Cb = Cr = 128 → seviye kaydırmadan sonra 0
+                    dcCb = Kodla(y, blok, kq, dcCb, dcKk, dcKu, acKk, acKu);
+                    dcCr = Kodla(y, blok, kq, dcCr, dcKk, dcKu, acKk, acKu);
+                }
+                else
+                {
+                    Krom(cbd, mx, my); dcCb = Kodla(y, blok, kq, dcCb, dcKk, dcKu, acKk, acKu);
+                    Krom(crd, mx, my); dcCr = Kodla(y, blok, kq, dcCr, dcKk, dcKu, acKk, acKu);
+                }
             }
         y.Bitir();
         B(0xFF, 0xD9);
         return m.ToArray();
+
+        // 4:2:2 - kroma bloğu yatayda iki pikselin ortalaması (16×8 MCU → 8×8).
+        void Krom(byte[] k, int mx, int my)
+        {
+            for (var i = 0; i < 64; i++)
+            {
+                int x0 = Math.Min(mx + 2 * (i & 7), w - 1), x1 = Math.Min(x0 + 1, w - 1), py = Math.Min(my + (i >> 3), h - 1);
+                blok[i] = (k[py * w + x0] + k[py * w + x1]) / 2.0 - 128.0;
+            }
+        }
     }
+
+    /// <summary>C[u, x] = ½ · c(u) · cos((2x+1)uπ/16), c(0) = 1/√2 (iki boyutta ¼ · c(u) · c(v)).</summary>
+    private static readonly double[] DctC = Enumerable.Range(0, 64)
+        .Select(i => 0.5 * (i / 8 == 0 ? Math.Sqrt(0.5) : 1) * Math.Cos((2 * (i % 8) + 1) * (i / 8) * Math.PI / 16)).ToArray();
 
     private static int Kodla(Yazar y, double[] blok, int[] q, int oncekiDc, int[] dcK, int[] dcU, int[] acK, int[] acU)
     {
-        var f = new double[64];
+        // Ayrık (satır sonra sütun) 8×8 DCT, katsayılar tablodan - tam boy WADO JPEG'inde hız için.
+        var ara = new double[64]; var f = new double[64];
+        for (var yy = 0; yy < 8; yy++)
+            for (var u = 0; u < 8; u++)
+            {
+                double t = 0;
+                for (var xx = 0; xx < 8; xx++) t += blok[yy * 8 + xx] * DctC[u * 8 + xx];
+                ara[yy * 8 + u] = t;
+            }
         for (var v = 0; v < 8; v++)
             for (var u = 0; u < 8; u++)
             {
                 double t = 0;
-                for (var yy = 0; yy < 8; yy++)
-                    for (var xx = 0; xx < 8; xx++)
-                        t += blok[yy * 8 + xx] * Math.Cos((2 * xx + 1) * u * Math.PI / 16) * Math.Cos((2 * yy + 1) * v * Math.PI / 16);
-                f[v * 8 + u] = 0.25 * (u == 0 ? Math.Sqrt(0.5) : 1) * (v == 0 ? Math.Sqrt(0.5) : 1) * t;
+                for (var yy = 0; yy < 8; yy++) t += ara[yy * 8 + u] * DctC[v * 8 + yy];
+                f[v * 8 + u] = t;
             }
         var z = new int[64];
         for (var i = 0; i < 64; i++) z[i] = (int)Math.Round(f[Zigzag[i]] / q[Zigzag[i]]);

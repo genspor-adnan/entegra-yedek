@@ -148,7 +148,8 @@ public static class TeletipUclari
         // ---------------------------------------------------------- PANO (mockup §2; kullanıcı 11.11.2026 "Mirth panosunu yap")
         // Günün özeti (şube saatine göre gün), bekleyen kuyruk, son olaylar ve Mirth kanal istatistikleri. Mirth erişilemezse
         //   DB bölümü yine gelir - pano "Mirth'e ulaşılamadı" der, boş kalmaz.
-        grup.MapGet("/pano", async (string? gun, VeriKaynagi veri, MirthIzleme mirth, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapGet("/pano", async (string? gun, VeriKaynagi veri, MirthIzleme mirth, Gentegre.Api.Servisler.TeletipWadoServisi wadoServis,
+                                    BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji.teletip.pano", Islem.Gor);
@@ -188,7 +189,29 @@ public static class TeletipUclari
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
             var adres = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.hl7_adres", "", iptal);
             var aktif = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.aktif", "0", iptal) == "1";
-            return Results.Ok(new { aktif, hl7Adres = adres, ozet, sonOlaylar, mirth = await mirth.DurumAsync(iptal) });
+            // Dışa açık WADO (1313): yapılandırma + bugünün / son 7 günün erişim sayacı (IP + çalışma bazında).
+            var w = wadoServis.Ayar;
+            var wadoSayac = (await b.ListeAsync("""
+                select coalesce(sum(istek_sayisi) filter (where gun = (now() at time zone 'Europe/Istanbul')::date), 0)::int as "bugunIstek",
+                       coalesce(sum(hata_sayisi)  filter (where gun = (now() at time zone 'Europe/Istanbul')::date), 0)::int as "bugunHata",
+                       coalesce(sum(istek_sayisi), 0)::int as "haftaIstek",
+                       count(distinct study_uid) filter (where study_uid <> '-')::int as "haftaCalisma",
+                       count(distinct ip)::int as "haftaIp",
+                       max(son_erisim) as "sonErisim"
+                  from public.teletip_wado_erisim
+                 where gun >= (now() at time zone 'Europe/Istanbul')::date - 6
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal)).First();
+            var wadoSonHata = await b.ListeAsync("""
+                select ip, study_uid as "studyUid", son_hata as hata, son_erisim as zaman
+                  from public.teletip_wado_erisim where hata_sayisi > 0 and son_hata <> ''
+                 order by son_erisim desc limit 5
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var wado = new
+            {
+                acik = w.Port > 0, port = w.Port, https = w.SertifikaYolu.Length > 0, yol = w.Yol,
+                ipSiniri = w.IzinliIpler.Length > 0, sayac = wadoSayac, sonHatalar = wadoSonHata,
+            };
+            return Results.Ok(new { aktif, hl7Adres = adres, ozet, sonOlaylar, mirth = await mirth.DurumAsync(iptal), wado });
         });
 
         // Bağlantı testi: Teletıp HL7 hedefine (Mirth K1) TCP + Mirth REST girişi. Mesaj göndermez.

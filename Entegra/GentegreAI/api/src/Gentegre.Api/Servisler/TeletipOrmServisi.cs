@@ -163,6 +163,8 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         var studyUid = K("StudyUid");
         if (studyUid.Length == 0)
             return await YazAsync(b, islem, id, 3, deneme, "", "İstemin PACS çalışması (study_uid) bağlı değil.", "", "", iptal);
+        // 1313: satır gönderdiği çalışmayı taşır - dışa açık WADO yalnız başarıyla gitmiş KOS'un çalışmasını verir.
+        await b.CalistirAsync("update public.teletip_gonderim set study_uid = @p1 where id = @p0", islem, [id, studyUid], iptal);
 
         KosCalisma? calisma;
         try { calisma = await dicom.KosCalismaAsync(studyUid, iptal); }

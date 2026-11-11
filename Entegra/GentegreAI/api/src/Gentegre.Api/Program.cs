@@ -53,6 +53,12 @@ kurucu.Services.AddHttpClient("dicom", c => c.Timeout = TimeSpan.FromSeconds(60)
 // Teletıp KOS (1310): RAD-68 MTOM gövdesi Mirth K2ye; KOS büyük olabilir (çok seri + ikon).
 kurucu.Services.AddHttpClient("teletip-xds", c => c.Timeout = TimeSpan.FromSeconds(120));
 kurucu.Services.AddSingleton<DicomKaynagi>();
+// Teletıp dışa açık WADO (1313): ayrı portta yalnız WADO-URI; TeletipWado:Port 0 → kapalı. Sertifika parolası ortamdan.
+kurucu.Services.Configure<Gentegre.Api.Servisler.TeletipWadoAyarlari>(kurucu.Configuration.GetSection("TeletipWado"));
+kurucu.Services.AddMemoryCache();
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IWadoPacs>(s => s.GetRequiredService<DicomKaynagi>());
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.TeletipWadoServisi>();
+kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeletipWadoSunucusu>();
 // MWL (1301): cihazların çalışma listesi - accession / TCKN cihaza istemden gider (Teletıp eşleşmesinin ön şartı).
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.MwlSunucusu>();
 

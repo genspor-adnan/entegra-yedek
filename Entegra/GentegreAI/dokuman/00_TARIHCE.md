@@ -491,6 +491,34 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     `http://betaxdsrepository.teletip.saglik.gov.tr/axis2/services/xdsrepositoryb` (SendKOS).
   * Doğrulama: `TeletipKosTestleri` şablon değerleri + kimlik eşleşmesi; Teletıp / ORM / ORU / MWL 178/178. KOSUYOLU
     KOS satırı 8 yeniden kuyrukta → Mirth K2 → benzetim OK, saklanan gövdede yeni kodlar ve OID.
+- **Teletıp dışa açık WADO (RAD-55) (db/1313; kullanıcı: "dışa açık WADO adımını yap"):** kılavuz 3.43 § 4.2 + XDS 1.15 § 2.3
+  Tablo 4. Bakanlık web görüntüleyicisi KOS'taki görüntüleri kurumun WADO-URI'sinden DICOM ve JPEG olarak çeker.
+  * `Servisler/TeletipWado.cs`: **TeletipWadoSunucusu** - API sürecinde AYRI Kestrel portu (`TeletipWado:Port`, 0 = kapalı;
+    ana API uçlarının hiçbiri bu portta yok), yol `/DCM/WADO` (+ `/WADO`), TLS Bakanlık sertifikası
+    (`TeletipWado:SertifikaYolu` .pfx, parola yalnız ortamdan `TeletipWado__SertifikaParola`), IP başına hız sınırı
+    (`DakikadaIstek`, 429), isteğe bağlı IP / CIDR izin listesi (403), CORS yalnız https `*.saglik.gov.tr`, Server başlığı yok.
+    **TeletipWadoServisi** - requestType / studyUID / seriesUID / objectUID zorunlu ve UID biçiminde (400), contentType boş →
+    application/dicom, image/jpeg (ve kılavuz metnindeki application/jpeg) desteklenir, diğeri 406; frameNumber / rows /
+    columns / windowCenter+Width / imageQuality. **Erişim kuralı:** yalnız KOS'u Bakanlık'a başarıyla gitmiş çalışma
+    (`teletip_gonderim` kanal 2 durum 1 `study_uid`) ve nesne o çalışmanın C-FIND listesinde (DicomKaynagi
+    `CalismaNesneleriAsync`, 10 dk önbellek) - aksi 404, PACS'a hiç gidilmez. DICOM PACS'ın WADO'sundan aynen; JPEG
+    **DicomGoruntuCizici** ile burada çizilir (ClearCanvas WADO JPEG vermiyor): MONOCHROME1/2 8/16 bit (BitsStored maskesi,
+    Rescale, VOI pencere / istek penceresi / min-max), RGB ve YBR_FULL renkli, çok kare, en/boy korunarak küçültme.
+    Sıkıştırılmış: JPEG Baseline + ek işlem yoksa kare aynen; aksi fo-dicom çekirdeğinin çözebildiği (RLE), çözülemeyen 406
+    (JPEG-LS / JPEG 2000 / JPEG Lossless için codec paketi gerekir - müşteri PACS'ı sıkıştırılmış saklıyorsa karar
+    verilmeli). KOS küçük resmi de aynı çiziciden.
+  * `JpegKodlayici`: renkli 4:2:2 (`Rgb422`) + tablo tabanlı ayrık DCT (tam boy görüntü için; 3,6 MP CR ≈ 1,2 sn).
+  * 1313: `teletip_gonderim.study_uid` (KOS gönderiminde damgalanır; mevcut KOS satırları istemden dolduruldu) +
+    `teletip_wado_erisim` (gün + IP + çalışma sayacı: istek / hata / bayt / son hata - KVKK izi). 4 DB'de uygulandı.
+  * Pano: "Dışa açık WADO" bloğu (port, HTTPS / sertifika yok, bugün / 7 gün istek, çalışma, IP, son hatalar). Mockup
+    `teletip_mirth.html` §2 aynı blok; §7'de "Public WADO = Gentegre API ayrı portu".
+  * Doğrulama: `TeletipWadoTestleri` (çizici gri / RGB renk / çok kare / pencere / 406; içerik türü, CORS, IP listesi;
+    DB'li: 400 / 404 / 406, reddedilmiş KOS'un çalışması 404, çalışmada olmayan nesne 404, PACS'a gidilmedi, DICOM + JPEG
+    200, sayaç) - Teletıp / ORM / ORU / MWL 184/184, Pillow çözüyor. KOSUYOLU'da test sertifikasıyla HTTPS 35004: demo BT
+    DICOM 200 / JPEG 200 (görsel doğru), 400 / 404 / 406, ana API yolu 404, CORS başlığı; deneme sonrası port kapatıldı,
+    test sertifikası silindi, deneme sayaç satırları silindi.
+  * Kurumun işi (kılavuz § 4.2): public port yönlendirmesi, statik iç / dış IP'yi teletip@saglik.gov.tr'ye bildirmek,
+    Bakanlık DNS + sertifikası (.pfx), 7/24 açık. KOS'taki RetrieveLocationUID SKRS'si WADO'yu sunan kurumun kodu.
 
 ### 10.11.2026
 

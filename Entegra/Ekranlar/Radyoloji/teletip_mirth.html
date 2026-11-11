@@ -190,6 +190,15 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
   <div class="bilgi">Sayılar Mirth REST API'den (<code>/api/channels/statuses</code>, <code>/api/channels/{id}/statistics</code>) - Gentegre okur, kullanıcı Mirth
     yönetici ekranına gitmeden kanal sağlığını görür. "durdur" yalnız sistem yöneticisinde; Mirth'e gelişmiş müdahale (kanal düzenleme) Mirth
     Administrator'dan. Kırmızı satır: AE/AR ya da XDS hatası - Mirth otomatik tekrar ETMEZ (aynı mesaj yine reddedilir), insan düzeltir ve yeniden gönderir.</div>
+  <h4 style="margin:12px 0 4px">Dışa açık WADO <span class="sonuk">· Bakanlık görüntüleyicisi KOS'taki görüntüleri buradan çeker (DICOM + JPEG) · son 7 gün</span></h4>
+  <div class="bilgi">Port <code>35004</code> <code>/DCM/WADO</code> <span class="rz ok">HTTPS</span> · Bugün <b>412</b> istek · <b class="kirmizi">2</b> hata ·
+    7 gün <b>3.120</b> istek · 41 çalışma · 3 IP · Son erişim 11.11.2026 10:52</div>
+  <table class="tablo">
+    <thead><tr><th style="width:130px">Zaman</th><th style="width:120px">IP</th><th style="width:260px">Çalışma</th><th>Son hata</th></tr></thead>
+    <tbody><tr><td>10:31</td><td>85.111.x.x</td><td class="sonuk">1.2.840.113619.2.55…</td><td class="kirmizi">404 Nesne bulunamadı.</td></tr></tbody>
+  </table>
+  <div class="bilgi">API'nin AYRI portu - ana API uçlarının hiçbiri bu portta yok. Yalnız KOS'u Bakanlık'a başarıyla gitmiş çalışmaların nesneleri verilir;
+    diğer her istek 404. JPEG PACS'ın DICOM'undan Gentegre'de çizilir (ClearCanvas WADO JPEG vermiyor). Kapalıysa: "TeletipWado:Port tanımlı değil".</div>
 </div>
 
 <!-- ===================================================================== 3 ===== -->
@@ -359,7 +368,7 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
     <tr><td>Doz RDSR</td><td>Mirth K3</td><td>ClearCanvas SR (SOP Class X-Ray Radiation Dose SR) için auto-route → Mirth DICOM dinleyici → TLS TELETIP_MGA</td></tr>
     <tr><td>Gönderim durumu</td><td>Mirth K4 → Gentegre</td><td>her hedef sonucunda HTTP POST; Gentegre <code>teletip_gonderim</code> aşamalarını yazar, ekranlar buradan okur</td></tr>
     <tr><td>MWL</td><td>Gentegre</td><td>1301 MwlSunucusu - Mirth dışı</td></tr>
-    <tr><td>Public WADO</td><td>vekil (IIS/nginx)</td><td>Mirth dışı; Bakanlık doğrudan çeker</td></tr>
+    <tr><td>Public WADO</td><td>Gentegre API ayrı portu (TeletipWado:Port, Bakanlık sertifikası)</td><td>Mirth dışı; Bakanlık doğrudan çeker</td></tr>
     <tr><td>Sorgu servisleri 6.x</td><td>Gentegre</td><td>günlük zamanlı iş; sonucu panoya</td></tr>
   </table>
   <h3>Sıra</h3>

@@ -48,7 +48,7 @@ public sealed class DicomAyarlari
 /// imzalı bağlantı jetonu. Kimlik: OHIF'in görüntü yükleyicisi JWT başlığı gönderemez; bu yüzden manifest ve
 /// WADO uçları anonim ama <c>t=</c> jetonlu - jeton çalışma UID'sine bağlı, süreli, HMAC(imza anahtarı).
 /// </summary>
-public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<GuvenlikAyarlari> guvenlik, IHttpClientFactory http)
+public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<GuvenlikAyarlari> guvenlik, IHttpClientFactory http) : IWadoPacs
 {
     public DicomAyarlari Ayar => ayar.Value;
 
@@ -259,6 +259,23 @@ public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<Guvenlik
         var url = $"{Ayar.WadoUrl}?requestType=WADO&studyUID={Uri.EscapeDataString(studyUid)}&seriesUID={Uri.EscapeDataString(seriesUid)}"
                 + $"&objectUID={Uri.EscapeDataString(objectUid)}&contentType=application%2Fdicom";
         return await istemci.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, iptal);
+    }
+
+    /// <summary>
+    /// TELETIP WADO (1313): çalışmadaki bütün nesneler "seriesUID|objectUID" - dışa açık WADO yalnız bu listedeki nesneyi
+    /// verir (istek parametreleriyle başka çalışmanın nesnesine uzanılamaz).
+    /// </summary>
+    public async Task<HashSet<string>> CalismaNesneleriAsync(string studyUid, CancellationToken iptal)
+    {
+        var sonuc = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var s in await SorgulaAsync(DicomCFindRequest.CreateSeriesQuery(studyUid), iptal))
+        {
+            var seriesUid = s.GetSingleValueOrDefault(DicomTag.SeriesInstanceUID, "");
+            if (seriesUid.Length == 0) continue;
+            foreach (var g in await SorgulaAsync(DicomCFindRequest.CreateImageQuery(studyUid, seriesUid), iptal))
+                if (g.GetSingleValueOrDefault(DicomTag.SOPInstanceUID, "") is { Length: > 0 } sop) sonuc.Add(seriesUid + "|" + sop);
+        }
+        return sonuc;
     }
 
     /// <summary>KOS'ta Retrieve AE Title olarak yazılan PACS AE başlığı.</summary>
