@@ -374,6 +374,33 @@ public sealed class BakanlikProfiliTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 
+    // 1306 (kullanıcı 11.11.2026: "ORU kontrolüne de Medula tesis kodunu ekle"): ORC-21 son bileşeni bizim MEDULA
+    //   tesis kodumuz (kurum_profil.tesis_kodu) - boş ya da 8 haneli sayı değilse eksik; ORM denetimiyle aynı kural.
+    [VtTheory]
+    [InlineData("", "MEDULA tesis kodu (ORC-21)")]
+    [InlineData("1174", "8 haneli")]
+    [InlineData("11740001", null)]
+    public async Task Eksik_listesi_MEDULA_tesis_kodu(string tesis, string? beklenen)
+    {
+        if (!_olgu.Baglandi(nameof(Eksik_listesi_MEDULA_tesis_kodu))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        var (sube, kurum, _) = await ZeminAsync(b, t, 1);
+        await b.CalistirAsync("update public.kurum_profil set tesis_kodu = @p0", t, [tesis], Iptal);   // geri alınır
+        var istek = await b.TekDegerAsync<int>("""
+            insert into public.telerad_istek
+                   (kurum_id, dis_erisim_no, oncelik, modalite, sube_id)
+            values (@p0, @p2, 1, 1, @p1) returning id
+            """, t, [kurum, sube, Guid.NewGuid().ToString("N")[..10]], Iptal);
+
+        var eksik = await b.TekDegerAsync<string>(
+            "select public.fn_telerad_bakanlik_eksik(@p0)", t, [istek], Iptal) ?? "";
+        if (beklenen is null) Assert.DoesNotContain("MEDULA", eksik);
+        else Assert.Contains(beklenen, eksik);
+        await t.RollbackAsync();
+    }
+
     [VtFact]
     public async Task Kapali_kurumda_eksik_listesi_bos()
     {

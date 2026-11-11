@@ -376,6 +376,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   API'ler yeniden başlatıldı; KOSUYOLU'da demo istem 545 değiştirilince açılan XO (satır 6) "gidemez: MEDULA tesis kodu
   yok" oldu - KOSUYOLU kurum profilinde tesis kodu boş. ORU tarafının ön kontrolü (`fn_telerad_bakanlik_eksik`) bu
   maddeyi henüz içermiyor.
+- **ORU ön kontrolüne MEDULA tesis kodu (db/1306; kullanıcı: "ORU kontrolüne de Medula tesis kodunu ekle"):**
+  `fn_telerad_bakanlik_eksik` ORC-21'in son bileşeni için bizim tesis kodumuzu (`kurum_profil.tesis_kodu`, teslim
+  sorgusuyla aynı kaynak, önce isteğin şubesi sonra 0) okur: boşsa "MEDULA tesis kodu (ORC-21)", 8 haneli sayı değilse
+  "8 haneli sayı olmalı" - ORM denetimiyle aynı kural. Eksik varsa Bakanlık teslimi gönderilmez (mevcut davranış).
+  Test `BakanlikProfiliTestleri.Eksik_listesi_MEDULA_tesis_kodu` (boş / 4 hane / 8 hane); Bakanlık profili, telerad
+  teslim, ORM, Teletıp kuyruğu 92/92. dev / test / UNIVERSE / KOSUYOLU'da.
 
 ### 10.11.2026
 
