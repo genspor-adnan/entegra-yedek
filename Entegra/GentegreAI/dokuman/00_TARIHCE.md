@@ -281,7 +281,18 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   `nextgenhealthcare/connect:4.5.2` konteyneri `gentegre-mirth` (8443 Administrator/REST, 8080, kanal portları 6661 K1 /
   8082 K2 / 4104 K3), mesaj arşivi gentegre-pg18 içinde `mirthdb` (rol `mirth`). Parolalar ilk çalıştırmada üretilir,
   `yayin/mirth/gizli/mirth.env` (depo dışı); varsayılan admin/admin ilk açılışta REST ile değiştirilir. Betik
-  tekrar çalıştırılabilir. Kanallar henüz yok (sıradaki adım K1).
+  tekrar çalıştırılabilir.
+- **K1 TELETIP_HL7 kuruldu (kullanıcı: "K1 kanalını kur"):** `yayin/mirth/kanal-uret.js` kanal XML'ini Mirth'in kendi
+  model sınıflarıyla konteyner içinde (Rhino) üretir - elle XML yok; `mirth-kanallar.ps1` üretir, yükler (sabit kanal
+  kimliği, tekrar çalıştırılabilir), configuration map'e Teletıp adresini (`teletip_hl7_host/port`) yazar ve deploy eder.
+  K1: MLLP 6661 → TCP Sender `${teletip_hl7_host}:${teletip_hl7_port}`, kaynak yanıtı `d1` (Teletıp ACK'i Gentegre'ye
+  aynen döner), hedef kuyruğu KAPALI (tekrar Gentegre kuyruğunda), yanıt doğrulama açık (AE/AR Mirth'te hata), mesaj
+  değişmeden geçer (dönüştürücüler RAW; HL7V2→XML Bakanlık ORC-21 `\S\` biçiminde 0x1 hatası veriyordu), arama sütunları
+  ACCESSION / MESAJ / EMIR / KONTROL_NO. Dev için `TELETIP_SIMULATOR` (MLLP 6671): kılavuz 0002 / 0003 / 0008 / 0278 ve
+  PID-4 TCKN kurallarıyla AA / AE döner; üretimde `-BenzetimYok -TeletipHost … -TeletipPort …`.
+  Doğrulama: Gentegre `OruUretici` (Bakanlık profili) + `MllpIstemci` → K1 → benzetim: AA; 2.5 kurum profili 0002 ile AE
+  (Gentegre AE olarak okudu); benzetim kapalıyken "ACK göndermeden kapattı" = kuyrukta kalır, tekrar. Dev DB'de onaylı
+  raporlu teleradyoloji işi olmadığından kuyruk ucu (`/istek/{id}/teslim`) uçtan uca denenemedi; kurum ayarı değişmedi.
 
 ### 10.11.2026
 
