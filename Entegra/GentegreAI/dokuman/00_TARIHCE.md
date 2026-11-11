@@ -300,7 +300,7 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   `acc^RBS`, OBR-4 SUT + çoklu LOINC, OBR-15/20/21/24/27/31/34/36, DG1 A/F, NTE 1-4 tek satır. NW / XO (NTE yok) / CA
   (yalnız MSH-PID-PV1-ORC). `OrmUretici.Denetle`: Bakanlık'ın reddedeceği eksikler (accession, SKRS, MSH-3, TCKN
   algoritması, PV1-19, Medula takip, hekim TCKN, SUT biçimi, LOINC, modalite 2-16, OBR-6/20/21/36, DG1 türü); iptalde
-  yalnız kimlik alanları. Testler `OrmUreticiTestleri` (24). K1 üzerinden benzetime NW/XO/CA: AA; PV1-19 boş: denetim
+  yalnız kimlik alanları. Testler `OrmUreticiTestleri` (22). K1 üzerinden benzetime NW/XO/CA: AA; PV1-19 boş: denetim
   yakalar, zorla gönderilirse 0278 AE. Not: mevcut ORU üreticisinin PID-3/PID-4 ekleri ve ORC-21'i kılavuz biçiminde
   değil (yalnız SKRS) - ayrıca düzeltilecek. Kuyruk/tetik (kabulde NW, randevu değişince XO, iptalde CA) sıradaki adım.
   (`MuayeneTamamlamaTestleri.Tamamlama_eNabiz_zorunlulariyla_engellenir` muayene uçlarının dosyalara bölünmesinden
