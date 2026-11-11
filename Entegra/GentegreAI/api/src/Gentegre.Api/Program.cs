@@ -197,6 +197,9 @@ if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazD
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MllpIstemci>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradTeslimServisi>();
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeslimKuyrukIscisi>();
+// Teletıp ORM (1302): radyoloji istemi -> HL7 ORM^O01 -> Mirth K1 -> Teletıp; teletip.aktif kapalıyken işçi boş döner.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeletipOrmServisi>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeletipOrmIscisi>();
 // GELEN ORU (817): disaridan gelen rapor. Dinleyici AYRI - cihaz portu lab
 //   analizorune, bu teleradyoloji raporuna bakiyor; port ayardan gelir.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradGelenServisi>();
@@ -490,6 +493,7 @@ uygulama.TeknikServisUclariniEkle();
 // DIS DOKTOR SAHA (1289): talep kapat / goreve cevir, ziyaret gordum.
 uygulama.DisHekimUclariniEkle();
 uygulama.SahaPerformansUclariniEkle();
+uygulama.TeletipUclariniEkle();          // Teletıp ORM izi / yeniden gönder / önizleme (1302)
 uygulama.DicomUclariniEkle();            // DICOM / OHIF (11.11.2026): ClearCanvas manifesti + WADO vekili   // Saha Performansı (1292): temsilci / doktor / şube / talep
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();

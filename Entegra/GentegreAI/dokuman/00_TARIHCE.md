@@ -305,6 +305,26 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   değil (yalnız SKRS) - ayrıca düzeltilecek. Kuyruk/tetik (kabulde NW, randevu değişince XO, iptalde CA) sıradaki adım.
   (`MuayeneTamamlamaTestleri.Tamamlama_eNabiz_zorunlulariyla_engellenir` muayene uçlarının dosyalara bölünmesinden
   beri düşüyor - bu işle ilgisiz.)
+- **ORM kuyruğa ve akışa bağlandı (db/1302; kullanıcı: "ORM'yi kuyruğa ve akışa bağla"):**
+  * Ayarlar `teletip.aktif` (0 = hiçbir şey kuyruğa girmez), `teletip.hl7_adres` (Mirth K1), `teletip.firma_kodu`
+    (MSH-3), `teletip.encoding`, `teletip.sube_no`.
+  * `teletip_gonderim` kuyruğu ve izi: emir NW/XO/CA; durum 0 bekliyor · 1 gönderildi · 2 reddedildi (AE, otomatik tekrar
+    yok) · 3 gidemez (eksik) · 4 atlandı · 5 ulaşmadı (artan aralıkla tekrar, 20 deneme); ham mesaj + ACK saklanır.
+  * `fn_teletip_orm_verisi(istem)` mesaj verisinin TEK kaynağı (jsonb, anahtarlar = C# `OrmVerisi`): hasta / pasaport /
+    ülke, başvuru türü → hasta sınıfı, bölüm, e-Nabız 101 SYS takip + hastane referansı (`fn_enabiz_basvuru_referans`),
+    Medula takip (`belge_provizyon`), hekim / teknisyen / giren, kurum SKRS (`kurum.skrs_kodu`) + Medula tesis
+    (`kurum_profil`), SUT + LOINC, randevu / kabul zamanı (şube saati), muayene tanıları (yoksa ön tanıdaki ICD).
+  * `radyoloji_istem` tetiği: hazır olunca (iptal değil, accession dolu, sevk accession'ı beklemiyor) bir kez NW;
+    NW gittikten sonra mesajı etkileyen alan değişirse tek XO (bekleyen varsa yenisi yok; gidemez satır veri değişince
+    yeniden denenir); iptal / silmede NW gitmişse anlık görüntülü CA, gitmemişse bekleyenler atlanır; accession
+    değişirse eskiye CA + yeniye NW.
+  * `TeletipOrmServisi` + `TeletipOrmIscisi` (30 sn, arka plan açıkken): aynı istemin önceki satırı sonuçlanmadan sonraki
+    gitmez; Denetle eksikse 3; ACK AA 1 / AE 2 / yok-AR 5. Uçlar `/api/teletip/istem/{id}` (iz), `/gonderim/{id}/mesaj`,
+    `/gonderim/{id}/dene` (yeniden gönder), `/istem/{id}/onizle` (mesaj + eksikler, göndermez).
+  * Testler `TeletipOrmKuyruguTestleri` (10; tetik kuralları transaction içinde, servis sahte Teletıp'a AA/AE);
+    radyoloji / telerad / başvuru / DICOM / MWL / ORM paketleri 159/159. Uçtan uca: test DB kuyruk satırı → servis →
+    Mirth K1 → benzetim AA; başvuru referansı boş satır göndermeden gidemez. Dev demo istem bugün gidemez: kurum SKRS,
+    firma kodu, SUT kodu, LOINC, SYS takip (e-Nabız 101) eksik. 1301-1302 dev, test, UNIVERSE, KOSUYOLU DB'lerinde.
 
 ### 10.11.2026
 
