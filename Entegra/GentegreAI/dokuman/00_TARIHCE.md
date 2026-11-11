@@ -251,6 +251,13 @@ başlığında … Listesi olsun".
   radyoloji_istem 540-544 ve dev'de 2564-2568 (GDEMO001-005; BT / MR / US / Röntgen / çok kareli MR; `study_uid` bağlı,
   durum 2 çekildi, serbest istem, SQL ile - KOSUYOLU admin parolası yok). İstem kartında PACS bloğu 5 çalışmayı
   listeler, kendi çalışması "✓ bağlı", "🖼 Görüntüle" OHIF'i açar (dev'de Edge ile doğrulandı).
+- **Demo istemleri başvuruya bağlandı (kullanıcı: "hasta için başvuru oluşturmadın mı"):** serbest istemler silindi;
+  dev'de API ile başvuru P-000167 (5 tetkik satırı → `fn_basvuru_radyoloji_istem_esitle` istemler 2569-2573),
+  KOSUYOLU'da SQL ile başvuru 000003 (belge 82168 + belge_basvuru + 5 satır, aynı fonksiyonla istemler 545-549;
+  API için hesap açma reddedildi). İstemler `study_uid` ile PACS'a bağlı, durum Kabul (çekildi işareti çekim öncesi
+  kontrol listesi tetiğine takılır - karttan işaretlenir).
+- **Mockup `Ekranlar/Radyoloji/pacs_goruntuleri.html`:** PACS Çalışmaları listesi (canlı C-FIND, eşleşme sırası
+  study_uid → accession → PatientID → ad+doğum) ve çalışma kartı (eşleşme, seriler, önizleme, geçmiş, etiketler).
 
 ### 10.11.2026
 

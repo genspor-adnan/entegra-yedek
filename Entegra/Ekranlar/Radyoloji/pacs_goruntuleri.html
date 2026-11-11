@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PACS Görüntüleri — Liste ve Kart — Mockup (GenoTIP AI)</title>
+<style>
+  :root{ --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+         --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;margin:22px auto 8px;max-width:1240px;color:var(--navy)}
+  h2 b{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:0 8px;margin-right:6px}
+  h2 .ipucu{font-weight:normal;color:var(--muted);font-size:11px;margin-left:8px}
+  .not{max-width:1240px;margin:0 auto 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 11px;font-size:11.5px;line-height:1.55;color:#2c4a6b}
+  .not code,.kural code{background:#fff;border:1px solid #cfe0f5;border-radius:2px;padding:0 4px;font-size:11px}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.teh{border-color:#c98c8c;color:#9d3434}
+  .baslikad{margin-left:auto;font-weight:bold;color:var(--navy);font-size:12.5px}
+  .combo{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 20px 0 7px;font-size:12px;display:flex;align-items:center;position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;font-size:12px;display:flex;align-items:center}
+  .ph{color:#aab4bf}
+  .cipler{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#f7f9fc;color:#3a5573}
+  .cip.on{background:#2f6db3;color:#fff;border-color:#2f6db3}
+  .arama{margin-left:auto;border:1px solid var(--line);border-radius:12px;padding:3px 10px;width:240px;color:#aab4bf;background:#fff}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;padding:8px 10px}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:16px;color:var(--navy)}
+  .kutu.kir b{color:#9d3434} .kutu.ok b{color:#2e7d46} .kutu.sari b{color:#9a5b00}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap;background:#fff;vertical-align:top}
+  td.sar{white-space:normal}
+  tr.secili td{background:#eef4fc}
+  tr.uyari td{background:#fffaf2}
+  tr.hata td{background:#fff6f6}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#eef1f5;color:#5b6b7c}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.uy{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mod{background:#eaf1fb;color:#1f4f8f;border-color:#c5d6ee;font-weight:bold}
+  .satirarac{display:inline-flex;gap:3px}
+  .satirarac span{border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 6px;font-size:10.5px;color:var(--accent)}
+  .bilgi{margin:10px 12px 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;padding:7px 9px;font-size:11px;color:#2c4a6b;line-height:1.55}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .kural{max-width:1240px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .kural h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kural ul{margin:0 0 8px 18px;padding:0}
+  .kural table td{white-space:normal}
+  /* kart */
+  .idstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:8px 12px;background:#fbfcfd;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .deg{font-weight:bold;font-size:12.5px;color:#1f2d3a;height:22px;display:flex;align-items:center;gap:6px}
+  .govde{display:grid;grid-template-columns:minmax(0,1.4fr) 420px;gap:12px;padding:10px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);margin-bottom:12px}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b;display:flex;align-items:center;gap:6px}
+  .grp h4 .tag{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line2);border-radius:9px;padding:0 7px}
+  .grp .ic{padding:8px 10px}
+  .esl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .esk{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px;line-height:1.5}
+  .esk b{color:var(--navy)} .esk .s{color:var(--muted);font-size:10.5px}
+  .esk .d{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .seri{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line2);background:#fff}
+  .seri .kr{width:64px;height:64px;border-radius:3px;background:radial-gradient(circle at 45% 40%,#9fb3c8,#2b3a4b 70%);border:1px solid #333;flex:none;display:grid;place-items:center;color:#dfe7f0;font-size:10px}
+  .seri .kr.us{background:radial-gradient(ellipse at 50% 70%,#cfd8e3,#3b4a5a 65%)}
+  .seri .kr.cr{background:linear-gradient(#e9eef3,#7f8d9c)}
+  .seri .ic{flex:1;line-height:1.4} .seri .ic b{color:var(--navy)}
+  .seri .ic .s{color:var(--muted);font-size:10.5px}
+  .onizle{border:1px solid #2b3a4b;border-radius:4px;background:#0b1118;height:300px;display:grid;place-items:center;color:#9fb3c8;position:relative;overflow:hidden}
+  .onizle .im{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 48% 45%,#c9d6e2 0,#7d93a8 35%,#22303f 72%,#0b1118 100%)}
+  .onizle .k{position:absolute;left:8px;top:6px;font-size:10.5px} .onizle .k2{position:absolute;right:8px;bottom:6px;font-size:10.5px}
+  .etiket td{font-family:Consolas,monospace;font-size:11px}
+  .gizli{display:none}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup — PACS Görüntüleri: Liste (çalışma tarama) ve Kart (çalışma)</b> (kullanıcı 11.11.2026: "pacs görüntüleri için liste / kart mockup yap").
+Kaynak ClearCanvas ImageServer (C-FIND 104, WADO 1000); görüntüleyici OHIF (3001). Bugün PACS görüntüsü yalnız <b>radyoloji istem kartının</b> "PACS Görüntüleri"
+bloğundan görülüyor. Bu ekranlar PACS'ı <b>istemden bağımsız</b> tarar: hangi çalışma geldi, hangisi bizde hangi hasta / istemle eşleşti, hangisi
+<b>eşleşmedi</b> (cihazdan yanlış kimlikle gelen, dışarıdan CD'den yüklenen, başvurusu açılmamış). Eşleşmeyen çalışma buradan hastaya / isteme
+bağlanır ya da başvuru açılır. Liste <b>canlı C-FIND</b> (tarih aralığı zorunlu, varsayılan bugün); eşleşme bizim DB'den (radyoloji_istem.study_uid /
+accession / hasta dosya no).</div>
+
+<!-- ===================================================================== 1 ===== -->
+<h2><b>1</b> — PACS Çalışmaları (liste) <span class="ipucu">Radyoloji › PACS Çalışmaları · yetki <code>radyoloji.pacs</code> · radyoloji sorumlusu, tekniker, radyolog</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span>☢️ Radyoloji İstem Listesi</span><span class="on">🗄 PACS Çalışmaları ×</span></div>
+  <div class="toolbar">
+    <span class="btn">◀</span><span class="inp">11.11.2026</span><span class="sonuk">–</span><span class="inp">11.11.2026</span><span class="btn">▶</span><span class="btn">Bugün</span><span class="btn">7 gün</span>
+    <span class="combo" style="width:120px">Modalite: Tümü</span>
+    <span class="combo" style="width:150px">Sunucu: SERVERAE</span>
+    <span class="btn primary">🔍 PACS'ı Tara</span>
+    <span class="btn">🔗 Toplu Eşle</span>
+    <span class="btn">🖨 Yazdır</span>
+    <span class="baslikad">ClearCanvas · 127.0.0.1:104 <span class="rz ok">bağlı</span> · WADO 1000 <span class="rz ok">ok</span></span>
+  </div>
+  <div class="ozet">
+    <div class="kutu"><small>Bugün gelen çalışma</small><b>7</b> <span class="sonuk">· 6 hasta</span></div>
+    <div class="kutu ok"><small>İstemle eşleşen</small><b>4</b> <span class="sonuk">· accession / UID</span></div>
+    <div class="kutu sari"><small>Hasta bulundu, istem yok</small><b>1</b> <span class="sonuk">· başvuru açılmalı</span></div>
+    <div class="kutu kir"><small>Eşleşmeyen</small><b>2</b> <span class="sonuk">· kimlik tutmuyor</span></div>
+    <div class="kutu"><small>Raporsuz (eşleşen)</small><b>3</b> <span class="sonuk">· radyolog kuyruğu</span></div>
+    <div class="kutu"><small>Görüntü / seri</small><b>412</b> <span class="sonuk">· 19 seri</span></div>
+  </div>
+  <div class="cipler">
+    <span class="cip on">Tümü</span><span class="cip">Eşleşmeyen</span><span class="cip">İstem yok</span><span class="cip">Raporsuz</span>
+    <span class="sonuk" style="margin-left:8px">Modalite:</span><span class="cip">BT</span><span class="cip">MR</span><span class="cip">US</span><span class="cip">CR</span><span class="cip">MG</span>
+    <span class="arama">🔍 hasta adı / PatientID / accession / UID…</span>
+  </div>
+  <table>
+    <thead><tr>
+      <th style="width:105px">Tarih · Saat</th><th style="width:60px" class="orta">Mod.</th><th style="width:200px">PACS Hasta <span class="sonuk">· PatientID</span></th>
+      <th>Açıklama</th><th style="width:120px">Accession</th><th style="width:70px" class="orta">Seri / Gör.</th>
+      <th style="width:230px">Eşleşme <span class="sonuk">· bizdeki kayıt</span></th><th style="width:90px" class="orta">Rapor</th><th style="width:150px"></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>11.11.2026 09:12</td><td class="orta"><span class="rz mod">CT</span></td><td>GENTEGRE DEMO BT <span class="sonuk">· GENTEGRE-DEMO-BT</span></td><td class="sar">GENTEGRE DEMO - BT</td><td>GDEMO001</td><td class="orta">1 / 1</td>
+          <td><span class="rz ok">✓ istem</span> KGM…45998 · <span class="sonuk">GENTEGRE DEMO (00000003)</span></td><td class="orta"><span class="rz uy">bekliyor</span></td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>📄 İstem</span><span>📝 Rapor</span></span></td></tr>
+      <tr><td>11.11.2026 09:40</td><td class="orta"><span class="rz mod">MR</span></td><td>GENTEGRE DEMO MR <span class="sonuk">· GENTEGRE-DEMO-MR</span></td><td class="sar">GENTEGRE DEMO - MR</td><td>GDEMO002</td><td class="orta">1 / 1</td>
+          <td><span class="rz ok">✓ istem</span> KGM…45999 · <span class="sonuk">GENTEGRE DEMO (00000003)</span></td><td class="orta"><span class="rz uy">bekliyor</span></td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>📄 İstem</span><span>📝 Rapor</span></span></td></tr>
+      <tr class="secili"><td>11.11.2026 10:05</td><td class="orta"><span class="rz mod">MR</span></td><td>GENTEGRE DEMO EMR <span class="sonuk">· GENTEGRE-DEMO-EMR</span></td><td class="sar">GENTEGRE DEMO - COK KARELI MR</td><td>GDEMO005</td><td class="orta">1 / 96</td>
+          <td><span class="rz ok">✓ istem</span> KGM…46002 · <span class="sonuk">GENTEGRE DEMO (00000003)</span></td><td class="orta"><span class="rz ok">yazıldı</span></td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>📄 İstem</span><span>📝 Rapor</span></span></td></tr>
+      <tr class="uyari"><td>11.11.2026 10:31</td><td class="orta"><span class="rz mod">US</span></td><td>YILMAZ^AYSE <span class="sonuk">· 12345678901</span></td><td class="sar">Batın USG</td><td>—</td><td class="orta">1 / 24</td>
+          <td><span class="rz uy">hasta bulundu</span> Ayşe YILMAZ (A/00000031) · <span class="sonuk">istem yok</span></td><td class="orta">—</td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>＋ Başvuru/İstem</span></span></td></tr>
+      <tr class="hata"><td>11.11.2026 11:02</td><td class="orta"><span class="rz mod">CR</span></td><td>DEMIR^MEHMET <span class="sonuk">· 0000</span></td><td class="sar">Akciğer PA</td><td>KGM…46050?</td><td class="orta">1 / 1</td>
+          <td><span class="rz hata">✖ eşleşmedi</span> <span class="sonuk">accession bulunamadı, kimlik 0000</span></td><td class="orta">—</td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>🔗 Eşle…</span></span></td></tr>
+      <tr class="hata"><td>11.11.2026 11:20</td><td class="orta"><span class="rz mod">CT</span></td><td>ANONYMOUS <span class="sonuk">· CD-IMPORT-7</span></td><td class="sar">Dış merkez toraks BT (CD)</td><td>—</td><td class="orta">3 / 288</td>
+          <td><span class="rz hata">✖ eşleşmedi</span> <span class="sonuk">dış kayıt (CD)</span></td><td class="orta">—</td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>🔗 Eşle…</span></span></td></tr>
+      <tr><td>11.11.2026 11:45</td><td class="orta"><span class="rz mod">CR</span></td><td>GENTEGRE DEMO XR <span class="sonuk">· GENTEGRE-DEMO-XR</span></td><td class="sar">GENTEGRE DEMO - RONTGEN</td><td>GDEMO004</td><td class="orta">1 / 1</td>
+          <td><span class="rz ok">✓ istem</span> KGM…46001 · <span class="sonuk">GENTEGRE DEMO (00000003)</span></td><td class="orta"><span class="rz uy">bekliyor</span></td>
+          <td><span class="satirarac"><span>🖼 Aç</span><span>📄 İstem</span><span>📝 Rapor</span></span></td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi">Çift tık = çalışma kartı (2). Satır sağ tuş: Aç (OHIF) · İstem kartı · Rapor yaz · Hastaya bağla · İsteme bağla · Başvuru + istem aç · UID kopyala.
+    <b>Eşleşme sırası:</b> ① <code>radyoloji_istem.study_uid</code> eşit → istem; ② accession = bizim accession → istem (study_uid yazılır);
+    ③ PatientID = dosya no ya da TCKN → hasta (istem yok); ④ PatientName (Soyad^Ad) + doğum tarihi → hasta adayı (onay ister); ⑤ hiçbiri → eşleşmedi.
+    Renk: sarı = hasta var istem yok, kırmızı = eşleşmedi. "Toplu Eşle" seçili satırlara ①-③'ü uygular.</div>
+  <div class="uyari">Tarama canlı C-FIND'dır; geniş aralık ClearCanvas'ı yorar - varsayılan bugün, en çok 31 gün; sonuçlar 60 sn önbellekte. Eşleşmeyenler ayrıca
+    gece işi ile <code>pacs_calisma</code> tablosuna yazılabilir (sonraki adım) - o zaman "Eşleşmeyen" çipi tarihsiz çalışır.</div>
+</div>
+
+<!-- ===================================================================== 2 ===== -->
+<h2><b>2</b> — PACS Çalışması (kart) <span class="ipucu">tek çalışma · seriler · eşleşme ve bağlama · OHIF</span></h2>
+<div class="win">
+  <div class="ekransekme"><span>🏠</span><span>🗄 PACS Çalışmaları</span><span class="on">🗄 GENTEGRE DEMO EMR · MR 10.05 ×</span></div>
+  <div class="toolbar">
+    <span class="btn primary">🖼 OHIF'te Aç</span><span class="btn">📄 İstem Kartı</span><span class="btn">📝 Rapor</span>
+    <span class="btn">🔗 Hastaya / İsteme Bağla</span><span class="btn">＋ Başvuru + İstem Aç</span><span class="btn">⬇ DICOM indir (zip)</span><span class="btn">📋 UID kopyala</span>
+    <span class="btn teh">⚠ Yanlış hasta bildir</span>
+    <span class="baslikad">GENTEGRE DEMO EMR · MR · 11.11.2026 10:05</span>
+  </div>
+  <div class="idstrip">
+    <div class="fld"><label>PACS Hasta</label><div class="deg">GENTEGRE DEMO EMR</div></div>
+    <div class="fld"><label>PatientID</label><div class="deg">GENTEGRE-DEMO-EMR</div></div>
+    <div class="fld"><label>Doğum · Cinsiyet</label><div class="deg">— · —</div></div>
+    <div class="fld"><label>Çalışma</label><div class="deg">11.11.2026 10:05</div></div>
+    <div class="fld"><label>Modalite</label><div class="deg"><span class="rz mod">MR</span> 1 seri · 96 görüntü</div></div>
+    <div class="fld"><label>Accession</label><div class="deg">GDEMO005</div></div>
+    <div class="fld"><label>Kaynak</label><div class="deg">SERVERAE <span class="rz">C-STORE</span></div></div>
+  </div>
+  <div class="govde">
+    <div>
+      <div class="grp"><h4>Eşleşme <span class="tag">study_uid ile</span></h4>
+        <div class="ic esl">
+          <div class="esk"><b>Hasta</b> <span class="rz ok">✓ bağlı</span><br>GENTEGRE DEMO · dosya 00000003 · E · 46y<div class="s">PACS kimliği GENTEGRE-DEMO-EMR ≠ dosya no - ad ile eşleşti</div>
+            <div class="d"><span class="btn">👤 Hasta kartı</span><span class="btn">🔁 Başka hastaya bağla</span></div></div>
+          <div class="esk"><b>İstem</b> <span class="rz ok">✓ bağlı</span><br>KGM0000000046002 · MR · Beyin MR · 11.11.2026<div class="s">başvuru 000003 · durum: Çekildi · rapor: yazıldı</div>
+            <div class="d"><span class="btn">📄 İstem kartı</span><span class="btn">🔁 Başka isteme bağla</span><span class="btn">✖ Bağı kaldır</span></div></div>
+        </div>
+      </div>
+      <div class="grp"><h4>Seriler <span class="tag">C-FIND SERIES + IMAGE</span></h4>
+        <div class="seri"><div class="kr">MR</div><div class="ic"><b>Seri 1 · T2 AX</b> · 96 görüntü · 512×512 · 5 mm<div class="s">1.2.826.0.1.3680043.8.498.8464965980…6578252 · MR Image Storage</div></div><span class="satirarac"><span>🖼 Aç</span><span>⬇</span></span></div>
+        <div class="seri"><div class="kr">MR</div><div class="ic"><b>Seri 2 · T1 SAG</b> <span class="rz">örnek</span> · 24 görüntü<div class="s">(çok serili çalışma örneği)</div></div><span class="satirarac"><span>🖼 Aç</span><span>⬇</span></span></div>
+        <div class="seri"><div class="kr">SR</div><div class="ic"><b>Seri 99 · Doz raporu (SR)</b> <span class="rz">örnek</span><div class="s">görüntü değil - OHIF açmaz, DLP / CTDI buradan isteme işlenir</div></div><span class="satirarac"><span>📥 Doz al</span></span></div>
+      </div>
+      <div class="grp"><h4>Geçmiş <span class="tag">islem_log</span></h4>
+        <table><tbody>
+          <tr><td>11.11.2026 10:06</td><td>PACS</td><td class="sar">Çalışma geldi (C-STORE, SERVERAE) · 96 görüntü</td></tr>
+          <tr><td>11.11.2026 10:06</td><td>Sistem</td><td class="sar">Otomatik eşleşme: ad ile hasta 00000003, accession ile istem KGM…46002 · study_uid yazıldı</td></tr>
+          <tr><td>11.11.2026 10:30</td><td>Dr. A. AKMAN</td><td class="sar">OHIF'te açıldı</td></tr>
+          <tr><td>11.11.2026 10:52</td><td>Dr. A. AKMAN</td><td class="sar">Rapor yazıldı</td></tr>
+        </tbody></table>
+      </div>
+      <div class="grp"><h4>DICOM Etiketleri <span class="tag">katlanır</span></h4>
+        <table class="etiket"><tbody>
+          <tr><td style="width:120px">(0008,0060)</td><td style="width:200px">Modality</td><td>MR</td></tr>
+          <tr><td>(0008,1030)</td><td>StudyDescription</td><td>GENTEGRE DEMO - COK KARELI MR</td></tr>
+          <tr><td>(0010,0020)</td><td>PatientID</td><td>GENTEGRE-DEMO-EMR</td></tr>
+          <tr><td>(0020,000D)</td><td>StudyInstanceUID</td><td class="sar">1.2.826.0.1.3680043.8.498.84649659806063499898841806013966578252</td></tr>
+          <tr><td>(0008,0050)</td><td>AccessionNumber</td><td>GDEMO005</td></tr>
+          <tr><td>(0008,0080)</td><td>InstitutionName</td><td>—</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div>
+      <div class="grp"><h4>Önizleme <span class="tag">OHIF · ilk seri</span></h4>
+        <div class="ic">
+          <div class="onizle"><span class="k">GENTEGRE DEMO EMR · MR</span><div class="im"></div><span class="k2">I: 1 (96/96)</span></div>
+          <div style="display:flex;gap:4px;margin-top:6px"><span class="btn primary" style="flex:1;justify-content:center">🖼 OHIF'te Aç (yeni sekme)</span><span class="btn">▶ Oynat</span></div>
+          <div class="sonuk" style="font-size:10.5px;margin-top:4px">Önizleme küçük (ilk görüntü, WADO vekili). Tanı için OHIF; MPR / 3D orada.</div>
+        </div>
+      </div>
+      <div class="grp"><h4>Kalite / Doz</h4>
+        <div class="ic" style="line-height:1.7">
+          Çekim → PACS gecikmesi: <b>1 dk</b> · İstem → çekim: <b>38 dk</b><br>
+          Tekniker: Sistem Yöneticisi · Cihaz: MR-1 (SERVERAE)<br>
+          DLP / CTDI: <span class="sonuk">— (MR)</span> · Kontrast: <span class="sonuk">verilmedi</span><br>
+          <span class="rz uy">Seri sayısı istemle uyuşmuyor (istem 1 · PACS 3)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== 3 ===== -->
+<h2><b>3</b> — Veri kaynağı ve kurallar</h2>
+<div class="kural">
+  <h3>Uçlar</h3>
+  <table style="margin-bottom:8px">
+    <tr><th style="width:280px">Bölüm</th><th>Kaynak</th><th style="width:110px">Durum</th></tr>
+    <tr><td>Liste satırları (tarih / modalite süzgeci)</td><td><code>GET /api/dicom/calismalar?bas&amp;bit&amp;modalite&amp;ara</code> → C-FIND STUDY (StudyDate aralığı, ModalitiesInStudy, PatientName/ID/Accession) + bizdeki eşleşme (radyoloji_istem.study_uid / accession, taraf kod / vkno)</td><td><span class="rz uy">ek uç</span></td></tr>
+    <tr><td>Kart: seriler, görüntü sayıları, etiketler</td><td><code>GET /api/dicom/manifest/{uid}</code> (var) + <code>GET /api/dicom/calisma/{uid}</code> (eşleşme, geçmiş, doz SR)</td><td><span class="rz uy">ek uç</span></td></tr>
+    <tr><td>OHIF'te Aç</td><td><code>GET /api/dicom/goruntule?studyUid</code> (var, jetonlu manifest)</td><td><span class="rz ok">var</span></td></tr>
+    <tr><td>İsteme bağla / bağı kaldır</td><td><code>POST /api/dicom/bagla</code> (var; kaldır = boş study_uid)</td><td><span class="rz ok">var</span></td></tr>
+    <tr><td>Hastaya bağla (PatientID ≠ dosya no)</td><td><code>POST /api/dicom/hasta-esle</code> {studyUid, hastaId}: <code>pacs_hasta_eslesme</code> (PatientID → taraf) - aynı PatientID'nin sonraki çalışmaları otomatik</td><td><span class="rz uy">ek tablo + uç</span></td></tr>
+    <tr><td>Başvuru + istem aç</td><td>mevcut başvuru akışı (tetkik seçimi modalite + açıklamadan önerilir), kayıtta study_uid yazılır</td><td><span class="rz ok">var akış</span></td></tr>
+    <tr><td>Önizleme</td><td>ilk görüntü WADO vekili (<code>/api/dicom/wado</code>) + istemcide cornerstone küçük render ya da sunucuda JPEG (<code>contentType=image/jpeg</code> ClearCanvas destekler)</td><td><span class="rz uy">seçim</span></td></tr>
+    <tr><td>Geçmiş</td><td><code>islem_log</code> tablo 1784 "pacs_calisma" (açıldı / bağlandı / bağ kaldırıldı / yanlış hasta bildirimi)</td><td><span class="rz uy">ek log id</span></td></tr>
+  </table>
+  <h3>Kurallar</h3>
+  <ul>
+    <li>Menü: Radyoloji › <b>PACS Çalışmaları</b> (liste kipi; kart jenerik değil, özel sayfa). Yetki <code>radyoloji.pacs</code> (gör / değiştir = bağlama). Radyolog ve tekniker görür; bağlama radyoloji sorumlusu.</li>
+    <li>Eşleşme sırası ①-⑤ (liste bilgi kutusu). ④ ad+doğum eşleşmesi <b>onay ister</b>; yanlış hasta bildirimi bağı kaldırır ve kalite olayı açar (KYS).</li>
+    <li>Kimlik: liste ve kart oturumlu; OHIF adresi ve WADO jetonlu (mevcut desen). Hasta adı PACS'tan gelir - KVKK: liste yalnız yetkili rolde, log tutulur.</li>
+    <li>Eşleşmeyen çalışma 30 gün içinde eşlenmezse "sahipsiz görüntü" uyarısı radyoloji sorumlusuna (bildirim); silme PACS yönetiminde, bizde yok.</li>
+    <li>Çok serili çalışmada istem seri sayısıyla uyuşmazsa kartta uyarı (kalite); doz SR serisi varsa DLP / CTDI isteme işlenir (BT).</li>
+    <li>ERP kipinde ekran yok (urunModu 2). Teleradyoloji: dış kurumdan gelen çalışmalar aynı listede kaynak "TELERAD" rozetiyle.</li>
+  </ul>
+</div>
+</body>
+</html>
