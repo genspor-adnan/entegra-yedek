@@ -3,6 +3,14 @@ import { gonder, istek } from '../cekirdek';
 export interface PlanZiyareti {
   id: number; tarih: string; hekim_id: number; hekim_ad: string; hekim_ilce: string; hekim_kurum: string;
   durum: number; oneri: number; sonuc_ad: string; acik_talep: number; notu: string; amac_ad: string; tur_ad: string;
+  /** Günün işi tablosu (panel): hedefin sıra bilgisi (plan ucu vade görünümünden ekler). */
+  siklik_hafta: number; son_ziyaret: string | null; son30_istem: number; gonderim_dusen: number;
+}
+/** SIRASI GELEN hedef (mockup v2 çekmecesi): planlı ziyareti olmayan, dikkat isteyen dış doktor / müşteri. */
+export interface SiradakiHedef {
+  hekim_id: number; hekim_ad: string; hekim_kurum: string; hekim_ilce: string; siklik_hafta: number;
+  son_ziyaret: string | null; vade_tarihi: string | null; gecikme_gun: number; acik_talep: number; son30_istem: number;
+  gonderim_dusen: number; sessiz_gun: number | null; yeni_hekim: number; tercih_gun: number | null; tercih_saat: string | null;
 }
 export interface SahaPerformansi {
   donem: { bas: string; bit: string; oncekiBas: string; oncekiBit: string };
@@ -26,6 +34,10 @@ export interface HaftalikPlan {
   temsilciler: { id: number; ad: string }[];
   ziyaretler: PlanZiyareti[];
   vade: { geciken: number; planlanacak: number; dusen: number; talepli: number } | null;
+  /** Özet kutuları (panel §1). */
+  ozet: { bugun_planli: number; bugun_yapildi: number; ay_gonderim: number; onceki_ay_gonderim: number;
+          hedef_sayisi: number; sessiz_sayisi: number; yeni_sayisi: number; sikliksiz_sayisi: number } | null;
+  siradakiler: SiradakiHedef[];
 }
 
 /**
@@ -48,8 +60,11 @@ export const disHekimUclari = {
   // ---- haftalık plan (1290) ----
   disHekimPlan: (haftaBas: string, temsilciId?: number) =>
     istek<HaftalikPlan>(`/api/dis-hekim/plan?hafta=${haftaBas}${temsilciId ? `&temsilciId=${temsilciId}` : ''}`),
-  disHekimPlanUret: (g: { haftaBas: string; temsilciId?: number; gunBasi?: number; grupla?: boolean }) =>
+  disHekimPlanUret: (g: { haftaBas: string; temsilciId?: number; gunBasi?: number; grupla?: boolean; hekimIdler?: number[] }) =>
     gonder<{ sayi: number; mesaj: string }>('/api/dis-hekim/plan/uret', g),
+  /** Toplu planla (mockup v2): seçili hedefler bir güne sırayla; saat verilmezse gündeki sondan + aralık. */
+  disHekimPlanlaToplu: (g: { hekimIdler: number[]; gun: string; baslangicSaat?: string; aralikDk?: number; temsilciId?: number }) =>
+    gonder<{ sayi: number; atlanan: number; idler: number[]; mesaj: string }>('/api/dis-hekim/planla-toplu', g),
   disHekimZiyaretTasi: (id: number, tarih: string) =>
     gonder<{ mesaj: string }>(`/api/dis-hekim/ziyaret/${id}/tasi`, { tarih }),
   disHekimZiyaretOnayla: (id: number) =>

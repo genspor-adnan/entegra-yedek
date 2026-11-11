@@ -177,6 +177,26 @@ başlığında … Listesi olsun".
 - **Terim (kullanıcı): "vade" yerine "Ziyaret Sırası"** (göç 1298: yetki adı, rehber satırı, rol amacı; web menü / sayfa
   metinleri; vade kolonu "Sıradaki Ziyaret"). Teknik adlar (`dis-hekim-vade`, `dis_doktor.vade`, `v_dis_hekim_ziyaret_vade`)
   değişmedi.
+- **Ziyaret Planı = Temsilci Paneli + takvim + "Sırası gelenler" çekmecesi (kullanıcı: "mockup uygula"; göçler 1299,
+  1300):** `DisHekimPlan.tsx` yeniden: üstte ÖZET KUTULARI (bugün planlı / yapıldı, geciken, açık talep, öneri, bu ay
+  gönderim-satış · geçen ay, hekimlerim / müşterilerim · 60 gün sessiz · yeni; tıklayınca çip + çekmece), ortada hafta
+  şeridi (eskisi), altta SEÇİLİ GÜNÜN İŞİ tablosu (gün başlığına tıkla; çipler Tümü / Geciken / Gönderimi-Satışı düşen /
+  Talebi açık / Öneri / Bu hafta; satırda ziyaret kartı, hedef kartı, ✓ / ✖). Görünüm segmenti **İkisi / Liste /
+  Takvim** (`localStorage dhp.mod`; liste kipinde gün sekmeleri). Sağda ÇEKMECE "⏰ Sırası gelenler": ilçe çipleri
+  (sayılı), ölçüt çipleri (Geciken / Sırası bu hafta / düşen / Talebi açık / Yeni), arama; satır **takvime
+  sürüklenir** (bırakınca `POST /planla-toplu` tek hedef), işaretlenip gün + saat ile **Seçilenleri plana ekle**, ilçe
+  başlığından **⤵ güne dağıt**, **⚙ Haftaya dağıt** = Planı Üret seçilenlerle. Sunucu: `GET /plan` yanıtına `ozet`
+  (bugün planlı / yapıldı, ay / önceki ay gönderim = istem ∪ satış, hedef / sessiz / yeni / sıklıksız sayıları) ve
+  `siradakiler` (planı olmayan, dikkat isteyen hedefler; hedef başına tek satır; tercih gün / saat), ziyaret satırına
+  sıra bilgisi (`siklik_hafta, son_ziyaret, son30_istem, gonderim_dusen`); yeni `POST /api/dis-hekim/planla-toplu`
+  {hekimIdler, gun, baslangicSaat?, aralikDk?=90, temsilciId?} (saat yoksa gündeki son planlıdan + aralık, yoksa 09:00;
+  o gün zaten planlı olan atlanır; dar kapsamda hedefler RolKapsamKapisi'ndan geçer). **1299:**
+  `fn_dis_hekim_plan_uret(..., p_hekimler int[] default null)` - verilince yalnız o hedefler, sıra şartı aranmaz (eski
+  6'lı imza düşürüldü). **1300:** `v_dis_hekim_ziyaret_vade` kipe bağlı (dış doktor `fn_urun_modu(0) <> 1`, müşteri
+  `<> 2`) - 1297 HBYS'de müşterileri de sayıyordu (dev 712). CSS `dhp-` ekleri (sayfa ızgarası `dhp-sayfa`; mod
+  parçaları TSX'te koşullu - temaSinifCakismasi kap altında genel sınıf yasağı). Testler `SahaPlanTopluTestleri`
+  (özet + sıradakiler + toplu planla 09:00 / 10:30 + tekrar atlama + seçili üretim), `SahaErpKipiTestleri` kip
+  görünümü. Rota (§4) yine yok.
 
 ### 10.11.2026
 

@@ -101,10 +101,17 @@ public sealed class SahaErpKipiTestleri(ApiSunucuOlgusu api)
             "insert into public.taraf (unvan, kod, musteri, personel, durum, sube_id, ziyaret_sikligi_hafta) values (@p0, @p1, 1, 0, 1, @p2, 4) returning id",
             [d.Onek + " Müşteri Ltd", d.Onek + "V", Merkez]);
         d.Temizle($"delete from public.taraf where id = {musteri}");
-        // Müşteri vade görünümünde (sıklık 4 hafta, hiç ziyaret yok → ekleme tarihinden vade).
-        var satir = await api.Veri.TekDegerAsync<int>(
-            "select count(*) from public.v_dis_hekim_ziyaret_vade where hekim_id = @p0 and siklik_hafta = 4", [musteri]);
-        Assert.Equal(1, satir);
+        // Müşteri sıra görünümünde YALNIZ ERP kipinde (1300; sıklık 4 hafta, hiç ziyaret yok → ekleme tarihinden sıra).
+        var eski = await KipYazAsync(1);
+        try
+        {
+            Assert.Equal(1, await api.Veri.TekDegerAsync<int>(
+                "select count(*) from public.v_dis_hekim_ziyaret_vade where hekim_id = @p0 and siklik_hafta = 4", [musteri]));
+            await KipYazAsync(2);
+            Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+                "select count(*) from public.v_dis_hekim_ziyaret_vade where hekim_id = @p0", [musteri]));
+        }
+        finally { await KipGeriAsync(eski); }
         // Temsilci bağı müşteriye de yazılabilir (tetik: dış doktor YA DA müşteri).
         var (temsilci, _) = await d.KullaniciAsync(await d.RolAsync("sahatem", ["dis_doktor.ziyaret:g"]), Merkez);
         await api.Veri.CalistirAsync("insert into public.taraf_personel (id, dis_hekim, sube_id) values (@p0, 0, @p1) on conflict (id) do nothing", [temsilci, Merkez]);
