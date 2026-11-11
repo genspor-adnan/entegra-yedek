@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../../api/istemci';
 import { guvenli, mesaj } from '../../mesaj';
-import { tarihSaat } from '../../bicim';
+import { anGirdiMetni, subeSimdiMetni, tarihSaat } from '../../bicim';
 import { KodSecim, MetinAlani, ZamanAlani, MUSTEHAKLIK } from './alanlar';
 import type { BasvuruBilgi } from '../BasvuruSekmesi';
 import type { KurumSozlesmesi } from '../../../sayfalar/belgeKarti/useKurumSecenekleri';
@@ -130,8 +130,8 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
   useEffect(() => {
     if (kilitli) return;
     const y: Partial<BasvuruBilgi> = {};
-    const zaman = (belgeTarihi ?? '').slice(0, 16)
-               || new Date().toISOString().slice(0, 16);
+    const zaman = anGirdiMetni(belgeTarihi ?? '').slice(0, 16)
+               || subeSimdiMetni();
 
     // SGK ALANLARI YALNIZ SGK ODEYICISINDE (tur 3). MEDULA grubu ozel ve
     //   "kurumu oder" basvurularinda da ciziliyor ama orada provizyon

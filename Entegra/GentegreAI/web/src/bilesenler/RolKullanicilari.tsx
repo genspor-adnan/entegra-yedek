@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { tarihSaat } from './bicim';
 import { api } from '../api/istemci';
 import type { RolKullanicisi } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -141,7 +142,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                   {k.aktif ? 'Aktif' : 'Pasif'}
                 </span>
               </td>
-              <td>{k.sonGiris ? String(k.sonGiris).slice(0, 16).replace('T', ' ') : '—'}</td>
+              <td>{k.sonGiris ? tarihSaat(k.sonGiris) : '—'}</td>
             </tr>
           ))}
         </tbody>

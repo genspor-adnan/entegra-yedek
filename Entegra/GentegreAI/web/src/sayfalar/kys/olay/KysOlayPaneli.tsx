@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { anGirdiMetni } from '../../../bilesenler/bicim';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../api/istemci';
 import { hataMetni, type KartMetaYaniti, type ListeSatiri } from '../../../api/sozlesme';
@@ -23,7 +24,7 @@ const okut = (k: Record<string, unknown>): Deger => {
   const d = bos();
   for (const a of ALANLAR) d[a] = k[a] == null ? '' : String(k[a]);
   // datetime-local "YYYY-MM-DDTHH:MM" ister; sunucu saniye / ofset döner.
-  d.tarih = d.tarih.slice(0, 16);
+  d.tarih = anGirdiMetni(d.tarih).slice(0, 16);
   return d;
 };
 

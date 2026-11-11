@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { yanittanBaslik, yanittanBasvuruBilgi } from '../sayfalar/belgeKarti/belgeOkuma';
+import { subeAyariniKur } from '../bilesenler/subeAyari';
 
 /**
  * SUNUCU YANITI -> KART DURUMU cevrimi.
@@ -11,6 +12,17 @@ import { yanittanBaslik, yanittanBasvuruBilgi } from '../sayfalar/belgeKarti/bel
 const bos = { tur: 15, tarafId: 5, tarafUnvan: 'Ali Veli' };
 
 describe('yanittanBaslik - tarih', () => {
+  beforeEach(() => subeAyariniKur({ id: 1, ad: 'Test', varsayilan: true, yazma: true,
+    ulkeKod: 'TR', telefonKodu: '+90', zamanDilimi: 'Europe/Istanbul', paraBirimi: 'TRY' }));
+
+  // KULLANICI 11.11.2026: "kaydettikten sonra tarih 3 saat geriye alıyor" - sunucu AN (…Z) döner, kutu ŞUBENİN
+  //   saatini göstermeli; ham metni kesmek UTC'yi (11:00) gösteriyordu. Yazma ve okuma aynı dilim.
+  it('sunucunun UTC ani subenin saatine cevrilir (11:00Z -> 14:00 Istanbul)', () => {
+    const d = yanittanBaslik({ ...bos, belgeTarihi: '2026-11-11T11:00:00Z', irsaliyeTarihi: '2026-11-11T05:30:00Z' }, 'TRY');
+    expect(d.tarih).toBe('2026-11-11T14:00');
+    expect(d.sevkTarihi).toBe('2026-11-11T08:30');
+  });
+
   it('16 karaktere kirpilir (datetime-local kutusu saniye kabul etmez)', () => {
     const d = yanittanBaslik({ ...bos, belgeTarihi: '2026-09-04T10:30:59.123' }, 'TRY');
     expect(d.tarih).toBe('2026-09-04T10:30');

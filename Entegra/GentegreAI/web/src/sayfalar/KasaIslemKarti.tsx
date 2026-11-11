@@ -13,7 +13,7 @@ import { TarafSecici } from '../bilesenler/TarafArama';
 import { FisOnizleme } from '../bilesenler/kasa/FisOnizleme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { GenForm, Modal } from '../bilesenler/GenForm';
-import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } from '../bilesenler/bicim';
+import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi, anGirdiMetni } from '../bilesenler/bicim';
 import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
 import { useKiymetBilgisi, usePlanGerceklestirme,
@@ -347,7 +347,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     onKaydedildi?.();
     const i = y.islem;
     setTur(Number(i.tur));
-    if (i.islemTarihi) setTarih(String(i.islemTarihi).slice(0, 16));
+    if (i.islemTarihi) setTarih(anGirdiMetni(i.islemTarihi).slice(0, 16));
     setPlanTarihi(i.planTarihi ? String(i.planTarihi).slice(0, 10) : '');
     // Sunucu ham ondalik gonderir ("1234.5600"); ekran Turkce bicim bekler -
     //   cevrilmezse kayit yeniden kaydedilince sayiOku noktayi binlik sanip

@@ -388,6 +388,9 @@ export function yerelGun(d: Date): string {
 }
 
 /** datetime-local kutusunun bekledigi YEREL "YYYY-MM-DDTHH:mm" (UTC'ye kaymaz). */
+/** ŞUBENİN ŞİMDİSİ girdi metni ("2026-11-11T14:05"): yeni kayıt varsayılanı - `toISOString().slice(0,16)` UTC verirdi (-3 sa). */
+export function subeSimdiMetni(d: Date = new Date()): string { return anGirdiMetni(d.toISOString()).slice(0, 16); }
+
 export function yerelAnMetni(d: Date): string {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${yerelGun(d)}T${p(d.getHours())}:${p(d.getMinutes())}`;

@@ -12,7 +12,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
-import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni } from './bicim';
+import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni, subeSimdiMetni } from './bicim';
 import { adSoyadUnvandan, ONEKLI_KARTLAR, useUnvanOneki } from './kart/useUnvanOneki';
 import { KIPLI_GOVDE_KARTLAR, KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
@@ -1440,7 +1440,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
                           const d = t[aktif.detay.ad] ?? bosDetay();
                           // Yeni olcum EN USTE: izgara hep en son olcumu gosterir.
                           const yeniSatir: Record<string, unknown> = {
-                            zaman: new Date().toISOString().slice(0, 16) };
+                            zaman: subeSimdiMetni() };
                           return { ...t, [aktif.detay.ad]:
                             { ...d, guncel: [yeniSatir, ...d.guncel] } };
                         })}>

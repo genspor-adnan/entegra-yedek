@@ -208,6 +208,19 @@ başlığında … Listesi olsun".
   deposu zorunlu; kalem eklemeden önce depo istenir (`transferBaslikEksigi` tüm depolu türlere); `belgeDogrula`
   `depoVar` ile boş depoyu reddeder. Test `BelgeDepoKuraliTestleri` (deposuz fiş 400, kalemli fişte depo değişimi
   422, aynı depo serbest).
+- **Belge tarihi kayıttan sonra 3 saat geri (kullanıcı: "alış/satış belgelerinde, transfer ve stoktan talep kartlarında
+  kaydettikten sonra tarih 3 saat geriye alıyor"; "bütün tarih kaydedilen yerlerde yazma ve okuma aynı zaman dilimi
+  olmalı"):** yazma doğruydu (istemci şube saati → PG oturumu şube diliminde → UTC an); okuma ham `…Z` metnini 16
+  karaktere kesip UTC saatini gösteriyordu. `belgeOkuma.dakika` artık `anGirdiMetni` (666/667, şube dilimi Intl) ile
+  çeviriyor; aynı kesme deseni başvuru alanları (`basvuru/alanlar.tsx`), kart zaman alanı (`kartAlanCizim`), satır
+  teslim tarihi (`belgeSatir`), kasa işlem tarihi, KYS olay tarihi, rol kullanıcıları son giriş (`tarihSaat`) için de
+  düzeltildi. Yeni kayıt varsayılanı `toISOString().slice(0,16)` (UTC şimdi) yerine `subeSimdiMetni()` (GenForm detay
+  satırı, provizyon). Test `belgeOkuma.test.ts` (11:00Z → 14:00 Istanbul). Kural: datetime-local kutusuna giden her
+  sunucu anı `anGirdiMetni`den geçer; ham `slice(0, 16)` yalnız dilimsiz metinde.
+- **Ziyaret Planı çekmecesi (kullanıcı): ilçe seçince o ilçedeki tüm hedefler** (planlı / sırada olmayan dahil; `GET
+  /plan` `siradakiler` artık bütün hedefler + `planli_ziyaret_id / planli_tarih`), ilçe combosu + en yoğun 6 rozet,
+  ölçüt Hepsi / Planlı, satırda durum rozeti; sürükle-bıraktan sonra mesaj yok; çekmece iç sınıfları `dhp-` öneki
+  (genel `ust / liste / alt / ic / d` ile çakışıp ölçüt çipleri eziliyordu).
 
 ### 10.11.2026
 

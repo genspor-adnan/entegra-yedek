@@ -8,7 +8,7 @@
  * KURAL: buradaki hesaplar ONIZLEMEDIR - kesin tutari sunucu (BelgeHesap)
  * hesaplar. Ikisi ayni sirayi izler ki ekran ile kayit uyusun.
  */
-import { hamSayi, yerelAnMetni } from '../bilesenler/bicim';
+import { anGirdiMetni, hamSayi, yerelAnMetni } from '../bilesenler/bicim';
 
 /**
  * Satırın ödeme dağılımı (470). Alan adları API ile birebir; kalanları da
@@ -334,7 +334,7 @@ export function yanittanSatirlar(
     izlemeKodu: String(r.izlemeKodu ?? ''),
     // Termin (140): sunucu tam tarih doner, ekran gun bekliyor.
     // 368: alan artik SAATLI (timestamp) - datetime-local 16 karakter ister.
-    teslimTarihi: String(r.teslimTarihi ?? '').slice(0, 16),
+    teslimTarihi: anGirdiMetni(r.teslimTarihi).slice(0, 16),
     // Ambalaj (143): GIRILEN miktar `adet`tir; `miktar` ana birim karsiligidir
     //   (2 kutu / 24 adet) - kart girileni gosterir.
     birim: Number(r.birim ?? 0),

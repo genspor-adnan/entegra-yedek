@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { anGirdiMetni } from '../../bicim';
 import { api } from '../../../api/istemci';
 
 /**
@@ -122,7 +123,7 @@ export function ZamanAlani({ etiket, deger, onDeger, kilitli }: {
   return (
     <label className="alan">
       <span className="etiket">{etiket}</span>
-      <input type="datetime-local" value={String(deger ?? '').slice(0, 16)}
+      <input type="datetime-local" value={anGirdiMetni(deger).slice(0, 16)}
              disabled={kilitli}
              onChange={e => onDeger(e.target.value || null)} />
     </label>

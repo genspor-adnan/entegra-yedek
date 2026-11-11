@@ -1,4 +1,4 @@
-import { yerelAnMetni } from '../../bilesenler/bicim';
+import { anGirdiMetni, yerelAnMetni } from '../../bilesenler/bicim';
 import type { BasvuruBilgi } from '../../bilesenler/belge/BasvuruSekmesi';
 
 /**
@@ -21,7 +21,9 @@ const metin = (v: unknown): string => String(v ?? '');
 /** Bos/`null` KIMLIGI 0'a degil `null`'a cevirir - 0 gecerli bir id degil. */
 const kimlik = (v: unknown): number | null => (v != null ? Number(v) : null);
 /** `datetime-local` kutusu 16 karakter ister ("2026-09-04T10:00"). */
-const dakika = (v: unknown): string | null => (v ? String(v).slice(0, 16) : null);
+// SUNUCU ANI (…Z) ŞUBE DİLİMİNE (kullanıcı 11.11.2026: "kaydettikten sonra tarih 3 saat geriye alıyor"): ham metni
+//   kesmek UTC saati gösteriyordu; yazma şube diliminde, okuma da öyle olmalı (anGirdiMetni, 666/667).
+const dakika = (v: unknown): string | null => (v ? anGirdiMetni(v).slice(0, 16) : null);
 const kisi = (id: unknown, ad: unknown) =>
   (id ? { id: Number(id), ad: metin(ad) } : null);
 

@@ -1,4 +1,5 @@
 import { TelefonGirdi } from './TelefonGirdi';
+import { anGirdiMetni } from './bicim';
 import { c } from '../dil/ceviri';
 import { telefonAlaniMi, epostaGecerliMi, bicimHatasi } from './alanBicim';
 import { agacSecenekleri } from './agacSecenek';
@@ -382,7 +383,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           type={a.tip === 'tarih' ? 'date' : a.tip === 'zaman' ? 'datetime-local'
                 : EPOSTA_ALANLARI.has(a.ad) ? 'email' : 'text'}
           value={a.tip === 'tarih' ? String(deger[a.ad] ?? '').slice(0, 10)
-                : a.tip === 'zaman' ? String(deger[a.ad] ?? '').slice(0, 16)
+                : a.tip === 'zaman' ? anGirdiMetni(deger[a.ad]).slice(0, 16)
                                    : String(deger[a.ad] ?? '')}
           maxLength={a.enFazlaUzunluk ?? undefined}
           disabled={salt || !a.yazilabilir}
