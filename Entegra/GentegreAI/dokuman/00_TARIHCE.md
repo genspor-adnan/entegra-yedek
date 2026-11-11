@@ -247,6 +247,10 @@ başlığında … Listesi olsun".
   çalışmaları, istemin kendi çalışması - study_uid ya da accession eşleşen - vurgulu "✓ bağlı"); eşleşmeyen çalışma
   **🔗 Bağla** ile isteme yazılır (`POST /api/dicom/bagla` {istemId, studyUid}; radyoloji değiştir) - sonra "🖼 Görüntüle"
   ve rapor o çalışmayı açar. Hasta kartındaki sekme kaldırıldı.
+- **Demo istemleri (kullanıcı: "GENTEGRE DEMO için PACS'taki tüm çekimlere istem kartı oluştur"):** KOSUYOLU'da
+  radyoloji_istem 540-544 ve dev'de 2564-2568 (GDEMO001-005; BT / MR / US / Röntgen / çok kareli MR; `study_uid` bağlı,
+  durum 2 çekildi, serbest istem, SQL ile - KOSUYOLU admin parolası yok). İstem kartında PACS bloğu 5 çalışmayı
+  listeler, kendi çalışması "✓ bağlı", "🖼 Görüntüle" OHIF'i açar (dev'de Edge ile doğrulandı).
 
 ### 10.11.2026
 

@@ -46,6 +46,8 @@ export function PacsGoruntuleri({ hastaId, istemId, vurguStudyUid, vurguAccessio
         <button className="d" style={{ marginLeft: 'auto' }} onClick={() => setYenile(t => t + 1)}>⟳</button>
       </div>
       <table className="hi-tablo" style={{ width: '100%' }}>
+        {/* Düğmeler tek satır (kırılınca "🖼" ve "Aç" ayrı satıra düşüyordu). */}
+        <style>{`[data-testid="istem-pacs"] td button { white-space: nowrap }`}</style>
         <thead><tr>
           <th>{c('Tarih')}</th><th>{c('Modalite')}</th><th>{c('Açıklama')}</th><th>{c('Accession')}</th>
           <th className="sag">{c('Görüntü')}</th><th>{c('PACS hasta')}</th><th>{c('Bu istem')}</th><th></th>
