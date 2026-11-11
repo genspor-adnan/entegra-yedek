@@ -293,6 +293,18 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   Doğrulama: Gentegre `OruUretici` (Bakanlık profili) + `MllpIstemci` → K1 → benzetim: AA; 2.5 kurum profili 0002 ile AE
   (Gentegre AE olarak okudu); benzetim kapalıyken "ACK göndermeden kapattı" = kuyrukta kalır, tekrar. Dev DB'de onaylı
   raporlu teleradyoloji işi olmadığından kuyruk ucu (`/istek/{id}/teslim`) uçtan uca denenemedi; kurum ayarı değişmedi.
+- **ORM üreticisi (kullanıcı: "ORM üreticiyi yaz"):** `Gentegre.Cekirdek/Cihaz/OrmUretici.cs` - Teletıp istem mesajı
+  ORM^O01, yalnız Bakanlık profili (2.3.1), alanlar kılavuz 3.43 Tablo 8-19 birebir: PID-2 `SKRS-dosya`, PID-3
+  `dosya^^HBYS`, PID-4 `TCKN^^^TC` / `pasaport^^^PASS` + PID-26 ülke, PV1-19 `başvuru^^^^^^^^birim&ad&HBYS`, PV1-20
+  SGK/OTHER + PV1-50 Medula takip, ORC-2 `acc^HBYS`, ORC-21 `Kurum^^SKRS\S\şube\S\Medula` (ayraç kaçışsız), OBR-3
+  `acc^RBS`, OBR-4 SUT + çoklu LOINC, OBR-15/20/21/24/27/31/34/36, DG1 A/F, NTE 1-4 tek satır. NW / XO (NTE yok) / CA
+  (yalnız MSH-PID-PV1-ORC). `OrmUretici.Denetle`: Bakanlık'ın reddedeceği eksikler (accession, SKRS, MSH-3, TCKN
+  algoritması, PV1-19, Medula takip, hekim TCKN, SUT biçimi, LOINC, modalite 2-16, OBR-6/20/21/36, DG1 türü); iptalde
+  yalnız kimlik alanları. Testler `OrmUreticiTestleri` (24). K1 üzerinden benzetime NW/XO/CA: AA; PV1-19 boş: denetim
+  yakalar, zorla gönderilirse 0278 AE. Not: mevcut ORU üreticisinin PID-3/PID-4 ekleri ve ORC-21'i kılavuz biçiminde
+  değil (yalnız SKRS) - ayrıca düzeltilecek. Kuyruk/tetik (kabulde NW, randevu değişince XO, iptalde CA) sıradaki adım.
+  (`MuayeneTamamlamaTestleri.Tamamlama_eNabiz_zorunlulariyla_engellenir` muayene uçlarının dosyalara bölünmesinden
+  beri düşüyor - bu işle ilgisiz.)
 
 ### 10.11.2026
 
