@@ -595,6 +595,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     Dev'de PACS hesabı (id 22, kurum geneli, dosyadaki değerlerle) kart ucundan açıldı: sınama C-ECHO / C-FIND (5 çalışma) /
     WADO 34 KB / görüntüleyici ✓; yanlış PACS AE ile C-ECHO reddi ve ipucu; görüntüleyici manifesti şubeli jetonla 200,
     şubesi değiştirilmiş jeton 401.
+  * KOSUYOLU (kullanıcı: "Entegrasyon Hesapları nda clear canvas yok"): 3000 portundaki ekran KOSUYOLU'ya bağlı, PACS hesabı
+    yalnız dev'de açılmıştı - satır yokken ayar dosyadan okunduğu için listede görünmüyordu (hata değil). KOSUYOLU'ya
+    kurum geneli PACS hesabı eklendi (id 10, "ClearCanvas - Merkez") - KOSUYOLU API'sinin zaten kullandığı dosya değerleriyle
+    (127.0.0.1:104, SERVERAE / GENTEGRE, WADO :1000, OHIF :3001); davranış değişmedi, artık ekrandan düzenlenir. SQL ile
+    eklendi - ISLEMLOG "eklendi" kaydı yok. UNIVERSE ERP modunda (urun_modu 1): PACS sağlık kodu, orada listelenmez.
 
 ### 10.11.2026
 
