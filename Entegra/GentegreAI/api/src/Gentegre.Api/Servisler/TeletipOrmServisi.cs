@@ -63,12 +63,13 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         await using var b = await veri.AcAsync(iptal);
         await using var islem = await b.BeginTransactionAsync(iptal);
         var satir = await b.TekAsync("""
-            select id, istem_id, emir, durum, deneme_no, veri::text as veri, accession_no
+            select id, istem_id, emir, durum, deneme_no, veri::text as veri, accession_no, rapor_id
               from public.teletip_gonderim where id = @p0 for update skip locked
             """, islem, [id], o => new
         {
             IstemId = o.SayiNull("istem_id"),
-            Emir = (OrmEmri)Convert.ToInt32(o.GetValue(o.GetOrdinal("emir"))),
+            RaporId = o.SayiNull("rapor_id"),
+            EmirKodu = Convert.ToInt32(o.GetValue(o.GetOrdinal("emir"))),
             Durum = Convert.ToInt16(o.GetValue(o.GetOrdinal("durum"))),
             Deneme = o.Sayi("deneme_no"),
             Veri = o.Metin("veri"),
@@ -88,22 +89,41 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         if (json.Length == 0)
             return await YazAsync(b, islem, id, 4, satir.Deneme, "", "İstem yok (silinmiş) ve anlık görüntü yok.", "", "", iptal);
 
+        var oruMu = satir.EmirKodu == 4;
         var v = (JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi()) with
         {
-            Emir = satir.Emir,
+            // ORU satırında ORM denetimi "yeni istem" kurallarıyla yapılır (hasta / istem / kurum alanları aynı).
+            Emir = oruMu ? OrmEmri.Yeni : (OrmEmri)satir.EmirKodu,
             FirmaKodu = firma,
             Encoding = kodlama.Length > 0 ? kodlama : "UTF8",
             KontrolNo = $"TT{id}-{satir.Deneme + 1}",
         };
 
-        var eksik = OrmUretici.Denetle(v);
-        if (eksik.Count > 0)
-            return await YazAsync(b, islem, id, 3, satir.Deneme, "", string.Join(" · ", eksik), "", "", iptal);
+        string mesaj;
+        if (oruMu)
+        {
+            // RAPOR (1309): rapor kısmı fn_teletip_oru_verisi; istem / hasta / kurum kısmı yukarıdaki ORM verisi.
+            var raporJson = satir.RaporId is int rid
+                ? await b.TekDegerAsync<string>("select public.fn_teletip_oru_verisi(@p0)::text", islem, [rid], iptal) ?? "" : "";
+            if (raporJson.Length == 0)
+                return await YazAsync(b, islem, id, 4, satir.Deneme, "", "Rapor yok (silinmiş).", "", "", iptal);
+            var rapor = JsonSerializer.Deserialize<TeletipRaporVerisi>(raporJson, JsonAyar) ?? new TeletipRaporVerisi();
+            var eksikOru = TeletipOruKurucu.Denetle(v, rapor);
+            if (eksikOru.Count > 0)
+                return await YazAsync(b, islem, id, 3, satir.Deneme, "", string.Join(" · ", eksikOru), "", "", iptal);
+            mesaj = OruUretici.Uret(TeletipOruKurucu.Kur(v, rapor));
+        }
+        else
+        {
+            var eksik = OrmUretici.Denetle(v);
+            if (eksik.Count > 0)
+                return await YazAsync(b, islem, id, 3, satir.Deneme, "", string.Join(" · ", eksik), "", "", iptal);
+            mesaj = OrmUretici.Uret(v);
+        }
         if (adres.Length == 0)
             return await YazAsync(b, islem, id, 5, satir.Deneme, "", "Teletıp HL7 adresi (teletip.hl7_adres) tanımlı değil.", "", "", iptal,
                                   sonraki: TimeSpan.FromMinutes(30));
 
-        var mesaj = OrmUretici.Uret(v);
         var s = await mllp.GonderAsync(adres, mesaj, v.Encoding, false, 40, iptal);
         short durum = s.AckKodu is "AA" or "CA" ? (short)1
                     : s.KaliciHata ? (short)2
@@ -145,6 +165,75 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         await islem.CommitAsync(iptal);
         _ = deneme;
         return new(id, durum, ack, hata);
+    }
+}
+
+/// <summary>fn_teletip_oru_verisi (1309) - raporun Bakanlık kısmı.</summary>
+public sealed record TeletipRaporVerisi
+{
+    public int RaporId { get; init; }
+    public string Teknik { get; init; } = "";
+    public string Karsilastirma { get; init; } = "";
+    public string Bulgular { get; init; } = "";
+    public string Sonuc { get; init; } = "";
+    public DateTime? OnayZamani { get; init; }
+    public DateTime? CekimZamani { get; init; }
+    public short IstemNedeniPuan { get; init; }
+    public short CekimKalitePuan { get; init; }
+    public string RadyologTckn { get; init; } = "";
+    public string RadyologSoyad { get; init; } = "";
+    public string RadyologAd { get; init; } = "";
+    public string KontrastObx17 { get; init; } = "";
+    public bool Duzeltme { get; init; }
+    /// <summary>fn_rad_bakanlik_eksik: Bulgular ≥ 50 karakter, Sonuç dolu - boş = uygun.</summary>
+    public string RaporEksik { get; init; } = "";
+}
+
+/// <summary>
+/// KENDİ RAPORUMUZUN ORU'SU (1309): istem / hasta / kurum alanları ORM verisinden (tek kaynak), rapor alanları
+/// <see cref="TeletipRaporVerisi"/>'nden; üretim <see cref="OruUretici"/> Bakanlık profili (kılavuz 3.43 Tablo 20-22).
+/// OBR-15 kendi hastanemizde "Radiology" (rapor ve istem aynı kurum - telerad'daki A/B ayrımı yok).
+/// </summary>
+public static class TeletipOruKurucu
+{
+    public static OruVerisi Kur(OrmVerisi v, TeletipRaporVerisi r) => new()
+    {
+        Profil = Hl7Profili.Bakanlik,
+        GonderenUygulama = v.FirmaKodu, GonderenTesis = v.HbysAdi,
+        AliciUygulama = v.AliciUygulama, AliciTesis = v.AliciTesis,
+        Zaman = v.Zaman, KontrolNo = v.KontrolNo, Encoding = v.Encoding,
+        HastaDosyaNo = v.HastaDosyaNo, HastaTckn = v.HastaTckn, HastaSoyad = v.HastaSoyad, HastaAd = v.HastaAd,
+        DogumTarihi = v.DogumTarihi, Cinsiyet = v.Cinsiyet,
+        BasvuruNo = v.BasvuruReferansi, HastaneReferans = v.HastaneReferansi,
+        KurumSkrs = v.KurumSkrs, KurumAdi = v.KurumAdi, KurumKisaAdi = v.KurumKisaAdi, SubeNo = v.SubeNo,
+        MedulaTesisKodu = v.MedulaTesisKodu,
+        HastaSinifi = v.HastaSinifi, BirimId = v.BirimId, Bolum = v.BirimAdi, Sgk = v.Sgk, MedulaTakipNo = v.MedulaTakipNo,
+        AccessionNo = v.AccessionNo,
+        IsteyenHekimTckn = v.IsteyenHekim.Kimlik, IsteyenHekimSoyad = v.IsteyenHekim.Soyad, IsteyenHekimAd = v.IsteyenHekim.Ad,
+        SutKodu = v.SutKodu, SutAdi = v.SutAdi,
+        Loinc = v.Loinc.FirstOrDefault()?.Kod ?? "", LoincAdi = v.Loinc.FirstOrDefault()?.Ad ?? "",
+        IstemZamani = v.IstemZamani, OnayZamani = r.OnayZamani, CekimZamani = r.CekimZamani,
+        PlanlananZaman = v.PlanlananZaman,
+        KlinikBilgi = v.KlinikBilgi, HizmetVerenSkrs = v.GonderilenSkrs,
+        SysTakipNo = v.SysTakipNo, ModaliteKodu = v.Modalite,
+        TeknisyenId = v.Teknisyen.Kimlik, TeknisyenSoyad = v.Teknisyen.Soyad, TeknisyenAd = v.Teknisyen.Ad,
+        RaporTeknik = r.Teknik, RaporKarsilastirma = r.Karsilastirma, RaporBulgular = r.Bulgular, RaporSonuc = r.Sonuc,
+        IstemNedeniPuan = r.IstemNedeniPuan, CekimKalitePuan = r.CekimKalitePuan,
+        RadyologTckn = r.RadyologTckn, RadyologSoyad = r.RadyologSoyad, RadyologAd = r.RadyologAd,
+        KontrastObx17 = r.KontrastObx17, Duzeltme = r.Duzeltme,
+        TaniIcd = [.. v.Tanilar.Select(t => t.Icd).Where(x => !string.IsNullOrWhiteSpace(x))],
+    };
+
+    /// <summary>ORM'in ortak denetimi (hasta, istem, kurum) + rapora özgü: kılavuz OBX-5 (Bulgular ≥ 50, Sonuç), OBX-16
+    /// radyolog TCKN (ÇKYS'den doğrulanır), OBX-13 puanları, OBR-7 onay zamanı.</summary>
+    public static List<string> Denetle(OrmVerisi v, TeletipRaporVerisi r)
+    {
+        var e = OrmUretici.Denetle(v with { Emir = OrmEmri.Yeni });
+        if (r.RaporEksik.Length > 0) e.Add(r.RaporEksik);
+        if (!OrmUretici.TcknGecerli(r.RadyologTckn)) e.Add("Raporu onaylayan radyoloğun TCKN'si yok ya da geçersiz (OBX-16).");
+        if (r.IstemNedeniPuan <= 0 || r.CekimKalitePuan <= 0) e.Add("İstem nedeni / çekim kalitesi puanı girilmemiş (OBX-13).");
+        if (r.OnayZamani is null) e.Add("Rapor onay zamanı yok (OBR-7).");
+        return e;
     }
 }
 

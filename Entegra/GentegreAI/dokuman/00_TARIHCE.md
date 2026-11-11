@@ -417,6 +417,22 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     ya da ayar yetkisiyle. `MirthIzleme.TeletipHaritasiAsync` configuration map'i okur.
   * Doğrulama: web tsc + 1133 vitest; API testleri; dev'de GET, eksik kimlikle açma 400 (alan hataları), geçerli kayıt,
     ekran görüntüsü; dev ayarları eski (boş) hâline döndürüldü.
+- **Kendi raporlarımızın ORU'su Teletıp'a (db/1309; kullanıcı: "kendi raporlarımızın ORU'sunu Teletıp'a bağla"):**
+  * Kuyruk: `teletip_gonderim` emir 4 = ORU (`rapor_id` sütunu). Aynı HL7 kuyruğu (kanal 1) olduğu için sıra kuralı
+    ORU'yu istemin NW'sinden sonraya koyar. Tetik `tg_radyoloji_rapor_teletip`: rapor onaya geçince (durum 3) ORU;
+    istemin NW'si hiç açılmamışsa (Teletıp istemden sonra açıldı) önce NW; aynı rapor için bekleyen ORU varken yenisi
+    yok; ek rapor (ust_rapor_id) OBX-11 "C".
+  * Veri: istem / hasta / kurum `fn_teletip_orm_verisi` (tek kaynak), rapor `fn_teletip_oru_verisi` (4 Bakanlık
+    parçası, onaylayan radyolog, onay / çekim zamanı, OBX-13 puanları, OBX-17 kontrast, ek rapor, fn_rad_bakanlik_eksik).
+  * Servis: `TeletipOruKurucu.Kur` (ORM verisi + rapor → OruVerisi, Bakanlık profili) ve `Denetle` (ORM ortak denetimi
+    + Bulgular ≥ 50 / Sonuç, radyolog TCKN OBX-16, OBX-13 puanları, OBR-7 onay zamanı); eksikse gidemez.
+  * Ekranlar: liste "Rapor (ORU)" sütunu, son emir "ORU", kartta "ORU^R01" başlığı, panoda "Rapor (ORU)" sayacı.
+  * Testler `TeletipOruTestleri` (7: onay → NW + ORU bir kez, NW yoksa önce NW, kapalıyken yok, rapor verisi, eşleme
+    SN / ORC-21 / OBX-13 / OBX-16 / C, rapora özgü denetim, servis); ilgili paketler 244/244. İki servis test sınıfı
+    aynı referans ayarlarını geçici değiştirdiği için `[Collection("TeletipReferans")]` ile sıralı (paralelken biri
+    ötekinin geçici değerini geri yazıyordu - test DB izi temizlendi).
+  * KOSUYOLU uçtan uca: demo istem 545'e TEST raporu (rapor 537, radyolog test hekim TT-HEKIM) yazılıp onaylandı →
+    ORU (satır 7) NW / XO'dan sonra Mirth K1 → benzetim AA (kontrol no TT7-1). 1309 dev / test / UNIVERSE / KOSUYOLU'da.
 
 ### 10.11.2026
 

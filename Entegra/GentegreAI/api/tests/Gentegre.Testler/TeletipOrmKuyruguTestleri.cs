@@ -15,6 +15,9 @@ namespace Gentegre.Testler;
 /// verisi C# OrmVerisi'ne birebir okunur mu, gönderim servisi ACK'e göre durumu doğru yazar mı.
 /// Tetik testleri transaction içinde (geri alınır); servis testi kendi satırlarını açar ve siler.
 /// </summary>
+// Servis testleri ortak referans ayarlarını (teletip.hl7_adres / firma_kodu) geçici değiştirir: paralel koşarsa biri
+//   ötekinin geçici değerini "eski" sanıp geri yazar. Aynı koleksiyon = sırayla.
+[Collection("TeletipReferans")]
 public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
     private static readonly CancellationToken Iptal = CancellationToken.None;

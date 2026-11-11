@@ -180,9 +180,12 @@ public static partial class KaynakKatalogu
             new("loinc",       "t.loinc",         "metin", "LOINC",      Genislik: 80),
             new("istem",       string.Format(TeletipDurumMetni, "t.nw_durum"), "metin", "İstem (NW)", Hizalama: "orta",
                                                                           Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
-            new("sonEmir",     "case t.son_emir when 1 then 'NW' when 2 then 'XO' when 3 then 'CA' else '' end",
+            new("sonEmir",     "case t.son_emir when 1 then 'NW' when 2 then 'XO' when 3 then 'CA' when 4 then 'ORU' else '' end",
                                                   "metin", "Son Emir",   Hizalama: "orta", Genislik: 80),
             new("sonDurum",    string.Format(TeletipDurumMetni, "t.son_durum"), "metin", "Son Mesaj", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
+            // RAPOR (1309): kendi raporumuzun ORU'su - onaylanınca kuyruğa girer; rapor yoksa boş.
+            new("rapor",       string.Format(TeletipDurumMetni, "t.oru_durum"), "metin", "Rapor (ORU)", Hizalama: "orta",
                                                                           Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
             new("genel",       "case t.genel_durum when 3 then 'sorunlu' when 2 then 'kuyrukta' when 1 then 'tamam' else 'atlandı' end",
                                                   "metin", "Genel",      Hizalama: "orta", Bicim: "rozet", Genislik: 90,

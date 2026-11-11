@@ -4,7 +4,7 @@ import { gonder, istek } from '../cekirdek';
  * TELETIP GÖNDERİMİ (1302-1304; Bakanlık Teleradyoloji, Mirth K1 üzerinden). Sunucu mesajı kurar, denetler, gönderir;
  * istemci yalnız izi gösterir, ham mesajı açar ve "yeniden gönder" der.
  * Durum: 0 kuyrukta · 1 gönderildi (AA) · 2 reddedildi (AE) · 3 gidemez (eksik) · 4 atlandı · 5 ulaşmadı (tekrar).
- * Emir: 1 NW (yeni istem) · 2 XO (güncelleme) · 3 CA (iptal).
+ * Emir: 1 NW (yeni istem) · 2 XO (güncelleme) · 3 CA (iptal) · 4 ORU (rapor, 1309).
  */
 export interface TeletipSatir {
   id: number; kanal: number; emir: number; durum: number; denemeNo: number; ackKodu: string; hata: string;
@@ -17,7 +17,7 @@ export interface TeletipIstemOzet {
 /** Teletıp panosu (mockup §2): günün özeti, son olaylar, Mirth kanal durumları. */
 export interface TeletipPano {
   aktif: boolean; hl7Adres: string;
-  ozet: { gun: string; nwToplam: number; nwGonderildi: number; xoCaToplam: number; xoCaGonderildi: number; reddedildi: number;
+  ozet: { gun: string; nwToplam: number; nwGonderildi: number; xoCaToplam: number; xoCaGonderildi: number; oruToplam: number; oruGonderildi: number; reddedildi: number;
           gidemez: number; kuyrukta: number; enEskiDk: number; sorunluToplam: number };
   sonOlaylar: { id: number; istemId: number | null; accessionNo: string; emir: number; durum: number; ackKodu: string;
                 hata: string; zaman: string; hastaAdi: string }[];
@@ -65,5 +65,5 @@ export const TELETIP_DURUM: Record<number, { ad: string; sinif: string }> = {
   4: { ad: 'atlandı', sinif: 'gri' },
   5: { ad: 'ulaşmadı', sinif: 'uyari' },
 };
-export const TELETIP_EMIR: Record<number, string> = { 1: 'NW', 2: 'XO', 3: 'CA' };
-export const TELETIP_EMIR_ADI: Record<number, string> = { 1: 'Yeni istem', 2: 'Güncelleme', 3: 'İptal' };
+export const TELETIP_EMIR: Record<number, string> = { 1: 'NW', 2: 'XO', 3: 'CA', 4: 'ORU' };
+export const TELETIP_EMIR_ADI: Record<number, string> = { 1: 'Yeni istem', 2: 'Güncelleme', 3: 'İptal', 4: 'Rapor' };

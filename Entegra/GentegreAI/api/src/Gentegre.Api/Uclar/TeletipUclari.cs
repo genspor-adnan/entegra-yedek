@@ -159,6 +159,8 @@ public static class TeletipUclari
                        (select count(*) from t where emir = 1 and durum = 1)       as "nwGonderildi",
                        (select count(*) from t where emir in (2, 3))               as "xoCaToplam",
                        (select count(*) from t where emir in (2, 3) and durum = 1) as "xoCaGonderildi",
+                       (select count(*) from t where emir = 4)                     as "oruToplam",
+                       (select count(*) from t where emir = 4 and durum = 1)       as "oruGonderildi",
                        (select count(*) from t where durum = 2)                    as reddedildi,
                        (select count(*) from t where durum = 3)                    as gidemez,
                        (select count(*) from public.teletip_gonderim where durum in (0, 5)) as kuyrukta,

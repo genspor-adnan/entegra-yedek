@@ -87,6 +87,7 @@ export function TeletipPano() {
       <div className="ttp-ozet">
         <div className="ttp-kutu"><small>{c('İstem (NW)')}</small><b>{o.nwToplam}</b> <span>· {o.nwGonderildi} {c('kabul')}</span></div>
         <div className="ttp-kutu"><small>{c('Güncelleme / iptal')}</small><b>{o.xoCaToplam}</b> <span>· {o.xoCaGonderildi} {c('kabul')}</span></div>
+        <div className="ttp-kutu"><small>{c('Rapor (ORU)')}</small><b>{o.oruToplam}</b> <span>· {o.oruGonderildi} {c('kabul')}</span></div>
         <div className={`ttp-kutu${o.kuyrukta > 0 ? ' sari' : ''}`}><small>{c('Kuyrukta bekleyen')}</small><b>{o.kuyrukta}</b>
           {o.kuyrukta > 0 && <span>· {c('en eski')} {o.enEskiDk} {c('dk')}</span>}</div>
         <div className={`ttp-kutu${o.reddedildi > 0 ? ' kir' : ''}`}><small>{c('Reddedildi (AE)')}</small><b>{o.reddedildi}</b></div>
@@ -155,7 +156,7 @@ const TTP_STIL = `
 .ttp .ttp-sag code{font-weight:normal;background:#eef4fc;border:1px solid #cfe0f5;border-radius:3px;padding:0 5px}
 .ttp .ttp-test{margin:8px 18px 0;padding:6px 10px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;font-size:12px}
 .ttp .ttp-test.ttp-hata{border-color:#efc3c3;background:#fbf0f0;color:#9d3434}
-.ttp .ttp-ozet{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:10px 18px}
+.ttp .ttp-ozet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:10px 18px}
 @media (max-width:1000px){.ttp .ttp-ozet{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ttp .ttp-kutu{border:1px solid #e3e9f0;border-radius:4px;background:#fbfcfd;padding:8px 10px}
 .ttp .ttp-kutu small{display:block;color:var(--soluk,#6b7a8b);font-size:10.5px}

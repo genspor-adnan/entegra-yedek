@@ -131,7 +131,7 @@ export function TeletipGonderimKarti() {
           </div>
           {satir && (
             <div className="ttk-blok">
-              <h4>{c('HL7 mesajı')} <span className="ttk-ip">· {TELETIP_EMIR[satir.emir]} · ORM^O01 · 2.3.1</span></h4>
+              <h4>{c('HL7 mesajı')} <span className="ttk-ip">· {TELETIP_EMIR[satir.emir]} · {satir.emir === 4 ? 'ORU^R01' : 'ORM^O01'} · 2.3.1</span></h4>
               <div className="ttk-ic">
                 {ham?.mesaj ? <pre className="ttk-hl7">{ham.mesaj}</pre>
                   : <div className="ttk-soluk">{satir.durum === 3 ? c('Mesaj gönderilmedi: eksik alanlar var (sağdaki "Ne yapmalı").')
