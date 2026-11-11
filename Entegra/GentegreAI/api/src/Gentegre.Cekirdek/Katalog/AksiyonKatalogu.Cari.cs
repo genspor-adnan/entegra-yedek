@@ -162,7 +162,10 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "dis_doktor.ziyaret", Islem: Islem.Degistir, KayitGerekir: true, Sira: 15,
                 Ipucu: "Ziyaret notunu okudum (yönetici)"),
             new("dis-hekim-ziyaret.hekim-karti", "🩺 Dış Doktor Kartı", "dis-hekim", Hedef: "sagtus,palet",
-                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 16),
+                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 16, UrunModu: UrunModlari.Hbys),
+            // ERP (1297): ziyaret edilen müşteri - kartı /cari.
+            new("dis-hekim-ziyaret.musteri-karti", "👤 Müşteri Kartı", "dis-hekim", Hedef: "sagtus,palet",
+                KaynakKodu: "cari", Islem: Islem.Gor, KayitGerekir: true, Sira: 16, UrunModu: UrunModlari.Erp),
         ];
         // ZIYARET VADESI (1290): satir = hekim; "Ziyaret Planla" planli (durum 0) ziyaret acar.
         s["dis-hekim-vade-liste"] =
@@ -174,7 +177,9 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "dis_doktor.ziyaret", Islem: Islem.Ekle, KayitGerekir: true, Sira: 11,
                 Ipucu: "Yapılan ziyareti hemen kaydet (ziyaret kartı)"),
             new("dis-hekim-vade.hekim-karti", "🩺 Dış Doktor Kartı", "dis-hekim", Hedef: "sagtus,palet",
-                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                KaynakKodu: "dis_doktor", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: UrunModlari.Hbys),
+            new("dis-hekim-vade.musteri-karti", "👤 Müşteri Kartı", "dis-hekim", Hedef: "sagtus,palet",
+                KaynakKodu: "cari", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: UrunModlari.Erp),
             new("dis-hekim-vade.plan", "🗓 Haftalık Plan", "dis-hekim", Hedef: "araccubugu,palet",
                 KaynakKodu: "dis_doktor.plan", Islem: Islem.Gor, Sira: 30),
             Yazdir(),

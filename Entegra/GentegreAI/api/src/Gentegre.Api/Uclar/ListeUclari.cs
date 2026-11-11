@@ -245,6 +245,8 @@ public static class ListeUclari
                             // AYAR KAPISI (1121): kapali ayarin kolonu listeye hic girmez.
                             && (k.AyarKapisi is null || kapaliKapilar?.Contains(k.AyarKapisi) != true)
                             && baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
+                // ERP BAŞLIĞI (1297): aynı kolon ERP'de başka adla ("Dış Doktor" → "Müşteri").
+                .Select(k => urunModu == UrunModlari.Erp && k.BaslikErp is { } be ? k with { Baslik = be } : k)
                 .ToList();
 
     /// <summary>

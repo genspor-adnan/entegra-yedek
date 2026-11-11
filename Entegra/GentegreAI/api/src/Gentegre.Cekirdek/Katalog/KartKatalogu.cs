@@ -94,6 +94,8 @@ public sealed record KartAlani(
     /// sorusu uretiyor.
     /// </summary>
     int UrunModu = 0,
+    /// <summary>ERP BAŞLIĞI (1297): alan iki kipte de var, adı farklı ("Dış Doktor" / "Müşteri"); ERP'de bu başlık gider.</summary>
+    string? BaslikErp = null,
     /// <summary>
     /// ALAN DOGRULAMASI (bicim kurali). Bugun tek deger: "tckn" - T.C. kimlik
     /// numarasi NVI algoritmasiyla dogrulanir (KimlikDogrulama). Kural

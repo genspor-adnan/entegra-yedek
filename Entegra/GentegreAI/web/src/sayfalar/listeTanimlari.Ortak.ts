@@ -193,6 +193,13 @@ export interface ListeTanimi {
     altGrup?: string;
     /** ERP grubundaki sıra; verilmezse menuSira. */
     sira?: number;
+    /** ERP'DE BAŞKA AD (1297, kullanıcı: "HBYS de Dış Doktor Ziyaretleri ERP de Müşteri Ziyaretleri"): sayfa başlığı,
+        kırıntı yolu, menü adı, kart başlığı ve çipler ERP'de bunlarla değişir; verilmeyen HBYS değerinde kalır. */
+    baslik?: string;
+    yol?: string;
+    menuAd?: string;
+    kartBaslik?: string;
+    cipler?: ListeTanimi['cipler'];
   };
   /** Cip seridine "Σ Ekstre" dugmesi ekler: secili satirin ekstresi AYNI
       ekranda acilir (grid ekstre kaynagina doner), cip'e basinca liste geri gelir. */
@@ -223,6 +230,23 @@ export interface ListeTanimi {
  * Menü girdisi olan liste tanımı - `LISTELER` dizisinin eleman tipi.
  * Parça dosyaları da bunu kullanır.
  */
+/**
+ * ERP KİPİ UYARLAMASI (1297): `erp` alanı olan girdi ERP kurulumunda (urunModu !== 2) grup / alt grup / sıra ile
+ * birlikte başlık, yol, menü adı, kart başlığı ve çiplerini de değiştirir. HBYS'de ve `erp`siz girdide girdi aynen döner.
+ * Menü (menuAgaci) ve liste sayfası (Liste) AYNI yardımcıyı kullanır - iki yerde ayrı çözülürse menü "Müşteri
+ * Ziyaretleri" der, sayfa "Dış Doktor Ziyaretleri" açar.
+ */
+export function erpUyarla<T extends ListeTanimi>(l: T, urunModu?: number): T {
+  if (!l.erp || urunModu === 2) return l;
+  const e = l.erp;
+  const m = l as T & { menuGrup?: string; menuAltGrup?: string; menuSira?: number; menuAd?: string };
+  return {
+    ...l,
+    baslik: e.baslik ?? l.baslik, yol: e.yol ?? l.yol, kartBaslik: e.kartBaslik ?? l.kartBaslik, cipler: e.cipler ?? l.cipler,
+    menuGrup: e.grup, menuAltGrup: e.altGrup, menuSira: e.sira ?? m.menuSira, menuAd: e.menuAd ?? m.menuAd,
+  } as T;
+}
+
 export type ListeGirdisi = ListeTanimi & {
   menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string;
 };

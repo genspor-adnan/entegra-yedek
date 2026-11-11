@@ -28,6 +28,8 @@ public static partial class KartKatalogu
         Ad: "cari",
         YetkiKodu: "cari",
         Tablo: "public.taraf",
+        // SAHA TEMSİLCİSİ (1297): ERP müşteri ziyaretinde temsilci yalnız kendi müşterisinin kartını açar.
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = RolKapsami.BenimHekimim("taraf.id") },
         LogTabloId: 71,                       // GENINI -11110: 71 = Cari
         // ADAY (122) da bu kartla acilir: sabit kosul adayi disarida birakirsa
         //   kayit yazilir ama geri OKUNAMAZ ("Nullable object must have a
@@ -153,6 +155,11 @@ public static partial class KartKatalogu
             //   sayi goruluyordu.
             new("temsilci",    "temsilci",     "kod",   KodTablosu: "public.v_personel_lookup",
                                                         Baslik: "Temsilci", Grup: "Kimlik"),
+            // SAHA ZİYARETİ (1297, yalnız ERP): müşteri ziyaret sıklığı plan üretir (fn_dis_hekim_plan_uret), tercih gün / saat.
+            new("ziyaretSikligiHafta", "ziyaret_sikligi_hafta", "kod", SabitKodlar: ZiyaretSikligiKodlari,
+                Baslik: "Ziyaret Sıklığı", Grup: "Saha Ziyareti", UrunModu: UrunModlari.Erp),
+            new("tercihGun",  "tercih_gun",  "kod",   SabitKodlar: HaftaGunuKodlari, Baslik: "Tercih Günü", Grup: "Saha Ziyareti", UrunModu: UrunModlari.Erp),
+            new("tercihSaat", "tercih_saat", "metin", EnFazlaUzunluk: 5, Baslik: "Tercih Saati", Grup: "Saha Ziyareti", UrunModu: UrunModlari.Erp),
             new("ozelKod",     "ozel_kod",     "metin", EnFazlaUzunluk: 20,  Baslik: "Ozel Kod",       AltGrup: "Tanımlama"),
             new("notlar",      "notlar",       "metin", EnFazlaUzunluk: 1000, Baslik: "Notlar",        AltGrup: "Notlar"),
             new("durum",       "durum",        "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum",    Grup: "Kimlik"),

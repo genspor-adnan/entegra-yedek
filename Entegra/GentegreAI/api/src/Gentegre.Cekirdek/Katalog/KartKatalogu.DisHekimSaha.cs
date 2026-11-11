@@ -43,8 +43,8 @@ public static partial class KartKatalogu
     [
         new("id",        "id",         "sayi",  Yazilabilir: false),
         .. (hekimli
-            ? new KartAlani[] { new("hekimId", "hekim_id", "kod", Zorunlu: true, KodTablosu: "public.v_dis_hekim_lookup",
-                                    AramaKaynagi: "dis-hekim", Baslik: "Dış Doktor", Grup: "Talep") }
+            ? new KartAlani[] { new("hekimId", "hekim_id", "kod", Zorunlu: true, KodTablosu: "public.v_saha_hedef_lookup",
+                                    AramaKaynagi: "saha-hedef", Baslik: "Dış Doktor", BaslikErp: "Müşteri", Grup: "Talep") }
             : []),
         new("tur",       "tur",        "kod",   Zorunlu: true, KodListesi: "dis_hekim.talep_turu", Baslik: "Tür", Grup: "Talep"),
         new("talep",     "talep",      "metin", Zorunlu: true, EnFazlaUzunluk: 500, Baslik: "Talep", Grup: "Talep", TekSatir: true),
@@ -68,8 +68,9 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",         "id",          "sayi",  Yazilabilir: false),
-            new("hekimId",    "hekim_id",    "kod",   Zorunlu: true, KodTablosu: "public.v_dis_hekim_lookup",
-                AramaKaynagi: "dis-hekim", Baslik: "Dış Doktor", Grup: "Kimlik"),
+            // ZİYARET EDİLEN (1297): HBYS dış doktor, ERP müşteri - seçim listesi ve arama kaynağı kipi DB'de çözer.
+            new("hekimId",    "hekim_id",    "kod",   Zorunlu: true, KodTablosu: "public.v_saha_hedef_lookup",
+                AramaKaynagi: "saha-hedef", Baslik: "Dış Doktor", BaslikErp: "Müşteri", Grup: "Kimlik"),
             // TEMSİLCİ boş bırakılırsa tetik şube temsilcisini yazar (1287).
             //   Combo yalnız SAHA ROLÜ olanlar + temsilcilik yapmış personel (1295 v_saha_temsilci_lookup; kullanıcı).
             new("temsilciId", "temsilci_id", "kod",   KodTablosu: "public.v_saha_temsilci_lookup", Baslik: "Temsilci", Grup: "Kimlik"),
@@ -90,9 +91,11 @@ public static partial class KartKatalogu
 
             new("sonrakiTarih", "sonraki_tarih", "tarih", Baslik: "Sonraki ziyaret", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             new("siklikAdi",
-                "(select case coalesce(p.ziyaret_sikligi_hafta, 0) when 0 then 'Planlanmaz' else p.ziyaret_sikligi_hafta::text || ' haftada bir' end"
-                + "   from public.taraf_personel p where p.id = dis_hekim_ziyaret.hekim_id)",
-                "metin", Yazilabilir: false, Baslik: "Sıklık (hekim kartı)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
+                // Sıklık: dış doktorda taraf_personel, müşteride taraf (1297).
+                "(select case coalesce(p.ziyaret_sikligi_hafta, t.ziyaret_sikligi_hafta, 0) when 0 then 'Planlanmaz'"
+                + " else coalesce(p.ziyaret_sikligi_hafta, t.ziyaret_sikligi_hafta)::text || ' haftada bir' end"
+                + "   from public.taraf t left join public.taraf_personel p on p.id = t.id where t.id = dis_hekim_ziyaret.hekim_id)",
+                "metin", Yazilabilir: false, Baslik: "Sıklık (hekim kartı)", BaslikErp: "Sıklık (müşteri kartı)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             new("hatirlat",   "hatirlat",    "mantik", Baslik: "Hatırlat (1 gün önce, temsilciye)", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
             // KOD LİSTESİ (1294, kullanıcı): etikete tıklayınca liste düzenlenir (kartAlanCizim listeDuzenle).
             new("materyal",   "materyal",    "kod",   KodListesi: "dis_hekim.materyal", Baslik: "Bırakılan materyal", Grup: "Görüşme", AltGrup: "Sonraki Adım"),
@@ -118,7 +121,7 @@ public static partial class KartKatalogu
         {
             // DOKTORUN TALEPLERİ: ziyaretten doğar; hekim / şube ziyaretten (tetik).
             new DetayTanimi("talepler", "public.dis_hekim_talep", "ziyaret_id", TalepAlanlari(hekimli: false),
-                Sirala: "durum, termin nulls last, id", SubeKolonu: "sube_id", LogTabloId: 1782, Baslik: "Doktorun Talepleri",
+                Sirala: "durum, termin nulls last, id", SubeKolonu: "sube_id", LogTabloId: 1782, Baslik: "Talepler",
                 YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1, ["oncelik"] = (short)1, ["tur"] = (short)9 },
                 BosAtlaAlani: "talep", GridKipi: true, AnindaKaydet: true),
             // YORUMLAR (yönetici ↔ temsilci): kim yazdı, ne zaman - uçtan değil karttan.

@@ -7,6 +7,7 @@ import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { GenLookup } from '../bilesenler/GenLookup';
 import { Modal } from '../bilesenler/Modal';
 import { c as cev } from '../dil/ceviri';
+import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
  * DIŞ DOKTOR HAFTALIK ZİYARET PLANI (1290, mockup Ekranlar/Radyoloji/temsilci_ziyaret.html §3).
@@ -53,6 +54,10 @@ export function DisHekimPlan() {
   const gunTarihi = (i: number) => { const d = new Date(hafta); d.setDate(d.getDate() + i); return d };
   const bugun = isoGun(new Date());
   const tazele = () => setYenile(t => t + 1);
+  // İKİ KİP (1297): HBYS dış doktor, ERP müşteri - metinler ona göre.
+  const { kullanici } = useOturum();
+  const erp = kullanici?.urunModu === 1;
+  const hedefAd = erp ? 'Müşteri' : 'Dış Doktor';
 
   const uret = () => guvenli(async () => {
     const y = await api.disHekimPlanUret({ haftaBas: isoGun(hafta), temsilciId: temsilci, gunBasi, grupla });
@@ -74,7 +79,7 @@ export function DisHekimPlan() {
   };
 
   const ekle = () => {
-    if (ekleGun === null || !ekleHekim) { mesaj('Dış doktor seçin.'); return }
+    if (ekleGun === null || !ekleHekim) { mesaj(erp ? 'Müşteri seçin.' : 'Dış doktor seçin.'); return }
     const gun = isoGun(gunTarihi(ekleGun));
     void guvenli(async () => {
       const y = await api.disHekimPlanla({ hekimId: ekleHekim.id, tarih: `${gun}T${ekleSaat || '10:00'}:00`, temsilciId: temsilci });
@@ -92,7 +97,7 @@ export function DisHekimPlan() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>{cev('Ziyaret Planı')}</h1>
-          <span className="yol">{cev('Kurumlar & Sigorta › Ziyaret Planı')}</span>
+          <span className="yol">{cev(erp ? 'Cari & CRM › CRM › Ziyaret Planı' : 'Kurumlar & Sigorta › Dış Doktorlar › Ziyaret Planı')}</span>
         </div>
       </div>
       <div className="cz-sayfa">
@@ -109,7 +114,7 @@ export function DisHekimPlan() {
           <span className="dhp-uret" style={{ marginLeft: 'auto' }}>
             <label>{cev('Gün başı')} <input type="number" min={1} max={20} value={gunBasi} onChange={e => setGunBasi(Number(e.target.value) || 6)} /></label>
             <label><input type="checkbox" checked={grupla} onChange={e => setGrupla(e.target.checked)} /> {cev('Aynı ilçe aynı gün')}</label>
-            <button className="d bir" onClick={() => void uret()} data-testid="plan-uret" title={cev('Sıklığı dolan, planı olmayan hekimlere öneri ziyaret açar')}>⚙ {cev('Planı Üret')}</button>
+            <button className="d bir" onClick={() => void uret()} data-testid="plan-uret" title={cev(erp ? 'Sıklığı dolan, planı olmayan müşterilere öneri ziyaret açar' : 'Sıklığı dolan, planı olmayan hekimlere öneri ziyaret açar')}>⚙ {cev('Planı Üret')}</button>
           </span>
           <button className="d" onClick={() => git('/dis-hekim-vade')}>⏰ {cev('Ziyaret Vadesi')}</button>
           <button className="d" onClick={() => git('/dis-hekim-ziyaret/yeni')}>＋ {cev('Ziyaret')}</button>
@@ -123,9 +128,9 @@ export function DisHekimPlan() {
             <div className="kutu ok"><b>{cev('Yapıldı')}</b><span>{yapildi}</span></div>
             <div className="kutu sari"><b>{cev('Öneri')}</b><span>{oneri}<small>{cev('onay bekliyor')}</small></span></div>
             {veri.vade && <>
-              <div className="kutu kir"><b>{cev('Geciken hekim')}</b><span>{veri.vade.geciken}</span></div>
+              <div className="kutu kir"><b>{cev(erp ? 'Geciken müşteri' : 'Geciken hekim')}</b><span>{veri.vade.geciken}</span></div>
               <div className="kutu"><b>{cev('Bu hafta planlanacak')}</b><span>{veri.vade.planlanacak}<small>{cev('vadesi dolan, planı yok')}</small></span></div>
-              <div className="kutu kir"><b>{cev('Gönderimi düşen')}</b><span>{veri.vade.dusen}</span></div>
+              <div className="kutu kir"><b>{cev(erp ? 'Satışı düşen' : 'Gönderimi düşen')}</b><span>{veri.vade.dusen}</span></div>
               <div className="kutu"><b>{cev('Açık talepli')}</b><span>{veri.vade.talepli}</span></div>
             </>}
           </div>
@@ -143,7 +148,7 @@ export function DisHekimPlan() {
                    onDragLeave={() => setHedef(h => h === i ? null : h)}
                    onDrop={e => { e.preventDefault(); birak(i) }}>
                 <h5>{ad} {gunTarihi(i).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}<small>{liste.length} {cev('ziyaret')}{ilceler ? ` · ${ilceler}` : ''}</small>
-                  <button type="button" className="bs-kalem" title={cev('Bu güne dış doktor ekle')} data-testid={`plan-ekle-${i}`}
+                  <button type="button" className="bs-kalem" title={cev(erp ? 'Bu güne müşteri ekle' : 'Bu güne dış doktor ekle')} data-testid={`plan-ekle-${i}`}
                           onClick={() => { setEkleGun(i); setEkleHekim(null) }}>＋</button></h5>
                 <div className="dhp-govde">
                   {liste.map(z => (
@@ -178,8 +183,8 @@ export function DisHekimPlan() {
             <button className="d kapat-dugmesi" onClick={() => setEkleGun(null)}>✖ {cev('Vazgeç')}</button>
           </>}>
           <div className="alan-izgara" data-testid="plan-ekle">
-            <GenLookup kaynak="dis-hekim" etiket={cev('Dış Doktor')} zorunlu
-                       alanlar={[{ ad: 'unvan', baslik: 'Dış Doktor', genis: true }, { ad: 'kurum', baslik: 'Kurum' }, { ad: 'departmanAdi', baslik: 'Bölüm' }]}
+            <GenLookup kaynak="saha-hedef" etiket={cev(hedefAd)} zorunlu
+                       alanlar={[{ ad: 'unvan', baslik: hedefAd, genis: true }, { ad: 'kurum', baslik: 'Kurum' }, { ad: 'ilce', baslik: 'İlçe' }]}
                        deger={ekleHekim?.ad}
                        onSec={x => setEkleHekim(x ? { id: Number(x.id), ad: String(x.unvan ?? '') } : null)} />
             <label className="alan">

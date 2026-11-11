@@ -190,14 +190,17 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Hekim Bilgisi ARTIK GENEL SEKMESINDE (kullanici): ayri sekme olarak da
     //   gorunmesi ayni kutuyu iki yere koymak olurdu.
     gizliKartSekmeleri: ['Hekim Bilgisi'],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktor Listesi', ic: '🩺', yetkiKodu: 'dis_doktor.liste',
-    menuSira: 50,
+    // ALT GRUP (kullanıcı 11.11.2026): Kurumlar & Sigorta › Dış Doktorlar (liste, ziyaretler, vade, plan, talepler).
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Dış Doktor Listesi', ic: '🩺', yetkiKodu: 'dis_doktor.liste',
+    menuSira: 21,
     urunModu: 2,
   },
   {
     // DIS DOKTOR ZIYARETLERI (1289, mockup Ekranlar/Radyoloji/temsilci_ziyaret.html §1-2): temsilcinin görüşme notu,
-    //   doktorun talepleri, sonraki ziyaret. Yalnız HBYS (dış doktor kavramı). Kart jenerik (dis-hekim-ziyaret).
-    kaynak: 'dis-hekim-ziyaret', baslik: 'Dış Doktor Ziyaretleri', yol: 'Kurumlar & Sigorta › Dış Doktor Ziyaretleri',
+    //   doktorun talepleri, sonraki ziyaret. Kart jenerik (dis-hekim-ziyaret).
+    //   İKİ KİP (1297, kullanıcı: "hbys de dış doktorlar, erp de ise müşteriler ziyaret edilir"): HBYS Kurumlar &
+    //   Sigorta › Dış Doktorlar › Dış Doktor Ziyaretleri; ERP Cari & CRM › CRM › Müşteri Ziyaretleri (erp alanı).
+    kaynak: 'dis-hekim-ziyaret', baslik: 'Dış Doktor Ziyaretleri', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Dış Doktor Ziyaretleri',
     kartYolu: '/dis-hekim-ziyaret', kartBaslik: 'Ziyaret',
     aksiyonEkrani: 'dis-hekim-ziyaret-liste',
     tarihAlani: 'tarih',
@@ -208,12 +211,14 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Görülmedi',   filtre: { alan: 'goruldu', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktor Ziyaretleri', ic: '🤝', yetkiKodu: 'dis_doktor.ziyaret',
-    menuSira: 22, urunModu: 2,
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Dış Doktor Ziyaretleri', ic: '🤝', yetkiKodu: 'dis_doktor.ziyaret',
+    menuSira: 22,
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 22, baslik: 'Müşteri Ziyaretleri', menuAd: 'Müşteri Ziyaretleri',
+           yol: 'Cari & CRM › CRM › Müşteri Ziyaretleri' },
   },
   {
     // DOKTOR TALEPLERI (1289, §2 "Doktorun Talepleri"): kurumun karşılaması gereken istekler; termini geçen kırmızı.
-    kaynak: 'dis-hekim-talep', baslik: 'Doktor Talepleri', yol: 'Kurumlar & Sigorta › Doktor Talepleri',
+    kaynak: 'dis-hekim-talep', baslik: 'Doktor Talepleri', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Doktor Talepleri',
     kartYolu: '/dis-hekim-talep', kartBaslik: 'Doktor Talebi',
     aksiyonEkrani: 'dis-hekim-talep-liste',
     tarihAlani: 'termin',
@@ -224,13 +229,15 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapandı',     filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Doktor Talepleri', ic: '📋', yetkiKodu: 'dis_doktor.talep',
-    menuSira: 23, urunModu: 2,
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Doktor Talepleri', ic: '📋', yetkiKodu: 'dis_doktor.talep',
+    menuSira: 25,
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 23, baslik: 'Müşteri Talepleri', menuAd: 'Müşteri Talepleri',
+           kartBaslik: 'Müşteri Talebi', yol: 'Cari & CRM › CRM › Müşteri Talepleri' },
   },
   {
     // ZIYARET VADESI (1290, mockup §1 / §3 ölçütleri): hekim × şube × temsilci; geciken, gönderimi düşen, sessiz,
     //   açık talepli. Satır = hekim (kart yok); "Ziyaret Planla" planlı ziyaret açar. Yalnız HBYS.
-    kaynak: 'dis-hekim-vade', baslik: 'Ziyaret Vadesi', yol: 'Kurumlar & Sigorta › Ziyaret Vadesi',
+    kaynak: 'dis-hekim-vade', baslik: 'Ziyaret Vadesi', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Ziyaret Vadesi',
     aksiyonEkrani: 'dis-hekim-vade-liste', kartHatirlatYok: true, sagTusYok: false,
     cipler: [
       { ad: 'Geciken',          filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
@@ -241,22 +248,35 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Sıklığı tanımsız', filtre: { alan: 'siklikHafta', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Ziyaret Vadesi', ic: '⏰', yetkiKodu: 'dis_doktor.vade',
-    menuSira: 24, urunModu: 2,
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Ziyaret Vadesi', ic: '⏰', yetkiKodu: 'dis_doktor.vade',
+    menuSira: 23,
+    // ERP (1297): "gönderim" = satış, hekim = müşteri - çipler de öyle.
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 24, yol: 'Cari & CRM › CRM › Ziyaret Vadesi',
+           cipler: [
+             { ad: 'Geciken',          filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
+             { ad: 'Satışı düşen',     filtre: { alan: 'gonderimDusen', op: 'esit', deger: 1 } },
+             { ad: '60 gün sessiz',    filtre: { alan: 'sessizGun', op: 'buyukEsit', deger: 60 } },
+             { ad: 'Açık talebi var',  filtre: { alan: 'acikTalep', op: 'buyuk', deger: 0 } },
+             { ad: 'Yeni müşteri',     filtre: { alan: 'yeniHekim', op: 'esit', deger: 1 } },
+             { ad: 'Sıklığı tanımsız', filtre: { alan: 'siklikHafta', op: 'esit', deger: 0 } },
+             { ad: 'Tümü' },
+           ] },
   },
   {
     // HAFTALIK ZIYARET PLANI (1290, mockup §3): özel sayfa - takvim, Planı Üret, sürükle-bırak. ROTA (§4) YAPILMADI.
     kaynak: 'dis-hekim-plan', rota: 'dis-hekim-plan', ozelSayfa: true,
-    baslik: 'Ziyaret Planı', yol: 'Kurumlar & Sigorta › Ziyaret Planı',
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Ziyaret Planı', ic: '🗓', yetkiKodu: 'dis_doktor.plan',
-    menuSira: 25, urunModu: 2,
+    baslik: 'Ziyaret Planı', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Ziyaret Planı',
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Ziyaret Planı', ic: '🗓', yetkiKodu: 'dis_doktor.plan',
+    menuSira: 24,
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 25, yol: 'Cari & CRM › CRM › Ziyaret Planı' },
   },
   {
     // SAHA PERFORMANSI (1292, mockup §6): yönetim - temsilci / doktor / şube / talep; dönem × şube. Özel sayfa.
     kaynak: 'saha-performans', rota: 'saha-performans', ozelSayfa: true,
     baslik: 'Saha Performansı', yol: 'Kurumlar & Sigorta › Saha Performansı',
     menuGrup: 'Kurumlar & Sigorta', menuAd: 'Saha Performansı', ic: '📈', yetkiKodu: 'dis_doktor.performans',
-    menuSira: 26, urunModu: 2,
+    menuSira: 26,
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 26, yol: 'Cari & CRM › CRM › Saha Performansı' },
   },
   {
     kaynak: 'proje', baslik: 'Proje Listesi', yol: 'CRM › Proje Listesi', kartYolu: '/proje',

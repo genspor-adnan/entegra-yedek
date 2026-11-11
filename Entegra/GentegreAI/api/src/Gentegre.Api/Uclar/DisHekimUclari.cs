@@ -24,7 +24,7 @@ public static class DisHekimUclari
 
     public static void DisHekimUclariniEkle(this IEndpointRouteBuilder yol)
     {
-        var grup = yol.MapGroup("/api/dis-hekim").WithTags("Dış Doktor").RequireAuthorization();
+        var grup = yol.MapGroup("/api/dis-hekim").WithTags("Saha Ziyareti").RequireAuthorization();
 
         // ------------------------------------------------ talep kapat / ret --
         grup.MapPost("/talep/{id:int}/kapat", async (int id, TalepKapatIstegi istek, VeriKaynagi veri, KartDeposu kart,

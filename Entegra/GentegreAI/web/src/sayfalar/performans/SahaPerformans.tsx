@@ -7,6 +7,7 @@ import { paraYaz } from '../../bilesenler/bicim';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { ayAraligi, degisimRozeti } from './performansOrtak';
+import { useOturum } from '../../kimlik/OturumBaglami';
 
 /**
  * SAHA PERFORMANSI `/saha-performans` (1292, mockup Ekranlar/Radyoloji/temsilci_ziyaret.html §6; kullanıcı 10.11.2026:
@@ -23,6 +24,17 @@ const yuzdeYaz = (d: number | null | undefined) => d == null ? '—' : `%${d}`;
 export function SahaPerformans() {
   const [arama, setArama] = useSearchParams();
   const git = useNavigate();
+  // İKİ KİP (1297): HBYS dış doktor / gönderim (istem), ERP müşteri / satış (fatura-fiş). Rakamlar sunucudan aynı
+  //   alanlarla gelir; yalnız adlar değişir.
+  const { kullanici } = useOturum();
+  const erp = kullanici?.urunModu === 1;
+  const S = erp
+    ? { hedef: 'Müşteri', hedefler: 'Müşteriler', hedefK: 'müşteri', gonderim: 'Satış', gonderimK: 'satış', gonderen: 'Satış primi',
+        modalite: 'Belge', kartYolu: '/cari', yol: 'Cari & CRM › CRM › Saha Performansı',
+        aciklama: 'Satış = satış faturası / fişi (iade hariç) · temsilci = belgenin satış temsilcisi · prim = hakediş (temsilci)' }
+    : { hedef: 'Dış Doktor', hedefler: 'Doktorlar', hedefK: 'hekim', gonderim: 'Gönderim', gonderimK: 'gönderim', gonderen: 'Gönderen primi',
+        modalite: 'Modalite', kartYolu: '/dis-hekim', yol: 'Kurumlar & Sigorta › Saha Performansı',
+        aciklama: 'Gönderim = radyoloji istemi · temsilci = başvurunun temsilcisi · prim = hakediş (gönderen / temsilci)' };
   const buAy = (() => { const d = new Date(); return ayAraligi(d.getFullYear(), d.getMonth() + 1) })();
   const bas = arama.get('bas') ?? buAy.bas;
   const bit = arama.get('bit') ?? buAy.bit;
@@ -61,7 +73,7 @@ export function SahaPerformans() {
       || (suzgec === 'sessiz' && d.sessiz) || (suzgec === 'yeni' && d.yeni) || (suzgec === 'ziyaretsiz' && d.ziyaretEdilmeyen))
     && (!ara || `${d.ad} ${d.kurum} ${d.temsilciler}`.toLocaleLowerCase('tr-TR').includes(ara.toLocaleLowerCase('tr-TR'))));
   const sekmeler: [Sekme, string, number][] = veri ? [
-    ['temsilci', 'Temsilciler', veri.temsilciler.length], ['doktor', 'Doktorlar', veri.doktorlar.length],
+    ['temsilci', 'Temsilciler', veri.temsilciler.length], ['doktor', S.hedefler, veri.doktorlar.length],
     ['sube', 'Şubeler', veri.subeler.length], ['talep', 'Talepler', veri.talepler.length]] : [];
 
   return (
@@ -70,11 +82,11 @@ export function SahaPerformans() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Saha Performansı</h1>
-          <span className="yol">Kurumlar & Sigorta › Saha Performansı</span>
+          <span className="yol">{S.yol}</span>
         </div>
       </div>
       <div className="hi-arac">
-        <span className="ki-soluk">Gönderim = radyoloji istemi · temsilci = başvurunun temsilcisi · prim = hakediş (gönderen / temsilci)</span>
+        <span className="ki-soluk">{S.aciklama}</span>
         <span className="sp" />
         <button onClick={() => git('/dis-hekim-plan')}>🗓 Ziyaret Planı</button>
         <button onClick={() => git('/dis-hekim-vade')}>⏰ Ziyaret Vadesi</button>
@@ -100,14 +112,14 @@ export function SahaPerformans() {
         </div>
 
         <div className="hi-ozet sp-ozet">
-          {kutu('Gönderim (istem)', String(o.gonderim), `önceki ${o.onceki}`)}
-          {kutu('Gönderim tutarı', paraYaz(o.tutar), `önceki ${paraYaz(o.oncekiTutar)}`)}
+          {kutu(erp ? 'Satış (belge)' : 'Gönderim (istem)', String(o.gonderim), `önceki ${o.onceki}`)}
+          {kutu(`${S.gonderim} tutarı`, paraYaz(o.tutar), `önceki ${paraYaz(o.oncekiTutar)}`)}
           {kutu('Değişim', degisimRozeti(o.degisim).ad, 'önceki döneme göre', degisimRozeti(o.degisim).renk)}
           {kutu('Ziyaret', String(o.ziyaret), `plan uyumu ${yuzdeYaz(o.planUyumu)}`)}
-          {kutu('Gönderimi düşen hekim', String(o.dusenHekim), `60 gün sessiz ${o.sessizHekim}`, o.dusenHekim > 0 ? 'kir' : '')}
-          {kutu('Gönderen primi', paraYaz(o.gonderenPrimi), 'dönem hakedişi')}
+          {kutu(`${S.gonderim}ı düşen ${S.hedefK}`, String(o.dusenHekim), `60 gün sessiz ${o.sessizHekim}`, o.dusenHekim > 0 ? 'kir' : '')}
+          {kutu(S.gonderen, paraYaz(o.gonderenPrimi), 'dönem hakedişi')}
           {kutu('Temsilci primi', paraYaz(o.temsilciPrimi), `${o.temsilci} temsilci`)}
-          {kutu('Dış doktor', String(o.hekim), 'kayıtlı, aktif')}
+          {kutu(S.hedef, String(o.hekim), 'kayıtlı, aktif')}
         </div>
 
         <div className="hi-sekmeler">
@@ -119,9 +131,9 @@ export function SahaPerformans() {
         {sekme === 'temsilci' && (
           <table className="hi-tablo sp-tablo">
             <thead><tr>
-              <th>Temsilci</th><th>Şube</th><th className="sag">Hekim</th><th className="sag">Aktif*</th>
-              <th className="sag">Ziyaret</th><th className="sag">Plan uyumu</th><th className="sag">Gönderim</th><th className="sag">Önceki</th><th className="sag">Değişim</th>
-              <th className="sag">Tutar</th><th className="sag">Yeni hekim</th><th className="sag">Kaybedilen**</th><th className="sag">Açık talep</th><th className="sag">Termini geçen</th><th className="sag">Prim</th>
+              <th>Temsilci</th><th>Şube</th><th className="sag">{S.hedef}</th><th className="sag">Aktif*</th>
+              <th className="sag">Ziyaret</th><th className="sag">Plan uyumu</th><th className="sag">{S.gonderim}</th><th className="sag">Önceki</th><th className="sag">Değişim</th>
+              <th className="sag">Tutar</th><th className="sag">Yeni {S.hedefK}</th><th className="sag">Kaybedilen**</th><th className="sag">Açık talep</th><th className="sag">Termini geçen</th><th className="sag">Prim</th>
             </tr></thead>
             <tbody>
               {veri.temsilciler.map(t => (
@@ -134,28 +146,28 @@ export function SahaPerformans() {
                   <td className="sag">{paraYaz(t.prim)}</td>
                 </tr>
               ))}
-              {veri.temsilciler.length === 0 && <tr><td colSpan={15} className="ki-soluk">Şube temsilcisi tanımlı dış doktor yok.</td></tr>}
+              {veri.temsilciler.length === 0 && <tr><td colSpan={15} className="ki-soluk">Şube temsilcisi tanımlı {S.hedefK} yok.</td></tr>}
             </tbody>
           </table>
         )}
-        {sekme === 'temsilci' && <div className="sp-not">* Aktif hekim = dönemde en az bir gönderim. ** Kaybedilen = önceki dönemde gönderip bu dönem göndermeyen. Plan uyumu = yapılan / (yapılan + geçmiş planlı + iptal).</div>}
+        {sekme === 'temsilci' && <div className="sp-not">* Aktif {S.hedefK} = dönemde en az bir {S.gonderimK}. ** Kaybedilen = önceki dönemde {S.gonderimK} yapıp bu dönem yapmayan. Plan uyumu = yapılan / (yapılan + geçmiş planlı + iptal).</div>}
 
         {sekme === 'doktor' && (<>
           <div className="hi-serit">
             {([['tum', 'Tümü'], ['yukselen', 'Yükselen'], ['dusen', 'Düşen'], ['sessiz', '60 gün sessiz'], ['yeni', 'Yeni (3 ay)'], ['ziyaretsiz', 'Ziyaret edilmeyen']] as [DoktorSuzgec, string][])
               .map(([k, ad]) => <button key={k} className={'ki-cip' + (suzgec === k ? ' on' : '')} onClick={() => setSuzgec(k)}>{ad}</button>)}
             <span className="sp" />
-            <input placeholder="hekim / kurum / temsilci…" value={ara} onChange={e => setAra(e.target.value)} style={{ width: 220 }} />
+            <input placeholder={`${S.hedefK} / kurum / temsilci…`} value={ara} onChange={e => setAra(e.target.value)} style={{ width: 220 }} />
           </div>
           <table className="hi-tablo sp-tablo">
             <thead><tr>
-              <th>Dış Doktor</th><th>Branş</th><th>Kurum</th><th>Şube / Temsilci</th>
-              <th className="sag">Gönderim</th><th className="sag">Önceki</th><th className="sag">Değişim</th><th className="sag">Tutar</th><th>Modalite</th>
-              <th>Son gönderim</th><th>Son ziyaret</th><th className="sag">Ziyaret</th><th className="sag">Açık talep</th><th className="sag">Gönderen primi</th>
+              <th>{S.hedef}</th><th>Branş</th><th>Kurum</th><th>Şube / Temsilci</th>
+              <th className="sag">{S.gonderim}</th><th className="sag">Önceki</th><th className="sag">Değişim</th><th className="sag">Tutar</th><th>{S.modalite}</th>
+              <th>Son {S.gonderimK}</th><th>Son ziyaret</th><th className="sag">Ziyaret</th><th className="sag">Açık talep</th><th className="sag">{S.gonderen}</th>
             </tr></thead>
             <tbody>
               {doktorlar.map(d => (
-                <tr key={d.id} className={'ac' + (d.dusen || d.ziyaretEdilmeyen ? ' sp-kir' : '')} title="Çift tık: dış doktor kartı" onDoubleClick={() => git(`/dis-hekim/${d.id}`)}>
+                <tr key={d.id} className={'ac' + (d.dusen || d.ziyaretEdilmeyen ? ' sp-kir' : '')} title={`Çift tık: ${S.hedefK} kartı`} onDoubleClick={() => git(`${S.kartYolu}/${d.id}`)}>
                   <td>{d.ad}</td><td>{d.brans}</td><td>{d.kurum}</td><td>{d.temsilciler}</td>
                   <td className="sag">{d.gonderim}</td><td className="sag">{d.onceki}</td>
                   <td className="sag">{d.sessiz ? <span className="ki-rozet kir">sessiz {d.sonGonderim ? `${Math.round((Date.now() - new Date(d.sonGonderim).getTime()) / 86400000)} g` : ''}</span> : d.yeni && d.onceki === 0 ? <span className="ki-rozet ok">yeni</span> : rozet(d.degisim)}</td>
@@ -172,8 +184,8 @@ export function SahaPerformans() {
         {sekme === 'sube' && (
           <table className="hi-tablo sp-tablo">
             <thead><tr>
-              <th>Şube</th><th className="sag">Temsilci</th><th className="sag">Hekim</th><th className="sag">Aktif hekim</th><th className="sag">Ziyaret</th><th className="sag">Plan uyumu</th>
-              <th className="sag">Gönderim</th><th className="sag">Önceki</th><th className="sag">Değişim</th><th className="sag">Tutar</th><th className="sag">Hekim başı</th><th className="sag">Temsilci primi</th>
+              <th>Şube</th><th className="sag">Temsilci</th><th className="sag">{S.hedef}</th><th className="sag">Aktif {S.hedefK}</th><th className="sag">Ziyaret</th><th className="sag">Plan uyumu</th>
+              <th className="sag">{S.gonderim}</th><th className="sag">Önceki</th><th className="sag">Değişim</th><th className="sag">Tutar</th><th className="sag">{S.hedef} başı</th><th className="sag">Temsilci primi</th>
             </tr></thead>
             <tbody>
               {veri.subeler.map(s => (

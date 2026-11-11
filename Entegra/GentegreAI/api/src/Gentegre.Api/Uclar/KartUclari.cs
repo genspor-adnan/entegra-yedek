@@ -653,6 +653,8 @@ public static class KartUclari
             // AYAR KAPISI (1121): kapali ayarin alani karta hic girmez (or. goruntuleme merkezinde bolum / doktor).
             if (alan.AyarKapisi is { } kapi && kapaliKapilar?.Contains(kapi) == true) continue;
             var etkin = KapiylaZorunlu(alan, kapaliKapilar) && !alan.Zorunlu ? alan with { Zorunlu = true } : alan;
+            // ERP BAŞLIĞI (1297): aynı alan ERP'de başka adla ("Dış Doktor" → "Müşteri").
+            if (urunModu == UrunModlari.Erp && etkin.BaslikErp is { } be) etkin = etkin with { Baslik = be };
 
             if (baglam.Yetkiler.AlanOkunur(tanim.Ad, alan.Ad)) okunabilir.Add(etkin);
             else gizli.Add(alan.Ad);

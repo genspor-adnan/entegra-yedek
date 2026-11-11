@@ -72,6 +72,8 @@ public static partial class KaynakKatalogu
         //   Delphi aktarımı kullanıcının rehber kartını personel yaparken müşteri bayrağı da kalıyordu. Personel
         //   kendi listesinde; kartı (id ile) ve geçmiş belgeleri etkilenmez.
         SabitKosul: "(t.musteri = 1 or t.tedarikci = 1 or t.aday = 1) and t.personel = 0",
+        // SAHA TEMSİLCİSİ (1297, ERP müşteri ziyareti) yalnız KENDİ müşterilerini görür (RolKapsami).
+        RolKosullari: new Dictionary<string, string> { [RolKapsami.SahaTemsilci] = RolKapsami.BenimHekimim("t.id") },
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         KapsamKolonu: "t.id",
         Kolonlar: new KolonTanimi[]

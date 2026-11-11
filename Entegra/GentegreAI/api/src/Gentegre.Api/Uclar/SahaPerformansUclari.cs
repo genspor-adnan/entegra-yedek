@@ -55,6 +55,16 @@ public static class SahaPerformansUclari
                        and coalesce(i.cekim_tarihi, i.ekleme_tarihi) >= @p2::date
                        and coalesce(i.cekim_tarihi, i.ekleme_tarihi) < (@p1::date + 1)
                        and (@p4::int is null or i.sube_id = @p4)
+                    union all
+                    -- ERP (1297): "gönderim" = müşterinin satış faturası / fişi (iade sayılmaz); modalite -1 = Satış.
+                    select bl.taraf_id, bl.sube_id, -1 as modalite, bl.belge_tarihi::date as gun,
+                           coalesce(bl.genel_toplam, 0) as tutar,
+                           coalesce(nullif(bl.satici_id, 0), public.fn_dis_hekim_temsilci(bl.taraf_id, bl.sube_id, current_date)) as temsilci_id
+                      from public.belge bl
+                      join public.taraf t on t.id = bl.taraf_id and t.musteri = 1 and t.personel = 0
+                     where bl.tur in (15, 16) and coalesce(bl.tipi, 0) <> 2 and bl.durum = 0
+                       and bl.belge_tarihi >= @p2::date and bl.belge_tarihi < (@p1::date + 1)
+                       and (@p4::int is null or bl.sube_id = @p4)
                 )
                 select g.hekim_id, g.sube_id, g.temsilci_id, g.modalite,
                        (g.gun >= @p0::date) as donem,
@@ -71,6 +81,7 @@ public static class SahaPerformansUclari
             var modaliteAd = (await b.ListeAsync("""
                 select kd.deger, kd.ad from public.kod_liste kl join public.kod_deger kd on kd.liste_id = kl.id where kl.kod = 'rad.modalite'
                 """, null, [], o => (Convert.ToInt32(o.GetValue(0)), o.GetString(1)), iptal)).ToDictionary(x => x.Item1, x => x.Item2);
+            modaliteAd[-1] = "Satış";
 
             // Ziyaretler (dönem): temsilci × hekim; yapıldı / planlı-geçmiş / iptal.
             var ziyaret = await b.ListeAsync("""

@@ -119,7 +119,7 @@ import { RandevuErtelePenceresi, type ErtelenecekRandevu } from '../bilesenler/R
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
-import { BELGE_KARTI_KAYNAKLARI, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
+import { BELGE_KARTI_KAYNAKLARI, erpUyarla, kartSekmeYolu, kartSekmesiVar } from './listeTanimlari.Ortak';
 import { useUretimListeUyarlamasi } from './uretim/uretimListeSeviye';
 import { donusumMenusu, KASA_ARAC_MENUSU, LISTELER, modulAcikMi, type ListeTanimi }
   from './listeTanimlari';
@@ -149,7 +149,11 @@ export type { ListeTanimi };
  * sunucudan geldigi icin ekran basina kod yazmaya gerek yok — yeni bir liste
  * eklemek katalogda kaynak tanimlamak + burada bir satir demek.
  */
-export function Liste({ tanim }: { tanim: ListeTanimi }) {
+export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
+  // TELERADYOLOJI "Bana Ata" oturumun taraf kimligini yazar (799).
+  const { kullanici, yetki } = useOturum();
+  // ERP KİPİ (1297): `erp` alanlı girdi ERP'de başka başlık / yol / çiplerle açılır (menüyle aynı yardımcı).
+  const tanim = erpUyarla(tanimHam, kullanici?.urunModu);
   // KARTA OZEL YERLESIM tek yerde (sayfalar/liste/kartOzellestirme.ts): sekme
   //   sirasi, gomulu detaylar, izgara. Buradaki uclu kosullar yuz satir saf
   //   yapilandirmayi bilesenin ortasina yayiyordu.
@@ -158,8 +162,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   yazan addir; disarida undefined doner ve tanimin kendi basligi kalir.
   const portalBaslik = usePortalBaslik(`/${tanim.rota ?? tanim.kaynak}`);
   const portalda = usePortaldaMi();
-  // TELERADYOLOJI "Bana Ata" oturumun taraf kimligini yazar (799).
-  const { kullanici, yetki } = useOturum();
   const git = useNavigate();
   const { id } = useParams();
   const [sorgu] = useSearchParams();

@@ -147,6 +147,31 @@ başlığında … Listesi olsun".
   (`kartHatirlatYok`); "Hizmet Kartı #id" bandı kalktı, başlık Sil'in sağında araç satırında (`baslikAracta`, sürüm
   rozeti çizilmez - yalnız ipucu). Test `HizmetFiyatSekmesiTestleri`.
 
+### 11.11.2026
+
+- **Saha ziyareti iki kip: HBYS dış doktor / ERP müşteri (kullanıcı: "ziyaret sisteminin erp ve hbys modu olsun.. hbys
+  de dış doktorlar, erp de ise müşteriler ziyaret edilir.. başlıkları vb buna göre düzenle"; göç 1297):** aynı tablolar
+  (`dis_hekim_ziyaret` / `talep` / `temsilci`), ziyaret edilen taraf kipe göre - HBYS `taraf_personel.dis_hekim = 1`,
+  ERP `taraf.musteri = 1` (kip 3 ikisi). **Etiket kipe göre sunucudan:** `KolonTanimi` / `KartAlani` `BaslikErp`
+  (ERP'de "Dış Doktor" → "Müşteri", "Gönderim ↓" → "Satış ↓", "30 gün ist." → "30 gün satış"; ListeUclari
+  `GorunurKolonlar` / KartUclari `Alanlar` ERP'de değiştirir). **Ortak arama kaynağı `saha-hedef`** (ziyaret / talep
+  kartı `hekimId` araması + plan ekranı; `v_saha_hedef_lookup` seçim listesi; kip `fn_urun_modu(0)` ile DB'de çözülür;
+  temsilci yalnız kendi hedeflerini arar). **"Gönderim" ERP'de satış:** `v_dis_hekim_ziyaret_vade` istem CTE'si
+  radyoloji istemi ∪ satış faturası / fişi (tür 15-16, iade hariç, durum 0, `belge.taraf_id`); `SahaPerformansUclari`
+  aynı birleşim (modalite -1 = "Satış"). Müşteri kartına **Saha Ziyareti** grubu (`taraf.ziyaret_sikligi_hafta` /
+  `tercih_gun` / `tercih_saat`, yalnız ERP); vade ve ziyaret kartı sıklığı `coalesce(taraf_personel, taraf)`.
+  Tetikler müşteriyi de kabul eder (`tg_dis_hekim_temsilci_dogrula`, talep mesajı). Yetkiler `dis_doktor.ziyaret /
+  talep / vade / plan / performans` ve rehber satırları `urun_modu 0`; `cari` kaynak + kartına `saha_temsilci` rol
+  kapsamı (yalnız kendi müşterileri); rol şablonları `Hepsi` (+ `cari.liste`, `cari`). Aksiyon kipe göre: "🩺 Dış Doktor
+  Kartı" (HBYS) / "👤 Müşteri Kartı" (ERP, `/cari`). **Menü (kullanıcı):** HBYS Kurumlar & Sigorta › **Dış Doktorlar**
+  alt grubu (Dış Doktor Listesi · Dış Doktor Ziyaretleri · Ziyaret Vadesi · Ziyaret Planı · Doktor Talepleri; Saha
+  Performansı grup düzeyinde); ERP Cari & CRM › **CRM** (Müşteri Ziyaretleri · Müşteri Talepleri · Ziyaret Vadesi ·
+  Ziyaret Planı · Saha Performansı). `ListeTanimi.erp` genişledi (`baslik / yol / menuAd / kartBaslik / cipler`) ve
+  `erpUyarla()` menü (menuAgaci) ile sayfa (Liste) için TEK yardımcı. Plan ve performans sayfaları `kullanici.urunModu`
+  ile sözlük seçer ("Doktorlar" → "Müşteriler", "Gönderim" → "Satış", çift tık kart yolu). Testler
+  `SahaErpKipiTestleri` (kip test DB'de geçici değiştirilip geri yazılır; başlıklar + saha-hedef araması + müşteri vade
+  / temsilci bağı). Mockup §1 **Temsilci Paneli** (günün işi) HENÜZ YOK - en yakını Ziyaret Planı + Ziyaret Vadesi.
+
 ### 10.11.2026
 
 - **Onay Akışı listesi + kartı mockup'a göre (kullanıcı; `Ekranlar/Onay/onay_akis_listesi.html`, `onay_akis_karti.html`):**

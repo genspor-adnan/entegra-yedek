@@ -43,6 +43,12 @@ public sealed record KolonTanimi(
     /// </summary>
     int UrunModu = 0,
     /// <summary>
+    /// ERP BAŞLIĞI (1297, kullanıcı: "hbys de dış doktorlar, erp de ise müşteriler ziyaret edilir.. başlıkları buna
+    /// göre düzenle"): kolon iki kipte de var ama adı farklı ("Dış Doktor" / "Müşteri", "Gönderim" / "Satış").
+    /// ERP kurulumunda (fn_urun_modu = 1) metaya BU başlık gider; verilmezse Baslik. Kip 3 (ikisi) HBYS adını kullanır.
+    /// </summary>
+    string? BaslikErp = null,
+    /// <summary>
     /// AYAR KAPISI (1121): verilirse alan yalniz bu ayar ACIKSA metaya girer (fn_ayar_kapilari -
     /// referans degeri, yoksa kurum tipi varsayilani). Kapaliysa urun modu gibi HIC gonderilmez.
     /// </summary>
@@ -259,6 +265,7 @@ public static partial class KaynakKatalogu
         Ekle(DisHekimZiyaret());
         Ekle(DisHekimTalep());
         Ekle(DisHekimVade());
+        Ekle(SahaHedef());
         Ekle(BasvuruHekim());
         Ekle(Kurum());
         Ekle(Departman());

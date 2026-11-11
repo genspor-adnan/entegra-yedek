@@ -12,7 +12,8 @@ export interface DisHekimBaglam {
 }
 
 const OZEL_KODLAR = new Set([
-  'dis-hekim-ziyaret.goruldu', 'dis-hekim-ziyaret.hekim-karti',
+  'dis-hekim-ziyaret.goruldu', 'dis-hekim-ziyaret.hekim-karti', 'dis-hekim-ziyaret.musteri-karti',
+  'dis-hekim-vade.musteri-karti',
   'dis-hekim-talep.kapat', 'dis-hekim-talep.ret', 'dis-hekim-talep.goreve-cevir',
   'dis-hekim-vade.planla', 'dis-hekim-vade.ziyaret-yaz', 'dis-hekim-vade.hekim-karti', 'dis-hekim-vade.plan',
 ]);
@@ -32,6 +33,8 @@ export async function disHekimAksiyonu(
     const hekimId = Number(satir?.hekimId ?? id);
     const hekimAd = String(satir?.hekimAd ?? '');
     if (kod === 'dis-hekim-vade.hekim-karti') { b.git?.(`/dis-hekim/${hekimId}`); return true }
+    // ERP (1297): ziyaret edilen müşteri.
+    if (kod === 'dis-hekim-vade.musteri-karti') { b.git?.(`/cari/${hekimId}`); return true }
     if (kod === 'dis-hekim-vade.ziyaret-yaz') { b.git?.(`/dis-hekim-ziyaret/yeni?hekimId=${hekimId}`); return true }
     if (kod === 'dis-hekim-vade.planla') {
       const varsayilan = new Date(); varsayilan.setDate(varsayilan.getDate() + 1);
@@ -60,10 +63,10 @@ export async function disHekimAksiyonu(
     });
     return true;
   }
-  if (kod === 'dis-hekim-ziyaret.hekim-karti') {
+  if (kod === 'dis-hekim-ziyaret.hekim-karti' || kod === 'dis-hekim-ziyaret.musteri-karti') {
     const hekimId = Number(satir?.hekimId ?? 0);
-    if (!hekimId) { mesaj('Ziyaretin doktoru yok.'); return true }
-    b.git?.(`/dis-hekim/${hekimId}`);
+    if (!hekimId) { mesaj('Ziyaretin tarafı yok.'); return true }
+    b.git?.(kod === 'dis-hekim-ziyaret.musteri-karti' ? `/cari/${hekimId}` : `/dis-hekim/${hekimId}`);
     return true;
   }
 
