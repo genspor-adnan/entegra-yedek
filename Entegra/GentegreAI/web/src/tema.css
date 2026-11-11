@@ -9540,12 +9540,12 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dhp-seg button { border: 0; border-radius: 0; height: 26px; padding: 0 10px; font-size: 11.5px; background: var(--yuz2); color: var(--soluk) }
 .dhp-seg button.on { background: var(--lacivert, #14315a); color: #fff; font-weight: 700 }
 .dhp-ozet { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 0 20px 8px }
-.dhp-ozet .kutu { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); padding: 7px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 1px }
-.dhp-ozet .kutu b { font-size: 10.5px; color: var(--soluk); font-weight: 600 }
-.dhp-ozet .kutu span { font-size: 18px; font-weight: 700; color: var(--yazi2) }
-.dhp-ozet .kutu small { font-size: 10px; color: var(--soluk); font-weight: 400 }
-.dhp-ozet .kutu.ok span { color: var(--ok) } .dhp-ozet .kutu.sari span { color: var(--uyari) } .dhp-ozet .kutu.kir span { color: var(--hata) }
-.dhp-ozet .kutu.suz { outline: 2px solid var(--vurgu, #2f6db3); outline-offset: -2px }
+.dhp-kutu { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); padding: 7px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 1px }
+.dhp-kutu b { font-size: 10.5px; color: var(--soluk); font-weight: 600 }
+.dhp-kutu span { font-size: 18px; font-weight: 700; color: var(--yazi2) }
+.dhp-kutu small { font-size: 10px; color: var(--soluk); font-weight: 400 }
+.dhp-kutu.ok span { color: var(--ok) } .dhp-kutu.sari span { color: var(--uyari) } .dhp-kutu.kir span { color: var(--hata) }
+.dhp-kutu.suz { outline: 2px solid var(--vurgu, #2f6db3); outline-offset: -2px }
 .dhp-haftabas { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 0 20px 6px; font-size: 11.5px; color: var(--soluk) }
 .dhp-cipler { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; padding: 6px 20px }
 .dhp-cipler input { margin-left: auto; width: 220px; height: 24px; border: 1px solid var(--cizgi); border-radius: 12px; padding: 0 10px; font-size: 11.5px }
@@ -9553,8 +9553,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dhp-cip.on { background: var(--vurgu, #2f6db3); color: #fff; border-color: var(--vurgu, #2f6db3) }
 .dhp-gunbas { display: flex; gap: 6px; align-items: center; padding: 8px 20px 0; border-top: 1px solid var(--cizgi2); margin-top: 4px }
 .dhp-gunbas h4 { margin: 0; font-size: 12px; color: var(--lacivert, #14315a) }
-.dhp-gunbas .tag { font-size: 10.5px; color: var(--soluk); background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 9px; padding: 0 7px }
-.dhp-gunbas .sag { margin-left: auto; font-size: 11px; color: var(--soluk) }
+.dhp-gunbas-tag { font-size: 10.5px; color: var(--soluk); background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 9px; padding: 0 7px }
+.dhp-gunbas-sag { margin-left: auto; font-size: 11px; color: var(--soluk) }
 .dhp-gunsekme { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; padding: 6px 20px 0 }
 .dhp-gunsekme button { height: 24px; padding: 0 10px; font-size: 11.5px }
 .dhp-gunsekme button.on { background: var(--vurgu, #2f6db3); color: #fff; border-color: var(--vurgu, #2f6db3); font-weight: 700 }
@@ -9567,24 +9567,24 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dhp-tablo tr.ac { cursor: pointer } .dhp-tablo tr.ac:hover td { background: var(--yuz2) }
 .dhp-tablo tr.gecik td { background: #fff6f6 } .dhp-tablo tr.yapildi td { color: var(--soluk) }
 .dhp-tablo .orta { text-align: center } .dhp-tablo .sag { text-align: right }
-.dhp-tablo .d { display: inline-flex; gap: 2px } .dhp-tablo .d button { height: 20px; padding: 0 5px; font-size: 10.5px }
+.dhp-tablo-d { display: inline-flex; gap: 2px } .dhp-tablo-d button { height: 20px; padding: 0 5px; font-size: 10.5px }
 .dhp-cek { border-left: 1px solid var(--cizgi); background: var(--yuz2); display: flex; flex-direction: column; align-self: stretch; min-height: 420px }
 .dhp-cek h4 { margin: 0; padding: 8px 10px; font-size: 12px; background: var(--yuz); border-bottom: 1px solid var(--cizgi2); color: #2c4a6b; display: flex; align-items: center; gap: 6px }
 .dhp-cek h4 button { margin-left: auto; height: 22px; padding: 0 6px }
-.dhp-cek .ust { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; background: var(--yuz); font-size: 11px; color: var(--soluk) }
-.dhp-cek .ust input { width: 100%; height: 24px; margin-top: 4px; border: 1px solid var(--cizgi); border-radius: 12px; padding: 0 10px; font-size: 11.5px }
-.dhp-cek .liste { flex: 1; overflow: auto; max-height: 520px }
+.dhp-cek-ust { padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; background: var(--yuz); font-size: 11px; color: var(--soluk) }
+.dhp-cek-ust input { width: 100%; height: 24px; margin-top: 4px; border: 1px solid var(--cizgi); border-radius: 12px; padding: 0 10px; font-size: 11.5px }
+.dhp-cek-liste { flex: 1; overflow: auto; max-height: 520px }
 .dhp-ilce { padding: 5px 8px; background: #f3f6fa; border-bottom: 1px solid var(--cizgi2); font-size: 11px; color: #2c4a6b; display: flex; align-items: center; gap: 6px; position: sticky; top: 0 }
 .dhp-ilce b { color: var(--lacivert, #14315a) }
 .dhp-ilce button { margin-left: auto; height: 20px; padding: 0 7px; font-size: 10.5px }
 .dhp-vs { display: flex; gap: 7px; align-items: flex-start; padding: 6px 8px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz); cursor: grab; font-size: 11px; line-height: 1.35 }
 .dhp-vs:hover { background: #f7f9fc } .dhp-vs.sec { background: #eef4fc }
-.dhp-vs input { margin: 2px 0 0 } .dhp-vs .ic { flex: 1; min-width: 0 } .dhp-vs .ic b { color: var(--lacivert, #14315a) }
-.dhp-vs .ic .s { color: var(--soluk); font-size: 10.5px }
-.dhp-vs .gk { color: var(--hata); font-size: 10.5px; white-space: nowrap } .dhp-vs .gk.sari { color: var(--uyari) }
-.dhp-cek .alt { padding: 8px; border-top: 1px solid var(--cizgi); background: var(--yuz); display: grid; gap: 6px; font-size: 11px }
-.dhp-cek .alt .satir { display: flex; gap: 4px; align-items: center }
-.dhp-cek .alt select, .dhp-cek .alt input[type=time] { height: 24px; font-size: 11.5px }
+.dhp-vs input { margin: 2px 0 0 } .dhp-vs-ic { flex: 1; min-width: 0 } .dhp-vs-ic b { color: var(--lacivert, #14315a) }
+.dhp-vs-not { color: var(--soluk); font-size: 10.5px }
+.dhp-vs-gk { color: var(--hata); font-size: 10.5px; white-space: nowrap } .dhp-vs-gk.sari { color: var(--uyari) }
+.dhp-cek-alt { padding: 8px; border-top: 1px solid var(--cizgi); background: var(--yuz); display: grid; gap: 6px; font-size: 11px }
+.dhp-cek-alt .dhp-cek-satir { display: flex; gap: 4px; align-items: center }
+.dhp-cek-alt select, .dhp-cek-alt input[type=time] { height: 24px; font-size: 11.5px }
 .dhp-bos2 { color: var(--soluk); text-align: center; padding: 16px 8px; font-size: 11px }
 /* Görünüm modu: liste / takvim parçaları TSX'te koşullu çizilir (temaSinifCakismasi: genel sınıf kap altında yeniden tanımlanmaz). */
 .dhp-gun.uzun { min-height: 360px }
