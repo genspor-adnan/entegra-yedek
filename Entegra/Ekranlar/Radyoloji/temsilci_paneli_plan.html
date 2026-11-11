@@ -138,7 +138,7 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
   <div class="toolbar">
     <span class="btn primary">＋ Ziyaret</span>
     <span class="btn sec">⚙ Planı Üret</span>
-    <span class="btn">⏰ Ziyaret Vadesi</span>
+    <span class="btn">⏰ Ziyaret Sırası</span>
     <span class="btn">📋 Açık Talepler <span class="rz hata" style="margin-left:2px">7</span></span>
     <span class="btn">🖨 Yazdır</span>
     <span class="seg" title="Görünüm (kullanıcı tercihi hatırlanır)"><span class="on" data-mod="ikisi">▦ İkisi</span><span data-mod="liste">📋 Liste</span><span data-mod="takvim">🗓 Takvim</span></span>
@@ -284,7 +284,7 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     <tr><td>Özet kutuları (geciken / <span class="k" data-hbys="gönderimi" data-erp="satışı">gönderimi</span> düşen / açık talep / yeni)</td><td><code>GET /api/dis-hekim/plan</code> yanıtındaki <code>vade</code> özeti + <code>v_dis_hekim_ziyaret_vade</code> (1290/1297)</td><td><span class="rz ok">var</span></td></tr>
     <tr><td>"Bugün planlı · yapıldı", "Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> · geçen ay", "<span class="k" data-hbys="Hekimlerim" data-erp="Müşterilerim">Hekimlerim</span> · 60 gün sessiz"</td><td>plan yanıtına <code>ozet</code> eklenir: <code>bugunPlanli, bugunYapildi, ayGonderim, oncekiAyGonderim, hedefSayisi, sessizSayisi</code> (temsilci × şube; vade görünümü + <code>dis_hekim_ziyaret</code>)</td><td><span class="rz uy">ek alan</span></td></tr>
     <tr><td>Günün işi tablosu (seçili gün)</td><td>plan yanıtındaki <code>ziyaretler</code> (hafta) + hekim bilgisi: <code>son_ziyaret, siklik_hafta, son30_istem, gonderim_dusen, acik_talep, acik_talep_ozeti</code> satıra gelir (ziyaret görünümüne vade kolonları JOIN) - ayrı uç yok</td><td><span class="rz uy">görünüm ek kolon</span></td></tr>
-    <tr><td>Çipler Geciken / <span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen / Talebi açık</td><td>istemci tarafı süzme (hafta verisi elde); "Tümü" = Ziyaret Vadesi listesine bağlantı değil, haftanın hepsi</td><td><span class="rz ok">istemci</span></td></tr>
+    <tr><td>Çipler Geciken / <span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen / Talebi açık</td><td>istemci tarafı süzme (hafta verisi elde); "Tümü" = Ziyaret Sırası listesine bağlantı değil, haftanın hepsi</td><td><span class="rz ok">istemci</span></td></tr>
     <tr><td>Temsilci combosu (sorumlu / yönetici)</td><td>plan yanıtı <code>temsilciler</code>; dar kapsamda yalnız kendisi (RolKapsami, 20e1705)</td><td><span class="rz ok">var</span></td></tr>
   </table>
   <h3>Kurallar</h3>

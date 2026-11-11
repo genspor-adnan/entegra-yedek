@@ -89,7 +89,7 @@ export function SahaPerformans() {
         <span className="ki-soluk">{S.aciklama}</span>
         <span className="sp" />
         <button onClick={() => git('/dis-hekim-plan')}>🗓 Ziyaret Planı</button>
-        <button onClick={() => git('/dis-hekim-vade')}>⏰ Ziyaret Vadesi</button>
+        <button onClick={() => git('/dis-hekim-vade')}>⏰ Ziyaret Sırası</button>
         <button onClick={() => git('/dis-hekim-talep')}>📋 Talepler</button>
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}

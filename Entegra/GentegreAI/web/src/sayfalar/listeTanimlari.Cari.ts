@@ -237,7 +237,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
   {
     // ZIYARET VADESI (1290, mockup §1 / §3 ölçütleri): hekim × şube × temsilci; geciken, gönderimi düşen, sessiz,
     //   açık talepli. Satır = hekim (kart yok); "Ziyaret Planla" planlı ziyaret açar. Yalnız HBYS.
-    kaynak: 'dis-hekim-vade', baslik: 'Ziyaret Vadesi', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Ziyaret Vadesi',
+    kaynak: 'dis-hekim-vade', baslik: 'Ziyaret Sırası', yol: 'Kurumlar & Sigorta › Dış Doktorlar › Ziyaret Sırası',
     aksiyonEkrani: 'dis-hekim-vade-liste', kartHatirlatYok: true, sagTusYok: false,
     cipler: [
       { ad: 'Geciken',          filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
@@ -248,10 +248,10 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Sıklığı tanımsız', filtre: { alan: 'siklikHafta', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Ziyaret Vadesi', ic: '⏰', yetkiKodu: 'dis_doktor.vade',
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Dış Doktorlar', menuAd: 'Ziyaret Sırası', ic: '⏰', yetkiKodu: 'dis_doktor.vade',
     menuSira: 23,
     // ERP (1297): "gönderim" = satış, hekim = müşteri - çipler de öyle.
-    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 24, yol: 'Cari & CRM › CRM › Ziyaret Vadesi',
+    erp: { grup: 'Cari & CRM', altGrup: 'CRM', sira: 24, yol: 'Cari & CRM › CRM › Ziyaret Sırası',
            cipler: [
              { ad: 'Geciken',          filtre: { alan: 'gecikmeGun', op: 'buyuk', deger: 0 } },
              { ad: 'Satışı düşen',     filtre: { alan: 'gonderimDusen', op: 'esit', deger: 1 } },

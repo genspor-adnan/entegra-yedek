@@ -116,7 +116,7 @@ export function DisHekimPlan() {
             <label><input type="checkbox" checked={grupla} onChange={e => setGrupla(e.target.checked)} /> {cev('Aynı ilçe aynı gün')}</label>
             <button className="d bir" onClick={() => void uret()} data-testid="plan-uret" title={cev(erp ? 'Sıklığı dolan, planı olmayan müşterilere öneri ziyaret açar' : 'Sıklığı dolan, planı olmayan hekimlere öneri ziyaret açar')}>⚙ {cev('Planı Üret')}</button>
           </span>
-          <button className="d" onClick={() => git('/dis-hekim-vade')}>⏰ {cev('Ziyaret Vadesi')}</button>
+          <button className="d" onClick={() => git('/dis-hekim-vade')}>⏰ {cev('Ziyaret Sırası')}</button>
           <button className="d" onClick={() => git('/dis-hekim-ziyaret/yeni')}>＋ {cev('Ziyaret')}</button>
           <button className="d" onClick={tazele}>⟳</button>
         </div>
@@ -129,7 +129,7 @@ export function DisHekimPlan() {
             <div className="kutu sari"><b>{cev('Öneri')}</b><span>{oneri}<small>{cev('onay bekliyor')}</small></span></div>
             {veri.vade && <>
               <div className="kutu kir"><b>{cev(erp ? 'Geciken müşteri' : 'Geciken hekim')}</b><span>{veri.vade.geciken}</span></div>
-              <div className="kutu"><b>{cev('Bu hafta planlanacak')}</b><span>{veri.vade.planlanacak}<small>{cev('vadesi dolan, planı yok')}</small></span></div>
+              <div className="kutu"><b>{cev('Bu hafta planlanacak')}</b><span>{veri.vade.planlanacak}<small>{cev('sırası gelen, planı yok')}</small></span></div>
               <div className="kutu kir"><b>{cev(erp ? 'Satışı düşen' : 'Gönderimi düşen')}</b><span>{veri.vade.dusen}</span></div>
               <div className="kutu"><b>{cev('Açık talepli')}</b><span>{veri.vade.talepli}</span></div>
             </>}

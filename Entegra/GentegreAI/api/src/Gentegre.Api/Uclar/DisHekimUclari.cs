@@ -148,7 +148,7 @@ public static class DisHekimUclari
             var sayi = await b.TekDegerAsync<int>(
                 "select public.fn_dis_hekim_plan_uret(@p0, @p1, @p2, @p3, @p4, @p5)", null,
                 [temsilci, baglam.SubeId.Value, istek.HaftaBas, istek.GunBasi ?? 6, istek.Grupla ?? true, baglam.KullaniciId], iptal);
-            return Results.Ok(new { sayi, mesaj = sayi == 0 ? "Bu hafta vadesi dolan, planı olmayan hekim yok." : $"{sayi} öneri ziyaret açıldı; onaylayın ya da taşıyın.",
+            return Results.Ok(new { sayi, mesaj = sayi == 0 ? "Bu hafta sırası gelen, planı olmayan kayıt yok." : $"{sayi} öneri ziyaret açıldı; onaylayın ya da taşıyın.",
                                     izlemeNo = baglam.IzlemeNo });
         });
 

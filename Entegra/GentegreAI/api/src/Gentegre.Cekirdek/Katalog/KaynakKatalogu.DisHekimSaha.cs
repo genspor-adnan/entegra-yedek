@@ -72,7 +72,7 @@ public static partial class KaynakKatalogu
             new("subeAd",        "v.sube_ad",        "metin", "Şube", Genislik: 110, Varsayilan: false),
             new("siklikHafta",   "v.siklik_hafta",   "sayi",  "Sıklık (hf)", Hizalama: "sag", Genislik: 90),
             new("sonZiyaret",    "v.son_ziyaret",    "tarih", "Son Ziyaret", Hizalama: "orta", Genislik: 110),
-            new("vadeTarihi",    "v.vade_tarihi",    "tarih", "Vade", Hizalama: "orta", Genislik: 100),
+            new("vadeTarihi",    "v.vade_tarihi",    "tarih", "Sıradaki Ziyaret", Hizalama: "orta", Genislik: 100),
             new("gecikmeGun",    "v.gecikme_gun",    "sayi",  "Gecikme (gün)", Hizalama: "sag", Genislik: 100),
             new("planliTarih",   "v.planli_tarih",   "tarih", "Planlı", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 120),
             new("planliZiyaretId", "v.planli_ziyaret_id", "sayi", "Planlı Ziyaret Id", Varsayilan: false),

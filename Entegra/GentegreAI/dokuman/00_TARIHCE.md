@@ -171,6 +171,12 @@ başlığında … Listesi olsun".
   ile sözlük seçer ("Doktorlar" → "Müşteriler", "Gönderim" → "Satış", çift tık kart yolu). Testler
   `SahaErpKipiTestleri` (kip test DB'de geçici değiştirilip geri yazılır; başlıklar + saha-hedef araması + müşteri vade
   / temsilci bağı). Mockup §1 **Temsilci Paneli** (günün işi) HENÜZ YOK - en yakını Ziyaret Planı + Ziyaret Vadesi.
+- **Mockup: Ziyaret Planı = Temsilci Paneli + haftalık plan** (`Ekranlar/Radyoloji/temsilci_paneli_plan.html`; v2
+  `temsilci_paneli_plan_v2.html` "sırası gelenler" çekmecesi: ilçe çipleri, çoklu seçim, güne sürükle / toplu ekle /
+  ilçeyi dağıt; görünüm segmenti İkisi / Liste / Takvim; HBYS · ERP kip anahtarı). Kod yok, tasarım aşaması.
+- **Terim (kullanıcı): "vade" yerine "Ziyaret Sırası"** (göç 1298: yetki adı, rehber satırı, rol amacı; web menü / sayfa
+  metinleri; vade kolonu "Sıradaki Ziyaret"). Teknik adlar (`dis-hekim-vade`, `dis_doktor.vade`, `v_dis_hekim_ziyaret_vade`)
+  değişmedi.
 
 ### 10.11.2026
 

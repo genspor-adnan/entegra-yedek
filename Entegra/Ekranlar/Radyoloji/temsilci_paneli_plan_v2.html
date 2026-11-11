@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>v2 · Ziyaret Planı + Vadesi Gelenler Çekmecesi — Mockup (Gentegre AI / GenoTIP AI)</title>
+<title>v2 · Ziyaret Planı + Sırası Gelenler Çekmecesi — Mockup (Gentegre AI / GenoTIP AI)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -111,7 +111,7 @@
   .win.liste .gunbas{border-top:none}
   .win.takvim .gunbas,.win.takvim .cipler.gunun,.win.takvim table.gunun,.win.takvim .sagmenu{display:none}
   .win.takvim .gun{min-height:300px}
-  /* v2: vadesi gelenler çekmecesi */
+  /* v2: sırası gelenler çekmecesi */
   .govde{display:grid;grid-template-columns:1fr 0}
   .win.cekmece .govde{grid-template-columns:1fr 360px}
   .cek{display:none;border-left:1px solid var(--line);background:#fbfcfd;flex-direction:column;min-height:100%}
@@ -147,12 +147,12 @@
 </head>
 <body>
 
-<div class="not"><b>Mockup v2 — Ziyaret Planı + "Vadesi gelenler" çekmecesi</b> (kullanıcı 11.11.2026: "ziyaret vadesi gelmiş belirli bölgedeki doktorlar listeden görüp
-pratik olarak nasıl eklenebilir"). v1'in üstüne: araç çubuğunda <b>⏰ Vadesi gelenler (11)</b> sağdan çekmece açar; <b>ilçe çipleri</b> + ölçüt çipleri (geciken / bu hafta /
+<div class="not"><b>Mockup v2 — Ziyaret Planı + "Sırası gelenler" çekmecesi</b> (kullanıcı 11.11.2026: "ziyaret vadesi gelmiş belirli bölgedeki doktorlar listeden görüp
+pratik olarak nasıl eklenebilir"). v1'in üstüne: araç çubuğunda <b>⏰ Sırası gelenler (11)</b> sağdan çekmece açar; <b>ilçe çipleri</b> + ölçüt çipleri (geciken / bu hafta /
 gönderimi düşen / talebi açık / yeni); satırlar işaretlenir ve <b>(a)</b> takvimde bir günün üstüne <b>sürüklenir</b>, <b>(b)</b> altta gün + saat seçilip
 "Seçilenleri plana ekle (N)", <b>(c)</b> ilçe başlığındaki <b>⤵ güne dağıt</b> ilçenin tümünü seçili güne saat sırasıyla ekler, <b>(d)</b> "Haftaya dağıt" = Planı Üret'in
 yalnız seçilenlere uygulanması. Eklenen kayıt takvimde kesik çerçeveli "yeni" kart olarak belirir, çekmeceden düşer.<br>
-<b>v1 — Ziyaret Planı = Temsilci Paneli + Haftalık Plan (tek ekran)</b> (kullanıcı 11.11.2026: "ziyaret planı ile temsilci panelini birleştiren bir mockup yap").
+<b>Terim (kullanıcı 11.11.2026): "vade" yerine <b>Ziyaret Sırası</b> / "sırası gelenler" - teknik adlar (dis-hekim-vade, v_dis_hekim_ziyaret_vade) aynı.</b><br><b>v1 — Ziyaret Planı = Temsilci Paneli + Haftalık Plan (tek ekran)</b> (kullanıcı 11.11.2026: "ziyaret planı ile temsilci panelini birleştiren bir mockup yap").
 <code>temsilci_ziyaret.html</code> §1 (Temsilci Paneli: günün işi, özet kutuları) ve §3 (Ziyaret Planlama: haftalık takvim, Planı Üret, sürükle-bırak) tek ekranda:
 üstte <b>özet kutuları</b> (bugün / geciken / açık talep / gönderim-satış / hekimlerim-müşterilerim), ortada <b>haftalık şerit</b> (5 gün, öneri / planlı / yapıldı),
 altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; varsayılan bugün). Mevcut rota <code>/dis-hekim-plan</code> ve menü adı
@@ -168,7 +168,7 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
   <div class="toolbar">
     <span class="btn primary">＋ Ziyaret</span>
     <span class="btn sec">⚙ Planı Üret</span>
-    <span class="btn sec vadebtn" style="border-color:#9d3434;color:#9d3434;background:#fff6f6">⏰ Vadesi gelenler <span class="rz hata" style="margin-left:2px">11</span></span>
+    <span class="btn sec vadebtn" style="border-color:#9d3434;color:#9d3434;background:#fff6f6">⏰ Sırası gelenler <span class="rz hata" style="margin-left:2px">11</span></span>
     <span class="btn">📋 Açık Talepler <span class="rz hata" style="margin-left:2px">7</span></span>
     <span class="btn">🖨 Yazdır</span>
     <span class="seg" title="Görünüm (kullanıcı tercihi hatırlanır)"><span class="on" data-mod="ikisi">▦ İkisi</span><span data-mod="liste">📋 Liste</span><span data-mod="takvim">🗓 Takvim</span></span>
@@ -263,14 +263,14 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
 
   </div><!-- /sol -->
 
-  <!-- v2: VADESİ GELENLER ÇEKMECESİ -->
+  <!-- v2: SIRASI GELENLER ÇEKMECESİ -->
   <div class="cek">
-    <h4>⏰ Vadesi gelenler <span class="rz hata">11</span> <span class="kapat">✖</span></h4>
+    <h4>⏰ Sırası gelenler <span class="rz hata">11</span> <span class="kapat">✖</span></h4>
     <div class="ust">
       <span class="sonuk">İlçe:</span>
       <span class="cip on">Üsküdar <small>4</small></span><span class="cip">Kadıköy <small>3</small></span><span class="cip">Ataşehir <small>2</small></span><span class="cip">Maltepe <small>2</small></span><span class="cip">Tümü</span>
       <span class="sonuk" style="width:100%;margin-top:4px">Ölçüt:</span>
-      <span class="cip on">Geciken</span><span class="cip on">Vadesi bu hafta</span><span class="cip"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen</span><span class="cip">Talebi açık</span><span class="cip">Yeni</span>
+      <span class="cip on">Geciken</span><span class="cip on">Sırası bu hafta</span><span class="cip"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen</span><span class="cip">Talebi açık</span><span class="cip">Yeni</span>
       <span class="arama">🔍 <span class="k" data-hbys="hekim / kurum…" data-erp="müşteri…">hekim / kurum…</span></span>
     </div>
     <div class="ilce"><b>Üsküdar</b> · 4 <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span> · 2 geciken <span class="dagit" title="İlçenin tümünü seçili güne saat sırasıyla dağıt">⤵ güne dağıt</span></div>
@@ -288,7 +288,7 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     <div class="alt">
       <div class="satir"><span class="sonuk">Seçili <b>2</b> →</span><span class="combo">Pzt 10.11 (seçili gün)</span><span class="combo" style="flex:0 0 78px">11:30</span></div>
       <div class="satir"><span class="btn primary" style="flex:1;justify-content:center">📅 Seçilenleri plana ekle (2)</span><span class="btn" title="Seçilenleri haftaya sıklık / ilçeye göre dağıt">⚙ Haftaya dağıt</span></div>
-      <div class="sonuk" style="font-size:10.5px">ya da satırı takvimde bir günün üstüne <b>sürükle-bırak</b>; saat gündeki son ziyaretten +90 dk.</div>
+      <div class="sonuk" style="font-size:10.5px">ya da satırı <b>tutup soldaki takvimde güne bırak</b> (bu mockup'ta çalışır): saat gündeki son ziyaretten +90 dk, kart "yeni" olarak belirir, satır listeden düşer.</div>
     </div>
   </div>
   </div><!-- /govde -->
@@ -348,12 +348,12 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     <tr><td>Özet kutuları (geciken / <span class="k" data-hbys="gönderimi" data-erp="satışı">gönderimi</span> düşen / açık talep / yeni)</td><td><code>GET /api/dis-hekim/plan</code> yanıtındaki <code>vade</code> özeti + <code>v_dis_hekim_ziyaret_vade</code> (1290/1297)</td><td><span class="rz ok">var</span></td></tr>
     <tr><td>"Bugün planlı · yapıldı", "Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> · geçen ay", "<span class="k" data-hbys="Hekimlerim" data-erp="Müşterilerim">Hekimlerim</span> · 60 gün sessiz"</td><td>plan yanıtına <code>ozet</code> eklenir: <code>bugunPlanli, bugunYapildi, ayGonderim, oncekiAyGonderim, hedefSayisi, sessizSayisi</code> (temsilci × şube; vade görünümü + <code>dis_hekim_ziyaret</code>)</td><td><span class="rz uy">ek alan</span></td></tr>
     <tr><td>Günün işi tablosu (seçili gün)</td><td>plan yanıtındaki <code>ziyaretler</code> (hafta) + hekim bilgisi: <code>son_ziyaret, siklik_hafta, son30_istem, gonderim_dusen, acik_talep, acik_talep_ozeti</code> satıra gelir (ziyaret görünümüne vade kolonları JOIN) - ayrı uç yok</td><td><span class="rz uy">görünüm ek kolon</span></td></tr>
-    <tr><td>Çipler Geciken / <span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen / Talebi açık</td><td>istemci tarafı süzme (hafta verisi elde); "Tümü" = Ziyaret Vadesi listesine bağlantı değil, haftanın hepsi</td><td><span class="rz ok">istemci</span></td></tr>
+    <tr><td>Çipler Geciken / <span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen / Talebi açık</td><td>istemci tarafı süzme (hafta verisi elde); "Tümü" = Ziyaret Sırası listesine bağlantı değil, haftanın hepsi</td><td><span class="rz ok">istemci</span></td></tr>
     <tr><td>Temsilci combosu (sorumlu / yönetici)</td><td>plan yanıtı <code>temsilciler</code>; dar kapsamda yalnız kendisi (RolKapsami, 20e1705)</td><td><span class="rz ok">var</span></td></tr>
   </table>
   <h3>Kurallar</h3>
   <ul>
-    <li><b>Vadesi gelenler çekmecesi (v2):</b> veri <code>v_dis_hekim_ziyaret_vade</code> (temsilci × şube; <code>hekim_ilce</code> ilçe çipleri, <code>gecikme_gun</code>,
+    <li><b>Sırası gelenler çekmecesi (v2):</b> veri <code>v_dis_hekim_ziyaret_vade</code> (temsilci × şube; <code>hekim_ilce</code> ilçe çipleri, <code>gecikme_gun</code>,
         <code>vade_tarihi</code> bu hafta, <code>gonderim_dusen</code>, <code>acik_talep</code>, <code>yeni_hekim</code>) - planlı ziyareti olanlar (<code>planli_ziyaret_id</code>) listede
         çıkmaz. Ekleme <code>POST /api/dis-hekim/planla</code> (hekim, tarih-saat, temsilci) satır başına; toplu ekleme için <code>POST /planla-toplu</code>
         {hekimIdler[], gun, baslangicSaat, aralikDk} <b>(ek uç)</b>: saatler sırayla, gündeki son ziyaretten sonra başlar, gün başı sınırı aşılırsa uyarı (devam / dur).
@@ -391,6 +391,38 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
   document.querySelector('.cek .kapat').addEventListener('click', e => e.target.closest('.win').classList.remove('cekmece'));
   document.querySelector('.vadebtn').addEventListener('click', e => e.currentTarget.closest('.win').classList.add('cekmece'));
   document.querySelectorAll('.vs input').forEach(i => i.addEventListener('change', () => i.closest('.vs').classList.toggle('sec', i.checked)));
+  // SÜRÜKLE-BIRAK (kullanıcı 11.11.2026: "sırası gelenlerden tutup solda takvime sürükle bırak"): çekmece satırı
+  //   draggable; gün sütunu hedef olunca kesik çerçeve; bırakınca saat = gündeki son ziyaret + 90 dk (yoksa 09:00),
+  //   kart "yeni" (kesik) çizilir, satır çekmeceden düşer, sayaçlar iner. Gerçekte POST /api/dis-hekim/planla.
+  let tasinan = null;
+  document.querySelectorAll('.vs').forEach(v => {
+    v.setAttribute('draggable', 'true');
+    v.addEventListener('dragstart', e => { tasinan = v; v.style.opacity = '.5'; e.dataTransfer.effectAllowed = 'move'; });
+    v.addEventListener('dragend', () => { v.style.opacity = ''; document.querySelectorAll('.gun').forEach(g => g.classList.remove('hedef')); });
+  });
+  const saatYaz = dk => String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
+  document.querySelectorAll('.gun').forEach(g => {
+    g.addEventListener('dragover', e => { if (tasinan) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; g.classList.add('hedef'); } });
+    g.addEventListener('dragleave', () => g.classList.remove('hedef'));
+    g.addEventListener('drop', e => {
+      e.preventDefault(); g.classList.remove('hedef');
+      if (!tasinan) return;
+      const kartlar = [...g.querySelectorAll('.zk:not(.iptal)')];
+      const son = kartlar.map(k => (k.querySelector('b')?.textContent.match(/^(\d\d):(\d\d)/) || [])).filter(m => m.length).map(m => +m[1] * 60 + +m[2]).sort((a, b) => b - a)[0];
+      const saat = saatYaz(son != null ? son + 90 : 9 * 60);
+      const ad = tasinan.querySelector('.ic b').textContent;
+      const ilce = tasinan.closest('.cek').querySelector('.ilce') && [...tasinan.parentElement.children].slice(0, [...tasinan.parentElement.children].indexOf(tasinan)).reverse().find(x => x.classList.contains('ilce'))?.querySelector('b')?.textContent || '';
+      const kart = document.createElement('div');
+      kart.className = 'zk yeni'; kart.style.borderStyle = 'dashed';
+      kart.innerHTML = '<b>' + saat + ' ' + ad + '</b> · ' + ilce + '<div class="s">↙ çekmeceden bırakıldı · POST /planla</div>';
+      const bos = g.querySelector('.bos'); if (bos) bos.remove();
+      g.querySelector('.gun > h5') ? g.appendChild(kart) : g.appendChild(kart);
+      const kucuk = g.querySelector('h5 small'); if (kucuk) kucuk.textContent = kucuk.textContent.replace(/^(\d+)/, m => String(+m + 1));
+      tasinan.remove(); tasinan = null;
+      const say = document.querySelectorAll('.cek .vs').length;
+      document.querySelectorAll('.cek h4 .rz, .vadebtn .rz').forEach(x => x.textContent = say);
+    });
+  });
   // Gün seçimi (yalnız görsel).
   document.querySelectorAll('.gun').forEach(g => g.addEventListener('click', () => {
     document.querySelectorAll('.gun').forEach(x => x.classList.toggle('secili', x === g));

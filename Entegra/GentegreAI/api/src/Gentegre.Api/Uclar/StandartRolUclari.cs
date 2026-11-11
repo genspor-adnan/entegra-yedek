@@ -369,7 +369,7 @@ public static class StandartRolUclari
         //   şube temsilcisi atar (dış doktor kartı), talebi kapatır.
         // SAHA (1289/1297): HBYS'de dış doktor, ERP'de müşteri ziyareti - rol iki üründe de (cari = ERP müşteri kartı).
         new("saha_temsilci", "Müşteri Temsilcisi (Saha)",
-            "Saha ziyaretleri (HBYS dış doktor / ERP müşteri), talepler, ziyaret vadesi ve haftalık plan; ziyaret edilen kartı düzenler, silmez.",
+            "Saha ziyaretleri (HBYS dış doktor / ERP müşteri), talepler, ziyaret sırası ve haftalık plan; ziyaret edilen kartı düzenler, silmez.",
             Hepsi,
             K(T("dis_doktor.liste"), Y("dis_doktor"), Y("dis_doktor.ziyaret"), Y("dis_doktor.talep"),
               Y("dis_doktor.vade"), Y("dis_doktor.plan"), T("kurum"), T("cari.liste"), Y("cari"), Y("gorev"))),
