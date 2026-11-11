@@ -382,6 +382,9 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   "8 haneli sayı olmalı" - ORM denetimiyle aynı kural. Eksik varsa Bakanlık teslimi gönderilmez (mevcut davranış).
   Test `BakanlikProfiliTestleri.Eksik_listesi_MEDULA_tesis_kodu` (boş / 4 hane / 8 hane); Bakanlık profili, telerad
   teslim, ORM, Teletıp kuyruğu 92/92. dev / test / UNIVERSE / KOSUYOLU'da.
+- **KOSUYOLU test MEDULA tesis kodu (kullanıcı: "KOSUYOLU'ya test Medula tesis kodu gir"):** `kurum_profil.tesis_kodu`
+  (şube 0) = `99999999` - TEST değeri, gerçek kod bilinmiyor; Bakanlık bağlantısından önce değiştirilmeli. Bekleyen XO
+  (satır 6, istem 545) yeniden kuyruğa alındı, işçi gönderdi: AA, ORC-21 `Merkez^^999999…1…99999999`. (DB verisi; kod değişmedi.)
 
 ### 10.11.2026
 
