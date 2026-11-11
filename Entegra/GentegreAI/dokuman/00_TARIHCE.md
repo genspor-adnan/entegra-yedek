@@ -358,6 +358,18 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   Demo istemler 545-549 kuyruğa alındı, işçi denedi: hepsi "gidemez" - KOSUYOLU'da kurum SKRS kodu ve e-Nabız firma
   kodu (MSH-3) KAYITLI DEĞİL (uydurulmadı), demo başvurularda e-Nabız 101 referansı / SYS takip, hekim TCKN, SUT kodu
   yok. Kodlar girilince satırlar "Yeniden gönder" ile (ya da istem değişince kendiliğinden) Mirth'e gider.
+- **Demo istem eksikleri test değerleriyle dolduruldu (kullanıcı: "demo istemlerin eksiklerini test değerleriyle doldur"):**
+  * Kod (db/1305): `fn_teletip_orm_verisi` hastane başvuru referansını (PV1-19 / OBR-21) e-Nabız 101 paketi yoksa
+    başvurunun belge id'sinden alır - Gentegre 101'e zaten bu değeri yazıyor (EnabizPaketUretici). SYS takip no hâlâ
+    yalnız e-Nabız'dan; denetim onu yakalamaya devam eder. dev / test / UNIVERSE / KOSUYOLU'da.
+  * KOSUYOLU TEST verisi (gerçek kişi / hizmet kartına dokunulmadı): test hekim `TT-HEKIM` (taraf 42538, TCKN
+    12345678950); test hizmet kartları `TT.BT / TT.MR / TT.US / TT.CR` (35523-35526) - SUT resmî SKRS listesinden
+    (804090 / 804480 / 803730 / 801720), LOINC test değeri 99990-1..4 (yerel SKRS LOINC listesinde radyoloji kodu yok);
+    demo istemler 545-549 bunlara bağlandı; başvuru 82168 `sys_takip_no = TEST-SYS-82168`; `kurum.skrs_kodu = 999999`,
+    `teletip.firma_kodu = GENTEGRE-TEST` (ikisi de TEST - gerçek Bakanlık bağlantısından önce değiştirilmeli).
+  * Sonuç: istem değişince tetik 5 "gidemez" satırı yeniden kuyruğa aldı, KOSUYOLU Teletıp işçisi gönderdi →
+    Mirth K1 → benzetim: 5/5 AA (kontrol no TT1-1..TT5-1; Mirth'te accession KGM…45998-46002). Not: KOSUYOLU'da
+    MEDULA tesis kodu (kurum_profil.tesis_kodu) boş - ORC-21 son bileşeni boş gidiyor; denetim bunu henüz engellemiyor.
 
 ### 10.11.2026
 
