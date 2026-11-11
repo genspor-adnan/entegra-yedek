@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v2 · Ziyaret Planı + Vadesi Gelenler Çekmecesi — Mockup (Gentegre AI / GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;margin:22px auto 8px;max-width:1240px;color:var(--navy)}
+  h2 b{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:0 8px;margin-right:6px}
+  h2 .ipucu{font-weight:normal;color:var(--muted);font-size:11px;margin-left:8px}
+  .not{max-width:1240px;margin:0 auto 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 11px;font-size:11.5px;line-height:1.55;color:#2c4a6b}
+  .not code,.kural code{background:#fff;border:1px solid #cfe0f5;border-radius:2px;padding:0 4px;font-size:11px}
+  .win{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line);align-items:flex-end}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .kipsec{margin-left:auto;border:none !important;background:none !important;padding:0 0 4px !important;display:flex;gap:4px;align-items:center}
+  .kipsec i{font-style:normal;color:var(--muted);font-size:10.5px;margin-right:4px}
+  .kipsec b{border:1px solid var(--line);border-radius:10px;padding:1px 9px;font-size:10.5px;background:#fff;color:var(--muted);cursor:pointer;font-weight:normal}
+  .kipsec b.on{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.sec{border-color:#9a5b00;color:#9a5b00;background:#fffaf2}
+  .baslikad{margin-left:auto;font-weight:bold;color:var(--navy);font-size:12.5px}
+  .combo{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 20px 0 7px;font-size:12px;display:flex;align-items:center;position:relative}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .cipler{display:flex;gap:4px;padding:6px 8px;background:#fff;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#f7f9fc;color:#3a5573}
+  .cip.on{background:#2f6db3;color:#fff;border-color:#2f6db3}
+  .arama{margin-left:auto;border:1px solid var(--line);border-radius:12px;padding:3px 10px;width:220px;color:#aab4bf;background:#fff}
+  .sonuk{color:var(--muted)} .sag{text-align:right} .orta{text-align:center}
+  /* özet kutuları (panel) */
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line2)}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;padding:8px 10px;cursor:default}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:16px;color:var(--navy)}
+  .kutu.kir b{color:#9d3434}
+  .kutu.ok b{color:#2e7d46}
+  .kutu.sari b{color:#9a5b00}
+  .kutu .alt{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+  .kutu.suz{outline:2px solid #2f6db3;outline-offset:-2px}
+  /* haftalık şerit (plan) */
+  .haftabas{display:flex;gap:4px;padding:6px 8px;background:#fbfcfd;border-bottom:1px solid var(--line2);align-items:center;flex-wrap:wrap}
+  .hafta{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 10px 6px}
+  .gun{border:1px solid var(--line2);border-radius:4px;background:#fff;min-height:150px;cursor:pointer}
+  .gun h5{margin:0;padding:6px 8px;font-size:11.5px;background:#f3f6fa;border-bottom:1px solid var(--line2);color:var(--navy);display:flex;align-items:center;gap:4px}
+  .gun h5 small{color:var(--muted);font-weight:normal;flex:1}
+  .gun h5 .ekle{border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 5px;color:var(--accent);font-weight:normal;font-size:11px}
+  .gun.bugun h5{background:#e3ecfa}
+  .gun.secili{border-color:#2f6db3;box-shadow:0 0 0 2px #cfe0f5 inset}
+  .zk{margin:5px 6px;border:1px solid var(--line);border-left:4px solid #2f6db3;border-radius:3px;padding:4px 7px;font-size:11px;background:#fbfcfd;line-height:1.35}
+  .zk.yapildi{border-left-color:#2e7d46;opacity:.8}
+  .zk.gecik{border-left-color:#9d3434;background:#fff6f6}
+  .zk.oneri{border-style:dashed;border-left-style:solid;border-left-color:#9a5b00;background:#fffaf2}
+  .zk.iptal{border-left-color:#aab4bf;color:var(--muted);text-decoration:line-through}
+  .zk b{color:var(--navy)}
+  .zk .s{color:var(--muted);font-size:10.5px}
+  .zk .d{display:none;gap:3px;margin-top:3px}
+  .zk:hover .d{display:flex}
+  .zk .d span{border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 5px;font-size:10.5px}
+  .bos{color:#aab4bf;text-align:center;padding:12px 0;font-size:11px}
+  /* günün işi tablosu (panel) */
+  .gunbas{display:flex;gap:6px;align-items:center;padding:8px 12px 6px;border-top:1px solid var(--line2);background:#fbfcfd}
+  .gunbas h4{margin:0;font-size:12px;color:var(--navy)}
+  .gunbas .tag{font-weight:normal;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line2);border-radius:9px;padding:0 7px}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap;background:#fff;vertical-align:top}
+  td.sar{white-space:normal}
+  tr.secili td{background:#eef4fc}
+  tr.gecik td{background:#fff6f6}
+  tr.yapildi td{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#eef1f5;color:#5b6b7c}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.uy{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.tur{background:#f3f6fa;color:#3a5573}
+  .satirarac{display:inline-flex;gap:3px}
+  .satirarac span{border:1px solid var(--line);border-radius:3px;background:#fff;padding:0 5px;font-size:10.5px;color:var(--accent)}
+  .bilgi{margin:10px 12px 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:3px;padding:7px 9px;font-size:11px;color:#2c4a6b;line-height:1.55}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .kural{max-width:1240px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:11.5px;line-height:1.6}
+  .kural h3{margin:0 0 6px;font-size:12.5px;color:var(--navy)}
+  .kural ul{margin:0 0 8px 18px;padding:0}
+  .kural table td{white-space:normal}
+  .sagmenu{position:absolute;right:28px;top:118px;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(20,40,70,.18);min-width:210px;font-size:11.5px;z-index:5}
+  .sagmenu div{padding:5px 12px;border-bottom:1px solid var(--line2)}
+  .sagmenu div:last-child{border-bottom:none}
+  .sagmenu div.b{background:#f3f6fa;color:var(--muted);font-size:10.5px}
+  .sagmenu .ks{color:var(--muted);float:right;font-size:10.5px}
+  /* liste / takvim modu */
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-left:8px}
+  .seg span{padding:5px 10px;font-size:11.5px;background:linear-gradient(var(--btnfrom),var(--btnto));color:var(--muted);cursor:pointer}
+  .seg span.on{background:var(--navy);color:#fff;font-weight:bold}
+  .gunsekme{display:none;gap:4px;padding:6px 10px;background:#fbfcfd;border-bottom:1px solid var(--line2);align-items:center}
+  .gunsekme span{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff;color:#3a5573;cursor:pointer}
+  .gunsekme span.on{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .gunsekme span small{color:inherit;opacity:.75;margin-left:4px}
+  .gunsekme .ipucu{margin-left:auto;color:var(--muted);font-size:11px}
+  .win.liste .haftabas,.win.liste .hafta{display:none}
+  .win.liste .gunsekme{display:flex}
+  .win.liste .gunbas{border-top:none}
+  .win.takvim .gunbas,.win.takvim .cipler.gunun,.win.takvim table.gunun,.win.takvim .sagmenu{display:none}
+  .win.takvim .gun{min-height:300px}
+  /* v2: vadesi gelenler çekmecesi */
+  .govde{display:grid;grid-template-columns:1fr 0}
+  .win.cekmece .govde{grid-template-columns:1fr 360px}
+  .cek{display:none;border-left:1px solid var(--line);background:#fbfcfd;flex-direction:column;min-height:100%}
+  .win.cekmece .cek{display:flex}
+  .cek h4{margin:0;padding:8px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b;display:flex;align-items:center;gap:6px}
+  .cek h4 .kapat{margin-left:auto;color:var(--muted);font-weight:normal;cursor:pointer}
+  .cek .ust{padding:6px 8px;border-bottom:1px solid var(--line2);display:flex;gap:4px;flex-wrap:wrap;align-items:center;background:#fff}
+  .cek .ust .arama{width:100%;margin:4px 0 0}
+  .ilce{padding:5px 8px;background:#f3f6fa;border-bottom:1px solid var(--line2);font-size:11px;color:#2c4a6b;display:flex;align-items:center;gap:6px}
+  .ilce b{color:var(--navy)}
+  .ilce .dagit{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;padding:1px 7px;font-size:10.5px;color:var(--accent);cursor:pointer}
+  .vs{display:flex;gap:7px;align-items:flex-start;padding:6px 8px;border-bottom:1px solid var(--line2);background:#fff;cursor:grab;font-size:11px;line-height:1.35}
+  .vs:hover{background:#f7f9fc}
+  .vs.sec{background:#eef4fc}
+  .vs input{margin:2px 0 0}
+  .vs .ic{flex:1} .vs .ic b{color:var(--navy)}
+  .vs .ic .s{color:var(--muted);font-size:10.5px}
+  .vs .gk{color:#9d3434;font-size:10.5px;white-space:nowrap}
+  .vs .gk.sari{color:#9a5b00}
+  .cek .alt{margin-top:auto;padding:8px;border-top:1px solid var(--line);background:#fff;display:grid;gap:6px}
+  .cek .alt .satir{display:flex;gap:4px;align-items:center}
+  .cek .alt .combo{flex:1}
+  .gun.hedef{outline:2px dashed #2f6db3;outline-offset:-2px;background:#f3f8ff}
+  .zk.yeni{border-left-color:#2f6db3;background:#eef4fc}
+  .mobil{max-width:1240px;margin:12px auto 0;display:grid;grid-template-columns:320px 1fr;gap:14px}
+  .tel{border:8px solid #1f2d3a;border-radius:26px;background:#fff;overflow:hidden;height:520px}
+  .tel .ust{background:var(--navy);color:#fff;padding:8px 10px;font-weight:bold;font-size:12px;display:flex;justify-content:space-between}
+  .tel .ozet{grid-template-columns:repeat(3,1fr);padding:8px;gap:6px}
+  .tel .kutu{padding:6px 7px} .tel .kutu b{font-size:14px}
+  .tel .zk{margin:6px 8px}
+  .tel .alt{display:flex;justify-content:space-around;border-top:1px solid var(--line2);padding:6px 0;color:var(--muted);font-size:10.5px;position:sticky;bottom:0;background:#fff}
+</style>
+</head>
+<body>
+
+<div class="not"><b>Mockup v2 — Ziyaret Planı + "Vadesi gelenler" çekmecesi</b> (kullanıcı 11.11.2026: "ziyaret vadesi gelmiş belirli bölgedeki doktorlar listeden görüp
+pratik olarak nasıl eklenebilir"). v1'in üstüne: araç çubuğunda <b>⏰ Vadesi gelenler (11)</b> sağdan çekmece açar; <b>ilçe çipleri</b> + ölçüt çipleri (geciken / bu hafta /
+gönderimi düşen / talebi açık / yeni); satırlar işaretlenir ve <b>(a)</b> takvimde bir günün üstüne <b>sürüklenir</b>, <b>(b)</b> altta gün + saat seçilip
+"Seçilenleri plana ekle (N)", <b>(c)</b> ilçe başlığındaki <b>⤵ güne dağıt</b> ilçenin tümünü seçili güne saat sırasıyla ekler, <b>(d)</b> "Haftaya dağıt" = Planı Üret'in
+yalnız seçilenlere uygulanması. Eklenen kayıt takvimde kesik çerçeveli "yeni" kart olarak belirir, çekmeceden düşer.<br>
+<b>v1 — Ziyaret Planı = Temsilci Paneli + Haftalık Plan (tek ekran)</b> (kullanıcı 11.11.2026: "ziyaret planı ile temsilci panelini birleştiren bir mockup yap").
+<code>temsilci_ziyaret.html</code> §1 (Temsilci Paneli: günün işi, özet kutuları) ve §3 (Ziyaret Planlama: haftalık takvim, Planı Üret, sürükle-bırak) tek ekranda:
+üstte <b>özet kutuları</b> (bugün / geciken / açık talep / gönderim-satış / hekimlerim-müşterilerim), ortada <b>haftalık şerit</b> (5 gün, öneri / planlı / yapıldı),
+altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; varsayılan bugün). Mevcut rota <code>/dis-hekim-plan</code> ve menü adı
+<b>Ziyaret Planı</b> korunur; ayrı "Temsilci Paneli" ekranı açılmaz. <b>İki kip</b> (1297): HBYS dış doktor / gönderim (istem), ERP müşteri / satış - sağ üstteki
+<b>HBYS · ERP</b> anahtarı metinleri değiştirir (gerçekte <code>kullanici.urunModu</code>).</div>
+
+<!-- ===================================================================== 1 ===== -->
+<h2><b>1</b> — Ziyaret Planı <span class="ipucu">HBYS: Kurumlar &amp; Sigorta › Dış Doktorlar › Ziyaret Planı · ERP: Cari &amp; CRM › CRM › Ziyaret Planı · yetki <code>dis_doktor.plan</code> · temsilci kendi, sorumlu / yönetici herkes</span></h2>
+<div class="win cekmece" style="position:relative">
+  <div class="ekransekme"><span>🏠</span><span class="on">🗓 Ziyaret Planı ×</span>
+    <span class="kipsec"><i>kip:</i><b class="on" data-kip="hbys">HBYS</b><b data-kip="erp">ERP</b></span></div>
+
+  <div class="toolbar">
+    <span class="btn primary">＋ Ziyaret</span>
+    <span class="btn sec">⚙ Planı Üret</span>
+    <span class="btn sec vadebtn" style="border-color:#9d3434;color:#9d3434;background:#fff6f6">⏰ Vadesi gelenler <span class="rz hata" style="margin-left:2px">11</span></span>
+    <span class="btn">📋 Açık Talepler <span class="rz hata" style="margin-left:2px">7</span></span>
+    <span class="btn">🖨 Yazdır</span>
+    <span class="seg" title="Görünüm (kullanıcı tercihi hatırlanır)"><span class="on" data-mod="ikisi">▦ İkisi</span><span data-mod="liste">📋 Liste</span><span data-mod="takvim">🗓 Takvim</span></span>
+    <span class="combo" style="width:210px;margin-left:8px" title="Yalnız sorumlu / yönetici görür; temsilci kendini">👤 Ahmet YILDIZ (ben)</span>
+    <span class="baslikad">Ahmet YILDIZ · Koşuyolu · Pazartesi 10.11.2026</span>
+  </div>
+
+  <div class="govde"><div class="sol">
+  <!-- panel §1 özet kutuları: tıklanınca alttaki tablo süzülür -->
+  <div class="ozet">
+    <div class="kutu suz"><small>Bugün planlı ziyaret</small><b>6</b> <span class="sonuk">· 2 yapıldı</span><span class="alt">kalan 4 · ilk 11:30</span></div>
+    <div class="kutu kir"><small>Geciken ziyaret</small><b>3</b> <span class="sonuk">· sıklığı aşılan <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span></span><span class="alt">en eski 25.08 (+77 gün)</span></div>
+    <div class="kutu kir"><small>Açık talep</small><b>7</b> <span class="sonuk">· 2 termini geçti</span><span class="alt">bu hafta termin 3</span></div>
+    <div class="kutu sari"><small>Öneri (onay bekliyor)</small><b>4</b> <span class="sonuk">· Planı Üret çıktısı</span><span class="alt">✓ hepsini plana al</span></div>
+    <div class="kutu ok"><small>Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span></small><b>142</b> <span class="sonuk">· geçen ay 128 <span class="rz ok">+11%</span></span><span class="alt"><span class="k" data-hbys="gönderimi" data-erp="satışı">gönderimi</span> düşen 5</span></div>
+    <div class="kutu"><small><span class="k" data-hbys="Hekimlerim" data-erp="Müşterilerim">Hekimlerim</span></small><b>38</b> <span class="sonuk">· 4'ü 60 gündür <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> yok</span><span class="alt">yeni (3 ay) 2 · sıklığı tanımsız 3</span></div>
+  </div>
+
+  <!-- plan §3 haftalık şerit -->
+  <div class="haftabas">
+    <span class="btn">◀</span><span class="btn">10 – 14 Kasım 2026</span><span class="btn">▶</span><span class="btn">Bugün</span>
+    <span class="sonuk" style="margin-left:10px">Planı Üret ölçütü:</span>
+    <span class="cip on">Sıklığı dolan</span><span class="cip on"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen (öne)</span><span class="cip on">Açık talebi olan (öne)</span><span class="cip">Yeni <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span> (tanışma)</span>
+    <span class="sonuk" style="margin-left:8px">gün başı</span><span class="cip">6</span><span class="cip on">aynı ilçe aynı gün</span>
+    <span class="sonuk" style="margin-left:auto">6 planlı · 2 yapıldı · 4 öneri · 1 iptal</span>
+  </div>
+  <div class="hafta">
+    <div class="gun bugun secili hedef"><h5>Pzt 10.11 <small>6 · Kadıköy / Üsküdar / Ataşehir</small><span class="ekle" title="Bu güne ekle">＋</span></h5>
+      <div class="zk yapildi"><b>09:00 <span class="k" data-hbys="Dr. AKSOY" data-erp="Mega Market">Dr. AKSOY</span></b> · Kadıköy<div class="s">Planlı · yapıldı ✓</div></div>
+      <div class="zk yapildi"><b>10:00 <span class="k" data-hbys="Dr. ARI" data-erp="Yıldız Gıda">Dr. ARI</span></b> · Kadıköy<div class="s">Planlı · yapıldı ✓</div></div>
+      <div class="zk"><b>11:30 <span class="k" data-hbys="Dr. ÖZ" data-erp="Kaya Ticaret">Dr. ÖZ</span></b> · Üsküdar<div class="s"><span class="k" data-hbys="Gönderim" data-erp="Satış">Gönderim</span> düştü ↓</div><div class="d"><span>📝 kart</span><span>✖ iptal</span></div></div>
+      <div class="zk gecik"><b>13:30 <span class="k" data-hbys="Dr. TAN" data-erp="Demir Ltd">Dr. TAN</span></b> · Üsküdar<div class="s">Geciken · talep termini geçti</div><div class="d"><span>📝 kart</span><span>✖ iptal</span></div></div>
+      <div class="zk"><b>15:00 <span class="k" data-hbys="Dr. EREN" data-erp="Çelik AŞ">Dr. EREN</span></b> · Ataşehir<div class="d"><span>📝 kart</span><span>✖ iptal</span></div></div>
+      <div class="zk"><b>16:00 <span class="k" data-hbys="Dr. SU" data-erp="Ak Yapı">Dr. SU</span></b> · Ataşehir<div class="s">Tanışma</div><div class="d"><span>📝 kart</span><span>✖ iptal</span></div></div>
+      <div class="zk yeni" style="border-style:dashed"><b>17:30 <span class="k" data-hbys="Dr. SARI" data-erp="Sarı Gıda">Dr. SARI</span></b> · Üsküdar<div class="s">↙ çekmeceden bırakıldı · kaydediliyor…</div></div>
+    </div>
+    <div class="gun"><h5>Sal 11.11 <small>4 · Maltepe / Kartal</small><span class="ekle">＋</span></h5>
+      <div class="zk"><b>09:30 <span class="k" data-hbys="Dr. YILMAZ" data-erp="Can Lojistik">Dr. YILMAZ</span></b> · Maltepe</div>
+      <div class="zk"><b>11:00 <span class="k" data-hbys="Dr. KOÇ" data-erp="Ege Tekstil">Dr. KOÇ</span></b> · Maltepe<div class="s">Açık talep: <span class="k" data-hbys="portal erişimi" data-erp="fiyat listesi">portal erişimi</span></div></div>
+      <div class="zk"><b>14:00 <span class="k" data-hbys="Dr. ŞEN" data-erp="Şen Market">Dr. ŞEN</span></b> · Kartal</div>
+      <div class="zk oneri"><b>15:30 <span class="k" data-hbys="Dr. ALP" data-erp="Alp İnşaat">Dr. ALP</span></b> · Kartal<div class="s">Öneri: sıklık doldu (6 hf)</div><div class="d"><span>✓ plana al</span><span>✖ kaldır</span></div></div>
+    </div>
+    <div class="gun"><h5>Çar 12.11 <small>Ofis · raporlama</small><span class="ekle">＋</span></h5>
+      <div class="zk"><b>10:00 <span class="k" data-hbys="Dr. DEMİRCİ" data-erp="Demirci Oto">Dr. DEMİRCİ</span></b> · Telefon<div class="s"><span class="k" data-hbys="Rapor süresi takibi" data-erp="Teklif takibi">Rapor süresi takibi</span></div></div>
+      <div class="zk iptal"><b>14:00 <span class="k" data-hbys="Dr. UÇAR" data-erp="Uçar Gıda">Dr. UÇAR</span></b> · Kartal<div class="s">İptal · müşteri erteledi</div></div>
+      <div class="bos">sürükle-bırak ile ziyaret taşı</div>
+    </div>
+    <div class="gun"><h5>Per 13.11 <small>5 · Ümraniye</small><span class="ekle">＋</span></h5>
+      <div class="zk"><b>09:00 <span class="k" data-hbys="Dr. KARA" data-erp="Kara Mobilya">Dr. KARA</span></b> · Ümraniye</div>
+      <div class="zk"><b>10:30 <span class="k" data-hbys="Dr. ÇETİN" data-erp="Çetin Elektrik">Dr. ÇETİN</span></b> · Ümraniye</div>
+      <div class="zk"><b>13:00 <span class="k" data-hbys="Dr. BULUT" data-erp="Bulut Kırtasiye">Dr. BULUT</span></b> · Ümraniye</div>
+      <div class="zk oneri"><b>14:30 <span class="k" data-hbys="Dr. ACAR" data-erp="Acar Boya">Dr. ACAR</span></b> · Ümraniye<div class="s">Öneri: 60 gündür <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> yok</div></div>
+      <div class="zk oneri"><b>16:00 <span class="k" data-hbys="Dr. GÜL" data-erp="Gül Plastik">Dr. GÜL</span></b> · Ümraniye<div class="s">Öneri: yeni <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span></div></div>
+    </div>
+    <div class="gun"><h5>Cum 14.11 <small>3 · Kadıköy</small><span class="ekle">＋</span></h5>
+      <div class="zk"><b>10:00 <span class="k" data-hbys="Dr. ÖZTÜRK" data-erp="Öztürk Metal">Dr. ÖZTÜRK</span></b> · Kadıköy</div>
+      <div class="zk"><b>11:30 <span class="k" data-hbys="Dr. AYDIN" data-erp="Aydın Cam">Dr. AYDIN</span></b> · Kadıköy<div class="s"><span class="k" data-hbys="Eğitim sunumu" data-erp="Ürün tanıtımı">Eğitim sunumu</span></div></div>
+      <div class="zk oneri"><b>14:00 <span class="k" data-hbys="Dr. POLAT" data-erp="Polat Gıda">Dr. POLAT</span></b> · Kadıköy<div class="s">Öneri: açık talep</div></div>
+    </div>
+  </div>
+
+  <!-- LİSTE modunda hafta şeridi yerine gün sekmeleri -->
+  <div class="gunsekme">
+    <span class="on">Pzt 10<small>6</small></span><span>Sal 11<small>4</small></span><span>Çar 12<small>2</small></span><span>Per 13<small>5</small></span><span>Cum 14<small>3</small></span>
+    <span style="border-style:dashed">Bu hafta<small>20</small></span>
+    <span class="ipucu">Liste modu: takvim gizli, günler sekme; "Bu hafta" tüm haftayı tarih sıralı listeler</span>
+  </div>
+  <!-- panel §1 günün işi: seçili gün -->
+  <div class="gunbas">
+    <h4>Günün işi — Pazartesi 10.11.2026 <span class="tag">seçili gün · takvimde gün başlığına tıkla</span></h4>
+    <span class="sonuk" style="margin-left:auto">6 ziyaret · 2 yapıldı · 1 geciken · 3 açık talep</span>
+  </div>
+  <div class="cipler gunun">
+    <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Geciken</span><span class="cip"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen</span><span class="cip">Talebi açık</span><span class="cip">Öneri</span><span class="cip">Tümü</span>
+    <span class="arama">🔍 <span class="k" data-hbys="hekim / kurum / ilçe…" data-erp="müşteri / ilçe…">hekim / kurum / ilçe…</span></span>
+  </div>
+  <table class="gunun">
+    <thead><tr>
+      <th style="width:56px" class="orta">Saat</th><th style="width:230px"><span class="k" data-hbys="Dış Doktor" data-erp="Müşteri">Dış Doktor</span></th><th style="width:180px"><span class="k" data-hbys="Kurum · İlçe" data-erp="İlçe · Temsilci">Kurum · İlçe</span></th>
+      <th style="width:80px" class="orta">Tür</th><th style="width:100px" class="orta">Son ziyaret</th><th style="width:70px" class="orta">Sıklık</th>
+      <th style="width:90px" class="orta"><span class="k" data-hbys="30 gün ist." data-erp="30 gün satış">30 gün ist.</span></th><th>Konu / Açık talep</th><th style="width:90px" class="orta">Durum</th><th style="width:120px"></th>
+    </tr></thead>
+    <tbody>
+      <tr class="yapildi"><td class="orta">09:00</td><td><span class="k" data-hbys="Dr. Ahmet AKSOY" data-erp="Mega Market AŞ">Dr. Ahmet AKSOY</span> <span class="rz mavi k" data-hbys="Radyoloji" data-erp="Perakende">Radyoloji</span></td><td><span class="k" data-hbys="Acıbadem Kozyatağı · Kadıköy" data-erp="Kadıköy · A. YILDIZ">Acıbadem Kozyatağı · Kadıköy</span></td><td class="orta"><span class="rz tur">Yüz yüze</span></td><td class="orta">13.10.2026</td><td class="orta">4 hafta</td><td class="orta">9</td><td class="sar"><span class="k" data-hbys="MR rapor süresi talebi açık" data-erp="Vade uzatma talebi açık">MR rapor süresi talebi açık</span></td><td class="orta"><span class="rz ok">Yapıldı</span></td><td><span class="satirarac"><span>📝</span><span>👁</span></span></td></tr>
+      <tr class="yapildi"><td class="orta">10:00</td><td><span class="k" data-hbys="Dr. Selin ARI" data-erp="Yıldız Gıda Ltd">Dr. Selin ARI</span> <span class="rz mavi k" data-hbys="Ortopedi" data-erp="Toptan">Ortopedi</span></td><td><span class="k" data-hbys="Özel Göztepe Hast. · Kadıköy" data-erp="Kadıköy · A. YILDIZ">Özel Göztepe Hast. · Kadıköy</span></td><td class="orta"><span class="rz tur">Yüz yüze</span></td><td class="orta">06.10.2026</td><td class="orta">4 hafta</td><td class="orta">4</td><td class="sar"><span class="k" data-hbys="Diz MR protokolü - eğitim istedi" data-erp="Yeni ürün tanıtımı - numune istedi">Diz MR protokolü - eğitim istedi</span></td><td class="orta"><span class="rz ok">Yapıldı</span></td><td><span class="satirarac"><span>📝</span><span>👁</span></span></td></tr>
+      <tr class="secili"><td class="orta">11:30</td><td><span class="k" data-hbys="Dr. Kerem ÖZ" data-erp="Kaya Ticaret">Dr. Kerem ÖZ</span> <span class="rz mavi k" data-hbys="Nöroloji" data-erp="Bayi">Nöroloji</span></td><td><span class="k" data-hbys="Muayenehane · Üsküdar" data-erp="Üsküdar · A. YILDIZ">Muayenehane · Üsküdar</span></td><td class="orta"><span class="rz tur">Yüz yüze</span></td><td class="orta">29.09.2026</td><td class="orta">4 hafta</td><td class="orta">2 <span class="rz hata">↓</span></td><td class="sar"><span class="k" data-hbys="Gönderim düştü - sebep?" data-erp="Satış düştü - sebep?">Gönderim düştü - sebep?</span></td><td class="orta"><span class="rz mavi">Planlı</span></td><td><span class="satirarac"><span>📝 yaz</span><span>✖</span><span>⇄</span></span></td></tr>
+      <tr class="gecik"><td class="orta">13:30</td><td><span class="k" data-hbys="Dr. Leyla TAN" data-erp="Demir Ltd">Dr. Leyla TAN</span> <span class="rz mavi k" data-hbys="Dahiliye" data-erp="Bayi">Dahiliye</span></td><td><span class="k" data-hbys="Üsküdar Tıp Merkezi · Üsküdar" data-erp="Üsküdar · A. YILDIZ">Üsküdar Tıp Merkezi · Üsküdar</span></td><td class="orta"><span class="rz hata">Geciken</span></td><td class="orta">25.08.2026</td><td class="orta">4 hafta</td><td class="orta">6</td><td class="sar"><span class="k" data-hbys="Randevu önceliği talebi termini geçti" data-erp="İskonto talebi termini geçti">Randevu önceliği talebi termini geçti</span></td><td class="orta"><span class="rz hata">Gecikti</span></td><td><span class="satirarac"><span>📝 yaz</span><span>✖</span><span>⇄</span></span></td></tr>
+      <tr><td class="orta">15:00</td><td><span class="k" data-hbys="Dr. Murat EREN" data-erp="Çelik AŞ">Dr. Murat EREN</span> <span class="rz mavi k" data-hbys="KBB" data-erp="Kurumsal">KBB</span></td><td><span class="k" data-hbys="Muayenehane · Ataşehir" data-erp="Ataşehir · A. YILDIZ">Muayenehane · Ataşehir</span></td><td class="orta"><span class="rz tur">Yüz yüze</span></td><td class="orta">13.10.2026</td><td class="orta">4 hafta</td><td class="orta">3</td><td class="sar sonuk">—</td><td class="orta"><span class="rz mavi">Planlı</span></td><td><span class="satirarac"><span>📝 yaz</span><span>✖</span><span>⇄</span></span></td></tr>
+      <tr><td class="orta">16:00</td><td><span class="k" data-hbys="Dr. Hande SU" data-erp="Ak Yapı">Dr. Hande SU</span> <span class="rz mavi k" data-hbys="Kadın Doğum" data-erp="Yeni">Kadın Doğum</span></td><td><span class="k" data-hbys="Ataşehir Kadın Sağlığı · Ataşehir" data-erp="Ataşehir · A. YILDIZ">Ataşehir Kadın Sağlığı · Ataşehir</span></td><td class="orta"><span class="rz tur">Tanışma</span></td><td class="orta">—</td><td class="orta">—</td><td class="orta">0</td><td class="sar"><span class="k" data-hbys="Yeni hekim - broşür + fiyat listesi" data-erp="Yeni müşteri - katalog + fiyat listesi">Yeni hekim - broşür + fiyat listesi</span></td><td class="orta"><span class="rz mavi">Planlı</span></td><td><span class="satirarac"><span>📝 yaz</span><span>✖</span><span>⇄</span></span></td></tr>
+    </tbody>
+  </table>
+
+  </div><!-- /sol -->
+
+  <!-- v2: VADESİ GELENLER ÇEKMECESİ -->
+  <div class="cek">
+    <h4>⏰ Vadesi gelenler <span class="rz hata">11</span> <span class="kapat">✖</span></h4>
+    <div class="ust">
+      <span class="sonuk">İlçe:</span>
+      <span class="cip on">Üsküdar <small>4</small></span><span class="cip">Kadıköy <small>3</small></span><span class="cip">Ataşehir <small>2</small></span><span class="cip">Maltepe <small>2</small></span><span class="cip">Tümü</span>
+      <span class="sonuk" style="width:100%;margin-top:4px">Ölçüt:</span>
+      <span class="cip on">Geciken</span><span class="cip on">Vadesi bu hafta</span><span class="cip"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen</span><span class="cip">Talebi açık</span><span class="cip">Yeni</span>
+      <span class="arama">🔍 <span class="k" data-hbys="hekim / kurum…" data-erp="müşteri…">hekim / kurum…</span></span>
+    </div>
+    <div class="ilce"><b>Üsküdar</b> · 4 <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span> · 2 geciken <span class="dagit" title="İlçenin tümünü seçili güne saat sırasıyla dağıt">⤵ güne dağıt</span></div>
+    <div class="vs sec"><input type="checkbox" checked><div class="ic"><b><span class="k" data-hbys="Dr. Leyla TAN" data-erp="Demir Ltd">Dr. Leyla TAN</span></b> · <span class="k" data-hbys="Üsküdar Tıp Merkezi" data-erp="bayi">Üsküdar Tıp Merkezi</span><div class="s">son 25.08 · 4 hf · açık talep 1 · <span class="k" data-hbys="30g ist. 6" data-erp="30g satış 6">30g ist. 6</span></div></div><span class="gk">+77 g</span></div>
+    <div class="vs sec"><input type="checkbox" checked><div class="ic"><b><span class="k" data-hbys="Dr. Kerem ÖZ" data-erp="Kaya Ticaret">Dr. Kerem ÖZ</span></b> · <span class="k" data-hbys="Muayenehane" data-erp="bayi">Muayenehane</span><div class="s">son 29.09 · 4 hf · <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> ↓</div></div><span class="gk">+14 g</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Nur SARI" data-erp="Sarı Gıda">Dr. Nur SARI</span></b> · <span class="k" data-hbys="Üsküdar Devlet H." data-erp="perakende">Üsküdar Devlet H.</span><div class="s">son 15.10 · 4 hf</div></div><span class="gk sari">bu hafta</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Ali KURT" data-erp="Kurt Nakliyat">Dr. Ali KURT</span></b> · <span class="k" data-hbys="Muayenehane" data-erp="kurumsal">Muayenehane</span><div class="s">son 16.10 · 4 hf · tercih Çar 14:00</div></div><span class="gk sari">bu hafta</span></div>
+    <div class="ilce"><b>Kadıköy</b> · 3 <span class="k" data-hbys="hekim" data-erp="müşteri">hekim</span> · 1 geciken <span class="dagit">⤵ güne dağıt</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Ece KAYA" data-erp="Kaya Market">Dr. Ece KAYA</span></b> · <span class="k" data-hbys="Acıbadem Kozyatağı" data-erp="perakende">Acıbadem Kozyatağı</span><div class="s">son 08.09 · 6 hf</div></div><span class="gk">+21 g</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Can IŞIK" data-erp="Işık Elektrik">Dr. Can IŞIK</span></b><div class="s">son 20.10 · 3 hf · talep termini 13.11</div></div><span class="gk sari">bu hafta</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Mert AK" data-erp="Ak Yapı Market">Dr. Mert AK</span></b><div class="s">yeni · tanışma</div></div><span class="gk sari">yeni</span></div>
+    <div class="ilce"><b>Ataşehir</b> · 2 <span class="dagit">⤵ güne dağıt</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Zeynep ER" data-erp="Er Tekstil">Dr. Zeynep ER</span></b><div class="s">son 01.10 · 4 hf</div></div><span class="gk">+12 g</span></div>
+    <div class="vs"><input type="checkbox"><div class="ic"><b><span class="k" data-hbys="Dr. Oğuz TEK" data-erp="Tek Otomotiv">Dr. Oğuz TEK</span></b><div class="s">son 17.10 · 4 hf</div></div><span class="gk sari">bu hafta</span></div>
+    <div class="alt">
+      <div class="satir"><span class="sonuk">Seçili <b>2</b> →</span><span class="combo">Pzt 10.11 (seçili gün)</span><span class="combo" style="flex:0 0 78px">11:30</span></div>
+      <div class="satir"><span class="btn primary" style="flex:1;justify-content:center">📅 Seçilenleri plana ekle (2)</span><span class="btn" title="Seçilenleri haftaya sıklık / ilçeye göre dağıt">⚙ Haftaya dağıt</span></div>
+      <div class="sonuk" style="font-size:10.5px">ya da satırı takvimde bir günün üstüne <b>sürükle-bırak</b>; saat gündeki son ziyaretten +90 dk.</div>
+    </div>
+  </div>
+  </div><!-- /govde -->
+
+  <div class="sagmenu" style="display:none">
+    <div class="b">Satır sağ tuş</div>
+    <div>📝 Ziyaret kartını aç <span class="ks">çift tık</span></div>
+    <div>🩺 <span class="k" data-hbys="Dış Doktor kartı" data-erp="Müşteri kartı">Dış Doktor kartı</span></div>
+    <div>📞 Telefon ziyareti yaz</div>
+    <div>⇄ Başka güne taşı <span class="ks">sürükle</span></div>
+    <div>⏭ Ertele (gelecek hafta)</div>
+    <div>✖ Planı iptal et</div>
+  </div>
+
+  <div class="bilgi">Tek ekran: üst kutular <b>bugünün özeti</b> (tıklayınca tablo o kümeye süzülür), orta şerit <b>hafta</b> (öneri kesik çerçeve ✓ / ✖, planlı sürüklenir,
+    yapıldı soluk, iptal üstü çizili), alt tablo <b>seçili günün işi</b> (varsayılan bugün; gün başlığına tıklayınca değişir; "Bu hafta" çipi haftanın tümünü listeler).
+    Çift tık = ziyaret kartı. "Geciken" = son ziyaret + sıklık &lt; bugün. "<span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen" = son 30 gün, önceki 30 günün yarısından az.</div>
+  <div class="uyari">Yönetici / sorumlu görünümü: temsilci combosu açılır; "Hepsi" seçilince hafta şeridi temsilci başına satır olur (yan yana değil, alt alta), günün işi tablosuna
+    <b>Temsilci</b> kolonu gelir. Temsilci (saha_temsilci) combo'yu görmez, yalnız kendi kayıtları (RolKapsami).</div>
+</div>
+
+<!-- ===================================================================== 2 ===== -->
+<h2><b>2</b> — Telefonda <span class="ipucu">aynı rota, dar ekran · günün işi öne, hafta şeridi yatay kaydırma</span></h2>
+<div class="mobil">
+  <div class="tel">
+    <div class="ust"><span>🗓 Ziyaret Planı</span><span>Pzt 10.11</span></div>
+    <div class="ozet">
+      <div class="kutu"><small>Bugün</small><b>6</b><span class="alt">2 yapıldı</span></div>
+      <div class="kutu kir"><small>Geciken</small><b>3</b></div>
+      <div class="kutu kir"><small>Açık talep</small><b>7</b></div>
+    </div>
+    <div class="cipler" style="overflow:hidden"><span class="cip on">Bugün</span><span class="cip">Hafta</span><span class="cip">Geciken</span><span class="cip">Öneri 4</span></div>
+    <div class="zk yapildi"><b>09:00 <span class="k" data-hbys="Dr. AKSOY" data-erp="Mega Market">Dr. AKSOY</span></b><div class="s">Kadıköy · yapıldı ✓</div></div>
+    <div class="zk yapildi"><b>10:00 <span class="k" data-hbys="Dr. ARI" data-erp="Yıldız Gıda">Dr. ARI</span></b><div class="s">Kadıköy · yapıldı ✓</div></div>
+    <div class="zk"><b>11:30 <span class="k" data-hbys="Dr. ÖZ" data-erp="Kaya Ticaret">Dr. ÖZ</span></b><div class="s">Üsküdar · <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> ↓ · 📞 0532…</div></div>
+    <div class="zk gecik"><b>13:30 <span class="k" data-hbys="Dr. TAN" data-erp="Demir Ltd">Dr. TAN</span></b><div class="s">Üsküdar · geciken · talep termini geçti</div></div>
+    <div class="zk"><b>15:00 <span class="k" data-hbys="Dr. EREN" data-erp="Çelik AŞ">Dr. EREN</span></b><div class="s">Ataşehir</div></div>
+    <div class="alt"><span>▶ Başla (konum)</span><span>＋ Ziyaret</span><span>📋 Talep</span></div>
+  </div>
+  <div class="kural">
+    <h3>Telefon</h3>
+    <ul>
+      <li>Aynı sayfa, &lt; 700px: özet 3 kutu, hafta şeridi gizli (çip "Hafta" açar, yatay kaydırma), günün işi kart listesi.</li>
+      <li>Ziyaret kartında "▶ Başla / ■ Bitir" mobil damgası (bas_zamani / bit_zamani / enlem-boylam) zaten var (1289); buradan tek dokunuşla açılır.</li>
+      <li>Rota (§4) bu aşamada YOK (kullanıcı kararı); ilçe gruplaması gün başlığında görünür.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================================================================== 3 ===== -->
+<h2><b>3</b> — Veri kaynağı ve kurallar <span class="ipucu">hepsi mevcut uçlar + bir ek: günün işi satırları</span></h2>
+<div class="kural">
+  <h3>Uçlar</h3>
+  <table style="margin-bottom:8px">
+    <tr><th style="width:260px">Bölüm</th><th>Kaynak</th><th style="width:120px">Durum</th></tr>
+    <tr><td>Hafta şeridi, öneri ✓ / ✖, taşı, iptal, Planı Üret, güne ekle</td><td><code>GET /api/dis-hekim/plan</code>, <code>POST /plan/uret</code>, <code>/ziyaret/{id}/onayla|iptal|tasi</code>, <code>POST /planla</code> (1290)</td><td><span class="rz ok">var</span></td></tr>
+    <tr><td>Özet kutuları (geciken / <span class="k" data-hbys="gönderimi" data-erp="satışı">gönderimi</span> düşen / açık talep / yeni)</td><td><code>GET /api/dis-hekim/plan</code> yanıtındaki <code>vade</code> özeti + <code>v_dis_hekim_ziyaret_vade</code> (1290/1297)</td><td><span class="rz ok">var</span></td></tr>
+    <tr><td>"Bugün planlı · yapıldı", "Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span> · geçen ay", "<span class="k" data-hbys="Hekimlerim" data-erp="Müşterilerim">Hekimlerim</span> · 60 gün sessiz"</td><td>plan yanıtına <code>ozet</code> eklenir: <code>bugunPlanli, bugunYapildi, ayGonderim, oncekiAyGonderim, hedefSayisi, sessizSayisi</code> (temsilci × şube; vade görünümü + <code>dis_hekim_ziyaret</code>)</td><td><span class="rz uy">ek alan</span></td></tr>
+    <tr><td>Günün işi tablosu (seçili gün)</td><td>plan yanıtındaki <code>ziyaretler</code> (hafta) + hekim bilgisi: <code>son_ziyaret, siklik_hafta, son30_istem, gonderim_dusen, acik_talep, acik_talep_ozeti</code> satıra gelir (ziyaret görünümüne vade kolonları JOIN) - ayrı uç yok</td><td><span class="rz uy">görünüm ek kolon</span></td></tr>
+    <tr><td>Çipler Geciken / <span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen / Talebi açık</td><td>istemci tarafı süzme (hafta verisi elde); "Tümü" = Ziyaret Vadesi listesine bağlantı değil, haftanın hepsi</td><td><span class="rz ok">istemci</span></td></tr>
+    <tr><td>Temsilci combosu (sorumlu / yönetici)</td><td>plan yanıtı <code>temsilciler</code>; dar kapsamda yalnız kendisi (RolKapsami, 20e1705)</td><td><span class="rz ok">var</span></td></tr>
+  </table>
+  <h3>Kurallar</h3>
+  <ul>
+    <li><b>Vadesi gelenler çekmecesi (v2):</b> veri <code>v_dis_hekim_ziyaret_vade</code> (temsilci × şube; <code>hekim_ilce</code> ilçe çipleri, <code>gecikme_gun</code>,
+        <code>vade_tarihi</code> bu hafta, <code>gonderim_dusen</code>, <code>acik_talep</code>, <code>yeni_hekim</code>) - planlı ziyareti olanlar (<code>planli_ziyaret_id</code>) listede
+        çıkmaz. Ekleme <code>POST /api/dis-hekim/planla</code> (hekim, tarih-saat, temsilci) satır başına; toplu ekleme için <code>POST /planla-toplu</code>
+        {hekimIdler[], gun, baslangicSaat, aralikDk} <b>(ek uç)</b>: saatler sırayla, gündeki son ziyaretten sonra başlar, gün başı sınırı aşılırsa uyarı (devam / dur).
+        Sürükle-bırak gün sütununa: aynı uç, saat = gündeki son + 90 dk (yoksa 09:00). "Haftaya dağıt" = <code>POST /plan/uret</code> hekimIdler ile sınırlı (ek parametre).
+        Çekmece durumu (açık/kapalı, seçili ilçe) kullanıcıda hatırlanır. Yönetici görünümünde çekmece seçili temsilcinin vadesini gösterir.</li>
+    <li><b>Görünüm modu</b> (araç çubuğu segmenti): <b>İkisi</b> (varsayılan: hafta şeridi + günün işi), <b>Liste</b> (takvim gizli, günler üstte sekme, tablo büyür;
+        "Bu hafta" sekmesi haftanın tümünü tarih-saat sıralı), <b>Takvim</b> (tablo gizli, gün sütunları uzun - haftayı tek bakışta). Tercih kullanıcıda
+        hatırlanır (<code>localStorage</code> <code>dhp.mod</code>); telefonda varsayılan Liste. Üç modda da özet kutuları ve çipler aynı veriyi süzer.</li>
+    <li>Menü adı ve rota değişmez: <b>Ziyaret Planı</b> (<code>/dis-hekim-plan</code>, yetki <code>dis_doktor.plan</code>); HBYS Kurumlar &amp; Sigorta › Dış Doktorlar, ERP Cari &amp; CRM › CRM. Ayrı "Temsilci Paneli" ekranı ve yetkisi açılmaz.</li>
+    <li>Özet kutusu tıklanınca alt tablo o kümeye süzülür ve ilgili çip yanar (kutu = çip kısayolu); "Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span>" tıklanınca Saha Performansı (yetkisi varsa).</li>
+    <li>Seçili gün varsayılan bugün; hafta değişince seçili gün o haftanın pazartesisi. Günün işi, planlı sırası saat; yapıldı satırları soluk ama listede kalır.</li>
+    <li>Kip: HBYS dış doktor / gönderim (radyoloji istemi), ERP müşteri / satış (fatura-fiş, 1297). Metinler <code>kullanici.urunModu</code>; veriler aynı uçlardan (sunucu birleşimi).</li>
+    <li>Ziyaret kartına çift tık; yeni ziyaret "＋ Ziyaret" (saha-hedef araması) ya da gün başlığındaki ＋ (planlı). Yapılan ziyaret karttan "Yapıldı" olarak kaydedilir; tablo ve kutular tazelenir.</li>
+    <li>Öneriler (Planı Üret) kesik çerçeve: ✓ plana al / ✖ kaldır; "✓ hepsini plana al" özet kutusunda (toplu onayla ucu: <code>POST /plan/onayla-hepsi?hafta</code> - ek).</li>
+  </ul>
+</div>
+
+<script>
+  // Kip anahtarı: data-hbys / data-erp metinleri (gerçekte kullanici.urunModu).
+  document.querySelectorAll('.kipsec b').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.kipsec b').forEach(x => x.classList.toggle('on', x === b));
+    const kip = b.dataset.kip;
+    document.querySelectorAll('.k').forEach(el => { el.textContent = el.dataset[kip] ?? el.textContent; });
+  }));
+  // Liste / Takvim / İkisi modu (yalnız görsel).
+  document.querySelectorAll('.seg span').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.seg span').forEach(x => x.classList.toggle('on', x === b));
+    const w = b.closest('.win'); w.classList.remove('liste', 'takvim');
+    if (b.dataset.mod !== 'ikisi') w.classList.add(b.dataset.mod);
+  }));
+  document.querySelectorAll('.gunsekme span:not(.ipucu)').forEach(g => g.addEventListener('click', () => {
+    document.querySelectorAll('.gunsekme span:not(.ipucu)').forEach(x => x.classList.toggle('on', x === g));
+  }));
+  // Çekmece aç / kapa (yalnız görsel).
+  document.querySelector('.cek .kapat').addEventListener('click', e => e.target.closest('.win').classList.remove('cekmece'));
+  document.querySelector('.vadebtn').addEventListener('click', e => e.currentTarget.closest('.win').classList.add('cekmece'));
+  document.querySelectorAll('.vs input').forEach(i => i.addEventListener('change', () => i.closest('.vs').classList.toggle('sec', i.checked)));
+  // Gün seçimi (yalnız görsel).
+  document.querySelectorAll('.gun').forEach(g => g.addEventListener('click', () => {
+    document.querySelectorAll('.gun').forEach(x => x.classList.toggle('secili', x === g));
+  }));
+</script>
+</body>
+</html>
