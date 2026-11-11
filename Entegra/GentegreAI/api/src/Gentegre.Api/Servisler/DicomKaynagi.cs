@@ -260,4 +260,54 @@ public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<Guvenlik
                 + $"&objectUID={Uri.EscapeDataString(objectUid)}&contentType=application%2Fdicom";
         return await istemci.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, iptal);
     }
+
+    /// <summary>KOS'ta Retrieve AE Title olarak yazılan PACS AE başlığı.</summary>
+    public string PacsAe => Ayar.SunucuAe;
+
+    /// <summary>
+    /// TELETIP KOS (1310): çalışmanın KOS yapısı - C-FIND study / series / image + her serinin ortadaki görüntüsünden
+    /// küçük resim (WADO application/dicom → <see cref="KucukResimUretici"/>). Çalışma yoksa null. Küçük resim
+    /// üretilemeyen seri ikonsuz döner (çağıran uyarı yazar).
+    /// </summary>
+    public async Task<KosCalisma?> KosCalismaAsync(string studyUid, CancellationToken iptal)
+    {
+        var calismalar = await SorgulaAsync(DicomCFindRequest.CreateStudyQuery(studyInstanceUid: studyUid), iptal);
+        var c = calismalar.FirstOrDefault();
+        if (c is null) return null;
+        var seriler = new List<KosSeri>();
+        foreach (var s in (await SorgulaAsync(DicomCFindRequest.CreateSeriesQuery(studyUid), iptal)).OrderBy(SeriNo))
+        {
+            var seriesUid = s.GetSingleValueOrDefault(DicomTag.SeriesInstanceUID, "");
+            if (string.IsNullOrWhiteSpace(seriesUid)) continue;
+            var istek = DicomCFindRequest.CreateImageQuery(studyUid, seriesUid);
+            foreach (var t in new[] { DicomTag.SOPClassUID, DicomTag.InstanceNumber, DicomTag.NumberOfFrames })
+                istek.Dataset.AddOrUpdate(t, string.Empty);
+            var goruntuler = (await SorgulaAsync(istek, iptal))
+                .Select(g => new KosGoruntu(g.GetSingleValueOrDefault(DicomTag.SOPClassUID, ""), g.GetSingleValueOrDefault(DicomTag.SOPInstanceUID, ""),
+                                            g.GetSingleValueOrDefault(DicomTag.InstanceNumber, 0), g.GetSingleValueOrDefault(DicomTag.NumberOfFrames, 1)))
+                .Where(g => g.SopInstanceUid.Length > 0).OrderBy(g => g.No).ToList();
+            var seri = new KosSeri(seriesUid, s.GetSingleValueOrDefault(DicomTag.Modality, ""),
+                                   s.GetSingleValueOrDefault(DicomTag.SeriesDescription, ""), SeriNo(s), goruntuler);
+            if (goruntuler.Count > 0)
+            {
+                var orta = goruntuler[goruntuler.Count / 2];
+                try
+                {
+                    using var y = await WadoAsync(studyUid, seriesUid, orta.SopInstanceUid, iptal);
+                    if (y.IsSuccessStatusCode)
+                    {
+                        await using var akis = await y.Content.ReadAsStreamAsync(iptal);
+                        using var bellek = new MemoryStream();
+                        await akis.CopyToAsync(bellek, iptal);
+                        bellek.Position = 0;
+                        seri.Ikon = KucukResimUretici.Uret((await DicomFile.OpenAsync(bellek)).Dataset);
+                    }
+                }
+                catch (Exception h) when (h is HttpRequestException or DicomFileException or TaskCanceledException) { /* ikonsuz */ }
+            }
+            seriler.Add(seri);
+        }
+        return new KosCalisma(studyUid, c.GetSingleValueOrDefault(DicomTag.StudyDate, ""), c.GetSingleValueOrDefault(DicomTag.StudyTime, ""),
+                              c.GetSingleValueOrDefault(DicomTag.StudyDescription, ""), seriler);
+    }
 }

@@ -91,6 +91,8 @@ export function TeletipAyar() {
               {alanHata.aktif && <div className="tta-hata">{alanHata.aktif}</div>}
             </div>
             {kutu('hl7Adres', 'Mirth K1 (HL7) adresi', 'host:port - Mirth TELETIP_HL7 dinleyicisi; Bakanlık\'a Mirth bağlanır', { genislik: 220, yerTutucu: '10.0.0.12:6661' })}
+            {kutu('xdsAdres', 'Mirth K2 (KOS) adresi', 'Mirth TELETIP_KOS - sonda / olmalı (…/kos/)', { genislik: 260, yerTutucu: 'http://10.0.0.12:8082/kos/' })}
+            {kutu('xdsHastaOid', 'XDS hasta OID', 'TCKN^^^&OID&ISO - Bakanlık KOS doğrulamasıyla teyit edin', { genislik: 220 })}
             <label htmlFor="tta-encoding">{c('Karakter seti (MSH-18)')}</label>
             <div>
               <select id="tta-encoding" value={f.encoding} onChange={e => ata('encoding', e.target.value)}>
@@ -150,7 +152,7 @@ export function TeletipAyar() {
 /** Kaydedilen alanlar (karşılaştırma ve PUT gövdesi). */
 function ayarGovdesi(a: Ayar) {
   return { aktif: a.aktif, kurumSkrs: a.kurumSkrs, medulaTesisKodu: a.medulaTesisKodu, subeNo: a.subeNo,
-           firmaKodu: a.firmaKodu, encoding: a.encoding, hl7Adres: a.hl7Adres };
+           firmaKodu: a.firmaKodu, encoding: a.encoding, hl7Adres: a.hl7Adres, xdsAdres: a.xdsAdres, xdsHastaOid: a.xdsHastaOid };
 }
 
 const TTA_STIL = `

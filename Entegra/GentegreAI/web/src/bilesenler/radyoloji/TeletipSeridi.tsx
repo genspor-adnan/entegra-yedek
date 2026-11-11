@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
-import { TELETIP_DURUM, TELETIP_EMIR, type TeletipSatir } from '../../api/uclar/teletip';
+import { TELETIP_DURUM, mesajKisaAdi, type TeletipSatir } from '../../api/uclar/teletip';
 import { tarihSaat } from '../bicim';
 import { c } from '../../dil/ceviri';
 
@@ -34,8 +34,8 @@ export function TeletipSeridi({ istemId, yenile, ac }: { istemId: number; yenile
           return (
             <span key={s.id} className="tts-parca">
               {i > 0 && <span className="tts-ayrac">›</span>}
-              <span className={`tts-adim ${d.sinif}`} title={s.hata || `${TELETIP_EMIR[s.emir]} · ${d.ad}`}>
-                {TELETIP_EMIR[s.emir] ?? s.emir} {s.durum === 1 ? '✓' : s.durum === 2 || s.durum === 3 ? '✖' : '…'} {c(d.ad)}{saat ? ` ${saat}` : ''}
+              <span className={`tts-adim ${d.sinif}`} title={s.hata || `${mesajKisaAdi(s.kanal, s.emir)} · ${d.ad}`}>
+                {mesajKisaAdi(s.kanal, s.emir)} {s.durum === 1 ? '✓' : s.durum === 2 || s.durum === 3 ? '✖' : '…'} {c(d.ad)}{saat ? ` ${saat}` : ''}
               </span>
             </span>
           );

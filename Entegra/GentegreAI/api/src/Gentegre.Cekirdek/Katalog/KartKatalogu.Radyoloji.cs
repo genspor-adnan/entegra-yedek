@@ -184,6 +184,8 @@ public static partial class KartKatalogu
             new("mwl",      "mwl",      "mantik", Baslik: "MWL (iş listesi)", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
             new("mpps",     "mpps",     "mantik", Baslik: "MPPS (çekim bildirimi)", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
             new("pacsHedef", "pacs_hedef", "metin", EnFazlaUzunluk: 100, Baslik: "PACS hedefi", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
+            // TELETIP (1310): STM > Cihaz Takip ekranında tanımlanınca Bakanlık'ın verdiği seri no - KOS DeviceSerialNumber.
+            new("teletipSeriNo", "teletip_seri_no", "metin", EnFazlaUzunluk: 64, Baslik: "Teletıp cihaz seri no (STM)", Grup: "Genel", AltGrup: "DICOM / bağlantı"),
             // ---- RANDEVU ----
             // RANDEVU: kapaliysa cihaz "walk-in" calisir, takvimde sutunu cikmaz.
             new("randevuVerilir", "randevu_verilir", "mantik", Baslik: "Randevu verilir", Grup: "Randevu ayarları"),

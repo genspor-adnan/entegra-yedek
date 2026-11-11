@@ -50,6 +50,8 @@ kurucu.Services.Configure<GuvenlikAyarlari>(kurucu.Configuration.GetSection("Guv
 // DICOM / OHIF (kullanıcı 11.11.2026): ClearCanvas C-FIND + WADO vekili + dicomjson manifesti (DicomKaynagi).
 kurucu.Services.Configure<DicomAyarlari>(kurucu.Configuration.GetSection("Dicom"));
 kurucu.Services.AddHttpClient("dicom", c => c.Timeout = TimeSpan.FromSeconds(60));
+// Teletıp KOS (1310): RAD-68 MTOM gövdesi Mirth K2ye; KOS büyük olabilir (çok seri + ikon).
+kurucu.Services.AddHttpClient("teletip-xds", c => c.Timeout = TimeSpan.FromSeconds(120));
 kurucu.Services.AddSingleton<DicomKaynagi>();
 // MWL (1301): cihazların çalışma listesi - accession / TCKN cihaza istemden gider (Teletıp eşleşmesinin ön şartı).
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.MwlSunucusu>();

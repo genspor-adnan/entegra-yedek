@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { TELETIP_DURUM, TELETIP_EMIR, TELETIP_EMIR_ADI, type TeletipIstemOzet, type TeletipSatir } from '../api/uclar/teletip';
+import { TELETIP_DURUM, mesajKisaAdi, mesajUzunAdi, type TeletipIstemOzet, type TeletipSatir } from '../api/uclar/teletip';
 import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { tarihSaat } from '../bilesenler/bicim';
@@ -113,7 +113,7 @@ export function TeletipGonderimKarti() {
                     return (
                       <tr key={s.id} className={`ac${s.id === secili ? ' secili' : ''}`} onClick={() => setSecili(s.id)}>
                         <td className="ttk-soluk">{s.id}</td>
-                        <td title={TELETIP_EMIR_ADI[s.emir]}><b>{TELETIP_EMIR[s.emir] ?? s.emir}</b> <span className="ttk-soluk">{c(TELETIP_EMIR_ADI[s.emir] ?? '')}</span></td>
+                        <td title={mesajUzunAdi(s.kanal, s.emir)}><b>{mesajKisaAdi(s.kanal, s.emir)}</b> <span className="ttk-soluk">{c(mesajUzunAdi(s.kanal, s.emir))}</span></td>
                         <td><span className={`rozet ${d.sinif}`}>{c(d.ad)}</span></td>
                         <td className="sag">{s.denemeNo}</td>
                         <td>{s.ackKodu}</td>
@@ -131,13 +131,13 @@ export function TeletipGonderimKarti() {
           </div>
           {satir && (
             <div className="ttk-blok">
-              <h4>{c('HL7 mesajı')} <span className="ttk-ip">· {TELETIP_EMIR[satir.emir]} · {satir.emir === 4 ? 'ORU^R01' : 'ORM^O01'} · 2.3.1</span></h4>
+              <h4>{satir.kanal === 2 ? c('XDS isteği (SOAP gövdesi)') : c('HL7 mesajı')} <span className="ttk-ip">· {mesajKisaAdi(satir.kanal, satir.emir)} · {satir.kanal === 2 ? 'RAD-68 / ITI-41 · KOS eki gösterilmez' : `${satir.emir === 4 ? 'ORU^R01' : 'ORM^O01'} · 2.3.1`}</span></h4>
               <div className="ttk-ic">
                 {ham?.mesaj ? <pre className="ttk-hl7">{ham.mesaj}</pre>
                   : <div className="ttk-soluk">{satir.durum === 3 ? c('Mesaj gönderilmedi: eksik alanlar var (sağdaki "Ne yapmalı").')
                     : c('Bu satır için henüz gönderilmiş mesaj yok.')}</div>}
                 {ham?.yanit && <>
-                  <div className="ttk-k" style={{ marginTop: 8 }}>{c('Teletıp yanıtı (ACK)')}</div>
+                  <div className="ttk-k" style={{ marginTop: 8 }}>{satir.kanal === 2 ? c('Teletıp yanıtı (RegistryResponse)') : c('Teletıp yanıtı (ACK)')}</div>
                   <pre className="ttk-hl7 ttk-ack">{ham.yanit}</pre>
                 </>}
               </div>

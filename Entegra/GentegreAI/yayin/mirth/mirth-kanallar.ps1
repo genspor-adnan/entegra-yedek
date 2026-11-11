@@ -1,13 +1,15 @@
 ﻿# MIRTH KANALLARI (K1 TELETIP_HL7 + dev için TELETIP_SIMULATOR) - üret, yükle, deploy et.
 #
 #   .\mirth-kanallar.ps1                                  -> dev: K1 hedefi benzetim (127.0.0.1:6671), benzetim kanalı da yüklenir
-#   .\mirth-kanallar.ps1 -TeletipHost 1.2.3.4 -TeletipPort 5555 -BenzetimYok   -> gerçek Bakanlık HL7 alıcısı
+#   .\mirth-kanallar.ps1 -TeletipHost 1.2.3.4 -TeletipPort 5555 -TeletipXdsUrl https://.../xds/ -BenzetimYok
+#                                                         -> gerçek Bakanlık HL7 alıcısı + XDS deposu (K1 + K2)
 #   .\mirth-kanallar.ps1 -Uretmeden                       -> kanallar\*.xml olduğu gibi yüklenir (konteynerde üretilmez)
 #
 # Kanal XML'i elle yazılmaz: kanal-uret.js Mirth'in kendi model sınıflarıyla konteyner içinde üretir (Rhino), çıktı
 # kanallar\ altına alınır ve depoda durur. Kanal kimlikleri sabit: tekrar çalıştırma aynı kanalı günceller.
 # Teletıp adresi kanalda değil Mirth "configuration map"te (teletip_hl7_host / teletip_hl7_port) - kurum başına değişir.
-param([string]$TeletipHost = '127.0.0.1', [string]$TeletipPort = '6671', [switch]$BenzetimYok, [switch]$Uretmeden,
+param([string]$TeletipHost = '127.0.0.1', [string]$TeletipPort = '6671',
+      [string]$TeletipXdsUrl = 'http://127.0.0.1:8083/xds/', [switch]$BenzetimYok, [switch]$Uretmeden,
       [string]$Ad = 'gentegre-mirth', [string]$Api = 'https://localhost:8443/api')
 
 $ErrorActionPreference = 'Stop'
@@ -65,12 +67,13 @@ function Anahtar($ad, $deg, $not) {
 if (-not $harita.DocumentElement) { $harita.LoadXml('<map/>') }
 Anahtar 'teletip_hl7_host' $TeletipHost 'K1 hedefi: Teletip HL7 alicisi (dev: TELETIP_SIMULATOR 127.0.0.1)'
 Anahtar 'teletip_hl7_port' $TeletipPort 'K1 hedefi portu (dev: 6671)'
+Anahtar 'teletip_xds_url' $TeletipXdsUrl 'K2 hedefi: Teletip XDS deposu RAD-68 (dev: TELETIP_XDS_SIMULATOR http://127.0.0.1:8083/xds/ - sondaki / şart, Jetty /xds -> /xds/ 302 verir, POST gövdesi kaybolur)'
 Cagir '/server/configurationMap' 'Put' $harita.OuterXml | Out-Null
-Write-Host "Configuration map: teletip_hl7 = ${TeletipHost}:${TeletipPort}"
+Write-Host "Configuration map: teletip_hl7 = ${TeletipHost}:${TeletipPort}, teletip_xds_url = $TeletipXdsUrl"
 
 # ---- 4) kanalları yükle (sabit kimlik: varsa güncelle) ve deploy et
-$dosyalar = @('TELETIP_HL7.xml')
-if (-not $BenzetimYok) { $dosyalar = @('TELETIP_SIMULATOR.xml') + $dosyalar }
+$dosyalar = @('TELETIP_HL7.xml', 'TELETIP_KOS.xml')
+if (-not $BenzetimYok) { $dosyalar = @('TELETIP_SIMULATOR.xml', 'TELETIP_XDS_SIMULATOR.xml') + $dosyalar }
 foreach ($d in $dosyalar) {
     $xml = [IO.File]::ReadAllText((Join-Path $kanalKlasoru $d), [Text.Encoding]::UTF8)
     $id = ([xml]$xml).channel.id
@@ -83,8 +86,9 @@ foreach ($d in $dosyalar) {
     Write-Host ("{0,-20} {1} ve deploy edildi ({2})" -f ([xml]$xml).channel.name, $(if ($var) { 'güncellendi' } else { 'yüklendi' }), $id)
 }
 if ($BenzetimYok) {
-    $simId = '6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6699'
-    try { Cagir "/channels/$simId/_undeploy" 'Post' | Out-Null; Cagir "/channels/$simId" 'Delete' | Out-Null; Write-Host 'TELETIP_SIMULATOR kaldırıldı.' } catch { }
+    foreach ($simId in @('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6699', '6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6698')) {
+        try { Cagir "/channels/$simId/_undeploy" 'Post' | Out-Null; Cagir "/channels/$simId" 'Delete' | Out-Null; Write-Host "Benzetim kanalı kaldırıldı ($simId)." } catch { }
+    }
 }
 Start-Sleep 3
 [xml]$durum = (Cagir '/channels/statuses').Content

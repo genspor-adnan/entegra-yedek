@@ -433,6 +433,41 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     ötekinin geçici değerini geri yazıyordu - test DB izi temizlendi).
   * KOSUYOLU uçtan uca: demo istem 545'e TEST raporu (rapor 537, radyolog test hekim TT-HEKIM) yazılıp onaylandı →
     ORU (satır 7) NW / XO'dan sonra Mirth K1 → benzetim AA (kontrol no TT7-1). 1309 dev / test / UNIVERSE / KOSUYOLU'da.
+- **KOS gönderimi K2 (db/1310-1311; kullanıcı: "KOS gönderimini (K2) yap"):** Teleradyoloji XDS Entegrasyon Kılavuzu 1.15.
+  * `TeletipKos.cs`: **KosUretici** - Key Object Selection (1.2.840.10008.5.1.4.1.1.88.59, KO, "Manifest" 113030) Tablo 2
+    birebir: StudyInstanceUID, AccessionNumber, PatientName, PatientID (TCKN; yoksa dosya no) + OtherPatientIDs,
+    InstitutionName `Ad^^^SKRS<kod>^^^FK<firma kodu>`, DeviceSerialNumber (Teletıp STM cihaz seri no), Current Requested
+    Procedure Evidence → Referenced Series (Retrieve AE + RetrieveLocationUID `1.3.6.1.4.1.21367.2017.10.26.<SKRS>`) →
+    Referenced SOP (çok karede Number of Frames) + seri başına Icon Image (JPEG OB, YBR_FULL_422, 8 bit, ≤128, aspect 1).
+    **KucukResimUretici** + **JpegKodlayici**: sıkıştırmasız MONOCHROME1/2 (8/16 bit) ve RGB'den pencereleme + küçültme,
+    kendi temel JPEG kodlayıcımız (YCbCr 4:2:2; ek paket yok - ImageSharp ticari lisans ister). Sıkıştırılmış transfer
+    söz diziminde ikon atlanır, satıra uyarı yazılır. **XdsZarfi**: RAD-68 / ITI-41 SOAP 1.2 + MTOM/XOP (multipart/related,
+    action, wsa başlıkları, SubmissionSet + DocumentEntry + HasMember, KOS ek `application/dicom`). **XdsYaniti**: Tablo 3
+    (Success + MatchStatus result / institutionId → eşleşti; PartialSuccess; Failure XDSRepositoryError).
+  * **ebRIM metadata kodları (classCode, formatCode, healthcareFacility / practiceSetting, patientId OID) kılavuzda
+    metin olarak YOK** (SOAP örneği resim) - IHE XDS-I.b standart değerleri; Bakanlık KOS doğrulama servisiyle
+    (betaygsadmin.teletip.saglik.gov.tr/KOSValidasyon) ya da Bakanlık SendKOS / MakeKOS kaynağıyla karşılaştırılmalı
+    (bu paketler indirilmedi). Hasta OID ayarı `teletip.xds_hasta_oid`.
+  * Akış (1310): kuyruk kanal 2; tetik `tg_radyoloji_istem_teletip_kos` - study_uid boştan doluya / değişince (bekleyen
+    varken tek); **sıra: istemin NW'si AA almadan KOS gitmez** (kılavuz 3.43 § 5.4 örnek 2). `fn_teletip_kos_verisi`
+    study_uid + cihaz seri (istemin cihazı; yoksa şube + modalitede tek aktif cihaz). `radyoloji_cihaz.teletip_seri_no`
+    (cihaz kartında "Teletıp cihaz seri no (STM)"). `DicomKaynagi.KosCalismaAsync` (C-FIND + ortadaki görüntüden ikon).
+    Servis K2'ye POST; Success+eşleşme → 1, PartialSuccess / Failure → 2, HTTP hatası → 5. Saklanan mesaj SOAP gövdesi.
+  * Mirth: **K2 TELETIP_KOS** (HTTP 8082 `/kos/`, gövde Base64 bayt - multipart ayrıştırılmaz, hedef HTTP Sender
+    `${teletip_xds_url}`, içerik `${message.rawData}` ikili, Content-Type `X-Gentegre-Content-Type` başlığından - Mirth
+    dinleyicisi içerik başlıklarını başlık haritasına KOYMUYOR; yanıt dönüştürücüsü Success değilse HATA) +
+    **TELETIP_XDS_SIMULATOR** (dev, 8083 `/xds/`, Tablo 3 yanıtları). Tuzak: Jetty `/kos` → `/kos/` 302 verir, POST
+    gövdesi kaybolur - adresler sonda `/` ile. `mirth-kanallar.ps1 -TeletipXdsUrl`.
+  * Ekranlar: liste "Görüntü (KOS)" sütunu, kart (XDS isteği + RegistryResponse), şerit / pano "KOS", panoda KOS sayacı,
+    Teletıp Ayarları'nda K2 adresi + XDS hasta OID.
+  * 1311: `kontrol_no` 40 → 64 (KOS SOP UID 64'e kadar; KOSUYOLU denemesinde sonuç yazılamadı - düzeltildi).
+  * Doğrulama: `TeletipKosTestleri` (8: Tablo 2 alanları, ikon kuralları, JPEG yapısı + Pillow ile açılıyor, 16 bit
+    DICOM'dan ikon, denetim, MTOM zarfı, Tablo 3 başarı / kısmi / hata); KOS tetiği testi; ilgili paketler 273/273,
+    web 1133. Gerçek PACS demo BT'sinden üretilen KOS 128×128 ikonla K2 → benzetim Success + eşleşme. KOSUYOLU: demo
+    istemlere PASİF test cihazları (TT-BT / MR / US / CR, seri TEST-STM-*; gerçek cihaz değil, "tek aktif cihaz" yedeği
+    görmez), `teletip.xds_adres = http://127.0.0.1:8082/kos/`; 5 KOS (satır 8-12) → Mirth K2 → benzetim: 5/5 OK.
+  * Ayrıca: ClearCanvas WADO bu PACS'ta JPEG vermiyor (400, yalnız DICOM) - Bakanlık WADO'su JPEG ister; "dışa açık WADO"
+    adımında çözülmeli.
 
 ### 10.11.2026
 

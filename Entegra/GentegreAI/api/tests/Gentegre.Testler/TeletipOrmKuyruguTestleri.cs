@@ -148,6 +148,31 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
         Assert.Equal(yeni, s[2].Acc);
     }
 
+    // KOS (1310): PACS çalışması bağlanınca (study_uid boştan doluya) kanal 2 satırı; aynı değer tekrar yazılınca yeni
+    //   satır yok; değişince (bekleyen varken) yine tek bekleyen. Kapalıyken hiçbir şey.
+    [VtFact]
+    public async Task Calisma_baglaninca_KOS_kuyruga()
+    {
+        if (!olgu.Baglandi(nameof(Calisma_baglaninca_KOS_kuyruga))) return;
+        await using var b = await olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+        var istem = await IstemAsync(b, t, Acc());
+        async Task<int> Kos() => (int)await b.TekDegerAsync<long>(
+            "select count(*) from public.teletip_gonderim where istem_id = @p0 and kanal = 2", t, [istem], Iptal);
+        Assert.Equal(0, await Kos());
+        await b.CalistirAsync("update public.radyoloji_istem set study_uid = '1.2.3.4.5' where id = @p0", t, [istem], Iptal);
+        Assert.Equal(1, await Kos());
+        await b.CalistirAsync("update public.radyoloji_istem set study_uid = '1.2.3.4.5' where id = @p0", t, [istem], Iptal);
+        await b.CalistirAsync("update public.radyoloji_istem set study_uid = '1.2.3.4.6' where id = @p0", t, [istem], Iptal);
+        Assert.Equal(1, await Kos());                                   // bekleyen KOS varken yenisi açılmaz
+        var kos = await b.TekDegerAsync<string>("select public.fn_teletip_kos_verisi(@p0)::text", t, [istem], Iptal);
+        Assert.Contains("1.2.3.4.6", kos);
+
+        var kapali = await IstemAsync(b, t, Acc(), aktif: false);
+        await b.CalistirAsync("update public.radyoloji_istem set study_uid = '1.2.3.4.7' where id = @p0", t, [kapali], Iptal);
+        Assert.Equal(0L, await b.TekDegerAsync<long>("select count(*) from public.teletip_gonderim where istem_id = @p0", t, [kapali], Iptal));
+    }
+
     [VtFact]
     public async Task Veri_fonksiyonu_OrmVerisi_ne_okunur()
     {

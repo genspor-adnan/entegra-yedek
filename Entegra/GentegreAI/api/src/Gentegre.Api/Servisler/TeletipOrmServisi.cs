@@ -23,7 +23,8 @@ public sealed record TeletipDenemeSonucu(long GonderimId, short Durum, string Ac
 /// <para><b>Sıra:</b> aynı istemin önceki satırı sonuçlanmadan (gönderilmeden) sonraki gitmez - XO / CA, NW'den önce
 /// Bakanlık'a varırsa "istem yok" diye reddedilir.</para>
 /// </summary>
-public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogger<TeletipOrmServisi> gunluk)
+public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogger<TeletipOrmServisi> gunluk,
+                                      DicomKaynagi? dicom = null, IHttpClientFactory? httpFabrika = null)
 {
     private static readonly JsonSerializerOptions JsonAyar = new() { PropertyNameCaseInsensitive = true };
     private const int AzamiDeneme = 20;
@@ -38,6 +39,9 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
                and not exists (select 1 from public.teletip_gonderim o
                                 where o.istem_id = g.istem_id and o.kanal = g.kanal and o.id < g.id
                                   and o.durum in (0, 2, 3, 5))
+               -- KOS (kanal 2) istemin NW'si Bakanlık'ta kabul edilmeden gitmez (kılavuz 3.43 § 5.4 örnek 2).
+               and (g.kanal <> 2 or exists (select 1 from public.teletip_gonderim n
+                                             where n.istem_id = g.istem_id and n.kanal = 1 and n.emir = 1 and n.durum = 1))
              order by g.id
              limit @p0
             """, [azami], o => o.GetInt64(0), iptal);
@@ -63,12 +67,13 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         await using var b = await veri.AcAsync(iptal);
         await using var islem = await b.BeginTransactionAsync(iptal);
         var satir = await b.TekAsync("""
-            select id, istem_id, emir, durum, deneme_no, veri::text as veri, accession_no, rapor_id
+            select id, istem_id, kanal, emir, durum, deneme_no, veri::text as veri, accession_no, rapor_id
               from public.teletip_gonderim where id = @p0 for update skip locked
             """, islem, [id], o => new
         {
             IstemId = o.SayiNull("istem_id"),
             RaporId = o.SayiNull("rapor_id"),
+            Kanal = Convert.ToInt32(o.GetValue(o.GetOrdinal("kanal"))),
             EmirKodu = Convert.ToInt32(o.GetValue(o.GetOrdinal("emir"))),
             Durum = Convert.ToInt16(o.GetValue(o.GetOrdinal("durum"))),
             Deneme = o.Sayi("deneme_no"),
@@ -98,6 +103,13 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             Encoding = kodlama.Length > 0 ? kodlama : "UTF8",
             KontrolNo = $"TT{id}-{satir.Deneme + 1}",
         };
+
+        if (satir.Kanal == 2)
+        {
+            var xdsAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_adres", "", iptal);
+            var hastaOid = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_hasta_oid", "2.16.792.1.2.1.1.5.2.1.1", iptal);
+            return await KosGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, xdsAdres, hastaOid, iptal);
+        }
 
         string mesaj;
         if (oruMu)
@@ -132,6 +144,74 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         var hata = durum == 1 ? "" : s.Hata.Length > 0 ? s.Hata : $"ACK {s.AckKodu}";
         return await YazAsync(b, islem, id, durum, satir.Deneme, s.AckKodu, hata, mesaj, s.YanitGovdesi, iptal,
                               kontrolNo: v.KontrolNo, sonraki: Geri(satir.Deneme + 1));
+    }
+
+    /// <summary>
+    /// KOS (K2, 1310): PACS'tan çalışma yapısı + küçük resimler → KOS (Tablo 2) → RAD-68 MTOM zarfı → Mirth K2 → yanıt
+    /// (Tablo 3). Success + eşleşme → 1; PartialSuccess (kayıt var, istem eşleşmedi) / Failure → 2 (insan bakmalı);
+    /// HTTP hatası / yanıt yok → 5 (tekrar). Saklanan mesaj SOAP gövdesidir (DICOM eki değil).
+    /// </summary>
+    private async Task<TeletipDenemeSonucu> KosGonderAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction islem, long id, int deneme,
+        int? istemId, OrmVerisi v, string xdsAdres, string hastaOid, CancellationToken iptal)
+    {
+        if (dicom is null || httpFabrika is null)
+            return await YazAsync(b, islem, id, 5, deneme, "", "DICOM / HTTP bileşeni yok (servis yapılandırması).", "", "", iptal);
+        var kosJson = istemId is int iid
+            ? await b.TekDegerAsync<string>("select public.fn_teletip_kos_verisi(@p0)::text", islem, [iid], iptal) ?? "" : "";
+        using var kj = System.Text.Json.JsonDocument.Parse(kosJson.Length > 0 ? kosJson : "{}");
+        string K(string ad) => kj.RootElement.TryGetProperty(ad, out var e) ? e.ToString() : "";
+        var studyUid = K("StudyUid");
+        if (studyUid.Length == 0)
+            return await YazAsync(b, islem, id, 3, deneme, "", "İstemin PACS çalışması (study_uid) bağlı değil.", "", "", iptal);
+
+        KosCalisma? calisma;
+        try { calisma = await dicom.KosCalismaAsync(studyUid, iptal); }
+        catch (Exception h) when (h is not OperationCanceledException || !iptal.IsCancellationRequested)
+        {
+            return await YazAsync(b, islem, id, 5, deneme, "", "PACS sorgusu başarısız: " + h.Message, "", "", iptal, sonraki: Geri(deneme + 1));
+        }
+        var kurum = new KosKurum(v.KurumAdi, v.KurumSkrs, v.FirmaKodu, dicom.PacsAe, K("CihazSeriNo"));
+        var eksik = KosUretici.Denetle(v, calisma, kurum);
+        eksik.AddRange(OrmUretici.Denetle(v with { Emir = OrmEmri.Iptal }));   // kurum kimliği (SKRS, MSH-3, MEDULA)
+        if (eksik.Count > 0)
+            return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", eksik.Distinct()), "", "", iptal);
+        if (xdsAdres.Length == 0)
+            return await YazAsync(b, islem, id, 5, deneme, "", "Teletıp KOS adresi (teletip.xds_adres, Mirth K2) tanımlı değil.", "", "", iptal,
+                                  sonraki: TimeSpan.FromMinutes(30));
+
+        var simdi = DateTime.UtcNow;
+        var kosSop = FellowOakDicom.DicomUID.Generate().UID;
+        var kos = KosUretici.Baytlar(KosUretici.Uret(v, calisma!, kurum, v.Zaman, kosSop));
+        var modalite = calisma!.Seriler.Select(x => x.Modalite).FirstOrDefault(x => x.Length > 0) ?? v.Modalite;
+        var zarf = XdsZarfi.Kur(kos, kosSop, studyUid, v, kurum, xdsAdres, simdi, hastaOid, modalite);
+        var ikonsuz = calisma.Seriler.Count(x => x.Ikon is null);
+        try
+        {
+            var istemci = httpFabrika.CreateClient("teletip-xds");
+            using var icerik = new ByteArrayContent(zarf.Govde);
+            icerik.Headers.TryAddWithoutValidation("Content-Type", zarf.IcerikTuru);
+            using var istek = new HttpRequestMessage(HttpMethod.Post, xdsAdres) { Content = icerik };
+            // Mirth HTTP dinleyicisi Content-Type'ı başlık haritasına koymuyor; K2 bu kopyadan okuyup hedefe yazar.
+            istek.Headers.TryAddWithoutValidation("X-Gentegre-Content-Type", zarf.IcerikTuru);
+            using var y = await istemci.SendAsync(istek, iptal);
+            var govde = await y.Content.ReadAsStringAsync(iptal);
+            var sonuc = XdsYaniti.Coz(govde);
+            short durum = sonuc.Durum == "" ? (short)5
+                        : sonuc.Basarili && (sonuc.Eslesti || sonuc.HataKodu != "MatchStatus") ? (short)1
+                        : (short)2;
+            var hata = durum == 1 ? (ikonsuz > 0 ? $"{ikonsuz} seride küçük resim üretilemedi (sıkıştırılmış görüntü)." : "")
+                     : sonuc.Durum == "" ? $"HTTP {(int)y.StatusCode}: {sonuc.Aciklama}"
+                     : $"{sonuc.Durum}{(sonuc.HataKodu.Length > 0 ? " / " + sonuc.HataKodu : "")}: {sonuc.Aciklama}";
+            var ack = sonuc.Durum switch { "Success" => "OK", "PartialSuccess" => "PARTIAL", "Failure" => "FAIL", _ => "" };
+            if (durum == 5 && deneme + 1 >= AzamiDeneme) durum = 2;
+            return await YazAsync(b, islem, id, durum, deneme, ack, hata, zarf.SoapXml, govde.Length > 4000 ? govde[..4000] : govde, iptal,
+                                  kontrolNo: kosSop, sonraki: Geri(deneme + 1));
+        }
+        catch (Exception h) when (h is HttpRequestException or TaskCanceledException)
+        {
+            return await YazAsync(b, islem, id, deneme + 1 >= AzamiDeneme ? (short)2 : (short)5, deneme, "",
+                                  "Mirth K2'ye ulaşılamadı: " + h.Message, zarf.SoapXml, "", iptal, kontrolNo: kosSop, sonraki: Geri(deneme + 1));
+        }
     }
 
     /// <summary>Artan aralık: 1, 2, 5, 10, 30 dk, sonra saatlik.</summary>

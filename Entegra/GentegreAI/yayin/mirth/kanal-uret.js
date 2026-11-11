@@ -54,10 +54,10 @@ function mllpDinleyici(port, yanitDegiskeni) {
   return p;
 }
 
-function kaynak(ozellik, adimlar) {
+function kaynak(ozellik, adimlar, tasima) {
   var k = new Connector();
   k.setMetaDataId(0); k.setName('sourceConnector'); k.setMode(Connector.Mode.SOURCE);
-  k.setTransportName('TCP Listener'); k.setProperties(ozellik); k.setEnabled(true);
+  k.setTransportName(tasima || 'TCP Listener'); k.setProperties(ozellik); k.setEnabled(true);
   k.setTransformer(donusturucu(adimlar)); k.setFilter(new Filter());
   return k;
 }
@@ -148,6 +148,92 @@ var simKolon = new java.util.ArrayList();
 simKolon.add(new Kolon('SONUC', KolonTipi.STRING, 'sonuc'));
 sim.getProperties().setMetaDataColumns(simKolon);
 
+// ------------------------------------------------------------------ K2 TELETIP_KOS (1310)
+// Gentegre RAD-68 (ITI-41) MTOM gövdesini HTTP ile gönderir; Mirth gövdeyi BAYT olarak (Base64) alır - multipart
+// ayrıştırılmaz, DICOM eki bozulmaz - ve Gentegre'nin Content-Type başlığıyla (boundary + action) aynen
+// ${teletip_xds_url}'e iletir. Yanıt (RegistryResponse) metin olarak Gentegre'ye döner (kaynak yanıtı d1).
+// Yanıt dönüştürücüsü: Success değilse Mirth'te HATA (pano). Kuyruk kapalı - tekrar Gentegre'de.
+function httpDinleyici(port, yol, yanitDegiskeni, yanitTuru) {
+  var p = new Packages.com.mirth.connect.connectors.http.HttpReceiverProperties();
+  p.getListenerConnectorProperties().setPort(String(port));
+  p.getSourceConnectorProperties().setResponseVariable(yanitDegiskeni);
+  p.setContextPath(yol);
+  p.setXmlBody(false);
+  p.setParseMultipart(false);
+  p.setBinaryMimeTypes('multipart/.*|application/.*');
+  p.setBinaryMimeTypesRegex(true);
+  p.setResponseContentType(yanitTuru);
+  p.setTimeout('120000');
+  return p;
+}
+// Content-Type: Mirth 4 HTTP dinleyicisi içerik başlıklarını (Content-Type / Length) sourceMap 'headers'
+//   (MessageHeaders) içine KOYMUYOR - denendi, yalnız [host] geliyor. Gentegre aynı değeri X-Gentegre-Content-Type
+//   başlığıyla da gönderir (boundary + action dahil); hedef bu değerle Content-Type yazar.
+var ICERIK_TURU = '' +
+  "var tur = '';\n" +
+  "var h = sourceMap.get('headers');\n" +
+  "if (h != null) { try { var v = h.getHeader('X-Gentegre-Content-Type'); if (v == null) v = h.getHeader('x-gentegre-content-type'); tur = v == null ? '' : String(v); } catch (e) { } }\n" +
+  "channelMap.put('icerikTuru', tur);\n";
+
+var k2 = kanal('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6602', 'TELETIP_KOS',
+  'K2 - Gentegre -> Teletip XDS (RAD-68 / ITI-41, SOAP 1.2 + MTOM). KOS ve zarf Gentegre\'de uretilir; Mirth govdeyi bayt ' +
+  'olarak (Base64) alip Content-Type ile aynen ${teletip_xds_url}\'e iletir, RegistryResponse Gentegre\'ye doner.');
+k2.setSourceConnector(kaynak(httpDinleyici(8082, '/kos', 'd1', 'application/soap+xml'),
+  [{ ad: 'Icerik turu', betik: ICERIK_TURU }], 'HTTP Listener'));
+var k2Ozellik = new Packages.com.mirth.connect.connectors.http.HttpDispatcherProperties();
+k2Ozellik.setHost('${teletip_xds_url}');
+k2Ozellik.setMethod('post');
+k2Ozellik.setContent('${message.rawData}');
+k2Ozellik.setContentType('${icerikTuru}');
+k2Ozellik.setDataTypeBinary(true);
+k2Ozellik.setSocketTimeout('120000');
+k2Ozellik.setResponseXmlBody(false);
+k2Ozellik.setResponseParseMultipart(false);
+k2Ozellik.setResponseBinaryMimeTypes('image/.*|video/.*|audio/.*');
+k2Ozellik.getDestinationConnectorProperties().setQueueEnabled(false);
+var k2Hedef = hedef(1, 'Teletip XDS', 'HTTP Sender', k2Ozellik);
+k2Hedef.setResponseTransformer(donusturucu([{ ad: 'RegistryResponse durumu',
+  betik: "if (String(msg).indexOf('ResponseStatusType:Success') < 0) { responseStatus = ERROR; }\n" }]));
+k2.getDestinationConnectors().add(k2Hedef);
+k2.setNextMetaDataId(2);
+k2.getProperties().setMessageStorageMode(Packages.com.mirth.connect.model.MessageStorageMode.PRODUCTION);
+
+// ------------------------------------------------------------------ TELETIP_XDS_SIMULATOR (dev, 1310)
+// Kilavuz XDS 1.15 Tablo 3 yanitlari: govdede ProvideAndRegister istegi + application/dicom eki + DICM varsa Success /
+// MatchStatus (institutionId = sourceId'deki SKRS); hasta kimligi bossa Failure XDSRepositoryError. Uretimde dagitilmaz.
+var simXds = kanal('6d1f0c2a-7e43-4c55-9a0e-1b7c5e2f6698', 'TELETIP_XDS_SIMULATOR',
+  'YALNIZ DEV/TEST - Teletip XDS (RAD-68) alicisi benzetimi (HTTP 8083 /xds, konteyner ici). Kilavuz XDS 1.15 Tablo 3 ' +
+  'Success / Failure yanitlari doner. Uretimde dagitilmaz.');
+simXds.setSourceConnector(kaynak(httpDinleyici(8083, '/xds', 'xds_yanit', 'application/soap+xml'), [{
+  ad: 'RAD-68 benzetimi',
+  betik:
+    "var ham = new java.lang.String(org.apache.commons.codec.binary.Base64.decodeBase64(String(connectorMessage.getRawData())), 'ISO-8859-1');\n" +
+    "var s = String(ham);\n" +
+    "var hasta = (s.match(/name=\"sourcePatientId\"><rim:ValueList><rim:Value>([^<^]*)/) || [])[1] || '';\n" +
+    "var skrs = ((s.match(/1\\.3\\.6\\.1\\.4\\.1\\.21367\\.2017\\.10\\.26\\.(\\d+)/) || [])[1]) || '-1';\n" +
+    "var hata = '';\n" +
+    "if (s.indexOf('ProvideAndRegisterDocumentSetRequest') < 0) hata = 'ProvideAndRegisterDocumentSetRequest yok';\n" +
+    "else if (s.indexOf('application/dicom') < 0 || s.indexOf('DICM') < 0) hata = 'KOS (application/dicom, DICM) eki yok';\n" +
+    "else if (hasta == '') hata = 'Hastaya ait bilgilerden PatientID/OtherPatientIDs bos olamaz.';\n" +
+    "var rs = 'urn:oasis:names:tc:ebxml-regrep:xsd:rs:3.0';\n" +
+    "var y = hata == ''\n" +
+    "  ? '<rs:RegistryResponse xmlns:rs=\"' + rs + '\" status=\"urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Success\"><rs:RegistryErrorList>' +\n" +
+    "    '<rs:RegistryError codeContext=\"{ &quot;result&quot;: true, &quot;institutionId&quot;: ' + skrs + ', &quot;citizenId&quot;: &quot;' + hasta + '&quot;, &quot;accessionNumberList&quot;: &quot;[]&quot;, &quot;error&quot;: &quot;&quot;}\" ' +\n" +
+    "    'errorCode=\"MatchStatus\" location=\"Benzetim\" severity=\"urn:oasis:names:tc:ebxml-regrep:ErrorSeverityType:Warning\"/></rs:RegistryErrorList></rs:RegistryResponse>'\n" +
+    "  : '<rs:RegistryResponse xmlns:rs=\"' + rs + '\" status=\"urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Failure\"><rs:RegistryErrorList>' +\n" +
+    "    '<rs:RegistryError codeContext=\"' + hata + '\" errorCode=\"XDSRepositoryError\" location=\"Benzetim\" severity=\"urn:oasis:names:tc:ebxml-regrep:ErrorSeverityType:Error\"/></rs:RegistryErrorList></rs:RegistryResponse>';\n" +
+    "var zarf = '<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\"><s:Body>' + y + '</s:Body></s:Envelope>';\n" +
+    "responseMap.put('xds_yanit', ResponseFactory.getSentResponse(zarf));\n" +
+    "channelMap.put('sonuc', hata == '' ? 'Success' : 'Failure');\n"
+}], 'HTTP Listener'));
+var simXdsHedef = new Packages.com.mirth.connect.connectors.js.JavaScriptDispatcherProperties();
+simXdsHedef.setScript('// Benzetim: istek yalniz arsivlenir.\nreturn;');
+simXds.getDestinationConnectors().add(hedef(1, 'Arsiv', 'JavaScript Writer', simXdsHedef));
+simXds.setNextMetaDataId(2);
+var simXdsKolon = new java.util.ArrayList();
+simXdsKolon.add(new Kolon('SONUC', KolonTipi.STRING, 'sonuc'));
+simXds.getProperties().setMetaDataColumns(simXdsKolon);
+
 new java.io.File('/tmp/kanallar').mkdirs();
 function yaz(c, dosya) {
   var w = new java.io.OutputStreamWriter(new java.io.FileOutputStream('/tmp/kanallar/' + dosya), 'UTF-8');
@@ -156,3 +242,5 @@ function yaz(c, dosya) {
 }
 yaz(k1, 'TELETIP_HL7.xml');
 yaz(sim, 'TELETIP_SIMULATOR.xml');
+yaz(k2, 'TELETIP_KOS.xml');
+yaz(simXds, 'TELETIP_XDS_SIMULATOR.xml');

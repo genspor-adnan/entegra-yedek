@@ -187,6 +187,9 @@ public static partial class KaynakKatalogu
             // RAPOR (1309): kendi raporumuzun ORU'su - onaylanınca kuyruğa girer; rapor yoksa boş.
             new("rapor",       string.Format(TeletipDurumMetni, "t.oru_durum"), "metin", "Rapor (ORU)", Hizalama: "orta",
                                                                           Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
+            // KOS (1310): görüntü manifesti XDS'e (K2) - PACS çalışması bağlanınca, istem kabul edildikten sonra gider.
+            new("kos",         string.Format(TeletipDurumMetni, "t.kos_durum"), "metin", "Görüntü (KOS)", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
             new("genel",       "case t.genel_durum when 3 then 'sorunlu' when 2 then 'kuyrukta' when 1 then 'tamam' else 'atlandı' end",
                                                   "metin", "Genel",      Hizalama: "orta", Bicim: "rozet", Genislik: 90,
                                                                           RozetSiniflari: TeletipDurumRozet),
