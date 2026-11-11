@@ -9582,6 +9582,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .dhp-vs input { margin: 2px 0 0 } .dhp-vs-ic { flex: 1; min-width: 0 } .dhp-vs-ic b { color: var(--lacivert, #14315a) }
 .dhp-vs-not { color: var(--soluk); font-size: 10.5px }
 .dhp-vs-gk { color: var(--hata); font-size: 10.5px; white-space: nowrap } .dhp-vs-gk.sari { color: var(--uyari) }
+.dhp-vs-gk.mavi { color: var(--vurgu, #2f6db3) } .dhp-vs-gk.gri { color: var(--soluk) }
 .dhp-cek-alt { padding: 8px; border-top: 1px solid var(--cizgi); background: var(--yuz); display: grid; gap: 6px; font-size: 11px }
 .dhp-cek-alt .dhp-cek-satir { display: flex; gap: 4px; align-items: center }
 .dhp-cek-alt select, .dhp-cek-alt input[type=time] { height: 24px; font-size: 11.5px }

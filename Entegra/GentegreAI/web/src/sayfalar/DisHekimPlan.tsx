@@ -24,7 +24,7 @@ import { useOturum } from '../kimlik/OturumBaglami';
 const GUNLER = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'];
 type Mod = 'ikisi' | 'liste' | 'takvim';
 type Cip = 'tum' | 'geciken' | 'dusen' | 'talepli' | 'oneri';
-type Olcut = 'geciken' | 'buhafta' | 'dusen' | 'talepli' | 'yeni';
+type Olcut = 'geciken' | 'buhafta' | 'dusen' | 'talepli' | 'yeni' | 'planli';
 
 const haftaBasi = (d: Date) => {
   const x = new Date(d); x.setHours(0, 0, 0, 0);
@@ -142,13 +142,21 @@ export function DisHekimPlan() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ziyaretler, seciliGun, seciliGunIso, cip, ara]);
 
-  // ÇEKMECE: sırası gelenler, ilçe + ölçüt + arama.
+  // ÇEKMECE: temsilcinin BÜTÜN hedefleri; ilçe + ölçüt + arama istemcide (kullanıcı 11.11.2026: "Perş Maltepe tarafına
+  //   gideceğim, Maltepe seçip oradaki durumu görmek istiyorum" - ilçe rozetleri hepsinden, ilçe seçince ölçüt Hepsi).
   const siradakiler = veri?.siradakiler ?? [];
   const haftaSon = isoGun(gunTarihi(6));
+  const buHaftaMi = (h: SiradakiHedef) => !!h.vade_tarihi && h.vade_tarihi.slice(0, 10) <= haftaSon && h.gecikme_gun === 0;
+  /** Dikkat isteyen = planı yok ve (geciken / sırası bu hafta / düşen / talepli / yeni) - araç çubuğu sayısı. */
+  const dikkatMi = (h: SiradakiHedef) => !h.planli_ziyaret_id
+    && (h.gecikme_gun > 0 || buHaftaMi(h) || h.gonderim_dusen === 1 || h.acik_talep > 0 || h.yeni_hekim === 1);
+  const dikkatSayisi = siradakiler.filter(dikkatMi).length;
   const olcutUyar = (h: SiradakiHedef) => {
-    if (olcutler.size === 0) return true;
+    if (olcutler.size === 0) return true;                       // Hepsi
+    if (olcutler.has('planli') && h.planli_ziyaret_id) return true;
+    if (h.planli_ziyaret_id) return false;                      // planlı olan sıra ölçütlerine girmez
     return (olcutler.has('geciken') && h.gecikme_gun > 0)
-      || (olcutler.has('buhafta') && !!h.vade_tarihi && h.vade_tarihi.slice(0, 10) <= haftaSon && h.gecikme_gun === 0)
+      || (olcutler.has('buhafta') && buHaftaMi(h))
       || (olcutler.has('dusen') && h.gonderim_dusen === 1)
       || (olcutler.has('talepli') && h.acik_talep > 0)
       || (olcutler.has('yeni') && h.yeni_hekim === 1);
@@ -159,12 +167,18 @@ export function DisHekimPlan() {
       .filter(h => !k || `${h.hekim_ad} ${h.hekim_kurum} ${h.hekim_ilce}`.toLocaleLowerCase('tr-TR').includes(k));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siradakiler, olcutler, ilce, cekAra, haftaSon]);
+  // İLÇE ROZETLERİ: tüm hedeflerden (toplam · dikkat isteyen) - ölçütten bağımsız, ilçe her zaman seçilebilir.
   const ilceler = useMemo(() => {
-    const m = new Map<string, number>();
-    siradakiler.filter(olcutUyar).forEach(h => { const i = h.hekim_ilce || '—'; m.set(i, (m.get(i) ?? 0) + 1) });
-    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+    const m = new Map<string, { toplam: number; dikkat: number }>();
+    siradakiler.forEach(h => { const i = h.hekim_ilce || '—'; const k = m.get(i) ?? { toplam: 0, dikkat: 0 }; k.toplam++; if (dikkatMi(h)) k.dikkat++; m.set(i, k) });
+    return [...m.entries()].sort((a, b) => b[1].dikkat - a[1].dikkat || b[1].toplam - a[1].toplam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siradakiler, olcutler, haftaSon]);
+  }, [siradakiler, haftaSon]);
+  /** İlçe seçimi: o ilçenin TÜM durumu görünsün diye ölçüt "Hepsi"ye düşer; ilçe bırakılınca varsayılan ölçüt döner. */
+  const ilceSec = (i: string) => {
+    if (!i || ilce === i) { setIlce(''); setOlcutler(new Set<Olcut>(['geciken', 'buhafta'])) }
+    else { setIlce(i); setOlcutler(new Set()) }
+  };
   const ilceGruplari = useMemo(() => {
     const m = new Map<string, SiradakiHedef[]>();
     cekSatirlari.forEach(h => { const i = h.hekim_ilce || '—'; m.set(i, [...(m.get(i) ?? []), h]) });
@@ -196,7 +210,7 @@ export function DisHekimPlan() {
         <div className="cp-arac">
           <button className="d bir" onClick={() => git('/dis-hekim-ziyaret/yeni')}>＋ {cev('Ziyaret')}</button>
           <button className="d" onClick={() => void uret()} data-testid="plan-uret" title={cev(erp ? 'Sırası gelen, planı olmayan müşterilere öneri ziyaret açar' : 'Sırası gelen, planı olmayan hekimlere öneri ziyaret açar')}>⚙ {cev('Planı Üret')}</button>
-          <button className={`d${cekmece ? ' bir' : ''}`} onClick={() => setCekmece(c => !c)} data-testid="plan-cekmece">⏰ {cev('Sırası gelenler')} {siradakiler.length > 0 && <span className="rozet hata">{siradakiler.length}</span>}</button>
+          <button className={`d${cekmece ? ' bir' : ''}`} onClick={() => setCekmece(c => !c)} data-testid="plan-cekmece">⏰ {cev('Sırası gelenler')} {dikkatSayisi > 0 && <span className="rozet hata">{dikkatSayisi}</span>}</button>
           <button className="d" onClick={() => git('/dis-hekim-talep')}>📋 {cev('Açık Talepler')}</button>
           <span className="dhp-seg" title={cev('Görünüm')}>
             {(['ikisi', 'liste', 'takvim'] as Mod[]).map(m => (
@@ -352,13 +366,23 @@ export function DisHekimPlan() {
         {/* SIRASI GELENLER ÇEKMECESİ (mockup v2) */}
         {cekmece && (
           <div className="dhp-cek" data-testid="plan-cek">
-            <h4>⏰ {cev('Sırası gelenler')} <span className="rozet hata">{cekSatirlari.length}</span><button className="d" onClick={() => setCekmece(false)}>✖</button></h4>
+            <h4>⏰ {ilce ? ilce : cev('Sırası gelenler')} <span className={`rozet${olcutler.size === 0 ? '' : ' hata'}`}>{cekSatirlari.length}</span><button className="d" onClick={() => setCekmece(false)}>✖</button></h4>
             <div className="dhp-cek-ust">
               <span>{cev('İlçe')}:</span>
-              {ilceler.map(([i, n]) => <span key={i} className={`dhp-cip${ilce === i ? ' on' : ''}`} onClick={() => setIlce(x => x === i ? '' : i)}>{i} <small>{n}</small></span>)}
+              {/* COMBO (kullanıcı 11.11.2026 "bir combodan buraya ölçüt olarak eklenebilir"): bütün ilçeler; rozetler en yoğun 6. */}
+              <select value={ilce} onChange={e => ilceSec(e.target.value)} data-testid="plan-ilce" style={{ height: 22, fontSize: 11 }}>
+                <option value="">{cev('— ilçe seç —')}</option>
+                {ilceler.map(([i, n]) => <option key={i} value={i}>{i} ({n.toplam}{n.dikkat > 0 ? ` · ${n.dikkat}!` : ''})</option>)}
+              </select>
+              {ilceler.filter(([i], k) => k < 6 || i === ilce).map(([i, n]) => (
+                <span key={i} className={`dhp-cip${ilce === i ? ' on' : ''}`} onClick={() => ilceSec(i)} title={cev('Tıkla: ilçedeki herkes (planlı, sırada olmayan dahil)')}>
+                  {i} <small>{n.toplam}{n.dikkat > 0 ? ` · ${n.dikkat}!` : ''}</small>
+                </span>
+              ))}
               {ilceler.length === 0 && <span>—</span>}
               <span style={{ width: '100%' }}>{cev('Ölçüt')}:</span>
-              {([['geciken', 'Geciken'], ['buhafta', 'Sırası bu hafta'], ['dusen', `${S.gonderimi} düşen`], ['talepli', 'Talebi açık'], ['yeni', 'Yeni']] as [Olcut, string][]).map(([k, ad]) => (
+              <span className={`dhp-cip${olcutler.size === 0 ? ' on' : ''}`} onClick={() => setOlcutler(new Set())}>{cev('Hepsi')}</span>
+              {([['geciken', 'Geciken'], ['buhafta', 'Sırası bu hafta'], ['dusen', `${S.gonderimi} düşen`], ['talepli', 'Talebi açık'], ['yeni', 'Yeni'], ['planli', 'Planlı']] as [Olcut, string][]).map(([k, ad]) => (
                 <span key={k} className={`dhp-cip${olcutler.has(k) ? ' on' : ''}`} onClick={() => olcutDegis(k)}>{cev(ad)}</span>
               ))}
               <input placeholder={cev(erp ? 'müşteri…' : 'hekim / kurum…')} value={cekAra} onChange={e => setCekAra(e.target.value)} />
@@ -366,8 +390,8 @@ export function DisHekimPlan() {
             <div className="dhp-cek-liste">
               {ilceGruplari.map(([i, satirlar]) => (
                 <div key={i}>
-                  <div className="dhp-ilce"><b>{i}</b> · {satirlar.length} {S.hedefK} · {satirlar.filter(h => h.gecikme_gun > 0).length} {cev('geciken')}
-                    <button className="d" title={cev('İlçenin tümünü seçili güne saat sırasıyla ekle')} onClick={() => void topluPlanla(satirlar.map(h => h.hekim_id), ekleGunIdx, ekleSaati)}>⤵ {cev('güne dağıt')}</button>
+                  <div className="dhp-ilce"><b>{i}</b> · {satirlar.length} {S.hedefK} · {satirlar.filter(h => h.gecikme_gun > 0).length} {cev('geciken')} · {satirlar.filter(h => h.planli_ziyaret_id).length} {cev('planlı')}
+                    <button className="d" title={cev('İlçede planı olmayanların tümünü seçili güne saat sırasıyla ekle')} onClick={() => void topluPlanla(satirlar.filter(h => !h.planli_ziyaret_id).map(h => h.hekim_id), ekleGunIdx, ekleSaati)}>⤵ {cev('güne dağıt')}</button>
                   </div>
                   {satirlar.map(h => (
                     <div key={h.hekim_id} className={`dhp-vs${secili.has(h.hekim_id) ? ' sec' : ''}`} draggable
@@ -379,7 +403,14 @@ export function DisHekimPlan() {
                           {h.acik_talep > 0 ? ` · ${cev('açık talep')} ${h.acik_talep}` : ''}{h.gonderim_dusen === 1 ? ` · ${S.gonderimK} ↓` : ''}
                           {h.tercih_gun ? ` · ${cev('tercih')} ${GUNLER[h.tercih_gun - 1] ?? h.tercih_gun} ${h.tercih_saat ?? ''}` : ''}</div>
                       </div>
-                      <span className={`dhp-vs-gk${h.gecikme_gun > 0 ? '' : ' sari'}`}>{h.gecikme_gun > 0 ? `+${h.gecikme_gun} g` : h.yeni_hekim === 1 && !h.vade_tarihi ? cev('yeni') : cev('bu hafta')}</span>
+                      <span className={`dhp-vs-gk${h.planli_ziyaret_id ? ' mavi' : h.gecikme_gun > 0 ? '' : buHaftaMi(h) || h.yeni_hekim === 1 ? ' sari' : ' gri'}`}>
+                        {h.planli_ziyaret_id ? `${cev('planlı')} ${h.planli_tarih ? new Date(h.planli_tarih).toLocaleDateString('tr-TR', { weekday: 'short', day: '2-digit', month: '2-digit' }) : ''}`
+                          : h.gecikme_gun > 0 ? `+${h.gecikme_gun} g`
+                          : buHaftaMi(h) ? cev('bu hafta')
+                          : h.yeni_hekim === 1 ? cev('yeni')
+                          : h.vade_tarihi ? `${cev('sırada değil')} · ${new Date(h.vade_tarihi).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}`
+                          : cev('sıklık yok')}
+                      </span>
                     </div>
                   ))}
                 </div>

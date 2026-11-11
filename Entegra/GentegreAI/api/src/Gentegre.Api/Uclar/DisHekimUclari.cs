@@ -157,23 +157,24 @@ public static class DisHekimUclari
                        (select count(*) from h where yeni = 1)::int as yeni_sayisi,
                        (select count(*) from h where siklik = 0)::int as sikliksiz_sayisi
                 """, null, [secili], OkuyucuGenisletmeleri.Sozluk, iptal);
-            // SIRASI GELENLER (mockup v2 çekmecesi): planlı ziyareti olmayan, dikkat isteyen hedefler - hedef başına tek
-            //   satır (vade görünümü hedef × şube). Çipler istemcide süzer (geciken / bu hafta / düşen / talepli / yeni).
+            // HEDEFLER (mockup v2 çekmecesi; kullanıcı 11.11.2026 "Maltepe seçip oradaki durumu görmek istiyorum"):
+            //   temsilcinin BÜTÜN hedefleri - hedef başına tek satır (vade görünümü hedef × şube), planlı ziyaret ve sıra
+            //   bilgisiyle. Çekmece ilçe rozetlerini hepsinden kurar; ölçüt çipleri (geciken / bu hafta / düşen /
+            //   talepli / yeni / planlı / hepsi) istemcide süzer; "Sırası gelenler" sayısı da istemcide.
             var siradakiler = await b.ListeAsync("""
                 select * from (
                     select distinct on (v.hekim_id)
                            v.hekim_id, v.hekim_ad, v.hekim_kurum, v.hekim_ilce, v.siklik_hafta, v.son_ziyaret, v.vade_tarihi,
                            v.gecikme_gun, v.acik_talep, v.son30_istem, v.gonderim_dusen, v.sessiz_gun, v.yeni_hekim,
+                           v.planli_ziyaret_id, v.planli_tarih,
                            coalesce(p.tercih_gun, t.tercih_gun) as tercih_gun, coalesce(p.tercih_saat, t.tercih_saat) as tercih_saat
                       from public.v_dis_hekim_ziyaret_vade v
                       join public.taraf t on t.id = v.hekim_id
                       left join public.taraf_personel p on p.id = t.id
-                     where v.temsilci_id = @p0 and v.planli_ziyaret_id is null
-                       and (v.gecikme_gun > 0 or (v.siklik_hafta > 0 and v.vade_tarihi <= @p1::date + 6)
-                            or v.gonderim_dusen = 1 or v.acik_talep > 0 or v.yeni_hekim = 1)
-                     order by v.hekim_id, v.gecikme_gun desc) s
+                     where v.temsilci_id = @p0
+                     order by v.hekim_id, (v.planli_ziyaret_id is not null) desc, v.gecikme_gun desc) s
                  order by s.gecikme_gun desc, s.vade_tarihi nulls last, s.hekim_ilce, s.hekim_ad
-                """, null, [secili, bas], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [secili], OkuyucuGenisletmeleri.Sozluk, iptal);
             var vade = await b.TekAsync("""
                 select count(*) filter (where gecikme_gun > 0)::int as geciken,
                        count(*) filter (where siklik_hafta > 0 and vade_tarihi <= @p1::date + 6 and planli_ziyaret_id is null)::int as planlanacak,

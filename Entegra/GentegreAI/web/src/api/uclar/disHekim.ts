@@ -6,11 +6,13 @@ export interface PlanZiyareti {
   /** Günün işi tablosu (panel): hedefin sıra bilgisi (plan ucu vade görünümünden ekler). */
   siklik_hafta: number; son_ziyaret: string | null; son30_istem: number; gonderim_dusen: number;
 }
-/** SIRASI GELEN hedef (mockup v2 çekmecesi): planlı ziyareti olmayan, dikkat isteyen dış doktor / müşteri. */
+/** Temsilcinin HEDEFİ (mockup v2 çekmecesi): dış doktor / müşteri; sıra, plan ve ilçe bilgisiyle - ölçüt istemcide. */
 export interface SiradakiHedef {
   hekim_id: number; hekim_ad: string; hekim_kurum: string; hekim_ilce: string; siklik_hafta: number;
   son_ziyaret: string | null; vade_tarihi: string | null; gecikme_gun: number; acik_talep: number; son30_istem: number;
   gonderim_dusen: number; sessiz_gun: number | null; yeni_hekim: number; tercih_gun: number | null; tercih_saat: string | null;
+  /** Planlı (yapılmamış, bugünden sonraki) ziyareti varsa: çekmecede "planlı · tarih"; o güne ikinci kez yazılmaz. */
+  planli_ziyaret_id: number | null; planli_tarih: string | null;
 }
 export interface SahaPerformansi {
   donem: { bas: string; bit: string; oncekiBas: string; oncekiBit: string };

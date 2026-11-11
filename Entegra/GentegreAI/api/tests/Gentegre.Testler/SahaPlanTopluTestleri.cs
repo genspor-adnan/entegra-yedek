@@ -82,7 +82,9 @@ public sealed class SahaPlanTopluTestleri(ApiSunucuOlgusu api)
         Assert.Equal(0, tekrar.GetProperty("sayi").GetInt32());
         Assert.Equal(2, tekrar.GetProperty("atlanan").GetInt32());
         var plan2 = await (await a.GetAsync($"/api/dis-hekim/plan?hafta={haftaBas:yyyy-MM-dd}&temsilciId={t}")).Content.ReadFromJsonAsync<JsonElement>();
-        Assert.DoesNotContain(h1, plan2.GetProperty("siradakiler").EnumerateArray().Select(x => x.GetProperty("hekim_id").GetInt32()));
+        // Hedef listede KALIR (ilçe görünümü), planlı ziyareti işaretlenir.
+        var h1Plan = plan2.GetProperty("siradakiler").EnumerateArray().First(x => x.GetProperty("hekim_id").GetInt32() == h1);
+        Assert.Equal(JsonValueKind.Number, h1Plan.GetProperty("planli_ziyaret_id").ValueKind);
         // Günün işi satırı sıra bilgisini taşır.
         var z1 = plan2.GetProperty("ziyaretler").EnumerateArray().First(x => x.GetProperty("hekim_id").GetInt32() == h1);
         Assert.Equal(4, z1.GetProperty("siklik_hafta").GetInt32());
