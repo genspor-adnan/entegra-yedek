@@ -133,6 +133,7 @@ const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCi
 const DisHekimPlan = tembel(() => import('./sayfalar/DisHekimPlan'), 'DisHekimPlan');
 const TeletipGonderimKarti = tembel(() => import('./sayfalar/TeletipGonderimKarti'), 'TeletipGonderimKarti');
 const TeletipPano = tembel(() => import('./sayfalar/TeletipPano'), 'TeletipPano');
+const TeletipAyar = tembel(() => import('./sayfalar/TeletipAyar'), 'TeletipAyar');
 const SahaPerformans = tembel(() => import('./sayfalar/performans/SahaPerformans'), 'SahaPerformans');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
 const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
@@ -448,6 +449,8 @@ function Yollar() {
         {yetki('radyoloji.teletip') && <Route path="/teletip/:id" element={<TeletipGonderimKarti />} />}
         {/* TELETIP PANOSU: günün özeti + Mirth kanal durumları. */}
         {yetki('radyoloji.teletip.pano') && <Route path="/teletip-pano" element={<TeletipPano />} />}
+        {/* TELETIP AYARLARI: kurum kimliği + Mirth K1 (yalnız sistem yöneticisi). */}
+        {yetki('radyoloji.teletip.ayar') && <Route path="/teletip-ayar" element={<TeletipAyar />} />}
         {/* Rapor CIKTISI (303): hastaya verilen belge - yazma ekranindan ayri
             sayfa, yazdirma tarayicinin kendi diyalogu. */}
         {yetki('radyoloji') && <Route path="/radyoloji/cikti/:id" element={<RadyolojiRaporCikti />} />}

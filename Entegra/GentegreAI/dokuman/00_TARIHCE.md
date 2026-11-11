@@ -403,6 +403,20 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Doğrulama: web tsc + 1133 vitest; API katalog / yetki / menü / Teletıp 118/118; tarayıcıda (5173 → 5180, dev'de
     Teletıp geçici açık) bağlantı testi "✓ Teletıp HL7 127.0.0.1:6661 · ✓ Mirth 4.5.2 · 2 kanal", Mirth kanalları gerçek
     sayaçlarla, 2 gidemez olay; dev ayarları ve test satırları geri alındı.
+- **Kurum Teletıp ayar ekranı (db/1308; kullanıcı: "kurum Teletıp ayar ekranını yap", mockup §5):**
+  * Radyoloji › Ayarlar › **Teletıp Ayarları** (`/teletip-ayar`, özel sayfa, yetki `radyoloji.teletip.ayar` - kurum
+    kimliğini değiştirdiği için YALNIZ rol 1'e; diğer rollere rol ekranından). Düzenlenen: gönderim aç / kapat, Mirth K1
+    adresi, karakter seti, kurum SKRS kodu (`kurum.skrs_kodu`, e-Nabız ile ortak), MEDULA tesis kodu (kurum profili genel
+    satırı), şube no, MSH-3 firma kodu. Yalnız görüntü: Mirth REST adresi / kullanıcı / parola tanımlı mı / sertifika,
+    Mirth configuration map'teki Teletıp hedefi (dev benzetimi rozetiyle), Bakanlık uçları bilgisi. Şubeye özel tesis
+    kodu varsa uyarı; test değerleri (999999 / 99999999 / TEST) üstte uyarılır. Bağlantı Testi düğmesi.
+  * API `GET / PUT /api/teletip/ayar`: doğrulama (SKRS rakam, tesis 8 hane, şube rakam, adres host:port, firma ≤ 60);
+    **açmak için kimlik tam olmalı** (SKRS, tesis, firma, adres) - eksik kimlikle açılan gönderim her mesajı gidemez'e
+    düşürürdü. Referans satırlarına değiştiren / zaman yazılır; tesis kodu kurum profilinin şube 0 satırına - satır yoksa
+    AÇILMAZ (o satır ürün modunu taşır, açmak ERP kurulumunu HBYS'ye çevirirdi) ve hata verilir. Bağlantı testi pano
+    ya da ayar yetkisiyle. `MirthIzleme.TeletipHaritasiAsync` configuration map'i okur.
+  * Doğrulama: web tsc + 1133 vitest; API testleri; dev'de GET, eksik kimlikle açma 400 (alan hataları), geçerli kayıt,
+    ekran görüntüsü; dev ayarları eski (boş) hâline döndürüldü.
 
 ### 10.11.2026
 

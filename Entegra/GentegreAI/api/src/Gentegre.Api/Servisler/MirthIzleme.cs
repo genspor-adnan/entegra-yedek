@@ -121,6 +121,34 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
                    S("SENT"), S("ERROR"));
     }
 
+    /// <summary>Panoda / ayar ekranında gösterilecek bağlantı bilgisi - parola DEĞİL, yalnız tanımlı mı.</summary>
+    public (string Url, string Kullanici, bool ParolaTanimli, bool SertifikaDogrula) Ozet() =>
+        (ayar.Value.Url, ayar.Value.Kullanici, !string.IsNullOrEmpty(ayar.Value.Parola), ayar.Value.SertifikaDogrula);
+
+    /// <summary>Mirth configuration map'ten "teletip_" ile başlayan anahtarlar (K1 hedefi vb.) - yalnız okunur.
+    /// Mirth erişilemezse boş sözlük.</summary>
+    public async Task<Dictionary<string, string>> TeletipHaritasiAsync(CancellationToken iptal)
+    {
+        var sonuc = new Dictionary<string, string>();
+        if (string.IsNullOrWhiteSpace(ayar.Value.Url) || string.IsNullOrEmpty(ayar.Value.Parola)) return sonuc;
+        try
+        {
+            var x = XDocument.Parse(await GetXmlAsync("/server/configurationMap", iptal));
+            foreach (var e in x.Root?.Elements("entry") ?? [])
+            {
+                var anahtar = e.Element("string")?.Value ?? "";
+                if (anahtar.StartsWith("teletip_", StringComparison.Ordinal))
+                    sonuc[anahtar] = e.Descendants("value").FirstOrDefault()?.Value ?? "";
+            }
+        }
+        catch (Exception h) when (h is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Xml.XmlException)
+        {
+            _oturumVar = false;
+            gunluk.LogWarning("Mirth configuration map okunamadı: {Hata}", h.Message);
+        }
+        return sonuc;
+    }
+
     /// <summary>host:port'a TCP bağlantı denemesi (Teletıp HL7 hedefi = Mirth K1 dinleyicisi).</summary>
     public static async Task<(bool Acik, string Hata, int SureMs)> TcpDeneAsync(string adres, CancellationToken iptal)
     {
