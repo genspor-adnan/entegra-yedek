@@ -351,6 +351,13 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     5174, dev'de Teletıp geçici açık) liste 2 satır "gidemez", kart eksikleri ve önizlemeyi, şerit "NW ✖ gidemez"i
     gösterdi, konsol hatası yok; dev ayarları ve test kuyruk satırları geri alındı. Henüz yok: Mirth pano (§2, Mirth
     REST istatistikleri), kurum Teletıp ayar ekranı (§5; ayarlar şimdilik referans tablosunda).
+- **KOSUYOLU'da Teletıp açıldı, Mirth K1'e bağlandı (kullanıcı: "KOSUYOLU'da Teletıp ayarlarını aç, Mirth'e bağla"):**
+  `teletip.aktif = 1`, `teletip.hl7_adres = 127.0.0.1:6661` (Mirth K1; dev'de K1 hedefi TELETIP_SIMULATOR). Yeni
+  anahtar `Teletip:Isci` (Program.cs): arka planı kapalı kopyada (müşteri DB'si - SMS / e-posta gitmesin) YALNIZ Teletıp
+  kuyruk işçisi çalışır; KOSUYOLU API 5187 `ArkaPlan__Kapali=true Teletip__Isci=true` ile yeniden başlatıldı.
+  Demo istemler 545-549 kuyruğa alındı, işçi denedi: hepsi "gidemez" - KOSUYOLU'da kurum SKRS kodu ve e-Nabız firma
+  kodu (MSH-3) KAYITLI DEĞİL (uydurulmadı), demo başvurularda e-Nabız 101 referansı / SYS takip, hekim TCKN, SUT kodu
+  yok. Kodlar girilince satırlar "Yeniden gönder" ile (ya da istem değişince kendiliğinden) Mirth'e gider.
 
 ### 10.11.2026
 
