@@ -207,6 +207,7 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
         {
             HastaDosyaNo = "H1", HastaTckn = "10000000146", HastaSoyad = "ÇELİK", HastaAd = "ALİ", BasvuruReferansi = "ENB1",
             AccessionNo = Acc(), IstemZamani = DateTime.Now, PlanlananZaman = DateTime.Now, KurumSkrs = "148", KurumAdi = "Test",
+            MedulaTesisKodu = "11740001",
             IsteyenHekim = new("12345678950", "GÜNEŞ", "ÖMER"), SutKodu = "804490", SutAdi = "Beyin BT", Loinc = [new("24725-4", "CT Head")],
             SysTakipNo = "SYS1", HastaneReferansi = "ENB1", Modalite = "CT",
         });

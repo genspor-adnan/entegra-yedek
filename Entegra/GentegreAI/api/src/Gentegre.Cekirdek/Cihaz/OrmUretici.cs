@@ -292,6 +292,7 @@ public static class OrmUretici
     // ------------------------------------------------------------------ denetim
     private static readonly Regex TcknBicim = new(@"^[1-9][0-9]{10}$", RegexOptions.Compiled);
     private static readonly Regex SutBicim = new(@"^[0-9A-Za-z]{6,}$", RegexOptions.Compiled);
+    private static readonly Regex MedulaBicim = new(@"^[0-9]{8}$", RegexOptions.Compiled);
 
     /// <summary>
     /// GÖNDERMEDEN ÖNCE: Bakanlık'ın reddedeceği eksikler (kılavuz § 3.3 "sık yapılan hatalar" + § 3.4 hata kodları).
@@ -303,6 +304,10 @@ public static class OrmUretici
         if (v.AccessionNo.Length == 0) e.Add("Accession numarası yok (ORC-2 / OBR-18).");
         if (v.KurumSkrs.Length == 0) e.Add("Kurum SKRS kodu yok (ORC-21, 0005).");
         if (v.FirmaKodu.Length == 0) e.Add("Firma uygulama kodu yok (MSH-3, 0275).");
+        // ORC-21 son bileşeni (Tablo 11 / 19, iptalde de var): "Kurum^^SKRS\S\şube\S\MEDULA tesis". Kılavuz örnekleri
+        //   8 hane (11740001); boş giderse kurum alanı eksik kalır (kullanıcı 11.11.2026: "Medula tesis kodunu denetime ekle").
+        if (v.MedulaTesisKodu.Length == 0) e.Add("MEDULA tesis kodu yok (ORC-21) - kurum profilinde tesis kodu girilmeli.");
+        else if (!MedulaBicim.IsMatch(v.MedulaTesisKodu)) e.Add("MEDULA tesis kodu 8 haneli sayı olmalı (ORC-21).");
         if (v.Emir == OrmEmri.Iptal) return e;
 
         if (v.HastaTckn.Length > 0 && !TcknGecerli(v.HastaTckn)) e.Add("Hasta TCKN geçersiz (PID-4).");

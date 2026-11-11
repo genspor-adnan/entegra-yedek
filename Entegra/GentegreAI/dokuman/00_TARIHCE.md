@@ -370,6 +370,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Sonuç: istem değişince tetik 5 "gidemez" satırı yeniden kuyruğa aldı, KOSUYOLU Teletıp işçisi gönderdi →
     Mirth K1 → benzetim: 5/5 AA (kontrol no TT1-1..TT5-1; Mirth'te accession KGM…45998-46002). Not: KOSUYOLU'da
     MEDULA tesis kodu (kurum_profil.tesis_kodu) boş - ORC-21 son bileşeni boş gidiyor; denetim bunu henüz engellemiyor.
+- **MEDULA tesis kodu denetimde (kullanıcı: "Medula tesis kodunu denetime ekle"):** `OrmUretici.Denetle` ORC-21'in
+  son bileşenini ister - boşsa "MEDULA tesis kodu yok", 8 haneli sayı değilse "8 haneli sayı olmalı" (kılavuz
+  örnekleri 11740001); iptal (CA) mesajında da aranır (ORC-21 orada da var). Testler ORM / ORU / Teletıp kuyruğu 72/72.
+  API'ler yeniden başlatıldı; KOSUYOLU'da demo istem 545 değiştirilince açılan XO (satır 6) "gidemez: MEDULA tesis kodu
+  yok" oldu - KOSUYOLU kurum profilinde tesis kodu boş. ORU tarafının ön kontrolü (`fn_telerad_bakanlik_eksik`) bu
+  maddeyi henüz içermiyor.
 
 ### 10.11.2026
 

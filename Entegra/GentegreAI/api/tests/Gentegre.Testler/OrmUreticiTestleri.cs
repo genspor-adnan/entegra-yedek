@@ -198,6 +198,17 @@ public sealed class OrmUreticiTestleri
         Assert.Contains(e, x => x.Contains("PID-4"));
     }
 
+    [Theory]
+    [InlineData("", "MEDULA tesis kodu yok")]
+    [InlineData("1174", "8 haneli")]
+    [InlineData("1174000A", "8 haneli")]
+    public void Denetim_MEDULA_tesis_kodu(string tesis, string beklenen)
+    {
+        Assert.Contains(OrmUretici.Denetle(Ornek() with { MedulaTesisKodu = tesis }), x => x.Contains(beklenen));
+        // İptal mesajında da ORC-21 var: orada da aranır.
+        Assert.Contains(OrmUretici.Denetle(Ornek(OrmEmri.Iptal) with { MedulaTesisKodu = tesis }), x => x.Contains(beklenen));
+    }
+
     [Fact]
     public void Iptal_denetimi_yalniz_kimlik_alanlari()
     {
