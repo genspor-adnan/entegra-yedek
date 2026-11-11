@@ -69,6 +69,8 @@ export interface BelgeTuruBilgisi {
   kaydedinceKapan: boolean;
   /** Ilk kalem eklenince baslik kilitlenir (depo/tarih sonradan degisemez). */
   kalemVarsaBaslikKilitli: boolean;
+  /** GENEL KURAL (kullanıcı 11.11.2026): depolu her türde ilk kalemle depo combo(ları) kilitlenir, başlığın gerisi serbest. */
+  kalemVarsaDepoKilitli: boolean;
 }
 
 /** Turden turetilen ortak gruplar - tablo satirlari bunlarla kisaliyor. */
@@ -202,7 +204,12 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
       // Alış belgelerinin numarası TEDARİKÇİNİN (02.11.2026) - BelgeTuru.DisNumaraliTurler ile aynı küme.
       disNumara: [10, 11, 12, 109].includes(tur),
     kaydedinceKapan: depoBelgesi || stokFisi,
-    // DEPO BELGESİNDE KİLİT YOK (kullanıcı 10.11.2026: "satır eklendikten sonra da depo / teslim eden-alan
+    // DEPO KİLİDİ (kullanıcı 11.11.2026 genel kural: "varsa depo giriş/çıkış comboları seçilmiş olmalı, satır
+    //   eklenince depo(lar) değişemez" - 10.11 "depo belgesinde kilit yok" kararını geri aldı): depolu her türde ilk
+    //   kalemle yalnız depo combo(ları) kilitlenir (kalemVarsaDepoKilitli); teslim eden / alan ve tarih serbest.
+    //   Stok fişinde başlığın tamamı kilitli kalır (aşağıdaki eski kural).
+    kalemVarsaDepoKilitli: !tahakkuk,
+    // (eski not) DEPO BELGESİNDE KİLİT YOK (kullanıcı 10.11.2026: "satır eklendikten sonra da depo / teslim eden-alan
     //   değişebilsin"): satırlar depo taşımaz (belge_satir depo kolonları boş), stok yazımı başlıktaki depoya
     //   düşer ve kayıtta eski etki geri alınıp yeniden yazılır. Tek risk lot/seri: çıkış deposu değişince seçili
     //   lotlar yeni depoda olmayabilir - BelgeKarti uyarır ve lot seçimlerini boşaltır, sunucu lot düşümünü depoda

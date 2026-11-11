@@ -197,6 +197,17 @@ başlığında … Listesi olsun".
   parçaları TSX'te koşullu - temaSinifCakismasi kap altında genel sınıf yasağı). Testler `SahaPlanTopluTestleri`
   (özet + sıradakiler + toplu planla 09:00 / 10:30 + tekrar atlama + seçili üretim), `SahaErpKipiTestleri` kip
   görünümü. Rota (§4) yine yok.
+- **Depo genel kuralı (kullanıcı: "tüm alış/satış belgeleri + stoktan talep kartı + stok transfer kartı: varsa depo
+  giriş/çıkış comboları seçilmiş olmalı, satır/kalem eklenince depo(lar) değişemez"):** sunucu `BelgeTuru.DepoZorunlu`
+  (alış 9/10/11/12/109, satış 14/15/16/29/119/133, stok fişi 3/4, üretim 121-123, transfer 20 ve talep 105 - iki
+  depolu; tahakkuk 13/17, başvuru 19, teklif 18 hariç) - `KaydetIcAsync` depo yoksa 400 (iade yönü için iki alandan
+  biri yeter; transfer / talepte ikisi de ve farklı; talepte teslim deposu artık ZORUNLU); `GuncelleIcAsync` belgede
+  satır varken dolu depo değişirse 422 (boş olan sonradan doldurulabilir). 10.11 "depo belgesinde kilit yok" kararı
+  geri alındı. Web: `bilgi.kalemVarsaDepoKilitli` (tahakkuk dışı) → `depoKilitli` yalnız depo combolarını kilitler
+  (başlığın gerisi serbest; stok fişinde tam başlık kilidi sürer); depo combosu `zorunlu` (başvuru hariç), teslim
+  deposu zorunlu; kalem eklemeden önce depo istenir (`transferBaslikEksigi` tüm depolu türlere); `belgeDogrula`
+  `depoVar` ile boş depoyu reddeder. Test `BelgeDepoKuraliTestleri` (deposuz fiş 400, kalemli fişte depo değişimi
+  422, aynı depo serbest).
 
 ### 10.11.2026
 

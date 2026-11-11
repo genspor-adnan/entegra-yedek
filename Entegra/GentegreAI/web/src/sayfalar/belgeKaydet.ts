@@ -77,6 +77,8 @@ export interface BelgeGirdisi {
   satici: Secim | null;
   depo: Secim | null;
   girisDepo: Secim | null;
+  /** DEPO ZORUNLU (genel kural 11.11.2026): başlıkta depo combosu var mı (bilgi.depo !== 'yok'). */
+  depoVar?: boolean;
   teslimEden: Secim | null;
   teslimAlan: Secim | null;
   tasiyici: Secim | null;
@@ -133,7 +135,7 @@ export interface BelgeGirdisi {
  * uyarmak ve hatali alanin sekmesine goturmek icindir.
  */
 export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
-  const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
+  const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih, depoVar,
           tarihEnGec, kayitliTarih, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
           odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli,
@@ -148,6 +150,11 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
     if (!depo) {
       return { [fisCikisMi ? 'cikisDepoId' : 'girisDepoId']: 'Depo seçilmeli.' };
     }
+  }
+  // DEPO ZORUNLU (kullanıcı 11.11.2026 genel kural: "varsa depo giriş/çıkış comboları seçilmiş olmalı"): alış /
+  //   satış belgelerinde combo varsa (başvuru hariç) depo boş kalamaz; sunucu da aynı kuralı uygular.
+  if (depoVar && !depoBelgesi && !stokFisiMi && !basvuruMu && !depo) {
+    return { [alisMi ? 'girisDepoId' : 'cikisDepoId']: 'Depo seçilmeli.' };
   }
   // ZORUNLU (kullanici): tarih bos gonderilemez - kalem fiyati, prim ve numara
   //   serisi bu tarihe bagli. Kart alani zaten bosalinca simdiki ani yaziyor;
@@ -168,6 +175,8 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   //   (tarihEnErken / geriGun tarih kutusunun sinirini cizer.)
   if (talepMi) {
     if (!depo) { return { cikisDepoId: 'İstenen depo seçilmeli.' } }
+    // Teslim deposu da ZORUNLU (genel kural 11.11.2026).
+    if (!girisDepo) { return { girisDepoId: 'Teslim deposu seçilmeli.' } }
     if (!teslimAlan) { return { teslimAlanId: 'Talep eden seçilmeli.' } }
     if (girisDepo && girisDepo.id === depo.id) {
       return { girisDepoId: 'Teslim deposu istenen depo ile aynı olamaz.' };

@@ -509,6 +509,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * satirlari silip yeniden secer. Diger turlerde bu kisit yok.
    */
   const baslikKilitli = kilitli || (bilgi.kalemVarsaBaslikKilitli && satirlar.length > 0);
+  /** GENEL KURAL (kullanıcı 11.11.2026): kalem varken depo combo(ları) değişmez - sunucu da reddeder (BelgeDeposu). */
+  const depoKilitli = baslikKilitli || (bilgi.kalemVarsaDepoKilitli && satirlar.length > 0);
 
   /**
    * Transferde BASLIK ONCE doldurulur: iki depo ve teslim eden/alan secilmeden
@@ -518,13 +520,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const transferBaslikEksigi = stokFisiMi
     ? (!fisTipi ? 'fiş tipi' : !depo ? 'depo' : null)
-    : !depoBelgesi ? null
+    // DEPO ÖNCE (kullanıcı 11.11.2026 genel kural): depolu her türde depo seçilmeden kalem eklenemez - sonradan
+    //   seçilen depo kalemleri başka depoya taşımış olurdu; kilit de ilk kalemle gelir.
+    : !depoBelgesi ? (bilgi.depo !== 'yok' && !basvuruMu && !depo ? (bilgi.alis ? 'giriş deposu' : 'çıkış deposu') : null)
     : talepMi
-      // Talepte teslim eden YOK (mal henuz cikmadi) ve teslim deposu opsiyonel:
-      //   talep eden kendi eline de alabilir.
+      // Talepte teslim eden YOK (mal henuz cikmadi); teslim deposu da ZORUNLU (genel kural 11.11.2026).
       ? (!depo ? 'istenen depo'
+        : !girisDepo ? 'teslim deposu'
         : !sevkiyat.teslimAlan ? 'talep eden'
-        : girisDepo && depo.id === girisDepo.id ? 'farklı teslim deposu'
+        : depo.id === girisDepo.id ? 'farklı teslim deposu'
         : null)
       : (!depo ? 'çıkış deposu'
         : !girisDepo ? 'giriş deposu'
@@ -1192,6 +1196,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       aciklama,
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
       senaryo, satici, depo, girisDepo,
+      // DEPO ZORUNLU (genel kural 11.11.2026): combo varsa seçilmiş olmalı (belgeDogrula).
+      depoVar: bilgi.depo !== 'yok',
       teslimEden: sevkiyat.teslimEden, teslimAlan: sevkiyat.teslimAlan,
       tasiyici: sevkiyat.tasiyici, aracPlaka: sevkiyat.aracPlaka,
       soforAd: sevkiyat.soforAd, soforTckn: sevkiyat.soforTckn,
@@ -1750,7 +1756,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           // SEKME DEĞİŞİNCE başvuru sekmesi görüntüleme kipine döner (basvuruDuzenle).
           setAktifSekme={s => { setHata(null); setAlanHatalari({}); setBasvuruDuzenle(false); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
-          kilitli={kilitli} baslikKilitli={baslikKilitli} belgeAdi={belgeAdi}
+          kilitli={kilitli} baslikKilitli={baslikKilitli} depoKilitli={depoKilitli} belgeAdi={belgeAdi}
           yeniMi={!mevcutBelge} baslikKapatAnahtari={baslikKapat}
           belgeNo={belgeNo} setBelgeNo={setBelgeNo}
           tarih={tarih} setTarih={setTarih}

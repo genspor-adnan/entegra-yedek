@@ -145,4 +145,17 @@ public static class BelgeTuru
     /// Transferde IKISI de dolar - ayri ele alinir (bkz. StokDurumGuncelle).
     /// </summary>
     public static string DepoAlani(int tur) => CikisMi(tur) ? "cikisDepoId" : "girisDepoId";
+
+    /// <summary>
+    /// DEPO ZORUNLU (kullanıcı 11.11.2026 genel kural: "tüm alış/satış belgeleri + stoktan talep + stok transfer:
+    /// varsa depo giriş/çıkış comboları seçilmiş olmalı; kalem eklenince depo(lar) değişemez"): alış (9, 10, 11, 12,
+    /// 109) ve satış (14, 15, 16, 29, 119, 133) belgeleri, stok fişleri (3, 4), üretim fişleri (121-123), transfer
+    /// (20, iki depo) ve talep (105, istenen + teslim deposu). Tahakkuk (13, 17), başvuru (19) ve teklif (18) dışında
+    /// - stok hareketi yok; teklifte depo combosu web'de istenir, sunucu zorlamaz.
+    /// </summary>
+    public static bool DepoZorunlu(int tur) =>
+        tur is not (13 or 17 or 18 or 19)
+        && (CikisMi(tur) || tur is 9 or 10 or 11 or 12 or 109 or Transfer or UretimGirisi || StokFisiMi(tur));
+    /// <summary>Transfer ve talep: başlıkta İKİ depo (çıkış / istenen + giriş / teslim), ikisi de zorunlu ve farklı.</summary>
+    public static bool IkiDepolu(int tur) => tur is Transfer or Talep;
 }

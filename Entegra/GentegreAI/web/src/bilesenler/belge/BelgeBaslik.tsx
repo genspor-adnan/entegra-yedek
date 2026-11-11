@@ -51,7 +51,7 @@ import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
  */
 export function BelgeBaslik(p: BelgeBaslikProps) {
   const {
-    aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
+    aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, depoKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     basvuruMu,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, sevkiyat, fisTipi,
@@ -266,11 +266,14 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       <GenLookup
         kaynak="depo"
         etiket={siparisMi ? 'Depo' : alisMi ? 'Giriş Deposu' : 'Çıkış Deposu'}
+        // ZORUNLU + KİLİT (genel kural 11.11.2026): başvuru dışında combo varsa seçilir, kalemle kilitlenir.
+        zorunlu={!basvuruMu}
         // Pasif depo secilemez: kapatilmis depoya belge kesilmesin.
         sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
         alanlar={LOOKUP_DEPO}
         deger={depo?.ad}
-        saltOkunur={kilitli}
+        hata={alanHatalari.cikisDepoId ?? alanHatalari.girisDepoId}
+        saltOkunur={depoKilitli}
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
   );
@@ -280,11 +283,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       <GenLookup
         kaynak="depo"
         etiket={talepMi ? 'Teslim Deposu' : 'Giriş Deposu'}
-        zorunlu={!talepMi}
+        zorunlu
         sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
         alanlar={LOOKUP_DEPO}
         deger={girisDepo?.ad}
-        saltOkunur={baslikKilitli}
+        saltOkunur={depoKilitli}
         hata={alanHatalari.girisDepoId}
         onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
@@ -380,7 +383,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
         alanlar={LOOKUP_DEPO}
         deger={depo?.ad}
-        saltOkunur={baslikKilitli}
+        saltOkunur={depoKilitli}
         hata={alanHatalari.cikisDepoId}
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
@@ -540,7 +543,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
         alanlar={LOOKUP_DEPO}
         deger={depo?.ad}
-        saltOkunur={baslikKilitli}
+        saltOkunur={depoKilitli}
         hata={alanHatalari.cikisDepoId ?? alanHatalari.girisDepoId}
         onSec={x => setDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
@@ -653,6 +656,8 @@ export interface BelgeBaslikProps {
   kilitli: boolean;
   /** Kalem girildikten sonra baslikta kilitlenen alanlar (depo, tip, tarih). */
   baslikKilitli: boolean;
+  /** GENEL KURAL (11.11.2026): kalem varken depo combo(ları) salt okunur. */
+  depoKilitli: boolean;
   /** Kart YENİ belge olarak açıldı (kayıtlı belge yok): fatura başlığı düzenleme kipinde başlar (bkz. baslikDuzenle). */
   yeniMi?: boolean;
   /**

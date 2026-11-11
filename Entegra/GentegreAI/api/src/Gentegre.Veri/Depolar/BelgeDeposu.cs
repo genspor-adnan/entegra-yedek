@@ -208,6 +208,34 @@ public sealed partial class BelgeDeposu
             belgeTarihi = o.GetDateTime(5); belgeNo = o.GetString(6); belgeSeri = o.GetString(7);
             teklifDurum = o.GetInt32(8);
         }
+        // KALEM VARKEN DEPO DEĞİŞMEZ (kullanıcı 11.11.2026 genel kural; 10.11 "depo belgesinde kilit yok" kararı
+        //   geri alındı): satırlar başlıktaki depoya yazılmıştır; depo değişince gridde duran satırlar başka bir
+        //   belgenin satırları olur, stok yanlış depodan düşer. Kalemleri silip depoyu değiştirmek serbest; boş olan
+        //   depo (talepte teslim deposu) sonradan DOLDURULABİLİR.
+        if (BelgeTuru.DepoZorunlu(tur))
+        {
+            int eskiGiris, eskiCikis; long satirSayisi;
+            await using (var dk = new NpgsqlCommand("""
+                select coalesce(b.giris_depo_id, 0), coalesce(b.cikis_depo_id, 0),
+                       (select count(*) from public.belge_satir s where s.belge_id = b.id)
+                  from public.belge b where b.id = @p0
+                """, baglanti, islem))
+            {
+                dk.Parameters.AddWithValue("p0", belgeId);
+                await using var o = await dk.ExecuteReaderAsync(iptal);
+                await o.ReadAsync(iptal);
+                eskiGiris = o.GetInt32(0); eskiCikis = o.GetInt32(1); satirSayisi = o.GetInt64(2);
+            }
+            if (satirSayisi > 0)
+            {
+                var yeniGiris = belge.ContainsKey("girisDepoId") ? Sayi(belge, "girisDepoId") : eskiGiris;
+                var yeniCikis = belge.ContainsKey("cikisDepoId") ? Sayi(belge, "cikisDepoId") : eskiCikis;
+                if ((eskiGiris > 0 && yeniGiris != eskiGiris) || (eskiCikis > 0 && yeniCikis != eskiCikis))
+                    throw GentegreHatasi.IsKurali(
+                        "Belgede kalem varken depo değiştirilemez. Önce kalemleri silin, depoyu değiştirip kalemleri yeniden ekleyin.");
+            }
+        }
+
         // TEKLİF İÇ ONAYI KİLİDİ (1282): onayda ya da onaylanmış teklif değiştirilemez - onaylanan metin
         //   değişirse imza anlamını yitirir. Hazırlayan "Geri Çek" ile açar; onaylandıysa yeni revizyon.
         if (tur == 18 && teklifDurum is 6 or 7)
@@ -478,23 +506,36 @@ public sealed partial class BelgeDeposu
         // Transferde SORUMLULUK DEVRI kayda gecer: mali kim verdi, kim aldi.
         //   Iki depo arasinda kaybolan malin hesabi bu iki isimden sorulur -
         //   bu yuzden ikisi de zorunlu ve birbirinden farkli olmali.
-        if (BelgeTuru.StokFisiMi(tur))
-        {
-            if (Sayi(belge, "tipi") <= 0)
-                throw GentegreHatasi.Dogrulama("Fiş tipi seçilmeli.",
-                    new AlanHatasi("tipi", "Zorunlu."));
+        if (BelgeTuru.StokFisiMi(tur) && Sayi(belge, "tipi") <= 0)
+            throw GentegreHatasi.Dogrulama("Fiş tipi seçilmeli.",
+                new AlanHatasi("tipi", "Zorunlu."));
 
-            var depoAlani = BelgeTuru.CikisMi(tur) ? "cikisDepoId" : "girisDepoId";
-            if (Sayi(belge, depoAlani) <= 0)
-                throw GentegreHatasi.Dogrulama("Depo seçilmeli.",
-                    new AlanHatasi(depoAlani, "Zorunlu."));
+        // DEPO ZORUNLU (kullanıcı 11.11.2026 genel kural; BelgeTuru.DepoZorunlu): depolu türde başlık deposu
+        //   seçilmeden belge yazılmaz. Transfer / talepte iki depo da dolu ve farklı; tek depolu türde yönün
+        //   deposu (iade yön değiştirdiğinden iki alandan biri yeter).
+        if (BelgeTuru.DepoZorunlu(tur))
+        {
+            if (BelgeTuru.IkiDepolu(tur))
+            {
+                var talep = BelgeTuru.TalepMi(tur);
+                if (Sayi(belge, "cikisDepoId") <= 0)
+                    throw GentegreHatasi.Dogrulama(talep ? "İstenen depo seçilmeli." : "Çıkış deposu seçilmeli.",
+                        new AlanHatasi("cikisDepoId", "Zorunlu."));
+                if (Sayi(belge, "girisDepoId") <= 0)
+                    throw GentegreHatasi.Dogrulama(talep ? "Teslim deposu seçilmeli." : "Giriş deposu seçilmeli.",
+                        new AlanHatasi("girisDepoId", "Zorunlu."));
+                if (Sayi(belge, "cikisDepoId") == Sayi(belge, "girisDepoId"))
+                    throw GentegreHatasi.IsKurali(talep ? "Teslim deposu istenen depo ile aynı olamaz." : "Giriş ve çıkış deposu aynı olamaz.");
+            }
+            else if (Sayi(belge, "cikisDepoId") <= 0 && Sayi(belge, "girisDepoId") <= 0)
+            {
+                var depoAlani = BelgeTuru.CikisMi(tur, Sayi(belge, "tipi")) ? "cikisDepoId" : "girisDepoId";
+                throw GentegreHatasi.Dogrulama("Depo seçilmeli.", new AlanHatasi(depoAlani, "Zorunlu."));
+            }
         }
 
         if (BelgeTuru.TalepMi(tur))
         {
-            if (Sayi(belge, "cikisDepoId") <= 0)
-                throw GentegreHatasi.Dogrulama("İstenen depo seçilmeli.",
-                    new AlanHatasi("cikisDepoId", "Zorunlu."));
             // Talep eden, mali TESLIM ALACAK kisidir - ayni kolonda tutulur.
             if (Sayi(belge, "teslimAlanId") <= 0)
                 throw GentegreHatasi.Dogrulama("Talep eden seçilmeli.",
