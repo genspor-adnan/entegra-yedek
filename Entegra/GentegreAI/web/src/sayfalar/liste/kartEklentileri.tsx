@@ -1,3 +1,4 @@
+import { PacsGoruntuleri } from '../hasta/PacsGoruntuleri';
 import type { ComponentProps } from 'react';
 import type { GenForm } from '../../bilesenler/GenForm';
 import type { ListeTanimi } from '../listeTanimlari';
@@ -109,6 +110,10 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   hasta: {
     ustBaglam: b => kayitli(b.kartId)
       ? d => <HastaKartBandi id={b.kartId as number} deger={d} git={b.git} /> : undefined,
+    // PACS GÖRÜNTÜLERİ (11.11.2026): hastanın PACS'taki çalışmaları (ad / kimlik eşlemesi), OHIF'te açar.
+    ekSekmeler: b => kayitli(b.kartId) && b.yetki('radyoloji', 'gor') ? [
+      { anahtar: 'ozel:hasta-pacs', baslik: 'PACS Görüntüleri', ciz: () => <PacsGoruntuleri hastaId={b.kartId as number} /> },
+    ] : undefined,
   },
   // ------------------------------------------- müşteri kartı Ver3 (1150) ----
   // Mockup musteri_karti_ver3.html: kimlik şeridinin altında özet şeridi, sağda dikkat /

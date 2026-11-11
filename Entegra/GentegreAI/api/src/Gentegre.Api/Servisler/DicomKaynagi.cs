@@ -97,6 +97,44 @@ public sealed class DicomKaynagi(IOptions<DicomAyarlari> ayar, IOptions<Guvenlik
                     .FirstOrDefault(u => !string.IsNullOrWhiteSpace(u));
     }
 
+    public sealed record PacsCalisma(string StudyUid, string Tarih, string Saat, string Modaliteler, string Aciklama,
+                                     string Accession, int Adet, string HastaAd, string HastaNo);
+
+    /// <summary>
+    /// HASTANIN PACS ÇALIŞMALARI (kullanıcı 11.11.2026: "GENTEGRE DEMO hasta görüntüleri var, programdan nasıl görürüm"):
+    /// PACS'ta hasta eşlemesi ad (PN: Soyad^Ad* ve Ad^Soyad*) ve kimlik (PatientID = dosya no / TCKN) üzerinden;
+    /// sonuçlar çalışma UID'siyle tekilleştirilir. Radyoloji istemine bağlı olmayan (dışarıdan gelmiş, eski) görüntüler
+    /// de böyle bulunur.
+    /// </summary>
+    public async Task<List<PacsCalisma>> HastaCalismalariAsync(IEnumerable<string> adDesenleri, IEnumerable<string> kimlikler,
+                                                               CancellationToken iptal)
+    {
+        var sonuc = new Dictionary<string, PacsCalisma>(StringComparer.Ordinal);
+        async Task Topla(DicomCFindRequest q)
+        {
+            foreach (var t in new[] { DicomTag.ModalitiesInStudy, DicomTag.NumberOfStudyRelatedInstances, DicomTag.StudyDescription,
+                                      DicomTag.AccessionNumber, DicomTag.StudyTime })
+                q.Dataset.AddOrUpdate(t, string.Empty);
+            foreach (var d in await SorgulaAsync(q, iptal))
+            {
+                var uid = d.GetSingleValueOrDefault(DicomTag.StudyInstanceUID, "");
+                if (string.IsNullOrWhiteSpace(uid) || sonuc.ContainsKey(uid)) continue;
+                sonuc[uid] = new PacsCalisma(uid,
+                    d.GetSingleValueOrDefault(DicomTag.StudyDate, ""), d.GetSingleValueOrDefault(DicomTag.StudyTime, ""),
+                    string.Join("/", d.Contains(DicomTag.ModalitiesInStudy) ? d.GetValues<string>(DicomTag.ModalitiesInStudy) : []),
+                    d.GetSingleValueOrDefault(DicomTag.StudyDescription, ""), d.GetSingleValueOrDefault(DicomTag.AccessionNumber, ""),
+                    d.GetSingleValueOrDefault(DicomTag.NumberOfStudyRelatedInstances, 0),
+                    d.GetSingleValueOrDefault(DicomTag.PatientName, "").Replace('^', ' ').Trim(),
+                    d.GetSingleValueOrDefault(DicomTag.PatientID, ""));
+            }
+        }
+        foreach (var k in kimlikler.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct())
+            await Topla(DicomCFindRequest.CreateStudyQuery(patientId: k));
+        foreach (var ad in adDesenleri.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct())
+            await Topla(DicomCFindRequest.CreateStudyQuery(patientName: ad));
+        return sonuc.Values.OrderByDescending(x => x.Tarih).ThenByDescending(x => x.Saat).ToList();
+    }
+
     /// <summary>
     /// OHIF "dicomjson" manifesti: studies[ series[ instances[ {metadata, url} ] ] ]. Görüntü adresi bu API'nin WADO
     /// vekili (<paramref name="wadoTaban"/> + jeton) - OHIF'in tarayıcısı ClearCanvas'a doğrudan gitmez (CORS / ağ).

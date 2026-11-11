@@ -235,6 +235,13 @@ başlığında … Listesi olsun".
   Web: radyoloji istem kartında ve listesinde **🖼 Görüntüle** (`radyoloji.goruntule`, yeni sekme). Doğrulama: örnek
   XA (96 kare) C-STORE → manifest → vekil → OHIF'te seri açıldı. Testler `DicomJetonTestleri`. CORS'a 3001 eklendi.
   Sunucu yayınında: OHIF konteyneri + `Dicom` ayarları (müşteri PACS adresi) + `GoruntuleyiciUrl` dış adres gerekir.
+- **Hasta kartı › PACS Görüntüleri sekmesi (kullanıcı: "ClearCanvas'ta GENTEGRE DEMO hasta görüntüleri var, programdan
+  nasıl görürüm.. önce hasta kaydı aç"):** `GET /api/dicom/hasta/{id}` (radyoloji yetkisi) PACS'ı hasta adı (PN
+  `Soyad^Ad*` ve `Ad^Soyad*`) ve kimlik (dosya no / TCKN = PatientID) ile C-FIND eder, çalışma başına jetonlu OHIF adresi
+  döner; `PacsGoruntuleri.tsx` sekmesi (kartEklentileri `hasta`) listeler, "🖼 Aç" / çift tık OHIF'te açar - radyoloji
+  istemine bağlı olmayan görüntüler de böyle bulunur. Demo hasta GENTEGRE DEMO dev DB'de (H-000084) ve KOSUYOLU'da
+  (dosya 00000003, SQL ile - admin parolası bilinmiyor); PACS'taki 5 demo çalışma (BT/MR/US/XR/çok kareli MR,
+  PatientName `GENTEGRE^DEMO^*`) sekmede listelendi.
 
 ### 10.11.2026
 

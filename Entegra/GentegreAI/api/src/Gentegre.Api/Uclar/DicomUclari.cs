@@ -55,6 +55,38 @@ public static class DicomUclari
             return Results.Ok(new { url, studyUid = uid, manifest, izlemeNo = baglam.IzlemeNo });
         });
 
+        // ------------------------------------------------ hastanın PACS çalışmaları (oturumlu) --
+        //   Hasta kartı "PACS Görüntüleri" sekmesi: ad / kimlik eşlemesiyle C-FIND, her satır için OHIF adresi.
+        grup.MapGet("/hasta/{hastaId:int}", async (int hastaId, DicomKaynagi dicom, VeriKaynagi veri, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            if (!dicom.Ayar.Aktif) return Results.Ok(new { aktif = false, calismalar = Array.Empty<object>(), izlemeNo = baglam.IzlemeNo });
+            var h = await veri.TekAsync(
+                "select coalesce(ad,'') as ad, coalesce(soyad,'') as soyad, coalesce(unvan,'') as unvan, coalesce(kod,'') as kod, coalesce(vkno,'') as vkno from public.taraf where id = @p0 and hasta = 1",
+                [hastaId], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
+            string S(string k) => (Convert.ToString(h[k]) ?? "").Trim();
+            var ad = S("ad"); var soyad = S("soyad"); var unvan = S("unvan");
+            var desenler = new List<string>();
+            if (ad.Length > 0 && soyad.Length > 0) { desenler.Add($"{soyad}^{ad}*"); desenler.Add($"{ad}^{soyad}*"); }
+            else if (unvan.Length > 0) desenler.Add(unvan.Replace(' ', '^') + "*");
+            var liste = await dicom.HastaCalismalariAsync(desenler, [S("kod"), S("vkno")], iptal);
+            var kok = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
+            var calismalar = liste.Select(c =>
+            {
+                var jeton = dicom.JetonUret(c.StudyUid);
+                var manifest = $"{kok}/api/dicom/manifest/{Uri.EscapeDataString(c.StudyUid)}?t={jeton}";
+                return new
+                {
+                    studyUid = c.StudyUid, tarih = c.Tarih, saat = c.Saat, modaliteler = c.Modaliteler, aciklama = c.Aciklama,
+                    accession = c.Accession, adet = c.Adet, hastaAd = c.HastaAd, hastaNo = c.HastaNo,
+                    url = $"{dicom.Ayar.GoruntuleyiciUrl.TrimEnd('/')}/viewer/dicomjson?url={Uri.EscapeDataString(manifest)}",
+                };
+            }).ToList();
+            return Results.Ok(new { aktif = true, calismalar, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------------ OHIF dicomjson manifesti (jetonlu, anonim) --
         grup.MapGet("/manifest/{studyUid}", async (string studyUid, string? t, DicomKaynagi dicom, HttpContext ctx, CancellationToken iptal) =>
         {
