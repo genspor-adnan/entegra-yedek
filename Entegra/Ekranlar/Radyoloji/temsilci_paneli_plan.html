@@ -97,6 +97,20 @@
   .sagmenu div:last-child{border-bottom:none}
   .sagmenu div.b{background:#f3f6fa;color:var(--muted);font-size:10.5px}
   .sagmenu .ks{color:var(--muted);float:right;font-size:10.5px}
+  /* liste / takvim modu */
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-left:8px}
+  .seg span{padding:5px 10px;font-size:11.5px;background:linear-gradient(var(--btnfrom),var(--btnto));color:var(--muted);cursor:pointer}
+  .seg span.on{background:var(--navy);color:#fff;font-weight:bold}
+  .gunsekme{display:none;gap:4px;padding:6px 10px;background:#fbfcfd;border-bottom:1px solid var(--line2);align-items:center}
+  .gunsekme span{border:1px solid var(--line);border-radius:3px;padding:3px 10px;font-size:11.5px;background:#fff;color:#3a5573;cursor:pointer}
+  .gunsekme span.on{background:#2f6db3;color:#fff;border-color:#2f6db3;font-weight:bold}
+  .gunsekme span small{color:inherit;opacity:.75;margin-left:4px}
+  .gunsekme .ipucu{margin-left:auto;color:var(--muted);font-size:11px}
+  .win.liste .haftabas,.win.liste .hafta{display:none}
+  .win.liste .gunsekme{display:flex}
+  .win.liste .gunbas{border-top:none}
+  .win.takvim .gunbas,.win.takvim .cipler.gunun,.win.takvim table.gunun,.win.takvim .sagmenu{display:none}
+  .win.takvim .gun{min-height:300px}
   .mobil{max-width:1240px;margin:12px auto 0;display:grid;grid-template-columns:320px 1fr;gap:14px}
   .tel{border:8px solid #1f2d3a;border-radius:26px;background:#fff;overflow:hidden;height:520px}
   .tel .ust{background:var(--navy);color:#fff;padding:8px 10px;font-weight:bold;font-size:12px;display:flex;justify-content:space-between}
@@ -127,6 +141,7 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     <span class="btn">⏰ Ziyaret Vadesi</span>
     <span class="btn">📋 Açık Talepler <span class="rz hata" style="margin-left:2px">7</span></span>
     <span class="btn">🖨 Yazdır</span>
+    <span class="seg" title="Görünüm (kullanıcı tercihi hatırlanır)"><span class="on" data-mod="ikisi">▦ İkisi</span><span data-mod="liste">📋 Liste</span><span data-mod="takvim">🗓 Takvim</span></span>
     <span class="combo" style="width:210px;margin-left:8px" title="Yalnız sorumlu / yönetici görür; temsilci kendini">👤 Ahmet YILDIZ (ben)</span>
     <span class="baslikad">Ahmet YILDIZ · Koşuyolu · Pazartesi 10.11.2026</span>
   </div>
@@ -183,16 +198,22 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     </div>
   </div>
 
+  <!-- LİSTE modunda hafta şeridi yerine gün sekmeleri -->
+  <div class="gunsekme">
+    <span class="on">Pzt 10<small>6</small></span><span>Sal 11<small>4</small></span><span>Çar 12<small>2</small></span><span>Per 13<small>5</small></span><span>Cum 14<small>3</small></span>
+    <span style="border-style:dashed">Bu hafta<small>20</small></span>
+    <span class="ipucu">Liste modu: takvim gizli, günler sekme; "Bu hafta" tüm haftayı tarih sıralı listeler</span>
+  </div>
   <!-- panel §1 günün işi: seçili gün -->
   <div class="gunbas">
     <h4>Günün işi — Pazartesi 10.11.2026 <span class="tag">seçili gün · takvimde gün başlığına tıkla</span></h4>
     <span class="sonuk" style="margin-left:auto">6 ziyaret · 2 yapıldı · 1 geciken · 3 açık talep</span>
   </div>
-  <div class="cipler">
+  <div class="cipler gunun">
     <span class="cip on">Bugün</span><span class="cip">Bu hafta</span><span class="cip">Geciken</span><span class="cip"><span class="k" data-hbys="Gönderimi" data-erp="Satışı">Gönderimi</span> düşen</span><span class="cip">Talebi açık</span><span class="cip">Öneri</span><span class="cip">Tümü</span>
     <span class="arama">🔍 <span class="k" data-hbys="hekim / kurum / ilçe…" data-erp="müşteri / ilçe…">hekim / kurum / ilçe…</span></span>
   </div>
-  <table>
+  <table class="gunun">
     <thead><tr>
       <th style="width:56px" class="orta">Saat</th><th style="width:230px"><span class="k" data-hbys="Dış Doktor" data-erp="Müşteri">Dış Doktor</span></th><th style="width:180px"><span class="k" data-hbys="Kurum · İlçe" data-erp="İlçe · Temsilci">Kurum · İlçe</span></th>
       <th style="width:80px" class="orta">Tür</th><th style="width:100px" class="orta">Son ziyaret</th><th style="width:70px" class="orta">Sıklık</th>
@@ -268,6 +289,9 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
   </table>
   <h3>Kurallar</h3>
   <ul>
+    <li><b>Görünüm modu</b> (araç çubuğu segmenti): <b>İkisi</b> (varsayılan: hafta şeridi + günün işi), <b>Liste</b> (takvim gizli, günler üstte sekme, tablo büyür;
+        "Bu hafta" sekmesi haftanın tümünü tarih-saat sıralı), <b>Takvim</b> (tablo gizli, gün sütunları uzun - haftayı tek bakışta). Tercih kullanıcıda
+        hatırlanır (<code>localStorage</code> <code>dhp.mod</code>); telefonda varsayılan Liste. Üç modda da özet kutuları ve çipler aynı veriyi süzer.</li>
     <li>Menü adı ve rota değişmez: <b>Ziyaret Planı</b> (<code>/dis-hekim-plan</code>, yetki <code>dis_doktor.plan</code>); HBYS Kurumlar &amp; Sigorta › Dış Doktorlar, ERP Cari &amp; CRM › CRM. Ayrı "Temsilci Paneli" ekranı ve yetkisi açılmaz.</li>
     <li>Özet kutusu tıklanınca alt tablo o kümeye süzülür ve ilgili çip yanar (kutu = çip kısayolu); "Bu ay <span class="k" data-hbys="gönderim" data-erp="satış">gönderim</span>" tıklanınca Saha Performansı (yetkisi varsa).</li>
     <li>Seçili gün varsayılan bugün; hafta değişince seçili gün o haftanın pazartesisi. Günün işi, planlı sırası saat; yapıldı satırları soluk ama listede kalır.</li>
@@ -283,6 +307,15 @@ altta <b>seçili günün işi</b> tablosu (gün sütununa tıklayınca o gün; v
     document.querySelectorAll('.kipsec b').forEach(x => x.classList.toggle('on', x === b));
     const kip = b.dataset.kip;
     document.querySelectorAll('.k').forEach(el => { el.textContent = el.dataset[kip] ?? el.textContent; });
+  }));
+  // Liste / Takvim / İkisi modu (yalnız görsel).
+  document.querySelectorAll('.seg span').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.seg span').forEach(x => x.classList.toggle('on', x === b));
+    const w = b.closest('.win'); w.classList.remove('liste', 'takvim');
+    if (b.dataset.mod !== 'ikisi') w.classList.add(b.dataset.mod);
+  }));
+  document.querySelectorAll('.gunsekme span:not(.ipucu)').forEach(g => g.addEventListener('click', () => {
+    document.querySelectorAll('.gunsekme span:not(.ipucu)').forEach(x => x.classList.toggle('on', x === g));
   }));
   // Gün seçimi (yalnız görsel).
   document.querySelectorAll('.gun').forEach(g => g.addEventListener('click', () => {
