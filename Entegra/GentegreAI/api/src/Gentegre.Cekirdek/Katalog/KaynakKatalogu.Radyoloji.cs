@@ -147,6 +147,54 @@ public static partial class KaynakKatalogu
             new("durum",      "p.durum",     "mantik", "Aktif", Hizalama: "orta", Genislik: 70),
         });
 
+    // TELETIP GÖNDERİMLERİ (1304; kullanıcı 11.11.2026 "Teletıp ekranlarını yap", mockup teletip_mirth.html §3):
+    //   istem başına TEK satır (v_teletip_istem). Aşama rozeti: son ORM mesajının durumu; "Genel" sorunlu > kuyrukta >
+    //   tamam. Çift tık /teletip/:istemId kartı (mesaj izi, ham mesaj, yeniden gönder). TCKN listede maskeli.
+    private static readonly Dictionary<string, string> TeletipDurumRozet = new()
+    {
+        ["gönderildi"] = "olumlu", ["kuyrukta"] = "uyari", ["ulaşmadı"] = "uyari",
+        ["reddedildi"] = "hata", ["gidemez"] = "hata", ["atlandı"] = "gri",
+        ["sorunlu"] = "hata", ["tamam"] = "olumlu",
+    };
+    private const string TeletipDurumMetni =
+        "case {0} when 0 then 'kuyrukta' when 1 then 'gönderildi' when 2 then 'reddedildi' when 3 then 'gidemez' " +
+        "when 4 then 'atlandı' when 5 then 'ulaşmadı' else '' end";
+
+    private static KaynakTanimi TeletipGonderim() => new(
+        Ad: "teletip-gonderim",
+        YetkiKodu: "radyoloji.teletip",
+        Kaynak: "public.v_teletip_istem t",
+        SubeKolonu: "t.sube_id",
+        VarsayilanSirala: "t.genel_durum desc, t.son_kayit desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",          "t.id",            "sayi",  "İstem Id",   Varsayilan: false),
+            new("kabul",       "t.kabul",         "tarih", "Kabul",      Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("accessionNo", "t.accession_no",  "metin", "Accession",  Genislik: 130),
+            new("modaliteAdi", RadyolojiIfadeleri.ModaliteAdi("t.modalite"), "metin", "Mod.", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 70, Filtrelenebilir: false),
+            new("hastaAdi",    "t.hasta_adi",     "metin", "Hasta",      Genislik: 180),
+            new("tckn",        "t.tckn_maskeli",  "metin", "TCKN",       Genislik: 120, Filtrelenebilir: false, Siralanabilir: false),
+            new("tetkikAdi",   "t.tetkik_adi",    "metin", "Tetkik",     Genislik: 220),
+            new("sutKodu",     "t.sut_kodu",      "metin", "SUT",        Genislik: 80),
+            new("loinc",       "t.loinc",         "metin", "LOINC",      Genislik: 80),
+            new("istem",       string.Format(TeletipDurumMetni, "t.nw_durum"), "metin", "İstem (NW)", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
+            new("sonEmir",     "case t.son_emir when 1 then 'NW' when 2 then 'XO' when 3 then 'CA' else '' end",
+                                                  "metin", "Son Emir",   Hizalama: "orta", Genislik: 80),
+            new("sonDurum",    string.Format(TeletipDurumMetni, "t.son_durum"), "metin", "Son Mesaj", Hizalama: "orta",
+                                                                          Bicim: "rozet", Genislik: 110, RozetSiniflari: TeletipDurumRozet),
+            new("genel",       "case t.genel_durum when 3 then 'sorunlu' when 2 then 'kuyrukta' when 1 then 'tamam' else 'atlandı' end",
+                                                  "metin", "Genel",      Hizalama: "orta", Bicim: "rozet", Genislik: 90,
+                                                                          RozetSiniflari: TeletipDurumRozet),
+            new("genelDurum",  "t.genel_durum",   "kod",   "Genel Kod",  Varsayilan: false),
+            new("nwDurum",     "t.nw_durum",      "kod",   "NW Kod",     Varsayilan: false),
+            new("sonHata",     "t.son_hata",      "metin", "Sorun",      Bicim: "uyari", Genislik: 320),
+            new("sonAck",      "t.son_ack",       "metin", "ACK",        Hizalama: "orta", Genislik: 60),
+            new("mesajSayisi", "t.mesaj_sayisi",  "sayi",  "Mesaj",      Hizalama: "sag", Genislik: 60),
+            new("sonDeneme",   "t.son_deneme",    "tarih", "Son Deneme", Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+        });
+
     private static KaynakTanimi RadyolojiIstem() => new(
         Ad: "radyoloji-istem",
         // DAR YETKI (796): calisma listesi `radyoloji-istem` yetkisine bagli,

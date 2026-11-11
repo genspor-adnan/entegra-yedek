@@ -10,6 +10,7 @@ import { KaynakArama } from '../bilesenler/KaynakArama';
 import { HastaSeridi } from '../bilesenler/belge/basvuru/HastaSeridi';
 import { TarafArama } from '../bilesenler/TarafArama';
 import { PacsGoruntuleri } from '../bilesenler/radyoloji/PacsGoruntuleri';
+import { TeletipSeridi } from '../bilesenler/radyoloji/TeletipSeridi';
 import { yerelZamanDamgasi } from './liste/zaman';
 
 /**
@@ -275,6 +276,11 @@ export function RadyolojiIstemKarti() {
           </div>
         ))}
       </div>
+
+      {/* TELETIP ŞERİDİ (1304, mockup teletip_mirth.html §6): Bakanlık mesajları tek satırda; Teletıp kapalı
+          kurumda çizilmez. Ayrıntı gönderim kartını ayrı sekmede açar. */}
+      {istemId > 0 && <TeletipSeridi istemId={istemId} yenile={N(k, 'durum')}
+        ac={() => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/teletip/${istemId}`); else git(`/teletip/${istemId}`) }} />}
 
       <div className="rik-govde">
         <div>

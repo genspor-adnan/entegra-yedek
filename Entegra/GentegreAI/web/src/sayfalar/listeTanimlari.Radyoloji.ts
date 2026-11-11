@@ -50,6 +50,25 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     menuSira: 10,
   },
   {
+    // TELETIP GÖNDERİMLERİ (1304; kullanıcı 11.11.2026 "Teletıp ekranlarını yap", mockup teletip_mirth.html §3):
+    //   istem başına tek satır - Bakanlık'a giden ORM mesajlarının durumu. Çift tık gönderim kartı (/teletip/:istemId,
+    //   özel kart: mesaj izi, ham HL7, ne yapmalı, yeniden gönder, önizleme). Varsayılan çip "Sorunlu": günün işi
+    //   reddedilen / gidemez mesajlar.
+    kaynak: 'teletip-gonderim', rota: 'teletip', baslik: 'Teletıp Gönderimleri',
+    yol: 'Radyoloji › Teletıp Gönderimleri',
+    kartYolu: '/teletip', kartBaslik: 'Teletıp Gönderimi', kartIc: '🏛', ozelKart: true,
+    tarihAlani: 'kabul',
+    cipler: [
+      { ad: 'Sorunlu',  filtre: { alan: 'genelDurum', op: 'esit', deger: 3 } },
+      { ad: 'Kuyrukta', filtre: { alan: 'genelDurum', op: 'esit', deger: 2 } },
+      { ad: 'Tamam',    filtre: { alan: 'genelDurum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAd: 'Teletıp Gönderimleri', ic: '🏛', yetkiKodu: 'radyoloji.teletip',
+    menuSira: 55,
+  },
+  {
     // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
     //   Sablon tetkike baglanir; rapor ekrani varsayilani kendiliginden yukler.
     kaynak: 'radyoloji-sablon', rota: 'radyoloji-sablon',

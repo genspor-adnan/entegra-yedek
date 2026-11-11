@@ -282,6 +282,7 @@ public static partial class KaynakKatalogu
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
+        Ekle(TeletipGonderim());
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
         Ekle(RadyolojiCihaz());

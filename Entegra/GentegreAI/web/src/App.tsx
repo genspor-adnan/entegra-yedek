@@ -131,6 +131,7 @@ const GozUniteGunOzeti = tembel(() => import('./sayfalar/goz/GozUniteGunOzeti'),
 const BelgeYazisi = tembel(() => import('./sayfalar/BelgeYazisi'), 'BelgeYazisi');
 const ServisCizelge = tembel(() => import('./sayfalar/ServisCizelge'), 'ServisCizelge');
 const DisHekimPlan = tembel(() => import('./sayfalar/DisHekimPlan'), 'DisHekimPlan');
+const TeletipGonderimKarti = tembel(() => import('./sayfalar/TeletipGonderimKarti'), 'TeletipGonderimKarti');
 const SahaPerformans = tembel(() => import('./sayfalar/performans/SahaPerformans'), 'SahaPerformans');
 const ArizaBildir = tembel(() => import('./sayfalar/ariza/ArizaBildir'), 'ArizaBildir');
 const Taleplerim = tembel(() => import('./sayfalar/Taleplerim'), 'Taleplerim');
@@ -442,6 +443,8 @@ function Yollar() {
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}
         {yetki('radyoloji-istem') && <Route path="/radyoloji/:id" element={<RadyolojiIstemKarti />} />}
+        {/* TELETIP GÖNDERİM KARTI (1304): istem başına Bakanlık mesaj izi. */}
+        {yetki('radyoloji.teletip') && <Route path="/teletip/:id" element={<TeletipGonderimKarti />} />}
         {/* Rapor CIKTISI (303): hastaya verilen belge - yazma ekranindan ayri
             sayfa, yazdirma tarayicinin kendi diyalogu. */}
         {yetki('radyoloji') && <Route path="/radyoloji/cikti/:id" element={<RadyolojiRaporCikti />} />}

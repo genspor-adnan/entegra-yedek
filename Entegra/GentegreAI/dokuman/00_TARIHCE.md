@@ -336,6 +336,21 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   verir. 1303: ORM veri fonksiyonu SUT'u ORU ile aynı yoldan çözer (`fn_hizmet_sut_kodu` + `skrs_sut`), modalite
   `fn_rad_modalite_kod`. Testler: ORU / çözümleyici / MLLP / ORM / telerad / Teletıp ORM 153/153; K1 üzerinden ORU AA,
   geri çözüm accession / SKRS / TCKN / dosya doğru. 1303 dev, test, UNIVERSE, KOSUYOLU'da.
+- **Teletıp ekranları (db/1304; kullanıcı: "Teletıp ekranlarını yap", mockup teletip_mirth.html §3 / §4 / §6):**
+  * **Teletıp Gönderimleri** listesi (Radyoloji menüsü, kaynak `teletip-gonderim`, görünüm `v_teletip_istem`): istem
+    başına tek satır - kabul, accession, modalite, hasta, maskeli TCKN, tetkik, SUT, LOINC, İstem (NW) / Son Mesaj / Genel
+    rozetleri, son sorun, ACK; çipler Sorunlu / Kuyrukta / Tamam / Tümü.
+  * **Teletıp Gönderim Kartı** (`/teletip/:istemId`, özel kart): istem bandı, mesaj izi (NW / XO / CA satırları; durum,
+    deneme, ACK, kontrol no, sorun, "Yeniden gönder"), seçili mesajın ham HL7'si + ACK'i, "Ne yapmalı" (durumuna göre
+    yönerge + eksik listesi), "Önizle / Eksikler" (şu anki veriyle mesaj, göndermez), İstem Kartı'na geçiş.
+  * **Radyoloji istem kartı Teletıp şeridi**: mesajlar tek satırda (NW ✓ / ✖ + durum + saat), sorunluysa kırmızı
+    zemin; Teletıp kapalı kurumda ve iz yoksa çizilmez; "ayrıntı" kartı ayrı sekmede açar (ekran yetkisi varsa).
+  * Yetki `radyoloji.teletip` (liste, kart, ham mesaj, yeniden gönder, önizleme); `radyoloji` yetkisi olan rollere aynı
+    haklarla, rol 1'e tam. Şerit için `radyoloji` görme yeter. Rehber ekranı eklendi.
+  * Doğrulama: web tsc + 1133 vitest; API katalog / yetki / menü / Teletıp 104/104; tarayıcıda (yeni API 5199 + vite
+    5174, dev'de Teletıp geçici açık) liste 2 satır "gidemez", kart eksikleri ve önizlemeyi, şerit "NW ✖ gidemez"i
+    gösterdi, konsol hatası yok; dev ayarları ve test kuyruk satırları geri alındı. Henüz yok: Mirth pano (§2, Mirth
+    REST istatistikleri), kurum Teletıp ayar ekranı (§5; ayarlar şimdilik referans tablosunda).
 
 ### 10.11.2026
 

@@ -98,6 +98,7 @@ import { aktarimEslemeUclari } from './uclar/aktarimEsleme';
 import { servisUclari } from './uclar/servis';
 import { disHekimUclari } from './uclar/disHekim';
 import { dicomUclari } from './uclar/dicom';
+import { teletipUclari } from './uclar/teletip';
 import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
 import { kasaUclari } from './uclar/kasa';
@@ -115,6 +116,7 @@ export type {
 export const api = {
   ...kimlikUclari,
   ...dicomUclari,
+  ...teletipUclari,
   ...klinikKaliteUclari,
   ...enabizUclari,
   ...bzbhUclari,

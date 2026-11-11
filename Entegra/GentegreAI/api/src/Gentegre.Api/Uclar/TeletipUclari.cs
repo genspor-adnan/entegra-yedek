@@ -20,7 +20,8 @@ public static class TeletipUclari
     {
         var grup = yol.MapGroup("/api/teletip").WithTags("Teletıp").RequireAuthorization();
 
-        // İstemin gönderimleri (eskiden yeniye): emir, durum, deneme, ACK, hata.
+        // İstemin gönderimleri (eskiden yeniye): emir, durum, deneme, ACK, hata. `radyoloji` görme yeter - istem
+        //   kartındaki şerit bunu okur; ham mesaj / yeniden gönder / önizleme ekran yetkisi (radyoloji.teletip) ister.
         grup.MapGet("/istem/{istemId:int}", async (int istemId, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -31,14 +32,27 @@ public static class TeletipUclari
                        son_deneme as "sonDeneme", sonraki_deneme as "sonrakiDeneme"
                   from public.teletip_gonderim where istem_id = @p0 order by id
                 """, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
-            return Results.Ok(new { aktif = await AktifAsync(veri, iptal), satirlar });
+            // Kart başlığı: istemin kimliği (istem silinmişse yok).
+            var istem = (await veri.ListeAsync("""
+                select i.id, i.accession_no as "accessionNo", i.durum, i.hasta_id as "hastaId",
+                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi",
+                       coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon) as "tetkikAdi",
+                       public.fn_rad_modalite_kod(i.modalite) as modalite,
+                       coalesce(i.kabul_tarihi, i.ekleme_tarihi) as kabul
+                  from public.radyoloji_istem i
+                  left join public.taraf h on h.id = i.hasta_id
+                  left join public.hizmet hz on hz.id = i.hizmet_id
+                 where i.id = @p0
+                """, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal)).FirstOrDefault();
+            return Results.Ok(new { aktif = await AktifAsync(veri, iptal), istem, satirlar,
+                                    detayYetkisi = baglam.Yetkiler.Var("radyoloji.teletip", Islem.Gor) });
         });
 
         // Ham mesaj + ACK (kart: mesaj izi). Hasta kimliği içerir - radyoloji görme yetkisi.
         grup.MapGet("/gonderim/{id:long}/mesaj", async (long id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Gor);
+            baglam.YetkiIste("radyoloji.teletip", Islem.Gor);
             var s = await veri.TekAsync("select mesaj, yanit from public.teletip_gonderim where id = @p0", [id],
                 o => new { mesaj = o.Metin("mesaj").Replace("\r", "\n"), yanit = o.Metin("yanit").Replace("\r", "\n") }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Gönderim bulunamadı.");
@@ -50,7 +64,7 @@ public static class TeletipUclari
                                                          HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            baglam.YetkiIste("radyoloji.teletip", Islem.Degistir);
             var n = await veri.CalistirAsync(
                 "update public.teletip_gonderim set durum = 0, sonraki_deneme = now() where id = @p0 and durum in (0, 2, 3, 5)", [id], iptal);
             if (n == 0) throw GentegreHatasi.Dogrulama("Bu gönderim yeniden denenemez (gönderilmiş ya da atlanmış).");
@@ -62,7 +76,7 @@ public static class TeletipUclari
         grup.MapGet("/istem/{istemId:int}/onizle", async (int istemId, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Gor);
+            baglam.YetkiIste("radyoloji.teletip", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var json = await b.TekDegerAsync<string>("select public.fn_teletip_orm_verisi(@p0)::text", null, [istemId], iptal)
                        ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
