@@ -242,6 +242,11 @@ başlığında … Listesi olsun".
   istemine bağlı olmayan görüntüler de böyle bulunur. Demo hasta GENTEGRE DEMO dev DB'de (H-000084) ve KOSUYOLU'da
   (dosya 00000003, SQL ile - admin parolası bilinmiyor); PACS'taki 5 demo çalışma (BT/MR/US/XR/çok kareli MR,
   PatientName `GENTEGRE^DEMO^*`) sekmede listelendi.
+- **PACS Görüntüleri hasta kartından radyoloji istem kartına taşındı (kullanıcı):** `bilesenler/radyoloji/PacsGoruntuleri.tsx`
+  istem kartında "Çekim / Görüntü" bloğunun altında (kayıtlı istem + hasta belliyken; hastanın PACS'taki tüm
+  çalışmaları, istemin kendi çalışması - study_uid ya da accession eşleşen - vurgulu "✓ bağlı"); eşleşmeyen çalışma
+  **🔗 Bağla** ile isteme yazılır (`POST /api/dicom/bagla` {istemId, studyUid}; radyoloji değiştir) - sonra "🖼 Görüntüle"
+  ve rapor o çalışmayı açar. Hasta kartındaki sekme kaldırıldı.
 
 ### 10.11.2026
 

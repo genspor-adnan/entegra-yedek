@@ -1,4 +1,4 @@
-import { istek } from '../cekirdek';
+import { gonder, istek } from '../cekirdek';
 
 /**
  * DICOM GÖRÜNTÜLEME (kullanıcı 11.11.2026: ClearCanvas ImageServer + OHIF). Sunucu çalışmayı bulur (study_uid ya da
@@ -10,6 +10,8 @@ export interface PacsCalisma {
 }
 
 export const dicomUclari = {
+  /** PACS çalışmasını radyoloji istemine bağlar (study_uid). */
+  dicomBagla: (g: { istemId: number; studyUid: string }) => gonder<{ mesaj: string }>('/api/dicom/bagla', g),
   /** Hastanın PACS'taki çalışmaları (ad / kimlik eşlemesi) - hasta kartı "PACS Görüntüleri" sekmesi. */
   dicomHastaCalismalari: (hastaId: number) =>
     istek<{ aktif: boolean; calismalar: PacsCalisma[] }>(`/api/dicom/hasta/${hastaId}`),

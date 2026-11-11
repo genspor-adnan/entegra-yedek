@@ -16,6 +16,8 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class DicomUclari
 {
+    public sealed record DicomBaglaIstegi(int IstemId, string StudyUid);
+
     public static void DicomUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/dicom").WithTags("DICOM / OHIF");
@@ -85,6 +87,22 @@ public static class DicomUclari
                 };
             }).ToList();
             return Results.Ok(new { aktif = true, calismalar, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ------------------------------------------------ çalışmayı isteme bağla (oturumlu) --
+        //   İstem kartı "PACS Görüntüleri" bloğu: accession eşleşmeyen (cihaz farklı yazmış, eski görüntü) çalışma elle
+        //   bağlanır - study_uid yazılır, "🖼 Görüntüle" ve rapor o çalışmayı açar.
+        grup.MapPost("/bagla", async (DicomBaglaIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Degistir);
+            if (istek.IstemId <= 0 || string.IsNullOrWhiteSpace(istek.StudyUid))
+                throw GentegreHatasi.Dogrulama("İstem ve çalışma gerekli.", new AlanHatasi("studyUid", "Zorunlu."));
+            var sayi = await veri.CalistirAsync(
+                "update public.radyoloji_istem set study_uid = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0",
+                [istek.IstemId, istek.StudyUid.Trim(), baglam.KullaniciId], iptal);
+            if (sayi == 0) throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+            return Results.Ok(new { mesaj = "Çalışma isteme bağlandı.", izlemeNo = baglam.IzlemeNo });
         });
 
         // ------------------------------------------------ OHIF dicomjson manifesti (jetonlu, anonim) --

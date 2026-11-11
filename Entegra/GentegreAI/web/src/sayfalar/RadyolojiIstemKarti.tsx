@@ -9,6 +9,7 @@ import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import { HastaSeridi } from '../bilesenler/belge/basvuru/HastaSeridi';
 import { TarafArama } from '../bilesenler/TarafArama';
+import { PacsGoruntuleri } from '../bilesenler/radyoloji/PacsGoruntuleri';
 import { yerelZamanDamgasi } from './liste/zaman';
 
 /**
@@ -401,6 +402,16 @@ export function RadyolojiIstemKarti() {
               </div>
             </>}
           </div>
+
+          {/* PACS GÖRÜNTÜLERİ (kullanıcı 11.11.2026: hasta kartından buraya taşındı): hastanın PACS'taki tüm çalışmaları,
+              istemin kendi çalışması vurgulu; "Bağla" study_uid yazar, "Aç" OHIF. Yalnız kayıtlı istemde ve hasta belliyken. */}
+          {istemId > 0 && N(k, 'hastaId') > 0 && yetki('radyoloji', 'gor') && (
+            <div className="rik-blok">
+              <h4>PACS Görüntüleri <span className="rik-ip" style={{ marginLeft: 0 }}>· hastanın PACS'taki çalışmaları</span></h4>
+              <PacsGoruntuleri hastaId={N(k, 'hastaId')} istemId={istemId} vurguStudyUid={M(k, 'studyUid')}
+                               vurguAccession={M(k, 'accessionNo')} bagliDegisti={() => void yukle()} />
+            </div>
+          )}
         </div>
 
         {/* İSTEM KÂĞIDI / DIŞ KURUM BELGELERİ (310 kaynağı "radyoloji-istem") - sağ sütun; radyolog buradan bakar. */}
