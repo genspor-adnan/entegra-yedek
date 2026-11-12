@@ -1,4 +1,4 @@
-import type { KolonMeta, Kosul } from '../api/sozlesme';
+import type { KolonMeta, Kosul, KosulOp } from '../api/sozlesme';
 
 /**
  * GRID SORGU KOSULLARI - hizli arama, filtre satiri, tarih araligi ve bunlarin
@@ -30,11 +30,40 @@ export function filtreSatiriKosulu(
 {
   const kosullar: Kosul[] = [];
   kolonlar.forEach(k => {
-    if (k.tip !== 'metin' && k.tip !== 'kod') return;
     const v = (filtreDeger[k.ad] ?? '').trim();
-    if (v) kosullar.push({ alan: k.ad, op: 'icerir', deger: v });
+    if (!v) return;
+    if (k.tip === 'metin' || k.tip === 'kod') kosullar.push({ alan: k.ad, op: 'icerir', deger: v });
+    else if (SAYISAL_TIPLER.has(k.tip)) { const s = sayiFiltresi(k.ad, v); if (s) kosullar.push(s) }
   });
   return kosullar.length ? { op: 'and', kosullar } : undefined;
+}
+
+/** Başlık filtresi sayısal kutu çizen kolon tipleri. */
+export const SAYISAL_TIPLER = new Set(['sayi', 'para', 'ondalik']);
+
+/**
+ * SAYISAL BAŞLIK FİLTRESİ (kullanıcı 12.11.2026: "stok listesinde kalan sütununda … filtreleme yapamıyorum"): kutu
+ * ">0", "<5", ">=10", "<=3", "<>0" / "!=0", "10..20" (arası, iki uç dahil) ve düz sayıyı (eşit) anlar; ondalık virgül
+ * de olur ("2,5"). Anlaşılmayan ifade süzmez (null) - yazarken yarım ifade listeyi boşaltmasın.
+ */
+export function sayiFiltresi(alan: string, ifade: string): Kosul | null {
+  const s = ifade.replace(/\s+/g, '');
+  const sayi = (x: string) => {
+    if (!/^-?\d+([.,]\d+)?$/.test(x)) return null;
+    return Number(x.replace(',', '.'));
+  };
+  const aralik = s.match(/^(-?[\d.,]+)\.\.(-?[\d.,]+)$/);
+  if (aralik) {
+    const a = sayi(aralik[1]), b = sayi(aralik[2]);
+    return a === null || b === null ? null : { alan, op: 'arasinda', deger: [Math.min(a, b), Math.max(a, b)] };
+  }
+  const m = s.match(/^(>=|<=|<>|!=|>|<|=)?(.*)$/);
+  const op = m?.[1] ?? '=';
+  const deger = sayi(m?.[2] ?? '');
+  if (deger === null) return null;
+  const islecler: Record<string, KosulOp> = { '>': 'buyuk', '>=': 'buyukEsit', '<': 'kucuk', '<=': 'kucukEsit',
+                                             '<>': 'esitDegil', '!=': 'esitDegil', '=': 'esit' };
+  return { alan, op: islecler[op] ?? 'esit', deger };
 }
 
 /**

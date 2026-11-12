@@ -4,6 +4,7 @@ import { bicimle } from '../bicim';
 import { durumRozeti, ikonHucre, rozetHucre, yuzdeRozeti } from '../gridHucre';
 import { agacAdi } from './agacDizim';
 import { satirHucre } from './satirHucre';
+import { SAYISAL_TIPLER } from '../gridSorgu';
 import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
 
 /**
@@ -74,6 +75,15 @@ export function GridTablo(p: GridTabloProps) {
             {(k.tip === 'metin' || k.tip === 'kod') && k.filtrelenebilir && (
               <input
                 placeholder="icerir…"
+                onChange={e => filtreSatiriDegisti(k.ad, e.target.value)}
+              />
+            )}
+            {/* SAYISAL KOLON (12.11.2026): >0 · <5 · 10..20 · =3 (bkz. gridSorgu.sayiFiltresi). */}
+            {SAYISAL_TIPLER.has(k.tip) && k.filtrelenebilir && (
+              <input
+                placeholder=">0 · 10..20"
+                title={c('Sayı filtresi: >0, <5, >=10, <=3, <>0, 10..20 (arası) ya da sayı (eşit)')}
+                style={{ textAlign: 'right' }}
                 onChange={e => filtreSatiriDegisti(k.ad, e.target.value)}
               />
             )}

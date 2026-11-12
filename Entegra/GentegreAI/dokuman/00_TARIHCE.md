@@ -800,6 +800,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   yapamıyorum"):** `KaynakKatalogu.Stok` kalan kolonundaki `Siralanabilir: false, Filtrelenebilir: false` kalktı. Alt sorgu
   stok_durum birincil anahtarından okur; ~1000 stokta sıralama 3-8 ms, süzme 3-27 ms (UNIVERSE / ZONE). API'de kalan
   azalan sıralama ve "kalan > 0" süzmesi doğru. Kalem arama penceresi de aynı kaynaktan yararlanır.
+  * Ekranda süzme yoktu (kullanıcı: "filtrelemeyi de ekle", "kalan kolonuna"): başlık filtre satırı yalnız metin / kod
+    kolonlarına kutu çiziyordu. Artık sayı / tutar / ondalık kolonlarında da kutu (`GridTablo`); `gridSorgu.sayiFiltresi`
+    ">0", "<5", ">=10", "<=3", "<>0", "10..20" (arası) ve düz sayıyı (eşit) anlar, ondalık virgül olur, yarım ifade
+    süzmez. Bütün listelerde geçerli (fiyat, KDV, tutar…). Tarayıcıda stok listesi Kalan ">0": 50 → 1 satır. Test
+    `sayiFiltresi.test.ts`.
 
 ### 10.11.2026
 
