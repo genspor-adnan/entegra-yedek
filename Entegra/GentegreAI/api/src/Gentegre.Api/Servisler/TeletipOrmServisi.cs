@@ -58,7 +58,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
     public async Task<bool> AktifMiAsync(CancellationToken iptal)
     {
         await using var b = await veri.AcAsync(iptal);
-        return await AyarDeposu.MetinAsync(b, null, "teletip.aktif", "0", iptal) == "1";
+        return await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);   // 1317: herhangi bir şubede
     }
 
     /// <summary>Tek satırı dener (işçi ve "Yeniden Gönder" ucu). Satır kilitlenir; aynı anda iki deneme olmaz.</summary>
@@ -90,9 +90,20 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, 4, satir.Deneme, "",
                 "Dış kurumun teleradyoloji işi - Bakanlık bildirimi Teleradyoloji › Teslim Kuyruğu'ndan (1315).", "", "", iptal);
 
-        var adres = await AyarDeposu.MetinAsync(b, islem, "teletip.hl7_adres", "", iptal);
-        var firma = await AyarDeposu.MetinAsync(b, islem, "teletip.firma_kodu", "", iptal);
-        var kodlama = await AyarDeposu.MetinAsync(b, islem, "teletip.encoding", "UTF8", iptal);
+        // 1317: ŞUBENİN TeleRadyoloji hesabı (şube satırı → kurum geneli; hesap modeli yoksa eski teletip.* ayarları) ve
+        //   şubenin Bakanlık kimliği (kurum profili - tek kaynak). Hesap kapalıysa satır bekler (hesap açılınca gider).
+        var ayarJson = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", islem, [satir.Sube], iptal) ?? "";
+        if (ayarJson.Length == 0)
+            return await YazAsync(b, islem, id, 5, satir.Deneme, "",
+                "Bu şubede aktif TeleRadyoloji hesabı yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
+                sonraki: TimeSpan.FromMinutes(30));
+        var hesap = JsonSerializer.Deserialize<TeleRadyolojiHesabi>(ayarJson, JsonAyar) ?? new TeleRadyolojiHesabi();
+        var kimlik = await b.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", islem, [satir.Sube],
+            o => new[] { o.IsDBNull(0) ? "" : o.GetString(0), o.IsDBNull(1) ? "" : o.GetString(1), o.IsDBNull(2) ? "" : o.GetString(2) }, iptal)
+            ?? ["", "", ""];
+        var adres = hesap.Hl7Adres;
+        var firma = hesap.FirmaKodu;
+        var kodlama = hesap.Encoding;
 
         // VERİ: CA anlık görüntüden (istem iptal / silinmiş olabilir), NW / XO güncel istemden.
         var json = satir.Veri.Length > 0 ? satir.Veri
@@ -111,18 +122,21 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             Encoding = kodlama.Length > 0 ? kodlama : "UTF8",
             KontrolNo = $"TT{id}-{satir.Deneme + 1}",
         };
+        // Kurum kimliği şubenin profilinden (CA anlık görüntüsündeki eski kimlik de güncellenir); MEDULA tesis profilde
+        //   yoksa istemin provizyonundaki tesis kodu (ORM verisinin yedeği) kalır.
+        v = v with
+        {
+            KurumAdi = kimlik[0].Length > 0 ? kimlik[0] : v.KurumAdi,
+            KurumSkrs = kimlik[1],
+            MedulaTesisKodu = kimlik[2].Length > 0 ? kimlik[2] : v.MedulaTesisKodu,
+            SubeNo = hesap.SubeNo.Length > 0 ? hesap.SubeNo : v.SubeNo,
+        };
 
         if (satir.Kanal == 3)
-        {
-            var dozAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.doz_adres", "", iptal);
-            return await DozGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, dozAdres, iptal);
-        }
+            return await DozGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, hesap.DozAdres, iptal);
         if (satir.Kanal == 2)
-        {
-            var xdsAdres = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_adres", "", iptal);
-            var hastaOid = await AyarDeposu.MetinAsync(b, islem, "teletip.xds_hasta_oid", XdsZarfi.VarsayilanHastaOid, iptal);
-            return await KosGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, xdsAdres, hastaOid, iptal);
-        }
+            return await KosGonderAsync(b, islem, id, satir.Deneme, satir.IstemId, v, hesap.XdsAdres,
+                                        hesap.XdsHastaOid.Length > 0 ? hesap.XdsHastaOid : XdsZarfi.VarsayilanHastaOid, iptal);
 
         string mesaj;
         if (oruMu)
@@ -146,7 +160,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             mesaj = OrmUretici.Uret(v);
         }
         if (adres.Length == 0)
-            return await YazAsync(b, islem, id, 5, satir.Deneme, "", "Teletıp HL7 adresi (teletip.hl7_adres) tanımlı değil.", "", "", iptal,
+            return await YazAsync(b, islem, id, 5, satir.Deneme, "", "TeleRadyoloji hesabında K1 HL7 adresi yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
                                   sonraki: TimeSpan.FromMinutes(30));
 
         var s = await mllp.GonderAsync(adres, mesaj, v.Encoding, false, 40, iptal);
@@ -191,7 +205,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         if (eksik.Count > 0)
             return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", eksik.Distinct()), "", "", iptal);
         if (xdsAdres.Length == 0)
-            return await YazAsync(b, islem, id, 5, deneme, "", "Teletıp KOS adresi (teletip.xds_adres, Mirth K2) tanımlı değil.", "", "", iptal,
+            return await YazAsync(b, islem, id, 5, deneme, "", "TeleRadyoloji hesabında K2 KOS adresi yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
                                   sonraki: TimeSpan.FromMinutes(30));
 
         var simdi = DateTime.UtcNow;
@@ -199,7 +213,8 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         var kos = KosUretici.Baytlar(KosUretici.Uret(v, calisma!, kurum, v.Zaman, kosSop));
         var modalite = calisma!.Seriler.Select(x => x.Modalite).FirstOrDefault(x => x.Length > 0) ?? v.Modalite;
         var zarf = XdsZarfi.Kur(kos, kosSop, studyUid, v, kurum, xdsAdres, simdi, hastaOid, modalite);
-        var ikonsuz = calisma.Seriler.Count(x => x.Ikon is null);
+        // Görüntüsüz seriler (doz SR, KO, PR) küçük resim taşımaz - eksik sayılmaz.
+        var ikonsuz = calisma.Seriler.Count(x => x.Ikon is null && x.Modalite is not ("SR" or "KO" or "PR"));
         try
         {
             var istemci = httpFabrika.CreateClient("teletip-xds");
@@ -273,7 +288,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         if (eksikKurum.Count > 0)
             return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", eksikKurum.Distinct()), "", "", iptal);
         if (dozAdres.Length == 0)
-            return await YazAsync(b, islem, id, 5, deneme, "", "Teletıp doz adresi (teletip.doz_adres, Mirth K3) tanımlı değil.", "", "", iptal,
+            return await YazAsync(b, islem, id, 5, deneme, "", "TeleRadyoloji hesabında K3 doz adresi yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
                                   sonraki: TimeSpan.FromMinutes(30));
 
         var mesajlar = new List<string>(); var uyarilar = new List<string>(); var sonSop = "";
@@ -459,4 +474,23 @@ public sealed class TeletipOrmIscisi(IServiceScopeFactory kapsam, ILogger<Teleti
             catch (OperationCanceledException) { break; }
         }
     }
+}
+
+/// <summary>
+/// ŞUBENİN TELERADYOLOJİ HESABI (1317, fn_teletip_hesap_ayar): entegrasyon hesabı (kod TELERADYOLOJI) - firma kodu, Mirth
+/// K1 / K2 / K3 adresleri, karakter seti, şube no, XDS hasta OID. Hesap modeli yoksa eski teletip.* ayarları.
+/// </summary>
+public sealed record TeleRadyolojiHesabi
+{
+    public int HesapId { get; init; }
+    public string HesapAd { get; init; } = "";
+    public bool Test { get; init; }
+    public string FirmaKodu { get; init; } = "";
+    public string Hl7Adres { get; init; } = "";
+    public string XdsAdres { get; init; } = "";
+    public string DozAdres { get; init; } = "";
+    public string Encoding { get; init; } = "UTF8";
+    public string SubeNo { get; init; } = "1";
+    public string XdsHastaOid { get; init; } = "";
+    public string MirthHesapId { get; init; } = "";
 }

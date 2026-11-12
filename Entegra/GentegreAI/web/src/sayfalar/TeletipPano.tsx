@@ -10,9 +10,9 @@ import { c } from '../dil/ceviri';
 
 /**
  * TELETIP PANOSU (kullanıcı 11.11.2026: "Mirth panosunu yap"; mockup Ekranlar/Radyoloji/teletip_mirth.html §2).
- * Üst: Mirth / Teletıp HL7 bağlantı durumu. Özet: günün istem (NW) ve güncelleme / iptal mesajları, kuyrukta bekleyen
+ * Üst: Mirth / TeleRadyoloji HL7 bağlantı durumu. Özet: günün istem (NW) ve güncelleme / iptal mesajları, kuyrukta bekleyen
  * (en eski kaç dk), reddedilen, gidemez. Kanal tablosu: Mirth REST'ten (gentegre_izleme kullanıcısı) durum + sayaçlar -
- * yalnız okunur; kanal durdur / başlat Mirth Administrator'da. Son olaylar: son 10 gönderim, çift tık istemin Teletıp
+ * yalnız okunur; kanal durdur / başlat Mirth Administrator'da. Son olaylar: son 10 gönderim, çift tık istemin TeleRadyoloji
  * kartı. Mirth erişilemezse DB bölümü yine çizilir. CSS öneki `ttp-`.
  */
 export function TeletipPano() {
@@ -37,7 +37,7 @@ export function TeletipPano() {
   const baglantiTesti = () => guvenli(async () => {
     const y = await api.teletipBaglantiTesti();
     setTest([
-      y.hl7.acik ? `✓ ${c('Teletıp HL7')} ${y.hl7.adres} (${y.hl7.sureMs} ms)` : `✖ ${c('Teletıp HL7')} ${y.hl7.adres || '—'}: ${y.hl7.hata}`,
+      y.hl7.acik ? `✓ ${c('TeleRadyoloji HL7')} ${y.hl7.adres} (${y.hl7.sureMs} ms)` : `✖ ${c('TeleRadyoloji HL7')} ${y.hl7.adres || '—'}: ${y.hl7.hata}`,
       !y.mirth.tanimli ? `– ${c('Mirth tanımlı değil')}` : y.mirth.erisilebilir
         ? `✓ Mirth ${y.mirth.surum} · ${y.mirth.kanalSayisi} ${c('kanal')}` : `✖ Mirth: ${y.mirth.hata}`,
     ].join('   '));
@@ -77,8 +77,8 @@ export function TeletipPano() {
           title={c('Reddedilen, gidemez ve ulaşmadı satırlarını şimdi yeniden dener')}>🔁 {c('Sorunluları Yeniden Gönder')}</button>
         <div className="ttp-sag">
           <span>Mirth {m.surum} {mirthRozet}</span>
-          <span>· {c('Teletıp HL7')} <code>{v.hl7Adres || '—'}</code></span>
-          {!v.aktif && <span className="rozet uyari">{c('Kurumda Teletıp kapalı')}</span>}
+          <span>· {c('TeleRadyoloji HL7')} <code>{v.hl7Adres || '—'}</code></span>
+          {!v.aktif && <span className="rozet uyari">{c('Kurumda TeleRadyoloji kapalı')}</span>}
         </div>
       </div>
       {test && <div className="ttp-test">{test}</div>}
@@ -116,7 +116,7 @@ export function TeletipPano() {
               ))}
             </tbody>
           </table>}
-        <div className="ttp-not">{c('Hatalı = Teletıp\'ın AE / AR yanıtı ya da ulaşılamayan hedef. Mirth otomatik tekrar etmez; tekrar Gentegre kuyruğundadır.')}</div>
+        <div className="ttp-not">{c('Hatalı = TeleRadyoloji\'nin AE / AR yanıtı ya da ulaşılamayan hedef. Mirth otomatik tekrar etmez; tekrar Gentegre kuyruğundadır.')}</div>
       </div>
 
       <div className="ttp-blok" data-testid="teletip-pano-wado">
@@ -143,7 +143,7 @@ export function TeletipPano() {
       </div>
 
       <div className="ttp-blok">
-        <h4>{c('Son olaylar')} <span className="ttp-ip">· {c('çift tık: Teletıp kartı')}</span></h4>
+        <h4>{c('Son olaylar')} <span className="ttp-ip">· {c('çift tık: TeleRadyoloji kartı')}</span></h4>
         {v.sonOlaylar.length === 0 ? <div className="ttp-ic ttp-soluk">{c('Henüz gönderim yok.')}</div>
           : <table className="ttp-tablo">
             <thead><tr><th>{c('Zaman')}</th><th>{c('Emir')}</th><th>{c('Durum')}</th><th>{c('Accession')}</th><th>{c('Hasta')}</th><th>ACK</th><th>{c('Sorun')}</th></tr></thead>
@@ -167,11 +167,11 @@ export function TeletipPano() {
 
 /** Kanal adı -> görevi (yayin/mirth/kanal-uret.js). */
 const KANAL_GOREV: Record<string, string> = {
-  TELETIP_HL7: 'K1 · HL7 ORM / ORU → Teletıp',
-  TELETIP_KOS: 'K2 · KOS / XDS → Teletıp',
+  TELETIP_HL7: 'K1 · HL7 ORM / ORU → TeleRadyoloji',
+  TELETIP_KOS: 'K2 · KOS / XDS → TeleRadyoloji',
   TELETIP_DOZ: 'K3 · RDSR → TELETIP_MGA',
   TELETIP_DURUM: 'K4 · durum → Gentegre',
-  TELETIP_SIMULATOR: 'yalnız dev · Teletıp benzetimi',
+  TELETIP_SIMULATOR: 'yalnız dev · TeleRadyoloji benzetimi',
   TELETIP_XDS_SIMULATOR: 'yalnız dev · XDS deposu benzetimi',
   TELETIP_MGA_SIMULATOR: 'yalnız dev · MGA doz alıcısı benzetimi',
 };

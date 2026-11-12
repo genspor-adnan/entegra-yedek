@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Xml.Linq;
+using Gentegre.Veri;
 using Microsoft.Extensions.Options;
 
 namespace Gentegre.Api.Servisler;
@@ -34,17 +35,66 @@ public sealed record MirthPanoSonucu(bool Tanimli, bool Erisilebilir, string Hat
 /// 401'de bir kez yeniden giriş yapılır. Kanal istatistikleri <c>GET /channels/statuses</c> (XML) - yalnız okunur,
 /// pano kanalı durdurmaz / başlatmaz (Mirth Administrator'ın işi).
 /// </summary>
-public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzleme> gunluk)
+public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzleme> gunluk, VeriKaynagi? veri = null)
 {
-    private readonly CookieContainer _cerez = new();
+    private CookieContainer _cerez = new();
     private readonly SemaphoreSlim _kilit = new(1, 1);
     private HttpClient? _http;
     private bool _oturumVar;
+    private MirthAyarlari _etkin = ayar.Value;
+    private string _anahtar = "";
+    private string _kaynak = "dosya";
+
+    /// <summary>
+    /// ETKİN AYAR (1317): Ayarlar › Entegrasyon'daki aktif MIRTH hesabı (kurum geneli önce; adres = url, kullanıcı,
+    /// şifre ŞİFRELİ alanda, ayarlar.sertifikaDogrula / zamanAsimiSn). Hesapta parola boşsa ortam değişkeni
+    /// (Mirth__Parola). Hesap yoksa dosya (Mirth bölümü) - eski kurulum bozulmaz. Ayar değişince oturum sıfırlanır.
+    /// </summary>
+    private async Task<MirthAyarlari> EtkinAsync(CancellationToken iptal)
+    {
+        var dosya = ayar.Value;
+        MirthAyarlari a = dosya; var kaynak = "dosya";
+        if (veri is not null)
+        {
+            try
+            {
+                var s = await veri.TekAsync("""
+                    select coalesce(url, ''), coalesce(kullanici_adi, ''), coalesce(sifre, ''),
+                           coalesce(ayarlar ->> 'sertifikaDogrula', ''), coalesce(ayarlar ->> 'zamanAsimiSn', ''), ad
+                      from public.entegrasyon_hesap
+                     where kod = 'MIRTH' and aktif = 1 and btrim(coalesce(url, '')) <> ''
+                     order by (sube_id is null) desc, test_mi, id limit 1
+                    """, null, o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.GetString(4), o.GetString(5) }, iptal);
+                if (s is not null)
+                {
+                    var parola = GizliMetin.Coz(s[2]);
+                    a = new MirthAyarlari
+                    {
+                        Url = s[0].Trim(), Kullanici = s[1].Length > 0 ? s[1] : dosya.Kullanici,
+                        Parola = parola.Length > 0 ? parola : dosya.Parola,
+                        SertifikaDogrula = s[3] is "true" or "1",
+                        ZamanAsimiSn = int.TryParse(s[4], out var z) && z > 0 ? z : dosya.ZamanAsimiSn,
+                    };
+                    kaynak = $"hesap: {s[5]}" + (parola.Length > 0 ? "" : " (parola ortamdan)");
+                }
+            }
+            catch (Exception h) when (h is not OperationCanceledException) { gunluk.LogWarning(h, "MIRTH hesabı okunamadı; dosyadaki ayar kullanılıyor."); }
+        }
+        var anahtar = $"{a.Url}|{a.Kullanici}|{a.Parola.GetHashCode()}|{a.SertifikaDogrula}|{a.ZamanAsimiSn}";
+        if (anahtar != _anahtar)
+        {
+            await _kilit.WaitAsync(iptal);
+            try { _http?.Dispose(); _http = null; _cerez = new(); _oturumVar = false; _anahtar = anahtar; _etkin = a; }
+            finally { _kilit.Release(); }
+        }
+        _kaynak = kaynak;
+        return a;
+    }
 
     private HttpClient Http()
     {
         if (_http is not null) return _http;
-        var a = ayar.Value;
+        var a = _etkin;
         var isleyici = new HttpClientHandler { CookieContainer = _cerez, UseCookies = true };
         if (!a.SertifikaDogrula && Uri.TryCreate(a.Url, UriKind.Absolute, out var kok))
             // Yalnız yapılandırılmış Mirth sunucusu için - başka bir ana bilgisayara bu istisna uygulanmaz.
@@ -56,15 +106,15 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         return _http;
     }
 
-    private string Kok => ayar.Value.Url.TrimEnd('/');
+    private string Kok => _etkin.Url.TrimEnd('/');
 
     private async Task GirisAsync(CancellationToken iptal)
     {
-        var a = ayar.Value;
+        var a = _etkin;
         using var govde = new FormUrlEncodedContent([new("username", a.Kullanici), new("password", a.Parola)]);
         using var y = await Http().PostAsync($"{Kok}/users/_login", govde, iptal);
         if (!y.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Mirth girişi başarısız ({(int)y.StatusCode}) - kullanıcı / parola (Mirth__Parola).");
+            throw new InvalidOperationException($"Mirth girişi başarısız ({(int)y.StatusCode}) - kullanıcı / parola ({_kaynak}).");
         _oturumVar = true;
     }
 
@@ -90,9 +140,9 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
     /// <summary>Kanal durumları. Mirth tanımsız / erişilemez ise hata metniyle boş liste (pano yine açılır).</summary>
     public async Task<MirthPanoSonucu> DurumAsync(CancellationToken iptal)
     {
-        var a = ayar.Value;
-        if (string.IsNullOrWhiteSpace(a.Url)) return new(false, false, "Mirth adresi tanımlı değil (Mirth:Url).", "", []);
-        if (string.IsNullOrEmpty(a.Parola)) return new(true, false, "Mirth parolası tanımlı değil (ortam değişkeni Mirth__Parola).", "", []);
+        var a = await EtkinAsync(iptal);
+        if (string.IsNullOrWhiteSpace(a.Url)) return new(false, false, "Mirth bağlantısı tanımlı değil (Ayarlar › Entegrasyon › Mirth).", "", []);
+        if (string.IsNullOrEmpty(a.Parola)) return new(true, false, "Mirth parolası tanımlı değil (Mirth hesabının şifresi ya da ortam değişkeni Mirth__Parola).", "", []);
         try
         {
             var surum = "";
@@ -122,15 +172,19 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
     }
 
     /// <summary>Panoda / ayar ekranında gösterilecek bağlantı bilgisi - parola DEĞİL, yalnız tanımlı mı.</summary>
-    public (string Url, string Kullanici, bool ParolaTanimli, bool SertifikaDogrula) Ozet() =>
-        (ayar.Value.Url, ayar.Value.Kullanici, !string.IsNullOrEmpty(ayar.Value.Parola), ayar.Value.SertifikaDogrula);
+    public async Task<(string Url, string Kullanici, bool ParolaTanimli, bool SertifikaDogrula, string Kaynak)> OzetAsync(CancellationToken iptal)
+    {
+        var a = await EtkinAsync(iptal);
+        return (a.Url, a.Kullanici, !string.IsNullOrEmpty(a.Parola), a.SertifikaDogrula, _kaynak);
+    }
 
     /// <summary>Mirth configuration map'ten "teletip_" ile başlayan anahtarlar (K1 hedefi vb.) - yalnız okunur.
     /// Mirth erişilemezse boş sözlük.</summary>
     public async Task<Dictionary<string, string>> TeletipHaritasiAsync(CancellationToken iptal)
     {
         var sonuc = new Dictionary<string, string>();
-        if (string.IsNullOrWhiteSpace(ayar.Value.Url) || string.IsNullOrEmpty(ayar.Value.Parola)) return sonuc;
+        var a = await EtkinAsync(iptal);
+        if (string.IsNullOrWhiteSpace(a.Url) || string.IsNullOrEmpty(a.Parola)) return sonuc;
         try
         {
             var x = XDocument.Parse(await GetXmlAsync("/server/configurationMap", iptal));

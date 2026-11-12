@@ -26,6 +26,7 @@ import { DenetimAraclari } from '../kys/denetim/kysDenetimKarti';
 import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
 import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
 import { PacsBaglantiSekmesi } from '../../bilesenler/kart/PacsBaglantiSekmesi';
+import { TeleradyolojiBaglantiSekmesi } from '../../bilesenler/kart/TeleradyolojiBaglantiSekmesi';
 import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
 import { SablonMetniSekmesi } from '../radyoloji/SablonMetniSekmesi';
 import { AlanPaketiCubugu } from '../radyoloji/AlanPaketleri';
@@ -224,6 +225,9 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
     ekSekmeler: b => [
       { anahtar: 'ozel:pacs', baslik: 'PACS Bağlantısı', yenideDe: true, kosulAlani: 'kod=PACS',
         ciz: e => <PacsBaglantiSekmesi e={e} kartId={kayitli(b.kartId) ? b.kartId : null} /> },
+      // TELERADYOLOJI (1317, mockup entegrasyon_teletip.html): şube başına Bakanlık gönderim hesabı.
+      { anahtar: 'ozel:teleradyoloji', baslik: 'TeleRadyoloji Bağlantısı', yenideDe: true, kosulAlani: 'kod=TELERADYOLOJI',
+        ciz: e => <TeleradyolojiBaglantiSekmesi e={e} kartId={kayitli(b.kartId) ? b.kartId : null} /> },
     ],
     sekmeSarmalayici: () => (baslik, icerik) => baslik !== 'Genel' ? icerik : (
       <>

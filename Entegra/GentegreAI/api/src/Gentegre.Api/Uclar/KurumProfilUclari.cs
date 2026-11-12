@@ -25,6 +25,9 @@ public static class KurumProfilUclari
         string? KimlikBicimi = null,
         string? KimlikDeseni = null,
         string? KimlikAciklama = null,
+        /// <summary>1317: SKRS kurum kodu ve Bakanlık'ta görünen ad (şube bazlı kurum kimliği).</summary>
+        string? SkrsKodu = null,
+        string? BakanlikAd = null,
         /// <summary>
         /// BU PROFILDE GECERLI ROLLER (786, kullanici: "profil sayfasinda altta
         /// her bir profil icin gecerli (aktif) rolleri isaretleyeyim.. ustte
@@ -135,7 +138,11 @@ public static class KurumProfilUclari
                 Devralindi: false,
                 KimlikBicimi: istek.KimlikBicimi ?? mevcut.KimlikBicimi,
                 KimlikDeseni: istek.KimlikDeseni ?? mevcut.KimlikDeseni,
-                KimlikAciklama: istek.KimlikAciklama ?? mevcut.KimlikAciklama);
+                KimlikAciklama: istek.KimlikAciklama ?? mevcut.KimlikAciklama,
+                // Devralınmış (şubenin satırı yok) profilde kurum geneli değer şubeye KOPYALANMAZ: kimlik boş kalır,
+                //   çözüm kurum geneline düşer (fn_kurum_kimlik). Şube kendi kodunu girerse yazılır.
+                SkrsKodu: istek.SkrsKodu ?? (mevcut.Devralindi ? "" : mevcut.SkrsKodu),
+                BakanlikAd: istek.BakanlikAd ?? (mevcut.Devralindi ? "" : mevcut.BakanlikAd));
 
             // ROL HARITASI AYNI KAYDETTE (786): "ustte kaydet deyip o profilin
             //   rollerine girince onlar gecerli olsun". Profil yazildiktan

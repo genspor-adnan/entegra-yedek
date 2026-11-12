@@ -53,7 +53,11 @@ public sealed record KurumProfil(
     /// <summary>`desen` biciminde uygulanan duzenli ifade.</summary>
     string KimlikDeseni = "",
     /// <summary>Alanin yaninda yazan aciklama ("6-12 hane pasaport no" gibi).</summary>
-    string KimlikAciklama = "");
+    string KimlikAciklama = "",
+    /// <summary>1317: SKRS kurum kodu (Bakanlık) - şube bazlı tek kaynak (TeleRadyoloji, e-Nabız).</summary>
+    string SkrsKodu = "",
+    /// <summary>1317: Bakanlık'ta görünen ad (ORC-21, KOS InstitutionName); boş = şube unvanı.</summary>
+    string BakanlikAd = "");
 
 /// <summary>
 /// KURUM PROFILI (359) - Firma Bilgileri › Kurum Tipi &amp; Sistem Ayarlari.
@@ -177,7 +181,7 @@ public sealed class KurumProfilDeposu
                 : int.TryParse(alan.Value.ToString(), out var s) ? s : 0;
 
         var okunanSube = o.GetInt16(11);
-        return new KurumProfil(o.GetInt16(0), o.GetString(1), o.GetString(2), o.GetString(3),
+        var profil = new KurumProfil(o.GetInt16(0), o.GetString(1), o.GetString(2), o.GetString(3),
             o.GetString(4), o.GetInt16(5), o.GetInt16(6), o.GetInt16(7), o.GetString(8),
             o.GetString(9), sozluk, subeId,
             // Istenen sube ile OKUNAN satirin subesi farkliysa deger kurum
@@ -185,6 +189,12 @@ public sealed class KurumProfilDeposu
             Devralindi: okunanSube != subeId,
             KimlikBicimi: o.GetString(12), KimlikDeseni: o.GetString(13),
             KimlikAciklama: o.GetString(14));
+        await o.CloseAsync();
+        // 1317: Bakanlık kimliği alanları - fn_kurum_profil'e dokunmadan, okunan satırdan.
+        var bakanlik = await baglanti.TekAsync(
+            "select skrs_kodu, bakanlik_ad from public.kurum_profil where sube_id = @p0", islem, [(short)okunanSube],
+            r => new[] { r.GetString(0), r.GetString(1) }, iptal) ?? ["", ""];
+        return profil with { SkrsKodu = bakanlik[0], BakanlikAd = bakanlik[1] };
     }
 
     /// <summary>
@@ -219,10 +229,10 @@ public sealed class KurumProfilDeposu
                 insert into public.kurum_profil
                        (sube_id, urun_modu, kurum_tipi, alt_tip, basamak, tesis_kodu,
                         sube_yapisi, hekim_sayisi, unite_sayisi, dil, para_birimi,
-                        moduller, kimlik_bicimi, kimlik_deseni, kimlik_aciklama,
+                        moduller, kimlik_bicimi, kimlik_deseni, kimlik_aciklama, skrs_kodu, bakanlik_ad,
                         ekleyen, degistiren, degistirme_tarihi)
                 values (@p12, @p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9,
-                        @p10::jsonb, @p13, @p14, @p15, @p11, @p11, now()::timestamp)
+                        @p10::jsonb, @p13, @p14, @p15, @p16, @p17, @p11, @p11, now()::timestamp)
                 on conflict (sube_id) do update
                    set urun_modu = excluded.urun_modu,
                        kurum_tipi = excluded.kurum_tipi,
@@ -238,6 +248,8 @@ public sealed class KurumProfilDeposu
                        kimlik_bicimi = excluded.kimlik_bicimi,
                        kimlik_deseni = excluded.kimlik_deseni,
                        kimlik_aciklama = excluded.kimlik_aciklama,
+                       skrs_kodu = excluded.skrs_kodu,
+                       bakanlik_ad = excluded.bakanlik_ad,
                        degistiren = excluded.degistiren,
                        degistirme_tarihi = now()::timestamp
                 """, islem,
@@ -251,7 +263,8 @@ public sealed class KurumProfilDeposu
                     : throw GentegreHatasi.Dogrulama(
                         "Kimlik biçimi geçersiz.",
                         new AlanHatasi("kimlikBicimi", "otomatik / tc / serbest / desen")),
-                yeni.KimlikDeseni ?? "", yeni.KimlikAciklama ?? ""))
+                yeni.KimlikDeseni ?? "", yeni.KimlikAciklama ?? "",
+                (yeni.SkrsKodu ?? "").Trim(), (yeni.BakanlikAd ?? "").Trim()))
                 await komut.ExecuteNonQueryAsync(iptal);
 
             // Ayar degisti: onbellek dussun, bir dakika beklemeden gecerli olsun.

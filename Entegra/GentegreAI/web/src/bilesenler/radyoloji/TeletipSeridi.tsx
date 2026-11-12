@@ -6,8 +6,8 @@ import { c } from '../../dil/ceviri';
 
 /**
  * RADYOLOJİ İSTEM KARTI › TELETIP ŞERİDİ (1304; mockup Ekranlar/Radyoloji/teletip_mirth.html §6): istemin Bakanlık
- * mesajları tek satırda - her mesaj bir adım (NW / XO / CA + durum + saat). Kurumda Teletıp kapalıysa ve iz yoksa
- * şerit hiç çizilmez (özel merkez). "Ayrıntı" Teletıp gönderim kartını (/teletip/:istemId) açar - ekran yetkisi varsa.
+ * mesajları tek satırda - her mesaj bir adım (NW / XO / CA + durum + saat). Kurumda TeleRadyoloji kapalıysa ve iz yoksa
+ * şerit hiç çizilmez (özel merkez). "Ayrıntı" TeleRadyoloji gönderim kartını (/teletip/:istemId) açar - ekran yetkisi varsa.
  * CSS öneki `tts-` (tema genel sınıflarıyla çakışmasın).
  */
 export function TeletipSeridi({ istemId, yenile, ac }: { istemId: number; yenile?: number; ac?(): void }) {
@@ -25,7 +25,7 @@ export function TeletipSeridi({ istemId, yenile, ac }: { istemId: number; yenile
   return (
     <div className={`tts-serit${sorunlu ? ' tts-sorunlu' : ''}`} data-testid="teletip-serit">
       <style>{TTS_STIL}</style>
-      <b>🏛 {c('Teletıp')}</b>
+      <b>🏛 {c('TeleRadyoloji')}</b>
       {v.satirlar.length === 0
         ? <span className="tts-adim">{c('henüz mesaj yok')}{v.aktif ? '' : ` · ${c('kurumda kapalı')}`}</span>
         : v.satirlar.map((s, i) => {

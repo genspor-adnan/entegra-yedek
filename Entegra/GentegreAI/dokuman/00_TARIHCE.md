@@ -600,6 +600,42 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     kurum geneli PACS hesabı eklendi (id 10, "ClearCanvas - Merkez") - KOSUYOLU API'sinin zaten kullandığı dosya değerleriyle
     (127.0.0.1:104, SERVERAE / GENTEGRE, WADO :1000, OHIF :3001); davranış değişmedi, artık ekrandan düzenlenir. SQL ile
     eklendi - ISLEMLOG "eklendi" kaydı yok. UNIVERSE ERP modunda (urun_modu 1): PACS sağlık kodu, orada listelenmez.
+- **TeleRadyoloji (Bakanlık) şube başına hesap · kurum kimliği tek kaynak (db/1317-1320; mockup
+  `Ekranlar/Ayarlar/entegrasyon_teletip.html`; kullanıcı: "her şube için ayrı teleradyoloji gönderimi olabilir", "teletıp yerine
+  TeleRadyoloji kullanalım", "mockup uygula"):**
+  * **Kurum kimliği şube bazlı TEK KAYNAK** (1317): `kurum_profil.skrs_kodu` + `bakanlik_ad` (tesis_kodu vardı);
+    `fn_kurum_kimlik(şube)` şube satırı → kurum geneli → eski yer. Geçiş: `kurum.skrs_kodu`, ENABIZ hesabının kurum kodu (SKRS) ve
+    MEDULA hesabının kurum kodu (tesis) profil boşsa taşındı; ikisi de dolu ve FARKLIYSA ezilmez → `kurum_kimlik_cakisma`, ekranda
+    "profildeki doğru / eski değer doğru" ile çözülür. 1318: `fn_kurum_skrs` / `fn_kurum_tesis` (profil boşsa eski yere düşer) -
+    e-Nabız paket sorguları + XML yazar kodu, MEDULA (kapı + uçlar, şube bazlı), Teleradyoloji teslimi (Bakanlık hedefi) artık
+    buradan okur.
+  * **TELERADYOLOJI entegrasyon hesabı** (1317): şube başına satır (şube boş = kurum geneli), test / canlı ayrı. Uygulama kodu =
+    firma kodu, canlı adres = Mirth K1; `ayarlar` = xdsAdres · dozAdres · encoding · subeNo · xdsHastaOid · mirthHesapId.
+    `fn_teletip_hesap(şube)` (şube satırı → kurum geneli, canlı önce), `fn_teletip_hesap_ayar(şube)` (C#'ın okuduğu tek jsonb),
+    `fn_teletip_aktif()` = aktif hesap var mı. Kuyruk kapısı: hesap modelinde şubenin hesabı yoksa satır AÇILMAZ. Hiç TELERADYOLOJI
+    satırı yokken eski `teletip.*` ayarları (geri uyum; 1320: eski yolda gönderimde "aktif" aranmaz - eskisi gibi). KOSUYOLU'da eski
+    ayarlar kurum geneli hesaba taşındı (id 11).
+  * Kuyruk işçisi (`TeletipOrmServisi`): satırın şubesinin hesabı (K1 / K2 / K3, firma kodu, karakter seti, OID) ve kimliği (ORC-21
+    ad / SKRS / MEDULA tesis, KOS InstitutionName, doz künyesi) - CA anlık görüntüsündeki eski kimlik de güncellenir; hesap kapalıysa
+    satır 30 dk sonra yeniden dener. Pano / bağlantı testi / önizleme de hesaptan.
+  * **MIRTH hesabı** (izleme): adres, kullanıcı, şifre (ŞİFRELİ alan), `ayarlar.sertifikaDogrula`; şifre boşsa ortam değişkeni
+    Mirth__Parola; hesap yoksa dosya. `MirthIzleme` etkin ayarı her çağrıda çözer, değişince oturumu sıfırlar.
+  * Sınama: TELERADYOLOJI → K1 / K2 / K3 adreslerine TCP (Mirth HTTP dinleyicisine istek atmak kanalda mesaj açardı) + K2 / K3'te
+    sondaki "/" + kimlik (eksik / TEST değeri); MIRTH → REST giriş + kanal sayısı.
+  * Web: kartta koşullu **TeleRadyoloji Bağlantısı** sekmesi (kimlik salt okunur; Bakanlık kimliği; Mirth kanalları; test);
+    **TeleRadyoloji Ayarları** artık şube özeti (kimlik satır içi düzenlenir - kurum profili ucu, şubeye ayrı satır açılacağı sorulur;
+    hesap / ortam / K1 adresi; "Tümünü Sına" K1/K2/K3; kimlik çakışmaları). GenProfil kurum profiline SKRS kurum kodu + Bakanlık'ta
+    görünen ad eklendi, "Tesis kodu (ÇKYS)" etiketi "MEDULA tesis kodu" oldu.
+  * **Ad** (1319): ekranlarda "Teletıp" → "TeleRadyoloji" (yetki adları, menü, pano / liste / kart / şerit, cihaz kartı etiketi).
+    Teknik adlar değişmedi (teletip_gonderim, teletip.*, radyoloji.teletip*, TELETIP_* kanalları, teletip.saglik.gov.tr). Lab / onam
+    ekranlarındaki "Teletıp" istem kaynağı başka kavram - dokunulmadı.
+  * Ayrıca: KOS uyarısında görüntüsüz seriler (doz SR / KO / PR) "küçük resim üretilemedi" sayılmıyor.
+  * Mockup'tan sapma: kimlik tablosu ana uygulamada TeleRadyoloji özetinde (Kurum Profili ekranı GenProfil'de); "Benzerinden kopyala"
+    yapılmadı.
+  * Doğrulama: `TeleradyolojiHesapTestleri` (kimlik çözümü, hesap çözümü canlı önce / pasif sayılmaz / kurum geneline düşer, kuyruk
+    kapısı, eski ayar yolu), `EnabizXmlTestleri.SKRS_kodu_degisince_YENI_paket_uretilir` tek kaynağa uyarlandı; tam paket 1068 geçti
+    (düşen tek test saha planı gün-sınırı). KOSUYOLU'da hesap modeliyle NW (AA) / KOS (OK) / doz (0000) Mirth benzetimine gitti; ORC-21
+    `Merkez^^999999\S\1\S\99999999` kurum profilinden. Dev'de özet + kart sekmesi ekran görüntüsüyle kontrol edildi (geçici satır silindi).
 
 ### 10.11.2026
 

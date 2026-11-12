@@ -257,7 +257,7 @@ public static class EntegrasyonUclari
 
         grup.MapPost("/{id:int}/sina", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
-            KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, MirthIzleme mirth, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // YAZMA YETKİSİ (K16): sınama `son_kullanim / son_sonuc` YAZAR - Gör yetkisi
@@ -287,6 +287,50 @@ public static class EntegrasyonUclari
                 await SonucYazAsync(baglanti, id, pacsMesaj, iptal);
                 dicomDepo.Gecersiz();
                 return Results.Ok(new { basarili = tamam, mesaj = pacsMesaj, adimlar });
+            }
+
+            // TELERADYOLOJI (1317): kanal adreslerine TCP (mesaj göndermez - Mirth HTTP dinleyicisine istek atmak kanalda mesaj
+            //   açardı), HTTP adreslerinde sondaki "/" (Jetty 302 → gövde düşer), şubenin kurum kimliği (eksik / test değeri).
+            if (string.Equals(hesap.Kod, "TELERADYOLOJI", StringComparison.OrdinalIgnoreCase))
+            {
+                var tr = await baglanti.TekAsync(
+                    "select coalesce(url, ''), coalesce(ayarlar ->> 'xdsAdres', ''), coalesce(ayarlar ->> 'dozAdres', ''), coalesce(sube_id, 0), coalesce(uygulama_kodu, '') from public.entegrasyon_hesap where id = @p0",
+                    null, [id], o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetInt32(3).ToString(), o.GetString(4) }, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Hesap bulunamadı.");
+                var adimlar = new List<DicomKaynagi.SinamaAdimi>();
+                async Task Kanal(string ad, string adres, bool http)
+                {
+                    if (adres.Length == 0) { adimlar.Add(new(ad, !ad.StartsWith("K1"), "tanımsız", 0)); return; }
+                    if (http && !adres.EndsWith('/')) { adimlar.Add(new(ad + " " + adres, false, "adres sonunda \"/\" yok (Jetty 302 verip gövdeyi düşürür)", 0)); return; }
+                    var hp = TeleradyolojiSubeUclari.HostPort(adres);
+                    if (hp is null) { adimlar.Add(new(ad + " " + adres, false, "adres çözülemedi", 0)); return; }
+                    var r = await MirthIzleme.TcpDeneAsync(hp, iptal);
+                    adimlar.Add(new(ad + " " + adres, r.Acik, r.Acik ? "bağlandı" : r.Hata, r.SureMs));
+                }
+                await Kanal("K1 HL7", tr[0], false);
+                await Kanal("K2 KOS", tr[1], true);
+                await Kanal("K3 Doz", tr[2], true);
+                var k = await baglanti.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", null, [int.Parse(tr[3])],
+                    o => new[] { o.GetString(0), o.GetString(1), o.GetString(2) }, iptal) ?? ["", "", ""];
+                var eksik = new List<string>();
+                if (k[1].Length == 0) eksik.Add("SKRS kurum kodu yok"); else if (k[1] == "999999") eksik.Add("SKRS TEST değeri");
+                if (k[2].Length == 0) eksik.Add("MEDULA tesis kodu yok"); else if (k[2] == "99999999") eksik.Add("MEDULA tesis TEST değeri");
+                if (tr[4].Length == 0) eksik.Add("firma kodu yok");
+                adimlar.Add(new($"Kurum kimliği SKRS {k[1]} · MEDULA {k[2]}", eksik.Count == 0, eksik.Count == 0 ? "eksik yok" : string.Join(", ", eksik), 0));
+                var tamamTr = adimlar.All(x => x.Tamam);
+                var ozetTr = string.Join(" · ", adimlar.Take(3).Select(x => $"{x.Ad.Split(' ')[0]} {(x.Tamam ? "✓" : "✖")}"))
+                             + (eksik.Count > 0 ? " · kimlik: " + string.Join(", ", eksik) : "");
+                await SonucYazAsync(baglanti, id, ozetTr, iptal);
+                return Results.Ok(new { basarili = tamamTr, mesaj = ozetTr, adimlar });
+            }
+
+            // MIRTH (1317): REST girişi + kanal durumları (etkin Mirth hesabıyla - kurum geneli aktif hesap).
+            if (string.Equals(hesap.Kod, "MIRTH", StringComparison.OrdinalIgnoreCase))
+            {
+                var d = await mirth.DurumAsync(iptal);
+                var mm = d.Erisilebilir ? $"Mirth {d.Surum} · {d.Kanallar.Count} kanal" : (d.Hata.Length > 0 ? d.Hata : "Mirth'e ulaşılamadı.");
+                await SonucYazAsync(baglanti, id, mm, iptal);
+                return Results.Ok(new { basarili = d.Erisilebilir, mesaj = mm });
             }
 
             // SINAMA SERVISE GORE (340): SKRS'de gerçek kod listesi çağrısı

@@ -109,6 +109,12 @@ public static partial class KartKatalogu
             // PACS (1316, mockup Ekranlar/Ayarlar/entegrasyon_pacs.html): ClearCanvas vb. DICOM arşivi. Kullanıcı adı =
             //   bizim AE, Uygulama kodu = PACS AE, Canlı adres = WADO; sunucu / port / görüntüleyici `ayarlar` içinde.
             ["PACS"] = "PACS (DICOM görüntü arşivi)",
+            // TELERADYOLOJI (1317, mockup Ekranlar/Ayarlar/entegrasyon_teletip.html): Bakanlık TeleRadyoloji (Teletıp) gönderimi,
+            //   ŞUBE BAŞINA satır. Uygulama kodu = firma kodu, Canlı adres = Mirth K1 HL7; K2 / K3 / encoding / şube no /
+            //   XDS hasta OID / Mirth hesabı `ayarlar` içinde. Kurum kimliği (SKRS, MEDULA tesis) kurum profilinden.
+            ["TELERADYOLOJI"] = "TeleRadyoloji (Bakanlık)",
+            // MIRTH (1317): Mirth Connect REST (izleme / pano). Kullanıcı adı + şifre (şifreli), Canlı adres = REST kökü.
+            ["MIRTH"] = "Mirth Connect (izleme)",
         };
 
     /// <summary>
@@ -118,7 +124,7 @@ public static partial class KartKatalogu
     /// hem kart metasi hem kaydetme kurali bunu okur.
     /// </summary>
     public static readonly IReadOnlySet<string> SaglikEntegrasyonlari =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA", "KPS", "PACS" };
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA", "KPS", "PACS", "TELERADYOLOJI", "MIRTH" };
 
     /// <summary>Urun moduna gore gecerli entegrasyon kodlari (342).</summary>
     /// Mod 3 ("ikisi") saglik kodlarini da icerir (492).

@@ -290,14 +290,12 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
                coalesce(public.fn_taraf_ad(tk.unvan, tk.ad, tk.soyad)::varchar(120), '')               as "kurumAdi",
                coalesce(sb.ad, '')                  as "subeAdi",
                -- BİZİM SKRS kodumuz (OBR-15): hizmeti veren kurum biziz.
-               coalesce((select r.deger from public.referans r
-                          where r.anahtar = 'kurum.skrs_kodu'), '') as "bizimSkrs",
+               -- 1317: BİZİM kimliğimiz şube bazlı tek kaynaktan (kurum profili).
+               coalesce(public.fn_kurum_skrs(coalesce(i.sube_id, 0)), '') as "bizimSkrs",
                -- ORC-21 (1303): raporu gönderen biz - kurum adı ve MEDULA tesis kodumuz.
-               coalesce(nullif(sb.unvan, ''), sb.ad, '') as "bizimKurumAdi",
-               coalesce((select kp.tesis_kodu from public.kurum_profil kp
-                          where kp.sube_id in (i.sube_id, 0) and coalesce(kp.tesis_kodu, '') <> ''
-                          order by (kp.sube_id = i.sube_id) desc limit 1), '') as "bizimTesis",
-               coalesce((select r.deger from public.referans r where r.anahtar = 'teletip.sube_no'), '1') as "teletipSubeNo",
+               coalesce((select k.ad from public.fn_kurum_kimlik(coalesce(i.sube_id, 0)) k), '') as "bizimKurumAdi",
+               coalesce(public.fn_kurum_tesis(coalesce(i.sube_id, 0)), '') as "bizimTesis",
+               coalesce(public.fn_teletip_hesap_ayar(coalesce(i.sube_id, 0)) ->> 'SubeNo', '1') as "teletipSubeNo",
 
                coalesce(i.dis_erisim_no, '')        as "accessionNo",
                -- PID-3: hastanin GONDEREN KURUMDAKI dosya numarasi (816).

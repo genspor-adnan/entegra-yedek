@@ -48,7 +48,7 @@ export function TeletipGonderimKarti() {
   const hastaAdi = v?.istem?.hastaAdi ?? '';
   useEffect(() => {
     // Sekme ikonu liste tanımından (kartIc 🏛) gelir; başlığa ayrıca eklenmez.
-    if (ekranSekmesi && istemId) ekranSekmesi.baslik(sekmeAdi(hastaAdi || c('Teletıp')), `/teletip/${istemId}`);
+    if (ekranSekmesi && istemId) ekranSekmesi.baslik(sekmeAdi(hastaAdi || c('TeleRadyoloji')), `/teletip/${istemId}`);
   }, [ekranSekmesi, hastaAdi, istemId]);
 
   const istemKarti = () => {
@@ -60,7 +60,7 @@ export function TeletipGonderimKarti() {
     try {
       const y = await api.teletipDene(s.id);
       const d = TELETIP_DURUM[y.durum]?.ad ?? String(y.durum);
-      mesaj(y.durum === 1 ? c('Teletıp kabul etti (AA).') : `${c('Sonuç')}: ${c(d)}${y.hata ? ` - ${y.hata}` : ''}`);
+      mesaj(y.durum === 1 ? c('TeleRadyoloji kabul etti (AA).') : `${c('Sonuç')}: ${c(d)}${y.hata ? ` - ${y.hata}` : ''}`);
       await yukle();
     } finally { setMesgul(false) }
   });
@@ -76,9 +76,9 @@ export function TeletipGonderimKarti() {
     <div className="fm-sayfa ttk" data-testid="teletip-kart">
       <style>{TTK_STIL}</style>
       <div className="ttk-bas">
-        <h1>🏛 {c('Teletıp Gönderimi')}</h1>
+        <h1>🏛 {c('TeleRadyoloji Gönderimi')}</h1>
         {ist && <span className="ttk-acc">{ist.accessionNo}</span>}
-        {!v.aktif && <span className="rozet uyari">{c('Kurumda Teletıp gönderimi kapalı')}</span>}
+        {!v.aktif && <span className="rozet uyari">{c('Kurumda TeleRadyoloji gönderimi kapalı')}</span>}
         <div className="ttk-sag">
           <button type="button" className="d" onClick={() => void yukle()}>🔄 {c('Yenile')}</button>
           <button type="button" className="d" onClick={() => void onizle()}>🔍 {c('Önizle / Eksikler')}</button>
@@ -98,9 +98,9 @@ export function TeletipGonderimKarti() {
       <div className="ttk-govde">
         <div>
           <div className="ttk-blok">
-            <h4>{c('Mesaj izi')} <span className="ttk-ip">· Gentegre → Mirth K1 → Teletıp</span></h4>
+            <h4>{c('Mesaj izi')} <span className="ttk-ip">· Gentegre → Mirth K1 → TeleRadyoloji</span></h4>
             {v.satirlar.length === 0
-              ? <div className="ttk-soluk ttk-ic">{c('Bu istem için Teletıp mesajı yok.')}</div>
+              ? <div className="ttk-soluk ttk-ic">{c('Bu istem için TeleRadyoloji mesajı yok.')}</div>
               : <table className="ttk-tablo">
                 <thead><tr>
                   <th>#</th><th>{c('Emir')}</th><th>{c('Durum')}</th><th className="sag">{c('Deneme')}</th><th>ACK</th>
@@ -137,7 +137,7 @@ export function TeletipGonderimKarti() {
                   : <div className="ttk-soluk">{satir.durum === 3 ? c('Mesaj gönderilmedi: eksik alanlar var (sağdaki "Ne yapmalı").')
                     : c('Bu satır için henüz gönderilmiş mesaj yok.')}</div>}
                 {ham?.yanit && <>
-                  <div className="ttk-k" style={{ marginTop: 8 }}>{satir.kanal === 2 ? c('Teletıp yanıtı (RegistryResponse)') : satir.kanal === 3 ? c('MGA yanıtı (C-STORE-RSP, Mirth K3)') : c('Teletıp yanıtı (ACK)')}</div>
+                  <div className="ttk-k" style={{ marginTop: 8 }}>{satir.kanal === 2 ? c('TeleRadyoloji yanıtı (RegistryResponse)') : satir.kanal === 3 ? c('MGA yanıtı (C-STORE-RSP, Mirth K3)') : c('TeleRadyoloji yanıtı (ACK)')}</div>
                   <pre className="ttk-hl7 ttk-ack">{ham.yanit}</pre>
                 </>}
               </div>
@@ -176,7 +176,7 @@ const ISTEM_DURUM: Record<number, string> = {
 function NeYapmali(s: TeletipSatir | null) {
   if (!s) return <span className="ttk-soluk">{c('Mesaj seçin.')}</span>;
   switch (s.durum) {
-    case 1: return <><span className="rozet olumlu">✓ {c('Teletıp kabul etti (AA).')}</span><p>{c('Yapılacak bir şey yok.')}</p></>;
+    case 1: return <><span className="rozet olumlu">✓ {c('TeleRadyoloji kabul etti (AA).')}</span><p>{c('Yapılacak bir şey yok.')}</p></>;
     case 3: return <>
       <span className="rozet hata">✖ {c('Gönderilmedi - eksik var')}</span>
       <p>{c('Bakanlık bu mesajı reddederdi; gönderilmeden durduruldu. Eksikleri tamamlayın:')}</p>
@@ -184,14 +184,14 @@ function NeYapmali(s: TeletipSatir | null) {
       <p className="ttk-soluk">{c('İstem kartında yapılan değişiklik satırı kendiliğinden yeniden kuyruğa alır; kurum ayarı (SKRS, firma kodu) değiştiyse "Yeniden gönder".')}</p>
     </>;
     case 2: return <>
-      <span className="rozet hata">✖ {c('Teletıp reddetti')} {s.ackKodu && `(${s.ackKodu})`}</span>
+      <span className="rozet hata">✖ {c('TeleRadyoloji reddetti')} {s.ackKodu && `(${s.ackKodu})`}</span>
       <p>{s.hata}</p>
       <p className="ttk-soluk">{c('Reddedilen mesaj kendiliğinden tekrar gönderilmez (aynı mesaj yine reddedilir). Hata kodundaki alanı düzeltip "Yeniden gönder".')}</p>
     </>;
     case 5: return <>
       <span className="rozet uyari">… {c('Ulaşılamadı - tekrar denenecek')}</span>
       <p>{s.hata}</p>
-      <p className="ttk-soluk">{c('Mirth ya da Teletıp yanıt vermedi; kuyruk artan aralıkla dener. Sonraki deneme')}: {s.sonrakiDeneme ? tarihSaat(s.sonrakiDeneme) : '—'}</p>
+      <p className="ttk-soluk">{c('Mirth ya da TeleRadyoloji yanıt vermedi; kuyruk artan aralıkla dener. Sonraki deneme')}: {s.sonrakiDeneme ? tarihSaat(s.sonrakiDeneme) : '—'}</p>
     </>;
     case 0: return <><span className="rozet uyari">… {c('Kuyrukta')}</span><p className="ttk-soluk">{c('İşçi 30 saniyede bir gönderir; önceki mesaj sonuçlanmadan sıradaki gitmez.')}</p></>;
     default: return <><span className="rozet gri">{c('Atlandı')}</span><p>{s.hata || c('İstem iptal edildi ya da mesaj gereksiz kaldı.')}</p></>;

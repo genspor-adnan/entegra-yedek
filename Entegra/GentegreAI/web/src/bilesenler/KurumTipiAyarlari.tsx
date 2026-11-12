@@ -586,11 +586,25 @@ export function KurumTipiAyarlari({ kaydetBagla }: {
                    title="Bilgi metni. Akılcı test istemi basamak kısıtı ŞUBE KARTINDAKİ 'Sağlık Tesisi Basamağı' alanından okunur (873)."
                    onChange={e => degistir({ basamak: e.target.value })} />
           </div>
+          {/* KURUM KİMLİĞİ (1317, mockup entegrasyon_teletip.html §4): şube bazlı TEK KAYNAK - TeleRadyoloji (ORC-21, KOS),
+              e-Nabız ve MEDULA buradan okur. Şube boş bırakırsa kurum genelinden. */}
           <div className="fld">
-            <label>{c('Tesis kodu (ÇKYS)')}</label>
+            <label>{c('MEDULA tesis kodu')}</label>
             <input className="inp" value={profil?.tesisKodu ?? ''} maxLength={20}
-                   placeholder="11xxxxxx"
+                   placeholder="11xxxxxx" title={c('8 haneli SGK / MEDULA tesis kodu - MEDULA ve TeleRadyoloji (ORC-21) buradan okur.')}
                    onChange={e => degistir({ tesisKodu: e.target.value })} />
+          </div>
+          <div className="fld">
+            <label>{c('SKRS kurum kodu (ÇKYS)')}</label>
+            <input className="inp" value={profil?.skrsKodu ?? ''} maxLength={20}
+                   placeholder="ör. 148" title={c('Bakanlık SKRS kurum kodu - TeleRadyoloji (ORC-21, KOS) ve e-Nabız buradan okur. Boş = kurum geneli.')}
+                   onChange={e => degistir({ skrsKodu: e.target.value })} />
+          </div>
+          <div className="fld">
+            <label>{c("Bakanlık'ta görünen ad")}</label>
+            <input className="inp" value={profil?.bakanlikAd ?? ''} maxLength={200}
+                   placeholder={c('boş = şube unvanı')} title={c('TeleRadyoloji ORC-21 kurum adı ve KOS InstitutionName.')}
+                   onChange={e => degistir({ bakanlikAd: e.target.value })} />
           </div>
           <div className="fld">
             <label>{c('Şube yapısı')}</label>

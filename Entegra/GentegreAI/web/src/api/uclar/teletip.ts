@@ -14,7 +14,7 @@ export interface TeletipIstemOzet {
   id: number; accessionNo: string; durum: number; hastaId: number; hastaAdi: string; tetkikAdi: string; modalite: string; kabul: string;
 }
 
-/** Teletıp panosu (mockup §2): günün özeti, son olaylar, Mirth kanal durumları. */
+/** TeleRadyoloji panosu (mockup §2): günün özeti, son olaylar, Mirth kanal durumları. */
 export interface TeletipPano {
   aktif: boolean; hl7Adres: string;
   ozet: { gun: string; nwToplam: number; nwGonderildi: number; xoCaToplam: number; xoCaGonderildi: number; oruToplam: number; oruGonderildi: number; reddedildi: number;
@@ -30,7 +30,7 @@ export interface TeletipPano {
           sonHatalar: { ip: string; studyUid: string; hata: string; zaman: string }[] };
 }
 
-/** Kurum Teletıp ayarları (mockup §5). Mirth bölümü yalnız görüntü. */
+/** Kurum TeleRadyoloji ayarları (mockup §5). Mirth bölümü yalnız görüntü. */
 export interface TeletipAyar {
   aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string; encoding: string; hl7Adres: string;
   xdsAdres: string; xdsHastaOid: string; dozAdres: string;
@@ -44,14 +44,14 @@ export const teletipUclari = {
   teletipAyarKaydet: (g: { aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string;
                            encoding: string; hl7Adres: string; xdsAdres: string; xdsHastaOid: string; dozAdres: string }) => gonder<TeletipAyar>('/api/teletip/ayar', g, 'PUT'),
   teletipPano: (gun?: string) => istek<TeletipPano>(`/api/teletip/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
-  /** Teletıp HL7 hedefine (Mirth K1) TCP + Mirth REST girişi; mesaj göndermez. */
+  /** TeleRadyoloji HL7 hedefine (Mirth K1) TCP + Mirth REST girişi; mesaj göndermez. */
   teletipBaglantiTesti: () => gonder<{
     hl7: { adres: string; acik: boolean; hata: string; sureMs: number };
     mirth: { tanimli: boolean; erisilebilir: boolean; hata: string; surum: string; kanalSayisi: number };
   }>('/api/teletip/baglanti-testi', {}),
   /** Reddedilen / gidemez / ulaşmadı satırlarını şimdi yeniden dener. */
   teletipTopluGonder: () => gonder<{ denenen: number; gonderilen: number; sorunluKalan: number }>('/api/teletip/yeniden-gonder-toplu', {}),
-  /** İstemin Teletıp mesaj izi (şerit + kart). `aktif` false ise kurumda Teletıp kapalı. */
+  /** İstemin TeleRadyoloji mesaj izi (şerit + kart). `aktif` false ise kurumda TeleRadyoloji kapalı. */
   teletipIstem: (istemId: number) =>
     istek<{ aktif: boolean; istem: TeletipIstemOzet | null; satirlar: TeletipSatir[]; detayYetkisi: boolean }>(`/api/teletip/istem/${istemId}`),
   /** Ham HL7 mesajı ve ACK (hasta kimliği içerir - radyoloji.teletip). */

@@ -277,7 +277,7 @@ export function RadyolojiIstemKarti() {
         ))}
       </div>
 
-      {/* TELETIP ŞERİDİ (1304, mockup teletip_mirth.html §6): Bakanlık mesajları tek satırda; Teletıp kapalı
+      {/* TELETIP ŞERİDİ (1304, mockup teletip_mirth.html §6): Bakanlık mesajları tek satırda; TeleRadyoloji kapalı
           kurumda çizilmez. Ayrıntı gönderim kartını ayrı sekmede açar. */}
       {istemId > 0 && <TeletipSeridi istemId={istemId} yenile={N(k, 'durum')}
         ac={() => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/teletip/${istemId}`); else git(`/teletip/${istemId}`) }} />}

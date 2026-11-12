@@ -107,7 +107,7 @@ public static partial class MedulaUclari
             baglam.YazmaIste();
             await using var b = await veri.AcAsync(iptal);
             var tckn = await b.TekDegerAsync<string>("select coalesce(vkno, '') from public.taraf where id = @p0", null, [istek.HastaId], iptal) ?? "";
-            var tesis = await TesisKoduAsync(b, iptal);
+            var tesis = await TesisKoduAsync(b, baglam.SubeId, iptal);
             var s = await medula.CagirAsync("YardimciIslemler", "mustehaklikSorgu", "taraf", istek.HastaId, istek.HastaId, istek.BelgeId,
                 new { tckn, tesisKodu = tesis, provizyonTipi = istek.ProvizyonTipi ?? 1, sorguTarihi = DateTime.UtcNow },
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip, 1, iptal);
@@ -132,7 +132,7 @@ public static partial class MedulaUclari
                   from public.taraf t left join public.taraf_personel p on p.id = t.id where t.id = @p0
                 """, null, [hid], o => new { tescil = o.GetString(0), brans = o.GetString(1), tckn = o.GetString(2) }, iptal) : null;
             var brans = istek.BransKodu ?? (hekim?.brans is { Length: > 0 } hb ? hb : bv.bolumId?.ToString() ?? "");
-            var tesis = await TesisKoduAsync(b, iptal);
+            var tesis = await TesisKoduAsync(b, baglam.SubeId, iptal);
             var s = await medula.CagirAsync("HastaKabulIslemleri", "hastaKabul", "belge", belgeId, bv.hastaId, belgeId, new
             {
                 tesisKodu = tesis, hastaTckn = bv.tckn, takipTipi = istek.TakipTipi ?? 1, provizyonTipi = istek.ProvizyonTipi ?? 1,
@@ -377,8 +377,9 @@ public static partial class MedulaUclari
                 o.IsDBNull(6) ? null : o.GetDateTime(6)), iptal)
            ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
 
-    internal static async Task<string> TesisKoduAsync(NpgsqlConnection b, CancellationToken iptal)
-        => await b.TekDegerAsync<string>("select coalesce(kurum_kodu, '') from public.entegrasyon_hesap where kod = 'MEDULA' order by test_mi nulls last, id limit 1", null, [], iptal) ?? "";
+    /// <summary>1318: MEDULA tesis kodu kurum profilinden (şube bazlı tek kaynak); profil boşsa MEDULA hesabının kurum kodu.</summary>
+    internal static async Task<string> TesisKoduAsync(NpgsqlConnection b, int? sube, CancellationToken iptal)
+        => await b.TekDegerAsync<string>("select public.fn_kurum_tesis(@p0)", null, [sube ?? 0], iptal) ?? "";
 
     internal static object TakipOku(NpgsqlDataReader o) => new
     {

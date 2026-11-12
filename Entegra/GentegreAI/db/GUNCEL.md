@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (707 ad, 191 tanesi birden cok dosyada)
+## Fonksiyonlar (713 ad, 194 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -341,10 +341,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_entegrasyon_durumu` | `491_kurum_entegrasyon_durumu.sql` | — |
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_kategori_uygula` | `527_profil_kategori.sql` | — |
+| `fn_kurum_kimlik` | `1317_teleradyoloji_sube_hesabi.sql` | — |
 | `fn_kurum_kurulum_adimlari` | `1140_entegrasyon_hesap_liste_kart.sql` | 490_kurum_kurulum_adimlari.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
+| `fn_kurum_skrs` | `1318_kurum_kimlik_okuyucular.sql` | — |
 | `fn_kurum_sozlesme_sec` | `468_kurum_sozlesme_1n.sql` | — |
+| `fn_kurum_tesis` | `1318_kurum_kimlik_okuyucular.sql` | — |
 | `fn_kurum_tipi_rol_portal_atla` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | — |
 | `fn_kurum_tipi_rol_uygula` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | 786_kurum_tipi_rol.sql |
 | `fn_kys_egitim_anahtar` | `1056_kys_egitim.sql` | — |
@@ -519,10 +522,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `fn_teletip_aktif` | `1302_teletip_orm_kuyrugu.sql` | — |
+| `fn_teletip_aktif` | `1317_teleradyoloji_sube_hesabi.sql` | 1302_teletip_orm_kuyrugu.sql |
 | `fn_teletip_dis_is` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `fn_teletip_dis_is_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `fn_teletip_doz_verisi` | `1314_teletip_doz.sql` | — |
+| `fn_teletip_hesap` | `1317_teleradyoloji_sube_hesabi.sql` | — |
+| `fn_teletip_hesap_ayar` | `1320_teletip_eski_ayar_aktifsiz.sql` | 1317_teleradyoloji_sube_hesabi.sql |
+| `fn_teletip_hesap_modeli` | `1317_teleradyoloji_sube_hesabi.sql` | — |
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
 | `fn_teletip_orm_verisi` | `1305_teletip_hastane_referansi.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql |
@@ -706,7 +712,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_istek_teletip_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `tg_teletip_gonderim_dis_is` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
+| `tg_teletip_gonderim_dis_is` | `1317_teleradyoloji_sube_hesabi.sql` | 1315_teletip_dis_kurum_isi_haric.sql |
 | `tg_teletip_gonderim_doz` | `1314_teletip_doz.sql` | — |
 | `tg_temsilci_rolu_belge` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_temsilci_rolu_satir` | `1287_dis_hekim_sube_temsilci.sql` | — |

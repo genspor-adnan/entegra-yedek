@@ -372,7 +372,9 @@ public sealed class MedulaSimulasyonKapisi : IMedulaKapisi
         if (canli == 1)
             throw new InvalidOperationException("Canlı Medula SOAP kapısı bu sürümde bağlı değil; hesabı test moduna alın.");
 
-        var tesis = await b.TekDegerAsync<string>("select kurum_kodu from public.entegrasyon_hesap where kod = 'MEDULA' limit 1", null, [], iptal) ?? "TEST";
+        // 1318: tesis kodu kurum profilinden (belgenin şubesi), profil boşsa MEDULA hesabından.
+        var tesis = await b.TekDegerAsync<string>(
+            "select nullif(public.fn_kurum_tesis(coalesce((select sube_id from public.belge where id = @p0), 0)), '')", null, [belgeId ?? 0], iptal) ?? "TEST";
         var takip = $"{DateTime.UtcNow:yyyyMMdd}{(belgeId ?? 0):D5}";
 
         switch (islem)

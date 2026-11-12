@@ -522,6 +522,9 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
 
         var eskiKod = await veri.TekDegerAsync<string>(
             "select coalesce(kurum_kodu,'') from public.entegrasyon_hesap where kod='ENABIZ'");
+        // 1318: SKRS kurum kodu TEK KAYNAK kurum profilinde (fn_kurum_skrs); ENABIZ hesabının kodu yalnız profil boşsa okunur.
+        var eskiProfil = await veri.ListeAsync("select sube_id, skrs_kodu from public.kurum_profil", null,
+                                               o => (Sube: Convert.ToInt32(o.GetValue(0)), Skrs: o.GetString(1)), CancellationToken.None);
         var ilk = await uretici.UretAsync("HASTA_KABUL", belgeId, 0, CancellationToken.None);
         Assert.NotNull(ilk);
         long? ikinciId = null;
@@ -530,6 +533,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
             // Yalniz KODU degistir - gorunen ad ayni kalsin.
             await veri.CalistirAsync(
                 "update public.entegrasyon_hesap set kurum_kodu = '999999' where kod='ENABIZ'");
+            await veri.CalistirAsync("update public.kurum_profil set skrs_kodu = '999998' where skrs_kodu <> ''");
             var ikinci = await uretici.UretAsync("HASTA_KABUL", belgeId, 0, CancellationToken.None);
             Assert.NotNull(ikinci);
             ikinciId = ikinci!.PaketId;
@@ -541,6 +545,8 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
             await veri.CalistirAsync(
                 "update public.entegrasyon_hesap set kurum_kodu = @p0 where kod='ENABIZ'",
                 [eskiKod]);
+            foreach (var (s, k) in eskiProfil)
+                await veri.CalistirAsync("update public.kurum_profil set skrs_kodu = @p1 where sube_id = @p0", [(short)s, k]);
             if (ikinciId is { } iid)
                 await veri.CalistirAsync(
                     "delete from public.enabiz_paket where id = @p0", [iid]);

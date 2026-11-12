@@ -192,8 +192,10 @@ public static class TeletipUclari
                  order by coalesce(t.son_deneme, t.ekleme_tarihi) desc, t.id desc
                  limit 10
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
-            var adres = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.hl7_adres", "", iptal);
-            var aktif = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.aktif", "0", iptal) == "1";
+            // 1317: TeleRadyoloji hesabı (oturum şubesi → kurum geneli); hesap modeli yoksa eski teletip.* ayarları.
+            var panoHesap = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0) ->> 'Hl7Adres'", null, [baglam.SubeId ?? 0], iptal);
+            var adres = panoHesap ?? "";
+            var aktif = await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);
             // Dışa açık WADO (1313): yapılandırma + bugünün / son 7 günün erişim sayacı (IP + çalışma bazında).
             var w = wadoServis.Ayar;
             var wadoSayac = (await b.ListeAsync("""
@@ -227,8 +229,8 @@ public static class TeletipUclari
             if (!baglam.Yetkiler.Var("radyoloji.teletip.pano", Islem.Gor) && !baglam.Yetkiler.Var("radyoloji.teletip.ayar", Islem.Gor))
                 throw GentegreHatasi.Yasak();
             await using var b = await veri.AcAsync(iptal);
-            var adres = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.hl7_adres", "", iptal);
-            var tcp = adres.Length == 0 ? (Acik: false, Hata: "teletip.hl7_adres tanımlı değil.", SureMs: 0)
+            var adres = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0) ->> 'Hl7Adres'", null, [baglam.SubeId ?? 0], iptal) ?? "";
+            var tcp = adres.Length == 0 ? (Acik: false, Hata: "Bu şubede TeleRadyoloji hesabı / K1 adresi yok.", SureMs: 0)
                                         : await MirthIzleme.TcpDeneAsync(adres, iptal);
             var m = await mirth.DurumAsync(iptal);
             return Results.Ok(new
@@ -259,9 +261,18 @@ public static class TeletipUclari
             await using var b = await veri.AcAsync(iptal);
             var json = await b.TekDegerAsync<string>("select public.fn_teletip_orm_verisi(@p0)::text", null, [istemId], iptal)
                        ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
-            var v = (JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi()) with
+            var sube = await b.TekDegerAsync<int?>("select sube_id from public.radyoloji_istem where id = @p0", null, [istemId], iptal) ?? 0;
+            var h = JsonSerializer.Deserialize<TeleRadyolojiHesabi>(
+                await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", null, [sube], iptal) ?? "{}", JsonAyar)
+                ?? new TeleRadyolojiHesabi();
+            var k = await b.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", null, [sube],
+                o => new[] { o.GetString(0), o.GetString(1), o.GetString(2) }, iptal) ?? ["", "", ""];
+            var v0 = JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi();
+            var v = v0 with
             {
-                FirmaKodu = await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.firma_kodu", "", iptal),
+                FirmaKodu = h.FirmaKodu, Encoding = h.Encoding, SubeNo = h.SubeNo,
+                KurumAdi = k[0].Length > 0 ? k[0] : v0.KurumAdi, KurumSkrs = k[1],
+                MedulaTesisKodu = k[2].Length > 0 ? k[2] : v0.MedulaTesisKodu,
                 KontrolNo = "ONIZLEME",
             };
             return Results.Ok(new { eksikler = OrmUretici.Denetle(v), mesaj = OrmUretici.Uret(v).Replace("\r", "\n") });
@@ -293,7 +304,7 @@ public static class TeletipUclari
         if (skrs == "999999") uyarilar.Add("Kurum SKRS kodu TEST değeri (999999) - gerçek Bakanlık bağlantısından önce değiştirin.");
         if (tesis == "99999999") uyarilar.Add("MEDULA tesis kodu TEST değeri (99999999).");
         if (firma.Contains("TEST", StringComparison.OrdinalIgnoreCase)) uyarilar.Add("Firma kodu TEST değeri gibi görünüyor.");
-        var m = mirth.Ozet();
+        var m = await mirth.OzetAsync(iptal);
         return new
         {
             aktif, kurumSkrs = skrs, medulaTesisKodu = tesis, subeNo = await R("teletip.sube_no", "1"), firmaKodu = firma,
@@ -309,6 +320,6 @@ public static class TeletipUclari
     private static async Task<bool> AktifAsync(VeriKaynagi veri, CancellationToken iptal)
     {
         await using var b = await veri.AcAsync(iptal);
-        return await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, "teletip.aktif", "0", iptal) == "1";
+        return await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);   // 1317
     }
 }

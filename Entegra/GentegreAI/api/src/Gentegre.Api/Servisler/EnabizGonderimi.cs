@@ -207,7 +207,8 @@ public sealed class EnabizGonderimi
                    --   Ikisi bastan ters baglanmisti: kuruma 11111111 yer
                    --   tutucusu gidiyordu ve USS "E0009 Kurum kodu hatalı!"
                    --   donuyordu.
-                   coalesce(h.kurum_kodu, ''), coalesce(h.uygulama_kodu, ''),
+                   -- 1318: tesis (SKRS kurum) kodu kurum profilinden, paketin şubesine göre; profil boşsa hesabın kodu.
+                   coalesce(public.fn_kurum_skrs(coalesce(p.sube_id, 0)), h.kurum_kodu, ''), coalesce(h.uygulama_kodu, ''),
                    coalesce(h.ad, '')
               from public.enabiz_paket p
               join public.enabiz_paket_turu t on t.id = p.paket_turu_id

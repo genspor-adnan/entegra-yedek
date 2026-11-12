@@ -126,7 +126,7 @@ export function PacsBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami; kartId: 
             <div className="pcs-oku"><span>{c('MWL AE')}</span><b>{din.mwlAe || '—'}</b></div>
             <div className="pcs-oku"><span>{c('MWL karakter seti')}</span><b>{din.mwlKarakterSeti}</b></div>
             <div className="pcs-oku"><span>{c('Tanımsız cihaza MWL')}</span><b>{din.mwlBilinmeyenAe ? c('evet') : c('hayır')}</b></div>
-            <div className="pcs-oku"><span>{c('Dışa açık WADO (Teletıp)')}</span><b>{din.wadoPort > 0 ? `${din.wadoPort} ${din.wadoYol}` : c('kapalı')}</b></div>
+            <div className="pcs-oku"><span>{c('Dışa açık WADO (TeleRadyoloji)')}</span><b>{din.wadoPort > 0 ? `${din.wadoPort} ${din.wadoYol}` : c('kapalı')}</b></div>
             <div className="pcs-oku"><span>{c('Dışa açık WADO HTTPS')}</span><b>{din.wadoPort > 0 ? (din.wadoHttps ? c('evet') : c('hayır (sertifika yok)')) : '—'}</b></div>
             <div className="pcs-oku pcs-genis"><span>{c('IP izin listesi')}</span><b>{din.wadoIzinliIpler.length ? din.wadoIzinliIpler.join(', ') : c('— (herkes)')}</b></div>
           </div>

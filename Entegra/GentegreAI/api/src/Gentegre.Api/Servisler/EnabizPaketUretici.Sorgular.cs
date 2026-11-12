@@ -467,16 +467,14 @@ public sealed partial class EnabizPaketUretici
                        coalesce((select e.ad from public.entegrasyon_hesap e
                                   where e.kod = 'ENABIZ' limit 1), ''),
                        'entegrasyon_hesap.kurum_kodu (tesis)', 'SKRS Kurum',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(b.sube_id, 0)),
                        'c3eade04-4f91-5dab-e043-14031b0ac9f9'
                   from public.belge b where b.id = @p0
                 union all select 'HASTA_BASVURU_BILGILERI/KAYIT_YERI',
                        coalesce((select e.ad from public.entegrasyon_hesap e
                                   where e.kod = 'ENABIZ' limit 1), ''),
                        'entegrasyon_hesap.kurum_kodu (tesis)', 'SKRS Kurum',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(b.sube_id, 0)),
                        'c3eade04-4f91-5dab-e043-14031b0ac9f9'
                   from public.belge b where b.id = @p0
                 union all select 'HASTA_BASVURU_BILGILERI/PROTOKOL_NUMARASI',
@@ -680,11 +678,9 @@ public sealed partial class EnabizPaketUretici
             //   kendi SKRS listesinden (c04bee57-…).
             "AY_SONU" => """
                 select 'AY_SONU_VERI_SETI/KAYIT_YERI',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(a.sube_id, 0)),
                        'entegrasyon_hesap.kurum_kodu', 'SKRS Kurum',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(a.sube_id, 0)),
                        'c3eade04-4f91-5dab-e043-14031b0ac9f9'
                   from public.enabiz_ay_sonu a where a.id = @p0
                 union all select 'AY_SONU_VERI_SETI/KALITE_YIL', a.yil::text,
@@ -750,11 +746,9 @@ public sealed partial class EnabizPaketUretici
             //   (Bakanlik eksik gonderim ile sifir isi ayirt edebilmeli).
             "GUN_SONU" => """
                 select 'GUN_SONU_VERI_SETI/KAYIT_YERI',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(g.sube_id, 0)),
                        'entegrasyon_hesap.kurum_kodu', 'SKRS Kurum',
-                       coalesce((select e.kurum_kodu from public.entegrasyon_hesap e
-                                  where e.kod = 'ENABIZ' limit 1), ''),
+                       public.fn_kurum_skrs(coalesce(g.sube_id, 0)),
                        'c3eade04-4f91-5dab-e043-14031b0ac9f9'
                   from public.enabiz_gun_sonu g where g.id = @p0
                 union all select 'GUN_SONU_VERI_SETI/GUN_SONU_BILGISI[1]/GUN_SONU_TARIH',

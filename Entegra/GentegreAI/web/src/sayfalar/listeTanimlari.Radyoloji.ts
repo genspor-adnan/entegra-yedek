@@ -50,29 +50,29 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     menuSira: 10,
   },
   {
-    // TELETIP AYARLARI (kullanıcı 11.11.2026 "kurum Teletıp ayar ekranını yap", mockup teletip_mirth.html §5): kurum
+    // TELETIP AYARLARI (kullanıcı 11.11.2026 "kurum TeleRadyoloji ayar ekranını yap", mockup teletip_mirth.html §5): kurum
     //   SKRS / MEDULA tesis / firma kodu / Mirth K1 adresi, gönderim aç-kapat. Yalnız sistem yöneticisi (1308). Özel sayfa.
     kaynak: 'teletip-ayar', rota: 'teletip-ayar', ozelSayfa: true,
-    baslik: 'Teletıp Ayarları', yol: 'Radyoloji › Ayarlar › Teletıp Ayarları',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Teletıp Ayarları', ic: '⚙', yetkiKodu: 'radyoloji.teletip.ayar',
+    baslik: 'TeleRadyoloji Ayarları', yol: 'Radyoloji › Ayarlar › TeleRadyoloji Ayarları',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'TeleRadyoloji Ayarları', ic: '⚙', yetkiKodu: 'radyoloji.teletip.ayar',
     menuSira: 95, urunModu: 2,
   },
   {
     // TELETIP PANOSU (kullanıcı 11.11.2026 "Mirth panosunu yap", mockup teletip_mirth.html §2): günün özeti, kuyruk,
     //   Mirth kanal durumları (REST, gentegre_izleme), bağlantı testi, sorunluları toplu yeniden gönder. Özel sayfa.
     kaynak: 'teletip-pano', rota: 'teletip-pano', ozelSayfa: true,
-    baslik: 'Teletıp Panosu', yol: 'Radyoloji › Teletıp Panosu',
-    menuGrup: 'Radyoloji', menuAd: 'Teletıp Panosu', ic: '🏛', yetkiKodu: 'radyoloji.teletip.pano',
+    baslik: 'TeleRadyoloji Panosu', yol: 'Radyoloji › TeleRadyoloji Panosu',
+    menuGrup: 'Radyoloji', menuAd: 'TeleRadyoloji Panosu', ic: '🏛', yetkiKodu: 'radyoloji.teletip.pano',
     menuSira: 54, urunModu: 2,
   },
   {
-    // TELETIP GÖNDERİMLERİ (1304; kullanıcı 11.11.2026 "Teletıp ekranlarını yap", mockup teletip_mirth.html §3):
+    // TELETIP GÖNDERİMLERİ (1304; kullanıcı 11.11.2026 "TeleRadyoloji ekranlarını yap", mockup teletip_mirth.html §3):
     //   istem başına tek satır - Bakanlık'a giden ORM mesajlarının durumu. Çift tık gönderim kartı (/teletip/:istemId,
     //   özel kart: mesaj izi, ham HL7, ne yapmalı, yeniden gönder, önizleme). Varsayılan çip "Sorunlu": günün işi
     //   reddedilen / gidemez mesajlar.
-    kaynak: 'teletip-gonderim', rota: 'teletip', baslik: 'Teletıp Gönderimleri',
-    yol: 'Radyoloji › Teletıp Gönderimleri',
-    kartYolu: '/teletip', kartBaslik: 'Teletıp Gönderimi', kartIc: '🏛', ozelKart: true,
+    kaynak: 'teletip-gonderim', rota: 'teletip', baslik: 'TeleRadyoloji Gönderimleri',
+    yol: 'Radyoloji › TeleRadyoloji Gönderimleri',
+    kartYolu: '/teletip', kartBaslik: 'TeleRadyoloji Gönderimi', kartIc: '🏛', ozelKart: true,
     tarihAlani: 'kabul',
     cipler: [
       { ad: 'Sorunlu',  filtre: { alan: 'genelDurum', op: 'esit', deger: 3 } },
@@ -81,7 +81,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Teletıp Gönderimleri', ic: '🏛', yetkiKodu: 'radyoloji.teletip',
+    menuGrup: 'Radyoloji', menuAd: 'TeleRadyoloji Gönderimleri', ic: '🏛', yetkiKodu: 'radyoloji.teletip',
     menuSira: 55,
   },
   {

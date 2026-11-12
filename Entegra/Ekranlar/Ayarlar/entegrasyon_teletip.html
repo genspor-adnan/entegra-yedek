@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TeleRadyoloji Hesabı (şube başına) — Ayarlar › Entegrasyon — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .bas{max-width:1180px;margin:0 auto 12px;color:var(--navy)}
+  .bas h1{font-size:16px;margin:0 0 4px}
+  .bas p{margin:0 0 4px;color:var(--muted);line-height:1.6;font-size:12px}
+  .win{max-width:1180px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .no{background:rgba(255,255,255,.18);border-radius:3px;padding:0 6px;font-size:11px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  tr.yeni td{background:#f3fbf5}
+  .orta{text-align:center} .sonuk{color:var(--muted)} .yesil{color:var(--ok)} .kirmizi{color:#9d3434} .sari{color:#9a5b00}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.test{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .rz.canli{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.kod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.yeni{background:#2e7d46;color:#fff;border-color:#2e7d46;font-weight:bold}
+  .rz.pasif{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.uyari{background:#fff4e0;color:#9a5b00;border-color:#f0d3a0}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .kart{max-width:1000px}
+  .idstrip{display:grid;grid-template-columns:1.3fr 1.3fr 1fr .6fr .6fr;gap:10px;padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;height:26px}
+  .ipucu{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .grp.salt h4{background:linear-gradient(#f7f7f7,#eef0f2);color:#5b6b7c}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .yari{grid-column:span 2}
+  .iz .tam{grid-column:1 / -1}
+  .test{margin:0 12px 12px;border:1px solid #bfe3cb;background:#f5fbf7;border-radius:3px;font-size:11.5px}
+  .test h5{margin:0;padding:6px 10px;border-bottom:1px solid #d6eedd;color:#2e7d46;font-size:12px}
+  .test table td{border-right:none;padding:4px 10px}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .zincir{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;padding:8px 10px;background:#fff;
+    border:1px solid var(--line2);border-radius:3px;margin:0 12px 12px;line-height:1.6}
+  .zincir .kutu{border:1px solid var(--line);border-radius:3px;padding:3px 8px;background:#fbfcfd}
+  .zincir .kutu b{color:#2c4a6b}
+  .zincir .ok{color:#8fa3b6;font-weight:bold}
+  .not{padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;background:#fff;border-top:1px solid var(--line2)}
+  .not b{color:#3d6294}
+  .maprow{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  ol.kural{margin:0;padding:10px 12px 10px 30px;line-height:1.7;font-size:11.5px}
+  .karar{margin:12px;border:2px dashed #d9a441;background:#fffaf0;border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.6}
+  .karar b{color:#8a6218}
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 12px 12px}
+  .secenek{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px;line-height:1.55}
+  .secenek h5{margin:0 0 4px;font-size:12px;color:#2c4a6b}
+  a.lnk{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="bas">
+  <h1>TeleRadyoloji (Bakanlık) bağlantısı entegrasyon ekranına · her şube kendi gönderimi</h1>
+  <p><b>Ad (kullanıcı 12.11.2026):</b> ekranlarda "Teletıp" yerine <b>TeleRadyoloji</b>. Teknik adlar değişmez: Bakanlık alan adı
+    (teletip.saglik.gov.tr), Mirth kanalları (TELETIP_HL7 / KOS / DOZ), ayar anahtarları ve yetki kodları. Radyoloji › Teleradyoloji menüsündeki
+    <b>kurumlar arası</b> teleradyoloji (kurum, sözleşme, nöbet, fatura) ile karışmasın diye Bakanlık'a gönderim tarafı yer yer
+    <b>"TeleRadyoloji (Bakanlık)"</b> diye nitelenir.</p>
+  <p>Bugün TeleRadyoloji tek kurum ayarı (Radyoloji › TeleRadyoloji Ayarları): bir firma kodu, bir Mirth adresi seti, bir SKRS kodu. Kullanıcı:
+    <i>"her şube için ayrı teleradyoloji gönderimi olabilir"</i>. Şubeler Bakanlık gözünde ayrı tesis (ayrı SKRS / MEDULA tesis kodu) ve
+    ayrı Mirth'e (ya da aynı Mirth'te ayrı kanallara) bağlanabilir.</p>
+  <p>Üç parça: <b>(1)</b> kurum kimliği (SKRS, MEDULA tesis, Bakanlık'ta görünen ad) <b>şube bazlı, TEK kaynak</b> - bugün iki yerde tutuluyor;
+    <b>(2)</b> Bakanlık bağlantısı <b>TELERADYOLOJI</b> entegrasyon hesabı - şube başına satır, test / canlı ayrı; <b>(3)</b> Mirth pano bağlantısı
+    <b>MIRTH</b> hesabı (karar bekliyor). TeleRadyoloji Ayarları ekranı şube özetine döner.</p>
+</div>
+
+<div class="bas" style="border:1px solid #bfe3cb;background:#f5fbf7;padding:8px 12px;border-radius:4px">
+  <p style="color:#2e7d46;margin:0"><b>UYGULANDI (12.11.2026, db/1317-1320).</b> Mockup'tan farklar: (a) şube kimlik tablosu (§4) ana uygulamada
+    <b>TeleRadyoloji Ayarları</b> özet ekranında satır içi düzenlenir - Kurum Profili ekranı GenProfil'de, orada da aynı alanlar (SKRS kurum
+    kodu, MEDULA tesis kodu, Bakanlık'ta görünen ad) var; (b) "Benzerinden kopyala" düğmesi yapılmadı (yeni şube satırı elle doldurulur);
+    (c) MIRTH hesabında parola şifreli alanda, boşsa ortam değişkeni (Mirth__Parola) - iki seçenek birlikte; (d) kanal testi TCP
+    (Mirth HTTP dinleyicisine istek atmak kanalda mesaj açardı) + K2/K3 adresinde sondaki "/" denetimi.</p>
+</div>
+
+<!-- ==================================================== 1 · LİSTE ======== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">1</span> Entegrasyon Hesapları
+    <span class="sp">Yönetim › Ayarlar › Entegrasyon · yetki: entegrasyon</span></div>
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div><div class="btn">✎ Düzenle</div><div class="btn">🗑 Sil</div>
+    <div class="sepv"></div><div class="btn">🔌 Bağlantıyı Sına</div>
+    <div class="ara">🔎 Ara… (kod, ad, şube)</div>
+  </div>
+  <table>
+    <thead><tr><th>Entegrasyon</th><th>Ad</th><th>Şube</th><th class="orta">Ortam</th><th>Kullanıcı</th><th class="orta">Şifre</th>
+      <th>Uygulama Kodu</th><th class="orta">Aktif</th><th>Son Kullanım</th><th>Son Sonuç</th></tr></thead>
+    <tbody>
+      <tr class="sel yeni"><td><span class="rz kod">TELERADYOLOJI</span> TeleRadyoloji (Bakanlık) <span class="rz yeni">YENİ</span></td>
+        <td>TeleRadyoloji - Merkez</td><td>Merkez</td><td class="orta"><span class="rz canli">CANLI</span></td><td class="sonuk">—</td><td class="orta sonuk">—</td>
+        <td>GENTEGRE <span class="sonuk">(firma kodu)</span></td><td class="orta">✔</td><td class="sonuk">12.11.2026 10:41</td>
+        <td class="yesil">K1 ✓ · K2 ✓ · K3 ✓</td></tr>
+      <tr class="yeni"><td><span class="rz kod">TELERADYOLOJI</span> TeleRadyoloji (Bakanlık)</td>
+        <td>TeleRadyoloji (beta) - Merkez</td><td>Merkez</td><td class="orta"><span class="rz test">TEST</span></td><td class="sonuk">—</td><td class="orta sonuk">—</td>
+        <td>GENTEGRE</td><td class="orta"><span class="rz pasif">Pasif</span></td><td class="sonuk">08.11.2026 16:12</td><td class="sonuk">K1 ✓ · K2 ✓ · K3 ✓</td></tr>
+      <tr class="yeni"><td><span class="rz kod">TELERADYOLOJI</span> TeleRadyoloji (Bakanlık)</td>
+        <td>TeleRadyoloji - Kadıköy Şubesi</td><td>Kadıköy Şubesi</td><td class="orta"><span class="rz canli">CANLI</span></td><td class="sonuk">—</td><td class="orta sonuk">—</td>
+        <td>GENTEGRE</td><td class="orta">✔</td><td class="sonuk">12.11.2026 10:38</td><td class="kirmizi">K1 ✓ · K2 ✖ (HTTP 404 - sonda / yok)</td></tr>
+      <tr class="yeni"><td><span class="rz kod">MIRTH</span> Mirth Connect (izleme)</td>
+        <td>Mirth - Merkez sunucu</td><td class="sonuk">Tümü</td><td class="orta"><span class="rz canli">CANLI</span></td><td>gentegre_izleme</td><td class="orta">✔</td>
+        <td class="sonuk">—</td><td class="orta">✔</td><td class="sonuk">12.11.2026 10:40</td><td class="yesil">Mirth 4.5.2 · 6 kanal</td></tr>
+      <tr><td><span class="rz kod">PACS</span> PACS (DICOM)</td><td>ClearCanvas - Merkez</td><td class="sonuk">Tümü</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td>GENTEGRE</td><td class="orta sonuk">—</td><td>SERVERAE</td><td class="orta">✔</td>
+        <td class="sonuk">12.11.2026 00:41</td><td class="yesil">C-ECHO ✓ · C-FIND ✓ · WADO ✓</td></tr>
+    </tbody>
+  </table>
+  <div class="statusbar"><span>TeleRadyoloji: 2 şube canlı · Ataşehir Şubesi'nde hesap yok → kurum geneli hesap da yok → TeleRadyoloji'a gitmez</span></div>
+</div>
+
+<!-- ==================================================== 2 · TELERADYOLOJI KARTI === -->
+<div class="win kart">
+  <div class="title"><span class="dot"></span> <span class="no">2</span> Entegrasyon Hesabı
+    <span class="sp">TELERADYOLOJI · Kadıköy Şubesi · CANLI</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">✖ Kapat</div>
+    <div class="sepv"></div><div class="btn">🔌 Bağlantıyı Sına</div><div class="btn">📋 Benzerinden kopyala</div><div class="btn">🗑 Sil</div>
+  </div>
+  <div class="idstrip">
+    <div class="fld"><label class="req">Entegrasyon</label><div class="inp combo">TeleRadyoloji (Bakanlık)</div></div>
+    <div class="fld"><label>Ad</label><div class="inp">TeleRadyoloji - Kadıköy Şubesi</div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Kadıköy Şubesi</div>
+      <div class="ipucu">her şube kendi satırı; boş = kurum geneli</div></div>
+    <div class="fld"><label>Test Ortamı</label><div class="chk"><input type="checkbox"> Beta</div></div>
+    <div class="fld"><label>Aktif</label><div class="chk"><input type="checkbox" checked> Aktif</div></div>
+  </div>
+  <div class="tabs"><div class="tab">Genel</div><div class="tab active">TeleRadyoloji Bağlantısı</div></div>
+
+  <div class="grp salt">
+    <h4>Kurum kimliği <span class="mini" style="color:#7b8794">şubenin kurum profilinden · burada değişmez · <a class="lnk" href="#4">Kurum Profili ›</a></span></h4>
+    <div class="iz">
+      <div class="fld yari"><label>Bakanlık'ta görünen ad</label><div class="inp ro">Koşuyolu Görüntüleme Kadıköy</div>
+        <div class="ipucu">ORC-21 kurum adı · KOS InstitutionName</div></div>
+      <div class="fld"><label>SKRS kurum kodu</label><div class="inp ro">148</div></div>
+      <div class="fld"><label>MEDULA tesis kodu</label><div class="inp ro">34123456</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Bakanlık kimliği <span class="mini">MSH-3 · ORC-21 · XDS</span></h4>
+    <div class="iz">
+      <div class="fld"><label class="req">Firma kodu</label><div class="inp">GENTEGRE</div>
+        <div class="ipucu">Bakanlık'ın verdiği (Uygulama Kodu); KOS'ta FK</div></div>
+      <div class="fld"><label>Mesaj karakter seti</label><div class="inp combo">UTF8</div>
+        <div class="ipucu">Bakanlık'a önceden bildirilen ile aynı (MSH-18)</div></div>
+      <div class="fld"><label>Şube no</label><div class="inp">2</div>
+        <div class="ipucu">ORC-21 şube bileşeni</div></div>
+      <div class="fld"><label>XDS hasta OID</label><div class="inp">1.3.6.1.4.1.21367.13.20.3000</div></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <h4>Mirth kanalları <span class="mini">Gentegre → Mirth · şubenin Mirth'i ya da aynı Mirth'te ayrı kanal portları</span></h4>
+    <div class="iz">
+      <div class="fld yari"><label class="req">K1 HL7 (MLLP) - istem / rapor</label><div class="inp">10.1.0.12:6661</div></div>
+      <div class="fld yari"><label>K2 KOS (HTTP)</label><div class="inp">http://10.1.0.12:8082/kos</div>
+        <div class="ipucu kirmizi">sonda / olmalı → http://10.1.0.12:8082/kos/ (Jetty 302 verip gövdeyi düşürür)</div></div>
+      <div class="fld yari"><label>K3 Doz (HTTP)</label><div class="inp">http://10.1.0.12:4104/doz/</div></div>
+      <div class="fld yari"><label>Mirth izleme hesabı</label><div class="inp combo">Mirth - Merkez sunucu</div>
+        <div class="ipucu">panodaki kanal durumları için (MIRTH hesabı, §6)</div></div>
+    </div>
+  </div>
+
+  <div class="test">
+    <h5>🔌 Bağlantı testi — 12.11.2026 10:38 <span class="sonuk" style="font-weight:normal">mesaj göndermez</span></h5>
+    <table>
+      <tr><td class="yesil">✓</td><td><b>K1</b> 10.1.0.12:6661 TCP</td><td class="sonuk">bağlandı · 12 ms</td></tr>
+      <tr><td class="kirmizi">✖</td><td><b>K2</b> http://10.1.0.12:8082/kos</td><td class="sonuk">HTTP 404 - adres sonunda "/" eksik</td></tr>
+      <tr><td class="yesil">✓</td><td><b>K3</b> http://10.1.0.12:4104/doz/</td><td class="sonuk">HTTP 200 (boş gövde → "DICM yok" yanıtı)</td></tr>
+      <tr><td class="yesil">✓</td><td><b>Kurum kimliği</b> SKRS 148 · MEDULA 34123456 · firma kodu</td><td class="sonuk">eksik yok · test değeri yok</td></tr>
+      <tr><td class="yesil">✓</td><td><b>Mirth</b> kanal durumları (izleme hesabı)</td><td class="sonuk">TELETIP_HL7 / KOS / DOZ STARTED</td></tr>
+    </table>
+  </div>
+
+  <div class="zincir">
+    <span class="sonuk">Gönderim hesabı (istem / rapor / KOS / doz satırının şubesi):</span>
+    <span class="kutu"><b>1.</b> şubenin aktif TELERADYOLOJI satırı</span><span class="ok">→</span>
+    <span class="kutu"><b>2.</b> kurum geneli aktif TELERADYOLOJI satırı</span><span class="ok">→</span>
+    <span class="kutu"><b>3.</b> yok → o şubenin işleri kuyruğa <u>girmez</u></span>
+  </div>
+  <div class="uyari">
+    <b>Test ve canlı AYRI SATIR</b> (e-Fatura / ÜTS ile aynı): beta satırı Bakanlık beta adreslerini taşıyan Mirth'e, canlı satır canlıya gider.
+    Canlıya geçerken beta pasife alınır, canlı aktif edilir; aynı şube + ortam için tek satır. <b>Benzerinden kopyala</b>: yeni şubenin
+    satırı mevcut bir satırdan (firma kodu, karakter seti, OID aynı) başlar - adresler şubeye göre düzeltilir.
+  </div>
+  <div class="maprow">
+    <span><b>Tablo:</b> entegrasyon_hesap (kod = TELERADYOLOJI)</span><span><b>uygulama_kodu:</b> firma kodu</span>
+    <span><b>url:</b> K1 HL7 adresi</span>
+    <span><b>ayarlar:</b> xdsAdres · dozAdres · encoding · subeNo · xdsHastaOid · mirthHesapId</span>
+    <span><b>Uç:</b> /api/entegrasyon/{id}/sina (TELERADYOLOJI: K1 TCP + K2 / K3 HTTP + kimlik + Mirth)</span>
+  </div>
+</div>
+
+<!-- ==================================================== 3 · TELERADYOLOJI AYARLARI ÖZETİ === -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">3</span> TeleRadyoloji Ayarları <span class="sp">Radyoloji › TeleRadyoloji Ayarları · artık ŞUBE ÖZETİ (düzenleme yok)</span></div>
+  <div class="toolbar">
+    <div class="btn">🔌 Tümünü Sına</div><div class="btn">➕ Şubeye TeleRadyoloji hesabı aç</div>
+    <div class="sepv"></div><div class="btn">🏛 Kurum Profili</div><div class="btn">🔗 Entegrasyon Hesapları</div>
+  </div>
+  <table>
+    <thead><tr><th>Şube</th><th>Bakanlık'ta görünen ad</th><th>SKRS</th><th>MEDULA tesis</th><th>TeleRadyoloji hesabı</th><th class="orta">Ortam</th>
+      <th>K1 HL7</th><th class="orta">K2</th><th class="orta">K3</th><th>Durum</th></tr></thead>
+    <tbody>
+      <tr><td><b>Merkez</b></td><td>Koşuyolu Görüntüleme</td><td>147</td><td>34100001</td><td>TeleRadyoloji - Merkez</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td>10.0.0.12:6661</td><td class="orta yesil">✓</td><td class="orta yesil">✓</td>
+        <td class="yesil">gönderiyor</td></tr>
+      <tr class="sel"><td><b>Kadıköy Şubesi</b></td><td>Koşuyolu Görüntüleme Kadıköy</td><td>148</td><td>34123456</td><td>TeleRadyoloji - Kadıköy Şubesi</td>
+        <td class="orta"><span class="rz canli">CANLI</span></td><td>10.1.0.12:6661</td><td class="orta kirmizi">✖</td><td class="orta yesil">✓</td>
+        <td class="kirmizi">KOS gidemiyor (K2 adresi)</td></tr>
+      <tr><td><b>Ataşehir Şubesi</b></td><td class="sari">— (kurum adı)</td><td class="kirmizi">yok</td><td class="kirmizi">yok</td><td class="sonuk">— hesap yok</td>
+        <td class="orta sonuk">—</td><td class="sonuk">—</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td>
+        <td><span class="rz pasif">TeleRadyoloji kapalı</span> <span class="sonuk">istemler kuyruğa girmez</span></td></tr>
+    </tbody>
+  </table>
+  <div class="not">
+    Bugünkü tek ekran (§5 teletip_mirth.html) bu özete döner: her şubenin kimliği nereden, hangi hesapla, kanallar ayakta mı - tek bakışta.
+    Düzenleme kimlikte Kurum Profili'nde, bağlantıda Entegrasyon Hesapları'nda. <b>Dışa açık WADO</b> kurulumda kalır (sunucunun açtığı port);
+    burada ve PACS kartında yalnız durumu görünür.
+  </div>
+</div>
+
+<!-- ==================================================== 4 · KURUM PROFİLİ (ŞUBE KİMLİĞİ) === -->
+<div class="win" id="4">
+  <div class="title"><span class="dot"></span> <span class="no">4</span> Kurum Profili › Şube kimlikleri <span class="sp">TEK KAYNAK · TeleRadyoloji, e-Nabız, MEDULA buradan okur</span></div>
+  <div class="toolbar"><div class="btn primary">💾 Kaydet</div><div class="btn">↻ Çakışma raporu</div></div>
+  <table>
+    <thead><tr><th>Şube</th><th>Bakanlık'ta görünen ad</th><th>SKRS kurum kodu</th><th>MEDULA tesis kodu</th><th>Okuyanlar</th></tr></thead>
+    <tbody>
+      <tr><td><b>Kurum geneli</b> <span class="sonuk">(şube boşsa)</span></td><td><span class="inp" style="display:inline-flex;min-width:220px">Koşuyolu Görüntüleme</span></td>
+        <td><span class="inp" style="display:inline-flex;width:90px">147</span></td><td><span class="inp" style="display:inline-flex;width:110px">34100001</span></td>
+        <td class="sonuk">TeleRadyoloji (Bakanlık) · e-Nabız · MEDULA · kurumlar arası teleradyoloji teslimi</td></tr>
+      <tr><td><b>Merkez</b></td><td class="sonuk">— (kurum genelinden)</td><td class="sonuk">— (147)</td><td class="sonuk">— (34100001)</td><td class="sonuk">aynı</td></tr>
+      <tr class="sel"><td><b>Kadıköy Şubesi</b></td><td><span class="inp" style="display:inline-flex;min-width:220px">Koşuyolu Görüntüleme Kadıköy</span></td>
+        <td><span class="inp" style="display:inline-flex;width:90px">148</span></td><td><span class="inp" style="display:inline-flex;width:110px">34123456</span></td><td class="sonuk">aynı</td></tr>
+      <tr><td><b>Ataşehir Şubesi</b></td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">—</td><td class="sonuk">kurum genelini kullanır</td></tr>
+    </tbody>
+  </table>
+  <div class="uyari" style="margin-top:12px">
+    <b>Bugün iki yerde:</b> MEDULA tesis kodu hem kurum profilinde (TeleRadyoloji okur) hem Entegrasyon › MEDULA hesabının "Kurum / Tesis Kodu"
+    alanında (Medula servisi okur); SKRS kurum kodu hem <code>kurum.skrs_kodu</code> ayarında (TeleRadyoloji, kurumlar arası teleradyoloji teslimi) hem
+    Entegrasyon › ENABIZ hesabının "Kurum / Tesis Kodu" alanında (e-Nabız). Biri güncellenip öteki unutulursa Bakanlık'a farklı kod gider.
+    <b>Yeni hâli:</b> ikisi de yalnız burada; MEDULA / ENABIZ kartlarındaki alan salt okunur gösterilir ("Kurum Profili'nden").
+  </div>
+  <div class="test" style="border-color:#f0d3a0;background:#fffaf0">
+    <h5 style="color:#9a5b00;border-color:#f3e2bf">↻ Çakışma raporu — geçişte bir kez, sonra istendikçe</h5>
+    <table>
+      <tr><td class="sari">!</td><td><b>MEDULA tesis</b> kurum geneli: kurum profili <b>34100001</b> · MEDULA hesabı <b>34100010</b></td><td class="sonuk">hangisi doğru? seçilen yazılır, öteki iz olarak kalır</td></tr>
+      <tr><td class="yesil">✓</td><td><b>SKRS</b> kurum geneli: ayar 147 · ENABIZ hesabı 147</td><td class="sonuk">aynı - taşındı</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================================================== 5 · MIRTH HESABI (KARAR) === -->
+<div class="win kart">
+  <div class="title"><span class="dot"></span> <span class="no">5</span> Entegrasyon Hesabı <span class="sp">MIRTH · Tümü · panodaki kanal durumları</span></div>
+  <div class="idstrip">
+    <div class="fld"><label class="req">Entegrasyon</label><div class="inp combo">Mirth Connect (izleme)</div></div>
+    <div class="fld"><label>Ad</label><div class="inp">Mirth - Merkez sunucu</div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Tümü</div></div>
+    <div class="fld"><label>Test</label><div class="chk"><input type="checkbox"> —</div></div>
+    <div class="fld"><label>Aktif</label><div class="chk"><input type="checkbox" checked> Aktif</div></div>
+  </div>
+  <div class="grp">
+    <h4>Mirth REST <span class="mini">yalnız okuma: kanal durumu / istatistik</span></h4>
+    <div class="iz">
+      <div class="fld yari"><label class="req">Adres</label><div class="inp">https://10.0.0.12:8443/api</div></div>
+      <div class="fld"><label class="req">Kullanıcı</label><div class="inp">gentegre_izleme</div></div>
+      <div class="fld"><label>Parola</label><div class="inp">••••••••</div></div>
+      <div class="fld"><label>Sertifikayı doğrula</label><div class="chk"><input type="checkbox"> kendinden imzalıysa kapalı</div></div>
+    </div>
+  </div>
+  <div class="karar">
+    <b>KARAR BEKLİYOR — parola nerede dursun?</b>
+    <div class="iki" style="margin:8px 0 0">
+      <div class="secenek"><h5>A) Hesapta, şifreli</h5>Entegrasyon hesaplarının şifre alanı gibi (AES-GCM). Ekrandan değişir, "Bağlantıyı Sına" çalışır,
+        şubeye göre farklı Mirth tanımlanabilir. Yetkili yönetici parolayı değiştirebilir (göremez).</div>
+      <div class="secenek"><h5>B) Ortamda kalsın (bugünkü)</h5>Hesapta adres + kullanıcı; parola yalnız sunucu ortam değişkeninde
+        (<code>Mirth__Parola</code>). Veritabanı yedeğinde yok; değiştirmek için sunucuya erişim gerekir. Şube başına farklı Mirth parolası olmaz.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================== 6 · KURALLAR + GEÇİŞ === -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">6</span> Kurallar ve geçiş</div>
+  <ol class="kural">
+    <li><b>Şube başına gönderim</b> — istem / rapor / KOS / doz satırı şubesiyle kuyruğa girer; işçi o şubenin TELERADYOLOJI hesabıyla (yoksa kurum geneli) gönderir. İkisi de yoksa ya da pasifse o şubenin işleri <b>kuyruğa girmez</b> (bugünkü "teletip.aktif = 0" davranışının şube karşılığı).</li>
+    <li><b>Kimlik şubeden</b> — ORM / ORU ORC-21, KOS InstitutionName / RetrieveLocationUID, doz künyesi şubenin kurum profilinden (şube boşsa kurum geneli). Firma kodu, karakter seti, OID hesaptan.</li>
+    <li><b>Tek kaynak</b> — SKRS ve MEDULA tesis kodu yalnız Kurum Profili'nde; Medula ve e-Nabız da oradan okur. MEDULA / ENABIZ kartlarındaki "Kurum / Tesis Kodu" bu iki servis için salt okunur.</li>
+    <li><b>Geçiş (otomatik, bir kez)</b> — <code>teletip.*</code> ayarları → kurum geneli TELERADYOLOJI satırı (aktif = teletip.aktif); <code>kurum.skrs_kodu</code> → kurum profili kurum geneli; ENABIZ / MEDULA kurum_kodu farklıysa <b>çakışma raporu</b> (kendiliğinden ezilmez). Eski anahtarlar silinmez, okunmaz olur.</li>
+    <li><b>Mirth kanalları şube başına</b> — aynı Mirth'te şube başına ayrı port seti (K1 6661 / 6662…) ya da şubenin kendi Mirth'i; Gentegre yalnız hesaptaki adrese gider. Kanal üretimi (mirth-kanallar.ps1) şube parametresi alır.</li>
+    <li><b>Pano / liste</b> — TeleRadyoloji Panosu ve Gönderimler listesi şube süzgeci alır; yönetici tüm şubeleri, şube kullanıcısı kendi şubesini görür.</li>
+    <li><b>Dışa açık WADO</b> kurulumda kalır; KOS'taki RetrieveLocationUID WADO'yu sunan şubenin SKRS'si (merkezden sunuluyorsa merkezinki - kılavuz 3.43 § 4.1).</li>
+    <li><b>Yetki</b> — hesaplar <code>entegrasyon</code>; şube özeti <code>radyoloji.teletip.ayar</code> (görüntüleme); kurum profili mevcut yetkisi. Değişiklikler ISLEMLOG'a.</li>
+  </ol>
+</div>
+
+</body>
+</html>
