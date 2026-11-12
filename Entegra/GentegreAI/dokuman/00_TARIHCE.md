@@ -805,6 +805,13 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     ">0", "<5", ">=10", "<=3", "<>0", "10..20" (arası) ve düz sayıyı (eşit) anlar, ondalık virgül olur, yarım ifade
     süzmez. Bütün listelerde geçerli (fiyat, KDV, tutar…). Tarayıcıda stok listesi Kalan ">0": 50 → 1 satır. Test
     `sayiFiltresi.test.ts`.
+- **MEDX tedarikçi listesi zaman aşımı (db/1327; kullanıcı: "medx serverda tedarikçi listesi hata veriyor.. yeni alış
+  irsaliyesi deyince gelen tedarikçi listesi de hatalı"):** sunucu günlüğü `/api/liste/cari` → Npgsql "Timeout during reading
+  attempt". Cari listesi `v_cari_ozet`'e bağlanıyor; görünümün bakiye / döviz / ay / eğri CTE'leri satır içine açılıyor,
+  planlayıcı 1-3 satır tahminle iç içe döngü seçip eğri adımını her cari için yeniden sıralıyordu (MEDX 533 cari × ~3000
+  satır). 1327 ara adımları materialized yapar (sütun ve hesap aynı, create or replace): MEDX'te aynı sorgu 2030 ms → 57 ms
+  (salt okuma ölçümü). Yerel UNIVERSE / ZONE'da plan zaten iyiydi (34 / 142 ms → 68 / 166 ms, kararlı). Dev DB'lere
+  uygulandı; MEDX'e yayın kullanıcı onayı bekliyor.
 
 ### 10.11.2026
 

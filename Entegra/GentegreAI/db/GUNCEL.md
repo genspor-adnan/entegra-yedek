@@ -773,7 +773,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cagri_kuyruk_lookup` | `839_cagri_merkezi.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `940_personel_unvan_yalniz_onek.sql` | 037_kisi_karti.sql, 122_aday_musteri.sql |
-| `v_cari_ozet` | `1162_tedarikci_v3.sql` | 1150_cari_ozet.sql |
+| `v_cari_ozet` | `1327_cari_ozet_materialized.sql` | 1150_cari_ozet.sql, 1162_tedarikci_v3.sql |
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |
