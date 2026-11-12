@@ -811,7 +811,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   planlayıcı 1-3 satır tahminle iç içe döngü seçip eğri adımını her cari için yeniden sıralıyordu (MEDX 533 cari × ~3000
   satır). 1327 ara adımları materialized yapar (sütun ve hesap aynı, create or replace): MEDX'te aynı sorgu 2030 ms → 57 ms
   (salt okuma ölçümü). Yerel UNIVERSE / ZONE'da plan zaten iyiydi (34 / 142 ms → 68 / 166 ms, kararlı). Dev DB'lere
-  uygulandı; MEDX'e yayın kullanıcı onayı bekliyor.
+  uygulandı; MEDX'e yayınlandı (1281 → 1327, yedek ~/yedek/MEDX_20261112_1220.dump; kapıyı saha planı testi tarih
+  hatası durdurmuştu - 22c8375). Yayın sonrası aynı sorgu MEDX'te 55 ms.
+- **Banka / kasa hesabı kartında Resim / Doküman sekmesi (kullanıcı: "banka hesabı kartı Id 5 te resim doküman sekmede hata"):**
+  doküman ucu `hesap` kartını tanımıyordu ("Bilinmeyen kart: hesap" → 500; aynı hata MEDX günlüğünde de vardı). `hesap`
+  kart → kaynak eşlemesine (DokumanUclari), izinli kaynaklara (DokumanDeposu) ve erişim kuralına (DokumanErisimi: yetki
+  "hesap", kayıt kapsamı hesap listesi) eklendi. API'de liste 200, yükleme / silme çalışıyor.
 
 ### 10.11.2026
 

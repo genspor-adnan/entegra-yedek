@@ -51,6 +51,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["demirbas"]        = new(["demirbas", "kys.kalibrasyon"], ["demirbas", "kys-kalibrasyon"]),
         // Kalite › Eğitim belgeleri (1065): kayıt kapsamı eğitim listesinden.
         ["kys-egitim"]      = new(["kys.egitim"], ["kys-egitim"]),
+        // KASA / BANKA HESABI (12.11.2026): hesap kartının yetkisi, kayıt kapsamı hesap listesinden.
+        ["hesap"]           = new(["hesap"], ["hesap"]),
         ["klasor"]          = new(["dokuman"], []),
         ["sube"]            = new(["sube"], [], HerkeseGor: true),
         ["ebelge-xslt"]     = new(["ebelge_xslt"], [], HerkeseGor: true),

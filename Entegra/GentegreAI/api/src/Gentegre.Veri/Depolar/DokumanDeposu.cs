@@ -66,7 +66,9 @@ public sealed class DokumanDeposu
               "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
               "kys-egitim", "personel-belge", "planli-gider",
               // ÜRETİM FİŞİ (1253): parti fotoğrafı, kalite raporu, teknik resim - kaynak_id fiş.
-              "uretim-fisi" };
+              "uretim-fisi",
+              // KASA / BANKA HESABI (12.11.2026): hesap kartının Resim / Doküman sekmesi - kaynak_id hesap.
+              "hesap" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.
