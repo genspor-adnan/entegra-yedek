@@ -71,10 +71,11 @@ public sealed class TeleradyolojiHesapTestleri(VeritabaniOlgusu olgu) : IClassFi
             insert into public.entegrasyon_hesap (kod, ad, sube_id, test_mi, aktif, kurum_kodu, ayarlar)
             values ('ENABIZ', 'TT ENABIZ', null, 0, 1, '500154', '{"medulaTesisKodu":"11068891","bakanlikAd":"Enabiz Ad"}'::jsonb)
             """, t, [], Iptal);
-        // 1323: şubenin KENDİ profili kurum geneli e-Nabız'ı ezer (sıra: şube e-Nabız → şube profili → kurum geneli e-Nabız).
+        // 1328: kurum geneli e-Nabız şube PROFİLİNİ ezer (sıra: şube e-Nabız → kurum geneli e-Nabız → şube profili) -
+        //   profil ekrandan düzenlenemiyor, yalnız yedek. Şubeye özel kod için şubenin kendi e-Nabız satırı açılır.
         var ke = await b.TekAsync("select ad, skrs, tesis, kaynak, sube_enabiz_id from public.fn_kurum_kimlik(@p0)", t, [s1],
             o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.IsDBNull(4) ? "" : o.GetInt32(4).ToString() }, Iptal);
-        Assert.Equal(new[] { "Şube Ad", "148", "34123456", "kurum profili (şube)", "" }, ke);
+        Assert.Equal(new[] { "Enabiz Ad", "500154", "11068891", "e-Nabız (kurum geneli)", "" }, ke);
         // Kurum geneli (şube 0) e-Nabız'dan.
         var k0e = await b.TekAsync("select ad, skrs, tesis, kaynak from public.fn_kurum_kimlik(0)", t, [],
             o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3) }, Iptal);
@@ -85,7 +86,7 @@ public sealed class TeleradyolojiHesapTestleri(VeritabaniOlgusu olgu) : IClassFi
             """, t, [s1], Iptal);
         var ks = await b.TekAsync("select skrs, tesis, kaynak, sube_enabiz_id is not null from public.fn_kurum_kimlik(@p0)", t, [s1],
             o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetBoolean(3).ToString() }, Iptal);
-        Assert.Equal(new[] { "500155", "34123456", "e-Nabız (şube)", "True" }, ks);      // tesis şube e-Nabız'da yok → şube profili
+        Assert.Equal(new[] { "500155", "11068891", "e-Nabız (şube)", "True" }, ks);      // tesis şube e-Nabız'da yok → kurum geneli e-Nabız
 
         // --- hesap yok: kapalı. 1324: eski teletip.* anahtarları OKUNMAZ (teletip.aktif = 1 olsa da).
         await b.CalistirAsync("update public.referans set deger = '1' where anahtar = 'teletip.aktif'", t, [], Iptal);

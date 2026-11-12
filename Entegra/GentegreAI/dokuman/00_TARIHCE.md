@@ -830,6 +830,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     büyük); TekKare çok kareli nesnede kare başı işlevsel grup (çizici zaten üst düzey rescale / pencere kullanıyor -
     gerileme değil); stokKontrolu=false akışlarında geriye dönük engel (kullanıcı kararı "her zaman engelle"); kurum profili
     şube SKRS'sinin ekrandan düzenlenememesi (karar bekliyor). Tam paket 1078 / 0 düşen.
+- **1328 - Kurum kimliği: e-Nabız önce, kurum profili yalnız yedek (kullanıcı "1.seçenek yap"):** fn_kurum_kimlik alan
+  alan şube e-Nabız → kurum geneli e-Nabız → şube profili → kurum geneli profil → eski yer. Profildeki SKRS / Bakanlık adı
+  ekrandan düzenlenemediği için şubede kalmış eski / test kod artık kurum geneli e-Nabız'ı ezmiyor. Şubeye özel kod =
+  şubenin kendi e-Nabız satırı. TeleRadyoloji pano çakışma çözümü: şubenin e-Nabız satırı yok + kurum geneli var ise profile
+  yazmaz (etkisiz kalırdı), "şubeye e-Nabız satırı açın" der. Test beklentileri yeni sıraya; tam paket 1078 / 0.
 
 ### 10.11.2026
 

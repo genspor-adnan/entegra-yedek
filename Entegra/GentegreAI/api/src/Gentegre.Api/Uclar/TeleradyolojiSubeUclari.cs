@@ -102,8 +102,15 @@ public static class TeleradyolojiSubeUclari
             var deger = istek.Secim == "eski" ? c.Eski : c.Profil;
             // 1323: yalnız şubenin KENDİ e-Nabız satırına yazılır (şube 0 → kurum geneli satır). Şubenin satırı yoksa şubenin
             //   kurum profili - kurum geneli satıra yazmak bütün şubelerin kodunu değiştirirdi.
-            var enabizId = await b.TekDegerAsync<int?>(
-                "select case when @p0 = 0 then enabiz_hesap_id else sube_enabiz_id end from public.fn_kurum_kimlik(@p0)", islem, [c.Sube], iptal);
+            var (enabizId, genelEnabizVar) = await b.TekAsync(
+                "select case when @p0 = 0 then enabiz_hesap_id else sube_enabiz_id end, enabiz_hesap_id is not null from public.fn_kurum_kimlik(@p0)",
+                islem, [c.Sube], o => Tuple.Create(o.IsDBNull(0) ? (int?)null : o.GetInt32(0), o.GetBoolean(1)), iptal)
+                ?? Tuple.Create((int?)null, false);
+            // 1328: kurum profili yalnız YEDEK (kurum geneli e-Nabız onu ezer) - şubenin kendi e-Nabız satırı yokken kurum
+            //   geneli e-Nabız varsa profile yazmak etkisiz kalırdı; şubeye e-Nabız satırı açılması istenir.
+            if (enabizId is null && c.Sube != 0 && genelEnabizVar)
+                throw GentegreHatasi.IsKurali(
+                    "Bu şubenin kendi e-Nabız satırı yok - şubeye özel kod için Ayarlar › Entegrasyon › e-Nabız'da şube seçili bir satır açın; kurum geneli değer kullanılacaksa çakışmayı ondan seçin.");
             int n;
             if (enabizId is int eid)
                 n = c.Alan == "skrs"
