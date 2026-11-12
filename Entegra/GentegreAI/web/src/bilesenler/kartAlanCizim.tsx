@@ -79,7 +79,7 @@ export interface AlanCizimBaglami {
   alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
   /** Uzun metin alanının GİRDİSİ yerine ekran-özel kutu (muayene: makro rozetli metin);
       undefined dönerse alan olağan textarea ile çizilir. */
-  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean): React.ReactNode | undefined;
+  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean, kart?: Record<string, unknown>): React.ReactNode | undefined;
 }
 
 /**
@@ -360,7 +360,7 @@ export function alanCizici(b: AlanCizimBaglami) {
         //   yazilani gormeden yaziliyordu. Esik alan tanimindan gelir -
         //   sunucu "bu alan uzun" bilgisini zaten enFazlaUzunluk ile veriyor,
         //   sozlesmeye yeni bayrak eklemek gerekmedi.
-        alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir) ?? <textarea
+        alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir, deger) ?? <textarea
           key={a.ad}
           // data-alan: kart duzeyindeki klavye yakalayicilari (muayene metin
           //   makrosu, 931) hangi alanda yazildigini bilsin.
@@ -371,7 +371,7 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
         />
-      ) : alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir) ?? (
+      ) : alanGirdisi?.(a.ad, String(deger[a.ad] ?? ''), v => alanDegistir(a.ad, v), salt || !a.yazilabilir, deger) ?? (
         <input
           key={a.ad}
           data-alan={a.ad}

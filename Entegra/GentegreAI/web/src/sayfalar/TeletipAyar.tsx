@@ -1,39 +1,34 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gonder, istek } from '../api/cekirdek';
-import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
-import { useOturum } from '../kimlik/OturumBaglami';
+import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { c } from '../dil/ceviri';
 
 /**
  * TELERADYOLOJİ AYARLARI = ŞUBE ÖZETİ (1317; mockup Ekranlar/Ayarlar/entegrasyon_teletip.html §3-§4). Eskiden tek kurum
  * ayarıydı (Teletıp Ayarları). Artık her şube Bakanlık'a kendi kimliği ve kendi hesabıyla gönderir:
- *   - kimlik (Bakanlık'ta görünen ad, SKRS, MEDULA tesis) = kurum profili, şube bazlı TEK KAYNAK - burada düzenlenir
- *     (GenProfil'deki kurum profili ekranında da aynı alanlar);
+ *   - kimlik (Bakanlık'ta görünen ad, SKRS, MEDULA tesis) = ANA kaynak e-Nabız hesabı (1321, şube satırı → kurum geneli;
+ *     yoksa kurum profili / eski ayar) - burada yalnız görünür, düzenleme e-Nabız hesabının "Kurum Kimliği" sekmesinde;
  *   - gönderim hesabı = Ayarlar › Entegrasyon › TeleRadyoloji (şube satırı → kurum geneli), burada yalnız görünür;
  *   - kimlik çakışmaları (geçişte iki yerde farklı bulunan kodlar) seçilerek çözülür.
  * "Tümünü Sına" kanal adreslerine TCP yapar, mesaj göndermez. CSS öneki `tta-`.
  */
 type Hesap = { hesapId: number; hesapAd: string; test: boolean; firmaKodu: string; hl7Adres: string; xdsAdres: string;
                dozAdres: string; encoding: string; subeNo: string; xdsHastaOid: string };
-type Sube = { subeId: number; subeAdi: string; kimlik: { ad: string; skrs: string; tesis: string; kendi: boolean }; hesap: Hesap | null };
+type Sube = { subeId: number; subeAdi: string; kimlik: { ad: string; skrs: string; tesis: string; kaynak: string; enabizHesapId: number | null }; hesap: Hesap | null };
 type Cakisma = { id: number; subeId: number; subeAdi: string; alan: string; profilDegeri: string; eskiKaynak: string; eskiDeger: string };
-type Ozet = { hesapModeli: boolean; subeler: Sube[]; cakismalar: Cakisma[];
+type Ozet = { hesapModeli: boolean; aktif: boolean; subeler: Sube[]; cakismalar: Cakisma[];
               mirth: { url: string; kullanici: string; parolaTanimli: boolean; kaynak: string } };
 type Kanal = { adres: string; acik: boolean; hata: string; sureMs: number } | null;
 type Sinama = Record<number, { k1: Kanal; k2: Kanal; k3: Kanal }>;
-type Duzen = { ad: string; skrs: string; tesis: string };
 
 export function TeletipAyar() {
   const git = useNavigate();
-  const { yetki } = useOturum();
   const [v, setV] = useState<Ozet | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [sinama, setSinama] = useState<Sinama | null>(null);
   const [mesgul, setMesgul] = useState(false);
-  const [duzen, setDuzen] = useState<Record<number, Duzen>>({});
 
   const yukle = useCallback(async () => {
     try { setV(await istek<Ozet>('/api/teletip/subeler')); setHata(null) } catch (e) { setHata(hataMetni(e)) }
@@ -50,14 +45,6 @@ export function TeletipAyar() {
       setSinama(Object.fromEntries(y.sonuclar.map(s => [s.subeId, { k1: s.k1, k2: s.k2, k3: s.k3 }])));
     } finally { setMesgul(false) }
   });
-  const kimlikKaydet = (s: Sube) => void guvenli(async () => {
-    const d = duzen[s.subeId]; if (!d) return;
-    if (!s.kimlik.kendi && !await onay(c('Bu şubeye ayrı kimlik girmek şubeye ayrı kurum profili satırı açar (diğer profil ayarları kurum genelinden kopyalanır). Devam?'))) return;
-    await api.kurumProfilYaz({ subeId: s.subeId, skrsKodu: d.skrs.trim(), tesisKodu: d.tesis.trim(), bakanlikAd: d.ad.trim() });
-    setDuzen(x => { const y = { ...x }; delete y[s.subeId]; return y });
-    mesaj(c('Kurum kimliği kaydedildi.'));
-    await yukle();
-  });
   const cakismaCoz = (k: Cakisma, secim: 'profil' | 'eski') => void guvenli(async () => {
     const y = await gonder<{ mesaj: string }>(`/api/teletip/cakisma/${k.id}/coz`, { secim });
     mesaj(y.mesaj); await yukle();
@@ -65,7 +52,6 @@ export function TeletipAyar() {
   const kanal = (k: Kanal | undefined) => !k ? <span className="tta-soluk">—</span>
     : k.acik ? <span className="tta-ok" title={`${k.adres} · ${k.sureMs} ms`}>✓</span>
     : <span className="tta-hata" title={`${k.adres}: ${k.hata}`}>✖</span>;
-  const yetkiAyar = yetki('ayar', 'degistir');   // kurum profili yazma yetkisi
 
   return (
     <div className="fm-sayfa tta" data-testid="teletip-ayar">
@@ -85,39 +71,30 @@ export function TeletipAyar() {
 
       <table className="tta-tablo">
         <thead><tr>
-          <th>{c('Şube')}</th><th>{c("Bakanlık'ta görünen ad")}</th><th>SKRS</th><th>{c('MEDULA tesis')}</th><th></th>
+          <th>{c('Şube')}</th><th>{c("Bakanlık'ta görünen ad")}</th><th>SKRS</th><th>{c('MEDULA tesis')}</th><th>{c('Kimlik nereden')}</th>
           <th>{c('TeleRadyoloji hesabı')}</th><th className="orta">{c('Ortam')}</th><th>K1 HL7</th>
           <th className="orta">K1</th><th className="orta">K2</th><th className="orta">K3</th><th>{c('Durum')}</th>
         </tr></thead>
         <tbody>
           {v.subeler.map(s => {
-            const d = duzen[s.subeId];
             const sn = sinama?.[s.subeId];
             const kanalSorun = sn && [sn.k1, sn.k2, sn.k3].some(k => k && !k.acik);
             const test = s.kimlik.skrs === '999999' || s.kimlik.tesis === '99999999';
-            const durum = !s.hesap ? <span className="rz gri">{c('TeleRadyoloji kapalı')}</span>
+            const durum = !s.hesap || (!v.hesapModeli && !v.aktif) ? <span className="rz gri">{c('TeleRadyoloji kapalı')}</span>
               : !s.kimlik.skrs || !s.kimlik.tesis ? <span className="tta-kirmizi">{c('kimlik eksik')}</span>
               : kanalSorun ? <span className="tta-kirmizi">{c('kanal sorunu')}</span>
               : test ? <span className="tta-sari">{c('TEST kimliği')}</span>
               : <span className="tta-yesil">{c('gönderiyor')}</span>;
             return (
               <tr key={s.subeId}>
-                <td><b>{s.subeAdi}</b>{!s.kimlik.kendi && <div className="tta-soluk">{c('kimlik kurum genelinden')}</div>}</td>
-                {d ? <>
-                  <td><input className="inp" value={d.ad} placeholder={c('boş = şube unvanı')} onChange={e => setDuzen(x => ({ ...x, [s.subeId]: { ...d, ad: e.target.value } }))} /></td>
-                  <td><input className="inp tta-kisa" value={d.skrs} onChange={e => setDuzen(x => ({ ...x, [s.subeId]: { ...d, skrs: e.target.value } }))} /></td>
-                  <td><input className="inp tta-kisa" value={d.tesis} onChange={e => setDuzen(x => ({ ...x, [s.subeId]: { ...d, tesis: e.target.value } }))} /></td>
-                  <td className="tta-dugmeler">
-                    <button type="button" className="d" onClick={() => kimlikKaydet(s)}>{c('Kaydet')}</button>
-                    <button type="button" className="d" onClick={() => setDuzen(x => { const y = { ...x }; delete y[s.subeId]; return y })}>✖</button>
-                  </td>
-                </> : <>
-                  <td>{s.kimlik.ad || '—'}</td>
-                  <td className={!s.kimlik.skrs ? 'tta-kirmizi' : s.kimlik.skrs === '999999' ? 'tta-sari' : ''}>{s.kimlik.skrs || c('yok')}</td>
-                  <td className={!s.kimlik.tesis ? 'tta-kirmizi' : s.kimlik.tesis === '99999999' ? 'tta-sari' : ''}>{s.kimlik.tesis || c('yok')}</td>
-                  <td>{yetkiAyar && <button type="button" className="d" title={c('Kimliği düzenle (kurum profili)')}
-                        onClick={() => setDuzen(x => ({ ...x, [s.subeId]: { ad: s.kimlik.kendi ? s.kimlik.ad : '', skrs: s.kimlik.kendi ? s.kimlik.skrs : '', tesis: s.kimlik.kendi ? s.kimlik.tesis : '' } }))}>✎</button>}</td>
-                </>}
+                <td><b>{s.subeAdi}</b></td>
+                <td>{s.kimlik.ad || '—'}</td>
+                <td className={!s.kimlik.skrs ? 'tta-kirmizi' : s.kimlik.skrs === '999999' ? 'tta-sari' : ''}>{s.kimlik.skrs || c('yok')}</td>
+                <td className={!s.kimlik.tesis ? 'tta-kirmizi' : s.kimlik.tesis === '99999999' ? 'tta-sari' : ''}>{s.kimlik.tesis || c('yok')}</td>
+                <td>{s.kimlik.enabizHesapId
+                  ? <a className="tta-lnk" title={c('Kimliği düzenle: e-Nabız hesabı › Kurum Kimliği')}
+                       onClick={() => git(`/entegrasyon-hesap/${s.kimlik.enabizHesapId}`)}>{s.kimlik.kaynak}</a>
+                  : <span className="tta-sari" title={c("e-Nabız hesabı yok - kimlik kurum profilinden / eski ayardan. Ayarlar › Entegrasyon'da e-Nabız hesabı açın.")}>{s.kimlik.kaynak}</span>}</td>
                 <td>{s.hesap ? <a className="tta-lnk" onClick={() => s.hesap!.hesapId > 0 && git(`/entegrasyon-hesap/${s.hesap!.hesapId}`)}>{s.hesap.hesapAd}</a>
                              : <span className="tta-soluk">{c('— hesap yok')}</span>}</td>
                 <td className="orta">{s.hesap ? (s.hesap.test ? <span className="rz uyari">BETA</span> : <span className="rz olumlu">{c('CANLI')}</span>) : '—'}</td>
@@ -142,6 +119,7 @@ export function TeletipAyar() {
                 <td className="tta-dugmeler">
                   <button type="button" className="d" onClick={() => cakismaCoz(k, 'profil')}>{c('Profildeki doğru')}</button>
                   <button type="button" className="d" onClick={() => cakismaCoz(k, 'eski')}>{c('Eski değer doğru')}</button>
+                  <span className="tta-soluk"> {c('seçilen e-Nabız hesabına yazılır')}</span>
                 </td>
               </tr>
             ))}</tbody>
@@ -150,7 +128,7 @@ export function TeletipAyar() {
       )}
 
       <div className="tta-not">
-        <b>{c('Nasıl çalışır:')}</b> {c("istem / rapor / KOS / doz o işin şubesinin TeleRadyoloji hesabıyla gider (şube satırı → kurum geneli); ikisi de yoksa o şubenin işleri kuyruğa girmez. Kimlik (ORC-21, KOS InstitutionName, doz künyesi) şubenin kurum profilinden - e-Nabız ve MEDULA da aynı kaynaktan okur. Bağlantı ayarları (firma kodu, Mirth K1 / K2 / K3, karakter seti) Entegrasyon Hesapları'nda. Dışa açık WADO kurulumda kalır (Ayarlar › Entegrasyon › PACS kartında durumu görünür).")}
+        <b>{c('Nasıl çalışır:')}</b> {c("istem / rapor / KOS / doz o işin şubesinin TeleRadyoloji hesabıyla gider (şube satırı → kurum geneli); ikisi de yoksa o şubenin işleri kuyruğa girmez. Kimlik (ORC-21, KOS InstitutionName, doz künyesi) şubenin e-Nabız hesabından (her HBYS e-Nabız kullanmak zorunda - ana kaynak); MEDULA da oradan okur. Bağlantı ayarları (firma kodu, Mirth K1 / K2 / K3, karakter seti) Entegrasyon Hesapları'nda. Dışa açık WADO kurulumda kalır (Ayarlar › Entegrasyon › PACS kartında durumu görünür).")}
       </div>
     </div>
   );

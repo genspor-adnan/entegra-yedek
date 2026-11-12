@@ -636,6 +636,24 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     kapısı, eski ayar yolu), `EnabizXmlTestleri.SKRS_kodu_degisince_YENI_paket_uretilir` tek kaynağa uyarlandı; tam paket 1068 geçti
     (düşen tek test saha planı gün-sınırı). KOSUYOLU'da hesap modeliyle NW (AA) / KOS (OK) / doz (0000) Mirth benzetimine gitti; ORC-21
     `Merkez^^999999\S\1\S\99999999` kurum profilinden. Dev'de özet + kart sekmesi ekran görüntüsüyle kontrol edildi (geçici satır silindi).
+- **Kurum kimliğinin ANA kaynağı e-Nabız hesabı (db/1321-1322; kullanıcı: "salt okunur yap" → "her yerde geçerli ana ayarlar
+  enabız ayarları olsun.. çünkü tüm hbys kullanan yerler enabız kullanmak zorunda ama medula ya da teleradyoloji kullanmak zorunda
+  değil"):** 1317'deki "kurum profili tek kaynak" yönü değişti.
+  * `fn_kurum_kimlik(şube)` (1321, `kaynak` + `enabiz_hesap_id` sütunlarıyla): e-Nabız hesabı (şube satırı → kurum geneli, canlı
+    önce) - kurum_kodu = SKRS, `ayarlar.medulaTesisKodu`, `ayarlar.bakanlikAd` → yoksa kurum profili → yoksa eski yer (referans
+    kurum.skrs_kodu; MEDULA hesabının kurum kodu). fn_kurum_skrs / fn_kurum_tesis aynen bunu okur (TeleRadyoloji, MEDULA,
+    Teleradyoloji teslimi, e-Nabız XML). 1321 + 1322: e-Nabız hesabında boş kalan tesis / SKRS geçerli değerle bir kez dolduruldu.
+  * "Salt okunur yap" isteğiyle ENABIZ / MEDULA kurum kodu kilitlenmişti (sunucu kuralı + kart); yeni kararla KALDIRILDI: e-Nabız'da
+    alan düzenlenebilir ("her yerde geçerli SKRS"), MEDULA'da da düzenlenebilir ama altında e-Nabız'daki geçerli tesis kodu yazar
+    ("bu alan kullanılmıyor"). Kartın alan girdisi kancası (`alanGirdisi`) artık kartın tüm değerlerini de alır.
+  * Web: e-Nabız kartında koşullu **Kurum Kimliği** sekmesi (SKRS, MEDULA tesis - 8 hane denetimi, Bakanlık adı; TEST değeri uyarısı).
+    TeleRadyoloji özetinde kimlik SALT OKUNUR + "kimlik nereden" (e-Nabız hesabına bağlantı; hesap yoksa uyarı); kimlik çakışması
+    seçimi ana kaynağa (e-Nabız hesabı; yoksa kurum profili) yazar; eski yolda (hesap modeli yok) Teletıp kapalıysa "kapalı" görünür.
+    GenProfil kurum profiline 1317'de eklenen SKRS / Bakanlık adı alanları geri alındı (tesis kodu eski hâliyle, "yedek değer" ipucu).
+  * Doğrulama: `TeleradyolojiHesapTestleri` e-Nabız önceliği (kurum geneli profili ezer, şube satırı kurum genelini ezer, şubede tesis
+    yoksa profil yedeği); tam paket 1068 geçti (düşen tek test saha planı gün-sınırı). Dev'de API ile ENABIZ kurum kodu yazılabiliyor;
+    e-Nabız Kurum Kimliği sekmesi + özet ekran görüntüsüyle kontrol edildi; KOSUYOLU'da NW yeniden gönderildi (AA; e-Nabız hesabı
+    olmadığı için kimlik kurum profilinden).
 
 ### 10.11.2026
 

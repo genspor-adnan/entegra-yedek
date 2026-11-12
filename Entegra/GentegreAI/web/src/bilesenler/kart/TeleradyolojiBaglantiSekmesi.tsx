@@ -11,7 +11,7 @@ import type { EkSekmeBaglami } from '../GenForm';
  * JSON'unda. Kurum kimliği (ad, SKRS, MEDULA tesis) şubenin kurum profilinden, salt okunur. Bağlantı testi kayıtlı ayarla
  * kanal adreslerine TCP yapar (mesaj göndermez). CSS öneki `trb-`.
  */
-type Baglam = { kimlik: { ad: string; skrs: string; tesis: string } | null; mirthler: { id: number; ad: string }[] };
+type Baglam = { kimlik: { ad: string; skrs: string; tesis: string; kaynak: string; enabizHesapId: number | null } | null; mirthler: { id: number; ad: string }[] };
 type Adim = { ad: string; tamam: boolean; ayrinti: string; ms: number };
 
 function jsonOku(v: unknown): Record<string, unknown> {
@@ -62,7 +62,7 @@ export function TeleradyolojiBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami;
       <style>{TRB_STIL}</style>
 
       <fieldset className="trb-grp trb-salt">
-        <legend>{c('Kurum kimliği')} <small>{c('şubenin kurum profilinden · burada değişmez (Kurum Profili)')}</small></legend>
+        <legend>{c('Kurum kimliği')} <small>{c('şubenin e-Nabız hesabından · burada değişmez')} · {k?.kaynak ?? ''}</small></legend>
         <div className="trb-izgara">
           <div className="trb-oku trb-genis"><span>{c("Bakanlık'ta görünen ad")}</span><b>{k?.ad || '—'}</b></div>
           <div className="trb-oku"><span>{c('SKRS kurum kodu')}</span>

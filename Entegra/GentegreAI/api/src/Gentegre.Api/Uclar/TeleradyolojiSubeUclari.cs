@@ -9,7 +9,7 @@ namespace Gentegre.Api.Uclar;
 
 /// <summary>
 /// TELERADYOLOJİ (BAKANLIK) ŞUBE ÖZETİ (1317; mockup Ekranlar/Ayarlar/entegrasyon_teletip.html §3-§4). Ayar ekranı artık
-/// düzenleme değil özet: her şubenin Bakanlık kimliği (kurum profili - tek kaynak), gönderim hesabı (Entegrasyon ›
+/// düzenleme değil özet: her şubenin Bakanlık kimliği (1321: ANA kaynak e-Nabız hesabı), gönderim hesabı (Entegrasyon ›
 /// TELERADYOLOJI; şube satırı → kurum geneli) ve kanal adresleri. Kimlik çakışmaları (1317 geçişinde iki yerde FARKLI
 /// bulunan kodlar) burada seçilerek çözülür. Kart sekmesi için kimlik + Mirth hesapları da buradan.
 /// </summary>
@@ -18,7 +18,7 @@ public static class TeleradyolojiSubeUclari
     private static readonly JsonSerializerOptions JsonAyar = new() { PropertyNameCaseInsensitive = true };
 
     public sealed record CakismaCozIstegi(string Secim);   // "profil" | "eski"
-    private sealed record CakismaSatiri(int Sube, string Alan, string Eski);
+    private sealed record CakismaSatiri(int Sube, string Alan, string Eski, string Profil);
 
     public static void TeleradyolojiSubeUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -30,10 +30,11 @@ public static class TeleradyolojiSubeUclari
             baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var model = await b.TekDegerAsync<bool>("select public.fn_teletip_hesap_modeli()", null, [], iptal);
+            // Eski yolda (hesap yok) ayar her zaman döner; açık mı ayrıca (teletip.aktif) - ekran "gönderiyor" demesin.
+            var aktif = await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);
             var subeler = await b.ListeAsync("""
                 select s.id, s.ad,
-                       k.ad as kimlik_ad, k.skrs, k.tesis,
-                       exists (select 1 from public.kurum_profil kp where kp.sube_id = s.id and (kp.skrs_kodu <> '' or coalesce(kp.tesis_kodu, '') <> '' or kp.bakanlik_ad <> '')) as kendi_kimlik,
+                       k.ad as kimlik_ad, k.skrs, k.tesis, k.kaynak, k.enabiz_hesap_id,
                        public.fn_teletip_hesap_ayar(s.id)::text as hesap
                   from public.sube s
                   cross join lateral public.fn_kurum_kimlik(s.id) k
@@ -42,8 +43,9 @@ public static class TeleradyolojiSubeUclari
                 """, null, [], o => new
             {
                 subeId = o.GetInt32(0), subeAdi = o.GetString(1),
-                kimlik = new { ad = o.GetString(2), skrs = o.GetString(3), tesis = o.GetString(4), kendi = o.GetBoolean(5) },
-                hesap = o.IsDBNull(6) ? null : JsonSerializer.Deserialize<TeleRadyolojiHesabi>(o.GetString(6), JsonAyar),
+                kimlik = new { ad = o.GetString(2), skrs = o.GetString(3), tesis = o.GetString(4), kaynak = o.GetString(5),
+                               enabizHesapId = o.IsDBNull(6) ? (int?)null : o.GetInt32(6) },
+                hesap = o.IsDBNull(7) ? null : JsonSerializer.Deserialize<TeleRadyolojiHesabi>(o.GetString(7), JsonAyar),
             }, iptal);
             var cakismalar = await b.ListeAsync("""
                 select c.id, c.sube_id, coalesce(s.ad, 'Kurum geneli'), c.alan, c.profil_degeri, c.eski_kaynak, c.eski_deger, c.ekleme_tarihi
@@ -57,7 +59,7 @@ public static class TeleradyolojiSubeUclari
             var m = await mirth.OzetAsync(iptal);
             return Results.Ok(new
             {
-                hesapModeli = model, subeler, cakismalar,
+                hesapModeli = model, aktif, subeler, cakismalar,
                 mirth = new { url = m.Url, kullanici = m.Kullanici, parolaTanimli = m.ParolaTanimli, kaynak = m.Kaynak },
                 izlemeNo = baglam.IzlemeNo,
             });
@@ -93,7 +95,8 @@ public static class TeleradyolojiSubeUclari
             return Results.Ok(new { sonuclar = liste, izlemeNo = baglam.IzlemeNo });
         });
 
-        // Çakışma çöz: "eski" → eski değer kurum profiline yazılır; "profil" → profildeki kalır. İki durumda da kayıt kapanır.
+        // Çakışma çöz (1321): seçilen değer ANA kaynağa yazılır - şubenin e-Nabız hesabı (SKRS → kurum_kodu, tesis →
+        //   ayarlar.medulaTesisKodu); e-Nabız hesabı yoksa kurum profili. Kayıt kapanır.
         grup.MapPost("/cakisma/{id:int}/coz", async (int id, CakismaCozIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
             HttpContext ctx, CancellationToken iptal) =>
         {
@@ -103,19 +106,25 @@ public static class TeleradyolojiSubeUclari
                 throw GentegreHatasi.Dogrulama("Seçim 'profil' ya da 'eski' olmalı.", new AlanHatasi("secim", "profil / eski"));
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
-            var c = await b.TekAsync("select sube_id, alan, eski_deger from public.kurum_kimlik_cakisma where id = @p0 and cozuldu = 0 for update",
-                islem, [id], o => new CakismaSatiri(o.GetInt32(0), o.GetString(1), o.GetString(2)), iptal)
+            var c = await b.TekAsync("select sube_id, alan, eski_deger, profil_degeri from public.kurum_kimlik_cakisma where id = @p0 and cozuldu = 0 for update",
+                islem, [id], o => new CakismaSatiri(o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetString(3)), iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Çakışma bulunamadı ya da çözülmüş.");
-            if (istek.Secim == "eski")
-            {
-                var kolon = c.Alan == "skrs" ? "skrs_kodu" : "tesis_kodu";
-                var n = await b.CalistirAsync($"update public.kurum_profil set {kolon} = @p1, degistiren = @p2, degistirme_tarihi = now()::timestamp where sube_id = @p0",
-                    islem, [c.Sube, c.Eski, baglam.KullaniciId], iptal);
-                if (n == 0) throw GentegreHatasi.IsKurali("Bu şubenin kurum profili satırı yok - önce Kurum Profili'nde şubeyi kaydedin.");
-            }
+            var deger = istek.Secim == "eski" ? c.Eski : c.Profil;
+            var enabizId = await b.TekDegerAsync<int?>("select enabiz_hesap_id from public.fn_kurum_kimlik(@p0)", islem, [c.Sube], iptal);
+            int n;
+            if (enabizId is int eid)
+                n = c.Alan == "skrs"
+                    ? await b.CalistirAsync("update public.entegrasyon_hesap set kurum_kodu = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0",
+                        islem, [eid, deger, baglam.KullaniciId], iptal)
+                    : await b.CalistirAsync("update public.entegrasyon_hesap set ayarlar = coalesce(ayarlar, '{}'::jsonb) || jsonb_build_object('medulaTesisKodu', @p1::text), degistiren = @p2, degistirme_tarihi = now() where id = @p0",
+                        islem, [eid, deger, baglam.KullaniciId], iptal);
+            else
+                n = await b.CalistirAsync($"update public.kurum_profil set {(c.Alan == "skrs" ? "skrs_kodu" : "tesis_kodu")} = @p1, degistiren = @p2, degistirme_tarihi = now()::timestamp where sube_id = @p0",
+                    islem, [c.Sube, deger, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Yazılacak yer yok - şubeye e-Nabız hesabı açın (Ayarlar › Entegrasyon › e-Nabız).");
             await b.CalistirAsync("update public.kurum_kimlik_cakisma set cozuldu = 1 where id = @p0", islem, [id], iptal);
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { mesaj = istek.Secim == "eski" ? "Eski değer kurum profiline yazıldı." : "Profildeki değer korundu.", izlemeNo = baglam.IzlemeNo });
+            return Results.Ok(new { mesaj = $"{deger} {(enabizId is null ? "kurum profiline" : "e-Nabız hesabına")} yazıldı.", izlemeNo = baglam.IzlemeNo });
         });
 
         // Entegrasyon kartı › TeleRadyoloji Bağlantısı sekmesi: şubenin kimliği (salt okunur) + Mirth hesapları (seçim).
@@ -125,8 +134,9 @@ public static class TeleradyolojiSubeUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            var k = await b.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", null, [subeId ?? 0],
-                o => new { ad = o.GetString(0), skrs = o.GetString(1), tesis = o.GetString(2) }, iptal);
+            var k = await b.TekAsync("select ad, skrs, tesis, kaynak, enabiz_hesap_id from public.fn_kurum_kimlik(@p0)", null, [subeId ?? 0],
+                o => new { ad = o.GetString(0), skrs = o.GetString(1), tesis = o.GetString(2), kaynak = o.GetString(3),
+                           enabizHesapId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4) }, iptal);
             var mirthler = await b.ListeAsync(
                 "select id, ad from public.entegrasyon_hesap where kod = 'MIRTH' and aktif = 1 order by id", null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);

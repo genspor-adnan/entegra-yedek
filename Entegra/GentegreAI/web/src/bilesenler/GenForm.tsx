@@ -297,7 +297,9 @@ interface Props {
   alanIpucu?(ad: string, yaz: (v: string) => void): React.ReactNode;
   /** Uzun metin alanının GİRDİSİ yerine ekran-özel kutu (muayene: makro rozetli metin);
       undefined dönerse alan olağan textarea ile çizilir. */
-  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean): React.ReactNode | undefined;
+  alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean,
+              /** Kartın o anki tüm değerleri - girdi başka bir alana bağlıysa (entegrasyon kodu). */
+              kart?: Record<string, unknown>): React.ReactNode | undefined;
   /** Bu EKRANDA zorunlu sayilacak alanlar (ör. Aday kartinda "Temsilci").
       Katalogda zorunlu YAPILMAZ: ayni alan Musteri kartinda bos olabilir ve
       eski kayitlarin duzenlenmesini kilitlerdi. */

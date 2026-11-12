@@ -27,6 +27,7 @@ import { ToplantiAraclari } from '../kys/toplanti/KysToplantilar';
 import { BankaBaglantiRozeti } from '../banka/BankaHareketPanelleri';
 import { PacsBaglantiSekmesi } from '../../bilesenler/kart/PacsBaglantiSekmesi';
 import { TeleradyolojiBaglantiSekmesi } from '../../bilesenler/kart/TeleradyolojiBaglantiSekmesi';
+import { EnabizKimlikSekmesi } from '../../bilesenler/kart/EnabizKimlikSekmesi';
 import { KasaOzetSeridi, KasaSayimSekmesi } from '../kasa/KasaPanelleri';
 import { SablonMetniSekmesi } from '../radyoloji/SablonMetniSekmesi';
 import { AlanPaketiCubugu } from '../radyoloji/AlanPaketleri';
@@ -228,6 +229,9 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
       // TELERADYOLOJI (1317, mockup entegrasyon_teletip.html): şube başına Bakanlık gönderim hesabı.
       { anahtar: 'ozel:teleradyoloji', baslik: 'TeleRadyoloji Bağlantısı', yenideDe: true, kosulAlani: 'kod=TELERADYOLOJI',
         ciz: e => <TeleradyolojiBaglantiSekmesi e={e} kartId={kayitli(b.kartId) ? b.kartId : null} /> },
+      // e-NABIZ KURUM KİMLİĞİ (1321): her yerde geçerli SKRS / MEDULA tesis / Bakanlık adı (ana kaynak).
+      { anahtar: 'ozel:enabiz-kimlik', baslik: 'Kurum Kimliği', yenideDe: true, kosulAlani: 'kod=ENABIZ',
+        ciz: e => <EnabizKimlikSekmesi e={e} /> },
     ],
     sekmeSarmalayici: () => (baslik, icerik) => baslik !== 'Genel' ? icerik : (
       <>

@@ -45,6 +45,7 @@ import { MakroIpucu } from '../../bilesenler/MakroIpucu';
 const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
 import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
 import { c } from '../../dil/ceviri';
+import { KurumKoduSalt } from '../../bilesenler/kart/KurumKoduSalt';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { GozlukHastaBandi, GozlukReceteFormu, useGozlukKaynak } from '../goz/GozlukPanelleri';
 import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
@@ -788,6 +789,13 @@ export function ListeKarti({
               : ad === 'kontrolOnerisiGun' ? <KontrolGunGirdisi deger={d} yaz={yaz} salt={salt} />
               : undefined
           // ZİYARET KARTI (1294, kullanıcı): görüşülen konular seçimli rozet - kod listesi dis_hekim.konu, değer virgüllü kod.
+          // ENTEGRASYON HESABI (1321, kullanıcı: "her yerde geçerli ana ayarlar enabız ayarları olsun"): ENABIZ'de Kurum Kodu =
+          //   her yerde geçerli SKRS kurum kodu; MEDULA'da tesis kodu yalnız e-Nabız'da yoksa kullanılır - ikisi de düzenlenebilir,
+          //   altında hangisinin geçerli olduğu yazar.
+          : tanim.kaynak === 'entegrasyon-hesap'
+          ? (ad, d, yaz, salt, kart) => ad === 'kurumKodu' && ['ENABIZ', 'MEDULA'].includes(String(kart?.kod ?? ''))
+              ? <KurumKoduSalt kod={String(kart?.kod)} subeId={Number(kart?.subeId ?? 0) || 0} deger={d} yaz={yaz} salt={salt} />
+              : undefined
           : tanim.kaynak === 'dis-hekim-ziyaret'
           ? (ad, d, yaz, salt) => ad === 'konular'
               ? <KonuRozetleri listeKod="dis_hekim.konu" baslik="Görüşülen Konular" deger={d} yaz={yaz} salt={salt} />
