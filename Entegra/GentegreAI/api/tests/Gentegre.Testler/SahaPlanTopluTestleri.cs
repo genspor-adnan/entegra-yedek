@@ -51,7 +51,9 @@ public sealed class SahaPlanTopluTestleri(ApiSunucuOlgusu api)
         var a = api.Istemci(access, Merkez);
         var bugun = DateOnly.FromDateTime(DateTime.Today);
         var haftaBas = bugun.AddDays(-(((int)bugun.DayOfWeek + 6) % 7));
-        var gun = haftaBas.AddDays(2); // Çarşamba
+        // Çarşamba; geçtiyse BUGÜN (aynı hafta): "planlı ziyaret" yalnız tarih >= bugün olanı sayar (1300) - Perşembe'den
+        //   itibaren geçmiş Çarşamba'ya planlanan ziyaret işaretlenmiyor, test haftanın ikinci yarısında düşüyordu.
+        var gun = haftaBas.AddDays(2) < bugun ? bugun : haftaBas.AddDays(2);
 
         // 1) Plan yanıtı: özet + sırası gelenler (h1 geciken; h3 sıklıksız listede değil).
         var plan = await (await a.GetAsync($"/api/dis-hekim/plan?hafta={haftaBas:yyyy-MM-dd}&temsilciId={t}")).Content.ReadFromJsonAsync<JsonElement>();
