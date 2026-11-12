@@ -279,6 +279,9 @@ public sealed partial class BelgeDeposu
                 Saat.Yerel(belgeTarihi, baglam.ZamanDilimi).Date.AddDays(duzenlemeGun))
             uyarilar.Add($"Belge tarihinden {duzenlemeGun} günden fazla geçti - eski tarihli belge değiştirildi.");
 
+        // STOK BAKİYE DENETİMİ (12.11.2026, BelgeDeposu.Bakiye): eski + yeni hâlin değdiği bakiyeler geri almadan ÖNCE.
+        var bakiyeOnce = await BakiyeAnligiAlAsync(baglanti, islem, belgeId, belge, satirlar, iptal);
+
         // --------------------------------- 2) eski etkiyi geri al (stok + cari) ----
         if (eskiDurum == 0)                            // taslak stok/cari yazmaz
         {
@@ -401,6 +404,8 @@ public sealed partial class BelgeDeposu
                                                     korunanSayisi: korunan.Count,
                                                     eskiBelgeTarihi: Saat.Yerel(belgeTarihi, baglam.ZamanDilimi));
         uyarilar.AddRange(yeniUyarilar);
+        // Düzenleme sonucu: giriş miktarını azaltmak / satırı silmek tüketilmiş malı geri alıyorsa engel; çıkış artışı ayara göre.
+        await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
 
         return (belgeId, uyarilar);
     }
@@ -482,6 +487,10 @@ public sealed partial class BelgeDeposu
         DateTime? eskiBelgeTarihi = null)
     {
         var uyarilar = new List<string>();
+        // STOK BAKİYE DENETİMİ (BelgeDeposu.Bakiye): yalnız YENİ belgede burada; düzenleme kendi anlık görüntüsünü
+        //   geri almadan önce alır (GuncelleIcAsync).
+        var bakiyeOnce = mevcutId == 0 && !secenekler.Taslak
+            ? await BakiyeAnligiAlAsync(baglanti, islem, 0, belge, satirlar, iptal) : null;
 
         var tur = Sayi(belge, "tur");
         var tarafId = Sayi(belge, "tarafId");
@@ -727,8 +736,9 @@ public sealed partial class BelgeDeposu
             }
 
             if (stokEtkiler)
-                await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"),
-                                             secenekler.StokKontrolu, uyarilar, iptal);
+                await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"), iptal);
+            if (bakiyeOnce is not null)
+                await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
             // cariAtla: kaynak belge (irsaliye) cariyi ZATEN borclandirdi - ondan
             //   turetilen fatura ikinci kez yazarsa cari bakiye ikiye katlanir.
             //   Stok tarafinda ayni koruma satir bazinda (stok_durum_degis=0) var.

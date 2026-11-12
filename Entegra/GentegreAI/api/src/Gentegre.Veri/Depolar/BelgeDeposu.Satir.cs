@@ -460,7 +460,13 @@ public sealed partial class BelgeDeposu
                     var durum = Convert.ToInt32(o.GetValue(2));
                     await o.CloseAsync();
                     if (durum == 0 && await StokEtkilerMiAsync(baglanti, islem, tur, iptal))
+                    {
+                        // STOK BAKİYE DENETİMİ (12.11.2026): giriş belgesini silmek tüketilmiş malı geri alıyorsa
+                        //   (çıkışı yapılmış) engel - "giriş sil, stok eksiye düşer" açığı. İşlem geri alınır.
+                        var bakiyeOnce = await BakiyeAnligiAlAsync(baglanti, islem, belgeId, null, null, iptal);
                         await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
+                        await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, true, [], iptal);
+                    }
                 }
             }
 

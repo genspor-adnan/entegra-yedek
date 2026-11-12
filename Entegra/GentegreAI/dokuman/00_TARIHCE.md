@@ -736,6 +736,21 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Kalan kırmızılar beklenen: MSH-5/6 doğrulayıcı "TELETIP" ister, kılavuz 3.68 tablosu "TELERADYOLOJI" der (örnekleri
     TELETIP) - Bakanlık'a sorulacak; PV1-50 yalnız SGK hastada; ORC-18 yalnız anjiyo / eko.
   * Terim (kullanıcı): Teletıp = uzaktan muayene, TeleRadyoloji = uzaktan görüntüleme.
+- **Stok bakiye denetimi - geriye dönük eksiye düşürme engeli (DB değişikliği yok; kullanıcı: "Giriş belgesi ile stoğu
+  arttırıyorum, çıkış belgesi ile hepsini çıkış yapıyorum sonra giriş belgesini silebiliyorum. Stok eksiye düşüyor.. Genel bir
+  çalışma yap" → kural "Her zaman engelle"):**
+  * Eskiden denetim yalnız yazarken satır satır "bakiye eksi mi" (`DepoyaYazAsync`): silmede hiç denetim yoktu (giriş silinince
+    tüketilmiş mal geri alınıp stok eksiye düşüyordu); zaten eksi stoğa GİRİŞ bile "engelle" modunda reddediliyordu.
+  * Yeni tek kural (`BelgeDeposu.Bakiye.cs`): kaydet / düzenle / sil öncesi belgenin değdiği stok × depo ve stok × depo × lot
+    bakiyelerinin anlık görüntüsü, sonrası yeniden okunur; eksiye düşüp KÖTÜLEŞEN bakiye:
+    - belgenin GİRİŞ tarafındaki depoda (giriş belgesi, iade girişi, transferin varış deposu) = tüketilmiş malın geri
+      alınması → ayardan bağımsız ENGEL ("Bu işlem stoğu eksiye düşürür - bu girişten çıkış yapılmış: ... Önce o çıkışları
+      silin ya da düzeltin.");
+    - ÇIKIŞ tarafında = yeni çıkış → `stok.negatif_davranis` (0/1/2) eskisi gibi; aktarım / içeri alma (StokKontrolu=false) atlar.
+    Kötüleşmeyen eksi sessiz; tekrar kullanılan stok (141) muaf. Mesajda stok kodu-adı, depo, lot, önce → sonra.
+  * Testler `StokBakiyeDenetimiTestleri`: tüketilmiş giriş silinemez / azaltılamaz / artırılabilir, önce çıkış silinince giriş
+    silinir; transferin varışından çıkış yapıldıysa transfer silinemez; eksi stoğa giriş serbest, girişsiz çıkış "uyar"da
+    uyarıyla yazılır. Tam paket 1072. Yerel UNIVERSE / ZONE API kopyaları yeniden yayımlandı.
 
 ### 10.11.2026
 
