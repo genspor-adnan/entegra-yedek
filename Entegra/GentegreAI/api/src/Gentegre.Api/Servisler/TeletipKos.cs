@@ -47,6 +47,18 @@ public static class KosUretici
     /// <summary>Kılavuz biçimi: "Hastane Adı^^^SKRS12345^^^FK&lt;firma kodu&gt;".</summary>
     public static string KurumAlani(KosKurum k) => $"{Temiz(k.KurumAdi)}^^^SKRS{k.Skrs}^^^FK{k.FirmaKodu}";
 
+    /// <summary>Bakanlık hasta kimliği (PatientID / PID-3): TCKN, yoksa dosya no - KOS, XDS ve doz aynı kuralı kullanır.</summary>
+    public static string HastaKimligi(OrmVerisi v) => v.HastaTckn.Length == 11 ? v.HastaTckn : v.HastaDosyaNo;
+
+    /// <summary>KOS ve doz künyesinin ortak kurum / cihaz eksikleri (InstitutionName FK, DeviceSerialNumber).</summary>
+    public static List<string> KurumDenetle(KosKurum k)
+    {
+        var e = new List<string>();
+        if (k.FirmaKodu.Length == 0) e.Add("Firma kodu yok (InstitutionName FK).");
+        if (k.CihazSeriNo.Length == 0) e.Add("Cihazın Teletıp seri numarası yok (DeviceSerialNumber) - radyoloji cihaz kartına STM seri no girilmeli.");
+        return e;
+    }
+
     public static DicomFile Uret(OrmVerisi v, KosCalisma c, KosKurum k, DateTime simdi, string? sopUid = null)
     {
         var d = new DicomDataset().NotValidated();
@@ -67,7 +79,7 @@ public static class KosUretici
         d.AddOrUpdate(DicomTag.AccessionNumber, v.AccessionNo);
         d.AddOrUpdate(DicomTag.ReferringPhysicianName, $"{v.IsteyenHekim.Soyad}^{v.IsteyenHekim.Ad}".Trim('^'));
         d.AddOrUpdate(DicomTag.PatientName, $"{v.HastaSoyad}^{v.HastaAd}".Trim('^'));
-        d.AddOrUpdate(DicomTag.PatientID, v.HastaTckn.Length == 11 ? v.HastaTckn : v.HastaDosyaNo);
+        d.AddOrUpdate(DicomTag.PatientID, HastaKimligi(v));
         if (v.HastaTckn.Length == 11 && v.HastaDosyaNo.Length > 0) d.AddOrUpdate(DicomTag.OtherPatientIDsRETIRED, v.HastaDosyaNo);
         d.AddOrUpdate(DicomTag.PatientBirthDate, v.DogumTarihi?.ToString("yyyyMMdd", CultureInfo.InvariantCulture) ?? "");
         d.AddOrUpdate(DicomTag.PatientSex, v.Cinsiyet is "M" or "F" ? v.Cinsiyet : "O");
@@ -175,8 +187,7 @@ public static class KosUretici
         if (v.HastaTckn.Length != 11) e.Add("Hasta TCKN yok - kurum alanı doğrulanamazsa Bakanlık TCKN ister (InstitutionName / PatientID).");
         if (v.Cinsiyet is not ("M" or "F")) e.Add("Hasta cinsiyeti yok.");
         if (k.Skrs.Length == 0) e.Add("Kurum SKRS kodu yok (InstitutionName / RetrieveLocationUID).");
-        if (k.FirmaKodu.Length == 0) e.Add("Firma kodu yok (InstitutionName FK).");
-        if (k.CihazSeriNo.Length == 0) e.Add("Cihazın Teletıp seri numarası yok (DeviceSerialNumber) - radyoloji cihaz kartına STM seri no girilmeli.");
+        e.AddRange(KurumDenetle(k));
         if (k.RetrieveAe.Length == 0) e.Add("PACS AE başlığı yok (Retrieve AE Title).");
         return e;
     }
@@ -421,14 +432,13 @@ public static class XdsZarfi
 
     public sealed record Zarf(string IcerikTuru, byte[] Govde, string SoapXml);
 
-    public static Zarf Kur(byte[] kos, string kosSopUid, string studyUid, OrmVerisi v, KosKurum k, string hedefUrl, DateTime simdiUtc,
-                           string hastaOid, string modalite)
+    public static Zarf Kur(byte[] kos, string kosSopUid, OrmVerisi v, string hedefUrl, DateTime simdiUtc, string hastaOid)
     {
         XNamespace soap = "http://www.w3.org/2003/05/soap-envelope", wsa = "http://www.w3.org/2005/08/addressing",
                    xds = "urn:ihe:iti:xds-b:2007", lcm = "urn:oasis:names:tc:ebxml-regrep:xsd:lcm:3.0",
                    rim = "urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", xop = "http://www.w3.org/2004/08/xop/include";
         var zaman = simdiUtc.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hasta = $"{(v.HastaTckn.Length == 11 ? v.HastaTckn : v.HastaDosyaNo)}^^^&{hastaOid}&ISO";
+        var hasta = $"{KosUretici.HastaKimligi(v)}^^^&{hastaOid}&ISO";
         XElement Slot(string ad, params string[] degerler) =>
             new(rim + "Slot", new XAttribute("name", ad), new XElement(rim + "ValueList", degerler.Select(x => new XElement(rim + "Value", x))));
         XElement Ad(string metin) => new(rim + "Name", new XElement(rim + "LocalizedString", new XAttribute("value", metin)));
@@ -470,7 +480,6 @@ public static class XdsZarfi
             Sinif("urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", belgeId, "34117-2", "2.16.840.1.113883.6.1", "History And Physical Note"),
             Dis("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab", belgeId, kosSopUid, "XDSDocumentEntry.uniqueId"),
             Dis("urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427", belgeId, hasta, "XDSDocumentEntry.patientId"));
-        _ = modalite; // şablonda eventCodeList yok - imza çağıranlar için korunuyor
 
         var kume = new XElement(rim + "RegistryPackage", new XAttribute("id", kumeId),
             new XAttribute("objectType", "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage"),

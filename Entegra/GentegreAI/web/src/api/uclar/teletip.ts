@@ -30,19 +30,7 @@ export interface TeletipPano {
           sonHatalar: { ip: string; studyUid: string; hata: string; zaman: string }[] };
 }
 
-/** Kurum TeleRadyoloji ayarları (mockup §5). Mirth bölümü yalnız görüntü. */
-export interface TeletipAyar {
-  aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string; encoding: string; hl7Adres: string;
-  xdsAdres: string; xdsHastaOid: string; dozAdres: string;
-  subeTesisleri: { subeId: number; subeAdi: string; tesisKodu: string }[];
-  uyarilar: string[];
-  mirth: { url: string; kullanici: string; parolaTanimli: boolean; sertifikaDogrula: boolean; harita: Record<string, string> };
-}
-
 export const teletipUclari = {
-  teletipAyar: () => istek<TeletipAyar>('/api/teletip/ayar'),
-  teletipAyarKaydet: (g: { aktif: boolean; kurumSkrs: string; medulaTesisKodu: string; subeNo: string; firmaKodu: string;
-                           encoding: string; hl7Adres: string; xdsAdres: string; xdsHastaOid: string; dozAdres: string }) => gonder<TeletipAyar>('/api/teletip/ayar', g, 'PUT'),
   teletipPano: (gun?: string) => istek<TeletipPano>(`/api/teletip/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
   /** TeleRadyoloji HL7 hedefine (Mirth K1) TCP + Mirth REST girişi; mesaj göndermez. */
   teletipBaglantiTesti: () => gonder<{

@@ -92,18 +92,13 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
 
         // 1317: ŞUBENİN TeleRadyoloji hesabı (şube satırı → kurum geneli; hesap modeli yoksa eski teletip.* ayarları) ve
         //   şubenin Bakanlık kimliği (kurum profili - tek kaynak). Hesap kapalıysa satır bekler (hesap açılınca gider).
-        var ayarJson = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", islem, [satir.Sube], iptal) ?? "";
-        if (ayarJson.Length == 0)
+        var hesap = await TeleRadyolojiHesabi.OkuAsync(b, islem, satir.Sube, iptal);
+        if (hesap is null)
             return await YazAsync(b, islem, id, 5, satir.Deneme, "",
                 "Bu şubede aktif TeleRadyoloji hesabı yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
                 sonraki: TimeSpan.FromMinutes(30));
-        var hesap = JsonSerializer.Deserialize<TeleRadyolojiHesabi>(ayarJson, JsonAyar) ?? new TeleRadyolojiHesabi();
-        var kimlik = await b.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", islem, [satir.Sube],
-            o => new[] { o.IsDBNull(0) ? "" : o.GetString(0), o.IsDBNull(1) ? "" : o.GetString(1), o.IsDBNull(2) ? "" : o.GetString(2) }, iptal)
-            ?? ["", "", ""];
+        var kimlik = await KurumKimlik.OkuAsync(b, islem, satir.Sube, iptal);
         var adres = hesap.Hl7Adres;
-        var firma = hesap.FirmaKodu;
-        var kodlama = hesap.Encoding;
 
         // VERİ: CA anlık görüntüden (istem iptal / silinmiş olabilir), NW / XO güncel istemden.
         var json = satir.Veri.Length > 0 ? satir.Veri
@@ -114,22 +109,13 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, 4, satir.Deneme, "", "İstem yok (silinmiş) ve anlık görüntü yok.", "", "", iptal);
 
         var oruMu = satir.EmirKodu == 4;
-        var v = (JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi()) with
+        // Kurum kimliği şubeden (CA anlık görüntüsündeki eski kimlik de güncellenir); MEDULA tesis yoksa istemin
+        //   provizyonundaki tesis kodu (ORM verisinin yedeği) kalır.
+        var v = kimlik.Uygula(JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi(), hesap) with
         {
             // ORU satırında ORM denetimi "yeni istem" kurallarıyla yapılır (hasta / istem / kurum alanları aynı).
             Emir = oruMu ? OrmEmri.Yeni : (OrmEmri)satir.EmirKodu,
-            FirmaKodu = firma,
-            Encoding = kodlama.Length > 0 ? kodlama : "UTF8",
             KontrolNo = $"TT{id}-{satir.Deneme + 1}",
-        };
-        // Kurum kimliği şubenin profilinden (CA anlık görüntüsündeki eski kimlik de güncellenir); MEDULA tesis profilde
-        //   yoksa istemin provizyonundaki tesis kodu (ORM verisinin yedeği) kalır.
-        v = v with
-        {
-            KurumAdi = kimlik[0].Length > 0 ? kimlik[0] : v.KurumAdi,
-            KurumSkrs = kimlik[1],
-            MedulaTesisKodu = kimlik[2].Length > 0 ? kimlik[2] : v.MedulaTesisKodu,
-            SubeNo = hesap.SubeNo.Length > 0 ? hesap.SubeNo : v.SubeNo,
         };
 
         if (satir.Kanal == 3)
@@ -211,30 +197,22 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         var simdi = DateTime.UtcNow;
         var kosSop = FellowOakDicom.DicomUID.Generate().UID;
         var kos = KosUretici.Baytlar(KosUretici.Uret(v, calisma!, kurum, v.Zaman, kosSop));
-        var modalite = calisma!.Seriler.Select(x => x.Modalite).FirstOrDefault(x => x.Length > 0) ?? v.Modalite;
-        var zarf = XdsZarfi.Kur(kos, kosSop, studyUid, v, kurum, xdsAdres, simdi, hastaOid, modalite);
+        var zarf = XdsZarfi.Kur(kos, kosSop, v, xdsAdres, simdi, hastaOid);
         // Görüntüsüz seriler (doz SR, KO, PR) küçük resim taşımaz - eksik sayılmaz.
-        var ikonsuz = calisma.Seriler.Count(x => x.Ikon is null && x.Modalite is not ("SR" or "KO" or "PR"));
+        var ikonsuz = calisma!.Seriler.Count(x => x.Ikon is null && x.Modalite is not ("SR" or "KO" or "PR"));
         try
         {
-            var istemci = httpFabrika.CreateClient("teletip-xds");
-            using var icerik = new ByteArrayContent(zarf.Govde);
-            icerik.Headers.TryAddWithoutValidation("Content-Type", zarf.IcerikTuru);
-            using var istek = new HttpRequestMessage(HttpMethod.Post, xdsAdres) { Content = icerik };
-            // Mirth HTTP dinleyicisi Content-Type'ı başlık haritasına koymuyor; K2 bu kopyadan okuyup hedefe yazar.
-            istek.Headers.TryAddWithoutValidation("X-Gentegre-Content-Type", zarf.IcerikTuru);
-            using var y = await istemci.SendAsync(istek, iptal);
-            var govde = await y.Content.ReadAsStringAsync(iptal);
+            var (httpKod, govde) = await MirthPostAsync(xdsAdres, zarf.Govde, zarf.IcerikTuru, iptal);
             var sonuc = XdsYaniti.Coz(govde);
             short durum = sonuc.Durum == "" ? (short)5
                         : sonuc.Basarili && (sonuc.Eslesti || sonuc.HataKodu != "MatchStatus") ? (short)1
                         : (short)2;
             var hata = durum == 1 ? (ikonsuz > 0 ? $"{ikonsuz} seride küçük resim üretilemedi (sıkıştırılmış görüntü)." : "")
-                     : sonuc.Durum == "" ? $"HTTP {(int)y.StatusCode}: {sonuc.Aciklama}"
+                     : sonuc.Durum == "" ? $"HTTP {httpKod}: {sonuc.Aciklama}"
                      : $"{sonuc.Durum}{(sonuc.HataKodu.Length > 0 ? " / " + sonuc.HataKodu : "")}: {sonuc.Aciklama}";
             var ack = sonuc.Durum switch { "Success" => "OK", "PartialSuccess" => "PARTIAL", "Failure" => "FAIL", _ => "" };
             if (durum == 5 && deneme + 1 >= AzamiDeneme) durum = 2;
-            return await YazAsync(b, islem, id, durum, deneme, ack, hata, zarf.SoapXml, govde.Length > 4000 ? govde[..4000] : govde, iptal,
+            return await YazAsync(b, islem, id, durum, deneme, ack, hata, zarf.SoapXml, Kirp(govde), iptal,
                                   kontrolNo: kosSop, sonraki: Geri(deneme + 1));
         }
         catch (Exception h) when (h is HttpRequestException or TaskCanceledException)
@@ -243,6 +221,21 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
                                   "Mirth K2'ye ulaşılamadı: " + h.Message, zarf.SoapXml, "", iptal, kontrolNo: kosSop, sonraki: Geri(deneme + 1));
         }
     }
+
+    /// <summary>Mirth HTTP kanalına (K2 / K3) gövde gönderir; yanıt kodu + gövde.</summary>
+    private async Task<(int Kod, string Govde)> MirthPostAsync(string adres, byte[] govde, string icerikTuru, CancellationToken iptal)
+    {
+        var istemci = httpFabrika!.CreateClient("teletip-xds");
+        using var icerik = new ByteArrayContent(govde);
+        icerik.Headers.TryAddWithoutValidation("Content-Type", icerikTuru);
+        using var istek = new HttpRequestMessage(HttpMethod.Post, adres) { Content = icerik };
+        // Mirth HTTP dinleyicisi Content-Type'ı başlık haritasına koymuyor; kanal bu kopyadan okuyup hedefe yazar.
+        istek.Headers.TryAddWithoutValidation("X-Gentegre-Content-Type", icerikTuru);
+        using var y = await istemci.SendAsync(istek, iptal);
+        return ((int)y.StatusCode, await y.Content.ReadAsStringAsync(iptal));
+    }
+
+    private static string Kirp(string s) => s.Length > 4000 ? s[..4000] : s;
 
     /// <summary>
     /// DOZ (1314, Mirth K3): çalışmanın RDSR'leri PACS'tan → künye KOS'la aynı (DozUretici.Kunye) → denetim → her RDSR
@@ -256,13 +249,17 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, 5, deneme, "", "DICOM / HTTP bileşeni yok (servis yapılandırması).", "", "", iptal);
         if (istemId is not int iid)
             return await YazAsync(b, islem, id, 4, deneme, "", "İstem yok (silinmiş).", "", "", iptal);
-        var kosJson = await b.TekDegerAsync<string>("select public.fn_teletip_kos_verisi(@p0)::text", islem, [iid], iptal) ?? "{}";
-        var dozJson = await b.TekDegerAsync<string>("select public.fn_teletip_doz_verisi(@p0)::text", islem, [iid], iptal) ?? "{}";
-        using var kj = JsonDocument.Parse(kosJson); using var dj = JsonDocument.Parse(dozJson);
+        // Tek sorgu: KOS / doz verisi, satırın çalışması ve 1323 ilerlemesi (kabul edilmiş RDSR'ler).
+        var s = await b.TekAsync("""
+            select coalesce(public.fn_teletip_kos_verisi(@p1)::text, '{}'), coalesce(public.fn_teletip_doz_verisi(@p1)::text, '{}'),
+                   coalesce(t.study_uid, ''), coalesce(t.ilerleme -> 'gonderilenSop', '[]'::jsonb)::text
+              from public.teletip_gonderim t where t.id = @p0
+            """, islem, [id, iid], o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3) }, iptal)
+            ?? ["{}", "{}", "", "[]"];
+        using var kj = JsonDocument.Parse(s[0]); using var dj = JsonDocument.Parse(s[1]);
         string K(string ad) => kj.RootElement.TryGetProperty(ad, out var e) ? e.ToString() : "";
         double? D(string ad) => dj.RootElement.TryGetProperty(ad, out var e) && e.ValueKind == JsonValueKind.Number ? e.GetDouble() : null;
-        var studyUid = await b.TekDegerAsync<string>("select study_uid from public.teletip_gonderim where id = @p0", islem, [id], iptal) ?? "";
-        if (studyUid.Length == 0) studyUid = K("StudyUid");
+        var studyUid = s[2].Length > 0 ? s[2] : K("StudyUid");
         if (studyUid.Length == 0)
             return await YazAsync(b, islem, id, 3, deneme, "", "İstemin PACS çalışması (study_uid) bağlı değil.", "", "", iptal);
 
@@ -283,8 +280,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
 
         var kurum = new KosKurum(v.KurumAdi, v.KurumSkrs, v.FirmaKodu, dicom.PacsAe, K("CihazSeriNo"));
         var eksikKurum = OrmUretici.Denetle(v with { Emir = OrmEmri.Iptal });
-        if (kurum.CihazSeriNo.Length == 0) eksikKurum.Add("Cihazın Teletıp seri numarası yok (DeviceSerialNumber) - radyoloji cihaz kartına STM seri no girilmeli.");
-        if (kurum.FirmaKodu.Length == 0) eksikKurum.Add("Firma kodu yok (InstitutionName FK).");
+        eksikKurum.AddRange(KosUretici.KurumDenetle(kurum));
         if (eksikKurum.Count > 0)
             return await YazAsync(b, islem, id, 3, deneme, "", string.Join(" · ", eksikKurum.Distinct()), "", "", iptal);
         if (dozAdres.Length == 0)
@@ -294,9 +290,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
         var mesajlar = new List<string>(); var uyarilar = new List<string>(); var sonSop = raporlar[^1].Sop;
         // 1323: Bakanlık'ın KABUL ETTİĞİ RDSR'ler satırın ilerlemesinde - sonraki biri düşüp satır yeniden denenince
         //   kabul edilmişler tekrar gönderilmez (mükerrer doz kaydı olmasın).
-        var gonderilen = (await b.TekDegerAsync<string>(
-                "select coalesce(ilerleme -> 'gonderilenSop', '[]'::jsonb)::text from public.teletip_gonderim where id = @p0", islem, [id], iptal) ?? "[]");
-        var gonderilenler = JsonSerializer.Deserialize<List<string>>(gonderilen) ?? [];
+        var gonderilenler = JsonSerializer.Deserialize<List<string>>(s[3]) ?? [];
         var onceden = gonderilenler.Count(g => raporlar.Any(r => r.Sop == g));
         foreach (var (seri, sop) in raporlar)
         {
@@ -325,16 +319,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
 
             var baytlar = KosUretici.Baytlar(new FellowOakDicom.DicomFile(hazir));
             string govde; int httpKod;
-            try
-            {
-                var istemci = httpFabrika.CreateClient("teletip-xds");
-                using var icerik = new ByteArrayContent(baytlar);
-                icerik.Headers.TryAddWithoutValidation("Content-Type", "application/dicom");
-                using var istek = new HttpRequestMessage(HttpMethod.Post, dozAdres) { Content = icerik };
-                istek.Headers.TryAddWithoutValidation("X-Gentegre-Content-Type", "application/dicom");
-                using var y = await istemci.SendAsync(istek, iptal);
-                govde = await y.Content.ReadAsStringAsync(iptal); httpKod = (int)y.StatusCode;
-            }
+            try { (httpKod, govde) = await MirthPostAsync(dozAdres, baytlar, "application/dicom", iptal); }
             catch (Exception h) when (h is HttpRequestException or TaskCanceledException)
             {
                 return await YazAsync(b, islem, id, deneme + 1 >= AzamiDeneme ? (short)2 : (short)5, deneme, "",
@@ -346,7 +331,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
                 var durum = sonuc.Durum == 5 && deneme + 1 >= AzamiDeneme ? (short)2 : sonuc.Durum;
                 return await YazAsync(b, islem, id, durum, deneme, sonuc.Ack,
                                       (sonuc.Durum == 5 ? $"HTTP {httpKod}: " : "") + sonuc.Aciklama, string.Join("\n\n", mesajlar),
-                                      govde.Length > 4000 ? govde[..4000] : govde, iptal, kontrolNo: sop, sonraki: Geri(deneme + 1));
+                                      Kirp(govde), iptal, kontrolNo: sop, sonraki: Geri(deneme + 1));
             }
             if (sonuc.Ack != "0000" && sonuc.Aciklama.Length > 0) uyarilar.Add($"MGA uyarısı 0x{sonuc.Ack}: {sonuc.Aciklama}");
             await b.CalistirAsync(
@@ -494,6 +479,15 @@ public sealed class TeletipOrmIscisi(IServiceScopeFactory kapsam, ILogger<Teleti
 /// </summary>
 public sealed record TeleRadyolojiHesabi
 {
+    private static readonly JsonSerializerOptions JsonAyar = new() { PropertyNameCaseInsensitive = true };
+
+    /// <summary>Şubenin hesabı (fn_teletip_hesap_ayar: şube satırı → kurum geneli → eski ayar); yoksa null.</summary>
+    public static async Task<TeleRadyolojiHesabi?> OkuAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction? islem, int sube, CancellationToken iptal)
+        => Coz(await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", islem, [sube], iptal));
+
+    public static TeleRadyolojiHesabi? Coz(string? json)
+        => string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<TeleRadyolojiHesabi>(json, JsonAyar) ?? new();
+
     public int HesapId { get; init; }
     public string HesapAd { get; init; } = "";
     public bool Test { get; init; }
@@ -505,4 +499,39 @@ public sealed record TeleRadyolojiHesabi
     public string SubeNo { get; init; } = "1";
     public string XdsHastaOid { get; init; } = "";
     public string MirthHesapId { get; init; } = "";
+}
+
+/// <summary>
+/// ŞUBENİN BAKANLIK KİMLİĞİ (fn_kurum_kimlik; 1321-1323: şube e-Nabız → şube profili → kurum geneli e-Nabız → kurum geneli
+/// profil → eski yer). Tek okuyucu: kuyruk işçisi, önizleme, entegrasyon sınaması aynı kaydı kullanır.
+/// </summary>
+public sealed record KurumKimlik(string Ad, string Skrs, string Tesis)
+{
+    /// <summary>Bakanlık test ortamı kodları - gerçek bağlantıdan önce değişmeli.</summary>
+    public const string TestSkrs = "999999", TestTesis = "99999999";
+
+    public static async Task<KurumKimlik> OkuAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction? islem, int sube, CancellationToken iptal)
+        => await b.TekAsync("select coalesce(ad, ''), coalesce(skrs, ''), coalesce(tesis, '') from public.fn_kurum_kimlik(@p0)", islem, [sube],
+               o => new KurumKimlik(o.GetString(0), o.GetString(1), o.GetString(2)), iptal) ?? new("", "", "");
+
+    /// <summary>ORM verisine şubenin kimliği + hesabı: ad / tesis boşsa istemin verisi kalır.</summary>
+    public OrmVerisi Uygula(OrmVerisi v, TeleRadyolojiHesabi h) => v with
+    {
+        FirmaKodu = h.FirmaKodu,
+        Encoding = h.Encoding.Length > 0 ? h.Encoding : "UTF8",
+        SubeNo = h.SubeNo.Length > 0 ? h.SubeNo : v.SubeNo,
+        KurumAdi = Ad.Length > 0 ? Ad : v.KurumAdi,
+        KurumSkrs = Skrs,
+        MedulaTesisKodu = Tesis.Length > 0 ? Tesis : v.MedulaTesisKodu,
+    };
+
+    /// <summary>Gönderimi engelleyen kimlik eksikleri (sınama ekranı).</summary>
+    public List<string> Eksikler(string firmaKodu)
+    {
+        var e = new List<string>();
+        if (Skrs.Length == 0) e.Add("SKRS kurum kodu yok"); else if (Skrs == TestSkrs) e.Add("SKRS TEST değeri");
+        if (Tesis.Length == 0) e.Add("MEDULA tesis kodu yok"); else if (Tesis == TestTesis) e.Add("MEDULA tesis TEST değeri");
+        if (firmaKodu.Length == 0) e.Add("firma kodu yok");
+        return e;
+    }
 }

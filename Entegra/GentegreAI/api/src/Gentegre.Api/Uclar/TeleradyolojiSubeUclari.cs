@@ -45,7 +45,7 @@ public static class TeleradyolojiSubeUclari
                 subeId = o.GetInt32(0), subeAdi = o.GetString(1),
                 kimlik = new { ad = o.GetString(2), skrs = o.GetString(3), tesis = o.GetString(4), kaynak = o.GetString(5),
                                enabizHesapId = o.IsDBNull(6) ? (int?)null : o.GetInt32(6) },
-                hesap = o.IsDBNull(7) ? null : JsonSerializer.Deserialize<TeleRadyolojiHesabi>(o.GetString(7), JsonAyar),
+                hesap = TeleRadyolojiHesabi.Coz(o.IsDBNull(7) ? null : o.GetString(7)),
             }, iptal);
             var cakismalar = await b.ListeAsync("""
                 select c.id, c.sube_id, coalesce(s.ad, 'Kurum geneli'), c.alan, c.profil_degeri, c.eski_kaynak, c.eski_deger, c.ekleme_tarihi
@@ -74,24 +74,17 @@ public static class TeleradyolojiSubeUclari
             var hesaplar = await b.ListeAsync("""
                 select s.id, public.fn_teletip_hesap_ayar(s.id)::text from public.sube s where s.aktif = 1 order by s.id
                 """, null, [], o => (Sube: o.GetInt32(0), Json: o.IsDBNull(1) ? null : o.GetString(1)), iptal);
-            var onbellek = new Dictionary<string, object>();
-            async Task<object> Dene(string adres)
-            {
-                var hp = HostPort(adres);
-                if (hp is null) return new { adres, acik = false, hata = adres.Length == 0 ? "tanımsız" : "adres çözülemedi", sureMs = 0 };
-                if (onbellek.TryGetValue(hp, out var x)) return x;
-                var r = await MirthIzleme.TcpDeneAsync(hp, iptal);
-                var sonuc = new { adres, acik = r.Acik, hata = r.Hata, sureMs = r.SureMs };
-                onbellek[hp] = sonuc;
-                return sonuc;
-            }
-            var liste = new List<object>();
-            foreach (var (sube, json) in hesaplar)
-            {
-                if (json is null) { liste.Add(new { subeId = sube, k1 = (object?)null, k2 = (object?)null, k3 = (object?)null }); continue; }
-                var h = JsonSerializer.Deserialize<TeleRadyolojiHesabi>(json, JsonAyar) ?? new();
-                liste.Add(new { subeId = sube, k1 = await Dene(h.Hl7Adres), k2 = await Dene(h.XdsAdres), k3 = await Dene(h.DozAdres) });
-            }
+            // Aynı adres bir kez denenir; bütün denemeler paralel (ölü adres başına 5 sn sırayla beklenmez).
+            var denemeler = new Dictionary<(string, bool), Task<KanalSonucu>>();
+            Task<KanalSonucu> Dene(string adres, bool http) =>
+                denemeler.TryGetValue((adres, http), out var g) ? g : denemeler[(adres, http)] = KanalDeneAsync(adres, http, iptal);
+            var bekleyen = hesaplar.Select(x => (x.Sube, H: TeleRadyolojiHesabi.Coz(x.Json)))
+                .Select(x => (x.Sube, Kanallar: x.H is null ? null
+                    : new[] { Dene(x.H.Hl7Adres, false), Dene(x.H.XdsAdres, true), Dene(x.H.DozAdres, true) })).ToList();
+            await Task.WhenAll(denemeler.Values);
+            var liste = bekleyen.Select(x => x.Kanallar is null
+                ? new { subeId = x.Sube, k1 = (KanalSonucu?)null, k2 = (KanalSonucu?)null, k3 = (KanalSonucu?)null }
+                : new { subeId = x.Sube, k1 = (KanalSonucu?)x.Kanallar[0].Result, k2 = (KanalSonucu?)x.Kanallar[1].Result, k3 = (KanalSonucu?)x.Kanallar[2].Result });
             return Results.Ok(new { sonuclar = liste, izlemeNo = baglam.IzlemeNo });
         });
 
@@ -147,14 +140,18 @@ public static class TeleradyolojiSubeUclari
         });
     }
 
-    /// <summary>"10.0.0.12:6661" ya da "http://10.0.0.12:8082/kos/" → "host:port".</summary>
-    public static string? HostPort(string adres)
+    public sealed record KanalSonucu(string Adres, bool Acik, string Hata, int SureMs);
+
+    /// <summary>
+    /// Kanal adresine TCP (mesaj göndermez - Mirth HTTP dinleyicisine istek atmak kanalda mesaj açardı). HTTP kanalında (K2 /
+    /// K3) adresin sonunda "/" olmalı (Jetty 302 verip gövdeyi düşürür). Şube özeti ve hesap kartı sınaması aynı kuralı kullanır.
+    /// </summary>
+    public static async Task<KanalSonucu> KanalDeneAsync(string adres, bool http, CancellationToken iptal)
     {
-        if (string.IsNullOrWhiteSpace(adres)) return null;
-        adres = adres.Trim();
-        if (Uri.TryCreate(adres, UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps))
-            return $"{u.Host}:{u.Port}";
-        var p = adres.Split(':');
-        return p.Length == 2 && int.TryParse(p[1], out _) ? adres : null;
+        adres = (adres ?? "").Trim();
+        if (adres.Length == 0) return new(adres, false, "tanımsız", 0);
+        if (http && !adres.EndsWith('/')) return new(adres, false, "adres sonunda \"/\" yok (Jetty 302 verip gövdeyi düşürür)", 0);
+        var r = await MirthIzleme.TcpDeneAsync(adres, iptal);
+        return new(adres, r.Acik, r.Acik ? "" : r.Hata, r.SureMs);
     }
 }

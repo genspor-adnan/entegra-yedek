@@ -138,7 +138,7 @@ public sealed class TeletipKosTestleri
     public void XDS_zarfi_MTOM_ve_eylem()
     {
         var kos = KosUretici.Baytlar(KosUretici.Uret(Orm(), Calisma(), Kurum(), DateTime.Now, "1.2.3.9"));
-        var z = XdsZarfi.Kur(kos, "1.2.3.9", "1.2.3.4", Orm(), Kurum(), "http://xds/repo", new DateTime(2026, 11, 11, 7, 0, 0), "2.16.792.1", "CT");
+        var z = XdsZarfi.Kur(kos, "1.2.3.9", Orm(), "http://xds/repo", new DateTime(2026, 11, 11, 7, 0, 0), "2.16.792.1");
         Assert.StartsWith("multipart/related;", z.IcerikTuru);
         Assert.Contains("type=\"application/xop+xml\"", z.IcerikTuru);
         Assert.Contains("action=\"urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b\"", z.IcerikTuru);
@@ -149,7 +149,7 @@ public sealed class TeletipKosTestleri
         Assert.Contains("78221082662^^^&amp;2.16.792.1&amp;ISO", z.SoapXml);
         Assert.Contains("PID-7|19800501000000", z.SoapXml);
         // 1323: doğum tarihi yoksa PID-7 boş (eskiden "000000" - geçersiz HL7 tarihi).
-        var zb = XdsZarfi.Kur(kos, "1.2.3.9", "1.2.3.4", Orm() with { DogumTarihi = null }, Kurum(), "http://xds/repo", new DateTime(2026, 11, 11, 7, 0, 0), "2.16.792.1", "CT");
+        var zb = XdsZarfi.Kur(kos, "1.2.3.9", Orm() with { DogumTarihi = null }, "http://xds/repo", new DateTime(2026, 11, 11, 7, 0, 0), "2.16.792.1");
         Assert.Contains("<rim:Value>PID-7|</rim:Value>", zb.SoapXml);
         // Bakanlık SendKOS v15 şablonu (submit_image_document.xml) birebir.
         Assert.Contains($"value=\"{XdsZarfi.KaynakKimligi}\"", z.SoapXml);         // sourceId sabit

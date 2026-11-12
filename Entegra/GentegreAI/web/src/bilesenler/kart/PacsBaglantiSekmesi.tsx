@@ -3,6 +3,7 @@ import { gonder, istek } from '../../api/cekirdek';
 import { guvenli } from '../mesaj';
 import { c } from '../../dil/ceviri';
 import type { EkSekmeBaglami } from '../GenForm';
+import { ayarYazici, jsonOku, metin } from './kartAyar';
 
 /**
  * ENTEGRASYON HESABI › PACS BAĞLANTISI (1316; mockup Ekranlar/Ayarlar/entegrasyon_pacs.html §2). Yalnız kod = PACS
@@ -22,11 +23,6 @@ type Adim = { ad: string; tamam: boolean; ayrinti: string; ms: number };
 
 const URUNLER = ['ClearCanvas ImageServer', 'Orthanc', 'dcm4chee', 'Diğer'];
 
-function jsonOku(v: unknown): Record<string, unknown> {
-  if (v && typeof v === 'object') return v as Record<string, unknown>;
-  try { const o = JSON.parse(String(v ?? '') || '{}'); return o && typeof o === 'object' ? o : {} } catch { return {} }
-}
-
 export function PacsBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami; kartId: number | null }) {
   const [din, setDin] = useState<Dinleyiciler | null>(null);
   const [test, setTest] = useState<{ zaman: string; basarili: boolean; adimlar: Adim[] } | null>(null);
@@ -36,12 +32,7 @@ export function PacsBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami; kartId: 
   const d = e.deger;
   const ay = jsonOku(d.ayarlar);
   const salt = e.saltOkunur;
-  const metin = (v: unknown) => (v === null || v === undefined ? '' : String(v));
-  const ayarYaz = (anahtar: string, v: string | number) => {
-    const yeni = { ...jsonOku(e.deger.ayarlar), [anahtar]: v };
-    if (v === '' || v === null) delete (yeni as Record<string, unknown>)[anahtar];
-    e.alanYaz('ayarlar', JSON.stringify(yeni));
-  };
+  const ayarYaz = ayarYazici(e);
   const bos = !metin(ay.sunucu) && !metin(d.uygulamaKodu) && !metin(d.url);
 
   const dosyadanAl = () => {

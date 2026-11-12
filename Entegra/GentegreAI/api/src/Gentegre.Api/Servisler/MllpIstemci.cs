@@ -113,15 +113,18 @@ public sealed class MllpIstemci(ILogger<MllpIstemci> gunluk)
         }
     }
 
-    /// <summary>"10.0.0.5:2575" → (10.0.0.5, 2575). Şema varsa atılır.</summary>
+    /// <summary>"10.0.0.5:2575" → (10.0.0.5, 2575). Şema ve yol varsa atılır ("http://h:8082/kos/" → (h, 8082)).</summary>
     public static (string Sunucu, int Port) AdresCoz(string adres)
     {
         var temiz = (adres ?? "").Trim();
         var sema = temiz.IndexOf("://", StringComparison.Ordinal);
+        var varsayilan = sema < 0 ? 0 : temiz[..sema].ToLowerInvariant() switch { "http" => 80, "https" => 443, _ => 0 };
         if (sema >= 0) temiz = temiz[(sema + 3)..];
-        temiz = temiz.TrimEnd('/');
+        var yol = temiz.IndexOf('/');
+        if (yol >= 0) temiz = temiz[..yol];
 
         var i = temiz.LastIndexOf(':');
+        if (i < 0 && varsayilan > 0 && temiz.Length > 0) return (temiz, varsayilan);   // https://host/yol → 443
         if (i <= 0 || i == temiz.Length - 1) return ("", 0);
         return int.TryParse(temiz[(i + 1)..], out var port) ? (temiz[..i], port) : ("", 0);
     }

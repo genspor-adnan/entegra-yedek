@@ -434,7 +434,8 @@ public sealed class DicomKaynagi(DicomAyarDeposu depo, IOptions<GuvenlikAyarlari
                 .Where(g => g.SopInstanceUid.Length > 0).OrderBy(g => g.No).ToList();
             var seri = new KosSeri(seriesUid, s.GetSingleValueOrDefault(DicomTag.Modality, ""),
                                    s.GetSingleValueOrDefault(DicomTag.SeriesDescription, ""), SeriNo(s), goruntuler);
-            if (goruntuler.Count > 0)
+            // Görüntüsüz seriler (doz SR, KO, PR) küçük resim taşımaz - WADO indirmesi boşa olurdu.
+            if (goruntuler.Count > 0 && seri.Modalite is not ("SR" or "KO" or "PR"))
             {
                 var orta = goruntuler[goruntuler.Count / 2];
                 try

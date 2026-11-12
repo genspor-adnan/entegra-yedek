@@ -296,28 +296,19 @@ public static class EntegrasyonUclari
             {
                 var tr = await baglanti.TekAsync(
                     "select coalesce(url, ''), coalesce(ayarlar ->> 'xdsAdres', ''), coalesce(ayarlar ->> 'dozAdres', ''), coalesce(sube_id, 0), coalesce(uygulama_kodu, '') from public.entegrasyon_hesap where id = @p0",
-                    null, [id], o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetInt32(3).ToString(), o.GetString(4) }, iptal)
+                    null, [id], o => new TeleradyolojiSatiri(o.GetString(0), o.GetString(1), o.GetString(2), o.GetInt32(3), o.GetString(4)), iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Hesap bulunamadı.");
-                var adimlar = new List<DicomKaynagi.SinamaAdimi>();
-                async Task Kanal(string ad, string adres, bool http)
-                {
-                    if (adres.Length == 0) { adimlar.Add(new(ad, !ad.StartsWith("K1"), "tanımsız", 0)); return; }
-                    if (http && !adres.EndsWith('/')) { adimlar.Add(new(ad + " " + adres, false, "adres sonunda \"/\" yok (Jetty 302 verip gövdeyi düşürür)", 0)); return; }
-                    var hp = TeleradyolojiSubeUclari.HostPort(adres);
-                    if (hp is null) { adimlar.Add(new(ad + " " + adres, false, "adres çözülemedi", 0)); return; }
-                    var r = await MirthIzleme.TcpDeneAsync(hp, iptal);
-                    adimlar.Add(new(ad + " " + adres, r.Acik, r.Acik ? "bağlandı" : r.Hata, r.SureMs));
-                }
-                await Kanal("K1 HL7", tr[0], false);
-                await Kanal("K2 KOS", tr[1], true);
-                await Kanal("K3 Doz", tr[2], true);
-                var k = await baglanti.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", null, [int.Parse(tr[3])],
-                    o => new[] { o.GetString(0), o.GetString(1), o.GetString(2) }, iptal) ?? ["", "", ""];
-                var eksik = new List<string>();
-                if (k[1].Length == 0) eksik.Add("SKRS kurum kodu yok"); else if (k[1] == "999999") eksik.Add("SKRS TEST değeri");
-                if (k[2].Length == 0) eksik.Add("MEDULA tesis kodu yok"); else if (k[2] == "99999999") eksik.Add("MEDULA tesis TEST değeri");
-                if (tr[4].Length == 0) eksik.Add("firma kodu yok");
-                adimlar.Add(new($"Kurum kimliği SKRS {k[1]} · MEDULA {k[2]}", eksik.Count == 0, eksik.Count == 0 ? "eksik yok" : string.Join(", ", eksik), 0));
+                // Üç kanal paralel (ölü adres başına 5 sn sırayla beklenmez). K1 zorunlu; K2 / K3 tanımsızsa o kanal kapalı sayılır.
+                var kanallar = await Task.WhenAll(
+                    TeleradyolojiSubeUclari.KanalDeneAsync(tr.Hl7, false, iptal),
+                    TeleradyolojiSubeUclari.KanalDeneAsync(tr.Xds, true, iptal),
+                    TeleradyolojiSubeUclari.KanalDeneAsync(tr.Doz, true, iptal));
+                var adimlar = new[] { "K1 HL7", "K2 KOS", "K3 Doz" }.Zip(kanallar, (ad, r) =>
+                    r.Adres.Length == 0 ? new DicomKaynagi.SinamaAdimi(ad, !ad.StartsWith("K1"), "tanımsız", 0)
+                                        : new DicomKaynagi.SinamaAdimi(ad + " " + r.Adres, r.Acik, r.Acik ? "bağlandı" : r.Hata, r.SureMs)).ToList();
+                var k = await KurumKimlik.OkuAsync(baglanti, null, tr.Sube, iptal);
+                var eksik = k.Eksikler(tr.Firma);
+                adimlar.Add(new($"Kurum kimliği SKRS {k.Skrs} · MEDULA {k.Tesis}", eksik.Count == 0, eksik.Count == 0 ? "eksik yok" : string.Join(", ", eksik), 0));
                 var tamamTr = adimlar.All(x => x.Tamam);
                 var ozetTr = string.Join(" · ", adimlar.Take(3).Select(x => $"{x.Ad.Split(' ')[0]} {(x.Tamam ? "✓" : "✖")}"))
                              + (eksik.Count > 0 ? " · kimlik: " + string.Join(", ", eksik) : "");
@@ -329,18 +320,10 @@ public static class EntegrasyonUclari
             if (string.Equals(hesap.Kod, "MIRTH", StringComparison.OrdinalIgnoreCase))
             {
                 var mr = await baglanti.TekAsync(
-                    "select coalesce(url, ''), coalesce(kullanici_adi, ''), coalesce(sifre, ''), coalesce(ayarlar ->> 'sertifikaDogrula', ''), coalesce(ayarlar ->> 'zamanAsimiSn', '') from public.entegrasyon_hesap where id = @p0",
+                    $"select {MirthIzleme.HesapSutunlari} from public.entegrasyon_hesap where id = @p0",
                     null, [id], o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.GetString(4) }, iptal)
                     ?? throw GentegreHatasi.Bulunamadi("Hesap bulunamadı.");
-                var dosyaMirth = mirthDosya.Value;
-                var parola = Gentegre.Veri.GizliMetin.Coz(mr[2]);
-                var d = await MirthIzleme.DeneAsync(new MirthAyarlari
-                {
-                    Url = mr[0].Trim(), Kullanici = mr[1].Length > 0 ? mr[1] : dosyaMirth.Kullanici,
-                    Parola = parola.Length > 0 ? parola : dosyaMirth.Parola,
-                    SertifikaDogrula = mr[3] is "true" or "1",
-                    ZamanAsimiSn = int.TryParse(mr[4], out var zs) && zs > 0 ? zs : dosyaMirth.ZamanAsimiSn,
-                }, iptal);
+                var d = await MirthIzleme.DeneAsync(MirthIzleme.HesaptanAyar(mr, mirthDosya.Value), iptal);
                 var mm = d.Erisilebilir ? $"Mirth {d.Surum} · {d.Kanallar.Count} kanal" : (d.Hata.Length > 0 ? d.Hata : "Mirth'e ulaşılamadı.");
                 await SonucYazAsync(baglanti, id, mm, iptal);
                 return Results.Ok(new { basarili = d.Erisilebilir, mesaj = mm });
@@ -1230,4 +1213,7 @@ public static class EntegrasyonUclari
         }
         return (yazilan, atlanan);
     }
+
+    /// <summary>TELERADYOLOJI hesap satırı (sınama): K1 / K2 / K3 adresleri, şube, firma kodu.</summary>
+    private sealed record TeleradyolojiSatiri(string Hl7, string Xds, string Doz, int Sube, string Firma);
 }

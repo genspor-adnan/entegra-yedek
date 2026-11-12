@@ -672,6 +672,23 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * PACS ayar deposu: ilk yükleme tek görev (eşzamanlı ilk çağrılar ayrı yüklemiyor), başlangıçta ısıtılır; sınama sonrası
     `YenileAsync` (okuyanlar eski anlık görüntüyle devam eder).
   * Testler güncellendi (kimlik önceliği, PID-7 boş, WADO sayacı toplu); tam paket 1068 geçti (düşen tek test saha planı gün-sınırı).
+- **Refaktör (kullanıcı: "kodu refaktor et"; /simplify, 2b01a00..HEAD; DB değişikliği yok, davranış aynı):**
+  * Tek okuyucular: `KurumKimlik` (fn_kurum_kimlik + ORM'e uygulama + eksik listesi + test kodu sabitleri) ve
+    `TeleRadyolojiHesabi.OkuAsync/Coz` - kuyruk işçisi, önizleme, pano, sınama aynı kodu kullanır (önizleme artık işçiyle birebir).
+  * Kanal sınaması tek yerde (`TeleradyolojiSubeUclari.KanalDeneAsync`): şube özeti de sondaki "/" kuralını uygular; denemeler
+    paralel (ölü adres başına 5 sn sırayla beklenmez). `HostPort` kalktı - `MllpIstemci.AdresCoz` yol ve http/https varsayılan
+    portunu da çözer.
+  * Mirth: hesap satırı → ayar (`HesaptanAyar` / `HesapSutunlari`) ve istemci kurulumu (`IstemciKur`, sertifika istisnası) tek yerde.
+  * KOS / doz: `KosUretici.HastaKimligi` ve `KurumDenetle` ortak; Mirth K2 / K3 POST tek yardımcı; doz satırı verisi tek sorgu
+    (4 → 1); `XdsZarfi.Kur`'un kullanılmayan parametreleri (studyUid, kurum, modalite) atıldı; SR / KO / PR serisinde küçük resim
+    için WADO indirmesi yapılmaz.
+  * Ölü kod: eski `GET/PUT /api/teletip/ayar` + istemci fonksiyonları (ekran 1317'den beri `/subeler`), `MirthIzleme.TeletipHaritasiAsync`,
+    kurum profili SKRS / Bakanlık adı tesisatı (ekranı yoktu; sütunlar kalır, fn_kurum_kimlik ve çakışma çözümü SQL'den kullanır).
+  * Web: `bilesenler/kart/kartAyar.ts` (jsonOku, ayarYazici, TEST_SKRS / TEST_TESIS) üç sekmede ortak; `KurumKoduSalt` →
+    `KurumKoduGirdisi` (artık düzenlenebilir).
+  * Ertelenen (geniş / davranış değiştirir): sına uç noktasında kod-başına strateji haritası, eski teletip.* yolunun tamamen
+    kaldırılması, DICOM şube kapsamının açık parametreye çevrilmesi, WADO tek kare çözme + önbellek, JPEG gri yolda chroma DCT'si,
+    işçinin ağ G/Ç'si sırasında açık tuttuğu işlem.
 
 ### 10.11.2026
 

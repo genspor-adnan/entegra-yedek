@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { TEST_SKRS, TEST_TESIS } from '../bilesenler/kart/kartAyar';
 import { useNavigate } from 'react-router-dom';
 import { gonder, istek } from '../api/cekirdek';
 import { hataMetni } from '../api/sozlesme';
@@ -79,7 +80,7 @@ export function TeletipAyar() {
           {v.subeler.map(s => {
             const sn = sinama?.[s.subeId];
             const kanalSorun = sn && [sn.k1, sn.k2, sn.k3].some(k => k && !k.acik);
-            const test = s.kimlik.skrs === '999999' || s.kimlik.tesis === '99999999';
+            const test = s.kimlik.skrs === TEST_SKRS || s.kimlik.tesis === TEST_TESIS;
             const durum = !s.hesap || (!v.hesapModeli && !v.aktif) ? <span className="rz gri">{c('TeleRadyoloji kapalı')}</span>
               : !s.kimlik.skrs || !s.kimlik.tesis ? <span className="tta-kirmizi">{c('kimlik eksik')}</span>
               : kanalSorun ? <span className="tta-kirmizi">{c('kanal sorunu')}</span>
@@ -89,8 +90,8 @@ export function TeletipAyar() {
               <tr key={s.subeId}>
                 <td><b>{s.subeAdi}</b></td>
                 <td>{s.kimlik.ad || '—'}</td>
-                <td className={!s.kimlik.skrs ? 'tta-kirmizi' : s.kimlik.skrs === '999999' ? 'tta-sari' : ''}>{s.kimlik.skrs || c('yok')}</td>
-                <td className={!s.kimlik.tesis ? 'tta-kirmizi' : s.kimlik.tesis === '99999999' ? 'tta-sari' : ''}>{s.kimlik.tesis || c('yok')}</td>
+                <td className={!s.kimlik.skrs ? 'tta-kirmizi' : s.kimlik.skrs === TEST_SKRS ? 'tta-sari' : ''}>{s.kimlik.skrs || c('yok')}</td>
+                <td className={!s.kimlik.tesis ? 'tta-kirmizi' : s.kimlik.tesis === TEST_TESIS ? 'tta-sari' : ''}>{s.kimlik.tesis || c('yok')}</td>
                 <td>{s.kimlik.enabizHesapId
                   ? <a className="tta-lnk" title={c('Kimliği düzenle: e-Nabız hesabı › Kurum Kimliği')}
                        onClick={() => git(`/entegrasyon-hesap/${s.kimlik.enabizHesapId}`)}>{s.kimlik.kaynak}</a>
@@ -144,8 +145,6 @@ const TTA_STIL = `
 .tta .tta-tablo th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid #cdd6e0;text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
 .tta .tta-tablo td{border-bottom:1px solid #e3e9f0;padding:5px 8px;vertical-align:middle}
 .tta .tta-tablo td.orta,.tta .tta-tablo th.orta{text-align:center}
-.tta .tta-tablo input.inp{height:26px;width:100%;min-width:160px}
-.tta .tta-tablo input.tta-kisa{min-width:80px;width:100px}
 .tta .tta-dugmeler{white-space:nowrap}
 .tta .tta-dugmeler button{margin-right:4px}
 .tta .tta-ok{color:#2e7d46;font-weight:bold}

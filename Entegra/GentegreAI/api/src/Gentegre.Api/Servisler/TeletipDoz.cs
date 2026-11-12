@@ -42,7 +42,7 @@ public static class DozUretici
         d.AddOrUpdate(DicomTag.StudyInstanceUID, studyUid);
         d.AddOrUpdate(DicomTag.AccessionNumber, v.AccessionNo);
         d.AddOrUpdate(DicomTag.PatientName, $"{v.HastaSoyad}^{v.HastaAd}".Trim('^'));
-        d.AddOrUpdate(DicomTag.PatientID, v.HastaTckn.Length == 11 ? v.HastaTckn : v.HastaDosyaNo);
+        d.AddOrUpdate(DicomTag.PatientID, KosUretici.HastaKimligi(v));
         if (v.HastaTckn.Length == 11 && v.HastaDosyaNo.Length > 0) d.AddOrUpdate(DicomTag.OtherPatientIDsRETIRED, v.HastaDosyaNo);
         if (v.DogumTarihi is DateTime dt) d.AddOrUpdate(DicomTag.PatientBirthDate, dt.ToString("yyyyMMdd", CultureInfo.InvariantCulture));
         if (v.Cinsiyet is "M" or "F") d.AddOrUpdate(DicomTag.PatientSex, v.Cinsiyet);

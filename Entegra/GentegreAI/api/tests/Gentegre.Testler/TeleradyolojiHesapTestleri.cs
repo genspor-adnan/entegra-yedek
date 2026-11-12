@@ -1,3 +1,4 @@
+using Gentegre.Api.Servisler;
 using Gentegre.Api.Uclar;
 using Gentegre.Veri;
 using Npgsql;
@@ -18,11 +19,12 @@ public sealed class TeleradyolojiHesapTestleri(VeritabaniOlgusu olgu) : IClassFi
     [Fact]
     public void Adres_host_port()
     {
-        Assert.Equal("10.0.0.12:6661", TeleradyolojiSubeUclari.HostPort("10.0.0.12:6661"));
-        Assert.Equal("10.1.0.12:8082", TeleradyolojiSubeUclari.HostPort("http://10.1.0.12:8082/kos/"));
-        Assert.Equal("teletip.saglik.gov.tr:443", TeleradyolojiSubeUclari.HostPort("https://teletip.saglik.gov.tr/x"));
-        Assert.Null(TeleradyolojiSubeUclari.HostPort(""));
-        Assert.Null(TeleradyolojiSubeUclari.HostPort("sadece-ad"));
+        // Kanal sınaması MllpIstemci.AdresCoz'u kullanır (HL7 host:port ve HTTP kanal adresi).
+        Assert.Equal(("10.0.0.12", 6661), MllpIstemci.AdresCoz("10.0.0.12:6661"));
+        Assert.Equal(("10.1.0.12", 8082), MllpIstemci.AdresCoz("http://10.1.0.12:8082/kos/"));
+        Assert.Equal(("teletip.saglik.gov.tr", 443), MllpIstemci.AdresCoz("https://teletip.saglik.gov.tr/x"));
+        Assert.Equal(("", 0), MllpIstemci.AdresCoz(""));
+        Assert.Equal(("", 0), MllpIstemci.AdresCoz("sadece-ad"));
     }
 
     private static async Task<long> HesapAsync(NpgsqlConnection b, NpgsqlTransaction t, int? sube, short aktif, short test, string hl7) =>

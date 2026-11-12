@@ -39,9 +39,6 @@ export interface KurumProfil {
   altTip: string;
   basamak: string;
   tesisKodu: string;
-  /** 1317: SKRS kurum kodu (ÇKYS) ve Bakanlık'ta görünen ad - şube bazlı kurum kimliği (TeleRadyoloji, e-Nabız). */
-  skrsKodu?: string;
-  bakanlikAd?: string;
   subeYapisi: number;
   hekimSayisi: number;
   uniteSayisi: number;

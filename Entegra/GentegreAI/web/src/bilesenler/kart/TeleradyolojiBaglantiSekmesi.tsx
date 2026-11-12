@@ -3,6 +3,7 @@ import { gonder, istek } from '../../api/cekirdek';
 import { guvenli } from '../mesaj';
 import { c } from '../../dil/ceviri';
 import type { EkSekmeBaglami } from '../GenForm';
+import { ayarYazici, jsonOku, metin, TEST_SKRS, TEST_TESIS } from './kartAyar';
 
 /**
  * ENTEGRASYON HESABI › TELERADYOLOJİ BAĞLANTISI (1317; mockup Ekranlar/Ayarlar/entegrasyon_teletip.html §2). Yalnız
@@ -13,11 +14,6 @@ import type { EkSekmeBaglami } from '../GenForm';
  */
 type Baglam = { kimlik: { ad: string; skrs: string; tesis: string; kaynak: string; enabizHesapId: number | null } | null; mirthler: { id: number; ad: string }[] };
 type Adim = { ad: string; tamam: boolean; ayrinti: string; ms: number };
-
-function jsonOku(v: unknown): Record<string, unknown> {
-  if (v && typeof v === 'object') return v as Record<string, unknown>;
-  try { const o = JSON.parse(String(v ?? '') || '{}'); return o && typeof o === 'object' ? o : {} } catch { return {} }
-}
 
 export function TeleradyolojiBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami; kartId: number | null }) {
   const d = e.deger;
@@ -31,12 +27,7 @@ export function TeleradyolojiBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami;
 
   const ay = jsonOku(d.ayarlar);
   const salt = e.saltOkunur;
-  const metin = (v: unknown) => (v === null || v === undefined ? '' : String(v));
-  const ayarYaz = (anahtar: string, v: string) => {
-    const yeni: Record<string, unknown> = { ...jsonOku(e.deger.ayarlar), [anahtar]: v };
-    if (v === '') delete yeni[anahtar];
-    e.alanYaz('ayarlar', JSON.stringify(yeni));
-  };
+  const ayarYaz = ayarYazici(e);
   const sondaEgik = (s: string) => s.length > 0 && !s.endsWith('/');
   const sina = () => kartId && void guvenli(async () => {
     setSinaniyor(true);
@@ -66,9 +57,9 @@ export function TeleradyolojiBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami;
         <div className="trb-izgara">
           <div className="trb-oku trb-genis"><span>{c("Bakanlık'ta görünen ad")}</span><b>{k?.ad || '—'}</b></div>
           <div className="trb-oku"><span>{c('SKRS kurum kodu')}</span>
-            <b className={!k?.skrs ? 'trb-kirmizi' : k.skrs === '999999' ? 'trb-sari' : ''}>{k?.skrs || c('yok')}{k?.skrs === '999999' ? ` (${c('TEST')})` : ''}</b></div>
+            <b className={!k?.skrs ? 'trb-kirmizi' : k.skrs === TEST_SKRS ? 'trb-sari' : ''}>{k?.skrs || c('yok')}{k?.skrs === TEST_SKRS ? ` (${c('TEST')})` : ''}</b></div>
           <div className="trb-oku"><span>{c('MEDULA tesis kodu')}</span>
-            <b className={!k?.tesis ? 'trb-kirmizi' : k.tesis === '99999999' ? 'trb-sari' : ''}>{k?.tesis || c('yok')}{k?.tesis === '99999999' ? ` (${c('TEST')})` : ''}</b></div>
+            <b className={!k?.tesis ? 'trb-kirmizi' : k.tesis === TEST_TESIS ? 'trb-sari' : ''}>{k?.tesis || c('yok')}{k?.tesis === TEST_TESIS ? ` (${c('TEST')})` : ''}</b></div>
         </div>
       </fieldset>
 

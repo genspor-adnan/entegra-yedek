@@ -45,7 +45,7 @@ import { MakroIpucu } from '../../bilesenler/MakroIpucu';
 const MAKRO_ALANLARI = new Set(['sikayet', 'hikaye', 'bulguOzet', 'karar']);
 import { MuayeneDikte } from '../../bilesenler/MuayeneDikte';
 import { c } from '../../dil/ceviri';
-import { KurumKoduSalt } from '../../bilesenler/kart/KurumKoduSalt';
+import { KurumKoduGirdisi } from '../../bilesenler/kart/KurumKoduGirdisi';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { GozlukHastaBandi, GozlukReceteFormu, useGozlukKaynak } from '../goz/GozlukPanelleri';
 import { GoruntulemeHastaBandi, GoruntulemeKarsilastirmaSekmesi, GoruntuOlcumSekmesi, useGoruntulemeOnizleme } from '../goz/GozGoruntulemePanelleri';
@@ -794,7 +794,7 @@ export function ListeKarti({
           //   altında hangisinin geçerli olduğu yazar.
           : tanim.kaynak === 'entegrasyon-hesap'
           ? (ad, d, yaz, salt, kart) => ad === 'kurumKodu' && ['ENABIZ', 'MEDULA'].includes(String(kart?.kod ?? ''))
-              ? <KurumKoduSalt kod={String(kart?.kod)} subeId={Number(kart?.subeId ?? 0) || 0} deger={d} yaz={yaz} salt={salt} />
+              ? <KurumKoduGirdisi kod={String(kart?.kod)} subeId={Number(kart?.subeId ?? 0) || 0} deger={d} yaz={yaz} salt={salt} />
               : undefined
           : tanim.kaynak === 'dis-hekim-ziyaret'
           ? (ad, d, yaz, salt) => ad === 'konular'

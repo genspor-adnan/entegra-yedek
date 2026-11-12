@@ -58,24 +58,16 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         {
             try
             {
-                var s = await veri.TekAsync("""
-                    select coalesce(url, ''), coalesce(kullanici_adi, ''), coalesce(sifre, ''),
-                           coalesce(ayarlar ->> 'sertifikaDogrula', ''), coalesce(ayarlar ->> 'zamanAsimiSn', ''), ad
+                var s = await veri.TekAsync($"""
+                    select {HesapSutunlari}, ad
                       from public.entegrasyon_hesap
                      where kod = 'MIRTH' and aktif = 1 and btrim(coalesce(url, '')) <> ''
                      order by (sube_id is null) desc, test_mi, id limit 1
                     """, null, o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.GetString(4), o.GetString(5) }, iptal);
                 if (s is not null)
                 {
-                    var parola = GizliMetin.Coz(s[2]);
-                    a = new MirthAyarlari
-                    {
-                        Url = s[0].Trim(), Kullanici = s[1].Length > 0 ? s[1] : dosya.Kullanici,
-                        Parola = parola.Length > 0 ? parola : dosya.Parola,
-                        SertifikaDogrula = s[3] is "true" or "1",
-                        ZamanAsimiSn = int.TryParse(s[4], out var z) && z > 0 ? z : dosya.ZamanAsimiSn,
-                    };
-                    kaynak = $"hesap: {s[5]}" + (parola.Length > 0 ? "" : " (parola ortamdan)");
+                    a = HesaptanAyar(s, dosya);
+                    kaynak = $"hesap: {s[5]}" + (GizliMetin.Coz(s[2]).Length > 0 ? "" : " (parola ortamdan)");
                 }
             }
             catch (Exception h) when (h is not OperationCanceledException) { gunluk.LogWarning(h, "MIRTH hesabı okunamadı; dosyadaki ayar kullanılıyor."); }
@@ -93,20 +85,37 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         return a;
     }
 
-    private HttpClient Http()
+    /// <summary>entegrasyon_hesap'tan Mirth ayarı için okunan sütunlar (url, kullanıcı, şifreli parola, sertifika, zaman aşımı).</summary>
+    public const string HesapSutunlari =
+        "coalesce(url, ''), coalesce(kullanici_adi, ''), coalesce(sifre, ''), coalesce(ayarlar ->> 'sertifikaDogrula', ''), coalesce(ayarlar ->> 'zamanAsimiSn', '')";
+
+    /// <summary>Hesap satırı (<see cref="HesapSutunlari"/> sırasıyla) → ayar; boş kullanıcı / parola / zaman aşımı dosyadan.</summary>
+    public static MirthAyarlari HesaptanAyar(IReadOnlyList<string> s, MirthAyarlari dosya)
     {
-        if (_http is not null) return _http;
-        var a = _etkin;
-        var isleyici = new HttpClientHandler { CookieContainer = _cerez, UseCookies = true };
+        var parola = GizliMetin.Coz(s[2]);
+        return new MirthAyarlari
+        {
+            Url = s[0].Trim(), Kullanici = s[1].Length > 0 ? s[1] : dosya.Kullanici,
+            Parola = parola.Length > 0 ? parola : dosya.Parola,
+            SertifikaDogrula = s[3] is "true" or "1",
+            ZamanAsimiSn = int.TryParse(s[4], out var z) && z > 0 ? z : dosya.ZamanAsimiSn,
+        };
+    }
+
+    /// <summary>Mirth REST istemcisi (çerezli oturum). Sertifika doğrulanmıyorsa istisna YALNIZ yapılandırılmış Mirth sunucusuna.</summary>
+    private static HttpClient IstemciKur(MirthAyarlari a, CookieContainer cerez)
+    {
+        var isleyici = new HttpClientHandler { CookieContainer = cerez, UseCookies = true };
         if (!a.SertifikaDogrula && Uri.TryCreate(a.Url, UriKind.Absolute, out var kok))
-            // Yalnız yapılandırılmış Mirth sunucusu için - başka bir ana bilgisayara bu istisna uygulanmaz.
             isleyici.ServerCertificateCustomValidationCallback = (istek, _, _, hata) =>
                 hata == System.Net.Security.SslPolicyErrors.None
                 || string.Equals(istek.RequestUri?.Host, kok.Host, StringComparison.OrdinalIgnoreCase);
-        _http = new HttpClient(isleyici) { Timeout = TimeSpan.FromSeconds(Math.Max(3, a.ZamanAsimiSn)) };
-        _http.DefaultRequestHeaders.Add("X-Requested-With", "OpenAPI");
-        return _http;
+        var http = new HttpClient(isleyici) { Timeout = TimeSpan.FromSeconds(Math.Max(3, a.ZamanAsimiSn)) };
+        http.DefaultRequestHeaders.Add("X-Requested-With", "OpenAPI");
+        return http;
     }
+
+    private HttpClient Http() => _http ??= IstemciKur(_etkin, _cerez);
 
     private string Kok => _etkin.Url.TrimEnd('/');
 
@@ -181,14 +190,7 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
     {
         if (string.IsNullOrWhiteSpace(a.Url)) return new(false, false, "Mirth adresi boş.", "", []);
         if (string.IsNullOrEmpty(a.Parola)) return new(true, false, "Mirth parolası boş (hesabın şifresi ya da Mirth__Parola).", "", []);
-        var cerez = new CookieContainer();
-        var isleyici = new HttpClientHandler { CookieContainer = cerez, UseCookies = true };
-        if (!a.SertifikaDogrula && Uri.TryCreate(a.Url, UriKind.Absolute, out var kok))
-            isleyici.ServerCertificateCustomValidationCallback = (istek, _, _, hata) =>
-                hata == System.Net.Security.SslPolicyErrors.None
-                || string.Equals(istek.RequestUri?.Host, kok.Host, StringComparison.OrdinalIgnoreCase);
-        using var http = new HttpClient(isleyici) { Timeout = TimeSpan.FromSeconds(Math.Max(3, a.ZamanAsimiSn)) };
-        http.DefaultRequestHeaders.Add("X-Requested-With", "OpenAPI");
+        using var http = IstemciKur(a, new CookieContainer());
         var url = a.Url.TrimEnd('/');
         try
         {
@@ -222,43 +224,18 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         return (a.Url, a.Kullanici, !string.IsNullOrEmpty(a.Parola), a.SertifikaDogrula, _kaynak);
     }
 
-    /// <summary>Mirth configuration map'ten "teletip_" ile başlayan anahtarlar (K1 hedefi vb.) - yalnız okunur.
-    /// Mirth erişilemezse boş sözlük.</summary>
-    public async Task<Dictionary<string, string>> TeletipHaritasiAsync(CancellationToken iptal)
-    {
-        var sonuc = new Dictionary<string, string>();
-        var a = await EtkinAsync(iptal);
-        if (string.IsNullOrWhiteSpace(a.Url) || string.IsNullOrEmpty(a.Parola)) return sonuc;
-        try
-        {
-            var x = XDocument.Parse(await GetXmlAsync("/server/configurationMap", iptal));
-            foreach (var e in x.Root?.Elements("entry") ?? [])
-            {
-                var anahtar = e.Element("string")?.Value ?? "";
-                if (anahtar.StartsWith("teletip_", StringComparison.Ordinal))
-                    sonuc[anahtar] = e.Descendants("value").FirstOrDefault()?.Value ?? "";
-            }
-        }
-        catch (Exception h) when (h is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Xml.XmlException)
-        {
-            _oturumVar = false;
-            gunluk.LogWarning("Mirth configuration map okunamadı: {Hata}", h.Message);
-        }
-        return sonuc;
-    }
-
-    /// <summary>host:port'a TCP bağlantı denemesi (Teletıp HL7 hedefi = Mirth K1 dinleyicisi).</summary>
+    /// <summary>TCP bağlantı denemesi (mesaj göndermez): Teletıp HL7 hedefi (Mirth K1) ya da HTTP kanalının dinleyicisi.</summary>
     public static async Task<(bool Acik, string Hata, int SureMs)> TcpDeneAsync(string adres, CancellationToken iptal)
     {
-        var p = adres.Split(':');
-        if (p.Length != 2 || !int.TryParse(p[1], out var port)) return (false, "Adres host:port biçiminde değil.", 0);
+        var (sunucu, port) = MllpIstemci.AdresCoz(adres);   // host:port ya da http://host:port/yol
+        if (port == 0) return (false, "adres çözülemedi", 0);
         var sw = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             using var c = new TcpClient();
             using var zaman = CancellationTokenSource.CreateLinkedTokenSource(iptal);
             zaman.CancelAfter(TimeSpan.FromSeconds(5));
-            await c.ConnectAsync(p[0], port, zaman.Token);
+            await c.ConnectAsync(sunucu, port, zaman.Token);
             return (true, "", (int)sw.ElapsedMilliseconds);
         }
         catch (Exception h) { return (false, h is OperationCanceledException ? "Zaman aşımı (5 sn)." : h.Message, (int)sw.ElapsedMilliseconds); }

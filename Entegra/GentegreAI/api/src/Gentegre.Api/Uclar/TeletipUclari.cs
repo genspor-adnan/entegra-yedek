@@ -72,82 +72,6 @@ public static class TeletipUclari
             return Results.Ok(new { s.GonderimId, s.Durum, s.AckKodu, s.Hata, izlemeNo = baglam.IzlemeNo });
         });
 
-        // ---------------------------------------------------------- AYAR (mockup §5; kullanıcı 11.11.2026 "kurum Teletıp ayar ekranını yap")
-        // Kurumun Teletıp kimliği ve Mirth K1 bağlantısı. Yazılanlar: referans (teletip.aktif / hl7_adres / firma_kodu /
-        //   encoding / sube_no, kurum.skrs_kodu) ve kurum_profil (şube 0) tesis_kodu. Mirth REST ve Mirth'teki Teletıp
-        //   hedefi YALNIZ GÖRÜNTÜLENİR (API ortam değişkeni / Mirth configuration map). Yetki radyoloji.teletip.ayar.
-        grup.MapGet("/ayar", async (VeriKaynagi veri, MirthIzleme mirth, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Gor);
-            return Results.Ok(await AyarOkuAsync(veri, mirth, iptal));
-        });
-
-        grup.MapPut("/ayar", async (TeletipAyarIstegi istek, VeriKaynagi veri, MirthIzleme mirth, BaglamCozucu cozucu,
-                                    HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Degistir);
-            var hatalar = new List<AlanHatasi>();
-            string T(string? v) => (v ?? "").Trim();
-            var skrs = T(istek.KurumSkrs); var tesis = T(istek.MedulaTesisKodu); var sube = T(istek.SubeNo);
-            var firma = T(istek.FirmaKodu); var adres = T(istek.Hl7Adres);
-            var kodlama = T(istek.Encoding) is "Windows1254" ? "Windows1254" : "UTF8";
-            var xds = T(istek.XdsAdres); var oid = T(istek.XdsHastaOid); var doz = T(istek.DozAdres);
-            if (doz.Length > 0 && !Uri.TryCreate(doz, UriKind.Absolute, out _))
-                hatalar.Add(new AlanHatasi("dozAdres", "Tam adres olmalı (ör. http://10.0.0.12:4104/doz/)."));
-            if (xds.Length > 0 && !Uri.TryCreate(xds, UriKind.Absolute, out _))
-                hatalar.Add(new AlanHatasi("xdsAdres", "Tam adres olmalı (ör. http://10.0.0.12:8082/kos/)."));
-            if (oid.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(oid, @"^[0-2](\.[0-9]+)+$"))
-                hatalar.Add(new AlanHatasi("xdsHastaOid", "OID biçiminde olmalı (Bakanlık: 1.3.6.1.4.1.21367.13.20.3000)."));
-            if (skrs.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(skrs, "^[0-9]{1,10}$"))
-                hatalar.Add(new AlanHatasi("kurumSkrs", "Yalnız rakam (SKRS kurum kodu)."));
-            if (tesis.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(tesis, "^[0-9]{8}$"))
-                hatalar.Add(new AlanHatasi("medulaTesisKodu", "8 haneli sayı olmalı."));
-            if (!System.Text.RegularExpressions.Regex.IsMatch(sube, "^[0-9]{1,4}$"))
-                hatalar.Add(new AlanHatasi("subeNo", "Rakam olmalı (genelde 1)."));
-            if (firma.Length > 60) hatalar.Add(new AlanHatasi("firmaKodu", "En fazla 60 karakter."));
-            if (adres.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(adres, @"^[A-Za-z0-9.\-]+:[0-9]{1,5}$"))
-                hatalar.Add(new AlanHatasi("hl7Adres", "host:port biçiminde olmalı (ör. 10.0.0.12:6661)."));
-            // Açmak için kimlik tam olmalı: eksik kimlikle açılan gönderim her mesajı "gidemez"e düşürür.
-            if (istek.Aktif)
-            {
-                if (skrs.Length == 0) hatalar.Add(new AlanHatasi("kurumSkrs", "Gönderimi açmak için zorunlu."));
-                if (tesis.Length == 0) hatalar.Add(new AlanHatasi("medulaTesisKodu", "Gönderimi açmak için zorunlu."));
-                if (firma.Length == 0) hatalar.Add(new AlanHatasi("firmaKodu", "Gönderimi açmak için zorunlu."));
-                if (adres.Length == 0) hatalar.Add(new AlanHatasi("hl7Adres", "Gönderimi açmak için zorunlu."));
-            }
-            if (hatalar.Count > 0) throw GentegreHatasi.Dogrulama("Teletıp ayarları kaydedilemedi.", [.. hatalar]);
-
-            await using var b = await veri.AcAsync(iptal);
-            await using var islem = await b.BeginTransactionAsync(iptal);
-            foreach (var (anahtar, deger, tip) in new[]
-            {
-                ("teletip.aktif", istek.Aktif ? "1" : "0", "sayi"), ("teletip.hl7_adres", adres, "metin"),
-                ("teletip.firma_kodu", firma, "metin"), ("teletip.encoding", kodlama, "metin"),
-                ("teletip.sube_no", sube, "metin"), ("kurum.skrs_kodu", skrs, "metin"),
-                ("teletip.xds_adres", xds, "metin"), ("teletip.xds_hasta_oid", oid, "metin"),
-                ("teletip.doz_adres", doz, "metin"),
-            })
-                await b.CalistirAsync("""
-                    insert into public.referans (anahtar, deger, tip, kapsam, degistiren, degistirme_tarihi)
-                    values (@p0, @p1, @p2, 'firma', @p3, now()::timestamp)
-                    on conflict (anahtar) do update set deger = excluded.deger, degistiren = excluded.degistiren,
-                           degistirme_tarihi = excluded.degistirme_tarihi
-                    """, islem, [anahtar, deger, tip, baglam.KullaniciId], iptal);
-            // MEDULA tesis kodu: kurum profilinin GENEL satırı (şube 0) - ORM / ORU önce isteğin şubesinin satırına,
-            //   boşsa buna bakar. Genel satır yoksa AÇILMAZ: o satır ürün modunu da taşır (fn_urun_modu, varsayılan 2
-            //   HBYS) - buradan açmak bir ERP kurulumunu sessizce HBYS'ye çevirirdi.
-            var n = await b.CalistirAsync(
-                "update public.kurum_profil set tesis_kodu = @p0, degistiren = @p1, degistirme_tarihi = now() where sube_id = 0",
-                islem, [tesis, baglam.KullaniciId], iptal);
-            if (n == 0 && tesis.Length > 0)
-                throw GentegreHatasi.Dogrulama("Kurum profili (genel satır) yok - önce kurum profili / kurulum sihirbazı tamamlanmalı.",
-                    new AlanHatasi("medulaTesisKodu", "Kurum profili yok."));
-            await islem.CommitAsync(iptal);
-            return Results.Ok(await AyarOkuAsync(veri, mirth, iptal));
-        });
-
         // ---------------------------------------------------------- PANO (mockup §2; kullanıcı 11.11.2026 "Mirth panosunu yap")
         // Günün özeti (şube saatine göre gün), bekleyen kuyruk, son olaylar ve Mirth kanal istatistikleri. Mirth erişilemezse
         //   DB bölümü yine gelir - pano "Mirth'e ulaşılamadı" der, boş kalmaz.
@@ -193,8 +117,7 @@ public static class TeletipUclari
                  limit 10
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
             // 1317: TeleRadyoloji hesabı (oturum şubesi → kurum geneli); hesap modeli yoksa eski teletip.* ayarları.
-            var panoHesap = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0) ->> 'Hl7Adres'", null, [baglam.SubeId ?? 0], iptal);
-            var adres = panoHesap ?? "";
+            var adres = (await TeleRadyolojiHesabi.OkuAsync(b, null, baglam.SubeId ?? 0, iptal))?.Hl7Adres ?? "";
             var aktif = await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);
             // Dışa açık WADO (1313): yapılandırma + bugünün / son 7 günün erişim sayacı (IP + çalışma bazında).
             var w = wadoServis.Ayar;
@@ -229,7 +152,7 @@ public static class TeletipUclari
             if (!baglam.Yetkiler.Var("radyoloji.teletip.pano", Islem.Gor) && !baglam.Yetkiler.Var("radyoloji.teletip.ayar", Islem.Gor))
                 throw GentegreHatasi.Yasak();
             await using var b = await veri.AcAsync(iptal);
-            var adres = await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0) ->> 'Hl7Adres'", null, [baglam.SubeId ?? 0], iptal) ?? "";
+            var adres = (await TeleRadyolojiHesabi.OkuAsync(b, null, baglam.SubeId ?? 0, iptal))?.Hl7Adres ?? "";
             var tcp = adres.Length == 0 ? (Acik: false, Hata: "Bu şubede TeleRadyoloji hesabı / K1 adresi yok.", SureMs: 0)
                                         : await MirthIzleme.TcpDeneAsync(adres, iptal);
             var m = await mirth.DurumAsync(iptal);
@@ -262,59 +185,12 @@ public static class TeletipUclari
             var json = await b.TekDegerAsync<string>("select public.fn_teletip_orm_verisi(@p0)::text", null, [istemId], iptal)
                        ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
             var sube = await b.TekDegerAsync<int?>("select sube_id from public.radyoloji_istem where id = @p0", null, [istemId], iptal) ?? 0;
-            var h = JsonSerializer.Deserialize<TeleRadyolojiHesabi>(
-                await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", null, [sube], iptal) ?? "{}", JsonAyar)
-                ?? new TeleRadyolojiHesabi();
-            var k = await b.TekAsync("select ad, skrs, tesis from public.fn_kurum_kimlik(@p0)", null, [sube],
-                o => new[] { o.GetString(0), o.GetString(1), o.GetString(2) }, iptal) ?? ["", "", ""];
-            var v0 = JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi();
-            var v = v0 with
-            {
-                FirmaKodu = h.FirmaKodu, Encoding = h.Encoding, SubeNo = h.SubeNo,
-                KurumAdi = k[0].Length > 0 ? k[0] : v0.KurumAdi, KurumSkrs = k[1],
-                MedulaTesisKodu = k[2].Length > 0 ? k[2] : v0.MedulaTesisKodu,
-                KontrolNo = "ONIZLEME",
-            };
+            // Kuyruk işçisiyle aynı birleştirme (KurumKimlik.Uygula) - önizleme gönderilecek mesajın aynısı.
+            var h = await TeleRadyolojiHesabi.OkuAsync(b, null, sube, iptal) ?? new TeleRadyolojiHesabi();
+            var k = await KurumKimlik.OkuAsync(b, null, sube, iptal);
+            var v = k.Uygula(JsonSerializer.Deserialize<OrmVerisi>(json, JsonAyar) ?? new OrmVerisi(), h) with { KontrolNo = "ONIZLEME" };
             return Results.Ok(new { eksikler = OrmUretici.Denetle(v), mesaj = OrmUretici.Uret(v).Replace("\r", "\n") });
         });
-    }
-
-    /// <summary>PUT /api/teletip/ayar gövdesi.</summary>
-    public sealed record TeletipAyarIstegi(bool Aktif, string? KurumSkrs, string? MedulaTesisKodu, string? SubeNo,
-                                           string? FirmaKodu, string? Encoding, string? Hl7Adres,
-                                           string? XdsAdres = null, string? XdsHastaOid = null, string? DozAdres = null);
-
-    /// <summary>Ayar ekranı verisi: DB ayarları + şube bazlı tesis kodları + Mirth (yalnız görüntü) + test değeri uyarıları.</summary>
-    private static async Task<object> AyarOkuAsync(VeriKaynagi veri, MirthIzleme mirth, CancellationToken iptal)
-    {
-        await using var b = await veri.AcAsync(iptal);
-        async Task<string> R(string a, string v) => await Gentegre.Veri.Depolar.AyarDeposu.MetinAsync(b, null, a, v, iptal);
-        var aktif = await R("teletip.aktif", "0") == "1";
-        var skrs = await R("kurum.skrs_kodu", "");
-        var firma = await R("teletip.firma_kodu", "");
-        var tesis = await b.TekDegerAsync<string>(
-            "select coalesce(tesis_kodu, '') from public.kurum_profil where sube_id = 0 limit 1", null, [], iptal) ?? "";
-        // Şubeye özel tesis kodu genel satırı ezer (ORM / ORU önce şubeye bakar) - ekranda görünsün.
-        var subeTesisleri = await b.ListeAsync("""
-            select kp.sube_id as "subeId", coalesce(s.ad, '') as "subeAdi", kp.tesis_kodu as "tesisKodu"
-              from public.kurum_profil kp left join public.sube s on s.id = kp.sube_id
-             where kp.sube_id <> 0 and coalesce(kp.tesis_kodu, '') <> '' order by kp.sube_id
-            """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
-        var uyarilar = new List<string>();
-        if (skrs == "999999") uyarilar.Add("Kurum SKRS kodu TEST değeri (999999) - gerçek Bakanlık bağlantısından önce değiştirin.");
-        if (tesis == "99999999") uyarilar.Add("MEDULA tesis kodu TEST değeri (99999999).");
-        if (firma.Contains("TEST", StringComparison.OrdinalIgnoreCase)) uyarilar.Add("Firma kodu TEST değeri gibi görünüyor.");
-        var m = await mirth.OzetAsync(iptal);
-        return new
-        {
-            aktif, kurumSkrs = skrs, medulaTesisKodu = tesis, subeNo = await R("teletip.sube_no", "1"), firmaKodu = firma,
-            encoding = await R("teletip.encoding", "UTF8"), hl7Adres = await R("teletip.hl7_adres", ""),
-            xdsAdres = await R("teletip.xds_adres", ""), xdsHastaOid = await R("teletip.xds_hasta_oid", ""),
-            dozAdres = await R("teletip.doz_adres", ""),
-            subeTesisleri, uyarilar,
-            mirth = new { url = m.Url, kullanici = m.Kullanici, parolaTanimli = m.ParolaTanimli, sertifikaDogrula = m.SertifikaDogrula,
-                          harita = await mirth.TeletipHaritasiAsync(iptal) },
-        };
     }
 
     private static async Task<bool> AktifAsync(VeriKaynagi veri, CancellationToken iptal)

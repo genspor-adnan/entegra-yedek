@@ -8,7 +8,7 @@ import { c } from '../../dil/ceviri';
  *   - ENABIZ: SKRS kurum kodu - her yerde geçerli (TeleRadyoloji, MEDULA, Teleradyoloji teslimi buradan okur);
  *   - MEDULA: tesis kodu yalnız e-Nabız hesabında MEDULA tesis kodu yoksa kullanılır - varsa geçerli değer gösterilir.
  */
-export function KurumKoduSalt({ kod, subeId, deger, yaz, salt }: { kod: string; subeId: number; deger: string; yaz(v: string): void; salt: boolean }) {
+export function KurumKoduGirdisi({ kod, subeId, deger, yaz, salt }: { kod: string; subeId: number; deger: string; yaz(v: string): void; salt: boolean }) {
   const [kimlik, setKimlik] = useState<{ tesis: string; kaynak: string } | null>(null);
   useEffect(() => {
     if (kod !== 'MEDULA') return;
@@ -17,7 +17,7 @@ export function KurumKoduSalt({ kod, subeId, deger, yaz, salt }: { kod: string; 
   }, [kod, subeId]);
   const enabizden = kod === 'MEDULA' && kimlik?.kaynak?.startsWith('e-Nabız') && !!kimlik.tesis;
   return (
-    <div className="kurum-kodu-salt">
+    <div>
       <input className="inp" value={deger} disabled={salt} onChange={e => yaz(e.target.value)} />
       <small className="sonuk">
         {kod === 'ENABIZ'

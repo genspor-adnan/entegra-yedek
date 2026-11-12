@@ -1,5 +1,6 @@
 import { c } from '../../dil/ceviri';
 import type { EkSekmeBaglami } from '../GenForm';
+import { ayarYazici, jsonOku, metin, TEST_SKRS, TEST_TESIS } from './kartAyar';
 
 /**
  * ENTEGRASYON HESABI › e-NABIZ › KURUM KİMLİĞİ (1321, kullanıcı: "her yerde geçerli ana ayarlar enabız ayarları olsun..
@@ -8,21 +9,11 @@ import type { EkSekmeBaglami } from '../GenForm';
  * (ayarlar). Şube başına satır (şube boş = kurum geneli). TeleRadyoloji (ORC-21, KOS, doz), MEDULA ve Teleradyoloji teslimi
  * buradan okur. CSS öneki `ekk-`.
  */
-function jsonOku(v: unknown): Record<string, unknown> {
-  if (v && typeof v === 'object') return v as Record<string, unknown>;
-  try { const o = JSON.parse(String(v ?? '') || '{}'); return o && typeof o === 'object' ? o : {} } catch { return {} }
-}
-
 export function EnabizKimlikSekmesi({ e }: { e: EkSekmeBaglami }) {
   const d = e.deger;
   const ay = jsonOku(d.ayarlar);
   const salt = e.saltOkunur;
-  const metin = (v: unknown) => (v === null || v === undefined ? '' : String(v));
-  const ayarYaz = (anahtar: string, v: string) => {
-    const yeni: Record<string, unknown> = { ...jsonOku(e.deger.ayarlar), [anahtar]: v };
-    if (v === '') delete yeni[anahtar];
-    e.alanYaz('ayarlar', JSON.stringify(yeni));
-  };
+  const ayarYaz = ayarYazici(e);
   const skrs = metin(d.kurumKodu), tesis = metin(ay.medulaTesisKodu);
   return (
     <div className="ekk">
@@ -32,11 +23,11 @@ export function EnabizKimlikSekmesi({ e }: { e: EkSekmeBaglami }) {
         <div className="ekk-izgara">
           <label className="ekk-alan"><span className="ekk-zor">{c('SKRS kurum kodu')}</span>
             <input value={skrs} disabled={salt} placeholder="ör. 148" onChange={ev => e.alanYaz('kurumKodu', ev.target.value.trim())} />
-            <small className={skrs === '999999' ? 'ekk-sari' : ''}>{skrs === '999999' ? c('TEST değeri') : c('e-Nabız, TeleRadyoloji (ORC-21 / KOS), Teleradyoloji teslimi')}</small></label>
+            <small className={skrs === TEST_SKRS ? 'ekk-sari' : ''}>{skrs === TEST_SKRS ? c('TEST değeri') : c('e-Nabız, TeleRadyoloji (ORC-21 / KOS), Teleradyoloji teslimi')}</small></label>
           <label className="ekk-alan"><span>{c('MEDULA tesis kodu')}</span>
             <input value={tesis} disabled={salt} placeholder="11xxxxxx" onChange={ev => ayarYaz('medulaTesisKodu', ev.target.value.trim())} />
-            <small className={tesis === '99999999' ? 'ekk-sari' : tesis && !/^\d{8}$/.test(tesis) ? 'ekk-kirmizi' : ''}>
-              {tesis === '99999999' ? c('TEST değeri') : tesis && !/^\d{8}$/.test(tesis) ? c('8 haneli sayı olmalı') : c('MEDULA, TeleRadyoloji ORC-21')}</small></label>
+            <small className={tesis === TEST_TESIS ? 'ekk-sari' : tesis && !/^\d{8}$/.test(tesis) ? 'ekk-kirmizi' : ''}>
+              {tesis === TEST_TESIS ? c('TEST değeri') : tesis && !/^\d{8}$/.test(tesis) ? c('8 haneli sayı olmalı') : c('MEDULA, TeleRadyoloji ORC-21')}</small></label>
           <label className="ekk-alan ekk-genis"><span>{c("Bakanlık'ta görünen ad")}</span>
             <input value={metin(ay.bakanlikAd)} disabled={salt} placeholder={c('boş = şube unvanı')} onChange={ev => ayarYaz('bakanlikAd', ev.target.value)} />
             <small>{c('TeleRadyoloji ORC-21 kurum adı, KOS InstitutionName')}</small></label>
