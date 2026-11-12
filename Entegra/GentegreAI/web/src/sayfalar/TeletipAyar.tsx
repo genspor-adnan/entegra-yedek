@@ -19,7 +19,7 @@ type Hesap = { hesapId: number; hesapAd: string; test: boolean; firmaKodu: strin
                dozAdres: string; encoding: string; subeNo: string; xdsHastaOid: string };
 type Sube = { subeId: number; subeAdi: string; kimlik: { ad: string; skrs: string; tesis: string; kaynak: string; enabizHesapId: number | null }; hesap: Hesap | null };
 type Cakisma = { id: number; subeId: number; subeAdi: string; alan: string; profilDegeri: string; eskiKaynak: string; eskiDeger: string };
-type Ozet = { hesapModeli: boolean; aktif: boolean; subeler: Sube[]; cakismalar: Cakisma[];
+type Ozet = { subeler: Sube[]; cakismalar: Cakisma[];
               mirth: { url: string; kullanici: string; parolaTanimli: boolean; kaynak: string } };
 type Kanal = { adres: string; acik: boolean; hata: string; sureMs: number } | null;
 type Sinama = Record<number, { k1: Kanal; k2: Kanal; k3: Kanal }>;
@@ -64,9 +64,9 @@ export function TeletipAyar() {
         <button type="button" className="d" onClick={() => void yukle()}>🔄 {c('Yenile')}</button>
         <span className="tta-sag">Mirth: {v.mirth.url ? <code>{v.mirth.url}</code> : c('tanımsız')} <span className="tta-soluk">({v.mirth.kaynak})</span></span>
       </div>
-      {!v.hesapModeli && (
+      {v.subeler.every(s => !s.hesap) && (
         <div className="tta-uyari">
-          {c("Henüz TeleRadyoloji hesabı yok - gönderim eski kurum ayarlarıyla (teletip.*) çalışıyor. Şube başına gönderim için Ayarlar › Entegrasyon'da 'TeleRadyoloji (Bakanlık)' hesabı açın; ilk hesap açılınca eski ayarlar okunmaz.")}
+          {c("TeleRadyoloji hesabı yok - gönderim kapalı. Açmak için Ayarlar › Entegrasyon'da 'TeleRadyoloji (Bakanlık)' hesabı açın (şube boş = kurum geneli).")}
         </div>
       )}
 
@@ -81,7 +81,7 @@ export function TeletipAyar() {
             const sn = sinama?.[s.subeId];
             const kanalSorun = sn && [sn.k1, sn.k2, sn.k3].some(k => k && !k.acik);
             const test = s.kimlik.skrs === TEST_SKRS || s.kimlik.tesis === TEST_TESIS;
-            const durum = !s.hesap || (!v.hesapModeli && !v.aktif) ? <span className="rz gri">{c('TeleRadyoloji kapalı')}</span>
+            const durum = !s.hesap ? <span className="rz gri">{c('TeleRadyoloji kapalı')}</span>
               : !s.kimlik.skrs || !s.kimlik.tesis ? <span className="tta-kirmizi">{c('kimlik eksik')}</span>
               : kanalSorun ? <span className="tta-kirmizi">{c('kanal sorunu')}</span>
               : test ? <span className="tta-sari">{c('TEST kimliği')}</span>

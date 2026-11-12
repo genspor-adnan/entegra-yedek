@@ -190,6 +190,7 @@ public sealed class TeletipDozTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
         if (!olgu.Baglandi(nameof(KOS_basarisinda_doz_satiri_yalniz_iyonlastirici))) return;
         await using var b = await olgu.Gerekli().AcAsync();
         await using var t = await b.BeginTransactionAsync();
+        await TeletipTestHesabi.AyarlaAsync(b, t, true);            // 1324: kuyruk kapısı hesap ister
         var sube = await b.TekDegerAsync<int>("select id from public.sube where aktif = 1 order by id limit 1", t, [], default);
         var hasta = await b.TekDegerAsync<int>(
             "insert into public.taraf (unvan, ad, soyad, kod, hasta, vkno, sube_id) values ('TT DOZ', 'Ali', 'Çelik', @p1, 1, '10000000146', @p0) returning id",

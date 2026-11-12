@@ -90,7 +90,7 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, 4, satir.Deneme, "",
                 "Dış kurumun teleradyoloji işi - Bakanlık bildirimi Teleradyoloji › Teslim Kuyruğu'ndan (1315).", "", "", iptal);
 
-        // 1317: ŞUBENİN TeleRadyoloji hesabı (şube satırı → kurum geneli; hesap modeli yoksa eski teletip.* ayarları) ve
+        // 1317 / 1324: ŞUBENİN TeleRadyoloji hesabı (şube satırı → kurum geneli; eski teletip.* yolu 1324'te kalktı) ve
         //   şubenin Bakanlık kimliği (kurum profili - tek kaynak). Hesap kapalıysa satır bekler (hesap açılınca gider).
         var hesap = await TeleRadyolojiHesabi.OkuAsync(b, islem, satir.Sube, iptal);
         if (hesap is null)
@@ -448,7 +448,7 @@ public static class TeletipOruKurucu
     }
 }
 
-/// <summary>Teletıp ORM kuyruğu işçisi: 30 sn'de bir; teletip.aktif kapalıysa hiçbir şey yapmaz.</summary>
+/// <summary>Teletıp ORM kuyruğu işçisi: 30 sn'de bir; aktif TeleRadyoloji hesabı yoksa hiçbir şey yapmaz.</summary>
 public sealed class TeletipOrmIscisi(IServiceScopeFactory kapsam, ILogger<TeletipOrmIscisi> gunluk) : BackgroundService
 {
     private static readonly TimeSpan Aralik = TimeSpan.FromSeconds(30);
@@ -475,7 +475,7 @@ public sealed class TeletipOrmIscisi(IServiceScopeFactory kapsam, ILogger<Teleti
 
 /// <summary>
 /// ŞUBENİN TELERADYOLOJİ HESABI (1317, fn_teletip_hesap_ayar): entegrasyon hesabı (kod TELERADYOLOJI) - firma kodu, Mirth
-/// K1 / K2 / K3 adresleri, karakter seti, şube no, XDS hasta OID. Hesap modeli yoksa eski teletip.* ayarları.
+/// K1 / K2 / K3 adresleri, karakter seti, şube no, XDS hasta OID. Hesap yoksa şubede kapalı (1324).
 /// </summary>
 public sealed record TeleRadyolojiHesabi
 {

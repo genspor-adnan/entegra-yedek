@@ -183,6 +183,8 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
         { ["requestType"] = "WADO", ["studyUID"] = study, ["seriesUID"] = series, ["objectUID"] = obj, ["contentType"] = tur };
 
 
+        // 1324: kuyruk kapısı hesap ister - kurum geneli test hesabı (sonda silinir).
+        await using (var hb = await veri.AcAsync()) await TeletipTestHesabi.AyarlaAsync(hb, null, true);
         try
         {
             // KOS'u başarıyla gitmiş çalışma (durum 1) + KOS'u REDDEDİLMİŞ çalışma (durum 2).
@@ -222,6 +224,8 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
         {
             await veri.CalistirAsync("delete from public.teletip_gonderim where accession_no = 'TT-WADO' and study_uid in (@p0, @p1)", [st, kapali]);
             await veri.CalistirAsync("delete from public.teletip_wado_erisim where ip = @p0", [ip]);
+            await using var hb = await veri.AcAsync();
+            await TeletipTestHesabi.SilAsync(hb);
         }
     }
 }

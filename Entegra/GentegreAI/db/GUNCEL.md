@@ -522,16 +522,16 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `fn_teletip_aktif` | `1317_teleradyoloji_sube_hesabi.sql` | 1302_teletip_orm_kuyrugu.sql |
+| `fn_teletip_aktif` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1302_teletip_orm_kuyrugu.sql, 1317_teleradyoloji_sube_hesabi.sql |
 | `fn_teletip_dis_is` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `fn_teletip_dis_is_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `fn_teletip_doz_verisi` | `1314_teletip_doz.sql` | — |
 | `fn_teletip_hesap` | `1317_teleradyoloji_sube_hesabi.sql` | — |
-| `fn_teletip_hesap_ayar` | `1320_teletip_eski_ayar_aktifsiz.sql` | 1317_teleradyoloji_sube_hesabi.sql |
+| `fn_teletip_hesap_ayar` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1317_teleradyoloji_sube_hesabi.sql, 1320_teletip_eski_ayar_aktifsiz.sql |
 | `fn_teletip_hesap_modeli` | `1317_teleradyoloji_sube_hesabi.sql` | — |
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
-| `fn_teletip_orm_verisi` | `1305_teletip_hastane_referansi.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql |
+| `fn_teletip_orm_verisi` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql, 1305_teletip_hastane_referansi.sql |
 | `fn_teletip_oru_verisi` | `1309_teletip_oru_kuyrugu.sql` | — |
 | `fn_temsilci_rolu_tazele` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |
@@ -712,7 +712,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_istek_teletip_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `tg_teletip_gonderim_dis_is` | `1317_teleradyoloji_sube_hesabi.sql` | 1315_teletip_dis_kurum_isi_haric.sql |
+| `tg_teletip_gonderim_dis_is` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1315_teletip_dis_kurum_isi_haric.sql, 1317_teleradyoloji_sube_hesabi.sql |
 | `tg_teletip_gonderim_doz` | `1314_teletip_doz.sql` | — |
 | `tg_temsilci_rolu_belge` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_temsilci_rolu_satir` | `1287_dis_hekim_sube_temsilci.sql` | — |

@@ -14,8 +14,8 @@ namespace Gentegre.Testler;
 /// girmez; Teletıp kapalıyken hiçbir şey olmaz. Eşleme (ORM verisi + rapor) ve rapora özgü denetim; servis uçtan uca
 /// sahte Teletıp'a ORU gönderir. Tetik testleri transaction içinde; servis testi kendi satırlarını açar ve siler.
 /// </summary>
-// Servis testleri ortak referans ayarlarını (teletip.hl7_adres / firma_kodu) geçici değiştirir: paralel koşarsa biri
-//   ötekinin geçici değerini "eski" sanıp geri yazar. Aynı koleksiyon = sırayla.
+// Testler ortak TeleRadyoloji test hesabını (TeletipTestHesabi) açıp kapatır ve kurum.skrs_kodu'nu geçici değiştirir:
+//   paralel koşarsa biri ötekini bozar. Aynı koleksiyon = sırayla.
 [Collection("TeletipReferans")]
 public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
@@ -24,7 +24,7 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
     private static async Task<(int Istem, int Rapor)> ZeminAsync(NpgsqlConnection b, NpgsqlTransaction? t, bool aktif)
     {
         if (t is not null)
-            await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.aktif'", t, [aktif ? "1" : "0"], Iptal);
+            await TeletipTestHesabi.AyarlaAsync(b, t, aktif);
         var sube = await b.TekDegerAsync<int>("select id from public.sube where aktif = 1 order by id limit 1", t, [], Iptal);
         var ek = Guid.NewGuid().ToString("N")[..8];
         var hasta = await b.TekDegerAsync<int>(
@@ -92,7 +92,7 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
         await using var t = await b.BeginTransactionAsync();
         var (istem, rapor) = await ZeminAsync(b, t, aktif: false);          // istem Teletıp kapalıyken açıldı: NW yok
         Assert.Empty(await SatirlarAsync(b, t, istem));
-        await b.CalistirAsync("update public.referans set deger = '1' where anahtar = 'teletip.aktif'", t, [], Iptal);
+        await TeletipTestHesabi.AyarlaAsync(b, t, true);
         await OnaylaAsync(b, t, rapor);
         Assert.Equal([(short)1, (short)4], (await SatirlarAsync(b, t, istem)).Select(x => x.Emir));
     }
@@ -212,15 +212,14 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
         var veri = olgu.Gerekli();
         using var sahte = new SahteTeletip();
         var eski = new Dictionary<string, string>();
-        string[] anahtarlar = ["teletip.hl7_adres", "teletip.firma_kodu", "kurum.skrs_kodu"];
+        string[] anahtarlar = ["kurum.skrs_kodu"];
         int istem = 0, rapor = 0; long gonderim = 0; string eskiTesis = "";
         await using (var b = await veri.AcAsync())
         {
             foreach (var a in anahtarlar)
                 eski[a] = await b.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", null, [a], Iptal) ?? "";
             eskiTesis = await b.TekDegerAsync<string>("select coalesce(tesis_kodu, '') from public.kurum_profil where sube_id = 0", null, [], Iptal) ?? "";
-            await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.hl7_adres'", null, [$"127.0.0.1:{sahte.Port}"], Iptal);
-            await b.CalistirAsync("update public.referans set deger = 'GENTEGRE' where anahtar = 'teletip.firma_kodu'", null, [], Iptal);
+            await TeletipTestHesabi.AyarlaAsync(b, null, true, $"127.0.0.1:{sahte.Port}");
             await b.CalistirAsync("update public.referans set deger = '148' where anahtar = 'kurum.skrs_kodu'", null, [], Iptal);
             await b.CalistirAsync("update public.kurum_profil set tesis_kodu = '11740001' where sube_id = 0", null, [], Iptal);
             (istem, rapor) = await ZeminAsync(b, null, aktif: false);

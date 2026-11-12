@@ -29,9 +29,6 @@ public static class TeleradyolojiSubeUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            var model = await b.TekDegerAsync<bool>("select public.fn_teletip_hesap_modeli()", null, [], iptal);
-            // Eski yolda (hesap yok) ayar her zaman döner; açık mı ayrıca (teletip.aktif) - ekran "gönderiyor" demesin.
-            var aktif = await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", null, [], iptal);
             var subeler = await b.ListeAsync("""
                 select s.id, s.ad,
                        k.ad as kimlik_ad, k.skrs, k.tesis, k.kaynak, k.enabiz_hesap_id,
@@ -59,7 +56,7 @@ public static class TeleradyolojiSubeUclari
             var m = await mirth.OzetAsync(iptal);
             return Results.Ok(new
             {
-                hesapModeli = model, aktif, subeler, cakismalar,
+                subeler, cakismalar,
                 mirth = new { url = m.Url, kullanici = m.Kullanici, parolaTanimli = m.ParolaTanimli, kaynak = m.Kaynak },
                 izlemeNo = baglam.IzlemeNo,
             });

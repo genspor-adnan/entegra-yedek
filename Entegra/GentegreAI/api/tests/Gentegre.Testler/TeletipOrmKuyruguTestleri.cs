@@ -15,8 +15,8 @@ namespace Gentegre.Testler;
 /// verisi C# OrmVerisi'ne birebir okunur mu, gönderim servisi ACK'e göre durumu doğru yazar mı.
 /// Tetik testleri transaction içinde (geri alınır); servis testi kendi satırlarını açar ve siler.
 /// </summary>
-// Servis testleri ortak referans ayarlarını (teletip.hl7_adres / firma_kodu) geçici değiştirir: paralel koşarsa biri
-//   ötekinin geçici değerini "eski" sanıp geri yazar. Aynı koleksiyon = sırayla.
+// Testler ortak TeleRadyoloji test hesabını (TeletipTestHesabi) açıp kapatır: paralel koşarsa biri ötekinin hesabını
+//   siler. Aynı koleksiyon = sırayla.
 [Collection("TeletipReferans")]
 public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFixture<VeritabaniOlgusu>
 {
@@ -25,7 +25,7 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
     private static async Task<int> IstemAsync(NpgsqlConnection b, NpgsqlTransaction t, string accession, bool aktif = true,
                                               bool accessionBekliyor = false, int? teleradIstekId = null)
     {
-        await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.aktif'", t, [aktif ? "1" : "0"], Iptal);
+        await TeletipTestHesabi.AyarlaAsync(b, t, aktif);
         var sube = await b.TekDegerAsync<int>("select id from public.sube where aktif = 1 order by id limit 1", t, [], Iptal);
         var hasta = await b.TekDegerAsync<int>(
             "insert into public.taraf (unvan, ad, soyad, kod, hasta, vkno, sube_id) values ('TT HASTA', 'Ali', 'Çelik', @p1, 1, '10000000146', @p0) returning id",
@@ -284,13 +284,9 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
             SysTakipNo = "SYS1", HastaneReferansi = "ENB1", Modalite = "CT",
         });
         long id = 0;
-        string eskiAdres = "", eskiFirma = "";
         await using (var b = await veri.AcAsync())
         {
-            eskiAdres = await b.TekDegerAsync<string>("select deger from public.referans where anahtar = 'teletip.hl7_adres'", null, [], Iptal) ?? "";
-            eskiFirma = await b.TekDegerAsync<string>("select deger from public.referans where anahtar = 'teletip.firma_kodu'", null, [], Iptal) ?? "";
-            await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.hl7_adres'", null, [$"127.0.0.1:{sahte.Port}"], Iptal);
-            await b.CalistirAsync("update public.referans set deger = 'GENTEGRE' where anahtar = 'teletip.firma_kodu'", null, [], Iptal);
+            await TeletipTestHesabi.AyarlaAsync(b, null, true, $"127.0.0.1:{sahte.Port}");
             id = await b.TekDegerAsync<long>(
                 "insert into public.teletip_gonderim (istem_id, accession_no, emir, durum, veri) values (null, 'TT', 3, 0, @p0::jsonb) returning id",
                 null, [anlik], Iptal);
@@ -313,8 +309,7 @@ public sealed class TeletipOrmKuyruguTestleri(VeritabaniOlgusu olgu) : IClassFix
         {
             await using var b = await veri.AcAsync();
             await b.CalistirAsync("delete from public.teletip_gonderim where id = @p0", null, [id], Iptal);
-            await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.hl7_adres'", null, [eskiAdres], Iptal);
-            await b.CalistirAsync("update public.referans set deger = @p0 where anahtar = 'teletip.firma_kodu'", null, [eskiFirma], Iptal);
+            await TeletipTestHesabi.SilAsync(b);
         }
     }
 

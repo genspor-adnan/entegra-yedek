@@ -7,8 +7,8 @@ namespace Gentegre.Testler;
 
 /// <summary>
 /// TELERADYOLOJİ ŞUBE HESABI (1317-1318): kurum kimliği şube → kurum geneli → eski yer; gönderim hesabı şube satırı →
-/// kurum geneli (canlı önce, pasif sayılmaz); hesap modelinde şubenin hesabı yoksa kuyruğa satır AÇILMAZ; hesap modeli
-/// yokken eski teletip.* ayarları (geri uyum); MEDULA / e-Nabız okuyucuları profil boşsa eski yere düşer.
+/// kurum geneli (canlı önce, pasif sayılmaz); şubenin hesabı yoksa kuyruğa satır AÇILMAZ; hiç hesap yokken eski
+/// teletip.* ayarları OKUNMAZ (1324); MEDULA / e-Nabız okuyucuları profil boşsa eski yere düşer.
 /// Hepsi tek işlemde, sonunda geri alınır.
 /// </summary>
 [Collection("TeletipReferans")]
@@ -87,10 +87,13 @@ public sealed class TeleradyolojiHesapTestleri(VeritabaniOlgusu olgu) : IClassFi
             o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetBoolean(3).ToString() }, Iptal);
         Assert.Equal(new[] { "500155", "34123456", "e-Nabız (şube)", "True" }, ks);      // tesis şube e-Nabız'da yok → şube profili
 
-        // --- hesap modeli yok: eski ayarlar (teletip.aktif) - geri uyum
-        Assert.False(await b.TekDegerAsync<bool>("select public.fn_teletip_hesap_modeli()", t, [], Iptal));
+        // --- hesap yok: kapalı. 1324: eski teletip.* anahtarları OKUNMAZ (teletip.aktif = 1 olsa da).
         await b.CalistirAsync("update public.referans set deger = '1' where anahtar = 'teletip.aktif'", t, [], Iptal);
-        Assert.Equal("Teletıp Ayarları (eski)", await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0) ->> 'HesapAd'", t, [s1], Iptal));
+        await b.CalistirAsync("update public.referans set deger = '10.9.9.9:6661' where anahtar = 'teletip.hl7_adres'", t, [], Iptal);
+        Assert.Null(await b.TekDegerAsync<string>("select public.fn_teletip_hesap_ayar(@p0)::text", t, [s1], Iptal));
+        Assert.False(await b.TekDegerAsync<bool>("select public.fn_teletip_aktif()", t, [], Iptal));
+        Assert.Null(await b.TekDegerAsync<long?>(
+            "insert into public.teletip_gonderim (kanal, emir, durum, accession_no, sube_id) values (1, 1, 0, 'TT-ESKI', @p0) returning id", t, [s1], Iptal));
 
         // --- hesap modeli: kurum geneli pasif + şube s1 canlı + s1 beta
         var genel = await HesapAsync(b, t, null, 0, 0, "10.0.0.1:6661");

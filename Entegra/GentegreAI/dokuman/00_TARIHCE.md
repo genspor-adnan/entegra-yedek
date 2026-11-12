@@ -689,6 +689,19 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Ertelenen (geniş / davranış değiştirir): sına uç noktasında kod-başına strateji haritası, eski teletip.* yolunun tamamen
     kaldırılması, DICOM şube kapsamının açık parametreye çevrilmesi, WADO tek kare çözme + önbellek, JPEG gri yolda chroma DCT'si,
     işçinin ağ G/Ç'si sırasında açık tuttuğu işlem.
+- **Eski Teletıp ayar yolu kaldırıldı (db/1324; kullanıcı: "Eski teletip ayar yolunun tamamen kaldırılması. yap"):**
+  * Gönderim artık YALNIZ TeleRadyoloji entegrasyon hesabından: `fn_teletip_hesap_ayar` / `fn_teletip_aktif` / kuyruk kapısı
+    (`tg_teletip_gonderim_dis_is`) referans `teletip.*` anahtarlarına düşmez; hiç hesap yoksa kapalı. `fn_teletip_hesap_modeli`
+    silindi; `fn_teletip_orm_verisi` `teletip.sube_no` okumaz (şube no hesaptan).
+  * Son taşıma: hesap yoksa ve eski anahtarlarda değer varsa kurum geneli satır açılır (1317 deseni). Dört dev DB'de
+    taşınacak bir şey çıkmadı (KOSUYOLU'nda hesap zaten var). Eski referans satırları silinmedi - yalnız okunmuyor.
+  * API `/api/teletip/subeler` `hesapModeli` / `aktif` döndürmez; ekranda "eski ayarlarla çalışıyor" uyarısı yerine
+    "hesap yok - gönderim kapalı".
+  * Testler eski anahtarlar yerine `TeletipTestHesabi` (kurum geneli test hesabı; işlem içinde ya da kalıcı + silme).
+    Doz / WADO testleri kuyruğa doğrudan satır açtığı için onlar da test hesabı açar. Tam paket 1068 geçti.
+  * Mirth entegrasyonlarda görünmüyordu (kullanıcı: "entegrasyonlar da mirth göremedim"): hiçbir DB'de MIRTH satırı yoktu,
+    pano dosya / ortam ayarıyla çalışıyordu. Dev (gentegre_ai #29) ve KOSUYOLU (#12) için "Mirth Connect (yerel)" satırı
+    açıldı (parola boş = `Mirth__Parola`); sınama ✓ Mirth 4.5.2 · 6 kanal.
 
 ### 10.11.2026
 
