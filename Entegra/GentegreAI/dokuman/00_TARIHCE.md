@@ -796,6 +796,10 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   alanında). `KartDeposu` ekleme / güncellemede boş değeri NOT NULL + varsayılanlı sütuna `DEFAULT` yazar (sütun listesi
   tablo başına bir kez information_schema'dan). Katalogdaki zorunlu alan denetimi aynen önce çalışır. Test
   `KartBosKodVarsayilanTestleri`. Tam paket 1077.
+- **Stok listesi Kalan sıralanır / süzülür (kullanıcı: "stok listesinde kalan sütununda hem sıralama hem de filtreleme
+  yapamıyorum"):** `KaynakKatalogu.Stok` kalan kolonundaki `Siralanabilir: false, Filtrelenebilir: false` kalktı. Alt sorgu
+  stok_durum birincil anahtarından okur; ~1000 stokta sıralama 3-8 ms, süzme 3-27 ms (UNIVERSE / ZONE). API'de kalan
+  azalan sıralama ve "kalan > 0" süzmesi doğru. Kalem arama penceresi de aynı kaynaktan yararlanır.
 
 ### 10.11.2026
 

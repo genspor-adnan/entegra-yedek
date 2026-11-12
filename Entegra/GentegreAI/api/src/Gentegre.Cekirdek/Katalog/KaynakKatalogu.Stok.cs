@@ -67,8 +67,10 @@ public static partial class KaynakKatalogu
                 "(select coalesce(sum(sd.kalan), 0) from public.stok_durum sd " +
                 " join public.depo d on d.id = sd.depo_id " +
                 " where sd.stok_id = s.id and d.varsayilan = 1)",
-                                            "para",  "Kalan",    Hizalama: "sag", Bicim: "#,##0.##",
-                                            Siralanabilir: false, Filtrelenebilir: false),
+                                            "para",  "Kalan",    Hizalama: "sag", Bicim: "#,##0.##"),
+            // SIRALANIR / SÜZÜLÜR (kullanıcı 12.11.2026: "stok listesinde kalan sütununda hem sıralama hem de filtreleme
+            //   yapamıyorum"): alt sorgu stok_durum (stok_id, depo_id) birincil anahtarından okur - ~1000 stokta
+            //   sıralama 3-8 ms, süzme 3-27 ms (UNIVERSE / ZONE ölçümü); kapalı tutmanın gerekçesi yok.
             // BIRIM, Kalan'in SAGINDA (kullanici): miktar ve birimi yan yana
             //   okumak dogal - "78 Adet".
             new("anaBirim",
