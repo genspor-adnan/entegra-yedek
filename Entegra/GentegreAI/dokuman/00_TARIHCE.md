@@ -790,6 +790,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   `useKalemAkisi` hızlı eklemeyi (Enter = 1 adet) atlar, kalem penceresi açılır; arama penceresinde düğme "Ekle (Enter)",
   "Miktar Ekle" ve toplu "Seçilenleri Ekle (1'er adet)" gizli. HBYS'de (başvuru, hasta faturası) eski kural: fiyatlı kalem
   Enter ile pencere açmadan, fiyatsız / lotlu kalemde pencere. Test `kalemAkisiSifirFiyat` (+2 durum).
+- **Kartta boş kod → sütun varsayılanı (kullanıcı: "stok kartı marka giriyorum ama modeli yok girmiyorum.. model zorunlu diye
+  hata veriyor.. olmamalı"):** marka seçilince markaya bağlı model combosu boşa sıfırlanır; boş değer NULL yazılıyor,
+  `stok.model smallint not null default 0` reddedip "zorunlu" diyordu (aynısı marka / grup vb. her NOT NULL varsayılanlı kod
+  alanında). `KartDeposu` ekleme / güncellemede boş değeri NOT NULL + varsayılanlı sütuna `DEFAULT` yazar (sütun listesi
+  tablo başına bir kez information_schema'dan). Katalogdaki zorunlu alan denetimi aynen önce çalışır. Test
+  `KartBosKodVarsayilanTestleri`. Tam paket 1077.
 
 ### 10.11.2026
 

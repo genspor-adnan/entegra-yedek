@@ -102,12 +102,17 @@ public sealed partial class KartDeposu
         var kolonlar = new List<string>();
         var yerTutucular = new List<string>();
         var parametreler = new List<object?>();
+        var varsayilanli = await VarsayilanliZorunluKolonlarAsync(baglanti, islem, tanim.Tablo, iptal);
 
         foreach (var (ad, deger) in degerler)
         {
             var kolon = ad == "__sube_id" ? "sube_id" : tanim.Alan(ad)?.Kolon;
             if (kolon is null) continue;
             kolonlar.Add(kolon);
+            // BOŞ DEĞER, NOT NULL + VARSAYILANLI SÜTUN → DEFAULT (12.11.2026, kullanıcı: "stok kartı marka giriyorum ama
+            //   modeli girmiyorum.. model zorunlu diye hata veriyor"): seçilmeyen kod combosu boş gelir, NULL yazılınca
+            //   `stok.model smallint not null default 0` reddediyordu. Sütunun kendi varsayılanı (0 = seçilmedi) yazılır.
+            if (deger is null && varsayilanli.Contains(kolon)) { yerTutucular.Add("DEFAULT"); continue; }
             // JSONB KOLONU CAST ISTER: parametre metin olarak gider ve PG
             //   "column is of type jsonb but expression is of type text" der.
             //   Tip katalogdan biliniyor - kolonun gercek tipini sormaya gerek yok.
@@ -269,12 +274,15 @@ public sealed partial class KartDeposu
         {
             var atamalar = new List<string>();
             var parametreler = new List<object?>();
+            var varsayilanli = await VarsayilanliZorunluKolonlarAsync(baglanti, islem, tanim.Tablo, iptal);
 
             foreach (var (ad, deger) in degerler)
             {
                 var alan = tanim.Alan(ad);
                 var kolon = alan?.Kolon;
                 if (kolon is null) continue;
+                // Boş değer NOT NULL + varsayılanlı sütuna: DEFAULT (bkz. EkleAsync).
+                if (deger is null && varsayilanli.Contains(kolon)) { atamalar.Add($"{kolon} = DEFAULT"); continue; }
                 // jsonb: bkz. EkleAsync - metin parametre cast'siz gecmiyor.
                 var cast = alan?.Tip == "json" ? "::jsonb" : "";
                 atamalar.Add($"{kolon} = @p{parametreler.Count.ToString(CultureInfo.InvariantCulture)}{cast}");
@@ -527,5 +535,32 @@ public sealed partial class KartDeposu
             else if (s.Length > 0 && s[^1] != '-') s.Append('-');
         }
         return s.ToString().Trim('-');
+    }
+
+    /// <summary>
+    /// Tablonun NOT NULL ve VARSAYILANI OLAN sütunları (boş değer yerine DEFAULT yazılabilenler). Tablo başına bir kez
+    /// okunur (veritabanı adıyla anahtarlı) - şema göçle değişir, süreç yeniden başlayınca tazelenir.
+    /// </summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, HashSet<string>> VarsayilanliOnbellek = new();
+
+    private static async Task<HashSet<string>> VarsayilanliZorunluKolonlarAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem, string tablo, CancellationToken iptal)
+    {
+        var anahtar = baglanti.Database + "|" + tablo;
+        if (VarsayilanliOnbellek.TryGetValue(anahtar, out var hazir)) return hazir;
+        var (sema, ad) = tablo.Contains('.') ? (tablo[..tablo.IndexOf('.')], tablo[(tablo.IndexOf('.') + 1)..]) : ("public", tablo);
+        var kume = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        await using (var komut = new NpgsqlCommand("""
+            select column_name from information_schema.columns
+             where table_schema = @s and table_name = @t and is_nullable = 'NO' and column_default is not null
+            """, baglanti, islem))
+        {
+            komut.Parameters.AddWithValue("s", sema.Trim('"'));
+            komut.Parameters.AddWithValue("t", ad.Trim('"'));
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            while (await o.ReadAsync(iptal)) kume.Add(o.GetString(0));
+        }
+        VarsayilanliOnbellek[anahtar] = kume;
+        return kume;
     }
 }
