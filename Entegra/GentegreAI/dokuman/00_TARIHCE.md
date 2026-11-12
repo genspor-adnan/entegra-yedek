@@ -702,6 +702,14 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Mirth entegrasyonlarda görünmüyordu (kullanıcı: "entegrasyonlar da mirth göremedim"): hiçbir DB'de MIRTH satırı yoktu,
     pano dosya / ortam ayarıyla çalışıyordu. Dev (gentegre_ai #29) ve KOSUYOLU (#12) için "Mirth Connect (yerel)" satırı
     açıldı (parola boş = `Mirth__Parola`); sınama ✓ Mirth 4.5.2 · 6 kanal.
+- **TeleRadyoloji Ayarları menüsü kalktı, şube özeti panoda (kullanıcı: "teleradyoloji ayarlarında sadece tek ayar kalmış onu
+  da entegrasyonlar a taşıyalım mı" → mockup → "uygula"; mockup Ekranlar/Radyoloji/teletip_mirth.html §2 "Şubeler"):**
+  * Ekranda düzenlenen ayar kalmamıştı (kimlik e-Nabız, bağlantı TELERADYOLOJI, Mirth MIRTH, PACS hesabında). Şube özeti
+    `bilesenler/radyoloji/TeleradyolojiSubeler.tsx` bileşeni oldu, TeleRadyoloji Panosu'nda "Şubeler" bloğu; araç çubuğunda
+    🔌 Tümünü Sına ve 🔗 Entegrasyon Hesapları. Kimlik çakışmaları yalnız `ayar` değiştirme yetkisiyle görünür.
+  * Menü "Radyoloji › Ayarlar › TeleRadyoloji Ayarları" ve `TeletipAyar.tsx` silindi; `/teletip-ayar` panoya yönlenir.
+  * `/api/teletip/subeler` ve `/subeler/sina` pano yetkisiyle (`radyoloji.teletip.pano`; eski `radyoloji.teletip.ayar` da kabul).
+  * Mockup'ta "Teletıp" adı her yerde TeleRadyoloji (kullanıcı: "Teletıp yerine TeleRadyoloji kullan"); teknik adlar aynı.
 
 ### 10.11.2026
 

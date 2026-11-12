@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Teletıp Gönderimi (Mirth Connect) — Mockup (GenoTIP AI)</title>
+<title>TeleRadyoloji Gönderimi (Mirth Connect) — Mockup (GenoTIP AI)</title>
 <style>
   :root{ --bg:#eef1f5; --card:#fff; --line:#cdd6e0; --line2:#e3e9f0; --ink:#1f2d3a; --muted:#6b7a8b; --accent:#2f6db3; --head:#f3f6fa;
          --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --grpbg:#fbfcfd; --ok:#2e7d46; --navy:#14315a; }
@@ -92,7 +92,13 @@
   .dk.bak2{border-style:dashed} .dk.wado{border-style:dashed}
   .ok-sut{display:flex;flex-direction:column;gap:6px} .ok{font-size:10.5px;color:#3a5573;border-bottom:1px dashed var(--line);padding-bottom:3px}
   .ok small{color:var(--muted)}
-  .kirmizi{color:#9d3434}
+  .kirmizi{color:#9d3434} .sarim{color:#9a5b00} .yesilm{color:#2e7d46}
+  .oneri{margin:0 0 14px;border:1px solid #c5d6ee;border-left:4px solid #2f6db3;background:#f6f9fd;border-radius:3px;padding:9px 12px;font-size:12px;line-height:1.6;color:#22384f}
+  .oneri b.bas{color:#1f4f8f}
+  .yeni{outline:2px dashed #2f6db3;outline-offset:3px;border-radius:3px}
+  .yeni-etiket{display:inline-block;background:#2f6db3;color:#fff;font-size:10px;font-weight:bold;padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle}
+  .kalkiyor{opacity:.55}
+  .kalkiyor-etiket{display:inline-block;background:#9d3434;color:#fff;font-size:10px;font-weight:bold;padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle}
   .hl7{margin:0;font-family:Consolas,monospace;font-size:10.5px;white-space:pre-wrap;word-break:break-all;background:#0f1a26;color:#cfe0f5;border-radius:3px;padding:8px}
   .asama div{display:flex;gap:6px;align-items:center;padding:3px 0;border-bottom:1px solid var(--line2)} .asama small{margin-left:auto;color:var(--muted)}
   .form{display:grid;grid-template-columns:170px 1fr;gap:6px 10px;align-items:center} .form label{color:var(--muted);font-size:11px}
@@ -105,13 +111,29 @@
 </style>
 </head>
 <body>
-<div class="not"><b>Mockup — Teletıp Gönderimi (Mirth Connect üzerinden)</b> (kullanıcı 11.11.2026: "ben teletıp gönderimlerde mirth connect kullanmak istiyorum" →
-"mirth'e göre mockup yeniden tasarla"). Hedef: Sağlık Bakanlığı Teleradyoloji (Teletıp) radyoloji verisini kılavuzdaki gibi görsün - istem (HL7 ORM),
+<div class="not"><b>Mockup — TeleRadyoloji Gönderimi (Mirth Connect üzerinden)</b> (kullanıcı 11.11.2026: "ben teletıp gönderimlerde mirth connect kullanmak istiyorum" →
+"mirth'e göre mockup yeniden tasarla"). Hedef: Sağlık Bakanlığı TeleRadyoloji sistemi radyoloji verisini kılavuzdaki gibi görsün - istem (HL7 ORM),
 rapor (HL7 ORU), görüntü manifesti (KOS / XDS-I.b), doz (RDSR) ve görüntünün kendisi (Bakanlık WADO ile bizden çeker).<br>
 <b>İş bölümü:</b> mesajın <b>içeriğini Gentegre üretir</b> (Bakanlık profili, eksik kontrolü, accession / TCKN kuralı); <b>Mirth taşır</b> - kuyruk,
-yeniden deneme, ACK, arşiv, Bakanlık bağlantısı. Gentegre Teletıp'a doğrudan bağlanmaz; Bakanlık'ta tanıtılan IP Mirth sunucusunun IP'sidir.
-Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>3</b> gönderim listesi · <b>4</b> gönderim kartı (mesaj izi) ·
-<b>5</b> kurum Teletıp / Mirth ayarı (Mirth Connect 4.5.2) · <b>6</b> radyoloji istem / PACS kartındaki Teletıp şeridi · <b>7</b> kurallar.</div>
+yeniden deneme, ACK, arşiv, Bakanlık bağlantısı. Gentegre TeleRadyoloji'ye doğrudan bağlanmaz; Bakanlık'ta tanıtılan IP Mirth sunucusunun IP'sidir.
+Ekranlar: <b>1</b> mimari · <b>2</b> TeleRadyoloji panosu (kanal sağlığı) · <b>3</b> gönderim listesi · <b>4</b> gönderim kartı (mesaj izi) ·
+<b>5</b> kurum TeleRadyoloji / Mirth ayarı (Mirth Connect 4.5.2) · <b>6</b> radyoloji istem / PACS kartındaki TeleRadyoloji şeridi · <b>7</b> kurallar.</div>
+
+<div class="oneri"><b class="bas">UYGULANDI (12.11.2026) — "TeleRadyoloji Ayarları" menüsü kalktı, şube özeti panoda.</b>
+  Mockup'tan fark: yok (blok Mirth kanal tablosu ile Dışa açık WADO arasında; kimlik çakışması uyarısı blok içinde, tablonun üstünde).<br>
+  Kullanıcı: <i>"teleradyoloji ayarlarında sadece tek ayar kalmış onu da entegrasyonlar a taşıyalım mı"</i>. 1317-1324 sonrası o ekranda
+  düzenlenen bir ayar kalmadı: kimlik e-Nabız hesabında, Bakanlık bağlantısı TELERADYOLOJI hesabında, Mirth MIRTH hesabında, PACS PACS hesabında
+  (hepsi <b>Ayarlar › Entegrasyon Hesapları</b>). Ekranda kalan yalnız <b>şube özeti</b> (salt okunur), <b>Tümünü Sına</b> ve geçişten kalan
+  <b>kimlik çakışmaları</b> - bunlar izleme işi, yeri pano.
+  <ul style="margin:6px 0 0 18px;padding:0">
+    <li><b>§2 Pano</b>'ya <span class="yeni-etiket">YENİ</span> "Şubeler" bloğu: şube · Bakanlık kimliği · kimlik nereden · gönderim hesabı · ortam · K1/K2/K3 · durum.
+      Satırdaki bağlantılar ilgili entegrasyon kartını açar (e-Nabız / TeleRadyoloji). Araç çubuğuna <b>🔌 Tümünü Sına</b> ve <b>🔗 Entegrasyon Hesapları</b>.</li>
+    <li>Kimlik çakışması varsa blok üstünde uyarı + "Bunu kullan" düğmeleri (yalnız <code>ayar</code> değiştirme yetkisiyle görünür); yoksa hiç görünmez.</li>
+    <li>Menü: <s>Radyoloji › Ayarlar › TeleRadyoloji Ayarları</s> kalkar; <code>/teletip-ayar</code> adresi panoya yönlenir (eski yer imleri bozulmasın).
+      Şube özeti pano yetkisiyle (<code>radyoloji.teletip.pano</code>) görünür; <code>radyoloji.teletip.ayar</code> yetkisi çakışma çözümü dışında kullanılmaz.</li>
+    <li>§5 (kurum ayar formu) zaten 1317'de şube özetine dönmüştü - bu öneriyle tamamen kalkar <span class="kalkiyor-etiket">KALKIYOR</span>.</li>
+  </ul>
+</div>
 
 <!-- ===================================================================== 1 ===== -->
 <h2><b>1</b> — Mimari <span class="ipucu">kim kime ne gönderir · Mirth kanalları K1-K4</span></h2>
@@ -128,7 +150,7 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
     </div>
     <div class="sut">
       <div class="dk gen"><b>Gentegre AI</b><small>istem · rapor · kuyruk (telerad_istek)<br>OrmUretici · OruUretici · eksik kontrolü<br>MWL sunucusu (1301)</small></div>
-      <div class="dk wado"><b>HTTPS WADO vekili</b><small>public statik IP · Teletıp sertifikası<br>DICOM + image/jpeg · 7/24</small></div>
+      <div class="dk wado"><b>HTTPS WADO vekili</b><small>public statik IP · TeleRadyoloji sertifikası<br>DICOM + image/jpeg · 7/24</small></div>
     </div>
     <div class="ok-sut">
       <div class="ok">→ <b>K1</b> MLLP (ORM/ORU)<br><small>ACK geri döner</small></div>
@@ -145,7 +167,7 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
       <div class="ok">⇠ sorgu servisleri 6.x</div>
     </div>
     <div class="sut">
-      <div class="dk bak"><b>Teletıp (Bakanlık)</b><small>HL7 alıcı · XDS repository<br>MGA (TELETIP_MGA) · web görüntüleyici</small></div>
+      <div class="dk bak"><b>TeleRadyoloji (Bakanlık)</b><small>HL7 alıcı · XDS repository<br>MGA (TELETIP_MGA) · web görüntüleyici</small></div>
       <div class="dk bak2"><small>Bakanlık görüntüleyicisi görüntüyü <b>bizim WADO'dan</b> çeker (RAD-55)</small></div>
     </div>
   </div>
@@ -154,14 +176,15 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
 </div>
 
 <!-- ===================================================================== 2 ===== -->
-<h2><b>2</b> — Teletıp Panosu <span class="ipucu">Radyoloji › Teletıp Gönderimi › Pano · yetki <code>radyoloji.teletip</code> · radyoloji sorumlusu, bilgi işlem</span></h2>
+<h2><b>2</b> — TeleRadyoloji Panosu <span class="ipucu">Radyoloji › TeleRadyoloji Gönderimi › Pano · yetki <code>radyoloji.teletip</code> · radyoloji sorumlusu, bilgi işlem</span></h2>
 <div class="win">
-  <div class="ekransekme"><span>🏠</span><span class="on">🏛 Teletıp Panosu ×</span><span>🏛 Teletıp Gönderimleri</span></div>
+  <div class="ekransekme"><span>🏠</span><span class="on">🏛 TeleRadyoloji Panosu ×</span><span>🏛 TeleRadyoloji Gönderimleri</span></div>
   <div class="toolbar">
     <span class="btn">◀</span><span class="inp">11.11.2026</span><span class="btn">▶</span><span class="btn">Bugün</span>
     <span class="combo" style="width:170px">Kurum: KOŞUYOLU (SKRS 148)</span>
     <span class="btn">🔄 Yenile</span><span class="btn">🧪 Bağlantı Testi</span><span class="btn">🔁 Hatalıları Yeniden Gönder</span>
-    <span class="baslikad">Mirth 4.5.2 · 10.0.0.12:8443 <span class="rz ok">çalışıyor</span> · Teletıp HL7 <span class="rz ok">bağlı</span> · WADO <span class="rz uy">son Bakanlık çağrısı 3 sa önce</span></span>
+    <span class="btn yeni">🔌 Tümünü Sına</span><span class="btn yeni">🔗 Entegrasyon Hesapları</span>
+    <span class="baslikad">Mirth 4.5.2 · 10.0.0.12:8443 <span class="rz ok">çalışıyor</span> · TeleRadyoloji HL7 <span class="rz ok">bağlı</span> · WADO <span class="rz uy">son Bakanlık çağrısı 3 sa önce</span></span>
   </div>
   <div class="ozet" style="grid-template-columns:repeat(6,1fr)">
     <div class="kutu"><small>Bugün istem (ORM)</small><b>42</b> <span class="sonuk">· 41 AA</span></div>
@@ -190,6 +213,37 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
   <div class="bilgi">Sayılar Mirth REST API'den (<code>/api/channels/statuses</code>, <code>/api/channels/{id}/statistics</code>) - Gentegre okur, kullanıcı Mirth
     yönetici ekranına gitmeden kanal sağlığını görür. "durdur" yalnız sistem yöneticisinde; Mirth'e gelişmiş müdahale (kanal düzenleme) Mirth
     Administrator'dan. Kırmızı satır: AE/AR ya da XDS hatası - Mirth otomatik tekrar ETMEZ (aynı mesaj yine reddedilir), insan düzeltir ve yeniden gönderir.</div>
+  <div class="yeni" style="margin:14px 0 6px">
+  <h4 style="margin:6px 0 4px">Şubeler <span class="yeni-etiket">YENİ — eski "TeleRadyoloji Ayarları" ekranından</span>
+    <span class="sonuk">· her şube Bakanlık'a kendi kimliği ve hesabıyla gider · salt okunur, düzenleme Entegrasyon Hesapları'nda</span></h4>
+  <div class="uyari" style="margin:4px 0 8px"><b>1 kimlik çakışması</b> (1317 geçişinde iki yerde farklı bulundu) ·
+    Kadıköy Şubesi MEDULA tesis: e-Nabız <b>34123456</b> · eski MEDULA hesabı <b>34123465</b>
+    <span class="btn" style="height:20px;font-size:11px;margin-left:8px">Bunu kullan: 34123456</span><span class="btn" style="height:20px;font-size:11px">Bunu kullan: 34123465</span>
+    <span class="sonuk">· yalnız ayar yetkisiyle · seçilen şubenin e-Nabız satırına yazılır</span></div>
+  <table>
+    <thead><tr><th style="width:130px">Şube</th><th>Bakanlık'ta görünen ad</th><th style="width:70px">SKRS</th><th style="width:90px">MEDULA tesis</th>
+      <th style="width:150px">Kimlik nereden</th><th style="width:190px">Gönderim hesabı</th><th style="width:60px" class="orta">Ortam</th><th style="width:120px">K1 HL7</th>
+      <th style="width:34px" class="orta">K1</th><th style="width:34px" class="orta">K2</th><th style="width:34px" class="orta">K3</th><th style="width:170px">Durum</th></tr></thead>
+    <tbody>
+      <tr><td><b>Merkez</b></td><td>Koşuyolu Görüntüleme</td><td>147</td><td>34100001</td>
+        <td><u style="color:#2f6db3">e-Nabız (kurum geneli) ↗</u></td><td><u style="color:#2f6db3">TeleRadyoloji - Kurum geneli ↗</u></td>
+        <td class="orta"><span class="rz ok">CANLI</span></td><td>10.0.0.12:6661</td><td class="orta yesilm">✓</td><td class="orta yesilm">✓</td><td class="orta yesilm">✓</td>
+        <td><span class="rz ok">gönderiyor</span></td></tr>
+      <tr><td><b>Kadıköy Şubesi</b></td><td>Koşuyolu Görüntüleme Kadıköy</td><td>148</td><td>34123456</td>
+        <td><u style="color:#2f6db3">e-Nabız (şube) ↗</u></td><td><u style="color:#2f6db3">TeleRadyoloji - Kadıköy Şubesi ↗</u></td>
+        <td class="orta"><span class="rz ok">CANLI</span></td><td>10.1.0.12:6661</td><td class="orta yesilm">✓</td><td class="orta kirmizi">✖</td><td class="orta yesilm">✓</td>
+        <td><span class="rz hata">kanal sorunu</span> <span class="sonuk">K2 adresi</span></td></tr>
+      <tr><td><b>Ataşehir Şubesi</b></td><td class="sonuk">— (kurum adı)</td><td class="sarim">999999</td><td class="sarim">99999999</td>
+        <td><u style="color:#2f6db3">kurum profili / eski ayar ↗</u></td><td class="sonuk">— hesap yok</td>
+        <td class="orta sonuk">—</td><td class="sonuk">—</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td>
+        <td><span class="rz">TeleRadyoloji kapalı</span> <span class="sonuk">kuyruğa girmez</span></td></tr>
+    </tbody>
+  </table>
+  <div class="bilgi" style="margin:8px 0 0">K1/K2/K3 sütunları <b>🔌 Tümünü Sına</b> ile dolar (kanal adreslerine TCP, mesaj göndermez; aynı adres bir kez,
+    paralel). "Kimlik nereden" e-Nabız kartını (şube satırı yoksa açma önerisiyle), "Gönderim hesabı" TeleRadyoloji kartını açar.
+    Sarı = Bakanlık TEST kodu (999999 / 99999999) - gerçek gönderimden önce e-Nabız hesabında değişmeli. Tek şubeli kurumda tek satır.</div>
+  </div>
+
   <h4 style="margin:12px 0 4px">Dışa açık WADO <span class="sonuk">· Bakanlık görüntüleyicisi KOS'taki görüntüleri buradan çeker (DICOM + JPEG) · son 7 gün</span></h4>
   <div class="bilgi">Port <code>35004</code> <code>/DCM/WADO</code> <span class="rz ok">HTTPS</span> · Bugün <b>412</b> istek · <b class="kirmizi">2</b> hata ·
     7 gün <b>3.120</b> istek · 41 çalışma · 3 IP · Son erişim 11.11.2026 10:52</div>
@@ -202,9 +256,9 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
 </div>
 
 <!-- ===================================================================== 3 ===== -->
-<h2><b>3</b> — Teletıp Gönderimleri (liste) <span class="ipucu">istem başına tek satır · dört aşama · süzgeç: hatalı / bekleyen / gidemez</span></h2>
+<h2><b>3</b> — TeleRadyoloji Gönderimleri (liste) <span class="ipucu">istem başına tek satır · dört aşama · süzgeç: hatalı / bekleyen / gidemez</span></h2>
 <div class="win">
-  <div class="ekransekme"><span>🏠</span><span>🏛 Teletıp Panosu</span><span class="on">🏛 Teletıp Gönderimleri ×</span></div>
+  <div class="ekransekme"><span>🏠</span><span>🏛 TeleRadyoloji Panosu</span><span class="on">🏛 TeleRadyoloji Gönderimleri ×</span></div>
   <div class="toolbar">
     <span class="inp">11.11.2026</span><span class="sonuk">–</span><span class="inp">11.11.2026</span>
     <span class="combo" style="width:110px">Modalite: Tümü</span><span class="combo" style="width:130px">Aşama: Tümü</span>
@@ -241,11 +295,11 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
 </div>
 
 <!-- ===================================================================== 4 ===== -->
-<h2><b>4</b> — Teletıp Gönderim Kartı <span class="ipucu">bir istemin tüm Bakanlık mesajları · Gentegre → Mirth → Teletıp izi</span></h2>
+<h2><b>4</b> — TeleRadyoloji Gönderim Kartı <span class="ipucu">bir istemin tüm Bakanlık mesajları · Gentegre → Mirth → TeleRadyoloji izi</span></h2>
 <div class="win">
-  <div class="ekransekme"><span>🏛 Teletıp Gönderimleri</span><span class="on">🏛 R-000027 · DEMİR^MEHMET ×</span></div>
+  <div class="ekransekme"><span>🏛 TeleRadyoloji Gönderimleri</span><span class="on">🏛 R-000027 · DEMİR^MEHMET ×</span></div>
   <div class="toolbar">
-    <span class="btn">📄 İstem Kartı</span><span class="btn">🗄 PACS Çalışması</span><span class="btn">🔁 KOS Yeniden Gönder</span><span class="btn">✖ Teletıp'ta İptal (ORM CA)</span>
+    <span class="btn">📄 İstem Kartı</span><span class="btn">🗄 PACS Çalışması</span><span class="btn">🔁 KOS Yeniden Gönder</span><span class="btn">✖ TeleRadyoloji'de İptal (ORM CA)</span>
     <span class="btn">🔗 Mirth'te Aç</span>
     <span class="baslikad">R-000027 · Akciğer PA · <span class="rz hata">KOS eşleşmedi</span></span>
   </div>
@@ -255,7 +309,7 @@ Ekranlar: <b>1</b> mimari · <b>2</b> Teletıp panosu (kanal sağlığı) · <b>
         <table><thead><tr><th style="width:62px">Saat</th><th style="width:80px">Kanal</th><th style="width:150px">Adım</th><th>Sonuç</th><th style="width:96px">Mirth no</th><th style="width:90px"></th></tr></thead><tbody>
           <tr><td>09:27:04</td><td>Gentegre</td><td>ORM NW üretildi</td><td>eksik kontrolü ✓ · accession R-000027 · SYS takip ✓ · LOINC ✓</td><td>—</td><td><span class="satirarac"><span>HL7</span></span></td></tr>
           <tr><td>09:27:04</td><td>K1</td><td>Mirth aldı</td><td>MLLP 10.0.0.12:6661</td><td>#18842</td><td><span class="satirarac"><span>ham</span></span></td></tr>
-          <tr><td>09:27:05</td><td>K1</td><td>Teletıp'a iletildi</td><td><span class="rz ok">ACK AA</span> · MSA-2 MSG000018842</td><td>#18842</td><td><span class="satirarac"><span>ACK</span></span></td></tr>
+          <tr><td>09:27:05</td><td>K1</td><td>TeleRadyoloji'ye iletildi</td><td><span class="rz ok">ACK AA</span> · MSA-2 MSG000018842</td><td>#18842</td><td><span class="satirarac"><span>ACK</span></span></td></tr>
           <tr><td>09:31:40</td><td>Cihaz</td><td>MWL sorgusu</td><td><span class="rz uy">görmedi</span> · RTG1 listeyi çekmedi (cihaz MWL kapalı?)</td><td>—</td><td></td></tr>
           <tr><td>09:52:12</td><td>PACS</td><td>çalışma geldi</td><td>accession "46050" · PatientID 1••••••••84 · 1 görüntü</td><td>—</td><td><span class="satirarac"><span>etiket</span></span></td></tr>
           <tr class="hata"><td>09:58:30</td><td>K2</td><td>KOS gönderildi</td><td>XDS kayıt ✓ · <b>istem ile eşleşme başarısız</b> (Bakanlık: accession farklı)</td><td>#4410</td><td><span class="satirarac"><span>KOS</span><span>yanıt</span></span></td></tr>
@@ -295,9 +349,9 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
 </div>
 
 <!-- ===================================================================== 5 ===== -->
-<h2><b>5</b> — Kurum Teletıp / Mirth Ayarı <span class="ipucu">Tanımlar › Teleradyoloji Kurumu › Bakanlık · yalnız sistem yöneticisi</span></h2>
-<div class="win">
-  <div class="ekransekme"><span>⚙ Teleradyoloji Kurumları</span><span class="on">⚙ Sağlık Bakanlığı Teletıp ×</span></div>
+<h2><b>5</b> — Kurum TeleRadyoloji / Mirth Ayarı <span class="kalkiyor-etiket">KALKIYOR (12.11.2026)</span> <span class="ipucu">ayarlar Entegrasyon Hesapları'nda (TELERADYOLOJI · MIRTH · PACS · e-Nabız kimliği); şube özeti §2 panoda</span></h2>
+<div class="win kalkiyor">
+  <div class="ekransekme"><span>⚙ Teleradyoloji Kurumları</span><span class="on">⚙ Sağlık Bakanlığı TeleRadyoloji ×</span></div>
   <div class="toolbar"><span class="btn primary">💾 Kaydet</span><span class="btn">🧪 Mirth Bağlantı Testi</span><span class="btn">🧪 HL7 Örnek Mesaj (doğrulama)</span><span class="btn">🧪 WADO Dış Erişim Testi</span>
     <span class="baslikad">bakanlik_gonderim = 1</span></div>
   <div class="govde" style="grid-template-columns:1fr 1fr">
@@ -323,7 +377,7 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
     </div>
     <div class="grp"><h4>Bakanlık uçları <span class="tag">Mirth kanallarında tanımlı · burada yalnız görüntülenir</span></h4>
       <div class="ic form">
-        <label>Teletıp HL7</label><span class="inp sonuk">Bakanlık'ın verdiği IP : port (K1 hedefi)</span>
+        <label>TeleRadyoloji HL7</label><span class="inp sonuk">Bakanlık'ın verdiği IP : port (K1 hedefi)</span>
         <label>XDS repository</label><span class="inp sonuk">Provide&amp;Register uç adresi (K2 hedefi)</span>
         <label>Doz MGA</label><span class="inp">dicom.teletip.saglik.gov.tr : 443 · TELETIP_MGA (TLS)</span>
         <label>Mirth çıkış IP'si</label><span class="inp">85.xx.xx.12 <span class="rz ok">Bakanlık'ta tanımlı</span></span>
@@ -341,10 +395,10 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
 </div>
 
 <!-- ===================================================================== 6 ===== -->
-<h2><b>6</b> — İstem kartı / PACS kartındaki Teletıp şeridi <span class="ipucu">her radyoloji istem kartının üstünde · tıklayınca 4 açılır</span></h2>
+<h2><b>6</b> — İstem kartı / PACS kartındaki TeleRadyoloji şeridi <span class="ipucu">her radyoloji istem kartının üstünde · tıklayınca 4 açılır</span></h2>
 <div class="win">
   <div class="serit">
-    <b>🏛 Teletıp</b>
+    <b>🏛 TeleRadyoloji</b>
     <span class="adim ok">ORM ✓ 09:27</span><span class="ayrac">›</span>
     <span class="adim uy">MWL ! cihaz sormadı</span><span class="ayrac">›</span>
     <span class="adim ok">PACS ✓ 09:52</span><span class="ayrac">›</span>
@@ -352,8 +406,8 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
     <span class="adim">ORU · rapor bekliyor</span>
     <span class="btn" style="margin-left:auto">ayrıntı</span>
   </div>
-  <div class="bilgi">Teletıp kapalı kurumda (özel merkez, <code>bakanlik_gonderim = 0</code>) şerit hiç çizilmez. PACS Çalışmaları ekranındaki (pacs_goruntuleri.html)
-    "Teletıp" sütunu da bu aşamalardan özetlenir.</div>
+  <div class="bilgi">TeleRadyoloji kapalı kurumda (özel merkez, <code>bakanlik_gonderim = 0</code>) şerit hiç çizilmez. PACS Çalışmaları ekranındaki (pacs_goruntuleri.html)
+    "TeleRadyoloji" sütunu da bu aşamalardan özetlenir.</div>
 </div>
 
 <!-- ===================================================================== 7 ===== -->
@@ -363,7 +417,7 @@ OBR|1|R-000027^HBYS|R-000027^RBS|801720^Akciğer grafisi PA^SUT^36572-6^XR Chest
   <table style="margin-bottom:8px">
     <tr><th style="width:230px">İş</th><th style="width:120px">Kimde</th><th>Not</th></tr>
     <tr><td>HL7 ORM / ORU içeriği</td><td>Gentegre</td><td>Bakanlık profili (2.3.1, ORU 4 parça base64), <code>fn_telerad_bakanlik_eksik</code>; kural tek yerde - Mirth'te dönüştürücü yazılmaz</td></tr>
-    <tr><td>HL7 taşıma, ACK, tekrar, arşiv</td><td>Mirth K1</td><td>Kaynak "Respond from: destination" - Teletıp ACK'i Gentegre'ye aynen döner; AE/AR'de otomatik tekrar yok</td></tr>
+    <tr><td>HL7 taşıma, ACK, tekrar, arşiv</td><td>Mirth K1</td><td>Kaynak "Respond from: destination" - TeleRadyoloji ACK'i Gentegre'ye aynen döner; AE/AR'de otomatik tekrar yok</td></tr>
     <tr><td>KOS üretimi + XDS gönderimi</td><td>Mirth K2</td><td>Bakanlık MakeKOS / SendKOS jar'ı Mirth <code>custom-lib</code>'e; Gentegre yalnız {studyUid, accession, skrs} gönderir</td></tr>
     <tr><td>Doz RDSR</td><td>Mirth K3</td><td>KOS başarıyla gidince (BT / röntgen / MG / XA / RF / BMD) Gentegre RDSR'yi PACS'tan alır, künyeyi KOS'la aynı yapar, BT'de DLP / CTDIvol &gt; 0 denetler → HTTP Mirth K3 (4104 /doz/) → DICOM Sender TLS TELETIP_MGA; C-STORE-RSP (0000H / 0110H + SR1xx) Gentegre'ye döner. İçerik ve Irradiation Event UID değişmez.</td></tr>
     <tr><td>Gönderim durumu</td><td>Mirth K4 → Gentegre</td><td>her hedef sonucunda HTTP POST; Gentegre <code>teletip_gonderim</code> aşamalarını yazar, ekranlar buradan okur</td></tr>

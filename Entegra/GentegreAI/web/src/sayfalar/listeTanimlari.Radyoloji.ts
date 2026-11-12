@@ -49,14 +49,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Radyoloji', menuAd: 'Radyoloji İstem Listesi', ic: '☢️', yetkiKodu: 'radyoloji-istem.liste',
     menuSira: 10,
   },
-  {
-    // TELETIP AYARLARI (kullanıcı 11.11.2026 "kurum TeleRadyoloji ayar ekranını yap", mockup teletip_mirth.html §5): kurum
-    //   SKRS / MEDULA tesis / firma kodu / Mirth K1 adresi, gönderim aç-kapat. Yalnız sistem yöneticisi (1308). Özel sayfa.
-    kaynak: 'teletip-ayar', rota: 'teletip-ayar', ozelSayfa: true,
-    baslik: 'TeleRadyoloji Ayarları', yol: 'Radyoloji › Ayarlar › TeleRadyoloji Ayarları',
-    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'TeleRadyoloji Ayarları', ic: '⚙', yetkiKodu: 'radyoloji.teletip.ayar',
-    menuSira: 95, urunModu: 2,
-  },
+  // TELERADYOLOJİ AYARLARI menüsü 12.11.2026'da kalktı (kullanıcı: "teleradyoloji ayarlarında sadece tek ayar kalmış"):
+  //   ayarlar Entegrasyon Hesapları'nda (TELERADYOLOJI / MIRTH / PACS / e-Nabız kimliği), şube özeti TeleRadyoloji Panosu'nda.
   {
     // TELETIP PANOSU (kullanıcı 11.11.2026 "Mirth panosunu yap", mockup teletip_mirth.html §2): günün özeti, kuyruk,
     //   Mirth kanal durumları (REST, gentegre_izleme), bağlantı testi, sorunluları toplu yeniden gönder. Özel sayfa.

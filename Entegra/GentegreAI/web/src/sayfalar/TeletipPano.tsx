@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TELETIP_DURUM, mesajKisaAdi, type TeletipPano as Pano } from '../api/uclar/teletip';
 import { EkranSekmesiBaglami } from '../bilesenler/sekmeBaglami';
+import { TeleradyolojiSubeler, subeleriSina, type Sinama } from '../bilesenler/radyoloji/TeleradyolojiSubeler';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { bugunIso, tarihSaat } from '../bilesenler/bicim';
 import { c } from '../dil/ceviri';
@@ -13,7 +14,8 @@ import { c } from '../dil/ceviri';
  * Üst: Mirth / TeleRadyoloji HL7 bağlantı durumu. Özet: günün istem (NW) ve güncelleme / iptal mesajları, kuyrukta bekleyen
  * (en eski kaç dk), reddedilen, gidemez. Kanal tablosu: Mirth REST'ten (gentegre_izleme kullanıcısı) durum + sayaçlar -
  * yalnız okunur; kanal durdur / başlat Mirth Administrator'da. Son olaylar: son 10 gönderim, çift tık istemin TeleRadyoloji
- * kartı. Mirth erişilemezse DB bölümü yine çizilir. CSS öneki `ttp-`.
+ * kartı. Şubeler (12.11.2026, eski "TeleRadyoloji Ayarları" ekranı): her şubenin kimliği / hesabı / kanal durumu
+ * (TeleradyolojiSubeler). Mirth erişilemezse DB bölümü yine çizilir. CSS öneki `ttp-`.
  */
 export function TeletipPano() {
   const git = useNavigate();
@@ -23,6 +25,9 @@ export function TeletipPano() {
   const [hata, setHata] = useState<string | null>(null);
   const [test, setTest] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
+  const [sinama, setSinama] = useState<Sinama | null>(null);
+  const [sinaniyor, setSinaniyor] = useState(false);
+  const [subeYenile, setSubeYenile] = useState(0);
 
   const yukle = useCallback(async () => {
     try { setV(await api.teletipPano(gun)); setHata(null) } catch (e) { setHata(hataMetni(e)) }
@@ -41,6 +46,10 @@ export function TeletipPano() {
       !y.mirth.tanimli ? `– ${c('Mirth tanımlı değil')}` : y.mirth.erisilebilir
         ? `✓ Mirth ${y.mirth.surum} · ${y.mirth.kanalSayisi} ${c('kanal')}` : `✖ Mirth: ${y.mirth.hata}`,
     ].join('   '));
+  });
+  const tumunuSina = () => guvenli(async () => {
+    setSinaniyor(true);
+    try { setSinama(await subeleriSina()) } finally { setSinaniyor(false) }
   });
   const topluGonder = () => guvenli(async () => {
     setMesgul(true);
@@ -71,10 +80,13 @@ export function TeletipPano() {
         <input type="date" value={gun} onChange={e => setGun(e.target.value || bugunIso())} />
         <button type="button" className="d" onClick={() => gunKaydir(1)}>▶</button>
         <button type="button" className="d" onClick={() => setGun(bugunIso())}>{c('Bugün')}</button>
-        <button type="button" className="d" onClick={() => void yukle()}>🔄 {c('Yenile')}</button>
+        <button type="button" className="d" onClick={() => { void yukle(); setSubeYenile(n => n + 1) }}>🔄 {c('Yenile')}</button>
         <button type="button" className="d" onClick={() => void baglantiTesti()}>🧪 {c('Bağlantı Testi')}</button>
         <button type="button" className="d" disabled={mesgul || o.sorunluToplam === 0} onClick={() => void topluGonder()}
           title={c('Reddedilen, gidemez ve ulaşmadı satırlarını şimdi yeniden dener')}>🔁 {c('Sorunluları Yeniden Gönder')}</button>
+        <button type="button" className="d" disabled={sinaniyor} onClick={() => void tumunuSina()}
+          title={c('Her şubenin K1 / K2 / K3 kanal adresine TCP - mesaj göndermez')}>🔌 {sinaniyor ? c('Sınanıyor…') : c('Tümünü Sına')}</button>
+        <button type="button" className="d" onClick={() => git('/entegrasyon-hesap')}>🔗 {c('Entegrasyon Hesapları')}</button>
         <div className="ttp-sag">
           <span>Mirth {m.surum} {mirthRozet}</span>
           <span>· {c('TeleRadyoloji HL7')} <code>{v.hl7Adres || '—'}</code></span>
@@ -117,6 +129,11 @@ export function TeletipPano() {
             </tbody>
           </table>}
         <div className="ttp-not">{c('Hatalı = TeleRadyoloji\'nin AE / AR yanıtı ya da ulaşılamayan hedef. Mirth otomatik tekrar etmez; tekrar Gentegre kuyruğundadır.')}</div>
+      </div>
+
+      <div className="ttp-blok" data-testid="teletip-pano-subeler">
+        <h4>{c('Şubeler')} <span className="ttp-ip">· {c("her şube Bakanlık'a kendi kimliği ve hesabıyla gider · düzenleme Entegrasyon Hesapları'nda")}</span></h4>
+        <div className="ttp-ic"><TeleradyolojiSubeler sinama={sinama} yenileSayaci={subeYenile} /></div>
       </div>
 
       <div className="ttp-blok" data-testid="teletip-pano-wado">

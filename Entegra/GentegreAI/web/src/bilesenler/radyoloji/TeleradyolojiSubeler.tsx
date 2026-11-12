@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
-import { TEST_SKRS, TEST_TESIS } from '../bilesenler/kart/kartAyar';
 import { useNavigate } from 'react-router-dom';
-import { gonder, istek } from '../api/cekirdek';
-import { hataMetni } from '../api/sozlesme';
-import { guvenli, mesaj } from '../bilesenler/mesaj';
-import { c } from '../dil/ceviri';
+import { gonder, istek } from '../../api/cekirdek';
+import { hataMetni } from '../../api/sozlesme';
+import { useOturum } from '../../kimlik/OturumBaglami';
+import { c } from '../../dil/ceviri';
+import { TEST_SKRS, TEST_TESIS } from '../kart/kartAyar';
+import { guvenli, mesaj } from '../mesaj';
 
 /**
- * TELERADYOLOJİ AYARLARI = ŞUBE ÖZETİ (1317; mockup Ekranlar/Ayarlar/entegrasyon_teletip.html §3-§4). Eskiden tek kurum
- * ayarıydı (Teletıp Ayarları). Artık her şube Bakanlık'a kendi kimliği ve kendi hesabıyla gönderir:
+ * TELERADYOLOJİ ŞUBELERİ (1317; 12.11.2026 "TeleRadyoloji Ayarları" ekranından panoya taşındı - mockup
+ * Ekranlar/Radyoloji/teletip_mirth.html §2 "Şubeler"). Her şube Bakanlık'a kendi kimliği ve hesabıyla gönderir:
  *   - kimlik (Bakanlık'ta görünen ad, SKRS, MEDULA tesis) = ANA kaynak e-Nabız hesabı (1321, şube satırı → kurum geneli;
- *     yoksa kurum profili / eski ayar) - burada yalnız görünür, düzenleme e-Nabız hesabının "Kurum Kimliği" sekmesinde;
+ *     yoksa kurum profili / eski yer) - burada yalnız görünür, düzenleme e-Nabız hesabının "Kurum Kimliği" sekmesinde;
  *   - gönderim hesabı = Ayarlar › Entegrasyon › TeleRadyoloji (şube satırı → kurum geneli), burada yalnız görünür;
- *   - kimlik çakışmaları (geçişte iki yerde farklı bulunan kodlar) seçilerek çözülür.
- * "Tümünü Sına" kanal adreslerine TCP yapar, mesaj göndermez. CSS öneki `tta-`.
+ *   - kimlik çakışmaları (geçişte iki yerde farklı bulunan kodlar) yalnız `ayar` değiştirme yetkisiyle çözülür.
+ * Kanal sütunları panonun "Tümünü Sına" düğmesiyle (subeleriSina) dolar - TCP, mesaj göndermez. CSS öneki `tta-`.
  */
 type Hesap = { hesapId: number; hesapAd: string; test: boolean; firmaKodu: string; hl7Adres: string; xdsAdres: string;
                dozAdres: string; encoding: string; subeNo: string; xdsHastaOid: string };
@@ -21,31 +22,29 @@ type Sube = { subeId: number; subeAdi: string; kimlik: { ad: string; skrs: strin
 type Cakisma = { id: number; subeId: number; subeAdi: string; alan: string; profilDegeri: string; eskiKaynak: string; eskiDeger: string };
 type Ozet = { subeler: Sube[]; cakismalar: Cakisma[];
               mirth: { url: string; kullanici: string; parolaTanimli: boolean; kaynak: string } };
-type Kanal = { adres: string; acik: boolean; hata: string; sureMs: number } | null;
-type Sinama = Record<number, { k1: Kanal; k2: Kanal; k3: Kanal }>;
+export type Kanal = { adres: string; acik: boolean; hata: string; sureMs: number } | null;
+export type Sinama = Record<number, { k1: Kanal; k2: Kanal; k3: Kanal }>;
 
-export function TeletipAyar() {
+/** Bütün şubelerin K1 / K2 / K3 adreslerine TCP (aynı adres bir kez, paralel). */
+export async function subeleriSina(): Promise<Sinama> {
+  const y = await gonder<{ sonuclar: { subeId: number; k1: Kanal; k2: Kanal; k3: Kanal }[] }>('/api/teletip/subeler/sina', {});
+  return Object.fromEntries(y.sonuclar.map(s => [s.subeId, { k1: s.k1, k2: s.k2, k3: s.k3 }]));
+}
+
+export function TeleradyolojiSubeler({ sinama, yenileSayaci = 0 }: { sinama: Sinama | null; yenileSayaci?: number }) {
   const git = useNavigate();
+  const { yetki } = useOturum();
   const [v, setV] = useState<Ozet | null>(null);
   const [hata, setHata] = useState<string | null>(null);
-  const [sinama, setSinama] = useState<Sinama | null>(null);
-  const [mesgul, setMesgul] = useState(false);
 
   const yukle = useCallback(async () => {
     try { setV(await istek<Ozet>('/api/teletip/subeler')); setHata(null) } catch (e) { setHata(hataMetni(e)) }
   }, []);
-  useEffect(() => { void yukle() }, [yukle]);
+  useEffect(() => { void yukle() }, [yukle, yenileSayaci]);
 
-  if (hata) return <div className="fm-sayfa"><div className="hata-kutusu">{hata}</div></div>;
-  if (!v) return <div className="fm-sayfa"><div className="yukleniyor">{c('Yükleniyor…')}</div></div>;
-
-  const tumunuSina = () => void guvenli(async () => {
-    setMesgul(true);
-    try {
-      const y = await gonder<{ sonuclar: { subeId: number; k1: Kanal; k2: Kanal; k3: Kanal }[] }>('/api/teletip/subeler/sina', {});
-      setSinama(Object.fromEntries(y.sonuclar.map(s => [s.subeId, { k1: s.k1, k2: s.k2, k3: s.k3 }])));
-    } finally { setMesgul(false) }
-  });
+  if (hata) return <div className="tta"><div className="tta-uyari">{hata}</div></div>;
+  if (!v) return <div className="tta"><div className="tta-soluk" style={{ padding: '6px 10px' }}>{c('Yükleniyor…')}</div></div>;
+  const cakismaYetkisi = yetki('ayar', 'degistir');
   const cakismaCoz = (k: Cakisma, secim: 'profil' | 'eski') => void guvenli(async () => {
     const y = await gonder<{ mesaj: string }>(`/api/teletip/cakisma/${k.id}/coz`, { secim });
     mesaj(y.mesaj); await yukle();
@@ -55,18 +54,31 @@ export function TeletipAyar() {
     : <span className="tta-hata" title={`${k.adres}: ${k.hata}`}>✖</span>;
 
   return (
-    <div className="fm-sayfa tta" data-testid="teletip-ayar">
+    <div className="tta" data-testid="teleradyoloji-subeler">
       <style>{TTA_STIL}</style>
-      <div className="tta-arac">
-        <b>🏛 {c('TeleRadyoloji (Bakanlık) · şube özeti')}</b>
-        <button type="button" className="d" disabled={mesgul} onClick={tumunuSina}>🔌 {mesgul ? c('Sınanıyor…') : c('Tümünü Sına')}</button>
-        <button type="button" className="d" onClick={() => git('/entegrasyon-hesap')}>🔗 {c('Entegrasyon Hesapları')}</button>
-        <button type="button" className="d" onClick={() => void yukle()}>🔄 {c('Yenile')}</button>
-        <span className="tta-sag">Mirth: {v.mirth.url ? <code>{v.mirth.url}</code> : c('tanımsız')} <span className="tta-soluk">({v.mirth.kaynak})</span></span>
-      </div>
       {v.subeler.every(s => !s.hesap) && (
         <div className="tta-uyari">
           {c("TeleRadyoloji hesabı yok - gönderim kapalı. Açmak için Ayarlar › Entegrasyon'da 'TeleRadyoloji (Bakanlık)' hesabı açın (şube boş = kurum geneli).")}
+        </div>
+      )}
+
+      {cakismaYetkisi && v.cakismalar.length > 0 && (
+        <div className="tta-blok tta-cakisma">
+          <h4>↻ {c('Kimlik çakışmaları')} <span className="tta-soluk">{c('geçişte iki yerde FARKLI bulunan kodlar - kendiliğinden ezilmez, hangisinin doğru olduğunu seçin')}</span></h4>
+          <table className="tta-tablo">
+            <thead><tr><th>{c('Şube')}</th><th>{c('Alan')}</th><th>{c('Kurum profili')}</th><th>{c('Eski yer')}</th><th>{c('Eski değer')}</th><th></th></tr></thead>
+            <tbody>{v.cakismalar.map(k => (
+              <tr key={k.id}>
+                <td>{k.subeAdi}</td><td>{k.alan === 'skrs' ? 'SKRS' : c('MEDULA tesis')}</td>
+                <td><b>{k.profilDegeri}</b></td><td className="tta-soluk">{k.eskiKaynak}</td><td><b>{k.eskiDeger}</b></td>
+                <td className="tta-dugmeler">
+                  <button type="button" className="d" onClick={() => cakismaCoz(k, 'profil')}>{c('Profildeki doğru')}</button>
+                  <button type="button" className="d" onClick={() => cakismaCoz(k, 'eski')}>{c('Eski değer doğru')}</button>
+                  <span className="tta-soluk"> {c('seçilen e-Nabız hesabına yazılır')}</span>
+                </td>
+              </tr>
+            ))}</tbody>
+          </table>
         </div>
       )}
 
@@ -108,40 +120,16 @@ export function TeletipAyar() {
         </tbody>
       </table>
 
-      {v.cakismalar.length > 0 && (
-        <div className="tta-blok tta-cakisma">
-          <h4>↻ {c('Kimlik çakışmaları')} <span className="tta-soluk">{c('geçişte iki yerde FARKLI bulunan kodlar - kendiliğinden ezilmez, hangisinin doğru olduğunu seçin')}</span></h4>
-          <table className="tta-tablo">
-            <thead><tr><th>{c('Şube')}</th><th>{c('Alan')}</th><th>{c('Kurum profili')}</th><th>{c('Eski yer')}</th><th>{c('Eski değer')}</th><th></th></tr></thead>
-            <tbody>{v.cakismalar.map(k => (
-              <tr key={k.id}>
-                <td>{k.subeAdi}</td><td>{k.alan === 'skrs' ? 'SKRS' : c('MEDULA tesis')}</td>
-                <td><b>{k.profilDegeri}</b></td><td className="tta-soluk">{k.eskiKaynak}</td><td><b>{k.eskiDeger}</b></td>
-                <td className="tta-dugmeler">
-                  <button type="button" className="d" onClick={() => cakismaCoz(k, 'profil')}>{c('Profildeki doğru')}</button>
-                  <button type="button" className="d" onClick={() => cakismaCoz(k, 'eski')}>{c('Eski değer doğru')}</button>
-                  <span className="tta-soluk"> {c('seçilen e-Nabız hesabına yazılır')}</span>
-                </td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-      )}
-
       <div className="tta-not">
-        <b>{c('Nasıl çalışır:')}</b> {c("istem / rapor / KOS / doz o işin şubesinin TeleRadyoloji hesabıyla gider (şube satırı → kurum geneli); ikisi de yoksa o şubenin işleri kuyruğa girmez. Kimlik (ORC-21, KOS InstitutionName, doz künyesi) şubenin e-Nabız hesabından (her HBYS e-Nabız kullanmak zorunda - ana kaynak); MEDULA da oradan okur. Bağlantı ayarları (firma kodu, Mirth K1 / K2 / K3, karakter seti) Entegrasyon Hesapları'nda. Dışa açık WADO kurulumda kalır (Ayarlar › Entegrasyon › PACS kartında durumu görünür).")}
+        {c("Her işin (istem / rapor / KOS / doz) şubesinin TeleRadyoloji hesabıyla gider (şube satırı → kurum geneli); ikisi de yoksa o şubenin işleri kuyruğa girmez. Kimlik şubenin e-Nabız hesabından. Düzenleme Entegrasyon Hesapları'nda - satırdaki bağlantılar ilgili kartı açar.")}
       </div>
     </div>
   );
 }
 
 const TTA_STIL = `
-.tta .tta-arac{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 18px;border-bottom:1px solid #e3e9f0}
-.tta .tta-arac>b{color:#14315a;margin-right:8px}
-.tta .tta-sag{margin-left:auto;font-size:12px;color:#14315a}
-.tta .tta-sag code{background:#eef4fc;border:1px solid #cfe0f5;border-radius:3px;padding:0 5px}
-.tta .tta-uyari{margin:10px 18px 0;padding:7px 10px;border:1px solid #f2ddbf;background:#fdf9f1;color:#8a6218;border-radius:3px;font-size:12px}
-.tta .tta-tablo{border-collapse:collapse;width:calc(100% - 36px);margin:10px 18px;font-size:12px}
+.tta .tta-uyari{margin:6px 0;padding:7px 10px;border:1px solid #f2ddbf;background:#fdf9f1;color:#8a6218;border-radius:3px;font-size:12px}
+.tta .tta-tablo{border-collapse:collapse;width:100%;margin:4px 0;font-size:12px}
 .tta .tta-tablo th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid #cdd6e0;text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
 .tta .tta-tablo td{border-bottom:1px solid #e3e9f0;padding:5px 8px;vertical-align:middle}
 .tta .tta-tablo td.orta,.tta .tta-tablo th.orta{text-align:center}
@@ -154,8 +142,8 @@ const TTA_STIL = `
 .tta .tta-sari{color:#9a5b00}
 .tta .tta-soluk{color:#6b7a8b;font-size:11px}
 .tta .tta-lnk{color:#2f6db3;cursor:pointer}
-.tta .tta-blok{margin:0 18px 10px;border:1px solid #f0d3a0;background:#fffaf0;border-radius:4px}
+.tta .tta-blok{margin:6px 0 8px;border:1px solid #f0d3a0;background:#fffaf0;border-radius:4px}
 .tta .tta-blok h4{margin:0;padding:7px 10px;font-size:12px;color:#9a5b00;border-bottom:1px solid #f3e2bf}
 .tta .tta-blok .tta-tablo{width:calc(100% - 20px);margin:6px 10px 10px}
-.tta .tta-not{margin:4px 18px 14px;font-size:11.5px;color:#6b7a8b;line-height:1.6}
+.tta .tta-not{margin:4px 0 2px;font-size:11.5px;color:#6b7a8b;line-height:1.6}
 `;

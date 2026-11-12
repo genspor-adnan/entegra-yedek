@@ -27,7 +27,7 @@ public static class TeleradyolojiSubeUclari
         grup.MapGet("/subeler", async (VeriKaynagi veri, MirthIzleme mirth, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Gor);
+            PanoYetkisi(baglam);
             await using var b = await veri.AcAsync(iptal);
             var subeler = await b.ListeAsync("""
                 select s.id, s.ad,
@@ -66,7 +66,7 @@ public static class TeleradyolojiSubeUclari
         grup.MapPost("/subeler/sina", async (VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji.teletip.ayar", Islem.Gor);
+            PanoYetkisi(baglam);
             await using var b = await veri.AcAsync(iptal);
             var hesaplar = await b.ListeAsync("""
                 select s.id, public.fn_teletip_hesap_ayar(s.id)::text from public.sube s where s.aktif = 1 order by s.id
@@ -135,6 +135,13 @@ public static class TeleradyolojiSubeUclari
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
             return Results.Ok(new { kimlik = k, mirthler, izlemeNo = baglam.IzlemeNo });
         });
+    }
+
+    /// <summary>Şube özeti TeleRadyoloji Panosu'nda (12.11.2026): pano yetkisi yeter; eski ayar ekranı yetkisi de kabul.</summary>
+    private static void PanoYetkisi(IstekBaglami baglam)
+    {
+        if (!baglam.Yetkiler.Var("radyoloji.teletip.pano", Islem.Gor) && !baglam.Yetkiler.Var("radyoloji.teletip.ayar", Islem.Gor))
+            throw GentegreHatasi.Yasak();
     }
 
     public sealed record KanalSonucu(string Adres, bool Acik, string Hata, int SureMs);
