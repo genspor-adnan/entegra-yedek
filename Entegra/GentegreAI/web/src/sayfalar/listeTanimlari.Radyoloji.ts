@@ -55,8 +55,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // TELETIP PANOSU (kullanıcı 11.11.2026 "Mirth panosunu yap", mockup teletip_mirth.html §2): günün özeti, kuyruk,
     //   Mirth kanal durumları (REST, gentegre_izleme), bağlantı testi, sorunluları toplu yeniden gönder. Özel sayfa.
     kaynak: 'teletip-pano', rota: 'teletip-pano', ozelSayfa: true,
-    baslik: 'TeleRadyoloji Panosu', yol: 'Radyoloji › TeleRadyoloji Panosu',
-    menuGrup: 'Radyoloji', menuAd: 'TeleRadyoloji Panosu', ic: '🏛', yetkiKodu: 'radyoloji.teletip.pano',
+    baslik: 'Bakanlık TeleRadyoloji Panosu', yol: 'Radyoloji › Bakanlık TeleRadyoloji Panosu',
+    menuGrup: 'Radyoloji', menuAd: 'Bakanlık TeleRadyoloji Panosu', ic: '🏛', yetkiKodu: 'radyoloji.teletip.pano',
     menuSira: 54, urunModu: 2,
   },
   {
@@ -64,8 +64,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   istem başına tek satır - Bakanlık'a giden ORM mesajlarının durumu. Çift tık gönderim kartı (/teletip/:istemId,
     //   özel kart: mesaj izi, ham HL7, ne yapmalı, yeniden gönder, önizleme). Varsayılan çip "Sorunlu": günün işi
     //   reddedilen / gidemez mesajlar.
-    kaynak: 'teletip-gonderim', rota: 'teletip', baslik: 'TeleRadyoloji Gönderimleri',
-    yol: 'Radyoloji › TeleRadyoloji Gönderimleri',
+    kaynak: 'teletip-gonderim', rota: 'teletip', baslik: 'Bakanlık TeleRadyoloji Gönderimleri',
+    yol: 'Radyoloji › Bakanlık TeleRadyoloji Gönderimleri',
     kartYolu: '/teletip', kartBaslik: 'TeleRadyoloji Gönderimi', kartIc: '🏛', ozelKart: true,
     tarihAlani: 'kabul',
     cipler: [
@@ -75,7 +75,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'TeleRadyoloji Gönderimleri', ic: '🏛', yetkiKodu: 'radyoloji.teletip',
+    menuGrup: 'Radyoloji', menuAd: 'Bakanlık TeleRadyoloji Gönderimleri', ic: '🏛', yetkiKodu: 'radyoloji.teletip',
     menuSira: 55,
   },
   {

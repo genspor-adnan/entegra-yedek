@@ -710,6 +710,10 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Menü "Radyoloji › Ayarlar › TeleRadyoloji Ayarları" ve `TeletipAyar.tsx` silindi; `/teletip-ayar` panoya yönlenir.
   * `/api/teletip/subeler` ve `/subeler/sina` pano yetkisiyle (`radyoloji.teletip.pano`; eski `radyoloji.teletip.ayar` da kabul).
   * Mockup'ta "Teletıp" adı her yerde TeleRadyoloji (kullanıcı: "Teletıp yerine TeleRadyoloji kullan"); teknik adlar aynı.
+- **"Bakanlık" öneki (db/1325; kullanıcı: "2 tane teleradyoloji panosu var"):** "Teletıp" → "TeleRadyoloji" sonrası Bakanlık panosu
+  kurumlar arası ticari teleradyoloji panosuyla (Radyoloji › Teleradyoloji › Telerad Panosu) aynı okunuyordu. Bakanlık ekranları
+  "Bakanlık TeleRadyoloji Panosu" / "Bakanlık TeleRadyoloji Gönderimleri" (menü, sekme başlığı, yetki matrisi adı). 1325 yalnız
+  1319'un yazdığı yetki adını değiştirir (elle değiştirilmiş ad korunur); yetki kodları aynı.
 
 ### 10.11.2026
 
