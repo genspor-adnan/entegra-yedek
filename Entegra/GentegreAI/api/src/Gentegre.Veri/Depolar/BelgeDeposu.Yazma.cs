@@ -251,7 +251,9 @@ public sealed partial class BelgeDeposu
 
         foreach (var (ad, deger) in belge)
         {
-            if (ad is "id" or "belgeNo" or "belgeSeri") continue;   // korunur
+            if (ad is "id" or "belgeSeri") continue;   // korunur
+            // Numara korunur - DIŞ NUMARALI belge (alış: tedarikçinin numarası) hariç: kullanıcı düzeltebilir (12.11.2026).
+            if (ad == "belgeNo" && !BelgeTuru.DisNumarali(Sayi(belge, "tur"))) continue;
             if (!BelgeKolonlari.TryGetValue(ad, out var kolon)) continue;
             parametreler.Add(deger);
             atamalar.Add($"{kolon} = @p{parametreler.Count - 1}");

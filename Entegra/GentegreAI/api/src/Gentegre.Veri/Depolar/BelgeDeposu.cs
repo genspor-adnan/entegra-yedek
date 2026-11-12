@@ -395,8 +395,11 @@ public sealed partial class BelgeDeposu
         }
 
         // ------------------------------------------- 3) yeni haliyle yeniden yaz ----
-        // Numara ve seri KORUNUR: duzenleme yeni belge degildir.
-        belge["belgeNo"] = belgeNo;
+        // Numara ve seri KORUNUR: duzenleme yeni belge degildir. DIŞ NUMARALI belgede (alış faturası / irsaliyesi)
+        //   numara tedarikçinindir ve kullanıcı yazar - düzenlemede düzeltilebilir (yazım hatası); boş gelirse eskisi.
+        var disNo = BelgeTuru.DisNumarali(tur) && belge.TryGetValue("belgeNo", out var yeniNo)
+                    && Convert.ToString(yeniNo, System.Globalization.CultureInfo.InvariantCulture)?.Trim() is { Length: > 0 } yn ? yn : null;
+        belge["belgeNo"] = disNo ?? belgeNo;
         belge["belgeSeri"] = belgeSeri;
         belge["id"] = belgeId;
         var (_, yeniUyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
@@ -659,8 +662,15 @@ public sealed partial class BelgeDeposu
             if (girilenNo.Length == 0 && !secenekler.Taslak)
                 throw GentegreHatasi.Dogrulama("Tedarikçi belge numarası girilmeli.",
                     new AlanHatasi("belgeNo", "Zorunlu."));
-            if (girilenNo.Length > 0)
-                await MukerrerNoKontrolAsync(baglanti, islem, tur, tarafId, girilenNo, 0, iptal);
+            // Kural (kullanıcı 12.11.2026): aynı tedarikçiden aynı türde aynı numara girilemez. Düzenlemede belgenin KENDİSİ
+            //   hariç ve yalnız numara DEĞİŞTİYSE: Delphi'den gelen eski mükerrerler (ZONE: 2021-22 alış fişleri "2", "001")
+            //   numarasına dokunulmadan düzenlenebilsin.
+            var eskiNo = mevcutId > 0
+                ? Convert.ToString(await baglanti.Komut("select coalesce(belge_no, '') from public.belge where id = @p0", islem, mevcutId)
+                                                .ExecuteScalarAsync(iptal), System.Globalization.CultureInfo.InvariantCulture)
+                : null;
+            if (girilenNo.Length > 0 && girilenNo != eskiNo)
+                await MukerrerNoKontrolAsync(baglanti, islem, tur, tarafId, girilenNo, mevcutId, iptal);
             belge["belgeNo"] = girilenNo;
         }
         else

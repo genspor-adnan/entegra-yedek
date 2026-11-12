@@ -915,6 +915,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         setTarih(d.tarih);
         setKayitliTarih(d.tarih);
         setSeri(d.seri);
+        // TEDARİKÇİ NUMARASI (12.11.2026, kullanıcı: "alış irs girip kaydettim geri açtığımda irs no boş geldi"): dış
+        //   numaralı belgede (alış faturası / irsaliyesi) numara düzenlenebilir alanda durur - açılışta yüklenmezse boş
+        //   görünür, yeniden yazılınca da "zaten kayıtlı" denirdi.
+        setBelgeNo(gorunenBelgeNo(y.belge.belgeNo) || '');
         setVadeGun(d.vadeGun);
         setAciklama(d.aciklama);
         setOdeyenKurumId(d.odeyenKurumId);

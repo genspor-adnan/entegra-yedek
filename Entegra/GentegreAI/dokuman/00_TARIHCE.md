@@ -751,6 +751,19 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Testler `StokBakiyeDenetimiTestleri`: tüketilmiş giriş silinemez / azaltılamaz / artırılabilir, önce çıkış silinince giriş
     silinir; transferin varışından çıkış yapıldıysa transfer silinemez; eksi stoğa giriş serbest, girişsiz çıkış "uyar"da
     uyarıyla yazılır. Tam paket 1072. Yerel UNIVERSE / ZONE API kopyaları yeniden yayımlandı.
+- **Alış belgesi tedarikçi numarası (DB değişikliği yok; kullanıcı: "#82169 id ile alış irs girip kaydettim geri açtığımda irs no
+  boş geldi", "tekrar girip kaydet dediğimde de zaten kayıtlı belge diyor", "diğer alış belgeleri için de kontrol et", "aynı
+  tedarikçiden aynı belge türünden aynı numara girilemez"):** dört dış numaralı tür (10 irsaliye, 11 fatura, 12 fiş, 109
+  konsinye giriş) için üç hata:
+  * Web: kayıtlı belge açılınca tedarikçi numarası düzenlenebilir alana yüklenmiyordu (`BelgeKarti` `setBelgeNo` yalnız yazınca)
+    - numara DB'de vardı, ekranda boş görünüyordu.
+  * API: mükerrer numara denetimi düzenlemede belgenin kendisini hariç tutmuyordu (haricId 0) - kayıtlı belge kendi numarasını
+    "zaten kayıtlı" buluyordu. Artık kendisi hariç ve yalnız numara DEĞİŞTİYSE (Delphi'den gelen eski mükerrerler - ZONE'da
+    2021-22 alış fişleri, 93 grup / 320 belge - numarasına dokunulmadan düzenlenebilir).
+  * API: düzenlemede numara her türde korunuyordu - dış numaralı belgede tedarikçi numarası artık düzeltilebilir.
+  * Kural: aynı tedarikçi + aynı tür + aynı numara (iptal hariç) girilemez; başka türde aynı numara serbest. Test
+    `AlisBelgeNumarasiTestleri` (4 tür × okuma / aynı numarayla kaydet / düzelt / mükerrer 422 / eski mükerrer düzenlenir /
+    başka tür serbest). Tam paket 1076. Yerel UNIVERSE / ZONE yeniden yayımlandı.
 
 ### 10.11.2026
 
