@@ -115,6 +115,23 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
     }
 
     [Fact]
+    public void Cizici_sikistirilmis_cok_karede_yalniz_istenen_kare()
+    {
+        // RLE (fo-dicom çekirdeğinin çözebildiği): tek kare çözümü, bütün nesnenin çözümüyle aynı görüntüyü vermeli.
+        var d = Gri16(32, 24, kare: 3);
+        var rle = new FellowOakDicom.Imaging.Codec.DicomTranscoder(DicomTransferSyntax.ExplicitVRLittleEndian, DicomTransferSyntax.RLELossless).Transcode(d);
+        Assert.True(rle.InternalTransferSyntax.IsEncapsulated);
+        for (var k = 0; k < 3; k++)
+            Assert.Equal(Convert.ToBase64String(DicomGoruntuCizici.Ciz(d, new CizimIstegi(Kare: k)).Jpeg),
+                         Convert.ToBase64String(DicomGoruntuCizici.Ciz(rle, new CizimIstegi(Kare: k)).Jpeg));
+        Assert.Equal(404, Assert.Throws<CizimHatasi>(() => DicomGoruntuCizici.Ciz(rle, new CizimIstegi(Kare: 3))).Kod);
+        // Renkli tek kare RLE de çözülür (tam yol).
+        var renk = new FellowOakDicom.Imaging.Codec.DicomTranscoder(DicomTransferSyntax.ExplicitVRLittleEndian, DicomTransferSyntax.RLELossless).Transcode(Rgb(8, 8, 200, 10, 10));
+        Assert.Equal(Convert.ToBase64String(DicomGoruntuCizici.Ciz(Rgb(8, 8, 200, 10, 10), new CizimIstegi()).Jpeg),
+                     Convert.ToBase64String(DicomGoruntuCizici.Ciz(renk, new CizimIstegi()).Jpeg));
+    }
+
+    [Fact]
     public void Cizici_desteklenmeyen_406()
     {
         var d = Rgb(8, 8, 1, 2, 3);
@@ -153,12 +170,15 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
     {
         public HashSet<string> Nesneler { get; } = new(StringComparer.Ordinal);
         public byte[] Dicom { get; set; } = [];
-        public int WadoCagrisi { get; private set; }
+        private int _wado;
+        public int WadoCagrisi => _wado;
+        public int GecikmeMs { get; set; }
         public Task<HashSet<string>> CalismaNesneleriAsync(string studyUid, CancellationToken iptal) => Task.FromResult(Nesneler);
-        public Task<HttpResponseMessage> WadoAsync(string studyUid, string seriesUid, string objectUid, CancellationToken iptal)
+        public async Task<HttpResponseMessage> WadoAsync(string studyUid, string seriesUid, string objectUid, CancellationToken iptal)
         {
-            WadoCagrisi++;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Dicom) });
+            Interlocked.Increment(ref _wado);
+            if (GecikmeMs > 0) await Task.Delay(GecikmeMs, iptal);
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Dicom) };
         }
     }
 
@@ -210,13 +230,23 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
             Assert.Equal("image/jpeg", jpg.IcerikTuru);
             Assert.Equal((32, 24), SofBoyut(jpg.Govde));
             Assert.Equal(404, (await s.IsleAsync(new Dictionary<string, string>(Q(st, se, ob, "image/jpeg")) { ["frameNumber"] = "2" }, ip, default)).Kod);
+            // Önbellek: DICOM + iki JPEG isteği tek PACS indirmesi; aynı JPEG ikinci kez aynı bayt.
+            Assert.Equal(1, pacs.WadoCagrisi);
+            var jpg2 = await s.IsleAsync(new Dictionary<string, string>(Q(st, se, ob, "image/jpeg")) { ["rows"] = "24" }, ip, default);
+            Assert.Same(jpg.Govde, jpg2.Govde);
+            // Eşzamanlı istekler aynı (henüz inmemiş) nesne için tek indirmeyi bekler.
+            var ob2 = "1.2.3.4.100.3"; pacs.Nesneler.Add(se + "|" + ob2); pacs.GecikmeMs = 200;
+            var eszamanli = await Task.WhenAll(Enumerable.Range(0, 6).Select(n =>
+                s.IsleAsync(new Dictionary<string, string>(Q(st, se, ob2, "image/jpeg")) { ["rows"] = (10 + n).ToString() }, ip, default)));
+            Assert.All(eszamanli, y => Assert.Equal(200, y.Kod));
+            Assert.Equal(2, pacs.WadoCagrisi);
 
             await s.SayacBosaltAsync();                          // 1323: sayaç bellekte birikir, toplu yazılır
             var sayac = await veri.TekAsync(
                 "select istek_sayisi, hata_sayisi, son_hata from public.teletip_wado_erisim where ip = @p0 and study_uid = @p1", [ip, st],
                 o => Tuple.Create(o.GetInt32(0), o.GetInt32(1), o.GetString(2)));
             Assert.NotNull(sayac);
-            Assert.Equal(8, sayac!.Item1);                      // st ile 8 istek (5 hata + 2 başarı + kare yok)
+            Assert.Equal(15, sayac!.Item1);                     // st ile 15 istek (5 hata + 2 başarı + kare yok + tekrar + 6 eşzamanlı)
             Assert.Equal(6, sayac.Item2);
             Assert.StartsWith("404", sayac.Item3);
         }

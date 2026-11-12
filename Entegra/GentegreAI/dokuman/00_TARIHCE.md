@@ -714,6 +714,14 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   kurumlar arası ticari teleradyoloji panosuyla (Radyoloji › Teleradyoloji › Telerad Panosu) aynı okunuyordu. Bakanlık ekranları
   "Bakanlık TeleRadyoloji Panosu" / "Bakanlık TeleRadyoloji Gönderimleri" (menü, sekme başlığı, yetki matrisi adı). 1325 yalnız
   1319'un yazdığı yetki adını değiştirir (elle değiştirilmiş ad korunur); yetki kodları aynı.
+- **Dışa açık WADO performansı (kullanıcı: "8 i yap"; DB değişikliği yok):** Bakanlık görüntüleyicisi çok kareli nesnenin
+  (US cine, çok kesitli BT/MR) her karesini ayrı ister; önceden her istek bütün nesneyi PACS'tan yeniden indiriyor, sıkıştırılmışsa
+  bütün kareleri çözüyordu.
+  * PACS'tan inen DICOM ve çizilmiş JPEG boyut sınırlı ayrı önbellekte (`TeletipWado:OnbellekMb`, varsayılan 256; 5 dk kayan /
+    30 dk mutlak). Aynı nesneye eşzamanlı istekler tek indirmeyi bekler. Erişim kuralı her istekte önbellekten önce.
+  * Sıkıştırılmış çok kareli nesnede yalnız istenen kare çözülür (tek karelik kopya fo-dicom'un tam çözme yolundan geçer -
+    renk yorumu / düzlem dönüşümü aynı). RLE testinde tek kare = bütün nesne çözümü, bayt bayt.
+  * Testler: önbellek (DICOM + JPEG'ler tek indirme, aynı JPEG aynı bayt), 6 eşzamanlı istek tek indirme, RLE çok kare. Tam paket 1069.
 
 ### 10.11.2026
 

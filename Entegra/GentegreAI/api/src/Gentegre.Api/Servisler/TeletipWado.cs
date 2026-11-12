@@ -43,6 +43,9 @@ public sealed class TeletipWadoAyarlari
     public int DakikadaIstek { get; set; } = 3000;
     /// <summary>imageQuality verilmezse JPEG kalitesi.</summary>
     public int JpegKalite { get; set; } = 90;
+    /// <summary>PACS'tan inen DICOM ve çizilmiş JPEG önbelleği (MB). Görüntüleyici çok kareli nesnenin her karesini ayrı
+    /// ister - önbelleksiz her kare tüm nesneyi PACS'tan yeniden indirirdi.</summary>
+    public int OnbellekMb { get; set; } = 256;
     /// <summary>CORS için izinli köken sonekleri (tarayıcıdaki Bakanlık görüntüleyicisi).</summary>
     public string[] KokenSonekleri { get; set; } = [".saglik.gov.tr"];
 }
@@ -73,14 +76,18 @@ public static class DicomGoruntuCizici
         var ts = d.InternalTransferSyntax;
         if (ts.IsEncapsulated)
         {
+            var p0 = DicomPixelData.Create(d);
+            if (i.Kare < 0 || i.Kare >= p0.NumberOfFrames) throw new CizimHatasi(404, $"Kare yok ({i.Kare + 1} / {p0.NumberOfFrames}).");
             if (ts == DicomTransferSyntax.JPEGProcess1 && i.Merkez is null && i.Genislik is null && !i.CiftGenislik
                 && (i.Satir <= 0 || i.Satir >= satir0) && (i.Sutun <= 0 || i.Sutun >= sutun0))
-            {
-                var p0 = DicomPixelData.Create(d);
-                if (i.Kare < 0 || i.Kare >= p0.NumberOfFrames) throw new CizimHatasi(404, $"Kare yok ({i.Kare + 1} / {p0.NumberOfFrames}).");
                 return new Cizim(p0.GetFrame(i.Kare).Data, satir0, sutun0);
+            // YALNIZ İSTENEN KARE çözülür: çok kareli nesnede (US cine, çok kesitli BT/MR) görüntüleyici her kareyi ayrı
+            //   ister - bütün nesneyi her istekte çözmek kare sayısının karesi kadar iş demekti.
+            try
+            {
+                if (p0.NumberOfFrames > 1) { d = TekKare(d, p0, i.Kare); i = i with { Kare = 0 }; }
+                d = new DicomTranscoder(ts, DicomTransferSyntax.ExplicitVRLittleEndian).Transcode(d);
             }
-            try { d = new DicomTranscoder(ts, DicomTransferSyntax.ExplicitVRLittleEndian).Transcode(d); }
             catch (Exception e) { throw new CizimHatasi(406, $"Sıkıştırılmış görüntü çözülemedi ({ts.UID.Name}): {e.Message}"); }
         }
 
@@ -159,6 +166,19 @@ public static class DicomGoruntuCizici
     }
 
     private static int Sinir(double x) => Math.Clamp((int)Math.Round(x), 0, 255);
+
+    /// <summary>Sıkıştırılmış çok kareli nesnenin TEK karelik kopyası (aynı aktarım sözdizimi, piksel dışı alanlar aynen) -
+    /// çözme (renk yorumu, düzlem dönüşümü dahil) fo-dicom'un tam yolundan geçsin diye yalnız veri kısaltılır.</summary>
+    private static DicomDataset TekKare(DicomDataset d, DicomPixelData p, int kare)
+    {
+        var tek = new DicomDataset(d.InternalTransferSyntax).NotValidated();
+        foreach (var o in d)
+            if (o.Tag != DicomTag.PixelData) tek.Add(o);
+        tek.AddOrUpdate(DicomTag.NumberOfFrames, "1");
+        var yeni = DicomPixelData.Create(tek, true);
+        yeni.AddFrame(p.GetFrame(kare));
+        return tek;
+    }
 
     /// <summary>Kutu ortalamasıyla küçültme (hedef pikselin kapsadığı kaynak alan).</summary>
     private static byte[] Kucult(byte[] kaynak, int w, int h, int kanal, int kw, int kh)
@@ -279,26 +299,21 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
         }
         if (!nesneler.Contains(se + "|" + ob)) return Hata(404, "Nesne bulunamadı.");
 
-        byte[] baytlar;
-        try
-        {
-            using var y = await pacs.WadoAsync(st, se, ob, iptal);
-            if (y.StatusCode == HttpStatusCode.NotFound) return Hata(404, "Nesne PACS'ta bulunamadı.");
-            if (!y.IsSuccessStatusCode) return Hata(502, $"PACS WADO HTTP {(int)y.StatusCode}.");
-            baytlar = await y.Content.ReadAsByteArrayAsync(iptal);
-        }
-        catch (Exception h) when (h is HttpRequestException || (h is TaskCanceledException && !iptal.IsCancellationRequested))
-        {
-            return Hata(503, "PACS WADO'suna ulaşılamadı: " + h.Message);
-        }
+        var istek = new CizimIstegi(Kare: (kare ?? 1) - 1, Satir: satir ?? 0, Sutun: sutun ?? 0,
+                                    Merkez: merkez, Genislik: genislik, Kalite: kalite ?? Ayar.JpegKalite);
+        var jpegAnahtar = $"j:{st}|{se}|{ob}|{istek}";
+        if (tur == Jpeg && _onbellek.TryGetValue(jpegAnahtar, out byte[]? hazirJpeg) && hazirJpeg is not null)
+            return new WadoYaniti(200, Jpeg, hazirJpeg);
+
+        var (kod, baytlar, hata) = await NesneAsync(st, se, ob, iptal);
+        if (kod != 200) return Hata(kod, hata);
         if (tur == Dicom) return new WadoYaniti(200, Dicom, baytlar);
 
         try
         {
             var dosya = await DicomFile.OpenAsync(new MemoryStream(baytlar));
-            var c = DicomGoruntuCizici.Ciz(dosya.Dataset, new CizimIstegi(
-                Kare: (kare ?? 1) - 1, Satir: satir ?? 0, Sutun: sutun ?? 0,
-                Merkez: merkez, Genislik: genislik, Kalite: kalite ?? Ayar.JpegKalite));
+            var c = DicomGoruntuCizici.Ciz(dosya.Dataset, istek);
+            _onbellek.Set(jpegAnahtar, c.Jpeg, Kayit(c.Jpeg.Length));
             return new WadoYaniti(200, Jpeg, c.Jpeg);
         }
         catch (CizimHatasi h) { return Hata(h.Kod, h.Message); }
@@ -324,6 +339,45 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
         // Boş liste kısa tutulur (PACS'a yeni gelen görüntü); dolu liste 10 dk.
         bellek.Set("tt-wado-nesne:" + st, liste, TimeSpan.FromMinutes(liste.Count == 0 ? 1 : 10));
         return liste;
+    }
+
+    // ---------------------------------------------------------------- nesne / JPEG önbelleği
+    // PACS'tan inen DICOM (anahtar = nesne) ve çizilmiş JPEG (anahtar = nesne + çizim parametreleri) boyut sınırlı ayrı
+    //   önbellekte; aynı nesneye eşzamanlı gelen istekler tek indirmeyi bekler. Erişim kuralı (KOS'u gitmiş çalışma +
+    //   nesne listesi) her istekte önbellekten ÖNCE uygulanır.
+    private readonly MemoryCache _onbellek = new(new MemoryCacheOptions { SizeLimit = Math.Max(16, ayar.Value.OnbellekMb) * 1024L * 1024L });
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<Task<(int Kod, byte[] Baytlar, string Hata)>>> _suren = new();
+
+    private static MemoryCacheEntryOptions Kayit(long boyut) => new()
+    {
+        Size = Math.Max(1, boyut), SlidingExpiration = TimeSpan.FromMinutes(5), AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
+    };
+
+    private async Task<(int Kod, byte[] Baytlar, string Hata)> NesneAsync(string st, string se, string ob, CancellationToken iptal)
+    {
+        var anahtar = $"n:{st}|{se}|{ob}";
+        if (_onbellek.TryGetValue(anahtar, out byte[]? hazir) && hazir is not null) return (200, hazir, "");
+        // İndirme ilk isteğin iptaline bağlı değil (öteki bekleyenler düşmesin); PACS istemcisinin kendi zaman aşımı var.
+        var gorev = _suren.GetOrAdd(anahtar, _ => new Lazy<Task<(int, byte[], string)>>(() => IndirAsync(st, se, ob, anahtar)));
+        try { return await gorev.Value.WaitAsync(iptal); }
+        finally { _suren.TryRemove(new KeyValuePair<string, Lazy<Task<(int, byte[], string)>>>(anahtar, gorev)); }
+    }
+
+    private async Task<(int Kod, byte[] Baytlar, string Hata)> IndirAsync(string st, string se, string ob, string anahtar)
+    {
+        try
+        {
+            using var y = await pacs.WadoAsync(st, se, ob, CancellationToken.None);
+            if (y.StatusCode == HttpStatusCode.NotFound) return (404, [], "Nesne PACS'ta bulunamadı.");
+            if (!y.IsSuccessStatusCode) return (502, [], $"PACS WADO HTTP {(int)y.StatusCode}.");
+            var b = await y.Content.ReadAsByteArrayAsync(CancellationToken.None);
+            _onbellek.Set(anahtar, b, Kayit(b.Length));
+            return (200, b, "");
+        }
+        catch (Exception h) when (h is HttpRequestException or TaskCanceledException)
+        {
+            return (503, [], "PACS WADO'suna ulaşılamadı: " + h.Message);
+        }
     }
 
     // ---------------------------------------------------------------- erişim sayacı (1323: bellekte biriktir, toplu yaz)
