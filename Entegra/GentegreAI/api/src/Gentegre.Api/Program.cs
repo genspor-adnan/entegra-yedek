@@ -62,7 +62,9 @@ kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IWadoPacs>(s => s.GetRequire
 kurucu.Services.AddSingleton<Gentegre.Api.Servisler.TeletipWadoServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeletipWadoSunucusu>();
 // MWL (1301): cihazların çalışma listesi - accession / TCKN cihaza istemden gider (Teletıp eşleşmesinin ön şartı).
-if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.MwlSunucusu>();
+//   1329: tekil - entegrasyon ekranı durum / sınama için okur; arka plan kapalıysa kayıtlı ama başlatılmaz (Calisiyor = false).
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MwlSunucusu>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService(s => s.GetRequiredService<Gentegre.Api.Servisler.MwlSunucusu>());
 
 var baglantiDizesi = kurucu.Configuration.GetConnectionString("Gentegre")
     ?? throw new InvalidOperationException("ConnectionStrings:Gentegre tanimli degil.");

@@ -18,45 +18,239 @@ namespace Gentegre.Api.Servisler;
 /// <para><b>Kural DB'de</b> (<c>fn_radyoloji_mwl</c>): hangi istem listede, hangi cihaza. Burada yalnız DICOM'a
 /// çevrilir (<see cref="MwlCevirici"/>).</para>
 ///
-/// <para><b>Cihaz kimliği:</b> çağıran AE başlığı <c>radyoloji_cihaz.ae_title</c> ile tanınır; tanınmayan AE
-/// bağlantısı reddedilir (<c>Dicom:MwlBilinmeyenAe</c> açıksa kabul edilir, yalnız modalite süzgeci).</para>
+/// <para><b>Ayar entegrasyon ekranından, şube başına (1329; mockup Ekranlar/Ayarlar/entegrasyon_mwl.html):</b>
+/// <c>entegrasyon_hesap</c> kod = MWL satırları - kullanıcı adı = AE adı, uygulama kodu = port, ayarlar = karakter seti ·
+/// tanımsız cihaz · tarih penceresi. Port başına TEK dinleyici; aynı porttaki satırlar çağrılan AE ile ayrılır
+/// (<see cref="MwlAyar.Sec"/>). Satırlar 5 sn'de bir imzayla (yalnız ayar sütunları - durum yazımı imzayı değiştirmez)
+/// kontrol edilir; değişince eksik portlar açılır, kalkanlar kapanır - API yeniden başlatılmaz. Hiç MWL satırı yoksa
+/// eski davranış: appsettings › Dicom:MwlPort (kurum geneli, tek dinleyici).</para>
 ///
-/// <para><b>Port 0 = kapalı</b> (<c>Dicom:MwlPort</c>). Arka plan kapalıysa (testler, ad-hoc kopya) açılmaz.</para>
+/// <para><b>Cihaz kimliği:</b> çağıran AE başlığı <c>radyoloji_cihaz.ae_title</c> ile tanınır; tanınmayan AE
+/// bağlantısı reddedilir (satırda "tanımsız cihaz kabul" açıksa kabul edilir, yalnız modalite + şube süzgeci).</para>
 /// </summary>
-public sealed class MwlSunucusu(IOptions<DicomAyarlari> ayar, VeriKaynagi veri, ILogger<MwlSunucusu> gunluk,
-                                ILoggerFactory gunlukFabrikasi) : BackgroundService
+public sealed class MwlSunucusu(IOptions<DicomAyarlari> ayar, VeriKaynagi veri, ILogger<MwlSunucusu> gunluk) : BackgroundService
 {
-    private IDicomServer? _sunucu;
+    private static readonly TimeSpan Aralik = TimeSpan.FromSeconds(5);
+    private readonly Dictionary<int, IDicomServer> _sunucular = [];
+    private volatile IReadOnlyList<MwlDinleyici> _satirlar = [];
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<int, MwlDurum> _durum = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (DateTime Zaman, int Sayi)> _sorgular =
+        new(StringComparer.OrdinalIgnoreCase);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _sessiz = new(StringComparer.OrdinalIgnoreCase);
+    private string? _imza;
 
-    protected override Task ExecuteAsync(CancellationToken dur)
+    internal VeriKaynagi Veri => veri;
+    internal ILogger Gunluk => gunluk;
+
+    /// <summary>Arka plan işleri bu API örneğinde çalışıyor mu (testlerde / ad-hoc kopyada kapalı).</summary>
+    public bool Calisiyor { get; private set; }
+
+    /// <summary>Satırın dinleyici durumu (null = henüz kurulmadı / satır aktif değil).</summary>
+    public MwlDurum? Durum(int id) => _durum.TryGetValue(id, out var d) ? d : null;
+
+    /// <summary>Cihazın (çağıran AE) son sorgusu - bellekte; API yeniden başlayınca sıfırlanır.</summary>
+    public (DateTime Zaman, int Sayi)? SonSorgu(string ae) => _sorgular.TryGetValue(ae.Trim(), out var s) ? s : null;
+
+    /// <summary>Sınama: bu port + çağıran AE çiftinin sorguları 60 sn iz / son sorgu yazmaz (cihaz "gördü" sayılmasın).</summary>
+    public void SessizSorgu(int port, string cagiranAe) => _sessiz[$"{port}|{cagiranAe.Trim()}"] = DateTime.UtcNow.AddSeconds(60);
+
+    internal bool SessizMi(int port, string cagiranAe) =>
+        _sessiz.TryGetValue($"{port}|{cagiranAe.Trim()}", out var bitis) && bitis > DateTime.UtcNow;
+
+    internal IReadOnlyList<MwlDinleyici> PorttakiSatirlar(int port) => _satirlar.Where(s => s.Port == port).ToList();
+
+    internal void SorguKaydet(string cagiranAe, int sayi) => _sorgular[cagiranAe.Trim()] = (DateTime.Now, sayi);
+
+    protected override async Task ExecuteAsync(CancellationToken dur)
     {
+        Calisiyor = true;
+        while (!dur.IsCancellationRequested)
+        {
+            try { await TazeleAsync(dur); }
+            catch (Exception h) when (h is not OperationCanceledException) { gunluk.LogWarning(h, "MWL ayarları okunamadı; son ayarla devam."); }
+            try { await Task.Delay(Aralik, dur); } catch (OperationCanceledException) { break; }
+        }
+    }
+
+    /// <summary>Satırları okur; imza değiştiyse dinleyicileri yeniden kurar.</summary>
+    public async Task TazeleAsync(CancellationToken iptal = default)
+    {
+        var imza = await veri.TekDegerAsync<string>("""
+            select coalesce(md5(string_agg(concat_ws('|', id, coalesce(sube_id, 0), aktif, kullanici_adi, uygulama_kodu, ayarlar::text),
+                                           ',' order by id)), '')
+              from public.entegrasyon_hesap where kod = 'MWL'
+            """, null, iptal) ?? "";
+        if (imza == _imza) return;
+        var satirlar = await veri.ListeAsync("""
+            select id, coalesce(sube_id, 0), coalesce(kullanici_adi, ''), coalesce(uygulama_kodu, ''), coalesce(ayarlar::text, '{}')
+              from public.entegrasyon_hesap
+             where kod = 'MWL' and aktif = 1
+             order by id
+            """, null, o => (Id: o.GetInt32(0), Sube: o.GetInt32(1), Ae: o.GetString(2), Port: o.GetString(3), Ayarlar: o.GetString(4)), iptal);
+        var gecerli = new List<MwlDinleyici>();
+        var hatalar = new Dictionary<int, string>();
+        foreach (var s in satirlar)
+        {
+            var d = MwlAyar.Coz(s.Id, s.Sube, s.Ae, s.Port, s.Ayarlar, out var hata);
+            if (d is null) hatalar[s.Id] = hata ?? "geçersiz ayar";
+            else if (gecerli.Any(x => x.Port == d.Port && string.Equals(x.Ae, d.Ae, StringComparison.OrdinalIgnoreCase)))
+                hatalar[s.Id] = $"port {d.Port} + AE {d.Ae} başka bir satırda da var";
+            else gecerli.Add(d);
+        }
+        // Eski kurulum: hiç MWL satırı yoksa dosyadaki tek dinleyici (kurum geneli).
         var a = ayar.Value;
-        if (a.MwlPort <= 0) { gunluk.LogInformation("MWL sunucusu kapalı (Dicom:MwlPort = 0)."); return Task.CompletedTask; }
+        if (satirlar.Count == 0 && a.MwlPort > 0)
+            gecerli.Add(new MwlDinleyici(0, 0, a.MwlPort, (a.MwlAe ?? "").Trim().ToUpperInvariant(),
+                string.IsNullOrWhiteSpace(a.MwlKarakterSeti) ? "ISO_IR 148" : a.MwlKarakterSeti, a.MwlBilinmeyenAe, 0));
+
+        Uygula(gecerli, hatalar);
+        _imza = imza;
+        await DurumYazAsync(satirlar.Select(s => s.Id), iptal);
+    }
+
+    private void Uygula(List<MwlDinleyici> gecerli, Dictionary<int, string> hatalar)
+    {
+        lock (_sunucular)
+        {
+            var portlar = gecerli.Select(s => s.Port).ToHashSet();
+            foreach (var p in _sunucular.Keys.Where(p => !portlar.Contains(p)).ToList())
+            {
+                try { _sunucular[p].Stop(); _sunucular[p].Dispose(); } catch (Exception h) { gunluk.LogWarning(h, "MWL: port {Port} kapatılamadı.", p); }
+                _sunucular.Remove(p);
+                gunluk.LogInformation("MWL: port {Port} kapatıldı.", p);
+            }
+            var acilamayan = new Dictionary<int, string>();
+            foreach (var p in portlar.Where(p => !_sunucular.ContainsKey(p)))
+            {
+                try
+                {
+                    // PORT DOLU MU: Windows'ta fo-dicom dolu porta da "bağlanır" (adres paylaşımı) ve hata vermez - gelen
+                    //   bağlantı öteki uygulamaya gider, dinleyici sessizce ölü kalır. Önce dışlayıcı bağlanma denenir.
+                    if (!PortBos(p)) throw new System.Net.Sockets.SocketException((int)System.Net.Sockets.SocketError.AddressAlreadyInUse);
+                    var s = DicomServerFactory.Create<MwlHizmeti>(p, userState: new MwlBaglami(this, p));
+                    // fo-dicom dinlemeyi ARKA PLANDA açar: port doluysa hata sonradan Exception özelliğine düşer, Create
+                    //   hata atmaz. Dinlemeye geçene ya da hata düşene kadar en çok 2 sn beklenir.
+                    for (var i = 0; i < 40 && !s.IsListening && s.Exception is null; i++) Thread.Sleep(50);
+                    if (s.Exception is not null || !s.IsListening)
+                    {
+                        var hata = s.Exception ?? new InvalidOperationException("dinlemeye geçmedi");
+                        try { s.Stop(); s.Dispose(); } catch { /* yarım açılmış */ }
+                        throw hata;
+                    }
+                    _sunucular[p] = s;
+                    gunluk.LogInformation("MWL sunucusu dinliyor: port {Port}.", p);
+                }
+                catch (Exception h)
+                {
+                    var soket = h as System.Net.Sockets.SocketException ?? h.GetBaseException() as System.Net.Sockets.SocketException;
+                    var m = soket?.SocketErrorCode == System.Net.Sockets.SocketError.AddressAlreadyInUse
+                        ? $"port {p} başka bir uygulamada kullanılıyor"
+                        : $"port {p} açılamadı: {h.GetBaseException().Message}";
+                    acilamayan[p] = m;
+                    gunluk.LogError(h, "MWL: {Mesaj}", m);
+                }
+            }
+            _satirlar = gecerli.Where(s => !acilamayan.ContainsKey(s.Port)).ToList();
+            var simdi = DateTime.Now;
+            _durum.Clear();
+            foreach (var s in gecerli)
+                _durum[s.Id] = acilamayan.TryGetValue(s.Port, out var m)
+                    ? new MwlDurum(false, $"Açılamadı: {m}", simdi)
+                    : new MwlDurum(true, $"Dinliyor · port {s.Port} · AE {(s.Ae.Length > 0 ? s.Ae : "(her AE)")}", simdi);
+            foreach (var (id, m) in hatalar) _durum[id] = new MwlDurum(false, $"Açılamadı: {m}", simdi);
+        }
+    }
+
+    /// <summary>Port başka bir uygulamada değil mi (dışlayıcı bağlanma denemesi; Linux'ta düz bağlanma zaten dışlayıcı).</summary>
+    private static bool PortBos(int port)
+    {
         try
         {
-            var baglam = new MwlBaglami(veri, a, gunlukFabrikasi.CreateLogger("MWL"));
-            _sunucu = DicomServerFactory.Create<MwlHizmeti>(a.MwlPort, userState: baglam);
-            gunluk.LogInformation("MWL sunucusu dinliyor: port {Port}, AE {Ae}.", a.MwlPort, a.MwlAe);
-            if (a.MwlBilinmeyenAe)
-                gunluk.LogWarning("MWL: tanınmayan AE başlıkları da kabul ediliyor (Dicom:MwlBilinmeyenAe).");
+            var l = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
+            if (OperatingSystem.IsWindows()) l.ExclusiveAddressUse = true;
+            l.Start();
+            l.Stop();
+            return true;
         }
-        catch (Exception h)
+        catch (System.Net.Sockets.SocketException) { return false; }
+    }
+
+    /// <summary>Durum satırın Son Sonuç'una (listede görünsün). İmza ayar sütunlarından - bu yazım dinleyiciyi yeniden kurdurmaz.</summary>
+    private async Task DurumYazAsync(IEnumerable<int> idler, CancellationToken iptal)
+    {
+        foreach (var id in idler)
         {
-            gunluk.LogError(h, "MWL sunucusu açılamadı (port {Port}).", a.MwlPort);
+            if (!_durum.TryGetValue(id, out var d)) continue;
+            try
+            {
+                await veri.CalistirAsync("""
+                    update public.entegrasyon_hesap set son_kullanim = (now())::timestamp, son_sonuc = left(@p1, 300)
+                     where id = @p0 and son_sonuc is distinct from left(@p1, 300)
+                    """, [id, d.Mesaj], iptal);
+            }
+            catch (Exception h) when (h is not OperationCanceledException) { gunluk.LogWarning(h, "MWL: durum yazılamadı ({Id}).", id); }
         }
-        return Task.CompletedTask;
     }
 
     public override async Task StopAsync(CancellationToken iptal)
     {
-        _sunucu?.Stop();
-        _sunucu?.Dispose();
+        lock (_sunucular)
+        {
+            foreach (var s in _sunucular.Values) { try { s.Stop(); s.Dispose(); } catch { /* kapanış */ } }
+            _sunucular.Clear();
+        }
         await base.StopAsync(iptal);
     }
 }
 
+/// <summary>Bir MWL dinleyici satırı (entegrasyon_hesap kod = MWL ya da dosya; Id 0 = dosya).</summary>
+public sealed record MwlDinleyici(int Id, int Sube, int Port, string Ae, string KarakterSeti, bool BilinmeyenAe, int PencereGun);
+
+/// <summary>Satırın dinleyici durumu.</summary>
+public sealed record MwlDurum(bool Dinliyor, string Mesaj, DateTime Zaman);
+
+/// <summary>MWL satırı çözümü ve bağlantı yönlendirmesi - saf, testli.</summary>
+public static class MwlAyar
+{
+    /// <summary>Satırdan dinleyici; port 1..65535, AE en çok 16 karakter (DICOM AE). Bozuksa null + hata.</summary>
+    public static MwlDinleyici? Coz(int id, int sube, string ae, string port, string ayarlarJson, out string? hata)
+    {
+        hata = null;
+        if (!int.TryParse((port ?? "").Trim(), out var p) || p is < 1 or > 65535) { hata = $"geçersiz port '{port}'"; return null; }
+        var a = (ae ?? "").Trim().ToUpperInvariant();
+        if (a.Length > 16) { hata = $"AE adı en çok 16 karakter ('{a}')"; return null; }
+        string kSet = "ISO_IR 148"; bool bilinmeyen = false; int pencere = 0;
+        try
+        {
+            using var j = System.Text.Json.JsonDocument.Parse(string.IsNullOrWhiteSpace(ayarlarJson) ? "{}" : ayarlarJson);
+            var k = j.RootElement;
+            if (k.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                if (k.TryGetProperty("karakterSeti", out var ks) && ks.ValueKind == System.Text.Json.JsonValueKind.String
+                    && !string.IsNullOrWhiteSpace(ks.GetString())) kSet = ks.GetString()!.Trim();
+                if (k.TryGetProperty("bilinmeyenAe", out var b))
+                    bilinmeyen = b.ValueKind == System.Text.Json.JsonValueKind.True
+                                 || (b.ValueKind == System.Text.Json.JsonValueKind.Number && b.GetInt32() != 0);
+                if (k.TryGetProperty("pencereGun", out var g))
+                    pencere = g.ValueKind == System.Text.Json.JsonValueKind.Number ? Math.Clamp(g.GetInt32(), 0, 30)
+                            : int.TryParse(g.GetString(), out var x) ? Math.Clamp(x, 0, 30) : 0;
+            }
+        }
+        catch (System.Text.Json.JsonException) { /* bozuk ayar: varsayılanlar */ }
+        return new MwlDinleyici(id, sube, p, a, kSet, bilinmeyen, pencere);
+    }
+
+    /// <summary>Gelen bağlantının satırı: çağrılan AE'si tam eşleşen satır; yoksa AE'si boş ("her AE") satır; yoksa null (red).</summary>
+    public static MwlDinleyici? Sec(IReadOnlyList<MwlDinleyici> porttakiler, string? cagrilanAe)
+    {
+        var c = (cagrilanAe ?? "").Trim();
+        return porttakiler.FirstOrDefault(s => s.Ae.Length > 0 && string.Equals(s.Ae, c, StringComparison.OrdinalIgnoreCase))
+            ?? porttakiler.FirstOrDefault(s => s.Ae.Length == 0);
+    }
+}
+
 /// <summary>fo-dicom hizmetine geçen bağımlılıklar (DicomServerFactory DI'sız kurar; userState ile taşınır).</summary>
-public sealed record MwlBaglami(VeriKaynagi Veri, DicomAyarlari Ayar, ILogger Gunluk);
+public sealed record MwlBaglami(MwlSunucusu Sunucu, int Port);
 
 /// <summary>Bir DICOM bağlantısı: C-ECHO (bağlantı testi) + Modality Worklist C-FIND.</summary>
 public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogger gunluk, DicomServiceDependencies bagimlilik)
@@ -64,6 +258,8 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
 {
     private MwlBaglami B => (MwlBaglami)UserState;
     private string _cagiranAe = "";
+    private MwlDinleyici? _satir;
+    private MwlDinleyici Satir => _satir ?? throw new InvalidOperationException("MWL: bağlantı satırı yok.");
 
     private static readonly DicomTransferSyntax[] Sozdizimleri =
         [DicomTransferSyntax.ExplicitVRLittleEndian, DicomTransferSyntax.ImplicitVRLittleEndian];
@@ -71,15 +267,16 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
     public async Task OnReceiveAssociationRequestAsync(DicomAssociation bag)
     {
         _cagiranAe = (bag.CallingAE ?? "").Trim();
-        if (!string.IsNullOrEmpty(B.Ayar.MwlAe) && !string.Equals(bag.CalledAE?.Trim(), B.Ayar.MwlAe, StringComparison.OrdinalIgnoreCase))
+        _satir = MwlAyar.Sec(B.Sunucu.PorttakiSatirlar(B.Port), bag.CalledAE);
+        if (_satir is null)
         {
-            B.Gunluk.LogWarning("MWL: çağrılan AE '{Ae}' bizim değil ({Bizim}); reddedildi.", bag.CalledAE, B.Ayar.MwlAe);
+            B.Sunucu.Gunluk.LogWarning("MWL: port {Port} çağrılan AE '{Ae}' tanımlı değil; reddedildi.", B.Port, bag.CalledAE);
             await SendAssociationRejectAsync(DicomRejectResult.Permanent, DicomRejectSource.ServiceUser, DicomRejectReason.CalledAENotRecognized);
             return;
         }
-        if (!B.Ayar.MwlBilinmeyenAe && !await CihazTanidikMiAsync(_cagiranAe))
+        if (!_satir.BilinmeyenAe && !await CihazTanidikMiAsync(_cagiranAe))
         {
-            B.Gunluk.LogWarning("MWL: tanınmayan cihaz AE '{Ae}' ({Ip}); reddedildi - radyoloji cihaz kartına AE başlığı girilmeli.",
+            B.Sunucu.Gunluk.LogWarning("MWL: tanınmayan cihaz AE '{Ae}' ({Ip}); reddedildi - radyoloji cihaz kartına AE başlığı girilmeli.",
                 _cagiranAe, bag.RemoteHost);
             await SendAssociationRejectAsync(DicomRejectResult.Permanent, DicomRejectSource.ServiceUser, DicomRejectReason.CallingAENotRecognized);
             return;
@@ -99,12 +296,12 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
         if (ae.Length == 0) return false;
         try
         {
-            return await B.Veri.TekDegerAsync<bool>(
+            return await B.Sunucu.Veri.TekDegerAsync<bool>(
                 "select exists (select 1 from public.radyoloji_cihaz where durum = 1 and upper(trim(ae_title)) = upper(@p0))", [ae]);
         }
         catch (Exception h)
         {
-            B.Gunluk.LogError(h, "MWL: cihaz sorgusu başarısız.");
+            B.Sunucu.Gunluk.LogError(h, "MWL: cihaz sorgusu başarısız.");
             return false;
         }
     }
@@ -124,25 +321,28 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
             yield break;
         }
         var sorgu = MwlCevirici.SorguOku(istek.Dataset);
+        // Cihaz tarih sormazsa satırın penceresi (bugün ± N gün; 0 = süzgeç yok).
+        if (sorgu.Baslangic is null && sorgu.Bitis is null && Satir.PencereGun > 0)
+            sorgu = sorgu with { Baslangic = DateTime.Today.AddDays(-Satir.PencereGun), Bitis = DateTime.Today.AddDays(Satir.PencereGun) };
         List<MwlSatiri> satirlar;
         DicomStatus? hata = null;
         try
         {
-            satirlar = await B.Veri.ListeAsync(
-                "select * from public.fn_radyoloji_mwl(@p0, @p1, @p2::date, @p3::date, @p4, @p5)",
-                [B.Ayar.MwlBilinmeyenAe && !await CihazTanidikMiAsync(_cagiranAe) ? "" : _cagiranAe,
-                 sorgu.Modalite, sorgu.Baslangic, sorgu.Bitis, sorgu.Accession, sorgu.HastaId],
+            satirlar = await B.Sunucu.Veri.ListeAsync(
+                "select * from public.fn_radyoloji_mwl(@p0, @p1, @p2::date, @p3::date, @p4, @p5, @p6)",
+                [Satir.BilinmeyenAe && !await CihazTanidikMiAsync(_cagiranAe) ? "" : _cagiranAe,
+                 sorgu.Modalite, sorgu.Baslangic, sorgu.Bitis, sorgu.Accession, sorgu.HastaId, Satir.Sube],
                 MwlCevirici.SatirOku);
         }
         catch (Exception h)
         {
-            B.Gunluk.LogError(h, "MWL: iş listesi okunamadı (AE {Ae}).", _cagiranAe);
+            B.Sunucu.Gunluk.LogError(h, "MWL: iş listesi okunamadı (AE {Ae}).", _cagiranAe);
             satirlar = [];
             hata = DicomStatus.ProcessingFailure;
         }
         if (hata is not null) { yield return new DicomCFindResponse(istek, hata); yield break; }
 
-        var kodlama = B.Ayar.MwlKarakterSeti;
+        var kodlama = Satir.KarakterSeti;
         var adDesen = sorgu.HastaAdi;
         foreach (var s in satirlar)
         {
@@ -153,7 +353,12 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
             };
             yield return yanit;
         }
-        await IzYazAsync(satirlar.Where(s => MwlCevirici.AdUyar(adDesen, s)).ToList());
+        var donen = satirlar.Where(s => MwlCevirici.AdUyar(adDesen, s)).ToList();
+        if (!B.Sunucu.SessizMi(B.Port, _cagiranAe))     // sınama sorgusu cihazın "gördü" izini yazmaz
+        {
+            B.Sunucu.SorguKaydet(_cagiranAe, donen.Count);
+            await IzYazAsync(donen);
+        }
         yield return new DicomCFindResponse(istek, DicomStatus.Success);
     }
 
@@ -164,7 +369,7 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
         try
         {
             foreach (var s in satirlar)
-                await B.Veri.CalistirAsync(
+                await B.Sunucu.Veri.CalistirAsync(
                     """
                     insert into public.radyoloji_pacs_olay (istem_id, accession_no, olay, yon, cihaz_id, ae_title, sonuc, mesaj)
                     values (@p0, @p1, 1, 1, (select id from public.radyoloji_cihaz where durum = 1 and upper(trim(ae_title)) = upper(@p2) order by id limit 1),
@@ -174,7 +379,7 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
         }
         catch (Exception h)
         {
-            B.Gunluk.LogWarning(h, "MWL: iz yazılamadı.");
+            B.Sunucu.Gunluk.LogWarning(h, "MWL: iz yazılamadı.");
         }
     }
 }

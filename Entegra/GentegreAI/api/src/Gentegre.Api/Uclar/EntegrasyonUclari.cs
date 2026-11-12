@@ -233,10 +233,22 @@ public static class EntegrasyonUclari
         // ---------------------------------------------------- bağlantı sına --
         // Kimlik ve adres doğru mu: servise en ucuz çağrı yapılır, sonuç
         //   kayda yazılır (son_kullanim / son_sonuc) - kullanıcı ekranda görür.
+        // ------------------------------------------- MWL dinleyici durumu (1329) --
+        // MWL kartı: satırın dinleyici durumu, sunucu adresleri (cihaza girilecek) ve satırın şubesindeki cihazlar
+        //   (AE adı, son sorgu, bekleyen istem). Salt okuma.
+        grup.MapGet("/mwl/{id:int}/durum", async (int id, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
+            MwlSunucusu mwl, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+            await erisim.IsteAsync(baglam, HesapKaynagi, id, HesapYok, iptal);
+            return Results.Ok(await MwlSinama.DurumAsync(veri, mwl, id, iptal));
+        });
+
         // ------------------------------------------- PACS dinleyicileri (1316) --
         // PACS kartındaki salt okunur blok: sunucunun DİNLEDİĞİ portlar kurulumda (appsettings › Dicom / TeletipWado);
         //   port değişimi yeniden başlatma ister, sertifika parolası ortamda - ekranda yalnız durum gösterilir.
-        grup.MapGet("/pacs/dinleyiciler", async (BaglamCozucu cozucu, DicomAyarDeposu depo,
+        grup.MapGet("/pacs/dinleyiciler", async (BaglamCozucu cozucu, DicomAyarDeposu depo, VeriKaynagi veri,
             Microsoft.Extensions.Options.IOptions<TeletipWadoAyarlari> wado, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -245,6 +257,9 @@ public static class EntegrasyonUclari
             return Results.Ok(new
             {
                 mwlPort = d.MwlPort, mwlAe = d.MwlAe, mwlKarakterSeti = d.MwlKarakterSeti, mwlBilinmeyenAe = d.MwlBilinmeyenAe,
+                // 1329: MWL satırı varsa dosyadaki MWL ayarı kullanılmaz - kart onları değil satırları gösterir.
+                mwlSatir = await veri.TekDegerAsync<int>(
+                    "select count(*)::int from public.entegrasyon_hesap where kod = 'MWL' and aktif = 1", null, iptal),
                 wadoPort = w.Port, wadoHttps = w.SertifikaYolu.Length > 0, wadoYol = w.Yol, wadoIzinliIpler = w.IzinliIpler,
                 // Satır yokken geçerli olan dosya ayarı - "ilk açılışta dosyadaki değerlerle öner" için.
                 dosya = new { sunucu = d.Sunucu, port = d.Port, bizimAe = d.BizimAe, pacsAe = d.SunucuAe, wadoUrl = d.WadoUrl,
@@ -258,7 +273,7 @@ public static class EntegrasyonUclari
         grup.MapPost("/{id:int}/sina", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
             KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, Microsoft.Extensions.Options.IOptions<MirthAyarlari> mirthDosya,
-            HttpContext ctx, CancellationToken iptal) =>
+            MwlSunucusu mwl, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // YAZMA YETKİSİ (K16): sınama `son_kullanim / son_sonuc` YAZAR - Gör yetkisi
@@ -288,6 +303,18 @@ public static class EntegrasyonUclari
                 await SonucYazAsync(baglanti, id, pacsMesaj, iptal);
                 await dicomDepo.YenileAsync(iptal);
                 return Results.Ok(new { basarili = tamam, mesaj = pacsMesaj, adimlar });
+            }
+
+            // MWL (1329): dinleyici ayakta mı → C-ECHO → cihaz gibi worklist sorgusu (şubenin kayıtlı bir cihazının AE'siyle).
+            if (string.Equals(hesap.Kod, "MWL", StringComparison.OrdinalIgnoreCase))
+            {
+                var adimlarM = await MwlSinama.SinaAsync(baglanti, mwl, id, iptal);
+                var tamamM = adimlarM.All(x => x.Tamam);
+                var ozetM = string.Join(" · ", adimlarM.Select(x => $"{x.Ad.Split(' ')[0]} {(x.Tamam ? "✓" : "✖")}"));
+                var ilkM = adimlarM.FirstOrDefault(x => !x.Tamam);
+                var mesajM = ilkM is null ? ozetM + " · " + adimlarM[^1].Ayrinti : $"{ozetM} - {ilkM.Ayrinti}";
+                // Son Sonuç dinleyici durumunu taşır (listede "Dinliyor / Açılamadı"); sınama sonucu yanıtta.
+                return Results.Ok(new { basarili = tamamM, mesaj = mesajM, adimlar = adimlarM });
             }
 
             // TELERADYOLOJI (1317): kanal adreslerine TCP (mesaj göndermez - Mirth HTTP dinleyicisine istek atmak kanalda mesaj

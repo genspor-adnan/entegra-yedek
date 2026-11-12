@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (713 ad, 195 tanesi birden cok dosyada)
+## Fonksiyonlar (713 ad, 196 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -451,7 +451,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_dicom_modalite` | `1301_radyoloji_mwl.sql` | — |
 | `fn_radyoloji_istem_sil` | `920_muayene_istem_sil.sql` | — |
 | `fn_radyoloji_modalite_dicomdan` | `1301_radyoloji_mwl.sql` | — |
-| `fn_radyoloji_mwl` | `1301_radyoloji_mwl.sql` | — |
+| `fn_radyoloji_mwl` | `1329_mwl_entegrasyon_sube.sql` | 1301_radyoloji_mwl.sql |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `1206_radyoloji_onay_kritik_dolu.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql |
 | `fn_radyoloji_sablon_bolum_html_bosalt` | `1216_radyoloji_sablon_bolum_html.sql` | — |

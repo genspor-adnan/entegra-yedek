@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modality Worklist Sunucusu — Ayarlar › Genel › Entegrasyon — Mockup (Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .bas{max-width:1180px;margin:0 auto 12px;color:var(--navy)}
+  .bas h1{font-size:16px;margin:0 0 4px}
+  .bas p{margin:0 0 6px;color:var(--muted);line-height:1.6;font-size:12px}
+  .win{max-width:1180px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .no{background:rgba(255,255,255,.18);border-radius:3px;padding:0 6px;font-size:11px}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  .tk{overflow-x:auto}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  tr.yeni td{background:#f3fbf5}
+  tr.yeni.sel td{background:var(--sel)}
+  .orta{text-align:center} .sonuk{color:var(--muted)} .yesil{color:var(--ok)} .kirmizi{color:#9d3434} .turuncu{color:#a9791a}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
+  .rz.canli{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.kod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.yeni{background:#2e7d46;color:#fff;border-color:#2e7d46;font-weight:bold}
+  .rz.hata{background:#fbe5e5;color:#9d3434;border-color:#efc3c3}
+  .rz.pasif{background:#f1f3f6;color:#7b8794}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .kart{max-width:980px}
+  .idstrip{display:grid;grid-template-columns:1.2fr 1.3fr 1.1fr .6fr;gap:10px;padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:26px;padding:0 7px;
+    font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inp.ro{background:#f4f6f9;color:var(--muted)}
+  .combo{position:relative;padding-right:18px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:11.5px;height:26px}
+  .ipucu{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .grp.salt h4{background:linear-gradient(#f7f7f7,#eef0f2);color:#5b6b7c}
+  .iz{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 12px;padding:10px}
+  .iz .yari{grid-column:span 2}
+  .iz .tam{grid-column:1 / -1}
+  .durum{display:flex;gap:10px;align-items:center;padding:9px 12px;margin:12px;border:1px solid #bfe3cb;background:#f5fbf7;border-radius:3px;font-size:11.5px;flex-wrap:wrap}
+  .durum .nokta{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px #d6eedd}
+  .durum b{color:#2e7d46}
+  .durum .sag{margin-left:auto;color:var(--muted)}
+  .test{margin:0 12px 12px;border:1px solid #bfe3cb;background:#f5fbf7;border-radius:3px;font-size:11.5px}
+  .test h5{margin:0;padding:6px 10px;border-bottom:1px solid #d6eedd;color:#2e7d46;font-size:12px}
+  .test table td{border-right:none;padding:4px 10px}
+  .test.kotu{border-color:#efc3c3;background:#fdf5f5}
+  .test.kotu h5{color:#9d3434;border-color:#f3d6d6}
+  .uyari{margin:0 12px 12px;border:1px solid #f2ddbf;background:#fdf9f1;border-radius:3px;padding:7px 9px;font-size:11px;color:#8a6218;line-height:1.55}
+  .not{padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;background:#fff;border-top:1px solid var(--line2)}
+  .not b{color:#3d6294}
+  .maprow{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  ol.kural{margin:0;padding:10px 12px 10px 30px;line-height:1.7;font-size:11.5px}
+  /* iki model */
+  .modeller{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+  .model{border:1px solid var(--line2);border-radius:4px;background:#fff}
+  .model h5{margin:0;padding:7px 10px;font-size:12px;border-bottom:1px solid var(--line2);background:linear-gradient(#f6f9fc,#eef3f9);color:#2c4a6b}
+  .model h5 .rz{float:right}
+  .sema{padding:10px;display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .sat{display:grid;grid-template-columns:1fr 26px 1.2fr;align-items:center;gap:6px}
+  .kutu{border:1px solid var(--line);border-radius:3px;padding:4px 8px;background:#fbfcfd;line-height:1.35}
+  .kutu b{color:#2c4a6b}
+  .kutu.srv{background:#eef4fc;border-color:#cfe0f5}
+  .ok{color:#8fa3b6;font-weight:bold;text-align:center}
+  .model p{margin:0;padding:0 10px 10px;color:var(--muted);line-height:1.55;font-size:11px}
+  @media (max-width:760px){.idstrip,.iz,.modeller{grid-template-columns:1fr}.iz .yari{grid-column:auto}}
+</style>
+</head>
+<body>
+
+<div class="bas">
+  <h1>Modality Worklist (MWL) sunucusu entegrasyon ekranına taşınıyor — çok şubeli</h1>
+  <p>Bugün worklist sunucusu yalnız kurulum dosyasından açılıyor (<code>appsettings</code> › <code>Dicom:MwlPort</code>, 0 = kapalı) ve PACS kartında salt okunur
+    görünüyor. Yeni hâli: <b>Ayarlar › Genel › Entegrasyon</b> listesinde <b>MWL</b> kodlu hesap, <b>şube başına ayrı satır</b>. Kaydedince dinleyici kendini
+    yeni ayarla yeniden açar; API yeniden başlatılmaz.</p>
+  <p>Her şube satırı kendi <b>port + AE adı</b> çiftini dinler. Bir şubenin cihazına yalnız o şubenin istemleri gider. Şubeler aynı portu paylaşıp
+    yalnız AE adıyla da ayrılabilir (bölüm 3).</p>
+</div>
+
+<!-- ==================================================== 1 · LİSTE ======== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">1</span> Genel Ayarlar
+    <span class="sp">Yönetim › Ayarlar › Genel · yetki: entegrasyon</span>
+  </div>
+  <div class="tabs">
+    <div class="tab">Genel</div><div class="tab">Güvenlik</div><div class="tab active">Entegrasyon</div><div class="tab">Belge No</div>
+  </div>
+  <div class="toolbar">
+    <div class="btn primary">➕ Yeni</div><div class="btn">✎ Düzenle</div><div class="btn">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div>
+    <div class="ara">🔎 Ara… (kod, ad, şube)</div>
+  </div>
+  <div class="tk">
+  <table>
+    <thead>
+      <tr><th>Entegrasyon</th><th>Ad</th><th>Şube</th><th>Kullanıcı</th><th>Uygulama Kodu</th>
+          <th class="orta">Aktif</th><th>Durum</th><th>Son Kullanım</th><th>Son Sonuç</th></tr>
+    </thead>
+    <tbody>
+      <tr class="sel yeni">
+        <td><span class="rz kod">MWL</span> Modality Worklist <span class="rz yeni">YENİ</span></td>
+        <td>Worklist - Merkez</td><td>Merkez</td>
+        <td>GENTEGRE_MRK <span class="sonuk">(AE)</span></td><td>11112 <span class="sonuk">(port)</span></td>
+        <td class="orta">✔</td><td class="yesil">● dinliyor</td><td class="sonuk">12.11.2026 09:14 · MR1_MRK</td>
+        <td class="yesil">3 cihaz · bugün 41 sorgu</td>
+      </tr>
+      <tr class="yeni">
+        <td><span class="rz kod">MWL</span> Modality Worklist</td>
+        <td>Worklist - Kadıköy</td><td>Kadıköy</td>
+        <td>GENTEGRE_KDK <span class="sonuk">(AE)</span></td><td>11112 <span class="sonuk">(port)</span></td>
+        <td class="orta">✔</td><td class="yesil">● dinliyor</td><td class="sonuk">12.11.2026 09:02 · BT_KDK</td>
+        <td class="yesil">2 cihaz · bugün 17 sorgu</td>
+      </tr>
+      <tr class="yeni">
+        <td><span class="rz kod">MWL</span> Modality Worklist</td>
+        <td>Worklist - Ataşehir</td><td>Ataşehir</td>
+        <td>GENTEGRE_ATS <span class="sonuk">(AE)</span></td><td>11113 <span class="sonuk">(port)</span></td>
+        <td class="orta">✔</td><td class="kirmizi">● açılamadı</td><td class="sonuk">—</td>
+        <td class="kirmizi">Port 11113 başka uygulamada</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">PACS</span> PACS (DICOM)</td><td>ClearCanvas - Merkez</td><td class="sonuk">Tümü</td>
+        <td>GENTEGRE <span class="sonuk">(bizim AE)</span></td><td>SERVERAE <span class="sonuk">(PACS AE)</span></td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td class="sonuk">12.11.2026 00:41</td><td class="yesil">C-ECHO ✓ · C-FIND ✓ · WADO ✓</td>
+      </tr>
+      <tr>
+        <td><span class="rz kod">ENABIZ</span> e-Nabız / USS</td><td>e-Nabız / USS</td><td class="sonuk">Tümü</td>
+        <td class="sonuk">—</td><td class="sonuk">—</td>
+        <td class="orta">✔</td><td class="sonuk">—</td><td class="sonuk">11.11.2026 16:02</td><td class="sonuk">Bağlantı doğrulandı</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="statusbar"><span>15 kayıt</span><span>Seçili: Worklist - Merkez</span><span>Sunucu: 2 port dinleniyor (11112, 11113)</span></div>
+  <div class="not">
+    MWL satırında <b>Kullanıcı</b> sütunu cihazların çağıracağı AE adını, <b>Uygulama Kodu</b> sütunu portu gösterir. Yeni <b>Durum</b> sütunu yalnız
+    dinleyici olan entegrasyonlarda dolar (MWL); dinleyici açılamadıysa nedeni Son Sonuç'ta yazar.
+  </div>
+</div>
+
+<!-- ==================================================== 2 · KART ========= -->
+<div class="win kart">
+  <div class="title"><span class="dot"></span> <span class="no">2</span> Entegrasyon Hesabı
+    <span class="sp">MWL · Merkez</span>
+  </div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">✖ Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">🔌 Bağlantıyı Sına</div><div class="btn">🗑 Sil</div>
+  </div>
+
+  <div class="idstrip">
+    <div class="fld"><label class="req">Entegrasyon</label><div class="inp combo">Modality Worklist (MWL)</div></div>
+    <div class="fld"><label>Ad</label><div class="inp">Worklist - Merkez</div></div>
+    <div class="fld"><label>Şube (boş = tümü)</label><div class="inp combo">Merkez</div>
+      <div class="ipucu">bu dinleyiciye bağlanan cihaz yalnız bu şubenin istemlerini görür</div></div>
+    <div class="fld"><label>Aktif</label><div class="chk"><input type="checkbox" checked> Aktif</div>
+      <div class="ipucu">pasif = dinleyici kapanır</div></div>
+  </div>
+
+  <div class="durum">
+    <span class="nokta"></span><b>Dinliyor</b> · 0.0.0.0:11112 · AE GENTEGRE_MRK · 09:12'den beri
+    <span class="sag">Son sorgu 09:14 · MR1_MRK · 6 hasta döndü</span>
+  </div>
+
+  <div class="grp">
+    <h4>Dinleyici <span class="mini">cihazın "Worklist sunucusu" ayarına girilecek değerler</span></h4>
+    <div class="iz">
+      <div class="fld"><label class="req">Port</label><div class="inp">11112</div>
+        <div class="ipucu">104 ClearCanvas'ın; şubeler aynı portu paylaşabilir</div></div>
+      <div class="fld"><label class="req">AE adı</label><div class="inp">GENTEGRE_MRK</div>
+        <div class="ipucu">aynı porttaki şubeler farklı AE ile ayrılır</div></div>
+      <div class="fld"><label>Karakter seti</label><div class="inp combo">ISO_IR 148 (Türkçe)</div>
+        <div class="ipucu">cihaz Türkçe göstermiyorsa ISO_IR 100 / ISO_IR 192 (UTF-8)</div></div>
+      <div class="fld"><label>Tanımsız cihaz</label><div class="chk"><input type="checkbox"> Kabul et</div>
+        <div class="ipucu">kapalı önerilir; açıksa yalnız modalite süzer</div></div>
+      <div class="fld yari"><label>Cihazın gireceği sunucu adresi</label><div class="inp ro">10.20.0.5 <span class="sonuk">&nbsp;(bu sunucunun IP'si — bilgi)</span></div>
+        <div class="ipucu">şube cihazı merkez sunucuya VPN / şube ağı üzerinden ulaşmalı</div></div>
+      <div class="fld yari"><label>Gösterilecek tarih aralığı</label><div class="inp combo">Bugün ± 1 gün</div>
+        <div class="ipucu">cihaz tarih sormazsa döndürülecek pencere</div></div>
+    </div>
+  </div>
+
+  <div class="grp salt">
+    <h4>Bu dinleyiciyi kullanan cihazlar <span class="mini" style="color:#7b8794">Radyoloji › Cihaz Listesi'nden · salt okunur</span></h4>
+    <div class="tk">
+    <table>
+      <thead><tr><th>Cihaz</th><th>Modalite</th><th>Cihaz AE</th><th>Son sorgu</th><th>Bekleyen istem</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>MR 1.5T - Merkez</td><td>MR</td><td>MR1_MRK</td><td>09:14</td><td>6</td><td class="yesil">bağlandı</td></tr>
+        <tr><td>BT 64 kesit - Merkez</td><td>BT</td><td>BT1_MRK</td><td>08:57</td><td>4</td><td class="yesil">bağlandı</td></tr>
+        <tr><td>Röntgen - Merkez</td><td>Röntgen</td><td>DR_MRK</td><td class="sonuk">hiç</td><td>9</td><td class="turuncu">henüz sorgulamadı</td></tr>
+        <tr><td>Mamografi - Merkez</td><td>MG</td><td class="kirmizi">— boş</td><td class="sonuk">—</td><td>2</td><td class="kirmizi">AE adı yok · bağlanamaz</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="test">
+    <h5>🔌 Bağlantı testi — 12.11.2026 09:20 · 0,4 sn</h5>
+    <table>
+      <tr><td class="yesil">✓</td><td><b>Dinleyici</b> 11112 portu açık</td><td class="sonuk">—</td></tr>
+      <tr><td class="yesil">✓</td><td><b>C-ECHO</b> GENTEGRE_TEST → GENTEGRE_MRK</td><td class="sonuk">6 ms</td></tr>
+      <tr><td class="yesil">✓</td><td><b>C-FIND</b> bugünün worklist'i (cihaz gibi, MR)</td><td class="sonuk">6 hasta · Türkçe karakter ✓</td></tr>
+    </table>
+  </div>
+  <div class="test kotu">
+    <h5>🔌 Örnek hata — port dolu</h5>
+    <table>
+      <tr><td class="kirmizi">✖</td><td><b>Dinleyici</b> 11113 açılamadı: <i>adres zaten kullanımda</i></td>
+          <td class="sonuk">Başka bir uygulama bu portu kullanıyor; farklı port seçin ya da Kadıköy gibi 11112'yi paylaşın.</td></tr>
+    </table>
+  </div>
+
+  <div class="uyari">
+    <b>Ekran güvenlik duvarını açmaz.</b> Port ekrandan değişir ve dinleyici hemen yeni portta açılır; ama sunucunun güvenlik duvarı ve (Docker
+    kurulumda) dışarı açılan port kurulumda ayarlanır. Bu yüzden önerilen: bütün şubeler <b>tek port (11112)</b>, şubeler <b>AE adıyla</b> ayrılır.
+  </div>
+
+  <div class="maprow">
+    <span><b>Tablo:</b> entegrasyon_hesap (kod = MWL)</span>
+    <span><b>kullanici_adi:</b> AE adı</span><span><b>uygulama_kodu:</b> port</span>
+    <span><b>sube_id:</b> şube (boş = tümü)</span>
+    <span><b>ayarlar (jsonb):</b> karakterSeti · bilinmeyenAe · tarihPenceresi</span>
+    <span><b>Benzersiz:</b> (port, AE) — aynı çift iki satırda olamaz</span>
+    <span><b>Uç:</b> /api/entegrasyon/{id}/sina (MWL: port + C-ECHO + C-FIND)</span>
+  </div>
+</div>
+
+<!-- ==================================================== 3 · İKİ MODEL ===== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">3</span> Şubeleri ayırmanın iki yolu <span class="sp">ikisi de desteklenir · karıştırılabilir</span></div>
+  <div class="modeller">
+    <div class="model">
+      <h5>A · Tek port, şube başına AE <span class="rz canli">önerilen</span></h5>
+      <div class="sema">
+        <div class="sat"><span class="kutu">MR1_MRK <span class="sonuk">(Merkez)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11112</b> AE GENTEGRE_MRK</span></div>
+        <div class="sat"><span class="kutu">BT_KDK <span class="sonuk">(Kadıköy)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11112</b> AE GENTEGRE_KDK</span></div>
+        <div class="sat"><span class="kutu">DR_ATS <span class="sonuk">(Ataşehir)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11112</b> AE GENTEGRE_ATS</span></div>
+      </div>
+      <p>Güvenlik duvarında tek port. Cihaz hangi AE'yi çağırırsa o şubenin listesini alır. Yeni şube = yalnız yeni satır, kurulum değişmez.</p>
+    </div>
+    <div class="model">
+      <h5>B · Şube başına port <span class="rz pasif">gerekirse</span></h5>
+      <div class="sema">
+        <div class="sat"><span class="kutu">MR1_MRK <span class="sonuk">(Merkez)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11112</b> AE GENTEGRE</span></div>
+        <div class="sat"><span class="kutu">BT_KDK <span class="sonuk">(Kadıköy)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11113</b> AE GENTEGRE</span></div>
+        <div class="sat"><span class="kutu">DR_ATS <span class="sonuk">(Ataşehir)</span></span><span class="ok">→</span><span class="kutu srv"><b>:11114</b> AE GENTEGRE</span></div>
+      </div>
+      <p>Cihazlarda AE adı değiştirilemiyorsa ya da şube ağları ayrı portla yönlendiriliyorsa. Her port güvenlik duvarında ayrıca açılır.</p>
+    </div>
+  </div>
+  <div class="not">
+    Her iki yolda da ikinci bir kontrol daha var: <b>cihaz kartındaki şube</b>. Cihaz başka şubenin dinleyicisine bağlansa bile kendi şubesi dışındaki
+    istemi görmez — yanlış ayarlanmış bir cihaz başka şubenin hastasını listeleyemez.
+  </div>
+</div>
+
+<!-- ==================================================== 4 · KURALLAR ===== -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">4</span> Kurallar</div>
+  <ol class="kural">
+    <li><b>Şube başına satır</b> — her MWL satırı bir (port, AE) dinler ve yalnız kendi şubesinin istemlerini döndürür. Şube boş satır = kurum geneli (tek şubeli kurum ya da ortak cihaz).</li>
+    <li><b>Aynı port paylaşılabilir</b> — aynı portta birden çok satır olabilir; gelen bağlantı çağrılan AE adına göre satıra yönlenir. Aynı (port, AE) iki satırda olamaz.</li>
+    <li><b>Cihaz şubesi de süzer</b> — cihaz kartındaki şube ile dinleyicinin şubesi çakışırsa istem dönmez; cihaz kartında AE adı yoksa cihaz bağlanamaz (tanımsız cihaz kabulü kapalıyken).</li>
+    <li><b>Kaydet hemen geçerli</b> — dinleyiciler satırlar değişince ≤ 5 sn'de yeniden kurulur (PACS ayarıyla aynı yeniden yükleme); pasif satırın portu, başka satır kullanmıyorsa kapanır. API yeniden başlatılmaz.</li>
+    <li><b>Açılamazsa görünür</b> — port doluysa ya da izin yoksa satırın Durum'u "açılamadı" olur, neden Son Sonuç'a yazılır; diğer şubelerin dinleyicileri etkilenmez.</li>
+    <li><b>Satır yoksa eski davranış</b> — kurulum dosyasındaki <code>Dicom:MwlPort</code> kullanılır (kurum geneli, tek dinleyici); mevcut kurulumlar bozulmaz. Boş kartta "↓ Dosyadaki değerleri al".</li>
+    <li><b>PACS kartı</b> — PACS kartındaki salt okunur "MWL" alanları kalkar; yerine "Worklist ayarları › MWL satırları" bağlantısı. Dışa açık WADO (TeleRadyoloji) kurulumda kalır.</li>
+    <li><b>Yetki</b> — mevcut <code>entegrasyon</code> yetkisi. Değişiklik ISLEMLOG'a alan alan yazılır.</li>
+  </ol>
+</div>
+
+<!-- ==================================================== 5 · SERVİS ======= -->
+<div class="win">
+  <div class="title"><span class="dot"></span> <span class="no">5</span> Servise göre alan kullanımı <span class="sp">(entegrasyon_hesaplari.html tablosuna eklenecek satır)</span></div>
+  <div class="tk">
+  <table>
+    <thead><tr><th>Entegrasyon</th><th>Kullanıcı Adı</th><th>Şifre / Token</th><th>Uygulama Kodu</th><th>Kurum / Tesis Kodu</th><th>Adres (url)</th><th>Aksiyon</th></tr></thead>
+    <tbody>
+      <tr><td><span class="rz kod">MWL</span> Modality Worklist</td><td>AE adı (cihazın çağıracağı)</td><td class="sonuk">— (DICOM'da yok)</td>
+          <td>port</td><td class="sonuk">—</td><td class="sonuk">—</td><td>Bağlantıyı Sına (port + C-ECHO + C-FIND)</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+</body>
+</html>

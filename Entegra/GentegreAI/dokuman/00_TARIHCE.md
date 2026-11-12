@@ -835,6 +835,23 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   ekrandan düzenlenemediği için şubede kalmış eski / test kod artık kurum geneli e-Nabız'ı ezmiyor. Şubeye özel kod =
   şubenin kendi e-Nabız satırı. TeleRadyoloji pano çakışma çözümü: şubenin e-Nabız satırı yok + kurum geneli var ise profile
   yazmaz (etkisiz kalırdı), "şubeye e-Nabız satırı açın" der. Test beklentileri yeni sıraya; tam paket 1078 / 0.
+- **1329 - Modality Worklist sunucusu entegrasyon ekranından, şube başına (kullanıcı "onun da ayarları entegrasyonlar
+  listesinde olabilir mi" → mockup Ekranlar/Ayarlar/entegrasyon_mwl.html → "çok şubeli yer ayrı ayrı olabilir" → "uygula"):**
+  * Yeni entegrasyon kodu MWL: kullanıcı adı = AE adı, uygulama kodu = port, ayarlar = karakterSeti / bilinmeyenAe /
+    pencereGun. Şube başına satır; şubeler aynı portu paylaşıp AE adıyla ayrılır (önerilen) ya da ayrı port. Aynı
+    (port, AE) iki aktif satırda olamaz (ux_entegrasyon_hesap_mwl_port_ae).
+  * MwlSunucusu: port başına tek dinleyici, gelen bağlantı çağrılan AE ile satıra yönlenir (MwlAyar.Sec); satırlar 5 sn'de
+    bir yalnız ayar sütunlarının imzasıyla izlenir - eksik port açılır, kalkan kapanır, API yeniden başlatılmaz. Durum
+    (Dinliyor / Açılamadı + neden) satırın Son Sonuç'una yazılır. Windows'ta fo-dicom dolu porta hata vermeden
+    "bağlandığı" için açmadan önce dışlayıcı bağlanma denenir. Satır yoksa eski davranış (appsettings Dicom:MwlPort).
+  * fn_radyoloji_mwl p_sube: şube dinleyicisine bağlanan cihaz yalnız o şubenin istemini görür (cihaz kartı şubesi de süzer).
+  * Kart sekmesi "Worklist Sunucusu": port / AE / karakter seti / tanımsız cihaz / tarih penceresi, durum şeridi, sunucu
+    adresleri, şubenin cihazları (AE, son sorgu, bekleyen istem, "AE adı yok · bağlanamaz"), bağlantı testi (dinleyici →
+    C-ECHO → cihaz gibi worklist C-FIND; şubenin kayıtlı cihaz AE'siyle, cihazın "gördü" izine yazılmaz). Uç
+    GET /api/entegrasyon/mwl/{id}/durum. PACS kartındaki salt okunur MWL alanları satır varsa "MWL satırlarında" der.
+  * Doğrulama (dev gentegre_ai, kendi satırları + temizlik): iki şube aynı 11112'de iki AE ile ✓, port 11113'e alınınca
+    yeniden kuruldu ✓, satırlar silinince portlar kapandı ✓, dolu port (5434) "başka bir uygulamada kullanılıyor" ✓, sınama
+    pacs_olay'a iz yazmadı ✓. MwlAyarTestleri +6; tam paket 1084 / 0. Gerçek cihazla henüz denenmedi.
 
 ### 10.11.2026
 

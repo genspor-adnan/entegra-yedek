@@ -18,6 +18,7 @@ type Dinleyiciler = {
   dosya: { sunucu: string; port: number; bizimAe: string; pacsAe: string; wadoUrl: string; goruntuleyiciUrl: string;
            jetonDakika: number; zamanAsimiSn: number; aktif: boolean };
   ekrandan: boolean;
+  mwlSatir: number;
 };
 type Adim = { ad: string; tamam: boolean; ayrinti: string; ms: number };
 
@@ -113,17 +114,22 @@ export function PacsBaglantiSekmesi({ e, kartId }: { e: EkSekmeBaglami; kartId: 
         <legend>{c('Sunucu dinleyicileri')} <small>{c('kurulumda · salt okunur')}</small></legend>
         {!din ? <div className="pcs-soluk">{c('Yükleniyor…')}</div> : (
           <div className="pcs-izgara">
-            <div className="pcs-oku"><span>{c('MWL portu')}</span><b>{din.mwlPort > 0 ? din.mwlPort : c('kapalı (0)')}</b></div>
-            <div className="pcs-oku"><span>{c('MWL AE')}</span><b>{din.mwlAe || '—'}</b></div>
-            <div className="pcs-oku"><span>{c('MWL karakter seti')}</span><b>{din.mwlKarakterSeti}</b></div>
-            <div className="pcs-oku"><span>{c('Tanımsız cihaza MWL')}</span><b>{din.mwlBilinmeyenAe ? c('evet') : c('hayır')}</b></div>
+            {din.mwlSatir > 0 ? (
+              <div className="pcs-oku pcs-genis"><span>{c('Worklist (MWL)')}</span>
+                <b>{c('Entegrasyon listesindeki MWL satırlarında')} ({din.mwlSatir})</b></div>
+            ) : (<>
+              <div className="pcs-oku"><span>{c('MWL portu')}</span><b>{din.mwlPort > 0 ? din.mwlPort : c('kapalı (0)')}</b></div>
+              <div className="pcs-oku"><span>{c('MWL AE')}</span><b>{din.mwlAe || '—'}</b></div>
+              <div className="pcs-oku"><span>{c('MWL karakter seti')}</span><b>{din.mwlKarakterSeti}</b></div>
+              <div className="pcs-oku"><span>{c('Tanımsız cihaza MWL')}</span><b>{din.mwlBilinmeyenAe ? c('evet') : c('hayır')}</b></div>
+            </>)}
             <div className="pcs-oku"><span>{c('Dışa açık WADO (TeleRadyoloji)')}</span><b>{din.wadoPort > 0 ? `${din.wadoPort} ${din.wadoYol}` : c('kapalı')}</b></div>
             <div className="pcs-oku"><span>{c('Dışa açık WADO HTTPS')}</span><b>{din.wadoPort > 0 ? (din.wadoHttps ? c('evet') : c('hayır (sertifika yok)')) : '—'}</b></div>
             <div className="pcs-oku pcs-genis"><span>{c('IP izin listesi')}</span><b>{din.wadoIzinliIpler.length ? din.wadoIzinliIpler.join(', ') : c('— (herkes)')}</b></div>
           </div>
         )}
         <div className="pcs-not">
-          {c("Bu alanlar burada değişmez: port açmak sunucu / güvenlik duvarı işi, değişince API'nin yeniden başlaması gerekir; sertifika parolası yalnız sunucu ortamında durur (appsettings › Dicom ve TeletipWado).")}
+          {c("Dışa açık WADO burada değişmez: port açmak sunucu / güvenlik duvarı işi, değişince API'nin yeniden başlaması gerekir; sertifika parolası yalnız sunucu ortamında durur (appsettings › TeletipWado). Worklist (MWL) dinleyicisi Entegrasyon listesinde 'Modality Worklist' satırı olarak, şube başına ayarlanır.")}
         </div>
       </fieldset>
 
