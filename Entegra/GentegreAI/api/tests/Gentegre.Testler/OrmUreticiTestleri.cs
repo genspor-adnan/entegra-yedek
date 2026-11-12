@@ -37,10 +37,23 @@ public sealed class OrmUreticiTestleri
         var m = OrmUretici.Uret(Ornek());
         var adlar = m.Split('\r', StringSplitOptions.RemoveEmptyEntries).Select(s => s[..3]).ToArray();
         Assert.Equal(["MSH", "PID", "PV1", "ORC", "OBR", "DG1", "DG1", "NTE", "NTE", "NTE", "NTE"], adlar);
-        Assert.StartsWith(@"MSH|^~\&|GENTEGRE|KOŞUYOLU GÖRÜNTÜLEME|TELERADYOLOJI|TELERADYOLOJI|20261111092704||ORM^O01|MSG000000001|P|2.3.1|", m);
+        // 1330: Bakanlık HL7 doğrulayıcısı MSH-5/6 "TELETIP" ister (kullanıcı "doğrulayıcıya uyalım").
+        Assert.StartsWith(@"MSH|^~\&|GENTEGRE|KOŞUYOLU GÖRÜNTÜLEME|TELETIP|TELETIP|20261111092704||ORM^O01|MSG000000001|P|2.3.1|", m);
         Assert.EndsWith("|UTF8", m.Split('\r')[0]);
         // MSH-18 = 18. alan: "MSH" + 17 ayraçtan sonra (MSH-1 ayracın kendisi).
         Assert.Equal("UTF8", Seg(m, "MSH")[17]);
+    }
+
+    [Fact]
+    public void Dogrulayici_zorunlulari_PV1_50_ve_ORC_18_hic_bos_kalmaz()
+    {
+        // 1330: doğrulayıcı PV1-50'yi ve ORC-18'i her mesajda dolu ister.
+        var ozel = OrmUretici.Uret(Ornek() with { Sgk = false, MedulaTakipNo = "", CihazGirisi = "" });
+        Assert.Equal("0", Seg(ozel, "PV1")[50]);                 // takip no yok: "0"
+        Assert.Equal("CR", Seg(ozel, "ORC")[18]);                // cihaz yok: modalite
+        var cihazli = OrmUretici.Uret(Ornek() with { Sgk = false, MedulaTakipNo = "T9X", CihazGirisi = "TR-ANJ|01^A" });
+        Assert.Equal("T9X", Seg(cihazli, "PV1")[50]);            // SGK dışında da varsa yazılır
+        Assert.Equal("TR-ANJ01A", Seg(cihazli, "ORC")[18]);      // ayraçlar ayıklanır
     }
 
     [Fact]

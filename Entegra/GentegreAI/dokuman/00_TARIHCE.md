@@ -852,6 +852,14 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Doğrulama (dev gentegre_ai, kendi satırları + temizlik): iki şube aynı 11112'de iki AE ile ✓, port 11113'e alınınca
     yeniden kuruldu ✓, satırlar silinince portlar kapandı ✓, dolu port (5434) "başka bir uygulamada kullanılıyor" ✓, sınama
     pacs_olay'a iz yazmadı ✓. MwlAyarTestleri +6; tam paket 1084 / 0. Gerçek cihazla henüz denenmedi.
+- **1330 - TeleRadyoloji HL7: Bakanlık doğrulayıcısına uyum (kullanıcı "doğrulayıcıya uyalım"):** son eklenen hastanın
+  (KOSUYOLU #42536) 5 ORM + 1 ORU mesajı teleradyoloji.saglik.gov.tr/hl7validasyon.html'de (ağ kesik araç) denendi, her
+  mesajda 4 kırmızı: MSH-5/6, PV1-50, ORC-18. Kılavuz yerine doğrulayıcı esas alındı (Hl7Sabit, ORM + ORU ortak):
+  * MSH-5 / MSH-6 = "TELETIP" (kılavuz 3.43 tablosu "TELERADYOLOJI" diyordu; teslim servisi de).
+  * PV1-50: Medula takip no varsa (SGK olsun olmasın) o, yoksa "0". SGK hastasında takip no yoksa gönderim yine durur.
+  * ORC-18: istemin atanmış cihazının TeleRadyoloji seri no → AE adı → cihaz kodu; cihaz yoksa DICOM modalite (MR…).
+    fn_teletip_orm_verisi 'CihazGirisi' verir (1330).
+  Sonra aynı 6 mesaj: hepsi yeşil, kırmızı 0. XO (güncelleme) / CA (iptal) sekmeleri denenmedi. Test +1; tam paket 1085 / 0.
 
 ### 10.11.2026
 

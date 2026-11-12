@@ -36,8 +36,10 @@ public sealed record OrmVerisi
     public string FirmaKodu { get; init; } = "";
     /// <summary>MSH-4: HBYS (hastane) adı.</summary>
     public string HbysAdi { get; init; } = "";
-    public string AliciUygulama { get; init; } = "TELERADYOLOJI";
-    public string AliciTesis { get; init; } = "TELERADYOLOJI";
+    // MSH-5 / MSH-6 (1330, kullanıcı "doğrulayıcıya uyalım"): Bakanlık HL7 doğrulayıcısı "TELETIP" istiyor (kılavuz 3.43
+    //   tablosu "TELERADYOLOJI" der); doğrulayıcı esas alındı.
+    public string AliciUygulama { get; init; } = Hl7Sabit.Alici;
+    public string AliciTesis { get; init; } = Hl7Sabit.Alici;
     public DateTime Zaman { get; init; } = Saat.Simdi;
     public string KontrolNo { get; init; } = "";
     /// <summary>MSH-18: UTF8 ya da Windows1254 (Windows1254 Bakanlık'a önceden bildirilir).</summary>
@@ -79,6 +81,9 @@ public sealed record OrmVerisi
     public bool Sgk { get; init; }
     /// <summary>PV1-50: SGK ise Medula takip numarası.</summary>
     public string MedulaTakipNo { get; init; } = "";
+
+    /// <summary>ORC-18 (1330): istemin cihazının TeleRadyoloji seri no / AE / kodu; boşsa modalite yazılır.</summary>
+    public string CihazGirisi { get; init; } = "";
     public DateTime? KabulZamani { get; init; }
 
     // ---- ORC / OBR
@@ -135,6 +140,32 @@ public sealed record OrmVerisi
 /// <para><b>ORC-21 kaçışsız <c>\S\</c>:</b> kılavuz biçimi "Kurum adı^^SKRS\S\şube\S\MEDULA tesis" - üçüncü bileşenin
 /// içindeki <c>\S\</c> HL7 kaçışının KENDİSİ; değerler ayrı ayrı kaçırılır, ayraç olduğu gibi yazılır.</para>
 /// </summary>
+/// <summary>
+/// BAKANLIK HL7 DOĞRULAYICISI UYUMU (1330; kullanıcı 12.11.2026 "doğrulayıcıya uyalım"). Doğrulayıcı
+/// (teleradyoloji.saglik.gov.tr/hl7validasyon.html) kılavuz 3.43'ten katı: MSH-5/6 "TELETIP", PV1-50 her mesajda dolu,
+/// ORC-18 her mesajda dolu. ORM ve ORU (Bakanlık profili) aynı kuralı buradan alır.
+/// </summary>
+public static class Hl7Sabit
+{
+    /// <summary>MSH-5 / MSH-6 alıcı uygulama / tesis.</summary>
+    public const string Alici = "TELETIP";
+
+    /// <summary>PV1-50 Medula takip no yoksa (SGK dışı hasta / provizyonsuz) yazılan değer.</summary>
+    public const string TakipNoYok = "0";
+
+    /// <summary>PV1-50: takip numarası varsa o (SGK olsun olmasın), yoksa <see cref="TakipNoYok"/>.</summary>
+    public static string TakipNo(string medulaTakipNo) =>
+        string.IsNullOrWhiteSpace(medulaTakipNo) ? TakipNoYok : medulaTakipNo.Trim().Replace("|", "").Replace("^", "");
+
+    /// <summary>ORC-18: cihazın TeleRadyoloji seri no / AE / kodu; cihaz yoksa DICOM modalite (CT, MR…).</summary>
+    public static string CihazGirisi(string cihaz, string modalite)
+    {
+        var c = (cihaz ?? "").Trim();
+        if (c.Length == 0) c = (modalite ?? "").Trim();
+        return c.Replace("|", "").Replace("^", "").Replace("~", "").Replace("\\", "").Replace("&", "");
+    }
+}
+
 public static class OrmUretici
 {
     private const string SegmentSonu = "\r";
@@ -225,7 +256,7 @@ public static class OrmUretici
               : $"{K(v.BasvuruReferansi)}^^^^^^^^{K(v.BirimId)}&{K(v.BirimAdi)}&HBYS";
         a[20] = v.Sgk ? "SGK" : "OTHER";
         a[44] = v.KabulZamani is { } k ? Z(k) : "";
-        a[50] = v.Sgk ? K(v.MedulaTakipNo) : "";
+        a[50] = Hl7Sabit.TakipNo(v.MedulaTakipNo);
         a[51] = "V";
         return a;
     }
@@ -243,6 +274,7 @@ public static class OrmUretici
         a[12] = Kisi(v.IsteyenHekim);
         a[17] = v.BirimId.Length == 0 && v.BirimAdi.Length == 0 ? ""
               : $"{K(v.BirimId)}^{K(v.BirimAdi)}^{K(v.KurumKisaAdi)}".TrimEnd('^');
+        a[18] = Hl7Sabit.CihazGirisi(v.CihazGirisi, v.Modalite);
         a[21] = Orc21(v);
         return a;
     }

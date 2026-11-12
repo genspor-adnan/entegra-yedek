@@ -141,11 +141,12 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
             Profil = bakanlikMi ? Hl7Profili.Bakanlik : Hl7Profili.Kurum,
             GonderenUygulama = M("mshUygulama").Length > 0 ? M("mshUygulama") : "GENTEGRE",
             GonderenTesis = M("mshTesis").Length > 0 ? M("mshTesis") : M("subeAdi"),
-            // Kılavuz 3.43 Tablo 8: MSH-5 / MSH-6 = TELERADYOLOJI (örnek mesajlardaki "TELETIP" eski).
+            // MSH-5 / MSH-6 (1330): Bakanlık HL7 doğrulayıcısı "TELETIP" ister (kılavuz tablosu "TELERADYOLOJI" der) -
+            //   kullanıcı kararı "doğrulayıcıya uyalım".
             AliciUygulama = M("aliciUygulama").Length > 0 ? M("aliciUygulama")
-                          : bakanlikMi ? "TELERADYOLOJI" : "HBYS",
+                          : bakanlikMi ? Hl7Sabit.Alici : "HBYS",
             AliciTesis = M("aliciTesis").Length > 0 ? M("aliciTesis")
-                       : bakanlikMi ? "TELERADYOLOJI" : M("kurumAdi"),
+                       : bakanlikMi ? Hl7Sabit.Alici : M("kurumAdi"),
             Zaman = Saat.Simdi,
             KontrolNo = kontrolNo,
             Encoding = S("mshEncoding") == 2 ? "Windows1254" : "UTF8",

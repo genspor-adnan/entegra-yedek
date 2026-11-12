@@ -92,6 +92,8 @@ public sealed record OruVerisi
     /// <summary>PV1-20 SGK / OTHER; SGK ise PV1-50 Medula takip.</summary>
     public bool Sgk { get; init; }
     public string MedulaTakipNo { get; init; } = "";
+    /// <summary>ORC-18 (1330, Bakanlık profili): cihaz girişi - <see cref="Hl7Sabit.CihazGirisi"/>.</summary>
+    public string CihazGirisi { get; init; } = "";
     /// <summary>ORC-7 / OBR-27 / OBR-36: randevu ya da çekim kabul zamanı (yoksa çekim zamanı).</summary>
     public DateTime? PlanlananZaman { get; init; }
     /// <summary>Ek rapor (addendum) ise durum C (correction), değilse F.</summary>
@@ -196,7 +198,7 @@ public static class OruUretici
             pv1[8] = Kisi(v.YonlendirenHekim);
             pv1[20] = v.Sgk ? "SGK" : "OTHER";
             pv1[44] = v.KabulZamani is { } kz ? Z(kz) : "";
-            pv1[50] = v.Sgk ? K(v.MedulaTakipNo) : "";
+            pv1[50] = Hl7Sabit.TakipNo(v.MedulaTakipNo);     // 1330: doğrulayıcı her mesajda dolu ister
             pv1[51] = "V";
         }
         else pv1[19] = K(ziyaretNo);
@@ -216,6 +218,7 @@ public static class OruUretici
             orc[12] = Kisi(v.IsteyenHekimTckn, v.IsteyenHekimSoyad, v.IsteyenHekimAd);
             orc[17] = v.BirimId.Length == 0 && v.Bolum.Length == 0 ? ""
                     : $"{K(v.BirimId)}^{K(v.Bolum)}^{K(v.KurumKisaAdi)}".TrimEnd('^');
+            orc[18] = Hl7Sabit.CihazGirisi(v.CihazGirisi, v.ModaliteKodu);   // 1330
             orc[21] = $@"{K(v.KurumAdi)}^^{K(v.KurumSkrs)}\S\{K(v.SubeNo)}\S\{K(v.MedulaTesisKodu)}";
         }
         else

@@ -426,7 +426,7 @@ public static class TeletipOruKurucu
         IstemZamani = v.IstemZamani, OnayZamani = r.OnayZamani, CekimZamani = r.CekimZamani,
         PlanlananZaman = v.PlanlananZaman,
         KlinikBilgi = v.KlinikBilgi, HizmetVerenSkrs = v.GonderilenSkrs,
-        SysTakipNo = v.SysTakipNo, ModaliteKodu = v.Modalite,
+        SysTakipNo = v.SysTakipNo, ModaliteKodu = v.Modalite, CihazGirisi = v.CihazGirisi,
         TeknisyenId = v.Teknisyen.Kimlik, TeknisyenSoyad = v.Teknisyen.Soyad, TeknisyenAd = v.Teknisyen.Ad,
         RaporTeknik = r.Teknik, RaporKarsilastirma = r.Karsilastirma, RaporBulgular = r.Bulgular, RaporSonuc = r.Sonuc,
         IstemNedeniPuan = r.IstemNedeniPuan, CekimKalitePuan = r.CekimKalitePuan,
