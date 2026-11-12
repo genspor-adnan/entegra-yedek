@@ -223,7 +223,8 @@ export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
   //   kartın kendisinde yazılı - kullanıcı belgeye çıkmadan görsün.
   'entegrasyon-hesap': {
     // PACS (1316, mockup entegrasyon_pacs.html): yalnız kod = PACS satırında; yeni kayıtta da (önce doldur, sonra kaydet).
-    ekSekmeler: b => [
+    //   Kart yokken (null) sekme yok - öteki eklentilerle aynı sözleşme.
+    ekSekmeler: b => b.kartId === null ? undefined : [
       { anahtar: 'ozel:pacs', baslik: 'PACS Bağlantısı', yenideDe: true, kosulAlani: 'kod=PACS',
         ciz: e => <PacsBaglantiSekmesi e={e} kartId={kayitli(b.kartId) ? b.kartId : null} /> },
       // TELERADYOLOJI (1317, mockup entegrasyon_teletip.html): şube başına Bakanlık gönderim hesabı.
