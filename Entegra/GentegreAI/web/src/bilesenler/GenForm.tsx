@@ -149,6 +149,8 @@ interface Props {
    */
   detayGrupta?: Record<string, { grup: string | readonly string[]; gizli?: string[]; etiket?: string[];
                                  sinif?: string; ustte?: boolean; sade?: boolean;
+                                 /** 1:1 detay (tekSatir) grid değil TEK KAYIT formu olarak gömülür. */
+                                 form?: boolean;
                                  /** GenGrid gorunumu: satir ici kutu yok,
                                      hucreler duz metin (liste gridi gibi). */
                                  gridKipi?: boolean;

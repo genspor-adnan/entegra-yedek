@@ -40,7 +40,7 @@ export interface KartGrupSarmalayiciOzellikleri {
   /** Gruba GOMULU detaylar (mockup "Fizik Muayene"): ayri sekme degil. */
   detayGrupta?: Record<string, { grup: string | readonly string[]; salt?: boolean; gridKipi?: boolean;
                                  sinif?: string; sade?: boolean; ekleGizli?: boolean;
-                                 gizli?: string[]; etiket?: string[]; ustte?: boolean;
+                                 gizli?: string[]; etiket?: string[]; ustte?: boolean; form?: boolean;
                                  yeni?: () => void; kolonBaslikEk?: Record<string, ReactNode>;
                                  baslikEk?(satirlar: Record<string, unknown>[]): ReactNode;
                                  ekKolon?: { baslik: string; genislik?: number; ciz(satir: Record<string, unknown>): ReactNode };
@@ -138,7 +138,23 @@ export function KartGrupSarmalayici({
           // Grup birden çok ad alabilir (sekme yeniden adlandırılınca eski ad
           //   da tanınsın - eski API ile çalışan ekran detayı kaybetmesin).
           .filter(d => ([] as string[]).concat(detayGrupta?.[d.ad]?.grup ?? []).includes(aktif.baslik));
-        const tablolar = gomulu.map(d => (
+        const tablolar = gomulu.map(d => detayGrupta?.[d.ad]?.form ? (
+              // 1:1 DETAY FORMU (hizmet › Radyoloji Protokolü; kullanıcı "1 tetkik için birden fazla satır olabilir mi"
+              //   - olamaz, DB tekil): "+ Satır"lı grid yanlış vaat - etiket + kutu formu, boşsa kaydedilmez.
+              <TekKayit
+                key={d.ad}
+                meta={d}
+                durum={detaylar[d.ad] ?? bosDetay()}
+                saltOkunur={salt || d.saltOkunur || !!detayGrupta?.[d.ad]?.salt}
+                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
+                baslik={d.baslik}
+                alanSirasi={d.alanlar.map(a => a.ad).filter(a => a !== 'id' && !(detayGrupta?.[d.ad]?.gizli ?? []).includes(a))}
+                // Grubun KENDİ alanları (hizmet modalitesi) çerçevenin içinde EN ÜSTTE (kullanıcı "modaliteyi de protokol
+                //   çerçeve içinde en üste al") - ayrıca çerçeve dışında çizilmez (aşağıda `formluGrup`).
+                ekAlanlar={renderAlanListesi(aktif.alanlar)}
+                ekAlanlarSira={0}
+              />
+        ) : (
               <GenDetayTablo
                 key={d.ad}
                 meta={d}
@@ -165,7 +181,10 @@ export function KartGrupSarmalayici({
         // USTTE: tanida tablo ONCE gelir (mockup) - hekim once ICD girer,
         //   sevk/takip alanlari karari yazarken doldurulur.
         const ustte = gomulu.some(d => detayGrupta?.[d.ad]?.ustte);
+        // FORM KİPİ: grubun alanları formun içinde çizildi - dışarıda ikinci kez çizilmez.
+        const formluGrup = gomulu.some(d => detayGrupta?.[d.ad]?.form);
         const tumu = gomulu.length === 0 ? tam
+          : formluGrup ? <>{tablolar}</>
           : ustte ? <>{tablolar}{tam}</> : <>{tam}{tablolar}</>;
         // IZGARA CIZICI: ekran bir DETAYI (or. vitaller) istedigi yere
         //   etiket+kutu izgarasi olarak koyabilsin - anamnez sekmesinin sag

@@ -868,6 +868,10 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   protokolün kendi modalitesi gizli. Gömülü koşullu detayın grup sekmesi de koşula uyar (kartSekmeleri - "Radyoloji
   Tetkiki" işaretsizken sekme yok). 1331: protokol modalitesi hizmetinkiyle eşit (tetikler; toplu protokol satırı
   açılmaz - varsayılan süre / kontrast yazılırdı). Tarayıcıda (5173, hizmet #413) sekmede Modalite = Röntgen görüldü.
+  Üçüncü adım (kullanıcı "radyoloji protokolü için neden grid var?", "1 tetkik için birden fazla satır olabilir mi" -
+  olamaz, ux_radyoloji_protokol_hizmet; "modaliteyi de protokol çerçeve içinde en üste al"): detayGrupta `form: true` -
+  gömülü 1:1 detay "+ Satır"lı grid değil TekKayit formu; grubun kendi alanları (modalite) formun içinde en üstte
+  (ekAlanlar), dışarıda ikinci kez çizilmez. Tarayıcıda doğrulandı.
 
 ### 10.11.2026
 

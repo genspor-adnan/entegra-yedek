@@ -74,7 +74,8 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   //   bundan) "Radyoloji Protokolü" grubunda; protokol satırı aynı sekmeye gömülür, protokolün modalite alanı gizli
   //   (DB'de hizmetinkinden eşitlenir - 1331). Sekme yine "Radyoloji Tetkiki" kutusuna bağlı (gömülü detayın koşulu).
   'hizmet': {
-    detayGrupta: { radyolojiProtokol: { grup: 'Radyoloji Protokolü', gizli: ['modalite'] } },
+    // 1:1 (bir tetkikin tek protokolü, DB tekil) - grid değil form.
+    detayGrupta: { radyolojiProtokol: { grup: 'Radyoloji Protokolü', gizli: ['modalite'], form: true } },
   },
   // ------------------------------------------- radyoloji tanımları (965) ----
   // Mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html · radyoloji_protokol_karti.html:
