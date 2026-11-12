@@ -341,7 +341,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_entegrasyon_durumu` | `491_kurum_entegrasyon_durumu.sql` | — |
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_kategori_uygula` | `527_profil_kategori.sql` | — |
-| `fn_kurum_kimlik` | `1321_kurum_kimligi_enabiz_ana.sql` | 1317_teleradyoloji_sube_hesabi.sql |
+| `fn_kurum_kimlik` | `1323_kimlik_sube_onceligi_doz_ilerleme.sql` | 1317_teleradyoloji_sube_hesabi.sql, 1321_kurum_kimligi_enabiz_ana.sql |
 | `fn_kurum_kurulum_adimlari` | `1140_entegrasyon_hesap_liste_kart.sql` | 490_kurum_kurulum_adimlari.sql |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |

@@ -509,6 +509,8 @@ uygulama.TeknikServisUclariniEkle();
 // DIS DOKTOR SAHA (1289): talep kapat / goreve cevir, ziyaret gordum.
 uygulama.DisHekimUclariniEkle();
 uygulama.SahaPerformansUclariniEkle();
+// PACS ayarını başlangıçta ısıt (1323) - ilk DICOM isteği DB yüklemesini beklemesin.
+_ = uygulama.Services.GetRequiredService<Gentegre.Api.Servisler.DicomAyarDeposu>().YenileAsync();
 uygulama.TeleradyolojiSubeUclariniEkle(); // TeleRadyoloji şube özeti / çakışma / kart bağlamı (1317)
 uygulama.TeletipUclariniEkle();          // Teletıp ORM izi / yeniden gönder / önizleme (1302)
 uygulama.DicomUclariniEkle();            // DICOM / OHIF (11.11.2026): ClearCanvas manifesti + WADO vekili   // Saha Performansı (1292): temsilci / doktor / şube / talep

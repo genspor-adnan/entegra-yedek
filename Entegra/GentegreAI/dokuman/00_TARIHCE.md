@@ -654,6 +654,24 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
     yoksa profil yedeği); tam paket 1068 geçti (düşen tek test saha planı gün-sınırı). Dev'de API ile ENABIZ kurum kodu yazılabiliyor;
     e-Nabız Kurum Kimliği sekmesi + özet ekran görüntüsüyle kontrol edildi; KOSUYOLU'da NW yeniden gönderildi (AA; e-Nabız hesabı
     olmadığı için kimlik kurum profilinden).
+- **Kod incelemesi düzeltmeleri (db/1323; kullanıcı: "kod review yap" → "düzelt"; kapsam 2b01a00..HEAD):** 10 bulgudan 9'u
+  geçerliydi, 1'i yanlış alarm (WADO HTTPS açılmaz denmişti - test sertifikasıyla 35004'te HTTPS çalıştığı denenmişti).
+  * Kimlikte şube önceliği (1323): `fn_kurum_kimlik` alan alan şube e-Nabız → ŞUBE PROFİLİ → kurum geneli e-Nabız → kurum geneli
+    profil → eski yer (kurum geneli e-Nabız şubenin kendi kodunu eziyordu). `sube_enabiz_id` sütunu.
+  * Kimlik çakışması yalnız şubenin KENDİ e-Nabız satırına (şube 0 → kurum geneli satır), yoksa şubenin kurum profiline yazar -
+    kurum geneli satıra yazıp bütün şubeleri değiştirmiyor.
+  * Doz: `teletip_gonderim.ilerleme` (1323) kabul edilen RDSR SOP'larını tutar; yeniden denemede tekrar gönderilmez (mükerrer doz
+    kaydı). KOSUYOLU: aynı çalışmaya ikinci RDSR → 1. tur 2 gönderildi, 2. tur ikisi "daha önce kabul edildi".
+  * KOS PID-7: doğum tarihi yoksa boş (eskiden "000000").
+  * MIRTH sınaması SINANAN hesabın kendi ayarıyla (`MirthIzleme.DeneAsync`, tek seferlik istemci) - etkin hesabı deneyip sonucu
+    başka satıra yazmıyor. Dev'de geçici hesapla: doğru parola ✓ 6 kanal, yanlış parola 401 (yerel Mirth; hesap silindi).
+  * Mirth panosu: ayar değişince eski HttpClient kapatılmıyor (eşzamanlı çağrıda ObjectDisposedException).
+  * Kurum profili: devralınan SKRS / Bakanlık adının ekrandan dönen yankısı şubeye yazılmıyor.
+  * Dışa açık WADO sayacı: izinsiz / geçersiz UID'ler tek "-" satırında; sayaçlar bellekte birikip 10 sn'de bir tek işlemde
+    yazılıyor (her görüntü isteği ayrı DB yazması yapıyordu).
+  * PACS ayar deposu: ilk yükleme tek görev (eşzamanlı ilk çağrılar ayrı yüklemiyor), başlangıçta ısıtılır; sınama sonrası
+    `YenileAsync` (okuyanlar eski anlık görüntüyle devam eder).
+  * Testler güncellendi (kimlik önceliği, PID-7 boş, WADO sayacı toplu); tam paket 1068 geçti (düşen tek test saha planı gün-sınırı).
 
 ### 10.11.2026
 

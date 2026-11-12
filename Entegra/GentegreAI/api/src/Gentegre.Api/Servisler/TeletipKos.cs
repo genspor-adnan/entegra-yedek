@@ -459,7 +459,7 @@ public static class XdsZarfi
             Slot("serviceStartTime", (v.PlanlananZaman ?? simdiUtc).ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)),
             Slot("creationTime", zaman), Slot("sourcePatientId", hasta),
             Slot("sourcePatientInfo", $"PID-3|{hasta}", $"PID-5|{v.HastaSoyad}^{v.HastaAd}",
-                 $"PID-7|{v.DogumTarihi?.ToString("yyyyMMdd", CultureInfo.InvariantCulture) ?? ""}000000", $"PID-8|{v.Cinsiyet}"),
+                 $"PID-7|{(v.DogumTarihi is DateTime dt ? dt.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + "000000" : "")}", $"PID-8|{v.Cinsiyet}"),
             Ad("Manifest"),
             Yazar("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d", belgeId),
             Sinif("urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", belgeId, "DEMO-Eval", "1.3.6.1.4.1.21367.100.1", "Evaluation"),

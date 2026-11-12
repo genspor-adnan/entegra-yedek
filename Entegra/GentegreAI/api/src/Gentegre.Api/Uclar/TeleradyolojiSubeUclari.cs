@@ -110,7 +110,10 @@ public static class TeleradyolojiSubeUclari
                 islem, [id], o => new CakismaSatiri(o.GetInt32(0), o.GetString(1), o.GetString(2), o.GetString(3)), iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Çakışma bulunamadı ya da çözülmüş.");
             var deger = istek.Secim == "eski" ? c.Eski : c.Profil;
-            var enabizId = await b.TekDegerAsync<int?>("select enabiz_hesap_id from public.fn_kurum_kimlik(@p0)", islem, [c.Sube], iptal);
+            // 1323: yalnız şubenin KENDİ e-Nabız satırına yazılır (şube 0 → kurum geneli satır). Şubenin satırı yoksa şubenin
+            //   kurum profili - kurum geneli satıra yazmak bütün şubelerin kodunu değiştirirdi.
+            var enabizId = await b.TekDegerAsync<int?>(
+                "select case when @p0 = 0 then enabiz_hesap_id else sube_enabiz_id end from public.fn_kurum_kimlik(@p0)", islem, [c.Sube], iptal);
             int n;
             if (enabizId is int eid)
                 n = c.Alan == "skrs"
@@ -121,7 +124,7 @@ public static class TeleradyolojiSubeUclari
             else
                 n = await b.CalistirAsync($"update public.kurum_profil set {(c.Alan == "skrs" ? "skrs_kodu" : "tesis_kodu")} = @p1, degistiren = @p2, degistirme_tarihi = now()::timestamp where sube_id = @p0",
                     islem, [c.Sube, deger, baglam.KullaniciId], iptal);
-            if (n == 0) throw GentegreHatasi.IsKurali("Yazılacak yer yok - şubeye e-Nabız hesabı açın (Ayarlar › Entegrasyon › e-Nabız).");
+            if (n == 0) throw GentegreHatasi.IsKurali("Yazılacak yer yok - bu şubeye e-Nabız satırı açın (Ayarlar › Entegrasyon › e-Nabız, şube seçili).");
             await b.CalistirAsync("update public.kurum_kimlik_cakisma set cozuldu = 1 where id = @p0", islem, [id], iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { mesaj = $"{deger} {(enabizId is null ? "kurum profiline" : "e-Nabız hesabına")} yazıldı.", izlemeNo = baglam.IzlemeNo });

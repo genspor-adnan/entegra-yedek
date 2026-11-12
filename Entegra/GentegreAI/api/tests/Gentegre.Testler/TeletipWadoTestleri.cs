@@ -209,6 +209,7 @@ public sealed class TeletipWadoTestleri(VeritabaniOlgusu olgu) : IClassFixture<V
             Assert.Equal((32, 24), SofBoyut(jpg.Govde));
             Assert.Equal(404, (await s.IsleAsync(new Dictionary<string, string>(Q(st, se, ob, "image/jpeg")) { ["frameNumber"] = "2" }, ip, default)).Kod);
 
+            await s.SayacBosaltAsync();                          // 1323: sayaç bellekte birikir, toplu yazılır
             var sayac = await veri.TekAsync(
                 "select istek_sayisi, hata_sayisi, son_hata from public.teletip_wado_erisim where ip = @p0 and study_uid = @p1", [ip, st],
                 o => Tuple.Create(o.GetInt32(0), o.GetInt32(1), o.GetString(2)));

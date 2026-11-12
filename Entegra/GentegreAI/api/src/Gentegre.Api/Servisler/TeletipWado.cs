@@ -238,7 +238,10 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
         string Q(string ad) => q.TryGetValue(ad, out var v) ? (v ?? "").Trim() : "";
         var st = Q("studyUID");
         var y = await HesaplaAsync(Q, st, Q("seriesUID"), Q("objectUID"), iptal);
-        await SayacAsync(ip, st.Length is > 0 and <= 64 && UidDeseni.IsMatch(st) ? st : "-", y, iptal);
+        // 1323: yalnız İZİNLİ çalışma (KOS'u gitmiş) kendi satırında sayılır; geçersiz / izinsiz UID'ler "-" satırında
+        //   toplanır - rastgele UID denemeleri her biri ayrı satır açıp tabloyu şişirmesin.
+        var izinli = st.Length is > 0 and <= 64 && UidDeseni.IsMatch(st) && await CalismaSubesiAsync(st, iptal) is not null;
+        Say(ip, izinli ? st : "-", y);
         return y;
     }
 
@@ -323,20 +326,44 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
         return liste;
     }
 
-    private async Task SayacAsync(string ip, string st, WadoYaniti y, CancellationToken iptal)
+    // ---------------------------------------------------------------- erişim sayacı (1323: bellekte biriktir, toplu yaz)
+    private sealed class Sayac { public int Istek, Hata; public long Bayt; public string SonHata = ""; }
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<(string Ip, string St), Sayac> _sayaclar = new();
+
+    private void Say(string ip, string st, WadoYaniti y)
     {
+        var s = _sayaclar.GetOrAdd((ip.Length > 45 ? ip[..45] : ip, st), _ => new Sayac());
+        lock (s)
+        {
+            s.Istek++; s.Bayt += y.Govde.Length;
+            if (y.Kod != 200) { s.Hata++; var m = $"{y.Kod} {y.Hata}"; s.SonHata = m.Length > 300 ? m[..300] : m; }
+        }
+    }
+
+    /// <summary>Biriken sayaçları tek işlemde yazar (sunucu 10 sn'de bir ve kapanırken çağırır; testler doğrudan).</summary>
+    public async Task SayacBosaltAsync(CancellationToken iptal = default)
+    {
+        var anahtarlar = _sayaclar.Keys.ToList();
+        if (anahtarlar.Count == 0) return;
         try
         {
-            var hata = y.Kod == 200 ? 0 : 1;
-            var metin = $"{y.Kod} {y.Hata}";
-            await veri.CalistirAsync("""
-                insert into public.teletip_wado_erisim as t (gun, ip, study_uid, istek_sayisi, hata_sayisi, bayt, son_hata)
-                values ((now() at time zone 'Europe/Istanbul')::date, @p0, @p1, 1, @p2, @p3, @p4)
-                on conflict (gun, ip, study_uid) do update
-                   set istek_sayisi = t.istek_sayisi + 1, hata_sayisi = t.hata_sayisi + excluded.hata_sayisi,
-                       bayt = t.bayt + excluded.bayt, son_erisim = now(),
-                       son_hata = case when excluded.hata_sayisi > 0 then excluded.son_hata else t.son_hata end
-                """, [ip.Length > 45 ? ip[..45] : ip, st, hata, (long)y.Govde.Length, hata == 1 ? (metin.Length > 300 ? metin[..300] : metin) : ""], iptal);
+            await using var b = await veri.AcAsync(iptal);
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            foreach (var k in anahtarlar)
+            {
+                if (!_sayaclar.TryRemove(k, out var s)) continue;
+                int istek, hata; long bayt; string son;
+                lock (s) { istek = s.Istek; hata = s.Hata; bayt = s.Bayt; son = s.SonHata; }
+                await b.CalistirAsync("""
+                    insert into public.teletip_wado_erisim as t (gun, ip, study_uid, istek_sayisi, hata_sayisi, bayt, son_hata)
+                    values ((now() at time zone 'Europe/Istanbul')::date, @p0, @p1, @p2, @p3, @p4, @p5)
+                    on conflict (gun, ip, study_uid) do update
+                       set istek_sayisi = t.istek_sayisi + excluded.istek_sayisi, hata_sayisi = t.hata_sayisi + excluded.hata_sayisi,
+                           bayt = t.bayt + excluded.bayt, son_erisim = now(),
+                           son_hata = case when excluded.hata_sayisi > 0 then excluded.son_hata else t.son_hata end
+                    """, islem, [k.Ip, k.St, istek, hata, bayt, son], iptal);
+            }
+            await islem.CommitAsync(iptal);
         }
         catch (Exception h) when (h is not OperationCanceledException) { gunluk.LogWarning(h, "Teletıp WADO erişim sayacı yazılamadı."); }
     }
@@ -411,8 +438,10 @@ public sealed class TeletipWadoSunucusu(TeletipWadoServisi servis, ILogger<Telet
             return;
         }
         gunluk.LogInformation("Teletıp WADO {Port} portunda ({Tls}) - {Yol}.", a.Port, a.SertifikaYolu.Length > 0 ? "HTTPS" : "HTTP", a.Yol);
-        try { await Task.Delay(Timeout.Infinite, dur); }
+        // Erişim sayacı 10 sn'de bir toplu yazılır (1323) - her görüntü isteği ayrı DB yazması yapmasın.
+        try { while (!dur.IsCancellationRequested) { await Task.Delay(TimeSpan.FromSeconds(10), dur); await servis.SayacBosaltAsync(dur); } }
         catch (OperationCanceledException) { }
+        await servis.SayacBosaltAsync(CancellationToken.None);
         await uygulama.StopAsync(CancellationToken.None);
         await uygulama.DisposeAsync();
     }

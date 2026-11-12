@@ -147,6 +147,10 @@ public sealed class TeletipKosTestleri
         Assert.Contains("mimeType=\"application/dicom\"", z.SoapXml);
         Assert.Contains("href=\"cid:kos@gentegre\"", z.SoapXml);
         Assert.Contains("78221082662^^^&amp;2.16.792.1&amp;ISO", z.SoapXml);
+        Assert.Contains("PID-7|19800501000000", z.SoapXml);
+        // 1323: doğum tarihi yoksa PID-7 boş (eskiden "000000" - geçersiz HL7 tarihi).
+        var zb = XdsZarfi.Kur(kos, "1.2.3.9", "1.2.3.4", Orm() with { DogumTarihi = null }, Kurum(), "http://xds/repo", new DateTime(2026, 11, 11, 7, 0, 0), "2.16.792.1", "CT");
+        Assert.Contains("<rim:Value>PID-7|</rim:Value>", zb.SoapXml);
         // Bakanlık SendKOS v15 şablonu (submit_image_document.xml) birebir.
         Assert.Contains($"value=\"{XdsZarfi.KaynakKimligi}\"", z.SoapXml);         // sourceId sabit
         Assert.Contains("nodeRepresentation=\"DEMO-Eval\"", z.SoapXml);              // classCode

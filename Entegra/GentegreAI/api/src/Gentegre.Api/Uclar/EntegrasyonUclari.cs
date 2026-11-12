@@ -257,7 +257,8 @@ public static class EntegrasyonUclari
 
         grup.MapPost("/{id:int}/sina", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
-            KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, MirthIzleme mirth, HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, DicomKaynagi dicom, DicomAyarDeposu dicomDepo, Microsoft.Extensions.Options.IOptions<MirthAyarlari> mirthDosya,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // YAZMA YETKİSİ (K16): sınama `son_kullanim / son_sonuc` YAZAR - Gör yetkisi
@@ -285,7 +286,7 @@ public static class EntegrasyonUclari
                 var ilkHata = adimlar.FirstOrDefault(x => !x.Tamam);
                 var pacsMesaj = ilkHata is null ? ozet : $"{ozet} - {Kisa(ilkHata.Ad)}: {ilkHata.Ayrinti}";
                 await SonucYazAsync(baglanti, id, pacsMesaj, iptal);
-                dicomDepo.Gecersiz();
+                await dicomDepo.YenileAsync(iptal);
                 return Results.Ok(new { basarili = tamam, mesaj = pacsMesaj, adimlar });
             }
 
@@ -324,10 +325,22 @@ public static class EntegrasyonUclari
                 return Results.Ok(new { basarili = tamamTr, mesaj = ozetTr, adimlar });
             }
 
-            // MIRTH (1317): REST girişi + kanal durumları (etkin Mirth hesabıyla - kurum geneli aktif hesap).
+            // MIRTH (1317 / 1323): SINANAN hesabın kendi ayarıyla (etkin hesap değil) giriş + kanal durumları.
             if (string.Equals(hesap.Kod, "MIRTH", StringComparison.OrdinalIgnoreCase))
             {
-                var d = await mirth.DurumAsync(iptal);
+                var mr = await baglanti.TekAsync(
+                    "select coalesce(url, ''), coalesce(kullanici_adi, ''), coalesce(sifre, ''), coalesce(ayarlar ->> 'sertifikaDogrula', ''), coalesce(ayarlar ->> 'zamanAsimiSn', '') from public.entegrasyon_hesap where id = @p0",
+                    null, [id], o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.GetString(4) }, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Hesap bulunamadı.");
+                var dosyaMirth = mirthDosya.Value;
+                var parola = Gentegre.Veri.GizliMetin.Coz(mr[2]);
+                var d = await MirthIzleme.DeneAsync(new MirthAyarlari
+                {
+                    Url = mr[0].Trim(), Kullanici = mr[1].Length > 0 ? mr[1] : dosyaMirth.Kullanici,
+                    Parola = parola.Length > 0 ? parola : dosyaMirth.Parola,
+                    SertifikaDogrula = mr[3] is "true" or "1",
+                    ZamanAsimiSn = int.TryParse(mr[4], out var zs) && zs > 0 ? zs : dosyaMirth.ZamanAsimiSn,
+                }, iptal);
                 var mm = d.Erisilebilir ? $"Mirth {d.Surum} · {d.Kanallar.Count} kanal" : (d.Hata.Length > 0 ? d.Hata : "Mirth'e ulaşılamadı.");
                 await SonucYazAsync(baglanti, id, mm, iptal);
                 return Results.Ok(new { basarili = d.Erisilebilir, mesaj = mm });

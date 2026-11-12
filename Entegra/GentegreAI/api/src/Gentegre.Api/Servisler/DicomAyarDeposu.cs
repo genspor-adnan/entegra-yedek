@@ -28,6 +28,8 @@ public sealed class DicomAyarDeposu(IOptions<DicomAyarlari> dosya, VeriKaynagi v
     private static readonly TimeSpan Tazelik = TimeSpan.FromSeconds(5);
     private volatile Anlik? _anlik;
     private int _tazeleniyor;
+    private readonly object _ilkKilit = new();
+    private Task<Anlik>? _ilkYukleme;
 
     /// <summary>Etkin şube kapsamı (null = kurum geneli).</summary>
     public static int? Kapsam => KapsamDegeri.Value;
@@ -62,17 +64,21 @@ public sealed class DicomAyarDeposu(IOptions<DicomAyarlari> dosya, VeriKaynagi v
         return (s is int sube && a.Subeler.ContainsKey(sube)) || a.Genel is not null;
     }
 
-    /// <summary>Bir sonraki okuma ayarı hemen (eşzamanlı) yeniden yükler - sınama sonrası.</summary>
-    public void Gecersiz() => _anlik = null;
+    /// <summary>Ayarı şimdi yeniden yükler (sınama sonrası) - okuyanlar yükleme bitene kadar eski anlık görüntüyle devam eder.</summary>
+    public async Task YenileAsync(CancellationToken iptal = default) => _anlik = await YukleAsync(iptal);
 
     private Anlik AnlikAl()
     {
         var a = _anlik;
         if (a is null)
         {
-            a = YukleAsync(CancellationToken.None).GetAwaiter().GetResult();
-            _anlik = a;
-            return a;
+            // İLK YÜKLEME TEK SEFER (1323): eşzamanlı ilk çağrılar aynı görevi bekler (her biri ayrı DB yüklemesi yapıyordu);
+            //   başlangıçta Program ısıtır, burada beklemek yalnız ısınmadan önceki ilk istekte olur.
+            Task<Anlik> gorev;
+            lock (_ilkKilit) gorev = _ilkYukleme ??= YukleAsync(CancellationToken.None);
+            a = gorev.GetAwaiter().GetResult();
+            _anlik ??= a;
+            return _anlik;
         }
         if (DateTime.UtcNow - a.Zaman > Tazelik && Interlocked.Exchange(ref _tazeleniyor, 1) == 0)
         {

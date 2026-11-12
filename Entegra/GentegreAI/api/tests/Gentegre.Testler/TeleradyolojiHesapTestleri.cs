@@ -62,24 +62,28 @@ public sealed class TeleradyolojiHesapTestleri(VeritabaniOlgusu olgu) : IClassFi
         Assert.Equal(new[] { "Kurum Geneli Ad", "147", "34100001" }, k0);
         Assert.Equal("148", await b.TekDegerAsync<string>("select public.fn_kurum_skrs(@p0)", t, [s1], Iptal));
         Assert.Equal("34123456", await b.TekDegerAsync<string>("select public.fn_kurum_tesis(@p0)", t, [s1], Iptal));
-        Assert.Equal("kurum profili / eski ayar", await b.TekDegerAsync<string>("select kaynak from public.fn_kurum_kimlik(@p0)", t, [s1], Iptal));
+        Assert.Equal("kurum profili (şube)", await b.TekDegerAsync<string>("select kaynak from public.fn_kurum_kimlik(@p0)", t, [s1], Iptal));
 
         // e-Nabız hesabı (kurum geneli) ANA kaynak: profili ezer; şubenin kendi e-Nabız satırı kurum genelini ezer.
         await b.CalistirAsync("""
             insert into public.entegrasyon_hesap (kod, ad, sube_id, test_mi, aktif, kurum_kodu, ayarlar)
             values ('ENABIZ', 'TT ENABIZ', null, 0, 1, '500154', '{"medulaTesisKodu":"11068891","bakanlikAd":"Enabiz Ad"}'::jsonb)
             """, t, [], Iptal);
-        var ke = await b.TekAsync("select ad, skrs, tesis, kaynak from public.fn_kurum_kimlik(@p0)", t, [s1],
+        // 1323: şubenin KENDİ profili kurum geneli e-Nabız'ı ezer (sıra: şube e-Nabız → şube profili → kurum geneli e-Nabız).
+        var ke = await b.TekAsync("select ad, skrs, tesis, kaynak, sube_enabiz_id from public.fn_kurum_kimlik(@p0)", t, [s1],
+            o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3), o.IsDBNull(4) ? "" : o.GetInt32(4).ToString() }, Iptal);
+        Assert.Equal(new[] { "Şube Ad", "148", "34123456", "kurum profili (şube)", "" }, ke);
+        // Kurum geneli (şube 0) e-Nabız'dan.
+        var k0e = await b.TekAsync("select ad, skrs, tesis, kaynak from public.fn_kurum_kimlik(0)", t, [],
             o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetString(3) }, Iptal);
-        Assert.Equal(new[] { "Enabiz Ad", "500154", "11068891", "e-Nabız (kurum geneli)" }, ke);
-        Assert.Equal("11068891", await b.TekDegerAsync<string>("select public.fn_kurum_tesis(@p0)", t, [s1], Iptal));
+        Assert.Equal(new[] { "Enabiz Ad", "500154", "11068891", "e-Nabız (kurum geneli)" }, k0e);
         await b.CalistirAsync("""
             insert into public.entegrasyon_hesap (kod, ad, sube_id, test_mi, aktif, kurum_kodu, ayarlar)
             values ('ENABIZ', 'TT ENABIZ şube', @p0, 0, 1, '500155', '{}'::jsonb)
             """, t, [s1], Iptal);
-        var ks = await b.TekAsync("select skrs, tesis, kaynak from public.fn_kurum_kimlik(@p0)", t, [s1],
-            o => new[] { o.GetString(0), o.GetString(1), o.GetString(2) }, Iptal);
-        Assert.Equal(new[] { "500155", "34123456", "e-Nabız (şube)" }, ks);      // tesis şube e-Nabız'da yok → profil yedeği
+        var ks = await b.TekAsync("select skrs, tesis, kaynak, sube_enabiz_id is not null from public.fn_kurum_kimlik(@p0)", t, [s1],
+            o => new[] { o.GetString(0), o.GetString(1), o.GetString(2), o.GetBoolean(3).ToString() }, Iptal);
+        Assert.Equal(new[] { "500155", "34123456", "e-Nabız (şube)", "True" }, ks);      // tesis şube e-Nabız'da yok → şube profili
 
         // --- hesap modeli yok: eski ayarlar (teletip.aktif) - geri uyum
         Assert.False(await b.TekDegerAsync<bool>("select public.fn_teletip_hesap_modeli()", t, [], Iptal));

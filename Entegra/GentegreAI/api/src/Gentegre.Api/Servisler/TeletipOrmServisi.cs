@@ -291,9 +291,16 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
             return await YazAsync(b, islem, id, 5, deneme, "", "TeleRadyoloji hesabında K3 doz adresi yok (Ayarlar › Entegrasyon › TeleRadyoloji).", "", "", iptal,
                                   sonraki: TimeSpan.FromMinutes(30));
 
-        var mesajlar = new List<string>(); var uyarilar = new List<string>(); var sonSop = "";
+        var mesajlar = new List<string>(); var uyarilar = new List<string>(); var sonSop = raporlar[^1].Sop;
+        // 1323: Bakanlık'ın KABUL ETTİĞİ RDSR'ler satırın ilerlemesinde - sonraki biri düşüp satır yeniden denenince
+        //   kabul edilmişler tekrar gönderilmez (mükerrer doz kaydı olmasın).
+        var gonderilen = (await b.TekDegerAsync<string>(
+                "select coalesce(ilerleme -> 'gonderilenSop', '[]'::jsonb)::text from public.teletip_gonderim where id = @p0", islem, [id], iptal) ?? "[]");
+        var gonderilenler = JsonSerializer.Deserialize<List<string>>(gonderilen) ?? [];
+        var onceden = gonderilenler.Count(g => raporlar.Any(r => r.Sop == g));
         foreach (var (seri, sop) in raporlar)
         {
+            if (gonderilenler.Contains(sop)) { mesajlar.Add($"{sop}: daha önce kabul edildi (tekrar gönderilmedi)."); continue; }
             FellowOakDicom.DicomDataset hazir;
             try
             {
@@ -342,9 +349,14 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
                                       govde.Length > 4000 ? govde[..4000] : govde, iptal, kontrolNo: sop, sonraki: Geri(deneme + 1));
             }
             if (sonuc.Ack != "0000" && sonuc.Aciklama.Length > 0) uyarilar.Add($"MGA uyarısı 0x{sonuc.Ack}: {sonuc.Aciklama}");
+            await b.CalistirAsync(
+                "update public.teletip_gonderim set ilerleme = jsonb_set(coalesce(ilerleme, '{}'::jsonb), '{gonderilenSop}', coalesce(ilerleme -> 'gonderilenSop', '[]'::jsonb) || to_jsonb(@p1::text)) where id = @p0",
+                islem, [id, sop], iptal);
+            gonderilenler.Add(sop);
         }
         return await YazAsync(b, islem, id, 1, deneme, "0000",
-                              (raporlar.Count > 1 ? $"{raporlar.Count} doz raporu gönderildi. " : "") + string.Join(" · ", uyarilar.Distinct()),
+                              (raporlar.Count > 1 ? $"{raporlar.Count - onceden} doz raporu gönderildi" + (onceden > 0 ? $", {onceden} önceden kabul edilmişti. " : ". ") : "")
+                              + string.Join(" · ", uyarilar.Distinct()),
                               string.Join("\n\n", mesajlar), "", iptal, kontrolNo: sonSop);
     }
 

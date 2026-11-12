@@ -76,11 +76,11 @@ public sealed class PacsAyarTestleri(VeritabaniOlgusu olgu) : IClassFixture<Veri
                 values ('PACS', 'TT PACS', @p0, 0, 1, 'GENTEGRE', @p1, 'http://x/wado', '{"sunucu":"10.9.9.9","port":104}'::jsonb) returning id
                 """, [s, ae]);
             eklenen.Add(await Ekle(null, "GENEL_PACS"));
-            depo.Gecersiz();
+            await depo.YenileAsync();
             Assert.Equal("GENEL_PACS", depo.Gecerli(sube).SunucuAe);                  // kurum geneli
             Assert.True(depo.EkrandanMi(sube));
             eklenen.Add(await Ekle(sube, "SUBE_PACS"));
-            depo.Gecersiz();
+            await depo.YenileAsync();
             Assert.Equal("SUBE_PACS", depo.Gecerli(sube).SunucuAe);                   // şube satırı ezer
             Assert.Equal("GENEL_PACS", depo.Gecerli(null).SunucuAe);
             using (DicomAyarDeposu.SubeIcin(sube)) Assert.Equal("SUBE_PACS", depo.Gecerli().SunucuAe);

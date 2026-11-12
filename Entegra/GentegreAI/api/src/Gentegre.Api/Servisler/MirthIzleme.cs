@@ -84,7 +84,9 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         if (anahtar != _anahtar)
         {
             await _kilit.WaitAsync(iptal);
-            try { _http?.Dispose(); _http = null; _cerez = new(); _oturumVar = false; _anahtar = anahtar; _etkin = a; }
+            // Eski istemci KAPATILMAZ (1323): başka bir çağrı onu hâlâ kullanıyor olabilir - ObjectDisposedException ve
+            //   yanlış "ulaşılamadı" doğuruyordu. Ayar değişimi seyrek; eski istemciyi GC toplar.
+            try { _http = null; _cerez = new(); _oturumVar = false; _anahtar = anahtar; _etkin = a; }
             finally { _kilit.Release(); }
         }
         _kaynak = kaynak;
@@ -169,6 +171,48 @@ public sealed class MirthIzleme(IOptions<MirthAyarlari> ayar, ILogger<MirthIzlem
         return new(d.Element("channelId")?.Value ?? "", d.Element("name")?.Value ?? "", d.Element("state")?.Value ?? "",
                    S("RECEIVED"), S("FILTERED"), long.TryParse(d.Element("queued")?.Value, out var q) ? q : 0,
                    S("SENT"), S("ERROR"));
+    }
+
+    /// <summary>
+    /// TEK SEFERLİK DENEME (1323): verilen ayarla (entegrasyon kartında SINANAN hesap) giriş + sürüm + kanal sayısı. Panonun
+    /// paylaşılan oturumuna dokunmaz - etkin hesap başkaysa onu denemek yanlış sonucu sınanan satıra yazardı.
+    /// </summary>
+    public static async Task<MirthPanoSonucu> DeneAsync(MirthAyarlari a, CancellationToken iptal)
+    {
+        if (string.IsNullOrWhiteSpace(a.Url)) return new(false, false, "Mirth adresi boş.", "", []);
+        if (string.IsNullOrEmpty(a.Parola)) return new(true, false, "Mirth parolası boş (hesabın şifresi ya da Mirth__Parola).", "", []);
+        var cerez = new CookieContainer();
+        var isleyici = new HttpClientHandler { CookieContainer = cerez, UseCookies = true };
+        if (!a.SertifikaDogrula && Uri.TryCreate(a.Url, UriKind.Absolute, out var kok))
+            isleyici.ServerCertificateCustomValidationCallback = (istek, _, _, hata) =>
+                hata == System.Net.Security.SslPolicyErrors.None
+                || string.Equals(istek.RequestUri?.Host, kok.Host, StringComparison.OrdinalIgnoreCase);
+        using var http = new HttpClient(isleyici) { Timeout = TimeSpan.FromSeconds(Math.Max(3, a.ZamanAsimiSn)) };
+        http.DefaultRequestHeaders.Add("X-Requested-With", "OpenAPI");
+        var url = a.Url.TrimEnd('/');
+        try
+        {
+            using (var govde = new FormUrlEncodedContent([new("username", a.Kullanici), new("password", a.Parola)]))
+            using (var y = await http.PostAsync($"{url}/users/_login", govde, iptal))
+                if (!y.IsSuccessStatusCode) return new(true, false, $"Mirth girişi başarısız ({(int)y.StatusCode}) - kullanıcı / parola.", "", []);
+            var surum = "";
+            using (var ist = new HttpRequestMessage(HttpMethod.Get, $"{url}/server/version"))
+            {
+                ist.Headers.Accept.ParseAdd("text/plain");
+                using var y = await http.SendAsync(ist, iptal);
+                if (y.IsSuccessStatusCode) surum = (await y.Content.ReadAsStringAsync(iptal)).Trim();
+            }
+            using var ist2 = new HttpRequestMessage(HttpMethod.Get, $"{url}/channels/statuses?includeUndeployed=true");
+            ist2.Headers.Accept.ParseAdd("application/xml");
+            using var y2 = await http.SendAsync(ist2, iptal);
+            y2.EnsureSuccessStatusCode();
+            var x = XDocument.Parse(await y2.Content.ReadAsStringAsync(iptal));
+            return new(true, true, "", surum, x.Root?.Elements("dashboardStatus").Select(Kanal).ToList() ?? []);
+        }
+        catch (Exception h) when (h is HttpRequestException or TaskCanceledException or System.Xml.XmlException)
+        {
+            return new(true, false, h is TaskCanceledException ? "Mirth yanıt vermedi (zaman aşımı)." : h.Message, "", []);
+        }
     }
 
     /// <summary>Panoda / ayar ekranında gösterilecek bağlantı bilgisi - parola DEĞİL, yalnız tanımlı mı.</summary>
