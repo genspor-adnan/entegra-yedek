@@ -780,6 +780,10 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   `sekme: true` + `rota` çip gruplarından türer; kardeş rota (gelen-irsaliye, gelen-irsaliye-disi, gelen-belge,
   gelen-belge-disi) grubun ilk çipinin sekmesine düşer, sekme yerinde içerik değiştirir. Tarayıcıda: alış irsaliyesi →
   Gelen Kutusu → Kullanım Dışı → Sistem tek sekme; alış faturasının gelen kutusu kendi sekmesinde.
+- **Alış irsaliyesi / faturası kolon sırası (kullanıcı: "matrah ve kdv yi genel toplam sütunu soluna al", "hasta kalksın",
+  "hedefi kaynak sağına al"):** iki listede sabit baş sıra (`kolonSirasi`) Kaynak · Hedef yan yana, Matrah · KDV · Genel
+  Toplam bitişik - bütün belge listelerinin ortak kayıtlı kolon tercihi sırayı bozamaz. Hasta kolonu bütün alış listelerinde
+  gizli (sipariş, fatura, fiş, tahakkuk, konsinye; irsaliyede zaten).
 
 ### 10.11.2026
 
