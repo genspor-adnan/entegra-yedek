@@ -784,6 +784,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   "hedefi kaynak sağına al"):** iki listede sabit baş sıra (`kolonSirasi`) Kaynak · Hedef yan yana, Matrah · KDV · Genel
   Toplam bitişik - bütün belge listelerinin ortak kayıtlı kolon tercihi sırayı bozamaz. Hasta kolonu bütün alış listelerinde
   gizli (sipariş, fatura, fiş, tahakkuk, konsinye; irsaliyede zaten).
+- **ERP'de adet / fiyat penceresi her zaman (kullanıcı: "ERP modunda satış belgelerin stok hizmet ara ekranında seçim yapılınca
+  her zaman adet/fiyat ekranı gelsin.. hbys için önceki kural geçerli", "alış belgeleri de aynı şekilde"):** `BelgeKarti`
+  `kalemPenceresiHerZaman` = ürün kipi GenoTIP değil + satış / alış belgesi (stok fişi / transfer / talep hariç).
+  `useKalemAkisi` hızlı eklemeyi (Enter = 1 adet) atlar, kalem penceresi açılır; arama penceresinde düğme "Ekle (Enter)",
+  "Miktar Ekle" ve toplu "Seçilenleri Ekle (1'er adet)" gizli. HBYS'de (başvuru, hasta faturası) eski kural: fiyatlı kalem
+  Enter ile pencere açmadan, fiyatsız / lotlu kalemde pencere. Test `kalemAkisiSifirFiyat` (+2 durum).
 
 ### 10.11.2026
 

@@ -36,7 +36,9 @@ function kisaAdSirasi(satir: Record<string, unknown>, aranan: string): number {
 export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizStokSabit,
                                     yalnizHizmet: yalnizHizmetSabit, yon,
                                     eklenen, fiyatListesiId, sgkBaglami, bolumId,
-                                    hizmetEkFiltre, zatenVarMi, kartAc, tekSecim }: {
+                                    hizmetEkFiltre, zatenVarMi, kartAc, tekSecim, herZamanPencere = false }: {
+  /** Seçim her zaman adet / fiyat penceresini açar (ERP satış / alış): "1 Adet Ekle" ve toplu 1'er adet ekleme yok. */
+  herZamanPencere?: boolean;
   /**
    * TEK SEÇİM (kullanıcı 02.11.2026, satış faturası ücret ekleme: "sadece 1 check yapılabilir.. ve sadece
    * check yapılmış eklenebilir"): aynı anda yalnız bir kutu işaretli; ekleme düğmeleri ve Enter YALNIZ
@@ -604,18 +606,18 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
           <span className="stok-ara-eylem" style={{ marginRight: 'auto' }}>
             <button className="d bir" disabled={!hedef}
                     title={tekSecim && !hedef ? c('Önce eklenecek satırı işaretleyin')
-                           : hedefFiyatli ? 'Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)'
+                           : hedefFiyatli && !herZamanPencere ? 'Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)'
                            : c('Fiyatı yok: miktar ve fiyat penceresi açılır')}
                     onClick={() => hedef && void sec(hedef, true)}>
-              ＋ {hedefFiyatli || !hedef ? c('1 Adet Ekle (Enter)') : c('Ekle (Enter)')}
+              ＋ {!herZamanPencere && (hedefFiyatli || !hedef) ? c('1 Adet Ekle (Enter)') : c('Ekle (Enter)')}
             </button>
-            {(hedefFiyatli || !hedef) && (
+            {!herZamanPencere && (hedefFiyatli || !hedef) && (
             <button className="d" disabled={!hedef}
                     title={tekSecim && !hedef ? c('Önce eklenecek satırı işaretleyin') : c('Miktar ve fiyat penceresini açar')}
                     onClick={() => hedef && void sec(hedef, false)}>
               🔢 Miktar Ekle (Shift+Enter)
             </button>)}
-            {!tekSecim && isaretli.size > 0 && (
+            {!tekSecim && !herZamanPencere && isaretli.size > 0 && (
               <button className="d bir" disabled={topluEkleniyor}
                       title={c('İşaretli kalemleri 1\'er adet, liste fiyatıyla ekler')}
                       onClick={() => void isaretlileriEkle()}>

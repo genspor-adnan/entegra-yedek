@@ -59,6 +59,8 @@ export interface BelgeKartiModalProps {
   siparisMi: boolean;
   stokFisiMi: boolean;
   depoBelgesi: boolean;
+  /** ERP satış / alış belgesi: arama seçimi her zaman adet / fiyat penceresini açar (hızlı 1 adet yok). */
+  kalemPenceresiHerZaman?: boolean;
   yerelPara: string;
   tarih: string;
   /** Ödeyen kurum - kart tarafında çözülür; modallar artık okumuyor (586:
@@ -186,7 +188,7 @@ export interface BelgeKartiModalProps {
 export function BelgeKartiModallari(p: BelgeKartiModalProps) {
   const {
     kayitliId, tur, turAdi, bilgi, basvuruMu, alisMi, irsaliyeMi, siparisMi, stokFisiMi,
-    depoBelgesi, yerelPara, tarih, fiyatListesiId, sgkBaglami, tarifeTipi, rota, bolumId,
+    depoBelgesi, kalemPenceresiHerZaman = false, yerelPara, tarih, fiyatListesiId, sgkBaglami, tarifeTipi, rota, bolumId,
     depo, sonuc, setSonuc,
     cari, setCari, cariArama, setCariArama,
     hastaAramaMetni, setHastaAramaMetni, hastaAramaYeni, setHastaAramaYeni,
@@ -445,6 +447,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
       {stokArama && (
         <StokAramaPenceresi
           etkin={kalem === null}
+          herZamanPencere={kalemPenceresiHerZaman}
           // Pencere ACIK KALDIGI icin (ardisik giris) eklenen kalem burada
           //   gorunur: satirin gride dustugu belli olsun.
           eklenen={{ sayi: aramaEklenen.sayi, son: aramaEklenen.son }}

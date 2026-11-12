@@ -23,7 +23,7 @@ export function useKalemAkisi({
   satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
   yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
   cariId, odeyenKurumId, fiyatListesiId, kampanyaId, basvuruBilgi, alisMi, sifirFiyatSor = false,
-  izlemliBelge = false, belgeTarihi,
+  izlemliBelge = false, belgeTarihi, herZamanPencere = false,
 }: {
   satirlar: SatirDurumu[];
   setSatirlar: (f: (s: SatirDurumu[]) => SatirDurumu[]) => void;
@@ -46,6 +46,12 @@ export function useKalemAkisi({
   izlemliBelge?: boolean;
   /** Belge tarihi: dövizli liste fiyatının kuru bu günden çekilir (stokSeciminiCoz). */
   belgeTarihi?: string;
+  /**
+   * ADET / FİYAT PENCERESİ HER ZAMAN (kullanıcı 12.11.2026: "ERP modunda satış belgelerin stok hizmet ara ekranında
+   * seçim yapılınca her zaman adet/fiyat ekranı gelsin.. hbys için önceki kural geçerli", "alış belgeleri de aynı
+   * şekilde"): hızlı ekleme (Enter = 1 adet) kalemi pencere açmadan gride düşürmez.
+   */
+  herZamanPencere?: boolean;
 }) {
   /**
    * STOK / HİZMET SEÇİLDİ (arama penceresinden): kalem penceresini açar.
@@ -151,7 +157,7 @@ export function useKalemAkisi({
     // LOTLU / SERILI STOK HIZLI EKLENMEZ (kullanici 24.10.2026: "giriş fişinde lotlu ürün girdim lot ekranı
     //   açılmadı"): Enter kalemi lotsuz gride dusuruyordu. Kalem penceresi acilir; Kaydet lot ekranini acar.
     const lotGerekli = izlemliBelge && yeni.satirTur === 1 && yeni.izleme > 0;
-    if (hizli && !lotGerekli && !(sifirFiyatSor && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return true }
+    if (hizli && !herZamanPencere && !lotGerekli && !(sifirFiyatSor && Number(yeni.birimFiyat || 0) <= 0)) { kalemKaydet(yeni); return true }
     setKalem(yeni);
     return false;
   };

@@ -1137,6 +1137,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   /* KALEM AKISI kendi kancasinda (useKalemAkisi): secilen stogu kaleme
      cevirme, gride yazma, paket icerigi ve rapor dovizi kurallari orada. */
+  // ADET / FİYAT PENCERESİ HER ZAMAN (kullanıcı 12.11.2026): ERP kipinde (GenoTIP / HBYS dışı) satış ve alış
+  //   belgesinde aramadan seçim her zaman adet / fiyat penceresini açar; HBYS'de (başvuru, hasta faturası) hızlı ekleme
+  //   kuralı aynen. Stok fişi / transfer / talep bu kurala girmez.
+  const kalemPenceresiHerZaman = kullanici?.urunModu !== URUN_GENOTIP && !depoBelgesi && !stokFisiMi;
   const { stokSecildi, kalemKaydet } = useKalemAkisi({
     satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
     yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,
@@ -1144,6 +1148,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     basvuruBilgi, alisMi: bilgi.alis, sifirFiyatSor: !depoBelgesi && !stokFisiMi,
     izlemliBelge: bilgi.girisIzlemi || bilgi.cikisIzlemi,
     belgeTarihi: tarih,
+    herZamanPencere: kalemPenceresiHerZaman,
   });
 
   /*
@@ -2169,7 +2174,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         )}
         <BelgeKartiModallari
           kayitliId={kayitliId} tur={tur} turAdi={seciliTurAdi} bilgi={bilgi} basvuruMu={basvuruMu}
-          tevkifatli={faturaMi && faturaTipi === 22}
+          tevkifatli={faturaMi && faturaTipi === 22} kalemPenceresiHerZaman={kalemPenceresiHerZaman}
           // YENİ HASTA SEKMEDE: kayıtsız yeni başvuru sekmesi kapanır, hasta kartı sekmede açılır; hasta
           //   kaydedilince o hastayla yeni başvuru açılır (ListeKarti, ?basvuru=1). Kayıtlı başvuruda ve
           //   sekmesiz kullanımda eski pencere davranışı.

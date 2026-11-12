@@ -18,14 +18,14 @@ vi.mock('../bilesenler/mesaj', () => ({ mesaj: vi.fn(), metinSor: vi.fn() }));
 
 const { useKalemAkisi } = await import('../sayfalar/belgeKarti/useKalemAkisi');
 
-function kur(sifirFiyatSor: boolean) {
+function kur(sifirFiyatSor: boolean, herZamanPencere = false) {
   const setKalem = vi.fn();
   const setSatirlar = vi.fn();
   const { result } = renderHook(() => useKalemAkisi({
     satirlar: [], setSatirlar, setKalem, setKalemDegisti: vi.fn(), setHata: vi.fn(),
     yerelPara: 'TL', raporDovizi: 'TL', setRaporDovizi: vi.fn(), setBelgeKuru: vi.fn(),
     cariId: null, odeyenKurumId: null, fiyatListesiId: null, kampanyaId: null,
-    basvuruBilgi: {}, alisMi: false, sifirFiyatSor,
+    basvuruBilgi: {}, alisMi: false, sifirFiyatSor, herZamanPencere,
   }));
   return { akis: result.current, setKalem, setSatirlar };
 }
@@ -52,5 +52,24 @@ describe('kalem akışı - sıfır fiyat', () => {
     const eklendi = await akis.stokSecildi({ id: 9, tip: 'stok', ad: 'Eldiven', fiyat: 0 }, true);
     expect(eklendi).toBe(true);
     expect(setKalem).not.toHaveBeenCalled();
+  });
+});
+
+/** ERP SATIŞ / ALIŞ (kullanıcı 12.11.2026): seçim her zaman adet / fiyat penceresini açar; HBYS'de kural aynen. */
+describe('kalem akışı - ERP her zaman pencere', () => {
+  it('fiyatı olan stok da hızlı eklenmez, pencere açılır', async () => {
+    const { akis, setKalem, setSatirlar } = kur(true, true);
+    const eklendi = await akis.stokSecildi({ id: 7, tip: 'stok', ad: 'Kalem', fiyat: 40 }, true);
+    expect(eklendi).toBe(false);
+    expect(setKalem).toHaveBeenCalledTimes(1);
+    expect(setSatirlar).not.toHaveBeenCalled();
+  });
+
+  it('kural kapalıyken (HBYS) fiyatı olan kalem eskisi gibi hızlı eklenir', async () => {
+    const { akis, setKalem, setSatirlar } = kur(true, false);
+    const eklendi = await akis.stokSecildi({ id: 7, tip: 'stok', ad: 'Kalem', fiyat: 40 }, true);
+    expect(eklendi).toBe(true);
+    expect(setKalem).not.toHaveBeenCalled();
+    expect(setSatirlar).toHaveBeenCalledTimes(1);
   });
 });
