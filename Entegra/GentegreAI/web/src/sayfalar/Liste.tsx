@@ -614,6 +614,9 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
     // 3) BASVURU KOLONLARI yalnız başvuru listesinde (kullanıcı 12.11.2026: "alış irs listesinden bölüm, ödeyen kurum,
     //    doktor kolonlarını kaldır"): değerleri başvurunun kendi kaydından (belge_basvuru.id = belge.id) gelir - alış,
     //    satış, stok belgesinde her satırda boştur, kolon seçicide de yer kaplar.
+    // 4) TEKLİF KONUSU yalnız teklif listesinde (kullanıcı 12.11.2026: "alış irs listede konusu kaldır"): kolon tercihi
+    //    kaynak başına tek kayıt (bütün belge listeleri paylaşır) - teklifte açılan kolon öteki listelere taşınıyordu.
+    if (tanim.kaynak === 'belge' && tanim.yeniBelgeTuru !== 18) liste.push('teklifKonusu');
     if (tanim.kaynak === 'belge' && !tanim.basvuruSuzgeci)
       liste.push('odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor', 'tamamlanma',
                  'odeyenKurumId', 'sozlesmeId', 'altKurum', 'altKurumAdi', 'sgkKullan', 'bolumId', 'doktorId');

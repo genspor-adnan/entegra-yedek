@@ -395,6 +395,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alis › Sipariş Listesi', aksiyonEkrani: 'siparis-liste', yeniBelgeTuru: 9,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 9 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },   // bütün alış listelerinde (kullanıcı 12.11.2026)
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Açık',    filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -414,6 +415,10 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     //   (gelen e-Irsaliye kendi sekmesinde), senaryo/tipi fatura kavrami, hasta HBYS faturasi.
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum',
                     'efaturaDurum', 'eBelgeDurumAdi', 'senaryoAdi', 'tipiAdi', 'hastaAdi'],
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },   // kullanıcı 12.11.2026: "alış irsaliyesi listesinde cari rename Tedarikçi"
+    // SABİT BAŞ SIRA (kullanıcı 12.11.2026: "hedef de kaynaktan sonraya al"): kayıtlı kolon tercihi (bütün belge
+    //   listelerinin ortak kaydı) sırayı bozamaz.
+    kolonSirasi: ['belgeNo', 'belgeTarihi', 'tarafUnvan', 'kaynak', 'hedef'],
     toplam: ['genelToplam'],
     cipler: [
       { ad: 'Faturalanmadı', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 0 } },
@@ -436,8 +441,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     tarihAlani: 'belgeTarihi',
     // KOLON SIRASI (kullanici): Tarih · Belge No · Cari en solda.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tarafUnvan'],
-    // GONDERICI: alis faturasinda cari fatura kesendir (gelen kutusuyla ayni ad).
-    kolonBasliklari: { tarafUnvan: 'Gönderici' },
+    // TEDARİKÇİ (kullanıcı 12.11.2026: "alış listelerinde cari → Tedarikçi"; eskiden gelen kutusuyla aynı "Gönderici").
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },
     yol: 'Alis › Fatura Listesi', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 11,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 11 },
     gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
@@ -461,6 +466,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alis › Fişler', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 12,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },   // bütün alış listelerinde (kullanıcı 12.11.2026)
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     menuGrup: 'Alış', menuSira: 50, menuAd: 'Alış Fişi Listesi', ic: '@b:fis:a', yetkiKodu: 'belge.alis.fis',
   },
@@ -472,6 +478,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alis › Tahakkuk Listesi', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 13,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },   // bütün alış listelerinde (kullanıcı 12.11.2026)
     toplam: ['genelToplam'],
     menuGrup: 'Alış', menuSira: 60, menuAd: 'Alış Tahakkuk Listesi', ic: '@b:tahakkuk:a', yetkiKodu: 'belge.alis.tahakkuk',
   },
@@ -482,6 +489,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     yol: 'Alis › Konsinye', aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 109,
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 109 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'eBelgeDurumAdi', 'teklifDurumAdi', 'teklifDurum'],
+    kolonBasliklari: { tarafUnvan: 'Tedarikçi' },   // bütün alış listelerinde (kullanıcı 12.11.2026)
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
     cipler: [
       { ad: 'Tumu' },

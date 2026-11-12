@@ -769,6 +769,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   `belge` kaynaklı ve `basvuruSuzgeci` olmayan her listede ödeyen kurum / sözleşme / bölüm / doktor / tamamlanma (ve id
   kolonları) gizli. Değerleri başvurunun kendi kaydından (belge_basvuru.id = belge.id) geldiği için başka belgede her satırda
   boştu. Tarayıcıda: alış irsaliyesi / faturası listesinde yok, başvuruda var.
+- **Alış listeleri (kullanıcı: "alış irsaliyesi listesinde cari rename Tedarikçi", "diğer alış listelerinde varsa onları da
+  değiş", "alış irs listede konusu kaldır, hedef de kaynaktan sonraya al"):** bütün alış listelerinde (sipariş, irsaliye,
+  fatura, fiş, tahakkuk, konsinye) cari kolonu "Tedarikçi" (alış faturasında eskiden "Gönderici"). "Konusu" (teklif konusu)
+  yalnız teklif listesinde (`Liste.tsx` kural 4) - kolon tercihi `belge` kaynağı başına TEK kayıt, teklifte açılan kolon
+  öteki listelere taşınıyordu. Alış irsaliyesinde sabit baş sıra Belge No · Tarih · Tedarikçi · Kaynak · Hedef (kayıtlı
+  tercih sırayı bozamaz).
 
 ### 10.11.2026
 
