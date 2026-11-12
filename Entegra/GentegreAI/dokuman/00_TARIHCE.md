@@ -722,6 +722,20 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Sıkıştırılmış çok kareli nesnede yalnız istenen kare çözülür (tek karelik kopya fo-dicom'un tam çözme yolundan geçer -
     renk yorumu / düzlem dönüşümü aynı). RLE testinde tek kare = bütün nesne çözümü, bayt bayt.
   * Testler: önbellek (DICOM + JPEG'ler tek indirme, aynı JPEG aynı bayt), 6 eşzamanlı istek tek indirme, RLE çok kare. Tam paket 1069.
+- **Bakanlık HL7 doğrulayıcısıyla deneme + düzeltmeler (db/1326; kullanıcı: "o zaman test ortamını oluştur.. deneyelim" → "başla"):**
+  * Bakanlık beta sunucuları (betaxdsrepository, betaygsadmin KOS / SR doğrulama) dışarıdan DNS'te çözülmüyor - gerçek
+    test için teletip@saglik.gov.tr'ye Mirth IP + SKRS kaydı gerekir. Sitedeki HL7 doğrulama sayfası
+    (teleradyoloji.saglik.gov.tr/hl7validasyon.html) mesajı TAMAMEN tarayıcıda denetliyor: `web/araclar/teleradyoloji-hl7-dogrula.mjs`
+    sayfayı yükleyip bütün ağı keser, HL7 dosyalarını ilgili sekmeye yapıştırır, kırmızı alanları yazar (veri dışarı çıkmaz).
+  * Kılavuz sitede 3.68 (66 s.; 3.43'ten sonrası çoğu sorgu / uzaktan raporlama servisi). KOS silme metodu VAR (§ 6.10
+    RemoveKos: medula tesis / SKRS + accession + StudyInstanceUID).
+  * Düzeltilen (KOSUYOLU test hastası NW / XO / ORU, Mirth simülatörü AA): PV1-8 sevk eden hekim ve ORC-11 onaylayan
+    (`fn_teletip_orm_verisi` YonlendirenHekim / Onaylayan = istem hekimi, personel id = taraf id; 1326). ORU Bakanlık profili:
+    PID ORM'nin PID'i (`OrmUretici.PidAlanlari` - doğrulayıcı kısa PID'de çöküyordu), PV1-8 / PV1-44 / ORC-10, DG1 tanı adı +
+    türüyle, ardından NTE 1-4 (kılavuz § 3.1.5.4 örneği).
+  * Kalan kırmızılar beklenen: MSH-5/6 doğrulayıcı "TELETIP" ister, kılavuz 3.68 tablosu "TELERADYOLOJI" der (örnekleri
+    TELETIP) - Bakanlık'a sorulacak; PV1-50 yalnız SGK hastada; ORC-18 yalnız anjiyo / eko.
+  * Terim (kullanıcı): Teletıp = uzaktan muayene, TeleRadyoloji = uzaktan görüntüleme.
 
 ### 10.11.2026
 

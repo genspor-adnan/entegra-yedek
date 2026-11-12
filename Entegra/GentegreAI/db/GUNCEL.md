@@ -531,7 +531,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_teletip_hesap_modeli` | `1317_teleradyoloji_sube_hesabi.sql` | — |
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
-| `fn_teletip_orm_verisi` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql, 1305_teletip_hastane_referansi.sql |
+| `fn_teletip_orm_verisi` | `1326_teleradyoloji_orm_sevk_onay_hekim.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql, 1305_teletip_hastane_referansi.sql, 1324_teletip_eski_ayar_yolu_kaldir.sql |
 | `fn_teletip_oru_verisi` | `1309_teletip_oru_kuyrugu.sql` | — |
 | `fn_temsilci_rolu_tazele` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |

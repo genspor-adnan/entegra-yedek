@@ -157,7 +157,17 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
         Assert.Equal("4^5", obx[13]);
         Assert.Equal("78221082662^AKMAN^ALİ", obx[16]);
         Assert.Equal("F", obx[11]);
-        Assert.Contains("DG1|1||R51^^I10", m);
+        // 1326: DG1 tanı adı ve türüyle; ardından NTE 1-4 (kılavuz § 3.1.5.4 örneği).
+        Assert.Contains("DG1|1||R51^Baş ağrısı^I10|||A", m);
+        var segmentler = m.Split('\r', StringSplitOptions.RemoveEmptyEntries).Select(x => x[..3]).ToArray();
+        Assert.Equal(["OBX", "DG1", "NTE", "NTE", "NTE", "NTE"], segmentler[^6..]);
+        Assert.Contains("NTE|1|P||NTE0001^PatientComplaints^TELETIP", m);
+        // 1326: PID ORM'nin PID'iyle birebir; PV1-8 / PV1-44 / ORC-10 ORM ile aynı.
+        var orm = OrmUretici.Uret(Orm());
+        Assert.Equal(orm.Split('\r').First(x => x.StartsWith("PID|")), m.Split('\r').First(x => x.StartsWith("PID|")));
+        var pv1 = m.Split('\r').First(x => x.StartsWith("PV1|")).Split('|');
+        Assert.Equal(Orm().YonlendirenHekim.BosMu ? "" : Orm().YonlendirenHekim.Kimlik, pv1[8].Split('^')[0]);
+        Assert.Equal(Orm().KabulZamani is { } kz ? kz.ToString("yyyyMMddHHmmss") : "", pv1[44]);
         // Ek rapor: OBX-11 C.
         var ek = OruUretici.Uret(TeletipOruKurucu.Kur(Orm(), Rapor() with { Duzeltme = true }));
         Assert.Equal("C", ek.Split('\r').First(x => x.StartsWith("OBX|")).Split('|')[11]);

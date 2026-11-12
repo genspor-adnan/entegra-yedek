@@ -248,8 +248,8 @@ public sealed class OruUreticiTestleri
         Assert.Equal(@"A\F\B^C\S\D", Alan(m, "PID", 5));
         Assert.Equal(@"x\T\y\E\z", Alan(m, "OBR", 13));
         // Kaçışsız tek karakter karşı tarafta BÜTÜN alanları kaydırır: mesaj
-        //   yine yedi segment olmalı (MSH PID PV1 ORC OBR OBX DG1).
-        Assert.Equal(7, m.Split('\r', StringSplitOptions.RemoveEmptyEntries).Length);
+        //   yine on bir segment olmalı (MSH PID PV1 ORC OBR OBX DG1 + Bakanlık NTE 1-4, 1326).
+        Assert.Equal(11, m.Split('\r', StringSplitOptions.RemoveEmptyEntries).Length);
     }
 
     [Fact]

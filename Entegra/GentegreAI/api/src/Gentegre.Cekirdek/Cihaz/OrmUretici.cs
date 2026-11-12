@@ -186,6 +186,10 @@ public static class OrmUretici
     }
 
     // ------------------------------------------------------------------ segmentler
+    /// <summary>PID alanları (dizin = alan no). ORU'nun Bakanlık profili de bunu kullanır - kılavuz ORU'nun PID'ini HBYS
+    /// bölümündekiyle aynı tanımlar; iki ayrı PID kodu biri düzeltilip öteki unutulurdu (1326).</summary>
+    public static string[] PidAlanlari(OrmVerisi v) => Pid(v);
+
     private static string[] Pid(OrmVerisi v)
     {
         var a = Bos(27);

@@ -433,6 +433,9 @@ public static class TeletipOruKurucu
         RadyologTckn = r.RadyologTckn, RadyologSoyad = r.RadyologSoyad, RadyologAd = r.RadyologAd,
         KontrastObx17 = r.KontrastObx17, Duzeltme = r.Duzeltme,
         TaniIcd = [.. v.Tanilar.Select(t => t.Icd).Where(x => !string.IsNullOrWhiteSpace(x))],
+        Tanilar = v.Tanilar, Sikayet = v.Sikayet, Gecmis = v.Gecmis, Bulgu = v.Bulgu, Tedavi = v.Tedavi,
+        YonlendirenHekim = v.YonlendirenHekim, Giren = v.Giren, KabulZamani = v.KabulZamani,
+        BakanlikPid = OrmUretici.PidAlanlari(v),
     };
 
     /// <summary>ORM'in ortak denetimi (hasta, istem, kurum) + rapora özgü: kılavuz OBX-5 (Bulgular ≥ 50, Sonuç), OBX-16

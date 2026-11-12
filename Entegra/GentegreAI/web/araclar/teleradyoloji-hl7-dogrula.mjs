@@ -30,6 +30,7 @@ await sayfa.goto('https://teleradyoloji.saglik.gov.tr/hl7validasyon.html', { wai
 const kesilen = [];
 await sayfa.route('**/*', r => { kesilen.push(`${r.request().method()} ${r.request().url()}`); return r.abort(); });
 sayfa.on('dialog', d => d.dismiss());
+if (process.env.HL7_HATA) sayfa.on('pageerror', h => console.log('   [sayfa JS hatası] ' + h.message));
 
 let toplamKirmizi = 0;
 for (const yol of dosyalar) {
@@ -38,8 +39,12 @@ for (const yol of dosyalar) {
   const s = SEKME[t];
   if (!s) { console.log(`== ${yol}: mesaj türü anlaşılamadı (${t})`); continue; }
   const [id, dugme] = s;
+  // Sekme geçişi animasyonlu: panel görünene kadar bekle (görünmezse bir kez daha tıkla).
+  const alan = sayfa.locator('#_textareainfo' + id);
   await sayfa.click('#' + dugme);
-  await sayfa.fill('#_textareainfo' + id, metin);
+  try { await alan.waitFor({ state: 'visible', timeout: 3000 }); }
+  catch { await sayfa.click('#' + dugme); await alan.waitFor({ state: 'visible', timeout: 5000 }); }
+  await alan.fill(metin);
   await sayfa.locator(`#_textareainfo${id}`).locator('xpath=ancestor::*[.//button[@id="btn_control"]][1]').locator('#btn_control').first().click();
   await sayfa.waitForTimeout(400);
   const r = await sayfa.evaluate(no => {

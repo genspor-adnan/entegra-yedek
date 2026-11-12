@@ -98,6 +98,22 @@ public sealed record OruVerisi
     public bool Duzeltme { get; init; }
 
     public IReadOnlyList<string> TaniIcd { get; init; } = [];
+    /// <summary>Bakanlık profilinde DG1 adı ve türüyle (kılavuz 3.68 Tablo 13: "ICD^Ad^I10", A/F). Boşsa TaniIcd.</summary>
+    public IReadOnlyList<Hl7Tani> Tanilar { get; init; } = [];
+    /// <summary>Bakanlık profilinde NTE 1-4 (şikâyet / geçmiş / bulgu / tedavi) - kılavuz rapor aktarımı örneği (§ 3.1.5.4)
+    /// OBX ve DG1'den sonra dördünü de gönderir; boş not da yazılır (ORM ile aynı).</summary>
+    public string Sikayet { get; init; } = "";
+    public string Gecmis { get; init; } = "";
+    public string Bulgu { get; init; } = "";
+    public string Tedavi { get; init; } = "";
+    /// <summary>Bakanlık profilinde ORM ile aynı alanlar (kılavuz: ORU'nun MSH/PID/PV1/ORC/OBR'si HBYS bölümündeki
+    /// gibi): PV1-8 sevk eden hekim, PV1-44 kabul zamanı, ORC-10 sisteme giren (1326).</summary>
+    public Hl7Kisi YonlendirenHekim { get; init; } = new();
+    public Hl7Kisi Giren { get; init; } = new();
+    public DateTime? KabulZamani { get; init; }
+    /// <summary>Bakanlık profilinde PID'in tamamı (OrmUretici.PidAlanlari - adres, telefon, anne TCKN vb. ORM ile aynı).
+    /// Boşsa yalnız temel alanlar (dosya no, TCKN, ad, doğum, cinsiyet).</summary>
+    public IReadOnlyList<string>? BakanlikPid { get; init; }
     /// <summary>Kurum profilinde düz metin rapor (TX satırları).</summary>
     public IReadOnlyList<string> RaporSatirlari { get; init; } = [];
 }
@@ -162,6 +178,7 @@ public static class OruUretici
             pid[3] = K(v.HastaDosyaNo);      // hastane dosya numarası
             pid[4] = K(v.HastaTckn);         // TCKN
         }
+        if (bakanlik && v.BakanlikPid is { Count: > 0 } tamPid) pid = [.. tamPid];
         Segment(s, "PID", pid);
 
         // PV1-19 (Visit No): Bakanlık e-Nabız'daki hastane başvuru referansını
@@ -176,7 +193,9 @@ public static class OruUretici
             pv1[19] = ziyaretNo.Length == 0 ? ""
                     : v.BirimId.Length == 0 && v.Bolum.Length == 0 ? K(ziyaretNo)      // birim yoksa yalnız ziyaret no
                     : $"{K(ziyaretNo)}^^^^^^^^{K(v.BirimId)}&{K(v.Bolum)}&HBYS";
+            pv1[8] = Kisi(v.YonlendirenHekim);
             pv1[20] = v.Sgk ? "SGK" : "OTHER";
+            pv1[44] = v.KabulZamani is { } kz ? Z(kz) : "";
             pv1[50] = v.Sgk ? K(v.MedulaTakipNo) : "";
             pv1[51] = "V";
         }
@@ -193,6 +212,7 @@ public static class OruUretici
             orc[3] = $"{K(v.AccessionNo)}^RBS";
             orc[7] = planlanan is { } p7 ? $"1^once^^{Z(p7)}" : "";
             orc[9] = Z(v.Zaman);
+            orc[10] = Kisi(v.Giren);
             orc[12] = Kisi(v.IsteyenHekimTckn, v.IsteyenHekimSoyad, v.IsteyenHekimAd);
             orc[17] = v.BirimId.Length == 0 && v.Bolum.Length == 0 ? ""
                     : $"{K(v.BirimId)}^{K(v.Bolum)}^{K(v.KurumKisaAdi)}".TrimEnd('^');
@@ -215,13 +235,24 @@ public static class OruUretici
         else                                 KurumObx(s, v);
 
         var sira = 1;
-        foreach (var icd in v.TaniIcd.Where(x => !string.IsNullOrWhiteSpace(x)))
+        var tanilar = v.Tanilar.Count > 0
+            ? v.Tanilar.Where(t => !string.IsNullOrWhiteSpace(t.Icd))
+            : v.TaniIcd.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => new Hl7Tani(x));
+        foreach (var t in tanilar)
         {
             var dg1 = Bos(7);
             dg1[1] = sira++.ToString();
-            dg1[3] = K(icd) + "^^I10";   // DG1-3: ICD-10, SUT koduyla ilgili tanı
-            dg1[6] = "A";                // A = admitting/kesin
+            dg1[3] = $"{K(t.Icd)}^{K(t.Ad)}^I10";   // DG1-3: ICD-10, SUT koduyla ilgili tanı
+            dg1[6] = t.Tur == "F" ? "F" : "A";        // A ön tanı / F kesin tanı (Tablo 13)
             Segment(s, "DG1", dg1);
+        }
+        if (v.Profil == Hl7Profili.Bakanlik)
+        {
+            // 1326: kılavuz § 3.1.5.4 rapor aktarımı örneği - NTE 1-4 OBX / DG1'den sonra, ORM'deki sıra ve türle.
+            Nte(s, 1, v.Sikayet, "NTE0001^PatientComplaints^TELETIP");
+            Nte(s, 2, v.Gecmis, "NTE0002^PatientHistory^TELETIP");
+            Nte(s, 3, v.Bulgu, "NTE0003^PatientSymptom^TELETIP");
+            Nte(s, 4, v.Tedavi, "NTE0004^PatientCure^TELETIP");
         }
 
         return s.ToString();
@@ -305,6 +336,16 @@ public static class OruUretici
         Segment(s, "OBX", a);
     }
 
+    private static void Nte(StringBuilder s, int no, string metin, string tur)
+    {
+        var a = Bos(5);
+        a[1] = no.ToString();
+        a[2] = "P";
+        a[3] = K((metin ?? "").Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim());   // Seq-3 tek satır
+        a[4] = tur;
+        Segment(s, "NTE", a);
+    }
+
     // -------------------------------------------------------------- kurum ----
     private static void KurumObx(StringBuilder s, OruVerisi v)
     {
@@ -372,6 +413,10 @@ public static class OruUretici
         => soyad.Length == 0 && ad.Length == 0 ? "" : $"{K(soyad)}^{K(ad)}";
 
     /// <summary>TCKN^Soyad^Ad — kılavuzun hekim/radyolog biçimi.</summary>
+    /// <summary>"Personel ID^Soyad^Ad^İkinci Ad^^Önek" (ORM ile aynı biçim).</summary>
+    private static string Kisi(Hl7Kisi k) => k.BosMu ? ""
+        : $"{K(k.Kimlik)}^{K(k.Soyad)}^{K(k.Ad)}^{K(k.IkinciAd)}^^{K(k.Onek)}".TrimEnd('^');
+
     private static string Kisi(string tckn, string soyad, string ad)
         => tckn.Length == 0 && soyad.Length == 0 ? ""
          : $"{K(tckn)}^{K(soyad)}^{K(ad)}";
