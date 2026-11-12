@@ -344,11 +344,13 @@ public static partial class KartKatalogu
             //   ya da protokol yazilinca bayrak kendiliginden kalkar (DB).
             new("radyoloji", "radyoloji", "mantik", Baslik: "Radyoloji Tetkiki",
                 Grup: "Genel", AltGrup: "Detay"),
-            // HİZMETİN MODALİTESİ (kullanıcı 12.11.2026: "mr.002 ye baktım boştu"): başvurudaki satırın radyoloji istemine
-            //   dönüşmesi (1242) ve istemin hangi cihazın worklist'ine düşeceği BU alandan. Kartta yalnız protokol
-            //   bölümünün modalitesi vardı (radyoloji_protokol) - protokolsüz hizmette boş görünüyor, hizmetinki girilemiyordu.
-            new("modalite", "modalite", "kod", KodListesi: "rad.modalite", Baslik: "Modalite (istem / cihaz)",
-                Grup: "Genel", AltGrup: "Detay"),
+            // HİZMETİN MODALİTESİ (kullanıcı 12.11.2026: "mr.002 ye baktım boştu" → "radyoloji protokolü sekmesinde
+            //   göremedim"): başvurudaki satırın radyoloji istemine dönüşmesi (1242) ve istemin hangi cihazın worklist'ine
+            //   düşeceği BU alandan. Sekmede yalnız protokol satırının modalitesi vardı - protokolsüz hizmette boş görünüyor,
+            //   hizmetinki girilemiyordu. Artık "Radyoloji Protokolü" sekmesinin başında; protokol satırı sekmeye gömülü
+            //   (web kartOzellestirme 'hizmet'), kendi modalitesi gizli ve DB'de bundan eşitlenir (1331).
+            new("modalite", "modalite", "kod", KodListesi: "rad.modalite", Baslik: "Modalite",
+                Grup: "Radyoloji Protokolü"),
             // YÖN ZORUNLU (1229) kartta yok (1237, kullanıcı: "ekrandan yön soramayız.. sut da nasılsa listeden seçelim"):
             //   yön SUT kodunun kendisinde - kabul listeden yönlü hizmeti seçer.
 

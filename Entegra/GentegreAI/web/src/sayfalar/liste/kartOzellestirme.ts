@@ -70,6 +70,12 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   'personel-belge-turu': {
     sekmeSirasi: ['Genel', 'Kime zorunlu', 'Personel durumu', 'Hatırlatma', 'Hareketler'],
   },
+  // HİZMET (kullanıcı 12.11.2026 "radyoloji protokolü sekmesinde göremedim"): hizmetin KENDİ modalitesi (istem / worklist
+  //   bundan) "Radyoloji Protokolü" grubunda; protokol satırı aynı sekmeye gömülür, protokolün modalite alanı gizli
+  //   (DB'de hizmetinkinden eşitlenir - 1331). Sekme yine "Radyoloji Tetkiki" kutusuna bağlı (gömülü detayın koşulu).
+  'hizmet': {
+    detayGrupta: { radyolojiProtokol: { grup: 'Radyoloji Protokolü', gizli: ['modalite'] } },
+  },
   // ------------------------------------------- radyoloji tanımları (965) ----
   // Mockup Ekranlar/Radyoloji/radyoloji_sablon_karti_v2.html · radyoloji_protokol_karti.html:
   //   kimlik şeridi + sekmeler (Önizleme / Sürümler / Kullanım ekranın ek sekmeleri).

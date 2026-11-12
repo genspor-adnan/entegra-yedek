@@ -151,6 +151,13 @@ export function sekmeleriKur(secenek: {
     .filter(([ad]) => !gizliSekmeler?.includes(ad))
     .filter(([ad]) => !yalnizSekmeler || yalnizSekmeler.includes(ad))
     .filter(([ad]) => !(kaynak === 'hasta' && ad === 'İletişim'))
+    // GÖMÜLÜ KOŞULLU DETAY (hizmet › Radyoloji Protokolü): koşullu bir detay bir grup sekmesine gömülüyse, o grup
+    //   sekmesi de detayın koşuluna uyar - "Radyoloji Tetkiki" işaretli değilken sekme açılmaz.
+    .filter(([ad]) => !(meta?.detaylar ?? []).some(d => {
+      const g = detayGrupta?.[d.ad]?.grup;
+      const gomulu = Array.isArray(g) ? g.includes(ad) : g === ad;
+      return gomulu && !!d.kosulAlani && !sekmeKosuluSaglandi(d.kosulAlani, deger, detaySatirlari);
+    }))
     .map(([ad, alanlar]) => ({ tur: 'grup', anahtar: grupSekmeAnahtari(ad), baslik: ad, alanlar }));
   // DOKUMAN (419): mockup sirasi Surumler - Baglantilar - Onay Akisi -
   //   Paylasim - Gunluk; alan grubu ("Icerik") EN SONA. Mockupta grup sekmesi

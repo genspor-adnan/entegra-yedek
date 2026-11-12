@@ -862,8 +862,12 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   Sonra aynı 6 mesaj: hepsi yeşil, kırmızı 0. XO (güncelleme) / CA (iptal) sekmeleri denenmedi. Test +1; tam paket 1085 / 0.
 - **Hizmet kartında hizmetin kendi Modalitesi (kullanıcı "mr.002 ye baktım boştu", "mr.019 da boş"):** kartta yalnız
   Radyoloji Protokolü bölümünün modalitesi vardı (radyoloji_protokol; protokolsüz hizmette boş). İstemin oluşması (1242) ve
-  worklist cihaz eşleşmesi hizmet.modalite'den - o alan girilemiyordu. Genel › Detay'a "Modalite (istem / cihaz)" eklendi.
-  KOSUYOLU'nda MR.* 37 hizmetin hepsi zaten MR (460 addan çözüm) - veri değişmedi.
+  worklist cihaz eşleşmesi hizmet.modalite'den - o alan girilemiyordu. KOSUYOLU'nda MR.* 37 hizmetin hepsi zaten MR
+  (460 addan çözüm) - veri değişmedi. İkinci adım (kullanıcı "radyoloji protokolü sekmesinde göremedim"): alan Genel'den
+  "Radyoloji Protokolü" sekmesinin başına alındı; protokol satırı o sekmeye gömüldü (kartOzellestirme 'hizmet'),
+  protokolün kendi modalitesi gizli. Gömülü koşullu detayın grup sekmesi de koşula uyar (kartSekmeleri - "Radyoloji
+  Tetkiki" işaretsizken sekme yok). 1331: protokol modalitesi hizmetinkiyle eşit (tetikler; toplu protokol satırı
+  açılmaz - varsayılan süre / kontrast yazılırdı). Tarayıcıda (5173, hizmet #413) sekmede Modalite = Röntgen görüldü.
 
 ### 10.11.2026
 

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (713 ad, 196 tanesi birden cok dosyada)
+## Fonksiyonlar (715 ad, 196 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -606,6 +606,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_ftr_seans_sil_koru` | `720_ftr_seans_sil_koruma.sql` | — |
 | `tg_goz_goruntuleme_kilit` | `975_goz_goruntuleme_kilit.sql` | — |
 | `tg_goz_goruntuleme_olcum_kilit` | `975_goz_goruntuleme_kilit.sql` | — |
+| `tg_hizmet_modalite_protokole` | `1331_hizmet_modalite_tek_deger.sql` | — |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
@@ -685,6 +686,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_yon` | `1230_radyoloji_hizmet_sabit_yon.sql` | — |
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
+| `tg_radyoloji_protokol_modalite` | `1331_hizmet_modalite_tek_deger.sql` | — |
 | `tg_radyoloji_rapor_teletip` | `1309_teletip_oru_kuyrugu.sql` | — |
 | `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
 | `tg_randevu_durum_geri` | `1122_randevu_geri_al_kurali.sql` | — |
