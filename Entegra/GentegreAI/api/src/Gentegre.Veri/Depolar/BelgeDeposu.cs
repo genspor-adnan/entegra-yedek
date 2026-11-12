@@ -490,10 +490,6 @@ public sealed partial class BelgeDeposu
         DateTime? eskiBelgeTarihi = null)
     {
         var uyarilar = new List<string>();
-        // STOK BAKİYE DENETİMİ (BelgeDeposu.Bakiye): yalnız YENİ belgede burada; düzenleme kendi anlık görüntüsünü
-        //   geri almadan önce alır (GuncelleIcAsync).
-        var bakiyeOnce = mevcutId == 0 && !secenekler.Taslak
-            ? await BakiyeAnligiAlAsync(baglanti, islem, 0, belge, satirlar, iptal) : null;
 
         var tur = Sayi(belge, "tur");
         var tarafId = Sayi(belge, "tarafId");
@@ -664,12 +660,16 @@ public sealed partial class BelgeDeposu
                     new AlanHatasi("belgeNo", "Zorunlu."));
             // Kural (kullanıcı 12.11.2026): aynı tedarikçiden aynı türde aynı numara girilemez. Düzenlemede belgenin KENDİSİ
             //   hariç ve yalnız numara DEĞİŞTİYSE: Delphi'den gelen eski mükerrerler (ZONE: 2021-22 alış fişleri "2", "001")
-            //   numarasına dokunulmadan düzenlenebilsin.
-            var eskiNo = mevcutId > 0
-                ? Convert.ToString(await baglanti.Komut("select coalesce(belge_no, '') from public.belge where id = @p0", islem, mevcutId)
-                                                .ExecuteScalarAsync(iptal), System.Globalization.CultureInfo.InvariantCulture)
-                : null;
-            if (girilenNo.Length > 0 && girilenNo != eskiNo)
+            //   numarasına dokunulmadan düzenlenebilsin. Kod incelemesi (12.11.2026): numara aynı kalıp TEDARİKÇİ ya da TÜR
+            //   değişirse de denetlenir - başka tedarikçinin belgesi aynı numarayla bu tedarikçiye taşınamaz.
+            var eskiKimlik = "";
+            if (mevcutId > 0)
+            {
+                await using var eskiKomut = baglanti.Komut(
+                    "select coalesce(belge_no, '') || '|' || coalesce(taraf_id, 0) || '|' || tur from public.belge where id = @p0", islem, mevcutId);
+                eskiKimlik = Convert.ToString(await eskiKomut.ExecuteScalarAsync(iptal), System.Globalization.CultureInfo.InvariantCulture) ?? "";
+            }
+            if (girilenNo.Length > 0 && $"{girilenNo}|{tarafId}|{tur}" != eskiKimlik)
                 await MukerrerNoKontrolAsync(baglanti, islem, tur, tarafId, girilenNo, mevcutId, iptal);
             belge["belgeNo"] = girilenNo;
         }
@@ -746,9 +746,16 @@ public sealed partial class BelgeDeposu
             }
 
             if (stokEtkiler)
+            {
+                // STOK BAKİYE DENETİMİ (BelgeDeposu.Bakiye): yalnız YENİ belgede burada (düzenleme kendi anlık görüntüsünü
+                //   geri almadan önce alır - GuncelleIcAsync). Anlık görüntü stok yazılmadan HEMEN önce: stok_durum henüz
+                //   değişmedi; stoğa dokunmayan belge (sipariş, teklif) ölçüm sorgularını hiç ödemez (kod incelemesi).
+                var bakiyeOnce = mevcutId == 0
+                    ? await BakiyeAnligiAlAsync(baglanti, islem, 0, belge, satirlar, iptal) : null;
                 await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"), iptal);
-            if (bakiyeOnce is not null)
-                await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
+                if (bakiyeOnce is not null)
+                    await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
+            }
             // cariAtla: kaynak belge (irsaliye) cariyi ZATEN borclandirdi - ondan
             //   turetilen fatura ikinci kez yazarsa cari bakiye ikiye katlanir.
             //   Stok tarafinda ayni koruma satir bazinda (stok_durum_degis=0) var.

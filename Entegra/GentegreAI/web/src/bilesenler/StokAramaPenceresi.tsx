@@ -527,7 +527,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
   /** Isaretlenenleri sirayla 1'er adet ekler (her biri tek tek eklemeyle ayni yol). */
   const [topluEkleniyor, setTopluEkleniyor] = useState(false);
   const isaretlileriEkle = async () => {
-    if (topluEkleniyor || isaretli.size === 0) return;
+    if (topluEkleniyor || isaretli.size === 0 || herZamanPencere) return;
     setTopluEkleniyor(true);
     try {
       for (const r of isaretli.values()) await sec(r, true);
@@ -569,7 +569,9 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
       //   (kullanici: "kısayolu shift+enter yap"). Shift+Enter ayni elin
       //   ayni tusu - hiz kaybi yok.
       // Birden çok satır işaretliyse (Shift+ok / Ctrl tık) Enter "Seçilenleri Ekle"dir.
-      if (!tekSecim && !e.shiftKey && isaretli.size > 1) { void isaretlileriEkle(); return }
+      //   Adet / fiyat penceresi her zaman açılan belgede (ERP satış / alış) toplu ekleme yok: her kalem pencere açar ve
+      //   sırayla açılan pencereler birbirini ezerdi (kod incelemesi) - imleçteki kalemin penceresi açılır.
+      if (!tekSecim && !herZamanPencere && !e.shiftKey && isaretli.size > 1) { void isaretlileriEkle(); return }
       void sec(hedef, !e.shiftKey);
     }
   };

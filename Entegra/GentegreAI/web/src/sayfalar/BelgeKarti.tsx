@@ -5,7 +5,7 @@ import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
 import { guvenli, mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
-import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
+import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, URUN_IKISI, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
          TAHAKKUK_TURLERI, iadeTipiMi }
@@ -1140,7 +1140,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   // ADET / FİYAT PENCERESİ HER ZAMAN (kullanıcı 12.11.2026): ERP kipinde (GenoTIP / HBYS dışı) satış ve alış
   //   belgesinde aramadan seçim her zaman adet / fiyat penceresini açar; HBYS'de (başvuru, hasta faturası) hızlı ekleme
   //   kuralı aynen. Stok fişi / transfer / talep bu kurala girmez.
-  const kalemPenceresiHerZaman = kullanici?.urunModu !== URUN_GENOTIP && !depoBelgesi && !stokFisiMi;
+  //   Yalnız SAF ERP kipinde (kod incelemesi 12.11.2026): "ikisi" (3) kurulumunda hasta belgeleri de var ve kart orada
+  //   başvuruyu ayırt etmiyor (basvuruMu yalnız GenoTIP'te) - HBYS hızlı ekleme kuralı korunur.
+  const kalemPenceresiHerZaman = kullanici?.urunModu !== URUN_GENOTIP && kullanici?.urunModu !== URUN_IKISI
+    && !depoBelgesi && !stokFisiMi;
   const { stokSecildi, kalemKaydet } = useKalemAkisi({
     satirlar, setSatirlar, setKalem, setKalemDegisti, setHata,
     yerelPara, raporDovizi, setRaporDovizi, setBelgeKuru,

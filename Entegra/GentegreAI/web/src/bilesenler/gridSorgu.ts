@@ -48,11 +48,16 @@ export const SAYISAL_TIPLER = new Set(['sayi', 'para', 'ondalik']);
  */
 export function sayiFiltresi(alan: string, ifade: string): Kosul | null {
   const s = ifade.replace(/\s+/g, '');
+  // TÜRKÇE BİÇİM (kod incelemesi 12.11.2026: grid "1.234,5" gösteriyor, ">1.000" 1,0 diye okunuyordu): virgül varsa
+  //   noktalar binlik ayıracı; yalnız nokta varsa ve hep 3'lü gruplar ("1.000", "12.500.000") binlik; aksi halde
+  //   nokta ondalık ("2.5").
   const sayi = (x: string) => {
-    if (!/^-?\d+([.,]\d+)?$/.test(x)) return null;
-    return Number(x.replace(',', '.'));
+    let s = x;
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : null;
   };
-  const aralik = s.match(/^(-?[\d.,]+)\.\.(-?[\d.,]+)$/);
+  const aralik = s.match(/^(-?[\d.,]+?)\.\.(-?[\d.,]+)$/);
   if (aralik) {
     const a = sayi(aralik[1]), b = sayi(aralik[2]);
     return a === null || b === null ? null : { alan, op: 'arasinda', deger: [Math.min(a, b), Math.max(a, b)] };

@@ -18,6 +18,13 @@ describe('sayiFiltresi', () => {
     expect(sayiFiltresi('kalan', '10..20')).toEqual({ alan: 'kalan', op: 'arasinda', deger: [10, 20] });
     expect(sayiFiltresi('kalan', '20..10')).toEqual({ alan: 'kalan', op: 'arasinda', deger: [10, 20] });
   });
+  it('Türkçe binlik ve ondalık', () => {
+    expect(sayiFiltresi('kalan', '>1.000')).toEqual({ alan: 'kalan', op: 'buyuk', deger: 1000 });
+    expect(sayiFiltresi('kalan', '1.234,5')).toEqual({ alan: 'kalan', op: 'esit', deger: 1234.5 });
+    expect(sayiFiltresi('kalan', '12.500.000')).toEqual({ alan: 'kalan', op: 'esit', deger: 12500000 });
+    expect(sayiFiltresi('kalan', '2.5')).toEqual({ alan: 'kalan', op: 'esit', deger: 2.5 });
+    expect(sayiFiltresi('kalan', '1.000..5.000')).toEqual({ alan: 'kalan', op: 'arasinda', deger: [1000, 5000] });
+  });
   it('yarım / bozuk ifade süzmez', () => {
     expect(sayiFiltresi('kalan', '>')).toBeNull();
     expect(sayiFiltresi('kalan', 'abc')).toBeNull();

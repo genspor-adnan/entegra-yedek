@@ -104,6 +104,29 @@ public sealed class AlisBelgeNumarasiTestleri(ApiSunucuOlgusu api)
         var p5 = await h.PutAsJsonAsync($"/api/belge/{baska}", new { surum = await Surum(baska), belge = Belge(no + "X"), satirlar });
         Assert.True(p5.IsSuccessStatusCode, $"tür {tur}: {(int)p5.StatusCode} {await p5.Content.ReadAsStringAsync()}");
 
+        // Başka tedarikçinin aynı numaralı belgesi bu tedarikçiye TAŞINAMAZ (numara değişmese de denetlenir).
+        var tedarikci2 = await api.Veri.TekDegerAsync<int>(
+            "insert into public.taraf (unvan, tedarikci, sube_id) values (@p0, 1, @p1) returning id", [d.Onek + " Tedarikçi 2", Merkez]);
+        d.Temizle($"delete from public.taraf where id = {tedarikci2}");
+        var y2 = await h.PostAsJsonAsync("/api/belge/", new
+        {
+            belge = new { tur, tipi = 1, belgeTarihi = Tarih, tarafId = tedarikci2, girisDepoId = depo, belgeNo = no + "Z" }, satirlar,
+        });
+        var g2 = await y2.Content.ReadAsStringAsync();
+        Assert.True(y2.IsSuccessStatusCode, $"tür {tur}: {(int)y2.StatusCode} {g2}");
+        var id2 = JsonDocument.Parse(g2).RootElement.GetProperty("belge").GetProperty("id").GetInt32();
+        d.Temizle($"delete from public.islem_log where tablo_id = 30 and kayit_id = {id2}");
+        d.Temizle($"delete from public.mali_hareket where belge_id = {id2}");
+        d.Temizle($"delete from public.stok_izleme where belge_id = {id2}");
+        d.Temizle($"delete from public.belge_satir where belge_id = {id2}");
+        d.Temizle($"delete from public.belge where id = {id2}");
+        await api.Veri.CalistirAsync("update public.belge set belge_no = @p1 where id = @p0", [id, no + "Z"]);   // X'in belgesi de "…Z"
+        var tasi = await h.PutAsJsonAsync($"/api/belge/{id2}", new
+        {
+            surum = await Surum(id2), belge = new { tur, tipi = 1, belgeTarihi = Tarih, tarafId = tedarikci, girisDepoId = depo, belgeNo = no + "Z" }, satirlar,
+        });
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, tasi.StatusCode);
+
         // Başka türde aynı numara serbest (irsaliye no = fatura no olabilir).
         var digerTur = tur == 10 ? 11 : 10;
         var y4 = await h.PostAsJsonAsync("/api/belge/", new

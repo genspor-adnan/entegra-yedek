@@ -817,6 +817,19 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   doküman ucu `hesap` kartını tanımıyordu ("Bilinmeyen kart: hesap" → 500; aynı hata MEDX günlüğünde de vardı). `hesap`
   kart → kaynak eşlemesine (DokumanUclari), izinli kaynaklara (DokumanDeposu) ve erişim kuralına (DokumanErisimi: yetki
   "hesap", kayıt kapsamı hesap listesi) eklendi. API'de liste 200, yükleme / silme çalışıyor.
+- **Kod incelemesi düzeltmeleri (8b62173..HEAD, GentegreAI; kullanıcı "gentegreai projesi için yap"):**
+  * Alış numarası: düzenlemede numara aynı kalıp TEDARİKÇİ / TÜR değişirse de mükerrer denetimi çalışır (başka tedarikçinin
+    belgesi aynı numarayla taşınamaz); eski numara sorgusundaki kapatılmayan komut düzeldi. Test +1 adım.
+  * Stok bakiye anlık görüntüsü yalnız stok etkileyen yeni belgede, stok yazılmadan hemen önce (sipariş / teklif ödemez).
+  * "Her zaman adet / fiyat penceresi" yalnız SAF ERP kipinde ("ikisi" kipinde kart başvuruyu ayırt etmiyor - HBYS kuralı
+    korunur); bu kuralda çoklu işaretli Enter toplu 1'er adet eklemez, imleçteki kalemin penceresini açar (pencereler
+    birbirini eziyordu).
+  * Sayı filtresi Türkçe biçim: virgül varsa nokta binlik ("1.234,5"), yalnız 3'lü gruplu nokta binlik (">1.000" = 1000),
+    aksi nokta ondalık. Test +1.
+  * Bilerek bırakılan: tek cari özet sorgusu 1327 sonrası ~1.6 kat (ZONE 151 → 245 ms, MEDX 43 ms - liste kazancı çok daha
+    büyük); TekKare çok kareli nesnede kare başı işlevsel grup (çizici zaten üst düzey rescale / pencere kullanıyor -
+    gerileme değil); stokKontrolu=false akışlarında geriye dönük engel (kullanıcı kararı "her zaman engelle"); kurum profili
+    şube SKRS'sinin ekrandan düzenlenememesi (karar bekliyor). Tam paket 1078 / 0 düşen.
 
 ### 10.11.2026
 
