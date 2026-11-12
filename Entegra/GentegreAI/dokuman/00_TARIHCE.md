@@ -860,6 +860,10 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * ORC-18: istemin atanmış cihazının TeleRadyoloji seri no → AE adı → cihaz kodu; cihaz yoksa DICOM modalite (MR…).
     fn_teletip_orm_verisi 'CihazGirisi' verir (1330).
   Sonra aynı 6 mesaj: hepsi yeşil, kırmızı 0. XO (güncelleme) / CA (iptal) sekmeleri denenmedi. Test +1; tam paket 1085 / 0.
+- **Hizmet kartında hizmetin kendi Modalitesi (kullanıcı "mr.002 ye baktım boştu", "mr.019 da boş"):** kartta yalnız
+  Radyoloji Protokolü bölümünün modalitesi vardı (radyoloji_protokol; protokolsüz hizmette boş). İstemin oluşması (1242) ve
+  worklist cihaz eşleşmesi hizmet.modalite'den - o alan girilemiyordu. Genel › Detay'a "Modalite (istem / cihaz)" eklendi.
+  KOSUYOLU'nda MR.* 37 hizmetin hepsi zaten MR (460 addan çözüm) - veri değişmedi.
 
 ### 10.11.2026
 
