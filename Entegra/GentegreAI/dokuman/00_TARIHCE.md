@@ -775,6 +775,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   yalnız teklif listesinde (`Liste.tsx` kural 4) - kolon tercihi `belge` kaynağı başına TEK kayıt, teklifte açılan kolon
   öteki listelere taşınıyordu. Alış irsaliyesinde sabit baş sıra Belge No · Tarih · Tedarikçi · Kaynak · Hedef (kayıtlı
   tercih sırayı bozamaz).
+- **Sekme çipi kardeşleri tek ekran sekmesinde (kullanıcı: "alış irsaliye listesinde gelen kutusu veya kullanım dışı sekmesine
+  tıkladığımda yeni sekmeler açıyor… karışıklığa yol açıyor"):** `EkranSekmeleri.SEKME_KARDES` liste tanımlarındaki
+  `sekme: true` + `rota` çip gruplarından türer; kardeş rota (gelen-irsaliye, gelen-irsaliye-disi, gelen-belge,
+  gelen-belge-disi) grubun ilk çipinin sekmesine düşer, sekme yerinde içerik değiştirir. Tarayıcıda: alış irsaliyesi →
+  Gelen Kutusu → Kullanım Dışı → Sistem tek sekme; alış faturasının gelen kutusu kendi sekmesinde.
 
 ### 10.11.2026
 

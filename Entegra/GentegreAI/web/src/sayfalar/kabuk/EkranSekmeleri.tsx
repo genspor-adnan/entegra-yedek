@@ -3,6 +3,7 @@ import { NavigationType, UNSAFE_LocationContext, type Location } from 'react-rou
 import { EkranSekmesiBaglami, SekmeGorunurBaglami, baslikAnahtari, ekstreKimligi, yuvaYolu } from '../../bilesenler/sekmeBaglami';
 import { PALET_AC_OLAYI } from '../Baslangic';
 import { menuYolu, yolEslesir } from '../../bilesenler/taleplerim/personelTalebi';
+import { LISTELER } from '../listeTanimlari';
 import { c } from '../../dil/ceviri';
 import { MenuIkon, type MenuSatiri } from './menuAgaci';
 
@@ -32,6 +33,23 @@ interface Sekme { anahtar: string; baslik: string; ikon: string; konum: Location
 
 const SEKME_TAKMA: Record<string, string> = { '/cari-ekstre': '/ekstre', '/hesap-ekstre': '/ekstre', '/cari-devir': '/devir' };
 
+/**
+ * SEKME ÇİPİ KARDEŞLERİ AYNI EKRAN SEKMESİ (kullanıcı 12.11.2026: "alış irsaliye listesinde gelen kutusu veya kullanım
+ * dışı sekmesine tıkladığımda yeni sekmeler açıyor… karışıklığa yol açıyor"): liste tanımında `sekme: true` + `rota`
+ * taşıyan çip grubu (Sistem / Gelen Kutusu / Kullanım Dışı) tek ekranın görünümleridir - kardeş rota grubun İLK
+ * çipinin sekmesine düşer, sekme yerinde içerik değiştirir. Kural tanımlardan türer: yeni grup eklenince kendiliğinden.
+ */
+export const SEKME_KARDES: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  for (const l of LISTELER) {
+    const grup = (l.cipler ?? []).filter(x => x.sekme && x.rota);
+    if (grup.length < 2) continue;
+    const ana = '/' + grup[0].rota;
+    for (const x of grup) if ('/' + x.rota !== ana) m['/' + x.rota] ??= ana;
+  }
+  return m;
+})();
+
 function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, { ad: string; ikon: string }>,
                   kartSekmeleri?: Record<string, { ad: string; ikon: string }>) {
   // KART KENDİ SEKMESİNDE (liste tanımı yeniSekmede): "/hasta/yeni" ve "/hasta/123" ayrı
@@ -48,7 +66,7 @@ function sekmeBul(satirlar: MenuSatiri[], konum: Location, ek?: Record<string, {
   }
   // ESKİ EKSTRE YOLLARI (1158): /cari-ekstre ve /hesap-ekstre /ekstre'ye yönlenir - yönlendirme
   //   anındaki sekme de Ekstre sekmesi sayılsın; yoksa boş bir "Hesap Ekstresi" sekmesi kalıyordu.
-  const yol = SEKME_TAKMA[konum.pathname] ?? menuYolu(konum.pathname, konum.state);
+  const yol = SEKME_TAKMA[konum.pathname] ?? SEKME_KARDES[konum.pathname] ?? menuYolu(konum.pathname, konum.state);
   if (yol === '/' || yolEslesir(yol, BASLANGIC)) return { anahtar: BASLANGIC, baslik: 'Başlangıç', ikon: '🏠' };
   // Menüde olmayan bilinen ekran (gösterge paneli) kendi adıyla.
   if (ek?.[konum.pathname]) return { anahtar: konum.pathname, baslik: ek[konum.pathname].ad, ikon: ek[konum.pathname].ikon };
