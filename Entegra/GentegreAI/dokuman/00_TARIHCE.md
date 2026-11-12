@@ -764,6 +764,11 @@ gönderimlerde mirth connect kullanmak istiyorum"; "mirth 4.5.2 kullanacağız".
   * Kural: aynı tedarikçi + aynı tür + aynı numara (iptal hariç) girilemez; başka türde aynı numara serbest. Test
     `AlisBelgeNumarasiTestleri` (4 tür × okuma / aynı numarayla kaydet / düzelt / mükerrer 422 / eski mükerrer düzenlenir /
     başka tür serbest). Tam paket 1076. Yerel UNIVERSE / ZONE yeniden yayımlandı.
+- **Başvuru kolonları yalnız başvuru listesinde (kullanıcı: "alış irs listesinden bölüm, ödeyen kurum, doktor kolonlarını
+  kaldır", "alış listelerinin hepsinden kaldır", "başvuruda kalsın"):** `Liste.tsx` merkezi gizleme kuralına 3. madde -
+  `belge` kaynaklı ve `basvuruSuzgeci` olmayan her listede ödeyen kurum / sözleşme / bölüm / doktor / tamamlanma (ve id
+  kolonları) gizli. Değerleri başvurunun kendi kaydından (belge_basvuru.id = belge.id) geldiği için başka belgede her satırda
+  boştu. Tarayıcıda: alış irsaliyesi / faturası listesinde yok, başvuruda var.
 
 ### 10.11.2026
 

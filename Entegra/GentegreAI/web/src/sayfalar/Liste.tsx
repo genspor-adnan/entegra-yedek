@@ -611,9 +611,15 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
     // Basvurudan kesilen faturalarin e-Belge ozeti YALNIZ BASVURU listesinde (kullanıcı 09.11.2026: "bu sütun
     //   başvuruda kalsın ama satış sipariş listesinden kaldır") - ERP sipariş listesi de tür 19 ama orada kafa karıştırıyordu.
     if (tanim.kaynak === 'belge' && !(tanim.yeniBelgeTuru === 19 && tanim.basvuruSuzgeci)) liste.push('faturaEBelgeDurum');
+    // 3) BASVURU KOLONLARI yalnız başvuru listesinde (kullanıcı 12.11.2026: "alış irs listesinden bölüm, ödeyen kurum,
+    //    doktor kolonlarını kaldır"): değerleri başvurunun kendi kaydından (belge_basvuru.id = belge.id) gelir - alış,
+    //    satış, stok belgesinde her satırda boştur, kolon seçicide de yer kaplar.
+    if (tanim.kaynak === 'belge' && !tanim.basvuruSuzgeci)
+      liste.push('odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor', 'tamamlanma',
+                 'odeyenKurumId', 'sozlesmeId', 'altKurum', 'altKurumAdi', 'sgkKullan', 'bolumId', 'doktorId');
     if (uretimUyarlama) liste.push(...uretimUyarlama.gizliKolonlar);
     return liste;
-  }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, klasorSecim.tur, uretimUyarlama]);
+  }, [tanim.gizliKolonlar, tanim.kaynak, tanim.yeniBelgeTuru, tanim.basvuruSuzgeci, klasorSecim.tur, uretimUyarlama]);
 
   const klasorluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (tanim.kaynak !== 'dokuman' || klasorSecim.tur === 'tum') return temel;
