@@ -734,6 +734,16 @@ begin
       where p.durum = 1;
   end if;
 
+  -- Bakanlık zorunlu parçası (^3 Bulgular / ^4 Sonuç) BOŞ çıkan şablonlar: radyolog bu şablonla yazdığı raporu o parça
+  --   dolmadan onaylatamaz (profil açıksa) - listesi rapora (1333).
+  insert into eski.aktarim_rapor (adim, olcu, eski, yeni, notlar)
+  select 'rapor şablonu', 'Bulgular / Sonuç boş', null, count(distinct s.id),
+         left(coalesce(string_agg(distinct s.kod || ' ' || s.ad, '; '), ''), 2000)
+    from public.radyoloji_sablon s
+    join public.radyoloji_sablon_bolum b on b.sablon_id = s.id
+   where s.aciklama like 'Eski HBYS şablonu%' and b.bakanlik_parca in (3, 4)
+     and btrim(coalesce(b.varsayilan_metin, '')) = '';
+
   insert into eski.aktarim_rapor (adim, olcu, eski, yeni, notlar)
   select 'rapor şablonu', 'kayıt (içi dolu)', (select count(*) from zz_sablon),
          (select count(*) from public.radyoloji_sablon where aciklama like 'Eski HBYS şablonu%'),

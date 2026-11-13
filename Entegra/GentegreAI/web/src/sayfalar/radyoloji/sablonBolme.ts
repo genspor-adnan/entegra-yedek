@@ -60,6 +60,9 @@ export function baslikBul(metin: string): [number, string] | null {
   return null;
 }
 
+/** Eski HBYS (Word) yer tutucusu: @ADSOYAD, @TETKIK ... (web'inkiler {istem.x}). */
+const YER_TUTUCU = /@[A-ZÇĞİÖŞÜ]{3,}/;
+
 const kacis = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Tek A4 HTML'i Bakanlık parçalarına böler. Dört parça her zaman döner (boşu boş); klinik bilgi varsa başta. */
@@ -69,12 +72,12 @@ export function bakanligaBol(html: string): SablonBolumu[] {
   let etkin = 3;   // başlıktan önceki kısım Bulgular'a
   let baslikGoruldu = false;
   for (const dugum of Array.from(govde.childNodes)) {
+    if (dugum.nodeType !== 1 && dugum.nodeType !== 3) continue;               // HTML yorumu (<!--StartFragment-->) vb.
     const el = dugum as HTMLElement;
     const metin = dugum.textContent ?? '';
     const s = sade(metin.replace(/\s+/g, ' ').trim());
     if (s.startsWith('SAYGILARIM')) break;                                    // imza ve sonrası
     if (/^SAYIN MESLEKTASIM[,;:.!]?$/.test(s)) continue;                       // yalnız hitap
-    if (!baslikGoruldu && /@[A-ZÇĞİÖŞÜ]{3,}/.test(metin)) continue;            // eski yer tutuculu üst bilgi
     const blok = dugum.nodeType === 1 && /^(P|DIV|H[1-6]|LI)$/.test(el.tagName);
     const b = blok ? baslikBul(metin) : null;
     if (b) {
@@ -83,6 +86,10 @@ export function bakanligaBol(html: string): SablonBolumu[] {
       if (b[1].trim()) kova[etkin].push(`<p>${kacis(b[1].trim())}</p>`);
       continue;
     }
+    // İlk başlıktan önce eski yer tutuculu KÜNYE: başlık sözcüğü yok ve yer tutucular çıkınca kısa (≤ 300) - bütün
+    //   metni saran tek Word tablosu atılmaz (1333).
+    if (!baslikGoruldu && YER_TUTUCU.test(metin) && !/(BULGU|SONUC|TEKNIK|KARSILASTIRMA|IZLENIM|KANAAT)[A-Z ]*:/.test(s)
+        && metin.replace(new RegExp(YER_TUTUCU.source, 'g'), '').replace(/\s+/g, ' ').trim().length <= 300) continue;
     const parca = dugum.nodeType === 1 ? el.outerHTML : kacis(metin);
     if (parca.trim()) kova[etkin].push(parca);
   }

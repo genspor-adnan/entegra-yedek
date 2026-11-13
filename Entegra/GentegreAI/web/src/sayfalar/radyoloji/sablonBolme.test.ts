@@ -45,6 +45,17 @@ describe('şablon bölme (1216)', () => {
     expect(b[2].html).toBe('<p>Ölçüm @OLCUM mm.</p>');
   });
 
+  // 1333 (kod incelemesi) - aynı örnekler SablonBakanlikBolmeTestleri'nde.
+  it('yer tutuculu başlık kaybolmaz, metni saran tablo atılmaz, HTML yorumu yok sayılır', () => {
+    const a = bakanligaBol('<p>BULGULAR: @OLCUM mm kalınlık.</p><p>SONUÇ:</p><p>Normal.</p>');
+    expect(a[2].html).toBe('<p>@OLCUM mm kalınlık.</p>');
+    const uzun = 'Karaciğer boyutları normal, parankim homojen. '.repeat(8);
+    const t = bakanligaBol(`<table><tbody><tr><td>@ADSOYAD</td><td>${uzun}</td></tr></tbody></table>`);
+    expect(t[2].html).toContain('Karaciğer boyutları normal');
+    const k = bakanligaBol('<!--StartFragment--><p>Serbest metin.</p><!--EndFragment-->');
+    expect(k[2].html).toBe('<p>Serbest metin.</p>');
+  });
+
   it('başlıksız metin bütünüyle bulgulara', () => {
     const b = bakanligaBol('<p>Serbest metin.</p>');
     expect(b.find(x => x.bakanlikParca === 3)?.html).toBe('<p>Serbest metin.</p>');

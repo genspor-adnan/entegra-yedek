@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (720 ad, 196 tanesi birden cok dosyada)
+## Fonksiyonlar (721 ad, 199 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -273,7 +273,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hizmet_tanim_kopyala` | `1239_skrs_yon_ailesi_fiyat_liste.sql` | 1237_skrs_yon_ailesi_ayri_hizmet.sql |
 | `fn_hizmet_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `fn_hizmet_yonleri` | `1232_skrs_yon_ailesi.sql` | — |
-| `fn_html_varlik_coz` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
+| `fn_html_varlik_coz` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | 1332_radyoloji_sablon_bakanlik_parcalari.sql |
 | `fn_ilac_alerji_kontrol` | `935_ilac_alerji_sinif.sql` | 413_recete.sql, 414_metin_sadelestir.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
@@ -443,14 +443,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_rad_alan_paketi_uygula` | `1217_radyoloji_alan_paketleri.sql` | — |
 | `fn_rad_bakanlik_eksik` | `809_bakanlik_rapor_parcalari.sql` | — |
 | `fn_rad_bakanlik_parca` | `809_bakanlik_rapor_parcalari.sql` | — |
-| `fn_rad_baslik_bul` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
+| `fn_rad_baslik_bul` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | 1332_radyoloji_sablon_bakanlik_parcalari.sql |
+| `fn_rad_bosluk_sinifi` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | — |
 | `fn_rad_duzden_html` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
 | `fn_rad_html_duz` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
 | `fn_rad_istem_hizmet_kullanim` | `550_hizmet_kullanim_puani.sql` | — |
 | `fn_rad_kontrast_obx17` | `811_bakanlik_degerlendirme_ve_kontrast.sql` | — |
 | `fn_rad_modalite_kod` | `810_bakanlik_hekim_ve_modalite.sql` | — |
 | `fn_rad_rol_tazele` | `1288_rad_rol_temsilci_haric.sql` | 326_radyoloji_prim_rol.sql, 332_prim_zamani.sql, 825_gonderen_primi_kendi_adina.sql |
-| `fn_rad_sablon_bol` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
+| `fn_rad_sablon_bol` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | 1332_radyoloji_sablon_bakanlik_parcalari.sql |
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_accession_ver` | `1229_radyoloji_yon_accession.sql` | — |
 | `fn_radyoloji_dicom_modalite` | `1301_radyoloji_mwl.sql` | — |

@@ -72,6 +72,31 @@ public sealed class SablonBakanlikBolmeTestleri(VeritabaniOlgusu olgu) : IClassF
         Assert.Equal("<p>Ölçüm @OLCUM mm.</p>", y[2].Html);
     }
 
+    // 1333 (kod incelemesi) - aynı örnekler sablonBolme.test.ts'te.
+    [VtFact]
+    public async Task Yer_tutuculu_baslik_ve_saran_tablo_korunur_yorum_yok_sayilir()
+    {
+        if (!_olgu.Baglandi(nameof(Yer_tutuculu_baslik_ve_saran_tablo_korunur_yorum_yok_sayilir))) return;
+        var a = await Bol("<p>BULGULAR: @OLCUM mm kalınlık.</p><p>SONUÇ:</p><p>Normal.</p>");
+        Assert.Equal("<p>@OLCUM mm kalınlık.</p>", a[2].Html);
+        var uzun = string.Concat(Enumerable.Repeat("Karaciğer boyutları normal, parankim homojen. ", 8));
+        var t = await Bol($"<table><tbody><tr><td>@ADSOYAD</td><td>{uzun}</td></tr></tbody></table>");
+        Assert.Contains("Karaciğer boyutları normal", t[2].Html);
+        var k = await Bol("<!--StartFragment--><p>Serbest metin.</p><!--EndFragment-->");
+        Assert.Equal("<p>Serbest metin.</p>", k[2].Html);
+    }
+
+    [VtFact]
+    public async Task Gecersiz_karakter_varligi_patlatmaz_oldugu_gibi_kalir()
+    {
+        if (!_olgu.Baglandi(nameof(Gecersiz_karakter_varligi_patlatmaz_oldugu_gibi_kalir))) return;
+        var cozulen = (await _olgu.Gerekli().ListeAsync("select public.fn_html_varlik_coz(@p0)",
+            ["a&#xD800;b&#55357;c&#x0;d&#xFFFFFF;e&#0;f&#231;g&#xE7;"], o => o.GetString(0)))[0];
+        Assert.Equal("a&#xD800;b&#55357;c&#x0;d&#xFFFFFF;e&#0;fçgç", cozulen);
+        var b = await Bol("<p>BULGULAR:</p><p>Kist &#55357; izlendi, boyutu normal sınırlarda, çevre doku doğal.</p>");
+        Assert.Contains("Kist", b[2].Html);
+    }
+
     [VtFact]
     public async Task Basliksiz_metin_butunuyle_bulgulara_klinik_bilgi_ayri()
     {

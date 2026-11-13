@@ -39,6 +39,23 @@ istediği 4 parça esas olmalı".
   boş EK RAPORU (tek "Ek Rapor" bölümü, parça 0) - dokunulmadı. **Açık sorun:** ek rapor tek "Ek Rapor" bölümüyle
   açıldığı için profil açıkken hiçbir ek rapor onaylanamaz; Teletıp ek raporu ayrı ORU (OBX-11 "C") olarak kendi
   parçalarıyla gönderir (1309) - ek raporun dört parçayla açılması gerekiyor (karar bekliyor).
+- Commit `8ccf259` (1332). **/code-review düzeltmeleri - göç 1333** (kullanıcı: "gentegreai tarafı bulguları
+  düzelt"; 1332 geçmiş, düzenlenmedi):
+  * `fn_html_varlik_coz`: geçersiz kod noktası (vekil aralık, 0, > 0x10FFFF) `chr()`'ı patlatıp göçü / aktarımı geri
+    aldırıyordu - artık olduğu gibi kalır. **Kalan risk:** 1332 henüz çalışmamış bir DB'de 1332 eski işlevle böler
+    (1333 sonra gelir); aktarım HTML'i .NET HtmlEncode çıktısı olduğu için bozuk varlık beklenmiyor.
+  * Eski üst bilgi kuralı daraldı (TS + SQL aynı): başlık denetimi önce ("BULGULAR: @OLCUM" başlık kalır); ilk
+    başlıktan önceki `@` yer tutuculu düğüm yalnız başlık sözcüğü yoksa ve yer tutucular çıkınca ≤ 300 karakterse
+    atılır (bütün metni saran tek Word tablosu korunur). HTML yorum düğümü (`<!--StartFragment-->`) web'de artık
+    metne dönmüyor (SQL'le aynı). Boşluk sınıfı `fn_rad_bosluk_sinifi()` - 1332'de dosyaya ham Unicode yazılmıştı.
+  * 1332'nin sürüm kaydı aynı sürümde satır varsa atlanıyordu: o durumdaki şablonlar 1333'te UYARI olarak listelenir
+    (KOSUYOLU'da yok, 338'inin de 1332 sürümü var).
+  * Onarım: 1332'nin böldüğü, dokunulmamış ve yeni kuralla farklı çıkan şablonlar dondurulmuş tek A4'ten yeniden
+    bölünür - KOSUYOLU'da **0** (eski kural veri kaybettirmemiş). Bulgular'ı boş 3 şablon (MR-AHMET.07, MR.09
+    Difüzyon; MR.81 Spektroskopi) eski şablonda da boş ("Bulgular: SONUÇ:").
+  * `esle.sql`: Bulgular / Sonuç boş eski HBYS şablonları `eski.aktarim_rapor`a satır olarak.
+  * Kapsam ("her tek Rapor bölümlü şablon") bilerek değişmedi - kullanıcı kararı "4 parça esas".
+  * Test: `SablonBakanlikBolmeTestleri` 6/6, radyoloji vitest 22/22, tsc temiz.
 
 ---
 
