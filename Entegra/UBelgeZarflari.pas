@@ -116,6 +116,7 @@ type
     GridStoklarDBTableView2FATBASID: TcxGridDBColumn;
     GridHizmetlerDBTableView1FATBASID: TcxGridDBColumn;
     GridFatBasliklarDBTableView1OZELKOD: TcxGridDBColumn;
+    GridFatBasliklarDBTableView1OZELKOD2: TcxGridDBColumn;
     procedure TabZarflarAfterScroll(DataSet: TDataSet);
     procedure ToolButton1Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
@@ -161,8 +162,8 @@ var
   i:Integer;
 begin
   Sonuc := Tablo.ListedenCokluSecim('Eklemek istediğiniz belgeleri seçiniz.',
-    'select F.ID,F.FATURATARIH,F.TUR,R.FIRMA,F.FATURANO,F.OZELKOD,FATURA_TUTARI,F.ACIKLAMA from FATBASLIK F inner join REHBER R on F.REHBERID=R.ID where isnull(F.ZARFID,0)=0 and TUR in (11,12) order by 2',
-    [nil,nil,Tablo.RepKasaTurleriReadOnly,nil,nil,nil,nil,Tablo.cxEditRepository1MemoItem1],['ID','Tarih','Tür','Firma','Belge No','Özel Kod','Tutar','Açıklama']);
+    'select F.ID,F.FATURATARIH,F.TUR,R.FIRMA,F.FATURANO,F.OZELKOD,F.OZELKOD2,FATURA_TUTARI,F.ACIKLAMA from FATBASLIK F inner join REHBER R on F.REHBERID=R.ID where isnull(F.ZARFID,0)=0 and TUR in (11,12) order by 2',
+    [nil,nil,Tablo.RepKasaTurleriReadOnly,nil,nil,nil,nil,nil,Tablo.cxEditRepository1MemoItem1],['ID','Tarih','Tür','Firma','Belge No','Özel Kod','Özel Kod2','Tutar','Açıklama']);
   for I := 0 to Sonuc.Count - 1 do
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update FATBASLIK set ZARFID=&ZarfID where ID=&FBid',['&ZarfID','&FBid'],[TabZarflar.FieldByName('ID').AsInteger,Sonuc[i]]);
   TabloYenile(TabZarfFatBaslik,[TabZarflar.FieldByName('ID').AsInteger]);

@@ -307,8 +307,8 @@ zorunluluk** — bugün `dis_erisim_no` boş kalabiliyor.
 | `OBR-31` | Süreye takılan tekrar istemde gerekçe `Kod^Ad` (SKRS listesi) | — | Kapsam dışı (istemi biz açmıyoruz) |
 | `OBR-34` | Teknisyen `ID&Soyad&Ad&&&Ön ek` | `radyoloji_istem` teknisyen | Bağ kurulacak |
 | `OBR-36` | Randevu ya da **çekim kabul** tarih-saati (40 dk kuralının girdisi) | `cekim_zamani` / `gelis_zamani` | Hangisi olduğu netleşmeli |
-| `OBX-2/3` | `TX` + `HTML^BASE64` ya da `TXT^BASE64` | — | Üreticide |
-| `OBX-5` | **Rapor 4 parçaya bölünür**, `~` ile ayrık, her parça **base64**: `^1` Teknik · `^2` Karşılaştırma · `^3` Bulgular · `^4` Sonuç ve Öneriler. Parça sırası serbest ama **`^3` ve `^4` eksikse hata**; **Bulgular < 50 karakter ise hata** | `radyoloji_rapor_bolum` (serbest başlık) | **Sabit eşleme gerekir** |
+| `OBX-2/3` | `TX` + `HTML^BASE64` ya da `TXT^BASE64` | — | **`HTML^BASE64`** (1334; 1309–1333 arası `TXT^BASE64` gitti). Kurulumda **HTMLBASE64** bildirilir |
+| `OBX-5` | **Rapor 4 parçaya bölünür**, `~` ile ayrık, her parça **base64**: `^1` Teknik · `^2` Karşılaştırma · `^3` Bulgular · `^4` Sonuç ve Öneriler. Parça sırası serbest ama **`^3` ve `^4` eksikse hata**; **Bulgular < 50 karakter ise hata** | `radyoloji_rapor_bolum.bakanlik_parca` (809); parça gövdesi bölümün **`metin_html`**'i, yoksa düz metin paragraflanır (`fn_rad_bakanlik_parca_html`, 1334). 50 karakter / boş denetimi düz `metin`de (`fn_rad_bakanlik_eksik`) | **Var** |
 | `OBX-11` | `F` (final) | rapor durumu | **Var** |
 | `OBX-13` | **İstem nedeni değerlendirme** (1 Yok … 5 Mükemmel) `^` **çekim kalitesi** (1 Çok kötü … 5 Çok iyi). Örnek `1^2` | — | **Yeni alan** (`goruntu_durum` yerine geçmez) |
 | `OBX-16` | **Raporu onaylayan radyolog TCKN**`^Soyad^Ad^^^Ön ek`, varsa ikinci radyolog `~` ile | `rapor.onaylayan_id` → taraf TCKN | Çekilecek — **eksikse hata** |
@@ -370,7 +370,7 @@ Kılavuz bunları kod yazmadan önce şart koşuyor (§3.1.3, §3.1.4.1, §4.2):
 | Encoding beyanı | UTF8 dışında (Windows1254) kullanılacaksa **mutlaka önceden** bildirilir |
 | HL7 **alıcımız** | SBA ağı içinden erişilebilir, **TLS**, yalnız Teleradyoloji SBA içi IP'sinden veri kabul eder |
 | Alıcı adres + port | Teleradyoloji birimine bildirilir |
-| Desteklenen rapor biçimi | `HTMLBASE64` (ya da `TXT^BASE64`) bildirilir |
+| Desteklenen rapor biçimi | **`HTMLBASE64`** bildirilir - 1334'ten beri gönderdiğimiz biçim bu (`TXT^BASE64` artık üretilmiyor; gelen mesajda ikisi de okunur) |
 | Radyolog tanıtımı | Teleradyoloji üzerinden rapor yazacak radyologların **TCKN ve isimleri** HBYS'ye tanıtılır |
 | WADO | Public port yönlendirmesi; **statik** SBA içi/dışı IP + port bildirilir; servis **7/24**; **DICOM ve JPEG iki biçim de** desteklenmeli |
 

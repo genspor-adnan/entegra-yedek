@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (721 ad, 199 tanesi birden cok dosyada)
+## Fonksiyonlar (723 ad, 200 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -443,7 +443,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_rad_alan_paketi_uygula` | `1217_radyoloji_alan_paketleri.sql` | — |
 | `fn_rad_bakanlik_eksik` | `809_bakanlik_rapor_parcalari.sql` | — |
 | `fn_rad_bakanlik_parca` | `809_bakanlik_rapor_parcalari.sql` | — |
+| `fn_rad_bakanlik_parca_html` | `1334_teletip_oru_html_base64.sql` | — |
 | `fn_rad_baslik_bul` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | 1332_radyoloji_sablon_bakanlik_parcalari.sql |
+| `fn_rad_bolum_html` | `1334_teletip_oru_html_base64.sql` | — |
 | `fn_rad_bosluk_sinifi` | `1333_radyoloji_sablon_bolme_duzeltme.sql` | — |
 | `fn_rad_duzden_html` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
 | `fn_rad_html_duz` | `1332_radyoloji_sablon_bakanlik_parcalari.sql` | — |
@@ -538,7 +540,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
 | `fn_teletip_orm_verisi` | `1330_teleradyoloji_dogrulayici_uyum.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql, 1305_teletip_hastane_referansi.sql, 1324_teletip_eski_ayar_yolu_kaldir.sql, 1326_teleradyoloji_orm_sevk_onay_hekim.sql |
-| `fn_teletip_oru_verisi` | `1309_teletip_oru_kuyrugu.sql` | — |
+| `fn_teletip_oru_verisi` | `1334_teletip_oru_html_base64.sql` | 1309_teletip_oru_kuyrugu.sql |
 | `fn_temsilci_rolu_tazele` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |

@@ -709,8 +709,6 @@ type
     procedure FormActivate(Sender: TObject);
     procedure PopupMenuYazPopup(Sender: TObject);
     procedure LabelNavlunSigortaClick(Sender: TObject);
-    procedure EditFatNoKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
 
   private
     { Private declarations }
@@ -6774,14 +6772,6 @@ begin
         TabFatura.Post;
      end;
   end;
-end;
-
-procedure TFaturaWizardDlg.EditFatNoKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
-begin
-   if TabFatbaslik.FieldByName('FATURANO').AsString='' then
-      TabFatbaslik.FieldByName('FATURASERI').AsString := ''
-   else
-      TabFatbaslik.FieldByName('FATURASERI').AsString := '0';
 end;
 
 procedure TFaturaWizardDlg.EditILPropertiesInitPopup(Sender: TObject);

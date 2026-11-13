@@ -512,7 +512,9 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         var ubl = v.AktarimUbl != "" ? v.AktarimUbl : UblUretici.Uret(v, await NotlarAsync(b, v, iptal), xslt);
         string html;
         try { html = xslt.Length > 0 ? Donustur(ubl, xslt) : SadeHtml(v); }
-        catch (Exception h) when (h is XsltException or XmlException) { html = SadeHtml(v); }
+        // ŞABLON UYGULANAMADI (13.11.2026): sebep sade görünümün başında gösterilir - sessiz düşüş kullanıcıyı
+        //   "şablon yüklendi ama görünmüyor" diye bırakıyordu (MEDX, XPath 2.0 dizi karşılaştırması).
+        catch (Exception h) when (h is XsltException or XmlException) { html = SadeHtml(v, h.InnerException?.Message ?? h.Message); }
         if (filigran && !EFaturaKodlari.Gonderildi(v.EfaturaDurum)) html = FiligranEkle(html, v.Irsaliye ? "TASLAK İRSALİYE" : "TASLAK FATURA");
         // AKTARILAN BELGE (e_belge kaydı yok): görüntü belge verisinden üretildi, GİB'e giden aslı değil - her zaman işaretli.
         if (v.EBelgeId == 0) html = FiligranEkle(html, "AKTARILAN BELGE · GÖRÜNTÜ");
@@ -556,7 +558,8 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
     private static string Donustur(string ubl, string xslt)
     {
         var donusum = new XslCompiledTransform();
-        using (var xr = XmlReader.Create(new StringReader(xslt), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit }))
+        // XSLT 2.0 kalıpları 1.0'a çevrilir (XsltUyum) - yalnız yerel görünüm için; GİB'e giden kopya dokunulmaz.
+        using (var xr = XmlReader.Create(new StringReader(XsltUyum.Xslt10Uyumlu(xslt)), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit }))
             donusum.Load(xr, new XsltSettings(enableDocumentFunction: false, enableScript: false), null);
         using var ur = XmlReader.Create(new StringReader(ubl), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
         var sb = new StringBuilder();
@@ -575,11 +578,14 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         return i >= 0 ? html.Insert(i, f) : html + f;
     }
 
-    private static string SadeHtml(EFaturaVerisi v)
+    /// <param name="uyari">XSLT şablonu uygulanamadıysa sebebi; görünümün başında gösterilir.</param>
+    private static string SadeHtml(EFaturaVerisi v, string? uyari = null)
     {
         string E(string s) => System.Net.WebUtility.HtmlEncode(s);
         string P(decimal d) => d.ToString("N2", new System.Globalization.CultureInfo("tr-TR")) + " " + v.ParaKodu;
         var sb = new StringBuilder("<!doctype html><html><head><meta charset=\"utf-8\"><style>body{font:12px Arial;margin:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:4px}th{background:#eee}.s{text-align:right}</style></head><body>");
+        if (!string.IsNullOrWhiteSpace(uyari))
+            sb.Append($"<p style=\"background:#fff3cd;border:1px solid #e0b000;padding:6px 10px\">⚠ XSLT şablonu uygulanamadı, sade görünüm gösteriliyor: {E(uyari)}</p>");
         sb.Append($"<h2>{E(EFaturaKodlari.TurAdi(v.EfaturaDurum))} {E(v.EBelgeNo)}</h2>");
         sb.Append($"<p><b>{E(v.Gonderici.Unvan)}</b> (VKN {E(v.Gonderici.Vkno)})<br>Sayın <b>{E(v.Alici.Unvan)}</b> ({E(v.Alici.Vkno)})<br>{E(v.Alici.Adres)} {E(v.Alici.Ilce)} / {E(v.Alici.Il)}</p>");
         sb.Append($"<p>Tarih: {v.Tarih:dd.MM.yyyy} · ETTN: {E(v.Uuid)} · Senaryo: {v.Profil} · Tip: {v.FaturaTipi}</p>");

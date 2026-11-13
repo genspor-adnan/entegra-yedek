@@ -383,10 +383,16 @@ public sealed class TeletipOrmServisi(VeriKaynagi veri, MllpIstemci mllp, ILogge
 public sealed record TeletipRaporVerisi
 {
     public int RaporId { get; init; }
+    /// <summary>Dört parçanın düz metni: denetim (fn_rad_bakanlik_eksik) ve kurum profili okur.</summary>
     public string Teknik { get; init; } = "";
     public string Karsilastirma { get; init; } = "";
     public string Bulgular { get; init; } = "";
     public string Sonuc { get; init; } = "";
+    /// <summary>Dört parçanın HTML'i (1334, fn_rad_bakanlik_parca_html): OBX-5 HTML^BASE64 gövdesi.</summary>
+    public string TeknikHtml { get; init; } = "";
+    public string KarsilastirmaHtml { get; init; } = "";
+    public string BulgularHtml { get; init; } = "";
+    public string SonucHtml { get; init; } = "";
     public DateTime? OnayZamani { get; init; }
     public DateTime? CekimZamani { get; init; }
     public short IstemNedeniPuan { get; init; }
@@ -429,6 +435,8 @@ public static class TeletipOruKurucu
         SysTakipNo = v.SysTakipNo, ModaliteKodu = v.Modalite, CihazGirisi = v.CihazGirisi,
         TeknisyenId = v.Teknisyen.Kimlik, TeknisyenSoyad = v.Teknisyen.Soyad, TeknisyenAd = v.Teknisyen.Ad,
         RaporTeknik = r.Teknik, RaporKarsilastirma = r.Karsilastirma, RaporBulgular = r.Bulgular, RaporSonuc = r.Sonuc,
+        RaporTeknikHtml = r.TeknikHtml, RaporKarsilastirmaHtml = r.KarsilastirmaHtml,
+        RaporBulgularHtml = r.BulgularHtml, RaporSonucHtml = r.SonucHtml,
         IstemNedeniPuan = r.IstemNedeniPuan, CekimKalitePuan = r.CekimKalitePuan,
         RadyologTckn = r.RadyologTckn, RadyologSoyad = r.RadyologSoyad, RadyologAd = r.RadyologAd,
         KontrastObx17 = r.KontrastObx17, Duzeltme = r.Duzeltme,

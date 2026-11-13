@@ -165,7 +165,10 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
         if (!_olgu.Baglandi(nameof(Soru_gunluge_yazilir))) return;
         var veri = _olgu.Gerekli();
         var servis = new RehberServisi(veri);
-        var isaret = "TEST-REHBER-" + Guid.NewGuid().ToString("N")[..8];
+        // "x" öneki: günlüğe yazılan soru PiiMaske'den geçer; 8 hex karakterin tümü rakam çıkarsa
+        //   (≈%2) "[numara]" olur ve aşağıdaki arama boş döner (13.11.2026 yayın kapısında kırmızı oldu).
+        //   Harfle başlayan dizide \b sınırı oluşmaz, maske dokunmaz.
+        var isaret = "TEST-REHBER-x" + Guid.NewGuid().ToString("N")[..8];
 
         // Cevapsız soru = eksik rehber konusu; günlük olmadan ölçülemez.
         await servis.CevaplaAsync(new RehberServisi.Istek(isaret, null, null, null),

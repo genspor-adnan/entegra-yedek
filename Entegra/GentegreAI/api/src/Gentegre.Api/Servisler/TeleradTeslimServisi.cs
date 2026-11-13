@@ -195,6 +195,10 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
             RaporKarsilastirma = M("raporKarsilastirma"),
             RaporBulgular = M("raporBulgular"),
             RaporSonuc = M("raporSonuc"),
+            RaporTeknikHtml = M("raporTeknikHtml"),
+            RaporKarsilastirmaHtml = M("raporKarsilastirmaHtml"),
+            RaporBulgularHtml = M("raporBulgularHtml"),
+            RaporSonucHtml = M("raporSonucHtml"),
             IstemNedeniPuan = S("istemNedeniPuan"),
             CekimKalitePuan = S("cekimKalitePuan"),
             RadyologTckn = M("radyologTckn"),
@@ -352,7 +356,12 @@ public sealed class TeleradTeslimServisi(VeriKaynagi veri, MllpIstemci mllp,
                           where b.rapor_id = rp.id and b.bakanlik_parca = 3), '') as "raporBulgular",
                coalesce((select string_agg(btrim(b.metin), E'\n' order by b.sira)
                            from public.radyoloji_rapor_bolum b
-                          where b.rapor_id = rp.id and b.bakanlik_parca = 4), '') as "raporSonuc"
+                          where b.rapor_id = rp.id and b.bakanlik_parca = 4), '') as "raporSonuc",
+               -- Parçaların HTML'i (1334, OBX-5 HTML^BASE64) - fn_teletip_oru_verisi ile aynı fonksiyon.
+               public.fn_rad_bakanlik_parca_html(rp.id, 1) as "raporTeknikHtml",
+               public.fn_rad_bakanlik_parca_html(rp.id, 2) as "raporKarsilastirmaHtml",
+               public.fn_rad_bakanlik_parca_html(rp.id, 3) as "raporBulgularHtml",
+               public.fn_rad_bakanlik_parca_html(rp.id, 4) as "raporSonucHtml"
           from public.telerad_teslim t
           join public.telerad_istek i on i.id = t.istek_id
           join public.telerad_kurum k on k.id = i.kurum_id

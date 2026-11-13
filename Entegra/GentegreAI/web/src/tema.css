@@ -2223,6 +2223,19 @@ input.skt-gecmis {
 .rad-zc-mod { background: #eef2f7; border-radius: 3px; padding: 0 5px; font-size: 10px; color: #34506e; font-weight: 700 }
 .rad-zc-ozet { color: #4d5d6e; margin-top: 2px }
 .rad-zc-bos { margin: 2px 0 8px }
+/* Seçili önceki tetkik (13.11.2026): liste yerinde kalır, düğüm vurgulanır, rapor sağ panelde (.rad-onceki). */
+.rad-zc-dugum.secili { border-color: var(--mor, #2f6db3); background: #fff6dc; box-shadow: inset 3px 0 0 var(--mor, #2f6db3) }
+.rad-zc-dugum.secili::before { background: var(--mor, #2f6db3); box-shadow: 0 0 0 3px #d7e6f7 }
+.rad-onceki { border: 1px solid #c8dcf3; background: #f3f8fe; border-radius: 6px; padding: 8px; margin-bottom: 10px }
+/* Başlık / A4 kutusu KENDİ adıyla (rad-onceki-bas, rad-onceki-a4): global .rad-oniz-bas / .rad-a4 kapsamlanmaz (temaSinifCakismasi). */
+.rad-onceki-bas { display: flex; align-items: center; gap: 6px; margin-bottom: 6px }
+.rad-onceki-bas b { color: var(--lacivert, #14315a); white-space: nowrap }
+.rad-onceki-bas .d { margin-left: auto }
+.rad-onceki-bas .d + .d { margin-left: 4px }
+.rad-onceki-metin { max-height: 45vh; overflow: auto }
+.rad-onceki-a4 { min-height: 0; padding: 6px 8px }
+.rad-onceki-metin .rad-bolum { margin-bottom: 6px }
+.rad-onceki-hata { color: #b3261e }
 /* Başlık satırı kalkınca düğmeler sekme şeridine ve hasta bandına yapıştı (kullanıcı 27.10.2026) - nefes payı. */
 .rad-rapor > .sayfa-bas { padding: 8px 0; margin: 0 }
 /* Bant: yazan asistansa mor rozet, onay bekleme süresi sarı (1199, mockup seçenek C). */

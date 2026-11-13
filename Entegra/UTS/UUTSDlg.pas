@@ -1932,7 +1932,7 @@ begin
 //    Durum := ' in (0,2)'
 // else
 //    Durum := ' ='+IntToStr(Sayfa);
-
+(*
  Komut := 'select top '+IntToStr(EditAdet.Value)+
           ' U.*,UM.ID,UM.KURUMNO,CASE WHEN ISNULL(UM.BELGENO,'''') = '''' THEN FATURASERI+FB.FATURANO ELSE UM.BELGENO END AS BELGENO, '+
           ' UM.URUNNO,UM.SERINO,UM.LOTNO,UM.JSON,UM.SONUCKODU,UM.SONUCMESAJI,UM.EKLEYEN,UM.EKLEMETARIHI,UM.URT,UM.SKT,UM.ONAY, '+
@@ -1945,6 +1945,23 @@ begin
           '  left join REHBERBILGI RB on R.ID=RB.YER_ID and RB.YERI=2 AND SIRA=40 '+
           '  inner join STOKLAR S on S.URUNNO=UM.URUNNO  '+
           ' where U.DURUM = '+IntToStr(Sayfa)+' ';
+                     *)
+ Komut :=  'select top '+IntToStr(EditAdet.Value)+
+	'U.*,UM.ID,UM.KURUMNO, '+
+	'CASE WHEN ISNULL(UM.BELGENO, '''') = '''' THEN FATURASERI+FB.FATURANO ELSE UM.BELGENO END AS BELGENO,  UM.URUNNO,UM.SERINO,UM.LOTNO,UM.JSON,UM.SONUCKODU,UM.SONUCMESAJI,UM.EKLEYEN,UM.EKLEMETARIHI,UM.URT,UM.SKT,UM.ONAY,  '+
+	'ISNULL(R.FIRMA,'''') AS FIRMA,STOKKODU=S.KOD,S.STOKADI, ONAYLAYAN=UM.ONAY  '+
+'from  '+
+	'UTSBILDIRIM U '+
+		'INNER join UTSBILDIRIMMESAJ UM on U.ID=UM.ID  '+
+		'INNER join STOKLAR S on S.URUNNO=UM.URUNNO  '+
+		'LEFT JOIN STOKIZLEME SI ON (SI.ID = U.YERID OR SI.YERID = U.ID)  '+
+		'LEFT JOIN FATBASLIK FB ON FB.ID = SI.BASLIKID  '+
+		'LEFT JOIN REHBER R ON R.ID = FB.REHBERID '+
+		'LEFT JOIN REHBERBILGI RB ON RB.BILGI = UM.KURUMNO AND ISNULL(UM.KURUMNO, '''') <> '''' AND RB.YERI = 2 AND RB.SIRA = 40 '+
+		'LEFT JOIN REHBER R1 ON R1.ID = RB.YER_ID '+
+' where U.DURUM = '+IntToStr(Sayfa)+' ';
+
+
 
 
    if EditUNO.Text <> '' then
@@ -2314,6 +2331,11 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
         FatTipi : Variant;
         FaturaTipi   : Smallint;  // FatTuru
     begin
+          // TUR secilen belgeyi (10: irsaliye, 11: fatura), TIPI normal islemi belirtir.
+          if BaslikTur in [3,4] then
+             FaturaTipi := 99
+          else
+             FaturaTipi := 1;
           if BaslikTur = 119 then //konsinye çıkış ise
              FaturaTipi := 1
           else begin
@@ -2373,11 +2395,6 @@ var RehberId, StokId,DepoId, Id, BaslikID, SatirID, GirisDepoId, CikisDepoId : I
                GirisDepoId := 0;
                CikisDepoId := DepoId;
              end;
-            if FaturaTipi=0 then //irsaliye
-               //FatTuru:=10
-               BaslikTur := 10;
-            //else
-              // FatTuru:= BaslikTur;
           end;
         //
 (*        if BNO='-99' then begin
@@ -2501,16 +2518,16 @@ begin
       if Tablo.Query1.Fields[2].AsInteger<>2 then
          Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update STOKLAR set BILDIRIM=2 where ID='+IntToStr(StokId), [], []);
    end;
-   //önce bakıyoruz bu belgeno ile daha önce kayıtlı fat veya irs var mı?
+   // Ayni numarali baska belge turune eklenmez; yalniz secilen TUR eslesebilir.
    Seri :='';
    if length(BNO)>=14 then begin//efatura BAŞTAKİ İLK 3 KARAKTERİ SERİ YAPARIZ
        Seri := copy(BNO,1,3);
        BNO := copy(BNO,4,50);
    end;
 
-   Tablo.TablodanSorguAc(1, 'select ID, GIRISDEPO, TUR from FATBASLIK where REHBERID='+IntToStr(RehberId)+' and TUR in ('+IntToStr(BaslikTur)+',10) '+
+   Tablo.TablodanSorguAc(1, 'select ID, GIRISDEPO, TUR from FATBASLIK where REHBERID='+IntToStr(RehberId)+' and TUR='+IntToStr(BaslikTur)+
           ' and isnull(FATURASERI,'''')='''+Seri+''' and FATURANO='''+BNO+'''  ');  //   and FATURATARIH='''+BZA+'''
-   if not Tablo.Query1.IsEmpty then begin                                                                     //giriş irsaliyesi de olabilir
+   if not Tablo.Query1.IsEmpty then begin
       BaslikID := Tablo.Query1.Fields[0].AsInteger;
       GirisDepoId:= Tablo.Query1.Fields[1].AsInteger;
       BaslikTur :=  Tablo.Query1.Fields[2].AsInteger;

@@ -53,7 +53,7 @@ param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
-    [ValidateSet('hepsi','hbys','erp','bilim','feta','zone','medx','profiller',
+    [ValidateSet('hepsi','hbys','erp','bilim','feta','zone','medx','sonomed','profiller',
                  'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme','muayene')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
@@ -119,6 +119,16 @@ $KURULUMLAR = @(
         Ad = 'medx'; Etiket = 'MEDX (ERP)';
         Yol = '/medx/'; Kok = 'gentegre-medx';
         Db = 'MEDX'; Kap = 'gentegre-api-medx'; Port = 5185; Urun = 'erp'
+    }
+    # SONOMED (13.11.2026, kullanici: "localhost 3000'i musteri server'a kopyala: 90.158.5.227"): MUSTERININ KENDI
+    #   SUNUCUSU, tek kurulum, KOK yolda, IP uzerinden HTTP. Yerel KOSUYOLU DB'si dump'la gitti (yayin/sunucu-kur.sh
+    #   sifir Ubuntu'ya docker + pg18 + nginx kurar ve dump'i SONOMED olarak yukler). `Sunucu` anahtari varsayilan
+    #   46.36.201.170'i ezer: paket, betik ve CORS kokeni o sunucuya gore kurulur.
+    [ordered]@{
+        Ad = 'sonomed'; Etiket = 'SONOMED (HBYS, musteri sunucusu)';
+        Yol = '/'; Kok = 'gentegre-sonomed';
+        Db = 'SONOMED'; Kap = 'gentegre-api-sonomed'; Port = 5180; Urun = 'hbys';
+        Sunucu = 'gentegre@90.158.5.227'
     }
 )
 
@@ -236,7 +246,11 @@ try {
 try {
 KaliteKapisi
 foreach ($k in $secilen) {
-    Write-Host "`n################ $($k.Etiket) -> $($k.Yol)" -ForegroundColor Yellow
+    # KURULUMA OZEL SUNUCU (sonomed): anahtar varsa -Sunucu parametresini ezer. Host (IP / alan adi) CORS
+    #   kokeni ve bitis mesaji icin kullanici@ kismi atilarak alinir.
+    $hedef = if ($k.Contains('Sunucu') -and $k.Sunucu) { $k.Sunucu } else { $Sunucu }
+    $hedefHost = ($hedef -split '@')[-1]
+    Write-Host "`n################ $($k.Etiket) -> $hedefHost$($k.Yol)" -ForegroundColor Yellow
     # Uzak dosyalar benzersiz: ayni sabit /tmp yoluna iki yayin yuklemesin.
     $damga     = "$($k.Ad)-$(Get-Date -Format yyyyMMddHHmmss)"
     $uzakPaket = "/tmp/gentegre-ai-paket-$damga.tgz"
@@ -275,7 +289,7 @@ foreach ($k in $secilen) {
         # GUVENILEN AGLAR (K08): API docker koprusunde, nginx host'ta - X-Forwarded-For ag gecidinden gelir.
         #   172.16.0.0/12 docker'in varsayilan kopru araligi. CORS'ta localhost yok (K87).
         $ayar = [ordered]@{
-            Cors = @{ Kaynaklar = @('http://46.36.201.170', 'https://46.36.201.170') }
+            Cors = @{ Kaynaklar = @("http://$hedefHost", "https://$hedefHost") }
             AllowedHosts = '*'
             Guvenlik = @{ GuvenilenAglar = @('172.16.0.0/12') }
         }
@@ -335,7 +349,7 @@ foreach ($k in $secilen) {
     if ($LASTEXITCODE -ne 0) { throw 'tar basarisiz' }
     Bilgi "paket: $([math]::Round((Get-Item $paket).Length/1MB,1)) MB"
 
-    scp -q $paket "${Sunucu}:$uzakPaket"
+    scp -q $paket "${hedef}:$uzakPaket"
     if ($LASTEXITCODE -ne 0) { throw 'scp basarisiz' }
 
     # Sunucu betigi de her seferinde tazelenir (bu depo tek dogruluk kaynagi).
@@ -346,9 +360,9 @@ foreach ($k in $secilen) {
     $betikLf = Join-Path $env:TEMP 'sunucu-guncelle.sh'
     [IO.File]::WriteAllText($betikLf,
         ((Get-Content (Join-Path $PSScriptRoot 'sunucu-guncelle.sh') -Raw) -replace "`r`n", "`n"))
-    scp -q $betikLf "${Sunucu}:$uzakBetik"
+    scp -q $betikLf "${hedef}:$uzakBetik"
     if ($LASTEXITCODE -ne 0) { throw 'betik scp basarisiz' }
-    ssh $Sunucu "mkdir -p ~/$($k.Kok) && mv $uzakBetik ~/$($k.Kok)/sunucu-guncelle.sh && chmod +x ~/$($k.Kok)/sunucu-guncelle.sh"
+    ssh $hedef "mkdir -p ~/$($k.Kok) && mv $uzakBetik ~/$($k.Kok)/sunucu-guncelle.sh && chmod +x ~/$($k.Kok)/sunucu-guncelle.sh"
     # Betik kopyasi dogrulanmadan paket calistirilmaz (K88): eski betik + yeni paket uyumsuz olabilir.
     if ($LASTEXITCODE -ne 0) { throw 'sunucu-guncelle.sh sunucuya yerlestirilemedi' }
 
@@ -360,13 +374,13 @@ foreach ($k in $secilen) {
     $ortam = "KOK=`$HOME/$($k.Kok) DB=$($k.Db) KAP=$($k.Kap) PORT=$($k.Port) YOL=$($k.Yol) URUN=$($k.Urun) UYGULAMA_ROLU=$(if ($SuperRolIleBaglan) { 0 } else { 1 })"
     # SUNUCU KILIDI: baska bir yayin (baska makineden de) sunucu adimindaysa
     #   BEKLER (en fazla 30 dk); sure dolarsa 75 ile cikar, hicbir sey yapilmaz.
-    ssh $Sunucu "flock -w 1800 -E 75 /tmp/gentegre-yayin.kilit env $ortam PAKET=$uzakPaket bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"
+    ssh $hedef "flock -w 1800 -E 75 /tmp/gentegre-yayin.kilit env $ortam PAKET=$uzakPaket bash ~/$($k.Kok)/sunucu-guncelle.sh $bayrak"
     if ($LASTEXITCODE -eq 75) { throw 'sunucuda baska bir yayin 30 dakikadir suruyor - bu kurulum ATLANDI, hicbir sey degismedi' }
     if ($LASTEXITCODE -ne 0) { throw 'sunucu guncellemesi basarisiz (sunucu kendi geri almasini yapti)' }
 
     Remove-Item $gecici -Recurse -Force
     Remove-Item $paket -ErrorAction SilentlyContinue
-    Write-Host "YAYIN TAMAM -> http://46.36.201.170$($k.Yol)" -ForegroundColor Green
+    Write-Host "YAYIN TAMAM -> http://$hedefHost$($k.Yol)" -ForegroundColor Green
 }
 } finally {
     $kilit.Dispose()

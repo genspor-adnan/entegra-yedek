@@ -48,6 +48,8 @@ interface Gecmis { id: number; accessionNo: string; tetkikAdi: string; tarih: st
                    modaliteAdi?: string; raporDurum?: number; birads?: string }
 interface Kritik { bulgu: string; bildirilenAd: string; yol: number;
                    bildirimZamani: string; geriBildirim: string }
+/** Sağ panelde salt okunur açılan önceki tetkik raporu (kullanıcı 13.11.2026). */
+interface OncekiGorunum { id: number; yukleniyor: boolean; hata: string; rapor: Record<string, unknown> | null; bolumler: Bolum[] }
 
 type Kayit = Record<string, unknown>;
 
@@ -137,6 +139,10 @@ export function RadyolojiRapor() {
   const [skorlar, setSkorlar] = useState<Skor[]>([]);
   const [skorDeger, setSkorDeger] = useState<Record<string, string>>({});
   const [gecmis, setGecmis] = useState<Gecmis[]>([]);
+  // ÖNCEKİ RAPOR SAĞDA (kullanıcı 13.11.2026: "eski bir tetkik tıkladığımda o üste çıkıyor.. kafa karıştırıyor..
+  //   liste olduğu gibi kalsın sadece renk highlight olsun ve sağda raporu göreyim"): tıklama kartı DEĞİŞTİRMEZ;
+  //   seçili düğüm vurgulanır, raporu sağ panelde salt okunur açılır. Kendi sekmesinde açmak o paneldeki ↗ düğmesi.
+  const [onceki, setOnceki] = useState<OncekiGorunum | null>(null);
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
   const [kritik, setKritik] = useState(false);
@@ -240,6 +246,27 @@ export function RadyolojiRapor() {
   }, [id]);
 
   useEffect(() => { void yukle() }, [yukle]);
+  useEffect(() => { setOnceki(null) }, [id]);
+
+  /** Önceki tetkike tıklama: aynı tetkik ikinci kez tıklanırsa kapanır; değilse raporu sağ panele yükler. */
+  const oncekiAc = useCallback(async (g: Gecmis) => {
+    if (onceki?.id === g.id) { setOnceki(null); return; }
+    setOnceki({ id: g.id, yukleniyor: true, hata: '', rapor: null, bolumler: [] });
+    try {
+      const y = await api.radyolojiRapor(g.id);
+      // Araya başka tıklama girdiyse eski yanıt atılır (K53 ile aynı sebep).
+      setOnceki(o => (o?.id !== g.id ? o : {
+        id: g.id, yukleniyor: false, hata: '', rapor: y.rapor,
+        bolumler: (y.bolumler as Kayit[]).map(b => ({
+          sira: Number(b.sira), baslik: String(b.baslik ?? ''), metin: String(b.metin ?? ''),
+          yazdir: Number(b.yazdir ?? 1), zorunlu: Number(b.zorunlu ?? 0),
+          html: b.metinHtml ? String(b.metinHtml) : undefined,
+        })),
+      }));
+    } catch (h) {
+      setOnceki(o => (o?.id !== g.id ? o : { ...o, yukleniyor: false, hata: hataMetni(h) }));
+    }
+  }, [onceki?.id]);
   const hastaAdi = String(istem?.hastaAdi ?? '').trim();
   useEffect(() => {
     if (ekranSekmesi && hastaAdi) ekranSekmesi.baslik(sekmeAdi(hastaAdi), `/radyoloji/rapor/${id}`);
@@ -615,7 +642,8 @@ export function RadyolojiRapor() {
           <h5>{c('Önceki Tetkikler')}</h5>
 
           {/* KRONOLOJİK GÖRÜNÜM (kullanıcı 27.10.2026): zaman çizgisi - en yeni üstte, yıl başlıkları,
-              bu tetkik en üstte "şimdi" düğümü. Tıklayınca o tetkikin raporu kendi sekmesinde açılır. */}
+              bu tetkik en üstte "şimdi" düğümü. Tıklayınca (13.11.2026) liste YERİNDE kalır, düğüm vurgulanır ve
+              o tetkikin raporu sağ panelde salt okunur açılır; kendi sekmesinde açmak oradaki ↗ düğmesi. */}
           <div className="rad-zc">
               <div className="rad-zc-dugum simdi">
                 <div className="rad-zc-tarih">{c('Bu tetkik')}
@@ -634,9 +662,10 @@ export function RadyolojiRapor() {
                 return (
                   <div key={g.id}>
                     {yil > 0 && yil !== oncekiYil && <div className="rad-zc-yil">{yil}</div>}
-                    <button type="button" className={`rad-zc-dugum d${Number(g.raporDurum ?? 0)}`}
-                            title={c('Raporu kendi sekmesinde aç')}
-                            onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/rapor/${g.id}`) : git(`/radyoloji/rapor/${g.id}`))}>
+                    <button type="button" className={`rad-zc-dugum d${Number(g.raporDurum ?? 0)}${onceki?.id === g.id ? ' secili' : ''}`}
+                            title={onceki?.id === g.id ? c('Sağdaki raporu kapat') : c('Raporu sağda göster')}
+                            aria-pressed={onceki?.id === g.id}
+                            onClick={() => void oncekiAc(g)}>
                       <div className="rad-zc-tarih">
                         {anMetni(g.tarih)}
                         {g.modaliteAdi && <span className="rad-zc-mod">{g.modaliteAdi}</span>}
@@ -737,6 +766,35 @@ export function RadyolojiRapor() {
 
         {/* -------------------------------------------- SAĞ: şablon / makro --- */}
         <div className="rad-yan">
+          {onceki && (() => {
+            const g = gecmis.find(x => x.id === onceki.id);
+            const durumAd = ({ 0: 'Raporsuz', 1: 'Taslak', 2: 'Ön rapor', 3: 'Onaylı' } as Record<number, string>)[Number(onceki.rapor?.durum ?? g?.raporDurum ?? 0)];
+            const yol = `/radyoloji/rapor/${onceki.id}`;
+            return (
+              <div className="rad-oniz rad-onceki">
+                <div className="rad-onceki-bas">
+                  <b>{c('Önceki rapor')}</b>
+                  <span className="sonuk kucuk">{g ? `${anMetni(g.tarih)} · ${g.tetkikAdi}` : ''}</span>
+                  <button type="button" className="d mini" title={c('Raporu kendi sekmesinde aç')}
+                          onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(yol) : git(yol))}>↗</button>
+                  <button type="button" className="d mini" title={c('Önceki raporu kapat')} onClick={() => setOnceki(null)}>✕</button>
+                </div>
+                {onceki.yukleniyor ? <div className="sonuk kucuk">{c('Yükleniyor…')}</div>
+                 : onceki.hata ? <div className="kucuk rad-onceki-hata">{onceki.hata}</div>
+                 : onceki.bolumler.length === 0 ? <div className="sonuk kucuk">{c('Bu tetkikin raporu yok.')}</div>
+                 : <>
+                     <div className="sonuk kucuk">{durumAd}{g?.raporlayan ? ` · ${g.raporlayan}` : ''}</div>
+                     <div className="rad-onceki-metin">
+                       {onceki.bolumler.filter(b => b.yazdir !== 0).map((b, i) => (
+                         <div className="rad-bolum" key={`${b.baslik}-${i}`}>
+                           {b.baslik !== TEK_BASLIK && <div className="rad-bolum-bas">{b.baslik}</div>}
+                           <BicimliAlan className="rad-a4 rad-onceki-a4 kucuk" html={htmlOf(b)} salt onDegis={() => undefined} />
+                         </div>))}
+                     </div>
+                   </>}
+              </div>
+            );
+          })()}
           {etkinGiris === 'yapisal' ? (
             <div className="rad-oniz">
               <div className="rad-oniz-bas">

@@ -34,10 +34,16 @@ object UTSDlg: TUTSDlg
     object cxTabSheet2: TcxTabSheet
       Caption = 'Sorgula / G'#246'nder'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet6: TcxTabSheet
       Caption = 'Ba'#351'ar'#305'l'#305'lar'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet5: TcxTabSheet
       Caption = 'Hatal'#305'lar'
@@ -48,10 +54,16 @@ object UTSDlg: TUTSDlg
       Font.Style = [fsBold]
       ImageIndex = 19
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
     object cxTabSheet1: TcxTabSheet
       Caption = #304'ptaller'
       ImageIndex = 19
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
     end
   end
   object PanelKategori: TJvNavPaneToolPanel
@@ -139,6 +151,10 @@ object UTSDlg: TUTSDlg
       object TabSheetSorgu: TcxTabSheet
         Caption = 'Sorgu Listesi'
         ImageIndex = 32
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridSorgu: TcxGrid
           Left = 0
           Top = 0
@@ -229,6 +245,10 @@ object UTSDlg: TUTSDlg
       object TabSheetBildirim: TcxTabSheet
         Caption = 'Bildirim Listesi'
         ImageIndex = 32
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GridUTS: TcxGrid
           Left = 0
           Top = 0

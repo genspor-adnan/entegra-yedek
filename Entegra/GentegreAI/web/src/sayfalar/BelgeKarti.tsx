@@ -214,6 +214,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   };
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
+  /** Sunucudaki KAYITLI depo id'leri (0 = boş): kalem kilidi yalnız dolu depoya uygulanır (bkz. depoKilitli). */
+  const [kayitliDepo, setKayitliDepo] = useState({ depo: 0, giris: 0 });
   /** Transferde sorumluluk devri: teslim EDEN (asagida, irsaliyeyle ortak) ve
       teslim ALAN personel - transferde ikisi de zorunlu. */
   /** Stok fisinde (3/4) fisin SEBEBI - belge.tipi. 0 = secilmedi. */
@@ -509,8 +511,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * satirlari silip yeniden secer. Diger turlerde bu kisit yok.
    */
   const baslikKilitli = kilitli || (bilgi.kalemVarsaBaslikKilitli && satirlar.length > 0);
-  /** GENEL KURAL (kullanıcı 11.11.2026): kalem varken depo combo(ları) değişmez - sunucu da reddeder (BelgeDeposu). */
-  const depoKilitli = baslikKilitli || (bilgi.kalemVarsaDepoKilitli && satirlar.length > 0);
+  /** GENEL KURAL (kullanıcı 11.11.2026): kalem varken depo combo(ları) değişmez - sunucu da reddeder (BelgeDeposu).
+   *  BOŞ DEPO DOLDURULABİLİR (13.11.2026, UNIVERSE alış faturası 10290: aktarımdan deposuz gelen belge düzenlemede
+   *  açılamıyordu): sunucu kilidi yalnız DOLU depoyu korur; kayıtlı belgede depo boşsa combo açık kalır. */
+  const kalemKilidi = bilgi.kalemVarsaDepoKilitli && satirlar.length > 0;
+  const depoKilitli = baslikKilitli || (kalemKilidi && (!mevcutBelge || kayitliDepo.depo > 0));
+  const girisDepoKilitli = baslikKilitli || (kalemKilidi && (!mevcutBelge || kayitliDepo.giris > 0));
 
   /**
    * Transferde BASLIK ONCE doldurulur: iki depo ve teslim eden/alan secilmeden
@@ -934,6 +940,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         teklif.setTeslim(d.teklifTeslim);
         setDepo(d.depo);
         setGirisDepo(d.girisDepo);
+        setKayitliDepo({ depo: d.depo?.id ?? 0, giris: d.girisDepo?.id ?? 0 });
         setSatici(d.satici);
         sevkiyat.setTeslimEden(d.teslimEden);
         sevkiyat.setTeslimAlan(d.teslimAlan);
@@ -981,6 +988,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         teklif.setTeslim(d.teklifTeslim);
         setDepo(d.depo);
         setGirisDepo(d.girisDepo);
+        setKayitliDepo({ depo: d.depo?.id ?? 0, giris: d.girisDepo?.id ?? 0 });
         setSatici(d.satici);
         sevkiyat.setTeslimSekli(d.teslimSekli);
         setSenaryo(d.senaryo);
@@ -1768,7 +1776,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           // SEKME DEĞİŞİNCE başvuru sekmesi görüntüleme kipine döner (basvuruDuzenle).
           setAktifSekme={s => { setHata(null); setAlanHatalari({}); setBasvuruDuzenle(false); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
-          kilitli={kilitli} baslikKilitli={baslikKilitli} depoKilitli={depoKilitli} belgeAdi={belgeAdi}
+          kilitli={kilitli} baslikKilitli={baslikKilitli} depoKilitli={depoKilitli} girisDepoKilitli={girisDepoKilitli} belgeAdi={belgeAdi}
           yeniMi={!mevcutBelge} baslikKapatAnahtari={baslikKapat}
           belgeNo={belgeNo} setBelgeNo={setBelgeNo}
           tarih={tarih} setTarih={setTarih}

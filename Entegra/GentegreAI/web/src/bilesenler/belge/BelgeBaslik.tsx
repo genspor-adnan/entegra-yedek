@@ -51,7 +51,7 @@ import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
  */
 export function BelgeBaslik(p: BelgeBaslikProps) {
   const {
-    aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, depoKilitli, belgeAdi,
+    aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, depoKilitli, girisDepoKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     basvuruMu,
     cari, satici, depo, setDepo, girisDepo, setGirisDepo, sevkiyat, fisTipi,
@@ -287,7 +287,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         sabitFiltre={{ alan: 'durum', op: 'esit', deger: 1 }}
         alanlar={LOOKUP_DEPO}
         deger={girisDepo?.ad}
-        saltOkunur={depoKilitli}
+        saltOkunur={girisDepoKilitli}
         hata={alanHatalari.girisDepoId}
         onSec={x => setGirisDepo(x ? { id: Number(x.id), ad: String(x.ad ?? '') } : null)}
       />
@@ -658,6 +658,8 @@ export interface BelgeBaslikProps {
   baslikKilitli: boolean;
   /** GENEL KURAL (11.11.2026): kalem varken depo combo(ları) salt okunur. */
   depoKilitli: boolean;
+  /** Giriş / teslim deposu combosu için ayrı kilit: kayıtlı belgede o depo boşsa doldurulabilir (13.11.2026). */
+  girisDepoKilitli: boolean;
   /** Kart YENİ belge olarak açıldı (kayıtlı belge yok): fatura başlığı düzenleme kipinde başlar (bkz. baslikDuzenle). */
   yeniMi?: boolean;
   /**

@@ -398,6 +398,11 @@ object BelgeZarflariDlg: TBelgeZarflariDlg
           DataBinding.FieldName = 'OZELKOD'
           Width = 45
         end
+        object GridFatBasliklarDBTableView1OZELKOD2: TcxGridDBColumn
+          Caption = #214'zel Kod2'
+          DataBinding.FieldName = 'OZELKOD2'
+          Width = 45
+        end
       end
       object GridFatBasliklarLevel1: TcxGridLevel
         GridView = GridFatBasliklarDBTableView1

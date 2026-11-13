@@ -276,6 +276,7 @@ type
     MenuSistemeTasi: TMenuItem;
     MenuGelenKutusunaTasi: TMenuItem;
     SGK1: TMenuItem;
+    N7: TMenuItem;
     procedure MenuEslesmeTablosunuAcClick(Sender: TObject);
     procedure MenuUrunEslestirClick(Sender: TObject);
     procedure GridFatViewCellClick(Sender: TcxCustomGridTableView;
@@ -706,7 +707,7 @@ begin
 //      LocateID := FATBASLIK.FieldByName('ID').AsInteger;
    gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
    // Belge Zarfi e-Belge ozelligidir: gelen fatura (11) + e-Fatura kullanimda ise.
-   BtnBelgeZarfi.Visible := (gf.FAltTur=11) and (EFaturaKullanimda>0);
+   BtnBelgeZarfi.Visible := True;//(gf.FAltTur=11) and (EFaturaKullanimda>0);
 
    SubeIDList := Tablo.YetkiliSubeleriGetir(24,YetkiTur_Gorme);
    if SubeIDList = '-999' then

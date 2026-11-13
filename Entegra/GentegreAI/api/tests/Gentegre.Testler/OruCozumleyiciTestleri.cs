@@ -58,11 +58,13 @@ public sealed class OruCozumleyiciTestleri
         Assert.Equal("11122233344", g.RadyologTckn);
         Assert.Equal("MERT YILMAZ", g.RadyologAdi);
 
-        // Dört parça base64 geri çözülür.
-        Assert.Equal(v.RaporTeknik, g.RaporTeknik);
-        Assert.Equal(v.RaporKarsilastirma, g.RaporKarsilastirma);
-        Assert.Equal(v.RaporBulgular, g.RaporBulgular);
-        Assert.Equal(v.RaporSonuc, g.RaporSonuc);
+        // Dört parça base64 geri çözülür. Gövde HTML (1334): üretici düz metni paragrafladı, çözümleyici etiket
+        //   soymaz - bayrağı kaydedene bırakır (TeleradGelenServisi metin_html'e yazar, düz metni türetir).
+        Assert.True(g.RaporHtmlMi);
+        Assert.Equal($"<p>{v.RaporTeknik}</p>", g.RaporTeknik);
+        Assert.Equal($"<p>{v.RaporKarsilastirma}</p>", g.RaporKarsilastirma);
+        Assert.Equal($"<p>{v.RaporBulgular}</p>", g.RaporBulgular);
+        Assert.Equal($"<p>{v.RaporSonuc}</p>", g.RaporSonuc);
 
         Assert.Equal(3, g.IstemNedeniPuan);
         Assert.Equal(4, g.CekimKalitePuan);
@@ -123,6 +125,7 @@ public sealed class OruCozumleyiciTestleri
         Assert.Equal("A1", g.AccessionNo);
         Assert.Equal("12345678901", g.HastaTckn);
         Assert.Equal("Bulgu metni", g.RaporBulgular);
+        Assert.False(g.RaporHtmlMi);                    // TXT^BASE64: düz gövde
     }
 
     [Theory]

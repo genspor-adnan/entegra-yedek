@@ -64,6 +64,21 @@ istediği 4 parça esas olmalı".
   `metin`i değiştiriyor, şablonun HTML'i kalıyordu - çıktı şablon metnini, Bakanlık düzenlenmiş metni alıyordu; kutu
   artık HTML'i bırakır (`RadyolojiRapor.tsx`, Bulgular / Sonuç'ta zaten böyleydi). Test `RaporBolumMetniTestleri`;
   radyoloji / Teletıp / Bakanlık profili xUnit 113/113, vitest 22/22, tsc temiz.
+- **Teletıp ORU gövdesi HTML^BASE64 (1334; kullanıcı: "teleradyoloji 64 bit html istiyormuş.. yani base 64" →
+  "html base64'e geç, 1334 göçüyle uygula"):** kılavuz OBX-2/3 için iki biçim tanır (`TX` + `HTML^BASE64` ya da
+  `TXT^BASE64`) ve kurulumda biri bildirilir (dokuman/14 §5.4, §5.6). 1309'dan beri `TXT^BASE64` gidiyordu - parçalar
+  düz `metin`den; radyoloğun 1195 biçimi (punto, renk, tablo) Bakanlık'ta ve e-Nabız'da kayboluyordu. Artık parça HTML:
+  bölümün `metin_html`'i, yoksa düz metin `fn_rad_duzden_html` ile paragraflanır (1332'nin sarması). Tek kural
+  `fn_rad_bakanlik_parca_html(rapor_id, parca)`; `fn_teletip_oru_verisi` (kendi raporumuz) ve `TeleradTeslimServisi`
+  sorgusu (telerad teslimi) ikisi de onu çağırır; `OruUretici.BakanlikObx` OBX-3'ü `HTML^BASE64` yazar, HTML'siz
+  çağrıda aynı sarmayı C#'ta yapar (`HtmlSar`). **Düz metni boş bölüm parçaya girmez** (1332 dört parçayı boşu boş
+  yazar; yoksa Karşılaştırma'sız rapor `<p><br></p>` gövdeli ^2 taşırdı), yalnız resimli bölüm dolu sayılır.
+  **Düz `metin` kolonu kalır:** Bulgular ≥ 50 / boş parça denetimi, e-Nabız 409, arama onu okur. Kurum HBYS profili
+  (2.5, satır satır TX) değişmedi. Gelen tarafta `OruCozumleyici.RaporHtmlMi`: `HTML^BASE64` gelen gövde
+  `RaporHtml.BolumMetni` ile temizlenip `metin_html`'e, düz metin ondan (`TeleradGelenServisi`). Kurulum beyanı:
+  Bakanlık kaydında "Desteklenen rapor biçimi: HTMLBASE64". Testler: `OruUreticiTestleri` (yeni
+  `Html_parca_oncelikli_duz_metin_paragraflanir`), `OruCozumleyiciTestleri`, `TeletipOruTestleri` (Sonuç biçimli +
+  boş Karşılaştırma).
 
 ---
 

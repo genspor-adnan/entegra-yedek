@@ -1030,7 +1030,7 @@ procedure TMasrafGelirDlg.SilTusClick(Sender: TObject);
 begin
   if TabMasrafGelir.IsEmpty then Exit;
   if MasrafSilmeIslemi(TabMasrafGelir.FieldByName('ID').AsInteger) then
-     TabloYenile(TabMasrafGelir, []);
+     TabloYenile(MASRAFGELIR, []);
 end;
 
 procedure TMasrafGelirDlg.TumunuKopyalaClick(Sender: TObject);

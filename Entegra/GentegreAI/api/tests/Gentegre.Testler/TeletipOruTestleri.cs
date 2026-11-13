@@ -47,14 +47,16 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
             insert into public.radyoloji_rapor (istem_id, durum, kilit, yazan_id, onaylayan_id, istem_nedeni_puan, cekim_kalite_puan)
             values (@p0, 1, 0, @p1, @p1, 4, 5) returning id
             """, t, [istem, radyolog], Iptal);
-        foreach (var (sira, parca, metin) in new[]
+        // Sonuç biçimli (metin_html dolu), ötekiler düz; Karşılaştırma 1332 gibi "boşu boş" bölüm.
+        foreach (var (sira, parca, metin, html) in new (int, int, string, string?)[]
         {
-            (1, 1, "Kontrastsız aksiyel kesitler."),
-            (2, 3, "Beyin parankiminde akut patoloji izlenmedi; ventriküller ve sulkuslar yaşla uyumlu, orta hat normal."),
-            (3, 4, "Normal beyin BT."),
+            (1, 1, "Kontrastsız aksiyel kesitler.", null),
+            (2, 2, "", null),
+            (3, 3, "Beyin parankiminde akut patoloji izlenmedi; ventriküller ve sulkuslar yaşla uyumlu, orta hat normal.", null),
+            (4, 4, "Normal beyin BT.", "<p><b>Normal</b> beyin BT.</p>"),
         })
-            await b.CalistirAsync("insert into public.radyoloji_rapor_bolum (rapor_id, sira, baslik, metin, bakanlik_parca) values (@p0, @p1, '', @p2, @p3)",
-                t, [rapor, sira, metin, (short)parca], Iptal);
+            await b.CalistirAsync("insert into public.radyoloji_rapor_bolum (rapor_id, sira, baslik, metin, bakanlik_parca, metin_html) values (@p0, @p1, '', @p2, @p3, @p4)",
+                t, [rapor, sira, metin, (short)parca, html], Iptal);
         return (istem, rapor);
     }
 
@@ -122,6 +124,11 @@ public sealed class TeletipOruTestleri(VeritabaniOlgusu olgu) : IClassFixture<Ve
         Assert.Equal("Kontrastsız aksiyel kesitler.", r.Teknik);
         Assert.StartsWith("Beyin parankiminde", r.Bulgular);
         Assert.Equal("Normal beyin BT.", r.Sonuc);
+        // 1334: parça HTML'i - metin_html varsa o, yoksa düz metin paragraflanır; düz metni boş bölüm parçaya girmez.
+        Assert.Equal("<p>Kontrastsız aksiyel kesitler.</p>", r.TeknikHtml);
+        Assert.Equal("", r.KarsilastirmaHtml);
+        Assert.StartsWith("<p>Beyin parankiminde", r.BulgularHtml);
+        Assert.Equal("<p><b>Normal</b> beyin BT.</p>", r.SonucHtml);
         Assert.Equal("78221082662", r.RadyologTckn);
         Assert.Equal("AKMAN", r.RadyologSoyad);
         Assert.Equal((short)4, r.IstemNedeniPuan);

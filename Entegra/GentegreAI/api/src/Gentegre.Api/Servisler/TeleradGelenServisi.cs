@@ -223,26 +223,31 @@ public sealed class TeleradGelenServisi(VeriKaynagi veri, ILogger<TeleradGelenSe
 
         // BÖLÜMLER PARÇA NUMARASIYLA (809): geldiği gibi yazılır, başlık
         //   uydurulmaz. Parçalanamamış düz metin tek "Rapor" bölümüdür.
-        var bolumler = new List<(short Sira, string Baslik, string Metin, short Parca)>();
-        void Ekle(short sira, string baslik, string metin, short parca)
+        // HTML^BASE64 GÖVDE (1334): parça biçimli metindir - beyaz listeyle
+        //   temizlenip metin_html'e, düz metin ONDAN türetilir (RaporHtml.BolumMetni,
+        //   kendi rapor kaydımızla aynı kural). Düz gelen gövdede metin_html boş kalır.
+        var bolumler = new List<(short Sira, string Baslik, string Metin, string Html, short Parca)>();
+        void Ekle(short sira, string baslik, string metin, short parca, bool htmlMi)
         {
-            if (!string.IsNullOrWhiteSpace(metin))
-                bolumler.Add((sira, baslik, metin.Trim(), parca));
+            if (string.IsNullOrWhiteSpace(metin)) return;
+            var (html, duz) = htmlMi ? RaporHtml.BolumMetni(metin, metin) : ("", metin);
+            if (!string.IsNullOrWhiteSpace(duz) || html.Length > 0)
+                bolumler.Add((sira, baslik, duz.Trim(), html, parca));
         }
-        Ekle(1, "Teknik", coz.RaporTeknik, 1);
-        Ekle(2, "Karşılaştırma", coz.RaporKarsilastirma, 2);
-        Ekle(3, "Bulgular", coz.RaporBulgular, 3);
-        Ekle(4, "Sonuç ve Öneriler", coz.RaporSonuc, 4);
-        Ekle(5, "Rapor", coz.RaporDuzMetin, 0);
+        Ekle(1, "Teknik", coz.RaporTeknik, 1, coz.RaporHtmlMi);
+        Ekle(2, "Karşılaştırma", coz.RaporKarsilastirma, 2, coz.RaporHtmlMi);
+        Ekle(3, "Bulgular", coz.RaporBulgular, 3, coz.RaporHtmlMi);
+        Ekle(4, "Sonuç ve Öneriler", coz.RaporSonuc, 4, coz.RaporHtmlMi);
+        Ekle(5, "Rapor", coz.RaporDuzMetin, 0, coz.RaporHtmlMi);
         if (coz.RadyologTckn.Length > 0 && radyologId is null)
-            Ekle(6, "Raporlayan", $"{coz.RadyologAdi} (TCKN {coz.RadyologTckn})", 0);
+            Ekle(6, "Raporlayan", $"{coz.RadyologAdi} (TCKN {coz.RadyologTckn})", 0, htmlMi: false);
 
-        foreach (var (sira, baslik, metin, parca) in bolumler)
+        foreach (var (sira, baslik, metin, html, parca) in bolumler)
             await b.CalistirAsync("""
                 insert into public.radyoloji_rapor_bolum
-                       (rapor_id, sira, baslik, metin, yazdir, bakanlik_parca)
-                values (@p0, @p1, @p2, @p3, 1, @p4)
-                """, islem, [raporId, sira, baslik, metin, parca], iptal);
+                       (rapor_id, sira, baslik, metin, yazdir, bakanlik_parca, metin_html)
+                values (@p0, @p1, @p2, @p3, 1, @p4, @p5)
+                """, islem, [raporId, sira, baslik, metin, parca, html.Length > 0 ? html : null], iptal);
 
         await b.CalistirAsync(
             "update public.radyoloji_istem set durum = 5 where id = @p0 and durum < 5",

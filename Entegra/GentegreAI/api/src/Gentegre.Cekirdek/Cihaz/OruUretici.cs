@@ -9,7 +9,7 @@ public enum Hl7Profili
     Kurum = 1,
     /// <summary>
     /// T.C. Sağlık Bakanlığı Teletıp/Teleradyoloji: HL7 <b>2.3.1</b>, rapor
-    /// gövdesi dört parça base64 (Entegrasyon Kılavuzu 3.46).
+    /// gövdesi dört parça base64 HTML (Entegrasyon Kılavuzu 3.46; OBX-3 <c>HTML^BASE64</c>, 1334).
     /// </summary>
     Bakanlik = 2,
 }
@@ -71,6 +71,13 @@ public sealed record OruVerisi
     public string RaporKarsilastirma { get; init; } = "";
     public string RaporBulgular { get; init; } = "";
     public string RaporSonuc { get; init; } = "";
+    /// <summary>Bakanlık profilinde OBX-5 parçasının HTML'i (1334, <c>HTML^BASE64</c>): parçaya bağlı bölümlerin
+    /// <c>metin_html</c>'i (fn_rad_bakanlik_parca_html). Boşsa düz metin <see cref="OruUretici.HtmlSar"/> ile
+    /// paragraflanır. Kurum profili bunları okumaz - orada düz metin satır satır gider.</summary>
+    public string RaporTeknikHtml { get; init; } = "";
+    public string RaporKarsilastirmaHtml { get; init; } = "";
+    public string RaporBulgularHtml { get; init; } = "";
+    public string RaporSonucHtml { get; init; } = "";
     public short IstemNedeniPuan { get; init; }
     public short CekimKalitePuan { get; init; }
     public string RadyologTckn { get; init; } = "";
@@ -128,7 +135,7 @@ public sealed record OruVerisi
 /// belgesindeki "HL7 önce yapılabilir" gerekçesi budur.</para>
 ///
 /// <para><b>Tek üretici, iki profil.</b> Bakanlık mesajı 2.3.1 ve gövdesi
-/// dört parça base64; kurum HBYS'si 2.5 ve satır satır TX. İki ayrı üretici
+/// dört parça base64 HTML; kurum HBYS'si 2.5 ve satır satır düz TX. İki ayrı üretici
 /// yazmak, bir alanı birinde düzeltip ötekinde unutmak demekti - bu yüzden
 /// fark <see cref="Hl7Profili"/> dalında, ayrı sınıfta değil.</para>
 ///
@@ -310,20 +317,28 @@ public static class OruUretici
     {
         // OBX-5: parçalar `~` ile ayrık, her parça base64 ve `^n` ile
         //   numaralı. Kılavuz sıraya bakmıyor ama NUMARAYA bakıyor.
+        // GÖVDE HTML (1334): kılavuz iki biçim tanır (HTML^BASE64 / TXT^BASE64)
+        //   ve kurulumda biri bildirilir - biz HTMLBASE64 bildiriyoruz: radyoloğun
+        //   biçimi (punto, renk, tablo) Bakanlık'ta ve e-Nabız'da korunur. Parça
+        //   bölümün metin_html'i; HTML'siz çağrıda düz metin paragraflanır (SQL'deki
+        //   fn_rad_bolum_html ile aynı sarma). Düz metni boş parça yazılmaz.
         var parcalar = new List<string>();
-        void Ekle(string metin, int no)
+        void Ekle(string metin, string html, int no)
         {
-            if (!string.IsNullOrWhiteSpace(metin)) parcalar.Add($"{B64(metin)}^{no}");
+            var govde = !string.IsNullOrWhiteSpace(html) ? html
+                      : !string.IsNullOrWhiteSpace(metin) ? HtmlSar(metin)
+                      : "";
+            if (govde.Length > 0) parcalar.Add($"{B64(govde)}^{no}");
         }
-        Ekle(v.RaporTeknik, 1);
-        Ekle(v.RaporKarsilastirma, 2);
-        Ekle(v.RaporBulgular, 3);
-        Ekle(v.RaporSonuc, 4);
+        Ekle(v.RaporTeknik, v.RaporTeknikHtml, 1);
+        Ekle(v.RaporKarsilastirma, v.RaporKarsilastirmaHtml, 2);
+        Ekle(v.RaporBulgular, v.RaporBulgularHtml, 3);
+        Ekle(v.RaporSonuc, v.RaporSonucHtml, 4);
 
         var a = Bos(18);
         a[1] = "1";
         a[2] = "TX";
-        a[3] = "TXT^BASE64";
+        a[3] = "HTML^BASE64";
         a[4] = "1";
         a[5] = string.Join(Tekrar, parcalar);
         a[11] = v.Duzeltme ? "C" : "F";
@@ -428,6 +443,24 @@ public static class OruUretici
 
     private static string B64(string metin)
         => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(metin.Trim()));
+
+    /// <summary>
+    /// Düz metni paragraflara sarar - DB'deki <c>fn_rad_duzden_html</c> (1332) ile AYNI kural: her satır
+    /// <c>&lt;p&gt;</c>, boş satır <c>&lt;p&gt;&lt;br&gt;&lt;/p&gt;</c>; <c>&amp; &lt; &gt;</c> kodlanır.
+    /// İki uygulama birlikte değişir (test: OruUreticiTestleri ↔ fn_rad_bolum_html).
+    /// </summary>
+    internal static string HtmlSar(string metin)
+    {
+        var sb = new StringBuilder();
+        foreach (var satir in metin.Replace("\r", "").Split('\n'))
+        {
+            if (satir.Trim().Length == 0) { sb.Append("<p><br></p>"); continue; }
+            sb.Append("<p>")
+              .Append(satir.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"))
+              .Append("</p>");
+        }
+        return sb.ToString();
+    }
 
     /// <summary>
     /// HL7 KAÇIŞI: ayırıcı karakterler alan içinde geçemez. Ters bölü ÖNCE

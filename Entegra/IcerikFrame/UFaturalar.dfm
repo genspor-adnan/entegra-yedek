@@ -1633,12 +1633,6 @@
         Caption = '-'
         GroupIndex = 1
       end
-      object IptalIsaretleMenu: TMenuItem
-        Caption = #304'ptal '#304#351'aretle'
-        GroupIndex = 1
-        ImageIndex = 49
-        OnClick = IptalIsaretleMenuClick
-      end
       object rnEletirme1: TMenuItem
         Tag = 2
         Caption = #220'r'#252'n E'#351'le'#351'tirme'
@@ -1662,6 +1656,16 @@
         GroupIndex = 1
         ImageIndex = 43
         OnClick = MenuMesajlarGosterClick
+      end
+      object N7: TMenuItem
+        Caption = '-'
+        GroupIndex = 1
+      end
+      object IptalIsaretleMenu: TMenuItem
+        Caption = #304'ptal '#304#351'aretle'
+        GroupIndex = 1
+        ImageIndex = 49
+        OnClick = IptalIsaretleMenuClick
       end
     end
     object N13: TMenuItem

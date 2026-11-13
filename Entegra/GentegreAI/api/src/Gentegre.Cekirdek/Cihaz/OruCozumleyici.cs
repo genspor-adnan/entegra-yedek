@@ -31,6 +31,9 @@ public sealed record GelenOru
     public string RaporSonuc { get; init; } = "";
     /// <summary>Parçalanamayan gövde (kurum profili düz metin) — olduğu gibi.</summary>
     public string RaporDuzMetin { get; init; } = "";
+    /// <summary>OBX-3 <c>HTML^BASE64</c> idi (1334): parçalar ve düz gövde HTML - kaydeden metin_html'e yazar, düz
+    /// metni ondan türetir. <c>TXT^BASE64</c> ve satır satır TX'te false.</summary>
+    public bool RaporHtmlMi { get; init; }
 
     public short IstemNedeniPuan { get; init; }
     public short CekimKalitePuan { get; init; }
@@ -176,6 +179,7 @@ public static class OruCozumleyici
             RaporBulgular = govde.Bulgular,
             RaporSonuc = govde.Sonuc,
             RaporDuzMetin = govde.DuzMetin,
+            RaporHtmlMi = govde.HtmlMi,
             IstemNedeniPuan = govde.NedenPuan,
             CekimKalitePuan = govde.KalitePuan,
             KontrastObx17 = govde.Kontrast,
@@ -186,7 +190,7 @@ public static class OruCozumleyici
     private sealed record Govde(string Teknik, string Karsilastirma, string Bulgular,
                                 string Sonuc, string DuzMetin, string RadyologTckn,
                                 string RadyologAdi, short NedenPuan, short KalitePuan,
-                                string Kontrast, bool Duzeltme);
+                                string Kontrast, bool Duzeltme, bool HtmlMi);
 
     private static Govde GovdeCoz(List<string> obxler, char alanAyirici, char bilesen,
                                   char tekrar, Func<string, int, string> Alan,
@@ -197,6 +201,7 @@ public static class OruCozumleyici
         string radyologTckn = "", radyologAdi = "", kontrast = "";
         short nedenPuan = 0, kalitePuan = 0;
         var duzeltme = false;
+        var htmlMi = false;
 
         foreach (var obx in obxler)
         {
@@ -226,9 +231,12 @@ public static class OruCozumleyici
 
             if (kontrast.Length == 0 && Alan(obx, 17).Length > 0) kontrast = Alan(obx, 17);
 
-            // BASE64 GÖVDE: tanım alanı `TXT^BASE64` / `HTML^BASE64`.
+            // BASE64 GÖVDE: tanım alanı `TXT^BASE64` / `HTML^BASE64`. HTML'de
+            //   parçalar biçimli metindir (1334) - bayrak kaydedene taşınır,
+            //   çözümleyici etiket soymaz (karar vermez).
             if (tanim.Contains("BASE64", StringComparison.OrdinalIgnoreCase))
             {
+                if (tanim.Contains("HTML", StringComparison.OrdinalIgnoreCase)) htmlMi = true;
                 foreach (var p in deger.Split(tekrar, StringSplitOptions.RemoveEmptyEntries))
                 {
                     var son = p.LastIndexOf(bilesen);
@@ -268,7 +276,7 @@ public static class OruCozumleyici
         return new Govde(
             parcalar.GetValueOrDefault(1, ""), parcalar.GetValueOrDefault(2, ""),
             parcalar.GetValueOrDefault(3, ""), parcalar.GetValueOrDefault(4, ""),
-            duzMetin, radyologTckn, radyologAdi, nedenPuan, kalitePuan, kontrast, duzeltme);
+            duzMetin, radyologTckn, radyologAdi, nedenPuan, kalitePuan, kontrast, duzeltme, htmlMi);
     }
 
     /// <summary>"Bulgular:" gibi başlıkları parça numarasına çevirir.</summary>

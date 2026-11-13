@@ -2395,7 +2395,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
                 DataBinding.DataSource = DtsFatBaslik
                 Style.Color = clWindow
                 TabOrder = 16
-                OnKeyUp = EditFatNoKeyUp
                 Width = 114
               end
               object EditFATURASERI: TcxDBTextEdit

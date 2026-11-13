@@ -183,10 +183,32 @@ public sealed class OruUreticiTestleri
             Encoding.UTF8.GetString(Convert.FromBase64String(parca.Split('^')[0]));
 
         // Parça NUMARASI kılavuzun tek bağlayıcı işareti: sıra serbest.
+        //   Gövde HTML (1334): HTML verilmeyen parça paragraflanır.
         var bulgular = parcalar.Single(p => p.EndsWith("^3", StringComparison.Ordinal));
-        Assert.Equal(v.RaporBulgular, Coz(bulgular));
+        Assert.Equal($"<p>{v.RaporBulgular}</p>", Coz(bulgular));
         var sonuc = parcalar.Single(p => p.EndsWith("^4", StringComparison.Ordinal));
-        Assert.Equal(v.RaporSonuc, Coz(sonuc));
+        Assert.Equal($"<p>{v.RaporSonuc}</p>", Coz(sonuc));
+    }
+
+    [Fact]
+    public void Html_parca_oncelikli_duz_metin_paragraflanir()
+    {
+        // HTML^BASE64 (1334): bölümün metin_html'i varsa olduğu gibi gider; yoksa düz metin
+        //   fn_rad_duzden_html ile AYNI kuralla sarılır - satır <p>, boş satır <p><br></p>, & < > kodlanır.
+        var v = Ornek() with
+        {
+            RaporBulgularHtml = "<p><b>Lumbar</b> dizilim <span style=\"color:red\">doğal</span>.</p>",
+            RaporTeknik = "Kesit < 5 mm & kontrast yok\n\nSagital.",
+        };
+        var parcalar = Alan(OruUretici.Uret(v), "OBX", 5).Split('~');
+        string Coz(string parca) =>
+            Encoding.UTF8.GetString(Convert.FromBase64String(parca.Split('^')[0]));
+
+        Assert.Equal(v.RaporBulgularHtml, Coz(parcalar.Single(p => p.EndsWith("^3", StringComparison.Ordinal))));
+        Assert.Equal("<p>Kesit &lt; 5 mm &amp; kontrast yok</p><p><br></p><p>Sagital.</p>",
+                     Coz(parcalar.Single(p => p.EndsWith("^1", StringComparison.Ordinal))));
+        // Base64 gövdede HL7 ayırıcısı geçmez: HTML'in `^`, `&`, `|` içermesi alanları kaydırmaz.
+        Assert.Equal(3, parcalar.Length);
     }
 
     [Fact]
@@ -194,7 +216,7 @@ public sealed class OruUreticiTestleri
     {
         var m = OruUretici.Uret(Ornek());
         Assert.Equal("TX", Alan(m, "OBX", 2));
-        Assert.Equal("TXT^BASE64", Alan(m, "OBX", 3));
+        Assert.Equal("HTML^BASE64", Alan(m, "OBX", 3));          // 1334: kurulumda HTMLBASE64 bildirilir
         Assert.Equal("F", Alan(m, "OBX", 11));
         Assert.Equal("4^5", Alan(m, "OBX", 13));                       // OBX-13
         Assert.Equal("11122233344^YILMAZ^MERT", Alan(m, "OBX", 16));   // radyolog TCKN
@@ -231,8 +253,9 @@ public sealed class OruUreticiTestleri
         // Başlık YAZILDIĞI GİBİ: büyük harfe çevirmek Türkçe "İ"yi bozuyordu.
         Assert.Contains(obx, x => x.Contains("Bulgular:", StringComparison.Ordinal));
         Assert.Contains(obx, x => x.Contains("Patolojik bulgu saptanmadı.", StringComparison.Ordinal));
-        // Base64 YOK: kurum profilinde metin düz gider.
+        // Base64 YOK, HTML YOK: kurum profilinde metin düz gider (1334 yalnız Bakanlık gövdesini değiştirdi).
         Assert.DoesNotContain("BASE64", m, StringComparison.Ordinal);
+        Assert.DoesNotContain("<p>", m, StringComparison.Ordinal);
     }
 
     // -------------------------------------------------------------- kaçış ----
