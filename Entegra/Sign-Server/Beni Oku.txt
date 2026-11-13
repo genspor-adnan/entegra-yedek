@@ -11,3 +11,10 @@ curl -X 'GET' \
   'http://localhost:51919/api/sign/certificates' \
   -H 'accept: application/json' \
   -H 'X-Api-Key: 3F2504E04F8941D39A0C0305E82C3301'
+
+CORS (13.11.2026, Gentegre AI e-imza - istemci kipi)
+config/application.properties icinde quarkus.http.cors.* satirlari: web uygulamasi (localhost:5173/3000,
+gentegreai.com, 46.36.201.170, musteri sunucusu) tarayicidan dogrudan bu servisi cagirir (sertifika listesi +
+imza). Yeni bir web adresi eklenince quarkus.http.cors.origins listesine eklenip servis yeniden baslatilir:
+  sign-server-service.exe restart   (yonetici olarak)
+Sunucu kipinde (kart sunucuda) CORS gerekmez; API sunucu icinden cagirir.
