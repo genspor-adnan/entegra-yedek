@@ -7,6 +7,41 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 13.11.2026 — Radyoloji şablonları Bakanlık dört parçasına (1332)
+
+Kullanıcı: "bakanlık radyoloji raporlarını kaç bölümde istiyor" → "bizim projede kaç bölüm" → "ölç" → "şablon göçünü
+yaz.. eski yazılmış raporları göndermeyeceğiz.. tek parça olarak kalabilir bundan sonrakileri göndereceğiz.. bakanlığın
+istediği 4 parça esas olmalı".
+
+- **Ölçüm (KOSUYOLU):** 338 eski HBYS şablonunun hepsi tek bölüm "Rapor" (parça 0) - bu şablonla yazılan rapor
+  TeleRadyoloji'ye gidemezdi (ORU OBX-5 ^3 Bulgular / ^4 Sonuç boş = ret). Metinde "Sonuç:" 325, "Bulgular:" 262,
+  "Teknik:" 195, "Karşılaştırma:" 0; 58'inin başında eski yer tutuculu hasta tablosu (@ADSOYAD...), 182'si
+  "Saygılarımızla, Dr. ..." ile bitiyor. 98 yazılmış raporun 98'i tek parça - **dokunulmadı** (gönderilmeyecek).
+- **Göç 1332:** `fn_rad_sablon_bol(html)` = web "☰ Başlıklardan böl" (`sablonBolme.ts · bakanligaBol`) kuralının SQL
+  eşi (üst düzey düğüm ayrıştırma, aynı başlık sözlüğü `fn_rad_baslik_bul`, `fn_html_varlik_coz`, `fn_rad_html_duz` =
+  RaporHtml.DuzMetin). Klinik bilgi (doluysa) + dört parça HER ZAMAN; Bulgular / Sonuç zorunlu. Kapsam yalnız tek
+  "Rapor" bölümlü şablon. Önce bugünkü içerik `radyoloji_sablon_surum`a dondurulur (kartta Sürümler → Geri yükle
+  eski tek A4'ü getirir) + `yedek_1332_radyoloji_sablon_bolum`; şablon sürümü artar, `degistirme_tarihi`
+  damgalanır (aktarım yeniden çalışınca ezmez). KOSUYOLU: 338 bölündü - Bulgular dolu 335, Sonuç dolu 318, Teknik
+  195; Sonuç'u boş 20 şablon (başlık var ama altı boş: radyolog her hastada yazıyor) ve Bulgular'ı boş 3 (Difüzyon MR
+  ×2, Spektroskopi MR) göç çıktısında listelenir. Dev ve test DB'de tek A4 şablon yoktu.
+- **Eski Word kalıntıları** (iki uygulamada aynı): ilk başlıktan önceki eski yer tutuculu blok (web yer tutucuları
+  `{istem.x}`; `@ADSOYAD` hiçbir yerde dolmuyordu), yalnız "Sayın Meslektaşım," paragrafı, "Saygılarımızla /
+  Saygılarımla" ve sonrası (şablona gömülü hekim adı = yanlış imza) atılır.
+- **Hata düzeltmesi (`sablonBolme.ts`):** sondaki boş paragraf temizliği hiç çalışmıyordu - tek desende `bos` iki kez
+  geçince ikinci kopyanın `\1` / `\2`'si birincinin gruplarını gösteriyordu; baş / son ayrı desen.
+- **Aktarım:** `esle.sql` şablonu artık doğrudan `fn_rad_sablon_bol` ile dört parça yazar (sonraki eski HBYS'ler).
+- Testler: `SablonBakanlikBolmeTestleri` (4/4, gentegre_ai_test) ↔ `sablonBolme.test.ts` (aynı örnekler, 6/6).
+- KOSUYOLU'da `radyoloji.bakanlik_profili` = 1 yapıldı (kullanıcı: "aç"; SQL ile - ISLEMLOG kaydı yok): onay kapısı
+  Bulgular ≥ 50 / Sonuç dolu kuralını zorlar. Açılışta onaylanmamış 2 taslak kapıya takıldı: rapor 243 (eski HBYS
+  taslağı, kullanıcı "1" = böl) aynı `fn_rad_sablon_bol` ile dört parçaya bölündü (Bulgular 409 karakter; Sonuç
+  raporda yok, radyolog yazacak; eski satır `yedek_1332_radyoloji_rapor_bolum`). Rapor 538 = 537'nin bugün açılmış
+  boş EK RAPORU (tek "Ek Rapor" bölümü, parça 0) - dokunulmadı. **Açık sorun:** ek rapor tek "Ek Rapor" bölümüyle
+  açıldığı için profil açıkken hiçbir ek rapor onaylanamaz; Teletıp ek raporu ayrı ORU (OBX-11 "C") olarak kendi
+  parçalarıyla gönderir (1309) - ek raporun dört parçayla açılması gerekiyor (karar bekliyor).
+
+---
+
 ## 09.11.2026 — MEDX yayını (1274-1278), ağaç combo dal/yaprak tıklaması, fiş menü adları (1279)
 
 Kullanıcı: "medx e yayınlama yapıyordun yarım kaldı devam et" · "kategori ağacında altında item varsa tıkladığımda

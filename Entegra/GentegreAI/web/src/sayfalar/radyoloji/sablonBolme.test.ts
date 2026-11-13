@@ -26,6 +26,25 @@ describe('şablon bölme (1216)', () => {
     expect(s.find(x => x.bakanlikParca === 3)?.html).toBe('<p>Var.</p>');
   });
 
+  // AYNI ÖRNEK api/tests/.../SablonBakanlikBolmeTestleri.cs'de SQL fn_rad_sablon_bol (1332) için sınanır.
+  it('eski Word kalıntıları atılır: yer tutuculu üst bilgi, hitap, imza (1332)', () => {
+    const b = bakanligaBol('<table><tbody><tr><td>HASTA ADI</td><td><b>@ADSOYAD</b></td></tr></tbody></table>'
+      + '<p><br></p><p>Sayın Meslektaşım,</p><p><b>Teknik: </b>T2A aksial.</p>'
+      + '<p><b><u>Bulgular</u></b><b>:</b></p><p>Karaciğer boyutları normal, parankim homojen, fokal lezyon izlenmedi.</p>'
+      + '<p><b>SONU&#199;:</b></p><p><b>Normal sınırlarda.</b></p><p><br></p>'
+      + '<p style="text-align: center">Saygılarımızla,</p><p>Rad.Dr. X</p>');
+    expect(b.map(x => x.bakanlikParca)).toEqual([1, 2, 3, 4]);
+    expect(b[0].html).toBe('<p>T2A aksial.</p>');
+    expect(b[2].html).toBe('<p>Karaciğer boyutları normal, parankim homojen, fokal lezyon izlenmedi.</p>');
+    expect(b[3].html).toBe('<p><b>Normal sınırlarda.</b></p>');
+    expect(b.map(x => x.html).join('')).not.toMatch(/@ADSOYAD|Meslektaşım|Saygılarımızla|Rad\.Dr/);
+  });
+
+  it('yer tutucu ilk başlıktan sonra korunur', () => {
+    const b = bakanligaBol('<p>BULGULAR:</p><p>Ölçüm @OLCUM mm.</p>');
+    expect(b[2].html).toBe('<p>Ölçüm @OLCUM mm.</p>');
+  });
+
   it('başlıksız metin bütünüyle bulgulara', () => {
     const b = bakanligaBol('<p>Serbest metin.</p>');
     expect(b.find(x => x.bakanlikParca === 3)?.html).toBe('<p>Serbest metin.</p>');

@@ -716,9 +716,14 @@ begin
      where not exists (select 1 from public.radyoloji_sablon s
                         where s.kod = left(z.kod, 40) and s.aciklama like 'Eski HBYS şablonu%')
     returning id, kod)
-  insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, varsayilan_html, yazdir)
-  select y.id, 1, 'Rapor', z.metin, z.html, 1
-    from yaz y join zz_sablon z on left(z.kod, 40) = y.kod;
+  -- BAKANLIK DÖRT PARÇASI (1332, kullanıcı 13.11.2026: "bakanlığın istediği 4 parça esas olmalı"): Word şablonu
+  --   kalın başlıklarından Klinik bilgi + Teknik / Karşılaştırma / Bulgular / Sonuç ve öneriler bölümlerine bölünür
+  --   (web "Başlıklardan böl" ile aynı kural). Tek "Rapor" bölümü TeleRadyoloji'ye gidemezdi.
+  insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, varsayilan_html, bakanlik_parca,
+                                             zorunlu, yazdir)
+  select y.id, p.sira, p.baslik, p.metin, nullif(p.html, ''), p.bakanlik_parca, p.zorunlu, 1
+    from yaz y join zz_sablon z on left(z.kod, 40) = y.kod
+   cross join lateral public.fn_rad_sablon_bol(coalesce(z.html, public.fn_rad_duzden_html(z.metin))) p;
 
   -- HAZIR ALAN PAKETLERİ (1217): adına uyan eski şablona paketin alanları (Lomber / Servikal / Dorsal / Diz / Omuz MR).
   --   Şablonda olan alan atlanır; şablon "değiştirildi" damgalanmaz (aktarım işi).

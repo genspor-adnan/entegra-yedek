@@ -7,6 +7,13 @@
  * "BULGULAR" ya da "Bulgular:" ile başlıyorsa başlıktır (iki nokta zorunlu değil ama satır başlıkla bitmeli ya da
  * iki noktayla devam etmeli - "Bulgular ile uyumlu..." başlık sayılmaz). Başlıksız ön kısım ve başlığı tanınmayan
  * metin Bulgular'a gider; Klinik bilgi ayrı bölüm (Bakanlık parçası değil, istemle gider).
+ *
+ * Eski Word baskısından kalanlar atılır (1332): ilk başlıktan önceki eski yer tutuculu üst bilgi (@ADSOYAD, @TETKIK -
+ * web'de dolmaz), yalnız "Sayın Meslektaşım," olan paragraf, "Saygılarımızla / Saygılarımla" ve sonrası (şablona gömülü
+ * hekim adı yanlış imza olur).
+ *
+ * AYNI KURAL SQL'de: db/1332 `fn_rad_sablon_bol` (eski HBYS aktarımı ve toplu göç onu kullanır). Sözlük ya da kural
+ * değişirse ikisi birlikte değişir (testler aynı örnekleri sınar: sablonBolme.test.ts ↔ SablonBakanlikBolmeTestleri).
  */
 
 export interface SablonBolumu {
@@ -60,13 +67,19 @@ export function bakanligaBol(html: string): SablonBolumu[] {
   const govde = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html').body;
   const kova: Record<number, string[]> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
   let etkin = 3;   // başlıktan önceki kısım Bulgular'a
+  let baslikGoruldu = false;
   for (const dugum of Array.from(govde.childNodes)) {
     const el = dugum as HTMLElement;
     const metin = dugum.textContent ?? '';
+    const s = sade(metin.replace(/\s+/g, ' ').trim());
+    if (s.startsWith('SAYGILARIM')) break;                                    // imza ve sonrası
+    if (/^SAYIN MESLEKTASIM[,;:.!]?$/.test(s)) continue;                       // yalnız hitap
+    if (!baslikGoruldu && /@[A-ZÇĞİÖŞÜ]{3,}/.test(metin)) continue;            // eski yer tutuculu üst bilgi
     const blok = dugum.nodeType === 1 && /^(P|DIV|H[1-6]|LI)$/.test(el.tagName);
     const b = blok ? baslikBul(metin) : null;
     if (b) {
       etkin = b[0];
+      baslikGoruldu = true;
       if (b[1].trim()) kova[etkin].push(`<p>${kacis(b[1].trim())}</p>`);
       continue;
     }
@@ -75,8 +88,11 @@ export function bakanligaBol(html: string): SablonBolumu[] {
   }
   // Baştaki / sondaki BOŞ paragraflar atılır (eski şablonlarda stilli: <p style="..."><br></p>).
   const bos = String.raw`<(p|div)\b[^>]*>(?:\s|&nbsp;|<br\s*\/?>|<(span|b|i|u)\b[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\2>)*<\/\1>`;
-  const kenar = new RegExp(String.raw`^(?:${bos}|\s)+|(?:${bos}|\s)+$`, 'g');
-  const temiz = (p: string[]) => p.join('').replace(kenar, '');
+  // Baş ve son AYRI desen: tek desende `bos` iki kez geçince ikinci kopyanın \1 / \2'si birincinin gruplarını
+  //   gösteriyor ve sondaki boşluk hiç atılmıyordu.
+  const bas = new RegExp(String.raw`^(?:${bos}|\s)+`);
+  const son = new RegExp(String.raw`(?:${bos}|\s)+$`);
+  const temiz = (p: string[]) => p.join('').replace(bas, '').replace(son, '');
   const sonuc: SablonBolumu[] = [];
   if (temiz(kova[0])) sonuc.push({ baslik: 'Klinik bilgi', html: temiz(kova[0]), bakanlikParca: 0, zorunlu: false, yazdir: true });
   for (const p of BAKANLIK_PARCALARI)
