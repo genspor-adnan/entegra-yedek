@@ -217,7 +217,7 @@ public static partial class DisUclari
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
             var fiyatListeleri = await b.ListeAsync("select id, ad from public.v_fiyat_listesi_lookup where aktif = 1 order by ad limit 100", null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
-            var kurumlar = await b.ListeAsync("select id, ad from public.v_kurum_lookup where aktif = 1 order by ad limit 300", null, [],
+            var kurumlar = await b.ListeAsync("select id, ad from public.v_anlasmali_kurum_lookup where aktif = 1 order by ad limit 300", null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
 
             return Results.Ok(new

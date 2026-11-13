@@ -153,13 +153,13 @@ public static class BelgeUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
-            // ODEYEN KURUMLAR: anlasmali kurumlar (taraf.kurum = 1), tum
+            // ODEYEN KURUMLAR: ANLAŞMALI kurumlar (taraf.kurum = 1 and taraf_kurum.anlasmali = 1, 1338), tum
             //   cariler degil. `tur` ekranda rotayi belirler (Özel/SGK/ÖSS).
             var kurumlar = await baglanti.ListeAsync("""
                 select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(k.tur, 0) as tur
                   from public.taraf t
                   left join public.taraf_kurum k on k.id = t.id
-                 where t.kurum = 1 and t.durum = 1
+                 where t.kurum = 1 and t.durum = 1 and coalesce(k.anlasmali, 0) = 1
                  order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1), tur = o.GetInt32(2) },
@@ -173,6 +173,18 @@ public static class BelgeUclari
                   from public.departman d
                  where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
                  order by d.ad
+                """, null, [],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
+
+            // GÖNDEREN BÖLÜMLERİ (kullanıcı 13.11.2026, KOSUYOLU: dış hekim "Beyin ve Sinir Cerrahisi"nin bölümü
+            //   başvuruda görünmedi): tetkik kurumunda (gönderen modu) Bölüm = gönderen hekimin BRANŞI, yani SKRS
+            //   klinik listesi (departman.kod). Kurumun o kliniği olmadığı için pasif / plansız olması bölümün
+            //   kaydedilmesine engel olmamalı - e-Nabız / Medula isteyen branşı ister. Pasifler ("· pasif") sonda.
+            var gonderenBolumleri = await baglanti.ListeAsync("""
+                select d.id, d.ad || case when d.durum = 1 then '' else ' · pasif' end
+                  from public.departman d
+                 where coalesce(d.kod, '') <> ''      -- yalnız SKRS klinik kodlu birimler (Muhasebe vb. değil)
+                 order by case when d.durum = 1 then 0 else 1 end, d.ad
                 """, null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
 
@@ -200,7 +212,7 @@ public static class BelgeUclari
                 o => new { id = o.GetInt32(0), ad = o.GetString(1),
                            yon = (int)o.GetInt16(2), tarifeTipi = (int)o.GetInt16(3) }, iptal);
 
-            return Results.Ok(new { kurumlar, bolumler, depolar, fiyatListeleri,
+            return Results.Ok(new { kurumlar, bolumler, gonderenBolumleri, depolar, fiyatListeleri,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

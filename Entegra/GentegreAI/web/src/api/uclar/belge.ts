@@ -115,6 +115,8 @@ export const belgeUclari = {
   basvuruKaynaklari: () => istek<{
     kurumlar: { id: number; ad: string; tur: number }[];
     bolumler: { id: number; ad: string }[];
+    /** Gönderen modunda Bölüm = gönderen hekimin branşı: TÜM departmanlar (SKRS klinik), pasifler sonda işaretli. */
+    gonderenBolumleri: { id: number; ad: string }[];
     depolar: { id: number; ad: string }[];
     /** Aktif fiyat listeleri - `yon` 1 alis, 2 satis. */
     fiyatListeleri: { id: number; ad: string; yon: number; tarifeTipi: number }[];

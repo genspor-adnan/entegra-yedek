@@ -456,7 +456,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   // Basvuru combolarinin (kurum · bolum · depo · gorevli) ve protokol numara
   //   sablonunun yuklenmesi ayri dosyada: hepsi ayni desendeki bes effect'ti.
-  const { kurumlar, bolumler, depolar, gorevliler, protokolElle } =
+  const { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle } =
     useBasvuruKaynaklari(basvuruMu, bolumId, kullanici?.hekimRolu);
 
   usePersonelAdi(personelId, gorevliler, setPersonelAd);
@@ -2095,7 +2095,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             tarih={tarih} setTarih={setTarih}
             tarihEnGec={tarihEnGec} tarihEnErken={tarihEnErken}
             tarihHatasi={alanHatalari.belgeTarihi}
-            bolumler={bolumler} bolumId={bolumId} setBolumId={setBolumId}
+            // GÖNDEREN MODU (13.11.2026): Bölüm = gönderen hekimin branşı; kurumun pasif kliniği de seçilebilir.
+            bolumler={gonderenModu ? gonderenBolumleri : bolumler} bolumId={bolumId} setBolumId={setBolumId}
             gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
             kurumlar={kurumlar} odeyenKurumId={odeyenKurumId}
             // Emekli kutusu ODEYEN KURUMUN TURUNE bagli (591) - alt kurum tek

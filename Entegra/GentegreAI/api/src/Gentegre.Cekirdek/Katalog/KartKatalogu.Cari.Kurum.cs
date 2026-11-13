@@ -67,18 +67,34 @@ public static partial class KartKatalogu
             //   kurumun en temel bilgisidir. Temsilci satis takibi alanidir -
             //   Tanımlama kutusuna indi.
             "temsilci" => a with { Grup = null, AltGrup = "Tanımlama" },
+            // SATIŞ KOŞULLARI KURUMDA YOK (kullanıcı 14.11.2026): kurumun fiyat kuralı SÖZLEŞMEDEN gelir; cari
+            //   satış/alış fiyat listesi alanları kurumda karşılıksız. Değerler taşınır (Gizli), ekranda yok.
+            _ when a.Grup == "Satış Koşulları" => a with { Gizli = true },
             _ => a
         }).ToList();
         alanlar.Add(new KartAlani("kurum", "kurum", "mantik", Baslik: "Kurum", Gizli: true));
 
         var detaylar = (c.Detaylar ?? Array.Empty<DetayTanimi>()).ToList();
+        // SATINALMA KOŞULLARI KURUMDA YOK (kullanıcı 14.11.2026): tedarikçi sekmesi - kurum ödeyen/gönderen
+        //   taraftır, bizden mal almaz. Satır (taraf_tedarikci) silinmez; aynı taraf tedarikçi de olabilir.
+        //   "Satış & Risk" (satisKosul, taraf_musteri) de kurumda yok (kullanıcı 14.11.2026): risk limiti / vade
+        //   kuralları sözleşmede. Satırlar duruyor, sekme çizilmiyor.
+        detaylar.RemoveAll(d => d.Ad is "satinalmaKosul" or "satisKosul");
+        // BANKA / IBAN yalnız anlaşmalı kurumda (kullanıcı 14.11.2026): hesap bilgisi sözleşmeli kurumla (ödeme /
+        //   tahsilat) anlamlı; yalnız hasta gönderen kurumda sekme boş kalıyordu.
+        detaylar = detaylar.Select(d => d.Ad == "bankalar" ? d with { KosulAlani = "kurumRolu.anlasmali" } : d).ToList();
         // KURUM TURU 1:1 kalir - kurumun kendisine ait tek bilgi (468).
         //   Sozlesmeye ait ne varsa asagidaki 1:N gride tasindi.
         detaylar.Add(new DetayTanimi("kurumRolu", "public.taraf_kurum", "id", new KartAlani[]
         {
             new("id",  "id",  "sayi", Yazilabilir: false),
-            new("tur", "tur", "kod",  Zorunlu: true,
+            // KURUM TÜRÜ yalnız anlaşmalı kurumda görünür ve zorunludur (kullanıcı 14.11.2026): görünürlüğü
+            //   KartKimlikSeridi (kurum şeridi) anlasmali'ya göre verir, zorunluluğu ZorunluKosulu.
+            new("tur", "tur", "kod",  Zorunlu: true, ZorunluKosulu: "anlasmali",
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
+            // ANLAŞMALI (1338, kullanıcı 13.11.2026): kurum rolü ile sözleşmeli olmak ayrıldı - hasta gönderen hastane
+            //   sözleşmesiz de kurumdur. 1 ise başvuruda ÖDEYEN listesinde çıkar ve Sözleşmeler sekmesi açılır.
+            new("anlasmali", "anlasmali", "mantik", Baslik: "Anlaşmalı Kurum"),
         }, SubeKolonu: null, Baslik: "Kurum Türü", LogTabloId: 1265, TekSatir: true));
 
         // SOZLESMELER - 1:N (468, kullanici: "alt kurum sozlesmeye bagli;
@@ -134,7 +150,8 @@ public static partial class KartKatalogu
                 Baslik: "Varsayılan Karşılama %"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
         }, SubeKolonu: "sube_id", Sirala: "alt_kurum, id", Baslik: "Sözleşmeler",
-           LogTabloId: 1264));
+           // Sekme yalnız anlaşmalı kurumda (kullanıcı 13.11.2026: "anlaşmalı ise sözleşme vb sekmeler görünsün").
+           KosulAlani: "kurumRolu.anlasmali", LogTabloId: 1264));
 
 
         return c with

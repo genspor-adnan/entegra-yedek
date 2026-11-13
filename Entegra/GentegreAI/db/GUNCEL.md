@@ -732,7 +732,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (367 ad, 164 tanesi birden cok dosyada)
+## Gorunumler (368 ad, 164 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -747,6 +747,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_acil_yatak_lookup` | `716_acil_servis.sql` | — |
 | `v_alt_kurum_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_ameliyat_salon_lookup` | `715_ameliyathane.sql` | — |
+| `v_anlasmali_kurum_lookup` | `1338_kurum_anlasmali_bayragi.sql` | — |
 | `v_ariza_talep` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_asi_skrs_eksik` | `898_asi_modulu.sql` | — |
 | `v_asi_uygulama` | `940_personel_unvan_yalniz_onek.sql` | 898_asi_modulu.sql |
@@ -829,7 +830,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_enabiz_klinik_kodsuz` | `885_enabiz_ay_sonu.sql` | — |
 | `v_enabiz_mesaj` | `940_personel_unvan_yalniz_onek.sql` | 877_enabiz_hasta_mesaji.sql, 881_enabiz_hasta_mesaji_411.sql |
 | `v_entegrasyon_hesap_lookup` | `430_sigorta_v1.sql` | — |
-| `v_entegrasyon_kod_lookup` | `337_entegrasyon_uts_ebelge.sql` | 336_entegrasyon_hesap.sql |
+| `v_entegrasyon_kod_lookup` | `1337_radyoloji_rapor_eimza.sql` | 336_entegrasyon_hesap.sql, 337_entegrasyon_uts_ebelge.sql |
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
 | `v_firsat_liste` | `940_personel_unvan_yalniz_onek.sql` | 121_firsat.sql |
 | `v_fiyat_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
@@ -934,7 +935,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_klinik_gosterge_lookup` | `711_klinik_kalite.sql` | — |
 | `v_klinik_olgu_lookup` | `712_klinik_olgu_lookup.sql` | — |
 | `v_kullanici_lookup` | `940_personel_unvan_yalniz_onek.sql` | 156_ebelge_seri.sql |
-| `v_kurum_lookup` | `940_personel_unvan_yalniz_onek.sql` | 249_kurum_sozlesme.sql, 250_kategori_lookup.sql, 478_pay_kolonlari_dusur.sql |
+| `v_kurum_lookup` | `1339_kurum_lookup_aktif_durum.sql` | 249_kurum_sozlesme.sql, 250_kategori_lookup.sql, 478_pay_kolonlari_dusur.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_kurum_sozlesme_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_arsiv` | `940_personel_unvan_yalniz_onek.sql` | 890_lab_numune_arsiv.sql |

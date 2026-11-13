@@ -65,6 +65,8 @@ public sealed class DokumanDeposu
               "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc", "belge",
               "ariza", "duyuru", "izin", "avans", "belge-talep", "rad-cihaz", "demirbas",
               "kys-egitim", "personel-belge", "planli-gider",
+              // RADYOLOJİ RAPORU e-İMZASI (1337): imzalı XAdES XML - kaynak_id rapor (RadyolojiUclari.Imza).
+              "radyoloji-rapor",
               // ÜRETİM FİŞİ (1253): parti fotoğrafı, kalite raporu, teknik resim - kaynak_id fiş.
               "uretim-fisi",
               // KASA / BANKA HESABI (12.11.2026): hesap kartının Resim / Doküman sekmesi - kaynak_id hesap.

@@ -102,7 +102,7 @@ public static partial class KartKatalogu
                     Baslik: "Kayıt Tipi"),
                 // Odeyen kurum (266) hastanin kendisinde: cok policeli izleme
                 //   ayri sekmede (taraf_hasta_kurum), burada tek alan yeter.
-                new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
+                new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_anlasmali_kurum_lookup",
                     Baslik: "Kurum / Ödeyen"),
                 // 335 (Genotıp alan gereksinimleri): SKRS/eNabız icin gereken
                 //   kimlik alanlari. Kod listelerinin DEGERI dogrudan SKRS
@@ -164,7 +164,7 @@ public static partial class KartKatalogu
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
             // Anlasmali kurumlar (249) - tum cariler DEGIL: odeyen ancak
             //   sozlesmesi olan bir kurum olabilir.
-            new("kurumId",    "kurum_id",   "kod",   KodTablosu: "public.v_kurum_lookup",
+            new("kurumId",    "kurum_id",   "kod",   KodTablosu: "public.v_anlasmali_kurum_lookup",
                 Baslik: "Kurum / Sigorta"),
             new("policeNo",   "police_no",  "metin", EnFazlaUzunluk: 40, Baslik: "Poliçe No"),
             new("gecerlilik", "gecerlilik", "tarih", Baslik: "Geçerlilik"),

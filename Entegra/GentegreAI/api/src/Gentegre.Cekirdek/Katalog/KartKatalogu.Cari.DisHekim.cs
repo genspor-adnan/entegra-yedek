@@ -91,10 +91,15 @@ public static partial class KartKatalogu
             //   YERI "Hekim Bilgisi" KUTUSUNUN EN USTU (kullanici): baslikta
             //   BOLUM durur, brans hekimin mesleki bilgisidir - tescil no ve
             //   calistigi kurumla ayni kutuya aittir.
+            // BRANŞ KARTTAN KALKTI (kullanıcı 13.11.2026: "dış dr daki branş kısmını kaldır bölüm kalsın yeter
+            //   karışmasın"): dış hekimin branşı = başlıktaki BÖLÜM (departman, SKRS klinik kodu). Alan veriyi
+            //   korumak için gizli (eski kayıtlar / Medula po.brans yolu), ekranda yok.
             new("gorevId",  "gorev_id", "kod",   KodTablosu: "public.v_gorev_agac_lookup",
-                Agac: true, Baslik: "Branş", Grup: "Hekim Bilgisi"),
-            new("kurumId",  "bag_id",   "kod",   KodTablosu: "public.v_cari_lookup",
-                AramaKaynagi: "cari", Baslik: "Kurum", Grup: "Hekim Bilgisi"),
+                Agac: true, Baslik: "Branş", Grup: "Hekim Bilgisi", Gizli: true),
+            // KURUM = KURUMLAR LİSTESİ (1338, kullanıcı 13.11.2026: "kurumlar listesinden seçelim"): dış hekimin
+            //   çalıştığı hastane/klinik kurum rolü taşıyan taraftır; anlaşmalı olması şart değil.
+            new("kurumId",  "bag_id",   "kod",   KodTablosu: "public.v_kurum_lookup",
+                AramaKaynagi: "kurum", Baslik: "Kurum", Grup: "Hekim Bilgisi"),
             // TC No YOK (kullanici): dis hekimin kimlik numarasini biz tutmuyoruz -
             //   sevk eden hekim icin gerekli olan iletisim ve tescil bilgisidir.
             // taraf'ta serbest not kolonu "notlar" (aciklama YOK).
@@ -118,15 +123,20 @@ public static partial class KartKatalogu
                     Baslik: "Diploma / Tescil No"),
                 // taraf_personel'de ZATEN VAR - dis hekimde "kadrolu / part-time /
                 //   serbest" ayrimini tasir, yeni kolon gerekmedi.
+                // ÇALIŞMA ŞEKLİ dış hekimde yok (kullanıcı 14.11.2026): kurum dışı hekimin kadro bilgisi sorulmaz;
+                //   kolon duruyor (aynı taraf personel de olabilir), kartta gizli.
                 new("calismaSekli", "calisma_sekli", "kod",
-                    SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
+                    SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli", Gizli: true),
                 // SAHA (1289, temsilci_ziyaret.html §5): ziyaret sıklığı plan üretir (adım c); tercih gün / saat ve
                 //   konum rota için. Eski HBYS ZIYARETSURESI (ay) sıklığa, adres ilçesi rotaya.
                 new("ziyaretSikligiHafta", "ziyaret_sikligi_hafta", "kod",
                     SabitKodlar: ZiyaretSikligiKodlari, Baslik: "Ziyaret Sıklığı"),
-                new("tercihGun",  "tercih_gun",  "kod", SabitKodlar: HaftaGunuKodlari, Baslik: "Tercih Günü"),
+                // YAN YANA (kullanıcı 14.11.2026: "tercih saati tercih günü sağında, boylam enlem sağında"): EslesAlan
+                //   çifti - tek etiket altında iki kutu (TekKayit eslesenAdlar).
+                new("tercihGun",  "tercih_gun",  "kod", SabitKodlar: HaftaGunuKodlari, Baslik: "Tercih Günü / Saati",
+                    EslesAlan: "tercihSaat"),
                 new("tercihSaat", "tercih_saat", "metin", EnFazlaUzunluk: 5, Baslik: "Tercih Saati"),
-                new("enlem",  "enlem",  "ondalik", Baslik: "Enlem"),
+                new("enlem",  "enlem",  "ondalik", Baslik: "Enlem / Boylam", EslesAlan: "boylam"),
                 new("boylam", "boylam", "ondalik", Baslik: "Boylam"),
             // SubeKolonu VARSAYILAN: taraf_personel.sube_id NOT NULL - detay
             //   satiri oturumun subesiyle yazilir (null verilirse insert

@@ -24,7 +24,7 @@ public static partial class RadyolojiUclari
         //   (durum 3 + kilit). Onay ön koşulları veritabanında (284).
         grup.MapPost("/rapor/{id:int}/durum", async (
             int id, string hedef, string? surum, int? onaylayacakId, DurumIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz,
+            LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz, Gentegre.Api.Servisler.EImzaServisi eimza,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -41,48 +41,16 @@ public static partial class RadyolojiUclari
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // SATIR KİLİDİ (B04 / B06): istem ve rapor kilitlenir; kilit ve onay uygunluğu KİLİDİN ALTINDA denetlenir -
-            //   denetim ile yazım arasında başka bir kayıt / onay araya giremez.
-            var istemId = await baglanti.TekDegerAsync<int?>(
-                "select istem_id from public.radyoloji_rapor where id = @p0", islem, [id], iptal)
-                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
-            await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update",
-                islem, [istemId], iptal);
-            var satir = await baglanti.TekAsync(
-                "select coalesce(kilit, 0)::int, xmin::text from public.radyoloji_rapor where id = @p0 for update",
-                islem, [id], o => new { Kilit = o.GetInt32(0), Surum = o.GetString(1) }, iptal)
-                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
-            if (satir.Kilit == 1)
-                throw GentegreHatasi.IsKurali("Rapor onaylanmış ve kilitli; düzeltme için ek rapor (addendum) açın.");
-            // SÜRÜM (kod inceleme raporu 28.10.2026, ikinci tur P2): onaylanan / uzmana giden metin, isteyenin
-            //   GÖRDÜĞÜ (kendi kaydettiği) metin olmalı. Arada başkası kaydettiyse 409 - sürümsüz istek de.
-            if (surum != satir.Surum)
-                throw GentegreHatasi.Cakisma(new { surum = satir.Surum });
-            if (onayMi)
-            {
-                var engel = await baglanti.TekDegerAsync<string>(
-                    "select public.fn_radyoloji_rapor_onaylanabilir(@p0)", islem, [id], iptal) ?? "";
-                if (engel.Length > 0) throw GentegreHatasi.IsKurali(engel);
-            }
+            //   denetim ile yazım arasında başka bir kayıt / onay araya giremez. Kilit / sürüm / onay adımları
+            //   e-imza ucuyla ORTAK (RadyolojiUclari.Imza.cs, 1337): imzalı onay da aynı kuralları uygular.
+            var istemId = await RaporKilitleAsync(baglanti, islem, id, surum, iptal);
+            // e-İMZA ZORUNLU (1337): EIMZA hesabı aktifken imzasız onay yok - hekim "Onayla ve İmzala"da kartla
+            //   imzalar (POST /rapor/{id}/imzala). Eski kurulumlar (hesap yok) eskisi gibi onaylar.
+            if (onayMi && (await eimza.AyarAsync(baglam.SubeId, iptal)).Aktif)
+                throw GentegreHatasi.IsKurali("Bu kurulumda rapor onayı e-imza ile yapılır; \"Onayla ve İmzala\" ile kartınızı kullanın.");
 
             if (onayMi)
-            {
-                // RESMI RAPOR NUMARASI onayda atanir (303): taslak asamasinda
-                //   vermek, vazgecilen raporlarda numara boslugu birakirdi.
-                //   Zaten numarali rapor (yeniden onay) numarasini KORUR.
-                await baglanti.CalistirAsync("""
-                    update public.radyoloji_rapor
-                       set durum = 3, kilit = 1, onaylayan_id = @p1, onay_tarihi = now()::timestamp,
-                           rapor_no = case when rapor_no = ''
-                                           then public.fn_radyoloji_rapor_no()
-                                           else rapor_no end,
-                           degistiren = @p1, degistirme_tarihi = now()::timestamp
-                     where id = @p0
-                    """, islem, [id, baglam.KullaniciId], iptal);
-                await baglanti.CalistirAsync(
-                    "update public.radyoloji_istem set durum = 5 where id = @p0", islem, [istemId], iptal);
-                // Onay geldi: uzmanın "onayınızı bekliyor" hatırlatması kapanır (vekâleten onaylansa da).
-                await OnayBildirimiKapatAsync(baglanti, islem, istemId, iptal);
-            }
+                await RaporOnaylaAsync(baglanti, islem, id, istemId, baglam, iptal);
             else
             {
                 // Seçilen kişi gerçekten onaylayabilmeli (aktif + rad.rapor_onayla) - yoksa rapor kimsenin
@@ -116,25 +84,8 @@ public static partial class RadyolojiUclari
 
             await islem.CommitAsync(iptal);
 
-            // e-NABIZ 409 RADYOLOJI SONUC (883, KTS H10/D19): paket ONAY
-            //   sonrasi uretilir - onaylanmamis rapor hastanin dosyasina
-            //   girmez, e-Nabiz'a hic girmemeli. Uretim SESSIZDIR: e-Nabiz
-            //   ikincil is, raporun onayi onun basarisina bagli degil.
-            object? paket = null;
-            if (onayMi)
-            {
-                try
-                {
-                    var s = await enabiz.UretAsync("RADYOLOJI_SONUC", id, baglam.KullaniciId, iptal);
-                    if (s is not null) paket = new { s.PaketNo, s.Durum, s.Eksikler };
-                }
-                catch (Exception h)
-                {
-                    ctx.RequestServices.GetRequiredService<ILoggerFactory>()
-                       .CreateLogger("enabiz").LogError(h,
-                           "e-Nabiz radyoloji sonuc paketi uretilemedi (rapor {Id})", id);
-                }
-            }
+            // e-NABIZ 409 RADYOLOJI SONUC (883): onay sonrasi, sessiz (RadyolojiUclari.Imza.cs EnabizPaketiAsync).
+            var paket = onayMi ? await EnabizPaketiAsync(enabiz, ctx, id, baglam, iptal) : null;
 
             return Results.Ok(new { tamam = true, paket });
         });

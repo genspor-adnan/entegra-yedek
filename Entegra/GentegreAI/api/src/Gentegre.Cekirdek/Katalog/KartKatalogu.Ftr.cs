@@ -129,7 +129,7 @@ public static partial class KartKatalogu
             new("raporNo",          "rapor_no",          "metin", EnFazlaUzunluk: 30, Baslik: "FTR e-Rapor No", Grup: "Ödeyen & Rapor"),
             new("raporSeansHakki",  "rapor_seans_hakki", "sayi",  Baslik: "Rapor seans hakkı", Grup: "Ödeyen & Rapor"),
             new("kalanHak",         "kalan_hak",         "sayi",  Baslik: "Kalan yıllık hak", Grup: "Ödeyen & Rapor"),
-            new("odeyenKurumId",    "odeyen_kurum_id",   "kod",   KodTablosu: "public.v_kurum_lookup", Baslik: "Ödeyen kurum", Grup: "Ödeyen & Rapor"),
+            new("odeyenKurumId",    "odeyen_kurum_id",   "kod",   KodTablosu: "public.v_anlasmali_kurum_lookup", Baslik: "Ödeyen kurum", Grup: "Ödeyen & Rapor"),
             new("belgeId",          "belge_id",          "sayi",  Yazilabilir: false, Baslik: "Başvuru", Grup: "Ödeyen & Rapor"),
             new("yapilanSeans",     "yapilan_seans",     "sayi",  Yazilabilir: false, Baslik: "Yapılan seans", Grup: "Sonuç"),
             new("devamsiz",         "devamsiz",          "sayi",  Yazilabilir: false, Baslik: "Devamsız", Grup: "Sonuç"),

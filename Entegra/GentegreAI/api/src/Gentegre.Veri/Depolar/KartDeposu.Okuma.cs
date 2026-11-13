@@ -379,6 +379,8 @@ public sealed partial class KartDeposu
             // Anlasmali kurum (249): hasta policesinde odeyen, kurum sozlesmesi
             //   satirinda kategori secimi.
             "public.v_kurum_lookup", "public.v_kategori_lookup",
+            // 1338: ödeyen kurum seçimi yalnız anlaşmalı kurumlar (hasta poliçesi, diş/FTR planı).
+            "public.v_anlasmali_kurum_lookup",
             "public.v_tahsilat_turu_lookup",
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.

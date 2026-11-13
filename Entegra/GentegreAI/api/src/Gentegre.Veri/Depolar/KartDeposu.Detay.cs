@@ -269,15 +269,30 @@ public sealed partial class KartDeposu
             var zorunlular = detay.Alanlar.Where(a => a.Zorunlu && a.Yazilabilir).ToList();
             if (zorunlular.Count == 0) continue;
 
-            var secim = string.Join(", ", zorunlular.Select((a, i) => $"{a.Kolon} as k{i.ToString(CultureInfo.InvariantCulture)}"));
+            // KOŞUL KOLONLARI (ZorunluKosulu, 1338): koşul alanı aynı satırdan okunur; işaretli değilse o zorunluluk
+            //   atlanır (kurum türü yalnız anlaşmalı kurumda zorunlu).
+            var kosulKolonlari = zorunlular
+                .Select(a => a.ZorunluKosulu is { } k ? detay.Alanlar.FirstOrDefault(x => x.Ad == k)?.Kolon : null)
+                .Where(k => k is not null).Distinct().ToList();
+            var secim = string.Join(", ", zorunlular.Select((a, i) => $"{a.Kolon} as k{i.ToString(CultureInfo.InvariantCulture)}")
+                .Concat(kosulKolonlari.Select((k, i) => $"{k} as c{i.ToString(CultureInfo.InvariantCulture)}")));
             await using var komut = baglanti.Komut(
                 $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0", islem, ustId);
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
             var satirVar = await okuyucu.ReadAsync(iptal);
+            bool KosulSaglandi(KartAlani a)
+            {
+                if (a.ZorunluKosulu is null) return true;
+                var kolon = detay.Alanlar.FirstOrDefault(x => x.Ad == a.ZorunluKosulu)?.Kolon;
+                var i = kolon is null ? -1 : kosulKolonlari.IndexOf(kolon);
+                if (i < 0 || !satirVar) return false;               // koşul satırda yoksa zorunluluk uygulanmaz
+                var d = okuyucu.IsDBNull(zorunlular.Count + i) ? null : okuyucu.GetValue(zorunlular.Count + i);
+                return d is not null && Convert.ToInt64(d, CultureInfo.InvariantCulture) != 0;
+            }
             // EKSİKLERİN HEPSİ TEK MESAJDA: biri doldurulunca sıradakini
             //   söylemek kullanıcıyı aynı kartta defalarca "Kaydet"e bastırır.
             var eksikler = zorunlular
-                .Where((a, i) => !satirVar || ZorunluBos(a, okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i)))
+                .Where((a, i) => KosulSaglandi(a) && (!satirVar || ZorunluBos(a, okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i))))
                 .ToList();
             if (eksikler.Count > 0)
                 throw GentegreHatasi.Dogrulama(

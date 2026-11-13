@@ -172,8 +172,8 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
             soylesin - kurum turu gibi bos birakilinca kaydi durduran alanda
             kullanici sebebi ancak hata mesajinda ogreniyordu. */}
         <span className="etiket">{a.baslik}{a.zorunlu && <b className="zorunlu"> *</b>}</span>
-        {girdi(a)}
-        {hedef && girdi(hedef)}
+        {/* EŞLEŞEN ALAN YAN YANA (14.11.2026): iki kutu tek satırda (tk-cift); sarmalayıcı yokken alt alta diziliyordu. */}
+        {hedef ? <span className="tk-cift">{girdi(a)}{girdi(hedef)}</span> : girdi(a)}
       </label>
     );
   };

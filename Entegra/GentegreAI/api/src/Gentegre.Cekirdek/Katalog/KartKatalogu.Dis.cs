@@ -75,7 +75,7 @@ public static partial class KartKatalogu
             new("durum", "durum", "kod", KodListesi: "dis.plan_durum", Baslik: "Durum", Grup: "Genel"),
             new("fiyatListesiId", "fiyat_listesi_id", "kod", KodTablosu: "public.v_fiyat_listesi_lookup",
                 Baslik: "Fiyat Listesi", Grup: "Fiyat & Onay"),
-            new("odeyenKurumId", "odeyen_kurum_id", "kod", KodTablosu: "public.v_kurum_lookup",
+            new("odeyenKurumId", "odeyen_kurum_id", "kod", KodTablosu: "public.v_anlasmali_kurum_lookup",
                 Baslik: "Ödeyen Kurum", Grup: "Fiyat & Onay"),
             // Toplamlar satırlardan türetilir (fn_dis_plan_toplam_tazele).
             new("toplam", "toplam", "para", Yazilabilir: false, Baslik: "Toplam", Grup: "Fiyat & Onay"),

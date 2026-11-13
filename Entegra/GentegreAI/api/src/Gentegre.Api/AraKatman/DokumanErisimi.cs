@@ -43,6 +43,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["belge"]           = new(["belge"], ["belge"]),
         ["muayene"]         = new(["muayene"], ["muayene"]),
         ["radyoloji-istem"] = new(["radyoloji", "radyoloji-istem"], ["radyoloji-istem"]),
+        // RAPOR e-İMZASI (1337): imzalı XAdES XML - raporu listede görebilen (şube / kayıt kapsamı rapor kataloğu) indirir.
+        ["radyoloji-rapor"] = new(["radyoloji"], ["radyoloji-rapor"]),
         ["masraf-beyan"]    = new(["ik.masraf"], ["personel-masraf"]),
         ["servis-ziyaret"]  = new(["servis"], ["servis-ziyaret"]),
         // CİHAZ BELGELERİ (967): lisans, servis sözleşmesi, test raporu, kılavuz.

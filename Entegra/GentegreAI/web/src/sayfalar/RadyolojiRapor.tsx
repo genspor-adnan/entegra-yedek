@@ -6,6 +6,11 @@ import { gorunumKaydet, gorunumOku, type RadyolojiRaporDuzeni, type RadyolojiRap
 import { guvenli, listeSor, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { tarihSaat, yasMetni } from '../bilesenler/bicim';
 import { Modal } from '../bilesenler/Modal';
+import { EImzaModal } from '../bilesenler/eimza/EImzaModal';
+import { dosyaIndirUrl } from '../bilesenler/indir';
+import { genSignerImzala, utf8Base64 } from '../bilesenler/eimza/genSigner';
+import { raporBelgesiHtml } from '../bilesenler/eimza/raporBelgesiHtml';
+import type { EImzaAyar, EImzaKart } from '../api/uclar/eimza';
 import { HastaSeridi } from '../bilesenler/belge/basvuru/HastaSeridi';
 import { c } from '../dil/ceviri';
 import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
@@ -156,6 +161,8 @@ export function RadyolojiRapor() {
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
   const [kritikModal, setKritikModal] = useState(false);
+  // e-İMZA (1337): EIMZA hesabı aktifken "Onayla ve İmzala" kart + PIN penceresinden geçer (imzasız onay sunucuda reddedilir).
+  const [eimzaModal, setEimzaModal] = useState(false);
   /**
    * KONSULTASYON (304): ikinci gorus. Istek ve DONEN GORUS ayni yerden
    * yazilir - gorus alanina yazip kaydetmek kaydi "dondu"ye gecirir.
@@ -519,6 +526,12 @@ export function RadyolojiRapor() {
     if (islemdeRef.current) return;
     // ONAY SORUSU (K55): imza geri alınamaz - kilitlemeden önce sorulur.
     if (hedef === 'onay' && !await onay('Rapor onaylanıp imzalanacak ve kilitlenecek. Devam edilsin mi?')) return;
+    if (hedef === 'onay') {
+      // e-İMZA (1337): hesap aktifse kart penceresi; değilse eski (imzasız) onay.
+      let eimza = false;
+      if (!await guvenli(async () => { eimza = (await api.eimzaAyar()).aktif })) return;
+      if (eimza) { setEimzaModal(true); return }
+    }
     let uzman: { id: number; not: string } | undefined;
     if (hedef === 'on-rapor') {
       // guvenli yalniz basari bayragi doner - secim disaridaki degiskene yazilir.
@@ -527,6 +540,34 @@ export function RadyolojiRapor() {
       uzman = secilen;
     }
     await kaydetVeGecir(hedef, uzman);
+  };
+
+  /**
+   * e-İMZA AKIŞI (1337): rapor kaydedilir → çıktı verisi okunur → aynı A4 belge tek dosyalık HTML olur →
+   * istemci kipinde bu bilgisayardaki GenSigner imzalar (PIN sunucuya gitmez), sunucu kipinde HTML + PIN API'ye →
+   * API imzalı XML'i doğrular, dokümana yazar, raporu onaylar ve kilitler. Hata pencereyi açık bırakır.
+   */
+  const eimzaIleOnayla = async (ayar: EImzaAyar, kart: EImzaKart, pin: string) => {
+    let hataMesaji = '';
+    const tamam = await kaydet(async ({ raporId, surum }) => {
+      if (!raporId) throw new Error('Rapor bulunamadı.');
+      // Hata TEK YERDE gösterilir (imza penceresi): kaydet'in guvenli sarmalı ikinci bir uyarı açmasın diye
+      //   burada yutulur, aşağıda pencereye fırlatılır.
+      try {
+        // 1) Hazırlık: kilit / sürüm / onaylanabilirlik + RESMİ RAPOR NO - imzalanan belge numarayı taşır.
+        const hazir = await api.radyolojiRaporImzaHazirla(raporId, surum);
+        const veri = await api.radyolojiRaporCikti(raporId) as unknown as Parameters<typeof raporBelgesiHtml>[0];
+        const html = await raporBelgesiHtml(veri, `Radyoloji Raporu ${String(veri.rapor.hastaAdi ?? '')} ${hazir.raporNo}`.trim());
+        const mimeType = 'text/html';
+        const imzaBase64 = ayar.kip === 'istemci'
+          ? await genSignerImzala(ayar.url, ayar.apiKey, kart, pin, utf8Base64(html), mimeType) : undefined;
+        // 2) İmza + onay: hazırlığın verdiği sürümle (rapor no ataması sürümü ilerletti).
+        await api.radyolojiRaporImzala(raporId, hazir.surum, { html, mimeType, sertifika: kart, imzaBase64, pin: ayar.kip === 'sunucu' ? pin : undefined });
+      } catch (h) { hataMesaji = hataMetni(h) }
+    });
+    if (!tamam || hataMesaji) throw new Error(hataMesaji || 'Rapor kaydedilemedi.');
+    setEimzaModal(false);
+    mesaj('Rapor e-imza ile imzalandı ve onaylandı; artık kilitlidir.');
   };
 
   const kaydetVeGecir = (hedef: 'on-rapor' | 'onay', uzman?: { id: number; not: string }) => kaydet(async ({ raporId, surum }) => {
@@ -585,6 +626,21 @@ export function RadyolojiRapor() {
           {/* İSTEM (kullanıcı 27.10.2026): istem kartını kendi sekmesinde açar. */}
           <button className="d" title={c('Radyoloji istem kartını aç')}
                   onClick={() => (ekranSekmesi ? ekranSekmesi.kartaGit(`/radyoloji/${id}`) : git(`/radyoloji/${id}`))}>☢️ İstem</button>
+          {/* GÖRÜNTÜ (kullanıcı 13.11.2026, istem kartındaki "Görüntüle" ile aynı): PACS çalışması OHIF'te yeni sekmede;
+              study_uid yoksa sunucu accession ile arar. Çekim yoksa görüntü de yoktur - düğme gizli. */}
+          {!cekimYok && <button className="d" title={c('DICOM görüntüleyici (OHIF)')}
+                  onClick={() => void (async () => {
+                    try { const y = await api.dicomGoruntule({ istemId: id }); window.open(y.url, '_blank', 'noopener') }
+                    catch (h) { setHata(hataMetni(h)) }
+                  })()}>🖼 Görüntü</button>}
+          {/* İMZALI BELGE (kullanıcı 13.11.2026): raporun XAdES imzalı XML'i (doküman deposu, kaynak radyoloji-rapor). */}
+          {Number(rapor?.imzaDokumanId ?? 0) > 0 && <button className="d" title={c('e-İmzalı rapor belgesini (XAdES XML) indir')}
+                  onClick={() => void (async () => {
+                    try {
+                      const url = await api.dokumanIcerikUrl(Number(rapor?.imzaDokumanId));
+                      dosyaIndirUrl(url, `e-imza ${String(rapor?.raporNo ?? '') || `rapor-${String(rapor?.id ?? '')}`}.xml`, true);
+                    } catch (h) { setHata(hataMetni(h)) }
+                  })()}>🔏 İmzalı Belge</button>}
           {/* SAĞA YASLI (kullanıcı 28.10.2026): Çıktı ve Kapat satırın sağ ucunda. */}
           <span className="ck-bosluk" />
           {/* YAZDIR (kullanıcı 28.10.2026, icmallerdeki gibi): Baskı Önizleme / Yazıcıya Yazdır / Gönder (PDF,
@@ -621,7 +677,7 @@ export function RadyolojiRapor() {
                        ? { k: `✔ ${c('Onaylayan')}`, v: String(rapor?.onaylayan ?? '') || '—',
                            alt: <>{rapor?.onaylayacakId && Number(rapor.onaylayacakId) !== Number(rapor.onaylayanId)
                                    ? `(${String(rapor.onaylayacak)} ${c('yerine')}) ` : ''}
-                                 {rapor?.onayTarihi ? `${saatYaz(rapor.onayTarihi)} · e-imza` : ''}</> }
+                                 {rapor?.onayTarihi ? `${saatYaz(rapor.onayTarihi)}${rapor?.imzaZamani ? ' · e-imza' : ''}` : ''}</> }
                        : { k: `⏳ ${c('Onaylayacak')}`, v: String(rapor?.onaylayacak ?? '') || '—',
                            alt: String(rapor?.onaylayacak ?? '') && rapor?.onayaGonderme
                              ? <span className="rad-bekliyor">{c('bekliyor')} · {sureYaz(rapor.onayaGonderme)}</span>
@@ -1008,6 +1064,10 @@ export function RadyolojiRapor() {
             “＋ Ek Rapor” ile addendum yazın.
           </div>
         </Modal>
+      )}
+
+      {eimzaModal && (
+        <EImzaModal baslik="e-İmza ile Onayla" onKapat={() => setEimzaModal(false)} onImzala={eimzaIleOnayla} />
       )}
 
       {kritikModal && (

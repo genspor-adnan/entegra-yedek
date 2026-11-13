@@ -130,7 +130,13 @@ public sealed record KartAlani(
     /// JSON ALANINDA ŞİFRELİ ANAHTARLAR (K28): `json` tipli alanın bu anahtarları <see cref="Sifreli"/> ile aynı
     /// kuralla saklanır (ör. entegrasyon `ayarlar.client_secret`). Diğer anahtarlar düz kalır.
     /// </summary>
-    string[]? SifreliAnahtarlar = null
+    string[]? SifreliAnahtarlar = null,
+    /// <summary>
+    /// KOŞULLU ZORUNLULUK (1338, kullanıcı 14.11.2026: "kurum türü anlaşmalı ise görünsün ve anlaşmalı değilse zorunlu
+    /// olmasın"): AYNI satırdaki (1:1 detay) mantık alanının adı; o alan işaretli değilken bu alanın boş kalması
+    /// hata değildir. Yalnız TekSatir detay denetiminde (KartDeposu.TekSatirZorunluDenetle) okunur.
+    /// </summary>
+    string? ZorunluKosulu = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

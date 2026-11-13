@@ -54,6 +54,9 @@ kurucu.Services.AddHttpClient("dicom", c => c.Timeout = TimeSpan.FromSeconds(60)
 kurucu.Services.AddHttpClient("teletip-xds", c => c.Timeout = TimeSpan.FromSeconds(120));
 // PACS ayarı entegrasyon ekranından (1316) - satır yoksa Dicom bölümü; şube kapsamı AsyncLocal.
 kurucu.Services.AddSingleton<DicomAyarDeposu>();
+// e-İMZA (1337): GenSigner (XAdES enveloping) - sunucu kipinde API imzalatır, istemci kipinde yalnız ayar verir / doğrular.
+kurucu.Services.AddHttpClient("eimza", c => c.Timeout = TimeSpan.FromSeconds(120));
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.EImzaServisi>();
 kurucu.Services.AddSingleton<DicomKaynagi>();
 // Teletıp dışa açık WADO (1313): ayrı portta yalnız WADO-URI; TeletipWado:Port 0 → kapalı. Sertifika parolası ortamdan.
 kurucu.Services.Configure<Gentegre.Api.Servisler.TeletipWadoAyarlari>(kurucu.Configuration.GetSection("TeletipWado"));
@@ -426,6 +429,7 @@ uygulama.StokDurumUclariniEkle();
 // Randevu Ayarlari > Bolumler (251): bolum/hekim bazli randevu duzeni.
 uygulama.RandevuUclariniEkle();
 uygulama.RadyolojiUclariniEkle();
+uygulama.EImzaUclariniEkle();            // e-İmza ayarı / kart listesi (1337)
 uygulama.AktarimEslemeUclariniEkle();   // SKRS eşleme masası (1222)
 uygulama.TeleradUclariniEkle();
 uygulama.IcmalUclariniEkle();

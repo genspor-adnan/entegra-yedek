@@ -135,6 +135,9 @@ public static partial class RadyolojiUclari
                        r.onaylayacak_id as "onaylayacakId", r.onaya_gonderme as "onayaGonderme", r.onay_notu as "onayNotu",
                        coalesce(public.fn_taraf_ad(oy.unvan, oy.ad, oy.soyad)::varchar(120), '') as "onaylayacak",
                        r.onaylayan_id as "onaylayanId",
+                       -- e-İMZA (1337): bant "· e-imza" yalnız gerçekten imzalanmışsa.
+                       r.imza_zamani as "imzaZamani", coalesce(r.imza_sertifika, '') as "imzaSertifika",
+                       coalesce(r.imza_dokuman_id, 0) as "imzaDokumanId",
                        coalesce(r.rapor_no, '') as "raporNo",
                        -- BAKANLIK OBX-13 (811): iki ayri degerlendirme.
                        r.istem_nedeni_puan as "istemNedeniPuan",

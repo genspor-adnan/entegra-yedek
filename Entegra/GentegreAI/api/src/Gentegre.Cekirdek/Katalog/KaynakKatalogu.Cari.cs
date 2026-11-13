@@ -501,7 +501,8 @@ public static partial class KaynakKatalogu
             new("bransAdi",
                 "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), "
                 + "coalesce(kd.ad, ''))",
-                "metin", "Branş", Genislik: 200),
+                // Listede varsayılan DEĞİL (kullanıcı 13.11.2026): branş yerine Bölüm kolonu; kolon gizli durur.
+                "metin", "Branş", Genislik: 200, Varsayilan: false),
             // BOLUM (367): basvuruda once bolum secilirse arama O BOLUMDEKI
             //   hekimlerle sinirlanir - kolon olmadan filtre "Bilinmeyen alan"
             //   ile 400 doner. Listede gizli, yalniz suzme icin.
@@ -775,6 +776,8 @@ public static partial class KaynakKatalogu
             //   secimi kurumlari 1 Özel / 2 ÖSS / 3 SGK diye suzer. Kurumlar
             //   gridinde gizli (listeTanimlari.gizliKolonlar) - orada turAdi var.
             new("tur",        "k.tur",           "sayi",  "Tür (ham)"),
+            // ANLAŞMALI (1338): listede kolon + Anlaşmalı / Anlaşmasız / Tümü çipleri (listeTanimlari.Cari).
+            new("anlasmali",  "coalesce(k.anlasmali, 0)", "mantik", "Anlaşmalı", Hizalama: "orta", Genislik: 90),
             // SOZLESME 1:N (468/478): kurumun tek bir sozlesme no'su yok.
             //   Listede SAYI ve POLICE TURLERI gorunur, ayrintisi kartta.
             new("sozlesmeSayisi",

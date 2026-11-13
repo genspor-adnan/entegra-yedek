@@ -139,9 +139,17 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Ad "Anlaşmalı Kurumlar" (kullanici): liste yalniz hastanin odemesini
     //   ustlenen ya da tarife anlasmasi olan kurumlari tutar - "Kurumlar"
     //   tek basina her tuzel kisiyi cagristiriyordu.
-    kaynak: 'kurum', baslik: 'Anlaşmalı Kurum Listesi', yol: 'Cari › Anlaşmalı Kurum Listesi',
+    kaynak: 'kurum', baslik: 'Kurum Listesi', yol: 'Cari › Kurum Listesi',
     kartYolu: '/kurum',
-    aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
+    aksiyonEkrani: 'cari-liste',
+    // ANLAŞMALI / ANLAŞMASIZ / PASİF / TÜMÜ (1338, kullanıcı 13.11.2026): kurum rolü ile sözleşmeli olmak ayrıldı;
+    //   ilk iki çip aktif kurumlar içinde ayırır, Pasif durum çipi korunur.
+    cipler: [
+      { ad: 'Anlaşmalı',  filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }, { alan: 'anlasmali', op: 'esit', deger: 1 }] } },
+      { ad: 'Anlaşmasız', filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }, { alan: 'anlasmali', op: 'esit', deger: 0 }] } },
+      { ad: 'Pasif',      filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
               tarihAlani: 'islemTarihi' },
     yeniKayitVarsayilanlari: { kurum: true, musteri: true },
@@ -153,7 +161,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Ham tur kolonu API'den geliyor (basvuru "Ödeyen Tipi" suzmesi icin) ama
     //   gridde gorunmesin - turAdi zaten var.
     gizliKolonlar: ['tur'],
-    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Anlaşmalı Kurum Listesi', ic: '🏛️', yetkiKodu: 'kurum.liste',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum Listesi', ic: '🏛️', yetkiKodu: 'kurum.liste',
   },
   {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi

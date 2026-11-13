@@ -443,7 +443,10 @@ export function RadyolojiIstemKarti() {
                              .map(s => ({ soruId: s.soruId, yanit: (kontrolTaslak[s.soruId] ?? '').trim() })))}>💾 Kaydet</button>
                     <button type="button" className="d" onClick={() => { setKontrolTaslak({}); setKontrolDuzen(false) }}>Vazgeç</button>
                   </span>
-                : yetki('radyoloji', 'degistir') && !cekildi &&
+                // KALEM HER ZAMAN (kullanıcı 13.11.2026: "çekim öncesi kontroller işaretlenmediği için imzalanmadı ama
+                //   ben de kontrolleri değiştiremiyorum"): çekim/PACS eşleşmesi sonrası da yanıtlanabilir - onayda istem
+                //   durumu yükselirken tetik (312) zorunlu soruları ister; kalem kapalıyken çıkış yolu kalmıyordu.
+                : yetki('radyoloji', 'degistir') &&
                   <button type="button" className="rik-kalem" title="Düzenle"
                           onClick={() => { setKontrolTaslak({}); setKontrolDuzen(true) }}>✎</button>)}
               {!kontrolDuzen && kontrol.length > 0 && <span className="rik-ip">{kontrol.length} soru · {yanitli} yanıt</span>}</h4>

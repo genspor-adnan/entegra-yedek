@@ -7112,6 +7112,9 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .kontrol-gun { display: flex; align-items: center; gap: 8px }
 .kontrol-gun input { width: 90px }
 
+/* TekKayit eşleşen çift (EslesAlan, 14.11.2026): tek etiket altında iki kutu yan yana, eşit genişlik. */
+.alan .tk-cift { grid-column: 2; display: flex; gap: 6px; min-width: 0 }
+.alan .tk-cift > * { flex: 1 1 0; min-width: 0; width: auto }
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
 .tk-hesap { display: inline-block; min-width: 60px; padding: 4px 6px; font-weight: bold; color: var(--lacivert, #1f3a5f); font-family: Consolas, monospace }
 

@@ -25,6 +25,8 @@ export interface BasvuruKaynaklari {
   kurumlar: KurumSecenegi[];
   /** Randevu verilebilen bolumler (poliklinik/klinik). */
   bolumler: Secenek[];
+  /** Gonderen modu (tetkik kurumu): gonderen hekimin bransi - butun departmanlar, pasifler sonda (13.11.2026). */
+  gonderenBolumleri: Secenek[];
   /** Aktif depolar - basvuru dip bolumundeki depo combosu. */
   depolar: Secenek[];
   /** Sorulan hekim/gonderen adaylari - rol ve bolume gore suzulur. */
@@ -46,6 +48,7 @@ export function useBasvuruKaynaklari(
 ): BasvuruKaynaklari {
   const [kurumlar, setKurumlar] = useState<KurumSecenegi[]>([]);
   const [bolumler, setBolumler] = useState<Secenek[]>([]);
+  const [gonderenBolumleri, setGonderenBolumleri] = useState<Secenek[]>([]);
   const [depolar, setDepolar] = useState<Secenek[]>([]);
   const [gorevliler, setGorevliler] = useState<GorevliSecenegi[]>([]);
   const [protokolElle, setProtokolElle] = useState(false);
@@ -81,6 +84,7 @@ export function useBasvuruKaynaklari(
         // Alt birim onekini ("— Dahiliye") combo'da gostermeyiz: agac
         //   gorunumu Bölüm/Görev ekranina ait.
         setBolumler(y.bolumler.map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));
+        setGonderenBolumleri((y.gonderenBolumleri ?? []).map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));
         setDepolar(y.depolar);
       } catch { /* kaynaklar okunamazsa combolar bos kalir, kayit engellenmez */ }
     })();
@@ -125,5 +129,5 @@ export function useBasvuruKaynaklari(
     return () => { iptal = true };
   }, [basvuruMu, bolumId, hekimRolu]);
 
-  return { kurumlar, bolumler, depolar, gorevliler, protokolElle };
+  return { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle };
 }

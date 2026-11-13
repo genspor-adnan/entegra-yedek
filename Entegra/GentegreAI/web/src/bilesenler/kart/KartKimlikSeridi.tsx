@@ -416,12 +416,16 @@ export function KartKimlikSeridi({
                degil - o yuzden renderAlanListesi ile cizilemez; TekKayit
                cercevesiz kipte seridin bir hucresi olur. */
             const rol = meta?.detaylar.find(d => d.ad === 'kurumRolu');
+            // KURUM TÜRÜ yalnız ANLAŞMALI kurumda (1338, kullanıcı 14.11.2026): sözleşme kuralları (Özel/ÖSS/SGK)
+            //   anlaşmasız kurumda anlamsız; alan gizlenir, sunucu da anlaşmasızda zorunlu tutmaz (ZorunluKosulu).
+            const anlasmali = !!detaylar[rol?.ad ?? 'kurumRolu']?.guncel?.[0]?.anlasmali;
+            const rolMeta = rol && { ...rol, alanlar: rol.alanlar.filter(a => a.ad !== 'tur' || anlasmali) };
             return (
               <div className="alan-izgara">
                 {renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'durum'))}
-                {rol && (
+                {rolMeta && (
                   <TekKayit
-                    meta={rol}
+                    meta={rolMeta}
                     durum={detaylar[rol.ad] ?? bosDetay()}
                     saltOkunur={salt || rol.saltOkunur}
                     onDegis={y => setDetaylar(t => ({ ...t, [rol.ad]: y }))}

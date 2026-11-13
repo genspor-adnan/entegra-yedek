@@ -813,6 +813,7 @@ public static partial class RadyolojiUclari
         CihazEkle(grup);
         CihazAracEkle(grup);
         OnayVeBulguEkle(grup);
+        ImzaEkle(grup);               // e-imza ile onay (1337)
     }
 
 
