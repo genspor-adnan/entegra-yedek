@@ -192,8 +192,7 @@ public static partial class RadyolojiUclari
             var sira = 0;
             foreach (var x in liste)
             {
-                var html = Servisler.RaporHtml.Temizle(x.Html);
-                var duz = html == "" ? (x.Metin ?? "").Trim() : Servisler.RaporHtml.DuzMetin(html);
+                var (html, duz) = Servisler.RaporHtml.BolumMetni((x.Metin ?? "").Trim(), x.Html);
                 await b.CalistirAsync("""
                     insert into public.radyoloji_sablon_bolum (sablon_id, sira, baslik, varsayilan_metin, varsayilan_html,
                                                                bakanlik_parca, zorunlu, yazdir, ekleyen)

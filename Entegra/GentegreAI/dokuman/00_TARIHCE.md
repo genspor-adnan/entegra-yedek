@@ -55,7 +55,15 @@ istediği 4 parça esas olmalı".
     Difüzyon; MR.81 Spektroskopi) eski şablonda da boş ("Bulgular: SONUÇ:").
   * `esle.sql`: Bulgular / Sonuç boş eski HBYS şablonları `eski.aktarim_rapor`a satır olarak.
   * Kapsam ("her tek Rapor bölümlü şablon") bilerek değişmedi - kullanıcı kararı "4 parça esas".
-  * Test: `SablonBakanlikBolmeTestleri` 6/6, radyoloji vitest 22/22, tsc temiz.
+  * Test: `SablonBakanlikBolmeTestleri` 6/6, radyoloji vitest 22/22, tsc temiz. Commit `c4fa1e6`, push.
+- **Rapor bölümü tek kaynak (kullanıcı: "raporları 2 formatta da mı tutacaksın text ve richtext olarak" → "yap"):**
+  iki kolon kalır (`metin_html` asıl - ekran / çıktı; `metin` türetilmiş - Bakanlık OBX-5, e-Nabız 409, arama), ama
+  rapor kaydı istemcinin düz metni gelince onu HTML'den türetmeden yazıyordu - iki kopya ayrışabilirdi.
+  `RaporHtml.BolumMetni`: HTML temizlikten dolu çıkarsa düz metin HER ZAMAN ondan; yoksa gelen düz metin. Rapor ve
+  şablon kaydı ikisi de bunu kullanır. **Bulunan hata:** BI-RADS yapısal girişte Teknik vb. parçanın düz kutusu yalnız
+  `metin`i değiştiriyor, şablonun HTML'i kalıyordu - çıktı şablon metnini, Bakanlık düzenlenmiş metni alıyordu; kutu
+  artık HTML'i bırakır (`RadyolojiRapor.tsx`, Bulgular / Sonuç'ta zaten böyleydi). Test `RaporBolumMetniTestleri`;
+  radyoloji / Teletıp / Bakanlık profili xUnit 113/113, vitest 22/22, tsc temiz.
 
 ---
 

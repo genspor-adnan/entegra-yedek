@@ -755,7 +755,10 @@ export function RadyolojiRapor() {
                       {formdan && <span className="sonuk kucuk"> · 🧩 {c('formdan')}</span>}</div>
                     <textarea value={b.metin} readOnly={kilitli || formdan} className={formdan ? 'formdan' : ''}
                               rows={bulguBolumuMu(b.baslik) ? 7 : 2}
-                              onChange={e => setParcalar(p => p.map(x => (x.baslik === b.baslik ? { ...x, metin: e.target.value } : x)))} />
+                              // Düz kutudan düzenleme şablonun biçimli halini bırakır: yoksa çıktı eski HTML'i, Bakanlık
+                              //   yeni metni alırdı (sunucu HTML varsa düz metni ondan türetir - tek kaynak).
+                              onChange={e => setParcalar(p => p.map(x => (x.baslik === b.baslik
+                                ? { ...x, metin: e.target.value, html: undefined } : x)))} />
                   </div>
                 );
               })}

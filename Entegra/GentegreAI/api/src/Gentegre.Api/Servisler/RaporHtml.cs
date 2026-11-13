@@ -109,7 +109,18 @@ public static partial class RaporHtml
     private static string Kodla(string metin) => WebUtility.HtmlDecode(metin)
         .Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
 
-    /// <summary>Biçimli metnin düz hali (istemci göndermediyse): satır sonları korunur.</summary>
+    /// <summary>
+    /// RAPOR BÖLÜMÜNÜN İKİ HALİ - TEK KAYNAK (kullanıcı 13.11.2026). Biçimli metin (HTML) ASIL kayıttır: temizlenir ve
+    /// doluysa düz metin HER ZAMAN ondan türetilir, istemcinin gönderdiği düz metin yok sayılır - yoksa çıktı bir metni,
+    /// Bakanlık TeleRadyoloji (OBX-5) / e-Nabız başka metni alırdı. HTML yoksa (düz giriş, eski kayıt) gelen düz metin.
+    /// </summary>
+    public static (string Html, string Duz) BolumMetni(string? metin, string? metinHtml)
+    {
+        var html = Temizle(metinHtml);
+        return html == "" ? ("", metin ?? "") : (html, DuzMetin(html));
+    }
+
+    /// <summary>Biçimli metnin düz hali: satır sonları korunur.</summary>
     public static string DuzMetin(string html)
     {
         var s = Regex.Replace(html, @"</t[dh]>", "\t", RegexOptions.IgnoreCase);

@@ -464,9 +464,8 @@ public static partial class RadyolojiUclari
                     islem, [raporId], iptal);
                 foreach (var b in istek.Bolumler)
                 {
-                    // BİÇİMLİ METİN (1195): beyaz listeyle temizlenir; düz metin gelmediyse HTML'den çıkarılır.
-                    var html = Servisler.RaporHtml.Temizle(b.MetinHtml);
-                    var duz = !string.IsNullOrEmpty(b.Metin) || html == "" ? b.Metin ?? "" : Servisler.RaporHtml.DuzMetin(html);
+                    // BİÇİMLİ METİN (1195): beyaz listeyle temizlenir; HTML varsa düz metin HER ZAMAN ondan (tek kaynak).
+                    var (html, duz) = Servisler.RaporHtml.BolumMetni(b.Metin, b.MetinHtml);
                     await baglanti.CalistirAsync("""
                         insert into public.radyoloji_rapor_bolum (rapor_id, sira, baslik, metin, yazdir, metin_html)
                         values (@p0, @p1, @p2, @p3, @p4, nullif(@p5, ''))
