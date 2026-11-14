@@ -67,12 +67,21 @@
   table.ozet{border-collapse:collapse;font-size:11.5px;margin-top:6px;background:#fff}
   table.ozet td,table.ozet th{border:1px solid var(--line);padding:3px 8px;text-align:left}
   table.ozet th{background:var(--head)}
+  .grp.zor{border-color:#9bd1ab;background:#f3faf5}
+  .zorl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:11.5px}
+  .zorl li{display:flex;gap:6px;align-items:baseline}
+  .zorl li i{font-style:normal;display:inline-flex;width:16px;height:16px;border-radius:50%;background:#2e7d46;color:#fff;font-size:10px;align-items:center;justify-content:center;flex:none}
+  .zorl li small{color:var(--muted);margin-left:auto;white-space:nowrap}
+  .rozet.kilit{color:#4f5b68;border-color:#c9d2dc;background:#f1f4f7;font-weight:normal;margin-left:6px;text-transform:none;letter-spacing:0}
+  .a4 .nr{position:absolute;display:inline-flex;width:18px;height:18px;border-radius:50%;background:#2e7d46;color:#fff;font:bold 11px/1 Arial;align-items:center;justify-content:center;left:-30px}
+  .a4 .r{position:relative}
+  .a4 .nri{display:inline-flex;width:14px;height:14px;border-radius:50%;background:#2e7d46;color:#fff;font:bold 9px/1 Arial;align-items:center;justify-content:center;vertical-align:middle;margin-right:3px}
   .sablon-ust{display:flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line2);border-radius:4px;background:#fff}
 </style>
 </head>
 <body>
 
-<h2 class="baslik">1. Ayarlar › Radyoloji › Rapor Tipografisi — <small>kurum düzeyi varsayılan; şablon kartı isterse üstüne yazar</small></h2>
+<h2 class="baslik">1. Ayarlar › Radyoloji › Rapor Tipografisi — <small>kurum düzeyi varsayılan; şablon kartı isterse üstüne yazar. Bakanlık görünüm şartı koymaz; <b>içerik</b> şartları (SKS · Teletıp) sabit bloklardır</small></h2>
 <div class="win">
   <div class="title">🖨 Rapor Tipografisi <span class="sp">Radyoloji › Ayarlar › Rapor Tipografisi · şube: Kosuyolu (kurum geneli)</span></div>
   <div class="toolbar">
@@ -84,6 +93,20 @@
   </div>
   <div class="govde">
     <div class="form">
+      <div class="grp zor">
+        <h5>Zorunlu içerik — SKS · Teletıp <span class="rozet kilit">değiştirilemez</span></h5>
+        <ul class="zorl">
+          <li><i>1</i> Kurum adı / antet <small>SKS</small></li>
+          <li><i>2</i> Hasta kimliği: ad soyad, TC (maskeli), cinsiyet, yaş, protokol no <small>SKS</small></li>
+          <li><i>3</i> Tetkik adı + SUT kodu, modalite, accession <small>SKS · Teletıp</small></li>
+          <li><i>4</i> Çekim ve rapor/onay tarih-saati <small>SKS · Teletıp</small></li>
+          <li><i>5</i> İsteyen hekim · İstem nedeni <small>SKS</small></li>
+          <li><i>6</i> Dört parça: Teknik · Karşılaştırma · Bulgular · Sonuç ve Öneriler <small>Teletıp (Bakanlık profili)</small></li>
+          <li><i>7</i> Raporlayan radyolog: ad, unvan, TCKN (sistemde), e-imza ibaresi <small>SKS · Teletıp</small></li>
+          <li><i>8</i> Rapor no · sayfa no "1/2" <small>SKS</small></li>
+        </ul>
+        <div class="not">Bu bloklar her şablonda ve her tipografide basılır; şablon yalnız 6. bloğun metnini belirler. Boş kalan zorunlu blok çıktı/onay öncesi uyarı verir (mevcut onay kapısı + çıktı denetimi).</div>
+      </div>
       <div class="grp">
         <h5>Gövde</h5>
         <div class="fld"><label>Font ailesi</label><span class="combo">Arial / Helvetica</span></div>
@@ -140,15 +163,15 @@
       <div>
         <h6>Öneri <span class="rozet oneri">Arial · 10,5 pt · 1,3</span><span class="etk">dünya pratiği</span></h6>
         <div class="a4k"><div class="a4 t-arial">
-          <div class="antet"><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
-          <div class="kimlik"><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ</span><span><b>Çekim:</b> 14.11.2026 10:42</span></div>
-          <div class="rb">MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
-          <div class="bb">Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
+          <div class="antet r"><span class="nr">1</span><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
+          <div class="kimlik r"><span class="nr">2</span><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ (SUT 803.350)</span><span><i class="nri">4</i><b>Çekim:</b> 14.11.2026 10:42</span><span><i class="nri">5</i><b>İsteyen:</b> Doç.Dr. Akın AKAKIN</span><span><b>İstem nedeni:</b> Sağ omuz ağrısı, 3 ay</span></div>
+          <div class="rb r"><span class="nr">3</span>MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
+          <div class="bb r"><span class="nr">6</span>Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
           <div class="bb">Karşılaştırma</div><p>Karşılaştırılabilecek önceki tetkik yok.</p>
           <div class="bb">Bulgular</div><p>Supraspinatus tendonunda distal kesimde intrasubstans sinyal artışı (tendinozis) izlenmektedir; tam kat yırtık saptanmamıştır. İnfraspinatus, subskapularis ve teres minör tendonları doğaldır. Akromioklaviküler eklemde hafif dejeneratif değişiklikler ve minimal efüzyon mevcuttur. Glenohumeral eklem aralığında fizyolojik sınırlarda sıvı izlenmiştir. Labrum bütünlüğü korunmuştur.</p>
           <div class="bb">Sonuç ve Öneriler</div><p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
-          <div class="imza"><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></b></div>
-          <div class="alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
+          <div class="imza r"><span class="nr" style="left:auto;right:-30px">7</span><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small><i class="nri">4</i>e-imzalıdır · Onay: 14.11.2026 14:05</small></b></div>
+          <div class="alt"><span class="nr" style="top:2px">8</span><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
         </div></div>
       </div>
       <div>
@@ -195,7 +218,7 @@
     <tr><td>Rapor ekranı A4 editörü</td><td>Seçili şablonun (yoksa kurumun) tipografisiyle çizilir — ekran = kâğıt.</td></tr>
     <tr><td>🖨 Çıktı / PDF</td><td>Aynı CSS; <code>@page</code> kâğıt ve kenar boşluğu ayardan.</td></tr>
     <tr><td>e-İmza belgesi</td><td>İmzalanan HTML aynı tipografiyi gömer; sonradan ayar değişse imzalı belge değişmez.</td></tr>
-    <tr><td>Teletıp / e-Nabız</td><td>Etkilenmez (düz metin / kendi şeması).</td></tr>
+    <tr><td>Teletıp / e-Nabız</td><td>Etkilenmez: Bakanlık rapor <b>içeriğini</b> ister (dört parça, TCKN, SUT, puanlar - HL7 ORU), görünüm şartı yok. Base64 HTML gönderiminde çıktıyla aynı HTML gider.</td></tr>
     <tr><td>Eski HBYS Word şablonları</td><td>"Şablonun kendi biçimi" → gömülü font/punto korunur; kurum ayarı yalnız antet, kimlik ve alt bilgiye uygulanır.</td></tr>
   </table>
 </div>
@@ -203,12 +226,14 @@
 <div class="karar">
   <b>Karar notları (kullanıcı 14.11.2026: "raporlarda / şablonlarda dünyada kullanılan font ve punto nedir" → "mockup yap")</b>
   <ol>
+    <li><b>Bakanlık / SKS görünüm standardı yok</b> (kullanıcı sorusu 14.11.2026): Teletıp Entegrasyon Kılavuzu 3.52 içerik ve HL7 alanlarını, SKS raporda bulunması gereken bilgileri tanımlar. Bunlar yukarıdaki 8 sabit blok olarak her çıktıda basılır; tipografi kurum tercihidir.</li>
     <li><b>Varsayılan Arial 10,5 pt · satır 1,3 · paragraf arası 6 pt · iki yana yaslı · A4 18 mm.</b> Başlıklar BÜYÜK HARF kalın gövde puntosunda; rapor başlığı 13 pt. Renk yok.</li>
     <li>Ayar <b>kurum düzeyinde</b> (referans anahtarı <code>radyoloji.tipografi</code>, jsonb) + şablon kartında üst-seçim (<code>radyoloji_sablon.tipografi</code> jsonb, boş = kurum). Şube bazlı ayrım yok.</li>
     <li>Ekran ve çıktı <b>tek CSS kaynağı</b>: pt → px çevrimi (×1,333) ekranda; yazdırmada pt doğrudan. Hekim ekranda büyütmek isterse tarayıcı yakınlaştırması, tipografi değil.</li>
     <li>Font aileleri sistem fontu olarak çağrılır (gömülmez): Arial/Helvetica, Calibri/Carlito, Times, Segoe UI. Sunucu PDF üretiminde Carlito ve Liberation (Arial/Times metrik eşdeğeri) kurulu olmalı.</li>
     <li>Eski HBYS Word şablonları (338 adet, KOSUYOLU) varsayılan <b>kendi biçimini korur</b>; toplu "kurum tipografisine uydur" isteğe bağlı, geri alınabilir.</li>
     <li>Alt sınır 9 pt, üst sınır 12 pt; dışına çıkılamaz (okunabilirlik / sayfa taşması).</li>
+    <li><b>Çıktı denetimi:</b> zorunlu blok verisi boşsa (isteyen hekim yok, SUT kodu yok, onay zamanı yok) çıktı "taslak / eksik" filigranı ile basılır, onaylı rapor çıktısı engellenmez ama eksik listesi gösterilir.</li>
   </ol>
 </div>
 
