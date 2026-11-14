@@ -762,7 +762,7 @@ export function RadyolojiRapor() {
 
           <h5>İstem Bilgisi</h5>
           <div className="rad-kart">
-            <div><b>{c('Ön tanı:')}</b> {String(istem.onTani ?? '—')}</div>
+            <div><b>{c('Ön tanı:')}</b> {istem.onTani ? `${istem.onTani}${istem.onTaniAdi ? ` · ${istem.onTaniAdi}` : ''}` : '—'}</div>
             <div><b>{c('İstem Nedeni:')}</b> {String(istem.klinikBilgi ?? '—')}</div>
             <div><b>{c('İsteyen:')}</b> {String(istem.isteyen ?? '—')}</div>
             <div><b>{c('Ödeyen:')}</b> {String(istem.odeyenKurum ?? '—')}</div>
