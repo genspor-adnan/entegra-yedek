@@ -2,22 +2,22 @@
 id: radyoloji-rapor-yazma-onay
 baslik: Radyoloji raporu yazma, uzmana gönderme, onay ve ek rapor
 modul: radyoloji
-ekran: radyoloji-istem
-rota: /radyoloji
+ekran: radyoloji-rapor
+rota: /radyoloji/rapor
 surec: radyoloji
 roller: radyolog
 dil: tr
-surum: 1
+surum: 2
 urun_modu: 2
 yetki: radyoloji
 erisim: kullanici
 ozet: Radyoloğun rapor ekranı - şablon ve makrolar, yapılandırılmış alanlar, önceki tetkikler, taslak kaydetme, Uzmana Gönder, Onayla ve İmzala, kritik bulgu bildirimi, konsültasyon, ek rapor (addendum) ve çıktı.
-guncelleme: 2026-10-10
+guncelleme: 2026-11-14
 dogrulama: insan-dogrulama-bekliyor
 ---
 
 ## Amaç
-Çekimi tamamlanan istem radyoloğun önüne **Raporlanacak** olarak gelir. Rapor ekranında şablon kendiliğinden yüklenir; radyolog bölümleri doldurur, makrolarla hızlanır, taslak kaydeder ve onaylar. Onaylanan rapor kilitlenir, numara alır, hekimin ekranına ve e-Nabız kuyruğuna gider; sonradan düzeltme yalnız **ek rapor** ile yapılır.
+Çekimi tamamlanan istem radyoloğun önüne **Raporlanacak** olarak gelir. Rapor ekranı **boş** açılır (şablon kendiliğinden uygulanmaz); radyolog **📄 Şablon Seç…** ile şablonu seçer ya da serbest yazar, makrolarla hızlanır, taslak kaydeder ve onaylar. Onaylanan rapor kilitlenir, numara alır, hekimin ekranına ve e-Nabız kuyruğuna gider; sonradan düzeltme yalnız **ek rapor** ile yapılır.
 
 ## Ekrana giriş yolları
 - **Radyoloji › Çalışma Listesi**, çip **Raporlanacak** → satırı seçip **✎ Rapor Yaz**.
@@ -25,11 +25,11 @@ dogrulama: insan-dogrulama-bekliyor
 
 ## Ön koşullar
 - **radyoloji** Gör ve `rad.rapor_yaz` aksiyon yetkisi; onay için ayrıca `rad.rapor_onayla`.
-- Tetkiğe bağlı rapor şablonu varsa varsayılan olarak gelir (**Radyoloji › Ayarlar › Rapor Şablonları**).
+- Şablonlar **Radyoloji › Ayarlar › Rapor Şablonları**'nda tanımlanır; tetkike bağlı olanlar seçim penceresinde en üstte "Bu tetkike bağlı" grubunda gelir.
 
 ## Ekranın bölümleri
 - Üst bilgi: Hasta, Tetkik, Çekim, Durum (onaylıysa **🔒 Kilitli**); **Önceki Tetkikler** (hastanın eski raporları); **İstem Bilgisi** (ön tanı, klinik bilgi, isteyen, ödeyen); Seri / Görüntü (PACS eşleşmesi).
-- **Şablon** seçimi ve rapor bölümleri (ör. Teknik, Bulgular, Sonuç ve Öneriler). "Klinik" başlıklı bölüm istemdeki klinik bilgiyle dolar.
+- **Şablon** satırı (sağ panel): seçili şablonun adı · kodu · sürümü ve **📄 Şablon Seç… / Değiştir…** düğmesi; rapor bölümleri (ör. Teknik, Bulgular, Sonuç ve Öneriler). "Klinik" başlıklı bölüm istemdeki klinik bilgiyle dolar.
 - **Makrolar**: tıklanınca metin hedef bölüme (yoksa son yazdığınız bölüme) eklenir.
 - **Yapılandırılmış Alanlar**: şablonun skor / ölçüm alanları.
 - Kurumda Bakanlık profili açıksa **Bakanlık Değerlendirmesi** (İstem Nedeni, Çekim Kalitesi puanı).
@@ -39,7 +39,7 @@ dogrulama: insan-dogrulama-bekliyor
 **💾 Taslak Kaydet** · **➜ Uzmana Gönder** · **✍ Onayla ve İmzala** · **⚠ Kritik Bulgu Bildir** · **＋ Ek Rapor** (yalnız onaylı raporda) · **🖨 Çıktı** · **Kapat**.
 
 ## Adım adım
-1. Listeden **✎ Rapor Yaz**; şablon gelir. Farklı şablon seçerseniz yazılmış metnin silineceği sorulur.
+1. Listeden **✎ Rapor Yaz**; rapor boş açılır. **📄 Şablon Seç…** ile şablonu seçip **Uygula** deyin (ya da **Serbest yaz**). Dolu rapora başka şablon uygularsanız yazılmış metnin değişeceği sorulur.
 2. **Önceki Tetkikler**'e bakın; karşılaştırma gerekiyorsa ilgili bölüme yazın.
 3. Bölümleri doldurun, makroları kullanın; yapılandırılmış alanları girin.
 4. **💾 Taslak Kaydet** ("Rapor taslağı kaydedildi."). İstem **Raporlanıyor** olur.
@@ -76,9 +76,47 @@ Rapor: Taslak · Uzman onayında · Onaylı · Ek rapor.
 - Kritik bulguyu işaretleyip haber vermeden bırakmayın.
 - "Yazdırılmaz" işaretli bölümlere hastanın görmesi gereken bilgi yazmayın; bu bölümler çıktıya ve e-Nabız'a gitmez.
 
+## Ekran kılavuzu
+
+### Şablon seçimi
+Rapor **boş** açılır; şablon kendiliğinden uygulanmaz. Ortadaki ya da sağ paneldeki **📄 Şablon Seç…** pencereyi açar: arama (ad / kod), kapsam çipleri (**Bu tetkike bağlı · Benim şablonlarım · Genel · Hepsi**), biçim çipleri (**Tek · Parçalı · Yapısal**), sağda önizleme. **Uygula** şablonu rapora yazar; **Boş rapor** şablonsuz serbest yazıma döner.
+- ★ yıldız: kişisel favori - listede öne gelir.
+- **Bu tetkik için varsayılanım yap**: bir sonraki raporda aynı şablon "önerilen" rozetiyle en üstte gelir; yine de otomatik uygulanmaz.
+- Dolu rapora yeni şablon uygulanırken onay sorulur: bölüm metinleri şablonun varsayılanıyla değişir.
+
+### Makrolar
+Seçili şablonun hazır metin parçalarıdır (ör. `.nl` normal bulgular). Tıklanınca metin hedef bölüme, hedefi yoksa son yazdığınız bölüme eklenir. Şablon seçilmeden makro gelmez; makrolar şablon kartında tanımlanır.
+
+### Yapılandırılmış Alanlar
+Serbest metnin yanında şablona bağlı, **kodlanmış** bulgu alanlarıdır; bulgu sorgulanabilir ve sayılabilir olur (ör. "bu ay kaç DVT pozitif"), kritik bulgu ve zorunluluk kuralı işletilebilir, Bakanlık / kalite göstergeleri üretilebilir.
+- **Seçimli**: Menisküs yırtığı = Yok / Medial / Lateral / Her ikisi.
+- **Sayısal**: Orta hat kayması (mm) - metne "Orta hatta {değer} mm kayma izlendi." kalıbıyla yazılır.
+- **Skor**: Fazekas 0-3. **Evet/Hayır**: Difüzyon kısıtlaması, Reflü.
+- Yıldızlı alan zorunludur: doldurulmadan rapor onaylanamaz.
+- **Metne ekle**: girilen değerleri kalıplarıyla cümleye çevirip ilgili bölüme (Bulgular / Sonuç) yazar.
+Alanlar şablon kartında tanımlanır; şablon seçilmeden görünmez. BI-RADS / TI-RADS gibi tam formlar bunun büyük hâlidir (**Giriş: Yapısal**).
+
+### Bakanlık Değerlendirmesi
+Yalnız kurum ayarı **Bakanlık profili** açıkken görünür. Sağlık Bakanlığı Teletıp rapor teslimi (HL7 ORU, OBX-13) için radyoloğun verdiği iki puandır (1-5):
+- **İstem Nedeni**: isteyen hekimin klinik bilgisi / ön tanısı raporu yazmaya ne kadar yetti (Yok · Yetersiz · Orta · İyi · Mükemmel). Bakanlık istem kalitesini bununla izler.
+- **Çekim Kalitesi**: görüntülerin değerlendirilebilirliği (Çok kötü · Kötü · Orta · İyi · Çok iyi). Cihaz / teknisyen kalite göstergesidir.
+Aynı profil onayda ek kural işletir: rapor dört Bakanlık parçasıyla (Teknik, Karşılaştırma, Bulgular, Sonuç ve Öneriler) **parçalı** yazılmalı, Bulgular en az 50 karakter, Sonuç ve Öneriler dolu olmalı. Puanlar onaylanan raporla Teletıp kuyruğuna gider.
+
+### Rapor biçimi ve giriş
+- **Tek / Parçalı**: tek A4 metin ya da başlıklı bölümler. Parçalıdan teke geçişte bölümler birleşir; tekten parçalıya geçişte metin Bulgular bölümüne taşınır.
+- **Serbest / Yapısal**: yapısal formu (BI-RADS, TI-RADS…) olan şablonda form görünümü; form değerlerinden metin üretilir.
+
+### Kritik Bulgu
+Hastayı bekletmeyecek bulgu varsa **⚠ Kritik Bulgu Bildir**: bulgu, haber verilen kişi, yol (telefon vb.) ve geri bildirim kaydedilir. Kritik işaretli tetkikte **bildirim kaydı olmadan rapor onaylanmaz**; teyit gelince **Radyoloji › Kritik Bulgular**'da kapatılır.
+
+### Onay ve e-İmza
+**💾 Taslak Kaydet** raporu saklar; **➜ Uzmana Gönder** onay yetkilisine iletir; **✍ Onayla ve İmzala** raporu kilitler ve numara verir. Kurumda e-İmza (EIMZA hesabı) açıksa onay yalnız e-imzayla olur: kart doktorun bilgisayarında ya da sunucuda, imzalı belge **🔏 İmzalı Belge** ile indirilir. Onaylı raporda düzeltme yalnız **＋ Ek Rapor** ile yapılır.
+
 ## Örnek sorular
+- Yapılandırılmış alanlar nedir?
+- Bakanlık Değerlendirmesi ne işe yarar?
 - Radyoloji raporu nasıl yazılır?
-- Rapor şablonu nasıl değiştirilir?
+- Rapor şablonu nasıl seçilir?
 - Makro nasıl kullanılır?
 - Raporu nasıl onaylarım?
 - Uzmana gönder ne demek?

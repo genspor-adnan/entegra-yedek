@@ -17,6 +17,8 @@ export interface AiEkranOzeti {
   yol: string; sekme?: string | null; kayitVar: boolean; hataKodu?: string | null;
 }
 
+export interface AiEkranKonusu { baslik: string; metin: string }
+
 export interface AiRehberYaniti {
   cevap: string;
   adimlar: { no: number; metin: string; ekran?: string; rota?: string; aksiyon?: string }[];
@@ -79,7 +81,9 @@ export const yapayZekaUclari = {
     for (const [k, v] of Object.entries(ipucu))
       if (v !== undefined && v !== null && v !== '') p.set(k, String(v));
     return istek<{ ekran: AiEkranOzeti; onerilenSorular: string[];
-                   aksiyonlar: { kod: string; ad: string; ekran: string }[] }>(
+                   aksiyonlar: { kod: string; ad: string; ekran: string }[];
+                   /** EKRAN KILAVUZU (14.11.2026): yardım belgesinin "### Başlık" konuları - tıklanınca metin, model yok. */
+                   konular?: AiEkranKonusu[] }>(
       `/api/ai/ekran-baglami?${p.toString()}`);
   },
 

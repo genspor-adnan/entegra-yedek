@@ -37,7 +37,15 @@ public sealed class YardimDizini
         string Id, string Baslik, string Modul, string Ekran, string Rota, string Surec,
         IReadOnlyList<string> Roller, string Dil, string Surum, string KaynakDosya,
         DateOnly? SonGuncelleme, string Erisim, string Ozet, string Yetki, short UrunModu,
-        string Dogrulama, IReadOnlyList<Parca> Parcalar, IReadOnlyList<string> OrnekSorular);
+        string Dogrulama, IReadOnlyList<Parca> Parcalar, IReadOnlyList<string> OrnekSorular,
+        IReadOnlyList<Konu>? Konular = null);
+
+    /// <summary>
+    /// EKRAN KILAVUZU KONUSU (kullanıcı 14.11.2026: "bu bilgileri rapor ekranda iken yapay zekaya sor kısmında
+    /// başlıklara koy.. tıklandığında bu bilgiler ekranda görünsün"): belgenin "## Ekran kılavuzu" bölümündeki her
+    /// "### Başlık" bir konu; panel başlıkları listeler, tıklanınca metni gösterir - model çağrısı / kontör yok.
+    /// </summary>
+    public sealed record Konu(string Baslik, string Metin);
 
     public sealed record Parca(string Id, string BelgeId, string Baslik, string Metin,
                                IReadOnlyList<string> Jetonlar, IReadOnlyList<string> BaslikJetonlari);
@@ -171,8 +179,18 @@ public sealed class YardimDizini
         // Gövde parçaları
         var parcalar = new List<Parca>();
         var ornekler = new List<string>();
+        var konular = new List<Konu>();
         var parcaBaslik = baslik;
         var govde = new StringBuilder();
+        string? konuBaslik = null;
+        var konuGovde = new StringBuilder();
+        void KonuKapat()
+        {
+            var m = konuGovde.ToString().Trim();
+            if (konuBaslik is { Length: > 0 } && m.Length > 0) konular.Add(new Konu(konuBaslik, m));
+            konuBaslik = null; konuGovde.Clear();
+        }
+        bool KilavuzMu() => RehberMetin.Sadelestir(parcaBaslik).StartsWith("ekran kilavuzu", StringComparison.Ordinal);
         void Kapat()
         {
             var metin = govde.ToString().Trim();
@@ -188,23 +206,28 @@ public sealed class YardimDizini
             var s = satirlar[i];
             if (s.StartsWith("## ", StringComparison.Ordinal))
             {
-                Kapat();
+                Kapat(); KonuKapat();
                 parcaBaslik = s[3..].Trim();
                 govde.Clear();
                 continue;
             }
             if (s.StartsWith("# ", StringComparison.Ordinal)) continue;   // belge başlığı tekrarı
             govde.AppendLine(s);
+            if (KilavuzMu())
+            {
+                if (s.StartsWith("### ", StringComparison.Ordinal)) { KonuKapat(); konuBaslik = s[4..].Trim(); }
+                else if (konuBaslik is not null) konuGovde.AppendLine(s);
+            }
             if (RehberMetin.Sadelestir(parcaBaslik).Contains("ornek soru", StringComparison.Ordinal)
                 && s.TrimStart().StartsWith("- ", StringComparison.Ordinal))
                 ornekler.Add(s.TrimStart()[2..].Trim().Trim('"'));
         }
-        Kapat();
+        Kapat(); KonuKapat();
 
         return new Belge(id, baslik, Al("modul"), Al("ekran"), Al("rota"), Al("surec"), roller,
                          Al("dil", "tr"), Al("surum", "1"), dosyaAdi, guncelleme,
                          Al("erisim", "kullanici"), Al("ozet"), Al("yetki"), urunModu,
-                         Al("dogrulama", "insan-dogrulama-bekliyor"), parcalar, ornekler);
+                         Al("dogrulama", "insan-dogrulama-bekliyor"), parcalar, ornekler, konular);
     }
 
     private static string Slug(string s)
@@ -295,6 +318,17 @@ public sealed class YardimDizini
                        .Take(azami).ToList();
     }
 
+    /// <summary>Ekrana bağlı belgelerin "Ekran kılavuzu" konuları (panelde tıklanır başlıklar; model çağrısı yok).</summary>
+    public IReadOnlyList<Konu> Konular(DogrulanmisBaglam ekran, IstekBaglami baglam, short urunModu, string dil)
+    {
+        List<Belge> belgeler;
+        lock (_kilit) belgeler = _belgeler;
+        return belgeler.Where(b => Erisilebilir(b, baglam, urunModu, dil) && EkranUyar(b, ekran))
+                       .SelectMany(b => b.Konular ?? [])
+                       .GroupBy(k => k.Baslik, StringComparer.OrdinalIgnoreCase).Select(g => g.First())
+                       .ToList();
+    }
+
     private static bool MetaParcasiMi(Parca p)
     {
         var b = RehberMetin.Sadelestir(p.Baslik);
@@ -308,9 +342,13 @@ public sealed class YardimDizini
     private static bool OrnekParcasiMi(Parca p)
         => RehberMetin.Sadelestir(p.Baslik).Contains("ornek soru", StringComparison.Ordinal);
 
+    /// <summary>Belgenin `ekran:` / `rota:` değeri virgülle birden çok ekranı sayabilir ("radyoloji-rapor, radyoloji-istem").</summary>
     public static bool EkranUyar(Belge b, DogrulanmisBaglam ekran)
-        => (b.Ekran.Length > 0 && string.Equals(b.Ekran, ekran.Kaynak, StringComparison.OrdinalIgnoreCase))
-           || (b.Rota.Length > 0 && string.Equals(b.Rota, ekran.Rota, StringComparison.OrdinalIgnoreCase));
+        => Listede(b.Ekran, ekran.Kaynak) || Listede(b.Rota, ekran.Rota);
+
+    private static bool Listede(string virgullu, string aranan)
+        => aranan.Length > 0 && virgullu.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                        .Any(x => string.Equals(x, aranan, StringComparison.OrdinalIgnoreCase));
 
     private static bool Erisilebilir(Belge b, IstekBaglami baglam, short urunModu, string dil)
     {

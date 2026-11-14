@@ -54,6 +54,9 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Null(EkranBaglamiCozucu.RotaNormalle("/hasta/<script>"));
         Assert.Null(EkranBaglamiCozucu.RotaNormalle("/" + new string('a', 130)));
         Assert.Equal(("/hasta", 5057L), EkranBaglamiCozucu.RotayiAyir("/hasta/5057"));
+        // İki kademeli kart (1341): rapor ekranının kendi satırı.
+        Assert.Equal(("/radyoloji/rapor", 2573L), EkranBaglamiCozucu.RotayiAyir("/radyoloji/rapor/2573"));
+        Assert.Equal(("/belge", null), EkranBaglamiCozucu.RotayiAyir("/belge/yeni"));
         Assert.Equal("tr", EkranBaglamiCozucu.DilNormalle("xx"));
         Assert.Equal("en", EkranBaglamiCozucu.DilNormalle("EN"));
     }
@@ -471,7 +474,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
     {
         if (!_olgu.Baglandi(nameof(Ekran_baglami_ucu_YETKISIZ_ekranda_yetki_sorusu_onerir_kayit_icerigi_okumaz))) return;
         var servis = new RehberServisi(_olgu.Gerekli());
-        var (ekran, sorular, aksiyonlar) = await servis.EkranBaglamiAsync(
+        var (ekran, sorular, aksiyonlar, _) = await servis.EkranBaglamiAsync(
             new IstemciBaglami("/hasta/999999", "hasta", 999999), Baglam(null, "stok"), CancellationToken.None);
         Assert.True(ekran.Bulundu);
         Assert.False(ekran.Yetkili);
@@ -479,7 +482,7 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.Empty(aksiyonlar);
         Assert.Contains(sorular, s => s.Contains("yetki", StringComparison.OrdinalIgnoreCase));
 
-        var (yetkili, sorular2, aksiyonlar2) = await servis.EkranBaglamiAsync(
+        var (yetkili, sorular2, aksiyonlar2, _) = await servis.EkranBaglamiAsync(
             new IstemciBaglami("/hasta/999999", "hasta", 999999, null, null, "en"), Baglam(null, "hasta"), CancellationToken.None);
         Assert.True(yetkili.Yetkili);
         Assert.True(yetkili.KayitVar);      // varlığı SORGULANMAZ; yalnız istemcinin kimliği kabul edildi

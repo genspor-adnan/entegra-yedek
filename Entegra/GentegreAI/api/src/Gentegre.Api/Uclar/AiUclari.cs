@@ -79,9 +79,9 @@ public static class AiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ai.rehber", Islem.Gor);
-            var (ekran, sorular, aksiyonlar) = await rehber.EkranBaglamiAsync(
+            var (ekran, sorular, aksiyonlar, konular) = await rehber.EkranBaglamiAsync(
                 new IstemciBaglami(rota, kaynak, kayitId, sekme, hataKodu, dil), baglam, iptal);
-            return Results.Ok(new { ekran, onerilenSorular = sorular, aksiyonlar,
+            return Results.Ok(new { ekran, onerilenSorular = sorular, aksiyonlar, konular,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

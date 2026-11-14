@@ -80,6 +80,21 @@ describe('AiRehberPaneli - bağlam', () => {
     expect(Object.keys(gonderilen).every(k => izinli.includes(k))).toBe(true);
   });
 
+  it('ekran kılavuzu konuları başlık olarak gelir; tıklanınca metin açılır, model çağrılmaz', async () => {
+    aiEkranBaglami.mockResolvedValue({
+      ekran: ekranOzeti(), onerilenSorular: ['Bu ekranda ne yapabilirim?'], aksiyonlar: [],
+      konular: [{ baslik: 'Yapılandırılmış Alanlar',
+                  metin: 'Şablona bağlı **kodlanmış** bulgu alanları.\n- Seçimli\n- Sayısal' }],
+    });
+    ac('/radyoloji/rapor/2573');
+    const bas = await screen.findByText(/Yapılandırılmış Alanlar/);
+    expect(screen.queryByText(/Seçimli/)).toBeNull();
+    fireEvent.click(bas);
+    expect(await screen.findByText('Seçimli')).toBeTruthy();
+    expect(screen.getByText('kodlanmış').tagName).toBe('B');
+    expect(aiRehber).not.toHaveBeenCalled();
+  });
+
   it('"şu ekran hakkında" satırı SUNUCUNUN doğruladığı ekranla çizilir', async () => {
     ac('/hasta');
     expect(await screen.findByText(/Şu ekran hakkında soruyorsunuz/)).toBeTruthy();

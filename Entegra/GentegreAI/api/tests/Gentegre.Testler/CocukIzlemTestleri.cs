@@ -41,8 +41,8 @@ public sealed class CocukIzlemTestleri(VeritabaniOlgusu olgu)
             returning id
             """, [hastaId], CancellationToken.None);
         await veri.CalistirAsync("""
-            insert into public.belge_basvuru (id, hasta_id, sys_takip_no)
-            values (@p0, @p1, 'TEST-TKP-' || @p0::text)
+            insert into public.belge_basvuru (id, hasta_id, sys_takip_no, enabiz_bildirim)
+            values (@p0, @p1, 'TEST-TKP-' || @p0::text, 1)   -- 1340: e-Nabız kapısı açık
             """, [belgeId, hastaId], CancellationToken.None);
 
         return (hastaId, belgeId);

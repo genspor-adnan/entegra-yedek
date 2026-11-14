@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
-import type { AiEkranIpucu, AiEkranOzeti, AiRehberYaniti } from '../api/uclar/yapayZeka';
+import type { AiEkranIpucu, AiEkranKonusu, AiEkranOzeti, AiRehberYaniti } from '../api/uclar/yapayZeka';
 import { ApiHatasi, hataMetni } from '../api/sozlesme';
 import { hataIziDinle, hataIziTemizle, sonHataIzi } from '../api/hataIzi';
 import { useAiBaglam } from './aiBaglam';
@@ -91,6 +91,10 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   // Sunucunun doğruladığı ekran + önerilen sorular ("şu ekran hakkında soruyorsunuz").
   const [ekran, setEkran] = useState<AiEkranOzeti | null>(null);
   const [onerilenSorular, setOnerilenSorular] = useState<string[]>(GENEL_SORULAR);
+  // EKRAN KILAVUZU (kullanıcı 14.11.2026: "başlıklara koy.. tıklandığında bu bilgiler ekranda görünsün"):
+  //   sunucunun ekrana bağladığı belge konuları; başlık tıklanınca metni açılır, model çağrısı yok.
+  const [konular, setKonular] = useState<AiEkranKonusu[]>([]);
+  const [acikKonu, setAcikKonu] = useState<string | null>(null);
   const kutu = useRef<HTMLInputElement>(null);
   const panel = useRef<HTMLDivElement>(null);
 
@@ -125,8 +129,9 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
         if (iptal) return;
         setEkran(y.ekran);
         setOnerilenSorular(y.onerilenSorular.length > 0 ? y.onerilenSorular : GENEL_SORULAR);
+        setKonular(y.konular ?? []); setAcikKonu(null);
       } catch {
-        if (!iptal) { setEkran(null); setOnerilenSorular(GENEL_SORULAR) }
+        if (!iptal) { setEkran(null); setOnerilenSorular(GENEL_SORULAR); setKonular([]) }
       }
     })();
     return () => { iptal = true };
@@ -240,6 +245,21 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
           </div>
         )}
 
+        {!yanit && !yukleniyor && !hata && konular.length > 0 && (
+          <div className="rehber-konular">
+            <div className="rehber-not">{c('Bu ekranda')}</div>
+            {konular.map(k => (
+              <div key={k.baslik} className={`rehber-konu${acikKonu === k.baslik ? ' acik' : ''}`}>
+                <button type="button" className="rehber-konu-bas" aria-expanded={acikKonu === k.baslik}
+                        onClick={() => setAcikKonu(a => (a === k.baslik ? null : k.baslik))}>
+                  <span className="rehber-konu-ok">{acikKonu === k.baslik ? '▾' : '▸'}</span> {k.baslik}
+                </button>
+                {acikKonu === k.baslik && <KonuMetni metin={k.metin} />}
+              </div>
+            ))}
+          </div>
+        )}
+
         {!yanit && !yukleniyor && !hata && (
           <div className="rehber-ornek">
             <div className="rehber-not">{c('Ne yapmak istediğinizi yazın ya da bir soru seçin:')}</div>
@@ -343,6 +363,29 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
                aria-label={c('Soru')} />
         <button className="d bir" type="submit" disabled={yukleniyor}>{c('Sor')}</button>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Kılavuz konu metni: "- " satırları madde, diğerleri paragraf; `**kalın**` Kalinla ile (HTML basılmaz, enjeksiyon yok).
+ */
+function KonuMetni({ metin }: { metin: string }) {
+  const bloklar: { tur: 'p' | 'ul'; satirlar: string[] }[] = [];
+  for (const ham of metin.split('\n')) {
+    const s = ham.trim();
+    if (s === '') continue;
+    const madde = s.startsWith('- ');
+    const son = bloklar[bloklar.length - 1];
+    if (madde) {
+      if (son?.tur === 'ul') son.satirlar.push(s.slice(2)); else bloklar.push({ tur: 'ul', satirlar: [s.slice(2)] });
+    } else bloklar.push({ tur: 'p', satirlar: [s] });
+  }
+  return (
+    <div className="rehber-konu-metin">
+      {bloklar.map((b, i) => b.tur === 'ul'
+        ? <ul key={i}>{b.satirlar.map((x, j) => <li key={j}><Kalinla metin={x} /></li>)}</ul>
+        : <p key={i}><Kalinla metin={b.satirlar[0]} /></p>)}
     </div>
   );
 }

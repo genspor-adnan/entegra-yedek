@@ -3776,6 +3776,16 @@ input.skt-gecmis {
 }
 .rehber-alt { display: flex; align-items: center; gap: 8px }
 
+/* Ekran kılavuzu konuları (14.11.2026): tıklanır başlık + açılan metin. */
+.rehber-konular { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px }
+.rehber-konu { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem) }
+.rehber-konu.acik { border-color: var(--dugkenar) }
+.rehber-konu-bas { width: 100%; text-align: left; border: 0; background: none; color: var(--yazi); padding: 6px 8px; font: inherit; font-weight: 700; cursor: pointer }
+.rehber-konu-bas:hover { background: var(--satirust) }
+.rehber-konu-ok { color: var(--soluk); font-size: 10px }
+.rehber-konu-metin { padding: 0 10px 8px; font-size: 12px; line-height: 1.5 }
+.rehber-konu-metin p { margin: 4px 0 }
+.rehber-konu-metin ul { margin: 4px 0; padding-left: 18px }
 .rehber-ornek { display: flex; flex-direction: column; gap: 6px }
 .rehber-ornek-dugme {
   text-align: left; border: 1px solid var(--cizgi2); border-radius: var(--r);

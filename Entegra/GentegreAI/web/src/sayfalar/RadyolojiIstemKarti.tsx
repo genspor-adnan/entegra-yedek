@@ -393,7 +393,7 @@ export function RadyolojiIstemKarti() {
                 </span>
                 <span /><span />
 
-                <span className="rik-et">Klinik Bilgi</span>
+                <span className="rik-et">İstem Nedeni</span>
                 <textarea className="inp rik-tam" rows={2} value={form?.klinikBilgi ?? ''}
                           placeholder="Doktor notu / istem gerekçesi…"
                           onChange={e => fs({ klinikBilgi: e.target.value })} />
@@ -403,7 +403,7 @@ export function RadyolojiIstemKarti() {
                 {/* Accession burada yok - başlıktaki rozette (kullanıcı 01.11.2026). */}
                 {ikili('Ön Tanı', M(k, 'onTani') ? `${M(k, 'onTani')}${M(k, 'onTaniAdi') ? ` · ${M(k, 'onTaniAdi')}` : ''}` : '')}
                 {ikili('Öncelik', M(k, 'oncelikAdi') || 'Normal')}
-                {ikili('Klinik Bilgi', M(k, 'klinikBilgi'), true)}
+                {ikili('İstem Nedeni', M(k, 'klinikBilgi'), true)}
               </div>
             )}
           </div>

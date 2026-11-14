@@ -91,18 +91,23 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
     /// üretmez, kontör harcamaz, günlüğe yazmaz.
     /// </summary>
     public async Task<(EkranOzeti Ekran, IReadOnlyList<string> OnerilenSorular,
-                       IReadOnlyList<AksiyonOnerisi> Aksiyonlar)>
+                       IReadOnlyList<AksiyonOnerisi> Aksiyonlar, IReadOnlyList<YardimDizini.Konu> Konular)>
         EkranBaglamiAsync(IstemciBaglami istemci, IstekBaglami baglam, CancellationToken iptal)
     {
         await using var baglanti = await veri.AcAsync(iptal);
         var urunModu = await UrunModuAsync(baglanti, baglam, iptal);
         var ekran = await EkranBaglamiCozucu.CozAsync(baglanti, istemci, baglam, urunModu, iptal);
         var sorular = new List<string>();
+        IReadOnlyList<YardimDizini.Konu> konular = [];
         if (ekran is { Bulundu: true, Yetkili: true })
         {
             sorular.Add("Bu ekranda ne yapabilirim?");
             if (dizin is not null)
+            {
                 sorular.AddRange(dizin.OnerilenSorular(ekran, baglam, urunModu, ekran.Dil, 4));
+                // EKRAN KILAVUZU (14.11.2026): belgenin "### Başlık" konuları - panelde tıklanır, kontör harcamaz.
+                konular = dizin.Konular(ekran, baglam, urunModu, ekran.Dil);
+            }
             if (ekran.KayitId is > 0 && ekran.Alanlar.Count > 0) sorular.Add("Bu kartta hangi alanlar zorunlu?");
             if (ekran.HataKodu is { Length: > 0 }) sorular.Insert(0, "Bu hata ne demek?");
         }
@@ -110,7 +115,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
         else sorular.Add("Yeni hasta kaydı nasıl açılır?");
         sorular.Add("Rolüm ne yapabilir?");
         return (Ozet(ekran), sorular.Distinct().Take(6).ToList(),
-                ekran.Aksiyonlar.Select(a => new AksiyonOnerisi(a.Kod, a.Ad, a.Ekran)).ToList());
+                ekran.Aksiyonlar.Select(a => new AksiyonOnerisi(a.Kod, a.Ad, a.Ekran)).ToList(), konular);
     }
 
     private static EkranOzeti Ozet(DogrulanmisBaglam e) =>

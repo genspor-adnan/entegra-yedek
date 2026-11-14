@@ -108,11 +108,18 @@ public static class EkranBaglamiCozucu
         return r.Length > 1 ? r.TrimEnd('/') : r;
     }
 
-    /// <summary>"/hasta/5057" → ("/hasta", 5057); "/hasta" → ("/hasta", null).</summary>
+    /// <summary>
+    /// "/hasta/5057" → ("/hasta", 5057); "/hasta" → ("/hasta", null).
+    /// İKİ KADEMELİ KART (14.11.2026): "/radyoloji/rapor/2573" → ("/radyoloji/rapor", 2573) - rapor ekranının kendi
+    /// katalog satırı (1341) bulunsun; satırı yoksa EkranBulAsync kökü ("/radyoloji") dener.
+    /// </summary>
     public static (string Kok, long? Id) RotayiAyir(string rota)
     {
         var parcalar = rota.TrimStart('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (parcalar.Length == 0) return ("/", null);
+        if (parcalar.Length >= 3 && !long.TryParse(parcalar[1], out _)
+            && long.TryParse(parcalar[2], out var n2) && n2 > 0)
+            return ("/" + parcalar[0] + "/" + parcalar[1], n2);
         var kok = "/" + parcalar[0];
         long? id = parcalar.Length >= 2 && long.TryParse(parcalar[1], out var n) && n > 0 ? n : null;
         return (kok, id);
@@ -131,10 +138,11 @@ public static class EkranBaglamiCozucu
                    e.yetki_kodu as "yetkiKodu", e.aksiyon_ekrani as "aksiyonEkrani",
                    e.kart_yolu as "kartYolu", e.urun_modu as "urunModu"
               from public.ai_rehber_ekran e
-             where (e.rota = @p0 or e.rota = @p1) and e.durum = 0
-             order by case when e.rota = @p0 then 0 else 1 end, e.id
+             where (e.rota = @p0 or e.rota = @p1 or e.rota = @p2) and e.durum = 0
+             order by case when e.rota = @p0 then 0 when e.rota = @p1 then 1 else 2 end, e.id
              limit 1
-            """, null, [rota, kok], OkuyucuGenisletmeleri.Sozluk, iptal);
+            """, null, [rota, kok, "/" + rota.TrimStart('/').Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault("")],
+            OkuyucuGenisletmeleri.Sozluk, iptal);
         if (s is null) return null;
         return new EkranSatiri(
             s["kaynak"]?.ToString() ?? "", s["rota"]?.ToString() ?? "",
