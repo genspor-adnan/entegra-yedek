@@ -100,8 +100,11 @@ public static partial class RadyolojiUclari
         bool? IsteyenGuncelle = null, int? IstekHekimId = null, string? DisHekimAd = null, int? IstekKurumId = null);
 
     /// <summary>
-    /// DIŞ ACCESSION DENETİMİ (1229): 16 karakter DICOM AccessionNumber sınırı, yalnız harf / rakam / - . _
-    /// ve kurumda benzersiz (görüntü istemle yalnız bu numarayla eşleşir).
+    /// DIŞ ACCESSION DENETİMİ (1229; sıkılaştırma 14.11.2026, kullanıcı "yazdığım her türlü numarayı kabul ediyor /
+    /// validasyon yok"): Teletıp accession biçimi - 16 karakter, 3 BÜYÜK HARF kurum öneki + 13 rakam (eski HBYS
+    /// TELETIPKURUMONEK + hane, ör. KGM0000000046003 / KTB0000000000337); DICOM 16 karakter sınırına da uyar. Kurumda
+    /// benzersiz (görüntü istemle yalnız bu numarayla eşleşir). Kurumun kendi numarası sayaçtan gelir, elle girilmez
+    /// (kart engeller). Kural yalnız ELLE girilen numaraya uygulanır; eski kayıtlar dokunulmaz.
     /// </summary>
     /// <summary>
     /// YÖN AİLESİ (1232): hizmetin Bakanlık kodu yönden çözülüyorsa seçilen yönün SUT kodu olmalı ("MRG, DİZ" ailesinde
@@ -122,9 +125,9 @@ public static partial class RadyolojiUclari
     internal static async Task AccessionDenetleAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction? tx,
         string acc, int? haricId, CancellationToken iptal)
     {
-        if (acc.Length > 16 || !System.Text.RegularExpressions.Regex.IsMatch(acc, "^[A-Za-z0-9._-]+$"))
+        if (!System.Text.RegularExpressions.Regex.IsMatch(acc, "^[A-Z]{3}[0-9]{13}$"))
             throw GentegreHatasi.Dogrulama($"Accession no geçersiz: {acc}",
-                new AlanHatasi("accessionNo", "En fazla 16 karakter; harf, rakam, - . _"));
+                new AlanHatasi("accessionNo", "16 karakter: 3 büyük harf kurum öneki + 13 rakam (ör. KTB0000000000337)."));
         var var_ = await b.TekDegerAsync<int?>(
             "select 1 from public.radyoloji_istem where accession_no = @p0 and id <> coalesce(@p1::int, 0) limit 1",
             tx, [acc, haricId], iptal);

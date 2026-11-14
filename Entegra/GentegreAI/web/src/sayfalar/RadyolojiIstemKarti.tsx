@@ -202,8 +202,12 @@ export function RadyolojiIstemKarti() {
   useEffect(() => {
     setAccBilgi('');
     if (!duzen || !accYazilan || accYazilan === accKayitli) { setAccUyari(''); return }
-    if (!/^[A-Za-z0-9._-]{1,16}$/.test(accYazilan)) {
-      setAccUyari('Accession en fazla 16 karakter; yalnız harf, rakam, tire, nokta ve alt çizgi.'); return;
+    // TELETIP ACCESSION BİÇİMİ (14.11.2026 "validasyon yok"): 16 karakter = 3 büyük harf kurum öneki + 13 rakam.
+    //   Sunucu (AccessionDenetleAsync) aynı kuralı uygular.
+    if (!/^[A-Z]{3}[0-9]{13}$/.test(accYazilan)) {
+      setAccUyari(accYazilan.length !== 16
+        ? `Accession 16 karakter olmalı (şu an ${accYazilan.length}): 3 büyük harf kurum öneki + 13 rakam, ör. KTB0000000000337.`
+        : 'Accession biçimi: 3 büyük harf kurum öneki + 13 rakam, ör. KTB0000000000337.'); return;
     }
     if (kurumOnEk && kurumHane > 0) {
       const kurumDeseniMi = accYazilan.startsWith(kurumOnEk) && accYazilan.length === kurumOnEk.length + kurumHane
