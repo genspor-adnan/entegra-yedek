@@ -58,7 +58,7 @@ interface Gecmis { id: number; accessionNo: string; tetkikAdi: string; tarih: st
                    /** Kronolojik görünüm (27.10.2026): modalite adı, rapor durumu (0 yok, 1-3), BI-RADS. */
                    modaliteAdi?: string; raporDurum?: number; birads?: string }
 interface Kritik { bulgu: string; bildirilenAd: string; yol: number;
-                   bildirimZamani: string; geriBildirim: string }
+                   bildirimZamani: string; geriBildirim: string; kapatmaZamani?: string | null }
 /** Sağ panelde salt okunur açılan önceki tetkik raporu (kullanıcı 13.11.2026). */
 interface OncekiGorunum { id: number; yukleniyor: boolean; hata: string; rapor: Record<string, unknown> | null; bolumler: Bolum[] }
 
@@ -203,12 +203,14 @@ export function RadyolojiRapor() {
   useEffect(() => {
     if (!kritikModal) return;
     let iptal = false;
-    api.radyolojiRadyologlar().then(l => {
-      if (iptal) return;
-      setRadyologlar(l);
+    // Liste sayfa ömründe değişmez: bir kez çekilir (kod inceleme 15.11.2026), her açılışta yalnız varsayılan atanır.
+    const varsayilanAta = (l: { id: number; ad: string; ben: number }[]) =>
       setKritikForm(f => f.bildirenId ? f : { ...f, bildirenId: l.find(x => Number(x.ben) === 1)?.id ?? l[0]?.id ?? null });
-    }).catch(() => { if (!iptal) setRadyologlar([]) });
+    if (radyologlar.length > 0) { varsayilanAta(radyologlar); return }
+    api.radyolojiRadyologlar().then(l => { if (iptal) return; setRadyologlar(l); varsayilanAta(l) })
+      .catch(() => { if (!iptal) setRadyologlar([]) });
     return () => { iptal = true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kritikModal]);
   /** Makro hangi bölüme eklenecek: en son dokunulan alan. */
   const sonBolum = useRef<number>(0);
@@ -1110,7 +1112,9 @@ export function RadyolojiRapor() {
 
           <h5 style={{ marginTop: 12 }}>Kritik Bulgu</h5>
           <label className="alan yatay">
-            <input type="checkbox" checked={kritik} disabled={kilitli}
+            {/* Açık (teyit bekleyen) bildirim varken işaret kaldırılamaz - sunucu da reddeder (15.11.2026). */}
+            <input type="checkbox" checked={kritik} disabled={kilitli || (kritik && kritikler.some(k => !k.kapatmaZamani))}
+                   title={kritik && kritikler.some(k => !k.kapatmaZamani) ? c('Açık bildirim var: önce Kritik Bulgular listesinde teyit alındı diye kapatın.') : undefined}
                    onChange={e => setKritik(e.target.checked)} />
             <span>{c('Bu tetkikte kritik bulgu var')}</span>
           </label>

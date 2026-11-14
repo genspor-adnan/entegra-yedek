@@ -256,7 +256,9 @@ export const mesajUclari = {
   radyolojiAddendum: (raporId: number) =>
     gonder<{ raporId: number }>(`/api/radyoloji/rapor/${raporId}/addendum`, {}),
 
-  radyolojiKritikBulgu: (istemId: number, govde: unknown) =>
+  /** Kritik bulgu bildirimi (RadyolojiUclari.KritikIstegi ile birebir alan adları). */
+  radyolojiKritikBulgu: (istemId: number, govde: { bulgu: string; bildirilenAd: string; yol: number; geriBildirim: string;
+                                                   bildirenId?: number | null; teyitAlindi?: number | null; kapat?: boolean }) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/kritik-bulgu`, govde),
 
 };

@@ -18,6 +18,17 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static partial class RadyolojiUclari
 {
+    /// <summary>
+    /// KULLANICI ŞUBE SÜZGECİ (onay-uzmanlari ve radyologlar ortak; kod inceleme 15.11.2026): kişiye şube atanmışsa o,
+    /// atanmamışsa rolünün şubeleri, rolde de yoksa sınırsız. @p0 = aktif şube (null = süzme yok). `k` = taraf_kullanici.
+    /// </summary>
+    private const string SubeSuzgeciSql = """
+        @p0::int is null
+        or exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id and ks.sube_id = @p0)
+        or (not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id)
+            and (exists (select 1 from public.fn_kullanici_subeleri(k.id) s where s.sube_id = @p0)
+                 or not exists (select 1 from public.fn_kullanici_subeleri(k.id))))
+        """;
     private static void RaporEkle(RouteGroupBuilder grup)
     {
         // ------------------------------------------------- rapor ekranı ----
@@ -33,7 +44,7 @@ public static partial class RadyolojiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("rad.rapor_yaz");
-            var liste = await veri.ListeAsync("""
+            var liste = await veri.ListeAsync($"""
                 select k.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad,
                        (select count(*)::int from public.radyoloji_rapor r
                          where r.onaylayacak_id = k.id and r.durum = 2) as bekleyen
@@ -41,11 +52,7 @@ public static partial class RadyolojiUclari
                   join public.taraf t on t.id = k.id
                  where k.aktif = 1
                    and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla')
-                   and (@p0::int is null
-                        or exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id and ks.sube_id = @p0)
-                        or (not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id)
-                            and (exists (select 1 from public.fn_kullanici_subeleri(k.id) s where s.sube_id = @p0)
-                                 or not exists (select 1 from public.fn_kullanici_subeleri(k.id)))))
+                   and ({SubeSuzgeciSql})
                  order by 2
                 """, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
             return Results.Ok(liste);
@@ -56,20 +63,16 @@ public static partial class RadyolojiUclari
         grup.MapGet("/radyologlar", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("radyoloji", Islem.Gor);
-            var liste = await veri.ListeAsync("""
+            // Besledigi uç (kritik-bulgu POST) ile aynı kapı: yalnız görme yetkisi olan banko kullanıcısı ad listesi çekemesin.
+            baglam.AksiyonIste("rad.rapor_yaz");
+            var liste = await veri.ListeAsync($"""
                 select k.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad,
                        case when k.id = @p1 then 1 else 0 end as ben
                   from public.taraf_kullanici k
                   join public.taraf t on t.id = k.id
                  where k.aktif = 1
                    and (public.fn_kullanici_yetkili(k.id, 'rad.rapor_yaz') or k.id = @p1)
-                   and (@p0::int is null
-                        or exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id and ks.sube_id = @p0)
-                        or (not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id)
-                            and (exists (select 1 from public.fn_kullanici_subeleri(k.id) s where s.sube_id = @p0)
-                                 or not exists (select 1 from public.fn_kullanici_subeleri(k.id))))
-                        or k.id = @p1)
+                   and (({SubeSuzgeciSql}) or k.id = @p1)
                  order by ben desc, 2
                 """, [baglam.SubeId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
             return Results.Ok(liste);
@@ -294,7 +297,8 @@ public static partial class RadyolojiUclari
 
             var kritikler = await baglanti.ListeAsync("""
                 select bulgu, bildirilen_ad as "bildirilenAd", yol,
-                       bildirim_zamani as "bildirimZamani", geri_bildirim as "geriBildirim"
+                       bildirim_zamani as "bildirimZamani", geri_bildirim as "geriBildirim",
+                       kapatma_zamani as "kapatmaZamani"
                   from public.radyoloji_kritik_bulgu where istem_id = @p0 order by id desc
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -576,9 +580,18 @@ public static partial class RadyolojiUclari
             }
 
             if (istek.Kritik is { } kritik)
+            {
+                // KRİTİK İŞARETİ AÇIK BİLDİRİM VARKEN KALDIRILAMAZ (kod inceleme 15.11.2026): kaldırılsaydı istem Kritik
+                //   Bulgular listesinden düşer, teyit bekleyen bildirim sahipsiz kalırdı. Önce listede ✔ Kapat (teyit alındı).
+                if (kritik == 0 && await baglanti.TekDegerAsync<bool>("""
+                        select exists (select 1 from public.radyoloji_kritik_bulgu
+                                        where istem_id = @p0 and kapatma_zamani is null)
+                        """, islem, [id], iptal))
+                    throw GentegreHatasi.IsKurali("Açık kritik bulgu bildirimi varken işaret kaldırılamaz; önce Radyoloji › Kritik Bulgular'da teyit alındı diye kapatın.");
                 await baglanti.CalistirAsync(
                     "update public.radyoloji_istem set kritik = @p1 where id = @p0",
                     islem, [id, kritik], iptal);
+            }
 
             // İstem "Raporlanıyor"a geçer (henüz çekilmemişse dokunulmaz).
             await baglanti.CalistirAsync(

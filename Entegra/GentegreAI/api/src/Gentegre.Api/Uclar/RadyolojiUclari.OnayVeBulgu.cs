@@ -152,6 +152,13 @@ public static partial class RadyolojiUclari
                 throw GentegreHatasi.Dogrulama("Bildirilen kişi yazılmalı.", new AlanHatasi("bildirilenAd", "Zorunlu."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // BİLDİREN (kod inceleme 15.11.2026): istemcideki combo tek süzgeç olamaz - aktif kullanıcı ve rapor yazma
+            //   yetkili (ya da oturum sahibi) değilse 400; hasta / rastgele taraf kimliği denetim kaydına giremez.
+            if (istek.BildirenId is { } bId && bId != baglam.KullaniciId && !await baglanti.TekDegerAsync<bool>("""
+                    select exists (select 1 from public.taraf_kullanici k
+                                    where k.id = @p0 and k.aktif = 1 and public.fn_kullanici_yetkili(k.id, 'rad.rapor_yaz'))
+                    """, null, [bId], iptal))
+                throw GentegreHatasi.Dogrulama("Bildiren, rapor yazma yetkili aktif bir kullanıcı olmalı.", new AlanHatasi("bildirenId", "Geçersiz."));
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             await baglanti.CalistirAsync("""

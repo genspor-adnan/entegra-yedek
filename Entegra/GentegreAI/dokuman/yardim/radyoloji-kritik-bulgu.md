@@ -5,11 +5,11 @@ modul: radyoloji
 ekran: radyoloji-kritik
 rota: /radyoloji-kritik
 surec: radyoloji
-roller: radyolog, radyoloji teknisyeni, hekim
+roller: radyolog, rad_teknisyen, hekim
 dil: tr
 surum: 1
 urun_modu: 2
-yetki: radyoloji
+yetki: radyoloji.kritik
 erisim: kullanici
 ozet: Kritik bulgu nedir, radyolog nasıl bildirir (bulgu, bildirilen kişi, yol, geri bildirim), neden bildirim kaydı olmadan rapor onaylanamaz, Kritik Bulgular listesindeki Bildirilmedi · Teyit Bekleyen · Teyitli · Kapatılan çipleri ve teyit alınınca kapatma.
 guncelleme: 2026-11-15
