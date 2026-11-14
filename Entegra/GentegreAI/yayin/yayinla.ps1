@@ -128,7 +128,8 @@ $KURULUMLAR = @(
         Ad = 'sonomed'; Etiket = 'SONOMED (HBYS, musteri sunucusu)';
         Yol = '/'; Kok = 'gentegre-sonomed';
         Db = 'SONOMED'; Kap = 'gentegre-api-sonomed'; Port = 5180; Urun = 'hbys';
-        Sunucu = 'gentegre@90.158.5.227'
+        # VPN (14.11.2026): musterinin disa IP'si degisken; erisim Check Point VPN icinden sunucunun IC adresine.
+        Sunucu = 'gentegre@192.168.37.60'
     }
 )
 
