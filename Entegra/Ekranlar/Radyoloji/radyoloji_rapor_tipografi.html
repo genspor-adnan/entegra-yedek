@@ -217,10 +217,29 @@
     <tr><th>Nerede</th><th>Ne olur</th></tr>
     <tr><td>Rapor ekranı A4 editörü</td><td>Seçili şablonun (yoksa kurumun) tipografisiyle çizilir — ekran = kâğıt.</td></tr>
     <tr><td>🖨 Çıktı / PDF</td><td>Aynı CSS; <code>@page</code> kâğıt ve kenar boşluğu ayardan.</td></tr>
-    <tr><td>e-İmza belgesi</td><td>İmzalanan HTML aynı tipografiyi gömer; sonradan ayar değişse imzalı belge değişmez.</td></tr>
+    <tr><td>Onay anı (damga)</td><td><b>Tipografi onayda rapora damgalanır</b> (<code>radyoloji_rapor.tipografi</code> jsonb: font, punto, satır aralığı, paragraf arası, hizalama, kenar boşluğu, kaynak = kurum/şablon/özgün). Onaylı raporun her yeniden çıktısı damgayla çizilir; sonradan kurum ayarı değişse eski rapor değişmez. Taslak rapor damgasızdır, güncel ayarla çizilir.</td></tr>
+    <tr><td>e-İmza belgesi</td><td>İmzalanan HTML damgadaki tipografiyi gömer; imzalı belge ve yeniden çıktı birebir aynı görünür.</td></tr>
+    <tr><td>Ek rapor (addendum)</td><td>Ana raporun damgasını devralır (tek belge, tek görünüm).</td></tr>
+    <tr><td>Rapor kartı üst şeridi</td><td>Onaylı raporda <span class="rozet">Arial 10,5 · onay damgası</span> rozeti; tıklanınca damga ayrıntısı ve "güncel kurum ayarı: Calibri 11" karşılaştırması.</td></tr>
     <tr><td>Teletıp / e-Nabız</td><td>Etkilenmez: Bakanlık rapor <b>içeriğini</b> ister (dört parça, TCKN, SUT, puanlar - HL7 ORU), görünüm şartı yok. Base64 HTML gönderiminde çıktıyla aynı HTML gider.</td></tr>
     <tr><td>Eski HBYS Word şablonları</td><td>"Şablonun kendi biçimi" → gömülü font/punto korunur; kurum ayarı yalnız antet, kimlik ve alt bilgiye uygulanır.</td></tr>
   </table>
+</div>
+
+<h2 class="baslik">3. Rapor kartı › üst şerit — <small>onaylı raporda tipografi damgası</small></h2>
+<div class="win" style="padding:10px 14px">
+  <div class="sablon-ust">
+    <span class="rozet" style="background:#f1f4f7">🔒 Onaylı · 14.11.2026 14:05</span>
+    <span class="rozet oneri">🖨 Arial 10,5 · 1,3 · onay damgası</span>
+    <span class="not">Yeniden çıktı ve e-imza belgesi bu damgayla çizilir. Güncel kurum ayarı: <b>Calibri 11</b> (bu rapora uygulanmaz).</span>
+    <span class="sp"></span>
+    <span class="btn">ℹ Damga ayrıntısı</span>
+  </div>
+  <div class="sablon-ust" style="margin-top:8px">
+    <span class="rozet">✎ Taslak</span>
+    <span class="rozet">🖨 Kurum ayarı (Calibri 11) · damgasız</span>
+    <span class="not">Taslak güncel ayarla çizilir; onayda o anki ayar damgalanır.</span>
+  </div>
 </div>
 
 <div class="karar">
@@ -233,6 +252,7 @@
     <li>Font aileleri sistem fontu olarak çağrılır (gömülmez): Arial/Helvetica, Calibri/Carlito, Times, Segoe UI. Sunucu PDF üretiminde Carlito ve Liberation (Arial/Times metrik eşdeğeri) kurulu olmalı.</li>
     <li>Eski HBYS Word şablonları (338 adet, KOSUYOLU) varsayılan <b>kendi biçimini korur</b>; toplu "kurum tipografisine uydur" isteğe bağlı, geri alınabilir.</li>
     <li>Alt sınır 9 pt, üst sınır 12 pt; dışına çıkılamaz (okunabilirlik / sayfa taşması).</li>
+    <li><b>Tipografi damgalama (kullanıcı 14.11.2026):</b> onay / e-imza anında geçerli tipografi rapora yazılır; çıktı ve e-imza belgesi onaylı raporda yalnız damgayı kullanır. Geçiş: 1343 öncesi onaylı raporlara ilk göçte "özgün" damgası (Trebuchet 13 px · 1,65) yazılır ki arşiv çıktıları değişmesin; isteyen kurum toplu yeniden damgalamayı ayrı ve geri alınabilir bir işlemle yapar. Taslak ve uzman onayı bekleyen raporlar güncel ayarı izler.</li>
     <li><b>Çıktı denetimi:</b> zorunlu blok verisi boşsa (isteyen hekim yok, SUT kodu yok, onay zamanı yok) çıktı "taslak / eksik" filigranı ile basılır, onaylı rapor çıktısı engellenmez ama eksik listesi gösterilir.</li>
   </ol>
 </div>
