@@ -2236,6 +2236,52 @@ input.skt-gecmis {
 .rad-onceki-a4 { min-height: 0; padding: 6px 8px }
 .rad-onceki-metin .rad-bolum { margin-bottom: 6px }
 .rad-onceki-hata { color: #b3261e }
+/* Rapor boş durumu + şablon satırı (14.11.2026, mockup radyoloji_rapor_sablon_secimi.html). */
+.rad-bos-a4 { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--soluk); min-height: 460px }
+.rad-bos-ic { max-width: 400px }
+.rad-bos-ic p { margin: 6px 0 12px; line-height: 1.5 }
+.rad-bos-ic .d { margin: 0 4px }
+.rad-bos-ikon { font-size: 32px; line-height: 1 }
+.rad-sablon-satir { display: flex; align-items: center; gap: 8px; background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px }
+.rad-sablon-ad { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3 }
+.rad-sablon-ad b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.rad-sablon-ad small { color: var(--soluk) }
+/* Şablon Seç modalı (ssm-). */
+.ssm-modal .kagov { padding: 0 }
+.ssm { display: flex; flex-direction: column; min-height: 520px; height: 70vh; max-height: 640px }
+.ssm-serit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz2) }
+.ssm-ara { flex: 1; min-width: 200px }
+.ssm-ayrac { width: 1px; height: 18px; background: var(--cizgi) }
+.ssm-cip { border: 1px solid var(--cizgi); border-radius: 12px; padding: 2px 9px; font: inherit; font-size: 11px; background: var(--yuz); color: inherit; cursor: pointer; white-space: nowrap; display: inline-flex; gap: 4px; align-items: center }
+.ssm-cip.on { background: #d7e7fb; border-color: #98c2ee; color: #14315a; font-weight: 700 }
+.ssm-cip i { font-style: normal; background: var(--yuz2); border-radius: 8px; padding: 0 5px; font-size: 10px; color: var(--soluk) }
+.ssm-uyari { padding: 5px 12px; font-size: 11.5px; background: #fff7e0; color: #8a5a00; border-bottom: 1px solid var(--cizgi2) }
+.ssm-icerik { display: grid; grid-template-columns: 1fr 380px; flex: 1; min-height: 0 }
+.ssm-liste { overflow: auto; border-right: 1px solid var(--cizgi2) }
+.ssm-liste h6 { margin: 0; padding: 6px 12px 3px; font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+.ssm-bos { padding: 16px 12px }
+.ssm-o { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 7px 12px; border-bottom: 1px solid var(--cizgi2); cursor: default }
+.ssm-o:hover { background: var(--yuz2) }
+.ssm-o.on { background: #d7e7fb; box-shadow: inset 3px 0 0 var(--vurgu) }
+.ssm-yildiz { border: 0; background: none; font: inherit; font-size: 15px; color: #c9ced6; cursor: pointer; padding: 0 }
+.ssm-yildiz.on { color: #e0a33a }
+.ssm-ad { min-width: 0 }
+.ssm-ad b { color: #14315a }
+.ssm-ad small { display: block; color: var(--soluk); font-size: 10.5px }
+.ssm-sag { font-size: 10.5px; color: var(--soluk) }
+.ssm-rozet { display: inline-block; border: 1px solid var(--cizgi); border-radius: 3px; padding: 0 5px; font-size: 10px; margin-left: 4px; vertical-align: middle; background: var(--yuz) }
+.ssm-rozet.parcali { color: #2f5c9e; border-color: #bcd2ef; background: #e3ecfa }
+.ssm-rozet.yapisal { color: #6a3d9a; border-color: #d9c6ee; background: #efe6f8 }
+.ssm-rozet.oneri { color: #8a5a00; border-color: #f0d090; background: #fff1d6; font-weight: 700 }
+.ssm-rozet.son { color: var(--soluk) }
+.ssm-oniz { padding: 10px 12px; background: var(--yuz2); overflow: auto }
+.ssm-oniz h6 { margin: 0 0 6px; font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .4px; display: flex; justify-content: space-between }
+.ssm-oniz h6 .sonuk { text-transform: none; letter-spacing: 0 }
+.ssm-a4 { background: var(--yuz); border: 1px solid var(--cizgi); box-shadow: 0 2px 8px rgba(20,40,70,.12); padding: 14px 16px; font-family: Arial, sans-serif; font-size: 11px; line-height: 1.55; min-height: 300px; white-space: pre-wrap }
+.ssm-bb { font-weight: 700; margin-top: 8px }
+.ssm-bb:first-child { margin-top: 0 }
+.ssm-varsayilan { display: inline-flex; align-items: center; gap: 5px; font-weight: normal }
+@media (max-width: 900px) { .ssm-icerik { grid-template-columns: 1fr } .ssm-oniz { display: none } }
 /* Başvuru bildirim kutuları (1340): tek satırda iki onay. */
 .bs-bildirimler { display: flex; gap: 14px; flex-wrap: wrap }
 .bs-bildirimler label { display: inline-flex; align-items: center; gap: 4px; font-weight: normal }

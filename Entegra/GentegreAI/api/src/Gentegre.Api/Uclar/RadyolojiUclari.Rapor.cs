@@ -212,8 +212,9 @@ public static partial class RadyolojiUclari
                      order by (s.modalite = @p0) desc, kapsam, s.varsayilan desc, s.ad
                     """, null, [Convert.ToInt32(istem["modalite"] ?? 0), baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            var sablonId = sablon ?? rapor?["sablonId"] as int?
-                        ?? (sablonlar.Count > 0 ? Convert.ToInt32(sablonlar[0]["id"]) : (int?)null);
+            // ŞABLONSUZ AÇILIŞ (kullanıcı 14.11.2026: "rapor kısmı boş gelsin"): şablon seçilmemişse ilk şablonun makro /
+            //   alanları da gelmez - makro ve yapılandırılmış alan şablona aittir, hekim modalden seçince gelir.
+            var sablonId = sablon ?? rapor?["sablonId"] as int?;
 
             var makrolar = sablonId is null
                 ? new List<IDictionary<string, object?>>()

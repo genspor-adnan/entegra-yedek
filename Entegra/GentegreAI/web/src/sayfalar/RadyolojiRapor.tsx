@@ -19,6 +19,7 @@ import { fleischnerOnerisi, fleischnerUygula } from './radyoloji/fleischner';
 import { TEK_BASLIK, alanCumleleri, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi, yerTutucuDoldur } from './radyoloji/raporBicimi';
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
+import { SablonSecModal, sablonTercihi } from './radyoloji/SablonSecModal';
 import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml, htmldenDuz } from '../bilesenler/BicimliMetin';
 import { CiktiMenusu } from '../bilesenler/cikti/CiktiMenusu';
 import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from './RadyolojiRaporCikti';
@@ -150,6 +151,7 @@ export function RadyolojiRapor() {
   const [onceki, setOnceki] = useState<OncekiGorunum | null>(null);
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
+  const [sablonModal, setSablonModal] = useState(false);
   const [kritik, setKritik] = useState(false);
   /**
    * BAKANLIK OBX-13 (811): iki AYRI degerlendirme - istemin gerekcesi ve
@@ -215,8 +217,9 @@ export function RadyolojiRapor() {
       setNedeniPuan(Number(y.rapor?.istemNedeniPuan ?? 0));
       setKalitePuan(Number(y.rapor?.cekimKalitePuan ?? 0));
 
-      const sec = (y.rapor?.sablonId as number | undefined)
-               ?? (y.sablonlar as unknown as Sablon[])[0]?.id ?? null;
+      // AÇILIŞTA OTOMATİK ŞABLON YOK (kullanıcı 14.11.2026: "otomatik şablon gelmiş ama uygun değil.. rapor kısmı boş
+      //   gelsin"): yalnız kayıtlı raporun şablonu; yeni rapor boş A4 + "Şablon Seç…" (SablonSecModal).
+      const sec = (y.rapor?.sablonId as number | undefined) ?? null;
       setSablonId(sec);
       // BI-RADS: şablonun formu varsa kayıtlı veriden (yoksa boş form).
       const sb = (y.sablonlar as unknown as Sablon[]).find(s => s.id === sec);
@@ -301,7 +304,28 @@ export function RadyolojiRapor() {
     const m = await api.radyolojiRapor(id, sId);
     setMakrolar(m.makrolar as unknown as Makro[]);
     setSkorlar(m.skorlar as unknown as Skor[]);
+    sablonTercihi.sonKullanilanYaz(Number(ist?.hizmetId ?? 0), sId);
+    setSablonModal(false);
   }
+
+  /** Şablonsuz serbest yazım (modal "Boş rapor" / boş durumdaki "Serbest yaz"): tek A4; makro / alan şablona ait, gelmez. */
+  async function bosRapor() {
+    if (bolumler.some(b => b.metin.trim())
+        && !(await onay(c('Şablon kaldırılsın mı? Yazılmış metin tek A4 olarak kalır.')))) return;
+    setSablonId(null);
+    setParcalar([]);
+    setBolumler(bolumler.length ? tekeCevir(bolumler) : tekBolum(''));
+    const m = await api.radyolojiRapor(id);
+    setMakrolar(m.makrolar as unknown as Makro[]);
+    setSkorlar(m.skorlar as unknown as Skor[]);
+    setSablonModal(false);
+  }
+
+  /** Modal önizlemesi: şablon iskeleti (yer tutucular bu istemle dolu). useCallback: modal önbelleği effect'e bağlı. */
+  const sablonOnizleme = useCallback(async (sId: number) => {
+    const y = await api.radyolojiSablonBolumleri(sId);
+    return y.map(b => ({ baslik: String(b.baslik ?? ''), metin: yerTutucuDoldur(String(b.varsayilanMetin ?? ''), istem).trim() }));
+  }, [istem]);
 
   /** Şablonun bölüm iskeleti (varsayılan metinlerle). `ist` açıkça verilir: ilk yüklemede state henüz boş. */
   async function sablonParcalari(sId: number, ist: Kayit | null): Promise<Bolum[]> {
@@ -797,8 +821,15 @@ export function RadyolojiRapor() {
           {/* BİÇİM ÇUBUĞU (1195): imlecin bulunduğu alanda çalışır (tek A4 ya da herhangi bir bölüm). */}
           {bolumler.length > 0 && <BicimAracCubugu pasif={kilitli} />}
           {bolumler.length === 0 && (
-            <div className="bilgi-kutusu">
-              Şablon seçilmemiş. Sağdan bir şablon seçip uygulayın.
+            <div className="rad-a4 rad-bos-a4">
+              <div className="rad-bos-ic">
+                <div className="rad-bos-ikon">📄</div>
+                <p><b>{c('Rapor boş.')}</b><br />{c('Bir şablon seçin ya da doğrudan yazmaya başlayın. Açılışta şablon otomatik uygulanmaz.')}</p>
+                <button type="button" className="d bir" disabled={kilitli} onClick={() => setSablonModal(true)}>📄 {c('Şablon Seç…')}</button>
+                <button type="button" className="d" disabled={kilitli} onClick={() => void guvenli(bosRapor)}>✎ {c('Serbest yaz')}</button>
+                {(() => { const son = sablonlar.find(s => s.id === sablonTercihi.sonKullanilan(Number(istem?.hizmetId ?? 0)));
+                  return son ? <p className="kucuk">{c('Son kullandığınız')}: <a href="#" onClick={e => { e.preventDefault(); void guvenli(() => sablonUygula(son.id)) }}>{son.ad}{son.kod ? ` · ${son.kod}` : ''}</a></p> : null })()}
+              </div>
             </div>
           )}
           {duzen === 'tek' && tekParcaMi(bolumler) ? (
@@ -881,24 +912,17 @@ export function RadyolojiRapor() {
             <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis={false} kilitli={kilitli}
                          onAktar={biradsAktar} />
           )}
-          <h5 style={{ marginTop: 12 }}>Şablon</h5>
-          <select value={sablonId ?? ''} disabled={kilitli}
-                  onChange={e => { const v = Number(e.target.value); if (v > 0) void sablonUygula(v) }}>
-            <option value="">— seçiniz —</option>
-            {/* GRUPLU (1216, mockup radyoloji_sablon_listesi_v3.html): bu tetkike bağlı · benim · genel. Başka
-                radyoloğun kişisel şablonu bu ekrana gelmez (kullanıcı: "diğer doktorlar tarafından görünmesin"). */}
-            {([['⭐ ' + c('Bu tetkike bağlı'), (s: Sablon) => s.tetkigeOzel === 1],
-               ['★ ' + c('Benim şablonlarım'), (s: Sablon) => s.tetkigeOzel !== 1 && s.kapsam === 1],
-               [c('Genel'), (s: Sablon) => s.tetkigeOzel !== 1 && s.kapsam !== 1]] as [string, (s: Sablon) => boolean][])
-              .map(([ad, f]) => { const g = sablonlar.filter(f); return g.length === 0 ? null : (
-                <optgroup key={ad} label={ad}>
-                  {g.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.ad}{s.kod ? ` · ${s.kod}` : ''}{Number(s.yapisalTur ?? 0) > 0 ? ` (${c('Yapısal')})`
-                        : Number(s.bolumSayisi ?? 0) > 1 ? ` (${c('Parçalı')})` : ''}
-                    </option>))}
-                </optgroup>) })}
-          </select>
+          <h5 style={{ marginTop: 12 }}>{c('Şablon')}</h5>
+          {/* COMBO YERİNE MODAL (kullanıcı 14.11.2026; mockup radyoloji_rapor_sablon_secimi.html): seçili şablonun adı ·
+              kodu · sürümü + "Şablon Seç… / Değiştir…". Gruplama / arama / önizleme SablonSecModal'da. */}
+          <div className="rad-sablon-satir">
+            {seciliSablon
+              ? <span className="rad-sablon-ad" title={seciliSablon.ad}><b>{seciliSablon.ad}</b>
+                  <small>{seciliSablon.kod ? `${seciliSablon.kod} · ` : ''}v{seciliSablon.surum}</small></span>
+              : <span className="rad-sablon-ad sonuk">— {c('seçilmedi')} —</span>}
+            <button type="button" className={seciliSablon ? 'd' : 'd bir'} disabled={kilitli} onClick={() => setSablonModal(true)}>
+              📄 {seciliSablon ? c('Değiştir…') : c('Şablon Seç…')}</button>
+          </div>
 
           <h5 style={{ marginTop: 12 }}>{c('Makrolar')}</h5>
           {makrolar.length === 0 && <div className="sonuk kucuk">{c('Bu şablonda makro yok.')}</div>}
@@ -1066,6 +1090,14 @@ export function RadyolojiRapor() {
         </Modal>
       )}
 
+      {sablonModal && (
+        <SablonSecModal sablonlar={sablonlar} seciliId={sablonId} hizmetId={Number(istem?.hizmetId ?? 0)}
+                        modalite={Number(istem?.modalite ?? 0)} raporDolu={bolumler.some(b => b.metin.trim())}
+                        onizlemeGetir={sablonOnizleme}
+                        onUygula={async sId => { await guvenli(() => sablonUygula(sId)) }}
+                        onBos={() => void guvenli(bosRapor)}
+                        onKapat={() => setSablonModal(false)} />
+      )}
       {eimzaModal && (
         <EImzaModal baslik="e-İmza ile Onayla" onKapat={() => setEimzaModal(false)} onImzala={eimzaIleOnayla} />
       )}
