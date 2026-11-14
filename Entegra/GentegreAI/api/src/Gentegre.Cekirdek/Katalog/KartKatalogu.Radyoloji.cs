@@ -14,6 +14,8 @@
 public static partial class KartKatalogu
 {
     /// <summary>radyoloji_sablon.yapisal_tur (1194): 0 yok, 1 BI-RADS.</summary>
+    private static Dictionary<string, string> RadyolojiSablonBicimleri => new() { ["1"] = "Tek A4", ["2"] = "Parçalı" };
+    private static Dictionary<string, string> RadyolojiSablonGirisleri => new() { ["1"] = "Serbest", ["2"] = "Yapısal (form)" };
     private static Dictionary<string, string> RadyolojiYapisalTurler => new() { ["0"] = "Yok", ["1"] = "BI-RADS" };
 
     private static KartTanimi RadyolojiIstem() => new(
@@ -403,6 +405,14 @@ public static partial class KartKatalogu
             new("istemBilgi", "istem_bilgi", "mantik", Baslik: "Klinik bilgi istemden dolsun", Grup: "Genel", AltGrup: "Davranış"),
             new("karsilastirma", "karsilastirma", "mantik", Baslik: "Önceki aynı bölge tetkiki karşılaştırmaya önerilsin", Grup: "Genel", AltGrup: "Davranış"),
             new("kritikSor", "kritik_sor", "mantik", Baslik: "Sonuçta kritik ifade geçerse kritik bulgu bildirimi sor", Grup: "Genel", AltGrup: "Davranış"),
+            // BİÇİM / GİRİŞ (1343, kullanıcı 14.11.2026): şablon uygulanınca rapor ekranı bu biçim ve girişe geçer;
+            //   her şablonda zorunlu. Yapısal giriş yalnız formu (yapisalTur) olan şablonda (DB kısıtı).
+            new("bicim", "bicim", "kod", Zorunlu: true, SabitKodlar: RadyolojiSablonBicimleri, Baslik: "Rapor biçimi",
+                Grup: "Genel", AltGrup: "Davranış",
+                Ipucu: "Tek A4: bölümler tek metne birleşir. Parçalı: bölümler başlıklarıyla ayrı yazılır (Bakanlık profili parçalı ister)."),
+            new("giris", "giris", "kod", Zorunlu: true, SabitKodlar: RadyolojiSablonGirisleri, Baslik: "Rapor girişi",
+                Grup: "Genel", AltGrup: "Davranış",
+                Ipucu: "Yapısal yalnız yapısal rapor formu (BI-RADS vb.) seçili şablonda; metin formdan üretilir."),
             // YAPISAL RAPOR (1194, kullanıcı 27.10.2026): doluysa rapor ekranında Giriş = Yapısal açılır (BI-RADS formu).
             new("yapisalTur", "yapisal_tur", "kod", SabitKodlar: RadyolojiYapisalTurler, Baslik: "Yapısal rapor formu",
                 Grup: "Genel", AltGrup: "Davranış",

@@ -16,6 +16,8 @@ import { hataMetni } from '../../api/sozlesme';
 export interface SecilebilirSablon {
   id: number; kod: string; ad: string; surum: number; tetkigeOzel: number;
   modalite?: number; yapisalTur?: number; kapsam?: number; bolumSayisi?: number;
+  /** 1343: şablon kartındaki biçim (1 tek, 2 parçalı) ve giriş (1 serbest, 2 yapısal). */
+  bicim?: number; giris?: number;
 }
 export interface OnizlemeBolumu { baslik: string; metin: string }
 
@@ -65,8 +67,10 @@ export function SablonSecModal({ sablonlar, seciliId, hizmetId, modalite, raporD
   const onbellek = useRef(new Map<number, OnizlemeBolumu[]>());
   const aramaRef = useRef<HTMLInputElement>(null);
 
+  // Biçim / giriş şablon kartındaki ayardan (1343); eski kayıt için bölüm sayısı / form yedeği.
   const bicimi = (s: SecilebilirSablon): Bicim =>
-    Number(s.yapisalTur ?? 0) > 0 ? 'yapisal' : Number(s.bolumSayisi ?? 0) > 1 ? 'parcali' : 'tek';
+    (s.giris != null ? Number(s.giris) === 2 : Number(s.yapisalTur ?? 0) > 0) ? 'yapisal'
+      : (s.bicim != null ? Number(s.bicim) === 2 : Number(s.bolumSayisi ?? 0) > 1) ? 'parcali' : 'tek';
   const bicimAdi = (b: Bicim) => b === 'yapisal' ? c('Yapısal') : b === 'parcali' ? c('Parçalı') : c('Tek A4');
 
   const suzulmus = useMemo(() => {

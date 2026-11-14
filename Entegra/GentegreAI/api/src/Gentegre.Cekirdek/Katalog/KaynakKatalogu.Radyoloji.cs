@@ -431,26 +431,20 @@ public static partial class KaynakKatalogu
                 RadyolojiIfadeleri.ModaliteAdi("s.modalite"),
                                         "metin", "Modalite", Hizalama: "orta", Bicim: "rozet",
                                                  Genislik: 90, Filtrelenebilir: false),
-            // ŞABLON v3 (1216, mockup radyoloji_sablon_listesi_v3.html): biçim bölüm sayısından (tek bölüm = tek A4),
-            //   giriş yapisal_tur'dan, kapsam sahip_id'den - düzenlenen ayar değil, hesaplanır.
+            // BİÇİM / GİRİŞ (1343, kullanıcı 14.11.2026): artık şablon kartındaki AYAR (1216'da bölüm sayısından /
+            //   yapisal_tur'dan hesaplanıyordu); rapor ekranı şablon uygulanınca bu biçim ve girişe geçer.
             new("bicim",
-                "case when (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) <= 1 then 'Tek' " +
-                "     else 'Parçalı · ' || (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) end",
+                "case when s.bicim = 2 then 'Parçalı · ' || (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) " +
+                "     else 'Tek' end",
                                         "metin", "Biçim", Hizalama: "orta", Genislik: 90, Filtrelenebilir: false),
-            new("bicimKod",
-                "case when (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id) <= 1 then 1 else 2 end",
-                                        "kod", "Biçim Kodu", Varsayilan: false),
-            // GİRİŞ (kullanıcı 01.11.2026: "yapısal butona basıyorum liste boş"): yapısal = BI-RADS gibi form YA DA
-            //   yapılandırılmış alanları (hazır alan paketleri 1217-1219) olan şablon.
+            new("bicimKod", "s.bicim", "kod", "Biçim Kodu", Varsayilan: false),
             new("girisAdi",
-                "case when s.yapisal_tur = 1 then 'Yapısal (BI-RADS)' when s.yapisal_tur > 0 then 'Yapısal' " +
+                "case when s.giris = 2 and s.yapisal_tur = 1 then 'Yapısal (BI-RADS)' when s.giris = 2 then 'Yapısal' " +
                 "     when exists (select 1 from public.radyoloji_sablon_alan a where a.sablon_id = s.id) " +
-                "     then 'Yapısal alan (' || (select count(*) from public.radyoloji_sablon_alan a where a.sablon_id = s.id) || ')' " +
+                "     then 'Serbest · ' || (select count(*) from public.radyoloji_sablon_alan a where a.sablon_id = s.id) || ' alan' " +
                 "     else 'Serbest' end",
                                         "metin", "Giriş", Hizalama: "orta", Bicim: "rozet", Genislik: 120, Filtrelenebilir: false),
-            new("yapisalKod",
-                "case when s.yapisal_tur > 0 or exists (select 1 from public.radyoloji_sablon_alan a where a.sablon_id = s.id) then 1 else 0 end",
-                                        "kod", "Yapısal Kodu", Varsayilan: false),
+            new("yapisalKod", "case when s.giris = 2 then 1 else 0 end", "kod", "Yapısal Kodu", Varsayilan: false),
             new("yapisalTur", "s.yapisal_tur", "kod", "Yapısal Tür", Varsayilan: false),
             new("kapsam",
                 "case when s.sahip_id is not null then 'Kişisel · ' || public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120) " +

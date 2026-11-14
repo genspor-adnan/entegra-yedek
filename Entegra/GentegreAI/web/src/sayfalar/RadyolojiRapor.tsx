@@ -42,7 +42,9 @@ interface Sablon { id: number; kod: string; ad: string; surum: number;
                    /** rad.modalite kodu ve yapısal form türü (1194: 1 = BI-RADS). */
                    modalite?: number; yapisalTur?: number;
                    /** 1216: 1 = benim kişisel şablonum, 2 = genel (başkasının kişiseli sunucudan hiç gelmez). */
-                   kapsam?: number; bolumSayisi?: number }
+                   kapsam?: number; bolumSayisi?: number;
+                   /** 1343: şablonun biçimi (1 tek, 2 parçalı) ve girişi (1 serbest, 2 yapısal) - uygulanınca ekran buna geçer. */
+                   bicim?: number; giris?: number }
 interface Makro { kisayol: string; ad: string; metin: string; hedefBolum: string }
 interface Skor { alanKod: string; alanAd: string; tip: number; secenekler: string;
                  zorunlu: number; raporaBas: number;
@@ -294,12 +296,21 @@ export function RadyolojiRapor() {
                      + 'şablonun varsayılan metniyle değişir.'))) return;
     }
     const yeniParcalar = await sablonParcalari(sId, ist);
+    const sb = sablonlar.find(s => s.id === sId);
+    // ŞABLONUN BİÇİMİ VE GİRİŞİ EKRANA YANSIR (1343, kullanıcı 14.11.2026: "ekran biçim tek seçili ama seçtiğimiz şablon
+    //   çok parçalı ise burası da çok parçalıya geçsin.. giriş de aynı şekilde"). Hekimin genel tercihi (gorunum)
+    //   bozulmaz; yalnız bu rapor şablona uyar.
+    const formlu = Number(sb?.yapisalTur ?? 0) === 1;
+    const hedefDuzen: RadyolojiRaporDuzeni = Number(sb?.bicim ?? (yeniParcalar.length > 1 ? 2 : 1)) === 2 ? 'parcali' : 'tek';
+    const hedefGiris: RadyolojiRaporGiris = Number(sb?.giris ?? 1) === 2 && formlu ? 'yapisal' : 'serbest';
     setParcalar(yeniParcalar);
-    setBolumler(duzenRef.current === 'tek' ? tekeCevir(yeniParcalar) : yeniParcalar);
+    setDuzen(hedefDuzen);
+    setBolumler(hedefDuzen === 'tek' ? tekeCevir(yeniParcalar) : yeniParcalar);
     setSablonId(sId);
     // Yeni şablonun BI-RADS formu varsa form (yoksa boş) hazırlanır; olmayan şablonda form durumu kalır, kullanılmaz.
-    const sb = sablonlar.find(s => s.id === sId);
-    if (Number(sb?.yapisalTur ?? 0) === 1 && !birads) setBiradsDurumu(durumOku(null, [], modaliteKodundan(sb?.modalite)));
+    if (formlu && !birads) setBiradsDurumu(durumOku(null, [], modaliteKodundan(sb?.modalite)));
+    setGiris(hedefGiris);
+    if (hedefGiris === 'yapisal') setBiradsKullanildi(true);
     // Makro ve yapılandırılmış alanlar YENİ şablonun (1217) - girilmiş değerler aynı kodlu alanda kalır.
     const m = await api.radyolojiRapor(id, sId);
     setMakrolar(m.makrolar as unknown as Makro[]);

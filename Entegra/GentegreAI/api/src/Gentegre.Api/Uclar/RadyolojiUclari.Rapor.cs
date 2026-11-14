@@ -179,7 +179,7 @@ public static partial class RadyolojiUclari
             //   ekranında"): başka radyoloğun kişisel şablonu rapor ekranına HİÇ gelmez (liste / kart yönetim için hepsini
             //   gösterir). kapsam 1 = benim kişisel, 2 = genel. Bölüm sayısı biçim rozeti (Tek / Parçalı) için.
             var sablonlar = await baglanti.ListeAsync("""
-                select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur",
+                select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", s.bicim, s.giris,
                        case when s.hizmet_id = @p0
                                  or exists (select 1 from public.radyoloji_sablon_hizmet x
                                              where x.sablon_id = s.id and x.hizmet_id = @p0) then 1 else 0 end as "tetkigeOzel",
@@ -203,7 +203,7 @@ public static partial class RadyolojiUclari
             //   hekim en yakınını seçer (tetkigeOzel 0, ★ yok).
             if (sablonlar.Count == 0)
                 sablonlar = await baglanti.ListeAsync("""
-                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", 0 as "tetkigeOzel",
+                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", s.bicim, s.giris, 0 as "tetkigeOzel",
                            case when s.sahip_id is null then 2 else 1 end as kapsam,
                            coalesce(public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120), '') as sahip,
                            (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)::int as "bolumSayisi"
