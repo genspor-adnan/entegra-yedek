@@ -2147,7 +2147,9 @@ input.skt-gecmis {
 .rad-kart { border: 1px solid var(--cizgi, #e3e9f0); border-radius: 3px; background: #fff;
             padding: 6px 8px; margin-bottom: 6px; font-size: 11px; line-height: 1.5; }
 .rad-kart.teh { border-color: #e4b7b2; background: #fdf3f2; }
-.rad-orta { display: flex; flex-direction: column; gap: 10px; }
+/* Biçim çubuğu ekran sekmeleri şeridinin (sticky, 35 px) ALTINA yapışır (kullanıcı 14.11.2026: "aşağı kaydırınca
+   yazı tipi / punto çubuğu üstten kırpılmış görünüyor"). */
+.rad-orta { display: flex; flex-direction: column; gap: 10px; --bm-arac-ust: 36px }
 /* TEK / PARÇALI anahtarı ve tek parça A4 yazı alanı (RadyolojiRapor, 27.10.2026). */
 .rad-duzen { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--soluk) }
 .rad-duzen .seg { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 4px; overflow: hidden }
@@ -2162,7 +2164,7 @@ input.skt-gecmis {
 .rad-a4:focus { outline: none; border-color: #98c2ee }
 /* BİÇİMLİ METİN (1195, bilesenler/BicimliMetin) */
 .bm-arac { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; background: var(--yuz2);
-           border: 1px solid var(--cizgi); border-radius: 4px; position: sticky; top: 0; z-index: 2 }
+           border: 1px solid var(--cizgi); border-radius: 4px; position: sticky; top: var(--bm-arac-ust, 0); z-index: 2 }
 .bm-arac button { border: 1px solid transparent; background: none; min-width: 26px; height: 24px; border-radius: 3px;
                   cursor: pointer; font: inherit; font-size: 12px; color: var(--yazi) }
 .bm-arac button:hover:not(:disabled) { background: var(--yuz); border-color: var(--cizgi) }

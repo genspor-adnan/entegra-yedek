@@ -814,13 +814,6 @@ export function RadyolojiRapor() {
         {/* --------------------------------------------------- ORTA: rapor --- */}
         <div className="rad-orta" data-rt-zorla={tipografi.kaynak === 'ozgun' ? undefined : '1'} style={tipografiStil(tipografi)}>
           <div className="rad-duzen">
-            {/* TİPOGRAFİ ROZETİ (1344): editör ve çıktı bu görünümle; onaylıda damga. */}
-            <span className={`rad-tip-roz${tipografiDamga ? ' damga' : ''}`}
-                  title={`${c('Rapor tipografisi')}: ${tipografiOzeti(tipografi)} · ${kaynakAdi(tipografi, tipografiDamga)}`
-                         + (tipografiDamga && tipografiOzeti(kurumTipografi) !== tipografiOzeti(tipografi)
-                            ? ` · ${c('güncel kurum ayarı')}: ${tipografiOzeti(kurumTipografi)} (${c('bu rapora uygulanmaz')})` : '')}>
-              🖨 {tipografiOzeti(tipografi)} <small>· {c(kaynakAdi(tipografi, tipografiDamga))}</small>
-            </span>
             <span>{c('Rapor biçimi')}</span>
             <span className="seg" role="group">
               {(['tek', 'parcali'] as const).map(d => (
@@ -843,6 +836,13 @@ export function RadyolojiRapor() {
             {duzen === 'tek' && bakanlikProfili && (
               <span className="uyari-yazi">{c('Bakanlık profili açık: onay dört parça ister - parçalı yazın.')}</span>
             )}
+            {/* TİPOGRAFİ ROZETİ (1344): editör ve çıktı bu görünümle; onaylıda damga. */}
+            <span className={`rad-tip-roz${tipografiDamga ? ' damga' : ''}`}
+                  title={`${c('Rapor tipografisi')}: ${tipografiOzeti(tipografi)} · ${kaynakAdi(tipografi, tipografiDamga)}`
+                         + (tipografiDamga && tipografiOzeti(kurumTipografi) !== tipografiOzeti(tipografi)
+                            ? ` · ${c('güncel kurum ayarı')}: ${tipografiOzeti(kurumTipografi)} (${c('bu rapora uygulanmaz')})` : '')}>
+              🖨 {tipografiOzeti(tipografi)} <small>· {c(kaynakAdi(tipografi, tipografiDamga))}</small>
+            </span>
           </div>
           {etkinGiris === 'yapisal' && birads ? (
             <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis kilitli={kilitli} />
