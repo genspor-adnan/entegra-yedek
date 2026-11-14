@@ -15,7 +15,7 @@ import { mesaj } from './mesaj';
  */
 
 export const FONTLAR = ['Trebuchet MS', 'Arial', 'Calibri', 'Times New Roman', 'Georgia', 'Verdana', 'Tahoma', 'Courier New'];
-export const PUNTOLAR = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24, 28];
+export const PUNTOLAR = [8, 9, 10, 10.5, 11, 12, 13, 14, 16, 18, 20, 24, 28];   // 10,5 = kurum tipografisi varsayılanı (1344)
 
 const kacis = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /** Düz metni biçimli alana: satırlar <br>. */
@@ -245,7 +245,57 @@ function sonRenkEkle(r: string) {
   return l;
 }
 
-function RenkSecici({ tur, pasif }: { tur: 'yazi' | 'vurgu'; pasif?: boolean }) {
+/**
+ * MEVCUT BİÇİM (kullanıcı 14.11.2026: "yazı tipi, punto vb özellikleri üstte seçim kısmında göster.. fareyle
+ * tıklandığında"): araç çubuğu Word gibi imlecin bulunduğu metnin fontunu, puntosunu,
+ * kalın / italik / çizili durumunu, rengini ve hizasını gösterir. Hesaplanan stilden okunur: şablonun gömülü biçimi,
+ * kurum tipografisi (CSS değişkeni) ve hekimin verdiği biçim aynı yoldan görünür.
+ */
+export interface BicimDurumu {
+  font: string; punto: string; kalin: boolean; italik: boolean; alti: boolean; ustu: boolean; renk: string; vurgu: string; hiza: string;
+}
+const BOS_DURUM: BicimDurumu = { font: '', punto: '', kalin: false, italik: false, alti: false, ustu: false, renk: '', vurgu: '', hiza: '' };
+export function bicimDurumu(dugum: Node | null | undefined): BicimDurumu {
+  const el = (dugum instanceof Element ? dugum : dugum?.parentElement) ?? null;
+  const alan = el?.closest('.bm-alan');
+  if (!el || !alan) return BOS_DURUM;
+  const cs = getComputedStyle(el);
+  const font = cs.fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '');
+  const pt = Math.round(parseFloat(cs.fontSize) * 0.75 * 2) / 2;
+  let vurgu = '', alti = false, ustu = false;
+  for (let e: Element | null = el; e; e = e.parentElement) {
+    const k = getComputedStyle(e);
+    if (!vurgu && e !== alan && k.backgroundColor && k.backgroundColor !== 'rgba(0, 0, 0, 0)' && k.backgroundColor !== 'transparent') vurgu = k.backgroundColor;
+    if (k.textDecorationLine.includes('underline')) alti = true;
+    if (k.textDecorationLine.includes('line-through')) ustu = true;
+    if (e === alan) break;
+  }
+  return {
+    font, punto: Number.isFinite(pt) ? String(pt) : '',
+    kalin: cs.fontWeight === 'bold' || parseInt(cs.fontWeight, 10) >= 600, italik: cs.fontStyle === 'italic',
+    alti, ustu, renk: cs.color, vurgu, hiza: cs.textAlign,
+  };
+}
+
+/** İmleç yerleştikçe / seçim değiştikçe (fareyle tıklama, ok tuşları) araç çubuğunun gösterdiği biçim. Fare üzerinde
+ *  gezinme DEĞİL (kullanıcı 14.11.2026: "fareyle punto tıklandığında göster") - gezinmede çubuk titrerdi. */
+function useBicimDurumu(): BicimDurumu {
+  const [durum, setDurum] = useState<BicimDurumu>(BOS_DURUM);
+  useEffect(() => {
+    const yenile = () => {
+      const s = document.getSelection();
+      const d = (s && s.rangeCount > 0 ? s.anchorNode : null) ?? sonAralik?.startContainer ?? null;
+      setDurum(bicimDurumu(d));
+    };
+    document.addEventListener('selectionchange', yenile);
+    document.addEventListener('input', yenile, true);
+    yenile();
+    return () => { document.removeEventListener('selectionchange', yenile); document.removeEventListener('input', yenile, true) };
+  }, []);
+  return durum;
+}
+
+function RenkSecici({ tur, pasif, mevcut }: { tur: 'yazi' | 'vurgu'; pasif?: boolean; mevcut?: string }) {
   const [acik, setAcik] = useState(false);
   const [son, setSon] = useState<string[]>(() => sonRenkler());
   const [seciliRenk, setSeciliRenk] = useState(tur === 'yazi' ? '#c00000' : '#ffff00');
@@ -271,7 +321,7 @@ function RenkSecici({ tur, pasif }: { tur: 'yazi' | 'vurgu'; pasif?: boolean }) 
       <button type="button" className={`bm-renk${tur === 'vurgu' ? ' vurgu' : ''}`} disabled={pasif}
               title={tur === 'yazi' ? c('Yazı rengi') : c('Vurgu rengi')} aria-haspopup="dialog" aria-expanded={acik}
               onMouseDown={e => { e.preventDefault(); secimiSakla(); setAcik(a => !a) }}>
-        {tur === 'yazi' ? 'A' : '▮'}<i className="bm-renk-cizgi" style={{ background: seciliRenk }} />
+        {tur === 'yazi' ? 'A' : '▮'}<i className="bm-renk-cizgi" style={{ background: mevcut || seciliRenk }} />
       </button>
       {acik && (
         <div className="bm-renk-menu" role="dialog" aria-label={tur === 'yazi' ? c('Yazı rengi') : c('Vurgu rengi')}>
@@ -299,35 +349,43 @@ function RenkSecici({ tur, pasif }: { tur: 'yazi' | 'vurgu'; pasif?: boolean }) 
 }
 
 export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
-  // onMouseDown + preventDefault: tıklama seçimi alandan çalmasın.
-  const d = (baslik: string, icerik: React.ReactNode, f: () => void) => (
-    <button type="button" title={baslik} disabled={pasif} onMouseDown={e => { e.preventDefault(); f() }}>{icerik}</button>
+  const durum = useBicimDurumu();
+  // onMouseDown + preventDefault: tıklama seçimi alandan çalmasın. `on`: imleçteki / fare altındaki metinde etkin.
+  const d = (baslik: string, icerik: React.ReactNode, f: () => void, on = false) => (
+    <button type="button" title={baslik} disabled={pasif} className={on ? 'on' : undefined}
+            onMouseDown={e => { e.preventDefault(); f() }}>{icerik}</button>
   );
+  const fontDeger = FONTLAR.includes(durum.font) ? durum.font : durum.font ? '__' : '';
+  const puntoDeger = PUNTOLAR.includes(Number(durum.punto)) ? durum.punto : durum.punto ? '__' : '';
+  const hizaKodu = durum.hiza === 'center' ? 'orta' : durum.hiza === 'right' || durum.hiza === 'end' ? 'sag'
+                 : durum.hiza === 'justify' ? 'iki' : durum.hiza ? 'sol' : '';
   return (
     <div className="bm-arac" role="toolbar">
-      <select title={c('Yazı tipi')} disabled={pasif} defaultValue=""
-              onChange={e => { if (e.target.value) komut('fontName', e.target.value); e.target.value = '' }}>
+      <select title={c('Yazı tipi')} disabled={pasif} value={fontDeger} className={fontDeger ? 'dolu' : undefined}
+              onChange={e => { if (e.target.value && e.target.value !== '__') komut('fontName', e.target.value) }}>
         <option value="">{c('Yazı tipi')}</option>
+        {fontDeger === '__' && <option value="__">{durum.font}</option>}
         {FONTLAR.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
       </select>
-      <select title={c('Punto')} disabled={pasif} defaultValue=""
-              onChange={e => { if (e.target.value) puntoUygula(Number(e.target.value)); e.target.value = '' }}>
+      <select title={c('Punto')} disabled={pasif} value={puntoDeger} className={puntoDeger ? 'dolu' : undefined}
+              onChange={e => { if (e.target.value && e.target.value !== '__') puntoUygula(Number(e.target.value)) }}>
         <option value="">{c('Punto')}</option>
-        {PUNTOLAR.map(p => <option key={p} value={p}>{p}</option>)}
+        {puntoDeger === '__' && <option value="__">{durum.punto.replace('.', ',')}</option>}
+        {PUNTOLAR.map(p => <option key={p} value={p}>{String(p).replace('.', ',')}</option>)}
       </select>
       <span className="bm-ayrac" />
-      {d(c('Kalın (Ctrl+B)'), <b>B</b>, () => komut('bold'))}
-      {d(c('İtalik (Ctrl+I)'), <i>I</i>, () => komut('italic'))}
-      {d(c('Altı çizili (Ctrl+U)'), <u>U</u>, () => komut('underline'))}
-      {d(c('Üstü çizili'), <s>S</s>, () => komut('strikeThrough'))}
+      {d(c('Kalın (Ctrl+B)'), <b>B</b>, () => komut('bold'), durum.kalin)}
+      {d(c('İtalik (Ctrl+I)'), <i>I</i>, () => komut('italic'), durum.italik)}
+      {d(c('Altı çizili (Ctrl+U)'), <u>U</u>, () => komut('underline'), durum.alti)}
+      {d(c('Üstü çizili'), <s>S</s>, () => komut('strikeThrough'), durum.ustu)}
       <span className="bm-ayrac" />
-      <RenkSecici tur="yazi" pasif={pasif} />
-      <RenkSecici tur="vurgu" pasif={pasif} />
+      <RenkSecici tur="yazi" pasif={pasif} mevcut={durum.renk} />
+      <RenkSecici tur="vurgu" pasif={pasif} mevcut={durum.vurgu} />
       <span className="bm-ayrac" />
-      {d(c('Sola hizala'), '⯇', () => komut('justifyLeft'))}
-      {d(c('Ortala'), '≡', () => komut('justifyCenter'))}
-      {d(c('Sağa hizala'), '⯈', () => komut('justifyRight'))}
-      {d(c('İki yana yasla'), '☰', () => komut('justifyFull'))}
+      {d(c('Sola hizala'), '⯇', () => komut('justifyLeft'), hizaKodu === 'sol')}
+      {d(c('Ortala'), '≡', () => komut('justifyCenter'), hizaKodu === 'orta')}
+      {d(c('Sağa hizala'), '⯈', () => komut('justifyRight'), hizaKodu === 'sag')}
+      {d(c('İki yana yasla'), '☰', () => komut('justifyFull'), hizaKodu === 'iki')}
       <span className="bm-ayrac" />
       {d(c('Madde işaretli liste'), '•≡', () => komut('insertUnorderedList'))}
       {d(c('Numaralı liste'), '1≡', () => komut('insertOrderedList'))}
