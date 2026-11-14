@@ -1,4 +1,5 @@
-﻿using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.Servisler;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -144,6 +145,8 @@ public static partial class RadyolojiUclari
                        r.istem_nedeni_puan as "istemNedeniPuan",
                        r.cekim_kalite_puan as "cekimKalitePuan",
                        -- YAPISAL (1194): giriş yolu + BI-RADS rapor düzeyi.
+                       -- TİPOGRAFİ DAMGASI (1344): onayda yazılır; varsa ekran / çıktı bununla çizilir.
+                       r.tipografi::text as "tipografiJson",
                        r.giris, r.birads_kompozisyon as "biradsKompozisyon", r.birads_oneri as "biradsOneri",
                        r.birads_kategori as "biradsKategori", r.birads_gerekce as "biradsGerekce",
                        r.birads_yonetim as "biradsYonetim"
@@ -180,6 +183,8 @@ public static partial class RadyolojiUclari
             //   gösterir). kapsam 1 = benim kişisel, 2 = genel. Bölüm sayısı biçim rozeti (Tek / Parçalı) için.
             var sablonlar = await baglanti.ListeAsync("""
                 select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", s.bicim, s.giris,
+                       s.tipografi_kaynak as "tipografiKaynak", s.tip_font as "tipFont", s.tip_punto as "tipPunto",
+                       s.tip_satir as "tipSatir", s.tip_paragraf as "tipParagraf", s.tip_hiza as "tipHiza",
                        case when s.hizmet_id = @p0
                                  or exists (select 1 from public.radyoloji_sablon_hizmet x
                                              where x.sablon_id = s.id and x.hizmet_id = @p0) then 1 else 0 end as "tetkigeOzel",
@@ -203,7 +208,9 @@ public static partial class RadyolojiUclari
             //   hekim en yakınını seçer (tetkigeOzel 0, ★ yok).
             if (sablonlar.Count == 0)
                 sablonlar = await baglanti.ListeAsync("""
-                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", s.bicim, s.giris, 0 as "tetkigeOzel",
+                    select s.id, s.kod, s.ad, s.surum, s.varsayilan, s.modalite, s.yapisal_tur as "yapisalTur", s.bicim, s.giris,
+                       s.tipografi_kaynak as "tipografiKaynak", s.tip_font as "tipFont", s.tip_punto as "tipPunto",
+                       s.tip_satir as "tipSatir", s.tip_paragraf as "tipParagraf", s.tip_hiza as "tipHiza", 0 as "tetkigeOzel",
                            case when s.sahip_id is null then 2 else 1 end as kapsam,
                            coalesce(public.fn_taraf_ad(sh.unvan, sh.ad, sh.soyad)::varchar(120), '') as sahip,
                            (select count(*) from public.radyoloji_sablon_bolum b where b.sablon_id = s.id)::int as "bolumSayisi"
@@ -282,8 +289,16 @@ public static partial class RadyolojiUclari
                       from public.radyoloji_rapor_lezyon where rapor_id = @p0 order by sira, id
                     """, null, [Convert.ToInt32(rapor["id"])], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // TİPOGRAFİ (1344): kurum ayarı + bu raporun etkin tipografisi (damga > şablon > kurum). Şablon değişince
+            //   istemci aynı kuralı kendi uygular (sablonTipografisi); onayda sunucu damgalar.
+            var kurumTipografi = await RaporTipografisi.KurumAsync(baglanti, null, iptal);
+            var (tipografi, tipografiDamga) = rapor is null
+                ? (await RaporTipografisi.SablonAsync(baglanti, null, sablonId, kurumTipografi, iptal), false)
+                : await RaporTipografisi.RaporAsync(baglanti, null, Convert.ToInt32(rapor["id"]), kurumTipografi, iptal);
+
             return Results.Ok(new { istem, rapor, bolumler, alanlar, sablonlar, makrolar,
-                                    skorlar, gecmis, kritikler, bakanlikProfili, lezyonlar });
+                                    skorlar, gecmis, kritikler, bakanlikProfili, lezyonlar,
+                                    tipografi, tipografiDamga, kurumTipografi });
         });
 
         // ------------------------------------------------- rapor ÇIKTISI ----
@@ -385,7 +400,10 @@ public static partial class RadyolojiUclari
                            (select id from public.sube where varsayilan = 1 limit 1))
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
-            return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum });
+            // TİPOGRAFİ (1344): çıktı ve e-imza belgesi raporun etkin tipografisiyle (onaylıda damga) çizilir.
+            var (tipografi, tipografiDamga) = await RaporTipografisi.RaporAsync(
+                baglanti, null, id, await RaporTipografisi.KurumAsync(baglanti, null, iptal), iptal);
+            return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum, tipografi, tipografiDamga });
         });
 
         // ------------------------------------------------- taslak kaydet ----

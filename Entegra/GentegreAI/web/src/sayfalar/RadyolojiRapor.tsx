@@ -20,6 +20,7 @@ import { TEK_BASLIK, alanCumleleri, bulguBolumuMu, sonucBolumuMu, tekMetneBolumY
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
 import { SablonSecModal, sablonTercihi } from './radyoloji/SablonSecModal';
+import { TIPOGRAFI_VARSAYILAN, kaynakAdi, sablonTipografisi, tipografiOku, tipografiOzeti, tipografiStil, type Tipografi } from './radyoloji/tipografi';
 import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml, htmldenDuz } from '../bilesenler/BicimliMetin';
 import { CiktiMenusu } from '../bilesenler/cikti/CiktiMenusu';
 import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from './RadyolojiRaporCikti';
@@ -44,7 +45,9 @@ interface Sablon { id: number; kod: string; ad: string; surum: number;
                    /** 1216: 1 = benim kişisel şablonum, 2 = genel (başkasının kişiseli sunucudan hiç gelmez). */
                    kapsam?: number; bolumSayisi?: number;
                    /** 1343: şablonun biçimi (1 tek, 2 parçalı) ve girişi (1 serbest, 2 yapısal) - uygulanınca ekran buna geçer. */
-                   bicim?: number; giris?: number }
+                   bicim?: number; giris?: number;
+                   /** 1344: tipografi üst-seçimi (1 kurum · 2 özel · 3 özgün) ve özel alanlar. */
+                   tipografiKaynak?: number; tipFont?: string; tipPunto?: number; tipSatir?: number; tipParagraf?: number; tipHiza?: number }
 interface Makro { kisayol: string; ad: string; metin: string; hedefBolum: string }
 interface Skor { alanKod: string; alanAd: string; tip: number; secenekler: string;
                  zorunlu: number; raporaBas: number;
@@ -154,6 +157,10 @@ export function RadyolojiRapor() {
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
   const [sablonModal, setSablonModal] = useState(false);
+  // TİPOGRAFİ (1344): kurum ayarı + bu raporun etkin tipografisi; onaylı raporda damga (şablon değişse de kalır).
+  const [kurumTipografi, setKurumTipografi] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
+  const [tipografi, setTipografi] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
+  const [tipografiDamga, setTipografiDamga] = useState(false);
   const [kritik, setKritik] = useState(false);
   /**
    * BAKANLIK OBX-13 (811): iki AYRI degerlendirme - istemin gerekcesi ve
@@ -216,6 +223,8 @@ export function RadyolojiRapor() {
       setKonsultasyonlar(konsultasyonlar);
       setKritik(Number(y.istem?.kritik ?? 0) === 1);
       setBakanlikProfili(Boolean(y.bakanlikProfili));
+      const kt = tipografiOku(y.kurumTipografi); setKurumTipografi(kt);
+      setTipografi(tipografiOku(y.tipografi, kt)); setTipografiDamga(Boolean(y.tipografiDamga));
       setNedeniPuan(Number(y.rapor?.istemNedeniPuan ?? 0));
       setKalitePuan(Number(y.rapor?.cekimKalitePuan ?? 0));
 
@@ -316,6 +325,7 @@ export function RadyolojiRapor() {
     setMakrolar(m.makrolar as unknown as Makro[]);
     setSkorlar(m.skorlar as unknown as Skor[]);
     sablonTercihi.sonKullanilanYaz(Number(ist?.hizmetId ?? 0), sId);
+    if (!tipografiDamga) setTipografi(sablonTipografisi(sb, kurumTipografi));
     setSablonModal(false);
   }
 
@@ -329,6 +339,7 @@ export function RadyolojiRapor() {
     const m = await api.radyolojiRapor(id);
     setMakrolar(m.makrolar as unknown as Makro[]);
     setSkorlar(m.skorlar as unknown as Skor[]);
+    if (!tipografiDamga) setTipografi({ ...kurumTipografi, kaynak: 'kurum' });
     setSablonModal(false);
   }
 
@@ -801,8 +812,15 @@ export function RadyolojiRapor() {
         </div>
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
-        <div className="rad-orta">
+        <div className="rad-orta" style={tipografiStil(tipografi)}>
           <div className="rad-duzen">
+            {/* TİPOGRAFİ ROZETİ (1344): editör ve çıktı bu görünümle; onaylıda damga. */}
+            <span className={`rad-tip-roz${tipografiDamga ? ' damga' : ''}`}
+                  title={`${c('Rapor tipografisi')}: ${tipografiOzeti(tipografi)} · ${kaynakAdi(tipografi, tipografiDamga)}`
+                         + (tipografiDamga && tipografiOzeti(kurumTipografi) !== tipografiOzeti(tipografi)
+                            ? ` · ${c('güncel kurum ayarı')}: ${tipografiOzeti(kurumTipografi)} (${c('bu rapora uygulanmaz')})` : '')}>
+              🖨 {tipografiOzeti(tipografi)} <small>· {c(kaynakAdi(tipografi, tipografiDamga))}</small>
+            </span>
             <span>{c('Rapor biçimi')}</span>
             <span className="seg" role="group">
               {(['tek', 'parcali'] as const).map(d => (

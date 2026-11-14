@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { tipografiOku, tipografiStil } from './radyoloji/tipografi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { AntetLogo } from '../bilesenler/AntetLogo';
@@ -88,6 +89,8 @@ export function RadyolojiRaporCikti() {
 /** Rapor çıktısının verisi (GET /api/radyoloji/rapor/{id}/cikti). */
 export type RaporCiktiVerisi = {
   rapor: Satir; bolumler: Satir[]; alanlar: Satir[]; ekler: Satir[]; kurum: Satir | null;
+  /** TİPOGRAFİ (1344): raporun etkin tipografisi (onaylıda onay damgası). */
+  tipografi?: Record<string, unknown>; tipografiDamga?: boolean;
 };
 
 /**
@@ -100,8 +103,11 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
   const onayli = Number(r.durum ?? 0) === 3;
   const adresSatiri = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
     .filter(x => String(x ?? '').trim() !== '').join(' · ');
+  // TİPOGRAFİ (1344): ekran A4'ü ile aynı CSS değişkenleri; kâğıt kenar boşluğu ayardan (@page).
+  const tip = tipografiOku(veri.tipografi);
   return (
-    <div className="cikti-sayfa">
+    <div className="cikti-sayfa" style={tipografiStil(tip)}>
+      <style>{`@media print { @page { size: A4; margin: ${tip.kenar}mm } .rapor-cikti .cikti-sayfa { padding: 0 } }`}</style>
       {/* --- KURUM ANTETI --- */}
       <div className="kbaslik">
         <AntetLogo dokumanId={k.logoDokumanId as number | undefined} yedek="🏥" />

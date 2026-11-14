@@ -15,6 +15,11 @@ public static partial class KartKatalogu
 {
     /// <summary>radyoloji_sablon.yapisal_tur (1194): 0 yok, 1 BI-RADS.</summary>
     private static Dictionary<string, string> RadyolojiSablonBicimleri => new() { ["1"] = "Tek A4", ["2"] = "Parçalı" };
+    private static Dictionary<string, string> RadyolojiTipografiKaynaklari => new()
+        { ["1"] = "Kurum ayarı", ["2"] = "Özel", ["3"] = "Şablonun kendi biçimi (özgün)" };
+    private static Dictionary<string, string> RadyolojiTipografiFontlari => new()
+        { ["arial"] = "Arial / Helvetica", ["calibri"] = "Calibri", ["times"] = "Times New Roman", ["segoe"] = "Segoe UI", ["trebuchet"] = "Trebuchet MS" };
+    private static Dictionary<string, string> RadyolojiTipografiHizalari => new() { ["1"] = "Sol", ["2"] = "İki yana" };
     private static Dictionary<string, string> RadyolojiSablonGirisleri => new() { ["1"] = "Serbest", ["2"] = "Yapısal (form)" };
     private static Dictionary<string, string> RadyolojiYapisalTurler => new() { ["0"] = "Yok", ["1"] = "BI-RADS" };
 
@@ -413,6 +418,16 @@ public static partial class KartKatalogu
             new("giris", "giris", "kod", Zorunlu: true, SabitKodlar: RadyolojiSablonGirisleri, Baslik: "Rapor girişi",
                 Grup: "Genel", AltGrup: "Davranış",
                 Ipucu: "Yapısal yalnız yapısal rapor formu (BI-RADS vb.) seçili şablonda; metin formdan üretilir."),
+            // TİPOGRAFİ ÜST-SEÇİMİ (1344, mockup radyoloji_rapor_tipografi.html): varsayılan kurum ayarı; Özel'de tip* alanları
+            //   (boş alan kurumdan dolar); "Şablonun kendi biçimi" = özgün görünüm (eski HBYS Word şablonları).
+            new("tipografiKaynak", "tipografi_kaynak", "kod", Zorunlu: true, SabitKodlar: RadyolojiTipografiKaynaklari,
+                Baslik: "Tipografi", Grup: "Genel", AltGrup: "Tipografi",
+                Ipucu: "Kurum ayarı: Radyoloji › Ayarlar › Rapor Tipografisi. Özel: aşağıdaki alanlar yalnız bu şablonun raporlarına uygulanır."),
+            new("tipFont", "tip_font", "kod", SabitKodlar: RadyolojiTipografiFontlari, Baslik: "Font (Özel)", Grup: "Genel", AltGrup: "Tipografi"),
+            new("tipPunto", "tip_punto", "sayi", Baslik: "Punto 9-12 (Özel)", Grup: "Genel", AltGrup: "Tipografi"),
+            new("tipSatir", "tip_satir", "sayi", Baslik: "Satır aralığı 1,0-2,0 (Özel)", Grup: "Genel", AltGrup: "Tipografi"),
+            new("tipParagraf", "tip_paragraf", "sayi", Baslik: "Paragraf arası pt 0-12 (Özel)", Grup: "Genel", AltGrup: "Tipografi"),
+            new("tipHiza", "tip_hiza", "kod", SabitKodlar: RadyolojiTipografiHizalari, Baslik: "Hizalama (Özel)", Grup: "Genel", AltGrup: "Tipografi"),
             // YAPISAL RAPOR (1194, kullanıcı 27.10.2026): doluysa rapor ekranında Giriş = Yapısal açılır (BI-RADS formu).
             new("yapisalTur", "yapisal_tur", "kod", SabitKodlar: RadyolojiYapisalTurler, Baslik: "Yapısal rapor formu",
                 Grup: "Genel", AltGrup: "Davranış",

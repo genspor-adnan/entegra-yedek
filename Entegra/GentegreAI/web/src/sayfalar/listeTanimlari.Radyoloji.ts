@@ -167,6 +167,15 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'radyoloji.cihaz.liste', urunModu: 2,
   },
   {
+    // RAPOR TİPOGRAFİSİ (1344, mockup radyoloji_rapor_tipografi.html): kurum düzeyi font / punto / satır aralığı /
+    //   kenar boşluğu; şablon kartı üstüne yazabilir; onayda rapora damgalanır. Liste değil (ozelSayfa).
+    kaynak: 'radyoloji-tipografi', rota: 'radyoloji-tipografi', ozelSayfa: true,
+    baslik: 'Rapor Tipografisi', yol: 'Radyoloji › Ayarlar › Rapor Tipografisi',
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuSira: 93, menuAd: 'Rapor Tipografisi', ic: '🖨',
+    yetkiKodu: 'radyoloji.tipografi',
+  },
+  {
     // RADYOLOJİ PANOSU (320): modülün "bugün ne durumdayız" ekranı. Liste
     //   değil (ozelSayfa) - sayaç, doluluk ve uyarı kutularından oluşur;
     //   her sayaç ilgili listeye götürür.

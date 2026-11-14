@@ -117,6 +117,7 @@ const YapayZeka = tembel(() => import('./sayfalar/YapayZeka'), 'YapayZeka');
 const YzKontor = tembel(() => import('./sayfalar/YzKontor'), 'YzKontor');
 const UtsSorgu = tembel(() => import('./sayfalar/UtsSorgu'), 'UtsSorgu');
 const RadyolojiPanosu = tembel(() => import('./sayfalar/RadyolojiPanosu'), 'RadyolojiPanosu');
+const RadyolojiTipografi = tembel(() => import('./sayfalar/RadyolojiTipografi'), 'RadyolojiTipografi');
 const TeleradyolojiPanosu = tembel(() => import('./sayfalar/TeleradyolojiPanosu'), 'TeleradyolojiPanosu');
 const TeleradFatura = tembel(() => import('./sayfalar/TeleradFatura'), 'TeleradFatura');
 const EnabizPanosu = tembel(() => import('./sayfalar/EnabizPanosu'), 'EnabizPanosu');
@@ -421,6 +422,8 @@ function Yollar() {
         {yetki('uts.sorgu') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
         {/* Radyoloji panosu (320): liste degil - sayac/doluluk/uyari ekrani. */}
         {yetki('radyoloji') && <Route path="/radyoloji-pano" element={<RadyolojiPanosu />} />}
+        {/* Rapor Tipografisi (1344): kurum ayarı, ozelSayfa. */}
+        {yetki('radyoloji.tipografi') && <Route path="/radyoloji-tipografi" element={<RadyolojiTipografi />} />}
         {yetki('teleradyoloji.pano') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
         {yetki('teleradyoloji.kurum.fatura') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
         {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}

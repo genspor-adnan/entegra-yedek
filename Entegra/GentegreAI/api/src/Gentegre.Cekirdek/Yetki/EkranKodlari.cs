@@ -53,6 +53,7 @@ public static partial class EkranKodlari
         ["demirbas.ayar"]      = "ayar",              // Sabit Varlıklar › Ayarlar › Demirbaş (1007)
         ["patoloji.dislab"]    = "lab.dislab",        // Patoloji › Dış Laboratuvarlar (Lab ile ORTAK kart, 1104)
         ["uretim.ayar"]        = "ayar",              // Üretim › Ayarlar › Üretim Ayarları (1262; seviye / emir kullan)
+        ["radyoloji.tipografi"] = "radyoloji.sablon", // Radyoloji › Ayarlar › Rapor Tipografisi (1344; şablonu düzenleyen)
     };
 
     /// <summary>
@@ -488,6 +489,8 @@ public static partial class EkranKodlari
         "demirbas.zimmet", "demirbas.ayar",
         // Üretim Ayarları (1262): yalnız /api/uretim/seviye kapısı; genel `ayar` kapısını açmaz.
         "uretim.ayar",
+        // Rapor Tipografisi (1344): yalnız /api/radyoloji/tipografi kapısı; şablon kartını açmaz.
+        "radyoloji.tipografi",
         // Vezne İcmali (1016): kendi ucu (VezneIcmalUclari) kendi koduna bakar.
         "banko.vezne_icmal",
         // Medula Mutabakat İcmali (1017): /api/medula/mutabakat kendi koduna bakar.

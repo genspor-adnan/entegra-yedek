@@ -198,6 +198,9 @@ public static partial class RadyolojiUclari
         if (engel.Length > 0) throw GentegreHatasi.IsKurali(engel);
         // RESMI RAPOR NUMARASI onayda atanir (303): taslak asamasinda vermek, vazgecilen raporlarda numara
         //   boslugu birakirdi. Zaten numarali rapor (yeniden onay / imza-hazirla) numarasini KORUR.
+        // TİPOGRAFİ DAMGASI (1344): onay anındaki görünüm rapora yazılır; sonradan kurum ayarı değişse arşiv çıktısı
+        //   ve e-imza belgesi aynı kalır. Zaten damgalıysa (yeniden onay / imza-hazirla) dokunulmaz.
+        await RaporTipografisi.DamgalaAsync(baglanti, islem, id, iptal);
         await baglanti.CalistirAsync("""
             update public.radyoloji_rapor
                set durum = 3, kilit = 1, onaylayan_id = @p1, onay_tarihi = now()::timestamp,

@@ -47,7 +47,16 @@ export const radyolojiUclari = {
       bakanlikProfili: boolean;
       /** BI-RADS lezyonlari (1194) - yapisal formun verisi. */
       lezyonlar: Record<string, unknown>[];
+      /** TİPOGRAFİ (1344): raporun etkin tipografisi (damga > şablon > kurum), damgalı mı, kurum ayarı. */
+      tipografi: Record<string, unknown>; tipografiDamga: boolean; kurumTipografi: Record<string, unknown>;
     }>(`/api/radyoloji/istem/${istemId}/rapor${sablonId ? `?sablon=${sablonId}` : ''}`),
+
+  /** Rapor tipografisi ayarı (1344): kurum düzeyi; GET herkes (radyoloji Gör), PUT radyoloji.tipografi Değiştir. */
+  radyolojiTipografi: () =>
+    istek<{ ayar: Record<string, unknown>; varsayilan: Record<string, unknown>; ozgun: Record<string, unknown>;
+            fontlar: { kod: string; ad: string }[]; damgaliRapor: number; duzenle: boolean }>('/api/radyoloji/tipografi'),
+  radyolojiTipografiKaydet: (ayar: { font: string; punto: number; satir: number; paragraf: number; hiza: string; kenar: number; baslikPunto: number }) =>
+    gonder<{ ayar: Record<string, unknown>; degisti: number }>('/api/radyoloji/tipografi', ayar, 'PUT'),
 
   radyolojiRaporYaz: (istemId: number, govde: unknown) =>
     gonder<{ raporId: number; surum: string }>(`/api/radyoloji/istem/${istemId}/rapor`, govde),

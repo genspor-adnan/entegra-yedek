@@ -429,6 +429,7 @@ uygulama.StokDurumUclariniEkle();
 // Randevu Ayarlari > Bolumler (251): bolum/hekim bazli randevu duzeni.
 uygulama.RandevuUclariniEkle();
 uygulama.RadyolojiUclariniEkle();
+uygulama.RadyolojiTipografiUclariniEkle();   // Rapor tipografisi ayarı (1344)
 uygulama.EImzaUclariniEkle();            // e-İmza ayarı / kart listesi (1337)
 uygulama.AktarimEslemeUclariniEkle();   // SKRS eşleme masası (1222)
 uygulama.TeleradUclariniEkle();
