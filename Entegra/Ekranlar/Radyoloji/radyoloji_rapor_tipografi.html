@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu — Rapor Tipografisi Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --grpbg:#fbfcfd;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --warn:#8a5a00; --warnbg:#fffaf0; --warnbd:#e0a33a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2.baslik{max-width:1280px;margin:18px auto 6px;font-size:13px;color:var(--navy)}
+  h2.baslik small{font-weight:normal;color:var(--muted)}
+  .win{max-width:1280px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .govde{display:grid;grid-template-columns:420px 1fr;gap:0;min-height:560px}
+  .form{padding:12px 14px;border-right:1px solid var(--line2);background:var(--grpbg)}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:10px 12px;margin-bottom:10px}
+  .grp h5{margin:0 0 8px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .fld{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:6px 8px;margin-bottom:6px}
+  .fld .yan{display:flex;gap:6px;align-items:center}
+  .fld label{color:var(--muted);text-align:right;font-size:11.5px}
+  .inp,.combo{border:1px solid var(--line);border-radius:3px;padding:4px 7px;background:#fff;min-height:26px;display:flex;align-items:center;font-size:12px}
+  .combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .radyo{display:flex;flex-direction:column;gap:5px}
+  .radyo label{display:flex;gap:6px;align-items:flex-start;text-align:left;color:var(--ink)}
+  .radyo small{display:block;color:var(--muted)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg span{padding:3px 10px;border-right:1px solid var(--line)}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:var(--navy);color:#fff}
+  .not{font-size:11px;color:var(--muted);line-height:1.5}
+  .oniz{padding:12px 16px;display:grid;grid-template-columns:repeat(2,413px);justify-content:center;gap:14px;align-items:start;background:#dfe5ec}
+  .oniz h6{margin:0 0 6px;font-size:10.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;display:flex;gap:8px;align-items:center}
+  .oniz h6 .etk{font-weight:normal;text-transform:none;letter-spacing:0;color:var(--muted)}
+  .a4k{width:413px;height:585px;overflow:hidden}
+  .a4{background:#fff;border:1px solid #cfd8e3;box-shadow:0 2px 10px rgba(20,40,70,.18);width:794px;height:1123px;padding:15mm 18mm;overflow:hidden;color:#000;position:relative;transform:scale(.52);transform-origin:top left}
+  .a4 .antet{display:flex;justify-content:space-between;border-bottom:1.5px solid #000;padding-bottom:4px;margin-bottom:8px}
+  .a4 .antet b{font-size:1.15em}
+  .a4 .kimlik{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;font-size:.92em;border:1px solid #999;padding:4px 8px;margin-bottom:10px}
+  .a4 .rb{text-align:center;font-weight:bold;margin:8px 0 10px;font-size:1.2em;letter-spacing:.5px}
+  .a4 .bb{font-weight:bold;text-transform:uppercase;margin-top:.6em}
+  .a4 p{margin:.25em 0 .4em;text-align:justify}
+  .a4 .imza{margin-top:1.4em;display:flex;justify-content:flex-end;text-align:center}
+  .a4 .imza small{display:block;font-weight:normal}
+  .a4 .alt{position:absolute;left:18mm;right:18mm;bottom:8mm;border-top:1px solid #999;font-size:.8em;color:#444;display:flex;justify-content:space-between;padding-top:3px}
+  /* tipografi varyantları */
+  .t-mevcut{font-family:"Trebuchet MS",Tahoma,sans-serif;font-size:13px;line-height:1.65}
+  .t-arial{font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.3}
+  .t-calibri{font-family:Calibri,Carlito,"Segoe UI",sans-serif;font-size:11pt;line-height:1.25}
+  .t-times{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.25}
+  .rozet{display:inline-block;border:1px solid var(--line);border-radius:3px;padding:0 6px;font-size:10px;background:#fff}
+  .rozet.oneri{color:#2e7d46;border-color:#9bd1ab;background:#e9f7ee;font-weight:bold}
+  .rozet.eski{color:#8a5a00;border-color:#f0d090;background:#fff1d6}
+  .karar{max-width:1280px;margin:12px auto 24px;border:2px dashed var(--warnbd);border-radius:6px;padding:10px 14px;background:var(--warnbg);font-size:11.5px;line-height:1.65}
+  .karar b{color:var(--warn)}
+  .karar ol{margin:4px 0 0 18px;padding:0}
+  table.ozet{border-collapse:collapse;font-size:11.5px;margin-top:6px;background:#fff}
+  table.ozet td,table.ozet th{border:1px solid var(--line);padding:3px 8px;text-align:left}
+  table.ozet th{background:var(--head)}
+  .sablon-ust{display:flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line2);border-radius:4px;background:#fff}
+</style>
+</head>
+<body>
+
+<h2 class="baslik">1. Ayarlar › Radyoloji › Rapor Tipografisi — <small>kurum düzeyi varsayılan; şablon kartı isterse üstüne yazar</small></h2>
+<div class="win">
+  <div class="title">🖨 Rapor Tipografisi <span class="sp">Radyoloji › Ayarlar › Rapor Tipografisi · şube: Kosuyolu (kurum geneli)</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn">↺ Varsayılana dön <small>(Arial 10,5)</small></span>
+    <span class="btn">🖨 Deneme baskısı</span>
+    <span class="sp"></span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+  <div class="govde">
+    <div class="form">
+      <div class="grp">
+        <h5>Gövde</h5>
+        <div class="fld"><label>Font ailesi</label><span class="combo">Arial / Helvetica</span></div>
+        <div class="fld"><label></label>
+          <div class="radyo">
+            <label><input type="radio" checked> Arial / Helvetica <small>dünya pratiği, PACS/RIS çıktıları · önerilen</small></label>
+            <label><input type="radio"> Calibri <small>Word şablonu geleneği (Türkiye'de yaygın)</small></label>
+            <label><input type="radio"> Times New Roman <small>eski hastane / akademik</small></label>
+            <label><input type="radio"> Segoe UI <small>ekran görünümüyle aynı</small></label>
+          </div>
+        </div>
+        <div class="fld"><label>Punto</label><span class="seg"><span>9</span><span>10</span><span class="on">10,5</span><span>11</span><span>12</span></span></div>
+        <div class="fld"><label>Satır aralığı</label><span class="seg"><span>1,15</span><span class="on">1,3</span><span>1,5</span></span></div>
+        <div class="fld"><label>Paragraf arası</label><span class="seg"><span>0</span><span class="on">6 pt</span><span>12 pt</span></span></div>
+        <div class="fld"><label>Hizalama</label><span class="seg"><span>Sol</span><span class="on">İki yana</span></span></div>
+      </div>
+      <div class="grp">
+        <h5>Başlıklar</h5>
+        <div class="fld"><label>Bölüm başlığı</label><span class="combo">BÜYÜK HARF · kalın · gövde puntosu</span></div>
+        <div class="fld"><label>Rapor başlığı</label><span class="yan"><span class="seg"><span>12</span><span class="on">13</span><span>14</span></span><span class="not">pt · kalın · ortalı</span></span></div>
+        <div class="fld"><label>Renk</label><span class="not">Yok — siyah/beyaz baskı ve faks (değiştirilemez)</span></div>
+      </div>
+      <div class="grp">
+        <h5>Sayfa</h5>
+        <div class="fld"><label>Kâğıt</label><span class="seg"><span class="on">A4</span><span>Letter</span></span></div>
+        <div class="fld"><label>Kenar boşluğu</label><span class="yan"><span class="seg"><span>15</span><span class="on">18</span><span>20</span></span><span class="not">mm</span></span></div>
+        <div class="fld"><label>Alt bilgi</label><span class="not">☑ Sayfa no "1/2" &nbsp; ☑ Rapor no &nbsp; ☑ Onay zamanı &nbsp; ☐ Yazan/onaylayan tekrarı</span></div>
+      </div>
+      <div class="grp">
+        <h5>Eski HBYS (Word) şablonları</h5>
+        <div class="radyo">
+          <label><input type="radio" checked> Kendi biçimini korur <small>(tablo / resim / font gömülü şablonlar bozulmaz)</small></label>
+          <label><input type="radio"> Kurum tipografisine uydur <small>(font ve punto ezilir, tablo kalır)</small></label>
+        </div>
+      </div>
+      <div class="not">Ayar <b>ekrandaki A4 editörü</b>, <b>çıktı/PDF</b> ve <b>e-imzalı belge</b> için ortaktır (ne görüyorsan onu imzalarsın). Ekranda px'e çevrilir: 10,5 pt ≈ 14 px.</div>
+    </div>
+
+    <div class="oniz">
+      <div>
+        <h6>Şimdi <span class="rozet eski">Trebuchet MS · 13 px · 1,65</span><span class="etk">uygulama fontu miras</span></h6>
+        <div class="a4k"><div class="a4 t-mevcut">
+          <div class="antet"><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
+          <div class="kimlik"><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ</span><span><b>Çekim:</b> 14.11.2026 10:42</span></div>
+          <div class="rb">MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
+          <div class="bb">Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
+          <div class="bb">Karşılaştırma</div><p>Karşılaştırılabilecek önceki tetkik yok.</p>
+          <div class="bb">Bulgular</div><p>Supraspinatus tendonunda distal kesimde intrasubstans sinyal artışı (tendinozis) izlenmektedir; tam kat yırtık saptanmamıştır. İnfraspinatus, subskapularis ve teres minör tendonları doğaldır. Akromioklaviküler eklemde hafif dejeneratif değişiklikler ve minimal efüzyon mevcuttur. Glenohumeral eklem aralığında fizyolojik sınırlarda sıvı izlenmiştir. Labrum bütünlüğü korunmuştur.</p>
+          <div class="bb">Sonuç ve Öneriler</div><p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
+          <div class="imza"><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></b></div>
+          <div class="alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
+        </div></div>
+      </div>
+      <div>
+        <h6>Öneri <span class="rozet oneri">Arial · 10,5 pt · 1,3</span><span class="etk">dünya pratiği</span></h6>
+        <div class="a4k"><div class="a4 t-arial">
+          <div class="antet"><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
+          <div class="kimlik"><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ</span><span><b>Çekim:</b> 14.11.2026 10:42</span></div>
+          <div class="rb">MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
+          <div class="bb">Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
+          <div class="bb">Karşılaştırma</div><p>Karşılaştırılabilecek önceki tetkik yok.</p>
+          <div class="bb">Bulgular</div><p>Supraspinatus tendonunda distal kesimde intrasubstans sinyal artışı (tendinozis) izlenmektedir; tam kat yırtık saptanmamıştır. İnfraspinatus, subskapularis ve teres minör tendonları doğaldır. Akromioklaviküler eklemde hafif dejeneratif değişiklikler ve minimal efüzyon mevcuttur. Glenohumeral eklem aralığında fizyolojik sınırlarda sıvı izlenmiştir. Labrum bütünlüğü korunmuştur.</p>
+          <div class="bb">Sonuç ve Öneriler</div><p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
+          <div class="imza"><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></b></div>
+          <div class="alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
+        </div></div>
+      </div>
+      <div>
+        <h6>Seçenek <span class="rozet">Calibri · 11 pt · 1,25</span><span class="etk">Word geleneği</span></h6>
+        <div class="a4k"><div class="a4 t-calibri">
+          <div class="antet"><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
+          <div class="kimlik"><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ</span><span><b>Çekim:</b> 14.11.2026 10:42</span></div>
+          <div class="rb">MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
+          <div class="bb">Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
+          <div class="bb">Karşılaştırma</div><p>Karşılaştırılabilecek önceki tetkik yok.</p>
+          <div class="bb">Bulgular</div><p>Supraspinatus tendonunda distal kesimde intrasubstans sinyal artışı (tendinozis) izlenmektedir; tam kat yırtık saptanmamıştır. İnfraspinatus, subskapularis ve teres minör tendonları doğaldır. Akromioklaviküler eklemde hafif dejeneratif değişiklikler ve minimal efüzyon mevcuttur. Glenohumeral eklem aralığında fizyolojik sınırlarda sıvı izlenmiştir. Labrum bütünlüğü korunmuştur.</p>
+          <div class="bb">Sonuç ve Öneriler</div><p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
+          <div class="imza"><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></b></div>
+          <div class="alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
+        </div></div>
+      </div>
+      <div>
+        <h6>Seçenek <span class="rozet">Times New Roman · 11 pt · 1,25</span><span class="etk">akademik / eski hastane</span></h6>
+        <div class="a4k"><div class="a4 t-times">
+          <div class="antet"><b>SONOMED Görüntüleme Merkezi</b><span>Radyoloji</span></div>
+          <div class="kimlik"><span><b>Hasta:</b> Kerem CAN</span><span><b>Protokol:</b> 2026-004512</span><span><b>TC:</b> 12*******34 · E · 44</span><span><b>Accession:</b> KTB0000000000337</span><span><b>Tetkik:</b> MRG, Omuz - Sağ</span><span><b>Çekim:</b> 14.11.2026 10:42</span></div>
+          <div class="rb">MANYETİK REZONANS GÖRÜNTÜLEME RAPORU</div>
+          <div class="bb">Teknik</div><p>Sağ omuz eklemine yönelik koronal ve sagittal T1A, PD-FS ve aksiyel T2A-FS sekanslarda kontrastsız MR incelemesi yapıldı.</p>
+          <div class="bb">Karşılaştırma</div><p>Karşılaştırılabilecek önceki tetkik yok.</p>
+          <div class="bb">Bulgular</div><p>Supraspinatus tendonunda distal kesimde intrasubstans sinyal artışı (tendinozis) izlenmektedir; tam kat yırtık saptanmamıştır. İnfraspinatus, subskapularis ve teres minör tendonları doğaldır. Akromioklaviküler eklemde hafif dejeneratif değişiklikler ve minimal efüzyon mevcuttur. Glenohumeral eklem aralığında fizyolojik sınırlarda sıvı izlenmiştir. Labrum bütünlüğü korunmuştur.</p>
+          <div class="bb">Sonuç ve Öneriler</div><p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
+          <div class="imza"><b>Uzm. Dr. Deniz KARA<small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></b></div>
+          <div class="alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="baslik">2. Şablon kartı › Davranış — <small>tipografi üst-seçimi (varsayılan: kurum ayarı)</small></h2>
+<div class="win" style="padding:12px 14px">
+  <div class="sablon-ust">
+    <b>Tipografi</b>
+    <span class="seg"><span class="on">Kurum ayarı (Arial 10,5)</span><span>Özel</span><span>Şablonun kendi biçimi (eski HBYS)</span></span>
+    <span class="not">Özel seçilirse aynı alanlar (font · punto · satır aralığı) şablonda açılır; yalnız bu şablonun raporlarına uygulanır.</span>
+  </div>
+  <table class="ozet">
+    <tr><th>Nerede</th><th>Ne olur</th></tr>
+    <tr><td>Rapor ekranı A4 editörü</td><td>Seçili şablonun (yoksa kurumun) tipografisiyle çizilir — ekran = kâğıt.</td></tr>
+    <tr><td>🖨 Çıktı / PDF</td><td>Aynı CSS; <code>@page</code> kâğıt ve kenar boşluğu ayardan.</td></tr>
+    <tr><td>e-İmza belgesi</td><td>İmzalanan HTML aynı tipografiyi gömer; sonradan ayar değişse imzalı belge değişmez.</td></tr>
+    <tr><td>Teletıp / e-Nabız</td><td>Etkilenmez (düz metin / kendi şeması).</td></tr>
+    <tr><td>Eski HBYS Word şablonları</td><td>"Şablonun kendi biçimi" → gömülü font/punto korunur; kurum ayarı yalnız antet, kimlik ve alt bilgiye uygulanır.</td></tr>
+  </table>
+</div>
+
+<div class="karar">
+  <b>Karar notları (kullanıcı 14.11.2026: "raporlarda / şablonlarda dünyada kullanılan font ve punto nedir" → "mockup yap")</b>
+  <ol>
+    <li><b>Varsayılan Arial 10,5 pt · satır 1,3 · paragraf arası 6 pt · iki yana yaslı · A4 18 mm.</b> Başlıklar BÜYÜK HARF kalın gövde puntosunda; rapor başlığı 13 pt. Renk yok.</li>
+    <li>Ayar <b>kurum düzeyinde</b> (referans anahtarı <code>radyoloji.tipografi</code>, jsonb) + şablon kartında üst-seçim (<code>radyoloji_sablon.tipografi</code> jsonb, boş = kurum). Şube bazlı ayrım yok.</li>
+    <li>Ekran ve çıktı <b>tek CSS kaynağı</b>: pt → px çevrimi (×1,333) ekranda; yazdırmada pt doğrudan. Hekim ekranda büyütmek isterse tarayıcı yakınlaştırması, tipografi değil.</li>
+    <li>Font aileleri sistem fontu olarak çağrılır (gömülmez): Arial/Helvetica, Calibri/Carlito, Times, Segoe UI. Sunucu PDF üretiminde Carlito ve Liberation (Arial/Times metrik eşdeğeri) kurulu olmalı.</li>
+    <li>Eski HBYS Word şablonları (338 adet, KOSUYOLU) varsayılan <b>kendi biçimini korur</b>; toplu "kurum tipografisine uydur" isteğe bağlı, geri alınabilir.</li>
+    <li>Alt sınır 9 pt, üst sınır 12 pt; dışına çıkılamaz (okunabilirlik / sayfa taşması).</li>
+  </ol>
+</div>
+
+</body>
+</html>
