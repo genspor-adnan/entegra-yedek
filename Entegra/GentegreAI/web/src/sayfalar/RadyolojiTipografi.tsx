@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { EkranSekmesiBaglami } from '../bilesenler/sekmeBaglami';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { mesaj, onay } from '../bilesenler/mesaj';
@@ -11,12 +13,24 @@ import { FONTLAR, TIPOGRAFI_OZGUN, TIPOGRAFI_VARSAYILAN, tipografiOku, tipografi
  * Kaydetmek şablon kayıtlarını değiştirmez; onaylı raporlar damgalarıyla korunur (rapor ekranında rozet).
  */
 export function RadyolojiTipografi() {
+  const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  const git = useNavigate();
   const [ayar, setAyar] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
   const [kayitli, setKayitli] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
   const [duzenle, setDuzenle] = useState(false);
   const [damgali, setDamgali] = useState(0);
   const [eski, setEski] = useState({ kendi: 0, kurum: 0, ozel: 0 });
   const [topluCalisiyor, setTopluCalisiyor] = useState(false);
+  // DENEME BASKISI (kullanıcı 14.11.2026): seçili (kaydedilmemiş olsa da) tipografiyle örnek A4 yazdırılır; kâğıtta nasıl
+  //   durduğu görülmeden kaydetmek gerekmez. Yazdırma penceresi kapanınca (afterprint) baskı kabı kaldırılır.
+  const [baski, setBaski] = useState(false);
+  useEffect(() => {
+    if (!baski) return;
+    const bitti = () => setBaski(false);
+    window.addEventListener('afterprint', bitti);
+    const z = window.setTimeout(() => window.print(), 150);
+    return () => { window.clearTimeout(z); window.removeEventListener('afterprint', bitti) };
+  }, [baski]);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
 
@@ -74,16 +88,21 @@ export function RadyolojiTipografi() {
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>🖨 {c('Rapor Tipografisi')}</h1>
-          <span className="yol">{c('Radyoloji › Ayarlar › Rapor Tipografisi')}</span>
-          <span className="ck-bosluk" />
-          <button type="button" className="d" disabled={!duzenle} onClick={() => setAyar({ ...TIPOGRAFI_VARSAYILAN })}
-                  title={c('Dünya pratiği: Arial 10,5 · 1,3')}>↺ {c('Varsayılana dön')}</button>
-          <button type="button" className="d bir" disabled={!duzenle || !degisti || kaydediliyor} onClick={() => void kaydet()}>
-            💾 {c('Kaydet')}</button>
-        </div>
+      {/* ARAÇ ÇUBUĞU (kullanıcı 14.11.2026): düğmeler solda, başlık düğmelerin sağında, Kapat sağa yaslı. */}
+      <div className="rt-arac">
+        <button type="button" className="d bir" disabled={!duzenle || !degisti || kaydediliyor} onClick={() => void kaydet()}>
+          💾 {c('Kaydet')}</button>
+        <button type="button" className="d" disabled={!duzenle} onClick={() => setAyar({ ...TIPOGRAFI_VARSAYILAN })}
+                title={c('Dünya pratiği: Arial 10,5 · 1,3')}>↺ {c('Varsayılana dön')}</button>
+        <button type="button" className="d" onClick={() => setBaski(true)}
+                title={c('Seçili tipografiyle örnek raporu yazdırır (kaydetmek gerekmez; yazdırma penceresinde PDF de seçilebilir).')}>
+          🖨 {c('Deneme baskısı')}</button>
+        <span className="rt-baslik"><b>🖨 {c('Rapor Tipografisi')}</b><span className="yol">{c('Radyoloji › Ayarlar › Rapor Tipografisi')}</span></span>
+        <span className="ck-bosluk" />
+        <button type="button" className="d" onClick={() => void (async () => {
+          if (degisti && !await onay(c('Kaydedilmemiş değişiklik var. Kaydetmeden kapatılsın mı?'))) return;
+          if (ekranSekmesi) ekranSekmesi.kapat(); else git('/radyoloji-pano');
+        })()}>✖ {c('Kapat')}</button>
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {!duzenle && !hata && <div className="bilgi-kutusu">{c('Bu ayarı yalnız görüntüleyebilirsiniz (radyoloji.tipografi Değiştir yetkisi gerekir).')}</div>}
@@ -150,6 +169,14 @@ export function RadyolojiTipografi() {
           <OrnekA4 baslik={degisti ? c('Seçiminiz (kaydedilmedi)') : c('Kurum ayarı')} t={ayar} rozet="oneri" />
         </div>
       </div>
+
+      {/* DENEME BASKISI: ekranda görünmez, yalnız yazdırmada (tema.css @media print .rt-baski). Gerçek boy, @page kenarı ayardan. */}
+      {baski && (
+        <div className="rt-baski">
+          <style>{`@media print { @page { size: A4; margin: ${ayar.kenar}mm } }`}</style>
+          <div className="rt-a4 rt-a4-tam" style={tipografiStil(ayar)}><OrnekA4Icerik /></div>
+        </div>
+      )}
     </>
   );
 }
@@ -160,7 +187,16 @@ function OrnekA4({ baslik, t, rozet }: { baslik: string; t: Tipografi; rozet: 'e
     <div>
       <h6 className="rt-oniz-bas">{baslik} <span className={`rt-roz ${rozet}`}>{tipografiOzeti(t)}</span></h6>
       <div className="rt-a4k">
-        <div className="rt-a4" style={{ ...tipografiStil(t), padding: `${t.kenar}mm` }}>
+        <div className="rt-a4" style={{ ...tipografiStil(t), padding: `${t.kenar}mm` }}><OrnekA4Icerik /></div>
+      </div>
+    </div>
+  );
+}
+
+/** Örnek rapor gövdesi: ekran önizlemesi ve deneme baskısı aynı içerik. */
+function OrnekA4Icerik() {
+  return (
+    <>
           <div className="rt-antet"><b>{c('Kurum Adı')}</b><span>Radyoloji</span></div>
           <div className="rt-kimlik">
             <span><b>Hasta:</b> Örnek HASTA</span><span><b>Protokol:</b> 2026-004512</span>
@@ -180,8 +216,6 @@ function OrnekA4({ baslik, t, rozet }: { baslik: string; t: Tipografi; rozet: 'e
           <p>Supraspinatus tendinozisi. Akromioklaviküler eklem dejenerasyonu. Klinik korelasyon önerilir.</p>
           <div className="rt-imza"><b>Uzm. Dr. Örnek RADYOLOG</b><small>Radyoloji Uzmanı · Dip. No 123456</small><small>e-imzalıdır · 14.11.2026 14:05</small></div>
           <div className="rt-alt"><span>Rapor No: RAD-2026-01187</span><span>1 / 1</span></div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
