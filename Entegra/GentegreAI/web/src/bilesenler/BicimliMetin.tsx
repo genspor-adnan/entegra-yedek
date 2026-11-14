@@ -269,6 +269,18 @@ function komut(ad: string, deger?: string) {
 /** İmlecin bulunduğu (ya da son seçili) biçimli alana düz metin ekler - ör. şablon yer tutucusu. */
 export function metinEkle(metin: string) { komut('insertText', metin) }
 
+/**
+ * Komutun uygulandığı düzenlenebilir alan. Ctrl+A ile yapılan seçimde anchor METİN DEĞİL alanın kendisidir
+ * (kullanıcı 15.11.2026: "Ctrl+A ile hepsini seçip puntoyu düşürdüm, değişmedi"): eski kod anchorNode.parentElement
+ * ile alanın dışına çıkıp null buluyor, işaretlenen <font> öğeleri span'a çevrilmeden kalıyordu.
+ */
+function aktifAlan(): Element | null {
+  const s = document.getSelection();
+  const a = (s && s.rangeCount > 0 ? s.anchorNode : null) ?? sonAralik?.startContainer ?? null;
+  const el = a instanceof Element ? a : a?.parentElement ?? null;
+  return el?.closest('[contenteditable="true"]') ?? null;
+}
+
 /** Seçime yeni biçim verilirken içteki aynı özellik temizlenir (yoksa iç span dıştakini ezer). */
 function icBicimTemizle(kok: Element, ozellik: 'font-size' | 'font-family') {
   kok.querySelectorAll<HTMLElement>('[style]').forEach(e => {
@@ -283,7 +295,7 @@ function fontUygula(font: string) {
   secimiGeriKoy();
   document.execCommand('styleWithCSS', false, 'false');
   document.execCommand('fontName', false, 'gentegre-isaret');
-  const alan = (document.getSelection()?.anchorNode?.parentElement)?.closest('[contenteditable="true"]');
+  const alan = aktifAlan();
   const yeni: HTMLSpanElement[] = [];
   alan?.querySelectorAll('font[face="gentegre-isaret"]').forEach(f => {
     const s = document.createElement('span');
@@ -307,7 +319,7 @@ function puntoUygula(pt: number) {
   secimiGeriKoy();
   document.execCommand('styleWithCSS', false, 'false');
   document.execCommand('fontSize', false, '7');
-  const alan = (document.getSelection()?.anchorNode?.parentElement)?.closest('[contenteditable="true"]');
+  const alan = aktifAlan();
   const yeni: HTMLSpanElement[] = [];
   alan?.querySelectorAll('font[size="7"]').forEach(f => {
     const s = document.createElement('span');
