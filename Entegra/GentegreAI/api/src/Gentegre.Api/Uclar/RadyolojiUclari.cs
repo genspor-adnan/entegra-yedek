@@ -55,7 +55,9 @@ public static partial class RadyolojiUclari
                                       /// <summary>Bildirilen hekim aldigini teyit etti mi (318).</summary>
                                       short? TeyitAlindi = null,
                                       /// <summary>Bildirimle birlikte takip kapatilsin mi (318).</summary>
-                                      bool Kapat = false);
+                                      bool Kapat = false,
+                                      /// <summary>Bildiren radyolog (kullanıcı 15.11.2026: combo, varsayılan oturum kullanıcısı); boş = kaydeden.</summary>
+                                      int? BildirenId = null);
 
     /// <summary>SONUC TESLIMI (304): film/CD/basili rapor kime verildi.</summary>
     public sealed record TeslimIstegi(short Tur, string AlanAd, string AlanYakinlik,

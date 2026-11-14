@@ -108,7 +108,11 @@ Aynı profil onayda ek kural işletir: rapor dört Bakanlık parçasıyla (Tekni
 - **Serbest / Yapısal**: yapısal formu (BI-RADS, TI-RADS…) olan şablonda form görünümü; form değerlerinden metin üretilir.
 
 ### Kritik Bulgu
-Hastayı bekletmeyecek bulgu varsa **⚠ Kritik Bulgu Bildir**: bulgu, haber verilen kişi, yol (telefon vb.) ve geri bildirim kaydedilir. Kritik işaretli tetkikte **bildirim kaydı olmadan rapor onaylanmaz**; teyit gelince **Radyoloji › Kritik Bulgular**'da kapatılır.
+Hastayı bekletmeyecek bulgu (pnömotoraks, akut kanama, serbest hava, kitle şüphesi) için isteyen hekime **anında haber verildiğini kayıt altına alan** hasta güvenliği mekanizması: kime, ne zaman, hangi yolla söylendi, karşı taraf ne dedi (SKS / JCI kritik sonuç bildirimi şartı).
+- Sağ panelde **Bu tetkikte kritik bulgu var** işaretlenir; şablonda "kritik ifade geçerse sor" açıksa Sonuç'ta kritik ifade yazılınca sistem kendisi sorar.
+- **⚠ Kritik Bulgu Bildir**: bulgu özeti, haber verilen kişi, yol (Telefon · SMS · Yüz yüze · e-Posta), geri bildirim. Zaman ve kaydeden otomatik; aynı tetkikte birden çok bildirim olabilir.
+- **Onay kapısı**: kritik işaretli tetkikte bildirim kaydı olmadan rapor onaylanamaz / e-imzalanamaz; boş bulgu ya da boş kişi kayıt sayılmaz.
+- **Takip**: Radyoloji › Kritik Bulgular listesinde çipler Bildirilmedi (en tehlikeli) · Teyit Bekleyen · Teyitli · Kapatılan; hekim teyit edince **✔ Kapat (teyit alındı)**. Bildirim kaydı silinmez, yalnız kapatılır; kritik işareti kaldırmak için önce bildirim kapatılır.
 
 ### Onay ve e-İmza
 **💾 Taslak Kaydet** raporu saklar; **➜ Uzmana Gönder** onay yetkilisine iletir; **✍ Onayla ve İmzala** raporu kilitler ve numara verir. Kurumda e-İmza (EIMZA hesabı) açıksa onay yalnız e-imzayla olur: kart doktorun bilgisayarında ya da sunucuda, imzalı belge **🔏 İmzalı Belge** ile indirilir. Onaylı raporda düzeltme yalnız **＋ Ek Rapor** ile yapılır.

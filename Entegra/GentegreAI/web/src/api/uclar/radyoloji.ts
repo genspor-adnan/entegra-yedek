@@ -85,6 +85,9 @@ export const radyolojiUclari = {
   /** UZMANA GÖNDER (1199): onay yetkili, bu şubede çalışan uzmanlar + üzerlerinde bekleyen ön rapor sayısı. */
   radyolojiOnayUzmanlari: () =>
     istek<{ id: number; ad: string; bekleyen: number }[]>('/api/radyoloji/onay-uzmanlari'),
+  /** Rapor yazma yetkili radyologlar; `ben` = oturum sahibi (kritik bulgu "bildiren" combosu, 15.11.2026). */
+  radyolojiRadyologlar: () =>
+    istek<{ id: number; ad: string; ben: number }[]>('/api/radyoloji/radyologlar'),
 
   /**
    * RAPOR CIKTISI (303): hastaya verilen belge. Yazma ekraninin verisinden

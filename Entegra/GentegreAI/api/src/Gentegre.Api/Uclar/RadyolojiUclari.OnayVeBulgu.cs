@@ -162,12 +162,12 @@ public static partial class RadyolojiUclari
                 select @p0,
                        (select id from public.radyoloji_rapor
                          where istem_id = @p0 and ust_rapor_id is null),
-                       @p1, @p2, @p3, @p4, @p5, @p2, coalesce(@p6, 0),
+                       @p1, coalesce(@p8::int, @p2), @p3, @p4, @p5, @p2, coalesce(@p6, 0),
                        case when @p7 then @p2 end,
                        case when @p7 then now()::timestamp end
                 """, islem, [id, istek.Bulgu ?? "", baglam.KullaniciId,
                              istek.BildirilenAd ?? "", istek.Yol, istek.GeriBildirim ?? "",
-                             istek.TeyitAlindi, istek.Kapat], iptal);
+                             istek.TeyitAlindi, istek.Kapat, istek.BildirenId], iptal);
 
             await baglanti.CalistirAsync(
                 "update public.radyoloji_istem set kritik = 1 where id = @p0", islem, [id], iptal);

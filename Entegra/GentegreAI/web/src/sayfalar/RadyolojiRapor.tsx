@@ -196,8 +196,20 @@ export function RadyolojiRapor() {
   const [konsModal, setKonsModal] = useState(false);
   const [konsForm, setKonsForm] = useState({ hekimId: '', gerekce: '' });
   const [gorusYaz, setGorusYaz] = useState<{ id: number; gorus: string } | null>(null);
-  const [kritikForm, setKritikForm] = useState({ bulgu: '', bildirilenAd: '', yol: 1,
-                                                 geriBildirim: '' });
+  const [kritikForm, setKritikForm] = useState<{ bulgu: string; bildirilenAd: string; yol: number; geriBildirim: string; bildirenId: number | null }>(
+    { bulgu: '', bildirilenAd: '', yol: 1, geriBildirim: '', bildirenId: null });
+  /** Bildiren combosu (kullanıcı 15.11.2026): rapor yazma yetkili radyologlar, varsayılan oturum kullanıcısı. */
+  const [radyologlar, setRadyologlar] = useState<{ id: number; ad: string; ben: number }[]>([]);
+  useEffect(() => {
+    if (!kritikModal) return;
+    let iptal = false;
+    api.radyolojiRadyologlar().then(l => {
+      if (iptal) return;
+      setRadyologlar(l);
+      setKritikForm(f => f.bildirenId ? f : { ...f, bildirenId: l.find(x => Number(x.ben) === 1)?.id ?? l[0]?.id ?? null });
+    }).catch(() => { if (!iptal) setRadyologlar([]) });
+    return () => { iptal = true };
+  }, [kritikModal]);
   /** Makro hangi bölüme eklenecek: en son dokunulan alan. */
   const sonBolum = useRef<number>(0);
   /** Tek / parçalı: kayıtlı rapor kendi biçiminde açılır; yeni raporda hekimin tercihi (gorunum). */
@@ -699,7 +711,7 @@ export function RadyolojiRapor() {
   const kritikKaydet = () => guvenli(async () => {
     await api.radyolojiKritikBulgu(id, kritikForm);
     setKritikModal(false);
-    setKritikForm({ bulgu: '', bildirilenAd: '', yol: 1, geriBildirim: '' });
+    setKritikForm({ bulgu: '', bildirilenAd: '', yol: 1, geriBildirim: '', bildirenId: null });
     await yukle();
     mesaj('Kritik bulgu bildirimi kaydedildi.');
   });
@@ -750,7 +762,7 @@ export function RadyolojiRapor() {
                   onClick={() => void (async () => {
                     try { const y = await api.dicomGoruntule({ istemId: id }); window.open(y.url, '_blank', 'noopener') }
                     catch (h) { setHata(hataMetni(h)) }
-                  })()}>🖼 Görüntü</button>}
+                  })()}>🦴 Görüntü</button>}
           {/* İMZALI BELGE (kullanıcı 13.11.2026): raporun XAdES imzalı XML'i (doküman deposu, kaynak radyoloji-rapor). */}
           {Number(rapor?.imzaDokumanId ?? 0) > 0 && <button className="d" title={c('e-İmzalı rapor belgesini (XAdES XML) indir')}
                   onClick={() => void (async () => {
@@ -1210,9 +1222,17 @@ export function RadyolojiRapor() {
                  {/* Boş bildirim kaydedilmez (K22): bulgu ve bildirilen kişi zorunlu - sunucu da reddeder. */}
                  <button className="d bir" disabled={!kritikForm.bulgu.trim() || !kritikForm.bildirilenAd.trim()}
                          onClick={() => void kritikKaydet()}>Kaydet</button>
+                 <span className="ck-bosluk" />
+                 {/* Kapat sağa yaslı (kullanıcı 15.11.2026). */}
                  <button className="d" onClick={() => setKritikModal(false)}>✖ Kapat</button>
                </>}>
           <div className="alan-izgara tek-sutun">
+            <label className="alan"><span className="etiket">{c('Bildiren')}</span>
+              <select value={kritikForm.bildirenId ?? ''}
+                      onChange={e => setKritikForm(f => ({ ...f, bildirenId: Number(e.target.value) || null }))}>
+                {radyologlar.length === 0 && <option value="">{c('Ben (oturum kullanıcısı)')}</option>}
+                {radyologlar.map(r => <option key={r.id} value={r.id}>{r.ad}{Number(r.ben) === 1 ? ` · ${c('ben')}` : ''}</option>)}
+              </select></label>
             <label className="alan"><span className="etiket">Bulgu</span>
               <input value={kritikForm.bulgu}
                      onChange={e => setKritikForm(f => ({ ...f, bulgu: e.target.value }))} /></label>

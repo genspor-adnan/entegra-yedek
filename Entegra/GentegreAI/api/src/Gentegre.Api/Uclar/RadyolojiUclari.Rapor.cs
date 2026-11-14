@@ -51,6 +51,30 @@ public static partial class RadyolojiUclari
             return Results.Ok(liste);
         });
 
+        // RADYOLOGLAR (kullanıcı 15.11.2026: kritik bulgu bildiriminde "bildiren kişi combo, varsayılan kullanıcı"):
+        //   rapor yazma yetkisi olan aktif kullanıcılar, şube süzgeci onay-uzmanlarıyla aynı; `ben` = oturum sahibi.
+        grup.MapGet("/radyologlar", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            var liste = await veri.ListeAsync("""
+                select k.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad,
+                       case when k.id = @p1 then 1 else 0 end as ben
+                  from public.taraf_kullanici k
+                  join public.taraf t on t.id = k.id
+                 where k.aktif = 1
+                   and (public.fn_kullanici_yetkili(k.id, 'rad.rapor_yaz') or k.id = @p1)
+                   and (@p0::int is null
+                        or exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id and ks.sube_id = @p0)
+                        or (not exists (select 1 from public.kullanici_sube ks where ks.taraf_id = k.id)
+                            and (exists (select 1 from public.fn_kullanici_subeleri(k.id) s where s.sube_id = @p0)
+                                 or not exists (select 1 from public.fn_kullanici_subeleri(k.id))))
+                        or k.id = @p1)
+                 order by ben desc, 2
+                """, [baglam.SubeId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(liste);
+        });
+
         // ------------------------------------------------ rapor listesi ----
         // RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215, mockup radyoloji_rapor_listesi.html): kutular listenin
         //   çiplerini açar - sayılar listenin kümesiyle aynı tanım (ana rapor, iptal edilmemiş istem).
