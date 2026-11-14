@@ -47,6 +47,10 @@ export function RadyolojiIstemKarti() {
   /** BLOK BAZLI DÜZENLEME (kullanıcı 01.11.2026: "kaydedildiğinde kabul bilgileri sağında kalem ikonu olsun..
    *  kaleme basınca tekrar edit moda geçebilsin"): genel Düzenle yok, her blok kendi kalemiyle. */
   const [duzen, setDuzen] = useState(false);
+  // DIŞ ACCESSION DENETİMİ (kullanıcı 14.11.2026: "dışardan verilen accession numarasını da kontrol et uyar ver"):
+  //   yazarken biçim (sunucu kuralı: en fazla 16, harf/rakam/- . _) ve BAŞKA İSTEMDE KAYITLI MI (liste sorgusu,
+  //   gecikmeli). Uyarı kutunun altında kırmızı; uyarı varken Kaydet durur (sunucu da reddederdi, kullanıcı erken görsün).
+  const [accUyari, setAccUyari] = useState('');
   const [cekimDuzen, setCekimDuzen] = useState(false);
   /** İSTEM KÂĞIDI / KONTROL KALEMLE (kullanıcı 02.11.2026: "istem kağıdı ve çekim kontrol gridlerine de kalem edit
    *  ekle.. diğerleri gibi"): görünümde etiket / dosya listesi, kalemle düzenleme. */
@@ -186,9 +190,32 @@ export function RadyolojiIstemKarti() {
     });
   };
 
+  const accYazilan = (form?.accessionNo ?? '').trim();
+  const accKayitli = String(k?.['accessionNo'] ?? '').trim();
+  useEffect(() => {
+    if (!duzen || !accYazilan || accYazilan === accKayitli) { setAccUyari(''); return }
+    if (!/^[A-Za-z0-9._-]{1,16}$/.test(accYazilan)) {
+      setAccUyari('Accession en fazla 16 karakter; yalnız harf, rakam, tire, nokta ve alt çizgi.'); return;
+    }
+    let iptal = false;
+    const z = setTimeout(() => void (async () => {
+      try {
+        const y = await api.liste('radyoloji-istem', {
+          sayfa: 1, boyut: 3, filtre: { alan: 'accessionNo', op: 'esit', deger: accYazilan } });
+        if (iptal) return;
+        const baska = y.satirlar.filter(r => Number(r.id) !== istemId);
+        setAccUyari(baska.length
+          ? `Bu accession başka bir istemde kayıtlı (${String(baska[0].hastaAdi ?? '').trim() || 'istem #' + String(baska[0].id)}). Aynı numara iki istemde olamaz.`
+          : '');
+      } catch { if (!iptal) setAccUyari('') }
+    })(), 400);
+    return () => { iptal = true; clearTimeout(z) };
+  }, [accYazilan, accKayitli, duzen, istemId]);
+
   const kaydet = async () => {
     if (!form) return;
     await guvenli(async () => {
+      if (accUyari) throw new Error(accUyari);
       await api.radyolojiIstemGuncelle(istemId, {
         klinikBilgi: form.klinikBilgi, onTani: form.onTani, oncelik: form.oncelik,
         kontrast: form.kontrast,
@@ -221,9 +248,27 @@ export function RadyolojiIstemKarti() {
   const sevkli = !!(N(k, 'istekHekimId') || M(k, 'disHekimAd'));
   const isteyenKurum = M(k, 'isteyenKurum');
 
+  // KABUL UYARISI (kullanıcı 14.11.2026: "henüz accession verilmediyse en üste kırmızı şerit ile bilgilendirme uyarısı
+  //   ver ve önce kabul bölümünden accession verilsin"): kabul kaydı yok ya da accession boş/bekliyor ve çekim yoksa.
+  const kabulUyarisi = !cekildi && (accBekliyor || !M(k, 'accessionNo') || !M(k, 'kabulTarihi'));
+  const kabuleGit = () => {
+    if (!duzen && yetki('radyoloji-istem', 'degistir')) { setForm(formAl(k)); setCekimDuzen(false); setDuzen(true) }
+    setTimeout(() => document.querySelector('.rik-kabul-blok')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
+
   return (
     <div className="fm-sayfa rik">
       <style>{RIK_STIL}</style>
+      {kabulUyarisi && (
+        <div className="rik-uyari" role="alert">
+          <span className="rik-uyari-metin">
+            <b>⚠ Bu istem henüz kabul edilmedi.</b> Önce <b>Kabul Bilgileri</b> bölümünden accession verin
+            (dış kurum numarasını yazın ya da boş bırakıp Kaydet'e basın; kurum numarası otomatik verilir).
+            Accession olmadan çekim, cihaz iş listesi (MWL) ve TeleRadyoloji gönderimi başlamaz.
+          </span>
+          <button type="button" className="d" onClick={kabuleGit}>Kabul bölümüne git</button>
+        </div>
+      )}
       {/* BAŞLIK: ad + accession rozeti + tek satır araç (v2 mockup Ekranlar/Radyoloji/radyoloji_istem_karti_v2.html). */}
       <div className="rik-bas">
         <h1>☢️ Radyoloji İstemi</h1>
@@ -286,7 +331,7 @@ export function RadyolojiIstemKarti() {
         <div>
           {/* KABUL BİLGİLERİ / İSTEM: düzenlemede girdiler, değilse kutusuz etiket-değer. Yön ve kontrast
               SORULMAZ - SUT kodunun içinde ("DİZ - SAĞ, KONTRASTSIZ"); verilen kontrast çekimde girilir. */}
-          <div className="rik-blok">
+          <div className="rik-blok rik-kabul-blok">
             <h4>Kabul Bilgileri
               {duzen ? <span className="rik-blokarac">
                   <button type="button" className="d bir" onClick={() => void kaydet()}>💾 Kaydet</button>
@@ -316,10 +361,13 @@ export function RadyolojiIstemKarti() {
                 </span>
 
                 <span className="rik-et">Accession No</span>
-                <input className="inp" maxLength={16} value={form?.accessionNo ?? ''} disabled={cekildi}
-                       placeholder={accBekliyor ? 'dış no · boşsa kurum no' : undefined}
-                       title={cekildi ? 'Çekim yapıldı - accession değişmez.' : 'Dışarıdan gelen hastanın numarası'}
-                       onChange={e => fs({ accessionNo: e.target.value })} />
+                <span className="rik-acc-kutu">
+                  <input className={`inp${accUyari ? ' rik-hatali' : ''}`} maxLength={16} value={form?.accessionNo ?? ''} disabled={cekildi}
+                         placeholder={accBekliyor ? 'dış no · boşsa kurum no' : undefined}
+                         title={cekildi ? 'Çekim yapıldı - accession değişmez.' : 'Dışarıdan gelen hastanın numarası'}
+                         onChange={e => fs({ accessionNo: e.target.value })} />
+                  {accUyari && <span className="rik-acc-uyari" role="alert">⚠ {accUyari}</span>}
+                </span>
                 <span /><span />
 
                 <span className="rik-et">Klinik Bilgi</span>
@@ -503,6 +551,12 @@ export function RadyolojiIstemKarti() {
 /* v2 YERLEŞİM (kullanıcı 01.11.2026: "rad istem ekranı kutularla çok kalabalık.. mockup yap" → "uygun"). Sınıflar
    "rik-" önekli: tema.css'teki kısa adlarla (.d düğme) çakışmasın. */
 const RIK_STIL = `
+.rik .rik-uyari{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 14px;margin:0 0 6px;padding:8px 12px;border:1px solid #e0a5a5;border-left:4px solid #c62828;border-radius:4px;background:#fdecea;color:#7a1f1f;font-size:12.5px}
+.rik .rik-uyari .rik-uyari-metin{flex:1 1 auto;min-width:0}
+.rik .rik-uyari .d{margin-left:auto;flex:0 0 auto;white-space:nowrap}
+.rik .rik-acc-kutu{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rik .rik-acc-kutu .rik-hatali{border-color:#c62828;background:#fff6f5}
+.rik .rik-acc-uyari{color:#b3261e;font-size:11px;line-height:1.3}
 .rik .rik-bas{display:flex;align-items:center;gap:8px;padding:6px 2px 8px;border-bottom:1px solid #e3e9f0}
 .rik .rik-bas h1{margin:0;font-size:15px;color:var(--baslik,#14315a)}
 .rik .rik-acc{font-family:Consolas,monospace;font-size:13px;color:var(--baslik,#14315a);background:#f3f6fa;border:1px solid #e3e9f0;border-radius:3px;padding:1px 6px}
