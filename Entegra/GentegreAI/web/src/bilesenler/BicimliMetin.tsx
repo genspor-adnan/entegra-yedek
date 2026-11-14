@@ -403,6 +403,10 @@ function useBicimDurumu(): BicimDurumu {
   const [durum, setDurum] = useState<BicimDurumu>(BOS_DURUM);
   useEffect(() => {
     const yenile = () => {
+      // ARAÇ ÇUBUĞUNDA ODAK VARKEN DONDUR (kullanıcı 15.11.2026: "hem fare seçiminde hem Ctrl+A'da çalışmadı"):
+      //   açılır liste fareyle açılınca odak değişimi selectionchange tetikliyor, kontrollü <select> yeniden
+      //   çiziliyor ve açık liste kapanıyordu - seçim hiç uygulanamıyordu.
+      if (document.activeElement?.closest('.bm-arac')) return;
       const s = document.getSelection();
       const r = s && s.rangeCount > 0 ? s.getRangeAt(0) : sonAralik;
       let d: Node | null = r?.startContainer ?? null;
