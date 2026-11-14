@@ -108,6 +108,15 @@ public sealed partial class EnabizPaketUretici
 
         var baglam = await BaglamAlAsync(baglanti, islem, paketKodu, kaynakId, iptal);
         if (baglam is null) return null;
+        // BAŞVURU KAPISI (1340, kullanıcı 14.11.2026): başvurusu olan paket, başvuruda "e-Nabız Bildirimi" kapalıysa
+        //   ÜRETİLMEZ (kurum varsayılanı başvuruya kopyalanır, kullanıcı değiştirebilir). Başvurusuz paketler
+        //   (ay/gün sonu) etkilenmez.
+        if (baglam.BelgeId is int belgeId)
+        {
+            var acik = await baglanti.TekDegerAsync<int?>(
+                "select coalesce(enabiz_bildirim, 0)::int from public.belge_basvuru where id = @p0", islem, [belgeId], iptal);
+            if (acik == 0) return null;
+        }
 
         // PARMAK IZINE SKRS KODU DA GIRER (602): kod, alanin USS'ye giden
         //   ASIL degeridir - `deger` yalnizca okunabilir karsiligidir

@@ -722,7 +722,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_telerad_istek_teletip_atla` | `1315_teletip_dis_kurum_isi_haric.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
-| `tg_teletip_gonderim_dis_is` | `1324_teletip_eski_ayar_yolu_kaldir.sql` | 1315_teletip_dis_kurum_isi_haric.sql, 1317_teleradyoloji_sube_hesabi.sql |
+| `tg_teletip_gonderim_dis_is` | `1340_kurum_basvuru_bildirim_bayraklari.sql` | 1315_teletip_dis_kurum_isi_haric.sql, 1317_teleradyoloji_sube_hesabi.sql, 1324_teletip_eski_ayar_yolu_kaldir.sql |
 | `tg_teletip_gonderim_doz` | `1314_teletip_doz.sql` | — |
 | `tg_temsilci_rolu_belge` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `tg_temsilci_rolu_satir` | `1287_dis_hekim_sube_temsilci.sql` | — |

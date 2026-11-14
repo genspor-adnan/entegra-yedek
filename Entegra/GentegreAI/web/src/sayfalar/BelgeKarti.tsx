@@ -1415,7 +1415,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     // Kurum degisti: eski sozlesme ARTIK GECERSIZ. Bos birakilir - tek
     //   sozlesme varsa sunucu tetigi kendisi atar, birden fazlaysa kullanici
     //   secer (469). Eski degeri tasimak baska kurumun policesini yazardi.
-    setBasvuruBilgi(o => ({ ...o, sozlesmeId: null, altKurum: null, sgkKullan: 1 }));
+    // BİLDİRİM VARSAYILANLARI (1340): kurumun e-Nabız / TeleRadyoloji bayrakları başvuruya kopyalanır; kullanıcı
+    //   kutuları sonradan değiştirebilir.
+    const kurum = (kurumlar ?? []).find(k => k.id === yeni);
+    setBasvuruBilgi(o => ({ ...o, sozlesmeId: null, altKurum: null, sgkKullan: 1,
+                            enabizBildirim: kurum ? Number(kurum.enabizBildirim ?? 0) : 0,
+                            teleradBildirim: kurum ? Number(kurum.teleradBildirim ?? 0) : 0 }));
     if (kilitli) return;
 
     // Kampanya cozulemezse KURUMUN SOZLESME LISTESI (495), o da yoksa mevcut

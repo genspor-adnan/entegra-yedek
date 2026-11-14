@@ -156,13 +156,16 @@ public static class BelgeUclari
             // ODEYEN KURUMLAR: ANLAŞMALI kurumlar (taraf.kurum = 1 and taraf_kurum.anlasmali = 1, 1338), tum
             //   cariler degil. `tur` ekranda rotayi belirler (Özel/SGK/ÖSS).
             var kurumlar = await baglanti.ListeAsync("""
-                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(k.tur, 0) as tur
+                select t.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad, coalesce(k.tur, 0) as tur,
+                       coalesce(k.enabiz_bildirim, 0), coalesce(k.telerad_bildirim, 0)
                   from public.taraf t
                   left join public.taraf_kurum k on k.id = t.id
                  where t.kurum = 1 and t.durum = 1 and coalesce(k.anlasmali, 0) = 1
                  order by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                 """, null, [],
-                o => new { id = o.GetInt32(0), ad = o.GetString(1), tur = o.GetInt32(2) },
+                // BİLDİRİM VARSAYILANLARI (1340): kurum seçilince başvurunun e-Nabız / TeleRadyoloji kutuları bununla dolar.
+                o => new { id = o.GetInt32(0), ad = o.GetString(1), tur = o.GetInt32(2),
+                           enabizBildirim = Convert.ToInt32(o.GetValue(3)), teleradBildirim = Convert.ToInt32(o.GetValue(4)) },
                 iptal);
 
             // BOLUMLER: randevu verilebilen birimler - randevu ekraniyla ayni

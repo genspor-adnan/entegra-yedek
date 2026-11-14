@@ -419,7 +419,9 @@ export function KartKimlikSeridi({
             // KURUM TÜRÜ yalnız ANLAŞMALI kurumda (1338, kullanıcı 14.11.2026): sözleşme kuralları (Özel/ÖSS/SGK)
             //   anlaşmasız kurumda anlamsız; alan gizlenir, sunucu da anlaşmasızda zorunlu tutmaz (ZorunluKosulu).
             const anlasmali = !!detaylar[rol?.ad ?? 'kurumRolu']?.guncel?.[0]?.anlasmali;
-            const rolMeta = rol && { ...rol, alanlar: rol.alanlar.filter(a => a.ad !== 'tur' || anlasmali) };
+            // Kurum türü ve bildirim varsayılanları (1340) yalnız anlaşmalı kurumda.
+            const ANLASMALI_ALANLARI = new Set(['tur', 'enabizBildirim', 'teleradBildirim']);
+            const rolMeta = rol && { ...rol, alanlar: rol.alanlar.filter(a => !ANLASMALI_ALANLARI.has(a.ad) || anlasmali) };
             return (
               <div className="alan-izgara">
                 {renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'durum'))}

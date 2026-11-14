@@ -16,6 +16,13 @@ namespace Gentegre.Testler;
 /// </summary>
 public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
 {
+    /// <summary>
+    /// BAŞVURU e-NABIZ KAPISI (1340): paket yalnız başvuruda "e-Nabız Bildirimi" açıkken üretilir; test başvurusu
+    /// eski (bayrak 0) olduğu için üretimden önce açılır - test DB'si, kalıcı kayıt.
+    /// </summary>
+    private static Task BildirimAcAsync(Gentegre.Veri.VeriKaynagi veri, int belgeId)
+        => veri.CalistirAsync("update public.belge_basvuru set enabiz_bildirim = 1 where id = @p0", [belgeId]);
+
     private readonly VeritabaniOlgusu _olgu;
     public EnabizXmlTestleri(VeritabaniOlgusu olgu) => _olgu = olgu;
 
@@ -170,6 +177,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
             " join public.belge_basvuru bb on bb.id = b.id " +
             " where b.tur = 19 and bb.bolum_id is not null");
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -226,6 +234,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and th.cinsiyet = 1
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -269,6 +278,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and bb.bolum_id is not null
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -342,6 +352,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and bb.bolum_id is not null
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -394,6 +405,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and bb.bolum_id is not null
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -515,6 +527,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and bb.bolum_id is not null
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -576,6 +589,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
              where b.tur = 19 and bb.bolum_id is not null
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions
@@ -628,6 +642,7 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
                      where s.belge_id = b.id) >= 2
             """);
         if (belgeId <= 0) return;
+        await BildirimAcAsync(veri, belgeId);
 
         var uretici = new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
             Microsoft.Extensions.Logging.Abstractions

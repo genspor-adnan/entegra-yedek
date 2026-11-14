@@ -2236,6 +2236,9 @@ input.skt-gecmis {
 .rad-onceki-a4 { min-height: 0; padding: 6px 8px }
 .rad-onceki-metin .rad-bolum { margin-bottom: 6px }
 .rad-onceki-hata { color: #b3261e }
+/* Başvuru bildirim kutuları (1340): tek satırda iki onay. */
+.bs-bildirimler { display: flex; gap: 14px; flex-wrap: wrap }
+.bs-bildirimler label { display: inline-flex; align-items: center; gap: 4px; font-weight: normal }
 /* Başlık satırı kalkınca düğmeler sekme şeridine ve hasta bandına yapıştı (kullanıcı 27.10.2026) - nefes payı. */
 .rad-rapor > .sayfa-bas { padding: 8px 0; margin: 0 }
 /* Bant: yazan asistansa mor rozet, onay bekleme süresi sarı (1199, mockup seçenek C). */

@@ -16,7 +16,7 @@ import type { ListeIstegi } from '../../api/sozlesme';
  */
 
 export interface Secenek { id: number; ad: string }
-export interface KurumSecenegi extends Secenek { tur: number }
+export interface KurumSecenegi extends Secenek { tur: number; enabizBildirim?: number; teleradBildirim?: number }
 /** Gorevli kendi bolumunu tasir: kisi secilince Bolum alani ondan doldurulur. */
 export interface GorevliSecenegi extends Secenek { bolumId: number | null }
 
@@ -80,7 +80,7 @@ export function useBasvuruKaynaklari(
     void (async () => {
       try {
         const y = await api.basvuruKaynaklari();
-        setKurumlar(y.kurumlar.map(k => ({ id: k.id, ad: k.ad, tur: k.tur })));
+        setKurumlar(y.kurumlar.map(k => ({ id: k.id, ad: k.ad, tur: k.tur, enabizBildirim: k.enabizBildirim, teleradBildirim: k.teleradBildirim })));
         // Alt birim onekini ("— Dahiliye") combo'da gostermeyiz: agac
         //   gorunumu Bölüm/Görev ekranina ait.
         setBolumler(y.bolumler.map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));

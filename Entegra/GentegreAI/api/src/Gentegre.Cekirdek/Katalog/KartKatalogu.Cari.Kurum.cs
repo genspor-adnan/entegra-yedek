@@ -95,6 +95,10 @@ public static partial class KartKatalogu
             // ANLAŞMALI (1338, kullanıcı 13.11.2026): kurum rolü ile sözleşmeli olmak ayrıldı - hasta gönderen hastane
             //   sözleşmesiz de kurumdur. 1 ise başvuruda ÖDEYEN listesinde çıkar ve Sözleşmeler sekmesi açılır.
             new("anlasmali", "anlasmali", "mantik", Baslik: "Anlaşmalı Kurum"),
+            // BİLDİRİM VARSAYILANLARI (1340, kullanıcı 14.11.2026): anlaşmalı kurumda görünür (KartKimlikSeridi);
+            //   başvuruda ödeyen kurum seçilince kutular bununla dolar, kullanıcı değiştirebilir.
+            new("enabizBildirim",  "enabiz_bildirim",  "mantik", Baslik: "e-Nabız Bildirimi"),
+            new("teleradBildirim", "telerad_bildirim", "mantik", Baslik: "TeleRadyoloji Bildirimi"),
         }, SubeKolonu: null, Baslik: "Kurum Türü", LogTabloId: 1265, TekSatir: true));
 
         // SOZLESMELER - 1:N (468, kullanici: "alt kurum sozlesmeye bagli;

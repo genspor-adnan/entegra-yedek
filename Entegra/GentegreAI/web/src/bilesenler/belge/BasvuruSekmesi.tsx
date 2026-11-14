@@ -66,6 +66,10 @@ export interface BasvuruBilgi {
    * emekli, oncekinde calisan olabilir ve belge o gunun durumunu tasimali.
    */
   emekli?: number | null;
+  /** BİLDİRİMLER (1340, kullanıcı 14.11.2026): ödeyen kurum seçilince kurumun varsayılanıyla dolar, değiştirilebilir.
+      1 = bu başvurunun e-Nabız paketleri üretilir / radyoloji istemleri Teletıp kuyruğuna girer. */
+  enabizBildirim?: number | null;
+  teleradBildirim?: number | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -382,6 +386,17 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             ))}
           </select>
           {kurumHatasi && <span className="alan-hata">{kurumHatasi}</span>}
+        </label>
+        {/* BİLDİRİMLER (1340): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
+            girilmez (sunucu kapıları). */}
+        <label className="alan onay-alan">
+          <span className="etiket">{c('Bildirimler')}</span>
+          <span className="onay-satir bs-bildirimler">
+            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.enabizBildirim ?? 0) === 1}
+                          onChange={e => degistir({ enabizBildirim: e.target.checked ? 1 : 0 })} /> {c('e-Nabız Bildirimi')}</label>
+            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.teleradBildirim ?? 0) === 1}
+                          onChange={e => degistir({ teleradBildirim: e.target.checked ? 1 : 0 })} /> {c('TeleRadyoloji Bildirimi')}</label>
+          </span>
         </label>
 
         {/* SOZLESME (468): ayni sigorta sirketiyle OSS / TSS / Karma police

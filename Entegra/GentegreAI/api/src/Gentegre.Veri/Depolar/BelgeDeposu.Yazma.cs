@@ -91,6 +91,8 @@ public sealed partial class BelgeDeposu
         //   kesiliyor. Basvurunun kendi bilgisi: ayni hasta bir basvuruda
         //   emekli, oncekinde calisan olabilir.
         ["emekli"] = "emekli",
+        // BİLDİRİM BAYRAKLARI (1340): e-Nabız / TeleRadyoloji - kurumdan varsayılan, başvuruda karar.
+        ["enabizBildirim"] = "enabiz_bildirim", ["teleradBildirim"] = "telerad_bildirim",
         // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
         ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
         ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",

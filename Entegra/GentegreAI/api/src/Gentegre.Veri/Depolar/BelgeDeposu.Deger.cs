@@ -78,6 +78,7 @@ public sealed partial class BelgeDeposu
                    coalesce(bb.alt_kurum, 0) as "altKurum",
                    coalesce(bb.sgk_kullan, 1) as "sgkKullan",
                    coalesce(bb.emekli, 0) as "emekli",
+                   coalesce(bb.enabiz_bildirim, 0) as "enabizBildirim", coalesce(bb.telerad_bildirim, 0) as "teleradBildirim",
                    -- Basvuru sekmesi alanlari (298).
                    bb.basvuru_turu as "basvuruTuru", bb.gelis_sekli as "gelisSekli",
                    bb.gelis_nedeni as "gelisNedeni", bb.oda, bb.sira_no as "siraNo",

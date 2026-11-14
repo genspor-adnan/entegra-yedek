@@ -65,6 +65,8 @@ export function yanittanBasvuruBilgi(b: Belge): BasvuruBilgi {
     sgkKullan: b.sgkKullan != null ? Number(b.sgkKullan) : 1,
     // EMEKLI (590): SGK katilim payi muafiyeti - belgeden geri okunur.
     emekli: b.emekli != null ? Number(b.emekli) : 0,
+    enabizBildirim: b.enabizBildirim != null ? Number(b.enabizBildirim) : 0,
+    teleradBildirim: b.teleradBildirim != null ? Number(b.teleradBildirim) : 0,
 
     // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
     sgkDurum: b.sgkDurum != null ? Number(b.sgkDurum) : 0,

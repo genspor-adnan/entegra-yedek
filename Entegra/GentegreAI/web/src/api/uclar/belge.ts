@@ -113,7 +113,7 @@ export const belgeUclari = {
    * yetkisi degildir: basvuru acabilen kisi odeyen kurumu secebilmeli.
    */
   basvuruKaynaklari: () => istek<{
-    kurumlar: { id: number; ad: string; tur: number }[];
+    kurumlar: { id: number; ad: string; tur: number; enabizBildirim?: number; teleradBildirim?: number }[];
     bolumler: { id: number; ad: string }[];
     /** Gönderen modunda Bölüm = gönderen hekimin branşı: TÜM departmanlar (SKRS klinik), pasifler sonda işaretli. */
     gonderenBolumleri: { id: number; ad: string }[];
