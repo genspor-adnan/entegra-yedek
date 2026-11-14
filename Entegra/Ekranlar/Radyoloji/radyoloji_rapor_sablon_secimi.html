@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu — Şablon Seçimi Modalı Mockup (GenoTIP AI)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    --warn:#8a5a00; --warnbg:#fffaf0; --warnbd:#e0a33a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2.baslik{max-width:1280px;margin:18px auto 6px;font-size:13px;color:var(--navy)}
+  h2.baslik small{font-weight:normal;color:var(--muted)}
+  .win{max-width:1280px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden;position:relative}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.kapali{opacity:.55}
+  .sp{margin-left:auto}
+  .band{display:flex;gap:0;border-bottom:1px solid var(--line);background:#fff}
+  .band .h{padding:7px 12px;border-right:1px solid var(--line2);min-width:150px}
+  .band .h small{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .band .h b{font-size:12.5px;color:var(--navy)}
+  .govde{display:grid;grid-template-columns:230px 1fr 290px;gap:0;min-height:520px}
+  .yan{background:var(--grpbg);border-right:1px solid var(--line2);padding:10px}
+  .yan.sag{border-right:0;border-left:1px solid var(--line2)}
+  .yan h5{margin:0 0 6px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .kart{background:#fff;border:1px solid var(--line2);border-radius:4px;padding:8px;margin-bottom:10px;font-size:11.5px;line-height:1.5}
+  .orta{padding:12px 16px}
+  .bicim{display:flex;gap:6px;align-items:center;margin-bottom:8px;color:var(--muted)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .seg span{padding:3px 10px;border-right:1px solid var(--line)}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:var(--navy);color:#fff}
+  .a4{background:#fff;border:1px solid #cfd8e3;box-shadow:0 2px 10px rgba(20,40,70,.12);min-height:430px;padding:28px 34px;font-family:Arial;font-size:12px;line-height:1.6;position:relative}
+  .a4.bos{display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center}
+  .a4.bos .ic{max-width:380px}
+  .a4.bos .ic p{margin:6px 0 12px}
+  .a4.bos .ic .btn{margin:0 4px}
+  .sablon-satir{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line2);border-radius:4px;padding:8px}
+  .sablon-satir .ad{flex:1;color:var(--muted);font-style:italic}
+  .cip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:11px;background:#fff;white-space:nowrap}
+  .cip.on{background:var(--sel);border-color:var(--selbd);color:var(--navy);font-weight:bold}
+  .cip i{font-style:normal;background:#e8eef5;border-radius:8px;padding:0 5px;font-size:10px;color:var(--muted)}
+  .mod{display:inline-block;font-size:9.5px;font-weight:bold;border-radius:3px;padding:0 5px;color:#fff;background:#6b7a8b}
+  .m-bt{background:#b0652a}.m-mr{background:#5b3f9e}.m-us{background:#2e7d46}.m-dr{background:#2f6db3}.m-mg{background:#b23b6b}
+  .makro{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--line2);border-radius:3px;padding:4px 8px;margin-bottom:4px;font-size:11.5px}
+  .makro code{background:#f3f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 5px;font-size:10.5px}
+  /* ---- modal ---- */
+  .perde{position:absolute;inset:0;background:rgba(20,40,70,.42);display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal{width:980px;max-width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 50px rgba(20,40,70,.35);display:flex;flex-direction:column;max-height:92%}
+  .modal .mbas{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:8px 12px;display:flex;align-items:center;gap:10px;font-weight:bold;border-radius:6px 6px 0 0}
+  .modal .mbas small{font-weight:normal;opacity:.85}
+  .modal .mbas .x{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .modal .serit{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line2);flex-wrap:wrap;background:var(--head)}
+  .modal .ara{flex:1;min-width:220px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 8px;color:var(--muted)}
+  .modal .ayrac{width:1px;height:18px;background:var(--line)}
+  .micerik{display:grid;grid-template-columns:1fr 380px;min-height:420px}
+  .liste{border-right:1px solid var(--line2);overflow:auto}
+  .liste h6{margin:0;padding:6px 12px 3px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;background:#fafbfd;border-bottom:1px solid var(--line2)}
+  .o{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;padding:7px 12px;border-bottom:1px solid #f0f3f7;cursor:default}
+  .o:hover{background:#f6faff}
+  .o.on{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
+  .o .yildiz{color:#c9ced6;font-size:14px}
+  .o .yildiz.on{color:#e0a33a}
+  .o .ad b{color:var(--navy)}
+  .o .ad small{display:block;color:var(--muted);font-size:10.5px}
+  .o .sag{display:flex;gap:6px;align-items:center;font-size:10.5px;color:var(--muted)}
+  .rozet{border:1px solid var(--line);border-radius:3px;padding:0 5px;font-size:10px;background:#fff}
+  .rozet.yap{color:#6a3d9a;border-color:#d9c6ee;background:#efe6f8}
+  .rozet.par{color:#2f5c9e;border-color:#bcd2ef;background:#e3ecfa}
+  .rozet.tek{color:#4f5b68}
+  .oniz{padding:10px 12px;background:#fafbfd;overflow:auto}
+  .oniz h6{margin:0 0 6px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:flex;gap:6px;align-items:center}
+  .mini-a4{background:#fff;border:1px solid #cfd8e3;box-shadow:0 2px 8px rgba(20,40,70,.12);padding:14px 16px;font-family:Arial;font-size:10.5px;line-height:1.55;min-height:300px}
+  .mini-a4 .bb{font-weight:bold;margin-top:8px;color:#333}
+  .mini-a4 .bb:first-child{margin-top:0}
+  .mini-a4 .yt{color:#8a5a00;background:#fff7e0;border-radius:2px;padding:0 2px}
+  .oniz .meta{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .malt{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:var(--head);border-radius:0 0 6px 6px}
+  .malt label{display:flex;gap:5px;align-items:center;font-size:11.5px;color:var(--ink)}
+  .malt .kbd{font-size:10px;color:var(--muted);margin-left:6px}
+  kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 4px;font-size:10px;background:#fff}
+  .karar{max-width:1280px;margin:12px auto 24px;border:2px dashed var(--warnbd);border-radius:6px;padding:10px 14px;background:var(--warnbg);font-size:11.5px;line-height:1.65}
+  .karar b{color:var(--warn)}
+  .karar ol{margin:4px 0 0 18px;padding:0}
+</style>
+</head>
+<body>
+
+<h2 class="baslik">1. Rapor kartı açılışı — <small>otomatik şablon YOK, rapor boş gelir; şablon sağ panelden "Şablon Seç…" ile</small></h2>
+<div class="win">
+  <div class="title">☢️ Radyoloji Raporu <span class="sp">Kerem Can · Omuz MR · KTB0000000000337</span></div>
+  <div class="toolbar">
+    <span class="btn primary">💾 Taslak Kaydet</span>
+    <span class="btn kapali">→ Uzmana Gönder</span>
+    <span class="btn kapali">✍ Onayla ve İmzala</span>
+    <span class="btn">⚠ Kritik Bulgu Bildir</span>
+    <span class="btn">☢️ İstem</span>
+    <span class="btn">🖼 Görüntü</span>
+    <span class="sp"></span>
+    <span class="btn kapali">🖨 Yazdır ▾</span>
+    <span class="btn">✖ Kapat</span>
+  </div>
+  <div class="band">
+    <div class="h"><small>Hasta</small><b>Kerem Can</b> E · 44y</div>
+    <div class="h"><small>Tetkik</small><b>MRG, OMUZ - SAĞ, KONTRASTSIZ</b></div>
+    <div class="h"><small>İsteyen</small><b>Doç.Dr. Akın Akakın</b></div>
+    <div class="h"><small>Kurum</small><b>Özel X Hastanesi</b></div>
+    <div class="h"><small>Durum</small><b>Taslak</b></div>
+  </div>
+
+  <div class="govde">
+    <div class="yan">
+      <h5>Önceki Tetkikler</h5>
+      <div class="kart"><b>Bu tetkik</b><br>14.11.2026 · <span class="mod m-mr">MR</span> Omuz MR</div>
+      <div class="kart" style="color:var(--muted)">Önceki tetkik yok.</div>
+      <h5>İstem Bilgisi</h5>
+      <div class="kart"><b>Ön tanı:</b> M75.1<br><b>Klinik:</b> Sağ omuz ağrısı, 3 ay<br><b>İsteyen:</b> Doç.Dr. Akın Akakın</div>
+    </div>
+
+    <div class="orta">
+      <div class="bicim">Rapor biçimi <span class="seg"><span class="on">Tek</span><span>Parçalı</span></span>
+        &nbsp; Giriş <span class="seg"><span class="on">Serbest</span><span>Yapısal</span></span></div>
+      <div class="a4 bos">
+        <div class="ic">
+          <div style="font-size:30px;line-height:1">📄</div>
+          <p><b>Rapor boş.</b><br>Bir şablon seçin ya da doğrudan yazmaya başlayın. Açılışta şablon <u>otomatik uygulanmaz</u>.</p>
+          <span class="btn primary">📄 Şablon Seç…</span>
+          <span class="btn">✎ Serbest yaz</span>
+          <p style="font-size:11px;margin-top:14px">Son kullandığınız: <a href="#">Omuz MR (kontrastsız) · MR-OMZ-02</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="yan sag">
+      <h5>Şablon</h5>
+      <div class="sablon-satir">
+        <span class="ad">— seçilmedi —</span>
+        <span class="btn primary">📄 Şablon Seç…</span>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);margin:6px 2px 12px">Seçilince burada adı · kodu · sürümü görünür; <b>Değiştir…</b> aynı modalı açar.</div>
+
+      <h5>Makrolar</h5>
+      <div class="makro"><code>.nl</code> Normal omuz MR</div>
+      <div class="makro"><code>.srt</code> Supraspinatus tendinozis</div>
+      <div class="makro"><code>.lbr</code> Labrum yırtığı</div>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Şablon seçilince şablonun makroları gelir; seçilmeden önce kurumun genel makroları.</div>
+
+      <h5 style="margin-top:12px">Yapılandırılmış Alanlar</h5>
+      <div class="kart" style="color:var(--muted)">Şablon seçilince (yapısal şablonda) burada skor / alanlar listelenir.</div>
+    </div>
+  </div>
+</div>
+
+<h2 class="baslik">2. "Şablon Seç" modalı — <small>arama · kapsam ve biçim çipleri · liste + önizleme · varsayılan yapma</small></h2>
+<div class="win" style="min-height:620px;background:#dfe5ec">
+  <div class="perde">
+    <div class="modal">
+      <div class="mbas">📄 Şablon Seç <small>· MRG, OMUZ - SAĞ, KONTRASTSIZ · <span class="mod m-mr">MR</span></small><span class="x">Esc ile kapanır</span></div>
+
+      <div class="serit">
+        <span class="ara">🔍 Şablon adı, kodu ya da içerik… &nbsp;<kbd>/</kbd></span>
+        <span class="ayrac"></span>
+        <span class="cip on">⭐ Bu tetkike bağlı <i>3</i></span>
+        <span class="cip">★ Benim şablonlarım <i>12</i></span>
+        <span class="cip">Genel <i>41</i></span>
+        <span class="cip">Hepsi <i>56</i></span>
+        <span class="ayrac"></span>
+        <span class="cip on">Tek</span>
+        <span class="cip">Parçalı</span>
+        <span class="cip">Yapısal</span>
+        <span class="ayrac"></span>
+        <span class="cip"><span class="mod m-mr">MR</span> yalnız bu modalite</span>
+        <span class="cip">Son kullanılanlar</span>
+      </div>
+
+      <div class="micerik">
+        <div class="liste">
+          <h6>⭐ Bu tetkike bağlı · MRG, OMUZ</h6>
+          <div class="o on">
+            <span class="yildiz on">★</span>
+            <span class="ad"><b>Omuz MR (kontrastsız)</b> <span class="rozet tek">Tek A4</span><small>MR-OMZ-02 · genel · son: dün, 14 kez bu ay</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v4</span>
+          </div>
+          <div class="o">
+            <span class="yildiz">☆</span>
+            <span class="ad"><b>Omuz MR — rotator manşet ayrıntılı</b> <span class="rozet par">Parçalı · 5 bölüm</span><small>MR-OMZ-05 · Dr. Deniz Kara · son: 3 gün önce</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v2</span>
+          </div>
+          <div class="o">
+            <span class="yildiz">☆</span>
+            <span class="ad"><b>Omuz MR artrografi</b> <span class="rozet tek">Tek A4</span><small>MR-OMZ-07 · genel · kontrastlı tetkik için</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v1</span>
+          </div>
+
+          <h6>★ Benim şablonlarım · MR</h6>
+          <div class="o">
+            <span class="yildiz on">★</span>
+            <span class="ad"><b>Eklem MR — kısa normal</b> <span class="rozet tek">Tek A4</span><small>BEN-MR-01 · kişisel · tüm eklemler</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v3</span>
+          </div>
+          <div class="o">
+            <span class="yildiz">☆</span>
+            <span class="ad"><b>Omuz MR — spor yaralanması</b> <span class="rozet yap">Yapısal</span><small>BEN-MR-04 · kişisel · skor alanlı</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v1</span>
+          </div>
+
+          <h6>Genel · MR (38 daha…)</h6>
+          <div class="o">
+            <span class="yildiz">☆</span>
+            <span class="ad"><b>Diz MR (kontrastsız)</b> <span class="rozet tek">Tek A4</span><small>MR-DIZ-01 · genel</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v6</span>
+          </div>
+          <div class="o">
+            <span class="yildiz">☆</span>
+            <span class="ad"><b>Lomber MR</b> <span class="rozet par">Parçalı · 4 bölüm</span><small>MR-LMB-01 · genel</small></span>
+            <span class="sag"><span class="mod m-mr">MR</span> v9</span>
+          </div>
+        </div>
+
+        <div class="oniz">
+          <h6>Önizleme <span class="rozet tek">Tek A4</span> <span style="margin-left:auto;font-weight:normal;text-transform:none;letter-spacing:0">MR-OMZ-02 · v4 · genel</span></h6>
+          <div class="mini-a4">
+            <div class="bb">TEKNİK:</div>
+            <div>Sağ omuz eklemine yönelik <span class="yt">{SEKANSLAR}</span> sekanslarda kontrastsız MR incelemesi yapıldı.</div>
+            <div class="bb">KARŞILAŞTIRMA:</div>
+            <div>Karşılaştırılabilecek önceki tetkik yok.</div>
+            <div class="bb">BULGULAR:</div>
+            <div>Supraspinatus, infraspinatus, subskapularis ve teres minör tendonları doğal kalınlık ve sinyaldedir. Labrum bütünlüğü korunmuştur. Akromioklaviküler eklemde dejeneratif değişiklik izlenmedi. Glenohumeral eklem aralığında minimal sıvı. Kemik iliği sinyali doğaldır.</div>
+            <div class="bb">SONUÇ:</div>
+            <div>Sağ omuz MR incelemesinde belirgin patoloji saptanmadı.</div>
+          </div>
+          <div class="meta">
+            <b>Makrolar:</b> .nl · .srt · .lbr &nbsp;·&nbsp; <b>Yer tutucu:</b> {SEKANSLAR} &nbsp;·&nbsp; <b>Bakanlık parçaları:</b> 4/4 tanımlı<br>
+            <b>Bu tetkikte kullanım:</b> 14 kez bu ay (3 hekim) · <b>Son değişiklik:</b> 02.11.2026, Dr. Deniz Kara
+          </div>
+        </div>
+      </div>
+
+      <div class="malt">
+        <label><input type="checkbox"> Bu tetkik için <b>varsayılanım</b> yap <span class="kbd">(bir dahaki raporda önerilir, yine otomatik uygulanmaz)</span></label>
+        <span class="sp"></span>
+        <span class="btn">◻ Boş rapor</span>
+        <span class="btn primary">✔ Uygula <kbd>Enter</kbd></span>
+        <span class="btn">✖ Kapat <kbd>Esc</kbd></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="karar">
+  <b>Karar / davranış notları (kullanıcı 14.11.2026: "otomatik şablon gelmiş ama uygun değil.. rapor kısmı boş gelsin.. combo yerine modal")</b>
+  <ol>
+    <li><b>Açılışta otomatik şablon yok.</b> Yeni rapor boş A4 ile açılır; ortada ve sağ panelde "Şablon Seç…" düğmesi. Kayıtlı raporda şablon zaten yazılmıştır, modal "Değiştir…" olarak görünür.</li>
+    <li><b>Modal</b> sağ paneldeki combo'nun yerine geçer: arama (ad/kod/içerik), kapsam çipleri (Bu tetkike bağlı · Benim · Genel · Hepsi), biçim çipleri (Tek · Parçalı · Yapısal), "yalnız bu modalite", "son kullanılanlar"; solda gruplu liste, sağda <b>önizleme</b> (bölüm başlıkları, varsayılan metin, yer tutucular, makrolar, kullanım sayısı).</li>
+    <li><b>Varsayılan</b>: alt satırdaki kutu hekimin bu tetkik için tercihi; bir sonraki raporda listede en üstte ve "önerilen" rozetiyle gelir, <u>yine otomatik uygulanmaz</u>. Yıldız = favori (kişisel).</li>
+    <li><b>Dolu rapora şablon uygulanırken</b> onay sorulur ("mevcut metin silinecek / şablonla değiştirilecek"); Parçalı → Tek geçişinde mevcut kural (bölümler birleştirilir) korunur.</li>
+    <li><b>Boş rapor</b> düğmesi şablonsuz serbest yazıma döner (Tek biçim, Serbest giriş); makro listesi kurum genel makrolarına düşer.</li>
+    <li><b>Klavye</b>: ↑↓ gez · Enter uygula · Esc kapat · <kbd>/</kbd> aramaya odak. Liste 300+ şablonda sayfalı/sanal.</li>
+    <li>Teknik not: mevcut sağ panel combosu (Şablon) kaldırılır; şablon seçimi <code>sablonUygula</code> ile aynı sunucu yolundan geçer, yeni uç gerekmez. Yapısal (BI-RADS/TI-RADS) şablon seçilince form eskisi gibi açılır.</li>
+  </ol>
+</div>
+
+</body>
+</html>
