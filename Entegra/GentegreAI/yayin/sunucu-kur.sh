@@ -71,6 +71,8 @@ if [ -s /root/.ssh/authorized_keys ]; then
     bilgi "ssh anahtarlari $KULLANICI'ye kopyalandi"
 fi
 install -d -o "$KULLANICI" -g "$KULLANICI" "$KOK"
+# nginx (www-data) web dizinine ev dizini uzerinden ulasir: Ubuntu useradd evi 750 acar -> 403 (14.11.2026 ilk kurulum).
+chmod 755 "/home/$KULLANICI" "$KOK"
 
 # ---------------------------------------------------------- 2. postgresql ----
 adim "postgresql ($PG)"
