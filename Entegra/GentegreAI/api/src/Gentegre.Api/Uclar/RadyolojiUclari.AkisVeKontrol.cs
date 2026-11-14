@@ -119,6 +119,15 @@ public static partial class RadyolojiUclari
                        coalesce(hz.kod,'') as "tetkikKodu", coalesce(hz.ad,'') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
                        i.yon, coalesce(hz.yon_zorunlu, 0) as "yonZorunlu", i.accession_dis as "accessionDis",
                        i.accession_bekliyor as "accessionBekliyor", i.kabul_tarihi as "kabulTarihi", i.kaynak,
+                       -- KURUM ACCESSION DESENİ (14.11.2026): kart elle girilen numarayı kurum desenine göre uyarır
+                       --   (desen numara elle girilmez; desen dışı = dış kurum numarası). Şube şablonu önce, yoksa genel.
+                       --   (numara_sablonu.sube_id 0 = kurum geneli, null değil.)
+                       (select n.on_ek from public.numara_sablonu n where n.tur = 903 and n.durum = 1
+                         and (n.sube_id = i.sube_id or coalesce(n.sube_id, 0) = 0)
+                        order by case when n.sube_id = i.sube_id then 0 else 1 end, n.id limit 1) as "kurumAccOnEk",
+                       (select n.hane from public.numara_sablonu n where n.tur = 903 and n.durum = 1
+                         and (n.sube_id = i.sube_id or coalesce(n.sube_id, 0) = 0)
+                        order by case when n.sube_id = i.sube_id then 0 else 1 end, n.id limit 1) as "kurumAccHane",
                        coalesce((select x.ad from public.icd x where x.kod = i.on_tani limit 1), '') as "onTaniAdi",
                        public.fn_hizmet_yonleri(i.hizmet_id) as yonlar,
                        coalesce(nullif(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120),''), nullif(i.dis_hekim_ad,''), '') as "isteyenHekim",

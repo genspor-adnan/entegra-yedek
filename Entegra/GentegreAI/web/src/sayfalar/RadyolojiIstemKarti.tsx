@@ -51,6 +51,8 @@ export function RadyolojiIstemKarti() {
   //   yazarken biçim (sunucu kuralı: en fazla 16, harf/rakam/- . _) ve BAŞKA İSTEMDE KAYITLI MI (liste sorgusu,
   //   gecikmeli). Uyarı kutunun altında kırmızı; uyarı varken Kaydet durur (sunucu da reddederdi, kullanıcı erken görsün).
   const [accUyari, setAccUyari] = useState('');
+  /** Engellemeyen bilgi: desen dışı numara dış kurum numarası olarak kaydedilir. */
+  const [accBilgi, setAccBilgi] = useState('');
   const [cekimDuzen, setCekimDuzen] = useState(false);
   /** İSTEM KÂĞIDI / KONTROL KALEMLE (kullanıcı 02.11.2026: "istem kağıdı ve çekim kontrol gridlerine de kalem edit
    *  ekle.. diğerleri gibi"): görünümde etiket / dosya listesi, kalemle düzenleme. */
@@ -192,10 +194,24 @@ export function RadyolojiIstemKarti() {
 
   const accYazilan = (form?.accessionNo ?? '').trim();
   const accKayitli = String(k?.['accessionNo'] ?? '').trim();
+  // KURUM DESENİ (kullanıcı 14.11.2026 "kbb00000033 ile accession girdim kabul etti uyarmadı"): ön ek + hane
+  //   (ör. KGM + 13 rakam). Desene uyan numara ELLE girilmez (sayaçla çakışır) - engel; uymayan numara dış kurum
+  //   numarası sayılır - bilgi notu. Küçük harf büyütülür (PACS eşleşmesi büyük/küçük harfe duyarlı).
+  const kurumOnEk = String(k?.['kurumAccOnEk'] ?? '').trim().toUpperCase();
+  const kurumHane = Number(k?.['kurumAccHane'] ?? 0);
   useEffect(() => {
+    setAccBilgi('');
     if (!duzen || !accYazilan || accYazilan === accKayitli) { setAccUyari(''); return }
     if (!/^[A-Za-z0-9._-]{1,16}$/.test(accYazilan)) {
       setAccUyari('Accession en fazla 16 karakter; yalnız harf, rakam, tire, nokta ve alt çizgi.'); return;
+    }
+    if (kurumOnEk && kurumHane > 0) {
+      const kurumDeseniMi = accYazilan.startsWith(kurumOnEk) && accYazilan.length === kurumOnEk.length + kurumHane
+        && /^[0-9]+$/.test(accYazilan.slice(kurumOnEk.length));
+      if (kurumDeseniMi) {
+        setAccUyari(`${kurumOnEk}… kurum numarasıdır, elle girilmez; kutuyu boş bırakın, kayıtta sıradaki numara otomatik verilir.`); return;
+      }
+      setAccBilgi(`Kurum deseni (${kurumOnEk} + ${kurumHane} rakam) dışında: DIŞ kurum numarası olarak kaydedilecek. Kurum numarası istiyorsanız kutuyu boş bırakın.`);
     }
     let iptal = false;
     const z = setTimeout(() => void (async () => {
@@ -365,8 +381,9 @@ export function RadyolojiIstemKarti() {
                   <input className={`inp${accUyari ? ' rik-hatali' : ''}`} maxLength={16} value={form?.accessionNo ?? ''} disabled={cekildi}
                          placeholder={accBekliyor ? 'dış no · boşsa kurum no' : undefined}
                          title={cekildi ? 'Çekim yapıldı - accession değişmez.' : 'Dışarıdan gelen hastanın numarası'}
-                         onChange={e => fs({ accessionNo: e.target.value })} />
+                         onChange={e => fs({ accessionNo: e.target.value.toUpperCase() })} />
                   {accUyari && <span className="rik-acc-uyari" role="alert">⚠ {accUyari}</span>}
+                  {!accUyari && accBilgi && <span className="rik-acc-bilgi">ℹ {accBilgi}</span>}
                 </span>
                 <span /><span />
 
@@ -557,6 +574,7 @@ const RIK_STIL = `
 .rik .rik-acc-kutu{display:flex;flex-direction:column;gap:2px;min-width:0}
 .rik .rik-acc-kutu .rik-hatali{border-color:#c62828;background:#fff6f5}
 .rik .rik-acc-uyari{color:#b3261e;font-size:11px;line-height:1.3}
+.rik .rik-acc-bilgi{color:#8a5a00;font-size:11px;line-height:1.3}
 .rik .rik-bas{display:flex;align-items:center;gap:8px;padding:6px 2px 8px;border-bottom:1px solid #e3e9f0}
 .rik .rik-bas h1{margin:0;font-size:15px;color:var(--baslik,#14315a)}
 .rik .rik-acc{font-family:Consolas,monospace;font-size:13px;color:var(--baslik,#14315a);background:#f3f6fa;border:1px solid #e3e9f0;border-radius:3px;padding:1px 6px}
