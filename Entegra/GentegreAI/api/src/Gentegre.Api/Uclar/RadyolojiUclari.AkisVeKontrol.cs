@@ -226,6 +226,12 @@ public static partial class RadyolojiUclari
                  (short)(istek.Kontrast ?? 0), istek.KontrastMl,
                  istek.SeriSayisi, istek.GoruntuSayisi, baglam.KullaniciId, istek.Yon, acc], iptal);
             if (n == 0) throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
+            // BEKLEYEN ACCESSION KAPANIR (14.11.2026, KOSUYOLU istem 550): numara verildiği hâlde bayrak 1 kalıyordu -
+            //   başlık "kabulde verilecek" diyor, MWL (1301) ve Teletıp ORM (1302) istemi atlıyordu. Ayrı ifade: sayaç
+            //   fonksiyonu ikinci kez çağrılmasın.
+            await baglanti.CalistirAsync(
+                "update public.radyoloji_istem set accession_bekliyor = 0 where id = @p0 and coalesce(accession_no, '') <> '' and coalesce(accession_bekliyor, 0) = 1",
+                null, [id], iptal);
             // İSTEYEN HEKİM / KURUM: kayıtlı hekim seçildiyse kayıtsız ad boşalır (ikisi birlikte tutulmaz).
             if (istek.IsteyenGuncelle == true)
             {
