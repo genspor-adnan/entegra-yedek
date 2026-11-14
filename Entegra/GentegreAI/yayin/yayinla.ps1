@@ -268,7 +268,9 @@ foreach ($k in $secilen) {
         # VITE_BASE  -> varlik yollari <yol>... ve React Router basename
         # VITE_API   -> istekler <yol>api/... (ayni koken; nginx proxy'ler)
         $env:VITE_BASE = $k.Yol
-        $env:VITE_API  = $k.Yol.TrimEnd('/')
+        # KOK YOL (sonomed): bos dize PowerShell'de degiskeni SILER, web/.env'deki localhost:5180 pakete sizar
+        #   (14.11.2026 "Failed to fetch"). '/' gonderilir; cekirdek.ts sondaki / atar -> ayni koken.
+        $env:VITE_API  = if ($k.Yol -eq '/') { '/' } else { $k.Yol.TrimEnd('/') }
         npm run build
         if ($LASTEXITCODE -ne 0) { Pop-Location; throw 'web derlemesi basarisiz' }
         Pop-Location

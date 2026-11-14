@@ -17,7 +17,9 @@ import { hataIziKaydet } from './hataIzi';
  * {@link tabanAyarla} - ESM canlı bağlama sayesinde içe alan modüller yeni
  * değeri görür.
  */
-export let TABAN = import.meta.env.VITE_API ?? 'http://localhost:5180';
+// KÖK KURULUM (sonomed, 14.11.2026): yayın VITE_API='/' verir (boş dize PowerShell'de ortam değişkenini SİLER ve
+//   .env'deki localhost:5180 pakete sızar - müşteri sunucusunda "Failed to fetch"). Sondaki / atılır: '' = aynı köken.
+export let TABAN = (import.meta.env.VITE_API ?? 'http://localhost:5180').replace(/\/+$/, '');
 
 /** Sonundaki `/` ve `/api` eki atılır: kullanıcı ikisini de yazabilir. */
 export function tabanAyarla(adres: string) {
