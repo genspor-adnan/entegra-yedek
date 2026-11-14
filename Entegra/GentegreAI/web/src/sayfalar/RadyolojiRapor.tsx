@@ -762,7 +762,7 @@ export function RadyolojiRapor() {
                   onClick={() => void (async () => {
                     try { const y = await api.dicomGoruntule({ istemId: id }); window.open(y.url, '_blank', 'noopener') }
                     catch (h) { setHata(hataMetni(h)) }
-                  })()}>💀 Görüntü</button>}
+                  })()}>🩻 Görüntü</button>}
           {/* İMZALI BELGE (kullanıcı 13.11.2026): raporun XAdES imzalı XML'i (doküman deposu, kaynak radyoloji-rapor). */}
           {Number(rapor?.imzaDokumanId ?? 0) > 0 && <button className="d" title={c('e-İmzalı rapor belgesini (XAdES XML) indir')}
                   onClick={() => void (async () => {

@@ -303,7 +303,7 @@ export function RadyolojiIstemKarti() {
               <button className="d" title="DICOM görüntüleyici (OHIF)" onClick={() => void guvenli(async () => {
                 const y = await api.dicomGoruntule({ istemId });
                 window.open(y.url, '_blank', 'noopener');
-              })}>💀 Görüntüle</button>}
+              })}>🩻 Görüntüle</button>}
             {/* RAPOR (kullanıcı 27.10.2026): raporu kendi sekmesinde açar; rapor ekranındaki "İstem" buraya döner. */}
             {yetki('radyoloji', 'gor') &&
               <button className="d bir" onClick={() => {
