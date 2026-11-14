@@ -221,6 +221,83 @@ function puntoUygula(pt: number) {
   alan?.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+/**
+ * GENİŞ RENK PALETİ (kullanıcı 14.11.2026: "raporda renklendirme çok geniş seçimli olsun"). Tarayıcının küçük renk
+ * penceresi yerine Word / Docs düzeni: standart 10 renk, 10 gri ton, 12 ton × 6 açıklık (=92 renk), son kullanılan 8,
+ * "Otomatik / Renk yok" ve "Özel renk…" (işletim sisteminin tam seçicisi). Örnek tıklaması seçimi düşürmesin diye
+ * onMouseDown + preventDefault; komut sonrası seçim korunur.
+ */
+const RENK_STANDART = ['#000000', '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff', '#ffffff'];
+const RENK_GRI = ['#000000', '#1c1c1c', '#434343', '#666666', '#808080', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f7f7f7', '#ffffff'];
+const RENK_TONLAR = [0, 20, 35, 50, 75, 120, 160, 185, 205, 225, 265, 300];   // kırmızıdan mora 12 ton
+const RENK_ACIKLIK = [22, 32, 42, 52, 66, 80, 90];                                // koyudan açığa 7 basamak
+function hsl(h: number, s: number, l: number): string {
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = (n: number) => { const k = (n + h / 30) % 12; const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return Math.round(255 * c).toString(16).padStart(2, '0') };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+const RENK_IZGARA: string[][] = RENK_ACIKLIK.map(l => RENK_TONLAR.map(h => hsl(h, 72, l / 100)));
+const SON_RENK_ANAHTAR = 'gentegre.bm.sonRenk';
+function sonRenkler(): string[] { try { return JSON.parse(localStorage.getItem(SON_RENK_ANAHTAR) ?? '[]') as string[] } catch { return [] } }
+function sonRenkEkle(r: string) {
+  const l = [r, ...sonRenkler().filter(x => x !== r)].slice(0, 12);
+  try { localStorage.setItem(SON_RENK_ANAHTAR, JSON.stringify(l)) } catch { /* özel pencere */ }
+  return l;
+}
+
+function RenkSecici({ tur, pasif }: { tur: 'yazi' | 'vurgu'; pasif?: boolean }) {
+  const [acik, setAcik] = useState(false);
+  const [son, setSon] = useState<string[]>(() => sonRenkler());
+  const [seciliRenk, setSeciliRenk] = useState(tur === 'yazi' ? '#c00000' : '#ffff00');
+  const kutu = useRef<HTMLSpanElement>(null);
+  const ozel = useRef<HTMLInputElement>(null);
+  const komutAdi = tur === 'yazi' ? 'foreColor' : 'hiliteColor';
+  useEffect(() => {
+    if (!acik) return;
+    const dis = (e: MouseEvent) => { if (!kutu.current?.contains(e.target as Node)) setAcik(false) };
+    const tus = (e: KeyboardEvent) => { if (e.key === 'Escape') setAcik(false) };
+    document.addEventListener('mousedown', dis); document.addEventListener('keydown', tus);
+    return () => { document.removeEventListener('mousedown', dis); document.removeEventListener('keydown', tus) };
+  }, [acik]);
+  const uygula = (renk: string) => {
+    komut(komutAdi, renk);
+    setSeciliRenk(renk); setSon(sonRenkEkle(renk)); setAcik(false);
+  };
+  const ornek = (renk: string, k: string) => (
+    <button key={k} type="button" className={`bm-renk-ornek${renk === seciliRenk ? ' on' : ''}`} style={{ background: renk }} title={renk}
+            onMouseDown={e => { e.preventDefault(); uygula(renk) }} aria-label={renk} />);
+  return (
+    <span className="bm-renk-kap" ref={kutu}>
+      <button type="button" className={`bm-renk${tur === 'vurgu' ? ' vurgu' : ''}`} disabled={pasif}
+              title={tur === 'yazi' ? c('Yazı rengi') : c('Vurgu rengi')} aria-haspopup="dialog" aria-expanded={acik}
+              onMouseDown={e => { e.preventDefault(); secimiSakla(); setAcik(a => !a) }}>
+        {tur === 'yazi' ? 'A' : '▮'}<i className="bm-renk-cizgi" style={{ background: seciliRenk }} />
+      </button>
+      {acik && (
+        <div className="bm-renk-menu" role="dialog" aria-label={tur === 'yazi' ? c('Yazı rengi') : c('Vurgu rengi')}>
+          <div className="bm-renk-satir">
+            <button type="button" className="bm-renk-oto" onMouseDown={e => { e.preventDefault(); uygula(tur === 'yazi' ? 'inherit' : 'transparent') }}>
+              {tur === 'yazi' ? c('Otomatik') : c('Vurgu yok')}</button>
+            <button type="button" className="bm-renk-oto" onMouseDown={e => { e.preventDefault(); secimiSakla(); ozel.current?.click() }}>{c('Özel renk…')}</button>
+            <input ref={ozel} type="color" className="bm-renk-gizli" defaultValue={seciliRenk.startsWith('#') ? seciliRenk : '#c00000'}
+                   onChange={e => uygula(e.target.value)} tabIndex={-1} />
+          </div>
+          <div className="bm-renk-bas">{c('Standart')}</div>
+          <div className="bm-renk-izgara">{RENK_STANDART.map((r, i) => ornek(r, 's' + i))}</div>
+          <div className="bm-renk-bas">{c('Gri tonları')}</div>
+          <div className="bm-renk-izgara">{RENK_GRI.map((r, i) => ornek(r, 'g' + i))}</div>
+          <div className="bm-renk-bas">{c('Tonlar (koyudan açığa)')}</div>
+          {RENK_IZGARA.map((satir, i) => <div key={i} className="bm-renk-izgara">{satir.map((r, j) => ornek(r, `t${i}-${j}`))}</div>)}
+          {son.length > 0 && <>
+            <div className="bm-renk-bas">{c('Son kullanılan')}</div>
+            <div className="bm-renk-izgara">{son.map((r, i) => ornek(r, 'son' + i))}</div>
+          </>}
+        </div>
+      )}
+    </span>
+  );
+}
+
 export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
   // onMouseDown + preventDefault: tıklama seçimi alandan çalmasın.
   const d = (baslik: string, icerik: React.ReactNode, f: () => void) => (
@@ -244,10 +321,8 @@ export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
       {d(c('Altı çizili (Ctrl+U)'), <u>U</u>, () => komut('underline'))}
       {d(c('Üstü çizili'), <s>S</s>, () => komut('strikeThrough'))}
       <span className="bm-ayrac" />
-      <label className="bm-renk" title={c('Yazı rengi')}>A
-        <input type="color" disabled={pasif} defaultValue="#c00000" onChange={e => komut('foreColor', e.target.value)} /></label>
-      <label className="bm-renk vurgu" title={c('Vurgu rengi')}>▮
-        <input type="color" disabled={pasif} defaultValue="#ffff00" onChange={e => komut('hiliteColor', e.target.value)} /></label>
+      <RenkSecici tur="yazi" pasif={pasif} />
+      <RenkSecici tur="vurgu" pasif={pasif} />
       <span className="bm-ayrac" />
       {d(c('Sola hizala'), '⯇', () => komut('justifyLeft'))}
       {d(c('Ortala'), '≡', () => komut('justifyCenter'))}

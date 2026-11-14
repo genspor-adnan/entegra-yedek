@@ -82,6 +82,22 @@ export function tipografiOzeti(t: Tipografi): string {
   return `${FONTLAR[t.font]?.ad.split(' /')[0] ?? t.font} ${tr(t.punto, 2)} · ${tr(t.satir, 2)}`;
 }
 
+/**
+ * Word'den aktarılan şablon HTML'inden GÖMÜLÜ font / punto / satır aralığını atar (font-size, font-family, line-height
+ * stil özellikleri ve <font size/face>). Kalın, italik, altı çizili, renk, tablo, hizalama kalır. Şablon uygulanırken
+ * çağrılır; hekimin editörde sonradan verdiği biçime dokunulmaz.
+ */
+export function gomuluBicimTemizle(html: string): string {
+  if (!html || typeof DOMParser === 'undefined') return html;
+  const d = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+  d.body.querySelectorAll<HTMLElement>('[style]').forEach(e => {
+    e.style.removeProperty('font-size'); e.style.removeProperty('font-family'); e.style.removeProperty('line-height');
+    if (!e.getAttribute('style')?.trim()) e.removeAttribute('style');
+  });
+  d.body.querySelectorAll('font').forEach(f => { f.removeAttribute('size'); f.removeAttribute('face') });
+  return d.body.innerHTML;
+}
+
 export function kaynakAdi(t: Tipografi, damgali: boolean): string {
   if (damgali) return 'onay damgası';
   return t.kaynak === 'sablon' ? 'şablon özel' : t.kaynak === 'ozgun' ? 'şablonun kendi biçimi' : 'kurum ayarı';

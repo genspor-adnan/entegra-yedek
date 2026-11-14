@@ -20,7 +20,7 @@ import { TEK_BASLIK, alanCumleleri, bulguBolumuMu, sonucBolumuMu, tekMetneBolumY
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
 import { SablonSecModal, sablonTercihi } from './radyoloji/SablonSecModal';
-import { TIPOGRAFI_VARSAYILAN, kaynakAdi, sablonTipografisi, tipografiOku, tipografiOzeti, tipografiStil, type Tipografi } from './radyoloji/tipografi';
+import { TIPOGRAFI_VARSAYILAN, gomuluBicimTemizle, kaynakAdi, sablonTipografisi, tipografiOku, tipografiOzeti, tipografiStil, type Tipografi } from './radyoloji/tipografi';
 import { BicimAracCubugu, BicimliAlan, bicimVarMi, duzdenHtml, htmldenDuz } from '../bilesenler/BicimliMetin';
 import { CiktiMenusu } from '../bilesenler/cikti/CiktiMenusu';
 import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from './RadyolojiRaporCikti';
@@ -361,7 +361,12 @@ export function RadyolojiRapor() {
       const varsayilan = yerTutucuDoldur(String(b.varsayilanMetin ?? ''), ist).trim();
       const klinikMi = baslik.toLocaleLowerCase('tr').includes('klinik');
       // BİÇİMLİ VARSAYILAN (1216): eski HBYS Word şablonu tablo / resim / biçimiyle gelir.
-      const html = b.varsayilanHtml ? yerTutucuDoldur(String(b.varsayilanHtml), ist) : '';
+      // GÖMÜLÜ FONT / PUNTO TEMİZLİĞİ (1344, kullanıcı 14.11.2026): kurum ya da şablon tipografisi geçerliyken Word'den
+      //   gelen font-size / font-family / line-height şablon UYGULANIRKEN atılır; kalın, tablo, hizalama kalır. Hekimin
+      //   sonradan araç çubuğuyla verdiği biçim dokunulmaz kalır. "Şablonun kendi biçimi" (özgün) seçiliyse olduğu gibi.
+      const hamHtml = b.varsayilanHtml ? yerTutucuDoldur(String(b.varsayilanHtml), ist) : '';
+      const html = hamHtml && sablonTipografisi(sablonlar.find(s => s.id === sId), kurumTipografi).kaynak !== 'ozgun'
+        ? gomuluBicimTemizle(hamHtml) : hamHtml;
       return {
         sira: Number(b.sira ?? i + 1), baslik,
         metin: html ? htmldenDuz(html) : !varsayilan && klinikMi ? klinik : varsayilan,
@@ -812,7 +817,7 @@ export function RadyolojiRapor() {
         </div>
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
-        <div className="rad-orta" data-rt-zorla={tipografi.kaynak === 'ozgun' ? undefined : '1'} style={tipografiStil(tipografi)}>
+        <div className="rad-orta" style={tipografiStil(tipografi)}>
           <div className="rad-duzen">
             <span>{c('Rapor biçimi')}</span>
             <span className="seg" role="group">

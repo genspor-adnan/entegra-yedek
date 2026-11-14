@@ -2147,7 +2147,7 @@ input.skt-gecmis {
 .rad-kart { border: 1px solid var(--cizgi, #e3e9f0); border-radius: 3px; background: #fff;
             padding: 6px 8px; margin-bottom: 6px; font-size: 11px; line-height: 1.5; }
 .rad-kart.teh { border-color: #e4b7b2; background: #fdf3f2; }
-/* Biçim çubuğu ekran sekmeleri şeridinin (sticky, 35 px) ALTINA yapışır (kullanıcı 14.11.2026: "aşağı kaydırınca
+/* Biçim çubuğu ekran sekmeleri şeridinin (sticky, 35 px) ALTINA yapışır (kullanıcı 14-11-2026: "aşağı kaydırınca
    yazı tipi / punto çubuğu üstten kırpılmış görünüyor"). */
 .rad-orta { display: flex; flex-direction: column; gap: 10px; --bm-arac-ust: 36px }
 /* TEK / PARÇALI anahtarı ve tek parça A4 yazı alanı (RadyolojiRapor, 27.10.2026). */
@@ -2175,6 +2175,21 @@ input.skt-gecmis {
 .bm-renk.vurgu { color: #e0c000 }
 .bm-renk:hover { background: var(--yuz) }
 .bm-renk input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100% }
+/* Geniş renk paleti (bm-renk-*): düğme altında açılır; 12 sütunlu örnek ızgarası. */
+.bm-renk-kap { position: relative; display: inline-flex }
+.bm-renk-kap .bm-renk { border: 1px solid transparent; background: none; font: inherit; font-weight: 700; font-size: 12px; padding: 0 4px; display: inline-grid; grid-template-rows: 1fr 4px; place-items: center; min-width: 26px; height: 24px }
+.bm-renk-kap .bm-renk:hover:not(:disabled) { background: var(--yuz); border-color: var(--cizgi) }
+.bm-renk-cizgi { display: block; width: 16px; height: 4px; border-radius: 1px; border: 1px solid rgba(0,0,0,.15) }
+.bm-renk-menu { position: absolute; left: 0; top: 100%; margin-top: 3px; z-index: 30; background: var(--yuz, #fff); border: 1px solid var(--cizgi); border-radius: 4px; box-shadow: 0 8px 24px rgba(20,40,70,.18); padding: 8px; width: 262px }
+.bm-renk-satir { display: flex; gap: 6px; margin-bottom: 6px }
+.bm-renk-oto { flex: 1; border: 1px solid var(--cizgi); background: var(--yuz2); border-radius: 3px; font: inherit; font-size: 11px; padding: 3px 6px; cursor: pointer; color: var(--yazi) }
+.bm-renk-oto:hover { background: var(--yuz) }
+.bm-renk-gizli { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none }
+.bm-renk-bas { font-size: 10px; color: var(--soluk); text-transform: uppercase; letter-spacing: .3px; margin: 6px 0 3px }
+.bm-renk-izgara { display: grid; grid-template-columns: repeat(12, 18px); gap: 2px }
+.bm-renk-ornek { width: 18px; height: 18px; border: 1px solid rgba(0,0,0,.18); border-radius: 2px; padding: 0; cursor: pointer }
+.bm-renk-ornek:hover { outline: 2px solid var(--vurgu); outline-offset: 1px }
+.bm-renk-ornek.on { outline: 2px solid #14315a; outline-offset: 1px }
 .bm-alan { outline: none; white-space: pre-wrap; word-break: break-word; overflow: auto }
 .bm-alan img { max-width: 100% }
 .bm-alan table { border-collapse: collapse; white-space: normal }
@@ -2238,7 +2253,7 @@ input.skt-gecmis {
 .rad-onceki-a4 { min-height: 0; padding: 6px 8px }
 .rad-onceki-metin .rad-bolum { margin-bottom: 6px }
 .rad-onceki-hata { color: #b3261e }
-/* Rapor boş durumu + şablon satırı (14.11.2026, mockup radyoloji_rapor_sablon_secimi.html). */
+/* Rapor boş durumu + şablon satırı (14-11-2026, mockup radyoloji_rapor_sablon_secimi.html). */
 .rad-bos-a4 { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--soluk); min-height: 460px }
 .rad-bos-ic { max-width: 400px }
 .rad-bos-ic p { margin: 6px 0 12px; line-height: 1.5 }
@@ -3778,7 +3793,7 @@ input.skt-gecmis {
 }
 .rehber-alt { display: flex; align-items: center; gap: 8px }
 
-/* Ekran kılavuzu konuları (14.11.2026): tıklanır başlık + açılan metin. */
+/* Ekran kılavuzu konuları (14-11-2026): tıklanır başlık + açılan metin. */
 .rehber-konular { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px }
 .rehber-konu { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem) }
 .rehber-konu.acik { border-color: var(--dugkenar) }
@@ -7173,7 +7188,7 @@ body.ekran-sekmeli .kaperde:not(.enust) > .kawin:not(.tam) {
 .kontrol-gun { display: flex; align-items: center; gap: 8px }
 .kontrol-gun input { width: 90px }
 
-/* TekKayit eşleşen çift (EslesAlan, 14.11.2026): tek etiket altında iki kutu yan yana, eşit genişlik. */
+/* TekKayit eşleşen çift (EslesAlan, 14-11-2026): tek etiket altında iki kutu yan yana, eşit genişlik. */
 .alan .tk-cift { grid-column: 2; display: flex; gap: 6px; min-width: 0 }
 .alan .tk-cift > * { flex: 1 1 0; min-width: 0; width: auto }
 /* Hesaplanan alan (vital BKİ): girdi değil etiket. */
@@ -9693,10 +9708,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
    --rt-font --rt-punto --rt-satir --rt-paragraf --rt-hiza --rt-baslik --rt-kenar. Değişken yoksa eski görünüm. */
 .rad-a4 { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, 13px); line-height: var(--rt-satir, 1.65); text-align: var(--rt-hiza, left) }
 .rad-bolum textarea, .rad-bolum-metin { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, inherit); line-height: var(--rt-satir, 1.55); text-align: var(--rt-hiza, left) }
-/* TİPOGRAFİ ZORLAMA (kullanıcı 14.11.2026: "tüm şablonlara uygula dedim ama puntolar değişmemiş"): eski HBYS Word
-   şablonlarının gömülü <span style="font-size: 13pt"> biçimi CSS değişkenini ezer. Kurum / şablon tipografisi geçerliyken
-   (kaynak özgün değilse) gömülü font ve punto etkisizleştirilir; kalın, tablo, hizalama kalır. */
-[data-rt-zorla] .rad-a4 *, [data-rt-zorla] .rad-bolum-metin *, [data-rt-zorla] .rapor-html *, [data-rt-zorla] .rapor-bolum p * { font-family: inherit !important; font-size: inherit !important; line-height: inherit !important }
+/* Gömülü Word font/puntosu CSS ile EZİLMEZ (kullanıcı 14-11-2026: "yazı tipi ve puntoyu rapor ekranında değiştiremiyorum"):
+   hekimin araç çubuğuyla verdiği biçim de satır içi olduğundan ayırt edilemez. Temizlik şablon uygulanırken yapılır
+   (sayfalar/radyoloji/tipografi gomuluBicimTemizle). */
 .cikti-sayfa { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, 12px); line-height: var(--rt-satir, 1.5) }
 .cikti-sayfa .rapor-bolum p, .cikti-sayfa .rapor-bolum .rapor-html { line-height: var(--rt-satir, 1.65); text-align: var(--rt-hiza, justify); margin-bottom: var(--rt-paragraf, 0) }
 .cikti-sayfa .rapor-bolum h3 { font-size: 1em }
