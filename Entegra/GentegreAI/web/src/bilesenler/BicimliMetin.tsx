@@ -269,6 +269,39 @@ function komut(ad: string, deger?: string) {
 /** İmlecin bulunduğu (ya da son seçili) biçimli alana düz metin ekler - ör. şablon yer tutucusu. */
 export function metinEkle(metin: string) { komut('insertText', metin) }
 
+/** Seçime yeni biçim verilirken içteki aynı özellik temizlenir (yoksa iç span dıştakini ezer). */
+function icBicimTemizle(kok: Element, ozellik: 'font-size' | 'font-family') {
+  kok.querySelectorAll<HTMLElement>('[style]').forEach(e => {
+    e.style.removeProperty(ozellik);
+    if (!e.getAttribute('style')?.trim()) e.removeAttribute('style');
+  });
+  kok.querySelectorAll('font').forEach(f => f.removeAttribute(ozellik === 'font-size' ? 'size' : 'face'));
+}
+
+/** Yazı tipi: işaret fontla uygulanır, sonra gerçek font yazılır ve içteki eski font-family temizlenir. */
+function fontUygula(font: string) {
+  secimiGeriKoy();
+  document.execCommand('styleWithCSS', false, 'false');
+  document.execCommand('fontName', false, 'gentegre-isaret');
+  const alan = (document.getSelection()?.anchorNode?.parentElement)?.closest('[contenteditable="true"]');
+  const yeni: HTMLSpanElement[] = [];
+  alan?.querySelectorAll('font[face="gentegre-isaret"]').forEach(f => {
+    const s = document.createElement('span');
+    s.style.fontFamily = font;
+    s.innerHTML = f.innerHTML;
+    icBicimTemizle(s, 'font-family');
+    f.replaceWith(s);
+    yeni.push(s);
+  });
+  if (yeni.length > 0) {
+    const r = document.createRange();
+    r.setStartBefore(yeni[0]); r.setEndAfter(yeni[yeni.length - 1]);
+    const s = document.getSelection(); s?.removeAllRanges(); s?.addRange(r);
+    sonAralik = r.cloneRange();
+  }
+  alan?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 /** Punto: execCommand yalnız 1-7 bilir - 7 ile işaretlenip span font-size'a çevrilir. */
 function puntoUygula(pt: number) {
   secimiGeriKoy();
@@ -280,6 +313,9 @@ function puntoUygula(pt: number) {
     const s = document.createElement('span');
     s.style.fontSize = `${pt}pt`;
     s.innerHTML = f.innerHTML;
+    // İÇTEKİ ESKİ PUNTO SİLİNİR (kullanıcı 15.11.2026: "Ctrl+A ile seçip 13 olan puntoyu 10'a düşürdüm ama değişmedi"):
+    //   Word şablonundan gelen <span style="font-size: 13pt"> yeni dış span'ın içinde kalıp onu eziyordu.
+    icBicimTemizle(s, 'font-size');
     f.replaceWith(s);
     yeni.push(s);
   });
@@ -356,7 +392,15 @@ function useBicimDurumu(): BicimDurumu {
   useEffect(() => {
     const yenile = () => {
       const s = document.getSelection();
-      const d = (s && s.rangeCount > 0 ? s.anchorNode : null) ?? sonAralik?.startContainer ?? null;
+      const r = s && s.rangeCount > 0 ? s.getRangeAt(0) : sonAralik;
+      let d: Node | null = r?.startContainer ?? null;
+      // Seçim bir elemanın sınırında başlıyorsa (ör. yeni sarılan span'ın önü) içindeki ilk metne inilir -
+      //   çubuk sarmalayıcıyı değil, görünen metnin biçimini göstersin.
+      if (d && d.nodeType === Node.ELEMENT_NODE && r) {
+        const c = d.childNodes[r.startOffset] ?? d.childNodes[r.startOffset - 1] ?? null;
+        if (c) d = c;
+        while (d && d.nodeType === Node.ELEMENT_NODE && d.firstChild) d = d.firstChild;
+      }
       setDurum(bicimDurumu(d));
     };
     document.addEventListener('selectionchange', yenile);
@@ -435,7 +479,7 @@ export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
   return (
     <div className="bm-arac" role="toolbar">
       <select title={c('Yazı tipi')} disabled={pasif} value={fontDeger} className={fontDeger ? 'dolu' : undefined}
-              onChange={e => { if (e.target.value && e.target.value !== '__') komut('fontName', e.target.value) }}>
+              onChange={e => { if (e.target.value && e.target.value !== '__') fontUygula(e.target.value) }}>
         <option value="">{c('Yazı tipi')}</option>
         {fontDeger === '__' && <option value="__">{durum.font}</option>}
         {FONTLAR.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
