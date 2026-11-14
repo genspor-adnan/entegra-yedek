@@ -211,7 +211,9 @@ export function RadyolojiIstemKarti() {
       if (kurumDeseniMi) {
         setAccUyari(`${kurumOnEk}… kurum numarasıdır, elle girilmez; kutuyu boş bırakın, kayıtta sıradaki numara otomatik verilir.`); return;
       }
-      setAccBilgi(`Kurum deseni (${kurumOnEk} + ${kurumHane} rakam) dışında: DIŞ kurum numarası olarak kaydedilecek. Kurum numarası istiyorsanız kutuyu boş bırakın.`);
+      // Dış numara OLAĞAN durumdur (sevkli hasta): not gri ve kısa, uyarı rengi değil (kullanıcı 14.11.2026 "KTB… girdim
+      //   ama uyarı verdi").
+      setAccBilgi(`Dış kurum numarası olarak kaydedilir (kurum numarası ${kurumOnEk}… için kutuyu boş bırakın).`);
     }
     let iptal = false;
     const z = setTimeout(() => void (async () => {
@@ -383,7 +385,7 @@ export function RadyolojiIstemKarti() {
                          title={cekildi ? 'Çekim yapıldı - accession değişmez.' : 'Dışarıdan gelen hastanın numarası'}
                          onChange={e => fs({ accessionNo: e.target.value.toUpperCase() })} />
                   {accUyari && <span className="rik-acc-uyari" role="alert">⚠ {accUyari}</span>}
-                  {!accUyari && accBilgi && <span className="rik-acc-bilgi">ℹ {accBilgi}</span>}
+                  {!accUyari && accBilgi && <span className="rik-acc-bilgi">{accBilgi}</span>}
                 </span>
                 <span /><span />
 
@@ -574,7 +576,7 @@ const RIK_STIL = `
 .rik .rik-acc-kutu{display:flex;flex-direction:column;gap:2px;min-width:0}
 .rik .rik-acc-kutu .rik-hatali{border-color:#c62828;background:#fff6f5}
 .rik .rik-acc-uyari{color:#b3261e;font-size:11px;line-height:1.3}
-.rik .rik-acc-bilgi{color:#8a5a00;font-size:11px;line-height:1.3}
+.rik .rik-acc-bilgi{color:#6b7a8c;font-size:11px;line-height:1.3}
 .rik .rik-bas{display:flex;align-items:center;gap:8px;padding:6px 2px 8px;border-bottom:1px solid #e3e9f0}
 .rik .rik-bas h1{margin:0;font-size:15px;color:var(--baslik,#14315a)}
 .rik .rik-acc{font-family:Consolas,monospace;font-size:13px;color:var(--baslik,#14315a);background:#f3f6fa;border:1px solid #e3e9f0;border-radius:3px;padding:1px 6px}
