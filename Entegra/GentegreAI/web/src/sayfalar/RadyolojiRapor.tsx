@@ -967,7 +967,8 @@ export function RadyolojiRapor() {
 
           {bakanlikProfili && (
             <>
-              <h5 style={{ marginTop: 12 }}>{c('Bakanlık Değerlendirmesi')}</h5>
+              {/* RADYOLOG DEĞERLENDİRMESİ (kullanıcı 14.11.2026, eski ad Bakanlık Değerlendirmesi): iki puan da onayda zorunlu (1342). */}
+              <h5 style={{ marginTop: 12 }}>{c('Radyolog Değerlendirmesi')}</h5>
               <label className="alan">
                 <span className="etiket">{c('İstem Nedeni')}</span>
                 <select value={nedeniPuan} disabled={kilitli}
@@ -987,7 +988,7 @@ export function RadyolojiRapor() {
                 </select>
               </label>
               <div className="not kucuk">
-                Bakanlık Teleradyoloji mesajında (OBX-13) gider. <b>Bulgular en az
+                Bakanlık Teleradyoloji mesajında (OBX-13) gider. <b>İki puan da verilmeden</b>, <b>Bulgular en az
                 50 karakter</b> ve <b>{c('Sonuç ve Öneriler')}</b> dolu olmadan rapor
                 onaylanamaz.
               </div>

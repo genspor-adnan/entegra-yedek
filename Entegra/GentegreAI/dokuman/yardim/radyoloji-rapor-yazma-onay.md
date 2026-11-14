@@ -32,7 +32,7 @@ dogrulama: insan-dogrulama-bekliyor
 - **Şablon** satırı (sağ panel): seçili şablonun adı · kodu · sürümü ve **📄 Şablon Seç… / Değiştir…** düğmesi; rapor bölümleri (ör. Teknik, Bulgular, Sonuç ve Öneriler). "Klinik" başlıklı bölüm istemdeki klinik bilgiyle dolar.
 - **Makrolar**: tıklanınca metin hedef bölüme (yoksa son yazdığınız bölüme) eklenir.
 - **Yapılandırılmış Alanlar**: şablonun skor / ölçüm alanları.
-- Kurumda Bakanlık profili açıksa **Bakanlık Değerlendirmesi** (İstem Nedeni, Çekim Kalitesi puanı).
+- Kurumda Bakanlık profili açıksa **Radyolog Değerlendirmesi** (İstem Nedeni, Çekim Kalitesi puanı; onay için ikisi de zorunlu).
 - **Kritik Bulgu Bildirimleri** ve **Konsültasyon** kutuları.
 
 ## Düğmeler
@@ -67,6 +67,7 @@ Rapor: Taslak · Uzman onayında · Onaylı · Ek rapor.
 - **"Zorunlu bölümler boş: rapor onaya gönderilemez."** → şablonda zorunlu işaretli bölümleri doldurun.
 - **"Kritik bulgu bildirimi kaydedilmeden rapor onaylanamaz."** → önce **⚠ Kritik Bulgu Bildir**.
 - **"Bakanlık profili: "Bulgular" en az 50 karakter olmalı …" / ""Sonuç ve Öneriler" bölümü boş …"** → Bakanlık profili açık kurumda bu iki bölüm zorunludur.
+- **"Radyolog Değerlendirmesi eksik: İstem Nedeni ve Çekim Kalitesi puanlarını verin."** → sağ paneldeki iki puanı seçip yeniden onaylayın.
 - **"Rapor onaylanmış ve kilitli; düzeltme için ek rapor (addendum) açın."** → **＋ Ek Rapor** kullanın.
 - **"Bu istemde bildirim kaydı yok - önce kritik bulgu bildirimini kaydedin."** → kritik takibi kapatmadan önce bildirim girin.
 - **Onayla düğmesi yetki hatası veriyor** → rolünüzde `rad.rapor_onayla` yok; **➜ Uzmana Gönder** kullanın.
@@ -96,8 +97,8 @@ Serbest metnin yanında şablona bağlı, **kodlanmış** bulgu alanlarıdır; b
 - **Metne ekle**: girilen değerleri kalıplarıyla cümleye çevirip ilgili bölüme (Bulgular / Sonuç) yazar.
 Alanlar şablon kartında tanımlanır; şablon seçilmeden görünmez. BI-RADS / TI-RADS gibi tam formlar bunun büyük hâlidir (**Giriş: Yapısal**).
 
-### Bakanlık Değerlendirmesi
-Yalnız kurum ayarı **Bakanlık profili** açıkken görünür. Sağlık Bakanlığı Teletıp rapor teslimi (HL7 ORU, OBX-13) için radyoloğun verdiği iki puandır (1-5):
+### Radyolog Değerlendirmesi
+Yalnız kurum ayarı **Bakanlık profili** açıkken görünür. Sağlık Bakanlığı Teletıp rapor teslimi (HL7 ORU, OBX-13) için raporu yazan radyoloğun verdiği iki puandır (1-5); **ikisi de verilmeden rapor onaylanamaz**:
 - **İstem Nedeni**: isteyen hekimin klinik bilgisi / ön tanısı raporu yazmaya ne kadar yetti (Yok · Yetersiz · Orta · İyi · Mükemmel). Bakanlık istem kalitesini bununla izler.
 - **Çekim Kalitesi**: görüntülerin değerlendirilebilirliği (Çok kötü · Kötü · Orta · İyi · Çok iyi). Cihaz / teknisyen kalite göstergesidir.
 Aynı profil onayda ek kural işletir: rapor dört Bakanlık parçasıyla (Teknik, Karşılaştırma, Bulgular, Sonuç ve Öneriler) **parçalı** yazılmalı, Bulgular en az 50 karakter, Sonuç ve Öneriler dolu olmalı. Puanlar onaylanan raporla Teletıp kuyruğuna gider.
@@ -114,7 +115,7 @@ Hastayı bekletmeyecek bulgu varsa **⚠ Kritik Bulgu Bildir**: bulgu, haber ver
 
 ## Örnek sorular
 - Yapılandırılmış alanlar nedir?
-- Bakanlık Değerlendirmesi ne işe yarar?
+- Radyolog Değerlendirmesi ne işe yarar?
 - Radyoloji raporu nasıl yazılır?
 - Rapor şablonu nasıl seçilir?
 - Makro nasıl kullanılır?

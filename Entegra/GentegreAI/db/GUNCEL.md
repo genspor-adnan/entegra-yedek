@@ -461,7 +461,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_modalite_dicomdan` | `1301_radyoloji_mwl.sql` | — |
 | `fn_radyoloji_mwl` | `1329_mwl_entegrasyon_sube.sql` | 1301_radyoloji_mwl.sql |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
-| `fn_radyoloji_rapor_onaylanabilir` | `1206_radyoloji_onay_kritik_dolu.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql |
+| `fn_radyoloji_rapor_onaylanabilir` | `1342_radyolog_degerlendirmesi_onay_kapisi.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql, 1206_radyoloji_onay_kritik_dolu.sql |
 | `fn_radyoloji_sablon_bolum_html_bosalt` | `1216_radyoloji_sablon_bolum_html.sql` | — |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_radyoloji_yon_ek` | `1231_radyoloji_yon_ek_sabit.sql` | 1229_radyoloji_yon_accession.sql |
