@@ -15,6 +15,8 @@ export function RadyolojiTipografi() {
   const [kayitli, setKayitli] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
   const [duzenle, setDuzenle] = useState(false);
   const [damgali, setDamgali] = useState(0);
+  const [eski, setEski] = useState({ kendi: 0, kurum: 0, ozel: 0 });
+  const [topluCalisiyor, setTopluCalisiyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
 
@@ -23,6 +25,7 @@ export function RadyolojiTipografi() {
       const y = await api.radyolojiTipografi();
       const t = tipografiOku(y.ayar);
       setAyar(t); setKayitli(t); setDuzenle(Boolean(y.duzenle)); setDamgali(Number(y.damgaliRapor ?? 0)); setHata(null);
+      setEski({ kendi: Number(y.eskiSablon?.kendi ?? 0), kurum: Number(y.eskiSablon?.kurum ?? 0), ozel: Number(y.eskiSablon?.ozel ?? 0) });
     } catch (h) { setHata(hataMetni(h)) }
   }, []);
   useEffect(() => { void yukle() }, [yukle]);
@@ -42,6 +45,24 @@ export function RadyolojiTipografi() {
       mesaj(c('Rapor tipografisi kaydedildi.'));
     } catch (h) { setHata(hataMetni(h)) }
     finally { setKaydediliyor(false) }
+  };
+
+  // TOPLU (kullanıcı 14.11.2026: "toplu düğmeyi ekle"): eski HBYS Word şablonları kurum ayarına / kendi biçimine; geri alınabilir.
+  const toplu = async (islem: 'kurum' | 'kendi') => {
+    const adet = islem === 'kurum' ? eski.kendi : eski.kurum;
+    if (adet === 0 || topluCalisiyor) return;
+    const soru = islem === 'kurum'
+      ? `${adet.toLocaleString('tr-TR')} eski HBYS şablonu kurum tipografisine alınacak: bu şablonların yeni / taslak raporları kurum ayarıyla çizilir `
+        + '(gömülü biçimli metin kendi fontunu korur). Onaylı raporlar değişmez. İstediğiniz an geri alınabilir. Devam edilsin mi?'
+      : `${adet.toLocaleString('tr-TR')} eski HBYS şablonu kendi biçimine (özgün görünüm) döndürülecek. Devam edilsin mi?`;
+    if (!await onay(c(soru))) return;
+    setTopluCalisiyor(true);
+    try {
+      const y = await api.radyolojiTipografiEskiSablon(islem);
+      mesaj(`${Number(y.adet).toLocaleString('tr-TR')} ${c('şablon güncellendi.')}`);
+      await yukle();
+    } catch (h) { setHata(hataMetni(h)) }
+    finally { setTopluCalisiyor(false) }
   };
 
   const seg = <T extends string | number>(deger: T, secenekler: { v: T; ad: string }[], sec: (v: T) => void) => (
@@ -97,6 +118,20 @@ export function RadyolojiTipografi() {
             <div className="rt-fld"><label>{c('Kenar boşluğu')}</label>
               <span className="rt-yan">{seg(ayar.kenar, [15, 18, 20].map(v => ({ v, ad: String(v) })), v => d({ kenar: v }))}<span className="sonuk kucuk">mm · A4</span></span></div>
             <div className="rt-fld"><label>{c('Renk')}</label><span className="sonuk">{c('Yok - siyah/beyaz baskı ve faks (sabit)')}</span></div>
+          </div>
+
+          <div className="kagrup rt-grp">
+            <h5>{c('Eski HBYS (Word) şablonları')}</h5>
+            <div className="rt-not"><ul>
+              <li>{c('Aktarılan Word şablonları kendi biçimini korur; kurum ayarı onları etkilemez. Toplu olarak kurum tipografisine alınabilir ve geri döndürülebilir.')}</li>
+              <li><b>{c('Kendi biçimi')}: {eski.kendi.toLocaleString('tr-TR')}</b> · {c('Kurum ayarı')}: {eski.kurum.toLocaleString('tr-TR')} · {c('Özel')}: {eski.ozel.toLocaleString('tr-TR')}</li>
+            </ul></div>
+            <div className="rt-yan" style={{ marginTop: 6 }}>
+              <button type="button" className="d bir" disabled={!duzenle || topluCalisiyor || eski.kendi === 0} onClick={() => void toplu('kurum')}>
+                ⇒ {c('Kurum tipografisine uydur')} ({eski.kendi.toLocaleString('tr-TR')})</button>
+              <button type="button" className="d" disabled={!duzenle || topluCalisiyor || eski.kurum === 0} onClick={() => void toplu('kendi')}>
+                ↩ {c('Kendi biçimine döndür')} ({eski.kurum.toLocaleString('tr-TR')})</button>
+            </div>
           </div>
 
           <div className="kagrup rt-grp rt-not">

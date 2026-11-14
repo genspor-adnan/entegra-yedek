@@ -54,7 +54,11 @@ export const radyolojiUclari = {
   /** Rapor tipografisi ayarı (1344): kurum düzeyi; GET herkes (radyoloji Gör), PUT radyoloji.tipografi Değiştir. */
   radyolojiTipografi: () =>
     istek<{ ayar: Record<string, unknown>; varsayilan: Record<string, unknown>; ozgun: Record<string, unknown>;
-            fontlar: { kod: string; ad: string }[]; damgaliRapor: number; duzenle: boolean }>('/api/radyoloji/tipografi'),
+            fontlar: { kod: string; ad: string }[]; damgaliRapor: number; duzenle: boolean;
+            eskiSablon: { kendi: number; kurum: number; ozel: number } }>('/api/radyoloji/tipografi'),
+  /** Eski HBYS (Word) şablonlarını toplu: kurum tipografisine uydur ('kurum') / kendi biçimine döndür ('kendi'). Geri alınabilir. */
+  radyolojiTipografiEskiSablon: (islem: 'kurum' | 'kendi') =>
+    gonder<{ adet: number; islem: string }>('/api/radyoloji/tipografi/eski-sablonlar', { islem }),
   radyolojiTipografiKaydet: (ayar: { font: string; punto: number; satir: number; paragraf: number; hiza: string; kenar: number; baslikPunto: number }) =>
     gonder<{ ayar: Record<string, unknown>; degisti: number }>('/api/radyoloji/tipografi', ayar, 'PUT'),
 
