@@ -9690,7 +9690,11 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
    Kurum ayarı / şablon üst-seçimi / onay damgası aynı CSS değişkenleriyle gelir (sayfalar/radyoloji/tipografi modülü):
    --rt-font --rt-punto --rt-satir --rt-paragraf --rt-hiza --rt-baslik --rt-kenar. Değişken yoksa eski görünüm. */
 .rad-a4 { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, 13px); line-height: var(--rt-satir, 1.65); text-align: var(--rt-hiza, left) }
-.rad-bolum textarea { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, inherit); line-height: var(--rt-satir, 1.55); text-align: var(--rt-hiza, left) }
+.rad-bolum textarea, .rad-bolum-metin { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, inherit); line-height: var(--rt-satir, 1.55); text-align: var(--rt-hiza, left) }
+/* TİPOGRAFİ ZORLAMA (kullanıcı 14.11.2026: "tüm şablonlara uygula dedim ama puntolar değişmemiş"): eski HBYS Word
+   şablonlarının gömülü <span style="font-size: 13pt"> biçimi CSS değişkenini ezer. Kurum / şablon tipografisi geçerliyken
+   (kaynak özgün değilse) gömülü font ve punto etkisizleştirilir; kalın, tablo, hizalama kalır. */
+[data-rt-zorla] .rad-a4 *, [data-rt-zorla] .rad-bolum-metin *, [data-rt-zorla] .rapor-html *, [data-rt-zorla] .rapor-bolum p * { font-family: inherit !important; font-size: inherit !important; line-height: inherit !important }
 .cikti-sayfa { font-family: var(--rt-font, inherit); font-size: var(--rt-punto, 12px); line-height: var(--rt-satir, 1.5) }
 .cikti-sayfa .rapor-bolum p, .cikti-sayfa .rapor-bolum .rapor-html { line-height: var(--rt-satir, 1.65); text-align: var(--rt-hiza, justify); margin-bottom: var(--rt-paragraf, 0) }
 .cikti-sayfa .rapor-bolum h3 { font-size: 1em }

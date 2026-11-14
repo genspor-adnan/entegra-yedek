@@ -106,7 +106,7 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
   // TİPOGRAFİ (1344): ekran A4'ü ile aynı CSS değişkenleri; kâğıt kenar boşluğu ayardan (@page).
   const tip = tipografiOku(veri.tipografi);
   return (
-    <div className="cikti-sayfa" style={tipografiStil(tip)}>
+    <div className="cikti-sayfa" data-rt-zorla={tip.kaynak === 'ozgun' ? undefined : '1'} style={tipografiStil(tip)}>
       <style>{`@media print { @page { size: A4; margin: ${tip.kenar}mm } .rapor-cikti .cikti-sayfa { padding: 0 } }`}</style>
       {/* --- KURUM ANTETI --- */}
       <div className="kbaslik">

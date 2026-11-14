@@ -812,7 +812,7 @@ export function RadyolojiRapor() {
         </div>
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
-        <div className="rad-orta" style={tipografiStil(tipografi)}>
+        <div className="rad-orta" data-rt-zorla={tipografi.kaynak === 'ozgun' ? undefined : '1'} style={tipografiStil(tipografi)}>
           <div className="rad-duzen">
             {/* TİPOGRAFİ ROZETİ (1344): editör ve çıktı bu görünümle; onaylıda damga. */}
             <span className={`rad-tip-roz${tipografiDamga ? ' damga' : ''}`}
