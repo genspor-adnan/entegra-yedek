@@ -83,8 +83,9 @@ async function resimHazirla(dosya: File): Promise<{ src: string; gen: number; yu
     src = tuval.toDataURL('image/jpeg', 0.85);
   }
   if (src.length > RESIM_AZAMI) throw new Error(c('Resim çok büyük (en çok ~3 MB).'));
-  // Kâğıtta en çok 680 px genişlikte görünür (oran korunur).
-  const gorunen = Math.min(gen, 680);
+  // EKLEMEDE VARSAYILAN (kullanıcı 14.11.2026: "resim çok büyük geldi"): metin sütununun yarısı (340 px); kâğıtta en çok
+  //   680 px. Hekim tıklayıp köşeden sürükleyerek ya da "Resim boyutu" ile büyütür / küçültür (oran korunur).
+  const gorunen = Math.min(gen, 340);
   return { src, gen: gorunen, yuk: Math.round(yuk * gorunen / gen) };
 }
 
@@ -95,17 +96,88 @@ async function resimEkle(dosya: File) {
   } catch (h) { mesaj(h instanceof Error ? h.message : String(h)) }
 }
 
-/** Son tıklanan resim (boyut değiştirmek için). */
+/** Son tıklanan resim (boyut değiştirmek için). Değişince araç çubuğu RESIM_OLAYI ile haberdar olur. */
 let seciliResim: HTMLImageElement | null = null;
-function resimBoyutu(yuzde: number) {
-  const img = seciliResim;
-  if (!img || !document.contains(img)) { mesaj(c('Önce metindeki resme tıklayın.')); return }
-  const dogal = img.naturalWidth || Number(img.getAttribute('width')) || 300;
-  const gen = Math.max(20, Math.min(680, Math.round(Math.min(dogal, 680) * yuzde / 100)));
-  const oran = img.naturalWidth ? img.naturalHeight / img.naturalWidth
-    : (Number(img.getAttribute('height')) || 1) / (Number(img.getAttribute('width')) || 1);
-  img.setAttribute('width', String(gen)); img.setAttribute('height', String(Math.round(gen * oran)));
+const RESIM_OLAYI = 'bm-resim-secildi';
+function resimSec(img: HTMLImageElement | null) {
+  if (seciliResim === img) return;
+  seciliResim?.classList.remove('bm-img-on');
+  seciliResim = img;
+  img?.classList.add('bm-img-on');
+  document.dispatchEvent(new CustomEvent(RESIM_OLAYI));
+}
+/** Resmin tam genişliği (kâğıtta en çok 680 px) - yüzde bunun üstünden. */
+const resimTam = (img: HTMLImageElement) => Math.min(img.naturalWidth || Number(img.getAttribute('width')) || 300, 680);
+const resimOran = (img: HTMLImageElement) => img.naturalWidth ? img.naturalHeight / img.naturalWidth
+  : (Number(img.getAttribute('height')) || 1) / (Number(img.getAttribute('width')) || 1);
+function resimGenislikAta(img: HTMLImageElement, gen: number) {
+  const g = Math.max(20, Math.min(680, Math.round(gen)));
+  img.setAttribute('width', String(g)); img.setAttribute('height', String(Math.round(g * resimOran(img))));
+  img.style.removeProperty('width'); img.style.removeProperty('height');
   degisti(img.closest('.bm-alan'));
+  document.dispatchEvent(new CustomEvent(RESIM_OLAYI));
+}
+/** Seçili resmin şimdiki yüzdesi (araç çubuğundaki kutu bunu gösterir). */
+function resimYuzdesi(img: HTMLImageElement | null): number | null {
+  if (!img || !document.contains(img)) return null;
+  const g = Number(img.getAttribute('width')) || img.width;
+  return g ? Math.round(g / resimTam(img) * 100) : null;
+}
+
+/**
+ * RESİM TUTAMACI (kullanıcı 14.11.2026: "küçültemedim"): tıklanan resmin sağ alt köşesinde sürüklenebilir tutamaç;
+ * sürükleyince genişlik değişir, oran korunur, 20-680 px. Tutamaç gövdeye eklenir, resim kaydıkça yeri güncellenir.
+ */
+function useResimSecimi() {
+  const [resim, setResim] = useState<HTMLImageElement | null>(null);
+  const [surum, setSurum] = useState(0);
+  useEffect(() => {
+    const olay = () => { setResim(seciliResim); setSurum(x => x + 1) };
+    const tikla = (e: MouseEvent) => {
+      const t = e.target as Element | null;
+      if (t instanceof HTMLImageElement && t.closest('.bm-alan[contenteditable="true"]')) { resimSec(t); return }
+      if (t?.closest?.('.bm-arac, .bm-resim-cerceve')) return;   // araç çubuğu / çerçeve seçimi bozmaz
+      resimSec(null);
+    };
+    document.addEventListener(RESIM_OLAYI, olay);
+    document.addEventListener('mousedown', tikla, true);
+    return () => { document.removeEventListener(RESIM_OLAYI, olay); document.removeEventListener('mousedown', tikla, true); resimSec(null) };
+  }, []);
+  // ÇERÇEVE + DÖRT KÖŞE TUTAMACI (kullanıcı 14.11.2026: "bir çerçeve içinde olsa ve köşelerinde fare ile size
+  //   ayarlasam"): resmin üstüne sabit konumlu çerçeve, köşelerinden sürükleyince genişlik değişir (oran korunur).
+  //   Sol köşeler sola çekilince büyür; alt/üst fark etmez. Bırakınca width/height özniteliğe yazılır.
+  useEffect(() => {
+    if (!resim) return;
+    const cer = document.createElement('div');
+    cer.className = 'bm-resim-cerceve';
+    const koseler = ['su', 'sa', 'au', 'aa'] as const;   // sol-üst, sağ-üst, alt-sol, alt-sağ
+    const tutamaclar = koseler.map(k => { const t = document.createElement('i'); t.className = `bm-resim-tutamac ${k}`; t.title = c('Sürükleyerek boyutlandır'); cer.appendChild(t); return t });
+    const bilgi = document.createElement('b'); bilgi.className = 'bm-resim-bilgi'; cer.appendChild(bilgi);
+    document.body.appendChild(cer);
+    const yerlestir = () => {
+      if (!document.contains(resim)) { cer.remove(); resimSec(null); return }
+      const r = resim.getBoundingClientRect();
+      cer.style.left = `${r.left}px`; cer.style.top = `${r.top}px`; cer.style.width = `${r.width}px`; cer.style.height = `${r.height}px`;
+      bilgi.textContent = `${Math.round(r.width)} × ${Math.round(r.height)} px · %${resimYuzdesi(resim) ?? ''}`;
+    };
+    yerlestir();
+    let bas: { x: number; gen: number; yon: 1 | -1 } | null = null;
+    const in_ = (yon: 1 | -1) => (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); bas = { x: e.clientX, gen: resim.getBoundingClientRect().width, yon } };
+    const hareket = (e: MouseEvent) => {
+      if (!bas) return;
+      const g = Math.max(20, Math.min(680, bas.gen + bas.yon * (e.clientX - bas.x)));
+      resim.style.width = `${g}px`; resim.style.height = 'auto'; yerlestir();
+    };
+    const birak = () => { if (!bas) return; bas = null; resimGenislikAta(resim, resim.getBoundingClientRect().width); yerlestir() };
+    tutamaclar.forEach((t, i) => t.addEventListener('mousedown', in_(koseler[i].endsWith('a') ? 1 : -1)));
+    document.addEventListener('mousemove', hareket); document.addEventListener('mouseup', birak);
+    window.addEventListener('scroll', yerlestir, true); window.addEventListener('resize', yerlestir);
+    return () => {
+      cer.remove(); document.removeEventListener('mousemove', hareket); document.removeEventListener('mouseup', birak);
+      window.removeEventListener('scroll', yerlestir, true); window.removeEventListener('resize', yerlestir);
+    };
+  }, [resim, surum]);
+  return { resim, yuzde: resimYuzdesi(resim) };
 }
 
 const HUCRE = 'border: 1px solid #000; padding: 4px; vertical-align: top';
@@ -350,6 +422,7 @@ function RenkSecici({ tur, pasif, mevcut }: { tur: 'yazi' | 'vurgu'; pasif?: boo
 
 export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
   const durum = useBicimDurumu();
+  useResimSecimi();   // seçili resmin çerçevesi + köşe tutamaçları (boyut kutusu kaldırıldı, 14.11.2026)
   // onMouseDown + preventDefault: tıklama seçimi alandan çalmasın. `on`: imleçteki / fare altındaki metinde etkin.
   const d = (baslik: string, icerik: React.ReactNode, f: () => void, on = false) => (
     <button type="button" title={baslik} disabled={pasif} className={on ? 'on' : undefined}
@@ -395,11 +468,6 @@ export function BicimAracCubugu({ pasif }: { pasif?: boolean }) {
         <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" disabled={pasif}
                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void resimEkle(f) }} />
       </label>
-      <select title={c('Tıklanan resmin boyutu')} disabled={pasif} defaultValue=""
-              onChange={e => { if (e.target.value) resimBoyutu(Number(e.target.value)); e.target.value = '' }}>
-        <option value="">{c('Resim boyutu')}</option>
-        {[25, 50, 75, 100].map(y => <option key={y} value={y}>%{y}</option>)}
-      </select>
       <TabloMenusu pasif={pasif} />
       <span className="bm-ayrac" />
       {d(c('Biçimi temizle'), '⌫', () => komut('removeFormat'))}
@@ -425,7 +493,7 @@ export function BicimliAlan({ html, onDegis, salt, className, onFocus }: {
     <div ref={ref} className={`bm-alan${className ? ` ${className}` : ''}`} contentEditable={!salt}
          suppressContentEditableWarning spellCheck lang="tr" onFocus={onFocus}
          onKeyUp={secimiSakla} onMouseUp={secimiSakla} onBlur={secimiSakla}
-         onClick={e => { if (e.target instanceof HTMLImageElement) seciliResim = e.target }}
+         onClick={e => { if (e.target instanceof HTMLImageElement) resimSec(e.target) }}
          // PANODAN RESİM: tarayıcı kendiliğinden ya dış adresli <img> ya da hiçbir şey koyar - dosya gömülü eklenir.
          onPaste={e => {
            const f = Array.from(e.clipboardData.files).find(x => x.type.startsWith('image/'));

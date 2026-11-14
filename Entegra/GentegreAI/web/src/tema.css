@@ -2194,7 +2194,16 @@ input.skt-gecmis {
 .bm-renk-ornek:hover { outline: 2px solid var(--vurgu); outline-offset: 1px }
 .bm-renk-ornek.on { outline: 2px solid #14315a; outline-offset: 1px }
 .bm-alan { outline: none; white-space: pre-wrap; word-break: break-word; overflow: auto }
-.bm-alan img { max-width: 100% }
+.bm-alan img { max-width: 100%; height: auto }
+/* Seçili resim + köşe tutamacı (14-11-2026): tıklanınca mavi çerçeve, sağ alt köşeden sürükleyerek boyut. */
+.bm-alan img.bm-img-on { outline: 1px dashed #2f6db3; outline-offset: 0 }
+.bm-resim-cerceve { position: fixed; border: 2px solid #2f6db3; box-sizing: border-box; pointer-events: none; z-index: 40 }
+.bm-resim-cerceve .bm-resim-tutamac { position: absolute; width: 12px; height: 12px; background: #fff; border: 2px solid #2f6db3; border-radius: 2px; pointer-events: auto }
+.bm-resim-cerceve .su { left: -7px; top: -7px; cursor: nwse-resize }
+.bm-resim-cerceve .sa { right: -7px; top: -7px; cursor: nesw-resize }
+.bm-resim-cerceve .au { left: -7px; bottom: -7px; cursor: nesw-resize }
+.bm-resim-cerceve .aa { right: -7px; bottom: -7px; cursor: nwse-resize }
+.bm-resim-bilgi { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); font: 10px/1 'Trebuchet MS', sans-serif; font-weight: normal; background: #2f6db3; color: #fff; padding: 3px 6px; border-radius: 3px; white-space: nowrap }
 .bm-alan table { border-collapse: collapse; white-space: normal }
 .bm-alan td, .bm-alan th { min-width: 30px }
 .bm-dosya { position: relative; height: 24px; padding: 0 6px; display: inline-flex; align-items: center; gap: 3px; border-radius: 3px;

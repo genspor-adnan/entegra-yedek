@@ -71,6 +71,17 @@ type Kayit = Record<string, unknown>;
  * Şablon tek modda bölüm başlıkları + varsayılan metinlerle TEK A4 METNİNE birleşir. Onaydaki zorunlu bölüm
  * kuralı şablon bölüm adıyla eşleştiği için tek bölüme uygulanmaz.
  */
+/**
+ * YEREL TASLAK YEDEĞİ (kullanıcı 14.11.2026: "rapor ekranı zaman zaman refresh oluyor ve yaptığım değişiklikler
+ * kayboluyor.. rapor yazımı için çok tehlikeli"): kaydedilmemiş her değişiklik ~1 sn içinde bu bilgisayarın tarayıcı
+ * deposuna yazılır; sayfa yenilense / sekme kapansa / tarayıcı çökse de rapor açılınca "kaydedilmemiş taslak bulundu,
+ * geri yüklensin mi?" sorulur. Kayıt geçince yedek silinir. Kilitli (onaylı) raporda yedek tutulmaz.
+ */
+const YEREL_TASLAK = (istemId: number) => `gentegre.rad.taslak.${istemId}`;
+interface YerelTaslak {
+  zaman: string; bolumler: Bolum[]; duzen: RadyolojiRaporDuzeni; giris: RadyolojiRaporGiris; sablonId: number | null;
+  skorDeger: Record<string, string>; nedeniPuan: number; kalitePuan: number;
+}
 const tekBolum = (metin: string, html?: string): Bolum[] => [{ sira: 1, baslik: TEK_BASLIK, metin, yazdir: 1, zorunlu: 0, html }];
 /** Bölümleri tek metne çevirir: basılan her bölüm "BAŞLIK:" satırı + metni, aralarında boş satır. */
 const birlestir = (b: Bolum[]): string => b
@@ -157,6 +168,9 @@ export function RadyolojiRapor() {
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
   const [sablonModal, setSablonModal] = useState(false);
+  /** Son sunucu durumu (yüklenen / kaydedilen) - yerel yedek yalnız bundan farklıysa yazılır. */
+  const tabanImza = useRef('');
+  const yedekZamanlayici = useRef<number | null>(null);
   // TİPOGRAFİ (1344): kurum ayarı + bu raporun etkin tipografisi; onaylı raporda damga (şablon değişse de kalır).
   const [kurumTipografi, setKurumTipografi] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
   const [tipografi, setTipografi] = useState<Tipografi>(TIPOGRAFI_VARSAYILAN);
@@ -260,6 +274,11 @@ export function RadyolojiRapor() {
       const d: Record<string, string> = {};
       (y.alanlar as Kayit[]).forEach(a => { d[String(a.alanKod)] = String(a.deger ?? '') });
       setSkorDeger(d);
+      // YEREL TASLAK: durum yerleşince taban alınır; sunucudan farklı bir yedek varsa sorulur.
+      if (sira === yukleSira.current) {
+        tabanImza.current = '';
+        window.setTimeout(() => void yerelTaslakGeriYukle(Number(y.rapor?.kilit ?? 0) === 1), 50);
+      }
     } catch (h) { if (sira === yukleSira.current) setHata(hataMetni(h)) }
     finally { if (sira === yukleSira.current) setYukleniyor(false) }
   // sablonUygula bilerek bagimlilikta degil: ilk yuklemede tek yon calisir.
@@ -539,12 +558,60 @@ export function RadyolojiRapor() {
   //   state düğmeleri kapatır).
   const islemdeRef = useRef(false);
   const [islemde, setIslemde] = useState(false);
+  // ---------------------------------------------------------------- yerel taslak yedeği ----
+  const taslakImzasi = () => JSON.stringify({ bolumler, duzen, giris, sablonId, skorDeger, nedeniPuan, kalitePuan });
+  const yerelTaslakSil = () => { try { localStorage.removeItem(YEREL_TASLAK(id)) } catch { /* yerel depo kapalı */ } };
+  const kilitliMi = Number(rapor?.kilit ?? 0) === 1;   // `kilitli` aşağıda tanımlı; burada aynı hesap
+  const kirli = tabanImza.current !== '' && !kilitliMi && taslakImzasi() !== tabanImza.current;
+  const kirliRef = useRef(false); kirliRef.current = kirli;
+  const yerelTaslakGeriYukle = async (kilit: boolean) => {
+    // Taban: sunucunun verdiği hâl (yükleme bitti, state yerleşti).
+    tabanImza.current = taslakImzasi();
+    if (kilit) { yerelTaslakSil(); return }
+    let yedek: YerelTaslak | null = null;
+    try { const ham = localStorage.getItem(YEREL_TASLAK(id)); yedek = ham ? JSON.parse(ham) as YerelTaslak : null } catch { yedek = null }
+    if (!yedek) return;
+    const yedekImza = JSON.stringify({ bolumler: yedek.bolumler, duzen: yedek.duzen, giris: yedek.giris, sablonId: yedek.sablonId,
+                                       skorDeger: yedek.skorDeger, nedeniPuan: yedek.nedeniPuan, kalitePuan: yedek.kalitePuan });
+    if (yedekImza === tabanImza.current) { yerelTaslakSil(); return }
+    const ne = new Date(yedek.zaman);
+    const saat = Number.isNaN(ne.getTime()) ? '' : ` (${ne.toLocaleString('tr-TR')})`;
+    if (await onay(c('Bu bilgisayarda kaydedilmemiş bir rapor taslağı bulundu') + saat + '. '
+                   + c('Ekran yenilenmiş ya da kapanmış olabilir. Taslak geri yüklensin mi? Hayır derseniz yedek silinir.'))) {
+      setBolumler(yedek.bolumler); setDuzen(yedek.duzen); setGiris(yedek.giris); setSablonId(yedek.sablonId);
+      setSkorDeger(yedek.skorDeger ?? {}); setNedeniPuan(Number(yedek.nedeniPuan ?? 0)); setKalitePuan(Number(yedek.kalitePuan ?? 0));
+      if (yedek.sablonId && yedek.sablonId !== sablonId) {
+        const m = await api.radyolojiRapor(id, yedek.sablonId).catch(() => null);
+        if (m) { setMakrolar(m.makrolar as unknown as Makro[]); setSkorlar(m.skorlar as unknown as Skor[]) }
+      }
+    } else yerelTaslakSil();
+  };
+  // Her değişiklikte (~1 sn gecikmeli) yedek; sunucuyla aynıysa yedek silinir.
+  useEffect(() => {
+    if (tabanImza.current === '' || kilitliMi) return;
+    if (yedekZamanlayici.current) window.clearTimeout(yedekZamanlayici.current);
+    yedekZamanlayici.current = window.setTimeout(() => {
+      if (!kirliRef.current) { yerelTaslakSil(); return }
+      const y: YerelTaslak = { zaman: new Date().toISOString(), bolumler, duzen, giris, sablonId, skorDeger, nedeniPuan, kalitePuan };
+      try { localStorage.setItem(YEREL_TASLAK(id), JSON.stringify(y)) } catch { /* yerel depo dolu / kapalı */ }
+    }, 800);
+    return () => { if (yedekZamanlayici.current) window.clearTimeout(yedekZamanlayici.current) };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bolumler, duzen, giris, sablonId, skorDeger, nedeniPuan, kalitePuan, kilitliMi]);
+  // Sayfa yenileme / kapatma: kaydedilmemiş değişiklik varsa tarayıcı sorar.
+  useEffect(() => {
+    const uyar = (e: BeforeUnloadEvent) => { if (kirliRef.current) { e.preventDefault(); e.returnValue = '' } };
+    window.addEventListener('beforeunload', uyar);
+    return () => window.removeEventListener('beforeunload', uyar);
+  }, []);
+
   const kaydet = async (sonra?: (k: { raporId: number; surum: string }) => Promise<void>) => {
     if (islemdeRef.current) return false;
     islemdeRef.current = true; setIslemde(true);
     try {
       return await guvenli(async () => {
         const k = await api.radyolojiRaporYaz(id, govde());
+        yerelTaslakSil();   // sunucuda; yerel yedek gereksiz
         // Kayıt geçtiyse sürüm değişti: sonraki adım hata verse de yeni sürüm okunur (yoksa ikinci kayıt 409 alırdı).
         try { if (sonra) await sonra(k) } finally { await yukle() }
         if (!sonra) mesaj('Rapor taslağı kaydedildi.');
