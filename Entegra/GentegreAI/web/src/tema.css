@@ -3617,6 +3617,9 @@ input.skt-gecmis {
 .basvuru-bilgi.bs-goster .alan button, .basvuru-bilgi.bs-goster .lookup button, .basvuru-bilgi.bs-goster .kla-combo::after { display: none }
 .basvuru-bilgi.bs-goster .alan input[type=checkbox] { appearance: auto; -webkit-appearance: auto; opacity: .8 !important }
 .basvuru-bilgi.bs-goster .seg .s { cursor: default }
+/* Ilk satir (Bolum, Gonderen...) basliga yapisikti (kullanici 16-11-2026): izgara basliktan biraz asagi alinir. */
+.basvuru-bilgi > h6 { margin-bottom: 10px }
+.basvuru-bilgi > .alan-izgara, .basvuru-bilgi > .bs-goster-sar > .alan-izgara { padding-top: 4px }
 .basvuru-bilgi .lookup-kutu { position: relative }
 .basvuru-bilgi .lookup-kutu input { padding-right: 58px }
 .basvuru-bilgi .lookup-kutu button { position: absolute; top: 0 }
