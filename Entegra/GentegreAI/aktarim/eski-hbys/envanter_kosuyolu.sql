@@ -3,7 +3,8 @@
 --  listesine ekle; cihazlar radyoloji cihaz listesinde ve randevu listesinde de bulunsun").
 --  Kaynak: Dosya/Envanter Listesi - Koşuyolu Radyoloji.pdf (Sonomed Biyomedikal Asset Manager, 13.11.2026).
 --
---  * radyoloji_cihaz: görüntüleme cihazları (7) - randevu verilir, 08:00-18:00, hafta içi, slot modaliteye göre
+--  * radyoloji_cihaz: görüntüleme cihazları (7) - randevu verilir, 08:00-20:00 Cumartesi dahil (kullanıcı 15.11.2026),
+--    slot modaliteye göre
 --    (MR 30 dk, diğerleri 15, DR 10). BT enjektörü aksesuardır: cihaz listesine girmez, yalnız demirbaş.
 --  * demirbas (Sabit Varlıklar): 8 kalem, kategori Tıbbi Cihaz. demirbas.cihaz_id lab/göz ARAYÜZ cihazı (public.cihaz)
 --    içindir, radyoloji cihazına bağ radyoloji_cihaz.demirbas_no = demirbas.kod üstünden kurulur.
@@ -27,15 +28,16 @@ insert into zz_env values
 -- ------------------------------------------------------------- radyoloji cihazları --
 insert into public.radyoloji_cihaz (kod, ad, modalite, sube_id, durum, randevu_verilir, baslangic_saat, bitis_saat,
                                     slot_dk, varsayilan_sure, calisma_gunleri, marka, model, seri_no, uretim_yili, demirbas_no, aciklama)
-select e.cihaz_kodu, e.ad, e.modalite, 1, 1, 1, '08:00', '18:00', e.slot_dk, e.slot_dk, '1,2,3,4,5',
+select e.cihaz_kodu, e.ad, e.modalite, 1, 1, 1, '08:00', '20:00', e.slot_dk, e.slot_dk, '1,2,3,4,5,6',
        e.marka, e.model, e.seri_no, e.uretim_yili, e.stok_no, 'Envanter listesi 13.11.2026 (Sonomed Asset Manager)'
   from zz_env e
  where e.cihaz_mi = 1
    and not exists (select 1 from public.radyoloji_cihaz c where lower(c.kod) = lower(e.cihaz_kodu));
--- Var olan kayıt: kimlik alanları envanterden tazelenir, randevu ayarlarına dokunulmaz.
+-- Var olan kayıt: kimlik alanları ve çalışma saatleri envanter kuralından tazelenir (08:00-20:00, Pzt-Cmt).
 update public.radyoloji_cihaz c
    set marka = e.marka, model = e.model, seri_no = e.seri_no, uretim_yili = e.uretim_yili, demirbas_no = e.stok_no,
-       modalite = e.modalite, ad = case when c.ad = '' then e.ad else c.ad end, durum = 1
+       modalite = e.modalite, ad = case when c.ad = '' then e.ad else c.ad end, durum = 1,
+       baslangic_saat = '08:00', bitis_saat = '20:00', calisma_gunleri = '1,2,3,4,5,6'
   from zz_env e
  where e.cihaz_mi = 1 and lower(c.kod) = lower(e.cihaz_kodu);
 
