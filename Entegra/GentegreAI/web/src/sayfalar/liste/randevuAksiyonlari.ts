@@ -173,6 +173,9 @@ export async function randevuAksiyonu(
     const odeyenKurumId = hasta.kurumId;
     // Başvurunun kişisi kurum moduna göre: gönderen modunda dış GÖNDEREN, değilse randevunun DOKTORU.
     const basvuruKisisi = (b.gonderenModu ? Number(satir.gonderenId) : Number(satir.hekimId)) || 0;
+    // KENDİ İSTEĞİ (1346; kullanıcı 16.11.2026: "gönderen dr veya kendi isteği aynen geçmeli"): yalnız gönderen
+    //   modunda anlamlı - hastane modunda başvurunun kişisi randevunun doktorudur, işaret oraya taşınmaz.
+    const kendiIstegi = b.gonderenModu && Number(satir.kendiIstegi) === 1 && !basvuruKisisi;
 
     // İŞLEM SEÇİLİ DEĞİLSE (kullanıcı 17.10.2026: "bilgiler ne kadar varsa onunla dönüşmeli"): sunucu
     //   kalemsiz başvuruyu kabul etmez - YENİ BAŞVURU KARTI randevudaki bilgilerle (hasta, gönderen /
@@ -185,6 +188,7 @@ export async function randevuAksiyonu(
         tarafUnvan: String((hasta.kart as { unvan?: unknown } | null)?.unvan ?? satir.hasta ?? ''),
         randevuId: String(Number(satir.id)),
         ...(kisi ? { personelId: String(kisi), personelAd: kisiAd } : {}),
+        ...(kendiIstegi ? { kendiIstegi: '1' } : {}),
         ...(Number(satir.bolum) ? { bolumId: String(Number(satir.bolum)) } : {}),
       });
       b.git(`/basvuru/yeni?${q.toString()}`);
@@ -248,6 +252,7 @@ export async function randevuAksiyonu(
         fiyatListesiId,
         // GÖNDEREN ve BÖLÜM randevudan (17.10.2026): gönderen (dış) doktor, yoksa randevunun doktoru.
         personelId: basvuruKisisi || null,
+        kendiIstegi: kendiIstegi ? 1 : 0,
         bolumId: Number(satir.bolum) || null,
         aciklama: `Randevu #${satir.id}`
                   + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),

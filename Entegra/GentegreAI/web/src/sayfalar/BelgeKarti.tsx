@@ -93,6 +93,8 @@ interface Props {
   randevuId?: number;
   onDolguPersonel?: { id: number; ad: string };
   onDolguBolumId?: number;
+  /** Randevuda "Kendi İsteği" işaretliyse başvuru da öyle açılır (1346; gönderen boş). */
+  onDolguKendiIstegi?: boolean;
   /**
    * BELGEYİ KOPYALA (kullanıcı 26.10.2026, ekstre Aksiyon › Diğer): yeni belge bu belgenin başlığı ve
    * kalemleriyle KAYDEDİLMEMİŞ açılır - numara, tarih (bugün), e-Belge durumu, lot / seri, dönüşüm zinciri
@@ -103,7 +105,7 @@ interface Props {
 
 export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
                             tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa,
-                            randevuId, onDolguPersonel, onDolguBolumId, kopyaId }: Props = {}) {
+                            randevuId, onDolguPersonel, onDolguBolumId, onDolguKendiIstegi, kopyaId }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
@@ -877,12 +879,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   (kendi isteği / geliş şekli kuralları da çalışsın diye); yalnız ilk açılışta.
   const onDolguYapildi = useRef(false);
   useEffect(() => {
-    if (belgeId || onDolguYapildi.current || (!onDolguPersonel && !onDolguBolumId)) return;
+    if (belgeId || onDolguYapildi.current || (!onDolguPersonel && !onDolguBolumId && !onDolguKendiIstegi)) return;
     onDolguYapildi.current = true;
     if (onDolguPersonel?.id) personelSecildi(onDolguPersonel.id, onDolguPersonel.ad);
+    // KENDİ İSTEĞİ randevudan (1346): işaret + geliş şekli kuralı kartın kendi işleyicisiyle (gönderen boş kalır).
+    else if (onDolguKendiIstegi) kendiIstegiDegisti(true);
     if (onDolguBolumId) setBolumId(onDolguBolumId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [belgeId, onDolguPersonel?.id, onDolguBolumId]);
+  }, [belgeId, onDolguPersonel?.id, onDolguBolumId, onDolguKendiIstegi]);
 
 
   /* BASVURUNUN KENDILIGINDEN DOLAN ALANLARI kendi kancasinda

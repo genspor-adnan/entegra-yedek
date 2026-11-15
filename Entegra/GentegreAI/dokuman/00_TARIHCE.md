@@ -21,6 +21,9 @@ Kullanıcı: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği che
   kolonu (varsayılan gizli). Erteleme gönderen + işareti yeni randevuya taşır (eskiden gönderen de taşınmıyordu).
 - Testler: `RandevuKendiIstegiTestleri` (meta karşıt alan + varsayılan 1; gönderenli kayıtta 0, gönderensizde 1),
   web `karsitAlan.test`.
+- 16.11.2026: kutu kilitlenmez, işaretlenince gönderen temizlenir (gönderen zorunlu olduğu için × yoktu; muaf-zorunlu
+  arama alanında × gösterilir). Randevudan başvuru: gönderen doktor ya da "Kendi İsteği" aynen geçer (kart linki ve
+  doğrudan başvuru yolu; yalnız gönderen modunda - hastane modunda başvurunun kişisi randevunun doktorudur).
 
 ## 15.11.2026 — Stok/hizmet arama penceresi yalnız AKTİF kalemleri getirir
 
