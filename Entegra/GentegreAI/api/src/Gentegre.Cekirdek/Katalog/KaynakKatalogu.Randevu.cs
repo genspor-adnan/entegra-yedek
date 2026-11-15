@@ -43,6 +43,8 @@ public static partial class KaynakKatalogu
             // GÖNDEREN (dış) HEKİM (1120) - görüntüleme merkezinde hastayı gönderen.
             new("gonderen",   "coalesce(public.fn_taraf_ad(gh.unvan, gh.ad, gh.soyad)::varchar(120), '')", "metin", "Gönderen Doktor", Genislik: 160,
                 AyarKapisi: "randevu.gonderen_doktor"),
+            new("kendiIstegi", "coalesce(rv.kendi_istegi, 0)", "sayi", "Kendi İsteği", Varsayilan: false,
+                AyarKapisi: "randevu.gonderen_doktor"),
             new("gonderenId", "rv.gonderen_id", "sayi", "Gönderen Id", Varsayilan: false),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
             // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): hastanın ham telefonu (cep + sabit,

@@ -619,7 +619,8 @@ public static class KartUclari
             alan.YalnizYeniKayitta,
             alan.Ipucu,
             alan.ZorunluMuafAlan,
-            alan.TekSatir);
+            alan.TekSatir,
+            alan.KarsitAlan);
 
 
     /// <summary>

@@ -98,6 +98,7 @@ public sealed partial class KartDeposu
         await SlugUretAsync(baglanti, islem, tanim, degerler, null, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, null, iptal);
         SirlariSifrele(tanim, degerler, null);
+        KarsitAlanlariUygula(tanim, degerler, null);
 
         var kolonlar = new List<string>();
         var yerTutucular = new List<string>();
@@ -203,6 +204,26 @@ public sealed partial class KartDeposu
     /// şifrelenir, boş değer sırrı siler. Log ve çakışma karşılaştırması şifreli metni görür - düz sır
     /// islem_log'a da yazılmaz.
     /// </summary>
+    /// <summary>
+    /// KARŞIT ALAN (KartAlani.KarsitAlan, 1346): karşıt alan DOLUYSA mantık işaret 0'a çekilir - iki bilgi aynı
+    /// anda doğru olamaz (randevu: gönderen hekim ↔ kendi isteği). Güncellemede karşıt alan istekte yoksa
+    /// kayıttaki değerine bakılır; işaret istekte gelmemişse de yazılır ki DB kısıtı (ck_randevu_kendi_istegi) 500
+    /// yerine tutarlı kayıt üretsin.
+    /// </summary>
+    private static void KarsitAlanlariUygula(KartTanimi tanim, IDictionary<string, object?> degerler,
+                                             IDictionary<string, object?>? oncesi)
+    {
+        foreach (var alan in tanim.Alanlar.Where(a => a.KarsitAlan is not null))
+        {
+            var karsit = degerler.TryGetValue(alan.KarsitAlan!, out var k) ? k
+                       : oncesi is not null && oncesi.TryGetValue(alan.KarsitAlan!, out var e) ? e : null;
+            var dolu = karsit is not null
+                       && Convert.ToString(karsit, CultureInfo.InvariantCulture) is { Length: > 0 } s
+                       && s.Trim() != "" && s != "0";
+            if (dolu) degerler[alan.Ad] = (short)0;
+        }
+    }
+
     private static void SirlariSifrele(KartTanimi tanim, IDictionary<string, object?> degerler,
                                        IDictionary<string, object?>? oncesi)
     {
@@ -269,6 +290,7 @@ public sealed partial class KartDeposu
         await SlugUretAsync(baglanti, islem, tanim, degerler, id, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, iptal);
         SirlariSifrele(tanim, degerler, oncesi.Kart);
+        KarsitAlanlariUygula(tanim, degerler, oncesi.Kart);
 
         if (degerler.Count > 0)
         {

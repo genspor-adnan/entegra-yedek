@@ -121,6 +121,13 @@ public sealed record KartAlani(
     /// </summary>
     string? ZorunluMuafAlan = null,
     /// <summary>
+    /// KARŞIT ALAN (kullanıcı 15.11.2026: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği check
+    /// olmalı"): bu MANTIK alan, karşıt alan DOLUYKEN doğru olamaz (başvuru 370: hasta ya gönderildi ya kendi
+    /// geldi). Sunucu kayıtta karşıt alan doluysa işareti 0'a çeker (KartDeposu.KarsitAlanlariUygula); ekran
+    /// karşıt alan seçilince işareti kaldırıp kilitler, karşıt alan boşaltılınca işaretler.
+    /// </summary>
+    string? KarsitAlan = null,
+    /// <summary>
     /// ŞİFRELİ SIR (kod inceleme 30.10.2026 K28): değer DB'ye <c>GizliMetin</c> ile şifreli yazılır, kart
     /// okumasında dolu ise yalnız maske döner (sır istemciye hiç gitmez), kayıtta maske gelirse alan
     /// değişmez. Okuyan servisler <c>GizliMetin.Coz</c> kullanır.

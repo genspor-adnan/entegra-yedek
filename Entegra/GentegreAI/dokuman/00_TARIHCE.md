@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 15.11.2026 — Randevuda "Kendi İsteği" işareti (1346) + kart alanı karşıtı (KarsitAlan)
+
+Kullanıcı: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği check olmalı".
+
+- `randevu.kendi_istegi` (1346) + kısıt `ck_randevu_kendi_istegi` (gönderen doluysa 0). Veri göçü yok (370 kararı).
+- Jenerik kart: `KartAlani.KarsitAlan` — mantık alan, karşıt alan doluyken doğru olamaz. Sunucu kayıtta karşıt
+  dolu ise işareti 0'a çeker (`KartDeposu.KarsitAlanlariUygula`, ekle + güncelle); meta `karsitAlan` ile taşır.
+  Ekran: karşıt alan seçilince kutu kalkar ve kilitlenir, boşaltılınca geri gelir (`bilesenler/karsitAlan.ts`,
+  GenForm.alanDegistir, kartAlanCizim). Zorunlu-muaf gösteriminde `false` artık "dolu" sayılmaz.
+- Randevu kartı: "Kendi İsteği" gönderen kapısıyla (`randevu.gonderen_doktor`) görünür, yeni kartta işaretli
+  açılır; gönderen zorunluluğu (`!randevu.bolum_doktor`) işaretle muaf (`ZorunluMuafAlan`). Listeye `kendiIstegi`
+  kolonu (varsayılan gizli). Erteleme gönderen + işareti yeni randevuya taşır (eskiden gönderen de taşınmıyordu).
+- Testler: `RandevuKendiIstegiTestleri` (meta karşıt alan + varsayılan 1; gönderenli kayıtta 0, gönderensizde 1),
+  web `karsitAlan.test`.
+
 ## 15.11.2026 — Stok/hizmet arama penceresi yalnız AKTİF kalemleri getirir
 
 Kullanıcı (görüntüleme): "profilden hizmet listesinde sadece lab ve rad tetkikler işaretli yaptım.. yeni randevu

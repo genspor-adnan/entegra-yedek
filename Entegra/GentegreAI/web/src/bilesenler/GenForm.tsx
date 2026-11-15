@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { karsitAlanUygula } from './karsitAlan';
 import { useNavigate } from 'react-router-dom';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from './sekmeBaglami';
 import { c } from '../dil/ceviri';
@@ -813,6 +814,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     setDeger(d => {
       const yeni = { ...d, [ad]: v };
       meta?.alanlar.forEach(x => { if (x.bagliAlan === ad) yeni[x.ad] = '' });
+      // KARŞIT ALAN (1346): gönderen seçilince "Kendi İsteği" kalkar, gönderen boşaltılınca geri gelir.
+      karsitAlanUygula(meta?.alanlar ?? [], yeni, ad, v);
       // TETKİK ÇALIŞMA DÜZENİ "SERİ" DEĞİLSE gün/saat TEMİZLENİR: kayıtta
       //   duran ama hesapta yok sayılan değer, veriyi yalancı yapar - liste
       //   "Sürekli" derken kartta üç gün seçili görünüyordu (gerçek vaka:

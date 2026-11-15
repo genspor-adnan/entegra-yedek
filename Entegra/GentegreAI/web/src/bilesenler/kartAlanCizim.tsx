@@ -1,6 +1,7 @@
 import { TelefonGirdi } from './TelefonGirdi';
 import { anGirdiMetni } from './bicim';
 import { c } from '../dil/ceviri';
+import { karsitDolu } from './karsitAlan';
 import { telefonAlaniMi, epostaGecerliMi, bicimHatasi } from './alanBicim';
 import { agacSecenekleri } from './agacSecenek';
 import { grupluSecenekler } from './grupluSecenek';
@@ -101,7 +102,7 @@ export function alanCizici(b: AlanCizimBaglami) {
 
   /** Yıldız: zorunlu ve muaf alanı boş (17.10.2026: randevuda cihaz seçiliyse doktor zorunlu değil). */
   const zorunluGoster = (a: { zorunlu: boolean; zorunluMuafAlan?: string | null }) =>
-    a.zorunlu && !(a.zorunluMuafAlan && !['', '0', 'null', 'undefined'].includes(String(deger[a.zorunluMuafAlan] ?? '')));
+    a.zorunlu && !(a.zorunluMuafAlan && !['', '0', 'false', 'null', 'undefined'].includes(String(deger[a.zorunluMuafAlan] ?? '')));
 
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
@@ -130,7 +131,8 @@ export function alanCizici(b: AlanCizimBaglami) {
           key={a.ad}
           type="checkbox"
           checked={Boolean(deger[a.ad])}
-          disabled={salt || !a.yazilabilir}
+          disabled={salt || !a.yazilabilir || karsitDolu(a, deger)}
+          title={karsitDolu(a, deger) ? c('Karşıt alan seçiliyken işaretlenemez') : undefined}
           onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.checked }))}
         />
       ) : kaynak === 'kisi' && a.ad === 'bagId' ? (

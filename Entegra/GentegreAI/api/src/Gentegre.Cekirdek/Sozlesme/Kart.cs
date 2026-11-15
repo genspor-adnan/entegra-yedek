@@ -115,7 +115,9 @@ public sealed record KartAlanMeta(
     /// <summary>Bu alan DOLUYSA zorunluluk kalkar (randevu: cihaz seçiliyse doktor zorunlu değil).</summary>
     string? ZorunluMuafAlan = null,
     /// <summary>Uzun metin kolonu ama EKRANDA TEK SATIR (notlar): arayüz textarea'ya geçmez.</summary>
-    bool TekSatir = false);
+    bool TekSatir = false,
+    /// <summary>Mantık alanın karşıtı: o alan doluyken bu işaret kaldırılır ve kilitlenir (randevu gönderen ↔ kendi isteği).</summary>
+    string? KarsitAlan = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

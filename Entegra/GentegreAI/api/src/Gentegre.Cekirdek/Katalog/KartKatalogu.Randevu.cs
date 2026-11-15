@@ -23,6 +23,7 @@ public static partial class KartKatalogu
             ["baslangic"] = "@simdi",
             ["tip"] = (short)1,             // Muayene
             ["kaynak"] = (short)1,          // Telefon
+            ["kendiIstegi"] = (short)1,     // gönderen seçilmedikçe hasta kendi isteğiyle (1346)
         },
         // GÖRÜNTÜLEME / LAB KURULUMU (kullanıcı 15.11.2026): bu kurumlarda randevu tetkik içindir, Muayene
         //   varsayılanı her kartta elle düzeltiliyordu. randevu.tip = 3 Tetkik (261; 316 radyoloji randevusu da bu tip).
@@ -79,7 +80,14 @@ public static partial class KartKatalogu
             new("gonderenId", "gonderen_id", "kod",
                 KodTablosu: "public.v_dis_hekim_lookup", AramaKaynagi: "dis-hekim",
                 Baslik: "Gönderen Doktor", Grup: "Randevu", AyarKapisi: "randevu.gonderen_doktor",
-                ZorunluKapisi: "!randevu.bolum_doktor"),
+                // KENDİ İSTEĞİ işaretliyse gönderen istenmez (başvuru 370 kuralının randevudaki karşılığı).
+                ZorunluKapisi: "!randevu.bolum_doktor", ZorunluMuafAlan: "kendiIstegi"),
+            // KENDİ İSTEĞİ (1346; kullanıcı 15.11.2026: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği
+            //   check olmalı"): gönderen hekim yok ama bu bir eksiklik değil, bir seçim. Yeni kartta işaretli açılır;
+            //   gönderen seçilince kalkar (KarsitAlan). Gönderen kapısıyla birlikte görünür.
+            new("kendiIstegi", "kendi_istegi", "mantik",
+                Baslik: "Kendi İsteği", Grup: "Randevu", AyarKapisi: "randevu.gonderen_doktor",
+                KarsitAlan: "gonderenId"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",

@@ -149,6 +149,8 @@ export interface KartAlanMeta {
   gizli?: boolean;
   /** Doluysa secenekler bu alanin degerine gore suzulur (Şube -> Banka). */
   bagliAlan?: string | null;
+  /** Mantık alanın karşıtı (1346): o alan doluyken işaret kaldırılır ve kilitlenir; boşaltılınca işaretlenir. */
+  karsitAlan?: string | null;
   /** Doluysa alan combo degil JENERIK ARAMA EKRANI ile secilir (260):
       'hasta' -> kisi/hasta aramasi, 'hizmet' -> stok/hizmet aramasi. */
   aramaKaynagi?: string | null;
