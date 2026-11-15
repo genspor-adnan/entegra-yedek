@@ -126,6 +126,8 @@ update public.taraf t
    set ad = initcap(lower(btrim(t.ad))), soyad = initcap(lower(btrim(coalesce(t.soyad, ''))))
  where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN' and t.personel = 1
    and (t.ad <> initcap(lower(btrim(t.ad))) or coalesce(t.soyad, '') <> initcap(lower(btrim(coalesce(t.soyad, '')))));
+-- Türkçe olmayan sabit adlar: ADMIN → "Admın" olmasın.
+update public.taraf set ad = 'Admin' where aktarim_kaynak = 2 and aktarim_tablo = 'KULLAN' and ad = 'Admın';
 
 -- ---------------------------------------------------------------- 4. rapor --
 select 'KULLAN kaynak: ' || (select count(*) from zz_k) || ' kişi (sistem kullanıcıları hariç)' as rapor
