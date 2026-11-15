@@ -370,7 +370,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                      onTemizle={() => onPersonelSec?.(0, '')} />
         )}
         <label className="alan">
-          <span className="etiket zorunlu-isaret">{c('Başvuru Tarihi / Saati')}</span>
+          <span className="etiket zorunlu-isaret">{c('Başvuru Tarihi')}</span>
           <input type="datetime-local" value={tarih} disabled={kilitli}
                  max={tarihEnGec} min={tarihEnErken}
                  onChange={e => setTarih(e.target.value)} />
