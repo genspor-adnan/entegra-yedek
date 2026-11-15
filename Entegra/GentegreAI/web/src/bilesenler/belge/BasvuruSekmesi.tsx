@@ -387,17 +387,6 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           </select>
           {kurumHatasi && <span className="alan-hata">{kurumHatasi}</span>}
         </label>
-        {/* BİLDİRİMLER (1340): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
-            girilmez (sunucu kapıları). */}
-        <label className="alan onay-alan">
-          <span className="etiket">{c('Bildirimler')}</span>
-          <span className="onay-satir bs-bildirimler">
-            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.enabizBildirim ?? 0) === 1}
-                          onChange={e => degistir({ enabizBildirim: e.target.checked ? 1 : 0 })} /> {c('e-Nabız Bildirimi')}</label>
-            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.teleradBildirim ?? 0) === 1}
-                          onChange={e => degistir({ teleradBildirim: e.target.checked ? 1 : 0 })} /> {c('TeleRadyoloji Bildirimi')}</label>
-          </span>
-        </label>
 
         {/* SOZLESME (468): ayni sigorta sirketiyle OSS / TSS / Karma police
             ayri sartlarla calisilir. TEK sozlesme varsa secici PASIF gelir -
@@ -541,6 +530,18 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                         onDeger={v => degistir({ ambulansBileklikNo: v })} />
           </>
         )}
+
+        {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
+            girilmez (sunucu kapıları). */}
+        <label className="alan onay-alan">
+          <span className="etiket">{c('Bildirimler')}</span>
+          <span className="onay-satir bs-bildirimler">
+            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.enabizBildirim ?? 0) === 1}
+                          onChange={e => degistir({ enabizBildirim: e.target.checked ? 1 : 0 })} /> {c('e-Nabız')}</label>
+            <label><input type="checkbox" disabled={kilitli} checked={Number(bilgi.teleradBildirim ?? 0) === 1}
+                          onChange={e => degistir({ teleradBildirim: e.target.checked ? 1 : 0 })} /> {c('Teleradyoloji')}</label>
+          </span>
+        </label>
 
         {/* BASVURU NOTU (mockup): tam genislikte serbest metin. Belgenin
             kendi aciklama alanina yazilir - ayri bir kolon acmaya gerek yok,
