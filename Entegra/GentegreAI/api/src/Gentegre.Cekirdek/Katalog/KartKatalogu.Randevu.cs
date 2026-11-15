@@ -24,6 +24,13 @@ public static partial class KartKatalogu
             ["tip"] = (short)1,             // Muayene
             ["kaynak"] = (short)1,          // Telefon
         },
+        // GÖRÜNTÜLEME / LAB KURULUMU (kullanıcı 15.11.2026): bu kurumlarda randevu tetkik içindir, Muayene
+        //   varsayılanı her kartta elle düzeltiliyordu. randevu.tip = 3 Tetkik (261; 316 radyoloji randevusu da bu tip).
+        KurumTipiVarsayilanlari: new Dictionary<string, IReadOnlyDictionary<string, object?>>
+        {
+            ["goruntuleme"] = new Dictionary<string, object?> { ["tip"] = (short)3 },
+            ["lab"]         = new Dictionary<string, object?> { ["tip"] = (short)3 },
+        },
         Alanlar: new KartAlani[]
         {
             new("id",        "id",        "sayi",  Yazilabilir: false),

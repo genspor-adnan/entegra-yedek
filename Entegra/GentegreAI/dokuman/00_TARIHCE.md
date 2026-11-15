@@ -7,6 +7,19 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 15.11.2026 — Randevu kartı kurum tipine göre "Tetkik" açılır (KurumTipiVarsayilanlari)
+
+Kullanıcı: "goruntuleme ve lab profilde yeni randevu açıldığında kartta randevu nedeni tetkik olarak gelmeli".
+
+- `KartTanimi.KurumTipiVarsayilanlari`: kurum tipi kodu → yeni kayıt varsayılanı üst yazımı. Kart meta ucu
+  (`/api/kart/{kaynak}/alanlar`) katalog varsayılanlarını alır, aktif şubenin `kurum_profil.kurum_tipi`'ne özel
+  olanları üzerine yazar, `@bugun`'u çözer (`KartUclari.KurumTipiVarsayilanlariAsync`). Karar sunucuda; istemci
+  kurum tipini bilmez.
+- Randevu kartı: `goruntuleme` ve `lab` kurulumunda `tip = 3` (Tetkik, kod listesi randevu.tip 261); diğerlerinde
+  katalog varsayılanı 1 (Muayene) sürer. `KartDeposu.KurumTipiKoduAsync` KurumProfilDeposu kuralıyla okur.
+- Test: `KartKurumTipiVarsayilaniTestleri` (goruntuleme/lab → 3, tip_merkezi/hastane → 1; kurum tipi test DB'de
+  geçici değişir, sonunda geri yazılır).
+
 ## 13.11.2026 — Radyoloji şablonları Bakanlık dört parçasına (1332)
 
 Kullanıcı: "bakanlık radyoloji raporlarını kaç bölümde istiyor" → "bizim projede kaç bölüm" → "ölç" → "şablon göçünü

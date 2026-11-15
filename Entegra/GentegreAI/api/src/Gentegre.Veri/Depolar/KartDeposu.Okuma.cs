@@ -645,6 +645,16 @@ public sealed partial class KartDeposu
     public async Task<int> UrunModuAsync(CancellationToken iptal = default)
         => await UrunModuAsync(0, iptal);
 
+    /// <summary>
+    /// Aktif şubenin kurum tipi kodu (`kurum_profil.kurum_tipi`, şube satırı yoksa kurum geneli) - kart meta'sı
+    /// `KartTanimi.KurumTipiVarsayilanlari`'nı bununla seçer. Okuma kuralı KurumProfilDeposu ile aynı.
+    /// </summary>
+    public async Task<string> KurumTipiKoduAsync(int subeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return (await KurumProfilDeposu.KurumTipiAsync(baglanti, subeId, iptal)).Kod ?? "";
+    }
+
     public async Task<int> UrunModuAsync(int subeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);

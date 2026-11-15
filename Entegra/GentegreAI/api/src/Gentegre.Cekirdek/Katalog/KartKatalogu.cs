@@ -281,6 +281,13 @@ public sealed record KartTanimi(
     /// <summary>ROL KAPSAMI (RolKapsami): rol kodu -> kart okuma kosulu ({kullanici}); listeyle AYNI kural, kart serbest kalmasin.</summary>
     IReadOnlyDictionary<string, string>? RolKosullari = null,
     IReadOnlyDictionary<string, object?>? YeniKayitVarsayilanlari = null,
+    /// <summary>
+    /// KURUM TİPİNE GÖRE YENİ KAYIT VARSAYILANI (kullanıcı 15.11.2026: "görüntüleme ve lab profilde yeni randevu
+    /// açıldığında kartta randevu nedeni tetkik olarak gelmeli"). Anahtar `kurum_profil.kurum_tipi` kodu
+    /// (goruntuleme, lab, hastane…), değer o kurulumda `YeniKayitVarsayilanlari`'nın ÜZERİNE yazılacak alanlar.
+    /// Karar sunucuda (kart meta) çözülür: istemci kurum tipini bilmez, kuralı ikinci kez yazmaz.
+    /// </summary>
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>>? KurumTipiVarsayilanlari = null,
     // YENI kayitta acilir acilmaz taraf (cari) secim ekrani acilsin mi - deger,
     //   secimin yazilacagi alan adidir ("tarafId"). Belge kartindaki desenin
     //   generic kartlardaki karsiligi; kullanici isterse sonra degistirir.

@@ -385,6 +385,24 @@ public static class KartUclari
             });
         });
 
+        // Yeni kayıt varsayılanları: katalog + kurum tipine özel üst yazım; "@bugun" sembolü burada çözülür
+        //   (katalogda sabit tarih yazılamaz - dosya bir kez derlenir, tarih donar; meta her istekte üretilir).
+        static async Task<Dictionary<string, object?>> KurumTipiVarsayilanlariAsync(
+            KartTanimi tanim, KartDeposu depo, int subeId, CancellationToken iptal)
+        {
+            var sonuc = new Dictionary<string, object?>(tanim.YeniKayitVarsayilanlari ?? new Dictionary<string, object?>());
+            if (tanim.KurumTipiVarsayilanlari is { Count: > 0 } kt)
+            {
+                var kurumTipi = await depo.KurumTipiKoduAsync(subeId, iptal);
+                if (kt.TryGetValue(kurumTipi, out var ozel))
+                    foreach (var (ad, deger) in ozel) sonuc[ad] = deger;
+            }
+            foreach (var ad in sonuc.Keys.ToList())
+                if (sonuc[ad] as string == "@bugun")
+                    sonuc[ad] = Saat.Bugun.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return sonuc;
+        }
+
         grup.MapGet("/{kaynak}/alanlar", async (
             string kaynak, BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -503,11 +521,9 @@ public static class KartUclari
                 //   "tarih cozulemedi (@bugun)" ile reddediliyordu, yani yeni
                 //   plan HIC acilamiyordu. Meta her istekte uretildigi icin
                 //   tarih de her acilista gunceldir.
-                Varsayilanlar = (tanim.YeniKayitVarsayilanlari
-                    ?? new Dictionary<string, object?>())
-                    .ToDictionary(x => x.Key, x => x.Value as string == "@bugun"
-                        ? Saat.Bugun.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-                        : x.Value),
+                // KURUM TİPİ VARSAYILANI (15.11.2026): görüntüleme / lab kurulumunda randevu "Tetkik" açılır
+                //   (KartTanimi.KurumTipiVarsayilanlari). Katalog varsayılanının ÜZERİNE yazılır, karar sunucuda.
+                Varsayilanlar = await KurumTipiVarsayilanlariAsync(tanim, depo, baglam.SubeId ?? 0, iptal),
                 AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
                 Doviz = dovizMeta,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
