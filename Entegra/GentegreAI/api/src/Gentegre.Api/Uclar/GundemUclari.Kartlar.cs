@@ -23,13 +23,16 @@ public static partial class GundemUclari
             var moduller = await Gentegre.Veri.Depolar.KurumProfilDeposu.AcikModullerAsync(b, sube, iptal);
             bool Modul(string m) => moduller.Count == 0 || moduller.Contains(m);
             bool Yetki(params string[] kodlar) => kodlar.Any(k => baglam.Yetkiler.Var(k, Islem.Gor));
+            // MALİ ÖZET (1345): para taşıyan kartlar yalnız mali.ozet aksiyon yetkisiyle (banko görevlisinin KENDİ oturum
+            //   kartı hariç - kendi kasası).
+            var mali = baglam.Yetkiler.AksiyonVar(GostergeUclari.MaliOzet);
             var kartlar = new List<GundemKarti>();
             void Ekle(GundemKarti? k) { if (k is not null) kartlar.Add(k); }
 
             // ---- F1 / F2 / S4 · cari vadeleri (FIFO, bütün geçmiş) - tek sorgu --------------------------------------
-            var cariOdeme = Modul("kasa") && Yetki("finans.cari_icmali", "finans.nakit_akis_icmali");
-            var cariTahsil = Modul("kasa") && Yetki("finans.cari_icmali", "finans.alacak_yaslandirma");
-            var risk = Modul("kasa") && Yetki("finans.musteri_risk_icmali");
+            var cariOdeme = mali && Modul("kasa") && Yetki("finans.cari_icmali", "finans.nakit_akis_icmali");
+            var cariTahsil = mali && Modul("kasa") && Yetki("finans.cari_icmali", "finans.alacak_yaslandirma");
+            var risk = mali && Modul("kasa") && Yetki("finans.musteri_risk_icmali");
             Cari7? cari = null;
             if (cariOdeme || cariTahsil || risk)
             {
@@ -74,7 +77,7 @@ public static partial class GundemUclari
                     "/musteri-risk-icmali", [new("Müşteri Risk İcmali", "/musteri-risk-icmali")]));
 
             // ---- F3 · çek / senet (7 gün) - açık kuralı nakit akışınki ---------------------------------------------
-            if (Modul("kasa") && Yetki("finans.cek_senet_icmali", "cek_senet.liste", "cek_senet"))
+            if (mali && Modul("kasa") && Yetki("finans.cek_senet_icmali", "cek_senet.liste", "cek_senet"))
             {
                 var c = await b.TekAsync("""
                     select count(*) filter (where c.yon = 1)::int, coalesce(sum(c.yerel_tutar) filter (where c.yon = 1), 0),
@@ -91,7 +94,7 @@ public static partial class GundemUclari
             }
 
             // ---- F4 · kredi taksiti (7 gün + geciken) ---------------------------------------------------------------
-            if (Modul("kasa") && Yetki("finans.nakit_akis_icmali", "hesap.tanim.kredi.liste", "kredi"))
+            if (mali && Modul("kasa") && Yetki("finans.nakit_akis_icmali", "hesap.tanim.kredi.liste", "kredi"))
             {
                 var k = await b.TekAsync("""
                     select count(*)::int, coalesce(sum(kt.toplam - coalesce(kt.odenen, 0)), 0),
@@ -107,7 +110,7 @@ public static partial class GundemUclari
             }
 
             // ---- F5 · planlı ödemeler (kira, abonelik, kart ...) - PlanliGiderMotoru'nun kuralı ---------------------
-            if (Modul("kasa") && Yetki("finans.planli_gider"))
+            if (mali && Modul("kasa") && Yetki("finans.planli_gider"))
             {
                 var (kalemler, _) = await PlanliGiderMotoru.AkisKalemleriAsync(b, subeler, 0, DateTime.Today, DateTime.Today.AddDays(7), iptal);
                 var gecmis = kalemler.Count(x => x.Gecmis);
@@ -119,7 +122,7 @@ public static partial class GundemUclari
             }
 
             // ---- F6 · nakit durumu (kasa + banka) + 7 günün vadeleri ------------------------------------------------
-            if (Modul("kasa") && Yetki("finans.nakit_akis_icmali"))
+            if (mali && Modul("kasa") && Yetki("finans.nakit_akis_icmali"))
             {
                 var bakiye = await b.TekDegerAsync<decimal>("""
                     select coalesce(sum(v.yerel_bakiye), 0) from public.v_hesap_bakiye v
@@ -133,7 +136,7 @@ public static partial class GundemUclari
             }
 
             // ---- F7 · banka hareketi eşleşme bekliyor -----------------------------------------------------------------
-            if (Modul("kasa") && Yetki("banka.hareket"))
+            if (mali && Modul("kasa") && Yetki("banka.hareket"))
             {
                 var n = await b.TekDegerAsync<int>("""
                     select count(*)::int from public.banka_hareket h
@@ -278,7 +281,7 @@ public static partial class GundemUclari
             }
 
             // ---- H3 · tahsil edilmemiş hasta payı (açık satır kalanı) -------------------------------------------------
-            if (Yetki("hasta.borc_takip"))
+            if (mali && Yetki("hasta.borc_takip"))
             {
                 var r = await b.TekAsync("""
                     select count(distinct a.belge_id)::int, coalesce(sum(coalesce(a.hasta_provizyon_kalan, 0) + coalesce(a.hasta_ek_katki_kalan, 0)), 0)
