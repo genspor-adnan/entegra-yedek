@@ -81,7 +81,8 @@ public static partial class KartKatalogu
                 KodTablosu: "public.v_dis_hekim_lookup", AramaKaynagi: "dis-hekim",
                 Baslik: "Gönderen Doktor", Grup: "Randevu", AyarKapisi: "randevu.gonderen_doktor",
                 // KENDİ İSTEĞİ işaretliyse gönderen istenmez (başvuru 370 kuralının randevudaki karşılığı).
-                ZorunluKapisi: "!randevu.bolum_doktor", ZorunluMuafAlan: "kendiIstegi"),
+                // Kutu gonderen kutusunun SAGINDA (kullanici 16.11.2026: "gonderen editi kucult ve sagina Kendi Istegi checki tasi").
+                ZorunluKapisi: "!randevu.bolum_doktor", ZorunluMuafAlan: "kendiIstegi", EslesAlan: "kendiIstegi"),
             // KENDİ İSTEĞİ (1346; kullanıcı 15.11.2026: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği
             //   check olmalı"): gönderen hekim yok ama bu bir eksiklik değil, bir seçim. Yeni kartta işaretli açılır;
             //   gönderen seçilince kalkar (KarsitAlan). Gönderen kapısıyla birlikte görünür.

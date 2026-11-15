@@ -521,7 +521,14 @@ export function alanCizici(b: AlanCizimBaglami) {
               <span className="etiket">
                 {c(a.baslik)}{zorunluGoster(a) && <b className="zorunlu"> *</b>}
               </span>
-              <div className="ikili">{renderGirdi(a)}{renderGirdi(hedef)}</div>
+              {/* ESLESEN ONAY KUTUSU (16.11.2026, randevu "Gonderen Doktor" + "Kendi Istegi"): kutu kendi adini
+                  tasir ve girdinin SAGINDA durur; girdi daralir (ikili-onayli). */}
+              <div className={`ikili${hedef.tip === 'mantik' ? ' ikili-onayli' : ''}`}>
+                {renderGirdi(a)}
+                {hedef.tip === 'mantik'
+                  ? <label className="ikili-onay">{renderGirdi(hedef)}<span>{c(hedef.baslik)}</span></label>
+                  : renderGirdi(hedef)}
+              </div>
               {(alanHatalari[a.ad] || alanHatalari[hedef.ad]) && (
                 <span className="alan-hata">{alanHatalari[a.ad] || alanHatalari[hedef.ad]}</span>
               )}
