@@ -99,6 +99,9 @@ function eskiBasvuru(b: Belge) {
     // EMEKLI (590): referans kopya BILEREK guncellendi - SGK katilim payi
     //   muafiyeti basvurunun bilgisidir ve karta geri okunmali.
     emekli: b.emekli != null ? Number(b.emekli) : 0,
+    // 1340: bildirim bayrakları (kurumdan varsayılan, başvuruda karar)
+    enabizBildirim: b.enabizBildirim != null ? Number(b.enabizBildirim) : 0,
+    teleradBildirim: b.teleradBildirim != null ? Number(b.teleradBildirim) : 0,
     // 370'te EKLENEN alan: "Kendi İsteği" isareti. Referans kopya BILEREK
     //   guncellendi - bu dosyanin isi "cevrim degismedi mi" degil, "cevrim
     //   YANLISLIKLA degismedi mi". Yeni bir alan eklendiginde buraya da

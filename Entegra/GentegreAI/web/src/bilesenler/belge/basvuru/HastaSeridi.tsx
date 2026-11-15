@@ -175,7 +175,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   const kurumHucre = (
         <span className="hs">
           {/* Istem kartinda yalniz "Kurum" (kullanici 01.11.2026: "ödeyen kurum rename kurum"). */}
-          <span className="k">🏢 {isteyen ? c('Kurum') : c('Ödeyen Kurum')}</span>
+          <span className="k"><i className="k-ik">🏢</i> <span>{isteyen ? c('Kurum') : c('Ödeyen Kurum')}</span></span>
           <span className="v">
             {kurumAdi || String(h?.sigortaAdi ?? '') || '—'}
             {mustehaklik != null && mustehaklik > 0 && (
@@ -201,7 +201,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
       </span>
       {tetkik && (
         <span className="hs hs3-tetkik" title={tetkik.ad}>
-          <span className="k">☢️ {c('Tetkik')}</span>
+          <span className="k"><i className="k-ik">☢️</i> <span>{c('Tetkik')}</span></span>
           <span className="v">{tetkik.ad || '—'}</span>
           {tetkik.kod && <span className="hs3-s2">{tetkik.kod}</span>}
         </span>
@@ -210,7 +210,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
       {/* IZINLER: yalniz kaydi olanlar. ? = sorulmadi / kayit yok. Istem kartinda yerine ISTEYEN. */}
       {isteyen ? (
         <span className="hs">
-          <span className="k">👨‍⚕️ {c('İsteyen')}</span>
+          <span className="k"><i className="k-ik">👨‍⚕️</i> <span>{c('İsteyen')}</span></span>
           <span className="v">{isteyen.ad || '—'}</span>
           {isteyen.bolum && <span className="hs3-s2">{isteyen.bolum}</span>}
         </span>
@@ -227,7 +227,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
       {/* ISTEM KIPI SIRASI (kullanici 01.11.2026: "kurum ve isteyen yer değişsin"): Isteyen · Kurum. */}
       {isteyen && kurumHucre}
       <span className="hs">
-        <span className="k">⚠️ {c('Uyarı')}</span>
+        <span className="k"><i className="k-ik">⚠️</i> <span>{c('Uyarı')}</span></span>
         {uyarilar.length === 0 && bant && bant.alerji.length === 0
           ? <span className="hs3-roz"><span className="rozet olumlu">{c('Alerji: yok')}</span></span>
           : rozetler(uyarilar, '—')}
