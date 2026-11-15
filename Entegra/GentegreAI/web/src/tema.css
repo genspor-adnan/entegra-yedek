@@ -2993,6 +2993,10 @@ input.skt-gecmis {
    Takvimin SOLUNDA durur; kart sürüklenip takvimin boş saatine bırakılır ya da
    seçilip boş saate tıklanır. Dar ekranda panel takvimin üstüne düşer. */
 .takvim-duzen { display: flex; gap: 12px; align-items: flex-start }
+/* Takvim kolon tutamacı (15-11-2026): başlığın sağ kenarı sürüklenerek genişlik. */
+.takvim-kol { position: relative }
+.takvim-kol-tutamac { position: absolute; top: 0; right: -4px; width: 8px; height: 100%; cursor: col-resize; user-select: none; z-index: 2 }
+.takvim-kol-tutamac:hover { background: rgba(47, 109, 179, .25) }
 /* Çok slotlu randevu (15-11-2026): tek çerçeve, rowSpan ile uzayan hücreyi kaplar. */
 .takvim-uzun { position: absolute; left: 2px; right: 2px; top: 2px; bottom: 2px; margin-bottom: 0 !important; overflow: hidden; white-space: normal; overflow-wrap: anywhere; line-height: 1.3 }
 .takvim-uzun b, .takvim-uzun span, .takvim-uzun div { white-space: normal }

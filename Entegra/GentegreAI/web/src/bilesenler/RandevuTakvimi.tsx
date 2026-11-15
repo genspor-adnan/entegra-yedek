@@ -277,6 +277,45 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    * mantigi ikisinde de ayni oldugu icin tek soyutlama - gun ve hekim suzgeci
    * sutunun kendisinde tasiniyor.
    */
+  /**
+   * KOLON GENİŞLİĞİ (kullanıcı 15.11.2026: "gridin kolonlarını fare ile genişletme / daraltma"): başlığın sağ
+   * kenarındaki tutamaç sürüklenir; genişlikler kolon kimliğine (cihaz / hekim / gün) göre tarayıcı deposunda kalır,
+   * çift tık sıfırlar. İlk sürüklemede bütün kolonların o anki genişliği sabitlenir (tablo fixed düzene geçer).
+   */
+  const KOLON_ANAHTAR = 'gentegre.randevu.takvim.kolon';
+  const [kolonGen, setKolonGen] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem(KOLON_ANAHTAR) ?? '{}') as Record<string, number> } catch { return {} }
+  });
+  const kolonKimligi = (s: Sutun) => (s.cihaz !== undefined ? `c${s.cihaz}` : s.hekim !== undefined ? `h${s.hekim}` : 'g');
+  const tabloRef = useRef<HTMLTableElement>(null);
+  const kolonGenYaz = (y: Record<string, number>) => {
+    setKolonGen(y);
+    try { localStorage.setItem(KOLON_ANAHTAR, JSON.stringify(y)) } catch { /* yerel depo kapalı */ }
+  };
+  const kolonSurukle = (s: Sutun, e: React.MouseEvent<HTMLSpanElement>) => {
+    e.preventDefault(); e.stopPropagation();
+    const th = (e.currentTarget as HTMLElement).closest('th') as HTMLTableCellElement | null;
+    if (!th) return;
+    // Snapshot: diğer kolonlar da ölçülü genişlik alır ki biri değişince ötekiler kaymasın.
+    const taban: Record<string, number> = { ...kolonGen };
+    tabloRef.current?.querySelectorAll<HTMLTableCellElement>('thead th[data-kolon]').forEach(h => {
+      const k = h.dataset.kolon!; if (!taban[k]) taban[k] = Math.round(h.getBoundingClientRect().width);
+    });
+    const kim = kolonKimligi(s), basX = e.clientX, basGen = taban[kim] || th.getBoundingClientRect().width;
+    const hareket = (m: MouseEvent) => {
+      const g = Math.max(70, Math.min(1400, Math.round(basGen + (m.clientX - basX))));
+      setKolonGen({ ...taban, [kim]: g });
+    };
+    const birak = (m: MouseEvent) => {
+      document.removeEventListener('mousemove', hareket); document.removeEventListener('mouseup', birak);
+      const g = Math.max(70, Math.min(1400, Math.round(basGen + (m.clientX - basX))));
+      kolonGenYaz({ ...taban, [kim]: g });
+    };
+    document.addEventListener('mousemove', hareket); document.addEventListener('mouseup', birak);
+  };
+  const kolonSifirla = () => kolonGenYaz({});
+  const sabitDuzen = Object.keys(kolonGen).length > 0;
+
   const sutunlar = useMemo<Sutun[]>(() => {
     const gunBaslik = (g: string) => {
       const t = new Date(g);
@@ -565,12 +604,18 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       )}
 
       <div style={{ overflowX: 'auto', flex: 1, minWidth: 0 }}>
-        <table className="grid randevu-takvim">
+        <table className="grid randevu-takvim" ref={tabloRef}
+               style={sabitDuzen ? { tableLayout: 'fixed', width: 64 + sutunlar.reduce((t, s) => t + (kolonGen[kolonKimligi(s)] || 160), 0) } : undefined}>
           <thead>
             <tr>
               <th style={{ width: 64 }}>Saat</th>
               {sutunlar.map(s => (
-                <th key={s.anahtar} style={{ textAlign: 'center' }}>{s.baslik}</th>
+                <th key={s.anahtar} data-kolon={kolonKimligi(s)} className="takvim-kol"
+                    style={{ textAlign: 'center', width: kolonGen[kolonKimligi(s)] || undefined }}>
+                  {s.baslik}
+                  <span className="takvim-kol-tutamac" title={cev('Sürükleyerek genişlet / daralt · çift tık: sıfırla')}
+                        onMouseDown={e => kolonSurukle(s, e)} onDoubleClick={kolonSifirla} />
+                </th>
               ))}
               {sutunlar.length === 0 && (
                 <th style={{ textAlign: 'center', fontWeight: 400, opacity: .7 }}>
