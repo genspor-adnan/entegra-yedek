@@ -3588,14 +3588,13 @@ input.skt-gecmis {
    is bitmemis gibi duruyordu. */
 .yuzde-cizgi.asama-yesil .deger { color: #2e7d46; font-weight: 600 }
 
-/* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
-   zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */
-/* align-items STRETCH: .alan'ın `center`ı sütun düzeninde içteki etiket + kutuyu ortalayıp daraltıyordu (Gönderen
-   kutusu Sözleşme'den 180 px kısa ve sağa kaymıştı); işaret kutunun altına (84 px etiket + 8 px aralık) hizalanır. */
-.gonderen-alani { display: flex; flex-direction: column; align-items: stretch; gap: 0 }
+/* GONDEREN + "Kendi İsteği" (370; 16-11-2026 kullanici: "randevu gibi gonderen editle ayni yerde sagina tasi"):
+   isaret gonderen kutusuyla AYNI SATIRDA, satirin sag kenarina yasli; kutu kalan yeri doldurur. */
+.gonderen-alani { display: flex; flex-direction: row; align-items: center; gap: 8px }
+.gonderen-alani > .alan { flex: 1 1 auto; min-width: 0 }
 .gonderen-alani .kendi-istegi {
-  display: flex; align-items: center; gap: 5px; margin-top: 3px; padding-left: 92px;
-  font-size: 11px; color: var(--soluk); cursor: pointer;
+  display: flex; align-items: center; gap: 5px; margin: 0; padding: 0; flex: none; white-space: nowrap;
+  font-size: 12px; color: var(--yazi); cursor: pointer;
 }
 .gonderen-alani .kendi-istegi input { margin: 0 }
 /* GÖNDEREN / DOKTOR KUTUSU ÖTEKİ ALANLARLA AYNI BOYDA (kullanıcı 01.11.2026: "gönderen edit boyunu sözleşme

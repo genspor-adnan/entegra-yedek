@@ -3,6 +3,7 @@ import { TarafSecici } from '../TarafArama';
 import { KodSecim, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
 import { c } from '../../dil/ceviri';
+import { useOturum } from '../../kimlik/OturumBaglami';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -205,6 +206,9 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   aciklama?: string;
   setAciklama?(v: string): void;
 }) {
+  // REFAKATÇİ YALNIZ HASTANE PROFİLİNDE (kullanıcı 16.11.2026): kurum tipi oturumdan (786).
+  const { kullanici: oturumKullanicisi } = useOturum();
+  const hastaneMi = oturumKullanicisi?.kurumTipi === 'hastane';
   /**
    * SGK ODEYEN MI (591) - emekli kutusunun kapisi. Sunucudaki
    * `fn_dagilim_rota` ile AYNI mantik: SGK kurumu (tür 3) her zaman, sigortada
@@ -512,8 +516,11 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           <span className="etiket">Randevu</span>
           <input value={randevuBilgi || '—'} readOnly />
         </label>
-        <MetinAlani etiket="Refakatçi" deger={bilgi.refakatci} kilitli={kilitli}
-                    onDeger={v => degistir({ refakatci: v })} />
+        {/* REFAKATÇİ yalnız HASTANE profilinde (kullanıcı 16.11.2026); dolu kayıtta her yerde görünür. */}
+        {(hastaneMi || bilgi.refakatci) && (
+          <MetinAlani etiket="Refakatçi" deger={bilgi.refakatci} kilitli={kilitli}
+                      onDeger={v => degistir({ refakatci: v })} />
+        )}
 
         {/* AMBULANS (300): yalniz gelis sekli Ambulans iken sorulur - ama
             DOLU ise her zaman gorunur, yoksa gelis sekli sonradan
