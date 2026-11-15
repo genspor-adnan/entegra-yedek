@@ -352,7 +352,9 @@ public static partial class KaynakKatalogu
             left join public.rol r on r.id = tk.rol_id
             left join public.v_personel_durum pd on pd.taraf_id = t.id
             """,
-        SabitKosul: "t.personel = 1",
+        // DIŞ HEKİMLER BU LİSTEDE DEĞİL (kullanıcı 15.11.2026: "personel listesinde 1512 kayıt görünüyor"): dış doktor
+        //   taraf.personel = 1 + taraf_personel.dis_hekim = 1 ile açılır (Kurumlar › Dış Doktorlar kendi listesi).
+        SabitKosul: "t.personel = 1 and coalesce(po.dis_hekim, 0) = 0",
         VarsayilanSirala: "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) asc",
         Kolonlar: new KolonTanimi[]
         {
