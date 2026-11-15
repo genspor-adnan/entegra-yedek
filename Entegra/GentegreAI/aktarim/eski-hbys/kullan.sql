@@ -6,9 +6,11 @@
 --  Sonra: docker exec -i gentegre-pg18 psql -U postgres -d KOSUYOLU -v ON_ERROR_STOP=1 -f - < kullan.sql
 --
 --  Ne yapar:
---   1) BOŞALTMA: esle.sql'in eski DOKTOR tablosundan açtığı kurum içi personel (taraf.personel = 1,
---      taraf_personel.dis_hekim = 0, aktarim_tablo = 'DOKTOR') silinir. Bir kayda başvuru / rapor / istem bağlıysa
---      silinmez: aynı adlı KULLAN kişisi varsa referans ona taşınır, yoksa kayıt PASİF bırakılır (raporda yazar).
+--   1) DOKTOR = KURUM İÇİ HEKİM, PERSONEL KALIR (kullanıcı 15.11.2026: "DOKTORLAR → dış doktor; KULLAN + DOKTOR →
+--      personel"). DOKTOR.KULLANID ile bir KULLAN kullanıcısına bağlı hekimler (radyologlar) KULLAN kaydıyla
+--      BİRLEŞTİRİLİR (tek personel kartı: hekim = 1, branş / diploma DOKTOR'dan; DOKTOR kaynaklı kopya silinir).
+--      Bağsız hekimler DOKTOR kaynaklı kart olarak kalır; ad / soyad standart biçime, "Dr." öneki unvana alınır.
+--      İlk sürümün (15.11.2026 sabah) sildiği DOKTOR kayıtları eski.yedek_taraf_doktor_20261115'ten geri yüklenir.
 --      Dış hekimler (DOKTORLAR / GELISLER.DOKTOR, dis_hekim = 1) ve elle açılan kayıtlar (admin vb.) DOKUNULMAZ.
 --   2) TEMSİLCİLER: ziyaret.sql'in KULLAN kodlarından açtığı TEM-ED / RC / BH / H8 / BG satırları (kullanıcı hesabı ve
 --      ziyaret referansları taşır) silinmez; KULLAN satırına bağlanır (kod = KULLANICI, aktarim_id = KULLAN.ID), boş
@@ -43,37 +45,60 @@ update zz_k z set cep = '' where cep <> '' and id <> (select min(id) from zz_k x
 update zz_k z set eposta = '' where eposta <> '' and id <> (select min(id) from zz_k x where x.eposta = z.eposta);
 update zz_k z set vkno = '' where vkno <> '' and id <> (select min(id) from zz_k x where x.vkno = z.vkno);
 
--- ---------------------------------------------------------------- 1. boşaltma --
--- Yedek (geri alınabilirlik): silinecek eski DOKTOR kaynaklı kayıtlar eski şemasına kopyalanır.
-create table if not exists eski.yedek_taraf_doktor_20261115 as select t.* from public.taraf t where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR';
-create table if not exists eski.yedek_taraf_personel_doktor_20261115 as select p.* from public.taraf_personel p where p.aktarim_kaynak = 2 and p.aktarim_tablo = 'DOKTOR';
-create temp table zz_eski_personel as
-select t.id, t.kod, t.ad,
-       exists (select 1 from public.belge_basvuru b where b.personel_id = t.id)
-       or exists (select 1 from public.radyoloji_rapor r where r.yazan_id = t.id or r.onaylayan_id = t.id or r.onaylayacak_id = t.id)
-       or exists (select 1 from public.radyoloji_istem i where i.istek_hekim_id = t.id)
-       or exists (select 1 from public.dis_hekim_ziyaret z where z.temsilci_id = t.id)
-       or exists (select 1 from public.dis_hekim_temsilci d where d.temsilci_id = t.id)
-       or exists (select 1 from public.taraf_kullanici k where k.id = t.id) as referansli
-  from public.taraf t
-  join public.taraf_personel p on p.id = t.id
- where t.personel = 1 and coalesce(p.dis_hekim, 0) = 0
-   and t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR';
+-- ---------------------------------------------------------------- 1. DOKTOR = kurum içi hekim --
+-- 1a) İlk sürümün sildiği kayıtların geri yüklenmesi (yalnız yedek tablosu olan DB'de; tekrar çalışmada boş).
+do $$
+begin
+  if to_regclass('eski.yedek_taraf_doktor_20261115') is not null then
+    insert into public.taraf select y.* from eski.yedek_taraf_doktor_20261115 y
+     where not exists (select 1 from public.taraf t where t.id = y.id)
+       and not exists (select 1 from public.taraf t where t.personel = 1 and t.kod = y.kod and t.id <> y.id);
+    -- kod çakışan (ör. AA: Admin KULLAN'da) geri yüklenen hekim '-DR' ekiyle
+    insert into public.taraf (id, kod, unvan, ad, soyad, vkno, cep_tel, eposta, durum, sube_id, personel, hekim,
+                              aktarim_kaynak, aktarim_tablo, aktarim_id)
+    select y.id, left(y.kod || '-DR', 30), y.unvan, y.ad, y.soyad, y.vkno, y.cep_tel, y.eposta, y.durum, y.sube_id, 1, 1,
+           y.aktarim_kaynak, y.aktarim_tablo, y.aktarim_id
+      from eski.yedek_taraf_doktor_20261115 y
+     where not exists (select 1 from public.taraf t where t.id = y.id);
+    insert into public.taraf_personel select y.* from eski.yedek_taraf_personel_doktor_20261115 y
+     where not exists (select 1 from public.taraf_personel p where p.id = y.id)
+       and exists (select 1 from public.taraf t where t.id = y.id);
+    -- ilk sürümün pasife çekip '-ESKI' eklediği referanslı kayıt
+    update public.taraf t set kod = replace(t.kod, '-ESKI', ''), durum = coalesce(y.durum, 1)
+      from eski.yedek_taraf_doktor_20261115 y
+     where y.id = t.id and t.kod like '%-ESKI'
+       and not exists (select 1 from public.taraf x where x.personel = 1 and x.kod = replace(t.kod, '-ESKI', '') and x.id <> t.id);
+    update public.taraf t set kod = left(replace(t.kod, '-ESKI', '') || '-DR', 30), durum = coalesce(y.durum, 1)
+      from eski.yedek_taraf_doktor_20261115 y
+     where y.id = t.id and t.kod like '%-ESKI';
+  end if;
+end $$;
 
--- Referanslı eski kayıt: aynı adlı KULLAN kişisi varsa başvuru referansı ona taşınır (kayıt sonra silinebilir).
-create temp table zz_tasima as
-select e.id as eski_id, z.id as kullan_id
-  from zz_eski_personel e
-  join zz_k z on upper(z.tam_ad) = upper(btrim(e.ad))
- where e.referansli;
+-- 1b) KULLAN'a bağlı hekim (DOKTOR.KULLANID): KULLAN kaydı hekim olur; branş / diploma DOKTOR'dan; DOKTOR kopyası
+--     silinir (referansları KULLAN kaydına taşınarak). KULLAN kaydı daha sonra (3.) açılıyorsa burada yalnız
+--     hazırlık tablosu kurulur, birleştirme 3c'de yapılır.
+create temp table zz_dr_bag as
+select d.id as doktor_id, d.kullanid as kullan_id, left(coalesce(d.diploma, ''), 30) as diploma,
+       coalesce((select kd.deger::text from public.kod_deger kd join public.kod_liste kl on kl.id = kd.liste_id
+                  where kl.kod = 'hekim.brans' and public.fn_ara_metin(kd.ad) = public.fn_ara_metin(d.uzmanlik) limit 1), '') as brans,
+       d.uzmanlik
+  from eski.doktor d
+ where d.kullanid is not null and exists (select 1 from zz_k z where z.id = d.kullanid);
 
-delete from public.personel_hareket where taraf_id in (select id from zz_eski_personel where not referansli);
-delete from public.taraf_personel  where id in (select id from zz_eski_personel where not referansli);
-delete from public.taraf           where id in (select id from zz_eski_personel where not referansli);
--- Referanslı ve KULLAN'da karşılığı olmayan: pasif, kodu '-ESKI' ekiyle (KULLAN kodu çakışmasın).
-update public.taraf t set durum = 0, kod = left(t.kod || '-ESKI', 30)
- where t.id in (select id from zz_eski_personel where referansli)
-   and t.id not in (select eski_id from zz_tasima);
+-- 1c) Bağsız DOKTOR hekimleri: "Dr." öneki unvana, ad / soyad ayrımı + standart biçim (bir kez; tekrar çalışmada değişmez).
+update public.taraf t
+   set unvan = case when t.ad ~ '^[Dd][Rr]\.?\s*' then 'Dr.' else t.unvan end,
+       ad = initcap(lower(case when regexp_replace(t.ad, '^[Dd][Rr]\.?\s*', '') ~ ' '
+                                then regexp_replace(regexp_replace(t.ad, '^[Dd][Rr]\.?\s*', ''), '\s+[^\s]+$', '')
+                                else regexp_replace(t.ad, '^[Dd][Rr]\.?\s*', '') end)),
+       soyad = initcap(lower(case when regexp_replace(t.ad, '^[Dd][Rr]\.?\s*', '') ~ ' '
+                                   then substring(regexp_replace(t.ad, '^[Dd][Rr]\.?\s*', '') from '([^\s]+)$') else '' end))
+ where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR' and t.personel = 1
+   and coalesce(t.soyad, '') = '' and t.ad ~ ' ';
+-- esle.sql unvana tam adı yazmıştı; personelde unvan yalnız önektir (Dr., Uzm.Dr., Prof.Dr. ...).
+update public.taraf t set unvan = ''
+ where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR' and t.personel = 1
+   and coalesce(t.unvan, '') <> '' and t.unvan !~ '^(Dr|Uzm|Prof|Doç|Op|Dt|Yrd)\.';
 
 -- ---------------------------------------------------------------- 2. temsilciler (TEM-*) --
 update public.taraf t
@@ -110,14 +135,28 @@ select t.id, 1, 0, z.gorev, 2, 'KULLAN', z.id
  where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN'
    and not exists (select 1 from public.taraf_personel p where p.id = t.id);
 
--- Referans taşıma (1): başvurudaki eski DOKTOR personeli → aynı adlı KULLAN personeli; sonra eski kayıt silinir.
-update public.belge_basvuru b set personel_id = t.id
-  from zz_tasima m join public.taraf t on t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN' and t.aktarim_id = m.kullan_id
- where b.personel_id = m.eski_id;
-delete from public.personel_hareket where taraf_id in (select eski_id from zz_tasima);
-delete from public.taraf_personel  where id in (select eski_id from zz_tasima);
-delete from public.taraf           where id in (select eski_id from zz_tasima)
-   and not exists (select 1 from public.belge_basvuru b where b.personel_id = taraf.id);
+-- 3c) KULLAN'a bağlı hekimlerin birleştirilmesi: KULLAN kaydı hekim = 1 + branş / diploma; DOKTOR kopyası
+--     (varsa) referanslarıyla birlikte KULLAN kaydına taşınıp silinir.
+update public.taraf t set hekim = 1
+  from zz_dr_bag b where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN' and t.aktarim_id = b.kullan_id and coalesce(t.hekim, 0) <> 1;
+update public.taraf_personel p
+   set brans = case when coalesce(p.brans, '') = '' then b.brans else p.brans end,
+       tescil_no = case when coalesce(p.tescil_no, '') = '' then b.diploma else p.tescil_no end
+  from public.taraf t join zz_dr_bag b on b.kullan_id = t.aktarim_id
+ where p.id = t.id and t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN';
+create temp table zz_dr_kopya as
+select dk.id as eski_id, kk.id as yeni_id
+  from zz_dr_bag b
+  join public.taraf dk on dk.aktarim_kaynak = 2 and dk.aktarim_tablo = 'DOKTOR' and dk.aktarim_id = b.doktor_id
+  join public.taraf kk on kk.aktarim_kaynak = 2 and kk.aktarim_tablo = 'KULLAN' and kk.aktarim_id = b.kullan_id;
+update public.belge_basvuru b set personel_id = m.yeni_id from zz_dr_kopya m where b.personel_id = m.eski_id;
+update public.radyoloji_rapor r set yazan_id = m.yeni_id from zz_dr_kopya m where r.yazan_id = m.eski_id;
+update public.radyoloji_rapor r set onaylayan_id = m.yeni_id from zz_dr_kopya m where r.onaylayan_id = m.eski_id;
+update public.radyoloji_rapor r set onaylayacak_id = m.yeni_id from zz_dr_kopya m where r.onaylayacak_id = m.eski_id;
+update public.radyoloji_istem i set istek_hekim_id = m.yeni_id from zz_dr_kopya m where i.istek_hekim_id = m.eski_id;
+delete from public.personel_hareket where taraf_id in (select eski_id from zz_dr_kopya);
+delete from public.taraf_personel  where id in (select eski_id from zz_dr_kopya);
+delete from public.taraf           where id in (select eski_id from zz_dr_kopya);
 
 -- ---------------------------------------------------------------- 3b. ad / soyad standart biçim --
 -- Kullanıcı 15.11.2026: "ad soyadları standart biçime çevir". Kaynakta BÜYÜK / karışık ("AYŞE NUR SAYI", "Esra Deniz
@@ -134,7 +173,7 @@ select 'KULLAN kaynak: ' || (select count(*) from zz_k) || ' kişi (sistem kulla
 union all select 'kurum personeli (dis_hekim 0, aktif): ' || count(*) from public.taraf t join public.taraf_personel p on p.id = t.id
   where t.personel = 1 and coalesce(p.dis_hekim, 0) = 0 and t.durum = 1
 union all select 'KULLAN kaynaklı personel: ' || count(*) || ' (pasif ' || count(*) filter (where durum = 0) || ')' from public.taraf where aktarim_kaynak = 2 and aktarim_tablo = 'KULLAN'
-union all select 'eski DOKTOR kaynaklı kalan: ' || count(*) || ' (referanslı, pasif)' from public.taraf where aktarim_kaynak = 2 and aktarim_tablo = 'DOKTOR'
-union all select 'başvuru referansı taşınan: ' || count(*) from zz_tasima;
+union all select 'DOKTOR kaynaklı kurum hekimi: ' || count(*) || ' (hekim kartı; KULLAN''a bağlı olanlar birleştirildi)' from public.taraf where aktarim_kaynak = 2 and aktarim_tablo = 'DOKTOR'
+union all select 'KULLAN kaydıyla birleştirilen hekim: ' || count(*) from zz_dr_bag;
 
 commit;
