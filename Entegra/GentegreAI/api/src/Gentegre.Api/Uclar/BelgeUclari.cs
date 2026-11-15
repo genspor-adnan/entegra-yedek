@@ -1124,6 +1124,10 @@ public static class BelgeUclari
         or "gelisNedeni" or "oda"
         // Kendi istegiyle geldi (370) - 0/1 isaret.
         or "kendiIstegi"
+        // BİLDİRİM BAYRAKLARI (1340) - 0/1 işaret. Yazma haritası (BelgeDeposu.Yazma) vardı, BU liste eksikti:
+        //   kurum seçili her yeni başvuru "Bilinmeyen belge alanı: enabizBildirim" 422'siyle KAYDEDİLEMİYORDU
+        //   (kullanıcı 15.11.2026). Yazma haritasındaki her alan burada da olmalı - testi BelgeBaslikAlanTestleri.
+        or "enabizBildirim" or "teleradBildirim"
         // Provizyon (299) - kod/sayi alanlari (SGK ve ozel sigorta ayri).
         or "sgkDurum" or "sgkProvizyonTipi" or "sgkTakipTuru" or "sgkMustehaklik"
         or "sgkSevkli" or "ossDurum" or "ossKurumId"

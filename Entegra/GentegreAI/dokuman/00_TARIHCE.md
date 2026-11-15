@@ -7,6 +7,15 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 15.11.2026 — Başvuru kaydı 422 "Bilinmeyen belge alanı: enabizBildirim" (1340 düzeltmesi)
+
+Kullanıcı: "yeni başvuru eklemek istedim hata: Bilinmeyen belge alanı: enabizBildirim".
+
+- 1340 bildirim bayrakları yazma haritasına (`BelgeDeposu.Yazma` BasvuruKolonlari) eklenmiş, uç tarafındaki tip
+  listesine (`BelgeUclari.BaslikTipi`) eklenmemişti; kurum seçili her yeni başvuru 422 ile kaydedilemiyordu (emekli 590 ve
+  hastaId 658 ile aynı tuzak). İki alan `sayi` grubuna eklendi.
+- Kilit test `BelgeBaslikAlanTestleri`: Basvuru / Provizyon / Sevkiyat yazma haritalarındaki her alanın başlık tipi olmalı.
+
 ## 15.11.2026 — Randevu kartı kurum tipine göre "Tetkik" açılır (KurumTipiVarsayilanlari)
 
 Kullanıcı: "goruntuleme ve lab profilde yeni randevu açıldığında kartta randevu nedeni tetkik olarak gelmeli".
