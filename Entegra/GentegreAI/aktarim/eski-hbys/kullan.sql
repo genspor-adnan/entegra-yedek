@@ -119,6 +119,14 @@ delete from public.taraf_personel  where id in (select eski_id from zz_tasima);
 delete from public.taraf           where id in (select eski_id from zz_tasima)
    and not exists (select 1 from public.belge_basvuru b where b.personel_id = taraf.id);
 
+-- ---------------------------------------------------------------- 3b. ad / soyad standart biçim --
+-- Kullanıcı 15.11.2026: "ad soyadları standart biçime çevir". Kaynakta BÜYÜK / karışık ("AYŞE NUR SAYI", "Esra Deniz
+--   KUŞÇU"); DB ICU tr-TR olduğundan lower / initcap Türkçe İ-ı doğru çalışır (ışık → Işık, İLKER → İlker).
+update public.taraf t
+   set ad = initcap(lower(btrim(t.ad))), soyad = initcap(lower(btrim(coalesce(t.soyad, ''))))
+ where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'KULLAN' and t.personel = 1
+   and (t.ad <> initcap(lower(btrim(t.ad))) or coalesce(t.soyad, '') <> initcap(lower(btrim(coalesce(t.soyad, '')))));
+
 -- ---------------------------------------------------------------- 4. rapor --
 select 'KULLAN kaynak: ' || (select count(*) from zz_k) || ' kişi (sistem kullanıcıları hariç)' as rapor
 union all select 'kurum personeli (dis_hekim 0, aktif): ' || count(*) from public.taraf t join public.taraf_personel p on p.id = t.id
