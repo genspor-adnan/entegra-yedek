@@ -7,7 +7,8 @@
 --     kutuları ve "Kurum & sözleşme (açık tahakkuk)" bloğu;
 --   * başlangıç rol kutucuklarındaki aynı göstergeler;
 --   * gündem (bekleyen işler) kartları: ödeme vadesi, tahsil edilecek, risk limiti, çek/senet, kredi taksiti, planlı
---     ödemeler, nakit durumu, banka hareketi, tahsil edilmemiş hasta payı.
+--     ödemeler, nakit durumu, banka hareketi, tahsil edilmemiş hasta payı, faturalanmamış satış / faturası gelmemiş alış
+--     irsaliyesi (tutar), cevap bekleyen teklif (tutar).
 --   Banko görevlisinin KENDİ oturum kartı (nakit / kart) kalır - kendi kasası.
 -- Yetki yalnız "Muhasebe / Finans" rolüne verilir; Yönetici (admin) dahil ötekiler Güvenlik › Roller matrisinden alır.
 -- Tekrar çalıştırılabilir.

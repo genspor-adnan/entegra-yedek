@@ -150,7 +150,8 @@ public static partial class GundemUclari
             // ---- S1 / S6 · faturası kesilmemiş irsaliye (kaynak_tur = 30 bağı, eşleşme icmalinin kuralı) -------------
             async Task Irsaliye(string kod, int tur, string baslik, string yon, string liste, string yetki)
             {
-                if (!Modul("erp_satis") || !Yetki("irsaliye_fatura_eslesme", yetki)) return;
+                // MALİ ÖZET (1345, kullanıcı 15.11.2026 "Faturası gelmemiş alış irsaliyesi"): tutar taşır, mali.ozet ister.
+                if (!mali || !Modul("erp_satis") || !Yetki("irsaliye_fatura_eslesme", yetki)) return;
                 var r = await b.TekAsync(IrsaliyeSql, null, [tur, subeler],
                     o => new { adet = o.GetInt32(0), tutar = o.GetDecimal(1), gun = o.GetInt32(2) }, iptal);
                 if (r is null || r.adet == 0) return;
@@ -182,7 +183,7 @@ public static partial class GundemUclari
             await Siparis("sipSatis", 19, "Açık satış siparişi", "satis", "/siparis", "belge.satis.siparis", "erp_satis");
 
             // ---- S3 · cevap bekleyen teklif (7 günden eski, dönüşmemiş) ---------------------------------------------
-            if (Modul("erp_satis") && Yetki("satis.teklif_icmali", "belge.satis"))
+            if (mali && Modul("erp_satis") && Yetki("satis.teklif_icmali", "belge.satis"))
             {
                 var r = await b.TekAsync("""
                     select count(*)::int, coalesce(sum(b.genel_toplam), 0)
