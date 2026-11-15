@@ -100,6 +100,14 @@ update public.taraf t set unvan = ''
  where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR' and t.personel = 1
    and coalesce(t.unvan, '') <> '' and t.unvan !~ '^(Dr|Uzm|Prof|Doç|Op|Dt|Yrd)\.';
 
+-- ---------------------------------------------------------------- 1d. kod çakışması --
+-- KULLAN kodu (ör. BG, AA) DOKTOR kaynaklı bir hekimde de varsa hekimin kodu '-DR' ekini alır: KULLAN kaydı düz kodla
+--   kalır (yerelde 1a bunu geri yüklemede yapıyordu; sunucuda DOKTOR satırları silinmediği için burada gerekir).
+update public.taraf t set kod = left(t.kod || '-DR', 30)
+ where t.aktarim_kaynak = 2 and t.aktarim_tablo = 'DOKTOR' and t.personel = 1
+   and exists (select 1 from zz_k z where z.kod = t.kod)
+   and not exists (select 1 from public.taraf x where x.personel = 1 and x.kod = left(t.kod || '-DR', 30));
+
 -- ---------------------------------------------------------------- 2. temsilciler (TEM-*) --
 update public.taraf t
    set kod = z.kod, aktarim_id = z.id,
