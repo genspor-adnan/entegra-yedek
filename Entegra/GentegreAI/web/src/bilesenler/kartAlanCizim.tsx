@@ -131,9 +131,15 @@ export function alanCizici(b: AlanCizimBaglami) {
           key={a.ad}
           type="checkbox"
           checked={Boolean(deger[a.ad])}
-          disabled={salt || !a.yazilabilir || karsitDolu(a, deger)}
-          title={karsitDolu(a, deger) ? c('Karşıt alan seçiliyken işaretlenemez') : undefined}
-          onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.checked }))}
+          disabled={salt || !a.yazilabilir}
+          title={karsitDolu(a, deger) ? c('İşaretlenince karşıt alan temizlenir') : undefined}
+          // KARŞIT ALAN (kullanıcı 16.11.2026: "gönderen dr seçtim ama sonra kendi isteği olduğunu söyledi ama
+          //   seçemiyorum"): kutu kilitlenmez; işaretlenince karşıt alan (gönderen) TEMİZLENİR - gönderen zorunlu
+          //   olduğu için × düğmesi yoktu, kullanıcı iki bilgi arasında sıkışıyordu. alanDegistir karşıt kuralını
+          //   çalıştırır (boşalan gönderen kutuyu işaretler).
+          onChange={e => (e.target.checked && a.karsitAlan)
+            ? alanDegistir(a.karsitAlan, '')
+            : setDeger(d => ({ ...d, [a.ad]: e.target.checked }))}
         />
       ) : kaynak === 'kisi' && a.ad === 'bagId' ? (
         // "Cariye Bağla" butonu + TarafArama modaliyla degistiriliyor - burada duz salt-okunur
@@ -252,15 +258,16 @@ export function alanCizici(b: AlanCizimBaglami) {
           <input
             readOnly
             data-alan={a.ad}
-            value={secilenAdlar[a.ad]
-                   ?? (deger[a.ad] ? (a.kodlar?.[String(deger[a.ad])] ?? '') : '')}
+            // Değer boşsa ad da boş: × ya da karşıt kutuyla temizlenen alan eski adı göstermesin.
+            value={deger[a.ad] ? (secilenAdlar[a.ad] ?? a.kodlar?.[String(deger[a.ad])] ?? '') : ''}
             placeholder="— seçiniz —"
             disabled={salt || !a.yazilabilir}
             onClick={() => !salt && a.yazilabilir && aramaAc(a.ad, a.aramaKaynagi!)}
           />
           <button type="button" className="d mini" disabled={salt || !a.yazilabilir}
                   title="Ara" onClick={() => aramaAc(a.ad, a.aramaKaynagi!)}>…</button>
-          {!a.zorunlu && deger[a.ad] ? (
+          {/* Temizle: zorunlu alanda yok; ama zorunluluk muaf alanla kalkabiliyorsa (gönderen ↔ kendi isteği) var. */}
+          {(!a.zorunlu || a.zorunluMuafAlan) && deger[a.ad] ? (
             <button type="button" className="d mini" disabled={salt || !a.yazilabilir}
                     title="Temizle" onClick={() => alanDegistir(a.ad, '')}>×</button>
           ) : null}
