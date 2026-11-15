@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { BasvuruKurallari } from '../../api/uclar/belge';
 import { api } from '../../api/istemci';
 import type { ListeIstegi } from '../../api/sozlesme';
 
@@ -29,6 +30,8 @@ export interface BasvuruKaynaklari {
   gonderenBolumleri: Secenek[];
   /** Aktif depolar - basvuru dip bolumundeki depo combosu. */
   depolar: Secenek[];
+  /** Kurum tipi kuralları (sunucu, BasvuruKurumKurallari); yüklenmeden / eski sunucuda null. */
+  kurallar: BasvuruKurallari | null;
   /** Sorulan hekim/gonderen adaylari - rol ve bolume gore suzulur. */
   gorevliler: GorevliSecenegi[];
   /** Protokol numarasini KULLANICI mi yazar (numara sablonu, 358). */
@@ -50,6 +53,8 @@ export function useBasvuruKaynaklari(
   const [bolumler, setBolumler] = useState<Secenek[]>([]);
   const [gonderenBolumleri, setGonderenBolumleri] = useState<Secenek[]>([]);
   const [depolar, setDepolar] = useState<Secenek[]>([]);
+  /** Kurum tipi kuralları (sunucu): geliş nedeni varsayılanı, Sıra No / Refakatçi görünürlüğü. */
+  const [kurallar, setKurallar] = useState<BasvuruKurallari | null>(null);
   const [gorevliler, setGorevliler] = useState<GorevliSecenegi[]>([]);
   const [protokolElle, setProtokolElle] = useState(false);
 
@@ -86,6 +91,7 @@ export function useBasvuruKaynaklari(
         setBolumler(y.bolumler.map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));
         setGonderenBolumleri((y.gonderenBolumleri ?? []).map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));
         setDepolar(y.depolar);
+        setKurallar(y.kurallar ?? null);
       } catch { /* kaynaklar okunamazsa combolar bos kalir, kayit engellenmez */ }
     })();
   }, [basvuruMu, kurumlar.length]);
@@ -129,5 +135,5 @@ export function useBasvuruKaynaklari(
     return () => { iptal = true };
   }, [basvuruMu, bolumId, hekimRolu]);
 
-  return { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle };
+  return { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle, kurallar };
 }

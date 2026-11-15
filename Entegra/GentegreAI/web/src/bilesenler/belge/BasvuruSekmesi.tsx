@@ -3,7 +3,7 @@ import { TarafSecici } from '../TarafArama';
 import { KodSecim, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
 import { c } from '../../dil/ceviri';
-import { useOturum } from '../../kimlik/OturumBaglami';
+import type { BasvuruKurallari } from '../../api/uclar/belge';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -109,7 +109,7 @@ export interface BasvuruBilgi {
   provizyonAciklama?: string;
 }
 
-export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
+export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kurallar,
                                  tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
@@ -119,6 +119,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  personelAd, onPersonelSec, kurumHatasi,
                                  bolumHatasi, personelHatasi, turHatasi,
                                  kendiIstegi, onKendiIstegi, duzenle = true, setDuzenle }: {
+  /** Kurum tipi kuralları (sunucu, BasvuruKurumKurallari); yoksa alanlar görünür. */
+  kurallar?: BasvuruKurallari | null;
   bilgi: BasvuruBilgi;
   /** Kaydedilmiş başvurunun belge id'si (istek kağıdı taraması istem kartına taşındı - kullanılmıyor). */
   belgeId?: number;
@@ -206,12 +208,10 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   aciklama?: string;
   setAciklama?(v: string): void;
 }) {
-  // REFAKATÇİ YALNIZ HASTANE PROFİLİNDE (kullanıcı 16.11.2026): kurum tipi oturumdan (786).
-  const { kullanici: oturumKullanicisi } = useOturum();
-  const hastaneMi = oturumKullanicisi?.kurumTipi === 'hastane';
-  // SIRA NO lab / görüntüleme / muayenehane profillerinde yok (kullanıcı 16.11.2026): bekleme sırası kavramı
-  //   polikliniklidir; dolu kayıtta yine görünür.
-  const siraNoYok = ['lab', 'goruntuleme', 'goruntuleme_lab', 'muayenehane'].includes(oturumKullanicisi?.kurumTipi ?? '');
+  // KURUM TİPİ KURALLARI SUNUCUDAN (kod inceleme 16.11.2026): Refakatçi yalnız hastanede, Sıra No tetkik
+  //   kurumları / muayenehanede yok (kullanıcı 16.11.2026). Kural gelmemişse (eski sunucu) alanlar görünür.
+  const hastaneMi = kurallar ? kurallar.refakatciVar : true;
+  const siraNoYok = kurallar ? !kurallar.siraNoVar : false;
   /**
    * SGK ODEYEN MI (591) - emekli kutusunun kapisi. Sunucudaki
    * `fn_dagilim_rota` ile AYNI mantik: SGK kurumu (tür 3) her zaman, sigortada

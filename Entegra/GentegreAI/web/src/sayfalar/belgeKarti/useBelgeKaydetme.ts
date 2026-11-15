@@ -41,6 +41,12 @@ export interface BelgeKaydetmeBaglami {
   bekleyenRadyoloji?: { current: { istemler: AcilanRadyolojiIstemi[]; disSevk: boolean } };
   /** Dış kurum sevkinde açılan istemin kartı (dış accession, doktor notu, istem kâğıdı) açılır. */
   radyolojiKabulAc?(istemler: AcilanRadyolojiIstemi[]): void;
+  /**
+   * GÖNDEREN MODU (görüntüleme / lab şubesi, hekim rolü 1): kullanıcı 16.11.2026 "görüntüleme profilinde yeni
+   * başvuru kaydında accession no girilmesi gerekiyorsa ve istem oluşmuşsa istem kartı hemen başvurunun sağında
+   * yeni sekme olarak açılmalı". Accession'ın kabulde elle girileceğine sunucu karar verir (accessionNo boş).
+   */
+  gonderenModu?: boolean;
 }
 
 /**
@@ -169,7 +175,9 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
           const { istemler, disSevk } = br.current;
           br.current = { istemler: [], disSevk: false };
           mesaj(`Radyoloji istemi açıldı: ${istemler.map(x => `${x.tetkik} · ${x.accessionNo || 'accession kabulde'}`).join(', ')}`);
-          if (disSevk) b.radyolojiKabulAc?.(istemler);
+          // KABUL KARTI: dış sevkte her zaman; görüntüleme / lab'da accession kabulde girilecekse (boş geldi).
+          const accessionGerekli = !!b.gonderenModu && istemler.some(x => !x.accessionNo);
+          if (disSevk || accessionGerekli) b.radyolojiKabulAc?.(istemler);
         }
       }
       // Açık listeler, cari kartı ve ekstre (başka sekmede) bu kaydı hemen görsün.

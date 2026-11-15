@@ -24,6 +24,9 @@ export const kartUclari = {
     if (cip) p.set('cip', cip);
     return istek<DetaySayfasi>(`/api/kart/${kaynak}/${id}/detay/${ad}?${p}`);
   },
+  /** BAĞLI VARSAYILAN (16.11.2026): kaynak alan değişince hedef alanın sunucu varsayılanı; yoksa null. */
+  kartBagliVarsayilan: (kaynak: string, alan: string, deger: string) =>
+    istek<{ alan: string; deger: unknown }>(`/api/kart/${kaynak}/bagli-varsayilan?alan=${encodeURIComponent(alan)}&deger=${encodeURIComponent(deger)}`),
   kartEkle: (kaynak: string, govde: KartYazmaIstegi) =>
     gonder<KartYaniti>(`/api/kart/${kaynak}`, govde),
   kartGuncelle: (kaynak: string, id: number, govde: KartYazmaIstegi) =>

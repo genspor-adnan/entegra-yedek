@@ -7,6 +7,24 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — Kod inceleme düzeltmeleri (randevu Kurum / Kendi İsteği dizisi) + accession kabul sekmesi
+
+Kod inceleme (9 bulgu) uygulandı:
+- Randevu kurumu artık hastanın kayıtlı kurumuyla dolar: `KartAlani.BagliVarsayilanAlan/Sql` + uç
+  `/api/kart/{kaynak}/bagli-varsayilan` (hasta seçilince `taraf_hasta.kurum_id`, yoksa Özel varsayılanı).
+- Kapısı kapalı alanın katalog varsayılanı kayda yazılmaz (hastanede görünmeyen "Kendi İsteği" = 1 yazılıyordu);
+  meta varsayılanları da kapıya göre süzülür.
+- Başvuru kurum tipi kuralları SUNUCUDA (`BasvuruKurumKurallari`, basvuru-kaynaklari `kurallar`): geliş nedeni
+  Tetkik, Sıra No / Refakatçi görünürlüğü; istemcideki kurum tipi listeleri kaldırıldı. Doğrudan randevu→başvuru
+  yolu da geliş nedeni varsayılanını yazar.
+- Randevu kurumu başvuru listesinde yoksa yedek kural (hasta kurumu / Özel) çalışır.
+- Karşıt alan: ortak `DegerCevirici.Dolu`; güncellemede karşıt alan okunabilir değilse kayıttan okunur (kısıt 500'ü
+  önlenir). `VarsayilanSql` 60 sn önbellekli. 1349: karşıt alan ipucu çevirisi.
+
+Kullanıcı (16.11.2026): "görüntüleme profilinde yeni başvuru kaydında accession no girilmesi gerekiyorsa ve istem
+oluşmuşsa istem kartı hemen başvurunun sağında yeni sekme olarak açılmalı" → gönderen modunda (görüntüleme / lab
+şubesi) accession'ı boş gelen istemin kartı kabul kipinde başvurunun sağında açılır (dış sevk kuralıyla aynı yol).
+
 ## 16.11.2026 — Randevuda ödeyen Kurum geri geldi (1347), varsayılan Özel (Ücretli); başvuru etiketleri
 
 Kullanıcı: "randevu kartına hizmetten önce Kurum ekle.. o da başvuruya geçsin" · "default ücretli olsun" ·

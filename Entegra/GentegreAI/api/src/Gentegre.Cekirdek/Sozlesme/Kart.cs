@@ -117,7 +117,9 @@ public sealed record KartAlanMeta(
     /// <summary>Uzun metin kolonu ama EKRANDA TEK SATIR (notlar): arayüz textarea'ya geçmez.</summary>
     bool TekSatir = false,
     /// <summary>Mantık alanın karşıtı: o alan doluyken bu işaret kaldırılır ve kilitlenir (randevu gönderen ↔ kendi isteği).</summary>
-    string? KarsitAlan = null);
+    string? KarsitAlan = null,
+    /// <summary>Bu alan değişince hedef alanın varsayılanı sunucudan çözülür (KartAlani.BagliVarsayilanAlan).</summary>
+    string? BagliVarsayilanAlan = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

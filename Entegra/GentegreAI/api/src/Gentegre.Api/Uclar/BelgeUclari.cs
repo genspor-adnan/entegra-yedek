@@ -215,7 +215,11 @@ public static class BelgeUclari
                 o => new { id = o.GetInt32(0), ad = o.GetString(1),
                            yon = (int)o.GetInt16(2), tarifeTipi = (int)o.GetInt16(3) }, iptal);
 
-            return Results.Ok(new { kurumlar, bolumler, gonderenBolumleri, depolar, fiyatListeleri,
+            // KURUM TİPİ KURALLARI (kod inceleme 16.11.2026): geliş nedeni varsayılanı, Sıra No / Refakatçi
+            //   görünürlüğü SUNUCUDA (BasvuruKurumKurallari) - istemci kurum tipi listesi tutmaz.
+            var kurumTipi = (await KurumProfilDeposu.KurumTipiAsync(baglanti, baglam.SubeId ?? 0, iptal)).Kod;
+            var kurallar = BasvuruKurumKurallari.Icin(kurumTipi);
+            return Results.Ok(new { kurumlar, bolumler, gonderenBolumleri, depolar, fiyatListeleri, kurallar,
                                     izlemeNo = baglam.IzlemeNo });
         });
 

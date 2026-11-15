@@ -6,6 +6,14 @@ import {
 } from '../sozlesme';
 import { istek, gonder } from '../cekirdek';
 
+/** Başvuru kartının kurum tipine bağlı kuralları - sunucudan (/api/belge/basvuru-kaynaklari). */
+export interface BasvuruKurallari {
+  /** Yeni başvuruda boş geliş nedenine yazılacak kod (3 Tetkik / Tahlil), yoksa null. */
+  gelisNedeniVarsayilan: number | null;
+  siraNoVar: boolean;
+  refakatciVar: boolean;
+}
+
 /** Belge, kurum profili, gelen belge kutusu. */
 /** islem_log satırı - /api/belge/{id}/gecmis (ham; TeklifGecmisi.gecmisOlayi metne çevirir). */
 export interface BelgeGecmisKaydi {
@@ -120,6 +128,8 @@ export const belgeUclari = {
     depolar: { id: number; ad: string }[];
     /** Aktif fiyat listeleri - `yon` 1 alis, 2 satis. */
     fiyatListeleri: { id: number; ad: string; yon: number; tarifeTipi: number }[];
+    /** Kurum tipine bağlı başvuru kuralları (sunucuda karar, BasvuruKurumKurallari). */
+    kurallar?: BasvuruKurallari;
   }>('/api/belge/basvuru-kaynaklari'),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),
 

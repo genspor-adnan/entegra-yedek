@@ -11,6 +11,8 @@ namespace Gentegre.Veri;
 public sealed class VeriKaynagi : IAsyncDisposable
 {
     private readonly string _baglantiDizesi;
+    /// <summary>Bağlantı dizgesi (önbellek anahtarı için; iki kurulum aynı süreçte karışmasın).</summary>
+    public string BaglantiDizesi => _baglantiDizesi;
 
     /// <summary>
     /// SAAT DILIMI BASINA HAVUZ (1097): oturumun saat dilimi istegin SUBESININ dilimidir

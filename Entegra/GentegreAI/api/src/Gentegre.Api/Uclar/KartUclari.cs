@@ -151,8 +151,15 @@ public static class KartUclari
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Ekle);
 
             var uyarilar = new List<string>();
-            var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true,
-                                    await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
+            var kapaliKapilar = await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal);
+            var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true, kapaliKapilar);
+            // KAPISI KAPALI ALANIN KATALOG VARSAYILANI YAZILMAZ (kod inceleme 16.11.2026): alan kartta yokken
+            //   (randevu "Kendi İsteği" hastane kurulumunda) varsayılan 1 her kayda işleniyordu; kapı sonradan
+            //   açılınca geçmiş yanlış görünürdü. null → DB varsayılanı (DEFAULT) yazılır.
+            foreach (var a in tanim.Alanlar)
+                if (a.AyarKapisi is { } kapi && kapaliKapilar.Contains(kapi) && !degerler.ContainsKey(a.Ad)
+                    && tanim.YeniKayitVarsayilanlari?.ContainsKey(a.Ad) == true)
+                    degerler[a.Ad] = null;
             // EKRAN SATIR KISITI (1003): yeni kayıt kısıtın dışında açılamaz.
             await EkranSatirKurali.KartAsync(tanim.Ad, baglam, erisim, degerler, null, Islem.Ekle, iptal);
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
@@ -388,9 +395,12 @@ public static class KartUclari
         // Yeni kayıt varsayılanları: katalog + kurum tipine özel üst yazım; "@bugun" sembolü burada çözülür
         //   (katalogda sabit tarih yazılamaz - dosya bir kez derlenir, tarih donar; meta her istekte üretilir).
         static async Task<Dictionary<string, object?>> KurumTipiVarsayilanlariAsync(
-            KartTanimi tanim, KartDeposu depo, int subeId, CancellationToken iptal)
+            KartTanimi tanim, KartDeposu depo, int subeId, IReadOnlySet<string>? kapaliKapilar, CancellationToken iptal)
         {
             var sonuc = new Dictionary<string, object?>(tanim.YeniKayitVarsayilanlari ?? new Dictionary<string, object?>());
+            // Kapısı kapalı (metada olmayan) alanın varsayılanı da gönderilmez - kayıt ucuyla aynı kural.
+            foreach (var a in tanim.Alanlar)
+                if (a.AyarKapisi is { } kapi && kapaliKapilar?.Contains(kapi) == true) sonuc.Remove(a.Ad);
             if (tanim.KurumTipiVarsayilanlari is { Count: > 0 } kt)
             {
                 var kurumTipi = await depo.KurumTipiKoduAsync(subeId, iptal);
@@ -410,6 +420,25 @@ public static class KartUclari
             return sonuc;
         }
 
+        // BAĞLI VARSAYILAN (16.11.2026): kaynak alan değişince hedefin değeri katalog SQL'iyle çözülür
+        //   (randevu: hasta seçilince kurumu). Değer yoksa null döner, ekran katalog varsayılanına döner.
+        grup.MapGet("/{kaynak}/bagli-varsayilan", async (
+            string kaynak, string alan, string deger, BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var tanim = KartBul(kaynak);
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.MenuAcikIste(kaynak);
+            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+            var hedef = tanim.Alan(alan);
+            if (hedef?.BagliVarsayilanSql is not { } sql || hedef.BagliVarsayilanAlan is null)
+                throw GentegreHatasi.Dogrulama($"'{alan}' alanının bağlı varsayılanı yok.");
+            if (!long.TryParse(deger, NumberStyles.Integer, CultureInfo.InvariantCulture, out var kaynakDegeri))
+                throw GentegreHatasi.Dogrulama("Kaynak değer sayı olmalı.");
+            var sonuc = await depo.BagliVarsayilanAsync(sql, kaynakDegeri, iptal);
+            return Results.Ok(new { alan, deger = sonuc });
+        });
+
         grup.MapGet("/{kaynak}/alanlar", async (
             string kaynak, BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -421,7 +450,8 @@ public static class KartUclari
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
             var urunModu = await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal);
-            var (okunabilir, gizli) = Alanlar(tanim, baglam, urunModu, await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal));
+            var kapaliKapilar = await depo.KapaliKapilarAsync(baglam.SubeId ?? 0, iptal);
+            var (okunabilir, gizli) = Alanlar(tanim, baglam, urunModu, kapaliKapilar);
 
             // KodTablosu (kendi tablosu) + KodListesi (kod_liste/kod_deger) alanlarinin
             //   TAM secenek listesi - kodAd yalniz kartta KULLANILAN tek degeri cozer.
@@ -530,7 +560,7 @@ public static class KartUclari
                 //   tarih de her acilista gunceldir.
                 // KURUM TİPİ VARSAYILANI (15.11.2026): görüntüleme / lab kurulumunda randevu "Tetkik" açılır
                 //   (KartTanimi.KurumTipiVarsayilanlari). Katalog varsayılanının ÜZERİNE yazılır, karar sunucuda.
-                Varsayilanlar = await KurumTipiVarsayilanlariAsync(tanim, depo, baglam.SubeId ?? 0, iptal),
+                Varsayilanlar = await KurumTipiVarsayilanlariAsync(tanim, depo, baglam.SubeId ?? 0, kapaliKapilar, iptal),
                 AcilistaTarafSecimi = tanim.AcilistaTarafSecimi,
                 Doviz = dovizMeta,
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
@@ -627,7 +657,8 @@ public static class KartUclari
             alan.Ipucu,
             alan.ZorunluMuafAlan,
             alan.TekSatir,
-            alan.KarsitAlan);
+            alan.KarsitAlan,
+            alan.BagliVarsayilanAlan);
 
 
     /// <summary>
@@ -692,9 +723,7 @@ public static class KartUclari
     /// AyarKapisi'yla gizliyse zorunlu sayılmaz - görünmeyen alanı doldurmak istenemez.
     /// </summary>
     /// <summary>Değer dolu mu: null, boş metin ve 0 boştur.</summary>
-    private static bool Dolu(object? v)
-        => v is not null && Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture) is { Length: > 0 } s
-           && s.Trim() != "" && s != "0";
+    private static bool Dolu(object? v) => DegerCevirici.Dolu(v);
 
     private static bool KapiylaZorunlu(KartAlani alan, IReadOnlySet<string>? kapaliKapilar)
     {

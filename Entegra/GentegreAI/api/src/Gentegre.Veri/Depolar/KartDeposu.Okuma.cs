@@ -649,11 +649,31 @@ public sealed partial class KartDeposu
     /// Aktif şubenin kurum tipi kodu (`kurum_profil.kurum_tipi`, şube satırı yoksa kurum geneli) - kart meta'sı
     /// `KartTanimi.KurumTipiVarsayilanlari`'nı bununla seçer. Okuma kuralı KurumProfilDeposu ile aynı.
     /// </summary>
-    /// <summary>Katalog sabiti tek değer sorgusu (KartAlani.VarsayilanSql); satır yoksa null.</summary>
+    /// <summary>
+    /// Katalog sabiti tek değer sorgusu (KartAlani.VarsayilanSql); satır yoksa null. ÖNBELLEK (kod inceleme
+    /// 16.11.2026): randevu kartı en sık açılan karttır, değer (Özel kurum id'si) kurum eklenince değişir -
+    /// sorgu başına 60 sn tutulur. Anahtar bağlantı dizgesi + sql: iki kurulum aynı süreçte karışmaz.
+    /// </summary>
     public async Task<object?> VarsayilanDegerAsync(string sql, CancellationToken iptal = default)
     {
+        var anahtar = _veri.BaglantiDizesi + "\n" + sql;
+        if (VarsayilanOnbellek.TryGetValue(anahtar, out var k) && k.Son > DateTime.UtcNow) return k.Deger;
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut(sql, null);
+        var v = await komut.ExecuteScalarAsync(iptal);
+        var deger = v is null or DBNull ? null : v;
+        VarsayilanOnbellek[anahtar] = (deger, DateTime.UtcNow.AddSeconds(60));
+        return deger;
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (object? Deger, DateTime Son)>
+        VarsayilanOnbellek = new(StringComparer.Ordinal);
+
+    /// <summary>Bağlı varsayılan (KartAlani.BagliVarsayilanSql): @p0 kaynak alanın değeri; satır yoksa null.</summary>
+    public async Task<object?> BagliVarsayilanAsync(string sql, long kaynakDegeri, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut(sql, null, kaynakDegeri);
         var v = await komut.ExecuteScalarAsync(iptal);
         return v is null or DBNull ? null : v;
     }

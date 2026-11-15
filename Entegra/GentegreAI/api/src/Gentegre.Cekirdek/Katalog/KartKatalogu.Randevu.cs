@@ -96,7 +96,13 @@ public static partial class KartKatalogu
                 KodTablosu: "public.v_anlasmali_kurum_lookup",
                 Baslik: "Kurum", Grup: "Randevu",
                 VarsayilanSql: "select t.id from public.taraf t join public.taraf_kurum k on k.id = t.id " +
-                               "where t.kurum = 1 and k.anlasmali = 1 and k.tur = 1 and t.durum = 1 order by t.id limit 1"),
+                               "where t.kurum = 1 and k.anlasmali = 1 and k.tur = 1 and t.durum = 1 order by t.id limit 1",
+                // HASTANIN KAYITLI KURUMU ÖNCE (kod inceleme 16.11.2026): hasta seçilince taraf_hasta.kurum_id gelir
+                //   (başvurudaki kuralın aynısı); hastanın kurumu yoksa Özel varsayılanı sürer.
+                BagliVarsayilanAlan: "hastaId",
+                BagliVarsayilanSql: "select h.kurum_id from public.taraf_hasta h join public.taraf t on t.id = h.kurum_id " +
+                                    "join public.taraf_kurum k on k.id = t.id " +
+                                    "where h.id = @p0 and t.durum = 1 and k.anlasmali = 1"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",

@@ -816,6 +816,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
       meta?.alanlar.forEach(x => { if (x.bagliAlan === ad) yeni[x.ad] = '' });
       // KARŞIT ALAN (1346): gönderen seçilince "Kendi İsteği" kalkar, gönderen boşaltılınca geri gelir.
       karsitAlanUygula(meta?.alanlar ?? [], yeni, ad, v);
+      // BAĞLI VARSAYILAN (16.11.2026, randevu: hasta seçilince kurumu): hedef alanın değeri sunucudan çözülür;
+      //   satır yoksa katalog varsayılanına (Özel) dönülür. Değer boşsa hedef katalog varsayılanına döner.
+      meta?.alanlar.filter(x => x.bagliVarsayilanAlan === ad).forEach(x => {
+        const varsayilan = meta.varsayilanlar?.[x.ad];
+        if (!v || v === '0') { yeni[x.ad] = varsayilan == null ? '' : String(varsayilan); return; }
+        void api.kartBagliVarsayilan(kaynak, x.ad, String(v)).then(y => {
+          setDeger(d => ({ ...d, [x.ad]: y.deger == null ? (varsayilan == null ? '' : String(varsayilan)) : String(y.deger) }));
+        }).catch(() => { /* çözülemezse katalog varsayılanı kalır */ });
+      });
       // TETKİK ÇALIŞMA DÜZENİ "SERİ" DEĞİLSE gün/saat TEMİZLENİR: kayıtta
       //   duran ama hesapta yok sayılan değer, veriyi yalancı yapar - liste
       //   "Sürekli" derken kartta üç gün seçili görünüyordu (gerçek vaka:

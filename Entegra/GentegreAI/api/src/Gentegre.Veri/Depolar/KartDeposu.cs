@@ -98,7 +98,7 @@ public sealed partial class KartDeposu
         await SlugUretAsync(baglanti, islem, tanim, degerler, null, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, null, iptal);
         SirlariSifrele(tanim, degerler, null);
-        KarsitAlanlariUygula(tanim, degerler, null);
+        await KarsitAlanlariUygulaAsync(baglanti, islem, tanim, degerler, null, null, iptal);
 
         var kolonlar = new List<string>();
         var yerTutucular = new List<string>();
@@ -210,17 +210,28 @@ public sealed partial class KartDeposu
     /// kayıttaki değerine bakılır; işaret istekte gelmemişse de yazılır ki DB kısıtı (ck_randevu_kendi_istegi) 500
     /// yerine tutarlı kayıt üretsin.
     /// </summary>
-    private static void KarsitAlanlariUygula(KartTanimi tanim, IDictionary<string, object?> degerler,
-                                             IDictionary<string, object?>? oncesi)
+    private async Task KarsitAlanlariUygulaAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+                                                        KartTanimi tanim, IDictionary<string, object?> degerler,
+                                                        IDictionary<string, object?>? oncesi, long? id,
+                                                        CancellationToken iptal)
     {
         foreach (var alan in tanim.Alanlar.Where(a => a.KarsitAlan is not null))
         {
-            var karsit = degerler.TryGetValue(alan.KarsitAlan!, out var k) ? k
-                       : oncesi is not null && oncesi.TryGetValue(alan.KarsitAlan!, out var e) ? e : null;
-            var dolu = karsit is not null
-                       && Convert.ToString(karsit, CultureInfo.InvariantCulture) is { Length: > 0 } s
-                       && s.Trim() != "" && s != "0";
-            if (dolu) degerler[alan.Ad] = (short)0;
+            object? karsit;
+            if (degerler.TryGetValue(alan.KarsitAlan!, out var k)) karsit = k;
+            else if (oncesi is not null && oncesi.TryGetValue(alan.KarsitAlan!, out var e)) karsit = e;
+            else if (id is { } kayitId && tanim.Alan(alan.KarsitAlan!) is { } ka)
+            {
+                // Karşıt alan okunabilir alanlarda yoksa (rolün okuma yetkisi yok) KAYITTAN okunur - yoksa kısıt
+                //   (ck_randevu_kendi_istegi) 500 verirdi (kod inceleme 16.11.2026).
+                await using var komut = Komut(baglanti, islem,
+                    $"select {ka.Kolon} from {tanim.Tablo} where {tanim.IdKolonu} = @p0", [kayitId]);
+                var v = await komut.ExecuteScalarAsync(iptal);
+                karsit = v is DBNull ? null : v;
+            }
+            else karsit = null;
+            // Ortak yüklem (DegerCevirici.Dolu): zorunlu-muaf denetimiyle aynı "boş" tanımı.
+            if (DegerCevirici.Dolu(karsit)) degerler[alan.Ad] = (short)0;
         }
     }
 
@@ -290,7 +301,7 @@ public sealed partial class KartDeposu
         await SlugUretAsync(baglanti, islem, tanim, degerler, id, iptal);
         await DovizHesaplaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, iptal);
         SirlariSifrele(tanim, degerler, oncesi.Kart);
-        KarsitAlanlariUygula(tanim, degerler, oncesi.Kart);
+        await KarsitAlanlariUygulaAsync(baglanti, islem, tanim, degerler, oncesi.Kart, id, iptal);
 
         if (degerler.Count > 0)
         {

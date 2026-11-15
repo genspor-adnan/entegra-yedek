@@ -13,6 +13,14 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static class DegerCevirici
 {
+    /// <summary>
+    /// DEĞER DOLU MU (kod inceleme 16.11.2026): boş / null / "0" boştur. Zorunlu-muaf (KartUclari) ve karşıt alan
+    /// (KartDeposu) denetimleri AYNI yüklemi kullanır - ikisi ayrı yazılınca biri 422 öteki kısıt hatası (500) verirdi.
+    /// </summary>
+    public static bool Dolu(object? v)
+        => v is not null && Convert.ToString(v, CultureInfo.InvariantCulture) is { Length: > 0 } s
+           && s.Trim() != "" && s != "0";
+
     /// <param name="zamanDilimi">
     /// AKTIF SUBENIN saat dilimi (666). "zaman" alanlarinda kullanicinin
     /// yazdigi duvar saati bu dilimde yorumlanip UTC ana cevrilir; bos ise

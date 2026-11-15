@@ -202,6 +202,7 @@ export async function randevuAksiyonu(
     //   kampanyanin kendi listesi varsa uc onu kullanir. Fiyat cikmazsa
     //   hizmet kartindaki fiyata dusulur.
     // Odeyen kurumun kendi listesi hastaninkini ezer (278).
+    const gelisNedeni = (await api.basvuruKaynaklari().catch(() => null))?.kurallar?.gelisNedeniVarsayilan ?? null;
     const varsayilanListe = await api.belgeVarsayilanListe(19, hastaId, odeyenKurumId);
     let fiyatListesiId = varsayilanListe.listeId ?? null;
     // KAMPANYANIN KENDI LISTESI bazi belirler (kurum sozlesmesi "TTB2018
@@ -255,6 +256,8 @@ export async function randevuAksiyonu(
         // GÖNDEREN ve BÖLÜM randevudan (17.10.2026): gönderen (dış) doktor, yoksa randevunun doktoru.
         personelId: basvuruKisisi || null,
         kendiIstegi: kendiIstegi ? 1 : 0,
+        // GELİŞ NEDENİ varsayılanı kart yoluyla AYNI (kod inceleme 16.11.2026): sunucu kuralı (lab / görüntüleme → Tetkik).
+        ...(gelisNedeni ? { gelisNedeni } : {}),
         bolumId: Number(satir.bolum) || null,
         aciklama: `Randevu #${satir.id}`
                   + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),

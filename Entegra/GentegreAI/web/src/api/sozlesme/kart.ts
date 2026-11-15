@@ -151,6 +151,8 @@ export interface KartAlanMeta {
   bagliAlan?: string | null;
   /** Mantık alanın karşıtı (1346): o alan doluyken işaret kaldırılır ve kilitlenir; boşaltılınca işaretlenir. */
   karsitAlan?: string | null;
+  /** Bu alan değişince hedefin varsayılanı sunucudan çözülür (randevu: hasta → kurum). */
+  bagliVarsayilanAlan?: string | null;
   /** Doluysa alan combo degil JENERIK ARAMA EKRANI ile secilir (260):
       'hasta' -> kisi/hasta aramasi, 'hizmet' -> stok/hizmet aramasi. */
   aramaKaynagi?: string | null;

@@ -460,7 +460,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   // Basvuru combolarinin (kurum · bolum · depo · gorevli) ve protokol numara
   //   sablonunun yuklenmesi ayri dosyada: hepsi ayni desendeki bes effect'ti.
-  const { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle } =
+  const { kurumlar, bolumler, gonderenBolumleri, depolar, gorevliler, protokolElle, kurallar: basvuruKurallari } =
     useBasvuruKaynaklari(basvuruMu, bolumId, kullanici?.hekimRolu);
 
   usePersonelAdi(personelId, gorevliler, setPersonelAd);
@@ -907,15 +907,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
      Ikisi de yalniz YENI kartta ve yalniz BOS alanda calisir. */
   useBasvuruVarsayilanlari({
     basvuruMu, belgeId, hastaId: cari?.id, kurumlar, personelId,
-    // Randevudan kurum geldiyse (1347) varsayılan kancası devreye girmez - iki kaynak yarışmasın.
-    odeyenKurumId: odeyenKurumId ?? (!belgeId && onDolguKurumId ? onDolguKurumId : null),
+    // Randevudan kurum geldiyse (1347) varsayılan kancası devreye girmez - iki kaynak yarışmasın. Kurum listede
+    //   yoksa (pasif / anlaşmasız) dolgu uygulanmaz, kanca hasta kurumu / Özel yedeğine düşer (kod inceleme).
+    odeyenKurumId: odeyenKurumId ?? (!belgeId && onDolguKurumId && kurumlar.some(k => k.id === onDolguKurumId)
+                                      ? onDolguKurumId : null),
     onKurum: k => void odeyenKurumDegisti(k),
     // DOLU ALANA DOKUNMA: ayni nesne donunce React "degismedi" sayar -
     //   kosulsuz yazmak karti kullanici hic dokunmadan kirli gosterirdi.
     onGelisSekli: () => setBasvuruBilgi(o => (Number(o.gelisSekli ?? 0)
       ? o : { ...o, gelisSekli: gelisSekliKarari(false) })),
-    // GELİŞ NEDENİ varsayılanı (lab / görüntüleme → Tetkik): yalnız BOŞ alan dolar.
-    kurumTipi: kullanici?.kurumTipi,
+    // GELİŞ NEDENİ varsayılanı sunucu kuralından (lab / görüntüleme → Tetkik): yalnız BOŞ alan dolar.
+    gelisNedeniVarsayilani: basvuruKurallari?.gelisNedeniVarsayilan ?? null,
     onGelisNedeni: n => setBasvuruBilgi(o => (Number(o.gelisNedeni ?? 0) ? o : { ...o, gelisNedeni: n })),
   });
 
@@ -1268,7 +1270,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     // Ikisi de ASAGIDA tanimli - cagri aninda cozulsun diye sarmalandi.
     imzayiTemizle: () => imzayiTemizle(),
     onKaydedildi, kapat: (zorla?: boolean) => void kapat(zorla),
-    bekleyenRadyoloji,
+    bekleyenRadyoloji, gonderenModu,
     // Dış kurum sevki: ilk istemin kartı KABUL kipinde kendi sekmesinde açılır; birden çok istem varsa ötekiler
     //   mesajda, istem listesinden açılır. Kaydet başvuruyu KAPATIYORSA hedef kapanışa bırakılır (cik): önce gidip
     //   sonra kapatmak, kapanan sekmenin bayat konumla komşu sekmeye dönmesiyle istem kartını kaybediyordu
@@ -2136,6 +2138,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             //   basvuru turu ve poliklinik odasi sorulmaz, hekim alani
             //   "Gönderen" olur.
             gonderenModu={gonderenModu}
+            kurallar={basvuruKurallari}
             personelAd={personelAd} onPersonelSec={personelSecildi}
             kurumHatasi={alanHatalari.odeyenKurumId}
             bolumHatasi={alanHatalari.bolumId}

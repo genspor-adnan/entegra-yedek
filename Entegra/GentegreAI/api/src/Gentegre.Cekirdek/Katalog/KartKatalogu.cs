@@ -134,6 +134,14 @@ public sealed record KartAlani(
     /// </summary>
     string? VarsayilanSql = null,
     /// <summary>
+    /// BAĞLI VARSAYILAN (kod inceleme 16.11.2026, randevu kurumu: hastanın kayıtlı kurumu Özel varsayılanını
+    /// ezmeli): `BagliVarsayilanAlan` değişince ekran `/api/kart/{kaynak}/bagli-varsayilan` ucunu çağırır, sunucu
+    /// `BagliVarsayilanSql`i (@p0 = o alanın değeri) çalıştırır; satır varsa bu alana yazılır, yoksa katalog
+    /// varsayılanına dönülür. SQL katalog sabitidir, istek metni girmez.
+    /// </summary>
+    string? BagliVarsayilanAlan = null,
+    string? BagliVarsayilanSql = null,
+    /// <summary>
     /// ŞİFRELİ SIR (kod inceleme 30.10.2026 K28): değer DB'ye <c>GizliMetin</c> ile şifreli yazılır, kart
     /// okumasında dolu ise yalnız maske döner (sır istemciye hiç gitmez), kayıtta maske gelirse alan
     /// değişmez. Okuyan servisler <c>GizliMetin.Coz</c> kullanır.
