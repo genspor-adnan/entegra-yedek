@@ -168,7 +168,9 @@ UYGULANAN=0; ATLANAN=0; AKTARIM_YOK=0
 for D in $DOSYALAR; do
     AD=$(basename "$D")
     case "$UYGULANMIS" in *" $AD "*) ATLANAN=$((ATLANAN+1)); continue ;; esac
-    OZET=$(sha256sum "$GECICI/$AD" | cut -d' ' -f1)
+    # stdin /dev/null: Windows'ta (Git coreutils) stdin tutamaci olmayan bir surecten (yayin kapisi, dotnet test)
+    #   cagrilinca sha256sum "failed to set file descriptor text/binary mode" ile cikiyordu (15.11.2026).
+    OZET=$(sha256sum "$GECICI/$AD" < /dev/null | cut -d' ' -f1)
 
     if [ "$TEMEL_AL" = "1" ]; then
         psqlq -v dosya="$AD" -v ozet="$OZET" <<'SQL'

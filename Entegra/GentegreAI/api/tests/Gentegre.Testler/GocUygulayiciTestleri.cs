@@ -173,7 +173,7 @@ public sealed class GocUygulayiciTestleri : IAsyncLifetime
         Goc("002_ekle.sql", "insert into public.sayac values (1);\n");
         Goc("003_kendi_islemi.sql", "begin;\ninsert into public.sayac values (2);\ncommit;\n");
 
-        Assert.Equal(0, (await CalistirAsync(tur)).Kod);
+        { var (ilkKod, ilkCikti) = await CalistirAsync(tur); Assert.True(ilkKod == 0, ilkCikti); }
         var (kod, cikti) = await CalistirAsync(tur);
         Assert.True(kod == 0, cikti);
 
