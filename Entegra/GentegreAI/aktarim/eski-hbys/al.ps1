@@ -79,6 +79,9 @@ $KAPSAM = [ordered]@{
   "OLE"        = " WHERE GELISID IN $gelisIdler"
   # Rapor şablonları (tamamı): Word belgesi, OLE ile aynı kap (zlib'siz).
   "HAZOLE"     = ""
+  # KULLAN (15.11.2026, kullanıcı: "personeli boşalt, KULLAN'dan yeniden aktar"): eski HBYS kullanıcıları = kurum
+  #   personeli. Tamamı; parola kolonları (SIFRE, CRMSIFRE, SANTRALSIFRE) kullan.sql ilk adımda boşaltır.
+  "KULLAN"     = ""
 }
 # RAPOR İÇERİKLİ TABLOLAR: Word kabı açılıp metin + biçimli HTML kolonlarına yazılır (ham kopyaya girmez).
 #   Sıra önemli: önce zlib'li kolon (ZlibAc), yoksa ham kolon.
