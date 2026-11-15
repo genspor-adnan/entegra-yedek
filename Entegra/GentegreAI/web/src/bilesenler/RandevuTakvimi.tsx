@@ -381,6 +381,22 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     return metin(cev('Mesai dışı'));
   };
 
+  /**
+   * DEVAM HÜCRELERİ (kullanıcı 15.11.2026: "10:00-10:45 randevu ekledim, yalnız 10:00 hücresi çerçeveli; 10:15 ve
+   * 10:30 da dolu olmalı"): randevu birden çok slot sürüyorsa başladığı hücreden sonraki hücreler de DOLU çizilir
+   * (aynı renk, kesikli çerçeve, "↓"), tıklanınca randevu açılır, yeni randevu / bırakma kabul etmez.
+   */
+  const devam = (sutun: Sutun, slot: number) => {
+    return satirlar.filter(r => {
+      if (String(r.tarih ?? '').slice(0, 10) !== sutun.gun) return false;
+      if (sutun.hekim !== undefined && Number(r.hekimId) !== sutun.hekim) return false;
+      if (sutun.cihaz !== undefined && Number(r.cihazId) !== sutun.cihaz) return false;
+      const b = dk(String(r.saat ?? ''));
+      const bitis = r.bitis ? dk(String(r.bitis)) : b + (Number(r.sureDk) || adim);
+      return b < slot && bitis > slot;
+    });
+  };
+
   /** sutun + slot -> o aralikta baslayan randevular. */
   const hucre = (sutun: Sutun, slot: number) => {
     return satirlar.filter(r => {
@@ -423,7 +439,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       //   gorunumunde SUTUNUN hekimi de forma tasinir.
       setSecim(null);
       onAralik?.(null, 0);
-      if (hucre(s, bas).length === 0) onYeni(`${s.gun}T${saatMetni(bas)}`, s.hekim, s.cihaz);
+      if (hucre(s, bas).length === 0 && devam(s, bas).length === 0) onYeni(`${s.gun}T${saatMetni(bas)}`, s.hekim, s.cihaz);
       return;
     }
     // Son slot da dahil: 09:00-09:30 isaretlenirse sure 45 dk degil 45'tir
@@ -438,7 +454,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
    */
   const [birakHedefi, setBirakHedefi] = useState<string | null>(null);
   const birakilabilir = (s: Sutun, slot: number) =>
-    !!onBirak && s.cihaz !== undefined && hucre(s, slot).length === 0
+    !!onBirak && s.cihaz !== undefined && hucre(s, slot).length === 0 && devam(s, slot).length === 0
     && !kapali(s, slot);
 
   const kaydir = (yon: number) => {
@@ -552,6 +568,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                 <td style={{ textAlign: 'center', opacity: .75 }}>{saatMetni(slot)}</td>
                 {sutunlar.map(sut => {
                   const kayitlar = hucre(sut, slot);
+                  const devamlar = kayitlar.length === 0 ? devam(sut, slot) : [];
                   const secili = araliktaMi(sut, slot);
                   const hedef = birakHedefi === sut.anahtar + slot;
                   const kapaliBlok = kapali(sut, slot);
@@ -566,7 +583,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                         style={{ cursor: 'pointer', verticalAlign: 'top',
                                  background: secili ? 'var(--sec, var(--mor2))' : undefined,
                                  userSelect: 'none' }}
-                        onMouseDown={() => kayitlar.length === 0 && !kapaliBlok
+                        onMouseDown={() => kayitlar.length === 0 && devamlar.length === 0 && !kapaliBlok
                                            && secimBasla(sut, slot)}
                         onMouseEnter={() => secimGenislet(sut, slot)}
                         onMouseUp={() => secimBitir(sut, slot)}
@@ -593,6 +610,15 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           {kapatmaBasi && <span>🔒 {kapaliBlok.metin}</span>}
                         </div>
                       )}
+                      {devamlar.map(r => (
+                        <div key={'d' + String(r.id)} className="takvim-devam"
+                             onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
+                             title={`${String(r.hasta ?? '')} · ${String(r.saat ?? '')}–${String(r.bitis ?? '')} (${cev('devam')})`}
+                             style={{ background: Number(r.durum) === 2 ? 'var(--okzem)'
+                                               : Number(r.durum) === 3 ? 'var(--hatazem)' : 'var(--yuz2)' }}>
+                          ↓ <span>{String(r.hasta ?? '')}</span>
+                        </div>
+                      ))}
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
