@@ -381,10 +381,17 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     return metin(cev('Mesai dışı'));
   };
 
+  /** Randevunun bitiş dakikası (bitis alanı yoksa süre, o da yoksa bir slot). */
+  const bitisDk = (r: ListeSatiri) => {
+    const b = dk(String(r.saat ?? ''));
+    return r.bitis ? dk(String(r.bitis)) : b + (Number(r.sureDk) || adim);
+  };
+
   /**
-   * DEVAM HÜCRELERİ (kullanıcı 15.11.2026: "10:00-10:45 randevu ekledim, yalnız 10:00 hücresi çerçeveli; 10:15 ve
-   * 10:30 da dolu olmalı"): randevu birden çok slot sürüyorsa başladığı hücreden sonraki hücreler de DOLU çizilir
-   * (aynı renk, kesikli çerçeve, "↓"), tıklanınca randevu açılır, yeni randevu / bırakma kabul etmez.
+   * ÇOK SLOTLU RANDEVU TEK ÇERÇEVE (kullanıcı 15.11.2026: "10:00-10:45 randevu; 10:15 ve 10:30 da dolu olmalı" →
+   * "tek çerçeve olsun ve alta doğru genişlesin"): randevu başladığı hücrede çizilir ve hücre kapsadığı slot kadar
+   * aşağı uzar (rowSpan); kapsanan slotların hücresi çizilmez. Kapsanan slotta BAŞLAYAN başka randevu varsa (eş zamanlı
+   * cihaz) uzama orada biter, o hücre normal çizilir. `devam`: slotu önceden başlamış bir randevu kapsıyor mu.
    */
   const devam = (sutun: Sutun, slot: number) => {
     return satirlar.filter(r => {
@@ -392,9 +399,19 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
       if (sutun.hekim !== undefined && Number(r.hekimId) !== sutun.hekim) return false;
       if (sutun.cihaz !== undefined && Number(r.cihazId) !== sutun.cihaz) return false;
       const b = dk(String(r.saat ?? ''));
-      const bitis = r.bitis ? dk(String(r.bitis)) : b + (Number(r.sureDk) || adim);
-      return b < slot && bitis > slot;
+      return b < slot && bitisDk(r) > slot;
     });
+  };
+  /** Başlangıç hücresinin kaç slot aşağı uzayacağı (kendi randevuları kapsadığı ve başka randevunun başlamadığı slotlar). */
+  const uzama = (sutun: Sutun, slot: number, kayitlar: ListeSatiri[]) => {
+    let span = 1;
+    for (let i = slotlar.indexOf(slot) + 1; i < slotlar.length; i++) {
+      const s2 = slotlar[i];
+      if (!kayitlar.some(r => bitisDk(r) > s2)) break;
+      if (hucre(sutun, s2).length > 0) break;
+      span++;
+    }
+    return span;
   };
 
   /** sutun + slot -> o aralikta baslayan randevular. */
@@ -568,7 +585,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                 <td style={{ textAlign: 'center', opacity: .75 }}>{saatMetni(slot)}</td>
                 {sutunlar.map(sut => {
                   const kayitlar = hucre(sut, slot);
-                  const devamlar = kayitlar.length === 0 ? devam(sut, slot) : [];
+                  // Önceki randevunun uzadığı hücre: çizilmez (rowSpan üstte).
+                  if (kayitlar.length === 0 && devam(sut, slot).length > 0) return null;
+                  const span = kayitlar.length > 0 ? uzama(sut, slot, kayitlar) : 1;
                   const secili = araliktaMi(sut, slot);
                   const hedef = birakHedefi === sut.anahtar + slot;
                   const kapaliBlok = kapali(sut, slot);
@@ -580,10 +599,11 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                   return (
                     <td key={sut.anahtar + slot}
                         className={hedef ? 'birak-hedef' : undefined}
-                        style={{ cursor: 'pointer', verticalAlign: 'top',
+                        style={{ cursor: 'pointer', verticalAlign: 'top', position: span > 1 ? 'relative' : undefined,
                                  background: secili ? 'var(--sec, var(--mor2))' : undefined,
                                  userSelect: 'none' }}
-                        onMouseDown={() => kayitlar.length === 0 && devamlar.length === 0 && !kapaliBlok
+                        rowSpan={span > 1 ? span : undefined}
+                        onMouseDown={() => kayitlar.length === 0 && !kapaliBlok
                                            && secimBasla(sut, slot)}
                         onMouseEnter={() => secimGenislet(sut, slot)}
                         onMouseUp={() => secimBitir(sut, slot)}
@@ -610,17 +630,9 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           {kapatmaBasi && <span>🔒 {kapaliBlok.metin}</span>}
                         </div>
                       )}
-                      {devamlar.map(r => (
-                        <div key={'d' + String(r.id)} className="takvim-devam"
-                             onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
-                             title={`${String(r.hasta ?? '')} · ${String(r.saat ?? '')}–${String(r.bitis ?? '')} (${cev('devam')})`}
-                             style={{ background: Number(r.durum) === 2 ? 'var(--okzem)'
-                                               : Number(r.durum) === 3 ? 'var(--hatazem)' : 'var(--yuz2)' }}>
-                          ↓ <span>{String(r.hasta ?? '')}</span>
-                        </div>
-                      ))}
                       {kayitlar.map(r => (
                         <div key={String(r.id)}
+                             className={span > 1 && kayitlar.length === 1 ? 'takvim-uzun' : undefined}
                              onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
                              title={[r.hizmet, r.gonderen ? `${cev('Gönderen')}: ${String(r.gonderen)}` : '', r.hekim, r.bolumAdi, r.aciklama]
                                       .map(x => String(x ?? '')).filter(Boolean).join(' · ')}
