@@ -150,3 +150,35 @@ describe('stok arama: ekleme hızları (786)', () => {
     await waitFor(() => expect(kutu(satirlar[0]).checked).toBe(false));
   });
 });
+
+/** Filtre ağacında `durum = 1` koşulu var mı (iç içe and/or). */
+const aktifKosuluVar = (f: unknown): boolean => {
+  if (!f || typeof f !== 'object') return false;
+  const k = f as { alan?: string; op?: string; deger?: unknown; kosullar?: unknown[] };
+  if (k.alan === 'durum' && k.op === 'esit' && k.deger === 1) return true;
+  return (k.kosullar ?? []).some(aktifKosuluVar);
+};
+
+describe('stok arama: yalnız aktif kalemler (15-11-2026)', () => {
+  beforeEach(() => {
+    liste.mockReset();
+    liste.mockResolvedValue({ satirlar: [SATIR], toplamKayit: 1 });
+  });
+
+  // Kullanıcı (görüntüleme): "profilde sadece lab ve rad tetkikler işaretli.. yeni randevu verirken listeye hepsi
+  //   geliyor". Kategori kapanınca hizmet pasif olur (527); seçim penceresi pasifi istemez.
+  it('hizmet ve stok sorgusuna durum = 1 koşulu eklenir', async () => {
+    render(<StokAramaPenceresi etkin onSec={vi.fn()} onKapat={() => {}} />);
+    await waitFor(() => expect(liste).toHaveBeenCalled());
+    const cagri = (kaynak: string) => liste.mock.calls.find(c => c[0] === kaynak);
+    expect(aktifKosuluVar(cagri('hizmet')?.[1]?.filtre)).toBe(true);
+    expect(aktifKosuluVar(cagri('stok')?.[1]?.filtre)).toBe(true);
+  });
+
+  it('kart açma kipinde (kartAc) pasif kart da bulunur: koşul yok', async () => {
+    render(<StokAramaPenceresi etkin kartAc yalnizHizmet onSec={vi.fn()} onKapat={() => {}} />);
+    await waitFor(() => expect(liste).toHaveBeenCalled());
+    const cagri = liste.mock.calls.find(c => c[0] === 'hizmet');
+    expect(aktifKosuluVar(cagri?.[1]?.filtre)).toBe(false);
+  });
+});

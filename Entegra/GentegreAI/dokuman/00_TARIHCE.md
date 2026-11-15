@@ -7,6 +7,16 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 15.11.2026 — Stok/hizmet arama penceresi yalnız AKTİF kalemleri getirir
+
+Kullanıcı (görüntüleme): "profilden hizmet listesinde sadece lab ve rad tetkikler işaretli yaptım.. yeni randevu
+verirken listeye hepsi geliyor.. sadece profilde seçtiklerim gelmeli".
+
+- Profil kategoriyi kapatınca hizmet/stok pasif olur (527) ve kart combo'su (`v_hizmet_lookup`, aktif = 1) bunu
+  zaten süzüyordu; ama `StokAramaPenceresi` (randevu / başvuru ücret satırı / kart alanı "hizmet" araması) durum
+  süzmüyordu. Hizmet ve stok sorgusuna `durum = 1` eklendi; kart açma kipinde (kartAc) süzülmez - pasif kartı bulup
+  yeniden açmak da bu pencereden yapılır. Test: stokAramaEkleme.test (yalnız aktif kalemler).
+
 ## 15.11.2026 — Başvuru kaydı 422 "Bilinmeyen belge alanı: enabizBildirim" (1340 düzeltmesi)
 
 Kullanıcı: "yeni başvuru eklemek istedim hata: Bilinmeyen belge alanı: enabizBildirim".

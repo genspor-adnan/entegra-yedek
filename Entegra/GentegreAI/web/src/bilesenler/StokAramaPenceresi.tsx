@@ -278,14 +278,19 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
       const yonKosulu = yon
         ? { alan: yon === 'alis' ? 'alinan' : 'satilan', op: 'esit' as const, deger: 1 }
         : null;
-      const filtre = veIle(veIle(hizmetFiltresi, kategoriKosulu('kategori')),
-                           hizmetEkFiltre);
-      const stokFiltresi = veIle(
+      // YALNIZ AKTİF KALEMLER (kullanıcı 15.11.2026, görüntüleme: "profilde sadece lab ve rad tetkikler işaretli..
+      //   yeni randevu verirken listeye hepsi geliyor"): profil kategoriyi kapatınca hizmet/stok pasif olur (527),
+      //   ama bu pencere durum süzmüyordu - seçim penceresinde pasif kalem işe yaramaz. Kart açma kipinde (kartAc)
+      //   süzülmez: pasif kartı bulup yeniden açmak da bu pencereden yapılır.
+      const aktifKosulu = kartAc ? null : { alan: 'durum', op: 'esit' as const, deger: 1 };
+      const filtre = veIle(veIle(veIle(hizmetFiltresi, kategoriKosulu('kategori')),
+                                 hizmetEkFiltre), aktifKosulu);
+      const stokFiltresi = veIle(veIle(
         yonKosulu
           ? (metinFiltresi ? { op: 'and' as const, kosullar: [metinFiltresi, yonKosulu] }
                            : yonKosulu)
           : metinFiltresi,
-        kategoriKosulu('kategoriId'));
+        kategoriKosulu('kategoriId')), aktifKosulu);
 
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunum = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
