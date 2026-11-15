@@ -649,6 +649,15 @@ public sealed partial class KartDeposu
     /// Aktif şubenin kurum tipi kodu (`kurum_profil.kurum_tipi`, şube satırı yoksa kurum geneli) - kart meta'sı
     /// `KartTanimi.KurumTipiVarsayilanlari`'nı bununla seçer. Okuma kuralı KurumProfilDeposu ile aynı.
     /// </summary>
+    /// <summary>Katalog sabiti tek değer sorgusu (KartAlani.VarsayilanSql); satır yoksa null.</summary>
+    public async Task<object?> VarsayilanDegerAsync(string sql, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = baglanti.Komut(sql, null);
+        var v = await komut.ExecuteScalarAsync(iptal);
+        return v is null or DBNull ? null : v;
+    }
+
     public async Task<string> KurumTipiKoduAsync(int subeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);

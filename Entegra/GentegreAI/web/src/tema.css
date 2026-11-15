@@ -1030,9 +1030,10 @@ tr.panel-basligi .d.mini {
 .alan .ikili { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
 .alan .ikili input { flex: 1; min-width: 0 }
 .alan .ikili select { flex: none; width: 64px }
-/* Eslesen ONAY kutusu (16-11-2026): arama girdisi daralir, kutu adiyla birlikte saginda durur. */
-.alan .ikili-onayli > .ikili { flex: 0 1 260px; min-width: 150px }
-.alan .ikili-onayli .ikili-onay { display: flex; align-items: center; gap: 6px; flex: none; white-space: nowrap; font-size: 12px; color: var(--yazi) }
+/* Eslesen ONAY kutusu (16-11-2026, kullanici: "check saga yanasik olsun, gonderen doktor ona gore dolsun"):
+   kutu satirin SAG kenarina yaslanir, arama girdisi kalan yeri doldurur. */
+.alan .ikili-onayli > .ikili { flex: 1 1 auto; min-width: 120px }
+.alan .ikili-onayli .ikili-onay { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; white-space: nowrap; font-size: 12px; color: var(--yazi) }
 .alan .ikili-onayli .ikili-onay input { flex: none; width: auto }
 /* Deger yanindaki sabit birim (ör. kalem penceresinde para birimi) - girdi degil,
    etiket gibi durur ama hizalama ayni kalsin diye input olarak cizilir. */

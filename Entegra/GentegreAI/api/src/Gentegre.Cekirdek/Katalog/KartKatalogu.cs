@@ -128,6 +128,12 @@ public sealed record KartAlani(
     /// </summary>
     string? KarsitAlan = null,
     /// <summary>
+    /// SORGUYLA YENİ KAYIT VARSAYILANI (kullanıcı 16.11.2026: randevu kurumu "default ücretli olsun"): tek değer
+    /// döndüren SABİT katalog SQL'i, kart meta'sı her açılışta çalıştırır ve `Varsayilanlar`a koyar (katalogda
+    /// kimlik yazılamaz - kurum her kurulumda farklı id'dedir). İstek metni girmez; yalnız katalog yazar.
+    /// </summary>
+    string? VarsayilanSql = null,
+    /// <summary>
     /// ŞİFRELİ SIR (kod inceleme 30.10.2026 K28): değer DB'ye <c>GizliMetin</c> ile şifreli yazılır, kart
     /// okumasında dolu ise yalnız maske döner (sır istemciye hiç gitmez), kayıtta maske gelirse alan
     /// değişmez. Okuyan servisler <c>GizliMetin.Coz</c> kullanır.

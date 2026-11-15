@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — Randevuda ödeyen Kurum geri geldi (1347), varsayılan Özel (Ücretli); başvuru etiketleri
+
+Kullanıcı: "randevu kartına hizmetten önce Kurum ekle.. o da başvuruya geçsin" · "default ücretli olsun" ·
+"kendi isteği check sağa yanaşık olsun" · başvuru kartı: "Kendi isteğiyle geldi (gönderen yok)" → "Kendi İsteği",
+"e-Nabız Bildirimi / Teleradyoloji Bildirimi" → "e-Nabız / Teleradyoloji", Bildirimler bloğu Başvuru Notu'ndan önce.
+
+- `randevu.kurum_id` (266 kaldırmıştı, karar geri alındı): randevu kartında Hizmet'ten önce "Kurum"
+  (`v_anlasmali_kurum_lookup`). Başvuruya dönüşte (kart linki ve doğrudan yol) ödeyen kurum olur; hastanın kayıtlı
+  kurumu / Özel varsayılanını ezer. Erteleme kurumu taşır. Listeye `kurum` / `kurumId` kolonları (gizli).
+- `KartAlani.VarsayilanSql`: sorguyla yeni kayıt varsayılanı - katalog sabiti, kurulum başına değer (kurum id'si
+  kurulumdan kuruluma değişir). Randevu kurumu = tür 1 Özel (Ücretli) aktif kurum.
+- `v_anlasmali_kurum_lookup`: tür 1 Özel kurum sözleşmesiz de aktif (485 ile uyum) - önceden ödeyen listelerinde
+  "pasif" sayılıp çıkmıyordu.
+- Randevu kartı: "Kendi İsteği" kutusu satırın sağına yaslı, gönderen girdisi kalan yeri doldurur (ikili-onayli).
+
 ## 15.11.2026 — Randevuda "Kendi İsteği" işareti (1346) + kart alanı karşıtı (KarsitAlan)
 
 Kullanıcı: "randevu kartında gönderen yoksa başvuru gibi Kendi İsteği check olmalı".

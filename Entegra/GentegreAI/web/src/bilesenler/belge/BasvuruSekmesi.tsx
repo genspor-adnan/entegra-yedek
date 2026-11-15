@@ -335,7 +335,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           <label className="kendi-istegi">
             <input type="checkbox" checked={kendiIstegi} disabled={kilitli}
                    onChange={e => onKendiIstegi?.(e.target.checked)} />
-            Kendi isteğiyle geldi (gönderen yok)
+            {c('Kendi İsteği')}
           </label>
           </div>
         ) : (

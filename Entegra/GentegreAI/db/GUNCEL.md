@@ -732,7 +732,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (368 ad, 164 tanesi birden cok dosyada)
+## Gorunumler (368 ad, 165 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -747,7 +747,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_acil_yatak_lookup` | `716_acil_servis.sql` | — |
 | `v_alt_kurum_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_ameliyat_salon_lookup` | `715_ameliyathane.sql` | — |
-| `v_anlasmali_kurum_lookup` | `1338_kurum_anlasmali_bayragi.sql` | — |
+| `v_anlasmali_kurum_lookup` | `1347_randevu_kurum_geri.sql` | 1338_kurum_anlasmali_bayragi.sql |
 | `v_ariza_talep` | `954_ariza_talep_takip.sql` | 911_ariza_talep_modulu.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_asi_skrs_eksik` | `898_asi_modulu.sql` | — |
 | `v_asi_uygulama` | `940_personel_unvan_yalniz_onek.sql` | 898_asi_modulu.sql |

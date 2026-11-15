@@ -170,7 +170,8 @@ export async function randevuAksiyonu(
       }
       hasta = await hastaOku(hastaId);
     }
-    const odeyenKurumId = hasta.kurumId;
+    // ÖDEYEN KURUM (1347): randevunun kurumu önce, yoksa hastanın kayıtlı kurumu.
+    const odeyenKurumId = Number(satir.kurumId) || hasta.kurumId;
     // Başvurunun kişisi kurum moduna göre: gönderen modunda dış GÖNDEREN, değilse randevunun DOKTORU.
     const basvuruKisisi = (b.gonderenModu ? Number(satir.gonderenId) : Number(satir.hekimId)) || 0;
     // KENDİ İSTEĞİ (1346; kullanıcı 16.11.2026: "gönderen dr veya kendi isteği aynen geçmeli"): yalnız gönderen
@@ -189,6 +190,7 @@ export async function randevuAksiyonu(
         randevuId: String(Number(satir.id)),
         ...(kisi ? { personelId: String(kisi), personelAd: kisiAd } : {}),
         ...(kendiIstegi ? { kendiIstegi: '1' } : {}),
+        ...(Number(satir.kurumId) ? { kurumId: String(Number(satir.kurumId)) } : {}),
         ...(Number(satir.bolum) ? { bolumId: String(Number(satir.bolum)) } : {}),
       });
       b.git(`/basvuru/yeni?${q.toString()}`);

@@ -17,6 +17,7 @@ public static partial class KaynakKatalogu
             left join public.hizmet hz on hz.id = rv.hizmet_id
             left join public.radyoloji_cihaz cz on cz.id = rv.cihaz_id
             left join public.taraf gh on gh.id = rv.gonderen_id
+            left join public.taraf ku on ku.id = rv.kurum_id
             """,
         SubeKolonu: "rv.sube_id",
         // PORTAL (794): hasta KENDI randevusunu gorur (ve alir). Dis doktor /
@@ -45,6 +46,9 @@ public static partial class KaynakKatalogu
                 AyarKapisi: "randevu.gonderen_doktor"),
             new("kendiIstegi", "coalesce(rv.kendi_istegi, 0)", "sayi", "Kendi İsteği", Varsayilan: false,
                 AyarKapisi: "randevu.gonderen_doktor"),
+            // ÖDEYEN KURUM (1347): başvuruya dönüşte odeyen_kurum_id olur; randevu aksiyonu kurumId'yi okur.
+            new("kurum",      "coalesce(public.fn_taraf_ad(ku.unvan, ku.ad, ku.soyad)::varchar(120), '')", "metin", "Kurum", Genislik: 150, Varsayilan: false),
+            new("kurumId",    "rv.kurum_id", "sayi", "Kurum Id", Varsayilan: false),
             new("gonderenId", "rv.gonderen_id", "sayi", "Gönderen Id", Varsayilan: false),
             new("hastaId",    "rv.hasta_id",  "sayi",  "Hasta Id", Varsayilan: false),
             // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): hastanın ham telefonu (cep + sabit,

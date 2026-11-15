@@ -95,6 +95,8 @@ interface Props {
   onDolguBolumId?: number;
   /** Randevuda "Kendi İsteği" işaretliyse başvuru da öyle açılır (1346; gönderen boş). */
   onDolguKendiIstegi?: boolean;
+  /** Randevunun ödeyen kurumu (1347): başvuru bu kurumla açılır; hastanın kayıtlı kurumu / Özel varsayılanını ezer. */
+  onDolguKurumId?: number;
   /**
    * BELGEYİ KOPYALA (kullanıcı 26.10.2026, ekstre Aksiyon › Diğer): yeni belge bu belgenin başlığı ve
    * kalemleriyle KAYDEDİLMEMİŞ açılır - numara, tarih (bugün), e-Belge durumu, lot / seri, dönüşüm zinciri
@@ -105,7 +107,7 @@ interface Props {
 
 export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTarafId,
                             tarafUnvan: onDolguUnvan, onKapat, onKaydedildi, sayfa,
-                            randevuId, onDolguPersonel, onDolguBolumId, onDolguKendiIstegi, kopyaId }: Props = {}) {
+                            randevuId, onDolguPersonel, onDolguBolumId, onDolguKendiIstegi, onDolguKurumId, kopyaId }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
   const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
@@ -889,11 +891,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   }, [belgeId, onDolguPersonel?.id, onDolguBolumId, onDolguKendiIstegi]);
 
 
+  // RANDEVUNUN KURUMU (1347): kurum listesi gelir gelmez, varsayılan kancası (hasta kurumu / Özel) devreye girmeden.
+  //   odeyenKurumDegisti bildirim bayraklarını kurumdan kopyalar - liste yüklenmeden çağrılırsa bayraklar 0 kalırdı.
+  const kurumDolgusuYapildi = useRef(false);
+  useEffect(() => {
+    if (belgeId || !onDolguKurumId || kurumDolgusuYapildi.current || kurumlar.length === 0) return;
+    if (!kurumlar.some(k => k.id === onDolguKurumId)) return;
+    kurumDolgusuYapildi.current = true;
+    void odeyenKurumDegisti(onDolguKurumId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [belgeId, onDolguKurumId, kurumlar.length]);
+
   /* BASVURUNUN KENDILIGINDEN DOLAN ALANLARI kendi kancasinda
      (useBasvuruVarsayilanlari): varsayilan odeyen kurum ve gelis sekli.
      Ikisi de yalniz YENI kartta ve yalniz BOS alanda calisir. */
   useBasvuruVarsayilanlari({
-    basvuruMu, belgeId, hastaId: cari?.id, kurumlar, odeyenKurumId, personelId,
+    basvuruMu, belgeId, hastaId: cari?.id, kurumlar, personelId,
+    // Randevudan kurum geldiyse (1347) varsayılan kancası devreye girmez - iki kaynak yarışmasın.
+    odeyenKurumId: odeyenKurumId ?? (!belgeId && onDolguKurumId ? onDolguKurumId : null),
     onKurum: k => void odeyenKurumDegisti(k),
     // DOLU ALANA DOKUNMA: ayni nesne donunce React "degismedi" sayar -
     //   kosulsuz yazmak karti kullanici hic dokunmadan kirli gosterirdi.

@@ -400,6 +400,13 @@ public static class KartUclari
             foreach (var ad in sonuc.Keys.ToList())
                 if (sonuc[ad] as string == "@bugun")
                     sonuc[ad] = Saat.Bugun.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            // SORGUYLA VARSAYILAN (KartAlani.VarsayilanSql, 1347): katalog sabiti, kurulum başına değer (randevu
+            //   kurumu = tür 1 Özel). Sonuç yoksa alan boş kalır; katalog / kurum tipi varsayılanı varsa o kazanır.
+            foreach (var alan in tanim.Alanlar.Where(a => a.VarsayilanSql is not null && !sonuc.ContainsKey(a.Ad)))
+            {
+                var deger = await depo.VarsayilanDegerAsync(alan.VarsayilanSql!, iptal);
+                if (deger is not null) sonuc[alan.Ad] = deger;
+            }
             return sonuc;
         }
 

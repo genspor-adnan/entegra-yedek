@@ -1838,7 +1838,8 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
                         onDolguPersonel: Number(sorgu.get('personelId'))
                           ? { id: Number(sorgu.get('personelId')), ad: sorgu.get('personelAd') ?? '' } : undefined,
                         onDolguBolumId: Number(sorgu.get('bolumId')) || undefined,
-                        onDolguKendiIstegi: sorgu.get('kendiIstegi') === '1' }
+                        onDolguKendiIstegi: sorgu.get('kendiIstegi') === '1',
+                        onDolguKurumId: Number(sorgu.get('kurumId')) || undefined }
                      : { id: Number(kartId) })}
                   onKapat={() => ekranSekmesi!.kapat()}
                   onKaydedildi={() => window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }))} />

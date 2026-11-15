@@ -89,6 +89,14 @@ public static partial class KartKatalogu
             new("kendiIstegi", "kendi_istegi", "mantik",
                 Baslik: "Kendi İsteği", Grup: "Randevu", AyarKapisi: "randevu.gonderen_doktor",
                 KarsitAlan: "gonderenId"),
+            // ÖDEYEN KURUM (1347; kullanıcı 16.11.2026: "hizmetten önce Kurum ekle.. o da başvuruya geçsin",
+            //   "default ücretli olsun"): 266 kaldırmıştı, geri geldi. Başvuruya dönüşte odeyen_kurum_id olur;
+            //   varsayılan tür 1 Özel (Ücretli) kurum (kurulum başına id farklı - meta'da sorguyla çözülür).
+            new("kurumId",   "kurum_id",  "kod",
+                KodTablosu: "public.v_anlasmali_kurum_lookup",
+                Baslik: "Kurum", Grup: "Randevu",
+                VarsayilanSql: "select t.id from public.taraf t join public.taraf_kurum k on k.id = t.id " +
+                               "where t.kurum = 1 and k.anlasmali = 1 and k.tur = 1 and t.durum = 1 order by t.id limit 1"),
             // Hizmet de jenerik stok/hizmet aramasindan, yalniz hizmetler (260).
             new("hizmetId",  "hizmet_id", "kod",
                 KodTablosu: "public.v_hizmet_lookup", AramaKaynagi: "hizmet",

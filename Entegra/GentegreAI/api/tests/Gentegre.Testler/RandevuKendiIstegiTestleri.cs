@@ -52,6 +52,11 @@ public sealed class RandevuKendiIstegiTestleri(ApiSunucuOlgusu api)
         if (alan.ValueKind == JsonValueKind.Object)
             Assert.Equal("gonderenId", alan.GetProperty("karsitAlan").GetString());
         Assert.Equal(1, j.GetProperty("varsayilanlar").GetProperty("kendiIstegi").GetInt32());
+        // KURUM VARSAYILANI (1347, "default ücretli olsun"): tür 1 Özel kurum id'si sorguyla gelir.
+        var ozel = await api.Veri.TekDegerAsync<int?>(
+            "select t.id from public.taraf t join public.taraf_kurum k on k.id = t.id where t.kurum = 1 and k.anlasmali = 1 and k.tur = 1 and t.durum = 1 order by t.id limit 1", null);
+        if (ozel is { } o)
+            Assert.Equal(o, j.GetProperty("varsayilanlar").GetProperty("kurumId").GetInt32());
     }
 
     [VtFact]
