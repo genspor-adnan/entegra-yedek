@@ -12,7 +12,7 @@ import type { KurumSecenegi } from './useBasvuruKaynaklari';
  */
 export function useBasvuruVarsayilanlari({
   basvuruMu, belgeId, hastaId, kurumlar, odeyenKurumId, personelId,
-  onKurum, onGelisSekli,
+  onKurum, onGelisSekli, kurumTipi, onGelisNedeni,
 }: {
   basvuruMu: boolean;
   belgeId?: number;
@@ -29,7 +29,22 @@ export function useBasvuruVarsayilanlari({
    * "değişmiş" gösterir ve Kapat'ta gereksiz "kaydetmediniz" sorusu çıkarır.
    */
   onGelisSekli(): void;
+  /** Aktif şubenin kurum tipi (oturum): lab / goruntuleme'de geliş nedeni varsayılanı Tetkik. */
+  kurumTipi?: string;
+  /** Geliş nedenini DOLDURUR - çağıran, alan doluysa DOKUNMAMALI (gelis sekli ile aynı kural). */
+  onGelisNedeni?(neden: number): void;
 }) {
+  /**
+   * GELİŞ NEDENİ (kullanıcı 16.11.2026: "lab ve görüntüleme profillerinde geliş nedeni tetkik olmalı default"):
+   * bu kurumlarda hasta tetkik için gelir; yeni başvuruda boş alan 3 "Tetkik / Tahlil" (basvuru.gelis_nedeni) ile
+   * dolar. Diğer kurum tiplerinde dokunulmaz.
+   */
+  useEffect(() => {
+    if (!basvuruMu || belgeId || !onGelisNedeni) return;
+    if (kurumTipi === 'lab' || kurumTipi === 'goruntuleme') onGelisNedeni(3);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basvuruMu, belgeId, kurumTipi]);
+
   /**
    * VARSAYILAN ÖDEYEN KURUM (kullanıcı: "default kurum seçili varsa o gelir"):
    * hasta seçilince onun KAYITLI kurumu (taraf_hasta.kurum_id) başvuruya geçer.

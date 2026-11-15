@@ -21,6 +21,8 @@ Kullanıcı: "randevu kartına hizmetten önce Kurum ekle.. o da başvuruya geç
 - `v_anlasmali_kurum_lookup`: tür 1 Özel kurum sözleşmesiz de aktif (485 ile uyum) - önceden ödeyen listelerinde
   "pasif" sayılıp çıkmıyordu.
 - Randevu kartı: "Kendi İsteği" kutusu satırın sağına yaslı, gönderen girdisi kalan yeri doldurur (ikili-onayli).
+- Başvuru kartı: "Kendi İsteği" kutusu gönderen satırında sağa yaslı; Refakatçi yalnız hastane profilinde (dolu kayıtta
+  her yerde); lab / görüntüleme profilinde yeni başvuruda geliş nedeni boşsa "Tetkik / Tahlil" (3) dolar.
 
 ## 15.11.2026 — Randevuda "Kendi İsteği" işareti (1346) + kart alanı karşıtı (KarsitAlan)
 

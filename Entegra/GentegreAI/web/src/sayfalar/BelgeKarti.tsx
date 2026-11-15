@@ -914,6 +914,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     //   kosulsuz yazmak karti kullanici hic dokunmadan kirli gosterirdi.
     onGelisSekli: () => setBasvuruBilgi(o => (Number(o.gelisSekli ?? 0)
       ? o : { ...o, gelisSekli: gelisSekliKarari(false) })),
+    // GELİŞ NEDENİ varsayılanı (lab / görüntüleme → Tetkik): yalnız BOŞ alan dolar.
+    kurumTipi: kullanici?.kurumTipi,
+    onGelisNedeni: n => setBasvuruBilgi(o => (Number(o.gelisNedeni ?? 0) ? o : { ...o, gelisNedeni: n })),
   });
 
   const iskontoTalepleri = useIskontoTalepleri(basvuruMu, belgeId, async () => {
