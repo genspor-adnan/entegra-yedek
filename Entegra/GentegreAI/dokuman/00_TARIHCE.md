@@ -23,6 +23,7 @@ Kullanıcı: "randevu kartına hizmetten önce Kurum ekle.. o da başvuruya geç
 - Randevu kartı: "Kendi İsteği" kutusu satırın sağına yaslı, gönderen girdisi kalan yeri doldurur (ikili-onayli).
 - Başvuru kartı: "Kendi İsteği" kutusu gönderen satırında sağa yaslı; Refakatçi yalnız hastane profilinde (dolu kayıtta
   her yerde); lab / görüntüleme profilinde yeni başvuruda geliş nedeni boşsa "Tetkik / Tahlil" (3) dolar.
+  Sıra No lab / görüntüleme / görüntüleme+lab / muayenehane profillerinde çizilmez (dolu kayıtta görünür).
 
 ## 15.11.2026 — Randevuda "Kendi İsteği" işareti (1346) + kart alanı karşıtı (KarsitAlan)
 

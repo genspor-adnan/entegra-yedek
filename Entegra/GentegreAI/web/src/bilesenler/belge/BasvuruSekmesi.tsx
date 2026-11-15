@@ -209,6 +209,9 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   // REFAKATÇİ YALNIZ HASTANE PROFİLİNDE (kullanıcı 16.11.2026): kurum tipi oturumdan (786).
   const { kullanici: oturumKullanicisi } = useOturum();
   const hastaneMi = oturumKullanicisi?.kurumTipi === 'hastane';
+  // SIRA NO lab / görüntüleme / muayenehane profillerinde yok (kullanıcı 16.11.2026): bekleme sırası kavramı
+  //   polikliniklidir; dolu kayıtta yine görünür.
+  const siraNoYok = ['lab', 'goruntuleme', 'goruntuleme_lab', 'muayenehane'].includes(oturumKullanicisi?.kurumTipi ?? '');
   /**
    * SGK ODEYEN MI (591) - emekli kutusunun kapisi. Sunucudaki
    * `fn_dagilim_rota` ile AYNI mantik: SGK kurumu (tür 3) her zaman, sigortada
@@ -507,8 +510,10 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                     deger={bilgi.oda} kilitli={kilitli}
                     onDeger={v => degistir({ oda: v })} />
         )}
-        <MetinAlani etiket="Sıra No" deger={bilgi.siraNo} kilitli={kilitli}
-                    ipucu="örn. A-037" onDeger={v => degistir({ siraNo: v })} />
+        {(!siraNoYok || bilgi.siraNo) && (
+          <MetinAlani etiket="Sıra No" deger={bilgi.siraNo} kilitli={kilitli}
+                      ipucu="örn. A-037" onDeger={v => degistir({ siraNo: v })} />
+        )}
         {/* Randevu SALT OKUNUR: bag randevu tarafinda kurulur (randevu.belge_id),
             burada yalnizca "hangi randevudan geldi" okunur. Mockup sirasi:
             Oda · Sıra No · Randevu · Refakatçi. */}

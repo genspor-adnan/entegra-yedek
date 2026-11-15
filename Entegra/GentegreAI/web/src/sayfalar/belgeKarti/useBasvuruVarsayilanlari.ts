@@ -41,7 +41,7 @@ export function useBasvuruVarsayilanlari({
    */
   useEffect(() => {
     if (!basvuruMu || belgeId || !onGelisNedeni) return;
-    if (kurumTipi === 'lab' || kurumTipi === 'goruntuleme') onGelisNedeni(3);
+    if (kurumTipi === 'lab' || kurumTipi === 'goruntuleme' || kurumTipi === 'goruntuleme_lab') onGelisNedeni(3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basvuruMu, belgeId, kurumTipi]);
 
