@@ -7,6 +7,30 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — KOSUYOLU personel listesi Excel'e eşlendi; Sonomed + görüntüleme yayını (1346–1349)
+
+Kullanıcı: "localhost 3000 de sonomed koşuyolu için personel listesi geldi.. çalıştığı yer Koşuyolu olacak.. şu anki
+listede ismi aynı olanlar kalsın, diğerlerini sil. ad soyad ilk harf büyük" — kaynak `Dosya/KOŞUYOLU ÇALIŞAN LİSTESİ.xls`
+(14 kişi). Veri işi, kod değişikliği yok; KOSUYOLU DB'de tek transaction:
+- Dış doktorlar (taraf_personel.dis_hekim = 1, 1.478) kapsam DIŞI — personel listesi onları zaten göstermez.
+- 64 iç personelden 10'u ad-soyadla eşleşti → kaldı; ad/soyad Türkçe baş-harf-büyük, Excel'de "DR." olanlara
+  ünvan `Dr.`, şube Koşuyolu (tek şube).
+- 46 bağsız kayıt silindi (eski GEN3000 KULLAN kullanıcıları + DOKTOR aktarımı). Silme öncesi FK taraması: taraf'a
+  bakan her FK için sayım, >0 ise işlem durur.
+- Bağlı kaydı olan 6 kişi SİLİNMEDİ, pasif yapıldı (kullanıcı seçimi): 4 saha temsilcisi (6.300 dış hekim
+  ziyareti onlara bağlı), Arzu Akman (1 başvuru), TEST TELETIP HEKİM (test raporları). admin aktif kaldı.
+- "İbrahim Halil / Halil" iki kayıttı: radyolog hekim kaydı `Dr. İbrahim Halil Koparan` oldu, eski kullanıcı
+  kopyası silindi. Listede olmayan 3 kişi eklendi (Semanur Yılmaz, Oykun Uğuz, Dr. Ayhan Cingi; sicil = baş harfler).
+- Telefon: Excel'de aynı cep 3'er kişide (bölüm telefonu); `ux_taraf_personel_cep` tekil → ilk deneme burada
+  patladı ve tamamı geri alındı; yalnız tek kişiye ait numara yazıldı.
+- Yedek: `yedek.personel_1116_taraf / _taraf_personel / _taraf_kullanici / _kullanici_sube / _personel_hareket`.
+- Görev/bölüm (ROL sütunu) kadroya atanmadı — istenirse Kadro Geçmişi giriş hareketi olarak.
+- Pasif personel giriş yapamaz (`t.durum = 1` şartı) → `ed` (Esra Deniz Kuşçu) girişi kapandı.
+
+Yayın: "bitince sonomed ve goruntuleme ye yayınla" → görüntüleme (kalite kapısı: web, API, duman) ve Sonomed
+(-KapiAtla) 1346–1349 ile yayınlandı; başvuru 422 (`enabizBildirim`) iki sunucuda da kapandı. Lab demo profili
+yayınlanmadı (istenmedi), orada 422 sürüyor.
+
 ## 16.11.2026 — Kod inceleme düzeltmeleri (randevu Kurum / Kendi İsteği dizisi) + accession kabul sekmesi
 
 Kod inceleme (9 bulgu) uygulandı:
@@ -23,7 +47,8 @@ Kod inceleme (9 bulgu) uygulandı:
 
 Kullanıcı (16.11.2026): "görüntüleme profilinde yeni başvuru kaydında accession no girilmesi gerekiyorsa ve istem
 oluşmuşsa istem kartı hemen başvurunun sağında yeni sekme olarak açılmalı" → gönderen modunda (görüntüleme / lab
-şubesi) accession'ı boş gelen istemin kartı kabul kipinde başvurunun sağında açılır (dış sevk kuralıyla aynı yol).
+şubesi) oluşan her istemin kartı kabul kipinde başvurunun sağında açılır (dış sevk kuralıyla aynı yol). İlk sürüm
+yalnız accession'ı boş istemde açıyordu; accession otomatik (KGM…) atandığı için sekme hiç gelmiyordu → koşul kaldırıldı.
 
 ## 16.11.2026 — Randevuda ödeyen Kurum geri geldi (1347), varsayılan Özel (Ücretli); başvuru etiketleri
 
