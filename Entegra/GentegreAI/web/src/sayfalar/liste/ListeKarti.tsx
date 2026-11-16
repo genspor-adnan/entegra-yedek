@@ -1,4 +1,5 @@
 import { GenForm, type EkSekmeBaglami } from '../../bilesenler/GenForm';
+import { kartSonucuBildir } from '../../bilesenler/kartSonucKapisi';
 import { Modal } from '../../bilesenler/Modal';
 import { LabMikroOzet, labMikroOzetiVar } from '../../bilesenler/lab/LabMikroOzet';
 import { MuayeneOzetSekmesi } from '../../bilesenler/MuayeneOzetSekmesi';
@@ -240,6 +241,8 @@ export function ListeKarti({
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
   /** Kart KENDİ ekran sekmesinde mi (kartSekmesiVar + sekmeler açık): yeni ve düzenle. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
+  /** Randevudan başvuruya dönüşte hasta kartı sekmede tamamlanıyor (kartSonucKapisi anahtarı). */
+  const tamamlaAnahtari = tanim.kaynak === 'hasta' ? sorgu.get('tamamla') : null;
   const yeniSekmede = kartId !== null && kartSekmesiVar(tanim) && !!ekranSekmesi && !sorgu.get('geri');
   /** Yeni başvurunun hasta aramasından "＋ Yeni" ile açılan hasta kartı (BelgeKarti, ?basvuru=1). */
   const basvurudanYeni = kartId === 'yeni' && tanim.kaynak === 'hasta' && sorgu.get('basvuru') === '1' && !!ekranSekmesi;
@@ -1595,7 +1598,9 @@ export function ListeKarti({
         // Seviyeye göre değişen kartlar (1258, reçete) eklentiden ek gizli alan / sekme verir.
         gizliAlanlar={eklenti?.gizliAlanlar ? [...(tanim.gizliKartAlanlari ?? []), ...(eklenti.gizliAlanlar(eb) ?? [])] : tanim.gizliKartAlanlari}
         gizliSekmeler={eklenti?.gizliSekmeler ? [...(tanim.gizliKartSekmeleri ?? []), ...(eklenti.gizliSekmeler(eb) ?? [])] : tanim.gizliKartSekmeleri}
-        zorunluAlanlar={tanim.zorunluKartAlanlari}
+        // RANDEVUDAN BAŞVURU İÇİN TAMAMLAMA (16.11.2026, sekmede): kimlik no bu akışta zorunlu (eski modalla aynı).
+        zorunluAlanlar={tamamlaAnahtari ? [...(tanim.zorunluKartAlanlari ?? []), 'vkno'] : tanim.zorunluKartAlanlari}
+        cariyeBaglaGizli={tamamlaAnahtari ? true : undefined}
         resimYerTutucu={tanim.resimYerTutucu}
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
@@ -1607,12 +1612,15 @@ export function ListeKarti({
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
         onBasvuruAc={onBasvuruAc}
         // Başvurudan gelen yeni hasta kartı vazgeçilirse boş yeni başvuruya dönülür.
-        onKapat={() => basvurudanYeni ? ekranSekmesi!.kapat('/basvuru/yeni')
+        onKapat={() => tamamlaAnahtari ? (kartSonucuBildir(tamamlaAnahtari, null), ekranSekmesi ? ekranSekmesi.kapat() : git(tanim.kartYolu!))
+                       : basvurudanYeni ? ekranSekmesi!.kapat('/basvuru/yeni')
                        : yeniSekmede ? ekranSekmesi!.kapat() : git(sorgu.get('geri') ?? tanim.kartYolu!)}
         // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
         onMevcutKayit={mevcutId => {
           // Başvurudan gelen yeni hasta zaten kayıtlıysa o hastayla başvuruya dönülür.
           if (basvurudanYeni) { void basvuruyaDon(mevcutId); return }
+          // Randevu → başvuru tamamlaması: aynı kimlikte mevcut hasta seçildi - akış onunla sürer.
+          if (tamamlaAnahtari) { kartSonucuBildir(tamamlaAnahtari, { id: mevcutId, mevcut: true }); if (ekranSekmesi) ekranSekmesi.kapat(); return }
           setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={(yeniId, acikKal) => {
           // AÇIK KALARAK KAYIT (çerçeve 💾, kullanıcı 15.10.2026: "save etsin ama kapanmasın"):
@@ -1621,6 +1629,13 @@ export function ListeKarti({
             window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
             setKayitSayaci(t => t + 1);
             return;
+          }
+          // Randevu → başvuru tamamlaması: kaydedildi, sekme kapanır, dönüşüm sürer.
+          if (tamamlaAnahtari) {
+            kartSonucuBildir(tamamlaAnahtari, { id: Number(yeniId ?? kartId) });
+            window.dispatchEvent(new CustomEvent(LISTE_TAZELE_OLAYI, { detail: tanim.kaynak }));
+            if (ekranSekmesi) ekranSekmesi.kapat(); else git(tanim.kartYolu!);
+            return true;
           }
           // YENİ MÜŞTERİ / TEDARİKÇİ (cari_devir_girisi.html): kart kapanmaz, kayıtlı haliyle açık
           //   kalır ve bir kez "açılış bakiyesi var mı?" diye sorar (CariDevirSorusu).

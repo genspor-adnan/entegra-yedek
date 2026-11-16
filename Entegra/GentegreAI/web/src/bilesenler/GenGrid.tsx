@@ -613,7 +613,11 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     const renk = satir.satirRengi === 'kritik' ? 'satir-kritik'
       : satir.satirRengi === 'uyari' ? 'satir-uyari'
       : satir.satirRengi === 'pasif' ? 'satir-pasif' : '';
-    return `${renk} ${islemRengi} ${seciliSatir?.id === satir.id ? 'secili' : ''}`.trim();
+    // RANDEVU DURUMU SATIRDA (kullanıcı 16.11.2026: "randevu durumuna göre (geldi, gelmedi vb) daha
+    //   belirgin renklensin"): satır zemini + solda durum şeridi + dolu durum rozeti. Seçili satırda
+    //   da şerit kalır ki durum kaybolmasın.
+    const rvDurum = kaynak === 'randevu' ? RANDEVU_DURUM_SINIFI[String(satir.durumAdi ?? '')] ?? '' : '';
+    return `${renk} ${islemRengi} ${rvDurum} ${seciliSatir?.id === satir.id ? 'secili' : ''}`.trim();
   };
 
   /**
@@ -1129,3 +1133,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     </>
   );
 }
+
+/** Randevu durum adı (katalog RandevuKatalog.DurumAdi) -> satır sınıfı (tema.css `rv-*`). */
+const RANDEVU_DURUM_SINIFI: Record<string, string> = {
+  'Planlandı': 'rv-planli', 'Geldi': 'rv-geldi', 'Gelmedi': 'rv-gelmedi', 'İptal': 'rv-iptal', 'Ertelendi': 'rv-ertelendi',
+};

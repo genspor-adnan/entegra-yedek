@@ -1,4 +1,5 @@
 import { EkstreIkon } from '../bilesenler/EkstreIkon';
+import { kartSonucuBekle } from '../bilesenler/kartSonucKapisi';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
 import { EkranSekmesiBaglami, LISTE_TAZELE_OLAYI } from '../bilesenler/sekmeBaglami';
@@ -1050,7 +1051,15 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
         setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId, setErtele: setErtelenecek,
-        hastaTamamla: hid => new Promise(coz => setHastaTamamla({ id: hid, coz })),
+        // HASTA KARTI SEKMEDE (kullanıcı 16.11.2026: "modal geliyor.. sekme olarak gelmeli"): ekran sekmesi
+        //   varsa kart kendi sekmesinde açılır, sonucu kartSonucKapisi ile döner; sekmesiz kipte modal kalır.
+        hastaTamamla: hid => {
+          if (!ekranSekmesi) return new Promise(coz => setHastaTamamla({ id: hid, coz }));
+          const anahtar = `hasta-tamamla-${hid}-${Date.now()}`;
+          const bekle = kartSonucuBekle(anahtar);
+          ekranSekmesi.kartaGit(`/hasta/${hid}?tamamla=${encodeURIComponent(anahtar)}`);
+          return bekle;
+        },
         gonderenModu: (kullanici?.hekimRolu ?? 4) === 1,
       })) return;
 

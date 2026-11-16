@@ -168,7 +168,6 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   const izin = (ad: string, d: '✓' | '✗' | '?', ipucu: string) => (
     <span title={ipucu}><b className={d === '✓' ? 'iz-v' : d === '✗' ? 'iz-y' : 'iz-b'}>{d}</b>{ad}</span>
   );
-  const smsIzin = Number(h?.postaIzin ?? 0) === 1, epostaIzin = Number(h?.epostaIzin ?? 0) === 1;
   const prov = provizyon ? PROVIZYON[provizyon.durum] ?? PROVIZYON[0] : null;
 
   // ÖDEYEN KURUM + PROVIZYON (kullanici): etiket ustte, kurum + provizyon altta tek satir.
@@ -219,8 +218,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
         <span className="k">{c('İzinler')}</span>
         <span className="hs3-izin">
           {izin('KVKK', kvkk ? '✓' : '?', kvkk ? `KVKK açık rıza formu imzalı (${kvkk})` : 'KVKK açık rıza formu imzalanmamış')}
-          {izin('SMS', smsIzin ? '✓' : '?', smsIzin ? 'SMS / posta izni var' : 'SMS / posta izni kayıtlı değil')}
-          {izin('E-posta', epostaIzin ? '✓' : '?', epostaIzin ? 'E-posta izni var' : 'E-posta izni kayıtlı değil')}
+          {/* SMS / E-posta izni 16.11.2026'da hasta kartından kaldırıldı - girilemeyen izin "?" gösterilmez. */}
         </span>
       </span>
       )}

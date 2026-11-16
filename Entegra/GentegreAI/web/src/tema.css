@@ -392,6 +392,23 @@ table.grid tr.flt input {
 .satir-kritik td { background: var(--hatazem) !important }
 .satir-uyari td { background: var(--uyarizem) !important }
 .satir-pasif td { color: var(--soluk) }
+/* RANDEVU DURUMU (16.11.2026): satır zemini + solda 4px şerit + dolu rozet. Seçili satırda zemin seçim
+   rengine döner ama şerit ve rozet kalır. */
+tr.rv-geldi td      { background: var(--okzem) }
+tr.rv-gelmedi td    { background: var(--hatazem) }
+tr.rv-ertelendi td  { background: var(--uyarizem) }
+tr.rv-iptal td      { color: var(--soluk); text-decoration: line-through; text-decoration-color: var(--hatakenar) }
+tr.rv-planli td:first-child     { box-shadow: inset 4px 0 0 var(--mor) }
+tr.rv-geldi td:first-child      { box-shadow: inset 4px 0 0 var(--ok) }
+tr.rv-gelmedi td:first-child    { box-shadow: inset 4px 0 0 var(--hata) }
+tr.rv-ertelendi td:first-child  { box-shadow: inset 4px 0 0 var(--uyari) }
+tr.rv-iptal td:first-child      { box-shadow: inset 4px 0 0 var(--soluk) }
+tr.rv-iptal td .rozet           { text-decoration: none }
+tr.rv-planli .rozet.bilgi       { background: var(--mor); color: #fff; border-color: var(--mor) }
+tr.rv-geldi .rozet.ok           { background: var(--ok); color: #fff; border-color: var(--ok) }
+tr.rv-gelmedi .rozet.hata       { background: var(--hata); color: #fff; border-color: var(--hata) }
+tr.rv-ertelendi .rozet.uyari    { background: var(--uyari); color: #fff; border-color: var(--uyari) }
+tr.rv-iptal .rozet.hata         { background: var(--soluk); color: #fff; border-color: var(--soluk) }
 .satir-log-ekle td { background: var(--okzem) !important }
 .satir-log-degisiklik td { background: var(--degisikzem) !important }
 .satir-log-sil td { background: var(--hatazem) !important }
