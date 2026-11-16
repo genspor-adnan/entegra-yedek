@@ -105,8 +105,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
   /**
    * FATURA BAŞLIĞI GÖRÜNTÜLEME / DÜZENLEME KİPİ (mockup Ekranlar/fatura_basligi_bant.html, kullanıcı 08.11.2026:
    * "fatura başlığını edit / display mode", "çip düzeni edit moda yakın olsun", "üstte 4 altta 4"): aynı 4 sütunlu
-   * ızgara iki kipte de durur - görüntülemede kutular kaybolur, değer düz koyu metin (CSS .bb-goster); ✎ ya da
-   * ızgaraya tıklamak düzenlemeye alır. YENİ belgede düzenleme açık başlar, Kaydet kapatmaz (seri giriş); kayıtlı
+   * ızgara iki kipte de durur - görüntülemede kutular kaybolur, değer düz koyu metin (CSS .bb-goster); yalnız ✎
+   * düzenlemeye alır (16.11.2026'dan beri ızgaraya tıklamak almaz). YENİ belgede düzenleme açık başlar, Kaydet kapatmaz (seri giriş); kayıtlı
    * belge görüntüleme kipinde açılır; KİLİTLİ belgede (e-Belge gönderildi, yetki yok) hep görüntüleme, ✎ pasif.
    * Önce yalnız faturada, sonra TÜM ALIŞ / SATIŞ belgelerinde (kullanıcı 08.11.2026: "bu müşteri bandı ve fatura
    * başlığı desenini tüm alış/satış belgelere uygula"): carili türler - fatura, fiş, irsaliye, sipariş, teklif, konsinye,
@@ -350,9 +350,9 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                     // CARİ KARTI YENİ SEKMEDE (kullanıcı 02.11.2026): yalnız cari görme yetkisi olana.
                     onKartAc={yetki('cari', 'gor') ? () => git(alisMi ? `/tedarikci/${cari!.id}` : `/cari/${cari!.id}`) : undefined} />)}
   {/* GÖRÜNTÜLEME KİPİNDE ızgara `inert` (fare + klavye + odak kapalı; inceleme: yalnız fare kesiliyordu, Tab ile
-      yazılabiliyordu); tıklama sarmalayıcıda yakalanır ve (kilitli değilse) düzenlemeye geçirir. */}
-  <div className={gosterKipi ? 'bb-goster-sar' : undefined}
-       onMouseDown={gosterKipi && !kipKilidi ? () => setBaslikDuzenle(true) : undefined}>
+      yazılabiliyordu). DÜZENLEMEYE YALNIZ ✎ İLE GEÇİLİR (kullanıcı 16.11.2026: "başlık view modda ise fare ile
+      tıklanınca edit moda geçmesin.. sadece kalem tıklanınca geçsin"): ızgaraya tıklamak artık bir şey yapmaz. */}
+  <div className={gosterKipi ? 'bb-goster-sar' : undefined}>
   <div className={`alan-izgara dort-sutun belge-hdr${tahakkukMu ? ' bes-sutun' : ''}${darUst ? ' dar-ust' : ''}${satisSiparis ? ' tek-satir' : ''}`
                   + (gosterKipi ? ' bb-goster' : kipli && !yeniAcildi ? ' bb-duzenle' : '')}
        inert={gosterKipi || undefined}>
