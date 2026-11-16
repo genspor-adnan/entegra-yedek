@@ -745,6 +745,8 @@ tr.rv-iptal .rozet.hata         { background: var(--soluk); color: #fff; border-
    yalnız stokta (StokAvatar), 44px daire kişi bandıyla aynı; ızgara iki kipte aynı yerde. ✎ çerçevesiz (.bs-kalem). */
 .kaid .kaid-kipli { display: flex; gap: 10px; align-items: flex-end; width: 100%; min-width: 0; position: relative }
 .kaid .kaid-kipli > .alan-izgara { flex: 1 1 auto; min-width: 0; padding-right: 30px }
+/* Hasta şeridi kipli (16.11.2026): ızgara bir sarmalayıcı içinde (inert), ✎ sağ üstte. */
+.kaid .kaid-kipli > .kaid-hasta-sar { flex: 1 1 auto; min-width: 0; padding-right: 30px }
 /* ✎ BAŞLIĞIN SAĞ ÜST KÖŞESİNDE, ÇERÇEVESİZ (kullanıcı 09.11.2026 fiyat listesi: "kalemi başlığın sağ üst
    köşesine ekle, çerçeve olmasın"): akıştan çıkar, şeridin köşesine oturur; ızgara sağdan yer bırakır. */
 .kaid .kaid-kipli > .bs-kalem { position: absolute; right: 0; top: 0; height: 24px; width: 26px; font-size: 14px }

@@ -115,6 +115,8 @@ interface Props {
   /** Hasta kartı: kimlik numarası kayıtlı bir hastaya aitse kaydetmek yerine O kart açılır.
       Verilmezse onKaydedildi(mevcutId) + onKapat ile aynı yola düşer. */
   onMevcutKayit?(id: number): void;
+  /** Kipli kart (stok / hasta) kayıtlı olsa da DÜZENLEMEDE açılır (ör. randevudan başvuruda hasta tamamlama). */
+  duzenlemedeAc?: boolean;
   /**
    * DIŞARIDAN KAYDET: kart, kaydedilmemiş değişikliği yazan bir fonksiyonu
    * kaydeder (değişiklik yoksa hemen true). Kayıtlı veriye bakan sunucu
@@ -365,7 +367,7 @@ export interface EkSekmeBaglami {
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, kaydetBagla, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari, sekmeGruplari, sekmeDurumu, yanPanel, detayRozeti, tekSayfa, tekSayfaSuzgec, tekSayfaBaslikYok, tekSayfaGizli, sayfaBaslikYok, baslikAracta, gezintiEk, gezintiOzel, sayfaKipi, onYuklendi, silYok, altSerit, baslikRozet, tazeleAnahtari, buyutmeYok, onKaydedildi, onMevcutKayit, duzenlemedeAc, kaydetBagla, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, kapatSolu, baslikEk, surumGizli,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari: yeniKayitVarsayilanlariHam, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, yalnizSekmeler, hatirlatYok, zorunluAlanlar: zorunluAlanlarHam, alanIpucu, alanGirdisi }: Props) {
@@ -1065,7 +1067,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
   // TEK KALEM, TÜM KART (kullanıcı 09.11.2026, stok): şeridin ✎'i hem şeridi hem gövde gruplarını açar/kapatır;
   //   yeni kart düzenlemede başlar. Kaleme basmadan düzenlemeye geçilemez (ızgaralar inert).
   const kipliGovde = KIPLI_GOVDE_KARTLAR.has(kaynak);
-  const [kipliAcik, setKipliAcik] = useState(yeniMi);
+  const [kipliAcik, setKipliAcik] = useState(yeniMi || !!duzenlemedeAc);
+  // KAYIT HATASI GÖRÜNÜR OLSUN: görüntüleme kipinde (inert) alan hatası düzeltilemez - kip açılır.
+  useEffect(() => { if (kipliGovde && Object.keys(alanHatalari).length > 0) setKipliAcik(true) }, [kipliGovde, alanHatalari]);
   const kayitBasarili = useRef(false);
   // ANINDA KAYIT (katalog detay.anindaKaydet, kullanıcı 09.11.2026 stok Fiyatlar): sekme satırı değişince
   //   bayrak kalkar; durum güncellendikten SONRA (bir sonraki render) kart açık kalarak kaydedilir. Yeni kartta

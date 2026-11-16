@@ -31,7 +31,9 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
  * geçilemesin"): bu kaynaklarda şeridin ✎'i gövde gruplarını da yönetir - kip GenForm'da tutulur
  * (seritAcikDis / onSeritAcik), KartGrupSekmesi `govdeGoster` ile gruplara uygular.
  */
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis']);
+// HASTA DA (kullanıcı 16.11.2026: "hasta kartını da stok gibi yap"): kayıtlı hasta görüntülemede açılır, şerit +
+//   Genel sekmesi yalnız ✎ ile düzenlemeye geçer (KartGrupSarmalayici gövdeyi inert sarar).
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -110,6 +112,20 @@ export function KartKimlikSeridi({
     return kimlikAlanlariHam.map(a => a.ad === 'kod' ? { ...a, baslik: `${rol} ${c('Kodu')}` }
       : a.ad === 'unvan' ? { ...a, baslik: `${rol} ${c('Ünvanı')}` } : a);
   })();
+        /** HASTA ŞERİDİ KİPLİ (16.11.2026): stok şeridinin düzeni - görüntülemede düz metin + inert, ✎ sağ üstte. */
+        const hastaSar = (izgara: ReactNode) => {
+          if (kaynak !== 'hasta' || seritAcikDis === undefined) return izgara;
+          const gosterKipi = salt || !seritAcik;
+          return (
+            <div className={`kaid-kipli${gosterKipi ? ' kaid-goster' : ''}`} data-testid="kimlik-kipli">
+              <div className="kaid-hasta-sar" inert={gosterKipi || undefined}>{izgara}</div>
+              <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={salt}
+                      data-testid="kimlik-kalem"
+                      title={salt ? c('Düzenleme yetkisi yok') : gosterKipi ? c('Hasta bilgilerini düzenle') : c('Düzenlemeyi kapat')}
+                      onClick={() => setSeritAcik(v => !v)}>✎</button>
+            </div>
+          );
+        };
         const kimlikSeridi = (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
@@ -251,7 +267,7 @@ export function KartKimlikSeridi({
                 )}
               </div>
             );
-          })() : personelGibiKart ? (
+          })() : personelGibiKart ? hastaSar(
             /* PERSONELDE 6 SUTUN (847): Ünvan YARIM (kisa deger - "Prof.Dr."
                tam sutunda bos yer birakiyordu), sonuna Ana Rol eklendi. */
             <div className="alan-izgara"

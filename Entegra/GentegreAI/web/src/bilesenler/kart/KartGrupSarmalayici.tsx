@@ -92,7 +92,11 @@ export function KartGrupSarmalayici({
           govdeGoster={govdeGoster} alanAyrildi={alanAyrildi}
         />
         );
-        const govde = grupCiz(aktif);
+        // HASTA GÖVDESİ GÖRÜNTÜLEMEDE (16.11.2026): kimlik özeti / iletişim / adres özel bileşenler - kagrup sınıfı
+        //   almıyorlar; tümü tek sarmalayıcıyla düz metin + inert olur, düzenleme yalnız şeridin ✎'i.
+        const govde = kaynak === 'hasta' && govdeGoster
+          ? <div className="kagrup-goster hasta-govde-goster" inert>{grupCiz(aktif)}</div>
+          : grupCiz(aktif);
         const tam = kaynak === 'randevu' ? (
           <>
             {govde}

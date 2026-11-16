@@ -1577,7 +1577,7 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
     {hastaTamamla && (
       // Hasta kartının KENDİ kuralları: zorunlu alanlar, kimlik no (bu akışta zorunlu), mükerrer kimlik.
       <GenForm kaynak="hasta" id={hastaTamamla.id} baslik={c('Hasta Kartı - başvuru için tamamlayın')}
-               cariyeBaglaGizli zorunluAlanlar={['vkno']}
+               cariyeBaglaGizli duzenlemedeAc zorunluAlanlar={['vkno']}
                onKaydedildi={hid => { hastaTamamla.coz({ id: hid }); setHastaTamamla(null) }}
                onMevcutKayit={hid => { hastaTamamla.coz({ id: hid, mevcut: true }); setHastaTamamla(null) }}
                onKapat={() => { hastaTamamla.coz(null); setHastaTamamla(null) }} />

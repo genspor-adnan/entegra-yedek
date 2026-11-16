@@ -1601,6 +1601,7 @@ export function ListeKarti({
         // RANDEVUDAN BAŞVURU İÇİN TAMAMLAMA (16.11.2026, sekmede): kimlik no bu akışta zorunlu (eski modalla aynı).
         zorunluAlanlar={tamamlaAnahtari ? [...(tanim.zorunluKartAlanlari ?? []), 'vkno'] : tanim.zorunluKartAlanlari}
         cariyeBaglaGizli={tamamlaAnahtari ? true : undefined}
+        duzenlemedeAc={!!tamamlaAnahtari}
         resimYerTutucu={tanim.resimYerTutucu}
         // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
         //   olur - kart acilinca alanlar dolu gelir.
