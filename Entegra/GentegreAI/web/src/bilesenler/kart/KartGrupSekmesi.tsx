@@ -12,7 +12,6 @@ import { KartKullaniciRolu } from '../KartKullaniciRolu';
 import { YatisAcikIsler } from '../yatan/YatisAcikIsler';
 import { KullaniciGuvenlik } from '../KullaniciGuvenlik';
 import { TEK_SUTUN_KARTLAR, type AltGrupBaslik } from '../kartSekmeleri';
-import { VARSAYILAN_UYRUK } from '../yerlerHook';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
 
@@ -445,8 +444,12 @@ const adliBlok = (
                       grupYok
                       ilIlceAyniSatir
                       baslikGizli
-                      uyruk={String((detaylar[ozlukDetay.ad]?.guncel[0] ?? {}).uyruk
-                                    ?? VARSAYILAN_UYRUK)}
+                      // Ham deger (bos olabilir): bos uyrukta TekAdres SUBENIN ULKESINI gosterir ve yeni
+                      //   kayitta yazar (1350) - burada sabit 9980'e cevirmek o varsayilani ezerdi.
+                      uyruk={(() => { const u = (detaylar[ozlukDetay.ad]?.guncel[0] ?? {}).uyruk;
+                                      return u == null || u === '' ? undefined : String(u) })()}
+                      skrsUlke
+                      yeniKayit={yeniMi}
                       onUyrukDegis={v => setDetaylar(t => {
                         const d = t[ozlukDetay.ad] ?? bosDetay();
                         const ilk = { ...(d.guncel[0] ?? {}), uyruk: v };

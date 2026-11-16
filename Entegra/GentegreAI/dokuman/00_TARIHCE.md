@@ -7,6 +7,27 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — Hasta kartında ülke ve uyruk tek SKRS listesi, varsayılan şubenin ülkesi (1350); KOSUYOLU kullanıcı rolleri
+
+Kullanıcı: "hasta kartında uyruk ülke listesi ile aynı olsun.. ülke ve uyruk defaultu şube hangi ülkedeyse o olsun".
+- Sorun iki yönlüydü: ülke kutusu `public.ulke`nin tamamını (aynı ülkenin kısa ve SKRS adı yan yana) gösteriyordu;
+  uyruk kutusu yalnız `skrs_kod` dolu satırları. 617 kodu yalnız 10 eski satıra verebilmişti, gerisini Entegrasyonlar ›
+  SKRS eşitlemesi ekliyordu - eşitleme çalışmamış kurulumda (KOSUYOLU, sunucular) uyrukta Türkiye bile yoktu.
+- 1350: SKRS kodları her kurulumda `hasta.uyruk` kod listesinden doldurulur (eşitlemeyle aynı ad kuralı:
+  `fn_ara_metin` tutan satıra kod, tutmayan SKRS adı yeni satır). `ulke.iso2` eklendi; şube kartında seçilebilen 16
+  ülkenin SKRS satırı ISO koduyla işaretlendi (sube.ulke_kod ile köprü).
+- Hasta kartı (`TekAdres` `skrsUlke`): ülke ve uyruk AYNI SKRS listesi; listede olmayan eski adres değeri ("Turkiye")
+  kendi seçeneği olarak korunur. Varsayılan aktif şubenin ülkesi (`subeUlkesi`); yeni kayıtta uyruk kayda yazılır
+  (yalnız göstermek DB varsayılanına, 9980'e düşerdi). Cari/kişi adresinde eski liste ve "TC" varsayılanı sürüyor -
+  e-Belge ülke adı oradan okunuyor.
+
+KOSUYOLU roller (kullanıcı: "rolleri tanımlayalım.. ben tanımlarsam eksik alanlar nedeniyle kaydetmiyor" - personel
+kartında TCKN/Cep/E-posta zorunlu, Excel'den gelenlerde boş): 13 kişiye hesap açıldı, sistem kuralıyla (kod = cep, yoksa
+sicil ASCII; ilk parola kart id'si, ilk girişte değişmeli). Ana Rol hesapla birlikte yazıldı, tetik kadro hareketine
+işledi: radyolog, rad_teknisyen ×2, banko_gorevlisi ×3, bilgi_islem_personel ×2, ust_yonetim ×3. Lab Uzmanı (Fatma
+Müldür) ve Tıbbi Sekreter (Serpil Demir) şablonları KOSUYOLU'da kurulu değil (görüntüleme tipinde listelenmiyor) -
+hesapları "Rol Atanmamış"; GenProfil › Roller'den kurulunca rol atanır.
+
 ## 16.11.2026 — KOSUYOLU personel listesi Excel'e eşlendi; Sonomed + görüntüleme yayını (1346–1349)
 
 Kullanıcı: "localhost 3000 de sonomed koşuyolu için personel listesi geldi.. çalıştığı yer Koşuyolu olacak.. şu anki

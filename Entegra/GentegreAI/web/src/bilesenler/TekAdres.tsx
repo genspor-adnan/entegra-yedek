@@ -1,6 +1,7 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
-import { useYerler, VARSAYILAN_ULKE, VARSAYILAN_UYRUK } from './yerlerHook';
+import { useEffect } from 'react';
+import { skrsUlkeleri, subeUlkesi, useYerler, VARSAYILAN_ULKE, VARSAYILAN_UYRUK } from './yerlerHook';
 import { c } from '../dil/ceviri';
 
 interface Props {
@@ -27,6 +28,13 @@ interface Props {
   uyruk?: string;
   onUyrukDegis?: (deger: string) => void;
   baslikGizli?: boolean;
+  /**
+   * HASTA KARTI (1350): ulke ve uyruk AYNI SKRS listesinden secilir, ikisinin varsayilani aktif subenin ulkesidir.
+   * Cari/kisi adresinde eski tam liste ve sabit varsayilan surer (e-Belge ulke adi oradan okunuyor).
+   */
+  skrsUlke?: boolean;
+  /** Yeni kayitta uyruk bos gelir - sube ulkesi kayda YAZILIR (yalniz gostermek DB varsayilanina, 9980'e duserdi). */
+  yeniKayit?: boolean;
 }
 
 /**
@@ -47,11 +55,22 @@ export function TekAdres({
   uyruk,
   onUyrukDegis,
   baslikGizli = false,
+  skrsUlke = false,
+  yeniKayit = false,
 }: Props) {
   const yerler = useYerler(true);
+  const subeninUlkesi = skrsUlke ? subeUlkesi(yerler) : null;
+  const varsayilanUlke = subeninUlkesi?.ad ?? VARSAYILAN_ULKE;
+  const varsayilanUyruk = subeninUlkesi?.skrsKod != null ? String(subeninUlkesi.skrsKod) : VARSAYILAN_UYRUK;
+  const uyrukBos = uyruk == null || uyruk === '';
+  useEffect(() => {
+    if (yeniKayit && !saltOkunur && onUyrukDegis && uyrukBos && subeninUlkesi?.skrsKod != null)
+      onUyrukDegis(String(subeninUlkesi.skrsKod));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- yalniz liste gelince / uyruk bosalinca
+  }, [yeniKayit, saltOkunur, uyrukBos, subeninUlkesi?.skrsKod]);
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
   const satir: Satir = {
-    ulke: VARSAYILAN_ULKE,
+    ulke: varsayilanUlke,
     ...(durum.guncel[0] ?? {}),
     ...(sabitTur ? { tur: sabitTur } : {}),
   };
@@ -129,9 +148,15 @@ export function TekAdres({
         <div className="adres-satir">
           <label className="alan tip-kod">
             <span className="etiket">{c('Ülke')}</span>
-            <select value={String(satir.ulke ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
+            <select value={String(satir.ulke ?? varsayilanUlke)} disabled={saltOkunur}
               onChange={e => degis({ ulke: e.target.value })}>
-              {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+              {/* Hasta: uyrukla AYNI SKRS listesi. Listede olmayan eski kayit degeri ("Turkiye") kaybolmasin diye
+                  basta kendi secenegi olarak durur - secili deger listede yoksa tarayici ilk secenegi gosterirdi. */}
+              {skrsUlke && !!satir.ulke && !skrsUlkeleri(yerler).some(y => y.ad === satir.ulke) && (
+                <option value={String(satir.ulke)}>{String(satir.ulke)}</option>
+              )}
+              {(skrsUlke ? skrsUlkeleri(yerler) : (yerler?.ulkeler ?? []))
+                .map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
             </select>
           </label>
           {onUyrukDegis && (
@@ -142,9 +167,9 @@ export function TekAdres({
                   MERNİS kodunu (9980) istiyor; alan da artık sayı.
                   Kodu olmayan ülke listede çıkmaz - seçilse pakete
                   yazılamazdı. */}
-              <select value={String(uyruk ?? VARSAYILAN_UYRUK)} disabled={saltOkunur}
+              <select value={uyrukBos ? varsayilanUyruk : String(uyruk)} disabled={saltOkunur}
                 onChange={e => onUyrukDegis(e.target.value)}>
-                {(yerler?.ulkeler ?? []).filter(y => y.skrsKod != null)
+                {skrsUlkeleri(yerler)
                   .map(y => <option key={y.id} value={String(y.skrsKod)}>{y.ad}</option>)}
               </select>
             </label>

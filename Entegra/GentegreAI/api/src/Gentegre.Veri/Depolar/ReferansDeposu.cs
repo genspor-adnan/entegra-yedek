@@ -12,7 +12,9 @@ public sealed record YerKaydi(short Id, string Ad);
 /// ulke uyruk kutusunda cikmaz: gonderilemeyecek bir secenegi
 /// gostermek, kaydi kaydedilemez yapardi.
 /// </summary>
-public sealed record UlkeKaydi(short Id, string Ad, int? SkrsKod);
+/// <c>Iso</c> (1350): ISO 3166 iki harf - yalniz subenin secebildigi ulkelerde dolu; istemci aktif subenin
+/// `ulkeKod`u ile eslestirip hasta kartinda ulke/uyruk varsayilanini bulur.
+public sealed record UlkeKaydi(short Id, string Ad, int? SkrsKod, string? Iso);
 public sealed record IlceKaydi(int Id, short IlId, string Ad);
 public sealed record YerlerYaniti(IReadOnlyList<YerKaydi> Iller, IReadOnlyList<IlceKaydi> Ilceler, IReadOnlyList<UlkeKaydi> Ulkeler);
 
@@ -38,11 +40,12 @@ public sealed class ReferansDeposu
 
         var ulkeler = new List<UlkeKaydi>();
         await using (var komut = new NpgsqlCommand(
-            "select id, ad, skrs_kod from public.ulke order by ad", baglanti))
+            "select id, ad, skrs_kod, iso2 from public.ulke order by ad", baglanti))
         await using (var okuyucu = await komut.ExecuteReaderAsync(iptal))
             while (await okuyucu.ReadAsync(iptal))
                 ulkeler.Add(new UlkeKaydi(okuyucu.GetInt16(0), okuyucu.GetString(1),
-                    okuyucu.IsDBNull(2) ? null : okuyucu.GetInt32(2)));
+                    okuyucu.IsDBNull(2) ? null : okuyucu.GetInt32(2),
+                    okuyucu.IsDBNull(3) ? null : okuyucu.GetString(3)));
 
         var ilceler = new List<IlceKaydi>();
         await using (var komut = new NpgsqlCommand("select id, il_id, ad from public.ilce where aktif = 1 order by ad", baglanti))
