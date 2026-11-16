@@ -64,7 +64,11 @@ export interface BelgeKaydetmeBaglami {
  *    = 1.800) ve acik tutarlar iki kati gorunuyordu.
  */
 export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
-  return async function kes(kapatilsin = true, otomatik = false): Promise<number> {
+  // `kullanici`: KULLANICI KAYDET'E BASTI (kullanıcı 16.11.2026: "başvuru aşamasında belge girişi (fiş, fatura vb)
+  //   yaparken sanırım kaydet oluyor ve yeni sekme çıkıyor.. kullanıcı kaydet butona basınca açılsın"). Fiş / fatura
+  //   / tahsilat / ek dosya öncesi `kes(false)` kaydı da kullanıcı eylemi değildir - istem sekmesi yalnız Kaydet'te.
+  //   Varsayılan: kapatan kayıt (araç çubuğu Kaydet) kullanıcınındır.
+  return async function kes(kapatilsin = true, otomatik = false, kullanici = kapatilsin && !otomatik): Promise<number> {
     b.setHata(null);
     b.setAlanHatalari({});
 
@@ -171,7 +175,7 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
           br.current.istemler.push(...yanit.radyolojiIstemleri);
           br.current.disSevk = br.current.disSevk || !!yanit.disKurumSevki;
         }
-        if (!otomatik && br.current.istemler.length) {
+        if (kullanici && br.current.istemler.length) {
           const { istemler, disSevk } = br.current;
           br.current = { istemler: [], disSevk: false };
           mesaj(`Radyoloji istemi açıldı: ${istemler.map(x => `${x.tetkik} · ${x.accessionNo || 'accession kabulde'}`).join(', ')}`);

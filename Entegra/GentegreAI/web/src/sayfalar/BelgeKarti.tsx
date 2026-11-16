@@ -1619,7 +1619,8 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     if (secim === 'geri') return;                 // kartta kal
     if (secim === 'iptal') { cik(); return }      // degisiklikleri at
     // Kaydet: hata varsa (zorunlu alan) kart ACIK kalir - kes() mesaji gosterir.
-    const id = await kes(false);
+    // Kapanış sorusunda "Kaydet" de kullanıcının Kaydet'idir - bekleyen radyoloji istemi açılır.
+    const id = await kes(false, false, true);
     if (id) cik();
   };
 

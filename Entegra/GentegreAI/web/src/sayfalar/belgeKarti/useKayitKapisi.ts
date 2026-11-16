@@ -25,7 +25,7 @@ export function useKayitKapisi({
   kurumTahakkukuOtomatik, satirlariTazele, onEksikAlan, aramaAc,
 }: {
   /** Asıl kaydetme akışı (doğrula → yaz → satırları tazele → kapat). */
-  kesHam(kapatilsin: boolean, otomatik: boolean): Promise<number>;
+  kesHam(kapatilsin: boolean, otomatik: boolean, kullanici?: boolean): Promise<number>;
   kayitliId: number;
   /** Gridde kaydedilmemiş satır var mı. */
   kalemDegisti: boolean;
@@ -43,9 +43,9 @@ export function useKayitKapisi({
   aramaAc(ac: boolean): void;
 }) {
   /** Kaydeder; başvuruda kayıt GERÇEKLEŞTİYSE kurum tahakkukunu da keser. */
-  const kes = async (kapatilsin = true, otomatik = false): Promise<number> => {
+  const kes = async (kapatilsin = true, otomatik = false, kullanici?: boolean): Promise<number> => {
     const degisiklikVardi = !kayitliId || kalemDegisti || kirliMi();
-    const id = await kesHam(kapatilsin, otomatik);
+    const id = await kesHam(kapatilsin, otomatik, kullanici);
     if (id && basvuruMu && degisiklikVardi) {
       await kurumTahakkukuOtomatik(id);
       // TAHAKKUK SONRASI SATIRLAR HER ZAMAN YENİDEN OKUNUR: kovaların
