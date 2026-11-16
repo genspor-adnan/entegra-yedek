@@ -22,6 +22,7 @@ import { kartGovdesiKur } from './kart/kartGovdesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
 import { mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
+import { bicimHatasi } from './alanBicim';
 import {
   degisenAlanlar as degisenAlanlarHesapla, kartDegistiMi,
 } from './kartDegisim';
@@ -1143,6 +1144,43 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
    * `sonra`: kayit basarili olunca, kart kapanmadan once calisan is (yeni randevuda Tekrarla:
    *   tekrarlar ilk randevunun id'siyle yazilir). Hatasi kaydi geri almaz - mesajla bildirilir.
    */
+  // MÜKERRER KİMLİK - ANINDA (kullanıcı 16.11.2026: "kimlikno alanı yazılıp çıkışta hemen
+  //   yapılmalı.. ad soyada geçerken zaten varsa kayıt haberimiz olmalı"). Aynı soru kaydette
+  //   de sorulur (atlanırsa sunucu da engeller); burada yalnız erken haber verilir.
+  const mukerrerRolu: 'hasta' | 'personel' | null =
+    (kaynak === 'hasta' || kaynak === 'hasta-aday') ? 'hasta'
+    : (kaynak === 'personel' || kaynak === 'dis-hekim') ? 'personel' : null;
+  /** Aktif kimlik eşleşmesi: "mevcut karta geçilsin mi" - evet ise o kart açılır. */
+  async function kimlikEngeliSor(k: { id: number; ad: string; kod: string }, kayitAnı: boolean) {
+    const kisiAd = mukerrerRolu === 'personel' ? 'personel' : 'hasta';
+    const gec = await onaySor(
+      `Bu kimlik numarası ile kayıtlı AKTİF ${kisiAd} var: ${k.ad}${k.kod ? ` (dosya ${k.kod})` : ''}.
+
+${kayitAnı ? 'Aynı kimlik no ile yeni kayıt açılamaz. ' : ''}Mevcut karta geçilsin mi?`);
+    if (gec) {
+      if (onMevcutKayit) onMevcutKayit(k.id);
+      else { onKaydedildi?.(k.id); onKapat?.(); }
+    }
+  }
+  /** Son sorulan numara: aynı numarayla alandan her çıkışta yeniden sorulmasın. */
+  const sorulanKimlikRef = useRef('');
+  async function alanAyrildi(ad: string, metin: string) {
+    if (ad !== 'vkno' || !mukerrerRolu || salt) return;
+    const vkno = metin.trim();
+    const alan = meta?.alanlar.find(a => a.ad === 'vkno');
+    if (vkno === '' || vkno === sorulanKimlikRef.current
+        || (alan?.dogrulama && bicimHatasi(alan.dogrulama, vkno))) return;
+    sorulanKimlikRef.current = vkno;
+    try {
+      const m = await api.tarafMukerrer({ rol: mukerrerRolu, vkno, haric: yeniMi ? undefined : Number(id) });
+      if (m.kimlik) await kimlikEngeliSor(m.kimlik, false);
+    } catch (h) {
+      // Ulaşılamazsa sessiz: kayıtta yine sorulur, sunucu da engeller.
+      sorulanKimlikRef.current = '';
+      console.warn('mükerrer kimlik kontrolü yapılamadı', h);
+    }
+  }
+
   async function kaydet(acikKal = false, sonra?: (id: number) => Promise<void>) {
     // ADAY HASTA (266): dosya no CEP NUMARASI, unvan ad+soyad. Ikisi de kartta
   //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
@@ -1198,9 +1236,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     //   * KİMLİK aynı + AKTİF → yeni kayıt AÇILMAZ; "mevcut karta geçilsin mi"
     //     sorulur (pasif kayıt engellemez, sunucu da böyle uygular).
     //   * TELEFON / E-POSTA aynı → UYARI; "evet" derse aynı bilgiyle eklenir.
-    const mukRol: 'hasta' | 'personel' | null =
-      (kaynak === 'hasta' || kaynak === 'hasta-aday') ? 'hasta'
-      : (kaynak === 'personel' || kaynak === 'dis-hekim') ? 'personel' : null;
+    const mukRol = mukerrerRolu;
     if (mukRol) {
       const kisiAd = mukRol === 'personel' ? 'personel' : 'hasta';
       const vkno = String(deger.vkno ?? '').trim();
@@ -1213,14 +1249,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
             haric: yeniMi ? undefined : Number(id),
           });
           if (m.kimlik) {
-            const gec = await onaySor(
-              `Bu kimlik numarası ile kayıtlı AKTİF ${kisiAd} var: ${m.kimlik.ad}${m.kimlik.kod ? ` (dosya ${m.kimlik.kod})` : ''}.
-
-Aynı kimlik no ile yeni kayıt açılamaz. Mevcut karta geçilsin mi?`);
-            if (gec) {
-              if (onMevcutKayit) onMevcutKayit(m.kimlik.id);
-              else { onKaydedildi?.(m.kimlik.id); onKapat?.(); }
-            }
+            await kimlikEngeliSor(m.kimlik, true);
             return;   // aktif kimlik engeli: her hâlde kaydetme
           }
           const uyari: string[] = [];
@@ -1353,7 +1382,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
   const { altGruplaVar, renderAlanListesi } = alanCizici({
     kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
-    secilenAdlar, alanIpucu, alanGirdisi,
+    secilenAdlar, alanIpucu, alanGirdisi, alanAyrildi: (ad, v) => { void alanAyrildi(ad, v); },
     aramaAc: (alanAdi, kaynakAdi, uygula) =>
       setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi, uygula }),
     listeDuzenle: a => {

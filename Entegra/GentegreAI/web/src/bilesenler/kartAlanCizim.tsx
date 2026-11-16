@@ -81,6 +81,9 @@ export interface AlanCizimBaglami {
   /** Uzun metin alanının GİRDİSİ yerine ekran-özel kutu (muayene: makro rozetli metin);
       undefined dönerse alan olağan textarea ile çizilir. */
   alanGirdisi?(ad: string, deger: string, yaz: (v: string) => void, salt: boolean, kart?: Record<string, unknown>): React.ReactNode | undefined;
+  /** Alandan ÇIKIŞ (blur): biçim kuralından sonra ekrana bildirilir. Hasta/personel kartı
+      Kimlik No'da mükerrer kaydı burada sorar - kaydetmeyi beklemeden (kullanıcı 16.11.2026). */
+  alanAyrildi?(ad: string, deger: string): void;
 }
 
 /**
@@ -98,7 +101,7 @@ export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
           bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc,
-          listeDuzenle, alanIpucu, alanGirdisi } = b;
+          listeDuzenle, alanIpucu, alanGirdisi, alanAyrildi } = b;
 
   /** Yıldız: zorunlu ve muaf alanı boş (17.10.2026: randevuda cihaz seçiliyse doktor zorunlu değil). */
   const zorunluGoster = (a: { zorunlu: boolean; zorunluMuafAlan?: string | null }) =>
@@ -426,6 +429,7 @@ export function alanCizici(b: AlanCizimBaglami) {
                 return { ...h, [a.ad]: 'Gecerli bir e-posta adresi girin.' };
               });
             }
+            alanAyrildi?.(a.ad, e.target.value);
           }}
         />
       )

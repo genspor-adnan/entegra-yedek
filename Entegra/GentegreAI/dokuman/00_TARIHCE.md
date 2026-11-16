@@ -7,6 +7,14 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — Kimlik No'dan çıkışta mükerrer kayıt uyarısı
+
+- Kullanıcı: "kaydetmede tcno kontrolü yapıyor.. bu kontrol kimlikno alanı yazılıp çıkışta hemen yapılmalı".
+- `kartAlanCizim.tsx`: yeni `alanAyrildi(ad, deger)` geri çağrısı; alan blur'unda biçim kuralından sonra çağrılır.
+- `GenForm.tsx`: hasta / hasta-aday / personel / dış hekim kartında Kimlik No'dan çıkılınca (biçimi geçerliyse)
+  `GET /api/hasta/mukerrer` sorulur; aynı kimlikle AKTİF kayıt varsa "Mevcut karta geçilsin mi?". Aynı numara
+  bir kez sorulur. Kaydetteki kontrol ve sunucu engeli aynen duruyor (ortak `kimlikEngeliSor`).
+
 ## 16.11.2026 — Hasta kartında ülke ve uyruk tek SKRS listesi, varsayılan şubenin ülkesi (1350); KOSUYOLU kullanıcı rolleri
 
 Kullanıcı: "hasta kartında uyruk ülke listesi ile aynı olsun.. ülke ve uyruk defaultu şube hangi ülkedeyse o olsun".
