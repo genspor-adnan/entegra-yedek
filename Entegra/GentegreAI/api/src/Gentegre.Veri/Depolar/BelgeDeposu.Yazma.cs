@@ -104,7 +104,9 @@ public sealed partial class BelgeDeposu
         // KENDI ISTEGI (370): gonderen hekim YOK ama bu bir eksiklik degil,
         //   bir SECIM - zorunluluk "personelId dolu VEYA kendiIstegi = 1"
         //   ile karsilanir.
-        ["kendiIstegi"] = "kendi_istegi"
+        ["kendiIstegi"] = "kendi_istegi",
+        // KVKK / ETK ONAYI (1351): 1 reddetti · 2 onaysız · 3 ıslak imza · 4 SMS; boş = sorulmadı.
+        ["kvkkOnay"] = "kvkk_onay", ["etkOnay"] = "etk_onay"
     };
 
     /// <summary>

@@ -1132,6 +1132,8 @@ public static class BelgeUclari
         //   kurum seçili her yeni başvuru "Bilinmeyen belge alanı: enabizBildirim" 422'siyle KAYDEDİLEMİYORDU
         //   (kullanıcı 15.11.2026). Yazma haritasındaki her alan burada da olmalı - testi BelgeBaslikAlanTestleri.
         or "enabizBildirim" or "teleradBildirim"
+        // KVKK / ETK onay durumu (1351) - 1..4 kod, boş = sorulmadı.
+        or "kvkkOnay" or "etkOnay"
         // Provizyon (299) - kod/sayi alanlari (SGK ve ozel sigorta ayri).
         or "sgkDurum" or "sgkProvizyonTipi" or "sgkTakipTuru" or "sgkMustehaklik"
         or "sgkSevkli" or "ossDurum" or "ossKurumId"

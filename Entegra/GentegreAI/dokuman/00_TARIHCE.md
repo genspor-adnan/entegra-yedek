@@ -7,6 +7,19 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 16.11.2026 — Başvuru KVKK / ETK onayı (1351); randevu durum renkleri; hasta kartı sekmede; SMS/e-posta izni kaldırıldı
+
+- **1351 `belge_basvuru.kvkk_onay` / `etk_onay`** (smallint 1..4, boş = sorulmadı): 1 Hasta Reddetti · 2 Onaysız durumu
+  seçildi · 3 Islak imzalı onay alındı · 4 SMS ile onay alındı. Başvuru sekmesinde Bildirimler'in önünde iki combo.
+  Yazma haritası + okuma + `BelgeUclari` alan listesi + `belgeOkuma` (test referansı da). Dev, KOSUYOLU, test DB'de uygulandı.
+- **Randevu listesi:** durum satırı renklendirir (Geldi yeşil, Gelmedi kırmızı, Ertelendi sarı, İptal soluk/üstü çizili),
+  solda 4px durum şeridi, durum rozeti dolu renk. Seçili satırda şerit ve rozet kalır (`GenGrid` + `tema.css rv-*`).
+- **Randevu → başvuru, aday hasta tamamlama:** hasta kartı modal yerine kendi sekmesinde (`?tamamla=<anahtar>`); sonuç
+  `kartSonucKapisi` ile dönüşüm akışına gelir. Sekmesiz kipte modal kalır.
+- **Hasta kartı:** SMS İzni / E-posta İzni onay kutuları kaldırıldı (kolonlar ve veri duruyor); başvuru şeridinin
+  İzinler hücresinde yalnız KVKK formu kaldı.
+- **Personel kartı:** Kimlik No çıkışında mükerrer uyarısı (`PersonelKimlikOzet.onVknoCik`).
+
 ## 16.11.2026 — Kimlik No'dan çıkışta mükerrer kayıt uyarısı
 
 - Kullanıcı: "kaydetmede tcno kontrolü yapıyor.. bu kontrol kimlikno alanı yazılıp çıkışta hemen yapılmalı".

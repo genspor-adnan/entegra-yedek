@@ -102,6 +102,8 @@ function eskiBasvuru(b: Belge) {
     // 1340: bildirim bayrakları (kurumdan varsayılan, başvuruda karar)
     enabizBildirim: b.enabizBildirim != null ? Number(b.enabizBildirim) : 0,
     teleradBildirim: b.teleradBildirim != null ? Number(b.teleradBildirim) : 0,
+    kvkkOnay: b.kvkkOnay != null ? Number(b.kvkkOnay) : null,
+    etkOnay: b.etkOnay != null ? Number(b.etkOnay) : null,
     // 370'te EKLENEN alan: "Kendi İsteği" isareti. Referans kopya BILEREK
     //   guncellendi - bu dosyanin isi "cevrim degismedi mi" degil, "cevrim
     //   YANLISLIKLA degismedi mi". Yeni bir alan eklendiginde buraya da

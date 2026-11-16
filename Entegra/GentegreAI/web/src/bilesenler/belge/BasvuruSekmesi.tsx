@@ -71,6 +71,10 @@ export interface BasvuruBilgi {
       1 = bu başvurunun e-Nabız paketleri üretilir / radyoloji istemleri Teletıp kuyruğuna girer. */
   enabizBildirim?: number | null;
   teleradBildirim?: number | null;
+  /** KVKK / ETK ONAYI (1351, kullanıcı 16.11.2026): 1 Hasta reddetti · 2 Onaysız durumu seçildi ·
+      3 Islak imzalı onay alındı · 4 SMS ile onay alındı; null = sorulmadı. */
+  kvkkOnay?: number | null;
+  etkOnay?: number | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -543,6 +547,18 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
           </>
         )}
 
+        {/* KVKK / ETK (1351, kullanıcı 16.11.2026): başvuruda hastanın onay durumu. Boş = sorulmadı. */}
+        {([['kvkkOnay', 'KVKK'], ['etkOnay', 'ETK']] as const).map(([alan, etiket]) => (
+          <label className="alan" key={alan}>
+            <span className="etiket" title={alan === 'etkOnay' ? c('Ticari elektronik ileti onayı') : c('Kişisel verilerin korunması - açık rıza')}>{etiket}</span>
+            <select value={bilgi[alan] != null ? String(bilgi[alan]) : ''} disabled={kilitli}
+                    onChange={e => degistir({ [alan]: e.target.value ? Number(e.target.value) : null })}>
+              <option value="">{c('— Seçin —')}</option>
+              {ONAY_DURUMLARI.map(([k, ad]) => <option key={k} value={k}>{c(ad)}</option>)}
+            </select>
+          </label>
+        ))}
+
         {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
             girilmez (sunucu kapıları). */}
         <label className="alan onay-alan">
@@ -577,3 +593,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
 export { HastaSeridi } from './basvuru/HastaSeridi';
 export { ProvizyonSekmesi } from './basvuru/ProvizyonSekmesi';
 export { OncekiBasvurular } from './basvuru/OncekiBasvurular';
+
+/** KVKK / ETK onay durumu kodları (1351, belge_basvuru.kvkk_onay / etk_onay). */
+const ONAY_DURUMLARI: [number, string][] = [
+  [1, 'Hasta Reddetti'], [2, 'Onaysız durumu seçildi'], [3, 'Islak imzalı onay alındı'], [4, 'SMS ile onay alındı'],
+];
