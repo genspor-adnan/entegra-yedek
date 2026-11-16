@@ -24,7 +24,13 @@ listede ismi aynı olanlar kalsın, diğerlerini sil. ad soyad ilk harf büyük"
 - Telefon: Excel'de aynı cep 3'er kişide (bölüm telefonu); `ux_taraf_personel_cep` tekil → ilk deneme burada
   patladı ve tamamı geri alındı; yalnız tek kişiye ait numara yazıldı.
 - Yedek: `yedek.personel_1116_taraf / _taraf_personel / _taraf_kullanici / _kullanici_sube / _personel_hareket`.
-- Görev/bölüm (ROL sütunu) kadroya atanmadı — istenirse Kadro Geçmişi giriş hareketi olarak.
+- Görev/bölüm (ROL sütunu) Kadro Geçmişi'ne işlendi (kullanıcı: "rolleri de kadro geçmişine işle"): her kişiye
+  tür 99 Diğer, kaynak Dolgu, yürürlük bugün bir `personel_hareket` satırı (giriş tarihi bilinmediği için İşe giriş
+  yazılmadı); tetik `taraf.departman/gorev_id` ve `taraf_personel.gorev`ü türetti. Eşleme: Radyolog → Radyoloji branşı /
+  Radyoloji; Biyokimya Uzmanı → Tıbbi Biyokimya; Tekniker → Radyoloji Teknisyeni; Banko → Hasta Kabul Görevlisi /
+  Hasta Kabul; Pazarlama (Saha) → Pazarlama Sorumlusu + Ana Rol saha_temsilci; IT → IT Destek / Bilgi İşlem.
+  Katalogda olmayan iki görev eklendi: Yönetici (Yönetim grubu), Raportör (Hasta Hizmetleri). Ana Rol yalnız hesabı
+  olana işler; yöneticilerin hesabı yok, KOSUYOLU'da hekim/tekniker/banko yetki rolü de yok → boş kaldı.
 - Pasif personel giriş yapamaz (`t.durum = 1` şartı) → `ed` (Esra Deniz Kuşçu) girişi kapandı.
 
 Yayın: "bitince sonomed ve goruntuleme ye yayınla" → görüntüleme (kalite kapısı: web, API, duman) ve Sonomed
