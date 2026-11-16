@@ -1421,6 +1421,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           detayGrupta={detayGrupta} detayIzgara={detayIzgara}
           sekmeSarmalayici={sekmeSarmalayici}
           govdeGoster={kipliGovde && !salt && !kipliAcik}
+          alanAyrildi={(ad, v) => { void alanAyrildi(ad, v); }}
         />
       )}
 

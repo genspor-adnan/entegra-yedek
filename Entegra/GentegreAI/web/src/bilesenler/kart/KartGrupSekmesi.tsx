@@ -36,7 +36,7 @@ export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
     aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
     detaylar, setDetaylar, alanHatalari, gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-    aramaAc, secilenAdlar, altBaslik: altBaslikEki, govdeGoster = false,
+    aramaAc, secilenAdlar, altBaslik: altBaslikEki, govdeGoster = false, alanAyrildi,
   } = p;
 const gruplanmis = altGruplaVar(aktif.alanlar);
 const adli = gruplanmis.filter(([b]) => b);
@@ -376,6 +376,7 @@ const adliBlok = (
               vknoAlan={vknoAlan}
               vkno={String(deger.vkno ?? '')}
               onVknoDegis={v => setDeger(d => ({ ...d, vkno: v }))}
+              onVknoCik={v => alanAyrildi?.('vkno', v)}
               vknoSagEk={kaynak === 'personel'
                 ? renderAlanListesi((meta.alanlar ?? []).filter(a => a.ad === 'kod'))
                 : undefined}
@@ -807,6 +808,8 @@ return (
 }
 
 export interface KartGrupSekmesiProps {
+  /** Alandan çıkış (blur) bildirimi: Kimlik No'da anında mükerrer kontrolü (16.11.2026). */
+  alanAyrildi?(ad: string, deger: string): void;
   /** Aktif GRUP sekmesi: baslik + o gruba dusen alanlar. */
   aktif: { baslik: string; alanlar: KartAlanMeta[] };
   kaynak: string;

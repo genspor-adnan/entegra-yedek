@@ -13,6 +13,8 @@ interface Props {
   vknoAlan: KartAlanMeta;
   vkno: string;
   onVknoDegis(v: string): void;
+  /** Kimlik No'dan çıkış: anında mükerrer kayıt kontrolü (16.11.2026). */
+  onVknoCik?(v: string): void;
   gorevAlan: KartAlanMeta;
   gorev: string;
   onGorevDegis(v: string): void;
@@ -58,7 +60,7 @@ const KISA_KUTU = 118;
  * diğer kimlik alanları 1:1 detay kaydından gelir.
  */
 export function PersonelKimlikOzet({
-  kartAdi = 'personel', vknoAlan, vkno, onVknoDegis,
+  kartAdi = 'personel', vknoAlan, vkno, onVknoDegis, onVknoCik,
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, isBilgiEk, ozetGizli,
   subeAlan, sube, onSubeDegis,
   vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false, vknoSagEk,
@@ -164,7 +166,8 @@ export function PersonelKimlikOzet({
                     <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
                     <input value={vkno} style={{ width: KISA_KUTU }}
                       maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
-                      onChange={e => onVknoDegis(e.target.value)} />
+                      onChange={e => onVknoDegis(e.target.value)}
+                      onBlur={e => onVknoCik?.(e.target.value)} />
                   </label>
                 )}
                 {/* ROL BURADAN KALKTI (845, kullanici: "hem rol hem ana rol

@@ -33,6 +33,8 @@ export interface KartGrupSarmalayiciOzellikleri {
   /** Alan cizim yardimcilari (kartAlanCizim fabrikasindan). */
   altGruplaVar(alanlar: KartAlanMeta[]): [string, KartAlanMeta[]][];
   renderAlanListesi(alanlar: KartAlanMeta[]): ReactNode;
+  /** Alandan çıkış (blur) bildirimi: Kimlik No'da anında mükerrer kontrolü (16.11.2026). */
+  alanAyrildi?(ad: string, deger: string): void;
   /** Jenerik arama modalini acar (305): 1:1 uzanti formundaki kurum secimi. */
   setAramaAlani(v: { alan: string; kaynak: string;
                      uygula?: (deger: string) => void } | null): void;
@@ -74,7 +76,7 @@ export function KartGrupSarmalayici({
   aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart,
   deger, setDeger, alanDegistir, detaylar, setDetaylar, alanHatalari,
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
-  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici, kaydetKal, govdeGoster,
+  setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici, kaydetKal, govdeGoster, alanAyrildi,
 }: KartGrupSarmalayiciOzellikleri) {
         const grupCiz = (sekme: typeof aktif, altBaslik?: AltGrupBaslik) => (
         <KartGrupSekmesi
@@ -87,7 +89,7 @@ export function KartGrupSarmalayici({
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
           aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
           secilenAdlar={secilenAdlar} altBaslik={altBaslik}
-          govdeGoster={govdeGoster}
+          govdeGoster={govdeGoster} alanAyrildi={alanAyrildi}
         />
         );
         const govde = grupCiz(aktif);
