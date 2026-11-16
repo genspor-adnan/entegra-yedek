@@ -4314,6 +4314,9 @@ input.skt-gecmis {
 /* Mesaj govdesi cerceveisiz ve dar (543): pencere iki cumleye gore boy alsin. */
 .kawin.mesaj-pencere .kagov { padding: 12px 14px }
 .mesaj-govde { font-size: 12px }
+/* TEHLİKELİ ONAY (16.11.2026, mükerrer kalem): kırmızı uyarı kutusu. */
+.mesaj-tehlike { color: var(--hata); background: var(--hatazem); border: 1px solid var(--hatakenar);
+  border-left: 4px solid var(--hata); border-radius: 4px; padding: 8px 10px; font-weight: 600 }
 
 /* MIKROBIYOLOJI KATALOG KARTLARI (mockup Ekranlar/Lab/*_karti.html) --------
    Serit mockup'taki `.hdr` gibi DORT SUTUN: sekiz alan 4x2 duzenli bir

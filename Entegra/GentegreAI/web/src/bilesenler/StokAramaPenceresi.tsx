@@ -486,13 +486,21 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok: yalnizSt
    * yuzden ard arda ayni ilaca basmak ikinci kart acmaz.
    */
   const [uretiliyor, setUretiliyor] = useState(false);
+  /** Bu pencereden HIZLI eklenenler: ilk satır gride düşmeden gelen ikinci seçim de mükerrer sayılsın. */
+  const eklenenler = useRef(new Set<string>());
   const sec = async (r: ListeSatiri, hizli = false) => {
     // MUKERRER (kullanici): urun zaten ekliyse uyar, tekrar eklensin mi sor.
-    if (zatenVarMi?.(r)) {
+    // KIRMIZI UYARI (kullanıcı 16.11.2026: "kullanıcı aynı işlemden 2 defa arka arkaya eklemiş.. kırmızı renkte uyarı
+    //   verilmeli.. yine isterse eklenmeli"): tehlikeli onay - odak "Kapat"ta, Enter'la geçilemez.
+    const anahtar = `${String(r.tip ?? '')}:${String(r.id ?? '')}`;
+    if (zatenVarMi && (zatenVarMi(r) || eklenenler.current.has(anahtar))) {
       const ad = String(r.ad ?? r.kisaAd ?? r.stokAdi ?? '').trim();
-      const devam = await onay(`"${ad || 'Bu kalem'}" belgeye zaten eklenmiş. Yine de tekrar eklensin mi?`);
+      const devam = await onay(`⚠ "${ad || 'Bu kalem'}" bu belgede ZATEN VAR.
+
+Aynı işlem ikinci kez eklenecek. Yine de eklensin mi?`, true);
       if (!devam) return;
     }
+    if (hizli) eklenenler.current.add(anahtar);
     if (r.tip !== 'ilac') { onSec(r, hizli); return }
     if (uretiliyor) return;
     setUretiliyor(true);

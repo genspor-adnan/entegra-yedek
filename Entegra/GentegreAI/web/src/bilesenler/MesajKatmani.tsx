@@ -147,12 +147,14 @@ export function MesajKatmani() {
               yapilmis bir isi geri aliyormus izlenimi veriyordu - oysa soru
               henuz cevaplanmadi, kutu kapaniyor. */}
           {istek.onayMi && (
-            <button type="button" className="d kapat-dugmesi"
+            // TEHLİKELİ ONAYDA ODAK "Kapat"ta (16.11.2026): Enter'la eklenen kalemin mükerrer uyarısı ikinci
+            //   Enter'la farkına varılmadan "Tamam"lanıyordu - aynı işlem başvuruya iki kez girdi.
+            <button type="button" className="d kapat-dugmesi" autoFocus={istek.tehlike}
                     onClick={() => kapat(false)}>✖ {c('Kapat')}</button>
           )}
           <button type="button"
                   className={`d ${istek.tehlike ? 'teh' : 'bir'}`}
-                  autoFocus
+                  autoFocus={!(istek.onayMi && istek.tehlike)}
                   onClick={() => kapat(true)}>
             {istek.onayMi ? 'Tamam' : 'Kapat'}
           </button>
@@ -167,7 +169,7 @@ export function MesajKatmani() {
           ikinci bir cerceve ve ikinci bir kenar boslugu koyuyor, iki
           cumlelik uyari 192 piksele cikiyordu. */}
       <div className="mesaj-govde">
-        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.45 }}>
+        <div className={istek.tehlike ? 'mesaj-tehlike' : undefined} style={{ whiteSpace: 'pre-wrap', lineHeight: 1.45 }}>
           {istek.metin}
         </div>
         {/* PARA ISTEGI: tutar + birim, dovizde kur ve yerel karsilik, istege

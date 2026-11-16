@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { mesaj } from '../../bilesenler/mesaj';
 
 /**
@@ -19,6 +20,11 @@ import { mesaj } from '../../bilesenler/mesaj';
  *    tahakkuk oluştu, hemen bir şey seçmeden") - kayıt atlandığında alttaki
  *    yazıcı yine belge kimliğini döndürüyor, çağıran "kaydedildi" sanıp kurum
  *    tahakkuku kesiyordu. Tahakkuk KAYIT olayına bağlıdır.
+ *  · KAYITLAR SIRAYLA (kullanıcı 16.11.2026: "son eklediğim başvuru için 2 tane istem açılmış"; KOSUYOLU
+ *    başvuru 000012): iki kayıt 0,3 sn arayla üst üste gitti (kartın ara kaydı + POS tahsilatı öncesi kayıt).
+ *    İkincisi birincinin satır kimliklerini görmeden yazdığı için aynı ücret satırı İKİ KEZ eklendi, her
+ *    satır kendi radyoloji istemini açtı. Artık süren kayıt bitmeden ikincisi başlamaz; bittiğinde kartın
+ *    GÜNCEL hâli okunur - ara kayıt isteyen için yazılacak bir şey kalmadıysa yeniden yazılmaz.
  */
 export function useKayitKapisi({
   kesHam, kayitliId, kalemDegisti, kirliMi, basvuruMu,
@@ -42,19 +48,38 @@ export function useKayitKapisi({
   /** Ücret arama penceresini aç/kapat. */
   aramaAc(ac: boolean): void;
 }) {
+  /** Son çizimin değerleri: sıra bekleyen kayıt, önceki kayıttan SONRAKİ kart hâliyle yazar. */
+  const son = useRef({ kesHam, kayitliId, kalemDegisti, kirliMi });
+  son.current = { kesHam, kayitliId, kalemDegisti, kirliMi };
+  const suren = useRef<Promise<number> | null>(null);
+
   /** Kaydeder; başvuruda kayıt GERÇEKLEŞTİYSE kurum tahakkukunu da keser. */
   const kes = async (kapatilsin = true, otomatik = false, kullanici?: boolean): Promise<number> => {
-    const degisiklikVardi = !kayitliId || kalemDegisti || kirliMi();
-    const id = await kesHam(kapatilsin, otomatik, kullanici);
-    if (id && basvuruMu && degisiklikVardi) {
-      await kurumTahakkukuOtomatik(id);
-      // TAHAKKUK SONRASI SATIRLAR HER ZAMAN YENİDEN OKUNUR: kovaların
-      //   KAPATILAN sayacı sunucuda dolar - okumazsak kurum payı hâlâ açık
-      //   görünür ("satış tahakkuk geldi ama açık tahsilat ve belge de 400
-      //   görünüyor").
-      await satirlariTazele(id);
+    const kullaniciKaydi = kullanici ?? (kapatilsin && !otomatik);
+    while (suren.current) {
+      const id = await suren.current.catch(() => 0);
+      // Önceki kaydın sonucu (satır kimlikleri, protokol) karta çizilsin.
+      await new Promise(coz => setTimeout(coz, 0));
+      const g = son.current;
+      if (!suren.current && id && !kullaniciKaydi && g.kayitliId && !g.kalemDegisti && !g.kirliMi()) return id;
     }
-    return id;
+    const is = (async () => {
+      const g = son.current;
+      const degisiklikVardi = !g.kayitliId || g.kalemDegisti || g.kirliMi();
+      const id = await g.kesHam(kapatilsin, otomatik, kullanici);
+      if (id && basvuruMu && degisiklikVardi) {
+        await kurumTahakkukuOtomatik(id);
+        // TAHAKKUK SONRASI SATIRLAR HER ZAMAN YENİDEN OKUNUR: kovaların
+        //   KAPATILAN sayacı sunucuda dolar - okumazsak kurum payı hâlâ açık
+        //   görünür ("satış tahakkuk geldi ama açık tahsilat ve belge de 400
+        //   görünüyor").
+        await satirlariTazele(id);
+      }
+      return id;
+    })();
+    suren.current = is;
+    try { return await is }
+    finally { if (suren.current === is) suren.current = null }
   };
 
   /** Belgeyi kaydettirir; kaydedilene kadar işleme izin vermez. */
