@@ -911,7 +911,9 @@ export function RadyolojiRapor() {
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
         <div className={`rad-orta${yazimKilit ? ' rad-goster' : ''}`} style={tipografiStil(tipografi)}>
-          <div className="rad-duzen">
+          {/* GÖRÜNTÜLEME KİPİNDE GİZLİ (kullanıcı 17.11.2026: "view modda iken rapor biçimi ile başlayan satır ve yazı
+              tipi / punto aracı görünmesin"): biçim / giriş / tipografi satırı ve biçim çubuğu yalnız düzenlemede. */}
+          {!yazimKilit && <div className="rad-duzen">
             <span>{c('Rapor biçimi')}</span>
             <span className="seg" role="group">
               {(['tek', 'parcali'] as const).map(d => (
@@ -941,12 +943,12 @@ export function RadyolojiRapor() {
                             ? ` · ${c('güncel kurum ayarı')}: ${tipografiOzeti(kurumTipografi)} (${c('bu rapora uygulanmaz')})` : '')}>
               🖨 {tipografiOzeti(tipografi)} <small>· {c(kaynakAdi(tipografi, tipografiDamga))}</small>
             </span>
-          </div>
+          </div>}
           {etkinGiris === 'yapisal' && birads ? (
             <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis kilitli={yazimKilit} />
           ) : <>
           {/* BİÇİM ÇUBUĞU (1195): imlecin bulunduğu alanda çalışır (tek A4 ya da herhangi bir bölüm). */}
-          {bolumler.length > 0 && <BicimAracCubugu pasif={yazimKilit} />}
+          {bolumler.length > 0 && !yazimKilit && <BicimAracCubugu pasif={yazimKilit} />}
           {bolumler.length === 0 && (
             <div className="rad-a4 rad-bos-a4">
               <div className="rad-bos-ic">
