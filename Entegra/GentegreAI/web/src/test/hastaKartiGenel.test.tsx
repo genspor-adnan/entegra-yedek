@@ -132,3 +132,13 @@ describe('hasta kartinda Yakınlar gridi', () => {
       .toBeLessThan(basliklar.indexOf('Kimlik Bilgileri'));
   });
 });
+
+describe('hasta kimlik şeridi tam kartta (17.11.2026)', () => {
+  it('kayıtlı hasta açılışta kimlik şeridi (Kimlik No / Ad / Soyad) çizilmez', async () => {
+    ciz();
+    await waitFor(() => expect(kartOku).toHaveBeenCalled());
+    await waitFor(() => expect(document.querySelector('.kagrup')).not.toBeNull());
+    expect(document.querySelector('[data-testid="kimlik-kipli"]')).toBeNull();
+    expect(document.querySelector('.kaid input[data-alan="ad"], .kaid input[data-alan="vkno"]')).toBeNull();
+  });
+});
