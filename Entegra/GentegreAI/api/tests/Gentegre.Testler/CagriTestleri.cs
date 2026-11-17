@@ -69,8 +69,9 @@ public sealed class CagriTestleri(VeritabaniOlgusu olgu) : IClassFixture<Veritab
             values (1, 1, '05000000002', @p0, now() - interval '5 minutes', now() - interval '4 minutes', 45, 5, @p1) returning id
             """, t, [kuyruk, sube], CancellationToken.None);
         var kacan = await b.TekDegerAsync<int>("""
+            -- GECE YARISI (18.11.2026: yayın kapısı 00:00'da kırmızı): kaçan bugün sayımı için çağrı her zaman BUGÜN başlar.
             insert into public.cagri (kanal, yon, arayan_no, kuyruk_id, baslama, bekleme_sn, durum, sube_id)
-            values (1, 1, '05000000003', @p0, now() - interval '5 minutes', 60, 6, @p1) returning id
+            values (1, 1, '05000000003', @p0, greatest(now() - interval '5 minutes', date_trunc('day', now())), 60, 6, @p1) returning id
             """, t, [kuyruk, sube], CancellationToken.None);
 
         Assert.Equal(1, await b.TekDegerAsync<int>("select sla_icinde from public.v_cagri where id = @p0", t, [hizli], CancellationToken.None));
