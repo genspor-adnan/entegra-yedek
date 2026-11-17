@@ -1753,7 +1753,14 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
               try {
                 const y = await api.basvuruKvkkKod(kayitliId, kod.trim());
                 setBasvuruBilgi(o => ({ ...o, kvkkOnayKodu: y.kod, kvkkOnay: y.kvkkOnay, etkOnay: y.etkOnay }));
-                mesaj('Onay kodu doğrulandı: KVKK ve ETK "SMS ile onay alındı".');
+                // KART DA KAYDEDİLİR (kullanıcı 17.11.2026: "kod girince kayıtlı değilse kaydedilsin"): kod ve KVKK/ETK
+                //   sunucuda zaten yazıldı; kartta bekleyen başka değişiklik (ücret satırı, alan) varsa o da kaydedilir.
+                //   Güncel durumla kaydetmek için önce çizim beklenir (akisRef her çizimde tazelenir).
+                await new Promise(r => setTimeout(r, 0));
+                const kaydedildi = await akisRef.current.kayitSart();
+                mesaj(kaydedildi
+                  ? 'Onay kodu doğrulandı ve başvuru kaydedildi: KVKK ve ETK "SMS ile onay alındı".'
+                  : 'Onay kodu doğrulandı (KVKK ve ETK "SMS ile onay alındı"), ancak başvurunun diğer değişiklikleri kaydedilemedi - eksik alanları tamamlayıp Kaydet’e basın.');
               } catch (h) { mesaj(hataMetni(h)) }
             })(),
             islakImza: () => setBasvuruBilgi(o => ({ ...o, kvkkOnay: 3, etkOnay: 3 })),
