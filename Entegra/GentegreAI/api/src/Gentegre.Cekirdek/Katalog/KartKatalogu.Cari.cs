@@ -488,7 +488,9 @@ public static partial class KartKatalogu
                 new("kaynak", "kaynak", "kod", Yazilabilir: false, Baslik: "Kaynak",
                     SabitKodlar: KaynakKatalogu.KadroKaynakKodlari),
             }, Sirala: "yururluk desc, id desc", Baslik: "Kadro Geçmişi",
-               LogTabloId: 1325),
+               // GENGRID (kullanıcı 17.11.2026: "personel kartında kadro geçmişini gengrid yap"): satır içi kutular
+               //   yerine liste gridi + ekle / düzenle / sil modalı, kolon menüsü ve CSV.
+               LogTabloId: 1325, GridKipi: true),
             // PRIM ROLLERI (361): kisi hangi rolde prim alabilir. Bir kisi hem
             //   isteyen hem yapan hem uygulayan olabilir - o yuzden GRID, tek
             //   secim degil.
