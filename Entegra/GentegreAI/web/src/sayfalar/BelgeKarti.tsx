@@ -2043,7 +2043,16 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             kayitliId,
             setDonusum: donusumler.setHedefTur,
             teklifMi, teklifDurum: teklif.durum,
-            donusumAc: donusumler.ac,
+            // BAŞVURUDA YENİ SEKMEDE (kullanıcı 17.11.2026: "başvuruda belgeye dönüşüm sekmesinde belgeler çift
+            //   tıklanıp açılınca yeni sekmede açılsın"): çift tık ve ✎ türetilen belgeyi kendi sekmesinde açar (aşağıdaki
+            //   sekmedeAc ile aynı yol: türün liste rotası). Diğer belgelerde pencere (modal) olarak açılır.
+            donusumAc: basvuruMu
+              ? (id: number) => {
+                  const tur = Number(donusumListesi.find(d => Number(d.belgeId) === id)?.tur ?? 0);
+                  const h = `${belgeTuruBilgisi(tur).liste}/${id}`;
+                  if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
+                }
+              : donusumler.ac,
             // SİPARİŞTEN AKTAR (irsaliye) / TEKLİFTEN AKTAR (satış siparişi, 07.11.2026): kayıtsız kartta da çalışır -
             //   satırlar karta gelir, kayıtta bağlanır. Alış siparişinin teklifi yok.
             // İRSALİYE: türetilen belge (fatura / fiş) KENDİ SEKMESİNDE (kullanıcı 07.11.2026 "tür'e tıklayınca yeni sekmede").

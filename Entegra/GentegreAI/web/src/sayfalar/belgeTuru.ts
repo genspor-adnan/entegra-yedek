@@ -119,6 +119,8 @@ const LISTE_YOLU: Record<number, string> = {
   18: '/teklif',
   19: '/siparis', 14: '/satis-irsaliye', 15: '/belge', 16: '/satis-fisi',
   17: '/tahakkuk', 119: '/satis-konsinye',
+  // HASTA FİŞİ (128) Satış › Fişler yetkisiyle açılır (belge.satis.fis) - kartı fişlerin sekmesinde.
+  128: '/satis-fisi',
   // ALIS
   9: '/alis-siparis', 10: '/alis-irsaliye', 11: '/alis-fatura', 12: '/alis-fisi',
   13: '/borc-tahakkuk', 109: '/alis-konsinye',
