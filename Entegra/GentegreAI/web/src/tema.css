@@ -9892,3 +9892,4 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rad-orta.rad-goster .bm-alan { cursor: default; caret-color: transparent }
 .rad-orta.rad-goster .bm-alan:focus { outline: none }
 .rad-yan h5 > .bs-kalem { margin-left: 4px; font-size: 13px; vertical-align: middle }
+.rad-alan-goster select { appearance: none; -webkit-appearance: none; border-color: transparent !important; background: transparent !important; color: var(--yazi) !important; font-weight: 600; opacity: 1 !important; padding-left: 0 }

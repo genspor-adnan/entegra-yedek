@@ -1103,19 +1103,20 @@ export function RadyolojiRapor() {
           {bakanlikProfili && (
             <>
               {/* RADYOLOG DEĞERLENDİRMESİ (kullanıcı 14.11.2026, eski ad Bakanlık Değerlendirmesi): iki puan da onayda zorunlu (1342). */}
+              {/* GÖRÜNTÜLEME KİPİNDE DEĞİŞMEZ (kullanıcı 17.11.2026): puanlar ve kritik bulgu rapor yazımının ✎'ine bağlı. */}
               <h5 style={{ marginTop: 12 }}>{c('Radyolog Değerlendirmesi')}</h5>
-              <label className="alan">
+              <label className={`alan${yazimKilit ? ' rad-alan-goster' : ''}`}>
                 <span className="etiket">{c('İstem Nedeni')}</span>
-                <select value={nedeniPuan} disabled={kilitli}
+                <select value={nedeniPuan} disabled={yazimKilit}
                         onChange={e => setNedeniPuan(Number(e.target.value))}>
                   {ISTEM_NEDENI_PUAN.map((ad, i) => (
                     <option key={i} value={i}>{i === 0 ? '—' : `${i} · ${ad}`}</option>
                   ))}
                 </select>
               </label>
-              <label className="alan">
+              <label className={`alan${yazimKilit ? ' rad-alan-goster' : ''}`}>
                 <span className="etiket">{c('Çekim Kalitesi')}</span>
-                <select value={kalitePuan} disabled={kilitli}
+                <select value={kalitePuan} disabled={yazimKilit}
                         onChange={e => setKalitePuan(Number(e.target.value))}>
                   {CEKIM_KALITE_PUAN.map((ad, i) => (
                     <option key={i} value={i}>{i === 0 ? '—' : `${i} · ${ad}`}</option>
@@ -1133,7 +1134,7 @@ export function RadyolojiRapor() {
           <h5 style={{ marginTop: 12 }}>Kritik Bulgu</h5>
           <label className="alan yatay">
             {/* Açık (teyit bekleyen) bildirim varken işaret kaldırılamaz - sunucu da reddeder (15.11.2026). */}
-            <input type="checkbox" checked={kritik} disabled={kilitli || (kritik && kritikler.some(k => !k.kapatmaZamani))}
+            <input type="checkbox" checked={kritik} disabled={yazimKilit || (kritik && kritikler.some(k => !k.kapatmaZamani))}
                    title={kritik && kritikler.some(k => !k.kapatmaZamani) ? c('Açık bildirim var: önce Kritik Bulgular listesinde teyit alındı diye kapatın.') : undefined}
                    onChange={e => setKritik(e.target.checked)} />
             <span>{c('Bu tetkikte kritik bulgu var')}</span>
