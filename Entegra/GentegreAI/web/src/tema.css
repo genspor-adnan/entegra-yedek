@@ -9887,3 +9887,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .ayar-sayfabas .basrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
 .ayar-sayfabas .basrow > .d.bir { order: -1 }
 .ayar-sayfabas-sag { margin-left: auto; display: flex; gap: 6px; align-items: center }
+
+/* RADYOLOJİ RAPOR YAZIMI GÖRÜNTÜLEME KİPİ (17.11.2026): editör yazılamaz, imleç metin değil; ✎ Serbest/Yapısal'ın sağında. */
+.rad-orta.rad-goster .bm-alan { cursor: default; caret-color: transparent }
+.rad-orta.rad-goster .bm-alan:focus { outline: none }
+.rad-orta .rad-duzen > .bs-kalem { margin-left: 2px; font-size: 14px }

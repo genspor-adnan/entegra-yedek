@@ -156,6 +156,12 @@ export function RadyolojiRapor() {
     return () => { iptal = true };
   }, [ciktiRaporId, ciktiSurum]);
   const [bolumler, setBolumler] = useState<Bolum[]>([]);
+  /**
+   * RAPOR YAZIMI GÖRÜNTÜLEME / DÜZENLEME KİPİ (kullanıcı 17.11.2026: "radyoloji rapor kartında ortadaki rapor yazım
+   * kısmını view/edit mode desenine geçir.. kalemi de serbest/yapısal buton sağına koy"): metni olan kayıtlı rapor
+   * görüntülemede açılır, ✎ düzenlemeye alır; boş rapor / yeni şablon düzenlemede. Onaylı (kilitli) raporda ✎ pasif.
+   */
+  const [raporDuzenle, setRaporDuzenle] = useState(true);
   const [sablonlar, setSablonlar] = useState<Sablon[]>([]);
   const [makrolar, setMakrolar] = useState<Makro[]>([]);
   const [skorlar, setSkorlar] = useState<Skor[]>([]);
@@ -279,10 +285,12 @@ export function RadyolojiRapor() {
           zorunlu: Number(b.zorunlu ?? 0), html: b.metinHtml ? String(b.metinHtml) : undefined,
         }));
         setBolumler(kb);
+        setRaporDuzenle(!kb.some(b => b.metin.trim() !== ''));
         // Yapısal tek parça raporda iskelet şablondan (tek metin bölünemez).
         if (yapisalAcilis) setParcalar(!tekParcaMi(kb) ? kb : sec ? await sablonParcalari(sec, y.istem) : []);
-      } else if (sec) {
-        await sablonUygula(sec, true, y.istem);
+      } else {
+        setRaporDuzenle(true);
+        if (sec) await sablonUygula(sec, true, y.istem);
       }
 
       const d: Record<string, string> = {};
@@ -352,6 +360,7 @@ export function RadyolojiRapor() {
     // Yeni şablonun BI-RADS formu varsa form (yoksa boş) hazırlanır; olmayan şablonda form durumu kalır, kullanılmaz.
     if (formlu && !birads) setBiradsDurumu(durumOku(null, [], modaliteKodundan(sb?.modalite)));
     setGiris(hedefGiris);
+    setRaporDuzenle(true);
     if (hedefGiris === 'yapisal') setBiradsKullanildi(true);
     // Makro ve yapılandırılmış alanlar YENİ şablonun (1217) - girilmiş değerler aynı kodlu alanda kalır.
     const m = await api.radyolojiRapor(id, sId);
@@ -368,6 +377,7 @@ export function RadyolojiRapor() {
         && !(await onay(c('Şablon kaldırılsın mı? Yazılmış metin tek A4 olarak kalır.')))) return;
     setSablonId(null);
     setParcalar([]);
+    setRaporDuzenle(true);
     setBolumler(bolumler.length ? tekeCevir(bolumler) : tekBolum(''));
     const m = await api.radyolojiRapor(id);
     setMakrolar(m.makrolar as unknown as Makro[]);
@@ -592,7 +602,7 @@ export function RadyolojiRapor() {
     const saat = Number.isNaN(ne.getTime()) ? '' : ` (${ne.toLocaleString('tr-TR')})`;
     if (await onay(c('Bu bilgisayarda kaydedilmemiş bir rapor taslağı bulundu') + saat + '. '
                    + c('Ekran yenilenmiş ya da kapanmış olabilir. Taslak geri yüklensin mi? Hayır derseniz yedek silinir.'))) {
-      setBolumler(yedek.bolumler); setDuzen(yedek.duzen); setGiris(yedek.giris); setSablonId(yedek.sablonId);
+      setBolumler(yedek.bolumler); setDuzen(yedek.duzen); setGiris(yedek.giris); setSablonId(yedek.sablonId); setRaporDuzenle(true);
       setSkorDeger(yedek.skorDeger ?? {}); setNedeniPuan(Number(yedek.nedeniPuan ?? 0)); setKalitePuan(Number(yedek.kalitePuan ?? 0));
       if (yedek.sablonId && yedek.sablonId !== sablonId) {
         const m = await api.radyolojiRapor(id, yedek.sablonId).catch(() => null);
@@ -735,6 +745,8 @@ export function RadyolojiRapor() {
   if (!istem) return <div className="hata-kutusu">{c('İstem bulunamadı.')}</div>;
 
   const kilitli = Number(rapor?.kilit ?? 0) === 1;
+  /** Rapor YAZIMI kilitli: onaylı rapor ya da görüntüleme kipi (✎). Araç çubuğu / skor / kritik bunu kullanmaz. */
+  const yazimKilit = kilitli || !raporDuzenle;
   // ÇEKİMSİZ RAPOR YOK (kullanıcı 01.11.2026): sunucu da reddeder; ekran önceden uyarır, yazma düğmeleri kapalı.
   const cekimYok = Number(istem.cekildi ?? 1) === 0;
   // ONAYLAYACAK → ONAYLAYAN (1199): onaya kadar seçilen uzman + bekleme süresi, onaydan sonra imzalayan - hasta
@@ -898,12 +910,12 @@ export function RadyolojiRapor() {
         </div>
 
         {/* --------------------------------------------------- ORTA: rapor --- */}
-        <div className="rad-orta" style={tipografiStil(tipografi)}>
+        <div className={`rad-orta${yazimKilit ? ' rad-goster' : ''}`} style={tipografiStil(tipografi)}>
           <div className="rad-duzen">
             <span>{c('Rapor biçimi')}</span>
             <span className="seg" role="group">
               {(['tek', 'parcali'] as const).map(d => (
-                <button key={d} type="button" className={duzen === d ? 'on' : ''} disabled={kilitli}
+                <button key={d} type="button" className={duzen === d ? 'on' : ''} disabled={yazimKilit}
                         onClick={() => void duzenDegistir(d)}>{d === 'tek' ? c('Tek') : c('Parçalı')}</button>
               ))}
             </span>
@@ -911,11 +923,16 @@ export function RadyolojiRapor() {
             <span className="seg" role="group">
               {(['serbest', 'yapisal'] as const).map(g => (
                 <button key={g} type="button" className={etkinGiris === g ? 'on' : ''}
-                        disabled={kilitli || (g === 'yapisal' && !biradsli)}
+                        disabled={yazimKilit || (g === 'yapisal' && !biradsli)}
                         title={g === 'yapisal' && !biradsli ? c('Bu şablonda yapısal form yok') : undefined}
                         onClick={() => void girisDegistir(g)}>{g === 'serbest' ? c('Serbest') : c('Yapısal')}</button>
               ))}
             </span>
+            {/* ✎ SERBEST / YAPISAL'IN SAĞINDA (17.11.2026): rapor yazımını düzenlemeye alır / kapatır. */}
+            <button type="button" className={`bs-kalem${yazimKilit ? '' : ' acik'}`} disabled={kilitli}
+                    data-testid="rapor-kalem"
+                    title={kilitli ? c('Onaylı rapor - düzeltme ek raporla') : raporDuzenle ? c('Düzenlemeyi kapat') : c('Raporu düzenle')}
+                    onClick={() => setRaporDuzenle(v => !v)}>✎</button>
             {giris === 'yapisal' && !biradsli && (
               <span className="sonuk kucuk">{c('tercih Yapısal - bu şablonda form yok')}</span>
             )}
@@ -931,24 +948,24 @@ export function RadyolojiRapor() {
             </span>
           </div>
           {etkinGiris === 'yapisal' && birads ? (
-            <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis kilitli={kilitli} />
+            <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis kilitli={yazimKilit} />
           ) : <>
           {/* BİÇİM ÇUBUĞU (1195): imlecin bulunduğu alanda çalışır (tek A4 ya da herhangi bir bölüm). */}
-          {bolumler.length > 0 && <BicimAracCubugu pasif={kilitli} />}
+          {bolumler.length > 0 && <BicimAracCubugu pasif={yazimKilit} />}
           {bolumler.length === 0 && (
             <div className="rad-a4 rad-bos-a4">
               <div className="rad-bos-ic">
                 <div className="rad-bos-ikon">📄</div>
                 <p><b>{c('Rapor boş.')}</b><br />{c('Bir şablon seçin ya da doğrudan yazmaya başlayın. Açılışta şablon otomatik uygulanmaz.')}</p>
-                <button type="button" className="d bir" disabled={kilitli} onClick={() => setSablonModal(true)}>📄 {c('Şablon Seç…')}</button>
-                <button type="button" className="d" disabled={kilitli} onClick={() => void guvenli(bosRapor)}>✎ {c('Serbest yaz')}</button>
+                <button type="button" className="d bir" disabled={yazimKilit} onClick={() => setSablonModal(true)}>📄 {c('Şablon Seç…')}</button>
+                <button type="button" className="d" disabled={yazimKilit} onClick={() => void guvenli(bosRapor)}>✎ {c('Serbest yaz')}</button>
                 {(() => { const son = sablonlar.find(s => s.id === sablonTercihi.sonKullanilan(Number(istem?.hizmetId ?? 0)));
                   return son ? <p className="kucuk">{c('Son kullandığınız')}: <a href="#" onClick={e => { e.preventDefault(); void guvenli(() => sablonUygula(son.id)) }}>{son.ad}{son.kod ? ` · ${son.kod}` : ''}</a></p> : null })()}
               </div>
             </div>
           )}
           {duzen === 'tek' && tekParcaMi(bolumler) ? (
-            <BicimliAlan className="rad-a4" html={htmlOf(bolumler[0])} salt={kilitli}
+            <BicimliAlan className="rad-a4" html={htmlOf(bolumler[0])} salt={yazimKilit}
                          onFocus={() => { sonBolum.current = 0 }}
                          onDegis={(h, d) => bolumYaz(0, d, h)} />
           ) : bolumler.map((b, i) => (
@@ -958,7 +975,7 @@ export function RadyolojiRapor() {
                 {b.yazdir === 0 && <span className="sonuk kucuk"> · çıktıya basılmaz</span>}
               </div>
               <BicimliAlan className={`rad-bolum-metin${bulguBolumuMu(b.baslik) ? ' uzun' : ''}`}
-                           html={htmlOf(b)} salt={kilitli}
+                           html={htmlOf(b)} salt={yazimKilit}
                            onFocus={() => { sonBolum.current = i }}
                            onDegis={(h, d) => bolumYaz(i, d, h)} />
             </div>
@@ -1035,14 +1052,14 @@ export function RadyolojiRapor() {
               ? <span className="rad-sablon-ad" title={seciliSablon.ad}><b>{seciliSablon.ad}</b>
                   <small>{seciliSablon.kod ? `${seciliSablon.kod} · ` : ''}v{seciliSablon.surum}</small></span>
               : <span className="rad-sablon-ad sonuk">— {c('seçilmedi')} —</span>}
-            <button type="button" className={seciliSablon ? 'd' : 'd bir'} disabled={kilitli} onClick={() => setSablonModal(true)}>
+            <button type="button" className={seciliSablon ? 'd' : 'd bir'} disabled={yazimKilit} onClick={() => setSablonModal(true)}>
               📄 {seciliSablon ? c('Değiştir…') : c('Şablon Seç…')}</button>
           </div>
 
           <h5 style={{ marginTop: 12 }}>{c('Makrolar')}</h5>
           {makrolar.length === 0 && <div className="sonuk kucuk">{c('Bu şablonda makro yok.')}</div>}
           {makrolar.map(m => (
-            <button type="button" className="rad-makro" key={m.kisayol} disabled={kilitli || etkinGiris === 'yapisal'}
+            <button type="button" className="rad-makro" key={m.kisayol} disabled={yazimKilit || etkinGiris === 'yapisal'}
                     title={m.metin} onClick={() => makroEkle(m)}>
               <span className="kis">{m.kisayol}</span>
               <span>{m.ad}</span>
@@ -1053,7 +1070,7 @@ export function RadyolojiRapor() {
             <>
               <h5 style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>{c('Yapılandırılmış Alanlar')}
                 <span style={{ flex: 1 }} />
-                <button type="button" className="d" disabled={kilitli} onClick={alanlariMetneEkle}
+                <button type="button" className="d" disabled={yazimKilit} onClick={alanlariMetneEkle}
                         title={c('Doldurulan alanları cümle olarak Bulgular bölümüne ekler')}>↧ {c('Metne ekle')}</button></h5>
               {skorlar.map((s, i) => (<Fragment key={s.alanKod}>
                 {s.grup && s.grup !== skorlar[i - 1]?.grup && <div className="rad-alan-grup">{s.grup}</div>}
