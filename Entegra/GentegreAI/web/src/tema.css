@@ -9894,5 +9894,5 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rad-yan h5 > .bs-kalem { margin-left: 4px; font-size: 13px; vertical-align: middle }
 .rad-alan-goster select { appearance: none; -webkit-appearance: none; border-color: transparent !important; background: transparent !important; color: var(--yazi) !important; font-weight: 600; opacity: 1 !important; padding-left: 0 }
 /* Radyoloji Raporu kart başlığı (17.11.2026: "koyu ve 1 punto büyük"). */
-.rad-rapor .kart-ara-baslik { font-size: 14px; font-weight: 800; color: var(--lacivert, #0f2747) }
-.rad-rapor .kart-ara-baslik b { font-weight: 800 }
+.rad-rapor .kart-ara-baslik { font-size: 15px; font-weight: 900; color: #0b1f3a; letter-spacing: .2px }
+.rad-rapor .kart-ara-baslik b { font-weight: 900 }
