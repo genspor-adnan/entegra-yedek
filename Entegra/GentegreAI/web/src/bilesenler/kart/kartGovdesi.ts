@@ -70,13 +70,9 @@ export function kartGovdesiKur(g: {
     const unvanMetni = [ad, soyad].filter(Boolean).join(' ');
     if (unvanMetni) govde.kart.unvan = unvanMetni;
   }
-  // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan ayrica
-  //   dosya no istemek yerine turetiliyor; elle girilmis kod varsa ona
-  //   dokunulmaz.
-  if (kaynak === 'hasta-aday' && !String(deger.kod ?? '').trim()) {
-    const cep = String(deger.cepTel ?? '').trim();
-    if (cep) govde.kart.kod = cep;
-  }
+  // ADAY HASTA DOSYA NO ARTIK CEP DEĞİL (kullanıcı 17.11.2026: "aday hastalar da kayıtta K numarası alsın"):
+  //   kod gönderilmez, DB tetiği (tg_taraf_hasta_dosya_no) şubenin hasta numarası şablonundan verir - aktif
+  //   hastayla aynı sıra. 266'daki "dosya no = cep" kuralı kalktı.
 
   return govde;
 }

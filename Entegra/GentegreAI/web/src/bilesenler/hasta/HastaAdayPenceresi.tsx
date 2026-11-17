@@ -45,7 +45,8 @@ export function HastaAdayPenceresi({ aranan = '', onKapat, onKaydedildi }: {
       const cep = telefonBicimle(tel);
       const y = await api.kartEkle('hasta-aday', {
         kart: {
-          ad: ad.trim(), soyad: soyad.trim(), unvan, cepTel: cep, kod: cep,
+          // Dosya no gönderilmez (17.11.2026): şubenin numara şablonundan tetik verir (Koşuyolu: K + 7 hane).
+          ad: ad.trim(), soyad: soyad.trim(), unvan, cepTel: cep,
           grup: 101, hasta: 1, musteri: 1, durum: 2, subeId: kullanici?.subeId ?? null,
         },
         // Hasta bilgisi satırı (taraf_hasta) YALNIZ ikisi birlikte varsa: veritabanı satırda cinsiyet
