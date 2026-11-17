@@ -173,7 +173,9 @@ const adliBlok = (
     {/* HASTA KARTI v5 (kullanıcı 24.10.2026): eski etiketli kimlik şeridinin alanları Genel'in başında
         tek satır, ÇERÇEVESİZ (kullanıcı: "kimlik çerçevesini de kaldır") - kartSekmeleri buraya taşır: Kimlik No · Ad · Soyad · Doğum Tarihi ·
         Cinsiyet · Durum. Doğum / cinsiyet kart alanı değil, özlük satırı (Kimlik Bilgileri'nde yok). */}
-    {kaynak === 'hasta' && aktif.baslik === 'Genel' && (() => {
+    {/* YALNIZ DÜZENLEMEDE (kullanıcı 17.11.2026: "genel sekmesinde kimlik no, ad, soyad olan şerit view modda
+        görünmesin.. edit olduğu zaman görünsün"): görüntülemede bu bilgiler üstteki hasta bandında (HastaKartBandi). */}
+    {kaynak === 'hasta' && aktif.baslik === 'Genel' && !govdeGoster && (() => {
       const k = adli.find(([b]) => b === 'Kimlik')?.[1];
       if (!k || k.length === 0) return null;
       const oz = meta.detaylar.find(d => d.ad === 'ozluk');

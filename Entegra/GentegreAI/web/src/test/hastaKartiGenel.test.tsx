@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GenForm } from '../bilesenler/GenForm';
 import gercek from './veri/hastaKartMeta.json';
@@ -133,12 +133,26 @@ describe('hasta kartinda Yakınlar gridi', () => {
   });
 });
 
-describe('hasta kimlik şeridi tam kartta (17.11.2026)', () => {
-  it('kayıtlı hasta açılışta kimlik şeridi (Kimlik No / Ad / Soyad) çizilmez', async () => {
-    ciz();
+describe('hasta Genel › Kimlik satırı (17.11.2026)', () => {
+  // GERÇEK KART KURULUMU: ListeKarti hasta için seritAlanlari=[] verir - Kimlik grubu Genel'in başına taşınır.
+  const cizV5 = () => render(
+    <MemoryRouter><GenForm kaynak="hasta" id={Number(gercek.kart.kart.id)} baslik="Hasta" seritAlanlari={[]}
+                           onKapat={() => {}} /></MemoryRouter>,
+  );
+  const kimlikInput = () => document.querySelector('input[data-alan="ad"], input[data-alan="vkno"], input[data-alan="soyad"]');
+
+  it('görüntülemede Kimlik No / Ad / Soyad satırı yok; ✎ ile görünür, tekrar ✎ ile gizlenir', async () => {
+    cizV5();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
-    await waitFor(() => expect(document.querySelector('.kagrup')).not.toBeNull());
-    expect(document.querySelector('[data-testid="kimlik-kipli"]')).toBeNull();
-    expect(document.querySelector('.kaid input[data-alan="ad"], .kaid input[data-alan="vkno"]')).toBeNull();
+    const kalem = await waitFor(() => {
+      const k = document.querySelector('[data-testid="iletisim-kalem"]') as HTMLButtonElement | null;
+      if (!k) throw new Error('İletişim ✎ yok');
+      return k;
+    });
+    expect(kimlikInput()).toBeNull();
+    await act(async () => { kalem.click() });
+    await waitFor(() => expect(kimlikInput()).not.toBeNull());
+    await act(async () => { (document.querySelector('[data-testid="iletisim-kalem"]') as HTMLButtonElement).click() });
+    await waitFor(() => expect(kimlikInput()).toBeNull());
   });
 });
