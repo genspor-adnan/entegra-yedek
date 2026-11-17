@@ -9844,7 +9844,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .bsk-sol .alan-izgara { grid-template-columns: 1fr !important }
 .bsk-sol .alan-govde { grid-template-columns: 1fr; row-gap: 3px; align-items: start }
 .bsk-sol .alan-govde .etiket { text-align: left }
-.bsk-sol .alan-govde textarea { grid-column: 1; min-height: 240px; font-size: 12.5px; line-height: 1.5 }
+.bsk-sol .alan-govde textarea { grid-column: 1; min-height: 120px; height: 120px; font-size: 12.5px; line-height: 1.5 }
 .bsk-sol { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
 .bsk-cipler { display: flex; gap: 5px; flex-wrap: wrap; align-items: center }
 .bsk-cipler small { color: var(--soluk); margin-right: 2px }
