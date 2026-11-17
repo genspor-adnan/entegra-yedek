@@ -1592,7 +1592,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   YABANCI DİLDE çevirinin ilk 3 harfi (kullanıcı: "örnek Inv-"): c('Fatura') = Invoice -> Inv, Delivery note -> Del.
   const sekmeBasligi = basvuruMu
     ? sekmeAdi(String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '')
-    : (cari?.unvan ? `${c(belgeKisaAdi(tur)).slice(0, 3)}-${sekmeAdi(cari.unvan)}` : '');
+    // FİŞLER "Fiş-" ÖNEKİNİ KORUR: kısa ad artık yönlü ("Satış Fişi"); ilk 3 harf "Sat" faturayla karışırdı.
+    : (cari?.unvan ? `${c([12, 16, 128].includes(tur) ? 'Fiş' : belgeKisaAdi(tur)).slice(0, 3)}-${sekmeAdi(cari.unvan)}` : '');
   useEffect(() => {
     if (sayfa && ekranSekmesi && (kayitliId || !basvuruMu) && sekmeBasligi) ekranSekmesi.baslik(sekmeBasligi, baslikAnahtari(sekmeKonumu));
   // ANAHTAR SORGUYLA (kullanıcı 02.11.2026: "cari seçilip sekme açıldığında ... sekme başlığında cari ad görünsün"):

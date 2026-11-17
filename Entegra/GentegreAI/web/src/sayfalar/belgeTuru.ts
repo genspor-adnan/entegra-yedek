@@ -133,6 +133,11 @@ const LISTE_YOLU: Record<number, string> = {
 /** Baslik etiketlerinde kullanilan kisa ad ("<ad> No", "<ad> Tarihi"). */
 function turAdi(tur: number): string {
   if (tur === 18) return 'Teklif';
+  // FİŞLER YÖNÜYLE (kullanıcı 17.11.2026: "Belgelerde Fiş rename Satış Fişi", "alış fişi de Alış Fişi olsun"):
+  //   "Satış Fişi No / Tarihi" - Hasta Fişi'nin yanında tek başına "Fiş" hangisi olduğunu söylemiyordu.
+  if (tur === 16) return 'Satış Fişi';
+  if (tur === 12) return 'Alış Fişi';
+  if (tur === HASTA_FISI) return 'Hasta Fişi';
   if (URETIM_TURLERI.has(tur)) return 'Fiş';
   if (STOK_FISI_TURLERI.has(tur)) return 'Fiş';
   if (tur === 105) return 'Talep';
@@ -143,7 +148,9 @@ function turAdi(tur: number): string {
 }
 
 /**
- * BELGENIN KISA ADI - yon (Satis / Alis) YOK, yalniz belge cinsi.
+ * BELGENIN KISA ADI - yon (Satis / Alis) YOK, yalniz belge cinsi. FİŞLER İSTİSNA (17.11.2026): "Satış Fişi" / "Alış
+ * Fişi" / "Hasta Fişi" - üç fiş türü yan yana durduğu için yönsüz "Fiş" belirsizdi. Veritabanındaki ikizi
+ * fn_belge_kisa_adi (db/1361) ile aynı tanım; dönüşüm menüsü, düğmeler ve tutar sorusu da adı buradan alır.
  *
  * Tahsilat aciklamasinda kullanilir (kullanici: "hangi belgedeysem ismi +
  * Tahsilatı yazsın - Fiş Tahsilatı / Fatura Tahsilatı / Tahakkuk Tahsilatı").
@@ -166,8 +173,10 @@ export function belgeKisaAdi(tur: number, basvuruMu = false): string {
   if (tur === HASTA_FISI) return 'Hasta Fişi';
   if (TAHAKKUK_TURLERI.has(tur)) return 'Tahakkuk';
   if (IRSALIYE_TURLERI.has(tur)) return 'İrsaliye';
-  // 16 satis / 12 alis FISI - katalogda fatura ailesinde ama adi "Fiş".
-  if (tur === 16 || tur === 12 || STOK_FISI_TURLERI.has(tur)) return 'Fiş';
+  // 16 satis / 12 alis FISI - katalogda fatura ailesinde; adi yonuyle (17.11.2026). Stok giris/cikis fisi "Fiş".
+  if (tur === 16) return 'Satış Fişi';
+  if (tur === 12) return 'Alış Fişi';
+  if (STOK_FISI_TURLERI.has(tur)) return 'Fiş';
   if (FATURA_TURLERI.has(tur)) return 'Fatura';
   return 'Belge';
 }

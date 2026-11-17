@@ -112,7 +112,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_fiyatlandir` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_belge_kalem_fiyati` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_belge_kapanma_tazele` | `471_dagilim_kapanma_tahsil.sql` | 191_kapanma_tazele.sql, 289_odeme_paylasimi.sql, 395_kapanma_miktarla.sql |
-| `fn_belge_kisa_adi` | `1360_hasta_fisi_turu.sql` | 394_tahsilat_aciklama_belgeden.sql |
+| `fn_belge_kisa_adi` | `1361_fis_kisa_adi_yonlu.sql` | 394_tahsilat_aciklama_belgeden.sql, 1360_hasta_fisi_turu.sql |
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `1168_belge_no_kaldigi_yerden.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql, 366_numara_onek_yil.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |

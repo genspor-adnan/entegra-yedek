@@ -154,7 +154,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                   // KONSİNYE (kullanıcı 07.11.2026 "konsinye kartlardaki İrsaliye -> Konsinye"): "Konsinye No / Tarihi".
                   : konsinyeMi ? 'Konsinye'
                   : irsaliyeMi ? 'İrsaliye' : siparisMi ? 'Sipariş'
-                  : tahakkukMu ? 'Tahakkuk'
+                  // Hasta Fişi de tahakkuk gibi davranır ama kendi adını taşır (turAdi).
+                  : tahakkukMu && belgeAdi === 'Belge' ? 'Tahakkuk'
                   : belgeAdi !== 'Belge' ? belgeAdi : 'Fatura';
   /** Numara etiketi: basvuruda "Protokol No", digerlerinde "<tur> No". */
   const numaraSozu = basvuruMu ? 'Protokol' : belgeSozu;
@@ -446,7 +447,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         REVIZE NO - serbest kullanici editi, varsayilan bos. */}
     <label className="alan">
       <span className={`etiket${disNumarali && !kilitli ? ' zorunlu-isaret' : ''}`}>
-        {disNumarali ? `Tedarikçi ${konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : /fiş/i.test(belgeAdi) ? 'Fiş' : 'Fatura'} No`
+        {disNumarali ? `Tedarikçi ${konsinyeMi ? 'Konsinye' : irsaliyeMi ? 'İrsaliye' : [12, 16].includes(bilgi.kod) ? 'Fiş' : 'Fatura'} No`
           : teklifMi ? `${belgeSozu} No / Revize No` : `${numaraSozu} No`}
       </span>
       {(disNumarali || numaraElle) && !kilitli ? (

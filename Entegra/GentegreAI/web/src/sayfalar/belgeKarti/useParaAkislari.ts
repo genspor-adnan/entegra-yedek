@@ -257,7 +257,7 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
                 + 'zaten belgeye çevrilmiş.');
           return;
         }
-        const sinir = await tutarSor(`${hedefTur === 16 ? 'Satış Fişi' : belgeKisaAdi(hedefTur)} tutarı (₺)`, tamami);
+        const sinir = await tutarSor(`${belgeKisaAdi(hedefTur)} tutarı (₺)`, tamami);
         if (sinir === null) return;
         gonderilecek = sinirliDonusumSecimi(acik, hedefTur, sinir, 'kalan', pay).satirlar;
       }

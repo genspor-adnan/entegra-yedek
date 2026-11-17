@@ -15,7 +15,7 @@ import { c } from '../../dil/ceviri';
 /** Dönüşüm logundaki hedef tür -> olay başlığı. */
 const DONUSUM_BASLIGI: Record<string, string> = {
   '19': 'Siparişe dönüştürüldü', '9': 'Alış siparişine dönüştürüldü', '14': 'İrsaliyeye dönüştürüldü',
-  '15': 'Faturaya dönüştürüldü', '16': 'Fişe dönüştürüldü', '17': 'Tahakkuka dönüştürüldü',
+  '15': 'Faturaya dönüştürüldü', '16': 'Satış fişine dönüştürüldü', '17': 'Tahakkuka dönüştürüldü',
 };
 
 export interface GecmisOlayi { baslik: string; ayrinti: string }

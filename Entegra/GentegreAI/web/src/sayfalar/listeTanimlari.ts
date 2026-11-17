@@ -1,4 +1,5 @@
 import { DONUSUM_IKON } from '../bilesenler/belge/donusumHedefleri';
+import { belgeKisaAdi } from './belgeTuru';
 import { type ListeGirdisi, type ListeTanimi } from './listeTanimlari.Ortak';
 
 // Tip ve sabitler ORTAK modulde (dongusel import kirildi); buradan
@@ -81,7 +82,7 @@ export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'belge.donustur': [
     { kod: 'belge.donustur.14', ad: '🚚 İrsaliye' },
     { kod: 'belge.donustur.15', ad: '🧾 Fatura' },
-    { kod: 'belge.donustur.16', ad: '🧮 Fiş' },
+    { kod: 'belge.donustur.16', ad: `🧮 ${belgeKisaAdi(16)}` },
     { kod: 'belge.donustur.13', ad: '📑 Tahakkuk' },
   ],
 };
@@ -91,15 +92,14 @@ export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
  * kaldır"): hedefler BelgeDonusumModali.HEDEFLER'den - irsaliye listesinde İrsaliye çıkmaz, satışta tahakkuk satış
  * tahakkukudur (sabit menü 13 = alış tahakkuku veriyordu). Tür bilinmiyorsa sabit menü.
  */
-const DONUSUM_KISA_AD: Record<number, string> = {
-  10: 'İrsaliye', 14: 'İrsaliye', 11: 'Fatura', 15: 'Fatura', 12: 'Fiş', 16: 'Satış Fişi', 13: 'Tahakkuk', 17: 'Tahakkuk', 128: 'Hasta Fişi', 19: 'Sipariş' };
 export function donusumMenusu(kaynakTur: number | undefined,
                               hedefler: Record<number, { kod: number; ad: string }[]>): Record<string, { kod: string; ad: string }[]> {
   const h = kaynakTur ? hedefler[kaynakTur] : undefined;
   if (!h?.length) return DONUSUM_MENUSU;
   return { 'belge.donustur': h.map(x => ({
     kod: `belge.donustur.${x.kod}`,
-    ad: `${DONUSUM_IKON[x.kod] ?? '⇢'} ${DONUSUM_KISA_AD[x.kod] ?? x.ad}`,
+    // Kısa ad TEK YERDEN (belgeKisaAdi): ayrı tablo adla çelişiyordu (kod inceleme 17.11.2026).
+    ad: `${DONUSUM_IKON[x.kod] ?? '⇢'} ${belgeKisaAdi(x.kod) === 'Belge' ? x.ad : belgeKisaAdi(x.kod)}`,
   })) };
 }
 

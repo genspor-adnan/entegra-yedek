@@ -9,6 +9,7 @@ import type { SevkiyatBilgisi }
   from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { para, tarihSaat } from '../bicim';
 import { c } from '../../dil/ceviri';
+import { belgeKisaAdi, HASTA_FISI } from '../../sayfalar/belgeTuru';
 import { gorunenBelgeNo } from '../../sayfalar/belgeKartiKurallari';
 
 /**
@@ -313,7 +314,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
                   // "Satış Fişi" (kullanıcı 17.11.2026: "Belgelerde Fiş rename Satış Fişi") - Hasta Fişi'nin yanında
                   //   tek başına "Fiş" hangisi olduğunu söylemiyordu.
-                  onClick={() => hizliDonustur?.(16)}>🧾 Satış Fişi</button>
+                  onClick={() => hizliDonustur?.(16)}>🧾 {belgeKisaAdi(16)}</button>
           <button type="button" className="d bir" disabled={donusumKapali}
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
                   onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
@@ -333,8 +334,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
               kurum tahakkukunda (kurum carisi). */}
           <button type="button" className="d bir" disabled={donusumKapali}
                   title="Hasta payını Hasta Fişi ile belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"
-                  onClick={() => hizliDonustur?.(128, 'hasta')}>
-            🧾 Hasta Fişi</button>
+                  onClick={() => hizliDonustur?.(HASTA_FISI, 'hasta')}>
+            🧾 {belgeKisaAdi(HASTA_FISI)}</button>
         </>
       )}
 
