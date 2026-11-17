@@ -21,7 +21,9 @@ export const PERSONEL_BELGE_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'personel-belge-ozet', rota: 'personel-belge-ozet', baslik: 'Belge Takibi',
     yol: 'İK › Belge Takibi', aksiyonEkrani: 'personel-belge-ozet-liste',
-    kartYolu: '/personel', kartBaslik: 'Personel',
+    // KART SEKMESİ İKONU = PERSONEL LİSTESİNİN İKONU (kullanıcı 17.11.2026): bu liste de /personel'i açar ve listelerde
+    //   önce geldiği için personel kartı sekmesi Belge Takibi'nin 📎'ini alıyordu.
+    kartYolu: '/personel', kartBaslik: 'Personel', kartIc: '🧑‍🤝‍🧑',
     cipler: [
       { ad: 'Eksiği olanlar', filtre: { op: 'or', kosullar: [
         { alan: 'eksik', op: 'buyuk', deger: 0 }, { alan: 'doldu', op: 'buyuk', deger: 0 }] } },

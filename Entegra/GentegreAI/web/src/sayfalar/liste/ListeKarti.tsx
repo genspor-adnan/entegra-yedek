@@ -578,8 +578,12 @@ export function ListeKarti({
           const metin = (x: unknown) => String(x ?? '').trim();
           // ROL KARTI: sekmede kart adı (kullanıcı 17.10.2026: "rol kartı sekmesi başlığına Rol Kartı yaz").
           // KİŞİ / KURUM ADI ilk 2 kelime (sekmeAdi): ünvan, ad soyad, hasta / taraf adı.
-          const kisiAdi = sekmeAdi(metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
-            || metin(d.hastaAdi) || metin(d.tarafUnvan));
+          // PERSONEL: ünvan yalnız önek ("Dr.") - sekmede Ünvan + Ad + Soyad, kısaltılmadan (kullanıcı 17.11.2026:
+          //   "personel kartı sekme başlığında da unvan+ad+soyad yazsın").
+          const kisiAdi = tanim.kaynak === 'personel'
+            ? [d.unvan, d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
+            : sekmeAdi(metin(d.unvan) || [d.ad, d.soyad].map(metin).filter(Boolean).join(' ')
+              || metin(d.hastaAdi) || metin(d.tarafUnvan));
           const ad = tanim.kaynak === 'rol' ? kartAdi(tanim) : kisiAdi || metin(d.adi) || metin(d.baslik) || metin(d.konu)
             || (tanim.kaynak === 'konsultasyon' || tanim.kaynak === 'sevk' ? metin(d.no) : '')
             || metin(d.vakaNo) || metin(d.belgeNo) || metin(d.gonderimNo) || metin(d.kisayol) || metin(d.kod)

@@ -121,6 +121,11 @@ export function KartKimlikSeridi({
           const gosterKipi = salt || !seritAcik;
           return (
             <div className={`kaid-kipli${gosterKipi ? ' kaid-goster' : ''}`} data-testid="kimlik-kipli">
+              {/* PERSONEL AVATARI (kullanıcı 17.11.2026: "başlık sol başa avatar yap"): ad + soyad baş harfleri. */}
+              {kaynak === 'personel' && (() => {
+                const bas = basHarfler(`${String(deger.ad ?? '')} ${String(deger.soyad ?? '')}`.trim());
+                return <span className="kart-avatar kaid-kisi-avatar" data-testid="personel-avatar">{bas === '?' ? '—' : bas}</span>;
+              })()}
               <div className="kaid-hasta-sar" inert={gosterKipi || undefined}>{izgara}</div>
               <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={salt}
                       data-testid="kimlik-kalem"
@@ -131,6 +136,8 @@ export function KartKimlikSeridi({
             </div>
           );
         };
+        /** Personel görüntülemede: Ünvan + Ad + Soyad tek "Ad Soyad" hücresi. */
+        const personelTekAd = kaynak === 'personel' && seritAcikDis !== undefined && (salt || !seritAcik);
         const kimlikSeridi = (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
@@ -274,9 +281,13 @@ export function KartKimlikSeridi({
             );
           })() : personelGibiKart ? hastaSar(
             /* PERSONELDE 6 SUTUN (847): Ünvan YARIM (kisa deger - "Prof.Dr."
-               tam sutunda bos yer birakiyordu), sonuna Ana Rol eklendi. */
+               tam sutunda bos yer birakiyordu), sonuna Ana Rol eklendi.
+               GÖRÜNTÜLEMEDE (kullanıcı 17.11.2026: "view modda label ad soyad olsun altında Unvan+Ad+soyad olsun"):
+               Ünvan / Ad / Soyad tek hücre - "Ad Soyad" etiketi, altında "Dr. Ali Kaya"; düzenlemede üç kutu. */
             <div className="alan-izgara"
-                 style={{ gridTemplateColumns: kaynak === 'personel'
+                 style={{ gridTemplateColumns: personelTekAd
+                   ? 'minmax(0, 1.6fr) repeat(3, minmax(0, 1fr))'
+                   : kaynak === 'personel'
                    ? '0.5fr repeat(5, minmax(0, 1fr))'
                    // HASTADA ilk sütun Kimlik No - %40 dar (kullanıcı 19.10.2026: "kimlikno editi %40 azalt").
                    : kaynak === 'hasta' ? 'minmax(0, 0.6fr) repeat(4, minmax(0, 1fr))'
@@ -289,7 +300,15 @@ export function KartKimlikSeridi({
                   (kartGovdesi) - hekim listede, aramada ve ciktida unvaniyla
                   gorunsun. SICIL NO ARTIK BURADA DEGIL (846, kullanici):
                   Kimlik No'nun sagina, Kimlik Bilgileri kutusuna tasindi. */}
-              {kaynak === 'personel' && (
+              {personelTekAd && (
+                <label className="alan tip-metin" data-testid="personel-ad-soyad">
+                  <span className="etiket">{c('Ad Soyad')}</span>
+                  <input readOnly tabIndex={-1}
+                         value={[unvanOneki.onek, String(deger.ad ?? ''), String(deger.soyad ?? '')]
+                           .map(x => x.trim()).filter(Boolean).join(' ')} />
+                </label>
+              )}
+              {kaynak === 'personel' && !personelTekAd && (
                 <label className="alan tip-kod">
                   <span className="etiket">{c('Ünvan')}</span>
                   <select value={unvanOneki.onek} disabled={salt}
@@ -306,7 +325,8 @@ export function KartKimlikSeridi({
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
                 && !(kaynak === 'hasta' && a.ad === 'kod')
-                && !(kaynak === 'personel' && a.ad === 'kod')))}
+                && !(kaynak === 'personel' && a.ad === 'kod')
+                && !(personelTekAd && (a.ad === 'ad' || a.ad === 'soyad'))))}
               {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
                   üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
                   zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi

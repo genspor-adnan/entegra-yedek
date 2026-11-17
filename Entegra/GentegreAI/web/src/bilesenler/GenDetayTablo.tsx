@@ -1678,6 +1678,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                               <option key={k} value={k}>{v}</option>
                             ))}
                           </select>
+                        ) : a.tip === 'tarih' ? (
+                          // MODALDA TARİH SEÇİCİ, SAATSİZ (kullanıcı 17.11.2026, Kadro Geçmişi: "yürürlük tarih
+                          //   seçilebilir olsun saat olmasın"): düz kutu sunucunun "2026-01-01T00:00:00"ını
+                          //   olduğu gibi gösteriyordu - satır içi kiple aynı takvim kutusu.
+                          <input type="date" value={String(taslak[a.ad] ?? '').slice(0, 10)}
+                                 disabled={!a.yazilabilir}
+                                 onChange={e => taslakYaz(a.ad, e.target.value)} />
                         ) : a.aramaKaynagi ? (
                           <span className="sonuk">
                             {a.kodlar?.[String(taslak[a.ad] ?? '')] ?? String(taslak[a.ad] ?? '')}

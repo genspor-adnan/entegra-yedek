@@ -12,20 +12,30 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KaynakKatalogu
 {
-    internal static readonly Dictionary<string, string> KadroTurKodlari = new()
+    // STATİK BAŞLATMA SIRASI (17.11.2026, kullanıcı: "hareket combo olsun, şu an sadece ID var"): bu sözlükler
+    //   KartKatalogu'ndan da okunur, KaynakKatalogu da KartKatalogu'nu okur - döngüde KartKatalogu kurulurken buradaki
+    //   alan henüz null'dı ve kartın Hareket / Kaynak alanı kodsuz (yalnız sayı) gidiyordu. Bağımsız iç sınıfta durur;
+    //   özellik her erişimde onu döndürür, sıra fark etmez.
+    private static class KadroKodlari
     {
-        ["1"] = "İşe giriş", ["2"] = "Terfi / unvan", ["3"] = "Birim değişikliği",
-        ["4"] = "Yönetici değişikliği", ["5"] = "Şube nakli",
-        ["6"] = "Çalışma şekli / sözleşme", ["7"] = "Vekâlet (süreli)",
-        ["8"] = "Ücretsiz izin / askı", ["9"] = "İşten çıkış", ["10"] = "İşe dönüş",
-        ["99"] = "Diğer",
-    };
+        internal static readonly Dictionary<string, string> Tur = new()
+        {
+            ["1"] = "İşe giriş", ["2"] = "Terfi / unvan", ["3"] = "Birim değişikliği",
+            ["4"] = "Yönetici değişikliği", ["5"] = "Şube nakli",
+            ["6"] = "Çalışma şekli / sözleşme", ["7"] = "Vekâlet (süreli)",
+            ["8"] = "Ücretsiz izin / askı", ["9"] = "İşten çıkış", ["10"] = "İşe dönüş",
+            ["99"] = "Diğer",
+        };
+        internal static readonly Dictionary<string, string> Kaynak = new()
+        {
+            ["1"] = "Elle", ["2"] = "Karttan", ["3"] = "Dolgu",
+        };
+    }
+
+    internal static Dictionary<string, string> KadroTurKodlari => KadroKodlari.Tur;
 
     /// <summary>Hareketin nereden geldiği: elle mi, karttan mı, göçten mi.</summary>
-    internal static readonly Dictionary<string, string> KadroKaynakKodlari = new()
-    {
-        ["1"] = "Elle", ["2"] = "Karttan", ["3"] = "Dolgu",
-    };
+    internal static Dictionary<string, string> KadroKaynakKodlari => KadroKodlari.Kaynak;
 
     private static KaynakTanimi PersonelHareketKaynagi() => new(
         Ad: "personel-hareket",

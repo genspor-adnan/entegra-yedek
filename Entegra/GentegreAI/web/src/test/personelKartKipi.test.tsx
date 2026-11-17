@@ -26,7 +26,7 @@ function Sarmal({ yeniMi, salt = false }: { yeniMi: boolean; salt?: boolean }) {
       renderAlanListesi={(a: KartAlanMeta[]) => a.map(x => (
         <label key={x.ad} className={`alan alan-${x.ad}`}><span className="etiket">{x.baslik}</span><input defaultValue="" /></label>))}
       personelGibiKart dogumYasMetni="" yeniMi={yeniMi}
-      unvanOneki={{ onek: '', setOnek: () => {}, secenekler: ['Dr.'] } as never}
+      unvanOneki={{ onek: 'Dr.', setOnek: () => {}, secenekler: ['Dr.'] } as never}
       aktifSekme="genel" seritAcikDis={acik} onSeritAcik={setAcik} />
   );
 }
@@ -47,6 +47,19 @@ describe('personel kartı görüntüleme / düzenleme kipi', () => {
     expect(inert()).toBe(false);
     fireEvent.click(screen.getByTestId('kimlik-kalem'));
     expect(inert()).toBe(true);
+  });
+
+  it('avatar sol başta; görüntülemede tek "Ad Soyad" hücresi = Ünvan + Ad + Soyad, düzenlemede ayrı kutular', () => {
+    render(<Sarmal yeniMi={false} />);
+    expect(screen.getByTestId('personel-avatar').textContent).toBe('AK');
+    const tek = screen.getByTestId('personel-ad-soyad');
+    expect(tek.querySelector('.etiket')!.textContent).toBe('Ad Soyad');
+    expect((tek.querySelector('input') as HTMLInputElement).value).toBe('Dr. Ali Kaya');
+    expect(kipli().querySelector('.alan-ad')).toBeNull();
+    fireEvent.click(screen.getByTestId('kimlik-kalem'));
+    expect(screen.queryByTestId('personel-ad-soyad')).toBeNull();
+    expect(kipli().querySelector('.alan-ad')).not.toBeNull();
+    expect(screen.getByTestId('personel-avatar')).toBeTruthy();
   });
 
   it('yeni personel düzenlemede açılır', () => {
