@@ -1,4 +1,5 @@
 import { basHarfler } from '../../basHarfler';
+import type { kvkkKisa } from '../basvuru/kvkkDurumu';
 import { useEffect, useState, type ReactNode } from 'react';
 import { api } from '../../../api/istemci';
 import { paraYaz, yasMetni } from '../../bicim';
@@ -28,8 +29,10 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
                               sysTakipNo, paylasimli, avans = 0,
                               kurumAdi, acikBorc, taraflar,
                               provizyon, belgeId, protokolNo, isteyen, paraYok, provizyonGizli, tetkik, durumEk,
-                              sonHucreler, durumGizli, yedek }: {
+                              sonHucreler, durumGizli, yedek, kvkkIzin }: {
   tarafId?: number | null;
+  /** KVKK / ETK İZNİ (1353): başvurunun onay durumu (kvkkKisa). Verilirse 'kvkk_riza' formu yerine bu gösterilir. */
+  kvkkIzin?: { kvkk: ReturnType<typeof kvkkKisa>; etk: ReturnType<typeof kvkkKisa> };
   /** BELGENIN odeyen kurumu (kullanici): hastanin sigortasi degil, bu basvuruyu odeyecek kurum. */
   kurumAdi?: string;
   /** Bu BASVURUNUN acik borcu = ucretlendirme genel toplami - tahsilat. Verilmezse hastanin genel bakiyesi. */
@@ -217,7 +220,10 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
       <span className="hs">
         <span className="k">{c('İzinler')}</span>
         <span className="hs3-izin">
-          {izin('KVKK', kvkk ? '✓' : '?', kvkk ? `KVKK açık rıza formu imzalı (${kvkk})` : 'KVKK açık rıza formu imzalanmamış')}
+          {kvkkIzin
+            ? <>{izin('KVKK', kvkkIzin.kvkk.isaret === '⚠' ? '?' : kvkkIzin.kvkk.isaret, `KVKK: ${kvkkIzin.kvkk.metin}`)}
+                {izin('ETK', kvkkIzin.etk.isaret === '⚠' ? '?' : kvkkIzin.etk.isaret, `ETK: ${kvkkIzin.etk.metin}`)}</>
+            : izin('KVKK', kvkk ? '✓' : '?', kvkk ? `KVKK açık rıza formu imzalı (${kvkk})` : 'KVKK açık rıza formu imzalanmamış')}
           {/* SMS / E-posta izni 16.11.2026'da hasta kartından kaldırıldı - girilemeyen izin "?" gösterilmez. */}
         </span>
       </span>

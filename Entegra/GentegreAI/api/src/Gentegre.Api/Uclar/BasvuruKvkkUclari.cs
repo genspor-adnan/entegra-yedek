@@ -20,6 +20,9 @@ public static class BasvuruKvkkUclari
 
     public sealed record KvkkKodIstegi(string? Kod);
 
+    /// <summary>Hastanın bir başvurudaki KVKK kaydı (kvkk-durum).</summary>
+    private sealed record KvkkKaydi(int KvkkOnay, int EtkOnay, DateTime Tarih, string BelgeNo, string Sube, string Kod);
+
     /// <summary>Şablon gövdesine kodu yazar: @ONAYKODU ve {{onay_kodu}} ikisi de desteklenir.</summary>
     public static string MetniDoldur(string govde, string kod) =>
         govde.Replace("@ONAYKODU", kod, StringComparison.OrdinalIgnoreCase)
@@ -29,6 +32,66 @@ public static class BasvuruKvkkUclari
     public static void BasvuruKvkkUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/basvuru").WithTags("Başvuru · KVKK").RequireAuthorization();
+
+        // KVKK ONAY DURUMU (1353, kullanıcı 17.11.2026: "her şube için ayrı KVKK onayı al" / "X gün sonra tekrar KVKK
+        //   onayı al"; mockup Ekranlar/Kayıt Kabul/kvkk_onay_gecerlilik.html). Hastanın bu başvuru dışındaki SON KVKK
+        //   kaydına bakılır (şube bazlıysa yalnız bu şube; iptal başvuru sayılmaz):
+        //     gecerli       - son kayıt SMS (4) / ıslak imza (3) ve süre içinde → yeni başvuruda KVKK/ETK onunla dolar
+        //     suresi_doldu  - son kayıt onay ama X gün geçti
+        //     reddetti      - son kayıt Hasta Reddetti (1) / Onaysız (2) - ret taşınmaz, yeniden sorulur
+        //     baska_sube    - bu şubede kayıt yok, başka şubede onay var (şube bazlı ayar açık)
+        //     yok           - hiç kayıt yok
+        grup.MapGet("/kvkk-durum", async (
+            int hastaId, int? haricBelgeId, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var subeBazli = (await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_sube_bazli", "0", iptal)).Trim() == "1";
+            var gun = int.TryParse((await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_gecerlilik_gun", "0", iptal)).Trim(), out var g) && g > 0 ? g : 0;
+            const string Sorgu = """
+                select bb.kvkk_onay::int, coalesce(bb.etk_onay, 0)::int, bl.belge_tarihi::date, coalesce(bl.belge_no, ''),
+                       coalesce(s.ad, ''), coalesce(bb.kvkk_onay_kodu, '')
+                  from public.belge bl
+                  join public.belge_basvuru bb on bb.id = bl.id
+                  left join public.sube s on s.id = bl.sube_id
+                 where bl.tur = 19 and bl.durum <> 6
+                   and coalesce(bb.hasta_id, bl.taraf_id) = @p0
+                   and bb.kvkk_onay is not null
+                   and bl.id <> @p1
+                   and (not @p2 or bl.sube_id = @p3)
+                   {0}
+                 order by bl.belge_tarihi desc, bl.id desc
+                 limit 1
+                """;
+            static KvkkKaydi Oku(Npgsql.NpgsqlDataReader o) => new(o.GetInt32(0), o.GetInt32(1),
+                o.GetFieldValue<DateTime>(2), o.GetString(3), o.GetString(4), o.GetString(5));
+            var sube = (short)(baglam.SubeId ?? 0);
+            var son = await b.TekAsync(string.Format(Sorgu, ""), null, [hastaId, haricBelgeId ?? 0, subeBazli, sube],
+                Oku, iptal);
+
+            if (son is null)
+            {
+                // Bu şubede kayıt yok: şube bazlıysa başka şubedeki onay bilgi olarak söylenir.
+                if (subeBazli)
+                {
+                    var diger = await b.TekAsync(string.Format(Sorgu, "and bb.kvkk_onay in (3, 4)"), null,
+                        [hastaId, haricBelgeId ?? 0, false, sube], Oku, iptal);
+                    if (diger is not null)
+                        return Results.Ok(new { durum = "baska_sube", kvkkOnay = diger.KvkkOnay, etkOnay = diger.EtkOnay,
+                            tarih = diger.Tarih.ToString("yyyy-MM-dd"), belgeNo = diger.BelgeNo, sube = diger.Sube });
+                }
+                return Results.Ok(new { durum = "yok" });
+            }
+            var tarih = son.Tarih.ToString("yyyy-MM-dd");
+            if (son.KvkkOnay is 1 or 2)
+                return Results.Ok(new { durum = "reddetti", kvkkOnay = son.KvkkOnay, etkOnay = son.EtkOnay, tarih,
+                                        belgeNo = son.BelgeNo, sube = son.Sube });
+            var bitis = gun > 0 ? son.Tarih.AddDays(gun) : (DateTime?)null;
+            var durum = bitis is null || bitis.Value.Date >= DateTime.Today ? "gecerli" : "suresi_doldu";
+            return Results.Ok(new { durum, kvkkOnay = son.KvkkOnay, etkOnay = son.EtkOnay, tarih, belgeNo = son.BelgeNo,
+                                    sube = son.Sube, kod = son.Kod, bitis = bitis?.ToString("yyyy-MM-dd"), gun });
+        });
 
         grup.MapPost("/{belgeId:int}/kvkk-sms", async (
             int belgeId, VeriKaynagi veri, BaglamCozucu cozucu, BildirimDeposu bildirim, LogDeposu log,

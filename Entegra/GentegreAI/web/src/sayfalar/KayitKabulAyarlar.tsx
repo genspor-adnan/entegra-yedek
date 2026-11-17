@@ -105,6 +105,24 @@ export function KayitKabulAyarlar() {
 
       {!yukleniyor && aktif === 'basvuru' && (
         <>
+        {/* KVKK / ETK ONAYI (1353, kullanıcı 17.11.2026; mockup Ekranlar/Kayıt Kabul/kvkk_onay_gecerlilik.html A):
+            yeni başvuruda hastanın geçerli son onayı KVKK / ETK'yı doldurur; geçerliliği bu iki ayar belirler. */}
+        <div className="kagrup">
+          <h6>{c('KVKK / ETK onayı')}</h6>
+          <div className="alan-izgara ayar-formu">
+            <AyarAlani anahtar="basvuru.kvkk_sube_bazli" etiket={c('KVKK onayı şube bazlı')} tip="secenek"
+                       secenekler={[
+                         { deger: '0', ad: c('Tüm şubelerde geçerli') },
+                         { deger: '1', ad: c('Her şube için ayrı onay al') },
+                       ]}
+                       ayarlar={ayarlar} onYaz={yaz} />
+            <AyarAlani anahtar="basvuru.kvkk_gecerlilik_gun" etiket={c('Onay geçerlilik süresi (gün, 0 = süresiz)')}
+                       ayarlar={ayarlar} onYaz={yaz} />
+          </div>
+          <div className="not" style={{ padding: '0 10px 10px' }}>
+            {c('Geçerli sayılan onay: SMS ile onay alındı ve Islak imzalı onay alındı. Hasta Reddetti ve Onaysız durumu sonraki başvuruya taşınmaz - hastaya her başvuruda yeniden sorulur. İptal edilmiş başvurudaki onay sayılmaz.')}
+          </div>
+        </div>
         <div className="kagrup">
           <h6>Başvuru</h6>
           <div className="alan-izgara tek-sutun ayar-formu">

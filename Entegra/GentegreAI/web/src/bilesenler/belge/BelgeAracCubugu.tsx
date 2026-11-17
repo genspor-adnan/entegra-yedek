@@ -63,7 +63,7 @@ export function BelgeAracCubugu({
   hastaKartiAc?(): void;
   acilBasvuru?(): void;
   /** KVKK ONAY menüsü (1352): SMS gönder / onay kodu gir / ıslak imza / hasta reddetti. Yalnız başvuruda. */
-  kvkkOnay?: KvkkOnayEylemleri;
+  kvkkOnay?: KvkkOnayEylemleri & { baslik?: string; smsGitti?: boolean };
   /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
   hastaVar?: boolean;
   /** DOKTOR İSTEMİ: hekimin muayenede açtığı bekleyen lab/radyoloji istemlerini
@@ -158,7 +158,8 @@ export function BelgeAracCubugu({
       <span className="ayrac" />
 
       {/* KVKK ONAY ▾ (kullanıcı 17.11.2026; önce "KVKK SMS Gönder" düğmesiydi): ayracın sağında. */}
-      {kvkkOnay && <KvkkOnayMenusu eylemler={kvkkOnay} pasif={kilitli} hastaVar={!!hastaVar} />}
+      {kvkkOnay && <KvkkOnayMenusu eylemler={kvkkOnay} pasif={kilitli} hastaVar={!!hastaVar}
+                                   baslik={kvkkOnay.baslik} smsGitti={kvkkOnay.smsGitti} />}
 
       {/* "Yatışa Çevir" KALDIRILDI (kullanici): yatan hasta modulu yok,
           pasif dugme yer kapliyordu. Modul gelince geri konur. */}

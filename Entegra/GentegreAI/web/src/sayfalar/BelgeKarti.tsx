@@ -1,4 +1,5 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { kvkkBilgiSatiri, kvkkKisa, type KvkkDurumu } from '../bilesenler/belge/basvuru/kvkkDurumu';
 import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
@@ -567,6 +568,26 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const eBelgeYok = !bilgi.eBelge;
   /** Kaydedilmis belgenin id'si (yeni kayittan ya da acilan belgeden). */
   const kayitliId = etkinBelgeId ?? (sonuc ? Number(sonuc.belge.id) : 0);
+
+  // KVKK ONAY DURUMU (1353, mockup Ekranlar/Kayıt Kabul/kvkk_onay_gecerlilik.html): hastanın bu başvuru dışındaki son
+  //   KVKK kaydı, ayarlara (şube bazlı / X gün) göre. YENİ başvuruda geçerli onay varsa KVKK / ETK onunla dolar
+  //   (seçilmemişse); kayıtlı başvuruda combolara dokunulmaz, yalnız bilgi satırı.
+  const [kvkkDurum, setKvkkDurum] = useState<KvkkDurumu | null>(null);
+  const kvkkHastaId = basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || 0) : 0;
+  useEffect(() => {
+    if (!kvkkHastaId) { setKvkkDurum(null); return }
+    let iptal = false;
+    // Promise zinciri: çağrı senkron hata verirse (eski sunucu, test sahtesi) kart düşmez, durum gösterilmez.
+    Promise.resolve().then(() => api.basvuruKvkkDurum(kvkkHastaId, kayitliId || undefined)).then(d => {
+      if (iptal) return;
+      setKvkkDurum(d ?? null);
+      if (!kayitliId && d?.durum === 'gecerli')
+        setBasvuruBilgi(o => o.kvkkOnay == null && o.etkOnay == null
+          ? { ...o, kvkkOnay: d.kvkkOnay ?? null, etkOnay: d.etkOnay || d.kvkkOnay || null } : o);
+    }).catch(() => { if (!iptal) setKvkkDurum(null) });
+    return () => { iptal = true };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kvkkHastaId, kayitliId]);
   /**
    * CARİYE ÖZEL FATURA TİPİ / SENARYO (1193, kullanıcı 26.10.2026: "müş kartı ebelge ayarlarına Fatura Tipi ve
    * Senaryo comboları ekle.. seçilmişse bu müşteriye fat keserken bunlar kullanılır yoksa default ayarlar"):
@@ -1726,6 +1747,11 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           //   = SMS ile onay) · ıslak imza (KVKK / ETK = 3) · hasta reddetti (KVKK / ETK = 1). Son ikisi combolara yazar,
           //   Kaydet'le kaydedilir. Kayıtsız başvuru SMS / kod için önce kaydedilir.
           kvkkOnay={basvuruMu ? {
+            // Menü başlığı: bu başvurunun durumu (mockup C).
+            baslik: basvuruBilgi.kvkkSmsTarihi && !basvuruBilgi.kvkkOnayKodu
+              ? `SMS gönderildi ${new Date(basvuruBilgi.kvkkSmsTarihi).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} · kod bekleniyor`
+              : kvkkKisa(basvuruBilgi.kvkkOnay, kvkkDurum).metin,
+            smsGitti: !!basvuruBilgi.kvkkSmsTarihi,
             smsGonder: () => void (async () => {
               // ÖNCEDEN ONAY / GÖNDERİM VARSA SOR (kullanıcı 17.11.2026: "onay kodu olduğu halde sms gönder dedim hemen
               //   gönderdi.. uyarı vermeli eğer yine de istiyorsa göndermeli"). Yeni SMS önceki kodu geçersiz kılar.
@@ -1733,6 +1759,11 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
                 if (!await onay(`⚠ Bu başvuruda KVKK onay kodu (${basvuruBilgi.kvkkOnayKodu}) zaten doğrulanmış.
 
 Yeni SMS gönderilirse kayıtlı kod silinir ve hastanın yeni kodu söylemesi gerekir. Yine de gönderilsin mi?`, true)) return;
+              } else if ((basvuruBilgi.kvkkOnay === 3 || basvuruBilgi.kvkkOnay === 4) && !basvuruBilgi.kvkkSmsTarihi) {
+                // GEÇERLİ ONAY VAR (1353, mockup C): önceki başvurudan gelen ya da ıslak imzalı onay.
+                if (!await onay(`⚠ Hastanın geçerli KVKK onayı var (${kvkkKisa(basvuruBilgi.kvkkOnay, kvkkDurum).metin}).
+
+Yine de SMS ile yeni onay alınsın mı?`, true)) return;
               } else if (basvuruBilgi.kvkkSmsTarihi) {
                 if (!await onay(`Bu başvuruya ${new Date(basvuruBilgi.kvkkSmsTarihi).toLocaleString('tr-TR')} tarihinde KVKK SMS'i gönderildi.
 
@@ -1816,7 +1847,8 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
                            : { durum: Number(basvuruBilgi.ossDurum ?? 0), no: String(basvuruBilgi.ossProvizyonNo || '') }}
                        belgeId={kayitliId || null}
                        protokolNo={String(sonuc?.belge.belgeNo ?? '')}
-                       taraflar={seritTaraflari} />
+                       taraflar={seritTaraflari}
+                       kvkkIzin={{ kvkk: kvkkKisa(basvuruBilgi.kvkkOnay, kvkkDurum), etk: kvkkKisa(basvuruBilgi.etkOnay, kvkkDurum) }} />
         )}
 
         {/* TAMAMLANMA SERIDI (370, kullanici): "bu basvuruda daha ne eksik"
@@ -2163,6 +2195,8 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
         {aktifSekme === 'basvuru' && (
           <BasvuruSekmesi
             bilgi={basvuruBilgi}
+            // Kayıtlı başvurunun kendi seçimi varsa önceki kayıt satırı gösterilmez (onun kendi onayı esastır).
+            kvkkBilgi={!kayitliId || basvuruBilgi.kvkkOnay == null ? kvkkBilgiSatiri(kvkkDurum) : null}
             belgeId={kayitliId}
             degistir={y => setBasvuruBilgi(x => ({ ...x, ...y }))}
             kilitli={kilitli}

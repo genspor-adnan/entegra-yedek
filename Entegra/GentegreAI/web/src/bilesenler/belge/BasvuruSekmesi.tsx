@@ -117,7 +117,7 @@ export interface BasvuruBilgi {
   provizyonAciklama?: string;
 }
 
-export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kurallar,
+export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kurallar, kvkkBilgi,
                                  tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
@@ -129,6 +129,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
                                  kendiIstegi, onKendiIstegi, duzenle = true, setDuzenle }: {
   /** Kurum tipi kuralları (sunucu, BasvuruKurumKurallari); yoksa alanlar görünür. */
   kurallar?: BasvuruKurallari | null;
+  /** KVKK ONAY DURUMU (1353): KVKK / ETK'nın altındaki bilgi satırı (kvkkBilgiSatiri). */
+  kvkkBilgi?: { sinif: 'g' | 's' | 'b' | 'k'; metin: string } | null;
   bilgi: BasvuruBilgi;
   /** Kaydedilmiş başvurunun belge id'si (istek kağıdı taraması istem kartına taşındı - kullanılmıyor). */
   belgeId?: number;
@@ -576,6 +578,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
             </span>
           </label>
         ))}
+        {/* ÖNCEKİ ONAY / GEREKLİ ONAY (1353, mockup kvkk_onay_gecerlilik.html B): tam satır. */}
+        {kvkkBilgi && <div className={`bs-kvkk-bilgi ${kvkkBilgi.sinif}`} data-testid="kvkk-bilgi">{kvkkBilgi.metin}</div>}
 
         {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
             girilmez (sunucu kapıları). */}

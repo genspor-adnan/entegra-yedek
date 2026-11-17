@@ -13,8 +13,12 @@ export interface KvkkOnayEylemleri {
  * "📱 KVKK Onay ▾" (kullanıcı 17.11.2026: "kvkk sms buton caption rename 'KVKK Onay' altına 4 tane menü ekle"):
  * SMS Gönder · Onay Kodu Gir · Islak İmzalı Onay Alındı · Hasta Reddetti. Dışarı tık / Esc kapatır (AktarMenusu deseni).
  */
-export function KvkkOnayMenusu({ eylemler, pasif, hastaVar }: {
+export function KvkkOnayMenusu({ eylemler, pasif, hastaVar, baslik, smsGitti }: {
   eylemler: KvkkOnayEylemleri; pasif: boolean; hastaVar: boolean;
+  /** Menünün üstündeki durum satırı (1353): "Geçerli onay var (…'e kadar)" / "Onay gerekli" / "SMS gönderildi · kod bekleniyor". */
+  baslik?: string;
+  /** SMS gönderildi mi: Onay Kodu Gir yalnız o zaman açık, SMS Gönder "Yeniden Gönder" olur. */
+  smsGitti?: boolean;
 }) {
   const [acik, setAcik] = useState(false);
   const kok = useRef<HTMLSpanElement>(null);
@@ -36,8 +40,10 @@ export function KvkkOnayMenusu({ eylemler, pasif, hastaVar }: {
       </button>
       {acik && (
         <div className="dugme-menu-liste" role="menu">
-          <button type="button" className="mi" role="menuitem" onClick={() => sec(eylemler.smsGonder)}>📤 {c('SMS Gönder')}</button>
-          <button type="button" className="mi" role="menuitem" onClick={() => sec(eylemler.kodGir)}>🔢 {c('Onay Kodu Gir')}</button>
+          {baslik && <div className="dugme-menu-baslik" data-testid="kvkk-menu-baslik">{baslik}</div>}
+          <button type="button" className="mi" role="menuitem" onClick={() => sec(eylemler.smsGonder)}>📤 {smsGitti ? c("SMS'i Yeniden Gönder") : c('SMS Gönder')}</button>
+          <button type="button" className="mi" role="menuitem" disabled={!smsGitti}
+                  title={smsGitti ? undefined : c('Önce SMS gönderin')} onClick={() => sec(eylemler.kodGir)}>🔢 {c('Onay Kodu Gir')}</button>
           <button type="button" className="mi" role="menuitem" onClick={() => sec(eylemler.islakImza)}>✍️ {c('Islak İmzalı Onay Alındı')}</button>
           <button type="button" className="mi" role="menuitem" onClick={() => sec(eylemler.hastaReddetti)}>🚫 {c('Hasta Reddetti')}</button>
         </div>

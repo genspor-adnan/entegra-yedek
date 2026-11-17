@@ -1,4 +1,5 @@
 import { gonder, istek } from '../cekirdek';
+import type { KvkkDurumu } from '../../bilesenler/belge/basvuru/kvkkDurumu';
 
 /**
  * Acil servis iş akışı uçları (api/AcilUclari, db 716).
@@ -21,6 +22,9 @@ export const acilUclari = {
   /** KVKK SMS (1352): hastanın cep telefonuna KVKK / ETK onay kodu SMS'i; dönen alıcı maskeli (***1234). */
   basvuruKvkkSms: (belgeId: number) =>
     gonder<{ gonderildi: boolean; alici: string }>(`/api/basvuru/${belgeId}/kvkk-sms`, {}),
+  /** KVKK ONAY DURUMU (1353): hastanın bu başvuru dışındaki son KVKK kaydı, ayarlara (şube bazlı / X gün) göre. */
+  basvuruKvkkDurum: (hastaId: number, haricBelgeId?: number) =>
+    istek<KvkkDurumu>(`/api/basvuru/kvkk-durum?hastaId=${hastaId}${haricBelgeId ? `&haricBelgeId=${haricBelgeId}` : ''}`),
   /** ONAY KODU GİR (1352): hastanın söylediği kod sunucuda doğrulanır; eşleşince KVKK / ETK = 4. */
   basvuruKvkkKod: (belgeId: number, kod: string) =>
     gonder<{ kod: string; kvkkOnay: number; etkOnay: number }>(`/api/basvuru/${belgeId}/kvkk-kod`, { kod }),

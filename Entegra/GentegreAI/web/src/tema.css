@@ -9822,3 +9822,11 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .bs-kvkk-satir > select { flex: 1 1 auto; min-width: 0 }
 .bs-kvkk-satir > .bs-onay-kodu { flex: 0 0 84px; width: 84px; text-align: center; font-family: Consolas, monospace; letter-spacing: 1px }
 .bs-onay-kodu-et { float: right; font-weight: 400; color: var(--soluk) }
+
+/* KVKK onay durumu (1353): başvuru sekmesinde KVKK / ETK altındaki tam satır, menü başlığı. */
+.bs-kvkk-bilgi { grid-column: 1 / -1; padding: 6px 9px; border-radius: 3px; font-size: 11.5px; line-height: 1.45; border: 1px solid }
+.bs-kvkk-bilgi.g { background: var(--okzem); border-color: var(--okkenar); color: var(--ok) }
+.bs-kvkk-bilgi.s { background: var(--uyarizem); border-color: var(--uyarikenar); color: var(--uyari) }
+.bs-kvkk-bilgi.k { background: var(--hatazem); border-color: var(--hatakenar); color: var(--hata) }
+.bs-kvkk-bilgi.b { background: var(--grupzem, #eef5fd); border-color: var(--cizgi); color: var(--mor) }
+.dugme-menu-baslik { padding: 5px 10px; font-size: 10.5px; color: var(--soluk); background: var(--yuz2, #f3f6fa); border-bottom: 1px solid var(--cizgi2); white-space: nowrap }
