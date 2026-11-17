@@ -9882,3 +9882,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .bsk-degiskenler .not { margin-bottom: 8px }
 .bsk-degiskenler .mono { font-family: Consolas, monospace; font-size: 11px }
 @media (max-width: 1000px) { .bsk-metin { grid-template-columns: 1fr } .bsk-sayac { grid-template-columns: 1fr 1fr } }
+
+/* AYAR SAYFASI BAŞLIĞI (17.11.2026): solda Kaydet & Uygula + başlık, sağda Kapat. */
+.ayar-sayfabas .basrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.ayar-sayfabas .basrow > .d.bir { order: -1 }
+.ayar-sayfabas-sag { margin-left: auto; display: flex; gap: 6px; align-items: center }

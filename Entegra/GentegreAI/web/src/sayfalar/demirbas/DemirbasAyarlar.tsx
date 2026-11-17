@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AyarSayfaBasligi } from '../../bilesenler/AyarSayfaBasligi';
 import { AyarAlani, useAyarlar } from '../../bilesenler/AyarAlani';
 import { KodListesiModali } from '../../bilesenler/KodListesiModali';
 
@@ -10,17 +11,13 @@ import { KodListesiModali } from '../../bilesenler/KodListesiModali';
  * davranışını belirleyen ayarlar + demirbaş kartının kod listeleri.
  */
 export function DemirbasAyarlar() {
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
   const [liste, setListe] = useState<{ kod: string; baslik: string } | null>(null);
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>Demirbaş Ayarları</h1>
-          <span className="yol">Sabit Varlıklar › Ayarlar › Demirbaş</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik="Demirbaş Ayarları" yol="Sabit Varlıklar › Ayarlar › Demirbaş" ayar={ayar} />
 
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}

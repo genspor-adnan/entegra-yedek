@@ -30,27 +30,46 @@ const TABLO: [string, string, string, string][] = [
   ['Maliyet (IAS 2)', 'her seviyede aynı: malzeme + işçilik + normal fire − yan ürün; anormal fire gidere', '', ''],
 ];
 
-export function UretimSeviyeAyari() {
+/**
+ * Üretim seviyesi ayarının durumu (ayar sayfası deseni, 17.11.2026): seçim TASLAKTIR, "Kaydet & Uygula" yazar.
+ * UretimAyarlar başlığı (AyarSayfaBasligi) `kaydet / degisti / kaydediyor / vazgec`'i kullanır.
+ */
+export function useUretimSeviyeAyari() {
+  const [kayitli, setKayitli] = useState<{ seviye: UretimSeviyesi; emirKullan: boolean }>({ seviye: 'basit', emirKullan: false });
   const [seviye, setSeviye] = useState<UretimSeviyesi>('basit');
   const [emirKullan, setEmirKullan] = useState(false);
   const [hata, setHata] = useState('');
   const [bilgi, setBilgi] = useState('');
-  const [mesgul, setMesgul] = useState(false);
+  const [kaydediyor, setKaydediyor] = useState(false);
 
-  useEffect(() => { void api.uretimSeviye().then(y => { setSeviye(y.seviye); setEmirKullan(y.emirKullan) }).catch(h => setHata(hataMetni(h))) }, []);
+  useEffect(() => {
+    void api.uretimSeviye().then(y => { setKayitli(y); setSeviye(y.seviye); setEmirKullan(y.emirKullan) })
+      .catch(h => setHata(hataMetni(h)));
+  }, []);
 
-  const yaz = async (s: UretimSeviyesi, e: boolean) => {
-    if (s !== seviye && ['denetimli', 'standart', 'basit'].indexOf(s) > ['denetimli', 'standart', 'basit'].indexOf(seviye)
-        && !await onay(c('Alt seviyeye geçiliyor: ekrandan bazı alanlar kalkar, kayıtlar bozulmaz. Açık emir ya da kalite bekleyen fiş varsa sunucu geçişi reddeder. Devam?'))) return;
-    setMesgul(true); setHata('');
+  const degisti = seviye !== kayitli.seviye || emirKullan !== kayitli.emirKullan;
+  const kaydet = async (): Promise<boolean> => {
+    if (!degisti) return true;
+    const sira = ['denetimli', 'standart', 'basit'];
+    if (sira.indexOf(seviye) > sira.indexOf(kayitli.seviye)
+        && !await onay(c('Alt seviyeye geçiliyor: ekrandan bazı alanlar kalkar, kayıtlar bozulmaz. Açık emir ya da kalite bekleyen fiş varsa sunucu geçişi reddeder. Devam?'))) return false;
+    setKaydediyor(true); setHata('');
     try {
-      const y = await api.uretimSeviyeYaz(s, e);
-      setSeviye(y.seviye); setEmirKullan(y.emirKullan);
+      const y = await api.uretimSeviyeYaz(seviye, emirKullan);
+      setKayitli(y); setSeviye(y.seviye); setEmirKullan(y.emirKullan);
       uretimSeviyesiOnbellegiTemizle();
       setBilgi(c('Üretim seviyesi kaydedildi. Menü hemen güncellenir; açık üretim ekranları yeniden açılınca yeni düzeni gösterir.'));
       setTimeout(() => setBilgi(''), 4000);
-    } catch (h) { setHata(hataMetni(h)) } finally { setMesgul(false) }
+      return true;
+    } catch (h) { setHata(hataMetni(h)); return false } finally { setKaydediyor(false) }
   };
+  const vazgec = () => { setSeviye(kayitli.seviye); setEmirKullan(kayitli.emirKullan) };
+  return { seviye, setSeviye, emirKullan, setEmirKullan, hata, bilgi, kaydediyor, degisti, kaydet, vazgec };
+}
+
+export function UretimSeviyeAyari({ a }: { a: ReturnType<typeof useUretimSeviyeAyari> }) {
+  const { seviye, emirKullan, hata, bilgi } = a;
+  const mesgul = a.kaydediyor;
 
   return (
     <>
@@ -61,12 +80,12 @@ export function UretimSeviyeAyari() {
         <h6>{c('Üretim seviyesi')}</h6>
         <div className="usa-ayar">
           {SEVIYELER.map(s => (
-            <button type="button" key={s.kod} className={`sec${seviye === s.kod ? ' on' : ''}`} disabled={mesgul} onClick={() => void yaz(s.kod, emirKullan)}>
+            <button type="button" key={s.kod} className={`sec${seviye === s.kod ? ' on' : ''}`} disabled={mesgul} onClick={() => a.setSeviye(s.kod)}>
               <b>{seviye === s.kod ? '◉' : '○'} {c(s.ad)} <small>{c(s.alt)}</small></b><span>{c(s.aciklama)}</span>
             </button>))}
         </div>
         <div className="usa-emir">
-          <label className="chk"><input type="checkbox" checked={emirKullan} disabled={mesgul || seviye !== 'basit'} onChange={e => void yaz(seviye, e.target.checked)} /> {c('Üretim emri kullan')}</label>
+          <label className="chk"><input type="checkbox" checked={emirKullan} disabled={mesgul || seviye !== 'basit'} onChange={e => a.setEmirKullan(e.target.checked)} /> {c('Üretim emri kullan')}</label>
           <span className="sl">{seviye === 'basit'
             ? c('Kapalıysa menüde yalnız Üretim Fişi görünür; açıksa Üretim Emirleri sade iş listesidir ("Üret…" fişi keser).')
             : c('Standart ve Denetimli seviyede üretim emri her zaman açıktır.')}</span>

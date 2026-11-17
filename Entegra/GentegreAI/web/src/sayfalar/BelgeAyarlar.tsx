@@ -1,4 +1,5 @@
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { c } from '../dil/ceviri';
 
 /**
@@ -15,7 +16,8 @@ import { c } from '../dil/ceviri';
  */
 export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
   const satisMi = yon === 'satis';
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
 
   const alan = (anahtar: string, etiket: string,
                 ek?: Partial<Parameters<typeof AyarAlani>[0]>) => (
@@ -24,14 +26,8 @@ export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>{satisMi ? 'Satış Belgeleri' : 'Alış Belgeleri'}</h1>
-          <span className="yol">
-            Yönetim › Ayarlar › {satisMi ? 'Satış Belgeleri' : 'Alış Belgeleri'}
-          </span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik={satisMi ? 'Satış Belgeleri' : 'Alış Belgeleri'}
+                        yol={`Yönetim › Ayarlar › ${satisMi ? 'Satış Belgeleri' : 'Alış Belgeleri'}`} ayar={ayar} />
 
       <div className="sahne">
         {hata && <div className="hata-kutusu">{hata}</div>}

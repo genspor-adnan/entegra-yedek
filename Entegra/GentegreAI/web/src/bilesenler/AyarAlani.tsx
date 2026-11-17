@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { ayarOnbellegiTemizle } from '../api/ayarlar';
 import { type AyarSatiri, hataMetni } from '../api/sozlesme';
@@ -7,19 +7,26 @@ import { KodListesiModali } from './KodListesiModali';
 import { c } from '../dil/ceviri';
 
 /**
- * Ayar ekranlarinin ortak kancasi: /api/ayar'i yukler, tek alan yazar, hata ve
- * "kaydedildi" bilgisini yonetir. Genel Ayarlar ve Stok Ayarlari ayni listeyi
- * kullanir (beyaz liste sunucuda) - her ekran kendi anahtarlarini cizer.
+ * Ayar ekranlarinin ortak kancasi: /api/ayar'i yukler, hata ve "kaydedildi" bilgisini yonetir. Genel Ayarlar ve Stok
+ * Ayarlari ayni listeyi kullanir (beyaz liste sunucuda) - her ekran kendi anahtarlarini cizer.
+ *
+ * TASLAK KİPİ (kullanıcı 17.11.2026: "ayarlar ekranlarında desen: sol üst köşeye 'Kaydet & Uygula', sağ üst köşeye
+ * kapat butonu ekle.. otomatik kaydetmeyi kaldır, kaydet basınca kaydedilsin"): `taslakli` verilince alan değişikliği
+ * yalnız TASLAĞA yazılır (ekranda görünür, sunucuya gitmez); `kaydet()` değişen anahtarları sırayla yazar. Ayar
+ * sayfası olmayan yerler (şube kartı › e-Belge türü ayarları) eski anlık kayıtla kalır.
  */
-export function useAyarlar() {
-  const [ayarlar, setAyarlar] = useState<AyarSatiri[]>([]);
+export function useAyarlar(secenek?: { taslakli?: boolean }) {
+  const taslakli = !!secenek?.taslakli;
+  const [sunucu, setSunucu] = useState<AyarSatiri[]>([]);
+  const [taslak, setTaslak] = useState<Record<string, string>>({});
   const [yukleniyor, setYukleniyor] = useState(true);
+  const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [bilgi, setBilgi] = useState<string | null>(null);
 
   const yukle = useCallback(async () => {
     try {
-      setAyarlar(await api.ayarlar());
+      setSunucu(await api.ayarlar());
       setHata(null);
     } catch (h) {
       setHata(hataMetni(h));
@@ -28,13 +35,15 @@ export function useAyarlar() {
 
   useEffect(() => { void yukle() }, [yukle]);
 
-  const yaz = useCallback(async (anahtar: string, yeni: string) => {
+  const bilgiVer = (m: string) => { setBilgi(m); setTimeout(() => setBilgi(null), 2500) };
+
+  /** Anlık kayıt (taslaksız kip). */
+  const hemenYaz = useCallback(async (anahtar: string, yeni: string) => {
     try {
-      setAyarlar(await api.ayarYaz(anahtar, yeni));
+      setSunucu(await api.ayarYaz(anahtar, yeni));
       ayarOnbellegiTemizle();          // acilacak ekranlar yeni degeri okusun
       setHata(null);
-      setBilgi('Ayar kaydedildi.');
-      setTimeout(() => setBilgi(null), 2500);
+      bilgiVer('Ayar kaydedildi.');
     } catch (h) {
       // ONCE tazele, SONRA hatayi yaz: yukle() basarida setHata(null) yaptigi
       //   icin ters sirada mesaj aninda siliniyordu.
@@ -43,7 +52,59 @@ export function useAyarlar() {
     }
   }, [yukle]);
 
-  return { ayarlar, yukleniyor, hata, bilgi, yaz };
+  /** Taslağa yaz: kayıtlı değere dönülürse taslaktan düşer. */
+  const taslagaYaz = useCallback((anahtar: string, yeni: string) => {
+    const kayitli = sunucu.find(a => a.anahtar === anahtar)?.deger ?? '';
+    setTaslak(t => {
+      const n = { ...t };
+      if (yeni === kayitli) delete n[anahtar]; else n[anahtar] = yeni;
+      return n;
+    });
+  }, [sunucu]);
+
+  /** KAYDET & UYGULA: değişen anahtarlar sırayla; ilk hatada durur, o ana kadar kaydedilenler taslaktan düşer. */
+  const kaydet = useCallback(async (): Promise<boolean> => {
+    const bekleyen = Object.entries(taslak);
+    if (bekleyen.length === 0) return true;
+    setKaydediyor(true); setHata(null);
+    let son: AyarSatiri[] | null = null;
+    const kaydedilen: string[] = [];
+    try {
+      for (const [anahtar, deger] of bekleyen) {
+        try {
+          son = await api.ayarYaz(anahtar, deger);
+          kaydedilen.push(anahtar);
+        } catch (h) {
+          if (son) setSunucu(son);
+          setTaslak(t => Object.fromEntries(Object.entries(t).filter(([k]) => !kaydedilen.includes(k))));
+          if (kaydedilen.length > 0) ayarOnbellegiTemizle();
+          setHata(`${anahtar}: ${hataMetni(h)}`);
+          return false;
+        }
+      }
+      if (son) setSunucu(son);
+      setTaslak({});
+      ayarOnbellegiTemizle();          // acilacak ekranlar yeni degeri okusun
+      bilgiVer(c('Ayarlar kaydedildi ve uygulandı.'));
+      return true;
+    } finally { setKaydediyor(false) }
+  }, [taslak]);
+
+  /** Ekranda görünen: sunucu değerleri + taslak (taslakta olup listede olmayan anahtar da gösterilir). */
+  const ayarlar = useMemo(() => {
+    if (!taslakli) return sunucu;
+    const liste = sunucu.map(a => (a.anahtar in taslak ? { ...a, deger: taslak[a.anahtar] } : a));
+    for (const [anahtar, deger] of Object.entries(taslak))
+      if (!sunucu.some(a => a.anahtar === anahtar)) liste.push({ anahtar, deger } as AyarSatiri);
+    return liste;
+  }, [sunucu, taslak, taslakli]);
+
+  return {
+    ayarlar, yukleniyor, hata, bilgi,
+    yaz: taslakli ? taslagaYaz : hemenYaz,
+    kaydet, kaydediyor, degisti: Object.keys(taslak).length > 0,
+    vazgec: () => setTaslak({}),
+  };
 }
 
 export type AyarTipi = 'sayi' | 'metin' | 'mantik' | 'secenek' | 'parola' | 'uzunMetin';
@@ -52,9 +113,8 @@ export type AyarTipi = 'sayi' | 'metin' | 'mantik' | 'secenek' | 'parola' | 'uzu
  * Tek ayar satiri — GENEL KURAL: etiket EDITIN USTUNDE, aciklama alt paragrafta
  * degil editin SAGINDAKI "?" ikonunda (metin public.help'te).
  *
- * Kayit ANINDA: sayi/metin alanlar blur ya da Enter'da, mantik/secenek
- * degistigi anda yazilir. Tek alanlik ayarlara "Kaydet" dugmesi koymak
- * kullaniciyi bekletmekten baska ise yaramiyordu.
+ * Değer sayi/metin alanlarda blur ya da Enter'da, mantik/secenek değiştiği anda `onYaz`a gider. Ayar SAYFALARINDA
+ * (useAyarlar taslakli) bu yalnız taslaktır - sunucuya "Kaydet & Uygula" ile gider (17.11.2026).
  */
 export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, listeKod,
                             ayarlar, onYaz, genis }: {

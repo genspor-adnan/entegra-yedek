@@ -1,4 +1,5 @@
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { c } from '../dil/ceviri';
 
 /**
@@ -13,16 +14,12 @@ const BASLIK = { hasta: 'Hasta Ayarları', basvuru: 'Başvuru Ayarları' } as co
 
 export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'basvuru' }) {
   const aktif = bolum;
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>{c(BASLIK[bolum])}</h1>
-          <span className="yol">{c('Kayıt Kabul › Ayarlar')} › {c(BASLIK[bolum])}</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik={BASLIK[bolum]} yol={`Kayıt Kabul › Ayarlar › ${BASLIK[bolum]}`} ayar={ayar} />
 
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}

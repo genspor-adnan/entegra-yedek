@@ -1,5 +1,5 @@
-import { UretimSeviyeAyari } from './UretimSeviyeAyari';
-import { c } from '../../dil/ceviri';
+import { UretimSeviyeAyari, useUretimSeviyeAyari } from './UretimSeviyeAyari';
+import { AyarSayfaBasligi } from '../../bilesenler/AyarSayfaBasligi';
 
 /**
  * ÜRETİM AYARLARI (1262, Üretim › Ayarlar › Üretim Ayarları) - kasa / stok / demirbaş ayarlarıyla aynı desen
@@ -9,16 +9,13 @@ import { c } from '../../dil/ceviri';
  * olarak taşı". İçerik 1253'teki seviye ayarı (UretimSeviyeAyari): Basit · Standart · Denetimli + "Üretim emri kullan".
  */
 export function UretimAyarlar() {
+  // AYAR SAYFASI DESENİ (17.11.2026): seçim taslak; "Kaydet & Uygula" yazar, Kapat değişiklikte sorar.
+  const a = useUretimSeviyeAyari();
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>{c('Üretim Ayarları')}</h1>
-          <span className="yol">{c('Üretim › Ayarlar › Üretim Ayarları')}</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik="Üretim Ayarları" yol="Üretim › Ayarlar › Üretim Ayarları" ayar={a} />
       <div className="sahne">
-        <UretimSeviyeAyari />
+        <UretimSeviyeAyari a={a} />
       </div>
     </>
   );

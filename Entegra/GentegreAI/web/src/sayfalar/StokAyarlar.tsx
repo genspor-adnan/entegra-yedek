@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { onay } from '../bilesenler/mesaj';
 import { api } from '../api/istemci';
@@ -6,7 +7,6 @@ import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
-import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -28,7 +28,8 @@ export function StokAyarlar() {
   const [yenile, setYenile] = useState(0);
   const [hata, setHata] = useState<string | null>(null);
   // "Genel" sekmesi artik bos degil: stok davranis ayarlari (public.referans).
-  const { ayarlar, yukleniyor: ayarYukleniyor, hata: ayarHatasi, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor: ayarYukleniyor, hata: ayarHatasi, bilgi, yaz } = ayar;
 
   async function depoAksiyonu(kod: string, satir: ListeSatiri | null) {
     setHata(null);
@@ -51,12 +52,7 @@ export function StokAyarlar() {
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>Stok Ayarları</h1>
-          <span className="yol">{c('Yönetim › Ayarlar › Stok Ayarları')}</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik="Stok Ayarları" yol="Yönetim › Ayarlar › Stok Ayarları" ayar={ayar} />
 
       <AyarSekmeSeridi sekmeler={SEKMELER} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
-import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -19,16 +19,12 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
  */
 export function KasaAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>Kasa Ayarları</h1>
-          <span className="yol">{c('Yönetim › Ayarlar › Kasa')}</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik="Kasa Ayarları" yol="Yönetim › Ayarlar › Kasa" ayar={ayar} />
 
       <AyarSekmeSeridi sekmeler={SEKMELER} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
@@ -32,7 +33,8 @@ type Sekme = typeof SEKMELER[number]['anahtar'];
  */
 export function GenelAyarlar() {
   const [aktif, setAktif] = useState<Sekme>('genel');
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+  const ayar = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
   const { yetki } = useOturum();
 
   // Belge yazisi sablonlari IK yetkisine bagli: satis kullanicisi personel
@@ -46,12 +48,7 @@ export function GenelAyarlar() {
 
   return (
     <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>Genel Ayarlar</h1>
-          <span className="yol">{c('Yönetim › Ayarlar › Genel')}</span>
-        </div>
-      </div>
+      <AyarSayfaBasligi baslik="Genel Ayarlar" yol="Yönetim › Ayarlar › Genel" ayar={ayar} />
 
       <AyarSekmeSeridi sekmeler={sekmeler} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 
