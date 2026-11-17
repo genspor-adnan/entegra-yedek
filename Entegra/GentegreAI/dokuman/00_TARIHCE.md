@@ -7,6 +7,42 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Kod inceleme düzeltmeleri (17.11 commit'leri); fiş adları; personel kartı; KVKK / ETK sadeleşmesi
+
+Kod inceleme (bugünkü 47 commit, 10 bulgu; 7. bulgu doğrulanınca geçersiz çıktı):
+- **e-İmza radyolog adına**: imza KRİPTOGRAFİK doğrulanır (System.Security.Cryptography.Xml 10.0.15,
+  `EImzaServisi.ImzaKimliginiDogrula`) ve TCKN yalnız imzayı doğrulayan sertifikanın SERIALNUMBER'ından okunur; seçilen
+  radyoloğun `taraf.vkno`suyla eşleşmezse red. Kendi adına imzada yalnız iki numara biliniyor ve farklıysa red.
+  Zincir / OCSP denetimi yok.
+- **KVKK onay günü** (1362 `belge_basvuru.kvkk_onay_tarihi` + `tr_belge_basvuru_kvkk_tarih`): devredilen onay ilk
+  alındığı günü taşır - "X gün" süresi her gelişte yeniden başlamaz. kvkk-durum bu günü kullanır.
+- **ETK** yeni başvuruda KVKK'dan kopyalanmaz (önceki ETK yoksa boş).
+- **SMS yeniden gönderimi** eski "SMS ile onay" (4) durumunu düşürür (sunucu + kart).
+- **Başkası adına şifre**: yanlış şifre şifresi istenen kişinin giriş sayacını artırmaz; ÇAĞIRAN 15 dk'da 5 hatada
+  durdurulur (`giris_denemesi` sebep `<amac>_parola:u<id>`).
+- **KVKK onay kodu** (1364 `kvkk_kod_hata`): 5 hatada kilit, SMS'ten 30 dk sonra geçersiz; yeni SMS sıfırlar.
+- **Radyolog = rol bayrağı** (1365 `rol.radyolog`, rol kartında "Radyolog"); rol kodu kalıbı ('%radyolog%') kalktı.
+  Mevcut roller eski kuralla (harf duyarsız) işaretlendi.
+- **Hasta Fişi çevrimi** (1363): kurumsuz başvurunun pay 0 tahakkukları da 128 (sunucu kuralıyla aynı ölçüt).
+- **Bildirim şablonu Deneme Gönder**: pasif şablonda 422 (kuyruk sessizce atlıyordu) + `YazmaIste`.
+- **Onay iptali**: şifre satır kilidinden önce; ekranın gördüğü sürüm (`surum`) değiştiyse 409.
+
+Fiş adları (kullanıcı: "Belgelerde Fiş rename Satış Fişi", "alış fişi de Alış Fişi olsun"):
+- `belgeKisaAdi` / başlık adı: 16 "Satış Fişi", 12 "Alış Fişi", 128 "Hasta Fişi" (stok fişi "Fiş"); veritabanı ikizi
+  `fn_belge_kisa_adi` 1361 (yeni tahsilat açıklaması "Satış Fişi Tahsilatı"). Dönüşüm menüsü / düğmeler / tutar sorusu
+  adı buradan alır; ayrı ad tablosu kalktı. Satış fişi başlığı "Fatura No", Hasta Fişi "Tahakkuk No" diyordu - düzeldi.
+- Başvuru Belgeye Dönüşüm: çift tık / ✎ belgeyi kendi sekmesinde açar (Hasta Fişi `/satis-fisi`).
+
+Personel kartı: stok deseni görüntüleme / düzenleme kipi (tek ✎), avatar, görüntülemede tek "Ad Soyad"
+(ünvan + ad + soyad), sekme başlığı ünvan + ad + soyad ve personel ikonu, durum rozeti Ana Rol'ün sağında. Kadro
+Geçmişi GenGrid + anında kayıt (İşe Giriş karta yansır); Hareket / Kaynak kodları statik başlatma sırası yüzünden boş
+geliyordu (`KaynakKatalogu.KadroKodlari`); modalda tarih seçici.
+
+Başvuru: KVKK / ETK'dan "Onaysız durumu seçildi" (2) kalktı (1359, kısıt 1/3/4); iki combo salt gösterim, değer
+yalnız KVKK Onay menüsünden. Tahsilat sekmesinde yalnız kurum tahakkuku.
+
+Radyoloji: radyolog = radyolog rolü (admin şifreyle radyolog adına); onay ve Uzmana Gönder aynı radyolog seçimi.
+
 ## 17.11.2026 — Hasta Fişi (belge türü 128): hasta payı tahakkuktan ayrıldı
 
 - Kullanıcı: "hasta tahakkuk ile kurum tahakkuk tamamen farklı.. hasta tahakkukta takip yok.. sadece belge ile kapatmak
