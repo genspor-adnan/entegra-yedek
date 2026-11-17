@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Bildirim Şablonu Kartı — Mockup</title>
+<!--
+  Kullanıcı 17.11.2026: "bildirim şablonu kartı için mockup yap".
+  Kart = bildirim_sablon (kod · ad · kanal · durum · saat_bas/saat_bit · konu · govde · degiskenler · aciklama) +
+  bildirim (gönderim kuyruğu / geçmişi). Bugünkü kart katalogdan düz alanlarla çiziliyor (KartKatalogu.Onam
+  BildirimSablonKarti: Kimlik + Metin grupları); bu mockup onun yerini alacak düzen.
+
+  Desen (stok / hizmet / hasta kartıyla aynı):
+   * Kipli kimlik şeridi - kayıtlı kart GÖRÜNTÜLEMEDE açılır, tek ✎ şeridi ve Metin sekmesini düzenlemeye alır;
+     ızgaraya tıklamak kipi değiştirmez. Yeni şablon düzenlemede açılır.
+   * Başlık bandı yok; "Bildirim Şablonu Kartı #41" araç satırında Sil'in sağında. Hatırlat yok.
+   * SİSTEM ŞABLONU (kodu programda geçen: basvuru.kvkk_sms, kimlik.parola_sifirlama, onam.istek …): Kod alanı
+     kilitli, Sil yok - kod değişirse ilgili ekran (ör. Başvuru › KVKK Onay › SMS Gönder) şablonu bulamaz.
+     Kullanıcının açtığı şablonda ikisi de serbest.
+
+  Sekmeler:
+   1 Metin              - solda düzenleyici (Konu yalnız e-posta kanalında; Gövde + değişken çipleri tıklayınca imlece
+                          eklenir), altında canlı sayaç: karakter · Türkçe karakter (UCS-2) · SMS adedi · tahmini kontör.
+                          Sağda TELEFON ÖNİZLEMESİ: değişkenler örnek değerle doldurulmuş, gönderen başlığı SMS hesabından.
+                          Altta denetim uyarıları (tanımsız değişken, bağlantı, uzunluk, saat penceresi).
+   2 Değişkenler        - degiskenler jsonb: Değişken · Yazımı · Açıklama · Örnek değer · Metinde var mı.
+   3 Gönderim Geçmişi   - bu şablonla kuyruğa giren bildirimler: Zaman · Alıcı (maskeli) · Kaynak kayıt · Durum ·
+                          SMS adedi · Sağlayıcı yanıtı. Hatalı satır kırmızı; "Yeniden dene".
+   4 Değişiklik Geçmişi - islem_log (metin farkı satır satır).
+  "🧪 Deneme Gönder" penceresi sayfanın altında: kendi numarana örnek değerlerle gönderir (gerçek kontör düşer).
+-->
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#d7e7fb;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b5731a;--mor:#6a3fb0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px 0 6px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .sayfa{max-width:1280px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .ekransekme{display:flex;gap:2px;padding:6px 8px 0;background:#e4e9ef;border-bottom:1px solid var(--line)}
+  .ekransekme span{padding:5px 12px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;background:#f4f6f9;font-size:11.5px;color:var(--muted)}
+  .ekransekme span.on{background:#fff;color:var(--navy);font-weight:bold}
+  .arac{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .arac .baslik{font-weight:bold;color:var(--navy);margin-left:6px}
+  .arac .sag{margin-left:auto;display:flex;gap:4px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap;cursor:pointer;user-select:none}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .btn.sm{padding:2px 8px;font-size:11px}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.k{background:#fde8e8;color:#9b2c2c;border-color:#f3c5c5}
+  .rz.m{background:#f1ebfa;color:var(--mor);border-color:#dccdf2}
+  .rz.b{background:#e6eef7;color:#2b4f7c;border-color:#cddcee}
+
+  /* KİMLİK ŞERİDİ: avatar · Kod · Şablon Adı · Kanal · Gönderim Saati · Durum · ✎ ; 2. satır Açıklama */
+  .kaid-sar{position:relative;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .kaid{display:grid;grid-template-columns:44px minmax(0,1.1fr) minmax(0,1.8fr) minmax(0,.7fr) minmax(0,.9fr) minmax(0,.55fr) 26px;gap:10px;padding:10px 12px;align-items:end}
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:#fff;align-self:center;background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15);user-select:none}
+  .avatar.eposta{background:linear-gradient(135deg,#8a5cc9,#4b2a85)}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);white-space:nowrap;display:flex;gap:6px;align-items:center}
+  .req::after{content:" *";color:var(--req)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;position:relative}
+  .inp.big{font-weight:bold;color:var(--navy)}
+  .inp.ro{background:#f7f9fb;color:var(--muted)}
+  .inp.mono{font-family:Consolas,monospace;font-size:11.5px}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .saat{display:flex;gap:4px;align-items:center}.saat .inp{width:54px;justify-content:center}
+  .goster .inp{border-color:transparent;background:transparent;font-weight:600;padding-left:0}
+  .goster .inp.big{font-size:12.5px}
+  .goster .combo::after{display:none}
+  .goster .fld label .req::after{content:""}
+  .kaid .fld.aciklama{grid-column:2/-2}
+  .kalem{border:0;background:transparent;width:26px;height:24px;display:grid;place-items:center;font-size:14px;color:var(--muted);cursor:pointer;border-radius:3px;user-select:none}
+  .kalem:hover{color:var(--accent);background:#e9f1fb}
+  .kalem.acik{color:var(--accent)}
+  .kilit{font-size:10px;color:var(--warn)}
+
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px;user-select:none}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:12px}.pane.active{display:block}
+
+  /* METİN */
+  .metin{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:14px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;overflow:hidden}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px}
+  .grp h4 .sag{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  .grp .ic{padding:10px;display:flex;flex-direction:column;gap:8px}
+  textarea{width:100%;min-height:170px;resize:vertical;border:1px solid var(--line);border-radius:2px;padding:7px;font:12.5px/1.5 "Trebuchet MS","Segoe UI",sans-serif;color:var(--ink)}
+  .goster textarea{border-color:transparent;background:#f7f9fb;resize:none}
+  .cipler{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+  .cipler small{color:var(--muted);margin-right:2px}
+  .cip{font:11px Consolas,monospace;padding:1px 8px;border-radius:9px;border:1px solid #cddcee;background:#e6eef7;color:#2b4f7c;cursor:pointer;user-select:none}
+  .cip:hover{background:#d7e7fb}
+  .goster .cip{pointer-events:none;opacity:.6}
+  .sayac{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 9px}
+  .kutu small{display:block;color:var(--muted);font-size:10.5px}
+  .kutu b{font-size:15px;color:var(--navy)}
+  .kutu b.u{color:var(--warn)}
+  .kutu i{font-style:normal;font-size:10.5px;color:var(--muted)}
+  .uyarilar{display:flex;flex-direction:column;gap:5px}
+  .uy{display:flex;gap:8px;align-items:flex-start;padding:6px 9px;border-radius:3px;font-size:11.5px;border:1px solid}
+  .uy.s{background:#fff8ea;border-color:#efd9a0;color:#7a5407}
+  .uy.b{background:#eef5fd;border-color:#cddcee;color:#2b4f7c}
+  .uy.k{background:#fdeceb;border-color:#f6d3d1;color:#9b2c2c}
+  .uy.g{background:#e9f6ee;border-color:#c4e6d0;color:var(--ok)}
+  .kullanim{font-size:11.5px;color:var(--ink)}
+  .kullanim b{color:var(--navy)}
+
+  /* telefon önizleme */
+  .telefon{width:270px;margin:4px auto 0;border:9px solid #1f2a36;border-radius:26px;background:#e9edf2;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+  .tel-ust{background:#f7f8fa;padding:8px 10px;border-bottom:1px solid #d8dee6;text-align:center}
+  .tel-ust b{display:block;font-size:12px;color:#1f2d3a}
+  .tel-ust small{font-size:10px;color:#7a8796}
+  .tel-ic{padding:12px 10px 16px;min-height:300px}
+  .balon{background:#fff;border-radius:14px 14px 14px 4px;padding:8px 10px;font-size:11.5px;line-height:1.45;color:#1f2d3a;box-shadow:0 1px 1px rgba(0,0,0,.08);word-wrap:break-word}
+  .balon .dg{background:#fff4c2;border-radius:2px;padding:0 2px;font-weight:bold}
+  .balon a{color:#2f6db3}
+  .tel-alt{font-size:10px;color:#7a8796;margin-top:4px}
+  .oniz-ayar{display:flex;gap:8px;justify-content:center;margin-top:8px;font-size:11px;color:var(--muted)}
+
+  /* grid */
+  .gbar{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .gbar .sp{margin-left:auto;display:flex;gap:6px}
+  .dgr{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#fff}
+  .dgr table{border-collapse:collapse;width:100%}
+  .dgr th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:5px 7px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dgr td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 7px;font-size:11.5px;vertical-align:middle}
+  .dgr tr:hover td{background:#f2f7fd}.dgr tr.hata td{background:#fdf3f2}
+  .c{text-align:center}.r{text-align:right;font-variant-numeric:tabular-nums}
+  .mono{font-family:Consolas,monospace;font-size:11px}
+  .fark{font-family:Consolas,monospace;font-size:11px;white-space:pre-wrap}
+  .fark .e{background:#fde8e8;color:#9b2c2c;text-decoration:line-through}
+  .fark .y{background:#e9f6ee;color:var(--ok)}
+
+  /* modal */
+  .perde{background:rgba(20,49,90,.08);border:1px dashed var(--line);border-radius:6px;padding:20px;display:flex;justify-content:center}
+  .modal{width:520px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);overflow:hidden}
+  .modal .mb{padding:9px 12px;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold;display:flex}
+  .modal .mb span{margin-left:auto;cursor:pointer}
+  .modal .mi{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+  .modal .mi .genis{grid-column:1/-1}
+  .modal .ma{padding:8px 12px;border-top:1px solid var(--line2);display:flex;justify-content:flex-end;gap:6px;background:var(--head)}
+</style>
+</head>
+<body>
+
+<h2><b>Bildirim Şablonu Kartı</b> — kayıtlı SMS şablonu, görüntüleme kipi <span class="ipucu">✎ ile düzenlemeye geçer · sekmelere tıklayın</span></h2>
+
+<div class="sayfa" id="kart">
+  <div class="ekransekme"><span>✉ Bildirim Şablonu Listesi</span><span class="on">✉ Başvuru KVKK / ETK onay SMS'i</span></div>
+
+  <div class="arac">
+    <span class="btn primary">💾 Kaydet</span>
+    <span class="btn pas" title="Sistem şablonu silinemez - Durum'u Pasif yapın">Sil</span>
+    <span class="baslik">Bildirim Şablonu Kartı #41</span>
+    <span class="rz m" title="Kodu programda geçer: Başvuru › KVKK Onay › SMS Gönder">⚙ Sistem şablonu</span>
+    <div class="sag">
+      <span class="btn" onclick="document.getElementById('deneme').scrollIntoView({behavior:'smooth'})">🧪 Deneme Gönder</span>
+      <span class="btn">📋 Kopyala</span>
+      <span class="btn">✖ Kapat</span>
+    </div>
+  </div>
+
+  <!-- KİMLİK ŞERİDİ (kipli) -->
+  <div class="kaid-sar goster" id="serit">
+    <div class="kaid">
+      <div class="avatar" id="avatar" title="Kanal: SMS">📱</div>
+      <div class="fld"><label><span class="req">Kod</span><span class="kilit" title="Sistem şablonu: kod programda geçer">🔒</span></label>
+        <div class="inp mono ro">basvuru.kvkk_sms</div></div>
+      <div class="fld"><label class="req">Şablon Adı</label><div class="inp big">Başvuru KVKK / ETK onay SMS'i</div></div>
+      <div class="fld"><label class="req">Kanal</label>
+        <div class="inp combo" onclick="kanalDegis()" id="kanal" title="Mockup: tıklayınca SMS / E-posta">SMS</div></div>
+      <div class="fld"><label>Gönderim Saati</label>
+        <div class="saat"><div class="inp">09:00</div>–<div class="inp">20:00</div></div></div>
+      <div class="fld"><label>Durum</label><div><span class="rz g">● Aktif</span></div></div>
+      <button class="kalem" id="kalem" title="Düzenle" onclick="kipDegis()">✎</button>
+      <div class="fld aciklama"><label>Açıklama</label>
+        <div class="inp">Başvuru kartı › KVKK Onay › SMS Gönder. Hasta kodu söyler, KVKK Onay › Onay Kodu Gir ile doğrulanır (1352).</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-p="p-metin">Metin</div>
+    <div class="tab" data-p="p-degisken">Değişkenler <span class="b">1</span></div>
+    <div class="tab" data-p="p-gecmis">Gönderim Geçmişi <span class="b">128</span></div>
+    <div class="tab" data-p="p-degisiklik">Değişiklik Geçmişi</div>
+  </div>
+
+  <!-- 1 METİN -->
+  <div class="pane active goster" id="p-metin">
+    <div class="metin">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="grp">
+          <h4>Mesaj <span class="sag">Değişkene tıklayın: imlecin olduğu yere eklenir</span></h4>
+          <div class="ic">
+            <div class="fld" id="konuSatir" style="display:none"><label>Konu (e-posta)</label>
+              <div class="inp">KVKK aydınlatma ve ticari ileti onayı</div></div>
+            <div class="fld"><label class="req">Gövde</label>
+              <textarea id="govde" readonly oninput="hesapla()">@ONAYKODU numaralı onay kodunu ilgiliye söyleyerek, https://www.kosuyoluradyoloji.com.tr/kvkk-aydinlatma-metni/ linkinde yer alan KVKK Aydınlatma Metnine göre kişisel verilerinizin işlenmesine ve sistemlerimizde kayıtlı iletişim adresleriniz üzerinden SMS, e-posta ve aramalar vasıtasıyla ticari elektronik ileti gönderimine izin vermiş olacaksınız.</textarea></div>
+            <div class="cipler"><small>Değişkenler:</small>
+              <span class="cip" onclick="ekle('@ONAYKODU')" title="Tek kullanımlık onay kodu">@ONAYKODU</span>
+              <span class="cip" onclick="ekle('{{kurum}}')" title="Kurum / şube adı (tüm şablonlarda)">{{kurum}}</span>
+              <span class="cip" onclick="ekle('{{hasta_ad}}')" title="Hastanın adı soyadı (tüm hasta şablonlarında)">{{hasta_ad}}</span>
+            </div>
+            <div class="sayac">
+              <div class="kutu"><small>Karakter</small><b id="kar">349</b> <i>/ 1 SMS = 70</i></div>
+              <div class="kutu"><small>Kodlama</small><b class="u" id="kod">UCS-2</b> <i id="kodnot">Türkçe harf var</i></div>
+              <div class="kutu"><small>SMS adedi (her gönderim)</small><b class="u" id="adet">6</b></div>
+              <div class="kutu"><small>Bu ay gönderim</small><b>128</b> <i>≈ 768 kontör</i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Denetim</h4>
+          <div class="ic uyarilar" id="uyarilar">
+            <div class="uy s">⚠ <span><b>Uzun mesaj:</b> Türkçe harfler (ı, ş, ğ, ü, ö, ç) mesajı UCS-2 kodlamasına geçirir; her parça 67 karakter. Bu metin <b>6 SMS</b> olarak ücretlenir. Türkçe harfsiz yazılırsa ≈ 3 SMS.</span></div>
+            <div class="uy b">ℹ <span><b>Bağlantı:</b> kosuyoluradyoloji.com.tr — yalnız Koşuyolu şubesinde geçerli; başka şube açılırsa şablon kopyalanıp şubeye göre düzenlenmeli.</span></div>
+            <div class="uy g">✓ <span><b>@ONAYKODU</b> metinde var — gönderimde başvuruya üretilen 6 haneli kodla değişir.</span></div>
+            <div class="uy b">🕘 <span><b>Gönderim saati 09:00–20:00:</b> bu saat dışında basılan SMS kuyrukta bekler, 09:00'da gider. Onay kodu SMS'i için saat penceresini kaldırmak önerilir (kabul gece de yapılır).</span></div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Kullanıldığı yer</h4>
+          <div class="ic kullanim">
+            <div>📋 <b>Başvuru Kartı</b> › 📱 KVKK Onay › <b>SMS Gönder</b> — alıcı: hastanın cep telefonu</div>
+            <div style="color:var(--muted)">Kod programda geçtiği için değiştirilemez; şablon pasifse düğme "şablon pasif" uyarısı verir.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TELEFON ÖNİZLEME -->
+      <div class="grp">
+        <h4>Önizleme <span class="sag">örnek değerlerle</span></h4>
+        <div class="ic">
+          <div class="telefon">
+            <div class="tel-ust"><b id="gonderen">KOSUYOLURAD</b><small>gönderen başlığı · SMS hesabı (Ayyıldız)</small></div>
+            <div class="tel-ic">
+              <div class="balon" id="balon"></div>
+              <div class="tel-alt">Bugün 14:32 · <span id="parca">6 parça</span></div>
+            </div>
+          </div>
+          <div class="oniz-ayar">Örnek kod: <span class="mono">482913</span> · <span style="color:var(--accent);cursor:pointer" onclick="yeniKod()">🔄 başka örnek</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 DEĞİŞKENLER -->
+  <div class="pane" id="p-degisken">
+    <div class="gbar">Şablonun kabul ettiği değişkenler (degiskenler). Kuruma özel değişken eklenemez - değeri program üretir.<div class="sp"></div></div>
+    <div class="dgr"><table>
+      <thead><tr><th>Değişken</th><th>Yazımı</th><th>Açıklama</th><th>Örnek değer</th><th class="c">Metinde</th><th>Değeri üreten</th></tr></thead>
+      <tbody>
+        <tr><td><b>ONAYKODU</b></td><td class="mono">@ONAYKODU · {{onay_kodu}}</td><td>Tek kullanımlık onay kodu</td><td class="mono">482913</td><td class="c"><span class="rz g">✓ var</span></td><td>Sunucu: 6 hane, rastgele, açık başvurularda tekil</td></tr>
+        <tr><td>kurum</td><td class="mono">{{kurum}}</td><td>Aktif şubenin adı</td><td>Koşuyolu</td><td class="c"><span class="rz gri">yok</span></td><td>Oturumun şubesi</td></tr>
+        <tr><td>hasta_ad</td><td class="mono">{{hasta_ad}}</td><td>Hastanın adı soyadı</td><td>Ayşe Kaya</td><td class="c"><span class="rz gri">yok</span></td><td>Başvurunun hastası</td></tr>
+      </tbody>
+    </table></div>
+    <div class="uy b" style="margin-top:8px">ℹ <span>Metinde tanımsız bir değişken yazılırsa (ör. <span class="mono">{{protokol}}</span>) Kaydet uyarır: gönderimde olduğu gibi kalır, hastaya "{{protokol}}" yazısı gider.</span></div>
+  </div>
+
+  <!-- 3 GÖNDERİM GEÇMİŞİ -->
+  <div class="pane" id="p-gecmis">
+    <div class="gbar">
+      <span class="btn sm">Son 30 gün ▾</span><span class="btn sm">Durum: Tümü ▾</span>
+      <span>128 gönderim · 124 iletildi · <b style="color:#9b2c2c">2 hatalı</b> · 2 kuyrukta · ≈ 768 kontör</span>
+      <div class="sp"><span class="btn sm">⟳ Hatalıları yeniden dene</span><span class="btn sm">⇩ Excel</span></div>
+    </div>
+    <div class="dgr"><table>
+      <thead><tr><th>Zaman</th><th>Alıcı</th><th>Hasta</th><th>Kaynak</th><th>Gönderen</th><th class="c">Durum</th><th class="r">SMS</th><th>Sağlayıcı yanıtı</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>17.11.2026 14:31</td><td class="mono">+90 5** *** 41 78</td><td>Emre Balcıoğlu</td><td>Başvuru <b>000014</b></td><td>Nail Demir</td><td class="c"><span class="rz g">İletildi</span></td><td class="r">6</td><td class="mono">00 · 18734592</td><td></td></tr>
+        <tr><td>17.11.2026 13:05</td><td class="mono">+90 5** *** 29 59</td><td>Aslı Şengör</td><td>Başvuru <b>000013</b></td><td>Cansu Geyik</td><td class="c"><span class="rz g">İletildi</span></td><td class="r">6</td><td class="mono">00 · 18734101</td><td></td></tr>
+        <tr class="hata"><td>17.11.2026 12:48</td><td class="mono">+90 5** *** 58 87</td><td>Kerem Can</td><td>Başvuru <b>000012</b></td><td>Emre Yılmaz</td><td class="c"><span class="rz k">Hata</span></td><td class="r">—</td><td class="mono" style="color:#9b2c2c">04 · Geçersiz numara</td><td><span class="btn sm">⟳ Tekrar</span></td></tr>
+        <tr><td>17.11.2026 21:12</td><td class="mono">+90 5** *** 10 22</td><td>Mustafa Yılmaz</td><td>Başvuru <b>000015</b></td><td>Nail Demir</td><td class="c"><span class="rz s">Kuyrukta</span></td><td class="r">6</td><td style="color:var(--muted)">09:00'da gidecek (saat penceresi)</td><td></td></tr>
+        <tr><td>16.11.2026 16:40</td><td class="mono">+90 5** *** 88 77</td><td>TEST HASTA</td><td>Başvuru <b>000010</b></td><td>admin</td><td class="c"><span class="rz g">İletildi</span></td><td class="r">6</td><td class="mono">00 · 18730077</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- 4 DEĞİŞİKLİK GEÇMİŞİ -->
+  <div class="pane" id="p-degisiklik">
+    <div class="dgr"><table>
+      <thead><tr><th style="width:140px">Zaman</th><th style="width:120px">Kullanıcı</th><th style="width:90px">Alan</th><th>Değişiklik</th></tr></thead>
+      <tbody>
+        <tr><td>17.11.2026 10:22</td><td>admin</td><td>Gövde</td><td class="fark"><span class="e">kurumumuzun KVKK Aydınlatma Metnine</span> <span class="y">https://www.kosuyoluradyoloji.com.tr/kvkk-aydinlatma-metni/ linkinde yer alan KVKK Aydınlatma Metnine</span></td></tr>
+        <tr><td>17.11.2026 10:05</td><td>sistem (1352)</td><td>—</td><td>Şablon kuruldu (varsayılan metin, bağlantısız)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<h2 id="deneme"><b>🧪 Deneme Gönder</b> penceresi — araç çubuğundan <span class="ipucu">gerçek SMS gider, kontör düşer</span></h2>
+<div class="perde">
+  <div class="modal">
+    <div class="mb">🧪 Deneme Gönder — Başvuru KVKK / ETK onay SMS'i <span>✖</span></div>
+    <div class="mi">
+      <div class="fld"><label class="req">Alıcı cep telefonu</label><div class="inp">+90 532 418 77 20</div></div>
+      <div class="fld"><label>SMS hesabı</label><div class="inp combo">SMS (Ayyıldız)</div></div>
+      <div class="fld"><label>@ONAYKODU örnek değeri</label><div class="inp mono">482913</div></div>
+      <div class="fld"><label>{{hasta_ad}} örnek değeri</label><div class="inp">Ayşe Kaya</div></div>
+      <div class="genis uy s">⚠ <span>Gerçek gönderimdir: <b>6 SMS</b> kontörü düşer. Saat penceresi deneme gönderiminde uygulanmaz. Deneme, Gönderim Geçmişi'nde "Deneme" etiketiyle görünür; başvuruya kod yazılmaz.</span></div>
+    </div>
+    <div class="ma"><span class="btn">Vazgeç</span><span class="btn primary">📤 Gönder</span></div>
+  </div>
+</div>
+
+<script>
+  // Sekmeler
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === t.dataset.p));
+  });
+  // Kip: ✎ şerit + Metin sekmesi birlikte
+  let duzen = false;
+  function kipDegis() {
+    duzen = !duzen;
+    document.getElementById('serit').classList.toggle('goster', !duzen);
+    document.getElementById('p-metin').classList.toggle('goster', !duzen);
+    document.getElementById('kalem').classList.toggle('acik', duzen);
+    document.getElementById('govde').readOnly = !duzen;
+  }
+  // Kanal: SMS / E-posta (Konu yalnız e-postada)
+  function kanalDegis() {
+    if (!duzen) return;
+    const k = document.getElementById('kanal'), sms = k.textContent === 'SMS';
+    k.textContent = sms ? 'E-posta' : 'SMS';
+    document.getElementById('konuSatir').style.display = sms ? '' : 'none';
+    const a = document.getElementById('avatar'); a.textContent = sms ? '✉' : '📱'; a.classList.toggle('eposta', sms);
+  }
+  // Değişken çipi imlece eklenir
+  function ekle(v) {
+    if (!duzen) return;
+    const t = document.getElementById('govde'), s = t.selectionStart, e = t.selectionEnd;
+    t.value = t.value.slice(0, s) + v + t.value.slice(e); t.focus(); t.selectionStart = t.selectionEnd = s + v.length; hesapla();
+  }
+  // Sayaç + önizleme
+  let ornek = '482913';
+  function yeniKod() { ornek = String(100000 + Math.floor(Math.random() * 900000)); document.querySelector('.oniz-ayar .mono').textContent = ornek; hesapla(); }
+  function hesapla() {
+    const g = document.getElementById('govde').value;
+    const dolu = g.replace(/@ONAYKODU|\{\{onay_kodu\}\}/gi, ornek).replace(/\{\{kurum\}\}/g, 'Koşuyolu').replace(/\{\{hasta_ad\}\}/g, 'Ayşe Kaya');
+    // GSM 7-bit tabloda olmayan Türkçe harfler (ö ü Ö Ü Ç tabloda var) mesajı UCS-2'ye geçirir.
+    const ucs = /[ığşİĞŞç]/.test(dolu);
+    const n = dolu.length, tek = ucs ? 70 : 160, parca = ucs ? 67 : 153;
+    const adet = n <= tek ? 1 : Math.ceil(n / parca);
+    document.getElementById('kar').textContent = n;
+    document.querySelector('#kar + i').textContent = '/ 1 SMS = ' + tek;
+    document.getElementById('kod').textContent = ucs ? 'UCS-2' : 'GSM 7-bit';
+    document.getElementById('kodnot').textContent = ucs ? 'Türkçe harf var' : 'Türkçe harf yok';
+    document.getElementById('adet').textContent = adet;
+    document.getElementById('parca').textContent = adet + ' parça';
+    const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    document.getElementById('balon').innerHTML = esc(g)
+      .replace(/@ONAYKODU|\{\{onay_kodu\}\}/gi, '<span class="dg">' + ornek + '</span>')
+      .replace(/\{\{kurum\}\}/g, '<span class="dg">Koşuyolu</span>')
+      .replace(/\{\{hasta_ad\}\}/g, '<span class="dg">Ayşe Kaya</span>')
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a>$1</a>');
+  }
+  hesapla();
+</script>
+</body>
+</html>
