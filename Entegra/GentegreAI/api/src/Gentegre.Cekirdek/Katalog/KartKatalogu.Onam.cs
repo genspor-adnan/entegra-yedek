@@ -81,8 +81,9 @@ public static partial class KartKatalogu
         {
             ["durum"] = (short)1,
             ["kanal"] = (short)1,
-            ["saat_bas"] = (short)9,
-            ["saat_bit"] = (short)20,
+            // SAAT SINIRI YOK (kullanıcı 17.11.2026: "yeni şablonda gönderim saati varsayılanı da 0 olsun"): 0/0 = her saat.
+            ["saat_bas"] = (short)0,
+            ["saat_bit"] = (short)0,
         },
         Alanlar: new KartAlani[]
         {
