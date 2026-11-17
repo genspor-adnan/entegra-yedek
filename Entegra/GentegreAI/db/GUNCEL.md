@@ -102,7 +102,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_basvuru_radyoloji_istem_esitle` | `1243_sevkli_accession_kabulde.sql` | 1242_basvuru_radyoloji_istem_esitle.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
 | `fn_belge_cikis_mi` | `1360_hasta_fisi_turu.sql` | 1084_aktarim_belge.sql, 1172_aktarim_lot_defteri.sql |
-| `fn_belge_diptoplam` | `1278_diptoplam_tevkifat_orani.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql, 372_diptoplam_kdvli.sql |
+| `fn_belge_diptoplam` | `1366_diptoplam_iskonto2_tevkifat_dahil_iskonto.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql, 372_diptoplam_kdvli.sql, 1278_diptoplam_tevkifat_orani.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
 | `fn_belge_fis_geri_al` | `190_belge_fisle.sql` | — |
 | `fn_belge_fis_turu_uygun` | `1360_hasta_fisi_turu.sql` | 280_taahhut_belgesi_fislenmez.sql, 281_tahakkuk_fislenmez.sql, 429_uretim_v1.sql, 1167_stok_fisi_fislenmez.sql |

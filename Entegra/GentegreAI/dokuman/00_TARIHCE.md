@@ -7,6 +7,25 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Hasta verisi incelemesi (1-5) ve para incelemesi (1-3): dip toplam 1366
+
+Hasta verisi:
+- `/api/hasta-icmal/{id}`, `/api/basvuru/kvkk-durum`, `/api/enabiz/erisim`: hasta KAYIT KAPISI (`KayitErisimi` "hasta" -
+  şube, kapsam, portal, hekim). Portal hastası / dış doktor başkasının icmalini, KVKK durumunu açamaz.
+- e-Nabız EHR erişim anahtarı yalnız OTURUM SAHİBİ adına (başka `hekimId` → 403).
+- Hastanın belgesi (taraf, `hasta = 1`): `hasta` yetkisi + hasta kapsamı (personelse personel yolu da); `cari` ile
+  açılmaz. Hasta kartı doküman sekmesi `hasta` yetkisine bağlandı (hekim 404 alıyordu).
+- e-Nabız gönderimi: başvurunun bildirimi sonradan kapatıldıysa bekleyen paket gönderilmez, İPTAL (5); `*_SIL` hariç.
+
+Para (`fn_belge_diptoplam`, 1366 - 1278 kopyası + 3 değişiklik):
+- KDV (Hariç) satır matrahından (`tutar`, iki iskonto düşülmüş) - iskonto2 atlanıyordu (13x65 %10+%5: 76,05 → 72,25).
+- İskonto = iskontosuz net toplam - satır matrahları; Dahil belgede KDV ikinci kez düşülüyordu (110 %10: 9,09 → 10,00).
+- Web tevkifatı (`tevkifat_orani`, Delphi kodu yok) genel toplamdan düşer (1000 + 200, 4/10: 1200 → 1120).
+- KOSUYOLU ölçümü: başvurularda yeni hesap kayıtlı (Delphi) toplamla 3310/3359 örtüşür (eski 201/3359) - eski
+  fonksiyon aktarılmış iskontolu başvuru yeniden kaydedilince borcu YANLIŞ yükseltiyordu. Faturada 3348/3420
+  (eski 3335). Kayıtlı `genel_toplam` dosyayla değişmez. Döviz yolları değişmedi.
+- Test: `HastaVerisiVeDipToplamTestleri`.
+
 ## 18.11.2026 — Güvenlik incelemesi (kimlik, yetki, şube / kapsam): 10 bulgu düzeltildi
 
 - **Personel hesabı** (`/api/kimlik/personel-hesap`): toplu yol parolasız hesaba kart id'sini (tahmin edilebilir) yazmaz;

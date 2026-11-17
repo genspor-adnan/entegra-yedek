@@ -30,12 +30,16 @@ public static class HastaIcmalUclari
         var grup = yol.MapGroup("/api/hasta-icmal").WithTags("Hasta İcmali").RequireAuthorization();
 
         grup.MapGet("/{hastaId:int}", async (int hastaId, DateTime? bas, DateTime? bit,
-                                             VeriKaynagi veri, BaglamCozucu cozucu,
+                                             VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
                                              HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("hasta", Islem.Gor);
             baglam.YetkiIste("belge", Islem.Gor);
+            // HASTA KAYIT KAPISI (hasta verisi incelemesi 18.11.2026): yalnız yetki vardı - portal hastası / dış doktor
+            //   başka hastanın kimliğiyle ad, doğum, işlemler (SUT), ödemeler okuyabiliyordu. Hasta kartıyla aynı kural
+            //   (şube, kayıt kapsamı, portal, hekim kısıtı); kapsam dışı = bulunamadı.
+            await erisim.IsteAsync(baglam, "hasta", hastaId, "Hasta bulunamadı.", iptal);
             var baslangic = (bas ?? Saat.Bugun.AddMonths(-12)).Date;
             var bitis = (bit ?? Saat.Bugun).Date.AddDays(1);
             var sube = baglam.SubeId ?? 0;
@@ -46,7 +50,7 @@ public static class HastaIcmalUclari
                        coalesce(t.vkno, ''), coalesce(t.kod, ''), th.dogum_tarihi, coalesce(th.cinsiyet, 0)
                   from public.taraf t
                   left join public.taraf_hasta th on th.id = t.id
-                 where t.id = @p0
+                 where t.id = @p0 and t.hasta = 1
                 """, null, [hastaId], o => new
             {
                 id = o.GetInt32(0), ad = o.GetString(1),

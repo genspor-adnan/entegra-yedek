@@ -288,7 +288,9 @@ public static class DokumanUclari
     private static string YetkiKodu(string kartAdi) => kartAdi switch
     {
         "kisi" => "cari",
-        "hasta" => "personel",
+        // HASTA BELGESİ HASTA YETKİSİYLE (hasta verisi incelemesi 18.11.2026): "personel"di - hekim kendi hastasının
+        //   Belgeler sekmesinde 404 alıyordu. Asıl karar DokumanErisimi'nde (hastaya ait taraf kuralı).
+        "hasta" => "hasta",
         "ebelge-xslt" => "ebelge_xslt",
         "radyoloji-istem" => "radyoloji",
         "muayene" => "muayene",

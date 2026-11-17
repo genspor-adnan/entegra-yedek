@@ -77,6 +77,26 @@ public sealed class EnabizGonderimi
         int gonderilen = 0, hatali = 0;
         foreach (var p in paketler)
         {
+            // BİLDİRİM SONRADAN KAPATILDIYSA GİTMEZ (hasta verisi incelemesi 18.11.2026): itiraz eden hastanın başvurusunda
+            //   "e-Nabız Bildirimi" kaldırılınca kuyruktaki paketler yine Bakanlığa gidiyordu - kural yalnız üretimde
+            //   bakılıyordu. Gönderim anında yeniden bakılır; kapalıysa paket İPTAL (5). SİLME paketleri (*_SIL) hariç:
+            //   Bakanlıktaki kaydı kaldırmak için gider.
+            if (await _veri.TekDegerAsync<bool>("""
+                    select exists (select 1 from public.enabiz_paket p
+                                     join public.belge_basvuru bb on bb.id = p.belge_id
+                                     left join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                                    where p.id = @p0 and coalesce(bb.enabiz_bildirim, 1) = 0
+                                      and coalesce(t.kod, '') not like '%\_SIL' escape '\')
+                    """, [p.Id], iptal))
+            {
+                await _veri.CalistirAsync("""
+                    update public.enabiz_paket
+                       set durum = 5, hata_mesaj = 'Hastanın e-Nabız bildirimi kapatıldı - gönderilmedi.',
+                           degistirme_tarihi = now()
+                     where id = @p0
+                    """, [p.Id], iptal);
+                continue;
+            }
             var xml = await XmlUretAsync(p.Id, iptal);
             var (basarili, httpKod, kod, mesaj, yanit, sure) =
                 await GonderAsync(hesap, xml, iptal);

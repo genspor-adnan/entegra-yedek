@@ -206,6 +206,23 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         if (!Kurallar.TryGetValue(kaynak, out var kural))
             throw GentegreHatasi.Bulunamadi(yok);
 
+        // HASTANIN BELGESİ (hasta verisi incelemesi 18.11.2026): hasta da bir `taraf` - belgesi cari / personel
+        //   yetkisiyle açılıyordu; aktarımda her hasta müşteri işaretli olduğundan yalnız `cari` gören bir finans
+        //   kullanıcısı epikriz / görüntüleme raporu indirebiliyordu. Hasta tarafında kural HASTA: `hasta` yetkisi +
+        //   hasta listesinin kapsamı (şube, portal, hekim kısıtı). Aynı kişi personelse personel yolu da açık
+        //   (personel olarak kendi özlüğü).
+        if (kaynak == "taraf")
+        {
+            var tur = await veri.TekAsync(
+                "select coalesce(t.hasta, 0)::int, exists (select 1 from public.taraf_personel p where p.id = t.id) " +
+                "  from public.taraf t where t.id = @p0", [(int)kaynakId],
+                o => new[] { o.GetInt32(0), o.GetBoolean(1) ? 1 : 0 }, iptal);
+            if (tur is not null && tur[0] == 1)
+                kural = tur[1] == 1
+                    ? new Kural(["hasta", "personel"], ["hasta", "personel"])
+                    : new Kural(["hasta"], ["hasta"]);
+        }
+
         if (islem == Islem.Gor && kural.HerkeseGor) return;
 
         var yetkili = kural.Yetkiler.Where(y => baglam.Yetkiler.Var(y, islem)).ToList();

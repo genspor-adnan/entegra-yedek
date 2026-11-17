@@ -133,7 +133,7 @@ public static class EnabizMesajUclari
         // POST, GET değil: çağrı Bakanlık tarafında iz bırakır ve bizde de
         //   KVKK kaydı açar - yan etkisi olan bir işlem GET olmamalı.
         grup.MapPost("/erisim", async (
-            ErisimIstegi istek, EnabizErisimServisi servis, LogDeposu log, BaglamCozucu cozucu,
+            ErisimIstegi istek, EnabizErisimServisi servis, LogDeposu log, BaglamCozucu cozucu, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -142,8 +142,14 @@ public static class EnabizMesajUclari
             baglam.YetkiIste("enabiz.erisim", Islem.Degistir);
             if (istek.HastaId <= 0) throw GentegreHatasi.Dogrulama("Hasta seçilmeli.");
 
-            // Hekim verilmezse oturumun sahibi (kullanıcı zaten bir taraftır).
-            var hekimId = istek.HekimId ?? baglam.KullaniciId;
+            // YALNIZ KENDİ ADINA + GÖRÜNÜR HASTA (hasta verisi incelemesi 18.11.2026): istek herhangi bir hekim adına ve
+            //   herhangi bir şubenin hastası için Bakanlıktan EHR anahtarı alabiliyordu - hekimin hiç yapmadığı erişim
+            //   onun kimliğiyle Bakanlık izine düşerdi. Anahtar oturum sahibinin TCKN'siyle (hekim zaten e-Devlet ile
+            //   kendisi girer); hasta kullanıcının kapsamında olmalı.
+            if (istek.HekimId is { } istenen && istenen != baglam.KullaniciId)
+                throw GentegreHatasi.Yasak("e-Nabız erişimi yalnız kendi adınıza açılır.");
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
+            var hekimId = baglam.KullaniciId;
             var s = await servis.AnahtarAlAsync(istek.HastaId, hekimId, istek.MuayeneId,
                 istek.BelgeId, baglam.SubeId ?? 0, baglam.KullaniciId, baglam.Ip, iptal);
 

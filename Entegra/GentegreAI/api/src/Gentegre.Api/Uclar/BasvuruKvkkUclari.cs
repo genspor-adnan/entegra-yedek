@@ -46,10 +46,14 @@ public static class BasvuruKvkkUclari
         //     baska_sube    - bu şubede kayıt yok, başka şubede onay var (şube bazlı ayar açık)
         //     yok           - hiç kayıt yok
         grup.MapGet("/kvkk-durum", async (
-            int hastaId, int? haricBelgeId, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+            int hastaId, int? haricBelgeId, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            // HASTA KAPSAMI (hasta verisi incelemesi 18.11.2026): herhangi bir hasta kimliğiyle onay durumu, başvuru no,
+            //   şube ve SMS onay kodu okunabiliyordu (başka şubeden / portaldan geliş geçmişi). Hasta kartının kuralı.
+            await erisim.IsteAsync(baglam, "hasta", hastaId, "Hasta bulunamadı.", iptal);
             await using var b = await veri.AcAsync(iptal);
             var subeBazli = (await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_sube_bazli", "0", iptal)).Trim() == "1";
             var gun = int.TryParse((await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_gecerlilik_gun", "0", iptal)).Trim(), out var g) && g > 0 ? g : 0;
