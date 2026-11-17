@@ -25,7 +25,7 @@ export function kvkkBilgiSatiri(d: KvkkDurumu | null): { sinif: 'g' | 's' | 'b' 
     case 'reddetti':
       return { sinif: 'k', metin: `🚫 Hasta son başvurusunda (${gun(d.tarih)}, ${d.belgeNo}) ${d.kvkkOnay === 1 ? 'onayı reddetti' : 'onaysız kaldı'}. Bu başvuruda yeniden sorun.` };
     case 'baska_sube':
-      return { sinif: 'b', metin: `ℹ Hastanın ${d.sube} şubesinde ${gun(d.tarih)} tarihli onayı var; bu şube için ayrı onay gerekiyor (Başvuru Kartı Ayarları › KVKK onayı şube bazlı).` };
+      return { sinif: 'b', metin: `ℹ Hastanın ${d.sube} şubesinde ${gun(d.tarih)} tarihli onayı var; bu şube için ayrı onay gerekiyor (Başvuru Ayarları › KVKK onayı şube bazlı).` };
     default:
       return { sinif: 's', metin: '⚠ Hastanın KVKK onayı yok - KVKK Onay › SMS Gönder ya da Islak İmzalı Onay Alındı.' };
   }

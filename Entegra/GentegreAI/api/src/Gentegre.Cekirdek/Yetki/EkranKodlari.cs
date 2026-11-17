@@ -46,8 +46,8 @@ public static partial class EkranKodlari
         ["belge.kurum_fatura"] = "belge.satis",       // Kurumlar & Sigorta › Faturalar
         ["belge.alis_fatura"]  = "belge.alis",        // Stok & Hizmet › Alış Faturaları
         ["eczane.miad"]        = "stok",              // Eczane › Miad & Tüketim
-        ["kayit_kabul.ayar"]   = "ayar",              // Kayıt Kabul › Ayarlar › Başvuru Kartı Ayarları
-        ["kayit_kabul.hasta_ayar"] = "kayit_kabul.ayar", // Kayıt Kabul › Ayarlar › Hasta Kartı Ayarları (1355)
+        ["kayit_kabul.ayar"]   = "ayar",              // Kayıt Kabul › Ayarlar › Başvuru Ayarları
+        ["kayit_kabul.hasta_ayar"] = "kayit_kabul.ayar", // Kayıt Kabul › Ayarlar › Hasta Ayarları (1355)
         ["cari.tedarikci"]     = "cari",              // Stok & Hizmet › Tedarikçiler
         ["dis_doktor"]         = "personel",          // Kurumlar & Sigorta › Dış Doktorlar
         ["medula.kabul"]       = "medula.provizyon",  // Kayıt Kabul › Medula Kabul

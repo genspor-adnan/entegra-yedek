@@ -8,7 +8,8 @@ import { c } from '../dil/ceviri';
  * İki ekran da `kayit_kabul.ayar` yetkisiyle açılır; yazdıkları anahtarlar EkranKodlari.KayitKabulAyarAnahtarlari.
  * Eski adres (/kayit-kabul-ayarlar) Başvuru Kartı Ayarları'na yönlenir (App.tsx).
  */
-const BASLIK = { hasta: 'Hasta Kartı Ayarları', basvuru: 'Başvuru Kartı Ayarları' } as const;
+// Adlar (17.11.2026): "Hasta Ayarları" / "Başvuru Ayarları".
+const BASLIK = { hasta: 'Hasta Ayarları', basvuru: 'Başvuru Ayarları' } as const;
 
 export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'basvuru' }) {
   const aktif = bolum;

@@ -468,17 +468,19 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // KAYIT KABUL AYARLARI İKİ MENÜ (kullanıcı 17.11.2026: "hasta sekmesini 'Hasta Kartı Ayarları' ve Başvuru
     //   sekmesini 'Başvuru Kartı Ayarları' şeklinde 2 menü halinde Kayıt Kabul ana menüsü altında Ayarlar menüsü
     //   altına oluştur"). Eski "Kayıt Kabul Ayarları" (Genel / Hasta / Başvuru sekmeli) kalktı; aynı yetki kodu.
-    kaynak: 'hasta-karti-ayarlar', baslik: 'Hasta Kartı Ayarları',
-    yol: 'Kayıt Kabul › Ayarlar › Hasta Kartı Ayarları', ozelSayfa: true,
-    menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Hasta Kartı Ayarları', menuSira: 90,
+    // AD (kullanıcı 17.11.2026: "hasta kartı ayarları rename 'Hasta Ayarları'").
+    kaynak: 'hasta-karti-ayarlar', baslik: 'Hasta Ayarları',
+    yol: 'Kayıt Kabul › Ayarlar › Hasta Ayarları', ozelSayfa: true,
+    menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Hasta Ayarları', menuSira: 90,
     // Kendi ekran kodu (1355): menü kodu = yetki matrisi kodu (1003).
     ic: '🤕', yetkiKodu: 'kayit_kabul.hasta_ayar', urunModu: 2,
   },
   {
     // Başvuru Kartı Ayarları: Tahsilatta POS, SGK katılım payı, iskonto onay eşiği, KVKK / ETK onayı (1353).
-    kaynak: 'basvuru-karti-ayarlar', baslik: 'Başvuru Kartı Ayarları',
-    yol: 'Kayıt Kabul › Ayarlar › Başvuru Kartı Ayarları', ozelSayfa: true,
-    menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Başvuru Kartı Ayarları', menuSira: 91,
+    // AD (kullanıcı 17.11.2026: "başvuru kartı ayarları rename 'Başvuru Ayarları'").
+    kaynak: 'basvuru-karti-ayarlar', baslik: 'Başvuru Ayarları',
+    yol: 'Kayıt Kabul › Ayarlar › Başvuru Ayarları', ozelSayfa: true,
+    menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Başvuru Ayarları', menuSira: 91,
     ic: '🚑', yetkiKodu: 'kayit_kabul.ayar', urunModu: 2,
   },
   {
