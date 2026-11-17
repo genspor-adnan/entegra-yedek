@@ -55,6 +55,27 @@ public sealed class DenemeSiniriTestleri(ApiSunucuOlgusu api)
     }
 
     [VtFact]
+    public async Task Pasif_sablonda_deneme_gonderimi_basarili_gorunmez()
+    {
+        // KOD İNCELEME 17.11.2026 (9): kuyruk pasif şablonu sessizce atlıyordu, uç 200 dönüp SMS gelmiyordu.
+        await using var d = new TestDunyasi(api.Veri);
+        var rol = await d.RolAsync("bsab", "bildirim_sablon:gde");
+        var (istemci, _) = await KullaniciAsync(d, rol);
+        var kod = "test." + d.Onek;
+        var sablon = await api.Veri.TekDegerAsync<int>("""
+            insert into public.bildirim_sablon (kod, ad, kanal, govde, durum)
+            values (@p0, 'Test pasif', 1, 'gitmemeli', 0) returning id
+            """, [kod]);
+        d.Temizle($"delete from public.bildirim where sablon_id = {sablon}");
+        d.Temizle($"delete from public.bildirim_sablon where id = {sablon}");
+
+        var y = await istemci.PostAsJsonAsync($"/api/bildirim-sablon/{sablon}/deneme", new { alici = "05321234567" });
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, y.StatusCode);
+        Assert.Contains("pasif", JsonSerializer.Deserialize<JsonElement>(await y.Content.ReadAsStringAsync())
+            .GetProperty("hata").GetProperty("mesaj").GetString());
+    }
+
+    [VtFact]
     public async Task KVKK_onay_kodu_5_hatada_kilitlenir_ve_30_dakikada_eskir()
     {
         await using var d = new TestDunyasi(api.Veri);

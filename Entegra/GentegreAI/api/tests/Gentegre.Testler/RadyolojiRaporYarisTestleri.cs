@@ -96,6 +96,28 @@ public sealed class RadyolojiRaporYarisTestleri(ApiSunucuOlgusu api)
             "select metin from public.radyoloji_rapor_bolum where rapor_id = @p0", [rapor]));
     }
     [VtFact]
+    public async Task Onay_iptali_eski_surumle_reddedilir_dogru_surumle_raporu_taslaga_dondurur()
+    {
+        // KOD İNCELEME 17.11.2026 (10): iptal edilen onay, ekranın GÖRDÜĞÜ onay olmalı - arada değiştiyse 409.
+        await using var d = new TestDunyasi(api.Veri);
+        var (istem, rapor) = await IstemAsync(d, onayli: true);
+        var h = await IstemciAsync(d);
+        await api.Veri.CalistirAsync("update public.radyoloji_rapor set onaylayan_id = @p1 where id = @p0", [rapor, _uzman]);
+
+        var eski = await h.PostAsJsonAsync($"/api/radyoloji/rapor/{rapor}/onay-iptal?surum=1", new { });
+        Assert.Equal(HttpStatusCode.Conflict, eski.StatusCode);
+        Assert.Equal(3, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor where id = @p0", [rapor]));
+
+        var surum = await api.Veri.TekDegerAsync<string>("select xmin::text from public.radyoloji_rapor where id = @p0", [rapor]);
+        var y = await h.PostAsJsonAsync($"/api/radyoloji/rapor/{rapor}/onay-iptal?surum={surum}", new { });
+        Assert.True(y.IsSuccessStatusCode, $"{(int)y.StatusCode} {await y.Content.ReadAsStringAsync()}");
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor where id = @p0", [rapor]));
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>("select kilit::int from public.radyoloji_rapor where id = @p0", [rapor]));
+        Assert.Equal(3, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_istem where id = @p0", [istem]));
+        d.Temizle($"delete from public.islem_log where kayit_id = {rapor}");
+    }
+
+    [VtFact]
     public async Task Onay_ve_on_rapor_arada_degisen_metni_kabul_etmez()
     {
         await using var d = new TestDunyasi(api.Veri);

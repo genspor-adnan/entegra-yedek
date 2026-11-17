@@ -24,6 +24,9 @@ public static partial class RadyolojiUclari
 {
     public sealed record OnayIptalIstegi(string? Parola = null);
 
+    /// <summary>Onay iptalinde okunan rapor durumu (kilitsiz ön okuma ve kilit altında yeniden okuma).</summary>
+    private sealed record OnayliRapor(int IstemId, int Durum, int Kilit, int Onaylayan, int ImzaDokuman, string No, string Surum);
+
     /// <summary>
     /// Radyolog rolü: rol kartında "Radyolog" işaretli (rol.radyolog, 1365 - kod inceleme 17.11.2026). Rol KODU kalıbı
     /// ('%radyolog%') bırakıldı: harfe duyarlıydı ve adla iş bilmiyordu ('Radyolog' / 'rad_uzman' dışarıda,
@@ -89,28 +92,27 @@ public static partial class RadyolojiUclari
         });
 
         grup.MapPost("/rapor/{id:int}/onay-iptal", async (
-            int id, OnayIptalIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, KimlikServisi kimlik,
-            HttpContext ctx, CancellationToken iptal) =>
+            int id, string? surum, OnayIptalIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            KimlikServisi kimlik, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("rad.rapor_yaz");
             await using var baglanti = await veri.AcAsync(iptal);
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            var r = await baglanti.TekAsync("""
-                select r.istem_id, coalesce(r.durum, 1)::int, coalesce(r.kilit, 0)::int, r.onaylayan_id,
-                       coalesce(r.imza_dokuman_id, 0)::int, coalesce(r.rapor_no, '')
-                  from public.radyoloji_rapor r where r.id = @p0 for update
-                """, islem, [id], o => new
-                {
-                    IstemId = o.GetInt32(0), Durum = o.GetInt32(1), Kilit = o.GetInt32(2),
-                    Onaylayan = o.IsDBNull(3) ? (int?)null : o.GetInt32(3), ImzaDokuman = o.GetInt32(4), No = o.GetString(5),
-                }, iptal) ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
-            if (r.Durum != 3 || r.Kilit != 1) throw GentegreHatasi.IsKurali("Rapor onaylı değil.");
-            await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update", islem, [r.IstemId], iptal);
+            // 1) KİLİTSİZ OKUMA + ŞİFRE (kod inceleme 17.11.2026): bcrypt ve hatalı deneme kaydı satır kilidinden ÖNCE -
+            //   durum ucunun kuralı; kilit tutulurken şifre beklemek rapora / isteme dokunan her isteği (kayıt, teslim,
+            //   e-Nabız işçisi) bekletiyordu. Onaylayan aşağıda kilit altında sürümle yeniden doğrulanır.
+            Task<OnayliRapor?> OkuAsync(NpgsqlTransaction? tx) => baglanti.TekAsync("""
+                select r.istem_id, coalesce(r.durum, 1)::int, coalesce(r.kilit, 0)::int, coalesce(r.onaylayan_id, 0),
+                       coalesce(r.imza_dokuman_id, 0)::int, coalesce(r.rapor_no, ''), r.xmin::text
+                  from public.radyoloji_rapor r where r.id = @p0
+                """ + (tx is null ? "" : " for update"), tx, [id], o => (OnayliRapor?)new OnayliRapor(
+                o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetInt32(3), o.GetInt32(4), o.GetString(5), o.GetString(6)), iptal);
 
+            var on = await OkuAsync(null) ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            if (on.Durum != 3 || on.Kilit != 1) throw GentegreHatasi.IsKurali("Rapor onaylı değil.");
             // YALNIZ ONAYLAYAN: başkası basarsa onaylayanın parolası.
-            var onaylayan = r.Onaylayan ?? 0;
+            var onaylayan = on.Onaylayan;
             if (onaylayan != baglam.KullaniciId)
             {
                 if (onaylayan == 0) throw GentegreHatasi.IsKurali("Raporu onaylayan kişi kayıtlı değil; iptal edilemez.");
@@ -119,6 +121,15 @@ public static partial class RadyolojiUclari
                 await kimlik.BaskasininParolasiniDogrulaAsync(onaylayan, govde.Parola, baglam.Ip,
                     ctx.Request.Headers.UserAgent.ToString(), "rad_onay_iptal", baglam.KullaniciId, iptal);
             }
+
+            // 2) KİLİT + SÜRÜM: iptal edilen onay, ekranın GÖRDÜĞÜ onay olmalı - ekran açıldıktan sonra rapor yeniden
+            //   onaylandıysa / değiştiyse 409 (istemci tazeler). Kilit sırası diğer uçlarla aynı: önce istem, sonra rapor.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update", islem, [on.IstemId], iptal);
+            var r = await OkuAsync(islem) ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            if (surum != r.Surum || r.Onaylayan != onaylayan)
+                throw GentegreHatasi.Cakisma(new { surum = r.Surum });
+            if (r.Durum != 3 || r.Kilit != 1) throw GentegreHatasi.IsKurali("Rapor onaylı değil.");
 
             // DIŞARI ÇIKTIYSA İPTAL YOK: teslim / e-Nabız (gönderiliyor-gönderildi-silindi) / Teletıp ORU gönderildi.
             var engel = await baglanti.TekDegerAsync<string>("""

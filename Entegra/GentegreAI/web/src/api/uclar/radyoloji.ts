@@ -85,8 +85,10 @@ export const radyolojiUclari = {
   /** Kimin adına onay (17.11.2026): radyolog rolündeki onay yetkililer; `benRadyolog` ise seçim sorulmaz. */
   radyolojiOnayRadyologlari: () =>
     istek<{ benRadyolog: boolean; liste: { id: number; ad: string }[] }>('/api/radyoloji/onay-radyologlari'),
-  radyolojiRaporOnayIptal: (raporId: number, parola?: string) =>
-    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/onay-iptal`, parola ? { parola } : {}),
+  /** `surum`: ekranın gördüğü rapor sürümü - arada yeniden onaylandıysa / değiştiyse sunucu 409 döner. */
+  radyolojiRaporOnayIptal: (raporId: number, surum: string, parola?: string) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/onay-iptal?surum=${encodeURIComponent(surum)}`,
+      parola ? { parola } : {}),
   /** RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215): bugün onaylanan, ön rapor, ek rapor (7 gün), teslim bekleyen, eski HBYS. */
   radyolojiRaporOzet: () =>
     istek<{ bugunOnay: number; onRapor: number; ekRapor: number; teslimBekleyen: number; eskiHbys: number }>(

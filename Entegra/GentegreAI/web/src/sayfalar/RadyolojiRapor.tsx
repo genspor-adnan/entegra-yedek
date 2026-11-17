@@ -737,7 +737,7 @@ Devam edilsin mi?`, true)) return;
       parola = p;
     }
     await guvenli(async () => {
-      await api.radyolojiRaporOnayIptal(raporId, parola);
+      await api.radyolojiRaporOnayIptal(raporId, String(rapor?.surum ?? ''), parola);
       await yukle();
       mesaj(`${ad} iptal edildi; rapor taslağa döndü.`);
     });

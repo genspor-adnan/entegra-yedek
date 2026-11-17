@@ -54,6 +54,8 @@ public static class BildirimSablonKartUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("bildirim_sablon", Islem.Degistir);
+            // Kuyruğa yazar (deneme mesajı ve günlüğü): salt okunur oturum / şube göndermez (kod inceleme 17.11.2026).
+            baglam.YazmaIste();
             var alici = (istek.Alici ?? "").Trim();
             if (alici.Length == 0) throw GentegreHatasi.IsKurali("Alıcıyı girin (cep telefonu ya da e-posta).");
             await using var b = await veri.AcAsync(iptal);
@@ -78,6 +80,10 @@ public static class BildirimSablonKartUclari
                 var bid = await bildirim.KuyrugaEkleAsync(b, null, new BildirimIstegi(s.Kod, s.Kanal, alici,
                     Konu: s.Konu.Length > 0 ? "[DENEME] " + Doldur(s.Konu) : null, Govde: Doldur(s.Govde),
                     KullaniciId: baglam.KullaniciId, KaynakTur: 1287, KaynakId: id, Oncelik: 1), baglam.KullaniciId, baglam.SubeId, iptal);
+                // PASİF ŞABLON (kod inceleme 17.11.2026): kuyruk pasif şablonu sessizce atlar (null) - ekran "gönderildi"
+                //   deyip SMS hiç gelmiyordu.
+                if (bid is null)
+                    throw GentegreHatasi.IsKurali("Şablon pasif - deneme gönderilmedi. Durum'u Aktif yapıp kaydedin, sonra deneyin.");
                 return Results.Ok(new { bildirimId = bid });
             }
             catch (InvalidOperationException h)
