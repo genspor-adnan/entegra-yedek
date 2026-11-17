@@ -286,9 +286,9 @@ export function KartKimlikSeridi({
                Ünvan / Ad / Soyad tek hücre - "Ad Soyad" etiketi, altında "Dr. Ali Kaya"; düzenlemede üç kutu. */
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: personelTekAd
-                   ? 'minmax(0, 1.6fr) repeat(3, minmax(0, 1fr))'
+                   ? `minmax(0, 1.6fr) repeat(3, minmax(0, 1fr))${yeniMi ? '' : ' auto'}`
                    : kaynak === 'personel'
-                   ? '0.5fr repeat(5, minmax(0, 1fr))'
+                   ? `0.5fr repeat(5, minmax(0, 1fr))${yeniMi ? '' : ' auto'}`
                    // HASTADA ilk sütun Kimlik No - %40 dar (kullanıcı 19.10.2026: "kimlikno editi %40 azalt").
                    : kaynak === 'hasta' ? 'minmax(0, 0.6fr) repeat(4, minmax(0, 1fr))'
                    : 'repeat(5, minmax(0, 1fr))' }}>
@@ -337,6 +337,21 @@ export function KartKimlikSeridi({
               {/* ANA ROL GOREVIN SAGINDA (847, kullanici) - Is Bilgileri
                   kutusundan buraya tasindi; gorev ile rol birlikte okunur. */}
               {anaRolEk}
+              {/* PERSONEL DURUMU ANA ROLÜN SAĞINDA (kullanıcı 17.11.2026, başlıktan taşındı): aktif yeşil; işten
+                  çıkış tarihi girilmişse ya da durum pasifse kırmızı "Pasif" - çıkışı olan biri aktif görünmesin. */}
+              {kaynak === 'personel' && !yeniMi && (() => {
+                const cikis = String((detaylar.ozluk?.guncel[0]?.istenCikisTarihi as string | undefined) ?? '');
+                const pasif = cikis.length > 0 || Number(deger.durum) === 0;
+                return (
+                  <span className="alan personel-durum" data-testid="personel-durum">
+                    <span className="etiket">{c('Durum')}</span>
+                    <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
+                          title={cikis ? `${c('İşten çıkış')}: ${cikis}` : undefined}>
+                      {pasif ? c('Pasif') : c('Aktif')}
+                    </span>
+                  </span>
+                );
+              })()}
               {/* DURUM: personelde seritte YOK (baslikta rozet), HASTADA VAR ve
                   TC No'nun SAGINDA (kullanici) - hasta durumu dort degerli
                   (Aktif/Pasif/Aday/Vefat), rozet tek basina yetmiyor. */}

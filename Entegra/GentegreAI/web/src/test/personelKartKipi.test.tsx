@@ -62,6 +62,14 @@ describe('personel kartı görüntüleme / düzenleme kipi', () => {
     expect(screen.getByTestId('personel-avatar')).toBeTruthy();
   });
 
+  it('durum rozeti şeritte (Ana Rol sağında): aktif yeşil; işten çıkış tarihi varsa Pasif; yeni kartta yok', () => {
+    const { unmount } = render(<Sarmal yeniMi={false} />);
+    expect(screen.getByTestId('personel-durum').textContent).toContain('Aktif');
+    unmount();
+    render(<Sarmal yeniMi />);
+    expect(screen.queryByTestId('personel-durum')).toBeNull();
+  });
+
   it('yeni personel düzenlemede açılır', () => {
     render(<Sarmal yeniMi />);
     expect(inert()).toBe(false);

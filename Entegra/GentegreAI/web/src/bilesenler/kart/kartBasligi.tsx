@@ -33,27 +33,20 @@ const ROZETLER: Record<string, (b: KartBaslikBaglami) => ReactNode> = {
   //   cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
   //   "aktif" gorunmesin. Serit alani olarak ayrica cizilmez.
   //   DIS HEKIMDE baslik rozeti YOK (kullanici): durum seritte combo.
-  personel: ({ deger, meta, detaylar }) => {
+  // DURUM ŞERİTTE, GÖREV ROZETİ YOK (kullanıcı 17.11.2026: "başlıktan durumu ana rol sağına taşı.. durum sağındaki
+  //   radyoloji yazan rozeti kaldır"): Aktif / Pasif rozeti kimlik şeridinde Ana Rol'ün sağında (KartKimlikSeridi
+  //   personelDurumu); görev zaten şeritte alan olarak duruyor. Başlıkta kıdem ve belge uyarıları kalır.
+  personel: ({ detaylar }) => {
     const ozluk = detaylar.ozluk?.guncel[0];
     const cikis = String((ozluk?.istenCikisTarihi as string | undefined) ?? '');
-    const pasif = cikis.length > 0 || Number(deger.durum) === 0;
-    // Kidem rozetin SAGINDA duz yazi (kullanici; "Özet" kutusu kalkti).
     const kidem = kidemMetni(
       String((ozluk?.iseGirisTarihi as string | undefined) ?? ''), cikis || null);
-    // Görev de basliktan gorunsun (kullanici): kod -> ad.
-    const gorevKod = String(deger.gorevId ?? '');
-    const gorev = gorevKod ? meta?.alanlar.find(a => a.ad === 'gorevId')?.kodlar?.[gorevKod] : null;
     // BELGE DURUMU (mockup personel_belge_takibi.html): hangi sekmede olursan ol.
     const belge = detaylar.belgeDurumu?.guncel ?? [];
     const eksik = belge.filter(x => (Number(x.durum) === 1 && Number(x.zorunlu) === 1) || Number(x.durum) === 2).length;
     const yakin = belge.filter(x => Number(x.durum) === 3).length;
     return (
       <span style={{ ...ortada, gap: 8 }}>
-        <span className={`rozet ${pasif ? 'hata' : 'ok'}`}
-              title={cikis ? `İşten çıkış: ${cikis}` : undefined}>
-          {pasif ? 'Pasif' : 'Aktif'}
-        </span>
-        {gorev && <span className="rozet gri">{gorev}</span>}
         {kidem && (
           <span style={{ fontWeight: 400, fontSize: 11.5, opacity: .9 }}>
             Kıdem {kidem}

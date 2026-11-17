@@ -752,6 +752,9 @@ tr.rv-iptal .rozet.hata         { background: var(--soluk); color: #fff; border-
 .kaid .kaid-kipli > .kaid-hasta-sar { flex: 1 1 auto; min-width: 0; padding-right: 30px }
 /* Personel avatarı şeridin sol başında, alan yüksekliğine ortalı (17.11.2026). */
 .kaid .kaid-kipli > .kaid-kisi-avatar { align-self: center }
+/* Personel durum rozeti şeritte (Ana Rol'ün sağında): etiket üstte, rozet altta - alanlarla aynı hizada. */
+.kaid .personel-durum { display: flex; flex-direction: column; justify-content: flex-end; gap: 3px }
+.kaid .personel-durum .rozet { align-self: flex-start }
 /* ✎ BAŞLIĞIN SAĞ ÜST KÖŞESİNDE, ÇERÇEVESİZ (kullanıcı 09.11.2026 fiyat listesi: "kalemi başlığın sağ üst
    köşesine ekle, çerçeve olmasın"): akıştan çıkar, şeridin köşesine oturur; ızgara sağdan yer bırakır. */
 .kaid .kaid-kipli > .bs-kalem { position: absolute; right: 0; top: 0; height: 24px; width: 26px; font-size: 14px }
