@@ -25,19 +25,29 @@ public static partial class RadyolojiUclari
         grup.MapPost("/rapor/{id:int}/durum", async (
             int id, string hedef, string? surum, int? onaylayacakId, DurumIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri,
             LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz, Gentegre.Api.Servisler.EImzaServisi eimza,
-            HttpContext ctx, CancellationToken iptal) =>
+            Gentegre.Api.Servisler.KimlikServisi kimlik, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             // HEDEF BEYAZ LİSTE (kod inceleme raporu 28.10.2026 B06): tanımsız hedef "ön rapor" koluna düşüyordu.
             var onayMi = string.Equals(hedef, "onay", StringComparison.OrdinalIgnoreCase);
             if (!onayMi && !string.Equals(hedef, "on-rapor", StringComparison.OrdinalIgnoreCase))
                 throw GentegreHatasi.Dogrulama("Geçersiz hedef: onay ya da on-rapor olmalı.", new AlanHatasi("hedef", "Geçersiz."));
-            baglam.AksiyonIste(onayMi ? "rad.rapor_onayla" : "rad.rapor_yaz");
+            // ONAY YETKİSİ (17.11.2026): radyolog kendi adına; radyolog olmayan seçilen radyolog adına (OnaylayanCozAsync).
+            if (!onayMi) baglam.AksiyonIste("rad.rapor_yaz");
             // ONAYLAYACAK (1199): ön rapor bir uzmana gönderilir - seçilmeden gönderilmez.
             if (!onayMi && onaylayacakId is not > 0)
                 throw GentegreHatasi.Dogrulama("Onaylayacak uzmanı seçin.", new AlanHatasi("onaylayacakId", "Zorunlu."));
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // KİMİN ADINA (17.11.2026): başkası adına onayda o radyoloğun parolası - satır kilidinden ÖNCE (bcrypt yavaş).
+            var onaylayanId = baglam.KullaniciId;
+            if (onayMi)
+            {
+                onaylayanId = await OnaylayanCozAsync(baglanti, null, baglam, govde?.AdinaId, iptal);
+                if (onaylayanId != baglam.KullaniciId)
+                    await kimlik.BaskasininParolasiniDogrulaAsync(onaylayanId, govde?.Parola ?? "", baglam.Ip,
+                        ctx.Request.Headers.UserAgent.ToString(), "rad_onay_adina", iptal);
+            }
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             // SATIR KİLİDİ (B04 / B06): istem ve rapor kilitlenir; kilit ve onay uygunluğu KİLİDİN ALTINDA denetlenir -
@@ -49,7 +59,7 @@ public static partial class RadyolojiUclari
             //   engeli kalktı; imzalı onay ayrı uçtan (POST /rapor/{id}/imzala) - kilit / sürüm / onay kuralları ortak.
 
             if (onayMi)
-                await RaporOnaylaAsync(baglanti, islem, id, istemId, baglam, iptal);
+                await RaporOnaylaAsync(baglanti, islem, id, istemId, onaylayanId, iptal);
             else
             {
                 // Seçilen kişi gerçekten onaylayabilmeli (aktif + rad.rapor_onayla) - yoksa rapor kimsenin
@@ -78,7 +88,9 @@ public static partial class RadyolojiUclari
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRapor, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new Dictionary<string, string> { ["durum"] = onayMi ? "Onaylandı" : "Ön rapor" },
+                onaylayanId != baglam.KullaniciId
+                    ? new Dictionary<string, string> { ["durum"] = "Onaylandı", ["onaylayan"] = onaylayanId.ToString(), ["adina"] = "parola ile" }
+                    : new Dictionary<string, string> { ["durum"] = onayMi ? "Onaylandı" : "Ön rapor" },
                 iptal: iptal);
 
             await islem.CommitAsync(iptal);

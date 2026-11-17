@@ -1,4 +1,6 @@
 import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { ParolaPenceresi } from './radyoloji/ParolaPenceresi';
+import { useOturum } from '../kimlik/OturumBaglami';
 import { UsbCipIkon } from '../bilesenler/UsbCipIkon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
@@ -195,6 +197,15 @@ export function RadyolojiRapor() {
   const [kritikModal, setKritikModal] = useState(false);
   // e-İMZA (1337): "e-İmzala" kart + PIN penceresinden geçer; "Onayla" e-imzasız onaydır (17.11.2026, ikisi ayrı düğme).
   const [eimzaModal, setEimzaModal] = useState(false);
+  /** e-İmza başkası (seçilen radyolog) adına mı (17.11.2026); kendi adına ise undefined. */
+  const [eimzaAdina, setEimzaAdina] = useState<number | undefined>(undefined);
+  /** Radyolog şifresi penceresi (onay adına / onay iptali). */
+  const [parolaIstek, setParolaIstek] = useState<{ kisi: string; amac: string; coz(p: string | null): void } | null>(null);
+  const parolaSor = (kisi: string, amac: string) =>
+    new Promise<string | null>(coz => setParolaIstek({ kisi, amac, coz }));
+  const { kullanici, aksiyonVar } = useOturum();
+  /** Radyolog = rapor onaylama yetkisi (rad.rapor_onayla): kendi adına doğrudan onaylar / imzalar. */
+  const radyologMu = aksiyonVar('rad.rapor_onayla');
   /** e-İmza hesabı aktif mi (1337): "e-İmzala" düğmesi buna bağlı; okunamazsa null (düğme açık, pencere söyler). */
   const [eimzaAktif, setEimzaAktif] = useState<boolean | null>(null);
   useEffect(() => {
@@ -676,15 +687,76 @@ export function RadyolojiRapor() {
    * ONAYLA / e-İMZALA AYRI (kullanıcı 17.11.2026: "Onayla imzala butonunu 2'ye böl: Onayla (e-imza olmadan doktorun
    * onayladığı), e-İmzala (e-imza ile onaylanan)"). 'onay' = e-imzasız onay; 'eimza' = kart penceresi (1337).
    */
+  /** RADYOLOG SEÇİMİ (17.11.2026): kullanıcı radyologsa kendisi; değilse onay yetkili radyologlar arasından seçilir. */
+  const radyologSec = async (): Promise<{ id: number; ad: string; kendisi: boolean } | null> => {
+    if (radyologMu && kullanici) return { id: kullanici.id, ad: kullanici.ad, kendisi: true };
+    let liste: { id: number; ad: string }[] = [];
+    if (!await guvenli(async () => { liste = await api.radyolojiOnayUzmanlari() })) return null;
+    if (liste.length === 0) { mesaj('Bu şubede rapor onaylama yetkisi olan radyolog yok.'); return null }
+    let son = '';
+    try { son = localStorage.getItem('rad.sonUzman') ?? '' } catch { /* yerel depo kapalı */ }
+    const varsayilan = liste.some(u => String(u.id) === son) ? son : String(liste[0].id);
+    const secilen = await listeSor('Rapor hangi radyolog adına onaylanacak?',
+      liste.map(u => ({ kod: String(u.id), ad: u.ad })), varsayilan, 'Radyolog');
+    if (!secilen) return null;
+    try { localStorage.setItem('rad.sonUzman', secilen) } catch { /* yerel depo kapalı */ }
+    const u = liste.find(x => String(x.id) === secilen)!;
+    return { id: u.id, ad: u.ad, kendisi: u.id === kullanici?.id };
+  };
+
+  /**
+   * ONAY / e-İMZA İPTALİ (17.11.2026): yalnız onaylayan radyolog; başkası basarsa onaylayanın şifresi sorulur.
+   * Teslim edilmiş / e-Nabız / Teletıp'a gitmiş raporda sunucu reddeder (düzeltme ek raporla).
+   */
+  const onayIptal = async () => {
+    const raporId = Number(rapor?.id ?? 0);
+    if (!raporId) return;
+    const imzali = Number(rapor?.imzaDokumanId ?? 0) > 0;
+    const ad = imzali ? 'e-İmza' : 'Onay';
+    let parola: string | undefined;
+    if (Number(rapor?.onaylayanId ?? 0) === kullanici?.id) {
+      if (!await onay(`⚠ ${ad} iptal edilecek: rapor taslağa döner, kilidi açılır ve yeniden düzenlenebilir.
+
+Devam edilsin mi?`, true)) return;
+    } else {
+      const p = await parolaSor(String(rapor?.onaylayan ?? '') || c('Onaylayan radyolog'),
+                                imzali ? c('e-imzayı iptal etmek') : c('onayı iptal etmek'));
+      if (!p) return;
+      parola = p;
+    }
+    await guvenli(async () => {
+      await api.radyolojiRaporOnayIptal(raporId, parola);
+      await yukle();
+      mesaj(`${ad} iptal edildi; rapor taslağa döndü.`);
+    });
+  };
+
   const durumaGecir = async (hedef: 'on-rapor' | 'onay' | 'eimza') => {
     if (islemdeRef.current) return;
     // ONAY SORUSU (K55): onay geri alınamaz - kilitlemeden önce sorulur.
-    if (hedef === 'onay' && !await onay('Rapor e-imza olmadan onaylanacak ve kilitlenecek. Devam edilsin mi?')) return;
+    if (hedef === 'onay') {
+      if (!await onay('Rapor e-imza olmadan onaylanacak ve kilitlenecek. Devam edilsin mi?')) return;
+      // KİMİN ADINA (17.11.2026): radyolog kendi adına; değilse radyolog seçilir + o radyoloğun şifresi.
+      const sec = await radyologSec();
+      if (!sec) return;
+      let adina: { id: number; parola: string } | undefined;
+      if (!sec.kendisi) {
+        const parola = await parolaSor(sec.ad, c('raporu onaylamak'));
+        if (!parola) return;
+        adina = { id: sec.id, parola };
+      }
+      await kaydetVeGecir('onay', undefined, adina);
+      return;
+    }
     if (hedef === 'eimza') {
       let eimza = false;
       if (!await guvenli(async () => { eimza = (await api.eimzaAyar()).aktif })) return;
       if (!eimza) { mesaj('Bu kurumda e-imza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza).'); return }
       if (!await onay('Rapor e-imza ile imzalanıp onaylanacak ve kilitlenecek. Devam edilsin mi?')) return;
+      // Radyolog değilse radyolog seçilir; kimliği kartın kendisi (çip + PIN) kanıtlar.
+      const sec = await radyologSec();
+      if (!sec) return;
+      setEimzaAdina(sec.kendisi ? undefined : sec.id);
       setEimzaModal(true);
       return;
     }
@@ -711,14 +783,14 @@ export function RadyolojiRapor() {
       //   burada yutulur, aşağıda pencereye fırlatılır.
       try {
         // 1) Hazırlık: kilit / sürüm / onaylanabilirlik + RESMİ RAPOR NO - imzalanan belge numarayı taşır.
-        const hazir = await api.radyolojiRaporImzaHazirla(raporId, surum);
+        const hazir = await api.radyolojiRaporImzaHazirla(raporId, surum, eimzaAdina);
         const veri = await api.radyolojiRaporCikti(raporId) as unknown as Parameters<typeof raporBelgesiHtml>[0];
         const html = await raporBelgesiHtml(veri, `Radyoloji Raporu ${String(veri.rapor.hastaAdi ?? '')} ${hazir.raporNo}`.trim());
         const mimeType = 'text/html';
         const imzaBase64 = ayar.kip === 'istemci'
           ? await genSignerImzala(ayar.url, ayar.apiKey, kart, pin, utf8Base64(html), mimeType) : undefined;
         // 2) İmza + onay: hazırlığın verdiği sürümle (rapor no ataması sürümü ilerletti).
-        await api.radyolojiRaporImzala(raporId, hazir.surum, { html, mimeType, sertifika: kart, imzaBase64, pin: ayar.kip === 'sunucu' ? pin : undefined });
+        await api.radyolojiRaporImzala(raporId, hazir.surum, { html, mimeType, sertifika: kart, imzaBase64, pin: ayar.kip === 'sunucu' ? pin : undefined, adinaId: eimzaAdina });
       } catch (h) { hataMesaji = hataMetni(h) }
     });
     if (!tamam || hataMesaji) throw new Error(hataMesaji || 'Rapor kaydedilemedi.');
@@ -726,9 +798,10 @@ export function RadyolojiRapor() {
     mesaj('Rapor e-imza ile imzalandı ve onaylandı; artık kilitlidir.');
   };
 
-  const kaydetVeGecir = (hedef: 'on-rapor' | 'onay', uzman?: { id: number; not: string }) => kaydet(async ({ raporId, surum }) => {
+  const kaydetVeGecir = (hedef: 'on-rapor' | 'onay', uzman?: { id: number; not: string },
+                         adina?: { id: number; parola: string }) => kaydet(async ({ raporId, surum }) => {
     if (!raporId) throw new Error('Rapor bulunamadı.');
-    await api.radyolojiRaporDurum(raporId, hedef, surum, uzman?.id, uzman?.not);
+    await api.radyolojiRaporDurum(raporId, hedef, surum, uzman?.id, uzman?.not, adina);
     mesaj(hedef === 'onay'
       ? 'Rapor onaylandı (e-imzasız); artık kilitlidir.'
       : 'Ön rapor uzman onayına gönderildi.');
@@ -777,12 +850,22 @@ export function RadyolojiRapor() {
           <button className="d" disabled={kilitli || islemde || cekimYok}
                   onClick={() => void durumaGecir('on-rapor')}>➜ Uzmana Gönder</button>
           {/* ONAYLA / e-İMZALA (17.11.2026): e-imzasız onay ve kartla imzalı onay ayrı düğmeler. */}
-          <button className="d basari" disabled={kilitli || islemde || cekimYok} data-testid="rapor-onayla"
-                  title={c('Raporu e-imza olmadan onaylar ve kilitler')}
-                  onClick={() => void durumaGecir('onay')}>✔ {c('Onayla')}</button>
-          <button className="d basari" disabled={kilitli || islemde || cekimYok || eimzaAktif === false} data-testid="rapor-eimzala"
-                  title={eimzaAktif === false ? c('e-İmza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza)') : c('Raporu e-imza (kart / USB token) ile imzalar ve onaylar')}
-                  onClick={() => void durumaGecir('eimza')}><UsbCipIkon /> {c('e-İmzala')}</button>
+          {/* ONAYLANDIYSA İPTAL (17.11.2026): e-imzasız onayda "Onay İptal", e-imzalıda "e-İmza İptal". */}
+          {kilitli && Number(rapor?.imzaDokumanId ?? 0) === 0
+            ? <button className="d teh" disabled={islemde} data-testid="rapor-onay-iptal"
+                      title={c('Onayı iptal eder; rapor taslağa döner (yalnız onaylayan radyolog)')}
+                      onClick={() => void onayIptal()}>⟲ {c('Onay İptal')}</button>
+            : <button className="d basari" disabled={kilitli || islemde || cekimYok} data-testid="rapor-onayla"
+                      title={radyologMu ? c('Raporu e-imza olmadan onaylar ve kilitler') : c('Radyolog seçilir; onun şifresiyle e-imza olmadan onaylanır')}
+                      onClick={() => void durumaGecir('onay')}>✔ {c('Onayla')}</button>}
+          {kilitli && Number(rapor?.imzaDokumanId ?? 0) > 0
+            ? <button className="d teh" disabled={islemde} data-testid="rapor-eimza-iptal"
+                      title={c('e-İmzayı ve onayı iptal eder; rapor taslağa döner (yalnız imzalayan radyolog)')}
+                      onClick={() => void onayIptal()}><UsbCipIkon /> {c('e-İmza İptal')}</button>
+            : <button className="d basari" disabled={kilitli || islemde || cekimYok || eimzaAktif === false} data-testid="rapor-eimzala"
+                      title={eimzaAktif === false ? c('e-İmza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza)')
+                             : radyologMu ? c('Raporu e-imza (kart / USB token) ile imzalar ve onaylar') : c('Radyolog seçilir; onun e-imza çipiyle imzalanır')}
+                      onClick={() => void durumaGecir('eimza')}><UsbCipIkon /> {c('e-İmzala')}</button>}
           <button className="d teh" disabled={kilitli}
                   onClick={() => setKritikModal(true)}>⚠ Kritik Bulgu Bildir</button>
           {kilitli && <button className="d" onClick={() => void addendum()}>＋ Ek Rapor</button>}
@@ -1257,6 +1340,11 @@ export function RadyolojiRapor() {
                         onUygula={async sId => { await guvenli(() => sablonUygula(sId)) }}
                         onBos={() => void guvenli(bosRapor)}
                         onKapat={() => setSablonModal(false)} />
+      )}
+      {parolaIstek && (
+        <ParolaPenceresi kisi={parolaIstek.kisi} amac={parolaIstek.amac}
+          onTamam={p => { parolaIstek.coz(p); setParolaIstek(null) }}
+          onKapat={() => { parolaIstek.coz(null); setParolaIstek(null) }} />
       )}
       {eimzaModal && (
         <EImzaModal baslik="e-İmza ile Onayla" onKapat={() => setEimzaModal(false)} onImzala={eimzaIleOnayla} />

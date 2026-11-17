@@ -24,7 +24,8 @@ public static partial class RadyolojiUclari
 
     /// <summary>MetinHtml (1195): editörün biçimli hali - sunucuda temizlenir; Metin düz hali (e-Nabız / HL7).</summary>
     /// <summary>Durum geçişi gövdesi (1200): uzmana gönderirken bırakılan not. Boş gövde de geçerli.</summary>
-    public sealed record DurumIstegi(string? Not = null);
+    /// <summary>AdinaId / Parola (17.11.2026): radyolog olmayan kullanıcı seçilen radyolog adına onaylar - o kişinin parolasıyla.</summary>
+    public sealed record DurumIstegi(string? Not = null, int? AdinaId = null, string? Parola = null);
 
     public sealed record BolumIstegi(int? Id, int Sira, string Baslik, string Metin, short Yazdir, string? MetinHtml = null);
     public sealed record AlanIstegi(string AlanKod, string AlanAd, string Deger);
@@ -819,6 +820,7 @@ public static partial class RadyolojiUclari
         CihazAracEkle(grup);
         OnayVeBulguEkle(grup);
         ImzaEkle(grup);               // e-imza ile onay (1337)
+        OnayIptalEkle(grup);          // onay / e-imza iptali, radyolog adına onay (17.11.2026)
     }
 
 

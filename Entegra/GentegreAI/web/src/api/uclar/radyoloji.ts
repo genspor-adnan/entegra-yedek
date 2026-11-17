@@ -74,9 +74,16 @@ export const radyolojiUclari = {
 
   /** Ön rapor / onay. Onay ön kosullari sunucuda (fn_radyoloji_rapor_onaylanabilir). */
   /** `surum`: onaylanan metnin sürümü (kaydın döndürdüğü) - arada değiştiyse sunucu 409 döner. */
-  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string, onaylayacakId?: number, not?: string) =>
+  /** `adina` (17.11.2026): radyolog olmayan kullanıcı seçilen radyolog adına onaylar - o kişinin şifresiyle. */
+  radyolojiRaporDurum: (raporId: number, hedef: 'on-rapor' | 'onay', surum: string, onaylayacakId?: number, not?: string,
+                        adina?: { id: number; parola: string }) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/durum?hedef=${hedef}&surum=${encodeURIComponent(surum)}`
-      + (onaylayacakId ? `&onaylayacakId=${onaylayacakId}` : ''), { not: not ?? '' }),
+      + (onaylayacakId ? `&onaylayacakId=${onaylayacakId}` : ''),
+      { not: not ?? '', ...(adina ? { adinaId: adina.id, parola: adina.parola } : {}) }),
+  /** ONAY / e-İMZA İPTALİ (17.11.2026): yalnız onaylayan radyolog; başkası onaylayanın şifresiyle. Teslim / e-Nabız /
+   *  Teletıp'a gitmiş raporda sunucu reddeder. */
+  radyolojiRaporOnayIptal: (raporId: number, parola?: string) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/onay-iptal`, parola ? { parola } : {}),
   /** RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215): bugün onaylanan, ön rapor, ek rapor (7 gün), teslim bekleyen, eski HBYS. */
   radyolojiRaporOzet: () =>
     istek<{ bugunOnay: number; onRapor: number; ekRapor: number; teslimBekleyen: number; eskiHbys: number }>(

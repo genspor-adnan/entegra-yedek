@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 17.11.2026 — Radyoloji raporu: Onayla / e-İmzala ayrı, radyolog adına onay, onay / e-imza iptali; ayar sayfası deseni
+
+- **Onayla** (e-imzasız) ve **e-İmzala** (USB çip ikonu) ayrı düğmeler; 1337'deki "e-imza hesabı aktifken imzasız onay yok" engeli kalktı.
+- **Radyolog** = aktif hesap + `rad.rapor_onayla`: kendi adına doğrudan. Radyolog olmayan (rapor yazma yetkili) kullanıcı radyolog
+  seçer; Onayla'da o radyoloğun şifresi (`KimlikServisi.BaskasininParolasiniDogrulaAsync` - girişteki sayaç / kilit, 422),
+  e-İmzala'da o radyoloğun çipi. `onaylayan_id` / `imzalayan_id` seçilen radyolog; log'da `onaylayan`.
+- **Onay İptal / e-İmza İptal** (`POST /api/radyoloji/rapor/{id}/onay-iptal`): yalnız onaylayan (başkası onun şifresiyle).
+  Teslim edilmiş / e-Nabız'a (2-3-6) / Teletıp ORU'su gönderilmiş raporda yok (Ek Rapor). Gitmemiş e-Nabız paketi 5,
+  bekleyen ORU 4; rapor taslağa (1) + kilit 0, istem 3; rapor no korunur, imzalı XML depoda iz.
+- Rapor kartı: yazım görüntüleme / düzenleme kipi (✎ Şablon etiketinin sağında; görüntülemede biçim satırı ve biçim
+  çubuğu gizli, radyolog değerlendirmesi ve kritik bulgu değişmez); "Radyoloji Raporu" başlığı.
+- Ayar sayfaları (Genel, Kasa, Stok, Belge, Demirbaş, Hasta, Başvuru, Üretim): otomatik kayıt kalktı - solda "Kaydet &
+  Uygula", sağda "Kapat" (AyarSayfaBasligi, useAyarlar taslakli). Kayıt Kabul ayarları iki menü: Hasta / Başvuru Ayarları
+  (1355, 1358; yeni kod `kayit_kabul.hasta_ayar`). Ayar beyaz listesi: KVKK anahtarları + `kasa.duzenleme_gun`.
+
 ## 17.11.2026 — KVKK onay geçerliliği (1353), KVKK Onay menüsü ve kod penceresi; bildirim şablonu kartı (1354)
 
 - **1353** `referans`: `basvuru.kvkk_sube_bazli` (0 tüm şubeler · 1 her şube ayrı), `basvuru.kvkk_gecerlilik_gun` (0 süresiz).

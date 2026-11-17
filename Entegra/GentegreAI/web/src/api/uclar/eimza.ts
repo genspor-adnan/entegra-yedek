@@ -22,12 +22,14 @@ export const eimzaUclari = {
   /** Sunucu kipi: sunucudaki GenSigner'ın gördüğü kartlar. */
   eimzaSertifikalar: () => istek<{ sertifikalar: EImzaSertifika[] }>('/api/eimza/sertifikalar'),
   /** İmza hazırlığı: kilit / sürüm / onaylanabilirlik denetimi + resmi rapor no; dönen sürümle çıktı çizilip imzalanır. */
-  radyolojiRaporImzaHazirla: (raporId: number, surum: string) =>
+  radyolojiRaporImzaHazirla: (raporId: number, surum: string, adinaId?: number) =>
     gonder<{ raporNo: string; surum: string; kip: 'istemci' | 'sunucu' }>(
-      `/api/radyoloji/rapor/${raporId}/imza-hazirla?surum=${encodeURIComponent(surum)}`, {}),
+      `/api/radyoloji/rapor/${raporId}/imza-hazirla?surum=${encodeURIComponent(surum)}${adinaId ? `&adinaId=${adinaId}` : ''}`, {}),
   /** Rapor e-imza + onay (RadyolojiUclari.Imza): imzalı XML doküman deposuna, rapor onaylanıp kilitlenir. */
   radyolojiRaporImzala: (raporId: number, surum: string, govde: {
     html: string; mimeType: string; sertifika: EImzaKart; imzaBase64?: string; pin?: string;
+    /** Radyolog olmayan kullanıcı seçilen radyolog adına imzalatır (17.11.2026). */
+    adinaId?: number;
   }) => gonder<{ tamam: boolean; dokumanId: number; imzaSertifika: string; paket?: unknown }>(
     `/api/radyoloji/rapor/${raporId}/imzala?surum=${encodeURIComponent(surum)}`, govde),
 };

@@ -38,21 +38,24 @@ public static partial class RadyolojiUclari
         /// <summary>İstemci kipi: tarayıcının GenSigner'dan aldığı imzalı XML (base64).</summary>
         string? ImzaBase64,
         /// <summary>Sunucu kipi: kart PIN'i - yalnız GenSigner'a iletilir, hiçbir yere yazılmaz.</summary>
-        string? Pin);
+        string? Pin,
+        /// <summary>Radyolog olmayan kullanıcı seçilen radyolog adına imzalatır (17.11.2026) - kimlik kanıtı kartın kendisi.</summary>
+        int? AdinaId = null);
 
     private static void ImzaEkle(RouteGroupBuilder grup)
     {
         // ---------------------------------------------------------------- 1. hazırlık: rapor no + sürüm --
         grup.MapPost("/rapor/{id:int}/imza-hazirla", async (
-            int id, string? surum, BaglamCozucu cozucu, VeriKaynagi veri, EImzaServisi eimza, HttpContext ctx,
+            int id, string? surum, int? adinaId, BaglamCozucu cozucu, VeriKaynagi veri, EImzaServisi eimza, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("rad.rapor_onayla");
             var ayar = await eimza.AyarAsync(baglam.SubeId, iptal);
             if (!ayar.Aktif) throw GentegreHatasi.IsKurali("e-İmza hesabı tanımlı değil (Ayarlar › Entegrasyon Hesapları › EIMZA).");
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // Radyolog kendi adına, değilse seçilen radyolog adına (17.11.2026).
+            await OnaylayanCozAsync(baglanti, null, baglam, adinaId, iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
             await RaporKilitleAsync(baglanti, islem, id, surum, iptal);
             var engel = await baglanti.TekDegerAsync<string>(
@@ -77,7 +80,10 @@ public static partial class RadyolojiUclari
             EImzaServisi eimza, DokumanDeposu dokuman, EnabizPaketUretici enabiz, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.AksiyonIste("rad.rapor_onayla");
+            // KİMİN ADINA (17.11.2026): radyolog kendi adına; değilse seçilen radyolog - kart + PIN onun kimliği.
+            int onaylayanId;
+            await using (var b0 = await veri.AcAsync(iptal))
+                onaylayanId = await OnaylayanCozAsync(b0, null, baglam, govde.AdinaId, iptal);
             if (string.IsNullOrWhiteSpace(govde.Html))
                 throw GentegreHatasi.Dogrulama("İmzalanacak rapor belgesi boş.", new AlanHatasi("html", "Zorunlu."));
             if (govde.Sertifika is null || string.IsNullOrWhiteSpace(govde.Sertifika.Serial))
@@ -128,15 +134,15 @@ public static partial class RadyolojiUclari
                 await using var baglanti = await veri.AcAsync(iptal);
                 await using var islem = await baglanti.BeginTransactionAsync(iptal);
                 var istemId = await RaporKilitleAsync(baglanti, islem, id, surum, iptal);
-                await RaporOnaylaAsync(baglanti, islem, id, istemId, baglam, iptal);
+                await RaporOnaylaAsync(baglanti, islem, id, istemId, onaylayanId, iptal);
                 await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor
                        set imza_zamani = now(), imzalayan_id = @p1, imza_sertifika = @p2, imza_dokuman_id = @p3, imza_ozet = @p4
                      where id = @p0
-                    """, islem, [id, baglam.KullaniciId, sertifikaMetni, dokumanId, ozet], iptal);
+                    """, islem, [id, onaylayanId, sertifikaMetni, dokumanId, ozet], iptal);
                 await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRapor, id,
                     baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                    new Dictionary<string, string> { ["durum"] = "Onaylandı", ["e-imza"] = sertifikaMetni },
+                    new Dictionary<string, string> { ["durum"] = "Onaylandı", ["e-imza"] = sertifikaMetni, ["onaylayan"] = onaylayanId.ToString() },
                     iptal: iptal);
                 await islem.CommitAsync(iptal);
             }
@@ -191,7 +197,7 @@ public static partial class RadyolojiUclari
 
     /// <summary>Onay: ön koşul fonksiyonu, durum 3 + kilit + rapor no, istem 5, uzman hatırlatması kapanır.</summary>
     private static async Task RaporOnaylaAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem, int id, int istemId,
-                                               IstekBaglami baglam, CancellationToken iptal)
+                                               int onaylayanId, CancellationToken iptal)
     {
         var engel = await baglanti.TekDegerAsync<string>(
             "select public.fn_radyoloji_rapor_onaylanabilir(@p0)", islem, [id], iptal) ?? "";
@@ -209,7 +215,7 @@ public static partial class RadyolojiUclari
                                    else rapor_no end,
                    degistiren = @p1, degistirme_tarihi = now()::timestamp
              where id = @p0
-            """, islem, [id, baglam.KullaniciId], iptal);
+            """, islem, [id, onaylayanId], iptal);
         await baglanti.CalistirAsync("update public.radyoloji_istem set durum = 5 where id = @p0", islem, [istemId], iptal);
         // Onay geldi: uzmanın "onayınızı bekliyor" hatırlatması kapanır (vekâleten onaylansa da).
         await OnayBildirimiKapatAsync(baglanti, islem, istemId, iptal);

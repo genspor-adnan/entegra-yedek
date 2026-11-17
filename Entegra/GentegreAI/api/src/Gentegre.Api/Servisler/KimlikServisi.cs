@@ -300,6 +300,36 @@ public sealed class KimlikServisi
     }
 
     /// <summary>
+    /// BAŞKASININ PAROLASI İLE ONAY (kullanıcı 17.11.2026, radyoloji raporu: "kullanıcı radyolog değilse radyolog seçimi
+    /// sorar, sonra onayla basıldıysa şifre"): seçilen kişinin parolası girişteki kurallarla doğrulanır - pasif / kilitli
+    /// hesap reddedilir, yanlış parola o hesabın hatalı giriş sayacını artırır (kilit), deneme günlüğe yazılır.
+    /// Hata 401 DEĞİL iş kuralıdır: oturumu açık olan kullanıcı atılmasın.
+    /// </summary>
+    public async Task BaskasininParolasiniDogrulaAsync(int kullaniciId, string parola, string ip, string istemci,
+        string amac, CancellationToken iptal = default)
+    {
+        var k = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal);
+        const string genel = "Parola hatalı.";
+        if (k is null || !k.Aktif || k.ParolaHash.Length == 0)
+        {
+            await _gunluk.GirisDenemesiAsync(amac, kullaniciId, ip, istemci, false, amac + "_hesap", iptal);
+            throw GentegreHatasi.IsKurali("Seçilen kişinin kullanıcı hesabı yok ya da pasif.");
+        }
+        if (k.KilitBitis is { } kilit && kilit > Saat.An)
+        {
+            await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, false, amac + "_kilitli", iptal);
+            throw GentegreHatasi.IsKurali($"Seçilen kişinin hesabı çok sayıda hatalı deneme yüzünden {kilit:HH:mm}'e kadar kilitli.");
+        }
+        if (!BCrypt.Net.BCrypt.Verify(parola ?? "", k.ParolaHash))
+        {
+            await _kullanicilar.HataliGirisAsync(k.TarafId, iptal);
+            await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, false, amac + "_parola", iptal);
+            throw GentegreHatasi.IsKurali(genel);
+        }
+        await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, true, amac, iptal);
+    }
+
+    /// <summary>
     /// Parola degisir, ACIK OTURUMLARIN HEPSI kapanir ve bu cihaz icin YENI
     /// bir oturum (yeni aile) acilir. Eskiden yanit bos donuyordu: access
     /// token 30 dk sonra bitince refresh de iptal edilmis oldugu icin kisi
