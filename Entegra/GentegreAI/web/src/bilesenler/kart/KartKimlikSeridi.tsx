@@ -525,5 +525,10 @@ export function KartKimlikSeridi({
           )}
         </div>
         );
-        return seritSarmalayici ? seritSarmalayici(kimlikSeridi, deger) : kimlikSeridi;
+        // HASTA ŞERİDİ YALNIZ DÜZENLEMEDE (kullanıcı 17.11.2026: "kimlik no, ad, soyad olan şerit view modda
+        //   görünmesin.. edit olduğu zaman görünsün"): görüntülemede kimlik bilgileri üstteki hasta bandında
+        //   (HastaKartBandi); düzenlemeye bandın / İletişim'in ✎'iyle geçilir.
+        const hastaGizli = kaynak === 'hasta' && seritAcikDis !== undefined && (salt || !seritAcik);
+        const serit = hastaGizli ? null : kimlikSeridi;
+        return seritSarmalayici ? seritSarmalayici(serit, deger) : serit;
 }

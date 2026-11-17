@@ -17,8 +17,8 @@ const alanlar = [
   { ad: 'soyad', baslik: 'Soyad', tip: 'metin', zorunlu: true },
 ] as unknown as KartAlanMeta[];
 
-function Sarmal({ yeniMi }: { yeniMi: boolean }) {
-  const [acik, setAcik] = useState(yeniMi);
+function Sarmal({ yeniMi, baslangicAcik }: { yeniMi: boolean; baslangicAcik?: boolean }) {
+  const [acik, setAcik] = useState(yeniMi || !!baslangicAcik);
   return (
     <KartKimlikSeridi
       kaynak="hasta" deger={{ id: 5, ad: 'Ayşe', soyad: 'Kaya', vkno: '10000000146', durum: '1', kod: 'H-1' } as never}
@@ -38,16 +38,17 @@ describe('hasta kartı görüntüleme / düzenleme kipi', () => {
     expect(KIPLI_GOVDE_KARTLAR.has('hasta')).toBe(true);
   });
 
-  it('kayıtlı hasta görüntülemede; tıklama kipi değiştirmez, ✎ değiştirir', () => {
+  it('kayıtlı hasta görüntülemede ŞERİT YOK; düzenleme açılınca görünür (17.11.2026)', () => {
     render(<Sarmal yeniMi={false} />);
-    expect(kipli().classList.contains('kaid-goster')).toBe(true);
-    expect(inert()).toBe(true);
-    fireEvent.mouseDown(kipli().querySelector('.kaid-hasta-sar')!);
-    fireEvent.click(kipli().querySelector('.kaid-hasta-sar')!);
-    expect(kipli().classList.contains('kaid-goster')).toBe(true);
-    fireEvent.click(screen.getByTestId('kimlik-kalem'));
+    expect(screen.queryByTestId('kimlik-kipli')).toBeNull();
+  });
+
+  it('düzenlemede şerit açık ve yazılabilir; ✎ kapatınca kaybolur', () => {
+    render(<Sarmal yeniMi={false} baslangicAcik />);
     expect(kipli().classList.contains('kaid-goster')).toBe(false);
     expect(inert()).toBe(false);
+    fireEvent.click(screen.getByTestId('kimlik-kalem'));
+    expect(screen.queryByTestId('kimlik-kipli')).toBeNull();
   });
 
   it('yeni hasta düzenlemede açılır', () => {
