@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>KVKK Onayı Geçerliliği — Mockup</title>
+<!--
+  Kullanıcı 17.11.2026: "kvkk için 2 opsiyonum var: 1- Her şube için ayrı KVKK onayı al  2- X gün sonra tekrar KVKK
+  onayı al" → "mockup yap".
+
+  Bugün: KVKK / ETK onayı BAŞVURUDA tutuluyor (1351/1352) ve her başvuruda yeniden soruluyor.
+  Öneri: yeni başvuruda hastanın GEÇERLİ son onayı aranır; varsa KVKK / ETK onunla dolar ve nereden geldiği yazılır,
+  yoksa boş gelir (yeniden onay alınır). Geçerliliği iki ayar belirler (Kayıt Kabul Ayarları › Başvuru):
+    ① KVKK onayı şube bazlı    - Tüm şubelerde geçerli / Her şube için ayrı onay
+    ② Onay geçerlilik süresi    - 0 = süresiz · X gün (ör. 365) sonra yeniden onay
+  Geçerli sayılan: "SMS ile onay alındı" (4) ve "Islak imzalı onay alındı" (3). "Hasta Reddetti" (1) ve "Onaysız
+  durumu seçildi" (2) TAŞINMAZ - her başvuruda yeniden sorulur; son durum bilgi olarak gösterilir.
+  İptal edilmiş başvurudaki onay sayılmaz.
+
+  Bölümler: A) ayar ekranı · B) başvuru kartı Başvuru sekmesi, dört durum (geçerli / süresi dolmuş / başka şubede /
+  önceki ret) · C) KVKK Onay ▾ menüsünün davranışı · D) karar tablosu.
+-->
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#d7e7fb;--head:#f3f6fa;--head2:#e8eef5;--btnfrom:#fbfcfe;--btnto:#e7edf4;--req:#b23b3b;--ok:#2e7d46;--warn:#b5731a;--mor:#6a3fb0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:22px 0 6px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .sayfa{max-width:1280px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .sayfabas{padding:10px 14px;border-bottom:1px solid var(--line2);display:flex;align-items:baseline;gap:12px}
+  .sayfabas h1{margin:0;font-size:16px;color:var(--navy)}
+  .sayfabas .yol{color:var(--muted);font-size:11px}
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .ic{padding:12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;overflow:hidden;margin-bottom:12px}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:var(--navy);background:var(--head);border-bottom:1px solid var(--line2);display:flex;gap:8px;align-items:center}
+  .grp h4 .yeni{font-size:10px;font-weight:bold;color:#fff;background:var(--accent);border-radius:8px;padding:0 7px}
+  .grp .ici{padding:10px}
+  .form{display:grid;grid-template-columns:repeat(2,minmax(0,320px));gap:10px 18px}
+  .fld{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fld label{font-size:10.5px;color:var(--muted);display:flex;gap:5px;align-items:center}
+  .fld label .soru{width:14px;height:14px;border-radius:50%;background:#dfe7f1;color:#2b4f7c;font-size:9.5px;font-weight:bold;display:inline-grid;place-items:center;cursor:help}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 7px;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;min-width:0;position:relative}
+  .inp.kisa{width:90px}
+  .combo{padding-right:18px}.combo::after{content:"▾";position:absolute;right:6px;top:5px;color:var(--muted);font-size:10px}
+  .satir{display:flex;gap:6px;align-items:center}
+  .not{font-size:11.5px;color:#4a5a6b;line-height:1.5;margin-top:8px}
+  .ornek{margin-top:8px;border:1px dashed var(--line);border-radius:4px;background:#fff;padding:8px 10px;font-size:11.5px;line-height:1.6}
+  .ornek b{color:var(--navy)}
+  .rz{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .rz.g{background:#e9f6ee;color:var(--ok);border-color:#c4e6d0}
+  .rz.gri{background:#eef1f5;color:#5b6b7c;border-color:#d4dde6}
+  .rz.s{background:#fdf1e2;color:var(--warn);border-color:#f2ddbf}
+  .rz.k{background:#fde8e8;color:#9b2c2c;border-color:#f3c5c5}
+  .rz.b{background:#e6eef7;color:#2b4f7c;border-color:#cddcee}
+
+  /* başvuru sekmesi KVKK/ETK satırı */
+  .durumlar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .senaryo{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .senaryo .sb{padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11.5px;color:var(--navy);font-weight:bold;display:flex;gap:8px;align-items:center}
+  .senaryo .sb small{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .senaryo .si{padding:10px;display:flex;flex-direction:column;gap:8px}
+  .kvkk{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px}
+  .hucre .et{display:flex;font-size:10.5px;color:var(--muted)}
+  .hucre .et span{margin-left:auto}
+  .hucre .ys{display:flex;gap:6px}
+  .hucre .ys .inp:first-child{flex:1}
+  .hucre .kod{width:84px;justify-content:center;font-family:Consolas,monospace;background:#f7f9fb;color:var(--muted)}
+  .dolu{background:#f2f9f4;border-color:#bfe3cb}
+  .bos{background:#fff8ea;border-color:#efd9a0}
+  .kaynak{display:flex;gap:8px;align-items:flex-start;padding:6px 9px;border-radius:3px;font-size:11.5px;border:1px solid;line-height:1.45}
+  .kaynak.g{background:#e9f6ee;border-color:#c4e6d0;color:#1f5a33}
+  .kaynak.s{background:#fff8ea;border-color:#efd9a0;color:#7a5407}
+  .kaynak.k{background:#fdeceb;border-color:#f6d3d1;color:#9b2c2c}
+  .kaynak.b{background:#eef5fd;border-color:#cddcee;color:#2b4f7c}
+  .kaynak a{color:var(--accent);text-decoration:underline;cursor:pointer}
+  .bant{display:flex;gap:8px;align-items:center;font-size:11.5px;padding:6px 10px;border-bottom:1px solid var(--line2);background:linear-gradient(#fff,#f5f8fb)}
+  .bant b{color:var(--navy)}
+  .bant .hiz{margin-left:auto;display:flex;gap:6px;align-items:center}
+
+  /* menü */
+  .menuler{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .menu{margin-top:4px;border:1px solid var(--line);border-radius:4px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.12);width:250px;overflow:hidden}
+  .menu div{padding:6px 10px;font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .menu div:hover{background:#f2f7fd}
+  .menu .ust{background:var(--head);color:var(--muted);font-size:10.5px;border-bottom:1px solid var(--line2)}
+  .menu .pas{color:#aab4bf}
+  .karar{border-collapse:collapse;width:100%;background:#fff}
+  .karar th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line);padding:5px 7px;font-size:11px;color:#3a5573;text-align:left}
+  .karar td{border:1px solid var(--line2);padding:5px 7px;font-size:11.5px;vertical-align:top}
+</style>
+</head>
+<body>
+
+<h2><b>A) Kayıt Kabul Ayarları › Başvuru</b> — yeni "KVKK / ETK onayı" grubu <span class="ipucu">açıklamalar "?" ikonunda</span></h2>
+<div class="sayfa">
+  <div class="sayfabas"><h1>Kayıt Kabul Ayarları</h1><span class="yol">Yönetim › Modül Ayarları › Kayıt Kabul</span></div>
+  <div class="tabs"><div class="tab">Genel</div><div class="tab">Hasta</div><div class="tab active">Başvuru</div></div>
+  <div class="ic">
+    <div class="grp" style="opacity:.55">
+      <h4>Başvuru</h4>
+      <div class="ici"><div class="form"><div class="fld"><label>Tahsilatta POS</label><div class="inp combo">Otomatik Fiş Oluşsun</div></div></div></div>
+    </div>
+    <div class="grp">
+      <h4>KVKK / ETK onayı <span class="yeni">YENİ</span></h4>
+      <div class="ici">
+        <div class="form">
+          <div class="fld"><label>① KVKK onayı şube bazlı <span class="soru" title="Açıksa bir şubede verilen onay yalnız o şubede geçerlidir.">?</span></label>
+            <div class="inp combo">Her şube için ayrı onay al</div>
+            <small style="color:var(--muted)">Seçenekler: Tüm şubelerde geçerli · Her şube için ayrı onay al</small></div>
+          <div class="fld"><label>② Onay geçerlilik süresi <span class="soru" title="0 = süresiz">?</span></label>
+            <div class="satir"><div class="inp kisa" style="justify-content:flex-end">365</div><span>gün sonra yeniden onay al</span></div>
+            <small style="color:var(--muted)">0 = süresiz (onay bir kez alınır)</small></div>
+        </div>
+        <div class="ornek">
+          Bu ayarlarla: Ayşe Kaya'nın <b>Koşuyolu</b>'nda <b>12.10.2026</b>'da SMS ile verdiği onay
+          <b>Koşuyolu</b>'ndaki başvurularında <b>12.10.2027</b>'ye kadar otomatik gelir;
+          <b>Kadıköy</b>'deki ilk başvurusunda ve 12.10.2027'den sonra Koşuyolu'nda yeniden onay alınır.
+        </div>
+        <div class="not">
+          Geçerli sayılan onay: <span class="rz g">SMS ile onay alındı</span> <span class="rz g">Islak imzalı onay alındı</span>.
+          <span class="rz k">Hasta Reddetti</span> ve <span class="rz gri">Onaysız durumu seçildi</span> sonraki başvuruya taşınmaz —
+          hastaya her başvuruda yeniden sorulur. İptal edilmiş başvurudaki onay sayılmaz.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2><b>B) Başvuru kartı › Başvuru sekmesi</b> — yeni başvuru açılınca KVKK / ETK nasıl gelir <span class="ipucu">ayarlar: şube bazlı + 365 gün · aktif şube Koşuyolu</span></h2>
+<div class="sayfa">
+  <div class="ic">
+    <div class="durumlar">
+
+      <div class="senaryo">
+        <div class="sb"><span class="rz g">1</span> Geçerli onay var <small>son onay 40 gün önce, aynı şube</small></div>
+        <div class="si">
+          <div class="kvkk">
+            <div class="hucre"><div class="et">KVKK<span>Onay Kodu ✉</span></div>
+              <div class="ys"><div class="inp combo dolu">SMS ile onay alındı</div><div class="inp kod">482913</div></div></div>
+            <div class="hucre"><div class="et">ETK</div><div class="ys"><div class="inp combo dolu">SMS ile onay alındı</div></div></div>
+          </div>
+          <div class="kaynak g">↻ <span><b>Önceki onay geçerli:</b> 08.10.2026 · Başvuru <a>000123</a> · Koşuyolu · SMS kodu 482913.
+            <b>08.10.2027</b>'ye kadar geçerli. Yeniden sorulmaz.</span></div>
+        </div>
+      </div>
+
+      <div class="senaryo">
+        <div class="sb"><span class="rz s">2</span> Süresi dolmuş <small>son onay 412 gün önce</small></div>
+        <div class="si">
+          <div class="kvkk">
+            <div class="hucre"><div class="et">KVKK<span>Onay Kodu</span></div>
+              <div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div><div class="inp kod">—</div></div></div>
+            <div class="hucre"><div class="et">ETK</div><div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div></div></div>
+          </div>
+          <div class="kaynak s">⚠ <span><b>KVKK onayının süresi doldu:</b> son onay 01.10.2025 (Başvuru <a>000041</a>, ıslak imza) — 365 gün geçti.
+            Yeniden onay alın: <b>KVKK Onay ▾</b> › SMS Gönder ya da Islak İmzalı Onay Alındı.</span></div>
+        </div>
+      </div>
+
+      <div class="senaryo">
+        <div class="sb"><span class="rz b">3</span> Başka şubede onay var <small>şube bazlı ayar açık</small></div>
+        <div class="si">
+          <div class="kvkk">
+            <div class="hucre"><div class="et">KVKK<span>Onay Kodu</span></div>
+              <div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div><div class="inp kod">—</div></div></div>
+            <div class="hucre"><div class="et">ETK</div><div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div></div></div>
+          </div>
+          <div class="kaynak b">ℹ <span>Hastanın <b>Kadıköy</b> şubesinde 03.11.2026 tarihli onayı var; <b>bu şube için ayrı onay</b> gerekiyor
+            (Kayıt Kabul Ayarları › KVKK onayı şube bazlı).</span></div>
+        </div>
+      </div>
+
+      <div class="senaryo">
+        <div class="sb"><span class="rz k">4</span> Önceki başvuruda reddetti <small>ret taşınmaz</small></div>
+        <div class="si">
+          <div class="kvkk">
+            <div class="hucre"><div class="et">KVKK<span>Onay Kodu</span></div>
+              <div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div><div class="inp kod">—</div></div></div>
+            <div class="hucre"><div class="et">ETK</div><div class="ys"><div class="inp combo bos"><span style="color:#aab4bf">— Seçin —</span></div></div></div>
+          </div>
+          <div class="kaynak k">🚫 <span>Hasta son başvurusunda (14.11.2026, <a>000140</a>) <b>onayı reddetti</b>. Bu başvuruda yeniden sorun.</span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="not">Kutu renkleri yalnız mockup içindir: yeşil = önceki onaydan doldu, sarı = boş (onay alınmalı). Kaydedilmiş bir başvuru
+      açıldığında combolar <b>doldurulmaz</b> (kaydedilmiş değer neyse o) — yalnız bilgi satırı görünür.</div>
+  </div>
+</div>
+
+<h2><b>Başvuru hasta bandı</b> — İzinler hücresi aynı kuraldan <span class="ipucu">hangi sekmede olursan ol görünür</span></h2>
+<div class="sayfa">
+  <div class="bant"><b>Ayşe Kaya</b> · K0274540 · 47 yaş <span class="hiz">İzinler: <span class="rz g">KVKK ✓ 08.10.2027'ye kadar</span> <span class="rz g">ETK ✓</span></span></div>
+  <div class="bant"><b>Kerem Can</b> · K0274543 · 31 yaş <span class="hiz">İzinler: <span class="rz s">KVKK ⚠ süresi doldu</span> <span class="rz s">ETK ⚠</span></span></div>
+  <div class="bant"><b>Mustafa Yılmaz</b> · K0274545 · 62 yaş <span class="hiz">İzinler: <span class="rz k">KVKK ✗ reddetti</span> <span class="rz gri">ETK ?</span></span></div>
+</div>
+
+<h2><b>C) KVKK Onay ▾</b> menüsü — duruma göre</h2>
+<div class="menuler">
+  <div><span class="btn">📱 KVKK Onay ▾</span>
+    <div class="menu"><div class="ust">Geçerli onay var (08.10.2027'ye kadar)</div>
+      <div>📤 SMS Gönder <span style="margin-left:auto;color:var(--warn);font-size:10.5px">sorar</span></div><div>🔢 Onay Kodu Gir</div><div>✍️ Islak İmzalı Onay Alındı</div><div>🚫 Hasta Reddetti</div></div>
+    <div class="not">SMS Gönder: "Hastanın geçerli onayı var — yine de yeni onay alınsın mı?" (kırmızı uyarı, odak Kapat'ta).</div></div>
+  <div><span class="btn">📱 KVKK Onay ▾</span>
+    <div class="menu"><div class="ust">Onay gerekli</div>
+      <div>📤 SMS Gönder</div><div class="pas">🔢 Onay Kodu Gir <span style="margin-left:auto;font-size:10.5px">SMS sonrası</span></div><div>✍️ Islak İmzalı Onay Alındı</div><div>🚫 Hasta Reddetti</div></div>
+    <div class="not">Onay Kodu Gir yalnız SMS gönderildikten sonra açılır.</div></div>
+  <div><span class="btn">📱 KVKK Onay ▾</span>
+    <div class="menu"><div class="ust">SMS gönderildi 14:31 · kod bekleniyor</div>
+      <div>📤 SMS'i Yeniden Gönder <span style="margin-left:auto;color:var(--warn);font-size:10.5px">sorar</span></div><div><b>🔢 Onay Kodu Gir</b></div><div>✍️ Islak İmzalı Onay Alındı</div><div>🚫 Hasta Reddetti</div></div>
+    <div class="not">Menü başlığı hastanın onay durumunu tek satırda söyler.</div></div>
+</div>
+
+<h2><b>D) Karar tablosu</b> — yeni başvuruda KVKK / ETK</h2>
+<div class="sayfa"><div class="ic">
+  <table class="karar">
+    <thead><tr><th>Hastanın son onayı</th><th>Şube bazlı = Tüm şubeler</th><th>Şube bazlı = Her şube ayrı</th><th>Süre (X gün)</th></tr></thead>
+    <tbody>
+      <tr><td>SMS / ıslak imza, bu şubede</td><td>Gelir</td><td>Gelir</td><td>X gün geçmediyse gelir, geçtiyse boş + "süresi doldu"</td></tr>
+      <tr><td>SMS / ıslak imza, başka şubede</td><td>Gelir</td><td>Boş + "bu şube için ayrı onay"</td><td>Aynı süre kuralı</td></tr>
+      <tr><td>Hasta reddetti / onaysız</td><td colspan="2">Boş + "son başvuruda reddetti" bilgisi (taşınmaz)</td><td>—</td></tr>
+      <tr><td>Hiç onay yok</td><td colspan="3">Boş (onay alınmalı)</td></tr>
+      <tr><td>İptal edilmiş başvurudaki onay</td><td colspan="3">Sayılmaz</td></tr>
+    </tbody>
+  </table>
+</div></div>
+
+</body>
+</html>
