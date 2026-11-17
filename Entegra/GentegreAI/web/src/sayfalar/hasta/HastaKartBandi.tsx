@@ -100,9 +100,7 @@ export function HastaKartBandi({ id, deger, git }: {
   // DURUM ROZETİ (KartKatalogu.HastaDurumKodlari): vefat bayrağı da Vefat sayılır.
   const durumKod = o?.vefat === 1 ? '3' : String(deger.durum ?? '1') || '1';
   const durum = HASTA_DURUM[durumKod] ?? [durumKod, 'gri'];
-  // Avatar köşesi (mockup "E · 63"): cinsiyet harfi + yaş.
-  const cins = o?.cinsiyet === 1 ? 'E' : o?.cinsiyet === 2 ? 'K' : '';
-  const kose = [cins, y ?? ''].filter(x => x !== '').join(' · ');
+  const cins = o?.cinsiyet === 1 ? c('Erkek') : o?.cinsiyet === 2 ? c('Kadın') : '';
   return (
     <>
       <style>{STIL}</style>
@@ -118,11 +116,11 @@ export function HastaKartBandi({ id, deger, git }: {
             {/* ✎ AD SOYADIN SAĞINDA (kullanıcı 17.11.2026): kartın görüntüleme / düzenleme kipini değiştirir. */}
             <span className="hkb-ad-sat"><b className="hkb-ad" title={ad}>{ad || '—'}</b><KipKalemi testId="hasta-bant-kalem" /></span>
             {/* Etiketsiz (kullanıcı 28.10.2026: "dosya ve kan label'lara gerek yok"): E · 69 · H-000081 · A Rh+. */}
-            <small>{[kose, String(deger.kod ?? ''), o?.kanGrubu ?? ''].filter(Boolean).join(' · ')}</small>
-            {/* 3. SATIR (kullanıcı 17.11.2026: "avatar ve ad soyad kutusunun olduğu yere 3. satır olarak doğum tarihi
-                ve kimlik no ve durum rozeti"): etiketsiz; Pasif / Vefat artık 2. satırda yazı değil, rozette. */}
+            {/* SATIR DÜZENİ (kullanıcı 17.11.2026): 2. satır cinsiyet · yaş · doğum tarihi; 3. satır kimlik no ·
+                hasta (dosya) no · durum rozeti. Etiketsiz. */}
+            <small>{[cins, y != null ? `${y} ${c('yaş')}` : '', dogumMetni(o?.dogumTarihi ?? null)].filter(Boolean).join(' · ')}</small>
             <small className="hkb-3">
-              {[dogumMetni(o?.dogumTarihi ?? null), String(deger.vkno ?? '').trim()].filter(Boolean).join(' · ')}
+              {[String(deger.vkno ?? '').trim(), String(deger.kod ?? '').trim()].filter(Boolean).join(' · ')}
               <span className={`rozet ${durum[1]}`} data-testid="hasta-durum">{c(durum[0])}</span>
             </small>
           </span>

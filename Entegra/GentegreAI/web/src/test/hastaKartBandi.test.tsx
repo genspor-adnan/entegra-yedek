@@ -16,12 +16,15 @@ vi.mock('../api/cekirdek', () => ({ istek: async () => ozet }));
 const { HastaKartBandi } = await import('../sayfalar/hasta/HastaKartBandi');
 
 describe('hasta kartı isim bandı', () => {
-  it('3. satır: doğum tarihi · kimlik no · durum rozeti', async () => {
+  it('2. satır cinsiyet · yaş · doğum; 3. satır kimlik no · hasta no · durum rozeti', async () => {
     render(<HastaKartBandi id={5} git={() => {}}
                            deger={{ ad: 'Ayşe', soyad: 'Kaya', vkno: '10000000146', durum: '1', kod: 'H-1' } as never} />);
-    await waitFor(() => expect(document.querySelector('.hkb-3')!.textContent).toContain('14.03.1979'));
+    await waitFor(() => expect(document.querySelector('.hkb-kim-m small')!.textContent).toContain('14.03.1979'));
+    const ikinci = document.querySelector('.hkb-kim-m small')!.textContent!;
+    expect(ikinci.startsWith('Kadın · ')).toBe(true);
+    expect(ikinci).toMatch(/Kadın · \d+ yaş · 14\.03\.1979/);
     const satir = document.querySelector('.hkb-3')!;
-    expect(satir.textContent).toContain('10000000146');
+    expect(satir.textContent).toContain('10000000146 · H-1');
     expect(satir.textContent).not.toContain('Kimlik');
     expect(screen.getByTestId('hasta-durum').textContent).toBe('Aktif');
     expect(screen.getByTestId('hasta-durum').classList.contains('ok')).toBe(true);
