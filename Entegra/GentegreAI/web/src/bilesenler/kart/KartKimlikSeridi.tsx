@@ -34,7 +34,9 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
 // HASTA DA (kullanıcı 16.11.2026: "hasta kartını da stok gibi yap"): kayıtlı hasta görüntülemede açılır, şerit +
 //   Genel sekmesi yalnız ✎ ile düzenlemeye geçer (KartGrupSarmalayici gövdeyi inert sarar).
 // BİLDİRİM ŞABLONU (1354, mockup bildirim_sablonu_karti.html): şerit + Metin sekmesi tek ✎ ile.
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon']);
+// PERSONEL (kullanıcı 17.11.2026: "personel kartını da stok kartı deseni gibi yap.. view/edit modu da olsun"):
+//   hasta ile aynı - kayıtlı kart görüntülemede, şerit + gövde grupları yalnız ✎ ile düzenlemeye geçer.
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon', 'personel']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -115,14 +117,16 @@ export function KartKimlikSeridi({
   })();
         /** HASTA ŞERİDİ KİPLİ (16.11.2026): stok şeridinin düzeni - görüntülemede düz metin + inert, ✎ sağ üstte. */
         const hastaSar = (izgara: ReactNode) => {
-          if (kaynak !== 'hasta' || seritAcikDis === undefined) return izgara;
+          if ((kaynak !== 'hasta' && kaynak !== 'personel') || seritAcikDis === undefined) return izgara;
           const gosterKipi = salt || !seritAcik;
           return (
             <div className={`kaid-kipli${gosterKipi ? ' kaid-goster' : ''}`} data-testid="kimlik-kipli">
               <div className="kaid-hasta-sar" inert={gosterKipi || undefined}>{izgara}</div>
               <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={salt}
                       data-testid="kimlik-kalem"
-                      title={salt ? c('Düzenleme yetkisi yok') : gosterKipi ? c('Hasta bilgilerini düzenle') : c('Düzenlemeyi kapat')}
+                      title={salt ? c('Düzenleme yetkisi yok') : gosterKipi
+                        ? (kaynak === 'personel' ? c('Personel bilgilerini düzenle') : c('Hasta bilgilerini düzenle'))
+                        : c('Düzenlemeyi kapat')}
                       onClick={() => setSeritAcik(v => !v)}>✎</button>
             </div>
           );

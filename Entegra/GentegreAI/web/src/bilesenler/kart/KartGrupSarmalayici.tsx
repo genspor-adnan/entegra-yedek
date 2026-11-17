@@ -96,7 +96,8 @@ export function KartGrupSarmalayici({
         //   almıyorlar; tümü tek sarmalayıcıyla düz metin + inert olur, düzenleme yalnız şeridin ✎'i.
         //   `inert` DEĞİL (17.11.2026): içinde ✎ (İletişim etiketi) var ve inert onu da kapatırdı. Fare CSS ile
         //   (pointer-events, ✎ hariç), klavye odağı yakalanıp bırakılarak kesilir.
-        const govde = kaynak === 'hasta' && govdeGoster
+        // PERSONEL DE (17.11.2026, stok deseni): kimlik özeti / eğitimler / rol özel bileşenler - aynı sarmalayıcı.
+        const govde = (kaynak === 'hasta' || kaynak === 'personel') && govdeGoster
           ? <div className="kagrup-goster hasta-govde-goster"
                  onFocusCapture={e => { const h = e.target as HTMLElement; if (!h.classList.contains('kip-kalemi')) h.blur() }}>
               {grupCiz(aktif)}</div>
