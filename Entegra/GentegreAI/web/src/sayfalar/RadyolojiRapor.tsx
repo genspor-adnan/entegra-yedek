@@ -158,7 +158,7 @@ export function RadyolojiRapor() {
   const [bolumler, setBolumler] = useState<Bolum[]>([]);
   /**
    * RAPOR YAZIMI GÖRÜNTÜLEME / DÜZENLEME KİPİ (kullanıcı 17.11.2026: "radyoloji rapor kartında ortadaki rapor yazım
-   * kısmını view/edit mode desenine geçir.. kalemi de serbest/yapısal buton sağına koy"): metni olan kayıtlı rapor
+   * kısmını view/edit mode desenine geçir"; ✎ Şablon etiketinin sağında): metni olan kayıtlı rapor
    * görüntülemede açılır, ✎ düzenlemeye alır; boş rapor / yeni şablon düzenlemede. Onaylı (kilitli) raporda ✎ pasif.
    */
   const [raporDuzenle, setRaporDuzenle] = useState(true);
@@ -928,11 +928,6 @@ export function RadyolojiRapor() {
                         onClick={() => void girisDegistir(g)}>{g === 'serbest' ? c('Serbest') : c('Yapısal')}</button>
               ))}
             </span>
-            {/* ✎ SERBEST / YAPISAL'IN SAĞINDA (17.11.2026): rapor yazımını düzenlemeye alır / kapatır. */}
-            <button type="button" className={`bs-kalem${yazimKilit ? '' : ' acik'}`} disabled={kilitli}
-                    data-testid="rapor-kalem"
-                    title={kilitli ? c('Onaylı rapor - düzeltme ek raporla') : raporDuzenle ? c('Düzenlemeyi kapat') : c('Raporu düzenle')}
-                    onClick={() => setRaporDuzenle(v => !v)}>✎</button>
             {giris === 'yapisal' && !biradsli && (
               <span className="sonuk kucuk">{c('tercih Yapısal - bu şablonda form yok')}</span>
             )}
@@ -1044,7 +1039,13 @@ export function RadyolojiRapor() {
             <BiradsFormu durum={birads} setDurum={setBirads} modalite={modalite} genis={false} kilitli={kilitli}
                          onAktar={biradsAktar} />
           )}
-          <h5 style={{ marginTop: 12 }}>{c('Şablon')}</h5>
+          {/* ✎ ŞABLON ETİKETİNİN SAĞINDA (kullanıcı 17.11.2026; önce Serbest/Yapısal'ın sağındaydı): rapor yazımını
+              düzenlemeye alır / kapatır. */}
+          <h5 style={{ marginTop: 12 }}>{c('Şablon')}
+            <button type="button" className={`bs-kalem${yazimKilit ? '' : ' acik'}`} disabled={kilitli}
+                    data-testid="rapor-kalem"
+                    title={kilitli ? c('Onaylı rapor - düzeltme ek raporla') : raporDuzenle ? c('Düzenlemeyi kapat') : c('Raporu düzenle')}
+                    onClick={() => setRaporDuzenle(v => !v)}>✎</button></h5>
           {/* COMBO YERİNE MODAL (kullanıcı 14.11.2026; mockup radyoloji_rapor_sablon_secimi.html): seçili şablonun adı ·
               kodu · sürümü + "Şablon Seç… / Değiştir…". Gruplama / arama / önizleme SablonSecModal'da. */}
           <div className="rad-sablon-satir">

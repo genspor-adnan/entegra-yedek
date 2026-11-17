@@ -9891,4 +9891,4 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* RADYOLOJİ RAPOR YAZIMI GÖRÜNTÜLEME KİPİ (17.11.2026): editör yazılamaz, imleç metin değil; ✎ Serbest/Yapısal'ın sağında. */
 .rad-orta.rad-goster .bm-alan { cursor: default; caret-color: transparent }
 .rad-orta.rad-goster .bm-alan:focus { outline: none }
-.rad-orta .rad-duzen > .bs-kalem { margin-left: 2px; font-size: 14px }
+.rad-yan h5 > .bs-kalem { margin-left: 4px; font-size: 13px; vertical-align: middle }
