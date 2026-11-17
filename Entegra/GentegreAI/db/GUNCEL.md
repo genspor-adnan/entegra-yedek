@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (725 ad, 202 tanesi birden cok dosyada)
+## Fonksiyonlar (727 ad, 202 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -351,6 +351,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_tesis` | `1318_kurum_kimlik_okuyucular.sql` | — |
 | `fn_kurum_tipi_rol_portal_atla` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | — |
 | `fn_kurum_tipi_rol_uygula` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | 786_kurum_tipi_rol.sql |
+| `fn_kvkk_devir_tarihi` | `1362_kvkk_onay_tarihi.sql` | — |
 | `fn_kys_egitim_anahtar` | `1056_kys_egitim.sql` | — |
 | `fn_kys_egitim_tarih` | `1056_kys_egitim.sql` | — |
 | `fn_kys_risk_seviye` | `1052_kurumsal_kalite_olay_risk.sql` | — |
@@ -589,6 +590,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_basvuru_yapan_hekim` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_basvuru_yapan_satir` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_belge_basvuru_kvkk_kod` | `1352_basvuru_kvkk_sms_onay.sql` | — |
+| `tg_belge_basvuru_kvkk_tarih` | `1362_kvkk_onay_tarihi.sql` | — |
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
 | `tg_belge_basvuru_tur` | `778_basvuru_turu_varsayilan.sql` | — |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |

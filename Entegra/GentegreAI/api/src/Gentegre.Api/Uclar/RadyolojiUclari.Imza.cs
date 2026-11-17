@@ -118,6 +118,26 @@ public static partial class RadyolojiUclari
             var hata = EImzaServisi.Dogrula(imzaXml, belge);
             if (hata.Length > 0) throw GentegreHatasi.IsKurali("İmza doğrulanamadı: " + hata);
 
+            // İMZALAYAN = ONAYLAYAN (kod inceleme 17.11.2026): radyolog adına imzada kart O RADYOLOĞUN olmalı - aksi
+            //   halde başkası kendi kartıyla imzalar, rapor X imzalamış gibi kilitlenip e-Nabız / Teletıp'a giderdi.
+            //   Sertifikadaki TCKN radyoloğun kimlik numarasıyla karşılaştırılır. Kendi adına imzada iki numara da
+            //   biliniyor ve farklıysa reddedilir; biri eksikse (eski kayıt) geçer.
+            var imzalayanTckn = EImzaServisi.ImzalayanTckn(imzaXml);
+            var onaylayanTckn = await veri.TekDegerAsync<string>(
+                "select coalesce(vkno, '') from public.taraf where id = @p0", [onaylayanId], iptal) ?? "";
+            onaylayanTckn = new string(onaylayanTckn.Where(char.IsDigit).ToArray());
+            if (onaylayanId != baglam.KullaniciId)
+            {
+                if (imzalayanTckn is null)
+                    throw GentegreHatasi.IsKurali("İmza sertifikasından kimlik numarası okunamadı; radyolog adına imza doğrulanamadı.");
+                if (onaylayanTckn.Length != 11)
+                    throw GentegreHatasi.IsKurali("Seçilen radyoloğun kimlik numarası kayıtlı değil; adına e-imza doğrulanamaz (personel kartına girin).");
+                if (imzalayanTckn != onaylayanTckn)
+                    throw GentegreHatasi.IsKurali("Takılı e-imza kartı seçilen radyoloğa ait değil - radyoloğun kendi kartıyla imzalayın.");
+            }
+            else if (imzalayanTckn is not null && onaylayanTckn.Length == 11 && imzalayanTckn != onaylayanTckn)
+                throw GentegreHatasi.IsKurali("Takılı e-imza kartı size ait değil - kendi kartınızla imzalayın.");
+
             var raporNo = await veri.TekDegerAsync<string>(
                 "select coalesce(rapor_no, '') from public.radyoloji_rapor where id = @p0", [id], iptal) ?? "";
             var dosyaAdi = $"e-imza {(raporNo.Length > 0 ? raporNo : "rapor-" + id)}.xml";

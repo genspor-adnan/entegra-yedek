@@ -50,7 +50,10 @@ public static class BasvuruKvkkUclari
             var subeBazli = (await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_sube_bazli", "0", iptal)).Trim() == "1";
             var gun = int.TryParse((await AyarDeposu.MetinAsync(b, null, "basvuru.kvkk_gecerlilik_gun", "0", iptal)).Trim(), out var g) && g > 0 ? g : 0;
             const string Sorgu = """
-                select bb.kvkk_onay::int, coalesce(bb.etk_onay, 0)::int, bl.belge_tarihi::date, coalesce(bl.belge_no, ''),
+                -- ONAYIN ALINDIĞI GÜN (1362): devredilen onayda ilk alındığı gün - başvuru tarihi değil; yoksa her
+                --   gelişte süre yeniden başlıyordu (kod inceleme 17.11.2026).
+                select bb.kvkk_onay::int, coalesce(bb.etk_onay, 0)::int, coalesce(bb.kvkk_onay_tarihi, bl.belge_tarihi::date),
+                       coalesce(bl.belge_no, ''),
                        coalesce(s.ad, ''), coalesce(bb.kvkk_onay_kodu, '')
                   from public.belge bl
                   join public.belge_basvuru bb on bb.id = bl.id
@@ -132,7 +135,12 @@ public static class BasvuruKvkkUclari
 
             await using var tx = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("""
-                update public.belge_basvuru set kvkk_sms_kod = @p1, kvkk_sms_tarihi = now(), kvkk_onay_kodu = null
+                -- YENİDEN GÖNDERİM ESKİ SMS ONAYINI DÜŞÜRÜR (kod inceleme 17.11.2026): kod silinip KVKK/ETK "SMS ile onay
+                --   alındı" (4) kalırsa, hasta yeni kodu hiç söylemese de onaylı sayılıyordu. Islak imza / ret dokunulmaz.
+                update public.belge_basvuru
+                   set kvkk_sms_kod = @p1, kvkk_sms_tarihi = now(), kvkk_onay_kodu = null,
+                       kvkk_onay = case when kvkk_onay = 4 then null else kvkk_onay end,
+                       etk_onay  = case when etk_onay  = 4 then null else etk_onay  end
                  where id = @p0
                 """, tx, [belgeId, kod], iptal);
             try

@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -142,6 +143,42 @@ public sealed class EImzaServisi(VeriKaynagi veri, IHttpClientFactory istemciUre
             if (icerik == beklenen) return "";
         }
         return "İmzalı XML'in içindeki belge, imzalanması istenen rapor değil.";
+    }
+
+    /// <summary>
+    /// İMZALAYANIN TCKN'Sİ (kod inceleme 17.11.2026): imzalı XML'deki (ds:X509Certificate) imza sertifikasının konu
+    /// SERIALNUMBER'ı (OID 2.5.4.5) - Türk nitelikli elektronik sertifikalarında kişinin T.C. kimlik numarasıdır.
+    /// Birden çok sertifika varsa (zincir) 11 haneli seri numarası taşıyan ilki. Bulunamazsa null.
+    /// </summary>
+    public static string? ImzalayanTckn(byte[] imzaXml)
+    {
+        var xml = new XmlDocument();
+        try
+        {
+            using var okuyucu = XmlReader.Create(new MemoryStream(imzaXml), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
+            xml.Load(okuyucu);
+        }
+        catch (XmlException) { return null; }
+        var ad = new XmlNamespaceManager(xml.NameTable);
+        ad.AddNamespace("ds", "http://www.w3.org/2000/09/xmldsig#");
+        var dugumler = xml.SelectNodes("//ds:X509Certificate", ad);
+        if (dugumler is null) return null;
+        foreach (XmlNode n in dugumler)
+        {
+            try
+            {
+                var ham = Convert.FromBase64String(new string(n.InnerText.Where(c => !char.IsWhiteSpace(c)).ToArray()));
+                using var sertifika = X509CertificateLoader.LoadCertificate(ham);
+                foreach (var rdn in sertifika.SubjectName.EnumerateRelativeDistinguishedNames())
+                {
+                    if (rdn.GetSingleElementType().Value != "2.5.4.5") continue;
+                    var rakam = new string((rdn.GetSingleElementValue() ?? "").Where(char.IsDigit).ToArray());
+                    if (rakam.Length == 11) return rakam;
+                }
+            }
+            catch (Exception h) when (h is FormatException or System.Security.Cryptography.CryptographicException) { }
+        }
+        return null;
     }
 
     /// <summary>Hekimin önceden hazırlanmış imzasını (istemci kipi) da aynı yoldan doğrular.</summary>

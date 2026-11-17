@@ -586,7 +586,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       setKvkkDurum(d ?? null);
       if (!kayitliId && d?.durum === 'gecerli')
         setBasvuruBilgi(o => o.kvkkOnay == null && o.etkOnay == null
-          ? { ...o, kvkkOnay: d.kvkkOnay ?? null, etkOnay: d.etkOnay || d.kvkkOnay || null } : o);
+          // ETK KENDİ DEĞERİNDEN (kod inceleme 17.11.2026): önceki başvuruda ETK hiç sorulmadıysa (0) KVKK değeri ETK'ya
+          //   kopyalanmaz - hasta vermediği ticari ileti onayını vermiş görünürdü.
+          ? { ...o, kvkkOnay: d.kvkkOnay ?? null, etkOnay: d.etkOnay || null } : o);
     }).catch(() => { if (!iptal) setKvkkDurum(null) });
     return () => { iptal = true };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1778,7 +1780,10 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
               if (!bid) return;
               try {
                 const y = await api.basvuruKvkkSms(bid);
-                setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null }));
+                // Sunucu eski SMS onayını (4) düşürdü: kart da düşürür, yoksa kayıtta 4 geri yazılırdı.
+                setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null,
+                                        kvkkOnay: o.kvkkOnay === 4 ? null : o.kvkkOnay,
+                                        etkOnay: o.etkOnay === 4 ? null : o.etkOnay }));
                 // ONAY KODU PENCERESİ KENDİLİĞİNDEN AÇILIR (kullanıcı 17.11.2026).
                 setKvkkKodPencere({ belgeId: bid, alici: y.alici });
               } catch (h) { mesaj(hataMetni(h)) }
