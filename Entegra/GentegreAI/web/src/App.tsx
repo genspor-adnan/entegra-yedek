@@ -308,7 +308,10 @@ function Yollar() {
 
         {/* Ayar ekranlari liste degil (ozelSayfa) - rotalari burada. */}
         {yetki('ayar') && <Route path="/genel-ayarlar" element={<GenelAyarlar />} />}
-        {(yetki('ayar') || yetki('kayit_kabul.ayar')) && <Route path="/kayit-kabul-ayarlar" element={<KayitKabulAyarlar />} />}
+        {/* KAYIT KABUL AYARLARI İKİ EKRAN (17.11.2026): Hasta Kartı / Başvuru Kartı Ayarları; eski adres başvuruya yönlenir. */}
+        {(yetki('ayar') || yetki('kayit_kabul.hasta_ayar')) && <Route path="/hasta-karti-ayarlar" element={<KayitKabulAyarlar key="hasta" bolum="hasta" />} />}
+        {(yetki('ayar') || yetki('kayit_kabul.ayar')) && <Route path="/basvuru-karti-ayarlar" element={<KayitKabulAyarlar key="basvuru" bolum="basvuru" />} />}
+        <Route path="/kayit-kabul-ayarlar" element={<Navigate to="/basvuru-karti-ayarlar" replace />} />
         {yetki('katalog.klinik') && <Route path="/katalog-ayarlar" element={<KatalogAyarlar />} />}
         {yetki('stok.ayar') && <Route path="/stok-ayarlar" element={<StokAyarlar />} />}
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}

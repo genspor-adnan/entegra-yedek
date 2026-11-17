@@ -46,7 +46,8 @@ public static partial class EkranKodlari
         ["belge.kurum_fatura"] = "belge.satis",       // Kurumlar & Sigorta › Faturalar
         ["belge.alis_fatura"]  = "belge.alis",        // Stok & Hizmet › Alış Faturaları
         ["eczane.miad"]        = "stok",              // Eczane › Miad & Tüketim
-        ["kayit_kabul.ayar"]   = "ayar",              // Kayıt Kabul › Ayarlar › Kayıt Kabul
+        ["kayit_kabul.ayar"]   = "ayar",              // Kayıt Kabul › Ayarlar › Başvuru Kartı Ayarları
+        ["kayit_kabul.hasta_ayar"] = "kayit_kabul.ayar", // Kayıt Kabul › Ayarlar › Hasta Kartı Ayarları (1355)
         ["cari.tedarikci"]     = "cari",              // Stok & Hizmet › Tedarikçiler
         ["dis_doktor"]         = "personel",          // Kurumlar & Sigorta › Dış Doktorlar
         ["medula.kabul"]       = "medula.provizyon",  // Kayıt Kabul › Medula Kabul
@@ -596,10 +597,14 @@ public static partial class EkranKodlari
         ["demirbas.parca_depo"]         = "demirbas.ayar",
         ["belge.satis.vade_gun"]        = "belge.satis.ayar",
         ["belge.alis.vade_gun"]         = "belge.alis.ayar",
+        // Hasta Kartı Ayarları (1355): Kayıt Kabul Ayarları'nın Hasta sekmesi kendi ekranı oldu.
+        ["kayit.kimlik_okutma"]         = "kayit_kabul.hasta_ayar",
+        ["kayit.suresi_dolmus_belge"]   = "kayit_kabul.hasta_ayar",
+        ["kayit.ocr_esik"]              = "kayit_kabul.hasta_ayar",
     };
 
     /// <summary>
-    /// Kayıt Kabul Ayarları sayfasının yazdığı anahtarlar. `kayit_kabul.ayar`
+    /// Başvuru Kartı Ayarları sayfasının (eski Kayıt Kabul Ayarları › Başvuru, 1355) yazdığı anahtarlar. `kayit_kabul.ayar`
     /// yalnız bunları yazabilir - genel `ayar` kapısını açmak bütün kurum
     /// ayarlarını açmak olurdu.
     /// </summary>
@@ -607,7 +612,8 @@ public static partial class EkranKodlari
     {
         "basvuru.pos_aksiyon", "basvuru.sgk_katilim_payi",
         "basvuru.sgk_katilim_kodlari", "basvuru.iskonto_onay_esik",
-        // Kimliği okut - MRZ (1255), Hasta sekmesi.
-        "kayit.kimlik_okutma", "kayit.suresi_dolmus_belge", "kayit.ocr_esik",
+        // KVKK / ETK onay geçerliliği (1353).
+        "basvuru.kvkk_sube_bazli", "basvuru.kvkk_gecerlilik_gun",
+        // Kimliği okut - MRZ (1255) Hasta Kartı Ayarları'na geçti: `kayit_kabul.hasta_ayar` (AyarAnahtariKodu, 1355).
     };
 }

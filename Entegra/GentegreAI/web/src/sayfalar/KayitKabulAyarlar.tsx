@@ -1,57 +1,32 @@
-import { useState } from 'react';
-import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { c } from '../dil/ceviri';
 
-const SEKMELER = [
-  { anahtar: 'genel',   baslik: 'Genel' },
-  { anahtar: 'hasta',   baslik: 'Hasta' },
-  { anahtar: 'basvuru', baslik: 'Başvuru' },
-] as const;
-
-type Sekme = typeof SEKMELER[number]['anahtar'];
-
 /**
- * KAYIT KABUL AYARLARI (Yönetim › Modül Ayarları › Kayıt Kabul, kullanici).
- * Kasa/Stok ayarlariyla ayni desen: liste degil, ayar konularini sekmelerde
- * toplayan ozel sayfa.
- *
- * Genel ve Hasta sekmeleri bilerek simdiden duruyor - hasta kartı ve kabul
- * akisinin ayarlari buraya eklenecek; ekran o zaman yeniden kurgulanmasin.
+ * KAYIT KABUL AYARLARI → İKİ EKRAN (kullanıcı 17.11.2026: "Kayıt Kabul Ayarları'nda hasta sekmesini 'Hasta Kartı
+ * Ayarları' ve Başvuru sekmesini de 'Başvuru Kartı Ayarları' şeklinde 2 menü halinde Kayıt Kabul ana menüsü altında
+ * Ayarlar menüsü altına oluştur"). Eski sekmeli sayfa (Genel / Hasta / Başvuru) bölündü; Genel boş yer tutucuydu, kalktı.
+ * İki ekran da `kayit_kabul.ayar` yetkisiyle açılır; yazdıkları anahtarlar EkranKodlari.KayitKabulAyarAnahtarlari.
+ * Eski adres (/kayit-kabul-ayarlar) Başvuru Kartı Ayarları'na yönlenir (App.tsx).
  */
-export function KayitKabulAyarlar() {
-  const [aktif, setAktif] = useState<Sekme>('genel');
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
+const BASLIK = { hasta: 'Hasta Kartı Ayarları', basvuru: 'Başvuru Kartı Ayarları' } as const;
 
+export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'basvuru' }) {
+  const aktif = bolum;
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = useAyarlar();
 
   return (
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>Kayıt Kabul Ayarları</h1>
-          <span className="yol">{c('Yönetim › Modül Ayarları › Kayıt Kabul')}</span>
+          <h1>{c(BASLIK[bolum])}</h1>
+          <span className="yol">{c('Kayıt Kabul › Ayarlar')} › {c(BASLIK[bolum])}</span>
         </div>
       </div>
-
-      <AyarSekmeSeridi sekmeler={SEKMELER} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
 
       {yukleniyor && <div className="yukleniyor">Yükleniyor…</div>}
-
-      {!yukleniyor && aktif === 'genel' && (
-        <>
-        <div className="kagrup">
-          <h6>Genel</h6>
-          <div className="not">
-            Kayıt kabul modülünün genel davranış ayarları buraya eklenecek.
-            Randevu düzeni (gün/saat, bölümler) ayrı ekranda: Kayıt Kabul ›
-            Randevu Ayarları.
-          </div>
-        </div>
-        </>
-      )}
 
       {!yukleniyor && aktif === 'hasta' && (
         <>

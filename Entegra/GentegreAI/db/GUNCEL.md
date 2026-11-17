@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (723 ad, 200 tanesi birden cok dosyada)
+## Fonksiyonlar (725 ad, 201 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -588,6 +588,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_banko_pos_varsayilan` | `985_banko_tanimi.sql` | — |
 | `tg_basvuru_yapan_hekim` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_basvuru_yapan_satir` | `584_basvuru_yapan_primi.sql` | — |
+| `tg_belge_basvuru_kvkk_kod` | `1352_basvuru_kvkk_sms_onay.sql` | — |
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
 | `tg_belge_basvuru_tur` | `778_basvuru_turu_varsayilan.sql` | — |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
@@ -598,6 +599,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql |
 | `tg_belge_satir_uygunluk` | `1203_hizmet_uygunluk_istisna_yas.sql` | 482_hizmet_cinsiyet_yas.sql, 1197_hizmet_cinsiyet_istisna.sql |
 | `tg_belge_talep_dogrulama` | `962_belge_talep_karti.sql` | — |
+| `tg_bildirim_sablon_sistem` | `1357_bildirim_sablon_sistem_bayrak_yazilabilir.sql` | 1354_bildirim_sablon_sistem.sql, 1356_bildirim_sablon_sistem_acik_bayrak.sql |
 | `tg_calisma_istisna_onay` | `950_ik_izin_saatli_istisna_izinsiz.sql` | 945_calisma_karti_kurallari.sql |
 | `tg_calisma_sablon_cakisma` | `945_calisma_karti_kurallari.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
