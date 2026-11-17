@@ -9838,7 +9838,13 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .kaid .alan-izgara.kaid-bsablon > .alan-kod input { font-family: Consolas, monospace; font-size: 11.5px }
 @media (max-width: 900px) { .kaid .alan-izgara.kaid-bsablon { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
 .bsk-metin { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr); gap: 14px; align-items: start }
-.bsk-metin .alan-govde textarea { min-height: 170px }
+/* GÖVDE GENİŞ VE YÜKSEK (kullanıcı 17.11.2026: "gövde metni alanı küçük kalmış"): grubun alanları alt grupsuz olduğu için
+   250px'lik çok sütunlu ızgaraya diziliyor, gövde Konu'nun yanında dar kalıyordu. Bu kartta tek sütun; gövdenin etiketi
+   üstte, kutu tam genişlik. */
+.bsk-sol .alan-izgara { grid-template-columns: 1fr !important }
+.bsk-sol .alan-govde { grid-template-columns: 1fr; row-gap: 3px; align-items: start }
+.bsk-sol .alan-govde .etiket { text-align: left }
+.bsk-sol .alan-govde textarea { grid-column: 1; min-height: 240px; font-size: 12.5px; line-height: 1.5 }
 .bsk-sol { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
 .bsk-cipler { display: flex; gap: 5px; flex-wrap: wrap; align-items: center }
 .bsk-cipler small { color: var(--soluk); margin-right: 2px }
