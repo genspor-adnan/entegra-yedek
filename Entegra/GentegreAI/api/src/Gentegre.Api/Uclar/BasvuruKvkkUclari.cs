@@ -18,6 +18,8 @@ public static class BasvuruKvkkUclari
 {
     public const string SablonKodu = "basvuru.kvkk_sms";
 
+    public sealed record KvkkKodIstegi(string? Kod);
+
     /// <summary>Şablon gövdesine kodu yazar: @ONAYKODU ve {{onay_kodu}} ikisi de desteklenir.</summary>
     public static string MetniDoldur(string govde, string kod) =>
         govde.Replace("@ONAYKODU", kod, StringComparison.OrdinalIgnoreCase)
@@ -86,6 +88,42 @@ public static class BasvuruKvkkUclari
 
             var rakam = new string(hasta.Cep.Where(char.IsDigit).ToArray());
             return Results.Ok(new { gonderildi = true, alici = "***" + rakam[^4..] });
+        });
+
+        // ONAY KODU GİR (kullanıcı 17.11.2026: "onay kodu girme modal'i gelsin ve hastanın gönderdiği onay kodunu
+        //   kontrol etsin.. tamamsa onay kodu alanına kaydetsin.. kvkk ve etk combolarda sms ile onay alındı seçilsin").
+        //   Kodu YALNIZ bu uç yazar; eşleşmeyi ve KVKK/ETK = 4'ü DB tetiği (tg_belge_basvuru_kvkk_kod) de uygular.
+        grup.MapPost("/{belgeId:int}/kvkk-kod", async (
+            int belgeId, KvkkKodIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+            baglam.YazmaIste();
+            var kod = new string((istek.Kod ?? "").Where(char.IsDigit).ToArray());
+            if (kod.Length == 0) throw GentegreHatasi.IsKurali("Onay kodunu girin.");
+            await using var b = await veri.AcAsync(iptal);
+
+            var durum = await b.TekAsync("""
+                select bl.sube_id, bb.kvkk_sms_kod
+                  from public.belge bl join public.belge_basvuru bb on bb.id = bl.id
+                 where bl.id = @p0 and bl.tur = 19
+                """, null, [belgeId], o => new { Sube = o.GetInt16(0), Gonderilen = o.IsDBNull(1) ? null : o.GetString(1) }, iptal)
+                ?? throw GentegreHatasi.IsKurali("Başvuru bulunamadı.");
+            if (durum.Sube != baglam.SubeId)
+                throw GentegreHatasi.Yasak("Başvuru başka şubede.");
+            if (durum.Gonderilen is null)
+                throw GentegreHatasi.IsKurali("Bu başvuru için KVKK onay SMS'i gönderilmemiş - önce \"SMS Gönder\".");
+            if (kod != durum.Gonderilen)
+                throw GentegreHatasi.IsKurali("Onay kodu hatalı - hastaya gönderilen kodla eşleşmiyor.");
+
+            await using var tx = await b.BeginTransactionAsync(iptal);
+            await b.CalistirAsync("update public.belge_basvuru set kvkk_onay_kodu = @p1 where id = @p0",
+                tx, [belgeId, kod], iptal);
+            await log.YazAsync(b, tx, LogIslemi.Degistir, 30, belgeId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string> { ["kvkkOnayKodu"] = "doğrulandı", ["kvkkOnay"] = "4", ["etkOnay"] = "4" }, iptal: iptal);
+            await tx.CommitAsync(iptal);
+            return Results.Ok(new { kod, kvkkOnay = 4, etkOnay = 4 });
         });
     }
 }

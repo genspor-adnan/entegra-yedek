@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
-import { guvenli, mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, URUN_IKISI, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -1722,17 +1722,32 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           basvuruIptalGorunur={basvuruMu && satirlar.length === 0 && (doktorIstem?.toplam ?? 0) === 0}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
-          // KVKK SMS (1352): kayıtsız başvuru önce kaydedilir (kod başvuruya yazılır); hasta kodu söyleyince Başvuru
-          //   sekmesindeki SMS Onay Kodu'na yazılır, kayıtta sunucu doğrular.
-          kvkSms={basvuruMu ? () => void (async () => {
-            const bid = kayitliId || await kes(false);
-            if (!bid) return;
-            try {
-              const y = await api.basvuruKvkkSms(bid);
-              setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null }));
-              mesaj(`KVKK onay SMS'i gönderildi (${y.alici}). Hastanın söylediği kodu Başvuru sekmesinde "SMS Onay Kodu"na yazıp kaydedin.`);
-            } catch (h) { mesaj(hataMetni(h)) }
-          })() : undefined}
+          // KVKK ONAY ▾ (1352; kullanıcı 17.11.2026): SMS gönder · onay kodu gir (sunucu doğrular, kodu yazar, KVKK / ETK
+          //   = SMS ile onay) · ıslak imza (KVKK / ETK = 3) · hasta reddetti (KVKK / ETK = 1). Son ikisi combolara yazar,
+          //   Kaydet'le kaydedilir. Kayıtsız başvuru SMS / kod için önce kaydedilir.
+          kvkkOnay={basvuruMu ? {
+            smsGonder: () => void (async () => {
+              const bid = kayitliId || await kes(false);
+              if (!bid) return;
+              try {
+                const y = await api.basvuruKvkkSms(bid);
+                setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null }));
+                mesaj(`KVKK onay SMS'i gönderildi (${y.alici}). Hasta kodu söyleyince KVKK Onay › Onay Kodu Gir.`);
+              } catch (h) { mesaj(hataMetni(h)) }
+            })(),
+            kodGir: () => void (async () => {
+              if (!kayitliId || !basvuruBilgi.kvkkSmsTarihi) { mesaj('Önce KVKK Onay › SMS Gönder.'); return }
+              const kod = await metinSor('Hastanın söylediği onay kodunu girin:', '', 'Onay Kodu');
+              if (kod === null || !kod.trim()) return;
+              try {
+                const y = await api.basvuruKvkkKod(kayitliId, kod.trim());
+                setBasvuruBilgi(o => ({ ...o, kvkkOnayKodu: y.kod, kvkkOnay: y.kvkkOnay, etkOnay: y.etkOnay }));
+                mesaj('Onay kodu doğrulandı: KVKK ve ETK "SMS ile onay alındı".');
+              } catch (h) { mesaj(hataMetni(h)) }
+            })(),
+            islakImza: () => setBasvuruBilgi(o => ({ ...o, kvkkOnay: 3, etkOnay: 3 })),
+            hastaReddetti: () => setBasvuruBilgi(o => ({ ...o, kvkkOnay: 1, etkOnay: 1 })),
+          } : undefined}
         />
       }
     >

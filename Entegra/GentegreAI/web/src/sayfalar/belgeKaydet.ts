@@ -20,8 +20,10 @@ export interface Secim { id: number; ad: string }
  * Liste TEK YERDE: her yeni okunur alan burada buyusun, cagri yerlerinde
  * degil - ayni hata uc kez ayri alanla yasandi.
  */
+// KVKK SMS (1352): gönderim zamanı ve doğrulanmış onay kodu YALNIZ kendi uçlarından yazılır (kvkk-sms / kvkk-kod);
+//   gövdede kalınca sunucu "Bilinmeyen belge alanı" ile kaydı reddediyordu.
 const PROVIZYON_SALT_OKUNUR = new Set(
-  ['sgkMustehaklikZaman', 'ossKurumAdi', 'hastaUnvan', 'sysTakipNo']);
+  ['sgkMustehaklikZaman', 'ossKurumAdi', 'hastaUnvan', 'sysTakipNo', 'kvkkSmsTarihi', 'kvkkOnayKodu']);
 
 /**
  * SAYISAL / TARIH alanlar: ekranda BOS iken '' tutulur ama sunucuya bos metin

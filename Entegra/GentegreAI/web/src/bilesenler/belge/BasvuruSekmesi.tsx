@@ -563,16 +563,17 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
           </label>
         ))}
         {/* SMS ONAY KODU (1352, kullanıcı 17.11.2026: "hasta onu bize söyleyecek biz de başvuruya sms combo sağına
-            kaydedeceğiz"): araç çubuğundaki "KVKK SMS Gönder"in kodu. Kayıtta sunucu doğrular; eşleşirse KVKK ve
-            ETK "SMS ile onay alındı" olur. */}
+            kaydedeceğiz"): KVKK Onay › Onay Kodu Gir sunucuda doğrular ve buraya yazar; KVKK ve ETK "SMS ile onay
+            alındı" olur. Elle girilmez. */}
         <label className="alan">
           <span className="etiket" title={bilgi.kvkkSmsTarihi
-            ? `${c('SMS gönderildi')}: ${new Date(bilgi.kvkkSmsTarihi).toLocaleString('tr-TR')}` : c('Önce "KVKK SMS Gönder"')}>
+            ? `${c('SMS gönderildi')}: ${new Date(bilgi.kvkkSmsTarihi).toLocaleString('tr-TR')}` : c('Önce KVKK Onay › SMS Gönder')}>
             {c('SMS Onay Kodu')}{bilgi.kvkkSmsTarihi ? ' ✉' : ''}</span>
-          <input value={bilgi.kvkkOnayKodu ?? ''} disabled={kilitli || !bilgi.kvkkSmsTarihi} maxLength={10}
-                 inputMode="numeric" placeholder={bilgi.kvkkSmsTarihi ? c('hastanın söylediği kod') : c('SMS gönderilmedi')}
-                 data-testid="kvkk-onay-kodu"
-                 onChange={e => degistir({ kvkkOnayKodu: e.target.value.replace(/\D/g, '') || null })} />
+          {/* SALT OKUNUR (kullanıcı 17.11.2026: "onay kodu alanı elle girilemesin/değişemesin"): yalnız
+              araç çubuğu › KVKK Onay › Onay Kodu Gir doğrulayıp yazar. */}
+          <input value={bilgi.kvkkOnayKodu ?? ''} readOnly tabIndex={-1} className="salt-okunur"
+                 placeholder={bilgi.kvkkSmsTarihi ? c('KVKK Onay › Onay Kodu Gir') : c('SMS gönderilmedi')}
+                 data-testid="kvkk-onay-kodu" />
         </label>
 
         {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
