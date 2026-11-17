@@ -7,6 +7,24 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Güvenlik incelemesi (kimlik, yetki, şube / kapsam): 10 bulgu düzeltildi
+
+- **Personel hesabı** (`/api/kimlik/personel-hesap`): toplu yol parolasız hesaba kart id'sini (tahmin edilebilir) yazmaz;
+  hesap ilk girişte İLK PAROLA (kayıtlı kanala kod) akışına düşer. Varsayılana çekme yalnız tek kişilik, yönetebilirlik
+  denetimli `sifirla`da.
+- **Kilit kahin değil**: kilitliyken doğru / yanlış parola AYNI cevap ("...çok sayıda hatalı denemede hesap geçici olarak
+  kilitlenir"); günlükte `kilitli_dogru`.
+- **Hız sınırı yolu** (`KimlikSinirYolu`): harf ve sondaki '/' duyarsız - `/api/kimlik/Giris` sınırı atlıyordu.
+- **İki adımlı doğrulama** yazılmadı: `totp_aktif = 1` hesap giremez (kapalı-güvenli, 403) - özellik gelene kadar.
+- **Tek kayıt kapısı** (`KayitErisimi`): listedeki belge türü kümesi (998), rol kapsamı ("yalnız kendi kayıtları") ve
+  kullanıcıya bağlı sabit koşul (banko 993) artık burada da.
+- **Kullanıcı kapsamı**: kapsam kolonu tanımsız, kişi verisi taşıyan (portal kuralı olan) kaynak kapsamlı kullanıcıya
+  hiç dönmez (önce sessizce açıktı). Tanım listeleri açık.
+- **Parolamı unuttum** yanıtı yalnız genel mesaj (gönderildi / kanal / maskeli hedef hesap varlığını sızdırıyordu).
+- **Kilit bitince sayaç baştan**: ilk kilitten sonra tek yanlış deneme yeniden kilitliyordu.
+- **Başkası adına şifre**: çağıranın denemeleri sırayla işlenir (eşzamanlı istek sınırı aşıyordu).
+- Test: `GuvenlikIncelemesiTestleri`.
+
 ## 18.11.2026 — Kod inceleme düzeltmeleri (17.11 commit'leri); fiş adları; personel kartı; KVKK / ETK sadeleşmesi
 
 Kod inceleme (bugünkü 47 commit, 10 bulgu; 7. bulgu doğrulanınca geçersiz çıktı):

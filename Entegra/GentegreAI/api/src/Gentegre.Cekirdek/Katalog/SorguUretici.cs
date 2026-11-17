@@ -326,8 +326,17 @@ public sealed partial class SorguUretici
         }
 
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
-        if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)
-            parcalar.Add($"{kk} = any({Ekle(kapsamTarafIdleri.ToArray())})");
+        if (kapsamTarafIdleri is { Count: > 0 })
+        {
+            if (_kaynak.KapsamKolonu is { } kk)
+                parcalar.Add($"{kk} = any({Ekle(kapsamTarafIdleri.ToArray())})");
+            // KAPSAM KOLONU TANIMSIZ KİŞİ VERİSİ KAPALI (güvenlik incelemesi 18.11.2026): kapsamlı kullanıcıda kural
+            //   sessizce düşüyor, kaynağın bütün satırları dönüyordu. Kişiye ait kayıt taşıyan kaynak (portal kuralı
+            //   tanımlı) kapsam kolonu yoksa HİÇ dönmez - eşleme kataloğa eklenene kadar. Tanım listeleri (stok,
+            //   hizmet...) açık kalır.
+            else if (_kaynak.PortalKosullari is { Count: > 0 })
+                parcalar.Add("false");
+        }
 
         // PORTAL KAPSAMI (794): dis doktor / dis kurum / hasta yalniz KENDI
         //   kayitlarini gorur. Kural katalogda, yer tutucu parametreyle

@@ -375,13 +375,23 @@ public sealed class KullaniciDeposu
                        coalesce((select deger::int from public.referans
                                   where anahtar = 'guvenlik.kilit_dakika'), 15) as dakika
             )
+            -- KİLİT BİTİNCE SAYAÇ BAŞTAN (güvenlik incelemesi 18.11.2026): yalnız başarılı giriş sıfırlıyordu - ilk
+            --   kilitten sonra TEK yanlış deneme hesabı yeniden kilitliyordu (15 dakikada bir deneme hekimi hep dışarıda
+            --   tutardı). Süresi dolmuş kilitte bu deneme 1. sayılır; yeniden kilit için yine `sinir` hata gerekir.
+            , yeni as (
+                select k.id,
+                       case when k.kilit_bitis is not null and k.kilit_bitis <= now()::timestamp
+                            then 1 else k.hatali_giris + 1 end as sayi
+                  from public.taraf_kullanici k where k.id = @p0
+            )
             update public.taraf_kullanici k
-               set hatali_giris = k.hatali_giris + 1,
-                   kilit_bitis  = case when k.hatali_giris + 1 >= a.sinir
+               set hatali_giris = y.sayi,
+                   kilit_bitis  = case when y.sayi >= a.sinir
                                        then now()::timestamp + make_interval(mins => a.dakika)
+                                       when k.kilit_bitis is not null and k.kilit_bitis <= now()::timestamp then null
                                        else k.kilit_bitis end
-              from ayar a
-             where k.id = @p0
+              from ayar a, yeni y
+             where k.id = y.id
             """, new object?[] { tarafId }, iptal);
 
     /// <summary>Parola atama tek kapidan: DB'deki fn_parola_ata (bcrypt).</summary>

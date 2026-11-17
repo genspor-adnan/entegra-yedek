@@ -255,7 +255,8 @@ public static class ListeUclari
     /// hiçbir koşul eklenmez - kısıt yalnız çok türlü <c>belge</c> kaynağını
     /// ilgilendiriyor, 200'den fazla liste boşuna bir koşul taşımasın.
     /// </summary>
-    private static IReadOnlyCollection<string>? BelgeKumeleri(KaynakTanimi tanim,
+    /// <summary>Kullanıcının belge türü kümeleri (998) - liste VE tek kayıt kapısı (KayitErisimi) aynı kuralı kullanır.</summary>
+    internal static IReadOnlyCollection<string>? BelgeKumeleri(KaynakTanimi tanim,
         IstekBaglami baglam)
     {
         if (KaynakKatalogu.BelgeKisitKolonu(tanim.Ad) is null) return null;

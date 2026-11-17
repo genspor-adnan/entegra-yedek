@@ -33,7 +33,12 @@ public sealed class KayitErisimi
     {
         var tanim = KaynakKatalogu.Bul(kaynakAdi)
             ?? throw new InvalidOperationException($"Bilinmeyen kaynak: {kaynakAdi}");
-        var erisim = tanim with { SabitKosul = null };
+        // SABİT KOŞUL: iş akışı süzgeci ("serbest bırakılmış istem") atlanır, ama KULLANICIYA BAĞLI olanı bir ERİŞİM
+        //   kuralıdır (banko 993: "görevli yalnız kendi oturumları") - o kalır (güvenlik incelemesi 18.11.2026).
+        var erisim = tanim with
+        {
+            SabitKosul = tanim.SabitKosul is { } sk && sk.Contains("{kullanici}") ? sk : null,
+        };
 
         // HEKIM KISITI: liste ucundaki kuralin aynisi (ListeUclari).
         int? hekimId = null;
@@ -45,15 +50,23 @@ public sealed class KayitErisimi
         // EKRAN SATIR KISITI (1003): liste ucundaki kuralin aynisi - yalniz
         //   `cari.tedarikci` ile gelen kullanici musteri kaydini kimligiyle
         //   acamaz.
-        var ekranKosulu = EkranKodlari.Kisit(tanim.Ad,
-            k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul;
+        // ROL KAPSAMI (güvenlik incelemesi 18.11.2026): listenin "yalnız kendi kayıtları" kuralı (saha temsilcisi,
+        //   RolKapsami) burada da - numarasını bilen başkasının kaydını tek kayıt ucundan açamaz.
+        var ekranKosulu = RolKapsami.Birlestir(
+            EkranKodlari.Kisit(tanim.Ad, k => baglam.Yetkiler.VarTam(k, Islem.Gor))?.Kosul,
+            baglam.RolKosulu(tanim.RolKosullari));
+        // BELGE TÜRÜ KISITI (998, güvenlik incelemesi 18.11.2026): listede uygulanıyor, burada yoktu - yalnız satış
+        //   kümesini gören kullanıcı alış belgesini / başvuruyu kimliğiyle açabiliyordu.
+        var belgeKumeleri = Gentegre.Api.Uclar.ListeUclari.BelgeKumeleri(tanim, baglam);
 
         var uretici = baglam.PortalTuru > 0
             ? new SorguUretici(erisim, baglam.PortalTuru, baglam.PortalKimlik)
-                  { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu }
+                  { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu,
+                    BelgeKumeleri = belgeKumeleri }
             : new SorguUretici(erisim)
             {
                 HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu,
+                BelgeKumeleri = belgeKumeleri,
                 // `{kullanici}` yer tutuculu SabitKosul icin (993).
                 KullaniciId = baglam.KullaniciId,
             };

@@ -79,8 +79,8 @@ export const kimlikUclari = {
 
   /** Parolamı unuttum (843) - 1. adım: kayıtlı telefona / e-postaya kod. Hesap yoksa da genel cevap. */
   parolaUnuttum: (kod: string) =>
-    gonder<{ gonderildi: boolean; kanal: 'sms' | 'eposta' | ''; hedef: string; dakika: number; mesaj: string }>(
-      '/api/kimlik/parola-unuttum', { kod }),
+    // Yanıt yalnız genel mesaj: hesabın var olup olmadığı / kanalı sızmaz (güvenlik incelemesi 18.11.2026).
+    gonder<{ mesaj: string }>('/api/kimlik/parola-unuttum', { kod }),
 
   /** Parolamı unuttum - 2. adım: kod + yeni parola. */
   parolaUnuttumDogrula: (kod: string, dogrulamaKodu: string, yeniParola: string) =>

@@ -297,12 +297,8 @@ kurucu.Services.AddRateLimiter(o =>
     };
     o.AddPolicy("kimlik", ctx =>
     {
-        var yol = ctx.Request.Path.Value ?? "";
-        var sinirli = yol.EndsWith("/giris", StringComparison.Ordinal)
-                   || yol.EndsWith("/yenile", StringComparison.Ordinal)
-                   || yol.Contains("/ilk-parola", StringComparison.Ordinal)
-                   || yol.Contains("/parola-unuttum", StringComparison.Ordinal)
-                   || yol.Contains("/giris-kodu", StringComparison.Ordinal);
+        // Yol harf / sondaki '/' duyarsız eşlenir (KimlikSinirYolu - güvenlik incelemesi 18.11.2026).
+        var sinirli = Gentegre.Api.AraKatman.KimlikSinirYolu.Sinirli(ctx.Request.Path.Value);
         if (!sinirli || guvenlik.GirisDakikaSinir <= 0)
             return System.Threading.RateLimiting.RateLimitPartition.GetNoLimiter("-");
         var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "?";

@@ -132,9 +132,7 @@ export function Giris() {
         const y = await api.parolaUnuttum(kod);
         // Hesap yoksa da sunucu genel cevap verir; kullanici 2. adima gecer,
         //   kod gelmediyse "Kodu yeniden iste" ile doner.
-        setBilgi(y.gonderildi
-          ? `Doğrulama kodu ${y.kanal === 'sms' ? 'SMS ile' : 'e-posta ile'} ${y.hedef} adresine gönderildi (${y.dakika} dk geçerli).`
-          : y.mesaj);
+        setBilgi(y.mesaj);
         setUnuttumAdim(2);
         return;
       }

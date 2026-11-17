@@ -80,6 +80,18 @@ public sealed class KimlikServisi
     private async Task<GirisYaniti> OturumAcAsync(KullaniciKaydi kullanici, List<SubeOzeti> subeler, int? subeId,
                                                   bool subeSecimiGerekli, string ip, string istemci, CancellationToken iptal)
     {
+        // İKİ ADIMLI DOĞRULAMA (güvenlik incelemesi 18.11.2026): taraf_kullanici.totp_aktif kolonu var ve "Hesabım"
+        //   onu gösteriyor ama ikinci adım (kurulum / kod doğrulama) YAZILMADI - açık hesaba parolayla token
+        //   veriliyordu, kullanıcı korunduğunu sanıyordu. Özellik gelene kadar KAPALI-GÜVENLİ: açık hesap giremez.
+        if (await _veri.TekDegerAsync<int>(
+                "select coalesce(totp_aktif, 0)::int from public.taraf_kullanici where id = @p0",
+                new object?[] { kullanici.TarafId }, iptal) == 1)
+        {
+            await _gunluk.GirisDenemesiAsync(kullanici.Kod, kullanici.TarafId, ip, istemci, false, "totp_yok", iptal);
+            throw GentegreHatasi.Yasak("Hesabınızda 2 adımlı doğrulama açık görünüyor ama bu sürüm henüz desteklemiyor; " +
+                                       "giriş yapılamaz. Yöneticinize başvurun (kullanıcı kartında kapatılabilir).");
+        }
+
         // Tek oturum ayari acikken yeni giris oncekileri kapatir.
         if (await AyarAsync("guvenlik.tek_oturum", 0, iptal) == 1)
             await _oturumlar.KullaniciOturumlariniKapatAsync(kullanici.TarafId, "yeni_giris", iptal);
@@ -90,6 +102,10 @@ public sealed class KimlikServisi
         yanit.SubeSecimiGerekli = subeSecimiGerekli;
         return yanit;
     }
+
+    /// <summary>Yanlış parola ve kilitli hesap için TEK metin (kilit kahin olmasın - güvenlik incelemesi 18.11.2026).</summary>
+    private const string KilitliOlabilirMesaji =
+        "Kullanici adi ya da parola hatali. Cok sayida hatali denemede hesap gecici olarak kilitlenir.";
 
     /// <summary>Kimlik + sube dogrulamasi (parola, aktiflik, kilit, rol, aski); oturum ACMAZ.</summary>
     private async Task<(KullaniciKaydi Kullanici, List<SubeOzeti> Subeler, int? SubeId)> GirisDogrulaAsync(
@@ -133,12 +149,15 @@ public sealed class KimlikServisi
 
         // 667: kilit bitisi veritabanindan UTC AN olarak gelir - duvar saatiyle
         //   karsilastirmak hesabi 3 saat erken/gec acardi.
+        // KİLİT KAHİN DEĞİL (güvenlik incelemesi 18.11.2026): kilitliyken doğru parola "kilitli", yanlış parola genel
+        //   hata alıyordu - kilit sürerken tahmin denenip "kilitli" yanıtı doğru parolayı ele veriyordu (kilit tahmini
+        //   durdurmuyordu). Artık kilit boyunca DOĞRU / YANLIŞ AYNI cevap; metin kilidin olabileceğini söyler ama
+        //   parolanın doğru olup olmadığını söylemez. Gerçek neden günlükte.
         if (kullanici.KilitBitis is { } kilit && kilit > Saat.An)
         {
-            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "kilitli", iptal);
-            throw GentegreHatasi.Yetkisiz(parolaDogru
-                ? $"Cok sayida hatali giris - hesap {kilit:HH:mm}'e kadar kilitli."
-                : genel);
+            await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false,
+                                             parolaDogru ? "kilitli_dogru" : "kilitli", iptal);
+            throw GentegreHatasi.Yetkisiz(KilitliOlabilirMesaji);
         }
 
         if (kullanici.ParolaHash.Length == 0)
@@ -152,7 +171,8 @@ public sealed class KimlikServisi
         {
             await _kullanicilar.HataliGirisAsync(kullanici.TarafId, iptal);
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "parola", iptal);
-            throw GentegreHatasi.Yetkisiz("Kullanici adi ya da parola hatali.");
+            // Bu deneme hesabı kilitlediyse de aynı metin (kilitli hesaba sonraki cevapla aynı).
+            throw GentegreHatasi.Yetkisiz(KilitliOlabilirMesaji);
         }
 
         // ROL ATANMAMIS HESAP GIREMEZ (kullanici). Parola DOGRULANDIKTAN sonra
@@ -305,8 +325,23 @@ public sealed class KimlikServisi
     /// hesap reddedilir, yanlış parola o hesabın hatalı giriş sayacını artırır (kilit), deneme günlüğe yazılır.
     /// Hata 401 DEĞİL iş kuralıdır: oturumu açık olan kullanıcı atılmasın.
     /// </summary>
+    /// <summary>"Başkası adına" şifre denemesi ÇAĞIRAN başına sıraya girer (güvenlik incelemesi 18.11.2026).</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, SemaphoreSlim> _adinaSira = new();
+
     public async Task BaskasininParolasiniDogrulaAsync(int kullaniciId, string parola, string ip, string istemci,
         string amac, int cagiranId, CancellationToken iptal = default)
+    {
+        // EŞZAMANLI DENEME (güvenlik incelemesi 18.11.2026): sayım kilitsizdi - aynı anda gönderilen yüzlerce istek
+        //   hepsi "5'in altında" görüp bcrypt'e gidiyordu. Aynı çağıranın denemeleri SIRAYLA işlenir: sayım, doğrulama
+        //   ve hatalı deneme kaydı tek parça. (Kurulum başına tek API süreci; çok süreçte DB kilidine taşınmalı.)
+        var sira = _adinaSira.GetOrAdd(cagiranId, _ => new SemaphoreSlim(1, 1));
+        await sira.WaitAsync(iptal);
+        try { await BaskasininParolasiniDogrulaIcAsync(kullaniciId, parola, ip, istemci, amac, cagiranId, iptal); }
+        finally { sira.Release(); }
+    }
+
+    private async Task BaskasininParolasiniDogrulaIcAsync(int kullaniciId, string parola, string ip, string istemci,
+        string amac, int cagiranId, CancellationToken iptal)
     {
         // DENEME SINIRI ÇAĞIRANA (kod inceleme 17.11.2026): yanlış şifre artık şifresi istenen kişinin GİRİŞ sayacını
         //   artırmaz - yoksa yetkili herhangi biri bir radyoloğun hesabını istediği an kilitletebiliyordu. Bunun yerine
@@ -429,6 +464,12 @@ public sealed class KimlikServisi
         int? tarafId = null, bool sifirla = false, CancellationToken iptal = default)
     {
         var acilan = await _kullanicilar.OtomatikHesapAcAsync(tarafId, iptal);
+        // PAROLASIZ HESAPLARA PAROLA YAZILMAZ (güvenlik incelemesi 18.11.2026): toplu yol şifresi boş her personel
+        //   hesabına kendi kart id'sini (tahmin edilebilir) yazıyordu - yalnız `personel.degistir` taşıyan biri,
+        //   yönetebilirlik denetimi olmadan, aktarılmış bir yöneticinin hesabını açıp girebiliyordu. Parolasız hesap
+        //   ilk girişte İLK PAROLA akışına düşer (kayıtlı kanala tek kullanımlık kod - denetim 28.09.2026 #5).
+        //   Varsayılana çekme YALNIZ tek kişilik, yönetebilirlik denetimli sıfırlamada (sifirla) kalır.
+        if (!sifirla) return (acilan, 0);
         var parolasiz = await _kullanicilar.VarsayilanParolaHedefleriAsync(
             tarafId, sifirla, iptal);
         foreach (var id in parolasiz)

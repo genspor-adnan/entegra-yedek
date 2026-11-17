@@ -215,8 +215,11 @@ public static class KimlikUclari
             ParolaUnuttumIstegi istek, Servisler.ParolaSifirlamaServisi servis, HttpContext ctx,
             CancellationToken iptal) =>
         {
-            var s = await servis.KodGonderAsync(istek.Kod, Ip(ctx), ctx.Request.Headers.UserAgent.ToString(), iptal);
-            return Results.Ok(new { s.Gonderildi, s.Kanal, s.Hedef, s.Dakika, mesaj = Servisler.ParolaSifirlamaServisi.GenelMesaj });
+            // HESAP VARLIĞI SIZMAZ (güvenlik incelemesi 18.11.2026): yanıt gönderildi / kanal / maskeli hedef taşıyordu -
+            //   hesap varsa dolu, yoksa boştu; TCKN / telefon / ad ile personel hesabı taranabiliyordu. Artık HER
+            //   durumda yalnız genel mesaj.
+            await servis.KodGonderAsync(istek.Kod, Ip(ctx), ctx.Request.Headers.UserAgent.ToString(), iptal);
+            return Results.Ok(new { mesaj = Servisler.ParolaSifirlamaServisi.GenelMesaj });
         }).AllowAnonymous();
 
         grup.MapPost("/parola-unuttum/dogrula", async (
