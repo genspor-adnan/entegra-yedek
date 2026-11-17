@@ -310,7 +310,9 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
     // EKRAN KODU (1115): basvuru.liste - `belge` muayenedeki başvuru / istem verisini de açar.
-    menuGrup: 'Kayıt Kabul', menuAd: 'Başvuru Listesi', ic: '@basvuru', yetkiKodu: 'basvuru.liste',
+    // İKON 🚑 (kullanıcı 17.11.2026: "acil başvuru butonundaki ikon başvuru listesi ve başvuru kartı menü ve sekme
+    //   ikonu olsun"): menü + liste sekmesi + kart sekmesi (kartIc yok, liste ikonu). Önceki: '@basvuru' (mavi H).
+    menuGrup: 'Kayıt Kabul', menuAd: 'Başvuru Listesi', ic: '🚑', yetkiKodu: 'basvuru.liste',
     menuSira: 20,
   },
   {
