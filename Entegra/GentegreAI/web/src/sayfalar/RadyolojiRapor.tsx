@@ -203,9 +203,16 @@ export function RadyolojiRapor() {
   const [parolaIstek, setParolaIstek] = useState<{ kisi: string; amac: string; coz(p: string | null): void } | null>(null);
   const parolaSor = (kisi: string, amac: string) =>
     new Promise<string | null>(coz => setParolaIstek({ kisi, amac, coz }));
-  const { kullanici, aksiyonVar } = useOturum();
-  /** Radyolog = rapor onaylama yetkisi (rad.rapor_onayla): kendi adına doğrudan onaylar / imzalar. */
-  const radyologMu = aksiyonVar('rad.rapor_onayla');
+  const { kullanici } = useOturum();
+  /** RADYOLOG = radyolog rolü + onay yetkisi (sunucu söyler; kullanıcı 17.11.2026: "sadece radyolog direkt onaylar" -
+   *  yönetici de radyolog seçip şifre girer). Okunamazsa false: seçim sorulur, sunucu yine denetler. */
+  const [radyologMu, setRadyologMu] = useState(false);
+  useEffect(() => {
+    let iptal = false;
+    Promise.resolve().then(() => api.radyolojiOnayRadyologlari())
+      .then(y => { if (!iptal) setRadyologMu(!!y.benRadyolog) }).catch(() => {});
+    return () => { iptal = true };
+  }, []);
   /** e-İmza hesabı aktif mi (1337): "e-İmzala" düğmesi buna bağlı; okunamazsa null (düğme açık, pencere söyler). */
   const [eimzaAktif, setEimzaAktif] = useState<boolean | null>(null);
   useEffect(() => {
@@ -666,18 +673,30 @@ export function RadyolojiRapor() {
   //   yeniden okunmaz - okunsaydı arada başkasının kaydettiği (uzmanın görmediği) metin onaylanırdı.
   // UZMANA GÖNDER (1199): onaylayacak uzman SEÇİLİR. Varsayılan: raporun önceki onaylayacağı, yoksa bu
   //   kullanıcının son seçtiği uzman (yerel). Seçim kayıttan ÖNCE sorulur - vazgeçilirse hiçbir şey yazılmaz.
-  const uzmanSec = async (): Promise<{ id: number; not: string } | null> => {
+  /**
+   * RADYOLOG / UZMAN SEÇİMİ - TEK PENCERE (kullanıcı 17.11.2026: "uzmana gönderdeki radyolog seçimi ile aynı olmalı
+   * onaylama için seçim"): Uzmana Gönder ve "kimin adına onay / e-imza" aynı listeyi (radyolog rolü + onay yetkisi +
+   * bu şube, bekleyen sayısıyla) ve aynı "son seçilen"i kullanır.
+   */
+  const uzmanListesindenSec = async (baslik: string): Promise<{ id: number; ad: string } | null> => {
     const liste = await api.radyolojiOnayUzmanlari();
-    if (liste.length === 0) { mesaj('Bu şubede rapor onaylama yetkisi olan uzman yok.'); return null }
+    if (liste.length === 0) { mesaj('Bu şubede rapor onaylama yetkisi olan radyolog yok.'); return null }
     let son = '';
     try { son = localStorage.getItem('rad.sonUzman') ?? '' } catch { /* yerel depo kapalı */ }
     const onceki = String(rapor?.onaylayacakId ?? '');
     const varsayilan = [onceki, son].find(k => k && liste.some(u => String(u.id) === k)) ?? String(liste[0].id);
-    const secilen = await listeSor('Raporu onaylayacak uzmanı seçin.',
-      liste.map(u => ({ kod: String(u.id), ad: `${u.ad} — ${u.bekleyen} onay bekliyor` })), varsayilan, 'Onaylayacak uzman');
+    const secilen = await listeSor(baslik,
+      liste.map(u => ({ kod: String(u.id), ad: `${u.ad} — ${u.bekleyen} onay bekliyor` })), varsayilan, 'Radyolog');
     if (!secilen) return null;
     try { localStorage.setItem('rad.sonUzman', secilen) } catch { /* yerel depo kapalı */ }
-    // NOT (1200): isteğe bağlı; uzman raporu açınca bandın altında sarı şerit. Vazgeç = gönderim iptal.
+    const u = liste.find(x => String(x.id) === secilen)!;
+    return { id: u.id, ad: u.ad };
+  };
+
+  const uzmanSec = async (): Promise<{ id: number; not: string } | null> => {
+    const secim = await uzmanListesindenSec('Raporu onaylayacak uzmanı seçin.');
+    if (!secim) return null;
+    const secilen = String(secim.id);
     const not = await metinSor('Uzmana not (isteğe bağlı):', '', 'ör. Sol memedeki lezyona özellikle bakar mısınız?');
     if (not === null) return null;
     return { id: Number(secilen), not: not.trim() };
@@ -689,19 +708,12 @@ export function RadyolojiRapor() {
    */
   /** RADYOLOG SEÇİMİ (17.11.2026): kullanıcı radyologsa kendisi; değilse onay yetkili radyologlar arasından seçilir. */
   const radyologSec = async (): Promise<{ id: number; ad: string; kendisi: boolean } | null> => {
+    // Kullanıcı radyologsa (radyolog rolü + onay yetkisi) seçim sorulmaz, kendi adına.
     if (radyologMu && kullanici) return { id: kullanici.id, ad: kullanici.ad, kendisi: true };
-    let liste: { id: number; ad: string }[] = [];
-    if (!await guvenli(async () => { liste = await api.radyolojiOnayUzmanlari() })) return null;
-    if (liste.length === 0) { mesaj('Bu şubede rapor onaylama yetkisi olan radyolog yok.'); return null }
-    let son = '';
-    try { son = localStorage.getItem('rad.sonUzman') ?? '' } catch { /* yerel depo kapalı */ }
-    const varsayilan = liste.some(u => String(u.id) === son) ? son : String(liste[0].id);
-    const secilen = await listeSor('Rapor hangi radyolog adına onaylanacak?',
-      liste.map(u => ({ kod: String(u.id), ad: u.ad })), varsayilan, 'Radyolog');
-    if (!secilen) return null;
-    try { localStorage.setItem('rad.sonUzman', secilen) } catch { /* yerel depo kapalı */ }
-    const u = liste.find(x => String(x.id) === secilen)!;
-    return { id: u.id, ad: u.ad, kendisi: u.id === kullanici?.id };
+    let secim: { id: number; ad: string } | null = null;
+    if (!await guvenli(async () => { secim = await uzmanListesindenSec('Rapor hangi radyolog adına onaylanacak?') })) return null;
+    const s = secim as { id: number; ad: string } | null;
+    return s ? { ...s, kendisi: s.id === kullanici?.id } : null;
   };
 
   /**

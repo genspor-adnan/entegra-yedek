@@ -16,18 +16,30 @@ namespace Gentegre.Api.Uclar;
 ///  * "onaylandıysa Onayla → Onay İptal olur, e-imzala ise e-İmza İptal olur" - YALNIZ onaylayan radyolog iptal eder
 ///    (başkası basarsa onaylayanın şifresi sorulur); teslim edilmiş ya da e-Nabız / Teletıp'a gitmiş raporda iptal YOK
 ///    (düzeltme ek raporla). Gitmemiş e-Nabız paketi iptal (5), bekleyen Teletıp ORU atlandı (4) olur.
-/// Radyolog = aktif hesap + `rad.rapor_onayla` aksiyonu.
+/// RADYOLOG = aktif hesap + `rad.rapor_onayla` + RADYOLOG ROLÜ (`radyolog` / `teleradyoloji_hekim`) - kullanıcı 17.11.2026:
+/// "ben admin olarak şifre sormadan onayladım.. sadece radyolog direkt onaylar" (yönetici rolü onay yetkisini taşır ama
+/// radyolog değildir; o da radyolog seçip şifre girer).
 /// </summary>
 public static partial class RadyolojiUclari
 {
     public sealed record OnayIptalIstegi(string? Parola = null);
 
+    /// <summary>
+    /// Radyolog rolü: kodunda `radyolog` geçen (şablondaki `radyolog`, kurumun açtığı `koşuyolu_radyolog` vb.) ya da dış
+    /// teleradyoloji hekimi. Asistan (`rad_asistan`), teknisyen ve yönetici girmez.
+    /// </summary>
+    private static string RadyologRolSql(string kullanici) => $"""
+        exists (select 1 from public.fn_kullanici_rolleri({kullanici}) kr join public.rol r on r.id = kr.rol_id
+                 where r.aktif = 1 and (r.kod like '%radyolog%' or r.kod = 'teleradyoloji_hekim'))
+        """;
+
     /// <summary>Kişi rapor onaylayabilir mi: aktif kullanıcı hesabı + rad.rapor_onayla.</summary>
     private static Task<bool> RadyologMuAsync(NpgsqlConnection b, NpgsqlTransaction? tx, int kullaniciId, CancellationToken iptal)
-        => b.TekDegerAsync<bool>("""
+        => b.TekDegerAsync<bool>($"""
             select exists (select 1 from public.taraf_kullanici k where k.id = @p0 and k.aktif = 1)
                and exists (select 1 from public.fn_kullanici_yetkileri(@p0) y
                             where y.yetki_kod = 'rad.rapor_onayla' and y.gor = 1)
+               and {RadyologRolSql("@p0")}
             """, tx, [kullaniciId], iptal);
 
     /// <summary>
@@ -40,6 +52,9 @@ public static partial class RadyolojiUclari
         if (adinaId is not > 0 || adinaId == baglam.KullaniciId)
         {
             baglam.AksiyonIste("rad.rapor_onayla");
+            // KENDİ ADINA YALNIZ RADYOLOG: onay yetkisi olan ama radyolog olmayan (yönetici) radyolog seçip şifre girer.
+            if (!await RadyologMuAsync(b, tx, baglam.KullaniciId, iptal))
+                throw GentegreHatasi.IsKurali("Radyolog değilsiniz; raporu bir radyolog adına onaylayın (radyolog seçimi + şifre / çip).");
             return baglam.KullaniciId;
         }
         baglam.AksiyonIste("rad.rapor_yaz");
@@ -50,6 +65,28 @@ public static partial class RadyolojiUclari
 
     private static void OnayIptalEkle(RouteGroupBuilder grup)
     {
+        // ONAYLAYACAK RADYOLOGLAR (17.11.2026): onay / e-imza "kimin adına" seçimi - radyolog rolündeki, onay yetkili,
+        //   aktif ve bu şubede çalışan kişiler (şube süzgeci onay-uzmanlarıyla aynı). `benRadyolog`: oturum sahibi
+        //   radyolog mu - öyleyse seçim sorulmaz, kendi adına.
+        grup.MapGet("/onay-radyologlari", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.rapor_yaz");
+            await using var b = await veri.AcAsync(iptal);
+            var benRadyolog = await RadyologMuAsync(b, null, baglam.KullaniciId, iptal);
+            var liste = await b.ListeAsync($"""
+                select k.id, public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120) as ad
+                  from public.taraf_kullanici k
+                  join public.taraf t on t.id = k.id
+                 where k.aktif = 1
+                   and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla')
+                   and {RadyologRolSql("k.id")}
+                   and ({SubeSuzgeciSql})
+                 order by 2
+                """, null, [baglam.SubeId], o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
+            return Results.Ok(new { benRadyolog, liste });
+        });
+
         grup.MapPost("/rapor/{id:int}/onay-iptal", async (
             int id, OnayIptalIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, KimlikServisi kimlik,
             HttpContext ctx, CancellationToken iptal) =>

@@ -52,6 +52,9 @@ public static partial class RadyolojiUclari
                   join public.taraf t on t.id = k.id
                  where k.aktif = 1
                    and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla')
+                   -- RADYOLOG ROLÜ (17.11.2026): onaylama ile AYNI liste ("uzmana gönderdeki radyolog seçimi ile aynı
+                   --   olmalı"); onay yetkisini taşıyan yönetici radyolog değildir.
+                   and {RadyologRolSql("k.id")}
                    and ({SubeSuzgeciSql})
                  order by 2
                 """, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);

@@ -82,6 +82,9 @@ export const radyolojiUclari = {
       { not: not ?? '', ...(adina ? { adinaId: adina.id, parola: adina.parola } : {}) }),
   /** ONAY / e-İMZA İPTALİ (17.11.2026): yalnız onaylayan radyolog; başkası onaylayanın şifresiyle. Teslim / e-Nabız /
    *  Teletıp'a gitmiş raporda sunucu reddeder. */
+  /** Kimin adına onay (17.11.2026): radyolog rolündeki onay yetkililer; `benRadyolog` ise seçim sorulmaz. */
+  radyolojiOnayRadyologlari: () =>
+    istek<{ benRadyolog: boolean; liste: { id: number; ad: string }[] }>('/api/radyoloji/onay-radyologlari'),
   radyolojiRaporOnayIptal: (raporId: number, parola?: string) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/onay-iptal`, parola ? { parola } : {}),
   /** RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215): bugün onaylanan, ön rapor, ek rapor (7 gün), teslim bekleyen, eski HBYS. */
