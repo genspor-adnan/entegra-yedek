@@ -92,7 +92,7 @@ export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
  * tahakkukudur (sabit menü 13 = alış tahakkuku veriyordu). Tür bilinmiyorsa sabit menü.
  */
 const DONUSUM_KISA_AD: Record<number, string> = {
-  10: 'İrsaliye', 14: 'İrsaliye', 11: 'Fatura', 15: 'Fatura', 12: 'Fiş', 16: 'Fiş', 13: 'Tahakkuk', 17: 'Tahakkuk', 128: 'Hasta Fişi', 19: 'Sipariş' };
+  10: 'İrsaliye', 14: 'İrsaliye', 11: 'Fatura', 15: 'Fatura', 12: 'Fiş', 16: 'Satış Fişi', 13: 'Tahakkuk', 17: 'Tahakkuk', 128: 'Hasta Fişi', 19: 'Sipariş' };
 export function donusumMenusu(kaynakTur: number | undefined,
                               hedefler: Record<number, { kod: number; ad: string }[]>): Record<string, { kod: string; ad: string }[]> {
   const h = kaynakTur ? hedefler[kaynakTur] : undefined;

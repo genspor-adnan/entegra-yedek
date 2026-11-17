@@ -311,7 +311,9 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
         <>
           <button type="button" className="d bir" disabled={donusumKapali}
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
-                  onClick={() => hizliDonustur?.(16)}>🧾 Fiş</button>
+                  // "Satış Fişi" (kullanıcı 17.11.2026: "Belgelerde Fiş rename Satış Fişi") - Hasta Fişi'nin yanında
+                  //   tek başına "Fiş" hangisi olduğunu söylemiyordu.
+                  onClick={() => hizliDonustur?.(16)}>🧾 Satış Fişi</button>
           <button type="button" className="d bir" disabled={donusumKapali}
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
                   onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
