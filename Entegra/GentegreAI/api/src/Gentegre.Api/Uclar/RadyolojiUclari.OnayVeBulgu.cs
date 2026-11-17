@@ -44,10 +44,9 @@ public static partial class RadyolojiUclari
             //   denetim ile yazım arasında başka bir kayıt / onay araya giremez. Kilit / sürüm / onay adımları
             //   e-imza ucuyla ORTAK (RadyolojiUclari.Imza.cs, 1337): imzalı onay da aynı kuralları uygular.
             var istemId = await RaporKilitleAsync(baglanti, islem, id, surum, iptal);
-            // e-İMZA ZORUNLU (1337): EIMZA hesabı aktifken imzasız onay yok - hekim "Onayla ve İmzala"da kartla
-            //   imzalar (POST /rapor/{id}/imzala). Eski kurulumlar (hesap yok) eskisi gibi onaylar.
-            if (onayMi && (await eimza.AyarAsync(baglam.SubeId, iptal)).Aktif)
-                throw GentegreHatasi.IsKurali("Bu kurulumda rapor onayı e-imza ile yapılır; \"Onayla ve İmzala\" ile kartınızı kullanın.");
+            // e-İMZASIZ ONAY SERBEST (kullanıcı 17.11.2026: "Onayla imzala butonunu 2'ye böl: Onayla (e-imza olmadan
+            //   doktorun onayladığı), e-İmzala (e-imza ile onaylanan)"). 1337'deki "hesap aktifken imzasız onay yok"
+            //   engeli kalktı; imzalı onay ayrı uçtan (POST /rapor/{id}/imzala) - kilit / sürüm / onay kuralları ortak.
 
             if (onayMi)
                 await RaporOnaylaAsync(baglanti, islem, id, istemId, baglam, iptal);

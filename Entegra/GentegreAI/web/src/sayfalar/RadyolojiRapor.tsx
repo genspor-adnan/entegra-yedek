@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { UsbCipIkon } from '../bilesenler/UsbCipIkon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -192,8 +193,15 @@ export function RadyolojiRapor() {
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
   const [kritikModal, setKritikModal] = useState(false);
-  // e-İMZA (1337): EIMZA hesabı aktifken "Onayla ve İmzala" kart + PIN penceresinden geçer (imzasız onay sunucuda reddedilir).
+  // e-İMZA (1337): "e-İmzala" kart + PIN penceresinden geçer; "Onayla" e-imzasız onaydır (17.11.2026, ikisi ayrı düğme).
   const [eimzaModal, setEimzaModal] = useState(false);
+  /** e-İmza hesabı aktif mi (1337): "e-İmzala" düğmesi buna bağlı; okunamazsa null (düğme açık, pencere söyler). */
+  const [eimzaAktif, setEimzaAktif] = useState<boolean | null>(null);
+  useEffect(() => {
+    let iptal = false;
+    Promise.resolve().then(() => api.eimzaAyar()).then(a => { if (!iptal) setEimzaAktif(!!a.aktif) }).catch(() => {});
+    return () => { iptal = true };
+  }, []);
   /**
    * KONSULTASYON (304): ikinci gorus. Istek ve DONEN GORUS ayni yerden
    * yazilir - gorus alanina yazip kaydetmek kaydi "dondu"ye gecirir.
@@ -664,15 +672,21 @@ export function RadyolojiRapor() {
     return { id: Number(secilen), not: not.trim() };
   };
 
-  const durumaGecir = async (hedef: 'on-rapor' | 'onay') => {
+  /**
+   * ONAYLA / e-İMZALA AYRI (kullanıcı 17.11.2026: "Onayla imzala butonunu 2'ye böl: Onayla (e-imza olmadan doktorun
+   * onayladığı), e-İmzala (e-imza ile onaylanan)"). 'onay' = e-imzasız onay; 'eimza' = kart penceresi (1337).
+   */
+  const durumaGecir = async (hedef: 'on-rapor' | 'onay' | 'eimza') => {
     if (islemdeRef.current) return;
-    // ONAY SORUSU (K55): imza geri alınamaz - kilitlemeden önce sorulur.
-    if (hedef === 'onay' && !await onay('Rapor onaylanıp imzalanacak ve kilitlenecek. Devam edilsin mi?')) return;
-    if (hedef === 'onay') {
-      // e-İMZA (1337): hesap aktifse kart penceresi; değilse eski (imzasız) onay.
+    // ONAY SORUSU (K55): onay geri alınamaz - kilitlemeden önce sorulur.
+    if (hedef === 'onay' && !await onay('Rapor e-imza olmadan onaylanacak ve kilitlenecek. Devam edilsin mi?')) return;
+    if (hedef === 'eimza') {
       let eimza = false;
       if (!await guvenli(async () => { eimza = (await api.eimzaAyar()).aktif })) return;
-      if (eimza) { setEimzaModal(true); return }
+      if (!eimza) { mesaj('Bu kurumda e-imza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza).'); return }
+      if (!await onay('Rapor e-imza ile imzalanıp onaylanacak ve kilitlenecek. Devam edilsin mi?')) return;
+      setEimzaModal(true);
+      return;
     }
     let uzman: { id: number; not: string } | undefined;
     if (hedef === 'on-rapor') {
@@ -716,7 +730,7 @@ export function RadyolojiRapor() {
     if (!raporId) throw new Error('Rapor bulunamadı.');
     await api.radyolojiRaporDurum(raporId, hedef, surum, uzman?.id, uzman?.not);
     mesaj(hedef === 'onay'
-      ? 'Rapor onaylandı ve imzalandı; artık kilitlidir.'
+      ? 'Rapor onaylandı (e-imzasız); artık kilitlidir.'
       : 'Ön rapor uzman onayına gönderildi.');
   });
 
@@ -762,8 +776,13 @@ export function RadyolojiRapor() {
           <button className="d bir" disabled={kilitli || islemde || cekimYok} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
           <button className="d" disabled={kilitli || islemde || cekimYok}
                   onClick={() => void durumaGecir('on-rapor')}>➜ Uzmana Gönder</button>
-          <button className="d basari" disabled={kilitli || islemde || cekimYok}
-                  onClick={() => void durumaGecir('onay')}>✍ Onayla ve İmzala</button>
+          {/* ONAYLA / e-İMZALA (17.11.2026): e-imzasız onay ve kartla imzalı onay ayrı düğmeler. */}
+          <button className="d basari" disabled={kilitli || islemde || cekimYok} data-testid="rapor-onayla"
+                  title={c('Raporu e-imza olmadan onaylar ve kilitler')}
+                  onClick={() => void durumaGecir('onay')}>✔ {c('Onayla')}</button>
+          <button className="d basari" disabled={kilitli || islemde || cekimYok || eimzaAktif === false} data-testid="rapor-eimzala"
+                  title={eimzaAktif === false ? c('e-İmza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza)') : c('Raporu e-imza (kart / USB token) ile imzalar ve onaylar')}
+                  onClick={() => void durumaGecir('eimza')}><UsbCipIkon /> {c('e-İmzala')}</button>
           <button className="d teh" disabled={kilitli}
                   onClick={() => setKritikModal(true)}>⚠ Kritik Bulgu Bildir</button>
           {kilitli && <button className="d" onClick={() => void addendum()}>＋ Ek Rapor</button>}
@@ -778,7 +797,7 @@ export function RadyolojiRapor() {
                     catch (h) { setHata(hataMetni(h)) }
                   })()}>🩻 Görüntü</button>}
           {/* KART ADI GÖRÜNTÜ'NÜN SAĞINDA (kullanıcı 17.11.2026): diğer kartlardaki "X Kartı" araç satırı başlığı deseni. */}
-          <span className="kart-ara-baslik"><b>{c('Radyoloji Raporu')}</b></span>
+          <span className="rad-kart-baslik">{c('Radyoloji Raporu')}</span>
           {/* İMZALI BELGE (kullanıcı 13.11.2026): raporun XAdES imzalı XML'i (doküman deposu, kaynak radyoloji-rapor). */}
           {Number(rapor?.imzaDokumanId ?? 0) > 0 && <button className="d" title={c('e-İmzalı rapor belgesini (XAdES XML) indir')}
                   onClick={() => void (async () => {
