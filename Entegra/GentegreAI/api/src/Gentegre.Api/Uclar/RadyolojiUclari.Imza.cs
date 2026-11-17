@@ -120,14 +120,18 @@ public static partial class RadyolojiUclari
 
             // İMZALAYAN = ONAYLAYAN (kod inceleme 17.11.2026): radyolog adına imzada kart O RADYOLOĞUN olmalı - aksi
             //   halde başkası kendi kartıyla imzalar, rapor X imzalamış gibi kilitlenip e-Nabız / Teletıp'a giderdi.
-            //   Sertifikadaki TCKN radyoloğun kimlik numarasıyla karşılaştırılır. Kendi adına imzada iki numara da
-            //   biliniyor ve farklıysa reddedilir; biri eksikse (eski kayıt) geçer.
-            var imzalayanTckn = EImzaServisi.ImzalayanTckn(imzaXml);
+            //   İmza KRİPTOGRAFİK doğrulanır (ImzaKimliginiDogrula) ve TCKN yalnız imzayı doğrulayan sertifikadan okunur
+            //   - istemci kipinde gelen XML'e başkasının sertifikası konamaz. Adına imzada doğrulama ZORUNLU; kendi
+            //   adına imzada (eski akış) yalnız iki numara da biliniyor ve farklıysa reddedilir.
+            var kimlik = EImzaServisi.ImzaKimliginiDogrula(imzaXml);
+            var imzalayanTckn = kimlik.Gecerli ? kimlik.Tckn : null;
             var onaylayanTckn = await veri.TekDegerAsync<string>(
                 "select coalesce(vkno, '') from public.taraf where id = @p0", [onaylayanId], iptal) ?? "";
             onaylayanTckn = new string(onaylayanTckn.Where(char.IsDigit).ToArray());
             if (onaylayanId != baglam.KullaniciId)
             {
+                if (!kimlik.Gecerli)
+                    throw GentegreHatasi.IsKurali("İmza doğrulanamadı: " + kimlik.Hata);
                 if (imzalayanTckn is null)
                     throw GentegreHatasi.IsKurali("İmza sertifikasından kimlik numarası okunamadı; radyolog adına imza doğrulanamadı.");
                 if (onaylayanTckn.Length != 11)

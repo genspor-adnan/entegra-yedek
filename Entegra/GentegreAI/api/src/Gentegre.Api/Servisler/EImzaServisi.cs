@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -145,38 +146,61 @@ public sealed class EImzaServisi(VeriKaynagi veri, IHttpClientFactory istemciUre
         return "İmzalı XML'in içindeki belge, imzalanması istenen rapor değil.";
     }
 
+    /// <summary>İmzanın kriptografik doğrulama sonucu: geçerli mi, imzalayan sertifikanın TCKN'si, hata metni.</summary>
+    public sealed record ImzaKimligi(bool Gecerli, string? Tckn, string Hata);
+
     /// <summary>
-    /// İMZALAYANIN TCKN'Sİ (kod inceleme 17.11.2026): imzalı XML'deki (ds:X509Certificate) imza sertifikasının konu
-    /// SERIALNUMBER'ı (OID 2.5.4.5) - Türk nitelikli elektronik sertifikalarında kişinin T.C. kimlik numarasıdır.
-    /// Birden çok sertifika varsa (zincir) 11 haneli seri numarası taşıyan ilki. Bulunamazsa null.
+    /// İMZA KİMLİĞİ - KRİPTOGRAFİK (kod inceleme 17.11.2026; kullanıcı: "paketi ekle, kriptografik doğrulamayı da yap"):
+    /// ds:Signature, KeyInfo'daki sertifikaların her biriyle denenir (SignedXml.CheckSignature: SignedInfo özetleri +
+    /// imza değeri). Hangisiyle doğrulanıyorsa İMZALAYAN odur ve TCKN YALNIZ ondan okunur - XML'e sonradan konmuş başka
+    /// bir sertifika imzayı doğrulamaz. Sertifika zinciri / iptal (OCSP) denetimi burada YOK: kimin imzaladığını kanıtlar,
+    /// sertifikanın hâlâ geçerli olduğunu değil.
     /// </summary>
-    public static string? ImzalayanTckn(byte[] imzaXml)
+    public static ImzaKimligi ImzaKimliginiDogrula(byte[] imzaXml)
     {
-        var xml = new XmlDocument();
+        var xml = new XmlDocument { PreserveWhitespace = true, XmlResolver = null };
         try
         {
-            using var okuyucu = XmlReader.Create(new MemoryStream(imzaXml), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
+            using var okuyucu = XmlReader.Create(new MemoryStream(imzaXml),
+                new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
             xml.Load(okuyucu);
         }
-        catch (XmlException) { return null; }
-        var ad = new XmlNamespaceManager(xml.NameTable);
-        ad.AddNamespace("ds", "http://www.w3.org/2000/09/xmldsig#");
-        var dugumler = xml.SelectNodes("//ds:X509Certificate", ad);
-        if (dugumler is null) return null;
-        foreach (XmlNode n in dugumler)
+        catch (XmlException h) { return new(false, null, "İmzalı XML okunamadı: " + h.Message); }
+        if (xml.GetElementsByTagName("Signature", SignedXml.XmlDsigNamespaceUrl) is not { Count: > 0 } imzalar
+            || imzalar[0] is not XmlElement imza)
+            return new(false, null, "XML'de ds:Signature yok.");
+
+        var sx = new SignedXml(xml);
+        try { sx.LoadXml(imza); }
+        catch (System.Security.Cryptography.CryptographicException h) { return new(false, null, "İmza okunamadı: " + h.Message); }
+
+        var sertifikalar = new List<X509Certificate2>();
+        try
         {
-            try
+            foreach (var bilgi in sx.KeyInfo.OfType<KeyInfoX509Data>())
+                foreach (var c in bilgi.Certificates?.OfType<X509Certificate>() ?? [])
+                    sertifikalar.Add(c as X509Certificate2 ?? X509CertificateLoader.LoadCertificate(c.GetRawCertData()));
+            if (sertifikalar.Count == 0) return new(false, null, "İmzada sertifika yok.");
+            foreach (var sertifika in sertifikalar)
             {
-                var ham = Convert.FromBase64String(new string(n.InnerText.Where(c => !char.IsWhiteSpace(c)).ToArray()));
-                using var sertifika = X509CertificateLoader.LoadCertificate(ham);
-                foreach (var rdn in sertifika.SubjectName.EnumerateRelativeDistinguishedNames())
-                {
-                    if (rdn.GetSingleElementType().Value != "2.5.4.5") continue;
-                    var rakam = new string((rdn.GetSingleElementValue() ?? "").Where(char.IsDigit).ToArray());
-                    if (rakam.Length == 11) return rakam;
-                }
+                bool tutar;
+                try { tutar = sx.CheckSignature(sertifika, verifySignatureOnly: true); }
+                catch (System.Security.Cryptography.CryptographicException) { tutar = false; }
+                if (tutar) return new(true, Tckn(sertifika), "");
             }
-            catch (Exception h) when (h is FormatException or System.Security.Cryptography.CryptographicException) { }
+            return new(false, null, "İmza, içindeki sertifikayla doğrulanamadı (belge ya da imza değiştirilmiş).");
+        }
+        finally { foreach (var c in sertifikalar) c.Dispose(); }
+    }
+
+    /// <summary>Sertifika konusunun SERIALNUMBER'ı (OID 2.5.4.5) - Türk nitelikli sertifikada T.C. kimlik no. Yoksa null.</summary>
+    private static string? Tckn(X509Certificate2 sertifika)
+    {
+        foreach (var rdn in sertifika.SubjectName.EnumerateRelativeDistinguishedNames())
+        {
+            if (rdn.GetSingleElementType().Value != "2.5.4.5") continue;
+            var rakam = new string((rdn.GetSingleElementValue() ?? "").Where(char.IsDigit).ToArray());
+            if (rakam.Length == 11) return rakam;
         }
         return null;
     }
