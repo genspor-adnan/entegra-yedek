@@ -1,11 +1,12 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { KvkkKodPenceresi } from '../bilesenler/belge/KvkkKodPenceresi';
 import { kvkkBilgiSatiri, kvkkKisa, type KvkkDurumu } from '../bilesenler/belge/basvuru/kvkkDurumu';
 import { EkranSekmesiBaglami, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
-import { guvenli, mesaj, metinSor, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { guvenli, mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, URUN_IKISI, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -573,6 +574,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   KVKK kaydı, ayarlara (şube bazlı / X gün) göre. YENİ başvuruda geçerli onay varsa KVKK / ETK onunla dolar
   //   (seçilmemişse); kayıtlı başvuruda combolara dokunulmaz, yalnız bilgi satırı.
   const [kvkkDurum, setKvkkDurum] = useState<KvkkDurumu | null>(null);
+  /** Onay Kodu Gir penceresi (SMS Gönder'den sonra kendiliğinden, ya da menüden). */
+  const [kvkkKodPencere, setKvkkKodPencere] = useState<{ belgeId: number; alici: string | null } | null>(null);
   const kvkkHastaId = basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || 0) : 0;
   useEffect(() => {
     if (!kvkkHastaId) { setKvkkDurum(null); return }
@@ -1774,26 +1777,14 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
               try {
                 const y = await api.basvuruKvkkSms(bid);
                 setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null }));
-                mesaj(`KVKK onay SMS'i gönderildi (${y.alici}). Hasta kodu söyleyince KVKK Onay › Onay Kodu Gir.`);
+                // ONAY KODU PENCERESİ KENDİLİĞİNDEN AÇILIR (kullanıcı 17.11.2026).
+                setKvkkKodPencere({ belgeId: bid, alici: y.alici });
               } catch (h) { mesaj(hataMetni(h)) }
             })(),
-            kodGir: () => void (async () => {
+            kodGir: () => {
               if (!kayitliId || !basvuruBilgi.kvkkSmsTarihi) { mesaj('Önce KVKK Onay › SMS Gönder.'); return }
-              const kod = await metinSor('Hastanın söylediği onay kodunu girin:', '', 'Onay Kodu');
-              if (kod === null || !kod.trim()) return;
-              try {
-                const y = await api.basvuruKvkkKod(kayitliId, kod.trim());
-                setBasvuruBilgi(o => ({ ...o, kvkkOnayKodu: y.kod, kvkkOnay: y.kvkkOnay, etkOnay: y.etkOnay }));
-                // KART DA KAYDEDİLİR (kullanıcı 17.11.2026: "kod girince kayıtlı değilse kaydedilsin"): kod ve KVKK/ETK
-                //   sunucuda zaten yazıldı; kartta bekleyen başka değişiklik (ücret satırı, alan) varsa o da kaydedilir.
-                //   Güncel durumla kaydetmek için önce çizim beklenir (akisRef her çizimde tazelenir).
-                await new Promise(r => setTimeout(r, 0));
-                const kaydedildi = await akisRef.current.kayitSart();
-                mesaj(kaydedildi
-                  ? 'Onay kodu doğrulandı ve başvuru kaydedildi: KVKK ve ETK "SMS ile onay alındı".'
-                  : 'Onay kodu doğrulandı (KVKK ve ETK "SMS ile onay alındı"), ancak başvurunun diğer değişiklikleri kaydedilemedi - eksik alanları tamamlayıp Kaydet’e basın.');
-              } catch (h) { mesaj(hataMetni(h)) }
-            })(),
+              setKvkkKodPencere({ belgeId: kayitliId, alici: null });
+            },
             islakImza: () => setBasvuruBilgi(o => ({ ...o, kvkkOnay: 3, etkOnay: 3 })),
             hastaReddetti: () => setBasvuruBilgi(o => ({ ...o, kvkkOnay: 1, etkOnay: 1 })),
           } : undefined}
@@ -1802,6 +1793,22 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
+        {/* ONAY KODU GİR (17.11.2026): yanlış kodda pencere açık kalır; doğru kod ya da Kapat kapatır. */}
+        {kvkkKodPencere && (
+          <KvkkKodPenceresi belgeId={kvkkKodPencere.belgeId} alici={kvkkKodPencere.alici}
+            onKapat={() => setKvkkKodPencere(null)}
+            onDogrulandi={y => void (async () => {
+              setKvkkKodPencere(null);
+              setBasvuruBilgi(o => ({ ...o, kvkkOnayKodu: y.kod, kvkkOnay: y.kvkkOnay, etkOnay: y.etkOnay }));
+              // KART DA KAYDEDİLİR (kullanıcı 17.11.2026: "kod girince kayıtlı değilse kaydedilsin"): kod ve KVKK/ETK
+              //   sunucuda zaten yazıldı; kartta bekleyen başka değişiklik varsa o da kaydedilir (güncel çizimle).
+              await new Promise(r => setTimeout(r, 0));
+              const kaydedildi = await akisRef.current.kayitSart();
+              mesaj(kaydedildi
+                ? 'Onay kodu doğrulandı ve başvuru kaydedildi: KVKK ve ETK "SMS ile onay alındı".'
+                : 'Onay kodu doğrulandı (KVKK ve ETK "SMS ile onay alındı"), ancak başvurunun diğer değişiklikleri kaydedilemedi - eksik alanları tamamlayıp Kaydet’e basın.');
+            })()} />
+        )}
 
         {aciliyor && <div className="yukleniyor">{c('Belge açılıyor…')}</div>}
 
