@@ -1803,8 +1803,9 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           /* Sekme degisince onceki hata kutusu TEMIZLENIR: kalemsiz kartta
              Tahsilat'a basip hata alan kullanici, sekme degistirince ayni
              kutuyu gorunce hatanin o sekmeden geldigini saniyordu. */
-          // SEKME DEĞİŞİNCE başvuru sekmesi görüntüleme kipine döner (basvuruDuzenle).
-          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setBasvuruDuzenle(false); setAktifSekme(s) }}
+          // BAŞVURU KİPİ YALNIZ ✎ İLE DEĞİŞİR (kullanıcı 17.11.2026: "başvuru kartını da [hasta kartı] aynı şekilde
+          //   yap"): sekme değişimi düzenlemeyi kapatmaz - stok / hasta kartıyla aynı kural.
+          setAktifSekme={s => { setHata(null); setAlanHatalari({}); setAktifSekme(s) }}
           alanHatalari={alanHatalari} bilgi={bilgi} sonuc={sonuc}
           kilitli={kilitli} baslikKilitli={baslikKilitli} depoKilitli={depoKilitli} girisDepoKilitli={girisDepoKilitli} belgeAdi={belgeAdi}
           yeniMi={!mevcutBelge} baslikKapatAnahtari={baslikKapat}

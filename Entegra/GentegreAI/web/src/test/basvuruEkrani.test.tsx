@@ -669,7 +669,7 @@ describe('başvuru bilgileri edit/view kipi', () => {
     expect(screen.getByTestId('basvuru-kalem').classList.contains('acik')).toBe(true);
   });
 
-  it('kayıtlı başvuru GÖRÜNTÜLEME kipinde açılır; ✎ düzenlemeye alır, sekme değişince geri döner', async () => {
+  it('kayıtlı başvuru GÖRÜNTÜLEME kipinde açılır; yalnız ✎ düzenlemeye alır / kapatır, sekme değişimi kipi değiştirmez', async () => {
     ciz({ id: 114349 });
     await waitFor(() => expect(screen.getByText('Ödeyen Kurum')).toBeInTheDocument());
     await act(async () => { (await sekme('Başvuru')).click() });
@@ -686,10 +686,14 @@ describe('başvuru bilgileri edit/view kipi', () => {
     expect(grup()!.classList.contains('bs-goster')).toBe(false);
     expect(grup()!.querySelector('.alan-izgara')!.hasAttribute('inert')).toBe(false);
 
-    // Başka sekmeye geçip dönünce yine görüntüleme.
+    // Başka sekmeye geçip dönünce DÜZENLEME sürer (17.11.2026: hasta / stok gibi yalnız ✎).
     await act(async () => { (await sekme('Ücretlendirme')).click() });
     await act(async () => { (await sekme('Başvuru')).click() });
     await waitFor(() => expect(grup()).toBeTruthy());
+    expect(grup()!.classList.contains('bs-goster')).toBe(false);
+
+    // ✎ tekrar → görüntüleme.
+    await act(async () => { screen.getByTestId('basvuru-kalem').click() });
     expect(grup()!.classList.contains('bs-goster')).toBe(true);
   });
 });
