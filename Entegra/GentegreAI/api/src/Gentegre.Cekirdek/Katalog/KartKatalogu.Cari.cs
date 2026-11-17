@@ -490,7 +490,11 @@ public static partial class KartKatalogu
             }, Sirala: "yururluk desc, id desc", Baslik: "Kadro Geçmişi",
                // GENGRID (kullanıcı 17.11.2026: "personel kartında kadro geçmişini gengrid yap"): satır içi kutular
                //   yerine liste gridi + ekle / düzenle / sil modalı, kolon menüsü ve CSV.
-               LogTabloId: 1325, GridKipi: true),
+               // ANINDA KAYIT (kullanıcı 17.11.2026: "kadro geçmişinde işe giriş girdim, işe giriş tarihine yansımadı"):
+               //   modalın Tamam'ı yalnız tabloya yazıyordu, kart görüntüleme kipinde Kaydet'e basılmadan kapatılınca
+               //   hareket hiç kaydedilmiyordu. Satır değişince kart hemen kaydedilir + yeniden okunur - tetik
+               //   (fn_personel_kadro_uygula) İşe Giriş / Çıkış, bölüm, görev, rolü karta yazar ve ekranda görünür.
+               LogTabloId: 1325, GridKipi: true, AnindaKaydet: true),
             // PRIM ROLLERI (361): kisi hangi rolde prim alabilir. Bir kisi hem
             //   isteyen hem yapan hem uygulayan olabilir - o yuzden GRID, tek
             //   secim degil.
