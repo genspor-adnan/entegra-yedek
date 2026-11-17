@@ -4,7 +4,7 @@ import { hamSayi } from '../bilesenler/bicim';
 import { bruta } from './belgeKarti/kdvModu';
 import { onerilenTutar, payKalanDahil, matrahaCevir, kurusTamamla }
   from './belgeDonusumHesap';
-import { TAHAKKUK_TURLERI } from './belgeTuru';
+import { TAHAKKUK_TURLERI, tahakkukGibi } from './belgeTuru';
 import { DONUSUM_KOVA_SIRASI, KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI,
          KOVA_SGK, KOVA_OSS }
   from './belgeKarti/dagilimKovalari';
@@ -70,7 +70,7 @@ export function donusumSatirlari(
       // TUTAR OLCUSUNDE de olcu ACIK KALANDIR (kullanici): tahsilat
       //   yapilmadan da fatura/tahakkuk kesilebilir. `onerilenTutar` yalniz
       //   otomatik POS fisinde anlamli - orada tahsilat zaten sinirdir.
-      .map(s => ({ s, dahil: TAHAKKUK_TURLERI.has(hedefTur) ? payKalanDahil(s, pay)
+      .map(s => ({ s, dahil: tahakkukGibi(hedefTur) ? payKalanDahil(s, pay)
                                              : onerilenTutar(s, hedefTur, pay) }))
       // Kurusun altindaki artiklar satir acmaya degmez.
       .filter(x => x.dahil > 0.005)

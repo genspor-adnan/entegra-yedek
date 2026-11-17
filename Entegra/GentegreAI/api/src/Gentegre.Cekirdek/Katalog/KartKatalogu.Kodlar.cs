@@ -177,7 +177,8 @@ public static partial class KartKatalogu
     /// seydir, hangisinin kesildigi kasa tercihidir; kurum payi TAHAKKUK'a
     /// gider. Bos deger = tumu, arayuz onu "Tümü" diye gosterir.
     private static readonly Dictionary<string, string> PrimBelgeTuruKodlari =
-        new() { ["15,16"] = "Fatura / Fiş", ["17"] = "Tahakkuk" };
+        // HASTA FİŞİ (128, 1360) hasta payını kapatır: "Fatura / Fiş" grubundadır (1360 kayıtlı "15,16"ları taşır).
+        new() { ["15,16,128"] = "Fatura / Fiş", ["17"] = "Tahakkuk" };
 
     /// <summary>Muayene raporu türleri (462).</summary>
     private static readonly Dictionary<string, string> RaporTuruKodlari =

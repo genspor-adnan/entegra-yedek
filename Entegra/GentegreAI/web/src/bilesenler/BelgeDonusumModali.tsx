@@ -134,7 +134,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
    * pay sayaclari). Onerilen tutar: fis/faturada tahsil edilen matrah (payin
    * kalanini asmaz), tahakkukta payin kalani.
    */
-  const tutarModOlur = belgeTur === 19 && [15, 16, 17].includes(hedefTur);
+  const tutarModOlur = belgeTur === 19 && [15, 16, 17, 128].includes(hedefTur);
   // BASVURUDA VARSAYILAN TUTAR MODU (kullanici: "butona basinca modal olarak
   //   ACIK BELGE TUTARI ne ise o gelecek"): kabul memuru adet degil TUTAR
   //   dusunur - "900 TL'lik muayenenin ne kadarina belge kesiyorum".
@@ -279,7 +279,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
       const yeni = await api.belgeDonustur(belgeId, hedefTur, lotluGonderilecek, tarih, taslak,
                                            disNumarali ? belgeNo.trim() : undefined,
                                            tutarMod ? (pay || 1) : paylasimVar ? pay : 0,
-                                           tutarMod && kalaniTahakkuk && hedefTur !== 17);
+                                           tutarMod && kalaniTahakkuk && hedefTur !== 17 && hedefTur !== 128);
       setSonuc(yeni);
       setSonucAd(hedefler.find(h => h.kod === hedefTur)?.ad ?? 'Belge');
       setBelgeNo('');
@@ -383,7 +383,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   </select>
                 </label>
               )}
-              {tutarMod && hedefTur !== 17 && (
+              {tutarMod && hedefTur !== 17 && hedefTur !== 128 && (
                 <label className="alan onay-kutusu">
                   <input type="checkbox" checked={kalaniTahakkuk}
                          onChange={e => setKalaniTahakkuk(e.target.checked)} />

@@ -120,6 +120,15 @@ public sealed partial class BelgeDeposu
         if (baglam.SubeId is { } sube && kaynak["sube_id"] is { } ks && Convert.ToInt32(ks) != sube)
             throw GentegreHatasi.Bulunamadi();
 
+        // HASTA PAYI = HASTA FİŞİ (1360): başvurudan hasta payı tahakkuka çevrilirken hedef Hasta Fişi'dir - Satış
+        //   Tahakkuku yalnız kurum payını belgeler (ödeme takibi). Bütün yollar (Hasta Fişi düğmesi, "kalanı tahakkuka
+        //   çevir", elle seçilen dönüşüm) aynı sonuca çıkar. Kurumsuz başvuruda pay 0 = satırın tamamı hasta payıdır.
+        var basvuruKaynagi = Convert.ToInt32(kaynak["tipi"] ?? 0) == KaynakKatalogu.BelgeTipiBasvuru;
+        var hastaPayi = pay is 1 or 4 || (pay == 0 && kaynak["odeyen_kurum_id"] is null);
+        if (basvuruKaynagi && hedefTur == BelgeTuru.SatisTahakkuku && hastaPayi) hedefTur = BelgeTuru.HastaFisi;
+        if (hedefTur == BelgeTuru.HastaFisi && !(basvuruKaynagi && hastaPayi))
+            throw GentegreHatasi.IsKurali("Hasta Fişi yalnız başvurunun hasta payından kesilir.");
+
         var hedefEtki = await TurEtkileriAsync(baglanti, islem, hedefTur, iptal);
 
         // -------------------------- 2) kaynak satirlari KILITLE + kalan kontrol ----
@@ -342,7 +351,7 @@ public sealed partial class BelgeDeposu
             //   "Dahil" belgede matrah bruttten turetilir, KDV = brut - matrah
             //   olur ve girilen rakam birebir tutar. Satir yine matrahla
             //   yazilir - fatura uzerinde KDV ayri satirdir.
-            ["kdvDurum"] = hedefTur is 17 or 13 || Convert.ToInt32(kaynak["tur"]) == 19
+            ["kdvDurum"] = hedefTur is 17 or 13 or BelgeTuru.HastaFisi || Convert.ToInt32(kaynak["tur"]) == 19
                            ? "Dahil" : "Hariç",
             // FIYAT LISTESI + KAMPANYA + ODEYEN KURUM (274): satirlar zaten
             //   kaynagin fiyatiyla kopyalanir, tutar degismez - tasinan sey

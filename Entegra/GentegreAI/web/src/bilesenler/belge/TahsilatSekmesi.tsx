@@ -111,9 +111,7 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
    * silinemez; duzeltmesi Belgeye Dönüşüm sekmesindedir.
    */
   kurumBelgeleri?: { id: number; belgeNo: string; tarih: string;
-                     turAdi: string; cari: string; tutar: number;
-                     /** Hastaya mi kesildi (ikon 👤) yoksa kuruma mi (🏛️). */
-                     hastaMi?: boolean }[];
+                     turAdi: string; cari: string; tutar: number }[];
 }) {
 /* SECIM: faturalama gridiyle AYNI desen - duz tik tek satir secer, Ctrl/Cmd
    ekler-cikarir, Shift aralik secer; basliktaki kutu tumunu secer. */
@@ -549,13 +547,9 @@ return (
           <tr key={`kb-${kb.id}`} className="kurum-belge" style={{ userSelect: 'none' }}>
             {!sade && (
             <td className="check">
-              {/* IKON BELGENIN TARAFINA GORE (kullanici tahakkuku ikiye ayirdi):
-                  hastaya kesilen 👤, kuruma kesilen 🏛️. Ikisi de TAHSILAT
-                  DEGIL - alacagin belgelenmesidir. */}
-              <span className="sonuk"
-                    title={kb.hastaMi ? 'Hastaya kesilen belge - tahsilat değildir'
-                                      : 'Kuruma kesilen belge - tahsilat değildir'}>
-                {kb.hastaMi ? '👤' : '🏛️'}</span>
+              {/* YALNIZ KURUM TAHAKKUKU (1360): hasta payı Hasta Fişi'yle kapanır, burada listelenmez. Tahsilat
+                  DEĞİL - kurum alacağının belgelenmesidir. */}
+              <span className="sonuk" title="Kuruma kesilen belge - tahsilat değildir">🏛️</span>
             </td>)}
             <td>{tarihSaat(kb.tarih)}</td>
             <td>{kb.belgeNo}</td>

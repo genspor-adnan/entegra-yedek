@@ -834,7 +834,9 @@ public static class BelgeUclari
             //   HASTA payi satis tahakkukuna (17) cevrilir. Ikinci adim ayri
             //   transaction'dir: basarisiz olursa ilk belge durur, kullanici
             //   uyariyla gorur ve kalanı elle donusturur.
-            if (istek.KalaniTahakkuk && istek.HedefTur != 17)
+            //   HASTA FİŞİ (1360): başvuruda hasta payı Hasta Fişi'ne gider (DonusturAsync 17'yi çevirir); hedef zaten
+            //   Hasta Fişi ise kalan yok.
+            if (istek.KalaniTahakkuk && istek.HedefTur is not (17 or BelgeTuru.HastaFisi))
             {
                 var secilenIdler = secilen.Select(s => s.SatirId).ToHashSet();
                 var kalanlar = (await depo.AcikSatirlarAsync(id, iptal))
@@ -853,7 +855,7 @@ public static class BelgeUclari
                     {
                         var (tahakkukId, _) = await depo.DonusturAsync(id, 17, kalanlar,
                             istek.BelgeTarihi, istek.Taslak, baglam.Yazma, iptal, null, 1);
-                        uyarilar.Add($"Kalan tutar satış tahakkukuna çevrildi (belge {tahakkukId}).");
+                        uyarilar.Add($"Kalan tutar belgelendi (başvuruda Hasta Fişi, diğerinde satış tahakkuku - belge {tahakkukId}).");
                     }
                     catch (GentegreHatasi h)
                     {

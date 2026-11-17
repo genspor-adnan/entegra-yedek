@@ -77,7 +77,8 @@ public static class CariIcmalUclari
         return (sadeceTedarikci, sadeceTedarikci ? 2 : kapsam switch { "musteri" => 1, "tedarikci" => 2, _ => 0 });
     }
 
-    private const string Satis = "15, 16, 17";
+    // Hasta Fişi (128, 1360) satış tarafı belge: cari borcu satış gibi sayılır.
+    private const string Satis = "15, 16, 17, 128";
     private const string Alis = "11, 12, 13";
 
     /// <summary>Ortak küme: carinin seçimi (tr), hareketler (h), FIFO açık kalemler (acik).

@@ -67,7 +67,8 @@ public static partial class KaynakKatalogu
         ["belge.satis.irsaliye"]   = ([14], false),        // İrsaliyeler (kart)
         ["belge.satis.fatura"]     = ([15], false),        // Faturalar
         ["belge.kurum_fatura"]     = ([15], false),        // Kurumlar & Sigorta › Faturalar
-        ["belge.satis.fis"]        = ([16], false),        // Fişler
+        // HASTA FİŞİ (128, 1360) fişlerin yetkisiyle açılır - tahakkuk yetkisi yalnız kurum tahakkukunu açar.
+        ["belge.satis.fis"]        = ([16, 128], false),   // Fişler
         ["belge.satis.tahakkuk"]   = ([17], false),        // Tahakkuklar
         ["belge.satis.acik_satir"] = ([19], true),         // Açık Satırlar (siparişin kartı)
         ["belge.satis.konsinye"]   = ([119], false),       // Satış Konsinyeler (1275)

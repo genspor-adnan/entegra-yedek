@@ -80,6 +80,15 @@ const SIPARIS_TURLERI   = new Set([9, 19]);
 const IRSALIYE_TURLERI  = new Set([10, 14, 109, 119]);
 const FATURA_TURLERI    = new Set([11, 12, 15, 16]);
 export const TAHAKKUK_TURLERI = new Set([13, 17]);
+/**
+ * HASTA FİŞİ (128, db/1360 - kullanıcı 17.11.2026: "hasta tahakkuk ile kurum tahakkuk tamamen farklı.. hasta
+ * tahakkukta takip yok.. sadece belge ile kapatmak için"): başvurunun hasta payını belgeleyip kapatır. Kartta ve
+ * dönüşümde tahakkuk GİBİ davranır (depo / stok yok, KDV dahil, payın kalanının tamamı) ama TAHAKKUK_TURLERI'nde
+ * DEĞİL: o küme kurum tahakkukunun anlamını taşır (kurum kovası önce, tahsilat sekmesinde kurum belgesi).
+ */
+export const HASTA_FISI = 128;
+/** Kart / dönüşüm mekaniği tahakkuk gibi olan türler: tahakkuklar + Hasta Fişi. */
+export const tahakkukGibi = (tur: number) => TAHAKKUK_TURLERI.has(tur) || tur === HASTA_FISI;
 const KONSINYE_TURLERI  = new Set([109, 119]);
 const STOK_FISI_TURLERI = new Set([3, 4]);
 /**
@@ -152,6 +161,7 @@ export function belgeKisaAdi(tur: number, basvuruMu = false): string {
   if (tur === 105) return 'Talep';
   if (SIPARIS_TURLERI.has(tur)) return 'Sipariş';
   if (KONSINYE_TURLERI.has(tur)) return 'Konsinye';
+  if (tur === HASTA_FISI) return 'Hasta Fişi';
   if (TAHAKKUK_TURLERI.has(tur)) return 'Tahakkuk';
   if (IRSALIYE_TURLERI.has(tur)) return 'İrsaliye';
   // 16 satis / 12 alis FISI - katalogda fatura ailesinde ama adi "Fiş".
@@ -171,7 +181,7 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
   const stokFisi = STOK_FISI_TURLERI.has(tur) || URETIM_TURLERI.has(tur);
   const depoBelgesi = transfer || talep;
   const irsaliye = IRSALIYE_TURLERI.has(tur);
-  const tahakkuk = TAHAKKUK_TURLERI.has(tur);
+  const tahakkuk = tahakkukGibi(tur);
   const siparis  = SIPARIS_TURLERI.has(tur);
   const alis     = ALIS_TURLERI.has(tur);
 

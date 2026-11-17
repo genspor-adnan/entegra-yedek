@@ -330,9 +330,9 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
               (yaslandirma) basvurunun hasta payindan yurur. Odeme takibi
               kurum tahakkukunda (kurum carisi). */}
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Hasta payını tahakkukla belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"
-                  onClick={() => hizliDonustur?.(17, 'hasta')}>
-            📑 Hasta Tahakkuk</button>
+                  title="Hasta payını Hasta Fişi ile belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"
+                  onClick={() => hizliDonustur?.(128, 'hasta')}>
+            🧾 Hasta Fişi</button>
         </>
       )}
 

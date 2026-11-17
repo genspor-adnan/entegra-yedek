@@ -367,7 +367,7 @@ export function CariBelgeler({ id }: { id: number }) {
                gizliKolonlar={['tarafUnvan']}
                cipler={[
                  { ad: 'Tümü' },
-                 { ad: 'Faturalar', filtre: { alan: 'tur', op: 'icinde', deger: [11, 15, 16, 17] } },
+                 { ad: 'Faturalar', filtre: { alan: 'tur', op: 'icinde', deger: [11, 15, 16, 17, 128] } },
                  { ad: 'Siparişler', filtre: { alan: 'tur', op: 'icinde', deger: [9, 19] } },
                  { ad: 'Teklifler', filtre: { alan: 'tur', op: 'esit', deger: 18 } },
                  { ad: 'İrsaliyeler', filtre: { alan: 'tur', op: 'icinde', deger: [10, 14] } },

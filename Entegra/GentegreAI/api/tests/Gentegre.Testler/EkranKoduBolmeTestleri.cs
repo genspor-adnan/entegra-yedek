@@ -153,7 +153,7 @@ public sealed class EkranKoduBolmeTestleri
         var beklenen = new Dictionary<string, int[]>
         {
             ["belge.satis"] = [18, 119], ["belge.satis.siparis"] = [19], ["belge.satis.irsaliye"] = [14],
-            ["belge.satis.fatura"] = [15], ["belge.satis.fis"] = [16], ["belge.satis.tahakkuk"] = [17],
+            ["belge.satis.fatura"] = [15], ["belge.satis.fis"] = [16, 128] /* Hasta Fişi (1360) */, ["belge.satis.tahakkuk"] = [17],
             ["belge.alis"] = [9], ["belge.alis.irsaliye"] = [10], ["belge.alis_fatura"] = [11],
             ["belge.alis.fis"] = [12], ["belge.alis.tahakkuk"] = [13], ["belge.alis.konsinye"] = [109],
             ["belge.stok"] = [105], ["belge.stok.transfer"] = [20], ["belge.stok.giris"] = [3], ["belge.stok.cikis"] = [4],

@@ -23,7 +23,18 @@ public static class BelgeTuru
     /// tahakkuku (13) listede YOK, satis tahakkuku (17) VAR.
     /// </summary>
     private static readonly HashSet<int> CikisTurleri =
-        new() { 17, 14, 15, 16, 119, 29, 105, 133, 4, SarfCikisi, FireCikisi };
+        new() { 17, HastaFisi, 14, 15, 16, 119, 29, 105, 133, 4, SarfCikisi, FireCikisi };
+
+    /// <summary>Satış Tahakkuku: başvuruda yalnız KURUM payı (ödemesi takip edilir).</summary>
+    public const int SatisTahakkuku = 17;
+
+    /// <summary>
+    /// HASTA FİŞİ (1360, kullanıcı 17.11.2026: "hasta tahakkuk ile kurum tahakkuk tamamen farklı.. hasta tahakkukta
+    /// takip yok.. sadece belge ile kapatmak için"): başvurunun HASTA payını belgeleyip kapatır. Muhasebesi Satış
+    /// Tahakkuku gibi (hasta carisi borçlanır, stok etkilemez) ama ödeme takibine girmez. Kod 128: 28/29 Delphi
+    /// aktarımında hediye / iade çeki tahsilatıdır (fn_aktar_kasa), çakışmasın diye satışın üç haneli bloğu.
+    /// </summary>
+    public const int HastaFisi = 128;
 
     /// <summary>Depolar arasi transfer: TEK satir iki depoyu birden oynatir.</summary>
     public const int Transfer = 20;
@@ -154,7 +165,7 @@ public static class BelgeTuru
     /// - stok hareketi yok; teklifte depo combosu web'de istenir, sunucu zorlamaz.
     /// </summary>
     public static bool DepoZorunlu(int tur) =>
-        tur is not (13 or 17 or 18 or 19)
+        tur is not (13 or 17 or HastaFisi or 18 or 19)
         && (CikisMi(tur) || tur is 9 or 10 or 11 or 12 or 109 or Transfer or UretimGirisi || StokFisiMi(tur));
     /// <summary>Transfer ve talep: başlıkta İKİ depo (çıkış / istenen + giriş / teslim), ikisi de zorunlu ve farklı.</summary>
     public static bool IkiDepolu(int tur) => tur is Transfer or Talep;

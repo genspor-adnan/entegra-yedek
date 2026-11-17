@@ -91,7 +91,7 @@ public static class MusteriRiskIcmalUclari
                    (ak.tarih is not null or a.vade < @p1::date) as olcu
               from akis a
               left join ak on ak.taraf_id = a.taraf_id and ak.rn = a.ak_once + 1
-             where a.k = 0 and a.tur in (15, 16, 17) and a.tarih >= @p6::date
+             where a.k = 0 and a.tur in (15, 16, 17, 128) and a.tarih >= @p6::date
         )
         select kp.taraf_id, count(*)::int,
                round(avg(kp.vade - kp.tarih), 1),

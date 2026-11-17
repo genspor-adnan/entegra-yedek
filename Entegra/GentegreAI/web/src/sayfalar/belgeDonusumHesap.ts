@@ -1,6 +1,6 @@
 import type { AcikSatir } from '../api/sozlesme';
 import { KOVA_KALAN_ALANI, KOVA_SGK } from './belgeKarti/dagilimKovalari';
-import { TAHAKKUK_TURLERI } from './belgeTuru';
+import { tahakkukGibi } from './belgeTuru';
 
 /**
  * TUTAR BAZLI DONUSUM HESABI (352) - dönüşüm modali ile otomatik POS fişi
@@ -53,7 +53,7 @@ export const tahsilDahil = (s: AcikSatir, pay: number) =>
  */
 export function onerilenTutar(s: AcikSatir, hedefTur: number, pay: number) {
   const kalan = payKalanDahil(s, pay);
-  if (TAHAKKUK_TURLERI.has(hedefTur)) return kalan;
+  if (tahakkukGibi(hedefTur)) return kalan;
   return Math.max(0, Math.min(kalan, tahsilDahil(s, pay)));
 }
 

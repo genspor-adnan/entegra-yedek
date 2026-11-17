@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (725 ad, 201 tanesi birden cok dosyada)
+## Fonksiyonlar (725 ad, 202 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -101,18 +101,18 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_basvuru_radyoloji_istem_birak` | `1242_basvuru_radyoloji_istem_esitle.sql` | — |
 | `fn_basvuru_radyoloji_istem_esitle` | `1243_sevkli_accession_kabulde.sql` | 1242_basvuru_radyoloji_istem_esitle.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
-| `fn_belge_cikis_mi` | `1172_aktarim_lot_defteri.sql` | 1084_aktarim_belge.sql |
+| `fn_belge_cikis_mi` | `1360_hasta_fisi_turu.sql` | 1084_aktarim_belge.sql, 1172_aktarim_lot_defteri.sql |
 | `fn_belge_diptoplam` | `1278_diptoplam_tevkifat_orani.sql` | 024_fn_belge_diptoplam.sql, 095_diptoplam_kdv_iskonto2.sql, 372_diptoplam_kdvli.sql |
 | `fn_belge_durum_kapatma` | `086_belge_donusum_kurallar.sql` | — |
 | `fn_belge_fis_geri_al` | `190_belge_fisle.sql` | — |
-| `fn_belge_fis_turu_uygun` | `1167_stok_fisi_fislenmez.sql` | 280_taahhut_belgesi_fislenmez.sql, 281_tahakkuk_fislenmez.sql, 429_uretim_v1.sql |
+| `fn_belge_fis_turu_uygun` | `1360_hasta_fisi_turu.sql` | 280_taahhut_belgesi_fislenmez.sql, 281_tahakkuk_fislenmez.sql, 429_uretim_v1.sql, 1167_stok_fisi_fislenmez.sql |
 | `fn_belge_fis_uretilsin` | `281_tahakkuk_fislenmez.sql` | 192_mali_ayarlar.sql, 280_taahhut_belgesi_fislenmez.sql |
 | `fn_belge_fisle` | `190_belge_fisle.sql` | — |
 | `fn_belge_fisle_toplu` | `190_belge_fisle.sql` | — |
 | `fn_belge_fiyatlandir` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_belge_kalem_fiyati` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_belge_kapanma_tazele` | `471_dagilim_kapanma_tahsil.sql` | 191_kapanma_tazele.sql, 289_odeme_paylasimi.sql, 395_kapanma_miktarla.sql |
-| `fn_belge_kisa_adi` | `394_tahsilat_aciklama_belgeden.sql` | — |
+| `fn_belge_kisa_adi` | `1360_hasta_fisi_turu.sql` | 394_tahsilat_aciklama_belgeden.sql |
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `1168_belge_no_kaldigi_yerden.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql, 366_numara_onek_yil.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |
@@ -786,7 +786,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cagri_kuyruk_lookup` | `839_cagri_merkezi.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `940_personel_unvan_yalniz_onek.sql` | 037_kisi_karti.sql, 122_aday_musteri.sql |
-| `v_cari_ozet` | `1327_cari_ozet_materialized.sql` | 1150_cari_ozet.sql, 1162_tedarikci_v3.sql |
+| `v_cari_ozet` | `1360_hasta_fisi_turu.sql` | 1150_cari_ozet.sql, 1162_tedarikci_v3.sql, 1327_cari_ozet_materialized.sql |
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |
@@ -985,7 +985,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_numara_turu_ik` | `767_ik_talep_numaralari.sql` | — |
 | `v_numara_turu_kimlik` | `1117_muayene_rapor_no.sql` | 358_numara_sablonu_elle_girilir.sql, 633_lab_istem_no_ayari.sql, 634_hasta_belge_numaralari.sql, 635_recete_no_numaralandirma.sql, 719_ameliyathane_acil_akis.sql |
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
-| `v_numara_turu_satis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
+| `v_numara_turu_satis` | `1360_hasta_fisi_turu.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql, 334_tahakkuk_tur_takas.sql |
 | `v_numara_turu_servis` | `773_teknik_servis.sql` | — |
 | `v_numara_turu_tahsilat` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_tedarik` | `731_tedarik_numaralari.sql` | — |

@@ -410,12 +410,12 @@ public static partial class FinansIcmalUclari
         var faturalar = await b.ListeAsync("""
             select coalesce(e.taraf_id, 0),
                    coalesce(sum(case when @p5 = '' then e.yerel_borc - e.yerel_alacak else e.borc - e.alacak end)
-                            filter (where e.tur in (15, 16, 17)), 0),
+                            filter (where e.tur in (15, 16, 17, 128)), 0),
                    coalesce(sum(case when @p5 = '' then e.yerel_alacak - e.yerel_borc else e.alacak - e.borc end)
                             filter (where e.tur in (11, 12, 13)), 0)
               from public.v_mali_hareket_ek e
              where e.hesap_turu = 'C' and e.cari_ekstre = 1 and e.bakiye_dahil = 1 and e.islem_durum in (1, 2)
-               and e.tur in (11, 12, 13, 15, 16, 17)
+               and e.tur in (11, 12, 13, 15, 16, 17, 128)
                and e.islem_tarihi >= @p0::date and e.islem_tarihi < @p1::date + 1
                and (coalesce(e.sube_id, 0) = 0 or e.sube_id = any(@p2::int[]))
                and (@p3 = 0 or e.sube_id = @p3)
@@ -643,7 +643,7 @@ public static partial class FinansIcmalUclari
         var odemesiz = await b.ListeAsync("""
             select t.id, coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), ''), x.bakiye, x.son_tahsilat
               from (select e.taraf_id, sum(e.yerel_borc - e.yerel_alacak) as bakiye,
-                           max(e.islem_tarihi::date) filter (where e.yerel_alacak > 0 and e.tur not in (11, 12, 13, 15, 16, 17)) as son_tahsilat
+                           max(e.islem_tarihi::date) filter (where e.yerel_alacak > 0 and e.tur not in (11, 12, 13, 15, 16, 17, 128)) as son_tahsilat
                       from public.v_mali_hareket_ek e
                      where e.hesap_turu = 'C' and e.cari_ekstre = 1 and e.bakiye_dahil = 1 and e.islem_durum in (1, 2)
                        and e.islem_tarihi < @p1::date + 1

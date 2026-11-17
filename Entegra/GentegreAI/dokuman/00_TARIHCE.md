@@ -7,6 +7,25 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 17.11.2026 — Hasta Fişi (belge türü 128): hasta payı tahakkuktan ayrıldı
+
+- Kullanıcı: "hasta tahakkuk ile kurum tahakkuk tamamen farklı.. hasta tahakkukta takip yok.. sadece belge ile kapatmak
+  için.. kurum tahakkukta ödeme vb takipler olmalı" → "evet, hasta fişi yap, eskileri de çevir".
+- **128 Hasta Fişi** (1360): başvurunun hasta payını belgeleyip kapatır. Muhasebesi 17 gibi (hasta carisi borçlanır,
+  stok / muhasebe fişi yok, KDV dahil); ödeme takibine (tahsilat sekmesi kurum belgeleri, kurum tahakkuku akışları)
+  girmez. **17 Satış Tahakkuku** başvuruda yalnız kurum payı. Kod 128: 28 / 29 Delphi aktarımında hediye / iade çeki
+  tahsilatı (fn_aktar_kasa).
+- Sunucu kuralı (`BelgeDeposu.DonusturAsync`): başvurudan hasta payı (1 / 4, kurumsuzda 0) 17'ye çevrilirken hedef
+  128 olur - Hasta Fişi düğmesi, "kalanı tahakkuka çevir", elle seçilen dönüşüm aynı sonuç. 128 başvurunun hasta payı
+  dışında kesilemez (422).
+- Türü bilen yerler: `BelgeTuru` (satış yönü, depo yok), satış numaralama, cari / finans / döviz / risk icmallerinde
+  satış, `fn_belge_cikis_mi`, `fn_belge_fis_turu_uygun`, `fn_belge_kisa_adi`, `v_numara_turu_satis`, `v_cari_ozet`;
+  prim ölçütü "Fatura / Fiş" = `15,16,128`. Yetki: Satış › Fişler (`belge.satis.fis`) Hasta Fişi'ni de açar.
+- Web: "Hasta Tahakkuk" düğmesi → "🧾 Hasta Fişi"; başvuru dönüşüm menüsü Hasta Fişi / Kurum Tahakkuku; hasta /
+  kurum ayrımı cari adı karşılaştırması yerine türden.
+- Eskilerin çevrilmesi: başvurudan doğmuş, hastaya kesilmiş, bütün satırları hasta kovasında olan 17'ler 128
+  (belge + mali hareket; yedek.hasta_fisi_1360). Test: `HastaFisiTestleri`.
+
 ## 17.11.2026 — Radyoloji raporu: Onayla / e-İmzala ayrı, radyolog adına onay, onay / e-imza iptali; ayar sayfası deseni
 
 - **Onayla** (e-imzasız) ve **e-İmzala** (USB çip ikonu) ayrı düğmeler; 1337'deki "e-imza hesabı aktifken imzasız onay yok" engeli kalktı.

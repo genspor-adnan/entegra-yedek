@@ -46,7 +46,8 @@ public static class DovizPozisyonUclari
     /// <summary>islem_log.tablo_id - kur_farki_takip (yeni numara, katalog / uç sabitlerinde boş).</summary>
     private const int LogTabloKurFarki = 1761;
 
-    private static readonly int[] SatisTurleri = [15, 16, 17];
+    // Hasta Fişi (128, 1360) satış tarafı belge: cari borcu satış gibi sayılır.
+    private static readonly int[] SatisTurleri = [15, 16, 17, 128];
     private static readonly int[] AlisTurleri = [11, 12, 13];
     private static readonly decimal[] Senaryolar = [-5m, 5m, 10m, 20m];
 

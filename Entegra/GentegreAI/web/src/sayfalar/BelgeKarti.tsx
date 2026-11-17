@@ -1161,10 +1161,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     // Liste HENUZ GELMEMIS olabilir (cagri ucusta): dizi degilse bos say -
     //   memo her cizimde calisiyor, yarim durumda patlamamali.
     Array.isArray(donusumler.liste) ? donusumler.liste : []).map(d => {
+    // HASTA FİŞİ AYRI TÜR (128, 1360): hasta / kurum ayrımı artık TÜRDEN - cari adı karşılaştırması (aynı adlı
+    //   kurum, sonradan değişen hasta adı) gerekmez. Başvuruda 17 yalnız kurum tahakkukudur.
     if (!basvuruMu || !TAHAKKUK_TURLERI.has(Number(d.tur))) return d;
-    const hastaMi = !!cari?.unvan && String(d.tarafUnvan ?? '') === cari.unvan;
-    return { ...d, turAdi: hastaMi ? 'Hasta Tahakkuku' : 'Kurum Tahakkuku', hastaMi };
-  }), [donusumler.liste, basvuruMu, cari?.unvan]);
+    return { ...d, turAdi: 'Kurum Tahakkuku' };
+  }), [donusumler.liste, basvuruMu]);
 
   /** ACIK BELGE (495): ucret toplami - faturaya/tahakkuka donusen tutar. */
   const basvuruAcikBelge = useMemo(() => acikBelgeHesapla(
@@ -2159,14 +2160,13 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
                            //   tahsilatta olmayacak.. kurum tahakkuk olursa tahsilatta görünebilir"): yalnız
                            //   kuruma kesilen tahakkuk listenin başında durur.
                            kurumBelgeleri={donusumListesi
-                             .filter(d => TAHAKKUK_TURLERI.has(Number(d.tur)) && !d.hastaMi)
+                             .filter(d => TAHAKKUK_TURLERI.has(Number(d.tur)))
                              .map(d => ({
                                id: Number(d.belgeId), belgeNo: String(d.belgeNo ?? ''),
                                tarih: String(d.belgeTarihi ?? ''),
                                turAdi: String(d.turAdi ?? ''),
                                cari: String(d.tarafUnvan ?? ''),
                                tutar: Number(d.tutar ?? 0),
-                               hastaMi: !!d.hastaMi,
                              }))}
                            // MAHSUPTAN SONRA (783): satirlarin TAHSIL
                            //   sayaclari VE tahsilat listesi birlikte

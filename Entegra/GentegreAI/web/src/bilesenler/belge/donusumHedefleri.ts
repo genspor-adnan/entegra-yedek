@@ -19,8 +19,9 @@ export const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
        { kod: 12, ad: 'Alış Fişi' }, { kod: 13, ad: 'Alış Tahakkuku' }],
   // Satis siparisi
   // BASVURU (246, kullanici): fatura / fis / tahakkuk.
+  // HASTA FİŞİ (128, 1360): hasta payı - takip yok; Kurum Tahakkuku (17) kurum payı, ödemesi takip edilir.
   30: [{ kod: 15, ad: 'Satış Faturası' }, { kod: 16, ad: 'Satış Fişi' },
-       { kod: 17, ad: 'Satış Tahakkuku' }],
+       { kod: 128, ad: 'Hasta Fişi' }, { kod: 17, ad: 'Kurum Tahakkuku' }],
   19: [{ kod: 14, ad: 'Satış İrsaliyesi' }, { kod: 15, ad: 'Satış Faturası' },
        { kod: 16, ad: 'Satış Fişi' }, { kod: 17, ad: 'Satış Tahakkuku' }],
   // Irsaliyeler (konsinye dahil): mal zaten cikti/girdi, sirada belgelenmesi var
@@ -37,4 +38,4 @@ export const HEDEFLER: Record<number, { kod: number; ad: string }[]> = {
 };
 
 /** Hedef türün ikonu - kart menüsü (DonusumMenusu) ve liste menüsü (donusumMenusu) aynı ikonu gösterir. */
-export const DONUSUM_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 19: '📋' };
+export const DONUSUM_IKON: Record<number, string> = { 10: '🚚', 14: '🚚', 11: '🧾', 15: '🧾', 12: '🧮', 16: '🧮', 13: '📑', 17: '📑', 128: '🧾', 19: '📋' };

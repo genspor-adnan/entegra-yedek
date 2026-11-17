@@ -52,7 +52,8 @@ public static partial class KaynakKatalogu
     // Kod kumeleri db/152'deki gorunumlerle AYNI olmali - biri degisirse oteki de
     //   degismeli (grid listeler, kart secim kutusunu doldurur).
     // 334: tahakkuk kodlari takas edildi - 13 ALIS, 17 SATIS.
-    private const string NumaraSatisTurleri    = "17, 14, 15, 16, 19, 119";
+    // 1360: Hasta Fişi (128) satış numaralarında.
+    private const string NumaraSatisTurleri    = "17, 128, 14, 15, 16, 19, 119";
     private const string NumaraAlisTurleri     = "8, 9, 10, 11, 12, 13, 109";
     private const string NumaraTahsilatTurleri = "21, 22, 23, 24, 25, 26";
     private const string NumaraOdemeTurleri    = "31, 32, 33, 34, 35, 36, 87";
