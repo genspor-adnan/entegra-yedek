@@ -7,6 +7,14 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 17.11.2026 — KOSUYOLU hasta dosya no: K + 7 hane (yalnız veri, yerel KOSUYOLU)
+
+- Kullanıcı: "son migrate ettiğimiz hasta no 0274539 ama sonradan eklediğimiz hastalar bu numara düzeninde gitmemiş.. başına K harfi ekle".
+- `numara_sablonu` 36: tür 900, şube 1, ön ek `K`, başlama `0274540` (7 hane). Şablon 27 (tüm şubeler, 8 hane) duruyor.
+- Göçten gelen 2.902 hastanın kodu `K` + eski no; sonradan eklenen 7 aktif hasta şablon sayacıyla K0274540–K0274546.
+  Aday (durum 2) iki hasta telefonla kayıtlı kaldı - aktifleşince tetik (1123) şablondan K numarası verir. Sıradaki: K0274547.
+- Yedek: `yedek.hasta_no_1117`, `yedek.hasta_no_1117_sayac`. Hasta web kartı: bant 2./3. satır düzeni, kimlik satırı yalnız düzenlemede, ✎ (KipKalemi).
+
 ## 16.11.2026 — Başvuru KVKK / ETK onayı (1351); randevu durum renkleri; hasta kartı sekmede; SMS/e-posta izni kaldırıldı
 
 - **1351 `belge_basvuru.kvkk_onay` / `etk_onay`** (smallint 1..4, boş = sorulmadı): 1 Hasta Reddetti · 2 Onaysız durumu
