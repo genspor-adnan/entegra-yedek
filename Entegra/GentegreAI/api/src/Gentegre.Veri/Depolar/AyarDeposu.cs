@@ -136,6 +136,11 @@ public sealed class AyarDeposu
         // KİMLİĞİ OKUT - MRZ (1255): 0 kapalı · 1 kamera · 2 tarayıcı / dosya · 3 ikisi; süresi dolmuş belge
         //   0 uyar · 1 engelle; OCR güven eşiği %.
         "kayit.kimlik_okutma", "kayit.suresi_dolmus_belge", "kayit.ocr_esik",
+        // KVKK / ETK ONAYI GEÇERLİLİĞİ (1353, Başvuru Ayarları): 0 tüm şubeler · 1 her şube ayrı; geçerlilik günü, 0 süresiz.
+        "basvuru.kvkk_sube_bazli", "basvuru.kvkk_gecerlilik_gun",
+        // KASA AYARLARI (149): tahsilat / ödeme kaç gün sonra kilitlensin - ekranı vardı, beyaz listede yoktu
+        //   ("Bilinmeyen ayar"); AyarAnahtarBeyazListeTestleri yakaladı (17.11.2026).
+        "kasa.duzenleme_gun",
         // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
         //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
         "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
@@ -223,6 +228,9 @@ public sealed class AyarDeposu
         ["kayit.kimlik_okutma"] = 3,
         ["kayit.suresi_dolmus_belge"] = 0,
         ["kayit.ocr_esik"] = 90,
+        // KVKK (1353): onay tüm şubelerde ve süresiz geçerli.
+        ["basvuru.kvkk_sube_bazli"] = 0,
+        ["basvuru.kvkk_gecerlilik_gun"] = 0,
         ["guvenlik.jwt_dakika"] = 30,
         ["guvenlik.refresh_gun"] = 30,
         ["guvenlik.parola_min_uzunluk"] = 8,
@@ -256,6 +264,9 @@ public sealed class AyarDeposu
         ["kayit.kimlik_okutma"] = (0, 3),             // kapalı / kamera / tarayıcı / ikisi
         ["kayit.suresi_dolmus_belge"] = (0, 1),       // uyar / engelle
         ["kayit.ocr_esik"] = (50, 100),
+        ["basvuru.kvkk_sube_bazli"] = (0, 1),         // tüm şubeler / her şube ayrı
+        ["basvuru.kvkk_gecerlilik_gun"] = (0, 3650),  // 0 = süresiz, en çok 10 yıl
+        ["kasa.duzenleme_gun"] = (-1, 3650),          // -1 sınırsız · 0 kapalı · gün
         ["efatura.senaryo"] = (1, 8),                // 1 Temel / 2 Ticari / 8 Ilac
         ["belge.satis.vade_gun"] = (0, 3650),
         ["belge.alis.vade_gun"] = (0, 3650),
@@ -326,7 +337,9 @@ public sealed class AyarDeposu
         // Sayisal ayarlarda deger dogrulanir: "abc" yazilirsa belge kaydi patlardi.
         if (Varsayilan.ContainsKey(anahtar))
         {
-            if (!int.TryParse(deger, out var sayi) || sayi < 0)
+            // Negatif yalnız aralığı negatiften başlayan ayarda (kasa.duzenleme_gun: -1 sınırsız).
+            var enAzSifir = Aralik.TryGetValue(anahtar, out var ilkSinir) ? Math.Min(0, ilkSinir.EnAz) : 0;
+            if (!int.TryParse(deger, out var sayi) || sayi < enAzSifir)
                 throw GentegreHatasi.Dogrulama("Değer 0 veya daha büyük bir tam sayı olmalı.",
                     new AlanHatasi("deger", "Geçersiz sayı."));
 
