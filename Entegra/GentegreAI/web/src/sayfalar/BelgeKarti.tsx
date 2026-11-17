@@ -2155,8 +2155,11 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
                            //   kuruma kesilen tahakkuk/fatura tahsilat degildir
                            //   ama ayni tabloda okunur - "800 kuruma yazildi,
                            //   200 hastadan alindi".
+                           // HASTA TAHAKKUKU GÖRÜNMEZ (kullanıcı 17.11.2026: "hasta tahakkuk belgesi girilince
+                           //   tahsilatta olmayacak.. kurum tahakkuk olursa tahsilatta görünebilir"): yalnız
+                           //   kuruma kesilen tahakkuk listenin başında durur.
                            kurumBelgeleri={donusumListesi
-                             .filter(d => TAHAKKUK_TURLERI.has(Number(d.tur)))
+                             .filter(d => TAHAKKUK_TURLERI.has(Number(d.tur)) && !d.hastaMi)
                              .map(d => ({
                                id: Number(d.belgeId), belgeNo: String(d.belgeNo ?? ''),
                                tarih: String(d.belgeTarihi ?? ''),
