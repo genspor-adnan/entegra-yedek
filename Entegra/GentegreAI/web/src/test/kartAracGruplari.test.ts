@@ -54,7 +54,9 @@ describe('karta özel sekme gövdeleri ve başlık parçaları (refaktör 23.10.
     const { kartBaslikRozeti, kartUstSeridi } = await import('../bilesenler/kart/kartBasligi');
     const bb = { id: 'yeni' as const, yeniMi: true, deger: {}, meta: null, detaylar: {} };
     for (const k of ['hasta', 'personel', 'dokuman']) expect(kartBaslikRozeti({ ...bb, kaynak: k }), k).toBeNull();
-    expect(isValidElement(kartBaslikRozeti({ ...bb, kaynak: 'hasta', id: 3, yeniMi: false }))).toBe(true);
+    // HASTA BAŞLIK ROZETİ YOK (17.11.2026): dosya no / kimlik no / doğum / durum kimlik şeridinin bandında.
+    expect(kartBaslikRozeti({ ...bb, kaynak: 'hasta', id: 3, yeniMi: false })).toBeNull();
+    expect(isValidElement(kartBaslikRozeti({ ...bb, kaynak: 'personel', id: 3, yeniMi: false }))).toBe(true);
     expect(kartBaslikRozeti({ ...bb, kaynak: 'dis-hekim', id: 3, yeniMi: false })).toBeNull();
     expect(kartUstSeridi('yatan', 'yeni')).toBeNull();
     expect(isValidElement(kartUstSeridi('radyoloji-istem', 7))).toBe(true);

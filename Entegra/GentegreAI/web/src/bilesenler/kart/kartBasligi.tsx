@@ -26,15 +26,9 @@ export interface KartBaslikBaglami {
 const ortada = { margin: '0 auto', display: 'flex', alignItems: 'center' } as const;
 
 const ROZETLER: Record<string, (b: KartBaslikBaglami) => ReactNode> = {
-  // HASTADA BASLIK ROZETI YOK (kullanici): durum artik SERITTE combo
-  //   (dort degerli: Aktif/Pasif/Aday/Vefat) - ayni bilgiyi iki yerde
-  //   gostermek gereksiz. Yerine DOSYA NO yaziyor: kartin kimligi
-  //   "Hasta #123" degil hastanenin verdigi dosya numarasidir.
-  hasta: b => (
-    <span style={{ margin: '0 auto', fontWeight: 400, fontSize: 12 }}>
-      Dosya No : <b>{String(b.deger.kod ?? '') || '—'}</b>
-    </span>
-  ),
+  // HASTADA BAŞLIK ROZETİ YOK (kullanıcı 17.11.2026: "başlıkta ad soyad kutusunun olduğu yere kimlik no ve doğum
+  //   tarihini taşı", "durum da oraya gelsin", "dosya no kimlikno label'lara gerek yok"): dosya no · kimlik no · doğum
+  //   tarihi ve durum rozeti kimlik şeridinin görüntüleme bandında (KartKimlikSeridi hastaSar), ad soyadın altında.
   // Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
   //   cikis tarihi girilmisse pasif kirmizi - cikis tarihi olan biri
   //   "aktif" gorunmesin. Serit alani olarak ayrica cizilmez.
