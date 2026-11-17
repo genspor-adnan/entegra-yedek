@@ -104,6 +104,8 @@ function eskiBasvuru(b: Belge) {
     teleradBildirim: b.teleradBildirim != null ? Number(b.teleradBildirim) : 0,
     kvkkOnay: b.kvkkOnay != null ? Number(b.kvkkOnay) : null,
     etkOnay: b.etkOnay != null ? Number(b.etkOnay) : null,
+    kvkkOnayKodu: b.kvkkOnayKodu != null ? String(b.kvkkOnayKodu) : null,
+    kvkkSmsTarihi: b.kvkkSmsTarihi != null ? String(b.kvkkSmsTarihi) : null,
     // 370'te EKLENEN alan: "Kendi İsteği" isareti. Referans kopya BILEREK
     //   guncellendi - bu dosyanin isi "cevrim degismedi mi" degil, "cevrim
     //   YANLISLIKLA degismedi mi". Yeni bir alan eklendiginde buraya da

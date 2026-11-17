@@ -1722,6 +1722,17 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           basvuruIptalGorunur={basvuruMu && satirlar.length === 0 && (doktorIstem?.toplam ?? 0) === 0}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}
+          // KVKK SMS (1352): kayıtsız başvuru önce kaydedilir (kod başvuruya yazılır); hasta kodu söyleyince Başvuru
+          //   sekmesindeki SMS Onay Kodu'na yazılır, kayıtta sunucu doğrular.
+          kvkSms={basvuruMu ? () => void (async () => {
+            const bid = kayitliId || await kes(false);
+            if (!bid) return;
+            try {
+              const y = await api.basvuruKvkkSms(bid);
+              setBasvuruBilgi(o => ({ ...o, kvkkSmsTarihi: new Date().toISOString(), kvkkOnayKodu: null }));
+              mesaj(`KVKK onay SMS'i gönderildi (${y.alici}). Hastanın söylediği kodu Başvuru sekmesinde "SMS Onay Kodu"na yazıp kaydedin.`);
+            } catch (h) { mesaj(hataMetni(h)) }
+          })() : undefined}
         />
       }
     >

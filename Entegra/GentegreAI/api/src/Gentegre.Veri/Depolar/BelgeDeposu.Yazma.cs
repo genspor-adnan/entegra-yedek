@@ -106,7 +106,9 @@ public sealed partial class BelgeDeposu
         //   ile karsilanir.
         ["kendiIstegi"] = "kendi_istegi",
         // KVKK / ETK ONAYI (1351): 1 reddetti · 2 onaysız · 3 ıslak imza · 4 SMS; boş = sorulmadı.
-        ["kvkkOnay"] = "kvkk_onay", ["etkOnay"] = "etk_onay"
+        ["kvkkOnay"] = "kvkk_onay", ["etkOnay"] = "etk_onay",
+        // SMS ONAY KODU (1352): hastanın söylediği kod; doğrulama tetikte. Gönderilen kod (kvkk_sms_kod) YAZILMAZ.
+        ["kvkkOnayKodu"] = "kvkk_onay_kodu"
     };
 
     /// <summary>

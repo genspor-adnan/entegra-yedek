@@ -69,6 +69,8 @@ export function yanittanBasvuruBilgi(b: Belge): BasvuruBilgi {
     teleradBildirim: b.teleradBildirim != null ? Number(b.teleradBildirim) : 0,
     kvkkOnay: b.kvkkOnay != null ? Number(b.kvkkOnay) : null,
     etkOnay: b.etkOnay != null ? Number(b.etkOnay) : null,
+    kvkkOnayKodu: b.kvkkOnayKodu != null ? String(b.kvkkOnayKodu) : null,
+    kvkkSmsTarihi: b.kvkkSmsTarihi != null ? String(b.kvkkSmsTarihi) : null,
 
     // PROVIZYON (299) - belge_provizyon 1:1; SGK ve ozel sigorta ayri.
     sgkDurum: b.sgkDurum != null ? Number(b.sgkDurum) : 0,

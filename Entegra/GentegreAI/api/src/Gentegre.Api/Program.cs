@@ -609,6 +609,7 @@ uygulama.KaliteIcmalUclariniEkle();         // kalite / SKS icmali (12.10.2026)
 uygulama.RandevuIcmalUclariniEkle();        // randevu / poliklinik icmali (12.10.2026)
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
+uygulama.BasvuruKvkkUclariniEkle();    // başvuru KVK onay SMS'i (1352)
 uygulama.SterilUclariniEkle();
 uygulama.PatolojiUclariniEkle();   // patoloji (1104)
 uygulama.KonsultasyonUclariniEkle();   // konsültasyon isteği (1107)

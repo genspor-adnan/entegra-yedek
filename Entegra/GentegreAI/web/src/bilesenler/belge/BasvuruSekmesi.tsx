@@ -75,6 +75,10 @@ export interface BasvuruBilgi {
       3 Islak imzalı onay alındı · 4 SMS ile onay alındı; null = sorulmadı. */
   kvkkOnay?: number | null;
   etkOnay?: number | null;
+  /** SMS ONAY KODU (1352): hastanın söylediği kod; sunucu gönderilenle karşılaştırır, eşleşince KVKK/ETK = 4. */
+  kvkkOnayKodu?: string | null;
+  /** KVKK SMS'inin gönderildiği an (salt okunur). */
+  kvkkSmsTarihi?: string | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -558,6 +562,18 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
             </select>
           </label>
         ))}
+        {/* SMS ONAY KODU (1352, kullanıcı 17.11.2026: "hasta onu bize söyleyecek biz de başvuruya sms combo sağına
+            kaydedeceğiz"): araç çubuğundaki "KVKK SMS Gönder"in kodu. Kayıtta sunucu doğrular; eşleşirse KVKK ve
+            ETK "SMS ile onay alındı" olur. */}
+        <label className="alan">
+          <span className="etiket" title={bilgi.kvkkSmsTarihi
+            ? `${c('SMS gönderildi')}: ${new Date(bilgi.kvkkSmsTarihi).toLocaleString('tr-TR')}` : c('Önce "KVKK SMS Gönder"')}>
+            {c('SMS Onay Kodu')}{bilgi.kvkkSmsTarihi ? ' ✉' : ''}</span>
+          <input value={bilgi.kvkkOnayKodu ?? ''} disabled={kilitli || !bilgi.kvkkSmsTarihi} maxLength={10}
+                 inputMode="numeric" placeholder={bilgi.kvkkSmsTarihi ? c('hastanın söylediği kod') : c('SMS gönderilmedi')}
+                 data-testid="kvkk-onay-kodu"
+                 onChange={e => degistir({ kvkkOnayKodu: e.target.value.replace(/\D/g, '') || null })} />
+        </label>
 
         {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
             girilmez (sunucu kapıları). */}

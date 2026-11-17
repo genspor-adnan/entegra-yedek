@@ -14,7 +14,7 @@ export function BelgeAracCubugu({
   siparisMi, irsaliyeMi, basvuruMu, eBelgeYok, kayitliId,
   kes, yeniBelge, kapat, setTerminAcik,
   rezerveVar, rezerveCalisiyor, rezerveDegistir,
-  hastaKartiAc, acilBasvuru, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
+  hastaKartiAc, acilBasvuru, kvkSms, hastaVar, doktorIstemi, doktorIstemVar, doktorIstemSayi,
   basvuruIptalGorunur, baslik, kapatSolu, onSil,
 }: {
   /** Belge başlığını yeniden oku (e-Fatura menüsünden sonra). */
@@ -61,6 +61,8 @@ export function BelgeAracCubugu({
   /** Basvuru dugmeleri (300, mockup): hasta karti / acil basvuru. */
   hastaKartiAc?(): void;
   acilBasvuru?(): void;
+  /** KVKK SMS (1352): hastanın cep telefonuna KVKK / ETK onay kodu SMS'i. Yalnız başvuruda. */
+  kvkSms?(): void;
   /** Hasta secili mi - "Hasta Kartını Aç" ona bagli. */
   hastaVar?: boolean;
   /** DOKTOR İSTEMİ: hekimin muayenede açtığı bekleyen lab/radyoloji istemlerini
@@ -153,6 +155,14 @@ export function BelgeAracCubugu({
       </button>
 
       <span className="ayrac" />
+
+      {/* KVKK SMS (kullanıcı 17.11.2026: "acil başvuru butonu sağında separator sağına 'KVK SMS gönder' butonu"). */}
+      {kvkSms && (
+        <button className="d" disabled={kilitli || !hastaVar}
+                title="Hastanın cep telefonuna KVKK / ETK onay kodu SMS'i gönderir; hastanın söylediği kod Başvuru sekmesinde SMS Onay Kodu'na yazılır"
+                onClick={() => kvkSms()}>
+          📱 KVKK SMS Gönder
+        </button>)}
 
       {/* "Yatışa Çevir" KALDIRILDI (kullanici): yatan hasta modulu yok,
           pasif dugme yer kapliyordu. Modul gelince geri konur. */}

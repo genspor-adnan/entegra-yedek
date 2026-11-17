@@ -7,6 +7,18 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 17.11.2026 — Başvuru KVKK SMS onay kodu (1352); aday hasta dosya no şablondan; başvuru ikonu 🚑
+
+- **1352:** `bildirim_sablon` `basvuru.kvkk_sms` (SMS; Yönetim › Bildirim Şablonu Listesi'nden değişir, `@ONAYKODU` /
+  `{{onay_kodu}}`). Varsayılan metin bağlantısız; KOSUYOLU'ya kurumun aydınlatma linkli metni veri olarak yazıldı.
+  `belge_basvuru.kvkk_sms_kod / kvkk_sms_tarihi / kvkk_onay_kodu`; tetik `tg_belge_basvuru_kvkk_kod`: kod eşleşmezse
+  GK422, eşleşince `kvkk_onay = etk_onay = 4`. Dev, KOSUYOLU, test DB'de uygulandı.
+- **API** `POST /api/basvuru/{id}/kvkk-sms` (BasvuruKvkkUclari): belge Değiştir + şube yazma, 6 haneli tekil kod,
+  kuyruk (KaynakTur 30), log. **Web:** araç çubuğunda ayracın sağında "📱 KVKK SMS Gönder"; Başvuru sekmesinde ETK'nın
+  sağında "SMS Onay Kodu".
+- **Aday hasta dosya no** artık cep değil: kod gönderilmez, `tg_taraf_hasta_dosya_no` şube şablonundan verir (KOSUYOLU K + 7).
+- Başvuru Listesi / kartı menü ve sekme ikonu 🚑.
+
 ## 17.11.2026 — KOSUYOLU hasta dosya no: K + 7 hane (yalnız veri, yerel KOSUYOLU)
 
 - Kullanıcı: "son migrate ettiğimiz hasta no 0274539 ama sonradan eklediğimiz hastalar bu numara düzeninde gitmemiş.. başına K harfi ekle".

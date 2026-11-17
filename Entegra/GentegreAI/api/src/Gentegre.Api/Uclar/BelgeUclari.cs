@@ -1160,6 +1160,8 @@ public static class BelgeUclari
         or "siraNo" or "refakatci"
         // Ambulans (300) - basvuru uzantisinda.
         or "ambulansHastaNo" or "ambulansBileklikNo"
+        // SMS onay kodu (1352) - hastanın söylediği kod, tetik doğrular.
+        or "kvkkOnayKodu"
         // Provizyon (299) - metin alanlari.
         or "sgkProvizyonNo" or "sgkRedNedeni" or "sgkSigortaTuru"
         or "sgkBasvuruNo" or "sgkTakipNo"

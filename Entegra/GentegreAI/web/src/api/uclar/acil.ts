@@ -18,6 +18,9 @@ export interface AcilSureOzeti {
 }
 
 export const acilUclari = {
+  /** KVKK SMS (1352): hastanın cep telefonuna KVKK / ETK onay kodu SMS'i; dönen alıcı maskeli (***1234). */
+  basvuruKvkkSms: (belgeId: number) =>
+    gonder<{ gonderildi: boolean; alici: string }>(`/api/basvuru/${belgeId}/kvkk-sms`, {}),
   /** Kart/pano şeridi: süreler, yatak, açık çağrı, bekleyen bildirim. */
   acilSure: (id: number) =>
     istek<Record<string, unknown>>(`/api/acil/basvuru/${id}/sure`),
