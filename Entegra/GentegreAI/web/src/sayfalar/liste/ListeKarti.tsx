@@ -641,7 +641,8 @@ export function ListeKarti({
         //   sekmeler arasındaki satır yok (kullanıcı 02.11.2026).
         // REÇETE de (kullanıcı 04.11.2026): "Ürün Ağacı (Reçete) Kartı" + kod / onay rozeti Hatırlat'ın sağında, başlık satırı yok.
         // Hizmet de (kullanıcı 09.11.2026: "hizmet kartı ve Id olan bandı kaldır.. sil butonu sağına taşı").
-        baslikAracta={tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis' || tanim.kaynak === 'dis-hekim-ziyaret'}
+        // HASTA da (kullanıcı 17.11.2026: "'Hasta Kartı' ve ID'yi yeni başvuru butonu sağına al. ve üstteki o bandı kaldır").
+        baslikAracta={tanim.kaynak === 'hasta' || tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis' || tanim.kaynak === 'dis-hekim-ziyaret'}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
