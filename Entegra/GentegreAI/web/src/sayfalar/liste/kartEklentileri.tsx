@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react';
+import { BildirimMetinPaneli, DegiskenlerSekmesi, DegisiklikGecmisiSekmesi, DenemeGonderDugmesi, GonderimGecmisiSekmesi } from '../../bilesenler/bildirim/BildirimSablonPanelleri';
 import type { GenForm } from '../../bilesenler/GenForm';
 import type { ListeTanimi } from '../listeTanimlari';
 import { api } from '../../api/istemci';
@@ -107,6 +108,21 @@ export interface KartEklentisi {
 const kayitli = (id: KartEklentiBaglami['kartId']): id is number => typeof id === 'number';
 
 export const KART_EKLENTILERI: Record<string, KartEklentisi> = {
+  // ------------------------------------- Bildirim şablonu kartı (1354, mockup Ekranlar/Ayarlar/bildirim_sablonu_karti.html) ----
+  // Metin sekmesi: alanlar + değişken çipleri + SMS sayacı + denetim + telefon önizlemesi; Değişkenler · Gönderim
+  //   Geçmişi · Değişiklik Geçmişi sekmeleri; araç çubuğunda 🧪 Deneme Gönder; başlıkta "⚙ Sistem şablonu" rozeti.
+  'bildirim-sablon': {
+    sekmeSarmalayici: b => (baslik, icerik, d) => baslik !== 'Metin' ? icerik
+      : <BildirimMetinPaneli icerik={icerik} deger={d} id={kayitli(b.kartId) ? b.kartId : null} />,
+    ekSekmeler: b => kayitli(b.kartId) ? [
+      { anahtar: 'ozel:bsablon-degisken', baslik: 'Değişkenler', ciz: bg => <DegiskenlerSekmesi id={b.kartId as number} deger={bg.deger} /> },
+      { anahtar: 'ozel:bsablon-gonderim', baslik: 'Gönderim Geçmişi', ciz: () => <GonderimGecmisiSekmesi id={b.kartId as number} /> },
+      { anahtar: 'ozel:bsablon-degisiklik', baslik: 'Değişiklik Geçmişi', ciz: () => <DegisiklikGecmisiSekmesi id={b.kartId as number} /> },
+    ] : undefined,
+    ekAraclar: b => kayitli(b.kartId) ? d => <DenemeGonderDugmesi id={b.kartId as number} deger={d} /> : undefined,
+    baslikEk: () => d => Number(d.sistem ?? 0) === 1
+      ? <span className="rozet mor" title="Kodu programda geçer: kod değiştirilemez, şablon silinemez">⚙ Sistem şablonu</span> : null,
+  },
   // ------------------------------------------------ hasta kartı v5 (24.10.2026) ----
   // Mockup Kayıt Kabul/hasta_karti_v5.html: etiketli kimlik şeridi yok (alanlar Genel › Kimlik),
   //   yerinde isim bandı + sayı kutuları.

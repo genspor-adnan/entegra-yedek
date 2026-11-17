@@ -322,6 +322,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'bildirim-sablon', baslik: 'Bildirim Şablonu Listesi',
     yol: 'Yonetim › Bildirim Şablonu Listesi', kartYolu: '/bildirim-sablon',
     aksiyonEkrani: 'bildirim-sablon-liste',
+    // HATIRLAT YOK (1354 mockup bildirim_sablonu_karti.html).
+    kartHatirlatYok: true,
     cipler: DURUM_CIPLERI,
     menuGrup: 'Platform', menuSira: 110,
     menuAd: 'Bildirim Şablonu Listesi', ic: '💬', yetkiKodu: 'bildirim_sablon.liste',

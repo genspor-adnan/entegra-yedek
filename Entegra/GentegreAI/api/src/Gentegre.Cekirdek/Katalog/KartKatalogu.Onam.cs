@@ -103,7 +103,10 @@ public static partial class KartKatalogu
                 Baslik: "Konu (e-posta)", Grup: "Metin"),
             new("govde", "govde", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Gövde", Grup: "Metin"),
+            // AÇIKLAMA KİMLİK ŞERİDİNDE (mockup bildirim_sablonu_karti.html, 17.11.2026): şablonun nerede kullanıldığı.
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "Metin"),
+                Baslik: "Açıklama", Grup: "Kimlik"),
+            // SİSTEM ŞABLONU (1354): kodu programda geçer - kod değişmez, silinmez (tetik). Ekranda rozet.
+            new("sistem", "sistem", "mantik", Yazilabilir: false, Gizli: true),
         });
 }

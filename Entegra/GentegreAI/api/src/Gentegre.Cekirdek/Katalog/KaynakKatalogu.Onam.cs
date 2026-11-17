@@ -143,6 +143,8 @@ public static partial class KaynakKatalogu
             new("alici",      "b.alici",     "metin", "Alıcı", Genislik: 180),
             new("kisi",       "coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '')", "metin", "Kişi", Genislik: 200),
             new("sablonAdi",  "coalesce(s.ad, '')", "metin", "Şablon", Genislik: 180),
+            // Şablon kartı › Gönderim Geçmişi bu kolonla süzer (1354).
+            new("sablonId",   "b.sablon_id", "sayi",  "Şablon Id", Varsayilan: false),
             new("konu",       "b.konu",      "metin", "Konu", Genislik: 200, Varsayilan: false),
             new("govde",      "b.govde",     "metin", "Gövde", Varsayilan: false),
             new("durumAdi",

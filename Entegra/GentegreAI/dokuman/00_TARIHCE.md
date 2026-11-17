@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 17.11.2026 — KVKK onay geçerliliği (1353), KVKK Onay menüsü ve kod penceresi; bildirim şablonu kartı (1354)
+
+- **1353** `referans`: `basvuru.kvkk_sube_bazli` (0 tüm şubeler · 1 her şube ayrı), `basvuru.kvkk_gecerlilik_gun` (0 süresiz).
+  Kayıt Kabul Ayarları › Başvuru › "KVKK / ETK onayı". `GET /api/basvuru/kvkk-durum`: hastanın bu başvuru dışındaki son
+  KVKK kaydı → gecerli / suresi_doldu / reddetti / baska_sube / yok (iptal başvuru sayılmaz, ret taşınmaz). Yeni başvuruda
+  geçerli onay KVKK / ETK'yı doldurur; Başvuru sekmesinde bilgi satırı, hasta şeridinde KVKK / ETK izni, menü başlığında durum.
+- **KVKK Onay ▾** (SMS Gönder · Onay Kodu Gir · Islak İmzalı · Hasta Reddetti): SMS'ten sonra **Onay Kodu penceresi** kendiliğinden
+  açılır; yanlış kodda hata pencerede kalır, doğru kod ya da Kapat kapatır (`POST /api/basvuru/{id}/kvkk-kod`; kod belge
+  kaydından yazılamaz). Geçerli onay / önceki SMS varken yeniden gönderim sorulur. `kvkkSmsTarihi` / `kvkkOnayKodu` gövdeye
+  girmez (kayıt 422 düzeltmesi).
+- **1354** `bildirim_sablon.sistem` (göçle gelen = 1; tetik: kod değişmez, satır silinmez). Bildirim şablonu kartı mockup'a göre:
+  kipli şerit (kanal avatarı, açıklama şeritte), Metin sekmesi (değişken çipleri imlece eklenir, SMS sayacı UCS-2/7-bit,
+  denetim, kullanıldığı yer, telefon / e-posta önizlemesi), Değişkenler · Gönderim Geçmişi (`bildirim.sablonId`) ·
+  Değişiklik Geçmişi sekmeleri, 🧪 Deneme Gönder (`/api/bildirim-sablon/{id}/ozet|deneme`), başlık araç satırında, Hatırlat yok.
+
 ## 17.11.2026 — Başvuru KVKK SMS onay kodu (1352); aday hasta dosya no şablondan; başvuru ikonu 🚑
 
 - **1352:** `bildirim_sablon` `basvuru.kvkk_sms` (SMS; Yönetim › Bildirim Şablonu Listesi'nden değişir, `@ONAYKODU` /

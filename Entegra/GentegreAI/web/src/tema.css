@@ -9830,3 +9830,49 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .bs-kvkk-bilgi.k { background: var(--hatazem); border-color: var(--hatakenar); color: var(--hata) }
 .bs-kvkk-bilgi.b { background: var(--grupzem, #eef5fd); border-color: var(--cizgi); color: var(--mor) }
 .dugme-menu-baslik { padding: 5px 10px; font-size: 10.5px; color: var(--soluk); background: var(--yuz2, #f3f6fa); border-bottom: 1px solid var(--cizgi2); white-space: nowrap }
+
+/* ============ BİLDİRİM ŞABLONU KARTI (1354, mockup Ekranlar/Ayarlar/bildirim_sablonu_karti.html) ============ */
+.kaid .alan-izgara.kaid-bsablon { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.8fr) minmax(0, .7fr) minmax(0, .55fr) minmax(0, .55fr) minmax(0, .55fr) }
+.kaid .alan-izgara.kaid-bsablon > .alan-aciklama { grid-column: 1 / -1 }
+.kaid .alan-izgara.kaid-bsablon > .alan-aciklama input { font-weight: 400; font-size: 12px }
+.kaid .alan-izgara.kaid-bsablon > .alan-kod input { font-family: Consolas, monospace; font-size: 11.5px }
+@media (max-width: 900px) { .kaid .alan-izgara.kaid-bsablon { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } }
+.bsk-metin { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr); gap: 14px; align-items: start }
+.bsk-metin .alan-govde textarea { min-height: 170px }
+.bsk-sol { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.bsk-cipler { display: flex; gap: 5px; flex-wrap: wrap; align-items: center }
+.bsk-cipler small { color: var(--soluk); margin-right: 2px }
+.bsk-cip { font: 11px Consolas, monospace; padding: 1px 8px; border-radius: 9px; border: 1px solid var(--cizgi); background: var(--grupzem, #e6eef7); color: var(--mor); cursor: pointer }
+.bsk-cip:hover { background: var(--mor2) }
+.bsk-sayac { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px }
+.bsk-sayac > div { border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz); padding: 6px 9px }
+.bsk-sayac small { display: block; color: var(--soluk); font-size: 10.5px }
+.bsk-sayac b { font-size: 15px; color: var(--yazi2, var(--mor)) }
+.bsk-sayac b.u { color: var(--uyari) }
+.bsk-sayac i { font-style: normal; font-size: 10.5px; color: var(--soluk); margin-left: 4px }
+.bsk-grp { border: 1px solid var(--cizgi2); border-radius: 4px; overflow: hidden; background: var(--yuz) }
+.bsk-grp > h6 { margin: 0; padding: 6px 10px; font-size: 11.5px; background: var(--yuz2, #f3f6fa); border-bottom: 1px solid var(--cizgi2); display: flex; gap: 8px }
+.bsk-grp > h6 .sonuk { margin-left: auto; font-weight: 400 }
+.bsk-uyarilar { padding: 8px 10px; display: flex; flex-direction: column; gap: 5px }
+.bsk-uy { display: flex; gap: 8px; align-items: flex-start; padding: 6px 9px; border-radius: 3px; font-size: 11.5px; border: 1px solid; line-height: 1.45 }
+.bsk-uy.s { background: var(--uyarizem); border-color: var(--uyarikenar); color: var(--uyari) }
+.bsk-uy.k { background: var(--hatazem); border-color: var(--hatakenar); color: var(--hata) }
+.bsk-uy.g { background: var(--okzem); border-color: var(--okkenar); color: var(--ok) }
+.bsk-uy.b { background: var(--grupzem, #eef5fd); border-color: var(--cizgi); color: var(--mor) }
+.bsk-kullanim { padding: 8px 10px; font-size: 11.5px; display: flex; flex-direction: column; gap: 4px }
+.bsk-telefon { width: 270px; margin: 10px auto; border: 9px solid #1f2a36; border-radius: 26px; background: #e9edf2; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.18) }
+.bsk-tel-ust { background: #f7f8fa; padding: 8px 10px; border-bottom: 1px solid #d8dee6; text-align: center }
+.bsk-tel-ust b { display: block; font-size: 12px; color: #1f2d3a }
+.bsk-tel-ust small { font-size: 10px; color: #7a8796 }
+.bsk-tel-ic { padding: 12px 10px 16px; min-height: 280px }
+.bsk-balon { background: #fff; border-radius: 14px 14px 14px 4px; padding: 8px 10px; font-size: 11.5px; line-height: 1.45; color: #1f2d3a; box-shadow: 0 1px 1px rgba(0,0,0,.08); overflow-wrap: anywhere; white-space: pre-wrap }
+.bsk-dg { background: #fff4c2; border-radius: 2px; padding: 0 2px; font-weight: 700 }
+.bsk-link { color: #2f6db3 }
+.bsk-tel-alt { font-size: 10px; color: #7a8796; margin-top: 4px }
+.bsk-eposta { margin: 10px; border: 1px solid var(--cizgi); border-radius: 4px; background: #fff; color: #1f2d3a }
+.bsk-ep-konu { padding: 8px 10px; border-bottom: 1px solid var(--cizgi2) }
+.bsk-ep-konu small { display: block; color: #7a8796; font-size: 10px }
+.bsk-ep-govde { padding: 10px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere }
+.bsk-degiskenler .not { margin-bottom: 8px }
+.bsk-degiskenler .mono { font-family: Consolas, monospace; font-size: 11px }
+@media (max-width: 1000px) { .bsk-metin { grid-template-columns: 1fr } .bsk-sayac { grid-template-columns: 1fr 1fr } }

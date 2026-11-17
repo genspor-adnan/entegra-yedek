@@ -610,6 +610,7 @@ uygulama.RandevuIcmalUclariniEkle();        // randevu / poliklinik icmali (12.1
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
 uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.BasvuruKvkkUclariniEkle();    // başvuru KVK onay SMS'i (1352)
+uygulama.BildirimSablonKartUclariniEkle(); // bildirim şablonu kartı: özet + deneme gönder (1354)
 uygulama.SterilUclariniEkle();
 uygulama.PatolojiUclariniEkle();   // patoloji (1104)
 uygulama.KonsultasyonUclariniEkle();   // konsültasyon isteği (1107)

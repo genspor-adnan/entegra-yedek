@@ -76,6 +76,7 @@ import { cocukIzlemUclari } from './uclar/cocukIzlem';
 import { gebelikUclari } from './uclar/gebelik';
 import { ameliyathaneUclari } from './uclar/ameliyathane';
 import { acilUclari } from './uclar/acil';
+import { bildirimSablonUclari } from './uclar/bildirimSablon';
 import { akisTedarikUclari } from './uclar/akisTedarik';
 import { onayUclari } from './uclar/onay';
 import { izinUclari } from './uclar/izin';
@@ -130,6 +131,7 @@ export const api = {
   ...gebelikUclari,
   ...ameliyathaneUclari,
   ...acilUclari,
+  ...bildirimSablonUclari,
   ...akisTedarikUclari,
   ...onayUclari,
   ...izinUclari,

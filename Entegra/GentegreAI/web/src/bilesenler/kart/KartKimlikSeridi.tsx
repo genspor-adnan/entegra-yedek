@@ -22,7 +22,7 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
  * tek geçiş yolu ✎ (ızgaraya tıklamak kipi değiştirmez - başvuru kararı); sekme değişince görüntülemeye döner;
  * salt okunur kartta hep görüntüleme, ✎ pasif. Değer: ızgaranın kaynağa özel sütun sınıfı (tema.css).
  */
-const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat', onayAkis: 'kaid-onayakis' };
+const KIPLI_SERITLER: Record<string, string> = { stok: 'kaid-stok', hizmet: 'kaid-hizmet', 'fiyat-listesi': 'kaid-fiyat', onayAkis: 'kaid-onayakis', 'bildirim-sablon': 'kaid-bsablon' };
 /** Onay akışı avatarı: kayıt türünün simgesi (mockup onay_akis_karti.html). */
 const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', '1224': '🔧', '1257': '💰', '1256': '🏷', '976': '📄', '1312': '🧾', '1314': '📑', '30': '📝' };
 /**
@@ -33,7 +33,8 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
  */
 // HASTA DA (kullanıcı 16.11.2026: "hasta kartını da stok gibi yap"): kayıtlı hasta görüntülemede açılır, şerit +
 //   Genel sekmesi yalnız ✎ ile düzenlemeye geçer (KartGrupSarmalayici gövdeyi inert sarar).
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta']);
+// BİLDİRİM ŞABLONU (1354, mockup bildirim_sablonu_karti.html): şerit + Metin sekmesi tek ✎ ile.
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -465,6 +466,12 @@ export function KartKimlikSeridi({
                 )}
                 {/* HİZMET (mockup hizmet_karti_baslik_kip.html, 09.11.2026): resim yok, hizmet adının baş harfleri. */}
                 {kaynak === 'hizmet' && <StokAvatar ad={String(deger.ad ?? '')} pasif={pasif} />}
+                {/* BİLDİRİM ŞABLONU avatarı: kanal simgesi (SMS 📱 · e-posta ✉ · push 🔔 · WhatsApp 💬). */}
+                {kaynak === 'bildirim-sablon' && (
+                  <span className={`kart-avatar stok-avatar${pasif ? ' pasif' : ''}`} title={c('Kanal')} data-testid="bsablon-avatar">
+                    {({ '1': '📱', '2': '✉', '3': '🔔', '4': '💬' } as Record<string, string>)[String(deger.kanal ?? '')] ?? '💬'}
+                  </span>
+                )}
                 {kaynak === 'onayAkis' && (
                   <span className={`kart-avatar stok-avatar${Number(deger.aktif ?? 1) === 0 ? ' pasif' : ''}`}
                         title={c('Kayıt türü')} data-testid="onay-avatar">
