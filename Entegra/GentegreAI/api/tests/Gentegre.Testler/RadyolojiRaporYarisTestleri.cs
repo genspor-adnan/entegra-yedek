@@ -40,8 +40,9 @@ public sealed class RadyolojiRaporYarisTestleri(ApiSunucuOlgusu api)
 
     private async Task<HttpClient> IstemciAsync(TestDunyasi d)
     {
-        // Rol adı "radyolog": onay / uzman listesi radyolog rolünü ister (17.11.2026).
+        // RADYOLOG ROLÜ (1365): onay / uzman listesi rol kartındaki "Radyolog" bayrağına bakar.
         var rol = await d.RolAsync("radyolog", "radyoloji:gde", "radyoloji-istem:gde", "rad.rapor_yaz", "rad.rapor_onayla");
+        await api.Veri.CalistirAsync("update public.rol set radyolog = 1 where id = @p0", [rol]);
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         _uzman = u;

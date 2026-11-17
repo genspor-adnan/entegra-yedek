@@ -29,6 +29,10 @@ public static class BasvuruKvkkUclari
              .Replace("{{onay_kodu}}", kod, StringComparison.OrdinalIgnoreCase)
              .Replace("{{ONAYKODU}}", kod, StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>KVKK SMS onay kodu: hatalı deneme sınırı ve geçerlilik süresi (1364).</summary>
+    private const int KodDenemeSiniri = 5;
+    private const int KodGecerlilikDakika = 30;
+
     public static void BasvuruKvkkUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/basvuru").WithTags("Başvuru · KVKK").RequireAuthorization();
@@ -138,7 +142,7 @@ public static class BasvuruKvkkUclari
                 -- YENİDEN GÖNDERİM ESKİ SMS ONAYINI DÜŞÜRÜR (kod inceleme 17.11.2026): kod silinip KVKK/ETK "SMS ile onay
                 --   alındı" (4) kalırsa, hasta yeni kodu hiç söylemese de onaylı sayılıyordu. Islak imza / ret dokunulmaz.
                 update public.belge_basvuru
-                   set kvkk_sms_kod = @p1, kvkk_sms_tarihi = now(), kvkk_onay_kodu = null,
+                   set kvkk_sms_kod = @p1, kvkk_sms_tarihi = now(), kvkk_onay_kodu = null, kvkk_kod_hata = 0,
                        kvkk_onay = case when kvkk_onay = 4 then null else kvkk_onay end,
                        etk_onay  = case when etk_onay  = 4 then null else etk_onay  end
                  where id = @p0
@@ -176,17 +180,35 @@ public static class BasvuruKvkkUclari
             await using var b = await veri.AcAsync(iptal);
 
             var durum = await b.TekAsync("""
-                select bl.sube_id, bb.kvkk_sms_kod
+                select bl.sube_id, bb.kvkk_sms_kod, coalesce(bb.kvkk_kod_hata, 0)::int,
+                       coalesce(bb.kvkk_sms_tarihi < now() - make_interval(mins => @p1), false)
                   from public.belge bl join public.belge_basvuru bb on bb.id = bl.id
                  where bl.id = @p0 and bl.tur = 19
-                """, null, [belgeId], o => new { Sube = o.GetInt16(0), Gonderilen = o.IsDBNull(1) ? null : o.GetString(1) }, iptal)
+                """, null, [belgeId, KodGecerlilikDakika], o => new
+                {
+                    Sube = o.GetInt16(0), Gonderilen = o.IsDBNull(1) ? null : o.GetString(1),
+                    Hata = o.GetInt32(2), Eskidi = o.GetBoolean(3),
+                }, iptal)
                 ?? throw GentegreHatasi.IsKurali("Başvuru bulunamadı.");
             if (durum.Sube != baglam.SubeId)
                 throw GentegreHatasi.Yasak("Başvuru başka şubede.");
             if (durum.Gonderilen is null)
                 throw GentegreHatasi.IsKurali("Bu başvuru için KVKK onay SMS'i gönderilmemiş - önce \"SMS Gönder\".");
+            // DENEME SINIRI + SÜRE (1364, kod inceleme 17.11.2026): 6 haneli kod sınırsız denenemez ve eskir - yoksa
+            //   hasta olmadan "SMS ile onay" üretilebilirdi. İkisinde de yeni SMS gerekir (gönderim sayacı sıfırlar).
+            if (durum.Hata >= KodDenemeSiniri)
+                throw GentegreHatasi.IsKurali($"{KodDenemeSiniri} kez hatalı kod girildi - kod kilitlendi, yeni SMS gönderin.");
+            if (durum.Eskidi)
+                throw GentegreHatasi.IsKurali($"Onay kodunun süresi doldu ({KodGecerlilikDakika} dakika) - yeni SMS gönderin.");
             if (kod != durum.Gonderilen)
-                throw GentegreHatasi.IsKurali("Onay kodu hatalı - hastaya gönderilen kodla eşleşmiyor.");
+            {
+                await b.CalistirAsync("update public.belge_basvuru set kvkk_kod_hata = coalesce(kvkk_kod_hata, 0) + 1 where id = @p0",
+                    null, [belgeId], iptal);
+                var kalan = KodDenemeSiniri - durum.Hata - 1;
+                throw GentegreHatasi.IsKurali(kalan > 0
+                    ? $"Onay kodu hatalı - hastaya gönderilen kodla eşleşmiyor ({kalan} deneme hakkı kaldı)."
+                    : "Onay kodu hatalı - deneme hakkı bitti, yeni SMS gönderin.");
+            }
 
             await using var tx = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("update public.belge_basvuru set kvkk_onay_kodu = @p1 where id = @p0",

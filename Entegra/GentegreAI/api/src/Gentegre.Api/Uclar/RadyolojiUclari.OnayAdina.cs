@@ -25,12 +25,13 @@ public static partial class RadyolojiUclari
     public sealed record OnayIptalIstegi(string? Parola = null);
 
     /// <summary>
-    /// Radyolog rolü: kodunda `radyolog` geçen (şablondaki `radyolog`, kurumun açtığı `koşuyolu_radyolog` vb.) ya da dış
-    /// teleradyoloji hekimi. Asistan (`rad_asistan`), teknisyen ve yönetici girmez.
+    /// Radyolog rolü: rol kartında "Radyolog" işaretli (rol.radyolog, 1365 - kod inceleme 17.11.2026). Rol KODU kalıbı
+    /// ('%radyolog%') bırakıldı: harfe duyarlıydı ve adla iş bilmiyordu ('Radyolog' / 'rad_uzman' dışarıda,
+    /// 'radyolog_sekreter' içeride kalıyordu).
     /// </summary>
     private static string RadyologRolSql(string kullanici) => $"""
         exists (select 1 from public.fn_kullanici_rolleri({kullanici}) kr join public.rol r on r.id = kr.rol_id
-                 where r.aktif = 1 and (r.kod like '%radyolog%' or r.kod = 'teleradyoloji_hekim'))
+                 where r.aktif = 1 and r.radyolog = 1)
         """;
 
     /// <summary>Kişi rapor onaylayabilir mi: aktif kullanıcı hesabı + rad.rapor_onayla.</summary>
@@ -116,7 +117,7 @@ public static partial class RadyolojiUclari
                 if (string.IsNullOrEmpty(govde?.Parola))
                     throw GentegreHatasi.Dogrulama("Onaylayan radyoloğun şifresi gerekli.", new AlanHatasi("parola", "Zorunlu."));
                 await kimlik.BaskasininParolasiniDogrulaAsync(onaylayan, govde.Parola, baglam.Ip,
-                    ctx.Request.Headers.UserAgent.ToString(), "rad_onay_iptal", iptal);
+                    ctx.Request.Headers.UserAgent.ToString(), "rad_onay_iptal", baglam.KullaniciId, iptal);
             }
 
             // DIŞARI ÇIKTIYSA İPTAL YOK: teslim / e-Nabız (gönderiliyor-gönderildi-silindi) / Teletıp ORU gönderildi.

@@ -46,7 +46,7 @@ public static partial class RadyolojiUclari
                 onaylayanId = await OnaylayanCozAsync(baglanti, null, baglam, govde?.AdinaId, iptal);
                 if (onaylayanId != baglam.KullaniciId)
                     await kimlik.BaskasininParolasiniDogrulaAsync(onaylayanId, govde?.Parola ?? "", baglam.Ip,
-                        ctx.Request.Headers.UserAgent.ToString(), "rad_onay_adina", iptal);
+                        ctx.Request.Headers.UserAgent.ToString(), "rad_onay_adina", baglam.KullaniciId, iptal);
             }
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 

@@ -345,6 +345,10 @@ public static partial class KartKatalogu
             //   veritabaninda durur - yeni sistem rolu eklemek derleme gerektirmesin.
             new("amac",      "amac",       "metin",  Yazilabilir: false, EnFazlaUzunluk: 200,
                 Baslik: "Amaç", Grup: "Kimlik"),
+            // RADYOLOG (1365, kod inceleme 17.11.2026): rapor onayını kendi adına veren rol - onay / e-imza "kimin adına"
+            //   ve Uzmana Gönder listeleri bu bayrağa bakar (rol kodu kalıbına değil).
+            new("radyolog",  "radyolog",   "mantik", Baslik: "Radyolog", Grup: "Kimlik",
+                Ipucu: "Rapor onaylama yetkisiyle birlikte: raporu kendi adına onaylar / e-imzalar; onay listelerinde görünür."),
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false)
         });
 

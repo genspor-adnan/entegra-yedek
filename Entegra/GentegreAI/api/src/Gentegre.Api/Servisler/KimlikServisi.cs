@@ -306,8 +306,20 @@ public sealed class KimlikServisi
     /// Hata 401 DEĞİL iş kuralıdır: oturumu açık olan kullanıcı atılmasın.
     /// </summary>
     public async Task BaskasininParolasiniDogrulaAsync(int kullaniciId, string parola, string ip, string istemci,
-        string amac, CancellationToken iptal = default)
+        string amac, int cagiranId, CancellationToken iptal = default)
     {
+        // DENEME SINIRI ÇAĞIRANA (kod inceleme 17.11.2026): yanlış şifre artık şifresi istenen kişinin GİRİŞ sayacını
+        //   artırmaz - yoksa yetkili herhangi biri bir radyoloğun hesabını istediği an kilitletebiliyordu. Bunun yerine
+        //   ÇAĞIRAN 15 dakikada en fazla 5 hatalı deneme yapabilir (bütün "başkası adına" yolları birlikte); tahmin
+        //   giriş ekranının sınırını da aşamaz. Hatalar giris_denemesi'ne "<amac>_parola:u<çağıran>" sebebiyle yazılır.
+        var cagiranEtiketi = ":u" + cagiranId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var sonHatalar = await _veri.TekDegerAsync<long>("""
+            select count(*) from public.giris_denemesi
+             where basarili = 0 and right(sebep, length(@p0) + 7) = '_parola' || @p0
+               and tarih > now() - interval '15 minutes'
+            """, new object?[] { cagiranEtiketi }, iptal);
+        if (sonHatalar >= 5)
+            throw GentegreHatasi.IsKurali("Çok sayıda hatalı şifre denemesi - 15 dakika sonra yeniden deneyin.");
         var k = await _kullanicilar.IdIleBulAsync(kullaniciId, iptal);
         const string genel = "Parola hatalı.";
         if (k is null || !k.Aktif || k.ParolaHash.Length == 0)
@@ -322,9 +334,8 @@ public sealed class KimlikServisi
         }
         if (!BCrypt.Net.BCrypt.Verify(parola ?? "", k.ParolaHash))
         {
-            await _kullanicilar.HataliGirisAsync(k.TarafId, iptal);
-            await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, false, amac + "_parola", iptal);
-            throw GentegreHatasi.IsKurali(genel);
+            await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, false, amac + "_parola" + cagiranEtiketi, iptal);
+            throw GentegreHatasi.IsKurali(sonHatalar >= 4 ? genel + " Son deneme hakkı kullanıldı; 15 dakika bekleyin." : genel);
         }
         await _gunluk.GirisDenemesiAsync(k.Kod, k.TarafId, ip, istemci, true, amac, iptal);
     }
