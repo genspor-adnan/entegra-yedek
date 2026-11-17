@@ -1727,6 +1727,17 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           //   Kaydet'le kaydedilir. Kayıtsız başvuru SMS / kod için önce kaydedilir.
           kvkkOnay={basvuruMu ? {
             smsGonder: () => void (async () => {
+              // ÖNCEDEN ONAY / GÖNDERİM VARSA SOR (kullanıcı 17.11.2026: "onay kodu olduğu halde sms gönder dedim hemen
+              //   gönderdi.. uyarı vermeli eğer yine de istiyorsa göndermeli"). Yeni SMS önceki kodu geçersiz kılar.
+              if (basvuruBilgi.kvkkOnayKodu) {
+                if (!await onay(`⚠ Bu başvuruda KVKK onay kodu (${basvuruBilgi.kvkkOnayKodu}) zaten doğrulanmış.
+
+Yeni SMS gönderilirse kayıtlı kod silinir ve hastanın yeni kodu söylemesi gerekir. Yine de gönderilsin mi?`, true)) return;
+              } else if (basvuruBilgi.kvkkSmsTarihi) {
+                if (!await onay(`Bu başvuruya ${new Date(basvuruBilgi.kvkkSmsTarihi).toLocaleString('tr-TR')} tarihinde KVKK SMS'i gönderildi.
+
+Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
+              }
               const bid = kayitliId || await kes(false);
               if (!bid) return;
               try {
