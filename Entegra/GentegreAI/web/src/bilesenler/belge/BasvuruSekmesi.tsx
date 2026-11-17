@@ -562,8 +562,11 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
               {etiket}{alan === 'kvkkOnay' && <span className="bs-onay-kodu-et">{c('Onay Kodu')}{bilgi.kvkkSmsTarihi ? ' ✉' : ''}</span>}
             </span>
             <span className={alan === 'kvkkOnay' ? 'bs-kvkk-satir' : undefined}>
-              <select value={bilgi[alan] != null ? String(bilgi[alan]) : ''} disabled={kilitli}
-                      onChange={e => degistir({ [alan]: e.target.value ? Number(e.target.value) : null })}>
+              {/* ELLE GİRİŞ / DEĞİŞTİRME YOK (kullanıcı 17.11.2026: "bu 2 comboyu giriş/değiştirmeyi tamamen kapat, sadece
+                  üstteki KVKK Onay butonu sonucu buraya yansısın"): değer yalnız araç çubuğu › KVKK Onay menüsünden
+                  (SMS + Onay Kodu / Islak İmzalı / Hasta Reddetti) gelir; combo yalnız gösterir. */}
+              <select value={bilgi[alan] != null ? String(bilgi[alan]) : ''} disabled data-testid={`basvuru-${alan}`}
+                      title={c('KVKK Onay menüsünden belirlenir')}>
                 <option value="">{c('— Seçin —')}</option>
                 {ONAY_DURUMLARI.map(([k, ad]) => <option key={k} value={k}>{c(ad)}</option>)}
               </select>
