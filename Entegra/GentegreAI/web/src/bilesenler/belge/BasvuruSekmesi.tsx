@@ -551,30 +551,31 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi, kuralla
           </>
         )}
 
-        {/* KVKK / ETK (1351, kullanıcı 16.11.2026): başvuruda hastanın onay durumu. Boş = sorulmadı. */}
+        {/* KVKK / ETK (1351, kullanıcı 16.11.2026): başvuruda hastanın onay durumu. Boş = sorulmadı.
+            ONAY KODU KVKK COMBOSUNUN SAĞINDA, AYNI HÜCREDE (kullanıcı 17.11.2026): SALT OKUNUR - yalnız araç çubuğu ›
+            KVKK Onay › Onay Kodu Gir sunucuda doğrulayıp yazar (1352); KVKK ve ETK "SMS ile onay alındı" olur. */}
         {([['kvkkOnay', 'KVKK'], ['etkOnay', 'ETK']] as const).map(([alan, etiket]) => (
           <label className="alan" key={alan}>
-            <span className="etiket" title={alan === 'etkOnay' ? c('Ticari elektronik ileti onayı') : c('Kişisel verilerin korunması - açık rıza')}>{etiket}</span>
-            <select value={bilgi[alan] != null ? String(bilgi[alan]) : ''} disabled={kilitli}
-                    onChange={e => degistir({ [alan]: e.target.value ? Number(e.target.value) : null })}>
-              <option value="">{c('— Seçin —')}</option>
-              {ONAY_DURUMLARI.map(([k, ad]) => <option key={k} value={k}>{c(ad)}</option>)}
-            </select>
+            <span className="etiket" title={alan === 'etkOnay' ? c('Ticari elektronik ileti onayı') : c('Kişisel verilerin korunması - açık rıza')}>
+              {etiket}{alan === 'kvkkOnay' && <span className="bs-onay-kodu-et">{c('Onay Kodu')}{bilgi.kvkkSmsTarihi ? ' ✉' : ''}</span>}
+            </span>
+            <span className={alan === 'kvkkOnay' ? 'bs-kvkk-satir' : undefined}>
+              <select value={bilgi[alan] != null ? String(bilgi[alan]) : ''} disabled={kilitli}
+                      onChange={e => degistir({ [alan]: e.target.value ? Number(e.target.value) : null })}>
+                <option value="">{c('— Seçin —')}</option>
+                {ONAY_DURUMLARI.map(([k, ad]) => <option key={k} value={k}>{c(ad)}</option>)}
+              </select>
+              {alan === 'kvkkOnay' && (
+                <input value={bilgi.kvkkOnayKodu ?? ''} readOnly tabIndex={-1} className="salt-okunur bs-onay-kodu"
+                       aria-label={c('Onay Kodu')}
+                       title={bilgi.kvkkSmsTarihi
+                         ? `${c('SMS gönderildi')}: ${new Date(bilgi.kvkkSmsTarihi).toLocaleString('tr-TR')}` : c('Önce KVKK Onay › SMS Gönder')}
+                       placeholder={bilgi.kvkkSmsTarihi ? c('kod girilmedi') : '—'}
+                       data-testid="kvkk-onay-kodu" />
+              )}
+            </span>
           </label>
         ))}
-        {/* SMS ONAY KODU (1352, kullanıcı 17.11.2026: "hasta onu bize söyleyecek biz de başvuruya sms combo sağına
-            kaydedeceğiz"): KVKK Onay › Onay Kodu Gir sunucuda doğrular ve buraya yazar; KVKK ve ETK "SMS ile onay
-            alındı" olur. Elle girilmez. */}
-        <label className="alan">
-          <span className="etiket" title={bilgi.kvkkSmsTarihi
-            ? `${c('SMS gönderildi')}: ${new Date(bilgi.kvkkSmsTarihi).toLocaleString('tr-TR')}` : c('Önce KVKK Onay › SMS Gönder')}>
-            {c('SMS Onay Kodu')}{bilgi.kvkkSmsTarihi ? ' ✉' : ''}</span>
-          {/* SALT OKUNUR (kullanıcı 17.11.2026: "onay kodu alanı elle girilemesin/değişemesin"): yalnız
-              araç çubuğu › KVKK Onay › Onay Kodu Gir doğrulayıp yazar. */}
-          <input value={bilgi.kvkkOnayKodu ?? ''} readOnly tabIndex={-1} className="salt-okunur"
-                 placeholder={bilgi.kvkkSmsTarihi ? c('KVKK Onay › Onay Kodu Gir') : c('SMS gönderilmedi')}
-                 data-testid="kvkk-onay-kodu" />
-        </label>
 
         {/* BİLDİRİMLER (1340; kullanıcı 16.11.2026: başvuru notundan hemen önce): kurum varsayılanı + başvuruda karar. Kapalıysa e-Nabız paketi üretilmez / Teletıp kuyruğuna
             girilmez (sunucu kapıları). */}

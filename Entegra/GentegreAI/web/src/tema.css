@@ -9816,3 +9816,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   .rt-baski .rt-a4-tam { transform: none; width: auto; height: auto; min-height: 0; border: 0; box-shadow: none; padding: 0 }
   .rt-baski .rt-alt { position: fixed; bottom: 0; left: 0; right: 0 }
 }
+
+/* Başvuru KVKK combosu + salt okunur Onay Kodu aynı hücrede (17.11.2026). */
+.bs-kvkk-satir { display: flex; gap: 6px; min-width: 0 }
+.bs-kvkk-satir > select { flex: 1 1 auto; min-width: 0 }
+.bs-kvkk-satir > .bs-onay-kodu { flex: 0 0 84px; width: 84px; text-align: center; font-family: Consolas, monospace; letter-spacing: 1px }
+.bs-onay-kodu-et { float: right; font-weight: 400; color: var(--soluk) }
