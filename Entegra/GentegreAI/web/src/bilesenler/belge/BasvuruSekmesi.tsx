@@ -71,7 +71,7 @@ export interface BasvuruBilgi {
       1 = bu başvurunun e-Nabız paketleri üretilir / radyoloji istemleri Teletıp kuyruğuna girer. */
   enabizBildirim?: number | null;
   teleradBildirim?: number | null;
-  /** KVKK / ETK ONAYI (1351, kullanıcı 16.11.2026): 1 Hasta reddetti · 2 Onaysız durumu seçildi ·
+  /** KVKK / ETK ONAYI (1351, kullanıcı 16.11.2026): 1 Hasta reddetti ·
       3 Islak imzalı onay alındı · 4 SMS ile onay alındı; null = sorulmadı. */
   kvkkOnay?: number | null;
   etkOnay?: number | null;
@@ -616,7 +616,10 @@ export { HastaSeridi } from './basvuru/HastaSeridi';
 export { ProvizyonSekmesi } from './basvuru/ProvizyonSekmesi';
 export { OncekiBasvurular } from './basvuru/OncekiBasvurular';
 
-/** KVKK / ETK onay durumu kodları (1351, belge_basvuru.kvkk_onay / etk_onay). */
+/**
+ * KVKK / ETK onay durumu kodları (1351, belge_basvuru.kvkk_onay / etk_onay).
+ * 2 "Onaysız durumu seçildi" KALDIRILDI (kullanıcı 17.11.2026, 1359 - veritabanı da kabul etmez).
+ */
 const ONAY_DURUMLARI: [number, string][] = [
-  [1, 'Hasta Reddetti'], [2, 'Onaysız durumu seçildi'], [3, 'Islak imzalı onay alındı'], [4, 'SMS ile onay alındı'],
+  [1, 'Hasta Reddetti'], [3, 'Islak imzalı onay alındı'], [4, 'SMS ile onay alındı'],
 ];

@@ -38,7 +38,7 @@ public static class BasvuruKvkkUclari
         //   kaydına bakılır (şube bazlıysa yalnız bu şube; iptal başvuru sayılmaz):
         //     gecerli       - son kayıt SMS (4) / ıslak imza (3) ve süre içinde → yeni başvuruda KVKK/ETK onunla dolar
         //     suresi_doldu  - son kayıt onay ama X gün geçti
-        //     reddetti      - son kayıt Hasta Reddetti (1) / Onaysız (2) - ret taşınmaz, yeniden sorulur
+        //     reddetti      - son kayıt Hasta Reddetti (1) - ret taşınmaz, yeniden sorulur
         //     baska_sube    - bu şubede kayıt yok, başka şubede onay var (şube bazlı ayar açık)
         //     yok           - hiç kayıt yok
         grup.MapGet("/kvkk-durum", async (

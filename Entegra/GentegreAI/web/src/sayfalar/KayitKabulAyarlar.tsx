@@ -93,7 +93,7 @@ export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'ba
                        ayarlar={ayarlar} onYaz={yaz} />
           </div>
           <div className="not" style={{ padding: '0 10px 10px' }}>
-            {c('Geçerli sayılan onay: SMS ile onay alındı ve Islak imzalı onay alındı. Hasta Reddetti ve Onaysız durumu sonraki başvuruya taşınmaz - hastaya her başvuruda yeniden sorulur. İptal edilmiş başvurudaki onay sayılmaz.')}
+            {c('Geçerli sayılan onay: SMS ile onay alındı ve Islak imzalı onay alındı. Hasta Reddetti sonraki başvuruya taşınmaz - hastaya her başvuruda yeniden sorulur. İptal edilmiş başvurudaki onay sayılmaz.')}
           </div>
         </div>
         <div className="kagrup">

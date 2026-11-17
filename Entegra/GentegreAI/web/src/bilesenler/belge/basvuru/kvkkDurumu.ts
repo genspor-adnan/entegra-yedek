@@ -11,7 +11,7 @@ export interface KvkkDurumu {
 }
 
 const gun = (iso?: string | null) => iso ? iso.slice(0, 10).split('-').reverse().join('.') : '';
-const onayTuru = (k?: number) => k === 4 ? 'SMS ile onay' : k === 3 ? 'ıslak imzalı onay' : k === 1 ? 'hasta reddetti' : k === 2 ? 'onaysız' : '';
+const onayTuru = (k?: number) => k === 4 ? 'SMS ile onay' : k === 3 ? 'ıslak imzalı onay' : k === 1 ? 'hasta reddetti' : '';
 
 /** Başvuru sekmesindeki bilgi satırı: sınıf (g / s / b / k) + metin. Durum yoksa null. */
 export function kvkkBilgiSatiri(d: KvkkDurumu | null): { sinif: 'g' | 's' | 'b' | 'k'; metin: string } | null {
@@ -23,7 +23,7 @@ export function kvkkBilgiSatiri(d: KvkkDurumu | null): { sinif: 'g' | 's' | 'b' 
     case 'suresi_doldu':
       return { sinif: 's', metin: `⚠ KVKK onayının süresi doldu: son onay ${gun(d.tarih)} (Başvuru ${d.belgeNo}, ${onayTuru(d.kvkkOnay)}) - ${d.gun} gün geçti. Yeniden onay alın: KVKK Onay › SMS Gönder ya da Islak İmzalı Onay Alındı.` };
     case 'reddetti':
-      return { sinif: 'k', metin: `🚫 Hasta son başvurusunda (${gun(d.tarih)}, ${d.belgeNo}) ${d.kvkkOnay === 1 ? 'onayı reddetti' : 'onaysız kaldı'}. Bu başvuruda yeniden sorun.` };
+      return { sinif: 'k', metin: `🚫 Hasta son başvurusunda (${gun(d.tarih)}, ${d.belgeNo}) onayı reddetti. Bu başvuruda yeniden sorun.` };
     case 'baska_sube':
       return { sinif: 'b', metin: `ℹ Hastanın ${d.sube} şubesinde ${gun(d.tarih)} tarihli onayı var; bu şube için ayrı onay gerekiyor (Başvuru Ayarları › KVKK onayı şube bazlı).` };
     default:
@@ -41,7 +41,6 @@ export function kvkkKisa(mevcut: number | null | undefined, d: KvkkDurumu | null
     return { isaret: '✓', metin: `${mevcut === 4 ? 'SMS ile onay' : 'Islak imzalı onay'}${bitis}`, sinif: 'olumlu' };
   }
   if (mevcut === 1) return { isaret: '✗', metin: 'Hasta reddetti', sinif: 'teh' };
-  if (mevcut === 2) return { isaret: '✗', metin: 'Onaysız', sinif: 'teh' };
   if (d?.durum === 'suresi_doldu') return { isaret: '⚠', metin: 'Süresi doldu - yeniden onay alın', sinif: 'uyari' };
   if (d?.durum === 'baska_sube') return { isaret: '⚠', metin: 'Bu şube için onay gerekli', sinif: 'uyari' };
   if (d?.durum === 'reddetti') return { isaret: '⚠', metin: 'Son başvuruda reddetti - yeniden sorun', sinif: 'uyari' };

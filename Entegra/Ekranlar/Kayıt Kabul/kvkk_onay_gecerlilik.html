@@ -12,8 +12,8 @@
   yoksa boş gelir (yeniden onay alınır). Geçerliliği iki ayar belirler (Kayıt Kabul Ayarları › Başvuru):
     ① KVKK onayı şube bazlı    - Tüm şubelerde geçerli / Her şube için ayrı onay
     ② Onay geçerlilik süresi    - 0 = süresiz · X gün (ör. 365) sonra yeniden onay
-  Geçerli sayılan: "SMS ile onay alındı" (4) ve "Islak imzalı onay alındı" (3). "Hasta Reddetti" (1) ve "Onaysız
-  durumu seçildi" (2) TAŞINMAZ - her başvuruda yeniden sorulur; son durum bilgi olarak gösterilir.
+  Geçerli sayılan: "SMS ile onay alındı" (4) ve "Islak imzalı onay alındı" (3). "Hasta Reddetti" (1)
+  TAŞINMAZ - her başvuruda yeniden sorulur; son durum bilgi olarak gösterilir.
   İptal edilmiş başvurudaki onay sayılmaz.
 
   Bölümler: A) ayar ekranı · B) başvuru kartı Başvuru sekmesi, dört durum (geçerli / süresi dolmuş / başka şubede /
@@ -123,7 +123,7 @@
         </div>
         <div class="not">
           Geçerli sayılan onay: <span class="rz g">SMS ile onay alındı</span> <span class="rz g">Islak imzalı onay alındı</span>.
-          <span class="rz k">Hasta Reddetti</span> ve <span class="rz gri">Onaysız durumu seçildi</span> sonraki başvuruya taşınmaz —
+          <span class="rz k">Hasta Reddetti</span> sonraki başvuruya taşınmaz —
           hastaya her başvuruda yeniden sorulur. İptal edilmiş başvurudaki onay sayılmaz.
         </div>
       </div>
@@ -223,7 +223,7 @@
     <tbody>
       <tr><td>SMS / ıslak imza, bu şubede</td><td>Gelir</td><td>Gelir</td><td>X gün geçmediyse gelir, geçtiyse boş + "süresi doldu"</td></tr>
       <tr><td>SMS / ıslak imza, başka şubede</td><td>Gelir</td><td>Boş + "bu şube için ayrı onay"</td><td>Aynı süre kuralı</td></tr>
-      <tr><td>Hasta reddetti / onaysız</td><td colspan="2">Boş + "son başvuruda reddetti" bilgisi (taşınmaz)</td><td>—</td></tr>
+      <tr><td>Hasta reddetti</td><td colspan="2">Boş + "son başvuruda reddetti" bilgisi (taşınmaz)</td><td>—</td></tr>
       <tr><td>Hiç onay yok</td><td colspan="3">Boş (onay alınmalı)</td></tr>
       <tr><td>İptal edilmiş başvurudaki onay</td><td colspan="3">Sayılmaz</td></tr>
     </tbody>
