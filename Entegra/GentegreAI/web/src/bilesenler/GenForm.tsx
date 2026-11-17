@@ -16,6 +16,7 @@ import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, anGirdiMetni, yasMetni, subeSimdiMetni } from './bicim';
 import { adSoyadUnvandan, ONEKLI_KARTLAR, useUnvanOneki } from './kart/useUnvanOneki';
 import { KIPLI_GOVDE_KARTLAR, KartKimlikSeridi } from './kart/KartKimlikSeridi';
+import { KartKipBaglami } from './kart/KipKalemi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
 import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
 import { kartGovdesiKur } from './kart/kartGovdesi';
@@ -1379,6 +1380,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     );
 
   const salt = !yeniMi && !yetki.duzenle;
+  /** Kartın her yerindeki ✎ (KipKalemi) bu tek durumu değiştirir - yalnız kipli kartta. */
+  //   HOOK DEĞİL: bu satırın üstünde erken dönüş var (hook sırası bozulurdu).
+  const kipBaglami = kipliGovde
+    ? { acik: kipliAcik && !salt, pasif: salt, degistir: () => setKipliAcik(v => !v) } : null;
   const aktif = sekmeler.find(s => s.anahtar === aktifSekme) ?? sekmeler[0];
 
   // Alan cizimi ayri dosyada (kartAlanCizim): govde uzunlugu okunabilirligi
@@ -1614,6 +1619,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
   const kartBasligi = `${baslik ?? kaynak}${yeniMi ? ' — Yeni' : baslikRozet ? '' : ` #${id}`}`;
 
   return (
+    <KartKipBaglami.Provider value={kipBaglami}>
     <Modal
       baslik={kartBasligi}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
@@ -1997,5 +2003,6 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         </div>
       )}
     </Modal>
+    </KartKipBaglami.Provider>
   );
 }

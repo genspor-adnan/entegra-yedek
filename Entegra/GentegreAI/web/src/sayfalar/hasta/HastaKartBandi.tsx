@@ -6,6 +6,7 @@ import { para, sayi } from '../../bilesenler/bicim';
 import { kartSekmeRozetiYayinla } from '../../bilesenler/kartSekmeleri';
 import { Avatar } from '../../bilesenler/grid/satirHucre';
 import { c } from '../../dil/ceviri';
+import { KipKalemi } from '../../bilesenler/kart/KipKalemi';
 
 /**
  * HASTA KARTI İSİM BANDI + SAYI KUTULARI (kullanıcı 24.10.2026, mockup Kayıt Kabul/hasta_karti_v5.html):
@@ -41,6 +42,16 @@ const kisalt = (s: string, n = 22) => (s.length > n ? s.slice(0, n - 1).trimEnd(
 // "AKLAV BID 1000 MG FILM KAPLI TABLET, 14 ADET" -> "AKLAV BID": ilk rakam / virgülden önce.
 const ilacKisa = (s: string) => kisalt(s.split(/[\d,(]/)[0].trim() || s, 18);
 
+/** Hasta durumu -> [ad, rozet sınıfı]: Aktif yeşil · Pasif kırmızı · Aday sarı · Vefat gri. */
+const HASTA_DURUM: Record<string, [string, string]> = {
+  '1': ['Aktif', 'ok'], '0': ['Pasif', 'hata'], '2': ['Aday', 'uyari'], '3': ['Vefat', 'gri'],
+};
+/** ISO doğum tarihi -> gg.aa.yyyy. */
+const dogumMetni = (t: string | null) => {
+  const g = String(t ?? '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(g) ? g.split('-').reverse().join('.') : '';
+};
+
 const STIL = `
 .mk-ozet.hkb-tek { grid-template-columns: 1.9fr 1.3fr 1.2fr 1fr 1fr 1fr 1.1fr }
 .mk-ozet > .hkb-kim { display: flex; flex-direction: row; align-items: center; gap: 12px; min-width: 0 }
@@ -51,6 +62,9 @@ const STIL = `
   border-radius: 8px; font-size: 9.5px; color: var(--soluk); padding: 0 4px; white-space: nowrap }
 .mk-ozet .hkb-ad { font-size: 15px; font-weight: bold; color: var(--lacivert, #14315a); overflow: hidden; text-overflow: ellipsis }
 .hkb-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
+.hkb-ad-sat { display: flex; align-items: center; gap: 2px; min-width: 0 }
+.hkb-3 { display: flex; align-items: center; gap: 6px; margin-top: 2px }
+.hkb-3 .rozet { font-size: 10.5px; padding: 0 7px }
 .hkb-alt b { color: var(--yazi, #1f2d3a); font-weight: normal }
 .hkb-alt .hkb-goz { cursor: pointer; margin-left: 3px; opacity: .7 }
 .hkb-govde { flex: 1; min-width: 0 }
@@ -83,6 +97,9 @@ export function HastaKartBandi({ id, deger, git }: {
   const ad = [deger.ad, deger.soyad].map(x => String(x ?? '').trim()).filter(Boolean).join(' ') || String(deger.unvan ?? '');
   const y = yas(o?.dogumTarihi ?? null);
   const aktif = Number(deger.durum ?? 1) === 1;
+  // DURUM ROZETİ (KartKatalogu.HastaDurumKodlari): vefat bayrağı da Vefat sayılır.
+  const durumKod = o?.vefat === 1 ? '3' : String(deger.durum ?? '1') || '1';
+  const durum = HASTA_DURUM[durumKod] ?? [durumKod, 'gri'];
   // Avatar köşesi (mockup "E · 63"): cinsiyet harfi + yaş.
   const cins = o?.cinsiyet === 1 ? 'E' : o?.cinsiyet === 2 ? 'K' : '';
   const kose = [cins, y ?? ''].filter(x => x !== '').join(' · ');
@@ -98,10 +115,16 @@ export function HastaKartBandi({ id, deger, git }: {
         <div className="hkb-kim">
           <Avatar ad={ad} buyuk soluk={!aktif} />
           <span className="hkb-kim-m">
-            <b className="hkb-ad" title={ad}>{ad || '—'}</b>
+            {/* ✎ AD SOYADIN SAĞINDA (kullanıcı 17.11.2026): kartın görüntüleme / düzenleme kipini değiştirir. */}
+            <span className="hkb-ad-sat"><b className="hkb-ad" title={ad}>{ad || '—'}</b><KipKalemi testId="hasta-bant-kalem" /></span>
             {/* Etiketsiz (kullanıcı 28.10.2026: "dosya ve kan label'lara gerek yok"): E · 69 · H-000081 · A Rh+. */}
-            <small>{[kose, String(deger.kod ?? ''), o?.kanGrubu ?? '',
-                     !aktif ? c('Pasif') : '', o?.vefat === 1 ? `✝ ${c('Vefat')}` : ''].filter(Boolean).join(' · ')}</small>
+            <small>{[kose, String(deger.kod ?? ''), o?.kanGrubu ?? ''].filter(Boolean).join(' · ')}</small>
+            {/* 3. SATIR (kullanıcı 17.11.2026: "avatar ve ad soyad kutusunun olduğu yere 3. satır olarak doğum tarihi
+                ve kimlik no ve durum rozeti"): etiketsiz; Pasif / Vefat artık 2. satırda yazı değil, rozette. */}
+            <small className="hkb-3">
+              {[dogumMetni(o?.dogumTarihi ?? null), String(deger.vkno ?? '').trim()].filter(Boolean).join(' · ')}
+              <span className={`rozet ${durum[1]}`} data-testid="hasta-durum">{c(durum[0])}</span>
+            </small>
           </span>
         </div>
         {/* SIRA (kullanıcı 28.10.2026): hasta · kurum · son başvuru · bakiye · alerji · bekleyen sonuç · sonraki randevu. */}

@@ -33,10 +33,6 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
  */
 // HASTA DA (kullanıcı 16.11.2026: "hasta kartını da stok gibi yap"): kayıtlı hasta görüntülemede açılır, şerit +
 //   Genel sekmesi yalnız ✎ ile düzenlemeye geçer (KartGrupSarmalayici gövdeyi inert sarar).
-/** Hasta durumu -> [ad, rozet sınıfı] (KartKatalogu.HastaDurumKodlari): Aktif yeşil · Pasif kırmızı · Aday sarı · Vefat gri. */
-const HASTA_DURUM: Record<string, [string, string]> = {
-  '1': ['Aktif', 'ok'], '0': ['Pasif', 'hata'], '2': ['Aday', 'uyari'], '3': ['Vefat', 'gri'],
-};
 export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta']);
 
 export interface KartKimlikSeridiOzellikleri {
@@ -120,38 +116,9 @@ export function KartKimlikSeridi({
         const hastaSar = (izgara: ReactNode) => {
           if (kaynak !== 'hasta' || seritAcikDis === undefined) return izgara;
           const gosterKipi = salt || !seritAcik;
-          // GÖRÜNTÜLEME = KİŞİ BANDI (17.11.2026): avatar · AD SOYAD, altında etiketsiz dosya no · kimlik no · doğum
-          //   (yaş), sağda durum rozeti + ✎. Düzenlemede alan ızgarası.
-          if (gosterKipi) {
-            const adSoyad = `${String(deger.ad ?? '')} ${String(deger.soyad ?? '')}`.trim();
-            const d = String(deger.durum ?? '1') || '1';
-            const [durumAd, durumSinif] = HASTA_DURUM[d]
-              ?? [kimlikAlanlari.find(a => a.ad === 'durum')?.kodlar?.[d] ?? d, 'gri'];
-            const dosyaNo = String(deger.kod ?? '').trim();
-            const kimlikNo = String(deger.vkno ?? '').trim();
-            return (
-              <div className="kisi-bant hasta-bant" data-testid="kimlik-kipli">
-                <span className={`kart-avatar kisi-avatar${d === '1' ? '' : ' pasif'}`}>{adSoyad ? basHarfler(adSoyad) : '?'}</span>
-                <div className="kim">
-                  <div className="ad"><span className="metin">{adSoyad || '—'}</span></div>
-                  <div className="alt">
-                    {dosyaNo && <span title={c('Dosya No')}>{dosyaNo}</span>}
-                    {kimlikNo && <span title={c('Kimlik No')}>{kimlikNo}</span>}
-                    {dogumYasMetni && <span title={c('Doğum tarihi / cinsiyet / yaş')}>{dogumYasMetni}</span>}
-                  </div>
-                </div>
-                <div className="sag">
-                  <span className={`rozet ${durumSinif}`} data-testid="hasta-durum">{durumAd}</span>
-                  <button type="button" className="d ik kalem-dugme" disabled={salt} data-testid="kimlik-kalem"
-                          title={salt ? c('Düzenleme yetkisi yok') : c('Hasta bilgilerini düzenle')}
-                          onClick={() => setSeritAcik(true)}>✎</button>
-                </div>
-              </div>
-            );
-          }
           return (
-            <div className="kaid-kipli" data-testid="kimlik-kipli">
-              <div className="kaid-hasta-sar">{izgara}</div>
+            <div className={`kaid-kipli${gosterKipi ? ' kaid-goster' : ''}`} data-testid="kimlik-kipli">
+              <div className="kaid-hasta-sar" inert={gosterKipi || undefined}>{izgara}</div>
               <button type="button" className={`bs-kalem${gosterKipi ? '' : ' acik'}`} disabled={salt}
                       data-testid="kimlik-kalem"
                       title={salt ? c('Düzenleme yetkisi yok') : gosterKipi ? c('Hasta bilgilerini düzenle') : c('Düzenlemeyi kapat')}

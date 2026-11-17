@@ -732,6 +732,9 @@ tr.rv-iptal .rozet.hata         { background: var(--soluk); color: #fff; border-
 .kaid .kisi-bant .alt > * + *::before { content: "·"; color: #b7c2cd; margin-right: 6px }
 .kaid .kisi-bant .alt .rol { border-radius: 10px; padding: 1px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .3px; background: #e4efdc; color: #2e5a1f; border: 1px solid #c6ddb8 }
 .kaid .kisi-bant .alt .rol::before { content: none }
+/* Hasta bandı 3. satırı (17.11.2026): doğum · kimlik no · durum rozeti; rozetin önünde ayraç noktası yok. */
+.kaid .kisi-bant .alt.hasta-bant-3 { margin-top: 2px }
+.kaid .kisi-bant .alt.hasta-bant-3 > .rozet::before { content: none }
 .kaid .kisi-bant .alt .not { font-style: italic; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .kaid .kisi-bant .alt .ipucu { color: #aab4bf }
 .kaid .kisi-bant .sag { display: flex; gap: 6px; align-items: center }
@@ -3625,6 +3628,9 @@ input.skt-gecmis {
   line-height: 1; color: var(--soluk); border-radius: 3px }
 .bs-kalem:hover:not(:disabled) { color: var(--vurgu, #2f6db3); background: #e9f1fb }
 .bs-kalem.acik { color: var(--vurgu, #2f6db3) }
+/* Hasta gövdesi görüntülemede (17.11.2026): fare kesik, yalnız ✎ tıklanır. */
+.hasta-govde-goster { pointer-events: none }
+.hasta-govde-goster .kip-kalemi { pointer-events: auto }
 .bs-kalem:disabled { opacity: .45; cursor: default }
 .basvuru-bilgi.bs-goster .alan input, .basvuru-bilgi.bs-goster .alan select, .basvuru-bilgi.bs-goster .alan textarea,
 .basvuru-bilgi.bs-goster .lookup-kutu, .basvuru-bilgi.bs-goster .lookup input {

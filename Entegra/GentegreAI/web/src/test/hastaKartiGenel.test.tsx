@@ -123,7 +123,8 @@ describe('hasta kartinda Yakınlar gridi', () => {
     ciz();
     await waitFor(() => expect(kartOku).toHaveBeenCalled());
     const basliklar = await waitFor(() => {
-      const b = [...document.querySelectorAll('h6')].map(x => x.textContent ?? '');
+      // ✎ (KipKalemi, 17.11.2026) etiketin içinde - metinden ayıklanır.
+      const b = [...document.querySelectorAll('h6')].map(x => (x.textContent ?? '').replace('✎', '').trim());
       if (!b.includes('İletişim')) throw new Error('İletişim kutusu yok');
       return b;
     });

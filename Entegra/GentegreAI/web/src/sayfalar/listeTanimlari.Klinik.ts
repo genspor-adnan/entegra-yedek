@@ -193,6 +193,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hasta', baslik: 'Hasta Listesi', yol: 'Hasta › Hasta Listesi', kartYolu: '/hasta', yeniSekmede: 'Yeni Hasta Kartı',
     // TELEFON / KİMLİK NO İLE ARAMA (kullanıcı 16.10.2026): kolonlar listede gizli; ham alanlarda aranır.
     aramaEkAlanlari: ['telefonHam', 'vknoHam'],
+    // HATIRLAT DÜĞMESİ YOK (kullanıcı 17.11.2026: "başlıktan hatırlat butonu kaldır").
+    kartHatirlatYok: true,
     aksiyonEkrani: 'hasta-liste', cipler: DURUM_CIPLERI,
     // Acik borc HASTA SERIDI icin katalogda duruyor (basvuru kartinin
     //   ustundeki serit onu okuyor) ama gridde gosterilmez.

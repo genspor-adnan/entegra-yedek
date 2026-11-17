@@ -5,6 +5,7 @@ import { IlgiliKisiler } from '../IlgiliKisiler';
 import { EBelgeDipnotlari } from './EBelgeDipnotlari';
 import { TekAdres } from '../TekAdres';
 import { TekKayit } from '../TekKayit';
+import { KipKalemi } from './KipKalemi';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
@@ -427,7 +428,8 @@ const adliBlok = (
               fotoSolEk={hastaIletisimAlanlari.length > 0 && (
                 <div className="kasutun" style={{ flex: '1 1 330px' }}>
                   <div className="kagrup">
-                    <h6>İletişim</h6>
+                    {/* ✎ İLETİŞİM ETİKETİNİN SAĞINDA (kullanıcı 17.11.2026) - bant ✎'iyle aynı kip. */}
+                    <h6>İletişim<KipKalemi testId="iletisim-kalem" /></h6>
                     {/* HASTADA ALANLAR YAN YANA (kullanici: "telefondakinde
                         daha fazla yükseklik var, çerçeve boyları aynı değil"):
                         tek sutunda iki alan alt alta dizilince kutu yanindaki
