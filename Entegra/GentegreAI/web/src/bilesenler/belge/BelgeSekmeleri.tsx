@@ -317,16 +317,20 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
                   onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
           {kurumPayliMi !== false && (
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Kurum payını TAHAKKUKA çevirir (kalanın tamamı) - alacak kurum carisine yazılır"
+                  title="Kurum payını TAHAKKUKA çevirir (kalanın tamamı) - alacak kurum carisine yazılır, ödemesi takip edilir"
                   onClick={() => hizliDonustur?.(17, 'kurum')}>📑 Kurum Tahakkuk</button>
           )}
           {/* HASTA TAHAKKUKU (kullanici: "tahakkukları ikiye ayıralım: Kurum
-              Tahakkuku ve Hasta Tahakkuku"): hastanin payi da pesin tahsil
-              edilmeden belgelenebilir - sonra tahsilat yapilir. Dugme hangi
-              tarafi belgeledigini soyler; pay ZORLANIR, "hangi kova aciksa"
-              tahminine birakilmaz. */}
+              Tahakkuku ve Hasta Tahakkuku"). Dugme hangi tarafi belgeledigini
+              soyler; pay ZORLANIR, "hangi kova aciksa" tahminine birakilmaz.
+              TAKIP YOK (kullanici 17.11.2026: "hasta tahakkukta takip yok..
+              sadece belge ile kapatmak için.. kurum tahakkukta ödeme vb
+              takipler olmalı"): hasta tahakkuku hastanin payini belgeyle
+              kapatir; tahsilat sekmesinde listelenmez, alacak takibi
+              (yaslandirma) basvurunun hasta payindan yurur. Odeme takibi
+              kurum tahakkukunda (kurum carisi). */}
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Hasta payını TAHAKKUKA çevirir (kalanın tamamı) - alacak hasta carisine yazılır"
+                  title="Hasta payını tahakkukla belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"
                   onClick={() => hizliDonustur?.(17, 'hasta')}>
             📑 Hasta Tahakkuk</button>
         </>
