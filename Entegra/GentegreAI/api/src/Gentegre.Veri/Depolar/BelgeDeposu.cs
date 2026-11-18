@@ -364,6 +364,8 @@ public sealed partial class BelgeDeposu
         //   lot korunan satirda hic oynamaz.
         if (eskiDurum == 0)
             await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal, korunan.ToArray());
+        else
+            await TaslakLotEtkisiGeriAlAsync(baglanti, islem, belgeId, korunan.ToArray(), iptal);
 
         // BELGEYE DONUSMUS UCRET SATIRI SILINEMEZ (kullanici 11.10.2026): yukaridaki
         //   koruma satiri sessizce yerinde birakiyordu - kullanici sildim sanip
@@ -507,6 +509,29 @@ public sealed partial class BelgeDeposu
                and l.seri_lot_id = i.seri_lot_id
             """, islem,
             belgeId, cikis, korunan);
+        await lot.ExecuteNonQueryAsync(iptal);
+    }
+
+    /// <summary>
+    /// TASLAĞIN ESKİ LOT ETKİSİ (kod inceleme 18.11.2026, 1368): 1368'den önce taslak belgenin izlem satırları lot
+    /// bakiyesine yazıyordu; 1368 bu satırlara fiilî yönü (+1 / -1) işledi. Taslak stok_durum'a yazmadığı için
+    /// kesinleştirme / düzenleme / silme StokDurumGeriAlAsync'i atlıyor, bu satırların lot etkisi hiç geri alınmıyordu
+    /// (kesinleşen 10 adetlik taslak alışta lot 20). Yalnız AÇIK YÖNÜ OLAN satırlar: 1368 sonrası taslak yon = 0
+    /// yazar (etkisiz), aktarım satırının yönü boştur - ikisi de değişmez. Korunan satırın izlemi silinmediği için hariç.
+    /// </summary>
+    private static async Task TaslakLotEtkisiGeriAlAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int[] korunan, CancellationToken iptal)
+    {
+        await using var lot = baglanti.Komut("""
+            update public.stok_lot_durum l
+               set kalan = l.kalan - i.etki
+              from (select stok_id, depo_id, seri_lot_id, sum(yon * adet) as etki
+                      from public.stok_izleme
+                     where belge_id = @p0 and seri_lot_id is not null and coalesce(yon, 0) <> 0
+                       and not (coalesce(belge_satir_id, 0) = any(@p1::int[]))
+                     group by 1, 2, 3) i
+             where l.stok_id = i.stok_id and l.depo_id = i.depo_id and l.seri_lot_id = i.seri_lot_id
+            """, islem, belgeId, korunan);
         await lot.ExecuteNonQueryAsync(iptal);
     }
 

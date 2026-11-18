@@ -151,6 +151,7 @@ public static class IskontoOnayUclari
                 istek.BelgeId, enYuksek, istek.Gerekce,
                 istek.Kalemler.Select(k => (k.SatirId, k.Oran)).ToList(),
                 baglam.KullaniciId, belgeSube, iptal);
+            await SatirlarTamMiAsync(baglanti, islem, id, istek.Kalemler.Select(k => k.SatirId).Distinct().Count(), iptal);
 
             // ÖLÇÜ = ORAN (yüzde), tutar değil: aynı %30 küçük ve büyük
             //   başvuruda kurumun fiyat politikasına aynı ölçüde dokunur.
@@ -244,6 +245,7 @@ public static class IskontoOnayUclari
             await using var islem = await b.BeginTransactionAsync(iptal);
             var id = await IskontoTalepDeposu.TalepAcAsync(b, islem, istek.BelgeId, enYuksek, gerekce,
                 kalemler.Select(k => (k.SatirId, k.Oran)).ToList(), baglam.KullaniciId, belge.Sube, iptal);
+            await SatirlarTamMiAsync(b, islem, id, kalemler.Select(k => k.SatirId).Distinct().Count(), iptal);
             // KARAR YÖNETİCİ ADINA: onay_id = sözünü veren; isteyen = beyan eden banko (783 "kendi talebini
             //   onaylayamaz" kuralı bu yüzden kendiliğinden işler). Oranı satırlara kilitli yazan tek yer.
             await b.CalistirAsync("select public.fn_iskonto_talep_karar(@p0, 1::smallint, @p1, @p2, @p3)", islem,
@@ -383,14 +385,26 @@ public static class IskontoOnayUclari
         await erisim.IsteAsync(baglam, "belge", t.BelgeId, "Belge bulunamadı.", iptal);
 
         var sozlu = t.Yontem == 2;
-        if (!(OnayciMi(baglam) || (sozlu && t.IsteyenId == baglam.KullaniciId)))
+        var onayci = OnayciMi(baglam);
+        if (!(onayci || (sozlu && t.IsteyenId == baglam.KullaniciId)))
             throw GentegreHatasi.Yasak(sozlu
                 ? "Sözlü onayı yalnız uygulayan görevli ya da iskonto onay yetkilisi geri alabilir."
                 : "Dijital onaylı iskontoyu yalnız iskonto onay yetkilisi geri alabilir.");
+        // Kod inceleme 18.11.2026: onaycı olmayan (sözlüyü uygulayan görevli) belgeyi değiştirebilmeli; iptal
+        //   edilmiş belgede satır tutarı değiştirilmez.
+        if (!onayci) baglam.YetkiIste("belge", Islem.Degistir);
+        if (await b.TekDegerAsync<short?>("select durum from public.belge where id = @p0", null, [t.BelgeId], iptal) == 6)
+            throw GentegreHatasi.IsKurali("İptal edilmiş belgede iskonto geri alınamaz.");
 
         await using var islem = await b.BeginTransactionAsync(iptal);
         await b.CalistirAsync("select public.fn_iskonto_talep_geri_al(@p0, @p1, @p2)", islem,
             [id, baglam.KullaniciId, neden], iptal);
+        // DİJİTAL ZİNCİR DE KAPANIR (kod inceleme 18.11.2026): talep "Geri çekildi" iken onay ekranları zinciri
+        //   "onaylandı" göstermesin - zincir İPTAL (3); basamakların onay geçmişi olduğu gibi kalır.
+        await b.CalistirAsync(
+            "update public.onay set durum = 3, bitis = now(), degistiren = @p1, degistirme_tarihi = now() "
+            + "where kaynak_tur = @p2 and kaynak_id = @p0 and durum = 1",
+            islem, [id, baglam.KullaniciId, KaynakIskonto], iptal);
         await belgeDeposu.IskontoSonrasiYenileAsync(b, islem, id, iptal);
         await log.YazAsync(b, islem, LogIslemi.Degistir, KaynakIskonto, id, baglam.KullaniciId, baglam.SubeId,
             baglam.Ip, new Dictionary<string, string>
@@ -418,5 +432,20 @@ public static class IskontoOnayUclari
         }
         await islem.CommitAsync(iptal);
         return Results.Ok(new { id, izlemeNo = baglam.IzlemeNo });
+    }
+
+    /// <summary>
+    /// Talebe giren satır sayısı istenenle aynı mı (kod inceleme 18.11.2026): TalepAcAsync belgeye ait olmayan satırı
+    /// sessizce atlar - eksikse işlem geri alınır, satırsız talep onaylanıp "uygulandı" bildirimi gitmez.
+    /// </summary>
+    private static async Task SatirlarTamMiAsync(Npgsql.NpgsqlConnection b, Npgsql.NpgsqlTransaction islem, int talepId,
+        int beklenen, CancellationToken iptal)
+    {
+        var giren = await b.TekDegerAsync<long>(
+            "select count(*) from public.iskonto_talep_satir where talep_id = @p0", islem, [talepId], iptal);
+        if (giren != beklenen)
+            throw GentegreHatasi.Dogrulama(
+                "Seçilen satırlardan bazıları bu belgeye ait değil ya da kaydedilmemiş; kartı yenileyip yeniden deneyin.",
+                new AlanHatasi("kalemler", "Geçersiz satır."));
     }
 }

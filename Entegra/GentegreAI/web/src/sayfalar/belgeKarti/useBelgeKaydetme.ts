@@ -158,6 +158,9 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
         try {
           const bilgi = await api.efaturaBilgi(yeniId);
           await api.efaturaBilgiKaydet(yeniId, { baslik: { ...bilgi.baslik, istisnaKodu }, satirlar: [] });
+          // SÜRÜM TAZELENİR (kod inceleme 18.11.2026): bu yazım belgenin xmin'ini değiştirdi; kart açık kalırsa
+          //   sonraki Kaydet eski sürümle 409 alıyordu.
+          b.setSonuc(await api.belgeOku(yeniId));
         } catch {
           mesaj('KDV istisna nedeni yazılamadı; e-Belge sekmesi › e-Fatura Bilgileri\'nden seçin.');
         }

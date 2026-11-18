@@ -476,6 +476,9 @@ public sealed partial class BelgeDeposu
                         await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
                         await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, true, [], iptal);
                     }
+                    // Taslak silinirken 1368 öncesi yazdığı lot etkisi de geri alınır (kod inceleme 18.11.2026).
+                    else if (durum != 0)
+                        await TaslakLotEtkisiGeriAlAsync(baglanti, islem, belgeId, [], iptal);
                 }
             }
 

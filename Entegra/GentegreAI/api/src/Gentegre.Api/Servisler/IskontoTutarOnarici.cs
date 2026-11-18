@@ -15,8 +15,12 @@ namespace Gentegre.Api.Servisler;
 /// Müşteri verisi kuralları (CLAUDE.md): yalnız KANITLI yanlış satır - onaylı (durum 1) talebin KİLİTLİ satırı, tutarı
 /// kendi oranıyla hesaplanan tutarı tutmuyor; belge iptal değil. Belgeye DÖNÜŞMÜŞ satırı olan talep ATLANIR ve günlüğe
 /// yazılır (o tutarla fiş / fatura kesilmiş - elle karar). Dokunmadan önce eski hâl `_yedek_iskonto_tutar_1378`e.
-/// Düzeltilen satır artık tutarsız olmadığından her açılışta güvenle yeniden koşar (idempotent); talep başına ayrı
-/// işlem - biri düşerse ötekiler yine düzelir.
+/// Düzeltilen satır artık tutarsız olmadığından yeniden koşması güvenlidir (idempotent); talep başına ayrı işlem -
+/// biri düşerse ötekiler yine düzelir.
+///
+/// BİR KEZ (kod inceleme 18.11.2026): ilk tam turdan sonra `referans` 'sistem.iskonto_tutar_onarim_1378' işareti yazılır;
+/// sonraki açılışlar tarama yapmaz (her yeniden başlatmada bütün onaylı satırları taramak boşa iş). İşaret silinirse
+/// bir sonraki açılışta yeniden çalışır. Test ve elle çağrı <see cref="OnarAsync"/> ile işarete bakmadan koşar.
 /// </summary>
 public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<IskontoTutarOnarici> gunluk) : BackgroundService
 {
@@ -27,7 +31,13 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
             await using var kapsam = servisler.CreateAsyncScope();
             var veri = kapsam.ServiceProvider.GetRequiredService<VeriKaynagi>();
             var depo = kapsam.ServiceProvider.GetRequiredService<BelgeDeposu>();
+            if (await veri.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", [Isaret], iptal) is not null)
+                return;
             var (onarilan, atlanan) = await OnarAsync(veri, depo, gunluk, iptal);
+            await veri.CalistirAsync(
+                "insert into public.referans (anahtar, deger, tip, kapsam, aciklama) values (@p0, @p1, 'metin', 'sistem', "
+                + "'IskontoTutarOnarici (1378) bir kez çalıştı') on conflict (anahtar) do nothing",
+                [Isaret, $"{DateTime.UtcNow:yyyy-MM-dd HH:mm} · {onarilan} düzeltildi · {atlanan} atlandı"], iptal);
             if (onarilan + atlanan > 0)
                 gunluk.LogWarning("İskonto tutar onarımı: {O} talep düzeltildi, {A} talep belgeye dönüştüğü için atlandı.",
                     onarilan, atlanan);
@@ -35,6 +45,9 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
         catch (OperationCanceledException) when (iptal.IsCancellationRequested) { }
         catch (Exception h) { gunluk.LogError(h, "İskonto tutar onarımı başarısız."); }
     }
+
+    /// <summary>Bir kez çalıştı işareti (referans anahtarı).</summary>
+    public const string Isaret = "sistem.iskonto_tutar_onarim_1378";
 
     /// <summary>Tek tur: (düzeltilen talep, atlanan talep). Test ve elle çağrı için açık.</summary>
     public static async Task<(int Onarilan, int Atlanan)> OnarAsync(VeriKaynagi veri, BelgeDeposu depo, ILogger gunluk,
@@ -47,8 +60,14 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
         var adaylar = await b.ListeAsync("""
             select t.id, s.id, coalesce(s.adet, 0), coalesce(s.birim_fiyat, 0), coalesce(s.iskonto, 0),
                    coalesce(s.iskonto2, 0), coalesce(s.tutar, 0),
-                   (coalesce(s.kapatilan_miktar, 0) > 0
-                    or exists (select 1 from public.belge_satir h where h.kaynak_tur = 30 and h.kaynak_id = s.id)) as donustu
+                   -- TALEBİN HERHANGİ BİR SATIRI dönüşmüşse (kod inceleme 18.11.2026): yenileme talebin bütün satırlarını
+                   --   yeniden yazar; yalnız aday satıra bakmak, sonra başka talepte onaylanıp fişe dönüşen satırı kaçırıyordu.
+                   exists (select 1 from public.iskonto_talep_satir tx
+                             join public.belge_satir sx on sx.id = tx.belge_satir_id
+                            where tx.talep_id = t.id
+                              and (coalesce(sx.kapatilan_miktar, 0) > 0
+                                   or exists (select 1 from public.belge_satir h
+                                               where h.kaynak_tur = 30 and h.kaynak_id = sx.id))) as donustu
               from public.iskonto_talep t
               join public.iskonto_talep_satir ts on ts.talep_id = t.id
               join public.belge_satir s on s.id = ts.belge_satir_id

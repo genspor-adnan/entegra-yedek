@@ -62,7 +62,10 @@ public sealed class KayitErisimi
         var uretici = baglam.PortalTuru > 0
             ? new SorguUretici(erisim, baglam.PortalTuru, baglam.PortalKimlik)
                   { HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu,
-                    BelgeKumeleri = belgeKumeleri }
+                    BelgeKumeleri = belgeKumeleri,
+                    // `{kullanici}` SabitKosul / rol koşulu portalda da bağlanır (kod inceleme 18.11.2026): yoksa 0
+                    //   bağlanıyor, listede görünen kayıt tek kayıt ucunda 404 veriyordu. Liste ucuyla aynı (ListeDeposu).
+                    KullaniciId = baglam.KullaniciId }
             : new SorguUretici(erisim)
             {
                 HekimId = hekimId, TetkikRolleri = baglam.RolIdleri, EkranKosulu = ekranKosulu,

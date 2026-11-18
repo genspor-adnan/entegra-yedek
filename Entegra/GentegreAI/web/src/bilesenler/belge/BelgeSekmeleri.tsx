@@ -182,7 +182,8 @@ export function EBelgeSekmesi({
     </div>
 
     {faturaMi && (
-      <EFaturaBilgileri belgeId={belgeId} tipi={Number(belge?.tipi ?? 0)} senaryo={senaryo} kilitli={kilitli} />
+      <EFaturaBilgileri belgeId={belgeId} tipi={Number(belge?.tipi ?? 0)} senaryo={senaryo} kilitli={kilitli}
+                        onKaydedildi={belgeYenile} />
     )}
   </div>
   );

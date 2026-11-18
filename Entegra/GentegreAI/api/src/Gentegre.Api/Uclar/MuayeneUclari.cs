@@ -105,7 +105,8 @@ public static partial class MuayeneUclari
                     where s.onay_zamani >= @p0 and s.onay_zamani < @p0 + interval '1 day') as "lab",
                   (select count(*) from public.radyoloji_rapor r
                     where r.onay_tarihi >= @p0
-                      and r.onay_tarihi < @p0 + interval '1 day') as "radyoloji",
+                      and r.onay_tarihi < @p0 + interval '1 day'
+                      and coalesce(r.revize, 0) = 0) as "radyoloji",
                   (select count(*) from public.lab_istem_satir ls
                      join public.lab_istem li on li.id = ls.istem_id
                     where ls.durum in (1, 2) and li.istem_tarihi >= @p0 - interval '7 days')

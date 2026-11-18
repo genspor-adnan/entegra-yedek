@@ -27,6 +27,10 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
         new(Toplamlar.Gruplar.Where(g => g.Depo).SelectMany(g => g.Tablolar), StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string[]> _pk = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string>> _kolon = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Delphi tablosunda OLMADIĞI görülen istenen kolonlar ve ne zaman bakıldığı (kod inceleme 18.11.2026).</summary>
+    private readonly Dictionary<string, (HashSet<string> Adlar, DateTime Zaman)> _eksik = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Eksik kolon bu süre içinde yeniden sorulmaz; Delphi güncellemesiyle eklenen kolon en geç bu kadar sonra görülür.</summary>
+    private static readonly TimeSpan EksikTazeleme = TimeSpan.FromMinutes(10);
     private bool? _depoVar;
 
     public static bool DepoTablosu(string tablo) => DepoTablolar.Contains(tablo);
@@ -141,7 +145,11 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
     public async Task<Dictionary<string, string>> KolonlarAsync(string tablo, IEnumerable<string> istenen, CancellationToken iptal)
     {
         var liste = istenen.ToList();
-        if (!_kolon.TryGetValue(tablo, out var tum) || liste.Any(s => !tum.ContainsKey(s)))
+        // EKSİK KOLON ÖNBELLEĞİ (kod inceleme 18.11.2026): müşterinin eski Delphi şemasında hiç olmayan kolon her
+        //   paket çağrısında sys.columns'a yeniden gidiyordu. Yakın zamanda "yok" görülen kolon yeniden okutmaz.
+        var simdi = DateTime.UtcNow;
+        bool YakindaYok(string ad) => _eksik.TryGetValue(tablo, out var e) && e.Adlar.Contains(ad) && simdi - e.Zaman < EksikTazeleme;
+        if (!_kolon.TryGetValue(tablo, out var tum) || liste.Any(s => !tum.ContainsKey(s) && !YakindaYok(s)))
         {
             await using var b = await AcAsync(tablo, iptal);
             await using var k = Komut(b, "SELECT name FROM sys.columns WHERE object_id = OBJECT_ID(@t)", new SqlParameter("@t", "dbo." + tablo));
@@ -149,6 +157,8 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
             await using (var r = await k.ExecuteReaderAsync(iptal))
                 while (await r.ReadAsync(iptal)) tum[r.GetString(0).ToLowerInvariant()] = r.GetString(0);
             _kolon[tablo] = tum;
+            var okunan = tum;
+            _eksik[tablo] = (liste.Where(s => !okunan.ContainsKey(s)).ToHashSet(StringComparer.Ordinal), simdi);
         }
         var sonuc = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var s in liste)

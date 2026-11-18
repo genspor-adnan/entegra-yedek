@@ -19,7 +19,7 @@ import { PosSecModali } from '../banko/PosSecModali';
 import { HesapSecModali } from './HesapSecModali';
 import { IskontoTalepModali } from './IskontoTalepModali';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
-import type { SatirDurumu } from '../../sayfalar/belgeSatir';
+import { type SatirDurumu, yanittanSatirlar } from '../../sayfalar/belgeSatir';
 import { iadeSatirlari, lotSorulacakSatirlar, siparisSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
 import type { useBelgeTahsilat, HizliTahsilatEki } from '../../sayfalar/belgeTahsilat';
 import type { ParaSecimi } from '../mesaj';
@@ -624,9 +624,12 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
             if (se.sozluOnaylayanId) {
               await api.iskontoSozluOnay(kayitliId, se.gerekce, se.sozluOnaylayanId,
                 se.kalemler.map(k => ({ satirId: k.satirId, oran: k.oran })));
-              const oranlar = new Map(se.kalemler.map(k => [k.anahtar, k.oran]));
-              setSatirlar(liste => liste.map(x => oranlar.has(x.anahtar)
-                ? { ...x, iskonto: String(oranlar.get(x.anahtar)), iskonto2: '0', iskontoKilit: true } : x));
+              // BELGE YENİDEN OKUNUR (kod inceleme 18.11.2026): sunucu satır tutarlarını ve dip toplamı yeniden
+              //   yazdı - yerel yamayla kart eski sürüm damgasıyla kalıyor, sonraki Kaydet 409 alıyor ve tahsilat
+              //   penceresi iskontosuz tutarı öneriyordu. Satırlar pencere açılmadan kaydedildiği için kayıp yok.
+              const okunan = await api.belgeOku(kayitliId);
+              setSonuc(okunan);
+              setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
               return;
             }
             if (se.onaya) {

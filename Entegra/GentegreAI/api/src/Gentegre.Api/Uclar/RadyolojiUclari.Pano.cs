@@ -63,6 +63,8 @@ public static partial class RadyolojiUclari
                   (select count(*) from public.radyoloji_rapor r
                      join public.radyoloji_istem i on i.id = r.istem_id
                     where r.onay_tarihi::date = @p0
+                      -- REVİZE ARŞİV KOPYASI SAYILMAZ (1374, kod inceleme 18.11.2026): yeniden onaylanan rapor iki kez sayılıyordu.
+                      and coalesce(r.revize, 0) = 0
                       and (@p1::int is null or i.sube_id = @p1))          as "tamamlanan",
                   (select count(*) from public.radyoloji_konsultasyon ks
                      join public.radyoloji_istem i on i.id = ks.istem_id
@@ -142,7 +144,7 @@ public static partial class RadyolojiUclari
                   from public.radyoloji_istem i
                   left join lateral (
                        select max(x.onay_tarihi) as onay_tarihi
-                         from public.radyoloji_rapor x where x.istem_id = i.id) r on true
+                         from public.radyoloji_rapor x where x.istem_id = i.id and coalesce(x.revize, 0) = 0) r on true
                   left join public.kod_liste kl on kl.kod = 'rad.modalite'
                   left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = i.modalite
                  where i.durum > 0
@@ -165,6 +167,7 @@ public static partial class RadyolojiUclari
                   join public.radyoloji_istem i on i.id = r.istem_id
                   left join public.taraf t on t.id = coalesce(r.yazan_id, r.onaylayan_id)
                  where (@p1::int is null or i.sube_id = @p1)
+                   and coalesce(r.revize, 0) = 0
                    and (r.durum < 3 or r.onay_tarihi::date = @p0)
                  group by public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)
                  order by 2 desc, 3 desc

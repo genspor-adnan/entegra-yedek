@@ -109,6 +109,45 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
         Assert.Equal(0m, await Stok(o, o.DepoA));
     }
 
+    /// <summary>
+    /// 1368 ÖNCESİ TASLAK (kod inceleme 18.11.2026): eski taslak lot bakiyesine yazmıştı, 1368 satıra +1 yön işledi.
+    /// Kesinleşince eski etki geri alınıp yenisi yazılır (lot 20 değil 10); taslak silinince de lot sıfıra döner.
+    /// </summary>
+    [VtFact]
+    public async Task Eski_taslagin_lot_etkisi_kesinlesince_ve_silinince_geri_alinir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d);
+        using var _ = o.H;
+        var satir = new[] { LotSatiri(o.Stok, 10, new { lotNo = "L-ESK", miktar = 10 }) };
+        async Task<int> EskiTaslakAsync(string no)
+        {
+            var id = await YazAsync(d, o, AlisIrsaliyesi(o, no), satir, taslak: true);
+            // 1368 öncesi hâl: izlem satırı +1 yönlü ve lot bakiyesine 10 yazılmış.
+            await api.Veri.CalistirAsync("update public.stok_izleme set yon = 1 where belge_id = @p0", [id]);
+            await api.Veri.CalistirAsync("""
+                insert into public.stok_lot_durum (stok_id, depo_id, seri_lot_id, kalan)
+                select stok_id, depo_id, seri_lot_id, adet from public.stok_izleme where belge_id = @p0
+                on conflict (stok_id, depo_id, seri_lot_id) do update set kalan = stok_lot_durum.kalan + excluded.kalan
+                """, [id]);
+            Assert.Equal(10m, await Lot(o, o.DepoA));
+            return id;
+        }
+
+        var id1 = await EskiTaslakAsync("ET" + d.Onek[^6..]);
+        await YazAsync(d, o, AlisIrsaliyesi(o, "ET" + d.Onek[^6..]), satir, taslak: false, id: id1);
+        Assert.Equal(10m, await Lot(o, o.DepoA));                      // eskiden 20
+        Assert.Equal(10m, await Stok(o, o.DepoA));
+        var sil1 = await o.H.DeleteAsync($"/api/belge/{id1}");
+        Assert.True(sil1.IsSuccessStatusCode, await sil1.Content.ReadAsStringAsync());
+        Assert.Equal(0m, await Lot(o, o.DepoA));
+
+        var id2 = await EskiTaslakAsync("EU" + d.Onek[^6..]);
+        var sil2 = await o.H.DeleteAsync($"/api/belge/{id2}");     // taslak silme
+        Assert.True(sil2.IsSuccessStatusCode, await sil2.Content.ReadAsStringAsync());
+        Assert.Equal(0m, await Lot(o, o.DepoA));                       // eskiden 10 kalıyordu
+    }
+
     [VtFact]
     public async Task Iadede_lot_stokla_ayni_yonde()
     {

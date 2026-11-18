@@ -18,8 +18,10 @@ import { mesaj } from '../mesaj';
  *   - Kamu senaryosu (7): ödeme IBAN'ı
  * Bölüm yalnız gerekiyorsa açılır; Hazırla eksikleri zaten tek mesajda söyler.
  */
-export function EFaturaBilgileri({ belgeId, tipi, senaryo, kilitli }: {
+export function EFaturaBilgileri({ belgeId, tipi, senaryo, kilitli, onKaydedildi }: {
   belgeId: number; tipi: number; senaryo: number; kilitli: boolean;
+  /** Kayıttan sonra kart belgeyi yeniden okur (sürüm tazelenir). */
+  onKaydedildi?(): void;
 }) {
   const [kodlar, setKodlar] = useState<EFaturaKodlari | null>(null);
   const [b, setB] = useState<EFaturaBilgiBaslik | null>(null);
@@ -51,6 +53,8 @@ export function EFaturaBilgileri({ belgeId, tipi, senaryo, kilitli }: {
     try {
       const y = await api.efaturaBilgiKaydet(belgeId, { baslik: b, satirlar });
       mesaj(y.mesaj); setDegisti(false);
+      // Belge satırı güncellendi: kart sürümünü tazelesin (yoksa sonraki Kaydet 409 - kod inceleme 18.11.2026).
+      onKaydedildi?.();
     } catch (h) { mesaj(hataMetni(h)) }
   };
   const istisnaListe = ihracKayitli ? kodlar.ihracKayitli : kodlar.istisna;

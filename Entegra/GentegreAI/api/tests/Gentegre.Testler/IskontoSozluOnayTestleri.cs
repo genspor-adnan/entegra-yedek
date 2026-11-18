@@ -78,6 +78,15 @@ public sealed class IskontoSozluOnayTestleri(ApiSunucuOlgusu api)
         Assert.Equal(HttpStatusCode.BadRequest, (await h.PostAsJsonAsync("/api/iskonto-talep/sozlu", Govde(yonetici, " "))).StatusCode);
         Assert.Equal(0m, await api.Veri.TekDegerAsync<decimal>("select iskonto from public.belge_satir where id = @p0", [satir]));
 
+        // 3b) Belgeye ait olmayan satır (kod inceleme 18.11.2026): talep satırsız "uygulandı" diye onaylanmaz, işlem geri alınır.
+        var yabanci = await h.PostAsJsonAsync("/api/iskonto-talep/sozlu", new
+        {
+            belgeId = belge, gerekce = "x", onaylayanId = yonetici,
+            kalemler = new[] { new { satirId = 2_000_000_000, oran = 40m } },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, yabanci.StatusCode);
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>("select count(*)::int from public.iskonto_talep where belge_id = @p0", [belge]));
+
         // 4) Geçerli sözlü onay: %40 (eşik ve banko tavanı üstü) hemen, kilitli yazılır.
         var y = await h.PostAsJsonAsync("/api/iskonto-talep/sozlu", Govde(yonetici));
         Assert.True(y.IsSuccessStatusCode, await y.Content.ReadAsStringAsync());
@@ -165,10 +174,23 @@ public sealed class IskontoSozluOnayTestleri(ApiSunucuOlgusu api)
                 (await hb.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "x" })).StatusCode);
         var (ya, _) = await api.GirisAsync(yonKod, TestDunyasi.Parola);
         using var hy = api.Istemci(ya, Merkez);
+        // Dijital zincir (onaylanmış) - geri alınınca İPTAL olmalı (kod inceleme 18.11.2026).
+        await api.Veri.CalistirAsync("""
+            insert into public.onay (akis_id, kaynak_tur, kaynak_id, sube_id, olcu, durum, baslatan_id, bitis)
+            values ((select id from public.onay_akis where kod = 'belge.iskonto' limit 1), 1256, @p0, @p1, 30, 1, @p2, now())
+            """, [talep, Merkez, banko]);
+        d.Temizle($"delete from public.onay where kaynak_tur = 1256 and kaynak_id = {talep}");
+        // İptal edilmiş belgede geri alma yok.
+        await api.Veri.CalistirAsync("update public.belge set durum = 6 where id = @p0", [belge]);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await hy.PostAsJsonAsync($"/api/iskonto-talep/satir/{satir}/geri-al", new { neden = "x" })).StatusCode);
+        await api.Veri.CalistirAsync("update public.belge set durum = 0 where id = @p0", [belge]);
         // Ekran SATIRDAN geri alır: satırı kilitleyen son onaylı talep bulunur.
         var g = await hy.PostAsJsonAsync($"/api/iskonto-talep/satir/{satir}/geri-al", new { neden = "Kurum değişti" });
         Assert.True(g.IsSuccessStatusCode, await g.Content.ReadAsStringAsync());
         Assert.Equal("0.0000/0/500.00", await api.Veri.TekDegerAsync<string>(
             "select iskonto::text || '/' || iskonto_kilit || '/' || round(tutar, 2)::text from public.belge_satir where id = @p0", [satir]));
+        Assert.Equal(3, await api.Veri.TekDegerAsync<int>(
+            "select durum::int from public.onay where kaynak_tur = 1256 and kaynak_id = @p0", [talep]));
     }
 }

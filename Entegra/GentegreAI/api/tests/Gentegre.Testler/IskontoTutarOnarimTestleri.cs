@@ -89,4 +89,45 @@ public sealed class IskontoTutarOnarimTestleri(ApiSunucuOlgusu api)
         Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
             "select count(*)::int from public._yedek_iskonto_tutar_1378 where belge_satir_id = @p0", [satir]));
     }
+
+    /// <summary>
+    /// Kod inceleme 18.11.2026: T1 talebi A ve B satırlarını kapsıyor, B sonradan T2 ile yeniden onaylanıp fişe
+    /// dönüşmüş. A'nın tutarı yanlış olsa da T1 ATLANIR - yenileme talebin bütün satırlarını yazar, B'ye dokunulmamalı.
+    /// </summary>
+    [VtFact]
+    public async Task Talebin_baska_satiri_donusmusse_talep_atlanir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var rol = await d.RolAsync("o", "belge:g");
+        var (u1, _) = await d.KullaniciAsync(rol, Merkez);
+        var (u2, _) = await d.KullaniciAsync(rol, Merkez);
+        var (belge, a, t1) = await EskiHataAsync(d, u1, u2);
+        var b = await api.Veri.TekDegerAsync<int>("""
+            insert into public.belge_satir (belge_id, sira, tur, miktar, adet, birim_fiyat, tutar, kdv, sube_id)
+            values (@p0, 2, 2, 1, 1, 800, 800, 0, @p1) returning id
+            """, [belge, Merkez]);
+        d.Temizle($"delete from public.belge_satir where id = {b}");
+        // T1 B'yi de kapsar (A ile aynı karar); sonra T2 B'yi yeniden onaylar ve B fişe dönüşür.
+        await api.Veri.CalistirAsync("""
+            insert into public.iskonto_talep_satir (talep_id, belge_satir_id, birim_fiyat, onceki_iskonto, oran)
+            values (@p0, @p1, 800, 0, 25)
+            """, [t1, b]);
+        var t2 = await api.Veri.TekDegerAsync<int>("""
+            insert into public.iskonto_talep (belge_id, sube_id, oran, gerekce, durum, isteyen_id, ekleyen)
+            values (@p0, @p1, 30, 'test2', 0, @p2, @p2) returning id
+            """, [belge, Merkez, u1]);
+        await api.Veri.CalistirAsync("""
+            insert into public.iskonto_talep_satir (talep_id, belge_satir_id, birim_fiyat, onceki_iskonto, oran)
+            values (@p0, @p1, 800, 0, 30)
+            """, [t2, b]);
+        await api.Veri.CalistirAsync("select public.fn_iskonto_talep_karar(@p0, 1::smallint, 30, 'ok', @p1)", [t2, u2]);
+        await api.Veri.CalistirAsync("update public.belge_satir set kapatilan_miktar = 1 where id = @p0", [b]);
+
+        await IskontoTutarOnarici.OnarAsync(api.Veri, new BelgeDeposu(api.Veri, new LogDeposu()),
+            NullLogger.Instance, CancellationToken.None);
+        Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [a]));
+        Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [b]));
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
+            "select count(*)::int from public._yedek_iskonto_tutar_1378 where belge_id = @p0", [belge]));
+    }
 }

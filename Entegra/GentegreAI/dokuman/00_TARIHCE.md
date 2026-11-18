@@ -7,6 +7,24 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Gentegre AI kod incelemesi (bugünkü 42 commit) düzeltmeleri
+
+1. Sözlü onaydan sonra kart belgeyi yeniden okur (yerel yamada sürüm eski kalıyor, sonraki Kaydet 409 + iskontosuz açık tutar).
+2. Kaydet sonrası istisna kodu yazımı ve e-Fatura Bilgileri kaydı belgeyi güncelliyor -> kart yeniden okur (409).
+3. IskontoTutarOnarici: dönüşüm kontrolü talebin BÜTÜN satırlarında (başka talepte onaylanıp dönüşen satır kaçıyordu).
+4. Revize arşiv kopyası pano "tamamlanan", radyolog "onaylanan", ortalama süre ve muayene günlük sayısına girmez.
+5. 1368 öncesi taslağın lot etkisi kesinleşince / düzenlenince / silinince geri alınır (TaslakLotEtkisiGeriAlAsync - yalnız
+   açık yönlü taslak izlem satırı; lot 20 değil 10).
+6. Sözlü ve dijital talepte belgeye ait olmayan satır -> 400, satırsız talep onaylanıp "uygulandı" bildirimi gitmez.
+7. Geri al: iptal belgede yok; onaycı değilse belge değiştirme yetkisi; dijital zincir İPTAL (onay.durum 3).
+8. Tek kayıt kapısı portalda `{kullanici}` koşulunu bağlar (0 bağlanıyordu, listede görünen kayıt 404).
+9. Tutar onarımı bir kez: `referans` 'sistem.iskonto_tutar_onarim_1378' işareti, sonraki açılışlar taramaz.
+10. Aktarım ajanı Delphi'de olmayan kolonu 10 dk "eksik" hatırlar (her turda sys.columns sorgusu yok).
+- Testler: sözlü onayda yabancı satır, iptal belgede geri alma, zincir iptali, onarımda talepteki dönüşmüş satır, eski
+  taslağın lot etkisi (kesinleşme + silme).
+
+---
+
 ## 18.11.2026 — Radyoloji yapısal rapor paketleri (1379, 1380)
 
 - Kullanıcı: "yapısal raporlar hangileri daha da eklenebilir mi" -> "1, 2 ve 3'ü yap, bitince 4 ve 5'e geç".
