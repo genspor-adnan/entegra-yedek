@@ -190,7 +190,7 @@ export function EBelgeSekmesi({
 
 export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi, kurumPayliMi,
                                     teklifDurum, donusumAc, donusumSil,
-                                    hizliDonustur, olcu = 'adet', setOlcu, donusumYenile, hizliYok, sekmedeAc, kaynakTur }: {
+                                    hizliDonustur, olcu = 'adet', setOlcu, donusumYenile, hizliYok, sekmedeAc, kaynakTur, donusumYetkisiz }: {
   donusumler: Record<string, unknown>[];
   /** İRSALİYE (kullanıcı 07.11.2026): Fiş / Fatura / Kurum-Hasta Tahakkuk / Adet-Tutar / Fatura İşlem / ✎ / 🗑 ve seçim
       kutusu YOK; sekme yalnız türetilmiş belge listesi, Tür'e tıklayınca belge YENİ SEKMEDE (sekmedeAc). Dönüşüm araç
@@ -231,8 +231,13 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   setOlcu?(v: 'adet' | 'tutar'): void;
   /** Listeyi yeniden oku (e-Fatura menusunden sonra). */
   donusumYenile?(): void;
+  /** Kullanıcının `belge.donustur` yetkisi yok: Fiş / Fatura / Tahakkuk düğmeleri sebebiyle pasif. */
+  donusumYetkisiz?: boolean;
 }) {
-  const donusumKapali = !!teklifMi && teklifDurum !== '3';
+  const donusumKapali = (!!teklifMi && teklifDurum !== '3') || !!donusumYetkisiz;
+  /** Yetkisizlikte ipucu yerine sebep (düğme yine çizilir - ne olduğu görünsün). */
+  const yetkisizIpucu = donusumYetkisiz
+    ? c("Belge kesme (dönüşüm) yetkiniz yok - rolünüze 'Belge dönüşümü' yetkisi verilmeli.") : undefined;
   /* COKLU SECIM (kullanici): bir basvurudan birden cok belge turuyor
      (kismi fis + kalan tahakkuk) - yanlis dogan iki belgeyi tek tek
      silmek yerine isaretleyip birlikte silmek gerekiyor. */
@@ -289,8 +294,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
       {hizliYok && kaynakTur && (
         <>
           {/* "Siparişten / Tekliften Aktar" Kalemler sekmesinde (kullanıcı 07.11.2026, KalemSekmesi.aktarSecenekleri). */}
-          <DonusumMenusu kaynakTur={kaynakTur} devre={!kayitliId}
-                         devreSebep={kaynakTur === 9 || kaynakTur === 19 ? 'Önce siparişi kaydedin.' : 'Önce irsaliyeyi kaydedin.'}
+          <DonusumMenusu kaynakTur={kaynakTur} devre={!kayitliId || !!donusumYetkisiz}
+                         devreSebep={yetkisizIpucu ?? (kaynakTur === 9 || kaynakTur === 19 ? 'Önce siparişi kaydedin.' : 'Önce irsaliyeyi kaydedin.')}
                          title={kaynakTur === 9 || kaynakTur === 19
                            ? 'Satırları irsaliyeye / faturaya / fişe / tahakkuka aktar'
                            : 'Sevk edilen satırları faturaya / fişe / tahakkuka aktar'}
@@ -311,16 +316,16 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
       {kayitliId > 0 && !teklifMi && !hizliYok && (
         <>
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
+                  title={yetkisizIpucu ?? `Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} satış FİŞİNE çevirir`}
                   // "Satış Fişi" (kullanıcı 17.11.2026: "Belgelerde Fiş rename Satış Fişi") - Hasta Fişi'nin yanında
                   //   tek başına "Fiş" hangisi olduğunu söylemiyordu.
                   onClick={() => hizliDonustur?.(16)}>🧾 {belgeKisaAdi(16)}</button>
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
+                  title={yetkisizIpucu ?? `Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
                   onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
           {kurumPayliMi !== false && (
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Kurum payını TAHAKKUKA çevirir (kalanın tamamı) - alacak kurum carisine yazılır, ödemesi takip edilir"
+                  title={yetkisizIpucu ?? "Kurum payını TAHAKKUKA çevirir (kalanın tamamı) - alacak kurum carisine yazılır, ödemesi takip edilir"}
                   onClick={() => hizliDonustur?.(17, 'kurum')}>📑 Kurum Tahakkuk</button>
           )}
           {/* HASTA TAHAKKUKU (kullanici: "tahakkukları ikiye ayıralım: Kurum
@@ -333,7 +338,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
               (yaslandirma) basvurunun hasta payindan yurur. Odeme takibi
               kurum tahakkukunda (kurum carisi). */}
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Hasta payını Hasta Fişi ile belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"
+                  title={yetkisizIpucu ?? "Hasta payını Hasta Fişi ile belgeleyip kapatır (kalanın tamamı) - ödeme takibi yapılmaz"}
                   onClick={() => hizliDonustur?.(HASTA_FISI, 'hasta')}>
             🧾 {belgeKisaAdi(HASTA_FISI)}</button>
         </>
@@ -347,8 +352,8 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           dugmeler teklifte hic cizilmiyor). */}
       {kayitliId > 0 && teklifMi && (
         <button type="button" className="d bir" disabled={donusumKapali}
-                title={donusumKapali
-                  ? 'Yalnız KABUL durumundaki teklif siparişe dönüştürülebilir.' : undefined}
+                title={yetkisizIpucu ?? (donusumKapali
+                  ? 'Yalnız KABUL durumundaki teklif siparişe dönüştürülebilir.' : undefined)}
                 onClick={() => setDonusum(0)}>{c('📋 Siparişe Dönüştür')}</button>
       )}
 

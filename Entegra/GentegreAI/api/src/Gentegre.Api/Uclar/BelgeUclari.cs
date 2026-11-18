@@ -815,6 +815,10 @@ public static class BelgeUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Ekle);
+            // NEDENİ SÖYLE (kullanıcı 18.11.2026: "başvuruda satış fişi ekleyemedim.. yetkiniz yok").
+            if (!baglam.Yetkiler.AksiyonVar("belge.donustur"))
+                throw GentegreHatasi.Yasak(
+                    "Belge kesme (fiş / fatura / tahakkuk dönüşümü) yetkiniz yok - rolünüze 'Belge dönüşümü' yetkisi verilmeli.");
             baglam.AksiyonIste("belge.donustur");
 
             if (istek is null || istek.HedefTur <= 0)

@@ -2078,6 +2078,9 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             },
             hizliDonustur: (t: number, taraf?: 'hasta' | 'kurum') =>
               void hizliDonustur(t, taraf),
+            // DÖNÜŞÜM YETKİSİ (kullanıcı 18.11.2026: "başvuruda satış fişi ekleyemedim.. yetkiniz yok"): sunucu
+            //   `belge.donustur` ister; yetkisizde düğme sebebiyle pasif.
+            donusumYetkisiz: !aksiyonVar('belge.donustur'),
             // KURUM TAHAKKUKU YALNIZ PAYLASIMLI KURUMDA (kullanici: "Kurum
             //   Tahakkuk butonu Özel hasta kurum tipinde görünmemeli"): özel
             //   (ücretli) başvuruda kurumun payı hep sıfırdır, düğme her zaman
