@@ -32,7 +32,7 @@ powershell -ExecutionPolicy Bypass -File aktarim\eski-hbys\al.ps1 -MssqlDb <MSSQ
 # 4) Eşleme + mutabakat
 docker cp aktarim\eski-hbys\esle.sql gentegre-pg18:/tmp/ ; docker exec gentegre-pg18 psql -U postgres -d <DB> -f /tmp/esle.sql
 # 4b) (kullan.sql'den sonra) radyoloji raporlarının radyoloğu
-docker exec -i gentegre-pg18 psql -U postgres -d <DB> -v ON_ERROR_STOP=1 -f - < aktarim\eski-hbysad_hekim.sql
+docker exec -i gentegre-pg18 psql -U postgres -d <DB> -v ON_ERROR_STOP=1 -f - < aktarim\eski-hbys\rad_hekim.sql
 ```
 
 Yeni kurulumda **önce `eski.tanim`'ı o kurulumun verisiyle karşılaştırın** — farklı kod değerleri (başka
