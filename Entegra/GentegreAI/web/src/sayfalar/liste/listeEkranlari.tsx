@@ -32,7 +32,7 @@ import { HemsireIzlem } from '../../bilesenler/yatan/HemsireIzlem';
 import { YatanIcmal } from '../../bilesenler/yatan/YatanIcmal';
 import { AlanPaketiDugmesi } from '../radyoloji/AlanPaketleri';
 import { EslemeAraclari, EslemePaneli, EslemeSekmeleri, EslemeSeridi, kaynaktanListe } from '../aktarim/EslemePanelleri';
-import { RaporListeCiktisi, RaporListeSeridi, RaporOnizlemePaneli } from '../radyoloji/RaporListePanelleri';
+import { RaporListeCiktisi, RaporListeSeridi } from '../radyoloji/RaporListePanelleri';
 import { BolgePaneli, ProtokolOnizlemePaneli, SablonOnizlemePaneli, useBolgeSuzgeci } from '../radyoloji/RadyolojiTanimPanelleri';
 import { CihazGostergesi, CihazOnizlemePaneli, CihazSolPanel, useCihazGostergesi, useCihazSuzgeci } from '../radyoloji/CihazPanelleri';
 import { GozCihazGostergesi, GozCihazOnizlemePaneli, GozCihazSolPanel,
@@ -290,12 +290,11 @@ const PANELLER: Record<string, ListePaneli> = {
     ustSerit: b => <KullaniciOzetSeridi yenile={b.yenile} onCip={b.setCip} />,
     altPanel: b => kayitId(b) ? <KullaniciAltPanel kullaniciId={kayitId(b)} saltOkunur={false} /> : undefined,
   },
-  // RADYOLOJİ RAPOR LİSTESİ (1215, mockup radyoloji_rapor_listesi.html): sayaç şeridi, sağda A4 önizleme,
-  //   araç çubuğunda icmallerdeki çıktı menüsü (işaretli raporlar, yoksa seçili rapor).
+  // RADYOLOJİ RAPOR LİSTESİ (1215, mockup radyoloji_rapor_listesi.html): sayaç şeridi, araç çubuğunda icmallerdeki
+  //   çıktı menüsü (işaretli raporlar, yoksa seçili rapor). Sağdaki A4 önizleme paneli KALDIRILDI (kullanıcı
+  //   18.11.2026) - liste tam genişlik; rapor çift tıkla açılır, belge Yazdır › Baskı Önizleme'de.
   'radyoloji-rapor': {
     ustSerit: b => <RaporListeSeridi yenile={b.yenile} onCip={b.setCip} />,
-    yanPanel: b => <RaporOnizlemePaneli satir={b.seciliSatir} yenile={b.yenile}
-                                        onAc={id => b.gitKart(`/radyoloji/rapor/${id}`)} />,
     basSag: b => <RaporListeCiktisi secili={b.seciliSatir} isaretli={b.isaretli} />,
   },
   // SKRS EŞLEME MASASI (1222): sayaç şeridi, sağda adaylar + karar, araç çubuğunda doldur / toplu onay / uygula.

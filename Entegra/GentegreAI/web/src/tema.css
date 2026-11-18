@@ -8342,16 +8342,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rt-dal.alt { padding-left: 24px }
 .rt-agac-ara { margin-top: 12px !important }
 .rt-oniz { font-size: 12px }
-/* RADYOLOJİ RAPOR LİSTESİ (1215): sağda raporun A4 belgesi küçültülmüş; çıktı menüsünde çoklu rapor. */
-.rr-oniz { font-size: 12px; display: flex; flex-direction: column; max-height: calc(100vh - 210px) }
-.rr-oniz.sonuk { padding: 16px }
-.rr-oniz-arac { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--cizgi2) }
-.rr-oniz-arac b { color: var(--yazi2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.rr-oniz-arac .sp { flex: 1 }
-.rr-kagit { overflow: auto; padding: 8px; background: var(--yuz2) }
-.rr-kagit > * { zoom: .5 }
+/* RADYOLOJİ RAPOR LİSTESİ (1215): çıktı menüsünde çoklu rapor (sağdaki A4 önizleme 18.11.2026'da kaldırıldı). */
 @media print {
-  .rr-oniz { display: none !important }
   /* Çıktı menüsü liste başlığında; başlık yazdırmada gizli (display:none) - belge için açılır, içi görünmez kalır. */
   .sayfabas:has(.rr-cikti) { display: block !important }
   .rr-cikti .cm { position: static }

@@ -9,7 +9,6 @@ import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from '../RadyolojiRaporC
  * RADYOLOJİ RAPOR LİSTESİ ÇEVRESİ (1215, mockup Ekranlar/Radyoloji/radyoloji_rapor_listesi.html):
  *
  *  · üst şerit - sayaçlar (kutu listeyi o çiple açar; `.kul-ozet` deseni),
- *  · yan panel - seçili raporun A4 belgesi küçültülmüş (açmadan okunur; tablo + gömülü resim dahil),
  *  · araç çubuğu - icmallerdeki ÇIKTI MENÜSÜ (Baskı Önizleme / Yazıcıya Yazdır / Gönder ▸):
  *    işaretli raporlar, işaret yoksa seçili rapor. Belge rapor ekranının yazdırdığı belgenin aynısı.
  */
@@ -49,38 +48,6 @@ export function RaporListeSeridi({ yenile, onCip }: { yenile: number; onCip(i: n
           <span className="alt">{c(k.alt)}</span>
         </button>
       ))}
-    </div>
-  );
-}
-
-export function RaporOnizlemePaneli({ satir, yenile, onAc }: {
-  satir: ListeSatiri | null; yenile: number; onAc(istemId: number): void;
-}) {
-  const raporId = raporIdsi(satir);
-  const [veri, setVeri] = useState<RaporCiktiVerisi | null>(null);
-  const [hata, setHata] = useState(false);
-  useEffect(() => {
-    setVeri(null); setHata(false);
-    if (!raporId) return;
-    let iptal = false;
-    api.radyolojiRaporCikti(raporId)
-      .then(v => { if (!iptal) setVeri(v as RaporCiktiVerisi) })
-      .catch(() => { if (!iptal) setHata(true) });
-    return () => { iptal = true };
-  }, [raporId, yenile]);
-  if (!raporId) return <div className="rr-oniz sonuk">{c('Önizleme için bir rapor seçin.')}</div>;
-  if (hata) return <div className="rr-oniz sonuk">{c('Rapor okunamadı.')}</div>;
-  if (!veri) return <div className="rr-oniz sonuk">{c('yükleniyor')}…</div>;
-  return (
-    <div className="rr-oniz">
-      <div className="rr-oniz-arac">
-        <b>{String(satir?.tetkikAdi ?? '')}</b>
-        <span className="rozet">{String(satir?.durumAdi ?? '')}</span>
-        {Number(satir?.ekRapor ?? 0) > 0 && <span className="rozet">+{String(satir?.ekRapor)} {c('ek rapor')}</span>}
-        <span className="sp" />
-        <button type="button" className="d" onClick={() => onAc(Number(satir?.id))}>📄 {c('Aç')}</button>
-      </div>
-      <div className="rr-kagit"><RadyolojiRaporBelgesi veri={veri} /></div>
     </div>
   );
 }
