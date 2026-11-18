@@ -59,11 +59,17 @@ interface Skor { alanKod: string; alanAd: string; tip: number; secenekler: strin
 interface Gecmis { id: number; accessionNo: string; tetkikAdi: string; tarih: string;
                    raporlayan: string; ozet: string;
                    /** Kronolojik görünüm (27.10.2026): modalite adı, rapor durumu (0 yok, 1-3), BI-RADS. */
-                   modaliteAdi?: string; raporDurum?: number; birads?: string }
+                   modaliteAdi?: string; raporDurum?: number; birads?: string;
+                   /** REVİZE (1374): raporun kaç eski (revize edilmiş) hâli var. */
+                   revizeSayisi?: number }
 interface Kritik { bulgu: string; bildirilenAd: string; yol: number;
                    bildirimZamani: string; geriBildirim: string; kapatmaZamani?: string | null }
 /** Sağ panelde salt okunur açılan önceki tetkik raporu (kullanıcı 13.11.2026). */
-interface OncekiGorunum { id: number; yukleniyor: boolean; hata: string; rapor: Record<string, unknown> | null; bolumler: Bolum[] }
+interface OncekiGorunum { id: number; yukleniyor: boolean; hata: string; rapor: Record<string, unknown> | null; bolumler: Bolum[];
+                         /** REVİZE (1374): raporun eski hâlleri ve panelde hangisi gösteriliyor (null = güncel rapor). */
+                         revizeler?: { id: number; revizeNo: number; raporNo: string; revizeTarihi: string | null;
+                                       neden: string; revizeEden: string }[];
+                         surum?: number | null; guncel?: Bolum[] }
 
 type Kayit = Record<string, unknown>;
 
@@ -348,18 +354,39 @@ export function RadyolojiRapor() {
     try {
       const y = await api.radyolojiRapor(g.id);
       // Araya başka tıklama girdiyse eski yanıt atılır (K53 ile aynı sebep).
+      const bols = (y.bolumler as Kayit[]).map(b => ({
+        sira: Number(b.sira), baslik: String(b.baslik ?? ''), metin: String(b.metin ?? ''),
+        yazdir: Number(b.yazdir ?? 1), zorunlu: Number(b.zorunlu ?? 0),
+        html: b.metinHtml ? String(b.metinHtml) : undefined,
+      }));
       setOnceki(o => (o?.id !== g.id ? o : {
-        id: g.id, yukleniyor: false, hata: '', rapor: y.rapor,
-        bolumler: (y.bolumler as Kayit[]).map(b => ({
-          sira: Number(b.sira), baslik: String(b.baslik ?? ''), metin: String(b.metin ?? ''),
-          yazdir: Number(b.yazdir ?? 1), zorunlu: Number(b.zorunlu ?? 0),
-          html: b.metinHtml ? String(b.metinHtml) : undefined,
-        })),
+        id: g.id, yukleniyor: false, hata: '', rapor: y.rapor, bolumler: bols,
+        revizeler: y.revizeler ?? [], surum: null, guncel: bols,
       }));
     } catch (h) {
       setOnceki(o => (o?.id !== g.id ? o : { ...o, yukleniyor: false, hata: hataMetni(h) }));
     }
   }, [onceki?.id]);
+
+  /** Önceki raporun ESKİ (revize edilmiş) hâlini panelde göster; null = güncel rapor (1374). */
+  const oncekiSurum = useCallback(async (surumId: number | null) => {
+    if (!onceki) return;
+    if (surumId === null) { setOnceki(o => (o ? { ...o, surum: null, bolumler: o.guncel ?? o.bolumler, hata: '' } : o)); return }
+    const oid = onceki.id;
+    setOnceki(o => (o ? { ...o, surum: surumId, yukleniyor: true, hata: '' } : o));
+    try {
+      const v = await api.radyolojiRaporCikti(surumId) as unknown as { bolumler: Kayit[] };
+      setOnceki(o => (o?.id !== oid || o.surum !== surumId ? o : {
+        ...o, yukleniyor: false,
+        bolumler: v.bolumler.map(b => ({
+          sira: Number(b.sira), baslik: String(b.baslik ?? ''), metin: String(b.metin ?? ''),
+          yazdir: 1, zorunlu: 0, html: b.metinHtml ? String(b.metinHtml) : undefined,
+        })),
+      }));
+    } catch (h) {
+      setOnceki(o => (o?.id !== oid ? o : { ...o, yukleniyor: false, hata: hataMetni(h) }));
+    }
+  }, [onceki]);
   const hastaAdi = String(istem?.hastaAdi ?? '').trim();
   useEffect(() => {
     if (ekranSekmesi && hastaAdi) ekranSekmesi.baslik(sekmeAdi(hastaAdi), `/radyoloji/rapor/${id}`);
@@ -900,7 +927,7 @@ Devam edilsin mi?`, true)) return;
     <div className="sayfa rad-rapor">
       {revizeler.length > 0 && (
         <div className="bilgi-kutusu" data-testid="rapor-revize-gecmisi">
-          🗂 {c('Bu rapor revize edildi')} ({revizeler.length}):{' '}
+          🗂 <b>{c('Önceki Revizeler')}</b> ({revizeler.length}):{' '}
           {revizeler.map(v => (
             <span key={v.id} style={{ marginRight: 12 }}>
               <a href="#" onClick={e => { e.preventDefault(); git(`/radyoloji/cikti/${v.id}`) }}
@@ -1047,7 +1074,13 @@ Devam edilsin mi?`, true)) return;
                         {g.birads && <span className={`brf-k k${g.birads[0]}`}>BI-RADS {g.birads}</span>}
                       </div>
                       <b>{g.tetkikAdi}</b>
-                      <div className="sonuk kucuk">{durumAd}{g.raporlayan ? ` · ${g.raporlayan}` : ''}</div>
+                      <div className="sonuk kucuk">{durumAd}{g.raporlayan ? ` · ${g.raporlayan}` : ''}
+                        {Number(g.revizeSayisi ?? 0) > 0 && (
+                          <span className="rozet sari" style={{ marginLeft: 6 }}
+                                title={c('Bu rapor revize edildi; eski hâlleri sağdaki panelde görülebilir')}>
+                            🗂 {c('Revize')} ×{Number(g.revizeSayisi)}
+                          </span>)}
+                      </div>
                       {g.ozet && <div className="kucuk rad-zc-ozet">{g.ozet}…</div>}
                     </button>
                   </div>
@@ -1174,6 +1207,26 @@ Devam edilsin mi?`, true)) return;
                  : onceki.hata ? <div className="kucuk rad-onceki-hata">{onceki.hata}</div>
                  : onceki.bolumler.length === 0 ? <div className="sonuk kucuk">{c('Bu tetkikin raporu yok.')}</div>
                  : <>
+                     {(onceki.revizeler?.length ?? 0) > 0 && (
+                       <div className="kucuk" style={{ display: 'flex', flexWrap: 'wrap', gap: 4, margin: '2px 0 4px', alignItems: 'center' }}>
+                         <b>{c('Önceki Revizeler')}:</b>
+                         <button type="button" className={`d mini${onceki.surum == null ? ' bir' : ''}`}
+                                 onClick={() => void oncekiSurum(null)}>{c('Güncel')}{onceki.rapor?.raporNo ? ` · ${String(onceki.rapor.raporNo)}` : ''}</button>
+                         {onceki.revizeler!.map(v => (
+                           <button key={v.id} type="button" className={`d mini${onceki.surum === v.id ? ' bir' : ''}`}
+                                   title={`${v.neden}${v.revizeEden ? ` · ${v.revizeEden}` : ''}`}
+                                   onClick={() => void oncekiSurum(v.id)}>
+                             🗂 {v.raporNo || `#${v.id}`}
+                           </button>))}
+                       </div>)}
+                     {onceki.surum != null && (() => {
+                       const v = onceki.revizeler?.find(x => x.id === onceki.surum);
+                       return (
+                         <div className="kucuk" style={{ border: '1px solid #c0392b', color: '#c0392b', padding: '3px 6px', margin: '2px 0 4px' }}>
+                           {c('REVİZE EDİLDİ — eski hâl, geçerli rapor değildir')}
+                           {v?.revizeTarihi ? ` · ${anMetni(v.revizeTarihi)}` : ''}{v?.neden ? ` · ${v.neden}` : ''}
+                         </div>);
+                     })()}
                      <div className="sonuk kucuk">{durumAd}{g?.raporlayan ? ` · ${g.raporlayan}` : ''}</div>
                      <div className="rad-onceki-metin">
                        {onceki.bolumler.filter(b => b.yazdir !== 0).map((b, i) => (

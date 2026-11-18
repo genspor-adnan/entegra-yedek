@@ -283,6 +283,8 @@ public static partial class RadyolojiUclari
                                   where l.kod = 'rad.modalite' and d.deger = i.modalite and d.dil = 0
                                   limit 1), '') as "modaliteAdi",
                        coalesce(r.durum, 0) as "raporDurum", coalesce(r.birads_kategori, '') as "birads",
+                       -- REVİZE (1374, kullanıcı: "önceki tetkiklerde raporun eski halini de göster"): kaç eski hâli var.
+                       (select count(*)::int from public.radyoloji_rapor v where v.ust_rapor_id = r.id and v.revize = 1) as "revizeSayisi",
                        coalesce((select left(b.metin, 120) from public.radyoloji_rapor_bolum b
                                   join public.radyoloji_rapor r2 on r2.id = b.rapor_id
                                  where r2.istem_id = i.id and r2.ust_rapor_id is null and b.baslik ilike '%sonu%'
