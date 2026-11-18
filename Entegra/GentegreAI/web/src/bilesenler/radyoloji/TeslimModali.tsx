@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { paraYaz } from '../bicim';
 
 /**
  * SONUC TESLIMI (304). Film / CD / basili rapor kime verildi.
@@ -52,6 +53,8 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
   /** Düzeltilen teslim (null = yeni teslim). */
   const [duzeltilen, setDuzeltilen] = useState<Teslim | null>(null);
   const [onceki, setOnceki] = useState<Teslim | null>(null);
+  /** Hastanın tahsil edilmemiş borcu (kullanıcı 18.11.2026: teslimde kırmızı uyarı; teslimi engellemez). */
+  const [borc, setBorc] = useState<{ acikBorc: number; basvuru: number } | null>(null);
 
   const doldur = (t: Teslim | null) => {
     setDuzeltilen(t);
@@ -72,6 +75,9 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
     void api.radyolojiTeslimler(istemId)
       .then(l => { if (!iptal && l.length > 0) { setOnceki(l[0]); doldur(l[0]) } })
       .catch(() => { /* okunamazsa yeni teslim */ });
+    void api.radyolojiTeslimDurum(istemId)
+      .then(d => { if (!iptal) setBorc(d) })
+      .catch(() => { /* uyarı okunamazsa teslim yine yapılır */ });
     return () => { iptal = true };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [istemId]);
@@ -115,6 +121,12 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
+      {borc && Number(borc.acikBorc) > 0 && (
+        <div className="hata-kutusu" role="alert">
+          ⚠ {c('Hastanın tahsil edilmemiş borcu var')}: <b>{paraYaz(Number(borc.acikBorc))}</b>
+          {borc.basvuru > 1 ? ` (${borc.basvuru} ${c('başvuruda')})` : ''}. {c('Teslimden önce tahsilatı kontrol edin.')}
+        </div>
+      )}
       {duzeltilen && (
         <div className="bilgi-kutusu">
           {String(duzeltilen.teslimZamani ?? '').replace('T', ' ').slice(0, 16)} tarihli teslim

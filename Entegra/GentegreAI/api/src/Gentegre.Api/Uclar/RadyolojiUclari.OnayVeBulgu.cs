@@ -304,6 +304,28 @@ public static partial class RadyolojiUclari
             return Results.Ok(new { tamam = true });
         });
 
+        // HASTANIN AÇIK BORCU (kullanıcı 18.11.2026: "hastanın tahsil edilmemiş kalan borcu varsa teslimde kırmızı
+        //   şekilde uyarmalı"): istemin hastasının KESİN başvurularındaki hasta tarafı açık tahsilat - başvuru
+        //   ekranının "Açık Tahsilat · Hasta" kuralı (v_belge_satir_tahsilat: hasta provizyonu + ek katkı + SGK katılım
+        //   payı, tahsil edilen düşülmüş). Teslimi ENGELLEMEZ, uyarır.
+        grup.MapGet("/istem/{id:int}/teslim-durum", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var d = await baglanti.TekAsync("""
+                select coalesce(round(sum(t.hasta_provizyon_kalan + t.hasta_ek_katki_kalan + t.sgk_katilim_kalan), 2), 0),
+                       count(distinct t.belge_id) filter (where t.hasta_provizyon_kalan + t.hasta_ek_katki_kalan
+                                                                + t.sgk_katilim_kalan > 0)
+                  from public.radyoloji_istem i
+                  join public.belge b on b.taraf_id = i.hasta_id and b.tur = 19 and b.durum = 0
+                  join public.v_belge_satir_tahsilat t on t.belge_id = b.id
+                 where i.id = @p0
+                """, null, [id], o => new { acikBorc = o.GetDecimal(0), basvuru = o.GetInt64(1) }, iptal);
+            return Results.Ok(d ?? new { acikBorc = 0m, basvuru = 0L });
+        });
+
         grup.MapGet("/istem/{id:int}/teslimler", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {

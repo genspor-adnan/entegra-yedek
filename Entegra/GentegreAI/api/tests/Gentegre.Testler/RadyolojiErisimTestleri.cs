@@ -198,4 +198,40 @@ public sealed class RadyolojiErisimTestleri(ApiSunucuOlgusu api)
         var l = await h.GetFromJsonAsync<List<Dictionary<string, System.Text.Json.JsonElement>>>($"/api/radyoloji/istem/{a.Istem}/teslimler");
         Assert.Equal(1, l![0]["cdVerildi"].GetInt32());
     }
+
+    /// <summary>TESLİMDE BORÇ UYARISI (kullanıcı 18.11.2026): hastanın kesin başvurularındaki tahsil edilmemiş hasta payı.</summary>
+    [VtFact]
+    public async Task Teslim_durumu_hastanin_acik_borcunu_verir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var hasta = await HastaAsync(d);
+        var a = await IstemAsync(d, hasta, Merkez);
+        var rol = await d.RolAsync("teslimb", "radyoloji:gde", "radyoloji-istem:gde", "rad.teslim");
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
+        var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var h = api.Istemci(access, Merkez);
+        async Task<decimal> Borc() => (await h.GetFromJsonAsync<Dictionary<string, System.Text.Json.JsonElement>>(
+            $"/api/radyoloji/istem/{a.Istem}/teslim-durum"))!["acikBorc"].GetDecimal();
+
+        Assert.Equal(0m, await Borc());
+
+        var belge = await api.Veri.TekDegerAsync<int>(
+            "insert into public.belge (tur, taraf_id, sube_id, belge_tarihi, durum) values (19, @p0, @p1, now(), 0) returning id",
+            [hasta, Merkez]);
+        d.Temizle($"delete from public.belge where id = {belge}");
+        var satir = await api.Veri.TekDegerAsync<int>(
+            "insert into public.belge_satir (belge_id, sira, tur, aciklama, miktar, adet, birim_fiyat, tutar, kdv, sube_id) values (@p0, 1, 0, 'Ücret', 1, 1, 250, 250, 0, @p1) returning id",
+            [belge, Merkez]);
+        await api.Veri.CalistirAsync("""
+            insert into public.belge_satir_dagilim (belge_satir_id, hasta_provizyon, sgk, oss, hasta_ek_katki)
+            values (@p0, 250, 0, 0, 0)
+            on conflict (belge_satir_id) do update set hasta_provizyon = 250, sgk = 0, oss = 0, hasta_ek_katki = 0
+            """, [satir]);
+        Assert.Equal(250m, await Borc());
+
+        // Taslak başvuru borç sayılmaz.
+        await api.Veri.CalistirAsync("update public.belge set durum = 1 where id = @p0", [belge]);
+        Assert.Equal(0m, await Borc());
+    }
 }

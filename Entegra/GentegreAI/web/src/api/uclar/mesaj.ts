@@ -237,6 +237,10 @@ export const mesajUclari = {
   radyolojiTeslimDuzelt: (istemId: number, teslimId: number, govde: unknown) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/teslim/${teslimId}`, govde, 'PUT'),
 
+  /** Teslimde uyarı: istemin hastasının kesin başvurularındaki tahsil edilmemiş hasta payı. */
+  radyolojiTeslimDurum: (istemId: number) =>
+    istek<{ acikBorc: number; basvuru: number }>(`/api/radyoloji/istem/${istemId}/teslim-durum`),
+
   radyolojiTeslimler: (istemId: number) =>
     istek<Record<string, unknown>[]>(`/api/radyoloji/istem/${istemId}/teslimler`),
 
