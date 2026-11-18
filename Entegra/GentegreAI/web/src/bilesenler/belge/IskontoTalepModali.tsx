@@ -74,6 +74,12 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
    */
   const [topluTutar, setTopluTutar] = useState('');
   /**
+   * SATIR İSTENEN TUTAR (kullanıcı 18.11.2026: "satırlarda da Oran% soluna İstenen Tutar ekle.. o satır için hastanın
+   * ödeyeceği rakam.. Oran % ona göre çıksın"): anahtar -> girilen net. Oran = (tutar - istenen) / tutar, 4 ondalık;
+   * satırın oranı elle değişirse ya da toplu oran / net girilirse temizlenir - iki kaynak çelişmesin.
+   */
+  const [istenenler, setIstenenler] = useState<Record<number, string>>({});
+  /**
    * KALEM BAZLI ORAN (673): anahtar -> yuzde metni. Toplu oran kutusu bunlari
    * TOPLUCA doldurur, sonra tek tek degistirilebilir - muayeneye %20, tetkike
    * %5 vermek gercek bir istek. Bos ise toplu oran gecerli.
@@ -104,9 +110,20 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
   /** TAVAN, EN YUKSEK kalem oranıyla ölçülür - sınırı zorlayan kalem odur. */
   const oranSayi = secilenler.reduce((m, k) => Math.max(m, kalemOrani(k.anahtar)), 0);
 
+  /** Satırda istenen netten oran: (tutar - net) / tutar, 0-100 arası, 4 ondalık. */
+  const istenendenOran = (k: IskontoKalemSatiri, metin: string) => {
+    setIstenenler(x => ({ ...x, [k.anahtar]: metin }));
+    setTopluTutar('');
+    if (!metin.trim()) { setOranlar(x => { const y = { ...x }; delete y[k.anahtar]; return y }); setHata(null); return }
+    const net = Math.max(0, hamSayi(metin));
+    const oran = k.tutar > 0 ? Math.min(100, Math.max(0, Math.round((k.tutar - net) / k.tutar * 100 * 10000) / 10000)) : 0;
+    setOranlar(x => ({ ...x, [k.anahtar]: oran.toLocaleString('tr-TR', { maximumFractionDigits: 4, useGrouping: false }) }));
+    setHata(net > k.tutar ? `${k.ad}: istenen tutar satır tutarından (${paraYaz(k.tutar)}) büyük - indirim yok.` : null);
+  };
+
   /** Net tutardan indirimi bul, indirilebilir tabana oranla, "tümüne oran"a yaz (kalem oranları sıfırlanır). */
   const tutardanOran = (metin: string, taban: number) => {
-    setOranlar({});
+    setOranlar({}); setIstenenler({});
     if (!metin.trim() || !(taban > 0)) { setTopluOran(''); setHata(null); return }
     const net = Math.max(0, hamSayi(metin));
     const indirimTutari = toplam - net;
@@ -205,7 +222,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                        //   sayi "hepsi bu olsun" demektir; eski tek tek
                        //   degerler kalsaydi yazdigi oran islemiyor gorunurdu.
                        //   Elle oran yazilinca tutar kutusu bosalir - ikisi celismesin.
-                       setTopluOran(e.target.value); setTopluTutar(''); setOranlar({}); setHata(null);
+                       setTopluOran(e.target.value); setTopluTutar(''); setOranlar({}); setIstenenler({}); setHata(null);
                      }} />
               {' '}%
             </span>
@@ -216,6 +233,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                 <th className="check"></th>
                 <th>Hizmet</th>
                 <th className="hiza-sag" style={{ width: 110 }}>Tutar</th>
+                <th className="hiza-sag" style={{ width: 100 }}>{c('İstenen Tutar')}</th>
                 <th className="hiza-sag" style={{ width: 70 }}>{c('Oran %')}</th>
                 <th className="hiza-sag" style={{ width: 90 }}>İskonto</th>
                 <th className="hiza-sag" style={{ width: 110 }}>Net</th>
@@ -236,6 +254,14 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                     <td>{k.ad}</td>
                     <td className="hiza-sag">{para.format(k.tutar)}</td>
                     <td className="hiza-sag">
+                      {/* İSTENEN TUTAR: hastanın bu satır için ödeyeceği; boşken o anki net soluk görünür. */}
+                      <input className="hiza-sag" style={{ width: 84 }} inputMode="decimal"
+                             disabled={!acik} aria-label={`${c('İstenen Tutar')} ${k.ad}`}
+                             value={istenenler[k.anahtar] ?? ''}
+                             placeholder={acik ? para.format(k.tutar - ind) : ''}
+                             onChange={e => istenendenOran(k, e.target.value)} />
+                    </td>
+                    <td className="hiza-sag">
                       {/* KALEM BAZLI ORAN: bos birakilirsa toplu oran gecerli. */}
                       <input className="hiza-sag" style={{ width: 56 }}
                              disabled={!acik}
@@ -243,6 +269,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                                ? String(topluSayi) : '')}
                              onChange={e => {
                                setOranlar(x => ({ ...x, [k.anahtar]: e.target.value }));
+                               setIstenenler(x => { const y = { ...x }; delete y[k.anahtar]; return y });
                                setTopluTutar(''); setHata(null);
                              }} />
                     </td>
@@ -261,6 +288,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
               <tr className="genel">
                 <td></td><td>TOPLAM</td>
                 <td className="hiza-sag">{para.format(toplam)}</td>
+                <td></td>
                 <td className="hiza-sag">—</td>
                 <td className="hiza-sag">{para.format(indirim)}</td>
                 <td className="hiza-sag">{para.format(toplam - indirim)}</td>

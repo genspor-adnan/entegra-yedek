@@ -60,4 +60,18 @@ describe('İskonto Uygula › tümüne net tutar', () => {
     expect(oran.value).toBe('');
     expect(screen.getByText(/indirim yok/)).toBeTruthy();
   });
+
+  it('satırda istenen tutar o satırın oranını verir; oran elle yazılınca istenen boşalır', async () => {
+    const sonuc = vi.fn<(s: IskontoTalepSonucu) => void>();
+    ciz(sonuc);
+    const istenen = screen.getByLabelText('İstenen Tutar Kalem 1') as HTMLInputElement;
+    fireEvent.change(istenen, { target: { value: '150' } });     // 200 -> 150: %25
+    const oranlar = () => (screen.getAllByRole('textbox') as HTMLInputElement[])
+      .filter(i => !i.getAttribute('aria-label') && i.closest('tbody'));
+    expect(oranlar()[0].value).toBe('25');
+    await act(async () => { fireEvent.click(screen.getByText('✔ Uygula')) });
+    expect(sonuc.mock.calls[0][0].kalemler).toEqual([{ anahtar: 1, satirId: 1, oran: 25 }]);
+    fireEvent.change(oranlar()[0], { target: { value: '5' } });
+    expect(istenen.value).toBe('');
+  });
 });
