@@ -277,7 +277,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
    * tarafindaki kararla (135) ayni. Iptal edilenin ters kaydi var,
    * duzeltilmez.
    */
-  const kilitli = durum === 3;
+  // Kapanmis plan (4) da kilitli: gerceklesmeleriyle kapandi, sunucu duzeltmeyi reddeder (1367).
+  const kilitli = durum === 3 || durum === 4;
   // Turun sekil kurallari (plan mi, karsi hesapli mi, cek/senet mi...) kaydetme
   //   mantigiyla ayni yerden gelir: kasaKaydet.kasaTurBilgisi.
   const { planMi, karsiHesapli, donusum, cariVirman, cekSenetMi } =
@@ -330,6 +331,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   /** Ileri tarih yasagi icin ust sinir - dakikada bir tazelenmesine gerek yok. */
   const enGecAn = yerelAnMetni(new Date());
   const anaDoviz = doviz;
+  // EKSTRE DOVIZI SECENEKLERDE KALIR (para incelemesi 18.11.2026): hesap / doviz degisince eski secim (USD) TL
+  //   isleme takili kaliyordu - sunucu artik ucuncu dovizi reddeder (1367). Secenek disina dusen secim islem dovizine.
+  useEffect(() => {
+    if (ekstreDovizi !== anaDoviz && ekstreDovizi !== YEREL_PARA_VARSAYILAN) setEkstreDovizi(anaDoviz);
+  }, [anaDoviz, ekstreDovizi]);
   const dovizli = anaDoviz !== 'TL';
   const ekleyebilir = yetki('kasa_islem', 'ekle');
 

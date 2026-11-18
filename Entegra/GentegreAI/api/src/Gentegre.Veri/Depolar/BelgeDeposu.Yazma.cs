@@ -669,18 +669,21 @@ public sealed partial class BelgeDeposu
         var dovizGenel = dip.Where(d => d.Tur == DipToplamTuru.GenelToplam).Sum(d => d.DovizTutari);
         await using (var kurKomut = new NpgsqlCommand(
             "select coalesce(nullif(btrim(rapor_dovizi), ''), ''), " +
-            "coalesce(nullif(btrim(belge_dovizi), ''), ''), coalesce(doviz_kuru, 1) " +
+            "coalesce(nullif(btrim(belge_dovizi), ''), ''), coalesce(doviz_kuru, 1), " +
+            "coalesce(nullif(btrim(rapor_dovizi), ''), '') <> '' " +
+            "  and public.fn_doviz_iso(btrim(rapor_dovizi)) <> public.fn_doviz_iso(public.fn_yerel_para()) " +
             "from public.belge where id = @p0", baglanti, islem))
         {
             kurKomut.Parameters.AddWithValue("p0", belgeId);
             await using var o = await kurKomut.ExecuteReaderAsync(iptal);
             if (await o.ReadAsync(iptal))
             {
-                var rapor = o.GetString(0);
-                var belgeDoviz = o.GetString(1);
                 var kur = o.GetDecimal(2);
-                if (rapor.Length > 0
-                    && !rapor.Equals(belgeDoviz, StringComparison.OrdinalIgnoreCase) && kur > 0)
+                // RAPOR DOVIZI YABANCI (para incelemesi 18.11.2026): kosul "rapor <> belge dovizi"ydi - USD belge + USD
+                //   rapor (ikisi de yabanci) "yerel" dalina dusuyor, karsilik 0 yaziliyordu; mali_hareket TL genel
+                //   toplami USD etiketiyle yaziyordu (1000 USD'lik faturada cariye 48.000 USD borc). Kural istemciyle
+                //   ayni (KalemSekmesi.raporDovizli): rapor dovizi yerel para degilse karsilik = genel / kur.
+                if (o.GetBoolean(3) && kur > 0)
                     dovizGenel = Math.Round(genel / kur, 2, MidpointRounding.ToEven);
                 else
                     // RAPOR DOVIZI YEREL: ayri bir "doviz karsiligi" YOKTUR.

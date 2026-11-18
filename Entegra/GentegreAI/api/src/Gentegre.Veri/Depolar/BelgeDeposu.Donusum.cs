@@ -134,6 +134,22 @@ public sealed partial class BelgeDeposu
         // -------------------------- 2) kaynak satirlari KILITLE + kalan kontrol ----
         var satirlar = new List<Dictionary<string, JsonElement>>();
         var idler = secilen.Select(s => s.SatirId).ToArray();
+        // AYNI SATIR IKI KEZ (para incelemesi 18.11.2026): [{5},{5}] ikisi de ayni okunmus kalana bakip geciyordu -
+        //   SGK payi iki kez tahakkuk ediyordu.
+        if (idler.Distinct().Count() != idler.Length)
+            throw GentegreHatasi.Dogrulama("Aynı satır iki kez seçilemez.",
+                new AlanHatasi("satirlar", "Aynı satır iki kez seçilemez."));
+
+        // ONCE KILIT, SONRA OKUMA (para incelemesi 18.11.2026): `for update of s` kilit beklendikten sonra yalniz `s`yi
+        //   tazeliyor, birlesik dagilim satiri (dg_*_kapatilan) eski anlik goruntuden geliyordu - ayni payi ayni anda
+        //   donusturen ikinci istek "kapatilan 0" gorup ikinci tahakkuku kesiyordu. Kilit ayri ifadeyle alinir;
+        //   asagidaki okuma (READ COMMITTED) kilit sonrasi yeni goruntuyle calisir.
+        await using (var kilit = new NpgsqlCommand(
+            "select 1 from public.belge_satir where id = any(@p0) order by id for update", baglanti, islem))
+        {
+            kilit.Parameters.AddWithValue("p0", idler);
+            await kilit.ExecuteNonQueryAsync(iptal);
+        }
 
         var kaynakSatirlar = new Dictionary<int, IDictionary<string, object?>>();
         await using (var komut = new NpgsqlCommand("""

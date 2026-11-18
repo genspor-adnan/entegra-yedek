@@ -84,6 +84,11 @@ public static class KasaUclari
         if (azami is { } tavan) kalanTutar = Math.Min(kalanTutar, tavan);
         if (kalanTutar <= 0) return 0;
 
+        // BELGE BASINA SIRA (para incelemesi 18.11.2026): acik tutarlar kilitsiz okunuyordu - ayni basvuruya ayni anda
+        //   iki tahsilat / mahsup ikisi de ayni acigi gorup dagitiyordu. Tetik (1367) fazlayi reddeder; bu kilit
+        //   ikincinin hata almak yerine guncel acigi gormesini saglar.
+        await baglanti.CalistirAsync("select pg_advisory_xact_lock(hashtext('belge_tahsilat'), @p0)", tx, [belgeId], iptal);
+
         var acik = await baglanti.ListeAsync("""
             select t.satir_id as "satirId",
                    t.hasta_provizyon_kalan as "hastaProvizyonKalan",
@@ -432,6 +437,9 @@ public static class KasaUclari
                 }
             }
 
+            // BELGE BASINA SIRA (para incelemesi 18.11.2026): bkz. AvansDagitAsync.
+            await baglanti.CalistirAsync("select pg_advisory_xact_lock(hashtext('belge_tahsilat'), @p0)", tx, [belgeId], iptal);
+
             await baglanti.CalistirAsync(
                 "delete from public.kasa_islem_dagitim where kasa_islem_id = @p0",
                 tx, [id], iptal);
@@ -683,6 +691,10 @@ public static class KasaUclari
                  where bs.id = d.belge_satir_id
                    and d.kasa_islem_id = @p0 and bs.belge_id = @p1
                 """, tx, [istek.KasaIslemId, istek.BelgeId], iptal);
+
+            // SGK KATILIM EMANETI (para incelemesi 18.11.2026): mahsupta katilim payi (pay 5) varsa hastadan SGK'ya
+            //   emanet virmani yazilmisti; geri alinca virman yerinde kaliyordu. Kalan dagitima gore tazelenir.
+            await baglanti.CalistirAsync("select public.fn_sgk_katilim_emanet_yaz(@p0)", tx, [istek.KasaIslemId], iptal);
 
             await log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, istek.KasaIslemId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

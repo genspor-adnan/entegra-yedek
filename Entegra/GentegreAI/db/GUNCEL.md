@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (727 ad, 202 tanesi birden cok dosyada)
+## Fonksiyonlar (727 ad, 203 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -299,9 +299,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kasa_dagitim_iade` | `660_iade_satir_tahsil.sql` | — |
 | `fn_kasa_gun_kapali` | `1030_kasa_gun_sonu.sql` | — |
 | `fn_kasa_gun_kilidi` | `1085_aktarim_kasa.sql` | 1030_kasa_gun_sonu.sql |
-| `fn_kasa_islem_bacak_uret` | `393_bacak_belge_no.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql |
+| `fn_kasa_islem_bacak_uret` | `1367_kasa_ekstre_plan_dagitim_kilidi.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql, 096_kasa_bacak_rol_kontrol.sql, 139_kasa_ekstre_dovizi.sql, 393_bacak_belge_no.sql |
 | `fn_kasa_islem_dogrula` | `085_fn_kasa_f3.sql` | 076_fn_kasa.sql |
-| `fn_kasa_islem_duzelt_hazirla` | `148_kasa_islem_duzelt.sql` | — |
+| `fn_kasa_islem_duzelt_hazirla` | `1367_kasa_ekstre_plan_dagitim_kilidi.sql` | 148_kasa_islem_duzelt.sql |
 | `fn_kasa_islem_fisle` | `148_kasa_islem_duzelt.sql` | 076_fn_kasa.sql |
 | `fn_kasa_islem_iptal` | `152_numara_sablonu.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
 | `fn_kasa_islem_kesinlestir` | `152_numara_sablonu.sql` | 076_fn_kasa.sql, 085_fn_kasa_f3.sql |
@@ -623,7 +623,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `tg_hizmet_radyoloji_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
-| `tg_kasa_dagitim_kontrol` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql, 471_dagilim_kapanma_tahsil.sql |
+| `tg_kasa_dagitim_kontrol` | `1367_kasa_ekstre_plan_dagitim_kilidi.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql, 471_dagilim_kapanma_tahsil.sql, 660_iade_satir_tahsil.sql |
 | `tg_kasa_dagitim_sil_tazele` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_dagitim_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kasa_islem_avans_iade` | `780_avans_iadesi.sql` | — |

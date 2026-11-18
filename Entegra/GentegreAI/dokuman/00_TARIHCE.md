@@ -7,6 +7,25 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Para incelemesi (4-10): döviz, kasa düzeltme, eşzamanlı dağıtım / dönüşüm, emanet (1367)
+
+- (4) Belge cari hareketi: rapor dövizi YABANCIYSA (belge dövizi aynı olsa da) karşılık `genel / kur`. USD belge + USD
+  rapor "yerel" dalına düşüp `doviz_tutari = 0` alıyor, cariye TL genel toplam USD etiketiyle yazılıyordu.
+- (5) `fn_kasa_islem_bacak_uret`: ekstre dövizi işlem dövizi ya da yerel para olmalı (139); üçüncü döviz yalnız etiketi
+  değiştiriyordu (4800 TL → 4800 USD). Kasa kartında hesap / döviz değişince ekstre dövizi seçenek dışında kalmaz.
+- (6) `fn_kasa_islem_duzelt_hazirla`: gerçekleşmiş tahsilat düzeltilirken planın `gerceklesen_tutar`'ı geri alınır
+  (400 → 450 düzeltme plana 850 yazıyordu); kapanmış plan (4) düzeltilmez (taslağa düşüyordu), kartta kilitli.
+  Düzeltilen tutar satır dağıtımından küçük olamaz; SGK katılım emaneti yeniden uzlaşır.
+- (7) PUT `/api/kasa-islem/{id}` `taslak`/`plan` ile gerçekleşmiş işlem taslağa çekilemez (`kasa.kesinlestir` ve
+  `kasa.iptal` atlanıp tahsilat ters kayıtsız defterden çıkıyordu).
+- (8) Aynı satır payına eşzamanlı tahsilat / mahsup: `tg_kasa_dagitim_kontrol` satırı kilitler (fazlası reddedilir),
+  otomatik dağıtım ve avans mahsubu belge başına sıraya girer (`pg_advisory_xact_lock`).
+- (9) Dönüşüm: kaynak satırlar ÖNCE kilitlenir sonra okunur (birleşik dağılım satırı eski görüntüden geliyordu - aynı
+  SGK payı iki kez tahakkuk); aynı satır iki kez seçilemez (400).
+- (10) Tahsilat iptali ve avans mahsubu geri alma SGK katılım emanetini (kaynak 473) uzlaştırır - virman canlı kalıyordu.
+- Mevcut veride etkilenen kayıt yok (gentegre_ai, KOSUYOLU: üçüncü döviz ekstresi 0, yabancı rapor = belge dövizi 0).
+- Test: `ParaKasaIncelemesiTestleri`.
+
 ## 18.11.2026 — Hasta verisi incelemesi (1-5) ve para incelemesi (1-3): dip toplam 1366
 
 Hasta verisi:

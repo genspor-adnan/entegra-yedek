@@ -226,6 +226,16 @@ public sealed partial class KasaDeposu
         //   alir: bacaklar ve fis SATIRLARI silinir, durum taslaga cekilir;
         //   asagidaki normal akis yeniden uretir. Fis NUMARASI korunur -
         //   yevmiye sirasi bozulmasin. Kapanmis donem motorda reddedilir.
+        // GERCEKLESMIS ISLEM TASLAGA / PLANA CEKILEMEZ (para incelemesi 18.11.2026): PUT {taslak:true}
+        //   `kasa.kesinlestir` yetkisini atliyor, asagidaki hazirlik gerceklesmis tahsilatin bacaklarini ve fis
+        //   satirlarini silip TASLAK birakiyordu - para ters kayitsiz, `kasa.iptal` yetkisi olmadan defterden
+        //   cikiyordu; taslak da silinebiliyordu. Gerceklesmis islem ya duzeltilip yeniden kesinlesir ya iptal edilir.
+        //   Kapanmis plan (4) da duzeltilmez (motor reddeder).
+        if (durum >= KasaDurum.Gerceklesti && (secenekler.Taslak || secenekler.Plan) && durum != KasaDurum.PlanKapandi)
+            throw GentegreHatasi.IsKurali(
+                "Gerçekleşmiş işlem taslağa çekilemez - düzeltip kaydedin ya da iptal edin.");
+
+        var duzeltme = durum == KasaDurum.Gerceklesti;
         if (durum >= KasaDurum.Gerceklesti)
         {
             await DuzeltmeSiniriKontrolAsync(baglanti, tx, id, iptal, baglam.ZamanDilimi);
@@ -262,6 +272,24 @@ public sealed partial class KasaDeposu
         if (!secenekler.Taslak && !secenekler.Plan)
             await MotorAsync(baglanti, tx, "select public.fn_kasa_islem_kesinlestir(@p0, @p1)",
                              new object?[] { id, baglam.KullaniciId }, iptal);
+
+        if (duzeltme)
+        {
+            // DUZELTILEN TUTAR DAGITIMI KAPSAMALI (para incelemesi 18.11.2026): satirlara 500 dagitilmis tahsilat
+            //   300'e cekilince satirlar hala 500 tahsil edilmis gorunuyordu - tetik yalniz dagitim yazilirken bakar.
+            await using (var k = baglanti.Komut("""
+                select abs(coalesce(sum(d.tutar), 0)) > abs(coalesce(max(k.tutar), 0)) + 0.005
+                  from public.kasa_islem k
+                  left join public.kasa_islem_dagitim d on d.kasa_islem_id = k.id
+                 where k.id = @p0
+                """, tx, id))
+                if (await k.ExecuteScalarAsync(iptal) is true)
+                    throw GentegreHatasi.IsKurali(
+                        "İşlemin satırlara dağıtılan tutarı yeni tutardan büyük - önce dağıtımı düzeltin.");
+            // SGK katilim emaneti (473) yeni tutara / dagitima gore tazelenir.
+            await MotorAsync(baglanti, tx, "select public.fn_sgk_katilim_emanet_yaz(@p0)",
+                             new object?[] { id }, iptal);
+        }
 
         await _log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, id,
             baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -304,6 +332,11 @@ public sealed partial class KasaDeposu
             komut.Parameters.AddWithValue("p3", sebep ?? "");
             yeniId = Convert.ToInt32(await CalistirAsync(komut, iptal));
         }
+
+        // SGK KATILIM EMANETI (para incelemesi 18.11.2026): tahsilat iptal edilince hastadan SGK'ya emanet virmani
+        //   (kaynak_tur 473, ayri gerceklesmis islem) yerinde kaliyordu - para alinmadan hasta borclu, SGK alacakli.
+        //   Fonksiyon kendini uzlastirir: iptal edilmis islemin emanetini iptal eder.
+        await MotorAsync(baglanti, tx, "select public.fn_sgk_katilim_emanet_yaz(@p0)", new object?[] { id }, iptal);
 
         await _log.YazAsync(baglanti, tx, LogIslemi.Degistir, LogTabloKasa, id,
             baglam.KullaniciId, baglam.SubeId, baglam.Ip,
