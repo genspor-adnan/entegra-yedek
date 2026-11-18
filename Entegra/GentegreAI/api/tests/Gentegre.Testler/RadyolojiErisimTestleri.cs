@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 
 namespace Gentegre.Testler;
@@ -156,5 +156,46 @@ public sealed class RadyolojiErisimTestleri(ApiSunucuOlgusu api)
             (await p.PostAsJsonAsync("/api/radyoloji/istem", Istek(disari, null))).StatusCode);
         Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
             "select count(*)::int from public.radyoloji_istem where hasta_id in (@p0, @p1)", [benim, disari]));
+    }
+
+    /// <summary>
+    /// TESLİM DÜZELTME (kullanıcı 18.11.2026): yanlış yazılan teslim alan / kalem düzeltilir, zaman değişmez, değişiklik
+    /// istem loguna düşer; başka istemin teslim kimliğiyle düzeltme 404, okuma ucu kalemleri döndürür.
+    /// </summary>
+    [VtFact]
+    public async Task Teslim_bilgisi_duzeltilir_zaman_degismez_loglanir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var hasta = await HastaAsync(d);
+        var a = await IstemAsync(d, hasta, Merkez);
+        var b = await IstemAsync(d, hasta, Merkez);
+        var teslim = await api.Veri.TekDegerAsync<int>("""
+            insert into public.radyoloji_teslim (istem_id, tur, teslim_zamani, alan_ad, rapor_verildi)
+            values (@p0, 2, '2026-11-18 10:00+00', 'Yanlis Ad', 1) returning id
+            """, [a.Istem]);
+        d.Temizle($"delete from public.islem_log where tablo_id = 940 and kayit_id in ({a.Istem}, {b.Istem})");
+        var rol = await d.RolAsync("teslim", "radyoloji:gde", "radyoloji-istem:gde", "rad.teslim");
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
+        var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var h = api.Istemci(access, Merkez);
+        var govde = new { tur = 2, alanAd = "Doğru Ad", alanYakinlik = "Eşi", kimlikDogrulandi = 1, aciklama = "",
+                          raporVerildi = 1, filmVerildi = 0, cdVerildi = 1, dijitalVerildi = 0 };
+
+        var y = await h.PutAsJsonAsync($"/api/radyoloji/istem/{a.Istem}/teslim/{teslim}", govde);
+        Assert.True(y.IsSuccessStatusCode, await y.Content.ReadAsStringAsync());
+        Assert.Equal("Doğru Ad/Eşi/1/1/2026-11-18 10:00", await api.Veri.TekDegerAsync<string>("""
+            select alan_ad || '/' || alan_yakinlik || '/' || rapor_verildi || '/' || cd_verildi || '/'
+                   || to_char(teslim_zamani at time zone 'UTC', 'YYYY-MM-DD HH24:MI')
+              from public.radyoloji_teslim where id = @p0
+            """, [teslim]));
+        Assert.Equal(1L, await api.Veri.TekDegerAsync<long>(
+            "select count(*) from public.islem_log where tablo_id = 940 and kayit_id = @p0 and islem_tipi = 2", [a.Istem]));
+        // Başka istemin yolundan bu teslim düzeltilemez.
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await h.PutAsJsonAsync($"/api/radyoloji/istem/{b.Istem}/teslim/{teslim}", govde)).StatusCode);
+        // Okuma ucu kalemleri döndürür (modal onlarla dolar).
+        var l = await h.GetFromJsonAsync<List<Dictionary<string, System.Text.Json.JsonElement>>>($"/api/radyoloji/istem/{a.Istem}/teslimler");
+        Assert.Equal(1, l![0]["cdVerildi"].GetInt32());
     }
 }

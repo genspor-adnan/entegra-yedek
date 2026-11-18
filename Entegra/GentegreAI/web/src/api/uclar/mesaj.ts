@@ -233,6 +233,10 @@ export const mesajUclari = {
   radyolojiTeslim: (istemId: number, govde: unknown) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/teslim`, govde),
 
+  /** Teslim kaydını düzeltir (teslim alan / yakınlık / kimlik / açıklama / kalemler; zaman değişmez). */
+  radyolojiTeslimDuzelt: (istemId: number, teslimId: number, govde: unknown) =>
+    gonder<{ tamam: boolean }>(`/api/radyoloji/istem/${istemId}/teslim/${teslimId}`, govde, 'PUT'),
+
   radyolojiTeslimler: (istemId: number) =>
     istek<Record<string, unknown>[]>(`/api/radyoloji/istem/${istemId}/teslimler`),
 

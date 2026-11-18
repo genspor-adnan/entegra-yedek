@@ -1290,6 +1290,9 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
         //   Oturumlari cift tiklayinca duzenle acilsin") - "Duzenle"
         //   aksiyonuyla ayni davranis, akis tek yerde.
         else if (tanim.kaynak === 'bankoOturum') setAcikOturumId(Number(satir.id));
+        // RADYOLOJİ RAPOR TESLİM (kullanıcı 18.11.2026): çift tık istem kartı değil TESLİM modalı - teslimi varsa son
+        //   teslimle dolu açılır, yanlış girilen bilgi düzeltilir. İstem kartı sağ tık / "İstemi Aç"ta.
+        else if (tanim.kaynak === 'radyoloji-teslim') void aksiyon('radyoloji.teslim', satir, []);
         // Gelen belgenin KARTI YOK: cift tik gonderenin goruntusunu acar.
         else if (tanim.kaynak === 'gelen-belge')
           void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));

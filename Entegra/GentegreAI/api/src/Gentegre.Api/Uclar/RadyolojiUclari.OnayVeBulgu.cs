@@ -261,6 +261,49 @@ public static partial class RadyolojiUclari
             return Results.Ok(new { tamam = true });
         });
 
+        // TESLİM DÜZELTME (kullanıcı 18.11.2026: "teslim kuyruğunda çift tıklayınca teslim etme bilgisi olan modal
+        //   açılmalı ki yanlış yazmışsam düzeltebileyim"): teslim alan / yakınlık / kimlik / açıklama / kalemler
+        //   düzeltilir; teslim ZAMANI ve teslim eden değişmez (olayın kendisi). Değişiklik alan bazlı istem loguna.
+        grup.MapPut("/istem/{id:int}/teslim/{teslimId:int}", async (
+            int id, int teslimId, TeslimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.teslim");
+            if (string.IsNullOrWhiteSpace(istek.AlanAd))
+                throw GentegreHatasi.Dogrulama("Teslim alan kişi yazılmalı.",
+                    new AlanHatasi("alanAd", "Zorunlu."));
+
+            const string teslimSql = """
+                select tur, alan_ad as "teslimAlan", alan_yakinlik as "teslimYakinlik",
+                       kimlik_dogrulandi as "teslimKimlik", aciklama as "teslimAciklama",
+                       rapor_verildi as "teslimRapor", film_verildi as "teslimFilm",
+                       cd_verildi as "teslimCd", dijital_verildi as "teslimDijital"
+                  from public.radyoloji_teslim where id = @p0 and istem_id = @p1
+                """;
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var eski = await baglanti.TekAsync(teslimSql + " for update", islem, [teslimId, id],
+                                                OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Teslim kaydı bulunamadı.");
+            await baglanti.CalistirAsync("""
+                update public.radyoloji_teslim
+                   set tur = @p2, alan_ad = @p3, alan_yakinlik = @p4, kimlik_dogrulandi = @p5, aciklama = @p6,
+                       rapor_verildi = coalesce(@p7, rapor_verildi), film_verildi = coalesce(@p8, film_verildi),
+                       cd_verildi = coalesce(@p9, cd_verildi), dijital_verildi = coalesce(@p10, dijital_verildi)
+                 where id = @p0 and istem_id = @p1
+                """, islem,
+                [teslimId, id, istek.Tur, Kisalt(istek.AlanAd.Trim(), 120), Kisalt(istek.AlanYakinlik ?? "", 60),
+                 istek.KimlikDogrulandi, Kisalt(istek.Aciklama ?? "", 300),
+                 istek.RaporVerildi, istek.FilmVerildi, istek.CdVerildi, istek.DijitalVerildi], iptal);
+            var yeni = await baglanti.TekAsync(teslimSql, islem, [teslimId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (yeni is not null && LogDeposu.Fark(eski, yeni) is { } fark)
+                await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloIstem, id,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { tamam = true });
+        });
+
         grup.MapGet("/istem/{id:int}/teslimler", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -271,7 +314,9 @@ public static partial class RadyolojiUclari
                 select t.id, t.tur, t.teslim_zamani as "teslimZamani",
                        coalesce(public.fn_taraf_ad(p.unvan, p.ad, p.soyad)::varchar(120), '') as "teslimEden", t.alan_ad as "alanAd",
                        t.alan_yakinlik as "alanYakinlik",
-                       t.kimlik_dogrulandi as "kimlikDogrulandi", t.aciklama
+                       t.kimlik_dogrulandi as "kimlikDogrulandi", t.aciklama,
+                       t.rapor_verildi as "raporVerildi", t.film_verildi as "filmVerildi",
+                       t.cd_verildi as "cdVerildi", t.dijital_verildi as "dijitalVerildi"
                   from public.radyoloji_teslim t
                   left join public.taraf p on p.id = t.teslim_eden_id
                  where t.istem_id = @p0 order by t.id desc

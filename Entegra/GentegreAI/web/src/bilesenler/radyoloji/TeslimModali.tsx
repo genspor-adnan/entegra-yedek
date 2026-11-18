@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
@@ -18,6 +18,14 @@ import { c } from '../../dil/ceviri';
  * verilir - tek "tür" secimi bunu anlatamiyordu. Eski `tur` kolonu geriye
  * donuk uyumluluk icin ilk isaretli kalemden turetilir.
  */
+/**
+ * DÜZELTME KİPİ (kullanıcı 18.11.2026: "teslim kuyruğunda çift tıklayınca teslim etme bilgisi olan modal açılmalı ki
+ * yanlış yazmışsam düzeltebileyim"): istemin daha önce teslimi varsa modal SON TESLİMLE dolu açılır ve kayıt onu
+ * düzeltir (PUT; teslim zamanı değişmez). Ayrı bir teslim (ör. CD sonradan verildi) "＋ Yeni teslim" ile girilir.
+ */
+type Teslim = Record<string, unknown>;
+const KALEM_ALANI: Record<string, string> = { rapor: 'raporVerildi', film: 'filmVerildi', cd: 'cdVerildi', dijital: 'dijitalVerildi' };
+
 const KALEMLER = [
   { anahtar: 'rapor',   ad: 'Rapor (basılı)', tur: 2 },
   { anahtar: 'film',    ad: 'Film',           tur: 4 },
@@ -41,6 +49,32 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
   const [aciklama, setAciklama] = useState('');
   const [hata, setHata] = useState('');
   const [kaydediyor, setKaydediyor] = useState(false);
+  /** Düzeltilen teslim (null = yeni teslim). */
+  const [duzeltilen, setDuzeltilen] = useState<Teslim | null>(null);
+  const [onceki, setOnceki] = useState<Teslim | null>(null);
+
+  const doldur = (t: Teslim | null) => {
+    setDuzeltilen(t);
+    if (t) {
+      setSecili(Object.fromEntries(KALEMLER.map(k => [k.anahtar, Number(t[KALEM_ALANI[k.anahtar]]) === 1])));
+      setAlanAd(String(t.alanAd ?? ''));
+      setYakinlik(String(t.alanYakinlik ?? ''));
+      setKimlik(Number(t.kimlikDogrulandi) === 1);
+      setAciklama(String(t.aciklama ?? ''));
+    } else {
+      setSecili({ rapor: true, film: false, cd: !!cdIstendi, dijital: false });
+      setAlanAd(''); setYakinlik(''); setKimlik(true); setAciklama('');
+    }
+  };
+
+  useEffect(() => {
+    let iptal = false;
+    void api.radyolojiTeslimler(istemId)
+      .then(l => { if (!iptal && l.length > 0) { setOnceki(l[0]); doldur(l[0]) } })
+      .catch(() => { /* okunamazsa yeni teslim */ });
+    return () => { iptal = true };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [istemId]);
 
   const kaydet = async () => {
     setHata('');
@@ -49,7 +83,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
     if (isaretli.length === 0) { setHata('En az bir teslim kalemi seçilmeli.'); return }
     setKaydediyor(true);
     try {
-      await api.radyolojiTeslim(istemId, {
+      const govde = {
         // Eski tek-deger kolonu: ilk isaretli kalem (geriye donuk uyum).
         tur: isaretli[0].tur,
         raporVerildi:   secili.rapor ? 1 : 0,
@@ -58,24 +92,35 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
         dijitalVerildi: secili.dijital ? 1 : 0,
         alanAd, alanYakinlik: yakinlik,
         kimlikDogrulandi: kimlik ? 1 : 0, aciklama,
-      });
-      mesaj('Teslim kaydedildi.');
+      };
+      if (duzeltilen) await api.radyolojiTeslimDuzelt(istemId, Number(duzeltilen.id), govde);
+      else await api.radyolojiTeslim(istemId, govde);
+      mesaj(duzeltilen ? 'Teslim bilgisi düzeltildi.' : 'Teslim kaydedildi.');
       onTamam?.();
       onKapat();
     } catch (h) { setHata(hataMetni(h)) } finally { setKaydediyor(false) }
   };
 
   return (
-    <Modal baslik={`Sonuç Teslimi${accessionNo ? ` — ${accessionNo}` : ''}`} dar
+    <Modal baslik={`${duzeltilen ? 'Teslim Düzeltme' : 'Sonuç Teslimi'}${accessionNo ? ` — ${accessionNo}` : ''}`} dar
            onKapat={onKapat}
            alt={
              <>
                <button className="d onay" disabled={kaydediyor}
-                       onClick={() => void kaydet()}>✔ Teslim Et</button>
+                       onClick={() => void kaydet()}>{duzeltilen ? '✔ Düzeltmeyi Kaydet' : '✔ Teslim Et'}</button>
+               {onceki && (duzeltilen
+                 ? <button className="d" onClick={() => doldur(null)}>＋ Yeni teslim</button>
+                 : <button className="d" onClick={() => doldur(onceki)}>✎ Son teslimi düzelt</button>)}
                <button className="d" onClick={onKapat}>✖ {c('Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
+      {duzeltilen && (
+        <div className="bilgi-kutusu">
+          {String(duzeltilen.teslimZamani ?? '').replace('T', ' ').slice(0, 16)} tarihli teslim
+          {duzeltilen.teslimEden ? ` (${String(duzeltilen.teslimEden)})` : ''} düzeltiliyor - teslim zamanı değişmez.
+        </div>
+      )}
       <div className="alan-izgara tek-sutun">
         <label className="alan">
           <span className="etiket zorunlu-isaret">{c('Teslim edilen')}</span>
