@@ -15,37 +15,49 @@ import { c } from '../dil/ceviri';
 // Adlar (17.11.2026): "Hasta Ayarları" / "Başvuru Ayarları".
 const BASLIK = { hasta: 'Hasta Ayarları', basvuru: 'Başvuru Ayarları' } as const;
 
+type Yontem = 1 | 2 | 3;
+
 /**
  * İSKONTO ONAY YÖNTEMİ (1375, kullanıcı 18.11.2026: "sözlü onay / dijital onay opsiyonlu olabilmeli"). ŞUBE ayarı -
- * kurum geneli `referans` değil, aktif şubenin kaydı (sube.iskonto_onay_yontemi); seçince hemen yazılır.
+ * kurum geneli `referans` değil, aktif şubenin kaydı (sube.iskonto_onay_yontemi).
+ * SAYFANIN KAYDET'İNE BAĞLI (kullanıcı: "Onay yöntemi seçtim ama kaydet aktif değil"): seçim taslaktır, başlıktaki
+ * Kaydet diğer ayarlarla birlikte yazar; vazgeç geri alır.
  */
-function IskontoOnayYontemi() {
-  const [yontem, setYontem] = useState<1 | 2 | 3 | null>(null);
+function useIskontoOnayYontemi(etkin: boolean) {
+  const [kayitli, setKayitli] = useState<Yontem | null>(null);
+  const [taslak, setTaslak] = useState<Yontem | null>(null);
   const [hata, setHata] = useState('');
-  const [bilgi, setBilgi] = useState('');
+  const [kaydediyor, setKaydediyor] = useState(false);
   useEffect(() => {
-    api.iskontoOnayYontemi().then(y => setYontem(y.yontem)).catch(h => setHata(hataMetni(h)));
-  }, []);
-  const degis = async (v: 1 | 2 | 3) => {
-    setHata(''); setBilgi('');
-    try { await api.iskontoOnayYontemiYaz(v); setYontem(v); setBilgi(c('Kaydedildi.')) }
-    catch (h) { setHata(hataMetni(h)) }
+    if (!etkin) return;
+    api.iskontoOnayYontemi().then(y => { setKayitli(y.yontem); setTaslak(y.yontem) }).catch(h => setHata(hataMetni(h)));
+  }, [etkin]);
+  const degisti = taslak !== null && kayitli !== null && taslak !== kayitli;
+  const kaydet = async () => {
+    if (!degisti || taslak === null) return true;
+    setHata(''); setKaydediyor(true);
+    try { await api.iskontoOnayYontemiYaz(taslak); setKayitli(taslak); return true }
+    catch (h) { setHata(hataMetni(h)); return false }
+    finally { setKaydediyor(false) }
   };
+  return { taslak, setTaslak, hata, degisti, kaydet, kaydediyor, vazgec: () => setTaslak(kayitli) };
+}
+
+function IskontoOnayYontemi({ y }: { y: ReturnType<typeof useIskontoOnayYontemi> }) {
   return (
     <>
       <div className="alan-izgara ayar-formu">
         <label className="alan">
           <span className="etiket">{c('İskonto Onay Yöntemi (bu şube)')}</span>
-          <select aria-label={c('İskonto Onay Yöntemi')} value={yontem ?? ''} disabled={yontem === null}
-                  onChange={e => void degis(Number(e.target.value) as 1 | 2 | 3)}>
+          <select aria-label={c('İskonto Onay Yöntemi')} value={y.taslak ?? ''} disabled={y.taslak === null}
+                  onChange={e => y.setTaslak(Number(e.target.value) as Yontem)}>
             <option value="1">{c('Dijital onay (onaya gönder)')}</option>
             <option value="2">{c('Sözlü onay (banko yöneticiyi seçer)')}</option>
             <option value="3">{c('İkisi de (banko seçer)')}</option>
           </select>
         </label>
       </div>
-      {hata && <div className="hata-kutusu">{hata}</div>}
-      {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
+      {y.hata && <div className="hata-kutusu">{y.hata}</div>}
       <div className="not">
         <b>{c('Sözlü onayda')}</b> {c('banko, limitini aşan iskontoyu onaylayan yöneticiyi seçip gerekçe yazarak hemen uygular; kayıt "sözlü onay" damgasıyla yöneticinin adına geçer, yöneticinin zilinde bildirim açılır ve İskonto İcmali\'nde ayrı görünür. Seçilebilen yöneticiler İskonto Onay Akışı\'nda onay verebilenlerdir.')}
       </div>
@@ -55,8 +67,17 @@ function IskontoOnayYontemi() {
 
 export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'basvuru' }) {
   const aktif = bolum;
-  const ayar = useAyarlar({ taslakli: true });
-  const { ayarlar, yukleniyor, hata, bilgi, yaz } = ayar;
+  const temel = useAyarlar({ taslakli: true });
+  const { ayarlar, yukleniyor, hata, bilgi, yaz } = temel;
+  const yontem = useIskontoOnayYontemi(bolum === 'basvuru');
+  // Başlığın Kaydet / değişti / vazgeç'i onay yöntemini de kapsar - ikisi tek kayıt gibi davranır.
+  const ayar = {
+    ...temel,
+    degisti: temel.degisti || yontem.degisti,
+    kaydediyor: temel.kaydediyor || yontem.kaydediyor,
+    kaydet: async () => (!temel.degisti || await temel.kaydet()) && await yontem.kaydet(),
+    vazgec: () => { temel.vazgec(); yontem.vazgec() },
+  };
 
   return (
     <>
@@ -195,7 +216,7 @@ export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'ba
             oranda hangi kademeye gideceği ise <b>Onay Akışları</b> ekranındaki
             <b>{c('Eşik (≥)')}</b> alanıdır.
           </div>
-          <IskontoOnayYontemi />
+          <IskontoOnayYontemi y={yontem} />
         </div>
         {/* PROTOKOL NO gridi de 634'te Hasta Belgeleri'ne tasindi. */}
         <div className="not">
