@@ -260,7 +260,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // SONUÇ TESLİM TAKİBİ (318): raporu onaylı ama alınmamış işler. "Hastanın
     //   raporu hazır mı, alındı mı" sorusunun ekranı.
     kaynak: 'radyoloji-teslim', rota: 'radyoloji-teslim',
-    baslik: 'Sonuç Teslim', yol: 'Radyoloji › Sonuç Teslim',
+    baslik: 'Radyoloji Rapor Teslim', yol: 'Radyoloji › Radyoloji Rapor Teslim',
     aksiyonEkrani: 'radyoloji-teslim-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
@@ -272,7 +272,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
+    // Ad (kullanıcı 18.11.2026): "Sonuç Teslim" -> "Radyoloji Rapor Teslim" (yetki / rehber / çeviri 1372).
+    menuGrup: 'Radyoloji', menuAd: 'Radyoloji Rapor Teslim', ic: '📦',
     yetkiKodu: 'radyoloji.teslim', menuSira: 50,
   },
   // ===================================================================
