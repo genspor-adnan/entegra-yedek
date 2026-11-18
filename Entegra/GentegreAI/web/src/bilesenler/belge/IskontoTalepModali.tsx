@@ -66,10 +66,11 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
     new Set(kalemler.filter(k => !k.kilit).map(k => k.anahtar)));
   const [topluOran, setTopluOran] = useState('');
   /**
-   * TÜMÜNE TUTAR (kullanıcı 18.11.2026: "tümüne oran soluna Tümüne Tutar ekle.. girilen rakam toplam tutara
-   * oranlanır ve tümüne oran a yazılır.. oradan da satırlara yansır"). Taban İNDİRİLEBİLİR toplamdır (seçili,
-   * kilitsiz kalemler): kilitli / seçilmemiş kalem tabana girseydi satırlara düşen indirim girilen tutarı tutmazdı.
-   * Oran 4 ondalık (belge_satir.iskonto numeric(9,4)) - kuruş sapması en çok satır yuvarlaması kadar.
+   * TÜMÜNE NET TUTAR (kullanıcı 18.11.2026: "tümüne oran soluna Tümüne Tutar ekle.. tümüne oran a yazılır..
+   * oradan da satırlara yansır" -> "rename Tümüne Net Tutar.. girilen rakam müşterinin toplam ödeyeceği net ücret
+   * olacak"). İndirim = toplam - net; oran = indirim / İNDİRİLEBİLİR toplam (seçili, kilitsiz kalemler) - kilitli /
+   * seçilmemiş kalem indirilmez, tam tutarıyla nete girer. Oran 4 ondalık (belge_satir.iskonto numeric(9,4)) -
+   * kuruş sapması en çok satır yuvarlaması kadar.
    */
   const [topluTutar, setTopluTutar] = useState('');
   /**
@@ -103,14 +104,22 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
   /** TAVAN, EN YUKSEK kalem oranıyla ölçülür - sınırı zorlayan kalem odur. */
   const oranSayi = secilenler.reduce((m, k) => Math.max(m, kalemOrani(k.anahtar)), 0);
 
-  /** Tutarı indirilebilir tabana oranla, "tümüne oran"a yaz (kalem oranları sıfırlanır). */
+  /** Net tutardan indirimi bul, indirilebilir tabana oranla, "tümüne oran"a yaz (kalem oranları sıfırlanır). */
   const tutardanOran = (metin: string, taban: number) => {
-    const t = Math.max(0, hamSayi(metin));
-    if (!metin.trim() || !(t > 0) || !(taban > 0)) { setTopluOran(''); return }
-    const oran = Math.min(100, Math.round(t / taban * 100 * 10000) / 10000);
-    setTopluOran(oran.toLocaleString('tr-TR', { maximumFractionDigits: 4, useGrouping: false }));
     setOranlar({});
-    setHata(t > taban ? `Tutar indirilebilir toplamı (${paraYaz(taban)}) aşıyor - %100 uygulandı.` : null);
+    if (!metin.trim() || !(taban > 0)) { setTopluOran(''); setHata(null); return }
+    const net = Math.max(0, hamSayi(metin));
+    const indirimTutari = toplam - net;
+    if (!(indirimTutari > 0)) {
+      setTopluOran('');
+      setHata(net > toplam ? `Net tutar toplamdan (${paraYaz(toplam)}) büyük - indirim yok.` : null);
+      return;
+    }
+    const oran = Math.min(100, Math.round(indirimTutari / taban * 100 * 10000) / 10000);
+    setTopluOran(oran.toLocaleString('tr-TR', { maximumFractionDigits: 4, useGrouping: false }));
+    setHata(indirimTutari > taban
+      ? `Net tutar indirilemeyen kalemlerin toplamının (${paraYaz(toplam - taban)}) altında olamaz - %100 uygulandı.`
+      : null);
   };
   // Kalem seçimi değişince tutar sabit kalır, oran yeni tabana göre yeniden hesaplanır.
   useEffect(() => {
@@ -182,10 +191,10 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
           <h6>
             İskonto Uygula
             <span className="sonuk" style={{ marginLeft: 'auto', fontWeight: 400 }}>
-              {c('tümüne tutar')}{' '}
+              {c('Tümüne Net Tutar')}{' '}
               <input className="hiza-sag" style={{ width: 84 }} value={topluTutar}
-                     inputMode="decimal" aria-label={c('Tümüne tutar')}
-                     title={c('Girilen indirim tutarı seçili kalemlerin toplamına oranlanır ve tümüne orana yazılır')}
+                     inputMode="decimal" aria-label={c('Tümüne Net Tutar')}
+                     title={c('Hastanın ödeyeceği net toplam - aradaki fark seçili kalemlere oranlanır ve tümüne orana yazılır')}
                      onChange={e => { setTopluTutar(e.target.value); tutardanOran(e.target.value, indirilebilir) }} />
               {' '}₺{'   '}
               {c('tümüne oran')}{' '}
