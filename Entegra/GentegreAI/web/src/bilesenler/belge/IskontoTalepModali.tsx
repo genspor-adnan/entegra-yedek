@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '../Modal';
 import { para, hamSayi, paraYaz } from '../bicim';
 import { ISKONTO_GEREKCELERI } from '../../sayfalar/belgeSabitleri';
@@ -66,6 +66,13 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
     new Set(kalemler.filter(k => !k.kilit).map(k => k.anahtar)));
   const [topluOran, setTopluOran] = useState('');
   /**
+   * TÜMÜNE TUTAR (kullanıcı 18.11.2026: "tümüne oran soluna Tümüne Tutar ekle.. girilen rakam toplam tutara
+   * oranlanır ve tümüne oran a yazılır.. oradan da satırlara yansır"). Taban İNDİRİLEBİLİR toplamdır (seçili,
+   * kilitsiz kalemler): kilitli / seçilmemiş kalem tabana girseydi satırlara düşen indirim girilen tutarı tutmazdı.
+   * Oran 4 ondalık (belge_satir.iskonto numeric(9,4)) - kuruş sapması en çok satır yuvarlaması kadar.
+   */
+  const [topluTutar, setTopluTutar] = useState('');
+  /**
    * KALEM BAZLI ORAN (673): anahtar -> yuzde metni. Toplu oran kutusu bunlari
    * TOPLUCA doldurur, sonra tek tek degistirilebilir - muayeneye %20, tetkike
    * %5 vermek gercek bir istek. Bos ise toplu oran gecerli.
@@ -95,6 +102,21 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
   const efektif = toplam > 0 ? indirim / toplam * 100 : 0;
   /** TAVAN, EN YUKSEK kalem oranıyla ölçülür - sınırı zorlayan kalem odur. */
   const oranSayi = secilenler.reduce((m, k) => Math.max(m, kalemOrani(k.anahtar)), 0);
+
+  /** Tutarı indirilebilir tabana oranla, "tümüne oran"a yaz (kalem oranları sıfırlanır). */
+  const tutardanOran = (metin: string, taban: number) => {
+    const t = Math.max(0, hamSayi(metin));
+    if (!metin.trim() || !(t > 0) || !(taban > 0)) { setTopluOran(''); return }
+    const oran = Math.min(100, Math.round(t / taban * 100 * 10000) / 10000);
+    setTopluOran(oran.toLocaleString('tr-TR', { maximumFractionDigits: 4, useGrouping: false }));
+    setOranlar({});
+    setHata(t > taban ? `Tutar indirilebilir toplamı (${paraYaz(taban)}) aşıyor - %100 uygulandı.` : null);
+  };
+  // Kalem seçimi değişince tutar sabit kalır, oran yeni tabana göre yeniden hesaplanır.
+  useEffect(() => {
+    if (topluTutar.trim()) tutardanOran(topluTutar, indirilebilir);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indirilebilir]);
 
   const limitIci = oranSayi > 0 && oranSayi <= tavan;
   const onayGerek = oranSayi > tavan;
@@ -160,13 +182,21 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
           <h6>
             İskonto Uygula
             <span className="sonuk" style={{ marginLeft: 'auto', fontWeight: 400 }}>
-              tümüne oran{' '}
-              <input className="hiza-sag" style={{ width: 56 }} value={topluOran}
+              {c('tümüne tutar')}{' '}
+              <input className="hiza-sag" style={{ width: 84 }} value={topluTutar}
+                     inputMode="decimal" aria-label={c('Tümüne tutar')}
+                     title={c('Girilen indirim tutarı seçili kalemlerin toplamına oranlanır ve tümüne orana yazılır')}
+                     onChange={e => { setTopluTutar(e.target.value); tutardanOran(e.target.value, indirilebilir) }} />
+              {' '}₺{'   '}
+              {c('tümüne oran')}{' '}
+              <input className="hiza-sag" style={{ width: 64 }} value={topluOran}
+                     inputMode="decimal" aria-label={c('Tümüne oran')}
                      onChange={e => {
                        // TOPLU ORAN kalem oranlarini SIFIRLAR: kutuya yazilan
                        //   sayi "hepsi bu olsun" demektir; eski tek tek
                        //   degerler kalsaydi yazdigi oran islemiyor gorunurdu.
-                       setTopluOran(e.target.value); setOranlar({}); setHata(null);
+                       //   Elle oran yazilinca tutar kutusu bosalir - ikisi celismesin.
+                       setTopluOran(e.target.value); setTopluTutar(''); setOranlar({}); setHata(null);
                      }} />
               {' '}%
             </span>
@@ -204,7 +234,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                                ? String(topluSayi) : '')}
                              onChange={e => {
                                setOranlar(x => ({ ...x, [k.anahtar]: e.target.value }));
-                               setHata(null);
+                               setTopluTutar(''); setHata(null);
                              }} />
                     </td>
                     <td className="hiza-sag">{ind > 0 ? para.format(ind) : '—'}</td>
