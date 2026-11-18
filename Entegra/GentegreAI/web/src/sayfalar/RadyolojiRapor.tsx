@@ -19,6 +19,7 @@ import { c } from '../dil/ceviri';
 import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { tiradsPuani, tiradsUygula } from './radyoloji/tirads';
 import { fleischnerOnerisi, fleischnerUygula } from './radyoloji/fleischner';
+import { obstetrikUygula } from './radyoloji/obstetrik';
 import { TEK_BASLIK, alanCumleleri, bulguBolumuMu, sonucBolumuMu, tekMetneBolumYaz, tekParcaMi, yerTutucuDoldur } from './radyoloji/raporBicimi';
 import { biradsGovdesi, durumOku, metinUret, modaliteKodundan, type BiradsDurumu } from './radyoloji/birads';
 import { BiradsFormu } from './radyoloji/BiradsFormu';
@@ -619,9 +620,11 @@ export function RadyolojiRapor() {
     mesaj(`${satirlar.length} ${c('cümle')} "${bolumler[i].baslik}" ${c('bölümüne eklendi.')}`);
   };
 
-  /** Alan değeri - TI-RADS (1218) / Fleischner (1221) paketi varsa girdiler değişince kategori / öneri yeniden hesaplanır. */
+  /** Alan değeri - TI-RADS (1218) / Fleischner (1221) / Obstetrik (1379) paketi varsa girdiler değişince kategori /
+   *  öneri / tahmini ağırlık yeniden hesaplanır (her hesap kendi paketinin alanı yoksa dokunmaz). */
   const alanDegistir = (kod: string, v: string) =>
-    setSkorDeger(d => fleischnerUygula(skorlar, tiradsUygula(skorlar, { ...d, [kod]: v }, kod), kod));
+    setSkorDeger(d => obstetrikUygula(skorlar,
+      fleischnerUygula(skorlar, tiradsUygula(skorlar, { ...d, [kod]: v }, kod), kod), kod));
   const fleischnerHesap = skorlar.some(s => s.alanKod === 'fleischner') && fleischnerOnerisi(skorlar, skorDeger) !== null;
   const tiradsPuan = skorlar.some(s => s.alanKod === 'tirads') ? tiradsPuani(skorlar, skorDeger) : null;
 
