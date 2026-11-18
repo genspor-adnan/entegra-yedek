@@ -14,7 +14,7 @@ import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
   from './belgeTuru';
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
+import { para, yerelAnMetni, yerelGun, hamSayi } from '../bilesenler/bicim';
 import { type SatirDurumu, yanittanSatirlar } from './belgeSatir';
 import { type BelgeGirdisi } from './belgeKaydet';
 import { belgeKaydetmeKur } from './belgeKarti/useBelgeKaydetme';
@@ -1651,6 +1651,55 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
     const id = await kes(false, false, true);
     if (id) cik();
   };
+
+  /**
+   * AYNI GÜN BAŞVURU UYARISI (kullanıcı 18.11.2026: "çok önemli hata : ali yıldız çok defa başvuru olmuş" - banko
+   * aynı hastaya bir öğleden sonra 6 başvuru açmıştı, ikisi birebir aynı). Kayıtsız YENİ başvurunun hastası
+   * belirlendiği an (arama, hasta kartı, randevu, palet - hangi yoldan gelirse) hastanın BUGÜNKÜ iptal edilmemiş
+   * başvuruları sorulur; varsa seçim: mevcut başvuruyu aç (bu boş kart kapanır) ya da yine de yeni başvuru. Engel
+   * değil (kullanıcı kararı): aynı gün farklı bölüme gerçek ikinci başvuru olabilir.
+   */
+  const ayniGunSorulan = useRef<number | null>(null);
+  useEffect(() => {
+    const hastaId = cari?.id ?? 0;
+    if (!basvuruMu || kayitliId || !hastaId || ayniGunSorulan.current === hastaId) return;
+    ayniGunSorulan.current = hastaId;
+    let iptal = false;
+    void (async () => {
+      let bugunku: Record<string, unknown>[] = [];
+      try {
+        const y = await api.liste('belge', {
+          sayfa: 1, boyut: 10, sirala: [{ alan: 'belgeTarihi', yon: 'asc' }],
+          filtre: { op: 'and', kosullar: [
+            { alan: 'hastaId', op: 'esit', deger: hastaId },
+            { alan: 'tur', op: 'esit', deger: 19 }, { alan: 'tipi', op: 'esit', deger: 30 },
+            { alan: 'durum', op: 'esitDegil', deger: 6 },
+            { alan: 'belgeTarihi', op: 'buyukEsit', deger: yerelGun(new Date()) },
+          ] },
+        });
+        bugunku = y.satirlar ?? [];
+      } catch { return }                       // okunamadı: uyarı yok, akış durmaz
+      if (iptal || bugunku.length === 0) return;
+      const saat = (v: unknown) => { const d = new Date(String(v ?? '')); return isNaN(d.getTime()) ? '' : d.toTimeString().slice(0, 5) };
+      const secim = await secimSor(
+        `${cari?.unvan ?? c('Hasta')}: ${c('bugün')} ${bugunku.length} ${c('başvurusu var')}. `
+          + c('Mevcut başvuruya mı devam edilsin, yoksa yeni başvuru mu açılsın?'),
+        [
+          ...bugunku.map(b => ({
+            kod: String(b.id),
+            ad: `📂 ${String(b.belgeNo ?? b.id)}${b.poliklinik ? ` · ${String(b.poliklinik)}` : ''}${saat(b.belgeTarihi) ? ` · ${saat(b.belgeTarihi)}` : ''}`,
+            sinif: 'bir',
+          })),
+          { kod: 'yeni', ad: `＋ ${c('Yine de yeni başvuru')}` },
+        ], String(bugunku[bugunku.length - 1].id));
+      if (iptal || secim === 'yeni' || !secim) return;
+      // Mevcut başvuru: bu kayıtsız kart sorusuz kapanır, seçilen başvuru kendi sekmesinde açılır.
+      await kapat(true);
+      git(`/basvuru/${secim}`);
+    })();
+    return () => { iptal = true };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basvuruMu, kayitliId, cari?.id]);
 
   // EKLEME YETKİSİ YALNIZ YENİ BELGEDE ARANIR (kullanıcı 09.10.2026: "uzman
   //   doktor rolü başvuru ekleme yetkisi yok ama düzenleme yetkisi var..
