@@ -82,7 +82,7 @@ public static class GoruntulemeIcmalUclari
                        coalesce(ti.kurum_id, 0), coalesce(public.fn_taraf_ad(kt.unvan, kt.ad, kt.soyad)::varchar(120), ''),
                        coalesce(ti.ucret, 0), ti.sla_bitis::timestamptz,
                        (select count(*)::int from public.radyoloji_kritik_bulgu k where k.istem_id = r.id),
-                       (select count(*)::int from public.radyoloji_rapor x where x.istem_id = r.id and x.ust_rapor_id is not null),
+                       (select count(*)::int from public.radyoloji_rapor x where x.istem_id = r.id and x.ust_rapor_id is not null and coalesce(x.revize, 0) = 0),
                        (select count(*)::int from public.radyoloji_konsultasyon x where x.istem_id = r.id)
                   from public.radyoloji_istem r
                   join public.belge be on be.id = r.belge_id

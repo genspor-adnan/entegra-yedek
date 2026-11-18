@@ -388,7 +388,7 @@ public static partial class KaynakKatalogu
                                               Genislik: 110, Filtrelenebilir: false),
             new("durum",        "r.durum",        "kod",   "Rapor Durum Kodu", Varsayilan: false),
             new("istemDurum",   "i.durum",        "kod",   "İstem Durum Kodu", Varsayilan: false),
-            new("ekRapor",      "(select count(*) from public.radyoloji_rapor e where e.ust_rapor_id = r.id)",
+            new("ekRapor",      "(select count(*) from public.radyoloji_rapor e where e.ust_rapor_id = r.id and coalesce(e.revize, 0) = 0)",
                                               "sayi",  "Ek Rapor", Hizalama: "orta", Genislik: 80, Bicim: "sayac"),
             new("kritik",       "i.kritik",       "mantik","Kritik", Hizalama: "orta", Genislik: 70),
             new("eskiHbys",     "case when b.aktarim_kaynak = 2 then 1 else 0 end", "mantik", "Eski HBYS",

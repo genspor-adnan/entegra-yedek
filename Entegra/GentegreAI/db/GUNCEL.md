@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (730 ad, 205 tanesi birden cok dosyada)
+## Fonksiyonlar (731 ad, 206 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -466,6 +466,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_mwl` | `1329_mwl_entegrasyon_sube.sql` | 1301_radyoloji_mwl.sql |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
 | `fn_radyoloji_rapor_onaylanabilir` | `1342_radyolog_degerlendirmesi_onay_kapisi.sql` | 284_radyoloji_operasyon.sql, 809_bakanlik_rapor_parcalari.sql, 1206_radyoloji_onay_kritik_dolu.sql |
+| `fn_radyoloji_rapor_revize` | `1374_radyoloji_rapor_revize.sql` | — |
 | `fn_radyoloji_sablon_bolum_html_bosalt` | `1216_radyoloji_sablon_bolum_html.sql` | — |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_radyoloji_yon_ek` | `1231_radyoloji_yon_ek_sabit.sql` | 1229_radyoloji_yon_accession.sql |
@@ -544,7 +545,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_teletip_kos_verisi` | `1310_teletip_kos.sql` | — |
 | `fn_teletip_orm_kuyrukla` | `1302_teletip_orm_kuyrugu.sql` | — |
 | `fn_teletip_orm_verisi` | `1330_teleradyoloji_dogrulayici_uyum.sql` | 1302_teletip_orm_kuyrugu.sql, 1303_teletip_oru_kilavuz_sut.sql, 1305_teletip_hastane_referansi.sql, 1324_teletip_eski_ayar_yolu_kaldir.sql, 1326_teleradyoloji_orm_sevk_onay_hekim.sql |
-| `fn_teletip_oru_verisi` | `1334_teletip_oru_html_base64.sql` | 1309_teletip_oru_kuyrugu.sql |
+| `fn_teletip_oru_verisi` | `1374_radyoloji_rapor_revize.sql` | 1309_teletip_oru_kuyrugu.sql, 1334_teletip_oru_html_base64.sql |
 | `fn_temsilci_rolu_tazele` | `1287_dis_hekim_sube_temsilci.sql` | — |
 | `fn_tevkifat_orani` | `1033_efatura_yeniden.sql` | 176_tevkifat_istisna.sql |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
@@ -702,7 +703,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_protokol_bayrak` | `514_hizmet_radyoloji_bayragi.sql` | — |
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
 | `tg_radyoloji_protokol_modalite` | `1331_hizmet_modalite_tek_deger.sql` | — |
-| `tg_radyoloji_rapor_teletip` | `1309_teletip_oru_kuyrugu.sql` | — |
+| `tg_radyoloji_rapor_teletip` | `1374_radyoloji_rapor_revize.sql` | 1309_teletip_oru_kuyrugu.sql |
 | `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
 | `tg_randevu_durum_geri` | `1122_randevu_geri_al_kurali.sql` | — |
 | `tg_randevu_izin_kontrol` | `1119_randevu_erteleme.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
@@ -1038,10 +1039,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_radyoloji_cihaz_durum` | `1119_randevu_erteleme.sql` | 967_radyoloji_cihaz_kart.sql |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
-| `v_radyoloji_kritik_takip` | `940_personel_unvan_yalniz_onek.sql` | 318_radyoloji_takip_listeleri.sql |
+| `v_radyoloji_kritik_takip` | `1374_radyoloji_rapor_revize.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |
 | `v_radyoloji_protokol_malzeme` | `320_radyoloji_sarf.sql` | — |
-| `v_radyoloji_teslim_takip` | `1373_radyoloji_teslim_telefon_cep.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql |
+| `v_radyoloji_teslim_takip` | `1374_radyoloji_rapor_revize.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql, 1373_radyoloji_teslim_telefon_cep.sql |
 | `v_radyoloji_tetkik` | `304_radyoloji_istem_acma.sql` | — |
 | `v_radyoloji_worklist` | `940_personel_unvan_yalniz_onek.sql` | 283_radyoloji_cekirdek.sql, 296_belge_basvuru.sql, 912_istem_banko_kapisi.sql |
 | `v_randevu_bolum_lookup` | `718_hekim_calisma_plani.sql` | 251_departman.sql, 254_departman_kod.sql, 256_departman_durum.sql |

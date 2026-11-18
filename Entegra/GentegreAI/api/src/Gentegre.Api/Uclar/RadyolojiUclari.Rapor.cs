@@ -94,7 +94,7 @@ public static partial class RadyolojiUclari
                        count(*) filter (where r.durum = 2)                                            as "onRapor",
                        (select count(*) from public.radyoloji_rapor e
                           join public.radyoloji_istem ei on ei.id = e.istem_id
-                         where e.ust_rapor_id is not null and e.ekleme_tarihi > now() - interval '7 days'
+                         where e.ust_rapor_id is not null and coalesce(e.revize, 0) = 0 and e.ekleme_tarihi > now() - interval '7 days'
                            and (@p0::int is null or ei.sube_id = @p0))                                 as "ekRapor",
                        count(*) filter (where r.durum = 3 and i.durum <> 6)                           as "teslimBekleyen",
                        count(*) filter (where b.aktarim_kaynak = 2)                                   as "eskiHbys"
@@ -179,7 +179,9 @@ public static partial class RadyolojiUclari
                        r.tipografi::text as "tipografiJson",
                        r.giris, r.birads_kompozisyon as "biradsKompozisyon", r.birads_oneri as "biradsOneri",
                        r.birads_kategori as "biradsKategori", r.birads_gerekce as "biradsGerekce",
-                       r.birads_yonetim as "biradsYonetim"
+                       r.birads_yonetim as "biradsYonetim",
+                       -- REVİZE (1374): kaç kez revize edildi; onay iptali engeli (dışarı çıkmışsa iptal yerine revize).
+                       coalesce(r.revize_no, 0) as "revizeNo"
                   from public.radyoloji_rapor r
                   left join public.taraf yz on yz.id = r.yazan_id
                   left join public.taraf on_ on on_.id = r.onaylayan_id
@@ -283,7 +285,7 @@ public static partial class RadyolojiUclari
                        coalesce(r.durum, 0) as "raporDurum", coalesce(r.birads_kategori, '') as "birads",
                        coalesce((select left(b.metin, 120) from public.radyoloji_rapor_bolum b
                                   join public.radyoloji_rapor r2 on r2.id = b.rapor_id
-                                 where r2.istem_id = i.id and b.baslik ilike '%sonu%'
+                                 where r2.istem_id = i.id and r2.ust_rapor_id is null and b.baslik ilike '%sonu%'
                                  order by b.sira limit 1), '') as "ozet"
                   from public.radyoloji_istem i
                   left join public.hizmet hz on hz.id = i.hizmet_id
@@ -327,9 +329,28 @@ public static partial class RadyolojiUclari
                 ? (await RaporTipografisi.SablonAsync(baglanti, null, sablonId, kurumTipografi, iptal), false)
                 : await RaporTipografisi.RaporAsync(baglanti, null, Convert.ToInt32(rapor["id"]), kurumTipografi, iptal);
 
+            // REVİZE (1374): onay iptal engeli (ekran "Onay İptal" yerine "revize" sorar) ve revize geçmişi (arşiv kopyaları).
+            var iptalEngeli = "";
+            var revizeler = new List<IDictionary<string, object?>>();
+            if (rapor is not null)
+            {
+                var rid = Convert.ToInt32(rapor["id"]);
+                if (Convert.ToInt32(rapor["durum"] ?? 0) == 3 && Convert.ToInt32(rapor["kilit"] ?? 0) == 1)
+                    iptalEngeli = await baglanti.TekDegerAsync<string>(IptalEngeliSql, null, [rid, id], iptal) ?? "";
+                revizeler = await baglanti.ListeAsync("""
+                    select v.id, v.revize_no as "revizeNo", coalesce(v.rapor_no, '') as "raporNo",
+                           v.onay_tarihi as "onayTarihi", v.revize_tarihi as "revizeTarihi", v.revize_nedeni as "neden",
+                           coalesce(public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120), '') as "revizeEden"
+                      from public.radyoloji_rapor v
+                      left join public.taraf t on t.id = v.revize_eden_id
+                     where v.ust_rapor_id = @p0 and v.revize = 1
+                     order by v.revize_no
+                    """, null, [rid], OkuyucuGenisletmeleri.Sozluk, iptal);
+            }
+
             return Results.Ok(new { istem, rapor, bolumler, alanlar, sablonlar, makrolar,
                                     skorlar, gecmis, kritikler, bakanlikProfili, lezyonlar,
-                                    tipografi, tipografiDamga, kurumTipografi });
+                                    tipografi, tipografiDamga, kurumTipografi, iptalEngeli, revizeler });
         });
 
         // ------------------------------------------------- rapor ÇIKTISI ----
@@ -350,6 +371,8 @@ public static partial class RadyolojiUclari
             var rapor = await baglanti.TekAsync("""
                 select r.id, r.rapor_no as "raporNo", r.durum, r.kilit,
                        r.ust_rapor_id as "ustRaporId",
+                       -- REVİZE (1374): arşiv kopyası çıktısı "REVİZE EDİLDİ" bandıyla basılır.
+                       coalesce(r.revize, 0) as revize, r.revize_tarihi as "revizeTarihi", r.revize_nedeni as "revizeNedeni",
                        coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
                        coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
                        i.id as "istemId", i.accession_no as "accessionNo",
@@ -413,7 +436,7 @@ public static partial class RadyolojiUclari
                                   where b.rapor_id = r.id and coalesce(b.yazdir, 1) = 1), '') as metin
                   from public.radyoloji_rapor r
                   left join public.taraf on_ on on_.id = r.onaylayan_id
-                 where r.ust_rapor_id = @p0
+                 where r.ust_rapor_id = @p0 and coalesce(r.revize, 0) = 0
                  order by r.id
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 

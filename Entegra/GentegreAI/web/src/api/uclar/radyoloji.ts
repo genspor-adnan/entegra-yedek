@@ -49,6 +49,11 @@ export const radyolojiUclari = {
       lezyonlar: Record<string, unknown>[];
       /** TİPOGRAFİ (1344): raporun etkin tipografisi (damga > şablon > kurum), damgalı mı, kurum ayarı. */
       tipografi: Record<string, unknown>; tipografiDamga: boolean; kurumTipografi: Record<string, unknown>;
+      /** REVİZE (1374): onaylı rapor dışarı çıktıysa onay iptali yerine revize sorulur - nedeni; boş = iptal edilebilir. */
+      iptalEngeli?: string;
+      /** Revize geçmişi: raporun önceki (revize edilmiş) hâlleri - arşiv kopyaları. */
+      revizeler?: { id: number; revizeNo: number; raporNo: string; onayTarihi: string | null; revizeTarihi: string | null;
+                    neden: string; revizeEden: string }[];
     }>(`/api/radyoloji/istem/${istemId}/rapor${sablonId ? `?sablon=${sablonId}` : ''}`),
 
   /** Rapor tipografisi ayarı (1344): kurum düzeyi; GET herkes (radyoloji Gör), PUT radyoloji.tipografi Değiştir. */
@@ -89,6 +94,10 @@ export const radyolojiUclari = {
   radyolojiRaporOnayIptal: (raporId: number, surum: string, parola?: string) =>
     gonder<{ tamam: boolean }>(`/api/radyoloji/rapor/${raporId}/onay-iptal?surum=${encodeURIComponent(surum)}`,
       parola ? { parola } : {}),
+  /** REVİZE (1374): dışarı çıkmış onaylı rapor - o anki hâl "Revize" olarak arşivlenir, rapor taslağa döner (no -R<n>). */
+  radyolojiRaporRevize: (raporId: number, surum: string, govde: { neden: string; parola?: string }) =>
+    gonder<{ tamam: boolean; arsivRaporId: number; raporNo: string }>(
+      `/api/radyoloji/rapor/${raporId}/revize?surum=${encodeURIComponent(surum)}`, govde),
   /** RAPOR LİSTESİ SAYAÇ ŞERİDİ (1215): bugün onaylanan, ön rapor, ek rapor (7 gün), teslim bekleyen, eski HBYS. */
   radyolojiRaporOzet: () =>
     istek<{ bugunOnay: number; onRapor: number; ekRapor: number; teslimBekleyen: number; eskiHbys: number }>(

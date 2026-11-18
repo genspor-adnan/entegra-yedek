@@ -234,4 +234,80 @@ public sealed class RadyolojiErisimTestleri(ApiSunucuOlgusu api)
         await api.Veri.CalistirAsync("update public.belge set durum = 1 where id = @p0", [belge]);
         Assert.Equal(0m, await Borc());
     }
+
+    /// <summary>
+    /// REVİZE (1374, kullanıcı 18.11.2026): teslim edilmiş onaylı raporun onayı geri alınamaz (422 + revize önerisi);
+    /// revizede eski hâl arşiv kopyası olur (no, metin, teslim bağı), rapor taslağa döner ve -R1 numarasını alır;
+    /// yeniden onaylanınca teslim listesinde tekrar "Hazır" (yeniden teslim bekler); ikinci revize -R2.
+    /// </summary>
+    [VtFact]
+    public async Task Disari_cikmis_rapor_onay_iptal_edilemez_revize_edilir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var hasta = await HastaAsync(d);
+        var a = await IstemAsync(d, hasta, Merkez);
+        var rol = await d.RolAsync("revize", "radyoloji:gde", "radyoloji-istem:gde", "rad.rapor_yaz");
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
+        var no = "RT-" + Guid.NewGuid().ToString("N")[..8];
+        await api.Veri.CalistirAsync("""
+            update public.radyoloji_rapor set durum = 3, kilit = 1, onaylayan_id = @p1, onay_tarihi = now(), rapor_no = @p2
+             where id = @p0
+            """, [a.Rapor, u, no]);
+        await api.Veri.CalistirAsync("update public.radyoloji_istem set durum = 5 where id = @p0", [a.Istem]);
+        await api.Veri.CalistirAsync(
+            "insert into public.radyoloji_teslim (istem_id, rapor_id, tur, alan_ad, rapor_verildi) values (@p0, @p1, 2, 'Hasta', 1)",
+            [a.Istem, a.Rapor]);
+        d.Temizle($"delete from public.islem_log where tablo_id = 941 and kayit_id = {a.Rapor}");
+        var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var h = api.Istemci(access, Merkez);
+        Task<string> Surum() => api.Veri.TekDegerAsync<string>("select xmin::text from public.radyoloji_rapor where id = @p0", [a.Rapor])!;
+
+        // 1) Onay iptali: reddedilir, revize önerilir.
+        var ip = await h.PostAsJsonAsync($"/api/radyoloji/rapor/{a.Rapor}/onay-iptal?surum={await Surum()}", new { });
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, ip.StatusCode);
+        var ipG = await ip.Content.ReadAsStringAsync();
+        Assert.Contains("revize", ipG);
+        // Ekran engeli önceden bilir.
+        var ekran = await h.GetFromJsonAsync<Dictionary<string, System.Text.Json.JsonElement>>($"/api/radyoloji/istem/{a.Istem}/rapor");
+        Assert.Equal("Rapor teslim edildi", ekran!["iptalEngeli"].GetString());
+
+        // 2) Nedensiz revize yok.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await h.PostAsJsonAsync($"/api/radyoloji/rapor/{a.Rapor}/revize?surum={await Surum()}", new { neden = "" })).StatusCode);
+
+        // 3) Revize.
+        var rv = await h.PostAsJsonAsync($"/api/radyoloji/rapor/{a.Rapor}/revize?surum={await Surum()}", new { neden = "Taraf yanlış" });
+        var rvG = await rv.Content.ReadAsStringAsync();
+        Assert.True(rv.IsSuccessStatusCode, rvG);
+        Assert.Equal($"1/0/{no}-R1/1", await api.Veri.TekDegerAsync<string>(
+            "select durum || '/' || kilit || '/' || rapor_no || '/' || revize_no from public.radyoloji_rapor where id = @p0", [a.Rapor]));
+        var arsiv = await api.Veri.TekDegerAsync<int>(
+            "select id from public.radyoloji_rapor where ust_rapor_id = @p0 and revize = 1", [a.Rapor]);
+        Assert.Equal($"3/1/{no}/Taraf yanlış/özgün", await api.Veri.TekDegerAsync<string>("""
+            select r.durum || '/' || r.kilit || '/' || r.rapor_no || '/' || r.revize_nedeni || '/'
+                   || (select b.metin from public.radyoloji_rapor_bolum b where b.rapor_id = r.id)
+              from public.radyoloji_rapor r where r.id = @p0
+            """, [arsiv]));
+        Assert.Equal(arsiv, await api.Veri.TekDegerAsync<int>(
+            "select rapor_id from public.radyoloji_teslim where istem_id = @p0", [a.Istem]));          // teslim izi arşivde
+        Assert.Equal(3, await api.Veri.TekDegerAsync<int>("select durum::int from public.radyoloji_istem where id = @p0", [a.Istem]));
+        var ekran2 = await h.GetFromJsonAsync<Dictionary<string, System.Text.Json.JsonElement>>($"/api/radyoloji/istem/{a.Istem}/rapor");
+        Assert.Equal(1, ekran2!["revizeler"].GetArrayLength());
+
+        // 4) Yeniden onay: teslim listesinde yeniden "Hazır" (eski teslim düzeltilmiş rapor için sayılmaz).
+        await api.Veri.CalistirAsync("update public.radyoloji_rapor set durum = 3, kilit = 1, onaylayan_id = @p1, onay_tarihi = now() where id = @p0", [a.Rapor, u]);
+        await api.Veri.CalistirAsync("update public.radyoloji_istem set durum = 5 where id = @p0", [a.Istem]);
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>(
+            "select takip_durum from public.v_radyoloji_teslim_takip where istem_id = @p0", [a.Istem]));
+        Assert.Equal(a.Rapor, await api.Veri.TekDegerAsync<int>(
+            "select (select x.id from public.radyoloji_rapor x where x.istem_id = @p0 and coalesce(x.revize, 0) = 0 order by x.id desc limit 1)", [a.Istem]));
+
+        // 5) İkinci revize: yeniden onaylı ve henüz dışarı çıkmamış raporda engel yok - doğrudan revize ucu -R2 verir.
+        var rv2 = await h.PostAsJsonAsync($"/api/radyoloji/rapor/{a.Rapor}/revize?surum={await Surum()}", new { neden = "İkinci düzeltme" });
+        Assert.True(rv2.IsSuccessStatusCode, await rv2.Content.ReadAsStringAsync());
+        Assert.Equal($"{no}-R2", await api.Veri.TekDegerAsync<string>("select rapor_no from public.radyoloji_rapor where id = @p0", [a.Rapor]));
+        Assert.Equal($"{no}-R1", await api.Veri.TekDegerAsync<string>(
+            "select rapor_no from public.radyoloji_rapor where ust_rapor_id = @p0 and revize_no = 2", [a.Rapor]));
+    }
 }

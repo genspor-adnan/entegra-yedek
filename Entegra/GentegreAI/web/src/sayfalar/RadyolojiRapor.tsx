@@ -175,6 +175,9 @@ export function RadyolojiRapor() {
   //   seçili düğüm vurgulanır, raporu sağ panelde salt okunur açılır. Kendi sekmesinde açmak o paneldeki ↗ düğmesi.
   const [onceki, setOnceki] = useState<OncekiGorunum | null>(null);
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
+  /** REVİZE (1374): onay iptal engeli (dışarı çıkmış rapor) ve revize geçmişi. */
+  const [iptalEngeli, setIptalEngeli] = useState('');
+  const [revizeler, setRevizeler] = useState<NonNullable<Awaited<ReturnType<typeof api.radyolojiRapor>>['revizeler']>>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
   const [sablonModal, setSablonModal] = useState(false);
   /** Son sunucu durumu (yüklenen / kaydedilen) - yerel yedek yalnız bundan farklıysa yazılır. */
@@ -278,6 +281,8 @@ export function RadyolojiRapor() {
       setSkorlar(y.skorlar as unknown as Skor[]);
       setGecmis(y.gecmis as unknown as Gecmis[]);
       setKritikler(y.kritikler as unknown as Kritik[]);
+      setIptalEngeli(String(y.iptalEngeli ?? ''));
+      setRevizeler(y.revizeler ?? []);
       const konsultasyonlar = await api.radyolojiKonsultasyonlar(id);
       if (sira !== yukleSira.current) return;
       setKonsultasyonlar(konsultasyonlar);
@@ -720,9 +725,42 @@ export function RadyolojiRapor() {
    * ONAY / e-İMZA İPTALİ (17.11.2026): yalnız onaylayan radyolog; başkası basarsa onaylayanın şifresi sorulur.
    * Teslim edilmiş / e-Nabız / Teletıp'a gitmiş raporda sunucu reddeder (düzeltme ek raporla).
    */
+  /**
+   * REVİZE (1374, kullanıcı 18.11.2026): rapor teslim edildiyse / e-Nabız'a / TeleRadyoloji'ye gittiyse onay geri
+   * alınamaz - kullanıcıya söylenir; devam ederse raporun bu hâli "Revize" olarak saklanır, rapor düzeltme için
+   * taslağa döner (numara -R ekiyle). Yetki onay iptaliyle aynı (onaylayan; başkası için onun şifresi).
+   */
+  const revizeEt = async (neden: string) => {
+    const raporId = Number(rapor?.id ?? 0);
+    if (!raporId) return;
+    const no = String(rapor?.raporNo ?? '');
+    if (!await onay(`⚠ ${neden}; onay geri alınamaz, ancak rapor REVİZE edilebilir.
+
+Devam ederseniz raporun bu hâli${no ? ` (${no})` : ''} "Revize" olarak saklanır (teslim / gönderim izleriyle birlikte),
+kopyası düzeltmek üzere taslak olarak açılır${no ? ` ve ${no.replace(/-R\d+$/, '')}-R${Number(rapor?.revizeNo ?? 0) + 1} numarasını alır` : ''}.
+Yeniden onaylanınca düzeltilmiş rapor TeleRadyoloji / e-Nabız'a düzeltme olarak gider ve yeniden teslim edilmelidir.
+
+Revize edilsin mi?`, true)) return;
+    const gerekce = await metinSor('Revize nedeni (zorunlu):', '', 'ör. Bulgularda taraf yanlış yazılmış');
+    if (!gerekce?.trim()) { mesaj('Revize nedeni yazılmadan revize yapılmaz.'); return }
+    let parola: string | undefined;
+    if (Number(rapor?.onaylayanId ?? 0) !== kullanici?.id) {
+      const p = await parolaSor(String(rapor?.onaylayan ?? '') || c('Onaylayan radyolog'), c('raporu revize etmek'));
+      if (!p) return;
+      parola = p;
+    }
+    await guvenli(async () => {
+      const y = await api.radyolojiRaporRevize(raporId, String(rapor?.surum ?? ''), { neden: gerekce.trim(), parola });
+      await yukle();
+      mesaj(`Rapor revize edildi: önceki hâl "Revize" olarak saklandı; düzeltilmiş rapor${y.raporNo ? ` (${y.raporNo})` : ''} taslak olarak açıldı.`);
+    });
+  };
+
   const onayIptal = async () => {
     const raporId = Number(rapor?.id ?? 0);
     if (!raporId) return;
+    // Dışarı çıkmış rapor: iptal yerine revize (parola sorulmadan ÖNCE söylenir).
+    if (iptalEngeli) { await revizeEt(iptalEngeli); return }
     const imzali = Number(rapor?.imzaDokumanId ?? 0) > 0;
     const ad = imzali ? 'e-İmza' : 'Onay';
     let parola: string | undefined;
@@ -736,11 +774,16 @@ Devam edilsin mi?`, true)) return;
       if (!p) return;
       parola = p;
     }
-    await guvenli(async () => {
+    try {
       await api.radyolojiRaporOnayIptal(raporId, String(rapor?.surum ?? ''), parola);
       await yukle();
       mesaj(`${ad} iptal edildi; rapor taslağa döndü.`);
-    });
+    } catch (h) {
+      // Ekran açıldıktan sonra rapor dışarı çıktıysa sunucu revize önerir.
+      const d = (h as { hata?: { engel?: { revize?: boolean; neden?: string } } })?.hata?.engel;
+      if (d?.revize) { await yukle(); await revizeEt(String(d.neden ?? 'Rapor dışarı gönderildi')); return }
+      await guvenli(async () => { throw h });
+    }
   };
 
   const durumaGecir = async (hedef: 'on-rapor' | 'onay' | 'eimza') => {
@@ -855,6 +898,20 @@ Devam edilsin mi?`, true)) return;
 
   return (
     <div className="sayfa rad-rapor">
+      {revizeler.length > 0 && (
+        <div className="bilgi-kutusu" data-testid="rapor-revize-gecmisi">
+          🗂 {c('Bu rapor revize edildi')} ({revizeler.length}):{' '}
+          {revizeler.map(v => (
+            <span key={v.id} style={{ marginRight: 12 }}>
+              <a href="#" onClick={e => { e.preventDefault(); git(`/radyoloji/cikti/${v.id}`) }}
+                 title={`${v.neden}${v.revizeEden ? ` · ${v.revizeEden}` : ''}`}>
+                {v.raporNo || `#${v.id}`} — {String(v.revizeTarihi ?? '').replace('T', ' ').slice(0, 16)}
+              </a>
+              {v.neden ? ` (${v.neden})` : ''}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="sayfa-bas">
         {/* BAŞLIK SATIRI KALKTI (kullanıcı 27.10.2026): sekme başlığı hasta adı; accession no solda "Bu tetkik"te. */}
         <div className="sayfa-eylem">
@@ -865,15 +922,17 @@ Devam edilsin mi?`, true)) return;
           {/* ONAYLANDIYSA İPTAL (17.11.2026): e-imzasız onayda "Onay İptal", e-imzalıda "e-İmza İptal". */}
           {kilitli && Number(rapor?.imzaDokumanId ?? 0) === 0
             ? <button className="d teh" disabled={islemde} data-testid="rapor-onay-iptal"
-                      title={c('Onayı iptal eder; rapor taslağa döner (yalnız onaylayan radyolog)')}
-                      onClick={() => void onayIptal()}>⟲ {c('Onay İptal')}</button>
+                      title={iptalEngeli ? `${iptalEngeli}: onay geri alınamaz, revize edilebilir`
+                                         : c('Onayı iptal eder; rapor taslağa döner (yalnız onaylayan radyolog)')}
+                      onClick={() => void onayIptal()}>⟲ {iptalEngeli ? c('Revize Et') : c('Onay İptal')}</button>
             : <button className="d basari" disabled={kilitli || islemde || cekimYok} data-testid="rapor-onayla"
                       title={radyologMu ? c('Raporu e-imza olmadan onaylar ve kilitler') : c('Radyolog seçilir; onun şifresiyle e-imza olmadan onaylanır')}
                       onClick={() => void durumaGecir('onay')}>✔ {c('Onayla')}</button>}
           {kilitli && Number(rapor?.imzaDokumanId ?? 0) > 0
             ? <button className="d teh" disabled={islemde} data-testid="rapor-eimza-iptal"
-                      title={c('e-İmzayı ve onayı iptal eder; rapor taslağa döner (yalnız imzalayan radyolog)')}
-                      onClick={() => void onayIptal()}><UsbCipIkon /> {c('e-İmza İptal')}</button>
+                      title={iptalEngeli ? `${iptalEngeli}: onay geri alınamaz, revize edilebilir`
+                                         : c('e-İmzayı ve onayı iptal eder; rapor taslağa döner (yalnız imzalayan radyolog)')}
+                      onClick={() => void onayIptal()}><UsbCipIkon /> {iptalEngeli ? c('Revize Et') : c('e-İmza İptal')}</button>
             : <button className="d basari" disabled={kilitli || islemde || cekimYok || eimzaAktif === false} data-testid="rapor-eimzala"
                       title={eimzaAktif === false ? c('e-İmza hesabı tanımlı / aktif değil (Entegrasyonlar › e-İmza)')
                              : radyologMu ? c('Raporu e-imza (kart / USB token) ile imzalar ve onaylar') : c('Radyolog seçilir; onun e-imza çipiyle imzalanır')}

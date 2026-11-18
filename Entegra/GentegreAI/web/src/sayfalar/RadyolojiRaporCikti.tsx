@@ -127,6 +127,15 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
         </div>
       </div>
 
+      {/* REVİZE (1374): arşiv kopyası - geçerli rapor değildir. */}
+      {Number(r.revize ?? 0) === 1 && (
+        <div style={{ border: '2px solid #c0392b', color: '#c0392b', fontWeight: 700, textAlign: 'center',
+                      padding: '6px 8px', margin: '6px 0' }}>
+          REVİZE EDİLDİ — {String(r.revizeTarihi ?? '').replace('T', ' ').slice(0, 16)} tarihinde revize edilmiştir;
+          bu çıktı raporun ÖNCEKİ hâlidir, geçerli rapor değildir.
+          {r.revizeNedeni ? <div style={{ fontWeight: 400 }}>Neden: {String(r.revizeNedeni)}</div> : null}
+        </div>
+      )}
       <div className="rapadi">
         {RAPOR_ADI[Number(r.modalite ?? 0)] ?? 'Radyolojik İnceleme Raporu'}
       </div>

@@ -241,7 +241,7 @@ public static partial class RadyolojiUclari
             //   verildiği sonradan sorulabiliyor (addendum sonrası önemli).
             var raporId = await baglanti.TekDegerAsync<int?>("""
                 select max(id) from public.radyoloji_rapor
-                 where istem_id = @p0 and durum = 3
+                 where istem_id = @p0 and durum = 3 and coalesce(revize, 0) = 0
                 """, null, [id], iptal);
 
             await baglanti.CalistirAsync("""
@@ -383,7 +383,7 @@ public static partial class RadyolojiUclari
                     new AlanHatasi("gerekce", "Zorunlu."));
 
             var raporId = await baglanti.TekDegerAsync<int?>(
-                "select max(id) from public.radyoloji_rapor where istem_id = @p0",
+                "select max(id) from public.radyoloji_rapor where istem_id = @p0 and coalesce(revize, 0) = 0",
                 null, [id], iptal);
 
             var yeni = await baglanti.TekDegerAsync<int>("""

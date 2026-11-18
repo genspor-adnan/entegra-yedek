@@ -23,6 +23,23 @@ namespace Gentegre.Api.Uclar;
 public static partial class RadyolojiUclari
 {
     public sealed record OnayIptalIstegi(string? Parola = null);
+    /// <summary>Revize (1374): onaylayanın parolası (başkası basarsa) + revize nedeni (zorunlu).</summary>
+    public sealed record RevizeIstegi(string? Parola = null, string? Neden = null);
+
+    /// <summary>
+    /// ONAY İPTAL ENGELİ (dışarı çıkmış rapor): teslim / e-Nabız (gönderiliyor-gönderildi-silindi) / Teletıp ORU
+    /// gönderildi. @p0 = rapor, @p1 = istem. Boş = engel yok. Rapor ekranı da okur (Onay İptal yerine Revize sorulur).
+    /// </summary>
+    internal const string IptalEngeliSql = """
+        select case
+          when exists (select 1 from public.radyoloji_teslim t where t.istem_id = @p1 or t.rapor_id = @p0)
+            then 'Rapor teslim edildi'
+          when exists (select 1 from public.enabiz_paket p where p.kaynak_tur = 5 and p.kaynak_id = @p0 and p.durum in (2, 3, 6))
+            then 'Rapor e-Nabız''a gönderildi'
+          when exists (select 1 from public.teletip_gonderim g where g.rapor_id = @p0 and g.durum = 1)
+            then 'Rapor TeleRadyoloji''ye (Bakanlık) gönderildi'
+          else '' end
+        """;
 
     /// <summary>Onay iptalinde okunan rapor durumu (kilitsiz ön okuma ve kilit altında yeniden okuma).</summary>
     private sealed record OnayliRapor(int IstemId, int Durum, int Kilit, int Onaylayan, int ImzaDokuman, string No, string Surum);
@@ -131,19 +148,12 @@ public static partial class RadyolojiUclari
                 throw GentegreHatasi.Cakisma(new { surum = r.Surum });
             if (r.Durum != 3 || r.Kilit != 1) throw GentegreHatasi.IsKurali("Rapor onaylı değil.");
 
-            // DIŞARI ÇIKTIYSA İPTAL YOK: teslim / e-Nabız (gönderiliyor-gönderildi-silindi) / Teletıp ORU gönderildi.
-            var engel = await baglanti.TekDegerAsync<string>("""
-                select case
-                  when exists (select 1 from public.radyoloji_teslim t where t.istem_id = @p1 or t.rapor_id = @p0)
-                    then 'Rapor teslim edildi'
-                  when exists (select 1 from public.enabiz_paket p where p.kaynak_tur = 5 and p.kaynak_id = @p0 and p.durum in (2, 3, 6))
-                    then 'Rapor e-Nabız''a gönderildi'
-                  when exists (select 1 from public.teletip_gonderim g where g.rapor_id = @p0 and g.durum = 1)
-                    then 'Rapor Teletıp''a (Bakanlık) gönderildi'
-                  else '' end
-                """, islem, [id, r.IstemId], iptal) ?? "";
+            // DIŞARI ÇIKTIYSA İPTAL YOK, REVİZE VAR (kullanıcı 18.11.2026): teslim / e-Nabız / Teletıp ORU gönderildi.
+            //   İstemci `revize` bilgisini görünce "onay geri alınamaz ama revize yapılabilir" sorar (POST .../revize).
+            var engel = await baglanti.TekDegerAsync<string>(IptalEngeliSql, islem, [id, r.IstemId], iptal) ?? "";
             if (engel.Length > 0)
-                throw GentegreHatasi.IsKurali($"{engel}; onay iptal edilemez. Düzeltme için Ek Rapor açın.");
+                throw GentegreHatasi.IsKurali(
+                    $"{engel}; onay geri alınamaz, ancak rapor revize edilebilir.", new { revize = true, neden = engel });
 
             // Gitmemiş dış kayıtlar düşer: yeniden onayda yenisi üretilir.
             await baglanti.CalistirAsync("""
@@ -174,6 +184,59 @@ public static partial class RadyolojiUclari
                 }, iptal: iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { tamam = true });
+        });
+
+        // REVİZE (1374, kullanıcı 18.11.2026): dışarı çıkmış raporun onayı geri alınamaz; raporun o anki hâli "Revize"
+        //   olarak arşivlenir (metin, no, onay, e-imza, teslim / Teletıp izi kopyada), ana rapor taslağa döner ve numarası
+        //   revize ekiyle (-R1) düzeltilir. Yetki ve kimlik onay iptaliyle AYNI: yalnız onaylayan, başkası için onun parolası.
+        grup.MapPost("/rapor/{id:int}/revize", async (
+            int id, string? surum, RevizeIstegi? govde, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            KimlikServisi kimlik, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.AksiyonIste("rad.rapor_yaz");
+            var neden = (govde?.Neden ?? "").Trim();
+            if (neden.Length == 0)
+                throw GentegreHatasi.Dogrulama("Revize nedeni yazılmalı.", new AlanHatasi("neden", "Zorunlu."));
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var on = await baglanti.TekAsync("""
+                select r.istem_id, coalesce(r.durum, 1)::int, coalesce(r.kilit, 0)::int, coalesce(r.onaylayan_id, 0),
+                       coalesce(r.imza_dokuman_id, 0)::int, coalesce(r.rapor_no, ''), r.xmin::text
+                  from public.radyoloji_rapor r where r.id = @p0 and r.ust_rapor_id is null
+                """, null, [id], o => (OnayliRapor?)new OnayliRapor(
+                o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetInt32(3), o.GetInt32(4), o.GetString(5), o.GetString(6)), iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+            if (on.Durum != 3 || on.Kilit != 1) throw GentegreHatasi.IsKurali("Rapor onaylı değil.");
+            if (on.Onaylayan != baglam.KullaniciId)
+            {
+                if (on.Onaylayan == 0) throw GentegreHatasi.IsKurali("Raporu onaylayan kişi kayıtlı değil; revize edilemez.");
+                if (string.IsNullOrEmpty(govde?.Parola))
+                    throw GentegreHatasi.Dogrulama("Onaylayan radyoloğun şifresi gerekli.", new AlanHatasi("parola", "Zorunlu."));
+                await kimlik.BaskasininParolasiniDogrulaAsync(on.Onaylayan, govde.Parola, baglam.Ip,
+                    ctx.Request.Headers.UserAgent.ToString(), "rad_revize", baglam.KullaniciId, iptal);
+            }
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync("select 1 from public.radyoloji_istem where id = @p0 for update", islem, [on.IstemId], iptal);
+            var guncel = await baglanti.TekDegerAsync<string>(
+                "select xmin::text from public.radyoloji_rapor where id = @p0 for update", islem, [id], iptal);
+            if (surum != guncel) throw GentegreHatasi.Cakisma(new { surum = guncel });
+
+            var arsivId = await baglanti.TekDegerAsync<int>(
+                "select public.fn_radyoloji_rapor_revize(@p0, @p1, @p2)", islem, [id, baglam.KullaniciId, Kisalt(neden, 300)], iptal);
+            var yeniNo = await baglanti.TekDegerAsync<string>(
+                "select coalesce(rapor_no, '') from public.radyoloji_rapor where id = @p0", islem, [id], iptal) ?? "";
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRapor, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string>
+                {
+                    ["durum"] = "Revize (taslağa döndü)", ["eskiRaporNo"] = on.No, ["yeniRaporNo"] = yeniNo,
+                    ["arsivRaporId"] = arsivId.ToString(), ["neden"] = Kisalt(neden, 300) ?? "",
+                    ["onaylayan"] = on.Onaylayan.ToString(),
+                }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { tamam = true, arsivRaporId = arsivId, raporNo = yeniNo });
         });
     }
 }

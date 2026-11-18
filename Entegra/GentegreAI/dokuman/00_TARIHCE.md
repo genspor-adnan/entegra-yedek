@@ -7,6 +7,29 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Radyoloji: rapor teslim ekranı ve rapor REVİZE (1372, 1373, 1374)
+
+- Menü "Sonuç Teslim" -> "Radyoloji Rapor Teslim" (yetki matrisi, AI rehberi, İngilizce çeviri: 1372).
+- Teslim listesi: çift tık teslim penceresi (son teslim dolu gelir, düzeltilir - PUT /istem/{id}/teslim/{teslimId},
+  zaman değişmez, istem loguna); hastanın tahsil edilmemiş borcu varsa pencerede kırmızı uyarı (GET teslim-durum,
+  başvuru "açık tahsilat · hasta" kuralı, engellemez); telefon cepten (1373); "🔗 Erişim ▾" menüsü (Hasta Kartı /
+  Başvuru / İstem / Rapor) - TeleRadyoloji Gönderimi kartında "İstem Kartı" yerine de.
+- Eski HBYS radyolog eşlemesi: OLE.RAD_ONAYLAYAN kullanıcı kodudur (aktarim/eski-hbys/rad_hekim.sql).
+- REVİZE (1374, kullanıcı: "teslim edildiyse veya teleradyoloji gönderimi yapıldıysa onay iptal dendiğinde onay geri
+  alınamaz ama revize yapılabilir denmeli.. raporun kopyası çıkarılmalı, eski rapor revize olarak kalmalı"): dışarı
+  çıkmış raporda Onay / e-İmza İptal düğmesi "Revize Et" olur, onay penceresi ve zorunlu neden sorulur (yetki onay
+  iptaliyle aynı). `fn_radyoloji_rapor_revize`: o anki hâl arşiv kopyasına (revize = 1, ust_rapor_id = ana; metin,
+  alanlar, lezyonlar, no, onay, e-imza; teslim ve Teletıp izi kopyaya taşınır), ana rapor (aynı kimlik) taslağa,
+  numara aynı + `-R<n>` (kullanıcı kararı). Yeniden onayda Teletıp ORU "Duzeltme" ve e-Nabız güncel sonuç gider; teslim
+  listesinde yeniden "Hazır" (kullanıcı kararı: yeniden teslim bekler). Rapor ekranında revize geçmişi, arşiv çıktısı
+  "REVİZE EDİLDİ" bandıyla. Arşiv kopyası Teletıp tetiğine, ek rapor sayaçlarına, teslim / kritik görünümlerine girmez.
+- Yerel KOSUYOLU: defter 39 göçü eksik gösteriyordu (yedekten gelen kopyada nesneler daha yeni). Toplu eşitleme 1304'te
+  durdu; 1301-1303'ün geri yazdığı fn_radyoloji_mwl / fn_teletip_aktif / fn_teletip_orm_verisi gentegre_ai'den geri
+  alındı (1301'in yeniden yarattığı eski 6 parametreli fn_radyoloji_mwl silindi); 1334 tek başına uygulandı.
+- Testler: RadyolojiErisimTestleri (+3: teslim düzeltme, teslim borcu, revize uçtan uca).
+
+---
+
 ## 18.11.2026 — Web arayüzü incelemesi (göç yok)
 
 - (2) Belge PUT'u sürüm (xmin) denetler: istemci kartın son okuduğu `surum`'u gönderir, başkası arada kaydettiyse
