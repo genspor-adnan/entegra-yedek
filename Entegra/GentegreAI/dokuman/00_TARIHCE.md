@@ -7,6 +7,24 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Stok / belge incelemesi: kalan dört konu (göç yok)
+
+- Tüketilmiş lotlu giriş düzenlenince izlem satırları yeni kimlik + TAM kalanla yazılıyor, çıkışların bağı
+  (`kaynak_dagilim`, `donus_id`) eski kimlikte kalıyordu: aynı mal FIFO'da yeniden tüketilebilir, çıkış silinince
+  kalan iade edilemez, geri çağırma izi kopardı. Silmeden önce tüketilmiş kaynak izlemler okunur, yeniden yazımdan
+  sonra tüketim aynı stok × lot × depodaki yeni satırlara taşınır ve tüketen satırların bağları yeni kimliklere
+  çevrilir (`BelgeDeposu.Izlem` TuketilmisKaynaklarAsync / TuketimTasiAsync). Transfer varış satırı da kaynaktır.
+- Transfer geri alması çıkış ve varışı tek komutta (CTE + update / upsert) güncelliyordu; aynı stok iki satırda ters
+  yönde taşınınca (A→B, B→A) iki güncelleme aynı satıra düşüyor, biri kayboluyordu. Dört ayrı komut.
+- Sayım kapanış fişi oturumun aktif şubesine yazılıyordu (belge yazıcısı gövdedeki şubeyi ezer); başka şubenin
+  sayımı kapatılınca fiş yanlış şubeye düşüyordu. Fiş sayımın şubesiyle yazılır.
+- Yeni belgede bakiye anlık görüntüsü satırlardan SONRA alınıyordu - lot bakiyesi satır yazılırken değiştiği için
+  lot denetimi hiç tetiklenmiyordu. Görüntü satırlardan önce. (Bugün lot düşen her yol LottanDusAsync'in kendi
+  denetiminden geçtiği için savunma amaçlı.)
+- Testler `StokLotYonuTestleri` (+3; üçü eski kodda kırmızı).
+
+---
+
 ## 18.11.2026 — Stok / belge incelemesi (5-10): numara, kilit, tür, hareket dökümü, şube, FIFO zinciri (1369)
 
 - (5) Taslak PUT ile kesinleşince numara alır (e-Belgede "0"); yalnız yeni belgeye veriliyordu.

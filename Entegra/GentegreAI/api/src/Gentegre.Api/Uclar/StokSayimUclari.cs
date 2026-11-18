@@ -395,6 +395,10 @@ public static class StokSayimUclari
             if (eksik.Count > 0 && !BelgeUclari.TurIzinli(baglam, 4, 5, Islem.Ekle))
                 throw GentegreHatasi.Yasak("Sayım eksiği için Çıkış Fişi yetkiniz yok.");
 
+            // FİŞ SAYIMIN ŞUBESİNE (stok/belge incelemesi 18.11.2026): belge yazıcısı şubeyi oturumun aktif şubesinden
+            //   alır (FisBasligi'ndaki subeId'yi ezer). Kullanıcı erişebildiği başka şubenin sayımını kapatınca fiş
+            //   kendi aktif şubesine yazılıyordu - depo sayımın şubesinde, fiş başka şubede.
+            var yazma = baglam.Yazma with { SubeId = b.SubeId };
             // Fiş tarihi = sayım tarihi (kesit), şubenin saatiyle.
             var tarih = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(b.SayimTarihi.ToUniversalTime(), DateTimeKind.Utc), Saat.Dilim(null));
             var uyarilar = new List<string>();
@@ -404,14 +408,14 @@ public static class StokSayimUclari
             {
                 var (fid, u) = await belgeDepo.KaydetAsync(baglanti, islem,
                     FisBasligi(3, 2, b, tarih, baglam), FisSatirlari(fazla, b.DepoId, giris: true),
-                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false }, baglam.Yazma, iptal);
+                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false }, yazma, iptal);
                 girisId = fid; uyarilar.AddRange(u);
             }
             if (eksik.Count > 0)
             {
                 var (fid, u) = await belgeDepo.KaydetAsync(baglanti, islem,
                     FisBasligi(4, 5, b, tarih, baglam), FisSatirlari(eksik, b.DepoId, giris: false),
-                    new BelgeSecenekleri { Taslak = false, StokKontrolu = true }, baglam.Yazma, iptal);
+                    new BelgeSecenekleri { Taslak = false, StokKontrolu = true }, yazma, iptal);
                 cikisId = fid; uyarilar.AddRange(u);
             }
 

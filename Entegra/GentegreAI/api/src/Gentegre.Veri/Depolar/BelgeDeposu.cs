@@ -386,6 +386,8 @@ public sealed partial class BelgeDeposu
                     + ". Önce Belgeye Dönüşüm'den oluşan belgeyi silin.");
         }
 
+        // Tüketilmiş kaynak izlemleri SİLMEDEN önce okunur; yeniden yazımdan sonra tüketim yeni satırlara taşınır.
+        var eskiTuketim = await TuketilmisKaynaklarAsync(baglanti, islem, belgeId, korunan.ToArray(), iptal);
         await using (var sil = new NpgsqlCommand("""
             -- Korunan satirin izlemi kalir, digerleri silinir (eskiden korunan varsa HICBIRI silinmiyordu).
             delete from public.stok_izleme where belge_id = @p0
@@ -428,6 +430,7 @@ public sealed partial class BelgeDeposu
                                                     korunanSayisi: korunan.Count,
                                                     eskiBelgeTarihi: Saat.Yerel(belgeTarihi, baglam.ZamanDilimi));
         uyarilar.AddRange(yeniUyarilar);
+        await TuketimTasiAsync(baglanti, islem, belgeId, eskiTuketim, korunan.ToArray(), iptal);
         // Düzenleme sonucu: giriş miktarını azaltmak / satırı silmek tüketilmiş malı geri alıyorsa engel; çıkış artışı ayara göre.
         await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
 
@@ -739,6 +742,14 @@ public sealed partial class BelgeDeposu
         //   sonraki isler yanlis karar verir.
         var etki = await TurEtkileriAsync(baglanti, islem, tur, iptal);
 
+        // STOK BAKİYE DENETİMİ (BelgeDeposu.Bakiye): yalnız YENİ belgede burada (düzenleme kendi anlık görüntüsünü
+        //   geri almadan önce alır - GuncelleIcAsync). Anlık görüntü SATIRLARDAN ÖNCE: lot bakiyesi (stok_lot_durum)
+        //   satır yazılırken (IzlemYazAsync) değişir - görüntü stok yazımının hemen önünde alınınca lotun "önce"si
+        //   zaten değişmiş hâli oluyor, lot denetimi yeni belgede hiç tetiklenmiyordu (stok/belge incelemesi
+        //   18.11.2026). Stoğa dokunmayan belge (sipariş, teklif) ölçüm sorgularını hiç ödemez.
+        var bakiyeOnce = mevcutId == 0 && !secenekler.Taslak && etki.Stok
+            ? await BakiyeAnligiAlAsync(baglanti, islem, 0, belge, satirlar, iptal) : null;
+
         var sira = 0;
         foreach (var satir in satirlar)
         {
@@ -780,11 +791,7 @@ public sealed partial class BelgeDeposu
 
             if (stokEtkiler)
             {
-                // STOK BAKİYE DENETİMİ (BelgeDeposu.Bakiye): yalnız YENİ belgede burada (düzenleme kendi anlık görüntüsünü
-                //   geri almadan önce alır - GuncelleIcAsync). Anlık görüntü stok yazılmadan HEMEN önce: stok_durum henüz
-                //   değişmedi; stoğa dokunmayan belge (sipariş, teklif) ölçüm sorgularını hiç ödemez (kod incelemesi).
-                var bakiyeOnce = mevcutId == 0
-                    ? await BakiyeAnligiAlAsync(baglanti, islem, 0, belge, satirlar, iptal) : null;
+                // Yeni belgenin anlık görüntüsü satırlardan önce alındı (yukarıda, bakiyeOnce).
                 await StokDurumGuncelleAsync(baglanti, islem, belgeId, tur, Sayi(belge, "tipi"), iptal);
                 if (bakiyeOnce is not null)
                     await BakiyeDenetleAsync(baglanti, islem, bakiyeOnce, secenekler.StokKontrolu, uyarilar, iptal);
@@ -942,53 +949,66 @@ public sealed partial class BelgeDeposu
     {
         korunan ??= [];
         await KaynakKalaniIadeAsync(baglanti, islem, belgeId, korunan, iptal);
-        await using (var stok = baglanti.Komut("""
-            with k as (
-                select s.stok_id,
-                       coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
-                       coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo,
-                       sum(case when coalesce(s.miktar, 0) <> 0 then s.miktar else coalesce(s.adet, 0) end) as miktar
-                  from public.belge_satir s
-                  join public.belge b on b.id = s.belge_id
-                 where s.belge_id = @p0 and s.stok_id is not null and s.tur = 1 and s.stok_durum_degis = 1
-                 group by 1, 2, 3),
-            cik as (
-                update public.stok_durum d
-                   set cikan = d.cikan - k.miktar, kalan = d.kalan + k.miktar
-                  from (select stok_id, cikis_depo, sum(miktar) miktar from k where cikis_depo is not null group by 1, 2) k
-                 where d.stok_id = k.stok_id and d.depo_id = k.cikis_depo
-                returning 1)
+
+        // İKİ AYRI KOMUT (stok/belge incelemesi 18.11.2026): eskiden çıkış ve varış tek komutta (CTE + ana update)
+        //   güncelleniyordu. Çıkış ve varış deposu aynı olan satırda iki güncelleme AYNI stok_durum / stok_lot_durum
+        //   satırına düşer; PG tek komutta bir satırı iki kez değiştirmez - biri sessizce kaybolur (giren / çıkan
+        //   bozulur). Sırayla çalışan iki komut her iki tarafı da uygular.
+        const string StokKaynak = """
+            select s.stok_id,
+                   coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
+                   coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo,
+                   sum(case when coalesce(s.miktar, 0) <> 0 then s.miktar else coalesce(s.adet, 0) end) as miktar
+              from public.belge_satir s
+              join public.belge b on b.id = s.belge_id
+             where s.belge_id = @p0 and s.stok_id is not null and s.tur = 1 and s.stok_durum_degis = 1
+             group by 1, 2, 3
+            """;
+        await using (var cik = baglanti.Komut($"""
+            update public.stok_durum d
+               set cikan = d.cikan - k.miktar, kalan = d.kalan + k.miktar
+              from (select stok_id, cikis_depo, sum(miktar) miktar from ({StokKaynak}) k0
+                     where cikis_depo is not null group by 1, 2) k
+             where d.stok_id = k.stok_id and d.depo_id = k.cikis_depo
+            """, islem, belgeId))
+            await cik.ExecuteNonQueryAsync(iptal);
+        await using (var gir = baglanti.Komut($"""
             update public.stok_durum d
                set giren = d.giren - k.miktar, kalan = d.kalan - k.miktar
-              from (select stok_id, giris_depo, sum(miktar) miktar from k where giris_depo is not null group by 1, 2) k
+              from (select stok_id, giris_depo, sum(miktar) miktar from ({StokKaynak}) k0
+                     where giris_depo is not null group by 1, 2) k
              where d.stok_id = k.stok_id and d.depo_id = k.giris_depo
             """, islem, belgeId))
-            await stok.ExecuteNonQueryAsync(iptal);
+            await gir.ExecuteNonQueryAsync(iptal);
 
-        await using (var lot = baglanti.Komut("""
-            with v as (
-                select i.stok_id, i.seri_lot_id, i.adet,
-                       coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
-                       coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo
-                  from public.stok_izleme i
-                  join public.belge b on b.id = i.belge_id
-                  left join public.belge_satir s on s.id = i.belge_satir_id
-                 where i.belge_id = @p0 and i.seri_lot_id is not null
-                   and i.depo_id = coalesce(s.giris_depo_id, b.giris_depo_id)
-                   and coalesce(i.yon, 1) <> 0                                     -- taslak satiri (1368) etkisiz
-                   and not (coalesce(i.belge_satir_id, 0) = any(@p1::int[]))),     -- korunan satirin lotu yerinde
-            hedef as (
-                update public.stok_lot_durum l
-                   set kalan = l.kalan - x.adet
-                  from (select stok_id, giris_depo, seri_lot_id, sum(adet) adet from v group by 1, 2, 3) x
-                 where l.stok_id = x.stok_id and l.depo_id = x.giris_depo and l.seri_lot_id = x.seri_lot_id
-                returning 1)
+        const string LotKaynak = """
+            select i.stok_id, i.seri_lot_id, i.adet,
+                   coalesce(s.cikis_depo_id, b.cikis_depo_id) as cikis_depo,
+                   coalesce(s.giris_depo_id, b.giris_depo_id) as giris_depo
+              from public.stok_izleme i
+              join public.belge b on b.id = i.belge_id
+              left join public.belge_satir s on s.id = i.belge_satir_id
+             where i.belge_id = @p0 and i.seri_lot_id is not null
+               and i.depo_id = coalesce(s.giris_depo_id, b.giris_depo_id)
+               -- taslak satiri (1368) etkisiz; korunan satirin lotu yerinde (son satirda yorum YOK - parca araya gomulur)
+               and coalesce(i.yon, 1) <> 0
+               and not (coalesce(i.belge_satir_id, 0) = any(@p1::int[]))
+            """;
+        await using (var hedef = baglanti.Komut($"""
+            update public.stok_lot_durum l
+               set kalan = l.kalan - x.adet
+              from (select stok_id, giris_depo, seri_lot_id, sum(adet) adet from ({LotKaynak}) v group by 1, 2, 3) x
+             where l.stok_id = x.stok_id and l.depo_id = x.giris_depo and l.seri_lot_id = x.seri_lot_id
+            """, islem, belgeId, korunan))
+            await hedef.ExecuteNonQueryAsync(iptal);
+        await using (var kaynak = baglanti.Komut($"""
             insert into public.stok_lot_durum (stok_id, depo_id, seri_lot_id, kalan)
-            select stok_id, cikis_depo, seri_lot_id, sum(adet) from v where cikis_depo is not null group by 1, 2, 3
+            select stok_id, cikis_depo, seri_lot_id, sum(adet) from ({LotKaynak}) v
+             where cikis_depo is not null group by 1, 2, 3
             on conflict (stok_id, depo_id, seri_lot_id) do update
                set kalan = public.stok_lot_durum.kalan + excluded.kalan
             """, islem, belgeId, korunan))
-            await lot.ExecuteNonQueryAsync(iptal);
+            await kaynak.ExecuteNonQueryAsync(iptal);
     }
 
     /// <summary>

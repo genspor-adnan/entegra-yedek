@@ -624,4 +624,145 @@ public sealed partial class BelgeDeposu
             stokId, depoId, giren, cikan);
         await komut.ExecuteNonQueryAsync(iptal);
     }
+
+    // ================================================== tüketim taşıma ====
+    /// <summary>Düzenlenen belgenin tüketilmiş kaynak izlem satırı (giriş ya da transfer varışı).</summary>
+    private sealed record EskiTuketim(int Id, int StokId, int LotId, int? DepoId, decimal Tuketilen);
+
+    /// <summary>Kaynak olarak kullanılabilen web izlem satırı: giriş (yon +1) ya da transfer varışı (yon boş, tür 20).</summary>
+    private const string KaynakIzlemSarti =
+        "aktarim_kaynak is null and (yon = 1 or (yon is null and belge_tur = 20))";
+
+    /// <summary>
+    /// TÜKETİLMİŞ GİRİŞİN DÜZENLENMESİ (stok/belge incelemesi 18.11.2026): düzenleme belgenin izlem satırlarını silip
+    /// yeni kimlikle ve TAM kalanla yeniden yazıyordu. Bu girişten yapılmış çıkışlar ise eski kimliğe bağlı kalıyordu
+    /// (`kaynak_dagilim`, `donus_id`): (a) aynı mal FIFO'da ikinci kez tüketilebiliyordu, (b) çıkış düzenlenip
+    /// silinince kalan iade edilecek satır bulunamıyordu, (c) geri çağırma izi kopuyordu. Silmeden ÖNCE tüketilmiş
+    /// kaynak satırları okunur; yeniden yazımdan sonra <see cref="TuketimTasiAsync"/> tüketimi yeni satırlara taşır.
+    /// </summary>
+    private static async Task<List<EskiTuketim>> TuketilmisKaynaklarAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int belgeId, int[] korunan, CancellationToken iptal)
+    {
+        var liste = new List<EskiTuketim>();
+        await using var k = baglanti.Komut($"""
+            select id, stok_id, seri_lot_id, depo_id, adet - kalan
+              from public.stok_izleme
+             where belge_id = @p0 and not (coalesce(belge_satir_id, 0) = any(@p1::int[]))
+               and {KaynakIzlemSarti} and adet - kalan > 0
+             order by id
+            """, islem, belgeId, korunan);
+        await using var o = await k.ExecuteReaderAsync(iptal);
+        while (await o.ReadAsync(iptal))
+            liste.Add(new EskiTuketim(o.GetInt32(0), o.GetInt32(1), o.GetInt32(2),
+                                      o.IsDBNull(3) ? null : o.GetInt32(3), o.GetDecimal(4)));
+        return liste;
+    }
+
+    /// <summary>
+    /// Eski kaynak satırların tüketimini belgenin YENİ kaynak satırlarına (aynı stok × lot × depo, kimlik sırasıyla)
+    /// taşır: yeni satırın kalanı düşer, tüketen çıkışların `kaynak_dagilim` ve `donus_id` bağları yeni kimliklere
+    /// çevrilir. Yeni satırlar tüketimi karşılamıyorsa (miktar azaldı / lot değişti) karşılanamayan kısım bağsız
+    /// kalır - bakiye denetimi (BakiyeDenetleAsync) tüketilmiş malın geri alınmasını zaten engeller.
+    /// </summary>
+    private static async Task TuketimTasiAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, List<EskiTuketim> eski, int[] korunan, CancellationToken iptal)
+    {
+        if (eski.Count == 0) return;
+        var esleme = new Dictionary<int, List<(int Yeni, decimal M)>>();
+        var dus = new Dictionary<int, decimal>();
+        foreach (var grup in eski.GroupBy(e => (e.StokId, e.LotId, e.DepoId)))
+        {
+            var yeniler = new List<(int Id, decimal Kalan)>();
+            await using (var k = baglanti.Komut($"""
+                select id, kalan from public.stok_izleme
+                 where belge_id = @p0 and stok_id = @p1 and seri_lot_id = @p2
+                   and depo_id is not distinct from @p3::int
+                   and not (coalesce(belge_satir_id, 0) = any(@p4::int[]))
+                   and {KaynakIzlemSarti} and kalan > 0
+                 order by id
+                 for update
+                """, islem, belgeId, grup.Key.StokId, grup.Key.LotId, (object?)grup.Key.DepoId ?? DBNull.Value, korunan))
+            await using (var o = await k.ExecuteReaderAsync(iptal))
+                while (await o.ReadAsync(iptal)) yeniler.Add((o.GetInt32(0), o.GetDecimal(1)));
+
+            var j = 0;
+            foreach (var e in grup.OrderBy(x => x.Id))
+            {
+                var parcalar = new List<(int, decimal)>();
+                var kalan = e.Tuketilen;
+                while (kalan > 0 && j < yeniler.Count)
+                {
+                    var pay = Math.Min(yeniler[j].Kalan, kalan);
+                    yeniler[j] = (yeniler[j].Id, yeniler[j].Kalan - pay);
+                    kalan -= pay;
+                    parcalar.Add((yeniler[j].Id, pay));
+                    dus[yeniler[j].Id] = dus.GetValueOrDefault(yeniler[j].Id) + pay;
+                    if (yeniler[j].Kalan <= 0) j++;
+                }
+                esleme[e.Id] = parcalar;
+            }
+        }
+
+        if (dus.Count > 0)
+        {
+            await using var k = baglanti.Komut("""
+                update public.stok_izleme i set kalan = i.kalan - x.m
+                  from unnest(@p0::int[], @p1::numeric[]) as x(id, m)
+                 where i.id = x.id
+                """, islem, dus.Keys.ToArray(), dus.Values.ToArray());
+            await k.ExecuteNonQueryAsync(iptal);
+        }
+
+        // TÜKETENLER: eski kimliğe bağlı çıkış / transfer satırları (başka belgelerde). Dağılım öğesi {id: eski, m}
+        //   eşlemedeki sırayla yeni kimliklere bölünür; karşılığı kalmayan kısım düşer. donus_id ilk yeni kaynağa.
+        var eskiIdler = eski.Select(e => e.Id).ToArray();
+        var tuketenler = new List<(int Id, string? Dagilim, int Donus)>();
+        await using (var k = baglanti.Komut("""
+            select i.id, i.kaynak_dagilim::text, i.donus_id
+              from public.stok_izleme i
+             where i.stok_id = any(@p0::int[]) and i.seri_lot_id = any(@p1::int[]) and i.aktarim_kaynak is null
+               and (i.donus_id = any(@p2::int[])
+                    or (i.kaynak_dagilim is not null
+                        and exists (select 1 from jsonb_array_elements(i.kaynak_dagilim) e
+                                     where (e ->> 'id')::int = any(@p2::int[]))))
+             order by i.id
+             for update
+            """, islem, eski.Select(e => e.StokId).Distinct().ToArray(),
+                 eski.Select(e => e.LotId).Distinct().ToArray(), eskiIdler))
+        await using (var o = await k.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+                tuketenler.Add((o.GetInt32(0), o.IsDBNull(1) ? null : o.GetString(1), o.GetInt32(2)));
+
+        var ilkYeni = esleme.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value[0].Yeni);
+        var kuyruk = esleme.ToDictionary(x => x.Key, x => new LinkedList<(int Yeni, decimal M)>(x.Value));
+        foreach (var (id, dagilimMetni, donus) in tuketenler)
+        {
+            var yeniDagilim = dagilimMetni;
+            if (dagilimMetni is not null)
+            {
+                var dizi = new List<object>();
+                using (var d = JsonDocument.Parse(dagilimMetni))
+                    foreach (var el in d.RootElement.EnumerateArray())
+                    {
+                        var kid = el.GetProperty("id").GetInt32();
+                        var m = el.GetProperty("m").GetDecimal();
+                        if (!kuyruk.TryGetValue(kid, out var q)) { dizi.Add(new { id = kid, m }); continue; }
+                        while (m > 0 && q.First is { } ilk)
+                        {
+                            var (yid, ym) = ilk.Value;
+                            var pay = Math.Min(ym, m);
+                            dizi.Add(new { id = yid, m = pay });
+                            m -= pay;
+                            if (ym > pay) ilk.Value = (yid, ym - pay); else q.RemoveFirst();
+                        }
+                    }
+                yeniDagilim = JsonSerializer.Serialize(dizi);
+            }
+            var yeniDonus = ilkYeni.TryGetValue(donus, out var yd) ? yd : donus;
+            await using var u = baglanti.Komut("""
+                update public.stok_izleme set kaynak_dagilim = @p1::jsonb, donus_id = @p2 where id = @p0
+                """, islem, id, (object?)yeniDagilim ?? DBNull.Value, yeniDonus);
+            await u.ExecuteNonQueryAsync(iptal);
+        }
+    }
 }

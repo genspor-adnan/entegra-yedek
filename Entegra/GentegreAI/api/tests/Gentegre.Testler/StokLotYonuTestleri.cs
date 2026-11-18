@@ -8,7 +8,8 @@ namespace Gentegre.Testler;
 /// STOK / BELGE İNCELEMESİ 18.11.2026 bulgu 1-4 (1368) ve 5, 7-10 (1369): lot bakiyesi stokla aynı yön ve depoda yürür.
 ///  1 taslak lot bakiyesine dokunmaz, kesinleşince işlenir, silinince iz kalmaz · 2 satış / alış iadesinde lot
 ///  stokla aynı yönde · 3 korunan satırlı belge düzenlenince lot erimez · 4 iki depolu giriş belgesinin geri alması
-///  yazıldığı depodan.
+///  yazıldığı depodan. Sonra: tüketilmiş giriş düzenlenince tüketim yeni izleme taşınır · transfer
+///  (ters yönlü iki satır) geri alınır · sayım fişi sayımın şubesine yazılır.
 /// </summary>
 [Collection(ApiKoleksiyonu.Ad)]
 public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
@@ -16,11 +17,12 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
     private const int Merkez = 1;
     private static readonly string Tarih = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:00");
 
-    private sealed record Ortam(HttpClient H, int DepoA, int DepoB, int Stok, int Tedarikci, int Musteri);
+    private sealed record Ortam(HttpClient H, int DepoA, int DepoB, int Stok, int Tedarikci, int Musteri, int Kullanici = 0, string Kod = "");
 
     private async Task<Ortam> OrtamAsync(TestDunyasi d, int izleme = 2)
     {
-        var rol = await d.RolAsync("stoklot", "belge:gedk", "belge.alis.irsaliye:gedk", "belge.satis.irsaliye:gedk", "belge.satis.fatura:gedk", "stok:g");
+        var rol = await d.RolAsync("stoklot", "belge:gedk", "belge.alis.irsaliye:gedk", "belge.satis.irsaliye:gedk", "belge.satis.fatura:gedk", "stok:g",
+                                  "belge.stok.transfer:gedk", "belge.stok.giris:gedk", "belge.stok.cikis:gedk", "stok.sayim:gedk");
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
@@ -50,7 +52,7 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
             d.Temizle($"delete from public.taraf where id = {id}");
             return id;
         }
-        return new Ortam(api.Istemci(access, Merkez), a, b, stok, await Taraf("tedarikci"), await Taraf("musteri"));
+        return new Ortam(api.Istemci(access, Merkez), a, b, stok, await Taraf("tedarikci"), await Taraf("musteri"), u, kod);
     }
 
     private async Task<int> YazAsync(TestDunyasi d, Ortam o, object belge, object[] satirlar, bool taslak = false, int? id = null)
@@ -258,5 +260,90 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
         Assert.True(sil.IsSuccessStatusCode, await sil.Content.ReadAsStringAsync());
         Assert.Equal(10m, await KaynakKalan());
         Assert.Equal(10m, await Lot(o, o.DepoA));
+    }
+
+    [VtFact]
+    public async Task Tuketilmis_giris_duzenlenince_tuketim_yeni_izleme_tasinir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d);
+        using var _ = o.H;
+        var no = "TT" + d.Onek[^6..];
+        var giris = await YazAsync(d, o, AlisIrsaliyesi(o, no), [LotSatiri(o.Stok, 10, new { lotNo = "L-TT", miktar = 10 })]);
+        var lot = await api.Veri.TekDegerAsync<int>("select id from public.stok_seri_lot where stok_id = @p0 and lot_no = 'L-TT'", [o.Stok]);
+        var cikis = await YazAsync(d, o, SatisIrsaliyesi(o), [LotSatiri(o.Stok, 4, new { seriLotId = lot, miktar = 4 })]);
+
+        // Giriş düzenlenir (miktar 12): izlem yeni kimlikle yazılır, tüketim (4) taşınır.
+        await YazAsync(d, o, AlisIrsaliyesi(o, no), [LotSatiri(o.Stok, 12, new { lotNo = "L-TT", miktar = 12 })], id: giris);
+        var (yeniId, kalan) = (await api.Veri.TekDegerAsync<int>("select id from public.stok_izleme where belge_id = @p0", [giris]),
+                               await api.Veri.TekDegerAsync<decimal>("select kalan from public.stok_izleme where belge_id = @p0", [giris]));
+        Assert.Equal(8m, kalan);                                                    // eskiden 12 (aynı mal yeniden tüketilebilir)
+        Assert.Equal(yeniId, await api.Veri.TekDegerAsync<int>(
+            "select (kaynak_dagilim -> 0 ->> 'id')::int from public.stok_izleme where belge_id = @p0", [cikis]));
+        Assert.Equal(yeniId, await api.Veri.TekDegerAsync<int>(
+            "select donus_id from public.stok_izleme where belge_id = @p0", [cikis]));
+
+        var sil = await o.H.DeleteAsync($"/api/belge/{cikis}");
+        Assert.True(sil.IsSuccessStatusCode, await sil.Content.ReadAsStringAsync());
+        Assert.Equal(12m, await api.Veri.TekDegerAsync<decimal>("select kalan from public.stok_izleme where belge_id = @p0", [giris]));
+        Assert.Equal(12m, await Lot(o, o.DepoA));
+    }
+
+    [VtFact]
+    public async Task Ters_yonlu_iki_satirli_transfer_geri_alinir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        await YazAsync(d, o, AlisIrsaliyesi(o, "AT" + d.Onek[^6..]), [new { tur = 1, stokId = o.Stok, adet = 10, miktar = 10, birimFiyat = 10 }]);
+        Task<string?> Durum(int depo) => api.Veri.TekDegerAsync<string>(
+            "select giren::numeric(10,0) || '/' || cikan::numeric(10,0) || '/' || kalan::numeric(10,0) from public.stok_durum where stok_id = @p0 and depo_id = @p1",
+            [o.Stok, depo]);
+        Assert.Equal("10/0/10", await Durum(o.DepoA));
+        // Aynı stok iki satırda ters yönde: A→B 3 (başlık), B→A 2 (satır deposu). Geri almada çıkış ve varış
+        //   güncellemeleri aynı stok_durum satırlarına düşer - eskiden tek komutta biri kayboluyordu.
+        var tr = await YazAsync(d, o, new { tur = 20, tipi = 1, belgeTarihi = Tarih, cikisDepoId = o.DepoA, girisDepoId = o.DepoB,
+                  teslimEdenId = o.Tedarikci, teslimAlanId = o.Musteri },
+            [new { tur = 1, stokId = o.Stok, adet = 3, miktar = 3, birimFiyat = 10 },
+             new { tur = 1, stokId = o.Stok, adet = 2, miktar = 2, birimFiyat = 10, cikisDepoId = o.DepoB, girisDepoId = o.DepoA }]);
+        Assert.Equal("12/3/9", await Durum(o.DepoA));
+        Assert.Equal("3/2/1", await Durum(o.DepoB));
+        var sil = await o.H.DeleteAsync($"/api/belge/{tr}");
+        Assert.True(sil.IsSuccessStatusCode, await sil.Content.ReadAsStringAsync());
+        Assert.Equal("10/0/10", await Durum(o.DepoA));
+        Assert.Equal("0/0/0", await Durum(o.DepoB));
+    }
+
+    [VtFact]
+    public async Task Sayim_fisi_sayimin_subesine_yazilir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        var diger = await api.Veri.TekDegerAsync<int>("select min(id) from public.sube where id <> @p0", [Merkez]);
+        await d.SubeVerAsync(o.Kullanici, diger, yazma: true);          // kullanıcı iki şubeye erişir, aktif şube Merkez
+        // Sayım DİĞER şubede açılmış (oturum açmak ilk oturumu düşürür - başlık doğrudan yazılır).
+        var sayim = await api.Veri.TekDegerAsync<int>("""
+            insert into public.stok_sayim (sube_id, depo_id, kapsam, aciklama, ekleyen, sayim_no)
+            values (@p0, @p1, 2, '', @p2, @p3) returning id
+            """, [diger, o.DepoB, o.Kullanici, "SYM-" + d.Onek[^6..]]);
+        await api.Veri.CalistirAsync(
+            "insert into public.stok_sayim_satir (sayim_id, stok_id, sistem, sayilan) values (@p0, @p1, 0, 3)", [sayim, o.Stok]);
+
+        var kapat = await o.H.PostAsync($"/api/stok-sayim/{sayim}/kapat", null);   // Merkez oturumundan kapatılır
+        var kG = await kapat.Content.ReadAsStringAsync();
+        var fis = kapat.IsSuccessStatusCode ? JsonDocument.Parse(kG).RootElement.GetProperty("girisBelgeId").GetInt32() : 0;
+        if (fis > 0)
+        {
+            d.Temizle($"delete from public.islem_log where tablo_id = 30 and kayit_id = {fis}");
+            d.Temizle($"delete from public.stok_izleme where belge_id = {fis}");
+            d.Temizle($"delete from public.belge_satir where belge_id = {fis}");
+            d.Temizle($"delete from public.belge where id = {fis}");
+        }
+        d.Temizle($"delete from public.islem_log where tablo_id = 1620 and kayit_id = {sayim}");
+        d.Temizle($"delete from public.stok_sayim_satir where sayim_id = {sayim}");
+        d.Temizle($"delete from public.stok_sayim where id = {sayim}");
+        Assert.True(kapat.IsSuccessStatusCode, kG);
+        Assert.Equal(diger, await api.Veri.TekDegerAsync<int>("select sube_id from public.belge where id = @p0", [fis]));   // eskiden Merkez
     }
 }
