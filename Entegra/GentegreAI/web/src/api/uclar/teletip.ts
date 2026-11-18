@@ -11,7 +11,7 @@ export interface TeletipSatir {
   kontrolNo: string; accessionNo: string; eklemeTarihi: string; sonDeneme: string | null; sonrakiDeneme: string | null;
 }
 export interface TeletipIstemOzet {
-  id: number; accessionNo: string; durum: number; hastaId: number; hastaAdi: string; tetkikAdi: string; modalite: string; kabul: string;
+  id: number; accessionNo: string; durum: number; hastaId: number; belgeId: number | null; hastaAdi: string; tetkikAdi: string; modalite: string; kabul: string;
 }
 
 /** TeleRadyoloji panosu (mockup §2): günün özeti, son olaylar, Mirth kanal durumları. */

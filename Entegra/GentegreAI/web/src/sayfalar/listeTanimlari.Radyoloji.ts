@@ -1,4 +1,5 @@
 import { type ListeGirdisi } from './listeTanimlari.Ortak';
+import { ERISIM_KODU, ERISIM_MENUSU } from '../bilesenler/radyoloji/radyolojiErisim';
 
 /**
  * Radyoloji: çalışma listesi, şablonlar, protokoller, cihazlar.
@@ -260,12 +261,14 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // SONUÇ TESLİM TAKİBİ (318): raporu onaylı ama alınmamış işler. "Hastanın
     //   raporu hazır mı, alındı mı" sorusunun ekranı.
     kaynak: 'radyoloji-teslim', rota: 'radyoloji-teslim',
+    // ERİŞİM ▾ (18.11.2026): Hasta / Başvuru / İstem / Rapor tek menüde.
+    altSecenekler: { [ERISIM_KODU]: ERISIM_MENUSU },
     baslik: 'Radyoloji Rapor Teslim', yol: 'Radyoloji › Radyoloji Rapor Teslim',
     aksiyonEkrani: 'radyoloji-teslim-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
     kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
-    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId'],
+    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId', 'basvuruId'],
     cipler: [
       { ad: 'Teslim Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
       { ad: 'Teslim Edilen',   filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },

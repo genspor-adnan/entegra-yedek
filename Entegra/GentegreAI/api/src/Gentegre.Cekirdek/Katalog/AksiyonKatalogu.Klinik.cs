@@ -286,10 +286,11 @@ public static partial class AksiyonKatalogu
         {
             new("radyoloji.teslim",   "📦 Teslim Et", "radyoloji",
                 AksiyonYetkisi: "rad.teslim", KayitGerekir: true, Sira: 10),
-            new("radyoloji.istem-ac", "👁 İstemi Aç", "radyoloji",
+            // ERİŞİM ▾ (kullanıcı 18.11.2026): "İstemi Aç" / "Raporu Aç" düğmeleri tek açılır menüde - Hasta Kartı /
+            //   Başvuru / İstem / Rapor. Alt seçenekler istemcide (radyolojiErisim.ts); her hedef kendi ekranının
+            //   yetkisiyle açılır.
+            new("radyoloji.erisim",   "🔗 Erişim", "radyoloji",
                 KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
-            new("radyoloji.rapor",    "📄 Raporu Aç", "radyoloji",
-                AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
         };
 
         // TELERADYOLOJI CALISMA LISTESI (799). 797'de `telerad.ata` ve

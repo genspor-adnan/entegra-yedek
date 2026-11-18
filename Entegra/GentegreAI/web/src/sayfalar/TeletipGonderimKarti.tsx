@@ -7,6 +7,7 @@ import { EkranSekmesiBaglami, sekmeAdi } from '../bilesenler/sekmeBaglami';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { tarihSaat } from '../bilesenler/bicim';
 import { c } from '../dil/ceviri';
+import { ERISIM_MENUSU, erisimYolu } from '../bilesenler/radyoloji/radyolojiErisim';
 
 /**
  * TELETIP GÖNDERİM KARTI (1304; mockup Ekranlar/Radyoloji/teletip_mirth.html §4): bir radyoloji isteminin Bakanlık
@@ -51,9 +52,14 @@ export function TeletipGonderimKarti() {
     if (ekranSekmesi && istemId) ekranSekmesi.baslik(sekmeAdi(hastaAdi || c('TeleRadyoloji')), `/teletip/${istemId}`);
   }, [ekranSekmesi, hastaAdi, istemId]);
 
-  const istemKarti = () => {
-    const yol = `/radyoloji/${istemId}`;
-    if (ekranSekmesi) ekranSekmesi.kartaGit(yol); else git(yol);
+  // ERİŞİM ▾ (kullanıcı 18.11.2026: "İstem Kartı" düğmesi yerine Hasta / Başvuru / İstem / Rapor menüsü).
+  const [erisimAcik, setErisimAcik] = useState(false);
+  const erisim = (kod: string) => {
+    setErisimAcik(false);
+    const e = erisimYolu(kod, { istemId, hastaId: v?.istem?.hastaId ?? null, basvuruId: v?.istem?.belgeId ?? null });
+    if (!e) return;
+    if ('hata' in e) { mesaj(e.hata); return }
+    if (ekranSekmesi) ekranSekmesi.kartaGit(e.yol); else git(e.yol);
   };
   const dene = (s: TeletipSatir) => guvenli(async () => {
     setMesgul(true);
@@ -82,7 +88,20 @@ export function TeletipGonderimKarti() {
         <div className="ttk-sag">
           <button type="button" className="d" onClick={() => void yukle()}>🔄 {c('Yenile')}</button>
           <button type="button" className="d" onClick={() => void onizle()}>🔍 {c('Önizle / Eksikler')}</button>
-          {ist && <button type="button" className="d" onClick={istemKarti}>📄 {c('İstem Kartı')}</button>}
+          {ist && (
+            <span className="dugme-menu">
+              <button type="button" className="d" onClick={e => { e.stopPropagation(); setErisimAcik(a => !a) }}>
+                <span>🔗 {c('Erişim')} ▾</span>
+              </button>
+              {erisimAcik && (
+                <div className="dugme-menu-liste" onMouseLeave={() => setErisimAcik(false)}>
+                  {ERISIM_MENUSU.map(o => (
+                    <button key={o.kod} type="button" className="mi" onClick={() => erisim(o.kod)}>{c(o.ad)}</button>
+                  ))}
+                </div>
+              )}
+            </span>
+          )}
         </div>
       </div>
       <div className="ttk-band">

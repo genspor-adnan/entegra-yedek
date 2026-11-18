@@ -638,6 +638,9 @@ public static partial class KaynakKatalogu
             new("accessionNo",  "t.accession_no", "metin", "Accession", Genislik: 150),
             new("hasta",        "t.hasta",        "metin", "Hasta", Genislik: 190),
             new("hastaId",      "t.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
+            // Erişim ▾ "Başvuruyu Aç" için (18.11.2026).
+            new("basvuruId",    "(select i.belge_id from public.radyoloji_istem i where i.id = t.istem_id)",
+                                                  "sayi",  "Başvuru Id", Varsayilan: false, Filtrelenebilir: false),
             new("telefon",      "t.telefon",      "metin", "Telefon", Genislik: 130),
             new("tetkik",       "t.tetkik",       "metin", "Tetkik", Genislik: 230),
             new("radyolog",     "t.radyolog",     "metin", "Radyolog", Genislik: 160),

@@ -34,7 +34,7 @@ public static class TeletipUclari
                 """, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
             // Kart başlığı: istemin kimliği (istem silinmişse yok).
             var istem = (await veri.ListeAsync("""
-                select i.id, i.accession_no as "accessionNo", i.durum, i.hasta_id as "hastaId",
+                select i.id, i.accession_no as "accessionNo", i.durum, i.hasta_id as "hastaId", i.belge_id as "belgeId",
                        coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi",
                        coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon) as "tetkikAdi",
                        public.fn_rad_modalite_kod(i.modalite) as modalite,

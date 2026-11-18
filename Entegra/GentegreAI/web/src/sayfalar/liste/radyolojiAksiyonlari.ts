@@ -2,6 +2,7 @@ import { api } from '../../api/istemci';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { yerelZamanDamgasi } from './zaman';
+import { erisimYolu } from '../../bilesenler/radyoloji/radyolojiErisim';
 
 /**
  * RADYOLOJI WORKLIST AKSIYONLARI (283 · 304 · 316 · 318 · 320).
@@ -166,6 +167,16 @@ export async function radyolojiAksiyonu(
   if (kod === 'radyoloji.istem-ac') {
     if (!satir) return true;
     b.git(`/radyoloji/${Number(satir.istemId ?? satir.id)}`);
+    return true;
+  }
+
+  // ERİŞİM ▾ alt menüsü: hasta kartı / başvuru / istem / rapor (satırın kimliği istem).
+  if (kod.startsWith('radyoloji.erisim.')) {
+    if (!satir) return true;
+    const e = erisimYolu(kod, { istemId: Number(satir.istemId ?? satir.id),
+                                hastaId: Number(satir.hastaId ?? 0) || null,
+                                basvuruId: Number(satir.basvuruId ?? 0) || null });
+    if (e && 'yol' in e) b.git(e.yol); else if (e) mesaj(e.hata);
     return true;
   }
 
