@@ -72,7 +72,9 @@ export function Kabuk() {
   // MENU AGACI (kabuk/menuAgaci): yetki + urun modu + kurum modulu suzgeci,
   //   grup/alt-grup, urune gore grup sirasi - hepsi saf fonksiyonda.
   // ÜRETİM SEVİYESİ (1253, uretim_basit.html ②): basit seviyede emir isteğe bağlı - kapalıysa Üretim Emiri Listesi menüde yok.
-  const uretimSv = useUretimSeviyesi();
+  //   Yalnız Üretim Emri Listesi'ni görebilen kullanıcıda sorulur: üretim yetkisi olmayan (banko, hekim) her sayfa
+  //   açılışında /api/uretim/seviye'den boşuna 403 alıyordu (18.11.2026).
+  const uretimSv = useUretimSeviyesi(yetki('uretim.liste'));
   const menuYetki = (kod: string) => (kod === 'uretim.liste' && uretimSv.yuklendi && uretimSv.basit && !uretimSv.emirKullan) ? false : yetki(kod);
   const kodSatirlari = menuSatirlariKur(LISTELER, menuYetki, kullanici?.urunModu, kullanici?.moduller);
   /**

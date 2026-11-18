@@ -338,4 +338,20 @@ public sealed class EkranKoduBolmeTestleri
         var salt = new YetkiSeti(1, [new YetkiKaydi("belge_satir", 0, true, false, false, false)], []);
         Assert.False(salt.Var("hizmet", Islem.Gor));
     }
+
+    [Fact]
+    public void Basvuru_listesi_olan_bolum_adlarini_yalniz_okur()
+    {
+        // Kullanıcı 18.11.2026: "banko görevlisi cansu olarak girdim.. başvuru listesi menüsüne tıkladım..
+        //   yetkiniz yok dedi" - Bölüm süzgeci `/api/liste/departman` 403 (rolde `departman` yoktu).
+        var banko = new YetkiSeti(1, [new YetkiKaydi("basvuru.liste", 0, true, false, false, false)], []);
+        Assert.True(banko.Var("departman", Islem.Gor));
+        Assert.False(banko.Var("departman", Islem.Ekle));        // bölüm tanımlayamaz
+        Assert.False(banko.VarTam("departman", Islem.Gor));     // matris / menü değişmez
+        Assert.False(banko.Var("personel", Islem.Gor));         // İK tanım ekranı açılmaz
+        Assert.True(new YetkiSeti(1, [new YetkiKaydi("randevu.liste", 0, true, false, false, false)], [])
+                        .Var("departman", Islem.Gor));
+        Assert.False(new YetkiSeti(1, [new YetkiKaydi("stok", 0, true, true, true, true)], [])
+                         .Var("departman", Islem.Gor));
+    }
 }

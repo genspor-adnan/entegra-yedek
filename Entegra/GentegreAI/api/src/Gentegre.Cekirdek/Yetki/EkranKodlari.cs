@@ -356,6 +356,14 @@ public static partial class EkranKodlari
         ["muayene"]       = ["muayene.sevk", "medula.recete"],   // Muayene › Sevk Listesi, Medula › e-Reçete
         ["klinik_kalite"] = ["klinik_kalite.olgu"],             // Klinik Kalite › Gösterge Listesi
         ["kasa_islem"]    = ["kasa.finans"],                    // Finans › Kasa İşlemi Listesi
+        // BÖLÜM LİSTESİ (kullanıcı 18.11.2026: "banko görevlisi cansu olarak girdim.. başvuru listesi menüsüne
+        //   tıkladım.. yetkiniz yok dedi"). 999 bölüm adlarını kendi `departman` koduna ayırıp o günkü rollere
+        //   dağıtmıştı; SONRA açılan roller (KOSUYOLU Banko Görevlisi / Sorumlusu 16.11) bu kodu hiç almadı ve
+        //   başvuru / randevu listesinin Bölüm süzgeci 403 verdi. Bölüm seçen ekranın kodu listeyi okumada
+        //   açar - rol kurarken ayrı bir "Sistem" satırını hatırlamak gerekmez; tanım ekranı (İK › Bölüm /
+        //   Görev) ve yazma `personel` / `departman`da kalır.
+        ["departman"]     = ["hasta", "hasta.liste", "belge", "basvuru.liste", "randevu", "randevu.liste",
+                             "acil.pano", "personel"],
     };
 
     /// <summary>Bu kaynağı yalnız okumada açan ekran kodları (yoksa boş).</summary>
