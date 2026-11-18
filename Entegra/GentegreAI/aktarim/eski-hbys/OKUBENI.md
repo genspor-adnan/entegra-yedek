@@ -10,6 +10,7 @@ Eski Delphi HBYS'nin (MSSQL, mantıksal dosya adı `GEN3000`) verisini yeni web 
 | `al.ps1` | 1. aşama — MSSQL'den hedef PG'nin `eski` şemasına **ham kopya** (yorumsuz; tablolar otomatik kurulur). Raporları açar: zlib → "BDOC" + OLE → `Package` akışı → .docx → düz metin + **biçimli HTML** (kalın / italik / hizalama / punto / renk, gerçek tablolar, gövdedeki resimler `data:` olarak; EMF / WMF / BMP PNG'ye çevrilir). Eski .doc içerik Word COM ile yalnız metne açılır. Şifre kolonlarını ve hasta resmini kopyalamaz. Örnek için `-RaporLimit N` (en yeni N) ya da `-RaporId 1,2,3`; `-Devam` mevcutların yanına ekler. |
 | `sozluk.sql` | **Bilgi alanı** — `eski.tanim`: eski tablo / kolon / kod değerlerinin anlamı, yeni sistemdeki karşılığı ve nasıl doğrulandığı (`olcum` / `kullanici` / `ad`). Tek kaynak budur; kurallar buradan okunur. |
 | `esle.sql` | 2. aşama — `eski` → yeni şema. Yeniden çalıştırılabilir (önce kendi yazdıklarını siler), tek işlem, sonunda `eski.aktarim_rapor` mutabakatı. |
+| `rad_hekim.sql` | Radyoloji raporunun yazan / onaylayan radyoloğu (18.11.2026): OLE.RAD_ONAYLAYAN eski **kullanıcı** kodudur (KULLAN.KULLANICI), DOKTORKOD değil - `esle.sql` eşleyemiyordu. KULLAN personeli → bağlı DOKTOR → ad eşleşmesiyle çözer; yalnız boş alanı doldurur, yedekli. `kullan.sql`'den SONRA çalışır (radyologların personel kartı orada birleşir). |
 | `accession_sayac.sql` | Radyoloji accession şablonu ve sayacı (aşağıda). |
 | `kategori_alt.sql` | Hizmet alt kategorileri: Radyoloji (MR / BT / Ultrason / Doppler / Röntgen / Mamografi / Kemik Dansitometri / Kontrast-Sarf, modaliteden) ve Laboratuvar (Biyokimya / Hormon / Hematoloji / Seroloji-İmmünoloji / Mikrobiyoloji, eski kod önekinden). Eşleme masası uygulamasından sonra; yeniden çalıştırılabilir, yalnız kökte duran hizmeti taşır. |
 
@@ -30,6 +31,8 @@ docker cp aktarim\eski-hbys\sozluk.sql gentegre-pg18:/tmp/ ; docker exec gentegr
 powershell -ExecutionPolicy Bypass -File aktarim\eski-hbys\al.ps1 -MssqlDb <MSSQL_DB> -PgDb <DB> -Yil 2026
 # 4) Eşleme + mutabakat
 docker cp aktarim\eski-hbys\esle.sql gentegre-pg18:/tmp/ ; docker exec gentegre-pg18 psql -U postgres -d <DB> -f /tmp/esle.sql
+# 4b) (kullan.sql'den sonra) radyoloji raporlarının radyoloğu
+docker exec -i gentegre-pg18 psql -U postgres -d <DB> -v ON_ERROR_STOP=1 -f - < aktarim\eski-hbysad_hekim.sql
 ```
 
 Yeni kurulumda **önce `eski.tanim`'ı o kurulumun verisiyle karşılaştırın** — farklı kod değerleri (başka

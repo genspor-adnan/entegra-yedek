@@ -616,6 +616,8 @@ with yaz as (
       join zz_ole o on o.id = e.eski_id
       left join zz_hekim hk on hk.eski_id = o.doktorid
       left join zz_hekim onay on onay.doktorkod = o.rad_onaylayan
+      -- NOT (18.11.2026): RAD_ONAYLAYAN eski KULLANICI kodudur (KULLAN.KULLANICI), DOKTORKOD değil - bu join çoğu
+      --   raporda boş kalır. Yazan / onaylayan rad_hekim.sql ile (kullan.sql'den sonra) doldurulur.
      where e.tablo = 'OLE' and e.hedef = 'radyoloji_istem'
     returning id, istem_id)
 insert into eski.esleme (tablo, eski_id, hedef, yeni_id)
