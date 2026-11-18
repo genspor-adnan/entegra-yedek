@@ -204,18 +204,27 @@ public static class BasvuruKvkkUclari
                 throw GentegreHatasi.IsKurali($"{KodDenemeSiniri} kez hatalı kod girildi - kod kilitlendi, yeni SMS gönderin.");
             if (durum.Eskidi)
                 throw GentegreHatasi.IsKurali($"Onay kodunun süresi doldu ({KodGecerlilikDakika} dakika) - yeni SMS gönderin.");
+            // DENEME HAKKI ÖNCE AYRILIR, TEK İFADEYLE (hasta verisi incelemesi 18.11.2026): sayaç okunup karşılaştırılıp
+            //   ayrı ifadeyle artırılıyordu - aynı anda gönderilen yüzlerce istek hepsi "0 hata" görüp kodu deniyordu.
+            //   Koşullu UPDATE sınırın altındaysa sayacı artırır ve yeni değeri döndürür; dönmezse hak bitmiştir. Kod
+            //   aynı SMS'e ait olmalı (araya yeni gönderim girdiyse bu deneme eski koda sayılmaz).
+            var kullanilan = await b.TekDegerAsync<int?>("""
+                update public.belge_basvuru set kvkk_kod_hata = coalesce(kvkk_kod_hata, 0) + 1
+                 where id = @p0 and coalesce(kvkk_kod_hata, 0) < @p1 and kvkk_sms_kod = @p2
+                returning kvkk_kod_hata::int
+                """, null, [belgeId, KodDenemeSiniri, durum.Gonderilen], iptal);
+            if (kullanilan is null)
+                throw GentegreHatasi.IsKurali($"{KodDenemeSiniri} kez hatalı kod girildi - kod kilitlendi, yeni SMS gönderin.");
             if (kod != durum.Gonderilen)
             {
-                await b.CalistirAsync("update public.belge_basvuru set kvkk_kod_hata = coalesce(kvkk_kod_hata, 0) + 1 where id = @p0",
-                    null, [belgeId], iptal);
-                var kalan = KodDenemeSiniri - durum.Hata - 1;
+                var kalan = KodDenemeSiniri - kullanilan.Value;
                 throw GentegreHatasi.IsKurali(kalan > 0
                     ? $"Onay kodu hatalı - hastaya gönderilen kodla eşleşmiyor ({kalan} deneme hakkı kaldı)."
                     : "Onay kodu hatalı - deneme hakkı bitti, yeni SMS gönderin.");
             }
 
             await using var tx = await b.BeginTransactionAsync(iptal);
-            await b.CalistirAsync("update public.belge_basvuru set kvkk_onay_kodu = @p1 where id = @p0",
+            await b.CalistirAsync("update public.belge_basvuru set kvkk_onay_kodu = @p1, kvkk_kod_hata = 0 where id = @p0",
                 tx, [belgeId, kod], iptal);
             await log.YazAsync(b, tx, LogIslemi.Degistir, 30, belgeId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string> { ["kvkkOnayKodu"] = "doğrulandı", ["kvkkOnay"] = "4", ["etkOnay"] = "4" }, iptal: iptal);

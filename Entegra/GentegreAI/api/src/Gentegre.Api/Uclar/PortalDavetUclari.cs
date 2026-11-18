@@ -30,6 +30,19 @@ public static class PortalDavetUclari
 {
     private const int LogTabloKullanici = 902;
     private const int EnFazlaDeneme = 5;
+    /// <summary>KİŞİ BAŞINA hatalı doğrulama sınırı, bütün davetleri toplamında (hasta verisi incelemesi 18.11.2026).</summary>
+    internal const int KisiGunlukDeneme = 5;
+
+    /// <summary>"Ayşe Yılmaz" -> "A*** Y***": davet sayfası kimlik doğrulanmadan tam ad göstermez.</summary>
+    internal static string AdMaskele(string ad) => string.Join(' ',
+        (ad ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(p => p[..1] + "***"));
+
+    /// <summary>Kişinin son 24 saatteki davetlerinde harcanan doğrulama denemesi.</summary>
+    internal static Task<int> KisiDenemesiAsync(Npgsql.NpgsqlConnection b, int tarafId, CancellationToken iptal)
+        => b.TekDegerAsync<int>("""
+            select coalesce(sum(deneme), 0)::int from public.portal_davet
+             where taraf_id = @p0 and ekleme_tarihi > now() - interval '24 hours'
+            """, null, [tarafId], iptal);
 
     public sealed record DavetIstegi(int TarafId, short Kanal = 1, string? Alici = null);
     public sealed record DavetKullanIstegi(string Jeton, string TcknSon4, string YeniParola);
@@ -97,7 +110,10 @@ public static class PortalDavetUclari
             return Results.Ok(new
             {
                 gecerli = true,
-                kisi = (string)(d["unvan"] ?? ""),
+                // MASKELİ AD (hasta verisi incelemesi 18.11.2026): kimlik doğrulanmadan tam ad dönüyordu - yanlış
+                //   numaraya giden bağlantı hastanın adını yabancıya gösteriyordu. Baş harfler kişinin "bu benim"
+                //   demesine yeter.
+                kisi = AdMaskele((string)(d["unvan"] ?? "")),
                 // Hangi kimlik kanıtının isteneceği ekranda yazsın.
                 kanit = "TCKN son 4 hane",
             });
@@ -126,23 +142,41 @@ public static class PortalDavetUclari
             var tckn = ((string)(d["tckn"] ?? "")).Trim();
             var son4 = (istek.TcknSon4 ?? "").Trim();
 
+            // KİŞİ BAŞINA SINIR (hasta verisi incelemesi 18.11.2026): sınır davet başınaydı - aynı hastaya ard arda
+            //   davet üretilip (alıcı serbest) her bağlantıda 5 tahmin, ~20 davette TCKN son 4 bulunabiliyordu.
+            //   24 saatte bütün davetlerin toplamı.
+            if (await KisiDenemesiAsync(b, tarafId, iptal) >= KisiGunlukDeneme)
+            {
+                await b.CalistirAsync("update public.portal_davet set durum = 3 where id = @p0 and durum = 1", null, [davetId], iptal);
+                throw GentegreHatasi.Yetkisiz("Bağlantı kapatıldı: kimlik doğrulaması çok kez hatalı girildi.");
+            }
+
+            // DENEME ÖNCE AYRILIR, TEK İFADEYLE (hasta verisi incelemesi 18.11.2026): karşılaştırma önce, sayaç sonra
+            //   artıyordu - aynı anda gönderilen yüzlerce istek hepsi açık davet görüp TCKN son 4'ü deniyordu.
+            //   Koşullu UPDATE hakkı ayırır; dönmezse davet kapanmıştır. Başarılı deneme de sayılır (davet zaten kapanır).
+            var deneme = await b.TekDegerAsync<int?>("""
+                update public.portal_davet
+                   set deneme = deneme + 1,
+                       durum = case when deneme + 1 >= @p1 then 3 else durum end
+                 where id = @p0 and durum = 1 and deneme < @p1
+                returning deneme::int
+                """, null, [davetId, EnFazlaDeneme], iptal);
+            if (deneme is null)
+                throw GentegreHatasi.Yetkisiz("Bağlantı kapatıldı: kimlik doğrulaması çok kez hatalı girildi.");
+
             if (tckn.Length < 4 || son4.Length != 4
                 || !tckn.EndsWith(son4, StringComparison.Ordinal))
             {
-                // DENEME SAYILIR: beşincide davet kapanır - 10.000 ihtimalli
+                // DENEME SAYILDI: beşincide davet kapanır - 10.000 ihtimalli
                 //   bir sayı sınırsız denenebilseydi bağlantıyı ele geçiren
                 //   kişi kaba kuvvetle açardı.
-                var deneme = await b.TekDegerAsync<int>("""
-                    update public.portal_davet
-                       set deneme = deneme + 1,
-                           durum = case when deneme + 1 >= @p1 then 3 else durum end
-                     where id = @p0
-                    returning deneme
-                    """, null, [davetId, EnFazlaDeneme], iptal);
                 throw GentegreHatasi.Yetkisiz(deneme >= EnFazlaDeneme
                     ? "Bağlantı kapatıldı: kimlik doğrulaması çok kez hatalı girildi."
                     : ortakHata);
             }
+
+            // Ayrılan deneme başarılıysa kapanmış olabilir (5. deneme doğru): bu deneme yine geçerlidir; aşağıda
+            //   davet zaten "kullanıldı" olur.
 
             var rolId = await b.TekDegerAsync<int?>(
                 "select id from public.rol where portal_turu = 3 and coalesce(aktif, 1) = 1 "
@@ -201,10 +235,12 @@ public static class PortalDavetUclari
                 on conflict do nothing
                 """, islem, [tarafId, subeId], iptal);
 
-            // TEK KULLANIM: parola konduğu an davet kapanır.
+            // TEK KULLANIM: parola konduğu an davet kapanır. (Başarılı deneme sayaca girmez - kişi sınırı yalnız
+            //   hatalıları saysın.)
             await b.CalistirAsync("""
                 update public.portal_davet
-                   set durum = 2, kullanim_zamani = now()::timestamp, kullanim_ip = @p1
+                   set durum = 2, kullanim_zamani = now()::timestamp, kullanim_ip = @p1,
+                       deneme = greatest(deneme - 1, 0)
                  where id = @p0
                 """, islem, [davetId, ip], iptal);
 

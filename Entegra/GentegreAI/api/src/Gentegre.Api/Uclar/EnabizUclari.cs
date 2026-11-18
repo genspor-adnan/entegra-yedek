@@ -17,6 +17,20 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class EnabizUclari
 {
+    /// <summary>
+    /// ŞUBE KAPISI (hasta verisi incelemesi 18.11.2026): paket kartı TCKN, adres, tanı kodları taşır; kimlikle
+    /// okunuyordu - A şubesinin entegrasyon kullanıcısı B şubesinin hastalarının paketlerini okuyabiliyordu. Şubesi
+    /// olmayan (kurum düzeyi, ay / gün sonu) paket herkese açık; kapsam dışı = bulunamadı.
+    /// </summary>
+    private static async Task PaketKapisiAsync(VeriKaynagi veri, IstekBaglami baglam, long id, CancellationToken iptal)
+    {
+        var gorunur = await veri.TekDegerAsync<bool>("""
+            select exists (select 1 from public.enabiz_paket p
+                            where p.id = @p0 and (@p1 = 0 or p.sube_id is null or p.sube_id = @p1))
+            """, [id, baglam.SubeId ?? 0], iptal);
+        if (!gorunur) throw GentegreHatasi.Bulunamadi("Paket bulunamadı.");
+    }
+
     public static void EnabizUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/enabiz").WithTags("e-Nabız").RequireAuthorization();
@@ -33,6 +47,7 @@ public static class EnabizUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Gor);
+            await PaketKapisiAsync(veri, baglam, id, iptal);
 
             await using var baglanti = await veri.AcAsync(iptal);
             var paket = await baglanti.TekAsync("""
@@ -99,6 +114,9 @@ public static class EnabizUclari
             var son = bas.AddMonths(1);
 
             await using var baglanti = await veri.AcAsync(iptal);
+            // ŞUBE (hasta verisi incelemesi 18.11.2026): yalnız ilk sayaç şubeye bakıyordu; hata, alan ve hekim
+            //   dökümleri kurum genelindeydi. Hepsi aynı şube kuralıyla.
+            var sube = baglam.SubeId ?? 0;
 
             var sayac = await baglanti.TekAsync("""
                 select count(*) as "uretilen",
@@ -115,7 +133,7 @@ public static class EnabizUclari
                   from public.enabiz_paket p
                  where p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
                    and (@p2 = 0 or p.sube_id = @p2)
-                """, null, [bas, son, baglam.SubeId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [bas, son, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ESLENMEMIS KOD: gecersiz alanin SKRS listesi varsa eksik olan bir
             //   kod eslemesidir - "kod eslemeye git" isaretini bu sayi verir.
@@ -125,8 +143,9 @@ public static class EnabizUclari
                   join public.enabiz_paket p on p.id = a.paket_id
                  where a.gecerli = 0 and coalesce(a.skrs_liste, '') <> ''
                    and p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                   and (@p2 = 0 or p.sube_id = @p2)
                  group by a.skrs_liste order by 2 desc limit 10
-                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [bas, son, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var turler = await baglanti.ListeAsync("""
                 select t.kod, t.ad, t.uss_paket_kodu as "ussPaket",
@@ -137,9 +156,10 @@ public static class EnabizUclari
                   from public.enabiz_paket_turu t
                   left join public.enabiz_paket p on p.paket_turu_id = t.id
                        and p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                       and (@p2 = 0 or p.sube_id = @p2)
                  group by t.id, t.kod, t.ad, t.uss_paket_kodu, t.aktif
                  order by t.aktif desc, count(p.id) desc, t.ad
-                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [bas, son, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // EN SIK HATA: kok neden burada gorunur - ayni hata yuz paketi
             //   birden dusuruyorsa duzeltilecek tek yer vardir.
@@ -149,8 +169,9 @@ public static class EnabizUclari
                        count(*) as "adet"
                   from public.enabiz_paket p
                  where p.durum = 4 and p.uretim_tarihi >= @p0 - interval '30 days'
+                   and (@p1 = 0 or p.sube_id = @p1)
                  group by 1, p.hata_sinifi order by count(*) desc limit 8
-                """, null, [bas], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [bas, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // ALAN BAZINDA EKSIK: "neyi duzeltirsem kac paket kurtulur".
             var eksikAlanlar = await baglanti.ListeAsync("""
@@ -159,8 +180,9 @@ public static class EnabizUclari
                   from public.enabiz_paket_alan a
                   join public.enabiz_paket p on p.id = a.paket_id
                  where a.gecerli = 0 and p.durum in (0, 4)
+                   and (@p0 = 0 or p.sube_id = @p0)
                  group by a.uss_alan order by count(distinct a.paket_id) desc limit 10
-                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var hekimler = await baglanti.ListeAsync("""
                 select coalesce(k.ad, '(hekimsiz)') as "hekim",
@@ -170,9 +192,10 @@ public static class EnabizUclari
                   from public.enabiz_paket p
                   left join public.v_personel_lookup k on k.id = p.hekim_id
                  where p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                   and (@p2 = 0 or p.sube_id = @p2)
                  group by 1 having count(*) filter (where p.durum = 0) > 0
                  order by 3 desc limit 10
-                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [bas, son, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var gunluk = await baglanti.ListeAsync("""
                 -- generate_series TIMESTAMPTZ uretir; gun aritmetigi icin DATE'e
@@ -186,8 +209,9 @@ public static class EnabizUclari
                                                interval '1 day') d) g
                   left join public.enabiz_paket p
                          on p.uretim_tarihi >= g.gun and p.uretim_tarihi < g.gun + 1
+                        and (@p0 = 0 or p.sube_id = @p0)
                  group by g.gun order by g.gun
-                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [sube], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new
             {
@@ -204,6 +228,7 @@ public static class EnabizUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            await PaketKapisiAsync(veri, baglam, id, iptal);
 
             var p = await veri.TekAsync("""
                 select t.kod, p.kaynak_id, p.durum
@@ -243,11 +268,12 @@ public static class EnabizUclari
         //   Zamanlayıcıyı beklemeden denemek için. Hesap tanımlı değilse
         //   sonuç bunu SÖYLER; sahte başarı yok.
         grup.MapPost("/paket/{id:long}/gonder", async (
-            long id, BaglamCozucu cozucu, Servisler.EnabizGonderimi gonderim,
+            long id, BaglamCozucu cozucu, Servisler.EnabizGonderimi gonderim, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            await PaketKapisiAsync(veri, baglam, id, iptal);
 
             var s = await gonderim.CalistirAsync(1, id, baglam.KullaniciId, iptal);
             return Results.Ok(new { id, s.Alinan, s.Gonderilen, s.Hatali,
@@ -276,6 +302,7 @@ public static class EnabizUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
+            await PaketKapisiAsync(veri, baglam, id, iptal);
 
             var p = await veri.TekAsync("""
                 select p.durum, p.kaynak_id, coalesce(p.sys_takip_no, ''),

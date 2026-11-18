@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Hasta verisi incelemesi (6-10): e-Nabız silme, KVKK kodu, portal daveti, MERNİS, paket şubesi
+
+- (6) e-Nabız silme paketleri (`HASTA_KABUL_SIL` / `HASTA_ISLEM_SIL`) başvurunun "e-Nabız Bildirimi" kapısından muaf:
+  bildirim kapatılınca Bakanlıktaki kayıt silinemiyordu ("Silme paketi üretilemedi").
+- (7) KVKK SMS kodu: deneme hakkı karşılaştırmadan ÖNCE tek koşullu UPDATE ile ayrılır - eşzamanlı yüzlerce istek
+  "0 hata" görüp kodu deniyordu. Doğru kodda sayaç sıfırlanır.
+- (8) Portal daveti: deneme hakkı önce ayrılır (eşzamanlı deneme 5'i aşamaz); kişi başına 24 saatte 5 hatalı deneme
+  bütün davetlerin toplamı (yeni davet hakkı tazelemiyor; sınır doluyken yeni davet de üretilmez); kimlik
+  doğrulanmadan ad maskeli ("A*** Y***"). Not: "eski davet kapanmıyor" bulgusu geçersizdi (822 tetiği kapatıyor).
+- (9) `/api/mernis/dogrula` (ve `/getir`) portala kapalı; doğrulama hasta ekleme / değiştirme yetkisi ister (yalnız
+  görme yetkisi NVİ kahini olarak kullanılabiliyordu).
+- (10) e-Nabız paket kartı ve paket işlemleri (yeniden üret, gönder, iptal) şube kapsamında (şubesiz paket açık);
+  veri kalitesi panosunun bütün dökümleri şubeye göre.
+- Test: `HastaVerisiIkinciTurTestleri` (6 dışında - silme paketi USS'ye gitmiş başvuru ister).
+
 ## 18.11.2026 — Para incelemesi (4-10): döviz, kasa düzeltme, eşzamanlı dağıtım / dönüşüm, emanet (1367)
 
 - (4) Belge cari hareketi: rapor dövizi YABANCIYSA (belge dövizi aynı olsa da) karşılık `genel / kur`. USD belge + USD

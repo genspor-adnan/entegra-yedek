@@ -105,6 +105,7 @@ public static class MernisUclari
             IMedulaKapisi medula, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
+            if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak("Kimlik sorgusu portaldan yapılamaz.");
             if (!baglam.Yetkiler.Var("hasta", Islem.Ekle) && !baglam.Yetkiler.Var("hasta", Islem.Degistir))
                 throw GentegreHatasi.Yasak("Hasta kartı ekleme / değiştirme yetkiniz yok.");
             var tc = (istek.KimlikNo ?? "").Trim();
@@ -140,8 +141,12 @@ public static class MernisUclari
             BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            if (!baglam.Yetkiler.Var("hasta", Islem.Gor))
-                throw GentegreHatasi.Yasak("Hasta kartı yetkiniz yok.");
+            // PORTALA KAPALI + KART YAZMA YETKİSİ (hasta verisi incelemesi 18.11.2026): yalnız `hasta:g` yetiyordu - portal
+            //   rolleri de taşıdığından hasta / dış hekim hesabı kurumun sunucusunu NVİ kimlik kahini olarak
+            //   kullanabiliyordu (TCKN + ad + doğum yılı tahmini, istek kurumun IP'sinden). /mukerrer ve /getir'in kuralı.
+            if (baglam.PortalTuru > 0) throw GentegreHatasi.Yasak("Kimlik doğrulaması portaldan yapılamaz.");
+            if (!baglam.Yetkiler.Var("hasta", Islem.Ekle) && !baglam.Yetkiler.Var("hasta", Islem.Degistir))
+                throw GentegreHatasi.Yasak("Hasta kartı ekleme / değiştirme yetkiniz yok.");
             var tc = (istek.KimlikNo ?? "").Trim();
             if (!MernisServisi.TcGecerli(tc)) throw GentegreHatasi.Dogrulama("Geçerli bir T.C. kimlik no girin (11 hane).");
             if (string.IsNullOrWhiteSpace(istek.Ad) || string.IsNullOrWhiteSpace(istek.Soyad) || istek.DogumYili < 1900)

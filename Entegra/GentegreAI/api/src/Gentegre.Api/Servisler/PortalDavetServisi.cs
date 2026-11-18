@@ -103,6 +103,16 @@ public sealed class PortalDavetServisi(VeriKaynagi veri, BildirimDeposu bildirim
                 : "Kişinin e-posta adresi yok.");
         }
 
+        // ÇOK HATALI DENEME VARSA YENİ DAVET YOK (hasta verisi incelemesi 18.11.2026): yeni davet eskisini kapatır
+        //   (822) ama deneme hakkını tazeliyordu - davet yenilenerek TCKN son 4 kaba kuvvetle bulunabiliyordu.
+        if (await Uclar.PortalDavetUclari.KisiDenemesiAsync(b, tarafId, iptal) >= Uclar.PortalDavetUclari.KisiGunlukDeneme)
+        {
+            if (!zorunlu) return null;
+            throw GentegreHatasi.IsKurali(
+                "Bu kişinin davet bağlantısında son 24 saatte çok kez hatalı kimlik doğrulaması yapıldı - yeni davet "
+                + "24 saat sonra gönderilebilir.");
+        }
+
         var (jeton, ozet) = JetonUret();
         var davetId = await b.TekDegerAsync<long>("""
             insert into public.portal_davet

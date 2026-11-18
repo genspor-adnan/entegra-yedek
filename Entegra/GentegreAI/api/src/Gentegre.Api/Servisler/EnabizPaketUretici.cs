@@ -111,7 +111,10 @@ public sealed partial class EnabizPaketUretici
         // BAŞVURU KAPISI (1340, kullanıcı 14.11.2026): başvurusu olan paket, başvuruda "e-Nabız Bildirimi" kapalıysa
         //   ÜRETİLMEZ (kurum varsayılanı başvuruya kopyalanır, kullanıcı değiştirebilir). Başvurusuz paketler
         //   (ay/gün sonu) etkilenmez.
-        if (baglam.BelgeId is int belgeId)
+        // SİLME PAKETLERİ KAPIDAN GEÇMEZ (hasta verisi incelemesi 18.11.2026): HASTA_KABUL_SIL / HASTA_ISLEM_SIL bildirim
+        //   kapatılınca da üretilmeli - hasta itiraz edip bildirim kaldırılınca Bakanlıktaki kayıt ancak böyle silinir;
+        //   "Silme paketi üretilemedi" ile kayıt USS'de kalıyordu. Gönderim tarafındaki istisnayla aynı (`*_SIL`).
+        if (baglam.BelgeId is int belgeId && !SilmePaketi(paketKodu))
         {
             var acik = await baglanti.TekDegerAsync<int?>(
                 "select coalesce(enabiz_bildirim, 0)::int from public.belge_basvuru where id = @p0", islem, [belgeId], iptal);
