@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Stok / belge incelemesi (1-4): lot yönü ve deposu stokla aynı (1368)
+
+- (1) Taslak belge lot bakiyesine dokunmaz: izlem satırı yalnız seçimi saklar (`yon` 0, kalan 0); kesinleşince işlenir.
+  Eskiden taslak her kayıtta lotu bir kez daha ekliyor, silinince geri almıyordu (stok 0, lot 20).
+- (2) Lot yönü `CikisMi(tur, tipi)` ve depo stok yazıcısıyla aynı (çıkışta çıkış ?? giriş, girişte giriş ?? çıkış). Satış
+  iadesinde stok girerken lot düşüyor, alış iadesinde lot ekleniyordu. İstemci değişmedi: iadede seçilen lot
+  (`seriLotId`) girişte, yazılan lot no (`lotNo`) çıkışta var olan lota çözülür.
+- (3) Korunan satırlı belge (ÜTS bildirimi, dönüşüm, radyoloji...) düzenlenince korunan satırın lotu geri alınmaz
+  (izlemi yerinde) - her kayıtta lot bir kez daha düşüyordu. Diğer satırların izlemi artık silinir.
+- (4) Stok geri alma yazıldığı depodan (iki depolu giriş belgesinde A'da hayali +10, B'de -10 kalıyordu).
+- `stok_izleme.yon` (1368): satırın lot bakiyesine yazdığı etki; geri alma ve `fn_stok_lot_hareketleri` (defter
+  kurulumu) yönü satırdan okur, boşsa eski kural (aktarım, transfer). Geçmiş web satırlarına eski yazıcının yönü yazıldı.
+- Mevcut veride etkilenen kayıt yok (UNIVERSE, ZONE, FETA, MEDX, KOSUYOLU: lotlu taslak 0, lotlu iade 0).
+- Test: `StokLotYonuTestleri` (eski kodda dördü de kırmızı).
+
 ## 18.11.2026 — Hasta verisi incelemesi (6-10): e-Nabız silme, KVKK kodu, portal daveti, MERNİS, paket şubesi
 
 - (6) e-Nabız silme paketleri (`HASTA_KABUL_SIL` / `HASTA_ISLEM_SIL`) başvurunun "e-Nabız Bildirimi" kapısından muaf:

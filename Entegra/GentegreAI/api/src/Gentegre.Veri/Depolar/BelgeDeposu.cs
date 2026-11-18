@@ -285,7 +285,7 @@ public sealed partial class BelgeDeposu
         // --------------------------------- 2) eski etkiyi geri al (stok + cari) ----
         if (eskiDurum == 0)                            // taslak stok/cari yazmaz
         {
-            await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal);
+            // STOK GERI ALMA asagida, korunan satirlar belli olduktan sonra (stok/belge incelemesi 18.11.2026).
             // YALNIZ BELGENIN KENDI cari satiri silinir (`kasa_islem_id is null`).
             //   Kosulsuz silme, belgeye baglanmis TAHSILATLARIN bacaklarini da
             //   siliyordu: taslak fise nakit tahsilat girilip fis tekrar
@@ -336,6 +336,14 @@ public sealed partial class BelgeDeposu
             while (await o.ReadAsync(iptal)) korunan.Add(o.GetInt32(0));
         }
 
+        // KORUNAN SATIRIN LOTU YERINDE KALIR (stok/belge incelemesi 18.11.2026): geri alma belgenin BUTUN izlem
+        //   satirlarinin lotunu geri aliyor, korunan satirin izlemi ise silinmedigi ve yeniden yazilmadigi icin lot
+        //   her duzenlemede bir kez daha dusuyordu (UTS bildirimli 5 adetlik satir: iki duzenlemede lot -10).
+        //   Stok korunan satir icin de geri alinip yeniden yazilir (StokDurumGuncelleAsync tum satirlari okur);
+        //   lot korunan satirda hic oynamaz.
+        if (eskiDurum == 0)
+            await StokDurumGeriAlAsync(baglanti, islem, belgeId, tur, tipi, iptal, korunan.ToArray());
+
         // BELGEYE DONUSMUS UCRET SATIRI SILINEMEZ (kullanici 11.10.2026): yukaridaki
         //   koruma satiri sessizce yerinde birakiyordu - kullanici sildim sanip
         //   kaydediyor, satir geri geliyordu. Istemci (satir kimlikleriyle
@@ -367,8 +375,9 @@ public sealed partial class BelgeDeposu
         }
 
         await using (var sil = new NpgsqlCommand("""
+            -- Korunan satirin izlemi kalir, digerleri silinir (eskiden korunan varsa HICBIRI silinmiyordu).
             delete from public.stok_izleme where belge_id = @p0
-                  and coalesce(array_length(@p1::int[], 1), 0) = 0;
+                  and not (coalesce(belge_satir_id, 0) = any(@p1::int[]));
             delete from public.belge_satir  where belge_id = @p0
                   and not (id = any(@p1::int[]));
             """, baglanti, islem))
@@ -419,11 +428,12 @@ public sealed partial class BelgeDeposu
     /// yolla geri alinir.
     /// </summary>
     private static async Task StokDurumGeriAlAsync(NpgsqlConnection baglanti,
-        NpgsqlTransaction islem, int belgeId, int tur, int tipi, CancellationToken iptal)
+        NpgsqlTransaction islem, int belgeId, int tur, int tipi, CancellationToken iptal, int[]? korunan = null)
     {
+        korunan ??= [];
         if (BelgeTuru.TransferMi(tur))
         {
-            await TransferGeriAlAsync(baglanti, islem, belgeId, iptal);
+            await TransferGeriAlAsync(baglanti, islem, belgeId, iptal, korunan);
             return;
         }
         var cikis = BelgeTuru.CikisMi(tur, tipi);
@@ -433,8 +443,12 @@ public sealed partial class BelgeDeposu
                    cikan = d.cikan - case when @p1 then k.miktar else 0 end,
                    kalan = d.kalan + case when @p1 then k.miktar else -k.miktar end
               from (select s.stok_id,
-                           coalesce(s.cikis_depo_id, s.giris_depo_id,
-                                    b.cikis_depo_id, b.giris_depo_id) as depo_id,
+                           -- YAZANLA AYNI DEPO (stok/belge incelemesi 18.11.2026): StokDurumGuncelleAsync cikista
+                           --   cikis ?? giris, giriste giris ?? cikis (satir, yoksa baslik) kullanir; geri alma hep
+                           --   once cikis deposuna bakiyordu - iki depolu alis belgesinde A'da hayali +10, B'de -10.
+                           case when @p1 then coalesce(s.cikis_depo_id, b.cikis_depo_id, s.giris_depo_id, b.giris_depo_id)
+                                else coalesce(s.giris_depo_id, b.giris_depo_id, s.cikis_depo_id, b.cikis_depo_id)
+                           end as depo_id,
                            sum(case when coalesce(s.miktar, 0) <> 0 then s.miktar
                                     else coalesce(s.adet, 0) end) as miktar   -- yazanla aynı: miktar 0 ise adet
                       from public.belge_satir s
@@ -450,18 +464,23 @@ public sealed partial class BelgeDeposu
             belgeId, cikis);
         await komut.ExecuteNonQueryAsync(iptal);
 
-        // Lot bakiyeleri: belgenin izlem satirlari ters isaretle geri alinir.
+        // Lot bakiyeleri: belgenin izlem satirlari ters isaretle geri alinir. YON SATIRIN KENDISINDEN (1368):
+        //   satir ne yazdiysa o geri alinir (yon +1 giris, -1 cikis, 0 taslak); yonu olmayan eski satirda belge yonu.
+        //   Korunan satirin izlemi haric (yukarida).
         await using var lot = baglanti.Komut("""
             update public.stok_lot_durum l
-               set kalan = l.kalan + case when @p1 then i.miktar else -i.miktar end
-              from (select stok_id, depo_id, seri_lot_id, sum(adet) as miktar
+               set kalan = l.kalan - i.etki
+              from (select stok_id, depo_id, seri_lot_id,
+                           sum(case when yon is not null then yon * adet
+                                    when @p1 then -adet else adet end) as etki
                       from public.stok_izleme
                      where belge_id = @p0 and seri_lot_id is not null
+                       and not (coalesce(belge_satir_id, 0) = any(@p2::int[]))
                      group by 1, 2, 3) i
              where l.stok_id = i.stok_id and l.depo_id = i.depo_id
                and l.seri_lot_id = i.seri_lot_id
             """, islem,
-            belgeId, cikis);
+            belgeId, cikis, korunan);
         await lot.ExecuteNonQueryAsync(iptal);
     }
 
@@ -878,8 +897,9 @@ public sealed partial class BelgeDeposu
     ///    yazar, aktarım 1248'den beri çıkış + varış yazar) giriş deposundan düşülür, çıkış deposuna eklenir.
     /// </summary>
     private static async Task TransferGeriAlAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        int belgeId, CancellationToken iptal)
+        int belgeId, CancellationToken iptal, int[]? korunan = null)
     {
+        korunan ??= [];
         await using (var stok = baglanti.Komut("""
             with k as (
                 select s.stok_id,
@@ -912,7 +932,9 @@ public sealed partial class BelgeDeposu
                   join public.belge b on b.id = i.belge_id
                   left join public.belge_satir s on s.id = i.belge_satir_id
                  where i.belge_id = @p0 and i.seri_lot_id is not null
-                   and i.depo_id = coalesce(s.giris_depo_id, b.giris_depo_id)),
+                   and i.depo_id = coalesce(s.giris_depo_id, b.giris_depo_id)
+                   and coalesce(i.yon, 1) <> 0                                     -- taslak satiri (1368) etkisiz
+                   and not (coalesce(i.belge_satir_id, 0) = any(@p1::int[]))),     -- korunan satirin lotu yerinde
             hedef as (
                 update public.stok_lot_durum l
                    set kalan = l.kalan - x.adet
@@ -923,7 +945,7 @@ public sealed partial class BelgeDeposu
             select stok_id, cikis_depo, seri_lot_id, sum(adet) from v where cikis_depo is not null group by 1, 2, 3
             on conflict (stok_id, depo_id, seri_lot_id) do update
                set kalan = public.stok_lot_durum.kalan + excluded.kalan
-            """, islem, belgeId))
+            """, islem, belgeId, korunan))
             await lot.ExecuteNonQueryAsync(iptal);
     }
 

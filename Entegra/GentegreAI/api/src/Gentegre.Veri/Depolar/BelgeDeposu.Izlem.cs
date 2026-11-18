@@ -40,6 +40,18 @@ public sealed partial class BelgeDeposu
         //   yeni satir giris deposuna yazilir.
         int? girisDepo = JsonSayiNull(satir, "girisDepoId") ?? SayiNull(belge, "girisDepoId");
         int? cikisDepo = JsonSayiNull(satir, "cikisDepoId") ?? SayiNull(belge, "cikisDepoId");
+        // YON VE DEPO STOKLA AYNI (stok/belge incelemesi 18.11.2026): lot yolu yonu yalniz turden
+        //   (CikisMi(tur)) ve depoyu kendi kuralindan aliyordu; stok ise CikisMi(tur, tipi) ve tek depo
+        //   (StokDurumGuncelleAsync). Satis IADESINDE stok girerken lot dusuyor, alis iadesinde stok
+        //   cikarken lot ekleniyordu. Tek kural: StokDurumGuncelleAsync ile ayni yon ve ayni depo.
+        var transfer = BelgeTuru.TransferMi(belgeTur);
+        var cikisYonu = BelgeTuru.CikisMi(belgeTur, Sayi(belge, "tipi"));
+        int? depo = cikisYonu ? cikisDepo ?? girisDepo : girisDepo ?? cikisDepo;
+        // TASLAK LOT BAKIYESINE DOKUNMAZ (stok/belge incelemesi 18.11.2026): taslak stok_durum'a yazmaz,
+        //   lot bakiyesi ise degisiyordu - taslak yeniden kaydedilince lot ikinci kez ekleniyor, silinince geri
+        //   alinmiyordu. Izlem satiri SECIMI SAKLAMAK icin yazilir (yon 0, kalan 0); bakiye ve FIFO zinciri
+        //   kesinlesince (taslak -> kesin kayit satirlari yeniden yazar) islenir.
+        var taslak = Sayi(belge, "durum") == 1;
         var stokIzleme = await StokIzlemeTuruAsync(baglanti, islem, stokId, iptal);
         var izlemler = satir.TryGetValue("izlemler", out var dizi) && dizi.ValueKind == JsonValueKind.Array
             ? dizi.EnumerateArray().ToList()
@@ -66,14 +78,14 @@ public sealed partial class BelgeDeposu
         //   transferde mal DEPO DEGISTIRIR - ayni lot stokta durmaya devam eder,
         //   o yuzden yeni satir kalanini TASIR. Aksi halde depolar arasi her
         //   transfer lot kalanini eritir, urun stokta gorunur ama lotu kalmaz.
-        if (BelgeTuru.CikisMi(belgeTur) || BelgeTuru.TransferMi(belgeTur))
+        if (cikisYonu || transfer)
         {
             await IzlemDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
                                 belgeTur, stokIzleme, adet, izlemler,
-                                kalaniTasi: BelgeTuru.TransferMi(belgeTur),
-                                kaynakDepo: cikisDepo,
-                                hedefDepo: BelgeTuru.TransferMi(belgeTur) ? girisDepo : cikisDepo,
-                                iptal);
+                                kalaniTasi: transfer,
+                                kaynakDepo: transfer ? cikisDepo : depo,
+                                hedefDepo: transfer ? girisDepo : depo,
+                                taslak, iptal);
             return;
         }
 
@@ -94,6 +106,24 @@ public sealed partial class BelgeDeposu
             var miktar = JsonOndalik(izlem, "miktar", 0);
             var uretim = JsonTarih(izlem, "uretimTarihi");
             var skt    = JsonTarih(izlem, "sonKullanmaTarihi");
+            // VAR OLAN LOTA GIRIS (satis iadesi): istemci iadede lotu stoktakilerden SECER (seriLotId) - lot no
+            //   yeniden yazilmaz. Lot bu stoga ait olmali.
+            var secilenLot = (int)JsonSayi(izlem, "seriLotId", 0);
+            if (secilenLot > 0 && lotNo.Length == 0 && seriNo.Length == 0)
+            {
+                if (miktar <= 0)
+                    throw GentegreHatasi.Dogrulama($"{sira}. satirdaki lot miktari sifirdan buyuk olmali.",
+                        new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Miktar sifir olamaz."));
+                await using (var aitMi = baglanti.Komut(
+                    "select count(*) from public.stok_seri_lot where id = @p0 and stok_id = @p1", islem, secilenLot, stokId))
+                    if (Convert.ToInt32(await aitMi.ExecuteScalarAsync(iptal)) == 0)
+                        throw GentegreHatasi.Dogrulama($"{sira}. satirda secilen lot bu stoga ait degil.",
+                            new AlanHatasi($"satirlar[{sira - 1}].izlemler", "Lot bu stoga ait degil."));
+                toplam += miktar;
+                await GirisIzlemiYazAsync(baglanti, islem, belgeId, satirId, stokId, secilenLot, stokIzleme,
+                                          belgeTur, miktar, (short)JsonSayi(izlem, "durum", 0), depo, taslak, iptal);
+                continue;
+            }
 
             if (miktar <= 0)
                 throw GentegreHatasi.Dogrulama($"{sira}. satirdaki lot miktari sifirdan buyuk olmali.",
@@ -118,25 +148,8 @@ public sealed partial class BelgeDeposu
 
             var seriLotId = await SeriLotIdAsync(baglanti, islem, stokId, lotNo, seriNo,
                                                  uretim, skt, iptal);
-
-            await using var komut = baglanti.Komut("""
-                insert into public.stok_izleme
-                    (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                     adet, kalan, durum, depo_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p6, @p7, @p9, @p8)
-                """, islem,
-                stokId, seriLotId, (short)stokIzleme, (short)belgeTur, belgeId, satirId, miktar);
-            // Giriste durum her zaman 0 (kullanici karari); diger durumlar
-            //   kod listesi tanimlanınca isletilecek.
-            komut.Parameters.AddWithValue("p7", (short)JsonSayi(izlem, "durum", 0));
-            komut.Parameters.AddWithValue("p8", 0);
-            komut.Parameters.AddWithValue("p9", (object?)girisDepo ?? DBNull.Value);
-            await komut.ExecuteNonQueryAsync(iptal);
-
-            // Lot BAKIYESI (117) - stok_durum'un lot kirilimi. Izlem satiri
-            //   hareket defteri, bakiye burada tutulur.
-            if (girisDepo is { } gd)
-                await LotDurumYazAsync(baglanti, islem, stokId, gd, seriLotId, miktar, iptal);
+            await GirisIzlemiYazAsync(baglanti, islem, belgeId, satirId, stokId, seriLotId, stokIzleme,
+                                      belgeTur, miktar, (short)JsonSayi(izlem, "durum", 0), depo, taslak, iptal);
         }
 
         // Lot toplami satir miktarini TUTMALI: tutmazsa depodaki miktar ile
@@ -174,10 +187,34 @@ public sealed partial class BelgeDeposu
     /// Kalan dusumu tek UPDATE icinde kosullu yapilir (kalan >= miktar): iki
     /// kullanici ayni lotu ayni anda tuketirse ikincisi hata alir, eksiye dusmez.
     /// </summary>
+    /// <summary>
+    /// GIRIS izlem satiri + lot bakiyesi. `yon` (1368): +1 giris, 0 taslak (bakiyeye etkisiz). Taslakta kalan 0 -
+    /// satir FIFO kaynagi olmaz.
+    /// </summary>
+    private static async Task GirisIzlemiYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int satirId, int stokId, int seriLotId, int stokIzleme, int belgeTur, decimal miktar,
+        short durum, int? depo, bool taslak, CancellationToken iptal)
+    {
+        await using (var komut = baglanti.Komut("""
+            insert into public.stok_izleme
+                (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
+                 adet, kalan, durum, depo_id, ekleyen, yon)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, 0, @p10)
+            """, islem,
+            stokId, seriLotId, (short)stokIzleme, (short)belgeTur, belgeId, satirId, miktar,
+            taslak ? 0m : miktar, durum, (object?)depo ?? DBNull.Value, (short)(taslak ? 0 : 1)))
+            await komut.ExecuteNonQueryAsync(iptal);
+
+        // Lot BAKIYESI (117) - stok_durum'un lot kirilimi. Izlem satiri
+        //   hareket defteri, bakiye burada tutulur. Stokla AYNI depo.
+        if (!taslak && depo is { } d)
+            await LotDurumYazAsync(baglanti, islem, stokId, d, seriLotId, miktar, iptal);
+    }
+
     private static async Task IzlemDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
         decimal adet, List<JsonElement> izlemler, bool kalaniTasi,
-        int? kaynakDepo, int? hedefDepo, CancellationToken iptal)
+        int? kaynakDepo, int? hedefDepo, bool taslak, CancellationToken iptal)
     {
         if (izlemler.Count == 0)
             throw GentegreHatasi.Dogrulama($"{sira}. satir icin lot secilmeli.",
@@ -189,6 +226,18 @@ public sealed partial class BelgeDeposu
             var izlem  = JsonNesne(oge);
             var seriLotId = (int)JsonSayi(izlem, "seriLotId", 0);
             var miktar = JsonOndalik(izlem, "miktar", 0);
+            // LOT NO ILE CIKIS (alis iadesi): istemci iadede lotu giris penceresinden YAZAR (lot no). Var olan lot
+            //   bulunur - stokta olmayan lot ACILMAZ, cikis olmayan lottan yapilamaz.
+            if (seriLotId <= 0)
+            {
+                var lotNo = JsonMetin(izlem, "lotNo").Trim();
+                var seriNo = JsonMetin(izlem, "seriNo").Trim();
+                if (lotNo.Length > 0 || seriNo.Length > 0)
+                    await using (var bul = baglanti.Komut(
+                        "select id from public.stok_seri_lot where stok_id = @p0 and lot_no = @p1 and seri_no = @p2",
+                        islem, stokId, lotNo, seriNo))
+                        seriLotId = await bul.ExecuteScalarAsync(iptal) is { } b and not DBNull ? Convert.ToInt32(b) : 0;
+            }
 
             if (seriLotId <= 0)
                 throw GentegreHatasi.Dogrulama($"{sira}. satirda lot secimi gecersiz.",
@@ -200,7 +249,7 @@ public sealed partial class BelgeDeposu
             toplam += miktar;
             await LottanDusAsync(baglanti, islem, belgeId, satirId, stokId, sira,
                                  belgeTur, stokIzleme, seriLotId, miktar, kalaniTasi,
-                                 kaynakDepo, hedefDepo, iptal);
+                                 kaynakDepo, hedefDepo, taslak, iptal);
         }
 
         if (Math.Abs(toplam - adet) > 0.0001m)
@@ -227,8 +276,24 @@ public sealed partial class BelgeDeposu
     private static async Task LottanDusAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, int satirId, int stokId, int sira, int belgeTur, int stokIzleme,
         int seriLotId, decimal miktar, bool kalaniTasi,
-        int? kaynakDepo, int? hedefDepo, CancellationToken iptal)
+        int? kaynakDepo, int? hedefDepo, bool taslak, CancellationToken iptal)
     {
+        // TASLAK: yalniz secim saklanir (yon 0, kalan 0) - bakiye denetimi, FIFO zinciri ve lot bakiyesi
+        //   kesinlesince (stok/belge incelemesi 18.11.2026).
+        if (taslak)
+        {
+            await using var t = baglanti.Komut("""
+                insert into public.stok_izleme
+                    (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
+                     adet, kalan, durum, donus_id, depo_id, ekleyen, yon)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 0, 0, 0, @p7, 0, 0)
+                """, islem,
+                stokId, seriLotId, (short)stokIzleme, (short)belgeTur, belgeId, satirId, miktar,
+                (object?)hedefDepo ?? DBNull.Value);
+            await t.ExecuteNonQueryAsync(iptal);
+            return;
+        }
+
         // 1) YETERLILIK: tek dogruluk kaynagi lot bakiyesidir (stok_lot_durum,
         //    117). Eskiden izlem satirlarinin kalani toplanip bakiliyordu; o
         //    alan gocmus veride "zincir devri" anlamina geldigi icin depoda
@@ -290,8 +355,8 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             insert into public.stok_izleme
                 (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                 adet, kalan, durum, donus_id, depo_id, ekleyen)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0)
+                 adet, kalan, durum, donus_id, depo_id, ekleyen, yon)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0, @p10)
             """, baglanti, islem))
         {
             komut.Parameters.AddWithValue("p0", stokId);
@@ -304,6 +369,8 @@ public sealed partial class BelgeDeposu
             komut.Parameters.AddWithValue("p7", kalaniTasi ? miktar : 0m);
             komut.Parameters.AddWithValue("p8", ilkKaynak);
             komut.Parameters.AddWithValue("p9", (object?)hedefDepo ?? DBNull.Value);
+            // YON (1368): cikis -1; transfer bos (iki depolu kural TransferGeriAlAsync / fn_stok_lot_hareketleri).
+            komut.Parameters.AddWithValue("p10", kalaniTasi ? DBNull.Value : (object)(short)-1);
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (727 ad, 203 tanesi birden cok dosyada)
+## Fonksiyonlar (727 ad, 204 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -507,7 +507,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
 | `fn_stok_kullanilmayan_pasife` | `1089_aktarim_salt_okunur.sql` | 552_stok_ilac_kisa_ad_kullanim.sql |
 | `fn_stok_lot_durum_kur` | `1249_lot_defteri_kurulum_transfer.sql` | 1172_aktarim_lot_defteri.sql |
-| `fn_stok_lot_hareketleri` | `1249_lot_defteri_kurulum_transfer.sql` | — |
+| `fn_stok_lot_hareketleri` | `1368_lot_izlem_yonu.sql` | 1249_lot_defteri_kurulum_transfer.sql |
 | `fn_stok_paket_kontrol` | `124_stok_paket.sql` | — |
 | `fn_stok_rezerve_tazele` | `142_siparis_rezervasyon.sql` | — |
 | `fn_stok_sayim_satir_uret` | `1169_stok_sayim.sql` | — |
