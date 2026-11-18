@@ -28,7 +28,7 @@ Sonuç kişisel sağlık verisidir: kime, ne zaman, ne verildiği kayda geçmeli
 - Rapor onaylı olmalı (onaysız rapor teslim listesine düşmez).
 
 ## Liste ve çipler
-Çipler: **Teslim Bekleyen · Teslim Edilen · Tümü**. Düğmeler: **📦 Teslim Et**, **👁 İstemi Aç**, **📄 Raporu Aç**.
+Çipler: **Teslim Bekleyen · Teslim Edilen · Tümü**. Düğmeler: **📦 Teslim Et** ve **🔗 Erişim ▾** (👤 Hasta Kartını Aç · 🧾 Başvuruyu Aç · ☢️ İstemi Aç · 📄 Raporu Aç). Satıra çift tık teslim penceresini açar; teslim edilmiş satırda son teslim dolu gelir ve düzeltilebilir. Hastanın tahsil edilmemiş borcu varsa pencerede kırmızı uyarı çıkar.
 
 ## Teslim penceresi
 - **Teslim edilen (zorunlu, en az biri)**: Rapor (basılı) · Film · CD / DVD · Dijital bağlantı / e-posta. Kabulde "Sonuç için CD hazırla" işaretlendiyse CD kutusu işaretli gelir.
@@ -39,7 +39,7 @@ Sonuç kişisel sağlık verisidir: kime, ne zaman, ne verildiği kayda geçmeli
 
 ## Adım adım
 1. **Radyoloji › Radyoloji Rapor Teslim**, çip **Teslim Bekleyen**; hastayı adı ya da Accession No ile bulun.
-2. Gerekirse **🖨 Çıktı** için **📄 Raporu Aç** ile raporu yazdırın.
+2. Gerekirse **🖨 Çıktı** için **📄 Raporu Aç** ile raporu yazdırın (**🔗 Erişim ▾** menüsünden).
 3. **📦 Teslim Et**; verilen kalemleri işaretleyin.
 4. Teslim alanın adını yazın; hasta değilse yakınlığını yazın ve kimliğini kontrol edip **Kimlik doğrulandı**'yı işaretleyin.
 5. **✔ Teslim Et** → "Teslim kaydedildi." Satır **Teslim Edilen** çipine geçer, istemin akış şeridinde **Teslim** adımı tamamlanır.
