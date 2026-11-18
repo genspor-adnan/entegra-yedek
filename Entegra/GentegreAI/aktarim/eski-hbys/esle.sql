@@ -512,7 +512,7 @@ select p.belge_id, coalesce(p.sirano, 0), 2, p.hizmet_id, left(coalesce(p.acikla
 --   kalan hasta. Ücretli başvuruda tamamı hasta. Kova: SGK -> sgk, diğer kurum -> oss.
 create temp table zz_kurum_fatura_payi as
 select f.paraid,
-       sum(case when fb.kdvdurum = 'Dahil' then f.tutar::numeric / (1 + coalesce(f.kdv, 10) / 100.0) else f.tutar::numeric end) as kurum_hariç
+       sum(case when lower(btrim(coalesce(fb.kdvdurum, ''))) like 'dah%' then f.tutar::numeric / (1 + coalesce(f.kdv, 10) / 100.0) else f.tutar::numeric end) as kurum_hariç
   from eski.fatura f
   join eski.fatbaslik fb on fb.id = f.fatbasid
   join eski.gelisler g on g.id = fb.gelisid
@@ -804,6 +804,8 @@ select o.islem_id, v.satir_id, 1,
 -- =========================================================================== 12. fatura ====
 -- Merkez (ücretli) ve "Katkı" faturası hastaya, diğerleri kuruma. "İPTAL" = iptal belge.
 --   KDVDURUM 'Dahil' faturada satır TUTAR KDV DAHİL, 'Hariç'te hariç (eski.tanim FATBASLIK.KDVDURUM).
+--   Karşılaştırma fn_aktar_belge ile aynı: lower(btrim(...)) like 'dah%' ('DAHİL', ' dahil' de dahil sayılır;
+--   aktarım incelemesi 18.11.2026 - KOSUYOLU kaynağında yalnız 'Dahil' / 'Hariç' vardı, veri etkilenmedi).
 --   Bazı kurum faturalarında %5 kesinti düşülmüş (FATURA_TUTARI = Σ × 0,95 / 1,05): toplam satırlardan,
 --   kesinti açıklamaya yazılır.
 create temp table zz_fb as
@@ -844,7 +846,7 @@ select b.id, coalesce(f.sirano, 0), 2, s.hizmet_id, left(coalesce(f.aciklama, ''
   from eski.fatura f
   cross join lateral (select coalesce(f.kdv, 10)::numeric as kdv) k0
   cross join lateral (select k0.kdv,
-                             case when (select kdvdurum from eski.fatbaslik where id = f.fatbasid) = 'Dahil'
+                             case when (select lower(btrim(coalesce(kdvdurum, ''))) from eski.fatbaslik where id = f.fatbasid) like 'dah%'
                                   then f.tutar::numeric / (1 + k0.kdv / 100) else f.tutar::numeric end as haric) x
   join zz_fb z on z.id = f.fatbasid
   join public.belge b on b.aktarim_kaynak = 2 and b.aktarim_tablo = 'FATBASLIK' and b.aktarim_id = z.id

@@ -439,8 +439,7 @@ function IcerikCoz([byte[]]$ham) {
       try { return @("doc", $doc, (WordMetin $doc)) } catch { return @("doc", $doc, $null) }
     }
   }
-  if ($bas -eq "{
-t") { $r = RtfMetin $ham; return @("rtf", $ham, $r[1]) }
+  if ($bas -eq '{\rt') { $r = RtfMetin $ham; return @("rtf", $ham, $r[1]) }   # tek tirnak: kacis dizisi yok (eskiden cift tirnak icindeki ters egik cizgi satir sonuna donusmustu)
   return @("metin", $ham, [System.Text.Encoding]::GetEncoding(1254).GetString($ham))
 }
 function ZlibAc([byte[]]$b) {

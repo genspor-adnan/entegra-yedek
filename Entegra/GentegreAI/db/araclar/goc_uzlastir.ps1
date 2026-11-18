@@ -136,12 +136,16 @@ $KolonSil = [regex]'alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?((?:\w+\.)?\w
 # Sonradan silinen / yeniden adlandirilan nesneler: "dosya numarasi" -> kume.
 #   Bir nesne, KENDISINDEN SONRAKI bir dosyada silindiyse kanit sayilmaz.
 $silinme = @{}   # anahtar -> en yuksek dosya adi
+# SAYISAL KARSILASTIRMA (aktarim incelemesi 18.11.2026): "sonraki dosyada silindi" karari dosya ADLARI metin olarak
+#   karsilastirilarak veriliyordu - '1050_y.sql' -gt '950_x.sql' yanlis; 950'de kurulup 1050'de silinen nesne kanit
+#   sayiliyor, 950 EKSIK / ETKI_KISMI gorunuyordu. Siralamadaki duzeltmenin (13.10) karsilastirmadaki esi.
+function DosyaNo([string]$Ad) { return [int]($Ad -split '_')[0] }
 # AYNI dosyada, OLUSTURMADAN SONRA silinen/adlandirilan (or. `x_yeni` kurulup
 #   `x` adini alir): dosya -> (anahtar -> son konum). Once-sil-sonra-kur
 #   deseni (drop if exists f; create f) bu yuzden ELENMEZ.
 $icSilinme = @{}
 function SilKaydet([string]$Anahtar, [string]$Dosya, [int]$Konum) {
-  if (-not $silinme.ContainsKey($Anahtar) -or $silinme[$Anahtar] -lt $Dosya) { $silinme[$Anahtar] = $Dosya }
+  if (-not $silinme.ContainsKey($Anahtar) -or (DosyaNo $silinme[$Anahtar]) -lt (DosyaNo $Dosya)) { $silinme[$Anahtar] = $Dosya }
   if (-not $icSilinme.ContainsKey($Dosya)) { $icSilinme[$Dosya] = @{} }
   if (-not $icSilinme[$Dosya].ContainsKey($Anahtar) -or $icSilinme[$Dosya][$Anahtar] -lt $Konum) {
     $icSilinme[$Dosya][$Anahtar] = $Konum
@@ -214,7 +218,7 @@ foreach ($d in $dosyalar) {
   # stg (MSSQL kaynak kopyasi) ve pg_temp nesneleri kanit sayilmaz.
   $kanit = @($nesneler | Select-Object -Unique | Where-Object {
       $_ -notmatch ':(stg|pg_temp)\.' -and
-      -not ($silinme.ContainsKey($_) -and $silinme[$_] -gt $ad) })
+      -not ($silinme.ContainsKey($_) -and (DosyaNo $silinme[$_]) -gt (DosyaNo $ad)) })
 
   if ($kanit.Count -eq 0) {
     $sonuc.Add([pscustomobject]@{ Dosya = $ad; Sinif = "BELIRSIZ"; Var = 0; Toplam = 0; Eksikler = ""; Not = "metinden nesne cikarilamadi"; Ozet = $ozet })

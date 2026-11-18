@@ -131,19 +131,29 @@ public sealed class DelphiOkuyucu(string baglanti, string? depoBaglanti = null)
         return _pk[tablo] = [.. l];
     }
 
-    /// <summary>Sunucunun istediği kolonların Delphi'deki gerçek adları (küçük harf -> ad).</summary>
+    /// <summary>
+    /// Sunucunun istediği kolonların Delphi'deki gerçek adları (küçük harf -> ad). ÖNBELLEK DELPHİ TABLOSUNUN TÜM
+    /// KOLONLARINI tutar, istenen liste HER ÇAĞRIDA süzülür (aktarım incelemesi 18.11.2026): eskiden ilk çağrının
+    /// süzülmüş sonucu süreç boyunca dönüyordu - göç stg tablosuna kolon ekleyip /durum onu isteyince ajan yeniden
+    /// başlatılana kadar kolonu göndermiyordu (web'de boş / varsayılan yazılıyordu). İstenen kolon önbellekte yoksa
+    /// (Delphi güncellemesi kolon eklemiş olabilir) tablo bir kez yeniden okunur.
+    /// </summary>
     public async Task<Dictionary<string, string>> KolonlarAsync(string tablo, IEnumerable<string> istenen, CancellationToken iptal)
     {
-        if (_kolon.TryGetValue(tablo, out var v)) return v;
-        await using var b = await AcAsync(tablo, iptal);
-        await using var k = Komut(b, "SELECT name FROM sys.columns WHERE object_id = OBJECT_ID(@t)", new SqlParameter("@t", "dbo." + tablo));
-        var var = new Dictionary<string, string>(StringComparer.Ordinal);
-        await using (var r = await k.ExecuteReaderAsync(iptal))
-            while (await r.ReadAsync(iptal)) var[r.GetString(0).ToLowerInvariant()] = r.GetString(0);
+        var liste = istenen.ToList();
+        if (!_kolon.TryGetValue(tablo, out var tum) || liste.Any(s => !tum.ContainsKey(s)))
+        {
+            await using var b = await AcAsync(tablo, iptal);
+            await using var k = Komut(b, "SELECT name FROM sys.columns WHERE object_id = OBJECT_ID(@t)", new SqlParameter("@t", "dbo." + tablo));
+            tum = new Dictionary<string, string>(StringComparer.Ordinal);
+            await using (var r = await k.ExecuteReaderAsync(iptal))
+                while (await r.ReadAsync(iptal)) tum[r.GetString(0).ToLowerInvariant()] = r.GetString(0);
+            _kolon[tablo] = tum;
+        }
         var sonuc = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var s in istenen)
-            if (var.TryGetValue(s, out var ad)) sonuc[s] = ad;
-        return _kolon[tablo] = sonuc;
+        foreach (var s in liste)
+            if (tum.TryGetValue(s, out var ad)) sonuc[s] = ad;
+        return sonuc;
     }
 
     public async Task<List<Degisiklik>> DegisikliklerAsync(string tablo, long versiyon, CancellationToken iptal)

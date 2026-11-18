@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (727 ad, 204 tanesi birden cok dosyada)
+## Fonksiyonlar (730 ad, 205 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -13,7 +13,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
-| `fn_aktar_belge` | `1188_aktarim_tahakkuk_aciklama.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql, 1142_aktarim_cari_doviz.sql |
+| `fn_aktar_belge` | `1370_aktarim_senkron_silme_varis_uretim_sube.sql` | 1084_aktarim_belge.sql, 1085_aktarim_kasa.sql, 1088_aktarim_belge_donus.sql, 1093_aktarim_metin_kirp.sql, 1142_aktarim_cari_doviz.sql, 1188_aktarim_tahakkuk_aciklama.sql |
+| `fn_aktar_belge_1188` | `1371_aktarim_tahakkuk_satiri_esitle.sql` | — |
 | `fn_aktar_cari` | `1268_aktarim_sube_firma.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_depo` | `1094_aktarim_depo_sahiplen.sql` | 1081_aktarim_cari_depo.sql |
 | `fn_aktar_doviz` | `1082_aktarim_stok_kalem_hesap.sql` | — |
@@ -66,9 +67,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_aktarim_oncesi_bosalt` | `1170_aktarim_oncesi_bosalt.sql` | — |
 | `fn_aktarim_salt_okunur` | `1089_aktarim_salt_okunur.sql` | — |
 | `fn_aktarim_sube` | `1081_aktarim_cari_depo.sql` | — |
-| `fn_aktarim_sube_isle` | `1268_aktarim_sube_firma.sql` | — |
+| `fn_aktarim_sube_isle` | `1370_aktarim_senkron_silme_varis_uretim_sube.sql` | 1268_aktarim_sube_firma.sql |
 | `fn_aktarim_tarih` | `1082_aktarim_stok_kalem_hesap.sql` | — |
+| `fn_aktarim_transfer_varis_esitle` | `1370_aktarim_senkron_silme_varis_uretim_sube.sql` | — |
 | `fn_aktarim_transfer_varis_tamamla` | `1248_aktarim_transfer_lot_varis.sql` | — |
+| `fn_aktarim_uretim_fisi_durum_esitle` | `1370_aktarim_senkron_silme_varis_uretim_sube.sql` | — |
 | `fn_aktarim_uretim_fisi_kur` | `1261_aktarim_uretim_fisi.sql` | — |
 | `fn_aktarim_ust` | `1087_aktarim_ust.sql` | — |
 | `fn_aktarim_web_id` | `1082_aktarim_stok_kalem_hesap.sql` | 1081_aktarim_cari_depo.sql |
@@ -550,7 +553,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_uretim_fisi_no` | `1253_uretim_fisi.sql` | — |
 | `fn_uretim_fisi_operasyon_hesapla` | `1253_uretim_fisi.sql` | — |
 | `fn_uretim_malzeme_hazirlik` | `429_uretim_v1.sql` | — |
-| `fn_uretim_stok_maliyeti` | `1261_aktarim_uretim_fisi.sql` | 429_uretim_v1.sql |
+| `fn_uretim_stok_maliyeti` | `1370_aktarim_senkron_silme_varis_uretim_sube.sql` | 429_uretim_v1.sql, 1261_aktarim_uretim_fisi.sql |
 | `fn_uretim_stok_son_maliyeti` | `1261_aktarim_uretim_fisi.sql` | 1253_uretim_fisi.sql |
 | `fn_uretim_zaman_hesapla` | `429_uretim_v1.sql` | — |
 | `fn_uretim_zaman_topla` | `429_uretim_v1.sql` | — |

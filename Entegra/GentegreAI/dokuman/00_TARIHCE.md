@@ -7,6 +7,35 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Göç / aktarım incelemesi (1370, 1371)
+
+- (1) Delphi'de silinen belge web'de bağlı kayda (aktarım üretim fişi, sayım fişi, tahsilat...) sahipse FK ihlaliyle
+  belge adımı düşüyor, paket ilk hatada durduğu için kasa / e-Belge / XSLT hiç çalışmıyordu - senkron kilitlenirdi.
+  `fn_aktar_belge` sarmalandı (1188 gövdesi `fn_aktar_belge_1188`): silme belge belge; aktarım üretim fişi önce
+  kalkar, başka bağ varsa belge silinmez, iptal (6) olur, cari satırı ve lot izlemi kalkar. Sonuç `silinemeyen_iptal`.
+- (2) `fn_aktarim_sube_isle` elle yapılan şube eşlemesini her pakette eziyor, kopya şube açıyordu. Eşleme varsa
+  eşlenen şubeye bağlanır, eşleme yalnız eksikse yazılır.
+- (6) Transfer varış lot satırı (STOKIZLEME_VARIS) yalnız tek seferlik ek aktarımda kuruluyordu; sürekli senkronda
+  yeni / düzenlenen / silinen transferin varışı tutulmuyordu. Sarmal paketteki transferlerin varışını yeniden kurar
+  (`fn_aktarim_transfer_varis_esitle`), lot bakiyesi aktarım tetiğiyle. Onarım: eksik varışlar kurulur (yerel MEDX
+  kopyasında 4.423 eksik satır görüldü, ama o kopya eski şemada - sunucuda yayında ölçülecek; UNIVERSE'te yeniden
+  kurulum lot bakiyesini değiştirmedi).
+- (7) Delphi iptali DURUM 6 (UFaturaWizard); 1261 yalnız 2'yi iptal sayıyordu. Aktarım üretim fişinin durumu
+  belgeden eşitlenir (2 / 6 -> ters kayıt), ortalama maliyet `b.durum = 0` süzer; üretim fişi artık sürekli senkronda
+  da kurulur.
+- (8, 1371) Satırsız tahakkuk satırı (FATBASLIK_TK) her pakette silinip yeni kimlikle yazılıyordu; artık eşitlenir.
+- (5) Aktarım ajanı kolon önbelleği süzülmüş listeyi tutuyordu - göç kolon ekleyince ajan yeniden başlatılana kadar
+  gönderilmiyordu. Önbellek Delphi'nin tüm kolonlarını tutar, istenen her çağrıda süzülür.
+- (10) Hareket başlangıç tarihi değişince EBELGE / EBELGEMESAJ da yeniden yüklenir.
+- (3) Eski HBYS `al.ps1` RTF kontrolü bozuk dizeyle hiç çalışmıyordu (düzeltildi; KOSUYOLU'da RTF rapor yok,
+  hepsi docx / doc - onarım gerekmez). (9) `esle.sql` KDV dahil kontrolü `like 'dah%'` (KOSUYOLU kaynağı yalnız
+  'Dahil' / 'Hariç' - etkilenmedi). (4) `goc_uzlastir.ps1` "sonradan silindi" kararı dosya numarasıyla (metin
+  karşılaştırması 1000+ dosyada yanlıştı).
+- Testler `AktarimSenkronTestleri` (5; hepsi eski tanımlarda kırmızı), `AktarimUretimFisiTestleri` yeni davranışa
+  uyarlandı. 3, 4, 5, 9, 10 için test yok.
+
+---
+
 ## 18.11.2026 — HBYS incelemesi (lab / radyoloji / muayene / reçete, göç yok)
 
 - (1) `POST /api/lab/istem` gövdedeki başvuru / hastayı kapsamdan geçirmiyordu - başka şubenin başvurusuna istem açılıp

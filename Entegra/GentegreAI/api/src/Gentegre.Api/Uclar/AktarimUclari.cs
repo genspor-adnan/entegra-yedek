@@ -260,8 +260,12 @@ public static class AktarimUclari
     public sealed record AjanIstegi(string? Ad);
     public sealed record SubeEslemeSatiri(int DelphiSube, int SubeId);
 
-    /// <summary>Hareket tabloları: başlangıç tarihi değişince yeniden (tam) yüklenir.</summary>
-    private static readonly string[] HareketTablolari = ["FATBASLIK", "FATURA", "STOKIZLEME", "KASA"];
+    /// <summary>
+    /// Hareket tabloları: başlangıç tarihi değişince yeniden (tam) yüklenir. e-BELGE DE (aktarım incelemesi 18.11.2026):
+    /// fn_aktar_ebelge belgesi web'de olmayan kaydı 'belgesiz' atlar; tarih geriye alınınca belgeler gelir ama
+    /// e-Belge sürümü sıfırlanmadığı için kayıtları gelmiyordu (gece mutabakatı kapalıysa hiç).
+    /// </summary>
+    private static readonly string[] HareketTablolari = ["FATBASLIK", "FATURA", "STOKIZLEME", "KASA", "EBELGE", "EBELGEMESAJ"];
 
     /// <summary>
     /// GenProfil / Kurum Profili › Veri Kaynağı (adım 6d, mockup sekme 3). Yetki kurum

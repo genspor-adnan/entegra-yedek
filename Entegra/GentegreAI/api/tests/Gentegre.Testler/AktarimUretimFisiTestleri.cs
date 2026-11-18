@@ -67,7 +67,9 @@ public sealed class AktarimUretimFisiTestleri(VeritabaniOlgusu olgu) : IClassFix
 
         var ilk = await CalistirAsync(b, t, "fn_aktarim_uretim_fisi_kur");
         // Paket dışı (gerçek kurulumdan kalan) belgeler de sayılabilir; bu paketin kayıtları satır bazında doğrulanır.
-        Assert.True(Sayi(ilk, "fis_eklenen") >= 1);
+        // 1370: fiş SÜREKLİ SENKRONDA (fn_aktar_belge) açıldı - bu çağrı bu paket için yeni fiş açmaz.
+        Assert.Equal(1L, await b.TekDegerAsync<long>(
+            "select count(*) from public.uretim_fisi where aktarim_tablo = 'FATBASLIK' and aktarim_id = 990006101", t, [], ct));
         Assert.True(Sayi(ilk, "mamulsuz_atlanan") >= 1);
         Assert.True(Sayi(ilk, "taslak_atlanan") >= 1);
 
