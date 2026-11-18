@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Stok / belge incelemesi (5-10): numara, kilit, tür, hareket dökümü, şube, FIFO zinciri (1369)
+
+- (5) Taslak PUT ile kesinleşince numara alır (e-Belgede "0"); yalnız yeni belgeye veriliyordu.
+- (6) Silme belgeyi kilitler (`for update`) - eşzamanlı PUT + DELETE stok geri almasını eski satırlardan yapıyordu.
+- (7) PUT belge türünü değiştiremez (alış siparişi PUT ile alış faturası olup dönüşüm / kapanmayı atlıyordu, 422);
+  korunan satırlı belgede iade / normal tipi değiştirilemez (stok yönü ters dönerdi).
+- (8) Stok kartı hareket dökümü stok yazıcısının kuralıyla: yön tür + tipten (`fn_belge_cikis_mi`), tek depo, miktar 0
+  ise adet. Satış iadesi "çıkış", iki depolu giriş "transfer" görünüyor, kart kalanı depo bakiyesini tutmuyordu.
+- (9) `/api/belge/{id}/acik-satirlar`, `/donusumler`, `/diptoplam` GET /{id} ile aynı kapıdan (şube + belge türü);
+  `/iade-satirlari` cari ya da belge ister, şubeye göre (tarafId=0 bütün carilerin satırlarını döndürüyordu).
+- (10) Çıkış / transfer izlemi FIFO ile düştüğü giriş satırlarını `stok_izleme.kaynak_dagilim`de (1369) taşır; düzenleme
+  ve silme o kalanı geri verir - üç düzenlemede kaynak satırın kalanı 0'a iniyor, geri çağırma izi kayboluyordu.
+  1369 öncesi çıkış satırlarında bilgi yok, dokunulmaz.
+- Test: `StokLotYonuTestleri` (8 test).
+
 ## 18.11.2026 — Stok / belge incelemesi (1-4): lot yönü ve deposu stokla aynı (1368)
 
 - (1) Taslak belge lot bakiyesine dokunmaz: izlem satırı yalnız seçimi saklar (`yon` 0, kalan 0); kesinleşince işlenir.

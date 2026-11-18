@@ -354,10 +354,11 @@ public static class BelgeUclari
 
         // GET /api/belge/{id}/acik-satirlar - donusturulmeyi bekleyen satirlar
         grup.MapGet("/{id:int}/acik-satirlar", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            await BelgeOkumaKapisiAsync(baglam, veri, id, iptal);
             return Results.Ok(new
             {
                 satirlar = await depo.AcikSatirlarAsync(id, iptal),
@@ -434,10 +435,16 @@ public static class BelgeUclari
 
         grup.MapGet("/iade-satirlari", async (
             int tarafId, int? belgeId, string? ara, string? turler,
-            BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            // CARİ YA DA BELGE ZORUNLU + KAPI (stok/belge incelemesi 18.11.2026): tarafId=0 bütün carilerin bütün
+            //   şubelerdeki iade edilebilir satırlarını (200) döndürüyordu.
+            if (tarafId <= 0 && belgeId is not > 0)
+                throw GentegreHatasi.Dogrulama("İade satırları için cari ya da belge seçilmeli.",
+                    new AlanHatasi("tarafId", "Zorunlu."));
+            if (belgeId is > 0) await BelgeOkumaKapisiAsync(baglam, veri, belgeId.Value, iptal);
             // turler: "14,119" gibi virgullu liste - iade IRSALIYESI yalniz
             //   irsaliye satirlarini, iade FATURASI fatura satirlarini gorsun.
             var turDizi = (turler ?? "")
@@ -446,7 +453,7 @@ public static class BelgeUclari
                 .Where(x => x > 0).ToArray();
             return Results.Ok(new
             {
-                satirlar = await depo.IadeSatirlariAsync(tarafId, belgeId, ara, turDizi, iptal),
+                satirlar = await depo.IadeSatirlariAsync(tarafId, belgeId, ara, turDizi, iptal, baglam.SubeId),
                 izlemeNo = baglam.IzlemeNo
             });
         });
@@ -877,10 +884,11 @@ public static class BelgeUclari
 
         // GET /api/belge/{id}/donusumler - bu belgeden turetilmis belgeler
         grup.MapGet("/{id:int}/donusumler", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            await BelgeOkumaKapisiAsync(baglam, veri, id, iptal);
             return Results.Ok(new
             {
                 belgeler = await depo.DonusumlerAsync(id, iptal),
@@ -890,10 +898,11 @@ public static class BelgeUclari
 
         // GET /api/belge/{id}/diptoplam - ekranin alt toplam seridi
         grup.MapGet("/{id:int}/diptoplam", async (
-            int id, BaglamCozucu cozucu, BelgeDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            int id, BaglamCozucu cozucu, BelgeDeposu depo, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("belge", Islem.Gor);
+            await BelgeOkumaKapisiAsync(baglam, veri, id, iptal);
             var kayit = await depo.OkuAsync(id, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new { dipToplam = kayit.DipToplam, izlemeNo = baglam.IzlemeNo });
         });
@@ -1204,6 +1213,21 @@ public static class BelgeUclari
     /// Çekirdek `belge` yetkisi türe değil `tipi`ye bakar: başvuru ve ondan
     /// kesilen hasta fişi/tahakkuku aynı tipi (30) taşır.
     /// </summary>
+    /// <summary>
+    /// OKUMA KAPISI (stok/belge incelemesi 18.11.2026): GET /{id} ile aynı - belge gör yetkisi, şube, belge türü.
+    /// Yan okuma uçları (açık satırlar, dönüşümler, dip toplam) yalnız yetkiye bakıyordu; başka şubenin satırları,
+    /// fiyatları ve cari adları kimlikle okunabiliyordu.
+    /// </summary>
+    private static async Task BelgeOkumaKapisiAsync(IstekBaglami baglam, VeriKaynagi veri, int id, CancellationToken iptal)
+    {
+        var b = await veri.TekAsync(
+            "select sube_id, tur::int, coalesce(tipi, 0)::int from public.belge where id = @p0", [id],
+            o => new { Sube = o.IsDBNull(0) ? (int?)null : o.GetInt32(0), Tur = o.GetInt32(1), Tipi = o.GetInt32(2) }, iptal)
+            ?? throw GentegreHatasi.Bulunamadi();
+        if (baglam.SubeId is not null && b.Sube is not null && b.Sube != baglam.SubeId) throw GentegreHatasi.Bulunamadi();
+        if (!TurIzinli(baglam, b.Tur, b.Tipi, Islem.Gor)) throw GentegreHatasi.Bulunamadi();
+    }
+
     private static void BelgeTuruIste(IstekBaglami baglam,
                                       IDictionary<string, object?> belge)
     {

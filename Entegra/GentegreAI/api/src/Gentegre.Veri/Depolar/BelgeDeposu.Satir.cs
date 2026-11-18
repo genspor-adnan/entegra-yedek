@@ -306,7 +306,7 @@ public sealed partial class BelgeDeposu
     /// </summary>
     public async Task<List<IDictionary<string, object?>>> IadeSatirlariAsync(
         int tarafId, int? belgeId, string? ara, IReadOnlyList<int>? turler = null,
-        CancellationToken iptal = default)
+        CancellationToken iptal = default, int? subeId = null)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
@@ -328,13 +328,15 @@ public sealed partial class BelgeDeposu
                --   (133): ayni mal iki kaynaktan iade edilip cift sayilmasin.
                and (cardinality(@p3::int[]) = 0 or v.belge_tur = any(@p3::int[]))
                and (v.miktar - v.iade_miktar) > 0
+               -- ŞUBE (stok/belge incelemesi 18.11.2026): başka şubenin satırları / fiyatları / carileri dönmez.
+               and (@p4 = 0 or exists (select 1 from public.belge bb where bb.id = v.belge_id and bb.sube_id = @p4))
                and (@p2 = '' or v.stok_kodu ilike '%' || @p2 || '%'
                              or v.stok_adi  ilike '%' || @p2 || '%'
                              or v.belge_no  ilike '%' || @p2 || '%')
              order by v.belge_tarihi desc, v.belge_id desc, v.sira
              limit 200
             """, null,
-            tarafId, belgeId ?? 0, ara ?? "", (turler ?? Array.Empty<int>()).ToArray());
+            tarafId, belgeId ?? 0, ara ?? "", (turler ?? Array.Empty<int>()).ToArray(), subeId ?? 0);
 
         var liste = new List<IDictionary<string, object?>>();
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -424,6 +426,13 @@ public sealed partial class BelgeDeposu
         {
             await using var baglanti = await _veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // BELGE KİLİDİ (stok/belge incelemesi 18.11.2026): düzenleme (GuncelleIcAsync) belgeyi kilitliyordu, silme
+            //   kilitlemiyordu - eşzamanlı PUT + DELETE'te silmenin stok geri alması eski satırlardan hesaplanıp PUT'un
+            //   üstüne yazılıyor (depoda 6 adet sapma), lot sonraki ifadede yeni satırları görüyordu. Silme de önce
+            //   belgeyi kilitler; bekleyen istek kilidi alınca güncel satırları okur.
+            await using (var kilit = baglanti.Komut("select 1 from public.belge where id = @p0 for update", islem, belgeId))
+                await kilit.ExecuteNonQueryAsync(iptal);
 
             // Log SILMEDEN ONCE yazilir: silinen satirin alanlari sonra okunamaz.
             //   Ozet (tur/no/cari) bilgiye konur - log listesi Modul/Kod/Ad

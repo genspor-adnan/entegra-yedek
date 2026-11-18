@@ -5,7 +5,7 @@ using Gentegre.Veri;
 namespace Gentegre.Testler;
 
 /// <summary>
-/// STOK / BELGE İNCELEMESİ 18.11.2026 bulgu 1-4 (1368): lot bakiyesi stokla aynı yön ve depoda yürür.
+/// STOK / BELGE İNCELEMESİ 18.11.2026 bulgu 1-4 (1368) ve 5, 7-10 (1369): lot bakiyesi stokla aynı yön ve depoda yürür.
 ///  1 taslak lot bakiyesine dokunmaz, kesinleşince işlenir, silinince iz kalmaz · 2 satış / alış iadesinde lot
 ///  stokla aynı yönde · 3 korunan satırlı belge düzenlenince lot erimez · 4 iki depolu giriş belgesinin geri alması
 ///  yazıldığı depodan.
@@ -20,7 +20,7 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
 
     private async Task<Ortam> OrtamAsync(TestDunyasi d, int izleme = 2)
     {
-        var rol = await d.RolAsync("stoklot", "belge:gedk", "belge.alis.irsaliye:gedk", "belge.satis.irsaliye:gedk");
+        var rol = await d.RolAsync("stoklot", "belge:gedk", "belge.alis.irsaliye:gedk", "belge.satis.irsaliye:gedk", "belge.satis.fatura:gedk", "stok:g");
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
@@ -175,5 +175,88 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
         Assert.True(sil.IsSuccessStatusCode, await sil.Content.ReadAsStringAsync());
         Assert.Equal(0m, await Stok(o, o.DepoA));                      // eskiden A'da +10 kalıyordu
         Assert.Equal(0m, await Stok(o, o.DepoB));                      // ve B -10'a düşüyordu
+    }
+
+    private object SatisIrsaliyesi(Ortam o, int tipi = 1)
+        => new { tur = 14, tipi, belgeTarihi = Tarih, tarafId = o.Musteri, cikisDepoId = o.DepoA };
+
+    [VtFact]
+    public async Task Taslaktan_kesine_belge_numara_alir_ve_tur_degismez()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        await YazAsync(d, o, AlisIrsaliyesi(o, "NG" + d.Onek[^6..]), [new { tur = 1, stokId = o.Stok, adet = 10, miktar = 10, birimFiyat = 10 }]);
+        var satir = new[] { new { tur = 1, stokId = o.Stok, adet = 2, miktar = 2, birimFiyat = 15 } };
+        var id = await YazAsync(d, o, SatisIrsaliyesi(o), satir, taslak: true);
+        Assert.Equal("", await api.Veri.TekDegerAsync<string>("select coalesce(belge_no, '') from public.belge where id = @p0", [id]));
+        await YazAsync(d, o, SatisIrsaliyesi(o), satir, taslak: false, id: id);
+        Assert.NotEqual("", await api.Veri.TekDegerAsync<string>("select coalesce(belge_no, '') from public.belge where id = @p0", [id]));
+
+        // 7) PUT türü değiştiremez (irsaliye -> fatura): dönüşüm kuralları atlanırdı.
+        var y = await o.H.PutAsJsonAsync($"/api/belge/{id}", new
+        {
+            surum = await Surum(id), satirlar = satir,
+            belge = new { tur = 15, tipi = 1, belgeTarihi = Tarih, tarafId = o.Musteri, cikisDepoId = o.DepoA },
+        });
+        Assert.Equal(System.Net.HttpStatusCode.UnprocessableEntity, y.StatusCode);
+        Assert.Equal(14, await api.Veri.TekDegerAsync<int>("select tur::int from public.belge where id = @p0", [id]));
+    }
+
+    [VtFact]
+    public async Task Stok_hareketi_iade_yonunu_ve_depo_bakiyesini_tutar()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        await YazAsync(d, o, AlisIrsaliyesi(o, "HR" + d.Onek[^6..], cikisDepo: o.DepoB),
+            [new { tur = 1, stokId = o.Stok, adet = 10, miktar = 10, birimFiyat = 10 }]);
+        await YazAsync(d, o, SatisIrsaliyesi(o, tipi: 2), [new { tur = 1, stokId = o.Stok, adet = 3, miktar = 3, birimFiyat = 10 }]);
+        Assert.Equal(13m, await Stok(o, o.DepoA));
+
+        var h = await o.H.GetFromJsonAsync<JsonElement>($"/api/kart/stok/{o.Stok}/hareket?bas=2000-01-01");
+        Assert.Equal(13m, h.GetProperty("kapanis").GetDecimal());                     // eskiden iade çıkış: 10 - 3
+        var yonler = h.GetProperty("satirlar").EnumerateArray().Select(x => x.GetProperty("yon").GetString()).ToList();
+        Assert.Equal(["giris", "giris"], yonler);                                   // iki depolu giriş "transfer" değil
+    }
+
+    [VtFact]
+    public async Task Yan_okuma_uclari_sube_kapisindan_gecer()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        var baskaSube = await api.Veri.TekDegerAsync<int>("select id from public.sube where id <> @p0 order by id limit 1", [Merkez]);
+        var baska = await api.Veri.TekDegerAsync<int>("""
+            insert into public.belge (tur, tipi, durum, belge_tarihi, taraf_id, sube_id, belge_no, kdv_durum, belge_dovizi, rapor_dovizi, doviz_kuru)
+            values (14, 1, 0, now(), @p0, @p1, 'SUBEB', 'Hariç', 'TL', 'TL', 1) returning id
+            """, [o.Musteri, baskaSube]);
+        d.Temizle($"delete from public.belge where id = {baska}");
+        foreach (var yol in new[] { "acik-satirlar", "donusumler", "diptoplam" })
+            Assert.Equal(System.Net.HttpStatusCode.NotFound, (await o.H.GetAsync($"/api/belge/{baska}/{yol}")).StatusCode);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, (await o.H.GetAsync("/api/belge/iade-satirlari?tarafId=0")).StatusCode);
+    }
+
+    [VtFact]
+    public async Task Cikis_duzenlenip_silinince_kaynak_girisin_kalani_geri_verilir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d);
+        using var _ = o.H;
+        var giris = await YazAsync(d, o, AlisIrsaliyesi(o, "KZ" + d.Onek[^6..]), [LotSatiri(o.Stok, 10, new { lotNo = "L-KZ", miktar = 10 })]);
+        var lot = await api.Veri.TekDegerAsync<int>("select id from public.stok_seri_lot where stok_id = @p0 and lot_no = 'L-KZ'", [o.Stok]);
+        Task<decimal> KaynakKalan() => api.Veri.TekDegerAsync<decimal>(
+            "select kalan from public.stok_izleme where belge_id = @p0", [giris]);
+
+        var satir = new[] { LotSatiri(o.Stok, 4, new { seriLotId = lot, miktar = 4 }) };
+        var cikis = await YazAsync(d, o, SatisIrsaliyesi(o), satir);
+        Assert.Equal(6m, await KaynakKalan());
+        await YazAsync(d, o, SatisIrsaliyesi(o), satir, id: cikis);
+        await YazAsync(d, o, SatisIrsaliyesi(o), satir, id: cikis);
+        Assert.Equal(6m, await KaynakKalan());                                     // eskiden her kayıtta -4 (0'a iner)
+        var sil = await o.H.DeleteAsync($"/api/belge/{cikis}");
+        Assert.True(sil.IsSuccessStatusCode, await sil.Content.ReadAsStringAsync());
+        Assert.Equal(10m, await KaynakKalan());
+        Assert.Equal(10m, await Lot(o, o.DepoA));
     }
 }

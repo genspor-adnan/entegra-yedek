@@ -337,12 +337,15 @@ public sealed partial class BelgeDeposu
         }
 
         var ilkKaynak = 0;
+        // KAYNAK DAĞILIMI (1369): hangi giriş satırından ne kadar düşüldü - geri almada aynen iade edilir.
+        var dagilim = new List<object>();
         foreach (var (kaynakId, kaynakKalan) in kaynaklar)
         {
             if (kalanIstek <= 0) break;
             var pay = Math.Min(kaynakKalan, kalanIstek);
             kalanIstek -= pay;
             if (ilkKaynak == 0) ilkKaynak = kaynakId;
+            dagilim.Add(new { id = kaynakId, m = pay });
 
             await using var dus = baglanti.Komut(
                 "update public.stok_izleme set kalan = kalan - @p1 where id = @p0 and kalan >= @p1", islem,
@@ -355,8 +358,8 @@ public sealed partial class BelgeDeposu
         await using (var komut = new NpgsqlCommand("""
             insert into public.stok_izleme
                 (stok_id, seri_lot_id, izlem_tur, belge_tur, belge_id, belge_satir_id,
-                 adet, kalan, durum, donus_id, depo_id, ekleyen, yon)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0, @p10)
+                 adet, kalan, durum, donus_id, depo_id, ekleyen, yon, kaynak_dagilim)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, 0, @p8, @p9, 0, @p10, @p11::jsonb)
             """, baglanti, islem))
         {
             komut.Parameters.AddWithValue("p0", stokId);
@@ -371,6 +374,7 @@ public sealed partial class BelgeDeposu
             komut.Parameters.AddWithValue("p9", (object?)hedefDepo ?? DBNull.Value);
             // YON (1368): cikis -1; transfer bos (iki depolu kural TransferGeriAlAsync / fn_stok_lot_hareketleri).
             komut.Parameters.AddWithValue("p10", kalaniTasi ? DBNull.Value : (object)(short)-1);
+            komut.Parameters.AddWithValue("p11", System.Text.Json.JsonSerializer.Serialize(dagilim));
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

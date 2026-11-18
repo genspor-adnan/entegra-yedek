@@ -336,6 +336,18 @@ public sealed partial class BelgeDeposu
             while (await o.ReadAsync(iptal)) korunan.Add(o.GetInt32(0));
         }
 
+        // TÜR DEĞİŞMEZ, KORUNAN SATIRDA YÖN DEĞİŞMEZ (stok/belge incelemesi 18.11.2026): PUT gövdesindeki `tur`
+        //   yazılıyordu - alış siparişi PUT ile alış faturasına çevrilip stok + cari yazıyor, dönüşüm / kapanma
+        //   kuralları atlanıyordu. Tür dönüşümle değişir. `tipi` (fatura tipi) değişebilir; ama iadeye çevirmek
+        //   korunan satırların stok yönünü ters çevirir (lotu yerinde kalır) - o durumda engel.
+        if (belge.TryGetValue("tur", out var yeniTurHam) && yeniTurHam is not null && Sayi(belge, "tur") != tur)
+            throw GentegreHatasi.IsKurali("Belge türü değiştirilemez - yeni belge girin ya da belgeyi dönüştürün.");
+        belge["tur"] = tur;
+        var yeniTipi = belge.TryGetValue("tipi", out var yeniTipiHam) && yeniTipiHam is not null ? Sayi(belge, "tipi") : tipi;
+        if (korunan.Count > 0 && BelgeTuru.CikisMi(tur, yeniTipi) != BelgeTuru.CikisMi(tur, tipi))
+            throw GentegreHatasi.IsKurali(
+                "Belgede başka kayıtlara bağlı satır var - iade / normal tipi değiştirilemez (stok yönü ters dönerdi).");
+
         // KORUNAN SATIRIN LOTU YERINDE KALIR (stok/belge incelemesi 18.11.2026): geri alma belgenin BUTUN izlem
         //   satirlarinin lotunu geri aliyor, korunan satirin izlemi ise silinmedigi ve yeniden yazilmadigi icin lot
         //   her duzenlemede bir kez daha dusuyordu (UTS bildirimli 5 adetlik satir: iki duzenlemede lot -10).
@@ -463,6 +475,8 @@ public sealed partial class BelgeDeposu
             """, islem,
             belgeId, cikis);
         await komut.ExecuteNonQueryAsync(iptal);
+
+        await KaynakKalaniIadeAsync(baglanti, islem, belgeId, korunan, iptal);
 
         // Lot bakiyeleri: belgenin izlem satirlari ters isaretle geri alinir. YON SATIRIN KENDISINDEN (1368):
         //   satir ne yazdiysa o geri alinir (yon +1 giris, -1 cikis, 0 taslak); yonu olmayan eski satirda belge yonu.
@@ -786,7 +800,10 @@ public sealed partial class BelgeDeposu
             // EN SON: buraya kadar her sey basarili. Satir kilidi altinda, BOSLUKSUZ.
             // Dis numarali belgede (alis faturasi) numara kullanicidan geldi.
             //   Duzenlemede numara ZATEN VAR - yeniden uretilmez.
-            if (!disNumara && mevcutId == 0)
+            // TASLAKTAN KESİNE (stok/belge incelemesi 18.11.2026): numara yalnız YENİ belgede veriliyordu - taslak
+            //   PUT ile kesinleşince belge numarasız kalıyor, e-Belge "0" yer tutucusu da yazılmıyordu. Numarası boş
+            //   belge (taslağın kesinleşmesi) de numara alır; NumaraVerAsync yalnız boş numarayı doldurur.
+            if (!disNumara && (mevcutId == 0 || Metin(belge, "belgeNo").Trim().Length == 0))
             {
                 // e-BELGE NUMARAYI BIZ VERMEYIZ (kullanici): e-Fatura/e-Arsiv ya da
                 //   e-Irsaliye acikken numara ENTEGRATORDEN gelir; kendi sayacimizi
@@ -896,10 +913,35 @@ public sealed partial class BelgeDeposu
     ///  - Lot: belgenin VARIŞ hareketleri (izlem satırının deposu = satırın giriş deposu; web transferi yalnız bunu
     ///    yazar, aktarım 1248'den beri çıkış + varış yazar) giriş deposundan düşülür, çıkış deposuna eklenir.
     /// </summary>
+    /// <summary>
+    /// TÜKETİLEN GİRİŞİN KALANI GERİ VERİLİR (stok/belge incelemesi 18.11.2026, 1369): çıkış / transfer izlemi lotun
+    /// giriş satırlarından FIFO ile `kalan` düşüyordu; belge düzenlenip silinince yalnız lot bakiyesi geri alınıyor,
+    /// zincir geri verilmiyordu - üç düzenlemede kaynak satırın kalanı 0'a iniyor, sonraki çıkış kaynak bulamıyor ve
+    /// "bu çıkış hangi girişin malıydı" izi (geri çağırma) kayboluyordu. Çıkış satırı hangi kaynaktan ne kadar
+    /// düştüğünü `kaynak_dagilim`de taşır; o kadarı geri eklenir. Eski satırlarda (1369 öncesi) bilgi yok, dokunulmaz.
+    /// </summary>
+    private static async Task KaynakKalaniIadeAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int belgeId, int[] korunan, CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut("""
+            update public.stok_izleme k
+               set kalan = k.kalan + x.m
+              from (select (e ->> 'id')::int as id, sum((e ->> 'm')::numeric) as m
+                      from public.stok_izleme i
+                      cross join lateral jsonb_array_elements(i.kaynak_dagilim) e
+                     where i.belge_id = @p0 and i.kaynak_dagilim is not null
+                       and not (coalesce(i.belge_satir_id, 0) = any(@p1::int[]))
+                     group by 1) x
+             where k.id = x.id
+            """, islem, belgeId, korunan);
+        await komut.ExecuteNonQueryAsync(iptal);
+    }
+
     private static async Task TransferGeriAlAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         int belgeId, CancellationToken iptal, int[]? korunan = null)
     {
         korunan ??= [];
+        await KaynakKalaniIadeAsync(baglanti, islem, belgeId, korunan, iptal);
         await using (var stok = baglanti.Komut("""
             with k as (
                 select s.stok_id,

@@ -234,25 +234,34 @@ public sealed class StokDurumDeposu
             birim = (await komut.ExecuteScalarAsync(iptal)) as string ?? "";
         }
 
-        // Depo suzgeci iki tarafa da bakar: transferde ayni satir bir depodan
-        //   cikip digerine girer. Suzgec yoksa (@p3 null) satirin kendi yonu gecerli.
-        //   Yon = satirda giris deposu VAR MI - alis/giris belgesinde giris_depo_id,
-        //   satis/cikis belgesinde cikis_depo_id dolu gelir.
-        const string GirisIfade = """
-            case when coalesce(bs.giris_depo_id, b.giris_depo_id) is not null
-                      and (@p3::int is null or coalesce(bs.giris_depo_id, b.giris_depo_id) = @p3)
-                 then bs.miktar else 0 end
+        // YAZANLA AYNI KURAL (stok/belge incelemesi 18.11.2026; BelgeDeposu.StokDurumGuncelleAsync): yön belge
+        //   TÜRÜ + TİPİNDEN (fn_belge_cikis_mi - iade ters), depo tek: çıkışta çıkış ?? giriş, girişte giriş ?? çıkış
+        //   (satır, yoksa başlık); transferde iki depo. Miktar 0 ise adet. Eskiden yön "hangi depo kolonu dolu"
+        //   sorusundan geliyordu - satış iadesi (çıkış deposu dolu) "Çıkış" görünüyor, iki depolu giriş belgesi hem
+        //   girip hem çıkıyor (net 0), adetli satır 0 sayılıyordu; kart kalanı depo bakiyesini tutmuyordu.
+        const string Miktar = "(case when coalesce(bs.miktar, 0) <> 0 then bs.miktar else coalesce(bs.adet, 0) end)";
+        const string Cikis = "public.fn_belge_cikis_mi(b.tur, coalesce(b.tipi, 0)::int)";
+        const string GDepo = "coalesce(bs.giris_depo_id, b.giris_depo_id)";
+        const string CDepo = "coalesce(bs.cikis_depo_id, b.cikis_depo_id)";
+        var GirisIfade = $"""
+            case when b.tur = 20
+                      then case when {GDepo} is not null and (@p3::int is null or {GDepo} = @p3) then {Miktar} else 0 end
+                 when not {Cikis} and coalesce({GDepo}, {CDepo}) is not null
+                      and (@p3::int is null or coalesce({GDepo}, {CDepo}) = @p3)
+                      then {Miktar}
+                 else 0 end
             """;
-        const string CikisIfade = """
-            case when coalesce(bs.cikis_depo_id, b.cikis_depo_id) is not null
-                      and (@p3::int is null or coalesce(bs.cikis_depo_id, b.cikis_depo_id) = @p3)
-                 then bs.miktar else 0 end
+        var CikisIfade = $"""
+            case when b.tur = 20
+                      then case when {CDepo} is not null and (@p3::int is null or {CDepo} = @p3) then {Miktar} else 0 end
+                 when {Cikis} and coalesce({CDepo}, {GDepo}) is not null
+                      and (@p3::int is null or coalesce({CDepo}, {GDepo}) = @p3)
+                      then {Miktar}
+                 else 0 end
             """;
-        const string Suzgec = """
-             where bs.stok_id = @p0 and bs.stok_durum_degis = 1 and b.durum = 0
-               and (@p3::int is null
-                    or coalesce(bs.giris_depo_id, b.giris_depo_id) = @p3
-                    or coalesce(bs.cikis_depo_id, b.cikis_depo_id) = @p3)
+        var Suzgec = $"""
+             where bs.stok_id = @p0 and bs.tur = 1 and bs.stok_durum_degis = 1 and b.durum = 0
+               and (({GirisIfade}) <> 0 or ({CikisIfade}) <> 0)
             """;
 
         decimal devir;
@@ -281,8 +290,11 @@ public sealed class StokDurumDeposu
               from public.belge_satir bs
               join public.belge b on b.id = bs.belge_id
               left join public.kasa_islem_turu t on t.kod = b.tur
-              left join public.depo gd on gd.id = coalesce(bs.giris_depo_id, b.giris_depo_id)
-              left join public.depo cd on cd.id = coalesce(bs.cikis_depo_id, b.cikis_depo_id)
+              -- Transfer dışında GÖSTERİLEN depo da yazılan depo (tek depo; iki kolon dolu olsa da).
+              left join public.depo gd on gd.id = case when b.tur = 20 then {GDepo}
+                                                       when not {Cikis} then coalesce({GDepo}, {CDepo}) end
+              left join public.depo cd on cd.id = case when b.tur = 20 then {CDepo}
+                                                       when {Cikis} then coalesce({CDepo}, {GDepo}) end
             {Suzgec} and b.belge_tarihi >= @p1 and b.belge_tarihi < @p2
              order by b.belge_tarihi, bs.id
             """, baglanti))
