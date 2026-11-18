@@ -1071,7 +1071,14 @@ Devam edilsin mi?`, true)) return;
       <div className={`rad-govde${etkinGiris === 'yapisal' ? ' yapisal' : ''}`}>
         {/* --------------------------------------------------- SOL: geçmiş --- */}
         <div className="rad-yan">
-          <h5>{c('Önceki Tetkikler')}</h5>
+          {/* ✎ ÖNCEKİ TETKİKLER BAŞLIĞININ SAĞINDA, SAĞA YASLI (kullanıcı 18.11.2026: "raporu edit moda / view moda
+              geçirsin") - Şablon başlığındakiyle aynı kip (raporDuzenle). */}
+          <h5 style={{ display: 'flex', alignItems: 'center' }}>{c('Önceki Tetkikler')}
+            <button type="button" className={`bs-kalem${yazimKilit ? '' : ' acik'}`} disabled={kilitli}
+                    style={{ marginLeft: 'auto' }} data-testid="rapor-kalem-gecmis"
+                    title={kilitli ? c('Onaylı rapor - düzeltme ek raporla')
+                           : raporDuzenle ? c('Görüntüleme kipine geç') : c('Düzenleme kipine geç')}
+                    onClick={() => setRaporDuzenle(v => !v)}>✎</button></h5>
 
           {/* KRONOLOJİK GÖRÜNÜM (kullanıcı 27.10.2026): zaman çizgisi - en yeni üstte, yıl başlıkları,
               bu tetkik en üstte "şimdi" düğümü. Tıklayınca (13.11.2026) liste YERİNDE kalır, düğüm vurgulanır ve
