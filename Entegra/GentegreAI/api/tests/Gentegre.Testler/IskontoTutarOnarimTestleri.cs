@@ -30,7 +30,7 @@ public sealed class IskontoTutarOnarimTestleri(ApiSunucuOlgusu api)
             values (@p0, 1, 2, 1, 1, 800, 800, 0, @p1) returning id
             """, [belge, Merkez]);
         d.Temizle($"delete from public.belge_satir where id = {satir}");
-        d.Temizle($"delete from public._yedek_iskonto_tutar_1378 where belge_id = {belge}");
+        d.Temizle($"delete from public.iskonto_tutar_onarim_yedek where belge_id = {belge}");
         d.Temizle($"delete from public.iskonto_talep where belge_id = {belge}");
         d.Temizle($"delete from public.iskonto_talep_satir where talep_id in (select id from public.iskonto_talep where belge_id = {belge})");
         var talep = await api.Veri.TekDegerAsync<int>("""
@@ -57,20 +57,21 @@ public sealed class IskontoTutarOnarimTestleri(ApiSunucuOlgusu api)
         Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [satir]));
 
         var depo = new BelgeDeposu(api.Veri, new LogDeposu());
-        var (onarilan, _) = await IskontoTutarOnarici.OnarAsync(api.Veri, depo, NullLogger.Instance, CancellationToken.None);
+        var (onarilan, _, hatali) = await IskontoTutarOnarici.OnarAsync(api.Veri, depo, NullLogger.Instance, CancellationToken.None);
         Assert.True(onarilan >= 1);
+        Assert.Equal(0, hatali);
         Assert.Equal("600.00/1/25.0000", await api.Veri.TekDegerAsync<string>(
             "select round(tutar, 2)::text || '/' || iskonto_kilit || '/' || iskonto::text from public.belge_satir where id = @p0", [satir]));
         Assert.Equal(600m, await api.Veri.TekDegerAsync<decimal>("select genel_toplam from public.belge where id = @p0", [belge]));
         Assert.Equal("800/800", await api.Veri.TekDegerAsync<string>("""
             select round(eski_tutar)::text || '/' || round(eski_genel_toplam)::text
-              from public._yedek_iskonto_tutar_1378 where belge_satir_id = @p0
+              from public.iskonto_tutar_onarim_yedek where belge_satir_id = @p0
             """, [satir]));
 
         // İkinci koşu: bu satır artık tutarlı - yedeğe ikinci kayıt düşmez.
         await IskontoTutarOnarici.OnarAsync(api.Veri, depo, NullLogger.Instance, CancellationToken.None);
         Assert.Equal(1, await api.Veri.TekDegerAsync<int>(
-            "select count(*)::int from public._yedek_iskonto_tutar_1378 where belge_satir_id = @p0", [satir]));
+            "select count(*)::int from public.iskonto_tutar_onarim_yedek where belge_satir_id = @p0", [satir]));
     }
 
     [VtFact]
@@ -87,7 +88,7 @@ public sealed class IskontoTutarOnarimTestleri(ApiSunucuOlgusu api)
             NullLogger.Instance, CancellationToken.None);
         Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [satir]));
         Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
-            "select count(*)::int from public._yedek_iskonto_tutar_1378 where belge_satir_id = @p0", [satir]));
+            "select count(*)::int from public.iskonto_tutar_onarim_yedek where belge_satir_id = @p0", [satir]));
     }
 
     /// <summary>
@@ -128,6 +129,6 @@ public sealed class IskontoTutarOnarimTestleri(ApiSunucuOlgusu api)
         Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [a]));
         Assert.Equal(800m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [b]));
         Assert.Equal(0, await api.Veri.TekDegerAsync<int>(
-            "select count(*)::int from public._yedek_iskonto_tutar_1378 where belge_id = @p0", [belge]));
+            "select count(*)::int from public.iskonto_tutar_onarim_yedek where belge_id = @p0", [belge]));
     }
 }

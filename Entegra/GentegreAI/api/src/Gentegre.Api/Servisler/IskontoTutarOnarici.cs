@@ -14,7 +14,7 @@ namespace Gentegre.Api.Servisler;
 ///
 /// Müşteri verisi kuralları (CLAUDE.md): yalnız KANITLI yanlış satır - onaylı (durum 1) talebin KİLİTLİ satırı, tutarı
 /// kendi oranıyla hesaplanan tutarı tutmuyor; belge iptal değil. Belgeye DÖNÜŞMÜŞ satırı olan talep ATLANIR ve günlüğe
-/// yazılır (o tutarla fiş / fatura kesilmiş - elle karar). Dokunmadan önce eski hâl `_yedek_iskonto_tutar_1378`e.
+/// yazılır (o tutarla fiş / fatura kesilmiş - elle karar). Dokunmadan önce eski hâl `iskonto_tutar_onarim_yedek`e.
 /// Düzeltilen satır artık tutarsız olmadığından yeniden koşması güvenlidir (idempotent); talep başına ayrı işlem -
 /// biri düşerse ötekiler yine düzelir.
 ///
@@ -33,7 +33,14 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
             var depo = kapsam.ServiceProvider.GetRequiredService<BelgeDeposu>();
             if (await veri.TekDegerAsync<string>("select deger from public.referans where anahtar = @p0", [Isaret], iptal) is not null)
                 return;
-            var (onarilan, atlanan) = await OnarAsync(veri, depo, gunluk, iptal);
+            var (onarilan, atlanan, hatali) = await OnarAsync(veri, depo, gunluk, iptal);
+            // İŞARET YALNIZ HATASIZ TURDA (yayın 18.11.2026): yetki / bağlantı hatası alan talep bir sonraki açılışta
+            //   yeniden denenir; hata alındı diye "bir kez çalıştı" sayılmaz.
+            if (hatali > 0)
+            {
+                gunluk.LogWarning("İskonto tutar onarımı: {H} talep hata aldı - bir sonraki açılışta yeniden denenecek.", hatali);
+                return;
+            }
             await veri.CalistirAsync(
                 "insert into public.referans (anahtar, deger, tip, kapsam, aciklama) values (@p0, @p1, 'metin', 'sistem', "
                 + "'IskontoTutarOnarici (1378) bir kez çalıştı') on conflict (anahtar) do nothing",
@@ -49,13 +56,13 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
     /// <summary>Bir kez çalıştı işareti (referans anahtarı).</summary>
     public const string Isaret = "sistem.iskonto_tutar_onarim_1378";
 
-    /// <summary>Tek tur: (düzeltilen talep, atlanan talep). Test ve elle çağrı için açık.</summary>
-    public static async Task<(int Onarilan, int Atlanan)> OnarAsync(VeriKaynagi veri, BelgeDeposu depo, ILogger gunluk,
+    /// <summary>Tek tur: (düzeltilen, dönüştüğü için atlanan, hata alan talep). Test ve elle çağrı için açık.</summary>
+    public static async Task<(int Onarilan, int Atlanan, int Hatali)> OnarAsync(VeriKaynagi veri, BelgeDeposu depo, ILogger gunluk,
         CancellationToken iptal)
     {
         await using var b = await veri.AcAsync(iptal);
-        if (await b.TekDegerAsync<string>("select to_regclass('public._yedek_iskonto_tutar_1378')::text", null, null, iptal) is null)
-            return (0, 0);                                    // göç henüz uygulanmamış
+        if (await b.TekDegerAsync<string>("select to_regclass('public.iskonto_tutar_onarim_yedek')::text", null, null, iptal) is null)
+            return (0, 0, 0);                                 // göç henüz uygulanmamış
 
         var adaylar = await b.ListeAsync("""
             select t.id, s.id, coalesce(s.adet, 0), coalesce(s.birim_fiyat, 0), coalesce(s.iskonto, 0),
@@ -88,7 +95,7 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
             .Where(a => Math.Abs(a.Tutar - BelgeHesap.SatirTutari(a.Adet, a.Fiyat, a.Isk, a.Isk2)) > 0.005m)
             .GroupBy(a => a.Talep).ToList();
 
-        int onarilan = 0, atlanan = 0;
+        int onarilan = 0, atlanan = 0, hatali = 0;
         foreach (var g in yanlis)
         {
             // Talebin HERHANGİ bir satırı dönüşmüşse talep atlanır (aynı talebin satırlarını yarım düzeltmeyelim).
@@ -102,7 +109,7 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
             {
                 await using var islem = await b.BeginTransactionAsync(iptal);
                 await b.CalistirAsync("""
-                    insert into public._yedek_iskonto_tutar_1378
+                    insert into public.iskonto_tutar_onarim_yedek
                            (talep_id, belge_id, belge_satir_id, eski_tutar, eski_tutar_kdvli, eski_doviz_tutari,
                             eski_dagilim, eski_genel_toplam)
                     select @p0, s.belge_id, s.id, s.tutar, s.tutar_kdvli, s.doviz_tutari,
@@ -118,10 +125,10 @@ public sealed class IskontoTutarOnarici(IServiceProvider servisler, ILogger<Isko
             // Talep başına ayrı işlem: biri (ör. Delphi kaynaklı salt-okunur satır, 1089) düşerse ötekiler sürer.
             catch (Exception h) when (h is not OperationCanceledException)
             {
-                atlanan++;
+                hatali++;
                 gunluk.LogWarning(h, "İskonto tutar onarımı: talep {T} düzeltilemedi.", g.Key);
             }
         }
-        return (onarilan, atlanan);
+        return (onarilan, atlanan, hatali);
     }
 }
