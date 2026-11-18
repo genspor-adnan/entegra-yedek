@@ -12,6 +12,7 @@ namespace Gentegre.Api.Uclar;
 ///
 /// Dönemde VERİLEN BÜTÜN iskontolar - yalnız onaylanan talepler değil:
 ///   talep    : satırda onaylı iskonto talebi var (iskonto_talep durum 1)
+///   sozlu    : talep SÖZLÜ onayla (1375): banko yöneticinin sözünü beyan etti, onaylayan = o yönetici
 ///   kampanya : satır bir kampanyadan (kampanya_satir_id)
 ///   banko    : ikisi de değil - bankonun onay eşiği içinde kendi verdiği
 /// İskonto tutarı = satırın adet x birim fiyatı - tutarı (Doktor Performans
@@ -58,7 +59,8 @@ public static class IskontoIcmalUclari
                        coalesce(d.ad, ''), coalesce(public.fn_taraf_ad(hk.unvan, hk.ad, hk.soyad)::varchar(120), ''),
                        coalesce(hz.ad, sk.ad, st.aciklama, ''),
                        round(st.adet * st.birim_fiyat, 2), round(greatest(st.adet * st.birim_fiyat - st.tutar, 0), 2), st.tutar,
-                       case when t.id is not null then 'talep' when st.kampanya_satir_id is not null then 'kampanya' else 'banko' end,
+                       case when t.id is not null and t.onay_yontemi = 2 then 'sozlu'
+                            when t.id is not null then 'talep' when st.kampanya_satir_id is not null then 'kampanya' else 'banko' end,
                        t.id, coalesce(t.gerekce, ''),
                        coalesce(public.fn_taraf_ad(ti.unvan, ti.ad, ti.soyad)::varchar(120), ''),
                        coalesce(public.fn_taraf_ad(tn.unvan, tn.ad, tn.soyad)::varchar(120), ''),
@@ -75,7 +77,7 @@ public static class IskontoIcmalUclari
                   left join public.stok sk on sk.id = st.stok_id
                   -- Satırın ONAYLI talebi (en son karar).
                   left join lateral (
-                      select it.id, it.gerekce, it.isteyen_id, it.onay_id
+                      select it.id, it.gerekce, it.isteyen_id, it.onay_id, it.onay_yontemi
                         from public.iskonto_talep_satir its
                         join public.iskonto_talep it on it.id = its.talep_id
                        where its.belge_satir_id = st.id and it.durum = 1
@@ -141,7 +143,7 @@ public static class IskontoIcmalUclari
                 var liste = g.Sum(x => x.Liste); var isk = g.Sum(x => x.Iskonto);
                 var oran = liste > 0 ? Math.Round(100 * isk / liste, 1) : 0m;
                 var kaynaklar = g.Select(x => x.Kaynak).Distinct().ToList();
-                var talepli = g.FirstOrDefault(x => x.Kaynak == "talep");
+                var talepli = g.FirstOrDefault(x => x.Kaynak is "talep" or "sozlu");
                 var esikUstu = g.Any(x => x.Kaynak == "banko" && x.Liste > 0 && 100 * x.Iskonto / x.Liste > esik + 0.05m);
                 return new
                 {
@@ -170,6 +172,8 @@ public static class IskontoIcmalUclari
                 basvuru = basvurular.Count,
                 iskonto = toplamIskonto,
                 talepli = iskontolu.Where(x => x.Kaynak == "talep").Sum(x => x.Iskonto),
+                // SÖZLÜ ONAY (1375) ayrı tutar: dijital onaylıdan ayrı denetlenir.
+                sozlu = iskontolu.Where(x => x.Kaynak == "sozlu").Sum(x => x.Iskonto),
                 kampanya = iskontolu.Where(x => x.Kaynak == "kampanya").Sum(x => x.Iskonto),
                 banko = iskontolu.Where(x => x.Kaynak == "banko").Sum(x => x.Iskonto),
                 ucretsiz = ucretsizTutar, ucretsizKalem = ucretsiz.Count,
@@ -184,10 +188,11 @@ public static class IskontoIcmalUclari
             {
                 donem = new { bas = baslangic, bit = sonGun },
                 ozet, basvurular,
-                onaylayanaGore = Gruplu(iskontolu.Where(x => x.Kaynak == "talep").GroupBy(x => x.Onaylayan is { Length: > 0 } a ? a : "(bilinmiyor)")),
+                onaylayanaGore = Gruplu(iskontolu.Where(x => x.Kaynak is "talep" or "sozlu")
+                    .GroupBy(x => (x.Onaylayan is { Length: > 0 } a ? a : "(bilinmiyor)") + (x.Kaynak == "sozlu" ? " (sözlü)" : ""))),
                 // Talep edene / bankoya göre: talepte isteyen, talepsizde başvuruyu açan görevli.
-                verenGore = Gruplu(iskontolu.GroupBy(x => x.Kaynak == "talep" && x.Isteyen.Length > 0 ? x.Isteyen : x.Banko is { Length: > 0 } bn ? bn : "(bilinmiyor)")),
-                gerekceGore = Gruplu(iskontolu.GroupBy(x => x.Kaynak == "talep" ? Kategori(x.Gerekce)
+                verenGore = Gruplu(iskontolu.GroupBy(x => x.Kaynak is "talep" or "sozlu" && x.Isteyen.Length > 0 ? x.Isteyen : x.Banko is { Length: > 0 } bn ? bn : "(bilinmiyor)")),
+                gerekceGore = Gruplu(iskontolu.GroupBy(x => x.Kaynak is "talep" or "sozlu" ? Kategori(x.Gerekce)
                                                           : x.Kaynak == "kampanya" ? "Kampanya" : "Banko (talepsiz)")),
                 ucretsizler = ucretsiz.Select(x => new { x.BelgeId, x.ProtokolNo, tarih = x.Tarih, x.Hasta, x.Bolum, x.Hekim, x.Hizmet, x.Liste, x.Kaynak, x.Gerekce, x.Onaylayan }),
                 redler,

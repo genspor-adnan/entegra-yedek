@@ -49,6 +49,26 @@ export const iskontoUclari = {
       `/api/onay/kayit/1256/${id}/karar`,
       { karar: 'onayla', olcu: oran, gerekce: not }),
 
+  /**
+   * SÖZLÜ ONAY (1375): şube ayarı (1 dijital · 2 sözlü · 3 ikisi de) ve bu belgede seçilebilecek yöneticiler
+   * (dijital zincirde iskonto onaylayabilenler, kendisi hariç).
+   */
+  iskontoSozluBilgi: (belgeId: number) =>
+    istek<{ yontem: 1 | 2 | 3; onaycilar: { id: number; ad: string }[] }>(
+      `/api/iskonto-talep/sozlu-bilgi?belgeId=${belgeId}`),
+
+  /** Sözlü onayla uygula: oran satırlara kilitli yazılır, yöneticinin zilinde hatırlatma açılır. */
+  iskontoSozluOnay: (belgeId: number, gerekce: string, onaylayanId: number,
+                     kalemler: { satirId: number; oran: number }[]) =>
+    gonder<{ id: number; oran: number; onaylayan: string }>('/api/iskonto-talep/sozlu',
+      { belgeId, gerekce, onaylayanId, kalemler }),
+
+  /** Aktif şubenin iskonto onay yöntemi (Başvuru Ayarları). */
+  iskontoOnayYontemi: () =>
+    istek<{ yontem: 1 | 2 | 3; subeId: number | null }>('/api/iskonto-talep/onay-yontemi'),
+  iskontoOnayYontemiYaz: (yontem: 1 | 2 | 3) =>
+    gonder<{ yontem: number }>('/api/iskonto-talep/onay-yontemi', { yontem }, 'PUT'),
+
   iskontoReddet: (id: number, not: string) =>
     gonder<{ zincirDurum: number; kayitDurum: number | null }>(
       `/api/onay/kayit/1256/${id}/karar`,

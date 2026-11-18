@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (731 ad, 206 tanesi birden cok dosyada)
+## Fonksiyonlar (733 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -286,6 +286,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ilac_stok_kart_ac` | `511_ilac_stok_koprusu.sql` | — |
 | `fn_isg_aylik_dk` | `741_isg_modulu.sql` | — |
 | `fn_isg_periyot_ay` | `741_isg_modulu.sql` | — |
+| `fn_iskonto_sozlu_onaycilar` | `1376_iskonto_sozlu_onayci_sube.sql` | 1375_iskonto_sozlu_onay.sql |
 | `fn_iskonto_talep_karar` | `783_iskonto_kendi_onayi_ve_esik.sql` | 662_iskonto_onay.sql, 673_iskonto_kalem_orani.sql |
 | `fn_istem_serbest` | `918_istem_serbest_kaynak_temelli.sql` | 912_istem_banko_kapisi.sql, 913_istem_ucret_kapisi.sql |
 | `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |
@@ -337,6 +338,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_portal_turu` | `794_portal_kapsami.sql` | — |
 | `fn_kullanici_rol_dogrula` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_rolleri` | `983_pasif_rol_yetki_vermez.sql` | 665_cok_rollu_kullanici.sql |
+| `fn_kullanici_sube_erisir` | `1376_iskonto_sozlu_onayci_sube.sql` | — |
 | `fn_kullanici_subeleri` | `666_sube_yerel_ayarlar.sql` | 665_cok_rollu_kullanici.sql |
 | `fn_kullanici_yetki_surumu` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_yetkileri` | `665_cok_rollu_kullanici.sql` | 020_sema_kimlik.sql, 068_taraf_rol_id_kolonlari.sql, 661_basvuru_fiyat_iskonto_yetkisi.sql |

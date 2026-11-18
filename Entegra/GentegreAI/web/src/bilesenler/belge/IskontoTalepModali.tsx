@@ -5,6 +5,7 @@ import { ISKONTO_GEREKCELERI } from '../../sayfalar/belgeSabitleri';
 import { satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { bruta } from '../../sayfalar/belgeKarti/kdvModu';
 import { c } from '../../dil/ceviri';
+import { api } from '../../api/istemci';
 
 /** Pencerenin kalem satiri - ekranda gosterilen ve hesaplanan her sey. */
 export interface IskontoKalemSatiri {
@@ -27,6 +28,8 @@ export interface IskontoTalepSonucu {
   onaya: boolean;
   /** Kalem bazli oranlar (673): her satirin kendi yuzdesi. */
   kalemler: { anahtar: number; satirId: number; oran: number }[];
+  /** SÖZLÜ ONAY (1375): sözünü veren yönetici - doluysa talep onaya düşmez, yönetici adına hemen uygulanır. */
+  sozluOnaylayanId?: number;
 }
 
 /**
@@ -41,8 +44,10 @@ export interface IskontoTalepSonucu {
  * aşıyorsa "Onaya Gönder". Görevli hangi yolda olduğunu tahmin etmez - sonuç
  * satırı söyler.
  */
-export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }: {
+export function IskontoTalepModali({ satirlar, tavan, hasta, belgeId, onKapat, onSonuc }: {
   satirlar: SatirDurumu[];
+  /** Kayıtlı başvuru - şubenin onay yöntemi ve sözlü onaycılar bununla okunur (1375). Yoksa yalnız dijital. */
+  belgeId?: number;
   /** Rolün iskonto tavanı (%) - `basvuru.iskonto` yetkisinin Sınır değeri. */
   tavan: number;
   hasta?: string;
@@ -89,6 +94,23 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
   const [aciklama, setAciklama] = useState('');
   const [hata, setHata] = useState<string | null>(null);
   const [calisiyor, setCalisiyor] = useState(false);
+  /**
+   * ONAY YÖNTEMİ (1375, şube ayarı): 1 dijital (Onaya Gönder) · 2 sözlü (yönetici seçilir, hemen uygulanır) · 3 ikisi.
+   * Okunamazsa / belge yoksa dijital - bugünkü davranış.
+   */
+  const [sozlu, setSozlu] = useState<{ yontem: 1 | 2 | 3; onaycilar: { id: number; ad: string }[] }>(
+    { yontem: 1, onaycilar: [] });
+  const [yonetici, setYonetici] = useState(0);
+  useEffect(() => {
+    if (!belgeId) return;
+    let iptal = false;
+    api.iskontoSozluBilgi(belgeId)
+      .then(y => { if (!iptal) setSozlu({ yontem: y.yontem, onaycilar: y.onaycilar ?? [] }) })
+      .catch(() => { /* okunamadı: dijital kalır */ });
+    return () => { iptal = true };
+  }, [belgeId]);
+  const dijitalVar = sozlu.yontem !== 2;
+  const sozluVar = sozlu.yontem !== 1;
 
   const topluSayi = Math.max(0, hamSayi(topluOran));
   /** Kalemin gecerli orani: kendi degeri varsa o, yoksa toplu oran. */
@@ -153,20 +175,24 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
     return y;
   });
 
-  const gonder = async (onaya: boolean) => {
+  const gonder = async (onaya: boolean, sozluOnay = false) => {
     setHata(null);
     if (!(oranSayi > 0)) { setHata('İskonto oranı sıfırdan büyük olmalı.'); return }
     if (secilenler.length === 0) { setHata('En az bir kalem seçin.'); return }
     // GEREKÇE ONAYA GİDECEKSE ZORUNLU, limit içi indirimde değil: gereksiz
     //   zorunlu alan görevliye rastgele kategori seçtirir, veri çöpe döner.
-    if (onaya && !gerekce) { setHata('Onaya gönderirken gerekçe zorunlu.'); return }
+    if ((onaya || sozluOnay) && !gerekce) {
+      setHata(sozluOnay ? 'Sözlü onayda gerekçe zorunlu.' : 'Onaya gönderirken gerekçe zorunlu.'); return
+    }
+    if (sozluOnay && !yonetici) { setHata('Sözlü onayı veren yöneticiyi seçin.'); return }
     setCalisiyor(true);
     try {
       await onSonuc({
         oran: oranSayi,
         gerekce: [gerekce && ISKONTO_GEREKCELERI.find(x => x.kod === gerekce)?.ad,
                   aciklama.trim()].filter(Boolean).join(' — '),
-        onaya,
+        onaya: onaya && !sozluOnay,
+        ...(sozluOnay ? { sozluOnaylayanId: yonetici } : {}),
         kalemler: secilenler
           .map(k => ({ anahtar: k.anahtar, satirId: k.satirId,
                        oran: kalemOrani(k.anahtar) }))
@@ -186,10 +212,20 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                        title={limitIci ? 'Limit içinde - doğrudan uygulanır'
                                        : `Limitiniz %${tavan} - onaya gönderin`}
                        onClick={() => void gonder(false)}>✔ Uygula</button>
-               <button type="button" className="d bir" disabled={calisiyor || !onayGerek}
-                       title={onayGerek ? 'Yetkilinin onayına gönderir'
-                                        : 'Limit içinde - onaya gerek yok'}
-                       onClick={() => void gonder(true)}>{c('⬆ Onaya Gönder')}</button>
+               {dijitalVar && (
+                 <button type="button" className="d bir" disabled={calisiyor || !onayGerek}
+                         title={onayGerek ? 'Yetkilinin onayına gönderir'
+                                          : 'Limit içinde - onaya gerek yok'}
+                         onClick={() => void gonder(true)}>{c('⬆ Onaya Gönder')}</button>
+               )}
+               {/* SÖZLÜ ONAY (1375): yöneticinin sözüyle hemen uygulanır, "sözlü" damgasıyla kayda geçer. */}
+               {sozluVar && (
+                 <button type="button" className="d bir" disabled={calisiyor || !onayGerek || !yonetici}
+                         title={!onayGerek ? 'Limit içinde - onaya gerek yok'
+                                : !yonetici ? 'Önce sözlü onayı veren yöneticiyi seçin'
+                                : 'Yöneticinin sözlü onayıyla hemen uygular; yöneticiye bildirim gider'}
+                         onClick={() => void gonder(true, true)}>🗣 {c('Sözlü Onayla Uygula')}</button>
+               )}
                {/* KAPAT SAGA YANASIK: eylem dugmeleriyle arasi acilir ki
                    yanlislikla tiklanmasin. */}
                <button type="button" className="d" style={{ marginLeft: 'auto' }}
@@ -340,8 +376,26 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
           <div className={`isk-sat ${onayGerek ? 'teh' : 'ok'}`}>
             <span>Sonuç</span>
             <b>{!(oranSayi > 0) ? 'Oran girin'
-                : onayGerek ? '⚠ Onay gerekir' : '✔ Limit içinde — doğrudan uygulanır'}</b>
+                : onayGerek ? (dijitalVar ? '⚠ Onay gerekir' : '⚠ Sözlü onay gerekir')
+                : '✔ Limit içinde — doğrudan uygulanır'}</b>
           </div>
+          {sozluVar && onayGerek && (
+            <div className="alan-izgara tek-sutun ayar-formu" style={{ marginTop: 6 }}>
+              <label className="alan">
+                <span className="etiket zorunlu-isaret">{c('Sözlü onay veren')}</span>
+                <select aria-label={c('Sözlü onay veren')} value={yonetici || ''}
+                        onChange={e => { setYonetici(Number(e.target.value) || 0); setHata(null) }}>
+                  <option value="">— {c('yönetici seçin')} —</option>
+                  {sozlu.onaycilar.map(o => <option key={o.id} value={o.id}>{o.ad}</option>)}
+                </select>
+              </label>
+              <div className="not">
+                {sozlu.onaycilar.length === 0
+                  ? c('Bu şubede iskonto onaylayabilecek yönetici tanımlı değil.')
+                  : c('İskonto hemen uygulanır, "sözlü onay" olarak kayda geçer ve seçilen yöneticiye bildirim gider.')}
+              </div>
+            </div>
+          )}
         </div>
 
         {!!hata && <div className="hata-kutusu">{hata}</div>}

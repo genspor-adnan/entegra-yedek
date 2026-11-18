@@ -111,6 +111,8 @@ export function IskontoIcmal() {
           {kutu('İskontolu Başvuru', String(o.basvuru), `${o.red} talep reddedildi`)}
           {kutu('Toplam İskonto', paraYaz(o.iskonto), `ort. ${oranMetni(o.ortOran)}`, 'uy')}
           {kutu('Onaylı Talep', paraYaz(o.talepli), 'İskonto Onayı\'ndan', 'iyi')}
+          {/* SÖZLÜ ONAY (1375): yöneticinin sözüyle banko uyguladı - dijital onaydan ayrı denetlenir. */}
+          {(o.sozlu ?? 0) > 0 && kutu('Sözlü Onay', paraYaz(o.sozlu), 'yönetici sözüyle, banko beyanı', 'uy')}
           {kutu('Banko (Talepsiz)', paraYaz(o.banko), o.esikUstu ? `⚠ ${o.esikUstu} eşik üstü` : 'eşik içinde', o.esikUstu ? 'teh' : '')}
           {kutu('Kampanya', paraYaz(o.kampanya), 'kampanya satırları', 'mor')}
           {kutu('Ücretsiz Hizmet', paraYaz(o.ucretsiz), `${o.ucretsizKalem} kalem · liste fiyatı`)}

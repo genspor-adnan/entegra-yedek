@@ -7,6 +7,25 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — İskonto: sözlü onay (1375, 1376) ve banko akışı düzeltmeleri
+
+- SÖZLÜ ONAY (kullanıcı: "bir çok müşterimiz sözlü onay kullanıyor.. banko ilgili yöneticinin sözüyle yüksek oranlarda
+  indirim yapabiliyor" · "sözlü onay / dijital onay opsiyonlu olabilmeli"). Şube ayarı `sube.iskonto_onay_yontemi`
+  (1 Dijital · 2 Sözlü · 3 İkisi de; Başvuru Ayarları). Sözlüde banko onaycıyı seçer + gerekçe: talep açılır ve
+  `fn_iskonto_talep_karar` yönetici adına onaylar (oranı kilitli yazan tek yer), `iskonto_talep.onay_yontemi = 2`;
+  oran sınırı yok (kullanıcı kararı). Onaycılar = dijital zincirin onaycıları (`belge.iskonto_onay_birim/mali/ust`),
+  şubeye erişen, kendisi hariç (`fn_iskonto_sozlu_onaycilar`; 1376 şube erişimini oturumun dört adımıyla ölçer -
+  `fn_kullanici_sube_erisir`). Yöneticinin zilinde başvuruya bağlı hatırlatma; İskonto İcmali'nde ayrı kaynak "Sözlü
+  onay", onay geçmişinde 🗣 rozeti. Uçlar: GET `/api/iskonto-talep/sozlu-bilgi`, POST `/sozlu`, GET/PUT `/onay-yontemi`.
+- İskonto Uygula: Tümüne Net Tutar (hastanın ödeyeceği net -> oran) ve satırda İstenen Tutar.
+- Banko rolü akışı: bölüm listesi (`departman`) hasta/başvuru/randevu ekran kodlarıyla, dış hekim listesi başvuruyu
+  yazabilenle okumada açılır (EkranKodlari); oturumsuz banko tahsilatı ve dönüşüm yetkisizliği nedenini söyler; Satış
+  Fişi / Fatura / Tahakkuk düğmeleri yetkisizde pasif.
+- Testler: IskontoSozluOnayTestleri (DB uçtan uca), K14KasaBankoTestleri (+1), EkranKoduBolmeTestleri (+2);
+  web iskontoSozluOnay / iskontoTalepModali.
+
+---
+
 ## 18.11.2026 — Radyoloji: rapor teslim ekranı ve rapor REVİZE (1372, 1373, 1374)
 
 - Menü "Sonuç Teslim" -> "Radyoloji Rapor Teslim" (yetki matrisi, AI rehberi, İngilizce çeviri: 1372).

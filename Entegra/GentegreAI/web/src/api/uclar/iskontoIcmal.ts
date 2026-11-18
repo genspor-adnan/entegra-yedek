@@ -1,7 +1,8 @@
 import { istek } from '../cekirdek';
 
 /** İskonto ve ücretsiz hizmet icmali (IskontoIcmalUclari). Rakamlar sunucuda hesaplanır. */
-export type IskontoKaynagi = 'talep' | 'kampanya' | 'banko' | 'karma';
+/** 1375: 'sozlu' = talep yöneticinin SÖZLÜ onayıyla (banko beyan etti). */
+export type IskontoKaynagi = 'talep' | 'sozlu' | 'kampanya' | 'banko' | 'karma';
 export type IskontoluBasvuru = {
   belgeId: number; protokolNo: string; tarih: string; hastaId: number; hasta: string; bolum: string; hekim: string;
   kaynak: IskontoKaynagi; isteyen: string; onaylayan: string; gerekce: string;
@@ -15,6 +16,8 @@ export type IskontoIcmali = {
   donem: { bas: string; bit: string };
   ozet: {
     basvuru: number; iskonto: number; talepli: number; kampanya: number; banko: number;
+    /** 1375: sözlü onaylı iskonto. */
+    sozlu: number;
     ucretsiz: number; ucretsizKalem: number; ortOran: number; esik: number; esikUstu: number;
     red: number; redTutar: number; personel: number; ciro: number; ciroOrani: number;
   };

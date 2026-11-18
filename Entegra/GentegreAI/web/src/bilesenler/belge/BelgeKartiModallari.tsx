@@ -616,8 +616,19 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           satirlar={satirlar.filter(x => iskontoTalebi.includes(x.anahtar))}
           tavan={iskontoTavani}
           hasta={cari?.unvan}
+          belgeId={kayitliId || undefined}
           onKapat={() => setIskontoTalebi?.(null)}
           onSonuc={async se => {
+            // SÖZLÜ ONAY (1375): sunucu talebi yönetici adına onaylı yazar ve oranı satırlara KİLİTLİ işler; ekrandaki
+            //   satırlar da aynı hâle getirilir - kart sonra kaydedilince onaylı oranın üstüne eski değer yazılmasın.
+            if (se.sozluOnaylayanId) {
+              await api.iskontoSozluOnay(kayitliId, se.gerekce, se.sozluOnaylayanId,
+                se.kalemler.map(k => ({ satirId: k.satirId, oran: k.oran })));
+              const oranlar = new Map(se.kalemler.map(k => [k.anahtar, k.oran]));
+              setSatirlar(liste => liste.map(x => oranlar.has(x.anahtar)
+                ? { ...x, iskonto: String(oranlar.get(x.anahtar)), iskonto2: '0', iskontoKilit: true } : x));
+              return;
+            }
             if (se.onaya) {
               await api.iskontoTalepAc(kayitliId, se.oran, se.gerekce,
                 se.kalemler.map(k => ({ satirId: k.satirId, oran: k.oran })));

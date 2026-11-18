@@ -115,6 +115,7 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
                 <b>{DURUM_ROZET[talep.durum]?.ad}</b>
                 {talep.durum === 1 && ` · %${talep.onaylananOran} uygulandı`}
                 {' · '}{talep.onaylayan || '—'}
+                {talep.onayYontemi === 2 && ' · 🗣 sözlü onay (banko beyanı)'}
                 {talep.kararNotu && <div className="sonuk">“{talep.kararNotu}”</div>}
               </div>
             ) : (

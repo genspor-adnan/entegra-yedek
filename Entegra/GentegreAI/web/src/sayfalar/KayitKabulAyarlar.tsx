@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { api } from '../api/istemci';
+import { hataMetni } from '../api/sozlesme';
 import { AyarSayfaBasligi } from '../bilesenler/AyarSayfaBasligi';
 import { c } from '../dil/ceviri';
 
@@ -11,6 +14,44 @@ import { c } from '../dil/ceviri';
  */
 // Adlar (17.11.2026): "Hasta Ayarları" / "Başvuru Ayarları".
 const BASLIK = { hasta: 'Hasta Ayarları', basvuru: 'Başvuru Ayarları' } as const;
+
+/**
+ * İSKONTO ONAY YÖNTEMİ (1375, kullanıcı 18.11.2026: "sözlü onay / dijital onay opsiyonlu olabilmeli"). ŞUBE ayarı -
+ * kurum geneli `referans` değil, aktif şubenin kaydı (sube.iskonto_onay_yontemi); seçince hemen yazılır.
+ */
+function IskontoOnayYontemi() {
+  const [yontem, setYontem] = useState<1 | 2 | 3 | null>(null);
+  const [hata, setHata] = useState('');
+  const [bilgi, setBilgi] = useState('');
+  useEffect(() => {
+    api.iskontoOnayYontemi().then(y => setYontem(y.yontem)).catch(h => setHata(hataMetni(h)));
+  }, []);
+  const degis = async (v: 1 | 2 | 3) => {
+    setHata(''); setBilgi('');
+    try { await api.iskontoOnayYontemiYaz(v); setYontem(v); setBilgi(c('Kaydedildi.')) }
+    catch (h) { setHata(hataMetni(h)) }
+  };
+  return (
+    <>
+      <div className="alan-izgara ayar-formu">
+        <label className="alan">
+          <span className="etiket">{c('İskonto Onay Yöntemi (bu şube)')}</span>
+          <select aria-label={c('İskonto Onay Yöntemi')} value={yontem ?? ''} disabled={yontem === null}
+                  onChange={e => void degis(Number(e.target.value) as 1 | 2 | 3)}>
+            <option value="1">{c('Dijital onay (onaya gönder)')}</option>
+            <option value="2">{c('Sözlü onay (banko yöneticiyi seçer)')}</option>
+            <option value="3">{c('İkisi de (banko seçer)')}</option>
+          </select>
+        </label>
+      </div>
+      {hata && <div className="hata-kutusu">{hata}</div>}
+      {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}
+      <div className="not">
+        <b>{c('Sözlü onayda')}</b> {c('banko, limitini aşan iskontoyu onaylayan yöneticiyi seçip gerekçe yazarak hemen uygular; kayıt "sözlü onay" damgasıyla yöneticinin adına geçer, yöneticinin zilinde bildirim açılır ve İskonto İcmali\'nde ayrı görünür. Seçilebilen yöneticiler İskonto Onay Akışı\'nda onay verebilenlerdir.')}
+      </div>
+    </>
+  );
+}
 
 export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'basvuru' }) {
   const aktif = bolum;
@@ -154,6 +195,7 @@ export function KayitKabulAyarlar({ bolum = 'basvuru' }: { bolum?: 'hasta' | 'ba
             oranda hangi kademeye gideceği ise <b>Onay Akışları</b> ekranındaki
             <b>{c('Eşik (≥)')}</b> alanıdır.
           </div>
+          <IskontoOnayYontemi />
         </div>
         {/* PROTOKOL NO gridi de 634'te Hasta Belgeleri'ne tasindi. */}
         <div className="not">

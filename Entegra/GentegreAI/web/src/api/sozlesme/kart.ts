@@ -71,6 +71,8 @@ export type YetkiSatiriIstegi =
 /** Iskonto onay talebi (662) - ucret sekmesi rozeti ve zil satiri. */
 export interface IskontoTalebi {
   id: number;
+  /** 1375: 1 dijital (onay zinciri) · 2 sözlü (banko yöneticinin sözünü beyan etti). */
+  onayYontemi?: number;
   belgeId: number;
   /** Talep edilen oran. */
   oran: number;

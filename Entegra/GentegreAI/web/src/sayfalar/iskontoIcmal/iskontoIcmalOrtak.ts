@@ -8,6 +8,7 @@ export type Rozet = { ad: string; renk: string };
 export function kaynakRozeti(k: IskontoKaynagi): Rozet {
   switch (k) {
     case 'talep': return { ad: 'Onaylı talep', renk: 'ok' };
+    case 'sozlu': return { ad: 'Sözlü onay', renk: 'kir' };
     case 'kampanya': return { ad: 'Kampanya', renk: 'mavi' };
     case 'banko': return { ad: 'Banko (talepsiz)', renk: 'sari' };
     default: return { ad: 'Karma', renk: 'mor' };
@@ -17,4 +18,4 @@ export function kaynakRozeti(k: IskontoKaynagi): Rozet {
 /** Oran gösterimi: "%15,9". */
 export const oranMetni = (o: number) => `%${o.toFixed(1).replace('.', ',')}`;
 
-export const KAYNAKLAR: [string, string][] = [['hepsi', 'Tümü'], ['talep', 'Onaylı talep'], ['kampanya', 'Kampanya'], ['banko', 'Banko (talepsiz)']];
+export const KAYNAKLAR: [string, string][] = [['hepsi', 'Tümü'], ['talep', 'Onaylı talep'], ['sozlu', 'Sözlü onay'], ['kampanya', 'Kampanya'], ['banko', 'Banko (talepsiz)']];

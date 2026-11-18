@@ -37,6 +37,7 @@ export function IskontoIcmalA4({ v, antet, duzenleyen, secili }: {
       </table>
       <table className="a4-toplam"><tbody>
         <tr><td>Onaylı talep iskontosu</td><td>{paraYaz(o.talepli)}</td></tr>
+        {(o.sozlu ?? 0) > 0 && <tr><td>Sözlü onaylı iskonto (yönetici sözü, banko beyanı)</td><td>{paraYaz(o.sozlu)}</td></tr>}
         <tr><td>Kampanya iskontosu</td><td>{paraYaz(o.kampanya)}</td></tr>
         <tr><td>Banko (talepsiz) iskontosu</td><td>{paraYaz(o.banko)}</td></tr>
         <tr><td>Ücretsiz hizmet ({o.ucretsizKalem} kalem, liste fiyatı)</td><td>{paraYaz(o.ucretsiz)}</td></tr>

@@ -78,7 +78,11 @@ export function KuyrukTablosu({ liste, gecmisMi, seciliId, yukleniyor,
                     <span className={`rozet ${rz.sinif}`}>
                       {t.durum === 1 && t.onaylananOran < t.oran ? 'Kısmi onay' : rz.ad}
                     </span>
-                    <div className="sonuk">{t.onaylayan || '—'}</div>
+                    <div className="sonuk">{t.onaylayan || '—'}
+                      {/* SÖZLÜ ONAY (1375): banko yöneticinin sözünü beyan etti - dijital imzadan ayrı. */}
+                      {t.onayYontemi === 2 && <span className="rozet turuncu" style={{ marginLeft: 4 }}
+                                                    title="Yöneticinin sözlü onayıyla banko uyguladı">🗣 Sözlü</span>}
+                    </div>
                     {t.kararNotu && <div className="sonuk">“{t.kararNotu}”</div>}
                   </>
                 ) : (
