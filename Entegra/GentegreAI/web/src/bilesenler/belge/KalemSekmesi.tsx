@@ -27,7 +27,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller, onIskontoOnay,
+    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller, onIskontoOnay, onIskontoGeriAl,
     iskontoTalepleri, dagilimOnizleme,
   } = p;
 
@@ -191,7 +191,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             disabled={kilitli || kilitliSecili || seciliSatirlar.size !== 1}
             title={kilitli ? 'Kesin belge satırı düzenlenemez.'
                   : kilitliSecili ? 'İskontosu onaylanmış satır değiştirilemez - '
-                                  + 'değişiklik için yeni bir iskonto onayı alın.'
+                                  + 'önce ↩ İskonto Onayını Geri Al.'
                   : seciliSatirlar.size === 0 ? 'Önce bir satır seçin'
                   : seciliSatirlar.size > 1 ? 'Tek satır seçin' : 'Seçili satırı düzenle'}
             onClick={() => {
@@ -206,7 +206,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             title={kilitli ? 'Kesin belgeden satır silinemez.'
                   : donusmusSecili ? 'Belgeye dönüşmüş ücret satırı silinemez - önce oluşan belgeyi silin.'
                   : kilitliSecili ? 'İskontosu onaylanmış satır silinemez - '
-                                  + 'önce iskonto onayını kaldırın.'
+                                  + 'önce ↩ İskonto Onayını Geri Al.'
                   : seciliSatirlar.size === 0 ? 'Önce satır seçin'
                   : `Seçili ${seciliSatirlar.size} satırı sil`}
             onClick={() => void seciliSil()}>
@@ -265,6 +265,17 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                     : `Seçili ${seciliSatirlar.size} satır için iskonto onayı iste`}
               onClick={() => onIskontoOnay([...seciliSatirlar])}>
         ✅
+      </button>
+    )}
+    {/* ONAYI GERİ AL (1377, kullanıcı 18.11.2026: "sözlü onaylandı ve kitlendi.. banko nasıl değişebilir?"): kilitli
+        tek satır seçiliyken; yetki ve dönüşüm kuralı sunucuda (sözlüyü uygulayan / onaycı, dijitali onaycı). */}
+    {basvuruMu && onIskontoGeriAl && kilitliSecili && (
+      <button type="button" className="d ikon"
+              disabled={kilitli || seciliSatirlar.size !== 1}
+              title={seciliSatirlar.size !== 1 ? 'Geri almak için tek satır seçin'
+                    : 'İskonto Onayını Geri Al - oran onay öncesine döner, satır yeniden düzenlenebilir'}
+              onClick={() => onIskontoGeriAl([...seciliSatirlar][0])}>
+        ↩
       </button>
     )}
     {/* DURUM ROZETI: son talebin akibeti. Bekleyende sari, onayda yesil
@@ -484,8 +495,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             return;
           }
           if (k.iskontoKilit) {
-            void mesaj('İskontosu onaya gönderilmiş/onaylanmış satır '
-                     + 'değiştirilemez - iskonto talebini geri çekin.');
+            void mesaj('İskontosu onaylanmış satır değiştirilemez - satırı seçip '
+                     + '↩ İskonto Onayını Geri Al ile onayı geri alın.');
             return;
           }
           setKalem(lot ? { ...k, lotEkrani: true } : k);
@@ -1079,6 +1090,8 @@ export interface KalemSekmesiProps {
    * kart once kaydeder sonra kimlikleri cozer.
    */
   onIskontoOnay?(anahtarlar: number[]): void;
+  /** ONAYI GERİ AL (1377): seçili kilitli satırın iskonto onayını geri alır (neden sorulur). */
+  onIskontoGeriAl?(anahtar: number): void;
   /**
    * Belgenin ISKONTO TALEPLERI (662) - en yenisi baslikta rozet olur.
    * Banko talebi gonderdikten sonra "ne oldu" sorusunu burada okur; sonucu

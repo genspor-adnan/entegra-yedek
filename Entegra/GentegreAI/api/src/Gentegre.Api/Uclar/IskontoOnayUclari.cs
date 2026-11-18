@@ -39,6 +39,13 @@ public static class IskontoOnayUclari
     public sealed record SozluIstegi(int BelgeId, string Gerekce, IReadOnlyList<TalepKalemi> Kalemler,
                                      int OnaylayanId);
     public sealed record YontemIstegi(short Yontem);
+    /// <summary>Onayı geri al (1377): neden zorunlu.</summary>
+    public sealed record GeriAlIstegi(string Neden);
+
+    /// <summary>İskonto onaycısı: dijital zincirin herhangi bir basamağını imzalayabilen (OnayBildirimi.AksiyonKodu).</summary>
+    private static bool OnayciMi(IstekBaglami b) =>
+        b.Yetkiler.AksiyonVar("belge.iskonto_onay_birim") || b.Yetkiler.AksiyonVar("belge.iskonto_onay_mali")
+        || b.Yetkiler.AksiyonVar("belge.iskonto_onay_ust");
 
     /// <summary>Şube onay yöntemi (1375): 1 dijital · 2 sözlü · 3 ikisi de.</summary>
     public const short YontemDijital = 1, YontemSozlu = 2, YontemIkisi = 3;
@@ -194,7 +201,7 @@ public static class IskontoOnayUclari
         });
 
         grup.MapPost("/sozlu", async (
-            SozluIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            SozluIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log, BelgeDeposu belgeDeposu,
             KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -245,6 +252,8 @@ public static class IskontoOnayUclari
                 update public.iskonto_talep set onay_yontemi = 2, degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, baglam.KullaniciId], iptal);
+            // Tutar / dağılım / dip toplam - karar oranı yazdı, para hesabı kart kaydıyla aynı yerden.
+            await belgeDeposu.IskontoSonrasiYenileAsync(b, islem, id, iptal);
 
             await log.YazAsync(b, islem, LogIslemi.Ekle, KaynakIskonto, id, baglam.KullaniciId, baglam.SubeId,
                 baglam.Ip, new Dictionary<string, string>
@@ -271,6 +280,30 @@ public static class IskontoOnayUclari
 
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id, oran = enYuksek, onaylayan = yonetici, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ============================================== ONAYI GERİ AL (1377) ===
+        // Kullanıcı 18.11.2026: "sözlü onaylandı ve kitlendi.. banko nasıl değişebilir?" Kararlar: SÖZLÜ onayı uygulayan
+        //   banko (ya da onaycı) geri alır, DİJİTAL onayı yalnız onaycı; belgeye dönüşmüş satırda geri alma yok,
+        //   tahsilat varsa izin (açık tutar artar). Oran onay öncesine döner, kilit açılır; tutar yeniden hesaplanır.
+        grup.MapPost("/{id:int}/geri-al", (
+            int id, GeriAlIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            BelgeDeposu belgeDeposu, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+            GeriAlAsync(id, istek, cozucu, veri, log, belgeDeposu, erisim, ctx, iptal));
+
+        // SATIRDAN GERİ AL: ekranda görülen kilitli SATIR - onu kilitleyen en son onaylı talep geri alınır.
+        grup.MapPost("/satir/{satirId:int}/geri-al", async (
+            int satirId, GeriAlIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            BelgeDeposu belgeDeposu, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var talepId = await veri.TekDegerAsync<int?>("""
+                select t.id from public.iskonto_talep_satir ts
+                  join public.iskonto_talep t on t.id = ts.talep_id and t.durum = 1
+                 where ts.belge_satir_id = @p0
+                 order by t.id desc limit 1
+                """, [satirId], iptal)
+                ?? throw GentegreHatasi.IsKurali("Bu satırda geri alınacak onaylı iskonto yok.");
+            return await GeriAlAsync(talepId, istek, cozucu, veri, log, belgeDeposu, erisim, ctx, iptal);
         });
 
         // ŞUBE AYARI: aktif şubenin yöntemi (Başvuru Ayarları). Okuma serbest - pencere davranışı buna bağlı.
@@ -317,6 +350,8 @@ public static class IskontoOnayUclari
 
     private sealed record SozluOnayci(int Id, string Ad);
     private sealed record SozluBelge(int Sube, string No, string Hasta);
+    private sealed record GeriAlinan(int BelgeId, short Durum, short Yontem, int IsteyenId, int OnayId, decimal Oran,
+                                     string BelgeNo, int Sube);
 
     private static string YontemAdi(short y) => y switch { YontemSozlu => "Sözlü", YontemIkisi => "İkisi de", _ => "Dijital" };
 
@@ -325,4 +360,63 @@ public static class IskontoOnayUclari
         CancellationToken iptal)
         => await b.TekDegerAsync<short?>("select iskonto_onay_yontemi from public.sube where id = @p0", islem, [sube], iptal)
            ?? YontemDijital;
+
+    /// <summary>ONAYI GERİ AL (1377) - iki uç (talep / satır) aynı kuralla.</summary>
+    private static async Task<IResult> GeriAlAsync(int id, GeriAlIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+        LogDeposu log, BelgeDeposu belgeDeposu, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal)
+    {
+        var baglam = await cozucu.CozAsync(ctx, iptal);
+        baglam.YazmaIste();
+        var neden = (istek?.Neden ?? "").Trim();
+        if (neden.Length == 0)
+            throw GentegreHatasi.Dogrulama("Geri alma nedeni zorunlu.", new AlanHatasi("neden", "Zorunlu."));
+
+        await using var b = await veri.AcAsync(iptal);
+        var t = await b.TekAsync("""
+            select t.belge_id, t.durum, t.onay_yontemi, t.isteyen_id, coalesce(t.onay_id, 0), t.oran,
+                   coalesce(be.belge_no, ''), coalesce(be.sube_id, 0)
+              from public.iskonto_talep t join public.belge be on be.id = t.belge_id
+             where t.id = @p0
+            """, null, [id], o => new GeriAlinan(o.GetInt32(0), o.GetInt16(1), o.GetInt16(2), o.GetInt32(3),
+                o.GetInt32(4), o.GetDecimal(5), o.GetString(6), o.GetInt32(7)), iptal)
+            ?? throw GentegreHatasi.Bulunamadi("İskonto talebi bulunamadı.");
+        await erisim.IsteAsync(baglam, "belge", t.BelgeId, "Belge bulunamadı.", iptal);
+
+        var sozlu = t.Yontem == 2;
+        if (!(OnayciMi(baglam) || (sozlu && t.IsteyenId == baglam.KullaniciId)))
+            throw GentegreHatasi.Yasak(sozlu
+                ? "Sözlü onayı yalnız uygulayan görevli ya da iskonto onay yetkilisi geri alabilir."
+                : "Dijital onaylı iskontoyu yalnız iskonto onay yetkilisi geri alabilir.");
+
+        await using var islem = await b.BeginTransactionAsync(iptal);
+        await b.CalistirAsync("select public.fn_iskonto_talep_geri_al(@p0, @p1, @p2)", islem,
+            [id, baglam.KullaniciId, neden], iptal);
+        await belgeDeposu.IskontoSonrasiYenileAsync(b, islem, id, iptal);
+        await log.YazAsync(b, islem, LogIslemi.Degistir, KaynakIskonto, id, baglam.KullaniciId, baglam.SubeId,
+            baglam.Ip, new Dictionary<string, string>
+            {
+                ["islem"] = "İskonto onayı geri alındı",
+                ["yontem"] = sozlu ? "Sözlü" : "Dijital",
+                ["belge"] = t.BelgeNo,
+                ["oran"] = t.Oran.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["neden"] = neden,
+            }, iptal: iptal);
+        // SÖZLÜ: sözünü veren yönetici haberdar olur (kendisi geri almadıysa).
+        if (sozlu && t.OnayId > 0 && t.OnayId != baglam.KullaniciId)
+        {
+            var kim = await b.TekDegerAsync<string>(
+                "select coalesce(public.fn_taraf_ad(unvan, ad, soyad)::varchar(120), '') from public.taraf where id = @p0",
+                islem, [baglam.KullaniciId], iptal) ?? "";
+            await b.CalistirAsync("""
+                insert into public.hatirlatma (sahip_id, baslik, notu, zaman, uyar_dk, oncelik, kanal_uygulama,
+                                               kaynak, kaynak_id, kaynak_ad, sube_id, ekleyen)
+                values (@p0, @p1, @p2, now(), 0, 2, 1, 'basvuru', @p3, @p4, @p5, @p6)
+                """, islem,
+                [t.OnayId, "Sözlü onayınızla verilen iskonto geri alındı",
+                 $"{kim} {t.BelgeNo} başvurusundaki sözlü onaylı iskontoyu geri aldı. Neden: {neden}",
+                 t.BelgeId, t.BelgeNo, t.Sube, baglam.KullaniciId], iptal);
+        }
+        await islem.CommitAsync(iptal);
+        return Results.Ok(new { id, izlemeNo = baglam.IzlemeNo });
+    }
 }

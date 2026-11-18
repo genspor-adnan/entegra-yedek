@@ -6,7 +6,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
 import { TeklifCiktisi } from '../bilesenler/belge/TeklifCiktisi';
-import { guvenli, mesaj, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor, onay, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
 import { type AcilanRadyolojiIstemi, type BelgeYaniti, URUN_GENOTIP, URUN_IKISI, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
@@ -1968,6 +1968,21 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             onIskontoOnay={anahtarlar => void (async () => {
               if (!await kayitSart()) return;
               setIskontoTalebi(anahtarlar);
+            })()}
+            /* ONAYI GERİ AL (1377): bekleyen değişiklik önce kaydedilir (satırlar sunucudan yeniden okunacak), neden
+               sorulur; sunucu oranı, kilidi, tutarı ve dip toplamı birlikte döndürür. */
+            onIskontoGeriAl={anahtar => void (async () => {
+              const satirId = satirlar.find(x => x.anahtar === anahtar)?.satirId ?? 0;
+              if (!satirId || !await kayitSart()) return;
+              const neden = await metinSor(c('İskonto onayını geri alma nedeni'), '', c('Neden'));
+              if (!neden?.trim()) return;
+              try {
+                await api.iskontoSatirGeriAl(satirId, neden.trim());
+                const okunan = await api.belgeOku(kayitliId);
+                setSonuc(okunan);
+                setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
+                mesaj(c('İskonto onayı geri alındı - satır yeniden düzenlenebilir.'));
+              } catch (h) { mesaj(hataMetni(h)) }
             })()}
             iskontoTalepleri={iskontoTalepleri}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}

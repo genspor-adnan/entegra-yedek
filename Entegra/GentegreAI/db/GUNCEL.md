@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (733 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (734 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -287,6 +287,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_isg_aylik_dk` | `741_isg_modulu.sql` | — |
 | `fn_isg_periyot_ay` | `741_isg_modulu.sql` | — |
 | `fn_iskonto_sozlu_onaycilar` | `1376_iskonto_sozlu_onayci_sube.sql` | 1375_iskonto_sozlu_onay.sql |
+| `fn_iskonto_talep_geri_al` | `1377_iskonto_onay_geri_al.sql` | — |
 | `fn_iskonto_talep_karar` | `783_iskonto_kendi_onayi_ve_esik.sql` | 662_iskonto_onay.sql, 673_iskonto_kalem_orani.sql |
 | `fn_istem_serbest` | `918_istem_serbest_kaynak_temelli.sql` | 912_istem_banko_kapisi.sql, 913_istem_ucret_kapisi.sql |
 | `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |

@@ -228,7 +228,7 @@ public static class OnayUclari
         grup.MapPost("/kayit/{kaynakTur:int}/{kaynakId:long}/karar", async (
             int kaynakTur, long kaynakId, OnayKararIstegi istek, BaglamCozucu cozucu,
             VeriKaynagi veri, Servisler.OnayMotoru onay, LogDeposu log,
-            Servisler.OnayBildirimi haber,
+            Servisler.OnayBildirimi haber, BelgeDeposu belgeDeposu,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -292,6 +292,10 @@ public static class OnayUclari
             // KAYDIN DURUMU: akışa göre. Zincir bitmediyse kayda dokunulmaz.
             var kayitDurum = await KayitDurumYazAsync(baglanti, islem, akisKod,
                 kaynakId, sonuc.ZincirDurum, istek.Gerekce, baglam, iptal);
+            // İSKONTO ONAYLANDI: karar fonksiyonu satıra yalnız oranı yazar - tutar / dağılım / dip toplam kart
+            //   kaydıyla aynı hesapla burada yenilenir (18.11.2026, onaylı satır tam fiyatla açık görünüyordu).
+            if (akisKod == "belge.iskonto" && kayitDurum == 1)
+                await belgeDeposu.IskontoSonrasiYenileAsync(baglanti, islem, (int)kaynakId, iptal);
             // TEKLİF: "bilgi iste" = DÜZELTME İSTE (1282) - zincir yürümeye devam eder ama teklif hazırlayana döner,
             //   kalem kilidi açılır (teklif_durum 8); hazırlayan düzeltip yeniden sunar.
             if (akisKod == "teklif.satis" && kararKodu == Servisler.OnayMotoru.BilgiIstendi)

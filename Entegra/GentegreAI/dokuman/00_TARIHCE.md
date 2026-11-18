@@ -17,6 +17,15 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   şubeye erişen, kendisi hariç (`fn_iskonto_sozlu_onaycilar`; 1376 şube erişimini oturumun dört adımıyla ölçer -
   `fn_kullanici_sube_erisir`). Yöneticinin zilinde başvuruya bağlı hatırlatma; İskonto İcmali'nde ayrı kaynak "Sözlü
   onay", onay geçmişinde 🗣 rozeti. Uçlar: GET `/api/iskonto-talep/sozlu-bilgi`, POST `/sozlu`, GET/PUT `/onay-yontemi`.
+- ONAYI GERİ AL (1377, kullanıcı: "sözlü onaylandı ve kitlendi.. banko nasıl değişebilir?"): kilitli satırda ↩ düğmesi
+  (`POST /api/iskonto-talep/satir/{satirId}/geri-al`, neden zorunlu). Sözlüyü uygulayan görevli ya da onaycı, dijitali
+  yalnız onaycı; belgeye dönüşmüş satırda yok, tahsilat varsa izin. `fn_iskonto_talep_geri_al`: oran onay öncesine
+  (`onceki_iskonto`), kilit açılır (önceki onay varsa kalır), talep durum 3; sözlüde yöneticiye bildirim.
+- HATA (dijital onayda da vardı): karar fonksiyonu satıra yalnız ORANI yazıyordu - tutar, ödeme dağılımı ve dip toplam
+  kart yeniden kaydedilene kadar eski kalıyordu (onaylı %50 iskontolu satır tam fiyatla açık). Artık dijital karar,
+  sözlü onay ve geri alma `BelgeDeposu.IskontoSonrasiYenileAsync` ile kart kaydının hesabını (BelgeHesap.SatirTutari,
+  fn_belge_satir_dagilim_tazele, fn_belge_diptoplam) çalıştırır. Bu düzeltmeden önce onaylanmış satırlar kart bir kez
+  kaydedilince düzelir (yerelde KOSUYOLU 1, gentegre_ai 1 satır).
 - İskonto Uygula: Tümüne Net Tutar (hastanın ödeyeceği net -> oran) ve satırda İstenen Tutar.
 - Banko rolü akışı: bölüm listesi (`departman`) hasta/başvuru/randevu ekran kodlarıyla, dış hekim listesi başvuruyu
   yazabilenle okumada açılır (EkranKodlari); oturumsuz banko tahsilatı ve dönüşüm yetkisizliği nedenini söyler; Satış

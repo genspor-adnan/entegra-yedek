@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -92,5 +92,83 @@ public sealed class IskontoSozluOnayTestleri(ApiSunucuOlgusu api)
             select count(*)::int from public.hatirlatma
              where sahip_id = @p0 and kaynak = 'basvuru' and kaynak_id = @p1 and baslik like '%Sözlü onayınızla%'
             """, [yonetici, belge]));
+        // TUTAR DA YENİLENİR (karar yalnız oranı yazıyordu): 1000 x %40 iskonto = 600, dip toplam da.
+        Assert.Equal(600m, await api.Veri.TekDegerAsync<decimal>("select tutar from public.belge_satir where id = @p0", [satir]));
+        Assert.Equal(600m, await api.Veri.TekDegerAsync<decimal>("select genel_toplam from public.belge where id = @p0", [belge]));
+
+        // 5) GERİ AL (1377): onaycı olmayan başka görevli alamaz; uygulayan banko alır - oran, kilit, tutar döner.
+        var talep = await api.Veri.TekDegerAsync<int>("select id from public.iskonto_talep where belge_id = @p0", [belge]);
+        var (bAccess, _) = await api.GirisAsync(await api.Veri.TekDegerAsync<string>(
+            "select kod from public.taraf_kullanici where id = @p0", [baskasi]) ?? "", TestDunyasi.Parola);
+        using (var hb = api.Istemci(bAccess, Merkez))
+            Assert.Equal(HttpStatusCode.Forbidden,
+                (await hb.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "yanlış" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await h.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "" })).StatusCode);
+        var g = await h.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "Yanlış hastaya uygulandı" });
+        Assert.True(g.IsSuccessStatusCode, await g.Content.ReadAsStringAsync());
+        Assert.Equal("0.0000/0/1000.00", await api.Veri.TekDegerAsync<string>(
+            "select iskonto::text || '/' || iskonto_kilit || '/' || round(tutar, 2)::text from public.belge_satir where id = @p0", [satir]));
+        Assert.Equal(1000m, await api.Veri.TekDegerAsync<decimal>("select genel_toplam from public.belge where id = @p0", [belge]));
+        Assert.Equal(3, await api.Veri.TekDegerAsync<int>("select durum::int from public.iskonto_talep where id = @p0", [talep]));
+        Assert.Equal(1, await api.Veri.TekDegerAsync<int>("""
+            select count(*)::int from public.hatirlatma
+             where sahip_id = @p0 and kaynak_id = @p1 and baslik like '%geri alındı%'
+            """, [yonetici, belge]));
+        // İkinci kez geri alınamaz (artık onaylı değil).
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await h.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "tekrar" })).StatusCode);
+    }
+
+    /// <summary>DİJİTAL onaylı iskontoyu banko geri alamaz, onaycı alır (1377, kullanıcı kararı).</summary>
+    [VtFact]
+    public async Task Dijital_onay_yalniz_onayci_geri_alir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var bankoRol = await d.RolAsync("banko", "belge:gde", "belge_satir:gde");
+        var (banko, bankoKod) = await d.KullaniciAsync(bankoRol, Merkez);
+        await d.SubeVerAsync(banko, Merkez, yazma: true, varsayilan: true);
+        var yonRol = await d.RolAsync("yonetici", "belge:gde", "belge.iskonto_onay_ust");
+        var (yonetici, yonKod) = await d.KullaniciAsync(yonRol, Merkez);
+        await d.SubeVerAsync(yonetici, Merkez, yazma: true, varsayilan: true);
+
+        var hasta = await api.Veri.TekDegerAsync<int>(
+            "insert into public.taraf (unvan, hasta, sube_id) values (@p0, 1, @p1) returning id", [d.Onek + " hasta", Merkez]);
+        d.Temizle($"delete from public.taraf where id = {hasta}");
+        var belge = await api.Veri.TekDegerAsync<int>("""
+            insert into public.belge (tur, tipi, belge_tarihi, taraf_id, durum, sube_id)
+            values (19, 30, now(), @p0, 0, @p1) returning id
+            """, [hasta, Merkez]);
+        d.Temizle($"delete from public.belge where id = {belge}");
+        var satir = await api.Veri.TekDegerAsync<int>("""
+            insert into public.belge_satir (belge_id, sira, tur, miktar, adet, birim_fiyat, tutar, kdv, sube_id)
+            values (@p0, 1, 2, 1, 1, 500, 500, 0, @p1) returning id
+            """, [belge, Merkez]);
+        d.Temizle($"delete from public.belge_satir where id = {satir}");
+        d.Temizle($"delete from public.iskonto_talep where belge_id = {belge}");
+        d.Temizle($"delete from public.iskonto_talep_satir where talep_id in (select id from public.iskonto_talep where belge_id = {belge})");
+
+        // Dijital onaylı talep (zincirin sonucu): talep + karar fonksiyonu.
+        var talep = await api.Veri.TekDegerAsync<int>("""
+            insert into public.iskonto_talep (belge_id, sube_id, oran, gerekce, durum, isteyen_id, ekleyen)
+            values (@p0, @p1, 30, 'test', 0, @p2, @p2) returning id
+            """, [belge, Merkez, banko]);
+        await api.Veri.CalistirAsync("""
+            insert into public.iskonto_talep_satir (talep_id, belge_satir_id, birim_fiyat, onceki_iskonto, oran)
+            values (@p0, @p1, 500, 0, 30)
+            """, [talep, satir]);
+        await api.Veri.CalistirAsync("select public.fn_iskonto_talep_karar(@p0, 1::smallint, 30, 'ok', @p1)", [talep, yonetici]);
+
+        var (ba, _) = await api.GirisAsync(bankoKod, TestDunyasi.Parola);
+        using (var hb = api.Istemci(ba, Merkez))
+            Assert.Equal(HttpStatusCode.Forbidden,
+                (await hb.PostAsJsonAsync($"/api/iskonto-talep/{talep}/geri-al", new { neden = "x" })).StatusCode);
+        var (ya, _) = await api.GirisAsync(yonKod, TestDunyasi.Parola);
+        using var hy = api.Istemci(ya, Merkez);
+        // Ekran SATIRDAN geri alır: satırı kilitleyen son onaylı talep bulunur.
+        var g = await hy.PostAsJsonAsync($"/api/iskonto-talep/satir/{satir}/geri-al", new { neden = "Kurum değişti" });
+        Assert.True(g.IsSuccessStatusCode, await g.Content.ReadAsStringAsync());
+        Assert.Equal("0.0000/0/500.00", await api.Veri.TekDegerAsync<string>(
+            "select iskonto::text || '/' || iskonto_kilit || '/' || round(tutar, 2)::text from public.belge_satir where id = @p0", [satir]));
     }
 }

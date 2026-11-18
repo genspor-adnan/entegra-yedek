@@ -70,7 +70,7 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
     //   başka yollardan da çağrılabiliyor (kısayol, toplu seçim) - sunucu
     //   reddedince kart kaydedilemez duruma düşerdi.
     if (satirlar.some(x => x.iskontoKilit && seciliSatirlar.has(x.anahtar))) {
-      void mesaj('İskontosu onaylanmış satır silinemez - önce iskonto onayını kaldırın.');
+      void mesaj('İskontosu onaylanmış satır silinemez - önce satırı seçip ↩ İskonto Onayını Geri Al.');
       return;
     }
     // BELGEYE DONUSMUS SATIR SILINMEZ (kullanici 11.10.2026): fiş / fatura /

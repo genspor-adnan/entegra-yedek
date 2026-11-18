@@ -63,6 +63,13 @@ export const iskontoUclari = {
     gonder<{ id: number; oran: number; onaylayan: string }>('/api/iskonto-talep/sozlu',
       { belgeId, gerekce, onaylayanId, kalemler }),
 
+  /**
+   * ONAYI GERİ AL (1377): satırı kilitleyen son onaylı iskonto geri alınır - oran onay öncesine döner, kilit açılır.
+   * Sözlüyü uygulayan görevli ya da onaycı, dijitali yalnız onaycı; belgeye dönüşmüş satırda olmaz.
+   */
+  iskontoSatirGeriAl: (satirId: number, neden: string) =>
+    gonder<{ id: number }>(`/api/iskonto-talep/satir/${satirId}/geri-al`, { neden }),
+
   /** Aktif şubenin iskonto onay yöntemi (Başvuru Ayarları). */
   iskontoOnayYontemi: () =>
     istek<{ yontem: 1 | 2 | 3; subeId: number | null }>('/api/iskonto-talep/onay-yontemi'),
