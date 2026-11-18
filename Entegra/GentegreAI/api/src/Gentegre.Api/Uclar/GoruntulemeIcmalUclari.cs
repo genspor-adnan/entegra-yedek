@@ -71,7 +71,7 @@ public static class GoruntulemeIcmalUclari
 
             var hepsi = await b.ListeAsync("""
                 select r.id, be.id, coalesce(be.belge_no, ''), coalesce(r.cekim_tarihi, r.ekleme_tarihi), coalesce(r.hasta_id, 0),
-                       coalesce(nullif(r.modalite, 0), h.modalite, 0)::smallint, coalesce(r.kaynak, 1)::smallint,
+                       coalesce(nullif(r.modalite, 0), h.modalite, 0)::smallint, coalesce(nullif(r.kaynak, 0), 1)::smallint,
                        coalesce(r.oncelik, 1)::smallint, coalesce(r.hizmet_id, 0), coalesce(h.kod, ''), coalesce(h.ad, ''),
                        coalesce(h.sut_kodu, ''), coalesce(r.belge_satir_id, 0), coalesce(r.kontrast, 0) > 0,
                        coalesce(r.cihaz_id, 0),
@@ -100,7 +100,10 @@ public static class GoruntulemeIcmalUclari
                   left join public.telerad_kurum tk on tk.id = ti.kurum_id
                   left join public.taraf kt on kt.id = tk.taraf_id
                  where be.tipi = 30 and be.tur = 19 and be.durum <> 6
-                   and r.durum <> 0 and coalesce(r.kaynak, 1) in (1, 3)
+                   -- KAYNAK 0 = İÇ (kullanıcı 18.11.2026: "görüntüleme icmali neden boş geliyor"): eski HBYS aktarımı
+                   --   (esle.sql) istemi kaynak 0 ile yazıyor; geçerli kodlar 1 iç · 2 telerad gelen · 3 dış merkeze.
+                   --   KOSUYOLU / SONOMED'de Ekim'in 99 isteminden 98'i icmal dışında kalıyordu. Veri değiştirilmedi.
+                   and r.durum <> 0 and coalesce(nullif(r.kaynak, 0), 1) in (1, 3)
                    and coalesce(r.cekim_tarihi, r.ekleme_tarihi) >= @p0 and coalesce(r.cekim_tarihi, r.ekleme_tarihi) < @p1
                    and (@p2 = 0 or coalesce(be.sube_id, 0) in (0, @p2))
                 """, null, [baslangic, bitis, sube], o => new Cekim(
