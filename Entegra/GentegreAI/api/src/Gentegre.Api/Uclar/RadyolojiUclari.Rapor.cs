@@ -126,6 +126,9 @@ public static partial class RadyolojiUclari
                        coalesce((select x.ad from public.icd x where x.kod = i.on_tani limit 1), '') as "onTaniAdi",
                        coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
                        i.cekim_tarihi as "cekimTarihi", i.kritik,
+                       -- ZAMAN ÇİZGİSİNDEKİ YERİ (18.11.2026): geçmiş listesiyle AYNI ölçüt - bu tetkik listede kendi
+                       --   tarihinde durur (↗ ile başka tetkik açılınca sıra kaymasın).
+                       coalesce(i.cekim_tarihi, i.ekleme_tarihi) as "zamanTarihi",
                        coalesce(cz.ad, '') as "cihazAdi",
                        i.seri_sayisi as "seriSayisi", i.goruntu_sayisi as "goruntuSayisi",
                        i.study_uid as "studyUid",
