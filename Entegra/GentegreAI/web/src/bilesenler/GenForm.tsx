@@ -1186,7 +1186,18 @@ ${kayitAnı ? 'Aynı kimlik no ile yeni kayıt açılamaz. ' : ''}Mevcut karta g
     }
   }
 
+  /**
+   * ÇİFT KAYIT KİLİDİ (web incelemesi 18.11.2026): `kaydediyor` (düğmeyi kapatan durum) ancak ön denetimler (mükerrer
+   * hasta sorgusu, lab istem onayı) BİTTİKTEN sonra açılıyordu - o arada ikinci tık ikinci kartEkle'yi gönderiyor, iki
+   * hasta kartı açılıyordu. Kilit eşzamanlıdır (ref): ilk kayıt bitene kadar sonraki çağrı yok sayılır.
+   */
+  const kaydetKilidi = useRef(false);
   async function kaydet(acikKal = false, sonra?: (id: number) => Promise<void>) {
+    if (kaydetKilidi.current) return;
+    kaydetKilidi.current = true;
+    try { await kaydetIc(acikKal, sonra) } finally { kaydetKilidi.current = false }
+  }
+  async function kaydetIc(acikKal = false, sonra?: (id: number) => Promise<void>) {
     // ADAY HASTA (266): dosya no CEP NUMARASI, unvan ad+soyad. Ikisi de kartta
   //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
   // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
@@ -1448,7 +1459,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
         && !detayIzgara?.[aktif.detay.ad] && (() => {
         const grid = (
         <KartDetaySekmesi
-          aktif={aktif} kaynak={kaynak} salt={salt}
+          // ANINDA KAYIT SÜRERKEN DETAY KİLİTLİ (web incelemesi 18.11.2026): kayıt bitince kart sunucudan yeniden
+          //   okunur (yukle -> detaylar); kayıt sürerken ikinci satıra yapılan değişiklik bu okumada sessizce
+          //   kayboluyordu (anında kayıt efekti "kaydediyor"da bayrağı düşürüp dönüyordu). Kayıt birkaç yüz ms sürer.
+          aktif={aktif} kaynak={kaynak} salt={salt || (kaydediyor && !!aktif.detay.anindaKaydet)}
           deger={deger} alanHatalari={alanHatalari}
           detaylar={detaylar} setDetaylar={setDetaylar}
           detaySayfa={detaySayfa} detayToplam={detayToplam}
@@ -1825,7 +1839,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
           <b>{c('Bu kaydi baska bir kullanici degistirdi.')}</b>
           {cakisma.alanlar.length > 0 && <div>Cakisan alanlar: {cakisma.alanlar.join(', ')}</div>}
           <div className="cakisma-arac">
-            <button className="d" onClick={() => { setCakisma(null); void yukle() }}>{c('Güncel Hâli Al (Değişikliklerim Gider)')}</button>
+            {/* DEĞİŞİKLİKLERİM GERÇEKTEN GİDER (web incelemesi 18.11.2026): yukle() aynı kaydı yeniden okurken kullanıcının
+                değiştirdiği alanları korur (tazeleme kuralı) - burada da koruyordu; düğme yeni sürümü alıp eski
+                değerleri ekranda bırakıyor, sonraki Kaydet öteki kullanıcının değişikliğini sessizce eziyordu. */}
+            <button className="d" onClick={() => { setCakisma(null); yuklenenRef.current = null; void yukle() }}>{c('Güncel Hâli Al (Değişikliklerim Gider)')}</button>
             <button className="d" onClick={() => {
               // Sunucudaki guncel surumu alip kendi degisikliklerimi UZERINE yaz
               setSurum(String(cakisma.guncel.surum ?? ''));

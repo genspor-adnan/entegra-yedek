@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type BelgeYaniti } from '../../api/sozlesme';
 import { mesaj, metinSor, onay, paraSor, type ParaSecimi } from '../../bilesenler/mesaj';
-import { para, tutarOku } from '../../bilesenler/bicim';
+import { para, tutarOku, bugunIso } from '../../bilesenler/bicim';
 import { belgeKisaAdi } from '../belgeTuru';
 import { DOVIZ_KODLARI, IADE_NEDENLERI, iadeNedenAdi } from '../belgeSabitleri';
 import type { HizliTahsilatEki } from '../belgeTahsilat';
@@ -106,7 +106,7 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
 
   /** O tarihin kurunu getirir (tahsilat yonu: satis kuru). */
   const kurGetir = async (doviz: string) => {
-    const bugun = new Date().toISOString().slice(0, 10);
+    const bugun = bugunIso();          // YEREL gün (toISOString UTC'dir: 00:00-03:00 arası dünün kuru alınıyordu)
     try { return (await api.dovizKur(doviz, bugun, gRef.current.alisMi ? 2 : 1)).kur }
     catch { return null }
   };

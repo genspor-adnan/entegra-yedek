@@ -41,7 +41,11 @@ export function GenLookup({
   const zamanlayici = useRef<number | undefined>(undefined);
   const kutu = useRef<HTMLInputElement | null>(null);
 
+  // YALNIZ SON ARAMA YAZAR (web incelemesi 18.11.2026): yavaş dönen eski aramanın sonucu yeni aramanınkini eziyor,
+  //   Enter listede görünen ama aranmayan kaydı seçiyordu.
+  const aramaNo = useRef(0);
   const ara = useCallback(async (metin: string) => {
+    const no = ++aramaNo.current;
     setYukleniyor(true);
     setListeHatasi(null);
     try {
@@ -58,13 +62,15 @@ export function GenLookup({
         : { op: 'and' as const, kosullar: parcalar };
 
       const yanit = await api.liste(kaynak, { sayfa: 1, boyut: 25, filtre });
+      if (no !== aramaNo.current) return;
       setSatirlar(yanit.satirlar);
       setSecili(0);
     } catch (h) {
+      if (no !== aramaNo.current) return;
       setListeHatasi(hataMetni(h));
       setSatirlar([]);
     } finally {
-      setYukleniyor(false);
+      if (no === aramaNo.current) setYukleniyor(false);
     }
   }, [kaynak, alanlar, sabitFiltre]);
 

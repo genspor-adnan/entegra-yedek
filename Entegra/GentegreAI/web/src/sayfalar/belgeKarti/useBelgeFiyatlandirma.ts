@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api/istemci';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import type { SatirDurumu } from '../belgeSatir';
@@ -201,14 +201,21 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
    * rounding ile BelgeHesap'ta - PG round'u farkli yuvarlar, kurus paritesi
    * DB'de tutturulamaz). Kaydetme hatti zaten tum toplamlari yeniden hesaplar.
    */
+  /**
+   * EN SON İSTEK KAZANIR, SATIRLAR GÜNCEL HALİNE UYGULANIR (web incelemesi 18.11.2026): fiyatlar çağrı anındaki satır
+   * kopyası üzerinde hesaplanıp `setSatirlar(kopya)` ile yazılıyordu - fiyat istekleri sürerken eklenen / düzenlenen
+   * satır siliniyor, art arda iki liste seçilince yavaş dönen ESKİ listenin fiyatları kalıyordu. Şimdi her çağrı bir
+   * kuşak numarası alır, eskisi sonuç yazmaz; fiyat güncel satıra (aynı anahtar + aynı kalem) uygulanır.
+   */
+  const fiyatlamaKusagi = useRef(0);
   async function satirlariYenidenFiyatla(
     listeId: number | null, kurumId: number | null, kaynakAdi: string,
   ) {
     if (!listeId) return;
+    const kusak = ++fiyatlamaKusagi.current;
     await guvenli(async () => {
-      let degisen = 0, bulunamayan = 0;
-      const yeniSatirlar = await Promise.all(satirlar.map(async r => {
-        if (!r.stokId && !r.hizmetId) return r;
+      const sonuclar = await Promise.all(satirlar.map(async r => {
+        if (!r.stokId && !r.hizmetId) return null;
         const f = await api.fiyatKalem(
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! },
           // SOZLESME VE SGK ISARETI BURADA DA GECER (601): satir eklerken
@@ -216,11 +223,21 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
           //   liste degistirince satirlarin SUT bedeli sessizce siliniyordu.
           { tarafId: cariId, kurumId, listeId,
             sozlesmeId: sozlesmeId ?? null, sgkKullan: sgkKullan ?? null });
-        const y = kampanyaFiyatiUygula(r, f);
-        if (y === r) bulunamayan++; else degisen++;
-        return y;
+        return { anahtar: r.anahtar, stokId: r.stokId, hizmetId: r.hizmetId, f };
       }));
-      setSatirlar(yeniSatirlar);
+      if (kusak !== fiyatlamaKusagi.current) return;          // daha yeni bir fiyatlama başladı
+      const fiyat = new Map(sonuclar.filter(x => x !== null).map(x => [x!.anahtar, x!]));
+      // Mesaj sayaçları çağrı anındaki satırlardan (güncelleyici React'in render turunda çalışır, sayacı dolduramaz).
+      let degisen = 0, bulunamayan = 0;
+      satirlar.forEach(r => {
+        const x = fiyat.get(r.anahtar);
+        if (x) { if (kampanyaFiyatiUygula(r, x.f) === r) bulunamayan++; else degisen++ }
+      });
+      setSatirlar(guncel => guncel.map(r => {
+        const x = fiyat.get(r.anahtar);
+        if (!x || x.stokId !== r.stokId || x.hizmetId !== r.hizmetId) return r;   // arada eklenen / değişen satır
+        return kampanyaFiyatiUygula(r, x.f);
+      }));
       mesaj(`${degisen} satırın fiyatı ${kaynakAdi} güncellendi.`
           + (bulunamayan ? ` ${bulunamayan} kalem listede bulunamadı, fiyatı DEĞİŞMEDİ.` : '')
           + (belgeId && degisen ? ' Kaydet ile kalıcı olur.' : ''));

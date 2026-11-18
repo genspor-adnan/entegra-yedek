@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Gentegre.Veri;
 
@@ -345,5 +345,32 @@ public sealed class StokLotYonuTestleri(ApiSunucuOlgusu api)
         d.Temizle($"delete from public.stok_sayim where id = {sayim}");
         Assert.True(kapat.IsSuccessStatusCode, kG);
         Assert.Equal(diger, await api.Veri.TekDegerAsync<int>("select sube_id from public.belge where id = @p0", [fis]));   // eskiden Merkez
+    }
+
+    /// <summary>WEB İNCELEMESİ 18.11.2026 (2): belge PUT'u sürüm denetler - eski sürümle kayıt 409, satırlar değişmez.</summary>
+    [VtFact]
+    public async Task Belge_PUT_eski_surumle_409_doner_satirlar_ezilmez()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var o = await OrtamAsync(d, izleme: 0);
+        using var _ = o.H;
+        var no = "SR" + d.Onek[^6..];
+        object Satir(decimal m) => new { tur = 1, stokId = o.Stok, adet = m, miktar = m, birimFiyat = 10 };
+        var id = await YazAsync(d, o, AlisIrsaliyesi(o, no), [Satir(5)]);
+        var eskiSurum = await Surum(id);
+
+        // Öteki kullanıcı kaydetti (güncel sürümle).
+        await YazAsync(d, o, AlisIrsaliyesi(o, no), [Satir(5), Satir(7)], id: id);
+        // Bu kullanıcı eski kopyasıyla kaydediyor.
+        var y = await o.H.PutAsJsonAsync($"/api/belge/{id}",
+            new { surum = eskiSurum, belge = AlisIrsaliyesi(o, no), satirlar = new[] { Satir(5) }, secenekler = new { taslak = false } });
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, y.StatusCode);                          // eskiden 200, satır 7 silinirdi
+        Assert.Equal(2L, await api.Veri.TekDegerAsync<long>("select count(*) from public.belge_satir where belge_id = @p0", [id]));
+        Assert.Equal(12m, await Stok(o, o.DepoA));
+
+        // Sürüm gönderilmezse (iç akış / eski istemci) denetim yok.
+        var z = await o.H.PutAsJsonAsync($"/api/belge/{id}",
+            new { belge = AlisIrsaliyesi(o, no), satirlar = new[] { Satir(5), Satir(7) }, secenekler = new { taslak = false } });
+        Assert.True(z.IsSuccessStatusCode, await z.Content.ReadAsStringAsync());
     }
 }

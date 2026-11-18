@@ -383,7 +383,7 @@ public static class BelgeUclari
 
             var (belgeId, uyarilar) = await depo.GuncelleAsync(id, belge, satirlar,
                 istek.Secenekler, baglam.Yazma,
-                iptal);
+                iptal, istek.Surum);
 
             // GUNCELLEMEDE DE (602): basvurunun bolumu/kurumu sonradan
             //   girilmis olabilir - paket o an tamamlanir. "Ayni icerik ->

@@ -171,6 +171,19 @@ function duzelt(h: unknown): GorunumTercihi {
 
 export function gorunumOku(): GorunumTercihi { return mevcut }
 
+/**
+ * KULLANICI LİSTE SATIR SAYISINI AÇIKÇA SEÇTİ Mİ (web incelemesi 18.11.2026): seçtiyse o sayı, seçmediyse null -
+ * liste o zaman Genel Ayarlar'daki `liste.sayfa_boyu`nu kullanır. Eskiden genel ayar (yoksa 50) her listede
+ * kullanıcının tercihini eziyor, liste iki kez yükleniyordu.
+ */
+export function listeSatirTercihi(): number | null {
+  try {
+    const ham = localStorage.getItem(AYNA);
+    const n = ham ? Number((JSON.parse(ham) as Partial<GorunumTercihi>).listeSatir) : NaN;
+    return LISTE_SATIR_SECENEKLERI.includes(n) ? n : null;
+  } catch { return null }
+}
+
 /** Yalnız ekrana uygular (kaydetmez) - önizleme ve açılış için. */
 export function gorunumUygula(t: GorunumTercihi) {
   mevcut = t;

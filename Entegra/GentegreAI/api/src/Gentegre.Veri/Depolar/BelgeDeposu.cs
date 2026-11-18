@@ -152,12 +152,13 @@ public sealed partial class BelgeDeposu
         List<Dictionary<string, JsonElement>> satirlar,
         BelgeSecenekleri secenekler,
         YazmaBaglami baglam,
-        CancellationToken iptal = default)
+        CancellationToken iptal = default,
+        string? surum = null)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var sonuc = await GuncelleIcAsync(baglanti, islem, belgeId, belge, satirlar, secenekler, baglam, iptal);
+        var sonuc = await GuncelleIcAsync(baglanti, islem, belgeId, belge, satirlar, secenekler, baglam, iptal, surum);
 
         await islem.CommitAsync(iptal);
         return sonuc;
@@ -186,16 +187,18 @@ public sealed partial class BelgeDeposu
         List<Dictionary<string, JsonElement>> satirlar,
         BelgeSecenekleri secenekler,
         YazmaBaglami baglam,
-        CancellationToken iptal)
+        CancellationToken iptal,
+        string? surum = null)
     {
         // --------------------------------------------------- 1) kilit kontrolu ----
         int tur, tipi, eskiDurum, efaturaDurum, kapanma, teklifDurum;
         DateTime belgeTarihi;
-        string belgeNo, belgeSeri;
+        string belgeNo, belgeSeri, guncelSurum;
         await using (var komut = new NpgsqlCommand("""
             select tur, coalesce(tipi, 0), durum, coalesce(efatura_durum, 0),
                    coalesce(kapanma_durum, 0), belge_tarihi,
-                   coalesce(belge_no, ''), coalesce(belge_seri, ''), coalesce(teklif_durum, 1)
+                   coalesce(belge_no, ''), coalesce(belge_seri, ''), coalesce(teklif_durum, 1),
+                   xmin::text
               from public.belge where id = @p0 for update
             """, baglanti, islem))
         {
@@ -207,7 +210,13 @@ public sealed partial class BelgeDeposu
             efaturaDurum = o.GetInt32(3); kapanma = o.GetInt32(4);
             belgeTarihi = o.GetDateTime(5); belgeNo = o.GetString(6); belgeSeri = o.GetString(7);
             teklifDurum = o.GetInt32(8);
+            guncelSurum = o.GetString(9);
         }
+        // İYİMSER EŞZAMANLILIK (web incelemesi 18.11.2026; proje kuralı xmin = surum, uyuşmazsa 409 + güncel): belge
+        //   PUT'u sürüm denetlemiyordu - aynı belgeyi açık tutan iki kişiden son kaydeden, ötekinin eklediği satırı
+        //   (stok / cari etkisiyle) siliyordu. Sürüm gelmezse (iç akışlar, eski istemci) denetim yok.
+        if (!string.IsNullOrEmpty(surum) && surum != guncelSurum)
+            throw GentegreHatasi.Cakisma(new { surum = guncelSurum });
         // KALEM VARKEN DEPO DEĞİŞMEZ (kullanıcı 11.11.2026 genel kural; 10.11 "depo belgesinde kilit yok" kararı
         //   geri alındı): satırlar başlıktaki depoya yazılmıştır; depo değişince gridde duran satırlar başka bir
         //   belgenin satırları olur, stok yanlış depodan düşer. Kalemleri silip depoyu değiştirmek serbest; boş olan

@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { hamSayi } from '../../bilesenler/bicim';
@@ -60,6 +61,18 @@ export function useKalemAkisi({
    * açılışta kopyalar (useState); sonradan gönderilen fiyat güncellemesi ona
    * ULAŞMAZ.
    */
+  /**
+   * YENİ SATIR ANAHTARI SEÇİM ANINDA AYRILIR (web incelemesi 18.11.2026): anahtar, fiyat / kur istekleri
+   * beklenmeden ÖNCEKİ satır kopyasından (sonAnahtar + 1) üretiliyordu - hızlı iki seçimde (barkod okutma) ikisi de
+   * aynı anahtarı alıyor, kalemKaydet ikinciyi "düzenleme" sayıp ilk kalemin yerine yazıyordu (kalem sessizce
+   * kayboluyordu). Sayaç kart ömrü boyunca artar; satırların en büyük anahtarından geri kalmaz.
+   */
+  const anahtarRef = useRef(0);
+  const anahtarAyir = () => {
+    anahtarRef.current = Math.max(anahtarRef.current, sonAnahtar(satirlar)) + 1;
+    return anahtarRef.current;
+  };
+
   /** Kalem penceresinden dönen satırı yazar (yeni ise ekler). */
   const kalemKaydet = (satir: SatirDurumu) => {
     const temel = satir.paket
@@ -129,6 +142,7 @@ export function useKalemAkisi({
    */
   /** Satir pencere ACMADAN gride dustuyse `true` (arama penceresinin sayaci icin). */
   const stokSecildi = async (sec: Record<string, unknown>, hizli = false): Promise<boolean> => {
+    const anahtar = anahtarAyir();                 // await'lerden ÖNCE (eşzamanlı seçimler ayrı anahtar alır)
     // HİZMET UYGUNLUĞU (kullanıcı 27.10.2026: "erkek hastaya Obstetrik ... ekledim gene"): cinsiyet / yaş kuralı
     //   (482) kalem SEÇİLİRKEN sorulur - kayıtta tetik zaten reddediyordu, kullanıcı satırı ekleyip sonra hata
     //   görüyordu. İstisna gerekçeyle geçer (uygunluk_notu, tetik bunu kabul eder); gerekçe yoksa kalem eklenmez.
@@ -148,7 +162,7 @@ export function useKalemAkisi({
     }
     const yeni = await stokSeciminiCoz(sec, {
       satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
-      fiyatListesiId, kampanyaId, basvuruBilgi, belgeTarihi, alisMi,
+      fiyatListesiId, kampanyaId, basvuruBilgi, belgeTarihi, alisMi, anahtar,
     });
     if (uygunlukNotu) yeni.uygunlukNotu = uygunlukNotu;
     // FIYATI SIFIR UCRET HIZLI EKLENMEZ (kullanici 12.10.2026: "ücret sıfırsa fiyat

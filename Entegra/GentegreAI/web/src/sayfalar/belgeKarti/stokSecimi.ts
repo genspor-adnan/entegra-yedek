@@ -1,7 +1,7 @@
 import { api } from '../../api/istemci';
 import type { SatirDurumu } from '../belgeSatir';
 import { dovizKuruUygula, kampanyaFiyatiUygula, sonAnahtar, stokSecimindenKalem } from '../belgeKalem';
-import { hamSayi } from '../../bilesenler/bicim';
+import { bugunIso, hamSayi } from '../../bilesenler/bicim';
 import type { BasvuruBilgi } from '../../bilesenler/belge/BasvuruSekmesi';
 
 /**
@@ -30,6 +30,8 @@ export async function stokSeciminiCoz(
     /** Belge tarihi (kur günü) ve yönü (alışta alış kuru) - dövizli liste fiyatının yerel karşılığı için. */
     belgeTarihi?: string;
     alisMi?: boolean;
+    /** Yeni satırın anahtarı - çağıran SEÇİM ANINDA ayırır (useKalemAkisi); yoksa satırlardan. */
+    anahtar?: number;
   },
 ): Promise<SatirDurumu> {
   const { satirlar, yerelPara, tarafId, odeyenKurumId,
@@ -37,7 +39,7 @@ export async function stokSeciminiCoz(
 
   // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
   void api.aramaIsaretle(sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
-  let yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
+  let yeni = stokSecimindenKalem(sec, baglam.anahtar ?? sonAnahtar(satirlar) + 1, yerelPara);
 
   if (fiyatListesiId || kampanyaId || basvuruBilgi.sozlesmeId) {
     try {
@@ -57,7 +59,7 @@ export async function stokSeciminiCoz(
   //   ekleme). Kur alınamazsa satır dövizli kalır; kalem penceresi açılınca yeniden dener, kullanıcı elle girer.
   if (yeni.fiyatDovizi && yeni.fiyatDovizi !== yerelPara && hamSayi(yeni.dovizFiyat) > 0) {
     try {
-      const gun = (belgeTarihi || new Date().toISOString()).slice(0, 10);
+      const gun = belgeTarihi ? belgeTarihi.slice(0, 10) : bugunIso();   // yerel gün (UTC değil)
       const k = await api.dovizKur(yeni.fiyatDovizi, gun, alisMi ? 2 : 1);
       yeni = dovizKuruUygula(yeni, k.kur);
     } catch { /* kur yoksa pencere / kullanıcı */ }

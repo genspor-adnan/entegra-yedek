@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { api, oturum } from '../api/istemci';
 import { OTURUM_TAZELE_OLAYI } from '../api/cekirdek';
-import { ApiHatasi, type BenYaniti, type KaynakYetkisi, type KullaniciOzeti } from '../api/sozlesme';
+import { ApiHatasi, type BenYaniti, type GirisYaniti, type KaynakYetkisi, type KullaniciOzeti } from '../api/sozlesme';
 import { subeAyariniKur } from '../bilesenler/subeAyari';
 import { sonKullaniciYaz } from './sonKullanici';
 
@@ -44,6 +44,12 @@ interface OturumDurumu {
   /** /ben'i yeniden dener (kullanici dugmesi). */
   yenidenDene(): Promise<void>;
   girisYap(kod: string, parola: string, subeId?: number): Promise<void>;
+  /**
+   * ELDEKİ GİRİŞ YANITIYLA oturum açar (web incelemesi 18.11.2026): giriş ekranı kimliği bir kez doğrular - eskiden
+   * ilk yanıt atılıp ikinci kez giriş yapılıyordu (iki refresh ailesi, biri kapatılamayan hayalet oturum, çift giriş
+   * logu). Şube seçimi gerektiyse seçilen şubeye bu oturumdan geçilir (api.subeSec).
+   */
+  girisYanitiUygula(kod: string, yanit: GirisYaniti, subeId?: number): Promise<void>;
   cikisYap(): Promise<void>;
   subeDegistir(subeId: number): Promise<void>;
   dilDegistir(dil: number): Promise<void>;
@@ -140,6 +146,18 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
       // SON KULLANICI (kullanici 09.10.2026: "login de son girdigim user name
       //   default gelsin"): yalniz BASARILI giristen sonra - yanlis yazilan
       //   kod bir sonraki acilisa tasinmasin. Parola saklanmaz.
+      sonKullaniciYaz(kod);
+      setBen(await api.ben());
+    },
+
+    async girisYanitiUygula(kod, yanit, subeId) {
+      oturum.yaz(yanit);
+      if (subeId !== undefined) {
+        try {
+          oturum.yaz(await api.subeSec(subeId));
+          oturum.subeYaz(subeId);
+        } catch (h) { oturum.temizle(); throw h }
+      }
       sonKullaniciYaz(kod);
       setBen(await api.ben());
     },

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SatirDurumu } from '../belgeSatir';
 import { mesaj, onay } from '../../bilesenler/mesaj';
 
@@ -16,22 +16,50 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
   /** Shift ile aralık seçimi için son tıklanan satırın sırası. */
   const sonTiklanan = useRef<number | null>(null);
 
-  const secimDegis = (anahtar: number) =>
+  /**
+   * SEÇİM SATIRIN KİMLİĞİNE BAĞLI (web incelemesi 18.11.2026): seçim yalnız `anahtar` tutuyordu; kayıt / tazeleme
+   * sonrası sunucu yanıtından kurulan satırlar yeniden numaralanıyor (yanittanSatirlar: anahtar = sıra) - seçim başka
+   * satırları gösteriyor, "Seçili Sil" yanlış ücret satırını siliyordu. Seçilen her anahtarın o anki satır kimliği
+   * (sunucu satırId'si + kalem) saklanır; satırlar değişince kimliği tutmayan anahtar seçimden düşer.
+   */
+  const kimlik = (x: SatirDurumu) => `${x.satirId ?? ''}|${x.stokId ?? ''}|${x.hizmetId ?? ''}`;
+  const seciminKimligi = useRef(new Map<number, string>());
+  useEffect(() => {
+    const m = new Map(satirlar.map(x => [x.anahtar, kimlik(x)]));
+    seciminKimligi.current.forEach((k, a) => { if (m.get(a) !== k) seciminKimligi.current.delete(a) });
+    setSeciliSatirlar(onceki => {
+      const kalan = new Set([...onceki].filter(a => seciminKimligi.current.has(a)));
+      return kalan.size === onceki.size ? onceki : kalan;
+    });
+    if (sonTiklanan.current !== null && sonTiklanan.current >= satirlar.length) sonTiklanan.current = null;
+  }, [satirlar]);
+  const kimlikKaydet = (anahtarlar: number[]) => {
+    for (const a of anahtarlar) {
+      const x = satirlar.find(y => y.anahtar === a);
+      if (x) seciminKimligi.current.set(a, kimlik(x));
+    }
+  };
+
+  const secimDegis = (anahtar: number) => {
+    kimlikKaydet([anahtar]);
     setSeciliSatirlar(k => {
       const y = new Set(k);
       if (y.has(anahtar)) y.delete(anahtar); else y.add(anahtar);
       return y;
     });
+  };
 
   const satirTikla = (sira: number, e: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean }) => {
     const anahtarlar = satirlar.map(x => x.anahtar);
     if (e.shiftKey && sonTiklanan.current !== null) {
       const [bas, son] = [sonTiklanan.current, sira].sort((a, b) => a - b);
+      kimlikKaydet(anahtarlar.slice(bas, son + 1));
       setSeciliSatirlar(k => new Set([...k, ...anahtarlar.slice(bas, son + 1)]));
       return;
     }
     sonTiklanan.current = sira;
     if (e.ctrlKey || e.metaKey) { secimDegis(anahtarlar[sira]); return }
+    kimlikKaydet([anahtarlar[sira]]);
     setSeciliSatirlar(new Set([anahtarlar[sira]]));
   };
 
@@ -63,5 +91,13 @@ export function useSatirSecimi(satirlar: SatirDurumu[],
     setKalemDegisti(true);
   };
 
-  return { seciliSatirlar, setSeciliSatirlar, sonTiklanan, satirTikla, secimDegis, seciliSil };
+  /** Dışarıdan seçim (grid "tümünü seç" vb.): seçilen anahtarların kimliği de kaydedilir. */
+  const secimiAyarla = (d: Set<number> | ((k: Set<number>) => Set<number>)) =>
+    setSeciliSatirlar(k => {
+      const yeni = typeof d === 'function' ? d(k) : d;
+      kimlikKaydet([...yeni]);
+      return yeni;
+    });
+
+  return { seciliSatirlar, setSeciliSatirlar: secimiAyarla, sonTiklanan, satirTikla, secimDegis, seciliSil };
 }

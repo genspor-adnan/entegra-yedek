@@ -137,7 +137,11 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
 
     b.setKaydediyor(true);
     try {
-      const govde = belgeGovdesi(girdi, dolu, b.taslak);
+      // SÜRÜM (web incelemesi 18.11.2026): kartın son okuduğu / kaydettiği belgenin xmin'i - başkası arada
+      //   kaydettiyse sunucu 409 döner, ötekinin satırları sessizce silinmez. Kart tahsilat / dönüşüm / tazeleme
+      //   sonrası belgeyi yeniden okur (setSonuc), sürüm güncel kalır.
+      const govde = { ...belgeGovdesi(girdi, dolu, b.taslak),
+                      surum: mevcutId ? (b.sonuc?.belge.surum as string | undefined) : undefined };
 
       // DUZENLEME (135): kayitli belge PUT ile yeniden yazilir - numara korunur,
       //   eski stok/cari etkisi sunucuda geri alinip yenisi uygulanir.
@@ -205,6 +209,9 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
     } catch (h) {
       const c = hataAyristir(h);
       b.setAlanHatalari(c.alanlar);
+      // 409: başkası kaydetti - kendi değişikliklerini yazıp sürümü almak ötekini ezerdi; kart yeniden açılmalı.
+      if (c.cakisma) c.mesaj = 'Bu belgeyi siz açtıktan sonra başka bir kullanıcı kaydetti. Değişikliklerinizi not alıp '
+                                       + 'kartı kapatın ve belgeyi yeniden açın - kaydetmek onun değişikliklerini silerdi.';
       b.setHata(c.mesaj);
       // KAYIT DUSTUYSE MESAJ DA CIKAR (kullanici: "değişiklik kaydet
       //   basıyorum ama kaydetmiyor"): sunucunun is kurali uyarisi

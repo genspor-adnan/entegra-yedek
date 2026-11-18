@@ -1110,8 +1110,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const basvuruAcikBorc = useMemo(() => acikBorcHesapla(
       satirlar.length, onizleme.genel, Number(sonuc?.belge.genelToplam ?? 0),
-      tahsilToplami(tahsilat.tahsilatlar)),
-    [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar]);
+      tahsilToplami(tahsilat.tahsilatlar), !sonuc || kalemDegisti),
+    [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar, kalemDegisti]);
 
   /**
    * PAYLASIMLI KURUMDA TARAF AYRIMI (kullanici): ÖSS/SGK anlasmasinda acik

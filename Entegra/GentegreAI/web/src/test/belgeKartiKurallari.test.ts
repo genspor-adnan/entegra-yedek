@@ -142,6 +142,11 @@ describe('gelisSekliKarari', () => {
 });
 
 describe('acikBorcHesapla', () => {
+  it('KAYITLI ve değişmemiş belgede SUNUCU toplamı esas (önizleme farklı olsa da)', () => {
+    expect(acikBorcHesapla(2, 10000, 9990, 0, false)).toBe(9990);
+    expect(acikBorcHesapla(2, 10000, 9990, 0, true)).toBe(10000);     // kaydedilmemiş değişiklik: önizleme
+  });
+
   it('kalem varken CANLI onizleme toplamini kullanir', () => {
     expect(acikBorcHesapla(2, 10000, 4000, 3000)).toBe(7000);
   });

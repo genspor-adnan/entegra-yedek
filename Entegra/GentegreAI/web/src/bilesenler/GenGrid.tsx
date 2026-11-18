@@ -4,7 +4,7 @@ import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { bicimle } from './bicim';
-import { gorunumOku } from './gorunum';
+import { gorunumOku, listeSatirTercihi } from './gorunum';
 import { hatirlatmaPenceresiAc } from './hatirlatma/hatirlatmaDeposu';
 import { GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
@@ -301,9 +301,12 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
   // ACILIS SAYFA BOYU kullanicinin tercihinden gelir (669 · Kullanici
   //   Ayarlari > Gorunum). Tek bir listede gecici olarak degistirmek tercihi
   //   BOZMAZ - burasi yalnizca baslangic degeri.
-  const [ayarBoyut, setAyarBoyut] = useState(() => gorunumOku().listeSatir);
+  const [ayarBoyut, setAyarBoyut] = useState(() => listeSatirTercihi() ?? gorunumOku().listeSatir);
   const sayfaBoyu = boyut ?? ayarBoyut;
-  useEffect(() => { void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut) }, []);
+  // Genel ayar YALNIZ kullanıcı tercihi yoksa (web incelemesi 18.11.2026: tercih eziliyordu, liste iki kez yükleniyordu).
+  useEffect(() => {
+    if (listeSatirTercihi() === null) void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut);
+  }, []);
 
 
   /**

@@ -7,6 +7,27 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Web arayüzü incelemesi (göç yok)
+
+- (2) Belge PUT'u sürüm (xmin) denetler: istemci kartın son okuduğu `surum`'u gönderir, başkası arada kaydettiyse
+  409 - ötekinin eklediği satır (stok / cari etkisiyle) sessizce silinmez. Sürüm gelmezse (iç akış) denetim yok.
+- (1) GenForm 409 "Güncel Hâli Al" kullanıcının değiştirdiği alanları ekranda bırakıp yeni sürümü alıyordu (sonraki
+  Kaydet ötekini eziyordu) - artık gerçekten sunucu hâline döner.
+- (4) Belge kartında hızlı iki stok seçimi aynı satır anahtarını alıp ilk kalemi siliyordu - anahtar seçim anında,
+  artan sayaçla ayrılır. (5) Yeniden fiyatlama en son çağrıyı, güncel satırlara (aynı anahtar + kalem) uygular.
+  (7) Satır seçimi satır kimliğine bağlı; yeniden numaralanınca "Seçili Sil" yanlış satırı silmez.
+- (3) Giriş kimliği bir kez doğrular (ilk yanıt atılıp ikinci giriş yapılıyordu - hayalet oturum, çift giriş logu);
+  şube seçiminde ilk oturumdan api.subeSec ile geçilir.
+- (6) Anında kayıtlı detay (stok fiyatları) kayıt sürerken salt okunur - kayıt sonrası yeniden okuma ikinci
+  değişikliği sessizce siliyordu. (8) GenForm Kaydet eşzamanlı kilitli (ön denetim sürerken çift tık iki kart açıyordu).
+- (10) Açık borç (nakit penceresi önerisi / üst sınırı) kayıtlı, değişmemiş belgede sunucu toplamından.
+- (9) Kullanıcının liste satır sayısı tercihi genel ayarla ezilmez. GenLookup yalnız son aramanın sonucunu yazar.
+  Kur tarihi yerel gün (UTC değil; 00:00-03:00 arası dünün kuru alınıyordu).
+- Testler: web `belgeKartiYarislari` (4; 3'ü eski kodda kırmızı) + `acikBorcHesapla`; API
+  `Belge_PUT_eski_surumle_409_doner_satirlar_ezilmez`. 1, 3, 6, 8, 9 ve iki not için otomatik test yok.
+
+---
+
 ## 18.11.2026 — Göç / aktarım incelemesi (1370, 1371)
 
 - (1) Delphi'de silinen belge web'de bağlı kayda (aktarım üretim fişi, sayım fişi, tahsilat...) sahipse FK ihlaliyle

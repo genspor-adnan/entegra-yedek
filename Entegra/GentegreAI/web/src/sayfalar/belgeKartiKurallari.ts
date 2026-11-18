@@ -301,10 +301,17 @@ export function kartBasligi({ basvuruMu, turAdi, mevcutBelge, kayitliId, belgeNo
   return `${ad} #${kayitliId}${belgeNo ? ` — ${belgeNo}` : ''}`;
 }
 
+/**
+ * TOPLAM SUNUCUDAN (web incelemesi 18.11.2026; proje kuralı: toplam yalnız fn_belge_diptoplam): satır varsa her zaman
+ * istemcinin önizleme toplamı kullanılıyordu - kayıtlı, değişmemiş belgede de. Sunucu toplamı (belge düzeyi düzeltme,
+ * yuvarlama, dağılım) farklıysa nakit penceresi yanlış tutar öneriyor ve gerçek açık bakiyeyi sınırlıyordu. Önizleme
+ * YALNIZ kaydedilmemiş satır değişikliği varken (ya da belge hiç kaydedilmemişken) kullanılır.
+ */
 export function acikBorcHesapla(
   satirSayisi: number, onizlemeGenel: number, kayitliGenel: number, tahsilToplam: number,
+  kaydedilmemis = true,
 ): number {
-  const genel = satirSayisi > 0 ? onizlemeGenel : kayitliGenel;
+  const genel = satirSayisi > 0 && kaydedilmemis ? onizlemeGenel : kayitliGenel;
   return Math.round((genel - tahsilToplam) * 100) / 100;
 }
 

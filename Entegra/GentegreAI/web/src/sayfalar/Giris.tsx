@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { TABAN } from '../api/cekirdek';
-import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
+import { ApiHatasi, type GirisYaniti, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { aktifDil, c, ceviriDinle, ceviriYukle } from '../dil/ceviri';
 import { sonKullaniciOku } from '../kimlik/sonKullanici';
@@ -14,7 +14,9 @@ import { ParolaGirdisi } from '../bilesenler/ParolaGirdisi';
  * kullanici hangi subede calistigini bilerek girsin.)
  */
 export function Giris() {
-  const { girisYap, dilDegistir } = useOturum();
+  const { girisYap, girisYanitiUygula, dilDegistir } = useOturum();
+  /** 1. adımın giriş yanıtı (şube seçimi gerekiyorsa 2. adım bu oturumdan şubeye geçer - ikinci giriş yok). */
+  const ilkYanit = useRef<GirisYaniti | null>(null);
   // Son başarılı girişin kodu öntanımlı; hiç giriş yoksa eski varsayılan.
   const [kod, setKod] = useState(() => sonKullaniciOku() ?? 'admin');
   const [parola, setParola] = useState('');
@@ -160,15 +162,19 @@ export function Giris() {
         // 1. adim: kimlik dogrulama - sube secimi gerekiyorsa listeyi goster
         const yanit = await api.giris(kod, parola);
         if (yanit.subeSecimiGerekli) {
+          ilkYanit.current = yanit;
           setSubeler(yanit.kullanici.subeler);
           setSubeId(yanit.kullanici.subeler.find(s => s.varsayilan)?.id ?? yanit.kullanici.subeler[0]?.id ?? null);
           return;
         }
-        await girisYap(kod, parola);
+        await girisYanitiUygula(kod, yanit);
         dilTercihiYaz();
       } else {
-        // 2. adim: secilen sube ile giris
-        await girisYap(kod, parola, subeId ?? undefined);
+        // 2. adim: 1. adımın oturumundan secilen subeye gecilir
+        const y = ilkYanit.current;
+        ilkYanit.current = null;
+        if (y) await girisYanitiUygula(kod, y, subeId ?? undefined);
+        else await girisYap(kod, parola, subeId ?? undefined);
         dilTercihiYaz();
       }
     } catch (h) {
