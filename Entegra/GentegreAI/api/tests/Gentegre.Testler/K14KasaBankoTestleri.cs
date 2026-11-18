@@ -188,4 +188,34 @@ public sealed class K14KasaBankoTestleri(ApiSunucuOlgusu api)
         Assert.True(await api.Veri.TekDegerAsync<bool>(
             "select fark_islem_id is not null from public.banko_oturum where id = @p0", [oturum]));
     }
+
+    /// <summary>
+    /// Kullanıcı 18.11.2026: "başvuru tahsilatta pos ile ekleyemedim yetki yok dedi". Oturumu olmayan banko görevlisi
+    /// belgeye bağlı kesin tahsilat yazamaz (kural aynı), ama 403 NEDENİNİ söyler: banko oturumu açılmalı.
+    /// </summary>
+    [VtFact]
+    public async Task Oturumsuz_banko_tahsilati_403_ve_oturum_ister()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var rol = await d.RolAsync("banko", "kasa_islem:ge", "belge:gde");
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        using var h = await IstemciAsync(d, u, kod);
+        var hasta = await api.Veri.TekDegerAsync<int>(
+            "insert into public.taraf (unvan, hasta, sube_id) values (@p0, 1, @p1) returning id", [d.Onek + " hasta", Merkez]);
+        d.Temizle($"delete from public.taraf where id = {hasta}");
+        var belge = await BelgeAsync(d, hasta);
+        var pos = await HesapAsync(d, "P", "pos");
+        d.Temizle($"delete from public.kasa_islem where belge_id = {belge}");
+
+        var y = await h.PostAsJsonAsync("/api/kasa-islem", new
+        {
+            islem = new { tur = 25, islemTarihi = DateTime.Now.ToString("s"), tarafId = hasta, hesapId = pos, tutar = 1m,
+                          dovizCinsi = "TL", dovizKuru = 1m, aciklama = "test" },
+            secenekler = new { taslak = false, plan = false, kurKontrolu = true, belgeId = belge },
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, y.StatusCode);
+        var g = await y.Content.ReadAsStringAsync();
+        Assert.Contains("banko oturum", g, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(0, await api.Veri.TekDegerAsync<int>("select count(*)::int from public.kasa_islem where belge_id = @p0", [belge]));
+    }
 }

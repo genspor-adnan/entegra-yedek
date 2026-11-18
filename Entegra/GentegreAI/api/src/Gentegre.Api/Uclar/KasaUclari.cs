@@ -257,7 +257,25 @@ public static class KasaUclari
                 && !(istek.Secenekler.BelgeId is > 0
                      && await veri.TekDegerAsync<long?>("select public.fn_banko_acik_oturum(@p0)",
                             [baglam.KullaniciId], iptal) is not null))
+            {
+                // NEDENİ SÖYLE (kullanıcı 18.11.2026: "başvuru tahsilatta pos ile ekleyemedim yetki yok dedi"): banko
+                //   görevlisinin eksiği yetki değil OTURUM - genel "yetkiniz yok" ne yapacağını söylemiyordu.
+                if (istek.Secenekler.BelgeId is > 0 && !baglam.Yetkiler.AksiyonVar("kasa.kesinlestir"))
+                {
+                    // Şubede banko (vezne) hiç tanımlı değilse oturum da açılamaz - önce tanım.
+                    if (await veri.TekDegerAsync<long?>(
+                            "select count(*) from public.banko where aktif = 1 and sube_id = @p0",
+                            [baglam.SubeId ?? 0], iptal) is null or 0)
+                        throw GentegreHatasi.Yasak(
+                            "Tahsilat için açık banko oturumu gerekir, ama bu şubede tanımlı banko (vezne) yok. "
+                            + "Yöneticiniz Finans › Banko Listesi'nden banko tanımlamalı; sonra Kayıt Kabul › Banko "
+                            + "Oturumu'ndan oturum açılır.");
+                    throw GentegreHatasi.Yasak(
+                        "Tahsilat için açık banko oturumunuz yok. Kayıt Kabul › Banko Oturumu'ndan oturum açın, "
+                        + "sonra tahsilatı yeniden girin. (Menüde Banko Oturumu yoksa rolünüze 'Banko Oturumu' yetkisi verilmeli.)");
+                }
                 baglam.AksiyonIste("kasa.kesinlestir");
+            }
             baglam.YazmaIste();
 
             var (id, uyarilar) = await depo.KaydetAsync(
