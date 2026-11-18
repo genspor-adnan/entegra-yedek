@@ -1072,7 +1072,13 @@ Devam edilsin mi?`, true)) return;
               bu tetkik en üstte "şimdi" düğümü. Tıklayınca (13.11.2026) liste YERİNDE kalır, düğüm vurgulanır ve
               o tetkikin raporu sağ panelde salt okunur açılır; kendi sekmesinde açmak oradaki ↗ düğmesi. */}
           <div className="rad-zc">
-              <div className="rad-zc-dugum simdi">
+              {/* BU TETKİK TIKLANIR (kullanıcı 18.11.2026): sağda önceki tetkik / revize açıksa kapanır, panel şablonlu
+                  rapor hâline döner. */}
+              <div className={`rad-zc-dugum simdi${onceki ? '' : ' secili'}`} role="button" tabIndex={0}
+                   style={{ cursor: onceki ? 'pointer' : undefined }}
+                   title={onceki ? c('Bu tetkikin raporuna dön') : undefined}
+                   onClick={() => setOnceki(null)}
+                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOnceki(null) } }}>
                 <div className="rad-zc-tarih">{c('Bu tetkik')}
                   {istem.tetkikKodu ? <span className="rad-zc-mod">{String(istem.tetkikKodu)}</span> : null}</div>
                 {istem.accessionNo ? <div className="sonuk kucuk" title={c('Erişim numarası: PACS ve cihazlar görüntüyü bu numarayla istemle eşleştirir')}>
