@@ -7,6 +7,22 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — Radyoloji yapısal rapor paketleri (1379, 1380)
+
+- Kullanıcı: "yapısal raporlar hangileri daha da eklenebilir mi" -> "1, 2 ve 3'ü yap, bitince 4 ve 5'e geç".
+- 1379: TÜM / ÜST ABDOMEN USG paketi (hepatosteatoz derecesi, fokal lezyon, safra, pankreas, dalak, böbrekler, mesane,
+  serbest sıvı; desen adında US / USG ister - "TÜM BATIN (ERKEK)" MR şablonunda da var). OBSTETRİK USG paketi (CRL,
+  BPD / HC / AC / FL, **Hadlock tahmini fetal ağırlık otomatik** - obstetrik.ts; persentil hekim seçimi; AFI / en
+  derin cep -> **ACOG amniyon değerlendirmesi otomatik**; plasenta; ikiz şablonlar hariç). Meme MR şablonları BI-RADS
+  yapısal girişe açıldı (yalnız işaretsiz, adı MEME + MR, modalite MR; KOSUYOLU 3 şablon).
+- 1380: PROSTAT MR (PI-RADS v2.1 - zon kuralı otomatik, elipsoid hacim ve PSA yoğunluğu otomatik; EPE / SV / lenf /
+  kemik) ve KARACİĞER BT / MR (LI-RADS v2018 tanı tablosu otomatik; LR-1 / LR-2 / LR-M / LR-TIV / LR-NC hekim seçimi).
+  KOSUYOLU'da adı eşleşen şablon yok - kartta "Paketten ekle" ile bağlanır.
+- Rapor ekranı hesap zinciri tek listede (RadyolojiRapor `HESAPLAR`): yeni skor sistemi = listeye bir fonksiyon.
+- Testler: obstetrik / pirads / lirads (tablo hücreleri birebir).
+
+---
+
 ## 18.11.2026 — İskonto: sözlü onay (1375, 1376) ve banko akışı düzeltmeleri
 
 - SÖZLÜ ONAY (kullanıcı: "bir çok müşterimiz sözlü onay kullanıyor.. banko ilgili yöneticinin sözüyle yüksek oranlarda
