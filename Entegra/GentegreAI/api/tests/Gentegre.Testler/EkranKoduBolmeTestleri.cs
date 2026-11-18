@@ -354,4 +354,17 @@ public sealed class EkranKoduBolmeTestleri
         Assert.False(new YetkiSeti(1, [new YetkiKaydi("stok", 0, true, true, true, true)], [])
                          .Var("departman", Islem.Gor));
     }
+
+    [Fact]
+    public void Basvuru_yazabilen_gonderen_hekimi_yalniz_okur()
+    {
+        // Kullanıcı 18.11.2026: "başvuruda gönderen hekimi ararken de yetki yok dedi" (`/api/liste/dis-hekim` 403).
+        var banko = new YetkiSeti(1, [new YetkiKaydi("belge", 0, true, true, true, false)], []);
+        Assert.True(banko.Var("dis_doktor", Islem.Gor));
+        Assert.False(banko.Var("dis_doktor", Islem.Degistir));  // hekim kartına yazamaz
+        Assert.False(banko.VarTam("dis_doktor", Islem.Gor));    // Dış Doktorlar menüsü açılmaz
+        // Yalnız listeyi gören (yazamayan) gönderen seçmez.
+        Assert.False(new YetkiSeti(1, [new YetkiKaydi("basvuru.liste", 0, true, false, false, false)], [])
+                         .Var("dis_doktor", Islem.Gor));
+    }
 }

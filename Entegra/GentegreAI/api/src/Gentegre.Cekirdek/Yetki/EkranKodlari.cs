@@ -130,6 +130,11 @@ public static partial class EkranKodlari
         //   (kullanıcı: "ücret ekleyemedim yine: Bu islem icin yetkiniz yok").
         ["stok"]          = ["belge_satir"],
         ["katalog"]       = ["belge_satir"],
+        // GÖNDEREN HEKİM (kullanıcı 18.11.2026: "başvuruda gönderen hekimi ararken de yetki yok dedi"): başvuru
+        //   kartının Gönderen araması `dis-hekim` kaynağını okur, kaynak Kurumlar & Sigorta › Dış Doktorlar
+        //   ekranının `dis_doktor` kodunda. Başvuruyu yazabilen (banko) listeyi yalnız seçmek için okur - Dış
+        //   Doktorlar menüsü açılmaz, hekim kartına yazamaz.
+        ["dis_doktor"]    = ["belge"],
     };
 
     /// <summary>
