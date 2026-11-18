@@ -11,16 +11,16 @@ surum: 1
 urun_modu: 2
 yetki: radyoloji.teslim
 erisim: kullanici
-ozet: Onaylı radyoloji sonucunun hastaya ya da yakınına teslimi (rapor / film / CD / dijital), teslim alan ve kimlik kaydı, Sonuç Teslim listesi, portal erişimi ve e-Nabız 409 Radyoloji Sonuç paketi.
+ozet: Onaylı radyoloji sonucunun hastaya ya da yakınına teslimi (rapor / film / CD / dijital), teslim alan ve kimlik kaydı, Radyoloji Rapor Teslim listesi, portal erişimi ve e-Nabız 409 Radyoloji Sonuç paketi.
 guncelleme: 2026-10-10
 dogrulama: insan-dogrulama-bekliyor
 ---
 
 ## Amaç
-Sonuç kişisel sağlık verisidir: kime, ne zaman, ne verildiği kayda geçmelidir. **Sonuç Teslim** listesi raporu onaylanmış ama henüz teslim edilmemiş işleri gösterir; teslimde hangi kalemlerin (rapor, film, CD, dijital) kime verildiği yazılır.
+Sonuç kişisel sağlık verisidir: kime, ne zaman, ne verildiği kayda geçmelidir. **Radyoloji Rapor Teslim** listesi raporu onaylanmış ama henüz teslim edilmemiş işleri gösterir; teslimde hangi kalemlerin (rapor, film, CD, dijital) kime verildiği yazılır.
 
 ## Ekrana giriş yolları
-- Sol menü **Radyoloji › Sonuç Teslim**.
+- Sol menü **Radyoloji › Radyoloji Rapor Teslim**.
 - **Radyoloji › Çalışma Listesi**'nde satır seçip **📦 Sonuç Teslim Et**.
 
 ## Ön koşullar
@@ -38,7 +38,7 @@ Sonuç kişisel sağlık verisidir: kime, ne zaman, ne verildiği kayda geçmeli
 - **Açıklama**.
 
 ## Adım adım
-1. **Radyoloji › Sonuç Teslim**, çip **Teslim Bekleyen**; hastayı adı ya da Accession No ile bulun.
+1. **Radyoloji › Radyoloji Rapor Teslim**, çip **Teslim Bekleyen**; hastayı adı ya da Accession No ile bulun.
 2. Gerekirse **🖨 Çıktı** için **📄 Raporu Aç** ile raporu yazdırın.
 3. **📦 Teslim Et**; verilen kalemleri işaretleyin.
 4. Teslim alanın adını yazın; hasta değilse yakınlığını yazın ve kimliğini kontrol edip **Kimlik doğrulandı**'yı işaretleyin.

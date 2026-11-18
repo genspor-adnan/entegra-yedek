@@ -21,7 +21,7 @@ Radyoloji İstem Listesi modülün giriş ekranıdır: cihaza randevu verilir, �
 Rol bazlı ayrıntılı belgeler: `radyoloji-hasta-kabul` (banko), `radyoloji-calisma-listesi` (teknisyen), `radyoloji-rapor-yazma-onay` (radyolog), `radyoloji-sonuc-teslim`, genel akış `goruntuleme-gunluk-akis`.
 
 ## Ekrana giriş yolları
-- Sol menü: **Radyoloji › Çalışma Listesi**; aynı grupta **Pano**, **Kritik Bulgular**, **Konsültasyonlar**, **Sonuç Teslim**, Ayarlar altında **Rapor Şablonları**, **Çekim Protokolleri**, **Cihazlar**.
+- Sol menü: **Radyoloji › Çalışma Listesi**; aynı grupta **Pano**, **Kritik Bulgular**, **Konsültasyonlar**, **Radyoloji Rapor Teslim**, Ayarlar altında **Rapor Şablonları**, **Çekim Protokolleri**, **Cihazlar**.
 - Muayene kartı › **İstem & Sonuçlar › 🔬 İstem Aç › Görüntüleme** (modalitesi tanımlı hizmetler).
 - Komut paleti (Ctrl+K) › "Radyoloji".
 

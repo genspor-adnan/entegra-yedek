@@ -21,7 +21,7 @@ dogrulama: insan-dogrulama-bekliyor
 
 ## Ekrana giriş yolları
 - **Radyoloji › Çalışma Listesi**, çip **Raporlanacak** → satırı seçip **✎ Rapor Yaz**.
-- **Kritik Bulgular**, **Konsültasyonlar**, **Sonuç Teslim** listelerinde **📄 Raporu Aç**.
+- **Kritik Bulgular**, **Konsültasyonlar**, **Radyoloji Rapor Teslim** listelerinde **📄 Raporu Aç**.
 
 ## Ön koşullar
 - **radyoloji** Gör ve `rad.rapor_yaz` aksiyon yetkisi; onay için ayrıca `rad.rapor_onayla`.
