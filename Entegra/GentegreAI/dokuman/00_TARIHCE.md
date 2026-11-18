@@ -26,6 +26,10 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   sözlü onay ve geri alma `BelgeDeposu.IskontoSonrasiYenileAsync` ile kart kaydının hesabını (BelgeHesap.SatirTutari,
   fn_belge_satir_dagilim_tazele, fn_belge_diptoplam) çalıştırır. Bu düzeltmeden önce onaylanmış satırlar kart bir kez
   kaydedilince düzelir (yerelde KOSUYOLU 1, gentegre_ai 1 satır).
+- ONARIM (1378, kullanıcı: "evet onarım adımını hazırla"): `Servisler/IskontoTutarOnarici` API açılışında bir kez -
+  onaylı talebin KİLİTLİ satırı, tutarı kendi oranıyla hesaplananı tutmuyorsa kart kaydının hesabıyla düzeltilir; eski
+  hâl `_yedek_iskonto_tutar_1378`; belgeye dönüşmüş satır ATLANIR ve günlüğe yazılır; idempotent. Yerelde gentegre_ai
+  belge 4056 düzeldi; KOSUYOLU 82181 atlandı (satırdan fiş 82182 + fatura 82183 kesilmiş - elle karar).
 - İskonto Uygula: Tümüne Net Tutar (hastanın ödeyeceği net -> oran) ve satırda İstenen Tutar.
 - Banko rolü akışı: bölüm listesi (`departman`) hasta/başvuru/randevu ekran kodlarıyla, dış hekim listesi başvuruyu
   yazabilenle okumada açılır (EkranKodlari); oturumsuz banko tahsilatı ve dönüşüm yetkisizliği nedenini söyler; Satış

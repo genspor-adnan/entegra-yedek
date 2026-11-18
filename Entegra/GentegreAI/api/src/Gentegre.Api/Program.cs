@@ -104,6 +104,8 @@ if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Uclar.BankaCekme
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.PlanliGiderIscisi>();
 // SÜRESİ DOLAN TEKLİF (1186, karar 25.10.2026): geçerliliği dolan teklif kendiliğinden "kaybedildi · süre doldu".
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeklifSureIscisi>();
+// İSKONTO TUTAR ONARIMI (1378): açılışta bir kez - karar oranı yazıp tutarı eski bırakmıştı (idempotent).
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.IskontoTutarOnarici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
