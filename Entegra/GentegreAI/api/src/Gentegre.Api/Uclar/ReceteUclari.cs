@@ -55,11 +55,15 @@ public static class ReceteUclari
         // GET /api/recete/kontrol?hastaId=&barkod= - alerji + tekrar kontrolü
         //   İlaç seçilirken çağrılır; yazmadan önce uyarı görünsün.
         grup.MapGet("/kontrol", async (
-            int hastaId, string barkod, BaglamCozucu cozucu, VeriKaynagi veri,
+            int hastaId, string barkod, BaglamCozucu cozucu, VeriKaynagi veri, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Gor);
+            // KAPSAM (HBYS incelemesi 18.11.2026): hastaId SORGUDA gelir - KayitKapisi.Recete yalnız yol kimliklerini
+            //   denetler. Kapsam dışı (başka şube / yalnız kendi hastası kısıtlı hekim) hastanın alerji listesi ve aktif
+            //   ilaçları okunabiliyordu.
+            await erisim.IsteAsync(baglam, "hasta", hastaId, "Hasta bulunamadı.", iptal);
 
             var uyarilar = await UyarilariTopla(veri, hastaId, barkod, iptal);
             return Results.Ok(new { hastaId, barkod, uyarilar,
@@ -125,6 +129,12 @@ public static class ReceteUclari
             if (barkod.Length is < 8 or > 20)
                 throw GentegreHatasi.Dogrulama("Ilac barkodu gecersiz.",
                     [new("barkod", "8-20 haneli barkod girin.")]);
+            // DÜZENLEMEYLE AYNI SINIRLAR (HBYS incelemesi 18.11.2026; PUT /{id}/ilac/{satirId}): kutu / süre short'a
+            //   denetimsiz çevriliyordu (kutu 70000 → 4464, eksi kutu olduğu gibi), uzun doz varchar(20)'ye 500 veriyordu.
+            if (istek.Kutu is < 1 or > 99)
+                throw GentegreHatasi.Dogrulama("Kutu 1-99 arasi olmali.", [new("kutu", "1-99")]);
+            if (istek.SureGun is < 0 or > 365)
+                throw GentegreHatasi.Dogrulama("Sure 0-365 gun olmali.", [new("sureGun", "0-365")]);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -188,8 +198,8 @@ public static class ReceteUclari
                                    where s.recete_id = @p0), 1), @p9)
                 returning id
                 """, islem,
-                [receteId, barkod, ilac.Ad, istek.Doz ?? "", istek.Periyot ?? "",
-                 (short)(istek.SureGun ?? 0), (short)(istek.Kutu ?? 1), istek.Aciklama ?? "",
+                [receteId, barkod, ilac.Ad, Kirp(istek.Doz, 20) ?? "", Kirp(istek.Periyot, 20) ?? "",
+                 (short)(istek.SureGun ?? 0), (short)(istek.Kutu ?? 1), Kirp(istek.Aciklama, 200) ?? "",
                  uyariMetni.Length > 200 ? uyariMetni[..200] : uyariMetni,
                  baglam.KullaniciId], iptal);
 
@@ -329,12 +339,17 @@ public static class ReceteUclari
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var m = await baglanti.TekAsync(
-                "select m.taraf_id, m.personel_id, m.sube_id from public.muayene m " +
+                "select m.taraf_id, m.personel_id, m.sube_id, m.durum from public.muayene m " +
                 " where m.id = @p0", islem, [muayeneId],
                 o => new { HastaId = o.GetInt32(0),
                            HekimId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
-                           SubeId = o.GetInt32(2) }, iptal)
+                           SubeId = o.GetInt32(2), Durum = o.GetInt16(3) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadi.");
+            // İLAÇ EKLEMEYLE AYNI KURALLAR (HBYS incelemesi 18.11.2026): kopyala tamamlanmış muayeneye reçete
+            //   açıyor, reçete türünü yükseltmiyor (kırmızı reçetedeki kontrollü ilaç normal reçeteye geçiyordu) ve
+            //   alerji / tekrar uyarısı üretmiyordu. Tür ve uyarılar aşağıda, kopyalanan satırlardan.
+            if (m.Durum == 3)
+                throw GentegreHatasi.IsKurali("Tamamlanmis muayeneye recete yazilamaz.");
 
             var kaynakId = await baglanti.TekDegerAsync<int>(
                 "select coalesce((select r.id from public.recete r " +
@@ -362,7 +377,7 @@ public static class ReceteUclari
                     islem, [muayeneId, m.HastaId, m.HekimId, m.SubeId,
                             baglam.KullaniciId], iptal);
 
-            var eklenen = await baglanti.CalistirAsync(
+            var yeniSatirlar = await baglanti.ListeAsync(
                 "insert into public.recete_satir (recete_id, ilac_barkod, ilac_ad, doz, " +
                 "        periyot, kullanim_sekli, sure_gun, kutu, aciklama, sira, ekleyen) " +
                 "select @p1, s.ilac_barkod, s.ilac_ad, s.doz, s.periyot, s.kullanim_sekli, " +
@@ -371,11 +386,37 @@ public static class ReceteUclari
                 " where s.recete_id = @p0 " +
                 "   and not exists (select 1 from public.recete_satir v " +
                 "                    where v.recete_id = @p1 " +
-                "                      and v.ilac_barkod = s.ilac_barkod)",
-                islem, [kaynakId, hedefId, baglam.KullaniciId], iptal);
+                "                      and v.ilac_barkod = s.ilac_barkod) " +
+                "returning id, ilac_barkod",
+                islem, [kaynakId, hedefId, baglam.KullaniciId],
+                o => (Id: o.GetInt32(0), Barkod: o.GetString(1)), iptal);
+            var eklenen = yeniSatirlar.Count;
+
+            // Reçete türü en yüksek satırdan (kırmızı / yeşil ilaç reçeteyi yükseltir).
+            await baglanti.CalistirAsync("""
+                update public.recete r
+                   set tur = greatest(r.tur, coalesce((select max(i.recete_turu) from public.recete_satir s
+                                                         join public.ilac i on i.barkod = s.ilac_barkod
+                                                        where s.recete_id = r.id), 0)),
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where r.id = @p0
+                """, islem, [hedefId, baglam.KullaniciId], iptal);
+
+            // Alerji / tekrar uyarıları: eklemedeki gibi satıra yazılır ve yanıtta döner (kayıt sonra alerji girilmiş olabilir).
+            var uyarilar = new List<string>();
+            foreach (var (satirId, satirBarkod) in yeniSatirlar)
+            {
+                var u = await UyarilariTopla(veri, m.HastaId, satirBarkod, iptal);
+                if (u.Count == 0) continue;
+                uyarilar.AddRange(u);
+                var metin = string.Join(" · ", u);
+                await baglanti.CalistirAsync(
+                    "update public.recete_satir set etkilesim_uyari = @p1 where id = @p0",
+                    islem, [satirId, metin.Length > 200 ? metin[..200] : metin], iptal);
+            }
 
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { receteId = hedefId, kaynakReceteId = kaynakId, eklenen,
+            return Results.Ok(new { receteId = hedefId, kaynakReceteId = kaynakId, eklenen, uyarilar,
                                     mesaj = eklenen == 0
                                         ? "Onceki recetedeki ilaclar zaten listede."
                                         : $"{eklenen} ilac onceki receteden kopyalandi.",

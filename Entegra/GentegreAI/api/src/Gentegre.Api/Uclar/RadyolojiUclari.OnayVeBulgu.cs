@@ -62,14 +62,12 @@ public static partial class RadyolojiUclari
                 await RaporOnaylaAsync(baglanti, islem, id, istemId, onaylayanId, iptal);
             else
             {
-                // Seçilen kişi gerçekten onaylayabilmeli (aktif + rad.rapor_onayla) - yoksa rapor kimsenin
-                //   kuyruğuna düşmeyen bir "bekliyor"da kalırdı.
-                if (!await baglanti.TekDegerAsync<bool>("""
-                        select exists (select 1 from public.taraf_kullanici k
-                                        where k.id = @p0 and k.aktif = 1
-                                          and public.fn_kullanici_yetkili(k.id, 'rad.rapor_onayla'))
-                        """, islem, [onaylayacakId!.Value], iptal))
-                    throw GentegreHatasi.IsKurali("Seçilen kişinin rapor onaylama yetkisi yok.");
+                // Seçilen kişi gerçekten onaylayabilmeli - yoksa rapor kimsenin kuyruğuna düşmeyen bir "bekliyor"da
+                //   kalırdı. ONAYDAKİ KURALIN AYNISI (HBYS incelemesi 18.11.2026): aktif + rad.rapor_onayla + RADYOLOG
+                //   rolü (RadyologMuAsync, OnaylayanCozAsync ve onay-uzmanlari listesi). Eskiden rol aranmıyordu - onay
+                //   yetkili yöneticiye gönderilen rapor, o kişi "Radyolog değilsiniz" aldığı için kuyrukta kalıyordu.
+                if (!await RadyologMuAsync(baglanti, islem, onaylayacakId!.Value, iptal))
+                    throw GentegreHatasi.IsKurali("Seçilen kişi rapor onaylayamaz (aktif radyolog değil).");
                 // Etkilenen satır yoksa istem ve log DEĞİŞMEZ (B06) - kilitli rapor yukarıda zaten reddedildi.
                 var degisen = await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor

@@ -104,7 +104,10 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                                         int? hastaId = null, int? disKurumId = null,
                                         short? kaynakKodu = null,
                                         IReadOnlyList<AkilciKarar>? akilci = null,
-                                        bool akilciSessiz = false)
+                                        bool akilciSessiz = false,
+                                        // AYNI İŞLEMDE (HBYS incelemesi 18.11.2026): çağıranın bağ kaydı (muayene_istem)
+                                        //   istemle TEK transaction'da yazılsın - commit'ten hemen önce, istem kimliğiyle.
+                                        Func<NpgsqlConnection, NpgsqlTransaction, int, Task>? ayniIslemde = null)
     {
         if (satirlar.Count == 0)
             throw GentegreHatasi.IsKurali("En az bir tetkik ya da panel seçilmeli.");
@@ -285,6 +288,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         if (akilciKayitlar.Count > 0)
             await AkilciKararlariYazAsync(baglanti, islem, istemId, satirIdler, b, akilciKayitlar, baglam, iptal);
 
+        if (ayniIslemde is not null) await ayniIslemde(baglanti, islem, istemId);
         await islem.CommitAsync(iptal);
         return istemId;
     }

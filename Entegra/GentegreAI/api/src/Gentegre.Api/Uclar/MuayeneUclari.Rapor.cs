@@ -2,6 +2,7 @@
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
 
@@ -14,6 +15,16 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static partial class MuayeneUclari
 {
+    /// <summary>islem_log.tablo_id - muayene raporu (KartKatalogu.Saglik "raporlar" LogTabloId 966).</summary>
+    private const int LogRapor = 966;
+
+    /// <summary>Rapor değişiklik logunun okuduğu alanlar (durum / muayene_id / hasta_id farka girmez).</summary>
+    private const string RaporLogSql = "select tur, alt_tur, baslangic, bitis, gun, aciklama, icd_kod, durum, muayene_id, hasta_id "
+                                     + "  from public.muayene_rapor where id = @p0";
+
+    private static Dictionary<string, object?> Logsuz(IDictionary<string, object?> s)
+        => s.Where(x => x.Key is not ("durum" or "muayene_id" or "hasta_id")).ToDictionary(x => x.Key, x => x.Value);
+
     private static void RaporUclariniEkle(RouteGroupBuilder grup)
     {
         // GET /api/muayene/{id}/raporlar - kartın raporları (imza seçimi için)
@@ -78,17 +89,20 @@ public static partial class MuayeneUclari
         //   ekranla çift tıklayıp düzenlenen ekran farklı" - düzenleme de "Rapor Ekle" penceresinden).
         //   İmzalı rapor değişmez; bitiş başlangıç + gün - 1 (gün yoksa verilen bitiş).
         grup.MapPut("/rapor/{raporId:int}", async (
-            int raporId, RaporEkleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            int raporId, RaporEkleIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
             await using var baglanti = await veri.AcAsync(iptal);
-            var durum = await baglanti.TekDegerAsync<int?>(
-                "select durum from public.muayene_rapor where id = @p0", null, [raporId], iptal);
-            if (durum is null)
+            // DEĞİŞİKLİK LOGU ALAN BAZLI, AYNI İŞLEMDE (HBYS incelemesi 18.11.2026; proje kuralı ULog): istirahat
+            //   raporunun tarih / tanı değişikliği iz bırakmıyordu. Satır kilitlenir, fark yoksa log satırı yok.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var eski = await baglanti.TekAsync(RaporLogSql + " for update", islem, [raporId],
+                                                OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (eski is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Rapor bulunamadı." } });
-            if (durum != 1)
+            if (Convert.ToInt32(eski["durum"]) != 1)
                 throw GentegreHatasi.IsKurali("İmzalanmış/onaylı rapor değiştirilemez.");
             var gun = istek.Gun ?? 0;
             await baglanti.CalistirAsync(
@@ -97,32 +111,48 @@ public static partial class MuayeneUclari
                 "  bitis = case when @p4 > 0 then coalesce(@p3::date, baslangic) + (@p4 - 1) else coalesce(@p5::date, bitis) end, " +
                 "  aciklama = @p6, icd_kod = @p7, degistiren = @p8, degistirme_tarihi = now() " +
                 " where id = @p0 and durum = 1",
-                null, [raporId, istek.Tur, istek.AltTur ?? 0,
+                islem, [raporId, istek.Tur, istek.AltTur ?? 0,
                        string.IsNullOrWhiteSpace(istek.Baslangic) ? null : istek.Baslangic, gun,
                        string.IsNullOrWhiteSpace(istek.Bitis) ? null : istek.Bitis,
                        istek.Aciklama ?? "", istek.IcdKod ?? "", baglam.KullaniciId], iptal);
+            var yeni = await baglanti.TekAsync(RaporLogSql, islem, [raporId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (yeni is not null && LogDeposu.Fark(Logsuz(eski), Logsuz(yeni)) is { } fark)
+                await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogRapor, raporId,
+                    baglam.KullaniciId, baglam.SubeId, baglam.Ip, fark,
+                    ustTabloId: LogMuayene, ustKayitId: Convert.ToInt32(eski["muayene_id"]),
+                    tarafId: eski["hasta_id"] is { } h ? Convert.ToInt32(h) : null, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { raporId, mesaj = "Rapor güncellendi.", izlemeNo = baglam.IzlemeNo });
         });
 
         // DELETE /api/muayene/rapor/{raporId} - TASLAK rapor sil (mockup "🗑").
         //   İmzalı/onaylı rapor silinmez (yasal kayıt).
         grup.MapDelete("/rapor/{raporId:int}", async (
-            int raporId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int raporId, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("muayene", Islem.Degistir);
             await using var baglanti = await veri.AcAsync(iptal);
 
-            var durum = await baglanti.TekDegerAsync<int?>(
-                "select durum from public.muayene_rapor where id = @p0", null, [raporId], iptal);
-            if (durum is null)
+            // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA, AYNI İŞLEMDE (HBYS incelemesi 18.11.2026; ULog / "Geri Al"):
+            //   taslak rapor iz bırakmadan siliniyordu.
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            var satir = await baglanti.TekAsync("select * from public.muayene_rapor where id = @p0 for update",
+                                                 islem, [raporId], OkuyucuGenisletmeleri.Sozluk, iptal);
+            if (satir is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "Rapor bulunamadı." } });
-            if (durum != 1)
+            if (Convert.ToInt32(satir["durum"]) != 1)
                 throw GentegreHatasi.IsKurali("İmzalanmış/onaylı rapor silinemez.");
 
+            await log.YazAsync(baglanti, islem, LogIslemi.Sil, LogRapor, raporId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                satir.ToDictionary(d => d.Key, d => (object?)LogDeposu.Metin(d.Value)),
+                ustTabloId: LogMuayene, ustKayitId: Convert.ToInt32(satir["muayene_id"]),
+                tarafId: satir["hasta_id"] is { } h ? Convert.ToInt32(h) : null, iptal: iptal);
             await baglanti.CalistirAsync("delete from public.muayene_rapor where id = @p0 and durum = 1",
-                null, [raporId], iptal);
+                islem, [raporId], iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { raporId, mesaj = "Taslak rapor silindi.", izlemeNo = baglam.IzlemeNo });
         });
 
@@ -132,7 +162,7 @@ public static partial class MuayeneUclari
         //   rapor Medula'da reddedilir - hatayı imza anında söylemek, günler
         //   sonra "rapor geçersiz" yanıtı almaktan iyidir.
         grup.MapPost("/rapor/{raporId:int}/imzala", async (
-            int raporId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int raporId, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -143,12 +173,13 @@ public static partial class MuayeneUclari
 
             var r = await baglanti.TekAsync(
                 "select durum, coalesce(tur, 0), baslangic, coalesce(gun, 0), " +
-                "       coalesce(icd_kod, '') " +
+                "       coalesce(icd_kod, ''), muayene_id, hasta_id " +
                 "  from public.muayene_rapor where id = @p0 for update",
                 islem, [raporId],
                 o => new { Durum = o.GetInt16(0), Tur = o.GetInt16(1),
                            Baslangic = o.IsDBNull(2) ? (DateTime?)null : o.GetDateTime(2),
-                           Gun = o.GetInt16(3), Icd = o.GetString(4) }, iptal);
+                           Gun = o.GetInt16(3), Icd = o.GetString(4),
+                           Muayene = o.GetInt32(5), Hasta = o.IsDBNull(6) ? (int?)null : o.GetInt32(6) }, iptal);
             if (r is null) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Rapor bulunamadi." } });
             if (r.Durum != 1)
@@ -168,6 +199,10 @@ public static partial class MuayeneUclari
                 "   set durum = 2, imza_zamani = now(), imzalayan = @p1, " +
                 "       degistiren = @p1, degistirme_tarihi = now() " +
                 " where id = @p0", islem, [raporId, baglam.KullaniciId], iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogRapor, raporId,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string> { ["durum"] = "İmzalandı" },
+                ustTabloId: LogMuayene, ustKayitId: r.Muayene, tarafId: r.Hasta, iptal: iptal);
             await islem.CommitAsync(iptal);
 
             return Results.Ok(new { raporId, mesaj = "Rapor imzalandi.",

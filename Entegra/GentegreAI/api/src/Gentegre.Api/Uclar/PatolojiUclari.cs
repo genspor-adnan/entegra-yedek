@@ -156,11 +156,13 @@ public static class PatolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await using var b = await veri.AcAsync(iptal);
             // Patoloji yetkisi yoksa hekim yalnız kendi açtığı istemi iptal eder (IstemSahipligi).
-            await IstemSahipligi.IsteAsync(baglam, b, "patoloji.vaka", Islem.Degistir, "pat_vaka", id, muayeneden == true, iptal);
+            var serbestSarti = await IstemSahipligi.IsteAsync(baglam, b, "patoloji.vaka", Islem.Degistir, "pat_vaka", id, muayeneden == true, iptal);
+            // Başvuruya işlenmemiş şartı güncellemenin kendisinde (kilitsiz ön okuma banko ücretlendirmesiyle yarışır).
             var n = await b.CalistirAsync(
                 "update public.pat_vaka set durum = 0, degistiren = @p1, degistirme_tarihi = now() " +
-                " where id = @p0 and durum = 1 and gonderim_id is null", null, [id, baglam.KullaniciId], iptal);
-            if (n == 0) throw GentegreHatasi.IsKurali("Hazırlanmış / gönderilmiş vaka iptal edilemez.");
+                " where id = @p0 and durum = 1 and gonderim_id is null and (not @p2 or coalesce(serbest, 0) = 0)",
+                null, [id, baglam.KullaniciId, serbestSarti], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Hazırlanmış / gönderilmiş ya da başvuruya işlenmiş vaka iptal edilemez.");
             // Muayene bağı da iptal (göz deseni): istem listesinden düşer, "istem var" sayılmaz
             //   (kullanıcı 15.10.2026: "patoloji silemedim" - iptal vaka listede kalıyordu).
             await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'pat_vaka' and hedef_id = @p0",

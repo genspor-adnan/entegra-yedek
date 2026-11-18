@@ -186,12 +186,14 @@ public static partial class GozUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await using var b = await veri.AcAsync(iptal);
             // Göz görüntüleme yetkisi yoksa hekim yalnız kendi açtığı istemi iptal eder.
-            await IstemSahipligi.IsteAsync(baglam, b, "goz.goruntuleme", Islem.Degistir, "goz_goruntuleme", id, muayeneden == true, iptal);
+            var serbestSarti = await IstemSahipligi.IsteAsync(baglam, b, "goz.goruntuleme", Islem.Degistir, "goz_goruntuleme", id, muayeneden == true, iptal);
             var r = await DurumOkuAsync(b, id, iptal);
             if (r.Durum != 1) throw GentegreHatasi.IsKurali("Çekilmiş görüntüleme istemi silinemez.");
             await using var islem = await b.BeginTransactionAsync(iptal);
-            await b.CalistirAsync("update public.goz_goruntuleme set durum = 0, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1",
-                islem, [id, baglam.KullaniciId], iptal);
+            // Başvuruya işlenmemiş şartı GÜNCELLEMENİN KENDİSİNDE (kilitsiz ön okuma ile banko ücretlendirmesi yarışır).
+            if (await b.CalistirAsync("update public.goz_goruntuleme set durum = 0, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1 and (not @p2 or coalesce(serbest, 0) = 0)",
+                    islem, [id, baglam.KullaniciId, serbestSarti], iptal) == 0)
+                throw GentegreHatasi.IsKurali("İstem bu arada değişti (başvuruya işlendi ya da çekildi); silinemez.");
             await b.CalistirAsync("update public.muayene_istem set sonuc_durum = 3 where hedef_tablo = 'goz_goruntuleme' and hedef_id = @p0",
                 islem, [id], iptal);
             await islem.CommitAsync(iptal);

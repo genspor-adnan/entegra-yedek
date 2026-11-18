@@ -367,7 +367,7 @@ public static partial class RadyolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await using var b = await veri.AcAsync(iptal);
             // Radyoloji yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
-            await IstemSahipligi.IsteAsync(baglam, b, "radyoloji", Islem.Sil, "radyoloji_istem", id, muayeneden == true, iptal);
+            var serbestSarti = await IstemSahipligi.IsteAsync(baglam, b, "radyoloji", Islem.Sil, "radyoloji_istem", id, muayeneden == true, iptal);
 
             // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
             //   istem satırı kilitlenip tam hâliyle okunur, log yazılır, sonra silinir - hepsi TEK transaction.
@@ -377,6 +377,7 @@ public static partial class RadyolojiUclari
                 tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (satir is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            IstemSahipligi.IslenmemisIste(serbestSarti, satir["serbest"]);   // kilit altında yeniden
             var durum = satir["durum"] is { } d ? Convert.ToInt32(d) : 0;
             var cekildi = satir["cekim_tarihi"] is not null;
             var raporVar = await b.TekDegerAsync<bool>(

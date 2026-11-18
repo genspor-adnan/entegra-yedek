@@ -19,7 +19,10 @@ internal static class IstemSahipligi
 {
     /// <param name="muayeneden">Muayene ekranından mı (kullanıcı: "başvuru kaydı yapıldıysa buradan hiç
     /// kimse silemez") - öyleyse başvuruya işlenmiş istem modül yetkisi olana da reddedilir.</param>
-    public static async Task IsteAsync(IstekBaglami baglam, NpgsqlConnection b, string modulYetki, Islem islem,
+    /// <returns>"Başvuruya işlenmemiş olmalı" şartı geçerli mi. TRUE ise çağıran, silme işleminde satırı KİLİTLEDİKTEN
+    /// sonra şartı yineler (<see cref="IslenmemisIsteAsync"/> ya da `serbest = 0` koşullu güncelleme) - buradaki okuma
+    /// kilitsiz ve işlem dışıdır; banko aynı anda ücretlendirirse işlenmiş istem silinirdi (HBYS incelemesi 18.11.2026).</returns>
+    public static async Task<bool> IsteAsync(IstekBaglami baglam, NpgsqlConnection b, string modulYetki, Islem islem,
                                        string hedefTablo, int hedefId, bool muayeneden, CancellationToken iptal)
     {
         if (muayeneden && await IslendiMiAsync(b, hedefTablo, hedefId, iptal))
@@ -27,7 +30,7 @@ internal static class IstemSahipligi
         if (baglam.Yetkiler.Var(modulYetki, islem))
         {
             baglam.YazmaIste();
-            return;
+            return muayeneden;
         }
         baglam.YetkiIste("muayene", Islem.Degistir);
         var ekleyen = await b.TekDegerAsync<int?>(
@@ -40,6 +43,14 @@ internal static class IstemSahipligi
         //   olduğu için modül çalışmaya başlayabilir - o istemi modül / banko iptal eder.
         //   Tablo adı yukarıdaki sabit listeden gelir (çağıranlar sabit yazar), istekten gelmez.
         if (await IslendiMiAsync(b, hedefTablo, hedefId, iptal))
+            throw GentegreHatasi.IsKurali("Bu istem başvuruya işlendi (kaydı yapıldı); silinemez - banko ya da ilgili birim iptal eder.");
+        return true;
+    }
+
+    /// <summary>Kilitli satırın `serbest` değeriyle şartı yineler (çağıranın işleminde, satır `for update` okunduktan sonra).</summary>
+    public static void IslenmemisIste(bool sart, object? serbest)
+    {
+        if (sart && serbest is not null && Convert.ToInt32(serbest) == 1)
             throw GentegreHatasi.IsKurali("Bu istem başvuruya işlendi (kaydı yapıldı); silinemez - banko ya da ilgili birim iptal eder.");
     }
 

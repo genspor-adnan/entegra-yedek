@@ -7,6 +7,28 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 18.11.2026 — HBYS incelemesi (lab / radyoloji / muayene / reçete, göç yok)
+
+- (1) `POST /api/lab/istem` gövdedeki başvuru / hastayı kapsamdan geçirmiyordu - başka şubenin başvurusuna istem açılıp
+  barkod dönüyordu. Radyoloji istemiyle aynı kural: hasta kapsamda, başvuru bu hastanın ve çalışılan şubenin.
+- (2) Radyoloji e-imza: istemci kipinde kendi adına imzada da kriptografik doğrulama zorunlu (sahte ds:Signature
+  rapor "e-imzalı" kilitleniyordu). Sunucu kipinde XML'i sunucu GenSigner'dan alır, eski davranış.
+- (3) Reçete kopyala: tamamlanmış muayene 422, reçete türü kopyalanan ilaçlardan yükselir (kırmızı ilaç normal
+  reçeteye geçiyordu), alerji / tekrar uyarısı satıra yazılır ve yanıtta döner.
+- (4) `GET /api/recete/kontrol` sorgudaki hastayı kayıt kapsamından geçirir (alerji / aktif ilaç sızıyordu).
+- (5) Muayeneden lab istemi: bağ (muayene_istem) istemle TEK işlemde (LabServisi `ayniIslemde`); muayene lab
+  işleminde kilitlenip yeniden denetlenir.
+- (6) Radyoloji onaya gönder: seçilen kişi onaydaki kuralla (radyolog rolü) denetlenir; rapor sahipsiz kuyrukta kalmaz.
+- (7) İstem silme / iptal (lab, radyoloji, göz, patoloji): "başvuruya işlenmemiş" şartı kilit altında / koşullu
+  güncellemede yinelenir - banko aynı anda ücretlendirirse işlenmiş istem silinebiliyordu.
+- (8) Reçeteye ilaç ekleme: kutu 1-99, süre 0-365, doz / periyot 20, açıklama 200 (düzenleme ucuyla aynı).
+- (9) `POST /api/lab/akilci-karar` yazma kapısından geçer, hasta kapsamda, vazgeçen hekim oturum sahibi;
+  `akilci-kontrol` da hasta kapsamından geçer (son sonuçları döndürür).
+- (10) Muayene raporu düzenleme / silme / imza `islem_log`'a yazılır (tablo 966; silmede tam satır, önce).
+- Testler `HbysIncelemeTestleri` (6; hepsi eski kodda kırmızı). 2, 5, 6, 7 için test yok (e-imza hesabı / eşzamanlılık).
+
+---
+
 ## 18.11.2026 — Stok / belge incelemesi: kalan dört konu (göç yok)
 
 - Tüketilmiş lotlu giriş düzenlenince izlem satırları yeni kimlik + TAM kalanla yazılıyor, çıkışların bağı

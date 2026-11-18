@@ -208,22 +208,32 @@ public static partial class MuayeneUclari
                     throw GentegreHatasi.Dogrulama("Laboratuvar istemi icin tetkik secilmeli.",
                         [new("tetkikIdler", "En az bir tetkik ya da panel secin.")]);
 
-                // Lab istemi KENDI islemini acar; bag satiri onun ardindan
-                //   yazilir - lab istemi acilamazsa bag satiri da olusmaz.
-                await islem.CommitAsync(iptal);
+                // Lab istemi KENDI islemini acar. BAĞ SATIRI AYNI İŞLEMDE (HBYS incelemesi 18.11.2026): eskiden
+                //   istem commit edildikten sonra ayrı bağlantıda yazılıyordu - bağ yazılamazsa istem muayenesiz
+                //   kalıyor, hekim kendi istemini silemiyordu (IstemSahipligi bağdan okur); dış işlem erken
+                //   kapandığı için muayene arada tamamlanabiliyordu. Muayene lab işleminde kilitlenip yeniden
+                //   denetlenir, bağ istemle birlikte commit olur.
+                await islem.RollbackAsync(iptal);                // bu yol dış işlemde yazmadı
+                var bagId = 0;
                 hedefId = await lab.IstemAcAsync(m.BelgeId.Value, satirlar,
                     (short)(istek.Aciliyet ?? 1), istek.Aciklama ?? "", m.OnTani,
-                    baglam, iptal, akilci: istek.Akilci);
+                    baglam, iptal, akilci: istek.Akilci,
+                    ayniIslemde: async (lb, li, labIstemId) =>
+                    {
+                        var durum = await lb.TekDegerAsync<short?>(
+                            "select durum from public.muayene where id = @p0 for update", li, [id], iptal);
+                        if (durum == 3)
+                            throw GentegreHatasi.IsKurali("Tamamlanmis muayeneye istem eklenemez.");
+                        bagId = await lb.TekDegerAsync<int>("""
+                            insert into public.muayene_istem
+                                   (muayene_id, tur, hedef_tablo, hedef_id, aciliyet,
+                                    sonuc_durum, ekleyen)
+                            values (@p0, 1, 'lab_istem', @p1, @p2, 0, @p3)
+                            returning id
+                            """, li,
+                            [id, labIstemId, (short)(istek.Aciliyet ?? 0), baglam.KullaniciId], iptal);
+                    });
                 hedefTablo = "lab_istem";
-
-                var bagId = await veri.TekDegerAsync<int>("""
-                    insert into public.muayene_istem
-                           (muayene_id, tur, hedef_tablo, hedef_id, aciliyet,
-                            sonuc_durum, ekleyen)
-                    values (@p0, 1, 'lab_istem', @p1, @p2, 0, @p3)
-                    returning id
-                    """,
-                    [id, hedefId, (short)(istek.Aciliyet ?? 0), baglam.KullaniciId], iptal);
 
                 return Results.Ok(new { istemId = bagId, hedefTablo, hedefId,
                                         mesaj = "Laboratuvar istemi acildi, barkodlar uretildi.",

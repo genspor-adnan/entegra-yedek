@@ -93,10 +93,28 @@ public static partial class LabUclari
         //   gönderen kuruma kesilir.
         grup.MapPost("/istem", async (
             IstemIstegi istek, BaglamCozucu cozucu, LabServisi servis,
-            VeriKaynagi veri, BelgeDeposu belgeDepo, HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, BelgeDeposu belgeDepo, KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Ekle);
+
+            // KAPSAM (HBYS incelemesi 18.11.2026): başvuru ve hasta GÖVDEDE gelir - KayitKapisi yalnız yol
+            //   kimliklerini denetler, LabServisi belgeyi kapsamsız okur. Başka şubenin başvurusuna istem açılıp
+            //   barkod / istem numarası dönüyordu. Radyoloji istemiyle aynı kural: hasta kapsamda, başvuru bu
+            //   hastanın (verildiyse) ve çalışılan şubenin.
+            if (istek.HastaId is int kapsamHasta && kapsamHasta > 0)
+                await erisim.IsteAsync(baglam, "hasta", kapsamHasta, "Hasta bulunamadı.", iptal);
+            if (istek.BelgeId is int kapsamBelge && kapsamBelge > 0)
+            {
+                var belgeHasta = await veri.TekDegerAsync<int?>("""
+                    select taraf_id from public.belge
+                     where id = @p0 and (@p1::int is null or sube_id = @p1)
+                       and (@p2::int is null or taraf_id = @p2)
+                    """, [kapsamBelge, baglam.SubeId, istek.HastaId is > 0 ? istek.HastaId : null], iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
+                if (istek.HastaId is not > 0)
+                    await erisim.IsteAsync(baglam, "hasta", belgeHasta, "Başvuru bulunamadı.", iptal);
+            }
 
             // DIŞ KURUM KABULÜ DE BAŞVURU ÜZERİNDEN (913, kullanıcı): numune
             //   dışarıdan gelir ama HBYS'de her kabul bir başvurudur - böylece
@@ -280,10 +298,12 @@ public static partial class LabUclari
         //   yapar (istemci kararı taşır, kuralı değil).
         grup.MapPost("/akilci-kontrol", async (
             AkilciKontrolIstegi istek, BaglamCozucu cozucu, LabServisi servis, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Gor);
+            // Yanıt hastanın son sonuçlarını taşır - gövdedeki hasta kapsamdan geçer (HBYS incelemesi 18.11.2026).
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
             await using var baglanti = await veri.AcAsync(iptal);
             var s = await servis.AkilciKontrolAsync(baglanti, null, istek.HastaId,
                                                     istek.HekimId ?? baglam.KullaniciId, baglam.SubeId ?? 0,
@@ -295,12 +315,17 @@ public static partial class LabUclari
         // POST /api/lab/akilci-karar - hekim uyarıya "Hayır" dedi: istem açılmaz,
         //   vazgeçme kaydı düşer (kılavuz §4.6).
         grup.MapPost("/akilci-karar", async (
-            AkilciKararIstegi istek, BaglamCozucu cozucu, LabServisi servis,
+            AkilciKararIstegi istek, BaglamCozucu cozucu, LabServisi servis, KayitErisimi erisim,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Gor);
-            await servis.AkilciVazgecAsync(istek.HastaId, istek.HekimId, istek.Kararlar ?? [], baglam, iptal);
+            // KAYIT YAZAR (HBYS incelemesi 18.11.2026; K16 /reflektif ile aynı kusur): Gör yetkisi YazmaIste'yi
+            //   atlıyor - salt okunur şubeye vazgeçme kaydı düşüyordu. Hasta kapsamdan geçer; vazgeçen hekim OTURUM
+            //   SAHİBİDİR (gövdedeki hekimId ile başka hekim adına kayıt yazılıyordu; istemci zaten göndermiyor).
+            baglam.YazmaIste();
+            await erisim.IsteAsync(baglam, "hasta", istek.HastaId, "Hasta bulunamadı.", iptal);
+            await servis.AkilciVazgecAsync(istek.HastaId, null, istek.Kararlar ?? [], baglam, iptal);
             return Results.Ok(new { tamam = true, izlemeNo = baglam.IzlemeNo });
         });
 
@@ -635,7 +660,7 @@ public static partial class LabUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             await using var b = await veri.AcAsync(iptal);
             // Lab yetkisi yoksa hekim yalnız kendi açtığı istemi siler (IstemSahipligi).
-            await IstemSahipligi.IsteAsync(baglam, b, "lab", Islem.Sil, "lab_istem", id, muayeneden == true, iptal);
+            var serbestSarti = await IstemSahipligi.IsteAsync(baglam, b, "lab", Islem.Sil, "lab_istem", id, muayeneden == true, iptal);
 
             // SİLME LOGU DELETE'TEN ÖNCE, TAM SATIRLA (kod inceleme 30.10.2026 K33; ULog kuralı "Geri Al"):
             //   istem başlığı kilitlenip tam hâliyle, tetkik satırları `__detaylar` altında yazılır;
@@ -646,6 +671,7 @@ public static partial class LabUclari
                 tx, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (satir is null)
                 return Results.NotFound(new { hata = new { kod = "BULUNAMADI", mesaj = "İstem bulunamadı." } });
+            IstemSahipligi.IslenmemisIste(serbestSarti, satir["serbest"]);   // kilit altında yeniden
             var durum = satir["durum"] is { } d ? Convert.ToInt32(d) : 0;
             if (durum >= 4)
                 throw GentegreHatasi.IsKurali("Sonuçlanmış/onaylı istem silinemez.");

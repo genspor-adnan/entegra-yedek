@@ -128,6 +128,12 @@ public static partial class RadyolojiUclari
             var onaylayanTckn = await veri.TekDegerAsync<string>(
                 "select coalesce(vkno, '') from public.taraf where id = @p0", [onaylayanId], iptal) ?? "";
             onaylayanTckn = new string(onaylayanTckn.Where(char.IsDigit).ToArray());
+            // İSTEMCİ KİPİNDE KENDİ ADINA DA (HBYS incelemesi 18.11.2026): imzalı XML istemciden gelir; Dogrula yalnız
+            //   biçime bakar. Kriptografik doğrulama yalnız adına imzada isteniyordu - kendi adına imzada sahte /
+            //   bozuk ds:Signature taşıyan XML rapor "e-imzalı" diye kilitleniyor, e-Nabız'a gidiyordu. Sunucu kipinde
+            //   XML'i sunucu GenSigner'dan kendisi aldı; orada eski davranış.
+            if (ayar.Kip != EImzaServisi.KipSunucu && !kimlik.Gecerli)
+                throw GentegreHatasi.IsKurali("İmza doğrulanamadı: " + kimlik.Hata);
             if (onaylayanId != baglam.KullaniciId)
             {
                 if (!kimlik.Gecerli)
