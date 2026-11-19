@@ -21,6 +21,7 @@ const SLOTLAR = [10, 15, 20, 30, 45, 60];
 export function CalismaSablonAraclari({ onDegisti }: { onDegisti(): void }) {
   const [bolumAcik, setBolumAcik] = useState(false);
   const [varsayilanAcik, setVarsayilanAcik] = useState(false);
+  const [smsAcik, setSmsAcik] = useState(false);
   return (
     <>
       <button type="button" className="d" title={c('Bir bölümü randevuya toplu aç / kapat')}
@@ -28,7 +29,11 @@ export function CalismaSablonAraclari({ onDegisti }: { onDegisti(): void }) {
       <button type="button" className="d" title={c('Yeni şablonun varsayılan düzeni ve randevu kuralları')}
               onClick={() => setVarsayilanAcik(true)}>⚙ {c('Varsayılanlar')}</button>
       {bolumAcik && <BolumPenceresi onKapat={() => setBolumAcik(false)} onDegisti={onDegisti} />}
+      {/* RANDEVU SMS (1382): şubenin bilgi / hatırlatma metni, hatırlatma açık / kaç saat önce. */}
+      <button type="button" className="d" title={c('Randevu SMS metinleri ve hatırlatma (bu şube)')}
+              onClick={() => setSmsAcik(true)}>📱 {c('SMS')}</button>
       {varsayilanAcik && <VarsayilanPenceresi onKapat={() => setVarsayilanAcik(false)} />}
+      {smsAcik && <SmsPenceresi onKapat={() => setSmsAcik(false)} />}
     </>
   );
 }
@@ -245,6 +250,85 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
           <div className="cs-alan"><span>{c('Gönderen doktor alanı')}</span>{kapi('gonderen')}</div>
           <div className="cs-alan"><span>{c('Bölüm / doktor alanları')}</span>{kapi('bolumDoktor')}</div>
           <div className="not">{c('"Kurum tipine göre": görüntüleme ve laboratuvarda bölüm / doktor gizli; muayenehane, diş, OSGB ve ERP’de gönderen doktor gizli.')}</div>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+// --------------------------------------------------------------- 📱 SMS ----
+/**
+ * ŞUBENİN RANDEVU SMS AYARI (1382, kullanıcı 19.11.2026: "şubeye özgü olsun mesaj.. 1 gün kala hatırlatma mesajı
+ * göndereceğiz opsiyonel olarak"). Boş metin = varsayılan metin. Otomatik kayıt yok: Kaydet'e bağlı (ayarlarda kural).
+ */
+type SmsAyar = { bilgiSablon: string; hatirlatmaAcik: boolean; hatirlatmaSaat: number; hatirlatmaSablon: string };
+
+function SmsPenceresi({ onKapat }: { onKapat(): void }) {
+  const [ilk, setIlk] = useState<SmsAyar | null>(null);
+  const [v, setV] = useState<SmsAyar | null>(null);
+  const [ek, setEk] = useState<{ varsayilanBilgi: string; varsayilanHatirlatma: string;
+                                 degiskenler: { ad: string; aciklama: string }[] } | null>(null);
+  const [hata, setHata] = useState('');
+
+  useEffect(() => {
+    api.randevuSmsAyar().then(y => {
+      const a = { bilgiSablon: y.bilgiSablon, hatirlatmaAcik: y.hatirlatmaAcik, hatirlatmaSaat: y.hatirlatmaSaat,
+                  hatirlatmaSablon: y.hatirlatmaSablon };
+      setIlk(a); setV(a);
+      setEk({ varsayilanBilgi: y.varsayilanBilgi, varsayilanHatirlatma: y.varsayilanHatirlatma, degiskenler: y.degiskenler });
+    }).catch(h => setHata(hataMetni(h)));
+  }, []);
+
+  const degisti = !!v && !!ilk && JSON.stringify(v) !== JSON.stringify(ilk);
+  const kaydet = () => guvenli(async () => {
+    if (!v) return;
+    if (!(v.hatirlatmaSaat >= 1 && v.hatirlatmaSaat <= 168)) throw new Error(c('Hatırlatma 1 ile 168 saat önce olabilir.'));
+    await api.randevuSmsAyarYaz(v);
+    mesaj(c('Randevu SMS ayarı kaydedildi.'));
+    onKapat();
+  });
+  const metinAlani = (etiket: string, alan: 'bilgiSablon' | 'hatirlatmaSablon', varsayilan: string) => v && (
+    <label className="cs-alan"><span>{etiket}</span>
+      <textarea rows={3} maxLength={500} value={v[alan]} placeholder={varsayilan} aria-label={etiket}
+                onChange={e => setV({ ...v, [alan]: e.target.value })} />
+      <span className="kucuk sonuk">
+        {v[alan] ? `${v[alan].length} / 500` : c('Boş: varsayılan metin kullanılır (silik yazı).')}
+        {!v[alan] && (
+          <button type="button" className="d mini" style={{ marginLeft: 6 }}
+                  onClick={() => setV({ ...v, [alan]: varsayilan })}>{c('Varsayılanı düzenle')}</button>
+        )}
+      </span>
+    </label>
+  );
+
+  return (
+    <Modal baslik={`📱 ${c('Randevu SMS (bu şube)')}`} dar enUst buyutmeYok onKapat={onKapat}
+           alt={<>
+             <button type="button" className="d bir" disabled={!degisti} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
+             <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
+           </>}>
+      {hata && <div className="hata-kutusu">{hata}</div>}
+      {!v || !ek ? <div className="yukleniyor-satir">{c('Yükleniyor…')}</div> : (
+        <div className="cs-pencere">
+          <h6>{c('Randevu bilgi SMS\'i')}</h6>
+          <div className="kucuk sonuk">{c('Randevu kartında "SMS Gönder" işaretliyse kayıtta gider; kartta o randevu için değiştirilebilir.')}</div>
+          {metinAlani(c('Bilgi metni'), 'bilgiSablon', ek.varsayilanBilgi)}
+
+          <h6>{c('Hatırlatma SMS\'i')}</h6>
+          <label className="cs-alan" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" checked={v.hatirlatmaAcik} aria-label={c('Hatırlatma gönder')}
+                   onChange={e => setV({ ...v, hatirlatmaAcik: e.target.checked })} />
+            <span>{c('Randevudan')}</span>
+            <input type="number" min={1} max={168} style={{ width: 64 }} value={v.hatirlatmaSaat} disabled={!v.hatirlatmaAcik}
+                   aria-label={c('Kaç saat önce')} onChange={e => setV({ ...v, hatirlatmaSaat: Number(e.target.value) })} />
+            <span>{c('saat önce hatırlat (kartta randevu bazında kapatılabilir)')}</span>
+          </label>
+          {v.hatirlatmaAcik && metinAlani(c('Hatırlatma metni'), 'hatirlatmaSablon', ek.varsayilanHatirlatma)}
+
+          <div className="kucuk sonuk" style={{ marginTop: 8 }}>
+            <b>{c('Kullanılabilecek alanlar')}:</b>{' '}
+            {ek.degiskenler.map(d => <span key={d.ad} style={{ marginRight: 8 }}><code>{`{${d.ad}}`}</code> {c(d.aciklama)}</span>)}
+          </div>
         </div>
       )}
     </Modal>

@@ -125,6 +125,19 @@ export const ayarUclari = {
   randevuBolumDoktorlari: (departmanId: number) =>
     istek<{ doktorlar: { id: number; ad: string; sablonVar: boolean }[] }>(`/api/randevu/bolum/${departmanId}/doktorlar`),
 
+  /** RANDEVU SMS (1382): kartın alanlarıyla bilgi metni önizlemesi ve şube hatırlatma durumu. */
+  randevuSmsOnizleme: (g: { randevuId: number | null; hastaId: number | null; baslangic: string | null;
+                            bolum: number | null; hekimId: number | null }) =>
+    gonder<{ bilgi: string; telefonVar: boolean; hatirlatmaAcik: boolean; hatirlatmaSaat: number; bilgiGitti: boolean }>(
+      '/api/randevu/sms-onizleme', g),
+  /** Aktif şubenin randevu SMS ayarı (boş metin = varsayılan). */
+  randevuSmsAyar: () =>
+    istek<{ subeId: number | null; bilgiSablon: string; hatirlatmaAcik: boolean; hatirlatmaSaat: number;
+            hatirlatmaSablon: string; varsayilanBilgi: string; varsayilanHatirlatma: string;
+            degiskenler: { ad: string; aciklama: string }[] }>('/api/randevu/sms-ayar'),
+  randevuSmsAyarYaz: (g: { bilgiSablon: string; hatirlatmaAcik: boolean; hatirlatmaSaat: number; hatirlatmaSablon: string }) =>
+    gonder<{ tamam: boolean }>('/api/randevu/sms-ayar', g, 'PUT'),
+
   // ---------------------------------------------------------- ayarlar ----
   ayarlar: () => istek<{ ayarlar: AyarSatiri[] }>('/api/ayar').then(y => y.ayarlar),
 

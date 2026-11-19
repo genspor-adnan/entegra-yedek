@@ -27,6 +27,9 @@ const KULLANIM: Record<string, string> = {
   'kimlik.parola_sifirlama.eposta': 'Giriş ekranı › Şifremi Unuttum — alıcı: kullanıcının e-postası',
   'onam.istek': 'Onam formu gönderimi — alıcı: hasta',
   'hatirlatma.kisisel': 'Kişisel hatırlatıcı — alıcı: hatırlatmayı kuran kullanıcı',
+  // RANDEVU SMS (1382): gövde {{metin}} - metin şubenin şablonundan (Randevu › Çalışma Şablonları › 📱 SMS).
+  'randevu.bilgi': 'Randevu Kartı › SMS Gönder (kayıtta) — alıcı: hastanın cep telefonu · metin: şube ayarı',
+  'randevu.hatirlatma_sube': 'Randevu hatırlatması (şube ayarı açıksa, N saat önce) — alıcı: hastanın cep telefonu',
 };
 
 /** Değişken adından örnek değer - önizleme ve deneme gönderimi için. */

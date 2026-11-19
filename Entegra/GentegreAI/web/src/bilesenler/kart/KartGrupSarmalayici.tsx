@@ -4,6 +4,7 @@ import { KartGrupSekmesi } from './KartGrupSekmesi';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { TekKayit } from '../TekKayit';
 import { RandevuUygunSaatler } from '../RandevuUygunSaatler';
+import { RandevuSmsAlani } from '../RandevuSmsAlani';
 import { RandevuOzetSeridi } from '../RandevuOzetSeridi';
 import { RandevuTetkikUyum } from '../RandevuTetkikUyum';
 import type { Deger } from '../kartAlanCizim';
@@ -133,6 +134,8 @@ export function KartGrupSarmalayici({
                 alanDegistir('sureDk', String(sure));
               }}
             />
+            {/* SMS (1382): bilgi SMS'i işareti + şube metni (kartta değiştirilebilir) + hatırlatma işareti. */}
+            <RandevuSmsAlani deger={deger} alanDegistir={alanDegistir} id={yeniMi ? null : Number(id)} salt={salt} />
             {/* Ozet serit EN ALTTA (mockup .ozet): hasta no, son randevu,
                 acik bakiye, olusturma. */}
             <RandevuOzetSeridi

@@ -66,6 +66,7 @@ public static partial class RandevuUclari
 
         ErteleUcunuEkle(grup);
         SeriUcunuEkle(grup);
+        SmsUclariniEkle(grup);          // 1382: randevu SMS önizleme + şube ayarı
         AdayTasiUcunuEkle(grup);
     }
 }

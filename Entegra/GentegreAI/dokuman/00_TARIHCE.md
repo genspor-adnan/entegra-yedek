@@ -7,6 +7,25 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 19.11.2026 — Randevu SMS (1382)
+
+- Kullanıcı: "randevu kartına SMS Gönder Check ekle.. default seçili olsun.. randevu alan hastaya randevu bilgilerini içeren
+  bir sms atalım.. şubeye özgü olsun mesaj.. istersek mesajı değiştirebilelim.. 1 gün kala hatırlatma mesajı göndereceğiz
+  opsiyonel olarak". Kararlar: şube şablonu + kartta düzenleme; hatırlatma şube ayarı + kartta ikinci işaret.
+- Kart (RandevuSmsAlani): "SMS Gönder" (yeni kartta işaretli), şube metninin önizlemesi - o randevu için değiştirilebilir
+  (`sms_metni`, gönderilince temizlenir), şubede hatırlatma açıksa "Hatırlatma SMS'i (N saat önce)" işareti; telefon yoksa uyarı.
+- Gönderim RandevuHatirlatmasi'nda (kart kaydı sonrası): bilgi `randevu.bilgi` hemen, aynı randevu saatine bir kez
+  (`sms_bilgi_baslangic`), saat değişince yeniden; hatırlatma `randevu.hatirlatma_sube` N saat önceye planlı, her kayıtta
+  tazelenir (kuyruktaki bilgi SMS'ine dokunmaz). Şube ayarı yoksa eski kurum geneli hatırlatma (randevu.hatirlatma_acik).
+  Mesajdaki saat artık ŞUBE YEREL saati (eskiden UTC yazılıyordu). DB varsayılanı sms_gonder 0: aday / erteleme / çalışma
+  planı yolları kendiliğinden SMS atmaz.
+- Şube ayarı: Randevu › Ayarlar › Çalışma Şablonları › 📱 SMS (randevu_sms_ayar; Kaydet'e bağlı) - bilgi metni, hatırlatma
+  açık / kaç saat önce / metin; değişkenler {hasta} {tarih} {gun} {saat} {bolum} {hekim} {sube} {adres} {telefon}.
+  Uçlar: POST /api/randevu/sms-onizleme, GET/PUT /api/randevu/sms-ayar.
+- Testler: RandevuSmsTestleri (kart ucundan uçtan uca), web randevuSmsAlani.
+
+---
+
 ## 18.11.2026 — Gentegre AI kod incelemesi (bugünkü 42 commit) düzeltmeleri
 
 1. Sözlü onaydan sonra kart belgeyi yeniden okur (yerel yamada sürüm eski kalıyor, sonraki Kaydet 409 + iskontosuz açık tutar).

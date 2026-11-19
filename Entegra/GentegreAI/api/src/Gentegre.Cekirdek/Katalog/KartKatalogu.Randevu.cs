@@ -24,6 +24,10 @@ public static partial class KartKatalogu
             ["tip"] = (short)1,             // Muayene
             ["kaynak"] = (short)1,          // Telefon
             ["kendiIstegi"] = (short)1,     // gönderen seçilmedikçe hasta kendi isteğiyle (1346)
+            // RANDEVU SMS (1382, kullanıcı 19.11.2026: "SMS Gönder Check ekle.. default seçili olsun"): yeni kartta bilgi
+            //   SMS'i ve (şube ayarı açıksa) hatırlatma işaretli gelir. DB varsayılanı 0 - kart dışı yollar SMS atmaz.
+            ["smsGonder"] = (short)1,
+            ["smsHatirlatma"] = (short)1,
         },
         // GÖRÜNTÜLEME / LAB KURULUMU (kullanıcı 15.11.2026): bu kurumlarda randevu tetkik içindir, Muayene
         //   varsayılanı her kartta elle düzeltiliyordu. randevu.tip = 3 Tetkik (261; 316 radyoloji randevusu da bu tip).
@@ -123,5 +127,10 @@ public static partial class KartKatalogu
             // ERTELEME İZİ (1119) - yalnız ertele ucu yazar; kart özet şeridinde gösterilir.
             new("oncekiRandevuId", "onceki_randevu_id", "sayi", Yazilabilir: false, Gizli: true),
             new("ertelemeNedeni", "erteleme_nedeni", "metin", Yazilabilir: false, Gizli: true),
+            // RANDEVU SMS (1382): kartın altındaki SMS bölümü (RandevuSmsAlani) çizer; değerler kayıtla gider,
+            //   gönderim RandevuHatirlatmasi'nda.
+            new("smsGonder", "sms_gonder", "mantik", Gizli: true),
+            new("smsMetni", "sms_metni", "metin", EnFazlaUzunluk: 500, Gizli: true),
+            new("smsHatirlatma", "sms_hatirlatma", "mantik", Gizli: true),
         });
 }
