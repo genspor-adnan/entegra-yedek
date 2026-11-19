@@ -173,12 +173,16 @@ export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, di
               {hastaAlani}
             </div>}
         <div className="rv-kutular">
-          <RandevuKalemi kilitli={!yeniMi && kilitli} />
-          <div className={`rv-kutu rv-kutu-zaman${z?.gecti && durum === 1 ? ' gecti' : ''}`}>
-            <small>{c('Randevu')}</small>
-            <b>{z?.aralik ?? '—'}</b>
-            <i>{z?.alt ?? c('saat seçilmedi')}</i>
-          </div>
+          {/* ✎ + RANDEVU KUTUSU TEK GRUP (kod inceleme 19.11.2026): dar ekranda kutular alt satıra geçerken kalem
+              Randevu kutusundan ayrılmasın. */}
+          <span className="rv-kalem-grup">
+            <RandevuKalemi kilitli={!yeniMi && kilitli} />
+            <div className={`rv-kutu rv-kutu-zaman${z?.gecti && durum === 1 ? ' gecti' : ''}`}>
+              <small>{c('Randevu')}</small>
+              <b>{z?.aralik ?? '—'}</b>
+              <i>{z?.alt ?? c('saat seçilmedi')}</i>
+            </div>
+          </span>
           <div className="rv-kutu">
             <small>{cihazli ? c('Cihaz') : c('Doktor')}</small>
             <b>{kaynakAd || '—'}</b>

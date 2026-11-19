@@ -55,7 +55,12 @@ const dk = (saat: string) => {
 const saatMetni = (toplam: number) =>
   `${String(Math.floor(toplam / 60)).padStart(2, '0')}:${String(toplam % 60).padStart(2, '0')}`;
 
-const isoGun = (t: Date) => t.toISOString().slice(0, 10);
+/**
+ * YEREL GÜN (19.11.2026, gece testi yakaladı): toISOString UTC'dir - Türkiye'de 00:00-03:00 arası takvim "bugün"ü dün
+ * açıyor, "Bugün" düğmesi dünü gösteriyordu.
+ */
+const isoGun = (t: Date) =>
+  `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
 /** Pazartesi başlangıçlı hafta. */
 function haftaBasi(t: Date) {
   const g = new Date(t);
@@ -169,7 +174,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
     //   dusunce veri araligi haftaya cikiyor ve secili gun calisma gunu
     //   degilse (Pazar) listeden tamamen eleniyordu.
     if (!haftalik) return [gun];
-    const bas = haftaBasi(new Date(gun));
+    const bas = haftaBasi(new Date(`${gun}T12:00`));   // öğlen: dilim farkı günü kaydırmasın
     return Array.from({ length: 7 }, (_, i) => {
       const t = new Date(bas);
       t.setDate(bas.getDate() + i);
@@ -523,7 +528,7 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
     && !kapali(s, slot);
 
   const kaydir = (yon: number) => {
-    const t = new Date(gun);
+    const t = new Date(`${gun}T12:00`);
     t.setDate(t.getDate() + (!haftalik ? yon : yon * 7));
     setGun(isoGun(t));
   };
