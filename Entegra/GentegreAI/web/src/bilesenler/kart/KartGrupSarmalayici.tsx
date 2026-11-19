@@ -113,7 +113,7 @@ export function KartGrupSarmalayici({
               hizmetId={Number(deger.hizmetId) || null}
               cihazId={Number(deger.cihazId) || null}
               sureDk={Number(deger.sureDk) || 0}
-              onSure={dk => alanDegistir('sureDk', String(dk))}
+              onSure={dk => { if (!govdeGoster) alanDegistir('sureDk', String(dk)) }}
             />
             {/* UYGUN SAATLER (mockup): secili hekim + tarih icin o gunun
                 slotlari; bos saate tiklamak kartin baslangicini tasir. */}
@@ -128,14 +128,15 @@ export function KartGrupSarmalayici({
               sureDk={Number(deger.sureDk) || 0}
               seciliSaat={String(deger.baslangic ?? '').slice(11, 16)}
               hariçId={yeniMi ? null : Number(id)}
-              saltOkunur={salt}
+              // GÖRÜNTÜLEME KİPİNDE (19.11.2026, kipli randevu) saat seçilmez - ✎ ile düzenlemeye geçilir.
+              saltOkunur={salt || !!govdeGoster}
               onSec={(saat, sure) => {
                 alanDegistir('baslangic', `${String(deger.baslangic ?? '').slice(0, 10)}T${saat}`);
                 alanDegistir('sureDk', String(sure));
               }}
             />
             {/* SMS (1382): bilgi SMS'i işareti + şube metni (kartta değiştirilebilir) + hatırlatma işareti. */}
-            <RandevuSmsAlani deger={deger} alanDegistir={alanDegistir} id={yeniMi ? null : Number(id)} salt={salt} />
+            <RandevuSmsAlani deger={deger} alanDegistir={alanDegistir} id={yeniMi ? null : Number(id)} salt={salt || !!govdeGoster} />
             {/* Ozet serit EN ALTTA (mockup .ozet): hasta no, son randevu,
                 acik bakiye, olusturma. */}
             <RandevuOzetSeridi

@@ -9936,3 +9936,22 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .detay-tablo tr.odeme-soz .soz-gecti { color: var(--hata); font-weight: 600 }
 .detay-tablo tr.odeme-soz.tutuldu td { background: color-mix(in srgb, var(--ok) 8%, transparent); opacity: .8 }
 .detay-tablo tr.odeme-soz.tutuldu td:first-child { box-shadow: inset 4px 0 0 var(--ok) }
+/* RANDEVU KARTI BAŞLIĞI (19.11.2026, mockup Ekranlar/Randevu/randevu_karti_baslik.html): hasta alanı + üç kutu + ✎,
+   sol kenar durumun rengi; tarih / süre / durum kutuları yalnız düzenlemede altta. */
+.rv-baslik { --rvd: var(--mor, #6d4aff); width: 100%; min-width: 0; border-left: 5px solid var(--rvd); padding-left: 10px }
+.rv-baslik.rv-d-geldi { --rvd: var(--ok) } .rv-baslik.rv-d-gelmedi { --rvd: var(--hata) }
+.rv-baslik.rv-d-ertele { --rvd: var(--uyari) } .rv-baslik.rv-d-iptal { --rvd: var(--soluk) }
+.rv-bant { display: flex; gap: 14px; align-items: center; min-width: 0 }
+.rv-bant-hasta { flex: 1 1 320px; min-width: 0 }
+.rv-bant-hasta > .alan { margin: 0 }
+.rv-kutular { display: flex; gap: 8px; align-items: center; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end }
+.rv-kutu { border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 4px; background: var(--yuz, #fff); padding: 5px 10px; min-width: 120px }
+.rv-kutu small { display: block; font-size: 9.5px; letter-spacing: .6px; color: var(--soluk); text-transform: uppercase }
+.rv-kutu b { display: block; font-size: 13px; color: var(--lacivert, #14315a); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px }
+.rv-kutu i { display: block; font-style: normal; font-size: 10.5px; color: var(--soluk); margin-top: 1px; white-space: nowrap }
+.rv-kutu-zaman { min-width: 160px } .rv-kutu-zaman b { font-size: 17px; letter-spacing: .3px }
+.rv-kutu-zaman.gecti i { color: var(--hata) }
+.rv-rozet { display: inline-block; border-radius: 10px; padding: 1px 10px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--rvd) }
+.rv-kalem { position: static !important; height: 30px; width: 30px; font-size: 15px }
+.rv-iz { margin-top: 6px; padding: 3px 8px; border-top: 1px dashed var(--cizgi2, #e3e9f0); font-size: 11px; color: var(--soluk) }
+.rv-alt-alanlar { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cizgi2, #e3e9f0) }

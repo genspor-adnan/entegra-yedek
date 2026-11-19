@@ -8,6 +8,7 @@ import type { useUnvanOneki } from './useUnvanOneki';
 import { c } from '../../dil/ceviri';
 import { KartAdi } from '../KartAdi';
 import { StokAvatar } from './StokAvatar';
+import { RandevuBasligi } from './RandevuBasligi';
 
 /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
@@ -36,7 +37,8 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
 // BİLDİRİM ŞABLONU (1354, mockup bildirim_sablonu_karti.html): şerit + Metin sekmesi tek ✎ ile.
 // PERSONEL (kullanıcı 17.11.2026: "personel kartını da stok kartı deseni gibi yap.. view/edit modu da olsun"):
 //   hasta ile aynı - kayıtlı kart görüntülemede, şerit + gövde grupları yalnız ✎ ile düzenlemeye geçer.
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon', 'personel']);
+// RANDEVU (19.11.2026, mockup randevu_karti_baslik.html): tek ✎ başlığı ve gövdeyi açar / kapatır.
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon', 'personel', 'randevu']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -493,7 +495,13 @@ export function KartKimlikSeridi({
                 {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
               </div>
             );
-          })() : KIPLI_SERITLER[kaynak] ? (() => {
+          })() : kaynak === 'randevu' && seritAcikDis !== undefined ? (
+            // RANDEVU BAŞLIĞI (19.11.2026): hasta alanı bugünkü bileşen; kutular + ✎; tarih / süre / durum düzenlemede.
+            <RandevuBasligi deger={deger} meta={meta} salt={salt} gosterKipi={salt || !seritAcik} yeniMi={yeniMi}
+                            hastaAlani={renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'hastaId'))}
+                            digerAlanlar={renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'hastaId'))}
+                            onKalem={() => setSeritAcik(v => !v)} />
+          ) : KIPLI_SERITLER[kaynak] ? (() => {
             const gosterKipi = salt || !seritAcik;
             // Durum kodu: boş ya da 1 aktif (kişi bandı ile aynı okuma); pasif stok avatarı gri.
             const d = String(deger.durum ?? '').trim();

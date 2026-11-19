@@ -522,11 +522,18 @@ const adsizBlok = adsizUst.length > 0 && (
                   //   okunur. Otomatik dolgu bunu 3+5 diziyordu.
                   (kaynak === 'goz-gozluk-recete' && aktif.baslik.startsWith('Reçete')
                      ? ' dort-sutun' : '') +
-                  (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '')}>
+                  (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '') +
+                  // GÖVDE GÖRÜNTÜLEME KİPİ ADSIZ ALANLARDA DA (19.11.2026, kipli randevu): grupsuz alanlar başlıklı
+                  //   grup yolundan geçmiyor - kutular düz metin, ızgara inert, ✎ ile düzenlemeye geçilir.
+                  (govdeGoster ? ' kagrup-goster' : '')}
+       inert={govdeGoster || undefined}>
     {renderAlanListesi(adsizUst)}
   </div>
 );
-const adsizAltBlok = adsizAlt.length > 0 && <div className="alan-izgara">{renderAlanListesi(adsizAlt)}</div>;
+const adsizAltBlok = adsizAlt.length > 0 && (
+  <div className={`alan-izgara${govdeGoster ? ' kagrup-goster' : ''}`} inert={govdeGoster || undefined}>
+    {renderAlanListesi(adsizAlt)}</div>
+);
 /* ADAY HASTA (266): cinsiyet / dogum tarihi / kurum ayri sekme degil, Genel'in
    altinda tek ekranda - kayit kabul masasinda tek nefeste doldurulsun. */
 const adayOzluk = kaynak === 'hasta-aday'
