@@ -9955,3 +9955,18 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-kalem { position: static !important; height: 30px; width: 30px; font-size: 15px }
 .rv-iz { margin-top: 6px; padding: 3px 8px; border-top: 1px dashed var(--cizgi2, #e3e9f0); font-size: 11px; color: var(--soluk) }
 .rv-alt-alanlar { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cizgi2, #e3e9f0) }
+/* RANDEVU KARTI › HASTA BANDI (19.11.2026, mockup): avatar + ad + dosya no + alt bilgi; arama kutusu yerine. */
+.rv-hasta { display: flex; gap: 12px; align-items: center; flex: 1 1 320px; min-width: 0 }
+.rv-avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
+  font-size: 15px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #3b7cc4, #14315a);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.15) }
+.rv-avatar.k { background: linear-gradient(135deg, #d16ba5, #8a3a6e) }
+.rv-kim { min-width: 0 }
+.rv-ad { font-size: 15px; color: var(--lacivert, #14315a); font-weight: 700; line-height: 1.15; display: flex; gap: 8px;
+  align-items: baseline; flex-wrap: wrap }
+.rv-ad .rv-kod { font-size: 11px; color: var(--soluk); font-weight: 400 }
+.rv-ad a { font-size: 11px; font-weight: 400; color: var(--mavi, #2f6db3); text-decoration: none }
+.rv-hasta-alt { margin-top: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--soluk); font-size: 11.5px }
+.rv-hasta-alt > * + *::before { content: "·"; color: #b7c2cd; margin-right: 6px }
+.rv-hasta-alt .uyari { color: var(--hata); font-weight: 700 }
+.rv-hasta-degistir { grid-column: 1 / -1 }

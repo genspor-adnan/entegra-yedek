@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../api/istemci';
+import { basHarfler } from '../basHarfler';
 import type { KartMetaYaniti } from '../../api/sozlesme';
 import { anGirdiMetni } from '../bicim';
 import { c } from '../../dil/ceviri';
@@ -9,13 +11,58 @@ import type { Deger } from '../kartAlanCizim';
  * RANDEVU KARTI BAŞLIĞI (mockup Ekranlar/Randevu/randevu_karti_baslik.html; kullanıcı 19.11.2026: "hasta arama/seçme
  * kısmı şu an iyi onu değiştirmeden diğer kısımları yap.. view/edit mode olarak da uygula").
  *
- *  * Solda HASTA alanı - bugünkü arama / seçme bileşeni aynen (görüntülemede kutusuz, inert).
+ *  * Solda HASTA BANDI (kullanıcı 19.11.2026: "hasta adı için mockup gibi avatar yap.. hasta adı edit modda olmasın
+ *    mockup başlık gibi gelsin aynısı"): avatar (baş harfler, cinsiyet rengi), ad + dosya no + "↗ hasta kartı", altında
+ *    TC (maskeli) · cinsiyet · yaş · telefon · kurum. Hasta seçiliyse İKİ KİPTE DE bant - arama kutusu yalnız hasta
+ *    yokken (yeni randevu); yeni randevuyu düzenlerken hasta değiştirmek için arama kutusu alt satırda da durur.
  *  * Sağda üç kutu: RANDEVU (saat aralığı büyük; gün, "bugün / yarın / n gün sonra / geçti", süre), DOKTOR ya da
  *    CİHAZ (altında bölüm / doktor), DURUM (renkli rozet + SMS). Sol kenar çizgisi durumun rengi (liste ile aynı).
  *  * ✎ tüm kartı açar / kapatır (GenForm kipli kart). Tarih / saat, süre ve durum kutuları yalnız düzenlemede,
  *    bandın altında. Başvuruya dönüşmüş randevu kilitli (✎ pasif) - iz şeridi başvuruyu gösterir.
  */
 const GUN = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+/** Hasta listesinin tek satırı (bant bilgisi) - liste ucu bütün kolonları döner. */
+function useHastaSatiri(hastaId: number) {
+  const [h, setH] = useState<Record<string, unknown> | null>(null);
+  useEffect(() => {
+    if (!(hastaId > 0)) { setH(null); return }
+    let iptal = false;
+    Promise.resolve().then(() => api.liste('hasta', { sayfa: 1, boyut: 1, filtre: { alan: 'id', op: 'esit', deger: hastaId } }))
+      .then(y => { if (!iptal) setH(y.satirlar[0] ?? null) })
+      .catch(() => { if (!iptal) setH(null) });
+    return () => { iptal = true };
+  }, [hastaId]);
+  return h;
+}
+const tcMaske = (v: string) => (v.length >= 11 ? `${v.slice(0, 3)}******${v.slice(-2)}` : v);
+
+function HastaBandi({ hastaId, h, yedekAd }: { hastaId: number; h: Record<string, unknown> | null; yedekAd: string }) {
+  const git = useNavigate();
+  const ad = String(h?.unvan ?? '') || yedekAd;
+  const cins = Number(h?.cinsiyet ?? 0);
+  const yas = String(h?.yasKisa ?? '') || (h?.yas != null && h.yas !== '' ? `${String(h.yas)} ${c('yaş')}` : '');
+  const tel = String(h?.cepTel ?? h?.telefon ?? '');
+  const alt = [
+    String(h?.vkno ?? '') && `TC ${tcMaske(String(h?.vkno))}`,
+    [cins === 1 ? 'E' : cins === 2 ? 'K' : '', yas].filter(Boolean).join(' · '),
+    tel && `☎ ${tel}`,
+    String(h?.kurum ?? h?.kurumAdi ?? ''),
+  ].filter(Boolean);
+  return (
+    <div className="rv-hasta" data-testid="randevu-hasta-bandi">
+      <span className={`rv-avatar${cins === 2 ? ' k' : ''}`}>{basHarfler(ad) || '?'}</span>
+      <div className="rv-kim">
+        <div className="rv-ad">{ad || '—'}
+          {String(h?.kod ?? '') && <span className="rv-kod">{String(h?.kod)}</span>}
+          <a href={`/hasta/${hastaId}`} onClick={e => { e.preventDefault(); git(`/hasta/${hastaId}`) }}>↗ {c('hasta kartı')}</a>
+        </div>
+        <div className="rv-hasta-alt">{alt.map((x, i) => <span key={i}>{x}</span>)}
+          {h && !tel && <span className="uyari">☎ {c('cep telefonu yok')}</span>}</div>
+      </div>
+    </div>
+  );
+}
 const DURUM_SINIF: Record<number, string> = { 1: 'planli', 2: 'geldi', 3: 'gelmedi', 4: 'iptal', 5: 'ertele' };
 
 function zamanBilgisi(baslangic: unknown, sureDk: number) {
@@ -45,13 +92,15 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
   /** Görüntüleme kipi (✎ kapalı ya da yetki yok). */
   gosterKipi: boolean;
   yeniMi: boolean;
-  /** Hasta alanı - bugünkü bileşen (renderAlanListesi). */
+  /** Hasta arama / seçme alanı - bugünkü bileşen (renderAlanListesi); yalnız hasta yokken / yeni randevuda. */
   hastaAlani: ReactNode;
   /** Tarih / saat, süre, durum - yalnız düzenlemede. */
   digerAlanlar: ReactNode;
   onKalem(): void;
 }) {
   const git = useNavigate();
+  const hastaId = Number(deger.hastaId) || 0;
+  const hastaSatiri = useHastaSatiri(hastaId);
   const ad = (alan: string) => {
     const v = String(deger[alan] ?? '');
     return v ? meta?.alanlar.find(a => a.ad === alan)?.kodlar?.[v] ?? '' : '';
@@ -68,9 +117,11 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
   return (
     <div className={`rv-baslik rv-d-${DURUM_SINIF[durum] ?? 'planli'}`} data-testid="randevu-basligi">
       <div className="rv-bant">
-        <div className={`rv-bant-hasta${gosterKipi ? ' kaid-goster' : ''}`} inert={gosterKipi || undefined}>
-          {hastaAlani}
-        </div>
+        {hastaId > 0
+          ? <HastaBandi hastaId={hastaId} h={hastaSatiri} yedekAd={ad('hastaId')} />
+          : <div className={`rv-bant-hasta${gosterKipi ? ' kaid-goster' : ''}`} inert={gosterKipi || undefined}>
+              {hastaAlani}
+            </div>}
         <div className="rv-kutular">
           <div className={`rv-kutu rv-kutu-zaman${z?.gecti && durum === 1 ? ' gecti' : ''}`}>
             <small>{c('Randevu')}</small>
@@ -100,7 +151,13 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
           <a href={`/basvuru/${belgeId}`} onClick={e => { e.preventDefault(); git(`/basvuru/${belgeId}`) }}>
             {c('Başvuruyu aç')}</a></div>
       )}
-      {!gosterKipi && <div className="alan-izgara rv-alt-alanlar">{digerAlanlar}</div>}
+      {!gosterKipi && (
+        <div className="alan-izgara rv-alt-alanlar">
+          {/* YENİ RANDEVUDA HASTA DEĞİŞTİRME: bant seçilen hastayı gösterir, arama kutusu burada. */}
+          {yeniMi && hastaId > 0 && <div className="rv-hasta-degistir">{hastaAlani}</div>}
+          {digerAlanlar}
+        </div>
+      )}
     </div>
   );
 }
