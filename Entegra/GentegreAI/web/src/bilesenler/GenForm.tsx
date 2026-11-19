@@ -1691,6 +1691,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             seritAcikDis={kipliGovde ? kipliAcik : undefined}
             onSeritAcik={kipliGovde ? setKipliAcik : undefined}
             // RANDEVU AVATARI hasta aramasını açar (alanın kendi arama düğmesiyle aynı pencere - 19.11.2026).
+            alanDegistir={kaynak === 'randevu' ? alanDegistir : undefined}
             hastaAra={kaynak === 'randevu' ? () => {
               const a = meta?.alanlar.find(x => x.ad === 'hastaId');
               if (a?.aramaKaynagi) setAramaAlani({ alan: 'hastaId', kaynak: a.aramaKaynagi });

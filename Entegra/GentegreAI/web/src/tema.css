@@ -9956,7 +9956,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* Tarih / Saat geniş (tarih + saat kutusu kırpılmasın), Süre dar, Durum içeriği kadar (kullanıcı 19.11.2026). */
 .rv-alt-alanlar { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cizgi2, #e3e9f0);
   display: grid !important; gap: 6px 14px; align-items: end }
-.kaid .rv-baslik .alan-izgara.rv-alt-alanlar { grid-template-columns: minmax(340px, 420px) 110px max-content !important }
+.kaid .rv-baslik .alan-izgara.rv-alt-alanlar { grid-template-columns: 250px 88px max-content max-content !important }
 /* RANDEVU KARTI › HASTA BANDI (19.11.2026, mockup): avatar + ad + dosya no + alt bilgi; arama kutusu yerine. */
 .rv-hasta { display: flex; gap: 12px; align-items: center; flex: 1 1 320px; min-width: 0 }
 .rv-avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
@@ -9976,3 +9976,9 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* RANDEVU ✎ alanların sağ üst köşesinde (19.11.2026). */
 .rv-govde { position: relative }
 .rv-govde > .rv-kalem { position: absolute !important; top: 2px; right: 2px; z-index: 2; height: 26px; width: 28px; font-size: 14px }
+/* RANDEVU BANDI › Durum rozetinin sağında SMS Gönder işareti (19.11.2026). */
+.rv-sms-isaret-bant { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 600; color: var(--metin, #1f2d3a); cursor: pointer }
+.rv-sms-isaret-bant input { margin: 0 }
+.rv-hasta-alt .rv-sms-isaret-bant { margin-left: 8px; font-weight: 400; color: var(--soluk) }
+.rv-sms-isaret-bant.salt { cursor: default }
+.rv-alt-alanlar > .rv-sms-isaret-bant { align-self: center; margin-top: 14px }

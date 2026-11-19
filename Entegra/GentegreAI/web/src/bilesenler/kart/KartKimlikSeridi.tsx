@@ -70,6 +70,8 @@ export interface KartKimlikSeridiOzellikleri {
   onSeritAcik?(acik: boolean): void;
   /** RANDEVU: avatar tıklanınca hasta arama penceresi (19.11.2026). */
   hastaAra?(): void;
+  /** RANDEVU: bandın SMS Gönder işareti kart alanı yazar. */
+  alanDegistir?(ad: string, v: Deger): void;
 }
 
 /**
@@ -83,7 +85,7 @@ export interface KartKimlikSeridiOzellikleri {
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
   seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk, aktifSekme,
-  seritAcikDis, onSeritAcik, hastaAra,
+  seritAcikDis, onSeritAcik, hastaAra, alanDegistir,
 }: KartKimlikSeridiOzellikleri) {
   /**
    * KİŞİ BANDI (mockup Ekranlar/kisi_karti_avatar_bant.html, kullanıcı 08.11.2026: "başlıktaki bilgiler bandda
@@ -502,7 +504,7 @@ export function KartKimlikSeridi({
             <RandevuBasligi deger={deger} meta={meta} salt={salt} gosterKipi={salt || !seritAcik} yeniMi={yeniMi}
                             hastaAlani={renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'hastaId'))}
                             digerAlanlar={renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'hastaId'))}
-                            hastaAra={hastaAra} />
+                            hastaAra={hastaAra} alanDegistir={alanDegistir} />
           ) : KIPLI_SERITLER[kaynak] ? (() => {
             const gosterKipi = salt || !seritAcik;
             // Durum kodu: boş ya da 1 aktif (kişi bandı ile aynı okuma); pasif stok avatarı gri.

@@ -39,8 +39,10 @@ function useHastaSatiri(hastaId: number) {
 }
 const tcMaske = (v: string) => (v.length >= 11 ? `${v.slice(0, 3)}******${v.slice(-2)}` : v);
 
-function HastaBandi({ hastaId, h, yedekAd, onAvatar }: {
+function HastaBandi({ hastaId, h, yedekAd, onAvatar, smsEk }: {
   hastaId: number; h: Record<string, unknown> | null; yedekAd: string;
+  /** Telefonun sağında (görüntülemede SMS Gönder işareti). */
+  smsEk?: ReactNode;
   /** Avatar tıklanınca hasta araması (yoksa avatar tıklanmaz). */
   onAvatar?(): void;
 }) {
@@ -52,9 +54,8 @@ function HastaBandi({ hastaId, h, yedekAd, onAvatar }: {
   const alt = [
     String(h?.vkno ?? '') && `TC ${tcMaske(String(h?.vkno))}`,
     [cins === 1 ? 'E' : cins === 2 ? 'K' : '', yas].filter(Boolean).join(' · '),
-    tel && `☎ ${tel}`,
-    String(h?.kurum ?? h?.kurumAdi ?? ''),
   ].filter(Boolean);
+  const kurum = String(h?.kurum ?? h?.kurumAdi ?? '');
   return (
     <div className="rv-hasta" data-testid="randevu-hasta-bandi">
       <span className={`rv-avatar${cins === 2 ? ' k' : ''}${onAvatar ? ' degisir' : ''}`}
@@ -66,7 +67,9 @@ function HastaBandi({ hastaId, h, yedekAd, onAvatar }: {
           <a href={`/hasta/${hastaId}`} onClick={e => { e.preventDefault(); git(`/hasta/${hastaId}`) }}>↗ {c('hasta kartı')}</a>
         </div>
         <div className="rv-hasta-alt">{alt.map((x, i) => <span key={i}>{x}</span>)}
-          {h && !tel && <span className="uyari">☎ {c('cep telefonu yok')}</span>}</div>
+          {tel && <span>☎ {tel}{smsEk}</span>}
+          {h && !tel && <span className="uyari">☎ {c('cep telefonu yok')}</span>}
+          {kurum && <span>{kurum}</span>}</div>
       </div>
     </div>
   );
@@ -109,7 +112,7 @@ export function RandevuKalemi({ kilitli }: { kilitli: boolean }) {
   );
 }
 
-export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, digerAlanlar, hastaAra }: {
+export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, digerAlanlar, hastaAra, alanDegistir }: {
   deger: Record<string, Deger>;
   meta: KartMetaYaniti | null | undefined;
   /** Yetki yok - görüntüleme kipine gosterKipi ile yansır (✎ kartın RandevuKalemi'nde). */
@@ -123,6 +126,8 @@ export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, di
   digerAlanlar: ReactNode;
   /** Hasta arama penceresini açar (GenForm) - avatar tıklaması. */
   hastaAra?(): void;
+  /** Kart alanı yazar (GenForm) - bandın SMS Gönder işareti. */
+  alanDegistir?(ad: string, v: Deger): void;
 }) {
   const kip = useContext(KartKipBaglami);
   const git = useNavigate();
@@ -140,12 +145,24 @@ export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, di
   const belgeId = Number(deger.belgeId) || 0;
   const kilitli = belgeId > 0;
   const sms = deger.smsGonder === true || Number(deger.smsGonder) === 1;
+  /**
+   * SMS GÖNDER işareti (kullanıcı 19.11.2026: "edit modda ortadaki tarih saat durum rozeti sağında olsun.. view modda
+   * hasta bandında telefon sağında"): görüntülemede salt (değişmez), düzenlemede Durum'un sağında; Kaydet'le yazılır.
+   */
+  const smsIsareti = (salt: boolean) => (
+    <label className={`rv-sms-isaret-bant${salt ? ' salt' : ''}`}
+           title={c('İşaretliyse kayıtta hastaya randevu bilgisi SMS ile gider')}>
+      <input type="checkbox" checked={sms} disabled={salt || !alanDegistir} aria-label={c('SMS Gönder')}
+             onChange={e => alanDegistir?.('smsGonder', e.target.checked)} />{c('SMS Gönder')}
+    </label>
+  );
 
   return (
     <div className={`rv-baslik rv-d-${DURUM_SINIF[durum] ?? 'planli'}`} data-testid="randevu-basligi">
       <div className="rv-bant">
         {hastaId > 0
           ? <HastaBandi hastaId={hastaId} h={hastaSatiri} yedekAd={ad('hastaId')}
+                        smsEk={gosterKipi ? smsIsareti(true) : undefined}
                         onAvatar={!hastaAra || (kip?.pasif ?? true) || (kilitli && !yeniMi) ? undefined : () => {
                           // Görüntülemedeyse önce düzenlemeye geç - değişen hasta Kaydet'le yazılır.
                           if (kip && !kip.acik) kip.degistir();
@@ -180,6 +197,7 @@ export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, di
       {!gosterKipi && (
         <div className="alan-izgara rv-alt-alanlar">
           {digerAlanlar}
+          {smsIsareti(false)}
         </div>
       )}
     </div>

@@ -40,36 +40,20 @@ export function RandevuSmsAlani({ deger, alanDegistir, id, salt }: {
 
   const gonder = acikMi(deger.smsGonder);
   const hatirlatma = acikMi(deger.smsHatirlatma);
-  const elle = String(deger.smsMetni ?? '');
-  const metin = elle || onizleme?.bilgi || '';
+  const telefonYok = !!hastaId && !!onizleme && !onizleme.telefonVar;
+  const gitti = gonder && !!onizleme?.bilgiGitti;
+  // İŞARET BANDA TAŞINDI, MESAJ KUTUSU KALKTI (kullanıcı 19.11.2026: "sms gönder check'ini durum rozeti sağına taşı..
+  //   mesaj editine gerek yok"): metin her zaman şube şablonu. Bölüm yalnız söylenecek bir şey varsa çizilir.
+  if (!onizleme?.hatirlatmaAcik && !telefonYok && !gitti) return null;
 
   return (
     <div className="kagrup rv-sms">
       <h6>📱 {c('SMS')}</h6>
-      <label className="rv-sms-isaret">
-        <input type="checkbox" checked={gonder} disabled={salt} aria-label={c('SMS Gönder')}
-               onChange={e => alanDegistir('smsGonder', e.target.checked)} />
-        {c('SMS Gönder')} <span className="sonuk kucuk">{c('(kayıtta randevu bilgisi)')}</span>
-      </label>
-      {hastaId && onizleme && !onizleme.telefonVar && (
+      {telefonYok && (
         <div className="kucuk rv-sms-uyari">⚠ {c('Hastanın cep telefonu yok - SMS gönderilemez.')}</div>
       )}
-      {gonder && onizleme?.bilgiGitti && !elle && (
+      {gitti && (
         <div className="sonuk kucuk">{c('Bu randevu saati için bilgi SMS\'i gönderildi; saat değişirse yeniden gönderilir.')}</div>
-      )}
-      {gonder && (
-        <>
-          <textarea className="rv-sms-metin" rows={3} maxLength={500} disabled={salt} value={metin}
-                    aria-label={c('SMS metni')}
-                    onChange={e => alanDegistir('smsMetni', e.target.value)} />
-          <div className="kucuk rv-sms-alt">
-            <span className="sonuk">{metin.length} / 500 · {Math.max(1, Math.ceil(metin.length / 153))} SMS</span>
-            {elle && !salt && (
-              <button type="button" className="d mini" title={c('Şubenin metnine dön')}
-                      onClick={() => alanDegistir('smsMetni', '')}>↺ {c('Şube metni')}</button>
-            )}
-          </div>
-        </>
       )}
       {onizleme?.hatirlatmaAcik && (
         <label className="rv-sms-isaret">
