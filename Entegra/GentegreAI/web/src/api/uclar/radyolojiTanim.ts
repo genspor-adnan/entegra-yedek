@@ -62,6 +62,11 @@ export interface CihazHafta {
 
 export const radyolojiTanimUclari = {
   radCihazHafta: (id: number) => istek<CihazHafta>(`/api/radyoloji/cihaz/${id}/hafta`),
+  /** Günün slotları (kapatmayı slotlardan seçme): saatler şubenin saati "yyyy-MM-ddTHH:mm". */
+  radCihazGunSlotlari: (id: number, tarih: string) =>
+    istek<{ calisir: boolean; mesaiYok: boolean; slotDk?: number;
+            slotlar: { bas: string; bit: string; saat: string; tur: 'acik' | 'ogle' | 'kapali' | 'dolu'; dolu: number }[] }>(
+      `/api/radyoloji/cihaz/${id}/gun-slotlari?tarih=${encodeURIComponent(tarih)}`),
   radCihazKapat: (id: number, g: { nedenTur: number; baslangic: string; bitis: string; aciklama?: string }) =>
     gonder<{ id: number; etkilenen: number }>(`/api/radyoloji/cihaz/${id}/kapat`, g),
   radCihazGosterge: () => istek<CihazGostergeYaniti>('/api/radyoloji/cihaz-gosterge'),

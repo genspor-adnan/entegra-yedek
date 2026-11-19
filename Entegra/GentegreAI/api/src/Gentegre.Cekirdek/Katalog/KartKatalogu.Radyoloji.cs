@@ -13,6 +13,20 @@
 /// </summary>
 public static partial class KartKatalogu
 {
+    // CİHAZ KAPATMA ARALIĞI METNİ (19.11.2026): şubenin saatinde. İki uç 00:00 ise TAM GÜN (bitiş ertesi gün, hariç).
+    private const string KapatmaTz =
+        "public.fn_sube_zaman_dilimi(coalesce((select kc.sube_id from public.radyoloji_cihaz kc where kc.id = radyoloji_cihaz_kapatma.cihaz_id), 1))";
+    private const string KapatmaBl = "(radyoloji_cihaz_kapatma.baslangic at time zone " + KapatmaTz + ")";
+    private const string KapatmaEl = "(radyoloji_cihaz_kapatma.bitis at time zone " + KapatmaTz + ")";
+    private const string KapatmaAralikSql =
+        "(case when " + KapatmaBl + "::time = '00:00' and " + KapatmaEl + "::time = '00:00' then " +
+        "   to_char(" + KapatmaBl + ", 'DD.MM.YYYY') || " +
+        "   case when (" + KapatmaEl + " - interval '1 day')::date > " + KapatmaBl + "::date " +
+        "        then ' – ' || to_char(" + KapatmaEl + " - interval '1 day', 'DD.MM.YYYY') else '' end || ' (tam gün)' " +
+        " when " + KapatmaBl + "::date = " + KapatmaEl + "::date then " +
+        "   to_char(" + KapatmaBl + ", 'DD.MM.YYYY HH24:MI') || '–' || to_char(" + KapatmaEl + ", 'HH24:MI') " +
+        " else to_char(" + KapatmaBl + ", 'DD.MM.YYYY HH24:MI') || ' – ' || to_char(" + KapatmaEl + ", 'DD.MM.YYYY HH24:MI') end)";
+
     /// <summary>radyoloji_sablon.yapisal_tur (1194): 0 yok, 1 BI-RADS.</summary>
     private static Dictionary<string, string> RadyolojiSablonBicimleri => new() { ["1"] = "Tek A4", ["2"] = "Parçalı" };
     private static Dictionary<string, string> RadyolojiTipografiKaynaklari => new()
@@ -232,8 +246,14 @@ public static partial class KartKatalogu
             new("kapatmalar", "public.radyoloji_cihaz_kapatma", "cihaz_id", new KartAlani[]
             {
                 new("id",        "id",        "sayi", Yazilabilir: false),
-                new("baslangic", "baslangic", "tarih", Zorunlu: true, Baslik: "Başlangıç"),
-                new("bitis",     "bitis",     "tarih", Zorunlu: true, Baslik: "Bitiş"),
+                // SAATLİ (kullanıcı 19.11.2026: "başlangıç / bitiş tarihlerine saat ekle"): kolon zaten timestamptz;
+                //   "zaman" = şubenin saatinde gir / göster (DegerCevirici 666), yarım günlük bakım girilebilir.
+                new("baslangic", "baslangic", "zaman", Zorunlu: true, Baslik: "Başlangıç"),
+                new("bitis",     "bitis",     "zaman", Zorunlu: true, Baslik: "Bitiş"),
+                // ARALIK METNİ (kullanıcı 19.11.2026: "2 seçim olsun tarih aralığı (tam gün kapansın) veya bir tarihteki
+                //   slot aralığı"): gridde başlangıç / bitiş yerine tek kolon - "20.11.2026 – 22.11.2026 (tam gün)" ya da
+                //   "20.11.2026 09:00–10:30". Tam gün bitişi ertesi gün 00:00 (hariç), metinde son gün gösterilir.
+                new("aralikMetni", KapatmaAralikSql, "metin", Yazilabilir: false, Baslik: "Aralık"),
                 new("nedenTur",  "neden_tur", "kod", KodListesi: "rad.kapatma", Baslik: "Neden"),
                 new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
                 // MOCKUP 6 KOLON (kullanıcı): etkilenen randevu + durum, salt okunur.
@@ -245,7 +265,11 @@ public static partial class KartKatalogu
                     "case when now() < radyoloji_cihaz_kapatma.baslangic then 'Planlandı' " +
                     "     when now() < radyoloji_cihaz_kapatma.bitis then 'Sürüyor' else 'Kapandı' end",
                     "metin", Yazilabilir: false, Baslik: "Durum"),
-            }, Sirala: "baslangic desc", SubeKolonu: null, Baslik: "Kapatma / bakım", LogTabloId: 1282),
+            }, Sirala: "baslangic desc", SubeKolonu: null, Baslik: "Kapatma / bakım", LogTabloId: 1282,
+               // GENGRID (kullanıcı 19.11.2026: "rad cihazı kartı kapatma/bakım gridi gengrid yap"): satır içi kutular
+               //   yerine grid + ekle / düzenle / sil modalı. ANINDA KAYIT: kayıtlı kartta modalın Tamam'ı kartı hemen
+               //   kaydeder - bakım girilince takvim ve randevu kartı o aralığı Kaydet'e basılmadan kapalı görür.
+               GridKipi: true, AnindaKaydet: true),
             // KALİTE KONTROL / LİSANS: periyot + son yapılış; sonraki = son + periyot.
             new("qa", "public.radyoloji_cihaz_qa", "cihaz_id", new KartAlani[]
             {

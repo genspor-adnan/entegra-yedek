@@ -252,6 +252,65 @@ public static partial class RadyolojiUclari
             return Results.Ok(new { randevulu = true, pazartesi = pzt, satirlar, toplam, dolu, izlemeNo = baglam.IzlemeNo });
         });
 
+        // GÜNÜN SLOTLARI (kullanıcı 19.11.2026: "slot bazında da kapatma olabilir mi? gün içinde başlama bitiş
+        //   slotlar işaretlenerek"): kapatma penceresinde seçilen günün slotları - başlangıç ve bitiş slotu
+        //   tıklanınca aralık başlangıç / bitiş alanlarına yazılır. Saatler ŞUBENİN saati ("yyyy-MM-ddTHH:mm"),
+        //   kart kaydı aynı metni şube diliminde yorumlar (666). Öğle, mevcut kapatma, dolu (randevu) işaretli.
+        grup.MapGet("/cihaz/{id:int}/gun-slotlari", async (int id, DateOnly tarih, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("radyoloji", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var c = await b.TekAsync("""
+                select baslangic_saat as bas, bitis_saat as bit, ogle_baslangic as ob, ogle_bitis as oe,
+                       coalesce(slot_dk, 15) as slot, greatest(coalesce(eszaman, 1), 1) as es,
+                       coalesce(calisma_gunleri, '') as gunler,
+                       public.fn_sube_zaman_dilimi(coalesce(sube_id, @p1)) as tz
+                  from public.radyoloji_cihaz where id = @p0
+                """, null, [id, baglam.SubeId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
+            static int? Dk(object? v) => v is string x && TimeOnly.TryParse(x, out var t) ? t.Hour * 60 + t.Minute : null;
+            int? bas = Dk(c["bas"]), bit = Dk(c["bit"]), ob = Dk(c["ob"]), oe = Dk(c["oe"]);
+            var slot = Math.Max(5, Convert.ToInt32(c["slot"])); var es = Convert.ToInt32(c["es"]);
+            var tz = (string)c["tz"]!;
+            var gunNo = ((int)tarih.DayOfWeek + 6) % 7 + 1;                               // 1 Pzt … 7 Paz
+            var calisir = ((string)c["gunler"]!).Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Any(x => int.TryParse(x.Trim(), out var g) && g == gunNo);
+            if (bas is null || bit is null || bit <= bas)
+                return Results.Ok(new { calisir = false, mesaiYok = true, slotlar = Array.Empty<object>(), izlemeNo = baglam.IzlemeNo });
+
+            var gun = tarih.ToDateTime(TimeOnly.MinValue);
+            var randevular = await b.ListeAsync("""
+                select (baslangic at time zone @p2) as b, (baslangic at time zone @p2) + make_interval(mins => coalesce(sure_dk, 15)) as e
+                  from public.randevu
+                 where cihaz_id = @p0 and durum not in (3, 4, 5)
+                   and (baslangic at time zone @p2) < @p1 + interval '1 day'
+                   and (baslangic at time zone @p2) + make_interval(mins => coalesce(sure_dk, 15)) > @p1
+                """, null, [id, gun, tz], o => (o.GetDateTime(0), o.GetDateTime(1)), iptal);
+            var kapatmalar = await b.ListeAsync("""
+                select (baslangic at time zone @p2), (bitis at time zone @p2) from public.radyoloji_cihaz_kapatma
+                 where cihaz_id = @p0 and (bitis at time zone @p2) > @p1 and (baslangic at time zone @p2) < @p1 + interval '1 day'
+                """, null, [id, gun, tz], o => (o.GetDateTime(0), o.GetDateTime(1)), iptal);
+
+            var slotlar = new List<object>();
+            for (var dk = bas.Value; dk + slot <= bit.Value; dk += slot)
+            {
+                var sb = gun.AddMinutes(dk); var se = sb.AddMinutes(slot);
+                var ogle = ob is int o1 && oe is int o2 && dk < o2 && dk + slot > o1;
+                var kapali = kapatmalar.Any(k => k.Item1 < se && k.Item2 > sb);
+                var dolu = randevular.Count(r => r.Item1 < se && r.Item2 > sb);
+                slotlar.Add(new
+                {
+                    bas = sb.ToString("yyyy-MM-dd'T'HH:mm"), bit = se.ToString("yyyy-MM-dd'T'HH:mm"),
+                    saat = sb.ToString("HH:mm"),
+                    tur = kapali ? "kapali" : ogle ? "ogle" : dolu >= es ? "dolu" : "acik",
+                    dolu,
+                });
+            }
+            return Results.Ok(new { calisir, mesaiYok = false, slotDk = slot, slotlar, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ---- CİHAZ KAPATMALARI (bakım / arıza / plan dışı kapalı) ----
         //   976 öncesinde bu iki uç "PanoVeCihaz" dosyasındaydı: cihaz
         //   işleri iki dosyaya bölünmüş olduğu için kapatma uçlarını arayan

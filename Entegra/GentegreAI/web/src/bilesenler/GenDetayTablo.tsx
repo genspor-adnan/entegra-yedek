@@ -182,6 +182,8 @@ interface Props {
    * Satir henuz kaydedilmemisse `null` gelir; bilesen buna gore uyarir.
    */
   modalAltBilesen?: (satirId: number | null) => React.ReactNode;
+  /** Modal alanlarinin USTUNDE, taslagi okuyup yazabilen ek bilesen (cihaz kapatma: slotlardan aralik secimi). */
+  modalUstBilesen?: (taslak: Record<string, unknown>, yaz: (alan: string, deger: unknown) => void) => React.ReactNode;
   /** Baslik ve satir eylemleri IKON olarak cizilir (＋ / ✎ / 🗑) - seri ve XSLT
       gridleriyle ayni gorunum (kullanici). Metin dugmeler dar gridlerde
       satiri tasiriyordu. */
@@ -331,7 +333,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                silGizli, onYeni, kolonBaslikEk, baslikEk, ekKolon, oneriAlanlari,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
-                               modalAltBilesen,
+                               modalAltBilesen, modalUstBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
   hucreEki, hucreSinifi, onSecim, ustSuzgec,
 }: Props) {
@@ -1565,6 +1567,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           </>}
         >
           <>
+          {modalUstBilesen?.(taslak, taslakYaz)}
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
               {/* YAŞ ALT ve ÜST TEK SATIRDA (kullanıcı): ikisi bir ARALIĞIN
@@ -1678,6 +1681,12 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                               <option key={k} value={k}>{v}</option>
                             ))}
                           </select>
+                        ) : a.tip === 'zaman' ? (
+                          // MODALDA TARİH + SAAT (kullanıcı 19.11.2026, cihaz kapatma / bakım): UTC an -> şubenin
+                          //   saati; yazılan yerel metni sunucu şube diliminde yorumlar (666).
+                          <input type="datetime-local" value={anGirdiMetni(taslak[a.ad]).slice(0, 16)}
+                                 disabled={!a.yazilabilir}
+                                 onChange={e => taslakYaz(a.ad, e.target.value)} />
                         ) : a.tip === 'tarih' ? (
                           // MODALDA TARİH SEÇİCİ, SAATSİZ (kullanıcı 17.11.2026, Kadro Geçmişi: "yürürlük tarih
                           //   seçilebilir olsun saat olmasın"): düz kutu sunucunun "2026-01-01T00:00:00"ını

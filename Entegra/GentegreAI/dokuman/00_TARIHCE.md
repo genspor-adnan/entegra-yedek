@@ -24,6 +24,17 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   Uçlar: POST /api/randevu/sms-onizleme, GET/PUT /api/randevu/sms-ayar.
 - Testler: RandevuSmsTestleri (kart ucundan uçtan uca), web randevuSmsAlani.
 
+### Radyoloji cihaz kartı › Kapatma / bakım
+
+- Kullanıcı: "kapatma/bakım gridi gengrid yap" · "slot bazında da kapatma olabilir mi" · "tarihten saati kaldır yine..
+  2 seçim olsun tarih aralığı (tam gün kapansın) veya bir tarihteki slot aralığı (slot bazında kısmi kapanma)".
+- Detay GridKipi + AnindaKaydet (kayıtlı kartta modal Tamam kartı hemen kaydeder). Başlangıç / bitiş kolonu "zaman"
+  (şube saati) ama kutuları gizli; aralık `KapatmaAraligiSecici` ile iki kipten: **Tam gün** (iki tarih; bitiş = son
+  günün ertesi 00:00, hariç) / **Slot aralığı** (tek gün, `GET /api/radyoloji/cihaz/{id}/gun-slotlari` çipleri; ilk tık
+  başlangıç, ikinci bitiş; öğle / kapalı / dolu işaretli). Gridde tek "Aralık" kolonu (katalog SQL'i). Aynı seçici
+  "⛔ Kapat / bakıma al" penceresinde. GenDetayTablo'ya `modalUstBilesen` (taslağı okuyup yazan ek bileşen) ve modalda
+  "zaman" alanı için tarih+saat kutusu. Test: CihazKapatmaSlotTestleri.
+
 ---
 
 ## 18.11.2026 — Gentegre AI kod incelemesi (bugünkü 42 commit) düzeltmeleri

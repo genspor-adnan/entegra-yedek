@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import type { KartDetayMeta } from '../../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
+import { KapatmaAraligiSecici } from '../radyoloji/CihazSlotSecici';
 import { KategoriSuzgeci } from '../KategoriSuzgeci';
 import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali, kurumTarifeTipi }
   from './tarifeKurallari';
@@ -64,6 +65,7 @@ export function KartDetaySekmesi({
 }: KartDetaySekmesiOzellikleri) {
   // STOK FİYATLAR (kullanıcı 09.11.2026): liste seçilince Yön / KDV listeden gelsin - listeler bir kez okunur.
   // Hizmet kartı da aynı desen (09.11.2026): fiyat_listesi_satir detayı, birim kartın birimi.
+  const kapatmaMi = kaynak === 'radyoloji-cihaz' && aktif.tur === 'detay' && aktif.detay.ad === 'kapatmalar';
   const stokFiyatMi = (kaynak === 'stok' || kaynak === 'hizmet') && aktif.tur === 'detay' && aktif.detay.ad === 'fiyatlar';
   const [listeBilgi, setListeBilgi] = useState<Record<string, { yonAdi: string; kdvDahilAdi: string }>>({});
   useEffect(() => {
@@ -335,6 +337,7 @@ export function KartDetaySekmesi({
           //   Anlamsiz kolonu gostermek, doldurulmasi gereken bir alan
           //   izlenimi veriyordu.
           gizliAlanlar={ayar?.gizli ? new Set(ayar.gizli)
+            : kapatmaMi ? new Set(['baslangic', 'bitis'])
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru'])
             : kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
@@ -351,6 +354,12 @@ export function KartDetaySekmesi({
           // KADEMELER (388): plan SATIRININ cocugu - satir modalinin altinda.
           //   Ayri sekme yapilamiyor cunku cerceve detayi kartin id'siyle
           //   baglar, kademe ise satir_id'ye bagli (torun).
+          // CİHAZ KAPATMA (19.11.2026): aralık iki kipten seçilir - tam gün (tarih aralığı) / slot aralığı (tek gün).
+          //   Başlangıç / bitiş kutuları gizli (gizliAlanlar), gridde "Aralık" metni görünür.
+          modalUstBilesen={kapatmaMi && Number(deger.id) > 0
+            ? ((t, yaz) => <KapatmaAraligiSecici cihazId={Number(deger.id)} bas={t.baslangic} bit={t.bitis} salt={salt}
+                                                 onSec={(b, e) => { yaz('baslangic', b); yaz('bitis', e) }} />)
+            : undefined}
           modalAltBilesen={kaynak === 'prim-plani' && aktif.detay.ad === 'satirlar'
             ? (satirId => <KademeGridi planSatirId={satirId} />) : undefined}
           aramaEkFiltre={kaynak === 'prim-plani' && aktif.detay.ad === 'taraflar'

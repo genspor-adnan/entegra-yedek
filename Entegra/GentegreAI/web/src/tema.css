@@ -9898,3 +9898,16 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-sms .rv-sms-metin { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; font-size: 12.5px }
 .rv-sms .rv-sms-alt { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px }
 .rv-sms .rv-sms-uyari { color: #b3261e; margin: 2px 0 4px }
+/* CİHAZ KAPATMA › SLOT SEÇİCİ (19.11.2026): günün slotları, başlangıç + bitiş tıklanır. */
+.cs-slot { border: 1px solid var(--cizgi, #d8dee6); border-radius: 6px; padding: 8px; margin-bottom: 8px }
+.cs-slot-ust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px }
+.cs-slot-cipler { display: flex; flex-wrap: wrap; gap: 4px }
+.cs-slot-cip { min-width: 52px; padding: 3px 6px; border: 1px solid #b9d7c0; background: #eef8f0; border-radius: 4px;
+  font-size: 12px; cursor: pointer }
+.cs-slot-cip sup { font-size: 9px; margin-left: 2px; color: #1f5fa8 }
+.cs-slot-dolu { background: #e6effa; border-color: #a9c4e6 }
+.cs-slot-ogle { background: #f3f3f3; border-color: #ddd; color: #888 }
+.cs-slot-kapali { background: #fbeaea; border-color: #e3b3b3; color: #a33 }
+.cs-slot-cip.on { background: #c62828; border-color: #a11; color: #fff }
+.cs-slot-cip.capa { outline: 2px solid #c62828; outline-offset: 1px }
+.cs-slot-cip:disabled { cursor: default }

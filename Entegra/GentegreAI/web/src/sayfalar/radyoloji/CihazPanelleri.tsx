@@ -5,6 +5,7 @@ import type { CihazDoz, CihazGostergeYaniti, CihazKullanim, CihazOzet } from '..
 import { sayi, tarihSaat } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { Modal } from '../../bilesenler/Modal';
+import { KapatmaAraligiSecici } from '../../bilesenler/radyoloji/CihazSlotSecici';
 
 /**
  * RADYOLOJİ CİHAZ LİSTESİ + KARTI PARÇALARI (967, mockup
@@ -276,12 +277,14 @@ export function CihazKapatModali({ id, onKapat, onTamam }: { id: number; onKapat
   const simdi = new Date(); simdi.setSeconds(0, 0);
   const yerel = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   const [neden, setNeden] = useState(1);
-  const [bas, setBas] = useState(yerel(simdi));
-  const [bit, setBit] = useState(yerel(new Date(simdi.getTime() + 4 * 3600000)));
+  // ARALIK (19.11.2026): saat kutusu yok - tam gün (bugün) varsayılan, slot aralığına geçilebilir.
+  const [bas, setBas] = useState(`${yerel(simdi).slice(0, 10)}T00:00`);
+  const [bit, setBit] = useState(`${yerel(new Date(simdi.getTime() + 86400000)).slice(0, 10)}T00:00`);
   const [aciklama, setAciklama] = useState('');
   const [hata, setHata] = useState<string | null>(null);
   const kaydet = async () => {
     setHata(null);
+    if (!(bas < bit)) { setHata(c('Kapatılacak slot aralığını seçin.')); return }
     try {
       const y = await api.radCihazKapat(id, { nedenTur: neden, baslangic: new Date(bas).toISOString(), bitis: new Date(bit).toISOString(), aciklama });
       onTamam(y.etkilenen);
@@ -295,8 +298,7 @@ export function CihazKapatModali({ id, onKapat, onTamam }: { id: number; onKapat
         <div className="ck-cipler">{([[1, 'Bakım'], [2, 'Arıza'], [3, 'Tatil'], [9, 'Diğer']] as [number, string][]).map(([k, a]) => (
           <button key={k} type="button" className={`ck-cip${neden === k ? ' on' : ''}`} onClick={() => setNeden(k)}>{c(a)}</button>
         ))}</div>
-        <label className="rk-fld"><span className="ck-etiket">{c('Başlangıç')}</span><input type="datetime-local" value={bas} onChange={e => setBas(e.target.value)} /></label>
-        <label className="rk-fld"><span className="ck-etiket">{c('Bitiş')}</span><input type="datetime-local" value={bit} onChange={e => setBit(e.target.value)} /></label>
+        <KapatmaAraligiSecici cihazId={id} bas={bas} bit={bit} onSec={(b, e) => { setBas(b); setBit(e) }} />
         <label className="rk-fld"><span className="ck-etiket">{c('Açıklama')}</span><input value={aciklama} maxLength={200} onChange={e => setAciklama(e.target.value)} /></label>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="sonuk rt-kucuk">{c('Bu aralıkta takvim kapalı çizilir, randevu verilmez. Aralıktaki randevular taşınmaz - sayısı bildirilir.')}</div>
