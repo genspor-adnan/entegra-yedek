@@ -17,7 +17,7 @@ public sealed class CihazKapatmaSlotTestleri(ApiSunucuOlgusu api)
     public async Task Saatli_kapatma_ve_gun_slotlari()
     {
         await using var d = new TestDunyasi(api.Veri);
-        var rol = await d.RolAsync("ckslot", "radyoloji:ged");
+        var rol = await d.RolAsync("ckslot", ["radyoloji:ged", "randevu:g"]);
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
@@ -58,6 +58,22 @@ public sealed class CihazKapatmaSlotTestleri(ApiSunucuOlgusu api)
         var kartJson = (await h.GetFromJsonAsync<JsonElement>($"/api/kart/radyoloji-cihaz/{cihaz}")).GetRawText();
         Assert.Contains($"{gun:dd.MM.yyyy} 09:00–10:00", System.Text.RegularExpressions.Regex.Unescape(kartJson));
         Assert.Contains($"{gun.AddDays(5):dd.MM.yyyy} – {gun.AddDays(6):dd.MM.yyyy} (tam gün)", System.Text.RegularExpressions.Regex.Unescape(kartJson));
+
+        // TAKVİM UCU ŞUBE SAATİ (kullanıcı 19.11.2026: "15.15 başlama olduğu halde 12.15'i kapattı"): dilimsiz yazılan
+        //   15:15 şube saatidir, takvim ucu da 15:15 metni döner (UTC an değil).
+        var yk = await h.PostAsJsonAsync($"/api/radyoloji/cihaz/{cihaz}/kapatma",
+            new { baslangic = $"{gun:yyyy-MM-dd}T15:15", bitis = $"{gun:yyyy-MM-dd}T16:00", nedenTur = 1, aciklama = "takvim" });
+        Assert.True(yk.IsSuccessStatusCode, await yk.Content.ReadAsStringAsync());
+        var tk = await h.GetFromJsonAsync<JsonElement>(
+            $"/api/radyoloji/cihaz-kapatma?bas={gun:yyyy-MM-dd}T00:00&bit={gun:yyyy-MM-dd}T23:59");
+        var tSatir = tk.GetProperty("kapatmalar").EnumerateArray().First(k => k.GetProperty("aciklama").GetString() == "takvim");
+        Assert.Equal($"{gun:yyyy-MM-dd}T15:15:00", tSatir.GetProperty("baslangic").GetString());
+        Assert.Equal($"{gun:yyyy-MM-dd}T16:00:00", tSatir.GetProperty("bitis").GetString());
+        Assert.Equal("15:15-16:00", await api.Veri.TekDegerAsync<string>("""
+            select to_char(k.baslangic at time zone public.fn_sube_zaman_dilimi(@p1), 'HH24:MI') || '-' ||
+                   to_char(k.bitis at time zone public.fn_sube_zaman_dilimi(@p1), 'HH24:MI')
+              from public.radyoloji_cihaz_kapatma k where k.cihaz_id = @p0 and k.aciklama = 'takvim'
+            """, [cihaz, Merkez]));
 
         var j = await h.GetFromJsonAsync<JsonElement>($"/api/radyoloji/cihaz/{cihaz}/gun-slotlari?tarih={gun:yyyy-MM-dd}");
         Assert.True(j.GetProperty("calisir").GetBoolean());

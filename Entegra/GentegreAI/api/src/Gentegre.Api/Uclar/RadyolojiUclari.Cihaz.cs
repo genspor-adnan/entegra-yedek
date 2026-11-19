@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net.Sockets;
 using Gentegre.Api.AraKatman;
+using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -330,8 +331,16 @@ public static partial class RadyolojiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
 
+            // ŞUBE SAATİ (kullanıcı 19.11.2026: "15.15 başlama olduğu halde 12.15'i kapattı"): takvim ve Uygun Saatler
+            //   "yyyy-MM-ddTHH:mm" metnini dilimsiz keser - UTC an gidince 15:15 kapatma 12:15'te çiziliyordu. Uçlar
+            //   şubenin duvar saati metni döner; gelen bas/bit dilimsizse şube saatidir (UtcYap).
+            bas = Saat.UtcYap(bas, baglam.ZamanDilimi); bit = Saat.UtcYap(bit, baglam.ZamanDilimi);
             var satirlar = await baglanti.ListeAsync("""
-                select k.id, k.cihaz_id as "cihazId", k.baslangic, k.bitis,
+                select k.id, k.cihaz_id as "cihazId",
+                       to_char(k.baslangic at time zone public.fn_sube_zaman_dilimi(coalesce(c.sube_id, @p2, 0)),
+                               'YYYY-MM-DD"T"HH24:MI:SS') as baslangic,
+                       to_char(k.bitis at time zone public.fn_sube_zaman_dilimi(coalesce(c.sube_id, @p2, 0)),
+                               'YYYY-MM-DD"T"HH24:MI:SS') as bitis,
                        k.neden_tur as "nedenTur",
                        coalesce(nullif(k.aciklama, ''), coalesce(kd.ad, 'Kapalı')) as aciklama,
                        coalesce(kd.ad, '') as "nedenAdi",
@@ -401,6 +410,9 @@ public static partial class RadyolojiUclari
 
             if (istek.Bitis <= istek.Baslangic)
                 throw GentegreHatasi.IsKurali("Kapatma bitişi başlangıçtan sonra olmalı.");
+            // Dilimsiz metin ŞUBE saatidir (eskiden olduğu gibi UTC yazılıp 3 saat kayıyordu); "Z"li an olduğu gibi.
+            var basUtc = Saat.UtcYap(istek.Baslangic, baglam.ZamanDilimi);
+            var bitUtc = Saat.UtcYap(istek.Bitis, baglam.ZamanDilimi);
 
             await using var baglanti = await veri.AcAsync(iptal);
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -412,9 +424,9 @@ public static partial class RadyolojiUclari
                    and r.baslangic < @p2
                    and (r.baslangic + make_interval(mins => greatest(coalesce(r.sure_dk, 0), 1)))
                        > @p1
-                """, islem, [id, istek.Baslangic, istek.Bitis], iptal);
+                """, islem, [id, basUtc, bitUtc], iptal);
 
-            var yeni = await KapatmaYazAsync(baglanti, islem, log, baglam, id, istek.Baslangic, istek.Bitis,
+            var yeni = await KapatmaYazAsync(baglanti, islem, log, baglam, id, basUtc, bitUtc,
                                              istek.NedenTur ?? (short)1, istek.Aciklama ?? "", etkilenen, iptal);
             await islem.CommitAsync(iptal);
 

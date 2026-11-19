@@ -517,7 +517,7 @@ public static partial class AksiyonKatalogu
             //   için kapatma ekranı çıksın.. tarih ve işaretli slotlar direkt form içine gelsin"): takvimin cihaz
             //   sütununda işaretli aralık kapatma penceresine (tam gün / slot aralığı) gelir. Kapatmayı yazan yetki
             //   radyoloji değiştir - poliklinik kurulumunda düğme çıkmaz.
-            new("randevu.kapat",    "🔒 Kapat",  "radyoloji",
+            new("randevu.kapat",    "🔒 Slot Kapat", "radyoloji",   // ad: kullanıcı 19.11.2026 "kapat rename Slot Kapat"
                 KaynakKodu: "radyoloji", Islem: Islem.Degistir, Sira: 48),
             // GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı.
             new("randevu.geri-al",  "↩ Geri Al", "randevu", Hedef: "sagtus,palet",

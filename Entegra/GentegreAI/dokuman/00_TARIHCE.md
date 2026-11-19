@@ -39,6 +39,11 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   takvimin cihaz sütununda işaretli aralık `CihazKapatmaModali`'na gelir; pencere artık saat kutusu yerine aynı
   `KapatmaAraligiSecici` (slot kipinde açılır, tam güne geçilebilir) ve UTC an gönderir. Takvimin kendi "🔒 Cihazı
   Kapat" düğmesi kalktı (iş tek yerde).
+- Düğme adı **🔒 Slot Kapat** (kullanıcı). **Saat kayması düzeltildi** (kullanıcı: "15.15 başlama olduğu halde 12.15'i
+  kapattı"): kayıt doğruydu (UTC 12:15 = 15:15), ama `GET /api/radyoloji/cihaz-kapatma` UTC an döndürüyor, takvim ve
+  Uygun Saatler metni dilimsiz kesiyordu. Uç artık şubenin duvar saati metni döner, gelen bas/bit dilimsizse şube saati;
+  `POST .../kapatma` dilimsiz metni şube saatinde yorumlar (eskiden UTC yazıyordu - o yoldan girilmiş eski kapatmalar
+  3 saat ileride görünür).
 
 ---
 

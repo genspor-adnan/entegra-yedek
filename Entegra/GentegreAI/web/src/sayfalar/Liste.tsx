@@ -1050,7 +1050,7 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
       if (kod === 'randevu.kapat') {
         const ar = randevuEkran.aralik;
         if (!ar?.cihazId) {
-          mesaj('Takvimin Cihaz görünümünde kapatılacak slotları fareyle işaretleyin, sonra Kapat\'a basın.');
+          mesaj('Takvimin Cihaz görünümünde kapatılacak slotları fareyle işaretleyin, sonra Slot Kapat\'a basın.');
           return;
         }
         const t = new Date(ar.baslangic); t.setMinutes(t.getMinutes() + (ar.sureDk || 0));
