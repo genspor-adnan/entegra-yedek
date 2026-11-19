@@ -394,12 +394,13 @@ table.grid tr.flt input {
 .satir-pasif td { color: var(--soluk) }
 /* RANDEVU DURUMU (16.11.2026): satır zemini + solda 4px şerit + dolu rozet. Seçili satırda zemin seçim
    rengine döner ama şerit ve rozet kalır. */
-tr.rv-geldi td      { background: var(--okzem) }
+/* GELDİ DAHA BELİRGİN (kullanıcı 19.11.2026): soluk okzem yerine yeşilin %24'ü (koyu temada da yeşil kalır). */
+tr.rv-geldi td      { background: color-mix(in srgb, var(--ok) 24%, transparent) }
 tr.rv-gelmedi td    { background: var(--hatazem) }
 tr.rv-ertelendi td  { background: var(--uyarizem) }
 tr.rv-iptal td      { color: var(--soluk); text-decoration: line-through; text-decoration-color: var(--hatakenar) }
 tr.rv-planli td:first-child     { box-shadow: inset 4px 0 0 var(--mor) }
-tr.rv-geldi td:first-child      { box-shadow: inset 4px 0 0 var(--ok) }
+tr.rv-geldi td:first-child      { box-shadow: inset 6px 0 0 var(--ok) }
 tr.rv-gelmedi td:first-child    { box-shadow: inset 4px 0 0 var(--hata) }
 tr.rv-ertelendi td:first-child  { box-shadow: inset 4px 0 0 var(--uyari) }
 tr.rv-iptal td:first-child      { box-shadow: inset 4px 0 0 var(--soluk) }

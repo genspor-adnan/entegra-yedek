@@ -698,10 +698,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
                              title={[r.hizmet, r.gonderen ? `${cev('Gönderen')}: ${String(r.gonderen)}` : '', r.hekim, r.bolumAdi, r.aciklama]
                                       .map(x => String(x ?? '')).filter(Boolean).join(' · ')}
                              style={{
-                               background: Number(r.durum) === 2 ? 'var(--okzem)'
+                               // GELDİ DAHA BELİRGİN (19.11.2026): koyu yeşil zemin + kalın sol şerit.
+                               background: Number(r.durum) === 2 ? 'color-mix(in srgb, var(--ok) 30%, transparent)'
                                           : Number(r.durum) === 3 ? 'var(--hatazem)'
                                           : 'var(--yuz2)',
-                               border: '1px solid var(--cizgi)', borderRadius: 4,
+                               border: `1px solid ${Number(r.durum) === 2 ? 'var(--ok)' : 'var(--cizgi)'}`,
+                               borderLeftWidth: Number(r.durum) === 2 ? 4 : 1, borderRadius: 4,
                                padding: '2px 6px', marginBottom: 2, fontSize: 11.5,
                              }}>
                           {onSec && (
