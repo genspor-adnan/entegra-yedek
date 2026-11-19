@@ -9911,3 +9911,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .cs-slot-cip.on { background: #c62828; border-color: #a11; color: #fff }
 .cs-slot-cip.capa { outline: 2px solid #c62828; outline-offset: 1px }
 .cs-slot-cip:disabled { cursor: default }
+/* RANDEVU TAKVİMİ › KAYIT SEÇİMİ (19.11.2026): sağ üstte işaret kutusu, tek tık seçer, çift tık açar. */
+.takvim-kayit { position: relative; padding-right: 20px !important; cursor: pointer; user-select: none }
+.takvim-kayit .takvim-kayit-isaret { position: absolute; top: 2px; right: 2px; margin: 0; width: 13px; height: 13px; cursor: pointer }
+.takvim-kayit.secili { outline: 2px solid var(--mor, #6d4aff); outline-offset: -1px; box-shadow: 0 0 0 1px #fff inset }

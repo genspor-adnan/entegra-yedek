@@ -64,7 +64,7 @@ function haftaBasi(t: Date) {
   return g;
 }
 
-export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
+export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, seciliId, onSec,
                                  bolum, hekimId, hekimler = [], cihazlar = [],
                                  yanPanel, onBirak, onKapatmaIste,
                                  gorunumBaslangic, onGorunumDegisti, hekimSabit, doktorYok }: {
@@ -96,6 +96,13 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
   onYeni(baslangic: string, hekimId?: number, cihazId?: number): void;
   /** Dolu randevu: kartı aç. */
   onAc(id: number): void;
+  /**
+   * SEÇİM (kullanıcı 19.11.2026: "kayıtlı randevuyu işaretlemek için sağ üst köşesine check ekle.. tek tıklama
+   * seçsin.. çift tıklama formu açsın"): seçili randevu araç çubuğunun seçili kaydıdır (Geldi / Ertele / İptal…).
+   * Aynı randevuya yeniden tıklamak seçimi kaldırır (null).
+   */
+  seciliId?: number | null;
+  onSec?(satir: Record<string, unknown> | null): void;
   /**
    * Fareyle YUKARIDAN AŞAĞI sürüklenerek seçilen aralık (kullanıcı): başlangıç
    * ve süre "＋ Yeni"ye taşınır. Seçim tek başına kart AÇMAZ - kullanıcı önce
@@ -675,10 +682,16 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                           {kapatmaBasi && <span>🔒 {kapaliBlok.metin}</span>}
                         </div>
                       )}
-                      {kayitlar.map(r => (
+                      {kayitlar.map(r => {
+                        const sec = seciliId != null && Number(r.id) === seciliId;
+                        const degistir = () => onSec?.(sec ? null : r);
+                        return (
                         <div key={String(r.id)}
-                             className={span > 1 && kayitlar.length === 1 ? 'takvim-uzun' : undefined}
-                             onClick={e => { e.stopPropagation(); onAc(Number(r.id)) }}
+                             className={[span > 1 && kayitlar.length === 1 ? 'takvim-uzun' : '', 'takvim-kayit', sec ? 'secili' : '']
+                                          .filter(Boolean).join(' ')}
+                             // TEK TIK SEÇER, ÇİFT TIK FORMU AÇAR (19.11.2026). Seçim yoksa (onSec verilmemiş) eski davranış.
+                             onClick={e => { e.stopPropagation(); if (onSec) degistir(); else onAc(Number(r.id)) }}
+                             onDoubleClick={e => { e.stopPropagation(); if (onSec) onAc(Number(r.id)) }}
                              title={[r.hizmet, r.gonderen ? `${cev('Gönderen')}: ${String(r.gonderen)}` : '', r.hekim, r.bolumAdi, r.aciklama]
                                       .map(x => String(x ?? '')).filter(Boolean).join(' · ')}
                              style={{
@@ -688,6 +701,12 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                                border: '1px solid var(--cizgi)', borderRadius: 4,
                                padding: '2px 6px', marginBottom: 2, fontSize: 11.5,
                              }}>
+                          {onSec && (
+                            <input type="checkbox" className="takvim-kayit-isaret" checked={sec}
+                                   aria-label={cev('Randevuyu seç')}
+                                   onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}
+                                   onChange={degistir} />
+                          )}
                           {/* YAPILACAK İŞLEM hastanın sağında parantezde (kullanıcı 17.10.2026). */}
                           <b>{String(r.hasta ?? '')}</b>{r.hizmet ? <span style={{ opacity: .85 }}> ({String(r.hizmet)})</span> : null}
                           <div style={{ opacity: .75 }}>
@@ -695,7 +714,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
                             {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.gonderen ? ` (${String(r.gonderen)})` : ''}{r.hekim ? ` · ${String(r.hekim)}` : ''}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </td>
                   );
                 })}

@@ -194,6 +194,11 @@ interface Props {
   /** Satir secimi degisince cagrilir - disaridaki dugmeler (Ekstre gibi) buna gore
       aktif/pasif olur. */
   onSecimDegisti?(satir: ListeSatiri | null): void;
+  /**
+   * DIŞARIDAN SEÇİLİ KAYIT (randevu takvimi, 19.11.2026): doluysa araç çubuğu aksiyonları (aktiflik + çalıştırma)
+   * gridin seçimi yerine bu kayda uygulanır - takvim görünümünde grid satırı yoktur.
+   */
+  disSecim?: ListeSatiri | null;
   /** ONAY KUTUSU İŞARETLİ satırlar değişince (yüklü sayfa) - gömülü gridin
       üstündeki toplu eylem düğmeleri için (ör. reçete ilaçlarını sil). */
   onIsaretliDegisti?(satirlar: ListeSatiri[]): void;
@@ -293,7 +298,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onKodSuzgec, varsayilanGrup, grupBirimi, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum, ekGorunumler, grupAnalizGizli,
                           gorunumBaslangic, onGorunumDegisti,
-                          onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti,
+                          onCipSecildi, onCipRota, onSecimDegisti, onIsaretliDegisti, disSecim,
                           yenile, odaklaSonEklenen, onEBelgeDegisti,
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -491,9 +496,10 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
 
   // Aksiyonlar secili kayda gore yeniden cozulur: "belge zaten gonderilmis" gibi
   //   kosullar sunucuda degerlendirilir, istemci kural yazmaz.
+  const aksiyonSatiri = disSecim ?? seciliSatir;
   const { aksiyonlar: aksiyonlarHam } = useAksiyonlar(
     aksiyonEkrani ?? 'cari-liste',
-    seciliSatir?.id != null ? Number(seciliSatir.id) : null);
+    aksiyonSatiri?.id != null ? Number(aksiyonSatiri.id) : null);
   // COKLU SECIMDE CALISAN AKSIYONLAR (kullanici 11.10.2026: "gelen kutusu coklu
   //   secimde ustteki butonlar aktarma kabul ret calisabilmeli"): tek kayit yokken
   //   sunucu bunlari "Once bir kayit secin" diye pasif doner; isi coklu isleyici
@@ -510,8 +516,8 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     if (kod === 'genel.csv') { void csvIndir(); return }
     // Secili ID listesi de gider: bir aksiyon (or. e-Belge hazirla/gonder)
     //   coklu secimde TOPLU calisabilsin. Tek secimde liste tek elemanlidir.
-    onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, seciliSatir,
-                satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
+    onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, aksiyonSatiri,
+                disSecim ? [disSecim] : satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
   };
 
   /**

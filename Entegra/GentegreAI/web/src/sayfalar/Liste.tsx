@@ -187,6 +187,10 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
   // Kart kaydedilince (ekleme ya da duzenleme) grid'i yeniden yukletmek icin - GenForm
   //   onKaydedildi'de bir arttirilir, GenGrid bu degisimi izleyip yukle() cagirir.
   const [yenile, setYenile] = useState(0);
+  // TAKVİMDE SEÇİLİ RANDEVU (19.11.2026): araç çubuğu aksiyonları bu kayda uygulanır; liste tazelenince
+  //   (durum değişti) seçim düşer - eski satırın durumuyla aksiyon çalışmasın.
+  const [takvimSecili, setTakvimSecili] = useState<ListeSatiri | null>(null);
+  useEffect(() => { setTakvimSecili(null) }, [yenile, tanim.kaynak]);
   /** KART KENDİ SEKMESİNDE (kartSekmesiVar): bu sekmede liste çizilmez, yalnız kart. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   /** Kart açan gezinme: sekmeler açıksa kayıtsız değişiklikli kartı korur (EkranSekmeleri.kartaGit). */
@@ -1328,7 +1332,8 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
       cipBaslangic={cipIndeks}
       onCipSecildi={setCipIndeks}
       onCipRota={r => git(`/${r}`)}
-      onSecimDegisti={s => { setSeciliSatir(s); if (s) setSonSeciliId(Number(s.id)) }}
+      onSecimDegisti={s => { setSeciliSatir(s); if (s) { setSonSeciliId(Number(s.id)); setTakvimSecili(null) } }}
+      disSecim={tanim.kaynak === 'randevu' ? takvimSecili : undefined}
       onIsaretliDegisti={panel?.basSag ? setIsaretli : undefined}
       cipSonu={tanim.kategoriSuzgeci ? (
         // Ciplerin SAGINDA: agac panelini acan dugme + (panel kapaliyken)
@@ -1509,6 +1514,8 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
                   + (bol ? `&bolum=${bol}` : ''));
             }}
             onAc={id => git(`/randevu/${id}`)}
+            seciliId={takvimSecili ? Number(takvimSecili.id) : null}
+            onSec={r => setTakvimSecili(r as ListeSatiri | null)}
             onAralik={(bas, sure, hek, cih) =>
               randevuEkran.setAralik(bas
                 ? { baslangic: bas, sureDk: sure, hekimId: hek, cihazId: cih } : null)}
