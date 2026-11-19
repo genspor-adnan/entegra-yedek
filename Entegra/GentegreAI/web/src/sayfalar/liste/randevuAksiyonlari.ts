@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { hataMetni } from '../../api/sozlesme';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ErtelenecekRandevu } from '../../bilesenler/RandevuErtelePenceresi';
@@ -57,7 +57,8 @@ export async function randevuAksiyonu(
     if (d === 1) { mesaj('Randevu zaten planlandı durumunda.'); return true }
     if (d === 5) { mesaj('Ertelenen randevu geri alınmaz - ertelemeyle açılan yeni randevuyu iptal edin.'); return true }
     if (satir.belgeId) { mesaj('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.'); return true }
-    if (!await onay(`Randevu "${String(satir.durumAdi ?? '')}" durumundan Planlandı'ya geri alınsın mı?`)) return true;
+    // ONAY SORULMAZ (kullanıcı 19.11.2026: "randevuda durum değiştirince yapılsın mı diye onay sormasın") - geri
+    //   alınabilir bir işlem; Durum Değiş menüsündeki diğer durumlar gibi doğrudan yazılır.
     await guvenli(async () => {
       const mevcut = await api.kartOku('randevu', Number(satir.id));
       await api.kartGuncelle('randevu', Number(satir.id), { surum: mevcut.kart.surum, kart: { durum: 1 } });
