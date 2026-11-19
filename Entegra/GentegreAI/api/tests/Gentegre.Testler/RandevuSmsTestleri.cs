@@ -82,6 +82,10 @@ public sealed class RandevuSmsTestleri(ApiSunucuOlgusu api)
              where b.kaynak_id = @p0 and b.kaynak_tur = 4 and s.kod = 'randevu.hatirlatma_sube' order by b.id desc limit 1
             """, [rid]));
 
+        // 1383: SMS damgası (sms_bilgi_baslangic) yazıldı ama randevu DEĞİŞMİŞ sayılmaz - liste "(HC)" gösterir.
+        Assert.True(await api.Veri.TekDegerAsync<bool>(
+            "select degistirme_tarihi is null from public.randevu where id = @p0", [rid]));
+
         // 2) Aynı saatle yeniden kayıt: bilgi ikinci kez gitmez; hatırlatma tazelenir (eski iptal, tek bekleyen).
         await Tazele();
         Assert.Equal(1, await Say("randevu.bilgi"));
@@ -89,6 +93,9 @@ public sealed class RandevuSmsTestleri(ApiSunucuOlgusu api)
 
         // 3) Saat değişti + kartta elle metin: yeni bilgi elle metinle, metin sonra temizlenir.
         await api.Veri.CalistirAsync("update public.randevu set baslangic = baslangic + interval '1 hour', sms_metni = 'Elle yazilan' where id = @p0", [rid]);
+        // 1383: iş alanı (saat) değişti - damga dolar, liste "(HC-..)" gösterir.
+        Assert.True(await api.Veri.TekDegerAsync<bool>(
+            "select degistirme_tarihi is not null from public.randevu where id = @p0", [rid]));
         await Tazele();
         Assert.Equal(2, await Say("randevu.bilgi"));
         Assert.Equal("Elle yazilan", await SonGovde("randevu.bilgi"));

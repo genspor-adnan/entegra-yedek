@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (734 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (735 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -708,6 +708,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_protokol_modalite` | `1331_hizmet_modalite_tek_deger.sql` | — |
 | `tg_radyoloji_rapor_teletip` | `1374_radyoloji_rapor_revize.sql` | 1309_teletip_oru_kuyrugu.sql |
 | `tg_randevu_cakisma` | `1119_randevu_erteleme.sql` | 316_randevu_cihaz_kaynagi.sql, 317_randevu_tetkik_uyum.sql |
+| `tg_randevu_degistirme_tarihi` | `1383_randevu_degistirme_tarihi.sql` | — |
 | `tg_randevu_durum_geri` | `1122_randevu_geri_al_kurali.sql` | — |
 | `tg_randevu_izin_kontrol` | `1119_randevu_erteleme.sql` | 748_izin_calisma_plani.sql, 940_personel_unvan_yalniz_onek.sql, 948_kismi_gun_izin.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
 | `tg_randevu_mesai_kontrol` | `1119_randevu_erteleme.sql` | 943_randevu_mesai_disi_kontrol.sql, 946_randevu_mesai_yerel_saat.sql, 950_ik_izin_saatli_istisna_izinsiz.sql |
