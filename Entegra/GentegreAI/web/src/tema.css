@@ -9974,8 +9974,12 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-avatar.degisir { cursor: pointer }
 .rv-avatar.degisir:hover { box-shadow: inset 0 0 0 2px rgba(255,255,255,.55), 0 0 0 3px var(--mavi, #2f6db3) }
 /* RANDEVU ✎ alanların sağ üst köşesinde (19.11.2026). */
-.rv-govde { position: relative }
-.rv-govde > .rv-kalem { position: absolute !important; top: 2px; right: 2px; z-index: 2; height: 26px; width: 28px; font-size: 14px }
+/* ✎ bantta Randevu kutusunun solunda, çerçeveli, dikey ortalı (19.11.2026; mockup .ik.kalem). */
+.rv-kalem { position: static !important; align-self: center; width: 32px; height: 32px; font-size: 15px;
+  border: 1px solid #98c2ee !important; border-radius: 4px; background: linear-gradient(#f3f8ff, #dfeafa) !important;
+  color: var(--mavi, #2f6db3) !important; display: grid; place-items: center; padding: 0 }
+.rv-kalem.acik { background: linear-gradient(#3b7cc4, #2f6db3) !important; color: #fff !important; border-color: #2a5f9c !important }
+.rv-kalem:disabled { opacity: .45 }
 /* RANDEVU BANDI › Durum rozetinin sağında SMS Gönder işareti (19.11.2026). */
 .rv-sms-isaret-bant { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 600; color: var(--metin, #1f2d3a); cursor: pointer }
 .rv-sms-isaret-bant input { margin: 0 }

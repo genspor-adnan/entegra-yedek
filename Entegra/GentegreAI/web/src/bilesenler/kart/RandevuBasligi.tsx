@@ -97,8 +97,9 @@ function zamanBilgisi(baslangic: unknown, sureDk: number) {
 }
 
 /**
- * RANDEVU ✎ (kullanıcı 19.11.2026: "kalemi alttaki alanın sağ üst köşesine taşı"): randevu alanları grubunun sağ üst
- * köşesinde; kartın kipini (GenForm, KartKipBaglami) açar / kapatır. Başvuruya dönüşmüş randevuda pasif.
+ * RANDEVU ✎ (kullanıcı 19.11.2026: "kalemi çerçeveli olarak hasta bandında randevu kutusu soluna ortalayarak taşı"):
+ * bantta, Randevu kutusunun solunda dikey ortalı, çerçeveli; kartın kipini (GenForm, KartKipBaglami) açar / kapatır.
+ * Başvuruya dönüşmüş randevuda pasif.
  */
 export function RandevuKalemi({ kilitli }: { kilitli: boolean }) {
   const k = useContext(KartKipBaglami);
@@ -172,6 +173,7 @@ export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, di
               {hastaAlani}
             </div>}
         <div className="rv-kutular">
+          <RandevuKalemi kilitli={!yeniMi && kilitli} />
           <div className={`rv-kutu rv-kutu-zaman${z?.gecti && durum === 1 ? ' gecti' : ''}`}>
             <small>{c('Randevu')}</small>
             <b>{z?.aralik ?? '—'}</b>
