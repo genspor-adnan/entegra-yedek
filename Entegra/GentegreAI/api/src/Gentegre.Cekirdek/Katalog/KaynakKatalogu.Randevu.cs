@@ -44,6 +44,10 @@ public static partial class KaynakKatalogu
             // GÖNDEREN (dış) HEKİM (1120) - görüntüleme merkezinde hastayı gönderen.
             new("gonderen",   "coalesce(public.fn_taraf_ad(gh.unvan, gh.ad, gh.soyad)::varchar(120), '')", "metin", "Gönderen Doktor", Genislik: 160,
                 AyarKapisi: "randevu.gonderen_doktor"),
+            // EKLEYEN / DEĞİŞTİREN BAŞ HARFLERİ (kullanıcı 19.11.2026: "randevuyu ekleyen kullanıcının parantez içinde
+            //   başharflerini yaz.. değişim olduysa değişenin de: (HC) / (HC-SK) / kendisi değiştiyse (HC-HC)" · "gönderen dr dan sonra yazsın"). Değişim =
+            //   kart üzerinden güncelleme (degistirme_tarihi dolu); eklemede degistiren de yazılır ama tarihi boş kalır.
+            new("kayit", RandevuKatalog.Kayit, "metin", "Kayıt", Hizalama: "orta", Genislik: 80),
             new("kendiIstegi", "coalesce(rv.kendi_istegi, 0)", "sayi", "Kendi İsteği", Varsayilan: false,
                 AyarKapisi: "randevu.gonderen_doktor"),
             // ÖDEYEN KURUM (1347): başvuruya dönüşte odeyen_kurum_id olur; randevu aksiyonu kurumId'yi okur.
@@ -103,6 +107,18 @@ public static partial class KaynakKatalogu
         public const string DurumAdi =
             "case rv.durum when 1 then 'Planlandı' when 2 then 'Geldi' " +
             "              when 3 then 'Gelmedi'   when 4 then 'İptal' when 5 then 'Ertelendi' else '' end";
+
+        /// <summary>Kullanıcının baş harfleri: ad + soyad ilk harfleri (soyad yoksa ünvanın ilk iki kelimesi), tr büyük harf.</summary>
+        private static string BasHarf(string id) =>
+            "(select upper(left(coalesce(nullif(bt.ad, ''), split_part(bt.unvan, ' ', 1)), 1) " +
+            "          || left(coalesce(nullif(bt.soyad, ''), split_part(bt.unvan, ' ', 2)), 1)) " +
+            "   from public.taraf bt where bt.id = " + id + ")";
+
+        /// <summary>"(HC)" ya da değiştiyse "(HC-SK)" (19.11.2026).</summary>
+        public static readonly string Kayit =
+            "coalesce('(' || " + BasHarf("rv.ekleyen") +
+            " || case when rv.degistirme_tarihi is not null and rv.degistiren is not null " +
+            "         then '-' || coalesce(" + BasHarf("rv.degistiren") + ", '?') else '' end || ')', '')";
 
         /// <summary>Erteleme izi (1119): eski satırda neden + yeni saat, yeni satırda eski saat.</summary>
         public const string Erteleme =

@@ -714,7 +714,10 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
                           <b>{String(r.hasta ?? '')}</b>{r.hizmet ? <span style={{ opacity: .85 }}> ({String(r.hizmet)})</span> : null}
                           <div style={{ opacity: .75 }}>
                             {/* GÖNDEREN saatin sağında parantezde (kullanıcı 17.10.2026) - kolon kapalıysa (1121) gelmez. */}
-                            {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.gonderen ? ` (${String(r.gonderen)})` : ''}{r.hekim ? ` · ${String(r.hekim)}` : ''}
+                            {String(r.saat ?? '')}–{String(r.bitis ?? '')}{r.gonderen ? ` (${String(r.gonderen)})` : ''}
+                            {/* EKLEYEN / DEĞİŞTİREN baş harfleri (19.11.2026): (HC) · (HC-SK) - gönderen doktordan sonra. */}
+                            {r.kayit ? <span title={cev('Ekleyen - değiştiren')}> {String(r.kayit)}</span> : null}
+                            {r.hekim ? ` · ${String(r.hekim)}` : ''}
                           </div>
                         </div>
                         );
