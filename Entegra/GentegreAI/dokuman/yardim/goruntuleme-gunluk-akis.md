@@ -30,7 +30,7 @@ Her istemin kartında üstte bir **akış şeridi** vardır: **İstem → Randev
 
 ## Banko / sekreter (gün içi)
 1. **Telefonla randevu:** takvimde cihaz sütununda boş saate tıklayın, hastayı ve tetkiki seçin. Radyolojide randevu hekime değil **cihaza** verilir.
-2. **Hasta geldiğinde (kabul):** Randevu listesinde satırı seçip **✔ Geldi** (ya da **➜ Başvuruya Dönüştür**). Cihazlı randevuda bu düğme **Radyoloji İstemi (kabul) penceresini** açar: başvuru (protokol), tetkik başına istem (Accession No) ve tahsilat tek işlemde oluşur. Ayrıntı: `radyoloji-hasta-kabul`.
+2. **Hasta geldiğinde (kabul):** Randevu listesinde randevuyu seçip **◐ Durum Değiş › Geldi** (yalnız durum), ardından **➜ Başvuruya Dönüştür**: başvuru kartında ücret satırı + kayıt ile tetkik başına istem (Accession No) oluşur, tahsilat başvurudan alınır. Randevusuz hasta için Kayıt Kabul'de başvuru açılır; istem yalnız başvuru kaydından açılır (`radyoloji-hasta-kabul`).
 3. **Yeni hasta:** önce hasta kartı açılır. Ayrıntı: `hasta-arama-kayit`.
 4. **Polikliniğe bağlı merkezde hekim istemi:** hekim muayenede görüntüleme isterse istem başvuruda **bekler**; başvuru kartında **🩺 Doktor İstemi** ile ücretlendirip **💾 Kaydet** deyince çalışma listesine düşer. Ayrıntı: `basvuru-acma`.
 5. **Tahsilat:** kabul penceresinde **💵 Tahsilat Al** ya da başvuru kartının Tahsilat sekmesinde **💵 Nakit** / **💳 POS**.
@@ -77,7 +77,7 @@ Ayrıntı: `banko-oturum-gun-sonu`.
 
 ## Kaynaklar
 - web/src/sayfalar/listeTanimlari.Radyoloji.ts, web/src/sayfalar/listeTanimlari.Ticari.ts (banko)
-- web/src/sayfalar/liste/randevuAksiyonlari.ts (cihazlı randevuda Geldi = kabul)
+- web/src/sayfalar/liste/randevuAksiyonlari.ts (Geldi = yalnız durum, 19.11.2026)
 - web/src/bilesenler/radyoloji/IstemAkisi.tsx (akış şeridi)
 - dokuman/00_TARIHCE.md (310-320 radyoloji kabul, 912-919 başvuru → istem banko kapısı, 987 banko vardiyası)
 

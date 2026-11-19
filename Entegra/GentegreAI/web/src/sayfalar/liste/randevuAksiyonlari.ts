@@ -9,9 +9,9 @@ import { yerelZamanDamgasi } from './zaman';
 /**
  * RANDEVU DURUM AKISI (243) ve BASVURUYA DONUSUM (265 · 317).
  *
- * `Liste.tsx` govdesinden ayrildi. Cihazli (radyoloji) randevuda "Geldi" ve
- * "Başvuru" duz durum degisikligi degil KABUL ekranidir (317): hasta cogunlukla
- * kuruma GELMEDEN randevu alir, geldigi an basvuru + ucret + ISTEM dogar.
+ * `Liste.tsx` govdesinden ayrildi. "Geldi" her randevuda yalniz durum yazar
+ * (19.11.2026; 317-19.11 arasi cihazli randevuda kabul ekranini aciyordu).
+ * Basvuru + ucret + ISTEM "Başvuruya Dönüştür" ile dogar (17.10 + 1242).
  *
  * Donus: aksiyon burada ele alindiysa true.
  */
@@ -80,33 +80,9 @@ export async function randevuAksiyonu(
     return true;
   }
 
-  /**
-   * RADYOLOJI RANDEVUSUNDA "GELDI" = KABUL (317).
-   *
-   * Hasta cogunlukla kuruma GELMEDEN randevu alir: o an ne basvuru ne odeme ne
-   * istem vardir - yalniz plan. Geldigi an kabul edilmeli: basvuru acilir,
-   * ucret/tahsilat alinir, ISTEM dogar; cihazin calisma listesine (MWL)
-   * dusecek kayit da budur. Bu yuzden cihazli randevuda "Geldi" durumu tek
-   * basina yazmak yerine kabul ekranini acar.
-   */
-  const radyolojiKabulu = (s: ListeSatiri) => {
-    b.setIstemModali({
-      hastaId: Number(s.hastaId), hastaAdi: String(s.hasta ?? ''),
-      // Isteyen hekim disaridan olabilir - kabul ekraninin tam hali acilir.
-      disIstem: true,
-      randevuId: Number(s.id),
-      hizmetId: Number(s.hizmetId) || undefined,
-      // GÖNDEREN HEKİM (1120): randevuda seçilen dış hekim istemin isteyeni olur.
-      gonderen: Number(s.gonderenId) ? { id: Number(s.gonderenId), ad: String(s.gonderen ?? '') } : undefined,
-    });
-  };
-
-  if (kod === 'randevu.geldi' && satir && Number(satir.cihazId) > 0
-      && !satir.belgeId) {
-    if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return true }
-    radyolojiKabulu(satir);
-    return true;
-  }
+  // GELDİ = YALNIZ DURUM (kullanıcı 19.11.2026: "randevu geldi diye durum değişince radyoloji istem kartını açtı..
+  //   artık istemiyorum"): 317'den beri cihazlı randevuda Geldi kabul ekranını (istem kartı) açıyordu. Artık her
+  //   randevuda yalnız durumu yazar; başvuru / ücret / istem "➜ Başvuruya Dönüştür" ile doğar (1242 başvuru -> istem).
 
   if (kod === 'randevu.geldi' || kod === 'randevu.gelmedi' || kod === 'randevu.iptal') {
     if (!satir) return true;
@@ -124,7 +100,7 @@ export async function randevuAksiyonu(
   if (!satir) return true;
   // CİHAZLI randevu da BAŞVURUYA döner (kullanıcı 17.10.2026: "başvuruya dönüştür deyince radyoloji
   //   istem ekranı değil başvuru sekmesi açılmalı, buradaki bilgiler oraya geçmeli"): istem / accession
-  //   başvuru kartının kendi istem penceresinden yapılır. Kabul ekranı yalnız "Geldi"de (317) kalır.
+  //   başvuru kartının kendi istem penceresinden yapılır. (Geldi'deki kabul ekranı da 19.11.2026'da kalktı.)
   await guvenli(async () => {
     let hastaId = Number(satir.hastaId) || 0;
     const hizmetId = Number(satir.hizmetId) || 0;

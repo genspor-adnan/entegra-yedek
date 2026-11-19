@@ -11,7 +11,7 @@ surum: 1
 urun_modu: 2
 yetki: randevu
 erisim: kullanici
-ozet: Cihaz randevusu olan hasta geldiğinde Geldi / Başvuruya Dönüştür ile açılan Radyoloji İstemi (kabul) penceresi; tetkik seçimi, isteyen hekim / kurum, ödeyen kurum, kabul sonrası seçenekleri ve tahsilat.
+ozet: Radyoloji istemi YALNIZ başvuru kaydından açılır (başvuru kartının istem penceresi); tetkik seçimi, isteyen hekim / kurum, ödeyen kurum, kabul sonrası seçenekleri ve tahsilat. Randevuda Geldi yalnız durum yazar.
 guncelleme: 2026-10-10
 dogrulama: insan-dogrulama-bekliyor
 ---
@@ -20,7 +20,9 @@ dogrulama: insan-dogrulama-bekliyor
 Görüntüleme merkezinde hasta çoğunlukla **randevu alarak** gelir. Randevu yalnız bir plandır: başvuru, ücret ve istem (Accession No) yoktur. Hasta kapıya geldiğinde **kabul** yapılır; bu tek işlemde başvuru (protokol) açılır, her tetkik için ayrı istem oluşur, ücret başvuruya yazılır ve istenirse tahsilat alınır. İstem ancak bundan sonra teknisyenin çalışma listesine düşer.
 
 ## Ekrana giriş yolları
-- **Randevu › Randevular**: hastanın cihaz randevusunu seçin → **✔ Geldi** ya da **➜ Başvuruya Dönüştür**. Cihazlı randevuda iki düğme de durum yazmak yerine **Radyoloji İstemi — [hasta adı]** penceresini açar.
+- **İstem yalnız başvuru kaydından açılır.** Radyoloji listelerinde "Yeni İstem" yoktur; başvurusuz (ücretsiz, ödeyensiz) istem oluşmaz.
+- **Randevulu hasta**: Randevu listesinde **◐ Durum Değiş › Geldi** yalnız durumu yazar (19.11.2026'dan beri istem penceresi açmaz). **➜ Başvuruya Dönüştür** başvuru kartını açar; istem ve ücret orada oluşur (bkz. `basvuru-acma`).
+- **Randevusuz hasta**: Kayıt Kabul'de başvuru açılır, istem başvuru kartından.
 - Polikliniği olan merkezde hekimin muayeneden istediği görüntüleme başvuru kartında **🩺 Doktor İstemi** ile ücretlendirilir (bkz. `basvuru-acma`).
 
 ## Ön koşullar
@@ -36,17 +38,17 @@ Görüntüleme merkezinde hasta çoğunlukla **randevu alarak** gelir. Randevu y
 - **📷 İstem Kâğıdını Tara**: dış hekimin istek kâğıdını isteme ekler.
 
 ## Adım adım
-1. **Randevu › Randevular**'da hastanın satırını seçin, **✔ Geldi**'ye basın.
+1. Hastanın başvuru kartını açın (randevudan **➜ Başvuruya Dönüştür** ya da Kayıt Kabul'de yeni başvuru) ve istem penceresini açın.
 2. Açılan pencerede tetkiğin doğru olduğunu kontrol edin; gerekirse başka tetkik ekleyin.
 3. İsteyen hekimi seçin (dış hekimse adını yazın), **Klinik Bilgi**'yi doldurun — radyolog raporu bu bilgiyle yazar.
 4. Ödeyen kurumu ve poliçe numarasını kontrol edin; tutarları gözden geçirin.
 5. Hastaya CD verilecekse **Sonuç için CD hazırla**'yı işaretleyin (teslimde CD kutusu hazır gelir).
 6. Ödeme şimdi alınacaksa **💵 Tahsilat Al ve Kabul Et**, alınmayacaksa **✔ İstemi Aç (n)**.
 7. Ekranda "n istem açıldı: [Accession No'lar]" mesajını görün. Hastadan ödeme kaldıysa **💵 Tahsilat Al (tutar)** düğmesi çıkar.
-8. Randevu kendiliğinden **Geldi** olur ve başvuruya bağlanır; istem teknisyenin listesinde **Bekleyen Çekim**'de görünür.
+8. İstem teknisyenin listesinde **Bekleyen Çekim**'de görünür.
 
 ## Randevusuz gelen hasta
-Kabul penceresi randevudan açılır. Randevusuz gelen hasta için önce **Randevu › Randevular › 📅 Takvim**'de ilgili cihazın şimdiki saatine randevu verin, ardından **✔ Geldi** ile kabul edin. (Bu yol kurumunuzda farklı tanımlanmış olabilir; sorumlunuza danışın.)
+Randevusuz gelen hasta için Kayıt Kabul'de başvuru açın; istem başvuru kartından açılır, randevu gerekmez. (Bu yol kurumunuzda farklı tanımlanmış olabilir; sorumlunuza danışın.)
 
 ## Sık karşılaşılan sorunlar
 - **"En az bir tetkik seçilmeli."** → soldan tetkik seçin.
@@ -70,7 +72,7 @@ Kabul penceresi randevudan açılır. Randevusuz gelen hasta için önce **Rande
 - Randevusuz gelen hastayı nasıl kabul ederim?
 
 ## Kaynaklar
-- web/src/sayfalar/liste/randevuAksiyonlari.ts (cihazlı randevuda Geldi / Başvuru = kabul)
+- web/src/sayfalar/liste/randevuAksiyonlari.ts (Geldi = yalnız durum, 19.11.2026)
 - web/src/bilesenler/radyoloji/IstemModali.tsx, web/src/sayfalar/liste/RadyolojiModallari.tsx
 - api/src/Gentegre.Api/Uclar/RadyolojiUclari.cs (POST /api/radyoloji/istem)
 - dokuman/00_TARIHCE.md (310-313 kabul ekranı, 316-317 randevudan kabul)
