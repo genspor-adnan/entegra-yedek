@@ -132,7 +132,7 @@ export const ayarUclari = {
       '/api/randevu/sms-onizleme', g),
   /** Aktif şubenin randevu SMS ayarı (boş metin = varsayılan). */
   randevuSmsAyar: () =>
-    istek<{ subeId: number | null; bilgiSablon: string; bilgiVarsayilan: boolean; hatirlatmaAcik: boolean; hatirlatmaSaat: number;
+    istek<{ subeId: number | null; kurumGeneli?: boolean; bilgiSablon: string; bilgiVarsayilan: boolean; hatirlatmaAcik: boolean; hatirlatmaSaat: number;
             hatirlatmaSablon: string; varsayilanBilgi: string; varsayilanHatirlatma: string;
             degiskenler: { ad: string; aciklama: string }[] }>('/api/randevu/sms-ayar'),
   randevuSmsAyarYaz: (g: { bilgiSablon: string; bilgiVarsayilan: boolean; hatirlatmaAcik: boolean; hatirlatmaSaat: number; hatirlatmaSablon: string }) =>

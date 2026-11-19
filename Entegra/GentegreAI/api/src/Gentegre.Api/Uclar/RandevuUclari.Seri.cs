@@ -97,12 +97,14 @@ public static partial class RandevuUclari
                     var id = await b.TekDegerAsync<int>($"""
                         insert into public.randevu
                                (sube_id, bolum, hekim_id, hasta_id, baslangic, sure_dk, durum, aciklama, hizmet_id, tip, kaynak,
-                                cihaz_id, gonderen_id, ekleyen)
+                                cihaz_id, gonderen_id, ekleyen, sms_hatirlatma)
                         values (@p0, @p1, @p2, @p3, @p4::timestamp at time zone @p13, @p5, 1, @p6, @p7, @p8, @p9,
-                                @p10, @p11, @p12)
+                                @p10, @p11, @p12,
+                                -- Kaynak randevudan tekrarda hatırlatma tercihi taşınır (kod inceleme 19.11.2026).
+                                coalesce((select r0.sms_hatirlatma from public.randevu r0 where r0.id = @p14::int), 1))
                         returning id
                         """, islem, [s.SubeId, s.Bolum, s.HekimId, s.HastaId, t, s.SureDk, s.Aciklama, s.HizmetId, s.Tip, s.Kaynak,
-                                     s.CihazId, s.GonderenId, baglam.KullaniciId, dilim], iptal);
+                                     s.CihazId, s.GonderenId, baglam.KullaniciId, dilim, istek.KaynakRandevuId], iptal);
                     if (istek.FtrProgramId is int fp && kalici)
                         await b.CalistirAsync("""
                             insert into public.ftr_seans (sube_id, program_id, sira, tarih, saat, fizyoterapist_id, kabin_id, randevu_id, durum, ekleyen)

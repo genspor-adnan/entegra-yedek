@@ -47,7 +47,8 @@ export function KapatmaAraligiSecici({ cihazId, bas, bit, salt, onSec }: {
       <div className="cipler cs-slot-kip">
         <button type="button" className={`cip${kip === 'gun' ? ' on' : ''}`} disabled={salt}
                 onClick={() => kipSec('gun')}>📅 {c('Tam gün (tarih aralığı)')}</button>
-        <button type="button" className={`cip${kip === 'slot' ? ' on' : ''}`} disabled={salt}
+        <button type="button" className={`cip${kip === 'slot' ? ' on' : ''}`} disabled={salt || !(cihazId > 0)}
+                title={cihazId > 0 ? undefined : c('Slotlar cihaz kaydedildikten sonra seçilebilir')}
                 onClick={() => kipSec('slot')}>⏱ {c('Slot aralığı (tek gün)')}</button>
       </div>
       {kip === 'gun'

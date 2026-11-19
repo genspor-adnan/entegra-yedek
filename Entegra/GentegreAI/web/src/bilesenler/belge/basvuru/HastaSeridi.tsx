@@ -123,7 +123,7 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   }, [tarafId, belgeId]);
 
   // Kanca erken dönüşten ÖNCE (React kancaları her çizimde aynı sırada).
-  const borcOzeti = useHastaBorcOzeti(tarafId);
+  const borcOzeti = useHastaBorcOzeti(tarafId, acikBorc ?? '');
   if (!tarafId) return null;
 
   const ad = String(h?.unvan ?? '') || yedek?.ad || '';

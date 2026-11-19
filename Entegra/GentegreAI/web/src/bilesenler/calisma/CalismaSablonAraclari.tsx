@@ -268,7 +268,7 @@ type SmsAyar = { bilgiSablon: string; bilgiVarsayilan: boolean; hatirlatmaAcik: 
 function SmsPenceresi({ onKapat }: { onKapat(): void }) {
   const [ilk, setIlk] = useState<SmsAyar | null>(null);
   const [v, setV] = useState<SmsAyar | null>(null);
-  const [ek, setEk] = useState<{ varsayilanBilgi: string; varsayilanHatirlatma: string;
+  const [ek, setEk] = useState<{ varsayilanBilgi: string; varsayilanHatirlatma: string; kurumGeneli: boolean;
                                  degiskenler: { ad: string; aciklama: string }[] } | null>(null);
   const [hata, setHata] = useState('');
 
@@ -278,7 +278,8 @@ function SmsPenceresi({ onKapat }: { onKapat(): void }) {
                   hatirlatmaAcik: y.hatirlatmaAcik, hatirlatmaSaat: y.hatirlatmaSaat,
                   hatirlatmaSablon: y.hatirlatmaSablon };
       setIlk(a); setV(a);
-      setEk({ varsayilanBilgi: y.varsayilanBilgi, varsayilanHatirlatma: y.varsayilanHatirlatma, degiskenler: y.degiskenler });
+      setEk({ varsayilanBilgi: y.varsayilanBilgi, varsayilanHatirlatma: y.varsayilanHatirlatma, degiskenler: y.degiskenler,
+              kurumGeneli: !!y.kurumGeneli });
     }).catch(h => setHata(hataMetni(h)));
   }, []);
 
@@ -325,6 +326,10 @@ function SmsPenceresi({ onKapat }: { onKapat(): void }) {
           {metinAlani(c('Bilgi metni'), 'bilgiSablon', ek.varsayilanBilgi)}
 
           <h6>{c('Hatırlatma SMS\'i')}</h6>
+          {/* ŞUBE AYARI YOK (kod inceleme 19.11.2026): değerler kurum geneli ayardan - kaydedilince bu şubeye özel olur. */}
+          {ek.kurumGeneli && (
+            <div className="kucuk sonuk">{c('Bu şubenin kendi ayarı yok: hatırlatma kurum geneli ayarla çalışıyor (aşağıdaki değerler). Kaydedince bu şubeye özel olur.')}</div>
+          )}
           <label className="cs-alan" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <input type="checkbox" checked={v.hatirlatmaAcik} aria-label={c('Hatırlatma gönder')}
                    onChange={e => setV({ ...v, hatirlatmaAcik: e.target.checked })} />

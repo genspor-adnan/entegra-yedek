@@ -356,8 +356,10 @@ export function KartDetaySekmesi({
           //   baglar, kademe ise satir_id'ye bagli (torun).
           // CİHAZ KAPATMA (19.11.2026): aralık iki kipten seçilir - tam gün (tarih aralığı) / slot aralığı (tek gün).
           //   Başlangıç / bitiş kutuları gizli (gizliAlanlar), gridde "Aralık" metni görünür.
-          modalUstBilesen={kapatmaMi && Number(deger.id) > 0
-            ? ((t, yaz) => <KapatmaAraligiSecici cihazId={Number(deger.id)} bas={t.baslangic} bit={t.bitis} salt={salt}
+          // Yeni (kaydedilmemiş) cihaz kartında da (kod inceleme 19.11.2026): tarih kutuları gizli, seçici şart; slot kipi
+          //   cihaz kaydedilince (cihazId 0 iken yalnız tam gün).
+          modalUstBilesen={kapatmaMi
+            ? ((t, yaz) => <KapatmaAraligiSecici cihazId={Number(deger.id) || 0} bas={t.baslangic} bit={t.bitis} salt={salt}
                                                  onSec={(b, e) => { yaz('baslangic', b); yaz('bitis', e) }} />)
             : undefined}
           modalAltBilesen={kaynak === 'prim-plani' && aktif.detay.ad === 'satirlar'

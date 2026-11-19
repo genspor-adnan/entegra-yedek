@@ -30,7 +30,17 @@ describe('randevuYapistir', () => {
     expect(id).toBe(5);
     expect(kartEkle).not.toHaveBeenCalled();
     expect(kartGuncelle).toHaveBeenCalledWith('randevu', 5,
-      { surum: 's1', kart: { baslangic: '2026-11-21T10:00', hekimId: 8, bolum: 6 } });
+      { surum: 's1', kart: { baslangic: '2026-11-21T10:00', hekimId: 8, bolum: 6, cihazId: null } });
+  });
+
+  it('cihaz randevusu doktor sütununa: cihaz bırakılır; cihaz sütununa: doktor kalır', async () => {
+    kartOku.mockResolvedValue({ kart: { ...kaynak, cihazId: 3, hekimId: null } });
+    await randevuYapistir({ mod: 'kopyala', id: 5, hasta: 'A', saat: '' }, { baslangic: '2026-11-22T09:30', hekimId: 8, bolum: 6 });
+    expect(kartEkle.mock.calls[0][1].kart).toMatchObject({ hekimId: 8, bolum: 6, cihazId: null });
+    kartEkle.mockClear();
+    kartOku.mockResolvedValue({ kart: kaynak });
+    await randevuYapistir({ mod: 'kopyala', id: 5, hasta: 'A', saat: '' }, { baslangic: '2026-11-22T09:30', cihazId: 3 });
+    expect(kartEkle.mock.calls[0][1].kart).toMatchObject({ hekimId: 4, cihazId: 3 });
   });
 
   it('kopyala: yeni randevu, planlandı; durum / belge / SMS damgası kopyalanmaz; düz sütunda kaynak aynı', async () => {

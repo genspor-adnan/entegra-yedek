@@ -496,7 +496,9 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
 
   // Aksiyonlar secili kayda gore yeniden cozulur: "belge zaten gonderilmis" gibi
   //   kosullar sunucuda degerlendirilir, istemci kural yazmaz.
-  const aksiyonSatiri = disSecim ?? seciliSatir;
+  // DIŞ SEÇİM YALNIZ EK GÖRÜNÜMDE (kod inceleme 19.11.2026): takvimde seçilen randevu liste görünümüne geçince
+  //   aksiyonları ele geçirmesin - listede B seçiliyken "İptal" gizli takvim seçimi A'yı iptal ediyordu.
+  const aksiyonSatiri = (gorunum === 'ek' ? disSecim : null) ?? seciliSatir;
   const { aksiyonlar: aksiyonlarHam } = useAksiyonlar(
     aksiyonEkrani ?? 'cari-liste',
     aksiyonSatiri?.id != null ? Number(aksiyonSatiri.id) : null);
@@ -517,7 +519,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     // Secili ID listesi de gider: bir aksiyon (or. e-Belge hazirla/gonder)
     //   coklu secimde TOPLU calisabilsin. Tek secimde liste tek elemanlidir.
     onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, aksiyonSatiri,
-                disSecim ? [disSecim] : satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
+                gorunum === 'ek' && disSecim ? [disSecim] : satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
   };
 
   /**

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { paraYaz } from '../bicim';
 import { guvenli, mesaj } from '../mesaj';
@@ -16,13 +16,6 @@ import { sozDegistiYayinla } from './hastaSoz';
  * ayda bir; kuruş farkı son taksitte) - hastaya söylenecek tutarları görmek için.
  */
 const bugun = () => new Date().toLocaleDateString('sv-SE');
-const ayEkle = (g: string, n: number) => {
-  const [y, a, d] = g.split('-').map(Number);
-  const t = new Date(y, a - 1 + n, 1);
-  const son = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
-  t.setDate(Math.min(d, son));
-  return t.toLocaleDateString('sv-SE');
-};
 const tr = (g: string) => g.split('-').reverse().join('.');
 
 export function OdemeSozuModali({ hastaId, hastaAdi, borc, borcEtiketi, mevcutVar, onKapat, onKaydedildi }: {
@@ -45,13 +38,19 @@ export function OdemeSozuModali({ hastaId, hastaAdi, borc, borcEtiketi, mevcutVa
   const [calisiyor, setCalisiyor] = useState(false);
 
   const sayi = Number(tutar.replace(',', '.')) || 0;
-  const n = Math.max(2, Math.min(36, Number(taksit) || 0));
-  const taksitler = tur === 3 && sayi > 0 && Number(taksit) >= 2
-    ? Array.from({ length: n }, (_, i) => {
-        const pay = Math.floor((sayi / n) * 100) / 100;
-        return { tarih: ayEkle(vade, i), tutar: i === n - 1 ? Math.round((sayi - pay * (n - 1)) * 100) / 100 : pay };
-      })
-    : [];
+  // TAKSİT TABLOSU SUNUCUDAN (kod inceleme 19.11.2026: "para hesabı tek yerde"): değerlendirmenin kullandığı bölüşüm.
+  const [taksitler, setTaksitler] = useState<{ tarih: string; tutar: number }[]>([]);
+  useEffect(() => {
+    const n = Number(taksit);
+    if (tur !== 3 || !(sayi > 0) || !(n >= 2 && n <= 36) || !vade) { setTaksitler([]); return }
+    let iptal = false;
+    const z = window.setTimeout(() => {
+      Promise.resolve().then(() => api.hastaBorcPlanOnizleme(sayi, vade, n))
+        .then(y => { if (!iptal) setTaksitler(y.taksitler) })
+        .catch(() => { if (!iptal) setTaksitler([]) });
+    }, 250);
+    return () => { iptal = true; window.clearTimeout(z) };
+  }, [tur, sayi, vade, taksit]);
 
   const kaydet = () => void guvenli(async () => {
     if (!(sayi > 0)) { mesaj(c('Tutar girin.')); return }

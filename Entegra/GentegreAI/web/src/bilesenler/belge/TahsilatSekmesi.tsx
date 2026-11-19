@@ -164,7 +164,9 @@ useEffect(() => {
 }, [aracMenu, iadeMenu, avansMenu, avansIadeMenu]);
 /** Avans durumu KARTTAN gelir (781): serit ve bu cubuk ayni sayiyi konusur. */
 const hastaId = Number(sonuc?.belge.tarafId ?? 0);
-const borcOzeti = useHastaBorcOzeti(basvuruMu ? hastaId : null);
+// Tahsilat toplamı değişince (yeni tahsilat / silme) söz değerlendirmesi yeniden okunur.
+const borcOzeti = useHastaBorcOzeti(basvuruMu ? hastaId : null,
+  tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0).toFixed(2));
 const sozKaydi = borcOzeti?.soz ?? null;
 const avansVar = avans.toplam > 0;
 

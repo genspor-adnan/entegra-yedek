@@ -34,10 +34,14 @@ export interface YapistirHedefi {
 const KOPYA_ALANLARI = ['hastaId', 'sureDk', 'tip', 'kaynak', 'bolum', 'hekimId', 'cihazId', 'hizmetId',
                         'gonderenId', 'kendiIstegi', 'kurumId', 'aciklama', 'smsGonder', 'smsHatirlatma'] as const;
 
-/** Hedef sütunun kaynağı: doktor sütunu doktor + bölüm, cihaz sütunu cihaz; ikisi de yoksa değişmez. */
+/**
+ * Hedef sütunun kaynağı: DOKTOR sütunu doktor + bölüm ve CİHAZ BIRAKILIR (kod inceleme 19.11.2026: cihaz randevusu doktor
+ * sütununa yapıştırılınca hem cihaza hem doktora yazılıyordu); CİHAZ sütunu cihaz - doktor kalır (göz / lazer gibi
+ * doktor + cihaz birlikte randevular bozulmasın). Düz gün sütununda kaynak değişmez.
+ */
 function kaynakAlanlari(h: YapistirHedefi): Record<string, unknown> {
   const k: Record<string, unknown> = {};
-  if (h.hekimId) { k.hekimId = h.hekimId; if (h.bolum) k.bolum = h.bolum }
+  if (h.hekimId) { k.hekimId = h.hekimId; if (h.bolum) k.bolum = h.bolum; k.cihazId = null }
   if (h.cihazId) k.cihazId = h.cihazId;
   return k;
 }

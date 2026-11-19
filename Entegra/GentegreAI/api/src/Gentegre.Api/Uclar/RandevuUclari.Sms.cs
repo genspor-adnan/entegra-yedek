@@ -28,10 +28,14 @@ public static partial class RandevuUclari
     {
         grup.MapPost("/sms-onizleme", async (
             SmsOnizlemeIstegi istek, VeriKaynagi veri, Servisler.RandevuHatirlatmasi sms, BaglamCozucu cozucu,
-            HttpContext ctx, CancellationToken iptal) =>
+            KayitErisimi erisim, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("randevu", Islem.Gor);
+            // KAYIT ERİŞİMİ (kod inceleme 19.11.2026): metin hastanın / hekimin adını taşır - görülemeyen randevu ya da
+            //   hasta için önizleme yok (şube / kapsam dışı kişinin adı bu uçtan sızmasın).
+            if (istek.RandevuId is int rid && rid > 0) await erisim.IsteAsync(baglam, "randevu", rid, "Randevu bulunamadı.", iptal);
+            if (istek.HastaId is int hid && hid > 0) await erisim.IsteAsync(baglam, "hasta", hid, "Hasta bulunamadı.", iptal);
             // Kayıtlı randevuda şube ve "bu saate bilgi gitti mi" kayıttan; yeni kartta aktif şube.
             var kayit = istek.RandevuId is > 0
                 ? await veri.TekAsync("""
@@ -45,6 +49,7 @@ public static partial class RandevuUclari
             var baslangic = istek.Baslangic ?? kayit?.Bas ?? DateTime.Now;
             var (degerler, telefon) = await sms.VeriAsync(sube, istek.HastaId, baslangic, istek.Bolum, istek.HekimId, iptal);
             var ayar = sube > 0 ? await sms.SubeAyariAsync(sube, iptal) : null;
+            var hatirlatma = await sms.GecerliHatirlatmaAsync(ayar, iptal);
             var bilgi = Servisler.RandevuHatirlatmasi.Doldur(
                 ayar?.BilgiSablon is { Length: > 0 } b ? b : Servisler.RandevuHatirlatmasi.VarsayilanBilgi, degerler);
             // Bilgi bu randevu saati için gitmiş mi: kayıtlı saat değişmediyse yeniden gitmez (kart bunu söyler).
@@ -54,8 +59,8 @@ public static partial class RandevuUclari
             {
                 bilgi,
                 telefonVar = Servisler.RandevuHatirlatmasi.Rakamlar(telefon).Length >= 10,
-                hatirlatmaAcik = ayar?.HatirlatmaAcik ?? false,
-                hatirlatmaSaat = ayar?.HatirlatmaSaat ?? 24,
+                hatirlatmaAcik = hatirlatma.Acik,
+                hatirlatmaSaat = hatirlatma.Saat,
                 bilgiGitti = saatAyni && kayit!.Gitti is not null && kayit.Gitti == kayit.Bas,
             });
         });
@@ -67,13 +72,16 @@ public static partial class RandevuUclari
             baglam.YetkiIste("randevu", Islem.Gor);
             var aktif = baglam.SubeId ?? 0;
             var ayar = aktif > 0 ? await sms.SubeAyariAsync(aktif, iptal) : null;
+            var hatirlatma = await sms.GecerliHatirlatmaAsync(ayar, iptal);
             return Results.Ok(new
             {
                 subeId = baglam.SubeId,
+                // Şube ayarı yok: hatırlatma değerleri kurum geneli ayardan (pencere bunu söyler).
+                kurumGeneli = ayar is null,
                 bilgiSablon = ayar?.BilgiSablon ?? "",
                 bilgiVarsayilan = ayar?.BilgiVarsayilan ?? true,
-                hatirlatmaAcik = ayar?.HatirlatmaAcik ?? false,
-                hatirlatmaSaat = ayar?.HatirlatmaSaat ?? 24,
+                hatirlatmaAcik = hatirlatma.Acik,
+                hatirlatmaSaat = hatirlatma.Saat,
                 hatirlatmaSablon = ayar?.HatirlatmaSablon ?? "",
                 varsayilanBilgi = Servisler.RandevuHatirlatmasi.VarsayilanBilgi,
                 varsayilanHatirlatma = Servisler.RandevuHatirlatmasi.VarsayilanHatirlatma,

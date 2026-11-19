@@ -197,6 +197,19 @@ public sealed class RandevuHatirlatmasi
             kullaniciId, r.SubeId > 0 ? r.SubeId : null, iptal);
     }
 
+    /// <summary>
+    /// ŞUBENİN GEÇERLİ HATIRLATMASI (kod inceleme 19.11.2026): şube ayarı varsa o; yoksa TazeleAsync'in kullandığı kurum
+    /// geneli randevu.hatirlatma_acik / _saat. Ayar penceresi ve kart önizlemesi bunu gösterir - "kapalı" görünüp
+    /// pencereyi kaydetmek kurum geneli açık hatırlatmayı o şubede sessizce kapatmasın.
+    /// </summary>
+    public async Task<(bool Acik, int Saat)> GecerliHatirlatmaAsync(SubeAyari? ayar, CancellationToken iptal)
+    {
+        if (ayar is not null) return (ayar.HatirlatmaAcik, ayar.HatirlatmaSaat);
+        var acik = await AyarAsync("randevu.hatirlatma_acik", "0", iptal) == "1";
+        var saat = int.TryParse(await AyarAsync("randevu.hatirlatma_saat", "24", iptal), out var sa) ? Math.Clamp(sa, 1, 168) : 24;
+        return (acik, saat);
+    }
+
     private async Task<string> AyarAsync(string anahtar, string varsayilan, CancellationToken iptal)
         => await _veri.TekDegerAsync<string>(
                "select deger from public.referans where anahtar = @p0",

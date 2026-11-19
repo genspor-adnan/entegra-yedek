@@ -7,6 +7,21 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 19.11.2026 (akşam) — Kod inceleme düzeltmeleri (günün 29 commit'i)
+
+- Takvim seçimi yalnız takvim görünümünde aksiyona gider (liste görünümünde gizli seçim A, listedeki B yerine iptal
+  ediliyordu). Pano: doktor sütununa yapıştırınca cihaz bırakılır (cihaz sütununda doktor kalır).
+- Randevu SMS: şube ayarı yokken pencere / önizleme kurum geneli hatırlatmayı gösterir (`GecerliHatirlatmaAsync`;
+  "kapalı" görünüp kaydetmek hatırlatmayı sessizce kapatıyordu; pencerede not). `sms-onizleme` kayıt erişimi ister
+  (randevu / hasta). Ertele ve Tekrarla kartta kapatılan hatırlatma tercihini (sms_hatirlatma) taşır.
+- Cihaz kapatma: iki pencere şube saati metnini dilimsiz gönderir; `/cihaz/{id}/kapat` artık DateTime + şube dilimi
+  (DateTimeOffset dilimsiz metni sunucu diliminde okuyordu). Kaydedilmemiş cihaz kartında da aralık seçici (yalnız tam gün).
+- Ödeme sözü: taksit tablosu sunucudan (`GET /api/hasta-borc/plan-onizleme`, `HastaBorcSozDegerlendirme.Taksitler`
+  tek kural). Borç özeti tahsilat değişince yenilenir; aynı anda aynı istek tek (3 sn ortak istek).
+- İncelemenin "aynı gün ödeme söze sayılmıyor" bulgusu yanlış: islem_tarihi saatli (KOSUYOLU 3.106 kayıt, gece yarısı 0).
+
+---
+
 ## 19.11.2026 — Randevu SMS (1382)
 
 - Kullanıcı: "randevu kartına SMS Gönder Check ekle.. default seçili olsun.. randevu alan hastaya randevu bilgilerini içeren

@@ -145,4 +145,38 @@ public sealed class RandevuSmsTestleri(ApiSunucuOlgusu api)
         Assert.Equal(1, await Varsayilan());
         Assert.True((await h.GetFromJsonAsync<JsonElement>("/api/randevu/sms-ayar")).GetProperty("bilgiVarsayilan").GetBoolean());
     }
+
+    [VtFact]
+    public async Task Sube_ayari_yoksa_pencere_kurum_geneli_hatirlatmayi_gosterir()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var onceki = await api.Veri.TekDegerAsync<string>(
+            "select row_to_json(a)::text from public.randevu_sms_ayar a where sube_id = @p0", [Merkez]);
+        d.Temizle(onceki is null
+            ? $"delete from public.randevu_sms_ayar where sube_id = {Merkez}"
+            : $"delete from public.randevu_sms_ayar where sube_id = {Merkez}; insert into public.randevu_sms_ayar select * from json_populate_record(null::public.randevu_sms_ayar, '{onceki.Replace("'", "''")}'::json)");
+        var ref1 = await api.Veri.TekDegerAsync<string>("select deger from public.referans where anahtar = 'randevu.hatirlatma_acik'", null);
+        var ref2 = await api.Veri.TekDegerAsync<string>("select deger from public.referans where anahtar = 'randevu.hatirlatma_saat'", null);
+        string Geri(string anahtar, string? eski) => eski is null
+            ? $"delete from public.referans where anahtar = '{anahtar}'"
+            : $"update public.referans set deger = '{eski.Replace("'", "''")}' where anahtar = '{anahtar}'";
+        d.Temizle(Geri("randevu.hatirlatma_acik", ref1));
+        d.Temizle(Geri("randevu.hatirlatma_saat", ref2));
+        await api.Veri.CalistirAsync("delete from public.randevu_sms_ayar where sube_id = @p0", [Merkez]);
+        foreach (var (k, v) in new[] { ("randevu.hatirlatma_acik", "1"), ("randevu.hatirlatma_saat", "48") })
+        {
+            var n = await api.Veri.TekDegerAsync<int>("select count(*)::int from public.referans where anahtar = @p0", [k]);
+            await api.Veri.CalistirAsync(n > 0 ? "update public.referans set deger = @p1 where anahtar = @p0"
+                                               : "insert into public.referans (anahtar, deger) values (@p0, @p1)", [k, v]);
+        }
+        var rol = await d.RolAsync("rsmsk", ["randevu:g"]);
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        await d.SubeVerAsync(u, Merkez, yazma: false, varsayilan: true);
+        var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var h = api.Istemci(access, Merkez);
+        var j = await h.GetFromJsonAsync<JsonElement>("/api/randevu/sms-ayar");
+        Assert.True(j.GetProperty("kurumGeneli").GetBoolean());
+        Assert.True(j.GetProperty("hatirlatmaAcik").GetBoolean());
+        Assert.Equal(48, j.GetProperty("hatirlatmaSaat").GetInt32());
+    }
 }

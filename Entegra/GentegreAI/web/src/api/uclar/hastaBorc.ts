@@ -47,6 +47,10 @@ export const hastaBorcUclari = {
     istek<{ islemler: BorcIslemi[] }>(`/api/hasta-borc/gecmis${hastaId ? `?hastaId=${hastaId}` : ''}`),
   hastaBorcHatirlat: (hastaIds: number[], kanal: 1 | 2) =>
     gonder<{ kuyruga: number; atlanan: { ad: string; neden: string }[] }>('/api/hasta-borc/hatirlat', { hastaIds, kanal }),
+  /** Ödeme planı taksit tablosu - bölüşüm sunucuda (HastaBorcSozDegerlendirme.Taksitler). */
+  hastaBorcPlanOnizleme: (tutar: number, ilk: string, taksit: number) =>
+    istek<{ taksitler: { tarih: string; tutar: number }[] }>(
+      `/api/hasta-borc/plan-onizleme?tutar=${encodeURIComponent(String(tutar))}&ilk=${encodeURIComponent(ilk)}&taksit=${taksit}`),
   hastaBorcSoz: (govde: { hastaId: number; tur: 2 | 3; tutar: number; vade: string; taksitSayisi?: number; aciklama?: string }) =>
     gonder<{ id: number }>('/api/hasta-borc/soz', govde),
   hastaBorcIsaret: (hastaIds: number[], aciklama?: string) =>

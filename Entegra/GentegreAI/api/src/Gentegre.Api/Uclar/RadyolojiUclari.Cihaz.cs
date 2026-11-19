@@ -169,7 +169,9 @@ public static partial class RadyolojiUclari
     /// takvim kapalı çizilir, randevu verilmez. Etkilenen (aralıktaki) randevu
     /// sayısı döner - taşıma / SMS ayrı iştir.
     /// </summary>
-    public sealed record KapatIstegi(short NedenTur, DateTimeOffset Baslangic, DateTimeOffset Bitis, string? Aciklama);
+    /// <summary>Baslangic / Bitis: dilimsiz metin ŞUBE saatidir, "Z"li an olduğu gibi (kod inceleme 19.11.2026; eskiden
+    /// DateTimeOffset - dilimsiz metni sunucunun dilimiyle okuyordu).</summary>
+    public sealed record KapatIstegi(short NedenTur, DateTime Baslangic, DateTime Bitis, string? Aciklama);
 
     private static void CihazAracEkle(RouteGroupBuilder grup)
     {
@@ -179,15 +181,17 @@ public static partial class RadyolojiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("radyoloji", Islem.Degistir);
             baglam.YazmaIste();
-            if (istek.Bitis <= istek.Baslangic)
+            var kBas = Saat.UtcYap(istek.Baslangic, baglam.ZamanDilimi);
+            var kBit = Saat.UtcYap(istek.Bitis, baglam.ZamanDilimi);
+            if (kBit <= kBas)
                 throw GentegreHatasi.Dogrulama("Bitiş başlangıçtan sonra olmalı.", new AlanHatasi("bitis", "Bitiş başlangıçtan sonra olmalı."));
             await using var b = await veri.AcAsync(iptal);
             await using var islem = await b.BeginTransactionAsync(iptal);
             var etkilenen = await b.TekDegerAsync<long>("""
                 select count(*) from public.randevu where cihaz_id = @p0 and durum not in (4, 5) and baslangic >= @p1 and baslangic < @p2
-                """, islem, [id, istek.Baslangic.ToUniversalTime(), istek.Bitis.ToUniversalTime()], iptal);
+                """, islem, [id, kBas, kBit], iptal);
             // Ortak yazım (K77): takvimin `/kapatma` ucu ile aynı satır + aynı log.
-            var kid = await KapatmaYazAsync(b, islem, log, baglam, id, istek.Baslangic.UtcDateTime, istek.Bitis.UtcDateTime,
+            var kid = await KapatmaYazAsync(b, islem, log, baglam, id, kBas, kBit,
                                             istek.NedenTur, istek.Aciklama ?? "", etkilenen, iptal);
             await islem.CommitAsync(iptal);
             return Results.Ok(new { id = kid, etkilenen, izlemeNo = baglam.IzlemeNo });

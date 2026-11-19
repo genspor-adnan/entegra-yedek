@@ -35,6 +35,20 @@ public static class HastaBorcSozDegerlendirme
                and coalesce(bb.hasta_id, be.taraf_id) = any(@p1)
             """, null, [bas, hastalar], o => new Odeme(o.GetInt32(0), o.GetDateTime(1), o.GetDecimal(2)), iptal);
 
+    /// <summary>
+    /// PLAN TAKSİTLERİ - tek kural (kod inceleme 19.11.2026: tablo istemcide ayrıca hesaplanıyordu): tutar taksit sayısına
+    /// kuruşa aşağı yuvarlanarak bölünür, kuruş farkı son taksitte; ilk taksit tarihinden ayda bir (ay sonu kırpılır).
+    /// Ödeme Sözü penceresinin tablosu ve değerlendirme bunu kullanır.
+    /// </summary>
+    public static List<(DateTime Tarih, decimal Tutar)> Taksitler(decimal toplam, DateTime ilk, int taksitSayisi)
+    {
+        var n = Math.Max(1, taksitSayisi);
+        toplam = Math.Max(0m, toplam);
+        var pay = Math.Floor(toplam / n * 100m) / 100m;
+        return Enumerable.Range(0, n)
+            .Select(i => (Tarih: ilk.Date.AddMonths(i), Tutar: i == n - 1 ? toplam - pay * (n - 1) : pay)).ToList();
+    }
+
     public static Sonuc Degerlendir(short tur, decimal? tutar, DateTime? vade, short? taksitSayisi, DateTime sozZamani,
                                     decimal borc, IEnumerable<Odeme> odemeler, DateTime bugun)
     {
@@ -52,10 +66,7 @@ public static class HastaBorcSozDegerlendirme
 
         // PLAN: taksitler ve sırayla karşılanma
         var n = Math.Max(1, (int)(taksitSayisi ?? 1));
-        var pay = Math.Floor(toplam / n * 100m) / 100m;
-        var ilk = (vade ?? bugun).Date;
-        var taksitler = Enumerable.Range(0, n)
-            .Select(i => (Tarih: ilk.AddMonths(i), Tutar: i == n - 1 ? toplam - pay * (n - 1) : pay)).ToList();
+        var taksitler = Taksitler(toplam, (vade ?? bugun).Date, n);
         int odenenTaksit = 0, geciken = 0;
         var birikim = 0m;
         (DateTime Tarih, decimal Tutar)? sonraki = null;

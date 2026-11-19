@@ -46,9 +46,10 @@ export function CihazKapatmaModali({ cihazId, cihazAdi, baslangic, bitis,
     if (bit <= bas) { setHata('Kapatılacak tarih aralığını ya da slotları seçin.'); return }
     setKaydediyor(true);
     try {
-      // Yerel (şube) saat metni -> UTC an: uç DateTime alır, dilimsiz metin sunucuda yanlış yorumlanırdı.
+      // ŞUBE SAATİ METNİ OLDUĞU GİBİ (kod inceleme 19.11.2026): sunucu dilimsiz metni şube diliminde yorumlar;
+      //   tarayıcı dilimiyle UTC'ye çevirmek tarayıcı şubeden farklı dilimdeyse kaydırıyordu.
       const y = await api.radyolojiKapatmaEkle(cihazId, {
-        baslangic: new Date(bas).toISOString(), bitis: new Date(bit).toISOString(), nedenTur: neden, aciklama,
+        baslangic: bas.slice(0, 16), bitis: bit.slice(0, 16), nedenTur: neden, aciklama,
       });
       mesaj(y.etkilenenRandevu > 0
         ? `Cihaz kapatıldı. DİKKAT: bu aralıkta ${y.etkilenenRandevu} randevu var — `

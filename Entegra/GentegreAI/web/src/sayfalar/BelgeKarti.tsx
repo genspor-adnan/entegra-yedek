@@ -948,8 +948,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     onGelisNedeni: n => setBasvuruBilgi(o => (Number(o.gelisNedeni ?? 0) ? o : { ...o, gelisNedeni: n })),
   });
 
-  // HASTANIN ÖDEME SÖZÜ / PLANI (19.11.2026): tahsilat penceresindeki not için.
-  const hastaBorcOzeti = useHastaBorcOzeti(basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || null) : null);
   // Geri alma sonrası talep listesi (rozet) yeniden okunsun.
   const [iskontoSurum, setIskontoSurum] = useState(0);
   const iskontoTalepleri = useIskontoTalepleri(basvuruMu, belgeId, async () => {
@@ -1117,6 +1115,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       satirlar.length, onizleme.genel, Number(sonuc?.belge.genelToplam ?? 0),
       tahsilToplami(tahsilat.tahsilatlar), !sonuc || kalemDegisti),
     [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar, kalemDegisti]);
+  // HASTANIN ÖDEME SÖZÜ / PLANI (19.11.2026): tahsilat penceresindeki not için; açık borç değişince (tahsilat) yenilenir.
+  const hastaBorcOzeti = useHastaBorcOzeti(basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || null) : null,
+                                           basvuruAcikBorc);
 
   /**
    * PAYLASIMLI KURUMDA TARAF AYRIMI (kullanici): ÖSS/SGK anlasmasinda acik

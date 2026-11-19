@@ -75,12 +75,15 @@ public static partial class RandevuUclari
             var yeniId = await b.TekDegerAsync<int>("""
                 insert into public.randevu
                        (sube_id, bolum, hekim_id, hasta_id, baslangic, sure_dk, durum, aciklama, hizmet_id, tip, kaynak,
-                        cihaz_id, unit_id, plan_satir_id, lab_isemri_id, onceki_randevu_id, gonderen_id, kendi_istegi, kurum_id, ekleyen)
+                        cihaz_id, unit_id, plan_satir_id, lab_isemri_id, onceki_randevu_id, gonderen_id, kendi_istegi, kurum_id, ekleyen,
+                        sms_hatirlatma)
                 select r.sube_id, r.bolum, @p1, r.hasta_id,
                        @p3::timestamp at time zone coalesce((select nullif(sb.zaman_dilimi, '') from public.sube sb
                                                               where sb.id = r.sube_id), 'Europe/Istanbul'),
                        @p4, 1, r.aciklama, r.hizmet_id, r.tip, r.kaynak, @p2, r.unit_id, r.plan_satir_id, r.lab_isemri_id,
-                       r.id, r.gonderen_id, r.kendi_istegi, r.kurum_id, @p5
+                       r.id, r.gonderen_id, r.kendi_istegi, r.kurum_id, @p5,
+                       -- HATIRLATMA TERCİHİ TAŞINIR (kod inceleme 19.11.2026): SMS istemeyen hasta ertelemede geri açılmasın.
+                       r.sms_hatirlatma
                   from public.randevu r where r.id = @p0
                 returning id
                 """, islem, [id, hekimId, cihazId, istek.Baslangic, sureDk, baglam.KullaniciId], iptal);

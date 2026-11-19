@@ -6,7 +6,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
  * ÖDEME SÖZÜ / PLAN PENCERESİ (19.11.2026): borç takibi ve başvuru Tahsilat "⋯" ortak pencere.
  */
 const soz = vi.fn();
-vi.mock('../api/istemci', () => ({ api: { hastaBorcSoz: (g: unknown) => soz(g) } }));
+vi.mock('../api/istemci', () => ({ api: {
+  hastaBorcSoz: (g: unknown) => soz(g),
+  // Taksit tablosu sunucudan (kod inceleme 19.11.2026) - sahte uç sunucunun bölüşümünü döner.
+  hastaBorcPlanOnizleme: (tutar: number, _ilk: string, n: number) => Promise.resolve({ taksitler: Array.from({ length: n },
+    (_, i) => ({ tarih: '2026-12-0' + (i + 1), tutar: i === n - 1 ? tutar - Math.floor(tutar / n * 100) / 100 * (n - 1) : Math.floor(tutar / n * 100) / 100 })) }),
+} }));
 const { OdemeSozuModali } = await import('../bilesenler/borc/OdemeSozuModali');
 
 describe('OdemeSozuModali', () => {
@@ -28,8 +33,8 @@ describe('OdemeSozuModali', () => {
     render(<OdemeSozuModali hastaId={7} hastaAdi="Ali" borc={1000} onKapat={() => {}} />);
     fireEvent.click(screen.getByText(/Ödeme planı/));
     fireEvent.change(screen.getByLabelText('Taksit sayısı'), { target: { value: '3' } });
-    expect(screen.getAllByRole('row')).toHaveLength(4);           // başlık + 3 taksit
-    expect(screen.getByText(/333,34/)).toBeTruthy();                // kuruş farkı son taksitte
+    await waitFor(() => expect(screen.getAllByRole('row')).toHaveLength(4));   // başlık + 3 taksit (sunucudan)
+    expect(screen.getByText(/333,34/)).toBeTruthy();                            // kuruş farkı son taksitte
     fireEvent.click(screen.getByText(/Kaydet/));
     await waitFor(() => expect(soz).toHaveBeenCalled());
     expect(soz.mock.calls[0][0]).toMatchObject({ tur: 3, tutar: 1000, taksitSayisi: 3 });

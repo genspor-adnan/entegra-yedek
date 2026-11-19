@@ -166,6 +166,22 @@ public static class HastaBorcTakipUclari
             });
         });
 
+        // --------------------------------------------- plan önizlemesi --
+        // ÖDEME PLANI TAKSİT TABLOSU sunucudan (kod inceleme 19.11.2026): pencere bölüşümü kendisi hesaplamasın.
+        grup.MapGet("/plan-onizleme", async (decimal tutar, DateTime ilk, int taksit, BaglamCozucu cozucu,
+                                             HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            if (!(baglam.Yetkiler.Var(Kod, Islem.Gor) || baglam.Yetkiler.Var("belge", Islem.Gor)))
+                baglam.YetkiIste(Kod, Islem.Gor);
+            if (taksit is < 2 or > 36) throw GentegreHatasi.Dogrulama("Ödeme planı 2 ile 36 taksit arasında olmalı.");
+            return Results.Ok(new
+            {
+                taksitler = HastaBorcSozDegerlendirme.Taksitler(tutar, ilk, taksit)
+                    .Select(t => new { tarih = t.Tarih.ToString("yyyy-MM-dd"), tutar = t.Tutar }),
+            });
+        });
+
         // ------------------------------------------------ tek hasta özeti --
         // HASTANIN BORCU + AÇIK SÖZÜ / PLANI (kullanıcı 19.11.2026: söz bilgisi başvuru hasta bandında, tahsilat tutarı
         //   sorulurken, hasta icmalinde ve randevu kartında görünsün - "hepsini yap"). Durum borç takibiyle aynı

@@ -286,7 +286,8 @@ export function CihazKapatModali({ id, onKapat, onTamam }: { id: number; onKapat
     setHata(null);
     if (!(bas < bit)) { setHata(c('Kapatılacak slot aralığını seçin.')); return }
     try {
-      const y = await api.radCihazKapat(id, { nedenTur: neden, baslangic: new Date(bas).toISOString(), bitis: new Date(bit).toISOString(), aciklama });
+      // Şube saati metni olduğu gibi - sunucu şube diliminde yorumlar (kod inceleme 19.11.2026).
+      const y = await api.radCihazKapat(id, { nedenTur: neden, baslangic: bas.slice(0, 16), bitis: bit.slice(0, 16), aciklama });
       onTamam(y.etkilenen);
     } catch (e) { setHata(hataMetni(e)) }
   };

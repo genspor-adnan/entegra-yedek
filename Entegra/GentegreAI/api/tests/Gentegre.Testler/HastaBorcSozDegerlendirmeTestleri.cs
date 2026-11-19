@@ -1,4 +1,4 @@
-using Gentegre.Api.Uclar;
+﻿using Gentegre.Api.Uclar;
 using O = Gentegre.Api.Uclar.HastaBorcSozDegerlendirme.Odeme;
 
 namespace Gentegre.Testler;
@@ -65,5 +65,13 @@ public sealed class HastaBorcSozDegerlendirmeTestleri
         Assert.Equal("tutuldu", t.Durum);
         Assert.Equal(3, t.OdenenTaksit);
         Assert.Null(t.SonrakiVade);
+    }
+
+    [Fact]
+    public void Taksitler_kurus_farki_son_taksitte_ay_sonu_kirpilir()
+    {
+        var t = HastaBorcSozDegerlendirme.Taksitler(1000m, new DateTime(2027, 1, 31), 3);
+        Assert.Equal([333.33m, 333.33m, 333.34m], t.Select(x => x.Tutar));
+        Assert.Equal([new DateTime(2027, 1, 31), new DateTime(2027, 2, 28), new DateTime(2027, 3, 31)], t.Select(x => x.Tarih));
     }
 }

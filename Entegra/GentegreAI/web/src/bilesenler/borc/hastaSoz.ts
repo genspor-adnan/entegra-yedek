@@ -30,8 +30,27 @@ export const SOZ_OLAYI = 'gentegre:hasta-soz-degisti';
 export const sozDegistiYayinla = (hastaId: number) =>
   window.dispatchEvent(new CustomEvent(SOZ_OLAYI, { detail: { hastaId } }));
 
-/** Hastanın borcu + açık sözü; okunamazsa (yetki / ağ) null - ekranlar hiçbir şey göstermez. */
-export function useHastaBorcOzeti(hastaId: number | null | undefined): HastaBorcOzeti | null {
+/**
+ * AYNI İSTEK BİR KEZ (kod inceleme 19.11.2026): başvuru kartında üç yer (kart, hasta şeridi, tahsilat sekmesi) aynı
+ * hastayı aynı anda soruyordu. Aynı anahtar (hasta + tetik + sürüm) 3 sn içinde tek istek paylaşır.
+ */
+const ortakIstek = new Map<string, { zaman: number; soz: Promise<HastaBorcOzeti> }>();
+function ozetGetir(hastaId: number, anahtar: string): Promise<HastaBorcOzeti> {
+  const simdi = Date.now();
+  const k = ortakIstek.get(anahtar);
+  if (k && simdi - k.zaman < 3000) return k.soz;
+  const soz = Promise.resolve().then(() => api.hastaBorcOzeti(hastaId));
+  ortakIstek.set(anahtar, { zaman: simdi, soz });
+  if (ortakIstek.size > 50) for (const [a, v] of ortakIstek) if (simdi - v.zaman > 3000) ortakIstek.delete(a);
+  return soz;
+}
+
+/**
+ * Hastanın borcu + açık sözü; okunamazsa (yetki / ağ) null - ekranlar hiçbir şey göstermez.
+ * `tetik` değişince yeniden okunur (kod inceleme 19.11.2026): tahsilat alınınca söz rozeti / notu kart yeniden
+ * açılmadan güncellensin - çağıran açık borcu ya da tahsil toplamını verir.
+ */
+export function useHastaBorcOzeti(hastaId: number | null | undefined, tetik: string | number = ''): HastaBorcOzeti | null {
   const [ozet, setOzet] = useState<HastaBorcOzeti | null>(null);
   const [surum, setSurum] = useState(0);
   useEffect(() => {
@@ -46,11 +65,11 @@ export function useHastaBorcOzeti(hastaId: number | null | undefined): HastaBorc
     if (!hastaId || hastaId <= 0) { setOzet(null); return }
     let iptal = false;
     // Senkron hata da (okunamayan uç / test sahtesi) yakalansın: bilgi amaçlı, ekranı düşürmemeli.
-    Promise.resolve().then(() => api.hastaBorcOzeti(hastaId))
+    ozetGetir(hastaId, `${hastaId}|${tetik}|${surum}`)
       .then(y => { if (!iptal) setOzet(y) })
       .catch(() => { if (!iptal) setOzet(null) });
     return () => { iptal = true };
-  }, [hastaId, surum]);
+  }, [hastaId, surum, tetik]);
   return ozet;
 }
 
