@@ -512,7 +512,7 @@ public static partial class AksiyonKatalogu
             // PANO İŞLEM ▾ (kullanıcı 19.11.2026: "Durum değiş sağına Pano İşlem buton ekle.. Altına Kes/Kopyala/Yapıştır
             //   ekle.. randevu plan modunda bir yerden kesilip başka yere yapıştırılsın, veya kopyalanıp 2. 3. yere"):
             //   menü ve pano istemcide (listeTanimlari + randevuPano.ts); yazım kart ucundan (kes = güncelle, kopyala = ekle).
-            new("randevu.pano",     "📋 Pano İşlem", "randevu",
+            new("randevu.pano",     "📋 Pano", "randevu",   // ad: kullanıcı 19.11.2026 "pano işlem rename Pano"
                 KaynakKodu: "randevu", Islem: Islem.Degistir, Sira: 33),
             // RENKLER (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı, Başvuruya Dönüştür sarı.
             new("randevu.geldi",    "✔ Geldi",   "randevu", Hedef: "sagtus,palet",
