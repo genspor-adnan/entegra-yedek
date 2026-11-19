@@ -103,7 +103,7 @@ public static class HastaBorcTakipUclari
                 return new
                 {
                     id = g.Key, ad = k.ad ?? "", dosyaNo = k.dosyaNo ?? "",
-                    telefon = Maskele(k.tel ?? ""), telefonVar = !string.IsNullOrWhiteSpace(k.tel),
+                    telefon = TelefonBicimle(k.tel ?? ""), telefonVar = !string.IsNullOrWhiteSpace(k.tel),
                     epostaVar = !string.IsNullOrWhiteSpace(k.eposta),
                     borc, acikProtokol = g.Count(), gun = (int)(bugun - enEski.Date).TotalDays,
                     sonBasvuru = g.Max(x => x.Tarih),
@@ -382,14 +382,18 @@ public static class HastaBorcTakipUclari
             """, islem, [hastaId, tur, kanal, bildirimId, tutar, vade, taksit,
                         aciklama.Length > 500 ? aciklama[..500] : aciklama, baglam.SubeId, baglam.KullaniciId], iptal);
 
-    /// <summary>"0555 *** ** 89": son iki hane - görevli doğru kişiyi arıyor mu anlasın.</summary>
-    private static string Maskele(string tel)
+    /// <summary>
+    /// "0555 123 45 67" - TAM NUMARA (kullanıcı 19.11.2026: "listede tel noları da tam göster * olmadan"; eskiden
+    /// "0555 *** ** 89" maskeliydi). Liste borç takibi yetkisinde; görevli hastayı buradan arıyor.
+    /// </summary>
+    private static string TelefonBicimle(string tel)
     {
         var r = new string(tel.Where(char.IsDigit).ToArray());
         // Ülke kodu (90 / 0090) yerel biçime: "905551234567" -> "05551234567".
         if (r.StartsWith("0090")) r = "0" + r[4..];
         else if (r.StartsWith("90") && r.Length == 12) r = "0" + r[2..];
         else if (r.Length == 10 && r[0] == '5') r = "0" + r;   // "5321234567"
-        return r.Length < 4 ? "" : $"{r[..Math.Min(4, r.Length - 2)]} *** ** {r[^2..]}";
+        if (r.Length == 11 && r[0] == '0') return $"{r[..4]} {r[4..7]} {r[7..9]} {r[9..]}";
+        return r.Length > 0 ? r : tel.Trim();
     }
 }
