@@ -44,7 +44,11 @@ interface CalistirProps {
  * Banka / POS / Cek / Senet). Kod anahtarli verilir; secilen secenegin `kod`u
  * calistir()'a gider, boylece cagiran tek yerde ayirt eder.
  */
-export interface AltSecenek { kod: string; ad: string }
+export interface AltSecenek {
+  kod: string; ad: string;
+  /** Renk sınıfı (randevu Durum Değiş menüsü: durum rengi - 19.11.2026). */
+  sinif?: string;
+}
 
 export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi, sonEk, sira }: CalistirProps & {
   altSecenekler?: Record<string, AltSecenek[]>;
@@ -112,8 +116,9 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler, yazdirOncesi, 
             </button>
             {alt && acikMenu === a.kod && (
               <div className="dugme-menu-liste">
-                {alt.map(o => (
-                  <button key={o.kod} type="button" className="mi"
+                {/* AYRAÇ ("*.ayrac*" kodu, sağ tuş menüsüyle aynı kural): çizgi, tıklanamaz. */}
+                {alt.map(o => o.kod.includes('.ayrac') ? <div key={o.kod} className="menu-ayrac" /> : (
+                  <button key={o.kod} type="button" className={`mi${o.sinif ? ` ${o.sinif}` : ''}`}
                           onClick={() => { setAcikMenu(null); calistir(o.kod) }}>
                     {o.ad}
                   </button>

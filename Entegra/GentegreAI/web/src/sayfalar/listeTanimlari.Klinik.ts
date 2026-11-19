@@ -132,6 +132,18 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // HASTANIN TELEFONU / KİMLİK NOSU İLE ARAMA (kullanıcı 16.10.2026) - kolonlar gizli.
     aramaEkAlanlari: ['telefonHam', 'vknoHam'],
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
+    // DURUM DEĞİŞ ▾ (19.11.2026): renkli durum menüsü - satır / rozet renkleriyle aynı (tema.css rv-*).
+    //   Planlandı = Geri Al (Geldi / Gelmedi / İptal'den döner), Ertele yeni saat penceresi.
+    altSecenekler: { 'randevu.durum': [
+      { kod: 'randevu.geri-al', ad: '● Planlandı', sinif: 'rv-m rv-m-planli' },
+      { kod: 'randevu.geldi',   ad: '✔ Geldi',     sinif: 'rv-m rv-m-geldi' },
+      { kod: 'randevu.gelmedi', ad: '✖ Gelmedi',   sinif: 'rv-m rv-m-gelmedi' },
+      { kod: 'randevu.ertele',  ad: '⏭ Ertele…',   sinif: 'rv-m rv-m-ertele' },
+      { kod: 'randevu.iptal',   ad: '⊘ İptal',     sinif: 'rv-m rv-m-iptal' },
+      // SLOT KAPAT menünün en altında, ayraçla (kullanıcı 19.11.2026) - araç çubuğunda ayrı düğme yok.
+      { kod: 'randevu.durum.ayrac', ad: '' },
+      { kod: 'randevu.kapat',   ad: '🔒 Slot Kapat' },
+    ] },
     tarihAlani: 'tarih',
     cipler: [
       { ad: 'Planlandı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },

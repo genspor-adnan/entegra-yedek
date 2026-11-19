@@ -9915,3 +9915,14 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .takvim-kayit { position: relative; padding-right: 20px !important; cursor: pointer; user-select: none }
 .takvim-kayit .takvim-kayit-isaret { position: absolute; top: 2px; right: 2px; margin: 0; width: 13px; height: 13px; cursor: pointer }
 .takvim-kayit.secili { outline: 2px solid var(--mor, #6d4aff); outline-offset: -1px; box-shadow: 0 0 0 1px #fff inset }
+/* RANDEVU › DURUM DEĞİŞ ▾ (19.11.2026): durum renkleri satır / rozet renkleriyle aynı. */
+.mi.rv-m { border-left: 4px solid transparent; font-weight: 600 }
+.mi.rv-m-planli  { border-left-color: var(--mor);   color: var(--mor) }
+.mi.rv-m-geldi   { border-left-color: var(--ok);    color: var(--ok) }
+.mi.rv-m-gelmedi { border-left-color: var(--hata);  color: var(--hata) }
+.mi.rv-m-ertele  { border-left-color: var(--uyari); color: var(--uyari) }
+.mi.rv-m-iptal   { border-left-color: var(--soluk); color: var(--soluk) }
+.mi.rv-m-planli:hover  { background: var(--mor2) }
+.mi.rv-m-geldi:hover   { background: var(--okzem) }
+.mi.rv-m-gelmedi:hover { background: var(--hatazem) }
+.mi.rv-m-ertele:hover  { background: var(--uyarizem) }

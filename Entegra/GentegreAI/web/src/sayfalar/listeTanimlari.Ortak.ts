@@ -220,7 +220,7 @@ export interface ListeTanimi {
   /** ☰/🕓/⭐ (Tum/Son/Sik) ikonlarini gizle (ÜTS listeleri). */
   aramaGorunumGizli?: boolean;
   /** Arac cubugu dugmesine acilir alt menu: aksiyon kodu -> secenekler. */
-  altSecenekler?: Record<string, { kod: string; ad: string }[]>;
+  altSecenekler?: Record<string, { kod: string; ad: string; sinif?: string }[]>;
   /** Liste DEGIL, kendi sayfasi olan menu ogesi (ör. Stok Ayarları: sekmeli ekran).
       App.tsx rotayi kendisi tanimlar; buradaki `kaynak` yalnizca anahtar/rota icindir. */
   ozelSayfa?: boolean;

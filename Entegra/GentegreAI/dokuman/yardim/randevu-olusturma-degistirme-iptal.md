@@ -43,6 +43,7 @@ Görünüm düğmesi **📅 Takvim**: hekim ya da cihaz sütunlu takvim; bölüm
 ## İşlemler (düğmeler)
 - `randevu.yeni` **＋ Yeni** (Ctrl+N): boş randevu kartı (takvimde boş saate tıklamak da kartı o saatle açar).
 - `randevu.duzenle` **✎ Düzenle** (Enter): saat / hekim / süre değiştirme.
+- `randevu.durum` **◐ Durum Değiş ▾**: renkli menü - **Planlandı** (Geldi / Gelmedi / İptal'den geri alır), **Geldi**, **Gelmedi**, **Ertele…**, **İptal**. Aynı işlemler sağ tuş menüsünde de var.
 - `randevu.geldi` **✔ Geldi**: durumu Geldi yapar.
 - `randevu.gelmedi` **✖ Gelmedi**: durumu Gelmedi yapar.
 - `randevu.basvuru` **➜ Başvuruya Dönüştür**: hastaya başvuru açar, randevunun hizmetini kalem yapar, fiyatı fiyat listesi / kampanyadan alır.
@@ -56,7 +57,7 @@ Görünüm düğmesi **📅 Takvim**: hekim ya da cihaz sütunlu takvim; bölüm
 3. Boş bir saate tıklayın; kart o saatle açılır. Hastayı arama penceresinden seçin.
 4. Hizmet / işlem, süre, randevu tipi ve kaynağı girip **Kaydet**'e basın.
 5. Değiştirmek için listede satırı seçip **✎ Düzenle**; yeni saat çakışıyorsa sistem kaydetmez.
-6. Hasta gelince **✔ Geldi**, ardından **➜ Başvuruya Dönüştür**; gelmezse **✖ Gelmedi**.
+6. Hasta gelince **◐ Durum Değiş › Geldi**, ardından **➜ Başvuruya Dönüştür**; gelmezse **Durum Değiş › Gelmedi**.
 7. Vazgeçildiyse sağ tuş **⊘ İptal** (silmek yerine).
 
 ## Durumlar

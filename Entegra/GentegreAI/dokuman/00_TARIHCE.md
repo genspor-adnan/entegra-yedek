@@ -45,6 +45,17 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   `POST .../kapatma` dilimsiz metni şube saatinde yorumlar (eskiden UTC yazıyordu - o yoldan girilmiş eski kapatmalar
   3 saat ileride görünür).
 
+### Randevu listesi › takvim seçimi ve Durum Değiş
+
+- Takvimde kayıtlı randevunun sağ üstünde işaret kutusu; **tek tık seçer, çift tık kartı açar** (kullanıcı). Seçili
+  randevu araç çubuğunun seçili kaydıdır: GenGrid `disSecim` (aksiyon aktifliği + çalıştırma ona), grid satırı seçilince
+  ya da liste tazelenince takvim seçimi düşer. Test: web `randevuTakvimSecim`.
+- **◐ Durum Değiş ▾** (kullanıcı: "altına durumları gösteren menü ekle (renkli olsun).. geldi gelmedi ertele butonları
+  kaldır"): renkli menü Planlandı (= Geri Al) · Geldi · Gelmedi · Ertele… · İptal, ayraç, **🔒 Slot Kapat** (yalnız
+  cihaz + radyoloji değiştir yetkisi varken). Geldi / Gelmedi / Ertele araç çubuğundan kalktı (sağ tuş + palet);
+  Slot Kapat yalnız menüde ve palette. Menü kayıtsız açılır, durum seçenekleri seçim yoksa uyarır. `AltSecenek.sinif`
+  (renk) ve `*.ayrac*` kodlu ayraç satırı GenToolbar'a eklendi.
+
 ---
 
 ## 18.11.2026 — Gentegre AI kod incelemesi (bugünkü 42 commit) düzeltmeleri

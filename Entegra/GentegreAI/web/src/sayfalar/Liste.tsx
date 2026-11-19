@@ -1067,6 +1067,12 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
         return;
       }
 
+      // DURUM DEĞİŞ ▾ seçenekleri kayıt ister (menü kayıtsız da açılır - altında Slot Kapat var).
+      if (!satir && ['randevu.geri-al', 'randevu.geldi', 'randevu.gelmedi', 'randevu.ertele', 'randevu.iptal'].includes(kod)) {
+        mesaj('Önce bir randevu seçin (listede satır, takvimde randevunun işaret kutusu).');
+        return;
+      }
+
       // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265 - 317).
       if (await randevuAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
@@ -1285,6 +1291,11 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={{ ...KASA_ARAC_MENUSU, ...donusumMenusu(tanim.yeniBelgeTuru, DONUSUM_HEDEFLERI),
                        ...(tanim.altSecenekler ?? {}),
+                       // DURUM DEĞİŞ › SLOT KAPAT yalnız cihaz tanımlı + radyoloji değiştirme yetkisi varken;
+                       //   yoksa ayracıyla birlikte düşer (poliklinik kurulumunda cihaz yok).
+                       ...(tanim.altSecenekler?.['randevu.durum'] && (!yetki('radyoloji', 'degistir') || randevuEkran.cihazlar.length === 0)
+                         ? { 'randevu.durum': tanim.altSecenekler['randevu.durum']
+                               .filter(o => o.kod !== 'randevu.kapat' && !o.kod.includes('.ayrac')) } : {}),
                        // YENİ TALEP ▾ (personel): yalnız eklemeye yetkili türler.
                        ...(tanim.altSecenekler?.['personel.talep'] ? { 'personel.talep': personelTalepSecenekleri(yetki, seciliSatir) } : {}) }}
       yenile={yenile}

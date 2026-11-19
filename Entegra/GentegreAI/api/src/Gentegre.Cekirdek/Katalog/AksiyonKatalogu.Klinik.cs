@@ -501,23 +501,32 @@ public static partial class AksiyonKatalogu
                 KaynakKodu: "randevu", Islem: Islem.Ekle, Sira: 10),
             new("randevu.duzenle",  "✎ Düzenle", "randevu", Kisayol: "Enter",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+            // DURUM DEĞİŞ ▾ (kullanıcı 19.11.2026: "Durum Değiş butonu ekle.. altına durumları gösteren menü ekle
+            //   (renkli olsun): Planlandı/Geldi/Gelmedi/İptal/Ertele.. ekrandaki geldi gelmedi ertele butonları
+            //   kaldır"): menü istemcide (listeTanimlari altSecenekler); seçenekler aşağıdaki kodları çalıştırır -
+            //   onlar araç çubuğunda yok, sağ tuş ve palette kalır.
+            //   Kayıt seçmeden de açılır: menünün altındaki Slot Kapat randevu istemez; durum seçenekleri
+            //   seçim yoksa "önce randevu seçin" der (Liste.tsx).
+            new("randevu.durum",    "◐ Durum Değiş", "randevu",
+                KaynakKodu: "randevu", Islem: Islem.Degistir, Sira: 30),
             // RENKLER (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı, Başvuruya Dönüştür sarı.
-            new("randevu.geldi",    "✔ Geldi",   "randevu",
-                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, Bicim: "onay"),
-            new("randevu.gelmedi",  "✖ Gelmedi", "randevu",
-                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, Bicim: "ret"),
+            new("randevu.geldi",    "✔ Geldi",   "randevu", Hedef: "sagtus,palet",
+                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 31, Bicim: "onay"),
+            new("randevu.gelmedi",  "✖ Gelmedi", "randevu", Hedef: "sagtus,palet",
+                KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 32, Bicim: "ret"),
             // Randevudan BASVURUYA (265): hasta geldiginde poliklinik
             //   basvurusu acilir, randevunun hizmeti kalem olur.
             new("randevu.basvuru",  "➜ Başvuruya Dönüştür", "belge",
                 KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 45, Bicim: "sari"),
             // ERTELE (1119): eski randevu "Ertelendi" kalır, yeni saatle yeni randevu açılır.
-            new("randevu.ertele",   "⏭ Ertele",  "randevu",
+            new("randevu.ertele",   "⏭ Ertele",  "randevu", Hedef: "sagtus,palet",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 47),
             // CİHAZ KAPAT (kullanıcı 19.11.2026: "ertele butonu sağına Kapat butonu ekle.. randevuda işaretlenen slotlar
             //   için kapatma ekranı çıksın.. tarih ve işaretli slotlar direkt form içine gelsin"): takvimin cihaz
             //   sütununda işaretli aralık kapatma penceresine (tam gün / slot aralığı) gelir. Kapatmayı yazan yetki
             //   radyoloji değiştir - poliklinik kurulumunda düğme çıkmaz.
-            new("randevu.kapat",    "🔒 Slot Kapat", "radyoloji",   // ad: kullanıcı 19.11.2026 "kapat rename Slot Kapat"
+            //   Araç çubuğunda ayrı düğme değil: Durum Değiş ▾ menüsünün en altında (kullanıcı 19.11.2026).
+            new("randevu.kapat",    "🔒 Slot Kapat", "radyoloji", Hedef: "palet",   // kullanıcı 19.11.2026: "slot kapat menüde yeterli ekrandan çıkar"
                 KaynakKodu: "radyoloji", Islem: Islem.Degistir, Sira: 48),
             // GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı.
             new("randevu.geri-al",  "↩ Geri Al", "randevu", Hedef: "sagtus,palet",
