@@ -116,4 +116,33 @@ public sealed class RandevuSmsTestleri(ApiSunucuOlgusu api)
         Assert.True(j.GetProperty("telefonVar").GetBoolean());
         Assert.True(j.GetProperty("hatirlatmaAcik").GetBoolean());
     }
+
+    [VtFact]
+    public async Task Yeni_kartta_SMS_Gonder_varsayilani_sube_ayarindan()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var onceki = await api.Veri.TekDegerAsync<string>(
+            "select row_to_json(a)::text from public.randevu_sms_ayar a where sube_id = @p0", [Merkez]);
+        d.Temizle(onceki is null
+            ? $"delete from public.randevu_sms_ayar where sube_id = {Merkez}"
+            : $"delete from public.randevu_sms_ayar where sube_id = {Merkez}; insert into public.randevu_sms_ayar select * from json_populate_record(null::public.randevu_sms_ayar, '{onceki.Replace("'", "''")}'::json)");
+        var rol = await d.RolAsync("rsmsv", ["randevu:ged", "randevu.plan.sablon:ged"]);
+        var (u, kod) = await d.KullaniciAsync(rol, Merkez);
+        await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
+        var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
+        using var h = api.Istemci(access, Merkez);
+        async Task<int> Varsayilan() => (await h.GetFromJsonAsync<JsonElement>("/api/kart/randevu/alanlar"))
+            .GetProperty("varsayilanlar").GetProperty("smsGonder").GetInt32();
+
+        // Ayar ekranından (PUT) kapat -> yeni kartta işaretsiz; aç -> işaretli (önbellek beklemeden).
+        var p = await h.PutAsJsonAsync("/api/randevu/sms-ayar", new { bilgiSablon = "", bilgiVarsayilan = false,
+            hatirlatmaAcik = false, hatirlatmaSaat = 24, hatirlatmaSablon = "" });
+        Assert.True(p.IsSuccessStatusCode, await p.Content.ReadAsStringAsync());
+        Assert.Equal(0, await Varsayilan());
+        p = await h.PutAsJsonAsync("/api/randevu/sms-ayar", new { bilgiSablon = "", bilgiVarsayilan = true,
+            hatirlatmaAcik = false, hatirlatmaSaat = 24, hatirlatmaSablon = "" });
+        Assert.True(p.IsSuccessStatusCode, await p.Content.ReadAsStringAsync());
+        Assert.Equal(1, await Varsayilan());
+        Assert.True((await h.GetFromJsonAsync<JsonElement>("/api/randevu/sms-ayar")).GetProperty("bilgiVarsayilan").GetBoolean());
+    }
 }

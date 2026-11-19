@@ -414,7 +414,11 @@ public static class KartUclari
             //   kurumu = tür 1 Özel). Sonuç yoksa alan boş kalır; katalog / kurum tipi varsayılanı varsa o kazanır.
             foreach (var alan in tanim.Alanlar.Where(a => a.VarsayilanSql is not null && !sonuc.ContainsKey(a.Ad)))
             {
-                var deger = await depo.VarsayilanDegerAsync(alan.VarsayilanSql!, iptal);
+                // "@sube" = aktif şube (1384, randevu SMS varsayılanı) - tamsayı, metne gömülür (önbellek anahtarı şubeye göre).
+                // Şubeye bağlı varsayılan bir AYAR ekranından gelir - önbelleksiz (kaydedilen ayar hemen geçerli).
+                var subeli = alan.VarsayilanSql!.Contains("@sube", StringComparison.Ordinal);
+                var deger = await depo.VarsayilanDegerAsync(
+                    alan.VarsayilanSql!.Replace("@sube", subeId.ToString(CultureInfo.InvariantCulture)), iptal, onbellek: !subeli);
                 if (deger is not null) sonuc[alan.Ad] = deger;
             }
             return sonuc;

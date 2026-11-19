@@ -93,7 +93,8 @@ function BolumPenceresi({ onKapat, onDegisti }: { onKapat(): void; onDegisti(): 
              <button type="button" className="d bir"
                      disabled={bolum === '' || (acilacak.length > 0 && secili.size === 0)}
                      onClick={() => void ac()}>✔ {c('Randevuya aç')}</button>
-             <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
+             {/* "Kapat" sağa yaslı (kullanıcı 19.11.2026: "vazgeç rename Kapat ve sağa yasla"). */}
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
       <div className="cs-pencere">
@@ -209,7 +210,8 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
     <Modal baslik={`⚙ ${c('Varsayılanlar ve kurallar')}`} dar enUst buyutmeYok onKapat={onKapat}
            alt={<>
              <button type="button" className="d bir" disabled={!v} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
-             <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
+             {/* "Kapat" sağa yaslı (kullanıcı 19.11.2026: "vazgeç rename Kapat ve sağa yasla"). */}
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {!v ? <div className="yukleniyor-satir">{c('Yükleniyor…')}</div> : (
@@ -261,7 +263,7 @@ function VarsayilanPenceresi({ onKapat }: { onKapat(): void }) {
  * ŞUBENİN RANDEVU SMS AYARI (1382, kullanıcı 19.11.2026: "şubeye özgü olsun mesaj.. 1 gün kala hatırlatma mesajı
  * göndereceğiz opsiyonel olarak"). Boş metin = varsayılan metin. Otomatik kayıt yok: Kaydet'e bağlı (ayarlarda kural).
  */
-type SmsAyar = { bilgiSablon: string; hatirlatmaAcik: boolean; hatirlatmaSaat: number; hatirlatmaSablon: string };
+type SmsAyar = { bilgiSablon: string; bilgiVarsayilan: boolean; hatirlatmaAcik: boolean; hatirlatmaSaat: number; hatirlatmaSablon: string };
 
 function SmsPenceresi({ onKapat }: { onKapat(): void }) {
   const [ilk, setIlk] = useState<SmsAyar | null>(null);
@@ -272,7 +274,8 @@ function SmsPenceresi({ onKapat }: { onKapat(): void }) {
 
   useEffect(() => {
     api.randevuSmsAyar().then(y => {
-      const a = { bilgiSablon: y.bilgiSablon, hatirlatmaAcik: y.hatirlatmaAcik, hatirlatmaSaat: y.hatirlatmaSaat,
+      const a = { bilgiSablon: y.bilgiSablon, bilgiVarsayilan: y.bilgiVarsayilan !== false,
+                  hatirlatmaAcik: y.hatirlatmaAcik, hatirlatmaSaat: y.hatirlatmaSaat,
                   hatirlatmaSablon: y.hatirlatmaSablon };
       setIlk(a); setV(a);
       setEk({ varsayilanBilgi: y.varsayilanBilgi, varsayilanHatirlatma: y.varsayilanHatirlatma, degiskenler: y.degiskenler });
@@ -305,13 +308,20 @@ function SmsPenceresi({ onKapat }: { onKapat(): void }) {
     <Modal baslik={`📱 ${c('Randevu SMS (bu şube)')}`} dar enUst buyutmeYok onKapat={onKapat}
            alt={<>
              <button type="button" className="d bir" disabled={!degisti} onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
-             <button type="button" className="d" onClick={onKapat}>{c('Vazgeç')}</button>
+             {/* "Kapat" sağa yaslı (kullanıcı 19.11.2026: "vazgeç rename Kapat ve sağa yasla"). */}
+             <button type="button" className="d" style={{ marginLeft: 'auto' }} onClick={onKapat}>✖ {c('Kapat')}</button>
            </>}>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {!v || !ek ? <div className="yukleniyor-satir">{c('Yükleniyor…')}</div> : (
         <div className="cs-pencere">
           <h6>{c('Randevu bilgi SMS\'i')}</h6>
           <div className="kucuk sonuk">{c('Randevu kartında "SMS Gönder" işaretliyse kayıtta gider; kartta o randevu için değiştirilebilir.')}</div>
+          {/* YENİ RANDEVUDA VARSAYILAN (1384, kullanıcı 19.11.2026). */}
+          <label className="cs-alan" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" checked={v.bilgiVarsayilan} aria-label={c('Yeni randevuda SMS Gönder işaretli gelsin')}
+                   onChange={e => setV({ ...v, bilgiVarsayilan: e.target.checked })} />
+            <span>{c('Yeni randevuda "SMS Gönder" işaretli gelsin')}</span>
+          </label>
           {metinAlani(c('Bilgi metni'), 'bilgiSablon', ek.varsayilanBilgi)}
 
           <h6>{c('Hatırlatma SMS\'i')}</h6>

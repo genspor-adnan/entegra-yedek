@@ -654,10 +654,11 @@ public sealed partial class KartDeposu
     /// 16.11.2026): randevu kartı en sık açılan karttır, değer (Özel kurum id'si) kurum eklenince değişir -
     /// sorgu başına 60 sn tutulur. Anahtar bağlantı dizgesi + sql: iki kurulum aynı süreçte karışmaz.
     /// </summary>
-    public async Task<object?> VarsayilanDegerAsync(string sql, CancellationToken iptal = default)
+    /// <param name="onbellek">false: ayar ekranından anında değişebilen değer (1384 randevu SMS) - 60 sn önbellek kullanılmaz.</param>
+    public async Task<object?> VarsayilanDegerAsync(string sql, CancellationToken iptal = default, bool onbellek = true)
     {
         var anahtar = _veri.BaglantiDizesi + "\n" + sql;
-        if (VarsayilanOnbellek.TryGetValue(anahtar, out var k) && k.Son > DateTime.UtcNow) return k.Deger;
+        if (onbellek && VarsayilanOnbellek.TryGetValue(anahtar, out var k) && k.Son > DateTime.UtcNow) return k.Deger;
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut(sql, null);
         var v = await komut.ExecuteScalarAsync(iptal);

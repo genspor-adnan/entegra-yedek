@@ -26,7 +26,7 @@ public static partial class KartKatalogu
             ["kendiIstegi"] = (short)1,     // gönderen seçilmedikçe hasta kendi isteğiyle (1346)
             // RANDEVU SMS (1382, kullanıcı 19.11.2026: "SMS Gönder Check ekle.. default seçili olsun"): yeni kartta bilgi
             //   SMS'i ve (şube ayarı açıksa) hatırlatma işaretli gelir. DB varsayılanı 0 - kart dışı yollar SMS atmaz.
-            ["smsGonder"] = (short)1,
+            //   smsGonder BURADA DEĞİL (1384): şube ayarından, alanın VarsayilanSql'i (sabit varsayılan onu ezerdi).
             ["smsHatirlatma"] = (short)1,
         },
         // GÖRÜNTÜLEME / LAB KURULUMU (kullanıcı 15.11.2026): bu kurumlarda randevu tetkik içindir, Muayene
@@ -129,7 +129,10 @@ public static partial class KartKatalogu
             new("ertelemeNedeni", "erteleme_nedeni", "metin", Yazilabilir: false, Gizli: true),
             // RANDEVU SMS (1382): kartın altındaki SMS bölümü (RandevuSmsAlani) çizer; değerler kayıtla gider,
             //   gönderim RandevuHatirlatmasi'nda.
-            new("smsGonder", "sms_gonder", "mantik", Gizli: true),
+            // YENİ KARTTA VARSAYILAN ŞUBE AYARINDAN (1384, kullanıcı 19.11.2026: "işaretliyse yeni randevuda sms gönder
+            //   işaretli gelir işaretsizse işaretsiz gelir"); ayarı olmayan şube işaretli.
+            new("smsGonder", "sms_gonder", "mantik", Gizli: true,
+                VarsayilanSql: "select coalesce((select a.bilgi_varsayilan from public.randevu_sms_ayar a where a.sube_id = @sube), 1)::smallint"),
             new("smsMetni", "sms_metni", "metin", EnFazlaUzunluk: 500, Gizli: true),
             new("smsHatirlatma", "sms_hatirlatma", "mantik", Gizli: true),
         });

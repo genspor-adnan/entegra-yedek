@@ -17,7 +17,9 @@ namespace Gentegre.Api.Uclar;
 public static partial class RandevuUclari
 {
     public sealed record SmsOnizlemeIstegi(int? RandevuId, int? HastaId, DateTime? Baslangic, int? Bolum, int? HekimId);
-    public sealed record SmsAyarIstegi(string? BilgiSablon, bool HatirlatmaAcik, short HatirlatmaSaat, string? HatirlatmaSablon);
+    /// <summary>BilgiVarsayilan (1384): yeni randevu kartında "SMS Gönder" işaretli gelsin mi (verilmezse evet).</summary>
+    public sealed record SmsAyarIstegi(string? BilgiSablon, bool HatirlatmaAcik, short HatirlatmaSaat, string? HatirlatmaSablon,
+                                       bool? BilgiVarsayilan = null);
 
     /// <summary>islem_log tablo kimliği - şube kartı (KartKatalogu.Firma LogTabloId).</summary>
     private const int LogTabloSube = 1276;
@@ -69,6 +71,7 @@ public static partial class RandevuUclari
             {
                 subeId = baglam.SubeId,
                 bilgiSablon = ayar?.BilgiSablon ?? "",
+                bilgiVarsayilan = ayar?.BilgiVarsayilan ?? true,
                 hatirlatmaAcik = ayar?.HatirlatmaAcik ?? false,
                 hatirlatmaSaat = ayar?.HatirlatmaSaat ?? 24,
                 hatirlatmaSablon = ayar?.HatirlatmaSablon ?? "",
@@ -97,18 +100,21 @@ public static partial class RandevuUclari
             await using var islem = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("""
                 insert into public.randevu_sms_ayar (sube_id, bilgi_sablon, hatirlatma_acik, hatirlatma_saat, hatirlatma_sablon,
-                                                     degistiren, degistirme_tarihi)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, now())
+                                                     bilgi_varsayilan, degistiren, degistirme_tarihi)
+                values (@p0, @p1, @p2, @p3, @p4, @p6, @p5, now())
                 on conflict (sube_id) do update
                    set bilgi_sablon = excluded.bilgi_sablon, hatirlatma_acik = excluded.hatirlatma_acik,
                        hatirlatma_saat = excluded.hatirlatma_saat, hatirlatma_sablon = excluded.hatirlatma_sablon,
+                       bilgi_varsayilan = excluded.bilgi_varsayilan,
                        degistiren = excluded.degistiren, degistirme_tarihi = now()
-                """, islem, [sube, bilgi, (short)(istek.HatirlatmaAcik ? 1 : 0), istek.HatirlatmaSaat, hatir, baglam.KullaniciId], iptal);
+                """, islem, [sube, bilgi, (short)(istek.HatirlatmaAcik ? 1 : 0), istek.HatirlatmaSaat, hatir, baglam.KullaniciId,
+                            (short)(istek.BilgiVarsayilan != false ? 1 : 0)], iptal);
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloSube, sube, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new Dictionary<string, string>
                 {
                     ["Randevu SMS"] = $"hatırlatma {(istek.HatirlatmaAcik ? $"açık ({istek.HatirlatmaSaat} sa)" : "kapalı")}",
                     ["Bilgi metni"] = bilgi.Length > 0 ? bilgi : "(varsayılan)",
+                    ["Yeni randevuda SMS Gönder"] = istek.BilgiVarsayilan != false ? "işaretli" : "işaretsiz",
                     ["Hatırlatma metni"] = hatir.Length > 0 ? hatir : "(varsayılan)",
                 }, iptal: iptal);
             await islem.CommitAsync(iptal);

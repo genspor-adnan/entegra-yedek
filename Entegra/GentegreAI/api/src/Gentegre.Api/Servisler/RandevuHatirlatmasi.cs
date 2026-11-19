@@ -69,14 +69,15 @@ public sealed class RandevuHatirlatmasi
     }
 
     /// <summary>Şubenin SMS ayarı; satır yoksa null (eski kurum geneli hatırlatma geçerli).</summary>
-    public sealed record SubeAyari(string BilgiSablon, bool HatirlatmaAcik, int HatirlatmaSaat, string HatirlatmaSablon);
+    public sealed record SubeAyari(string BilgiSablon, bool HatirlatmaAcik, int HatirlatmaSaat, string HatirlatmaSablon,
+                                   bool BilgiVarsayilan = true);
 
     public async Task<SubeAyari?> SubeAyariAsync(int subeId, CancellationToken iptal)
         => await _veri.TekAsync("""
-            select bilgi_sablon, hatirlatma_acik, hatirlatma_saat, hatirlatma_sablon
+            select bilgi_sablon, hatirlatma_acik, hatirlatma_saat, hatirlatma_sablon, bilgi_varsayilan
               from public.randevu_sms_ayar where sube_id = @p0
             """, new object?[] { subeId },
-            o => new SubeAyari(o.GetString(0), o.GetInt16(1) == 1, o.GetInt16(2), o.GetString(3)), iptal);
+            o => new SubeAyari(o.GetString(0), o.GetInt16(1) == 1, o.GetInt16(2), o.GetString(3), o.GetInt16(4) == 1), iptal);
 
     /// <summary>Mesaj değişkenleri - randevu kaydından ya da kartın kaydedilmemiş alanlarından (önizleme).</summary>
     public async Task<(Dictionary<string, string> Degerler, string Telefon)> VeriAsync(
