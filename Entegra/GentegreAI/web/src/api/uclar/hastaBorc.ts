@@ -48,5 +48,8 @@ export const hastaBorcUclari = {
   hastaBorcIsaret: (hastaIds: number[], aciklama?: string) =>
     gonder<{ isaretlenen: number }>('/api/hasta-borc/isaret', { hastaIds, aciklama }),
   hastaBorcNot: (hastaId: number, aciklama: string) => gonder<{ id: number }>('/api/hasta-borc/not', { hastaId, aciklama }),
+  /** Tek hastanın borcu + açık sözü / planı (başvuru bandı, tahsilat, icmal, randevu - 19.11.2026). */
+  hastaBorcOzeti: (hastaId: number) =>
+    istek<import('../../bilesenler/borc/hastaSoz').HastaBorcOzeti>(`/api/hasta-borc/hasta/${hastaId}`),
   hastaBorcKaldir: (id: number) => gonder<{ kaldirildi: boolean }>(`/api/hasta-borc/islem/${id}/kaldir`, {}),
 };

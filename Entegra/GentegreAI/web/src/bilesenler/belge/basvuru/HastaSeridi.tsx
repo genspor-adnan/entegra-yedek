@@ -2,6 +2,7 @@ import { basHarfler } from '../../basHarfler';
 import type { kvkkKisa } from '../basvuru/kvkkDurumu';
 import { useEffect, useState, type ReactNode } from 'react';
 import { api } from '../../../api/istemci';
+import { sozRozeti, useHastaBorcOzeti } from '../../borc/hastaSoz';
 import { paraYaz, yasMetni } from '../../bicim';
 import { MUSTEHAKLIK } from './alanlar';
 import { c } from '../../../dil/ceviri';
@@ -121,6 +122,8 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
     return () => { iptal = true };
   }, [tarafId, belgeId]);
 
+  // Kanca erken dönüşten ÖNCE (React kancaları her çizimde aynı sırada).
+  const borcOzeti = useHastaBorcOzeti(tarafId);
   if (!tarafId) return null;
 
   const ad = String(h?.unvan ?? '') || yedek?.ad || '';
@@ -151,6 +154,8 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
 
   // DURUM: yalniz varsa.
   const durumlar: { ad: string; sinif: string; ipucu?: string }[] = [];
+  // ÖDEME SÖZÜ / PLANI EN BAŞTA (kullanıcı 19.11.2026): banko hasta kapıdayken görsün; tutulmadıysa kırmızı.
+  if (borcOzeti?.soz) durumlar.push(sozRozeti(borcOzeti.soz));
   if (avans > 0) durumlar.push({ ad: `${c('Avans')} ${paraYaz(avans)}`, sinif: 'olumlu',
                                  ipucu: c('Hastanın kullanılmamış avansı — Tahsilat sekmesinden bu başvuruya mahsup edilir.') });
   if (acikBasvuru) durumlar.push({ ad: `📂 ${c('Açık başvuru')} ${acikBasvuru.tarih}`, sinif: 'uyari',

@@ -152,6 +152,37 @@ public static class HastaBorcTakipUclari
             });
         });
 
+        // ------------------------------------------------ tek hasta özeti --
+        // HASTANIN BORCU + AÇIK SÖZÜ / PLANI (kullanıcı 19.11.2026: söz bilgisi başvuru hasta bandında, tahsilat tutarı
+        //   sorulurken, hasta icmalinde ve randevu kartında görünsün - "hepsini yap"). Kural borç takibiyle aynı: söz
+        //   vadesi geçti ve borç hâlâ açık -> "tutulmadi". Okuma: borç takibi YA DA başvuru / randevu görme yetkisi
+        //   (banko ve randevu görevlisi hastanın sözünü görmeli; liste ekranı yine borç takibi yetkisinde).
+        grup.MapGet("/hasta/{id:int}", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
+                                              HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            if (!(baglam.Yetkiler.Var(Kod, Islem.Gor) || baglam.Yetkiler.Var("belge", Islem.Gor)
+                  || baglam.Yetkiler.Var("randevu", Islem.Gor)))
+                baglam.YetkiIste(Kod, Islem.Gor);
+            await erisim.IsteAsync(baglam, "hasta", id, "Hasta bulunamadı.", iptal);
+            var bugun = Saat.Bugun;
+            await using var b = await veri.AcAsync(iptal);
+            var basvurular = await HastaBorcSorgusu.BasvurularAsync(b, bugun.AddDays(1), baglam.SubeId ?? 0, [id], iptal);
+            var borc = basvurular.Where(x => x.Kalan > 0.005m).Sum(x => x.Kalan);
+            var soz = (await IslemlerAsync(b, [id], 0, iptal))
+                .Where(i => i.Durum == 0 && (i.Tur == TurSoz || i.Tur == TurPlan)).MaxBy(i => i.Zaman);
+            var sozDurum = soz is null ? "" : soz.Vade < bugun && borc > 0.005m ? "tutulmadi" : "bekliyor";
+            return Results.Ok(new
+            {
+                borc,
+                soz = soz is null ? null : new
+                {
+                    soz.Id, tur = soz.Tur, soz.Tutar, soz.Vade, soz.TaksitSayisi, soz.Aciklama, zaman = soz.Zaman,
+                    soz.Ekleyen, durum = sozDurum,
+                },
+            });
+        });
+
         // ------------------------------------------------------- hatırlat --
         grup.MapPost("/hatirlat", async (HatirlatIstegi istek, VeriKaynagi veri, BildirimDeposu bildirim,
                                          BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>

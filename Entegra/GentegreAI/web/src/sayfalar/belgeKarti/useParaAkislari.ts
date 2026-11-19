@@ -58,6 +58,8 @@ export interface ParaAkisGirdisi {
    * oldugu sekmeye doner ve kullaniciya sebebi soylenir.
    */
   kayitBasarisiz(): void;
+  /** Hastanın ödeme sözü / planı notu (19.11.2026) - tahsilat tutarı sorulurken pencerede görünür; yoksa ''. */
+  sozNotu?: string;
   setSonuc(y: BelgeYaniti): void;
   donusumleriYukle(id?: number): Promise<void>;
 }
@@ -124,9 +126,10 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
     const yerel = gRef.current.yerelPara || 'TL';
     // BASVURUDA HER ZAMAN SORULUR (kullanici): kismi tahsilat alinabilsin.
     // Acik borc yoksa da sorulur - fazla/pesin tahsilat girilebilsin.
+    const not = gRef.current.sozNotu ? ` — ${gRef.current.sozNotu}` : '';
     const s = await paraSor(
-      kalan > 0 ? `${baslik} tutarı`
-                : `${baslik}: bu belgede açık borç yok. Tahsilat tutarını yazın`,
+      (kalan > 0 ? `${baslik} tutarı`
+                 : `${baslik}: bu belgede açık borç yok. Tahsilat tutarını yazın`) + not,
       {
         varsayilan: kalan > 0 ? para.format(kalan) : '',
         doviz: yerel, yerelPara: yerel, dovizler: DOVIZ_KODLARI,

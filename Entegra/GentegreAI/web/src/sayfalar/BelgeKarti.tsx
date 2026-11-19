@@ -47,6 +47,7 @@ import { useKartKirliligi } from './belgeKarti/useKartKirliligi';
 import { useParaAkislari, type ParaAkisRef } from './belgeKarti/useParaAkislari';
 import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import { useIskontoTalepleri } from './belgeKarti/useIskontoTalepleri';
+import { sozNotu, useHastaBorcOzeti } from '../bilesenler/borc/hastaSoz';
 import { useBasvuruVarsayilanlari } from './belgeKarti/useBasvuruVarsayilanlari';
 import { useSatirSecimi } from './belgeKarti/useSatirSecimi';
 import { useKalemAkisi } from './belgeKarti/useKalemAkisi';
@@ -947,6 +948,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     onGelisNedeni: n => setBasvuruBilgi(o => (Number(o.gelisNedeni ?? 0) ? o : { ...o, gelisNedeni: n })),
   });
 
+  // HASTANIN ÖDEME SÖZÜ / PLANI (19.11.2026): tahsilat penceresindeki not için.
+  const hastaBorcOzeti = useHastaBorcOzeti(basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || null) : null);
   // Geri alma sonrası talep listesi (rozet) yeniden okunsun.
   const [iskontoSurum, setIskontoSurum] = useState(0);
   const iskontoTalepleri = useIskontoTalepleri(basvuruMu, belgeId, async () => {
@@ -1355,6 +1358,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       //   1.000 gelmesi, memurun kurumun payini da hastadan tahsil etmesine
       //   acik kapi birakiyordu. Kurum payi tahsil edilmez, TAHAKKUK edilir.
       acikBorc: seritTaraflari ? seritTaraflari.tahsilat.hasta : basvuruAcikBorc,
+      // SÖZ / PLAN NOTU tahsilat penceresinde (19.11.2026): "Hastanın 25.11 vadeli 1.250 ₺ ödeme sözü var".
+      sozNotu: basvuruMu ? sozNotu(hastaBorcOzeti?.soz) : '',
       kullaniciId: kullanici?.id ?? null, yerelPara,
       setHata, setSonuc, donusumleriYukle: donusumler.yukle,
       // Kovalarin sayaclari degisince satirlar yeniden okunur (serit/dipnot).

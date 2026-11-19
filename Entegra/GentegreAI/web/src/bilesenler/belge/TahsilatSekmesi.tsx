@@ -5,8 +5,7 @@ import { para, tarihSaat, paraYaz } from '../bicim';
 import { type BelgeYaniti, URUN_GENOTIP } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
 import { OdemeSozuModali } from '../borc/OdemeSozuModali';
-import { api } from '../../api/istemci';
-import type { BorcIslemi } from '../../api/uclar/hastaBorc';
+import { useHastaBorcOzeti } from '../borc/hastaSoz';
 
 /**
  * TAHSILAT SEKMESI - belgeye bagli kasa islemleri ve kalan bakiye.
@@ -155,8 +154,7 @@ const [sozAcik, setSozAcik] = useState(false);
  * borç takibinin kaydı (tür 2 söz / 3 plan, durum 0 açık) - hasta bazında, tahsilat DEĞİL; toplama girmez. Borç takibi
  * yetkisi yoksa okunamaz ve satır çıkmaz.
  */
-const [sozKaydi, setSozKaydi] = useState<BorcIslemi | null>(null);
-const [sozSurum, setSozSurum] = useState(0);
+
 useEffect(() => {
   if (!aracMenu && !iadeMenu && !avansMenu && !avansIadeMenu) return;
   const kapat = () => { setAracMenu(false); setIadeMenu(false);
@@ -166,16 +164,8 @@ useEffect(() => {
 }, [aracMenu, iadeMenu, avansMenu, avansIadeMenu]);
 /** Avans durumu KARTTAN gelir (781): serit ve bu cubuk ayni sayiyi konusur. */
 const hastaId = Number(sonuc?.belge.tarafId ?? 0);
-useEffect(() => {
-  if (!basvuruMu || !(hastaId > 0)) { setSozKaydi(null); return }
-  let iptal = false;
-  // Senkron hata da (okunamayan uç) yakalansın: söz satırı yalnız bilgi, sekmeyi düşürmemeli.
-  Promise.resolve().then(() => api.hastaBorcGecmisi(hastaId))
-    .then(r => { if (!iptal) setSozKaydi(r.islemler.filter(i => (i.tur === 2 || i.tur === 3) && i.durum === 0)
-                                                     .sort((a, b) => b.id - a.id)[0] ?? null) })
-    .catch(() => { if (!iptal) setSozKaydi(null) });
-  return () => { iptal = true };
-}, [basvuruMu, hastaId, sozSurum]);
+const borcOzeti = useHastaBorcOzeti(basvuruMu ? hastaId : null);
+const sozKaydi = borcOzeti?.soz ?? null;
 const avansVar = avans.toplam > 0;
 
 /**
@@ -400,7 +390,7 @@ return (
           <OdemeSozuModali hastaId={hastaId} hastaAdi={String(sonuc?.belge.tarafUnvan ?? '')}
                            borc={Math.max(0, kalan)} borcEtiketi={c('Bu başvurunun kalanı (hasta payı)')}
                            mevcutVar={!!sozKaydi}
-                           onKapat={() => setSozAcik(false)} onKaydedildi={() => setSozSurum(s => s + 1)} />
+                           onKapat={() => setSozAcik(false)} />
         )}
       </span>
       {/* AVANS AL (781, kullanici: "bu 3 nokta butonun sağında Avans Al
@@ -652,7 +642,7 @@ return (
         {/* ÖDEME SÖZÜ / PLANI (19.11.2026): tahsilatların altında, mor şeritli; toplama girmez. Çift tık pencereyi açar. */}
         {sozKaydi && (() => {
           const vade = String(sozKaydi.vade ?? '').slice(0, 10);
-          const gecti = !!vade && vade < new Date().toLocaleDateString('sv-SE') && kalan > 0.005;
+          const gecti = sozKaydi.durum === 'tutulmadi';
           const plan = sozKaydi.tur === 3;
           return (
             <tr className="odeme-soz" style={{ userSelect: 'none' }} onDoubleClick={() => setSozAcik(true)}
@@ -664,7 +654,7 @@ return (
               <td>
                 <span className={gecti ? 'soz-gecti' : undefined}>
                   {plan ? c('İlk taksit') : c('Söz tarihi')} {vade ? vade.split('-').reverse().join('.') : '—'}
-                  {gecti && ` · ${c('vadesi geçti')}`}
+                  {gecti && ` · ${c('tutulmadı')}`}
                 </span>
                 {sozKaydi.aciklama && <span className="sonuk"> · {sozKaydi.aciklama}</span>}
               </td>

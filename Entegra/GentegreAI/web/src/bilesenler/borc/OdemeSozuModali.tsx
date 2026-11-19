@@ -4,6 +4,7 @@ import { paraYaz } from '../bicim';
 import { guvenli, mesaj } from '../mesaj';
 import { Modal } from '../Modal';
 import { c } from '../../dil/ceviri';
+import { sozDegistiYayinla } from './hastaSoz';
 
 /**
  * ÖDEME SÖZÜ / PLANI PENCERESİ (kullanıcı 19.11.2026: "hasta borç takibi listesinde ödeme sözü plan modal olarak
@@ -61,6 +62,7 @@ export function OdemeSozuModali({ hastaId, hastaAdi, borc, borcEtiketi, mevcutVa
       await api.hastaBorcSoz({ hastaId, tur, tutar: sayi, vade,
         taksitSayisi: tur === 3 ? Number(taksit) : undefined, aciklama: aciklama.trim() });
       mesaj(tur === 3 ? c('Ödeme planı kaydedildi.') : c('Ödeme sözü kaydedildi.'));
+      sozDegistiYayinla(hastaId);
       onKaydedildi?.();
       onKapat();
     } finally { setCalisiyor(false) }

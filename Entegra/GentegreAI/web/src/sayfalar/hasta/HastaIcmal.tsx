@@ -6,6 +6,7 @@ import type { HastaIcmali } from '../../api/uclar/hastaIcmal';
 import { paraYaz } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { KartAdi } from '../../bilesenler/KartAdi';
+import { sozRozeti, useHastaBorcOzeti } from '../../bilesenler/borc/hastaSoz';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { IcmalA4 } from './icmal/IcmalA4';
 import {
@@ -27,6 +28,9 @@ type Sekme = 'basvuru' | 'hizmet' | 'tahsilat' | 'provizyon' | 'hareket';
 
 export function HastaIcmal() {
   const { hastaId } = useParams();
+  // ÖDEME SÖZÜ / PLANI (19.11.2026): "Açık borç var"ın yanında; tutulmadıysa kırmızı.
+  const borcOzeti = useHastaBorcOzeti(Number(hastaId) || null);
+  const soz = borcOzeti?.soz ? sozRozeti(borcOzeti.soz) : null;
   const [arama] = useSearchParams();
   const git = useNavigate();
   const { kullanici } = useOturum();
@@ -92,6 +96,7 @@ export function HastaIcmal() {
           </div>
           <span className="sp" />
           {o.kalan > 0.005 && <span className="bo-rz kir">Açık borç var</span>}
+          {soz && <span className={`rozet ${soz.sinif}`} style={{ marginLeft: 6 }} title={soz.ipucu}>{soz.ad}</span>}
         </div>
 
         <div className="hi-ozet">

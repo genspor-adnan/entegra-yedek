@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { c } from '../dil/ceviri';
+import { sozRozeti, useHastaBorcOzeti } from './borc/hastaSoz';
 
 /**
  * Randevu kartının ALT ÖZET ŞERİDİ (Ekranlar/randevu_karti.html: "Hasta No ·
@@ -22,6 +23,9 @@ export function RandevuOzetSeridi({ hastaId, hariçId, olusturan, ertelemeIzi }:
   const [hasta, setHasta] = useState<{ kod: string; bakiye: number } | null>(null);
   const [son, setSon] = useState<string>('');
   const [erteleme, setErteleme] = useState('');
+  // ÖDEME SÖZÜ / PLANI (19.11.2026): randevu verilirken görülsün - sözü tutulmamış borçlu hasta kırmızı.
+  const borcOzeti = useHastaBorcOzeti(hastaId);
+  const soz = borcOzeti?.soz ? sozRozeti(borcOzeti.soz) : null;
 
   useEffect(() => {
     if (!ertelemeIzi || !hariçId) { setErteleme(''); return }
@@ -76,6 +80,7 @@ export function RandevuOzetSeridi({ hastaId, hariçId, olusturan, ertelemeIzi }:
       <span>{c('Açık Bakiye:')}<b>
         {(hasta?.bakiye ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
       </b></span>
+      {soz && <span><span className={`rozet ${soz.sinif}`} title={soz.ipucu}>{soz.ad}</span></span>}
       {erteleme && <span>{c('Erteleme:')}<b>{erteleme}</b></span>}
       {olusturan && (
         <span>{c('Oluşturma:')}<b>{olusturan.slice(0, 10).split('-').reverse().join('.')}</b></span>
