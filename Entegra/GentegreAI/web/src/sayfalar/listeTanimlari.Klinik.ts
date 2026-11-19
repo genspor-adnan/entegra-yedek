@@ -143,6 +143,12 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       // SLOT KAPAT menünün en altında, ayraçla (kullanıcı 19.11.2026) - araç çubuğunda ayrı düğme yok.
       { kod: 'randevu.durum.ayrac', ad: '' },
       { kod: 'randevu.kapat',   ad: '🔒 Slot Kapat' },
+    ],
+    // PANO İŞLEM ▾ (19.11.2026): pano doluyken Liste.tsx etiketleri hastayla günceller + "Panoyu Boşalt" ekler.
+    'randevu.pano': [
+      { kod: 'randevu.kes',      ad: '✂ Kes' },
+      { kod: 'randevu.kopyala',  ad: '⧉ Kopyala' },
+      { kod: 'randevu.yapistir', ad: '📋 Yapıştır' },
     ] },
     tarihAlani: 'tarih',
     cipler: [

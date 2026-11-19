@@ -64,7 +64,7 @@ function haftaBasi(t: Date) {
   return g;
 }
 
-export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, seciliId, onSec,
+export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, seciliId, onSec, kesilenId,
                                  bolum, hekimId, hekimler = [], cihazlar = [],
                                  yanPanel, onBirak, onKapatmaIste,
                                  gorunumBaslangic, onGorunumDegisti, hekimSabit, doktorYok }: {
@@ -103,6 +103,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
    */
   seciliId?: number | null;
   onSec?(satir: Record<string, unknown> | null): void;
+  /** Panoda KESİLMİŞ randevu (19.11.2026): yapıştırılana kadar soluk, kesik çerçeveli. */
+  kesilenId?: number | null;
   /**
    * Fareyle YUKARIDAN AŞAĞI sürüklenerek seçilen aralık (kullanıcı): başlangıç
    * ve süre "＋ Yeni"ye taşınır. Seçim tek başına kart AÇMAZ - kullanıcı önce
@@ -687,7 +689,8 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile, secili
                         const degistir = () => onSec?.(sec ? null : r);
                         return (
                         <div key={String(r.id)}
-                             className={[span > 1 && kayitlar.length === 1 ? 'takvim-uzun' : '', 'takvim-kayit', sec ? 'secili' : '']
+                             className={[span > 1 && kayitlar.length === 1 ? 'takvim-uzun' : '', 'takvim-kayit', sec ? 'secili' : '',
+                                         kesilenId != null && Number(r.id) === kesilenId ? 'kesildi' : '']
                                           .filter(Boolean).join(' ')}
                              // TEK TIK SEÇER, ÇİFT TIK FORMU AÇAR (19.11.2026). Seçim yoksa (onSec verilmemiş) eski davranış.
                              onClick={e => { e.stopPropagation(); if (onSec) degistir(); else onAc(Number(r.id)) }}

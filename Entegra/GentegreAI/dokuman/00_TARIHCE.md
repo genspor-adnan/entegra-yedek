@@ -55,6 +55,14 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   cihaz + radyoloji değiştir yetkisi varken). Geldi / Gelmedi / Ertele araç çubuğundan kalktı (sağ tuş + palet);
   Slot Kapat yalnız menüde ve palette. Menü kayıtsız açılır, durum seçenekleri seçim yoksa uyarır. `AltSecenek.sinif`
   (renk) ve `*.ayrac*` kodlu ayraç satırı GenToolbar'a eklendi.
+- **📋 Pano İşlem ▾** (Durum Değiş'in sağında; kullanıcı: "Kes/Kopyala/Yapıştır.. plan modunda bir yerden kesilip başka
+  yere yapıştırılsın, veya kopyalanıp 2. 3. yere"): `randevuPano.ts`. Kes = aynı randevu yeni saate / hedef sütunun
+  doktoru (+bölüm) ya da cihazına taşınır (kart PUT; SMS açıksa yeni saat için bilgi SMS'i yeniden gider), pano boşalır;
+  yalnız planlanmış ve başvuruya dönüşmemiş randevu. Kopyala = aynı hastaya yeni randevu (hizmet, gönderen, kurum,
+  açıklama, SMS tercihleri; durum / belge / SMS damgası taşınmaz), pano dolu kalır. Pano doluyken takvimde boş saate
+  tık doğrudan yapıştırır (yeni kart açılmaz); işaretli aralık + menüden Yapıştır da olur. Kesilen randevu takvimde
+  soluk + kesik çerçeve; menüde Yapıştır hastayı gösterir, "Panoyu Boşalt". Çakışma / mesai / kapatma tetikte. Test: web
+  `randevuPano`.
 
 ---
 

@@ -9926,3 +9926,5 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mi.rv-m-geldi:hover   { background: var(--okzem) }
 .mi.rv-m-gelmedi:hover { background: var(--hatazem) }
 .mi.rv-m-ertele:hover  { background: var(--uyarizem) }
+/* RANDEVU PANOSU (19.11.2026): kesilmiş randevu yapıştırılana kadar soluk + kesik çerçeve. */
+.takvim-kayit.kesildi { opacity: .45; border-style: dashed !important; border-color: var(--mor, #6d4aff) !important }

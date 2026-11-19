@@ -116,6 +116,7 @@ import { useTaniEkleTercihi } from '../bilesenler/taniEkleTercihi';
 import { usePortalBaslik, usePortaldaMi } from './portal/portalBaslik';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
 import { randevuAksiyonu } from './liste/randevuAksiyonlari';
+import { randevuYapistir, type RandevuPano, type YapistirHedefi } from './liste/randevuPano';
 import { RandevuErtelePenceresi, type ErtelenecekRandevu } from '../bilesenler/RandevuErtelePenceresi';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
@@ -190,6 +191,8 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
   // TAKVİMDE SEÇİLİ RANDEVU (19.11.2026): araç çubuğu aksiyonları bu kayda uygulanır; liste tazelenince
   //   (durum değişti) seçim düşer - eski satırın durumuyla aksiyon çalışmasın.
   const [takvimSecili, setTakvimSecili] = useState<ListeSatiri | null>(null);
+  // RANDEVU PANOSU (19.11.2026): Kes / Kopyala ile dolar; takvimde boş saate tık ya da Yapıştır hedefe koyar.
+  const [randevuPano, setRandevuPano] = useState<RandevuPano | null>(null);
   useEffect(() => { setTakvimSecili(null) }, [yenile, tanim.kaynak]);
   /** KART KENDİ SEKMESİNDE (kartSekmesiVar): bu sekmede liste çizilmez, yalnız kart. */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
@@ -651,6 +654,21 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
    * Burada kalanlar: belge/kart acma, silme, donusum, randevu akisi, radyoloji
    * ve listeye ozel tek tuk isler - hepsi ekranin kendi state'ine sikica bagli.
    */
+  /** Panodaki randevuyu hedefe koyar: kes = taşı (pano boşalır), kopyala = yeni randevu (pano kalır). */
+  async function panoyaYapistir(h: YapistirHedefi) {
+    const p = randevuPano;
+    if (!p) return;
+    if (randevuEkran.gecmisGun(h.baslangic)) { mesaj('Geçmiş güne yapıştırılamaz.'); return }
+    await guvenli(async () => {
+      await randevuYapistir(p, h);
+      if (p.mod === 'kes') setRandevuPano(null);
+      randevuEkran.setAralik(null);
+      setYenile(t => t + 1);
+      mesaj(`${p.hasta}: ${p.mod === 'kes' ? 'randevu taşındı' : 'yeni randevu açıldı'} `
+            + `(${h.baslangic.slice(0, 10).split('-').reverse().join('.')} ${h.baslangic.slice(11, 16)}).`);
+    });
+  }
+
   async function aksiyon(kod: string, satir?: ListeSatiri | null,
                          secililer?: ListeSatiri[],
                          /** Ekran-ozel ek girdi (or. tani arama metni). */
@@ -1067,6 +1085,28 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
         return;
       }
 
+      // PANO İŞLEM ▾ (19.11.2026): Kes / Kopyala / Yapıştır / Panoyu Boşalt.
+      if (kod === 'randevu.kes' || kod === 'randevu.kopyala') {
+        if (!satir) { mesaj('Önce bir randevu seçin (listede satır, takvimde randevunun işaret kutusu).'); return }
+        const kes = kod === 'randevu.kes';
+        if (kes && Number(satir.durum) !== 1) { mesaj('Yalnız planlanmış randevu kesilip taşınır - kopyalayabilirsiniz.'); return }
+        if (kes && satir.belgeId) { mesaj('Başvuruya dönüşmüş randevu taşınamaz.'); return }
+        setRandevuPano({ mod: kes ? 'kes' : 'kopyala', id: Number(satir.id), hasta: String(satir.hasta ?? ''),
+                         saat: `${String(satir.tarih ?? '').slice(0, 10).split('-').reverse().join('.')} ${String(satir.saat ?? '')}` });
+        mesaj(`${String(satir.hasta ?? '')} ${kes ? 'kesildi' : 'kopyalandı'} - takvimde hedef saate tıklayın `
+              + `(ya da aralık işaretleyip Yapıştır).${kes ? '' : ' Birden çok yere yapıştırabilirsiniz.'}`);
+        return;
+      }
+      if (kod === 'randevu.pano-bosalt') { setRandevuPano(null); return }
+      if (kod === 'randevu.yapistir') {
+        if (!randevuPano) { mesaj('Pano boş - önce bir randevuyu kesin ya da kopyalayın.'); return }
+        const ar = randevuEkran.aralik;
+        if (!ar) { mesaj('Takvimde hedef saate tıklayın ya da hedef aralığı fareyle işaretleyin.'); return }
+        await panoyaYapistir({ baslangic: ar.baslangic.slice(0, 16), hekimId: ar.hekimId,
+                               bolum: ar.hekimId ? randevuEkran.hekimBolumu(ar.hekimId) : undefined, cihazId: ar.cihazId });
+        return;
+      }
+
       // DURUM DEĞİŞ ▾ seçenekleri kayıt ister (menü kayıtsız da açılır - altında Slot Kapat var).
       if (!satir && ['randevu.geri-al', 'randevu.geldi', 'randevu.gelmedi', 'randevu.ertele', 'randevu.iptal'].includes(kod)) {
         mesaj('Önce bir randevu seçin (listede satır, takvimde randevunun işaret kutusu).');
@@ -1291,6 +1331,14 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
       kolonSirasi={tanim.kolonSirasi}
       altSecenekler={{ ...KASA_ARAC_MENUSU, ...donusumMenusu(tanim.yeniBelgeTuru, DONUSUM_HEDEFLERI),
                        ...(tanim.altSecenekler ?? {}),
+                       // PANO İŞLEM ▾: pano doluyken Yapıştır hastayı gösterir, Panoyu Boşalt eklenir.
+                       ...(tanim.altSecenekler?.['randevu.pano'] && randevuPano ? { 'randevu.pano': [
+                         ...tanim.altSecenekler['randevu.pano'].map(o => o.kod === 'randevu.yapistir'
+                           ? { ...o, ad: `📋 Yapıştır — ${randevuPano.hasta} (${randevuPano.mod === 'kes' ? 'kesildi' : 'kopya'} · ${randevuPano.saat})` }
+                           : o),
+                         { kod: 'randevu.pano.ayrac', ad: '' },
+                         { kod: 'randevu.pano-bosalt', ad: '✖ Panoyu Boşalt' },
+                       ] } : {}),
                        // DURUM DEĞİŞ › SLOT KAPAT yalnız cihaz tanımlı + radyoloji değiştirme yetkisi varken;
                        //   yoksa ayracıyla birlikte düşer (poliklinik kurulumunda cihaz yok).
                        ...(tanim.altSecenekler?.['randevu.durum'] && (!yetki('radyoloji', 'degistir') || randevuEkran.cihazlar.length === 0)
@@ -1516,6 +1564,12 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
               //   saate tiklayinca kart acmaz - kaydedemeyecegi formu gostermeyiz.
               if (!yetki('randevu', 'ekle')) return;
               if (randevuEkran.gecmisGun(bas)) return;
+              // PANO DOLUYSA boş saate tıklamak YAPIŞTIRIR (19.11.2026) - yeni randevu kartı açılmaz.
+              if (randevuPano) {
+                void panoyaYapistir({ baslangic: bas.slice(0, 16), hekimId: hek,
+                                      bolum: hek ? randevuEkran.hekimBolumu(hek) : undefined, cihazId: cih });
+                return;
+              }
               if (randevuEkran.bekleyenSecili) { void randevuEkran.bekleyeneRandevuVer(randevuEkran.bekleyenSecili, bas, cih); return }
               // Cihaz sutunundan aciliyorsa bolum/hekim ARANMAZ - kaynak cihaz.
               const bol = cih ? undefined : (randevuEkran.hekimBolumu(hek) ?? (randevuEkran.bolum || undefined));
@@ -1526,6 +1580,7 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
             }}
             onAc={id => git(`/randevu/${id}`)}
             seciliId={takvimSecili ? Number(takvimSecili.id) : null}
+            kesilenId={randevuPano?.mod === 'kes' ? randevuPano.id : null}
             onSec={r => setTakvimSecili(r as ListeSatiri | null)}
             onAralik={(bas, sure, hek, cih) =>
               randevuEkran.setAralik(bas
