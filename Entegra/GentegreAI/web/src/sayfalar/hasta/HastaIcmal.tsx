@@ -70,7 +70,7 @@ export function HastaIcmal() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Hasta İcmali{veri ? ` — ${veri.hasta.ad}` : ''}</h1>
-          <span className="yol">Kayıt Kabul › Hasta › Hesap İcmali</span>
+          <span className="yol">Kayıt Kabul › Hasta › Hasta İcmali</span>
         </div>
       </div>
 

@@ -30,8 +30,8 @@ Hasta İcmali "bu hasta bize ne kadar borçlu, neyi ödedi, kurum ne kadarını 
 - **Geldiğiniz ekrana dönme** — başka bir icmalden ya da listeden geldiyseniz **↩ Geri Dön** sizi aynı süzgeçlerle oraya götürür.
 
 ## Ekrana giriş
-- Hasta listesinde hastayı seçip araç çubuğu / sağ tuş / komut paleti (Ctrl+K) › **🧾 Hesap İcmali** (aksiyon `hasta.icmal`; hasta seçilmemişse "Önce bir hasta seçin.").
-- Hasta kartının hesap bölümündeki **Hesap Özeti** kutusunda **📊 Hesap İcmali** düğmesi.
+- Hasta listesinde hastayı seçip araç çubuğu / sağ tuş / komut paleti (Ctrl+K) › **🧾 Hasta İcmali** (aksiyon `hasta.icmal`; hasta seçilmemişse "Önce bir hasta seçin.").
+- Hasta kartının hesap bölümündeki **Hesap Özeti** kutusunda **📊 Hasta İcmali** düğmesi.
 - Hasta adına tıklayarak: Kurum İcmali, İskonto İcmali, Hasta Başı Maliyet, Hasta Borç Takibi, Alacak Yaşlandırma, Medula Mutabakat İcmali ekranlarından (bu durumda **↩ Geri Dön** çıkar).
 - Adres `/hasta-icmal/[hasta no]`; sol menüde ayrı bir girişi yoktur, her zaman bir hasta için açılır.
 - Rota hem **hasta** hem **belge** görme yetkisi ister; ikisinden biri yoksa ekran açılmaz.

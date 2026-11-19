@@ -113,7 +113,7 @@ export function HastaMali({ hastaId }: { hastaId: number }) {
       <div className="kasira">
         <div className="kasutun" style={{ flex: 1, minWidth: 0 }}>
           <Kutu baslik="Hesap Özeti" sag={<>
-            <button type="button" className="d" onClick={() => git(`/hasta-icmal/${hastaId}`)}>📊 {c('Hesap İcmali')}</button>
+            <button type="button" className="d" onClick={() => git(`/hasta-icmal/${hastaId}`)}>📊 {c('Hasta İcmali')}</button>
             <button type="button" className="d" onClick={() => git(`/ekstre?tur=cari&id=${hastaId}`)}><EkstreIkon /> {c('Ekstre')}</button></>}>
             <table className="detay-tablo">
               <thead><tr><th>{c('Kalem')}</th><th className="hiza-sag" style={{ width: 140 }}>{c('Tutar')}</th></tr></thead>

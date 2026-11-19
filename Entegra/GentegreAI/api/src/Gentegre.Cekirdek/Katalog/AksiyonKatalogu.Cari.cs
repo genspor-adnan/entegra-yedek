@@ -133,9 +133,10 @@ public static partial class AksiyonKatalogu
             // FORM MOTORU (740): hastanın formları (onam, değerlendirme, beyan).
             // HASTA İCMALİ (10.10.2026, mockup İcmal/hasta_icmal.html):
             //   dönemdeki başvurular, kurum / hasta payı, tahsilat, kalan borç.
-            new("hasta.icmal", "🧾 Hesap İcmali", "hasta", Hedef: "araccubugu2,sagtus,palet",
+            new("hasta.icmal", "🧾 Hasta İcmali", "hasta",   // ad: kullanıcı 19.11.2026 (eski "Hesap İcmali")
+                Hedef: "araccubugu2,sagtus,palet",
                 KaynakKodu: "hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 55, UrunModu: 2,
-                Ipucu: "Seçili hastanın hesap icmali (başvurular, tahsilat, kalan borç)"),
+                Ipucu: "Seçili hastanın hasta icmali (başvurular, tahsilat, kalan borç)"),
             new("form.hasta-formlar", "📋 Formlar", "form", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "form.istek", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
             // PORTAL DAVETI (822): hastaya SMS/e-posta ile tek kullanimlik
             //   baglanti gider, hesabini KENDI acar. Hastaya "portalimiz
