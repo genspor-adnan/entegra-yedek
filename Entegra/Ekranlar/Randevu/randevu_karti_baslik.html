@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Randevu Kartı — Başlık: hasta bandı + görüntüleme / düzenleme kipi (mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --head:#f3f6fa; --head2:#e8eef5; --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b;
+    /* randevu durum renkleri - liste satırı / Durum Değiş menüsüyle aynı */
+    --planli:#6d4aff; --planlizem:#efeaff; --geldi:#2e7d46; --geldizem:#e2f3e8;
+    --gelmedi:#c0392b; --gelmedizem:#fdeceb; --ertele:#a9791a; --ertelezem:#fdf6e3; --iptal:#8a96a3; --iptalzem:#eef1f4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:18px auto 6px;max-width:1240px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .win{max-width:1240px;margin:0 auto 8px;background:var(--card);border:1px solid var(--line);border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .toolbar .tur{font-weight:bold;color:var(--navy);letter-spacing:.6px;margin-left:8px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);display:flex;gap:5px;align-items:center;cursor:pointer;user-select:none;white-space:nowrap}
+  .btn.ok{background:linear-gradient(#3f9a5c,#2e7d46);color:#fff;border-color:#276b3b}
+  .btn.teh{background:linear-gradient(#e36a6a,#cf4f4f);color:#fff;border-color:#b84343}
+  .btn.sari{background:linear-gradient(#f6d77a,#e9bd3c);border-color:#d0a52c;color:#4a3a08}
+  .btn.pas{opacity:.45;pointer-events:none}
+  .right{margin-left:auto}
+
+  /* ---------- HASTA BANDI ---------- */
+  .bant{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px 8px;
+        background:linear-gradient(#ffffff,#f6f9fc);border-left:5px solid var(--durum,var(--planli))}
+  .avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:bold;color:#fff;
+          background:linear-gradient(135deg,#3b7cc4,#14315a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.15)}
+  .avatar.k{background:linear-gradient(135deg,#d16ba5,#8a3a6e)}
+  .avatar.bos{background:#dfe6ee;color:#8a96a3;font-size:18px}
+  .kim{min-width:0}
+  .ad{font-size:15px;color:var(--navy);font-weight:bold;line-height:1.15;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .ad .kod{font-size:11px;color:var(--muted);font-weight:normal}
+  .ad a{font-size:11px;font-weight:normal;color:var(--accent);text-decoration:none}
+  .alt{margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11.5px}
+  .alt > * + *::before{content:"·";color:#b7c2cd;margin-right:6px}
+  .alt .uyari{color:var(--req);font-weight:bold}
+  .etk{border-radius:3px;padding:0 6px;font-size:10.5px;font-weight:bold;background:#e3edf8;color:#2a5f9c;border:1px solid #c2d6ec}
+  .etk::before{content:none !important}
+  .etk.ok{background:var(--geldizem);color:var(--geldi);border-color:#bfe3cb}
+  .etk.uy{background:var(--ertelezem);color:var(--ertele);border-color:#eeddb4}
+  .sag{display:flex;gap:8px;align-items:center}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 10px;min-width:118px}
+  .kutu small{display:block;font-size:9.5px;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+  .kutu b{display:block;font-size:13px;color:var(--navy);margin-top:2px;white-space:nowrap}
+  .kutu b.buyuk{font-size:17px;letter-spacing:.3px}
+  .kutu i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px;white-space:nowrap}
+  .kutu.zaman{min-width:150px}
+  .kutu.durum{min-width:128px}
+  .rozet{display:inline-block;border-radius:10px;padding:2px 10px;font-size:11.5px;font-weight:bold;color:#fff;background:var(--planli)}
+  .rozet.geldi{background:var(--geldi)} .rozet.gelmedi{background:var(--gelmedi)} .rozet.ertele{background:var(--ertele)} .rozet.iptal{background:var(--iptal)}
+  .ik{width:30px;height:30px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(var(--btnfrom),var(--btnto));display:grid;place-items:center;font-size:14px;cursor:pointer}
+  .ik.kalem{border-color:#98c2ee;background:linear-gradient(#f3f8ff,#dfeafa);color:var(--accent)}
+  .ik.kalem.acik{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .ik.kalem.kilit{opacity:.45;pointer-events:none}
+  .ara{display:flex;gap:6px;align-items:center}
+  .ara .inp{width:420px;height:28px;font-size:13px}
+
+  /* ---------- İZ ŞERİDİ (erteleme / başvuru bağı) ---------- */
+  .iz{display:flex;gap:14px;align-items:center;padding:4px 14px;background:#fbfcfd;border-top:1px dashed var(--line2);font-size:11px;color:var(--muted)}
+  .iz b{color:var(--ink)}
+  .iz a{color:var(--accent);text-decoration:none}
+
+  /* ---------- BAŞLIK ALANLARI: aynı 4 sütunlu ızgara, iki kip ---------- */
+  .alanlar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 18px;padding:6px 14px 10px;border-bottom:1px solid var(--line2)}
+  .alanlar.gizli{display:none}
+  .fld{display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;min-width:0}
+  .fld.c2{grid-column:span 2}
+  .fld label{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+  .fld label.req::after{content:" *";color:var(--req)}
+  .goster .deg{height:24px;display:flex;align-items:center;padding:0 6px;font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border-radius:3px}
+  .goster .deg:hover{background:#f3f8ff}
+  .goster .deg.bos{color:#aab4bf;font-weight:normal}
+  .goster .deg small{color:var(--muted);font-weight:normal;margin-left:6px}
+  .duzenle{background:linear-gradient(#fbfcfe,#eef4fa);border-left:3px solid var(--accent)}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:24px;padding:0 6px;font-size:12px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+  .inp.ro{background:#f4f6f9;color:#55657a}
+  .inp .ph{color:#aab4bf}
+  .combo::after{content:"▾";position:absolute;right:6px;top:4px;color:var(--muted);font-size:10px}
+  .grup{display:flex;gap:4px;min-width:0}
+  .grup .inp{flex:1}
+  .grup .ik{height:24px;width:24px;font-size:11px}
+  .tik{display:flex;align-items:center;gap:5px;height:24px;font-size:12px}
+
+  .govde{padding:10px 14px;color:var(--muted);font-size:11.5px;min-height:40px}
+  .aciklama{max-width:1240px;margin:4px auto 0;color:var(--muted);font-size:11px;line-height:1.55}
+  .aciklama b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ================================================================== 1 -->
+<h2><b>1</b> — Kayıtlı poliklinik randevusu: GÖRÜNTÜLEME kipi <span class="ipucu">✎ ya da bir değere tıkla → düzenleme</span></h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div><div class="btn teh">🗑 Sil</div>
+    <div class="btn">◐ Durum Değiş ▾</div><div class="btn sari">➜ Başvuruya Dönüştür</div>
+    <span class="tur">RANDEVU</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+
+  <div class="bant" style="--durum:var(--planli)">
+    <div class="avatar k">AY</div>
+    <div class="kim">
+      <div class="ad">Ayşe Yılmaz <span class="kod">H-000871</span> <a href="#">↗ hasta kartı</a></div>
+      <div class="alt"><span>TC 123******34</span><span>K · 42 yaş</span><span>☎ 0532 111 22 33</span><span>SGK</span><span class="etk">KVKK ✓</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu zaman"><small>Randevu</small><b class="buyuk">10:20 – 10:40</b><i>Per 20.11.2026 · yarın · 20 dk</i></div>
+      <div class="kutu"><small>Doktor</small><b>Uzm. Dr. Mehmet Kaya</b><i>Dahiliye Polikliniği</i></div>
+      <div class="kutu durum"><small>Durum</small><b><span class="rozet">Planlandı</span></b><i>📱 bilgi SMS'i gitti · hatırlatma 19.11 10:20</i></div>
+      <div class="ik kalem" id="k1" title="Randevu alanlarını düzenle" onclick="kip(1)">✎</div>
+    </div>
+  </div>
+
+  <div class="alanlar goster" id="g1" onclick="kip(1)">
+    <div class="fld"><label>Bölüm / Poliklinik</label><div class="deg">Dahiliye Polikliniği</div></div>
+    <div class="fld"><label>Doktor</label><div class="deg">Uzm. Dr. Mehmet Kaya</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="deg">520.030 Muayene <small>dahiliye</small></div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="deg">Muayene</div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="deg bos">— (kendi isteği)</div></div>
+    <div class="fld"><label>Kurum</label><div class="deg">SGK</div></div>
+    <div class="fld"><label>Kaynak</label><div class="deg">Telefon</div></div>
+    <div class="fld"><label>Açıklama</label><div class="deg">Kontrol - tahlil sonuçlarıyla gelecek</div></div>
+  </div>
+  <div class="alanlar duzenle gizli" id="e1">
+    <div class="fld"><label class="req">Bölüm / Poliklinik</label><div class="inp combo">Dahiliye Polikliniği</div></div>
+    <div class="fld"><label class="req">Doktor</label><div class="inp combo">Uzm. Dr. Mehmet Kaya</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="grup"><div class="inp">520.030 Muayene</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="inp combo">Muayene</div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="grup"><div class="inp"><span class="ph">—</span></div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Kurum</label><div class="inp combo">SGK</div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp combo">Telefon</div></div>
+    <div class="fld"><label>Açıklama</label><div class="inp">Kontrol - tahlil sonuçlarıyla gelecek</div></div>
+  </div>
+  <div class="govde">↓ Uygun Saatler · 📱 SMS · özet şeridi (değişmez)</div>
+</div>
+<p class="aciklama">
+  <b>Hasta bandı</b> diğer kartlarla aynı desen: avatar (cinsiyet rengi), ad + hasta no + "↗ hasta kartı", altında TC maskeli · cinsiyet/yaş ·
+  cep telefonu · kurum · KVKK. Sol kenardaki <b>renkli çizgi</b> durumun rengi (liste satırı ve Durum Değiş menüsüyle aynı).
+  Sağda üç kutu: <b>Randevu</b> (saat aralığı büyük; gün, "yarın / 3 gün sonra / geçti", süre), <b>Doktor</b> (ya da cihaz) ve <b>Durum</b>
+  (renkli rozet + SMS durumu). Tarih/saat ve hasta bantta okunur; değiştirmek için ✎ → Tarih/Saat + Uygun Saatler aşağıda.
+  Durum düğmeleri tek <b>◐ Durum Değiş ▾</b> (liste ile aynı menü).
+</p>
+
+<!-- ================================================================== 2 -->
+<h2><b>2</b> — Görüntüleme merkezi: cihaz randevusu, ertelenmiş randevudan doğmuş</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div><div class="btn teh">🗑 Sil</div>
+    <div class="btn">◐ Durum Değiş ▾</div><div class="btn sari">➜ Kabul (Başvuru)</div>
+    <span class="tur">RANDEVU</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant" style="--durum:var(--planli)">
+    <div class="avatar">MD</div>
+    <div class="kim">
+      <div class="ad">Mehmet Demir <span class="kod">H-004512</span> <a href="#">↗ hasta kartı</a></div>
+      <div class="alt"><span>TC 456******78</span><span>E · 61 yaş</span><span class="uyari">☎ cep telefonu yok</span><span>Özel</span><span class="etk uy">aç gelecek</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu zaman"><small>Randevu</small><b class="buyuk">15:15 – 15:45</b><i>Cum 21.11.2026 · 2 gün sonra · 30 dk</i></div>
+      <div class="kutu"><small>Cihaz</small><b>MR-1 · Siemens Aera</b><i>Gönderen: Dr. Ali Ak (dış)</i></div>
+      <div class="kutu durum"><small>Durum</small><b><span class="rozet">Planlandı</span></b><i>SMS yok - telefon girilmemiş</i></div>
+      <div class="ik kalem" id="k2" onclick="kip(2)">✎</div>
+    </div>
+  </div>
+  <div class="iz">⏭ <span><b>20.11.2026 10:00</b> randevusundan ertelendi · neden: <b>Cihaz arızası</b> · <a href="#">eski randevuyu aç</a></span></div>
+  <div class="alanlar goster" id="g2" onclick="kip(2)">
+    <div class="fld"><label>Cihaz</label><div class="deg">MR-1 · Siemens Aera</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="deg">803.050 Lomber MR <small>kontrastsız</small></div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="deg">Dr. Ali Ak <small>Ortopedi · dış</small></div></div>
+    <div class="fld"><label>Kurum</label><div class="deg">Özel</div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="deg">Tetkik</div></div>
+    <div class="fld"><label>Kaynak</label><div class="deg">Dış doktor talebi</div></div>
+    <div class="fld c2"><label>Açıklama</label><div class="deg">Bel fıtığı ön tanısı - önceki MR CD'si getirilecek</div></div>
+  </div>
+  <div class="alanlar duzenle gizli" id="e2">
+    <div class="fld"><label class="req">Cihaz</label><div class="inp combo">MR-1 · Siemens Aera</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="grup"><div class="inp">803.050 Lomber MR</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="grup"><div class="inp">Dr. Ali Ak</div><div class="ik">×</div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Kurum</label><div class="inp combo">Özel</div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="inp combo">Tetkik</div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp combo">Dış doktor talebi</div></div>
+    <div class="fld c2"><label>Açıklama</label><div class="inp">Bel fıtığı ön tanısı - önceki MR CD'si getirilecek</div></div>
+  </div>
+  <div class="govde">↓ Tetkik uyumu · Uygun Saatler (cihaz) · 📱 SMS</div>
+</div>
+<p class="aciklama">
+  <b>Cihazlı randevuda</b> ikinci kutu ve ilk alan <b>Cihaz</b> olur (bölüm / doktor görüntüleme merkezinde çıkmaz), altında gönderen doktor.
+  <b>İz şeridi</b> yalnız gerekince: ertelemeden doğduysa nereden ve neden, başvuruya dönüştüyse başvuru bağı (3). Telefon yoksa bantta kırmızı uyarı -
+  SMS gitmeyeceği kayıttan önce görülür.
+</p>
+
+<!-- ================================================================== 3 -->
+<h2><b>3</b> — Hasta geldi, başvuruya dönüştü: kilitli, yalnız görüntüleme</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok pas">💾 Kaydet</div><div class="btn teh pas">🗑 Sil</div>
+    <div class="btn pas">◐ Durum Değiş ▾</div>
+    <span class="tur">RANDEVU</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant" style="--durum:var(--geldi)">
+    <div class="avatar k">ZK</div>
+    <div class="kim">
+      <div class="ad">Zeynep Kara <span class="kod">H-002230</span> <a href="#">↗ hasta kartı</a></div>
+      <div class="alt"><span>TC 789******12</span><span>K · 29 yaş</span><span>☎ 0544 333 44 55</span><span>SGK</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu zaman"><small>Randevu</small><b class="buyuk">09:00 – 09:15</b><i>Çar 19.11.2026 · bugün · 15 dk</i></div>
+      <div class="kutu"><small>Doktor</small><b>Op. Dr. Can Er</b><i>Göz Polikliniği</i></div>
+      <div class="kutu durum"><small>Durum</small><b><span class="rozet geldi">Geldi</span></b><i>08:52 geldi işaretlendi</i></div>
+      <div class="ik kalem kilit" title="Başvuruya dönüşmüş randevu değiştirilemez">✎</div>
+    </div>
+  </div>
+  <div class="iz">➜ <span>Başvuruya dönüştü: <a href="#"><b>Başvuru 82181</b></a> · 19.11.2026 08:53 · banko: Cansu</span></div>
+  <div class="alanlar goster" style="cursor:default">
+    <div class="fld"><label>Bölüm / Poliklinik</label><div class="deg" style="cursor:default">Göz Polikliniği</div></div>
+    <div class="fld"><label>Doktor</label><div class="deg" style="cursor:default">Op. Dr. Can Er</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="deg" style="cursor:default">520.030 Muayene</div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="deg" style="cursor:default">Muayene</div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="deg bos" style="cursor:default">—</div></div>
+    <div class="fld"><label>Kurum</label><div class="deg" style="cursor:default">SGK</div></div>
+    <div class="fld"><label>Kaynak</label><div class="deg" style="cursor:default">Online</div></div>
+    <div class="fld"><label>Açıklama</label><div class="deg bos" style="cursor:default">—</div></div>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Kilitli randevu</b> (başvuruya dönüşmüş / iptal / ertelenmiş): bant ve alanlar okunur, ✎ soluk, Durum Değiş pasif. Rozet ve sol çizgi durumun rengi:
+  <span class="rozet" style="font-size:10px">Planlandı</span> <span class="rozet geldi" style="font-size:10px">Geldi</span>
+  <span class="rozet gelmedi" style="font-size:10px">Gelmedi</span> <span class="rozet ertele" style="font-size:10px">Ertelendi</span>
+  <span class="rozet iptal" style="font-size:10px">İptal</span>.
+</p>
+
+<!-- ================================================================== 4 -->
+<h2><b>4</b> — Yeni randevu: hasta seçilmeden önce — bantta hasta araması, düzenleme kipi açık</h2>
+<div class="win">
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div><div class="btn teh pas">🗑 Sil</div>
+    <span class="tur">YENİ RANDEVU</span>
+    <div class="right btn">✖ Kapat</div>
+  </div>
+  <div class="bant" style="--durum:#c9d3de">
+    <div class="avatar bos">👤</div>
+    <div class="kim">
+      <div class="ara"><div class="inp"><span class="ph">🔍 Hasta ara — ad, TC, telefon, hasta no…</span></div><div class="btn">＋ Yeni Hasta</div></div>
+      <div class="alt" style="margin-top:4px"><span>Hasta seçilince bant dolar; aynı gün başka randevusu varsa burada uyarı çıkar</span></div>
+    </div>
+    <div class="sag">
+      <div class="kutu zaman"><small>Randevu</small><b class="buyuk">10:20 – 10:40</b><i>Per 20.11.2026 · takvimden seçildi</i></div>
+      <div class="kutu"><small>Doktor</small><b>Uzm. Dr. Mehmet Kaya</b><i>Dahiliye Polikliniği</i></div>
+      <div class="kutu durum"><small>Durum</small><b><span class="rozet">Planlandı</span></b><i>📱 SMS gönderilecek</i></div>
+      <div class="ik kalem acik" id="k4" onclick="kip(4)">✎</div>
+    </div>
+  </div>
+  <div class="alanlar goster gizli" id="g4" onclick="kip(4)">
+    <div class="fld"><label>Bölüm / Poliklinik</label><div class="deg">Dahiliye Polikliniği</div></div>
+    <div class="fld"><label>Doktor</label><div class="deg">Uzm. Dr. Mehmet Kaya</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="deg bos">—</div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="deg">Muayene</div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="deg bos">—</div></div>
+    <div class="fld"><label>Kurum</label><div class="deg bos">—</div></div>
+    <div class="fld"><label>Kaynak</label><div class="deg">Banko</div></div>
+    <div class="fld"><label>Açıklama</label><div class="deg bos">—</div></div>
+  </div>
+  <div class="alanlar duzenle" id="e4">
+    <div class="fld"><label class="req">Bölüm / Poliklinik</label><div class="inp combo">Dahiliye Polikliniği</div></div>
+    <div class="fld"><label class="req">Doktor</label><div class="inp combo">Uzm. Dr. Mehmet Kaya</div></div>
+    <div class="fld"><label>Hizmet / İşlem</label><div class="grup"><div class="inp"><span class="ph">Seçiniz…</span></div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Randevu Tipi</label><div class="inp combo">Muayene</div></div>
+    <div class="fld"><label>Gönderen Doktor</label><div class="grup"><div class="inp"><span class="ph">—</span></div><div class="ik">…</div></div></div>
+    <div class="fld"><label>Kurum</label><div class="inp combo"><span class="ph">Seçiniz…</span></div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp combo">Banko</div></div>
+    <div class="fld"><label>Kendi İsteği</label><div class="tik"><input type="checkbox"> gönderen yok</div></div>
+  </div>
+  <div class="govde">↓ Uygun Saatler · 📱 SMS Gönder ☑ · Hatırlatma ☑</div>
+</div>
+<p class="aciklama">
+  <b>Yeni randevuda</b> bandın ortası hasta arama kutusu (+ Yeni Hasta); hasta seçilince 1'deki bant gelir. Saat takvimden geldiyse Randevu kutusu dolu,
+  doktor / bölüm süzgeçten. Düzenleme kipi açık gelir, Kaydet'ten sonra kart görüntüleme kipinde açılır (fatura / stok kartıyla aynı kural).
+</p>
+
+<script>
+  function kip(n){
+    var g = document.getElementById('g'+n), e = document.getElementById('e'+n), k = document.getElementById('k'+n);
+    var duzenle = !g.classList.contains('gizli');
+    g.classList.toggle('gizli', duzenle); e.classList.toggle('gizli', !duzenle); k.classList.toggle('acik', duzenle);
+  }
+</script>
+</body>
+</html>
