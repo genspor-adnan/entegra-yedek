@@ -4,6 +4,7 @@ import { mesaj, paraSor } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import { type BelgeYaniti, URUN_GENOTIP } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
+import { OdemeSozuModali } from '../borc/OdemeSozuModali';
 
 /**
  * TAHSILAT SEKMESI - belgeye bagli kasa islemleri ve kalan bakiye.
@@ -145,6 +146,8 @@ const [iadeMenu, setIadeMenu] = useState(false);
 const [avansMenu, setAvansMenu] = useState(false);
 /** AVANS IADE menusu (781): hangi avans iade edilecek. */
 const [avansIadeMenu, setAvansIadeMenu] = useState(false);
+/** ÖDEME SÖZÜ / PLAN penceresi (19.11.2026). */
+const [sozAcik, setSozAcik] = useState(false);
 useEffect(() => {
   if (!aracMenu && !iadeMenu && !avansMenu && !avansIadeMenu) return;
   const kapat = () => { setAracMenu(false); setIadeMenu(false);
@@ -362,7 +365,22 @@ return (
               💰 Avans Kullan
               {avansVar && <span className="mi-tutar">{paraYaz(avans.toplam)}</span>}
             </button>
+            {/* ÖDEME SÖZÜ / PLAN (kullanıcı 19.11.2026: "başvuru tahsilat sekmesindeyken de çağrılabilsin.. 3 nokta
+                menü en alta"): hastaya söz / taksit planı - Hasta Borç Takibi'ndeki pencerenin aynısı. */}
+            {basvuruMu && (<>
+              <div className="menu-ayrac" />
+              <button type="button" className="mi" disabled={!hastaId}
+                      title={hastaId ? 'Hastanın borcu için ödeme sözü ya da taksit planı' : 'Önce hasta seçin.'}
+                      onClick={() => { setAracMenu(false); setSozAcik(true) }}>
+                🤝 Ödeme Sözü / Plan
+              </button>
+            </>)}
           </div>
+        )}
+        {sozAcik && hastaId > 0 && (
+          <OdemeSozuModali hastaId={hastaId} hastaAdi={String(sonuc?.belge.tarafUnvan ?? '')}
+                           borc={Math.max(0, kalan)} borcEtiketi={c('Bu başvurunun kalanı (hasta payı)')}
+                           onKapat={() => setSozAcik(false)} />
         )}
       </span>
       {/* AVANS AL (781, kullanici: "bu 3 nokta butonun sağında Avans Al

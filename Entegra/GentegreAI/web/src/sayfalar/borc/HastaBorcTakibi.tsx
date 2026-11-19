@@ -9,6 +9,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { BorcMektubu } from './BorcMektubu';
+import { OdemeSozuModali } from '../../bilesenler/borc/OdemeSozuModali';
 import { BorcluTablosu, GecmisTablosu, SozTablosu } from './BorcTablolari';
 import { CIPLER, type Cip, kanalaUygun } from './borcOrtak';
 
@@ -24,8 +25,6 @@ import { CIPLER, type Cip, kanalaUygun } from './borcOrtak';
  */
 type Sekme = 'borclu' | 'gecmis' | 'soz' | 'onizleme';
 
-const bugun = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` };
-
 export function HastaBorcTakibi() {
   const git = useNavigate();
   const { kullanici } = useOturum();
@@ -39,8 +38,8 @@ export function HastaBorcTakibi() {
   const [antet, setAntet] = useState<Record<string, unknown> | null>(null);
   const [tazele, setTazele] = useState(0);
   const [calisiyor, setCalisiyor] = useState(false);
-  // ÖDEME SÖZÜ / PLANI formu (tek hasta seçiliyken).
-  const [sozForm, setSozForm] = useState<{ tur: 2 | 3; tutar: string; vade: string; taksit: string; aciklama: string } | null>(null);
+  // ÖDEME SÖZÜ / PLANI penceresi (tek hasta seçiliyken; 19.11.2026 satır içi formdan modala).
+  const [sozAcik, setSozAcik] = useState(false);
 
   useEffect(() => {
     setHata('');
@@ -74,15 +73,6 @@ export function HastaBorcTakibi() {
     if (!(await onay(`Seçili ${secili.length} hasta "tahsilata çağrılacak" olarak işaretlensin mi?`))) return;
     const r = await api.hastaBorcIsaret(secili);
     mesaj(`${r.isaretlenen} hasta işaretlendi.`); yenile();
-  });
-
-  const sozKaydet = () => void guvenli(async () => {
-    if (!tek || !sozForm) return;
-    const tutar = Number(sozForm.tutar.replace(',', '.'));
-    await api.hastaBorcSoz({ hastaId: tek.id, tur: sozForm.tur, tutar, vade: sozForm.vade,
-      taksitSayisi: sozForm.tur === 3 ? Number(sozForm.taksit) : undefined, aciklama: sozForm.aciklama });
-    mesaj(sozForm.tur === 3 ? 'Ödeme planı kaydedildi.' : 'Ödeme sözü kaydedildi.');
-    setSozForm(null); yenile();
   });
 
   const notEkle = () => void guvenli(async () => {
@@ -119,7 +109,7 @@ export function HastaBorcTakibi() {
         <button disabled={!secili.length || calisiyor} onClick={() => hatirlat(2)}>✉ E-posta Hatırlat</button>
         <button disabled={!secili.length} onClick={isaretle}>📞 Tahsilata Çağır</button>
         <button disabled={!tek} title={tek ? '' : 'Tek hasta seçin'}
-                onClick={() => setSozForm({ tur: 2, tutar: String(tek?.borc ?? ''), vade: bugun(), taksit: '3', aciklama: '' })}>🤝 Ödeme Sözü / Plan</button>
+                onClick={() => setSozAcik(true)}>🤝 Ödeme Sözü / Plan</button>
         <button disabled={!tek} title={tek ? '' : 'Tek hasta seçin'} onClick={notEkle}>📝 Not</button>
         <span className="ki-ayrac" />
         <button className="hi-ana" disabled={!seciliHastalar.length} title="Seçili hastalara borç bildirim mektubu"
@@ -131,23 +121,9 @@ export function HastaBorcTakibi() {
 
       {hata && <div className="hata-kutusu">{hata}</div>}
 
-      {sozForm && tek && (
-        <div className="ki-secim bt-form">
-          <b>{tek.ad}</b> · açık borç {paraYaz(tek.borc)} ·
-          <select value={sozForm.tur} onChange={e => setSozForm({ ...sozForm, tur: Number(e.target.value) as 2 | 3 })}>
-            <option value={2}>Ödeme sözü</option><option value={3}>Ödeme planı</option>
-          </select>
-          tutar <input value={sozForm.tutar} onChange={e => setSozForm({ ...sozForm, tutar: e.target.value })} style={{ width: 90 }} />
-          {sozForm.tur === 3 ? 'ilk taksit' : 'vade'} <input type="date" value={sozForm.vade} min={bugun()}
-            onChange={e => setSozForm({ ...sozForm, vade: e.target.value })} />
-          {sozForm.tur === 3 && <>taksit <input type="number" min={2} max={36} value={sozForm.taksit} style={{ width: 54 }}
-            onChange={e => setSozForm({ ...sozForm, taksit: e.target.value })} /></>}
-          <input placeholder="açıklama" value={sozForm.aciklama} style={{ width: 200 }}
-                 onChange={e => setSozForm({ ...sozForm, aciklama: e.target.value })} />
-          <button className="hi-yesil" onClick={sozKaydet}>Kaydet</button>
-          <button onClick={() => setSozForm(null)}>Vazgeç</button>
-          {tek.soz && <span className="ki-soluk">Mevcut söz / plan kaydedince kaldırılır.</span>}
-        </div>
+      {sozAcik && tek && (
+        <OdemeSozuModali hastaId={tek.id} hastaAdi={tek.ad} borc={tek.borc} mevcutVar={!!tek.soz}
+                         onKapat={() => setSozAcik(false)} onKaydedildi={yenile} />
       )}
 
       {veri && o && (<>
