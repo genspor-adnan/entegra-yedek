@@ -9929,3 +9929,8 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mi.rv-m-ertele:hover  { background: var(--uyarizem) }
 /* RANDEVU PANOSU (19.11.2026): kesilmiş randevu yapıştırılana kadar soluk + kesik çerçeve. */
 .takvim-kayit.kesildi { opacity: .45; border-style: dashed !important; border-color: var(--mor, #6d4aff) !important }
+/* TAHSİLAT SEKMESİ › ÖDEME SÖZÜ / PLANI satırı (19.11.2026): tahsilat değil - mor şerit, italik tutar, toplama girmez. */
+.detay-tablo tr.odeme-soz td { background: color-mix(in srgb, var(--mor, #6d4aff) 8%, transparent) }
+.detay-tablo tr.odeme-soz td:first-child { box-shadow: inset 4px 0 0 var(--mor, #6d4aff) }
+.detay-tablo tr.odeme-soz .soz-tutar { font-style: italic; color: var(--mor, #6d4aff) }
+.detay-tablo tr.odeme-soz .soz-gecti { color: var(--hata); font-weight: 600 }
