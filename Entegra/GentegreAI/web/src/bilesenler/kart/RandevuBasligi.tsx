@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useState, type ReactNode } from 'react';
+import { KartKipBaglami } from './KipKalemi';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { basHarfler } from '../basHarfler';
@@ -14,7 +15,8 @@ import type { Deger } from '../kartAlanCizim';
  *  * Solda HASTA BANDI (kullanıcı 19.11.2026: "hasta adı için mockup gibi avatar yap.. hasta adı edit modda olmasın
  *    mockup başlık gibi gelsin aynısı"): avatar (baş harfler, cinsiyet rengi), ad + dosya no + "↗ hasta kartı", altında
  *    TC (maskeli) · cinsiyet · yaş · telefon · kurum. Hasta seçiliyse İKİ KİPTE DE bant - arama kutusu yalnız hasta
- *    yokken (yeni randevu); yeni randevuyu düzenlerken hasta değiştirmek için arama kutusu alt satırda da durur.
+ *    yokken (yeni randevu). HASTA DEĞİŞTİRME avatara tıklayınca (kullanıcı 19.11.2026: "avatar tıklanınca hasta arama
+ *    gelsin ve hasta bilgisi değişebilsin") - görüntülemedeyse kart düzenlemeye geçer; başvuruya dönüşmüşte olmaz.
  *  * Sağda üç kutu: RANDEVU (saat aralığı büyük; gün, "bugün / yarın / n gün sonra / geçti", süre), DOKTOR ya da
  *    CİHAZ (altında bölüm / doktor), DURUM (renkli rozet + SMS). Sol kenar çizgisi durumun rengi (liste ile aynı).
  *  * ✎ tüm kartı açar / kapatır (GenForm kipli kart). Tarih / saat, süre ve durum kutuları yalnız düzenlemede,
@@ -37,7 +39,11 @@ function useHastaSatiri(hastaId: number) {
 }
 const tcMaske = (v: string) => (v.length >= 11 ? `${v.slice(0, 3)}******${v.slice(-2)}` : v);
 
-function HastaBandi({ hastaId, h, yedekAd }: { hastaId: number; h: Record<string, unknown> | null; yedekAd: string }) {
+function HastaBandi({ hastaId, h, yedekAd, onAvatar }: {
+  hastaId: number; h: Record<string, unknown> | null; yedekAd: string;
+  /** Avatar tıklanınca hasta araması (yoksa avatar tıklanmaz). */
+  onAvatar?(): void;
+}) {
   const git = useNavigate();
   const ad = String(h?.unvan ?? '') || yedekAd;
   const cins = Number(h?.cinsiyet ?? 0);
@@ -51,7 +57,9 @@ function HastaBandi({ hastaId, h, yedekAd }: { hastaId: number; h: Record<string
   ].filter(Boolean);
   return (
     <div className="rv-hasta" data-testid="randevu-hasta-bandi">
-      <span className={`rv-avatar${cins === 2 ? ' k' : ''}`}>{basHarfler(ad) || '?'}</span>
+      <span className={`rv-avatar${cins === 2 ? ' k' : ''}${onAvatar ? ' degisir' : ''}`}
+            role={onAvatar ? 'button' : undefined} data-testid="randevu-hasta-avatar"
+            title={onAvatar ? c('Hastayı değiştir') : undefined} onClick={onAvatar}>{basHarfler(ad) || '?'}</span>
       <div className="rv-kim">
         <div className="rv-ad">{ad || '—'}
           {String(h?.kod ?? '') && <span className="rv-kod">{String(h?.kod)}</span>}
@@ -85,10 +93,27 @@ function zamanBilgisi(baslangic: unknown, sureDk: number) {
   };
 }
 
-export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAlani, digerAlanlar, onKalem }: {
+/**
+ * RANDEVU ✎ (kullanıcı 19.11.2026: "kalemi alttaki alanın sağ üst köşesine taşı"): randevu alanları grubunun sağ üst
+ * köşesinde; kartın kipini (GenForm, KartKipBaglami) açar / kapatır. Başvuruya dönüşmüş randevuda pasif.
+ */
+export function RandevuKalemi({ kilitli }: { kilitli: boolean }) {
+  const k = useContext(KartKipBaglami);
+  if (!k) return null;
+  return (
+    <button type="button" className={`bs-kalem rv-kalem kip-kalemi${k.acik ? ' acik' : ''}`} data-testid="randevu-kalem"
+            disabled={k.pasif || kilitli}
+            title={k.pasif ? c('Düzenleme yetkisi yok') : kilitli ? c('Başvuruya dönüşmüş randevu değiştirilemez')
+                   : k.acik ? c('Düzenlemeyi kapat') : c('Randevuyu düzenle')}
+            onClick={e => { e.stopPropagation(); k.degistir() }}>✎</button>
+  );
+}
+
+export function RandevuBasligi({ deger, meta, gosterKipi, yeniMi, hastaAlani, digerAlanlar, hastaAra }: {
   deger: Record<string, Deger>;
   meta: KartMetaYaniti | null | undefined;
-  salt: boolean;
+  /** Yetki yok - görüntüleme kipine gosterKipi ile yansır (✎ kartın RandevuKalemi'nde). */
+  salt?: boolean;
   /** Görüntüleme kipi (✎ kapalı ya da yetki yok). */
   gosterKipi: boolean;
   yeniMi: boolean;
@@ -96,8 +121,10 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
   hastaAlani: ReactNode;
   /** Tarih / saat, süre, durum - yalnız düzenlemede. */
   digerAlanlar: ReactNode;
-  onKalem(): void;
+  /** Hasta arama penceresini açar (GenForm) - avatar tıklaması. */
+  hastaAra?(): void;
 }) {
+  const kip = useContext(KartKipBaglami);
   const git = useNavigate();
   const hastaId = Number(deger.hastaId) || 0;
   const hastaSatiri = useHastaSatiri(hastaId);
@@ -118,7 +145,12 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
     <div className={`rv-baslik rv-d-${DURUM_SINIF[durum] ?? 'planli'}`} data-testid="randevu-basligi">
       <div className="rv-bant">
         {hastaId > 0
-          ? <HastaBandi hastaId={hastaId} h={hastaSatiri} yedekAd={ad('hastaId')} />
+          ? <HastaBandi hastaId={hastaId} h={hastaSatiri} yedekAd={ad('hastaId')}
+                        onAvatar={!hastaAra || (kip?.pasif ?? true) || (kilitli && !yeniMi) ? undefined : () => {
+                          // Görüntülemedeyse önce düzenlemeye geç - değişen hasta Kaydet'le yazılır.
+                          if (kip && !kip.acik) kip.degistir();
+                          hastaAra();
+                        }} />
           : <div className={`rv-bant-hasta${gosterKipi ? ' kaid-goster' : ''}`} inert={gosterKipi || undefined}>
               {hastaAlani}
             </div>}
@@ -138,12 +170,6 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
             <b><span className="rv-rozet">{ad('durum') || c('Planlandı')}</span></b>
             <i>{sms ? `📱 ${c('SMS açık')}` : c('SMS yok')}</i>
           </div>
-          <button type="button" className={`bs-kalem rv-kalem${gosterKipi ? '' : ' acik'}`} data-testid="randevu-kalem"
-                  disabled={salt || (kilitli && !yeniMi)}
-                  title={salt ? c('Düzenleme yetkisi yok')
-                         : kilitli ? c('Başvuruya dönüşmüş randevu değiştirilemez')
-                         : gosterKipi ? c('Randevuyu düzenle') : c('Düzenlemeyi kapat')}
-                  onClick={onKalem}>✎</button>
         </div>
       </div>
       {kilitli && (
@@ -153,8 +179,6 @@ export function RandevuBasligi({ deger, meta, salt, gosterKipi, yeniMi, hastaAla
       )}
       {!gosterKipi && (
         <div className="alan-izgara rv-alt-alanlar">
-          {/* YENİ RANDEVUDA HASTA DEĞİŞTİRME: bant seçilen hastayı gösterir, arama kutusu burada. */}
-          {yeniMi && hastaId > 0 && <div className="rv-hasta-degistir">{hastaAlani}</div>}
           {digerAlanlar}
         </div>
       )}

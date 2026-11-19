@@ -1690,6 +1690,11 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             unvanOneki={unvanOneki}
             seritAcikDis={kipliGovde ? kipliAcik : undefined}
             onSeritAcik={kipliGovde ? setKipliAcik : undefined}
+            // RANDEVU AVATARI hasta aramasını açar (alanın kendi arama düğmesiyle aynı pencere - 19.11.2026).
+            hastaAra={kaynak === 'randevu' ? () => {
+              const a = meta?.alanlar.find(x => x.ad === 'hastaId');
+              if (a?.aramaKaynagi) setAramaAlani({ alan: 'hastaId', kaynak: a.aramaKaynagi });
+            } : undefined}
             anaRolEk={kaynak !== 'personel' ? undefined
               : yeniMi
               ? <KartKullaniciRolu kartId={0} saltOkunur={salt}

@@ -7,6 +7,7 @@ import { RandevuUygunSaatler } from '../RandevuUygunSaatler';
 import { RandevuSmsAlani } from '../RandevuSmsAlani';
 import { RandevuOzetSeridi } from '../RandevuOzetSeridi';
 import { RandevuTetkikUyum } from '../RandevuTetkikUyum';
+import { RandevuKalemi } from './RandevuBasligi';
 import type { Deger } from '../kartAlanCizim';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { AltGrupBaslik, SekmeParcalari, SekmeTanimi } from '../kartSekmeleri';
@@ -105,7 +106,11 @@ export function KartGrupSarmalayici({
           : grupCiz(aktif);
         const tam = kaynak === 'randevu' ? (
           <>
-            {govde}
+            {/* ✎ RANDEVU ALANLARININ SAĞ ÜST KÖŞESİNDE (19.11.2026) - başlıktan taşındı. */}
+            <div className="rv-govde">
+              {govde}
+              <RandevuKalemi kilitli={!yeniMi && !!Number(deger.belgeId ?? 0)} />
+            </div>
             {/* TETKİK-CİHAZ uyumu ve protokol süresi (317): hasta gelmeden
                 randevu alındığı için yanlış cihaz ancak hasta geldiğinde fark
                 edilirdi. Engelleme veritabanı tetiğinde, bu erken uyarı. */}
