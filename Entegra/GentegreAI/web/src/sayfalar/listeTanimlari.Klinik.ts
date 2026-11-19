@@ -132,6 +132,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // HASTANIN TELEFONU / KİMLİK NOSU İLE ARAMA (kullanıcı 16.10.2026) - kolonlar gizli.
     aramaEkAlanlari: ['telefonHam', 'vknoHam'],
     kartYolu: '/randevu', aksiyonEkrani: 'randevu-liste',
+    // "⏰ Hatırlat" randevu kartında yok (kullanıcı 19.11.2026) - hastaya hatırlatma SMS'i kartın SMS bölümünde.
+    kartHatirlatYok: true,
     // DURUM DEĞİŞ ▾ (19.11.2026): renkli durum menüsü - satır / rozet renkleriyle aynı (tema.css rv-*).
     //   Planlandı = Geri Al (Geldi / Gelmedi / İptal'den döner), Ertele yeni saat penceresi.
     altSecenekler: { 'randevu.durum': [

@@ -302,28 +302,49 @@ function RandevuKartAraclari({ b }: { b: KartAracBaglami }) {
   const [erteleAcik, setErteleAcik] = useState(false);
   /** Randevu kartında Tekrarla (seri randevu) penceresi. */
   const [tekrarAcik, setTekrarAcik] = useState(false);
+  /** DURUM DEĞİŞ ▾ menüsü açık mı. */
+  const [durumMenu, setDurumMenu] = useState(false);
+  useEffect(() => {
+    if (!durumMenu) return;
+    const kapat = () => setDurumMenu(false);
+    window.addEventListener('click', kapat);
+    return () => window.removeEventListener('click', kapat);
+  }, [durumMenu]);
+  const durum = Number(deger.durum ?? 1) || 1;
+  const donustu = !!Number(deger.belgeId ?? 0);
+  // DURUM DEĞİŞ ▾ (kullanıcı 19.11.2026: "listedeki Durum Değiş butonunu buraya da ekle.. geldi / gelmedi / iptal /
+  //   ertele butonları kaldır"): listedeki renkli menünün aynısı. Durum Kaydet'le yazılır (kart standardı); Ertele
+  //   penceresi kayıtlı, planlanmış ve kaydedilmemiş değişikliği olmayan randevuda.
+  const secenekler: { ad: string; sinif: string; pasif?: string; tikla(): void }[] = [
+    { ad: '● Planlandı', sinif: 'rv-m-planli',
+      pasif: durum === 1 ? c('Randevu zaten planlandı.') : durum === 5 ? c('Ertelenen randevu geri alınmaz.')
+             : donustu ? c('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.') : undefined,
+      tikla: () => b.alanDegistir('durum', '1') },
+    { ad: '✔ Geldi', sinif: 'rv-m-geldi', pasif: durum === 2 ? c('Zaten geldi.') : undefined,
+      tikla: () => b.alanDegistir('durum', '2') },
+    { ad: '✖ Gelmedi', sinif: 'rv-m-gelmedi', pasif: durum === 3 ? c('Zaten gelmedi.') : undefined,
+      tikla: () => b.alanDegistir('durum', '3') },
+    { ad: '⏭ Ertele…', sinif: 'rv-m-ertele',
+      pasif: yeniMi ? c('Önce randevuyu kaydedin.') : durum !== 1 ? c('Yalnız planlanmış randevu ertelenir.')
+             : kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined,
+      tikla: () => setErteleAcik(true) },
+    { ad: '⊘ İptal', sinif: 'rv-m-iptal', pasif: durum === 4 ? c('Zaten iptal.') : undefined,
+      tikla: () => b.alanDegistir('durum', '4') },
+  ];
   return (
     <>
-      {/* Renkler listedekiyle aynı (kullanıcı 16.10.2026): Geldi yeşil, Gelmedi kırmızı. */}
-      <button className="d onay" disabled={Number(deger.durum) === 2}
-              onClick={() => b.alanDegistir('durum', '2')}>✔ Geldi İşaretle</button>
-      <button className="d ret" disabled={Number(deger.durum) === 3}
-              onClick={() => b.alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
-      <button className="d" disabled={Number(deger.durum) === 4}
-              onClick={() => b.alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
-      {/* GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı (Kaydet'le yazılır).
-          Başvuruya dönüşmüş ya da ertelenmiş randevuda yok. */}
-      {[2, 3, 4].includes(Number(deger.durum)) && (
-        <button className="d" disabled={!!deger.belgeId}
-                title={deger.belgeId ? c('Randevu başvuruya dönüşmüş - önce başvuruyu iptal edin.') : c('Durumu Planlandı yap')}
-                onClick={() => b.alanDegistir('durum', '1')}>{c('↩ Geri Al')}</button>
-      )}
-      {/* ERTELE (1119): kayıtlı, planlanmış randevu; kaydedilmemiş değişiklik varken kapalı. */}
-      {!yeniMi && (
-        <button className="d" disabled={Number(deger.durum) !== 1 || kaydedilmemisDegisiklikVar}
-                title={kaydedilmemisDegisiklikVar ? c('Önce değişiklikleri kaydedin.') : undefined}
-                onClick={() => setErteleAcik(true)}>{c('⏭ Ertele')}</button>
-      )}
+      <span className="dugme-menu">
+        <button type="button" className="d" title={c('Randevunun durumunu değiştir (Kaydet ile yazılır)')}
+                onClick={e => { e.stopPropagation(); setDurumMenu(v => !v) }}>◐ {c('Durum Değiş')} ▾</button>
+        {durumMenu && (
+          <div className="dugme-menu-liste">
+            {secenekler.map(s => (
+              <button key={s.sinif} type="button" className={`mi rv-m ${s.sinif}`} disabled={!!s.pasif} title={s.pasif}
+                      onClick={() => { setDurumMenu(false); s.tikla() }}>{c(s.ad)}</button>
+            ))}
+          </div>
+        )}
+      </span>
       {/* TEKRARLA (kullanıcı 17.10.2026): aynı randevudan seri - gün / sayı seçilir, çakışma kontrollü. */}
       {/* Yeni kartta da (17.10.2026): pencerenin Kaydet'i önce bu randevuyu yazar. */}
       <button className="d" disabled={!yeniMi && kaydedilmemisDegisiklikVar}
