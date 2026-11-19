@@ -143,6 +143,8 @@ export interface BelgeKartiModalProps {
   /** Acik iskonto talep penceresinin satir anahtarlari (null = kapali). */
   iskontoTalebi?: number[] | null;
   setIskontoTalebi?: Ayarla<number[] | null>;
+  /** Sözlü onay / onaya gönder sonrası: iskonto talep listesi (rozet + "Onayı Geri Al") yeniden okunsun. */
+  onIskontoDegisti?(): void;
   /** Rolun iskonto tavani (%) - pencere hangi dugmeyi acacagini bundan bilir. */
   iskontoTavani?: number;
   iadeYaz?(tur: number, hesapId: number, hesapAdi: string,
@@ -200,7 +202,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     tahsilat, tahsilatTutariSor, posSonrasi, hizliTahsilat,
     hesapSecim, setHesapSecim, hesapSecimIade, setHesapSecimIade,
     hesapSecimPara, setHesapSecimPara, iadeYaz, kalemSeridi,
-    iskontoTalebi, setIskontoTalebi, iskontoTavani = 0,
+    iskontoTalebi, setIskontoTalebi, onIskontoDegisti, iskontoTavani = 0,
     donusum, setDonusum, donusumPay, setDonusumPay,
     acilanDonusum, setAcilanDonusum, donusumleriYukle,
     terminAcik, setTerminAcik, rolModali, setRolModali,
@@ -630,11 +632,15 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
               const okunan = await api.belgeOku(kayitliId);
               setSonuc(okunan);
               setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
+              // TALEP LİSTESİ DE (kullanıcı 19.11.2026: "sözlü iskonto yapınca geri alabilmeliyim"): rozet ve
+              //   "↩ Onayı Geri Al" talep listesinden çizilir; yenilenmeyince kart kapanıp açılana kadar çıkmıyordu.
+              onIskontoDegisti?.();
               return;
             }
             if (se.onaya) {
               await api.iskontoTalepAc(kayitliId, se.oran, se.gerekce,
                 se.kalemler.map(k => ({ satirId: k.satirId, oran: k.oran })));
+              onIskontoDegisti?.();
               return;
             }
             // LIMIT ICI: onaya dusmez, oran satirlara DOGRUDAN yazilir.

@@ -2445,6 +2445,7 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
              kalir, bu uc bilgi orada da okunabilmeli. */
           iskontoTalebi={iskontoTalebi}
           setIskontoTalebi={setIskontoTalebi}
+          onIskontoDegisti={() => setIskontoSurum(s => s + 1)}
           // 783: talep penceresi "limit ici mi" kararini da esikle birlikte
           //   verir - tavani yeten kullanici esik ustunu dogrudan uygulayamaz.
           iskontoTavani={iskontoEkranLimiti(aksiyonDegeri('basvuru.iskonto'),
