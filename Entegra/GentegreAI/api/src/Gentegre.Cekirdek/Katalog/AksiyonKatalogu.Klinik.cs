@@ -513,6 +513,12 @@ public static partial class AksiyonKatalogu
             // ERTELE (1119): eski randevu "Ertelendi" kalır, yeni saatle yeni randevu açılır.
             new("randevu.ertele",   "⏭ Ertele",  "randevu",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 47),
+            // CİHAZ KAPAT (kullanıcı 19.11.2026: "ertele butonu sağına Kapat butonu ekle.. randevuda işaretlenen slotlar
+            //   için kapatma ekranı çıksın.. tarih ve işaretli slotlar direkt form içine gelsin"): takvimin cihaz
+            //   sütununda işaretli aralık kapatma penceresine (tam gün / slot aralığı) gelir. Kapatmayı yazan yetki
+            //   radyoloji değiştir - poliklinik kurulumunda düğme çıkmaz.
+            new("randevu.kapat",    "🔒 Kapat",  "radyoloji",
+                KaynakKodu: "radyoloji", Islem: Islem.Degistir, Sira: 48),
             // GERİ AL (17.10.2026): yanlış Geldi / Gelmedi / İptal -> Planlandı.
             new("randevu.geri-al",  "↩ Geri Al", "randevu", Hedef: "sagtus,palet",
                 KaynakKodu: "randevu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 49),

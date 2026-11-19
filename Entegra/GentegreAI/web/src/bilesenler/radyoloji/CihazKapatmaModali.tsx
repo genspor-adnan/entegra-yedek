@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
 import { c } from '../../dil/ceviri';
+import { KapatmaAraligiSecici } from './CihazSlotSecici';
 
 /**
  * CİHAZ KAPATMA (318) - bakım / arıza / tatil.
@@ -42,11 +43,12 @@ export function CihazKapatmaModali({ cihazId, cihazAdi, baslangic, bitis,
 
   const kaydet = async () => {
     setHata('');
-    if (bit <= bas) { setHata('Bitiş, başlangıçtan sonra olmalı.'); return }
+    if (bit <= bas) { setHata('Kapatılacak tarih aralığını ya da slotları seçin.'); return }
     setKaydediyor(true);
     try {
+      // Yerel (şube) saat metni -> UTC an: uç DateTime alır, dilimsiz metin sunucuda yanlış yorumlanırdı.
       const y = await api.radyolojiKapatmaEkle(cihazId, {
-        baslangic: bas, bitis: bit, nedenTur: neden, aciklama,
+        baslangic: new Date(bas).toISOString(), bitis: new Date(bit).toISOString(), nedenTur: neden, aciklama,
       });
       mesaj(y.etkilenenRandevu > 0
         ? `Cihaz kapatıldı. DİKKAT: bu aralıkta ${y.etkilenenRandevu} randevu var — `
@@ -71,20 +73,14 @@ export function CihazKapatmaModali({ cihazId, cihazAdi, baslangic, bitis,
 
       <div className="kagrup">
         <h6>{c('Kapatma')}</h6>
+        {/* ARALIK (19.11.2026): takvimde işaretli slotlarla açılır (slot kipi); tam güne geçilebilir. */}
+        <KapatmaAraligiSecici cihazId={cihazId} bas={bas} bit={bit} onSec={(b, e) => { setBas(b); setBit(e) }} />
         <div className="alan-izgara tek-sutun">
           <label className="alan">
             <span className="etiket zorunlu-isaret">Neden</span>
             <select value={neden} onChange={e => setNeden(Number(e.target.value))}>
               {NEDENLER.map(n => <option key={n.deger} value={n.deger}>{n.ad}</option>)}
             </select>
-          </label>
-          <label className="alan">
-            <span className="etiket zorunlu-isaret">Başlangıç</span>
-            <input type="datetime-local" value={bas} onChange={e => setBas(e.target.value)} />
-          </label>
-          <label className="alan">
-            <span className="etiket zorunlu-isaret">Bitiş</span>
-            <input type="datetime-local" value={bit} onChange={e => setBit(e.target.value)} />
           </label>
           <label className="alan">
             <span className="etiket">Açıklama</span>

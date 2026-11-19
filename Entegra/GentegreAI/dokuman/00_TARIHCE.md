@@ -34,6 +34,11 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
   başlangıç, ikinci bitiş; öğle / kapalı / dolu işaretli). Gridde tek "Aralık" kolonu (katalog SQL'i). Aynı seçici
   "⛔ Kapat / bakıma al" penceresinde. GenDetayTablo'ya `modalUstBilesen` (taslağı okuyup yazan ek bileşen) ve modalda
   "zaman" alanı için tarih+saat kutusu. Test: CihazKapatmaSlotTestleri.
+- Randevu listesi araç çubuğunda Ertele'nin sağında **🔒 Kapat** (`randevu.kapat`, radyoloji değiştir; kullanıcı:
+  "randevuda işaretlenen slotlar için kapatma ekranı çıksın.. tarih ve işaretli slotlar direkt form içine gelsin"):
+  takvimin cihaz sütununda işaretli aralık `CihazKapatmaModali`'na gelir; pencere artık saat kutusu yerine aynı
+  `KapatmaAraligiSecici` (slot kipinde açılır, tam güne geçilebilir) ve UTC an gönderir. Takvimin kendi "🔒 Cihazı
+  Kapat" düğmesi kalktı (iş tek yerde).
 
 ---
 

@@ -1046,6 +1046,23 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
         setDonemModali, setRolModali, setAcikBelgeId,
       })) return;
 
+      // CİHAZ KAPAT (19.11.2026): takvimde cihaz sütununda işaretli slotlar kapatma penceresine gelir.
+      if (kod === 'randevu.kapat') {
+        const ar = randevuEkran.aralik;
+        if (!ar?.cihazId) {
+          mesaj('Takvimin Cihaz görünümünde kapatılacak slotları fareyle işaretleyin, sonra Kapat\'a basın.');
+          return;
+        }
+        const t = new Date(ar.baslangic); t.setMinutes(t.getMinutes() + (ar.sureDk || 0));
+        const p2 = (n: number) => String(n).padStart(2, '0');
+        const bitis = `${t.getFullYear()}-${p2(t.getMonth() + 1)}-${p2(t.getDate())}T${p2(t.getHours())}:${p2(t.getMinutes())}`;
+        radyolojiModal.setKapatma({
+          cihazId: ar.cihazId, baslangic: ar.baslangic.slice(0, 16), bitis,
+          cihazAdi: randevuEkran.cihazlar.find(c => c.id === ar.cihazId)?.ad ?? '',
+        });
+        return;
+      }
+
       // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265 - 317).
       if (await randevuAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
@@ -1469,10 +1486,8 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
                 })}
               />
             ) : undefined}
-            onKapatmaIste={(cihazId, bas, bit) => radyolojiModal.setKapatma({
-              cihazId, baslangic: bas, bitis: bit,
-              cihazAdi: randevuEkran.cihazlar.find(c => c.id === cihazId)?.ad ?? '',
-            })}
+            // Takvimin "🔒 Cihazı Kapat" düğmesi kalktı (19.11.2026): araç çubuğunda Ertele'nin sağındaki
+            //   "🔒 Kapat" aynı işaretli aralığı kapatma penceresine taşır.
             onBirak={(veri, bas, cih) => {
               // Yuk istemin kendisi (panel JSON yazar) - secili satira bakmayiz.
               try { void randevuEkran.bekleyeneRandevuVer(JSON.parse(veri) as BekleyenIstem, bas, cih) }
