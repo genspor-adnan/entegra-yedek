@@ -947,13 +947,15 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     onGelisNedeni: n => setBasvuruBilgi(o => (Number(o.gelisNedeni ?? 0) ? o : { ...o, gelisNedeni: n })),
   });
 
+  // Geri alma sonrası talep listesi (rozet) yeniden okunsun.
+  const [iskontoSurum, setIskontoSurum] = useState(0);
   const iskontoTalepleri = useIskontoTalepleri(basvuruMu, belgeId, async () => {
     // Karar dustu: baslik ve satirlar sunucudan yeniden okunur - onay orani
     //   satirlara SUNUCUDA islendi ve satirlar kilitlendi.
     if (!belgeId) return;
     try { setSonuc(await api.belgeOku(belgeId)) } catch { /* yoksay */ }
     await paraRef.current.satirlariTazele(belgeId);
-  });
+  }, iskontoSurum);
 
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
@@ -2020,13 +2022,16 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             })()}
             /* ONAYI GERİ AL (1377): bekleyen değişiklik önce kaydedilir (satırlar sunucudan yeniden okunacak), neden
                sorulur; sunucu oranı, kilidi, tutarı ve dip toplamı birlikte döndürür. */
-            onIskontoGeriAl={anahtar => void (async () => {
-              const satirId = satirlar.find(x => x.anahtar === anahtar)?.satirId ?? 0;
-              if (!satirId || !await kayitSart()) return;
+            onIskontoGeriAl={(anahtar, talepId) => void (async () => {
+              const satirId = anahtar == null ? 0 : satirlar.find(x => x.anahtar === anahtar)?.satirId ?? 0;
+              if ((!satirId && !talepId) || !await kayitSart()) return;
               const neden = await metinSor(c('İskonto onayını geri alma nedeni'), '', c('Neden'));
               if (!neden?.trim()) return;
               try {
-                await api.iskontoSatirGeriAl(satirId, neden.trim());
+                // TALEP (rozetin yanındaki düğme, 19.11.2026): bütün satırlar; SATIR: o satırı kilitleyen talep.
+                if (talepId) await api.iskontoTalepGeriAl(talepId, neden.trim());
+                else await api.iskontoSatirGeriAl(satirId, neden.trim());
+                setIskontoSurum(s => s + 1);
                 const okunan = await api.belgeOku(kayitliId);
                 setSonuc(okunan);
                 setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));

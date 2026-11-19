@@ -298,9 +298,18 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {/* Rozet ikonu MENUDEKIYLE AYNI (kullanici): ekranda ayni isin iki
             farkli sembolu olmasin. */}
         {sonTalep.durum === 0 ? `✅ İskonto onayı bekliyor (%${sonTalep.oran})`
-         : sonTalep.durum === 1 ? `✅ İskonto onaylandı %${sonTalep.onaylananOran}`
+         : sonTalep.durum === 1 ? `✅ İskonto onaylandı %${sonTalep.onaylananOran}${sonTalep.onayYontemi === 2 ? ' (sözlü)' : ''}`
+         : sonTalep.durum === 3 ? '↩ İskonto onayı geri alındı'
          : '✅ İskonto reddedildi'}
       </span>
+    )}
+    {/* ONAYI GERİ AL - TALEP (kullanıcı 19.11.2026: "sözlü iskontoyu geri alabilmem lazım"): satır seçmeden, onaylı
+        rozetin yanında; talebin bütün satırları onay öncesine döner. Yetki sunucuda (sözlüyü uygulayan / onaycı). */}
+    {basvuruMu && onIskontoGeriAl && sonTalep?.durum === 1 && (
+      <button type="button" className="d mini" style={{ marginLeft: 4 }} disabled={kilitli}
+              title={kilitli ? 'Kesin belgede geri alınamaz.'
+                     : `Onayı geri al - ${sonTalep.satirSayisi} satırın iskontosu onay öncesine döner, satırlar yeniden düzenlenebilir`}
+              onClick={() => onIskontoGeriAl(null, sonTalep.id)}>↩ {c('Onayı Geri Al')}</button>
     )}
   </h6>
 
@@ -1091,7 +1100,8 @@ export interface KalemSekmesiProps {
    */
   onIskontoOnay?(anahtarlar: number[]): void;
   /** ONAYI GERİ AL (1377): seçili kilitli satırın iskonto onayını geri alır (neden sorulur). */
-  onIskontoGeriAl?(anahtar: number): void;
+  /** Satırdan (anahtar) ya da talebin tamamı (talepId, anahtar null) - 1377 / 19.11.2026. */
+  onIskontoGeriAl?(anahtar: number | null, talepId?: number): void;
   /**
    * Belgenin ISKONTO TALEPLERI (662) - en yenisi baslikta rozet olur.
    * Banko talebi gonderdikten sonra "ne oldu" sorusunu burada okur; sonucu

@@ -15,7 +15,9 @@ import type { IskontoTalebi } from '../../api/sozlesme';
  * kilitsiz satırlar yanlış gösterirdi.
  */
 export function useIskontoTalepleri(basvuruMu: boolean, belgeId: number | undefined,
-                                    kararSonrasi: () => Promise<void>) {
+                                    kararSonrasi: () => Promise<void>,
+                                    /** Artınca liste yeniden okunur (geri alma sonrası - 19.11.2026). */
+                                    surum = 0) {
   const [talepler, setTalepler] = useState<IskontoTalebi[]>([]);
   /* Karar sonrasi isi REF'TE: cagiran her cizimde yeni bir kapanis verir,
      bagimliliga koymak yoklama zamanlayicisini surekli sifirlardi. */
@@ -49,7 +51,7 @@ export function useIskontoTalepleri(basvuruMu: boolean, belgeId: number | undefi
     // `kararSonrasi` her cizimde yeniden kurulur; bagimliliga koymak
     //   zamanlayiciyi surekli sifirlardi - guncel hali ref'ten okunur.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basvuruMu, belgeId]);
+  }, [basvuruMu, belgeId, surum]);
 
   return talepler;
 }

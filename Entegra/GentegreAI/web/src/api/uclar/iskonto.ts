@@ -67,6 +67,9 @@ export const iskontoUclari = {
    * ONAYI GERİ AL (1377): satırı kilitleyen son onaylı iskonto geri alınır - oran onay öncesine döner, kilit açılır.
    * Sözlüyü uygulayan görevli ya da onaycı, dijitali yalnız onaycı; belgeye dönüşmüş satırda olmaz.
    */
+  /** Talebin TAMAMI (tüm satırları) geri alınır - rozetin yanındaki "↩ Onayı Geri Al" (19.11.2026). */
+  iskontoTalepGeriAl: (talepId: number, neden: string) =>
+    gonder<{ id: number }>(`/api/iskonto-talep/${talepId}/geri-al`, { neden }),
   iskontoSatirGeriAl: (satirId: number, neden: string) =>
     gonder<{ id: number }>(`/api/iskonto-talep/satir/${satirId}/geri-al`, { neden }),
 
