@@ -155,7 +155,8 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   // DURUM: yalniz varsa.
   const durumlar: { ad: string; sinif: string; ipucu?: string }[] = [];
   // ÖDEME SÖZÜ / PLANI EN BAŞTA (kullanıcı 19.11.2026): banko hasta kapıdayken görsün; tutulmadıysa kırmızı.
-  if (borcOzeti?.soz) durumlar.push(sozRozeti(borcOzeti.soz));
+  const sozR = borcOzeti?.soz ? sozRozeti(borcOzeti.soz) : null;
+  if (sozR) durumlar.push(sozR);
   if (avans > 0) durumlar.push({ ad: `${c('Avans')} ${paraYaz(avans)}`, sinif: 'olumlu',
                                  ipucu: c('Hastanın kullanılmamış avansı — Tahsilat sekmesinden bu başvuruya mahsup edilir.') });
   if (acikBasvuru) durumlar.push({ ad: `📂 ${c('Açık başvuru')} ${acikBasvuru.tarih}`, sinif: 'uyari',

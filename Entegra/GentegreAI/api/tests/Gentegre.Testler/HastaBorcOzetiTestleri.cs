@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -15,7 +15,7 @@ public sealed class HastaBorcOzetiTestleri(ApiSunucuOlgusu api)
     private const int Merkez = 1;
 
     [VtFact]
-    public async Task Soz_ozeti_okunur_ve_borcsuzda_tutulmadi_sayilmaz()
+    public async Task Soz_ozeti_okunur_ve_borcsuzda_tutuldu_sayilir()
     {
         await using var d = new TestDunyasi(api.Veri);
         var hasta = await api.Veri.TekDegerAsync<int>(
@@ -44,13 +44,14 @@ public sealed class HastaBorcOzetiTestleri(ApiSunucuOlgusu api)
         Assert.Equal(3, soz.GetProperty("tur").GetInt32());
         Assert.Equal(3, soz.GetProperty("taksitSayisi").GetInt32());
         Assert.Equal(900m, soz.GetProperty("tutar").GetDecimal());
-        Assert.Equal("bekliyor", soz.GetProperty("durum").GetString());
         Assert.Equal(0m, j.GetProperty("borc").GetDecimal());
+        // Borcu yok: söz / plan TUTULMUŞ sayılır (19.11.2026 değerlendirme) - rozetler göstermez.
+        Assert.Equal("tutuldu", soz.GetProperty("durum").GetString());
 
         // Vadesi geçti ama borç yok: tutulmadı DEĞİL.
         await api.Veri.CalistirAsync("update public.hasta_borc_islem set vade = current_date - 3 where hasta_id = @p0 and tur = 3", [hasta]);
         j = await hr.GetFromJsonAsync<JsonElement>($"/api/hasta-borc/hasta/{hasta}");
-        Assert.Equal("bekliyor", j.GetProperty("soz").GetProperty("durum").GetString());
+        Assert.Equal("tutuldu", j.GetProperty("soz").GetProperty("durum").GetString());
 
         // Hiç yetkisi olmayan (stok) okuyamaz.
         var rolS = await d.RolAsync("hbo-s", ["stok:g"]);

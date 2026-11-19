@@ -643,19 +643,27 @@ return (
         {sozKaydi && (() => {
           const vade = String(sozKaydi.vade ?? '').slice(0, 10);
           const gecti = sozKaydi.durum === 'tutulmadi';
+          const tutuldu = sozKaydi.durum === 'tutuldu';
           const plan = sozKaydi.tur === 3;
+          const odenen = Number(sozKaydi.odenen ?? 0);
           return (
-            <tr className="odeme-soz" style={{ userSelect: 'none' }} onDoubleClick={() => setSozAcik(true)}
+            <tr className={`odeme-soz${tutuldu ? ' tutuldu' : ''}`} style={{ userSelect: 'none' }} onDoubleClick={() => setSozAcik(true)}
                 title={c('Hastanın ödeme sözü / planı - tahsilat değildir, toplama girmez. Çift tık: yeni söz / plan.')}>
               {!sade && <td className="check"><span title={c('Ödeme sözü / planı')}>{plan ? '📅' : '🤝'}</span></td>}
               <td>{tarihSaat(sozKaydi.zaman)}</td>
               <td className="sonuk">{sozKaydi.ekleyen || '—'}</td>
-              <td><b>{plan ? `${c('Ödeme planı')} · ${sozKaydi.taksitSayisi ?? '?'} ${c('taksit')}` : c('Ödeme sözü')}</b></td>
+              <td><b>{plan ? `${c('Ödeme planı')} · ${sozKaydi.odenenTaksit ?? 0}/${sozKaydi.taksitSayisi ?? '?'} ${c('taksit')}` : c('Ödeme sözü')}</b>
+                {tutuldu && <span className="rozet olumlu" style={{ marginLeft: 6 }}>✓ {c('tutuldu')}</span>}</td>
               <td>
                 <span className={gecti ? 'soz-gecti' : undefined}>
                   {plan ? c('İlk taksit') : c('Söz tarihi')} {vade ? vade.split('-').reverse().join('.') : '—'}
-                  {gecti && ` · ${c('tutulmadı')}`}
+                  {gecti && (plan ? ` · ${sozKaydi.gecikenTaksit ?? 1} ${c('taksit gecikti')}` : ` · ${c('tutulmadı')}`)}
                 </span>
+                {!tutuldu && plan && sozKaydi.sonrakiVade && (
+                  <span className="sonuk"> · {c('sonraki')} {String(sozKaydi.sonrakiVade).slice(0, 10).split('-').reverse().join('.')}
+                    {sozKaydi.sonrakiTutar ? ` (${para.format(Number(sozKaydi.sonrakiTutar))})` : ''}</span>
+                )}
+                {odenen > 0 && <span className="sonuk"> · {c('söz sonrası ödenen')} {para.format(odenen)}</span>}
                 {sozKaydi.aciklama && <span className="sonuk"> · {sozKaydi.aciklama}</span>}
               </td>
               {bankoVar && <td className="sonuk">—</td>}

@@ -19,7 +19,10 @@ export interface HastaSoz {
   aciklama?: string;
   zaman?: string;
   ekleyen?: string;
-  durum: 'bekliyor' | 'tutulmadi';
+  durum: 'bekliyor' | 'tutulmadi' | 'tutuldu';
+  /** Söz sonrası tahsilattan (sunucu, 19.11.2026): ödenen, kalan, plan taksit durumu, sıradaki vade. */
+  odenen?: number; kalan?: number; odenenTaksit?: number; gecikenTaksit?: number;
+  sonrakiVade?: string | null; sonrakiTutar?: number | null;
 }
 export interface HastaBorcOzeti { borc: number; soz: HastaSoz | null }
 
@@ -56,24 +59,40 @@ const gunAy = (g?: string | null) => {
   return s ? `${s.slice(8, 10)}.${s.slice(5, 7)}` : '—';
 };
 
-/** Kısa rozet metni + sınıfı: "🤝 Söz 25.11 · 1.250,00" / "📅 Plan 3 taksit · ilk 25.11" / "⚠ Söz tutulmadı (25.11)". */
-export function sozRozeti(s: HastaSoz): { ad: string; sinif: string; ipucu: string } {
+/**
+ * Kısa rozet - TUTULAN söz / plan için null (gösterilmez):
+ *   söz: "🤝 Söz 25.11 · kalan 400 / 1.250" · plan: "📅 Plan 1/3 · sonraki 25.12 (300)" ·
+ *   tutulmadı: "⚠ Söz tutulmadı (25.11) · kalan 400" / "⚠ Plan: 1 taksit gecikti".
+ */
+export function sozRozeti(s: HastaSoz): { ad: string; sinif: string; ipucu: string } | null {
+  if (s.durum === 'tutuldu') return null;
   const plan = s.tur === 3;
   const tutar = s.tutar != null ? paraYaz(Number(s.tutar)) : '';
+  const odenen = Number(s.odenen ?? 0), kalan = s.kalan != null ? Number(s.kalan) : Number(s.tutar ?? 0);
   const ipucu = [plan ? `Ödeme planı · ${s.taksitSayisi ?? '?'} taksit · ilk taksit ${gunAy(s.vade)}` : `Ödeme sözü · ${gunAy(s.vade)}`,
-                 tutar && `tutar ${tutar}`, s.aciklama, s.ekleyen && `kaydeden ${s.ekleyen}`].filter(Boolean).join(' · ');
+                 tutar && `tutar ${tutar}`, odenen > 0 && `söz sonrası ödenen ${paraYaz(odenen)}`,
+                 s.aciklama, s.ekleyen && `kaydeden ${s.ekleyen}`].filter(Boolean).join(' · ');
+  if (plan) {
+    const n = s.taksitSayisi ?? 0, od = s.odenenTaksit ?? 0;
+    if (s.durum === 'tutulmadi')
+      return { ad: `⚠ Plan: ${s.gecikenTaksit ?? 1} taksit gecikti · ${od}/${n} ödendi`, sinif: 'hata', ipucu };
+    return { ad: `📅 Plan ${od}/${n}${s.sonrakiVade ? ` · sonraki ${gunAy(s.sonrakiVade)}` : ''}`
+                 + `${s.sonrakiTutar ? ` (${paraYaz(Number(s.sonrakiTutar))})` : ''}`, sinif: 'mor', ipucu };
+  }
+  const kalanMetni = odenen > 0 && tutar ? ` · kalan ${paraYaz(kalan)} / ${tutar}` : tutar ? ` · ${tutar}` : '';
   if (s.durum === 'tutulmadi')
-    return { ad: `⚠ ${plan ? 'Plan' : 'Söz'} tutulmadı (${gunAy(s.vade)})`, sinif: 'hata', ipucu };
-  return plan
-    ? { ad: `📅 Plan ${s.taksitSayisi ?? '?'} taksit · ilk ${gunAy(s.vade)}`, sinif: 'mor', ipucu }
-    : { ad: `🤝 Söz ${gunAy(s.vade)}${tutar ? ` · ${tutar}` : ''}`, sinif: 'mor', ipucu };
+    return { ad: `⚠ Söz tutulmadı (${gunAy(s.vade)})${odenen > 0 ? ` · kalan ${paraYaz(kalan)}` : ''}`, sinif: 'hata', ipucu };
+  return { ad: `🤝 Söz ${gunAy(s.vade)}${kalanMetni}`, sinif: 'mor', ipucu };
 }
 
 /** Tahsilat penceresine eklenecek tek satır not ("Hastanın 25.11 vadeli 1.250 ₺ ödeme sözü var"). */
 export function sozNotu(s: HastaSoz | null | undefined): string {
-  if (!s) return '';
-  const tutar = s.tutar != null ? ` ${paraYaz(Number(s.tutar))}` : '';
-  const ne = s.tur === 3 ? `ödeme planı (${s.taksitSayisi ?? '?'} taksit, ilk ${gunAy(s.vade)})` : `${gunAy(s.vade)} vadeli${tutar} ödeme sözü`;
+  if (!s || s.durum === 'tutuldu') return '';
+  const kalan = s.kalan != null ? Number(s.kalan) : Number(s.tutar ?? 0);
+  const tutar = kalan > 0 ? ` ${paraYaz(kalan)}` : '';
+  const ne = s.tur === 3
+    ? `ödeme planı (${s.odenenTaksit ?? 0}/${s.taksitSayisi ?? '?'} taksit ödendi${s.sonrakiVade ? `, sonraki ${gunAy(s.sonrakiVade)}${s.sonrakiTutar ? ` ${paraYaz(Number(s.sonrakiTutar))}` : ''}` : ''})`
+    : `${gunAy(s.vade)} vadeli${tutar} ödeme sözü`;
   return s.durum === 'tutulmadi'
     ? `⚠ Hastanın ${ne} TUTULMADI.`
     : `🤝 Hastanın ${ne} var.`;

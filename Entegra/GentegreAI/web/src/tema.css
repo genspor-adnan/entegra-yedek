@@ -9934,3 +9934,5 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .detay-tablo tr.odeme-soz td:first-child { box-shadow: inset 4px 0 0 var(--mor, #6d4aff) }
 .detay-tablo tr.odeme-soz .soz-tutar { font-style: italic; color: var(--mor, #6d4aff) }
 .detay-tablo tr.odeme-soz .soz-gecti { color: var(--hata); font-weight: 600 }
+.detay-tablo tr.odeme-soz.tutuldu td { background: color-mix(in srgb, var(--ok) 8%, transparent); opacity: .8 }
+.detay-tablo tr.odeme-soz.tutuldu td:first-child { box-shadow: inset 4px 0 0 var(--ok) }

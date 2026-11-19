@@ -63,6 +63,12 @@ public static class HastaBorcTakipUclari
                 """, null, [idler], o => (id: o.GetInt32(0), ad: o.GetString(1), dosyaNo: o.GetString(2),
                     tel: o.GetString(3), eposta: o.GetString(4)), iptal)).ToDictionary(x => x.id);
             var islemler = await IslemlerAsync(b, idler, 0, iptal);
+            // SÖZ DEĞERLENDİRMESİ (19.11.2026): açık sözlerin en eskisinden bu yana tahsilatlar - söz / plan ne kadar
+            //   tutuldu (HastaBorcSozDegerlendirme).
+            var acikSozler = islemler.Where(i => i.Durum == 0 && (i.Tur == TurSoz || i.Tur == TurPlan)).ToList();
+            var sozOdemeleri = acikSozler.Count == 0 ? []
+                : await HastaBorcSozDegerlendirme.OdemelerAsync(b, acikSozler.Select(i => i.HastaId).Distinct().ToArray(),
+                                                                acikSozler.Min(i => i.Zaman), iptal);
 
             // Bu ay başvurulara yapılan tahsilat (yalnız takipteki borçlu hastalar).
             var ayBasi = new DateTime(bugun.Year, bugun.Month, 1);
@@ -84,11 +90,13 @@ public static class HastaBorcTakipUclari
                 var sonHatirlatma = hi.Where(i => i.Tur == TurHatirlatma).MaxBy(i => i.Zaman);
                 var soz = hi.Where(i => i.Tur is TurSoz or TurPlan).MaxBy(i => i.Zaman);
                 var isaret = hi.Where(i => i.Tur == TurIsaret).MaxBy(i => i.Zaman);
-                // Söz tutuldu mu: vadesi geçti ve borç hâlâ açık -> tutulmadı.
-                var sozDurum = soz is null ? "" : soz.Vade < bugun ? "tutulmadi" : "bekliyor";
+                // Söz / plan söz sonrası tahsilatla değerlendirilir; TUTULAN söz borçlunun durumunu belirlemez.
+                var deg = soz is null ? null : HastaBorcSozDegerlendirme.Degerlendir(soz.Tur, soz.Tutar, soz.Vade,
+                    soz.TaksitSayisi, soz.Zaman, borc, sozOdemeleri.Where(x => x.HastaId == g.Key), bugun);
+                var sozDurum = deg?.Durum ?? "";
                 var durum = isaret is not null ? "tahsilata"
                           : sozDurum == "tutulmadi" ? "soz_tutulmadi"
-                          : soz is not null ? (soz.Tur == TurPlan ? "planli" : "soz")
+                          : soz is not null && sozDurum == "bekliyor" ? (soz.Tur == TurPlan ? "planli" : "soz")
                           : sonHatirlatma is not null && (bugun - sonHatirlatma.Zaman.Date).TotalDays <= 7 ? "hatirlatildi"
                           : "yeni";
                 var enEski = g.Min(x => x.Tarih);
@@ -101,7 +109,12 @@ public static class HastaBorcTakipUclari
                     sonBasvuru = g.Max(x => x.Tarih),
                     sonTahsilat = basvurular.Where(x => x.HastaId == g.Key).Select(x => x.SonTahsilat).Max(),
                     sonHatirlatma = sonHatirlatma?.Zaman, sonHatirlatmaKanal = sonHatirlatma?.Kanal,
-                    soz = soz is null ? null : new { soz.Id, tur = soz.Tur, soz.Tutar, soz.Vade, soz.TaksitSayisi, durum = sozDurum },
+                    soz = soz is null ? null : new
+                    {
+                        soz.Id, tur = soz.Tur, soz.Tutar, soz.Vade, soz.TaksitSayisi, durum = sozDurum,
+                        odenen = deg!.Odenen, kalan = deg.Kalan, odenenTaksit = deg.OdenenTaksit,
+                        gecikenTaksit = deg.GecikenTaksit, sonrakiVade = deg.SonrakiVade, sonrakiTutar = deg.SonrakiTutar,
+                    },
                     isaretId = isaret?.Id,
                     durum,
                     protokoller = g.OrderBy(x => x.Tarih).Select(x => new
@@ -120,8 +133,9 @@ public static class HastaBorcTakipUclari
                 gun30Hasta = borclular.Count(x => x.gun > 30),
                 hatirlatmaBekleyen = borclular.Count(x => x.durum == "yeni"),
                 buAyTahsil,
-                sozTutar = borclular.Where(x => x.soz is not null && x.soz.tur == TurSoz && x.soz.durum == "bekliyor").Sum(x => x.soz!.Tutar ?? 0),
-                planTutar = borclular.Where(x => x.soz is not null && x.soz.tur == TurPlan && x.soz.durum == "bekliyor").Sum(x => x.soz!.Tutar ?? 0),
+                // Bekleyen söz / planın KALANI (ödenen kısım düşülür).
+                sozTutar = borclular.Where(x => x.soz is not null && x.soz.tur == TurSoz && x.soz.durum == "bekliyor").Sum(x => x.soz!.kalan),
+                planTutar = borclular.Where(x => x.soz is not null && x.soz.tur == TurPlan && x.soz.durum == "bekliyor").Sum(x => x.soz!.kalan),
                 tutulmayan = borclular.Count(x => x.durum == "soz_tutulmadi"),
                 tahsilata = borclular.Count(x => x.durum == "tahsilata"),
             };
@@ -154,8 +168,8 @@ public static class HastaBorcTakipUclari
 
         // ------------------------------------------------ tek hasta özeti --
         // HASTANIN BORCU + AÇIK SÖZÜ / PLANI (kullanıcı 19.11.2026: söz bilgisi başvuru hasta bandında, tahsilat tutarı
-        //   sorulurken, hasta icmalinde ve randevu kartında görünsün - "hepsini yap"). Kural borç takibiyle aynı: söz
-        //   vadesi geçti ve borç hâlâ açık -> "tutulmadi". Okuma: borç takibi YA DA başvuru / randevu görme yetkisi
+        //   sorulurken, hasta icmalinde ve randevu kartında görünsün - "hepsini yap"). Durum borç takibiyle aynı
+        //   değerlendirmeden (HastaBorcSozDegerlendirme: söz sonrası tahsilat). Okuma: borç takibi YA DA başvuru / randevu görme yetkisi
         //   (banko ve randevu görevlisi hastanın sözünü görmeli; liste ekranı yine borç takibi yetkisinde).
         grup.MapGet("/hasta/{id:int}", async (int id, VeriKaynagi veri, BaglamCozucu cozucu, KayitErisimi erisim,
                                               HttpContext ctx, CancellationToken iptal) =>
@@ -171,14 +185,17 @@ public static class HastaBorcTakipUclari
             var borc = basvurular.Where(x => x.Kalan > 0.005m).Sum(x => x.Kalan);
             var soz = (await IslemlerAsync(b, [id], 0, iptal))
                 .Where(i => i.Durum == 0 && (i.Tur == TurSoz || i.Tur == TurPlan)).MaxBy(i => i.Zaman);
-            var sozDurum = soz is null ? "" : soz.Vade < bugun && borc > 0.005m ? "tutulmadi" : "bekliyor";
+            var deg = soz is null ? null : HastaBorcSozDegerlendirme.Degerlendir(soz.Tur, soz.Tutar, soz.Vade,
+                soz.TaksitSayisi, soz.Zaman, borc, await HastaBorcSozDegerlendirme.OdemelerAsync(b, [id], soz.Zaman, iptal), bugun);
             return Results.Ok(new
             {
                 borc,
                 soz = soz is null ? null : new
                 {
                     soz.Id, tur = soz.Tur, soz.Tutar, soz.Vade, soz.TaksitSayisi, soz.Aciklama, zaman = soz.Zaman,
-                    soz.Ekleyen, durum = sozDurum,
+                    soz.Ekleyen, durum = deg!.Durum, odenen = deg.Odenen, kalan = deg.Kalan,
+                    odenenTaksit = deg.OdenenTaksit, gecikenTaksit = deg.GecikenTaksit,
+                    sonrakiVade = deg.SonrakiVade, sonrakiTutar = deg.SonrakiTutar,
                 },
             });
         });

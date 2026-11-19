@@ -5,7 +5,11 @@ export type BorcSozu = {
   id: number;
   /** 2 ödeme sözü, 3 ödeme planı. */
   tur: number; tutar?: number | null; vade?: string | null; taksitSayisi?: number | null;
-  durum: 'bekliyor' | 'tutulmadi';
+  /** tutuldu: söz tutarı / plan ödendi ya da borç kapandı (söz sonrası tahsilattan - 19.11.2026). */
+  durum: 'bekliyor' | 'tutulmadi' | 'tutuldu';
+  /** Söz sonrası tahsilattan (sunucu, 19.11.2026): ödenen, kalan, plan taksit durumu, sıradaki vade. */
+  odenen?: number; kalan?: number; odenenTaksit?: number; gecikenTaksit?: number;
+  sonrakiVade?: string | null; sonrakiTutar?: number | null;
 };
 export type BorcProtokolu = {
   belgeId: number; protokolNo: string; tarih: string; bolum: string;

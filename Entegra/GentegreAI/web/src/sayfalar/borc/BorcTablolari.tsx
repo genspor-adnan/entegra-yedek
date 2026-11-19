@@ -53,7 +53,8 @@ export function BorcluTablosu({ liste, secili, setSecili, hastaAc }: {
                 <td className={'sag' + (b.gun > 30 ? ' kir' : '')}>{b.gun}</td>
                 <td>{b.sonTahsilat ? tarihKisa(b.sonTahsilat) : '—'}</td>
                 <td>{b.sonHatirlatma ? `${tarihKisa(b.sonHatirlatma)} · ${KANAL_ADI[b.sonHatirlatmaKanal ?? 0] ?? ''}` : '—'}</td>
-                <td>{b.soz ? `${b.soz.tur === 3 ? `Plan ${b.soz.taksitSayisi} taksit` : 'Söz'} · ${p(b.soz.tutar ?? 0)} · ${tarihKisa(b.soz.vade)}` : '—'}</td>
+                <td>{b.soz ? `${b.soz.tur === 3 ? `Plan ${b.soz.odenenTaksit ?? 0}/${b.soz.taksitSayisi} taksit` : 'Söz'} · `
+                  + `${b.soz.durum === 'tutuldu' ? 'tutuldu ✓' : `kalan ${p(b.soz.kalan ?? b.soz.tutar ?? 0)}`} · ${tarihKisa(b.soz.vade)}` : '—'}</td>
                 <td><span className={'bo-rz ' + r.renk}>{r.ad}</span></td>
               </tr>
               {ac && (
@@ -97,18 +98,25 @@ export function GecmisTablosu({ islemler, kaldir }: { islemler: BorcIslemi[]; ka
 
 /** ÖDEME SÖZLERİ / PLANLARI: geçerli söz ve planlar, tutulmayanlar üstte. */
 export function SozTablosu({ liste, kaldir }: { liste: Borclu[]; kaldir(id: number): void }) {
-  const sozlu = liste.filter(b => b.soz).sort((a, b) => (a.soz!.durum === 'tutulmadi' ? -1 : 0) - (b.soz!.durum === 'tutulmadi' ? -1 : 0));
+  // Sıra: tutulmayan, bekleyen, tutulan (19.11.2026: söz sonrası tahsilatla değerlendirilir).
+  const sira = (d?: string) => d === 'tutulmadi' ? 0 : d === 'bekliyor' ? 1 : 2;
+  const sozlu = liste.filter(b => b.soz).sort((a, b) => sira(a.soz!.durum) - sira(b.soz!.durum));
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Hasta</th><th>Tür</th><th className="sag">Tutar</th><th>Vade / İlk Taksit</th><th className="sag">Taksit</th>
-        <th className="sag">Açık Borç</th><th>Durum</th><th /></tr></thead>
+      <thead><tr><th>Hasta</th><th>Tür</th><th className="sag">Tutar</th><th className="sag">Ödenen</th><th className="sag">Kalan</th>
+        <th>Vade / Sonraki</th><th className="sag">Taksit</th><th className="sag">Açık Borç</th><th>Durum</th><th /></tr></thead>
       <tbody>
-        {sozlu.length === 0 && <tr><td colSpan={8} className="bos">Geçerli ödeme sözü / planı yok.</td></tr>}
+        {sozlu.length === 0 && <tr><td colSpan={10} className="bos">Geçerli ödeme sözü / planı yok.</td></tr>}
         {sozlu.map(b => (
           <tr key={b.id}><td>{b.ad}</td><td>{b.soz!.tur === 3 ? 'Ödeme planı' : 'Ödeme sözü'}</td>
-            <td className="sag">{p(b.soz!.tutar ?? 0)}</td><td>{tarihKisa(b.soz!.vade)}</td>
-            <td className="sag">{b.soz!.taksitSayisi ?? '—'}</td><td className="sag">{p(b.borc)}</td>
-            <td><span className={'bo-rz ' + (b.soz!.durum === 'tutulmadi' ? 'kir' : 'mavi')}>{b.soz!.durum === 'tutulmadi' ? 'Tutulmadı (vade geçti)' : 'Bekliyor'}</span></td>
+            <td className="sag">{p(b.soz!.tutar ?? 0)}</td><td className="sag">{p(b.soz!.odenen ?? 0)}</td>
+            <td className="sag">{p(b.soz!.kalan ?? b.soz!.tutar ?? 0)}</td>
+            <td>{tarihKisa(b.soz!.sonrakiVade ?? b.soz!.vade)}</td>
+            <td className="sag">{b.soz!.tur === 3 ? `${b.soz!.odenenTaksit ?? 0}/${b.soz!.taksitSayisi ?? '—'}` : '—'}</td><td className="sag">{p(b.borc)}</td>
+            <td><span className={'bo-rz ' + (b.soz!.durum === 'tutulmadi' ? 'kir' : b.soz!.durum === 'tutuldu' ? 'ok' : 'mavi')}>
+              {b.soz!.durum === 'tutulmadi'
+                ? (b.soz!.tur === 3 ? `${b.soz!.gecikenTaksit ?? 1} taksit gecikti` : 'Tutulmadı (vade geçti)')
+                : b.soz!.durum === 'tutuldu' ? 'Tutuldu ✓' : 'Bekliyor'}</span></td>
             <td><a className="ki-lnk" onClick={() => kaldir(b.soz!.id)}>kaldır</a></td></tr>
         ))}
       </tbody>
