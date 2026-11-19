@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState, type MouseEvent } from 'react';
+import { Fragment, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import type { BorcIslemi, Borclu } from '../../api/uclar/hastaBorc';
 import { para } from '../../bilesenler/bicim';
 import { secimUygula } from '../../bilesenler/listeSecimi';
@@ -10,6 +10,37 @@ import { ISLEM_ADI, KANAL_ADI, durumRozeti, islemSonucu } from './borcOrtak';
 const p = (n: number) => para.format(n);
 
 /**
+ * KOLON SIRALAMA (kullanıcı 19.11.2026: "hasta borç takibi listesinde grid kolonlara sıralama özelliği ekle"):
+ * başlığa tık artan, ikinci tık azalan, üçüncü tık varsayılan sıraya döner. Metin Türkçe kurala göre, sayı / tarih
+ * sayısal; boş değer her yönde sonda.
+ */
+type Anahtar<T> = (x: T) => string | number | null | undefined;
+function useSiralama<T>(liste: T[], anahtarlar: Record<string, Anahtar<T>>) {
+  const [sira, setSira] = useState<{ alan: string; yon: 1 | -1 } | null>(null);
+  const sirali = useMemo(() => {
+    if (!sira || !anahtarlar[sira.alan]) return liste;
+    const k = anahtarlar[sira.alan];
+    return [...liste].sort((a, b) => {
+      const x = k(a), y = k(b);
+      const xb = x == null || x === '', yb = y == null || y === '';
+      if (xb || yb) return xb === yb ? 0 : xb ? 1 : -1;
+      const f = typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), 'tr', { numeric: true });
+      return f * sira.yon;
+    });
+    // anahtarlar her çizimde yeni nesne - sıralamayı yalnız liste / seçim değiştirir.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liste, sira]);
+  const baslik = (alan: string, metin: ReactNode, sinif?: string) => (
+    <th className={['sirala', sinif ?? ''].filter(Boolean).join(' ')} title="Sırala"
+        onClick={() => setSira(s => (s?.alan !== alan ? { alan, yon: 1 } : s.yon === 1 ? { alan, yon: -1 } : null))}>
+      {metin}<span className="sirala-ok">{sira?.alan === alan ? (sira.yon === 1 ? ' ▲' : ' ▼') : ''}</span>
+    </th>
+  );
+  return { sirali, baslik };
+}
+const zaman = (g?: string | null) => (g ? new Date(g).getTime() : null);
+
+/**
  * BORÇLULAR - tık tek hasta, Ctrl / Shift çoklu seçer (listeSecimi); seçim
  * hatırlatma / işaret / mektup içindir. ▸ işareti açık protokolleri açar.
  */
@@ -18,10 +49,17 @@ export function BorcluTablosu({ liste, secili, setSecili, hastaAc }: {
 }) {
   const son = useRef<number | null>(null);
   const [acik, setAcik] = useState<number[]>([]);
+  const { sirali, baslik } = useSiralama(liste, {
+    ad: b => b.ad, dosya: b => b.dosyaNo, tel: b => b.telefon, basvuru: b => zaman(b.sonBasvuru),
+    protokol: b => b.acikProtokol, borc: b => b.borc, gun: b => b.gun, tahsilat: b => zaman(b.sonTahsilat),
+    hatirlatma: b => zaman(b.sonHatirlatma), soz: b => (b.soz ? zaman(b.soz.sonrakiVade ?? b.soz.vade) : null),
+    durum: b => durumRozeti(b.durum).ad,
+  });
   const tikla = (id: number, e: MouseEvent) => {
     e.stopPropagation();
     if (e.shiftKey) window.getSelection()?.removeAllRanges();
-    setSecili(secimUygula(secili, id, liste.map(b => b.id), son.current, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }));
+    // Shift aralığı EKRANDAKİ (sıralı) düzene göre.
+    setSecili(secimUygula(secili, id, sirali.map(b => b.id), son.current, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }));
     if (!e.shiftKey) son.current = id;
   };
   const hepsi = liste.length > 0 && liste.every(b => secili.includes(b.id));
@@ -29,12 +67,13 @@ export function BorcluTablosu({ liste, secili, setSecili, hastaAc }: {
     <table className="hi-tablo">
       <thead><tr>
         <th style={{ width: 28 }}><input type="checkbox" checked={hepsi} onChange={() => setSecili(hepsi ? [] : liste.map(b => b.id))} /></th>
-        <th>Hasta</th><th>Dosya No</th><th>Telefon</th><th>Son Başvuru</th><th className="sag">Protokol</th>
-        <th className="sag">Açık Borç</th><th className="sag">Gün</th><th>Son Tahsilat</th><th>Son Hatırlatma</th>
-        <th>Söz / Plan</th><th>Durum</th></tr></thead>
+        {baslik('ad', 'Hasta')}{baslik('dosya', 'Dosya No')}{baslik('tel', 'Telefon')}{baslik('basvuru', 'Son Başvuru')}
+        {baslik('protokol', 'Protokol', 'sag')}{baslik('borc', 'Açık Borç', 'sag')}{baslik('gun', 'Gün', 'sag')}
+        {baslik('tahsilat', 'Son Tahsilat')}{baslik('hatirlatma', 'Son Hatırlatma')}{baslik('soz', 'Söz / Plan')}
+        {baslik('durum', 'Durum')}</tr></thead>
       <tbody>
         {liste.length === 0 && <tr><td colSpan={12} className="bos">Bu süzgeçte borçlu hasta yok.</td></tr>}
-        {liste.map(b => {
+        {sirali.map(b => {
           const r = durumRozeti(b.durum);
           const sec = secili.includes(b.id);
           const ac = acik.includes(b.id);
@@ -71,13 +110,19 @@ export function BorcluTablosu({ liste, secili, setSecili, hastaAc }: {
 }
 
 export function GecmisTablosu({ islemler, kaldir }: { islemler: BorcIslemi[]; kaldir(id: number): void }) {
+  const { sirali, baslik } = useSiralama(islemler, {
+    zaman: i => zaman(i.zaman), hasta: i => i.hasta, islem: i => ISLEM_ADI[i.tur] ?? String(i.tur),
+    kanal: i => (i.kanal ? KANAL_ADI[i.kanal] : null), tutar: i => i.tutar ?? null, vade: i => zaman(i.vade),
+    aciklama: i => i.aciklama, yapan: i => i.ekleyen, sonuc: i => islemSonucu(i).ad,
+  });
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Zaman</th><th>Hasta</th><th>İşlem</th><th>Kanal</th><th className="sag">Tutar</th><th>Vade</th>
-        <th>Açıklama</th><th>Yapan</th><th>Sonuç</th><th /></tr></thead>
+      <thead><tr>{baslik('zaman', 'Zaman')}{baslik('hasta', 'Hasta')}{baslik('islem', 'İşlem')}{baslik('kanal', 'Kanal')}
+        {baslik('tutar', 'Tutar', 'sag')}{baslik('vade', 'Vade')}{baslik('aciklama', 'Açıklama')}{baslik('yapan', 'Yapan')}
+        {baslik('sonuc', 'Sonuç')}<th /></tr></thead>
       <tbody>
         {islemler.length === 0 && <tr><td colSpan={10} className="bos">Henüz hatırlatma / söz kaydı yok.</td></tr>}
-        {islemler.map(i => {
+        {sirali.map(i => {
           const r = islemSonucu(i);
           return (
             <tr key={i.id} className={i.durum === 9 ? 'iptal' : ''}>
@@ -100,11 +145,17 @@ export function GecmisTablosu({ islemler, kaldir }: { islemler: BorcIslemi[]; ka
 export function SozTablosu({ liste, kaldir }: { liste: Borclu[]; kaldir(id: number): void }) {
   // Sıra: tutulmayan, bekleyen, tutulan (19.11.2026: söz sonrası tahsilatla değerlendirilir).
   const sira = (d?: string) => d === 'tutulmadi' ? 0 : d === 'bekliyor' ? 1 : 2;
-  const sozlu = liste.filter(b => b.soz).sort((a, b) => sira(a.soz!.durum) - sira(b.soz!.durum));
+  const sozluHam = useMemo(() => liste.filter(b => b.soz).sort((a, b) => sira(a.soz!.durum) - sira(b.soz!.durum)), [liste]);
+  const { sirali: sozlu, baslik } = useSiralama(sozluHam, {
+    ad: b => b.ad, tur: b => b.soz!.tur, tutar: b => b.soz!.tutar ?? null, odenen: b => b.soz!.odenen ?? 0,
+    kalan: b => b.soz!.kalan ?? b.soz!.tutar ?? null, vade: b => zaman(b.soz!.sonrakiVade ?? b.soz!.vade),
+    taksit: b => b.soz!.taksitSayisi ?? null, borc: b => b.borc, durum: b => sira(b.soz!.durum),
+  });
   return (
     <table className="hi-tablo">
-      <thead><tr><th>Hasta</th><th>Tür</th><th className="sag">Tutar</th><th className="sag">Ödenen</th><th className="sag">Kalan</th>
-        <th>Vade / Sonraki</th><th className="sag">Taksit</th><th className="sag">Açık Borç</th><th>Durum</th><th /></tr></thead>
+      <thead><tr>{baslik('ad', 'Hasta')}{baslik('tur', 'Tür')}{baslik('tutar', 'Tutar', 'sag')}{baslik('odenen', 'Ödenen', 'sag')}
+        {baslik('kalan', 'Kalan', 'sag')}{baslik('vade', 'Vade / Sonraki')}{baslik('taksit', 'Taksit', 'sag')}
+        {baslik('borc', 'Açık Borç', 'sag')}{baslik('durum', 'Durum')}<th /></tr></thead>
       <tbody>
         {sozlu.length === 0 && <tr><td colSpan={10} className="bos">Geçerli ödeme sözü / planı yok.</td></tr>}
         {sozlu.map(b => (

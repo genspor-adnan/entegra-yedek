@@ -25,6 +25,9 @@ export const stil = `
 .hi-tablo { width:100%; border-collapse:collapse; font-size:12px; background:var(--yuz,#fff); }
 .hi-tablo th, .hi-tablo td { border-bottom:1px solid var(--cizgi-ince,#e3e9f0); padding:5px 8px; text-align:left; }
 .hi-tablo th { background:#f3f6fa; font-weight:600; }
+.hi-tablo th.sirala { cursor:pointer; user-select:none; white-space:nowrap; }
+.hi-tablo th.sirala:hover { background:#e8eef5; }
+.hi-tablo th .sirala-ok { color:#2f6db3; font-size:10px; }
 .hi-tablo .sag { text-align:right; font-family:Consolas,monospace; } .hi-tablo th.sag { font-family:inherit; }
 .hi-tablo .kir { color:#b3261e; font-weight:bold; }
 .hi-tablo tr.ac { cursor:pointer; } .hi-tablo tr.sec td { background:#eef4fc; }
