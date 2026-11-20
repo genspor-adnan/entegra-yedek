@@ -66,9 +66,12 @@ export async function raporGonderimAksiyonu(kod: string, satir: ListeSatiri | nu
     }
     case 'radyoloji.gonderim.baglanti':
       await guvenli(async () => {
-        const y = await api.raporGonderimleri(Number(satir.istemId ?? satir.id));
-        const h = y.satirlar.find(s => s.aliciTur === 1);
-        if (!h) { mesaj('Bağlantı yok: rapor onaylanınca oluşur.'); return }
+        // Kod satırda (1396 - lab satırının istemi yok); eski yanıtta yoksa istemden okunur.
+        let h: { kod: string; webKok: string } | undefined = satir.hastaKod
+          ? { kod: String(satir.hastaKod), webKok: String(satir.hastaWebKok ?? '') } : undefined;
+        if (!h && Number(satir.kaynakTur) !== 2)
+          h = (await api.raporGonderimleri(Number(satir.istemId ?? satir.id))).satirlar.find(s => s.aliciTur === 1);
+        if (!h) { mesaj('Bağlantı yok: rapor / sonuç onaylanınca oluşur.'); return }
         const adres = raporBaglantisi(h.kod, h.webKok);
         await navigator.clipboard.writeText(adres);
         mesaj(`Bağlantı kopyalandı: ${adres}`);

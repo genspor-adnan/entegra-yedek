@@ -124,6 +124,7 @@ export function RadyolojiModallari(
           istemId={m.teslim.istemId}
           accessionNo={m.teslim.accessionNo}
           cdIstendi={m.teslim.cdIstendi}
+          lab={m.teslim.lab}
           onKapat={() => m.setTeslim(null)}
           onTamam={tazele}
         />

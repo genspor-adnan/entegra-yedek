@@ -15,7 +15,8 @@ import { c } from '../../dil/ceviri';
  *    kod › kategori › tümü (sunucu RaporGonderimKurali).
  * Hiçbir alan anında yazmaz - hepsi sayfanın Kaydet'iyle (ayarlarda otomatik kayıt yok).
  */
-const BOS_AYAR: Ayar = { otomatik: false, kritikDakika: 0, labPanikDakika: 0, borcKontrol: true, hastaSms: true, hastaEposta: false, gecerlilikGun: 30, webKok: '' };
+const BOS_AYAR: Ayar = { otomatik: false, kritikDakika: 0, labPanikDakika: 0, borcKontrol: true, hastaSms: true, hastaEposta: false, gecerlilikGun: 30, webKok: '',
+                         karekodRadyoloji: true, karekodLab: true };
 type Tetkik = { id: number; kod: string; ad: string; kategori: number | null };
 type Kategori = { id: number; ad: string };
 
@@ -140,6 +141,12 @@ export function RaporGonderimAyari() {
           <div className="rga-sat"><span>{c('Hastaya')}</span>
             <span><label className="rga-cb ic"><input type="checkbox" checked={ayar.hastaSms} onChange={e => a({ hastaSms: e.target.checked })} /> SMS</label>
               <label className="rga-cb ic"><input type="checkbox" checked={ayar.hastaEposta} onChange={e => a({ hastaEposta: e.target.checked })} /> {c('E-posta')}</label></span></div>
+          {/* ÇIKTIDA KAREKOD (1396; kullanıcı 20.11.2026: "karekod gösterimi rad ve lab için ayrı ayrı opsiyonel olmalı"). */}
+          <div className="rga-sat"><span>{c('Basılı çıktıda karekod')}</span>
+            <span><label className="rga-cb ic"><input type="checkbox" checked={ayar.karekodRadyoloji !== false} data-testid="rga-karekod-rad"
+                                                     onChange={e => a({ karekodRadyoloji: e.target.checked })} /> {c('Radyoloji raporu')}</label>
+              <label className="rga-cb ic"><input type="checkbox" checked={ayar.karekodLab !== false} data-testid="rga-karekod-lab"
+                                                 onChange={e => a({ karekodLab: e.target.checked })} /> {c('Laboratuvar sonucu')}</label></span></div>
           <div className="rga-sat"><span>{c('Gönderen dış doktora')}</span>
             <span>{c('Kartında "Rapor Bildirimi" seçili doktorlara, doktorun tercih ettiği kanaldan. Bağlantı gider (ek dosya yok).')}</span></div>
           <small className="rga-not">{c('Mesaj metinleri: Yönetim › Bildirim Şablonları › "Radyoloji raporu hazır". Hastanın bağlantıyı açması teslim edildi sayılır.')}</small>

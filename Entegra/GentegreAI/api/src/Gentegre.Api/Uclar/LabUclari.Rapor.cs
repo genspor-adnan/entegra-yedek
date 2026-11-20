@@ -257,7 +257,22 @@ public static partial class LabUclari
                    and not public.fn_lab_tetkik_izin_roller(s.tetkik_id, @p1, 'gor')
                 """, null, [istemId, baglam.RolIdleri.ToArray()], iptal);
 
-            return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram,
+            // SONUÇ BAĞLANTISI (1394 / 1396): bu istemin bölümlerinden bağlantısı kurulmuş (tamamı onaylı) olanlar -
+            //   çıktıya karekod. Ayarda "laboratuvar çıktısında karekod" kapalıysa boş döner.
+            var baglantilar = await baglanti.ListeAsync("""
+                select g.kod, coalesce(nullif(g.web_kok, ''), a.web_kok, '') as "webKok", g.son_gecerli as "sonGecerli",
+                       public.fn_lab_bolum_ad(g.lab_bolum) as "bolumAd"
+                  from public.lab_istem i
+                  join public.radyoloji_rapor_gonderim g on g.kaynak = 2 and g.belge_id = i.belge_id and g.alici_tur = 1 and g.durum <> 9
+                  left join public.radyoloji_rapor_gonderim_ayar a on a.sube_id = g.sube_id
+                 where i.id = @p0 and coalesce(a.cikti_karekod_lab, 1) = 1
+                   and g.lab_bolum in (select coalesce(t.bolum, 9) from public.lab_istem_satir s
+                                         left join public.lab_tetkik t on t.id = s.tetkik_id
+                                        where s.istem_id = i.id and s.durum <> 0)
+                 order by g.lab_bolum
+                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram, baglantilar,
                                     vakalar, varyantlar, kurum, gizlenen, grafikler,
                                     izlemeNo = baglam.IzlemeNo });
         });

@@ -8,6 +8,8 @@ import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
 import { c } from '../dil/ceviri';
 import { GEN_KALITIM, GEN_YONTEM, MIKRO_ID_YONTEM, genSinifMetni } from '../bilesenler/labKodlari';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
+import { Karekod } from '../bilesenler/Karekod';
+import { raporBaglantisi } from '../api/uclar/raporGonderim';
 
 /**
  * LABORATUVAR SONUÇ RAPORU (mockuplar: Ekranlar/Lab/lab_sonuc_formu_*.html).
@@ -64,6 +66,8 @@ export function LabRaporCikti() {
     // GRAFİK TİPLİ SONUÇ (892, KTS L10): raporda gösterilmesi işaretlenmiş
     //   eğriler (elektroforez, kromatogram, jel).
     grafikler?: Satir[];
+    // SONUÇ BAĞLANTISI (1394 / 1396): tamamı onaylı bölümlerin hasta bağlantıları - karekod. Ayarda kapalıysa boş.
+    baglantilar?: { kod: string; webKok: string; sonGecerli?: string | null; bolumAd: string }[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -573,6 +577,22 @@ export function LabRaporCikti() {
             isteyin.
           </p>
         )}
+
+        {/* --- KAREKOD (1396): sonucu telefonda gör. Bölümün tamamı onaylıysa ve ayarda açıksa. --- */}
+        {(veri.baglantilar ?? []).map(bg => {
+          const adres = raporBaglantisi(bg.kod, bg.webKok);
+          return (
+            <div className="rapor-karekod" data-testid="lab-karekod" key={bg.kod}>
+              <Karekod deger={adres} baslik="Sonuç bağlantısı" />
+              <div>
+                <b>{bg.bolumAd} {c('sonuçlarınızı telefonda görün')}</b>
+                {c('Karekodu telefonunuzun kamerasıyla okutun ya da')}<br />
+                <span className="rk-adres">{adres.replace(/^https?:\/\//, '')}</span>
+                {bg.sonGecerli && <><br />{gunNokta(bg.sonGecerli)} {c('tarihine kadar geçerlidir.')}</>}
+              </div>
+            </div>
+          );
+        })}
 
         {/* --- İMZA --- */}
         <div className="imza">

@@ -279,7 +279,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
     kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
-    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId', 'basvuruId',
+    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId', 'basvuruId', 'kaynakTur', 'labBolum', 'hastaKod', 'hastaWebKok',
                     'hastaGonderimDurum', 'hekimGonderimDurum', 'borcBekliyor', 'hastaGonderimId', 'hekimGonderimId', 'kritik'],
     cipler: [
       { ad: 'Teslim Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
@@ -289,6 +289,9 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gönderilemeyen',    filtre: { op: 'or', kosullar: [
         { alan: 'hastaGonderimDurum', op: 'esit', deger: 4 }, { alan: 'hekimGonderimDurum', op: 'esit', deger: 4 }] } },
       { ad: 'Teslim Edilen',   filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },
+      // TEK LİSTE (1396; kullanıcı 20.11.2026): radyoloji raporları + laboratuvar bölümleri; türe göre süzme.
+      { ad: '☢ Radyoloji',   filtre: { alan: 'kaynakTur', op: 'esit', deger: 1 } },
+      { ad: '🧪 Laboratuvar', filtre: { alan: 'kaynakTur', op: 'esit', deger: 2 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2,

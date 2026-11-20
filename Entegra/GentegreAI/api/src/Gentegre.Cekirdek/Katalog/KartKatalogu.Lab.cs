@@ -204,6 +204,11 @@ public static partial class KartKatalogu
             //   kalır: oto-onay tek aşamalı yayındır.
             new("ciftOnay", "cift_onay", "kod", SabitKodlar: LabCiftOnayKodlari,
                 Baslik: "İki Seviyeli Onay", Grup: "Genel", AltGrup: "Süre ve Onay"),
+            // HASTA BAĞLANTISI (1394; kullanıcı 20.11.2026): işaretli testin sonucu hastanın sonuç bağlantısında
+            //   GÖSTERİLMEZ (HIV, genetik gibi yüz yüze bildirilen testler) - hasta "1 testinizin sonucu gösterilmez"
+            //   görür, test adı yazmaz. Gönderen dış doktor görür.
+            new("baglantidaGizle", "baglantida_gizle", "mantik",
+                Baslik: "Hasta Bağlantısında Gösterme", Grup: "Genel", AltGrup: "Süre ve Onay"),
             new("varsayilanCihazId", "varsayilan_cihaz_id", "kod",
                 KodTablosu: "public.v_cihaz_lookup",
                 Baslik: "Varsayılan Cihaz", Grup: "Genel", AltGrup: "Süre ve Onay"),

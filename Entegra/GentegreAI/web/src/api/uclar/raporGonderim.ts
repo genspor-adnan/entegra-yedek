@@ -26,6 +26,8 @@ export type RaporGonderimAyari = {
   labPanikDakika: number;
   borcKontrol: boolean; hastaSms: boolean; hastaEposta: boolean;
   gecerlilikGun: number; webKok: string;
+  /** Basılı çıktıda bağlantı karekodu - radyoloji ve laboratuvar AYRI AYRI (1396). */
+  karekodRadyoloji: boolean; karekodLab: boolean;
 };
 
 export type RaporGonderimSatiri = {
@@ -96,6 +98,9 @@ export const raporGonderimUclari = {
   raporGonderimleri: (istemId: number) => istek<RaporGonderimIstemYaniti>(`/api/radyoloji/rapor-gonderim/istem/${istemId}`),
   raporGonder: (id: number, borcaRagmen = false) =>
     gonder<{ durum: number }>(`/api/radyoloji/rapor-gonderim/${id}/gonder`, { borcaRagmen }),
+  /** Lab bölümünün elden teslimi (1396) - tek teslim listesinin lab satırı. */
+  labSonucTeslim: (govde: { belgeId: number; bolum: number; alanAd: string; alanYakinlik: string; aciklama: string }) =>
+    gonder<{ tamam: boolean }>('/api/radyoloji/rapor-gonderim/lab-teslim', govde),
   raporGonderimIptal: (id: number) => gonder<{ tamam: boolean }>(`/api/radyoloji/rapor-gonderim/${id}/iptal`, {}),
 };
 

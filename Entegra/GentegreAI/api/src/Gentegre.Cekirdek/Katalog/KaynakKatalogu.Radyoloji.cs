@@ -613,7 +613,7 @@ public static partial class KaynakKatalogu
     private static readonly Dictionary<string, string> GonderimRozet = new()
     {
         ["Planlandı"] = "mavi", ["Borç bekliyor"] = "hata", ["Gönderildi"] = "olumlu", ["Açıldı"] = "olumlu",
-        ["Gönderilemedi"] = "uyari", ["Hazır"] = "gri", ["İptal"] = "gri", ["Yok"] = "gri",
+        ["Gönderilemedi"] = "uyari", ["Hazır"] = "gri", ["İptal"] = "gri", ["Yok"] = "gri", ["Onay bekliyor"] = "gri",
         ["Dijital"] = "olumlu", ["Elden"] = "olumlu", ["Bekliyor"] = "gri", ["CD bekliyor"] = "uyari",
     };
 
@@ -631,10 +631,20 @@ public static partial class KaynakKatalogu
         YetkiKodu: "radyoloji",
         Kaynak: "public.v_radyoloji_teslim_takip t",
         SubeKolonu: "t.sube_id",
-        VarsayilanSirala: "t.takip_durum, t.bekleme_dk desc",
+        // Sıra: teslim bekleyen · onay bekleyen (yalnız lab, takip 0) · teslim edilen.
+        VarsayilanSirala: "case t.takip_durum when 1 then 0 when 0 then 1 else 2 end, t.bekleme_dk desc",
         Kolonlar: new KolonTanimi[]
         {
-            new("id",           "t.istem_id",     "sayi",  "Id", Varsayilan: false),
+            // TEK LİSTE (1396; kullanıcı 20.11.2026): satır kimliği radyolojide istem id, laboratuvarda
+            //   -(başvuru*100 + bölüm) - iki tür çakışmaz, radyoloji satırının id'si değişmedi.
+            new("id",           "t.satir_id",     "sayi",  "Id", Varsayilan: false),
+            new("turAdi",       "case t.kaynak when 2 then '🧪 Lab' else '☢ Rad' end",
+                                                  "metin", "Tür", Hizalama: "orta", Bicim: "rozet", Genislik: 80,
+                                                  Filtrelenebilir: false, Siralanabilir: false),
+            new("kaynakTur",    "t.kaynak",       "sayi",  "Tür Kodu", Varsayilan: false),
+            new("labBolum",     "t.lab_bolum",    "sayi",  "Lab Bölümü", Varsayilan: false),
+            new("hastaKod",     "t.hasta_kod",    "metin", "Bağlantı Kodu", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
+            new("hastaWebKok",  "t.hasta_web_kok","metin", "Bağlantı Kökü", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
             new("istemId",      "t.istem_id",     "sayi",  "İstem", Varsayilan: false),
             // ---- MOCKUP KOLONLARI (kullanıcı 20.11.2026: "Radyoloji Rapor Teslim mockup gibi yap kolonları"; mockup
             //   radyoloji_rapor_hasta_goruntuleme.html §5): Rapor Onayı · Hasta · Tetkik · Borç · Hastaya Gönderim ·
@@ -643,7 +653,7 @@ public static partial class KaynakKatalogu
             //   onlarla çalışmaya devam eder.
             new("raporOnayi",
                 "to_char(t.onay_tarihi, 'DD.MM.YYYY HH24:MI')",
-                                                  "metin", "Rapor Onayı", Genislik: 170, Bicim: "alt:radyologOzet",
+                                                  "metin", "Onay", Genislik: 170, Bicim: "alt:radyologOzet",
                                                   Filtrelenebilir: false, Siralanabilir: false),
             new("radyologOzet",
                 "concat_ws(' · ', nullif(t.radyolog, ''), case when exists (select 1 from public.radyoloji_rapor rr"
@@ -660,16 +670,19 @@ public static partial class KaynakKatalogu
             new("hasta",        "t.hasta",        "metin", "Hasta", Genislik: 210, Bicim: "alt:telefon"),
             new("hastaId",      "t.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
             // Erişim ▾ "Başvuruyu Aç" için (18.11.2026).
-            new("basvuruId",    "(select i.belge_id from public.radyoloji_istem i where i.id = t.istem_id)",
+            new("basvuruId",    "t.belge_id",
                                                   "sayi",  "Başvuru Id", Varsayilan: false, Filtrelenebilir: false),
             new("telefon",      "t.telefon",      "metin", "Telefon", Genislik: 130, Varsayilan: false),
-            new("tetkik",       "t.tetkik",       "metin", "Tetkik", Genislik: 240, Bicim: "alt:tetkikEk"),
+            new("tetkik",       "t.tetkik",       "metin", "Tetkik / Testler", Genislik: 240, Bicim: "alt:tetkikEk"),
             new("tetkikEk",
-                "concat_ws(' · ', case when t.kritik = 1 then '⚠ Kritik bulgu' end, case when t.cd_istendi = 1 then 'CD istendi' end)",
+                "concat_ws(' · ', case when t.kritik = 1 then case when t.kaynak = 2 then '⚠ Panik değer' else '⚠ Kritik bulgu' end end,"
+                + " case when t.cd_istendi = 1 then 'CD istendi' end,"
+                + " case when t.kaynak = 2 and t.takip_durum <> 0 then 'tamamı onaylı' end,"
+                + " case when t.gizli_test > 0 then t.gizli_test || ' test bağlantıda gösterilmez' end)",
                                                   "metin", "Tetkik Notu", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
             new("radyolog",     "t.radyolog",     "metin", "Radyolog", Genislik: 160, Varsayilan: false),
             new("durumAdi",
-                "case when t.takip_durum = 1 then 'Hazır' else 'Teslim edildi' end",
+                "case t.takip_durum when 1 then 'Hazır' when 0 then 'Onay bekliyor' else 'Teslim edildi' end",
                                                   "metin", "Durum", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 120,
                                                   Filtrelenebilir: false, Varsayilan: false),
@@ -715,6 +728,7 @@ public static partial class KaynakKatalogu
             // TESLİM: rozet + alan / zaman. Dijital = hasta bağlantıdan açtı; CD istenmişse CD verilene kadar bekler.
             new("teslimOzet",
                 "case when t.takip_durum = 2 then case when t.teslim_eden = '' and t.dijital_verildi = 1 then 'Dijital' else 'Elden' end"
+                + " when t.takip_durum = 0 then 'Onay bekliyor'"
                 + " when t.teslim_id is not null then 'CD bekliyor' else 'Bekliyor' end",
                                                   "metin", "Teslim", Bicim: "rozetAlt:teslimAyrinti", Genislik: 230,
                                                   Filtrelenebilir: false, RozetSiniflari: GonderimRozet),

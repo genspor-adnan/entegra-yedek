@@ -130,6 +130,24 @@ public sealed class RaporGonderimLabTestleri(VeritabaniOlgusu olgu) : IClassFixt
         Assert.Equal(1, Convert.ToInt32(s[0]["durum"]));
         Assert.Equal(simdi.AddDays(4).AddHours(2), ((DateTime)s[0]["planlanan"]!).ToUniversalTime());
 
+        // TEK TESLİM LİSTESİ (1396): başvurunun iki bölümü iki lab satırı; kimlik -(başvuru*100 + bölüm); elden teslimle kapanır.
+        var liste = await b.ListeAsync("""
+            select satir_id, lab_bolum, takip_durum, tetkik, gizli_test, hasta_kod from public.v_radyoloji_teslim_takip
+             where kaynak = 2 and belge_id = @p0 order by lab_bolum
+            """, t, [z.Belge], OkuyucuGenisletmeleri.Sozluk, Iptal);
+        Assert.Equal(2, liste.Count);
+        Assert.Equal(-((long)z.Belge * 100 + 1), Convert.ToInt64(liste[0]["satir_id"]));
+        Assert.Equal("Biyokimya · 2 test", liste[0]["tetkik"]!.ToString());
+        Assert.Equal(1, Convert.ToInt32(liste[0]["gizli_test"]));
+        Assert.Equal(kod, liste[0]["hasta_kod"]!.ToString());
+        Assert.All(liste, x => Assert.Equal(1, Convert.ToInt32(x["takip_durum"])));
+        await b.CalistirAsync("update public.lab_istem_satir set durum = 3 where id = @p0", t, [z.SatirKultur], Iptal);
+        await b.CalistirAsync("insert into public.lab_sonuc_teslim (belge_id, bolum, tur, alan_ad, dijital) values (@p0, 1, 1, 'Kendisi', 0)", t, [z.Belge], Iptal);
+        liste = await b.ListeAsync("""
+            select takip_durum from public.v_radyoloji_teslim_takip where kaynak = 2 and belge_id = @p0 order by lab_bolum
+            """, t, [z.Belge], OkuyucuGenisletmeleri.Sozluk, Iptal);
+        Assert.Equal([2, 0], liste.Select(x => Convert.ToInt32(x["takip_durum"])).ToArray());   // teslim edildi · onay bekliyor
+
         await t.RollbackAsync();
     }
 

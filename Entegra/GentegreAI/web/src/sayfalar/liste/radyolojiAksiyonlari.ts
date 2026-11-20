@@ -21,12 +21,19 @@ export interface RadyolojiBaglam {
   setSarfModali(m: { istemId: number; accessionNo: string; tetkikAdi: string }): void;
   setRandevuModali(m: { istemId: number; accessionNo: string; tetkikAdi: string;
                         modalite: number; sureDk: number }): void;
-  setTeslimModali(m: { istemId: number; accessionNo: string; cdIstendi?: boolean }): void;
+  setTeslimModali(m: { istemId: number; accessionNo: string; cdIstendi?: boolean; lab?: { belgeId: number; bolum: number } }): void;
   setKritikModali(m: { istemId: number; accessionNo: string; hasta: string;
                        tetkik: string; bulgu: string; bildirilenAd: string }): void;
   setKonsultasyonModali(m: { istemId: number; konsultasyonId: number; accessionNo: string;
                              hasta: string; tetkik: string; soru: string; gorus: string }): void;
 }
+
+/** Tek teslim listesinin laboratuvar satırı mı (kaynakTur 2; 1396). */
+const labSatiri = (satir: ListeSatiri) => Number(satir.kaynakTur) === 2;
+const basvuruAc = (satir: ListeSatiri, b: { git(yol: string): void }) => {
+  const id = Number(satir.basvuruId ?? 0);
+  if (id) b.git(`/basvuru/${id}`); else mesaj('Başvuru bulunamadı.');
+};
 
 export async function radyolojiAksiyonu(
   kod: string,
@@ -167,6 +174,7 @@ export async function radyolojiAksiyonu(
   // Takip listelerinde satirin kimligi ISTEM'dir: istemi ac.
   if (kod === 'radyoloji.istem-ac') {
     if (!satir) return true;
+    if (labSatiri(satir)) { basvuruAc(satir, b); return true }
     b.git(`/radyoloji/${Number(satir.istemId ?? satir.id)}`);
     return true;
   }
@@ -174,6 +182,8 @@ export async function radyolojiAksiyonu(
   // ERİŞİM ▾ alt menüsü: hasta kartı / başvuru / istem / rapor (satırın kimliği istem).
   if (kod.startsWith('radyoloji.erisim.')) {
     if (!satir) return true;
+    // LAB SATIRI (1396): istem / rapor kartı yok - satır başvurunun bir bölümü; ikisi de başvuruyu açar.
+    if (labSatiri(satir) && (kod.endsWith('.istem') || kod.endsWith('.rapor'))) { basvuruAc(satir, b); return true }
     const e = erisimYolu(kod, { istemId: Number(satir.istemId ?? satir.id),
                                 hastaId: Number(satir.hastaId ?? 0) || null,
                                 basvuruId: Number(satir.basvuruId ?? 0) || null });
@@ -186,6 +196,13 @@ export async function radyolojiAksiyonu(
 
   if (kod === 'radyoloji.teslim') {
     if (!satir) return true;
+    // LAB SATIRI (1396): başvurunun lab bölümü - aynı pencere, film / CD kalemleri yok.
+    if (labSatiri(satir)) {
+      if (Number(satir.takipDurum) === 0) { mesaj('Bu bölümün sonuçlarının tamamı onaylanmadan teslim edilemez.'); return true }
+      b.setTeslimModali({ istemId: 0, accessionNo: String(satir.tetkik ?? ''),
+                          lab: { belgeId: Number(satir.basvuruId), bolum: Number(satir.labBolum) } });
+      return true;
+    }
     b.setTeslimModali({ istemId: Number(satir.istemId ?? satir.id),
                         accessionNo: String(satir.accessionNo ?? ''),
                         cdIstendi: Number(satir.cdIstendi) === 1 });

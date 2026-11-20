@@ -25,7 +25,7 @@ export function useRadyolojiModallari() {
       modalite: number; sureDk: number } | null>(null);
   /** Sonuc teslimi (304) - film/CD/rapor kime verildi. */
   const [teslim, setTeslim] = useState<
-    { istemId: number; accessionNo: string; cdIstendi?: boolean } | null>(null);
+    { istemId: number; accessionNo: string; cdIstendi?: boolean; lab?: { belgeId: number; bolum: number } } | null>(null);
   /** Kritik bulgu bildirimi (318) - takip listesinden acilir. */
   const [kritik, setKritik] = useState<
     { istemId: number; accessionNo: string; hasta: string; tetkik: string;

@@ -23,7 +23,11 @@ public static class RaporGonderimUclari
 {
     public sealed record KuralIstegi(short Kapsam, int? KategoriId, int? HizmetId, short ZamanTur, int Saat, int GunDakika, bool Aktif);
     public sealed record AyarIstegi(bool Otomatik, int KritikDakika, bool BorcKontrol, bool HastaSms, bool HastaEposta,
-                                    int GecerlilikGun, string? WebKok, KuralIstegi[]? Kurallar, int LabPanikDakika = 0);
+                                    int GecerlilikGun, string? WebKok, KuralIstegi[]? Kurallar, int LabPanikDakika = 0,
+                                    bool? KarekodRadyoloji = null, bool? KarekodLab = null);
+
+    /// <summary>Lab bölümünün elden teslimi (1396) - tek teslim listesinin lab satırı.</summary>
+    public sealed record LabTeslimIstegi(int BelgeId, short Bolum, string? AlanAd, string? AlanYakinlik, string? Aciklama);
     public sealed record GonderIstegi(bool BorcaRagmen);
 
     private const string AyarYetkisi = "radyoloji.rapor_gonderim";
@@ -47,15 +51,18 @@ public static class RaporGonderimUclari
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             await using var b = await veri.AcAsync(iptal);
             var ayar = await b.TekAsync("""
-                select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika
+                select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika,
+                       cikti_karekod_rad, cikti_karekod_lab
                   from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0
                 """, null, [sube], o => new
                 {
                     otomatik = o.GetInt16(0) == 1, kritikDakika = o.GetInt32(1), borcKontrol = o.GetInt16(2) == 1,
                     hastaSms = o.GetInt16(3) == 1, hastaEposta = o.GetInt16(4) == 1, gecerlilikGun = o.GetInt32(5),
                     webKok = o.GetString(6), labPanikDakika = o.GetInt32(7),
+                    // ÇIKTIDA KAREKOD (1396; kullanıcı 20.11.2026: "rad ve lab için ayrı ayrı opsiyonel").
+                    karekodRadyoloji = o.GetInt16(8) == 1, karekodLab = o.GetInt16(9) == 1,
                 }, iptal) ?? new { otomatik = false, kritikDakika = 0, borcKontrol = true, hastaSms = true, hastaEposta = false,
-                                   gecerlilikGun = 30, webKok = "", labPanikDakika = 0 };
+                                   gecerlilikGun = 30, webKok = "", labPanikDakika = 0, karekodRadyoloji = true, karekodLab = true };
             var kurallar = await b.ListeAsync("""
                 select k.id, k.kapsam, k.kategori_id, k.hizmet_id, k.zaman_tur, k.saat, k.gun_dakika, k.aktif,
                        coalesce(kt.ad, ''), coalesce(hz.kod, ''), coalesce(hz.ad, '')
@@ -116,16 +123,18 @@ public static class RaporGonderimUclari
             await b.CalistirAsync("""
                 insert into public.radyoloji_rapor_gonderim_ayar
                        (sube_id, otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, degistiren,
-                        lab_panik_dakika)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
+                        lab_panik_dakika, cikti_karekod_rad, cikti_karekod_lab)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
                 on conflict (sube_id) do update
                    set otomatik = excluded.otomatik, kritik_dakika = excluded.kritik_dakika, borc_kontrol = excluded.borc_kontrol,
                        lab_panik_dakika = excluded.lab_panik_dakika,
+                       cikti_karekod_rad = excluded.cikti_karekod_rad, cikti_karekod_lab = excluded.cikti_karekod_lab,
                        hasta_sms = excluded.hasta_sms, hasta_eposta = excluded.hasta_eposta, gecerlilik_gun = excluded.gecerlilik_gun,
                        web_kok = excluded.web_kok, degistiren = excluded.degistiren, degistirme_tarihi = now()
                 """, tx, [sube, (short)(istek.Otomatik ? 1 : 0), istek.KritikDakika, (short)(istek.BorcKontrol ? 1 : 0),
                           (short)(istek.HastaSms ? 1 : 0), (short)(istek.HastaEposta ? 1 : 0), istek.GecerlilikGun, kok,
-                          baglam.KullaniciId, istek.LabPanikDakika], iptal);
+                          baglam.KullaniciId, istek.LabPanikDakika,
+                          (short)(istek.KarekodRadyoloji ?? true ? 1 : 0), (short)(istek.KarekodLab ?? true ? 1 : 0)], iptal);
             await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim_kural where sube_id = @p0", tx, [sube], iptal);
             foreach (var k in kurallar)
                 await b.CalistirAsync("""
@@ -185,6 +194,8 @@ public static class RaporGonderimUclari
         });
 
         // ------------------------------------------------------------------------------------------ gönder / iptal --
+        grup.MapPost("/lab-teslim", LabTeslimAsync);
+
         grup.MapPost("/{id:int}/gonder", async (int id, GonderIstegi? istek, BaglamCozucu cozucu, KayitErisimi erisim,
                                                 VeriKaynagi veri, RaporGonderimi servis, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -307,6 +318,37 @@ public static class RaporGonderimUclari
 
     /// <summary>islem_log tablo kodu: şube ayarı değişikliği (radyoloji_rapor_gonderim_ayar).</summary>
     private const int LogTabloAyar = 1389;
+
+    /// <summary>
+    /// LAB TESLİMİ (1396): başvurunun bir lab bölümünün sonucu elden verildi. Bölümün testlerinin tamamı onaylı olmalı.
+    /// Radyoloji teslimiyle aynı aksiyon yetkisi (tek liste, tek "Teslim Et").
+    /// </summary>
+    private static async Task<IResult> LabTeslimAsync(LabTeslimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+        KayitErisimi erisim, HttpContext ctx, CancellationToken iptal)
+    {
+        var baglam = await cozucu.CozAsync(ctx, iptal);
+        baglam.AksiyonIste("rad.teslim");
+        if (string.IsNullOrWhiteSpace(istek.AlanAd))
+            throw GentegreHatasi.Dogrulama("Teslim alan kişi yazılmalı.", new AlanHatasi("alanAd", "Zorunlu."));
+        await erisim.IsteAsync(baglam, "belge", istek.BelgeId, "Başvuru bulunamadı.", iptal);
+        await using var b = await veri.AcAsync(iptal);
+        var tamam = await b.TekDegerAsync<bool?>("""
+            select count(*) > 0 and count(*) = count(*) filter (where s.durum = 5)
+              from public.lab_istem li
+              join public.lab_istem_satir s on s.istem_id = li.id and s.durum <> 0
+              left join public.lab_tetkik t on t.id = s.tetkik_id
+             where li.belge_id = @p0 and coalesce(t.bolum, 9) = @p1
+            """, null, [istek.BelgeId, istek.Bolum], iptal);
+        if (tamam != true)
+            throw GentegreHatasi.IsKurali("Bu bölümün sonuçlarının tamamı onaylanmadan teslim edilemez.");
+        var ad = istek.AlanAd.Trim(); var yakinlik = (istek.AlanYakinlik ?? "").Trim(); var aciklama = (istek.Aciklama ?? "").Trim();
+        await b.CalistirAsync("""
+            insert into public.lab_sonuc_teslim (belge_id, bolum, tur, teslim_eden_id, alan_ad, alan_yakinlik, aciklama, dijital, ekleyen)
+            values (@p0, @p1, 1, @p2, @p3, @p4, @p5, 0, @p2)
+            """, null, [istek.BelgeId, istek.Bolum, baglam.KullaniciId, ad[..Math.Min(ad.Length, 120)],
+                       yakinlik[..Math.Min(yakinlik.Length, 60)], aciklama[..Math.Min(aciklama.Length, 300)]], iptal);
+        return Results.Ok(new { tamam = true });
+    }
 
     /// <summary>Gönderim satırının kayıt kapsamı: radyolojide istem (radyoloji listesi), laboratuvarda başvuru (belge).</summary>
     private static async Task KapsamIsteAsync(VeriKaynagi veri, KayitErisimi erisim, IstekBaglami baglam, int gonderimId, CancellationToken iptal)

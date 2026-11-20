@@ -380,6 +380,8 @@ public static partial class RadyolojiUclari
                   from public.radyoloji_rapor_gonderim g
                   left join public.radyoloji_rapor_gonderim_ayar a on a.sube_id = g.sube_id
                  where g.rapor_id = @p0 and g.alici_tur = 1 and g.durum <> 9
+                   -- ÇIKTIDA KAREKOD ayarı (1396): kapalıysa bağlantı çıktıya verilmez.
+                   and coalesce(a.cikti_karekod_rad, 1) = 1
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             return Results.Ok(new { rapor = c.Rapor, bolumler = c.Bolumler, alanlar = c.Alanlar, ekler = c.Ekler,
                                     kurum = c.Kurum, tipografi = c.Tipografi, tipografiDamga = c.TipografiDamga,

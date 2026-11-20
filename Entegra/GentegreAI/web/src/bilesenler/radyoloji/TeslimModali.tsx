@@ -34,8 +34,10 @@ const KALEMLER = [
   { anahtar: 'dijital', ad: 'Dijital bağlantı / e-posta', tur: 5 },
 ] as const;
 
-export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam }: {
+export function TeslimModali({ istemId, accessionNo, cdIstendi, lab, onKapat, onTamam }: {
   istemId: number;
+  /** LAB SATIRI (1396, tek teslim listesi): başvurunun lab bölümü teslim edilir - kalem / düzeltme yok. */
+  lab?: { belgeId: number; bolum: number };
   accessionNo?: string;
   /** Kabulde "CD istendi" isaretliyse CD kutusu onden isaretli gelir (311). */
   cdIstendi?: boolean;
@@ -72,6 +74,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
 
   useEffect(() => {
     let iptal = false;
+    if (lab) return;
     void api.radyolojiTeslimler(istemId)
       .then(l => { if (!iptal && l.length > 0) { setOnceki(l[0]); doldur(l[0]) } })
       .catch(() => { /* okunamazsa yeni teslim */ });
@@ -86,9 +89,15 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
     setHata('');
     if (!alanAd.trim()) { setHata('Teslim alan kişi yazılmalı.'); return }
     const isaretli = KALEMLER.filter(k => secili[k.anahtar]);
-    if (isaretli.length === 0) { setHata('En az bir teslim kalemi seçilmeli.'); return }
+    if (!lab && isaretli.length === 0) { setHata('En az bir teslim kalemi seçilmeli.'); return }
     setKaydediyor(true);
     try {
+      if (lab) {
+        await api.labSonucTeslim({ belgeId: lab.belgeId, bolum: lab.bolum, alanAd, alanYakinlik: yakinlik, aciklama });
+        mesaj('Teslim kaydedildi.');
+        onTamam?.(); onKapat();
+        return;
+      }
       const govde = {
         // Eski tek-deger kolonu: ilk isaretli kalem (geriye donuk uyum).
         tur: isaretli[0].tur,
@@ -134,7 +143,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
         </div>
       )}
       <div className="alan-izgara tek-sutun">
-        <label className="alan">
+        {!lab && <label className="alan">
           <span className="etiket zorunlu-isaret">{c('Teslim edilen')}</span>
           <span className="deger-serit" style={{ flexWrap: 'wrap', gap: 12 }}>
             {KALEMLER.map(k => (
@@ -145,7 +154,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
               </label>
             ))}
           </span>
-        </label>
+        </label>}
         <label className="alan">
           <span className="etiket zorunlu-isaret">Teslim Alan</span>
           <input value={alanAd} placeholder="Ad Soyad"
@@ -157,14 +166,14 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
           <input value={yakinlik} placeholder="örn. Hastanın kendisi / Eşi / Oğlu"
                  onChange={e => setYakinlik(e.target.value)} />
         </label>
-        <label className="alan">
+        {!lab && <label className="alan">
           <span className="etiket">Kimlik</span>
           <span className="deger-serit">
             <input type="checkbox" checked={kimlik}
                    onChange={e => setKimlik(e.target.checked)} />
             <span>{c('Kimlik doğrulandı')}</span>
           </span>
-        </label>
+        </label>}
         <label className="alan">
           <span className="etiket">Açıklama</span>
           <input value={aciklama} onChange={e => setAciklama(e.target.value)} />

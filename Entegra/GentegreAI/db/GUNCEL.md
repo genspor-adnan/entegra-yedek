@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (737 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (738 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -374,6 +374,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
+| `fn_lab_bolum_ad` | `1396_tek_teslim_listesi_karekod.sql` | — |
 | `fn_lab_calisma_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | — |
 | `fn_lab_cfu` | `509_mikro_organizma_besiyeri.sql` | — |
 | `fn_lab_cihaz_calisma_listesi` | `940_personel_unvan_yalniz_onek.sql` | 434_lab_cihaz_esleme.sql |
@@ -1049,7 +1050,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_radyoloji_kritik_takip` | `1374_radyoloji_rapor_revize.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |
 | `v_radyoloji_protokol_malzeme` | `320_radyoloji_sarf.sql` | — |
-| `v_radyoloji_teslim_takip` | `1393_radyoloji_teslim_gonderim_istem.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql, 1373_radyoloji_teslim_telefon_cep.sql, 1374_radyoloji_rapor_revize.sql, 1390_radyoloji_teslim_gonderim.sql |
+| `v_radyoloji_teslim_takip` | `1396_tek_teslim_listesi_karekod.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql, 1373_radyoloji_teslim_telefon_cep.sql, 1374_radyoloji_rapor_revize.sql, 1390_radyoloji_teslim_gonderim.sql, 1393_radyoloji_teslim_gonderim_istem.sql |
 | `v_radyoloji_tetkik` | `304_radyoloji_istem_acma.sql` | — |
 | `v_radyoloji_worklist` | `940_personel_unvan_yalniz_onek.sql` | 283_radyoloji_cekirdek.sql, 296_belge_basvuru.sql, 912_istem_banko_kapisi.sql |
 | `v_randevu_bolum_lookup` | `718_hekim_calisma_plani.sql` | 251_departman.sql, 254_departman_kod.sql, 256_departman_durum.sql |
