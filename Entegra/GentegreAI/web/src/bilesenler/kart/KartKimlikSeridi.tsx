@@ -9,6 +9,7 @@ import { c } from '../../dil/ceviri';
 import { KartAdi } from '../KartAdi';
 import { StokAvatar } from './StokAvatar';
 import { RandevuBasligi } from './RandevuBasligi';
+import { CekSenetBasligi } from './CekSenetBasligi';
 
 /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
@@ -38,7 +39,8 @@ const ONAY_TUR_SIMGE: Record<string, string> = { '1241': '🛒', '904': '🏖', 
 // PERSONEL (kullanıcı 17.11.2026: "personel kartını da stok kartı deseni gibi yap.. view/edit modu da olsun"):
 //   hasta ile aynı - kayıtlı kart görüntülemede, şerit + gövde grupları yalnız ✎ ile düzenlemeye geçer.
 // RANDEVU (19.11.2026, mockup randevu_karti_baslik.html): tek ✎ başlığı ve gövdeyi açar / kapatır.
-export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon', 'personel', 'randevu']);
+// ÇEK / SENET (20.11.2026, mockup cek_senet_baslik.html): cari bandı + Tutar / Vade / Durum kutuları, tek ✎.
+export const KIPLI_GOVDE_KARTLAR: ReadonlySet<string> = new Set(['stok', 'hizmet', 'onayAkis', 'hasta', 'bildirim-sablon', 'personel', 'randevu', 'cek-senet']);
 
 export interface KartKimlikSeridiOzellikleri {
   kaynak: string;
@@ -72,6 +74,8 @@ export interface KartKimlikSeridiOzellikleri {
   hastaAra?(): void;
   /** RANDEVU: bandın SMS Gönder işareti kart alanı yazar. */
   alanDegistir?(ad: string, v: Deger): void;
+  /** ÇEK / SENET: avatar tıklanınca cari arama penceresi (20.11.2026 - kartta cari arama kutusu yok). */
+  cariAra?(): void;
 }
 
 /**
@@ -85,7 +89,7 @@ export interface KartKimlikSeridiOzellikleri {
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
   seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk, aktifSekme,
-  seritAcikDis, onSeritAcik, hastaAra, alanDegistir,
+  seritAcikDis, onSeritAcik, hastaAra, alanDegistir, cariAra,
 }: KartKimlikSeridiOzellikleri) {
   /**
    * KİŞİ BANDI (mockup Ekranlar/kisi_karti_avatar_bant.html, kullanıcı 08.11.2026: "başlıktaki bilgiler bandda
@@ -505,6 +509,11 @@ export function KartKimlikSeridi({
                             hastaAlani={renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'hastaId'))}
                             digerAlanlar={renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'hastaId'))}
                             hastaAra={hastaAra} alanDegistir={alanDegistir} />
+          ) : kaynak === 'cek-senet' && seritAcikDis !== undefined ? (
+            // ÇEK / SENET BAŞLIĞI (20.11.2026): cari bandı (arama kutusu yok - avatar), kutular + ✎; tutar / para
+            //   birimi / vade / seri no yalnız düzenlemede. Cari ve durum bantta okunur.
+            <CekSenetBasligi deger={deger} meta={meta} yeniMi={yeniMi} cariAra={salt ? undefined : cariAra}
+                             duzenAlanlari={renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'tarafId' && a.ad !== 'durum'))} />
           ) : KIPLI_SERITLER[kaynak] ? (() => {
             const gosterKipi = salt || !seritAcik;
             // Durum kodu: boş ya da 1 aktif (kişi bandı ile aynı okuma); pasif stok avatarı gri.

@@ -1,5 +1,6 @@
 import { EkstreIkon } from '../EkstreIkon';
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { KartKipBaglami } from './KipKalemi';
 import { ayarSayi } from '../../api/ayarlar';
 import { KimlikOkutPenceresi } from '../kimlik/KimlikOkutPenceresi';
 import { aktarimiUygula, mrzBekleyenAl, mrzBekleyenKoy, type MrzAktarim } from '../kimlik/mrzAktarim';
@@ -253,7 +254,10 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
  * alindi; karttaki alan Gizli, deger buradan yazilir.
  */
 function CekSenetYonu({ b }: { b: KartAracBaglami }) {
+  // KİPLİ KART (20.11.2026, çek / senet başlığı): görüntüleme kipinde yön de değişmez - ✎ ile düzenlemeye geçilir.
+  const kip = useContext(KartKipBaglami);
   if (!b.meta.alanlar.some(a => a.ad === 'yon')) return null;
+  const kipKapali = !!kip && (!kip.acik || kip.pasif);
   return (
     <label className="satir-ici" style={{ fontSize: 13, gap: 8 }}
            title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
@@ -263,7 +267,7 @@ function CekSenetYonu({ b }: { b: KartAracBaglami }) {
       {/* YÖN SABİT (kullanıcı 26.10.2026: "tahsilat ya da ödeme menüsünden geliyorsa yön değişemez"): ekran
           'yon'u gizliAlanlar'a koyduysa (kasa işleminden açılan kıymet kartı) seçim görünür ama kilitli -
           tahsilat alınan, ödeme verilen çektir. */}
-      <select value={String(b.deger.yon ?? 1)} disabled={b.salt || !!b.gizliAlanlar?.includes('yon')}
+      <select value={String(b.deger.yon ?? 1)} disabled={b.salt || kipKapali || !!b.gizliAlanlar?.includes('yon')}
               style={{ width: 150, height: 28, fontSize: 13 }}
               onChange={e => b.setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
         <option value={1}>{c('Alınan')}</option>

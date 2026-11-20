@@ -205,6 +205,10 @@ public static partial class KaynakKatalogu
                 " when 50 then 'Tahsil Edildi' when 60 then 'Karşılıksız'" +
                 " when 70 then 'İade' when 0 then 'İptal' else '' end",
                                               "metin", "Durum",  Hizalama: "orta", Bicim: "rozet"),
+            // DURUM KODU - çiplerin filtresi (kullanıcı 20.11.2026: "çek ekledim ama listede Portföy'de görünmedi..
+            //   tümü deyince çıktı"): `durum` kolonu METİN ("Portföyde") - çipler sayıyla (10 / 30 / 50,70)
+            //   filtreleyince hiçbir satır eşleşmiyordu. Kod ayrı kolonda; listede gösterilmez (gizliKolonlar).
+            new("durumKod",    "c.durum",        "sayi",  "Durum Kodu", Hizalama: "orta", Varsayilan: false),
             new("seriNo",      "c.seri_no",      "metin", "Seri No"),
             new("tarafUnvan",  "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",        "metin", "Cari",   Genislik: 200),
             new("kesideci",    "c.kesideci",     "metin", "Kesideci", Varsayilan: false),

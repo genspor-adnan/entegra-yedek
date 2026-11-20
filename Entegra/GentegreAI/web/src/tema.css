@@ -9991,3 +9991,21 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-hasta-alt .rv-sms-isaret-bant { margin-left: 8px; font-weight: 400; color: var(--soluk) }
 .rv-sms-isaret-bant.salt { cursor: default }
 .rv-alt-alanlar > .rv-sms-isaret-bant { align-self: center; margin-top: 14px }
+/* ÇEK / SENET KARTI BAŞLIĞI (20.11.2026, mockup Ekranlar/cek_senet_baslik.html): randevu bandının sınıfları + cari
+   avatarında yön rozeti, Çek/Senet · Alınan/Verilen etiketleri, vade uyarı renkleri; düzenleme alanları altta. */
+.cs-avatar { position: relative }
+.cs-avatar.bos { background: #dfe6ee; color: #8a96a3; font-size: 18px }
+.cs-yon { position: absolute; right: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 50%; display: grid;
+  place-items: center; font-size: 11px; border: 2px solid var(--yuz, #fff); background: var(--ok, #2e7d46); color: #fff }
+.cs-yon.ver { background: #c2621a }
+.rv-hasta-alt .cs-etk { border-radius: 3px; padding: 0 6px; font-size: 10.5px; font-weight: 700; border: 1px solid }
+.rv-hasta-alt > .cs-etk + .cs-etk::before { content: none }
+.rv-hasta-alt > .cs-etk + .cs-etk { margin-left: -2px }
+.cs-etk.tur { background: #e3edf8; color: #2a5f9c; border-color: #c2d6ec }
+.cs-etk.al { background: #e2f3e8; color: var(--ok, #2e7d46); border-color: #bfe3cb }
+.cs-etk.ver { background: #fdeee2; color: #c2621a; border-color: #f2d0b5 }
+.cs-cari-yok { color: var(--soluk); font-weight: 400; cursor: pointer }
+.rv-kutu i.cs-sari { color: #a9791a; font-weight: 700 }
+.rv-kutu i.cs-kir { color: var(--hata); font-weight: 700 }
+.rv-iz.cs-iz-kir { background: color-mix(in srgb, var(--hata) 10%, transparent); color: var(--hata) }
+.kaid .cs-baslik .alan-izgara.cs-alt-alanlar { grid-template-columns: 180px 110px 150px 220px !important }
