@@ -87,7 +87,7 @@ export function RaporAcik() {
       </>)}
       {/* Telefon: imza paneli tek satır; "Ayrıntı" tam paneli açar. */}
       <button type="button" className={`ra-m-imza${imza.imzali ? '' : ' sari'}`} onClick={() => setImzaAcik(v => !v)} data-testid="rapor-acik-imza-ozet">
-        <span className={`ra-tik${imza.imzali ? '' : ' sari'}`}>{imza.imzali ? '✔' : 'i'}</span>
+        <span className={`ra-tik ra-tik-m${imza.imzali ? '' : ' sari'}`}>{imza.imzali ? '✔' : 'i'}</span>
         <span><b>{imza.imzali ? c('e-İmzalı · İmza geçerli') : c('Onaylı rapor (e-imzasız)')}</b>
           <span>{[imza.hekim, imza.zaman ? tarihSaat(imza.zaman) : r.onayTarihi ? tarihSaat(r.onayTarihi) : ''].filter(Boolean).join(' · ')}</span></span>
         <span className="ra-ok">{imzaAcik ? c('Kapat') + ' ‹' : c('Ayrıntı') + ' ›'}</span>

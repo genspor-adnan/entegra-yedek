@@ -10047,7 +10047,7 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   font-size: 17px; flex: 0 0 auto; font-style: normal }
 .ra-tik.sari { background: #c9972b }
 .ra-satir { display: grid; grid-template-columns: 96px 1fr; gap: 6px; padding: 3px 0; font-size: 11.5px; border-top: 1px dotted var(--cizgi2, #e3e9f0) }
-.ra-kutu h4 + .ra-satir { border-top: 0 }
+.ra-kutu h4 + div { border-top: 0 }
 .ra-satir > span { color: var(--soluk) }
 .ra-satir b { font-weight: 600; word-break: break-word }
 .ra-satir b.mono { font-family: Consolas, monospace; font-size: 10.5px; font-weight: 400 }
@@ -10079,10 +10079,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   .ra-m-imza.sari { border-color: #ecd9a6; background: linear-gradient(#fdf8ea, #fff) }
   .ra-m-imza.sari b { color: #a9791a }
   .ra-m-imza span span { display: block; color: var(--soluk); font-size: 10.5px }
-  .ra-m-imza .ra-tik { width: 28px; height: 28px; font-size: 14px }
+  .ra-tik-m { width: 28px; height: 28px; font-size: 14px }
   .ra-m-imza .ra-ok { color: var(--mavi, #2f6db3); font-size: 11px; white-space: nowrap }
   .ra-rapor { padding: 4px }
-  .ra-rapor .cikti-sayfa { padding: 14px 12px; min-height: 0; border: 0; box-shadow: none; width: auto }
+  .ra-rapor > div { padding: 14px 12px; min-height: 0; border: 0; box-shadow: none; width: auto }
   .ra-ust-sag .d { padding: 4px 8px; font-size: 11px }
 }
 @media print {
@@ -10116,3 +10116,10 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rga-bos { color: var(--soluk); text-align: center; padding: 12px !important }
 .rga-uyari { color: var(--hata); margin-left: 6px }
 @media (max-width: 900px) { .rga-govde { grid-template-columns: 1fr } }
+/* RAPOR ÇIKTISI › KAREKOD (1389): raporun sonunda, sağda - telefonla okutulan rapor bağlantısı. */
+.cikti-sayfa .rapor-karekod { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 14px;
+  page-break-inside: avoid; break-inside: avoid }
+.cikti-sayfa .rapor-karekod > div { font-size: 10px; color: #5a6877; line-height: 1.5; max-width: 230px }
+.cikti-sayfa .rapor-karekod b { display: block; color: #1a2430; font-size: 10.5px }
+.cikti-sayfa .rapor-karekod .rk-adres { font-family: Consolas, monospace; color: #1a2430; word-break: break-all }
+.karekod { flex: 0 0 auto; display: block }

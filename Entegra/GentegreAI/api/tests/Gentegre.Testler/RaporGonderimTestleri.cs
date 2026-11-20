@@ -202,4 +202,107 @@ public sealed class RaporGonderimTestleri(VeritabaniOlgusu olgu) : IClassFixture
 
         await t.RollbackAsync();
     }
+
+    /// <summary>
+    /// ÇEKİRDEK KURAL uçtan uca (gerçek servis, kendi transaction'ları): başvurunun borcu varken gönderim BEKLER ve
+    /// bağlantı raporu açmaz; borç kapanınca aynı satır gönderilir (bildirim kuyruğa yazılır) ve bağlantı açılır;
+    /// hastanın açması dijital teslim yazar; "borca rağmen" borç varken de gönderir. Satırlarını sonunda siler.
+    /// </summary>
+    [VtFact]
+    public async Task Borc_varken_bekler_kapaninca_gonderir_ve_baglanti_acilir()
+    {
+        if (!_olgu.Baglandi(nameof(Borc_varken_bekler_kapaninca_gonderir_ve_baglanti_acilir))) return;
+        var veri = _olgu.Gerekli();
+        var gunluk = new HataToplayan();
+        var servis = new RaporGonderimi(veri, new Gentegre.Veri.Depolar.BildirimDeposu(veri), gunluk);
+        Zemin z;
+        await using var b = await veri.AcAsync();
+        var eskiAyar = await b.ListeAsync("select * from public.radyoloji_rapor_gonderim_ayar", null, [], OkuyucuGenisletmeleri.Sozluk, Iptal);
+        await using (var t = await b.BeginTransactionAsync())
+        {
+            z = await ZeminAsync(b, t);
+            await AyarAsync(b, t, z.Sube, true, 0);
+            await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim_kural where sube_id = @p0 and kapsam = 2 and hizmet_id = @p1", t, [z.Sube, z.Hizmet], Iptal);
+            await b.CalistirAsync("insert into public.radyoloji_rapor_gonderim_kural (sube_id, kapsam, hizmet_id, zaman_tur) values (@p0, 2, @p1, 0)", t, [z.Sube, z.Hizmet], Iptal);
+            await RaporGonderimi.PlanlaAsync(b, t, z.Rapor, 0, Iptal);
+            await t.CommitAsync();
+        }
+        try
+        {
+            var hasta = (Id: await b.TekDegerAsync<int>("select id from public.radyoloji_rapor_gonderim where rapor_id = @p0 and alici_tur = 1", null, [z.Rapor], Iptal),
+                         Kod: await b.TekDegerAsync<string>("select kod from public.radyoloji_rapor_gonderim where rapor_id = @p0 and alici_tur = 1", null, [z.Rapor], Iptal) ?? "");
+            var hekim = await b.TekDegerAsync<int>("select id from public.radyoloji_rapor_gonderim where rapor_id = @p0 and alici_tur = 2", null, [z.Rapor], Iptal);
+
+            // BORÇ VAR (1000): bekler, bildirim yazılmaz, bağlantı raporu açmaz.
+            Assert.Equal(RaporGonderimi.DurumBorc, await servis.SimdiGonderAsync(hasta.Id, false, 0, Iptal));
+            Assert.Equal(0L, await b.TekDegerAsync<long>("select count(*) from public.bildirim where kaynak_tur = 51 and kaynak_id = @p0", null, [hasta.Id], Iptal));
+            Assert.Equal("iletisim", (await servis.AcAsync(hasta.Kod, Iptal))!.Durum);
+            Assert.Equal(0L, await b.TekDegerAsync<long>("select count(*) from public.radyoloji_teslim where istem_id = @p0", null, [z.Istem], Iptal));
+
+            // BORCA RAĞMEN (dış doktora): borç varken de gider; hastanın satırı beklemeye devam eder.
+            Assert.Equal(RaporGonderimi.DurumGonderildi, await servis.SimdiGonderAsync(hekim, true, 0, Iptal));
+            Assert.Equal(2L, await b.TekDegerAsync<long>("select count(*) from public.bildirim where kaynak_tur = 51 and kaynak_id = @p0", null, [hekim], Iptal));
+
+            // BORÇ KAPANDI: işçi turu bekleyeni gönderir (SMS; hastada e-posta kapalı), bağlantı açılır.
+            await b.CalistirAsync("update public.belge set genel_toplam = 0 where id = @p0", null, [z.Belge], Iptal);
+            Assert.Equal(0m, await RaporGonderimi.BorcAsync(b, null, z.Belge, Iptal));
+            // İşçi "zamanı gelen"e VERİTABANI saatiyle bakar; uygulama saati birkaç yüz ms ileride olabilir - kısa bekleme.
+            var gonderilen = 0;
+            for (var deneme = 0; deneme < 20 && gonderilen == 0; deneme++)
+            {
+                gonderilen = await servis.SiradakileriIsleAsync(500, Iptal);
+                if (gonderilen == 0) await Task.Delay(250);
+            }
+            Assert.True(gonderilen >= 1, "İşçi turu göndermedi: " + string.Join(" | ", gunluk.Hatalar));
+            Assert.Equal(3, await b.TekDegerAsync<int>("select durum::int from public.radyoloji_rapor_gonderim where id = @p0", null, [hasta.Id], Iptal));
+            var govde = await b.TekDegerAsync<string>("select govde from public.bildirim where kaynak_tur = 51 and kaynak_id = @p0 and kanal = 1", null, [hasta.Id], Iptal);
+            Assert.Contains($"https://rapor.test/r/{hasta.Kod}", govde);
+            Assert.Contains("RG TEST H***", govde);                                  // ad maskeli
+            var acilis = await servis.AcAsync(hasta.Kod.ToLowerInvariant(), Iptal);   // kod büyük / küçük harf duyarsız
+            Assert.Equal("ok", acilis!.Durum);
+            await servis.AcAsync(hasta.Kod, Iptal);
+            // Hastanın açması dijital teslim: tek satır (ikinci açılış yinelemez), teslim listesi "teslim edildi".
+            Assert.Equal(1L, await b.TekDegerAsync<long>("select count(*) from public.radyoloji_teslim where istem_id = @p0 and tur = 1 and dijital_verildi = 1", null, [z.Istem], Iptal));
+            Assert.Equal(2, await b.TekDegerAsync<int>("select takip_durum from public.v_radyoloji_teslim_takip where istem_id = @p0", null, [z.Istem], Iptal));
+            Assert.Equal(2, await b.TekDegerAsync<int>("select acilma_sayisi from public.radyoloji_rapor_gonderim where id = @p0", null, [hasta.Id], Iptal));
+
+            // ONAY GERİ ALINDI: bağlantı raporu açmaz.
+            await using (var t = await b.BeginTransactionAsync())
+            {
+                await RaporGonderimi.IptalAsync(b, t, z.Rapor, 0, Iptal);
+                await t.CommitAsync();
+            }
+            Assert.Equal("guncel", (await servis.AcAsync(hasta.Kod, Iptal))!.Durum);
+            Assert.Null(await servis.AcAsync("OLMAYANKOD", Iptal));
+        }
+        finally
+        {
+            await b.CalistirAsync("""
+                delete from public.bildirim where kaynak_tur = 51 and kaynak_id in (select id from public.radyoloji_rapor_gonderim where rapor_id = @p0);
+                """, null, [z.Rapor], Iptal);
+            await b.CalistirAsync("delete from public.radyoloji_teslim where istem_id = @p0", null, [z.Istem], Iptal);
+            await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim where rapor_id = @p0", null, [z.Rapor], Iptal);
+            await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim_kural where sube_id = @p0 and hizmet_id = @p1", null, [z.Sube, z.Hizmet], Iptal);
+            await b.CalistirAsync("delete from public.radyoloji_rapor where id = @p0", null, [z.Rapor], Iptal);
+            await b.CalistirAsync("delete from public.radyoloji_istem where id = @p0", null, [z.Istem], Iptal);
+            await b.CalistirAsync("delete from public.belge where id = @p0", null, [z.Belge], Iptal);
+            await b.CalistirAsync("delete from public.hizmet where id = @p0", null, [z.Hizmet], Iptal);
+            await b.CalistirAsync("delete from public.kategori where id = @p0 or id = (select ust_id from public.kategori where id = @p0)", null, [z.Kategori], Iptal);
+            await b.CalistirAsync("delete from public.taraf_personel where id = @p0", null, [z.Hekim], Iptal);
+            await b.CalistirAsync("delete from public.taraf where id in (@p0, @p1)", null, [z.Hasta, z.Hekim], Iptal);
+            // Şube ayarı testten önceki haline döner (test DB'sinde başka testin ayarı olabilir).
+            if (eskiAyar.Count == 0) await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0", null, [z.Sube], Iptal);
+        }
+    }
+
+    /// <summary>İşçi turunun yuttuğu hataları testte görünür kılar.</summary>
+    private sealed class HataToplayan : Microsoft.Extensions.Logging.ILogger<RaporGonderimi>
+    {
+        public List<string> Hatalar { get; } = [];
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+        public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId,
+                                TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        { if (exception is not null) Hatalar.Add(exception.GetType().Name + ": " + exception.Message); }
+    }
 }

@@ -373,8 +373,17 @@ public static partial class RadyolojiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var c = await CiktiVerisiAsync(baglanti, id, iptal);
+            // RAPOR BAĞLANTISI (1389): onaylı raporun kâğıt çıktısına karekod - hasta telefonla okutup raporu görür.
+            //   Bağlantı onayda kurulur (RaporGonderimi.PlanlaAsync); taslakta / iptalde yoktur.
+            var baglantiBilgisi = await baglanti.TekAsync("""
+                select g.kod, coalesce(nullif(g.web_kok, ''), a.web_kok, '') as "webKok", g.son_gecerli as "sonGecerli"
+                  from public.radyoloji_rapor_gonderim g
+                  left join public.radyoloji_rapor_gonderim_ayar a on a.sube_id = g.sube_id
+                 where g.rapor_id = @p0 and g.alici_tur = 1 and g.durum <> 9
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             return Results.Ok(new { rapor = c.Rapor, bolumler = c.Bolumler, alanlar = c.Alanlar, ekler = c.Ekler,
-                                    kurum = c.Kurum, tipografi = c.Tipografi, tipografiDamga = c.TipografiDamga });
+                                    kurum = c.Kurum, tipografi = c.Tipografi, tipografiDamga = c.TipografiDamga,
+                                    baglanti = baglantiBilgisi });
         });
 
         // ------------------------------------------------- taslak kaydet ----

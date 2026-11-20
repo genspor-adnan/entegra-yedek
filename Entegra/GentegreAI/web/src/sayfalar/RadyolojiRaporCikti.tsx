@@ -7,6 +7,8 @@ import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 import { tekParcaMi } from './radyoloji/raporBicimi';
+import { Karekod } from '../bilesenler/Karekod';
+import { raporBaglantisi } from '../api/uclar/raporGonderim';
 
 /**
  * RADYOLOJI RAPOR CIKTISI (mockup: Ekranlar/radyoloji_rapor_onizleme.html).
@@ -91,6 +93,8 @@ export type RaporCiktiVerisi = {
   rapor: Satir; bolumler: Satir[]; alanlar: Satir[]; ekler: Satir[]; kurum: Satir | null;
   /** TİPOGRAFİ (1344): raporun etkin tipografisi (onaylıda onay damgası). */
   tipografi?: Record<string, unknown>; tipografiDamga?: boolean;
+  /** RAPOR BAĞLANTISI (1389): onaylı raporda hasta bağlantısı - çıktının köşesine karekod. Yoksa basılmaz. */
+  baglanti?: { kod?: string; webKok?: string; sonGecerli?: string } | null;
 };
 
 /**
@@ -248,6 +252,22 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
         diğer tetkiklerle birlikte değerlendirilmelidir.
         {r.cihazAdi ? ` Çekim cihazı: ${r.cihazAdi}.` : ''}
       </div>
+
+      {/* --- KAREKOD (1389): raporu telefonda gör. Onaylı raporda, bağlantı varsa. --- */}
+      {onayli && veri.baglanti?.kod && (() => {
+        const adres = raporBaglantisi(veri.baglanti.kod, veri.baglanti.webKok);
+        return (
+          <div className="rapor-karekod" data-testid="rapor-karekod">
+            <Karekod deger={adres} baslik="Rapor bağlantısı" />
+            <div>
+              <b>Raporunuzu telefonda görün</b>
+              Karekodu telefonunuzun kamerasıyla okutun ya da<br />
+              <span className="rk-adres">{adres.replace(/^https?:\/\//, '')}</span>
+              {veri.baglanti.sonGecerli && <><br />{gunNokta(veri.baglanti.sonGecerli)} tarihine kadar geçerlidir.</>}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

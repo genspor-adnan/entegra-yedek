@@ -13,6 +13,7 @@
     "duman": "vitest run --config vitest.duman.config.ts"
   },
   "dependencies": {
+    "qrcode-generator": "^1.4.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",

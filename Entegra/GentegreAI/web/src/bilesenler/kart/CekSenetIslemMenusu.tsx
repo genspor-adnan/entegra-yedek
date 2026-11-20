@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { CekSenetIslemi, CekSenetIslemleri } from '../../api/uclar/cekSenetIslem';
@@ -6,7 +6,9 @@ import { c } from '../../dil/ceviri';
 import { yerelGun } from '../bicim';
 import { onay } from '../mesaj';
 import { Modal } from '../Modal';
-import { TarafArama } from '../TarafArama';
+
+// TEMBEL (döngüsel import: TarafArama → GenForm → KartAracGruplari → bu dosya): cari penceresi açılınca yüklenir.
+const TarafArama = lazy(() => import('../TarafArama').then(m => ({ default: m.TarafArama })));
 
 /**
  * ÇEK / SENET "⚙ İşlem ▾" (kullanıcı 20.11.2026: "işlem buton ve altında menüyü de ekle", "çek/senet hareketleri
@@ -177,8 +179,11 @@ function CekSenetIslemPenceresi({ id, islem, varsayilanHesap, onKapat, onBitti }
           {hata && <div className="hata">{hata}</div>}
         </div>
       </Modal>
-      <TarafArama acik={cariAra} kaynaklar={['cari']} onKapat={() => setCariAra(false)}
-                  onSec={s => { setCari({ id: s.id, unvan: s.unvan }); setCariAra(false) }} />
+      {cariAra && (
+        <Suspense fallback={null}>
+          <TarafArama acik kaynaklar={['cari']} onKapat={() => setCariAra(false)}
+                      onSec={s => { setCari({ id: s.id, unvan: s.unvan }); setCariAra(false) }} />
+        </Suspense>)}
     </>
   );
 }
