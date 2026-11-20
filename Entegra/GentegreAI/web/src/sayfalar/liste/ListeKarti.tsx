@@ -647,7 +647,8 @@ export function ListeKarti({
         // Hizmet de (kullanıcı 09.11.2026: "hizmet kartı ve Id olan bandı kaldır.. sil butonu sağına taşı").
         // HASTA da (kullanıcı 17.11.2026: "'Hasta Kartı' ve ID'yi yeni başvuru butonu sağına al. ve üstteki o bandı kaldır").
         // BİLDİRİM ŞABLONU da (1354 mockup: başlık bandı yok, kart adı Sil'in sağında).
-        baslikAracta={tanim.kaynak === 'hasta' || tanim.kaynak === 'personel' || tanim.kaynak === 'bildirim-sablon' || tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis' || tanim.kaynak === 'dis-hekim-ziyaret'}
+        baslikAracta={tanim.kaynak === 'hasta' || tanim.kaynak === 'personel' || tanim.kaynak === 'bildirim-sablon' || tanim.kaynak === 'cari' || tanim.kaynak === 'stok' || tanim.kaynak === 'urun-agaci' || tanim.kaynak === 'hizmet' || tanim.kaynak === 'onayAkis' || tanim.kaynak === 'dis-hekim-ziyaret'
+                     || tanim.kaynak === 'cek-senet' /* 20.11.2026: "label ve ID yi de butonlar sağına al" */}
         tekSayfa={tanim.kaynak === 'muayene' && muayeneDuzeni === 'sekmesiz'}
         // "Tanı (ICD-10)" ve "Muayene" BAŞLIKLARI YOK (kullanıcı 15.10.2026): çerçevelerin kendi
         //   başlıkları (Tanılar, Anamnez...) yeter.
