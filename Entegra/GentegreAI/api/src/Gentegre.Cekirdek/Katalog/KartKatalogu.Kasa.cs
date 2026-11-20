@@ -231,19 +231,19 @@ public static partial class KartKatalogu
         //   ortak galeri (web kartSekmeleri, DokumanUclari "cek-senet").
         Detaylar: new[]
         {
-            new DetayTanimi("hareketler", "public.cek_senet_hareket", "cek_senet_id", new KartAlani[]
+            // DELPHI KOLONLARI (kullanıcı 20.11.2026: "aynı delphi erp deki çek/senet hareketleri gibi olmalı"; Delphi
+            //   UCekWizard Tarihçe / UCekListeFrame Hareketler): Tarih, Makbuz No, İşlem, İşlem Yeri, Açıklama, Yerel
+            //   Tutar. Görünüm 1386 (İşlem Yeri = cari, yoksa hesap; makbuz no kasa makbuzundan ya da elle).
+            new DetayTanimi("hareketler", "public.v_cek_senet_hareket", "cek_senet_id", new KartAlani[]
             {
                 new("id",          "id",            "sayi",  Yazilabilir: false),
                 new("tarih",       "tarih",         "tarih", Yazilabilir: false, Baslik: "Tarih"),
+                new("belgeNo",     "belge_no",      "metin", Yazilabilir: false, Baslik: "Makbuz No"),
                 new("islem",       "islem",         "kod",   Yazilabilir: false, SabitKodlar: CekSenetIslemKodlari, Baslik: "İşlem"),
-                new("eskiDurum",   "eski_durum",    "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Önceki Durum"),
-                new("yeniDurum",   "yeni_durum",    "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Yeni Durum"),
-                new("tarafId",     "taraf_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Cari"),
-                new("hesapId",     "hesap_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Hesap"),
-                new("kasaIslemId", "kasa_islem_id", "sayi",  Yazilabilir: false, Baslik: "İşlem No"),
+                new("islemYeri",   "islem_yeri",    "metin", Yazilabilir: false, Baslik: "İşlem Yeri"),
                 new("aciklama",    "aciklama",      "metin", Yazilabilir: false, Baslik: "Açıklama"),
-                new("ekleyen",     "ekleyen",       "kod",   Yazilabilir: false, KodTablosu: "public.v_kullanici_lookup", Baslik: "Kullanıcı"),
-            }, Sirala: "tarih, id", SubeKolonu: null, Baslik: "Hareketler", SaltOkunur: true),
+                new("yerelTutar",  "yerel_tutar",   "para",  Yazilabilir: false, Baslik: "Yerel Tutar"),
+            }, Sirala: "tarih, id", SubeKolonu: null, Baslik: "Hareketler", SaltOkunur: true, GridKipi: true),
             new DetayTanimi("iliskili", "public.kasa_islem", "cek_senet_id", new KartAlani[]
             {
                 new("id",          "id",            "sayi",  Yazilabilir: false, Baslik: "İşlem No"),
@@ -254,7 +254,7 @@ public static partial class KartKatalogu
                 new("tutar",       "tutar",         "para",  Yazilabilir: false, Baslik: "Tutar"),
                 new("dovizCinsi",  "doviz_cinsi",   "metin", Yazilabilir: false, Baslik: "Döviz"),
                 new("aciklama",    "aciklama",      "metin", Yazilabilir: false, Baslik: "Açıklama"),
-            }, Sirala: "islem_tarihi, id", SubeKolonu: null, Baslik: "İlişkili Kayıtlar", SaltOkunur: true),
+            }, Sirala: "islem_tarihi, id", SubeKolonu: null, Baslik: "İlişkili Kayıtlar", SaltOkunur: true, GridKipi: true),
         },
         SilmeEngelleri: new[]
         {

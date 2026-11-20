@@ -104,6 +104,7 @@ import { teletipUclari } from './uclar/teletip';
 import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
 import { kasaUclari } from './uclar/kasa';
+import { cekSenetIslemUclari } from './uclar/cekSenetIslem';
 import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
 import { dokumUclari } from './uclar/dokum';
@@ -222,6 +223,7 @@ export const api = {
   ...mesajUclari,
   ...ayarUclari,
   ...kasaUclari,
+  ...cekSenetIslemUclari,
   ...iskontoUclari,
   ...iceriAlmaUclari,
   ...dokumUclari,

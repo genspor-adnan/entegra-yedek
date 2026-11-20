@@ -53,14 +53,15 @@ public static partial class FinansIcmalUclari
     {
         130 => yon == 2 ? "Verildi" : "Portföye giriş",
         131 => "Ciro edildi",
-        132 => "Bankaya tahsile verildi",
+        132 => "Takasa verildi",
         133 => "Tahsil edildi",
         134 => "Karşılıksız",
         135 => "İade",
         136 => "Ödendi",
         137 => "Teminata verildi",
         138 => "Teminattan döndü",
-        139 => "İptal (geri alma)",
+        139 => "İptal",
+        140 => "İcraya verildi",
         _ => "İşlem " + islem,
     };
 

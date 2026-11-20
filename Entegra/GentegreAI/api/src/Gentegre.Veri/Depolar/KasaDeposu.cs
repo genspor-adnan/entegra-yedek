@@ -50,6 +50,22 @@ public sealed partial class KasaDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var tx = await baglanti.BeginTransactionAsync(iptal);
 
+        var id = await KaydetIcAsync(baglanti, tx, islem, bacaklar, secenekler, baglam, uyarilar, cekSenet, true, iptal);
+
+        await tx.CommitAsync(iptal);
+        return (id, uyarilar);
+    }
+
+    /// <summary>
+    /// KaydetAsync'in gövdesi - ÇAĞIRANIN TRANSACTION'ında (çek / senet işlemi, 1386: kasa işlemi + kıymet durumu +
+    /// hareket tek transaction). `cekSenetBagla` false: 23/24/33/34 mevcut kıymete bağlanırken GİRİŞ hareketi
+    /// (130) ve giris_kasa_islem_id YAZILMAZ - portföye geri alma / iade alma çeki yeniden "girmez".
+    /// </summary>
+    private async Task<int> KaydetIcAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,
+        IDictionary<string, object?> islem, List<Dictionary<string, JsonElement>>? bacaklar,
+        KasaSecenekleri secenekler, YazmaBaglami baglam, List<string> uyarilar,
+        CekSenetGirisi? cekSenet, bool cekSenetBagla, CancellationToken iptal)
+    {
         var tur = (int)Sayi(islem, "tur");
         if (tur <= 0)
             throw GentegreHatasi.Dogrulama("İşlem türü seçilmeli.", new AlanHatasi("tur", "Zorunlu."));
@@ -103,7 +119,7 @@ public sealed partial class KasaDeposu
 
         var id = await BaslikEkleAsync(baglanti, tx, islem, baglam, iptal);
 
-        if (cekSenetId > 0)
+        if (cekSenetId > 0 && cekSenetBagla)
             await CekSenetBaglaAsync(baglanti, tx, cekSenetId, id, islem, baglam, iptal);
 
         // Bacaklar: istemci vermediyse sablondan uretilir (normal akis).
@@ -129,8 +145,7 @@ public sealed partial class KasaDeposu
             },
             tarafId: SayiNull(islem, "tarafId"), iptal: iptal);
 
-        await tx.CommitAsync(iptal);
-        return (id, uyarilar);
+        return id;
     }
 
     /// <summary>

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (735 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (736 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -143,6 +143,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_cagri_arayan_bul` | `940_personel_unvan_yalniz_onek.sql` | 839_cagri_merkezi.sql |
 | `fn_cagri_tel_anahtar` | `839_cagri_merkezi.sql` | — |
 | `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
+| `fn_cek_senet_giris_hareketi` | `1387_cek_senet_giris_hareketi.sql` | — |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
 | `fn_cihaz_siradakiler` | `432_cihaz_ara_katman.sql` | — |
@@ -744,7 +745,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 | `trg_zamanli_is_plan_degisti` | `1079_zamanli_is_kurum_saati.sql` | — |
 
-## Gorunumler (368 ad, 165 tanesi birden cok dosyada)
+## Gorunumler (369 ad, 166 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -797,6 +798,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `940_personel_unvan_yalniz_onek.sql` | 037_kisi_karti.sql, 122_aday_musteri.sql |
 | `v_cari_ozet` | `1360_hasta_fisi_turu.sql` | 1150_cari_ozet.sql, 1162_tedarikci_v3.sql, 1327_cari_ozet_materialized.sql |
+| `v_cek_senet_hareket` | `1388_cek_senet_hareket_islem_yeri.sql` | 1386_cek_senet_hareket_kart.sql |
 | `v_cek_senet_portfoy` | `940_personel_unvan_yalniz_onek.sql` | 072_cek_senet.sql |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
 | `v_cocuk_izlem` | `940_personel_unvan_yalniz_onek.sql` | 899_cocuk_izlem.sql |

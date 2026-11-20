@@ -188,11 +188,21 @@ public sealed partial class KasaDeposu
             await komut.ExecuteNonQueryAsync(iptal);
         }
 
+        // GİRİŞ SATIRI TETİKTEN (1387): cek_senet eklenince tetik açılış satırını yazar - burada kasa işlemine
+        //   BAĞLANIR. Tetiği olmayan kurulumda (1387 öncesi) satır yoksa eklenir.
         await using (var komut = new NpgsqlCommand("""
+            with g as (
+                update public.cek_senet_hareket
+                   set kasa_islem_id = @p3::int, tarih = @p1::date, taraf_id = coalesce(@p2::int, taraf_id)
+                 where id = (select id from public.cek_senet_hareket
+                              where cek_senet_id = @p0::int and islem = 130 and eski_durum = 0 and kasa_islem_id is null
+                              order by id limit 1)
+                returning id)
             insert into public.cek_senet_hareket
                 (cek_senet_id, islem, tarih, eski_durum, yeni_durum, taraf_id,
                  kasa_islem_id, aciklama, ekleyen)
-            values (@p0, 130, @p1, 0, 10, @p2, @p3, 'Portföye giriş', @p4)
+            select @p0::int, 130, @p1::date, 0, 10, @p2::int, @p3::int, 'Portföye giriş', @p4::int
+             where not exists (select 1 from g)
             """, baglanti, tx))
         {
             komut.Parameters.AddWithValue("p0", cekSenetId);

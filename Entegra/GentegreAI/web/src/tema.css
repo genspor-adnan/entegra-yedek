@@ -10009,3 +10009,15 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-kutu i.cs-kir { color: var(--hata); font-weight: 700 }
 .rv-iz.cs-iz-kir { background: color-mix(in srgb, var(--hata) 10%, transparent); color: var(--hata) }
 .kaid .cs-baslik .alan-izgara.cs-alt-alanlar { grid-template-columns: 120px 180px 110px 150px 220px !important }
+/* ÇEK / SENET › ⚙ İŞLEM ▾ (20.11.2026, Delphi çek menüsü): işlem renkleri kıymet durum renkleriyle aynı. */
+.cs-islem-menu { min-width: 240px }
+.cs-islem-menu .ayrac { height: 1px; background: var(--cizgi2, #e3e9f0); margin: 4px 0 }
+.mi.cs-m { border-left: 4px solid transparent; font-weight: 600; white-space: nowrap }
+.mi.cs-m-portfoy { border-left-color: var(--mavi, #2f6db3); color: var(--mavi, #2f6db3) }
+.mi.cs-m-ciro    { border-left-color: var(--mor, #6d4aff);  color: var(--mor, #6d4aff) }
+.mi.cs-m-teminat { border-left-color: #5b6b7c; color: #5b6b7c }
+.mi.cs-m-takas   { border-left-color: #a9791a; color: #a9791a }
+.mi.cs-m-tahsil  { border-left-color: var(--ok); color: var(--ok) }
+.mi.cs-m-kir     { border-left-color: var(--hata); color: var(--hata) }
+.mi.cs-m-gri     { border-left-color: var(--soluk); color: var(--soluk) }
+.mi.cs-m:hover   { background: var(--mor2, #f3f8ff) }

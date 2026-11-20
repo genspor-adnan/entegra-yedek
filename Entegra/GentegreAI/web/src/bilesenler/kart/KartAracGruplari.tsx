@@ -13,6 +13,7 @@ import { dokumanDosyaAdi, dosyaIndirUrl } from '../indir';
 import type { Deger } from '../kartAlanCizim';
 import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from '../mesaj';
 import { RandevuErtelePenceresi } from '../RandevuErtelePenceresi';
+import { CekSenetIslemMenusu } from './CekSenetIslemMenusu';
 import { RandevuSeriPenceresi } from '../RandevuSeriPenceresi';
 import { DevirPenceresi } from '../../sayfalar/cari/CariDevirPenceresi';
 import { yerelGun } from '../bicim';
@@ -46,6 +47,8 @@ export interface KartAracBaglami {
   gizliAlanlar?: string[];
   cariyeBaglaGizli?: boolean;
   cariyeBagla(): void;
+  /** Kartı sunucudan yeniden okur (sunucu aksiyonundan sonra - çek / senet işlemi). */
+  yenile?(): void;
 }
 
 /** Sil'in sağındaki kaynağa özel grup (yoksa null). */
@@ -61,6 +64,10 @@ export function kartAracGrubu(b: KartAracBaglami): ReactNode {
       return !b.salt && !b.cariyeBaglaGizli && !b.deger.bagId
         ? <button className="d" onClick={b.cariyeBagla}>🔗 Cariye Bağla</button> : null;
     // YÖN ARAÇ ÇUBUĞUNDAN KALKTI (kullanıcı 20.11.2026: "yön comboyu edit modda tutar soluna taşı") - CekSenetBasligi.
+    // ⚙ İŞLEM ▾ (20.11.2026, Delphi çek menüsü): kayıtlı kıymette, yazma yetkisi varken.
+    case 'cek-senet':
+      return b.yeniMi || b.salt ? null
+        : <CekSenetIslemMenusu id={Number(b.id)} kirli={b.kaydedilmemisDegisiklikVar} onBitti={() => b.yenile?.()} />;
     case 'hasta-aday': return <AdayDurumRozeti b={b} />;
     case 'randevu': return b.salt ? null : <RandevuKartAraclari b={b} />;
     case 'dokuman': return b.yeniMi ? null : <DokumanKartAraclari b={b} />;

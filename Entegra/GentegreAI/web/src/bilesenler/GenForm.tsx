@@ -1612,6 +1612,7 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
 
   // KAYNAĞA ÖZEL ARAÇ GRUPLARI (kart/KartAracGruplari): Sil'in sağı ve Kapat'ın sağı.
   const aracBaglami: KartAracBaglami = {
+    yenile: () => { void yukle() },
     kaynak, id, yeniMi, salt, meta, deger, setDeger, alanDegistir, detaylar, setDetaylar, setHata,
     kaydedilmemisDegisiklikVar, kaydet, basvuruAc, onKaydedildi, onKapat, gizliAlanlar, cariyeBaglaGizli,
     cariyeBagla: () => setCariyeBaglaAcik(true),

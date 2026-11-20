@@ -310,9 +310,11 @@ public static partial class KartKatalogu
 
     /// <summary>cek_senet_hareket.islem (072) - kart Hareketler sekmesi; çek / senet icmali aynı adları kullanır.</summary>
     private static readonly Dictionary<string, string> CekSenetIslemKodlari =
-        new() { ["130"] = "Portföye giriş / Verildi", ["131"] = "Ciro edildi", ["132"] = "Bankaya tahsile verildi",
+        // Delphi adları (1386): 132 = Takasa verildi (bankaya tahsile), 140 = İcraya verildi.
+        new() { ["130"] = "Portföye alındı", ["131"] = "Ciro edildi", ["132"] = "Takasa verildi",
                 ["133"] = "Tahsil edildi", ["134"] = "Karşılıksız", ["135"] = "İade", ["136"] = "Ödendi",
-                ["137"] = "Teminata verildi", ["138"] = "Teminattan döndü", ["139"] = "İptal (geri alma)" };
+                ["137"] = "Teminata verildi", ["138"] = "Teminattan döndü", ["139"] = "İptal",
+                ["140"] = "İcraya verildi" };
 
     private static readonly Dictionary<string, string> CekSenetDurumKodlari =
         new() { ["10"] = "Portföyde", ["20"] = "Ciro Edildi", ["30"] = "Bankada Tahsilde",
