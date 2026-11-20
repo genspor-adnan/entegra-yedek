@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Radyoloji Raporu — Hasta görüntüleme sayfası: karekod / SMS bağlantısı, e-imza paneli, gönderim ve teslim (mockup)</title>
+<title>Rapor Gönderimi (Radyoloji + Laboratuvar) — hasta sayfası, karekod / SMS bağlantısı, tek ayar, tek teslim listesi (mockup)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -334,91 +334,88 @@
 </p>
 
 <!-- ================================================================== 4 -->
-<h2><b>4</b> — Şube ayarları: Radyoloji › Rapor gönderimi <span class="ipucu">hepsi sayfanın Kaydet'iyle yazılır</span></h2>
+<h2><b>4</b> — Rapor Gönderimi Ayarı: radyoloji ve laboratuvar için TEK ekran <span class="ipucu">hepsi sayfanın Kaydet'iyle yazılır</span></h2>
 <div class="ayar">
-  <div class="bas">📨 Rapor Gönderimi <span style="font-weight:normal;color:var(--muted);font-size:11.5px">— Merkez Şube</span>
+  <div class="bas">📨 Rapor Gönderimi Ayarı <span style="font-weight:normal;color:var(--muted);font-size:11.5px">— Merkez Şube · Radyoloji ve Laboratuvar</span>
     <span style="margin-left:auto" class="btn bir">💾 Kaydet</span></div>
   <div class="ic">
     <div class="grup"><h4>Otomatik gönderim</h4>
-      <div class="asat"><span>Otomatik gönderim</span><div><span class="cb"><i class="on">✓</i> Rapor onaylanınca / e-imzalanınca gönder</span></div></div>
+      <div class="asat"><span>Otomatik gönderim</span><div><span class="cb"><i class="on">✓</i> Rapor / sonuç onaylanınca kurallara göre gönder</span></div></div>
       <div class="asat"><span>Ne zaman</span><div>Aşağıdaki <b>Gönderim zamanı kuralları</b> tablosundan (kod › kategori › tümü)</div></div>
-      <div class="asat"><span>Kritik bulgulu raporda</span><div><span class="kutucuk">5</span> dakika sonra
-        <div class="ipucu2"><b>0</b> = otomatik gitmez, elle gönderilir. Kritik raporda kural tablosu yerine <b>yalnız bu süre</b> geçerlidir (tek süre).</div></div></div>
-      <div class="asat"><span>Sessiz saatler</span><div><span class="kutucuk">21:00</span> – <span class="kutucuk">08:00</span> <span style="color:var(--muted);font-size:11px">arası bekleyen sabaha kalır</span></div></div>
-    </div>
-    <div class="grup"><h4>Borç kuralı</h4>
-      <div class="asat"><span>Borç kontrolü</span><div><span class="cb"><i class="on">✓</i> Başvurunun borcu varken gönderme</span></div></div>
-      <div class="asat"><span>Kapsam</span><div><b>Yalnız raporun başvurusu</b> · hasta payı (kurum / sigorta payı sayılmaz)</div></div>
-      <div class="asat"><span>Kimi durdurur</span><div><b>Hastayı ve gönderen dış doktoru</b> · bağlantı ve karekod da açılmaz</div></div>
-      <div class="asat"><span>Borç kapanınca</span><div>Bekleyen gönderimler <b>kendiliğinden</b> gider</div></div>
-      <div class="ipucu2">Kuruş farkı eşiğinin altı borç sayılmaz. "Borca Rağmen Gönder" ayrı aksiyon yetkisi ister.</div>
-    </div>
-    <div class="grup"><h4>Hastaya</h4>
-      <div class="asat"><span>Kanal</span><div><span class="cb"><i class="on">✓</i> SMS</span><span class="cb"><i>&nbsp;</i> E-posta</span></div></div>
-      <div class="asat"><span>SMS şablonu</span><div class="kutucuk combo">Rapor hazır - hasta</div></div>
+      <div class="asat"><span>Radyoloji · kritik bulgu</span><div><span class="kutucuk">5</span> dakika sonra</div></div>
+      <div class="asat"><span>Laboratuvar · panik değer</span><div><span class="kutucuk">0</span> dakika sonra
+        <div class="ipucu2">İki süre ayrı ayrı girilir. <b>0</b> = otomatik gitmez, elle gönderilir. Kritik bulgulu rapor / panik değerli sonuçta kural tablosuna bakılmaz, yalnız bu süre geçerlidir.</div></div></div>
       <div class="asat"><span>Bağlantı geçerliliği</span><div><span class="kutucuk">30</span> gün</div></div>
-      <div class="asat"><span>Açılınca</span><div><b>Teslim edildi sayılır</b> (CD istenmişse CD teslimine kadar bekler)</div></div>
+      <div class="asat"><span>Bağlantı adresi</span><div><span class="kutucuk" style="min-width:240px">https://rapor.kurum.com</span></div></div>
     </div>
-    <div class="grup"><h4>Gönderen dış doktora</h4>
-      <div class="asat"><span>Kime</span><div>Kartında <b>"Rapor bildirimi istiyor"</b> seçili doktorlara · kanal doktorun tercihi (SMS / e-posta / ikisi)</div></div>
-      <div class="asat"><span>Ne gider</span><div><b>Bağlantı</b> (PDF eki yok)</div></div>
-      <div class="asat"><span>SMS / e-posta şablonu</span><div class="kutucuk combo">Rapor hazır - gönderen hekim</div></div>
-      <div class="asat"><span>Bağlantı</span><div>Hastanınkinden <b>ayrı</b> bağlantı; doğrulama yok, açılışlar kayda geçer</div></div>
-      <div class="ipucu2">Doktorun açması hastaya teslim sayılmaz; ayrıca kaydedilir.</div>
+    <div class="grup"><h4>Borç kuralı ve alıcılar</h4>
+      <div class="asat"><span>Borç kontrolü</span><div><span class="cb"><i class="on">✓</i> Başvurunun borcu varken gönderme</span></div></div>
+      <div class="asat"><span>Kapsam</span><div><b>Yalnız o başvuru</b> · hasta payı · hastayı ve gönderen dış doktoru birlikte durdurur · bağlantı da açılmaz</div></div>
+      <div class="asat"><span>Hastaya</span><div><span class="cb"><i class="on">✓</i> SMS</span><span class="cb"><i>&nbsp;</i> E-posta</span></div></div>
+      <div class="asat"><span>Gönderen dış doktora</span><div>Kartında <b>"Rapor Bildirimi"</b> seçili doktorlara · bağlantı gider (ek dosya yok)</div></div>
+      <div class="asat"><span>Açılınca</span><div><b>Teslim edildi sayılır</b> (radyolojide CD istenmişse CD teslimine kadar bekler)</div></div>
+      <div class="ipucu2">Borç kapanınca bekleyen gönderimler kendiliğinden gider. "Borca Rağmen Gönder" ayrı yetki ister.</div>
     </div>
-    <div class="grup" style="grid-column:1 / -1"><h4>Gönderim zamanı kuralları <span style="text-transform:none;letter-spacing:0">— öncelik: <b style="color:var(--ink)">Kod</b> › <b style="color:var(--ink)">Kategori</b> › <b style="color:var(--ink)">Tümü</b></span></h4>
-      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="btn">＋ Satır</span><span class="btn">✎</span><span class="btn">🗑</span></div>
+    <div class="grup" style="grid-column:1 / -1"><h4>Gönderim zamanı kuralları <span style="text-transform:none;letter-spacing:0">— öncelik: <b style="color:var(--ink)">Kod</b> › <b style="color:var(--ink)">Kategori</b> › <b style="color:var(--ink)">Tümü</b> · radyoloji tetkikleri ve laboratuvar testleri aynı tabloda</span></h4>
+      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="btn">＋ Satır</span></div>
       <table class="kural">
-        <thead><tr><th style="width:26px">☐</th><th style="width:130px">Kapsam</th><th>Seçim</th><th style="width:300px">Gönderim zamanı</th><th style="width:90px">Durum</th></tr></thead>
+        <thead><tr><th style="width:130px">Kapsam</th><th>Seçim</th><th style="width:300px">Gönderim zamanı</th><th style="width:90px">Durum</th></tr></thead>
         <tbody>
-          <tr><td>☐</td><td><span class="d yok">Tümü</span></td><td style="color:var(--muted)">— bütün tetkikler —</td><td><b>2 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
-          <tr><td>☐</td><td><span class="d plan">Kategori</span></td><td><b>MR</b> <small style="display:inline;color:var(--muted)">· 48 tetkik</small></td><td><b>3 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
-          <tr><td>☐</td><td><span class="d plan">Kategori</span></td><td><b>Mamografi</b> <small style="display:inline;color:var(--muted)">· 6 tetkik</small></td><td><b>Ertesi gün saat 15:00</b></td><td><span class="d gitti">Aktif</span></td></tr>
-          <tr><td>☐</td><td><span class="d acildi">Kod</span></td><td><b>804.160</b> Akciğer grafisi PA <small style="display:inline;color:var(--muted)">· Kategori: Röntgen</small></td><td><b>1 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
-          <tr class="sec"><td>☑</td><td><span class="kutucuk combo">Kod</span></td><td><span class="kutucuk" style="min-width:280px">🔍 tetkik kodu ya da adı…</span></td>
-              <td><span class="kutucuk combo">Saat sonra</span> <span class="kutucuk" style="min-width:44px">1</span> saat &nbsp;<span style="color:var(--muted)">ya da</span>&nbsp; <span class="kutucuk combo">Ertesi gün</span> <span class="kutucuk">15:00</span></td><td><span class="cb"><i class="on">✓</i> Aktif</span></td></tr>
+          <tr><td><span class="d yok">Tümü</span></td><td style="color:var(--muted)">— bütün tetkik ve testler —</td><td><b>2 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d plan">Kategori</span></td><td><b>MR</b> <small style="display:inline;color:var(--muted)">· Radyoloji</small></td><td><b>3 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d plan">Kategori</span></td><td><b>Mamografi</b> <small style="display:inline;color:var(--muted)">· Radyoloji</small></td><td><b>Ertesi gün saat 15:00</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d plan">Kategori</span></td><td><b>Hormon</b> <small style="display:inline;color:var(--muted)">· Laboratuvar</small></td><td><b>Ertesi gün saat 10:00</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d plan">Kategori</span></td><td><b>Mikrobiyoloji</b> <small style="display:inline;color:var(--muted)">· Laboratuvar</small></td><td><b>Hemen</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d acildi">Kod</span></td><td><b>804.160</b> Akciğer grafisi PA <small style="display:inline;color:var(--muted)">· Radyoloji</small></td><td><b>1 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td><span class="d acildi">Kod</span></td><td><b>HBA1C</b> Glikozile hemoglobin <small style="display:inline;color:var(--muted)">· Laboratuvar</small></td><td><b>2 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
         </tbody>
       </table>
       <div class="ipucu2">
-        <b>Hesap:</b> raporun tetkiği için önce <b>Kod</b> satırına bakılır; yoksa tetkiğin <b>Kategori</b> satırına; o da yoksa <b>Tümü</b> satırına. Hiç satır uymuyorsa otomatik gönderilmez (elle).
-        Zaman seçenekleri: <b>Hemen</b> · <b>N saat sonra</b> · <b>Ertesi gün saat SS:DD</b>. Aynı kod / kategori iki kez girilemez; "Tümü" tek satırdır.
-        <b>Örnek:</b> Lomber MR → Kategori MR → 3 saat · Akciğer grafisi PA → Kod 804.160 → 1 saat (Röntgen kategorisi olsa da kod kazanır) · Tiroid USG → Tümü → 2 saat.
-        Bir başvuruda birden çok rapor varsa her rapor <b>kendi</b> kuralına göre planlanır.
+        <b>Radyoloji:</b> her rapor kendi tetkiğinin kuralıyla planlanır. <b>Laboratuvar:</b> gönderim birimi <b>bölümdür</b> (Biyokimya, Hematoloji, Hormon, Mikrobiyoloji…) -
+        bir bölümün testlerinin tamamı onaylanınca o bölümün bildirimi planlanır; zaman, bölümdeki testlerin kurallarından <b>en geç</b> olanıdır.
+        Hiçbir satır uymuyorsa otomatik gönderilmez (elle). Aynı kod / kategori iki kez girilemez; "Tümü" tek satırdır.
       </div>
     </div>
   </div>
 </div>
 <p class="aciklama">
-  Gecikme süresi içinde rapor <b>geri çekilir ya da düzeltilirse</b> bekleyen gönderim iptal edilir; yeni onayda süre baştan başlar.
-  Dış doktor kartına <b>"Rapor bildirimi istiyor: Yok / SMS / E-posta / İkisi"</b> alanı eklenir.
+  <b>Tek ayar ekranı</b> (kullanıcı kararı): Radyoloji › Ayarlar ve Laboratuvar › Ayarlar menülerinin ikisi de bu ekranı açar. Ayrı olan yalnız iki süre:
+  <b>radyoloji kritik bulgu</b> ve <b>laboratuvar panik değer</b>. Kural tablosu ortak - radyoloji tetkikleri de laboratuvar testleri de aynı hizmet / kategori ağacındadır.
+  Gecikme süresi içinde rapor geri çekilir ya da sonuç düzeltilirse bekleyen gönderim iptal edilir.
 </p>
 
 <!-- ================================================================== 5 -->
-<h2><b>5</b> — Radyoloji Rapor Teslim listesi: elden teslim + dijital gönderim tek ekranda <span class="ipucu">ayrı liste yok</span></h2>
+<h2><b>5</b> — Rapor Teslim listesi: radyoloji ve laboratuvar TEK listede <span class="ipucu">ayrı liste yok</span></h2>
 <div class="liste">
   <div class="arac">
-    <b>Radyoloji Rapor Teslim</b>
-    <span class="cip">Teslim Bekleyen <b>14</b></span><span class="cip on">Gönderim Bekleyen <b>6</b></span><span class="cip">Borçlu Bekleyen <b>3</b></span>
-    <span class="cip">Gönderilemeyen <b>1</b></span><span class="cip">Teslim Edilen</span><span class="cip">Tümü</span>
+    <b>Rapor Teslim</b>
+    <span class="cip on">Teslim Bekleyen <b>45</b></span><span class="cip">Gönderim Bekleyen <b>18</b></span><span class="cip">Borçlu Bekleyen <b>7</b></span>
+    <span class="cip">Gönderilemeyen <b>3</b></span><span class="cip">Teslim Edilen</span><span class="cip">Tümü</span>
+    <span style="width:1px;height:18px;background:var(--line);margin:0 4px"></span>
+    <span class="cip on">Hepsi</span><span class="cip">☢ Radyoloji</span><span class="cip">🧪 Laboratuvar</span>
     <span style="margin-left:auto" class="btn">✔ Teslim Et</span><span class="btn">📨 Gönderim ▾</span><span class="btn">🖨 Karekodlu Çıktı</span>
   </div>
   <table>
-    <thead><tr><th style="width:24px">☐</th><th>Rapor Onayı</th><th>Hasta</th><th>Tetkik</th><th>Borç</th><th>Hastaya Gönderim</th><th>Dış Doktora Gönderim</th><th>Teslim</th></tr></thead>
+    <thead><tr><th style="width:24px">☐</th><th style="width:70px">Tür</th><th>Onay</th><th>Hasta</th><th>Tetkik / Testler</th><th>Borç</th><th>Hastaya Gönderim</th><th>Dış Doktora Gönderim</th><th>Teslim</th></tr></thead>
     <tbody>
-      <tr><td>☐</td><td>20.11.2026 14:28<small>Dr. M. Yılmaz · e-imzalı</small></td><td><b>Ayşe Kaya</b><small>0532 *** 41 10</small></td><td>Bilateral Mamografi</td><td>—</td>
+      <tr><td>☐</td><td><span class="d plan">☢ Rad</span></td><td>20.11.2026 14:28<small>Dr. M. Yılmaz · e-imzalı</small></td><td><b>Ayşe Kaya</b><small>0532 *** 41 10</small></td><td>Bilateral Mamografi</td><td>—</td>
           <td><span class="d plan">Planlandı</span><small>SMS · yarın 15:00 · kural: Kategori Mamografi</small></td><td><span class="d plan">Planlandı</span><small>Op. Dr. S. Aydın · e-posta · yarın 15:00</small></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr class="sec"><td>☑</td><td>20.11.2026 13:05<small>Dr. M. Yılmaz</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>Lomber MR</td><td><b style="color:var(--hata)">1.250,00 ₺</b></td>
-          <td><span class="d borc">Borç nedeniyle bekliyor</span><small>SMS · 16:05'te gidecekti · kural: Kategori MR (3 saat)</small></td><td><span class="d borc">Borç nedeniyle bekliyor</span><small>Dr. K. Aras · SMS</small></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr><td>☐</td><td>20.11.2026 11:40<small>Dr. E. Çelik · e-imzalı</small></td><td><b>Zeynep Arı</b><small>0505 *** 90 31</small></td><td>Akciğer BT</td><td>—</td>
-          <td><span class="d acildi">Açıldı</span><small>SMS 12:40 · açıldı 12:52</small></td><td><span class="d yok">İstemiyor</span></td><td><span class="d gitti">Dijital</span><small>Hasta (bağlantı) · 12:52</small></td></tr>
-      <tr><td>☐</td><td>20.11.2026 11:12<small>Dr. E. Çelik · e-imzalı</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>Beyin BT <span class="d kritik">Kritik</span></td><td>—</td>
+      <tr><td>☐</td><td><span class="d gitti">🧪 Lab</span></td><td>20.11.2026 13:20<small>Uzm. Dr. E. Arslan</small></td><td><b>Ayşe Kaya</b><small>0532 *** 41 10</small></td><td>Biyokimya · 8 test<small>tamamı onaylı</small></td><td>—</td>
+          <td><span class="d gitti">Gönderildi</span><small>SMS 15:20 · kural: Tümü (2 saat)</small></td><td><span class="d gitti">Gönderildi</span><small>Op. Dr. S. Aydın · e-posta</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td><span class="d gitti">🧪 Lab</span></td><td><small style="color:var(--uyari)">onay bekliyor</small></td><td><b>Ayşe Kaya</b><small>0532 *** 41 10</small></td><td>Mikrobiyoloji · 1 test<small>İdrar kültürü çalışılıyor</small></td><td>—</td>
+          <td><span class="d yok">—</span><small>bölüm onaylanınca planlanır</small></td><td><span class="d yok">—</span></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr class="sec"><td>☑</td><td><span class="d plan">☢ Rad</span></td><td>20.11.2026 13:05<small>Dr. M. Yılmaz</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>Lomber MR</td><td><b style="color:var(--hata)">1.250,00 ₺</b></td>
+          <td><span class="d borc">Borç bekliyor</span><small>SMS · 16:05'te gidecekti · kural: Kategori MR</small></td><td><span class="d borc">Borç bekliyor</span><small>Dr. K. Aras · SMS</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td><span class="d gitti">🧪 Lab</span></td><td>20.11.2026 12:40<small>otomatik onay</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>Hematoloji · 5 test<small>tamamı onaylı</small></td><td><b style="color:var(--hata)">1.250,00 ₺</b></td>
+          <td><span class="d borc">Borç bekliyor</span><small>SMS · 14:40'ta gidecekti</small></td><td><span class="d borc">Borç bekliyor</span><small>Dr. K. Aras · SMS</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td><span class="d gitti">🧪 Lab</span></td><td>20.11.2026 11:48<small>otomatik onay</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>Biyokimya · 9 test <span class="d kritik">Panik</span><small>Potasyum 6,8 mmol/L</small></td><td>—</td>
+          <td><span class="d yok">Hazır</span><small>panik değer · elle gönderilir</small></td><td><span class="d yok">Yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td><span class="d plan">☢ Rad</span></td><td>20.11.2026 11:12<small>Dr. E. Çelik · e-imzalı</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>Beyin BT <span class="d kritik">Kritik</span></td><td>—</td>
           <td><span class="d gitti">Gönderildi</span><small>SMS 11:17 (kritik · 5 dk)</small></td><td><span class="d acildi">Açıldı</span><small>Dr. N. Polat · 11:21</small></td><td><span class="d yok">Bekliyor</span><small>hasta henüz açmadı</small></td></tr>
-      <tr><td>☐</td><td>20.11.2026 10:30<small>Dr. M. Yılmaz</small></td><td><b>Fatma Öz</b><small>telefon yok</small></td><td>Diz MR · <b>CD istendi</b></td><td>—</td>
-          <td><span class="d hata">Gönderilemedi</span><small>cep telefonu kayıtlı değil</small></td><td><span class="d yok">Dış doktor yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr><td>☐</td><td>19.11.2026 16:45<small>Dr. E. Çelik</small></td><td><b>Ali Şen</b><small>0544 *** 03 77</small></td><td>Omuz MR · <b>CD istendi</b></td><td>—</td>
-          <td><span class="d acildi">Açıldı</span><small>SMS 20.11 16:00 · açıldı 16:09</small></td><td><span class="d gitti">Gönderildi</span><small>Dr. B. Tan · e-posta</small></td><td><span class="d yok">CD bekliyor</span><small>rapor dijital açıldı</small></td></tr>
-      <tr><td>☐</td><td>19.11.2026 15:10<small>Dr. M. Yılmaz</small></td><td><b>Elif Tok</b><small>0530 *** 55 12</small></td><td>Tiroid USG</td><td>—</td>
-          <td><span class="d gitti">Gönderildi</span><small>SMS 16:10 · açılmadı</small></td><td><span class="d yok">İstemiyor</span></td><td><span class="d gitti">Elden</span><small>Kendisi · 20.11 09:14 · A. Kaya teslim etti</small></td></tr>
+      <tr><td>☐</td><td><span class="d gitti">🧪 Lab</span></td><td>20.11.2026 10:30<small>Uzm. Dr. S. Koç</small></td><td><b>Zeynep Arı</b><small>0505 *** 90 31</small></td><td>Seroloji · 3 test<small>1 test bağlantıda gösterilmez</small></td><td>—</td>
+          <td><span class="d acildi">Açıldı</span><small>SMS 10:31 · açıldı 10:44</small></td><td><span class="d yok">Yok</span></td><td><span class="d gitti">Dijital</span><small>Hasta (bağlantı) · 10:44</small></td></tr>
+      <tr><td>☐</td><td><span class="d plan">☢ Rad</span></td><td>19.11.2026 16:45<small>Dr. E. Çelik</small></td><td><b>Ali Şen</b><small>telefon yok</small></td><td>Omuz MR<small>CD istendi</small></td><td>—</td>
+          <td><span class="d hata">Gönderilemedi</span><small>cep telefonu kayıtlı değil</small></td><td><span class="d gitti">Gönderildi</span><small>Dr. B. Tan · e-posta</small></td><td><span class="d gitti">Elden</span><small>Kendisi · 20.11 09:14 · A. Kaya teslim etti</small></td></tr>
     </tbody>
   </table>
 </div>
@@ -426,18 +423,17 @@
   <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">"📨 Gönderim ▾" (seçili satır borçlu)</div>
     <div class="menu2"><div class="a">📨 Şimdi Gönder</div><div class="a">🔁 Yeniden Gönder</div><div class="g">✖ Gönderimi İptal Et</div><hr>
       <div class="k">⚠ Borca Rağmen Gönder › Hastaya</div><div class="k">⚠ Borca Rağmen Gönder › Dış Doktora</div><hr><div class="y">💵 Tahsilat Al…</div></div></div>
-  <div style="flex:1;min-width:280px" class="kutu"><h4>Gönderim durumları</h4>
-    <div class="satir"><span><span class="d plan">Planlandı</span></span><b>Kuyrukta; saati gelince gider.</b></div>
-    <div class="satir"><span><span class="d borc">Borç bekliyor</span></span><b>Başvurunun borcu var; kapanınca hasta ve doktor gönderimi birlikte gider.</b></div>
-    <div class="satir"><span><span class="d gitti">Gönderildi</span></span><b>SMS / e-posta çıktı, bağlantı henüz açılmadı.</b></div>
-    <div class="satir"><span><span class="d acildi">Açıldı</span></span><b>Bağlantı açıldı. Hastanın bağlantısı açıldıysa teslim "Dijital" olur.</b></div>
-    <div class="satir"><span><span class="d hata">Gönderilemedi</span></span><b>Telefon / e-posta yok ya da sağlayıcı hatası; nedeni altında.</b></div>
+  <div style="flex:1;min-width:280px" class="kutu"><h4>Satır nedir</h4>
+    <div class="satir"><span><span class="d plan">☢ Rad</span></span><b>Bir radyoloji raporu (istem). Bugünkü Radyoloji Rapor Teslim listesinin satırı.</b></div>
+    <div class="satir"><span><span class="d gitti">🧪 Lab</span></span><b>Bir başvurunun bir <u>lab bölümü</u> (Biyokimya, Mikrobiyoloji…). Bölümün testlerinin tamamı onaylanınca gönderimi planlanır.</b></div>
+    <div class="satir"><span>Aynı başvuru</span><b>Hem radyoloji hem lab varsa <u>ayrı satırlar ve ayrı bildirimler</u> (Ayşe Kaya: mamografi + biyokimya + mikrobiyoloji = 3 satır, 3 bildirim).</b></div>
+    <div class="satir"><span>Borç</span><b>Başvuruya bakar: borç varsa o başvurunun bütün satırları bekler (Mehmet Demir).</b></div>
   </div>
 </div>
 <p class="aciklama">
-  Mevcut <b>Radyoloji › Radyoloji Rapor Teslim</b> listesi genişler: Borç, Hastaya Gönderim ve Dış Doktora Gönderim kolonları; Gönderim Bekleyen / Borçlu Bekleyen / Gönderilemeyen çipleri.
-  <b>Teslim</b> kolonu: hasta bağlantıdan açınca "Dijital" (teslim alan: Hasta (bağlantı), zaman: ilk açılış) ve satır Teslim Edilen'e geçer; <b>CD istenmişse</b> CD elden verilene kadar bekleyende kalır.
-  Yalnız dış doktorun açması teslim saymaz. Elden teslim bugünkü gibi sürer; borçlu satırdan "Tahsilat Al" doğrudan başvurunun tahsilatını açar.
+  <b>Tek teslim listesi</b> (kullanıcı kararı): radyoloji raporları ve laboratuvar sonuçları aynı listede; baştaki <b>Tür</b> kolonu ve sağdaki Hepsi / Radyoloji / Laboratuvar çipleri ayırır.
+  Kolonlar aynı: Onay, Hasta, Tetkik / Testler, Borç, Hastaya Gönderim, Dış Doktora Gönderim, Teslim. Hasta bağlantıyı açınca teslim <b>Dijital</b> olur; elden teslim ayrıca kaydedilir.
+  Liste Radyoloji ve Laboratuvar menülerinin ikisinde de durur (aynı ekran, türe göre süzülü açılır).
 </p>
 
 <!-- ================================================================== 6 -->
@@ -479,21 +475,21 @@
   Hekim sayfası bölüm 2'deki sayfanın aynısıdır (solda e-imza paneli, sağda rapor); telefonda yukarıdaki gibi görünür.
 </p>
 
-<div class="ayrim">LABORATUVAR — aynı gönderim altyapısı <span>karekod / SMS bağlantısı · zaman kuralları · borç kuralı · teslim listesi (öneri; kararlar aşağıda işaretli)</span></div>
+<div class="ayrim">LABORATUVAR — aynı ayar ekranı (bölüm 4) ve aynı teslim listesi (bölüm 5) <span>lab'a özgü olan yalnız hastanın gördüğü sonuç sayfası</span></div>
 
 <!-- ================================================================== 7 -->
-<h2><b>7</b> — Lab sonuç sayfası (hasta): solda onay bilgisi, sağda sonuç tablosu <span class="ipucu">bağlantı başvuru başına tek · /r/kod</span></h2>
+<h2><b>7</b> — Lab sonuç sayfası (hasta): solda onay bilgisi, sağda sonuç tablosu <span class="ipucu">bölüm onaylandıkça bildirim · /r/kod</span></h2>
 <div class="tarayici">
   <div class="adres"><span class="kilit">🔒</span><span class="url">https://rapor.kurum.com/r/5HN8-QW3D</span></div>
   <div class="ust">
     <div class="logo">GT</div>
-    <div class="kurum"><b>Genotip Tıp Merkezi</b><span>Laboratuvar sonuçları · Protokol GT-2026-118310</span></div>
+    <div class="kurum"><b>Genotip Tıp Merkezi</b><span>Laboratuvar sonuçları · Biyokimya · Protokol GT-2026-118310</span></div>
     <div class="sag"><span class="rozet ok">✔ Onaylı</span><div class="btn">🖨 Yazdır / PDF</div></div>
   </div>
   <div class="govde">
     <div class="panel">
       <div class="kutu gecerli">
-        <div class="buyuk"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>14 testin tamamı uzman onayından geçti.</span></div></div>
+        <div class="buyuk"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>Biyokimya bölümünün 8 testi uzman onayından geçti.</span></div></div>
       </div>
       <div class="kutu">
         <h4>🧪 Numune</h4>
@@ -530,12 +526,10 @@
             <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td></tr>
             <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td></tr>
             <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 130</td></tr>
-            <tr class="grup"><td colspan="4">Hematoloji</td></tr>
-            <tr><td>Hemoglobin</td><td class="s dus">12,8 <span class="isr l">L</span></td><td>g/dL</td><td class="ref">13,5 – 17,5</td></tr>
-            <tr><td>Lökosit (WBC)</td><td class="s">6,4</td><td>10³/µL</td><td class="ref">4,0 – 10,0</td></tr>
-            <tr><td>Trombosit</td><td class="s">248</td><td>10³/µL</td><td class="ref">150 – 400</td></tr>
-            <tr class="grup"><td colspan="4">Hormon</td></tr>
-            <tr><td>TSH</td><td class="s">2,14</td><td>µIU/mL</td><td class="ref">0,27 – 4,20</td></tr>
+            <tr><td>Üre</td><td class="s">34</td><td>mg/dL</td><td class="ref">17 – 43</td></tr>
+            <tr><td>AST</td><td class="s">24</td><td>U/L</td><td class="ref">0 – 40</td></tr>
+            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 200</td></tr>
+            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td></tr>
           </tbody>
         </table>
         <div class="gizli-not">ℹ <b>1 testinizin</b> sonucu bu sayfada gösterilmez. Bu sonuç için lütfen hekiminize ya da kurumumuza başvurun: <b>0216 000 00 00</b></div>
@@ -554,106 +548,32 @@
       <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small></span><b style="color:var(--hata)">126 <span class="isr h">H</span></b></div>
       <div class="t"><span>Kreatinin<small>0,70 – 1,20 mg/dL</small></span><b>0,92</b></div>
       <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small></span><b style="color:var(--hata)">162 <span class="isr h">H</span></b></div>
-      <div class="grp">Hematoloji</div>
-      <div class="t"><span>Hemoglobin<small>13,5 – 17,5 g/dL</small></span><b style="color:#2a5f9c">12,8 <span class="isr l">L</span></b></div>
-      <div class="t"><span>Lökosit (WBC)<small>4,0 – 10,0 10³/µL</small></span><b>6,4</b></div>
+      <div class="t"><span>Total Kolesterol<small>&lt; 200 mg/dL</small></span><b style="color:var(--hata)">238 <span class="isr h">H</span></b></div>
     </div>
     <div class="m-alt"><div class="btn bir">⬇ PDF</div><div class="btn">↗ Paylaş</div></div>
   </div></div>
   <div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:8px">
-    <div class="kutu"><h4>Bağlantı ne zaman gider (öneri)</h4>
-      <div class="satir"><span>Tetik</span><b>Başvurunun lab istemlerindeki testlerin <u>tamamı</u> onaylanınca (elle onay, otomatik onay, kültür ve genetik onayı dahil).</b></div>
-      <div class="satir"><span>Tek bağlantı</span><b>Bir başvuruda birden çok lab istemi olsa da hasta <u>tek</u> SMS ve tek bağlantı alır; sayfada hepsi bölüm bölüm görünür.</b></div>
-      <div class="satir"><span>Uzun süren test</span><b>Ayarda "bekleme" işaretli test (ör. kültür) varsa diğerleri onu beklemez; sayfada "1 test çalışılıyor" notu çıkar, o da onaylanınca ikinci SMS gider.</b></div>
-      <div class="satir"><span>Düzeltme</span><b>Onaylı sonuç düzeltilirse bekleyen gönderim iptal olur, bağlantı "sonuç güncelleniyor" gösterir; yeniden onayda aynı bağlantı çalışır.</b></div>
+    <div class="kutu"><h4>Bildirim ne zaman gider</h4>
+      <div class="satir"><span>Birim</span><b>Başvurunun bir <u>lab bölümü</u>: bölümün testlerinin tamamı onaylanınca (elle onay, otomatik onay, kültür ve genetik onayı dahil) o bölümün bildirimi planlanır.</b></div>
+      <div class="satir"><span>Ayrı ayrı</span><b>Biyokimya bugün, mikrobiyoloji üç gün sonra onaylanırsa hasta <u>iki ayrı</u> SMS alır; her bağlantı kendi bölümünün sonuçlarını gösterir.</b></div>
+      <div class="satir"><span>Radyolojiyle</span><b>Aynı başvuruda radyoloji de varsa o ayrıca bildirilir (ayrı bağlantı).</b></div>
+      <div class="satir"><span>Düzeltme</span><b>Onaylı sonuç düzeltilirse o bölümün bekleyen gönderimi iptal olur, bağlantı "sonuç güncelleniyor" gösterir; yeniden onayda aynı bağlantı çalışır.</b></div>
     </div>
-    <div class="kutu"><h4>Bağlantıda gösterilmeyen testler (öneri)</h4>
+    <div class="kutu"><h4>Bağlantıda gösterilmeyen testler</h4>
       <div class="satir"><span>İşaret</span><b>Test kartında yeni seçenek: <u>"Hasta bağlantısında gösterme"</u> (HIV, hepatit, gebelik, genetik gibi).</b></div>
       <div class="satir"><span>Hastada</span><b>Sonuç yerine "1 testinizin sonucu bu sayfada gösterilmez" notu (testin adı da yazmaz).</b></div>
       <div class="satir"><span>Doktorda</span><b>Gönderen dış doktorun bağlantısında bu testler <u>görünür</u>.</b></div>
     </div>
-    <div class="bekleyen-not">⏳ <b>Kısmi durumda sayfa:</b> "İdrar kültürü çalışılıyor - sonuçlandığında bu sayfada görünecek ve size yeniden haber verilecek."</div>
+    <div class="bekleyen-not">ℹ Sayfada yalnız <b>bu bölümün onaylı</b> sonuçları görünür; başka bölümün sonucu kendi bildirimiyle gelir.</div>
   </div>
 </div>
 <p class="aciklama">
   Lab sayfası radyolojideki sayfanın aynı kabuğu: üstte kurum, solda panel, sağda içerik; telefonda panel tek satıra iner. Lab'da e-imza yok - panel
-  <b>onay bilgisini</b> gösterir (numune alma, kabul, onay zamanı, onaylayan uzman). Sağda mevcut sonuç çıktısının içeriği: bölüm bölüm test, sonuç, birim, referans aralığı;
-  referans dışı sonuçlar renkli ve <b>H / L</b> işaretli. Kültür ve antibiyogram varsa tablonun altında, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
-  Borç, süre ve iptal ekranları radyolojiyle aynı (bölüm 6).
+  <b>onay bilgisini</b> gösterir (numune alma, kabul, onay zamanı, onaylayan uzman). Sağda mevcut sonuç çıktısının içeriği: test, sonuç, birim, referans aralığı;
+  referans dışı sonuçlar renkli ve <b>H / L</b> işaretli. Mikrobiyoloji bölümünde kültür ve antibiyogram, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
+  Borç, süre ve iptal ekranları radyolojiyle aynı (bölüm 6). Ayar ve teslim listesi için ayrı lab ekranı yok - bölüm 4 ve 5.
 </p>
 
-<!-- ================================================================== 8 -->
-<h2><b>8</b> — Laboratuvar › Ayarlar › Sonuç Gönderimi Ayarı <span class="ipucu">radyolojiyle aynı ekran, ayrı kural seti</span></h2>
-<div class="ayar">
-  <div class="bas">📨 Sonuç Gönderimi Ayarı <span style="font-weight:normal;color:var(--muted);font-size:11.5px">— Laboratuvar · Merkez Şube</span>
-    <span style="margin-left:auto" class="btn bir">💾 Kaydet</span></div>
-  <div class="ic">
-    <div class="grup"><h4>Otomatik gönderim</h4>
-      <div class="asat"><span>Otomatik gönderim</span><div><span class="cb"><i class="on">✓</i> Sonuçların tamamı onaylanınca gönder</span></div></div>
-      <div class="asat"><span>Ne zaman</span><div>Aşağıdaki <b>Gönderim zamanı kuralları</b> tablosundan (test › bölüm › tümü)</div></div>
-      <div class="asat"><span>Panik değerli sonuçta</span><div><span class="kutucuk">0</span> dakika sonra
-        <div class="ipucu2"><b>0</b> = otomatik gitmez, elle gönderilir (hasta sonucu önce hekimden duysun). Başvuruda tek bir panik değer varsa tüm gönderim bu kurala uyar.</div></div></div>
-      <div class="asat"><span>Bağlantı geçerliliği</span><div><span class="kutucuk">30</span> gün</div></div>
-    </div>
-    <div class="grup"><h4>Borç kuralı ve alıcılar</h4>
-      <div class="asat"><span>Borç kontrolü</span><div><span class="cb"><i class="on">✓</i> Başvurunun borcu varken gönderme</span></div></div>
-      <div class="asat"><span>Hastaya</span><div><span class="cb"><i class="on">✓</i> SMS</span><span class="cb"><i>&nbsp;</i> E-posta</span></div></div>
-      <div class="asat"><span>Gönderen dış doktora</span><div>Kartında "Rapor Bildirimi" seçili doktorlara (radyolojiyle aynı tercih)</div></div>
-      <div class="ipucu2">Borç kuralı radyolojiyle aynı: yalnız o başvuru; hastayı ve dış doktoru birlikte durdurur; bağlantı da açılmaz; borç kapanınca kendiliğinden gider.</div>
-    </div>
-    <div class="grup" style="grid-column:1 / -1"><h4>Gönderim zamanı kuralları <span style="text-transform:none;letter-spacing:0">— öncelik: <b style="color:var(--ink)">Test</b> › <b style="color:var(--ink)">Bölüm</b> › <b style="color:var(--ink)">Tümü</b></span></h4>
-      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="btn">＋ Satır</span></div>
-      <table class="kural">
-        <thead><tr><th style="width:130px">Kapsam</th><th>Seçim</th><th style="width:300px">Gönderim zamanı</th><th style="width:150px">Diğerleri beklesin mi</th><th style="width:70px">Aktif</th></tr></thead>
-        <tbody>
-          <tr><td><span class="d yok">Tümü</span></td><td style="color:var(--muted)">— bütün testler —</td><td><b>1 saat sonra</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
-          <tr><td><span class="d plan">Bölüm</span></td><td><b>Hormon</b></td><td><b>Ertesi gün saat 10:00</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
-          <tr><td><span class="d plan">Bölüm</span></td><td><b>Mikrobiyoloji</b></td><td><b>Hemen</b></td><td><span class="d hata">Beklemez</span></td><td>✓</td></tr>
-          <tr><td><span class="d acildi">Test</span></td><td><b>HBA1C</b> Glikozile hemoglobin</td><td><b>2 saat sonra</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
-        </tbody>
-      </table>
-      <div class="ipucu2">
-        <b>Zaman:</b> başvurudaki testlerin kurallarından <b>en geç</b> olanı uygulanır (tek SMS gider). Örnek: Glukoz (Tümü → 1 saat) + TSH (Hormon → ertesi gün 10:00) → ertesi gün 10:00.
-        <b>"Beklemez"</b> işaretli bölüm / test tamamlanmasa da diğerleri gönderilir (ör. idrar kültürü 3 gün sürer); o sonuç onaylanınca ikinci bildirim gider.
-      </div>
-    </div>
-  </div>
-</div>
-<p class="aciklama">
-  Radyolojideki <b>Rapor Gönderimi Ayarı</b> ile aynı düzen ve aynı Kaydet davranışı. Farklar: kapsam <b>Test / Bölüm / Tümü</b> (bölüm = Biyokimya, Hematoloji, Hormon, Mikrobiyoloji, Seroloji, Koagülasyon, İdrar);
-  bir başvuruda çok test olduğu için zaman <b>en geç kurala</b> göre; uzun süren testler için <b>"Beklemez"</b> kolonu; kritik bulgu yerine <b>panik değer</b> süresi.
-</p>
-
-<!-- ================================================================== 9 -->
-<h2><b>9</b> — Laboratuvar › Sonuç Teslim listesi <span class="ipucu">lab'da bugün teslim takibi yok - yeni liste</span></h2>
-<div class="liste">
-  <div class="arac">
-    <b>Laboratuvar Sonuç Teslim</b>
-    <span class="cip on">Teslim Bekleyen <b>31</b></span><span class="cip">Gönderim Bekleyen <b>12</b></span><span class="cip">Borçlu Bekleyen <b>4</b></span>
-    <span class="cip">Gönderilemeyen <b>2</b></span><span class="cip">Teslim Edilen</span><span class="cip">Tümü</span>
-    <span style="margin-left:auto" class="btn">✔ Teslim Et</span><span class="btn">📨 Gönderim ▾</span><span class="btn">🖨 Karekodlu Çıktı</span>
-  </div>
-  <table>
-    <thead><tr><th style="width:24px">☐</th><th>Sonuç Onayı</th><th>Hasta</th><th>Testler</th><th>Borç</th><th>Hastaya Gönderim</th><th>Dış Doktora Gönderim</th><th>Teslim</th></tr></thead>
-    <tbody>
-      <tr><td>☐</td><td>20.11.2026 13:20<small>Uzm. Dr. E. Arslan</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>14 test · tamamı onaylı<small>Biyokimya · Hematoloji · Hormon</small></td><td>—</td>
-          <td><span class="d plan">Planlandı</span><small>SMS · yarın 10:00 · kural: Bölüm Hormon</small></td><td><span class="d plan">Planlandı</span><small>Dr. K. Aras · SMS · yarın 10:00</small></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr class="sec"><td>☑</td><td>20.11.2026 12:05<small>Uzm. Dr. E. Arslan</small></td><td><b>Zeynep Arı</b><small>0505 *** 90 31</small></td><td>6 test · tamamı onaylı<small>Biyokimya</small></td><td><b style="color:var(--hata)">480,00 ₺</b></td>
-          <td><span class="d borc">Borç bekliyor</span><small>SMS · 13:05'te gidecekti</small></td><td><span class="d yok">Yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr><td>☐</td><td>20.11.2026 11:48<small>otomatik onay</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>9 test · tamamı onaylı <span class="d kritik">Panik</span><small>Potasyum 6,8 mmol/L</small></td><td>—</td>
-          <td><span class="d yok">Hazır</span><small>panik değer · elle gönderilir</small></td><td><span class="d yok">Yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
-      <tr><td>☐</td><td>20.11.2026 10:30<small>Uzm. Dr. S. Koç</small></td><td><b>Fatma Öz</b><small>0530 *** 41 77</small></td><td>5 / 6 test onaylı<small>İdrar kültürü çalışılıyor (beklemez)</small></td><td>—</td>
-          <td><span class="d acildi">Açıldı</span><small>SMS 10:31 · açıldı 10:44 · 1 test bekliyor</small></td><td><span class="d yok">Yok</span></td><td><span class="d gitti">Dijital</span><small>Hasta (bağlantı) · 10:44</small></td></tr>
-      <tr><td>☐</td><td>19.11.2026 16:10<small>Uzm. Dr. E. Arslan</small></td><td><b>Ali Şen</b><small>telefon yok</small></td><td>3 test · tamamı onaylı<small>Seroloji · 1 test bağlantıda gösterilmez</small></td><td>—</td>
-          <td><span class="d hata">Gönderilemedi</span><small>cep telefonu kayıtlı değil</small></td><td><span class="d yok">Yok</span></td><td><span class="d gitti">Elden</span><small>Kendisi · 20.11 09:02 · A. Kaya teslim etti</small></td></tr>
-    </tbody>
-  </table>
-</div>
-<p class="aciklama">
-  Radyoloji Rapor Teslim listesiyle aynı kolonlar ve aynı <b>Gönderim ▾</b> menüsü; satır <b>başvurudur</b> (o başvurunun bütün lab istemleri). "Testler" kolonu kaç testin onaylandığını,
-  panik değeri ve bağlantıda gösterilmeyen test sayısını söyler. Hasta bağlantıyı açınca teslim <b>Dijital</b> olur; elden teslim (basılı sonuç) ayrıca kaydedilebilir.
-  <b>Karekodlu Çıktı:</b> lab sonuç çıktısının köşesine de aynı karekod basılır.
-</p>
 
 </body>
 </html>
