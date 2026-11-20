@@ -8,6 +8,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -108,8 +109,6 @@ public static class KdvIcmalUclari
     public sealed record UyariSatiri(string Tur, string Seviye, int? BelgeId, string No, DateTime? Tarih, int TarafId,
         string Taraf, string Aciklama, string Oneri, decimal? Tutar);
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
-    private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
     internal static string Rakam(string? s) => new((s ?? "").Where(char.IsDigit).ToArray());
     private static string Ay(DateTime d) => d.ToString("yyyy-MM", CultureInfo.InvariantCulture);
 

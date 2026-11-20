@@ -6,6 +6,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -53,7 +54,6 @@ public static class TemsilciPerformansUclari
 
     public sealed record HedefIstegi(int TemsilciId, DateTime Donem, short Olcut, decimal? Hedef);
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal? Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : null;
 
     /// <summary>Temsilcinin dönem toplamı (iade "düşülsün" seçiliyse net ve maliyetten çıkar).</summary>
@@ -88,12 +88,6 @@ public static class TemsilciPerformansUclari
         };
     }
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     // ================================================================ sorgular ===
 

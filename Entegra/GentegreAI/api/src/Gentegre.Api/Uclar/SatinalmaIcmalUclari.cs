@@ -7,6 +7,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -105,7 +106,6 @@ public static class SatinalmaIcmalUclari
     private sealed record Hatirlatma(int Sayi, DateTime? Son, bool Bugun);
 
     // ---------------------------------------------------------------- yardımcılar --
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static double? Ort(IEnumerable<double> l) { var a = l.ToList(); return a.Count == 0 ? null : Math.Round(a.Average(), 1); }
     private static double? Medyan(IEnumerable<double> l)
     {

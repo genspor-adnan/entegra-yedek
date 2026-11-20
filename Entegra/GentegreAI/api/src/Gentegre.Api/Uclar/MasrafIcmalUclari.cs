@@ -7,6 +7,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -258,10 +259,8 @@ public static class MasrafIcmalUclari
 
     // ============================================================= yardımcılar ===
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal? Degisim(decimal simdi, decimal once)
         => Math.Abs(once) > 0.005m ? Math.Round(100m * (simdi - once) / Math.Abs(once), 1) : null;
-    private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
     private static DateTime AyBasi(DateTime d) => new(d.Year, d.Month, 1);
     private static string Tarih(DateTime d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -278,12 +277,6 @@ public static class MasrafIcmalUclari
         return new Donem(baslangic, bitis, kb, kbt, k, gun);
     }
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     private static Gider GiderOku(NpgsqlDataReader o) => new(
         o.GetString(0), o.GetInt64(1), o.GetInt32(2), o.GetString(3), o.GetString(4), o.GetDateTime(5).Date, o.GetInt32(6),

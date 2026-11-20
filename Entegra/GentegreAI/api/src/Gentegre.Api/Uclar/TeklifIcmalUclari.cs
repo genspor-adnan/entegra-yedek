@@ -6,6 +6,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -85,8 +86,6 @@ public static class TeklifIcmalUclari
         public bool Bekliyor => Durum is "bekliyor" or "kabul" or "suresi_doldu";
     }
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
-    private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
     private static decimal? YuzdeN(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : null;
     private static decimal? Ort(IEnumerable<int> l) { var x = l.ToList(); return x.Count > 0 ? Math.Round((decimal)x.Average(), 1) : null; }
 
@@ -217,12 +216,6 @@ public static class TeklifIcmalUclari
         return l;
     }
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     private static async Task<Dictionary<short, string>> NedenlerAsync(NpgsqlConnection b, NpgsqlTransaction? tx, CancellationToken iptal)
     {

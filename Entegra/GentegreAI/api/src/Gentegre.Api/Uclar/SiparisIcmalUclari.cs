@@ -6,6 +6,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -103,8 +104,6 @@ public static class SiparisIcmalUclari
 
     private sealed record Karsilama(string Durum, decimal Eksik, decimal Yolda);
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
-    private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
     private static decimal? Oran(int a, int b) => b > 0 ? Math.Round(100m * a / b, 1) : null;
     private static decimal? Ort(IEnumerable<double> l)
     {
@@ -270,12 +269,6 @@ public static class SiparisIcmalUclari
         return new Kip(p, yerel);
     }
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     /// <summary>
     /// STOK KARŞILAMA (karar 25.10.2026). Stok × depo kümesinde: satırın kendi rezervesi önce,

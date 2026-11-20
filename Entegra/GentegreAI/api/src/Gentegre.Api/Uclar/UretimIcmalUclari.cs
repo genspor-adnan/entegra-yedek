@@ -7,6 +7,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -62,12 +63,6 @@ public static class UretimIcmalUclari
     private static async Task<decimal> AyarSayiAsync(NpgsqlConnection b, string anahtar, decimal varsayilan, CancellationToken iptal)
         => await AyarDeposu.OndalikAsync(b, null, anahtar, iptal) is decimal d && d > 0 ? d : varsayilan;
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     /// <summary>Stok ana birim adı (Stok icmalleriyle aynı kod listesi). Takma ad: st = stok.</summary>
     private const string BirimIfadesi = """

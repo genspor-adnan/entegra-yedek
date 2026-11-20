@@ -8,6 +8,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -126,7 +127,6 @@ public static class BankaMutabakatUclari
 
     private static readonly CultureInfo Tr = CultureInfo.GetCultureInfo("tr-TR");
     private static readonly JsonSerializerOptions DetayJson = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal? Tl(decimal? tutar, decimal? kur) => tutar is { } t && kur is { } k ? R(t * k) : null;
 
     // ================================================================== uçlar ===

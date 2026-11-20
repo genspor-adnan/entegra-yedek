@@ -6,6 +6,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -205,7 +206,6 @@ public static class DovizPozisyonUclari
         return (parcalar, aciklar);
     }
 
-    private static decimal R(decimal x) => Math.Round(x, 2);
 
     // =================================================================== uçlar ===
 

@@ -9,6 +9,7 @@ using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
 using Bel = Gentegre.Api.Uclar.KdvIcmalUclari.Bel;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -55,7 +56,6 @@ public static class BabsIcmalUclari
     public sealed record YanitIstegi(short Yanit, decimal? CarininTutari, int? CarininBelge, string? Not);
 
     private static readonly CultureInfo Tr = CultureInfo.GetCultureInfo("tr-TR");
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static string AyAdi(DateTime d) => Tr.TextInfo.ToTitleCase(d.ToString("MMMM yyyy", Tr));
 
     // ================================================================ hesap ===

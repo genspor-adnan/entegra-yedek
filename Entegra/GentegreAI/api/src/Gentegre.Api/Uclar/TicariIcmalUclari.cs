@@ -4,6 +4,7 @@ using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -106,10 +107,8 @@ public static class TicariIcmalUclari
         return t;
     }
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal? Degisim(decimal simdi, decimal once)
         => once > 0.005m ? Math.Round(100m * (simdi - once) / once, 1) : null;
-    private static decimal Yuzde(decimal a, decimal b) => b != 0 ? Math.Round(100m * a / b, 1) : 0m;
     private static decimal? Marj(Top t, bool iadeDus)
         => Math.Abs(t.Net(iadeDus)) > 0.005m ? Math.Round(100m * t.Kar(iadeDus) / t.Net(iadeDus), 1) : null;
     /// <summary>İade belgesi neti düşürür; "iadeleri düş" kapalıysa nete girmez.</summary>
@@ -454,12 +453,6 @@ public static class TicariIcmalUclari
         return new Donem(baslangic, bitis, kb, kbt, k, gun);
     }
 
-    private static int SubeCoz(IstekBaglami baglam, int? sube)
-    {
-        var s = sube ?? 0;
-        if (s > 0 && baglam.Subeler.All(x => x.Id != s)) throw GentegreHatasi.Yasak("Bu şubenin verisini görme yetkiniz yok.");
-        return s;
-    }
 
     private static async Task<Kip> KipCozAsync(NpgsqlConnection b, int? kdv, int? iade, string? para, CancellationToken iptal)
     {

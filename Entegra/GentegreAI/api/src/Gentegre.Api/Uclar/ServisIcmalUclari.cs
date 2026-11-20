@@ -6,6 +6,7 @@ using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 using Npgsql;
+using static Gentegre.Api.Uclar.IcmalYardimci;
 
 namespace Gentegre.Api.Uclar;
 
@@ -121,7 +122,6 @@ public static class ServisIcmalUclari
         public string Anahtar => StokId > 0 ? "s" + StokId : "p" + Kod.ToUpperInvariant() + "|" + Ad.ToUpperInvariant();
     }
 
-    private static decimal R(decimal d) => Math.Round(d, 2);
     private static decimal R1(decimal d) => Math.Round(d, 1);
     private static decimal? Yuzde(int a, int b) => b > 0 ? Math.Round(100m * a / b, 1) : null;
     private static decimal SaatFark(DateTime bas, DateTime bit) => (decimal)(bit - bas).TotalHours;
