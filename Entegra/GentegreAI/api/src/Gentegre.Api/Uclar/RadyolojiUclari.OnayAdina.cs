@@ -174,6 +174,9 @@ public static partial class RadyolojiUclari
                  where id = @p0
                 """, islem, [id, baglam.KullaniciId], iptal);
             await baglanti.CalistirAsync("update public.radyoloji_istem set durum = 3 where id = @p0 and durum = 5", islem, [r.IstemId], iptal);
+            // RAPOR GÖNDERİMİ (1389): bekleyen SMS / e-posta iptal, bağlantı raporu açmaz ("rapor güncelleniyor").
+            //   Yeniden onayda aynı bağlantı kodu yeniden çalışır (basılmış karekod yaşar).
+            await Gentegre.Api.Servisler.RaporGonderimi.IptalAsync(baglanti, islem, id, baglam.KullaniciId, iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRapor, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

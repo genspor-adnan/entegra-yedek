@@ -372,97 +372,9 @@ public static partial class RadyolojiUclari
             baglam.YetkiIste("radyoloji", Islem.Gor);
 
             await using var baglanti = await veri.AcAsync(iptal);
-
-            var rapor = await baglanti.TekAsync("""
-                select r.id, r.rapor_no as "raporNo", r.durum, r.kilit,
-                       r.ust_rapor_id as "ustRaporId",
-                       -- REVİZE (1374): arşiv kopyası çıktısı "REVİZE EDİLDİ" bandıyla basılır.
-                       coalesce(r.revize, 0) as revize, r.revize_tarihi as "revizeTarihi", r.revize_nedeni as "revizeNedeni",
-                       coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
-                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
-                       i.id as "istemId", i.accession_no as "accessionNo",
-                       i.modalite, i.cekim_tarihi as "cekimTarihi",
-                       i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
-                       coalesce((select x.ad from public.icd x where x.kod = i.on_tani limit 1), '') as "onTaniAdi",
-                       i.kontrast, coalesce(cz.ad, '') as "cihazAdi",
-                       coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
-                       coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
-                       coalesce(h.vkno, '') as "hastaTc",
-                       hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
-                       coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
-                       coalesce(public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120), '') as "isteyenKurum",
-                       coalesce(b.belge_no, '') as "protokolNo",
-                       coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum"
-                  from public.radyoloji_rapor r
-                  join public.radyoloji_istem i on i.id = r.istem_id
-                  left join public.taraf yz on yz.id = r.yazan_id
-                  left join public.taraf on_ on on_.id = r.onaylayan_id
-                  left join public.taraf h on h.id = i.hasta_id
-                  left join public.taraf_hasta hs on hs.id = i.hasta_id
-                  left join public.hizmet hz on hz.id = i.hizmet_id
-                  left join public.taraf ih on ih.id = i.istek_hekim_id
-                  left join public.taraf ik on ik.id = i.istek_kurum_id
-                  left join public.radyoloji_cihaz cz on cz.id = i.cihaz_id
-                  left join public.belge b on b.id = i.belge_id
-                  left join public.belge_basvuru bb on bb.id = b.id
-                  left join public.taraf ok on ok.id = bb.odeyen_kurum_id
-                 where r.id = @p0
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
-                ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
-
-            var bolumler = await baglanti.ListeAsync("""
-                select sira, baslik, metin, metin_html as "metinHtml"
-                  from public.radyoloji_rapor_bolum
-                 where rapor_id = @p0 and coalesce(yazdir, 1) = 1
-                   and coalesce(metin, '') <> ''
-                 order by sira
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
-
-            // Skor/ölçüm alanları rapora BASILACAK olanlarla sınırlı.
-            var alanlar = await baglanti.ListeAsync("""
-                select a.alan_ad as "alanAd", a.deger
-                  from public.radyoloji_rapor_alan a
-                  join public.radyoloji_rapor r on r.id = a.rapor_id
-                  left join public.radyoloji_sablon_alan sa
-                         on sa.sablon_id = r.sablon_id and sa.alan_kod = a.alan_kod
-                 where a.rapor_id = @p0
-                   and coalesce(sa.rapora_bas, 1) = 1
-                   and coalesce(a.deger, '') <> ''
-                 order by a.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
-
-            // EK RAPORLAR (addendum): orijinalin altında, tarihleriyle basılır -
-            //   düzeltme ayrı kayıttır, orijinal metin değişmez.
-            var ekler = await baglanti.ListeAsync("""
-                select r.id, r.rapor_no as "raporNo", r.onay_tarihi as "onayTarihi",
-                       coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan",
-                       coalesce((select string_agg(b.metin, E'\n' order by b.sira)
-                                   from public.radyoloji_rapor_bolum b
-                                  where b.rapor_id = r.id and coalesce(b.yazdir, 1) = 1), '') as metin
-                  from public.radyoloji_rapor r
-                  left join public.taraf on_ on on_.id = r.onaylayan_id
-                 where r.ust_rapor_id = @p0 and coalesce(r.revize, 0) = 0
-                 order by r.id
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
-
-            // ANTET: raporun ait olduğu şube (kurum kimliği hastaya verilen
-            //   belgede zorunlu). Şube yoksa varsayılan şube kullanılır.
-            var kurum = await baglanti.TekAsync("""
-                select a.unvan, a.adres, a.ilce, a.il, a.telefon,
-                       a.mersis_no as "mersisNo", a.vkno, a.vd,
-                       a.logo_dokuman_id as "logoDokumanId"
-                  from public.v_sube_antet a
-                 where a.sube_id = coalesce(
-                           (select i.sube_id from public.radyoloji_istem i
-                              join public.radyoloji_rapor r on r.istem_id = i.id
-                             where r.id = @p0),
-                           (select id from public.sube where varsayilan = 1 limit 1))
-                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
-
-            // TİPOGRAFİ (1344): çıktı ve e-imza belgesi raporun etkin tipografisiyle (onaylıda damga) çizilir.
-            var (tipografi, tipografiDamga) = await RaporTipografisi.RaporAsync(
-                baglanti, null, id, await RaporTipografisi.KurumAsync(baglanti, null, iptal), iptal);
-            return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum, tipografi, tipografiDamga });
+            var c = await CiktiVerisiAsync(baglanti, id, iptal);
+            return Results.Ok(new { rapor = c.Rapor, bolumler = c.Bolumler, alanlar = c.Alanlar, ekler = c.Ekler,
+                                    kurum = c.Kurum, tipografi = c.Tipografi, tipografiDamga = c.TipografiDamga });
         });
 
         // ------------------------------------------------- taslak kaydet ----
@@ -637,5 +549,103 @@ public static partial class RadyolojiUclari
             await islem.CommitAsync(iptal);
             return Results.Ok(new { raporId, surum = yeniSurum });
         });
+    }
+
+    /// <summary>Rapor çıktısının verisi - basılı çıktı (GET /rapor/{id}/cikti) ve hastanın açık rapor sayfası (1389) AYNI veriyi kullanır.</summary>
+    internal sealed record CiktiVerisi(IDictionary<string, object?> Rapor, object Bolumler, object Alanlar, object Ekler,
+                                       object? Kurum, object? Tipografi, object? TipografiDamga);
+
+    internal static async Task<CiktiVerisi> CiktiVerisiAsync(NpgsqlConnection baglanti, int id, CancellationToken iptal)
+    {
+        var rapor = await baglanti.TekAsync("""
+            select r.id, r.rapor_no as "raporNo", r.durum, r.kilit,
+                   r.ust_rapor_id as "ustRaporId",
+                   -- REVİZE (1374): arşiv kopyası çıktısı "REVİZE EDİLDİ" bandıyla basılır.
+                   coalesce(r.revize, 0) as revize, r.revize_tarihi as "revizeTarihi", r.revize_nedeni as "revizeNedeni",
+                   coalesce(public.fn_taraf_ad(yz.unvan, yz.ad, yz.soyad)::varchar(120), '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
+                   coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                   i.id as "istemId", i.accession_no as "accessionNo",
+                   i.modalite, i.cekim_tarihi as "cekimTarihi",
+                   i.on_tani as "onTani", i.klinik_bilgi as "klinikBilgi",
+                   coalesce((select x.ad from public.icd x where x.kod = i.on_tani limit 1), '') as "onTaniAdi",
+                   i.kontrast, coalesce(cz.ad, '') as "cihazAdi",
+                   coalesce(hz.kod, '') as "tetkikKodu", coalesce(hz.ad, '') || public.fn_radyoloji_yon_ek(i.yon, hz.yon) as "tetkikAdi",
+                   coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), '') as "hastaAdi", coalesce(h.kod, '') as "hastaNo",
+                   coalesce(h.vkno, '') as "hastaTc",
+                   hs.dogum_tarihi as "dogumTarihi", coalesce(hs.cinsiyet, 0) as cinsiyet,
+                   coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), nullif(i.dis_hekim_ad, ''), '') as "isteyen",
+                   coalesce(public.fn_taraf_ad(ik.unvan, ik.ad, ik.soyad)::varchar(120), '') as "isteyenKurum",
+                   coalesce(b.belge_no, '') as "protokolNo",
+                   coalesce(public.fn_taraf_ad(ok.unvan, ok.ad, ok.soyad)::varchar(120), '') as "odeyenKurum"
+              from public.radyoloji_rapor r
+              join public.radyoloji_istem i on i.id = r.istem_id
+              left join public.taraf yz on yz.id = r.yazan_id
+              left join public.taraf on_ on on_.id = r.onaylayan_id
+              left join public.taraf h on h.id = i.hasta_id
+              left join public.taraf_hasta hs on hs.id = i.hasta_id
+              left join public.hizmet hz on hz.id = i.hizmet_id
+              left join public.taraf ih on ih.id = i.istek_hekim_id
+              left join public.taraf ik on ik.id = i.istek_kurum_id
+              left join public.radyoloji_cihaz cz on cz.id = i.cihaz_id
+              left join public.belge b on b.id = i.belge_id
+              left join public.belge_basvuru bb on bb.id = b.id
+              left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+             where r.id = @p0
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Rapor bulunamadı.");
+
+        var bolumler = await baglanti.ListeAsync("""
+            select sira, baslik, metin, metin_html as "metinHtml"
+              from public.radyoloji_rapor_bolum
+             where rapor_id = @p0 and coalesce(yazdir, 1) = 1
+               and coalesce(metin, '') <> ''
+             order by sira
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        // Skor/ölçüm alanları rapora BASILACAK olanlarla sınırlı.
+        var alanlar = await baglanti.ListeAsync("""
+            select a.alan_ad as "alanAd", a.deger
+              from public.radyoloji_rapor_alan a
+              join public.radyoloji_rapor r on r.id = a.rapor_id
+              left join public.radyoloji_sablon_alan sa
+                     on sa.sablon_id = r.sablon_id and sa.alan_kod = a.alan_kod
+             where a.rapor_id = @p0
+               and coalesce(sa.rapora_bas, 1) = 1
+               and coalesce(a.deger, '') <> ''
+             order by a.id
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        // EK RAPORLAR (addendum): orijinalin altında, tarihleriyle basılır -
+        //   düzeltme ayrı kayıttır, orijinal metin değişmez.
+        var ekler = await baglanti.ListeAsync("""
+            select r.id, r.rapor_no as "raporNo", r.onay_tarihi as "onayTarihi",
+                   coalesce(public.fn_taraf_ad(on_.unvan, on_.ad, on_.soyad)::varchar(120), '') as "onaylayan",
+                   coalesce((select string_agg(b.metin, E'\n' order by b.sira)
+                               from public.radyoloji_rapor_bolum b
+                              where b.rapor_id = r.id and coalesce(b.yazdir, 1) = 1), '') as metin
+              from public.radyoloji_rapor r
+              left join public.taraf on_ on on_.id = r.onaylayan_id
+             where r.ust_rapor_id = @p0 and coalesce(r.revize, 0) = 0
+             order by r.id
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        // ANTET: raporun ait olduğu şube (kurum kimliği hastaya verilen
+        //   belgede zorunlu). Şube yoksa varsayılan şube kullanılır.
+        var kurum = await baglanti.TekAsync("""
+            select a.unvan, a.adres, a.ilce, a.il, a.telefon,
+                   a.mersis_no as "mersisNo", a.vkno, a.vd,
+                   a.logo_dokuman_id as "logoDokumanId"
+              from public.v_sube_antet a
+             where a.sube_id = coalesce(
+                       (select i.sube_id from public.radyoloji_istem i
+                          join public.radyoloji_rapor r on r.istem_id = i.id
+                         where r.id = @p0),
+                       (select id from public.sube where varsayilan = 1 limit 1))
+            """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        // TİPOGRAFİ (1344): çıktı ve e-imza belgesi raporun etkin tipografisiyle (onaylıda damga) çizilir.
+        var (tipografi, tipografiDamga) = await RaporTipografisi.RaporAsync(
+            baglanti, null, id, await RaporTipografisi.KurumAsync(baglanti, null, iptal), iptal);
+        return new CiktiVerisi(rapor, bolumler, alanlar, ekler, kurum, tipografi, tipografiDamga);
     }
 }

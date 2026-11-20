@@ -291,6 +291,10 @@ public static partial class AksiyonKatalogu
             //   yetkisiyle açılır.
             new("radyoloji.erisim",   "🔗 Erişim", "radyoloji",
                 KaynakKodu: "radyoloji", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+            // GÖNDERİM ▾ (1390; kullanıcı 20.11.2026): Şimdi Gönder / Yeniden Gönder / İptal / Borca Rağmen Gönder -
+            //   alt seçenekler istemcide (listeTanimlari.Radyoloji). "Borca rağmen" sunucuda ayrı aksiyon yetkisi ister.
+            new("radyoloji.rapor-gonderim", "📨 Gönderim", "radyoloji",
+                AksiyonYetkisi: "rad.rapor_gonder", KayitGerekir: true, Sira: 15),
         };
 
         // TELERADYOLOJI CALISMA LISTESI (799). 797'de `telerad.ata` ve

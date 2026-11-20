@@ -668,5 +668,34 @@ public static partial class KaynakKatalogu
             new("teslimZamani", "t.teslim_zamani","tarih", "Teslim", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
             new("beklemeDk",    "t.bekleme_dk",   "sayi",  "Bekleme (dk)", Hizalama: "sag",
                                                   Genislik: 110),
+            // ---- DİJİTAL GÖNDERİM (1390; kullanıcı 20.11.2026: "teslim listesi ile bunu birleştirsek") ----
+            // Borç yalnız "borç bekliyor" satırında hesaplanır (başvurunun hasta payı kalanı) - her satırda fonksiyon
+            //   çağırmak listeyi yavaşlatırdı.
+            new("borc",
+                "case when 2 in (coalesce(t.hasta_gonderim_durum, -1), coalesce(t.hekim_gonderim_durum, -1))"
+                + " then public.fn_basvuru_hasta_kalan(t.belge_id) end",
+                                                  "para",  "Borç", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 100,
+                                                  Filtrelenebilir: false, Siralanabilir: false),
+            new("hastaGonderim", "case t.hasta_gonderim_durum when 0 then 'Hazır' when 1 then 'Planlandı' when 2 then 'Borç bekliyor' when 3 then case when t.hasta_acilma is not null then 'Açıldı' else 'Gönderildi' end when 4 then 'Gönderilemedi' when 9 then 'İptal' else '' end",
+                                                  "metin", "Hastaya Gönderim", Hizalama: "orta", Bicim: "rozet", Genislik: 130,
+                                                  Filtrelenebilir: false),
+            new("hastaGonderimAyrinti", "concat_ws(' · ', nullif(case t.hasta_gonderim_kanal when 1 then 'SMS' when 2 then 'e-posta' when 3 then 'SMS + e-posta' else '' end, ''), case when t.hasta_gonderim_durum in (1, 2) and t.hasta_planlanan is not null then 'plan ' || to_char(t.hasta_planlanan at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hasta_gonderim is not null then 'gitti ' || to_char(t.hasta_gonderim at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hasta_acilma is not null then 'açıldı ' || to_char(t.hasta_acilma at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, nullif(t.hasta_kural, ''), nullif(t.hasta_hata, ''))",
+                                                  "metin", "Hasta Gönderim Ayrıntısı", Genislik: 280,
+                                                  Filtrelenebilir: false, Siralanabilir: false),
+            new("hekimGonderim", "case t.hekim_gonderim_durum when 0 then 'Hazır' when 1 then 'Planlandı' when 2 then 'Borç bekliyor' when 3 then case when t.hekim_acilma is not null then 'Açıldı' else 'Gönderildi' end when 4 then 'Gönderilemedi' when 9 then 'İptal' else '' end",
+                                                  "metin", "Dış Doktora Gönderim", Hizalama: "orta", Bicim: "rozet", Genislik: 140,
+                                                  Filtrelenebilir: false),
+            new("hekimGonderimAyrinti", "concat_ws(' · ', nullif(t.hekim_ad, ''), nullif(case t.hekim_gonderim_kanal when 1 then 'SMS' when 2 then 'e-posta' when 3 then 'SMS + e-posta' else '' end, ''), case when t.hekim_gonderim_durum in (1, 2) and t.hekim_planlanan is not null then 'plan ' || to_char(t.hekim_planlanan at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hekim_gonderim is not null then 'gitti ' || to_char(t.hekim_gonderim at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hekim_acilma is not null then 'açıldı ' || to_char(t.hekim_acilma at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, nullif(t.hekim_hata, ''))",
+                                                  "metin", "Dış Doktor Gönderim Ayrıntısı", Genislik: 280,
+                                                  Filtrelenebilir: false, Siralanabilir: false),
+            // Çipler ve aksiyonlar için kodlar (listede gizli).
+            new("hastaGonderimDurum", "t.hasta_gonderim_durum", "sayi", "Hasta Gönderim Kodu", Varsayilan: false),
+            new("hekimGonderimDurum", "t.hekim_gonderim_durum", "sayi", "Dış Doktor Gönderim Kodu", Varsayilan: false),
+            new("borcBekliyor",
+                "case when 2 in (coalesce(t.hasta_gonderim_durum, -1), coalesce(t.hekim_gonderim_durum, -1)) then 1 else 0 end",
+                                                  "sayi",  "Borç Bekliyor", Varsayilan: false),
+            new("hastaGonderimId", "t.hasta_gonderim_id", "sayi", "Hasta Gönderim Id", Varsayilan: false, Filtrelenebilir: false),
+            new("hekimGonderimId", "t.hekim_gonderim_id", "sayi", "Dış Doktor Gönderim Id", Varsayilan: false, Filtrelenebilir: false),
+            new("kritik",       "t.kritik",       "mantik","Kritik", Hizalama: "orta", Genislik: 80, Varsayilan: false),
         });
 }

@@ -107,6 +107,9 @@ if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.Teklif
 // İSKONTO TUTAR ONARIMI (1378): açılışta bir kez - karar oranı yazıp tutarı eski bırakmıştı (idempotent).
 if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.IskontoTutarOnarici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
+// RADYOLOJİ RAPOR GÖNDERİMİ (1389): hasta / gönderen dış doktora bağlantı, zaman kuralları, borç kuralı.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.RaporGonderimi>();
+if (arkaPlanAcik) kurucu.Services.AddHostedService<Gentegre.Api.Servisler.RaporGonderimIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TitckIlacGuncelleme>();
@@ -577,6 +580,7 @@ uygulama.KurumIcmalOzetUclariniEkle();   // kurum icmali ekrani (10.10.2026)
 uygulama.VezneIcmalUclariniEkle();   // vezne / kasa konsolide icmali (10.10.2026)
 uygulama.AlacakYaslandirmaUclariniEkle();   // alacak yaşlandırma (10.10.2026)
 uygulama.HastaBorcTakipUclariniEkle();   // hasta borç takibi (10.10.2026)
+uygulama.RaporGonderimUclariniEkle();   // radyoloji rapor gönderimi + açık rapor sayfası (1389, 20.11.2026)
 uygulama.CekSenetUclariniEkle();        // çek / senet portföy işlemleri (1386, 20.11.2026)
 uygulama.PersonelBelgeTakipUclariniEkle();   // İK belge takibi: özet şerit + hatırlatma (22.10.2026)
 uygulama.PersonelBelgeTurUclariniEkle();      // İK belge türleri: sayaç, personel durumu, kapsam önizleme, kopyala/pasif/sıra (22.10.2026)

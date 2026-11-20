@@ -249,6 +249,9 @@ public static partial class RadyolojiUclari
         await baglanti.CalistirAsync("update public.radyoloji_istem set durum = 5 where id = @p0", islem, [istemId], iptal);
         // Onay geldi: uzmanın "onayınızı bekliyor" hatırlatması kapanır (vekâleten onaylansa da).
         await OnayBildirimiKapatAsync(baglanti, islem, istemId, iptal);
+        // RAPOR GÖNDERİMİ (1389): hasta / gönderen dış doktor bağlantısı kurulur, şube ayarı açıksa gönderim planlanır
+        //   (kod › kategori › tümü; kritikte tek süre). Onayla AYNI işlemde - onay geri alınırsa plan da gider.
+        await Gentegre.Api.Servisler.RaporGonderimi.PlanlaAsync(baglanti, islem, id, onaylayanId, iptal);
     }
 
     /// <summary>

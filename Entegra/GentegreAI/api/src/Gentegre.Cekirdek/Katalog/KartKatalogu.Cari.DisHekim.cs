@@ -121,6 +121,11 @@ public static partial class KartKatalogu
                     Baslik: "Branş"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
                     Baslik: "Diploma / Tescil No"),
+                // RAPOR BİLDİRİMİ (1389; kullanıcı 20.11.2026: "gönderen dış dr varsa ve o raporu sms/mail olarak
+                //   istediyse ona da"): hastasının radyoloji raporu onaylanınca bu doktora bağlantı gider (borç yoksa).
+                new("raporBildirim", "rapor_bildirim", "kod", Baslik: "Rapor Bildirimi",
+                    SabitKodlar: new Dictionary<string, string>
+                        { ["0"] = "İstemiyor", ["1"] = "SMS", ["2"] = "E-posta", ["3"] = "SMS + E-posta" }),
                 // taraf_personel'de ZATEN VAR - dis hekimde "kadrolu / part-time /
                 //   serbest" ayrimini tasir, yeni kolon gerekmedi.
                 // ÇALIŞMA ŞEKLİ dış hekimde yok (kullanıcı 14.11.2026): kurum dışı hekimin kadro bilgisi sorulmaz;

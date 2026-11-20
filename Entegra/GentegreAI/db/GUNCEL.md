@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (736 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (737 ad, 207 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -98,6 +98,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_baslik_harf` | `653_baslik_harfi_kisaltma_ek.sql` | 630_baslik_harf.sql, 651_hizmet_adi_baslik_harfi.sql, 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_baslik_kelime` | `630_baslik_harf.sql` | — |
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
+| `fn_basvuru_hasta_kalan` | `1389_radyoloji_rapor_gonderim.sql` | — |
 | `fn_basvuru_hekim_dis_mi` | `578_basvuru_hekim_kaynagi.sql` | — |
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
 | `fn_basvuru_istem_serbest_uygula` | `1105_patoloji_basvuru_kapisi.sql` | 919_istem_bazli_serbest.sql, 925_basvuru_istem_serbest_panel.sql, 974_goz_goruntuleme_istem.sql |
@@ -1048,7 +1049,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_radyoloji_kritik_takip` | `1374_radyoloji_rapor_revize.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql |
 | `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |
 | `v_radyoloji_protokol_malzeme` | `320_radyoloji_sarf.sql` | — |
-| `v_radyoloji_teslim_takip` | `1374_radyoloji_rapor_revize.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql, 1373_radyoloji_teslim_telefon_cep.sql |
+| `v_radyoloji_teslim_takip` | `1390_radyoloji_teslim_gonderim.sql` | 318_radyoloji_takip_listeleri.sql, 940_personel_unvan_yalniz_onek.sql, 1373_radyoloji_teslim_telefon_cep.sql, 1374_radyoloji_rapor_revize.sql |
 | `v_radyoloji_tetkik` | `304_radyoloji_istem_acma.sql` | — |
 | `v_radyoloji_worklist` | `940_personel_unvan_yalniz_onek.sql` | 283_radyoloji_cekirdek.sql, 296_belge_basvuru.sql, 912_istem_banko_kapisi.sql |
 | `v_randevu_bolum_lookup` | `718_hekim_calisma_plani.sql` | 251_departman.sql, 254_departman_kod.sql, 256_departman_durum.sql |
