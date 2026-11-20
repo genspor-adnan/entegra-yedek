@@ -70,7 +70,9 @@ public sealed class DokumanDeposu
               // ÜRETİM FİŞİ (1253): parti fotoğrafı, kalite raporu, teknik resim - kaynak_id fiş.
               "uretim-fisi",
               // KASA / BANKA HESABI (12.11.2026): hesap kartının Resim / Doküman sekmesi - kaynak_id hesap.
-              "hesap" };
+              "hesap",
+              // ÇEK / SENET (20.11.2026): kıymetin taraması, protesto yazısı - kaynak_id çek / senet.
+              "cek-senet" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

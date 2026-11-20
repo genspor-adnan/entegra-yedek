@@ -137,7 +137,9 @@ export function sekmeleriKur(secenek: {
           gizliDetaylar, ekSekmeler, sekmeSirasi, sekmeBasliklari, yalnizSekmeler,
           detaySatirlari = () => [] } = secenek;
   // HESAP (1157, mockup banka_hareketleri.html): banka sözleşmesi / API onay formu.
-  const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap';
+  // ÇEK / SENET (20.11.2026, mockup cek_senet_baslik.html): çekin taraması, protesto yazısı.
+  const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok' || kaynak === 'hesap'
+                     || kaynak === 'cek-senet';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Resim / Doküman');
   const s: SekmeTanimi[] = gruplar
     // Serit alanlari acikca verilmisse Kimlik grubu sekme olarak da cizilir;

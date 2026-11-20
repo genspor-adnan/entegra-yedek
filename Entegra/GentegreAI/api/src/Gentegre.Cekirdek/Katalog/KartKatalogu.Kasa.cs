@@ -224,6 +224,38 @@ public static partial class KartKatalogu
             new("subeId",        "sube_id",         "sayi",  Yazilabilir: false, Baslik: "Şube"),
             new("eklemeTarihi",  "ekleme_tarihi",   "tarih", Yazilabilir: false)
         },
+        // SEKMELER (kullanıcı 20.11.2026: "çek/senet için mockup gibi hareketler vb sekmeleri ekle"; mockup
+        //   Ekranlar/cek_senet_baslik.html): HAREKETLER = portföy defteri (cek_senet_hareket - giriş, ciro, tahsile
+        //   verme, tahsil, karşılıksız…; kasa / tahsilat akışı yazar), İLİŞKİLİ KAYITLAR = kıymete bağlı kasa / banka
+        //   işlemleri. İkisi de SALT OKUNUR: defter elle yazılırsa kıymetin durumuyla tutarsızlaşır. Resim / Doküman
+        //   ortak galeri (web kartSekmeleri, DokumanUclari "cek-senet").
+        Detaylar: new[]
+        {
+            new DetayTanimi("hareketler", "public.cek_senet_hareket", "cek_senet_id", new KartAlani[]
+            {
+                new("id",          "id",            "sayi",  Yazilabilir: false),
+                new("tarih",       "tarih",         "tarih", Yazilabilir: false, Baslik: "Tarih"),
+                new("islem",       "islem",         "kod",   Yazilabilir: false, SabitKodlar: CekSenetIslemKodlari, Baslik: "İşlem"),
+                new("eskiDurum",   "eski_durum",    "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Önceki Durum"),
+                new("yeniDurum",   "yeni_durum",    "kod",   Yazilabilir: false, SabitKodlar: CekSenetDurumKodlari, Baslik: "Yeni Durum"),
+                new("tarafId",     "taraf_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Cari"),
+                new("hesapId",     "hesap_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Hesap"),
+                new("kasaIslemId", "kasa_islem_id", "sayi",  Yazilabilir: false, Baslik: "İşlem No"),
+                new("aciklama",    "aciklama",      "metin", Yazilabilir: false, Baslik: "Açıklama"),
+                new("ekleyen",     "ekleyen",       "kod",   Yazilabilir: false, KodTablosu: "public.v_kullanici_lookup", Baslik: "Kullanıcı"),
+            }, Sirala: "tarih, id", SubeKolonu: null, Baslik: "Hareketler", SaltOkunur: true),
+            new DetayTanimi("iliskili", "public.kasa_islem", "cek_senet_id", new KartAlani[]
+            {
+                new("id",          "id",            "sayi",  Yazilabilir: false, Baslik: "İşlem No"),
+                new("islemTarihi", "islem_tarihi",  "zaman", Yazilabilir: false, Baslik: "Tarih"),
+                new("makbuzNo",    "makbuz_no",     "metin", Yazilabilir: false, Baslik: "Makbuz No"),
+                new("tarafId",     "taraf_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_cari_lookup", Baslik: "Cari"),
+                new("hesapId",     "hesap_id",      "kod",   Yazilabilir: false, KodTablosu: "public.v_hesap_lookup", Baslik: "Hesap"),
+                new("tutar",       "tutar",         "para",  Yazilabilir: false, Baslik: "Tutar"),
+                new("dovizCinsi",  "doviz_cinsi",   "metin", Yazilabilir: false, Baslik: "Döviz"),
+                new("aciklama",    "aciklama",      "metin", Yazilabilir: false, Baslik: "Açıklama"),
+            }, Sirala: "islem_tarihi, id", SubeKolonu: null, Baslik: "İlişkili Kayıtlar", SaltOkunur: true),
+        },
         SilmeEngelleri: new[]
         {
             new SilmeEngeli("public.mali_hareket", "cek_senet_id", "Bu cek/senedin hareketi var, silinemez.")

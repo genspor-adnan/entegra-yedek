@@ -55,6 +55,8 @@ public sealed class DokumanErisimi(VeriKaynagi veri, KayitErisimi erisim)
         ["kys-egitim"]      = new(["kys.egitim"], ["kys-egitim"]),
         // KASA / BANKA HESABI (12.11.2026): hesap kartının yetkisi, kayıt kapsamı hesap listesinden.
         ["hesap"]           = new(["hesap"], ["hesap"]),
+        // ÇEK / SENET (20.11.2026): kartın yetkisi, kayıt kapsamı (şube) çek / senet listesinden.
+        ["cek-senet"]       = new(["cek_senet"], ["cek-senet"]),
         ["klasor"]          = new(["dokuman"], []),
         ["sube"]            = new(["sube"], [], HerkeseGor: true),
         ["ebelge-xslt"]     = new(["ebelge_xslt"], [], HerkeseGor: true),

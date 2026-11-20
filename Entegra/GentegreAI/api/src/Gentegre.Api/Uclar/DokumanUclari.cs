@@ -249,6 +249,8 @@ public static class DokumanUclari
         // KASA / BANKA HESABI BELGELERİ (12.11.2026, kullanıcı: banka hesabı kartında "Resim / Doküman" sekmesi
         //   "Beklenmeyen hata" veriyordu - eşleme yoktu): sözleşme, hesap cüzdanı, imza sirküleri; kaynak_id hesap.
         "hesap" => "hesap",
+        // ÇEK / SENET BELGELERİ (20.11.2026): çekin / senedin taraması, protesto yazısı; kaynak_id kıymet.
+        "cek-senet" => "cek-senet",
         "cari" or "kisi" or "personel" or "hasta" => "taraf",
         "stok" => "stok",
         // e-Belge XSLT sablonlari (160): kart degil ama ayni depoyu kullanir.
@@ -311,6 +313,7 @@ public static class DokumanUclari
         "servisZiyaret" => "servis",
         "planliGider" => "finans.planli_gider",
         "uretim-fisi" => "uretim.fis",
+        "cek-senet" => "cek_senet",
         _ => kartAdi
     };
 

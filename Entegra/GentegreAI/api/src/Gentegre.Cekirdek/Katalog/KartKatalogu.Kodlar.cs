@@ -308,6 +308,12 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> CekSenetYonKodlari =
         new() { ["1"] = "Alınan", ["2"] = "Verilen" };
 
+    /// <summary>cek_senet_hareket.islem (072) - kart Hareketler sekmesi; çek / senet icmali aynı adları kullanır.</summary>
+    private static readonly Dictionary<string, string> CekSenetIslemKodlari =
+        new() { ["130"] = "Portföye giriş / Verildi", ["131"] = "Ciro edildi", ["132"] = "Bankaya tahsile verildi",
+                ["133"] = "Tahsil edildi", ["134"] = "Karşılıksız", ["135"] = "İade", ["136"] = "Ödendi",
+                ["137"] = "Teminata verildi", ["138"] = "Teminattan döndü", ["139"] = "İptal (geri alma)" };
+
     private static readonly Dictionary<string, string> CekSenetDurumKodlari =
         new() { ["10"] = "Portföyde", ["20"] = "Ciro Edildi", ["30"] = "Bankada Tahsilde",
                 ["40"] = "Teminatta", ["50"] = "Tahsil Edildi / Ödendi", ["60"] = "Karşılıksız",
