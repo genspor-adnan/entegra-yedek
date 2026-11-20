@@ -186,6 +186,13 @@
   .m-sonuc .t{display:grid;grid-template-columns:1fr auto;gap:6px;padding:4px 0;border-bottom:1px solid var(--line2)}
   .m-sonuc .t small{display:block;color:var(--muted);font-size:10px}
   .m-sonuc .t b{white-space:nowrap}
+  /* önceki iki sonuç (kullanıcı 20.11.2026) */
+  table.sonuc th small{font-weight:normal;color:var(--muted);font-size:10px}
+  table.sonuc th.onc-b{text-align:right;border-left:1px dashed var(--line)}
+  table.sonuc td.onc{text-align:right;color:#55657a;white-space:nowrap;border-left:1px dashed var(--line2);font-size:11.5px}
+  table.sonuc td.onc.yuk{color:#b0554c} table.sonuc td.onc.dus{color:#5b82b3} table.sonuc td.onc.bos{color:#b7c2cd}
+  table.sonuc td.onc .isr{opacity:.75}
+  .m-sonuc .m-onc{margin-top:1px;color:#7a8794} .m-sonuc .m-onc b{color:#55657a;font-weight:600} .m-sonuc .m-onc b.yuk{color:#b0554c}
   @media (max-width:860px){ .govde{grid-template-columns:1fr} .panel{border-right:0;border-bottom:1px solid var(--line2)} }
 </style>
 </head>
@@ -510,7 +517,7 @@
       <div class="kucuk">Sonuçlar, isteyen hekiminizin değerlendirmesiyle birlikte anlam taşır. Referans aralıkları yaş ve cinsiyete göredir.</div>
     </div>
     <div>
-      <div class="sekme"><div class="on">Sonuçlar</div><div>Önceki sonuçlarla karşılaştır</div></div>
+      <div class="sekme"><div class="on">Sonuçlar</div></div>
       <div class="rapor">
         <div class="bant"><b>LABORATUVAR SONUÇ RAPORU</b><span>Protokol GT-2026-118310<br>Onay: 20.11.2026 13:20</span></div>
         <div class="bilgi">
@@ -519,17 +526,18 @@
           <div><span>İsteyen hekim</span><br><b>Dr. Kemal Aras</b></div>
         </div>
         <table class="sonuc">
-          <thead><tr><th>Test</th><th style="text-align:right">Sonuç</th><th>Birim</th><th>Referans aralığı</th></tr></thead>
+          <thead><tr><th>Test</th><th style="text-align:right">Sonuç<br><small>20.11.2026</small></th><th>Birim</th><th>Referans aralığı</th>
+            <th class="onc-b">Önceki<br><small>14.08.2026</small></th><th class="onc-b">Önceki<br><small>02.03.2026</small></th></tr></thead>
           <tbody>
-            <tr class="grup"><td colspan="4">Biyokimya</td></tr>
-            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">70 – 100</td></tr>
-            <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td></tr>
-            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td></tr>
-            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 130</td></tr>
-            <tr><td>Üre</td><td class="s">34</td><td>mg/dL</td><td class="ref">17 – 43</td></tr>
-            <tr><td>AST</td><td class="s">24</td><td>U/L</td><td class="ref">0 – 40</td></tr>
-            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 200</td></tr>
-            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td></tr>
+            <tr class="grup"><td colspan="6">Biyokimya</td></tr>
+            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">70 – 100</td><td class="onc yuk">118 <span class="isr h">H</span></td><td class="onc yuk">104 <span class="isr h">H</span></td></tr>
+            <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td><td class="onc">0,95</td><td class="onc">0,90</td></tr>
+            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td><td class="onc">31</td><td class="onc yuk">44 <span class="isr h">H</span></td></tr>
+            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 130</td><td class="onc yuk">171 <span class="isr h">H</span></td><td class="onc bos">—</td></tr>
+            <tr><td>Üre</td><td class="s">34</td><td>mg/dL</td><td class="ref">17 – 43</td><td class="onc">36</td><td class="onc">33</td></tr>
+            <tr><td>AST</td><td class="s">24</td><td>U/L</td><td class="ref">0 – 40</td><td class="onc">26</td><td class="onc">29</td></tr>
+            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 200</td><td class="onc yuk">246 <span class="isr h">H</span></td><td class="onc bos">—</td></tr>
+            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td><td class="onc yuk">162 <span class="isr h">H</span></td><td class="onc">139</td></tr>
           </tbody>
         </table>
         <div class="gizli-not">ℹ <b>1 testinizin</b> sonucu bu sayfada gösterilmez. Bu sonuç için lütfen hekiminize ya da kurumumuza başvurun: <b>0216 000 00 00</b></div>
@@ -545,10 +553,10 @@
     <div class="m-imza"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>Uzm. Dr. Elif Arslan · 13:20</span></div><span class="ok">Ayrıntı ›</span></div>
     <div class="m-sonuc">
       <div class="grp">Biyokimya</div>
-      <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small></span><b style="color:var(--hata)">126 <span class="isr h">H</span></b></div>
-      <div class="t"><span>Kreatinin<small>0,70 – 1,20 mg/dL</small></span><b>0,92</b></div>
-      <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small></span><b style="color:var(--hata)">162 <span class="isr h">H</span></b></div>
-      <div class="t"><span>Total Kolesterol<small>&lt; 200 mg/dL</small></span><b style="color:var(--hata)">238 <span class="isr h">H</span></b></div>
+      <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small><small class="m-onc">önceki: <b class="yuk">118</b> (14.08) · <b class="yuk">104</b> (02.03)</small></span><b style="color:var(--hata)">126 <span class="isr h">H</span></b></div>
+      <div class="t"><span>Kreatinin<small>0,70 – 1,20 mg/dL</small><small class="m-onc">önceki: <b>0,95</b> (14.08) · <b>0,90</b> (02.03)</small></span><b>0,92</b></div>
+      <div class="t"><span>ALT<small>0 – 41 U/L</small><small class="m-onc">önceki: <b>31</b> (14.08) · <b class="yuk">44</b> (02.03)</small></span><b>28</b></div>
+      <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small><small class="m-onc">önceki: <b class="yuk">171</b> (14.08)</small></span><b style="color:var(--hata)">162 <span class="isr h">H</span></b></div>
     </div>
     <div class="m-alt"><div class="btn bir">⬇ PDF</div><div class="btn">↗ Paylaş</div></div>
   </div></div>
@@ -563,6 +571,12 @@
       <div class="satir"><span>İşaret</span><b>Test kartında yeni seçenek: <u>"Hasta bağlantısında gösterme"</u> (HIV, hepatit, gebelik, genetik gibi).</b></div>
       <div class="satir"><span>Hastada</span><b>Sonuç yerine "1 testinizin sonucu bu sayfada gösterilmez" notu (testin adı da yazmaz).</b></div>
       <div class="satir"><span>Doktorda</span><b>Gönderen dış doktorun bağlantısında bu testler <u>görünür</u>.</b></div>
+    </div>
+    <div class="kutu"><h4>Önceki iki sonuç</h4>
+      <div class="satir"><span>Ne gösterilir</span><b>Her testin, hastanın kurumdaki <u>son iki</u> onaylı sonucu (bu başvurudan önceki), tarihleriyle. Referans dışıysa soluk kırmızı / mavi ve H / L.</b></div>
+      <div class="satir"><span>Kolon başlığı</span><b>O başvuruların tarihleri. Bir test o tarihte çalışılmadıysa hücre "—".</b></div>
+      <div class="satir"><span>Yoksa</span><b>Hastanın önceki sonucu hiç yoksa iki kolon çizilmez.</b></div>
+      <div class="satir"><span>Nerede</span><b>Hasta bağlantısında ve basılı sonuç çıktısında; gösterilmeyen (hassas) testin öncekileri de gösterilmez.</b></div>
     </div>
     <div class="bekleyen-not">ℹ Sayfada yalnız <b>bu bölümün onaylı</b> sonuçları görünür; başka bölümün sonucu kendi bildirimiyle gelir.</div>
   </div>
