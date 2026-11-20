@@ -206,23 +206,34 @@ public static class RaporGonderimUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             AyarYetkiIste(baglam, Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
+            // LAB HİZMETİ: lab tetkiğine / paneline bağlı olan YA DA Laboratuvar kategori ağacındaki hizmet. İkincisi
+            //   şart: lab test kataloğu henüz kurulmamış kurumda (eski sistemden aktarılan) lab hizmetleri teste bağlı
+            //   değil - yalnız kategorisinden tanınır (kök kod SUT.8 / LAB / ESKI.LAB ve altları).
+            const string labKategori = """
+                lk as (select k.id from public.kategori k
+                        where k.kod = 'SUT.8' or k.kod ~* '(^|\.)LAB(\.|$)'
+                       union
+                       select k.id from public.kategori k join lk on k.ust_id = lk.id)
+                """;
             const string hizmetler = """
                 select h.id, coalesce(h.kod, '') as kod, coalesce(h.ad, '') as ad, h.kategori,
-                       case when coalesce(h.modalite, 0) > 0 then 1 else 2 end as tur
+                       case when coalesce(h.modalite, 0) > 0 or coalesce(h.radyoloji, 0) = 1 then 1 else 2 end as tur
                   from public.hizmet h
-                 where (coalesce(h.modalite, 0) > 0
-                        or exists (select 1 from public.lab_tetkik t where t.hizmet_id = h.id)
-                        or exists (select 1 from public.lab_panel p where p.hizmet_id = h.id))
+                 where coalesce(h.modalite, 0) > 0 or coalesce(h.radyoloji, 0) = 1
+                    or h.kategori in (select id from lk)
+                    or exists (select 1 from public.lab_tetkik t where t.hizmet_id = h.id)
+                    or exists (select 1 from public.lab_panel p where p.hizmet_id = h.id)
                 """;
-            var tetkikler = await b.ListeAsync(hizmetler + " order by ad", null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var tetkikler = await b.ListeAsync($"with recursive {labKategori} {hizmetler} order by 3", null, [],
+                                               OkuyucuGenisletmeleri.Sozluk, iptal);
             var kategoriler = await b.ListeAsync($"""
-                with recursive hz as ({hizmetler}),
-                z as (select k.id, k.ad, k.ust_id, 0 as d from public.kategori k where k.id in (select kategori from hz)
+                with recursive {labKategori},
+                hz as ({hizmetler}),
+                z as (select k.id, k.ad, k.ust_id, 0 as d from public.kategori k
+                       where k.id in (select kategori from hz) or k.id in (select id from lk)
                       union
                       select k.id, k.ad, k.ust_id, z.d + 1 from public.kategori k join z on k.id = z.ust_id where z.d < 20)
-                select distinct z.id, coalesce(z.ad, '') as ad,
-                       -- Tür: kategorinin (alt kategorileri dahil) tetkikleri radyoloji mi lab mı (1 / 2 / 3 ikisi).
-                       coalesce(u.ad, '') as "ustAd"
+                select distinct z.id, coalesce(z.ad, '') as ad, coalesce(u.ad, '') as "ustAd"
                   from z left join public.kategori u on u.id = z.ust_id
                  order by 2
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
