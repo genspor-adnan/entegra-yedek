@@ -10090,3 +10090,29 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
   .ra-sayfa { background: #fff; min-height: 0 } .ra-govde { display: block }
   .ra-rapor { padding: 0; overflow: visible }
 }
+/* RADYOLOJİ › AYARLAR › RAPOR GÖNDERİMİ (1389): ayar kutuları + gönderim zamanı kuralları grid'i. `rga-` önekli. */
+.rga { padding: 10px }
+.rga-govde { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+.rga-grp { padding: 10px 12px; display: flex; flex-direction: column; gap: 7px }
+.rga-grp h5 { margin: 0 0 2px }
+.rga-tam { grid-column: 1 / -1 }
+.rga-cb { display: flex; gap: 6px; align-items: center; font-size: 12.5px; font-weight: 600 }
+.rga-cb.ic { display: inline-flex; font-weight: 400; margin-right: 14px }
+.rga-sat { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px; align-items: start; font-size: 12.5px }
+.rga-sat > span:first-child { color: var(--soluk); padding-top: 4px }
+.rga-sat input[type="number"] { width: 76px; height: 26px }
+.rga-sat .rga-genis { width: 100%; max-width: 420px; height: 26px }
+.rga-sat small, .rga-not { display: block; color: var(--soluk); font-size: 11px; line-height: 1.45; margin-top: 3px }
+.rga-oncelik { font-weight: 400; color: var(--soluk); font-size: 11.5px } .rga-oncelik b { color: var(--metin) }
+.rga-arac { display: flex; gap: 6px }
+.rga-kural { width: 100%; border-collapse: collapse; font-size: 12.5px }
+.rga-kural th { background: var(--yuz2, #eef2f7); text-align: left; padding: 5px 8px; border: 1px solid var(--cizgi2, #e3e9f0); color: var(--soluk); font-weight: 400 }
+.rga-kural td { padding: 4px 8px; border: 1px solid var(--cizgi2, #e3e9f0); vertical-align: middle }
+.rga-kural select, .rga-kural input[type="number"], .rga-kural input[type="time"], .rga-kural .rga-tetkik { height: 26px }
+.rga-kural td:not(.rga-zaman) > select { width: 100% }
+.rga-kural .rga-tetkik { width: min(100%, 460px) }
+.rga-zaman { white-space: nowrap } .rga-kural td.rga-zaman > select { width: 150px; margin-right: 6px }
+.rga-zaman input[type="number"] { width: 64px } .rga-zaman input[type="time"] { width: 96px }
+.rga-bos { color: var(--soluk); text-align: center; padding: 12px !important }
+.rga-uyari { color: var(--hata); margin-left: 6px }
+@media (max-width: 900px) { .rga-govde { grid-template-columns: 1fr } }

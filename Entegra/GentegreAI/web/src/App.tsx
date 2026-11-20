@@ -118,6 +118,7 @@ const YzKontor = tembel(() => import('./sayfalar/YzKontor'), 'YzKontor');
 const UtsSorgu = tembel(() => import('./sayfalar/UtsSorgu'), 'UtsSorgu');
 const RadyolojiPanosu = tembel(() => import('./sayfalar/RadyolojiPanosu'), 'RadyolojiPanosu');
 const RadyolojiTipografi = tembel(() => import('./sayfalar/RadyolojiTipografi'), 'RadyolojiTipografi');
+const RaporGonderimAyari = tembel(() => import('./sayfalar/radyoloji/RaporGonderimAyari'), 'RaporGonderimAyari');
 const TeleradyolojiPanosu = tembel(() => import('./sayfalar/TeleradyolojiPanosu'), 'TeleradyolojiPanosu');
 const TeleradFatura = tembel(() => import('./sayfalar/TeleradFatura'), 'TeleradFatura');
 const EnabizPanosu = tembel(() => import('./sayfalar/EnabizPanosu'), 'EnabizPanosu');
@@ -437,6 +438,8 @@ function Yollar() {
         {yetki('radyoloji') && <Route path="/radyoloji-pano" element={<RadyolojiPanosu />} />}
         {/* Rapor Tipografisi (1344): kurum ayarı, ozelSayfa. */}
         {yetki('radyoloji.tipografi') && <Route path="/radyoloji-tipografi" element={<RadyolojiTipografi />} />}
+        {/* Rapor Gönderimi (1389): şube ayarı + zaman kuralları, ozelSayfa. */}
+        {yetki('radyoloji.rapor_gonderim') && <Route path="/radyoloji-rapor-gonderim" element={<RaporGonderimAyari />} />}
         {yetki('teleradyoloji.pano') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
         {yetki('teleradyoloji.kurum.fatura') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
         {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}

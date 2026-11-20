@@ -177,6 +177,15 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'radyoloji.tipografi',
   },
   {
+    // RAPOR GÖNDERİMİ (1389, mockup radyoloji_rapor_hasta_goruntuleme.html §4): hastaya / gönderen dış doktora
+    //   otomatik gönderim, zaman kuralları (kod › kategori › tümü), borç kuralı. Şube ayarı, liste değil (ozelSayfa).
+    kaynak: 'radyoloji-rapor-gonderim', rota: 'radyoloji-rapor-gonderim', ozelSayfa: true,
+    baslik: 'Rapor Gönderimi', yol: 'Radyoloji › Ayarlar › Rapor Gönderimi',
+    urunModu: 2,
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuSira: 94, menuAd: 'Rapor Gönderimi', ic: '📨',
+    yetkiKodu: 'radyoloji.rapor_gonderim',
+  },
+  {
     // RADYOLOJİ PANOSU (320): modülün "bugün ne durumdayız" ekranı. Liste
     //   değil (ozelSayfa) - sayaç, doluluk ve uyarı kutularından oluşur;
     //   her sayaç ilgili listeye götürür.
