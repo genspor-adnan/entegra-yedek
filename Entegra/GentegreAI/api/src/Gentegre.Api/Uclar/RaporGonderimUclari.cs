@@ -23,7 +23,7 @@ public static class RaporGonderimUclari
 {
     public sealed record KuralIstegi(short Kapsam, int? KategoriId, int? HizmetId, short ZamanTur, int Saat, int GunDakika, bool Aktif);
     public sealed record AyarIstegi(bool Otomatik, int KritikDakika, bool BorcKontrol, bool HastaSms, bool HastaEposta,
-                                    int GecerlilikGun, string? WebKok, KuralIstegi[]? Kurallar);
+                                    int GecerlilikGun, string? WebKok, KuralIstegi[]? Kurallar, int LabPanikDakika = 0);
     public sealed record GonderIstegi(bool BorcaRagmen);
 
     private const string AyarYetkisi = "radyoloji.rapor_gonderim";
@@ -40,15 +40,15 @@ public static class RaporGonderimUclari
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             await using var b = await veri.AcAsync(iptal);
             var ayar = await b.TekAsync("""
-                select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok
+                select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika
                   from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0
                 """, null, [sube], o => new
                 {
                     otomatik = o.GetInt16(0) == 1, kritikDakika = o.GetInt32(1), borcKontrol = o.GetInt16(2) == 1,
                     hastaSms = o.GetInt16(3) == 1, hastaEposta = o.GetInt16(4) == 1, gecerlilikGun = o.GetInt32(5),
-                    webKok = o.GetString(6),
+                    webKok = o.GetString(6), labPanikDakika = o.GetInt32(7),
                 }, iptal) ?? new { otomatik = false, kritikDakika = 0, borcKontrol = true, hastaSms = true, hastaEposta = false,
-                                   gecerlilikGun = 30, webKok = "" };
+                                   gecerlilikGun = 30, webKok = "", labPanikDakika = 0 };
             var kurallar = await b.ListeAsync("""
                 select k.id, k.kapsam, k.kategori_id, k.hizmet_id, k.zaman_tur, k.saat, k.gun_dakika, k.aktif,
                        coalesce(kt.ad, ''), coalesce(hz.kod, ''), coalesce(hz.ad, '')
@@ -75,6 +75,8 @@ public static class RaporGonderimUclari
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             if (istek.KritikDakika is < 0 or > 1440)
                 throw GentegreHatasi.Dogrulama("Kritik bulgu süresi 0 - 1440 dakika olmalı.", new AlanHatasi("kritikDakika", "Geçersiz."));
+            if (istek.LabPanikDakika is < 0 or > 1440)
+                throw GentegreHatasi.Dogrulama("Panik değer süresi 0 - 1440 dakika olmalı.", new AlanHatasi("labPanikDakika", "Geçersiz."));
             if (istek.GecerlilikGun is < 1 or > 3650)
                 throw GentegreHatasi.Dogrulama("Bağlantı geçerliliği 1 - 3650 gün olmalı.", new AlanHatasi("gecerlilikGun", "Geçersiz."));
             var kok = (istek.WebKok ?? "").Trim().TrimEnd('/');
@@ -106,15 +108,17 @@ public static class RaporGonderimUclari
             await using var tx = await b.BeginTransactionAsync(iptal);
             await b.CalistirAsync("""
                 insert into public.radyoloji_rapor_gonderim_ayar
-                       (sube_id, otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, degistiren)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+                       (sube_id, otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, degistiren,
+                        lab_panik_dakika)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
                 on conflict (sube_id) do update
                    set otomatik = excluded.otomatik, kritik_dakika = excluded.kritik_dakika, borc_kontrol = excluded.borc_kontrol,
+                       lab_panik_dakika = excluded.lab_panik_dakika,
                        hasta_sms = excluded.hasta_sms, hasta_eposta = excluded.hasta_eposta, gecerlilik_gun = excluded.gecerlilik_gun,
                        web_kok = excluded.web_kok, degistiren = excluded.degistiren, degistirme_tarihi = now()
                 """, tx, [sube, (short)(istek.Otomatik ? 1 : 0), istek.KritikDakika, (short)(istek.BorcKontrol ? 1 : 0),
                           (short)(istek.HastaSms ? 1 : 0), (short)(istek.HastaEposta ? 1 : 0), istek.GecerlilikGun, kok,
-                          baglam.KullaniciId], iptal);
+                          baglam.KullaniciId, istek.LabPanikDakika], iptal);
             await b.CalistirAsync("delete from public.radyoloji_rapor_gonderim_kural where sube_id = @p0", tx, [sube], iptal);
             foreach (var k in kurallar)
                 await b.CalistirAsync("""
@@ -181,8 +185,7 @@ public static class RaporGonderimUclari
             baglam.AksiyonIste("rad.rapor_gonder");
             var borcaRagmen = istek?.BorcaRagmen == true;
             if (borcaRagmen) baglam.AksiyonIste("rad.rapor_borca_ragmen");
-            var istemId = await IstemAsync(veri, id, iptal);
-            await erisim.IsteAsync(baglam, "radyoloji", istemId, "Gönderim kaydı bulunamadı.", iptal);
+            await KapsamIsteAsync(veri, erisim, baglam, id, iptal);
             var durum = await servis.SimdiGonderAsync(id, borcaRagmen, baglam.KullaniciId, iptal);
             return Results.Ok(new { durum });
         });
@@ -192,8 +195,7 @@ public static class RaporGonderimUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.AksiyonIste("rad.rapor_gonder");
-            var istemId = await IstemAsync(veri, id, iptal);
-            await erisim.IsteAsync(baglam, "radyoloji", istemId, "Gönderim kaydı bulunamadı.", iptal);
+            await KapsamIsteAsync(veri, erisim, baglam, id, iptal);
             await using var b = await veri.AcAsync(iptal);
             // Yalnız BEKLEYEN gönderim iptal edilir (planlı / borç bekleyen): satır "hazır"a döner - bağlantı (basılı
             //   karekod) yaşamaya devam eder, otomatik gönderim durur.
@@ -223,7 +225,11 @@ public static class RaporGonderimUclari
             if (a.Durum != "ok")
             {
                 // Rapor GÖSTERİLMEZ: yalnız tetkik adı ve tarih (bulgu / sonuç / borç tutarı yok).
-                var ozet = await b.TekAsync("""
+                var ozet = a.Kaynak == RaporGonderimi.KaynakLab
+                    ? await b.TekAsync("""
+                        select @p1::text as tetkik, be.belge_tarihi as "cekimTarihi" from public.belge be where be.id = @p0
+                        """, null, [a.BelgeId, RaporGonderimi.LabBolumAdi(a.LabBolum) + " laboratuvar sonuçları"], OkuyucuGenisletmeleri.Sozluk, iptal)
+                    : await b.TekAsync("""
                     select coalesce(hz.ad, '') as tetkik, i.cekim_tarihi as "cekimTarihi"
                       from public.radyoloji_rapor r
                       join public.radyoloji_istem i on i.id = r.istem_id
@@ -231,6 +237,14 @@ public static class RaporGonderimUclari
                     """, null, [a.RaporId], OkuyucuGenisletmeleri.Sozluk, iptal);
                 return Results.Ok(new { durum = a.Durum, kurum, ozet, sonGecerli = a.SonGecerli });
             }
+
+            // LABORATUVAR (1394): bölümün onaylı sonuçları - Bakanlık Tetkik Sonuç Raporu alanlarıyla.
+            if (a.Kaynak == RaporGonderimi.KaynakLab)
+                return Results.Ok(new
+                {
+                    durum = "ok", tur = "lab", aliciTur = a.AliciTur, sonGecerli = a.SonGecerli, kurum,
+                    lab = await RaporGonderimi.LabRaporVerisiAsync(b, a.BelgeId, a.LabBolum, a.AliciTur == RaporGonderimi.AliciHekim, iptal),
+                });
 
             var c = await RadyolojiUclari.CiktiVerisiAsync(b, a.RaporId, iptal);
             c.Rapor["hastaTc"] = "";                 // kimlik no açık sayfaya çıkmaz
@@ -287,8 +301,18 @@ public static class RaporGonderimUclari
     /// <summary>islem_log tablo kodu: şube ayarı değişikliği (radyoloji_rapor_gonderim_ayar).</summary>
     private const int LogTabloAyar = 1389;
 
-    private static async Task<int> IstemAsync(VeriKaynagi veri, int gonderimId, CancellationToken iptal)
-        => await veri.TekDegerAsync<int?>("select istem_id from public.radyoloji_rapor_gonderim where id = @p0",
-                                          new object?[] { gonderimId }, iptal)
-           ?? throw GentegreHatasi.Bulunamadi("Gönderim kaydı bulunamadı.");
+    /// <summary>Gönderim satırının kayıt kapsamı: radyolojide istem (radyoloji listesi), laboratuvarda başvuru (belge).</summary>
+    private static async Task KapsamIsteAsync(VeriKaynagi veri, KayitErisimi erisim, IstekBaglami baglam, int gonderimId, CancellationToken iptal)
+    {
+        await using var b = await veri.AcAsync(iptal);
+        var g = await b.TekAsync("select kaynak, coalesce(istem_id, 0), coalesce(belge_id, 0) from public.radyoloji_rapor_gonderim where id = @p0",
+            null, [gonderimId], o => (Kaynak: o.GetInt16(0), Istem: o.GetInt32(1), Belge: o.GetInt32(2)).ToTuple(), iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Gönderim kaydı bulunamadı.");
+        if (g.Item1 == RaporGonderimi.KaynakLab)
+        {
+            baglam.YetkiIste("lab", Islem.Gor);
+            await erisim.IsteAsync(baglam, "belge", g.Item3, "Gönderim kaydı bulunamadı.", iptal);
+        }
+        else await erisim.IsteAsync(baglam, "radyoloji", g.Item2, "Gönderim kaydı bulunamadı.", iptal);
+    }
 }

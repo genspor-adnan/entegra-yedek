@@ -429,6 +429,22 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     /// </summary>
     private static async Task IstemDurumTazeleAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction? islem, int istemId, CancellationToken iptal)
+    {
+        await IstemDurumYazAsync(baglanti, islem, istemId, iptal);
+        // RAPOR GÖNDERİMİ (1394): onayın dört yolu da (elle, otomatik, kültür, genetik) buradan geçer - bölümünün
+        //   testleri tamamı onaylanan başvuruya hasta / dış doktor bağlantısı kurulur ve gönderim planlanır; düzeltmede
+        //   bekleyen gönderim iptal edilir. İKİNCİL İŞ: planlama hatası sonuç onayını bozmaz (savepoint + günlük).
+        if (islem is not null) await islem.SaveAsync("rapor_gonderim", iptal);
+        try { await RaporGonderimi.LabPlanlaAsync(baglanti, islem, istemId, iptal); }
+        catch (Exception h) when (h is not OperationCanceledException)
+        {
+            if (islem is not null) await islem.RollbackAsync("rapor_gonderim", iptal);
+            System.Diagnostics.Trace.TraceError($"Lab rapor gönderimi planlanamadı (istem {istemId}): {h.Message}");
+        }
+    }
+
+    private static async Task IstemDurumYazAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction? islem, int istemId, CancellationToken iptal)
         => await baglanti.CalistirAsync("""
             update public.lab_istem i
                set durum = case

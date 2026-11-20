@@ -25,12 +25,14 @@ namespace Gentegre.Api.Servisler;
 ///    Hastanın ilk açışı dijital teslim yazar (radyoloji_teslim tur 1 - "teslim edildi sayılsın").
 ///  * Onay geri alınırsa bekleyen gönderimler iptal; yeniden onayda aynı bağlantı kodu korunur (basılmış karekod yaşar).
 /// </summary>
-public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, ILogger<RaporGonderimi> gunluk)
+public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, ILogger<RaporGonderimi> gunluk)
 {
     /// <summary>bildirim.kaynak_tur: radyoloji rapor gönderimi (kaynak_id = radyoloji_rapor_gonderim.id).</summary>
     public const short KaynakRapor = 51;
 
     public const short AliciHasta = 1, AliciHekim = 2;
+    /// <summary>Gönderimin kaynağı: 1 radyoloji raporu · 2 başvurunun laboratuvar bölümü (1394).</summary>
+    public const short KaynakRadyoloji = 1, KaynakLab = 2;
     public const short DurumHazir = 0, DurumPlanli = 1, DurumBorc = 2, DurumGonderildi = 3, DurumHata = 4, DurumIptal = 9;
 
     // ------------------------------------------------------------------------------------------------- planlama --
@@ -39,15 +41,15 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
         string HekimEposta, string HizmetKod, string HizmetAd, int? Kategori);
 
     private sealed record Ayar(bool Otomatik, int KritikDakika, bool BorcKontrol, bool HastaSms, bool HastaEposta,
-                               int GecerlilikGun, string WebKok);
+                               int GecerlilikGun, string WebKok, int LabPanikDakika = 0);
 
     private static async Task<Ayar> AyarOkuAsync(NpgsqlConnection b, NpgsqlTransaction? tx, int subeId, CancellationToken iptal)
         => await b.TekAsync("""
-            select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok
+            select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika
               from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0
             """, tx, [subeId],
             o => new Ayar(o.GetInt16(0) == 1, o.GetInt32(1), o.GetInt16(2) == 1, o.GetInt16(3) == 1, o.GetInt16(4) == 1,
-                          Math.Clamp(o.GetInt32(5), 1, 3650), o.GetString(6)), iptal)
+                          Math.Clamp(o.GetInt32(5), 1, 3650), o.GetString(6), o.GetInt32(7)), iptal)
            ?? new Ayar(false, 0, true, true, false, 30, "");
 
     /// <summary>Tahmin edilemez bağlantı kodu: 16 karakter, karışmayan harf / rakam (0 O 1 I yok) - 80 bit.</summary>
@@ -251,19 +253,30 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
 
     private sealed record Satir(int Id, int RaporId, int IstemId, int SubeId, short AliciTur, int? TarafId, string Kod,
         short Kanal, string Sms, string Eposta, short Durum, bool BorcaRagmen, string WebKok, DateTime SonGecerli,
-        short RaporDurum, int? BelgeId, string Hasta, string Tetkik, DateTime? Cekim, string Sube, string Hekim, bool Revize);
+        short RaporDurum, int? BelgeId, string Hasta, string Tetkik, DateTime? Cekim, string Sube, string Hekim, bool Revize,
+        short Kaynak, short LabBolum);
 
+    /// <summary>
+    /// Gönderim satırı + kaynağının güncel durumu. RaporDurum 3 = "onaylı, gösterilebilir": radyolojide raporun durumu,
+    /// laboratuvarda bölümün o başvurudaki testlerinin TAMAMI onaylı mı (1394).
+    /// </summary>
     private static Task<Satir?> SatirOkuAsync(NpgsqlConnection b, NpgsqlTransaction? tx, string kosul, object deger, bool kilitle, CancellationToken iptal)
         => b.TekAsync($"""
-            select g.id, g.rapor_id, g.istem_id, g.sube_id, g.alici_tur, g.taraf_id, g.kod, g.kanal, g.sms_alici,
-                   g.eposta_alici, g.durum, g.borca_ragmen, g.web_kok, g.son_gecerli, r.durum, i.belge_id,
+            select g.id, coalesce(g.rapor_id, 0), coalesce(g.istem_id, 0), g.sube_id, g.alici_tur, g.taraf_id, g.kod, g.kanal,
+                   g.sms_alici, g.eposta_alici, g.durum, g.borca_ragmen, g.web_kok, g.son_gecerli,
+                   case when g.kaynak = 2 then case when {LabBolumOnayliSql("g.belge_id", "g.lab_bolum")} then 3 else 1 end
+                        else coalesce(r.durum, 0) end,
+                   coalesce(i.belge_id, g.belge_id),
                    coalesce(public.fn_taraf_ad(h.unvan, h.ad, h.soyad)::varchar(120), ''),
-                   coalesce(hz.ad, ''), i.cekim_tarihi, coalesce(s.ad, ''),
-                   coalesce(public.fn_taraf_ad(dh.unvan, dh.ad, dh.soyad)::varchar(120), ''), coalesce(r.revize, 0)
+                   coalesce(hz.ad, ''), coalesce(i.cekim_tarihi, be.belge_tarihi), coalesce(s.ad, ''),
+                   coalesce(public.fn_taraf_ad(dh.unvan, dh.ad, dh.soyad)::varchar(120), ''), coalesce(r.revize, 0),
+                   g.kaynak, coalesce(g.lab_bolum, 0)
               from public.radyoloji_rapor_gonderim g
-              join public.radyoloji_rapor r on r.id = g.rapor_id
-              join public.radyoloji_istem i on i.id = g.istem_id
-              left join public.taraf h on h.id = i.hasta_id
+              left join public.radyoloji_rapor r on r.id = g.rapor_id
+              left join public.radyoloji_istem i on i.id = g.istem_id
+              left join public.belge be on be.id = g.belge_id
+              left join public.taraf h on h.id = coalesce(i.hasta_id,
+                        (select li.taraf_id from public.lab_istem li where li.belge_id = g.belge_id order by li.id limit 1))
               left join public.hizmet hz on hz.id = i.hizmet_id
               left join public.sube s on s.id = g.sube_id
               left join public.taraf dh on dh.id = g.taraf_id and g.alici_tur = 2
@@ -271,9 +284,10 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
             """, tx, [deger],
             o => new Satir(o.GetInt32(0), o.GetInt32(1), o.GetInt32(2), o.GetInt32(3), o.GetInt16(4),
                 o.IsDBNull(5) ? null : o.GetInt32(5), o.GetString(6), o.GetInt16(7), o.GetString(8), o.GetString(9),
-                o.GetInt16(10), o.GetInt16(11) == 1, o.GetString(12), o.GetDateTime(13), o.GetInt16(14),
+                o.GetInt16(10), o.GetInt16(11) == 1, o.GetString(12), o.GetDateTime(13), Convert.ToInt16(o.GetValue(14)),
                 o.IsDBNull(15) ? null : o.GetInt32(15), o.GetString(16), o.GetString(17),
-                o.IsDBNull(18) ? null : o.GetDateTime(18), o.GetString(19), o.GetString(20), o.GetInt16(21) == 1), iptal);
+                o.IsDBNull(18) ? null : o.GetDateTime(18), o.GetString(19), o.GetString(20), o.GetInt16(21) == 1,
+                o.GetInt16(22), o.GetInt16(23)), iptal);
 
     /// <summary>Hasta adı maskeli: "Ayşe K***" - SMS yanlış numaraya giderse tam ad açığa çıkmasın.</summary>
     public static string Maske(string ad)
@@ -326,15 +340,20 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
             ["gun"] = Math.Max(1, (int)Math.Ceiling((s.SonGecerli - Saat.An).TotalDays)).ToString(CultureInfo.InvariantCulture),
         };
         var hekim = s.AliciTur == AliciHekim;
+        var lab = s.Kaynak == KaynakLab;
+        if (lab) degisken["tetkik"] = LabBolumAdi(s.LabBolum) + " laboratuvar";
+        var (smsSablon, epostaSablon) = lab
+            ? (hekim ? "lab.sonuc_hekim" : "lab.sonuc_hasta", hekim ? "lab.sonuc_hekim_eposta" : "lab.sonuc_hasta_eposta")
+            : (hekim ? "radyoloji.rapor_hekim" : "radyoloji.rapor_hasta", hekim ? "radyoloji.rapor_hekim_eposta" : "radyoloji.rapor_hasta_eposta");
         var yazilan = 0;
         if ((s.Kanal & 1) == 1 && Rakamlar(s.Sms) is { Length: >= 10 } tel)
             if (await bildirim.KuyrugaEkleAsync(b, tx, new BildirimIstegi(
-                    SablonKodu: hekim ? "radyoloji.rapor_hekim" : "radyoloji.rapor_hasta", Kanal: BildirimKanali.Sms, Alici: tel,
+                    SablonKodu: smsSablon, Kanal: BildirimKanali.Sms, Alici: tel,
                     Degiskenler: degisken, TarafId: s.TarafId, KaynakTur: KaynakRapor, KaynakId: s.Id, Oncelik: 4),
                     kullaniciId, s.SubeId, iptal) is not null) yazilan++;
         if ((s.Kanal & 2) == 2 && s.Eposta.Contains('@'))
             if (await bildirim.KuyrugaEkleAsync(b, tx, new BildirimIstegi(
-                    SablonKodu: hekim ? "radyoloji.rapor_hekim_eposta" : "radyoloji.rapor_hasta_eposta", Kanal: BildirimKanali.Eposta,
+                    SablonKodu: epostaSablon, Kanal: BildirimKanali.Eposta,
                     Alici: s.Eposta, Degiskenler: degisken, TarafId: s.TarafId, KaynakTur: KaynakRapor, KaynakId: s.Id, Oncelik: 4),
                     kullaniciId, s.SubeId, iptal) is not null) yazilan++;
         return yazilan > 0
@@ -344,7 +363,8 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
 
     // --------------------------------------------------------------------------------------------- bağlantı açılışı --
     /// <summary>ok rapor gösterilir · iletisim borç var · sure süresi doldu · guncel rapor geri çekildi / güncelleniyor.</summary>
-    public sealed record Acilis(string Durum, int RaporId, short AliciTur, DateTime SonGecerli, int SubeId);
+    public sealed record Acilis(string Durum, int RaporId, short AliciTur, DateTime SonGecerli, int SubeId,
+                                short Kaynak = KaynakRadyoloji, int BelgeId = 0, short LabBolum = 0);
 
     /// <summary>
     /// Bağlantı açıldı. Kod yoksa null. Borç / süre / iptal durumunda rapor GÖSTERİLMEZ (denemeler de sayılmaz - yalnız
@@ -375,7 +395,14 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
                  where id = @p0
                 """, tx, [s.Id], iptal);
             // HASTANIN İLK AÇIŞI = DİJİTAL TESLİM (kullanıcı: "teslim edildi sayılsın"). Doktorun açması teslim değil.
-            if (s.AliciTur == AliciHasta)
+            if (s.AliciTur == AliciHasta && s.Kaynak == KaynakLab)
+                await b.CalistirAsync("""
+                    insert into public.lab_sonuc_teslim (belge_id, bolum, tur, alan_ad, alan_yakinlik, aciklama, dijital)
+                    select @p0, @p1, 1, 'Hasta (bağlantı)', 'Kendisi', 'Sonuç bağlantısı açıldı', 1
+                     where not exists (select 1 from public.lab_sonuc_teslim t
+                                        where t.belge_id = @p0 and t.bolum = @p1 and t.dijital = 1)
+                    """, tx, [s.BelgeId, s.LabBolum], iptal);
+            else if (s.AliciTur == AliciHasta)
                 await b.CalistirAsync("""
                     insert into public.radyoloji_teslim
                            (istem_id, rapor_id, tur, teslim_zamani, teslim_eden_id, alan_ad, alan_yakinlik,
@@ -387,7 +414,7 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
                     """, tx, [s.IstemId, s.RaporId], iptal);
         }
         await tx.CommitAsync(iptal);
-        return new Acilis(durum, s.RaporId, s.AliciTur, s.SonGecerli, s.SubeId);
+        return new Acilis(durum, s.RaporId, s.AliciTur, s.SonGecerli, s.SubeId, s.Kaynak, s.BelgeId ?? 0, s.LabBolum);
     }
 
     // ------------------------------------------------------------------------------------------------- imza bilgisi --

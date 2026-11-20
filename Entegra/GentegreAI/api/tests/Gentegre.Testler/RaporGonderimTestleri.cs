@@ -70,8 +70,8 @@ public sealed class RaporGonderimTestleri(VeritabaniOlgusu olgu) : IClassFixture
             "insert into public.taraf (unvan, kod, hasta, sube_id, cep_tel, eposta) values ('RG TEST HASTA', @p1, 1, @p0, '05321112233', 'h@test.tr') returning id",
             t, [sube, $"RGH{Guid.NewGuid().ToString("N")[..8]}"], Iptal);
         var hekim = await b.TekDegerAsync<int>(
-            "insert into public.taraf (unvan, kod, personel, sube_id, cep_tel, eposta) values ('RG TEST DIS HEKIM', @p1, 1, @p0, '05442223344', 'd@test.tr') returning id",
-            t, [sube, $"RGD{Guid.NewGuid().ToString("N")[..8]}"], Iptal);
+            "insert into public.taraf (unvan, kod, personel, sube_id, cep_tel, eposta) values ('RG TEST DIS HEKIM', @p1, 1, @p0, @p2, 'd@test.tr') returning id",
+            t, [sube, $"RGD{Guid.NewGuid().ToString("N")[..8]}", $"0545{Random.Shared.Next(1000000, 9999999)}"], Iptal);
         await b.CalistirAsync(
             "insert into public.taraf_personel (id, dis_hekim, rapor_bildirim, sube_id) values (@p0, 1, @p1, @p2)",
             t, [hekim, hekimTercih, sube], Iptal);
