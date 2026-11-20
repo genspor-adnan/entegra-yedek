@@ -65,7 +65,7 @@ public static class KullaniciYonetimUclari
             var kod = await b.TekDegerAsync<string>(
                 "select kod from public.taraf_kullanici where id = @p0 for update",
                 islem, [id], iptal);
-            if (string.IsNullOrEmpty(kod)) return Results.NotFound();
+            if (string.IsNullOrEmpty(kod)) return HataSonucu.Bulunamadi();
 
             await b.CalistirAsync("""
                 update public.taraf_kullanici
@@ -115,7 +115,7 @@ public static class KullaniciYonetimUclari
                        degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, baglam.KullaniciId], iptal);
-            if (etkilenen == 0) return Results.NotFound();
+            if (etkilenen == 0) return HataSonucu.Bulunamadi();
 
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogTabloKullanici, id,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
@@ -177,7 +177,7 @@ public static class KullaniciYonetimUclari
                    set aktif = @p1, degistiren = @p2, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, (short)(aktif ? 1 : 0), baglam.KullaniciId], iptal);
-            if (etkilenen == 0) return Results.NotFound();
+            if (etkilenen == 0) return HataSonucu.Bulunamadi();
 
             if (!aktif) await OturumDeposu.KullaniciOturumlariniKapatAsync(b, islem, id, "pasif", iptal);
 

@@ -67,7 +67,7 @@ public static class FiyatListesiUclari
             int subeId;
             await using (var o = await kontrol.ExecuteReaderAsync(iptal))
             {
-                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                if (!await o.ReadAsync(iptal)) return HataSonucu.Bulunamadi();
                 ad = o.GetString(0);
                 subeId = o.GetInt32(1);
             }
@@ -133,7 +133,7 @@ public static class FiyatListesiUclari
             int subeId;
             await using (var o = await kontrol.ExecuteReaderAsync(iptal))
             {
-                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                if (!await o.ReadAsync(iptal)) return HataSonucu.Bulunamadi();
                 ad = o.GetString(0);
                 subeId = o.GetInt32(1);
             }
@@ -181,7 +181,7 @@ public static class FiyatListesiUclari
             int tip, subeId;
             await using (var o = await kontrol.ExecuteReaderAsync(iptal))
             {
-                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                if (!await o.ReadAsync(iptal)) return HataSonucu.Bulunamadi();
                 ad = o.GetString(0);
                 tip = o.GetInt16(1);
                 subeId = o.GetInt32(2);
@@ -250,7 +250,7 @@ public static class FiyatListesiUclari
             int tip, subeId;
             await using (var o = await kontrol.ExecuteReaderAsync(iptal))
             {
-                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                if (!await o.ReadAsync(iptal)) return HataSonucu.Bulunamadi();
                 listeAdi = o.GetString(0);
                 tip = o.GetInt16(1);
                 subeId = o.GetInt32(2);
@@ -630,7 +630,7 @@ public static class FiyatListesiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var liste = await ListeBulAsync(baglanti, id, baglam, iptal);
-            if (liste is null) return Results.NotFound();
+            if (liste is null) return HataSonucu.Bulunamadi();
 
             byte[] icerik;
             if (dolu == 1)
@@ -690,7 +690,7 @@ public static class FiyatListesiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var liste = await ListeBulAsync(baglanti, id, baglam, iptal);
-            if (liste is null) return Results.NotFound();
+            if (liste is null) return HataSonucu.Bulunamadi();
 
             ExcelOkuma.Sayfa sayfa;
             await using (var akis = dosya.OpenReadStream())

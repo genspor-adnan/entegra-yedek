@@ -286,7 +286,7 @@ public static class IceriAlmaUclari
             await using var komut = baglanti.Komut(
                 "delete from public.iceri_alma_kurali where id = @p0", null, id);
             var silinen = await komut.ExecuteNonQueryAsync(iptal);
-            return silinen == 0 ? Results.NotFound() : Results.Ok(new { id });
+            return silinen == 0 ? HataSonucu.Bulunamadi() : Results.Ok(new { id });
         }).WithTags("IceriAlma").RequireAuthorization();
 
         // ----------------------------------------------------------- sablon ----

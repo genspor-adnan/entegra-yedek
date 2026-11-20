@@ -313,7 +313,7 @@ public static class EnabizUclari
                 """, [id],
                 o => new { Durum = o.GetInt16(0), Kaynak = o.GetInt32(1),
                            Takip = o.GetString(2), Kod = o.GetString(3) }, iptal);
-            if (p is null) return Results.NotFound();
+            if (p is null) return HataSonucu.Bulunamadi();
 
             // --- GONDERILMIS PAKET: USS'ye SILME paketi gonderilir ---
             if (p.Durum == 3)

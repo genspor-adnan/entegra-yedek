@@ -303,7 +303,7 @@ public static class KimlikUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var h = await depo.HesapBilgisiAsync(baglam.KullaniciId, iptal);
-            if (h is null) return Results.NotFound();
+            if (h is null) return HataSonucu.Bulunamadi();
             return Results.Ok(new
             {
                 unvan = h.Unvan, gorev = h.Gorev,
@@ -366,7 +366,7 @@ public static class KimlikUclari
             // Sahiplik kontrolu SQL'in icinde: baskasinin oturum kimligini
             //   yazan istek 0 satir kapatir ve 404 alir.
             var kapanan = await depo.KendiOturumunuKapatAsync(baglam.KullaniciId, oturumId, iptal);
-            if (kapanan == 0) return Results.NotFound();
+            if (kapanan == 0) return HataSonucu.Bulunamadi();
             return Results.Ok(new { kapanan });
         }).RequireAuthorization()
           .SinirliOturumaAcik(SinirliOturum.Subesiz);

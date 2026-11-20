@@ -35,7 +35,7 @@ public static class AyarUclari
         {
             await cozucu.CozAsync(ctx, iptal);
             var y = await depo.YardimAsync(anahtar, iptal);
-            return y is null ? Results.NotFound() : Results.Ok(y);
+            return y is null ? HataSonucu.Bulunamadi() : Results.Ok(y);
         }).WithTags("Ayar").RequireAuthorization();
 
         grup.MapPut("/{anahtar}", async (

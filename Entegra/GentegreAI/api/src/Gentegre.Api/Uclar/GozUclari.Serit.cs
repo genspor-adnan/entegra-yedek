@@ -101,7 +101,7 @@ public static partial class GozUclari
                 oda = o.GetString(16),
             }, iptal);
 
-            if (kimlik is null) return Results.NotFound();
+            if (kimlik is null) return HataSonucu.Bulunamadi();
 
             // ÖN TETKİK: kaynağı CİHAZ olan ölçümler ve saatleri. Hekimin
             //   "bunu tekniker ölçtü mü" sorusunun cevabı; elle girilen

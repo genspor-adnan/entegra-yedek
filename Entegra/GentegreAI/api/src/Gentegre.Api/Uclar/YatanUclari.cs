@@ -217,7 +217,7 @@ public static partial class YatanUclari
                 yatakId = o.IsDBNull(33) ? (int?)null : o.GetInt32(33),
             }, iptal);
 
-            if (ozet is null) return Results.NotFound();
+            if (ozet is null) return HataSonucu.Bulunamadi();
 
             // RİSK ÖLÇEKLERİ dönemseldir (yatışta + her 24 saatte): son değer
             //   YAŞIYLA birlikte döner, ekran "süresi geçti" diyebilsin.

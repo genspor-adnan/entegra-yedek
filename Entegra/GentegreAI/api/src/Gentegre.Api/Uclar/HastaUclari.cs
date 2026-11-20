@@ -83,7 +83,7 @@ public static class HastaUclari
             baglam.YetkiIste("hasta", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
             var o = await b.TekAsync(KartOzetiSql, null, [id], OzetOku, iptal);
-            return o is null ? Results.NotFound() : Results.Ok(o);
+            return o is null ? HataSonucu.Bulunamadi() : Results.Ok(o);
         });
     }
 

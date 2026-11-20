@@ -46,7 +46,7 @@ public static class BildirimSablonKartUclari
                     sistem = o.GetInt32(3) == 1, gonderen = o.GetString(4), hesap = o.GetString(5),
                     buAy = o.GetInt32(6), hatali = o.GetInt32(7),
                 }, iptal);
-            return ozet is null ? Results.NotFound() : Results.Ok(ozet);
+            return ozet is null ? HataSonucu.Bulunamadi() : Results.Ok(ozet);
         });
 
         grup.MapPost("/{id:int}/deneme", async (int id, DenemeIstegi istek, VeriKaynagi veri, BaglamCozucu cozucu,
