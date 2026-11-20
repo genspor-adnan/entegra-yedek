@@ -10021,3 +10021,72 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .mi.cs-m-kir     { border-left-color: var(--hata); color: var(--hata) }
 .mi.cs-m-gri     { border-left-color: var(--soluk); color: var(--soluk) }
 .mi.cs-m:hover   { background: var(--mor2, #f3f8ff) }
+/* AÇIK RAPOR SAYFASI /r/{kod} (1389, mockup Ekranlar/Radyoloji/radyoloji_rapor_hasta_goruntuleme.html): solda e-imza
+   paneli, sağda rapor; telefonda panel tek satıra iner. Sınıflar `ra-` önekli. Yazdırmada yalnız rapor kalır. */
+.ra-sayfa { min-height: 100vh; background: var(--zemin, #eef1f5); color: var(--metin, #1f2d3a); display: flex; flex-direction: column }
+.ra-ust { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: linear-gradient(#fff, #f6f9fc);
+  border-bottom: 1px solid var(--cizgi2, #e3e9f0) }
+.ra-logo { width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, #3b7cc4, #14315a); color: #fff;
+  display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: 0 0 auto }
+.ra-kurum { min-width: 0 }
+.ra-kurum b { display: block; color: var(--lacivert, #14315a); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ra-kurum span { color: var(--soluk); font-size: 11.5px }
+.ra-ust-sag { margin-left: auto; display: flex; gap: 6px; align-items: center; flex: 0 0 auto }
+.ra-rozet { border-radius: 10px; padding: 2px 10px; font-size: 11px; font-weight: 700; white-space: nowrap }
+.ra-rozet.ok { background: var(--okzem, #e2f3e8); color: var(--ok); border: 1px solid #bfe3cb }
+.ra-rozet.sari { background: #fbf3df; color: #a9791a; border: 1px solid #ecd9a6 }
+.ra-govde { display: grid; grid-template-columns: 300px minmax(0, 1fr); flex: 1; min-height: 0 }
+.ra-panel { background: #f7f9fc; border-right: 1px solid var(--cizgi2, #e3e9f0); padding: 12px; display: flex; flex-direction: column; gap: 10px }
+.ra-kutu { background: #fff; border: 1px solid var(--cizgi2, #e3e9f0); border-radius: 6px; padding: 9px 11px }
+.ra-kutu h4 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--soluk); font-weight: 400 }
+.ra-kutu.gecerli { border-color: #bfe3cb; background: linear-gradient(#f4fbf6, #fff) }
+.ra-buyuk { display: flex; gap: 9px; align-items: center }
+.ra-buyuk b { color: var(--ok); font-size: 13.5px } .ra-buyuk b.sari { color: #a9791a }
+.ra-buyuk div span { display: block; color: var(--soluk); font-size: 11px }
+.ra-tik { width: 32px; height: 32px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center;
+  font-size: 17px; flex: 0 0 auto; font-style: normal }
+.ra-tik.sari { background: #c9972b }
+.ra-satir { display: grid; grid-template-columns: 96px 1fr; gap: 6px; padding: 3px 0; font-size: 11.5px; border-top: 1px dotted var(--cizgi2, #e3e9f0) }
+.ra-kutu h4 + .ra-satir { border-top: 0 }
+.ra-satir > span { color: var(--soluk) }
+.ra-satir b { font-weight: 600; word-break: break-word }
+.ra-satir b.mono { font-family: Consolas, monospace; font-size: 10.5px; font-weight: 400 }
+.ra-indir { justify-content: center; text-align: center; text-decoration: none }
+.ra-kucuk { font-size: 10.5px; color: var(--soluk); line-height: 1.5 }
+.ra-sag { min-width: 0; display: flex; flex-direction: column }
+.ra-sekme { display: flex; gap: 2px; padding: 0 12px; background: #e9eef4; border-bottom: 1px solid var(--cizgi, #cdd6e0) }
+.ra-sekme button { padding: 7px 14px; font-size: 12px; background: #e1e8f0; border: 1px solid var(--cizgi, #cdd6e0); border-bottom: none;
+  border-radius: 4px 4px 0 0; margin-top: 5px; color: var(--soluk); position: relative; top: 1px; cursor: pointer }
+.ra-sekme button.on { background: #fff; color: var(--lacivert, #14315a); font-weight: 700 }
+.ra-rapor { overflow: auto }
+.ra-belge { padding: 22px 26px; max-width: 640px; line-height: 1.6 }
+.ra-belge h3 { margin: 0 0 8px; color: var(--lacivert, #14315a) }
+.ra-belge a { display: inline-flex; text-decoration: none; margin-top: 6px }
+.ra-m-imza { display: none }
+.ra-durum { flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; text-align: center; padding: 40px 18px }
+.ra-durum-ikon { width: 58px; height: 58px; border-radius: 50%; background: #e3edf8; color: var(--mavi, #2f6db3); display: grid; place-items: center; font-size: 26px }
+.ra-durum h2 { margin: 0; font-size: 17px; color: var(--lacivert, #14315a) }
+.ra-durum p { margin: 0; color: var(--soluk); line-height: 1.55; max-width: 360px }
+.ra-ara { text-decoration: none; font-size: 14px; padding: 8px 16px }
+@media (max-width: 860px) {
+  .ra-govde { display: block }
+  .ra-panel { display: none; border-right: 0; border-bottom: 1px solid var(--cizgi2, #e3e9f0) }
+  .ra-panel.acik { display: flex }
+  .ra-m-imza { display: flex; gap: 8px; align-items: center; margin: 10px; padding: 8px 10px; border: 1px solid #bfe3cb;
+    background: linear-gradient(#f4fbf6, #fff); border-radius: 6px; text-align: left; cursor: pointer; font: inherit; color: inherit }
+  .ra-m-imza > span:nth-child(2) { flex: 1; min-width: 0 }
+  .ra-m-imza b { display: block; color: var(--ok); font-size: 12.5px }
+  .ra-m-imza.sari { border-color: #ecd9a6; background: linear-gradient(#fdf8ea, #fff) }
+  .ra-m-imza.sari b { color: #a9791a }
+  .ra-m-imza span span { display: block; color: var(--soluk); font-size: 10.5px }
+  .ra-m-imza .ra-tik { width: 28px; height: 28px; font-size: 14px }
+  .ra-m-imza .ra-ok { color: var(--mavi, #2f6db3); font-size: 11px; white-space: nowrap }
+  .ra-rapor { padding: 4px }
+  .ra-rapor .cikti-sayfa { padding: 14px 12px; min-height: 0; border: 0; box-shadow: none; width: auto }
+  .ra-ust-sag .d { padding: 4px 8px; font-size: 11px }
+}
+@media print {
+  .ra-ust, .ra-panel, .ra-panel.acik, .ra-sekme, .ra-m-imza { display: none !important }
+  .ra-sayfa { background: #fff; min-height: 0 } .ra-govde { display: block }
+  .ra-rapor { padding: 0; overflow: visible }
+}

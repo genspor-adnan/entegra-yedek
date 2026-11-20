@@ -105,6 +105,7 @@ import { arizaUclari } from './uclar/ariza';
 import { basvuruIstemUclari } from './uclar/basvuruIstem';
 import { kasaUclari } from './uclar/kasa';
 import { cekSenetIslemUclari } from './uclar/cekSenetIslem';
+import { raporGonderimUclari } from './uclar/raporGonderim';
 import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
 import { dokumUclari } from './uclar/dokum';
@@ -224,6 +225,7 @@ export const api = {
   ...ayarUclari,
   ...kasaUclari,
   ...cekSenetIslemUclari,
+  ...raporGonderimUclari,
   ...iskontoUclari,
   ...iceriAlmaUclari,
   ...dokumUclari,

@@ -161,6 +161,7 @@ const FtrProgramKarti = tembel(() => import('./sayfalar/ftr/FtrProgramKarti'), '
 const FtrSeansKarti = tembel(() => import('./sayfalar/ftr/FtrSeansKarti'), 'FtrSeansKarti');
 const FtrPano = tembel(() => import('./sayfalar/ftr/FtrPano'), 'FtrPano');
 const FormAcik = tembel(() => import('./sayfalar/form/FormAcik'), 'FormAcik');
+const RaporAcik = tembel(() => import('./sayfalar/radyoloji/RaporAcik'), 'RaporAcik');
 const FormDoldur = tembel(() => import('./sayfalar/form/FormDoldur'), 'FormDoldur');
 const HastaFormlari = tembel(() => import('./sayfalar/form/HastaFormlari'), 'HastaFormlari');
 const FormKutuphane = tembel(() => import('./sayfalar/form/FormKutuphane'), 'FormKutuphane');
@@ -199,6 +200,9 @@ function Yollar() {
   // ACIK FORM SAYFASI (740): /f/{kod} - hastanin telefonunda, OTURUMSUZ. Giris
   //   ekranindan ONCE: kimlik kaniti bağlantı + TCKN son 4, JWT degil.
   if (konum.pathname.startsWith('/f/')) return <Routes><Route path="/f/:kod" element={<FormAcik />} /></Routes>;
+
+  // AÇIK RAPOR SAYFASI (1389): /r/{kod} - hastanın / gönderen doktorun telefonunda, OTURUMSUZ (karekod / SMS bağlantısı).
+  if (konum.pathname.startsWith('/r/')) return <Routes><Route path="/r/:kod" element={<RaporAcik />} /></Routes>;
 
   // PORTAL DAVETI (822): /davet/{jeton} - hastanin telefonunda, OTURUMSUZ.
   //   Giris ekranindan ONCE: kisi henuz kullanici degil, hesabini burada acar.
