@@ -166,6 +166,26 @@
   table.kural th{background:#eef2f7;text-align:left;padding:5px 8px;border:1px solid var(--line2);color:var(--muted);font-weight:normal}
   table.kural td{padding:5px 8px;border:1px solid var(--line2);vertical-align:middle}
   table.kural tr.sec td{background:#f3f8ff}
+
+  /* ---------- 7-9: LABORATUVAR ---------- */
+  .ayrim{max-width:1240px;margin:34px auto 0;padding:10px 14px;background:linear-gradient(#14315a,#1d4478);color:#fff;border-radius:6px;font-size:14px;font-weight:bold;letter-spacing:.4px}
+  .ayrim span{font-weight:normal;font-size:11.5px;opacity:.85;margin-left:10px}
+  table.sonuc{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+  table.sonuc th{background:#eef2f7;text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);color:var(--muted);font-weight:normal;font-size:11px}
+  table.sonuc td{padding:5px 8px;border-bottom:1px solid var(--line2)}
+  table.sonuc tr.grup td{background:#f7f9fc;font-weight:bold;color:var(--navy);font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+  table.sonuc td.s{text-align:right;font-weight:bold;white-space:nowrap}
+  table.sonuc td.yuk{color:var(--hata)} table.sonuc td.dus{color:#2a5f9c}
+  table.sonuc td.ref{color:var(--muted);white-space:nowrap}
+  .isr{display:inline-block;min-width:16px;text-align:center;border-radius:3px;font-size:10px;font-weight:bold;padding:0 3px;margin-left:4px}
+  .isr.h{background:var(--hatazem);color:var(--hata)} .isr.l{background:#e3edf8;color:#2a5f9c}
+  .gizli-not{border:1px dashed #ecd9a6;background:var(--uyarizem);color:#7a5a12;border-radius:5px;padding:8px 10px;font-size:11.5px;line-height:1.5;margin-bottom:10px}
+  .bekleyen-not{border:1px dashed var(--line);background:#f7f9fc;color:var(--muted);border-radius:5px;padding:8px 10px;font-size:11.5px;line-height:1.5}
+  .m-sonuc{padding:6px 10px 10px;flex:1;font-size:11.5px}
+  .m-sonuc .grp{font-size:10.5px;color:var(--navy);font-weight:bold;text-transform:uppercase;letter-spacing:.4px;margin:8px 0 2px}
+  .m-sonuc .t{display:grid;grid-template-columns:1fr auto;gap:6px;padding:4px 0;border-bottom:1px solid var(--line2)}
+  .m-sonuc .t small{display:block;color:var(--muted);font-size:10px}
+  .m-sonuc .t b{white-space:nowrap}
   @media (max-width:860px){ .govde{grid-template-columns:1fr} .panel{border-right:0;border-bottom:1px solid var(--line2)} }
 </style>
 </head>
@@ -457,6 +477,182 @@
 <p class="aciklama">
   Borç kontrolü <b>açılış anında</b> da yapılır: SMS gitmiş olsa bile sonradan borç doğarsa (ör. tahsilat iptali) bağlantı kapanır.
   Hekim sayfası bölüm 2'deki sayfanın aynısıdır (solda e-imza paneli, sağda rapor); telefonda yukarıdaki gibi görünür.
+</p>
+
+<div class="ayrim">LABORATUVAR — aynı gönderim altyapısı <span>karekod / SMS bağlantısı · zaman kuralları · borç kuralı · teslim listesi (öneri; kararlar aşağıda işaretli)</span></div>
+
+<!-- ================================================================== 7 -->
+<h2><b>7</b> — Lab sonuç sayfası (hasta): solda onay bilgisi, sağda sonuç tablosu <span class="ipucu">bağlantı başvuru başına tek · /r/kod</span></h2>
+<div class="tarayici">
+  <div class="adres"><span class="kilit">🔒</span><span class="url">https://rapor.kurum.com/r/5HN8-QW3D</span></div>
+  <div class="ust">
+    <div class="logo">GT</div>
+    <div class="kurum"><b>Genotip Tıp Merkezi</b><span>Laboratuvar sonuçları · Protokol GT-2026-118310</span></div>
+    <div class="sag"><span class="rozet ok">✔ Onaylı</span><div class="btn">🖨 Yazdır / PDF</div></div>
+  </div>
+  <div class="govde">
+    <div class="panel">
+      <div class="kutu gecerli">
+        <div class="buyuk"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>14 testin tamamı uzman onayından geçti.</span></div></div>
+      </div>
+      <div class="kutu">
+        <h4>🧪 Numune</h4>
+        <div class="satir"><span>Numune alma</span><b>20.11.2026 08:42</b></div>
+        <div class="satir"><span>Laboratuvara kabul</span><b>20.11.2026 09:05</b></div>
+        <div class="satir"><span>Sonuç onayı</span><b>20.11.2026 13:20</b></div>
+      </div>
+      <div class="kutu">
+        <h4>✍ Onaylayan</h4>
+        <div class="satir"><span>Uzman</span><b>Uzm. Dr. Elif Arslan</b></div>
+        <div class="satir"><span>Branş</span><b>Tıbbi Biyokimya</b></div>
+        <div class="satir"><span>İsteyen hekim</span><b>Dr. Kemal Aras</b></div>
+      </div>
+      <div class="kutu">
+        <h4>🔗 Bağlantı</h4>
+        <div class="satir"><span>Geçerlilik</span><b>20.12.2026'ya kadar</b></div>
+      </div>
+      <div class="kucuk">Sonuçlar, isteyen hekiminizin değerlendirmesiyle birlikte anlam taşır. Referans aralıkları yaş ve cinsiyete göredir.</div>
+    </div>
+    <div>
+      <div class="sekme"><div class="on">Sonuçlar</div><div>Önceki sonuçlarla karşılaştır</div></div>
+      <div class="rapor">
+        <div class="bant"><b>LABORATUVAR SONUÇ RAPORU</b><span>Protokol GT-2026-118310<br>Onay: 20.11.2026 13:20</span></div>
+        <div class="bilgi">
+          <div><span>Hasta</span><br><b>Mehmet Demir</b></div>
+          <div><span>Doğum / Cinsiyet</span><br><b>1971 · Erkek</b></div>
+          <div><span>İsteyen hekim</span><br><b>Dr. Kemal Aras</b></div>
+        </div>
+        <table class="sonuc">
+          <thead><tr><th>Test</th><th style="text-align:right">Sonuç</th><th>Birim</th><th>Referans aralığı</th></tr></thead>
+          <tbody>
+            <tr class="grup"><td colspan="4">Biyokimya</td></tr>
+            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">70 – 100</td></tr>
+            <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td></tr>
+            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td></tr>
+            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 130</td></tr>
+            <tr class="grup"><td colspan="4">Hematoloji</td></tr>
+            <tr><td>Hemoglobin</td><td class="s dus">12,8 <span class="isr l">L</span></td><td>g/dL</td><td class="ref">13,5 – 17,5</td></tr>
+            <tr><td>Lökosit (WBC)</td><td class="s">6,4</td><td>10³/µL</td><td class="ref">4,0 – 10,0</td></tr>
+            <tr><td>Trombosit</td><td class="s">248</td><td>10³/µL</td><td class="ref">150 – 400</td></tr>
+            <tr class="grup"><td colspan="4">Hormon</td></tr>
+            <tr><td>TSH</td><td class="s">2,14</td><td>µIU/mL</td><td class="ref">0,27 – 4,20</td></tr>
+          </tbody>
+        </table>
+        <div class="gizli-not">ℹ <b>1 testinizin</b> sonucu bu sayfada gösterilmez. Bu sonuç için lütfen hekiminize ya da kurumumuza başvurun: <b>0216 000 00 00</b></div>
+        <div class="imzablok"><div>Uzm. Dr. Elif Arslan<br>Tıbbi Biyokimya Uzmanı<small>✔ Onaylandı · 20.11.2026 13:20</small></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="yan" style="margin-top:10px">
+  <div class="telefon"><div class="ekran">
+    <div class="adres"><span class="kilit">🔒</span><span class="url">rapor.kurum.com/r/5HN8-QW3D</span></div>
+    <div class="ust"><div class="logo">GT</div><div class="kurum"><b>Genotip Tıp Merkezi</b><span>Laboratuvar · 20.11.2026</span></div></div>
+    <div class="m-imza"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>Uzm. Dr. Elif Arslan · 13:20</span></div><span class="ok">Ayrıntı ›</span></div>
+    <div class="m-sonuc">
+      <div class="grp">Biyokimya</div>
+      <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small></span><b style="color:var(--hata)">126 <span class="isr h">H</span></b></div>
+      <div class="t"><span>Kreatinin<small>0,70 – 1,20 mg/dL</small></span><b>0,92</b></div>
+      <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small></span><b style="color:var(--hata)">162 <span class="isr h">H</span></b></div>
+      <div class="grp">Hematoloji</div>
+      <div class="t"><span>Hemoglobin<small>13,5 – 17,5 g/dL</small></span><b style="color:#2a5f9c">12,8 <span class="isr l">L</span></b></div>
+      <div class="t"><span>Lökosit (WBC)<small>4,0 – 10,0 10³/µL</small></span><b>6,4</b></div>
+    </div>
+    <div class="m-alt"><div class="btn bir">⬇ PDF</div><div class="btn">↗ Paylaş</div></div>
+  </div></div>
+  <div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:8px">
+    <div class="kutu"><h4>Bağlantı ne zaman gider (öneri)</h4>
+      <div class="satir"><span>Tetik</span><b>Başvurunun lab istemlerindeki testlerin <u>tamamı</u> onaylanınca (elle onay, otomatik onay, kültür ve genetik onayı dahil).</b></div>
+      <div class="satir"><span>Tek bağlantı</span><b>Bir başvuruda birden çok lab istemi olsa da hasta <u>tek</u> SMS ve tek bağlantı alır; sayfada hepsi bölüm bölüm görünür.</b></div>
+      <div class="satir"><span>Uzun süren test</span><b>Ayarda "bekleme" işaretli test (ör. kültür) varsa diğerleri onu beklemez; sayfada "1 test çalışılıyor" notu çıkar, o da onaylanınca ikinci SMS gider.</b></div>
+      <div class="satir"><span>Düzeltme</span><b>Onaylı sonuç düzeltilirse bekleyen gönderim iptal olur, bağlantı "sonuç güncelleniyor" gösterir; yeniden onayda aynı bağlantı çalışır.</b></div>
+    </div>
+    <div class="kutu"><h4>Bağlantıda gösterilmeyen testler (öneri)</h4>
+      <div class="satir"><span>İşaret</span><b>Test kartında yeni seçenek: <u>"Hasta bağlantısında gösterme"</u> (HIV, hepatit, gebelik, genetik gibi).</b></div>
+      <div class="satir"><span>Hastada</span><b>Sonuç yerine "1 testinizin sonucu bu sayfada gösterilmez" notu (testin adı da yazmaz).</b></div>
+      <div class="satir"><span>Doktorda</span><b>Gönderen dış doktorun bağlantısında bu testler <u>görünür</u>.</b></div>
+    </div>
+    <div class="bekleyen-not">⏳ <b>Kısmi durumda sayfa:</b> "İdrar kültürü çalışılıyor - sonuçlandığında bu sayfada görünecek ve size yeniden haber verilecek."</div>
+  </div>
+</div>
+<p class="aciklama">
+  Lab sayfası radyolojideki sayfanın aynı kabuğu: üstte kurum, solda panel, sağda içerik; telefonda panel tek satıra iner. Lab'da e-imza yok - panel
+  <b>onay bilgisini</b> gösterir (numune alma, kabul, onay zamanı, onaylayan uzman). Sağda mevcut sonuç çıktısının içeriği: bölüm bölüm test, sonuç, birim, referans aralığı;
+  referans dışı sonuçlar renkli ve <b>H / L</b> işaretli. Kültür ve antibiyogram varsa tablonun altında, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
+  Borç, süre ve iptal ekranları radyolojiyle aynı (bölüm 6).
+</p>
+
+<!-- ================================================================== 8 -->
+<h2><b>8</b> — Laboratuvar › Ayarlar › Sonuç Gönderimi Ayarı <span class="ipucu">radyolojiyle aynı ekran, ayrı kural seti</span></h2>
+<div class="ayar">
+  <div class="bas">📨 Sonuç Gönderimi Ayarı <span style="font-weight:normal;color:var(--muted);font-size:11.5px">— Laboratuvar · Merkez Şube</span>
+    <span style="margin-left:auto" class="btn bir">💾 Kaydet</span></div>
+  <div class="ic">
+    <div class="grup"><h4>Otomatik gönderim</h4>
+      <div class="asat"><span>Otomatik gönderim</span><div><span class="cb"><i class="on">✓</i> Sonuçların tamamı onaylanınca gönder</span></div></div>
+      <div class="asat"><span>Ne zaman</span><div>Aşağıdaki <b>Gönderim zamanı kuralları</b> tablosundan (test › bölüm › tümü)</div></div>
+      <div class="asat"><span>Panik değerli sonuçta</span><div><span class="kutucuk">0</span> dakika sonra
+        <div class="ipucu2"><b>0</b> = otomatik gitmez, elle gönderilir (hasta sonucu önce hekimden duysun). Başvuruda tek bir panik değer varsa tüm gönderim bu kurala uyar.</div></div></div>
+      <div class="asat"><span>Bağlantı geçerliliği</span><div><span class="kutucuk">30</span> gün</div></div>
+    </div>
+    <div class="grup"><h4>Borç kuralı ve alıcılar</h4>
+      <div class="asat"><span>Borç kontrolü</span><div><span class="cb"><i class="on">✓</i> Başvurunun borcu varken gönderme</span></div></div>
+      <div class="asat"><span>Hastaya</span><div><span class="cb"><i class="on">✓</i> SMS</span><span class="cb"><i>&nbsp;</i> E-posta</span></div></div>
+      <div class="asat"><span>Gönderen dış doktora</span><div>Kartında "Rapor Bildirimi" seçili doktorlara (radyolojiyle aynı tercih)</div></div>
+      <div class="ipucu2">Borç kuralı radyolojiyle aynı: yalnız o başvuru; hastayı ve dış doktoru birlikte durdurur; bağlantı da açılmaz; borç kapanınca kendiliğinden gider.</div>
+    </div>
+    <div class="grup" style="grid-column:1 / -1"><h4>Gönderim zamanı kuralları <span style="text-transform:none;letter-spacing:0">— öncelik: <b style="color:var(--ink)">Test</b> › <b style="color:var(--ink)">Bölüm</b> › <b style="color:var(--ink)">Tümü</b></span></h4>
+      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="btn">＋ Satır</span></div>
+      <table class="kural">
+        <thead><tr><th style="width:130px">Kapsam</th><th>Seçim</th><th style="width:300px">Gönderim zamanı</th><th style="width:150px">Diğerleri beklesin mi</th><th style="width:70px">Aktif</th></tr></thead>
+        <tbody>
+          <tr><td><span class="d yok">Tümü</span></td><td style="color:var(--muted)">— bütün testler —</td><td><b>1 saat sonra</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
+          <tr><td><span class="d plan">Bölüm</span></td><td><b>Hormon</b></td><td><b>Ertesi gün saat 10:00</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
+          <tr><td><span class="d plan">Bölüm</span></td><td><b>Mikrobiyoloji</b></td><td><b>Hemen</b></td><td><span class="d hata">Beklemez</span></td><td>✓</td></tr>
+          <tr><td><span class="d acildi">Test</span></td><td><b>HBA1C</b> Glikozile hemoglobin</td><td><b>2 saat sonra</b></td><td><span class="d gitti">Bekler</span></td><td>✓</td></tr>
+        </tbody>
+      </table>
+      <div class="ipucu2">
+        <b>Zaman:</b> başvurudaki testlerin kurallarından <b>en geç</b> olanı uygulanır (tek SMS gider). Örnek: Glukoz (Tümü → 1 saat) + TSH (Hormon → ertesi gün 10:00) → ertesi gün 10:00.
+        <b>"Beklemez"</b> işaretli bölüm / test tamamlanmasa da diğerleri gönderilir (ör. idrar kültürü 3 gün sürer); o sonuç onaylanınca ikinci bildirim gider.
+      </div>
+    </div>
+  </div>
+</div>
+<p class="aciklama">
+  Radyolojideki <b>Rapor Gönderimi Ayarı</b> ile aynı düzen ve aynı Kaydet davranışı. Farklar: kapsam <b>Test / Bölüm / Tümü</b> (bölüm = Biyokimya, Hematoloji, Hormon, Mikrobiyoloji, Seroloji, Koagülasyon, İdrar);
+  bir başvuruda çok test olduğu için zaman <b>en geç kurala</b> göre; uzun süren testler için <b>"Beklemez"</b> kolonu; kritik bulgu yerine <b>panik değer</b> süresi.
+</p>
+
+<!-- ================================================================== 9 -->
+<h2><b>9</b> — Laboratuvar › Sonuç Teslim listesi <span class="ipucu">lab'da bugün teslim takibi yok - yeni liste</span></h2>
+<div class="liste">
+  <div class="arac">
+    <b>Laboratuvar Sonuç Teslim</b>
+    <span class="cip on">Teslim Bekleyen <b>31</b></span><span class="cip">Gönderim Bekleyen <b>12</b></span><span class="cip">Borçlu Bekleyen <b>4</b></span>
+    <span class="cip">Gönderilemeyen <b>2</b></span><span class="cip">Teslim Edilen</span><span class="cip">Tümü</span>
+    <span style="margin-left:auto" class="btn">✔ Teslim Et</span><span class="btn">📨 Gönderim ▾</span><span class="btn">🖨 Karekodlu Çıktı</span>
+  </div>
+  <table>
+    <thead><tr><th style="width:24px">☐</th><th>Sonuç Onayı</th><th>Hasta</th><th>Testler</th><th>Borç</th><th>Hastaya Gönderim</th><th>Dış Doktora Gönderim</th><th>Teslim</th></tr></thead>
+    <tbody>
+      <tr><td>☐</td><td>20.11.2026 13:20<small>Uzm. Dr. E. Arslan</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>14 test · tamamı onaylı<small>Biyokimya · Hematoloji · Hormon</small></td><td>—</td>
+          <td><span class="d plan">Planlandı</span><small>SMS · yarın 10:00 · kural: Bölüm Hormon</small></td><td><span class="d plan">Planlandı</span><small>Dr. K. Aras · SMS · yarın 10:00</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr class="sec"><td>☑</td><td>20.11.2026 12:05<small>Uzm. Dr. E. Arslan</small></td><td><b>Zeynep Arı</b><small>0505 *** 90 31</small></td><td>6 test · tamamı onaylı<small>Biyokimya</small></td><td><b style="color:var(--hata)">480,00 ₺</b></td>
+          <td><span class="d borc">Borç bekliyor</span><small>SMS · 13:05'te gidecekti</small></td><td><span class="d yok">Yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td>20.11.2026 11:48<small>otomatik onay</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>9 test · tamamı onaylı <span class="d kritik">Panik</span><small>Potasyum 6,8 mmol/L</small></td><td>—</td>
+          <td><span class="d yok">Hazır</span><small>panik değer · elle gönderilir</small></td><td><span class="d yok">Yok</span></td><td><span class="d yok">Bekliyor</span></td></tr>
+      <tr><td>☐</td><td>20.11.2026 10:30<small>Uzm. Dr. S. Koç</small></td><td><b>Fatma Öz</b><small>0530 *** 41 77</small></td><td>5 / 6 test onaylı<small>İdrar kültürü çalışılıyor (beklemez)</small></td><td>—</td>
+          <td><span class="d acildi">Açıldı</span><small>SMS 10:31 · açıldı 10:44 · 1 test bekliyor</small></td><td><span class="d yok">Yok</span></td><td><span class="d gitti">Dijital</span><small>Hasta (bağlantı) · 10:44</small></td></tr>
+      <tr><td>☐</td><td>19.11.2026 16:10<small>Uzm. Dr. E. Arslan</small></td><td><b>Ali Şen</b><small>telefon yok</small></td><td>3 test · tamamı onaylı<small>Seroloji · 1 test bağlantıda gösterilmez</small></td><td>—</td>
+          <td><span class="d hata">Gönderilemedi</span><small>cep telefonu kayıtlı değil</small></td><td><span class="d yok">Yok</span></td><td><span class="d gitti">Elden</span><small>Kendisi · 20.11 09:02 · A. Kaya teslim etti</small></td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="aciklama">
+  Radyoloji Rapor Teslim listesiyle aynı kolonlar ve aynı <b>Gönderim ▾</b> menüsü; satır <b>başvurudur</b> (o başvurunun bütün lab istemleri). "Testler" kolonu kaç testin onaylandığını,
+  panik değeri ve bağlantıda gösterilmeyen test sayısını söyler. Hasta bağlantıyı açınca teslim <b>Dijital</b> olur; elden teslim (basılı sonuç) ayrıca kaydedilebilir.
+  <b>Karekodlu Çıktı:</b> lab sonuç çıktısının köşesine de aynı karekod basılır.
 </p>
 
 </body>
