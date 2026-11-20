@@ -195,6 +195,29 @@
   table.sonuc td.onc.yuk{color:#b0554c} table.sonuc td.onc.dus{color:#5b82b3} table.sonuc td.onc.bos{color:#b7c2cd}
   table.sonuc td.onc .isr{opacity:.75}
   .m-sonuc .m-onc{margin-top:1px;color:#7a8794} .m-sonuc .m-onc b{color:#55657a;font-weight:600} .m-sonuc .m-onc b.yuk{color:#b0554c}
+  /* TETKİK SONUÇ RAPORU - Bakanlık biçimi (örnek raporlar: Ekranlar/Lab/GTL ve Anlaşmalı Lab önizlemeleri) */
+  .tsr{padding:16px 22px 18px}
+  .tsr-bas{display:flex;gap:12px;align-items:center;justify-content:center;text-align:center;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:8px}
+  .tsr-logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#3b7cc4,#14315a);color:#fff;display:grid;place-items:center;font-weight:bold}
+  .tsr-bas b{display:block;font-size:15px;color:var(--navy);letter-spacing:.3px}
+  .tsr-bas small{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.4px}
+  .tsr-kimlik,.tsr-zaman{display:grid;grid-template-columns:1fr 1fr;gap:2px 22px;border:1px solid var(--line);padding:7px 10px;font-size:11.5px;margin-bottom:6px}
+  .tsr-kimlik div,.tsr-zaman div{display:grid;grid-template-columns:150px 1fr;gap:6px}
+  .tsr-kimlik span,.tsr-zaman span{color:var(--muted)} .tsr-kimlik span::after,.tsr-zaman span::after{content:" :"}
+  .tsr-kimlik .tam{grid-column:1 / -1;border-top:1px solid var(--line2);padding-top:4px;margin-top:3px;grid-template-columns:150px auto 1fr}
+  .tsr-kimlik .tam em{font-style:normal;color:var(--muted);text-align:right}
+  .tsr-bolum{display:flex;justify-content:space-between;align-items:baseline;background:#eef2f7;padding:4px 10px;font-size:11.5px;border:1px solid var(--line);border-bottom:0}
+  .tsr-bolum b{font-size:13px;color:var(--navy)} .tsr-bolum span{color:var(--muted)}
+  table.tsr-tablo{border:1px solid var(--line)} table.tsr-tablo th{border-bottom:1px solid var(--line)}
+  table.tsr-tablo td small.num{display:block;color:var(--muted);font-size:9.5px;font-weight:normal}
+  table.tsr-tablo td.drm{text-align:center}
+  table.tsr-tablo td.ref{white-space:normal;line-height:1.5}
+  .tsr-lejant{display:flex;gap:18px;font-size:11px;color:var(--muted);margin:8px 0 2px}
+  .tsr-imza{display:flex;justify-content:flex-end;margin-top:12px}
+  .tsr-imza div{text-align:center;font-size:11.5px;line-height:1.5}
+  .tsr-imza small{color:var(--muted);font-size:10.5px} .tsr-imza em{display:block;font-style:normal;color:var(--ok);font-weight:bold;font-size:11px;margin-top:2px}
+  .tsr-dipnot{margin:12px 0 6px;padding-left:18px;font-size:10px;color:var(--muted);line-height:1.55;border-top:1px solid var(--line2);padding-top:6px}
+  .tsr-alt{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding-top:5px}
   @media (max-width:860px){ .govde{grid-template-columns:1fr} .panel{border-right:0;border-bottom:1px solid var(--line2)} }
 </style>
 </head>
@@ -501,12 +524,6 @@
         <div class="buyuk"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>Biyokimya bölümünün 8 testi uzman onayından geçti.</span></div></div>
       </div>
       <div class="kutu">
-        <h4>🧪 Numune</h4>
-        <div class="satir"><span>Numune alma</span><b>20.11.2026 08:42</b></div>
-        <div class="satir"><span>Laboratuvara kabul</span><b>20.11.2026 09:05</b></div>
-        <div class="satir"><span>Sonuç onayı</span><b>20.11.2026 13:20</b></div>
-      </div>
-      <div class="kutu">
         <h4>✍ Onaylayan</h4>
         <div class="satir"><span>Uzman</span><b>Uzm. Dr. Elif Arslan</b></div>
         <div class="satir"><span>Branş</span><b>Tıbbi Biyokimya</b></div>
@@ -520,32 +537,63 @@
     </div>
     <div>
       <div class="sekme"><div class="on">Sonuçlar</div></div>
-      <div class="rapor">
-        <div class="bant"><b>LABORATUVAR SONUÇ RAPORU</b><span>Protokol GT-2026-118310<br>Onay: 20.11.2026 13:20</span></div>
-        <div class="bilgi">
-          <div><span>Hasta</span><br><b>Mehmet Demir</b></div>
-          <div><span>Doğum / Cinsiyet</span><br><b>1971 · Erkek</b></div>
-          <div><span>İsteyen hekim</span><br><b>Dr. Kemal Aras</b></div>
+      <div class="rapor tsr">
+        <div class="tsr-bas">
+          <div class="tsr-logo">GT</div>
+          <div>
+            <small>GENOTİP TIP MERKEZİ</small>
+            <b>Tıbbi Laboratuvar Tetkik Sonuç Raporu</b>
+            <small>(Laboratuvar Ruhsat Numarası: 770-MRK)</small>
+          </div>
         </div>
-        <table class="sonuc">
-          <thead><tr><th>Test</th><th style="text-align:right">Sonuç<br><small>20.11.2026</small></th><th>Birim</th><th>Referans aralığı</th>
-            <th class="onc-b">Önceki<br><small>14.08.2026</small></th><th class="onc-b">Önceki<br><small>02.03.2026</small></th></tr></thead>
+        <div class="tsr-kimlik">
+          <div><span>Hastanın Adı, Soyadı</span><b>Mehmet Demir</b></div>
+          <div><span>Tetkiki İsteyen</span><b>Dr. Kemal Aras</b></div>
+          <div><span>T.C. Kimlik No</span><b>35*******32</b></div>
+          <div><span>Gönderileceği Yer</span><b>Dahiliye Polikliniği</b></div>
+          <div><span>Doğum Tarihi / Cinsiyet</span><b>14.03.1971 / Erkek</b></div>
+          <div><span>Kurum</span><b>Ücretli</b></div>
+          <div><span>Dosya No / Geliş No</span><b>5315618 / 2</b></div>
+          <div><span>Şube</span><b>Merkez</b></div>
+          <div class="tam"><span>Rapor Numarası</span><b>5315618.2.6906381.2026</b><em>Protokol / Barkod No: GT-2026-118310 / 8808590</em></div>
+        </div>
+        <div class="tsr-zaman">
+          <div><span>Tetkik İstem Zamanı</span><b>20.11.2026 08:15</b></div>
+          <div><span>Numune Kabul Zamanı</span><b>20.11.2026 09:05:12</b></div>
+          <div><span>Numune Alma Zamanı</span><b>20.11.2026 08:42</b></div>
+          <div><span>Uzman Onay Zamanı</span><b>20.11.2026 13:20:00</b></div>
+          <div><span>Numune Türü</span><b>Serum</b></div>
+          <div><span>Rapor Basım Zamanı</span><b>20.11.2026 15:21:53</b></div>
+        </div>
+        <div class="tsr-bolum"><b>Biyokimya</b><span>Uzman Onay Tarihi: 20.11.2026 13:20</span></div>
+        <table class="sonuc tsr-tablo">
+          <thead><tr><th>Tetkik Adı</th><th style="text-align:right">Sonuç</th><th style="width:44px">Durum</th><th>Birim</th><th>Referans Aralığı / Karar Sınırı</th>
+            <th class="onc-b" colspan="2">Geçmiş Sonuç<br><small>14.08.2026 &nbsp;·&nbsp; 02.03.2026</small></th></tr></thead>
           <tbody>
-            <tr class="grup"><td colspan="6">Biyokimya</td></tr>
-            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">70 – 100</td><td class="onc yuk">118 <span class="isr h">↑</span></td><td class="onc yuk">104 <span class="isr h">↑</span></td></tr>
-            <tr><td>Potasyum</td><td class="s yuk">6,8 <span class="isr h pnk" title="Panik değer">↑↑</span></td><td>mmol/L</td><td class="ref">3,5 – 5,1</td><td class="onc">4,6</td><td class="onc">4,4</td></tr>
-            <tr><td>Sodyum</td><td class="s dus">132 <span class="isr l">↓</span></td><td>mmol/L</td><td class="ref">136 – 145</td><td class="onc">138</td><td class="onc dus">134 <span class="isr l">↓</span></td></tr>
-            <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td><td class="onc">0,95</td><td class="onc">0,90</td></tr>
-            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td><td class="onc">31</td><td class="onc yuk">44 <span class="isr h">↑</span></td></tr>
-            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 130</td><td class="onc yuk">171 <span class="isr h">↑</span></td><td class="onc bos">—</td></tr>
-            <tr><td>Üre</td><td class="s">34</td><td>mg/dL</td><td class="ref">17 – 43</td><td class="onc">36</td><td class="onc">33</td></tr>
-            <tr><td>AST</td><td class="s">24</td><td>U/L</td><td class="ref">0 – 40</td><td class="onc">26</td><td class="onc">29</td></tr>
-            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 200</td><td class="onc yuk">246 <span class="isr h">↑</span></td><td class="onc bos">—</td></tr>
-            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td><td class="onc yuk">162 <span class="isr h">↑</span></td><td class="onc">139</td></tr>
+            <tr><td><b>Glukoz (açlık)</b><small class="num">Serum-8808590</small></td><td class="s yuk">126</td><td class="drm"><span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">70 – 100</td><td class="onc yuk">118 ↑</td><td class="onc yuk">104 ↑</td></tr>
+            <tr><td><b>Potasyum</b><small class="num">Serum-8808590</small></td><td class="s yuk">6,8</td><td class="drm"><span class="isr h pnk">↑↑</span></td><td>mmol/L</td><td class="ref">3,5 – 5,1</td><td class="onc">4,6</td><td class="onc">4,4</td></tr>
+            <tr><td><b>Sodyum</b><small class="num">Serum-8808590</small></td><td class="s dus">132</td><td class="drm"><span class="isr l">↓</span></td><td>mmol/L</td><td class="ref">136 – 145</td><td class="onc">138</td><td class="onc dus">134 ↓</td></tr>
+            <tr><td><b>Kreatinin</b><small class="num">Serum-8808590</small></td><td class="s">0,92</td><td class="drm"></td><td>mg/dL</td><td class="ref">0,70 – 1,20</td><td class="onc">0,95</td><td class="onc">0,90</td></tr>
+            <tr><td><b>ALT</b><small class="num">Serum-8808590</small></td><td class="s">28</td><td class="drm"></td><td>U/L</td><td class="ref">0 – 41</td><td class="onc">31</td><td class="onc yuk">44 ↑</td></tr>
+            <tr><td><b>LDL Kolesterol</b><small class="num">Serum-8808590</small></td><td class="s yuk">162</td><td class="drm"><span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 100 optimal<br>100 – 129 optimale yakın<br>130 – 159 sınırda yüksek<br>≥ 160 yüksek</td><td class="onc yuk">171 ↑</td><td class="onc bos">—</td></tr>
+            <tr><td><b>Total Kolesterol</b><small class="num">Serum-8808590</small></td><td class="s yuk">238</td><td class="drm"><span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 200</td><td class="onc yuk">246 ↑</td><td class="onc bos">—</td></tr>
+            <tr><td><b>Trigliserid</b><small class="num">Serum-8808590</small></td><td class="s">148</td><td class="drm"></td><td>mg/dL</td><td class="ref">&lt; 150</td><td class="onc yuk">162 ↑</td><td class="onc">139</td></tr>
           </tbody>
         </table>
         <div class="gizli-not">ℹ <b>1 testinizin</b> sonucu bu sayfada gösterilmez. Bu sonuç için lütfen hekiminize ya da kurumumuza başvurun: <b>0216 000 00 00</b></div>
-        <div class="imzablok"><div>Uzm. Dr. Elif Arslan<br>Tıbbi Biyokimya Uzmanı<small>✔ Onaylandı · 20.11.2026 13:20</small></div></div>
+        <div class="tsr-lejant"><span><span class="isr h">↑</span> Yüksek</span><span><span class="isr l">↓</span> Düşük</span>
+          <span><span class="isr h pnk">↑↑</span> Kritik Yüksek</span><span><span class="isr l pnk">↓↓</span> Kritik Düşük</span></div>
+        <div class="tsr-imza">
+          <div>Uzm. Dr. Elif ARSLAN<br>Tıbbi Biyokimya Uzmanı<br><small>Diploma No: 2003-014 · Uzmanlık Belge No: 76259-125385</small><em>✔ Onaylandı · 20.11.2026 13:20</em></div>
+        </div>
+        <ol class="tsr-dipnot">
+          <li>Onaysız ve imzasız raporlar geçersizdir.</li>
+          <li>Bu rapor, yalnızca analizi yapılan numuneyi kapsamaktadır.</li>
+          <li>Uygunsuz örnekler veya test sonuçları ile ilgili açıklamalar, varsa, ilgili testin altında not olarak belirtilmektedir.</li>
+          <li>(#) işaretli testler akreditasyon kapsamındadır; (+) işaretli testler kapsam dışındadır. (*) işaretli testler dış laboratuvarda çalışılmıştır.</li>
+          <li>Bu raporun doğruluğunu köşedeki karekodu okutarak ya da rapor.kurum.com/r/5HN8-QW3D adresinden denetleyebilirsiniz.</li>
+        </ol>
+        <div class="tsr-alt"><span>Genotip Tıp Merkezi · Eğitim Mah. Örnek Cad. No:1 Kadıköy / İstanbul · 0216 000 00 00</span><span>Bu raporun tamamı 1 sayfadır. · Sayfa 1/1</span></div>
       </div>
     </div>
   </div>
@@ -580,7 +628,7 @@
     <div class="kutu"><h4>İşaretler</h4>
       <div class="satir"><span><span class="isr h">↑</span> <span class="isr l">↓</span></span><b>Referans aralığının üstünde / altında (kırmızı yukarı ok, mavi aşağı ok).</b></div>
       <div class="satir"><span><span class="isr h pnk">↑↑</span> <span class="isr l pnk">↓↓</span></span><b>Panik değer: çift ok, dolu rozet (kritik yüksek / kritik düşük).</b></div>
-      <div class="satir"><span>Harf yok</span><b>H / L / HH / LL harfleri yerine ok - hasta için daha anlaşılır. Aynı işaretler basılı sonuç çıktısında da kullanılır.</b></div>
+      <div class="satir"><span>Harf yok</span><b>Ok işaretleri ayrı <u>Durum</u> kolonunda - Bakanlık örnek raporlarındaki gösterimle aynı (↑ Yüksek, ↓ Düşük, çift ok Kritik). Basılı çıktıda da aynı.</b></div>
     </div>
     <div class="kutu"><h4>Önceki iki sonuç</h4>
       <div class="satir"><span>Ne gösterilir</span><b>Her testin, hastanın kurumdaki <u>son iki</u> onaylı sonucu (bu başvurudan önceki), tarihleriyle. Referans dışıysa soluk kırmızı / mavi ve ↑ / ↓ ok.</b></div>
@@ -592,10 +640,11 @@
   </div>
 </div>
 <p class="aciklama">
-  Lab sayfası radyolojideki sayfanın aynı kabuğu: üstte kurum, solda panel, sağda içerik; telefonda panel tek satıra iner. Lab'da e-imza yok - panel
-  <b>onay bilgisini</b> gösterir (numune alma, kabul, onay zamanı, onaylayan uzman). Sağda mevcut sonuç çıktısının içeriği: test, sonuç, birim, referans aralığı;
-  referans dışı sonuçlar renkli ve <b>↑ / ↓</b> ok işaretli; <b>panik değer çift ok</b> (↑↑ / ↓↓, dolu rozet). Mikrobiyoloji bölümünde kültür ve antibiyogram, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
-  Borç, süre ve iptal ekranları radyolojiyle aynı (bölüm 6). Ayar ve teslim listesi için ayrı lab ekranı yok - bölüm 4 ve 5.
+  <b>Rapor biçimi Bakanlığın "Tıbbi Laboratuvar Tetkik Sonuç Raporu" düzeni</b> (kaynak: Ekranlar/Lab'daki iki örnek rapor - GTL ve anlaşmalı laboratuvar önizlemeleri):
+  başlıkta kurum adı ve <b>laboratuvar ruhsat no</b>; kimlik bloğunda hasta adı, maskeli T.C. kimlik no, doğum tarihi / cinsiyet, dosya / geliş no, <b>rapor numarası</b>, tetkiki isteyen, gönderileceği yer, kurum, şube;
+  zaman bloğunda <b>istem, numune alma, numune kabul, uzman onay ve rapor basım</b> zamanları ile numune türü; tabloda <b>Tetkik Adı (altında numune türü - barkod), Sonuç, Durum, Birim, Referans Aralığı / Karar Sınırı, Geçmiş Sonuç</b>;
+  altta işaret açıklaması (↑ Yüksek · ↓ Düşük · ↑↑ Kritik Yüksek · ↓↓ Kritik Düşük), uzmanın adı, dalı, <b>diploma / uzmanlık belge no</b>, standart dipnotlar ve "raporun tamamı N sayfadır".
+  Sayfanın kabuğu radyolojideki gibi: üstte kurum, solda onay paneli, sağda rapor; telefonda sade liste (aşağıda). Borç, süre ve iptal ekranları bölüm 6 ile aynı.
 </p>
 
 
