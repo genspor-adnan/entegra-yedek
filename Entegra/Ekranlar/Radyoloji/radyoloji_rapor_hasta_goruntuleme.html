@@ -179,6 +179,8 @@
   table.sonuc td.ref{color:var(--muted);white-space:nowrap}
   .isr{display:inline-block;min-width:16px;text-align:center;border-radius:3px;font-size:10px;font-weight:bold;padding:0 3px;margin-left:4px}
   .isr.h{background:var(--hatazem);color:var(--hata)} .isr.l{background:#e3edf8;color:#2a5f9c}
+  .isr{font-size:12px;line-height:1.2} .isr.pnk{background:var(--hata);color:#fff;letter-spacing:-2px;padding:0 5px 0 3px}
+  .isr.l.pnk{background:#2a5f9c;color:#fff}
   .gizli-not{border:1px dashed #ecd9a6;background:var(--uyarizem);color:#7a5a12;border-radius:5px;padding:8px 10px;font-size:11.5px;line-height:1.5;margin-bottom:10px}
   .bekleyen-not{border:1px dashed var(--line);background:#f7f9fc;color:var(--muted);border-radius:5px;padding:8px 10px;font-size:11.5px;line-height:1.5}
   .m-sonuc{padding:6px 10px 10px;flex:1;font-size:11.5px}
@@ -530,14 +532,16 @@
             <th class="onc-b">Önceki<br><small>14.08.2026</small></th><th class="onc-b">Önceki<br><small>02.03.2026</small></th></tr></thead>
           <tbody>
             <tr class="grup"><td colspan="6">Biyokimya</td></tr>
-            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">70 – 100</td><td class="onc yuk">118 <span class="isr h">H</span></td><td class="onc yuk">104 <span class="isr h">H</span></td></tr>
+            <tr><td>Glukoz (açlık)</td><td class="s yuk">126 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">70 – 100</td><td class="onc yuk">118 <span class="isr h">↑</span></td><td class="onc yuk">104 <span class="isr h">↑</span></td></tr>
+            <tr><td>Potasyum</td><td class="s yuk">6,8 <span class="isr h pnk" title="Panik değer">↑↑</span></td><td>mmol/L</td><td class="ref">3,5 – 5,1</td><td class="onc">4,6</td><td class="onc">4,4</td></tr>
+            <tr><td>Sodyum</td><td class="s dus">132 <span class="isr l">↓</span></td><td>mmol/L</td><td class="ref">136 – 145</td><td class="onc">138</td><td class="onc dus">134 <span class="isr l">↓</span></td></tr>
             <tr><td>Kreatinin</td><td class="s">0,92</td><td>mg/dL</td><td class="ref">0,70 – 1,20</td><td class="onc">0,95</td><td class="onc">0,90</td></tr>
-            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td><td class="onc">31</td><td class="onc yuk">44 <span class="isr h">H</span></td></tr>
-            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 130</td><td class="onc yuk">171 <span class="isr h">H</span></td><td class="onc bos">—</td></tr>
+            <tr><td>ALT</td><td class="s">28</td><td>U/L</td><td class="ref">0 – 41</td><td class="onc">31</td><td class="onc yuk">44 <span class="isr h">↑</span></td></tr>
+            <tr><td>LDL Kolesterol</td><td class="s yuk">162 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 130</td><td class="onc yuk">171 <span class="isr h">↑</span></td><td class="onc bos">—</td></tr>
             <tr><td>Üre</td><td class="s">34</td><td>mg/dL</td><td class="ref">17 – 43</td><td class="onc">36</td><td class="onc">33</td></tr>
             <tr><td>AST</td><td class="s">24</td><td>U/L</td><td class="ref">0 – 40</td><td class="onc">26</td><td class="onc">29</td></tr>
-            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">H</span></td><td>mg/dL</td><td class="ref">&lt; 200</td><td class="onc yuk">246 <span class="isr h">H</span></td><td class="onc bos">—</td></tr>
-            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td><td class="onc yuk">162 <span class="isr h">H</span></td><td class="onc">139</td></tr>
+            <tr><td>Total Kolesterol</td><td class="s yuk">238 <span class="isr h">↑</span></td><td>mg/dL</td><td class="ref">&lt; 200</td><td class="onc yuk">246 <span class="isr h">↑</span></td><td class="onc bos">—</td></tr>
+            <tr><td>Trigliserid</td><td class="s">148</td><td>mg/dL</td><td class="ref">&lt; 150</td><td class="onc yuk">162 <span class="isr h">↑</span></td><td class="onc">139</td></tr>
           </tbody>
         </table>
         <div class="gizli-not">ℹ <b>1 testinizin</b> sonucu bu sayfada gösterilmez. Bu sonuç için lütfen hekiminize ya da kurumumuza başvurun: <b>0216 000 00 00</b></div>
@@ -553,10 +557,11 @@
     <div class="m-imza"><div class="tik">✔</div><div><b>Sonuçlar onaylı</b><span>Uzm. Dr. Elif Arslan · 13:20</span></div><span class="ok">Ayrıntı ›</span></div>
     <div class="m-sonuc">
       <div class="grp">Biyokimya</div>
-      <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small><small class="m-onc">önceki: <b class="yuk">118</b> (14.08) · <b class="yuk">104</b> (02.03)</small></span><b style="color:var(--hata)">126 <span class="isr h">H</span></b></div>
+      <div class="t"><span>Glukoz (açlık)<small>70 – 100 mg/dL</small><small class="m-onc">önceki: <b class="yuk">118</b> (14.08) · <b class="yuk">104</b> (02.03)</small></span><b style="color:var(--hata)">126 <span class="isr h">↑</span></b></div>
+      <div class="t"><span>Potasyum<small>3,5 – 5,1 mmol/L</small><small class="m-onc">önceki: <b>4,6</b> (14.08) · <b>4,4</b> (02.03)</small></span><b style="color:var(--hata)">6,8 <span class="isr h pnk">↑↑</span></b></div>
       <div class="t"><span>Kreatinin<small>0,70 – 1,20 mg/dL</small><small class="m-onc">önceki: <b>0,95</b> (14.08) · <b>0,90</b> (02.03)</small></span><b>0,92</b></div>
       <div class="t"><span>ALT<small>0 – 41 U/L</small><small class="m-onc">önceki: <b>31</b> (14.08) · <b class="yuk">44</b> (02.03)</small></span><b>28</b></div>
-      <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small><small class="m-onc">önceki: <b class="yuk">171</b> (14.08)</small></span><b style="color:var(--hata)">162 <span class="isr h">H</span></b></div>
+      <div class="t"><span>LDL Kolesterol<small>&lt; 130 mg/dL</small><small class="m-onc">önceki: <b class="yuk">171</b> (14.08)</small></span><b style="color:var(--hata)">162 <span class="isr h">↑</span></b></div>
     </div>
     <div class="m-alt"><div class="btn bir">⬇ PDF</div><div class="btn">↗ Paylaş</div></div>
   </div></div>
@@ -572,8 +577,13 @@
       <div class="satir"><span>Hastada</span><b>Sonuç yerine "1 testinizin sonucu bu sayfada gösterilmez" notu (testin adı da yazmaz).</b></div>
       <div class="satir"><span>Doktorda</span><b>Gönderen dış doktorun bağlantısında bu testler <u>görünür</u>.</b></div>
     </div>
+    <div class="kutu"><h4>İşaretler</h4>
+      <div class="satir"><span><span class="isr h">↑</span> <span class="isr l">↓</span></span><b>Referans aralığının üstünde / altında (kırmızı yukarı ok, mavi aşağı ok).</b></div>
+      <div class="satir"><span><span class="isr h pnk">↑↑</span> <span class="isr l pnk">↓↓</span></span><b>Panik değer: çift ok, dolu rozet (kritik yüksek / kritik düşük).</b></div>
+      <div class="satir"><span>Harf yok</span><b>H / L / HH / LL harfleri yerine ok - hasta için daha anlaşılır. Aynı işaretler basılı sonuç çıktısında da kullanılır.</b></div>
+    </div>
     <div class="kutu"><h4>Önceki iki sonuç</h4>
-      <div class="satir"><span>Ne gösterilir</span><b>Her testin, hastanın kurumdaki <u>son iki</u> onaylı sonucu (bu başvurudan önceki), tarihleriyle. Referans dışıysa soluk kırmızı / mavi ve H / L.</b></div>
+      <div class="satir"><span>Ne gösterilir</span><b>Her testin, hastanın kurumdaki <u>son iki</u> onaylı sonucu (bu başvurudan önceki), tarihleriyle. Referans dışıysa soluk kırmızı / mavi ve ↑ / ↓ ok.</b></div>
       <div class="satir"><span>Kolon başlığı</span><b>O başvuruların tarihleri. Bir test o tarihte çalışılmadıysa hücre "—".</b></div>
       <div class="satir"><span>Yoksa</span><b>Hastanın önceki sonucu hiç yoksa iki kolon çizilmez.</b></div>
       <div class="satir"><span>Nerede</span><b>Hasta bağlantısında ve basılı sonuç çıktısında; gösterilmeyen (hassas) testin öncekileri de gösterilmez.</b></div>
@@ -584,7 +594,7 @@
 <p class="aciklama">
   Lab sayfası radyolojideki sayfanın aynı kabuğu: üstte kurum, solda panel, sağda içerik; telefonda panel tek satıra iner. Lab'da e-imza yok - panel
   <b>onay bilgisini</b> gösterir (numune alma, kabul, onay zamanı, onaylayan uzman). Sağda mevcut sonuç çıktısının içeriği: test, sonuç, birim, referans aralığı;
-  referans dışı sonuçlar renkli ve <b>H / L</b> işaretli. Mikrobiyoloji bölümünde kültür ve antibiyogram, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
+  referans dışı sonuçlar renkli ve <b>↑ / ↓</b> ok işaretli; <b>panik değer çift ok</b> (↑↑ / ↓↓, dolu rozet). Mikrobiyoloji bölümünde kültür ve antibiyogram, bugünkü çıktıdaki gibi. Yalnız <b>onaylı</b> sonuçlar görünür.
   Borç, süre ve iptal ekranları radyolojiyle aynı (bölüm 6). Ayar ve teslim listesi için ayrı lab ekranı yok - bölüm 4 ve 5.
 </p>
 
