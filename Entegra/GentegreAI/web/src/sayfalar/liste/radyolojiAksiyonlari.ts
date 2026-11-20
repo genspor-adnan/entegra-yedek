@@ -3,6 +3,7 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { yerelZamanDamgasi } from './zaman';
 import { erisimYolu } from '../../bilesenler/radyoloji/radyolojiErisim';
+import { raporGonderimAksiyonu } from '../../bilesenler/radyoloji/raporGonderimMenusu';
 
 /**
  * RADYOLOJI WORKLIST AKSIYONLARI (283 · 304 · 316 · 318 · 320).
@@ -179,6 +180,9 @@ export async function radyolojiAksiyonu(
     if (e && 'yol' in e) b.git(e.yol); else if (e) mesaj(e.hata);
     return true;
   }
+
+  // GÖNDERİM ▾ alt menüsü (1390): hastaya / dış doktora gönder, iptal, borca rağmen, bağlantı, tahsilat.
+  if (await raporGonderimAksiyonu(kod, satir, b)) return true;
 
   if (kod === 'radyoloji.teslim') {
     if (!satir) return true;

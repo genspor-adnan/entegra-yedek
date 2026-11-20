@@ -1,5 +1,6 @@
 import { type ListeGirdisi } from './listeTanimlari.Ortak';
 import { ERISIM_KODU, ERISIM_MENUSU } from '../bilesenler/radyoloji/radyolojiErisim';
+import { GONDERIM_KODU, GONDERIM_MENUSU } from '../bilesenler/radyoloji/raporGonderimMenusu';
 
 /**
  * Radyoloji: çalışma listesi, şablonlar, protokoller, cihazlar.
@@ -271,15 +272,22 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   raporu hazır mı, alındı mı" sorusunun ekranı.
     kaynak: 'radyoloji-teslim', rota: 'radyoloji-teslim',
     // ERİŞİM ▾ (18.11.2026): Hasta / Başvuru / İstem / Rapor tek menüde.
-    altSecenekler: { [ERISIM_KODU]: ERISIM_MENUSU },
+    // GÖNDERİM ▾ (1390, kullanıcı 20.11.2026: teslim listesi + dijital gönderim tek ekranda).
+    altSecenekler: { [ERISIM_KODU]: ERISIM_MENUSU, [GONDERIM_KODU]: GONDERIM_MENUSU },
     baslik: 'Radyoloji Rapor Teslim', yol: 'Radyoloji › Radyoloji Rapor Teslim',
     aksiyonEkrani: 'radyoloji-teslim-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
     kartYolu: '/radyoloji', kartBaslik: 'Radyoloji İstemi', kartIc: '☢️',
-    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId', 'basvuruId'],
+    gizliKolonlar: ['modalite', 'takipDurum', 'hastaId', 'istemId', 'basvuruId',
+                    'hastaGonderimDurum', 'hekimGonderimDurum', 'borcBekliyor', 'hastaGonderimId', 'hekimGonderimId', 'kritik'],
     cipler: [
       { ad: 'Teslim Bekleyen', filtre: { alan: 'takipDurum', op: 'esit', deger: 1 } },
+      // Dijital gönderim (1390): planlanmış · başvurunun borcu yüzünden bekleyen · gönderilemeyen.
+      { ad: 'Gönderim Bekleyen', filtre: { alan: 'hastaGonderimDurum', op: 'esit', deger: 1 } },
+      { ad: 'Borçlu Bekleyen',   filtre: { alan: 'borcBekliyor', op: 'esit', deger: 1 } },
+      { ad: 'Gönderilemeyen',    filtre: { op: 'or', kosullar: [
+        { alan: 'hastaGonderimDurum', op: 'esit', deger: 4 }, { alan: 'hekimGonderimDurum', op: 'esit', deger: 4 }] } },
       { ad: 'Teslim Edilen',   filtre: { alan: 'takipDurum', op: 'esit', deger: 2 } },
       { ad: 'Tümü' },
     ],
