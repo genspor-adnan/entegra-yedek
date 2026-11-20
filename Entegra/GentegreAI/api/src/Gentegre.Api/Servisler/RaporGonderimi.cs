@@ -315,7 +315,7 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
             return await BitirAsync(DurumBorc);
 
         var kok = s.WebKok.Length > 0 ? s.WebKok : ayar.WebKok;
-        if (kok.Length == 0) return await BitirAsync(DurumHata, "Bağlantı adresi tanımlı değil (Radyoloji › Rapor Gönderimi ayarını kaydedin)");
+        if (kok.Length == 0) return await BitirAsync(DurumHata, "Bağlantı adresi tanımlı değil (Radyoloji › Ayarlar › Rapor Gönderimi Ayarı'nı kaydedin)");
         if (s.Kanal == 0) return await BitirAsync(DurumHata, s.AliciTur == AliciHasta ? "Cep telefonu / e-posta kayıtlı değil" : "Doktorun cep telefonu / e-postası kayıtlı değil");
 
         var degisken = new Dictionary<string, string>

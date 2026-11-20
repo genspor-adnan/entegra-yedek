@@ -98,7 +98,7 @@ export function RaporGonderimAyari() {
       <div className="rt-arac">
         <button type="button" className="d bir" disabled={!duzenle || !degisti || kaydediliyor} data-testid="rga-kaydet"
                 onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
-        <span className="rt-baslik"><b>📨 {c('Rapor Gönderimi')}</b><span className="yol">{c('Radyoloji › Ayarlar › Rapor Gönderimi')}</span></span>
+        <span className="rt-baslik"><b>📨 {c('Rapor Gönderimi Ayarı')}</b><span className="yol">{c('Radyoloji › Ayarlar › Rapor Gönderimi Ayarı')}</span></span>
         <span className="ck-bosluk" />
         <button type="button" className="d" onClick={() => void (async () => {
           if (degisti && !await onay(c('Kaydedilmemiş değişiklik var. Kaydetmeden kapatılsın mı?'))) return;
@@ -106,7 +106,7 @@ export function RaporGonderimAyari() {
         })()}>✖ {c('Kapat')}</button>
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
-      {!duzenle && !hata && <div className="bilgi-kutusu">{c('Bu ayarı yalnız görüntüleyebilirsiniz (Rapor Gönderimi ayarları Değiştir yetkisi gerekir).')}</div>}
+      {!duzenle && !hata && <div className="bilgi-kutusu">{c('Bu ayarı yalnız görüntüleyebilirsiniz (Rapor Gönderimi Ayarı - Değiştir yetkisi gerekir).')}</div>}
 
       <fieldset className="rga-govde" disabled={!duzenle}>
         <div className="kagrup rga-grp">
