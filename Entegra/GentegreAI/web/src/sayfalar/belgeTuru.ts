@@ -1,3 +1,4 @@
+import { URUN_GENOTIP } from '../api/sozlesme';
 /**
  * BELGE TURU DAVRANIS TABLOSU — tek dogruluk kaynagi.
  *
@@ -247,4 +248,15 @@ export function belgeTuruBilgisi(tur: number): BelgeTuruBilgisi {
                   && (irsaliye || FATURA_TURLERI.has(tur) || tur === 16 || tur === 119))
                  || tur === 4 || tur === 121 || tur === 123 || transfer,
   };
+}
+
+/**
+ * BELGENİN KART ADRESİ (kullanıcı 20.11.2026: "başvurusunda satış faturası oluşturdum.. çift tıklıyorum ama açılmıyor"):
+ * türün liste rotası + id. HBYS'de `/belge` (ERP Satış Faturası Listesi) kayıtlı değil - satış faturaları
+ * Kurumlar & Sigorta › Satış Faturası Listesi'nde (`/fatura`); `/belge/{id}` boş "Kart" sekmesi açıyordu.
+ * Türü bilinmeyen belge de HBYS'de `/fatura`dan açılır (kart türü belgeden okur).
+ */
+export function belgeKartYolu(id: number, tur?: number | null, urunModu?: number | null): string {
+  const liste = tur ? belgeTuruBilgisi(tur).liste : '/belge';
+  return `${urunModu === URUN_GENOTIP && liste === '/belge' ? '/fatura' : liste}/${id}`;
 }

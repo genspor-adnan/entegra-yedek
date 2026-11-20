@@ -15,6 +15,7 @@ import { BelgeKarti } from '../BelgeKarti';
 import { EFaturaA4 } from './EFaturaA4';
 import { yuzde } from './efaturaIcmalOrtak';
 import { AliciSeriTablosu, IadeIptalTablosu, KdvTablosu, SorunluTablosu, TurTablosu } from './EFaturaTablolari';
+import { belgeKartYolu } from '../belgeTuru';
 
 /**
  * FATURA / e-BELGE İCMALİ `/efatura-icmal` - mockup Ekranlar/İcmal/fatura_ebelge_icmali.html
@@ -40,7 +41,7 @@ export function EFaturaIcmal() {
    * kapalıysa (eski görünüm) pencere.
    */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/belge/${id}`); else setAcikBelge(id) };
+  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(belgeKartYolu(id, null, kullanici?.urunModu)); else setAcikBelge(id) };
   const gecen = (() => { const d = new Date(); d.setMonth(d.getMonth() - 1); return ayAraligi(d.getFullYear(), d.getMonth() + 1) })();
   const bas = arama.get('bas') ?? gecen.bas;
   const bit = arama.get('bit') ?? gecen.bit;

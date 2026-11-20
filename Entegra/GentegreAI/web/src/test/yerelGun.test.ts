@@ -20,3 +20,14 @@ describe('yerelGun', () => {
     expect(yerelGun(d)).toBe('2026-11-21');
   });
 });
+
+import { belgeKartYolu } from '../sayfalar/belgeTuru';
+describe('belgeKartYolu', () => {
+  it('HBYS satış faturası /fatura, ERP /belge, diğer türler kendi listesi', () => {
+    expect(belgeKartYolu(5, 15, 2)).toBe('/fatura/5');
+    expect(belgeKartYolu(5, 15, 1)).toBe('/belge/5');
+    expect(belgeKartYolu(5, 15, 3)).toBe('/belge/5');
+    expect(belgeKartYolu(5, null, 2)).toBe('/fatura/5');
+    expect(belgeKartYolu(5, 16, 2)).toBe('/satis-fisi/5');
+  });
+});

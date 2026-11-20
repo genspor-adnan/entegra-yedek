@@ -64,6 +64,7 @@ import { DoktorIstemModal } from '../bilesenler/belge/DoktorIstemModal';
 import type { BekleyenIstemYaniti } from '../api/uclar/basvuruIstem';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
 import { c } from '../dil/ceviri';
+import { belgeKartYolu } from './belgeTuru';
 
 interface Props {
   /** Verilirse MEVCUT belge acilir (salt gorunum). Duzenleme F7'de gelecek. */
@@ -2130,7 +2131,7 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             donusumAc: basvuruMu
               ? (id: number) => {
                   const tur = Number(donusumListesi.find(d => Number(d.belgeId) === id)?.tur ?? 0);
-                  const h = `${belgeTuruBilgisi(tur).liste}/${id}`;
+                  const h = belgeKartYolu(id, tur, kullanici?.urunModu);
                   if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
                 }
               : donusumler.ac,
@@ -2140,7 +2141,7 @@ Yeni SMS önceki kodu geçersiz kılar. Yine de gönderilsin mi?`)) return;
             // YOL TÜRÜN LİSTESİNDEN (07.11.2026): kayıtlı belge `/<liste>/{id}` ile açılır (`/belge/{id}` yalnız satış
             //   faturasının listesi; fiş `/satis-fisi/{id}`, irsaliye `/satis-irsaliye/{id}` - yoksa boş "Kart" sekmesi).
             sekmedeAc: (id: number, hedefTur: number) => {
-              const h = `${belgeTuruBilgisi(hedefTur).liste}/${id}`;
+              const h = belgeKartYolu(id, hedefTur, kullanici?.urunModu);
               if (ekranSekmesiKabul) ekranSekmesiKabul.kartaGit(h); else git(h);
             },
             // SILME SONRASI SERIT ANINDA (kullanici: "ücret/tahsilat ve dönüşüm

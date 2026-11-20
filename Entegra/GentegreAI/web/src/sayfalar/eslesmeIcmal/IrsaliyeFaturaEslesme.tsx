@@ -18,6 +18,7 @@ import { stil as hastaIcmalStili } from '../hasta/icmal/icmalStil';
 import { stil as kurumIcmalStili } from '../kurum/icmal/kurumIcmalStil';
 import { kisaTl, Kutu, Kutucuk, sayi, Sekmeler, STOK_ICMAL_STILI, tarihT, tl, useAntet, useSuzgec } from '../stokIcmal/stokIcmalOrtak';
 import { kumeCevir } from '../../bilesenler/kume';
+import { belgeKartYolu } from '../belgeTuru';
 
 /**
  * İRSALİYE-FATURA EŞLEŞME İCMALİ `/irsaliye-fatura-eslesme` - mockup
@@ -80,7 +81,7 @@ export function IrsaliyeFaturaEslesme() {
    * kapalıysa (eski görünüm) pencere.
    */
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
-  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(`/belge/${id}`); else setAcikBelge(id) };
+  const belgeAc = (id: number) => { if (ekranSekmesi) ekranSekmesi.kartaGit(belgeKartYolu(id, null, kullanici?.urunModu)); else setAcikBelge(id) };
   const [kuyruk, setKuyruk] = useState<{ id: number; tur: number; yon: 'satis' | 'alis' }[]>([]);
   const [uretilen, setUretilen] = useState<{ id: number; no: string }[]>([]);
   const [isliyor, setIsliyor] = useState(false);

@@ -12,6 +12,7 @@ import { cariIslemCoz, cariIslemSatirlari, cariKartGovdesi, cariKartYolu, cariNi
 import { paletSadelestir } from './paletMetin';
 import { type AkisSonucu, KIMDEN_SECENEKLERI, akisYolu, niyetCoz, niyetSecenekleri } from './paletNiyet';
 import type { GundemKarti, KayitOnerileri, KayitTuru } from '../../api/uclar/gundem';
+import { belgeKartYolu } from '../belgeTuru';
 
 /**
  * GÜNDEM NİYETİ (kullanıcı 03.11.2026: "bugünkü işlerim veya görevlerim neler? diye yazsa ... vadesi gelen ödemeler, çekler,
@@ -329,7 +330,7 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
         for (const b of y.belgeler)
           l.push({ bolum: 'Kayıtlar', tur: 'ekran', anahtar: `vb${b.id}`, ikon: '🧾',
             ad: `${b.no || `#${b.id}`} — ${b.unvan}`, grup: `${etiket} · ${new Date(b.tarih).toLocaleDateString('tr-TR')} · ${b.tutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-            yol: `/belge/${b.id}` });
+            yol: belgeKartYolu(Number(b.id), null, urunModu) });
         if (y.kayitlar.length === 0) {
           const roller = (vkn.length === 10 ? ['musteri', 'tedarikci'] : ['musteri']) as ('musteri' | 'tedarikci')[];
           for (const r of roller) if (menude.has(cariKartYolu(r)))

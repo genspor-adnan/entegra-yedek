@@ -15,6 +15,7 @@ import {
 } from './icmal/KurumIcmalTablolari';
 import { donemAdimlari, gecenAy, yerelGun } from './icmal/kurumIcmalOrtak';
 import { stil } from './icmal/kurumIcmalStil';
+import { belgeKartYolu } from '../belgeTuru';
 
 /**
  * KURUM İCMALİ `/kurum-icmali` — mockup Ekranlar/İcmal/
@@ -233,7 +234,7 @@ export function KurumIcmal() {
                                icmalOlustur={icmalOlustur}
                                ac={k => icmaleGec(k, 'basvuru')}
                                yazdir={k => { icmaleGec(k, 'basvuru'); setYazdirBekliyor(true) }}
-                               faturaAc={id => git(`/belge/${id}`)} degisti={() => setTazele(t => t + 1)} />
+                               faturaAc={id => git(belgeKartYolu(id, 15, kullanici?.urunModu))} degisti={() => setTazele(t => t + 1)} />
             )}
             {sekme === 'cari' && <CariTablosu v={veri} />}
           </div>

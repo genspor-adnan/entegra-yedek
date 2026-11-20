@@ -4,7 +4,7 @@ import { CariAksiyonMenusu } from '../../bilesenler/CariAksiyonMenusu';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, baslikAnahtari, cariHareketiDegisti, sekmeAdi } from '../../bilesenler/sekmeBaglami';
-import { belgeTuruBilgisi } from '../belgeTuru';
+import { belgeKartYolu } from '../belgeTuru';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { Ekstre as Veri, EkstreHesapSecimi, EkstreParasi, EkstreSatiri, EkstreTuru } from '../../api/uclar/ekstre';
@@ -129,7 +129,7 @@ export function Ekstre() {
     if (!s) { mesaj('Önce bir satır seçin.'); return }
     if (!s.kasaIslemId && !s.belgeId) { mesaj('Bu satırın bağlı olduğu bir kayıt yok (devir / açılış).'); return }
     if (ekranSekmesi) {
-      ekranSekmesi.kartaGit(s.kasaIslemId ? `/kasa-islem/${s.kasaIslemId}` : `${belgeTuruBilgisi(s.tur).liste}/${s.belgeId}`);
+      ekranSekmesi.kartaGit(s.kasaIslemId ? `/kasa-islem/${s.kasaIslemId}` : belgeKartYolu(Number(s.belgeId), Number(s.tur), kullanici?.urunModu));
       return;
     }
     if (s.kasaIslemId) setAcikKasa(s.kasaIslemId);

@@ -2,13 +2,13 @@ import { useContext } from 'react';
 import { EkranSekmesiBaglami } from './bilesenler/sekmeBaglami';
 import { ReceteKartiSayfa, OzelKartRota, AlerjiKartiSayfa, KronikTaniKartiSayfa, IlacKaydiKartiSayfa, GecmisOlayKartiSayfa } from './sayfalar/OzelKartSayfalari';
 import { OZEL_KART_SEKME_YOLLARI } from './sayfalar/ozelKartSekmeleri';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { personelTalepDurumu } from './bilesenler/taleplerim/personelTalebi';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { kartKodu } from './kimlik/listeKartKodlari';
 import { kartSekmesiVar } from './sayfalar/listeTanimlari.Ortak';
 import { DOKUM_KODLARI } from './sayfalar/listeTanimlari.Dokumler';
-import { modUyar } from './api/sozlesme';
+import { modUyar, URUN_GENOTIP } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
@@ -284,6 +284,12 @@ function Yollar() {
 
         {/* Doğrudan /belge/yeni: ekran sekmesindeyse kart sekmesi (sayfa kipi), değilse eski pencere. */}
         <Route path="/belge/yeni" element={<BelgeYeniRota />} />
+
+        {/* HBYS'DE /belge/:id → /fatura/:id (kullanıcı 20.11.2026: "başvurusunda satış faturası oluşturdum.. çift
+            tıklıyorum ama açılmıyor"): `/belge` (Satış Faturası Listesi) yalnız ERP ürününde kayıtlı; HBYS'de satış
+            faturaları Kurumlar & Sigorta › Satış Faturası Listesi (`/fatura`). Başvurudan, kurum icmalinden, komut
+            paletinden `/belge/{id}` ile açılan belge boş "Kart" sekmesi açıyordu - tek yerde yönlendirilir. */}
+        {kullanici.urunModu === URUN_GENOTIP && <Route path="/belge/:id" element={<BelgedenFaturaya />} />}
 
         {/* Kasa islem karti BESPOKE (GenForm degil): tur sablonu, bacaklar ve fis
             paneli generic karta sigmaz. LISTELER dongusu 'kasa-islem' icin kart
@@ -760,6 +766,13 @@ function BilinmeyenYol({ hedef }: { hedef: string }) {
 }
 
 /** /belge/yeni (Satış Faturası "Yeni"): kart sekmesindeyse çerçevesiz, Kapat sekmeyi kapatır. */
+/** HBYS: `/belge/{id}` → `/fatura/{id}` (adres değişir, geçmişe yeni kayıt eklenmez). */
+function BelgedenFaturaya() {
+  const { id } = useParams();
+  const { search } = useLocation();
+  return <Navigate to={`/fatura/${id ?? ''}${search}`} replace />;
+}
+
 function BelgeYeniRota() {
   const ekranSekmesi = useContext(EkranSekmesiBaglami);
   // CARİ ÖN DOLGUSU (Ctrl+K "cari seç -> fat kes", 25.10.2026): ?tarafId=&tarafUnvan= ile cari seçili açılır.
