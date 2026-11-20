@@ -609,6 +609,14 @@ public static partial class KaynakKatalogu
                                                   Genislik: 110, Filtrelenebilir: false),
         });
 
+    /// <summary>Teslim listesi gönderim / teslim rozet renkleri (1390, mockup).</summary>
+    private static readonly Dictionary<string, string> GonderimRozet = new()
+    {
+        ["Planlandı"] = "mavi", ["Borç bekliyor"] = "hata", ["Gönderildi"] = "olumlu", ["Açıldı"] = "olumlu",
+        ["Gönderilemedi"] = "uyari", ["Hazır"] = "gri", ["İptal"] = "gri", ["Yok"] = "gri",
+        ["Dijital"] = "olumlu", ["Elden"] = "olumlu", ["Bekliyor"] = "gri", ["CD bekliyor"] = "uyari",
+    };
+
     /// <summary>
     /// SONUÇ TESLİM TAKİBİ (318) - raporu onaylı ama teslim edilmemiş işler.
     ///
@@ -628,27 +636,43 @@ public static partial class KaynakKatalogu
         {
             new("id",           "t.istem_id",     "sayi",  "Id", Varsayilan: false),
             new("istemId",      "t.istem_id",     "sayi",  "İstem", Varsayilan: false),
-            new("onayTarihi",   "t.onay_tarihi",  "tarih", "Rapor Onayı", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
+            // ---- MOCKUP KOLONLARI (kullanıcı 20.11.2026: "Radyoloji Rapor Teslim mockup gibi yap kolonları"; mockup
+            //   radyoloji_rapor_hasta_goruntuleme.html §5): Rapor Onayı · Hasta · Tetkik · Borç · Hastaya Gönderim ·
+            //   Dış Doktora Gönderim · Teslim. Her hücre iki satır (üst değer / rozet, altta ayrıntı - "alt:" ve
+            //   "rozetAlt:" biçimleri). Eski tekil kolonlar kolon seçicide durur (Varsayilan: false), arama / filtre
+            //   onlarla çalışmaya devam eder.
+            new("raporOnayi",
+                "to_char(t.onay_tarihi, 'DD.MM.YYYY HH24:MI')",
+                                                  "metin", "Rapor Onayı", Genislik: 170, Bicim: "alt:radyologOzet",
+                                                  Filtrelenebilir: false, Siralanabilir: false),
+            new("radyologOzet",
+                "concat_ws(' · ', nullif(t.radyolog, ''), case when exists (select 1 from public.radyoloji_rapor rr"
+                + " where rr.id = t.rapor_id and rr.imza_dokuman_id is not null) then 'e-imzalı' end)",
+                                                  "metin", "Radyolog / İmza", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
+            new("onayTarihi",   "t.onay_tarihi",  "tarih", "Rapor Onayı (tarih)", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm", Varsayilan: false),
             new("modaliteAdi",
                 RadyolojiIfadeleri.ModaliteAdi("t.modalite"),
                                                   "metin", "Mod.", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 80,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false, Varsayilan: false),
             new("modalite",     "t.modalite",     "kod",   "Modalite Kodu", Varsayilan: false),
-            new("accessionNo",  "t.accession_no", "metin", "Accession", Genislik: 150),
-            new("hasta",        "t.hasta",        "metin", "Hasta", Genislik: 190),
+            new("accessionNo",  "t.accession_no", "metin", "Accession", Genislik: 150, Varsayilan: false),
+            new("hasta",        "t.hasta",        "metin", "Hasta", Genislik: 210, Bicim: "alt:telefon"),
             new("hastaId",      "t.hasta_id",     "sayi",  "Hasta Id", Varsayilan: false),
             // Erişim ▾ "Başvuruyu Aç" için (18.11.2026).
             new("basvuruId",    "(select i.belge_id from public.radyoloji_istem i where i.id = t.istem_id)",
                                                   "sayi",  "Başvuru Id", Varsayilan: false, Filtrelenebilir: false),
-            new("telefon",      "t.telefon",      "metin", "Telefon", Genislik: 130),
-            new("tetkik",       "t.tetkik",       "metin", "Tetkik", Genislik: 230),
-            new("radyolog",     "t.radyolog",     "metin", "Radyolog", Genislik: 160),
+            new("telefon",      "t.telefon",      "metin", "Telefon", Genislik: 130, Varsayilan: false),
+            new("tetkik",       "t.tetkik",       "metin", "Tetkik", Genislik: 240, Bicim: "alt:tetkikEk"),
+            new("tetkikEk",
+                "concat_ws(' · ', case when t.kritik = 1 then '⚠ Kritik bulgu' end, case when t.cd_istendi = 1 then 'CD istendi' end)",
+                                                  "metin", "Tetkik Notu", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
+            new("radyolog",     "t.radyolog",     "metin", "Radyolog", Genislik: 160, Varsayilan: false),
             new("durumAdi",
                 "case when t.takip_durum = 1 then 'Hazır' else 'Teslim edildi' end",
                                                   "metin", "Durum", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 120,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false, Varsayilan: false),
             new("takipDurum",   "t.takip_durum",  "sayi",  "Durum Kodu", Varsayilan: false),
             // Teslim edilen KALEMLER tek okunur metin: dort ayri evet/hayir
             //   kolonu listede yer harcar, "Rapor + Film" bir bakista anlasilir.
@@ -659,15 +683,15 @@ public static partial class KaynakKatalogu
                 " case when t.cd_verildi = 1 then 'CD + ' else '' end || " +
                 " case when t.dijital_verildi = 1 then 'Dijital + ' else '' end)",
                                                   "metin", "Teslim Kalemleri", Genislik: 190,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false, Varsayilan: false),
             new("cdIstendi",    "t.cd_istendi",   "mantik","CD İstendi", Hizalama: "orta",
-                                                  Genislik: 100),
-            new("alanAd",       "t.alan_ad",      "metin", "Teslim Alan", Genislik: 180),
-            new("alanYakinlik", "t.alan_yakinlik","metin", "Yakınlık", Genislik: 110),
-            new("teslimEden",   "t.teslim_eden",  "metin", "Teslim Eden", Genislik: 160),
-            new("teslimZamani", "t.teslim_zamani","tarih", "Teslim", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm"),
+                                                  Genislik: 100, Varsayilan: false),
+            new("alanAd",       "t.alan_ad",      "metin", "Teslim Alan", Genislik: 180, Varsayilan: false),
+            new("alanYakinlik", "t.alan_yakinlik","metin", "Yakınlık", Genislik: 110, Varsayilan: false),
+            new("teslimEden",   "t.teslim_eden",  "metin", "Teslim Eden", Genislik: 160, Varsayilan: false),
+            new("teslimZamani", "t.teslim_zamani","tarih", "Teslim (tarih)", Genislik: 140, Bicim: "dd.MM.yyyy HH:mm", Varsayilan: false),
             new("beklemeDk",    "t.bekleme_dk",   "sayi",  "Bekleme (dk)", Hizalama: "sag",
-                                                  Genislik: 110),
+                                                  Genislik: 110, Varsayilan: false),
             // ---- DİJİTAL GÖNDERİM (1390; kullanıcı 20.11.2026: "teslim listesi ile bunu birleştirsek") ----
             // Borç yalnız "borç bekliyor" satırında hesaplanır (başvurunun hasta payı kalanı) - her satırda fonksiyon
             //   çağırmak listeyi yavaşlatırdı.
@@ -677,17 +701,28 @@ public static partial class KaynakKatalogu
                                                   "para",  "Borç", Hizalama: "sag", Bicim: "#,##0.00", Genislik: 100,
                                                   Filtrelenebilir: false, Siralanabilir: false),
             new("hastaGonderim", "case t.hasta_gonderim_durum when 0 then 'Hazır' when 1 then 'Planlandı' when 2 then 'Borç bekliyor' when 3 then case when t.hasta_acilma is not null then 'Açıldı' else 'Gönderildi' end when 4 then 'Gönderilemedi' when 9 then 'İptal' else '' end",
-                                                  "metin", "Hastaya Gönderim", Hizalama: "orta", Bicim: "rozet", Genislik: 130,
-                                                  Filtrelenebilir: false),
+                                                  "metin", "Hastaya Gönderim", Bicim: "rozetAlt:hastaGonderimAyrinti", Genislik: 260,
+                                                  Filtrelenebilir: false, RozetSiniflari: GonderimRozet),
             new("hastaGonderimAyrinti", "concat_ws(' · ', nullif(case t.hasta_gonderim_kanal when 1 then 'SMS' when 2 then 'e-posta' when 3 then 'SMS + e-posta' else '' end, ''), case when t.hasta_gonderim_durum in (1, 2) and t.hasta_planlanan is not null then 'plan ' || to_char(t.hasta_planlanan at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hasta_gonderim is not null then 'gitti ' || to_char(t.hasta_gonderim at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hasta_acilma is not null then 'açıldı ' || to_char(t.hasta_acilma at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, nullif(t.hasta_kural, ''), nullif(t.hasta_hata, ''))",
                                                   "metin", "Hasta Gönderim Ayrıntısı", Genislik: 280,
-                                                  Filtrelenebilir: false, Siralanabilir: false),
-            new("hekimGonderim", "case t.hekim_gonderim_durum when 0 then 'Hazır' when 1 then 'Planlandı' when 2 then 'Borç bekliyor' when 3 then case when t.hekim_acilma is not null then 'Açıldı' else 'Gönderildi' end when 4 then 'Gönderilemedi' when 9 then 'İptal' else '' end",
-                                                  "metin", "Dış Doktora Gönderim", Hizalama: "orta", Bicim: "rozet", Genislik: 140,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false, Siralanabilir: false, Varsayilan: false),
+            new("hekimGonderim", "case t.hekim_gonderim_durum when 0 then 'Hazır' when 1 then 'Planlandı' when 2 then 'Borç bekliyor' when 3 then case when t.hekim_acilma is not null then 'Açıldı' else 'Gönderildi' end when 4 then 'Gönderilemedi' when 9 then 'İptal' else 'Yok' end",
+                                                  "metin", "Dış Doktora Gönderim", Bicim: "rozetAlt:hekimGonderimAyrinti", Genislik: 260,
+                                                  Filtrelenebilir: false, RozetSiniflari: GonderimRozet),
             new("hekimGonderimAyrinti", "concat_ws(' · ', nullif(t.hekim_ad, ''), nullif(case t.hekim_gonderim_kanal when 1 then 'SMS' when 2 then 'e-posta' when 3 then 'SMS + e-posta' else '' end, ''), case when t.hekim_gonderim_durum in (1, 2) and t.hekim_planlanan is not null then 'plan ' || to_char(t.hekim_planlanan at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hekim_gonderim is not null then 'gitti ' || to_char(t.hekim_gonderim at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, case when t.hekim_acilma is not null then 'açıldı ' || to_char(t.hekim_acilma at time zone public.fn_sube_zaman_dilimi(t.sube_id), 'DD.MM HH24:MI') end, nullif(t.hekim_hata, ''))",
                                                   "metin", "Dış Doktor Gönderim Ayrıntısı", Genislik: 280,
-                                                  Filtrelenebilir: false, Siralanabilir: false),
+                                                  Filtrelenebilir: false, Siralanabilir: false, Varsayilan: false),
+            // TESLİM: rozet + alan / zaman. Dijital = hasta bağlantıdan açtı; CD istenmişse CD verilene kadar bekler.
+            new("teslimOzet",
+                "case when t.takip_durum = 2 then case when t.teslim_eden = '' and t.dijital_verildi = 1 then 'Dijital' else 'Elden' end"
+                + " when t.teslim_id is not null then 'CD bekliyor' else 'Bekliyor' end",
+                                                  "metin", "Teslim", Bicim: "rozetAlt:teslimAyrinti", Genislik: 230,
+                                                  Filtrelenebilir: false, RozetSiniflari: GonderimRozet),
+            new("teslimAyrinti",
+                "case when t.teslim_id is null then '' else concat_ws(' · ', nullif(t.alan_ad, ''),"
+                + " to_char(t.teslim_zamani, 'DD.MM HH24:MI'), case when t.teslim_eden <> '' then t.teslim_eden || ' teslim etti' end,"
+                + " case when t.takip_durum = 1 then 'rapor dijital açıldı' end) end",
+                                                  "metin", "Teslim Ayrıntısı", Varsayilan: false, Filtrelenebilir: false, Siralanabilir: false),
             // Çipler ve aksiyonlar için kodlar (listede gizli).
             new("hastaGonderimDurum", "t.hasta_gonderim_durum", "sayi", "Hasta Gönderim Kodu", Varsayilan: false),
             new("hekimGonderimDurum", "t.hekim_gonderim_durum", "sayi", "Dış Doktor Gönderim Kodu", Varsayilan: false),

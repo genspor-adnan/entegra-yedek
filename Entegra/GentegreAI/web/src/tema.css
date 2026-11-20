@@ -10123,3 +10123,6 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .cikti-sayfa .rapor-karekod b { display: block; color: #1a2430; font-size: 10.5px }
 .cikti-sayfa .rapor-karekod .rk-adres { font-family: Consolas, monospace; color: #1a2430; word-break: break-all }
 .karekod { flex: 0 0 auto; display: block }
+/* GRID › ROZET + ALT AYRINTI (1390, "rozetAlt:" biçimi): rozet içeriği kadar, ayrıntı altında tek satır. */
+.gh-rozet-alt { gap: 2px; align-items: flex-start }
+.gh-rozet-alt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100% }

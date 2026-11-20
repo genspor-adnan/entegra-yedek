@@ -17,12 +17,14 @@ import { para, sayi } from '../bicim';
  *                     2 verildi ✓ · 1 bekliyor · 5 gecikti · 3/4 atlandı / reddetti
  *   "bakiye:dovizBakiye"  B/A renkli tutar + altında döviz bakiyeleri (1150 müşteri listesi)
  *   "risk:riskLimiti" limit kullanım çubuğu (yeşil <%70, sarı, kırmızı >%100); boş = limitsiz
+ *   "rozetAlt:alan"   durum rozeti + altında başka alandan ayrıntı (1390 radyoloji rapor teslim)
  *   "gun"             "48 gün" - 30+ sarı, 90+ kırmızı
  *   "egri:ciro12Ay"   "a,b,c..." mini çizgi; title'da toplam
  */
 
 /** "Dr. Aslı Demir" -> "AD" (unvan öneki ve "(çağrı)" gibi parantezli ekler atlanır). */
 //   Ortak kural (basHarfler.ts): ünvan ve parantezli ekler atılır.
+import { rozetHucre } from '../gridHucre';
 import { basHarfler } from '../basHarfler';
 export { basHarfler };
 
@@ -59,6 +61,13 @@ export function satirHucre(satir: ListeSatiri, kolon: KolonMeta) {
   if (b.startsWith('alt:')) {
     const alt = String(satir[b.slice(4)] ?? '');
     return <span className="gh-iki">{String(v ?? '')}{alt && <small>{alt}</small>}</span>;
+  }
+  // ROZET + ALT AYRINTI (1390, Radyoloji Rapor Teslim mockup kolonları): üstte durum rozeti, altta ayrıntı satırı.
+  if (b.startsWith('rozetAlt:')) {
+    const alt = String(satir[b.slice(9)] ?? '');
+    const rozet = rozetHucre(v, { ...kolon, bicim: 'rozet' });
+    if (!rozet && !alt) return <span className="gh-sonuk">—</span>;
+    return <span className="gh-iki gh-rozet-alt">{rozet}{alt && <small>{alt}</small>}</span>;
   }
   if (b.startsWith('cubuk:')) {
     if (v === null || v === undefined || v === '') return <span className="gh-sonuk">—</span>;

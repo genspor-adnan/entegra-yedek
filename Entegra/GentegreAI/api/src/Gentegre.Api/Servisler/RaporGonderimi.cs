@@ -69,6 +69,13 @@ public sealed class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bildirim, IL
     public static async Task PlanlaAsync(NpgsqlConnection b, NpgsqlTransaction tx, int raporId, int kullaniciId,
                                          CancellationToken iptal, DateTime? simdi = null)
     {
+        // EK RAPOR (addendum): ayrı bağlantı açılmaz - ASIL raporun bağlantısı yeniden planlanır (hasta tek bağlantıdan
+        //   raporu ekleriyle görür; ek onaylanınca yeniden bilgilendirilir). Revize arşiv kopyası hiç planlanmaz.
+        var ust = await b.TekAsync("select ust_rapor_id, coalesce(revize, 0) from public.radyoloji_rapor where id = @p0", tx,
+            [raporId], o => (Ust: o.IsDBNull(0) ? (int?)null : o.GetInt32(0), Revize: o.GetInt16(1) == 1).ToTuple(), iptal);
+        if (ust is null || ust.Item2) return;
+        if (ust.Item1 is { } asil) raporId = asil;
+
         var i = await b.TekAsync("""
             select i.id, coalesce(i.sube_id, 0), i.belge_id, i.hasta_id, i.hizmet_id, coalesce(i.kritik, 0),
                    coalesce(nullif(btrim(h.cep_tel), ''), ''), coalesce(nullif(btrim(h.eposta), ''), ''),

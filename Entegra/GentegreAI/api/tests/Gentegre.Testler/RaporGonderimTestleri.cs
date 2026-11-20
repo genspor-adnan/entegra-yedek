@@ -145,6 +145,18 @@ public sealed class RaporGonderimTestleri(VeritabaniOlgusu olgu) : IClassFixture
         Assert.Equal(simdi.AddHours(1), ((DateTime)s[0]["planlanan"]!).ToUniversalTime());
         Assert.StartsWith("Kod", s[0]["kural"]!.ToString());
 
+        // EK RAPOR (addendum) onaylanınca ayrı bağlantı açılmaz: asıl raporun satırı yeniden planlanır, kod aynı.
+        var ek = await b.TekDegerAsync<int>(
+            "insert into public.radyoloji_rapor (istem_id, durum, kilit, ust_rapor_id) values (@p0, 3, 1, @p1) returning id", t, [z.Istem, z.Rapor], Iptal);
+        await RaporGonderimi.PlanlaAsync(b, t, ek, 0, Iptal, simdi.AddHours(5));
+        Assert.Empty(await SatirlarAsync(b, t, ek));
+        s = await SatirlarAsync(b, t, z.Rapor);
+        Assert.Equal(kod, s[0]["kod"]!.ToString());
+        Assert.Equal(simdi.AddHours(6), ((DateTime)s[0]["planlanan"]!).ToUniversalTime());
+        // Teslim listesi gönderimi isteme göre bulur (1393): en son rapor kaydı ek rapor olsa da görünür.
+        Assert.Equal(1, await b.TekDegerAsync<int>(
+            "select hasta_gonderim_durum::int from public.v_radyoloji_teslim_takip where istem_id = @p0", t, [z.Istem], Iptal));
+
         await t.RollbackAsync();
     }
 
