@@ -3798,6 +3798,9 @@ input.skt-gecmis {
   box-shadow: 0 3px 10px rgba(20, 40, 70, .25); font-size: 12px;
 }
 .rehber-dugme:hover { background: linear-gradient(#5c9bdd, #3577bd) }
+/* SÜRÜKLENEBİLİR (20.11.2026): taşınırken sayfa kaymasın / metin seçilmesin. */
+.rehber-dugme { touch-action: none; user-select: none; cursor: grab }
+.rehber-dugme:active { cursor: grabbing }
 
 .rehber-panel {
   position: fixed; right: 18px; bottom: 18px; z-index: 430;

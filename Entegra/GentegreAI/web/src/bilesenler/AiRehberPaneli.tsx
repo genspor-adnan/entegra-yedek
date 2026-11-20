@@ -8,6 +8,10 @@ import { useAiBaglam } from './aiBaglam';
 import { Kalinla } from './kalinMetin';
 import { aktifDil, c } from '../dil/ceviri';
 
+/** Sürüklenen düğmenin konumu (bu tarayıcı) - 20.11.2026. */
+const KONUM_ANAHTARI = 'gentegre.aiRehber.konum';
+const VARSAYILAN_KONUM = { sag: 18, alt: 18 };
+
 /**
  * YAPAY ZEKÂYA SOR — BAĞLAMSAL YARDIM PANELİ (447 · 871), sağ altta, her ekranda.
  *
@@ -183,6 +187,58 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
     return () => window.removeEventListener(YARDIM_AC_OLAYI, ac);
   }, [sor]);
 
+  /**
+   * SÜRÜKLENEBİLİR DÜĞME (kullanıcı 20.11.2026: "yapay zekaya sor altta sabit ve toplam üzerine geliyor.. yerini
+   * değişebilir yap"): düğme fareyle taşınır, konum (sağdan / alttan px) bu tarayıcıda hatırlanır; panel de oradan
+   * açılır. 4 px'ten az kayma tıklamadır (paneli açar); çift tık varsayılan köşeye döndürür. Ekran dışına taşmaz.
+   */
+  const [dKonum, setDKonum] = useState<{ sag: number; alt: number }>(() => {
+    try {
+      const k = JSON.parse(localStorage.getItem(KONUM_ANAHTARI) ?? 'null') as { sag?: number; alt?: number } | null;
+      if (k && Number.isFinite(k.sag) && Number.isFinite(k.alt)) return { sag: k.sag!, alt: k.alt! };
+    } catch { /* depolama yok - varsayılan */ }
+    return VARSAYILAN_KONUM;
+  });
+  const surukleme = useRef<{ x: number; y: number; sag: number; alt: number; tasindi: boolean } | null>(null);
+  /** Sürükleme bırakıldıktan hemen sonra gelen tıklama paneli açmasın. */
+  const yeniSuruklendi = useRef(false);
+  const sinirla = (sag: number, alt: number) => ({
+    sag: Math.round(Math.min(Math.max(4, sag), Math.max(4, window.innerWidth - 60))),
+    alt: Math.round(Math.min(Math.max(4, alt), Math.max(4, window.innerHeight - 40))),
+  });
+  const konumYaz = (k: { sag: number; alt: number }) => {
+    setDKonum(k);
+    try { localStorage.setItem(KONUM_ANAHTARI, JSON.stringify(k)) } catch { /* yok say */ }
+  };
+  const basla = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0) return;
+    surukleme.current = { x: e.clientX, y: e.clientY, sag: dKonum.sag, alt: dKonum.alt, tasindi: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const tasi = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const s = surukleme.current;
+    if (!s) return;
+    const dx = e.clientX - s.x, dy = e.clientY - s.y;
+    if (!s.tasindi && Math.abs(dx) + Math.abs(dy) < 4) return;
+    s.tasindi = true;
+    setDKonum(sinirla(s.sag - dx, s.alt - dy));
+  };
+  const birak = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const s = surukleme.current;
+    surukleme.current = null;
+    try { e.currentTarget.releasePointerCapture(e.pointerId) } catch { /* yok say */ }
+    if (s?.tasindi) {
+      yeniSuruklendi.current = true;
+      konumYaz(sinirla(s.sag - (e.clientX - s.x), s.alt - (e.clientY - s.y)));
+    }
+  };
+  // Pencere küçülünce ekran dışında kalmasın.
+  useEffect(() => {
+    const boyut = () => setDKonum(k => sinirla(k.sag, k.alt));
+    window.addEventListener('resize', boyut);
+    return () => window.removeEventListener('resize', boyut);
+  }, []);
+
   // KLAVYE: Esc kapatır; odak panelde kalır.
   const tusla = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') { e.stopPropagation(); setAcik(false) }
@@ -190,9 +246,12 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
 
   if (!acik) {
     return (
-      <button className="rehber-dugme" onClick={() => setAcik(true)}
+      <button className="rehber-dugme" style={{ right: dKonum.sag, bottom: dKonum.alt }}
+              onPointerDown={basla} onPointerMove={tasi} onPointerUp={birak}
+              onClick={() => { if (yeniSuruklendi.current) { yeniSuruklendi.current = false; return } setAcik(true) }}
+              onDoubleClick={() => konumYaz(VARSAYILAN_KONUM)}
               aria-label={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır?')}
-              title={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır?')}>
+              title={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır? (Sürükleyerek taşıyabilirsiniz; çift tık: köşeye)')}>
         💡 <span>{c('Yapay Zekâya Sor')}</span>
       </button>
     );
@@ -204,7 +263,8 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
     : null;
 
   return (
-    <div className="rehber-panel" role="dialog" aria-label={c('Yapay Zekâya Sor')}
+    <div className="rehber-panel" style={{ right: Math.min(dKonum.sag, Math.max(4, window.innerWidth - 392)),
+                                           bottom: Math.min(dKonum.alt, Math.max(4, window.innerHeight - 320)) }} role="dialog" aria-label={c('Yapay Zekâya Sor')}
          aria-modal="false" ref={panel} onKeyDown={tusla}>
       <div className="rehber-bas">
         <b>{c('💡 Yapay Zekâya Sor')}</b>
