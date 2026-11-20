@@ -227,7 +227,7 @@ public static partial class RadyolojiUclari
             if (surum != guncel) throw GentegreHatasi.Cakisma(new { surum = guncel });
 
             var arsivId = await baglanti.TekDegerAsync<int>(
-                "select public.fn_radyoloji_rapor_revize(@p0, @p1, @p2)", islem, [id, baglam.KullaniciId, Kisalt(neden, 300)], iptal);
+                "select public.fn_radyoloji_rapor_revize(@p0, @p1, @p2)", islem, [id, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.KirpKes(neden, 300)], iptal);
             var yeniNo = await baglanti.TekDegerAsync<string>(
                 "select coalesce(rapor_no, '') from public.radyoloji_rapor where id = @p0", islem, [id], iptal) ?? "";
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloRapor, id,
@@ -235,7 +235,7 @@ public static partial class RadyolojiUclari
                 new Dictionary<string, string>
                 {
                     ["durum"] = "Revize (taslağa döndü)", ["eskiRaporNo"] = on.No, ["yeniRaporNo"] = yeniNo,
-                    ["arsivRaporId"] = arsivId.ToString(), ["neden"] = Kisalt(neden, 300) ?? "",
+                    ["arsivRaporId"] = arsivId.ToString(), ["neden"] = Gentegre.Cekirdek.MetinAraci.KirpKes(neden, 300) ?? "",
                     ["onaylayan"] = on.Onaylayan.ToString(),
                 }, iptal: iptal);
             await islem.CommitAsync(iptal);

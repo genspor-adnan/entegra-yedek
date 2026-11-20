@@ -104,7 +104,7 @@ public static class DisHekimUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis_doktor.plan", Islem.Gor);
-            var bugun = DateOnly.FromDateTime(DateTime.Today);
+            var bugun = DateOnly.FromDateTime(Gentegre.Cekirdek.Saat.Bugun);
             var bas = hafta ?? bugun.AddDays(-(((int)bugun.DayOfWeek + 6) % 7));
             await using var b = await veri.AcAsync(iptal);
             var temsilciler = await b.ListeAsync("""

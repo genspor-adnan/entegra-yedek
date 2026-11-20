@@ -31,7 +31,7 @@ public static class SahaPerformansUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Kod, Islem.Gor);
 
-            var bugun = DateTime.Today;
+            var bugun = Gentegre.Cekirdek.Saat.Bugun;
             var b1 = (bas ?? new DateTime(bugun.Year, bugun.Month, 1)).Date;
             var b2 = (bit ?? b1.AddMonths(1).AddDays(-1)).Date;
             if (b2 < b1) (b1, b2) = (b2, b1);

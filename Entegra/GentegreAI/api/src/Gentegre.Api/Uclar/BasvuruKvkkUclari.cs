@@ -99,7 +99,7 @@ public static class BasvuruKvkkUclari
                 return Results.Ok(new { durum = "reddetti", kvkkOnay = son.KvkkOnay, etkOnay = son.EtkOnay, tarih,
                                         belgeNo = son.BelgeNo, sube = son.Sube });
             var bitis = gun > 0 ? son.Tarih.AddDays(gun) : (DateTime?)null;
-            var durum = bitis is null || bitis.Value.Date >= DateTime.Today ? "gecerli" : "suresi_doldu";
+            var durum = bitis is null || bitis.Value.Date >= Gentegre.Cekirdek.Saat.Bugun ? "gecerli" : "suresi_doldu";
             return Results.Ok(new { durum, kvkkOnay = son.KvkkOnay, etkOnay = son.EtkOnay, tarih, belgeNo = son.BelgeNo,
                                     sube = son.Sube, kod = son.Kod, bitis = bitis?.ToString("yyyy-MM-dd"), gun });
         });

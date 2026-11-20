@@ -538,9 +538,9 @@ public sealed class EnabizGonderimi
                     //   ekraninda "neden gitmedi" sorusunun cevabi odur.
                     kod.Length > 0 ? kod : sonucKodu,
                     basariliMi ? ""
-                        : (sonucMesaji.Length > 0 ? Kirp(sonucMesaji, 400)
-                                                  : Kirp(govde, 400)),
-                    Kirp(govde, 4000), (int)kronometre.ElapsedMilliseconds);
+                        : (sonucMesaji.Length > 0 ? Gentegre.Cekirdek.MetinAraci.Kes(sonucMesaji, 400)
+                                                  : Gentegre.Cekirdek.MetinAraci.Kes(govde, 400)),
+                    Gentegre.Cekirdek.MetinAraci.Kes(govde, 4000), (int)kronometre.ElapsedMilliseconds);
         }
         // Servis kapanırken iptal (K73): deneme sayılmaz, hata olarak da yazılmaz - yukarıya çıkar.
         catch (OperationCanceledException) when (iptal.IsCancellationRequested) { throw; }
@@ -548,7 +548,7 @@ public sealed class EnabizGonderimi
         {
             kronometre.Stop();
             // Baglanti hatasi SERVIS hatasidir (http 0): otomatik tekrarlanir.
-            return (false, 0, "BAGLANTI", Kirp(h.Message, 400), "",
+            return (false, 0, "BAGLANTI", Gentegre.Cekirdek.MetinAraci.Kes(h.Message, 400), "",
                     (int)kronometre.ElapsedMilliseconds);
         }
     }
@@ -625,7 +625,7 @@ public sealed class EnabizGonderimi
             var dugum = kok.Descendants().FirstOrDefault(
                 x => x.Name.LocalName.Equals("SYSTakipNo", StringComparison.OrdinalIgnoreCase));
             var deger = dugum?.Attribute("value")?.Value ?? dugum?.Value ?? "";
-            if (deger.Trim().Length > 0) return Kirp(deger.Trim(), 64);
+            if (deger.Trim().Length > 0) return Gentegre.Cekirdek.MetinAraci.Kes(deger.Trim(), 64);
 
             // YEDEK YOL: E2033'te numara kendi elemaninda degil, sonuc
             //   mesajinin METNINDE geliyor - "... Kullanabileceginiz
@@ -633,7 +633,7 @@ public sealed class EnabizGonderimi
             //   numarasi burada; okumamak, elimizdeki tek kimligi atmaktir.
             var esles = System.Text.RegularExpressions.Regex.Match(
                 govde, @"SYSTakipNo\s*=\s*([A-Za-z0-9]+)");
-            return esles.Success ? Kirp(esles.Groups[1].Value, 64) : "";
+            return esles.Success ? Gentegre.Cekirdek.MetinAraci.Kes(esles.Groups[1].Value, 64) : "";
         }
         catch { return ""; }
     }
@@ -766,6 +766,4 @@ public sealed class EnabizGonderimi
 
     }
 
-    private static string Kirp(string metin, int en)
-        => string.IsNullOrEmpty(metin) ? "" : metin.Length <= en ? metin : metin[..en];
 }

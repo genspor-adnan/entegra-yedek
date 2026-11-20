@@ -393,7 +393,7 @@ public sealed partial class BelgeDeposu
             ["bolumId"] = kaynak["bolum_id"],
             ["personelId"] = kaynak["personel_id"],
             ["ozelKod"] = kaynak["ozel_kod"],
-            ["aciklama"] = Kirp($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
+            ["aciklama"] = Gentegre.Cekirdek.MetinAraci.Kes($"{kaynak["tur_adi"]} {kaynak["belge_no"]} dönüşümü", 200),
         };
 
         // Dis numarali hedefte (alis faturasi) numarayi kullanici verir - kaynagin

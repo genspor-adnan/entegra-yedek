@@ -25,7 +25,6 @@ public static class KonsultasyonUclari
     public sealed record GerekceIstegi(string? Gerekce);
     public sealed record SonucIstegi(short Sonuc);
 
-    private static string Kirp(string? s, int n) => (s ?? "").Trim() is var t && t.Length > n ? t[..n] : t;
 
     private sealed record Istek(int Id, string No, short Durum, int TarafId, int? BelgeId, int SubeId,
                                 int? IsteyenMuayeneId, int? IsteyenHekimId, int? HedefBolumId, int? HedefHekimId,
@@ -289,7 +288,7 @@ public static class KonsultasyonUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Yetki, Islem.Degistir);
-            var gerekce = Kirp(g.Gerekce, 400);
+            var gerekce = Gentegre.Cekirdek.MetinAraci.KirpKes(g.Gerekce, 400);
             if (gerekce.Length == 0) throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.", new AlanHatasi("gerekce", "Gerekçe yazın."));
             if (g.HedefBolumId is not > 0) throw GentegreHatasi.Dogrulama("Yeni hedef bölüm seçilmeli.", new AlanHatasi("hedefBolumId", "Bölüm seçin."));
             await using var b = await veri.AcAsync(iptal);
@@ -317,7 +316,7 @@ public static class KonsultasyonUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(Yetki, Islem.Degistir);
-            var gerekce = Kirp(g.Gerekce, 400);
+            var gerekce = Gentegre.Cekirdek.MetinAraci.KirpKes(g.Gerekce, 400);
             if (gerekce.Length == 0) throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.", new AlanHatasi("gerekce", "Gerekçe yazın."));
             await using var b = await veri.AcAsync(iptal);
             await using var tx = await b.BeginTransactionAsync(iptal);

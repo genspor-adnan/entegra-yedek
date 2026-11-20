@@ -123,6 +123,4 @@ public sealed class EnabizPortalIstemcisi
     /// <summary>SOAP Fault varsa metnini döner.</summary>
     public static string? Fault(string zarf) => Eleman(zarf, "faultstring");
 
-    public static string Kirp(string? metin, int uzunluk)
-        => (metin ?? "").Length <= uzunluk ? metin ?? "" : metin![..uzunluk];
 }

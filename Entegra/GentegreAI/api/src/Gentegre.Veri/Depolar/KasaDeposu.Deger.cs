@@ -83,8 +83,6 @@ public sealed partial class KasaDeposu
     }
 
 
-    private static string Kirp(string deger, int sinir)
-        => deger.Length <= sinir ? deger : deger[..sinir];
 
     private static long Sayi(IDictionary<string, object?> d, string ad)
         => d.TryGetValue(ad, out var v) && v is not null ? Convert.ToInt64(v) : 0;

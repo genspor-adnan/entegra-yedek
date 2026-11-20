@@ -122,14 +122,14 @@ public static class TeletipUclari
             // Dışa açık WADO (1313): yapılandırma + bugünün / son 7 günün erişim sayacı (IP + çalışma bazında).
             var w = wadoServis.Ayar;
             var wadoSayac = (await b.ListeAsync("""
-                select coalesce(sum(istek_sayisi) filter (where gun = (now() at time zone 'Europe/Istanbul')::date), 0)::int as "bugunIstek",
-                       coalesce(sum(hata_sayisi)  filter (where gun = (now() at time zone 'Europe/Istanbul')::date), 0)::int as "bugunHata",
+                select coalesce(sum(istek_sayisi) filter (where gun = (now() at time zone current_setting('TimeZone'))::date), 0)::int as "bugunIstek",
+                       coalesce(sum(hata_sayisi)  filter (where gun = (now() at time zone current_setting('TimeZone'))::date), 0)::int as "bugunHata",
                        coalesce(sum(istek_sayisi), 0)::int as "haftaIstek",
                        count(distinct study_uid) filter (where study_uid <> '-')::int as "haftaCalisma",
                        count(distinct ip)::int as "haftaIp",
                        max(son_erisim) as "sonErisim"
                   from public.teletip_wado_erisim
-                 where gun >= (now() at time zone 'Europe/Istanbul')::date - 6
+                 where gun >= (now() at time zone current_setting('TimeZone'))::date - 6
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal)).First();
             var wadoSonHata = await b.ListeAsync("""
                 select ip, study_uid as "studyUid", son_hata as hata, son_erisim as zaman

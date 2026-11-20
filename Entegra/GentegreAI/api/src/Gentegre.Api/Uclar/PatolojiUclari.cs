@@ -30,7 +30,6 @@ public static class PatolojiUclari
     /// <summary>Başvuru kapısı (1105): hekim istemi bankoda ücretlendirilip başvuru kaydedilmeden çalışılmaz.</summary>
     private const string BankoBekliyor = "Vaka başvuru kaydı bekliyor: bankoda ücretlendirilip başvuru kaydedilmeden çalışılamaz.";
 
-    private static string Kirp(string? s, int n) => (s ?? "").Trim() is var t && t.Length > n ? t[..n] : (s ?? "").Trim();
 
     public static void PatolojiUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -124,7 +123,7 @@ public static class PatolojiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("patoloji.vaka", Islem.Degistir);
-            var no = Kirp(g.LabVakaNo, 40);
+            var no = MetinAraci.KirpKes(g.LabVakaNo, 40);
             if (no == "") throw GentegreHatasi.Dogrulama("Lab vaka numarası girilmedi.");
             await using var b = await veri.AcAsync(iptal);
             var n = await b.CalistirAsync(
@@ -143,7 +142,7 @@ public static class PatolojiUclari
             var n = await b.CalistirAsync(
                 "update public.pat_vaka set durum = 90, ret_nedeni_id = @p1, aciklama = case when @p2 = '' then aciklama else @p2 end, " +
                 " degistiren = @p3, degistirme_tarihi = now() where id = @p0 and durum between 1 and 4",
-                null, [id, g.RetNedeniId, Kirp(g.Aciklama, 600), baglam.KullaniciId], iptal);
+                null, [id, g.RetNedeniId, MetinAraci.KirpKes(g.Aciklama, 600), baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Rapor aşamasına geçmiş vaka reddedilemez.");
             await log.YazAsync(LogIslemi.Degistir, LogVaka, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Reddedildi", g.RetNedeniId, g.Aciklama }, iptal: iptal);
             return Results.Ok(new { id, mesaj = "Vaka reddedildi - isteyen hekime bildirilmeli." });
@@ -235,7 +234,7 @@ public static class PatolojiUclari
             if (vaka == 0) throw GentegreHatasi.IsKurali("Pakette vaka yok.");
             var n = await b.CalistirAsync(
                 "update public.pat_gonderim set durum = 2, kurye_zamani = now(), kurye = case when @p1 = '' then kurye else @p1 end, " +
-                " degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 1", null, [id, Kirp(g.Kurye, 120), baglam.KullaniciId], iptal);
+                " degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 1", null, [id, MetinAraci.KirpKes(g.Kurye, 120), baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Yalnız hazırlanan paket kuryeye verilir.");
             await b.CalistirAsync("update public.pat_vaka set durum = 3, degistiren = @p1, degistirme_tarihi = now() where gonderim_id = @p0 and durum in (1, 2)",
                 null, [id, baglam.KullaniciId], iptal);
@@ -250,7 +249,7 @@ public static class PatolojiUclari
             await using var b = await veri.AcAsync(iptal);
             var n = await b.CalistirAsync(
                 "update public.pat_gonderim set durum = 3, teslim_zamani = now(), teslim_alan = case when @p1 = '' then teslim_alan else @p1 end, " +
-                " degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 2", null, [id, Kirp(g.TeslimAlan, 120), baglam.KullaniciId], iptal);
+                " degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum = 2", null, [id, MetinAraci.KirpKes(g.TeslimAlan, 120), baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Yalnız yoldaki paket teslim edilir.");
             await log.YazAsync(LogIslemi.Degistir, LogGonderim, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { durum = "Lab teslim aldı", g.TeslimAlan }, iptal: iptal);
             return Results.Ok(new { id, mesaj = "Lab paketi teslim aldı - vakaların lab kabulü (lab vaka no) bekleniyor." });

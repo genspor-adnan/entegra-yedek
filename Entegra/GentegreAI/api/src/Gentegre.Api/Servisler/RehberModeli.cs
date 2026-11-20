@@ -213,7 +213,7 @@ public sealed class RehberModeli(IModelSaglayici saglayici, ILogger<RehberModeli
         {
             using var belge = JsonDocument.Parse(metin);
             var kok = belge.RootElement;
-            var cevap = Kisalt(Metin(kok, "cevap"), 700);
+            var cevap = Gentegre.Cekirdek.MetinAraci.Kes(Metin(kok, "cevap"), 700);
             if (cevap.Length == 0) return null;
 
             var adimlar = new List<ModelAdimi>();
@@ -222,7 +222,7 @@ public sealed class RehberModeli(IModelSaglayici saglayici, ILogger<RehberModeli
                 foreach (var oge in dizi.EnumerateArray())
                 {
                     if (adimlar.Count >= 6) break;
-                    var adimMetni = Kisalt(Metin(oge, "metin"), 240);
+                    var adimMetni = Gentegre.Cekirdek.MetinAraci.Kes(Metin(oge, "metin"), 240);
                     if (adimMetni.Length == 0) continue;
                     var ekran = Metin(oge, "ekran");
                     var gecerli = beyazListe.FirstOrDefault(
@@ -234,7 +234,7 @@ public sealed class RehberModeli(IModelSaglayici saglayici, ILogger<RehberModeli
                 }
             }
 
-            var soru = Kisalt(Metin(kok, "eksikBilgiSorusu"), 200);
+            var soru = Gentegre.Cekirdek.MetinAraci.Kes(Metin(kok, "eksikBilgiSorusu"), 200);
             var guven = 0.5m;
             if (kok.TryGetProperty("guven", out var gv)
                 && gv.ValueKind == JsonValueKind.Number && gv.TryGetDecimal(out var g))
@@ -270,6 +270,4 @@ public sealed class RehberModeli(IModelSaglayici saglayici, ILogger<RehberModeli
             ? (d.GetString() ?? "").Trim()
             : "";
 
-    private static string Kisalt(string s, int uzunluk) =>
-        s.Length <= uzunluk ? s : s[..uzunluk];
 }

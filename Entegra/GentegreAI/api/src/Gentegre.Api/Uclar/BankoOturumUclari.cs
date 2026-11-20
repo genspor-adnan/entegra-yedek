@@ -413,8 +413,8 @@ public static class BankoOturumUclari
                             case when @p4 = 2 then now() end, @p9, @p2)
                     returning id
                     """, islem,
-                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, Kirp(vMetin, 60),
-                     durum, devir, sayim, fark, Kirp(istek.Not, 400), banko.Birakilacak,
+                    [banko.Id, baglam.SubeId ?? 0, baglam.KullaniciId, MetinAraci.Kes(vMetin, 60),
+                     durum, devir, sayim, fark, MetinAraci.Kes(istek.Not, 400), banko.Birakilacak,
                      vKod, vBas, vBit], iptal);
             }
             catch (PostgresException h) when (h.SqlState == "23505")
@@ -584,7 +584,7 @@ public static class BankoOturumUclari
                     update public.banko_oturum
                        set durum = 5, red_neden = @p2, degistiren = @p1, degistirme_tarihi = now()
                      where id = @p0
-                    """, islem, [id, baglam.KullaniciId, Kirp(istek.Not, 400)], iptal);
+                    """, islem, [id, baglam.KullaniciId, MetinAraci.Kes(istek.Not, 400)], iptal);
             }
             else if (o.Durum == TeslimBekler)
             {
@@ -596,7 +596,7 @@ public static class BankoOturumUclari
                        set durum = 2, kapanis_talep_ts = null, red_neden = @p2,
                            degistiren = @p1, degistirme_tarihi = now()
                      where id = @p0
-                    """, islem, [id, baglam.KullaniciId, Kirp(istek.Not, 400)], iptal);
+                    """, islem, [id, baglam.KullaniciId, MetinAraci.Kes(istek.Not, 400)], iptal);
             }
             else throw GentegreHatasi.IsKurali("Bu oturum onay beklemiyor.");
 
@@ -668,7 +668,7 @@ public static class BankoOturumUclari
                  where id = @p0 and durum = @p11
                 """, islem,
                 [id, onayIster ? TeslimBekler : Kapandi, sayim, beklenen, fark,
-                 (short)(istek.FarkNeden ?? 0), Kirp(istek.FarkAciklama, 600),
+                 (short)(istek.FarkNeden ?? 0), MetinAraci.Kes(istek.FarkAciklama, 600),
                  birakilan, Math.Round(sayim - birakilan, 2),
                  istek.TeslimAlanId, baglam.KullaniciId, Acik], iptal);
             if (etkilenen == 0)
@@ -745,7 +745,7 @@ public static class BankoOturumUclari
                            durum = @p5, aciklama = @p6
                     """, islem,
                     [id, satir.BankoPosId, cihaz, sistem, fark, durum,
-                     Kirp(satir.Aciklama, 300), baglam.KullaniciId], iptal);
+                     MetinAraci.Kes(satir.Aciklama, 300), baglam.KullaniciId], iptal);
             }
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogTablo, (int)id, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip, new { posEslesme = (istek.Satirlar ?? []).Count }, iptal: iptal);
@@ -841,7 +841,7 @@ public static class BankoOturumUclari
                            kapanis_onay_id = null, kapanis_onay_ts = null,
                            red_neden = @p2, degistiren = @p1, degistirme_tarihi = now()
                      where id = @p0
-                    """, islem, [id, baglam.KullaniciId, Kirp(istek.Not, 400)], iptal);
+                    """, islem, [id, baglam.KullaniciId, MetinAraci.Kes(istek.Not, 400)], iptal);
             }
             catch (PostgresException h) when (h.SqlState == "23505")
             {
@@ -925,7 +925,6 @@ public static class BankoOturumUclari
     /// <summary>islem_log.tablo_id — banko oturumu.</summary>
     private const int LogTablo = 1385;
 
-    private static string Kirp(string? m, int n) => (m ?? "").Length <= n ? m ?? "" : m![..n];
 
     private sealed record OturumDurumu(short Durum, int KullaniciId, int BankoId);
 
@@ -1008,7 +1007,7 @@ public static class BankoOturumUclari
             returning id
             """, islem,
             [tur, kasaHesapId, karsiHesap, Math.Abs(fark), oturumId,
-             Kirp(not, 300), baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
+             MetinAraci.Kes(not, 300), baglam.SubeId ?? 0, baglam.KullaniciId], iptal);
 
         // KOŞULLU BAĞ (K14): satır bu arada fiş almışsa yeni fiş geri alınır
         //   (aynı tx içinde silinir) - oturumda tek fark fişi kalır.

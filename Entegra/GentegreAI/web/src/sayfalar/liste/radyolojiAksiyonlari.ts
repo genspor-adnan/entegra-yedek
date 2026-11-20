@@ -3,7 +3,7 @@ import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import { yerelZamanDamgasi } from './zaman';
 import { erisimYolu } from '../../bilesenler/radyoloji/radyolojiErisim';
-import { raporGonderimAksiyonu } from '../../bilesenler/radyoloji/raporGonderimMenusu';
+import { raporGonderimAksiyonu } from '../../bilesenler/raporGonderim/raporGonderimMenusu';
 
 /**
  * RADYOLOJI WORKLIST AKSIYONLARI (283 · 304 · 316 · 318 · 320).

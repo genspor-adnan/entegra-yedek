@@ -49,7 +49,7 @@ public static class MrzCozucu
     {
         var satirlar = Satirlar(metin);
         if (satirlar.Count is < 2 or > 3) return null;
-        var gun = bugun ?? DateOnly.FromDateTime(DateTime.Today);
+        var gun = bugun ?? DateOnly.FromDateTime(Gentegre.Cekirdek.Saat.Bugun);
 
         // Biçim: 3 satır → TD1 (30); 2 satır → P ile başlıyorsa ya da 36'dan uzunsa TD3 (44), yoksa TD2 (36).
         var enUzun = satirlar.Max(s => s.Length);

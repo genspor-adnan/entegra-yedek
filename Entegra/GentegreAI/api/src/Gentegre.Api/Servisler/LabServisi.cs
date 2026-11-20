@@ -427,7 +427,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     /// 6 (tekrar numune bekliyor) ve 7 (dış laboratuvarda) SAYILMAZ -
     /// ikisinde de o tetkiğin sonucu hâlâ yok.</para>
     /// </summary>
-    private static async Task IstemDurumTazeleAsync(NpgsqlConnection baglanti,
+    private async Task IstemDurumTazeleAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction? islem, int istemId, CancellationToken iptal)
     {
         await IstemDurumYazAsync(baglanti, islem, istemId, iptal);
@@ -439,7 +439,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         catch (Exception h) when (h is not OperationCanceledException)
         {
             if (islem is not null) await islem.RollbackAsync("rapor_gonderim", iptal);
-            System.Diagnostics.Trace.TraceError($"Lab rapor gönderimi planlanamadı (istem {istemId}): {h.Message}");
+            _gunluk.LogError(h, "Lab rapor gönderimi planlanamadı (istem {IstemId}).", istemId);
         }
     }
 

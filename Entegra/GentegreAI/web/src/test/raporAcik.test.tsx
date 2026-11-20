@@ -15,7 +15,7 @@ vi.mock('../api/uclar/raporGonderim', async asil => ({
   acikRaporOku: async () => yanit,
 }));
 vi.mock('../api/istemci', () => ({ api: { dokumanIcerikUrl: async () => null } }));
-const { RaporAcik } = await import('../sayfalar/radyoloji/RaporAcik');
+const { RaporAcik } = await import('../sayfalar/raporGonderim/RaporAcik');
 const { Karekod } = await import('../bilesenler/Karekod');
 const { raporBaglantisi } = await import('../api/uclar/raporGonderim');
 

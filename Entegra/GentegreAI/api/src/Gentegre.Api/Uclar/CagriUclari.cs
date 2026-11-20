@@ -89,7 +89,6 @@ public static partial class CagriUclari
         => ParseList(await b.ListeAsync(sql, null, par, o => o.GetString(0), iptal));
 
     private static int? SayiN(NpgsqlDataReader o, int i) => o.IsDBNull(i) ? null : o.GetInt32(i);
-    private static string Kirp(string? m, int n) => (m ?? "").Length <= n ? m ?? "" : m![..n];
 
     private static string TelAnahtar(string? tel)
     {
@@ -117,12 +116,12 @@ public static partial class CagriUclari
 
     private static async Task OlayYazAsync(NpgsqlConnection b, int cagriId, short tur, int? agentId, string aciklama, string veri, CancellationToken iptal)
         => await b.CalistirAsync("insert into public.cagri_olay (cagri_id, tur, zaman, agent_id, aciklama, veri) values (@p0, @p1, now(), @p2, @p3, @p4)", null,
-            [cagriId, tur, agentId, Kirp(aciklama, 300), Kirp(veri, 1000)], iptal);
+            [cagriId, tur, agentId, Gentegre.Cekirdek.MetinAraci.Kes(aciklama, 300), Gentegre.Cekirdek.MetinAraci.Kes(veri, 1000)], iptal);
 
     private static async Task<int> IlgiliEkleAsync(NpgsqlConnection b, int cagriId, string kaynakTur, int kaynakId, string aciklama, int kullaniciId, CancellationToken iptal)
     {
         var id = await b.TekDegerAsync<int>("insert into public.cagri_ilgili (cagri_id, kaynak_tur, kaynak_id, aciklama, ekleyen) values (@p0, @p1, @p2, @p3, @p4) returning id", null,
-            [cagriId, Kirp(kaynakTur, 30), kaynakId, Kirp(aciklama, 200), kullaniciId], iptal);
+            [cagriId, Gentegre.Cekirdek.MetinAraci.Kes(kaynakTur, 30), kaynakId, Gentegre.Cekirdek.MetinAraci.Kes(aciklama, 200), kullaniciId], iptal);
         await OlayYazAsync(b, cagriId, 9, kullaniciId, $"{kaynakTur} #{kaynakId} {aciklama}", "", iptal);
         return id;
     }

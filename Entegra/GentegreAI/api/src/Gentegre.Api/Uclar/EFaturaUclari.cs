@@ -138,8 +138,8 @@ public static class EFaturaUclari
                        sgk_donem_bit = excluded.sgk_donem_bit, kamu_hesap_id = excluded.kamu_hesap_id,
                        degistiren = @p12, degistirme_tarihi = now()
                 """, tx, [id, (short)D(h, "tevkifatKodu"), (short)D(h, "istisnaKodu"), D(h, "navlun"), D(h, "sigorta"),
-                          Kirp(M("sgkTip"), 20), Kirp(M("sgkMukellefKod"), 30), Kirp(M("sgkMukellefAd"), 200),
-                          Kirp(M("sgkDosyaNo"), 50), T("sgkDonemBas"), T("sgkDonemBit"), HesapId(), bg.KullaniciId], iptal);
+                          Gentegre.Cekirdek.MetinAraci.Kes(M("sgkTip"), 20), Gentegre.Cekirdek.MetinAraci.Kes(M("sgkMukellefKod"), 30), Gentegre.Cekirdek.MetinAraci.Kes(M("sgkMukellefAd"), 200),
+                          Gentegre.Cekirdek.MetinAraci.Kes(M("sgkDosyaNo"), 50), T("sgkDonemBas"), T("sgkDonemBit"), HesapId(), bg.KullaniciId], iptal);
 
             if (g.TryGetProperty("satirlar", out var ss) && ss.ValueKind == JsonValueKind.Array)
                 foreach (var s in ss.EnumerateArray())
@@ -152,8 +152,8 @@ public static class EFaturaUclari
                         on conflict (satir_id) do update set gtip = excluded.gtip, teslim_sarti = excluded.teslim_sarti,
                                tasima_sekli = excluded.tasima_sekli, kap_cinsi = excluded.kap_cinsi,
                                kap_no = excluded.kap_no, kap_adet = excluded.kap_adet
-                        """, tx, [(int)D(s, "satirId"), id, Kirp(EFaturaKodlari.Rakam(SM("gtip")), 12), Kirp(SM("teslimSarti"), 3),
-                                  (short)D(s, "tasimaSekli"), Kirp(SM("kapCinsi"), 3), Kirp(SM("kapNo"), 30), D(s, "kapAdet")], iptal);
+                        """, tx, [(int)D(s, "satirId"), id, Gentegre.Cekirdek.MetinAraci.Kes(EFaturaKodlari.Rakam(SM("gtip")), 12), Gentegre.Cekirdek.MetinAraci.Kes(SM("teslimSarti"), 3),
+                                  (short)D(s, "tasimaSekli"), Gentegre.Cekirdek.MetinAraci.Kes(SM("kapCinsi"), 3), Gentegre.Cekirdek.MetinAraci.Kes(SM("kapNo"), 30), D(s, "kapAdet")], iptal);
                 }
 
             var yeniBaslik = await b.TekAsync(BilgiBaslikSql, tx, [id], o => o.Sozluk(), iptal) ?? new Dictionary<string, object?>();
@@ -224,7 +224,6 @@ public static class EFaturaUclari
                                    string.Concat(k.Key.Split('_').Select((p, i) => i == 0 ? p : char.ToUpperInvariant(p[0]) + p[1..]))),
                           k => k.Value);
 
-    private static string Kirp(string s, int n) => s.Length <= n ? s : s[..n];
 
     /// <summary>islem_log.tablo_id - belge (BelgeUclari / EslesmeIcmalUclari ile aynı: 30). belge_efatura belgenin uzantısıdır.</summary>
     private const int LogTabloBelge = 30;

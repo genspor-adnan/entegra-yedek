@@ -156,7 +156,7 @@ public sealed class GozCihazServisi
                 // TEK MESAJIN HATASI KUYRUĞU DÜŞÜRMEZ: sebebi satıra yazılır,
                 //   kuyruk devam eder. Yoksa bozuk tek bir dosya, günün bütün
                 //   ölçümlerini bekletirdi.
-                await DurumYazAsync(baglanti, m.id, 3, Kirp(h.Message, 300), iptal);
+                await DurumYazAsync(baglanti, m.id, 3, Gentegre.Cekirdek.MetinAraci.Kes(h.Message, 300), iptal);
                 hatali++;
             }
         }
@@ -503,7 +503,6 @@ public sealed class GozCihazServisi
             update public.goz_cihaz_mesaj
                set islem_durum = @p1, hata = @p2, degistirme_tarihi = now()
              where id = @p0
-            """, null, [id, durum, Kirp(hata, 300)], iptal);
+            """, null, [id, durum, Gentegre.Cekirdek.MetinAraci.Kes(hata, 300)], iptal);
 
-    private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 }

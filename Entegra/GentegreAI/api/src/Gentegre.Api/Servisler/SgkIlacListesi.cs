@@ -135,7 +135,7 @@ public sealed class SgkIlacListesi
                    and nullif(t.esdeger, '') is not null
                    and i.esdeger_grup is distinct from t.esdeger
                 """, null,
-                [p.Select(x => x.Barkod).ToArray(), p.Select(x => Kirp(x.Esdeger, 64)).ToArray()], iptal);
+                [p.Select(x => x.Barkod).ToArray(), p.Select(x => MetinAraci.Kes(x.Esdeger, 64)).ToArray()], iptal);
         }
 
         // Ek-4/A'da olup KATALOĞUMUZDA olmayan barkod: ruhsat listesi ile
@@ -179,7 +179,6 @@ public sealed class SgkIlacListesi
     }
 
     /// <summary>Kolon sınırına kırpar: kaynak listede uzun değer var diye yükleme durmasın.</summary>
-    private static string Kirp(string metin, int en) => metin.Length <= en ? metin : metin[..en];
 
     private static string Rakam(string metin)
         => new(metin.Where(char.IsDigit).ToArray());

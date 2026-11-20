@@ -31,7 +31,7 @@ public static partial class CagriUclari
             var agentId = await AgentBulAsync(b, g.Dahili, iptal);
             // Çağrı yalnız anahtarın şubesinde aranır (K60): bir şubenin anahtarıyla başkasının çağrısı kapatılamaz.
             int? id = reff == "" ? null : await b.TekDegerAsync<int?>("select id from public.cagri where dis_ref = @p0 and sube_id = @p1", null, [reff, sube], iptal);
-            var ham = Kirp(JsonSerializer.Serialize(g), 1000);
+            var ham = Gentegre.Cekirdek.MetinAraci.Kes(JsonSerializer.Serialize(g), 1000);
             switch (olay)
             {
                 case "ringing":

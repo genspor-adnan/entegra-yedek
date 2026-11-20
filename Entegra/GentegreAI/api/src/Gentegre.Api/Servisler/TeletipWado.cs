@@ -410,7 +410,7 @@ public sealed class TeletipWadoServisi(VeriKaynagi veri, IWadoPacs pacs, IMemory
                 lock (s) { istek = s.Istek; hata = s.Hata; bayt = s.Bayt; son = s.SonHata; }
                 await b.CalistirAsync("""
                     insert into public.teletip_wado_erisim as t (gun, ip, study_uid, istek_sayisi, hata_sayisi, bayt, son_hata)
-                    values ((now() at time zone 'Europe/Istanbul')::date, @p0, @p1, @p2, @p3, @p4, @p5)
+                    values ((now() at time zone current_setting('TimeZone'))::date, @p0, @p1, @p2, @p3, @p4, @p5)
                     on conflict (gun, ip, study_uid) do update
                        set istek_sayisi = t.istek_sayisi + excluded.istek_sayisi, hata_sayisi = t.hata_sayisi + excluded.hata_sayisi,
                            bayt = t.bayt + excluded.bayt, son_erisim = now(),

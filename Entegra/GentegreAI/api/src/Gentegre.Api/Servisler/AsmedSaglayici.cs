@@ -87,7 +87,7 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
 
         if (!yanit.IsSuccessStatusCode)
             throw new InvalidOperationException(
-                $"Sigorta jetonu alınamadı ({(int)yanit.StatusCode}): {Kirp(metin, 200)}");
+                $"Sigorta jetonu alınamadı ({(int)yanit.StatusCode}): {MetinAraci.KesUc(metin, 200)}");
 
         using var belge = JsonDocument.Parse(metin);
         var jeton = belge.RootElement.TryGetProperty("access_token", out var a)
@@ -158,7 +158,7 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
 
         if (!yanit.IsSuccessStatusCode)
             _gunluk.LogWarning("Sigorta {Uc} {Durum}: {Yanit}", uc,
-                               (int)yanit.StatusCode, Kirp(metin, 300));
+                               (int)yanit.StatusCode, MetinAraci.KesUc(metin, 300));
         return ((int)yanit.StatusCode, metin);
     }
 
@@ -572,9 +572,7 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
                 if (kok?[ad]?.ToString() is { Length: > 0 } m) return m;
         }
         catch { /* metin yanıt - aşağıda kırpılır */ }
-        return $"Servis hatası ({durum}): {Kirp(yanit, 200)}";
+        return $"Servis hatası ({durum}): {MetinAraci.KesUc(yanit, 200)}";
     }
 
-    private static string Kirp(string m, int n)
-        => string.IsNullOrEmpty(m) ? "" : m.Length <= n ? m : m[..n] + "…";
 }

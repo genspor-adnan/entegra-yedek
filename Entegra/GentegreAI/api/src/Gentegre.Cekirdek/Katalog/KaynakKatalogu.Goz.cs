@@ -244,7 +244,7 @@ public static partial class KaynakKatalogu
             //   Gün ve saat birlikte: liste bir günle sınırlı değil (dönem
             //   çipleri hafta / tümü de seçiyor), yalnız saat yazmak hangi
             //   güne ait olduğunu belirsiz bırakırdı.
-            new("saat", "to_char(m.muayene_tarihi at time zone 'Europe/Istanbul', 'DD.MM HH24:MI')",
+            new("saat", "to_char(m.muayene_tarihi at time zone current_setting('TimeZone'), 'DD.MM HH24:MI')",
                                              "metin", "Saat", Hizalama: "orta", Genislik: 100,
                                              Filtrelenebilir: false, Bicim: "alt:saatAlt"),
             // DAMLA SAATİ istasyon kaydından (goz_ziyaret_istasyon.dilatasyon_zamani):
@@ -255,7 +255,7 @@ public static partial class KaynakKatalogu
                 //   ziyarette damlası olabilir, dilate OLMAYAN muayenenin altına
                 //   saat yazmak o muayenede damla yapıldığı anlamına gelirdi.
                 "case when gm.dilate = 1 then concat_ws(' ', 'dilate', "
-                + "(select to_char(zi.dilatasyon_zamani at time zone 'Europe/Istanbul', 'HH24:MI') "
+                + "(select to_char(zi.dilatasyon_zamani at time zone current_setting('TimeZone'), 'HH24:MI') "
                 + "   from public.goz_ziyaret_istasyon zi "
                 + "  where zi.hasta_id = gm.hasta_id and zi.dilatasyon_zamani is not null "
                 + "    and zi.dilatasyon_zamani::date = m.muayene_tarihi::date "
@@ -301,7 +301,7 @@ public static partial class KaynakKatalogu
                                              "metin", "Durum", Hizalama: "orta", Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
             new("glokom", "coalesce(v.glokom, 0)", "mantik", "Glokom Takibi", Varsayilan: false),
             new("retina", "coalesce(v.retina, 0)", "mantik", "Retina Takibi", Varsayilan: false),
-            new("bugun", "case when (m.muayene_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+            new("bugun", "case when (m.muayene_tarihi at time zone current_setting('TimeZone'))::date = (now() at time zone current_setting('TimeZone'))::date then 1 else 0 end",
                                              "mantik", "Bugün", Varsayilan: false),
             new("son30", "case when m.muayene_tarihi >= now() - interval '30 days' then 1 else 0 end",
                                              "mantik", "Son 30 Gün", Varsayilan: false),
@@ -356,7 +356,7 @@ public static partial class KaynakKatalogu
             new("id",        "g.id",          "sayi", "Id", Varsayilan: false),
             new("hastaId",   "g.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
             // 974 (mockup goz_goruntuleme_listesi_v2): istem saati altında isteyen hekim.
-            new("istemSaat", "to_char(g.istem_zamani at time zone 'Europe/Istanbul', 'DD.MM HH24:MI')",
+            new("istemSaat", "to_char(g.istem_zamani at time zone current_setting('TimeZone'), 'DD.MM HH24:MI')",
                                               "metin", "İstem", Genislik: 110, Filtrelenebilir: false, Bicim: "alt:istekHekim"),
             new("istekHekim", "coalesce(public.fn_taraf_ad(ih.unvan, ih.ad, ih.soyad)::varchar(120), '')", "metin", "İsteyen", Varsayilan: false),
             new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 200,
@@ -389,7 +389,7 @@ public static partial class KaynakKatalogu
                                               Genislik: 130, Filtrelenebilir: false),
             new("durumAlt",
                 "case when g.durum = 1 and g.serbest = 0 then 'ödeme bekliyor' "
-                + "when g.cekim_zamani is not null then concat_ws(' · ', to_char(g.cekim_zamani at time zone 'Europe/Istanbul', 'HH24:MI'), nullif(c.ad, '')) "
+                + "when g.cekim_zamani is not null then concat_ws(' · ', to_char(g.cekim_zamani at time zone current_setting('TimeZone'), 'HH24:MI'), nullif(c.ad, '')) "
                 + "else '' end", "metin", "Durum Ayrıntısı", Varsayilan: false, Filtrelenebilir: false),
             new("anaOd", "v.ana_od", "sayi", "Ana ölçüm", Hizalama: "orta", Genislik: 110,
                 Bicim: "odos:anaOs:anaBayrak", Filtrelenebilir: false),
@@ -402,7 +402,7 @@ public static partial class KaynakKatalogu
             new("beklemeDk", "v.bekleme_dk", "sayi", "Bekleme (dk)", Hizalama: "orta", Genislik: 90),
             new("uyari", "coalesce(v.uyari, '')", "metin", "Uyarı", Genislik: 180, Filtrelenebilir: false, Bicim: "uyari"),
             new("serbest", "g.serbest", "mantik", "Ödendi", Varsayilan: false),
-            new("bugun", "case when (g.istem_zamani at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+            new("bugun", "case when (g.istem_zamani at time zone current_setting('TimeZone'))::date = (now() at time zone current_setting('TimeZone'))::date then 1 else 0 end",
                                               "mantik", "Bugün", Varsayilan: false),
             new("buHafta", "case when g.istem_zamani >= date_trunc('week', now()) then 1 else 0 end", "mantik", "Bu Hafta", Varsayilan: false),
             new("kaliteDusuk", "case when g.kalite is not null and g.kalite < 6 then 1 else 0 end", "mantik", "Kalite Düşük", Varsayilan: false),
@@ -556,7 +556,7 @@ public static partial class KaynakKatalogu
             new("hastaId",   "r.hasta_id",    "sayi", "Hasta Id", Varsayilan: false),
             new("receteNo",  "coalesce(r.recete_no, '')", "metin", "Reçete No", Varsayilan: false),
             // 973 (mockup goz_gozluk_recete_listesi_v2): tarih altında reçete no, hasta altında yaş / H / P.
-            new("tarihMetin", "to_char(r.ekleme_tarihi at time zone 'Europe/Istanbul', 'DD.MM.YYYY HH24:MI')",
+            new("tarihMetin", "to_char(r.ekleme_tarihi at time zone current_setting('TimeZone'), 'DD.MM.YYYY HH24:MI')",
                                               "metin", "Tarih", Genislik: 130, Filtrelenebilir: false, Bicim: "alt:receteNo"),
             new("tarih",     "r.ekleme_tarihi", "tarih", "Tarih (gün)", Varsayilan: false, Bicim: "dd.MM.yyyy"),
             new("hasta",     "public.fn_taraf_ad(t.unvan, t.ad, t.soyad)::varchar(120)",       "metin", "Hasta", Genislik: 200,
@@ -571,7 +571,7 @@ public static partial class KaynakKatalogu
                 + "then to_char(coalesce(r.od_pd, 0) + coalesce(r.os_pd, 0), 'FM990.0') end, to_char(r.pd_yakin, 'FM990.0')), '.', ',')", "metin", "PD",
                                               Hizalama: "orta", Genislik: 80, Filtrelenebilir: false),
             new("uyari", "coalesce(v.uyari, '')", "metin", "Uyarı", Genislik: 170, Filtrelenebilir: false, Bicim: "uyari"),
-            new("bugun", "case when (r.ekleme_tarihi at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date then 1 else 0 end",
+            new("bugun", "case when (r.ekleme_tarihi at time zone current_setting('TimeZone'))::date = (now() at time zone current_setting('TimeZone'))::date then 1 else 0 end",
                                               "mantik", "Bugün", Varsayilan: false),
             new("buHafta", "case when r.ekleme_tarihi >= date_trunc('week', now()) then 1 else 0 end", "mantik", "Bu Hafta", Varsayilan: false),
             new("bitecek", "coalesce(v.bitecek, 0)", "mantik", "Geçerlilik Bitiyor", Varsayilan: false),

@@ -2,7 +2,7 @@ import { api } from '../../api/istemci';
 import { guvenli } from '../../bilesenler/mesaj';
 import { TarafArama } from '../../bilesenler/TarafArama';
 import { IstemModali } from '../../bilesenler/radyoloji/IstemModali';
-import { TeslimModali } from '../../bilesenler/radyoloji/TeslimModali';
+import { TeslimModali } from '../../bilesenler/raporGonderim/TeslimModali';
 import { RandevuModali } from '../../bilesenler/radyoloji/RandevuModali';
 import { KritikBildirimModali } from '../../bilesenler/radyoloji/KritikBildirimModali';
 import { KonsultasyonCevapModali }

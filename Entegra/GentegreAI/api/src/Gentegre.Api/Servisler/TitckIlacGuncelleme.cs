@@ -260,10 +260,10 @@ public sealed class TitckIlacGuncelleme
             var askidaSutun = Al("ASKIDA");
             var aktif = (short)(string.IsNullOrEmpty(askidaSutun) || askidaSutun == "0" ? 1 : 0);
 
-            sonuc.Add(new IlacSatiri(barkod, Kirp(urun, 300),
-                                     Kirp(Al("ETKIN MADDE", "ETKEN MADDE"), 300),
-                                     Kirp(Al("ATC"), 20),
-                                     Kirp(Al("RUHSAT SAHIBI", "FIRMA"), 200), aktif));
+            sonuc.Add(new IlacSatiri(barkod, Gentegre.Cekirdek.MetinAraci.Kes(urun, 300),
+                                     Gentegre.Cekirdek.MetinAraci.Kes(Al("ETKIN MADDE", "ETKEN MADDE"), 300),
+                                     Gentegre.Cekirdek.MetinAraci.Kes(Al("ATC"), 20),
+                                     Gentegre.Cekirdek.MetinAraci.Kes(Al("RUHSAT SAHIBI", "FIRMA"), 200), aktif));
         }
         return sonuc;
     }
@@ -381,7 +381,6 @@ public sealed class TitckIlacGuncelleme
         return (tekil.Count, tekil.Count(x => x.Aktif == 0), atlanan);
     }
 
-    private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 
     /// <summary>Başlık karşılaştırması için: Türkçe harfler sadeleşir, boşluk tekleşir.</summary>
     private static string Sadelestir(string metin)

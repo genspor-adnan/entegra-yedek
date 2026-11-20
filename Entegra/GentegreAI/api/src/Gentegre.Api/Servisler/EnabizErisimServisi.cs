@@ -81,7 +81,7 @@ public sealed class EnabizErisimServisi
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 0, @p7, @p8)
             returning id
             """, null, [subeId, hastaId, hekimId, kimlikler.Hasta, kimlikler.Hekim,
-                        muayeneId, belgeId, EnabizPortalIstemcisi.Kirp(ip, 45), kullaniciId], iptal);
+                        muayeneId, belgeId, Gentegre.Cekirdek.MetinAraci.Kes(ip, 45), kullaniciId], iptal);
 
         short sonuc; string mesaj = ""; string adres = "";
         try
@@ -96,17 +96,17 @@ public sealed class EnabizErisimServisi
             if (!httpTamam)
             {
                 sonuc = 3;
-                mesaj = $"HTTP {httpKod}: {EnabizPortalIstemcisi.Kirp(zarf, 200)}";
+                mesaj = $"HTTP {httpKod}: {Gentegre.Cekirdek.MetinAraci.Kes(zarf, 200)}";
             }
             else if (EnabizPortalIstemcisi.Fault(zarf) is string fault)
             {
-                sonuc = 3; mesaj = EnabizPortalIstemcisi.Kirp(fault, 400);
+                sonuc = 3; mesaj = Gentegre.Cekirdek.MetinAraci.Kes(fault, 400);
             }
             else
             {
                 var basari = EnabizPortalIstemcisi.Eleman(zarf, "IslemBasarisi");
                 var anahtar = EnabizPortalIstemcisi.Eleman(zarf, "AccessKey") ?? "";
-                mesaj = EnabizPortalIstemcisi.Kirp(
+                mesaj = Gentegre.Cekirdek.MetinAraci.Kes(
                     EnabizPortalIstemcisi.Eleman(zarf, "ServisMesaji") ?? "", 400);
 
                 // İKİ KOŞUL BİRDEN: servis "başarılı" deyip anahtarı boş
@@ -128,13 +128,13 @@ public sealed class EnabizErisimServisi
 
                 await baglanti.CalistirAsync(
                     "update public.enabiz_erisim set anahtar_onek = @p1 where id = @p0",
-                    null, [kayitId, EnabizPortalIstemcisi.Kirp(anahtar.Trim(), 8)], iptal);
+                    null, [kayitId, Gentegre.Cekirdek.MetinAraci.Kes(anahtar.Trim(), 8)], iptal);
             }
         }
         catch (Exception h)
         {
             _gunluk.LogError(h, "e-Nabiz erisim anahtari alinamadi (hasta {Hasta})", hastaId);
-            sonuc = 3; mesaj = EnabizPortalIstemcisi.Kirp(h.Message, 400);
+            sonuc = 3; mesaj = Gentegre.Cekirdek.MetinAraci.Kes(h.Message, 400);
         }
 
         await baglanti.CalistirAsync("""

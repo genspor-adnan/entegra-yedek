@@ -187,14 +187,14 @@ public static partial class CagriUclari
                        islem_sonrasi_sn = case when bitis is null then 0 else extract(epoch from (now() - bitis))::int end,
                        durum = 5, degistiren = @p10, degistirme_tarihi = now()
                  where id = @p0 and durum <> 5
-                """, islem, [id, g.KonuId, g.AltKonuId, g.Sonuc ?? (short)1, Kirp(g.Notu, 1200), g.Oncelik, tarafId,
+                """, islem, [id, g.KonuId, g.AltKonuId, g.Sonuc ?? (short)1, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 1200), g.Oncelik, tarafId,
                             g.GeriArama is null ? null : Saat.UtcYap(DateTime.SpecifyKind(g.GeriArama.Value, DateTimeKind.Unspecified)), gorevId, g.Memnuniyet, baglam.KullaniciId], iptal);
             if (etkilenen == 0) throw GentegreHatasi.IsKurali("Çağrı zaten kapatılmış.");
             await OlayYazAsync(b, id, 9, baglam.KullaniciId, "Kayıt tamamlandı", "", iptal);
             if (c.kisiId is not null)
             {
                 short kd = g.Sonuc switch { 7 or 1 or 6 => 5, 4 => 3, 8 => 6, 2 => 1, _ => 4 };
-                await b.CalistirAsync("update public.cagri_kampanya_kisi set durum = @p1, sonuc = @p2, cagri_id = @p3 where id = @p0", islem, [c.kisiId, kd, Kirp(g.Notu, 200), id], iptal);
+                await b.CalistirAsync("update public.cagri_kampanya_kisi set durum = @p1, sonuc = @p2, cagri_id = @p3 where id = @p0", islem, [c.kisiId, kd, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 200), id], iptal);
             }
             await islem.CommitAsync(iptal);
             // SMS / agent durumu / log yalnız kapanış gerçekten yazıldıysa (commit sonrası; ikisi kendi bağlantısını açar).
@@ -308,7 +308,7 @@ public static partial class CagriUclari
                 on conflict (cagri_id) do update set degerlendiren = excluded.degerlendiren, puan = excluded.puan, olcutler = excluded.olcutler, notu = excluded.notu,
                                                      degistiren = excluded.ekleyen, degistirme_tarihi = now()
                 returning id
-                """, islem, [id, baglam.KullaniciId, g.Puan, g.Olcutler?.ToJsonString() ?? "[]", Kirp(g.Notu, 600)], iptal);
+                """, islem, [id, baglam.KullaniciId, g.Puan, g.Olcutler?.ToJsonString() ?? "[]", Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 600)], iptal);
             await b.CalistirAsync("update public.cagri set kalite_puan = @p1 where id = @p0", islem, [id, g.Puan], iptal);
             await log.YazAsync(b, islem, LogIslemi.Ekle, LogKalite, kid, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { cagriId = id, g.Puan }, iptal: iptal);
             await islem.CommitAsync(iptal);
@@ -331,7 +331,7 @@ public static partial class CagriUclari
             await b.CalistirAsync("""
                 insert into public.cagri_kalite (cagri_id, ozet_ai, ekleyen) values (@p0, @p1, @p2)
                 on conflict (cagri_id) do update set ozet_ai = excluded.ozet_ai, degistiren = excluded.ekleyen, degistirme_tarihi = now()
-                """, null, [id, Kirp(ozet, 1500), baglam.KullaniciId], iptal);
+                """, null, [id, Gentegre.Cekirdek.MetinAraci.Kes(ozet, 1500), baglam.KullaniciId], iptal);
             return Results.Ok(new { ozet, kaynak = "kural" });
         });
     }

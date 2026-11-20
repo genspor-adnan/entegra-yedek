@@ -723,7 +723,7 @@ public sealed class SigortaServisi(
                         @p9::jsonb, @p10::jsonb, @p11, @p12)
                 """,
                 [hesap.SaglayiciId, hesap.HesapId, uc, kayitTuru, kayitId,
-                 (short)httpDurum, sureMs, (short)(basarili ? 1 : 0), Kirp(hata, 400),
+                 (short)httpDurum, sureMs, (short)(basarili ? 1 : 0), Gentegre.Cekirdek.MetinAraci.KesUc(hata, 400),
                  JsonGuvenli(istek), JsonGuvenli(yanit), baglam.KullaniciId,
                  baglam.SubeId ?? 0], iptal);
         }
@@ -742,9 +742,7 @@ public sealed class SigortaServisi(
     {
         if (string.IsNullOrWhiteSpace(metin)) return null;
         try { using var _ = JsonDocument.Parse(metin); return metin; }
-        catch { return JsonSerializer.Serialize(new { ham = Kirp(metin, 20000) }); }
+        catch { return JsonSerializer.Serialize(new { ham = Gentegre.Cekirdek.MetinAraci.KesUc(metin, 20000) }); }
     }
 
-    private static string Kirp(string? m, int n)
-        => string.IsNullOrEmpty(m) ? "" : m.Length <= n ? m : m[..n] + "…";
 }

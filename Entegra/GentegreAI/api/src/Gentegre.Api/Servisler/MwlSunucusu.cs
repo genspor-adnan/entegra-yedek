@@ -59,7 +59,7 @@ public sealed class MwlSunucusu(IOptions<DicomAyarlari> ayar, VeriKaynagi veri, 
 
     internal IReadOnlyList<MwlDinleyici> PorttakiSatirlar(int port) => _satirlar.Where(s => s.Port == port).ToList();
 
-    internal void SorguKaydet(string cagiranAe, int sayi) => _sorgular[cagiranAe.Trim()] = (DateTime.Now, sayi);
+    internal void SorguKaydet(string cagiranAe, int sayi) => _sorgular[cagiranAe.Trim()] = (Gentegre.Cekirdek.Saat.Simdi, sayi);
 
     protected override async Task ExecuteAsync(CancellationToken dur)
     {
@@ -151,7 +151,7 @@ public sealed class MwlSunucusu(IOptions<DicomAyarlari> ayar, VeriKaynagi veri, 
                 }
             }
             _satirlar = gecerli.Where(s => !acilamayan.ContainsKey(s.Port)).ToList();
-            var simdi = DateTime.Now;
+            var simdi = Gentegre.Cekirdek.Saat.Simdi;
             _durum.Clear();
             foreach (var s in gecerli)
                 _durum[s.Id] = acilamayan.TryGetValue(s.Port, out var m)
@@ -323,7 +323,7 @@ public sealed class MwlHizmeti(INetworkStream akis, Encoding yedekKodlama, ILogg
         var sorgu = MwlCevirici.SorguOku(istek.Dataset);
         // Cihaz tarih sormazsa satırın penceresi (bugün ± N gün; 0 = süzgeç yok).
         if (sorgu.Baslangic is null && sorgu.Bitis is null && Satir.PencereGun > 0)
-            sorgu = sorgu with { Baslangic = DateTime.Today.AddDays(-Satir.PencereGun), Bitis = DateTime.Today.AddDays(Satir.PencereGun) };
+            sorgu = sorgu with { Baslangic = Gentegre.Cekirdek.Saat.Bugun.AddDays(-Satir.PencereGun), Bitis = Gentegre.Cekirdek.Saat.Bugun.AddDays(Satir.PencereGun) };
         List<MwlSatiri> satirlar;
         DicomStatus? hata = null;
         try
@@ -480,7 +480,7 @@ public static class MwlCevirici
         if (!ascii) d.AddOrUpdate(DicomTag.SpecificCharacterSet, string.IsNullOrWhiteSpace(karakterSeti) ? "ISO_IR 148" : karakterSeti);
 
         var hekim = $"{M(s.HekimSoyad.ToUpper(Tr))}^{M(s.HekimAd.ToUpper(Tr))}^^{M(s.HekimUnvan)}".TrimEnd('^');
-        var zaman = s.YerelZaman ?? DateTime.Now;
+        var zaman = s.YerelZaman ?? Gentegre.Cekirdek.Saat.Simdi;
         var aciklama = M(s.HizmetAd);
 
         d.AddOrUpdate(DicomTag.AccessionNumber, s.Accession);

@@ -156,7 +156,7 @@ public static partial class RadyolojiUclari
                                                      false, baglam.Yazma, iptal);
             var dokumanId = dokumanlar.Count > 0 ? dokumanlar.Max(d => d.Id) : 0;
             var ozet = Convert.ToHexString(SHA256.HashData(belge));
-            var sertifikaMetni = Kisalt(string.Join(" · ", new[] { govde.Sertifika.Cn ?? "", govde.Sertifika.Serial }
+            var sertifikaMetni = Gentegre.Cekirdek.MetinAraci.KirpKes(string.Join(" · ", new[] { govde.Sertifika.Cn ?? "", govde.Sertifika.Serial }
                                                               .Where(s => s.Length > 0)), 200);
 
             try

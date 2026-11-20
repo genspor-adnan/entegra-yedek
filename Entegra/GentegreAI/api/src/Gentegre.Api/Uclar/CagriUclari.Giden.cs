@@ -123,7 +123,7 @@ public static partial class CagriUclari
                     insert into public.cagri_kampanya_kisi (kampanya_id, taraf_id, ad, telefon, kaynak_tur, kaynak_id, ozet, durum, sube_id, ekleyen)
                     values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 1, @p7, @p8)
                     on conflict (kampanya_id, kaynak_tur, kaynak_id) where kaynak_id > 0 do nothing
-                    """, islem, [id, a.tarafId, Kirp(a.ad, 150), Kirp(a.tel, 30), a.kaynakTur, a.kaynakId, Kirp(a.ozet, 200), p.subeId, baglam.KullaniciId], iptal);
+                    """, islem, [id, a.tarafId, Gentegre.Cekirdek.MetinAraci.Kes(a.ad, 150), Gentegre.Cekirdek.MetinAraci.Kes(a.tel, 30), a.kaynakTur, a.kaynakId, Gentegre.Cekirdek.MetinAraci.Kes(a.ozet, 200), p.subeId, baglam.KullaniciId], iptal);
                 if (n > 0) eklenen++; else atlanan++;
             }
             await log.YazAsync(b, islem, LogIslemi.Degistir, LogKampanya, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { uret = true, eklenen, atlanan }, iptal: iptal);
@@ -196,7 +196,7 @@ public static partial class CagriUclari
                    set durum = @p1, sonuc = @p2, cagri_id = coalesce(@p3, cagri_id), deneme = case when @p1 = 3 then deneme + 1 else deneme end, son_deneme = now(),
                        degistiren = @p4, degistirme_tarihi = now()
                  where id = @p0
-                """, islem, [id, g.Durum, Kirp(g.Sonuc, 200), g.CagriId, baglam.KullaniciId], iptal);
+                """, islem, [id, g.Durum, Gentegre.Cekirdek.MetinAraci.Kes(g.Sonuc, 200), g.CagriId, baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.Bulunamadi("Kampanya kişisi bulunamadı.");
             // Randevu hatırlatmada "onayladı" → randevu onaylı kalır; "iptal etti" → randevu iptal (4).
             if (g.Durum == 6)

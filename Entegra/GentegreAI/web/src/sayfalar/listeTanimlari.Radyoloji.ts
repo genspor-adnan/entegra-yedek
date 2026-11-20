@@ -1,6 +1,6 @@
 import { type ListeGirdisi } from './listeTanimlari.Ortak';
 import { ERISIM_KODU, ERISIM_MENUSU } from '../bilesenler/radyoloji/radyolojiErisim';
-import { GONDERIM_KODU, GONDERIM_MENUSU } from '../bilesenler/radyoloji/raporGonderimMenusu';
+import { GONDERIM_KODU, GONDERIM_MENUSU } from '../bilesenler/raporGonderim/raporGonderimMenusu';
 
 /**
  * Radyoloji: çalışma listesi, şablonlar, protokoller, cihazlar.

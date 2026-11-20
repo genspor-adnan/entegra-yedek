@@ -163,12 +163,12 @@ public sealed partial class KasaDeposu
             returning id
             """, new object?[]
         {
-            (short)kiymetTuru, (short)yon, tarafId, Kirp(giris.Kesideci, 150),
+            (short)kiymetTuru, (short)yon, tarafId, Gentegre.Cekirdek.MetinAraci.Kes(giris.Kesideci, 150),
             giris.Tarih ?? Tarih(islem, "islemTarihi") ?? Saat.Bugun, vade, tutar,
             Metin(islem, "dovizCinsi") is { Length: > 0 } d ? d : KasaHesap.YerelDoviz,
-            kur, KasaHesap.YerelTutar(tutar, kur), Kirp(giris.SeriNo, 30),
-            Kirp(giris.BankaAdi, 60), Kirp(giris.BankaSubesi, 60), Kirp(giris.HesapNo, 30),
-            SayiNull(islem, "projeId"), baglam.SubeZorunlu(), Kirp(giris.Aciklama, 200),
+            kur, KasaHesap.YerelTutar(tutar, kur), Gentegre.Cekirdek.MetinAraci.Kes(giris.SeriNo, 30),
+            Gentegre.Cekirdek.MetinAraci.Kes(giris.BankaAdi, 60), Gentegre.Cekirdek.MetinAraci.Kes(giris.BankaSubesi, 60), Gentegre.Cekirdek.MetinAraci.Kes(giris.HesapNo, 30),
+            SayiNull(islem, "projeId"), baglam.SubeZorunlu(), Gentegre.Cekirdek.MetinAraci.Kes(giris.Aciklama, 200),
             baglam.KullaniciId,
         });
 
@@ -346,7 +346,7 @@ public sealed partial class KasaDeposu
             Kimlik(komut, "p12", masrafId);
             Kimlik(komut, "p13", hizmetId);
             Kimlik(komut, "p14", JsonSayiNull(bacak, "projeId"));
-            komut.Parameters.AddWithValue("p15", Kirp(JsonMetin(bacak, "aciklama"), 100));
+            komut.Parameters.AddWithValue("p15", Gentegre.Cekirdek.MetinAraci.Kes(JsonMetin(bacak, "aciklama"), 100));
             komut.Parameters.AddWithValue("p16", baglam.KullaniciId);
 
             await CalistirAsync(komut, iptal, satirSayisi: true);
@@ -369,7 +369,7 @@ public sealed partial class KasaDeposu
         await using var o = await komut.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal))
             throw GentegreHatasi.Dogrulama("Cari kayıt bulunamadı.", new AlanHatasi("tarafId", "Geçersiz."));
-        islem["tarafUnvan"] = Kirp(o.Metin("unvan"), 200);
+        islem["tarafUnvan"] = Gentegre.Cekirdek.MetinAraci.Kes(o.Metin("unvan"), 200);
     }
 
     /// <summary>

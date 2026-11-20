@@ -21,8 +21,8 @@ public sealed class GunlukDeposu
                 """,
                 new object?[]
                 {
-                    izlemeNo, kod, (short)httpDurum, Kirp(yol, 200), Kirp(yontem, 10),
-                    Kirp(mesaj, 500), ayrinti, yigin, kullaniciId, subeId, Kirp(ip, 45), istekJson
+                    izlemeNo, kod, (short)httpDurum, Gentegre.Cekirdek.MetinAraci.Kes(yol, 200), Gentegre.Cekirdek.MetinAraci.Kes(yontem, 10),
+                    Gentegre.Cekirdek.MetinAraci.Kes(mesaj, 500), ayrinti, yigin, kullaniciId, subeId, Gentegre.Cekirdek.MetinAraci.Kes(ip, 45), istekJson
                 }, iptal);
         }
         catch
@@ -42,8 +42,8 @@ public sealed class GunlukDeposu
                 """,
                 new object?[]
                 {
-                    Kirp(kod, 120), kullaniciId, Kirp(ip, 45), Kirp(istemci, 200),
-                    (short)(basarili ? 1 : 0), Kirp(sebep, 40)
+                    Gentegre.Cekirdek.MetinAraci.Kes(kod, 120), kullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(ip, 45), Gentegre.Cekirdek.MetinAraci.Kes(istemci, 200),
+                    (short)(basarili ? 1 : 0), Gentegre.Cekirdek.MetinAraci.Kes(sebep, 40)
                 }, iptal);
         }
         catch
@@ -52,6 +52,4 @@ public sealed class GunlukDeposu
         }
     }
 
-    private static string Kirp(string? m, int uzunluk)
-        => string.IsNullOrEmpty(m) ? "" : (m.Length <= uzunluk ? m : m[..uzunluk]);
 }

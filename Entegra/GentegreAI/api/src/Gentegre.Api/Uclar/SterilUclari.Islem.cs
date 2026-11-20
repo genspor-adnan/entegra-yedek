@@ -79,13 +79,13 @@ public static partial class SterilUclari
             var id = await b.TekDegerAsync<int>("""
                 insert into public.steril_dongu (cihaz_id, sayac_no, program_id, baslama, operator_id, durum, bd_onay_notu, karar_notu, sube_id, ekleyen)
                 values (@p0, @p1, @p2, now(), @p3, @p4, @p5, @p6, @p7, @p3) returning id
-                """, tx, [cihaz.id, sayac, program.id, baglam.KullaniciId, testProgrami ? DonguTest : DonguCalisiyor, Kirp(bdOnay, 300), Kirp(g.Notu, 400), baglam.SubeId ?? 0], iptal);
+                """, tx, [cihaz.id, sayac, program.id, baglam.KullaniciId, testProgrami ? DonguTest : DonguCalisiyor, Gentegre.Cekirdek.MetinAraci.Kes(bdOnay, 300), Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 400), baglam.SubeId ?? 0], iptal);
             await OlayYazIslemdeAsync(b, tx, null, null, id, OlayYukle, baglam.KullaniciId, $"Döngü #{sayac} başlatıldı · {program.ad}" + (bdOnay != "" ? " · BD onayı: " + bdOnay : ""), iptal);
             if (testProgrami)
             {
                 var turler = program.ad.Contains("Vakum", StringComparison.OrdinalIgnoreCase) ? new[] { IndVakum } : new[] { IndBowieDick, IndHelix };
                 foreach (var t in turler)
-                    await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, ekleyen) values (@p0, @p1, @p2, 'boş kazan', 0, @p3)", tx, [id, t, Kirp(g.KimyasalLot, 40), baglam.KullaniciId], iptal);
+                    await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, ekleyen) values (@p0, @p1, @p2, 'boş kazan', 0, @p3)", tx, [id, t, Gentegre.Cekirdek.MetinAraci.Kes(g.KimyasalLot, 40), baglam.KullaniciId], iptal);
             }
             else
             {
@@ -97,13 +97,13 @@ public static partial class SterilUclari
                     var pid = await b.TekDegerAsync<int>("""
                         insert into public.steril_paket (barkod, birim_id, dongu_id, paket_tur, paketleyen_id, paketleme_zamani, raf, durum, sube_id, ekleyen)
                         values (@p0, @p1, @p2, @p3, @p4, now(), @p5, 1, @p6, @p4) returning id
-                        """, tx, [$"P-{tarihKodu}-{cihaz.id}-{sayac}-{n:00}", br.Id, id, istek.PaketTur ?? br.PaketTur, baglam.KullaniciId, Kirp(istek.Raf ?? br.Konum, 30), baglam.SubeId ?? 0], iptal);
+                        """, tx, [$"P-{tarihKodu}-{cihaz.id}-{sayac}-{n:00}", br.Id, id, istek.PaketTur ?? br.PaketTur, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(istek.Raf ?? br.Konum, 30), baglam.SubeId ?? 0], iptal);
                     await b.CalistirAsync("update public.steril_birim set durum = 5, durum_zaman = now(), son_dongu_id = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0", tx, [br.Id, id, baglam.KullaniciId], iptal);
                     await OlayYazIslemdeAsync(b, tx, br.Id, pid, id, OlayYukle, baglam.KullaniciId, $"{cihaz.ad} #{sayac} döngüsüne yüklendi", iptal);
                 }
-                await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, ekleyen) values (@p0, 4, @p1, 'kazan ortası', 0, @p2)", tx, [id, Kirp(g.KimyasalLot, 40), baglam.KullaniciId], iptal);
+                await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, ekleyen) values (@p0, 4, @p1, 'kazan ortası', 0, @p2)", tx, [id, Gentegre.Cekirdek.MetinAraci.Kes(g.KimyasalLot, 40), baglam.KullaniciId], iptal);
                 if (!string.IsNullOrWhiteSpace(g.BioLot))
-                    await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, inkubasyon_bitis, ekleyen) values (@p0, 6, @p1, 'kazan ortası', 3, now() + interval '24 hours', @p2)", tx, [id, Kirp(g.BioLot, 40), baglam.KullaniciId], iptal);
+                    await b.CalistirAsync("insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, inkubasyon_bitis, ekleyen) values (@p0, 6, @p1, 'kazan ortası', 3, now() + interval '24 hours', @p2)", tx, [id, Gentegre.Cekirdek.MetinAraci.Kes(g.BioLot, 40), baglam.KullaniciId], iptal);
             }
             await log.YazAsync(b, tx, LogIslemi.Ekle, LogDongu, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { cihaz = cihaz.ad, sayac, program = program.ad, paket = yuk.Count, bdOnay }, iptal: iptal);
             await tx.CommitAsync(iptal);
@@ -123,7 +123,7 @@ public static partial class SterilUclari
             var n = await b.CalistirAsync("""
                 update public.steril_dongu set bitis = now(), tepe_sicaklik = @p1, plato_dk = @p2, tepe_basinc = @p3, kurutma_dk = @p4, hata_kodu = @p5,
                        durum = case when durum = 8 then 8 else 3 end, degistiren = @p6, degistirme_tarihi = now() where id = @p0 and durum in (2, 8)
-                """, tx, [id, g.TepeSicaklik, g.PlatoDk, g.TepeBasinc, g.KurutmaDk, Kirp(g.HataKodu, 40), baglam.KullaniciId], iptal);
+                """, tx, [id, g.TepeSicaklik, g.PlatoDk, g.TepeBasinc, g.KurutmaDk, Gentegre.Cekirdek.MetinAraci.Kes(g.HataKodu, 40), baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Döngü çalışmıyor.");
             await OlayYazIslemdeAsync(b, tx, null, null, id, OlayBitti, baglam.KullaniciId, $"Döngü #{d.no} bitti · tepe {g.TepeSicaklik}°C · plato {g.PlatoDk} dk · {g.TepeBasinc} bar" + (string.IsNullOrEmpty(g.HataKodu) ? "" : $" · HATA {g.HataKodu}"), iptal);
             await log.YazAsync(b, tx, LogIslemi.Degistir, LogDongu, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { bitti = true, g.TepeSicaklik, g.PlatoDk, g.TepeBasinc, g.KurutmaDk, g.HataKodu }, iptal: iptal);
@@ -153,14 +153,14 @@ public static partial class SterilUclari
                 await b.CalistirAsync("""
                     update public.steril_dongu_indikator set lot = case when @p1 <> '' then @p1 else lot end, konum = case when @p2 <> '' then @p2 else konum end, sonuc = @p3,
                            okuyan_id = @p4, okuma_zamani = now(), inkubasyon_bitis = coalesce(@p5, inkubasyon_bitis), notu = @p6 where id = @p0
-                    """, tx, [mid, Kirp(g.Lot, 40), Kirp(g.Konum, 60), g.Sonuc, baglam.KullaniciId, inkubasyon, Kirp(g.Notu, 200)], iptal);
+                    """, tx, [mid, Gentegre.Cekirdek.MetinAraci.Kes(g.Lot, 40), Gentegre.Cekirdek.MetinAraci.Kes(g.Konum, 60), g.Sonuc, baglam.KullaniciId, inkubasyon, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 200)], iptal);
                 iid = mid;
             }
             else
                 iid = await b.TekDegerAsync<int>("""
                     insert into public.steril_dongu_indikator (dongu_id, tur, lot, konum, sonuc, okuyan_id, okuma_zamani, inkubasyon_bitis, notu, ekleyen)
                     values (@p0, @p1, @p2, @p3, @p4, @p5, now(), @p6, @p7, @p5) returning id
-                    """, tx, [id, g.Tur, Kirp(g.Lot, 40), Kirp(g.Konum, 60), g.Sonuc, baglam.KullaniciId, inkubasyon, Kirp(g.Notu, 200)], iptal);
+                    """, tx, [id, g.Tur, Gentegre.Cekirdek.MetinAraci.Kes(g.Lot, 40), Gentegre.Cekirdek.MetinAraci.Kes(g.Konum, 60), g.Sonuc, baglam.KullaniciId, inkubasyon, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 200)], iptal);
             var turAdi = g.Tur switch { 1 => "Bowie-Dick", 2 => "Helix", 3 => "Sınıf 4", 4 => "Sınıf 5", 5 => "Sınıf 6", 6 => "Biyolojik", _ => "Vakum testi" };
             var sonucAdi = g.Sonuc switch { 1 => "GEÇTİ", 2 => "KALDI", 3 => "inkübasyonda", _ => "bekliyor" };
             await OlayYazIslemdeAsync(b, tx, null, null, id, OlayIndikator, baglam.KullaniciId, $"{turAdi}: {sonucAdi}" + (string.IsNullOrEmpty(g.Lot) ? "" : $" · lot {g.Lot}"), iptal);
@@ -215,7 +215,7 @@ public static partial class SterilUclari
             if (d.durum is DonguCalisiyor) throw GentegreHatasi.IsKurali("Döngü henüz bitmedi; önce 'Döngü bitti' (parametre) girin.");
             if (d.durum is DonguSerbest or DonguBasarisiz or DonguIptal or DonguTest) throw GentegreHatasi.IsKurali("Döngü zaten sonuçlanmış.");
             var bdOnay = (g.BdOnayNotu ?? "").Trim();
-            if (bdOnay != "") await b.CalistirAsync("update public.steril_dongu set bd_onay_notu = @p1 where id = @p0", tx, [id, Kirp(bdOnay, 300)], iptal);
+            if (bdOnay != "") await b.CalistirAsync("update public.steril_dongu set bd_onay_notu = @p1 where id = @p0", tx, [id, Gentegre.Cekirdek.MetinAraci.Kes(bdOnay, 300)], iptal);
             var eksik = new List<string>();
             if (karar == "serbest")
             {
@@ -245,26 +245,26 @@ public static partial class SterilUclari
                 {
                     var ay = p.rafAy > 0 ? p.rafAy : (k.RafOmru.TryGetValue(p.tur.ToString(), out var a) ? a : 6);
                     DateTime? skt = ay > 0 ? (d.bitis ?? Saat.Simdi).Date.AddMonths(ay) : null;
-                    await b.CalistirAsync("update public.steril_paket set durum = 3, skt = @p1, raf = case when raf = '' then @p3 else raf end, degistiren = @p2, degistirme_tarihi = now() where id = @p0", tx, [p.id, skt, baglam.KullaniciId, Kirp(p.konum, 30)], iptal);
+                    await b.CalistirAsync("update public.steril_paket set durum = 3, skt = @p1, raf = case when raf = '' then @p3 else raf end, degistiren = @p2, degistirme_tarihi = now() where id = @p0", tx, [p.id, skt, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(p.konum, 30)], iptal);
                     await b.CalistirAsync("update public.steril_birim set durum = 7, durum_zaman = now(), dongu_sayisi = dongu_sayisi + 1 where id = @p0", tx, [p.birimId], iptal);
                     await OlayYazIslemdeAsync(b, tx, p.birimId, p.id, id, OlaySerbest, baglam.KullaniciId, $"Serbest bırakıldı · SKT {skt:dd.MM.yyyy}", iptal);
                     etiketler.Add(new { paketId = p.id, barkod = p.barkod, icerik = p.icerik, cihaz = d.cihaz, donguNo = d.no, tarih = d.bitis ?? Saat.Simdi, skt, operatorAdi = operatorAdi, raf = p.konum });
                 }
-                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Kirp(g.Notu, 400), DonguSerbest], iptal);
+                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 400), DonguSerbest], iptal);
                 await OlayYazIslemdeAsync(b, tx, null, null, id, OlaySerbest, baglam.KullaniciId, $"Döngü #{d.no} serbest bırakıldı · {paketler.Count} paket", iptal);
             }
             else if (karar == "karantina")
             {
                 await b.CalistirAsync("update public.steril_paket set durum = 2, degistiren = @p1, degistirme_tarihi = now() where dongu_id = @p0 and durum in (1, 2)", tx, [id, baglam.KullaniciId], iptal);
                 await b.CalistirAsync("update public.steril_birim set durum = 6, durum_zaman = now(), dongu_sayisi = dongu_sayisi + 1 where id in (select birim_id from public.steril_paket where dongu_id = @p0) and durum = 5", tx, [id], iptal);
-                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Kirp(g.Notu, 400), DonguKarantina], iptal);
+                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 400), DonguKarantina], iptal);
                 await OlayYazIslemdeAsync(b, tx, null, null, id, OlayKarantina, baglam.KullaniciId, $"Döngü #{d.no} karantinada" + (d.bio == SonucInkubasyon ? " (biyolojik inkübasyonda)" : ""), iptal);
             }
             else
             {
                 await b.CalistirAsync("update public.steril_paket set durum = 5, degistiren = @p1, degistirme_tarihi = now() where dongu_id = @p0 and durum in (1, 2)", tx, [id, baglam.KullaniciId], iptal);
                 await b.CalistirAsync("update public.steril_birim set durum = 10, durum_zaman = now() where id in (select birim_id from public.steril_paket where dongu_id = @p0) and durum in (5, 6)", tx, [id], iptal);
-                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Kirp(g.Notu, 400), DonguBasarisiz], iptal);
+                kararYazildi = await b.CalistirAsync(DonguKararSql, tx, [id, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 400), DonguBasarisiz], iptal);
                 await OlayYazIslemdeAsync(b, tx, null, null, id, OlayBasarisiz, baglam.KullaniciId, $"Döngü #{d.no} BAŞARISIZ: paketler yeniden işlenecek · {g.Notu}", iptal);
             }
             if (kararYazildi == 0) throw GentegreHatasi.IsKurali("Döngü bu arada sonuçlandı; kartı yenileyin.");
@@ -280,7 +280,7 @@ public static partial class SterilUclari
             baglam.YetkiIste("steril.dongu", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             await using var tx = await b.BeginTransactionAsync(iptal);
-            var n = await b.CalistirAsync("update public.steril_dongu set durum = 7, bitis = coalesce(bitis, now()), karar_notu = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum in (2, 3, 8)", tx, [id, Kirp(g.Aciklama, 400), baglam.KullaniciId], iptal);
+            var n = await b.CalistirAsync("update public.steril_dongu set durum = 7, bitis = coalesce(bitis, now()), karar_notu = @p1, degistiren = @p2, degistirme_tarihi = now() where id = @p0 and durum in (2, 3, 8)", tx, [id, Gentegre.Cekirdek.MetinAraci.Kes(g.Aciklama, 400), baglam.KullaniciId], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Döngü iptal edilemez (sonuçlanmış).");
             await b.CalistirAsync("update public.steril_paket set durum = 5 where dongu_id = @p0 and durum = 1", tx, [id], iptal);
             await b.CalistirAsync("update public.steril_birim set durum = 3, durum_zaman = now() where id in (select birim_id from public.steril_paket where dongu_id = @p0) and durum = 5", tx, [id], iptal);
@@ -429,7 +429,7 @@ public static partial class SterilUclari
             var kid = await b.TekDegerAsync<int>("""
                 insert into public.steril_paket_kullanim (paket_id, taraf_id, belge_id, hekim_id, unite, okutan_id, notu, sube_id, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p5) returning id
-                """, tx, [p.id, g.TarafId, g.BelgeId, g.HekimId, Kirp(g.Unite, 40), baglam.KullaniciId, Kirp(g.Notu, 200) + (p.kullanilabilir == 2 ? " [karantina onayı]" : ""), baglam.SubeId ?? 0], iptal);
+                """, tx, [p.id, g.TarafId, g.BelgeId, g.HekimId, Gentegre.Cekirdek.MetinAraci.Kes(g.Unite, 40), baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(g.Notu, 200) + (p.kullanilabilir == 2 ? " [karantina onayı]" : ""), baglam.SubeId ?? 0], iptal);
             await b.CalistirAsync("update public.steril_birim set durum = 1, durum_zaman = now(), son_kullanim = now(), son_taraf_id = @p1, son_belge_id = @p2, degistiren = @p3, degistirme_tarihi = now() where id = @p0", tx, [p.birimId, g.TarafId, g.BelgeId, baglam.KullaniciId], iptal);
             var hasta = g.TarafId is null ? "" : await b.TekDegerAsync<string>("select unvan from public.taraf where id = @p0", tx, [g.TarafId], iptal) ?? "";
             await OlayYazIslemdeAsync(b, tx, p.birimId, p.id, p.donguId, OlayKullanim, baglam.KullaniciId, $"Kullanıldı · {hasta}{(string.IsNullOrEmpty(g.Unite) ? "" : " · " + g.Unite)}", iptal);
@@ -525,7 +525,7 @@ public static partial class SterilUclari
             baglam.YetkiIste("steril.izleme", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
             await using var tx = await b.BeginTransactionAsync(iptal);   // kapanış + cihazın açılması + log tek işlem (K12)
-            var n = await b.CalistirAsync("update public.steril_geri_cagirma set durum = 2, kapatan_id = @p1, kapanis = now(), aciklama = aciklama || case when @p2 <> '' then E'\n' || @p2 else '' end, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1", tx, [id, baglam.KullaniciId, Kirp(g.Aciklama, 300)], iptal);
+            var n = await b.CalistirAsync("update public.steril_geri_cagirma set durum = 2, kapatan_id = @p1, kapanis = now(), aciklama = aciklama || case when @p2 <> '' then E'\n' || @p2 else '' end, degistiren = @p1, degistirme_tarihi = now() where id = @p0 and durum = 1", tx, [id, baglam.KullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(g.Aciklama, 300)], iptal);
             if (n == 0) throw GentegreHatasi.IsKurali("Geri çağırma açık değil.");
             await b.CalistirAsync("update public.steril_cihaz set durum = 1 where id = (select cihaz_id from public.steril_geri_cagirma where id = @p0) and durum = 2", tx, [id], iptal);
             await log.YazAsync(b, tx, LogIslemi.Degistir, LogGeriCagirma, id, baglam.KullaniciId, baglam.SubeId, baglam.Ip, new { kapat = true, g.Aciklama }, iptal: iptal);
@@ -596,7 +596,7 @@ public static partial class SterilUclari
     /// </summary>
     private static async Task OlayYazIslemdeAsync(NpgsqlConnection b, NpgsqlTransaction tx, int? birimId, int? paketId, int? donguId, short tur, int? kullaniciId, string aciklama, CancellationToken iptal)
         => await b.CalistirAsync("insert into public.steril_olay (birim_id, paket_id, dongu_id, tur, kullanici_id, aciklama, veri) values (@p0, @p1, @p2, @p3, @p4, @p5, '')", tx,
-            [birimId, paketId, donguId, tur, kullaniciId, Kirp(aciklama, 300)], iptal);
+            [birimId, paketId, donguId, tur, kullaniciId, Gentegre.Cekirdek.MetinAraci.Kes(aciklama, 300)], iptal);
 
     private const string OlaySql = """
         select json_build_object('id', o.id, 'zaman', o.zaman, 'tur', o.tur, 'turAdi', coalesce(k.ad, ''), 'kullaniciAdi', coalesce(u.ad, ''), 'aciklama', o.aciklama, 'birimId', o.birim_id, 'paketId', o.paket_id, 'donguId', o.dongu_id)::text
@@ -623,7 +623,7 @@ public static partial class SterilUclari
         var id = await b.TekDegerAsync<int>("""
             insert into public.steril_geri_cagirma (cihaz_id, tetik_dongu_id, bas_dongu_id, etkilenen_dongu, etkilenen_paket, kullanilan_paket, hasta_sayisi, durum, aciklama, acan_id, sube_id, ekleyen)
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, 1, @p7, @p8, @p9, @p8) returning id
-            """, null, [d.cihazId, donguId, idler.Min(), idler.Length, sayim!.paket, sayim.kullanilan, sayim.hasta, Kirp(aciklama, 600), baglam.KullaniciId, baglam.SubeId ?? 0], iptal);
+            """, null, [d.cihazId, donguId, idler.Min(), idler.Length, sayim!.paket, sayim.kullanilan, sayim.hasta, Gentegre.Cekirdek.MetinAraci.Kes(aciklama, 600), baglam.KullaniciId, baglam.SubeId ?? 0], iptal);
         await b.CalistirAsync("update public.steril_cihaz set durum = 2 where id = @p0", null, [d.cihazId], iptal);
         await b.CalistirAsync("update public.steril_dongu set durum = 6, karar_notu = 'Biyolojik pozitif · geri çağırma #' || @p1 where id = @p0 and durum <> 6", null, [donguId, id], iptal);
         foreach (var x in idler)

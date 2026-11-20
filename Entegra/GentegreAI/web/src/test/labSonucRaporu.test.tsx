@@ -32,8 +32,8 @@ vi.mock('../api/uclar/raporGonderim', async asil => ({
   acikRaporOku: async () => yanit,
 }));
 vi.mock('../api/istemci', () => ({ api: { dokumanIcerikUrl: async () => null } }));
-const { RaporAcik } = await import('../sayfalar/radyoloji/RaporAcik');
-const { durumOku } = await import('../sayfalar/radyoloji/LabSonucRaporu');
+const { RaporAcik } = await import('../sayfalar/raporGonderim/RaporAcik');
+const { durumOku } = await import('../sayfalar/raporGonderim/LabSonucRaporu');
 
 describe('lab sonuç sayfası', () => {
   it('durum oku: tek ok / panikte çift ok / normalde yok', () => {

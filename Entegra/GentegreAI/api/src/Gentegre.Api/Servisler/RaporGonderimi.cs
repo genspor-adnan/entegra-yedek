@@ -40,16 +40,23 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
         string HastaCep, string HastaEposta, int? HekimId, bool DisHekim, short HekimTercih, string HekimCep,
         string HekimEposta, string HizmetKod, string HizmetAd, int? Kategori);
 
-    private sealed record Ayar(bool Otomatik, int KritikDakika, bool BorcKontrol, bool HastaSms, bool HastaEposta,
-                               int GecerlilikGun, string WebKok, int LabPanikDakika = 0);
+    /// <summary>
+    /// Şubenin gönderim ayarı - TEK okuma yeri (refaktör 20.11.2026, A6): planlama, gönderim, bağlantı açılışı ve ayar
+    /// ekranı aynı kaydı ve aynı varsayılanları görür. Yeni alan yalnız buraya eklenir.
+    /// </summary>
+    public sealed record Ayar(bool Otomatik, int KritikDakika, bool BorcKontrol, bool HastaSms, bool HastaEposta,
+                              int GecerlilikGun, string WebKok, int LabPanikDakika = 0,
+                              bool KarekodRadyoloji = true, bool KarekodLab = true);
 
-    private static async Task<Ayar> AyarOkuAsync(NpgsqlConnection b, NpgsqlTransaction? tx, int subeId, CancellationToken iptal)
+    public static async Task<Ayar> AyarOkuAsync(NpgsqlConnection b, NpgsqlTransaction? tx, int subeId, CancellationToken iptal)
         => await b.TekAsync("""
-            select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika
+            select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika,
+                   cikti_karekod_rad, cikti_karekod_lab
               from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0
             """, tx, [subeId],
             o => new Ayar(o.GetInt16(0) == 1, o.GetInt32(1), o.GetInt16(2) == 1, o.GetInt16(3) == 1, o.GetInt16(4) == 1,
-                          Math.Clamp(o.GetInt32(5), 1, 3650), o.GetString(6), o.GetInt32(7)), iptal)
+                          Math.Clamp(o.GetInt32(5), 1, 3650), o.GetString(6), o.GetInt32(7),
+                          o.GetInt16(8) == 1, o.GetInt16(9) == 1), iptal)
            ?? new Ayar(false, 0, true, true, false, 30, "");
 
     /// <summary>Tahmin edilemez bağlantı kodu: 16 karakter, karışmayan harf / rakam (0 O 1 I yok) - 80 bit.</summary>

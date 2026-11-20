@@ -98,7 +98,7 @@ public sealed class ItsServisi
             var metin = await yanit.Content.ReadAsStringAsync(iptal);
             if (!yanit.IsSuccessStatusCode)
                 throw new InvalidOperationException(
-                    $"İTS jetonu alınamadı ({(int)yanit.StatusCode}): {Kirp(metin, 200)}");
+                    $"İTS jetonu alınamadı ({(int)yanit.StatusCode}): {MetinAraci.Kes(metin, 200)}");
 
             using var belge = JsonDocument.Parse(metin);
             var jeton = belge.RootElement.TryGetProperty("token", out var t) ? t.GetString()
@@ -155,15 +155,15 @@ public sealed class ItsServisi
             var metin = await yanit.Content.ReadAsStringAsync(iptal);
 
             return yanit.IsSuccessStatusCode
-                ? new DogrulamaSonucu(true, "gecerli", Kirp(metin, 200))
-                : new DogrulamaSonucu(false, "gecersiz", Kirp(metin, 200));
+                ? new DogrulamaSonucu(true, "gecerli", MetinAraci.Kes(metin, 200))
+                : new DogrulamaSonucu(false, "gecersiz", MetinAraci.Kes(metin, 200));
         }
         catch (Exception h)
         {
             // Dogrulama SERVIS hatasi mal kabulu durdurmaz: kod kaydedilir,
             //   dogrulama "yapilamadi" kalir ve bildirim yine kuyruga girer.
             _gunluk.LogWarning(h, "İTS doğrulaması yapılamadı (GTIN {Gtin})", kod.Gtin);
-            return new DogrulamaSonucu(false, "hata", Kirp(h.Message, 200));
+            return new DogrulamaSonucu(false, "hata", MetinAraci.Kes(h.Message, 200));
         }
     }
 
@@ -293,15 +293,15 @@ public sealed class ItsServisi
             {
                 var s = (int)yanit.StatusCode;
                 return (false, s is 401 or 403 ? "YETKI" : s >= 500 ? "BAGLANTI" : $"HTTP{s}",
-                        Kirp(metin, 400), govde, Kirp(metin, 4000));
+                        MetinAraci.Kes(metin, 400), govde, MetinAraci.Kes(metin, 4000));
             }
 
-            return (true, BildirimNoCoz(metin), "", govde, Kirp(metin, 4000));
+            return (true, BildirimNoCoz(metin), "", govde, MetinAraci.Kes(metin, 4000));
         }
         catch (Exception h)
         {
             kronometre.Stop();
-            return (false, "BAGLANTI", Kirp(h.Message, 400), govde, "");
+            return (false, "BAGLANTI", MetinAraci.Kes(h.Message, 400), govde, "");
         }
     }
 
@@ -313,12 +313,10 @@ public sealed class ItsServisi
             using var belge = JsonDocument.Parse(yanit);
             foreach (var ad in new[] { "notificationId", "id", "documentId", "uuid" })
                 if (belge.RootElement.TryGetProperty(ad, out var d))
-                    return Kirp(d.ToString(), 64);
+                    return MetinAraci.Kes(d.ToString(), 64);
         }
         catch { /* yanit JSON degilse kimlik de yok */ }
         return "";
     }
 
-    private static string Kirp(string m, int n)
-        => string.IsNullOrEmpty(m) ? "" : m.Length <= n ? m : m[..n];
 }

@@ -76,7 +76,7 @@ public static partial class RadyolojiUclari
                            onay_notu = @p3,
                            degistiren = @p1, degistirme_tarihi = now()::timestamp
                      where id = @p0 and coalesce(kilit, 0) = 0
-                    """, islem, [id, baglam.KullaniciId, onaylayacakId.Value, Kisalt(govde?.Not, 500)], iptal);
+                    """, islem, [id, baglam.KullaniciId, onaylayacakId.Value, Gentegre.Cekirdek.MetinAraci.KirpKes(govde?.Not, 500)], iptal);
                 if (degisen != 1)
                     throw GentegreHatasi.IsKurali("Rapor ön rapora geçirilemedi (kilitli ya da bulunamadı).");
                 await OnayBildirimiAsync(baglanti, islem, istemId, onaylayacakId.Value, govde?.Not, baglam, iptal);
@@ -293,8 +293,8 @@ public static partial class RadyolojiUclari
                        cd_verildi = coalesce(@p9, cd_verildi), dijital_verildi = coalesce(@p10, dijital_verildi)
                  where id = @p0 and istem_id = @p1
                 """, islem,
-                [teslimId, id, istek.Tur, Kisalt(istek.AlanAd.Trim(), 120), Kisalt(istek.AlanYakinlik ?? "", 60),
-                 istek.KimlikDogrulandi, Kisalt(istek.Aciklama ?? "", 300),
+                [teslimId, id, istek.Tur, Gentegre.Cekirdek.MetinAraci.KirpKes(istek.AlanAd.Trim(), 120), Gentegre.Cekirdek.MetinAraci.KirpKes(istek.AlanYakinlik ?? "", 60),
+                 istek.KimlikDogrulandi, Gentegre.Cekirdek.MetinAraci.KirpKes(istek.Aciklama ?? "", 300),
                  istek.RaporVerildi, istek.FilmVerildi, istek.CdVerildi, istek.DijitalVerildi], iptal);
             var yeni = await baglanti.TekAsync(teslimSql, islem, [teslimId, id], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (yeni is not null && LogDeposu.Fark(eski, yeni) is { } fark)
@@ -445,7 +445,7 @@ public static partial class RadyolojiUclari
               left join public.hizmet hz on hz.id = i.hizmet_id
              where i.id = @p5
             returning id
-            """, islem, [uzmanId, Kisalt(not, 500), BildirimKaynagi, baglam.SubeId, baglam.KullaniciId, istemId], iptal);
+            """, islem, [uzmanId, Gentegre.Cekirdek.MetinAraci.KirpKes(not, 500), BildirimKaynagi, baglam.SubeId, baglam.KullaniciId, istemId], iptal);
         await b.CalistirAsync("""
             insert into public.hatirlatma_hareket (hatirlatma_id, olay, ayrinti, kullanici_id)
             values (@p0, 1, 'radyoloji: uzmana gönderildi', @p1)
@@ -461,10 +461,5 @@ public static partial class RadyolojiUclari
             """, islem, [BildirimKaynagi, istemId], iptal);
 
     /// <summary>Not: kırpılmış, boşluksuz; yoksa boş metin (kolon not null).</summary>
-    private static string Kisalt(string? metin, int uzunluk)
-    {
-        var t = (metin ?? "").Trim();
-        return t.Length > uzunluk ? t[..uzunluk] : t;
-    }
 
 }

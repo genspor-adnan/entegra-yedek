@@ -73,7 +73,7 @@ public static class GarantiCevirici
         var vkn = S("corrVKN") is { Length: > 0 } v1 ? v1 : S("corrTCKN") is { Length: > 0 } v2 ? v2 : eftVkn;
 
         // Garanti tarih alanı gün hassasiyetinde; aynı günün sırası oluşturma anından.
-        var gun = T("activityDate") ?? DateTime.Now;
+        var gun = T("activityDate") ?? Gentegre.Cekirdek.Saat.Simdi;
         var olusma = T("transactionInstanceId");
         var tarih = gun.TimeOfDay == TimeSpan.Zero && olusma is { } o && o.Date == gun.Date ? o : gun;
 

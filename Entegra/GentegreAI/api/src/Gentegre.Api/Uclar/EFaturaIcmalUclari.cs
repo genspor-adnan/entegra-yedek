@@ -105,7 +105,7 @@ public static class EFaturaIcmalUclari
                     x.Id, belgeNo = x.No, tarih = x.Tarih, tur = x.ETur, x.Alici, protokol = x.Protokol, tutar = x.Toplam,
                     sorun = Sorun(x) ?? "", gun = YediGun(x) ? GunFark(x) : 0, gonderildi = x.Gonderildi,
                     aciklama = x.EDurum == 0 ? "fatura kesildi, e-Belge hazırlanmadı"
-                             : x.Hazir && x.Sonuc == 3 ? Kisalt(HataOzet(x.Hata), 160)
+                             : x.Hazir && x.Sonuc == 3 ? MetinAraci.KesUc(HataOzet(x.Hata), 160)
                              : x.Hazir ? "hazırlandı, gönderilmedi"
                              : x.Gonderildi ? "geç gönderildi" : "",
                     gonderim = x.Gonderim, hazir = x.Hazir,
@@ -230,5 +230,4 @@ public static class EFaturaIcmalUclari
         return m.Success ? (k.Success ? $"{k.Groups[1].Value}: " : "") + m.Groups[1].Value : ham ?? "";
     }
 
-    private static string Kisalt(string s, int n) => s.Length <= n ? s : s[..n] + "…";
 }

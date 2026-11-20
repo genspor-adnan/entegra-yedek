@@ -43,7 +43,7 @@ public static partial class GundemUclari
                                coalesce(sum(a.acik_alacak) filter (where a.acik_alacak > 0.005 and a.vade < current_date + 8), 0),
                                coalesce(min(a.vade::date) filter (where a.acik_alacak > 0.005), null)
                           from acik a
-                        """, null, [new DateTime(1900, 1, 1), DateTime.Today, 0, 0, new[] { kayitId }, 1],
+                        """, null, [new DateTime(1900, 1, 1), Gentegre.Cekirdek.Saat.Bugun, 0, 0, new[] { kayitId }, 1],
                         o => new { bakiye = o.GetDecimal(0), gecen = o.GetDecimal(1), gun = o.GetInt32(2), odeme7 = o.GetDecimal(3),
                                    ilkOdeme = o.IsDBNull(4) ? (DateTime?)null : o.GetDateTime(4) }, iptal);
                     if (c is not null)

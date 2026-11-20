@@ -46,7 +46,7 @@ public static partial class RandevuUclari
                     }, iptal)
                 : null;
             var sube = kayit?.Sube is > 0 ? kayit.Sube : baglam.SubeId ?? 0;
-            var baslangic = istek.Baslangic ?? kayit?.Bas ?? DateTime.Now;
+            var baslangic = istek.Baslangic ?? kayit?.Bas ?? Gentegre.Cekirdek.Saat.Simdi;
             var (degerler, telefon) = await sms.VeriAsync(sube, istek.HastaId, baslangic, istek.Bolum, istek.HekimId, iptal);
             var ayar = sube > 0 ? await sms.SubeAyariAsync(sube, iptal) : null;
             var hatirlatma = await sms.GecerliHatirlatmaAsync(ayar, iptal);

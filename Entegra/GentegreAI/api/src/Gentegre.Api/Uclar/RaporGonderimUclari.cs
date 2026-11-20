@@ -50,19 +50,13 @@ public static class RaporGonderimUclari
             AyarYetkiIste(baglam, Islem.Gor);
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             await using var b = await veri.AcAsync(iptal);
-            var ayar = await b.TekAsync("""
-                select otomatik, kritik_dakika, borc_kontrol, hasta_sms, hasta_eposta, gecerlilik_gun, web_kok, lab_panik_dakika,
-                       cikti_karekod_rad, cikti_karekod_lab
-                  from public.radyoloji_rapor_gonderim_ayar where sube_id = @p0
-                """, null, [sube], o => new
-                {
-                    otomatik = o.GetInt16(0) == 1, kritikDakika = o.GetInt32(1), borcKontrol = o.GetInt16(2) == 1,
-                    hastaSms = o.GetInt16(3) == 1, hastaEposta = o.GetInt16(4) == 1, gecerlilikGun = o.GetInt32(5),
-                    webKok = o.GetString(6), labPanikDakika = o.GetInt32(7),
-                    // ÇIKTIDA KAREKOD (1396; kullanıcı 20.11.2026: "rad ve lab için ayrı ayrı opsiyonel").
-                    karekodRadyoloji = o.GetInt16(8) == 1, karekodLab = o.GetInt16(9) == 1,
-                }, iptal) ?? new { otomatik = false, kritikDakika = 0, borcKontrol = true, hastaSms = true, hastaEposta = false,
-                                   gecerlilikGun = 30, webKok = "", labPanikDakika = 0, karekodRadyoloji = true, karekodLab = true };
+            var a = await RaporGonderimi.AyarOkuAsync(b, null, sube, iptal);
+            var ayar = new
+            {
+                otomatik = a.Otomatik, kritikDakika = a.KritikDakika, borcKontrol = a.BorcKontrol, hastaSms = a.HastaSms,
+                hastaEposta = a.HastaEposta, gecerlilikGun = a.GecerlilikGun, webKok = a.WebKok, labPanikDakika = a.LabPanikDakika,
+                karekodRadyoloji = a.KarekodRadyoloji, karekodLab = a.KarekodLab,
+            };
             var kurallar = await b.ListeAsync("""
                 select k.id, k.kapsam, k.kategori_id, k.hizmet_id, k.zaman_tur, k.saat, k.gun_dakika, k.aktif,
                        coalesce(kt.ad, ''), coalesce(hz.kod, ''), coalesce(hz.ad, '')

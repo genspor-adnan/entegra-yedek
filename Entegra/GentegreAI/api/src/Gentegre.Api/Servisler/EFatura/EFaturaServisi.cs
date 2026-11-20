@@ -207,7 +207,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             values (@p0, @p1, @p2, 1, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11::date, @p12, @p13, @p14, @p15, @p16, @p17)
             returning id
             """, tx, [belgeId, v.TarafId == 0 ? null : v.TarafId, eTur, uuid, no, v.GondericiAlias, alias, durum, v.SubeId,
-                      EFaturaKodlari.Rakam(v.Gonderici.Vkno), Kirp(v.Gonderici.Unvan, 200), v.Tarih.Date, v.Odenecek, v.Kdv,
+                      EFaturaKodlari.Rakam(v.Gonderici.Vkno), Gentegre.Cekirdek.MetinAraci.Kes(v.Gonderici.Unvan, 200), v.Tarih.Date, v.Odenecek, v.Kdv,
                       v.ParaKodu, eTur == EFaturaKodlari.TurEArsiv ? "EARSIVFATURA" : v.Irsaliye ? v.Profil : EFaturaKodlari.Profil(false, v.Senaryo),
                       hesap.Entegrator, bg.KullaniciId], iptal);
         await b.CalistirAsync("""
@@ -323,7 +323,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
             if (!yanit.IsSuccessStatusCode)
             {
                 var hata = EBelgeIstemcisi.HataMetni(metin, yanit.StatusCode);
-                await HataYazAsync(b, v, $"HTTP {kod}: {Kirp(metin, 700)}", kod, hesap.TestMi, bg, iptal);
+                await HataYazAsync(b, v, $"HTTP {kod}: {Gentegre.Cekirdek.MetinAraci.Kes(metin, 700)}", kod, hesap.TestMi, bg, iptal);
                 if (v.Irsaliye && metin.Contains("RECEIVER_COULD_NOT_FOUND", StringComparison.OrdinalIgnoreCase))
                 {
                     await b.CalistirAsync("update public.taraf set eirsaliye = 0 where id = @p0", null, [v.TarafId], iptal);
@@ -356,7 +356,7 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
                 update public.belge set efatura_durum = @p1, efatura_sonuc = @p2, degistiren = @p3, degistirme_tarihi = now()
                  where id = @p0
                 """, tx, [belgeId, durum, EFaturaKodlari.SonucGonderildi, bg.KullaniciId], iptal);
-            await MesajYazAsync(b, tx, belgeId, v.EBelgeId, 2, 2, Kirp(metin, 4000), kod, hesap.TestMi, bg.KullaniciId, iptal);
+            await MesajYazAsync(b, tx, belgeId, v.EBelgeId, 2, 2, Gentegre.Cekirdek.MetinAraci.Kes(metin, 4000), kod, hesap.TestMi, bg.KullaniciId, iptal);
             await LogAsync(b, tx, belgeId, v.TarafId, "Gönder", bg, iptal);
             await tx.CommitAsync(iptal);
         }
@@ -703,5 +703,4 @@ public sealed class EFaturaServisi(VeriKaynagi veri, IHttpClientFactory istemciU
         return notlar;
     }
 
-    private static string Kirp(string s, int n) => s.Length <= n ? s : s[..n];
 }

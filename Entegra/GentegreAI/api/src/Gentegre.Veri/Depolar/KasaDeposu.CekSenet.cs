@@ -151,7 +151,7 @@ public sealed partial class KasaDeposu
                 ["dovizCinsi"] = c.Doviz,
                 ["dovizKuru"] = c.Kur,
                 ["cekSenetId"] = id,
-                ["aciklama"] = Kirp($"{c.SeriNo} seri nolu {(senet ? "senet" : "çek")} - {islemAdi}"
+                ["aciklama"] = Gentegre.Cekirdek.MetinAraci.Kes($"{c.SeriNo} seri nolu {(senet ? "senet" : "çek")} - {islemAdi}"
                                     + (aciklama.Length > 0 ? $" ({aciklama})" : ""), 200),
             };
             if (kasaCari is > 0 && kasaTur is not (51 or 53 or 55)) islem["tarafId"] = kasaCari;
@@ -181,8 +181,8 @@ public sealed partial class KasaDeposu
             returning id
             """, tx, id, (short)kural.Hareket, gun, (short)c.Durum, (short)kural.YeniDurum,
                (object?)(tarafId ?? (kasaTur > 0 ? kasaCari : null)) ?? DBNull.Value, (object?)hesapId ?? DBNull.Value,
-               (object?)kasaIslemId ?? DBNull.Value, Kirp(aciklama.Length > 0 ? aciklama : islemAdi, 200),
-               Kirp((istek.BelgeNo ?? "").Trim(), 30), baglam.KullaniciId))
+               (object?)kasaIslemId ?? DBNull.Value, Gentegre.Cekirdek.MetinAraci.Kes(aciklama.Length > 0 ? aciklama : islemAdi, 200),
+               Gentegre.Cekirdek.MetinAraci.Kes((istek.BelgeNo ?? "").Trim(), 30), baglam.KullaniciId))
             hareketId = Convert.ToInt32(await CalistirAsync(k, iptal));
 
         await _log.YazAsync(b, tx, LogIslemi.Degistir, LogTabloCekSenet, id,

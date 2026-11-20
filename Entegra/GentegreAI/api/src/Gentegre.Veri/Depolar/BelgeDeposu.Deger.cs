@@ -34,8 +34,6 @@ public sealed partial class BelgeDeposu
     private static string Metin(IDictionary<string, object?> d, string ad)
         => d.TryGetValue(ad, out var v) && v is not null ? v.ToString() ?? "" : "";
 
-    private static string Kirp(string deger, int sinir)
-        => deger.Length <= sinir ? deger : deger[..sinir];
 
     // ================================================================== okuma ====
     public async Task<(IDictionary<string, object?> Belge, List<IDictionary<string, object?>> Satirlar,

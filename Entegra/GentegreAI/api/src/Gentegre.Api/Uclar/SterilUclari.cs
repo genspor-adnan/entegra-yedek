@@ -88,7 +88,6 @@ public static partial class SterilUclari
     private static async Task<JsonNode?[]> JsonListeAsync(NpgsqlConnection b, string sql, object?[] par, CancellationToken iptal)
         => (await b.ListeAsync(sql, null, par, o => o.GetString(0), iptal)).Select(x => JsonNode.Parse(x)).ToArray();
     private static int? SayiN(NpgsqlDataReader o, int i) => o.IsDBNull(i) ? null : o.GetInt32(i);
-    private static string Kirp(string? m, int n) => (m ?? "").Length <= n ? m ?? "" : m![..n];
 
     private static async Task<Kurallar> KurallarAsync(NpgsqlConnection b, CancellationToken iptal)
     {
@@ -99,7 +98,7 @@ public static partial class SterilUclari
 
     private static async Task OlayYazAsync(NpgsqlConnection b, int? birimId, int? paketId, int? donguId, short tur, int? kullaniciId, string aciklama, CancellationToken iptal, string veri = "")
         => await b.CalistirAsync("insert into public.steril_olay (birim_id, paket_id, dongu_id, tur, kullanici_id, aciklama, veri) values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)", null,
-            [birimId, paketId, donguId, tur, kullaniciId, Kirp(aciklama, 300), Kirp(veri, 600)], iptal);
+            [birimId, paketId, donguId, tur, kullaniciId, MetinAraci.Kes(aciklama, 300), MetinAraci.Kes(veri, 600)], iptal);
 
     private static async Task BirimDurumAsync(NpgsqlConnection b, int birimId, short durum, int kullaniciId, CancellationToken iptal, string? konum = null)
         => await b.CalistirAsync("update public.steril_birim set durum = @p1, durum_zaman = now(), konum = coalesce(@p3::text, konum), degistiren = @p2, degistirme_tarihi = now() where id = @p0", null,

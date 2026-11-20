@@ -57,7 +57,7 @@ public static partial class GundemUclari
                            where a2.acik_alacak > 0.005 and a2.vade >= current_date and a2.vade < current_date + 8
                            group by tr.ad order by 2 desc limit 3) x), '')
                       from acik a
-                    """, null, [new DateTime(1900, 1, 1), DateTime.Today, 0, 0, kapsam, 0],
+                    """, null, [new DateTime(1900, 1, 1), Gentegre.Cekirdek.Saat.Bugun, 0, 0, kapsam, 0],
                     o => new Cari7(o.GetDecimal(0), o.GetInt32(1), o.GetDecimal(2), o.GetDecimal(3), o.GetDecimal(4), o.GetInt32(5),
                                    o.GetInt32(6), o.GetInt32(7), o.GetInt32(8), o.GetDecimal(9), o.GetString(10)), iptal);
             }
@@ -112,7 +112,7 @@ public static partial class GundemUclari
             // ---- F5 · planlı ödemeler (kira, abonelik, kart ...) - PlanliGiderMotoru'nun kuralı ---------------------
             if (mali && Modul("kasa") && Yetki("finans.planli_gider"))
             {
-                var (kalemler, _) = await PlanliGiderMotoru.AkisKalemleriAsync(b, subeler, 0, DateTime.Today, DateTime.Today.AddDays(7), iptal);
+                var (kalemler, _) = await PlanliGiderMotoru.AkisKalemleriAsync(b, subeler, 0, Gentegre.Cekirdek.Saat.Bugun, Gentegre.Cekirdek.Saat.Bugun.AddDays(7), iptal);
                 var gecmis = kalemler.Count(x => x.Gecmis);
                 if (kalemler.Count > 0)
                     Ekle(new("planli", "Planlı ödemeler", "📆", kalemler.Count.ToString(), gecmis > 0 ? "kir" : "sar",

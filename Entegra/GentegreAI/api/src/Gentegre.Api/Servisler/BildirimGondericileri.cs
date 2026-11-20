@@ -210,10 +210,10 @@ public sealed class HttpSmsGonderici : IBildirimGonderici
                            && (aranan.Length == 0 || metin.Contains(aranan, StringComparison.OrdinalIgnoreCase));
 
             return new GonderimSonucu(basarili,
-                SaglayiciRef: basarili ? Kirp(metin, 80) : "",
-                Hata: basarili ? "" : $"HTTP {(int)yanit.StatusCode}: {Kirp(metin, 300)}",
+                SaglayiciRef: basarili ? Gentegre.Cekirdek.MetinAraci.Kes(metin, 80) : "",
+                Hata: basarili ? "" : $"HTTP {(int)yanit.StatusCode}: {Gentegre.Cekirdek.MetinAraci.Kes(metin, 300)}",
                 HttpDurum: (int)yanit.StatusCode,
-                HamYanit: JsonSerializer.Serialize(new { yanit = Kirp(metin, 2000) }));
+                HamYanit: JsonSerializer.Serialize(new { yanit = Gentegre.Cekirdek.MetinAraci.Kes(metin, 2000) }));
         }
         catch (Exception h)
         {
@@ -236,7 +236,6 @@ public sealed class HttpSmsGonderici : IBildirimGonderici
             _ => JsonEncodedText.Encode(metin).ToString(),
         };
 
-    private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 }
 
 /// <summary>Kanala göre doğru göndericiyi kurar (hesap varsa gerçek, yoksa kayıt modu).</summary>

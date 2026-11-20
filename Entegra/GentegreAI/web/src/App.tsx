@@ -118,7 +118,7 @@ const YzKontor = tembel(() => import('./sayfalar/YzKontor'), 'YzKontor');
 const UtsSorgu = tembel(() => import('./sayfalar/UtsSorgu'), 'UtsSorgu');
 const RadyolojiPanosu = tembel(() => import('./sayfalar/RadyolojiPanosu'), 'RadyolojiPanosu');
 const RadyolojiTipografi = tembel(() => import('./sayfalar/RadyolojiTipografi'), 'RadyolojiTipografi');
-const RaporGonderimAyari = tembel(() => import('./sayfalar/radyoloji/RaporGonderimAyari'), 'RaporGonderimAyari');
+const RaporGonderimAyari = tembel(() => import('./sayfalar/raporGonderim/RaporGonderimAyari'), 'RaporGonderimAyari');
 const TeleradyolojiPanosu = tembel(() => import('./sayfalar/TeleradyolojiPanosu'), 'TeleradyolojiPanosu');
 const TeleradFatura = tembel(() => import('./sayfalar/TeleradFatura'), 'TeleradFatura');
 const EnabizPanosu = tembel(() => import('./sayfalar/EnabizPanosu'), 'EnabizPanosu');
@@ -162,7 +162,7 @@ const FtrProgramKarti = tembel(() => import('./sayfalar/ftr/FtrProgramKarti'), '
 const FtrSeansKarti = tembel(() => import('./sayfalar/ftr/FtrSeansKarti'), 'FtrSeansKarti');
 const FtrPano = tembel(() => import('./sayfalar/ftr/FtrPano'), 'FtrPano');
 const FormAcik = tembel(() => import('./sayfalar/form/FormAcik'), 'FormAcik');
-const RaporAcik = tembel(() => import('./sayfalar/radyoloji/RaporAcik'), 'RaporAcik');
+const RaporAcik = tembel(() => import('./sayfalar/raporGonderim/RaporAcik'), 'RaporAcik');
 const FormDoldur = tembel(() => import('./sayfalar/form/FormDoldur'), 'FormDoldur');
 const HastaFormlari = tembel(() => import('./sayfalar/form/HastaFormlari'), 'HastaFormlari');
 const FormKutuphane = tembel(() => import('./sayfalar/form/FormKutuphane'), 'FormKutuphane');

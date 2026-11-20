@@ -141,7 +141,7 @@ public sealed class BildirimDeposu
                    saglayici_ref = case when @p2 <> '' then @p2 else saglayici_ref end,
                    hata = @p3
              where id = @p0
-            """, tx, [kayit.Id, yeniDurum, sonuc.SaglayiciRef, Kirp(sonuc.Hata, 400)], iptal);
+            """, tx, [kayit.Id, yeniDurum, sonuc.SaglayiciRef, Gentegre.Cekirdek.MetinAraci.Kes(sonuc.Hata, 400)], iptal);
 
         await baglanti.CalistirAsync("""
             insert into public.bildirim_log
@@ -149,7 +149,7 @@ public sealed class BildirimDeposu
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7::jsonb)
             """, tx,
             [kayit.Id, kayit.Deneme, sonuc.Basarili ? (short)1 : (short)0,
-             (short)sonuc.HttpDurum, sureMs, sonuc.SaglayiciRef, Kirp(sonuc.Hata, 400),
+             (short)sonuc.HttpDurum, sureMs, sonuc.SaglayiciRef, Gentegre.Cekirdek.MetinAraci.Kes(sonuc.Hata, 400),
              sonuc.HamYanit], iptal);
 
         await tx.CommitAsync(iptal);
@@ -205,6 +205,4 @@ public sealed class BildirimDeposu
         new(o.GetInt32(0), o.GetInt16(1), o.GetString(2), o.GetString(3), o.GetInt16(4));
 
 
-    private static string Kirp(string metin, int en) =>
-        string.IsNullOrEmpty(metin) ? "" : metin.Length <= en ? metin : metin[..en];
 }

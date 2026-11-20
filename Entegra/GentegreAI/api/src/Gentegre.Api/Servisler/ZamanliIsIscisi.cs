@@ -495,7 +495,7 @@ public sealed class ZamanliIsIscisi : BackgroundService
                set calisiyor = 0, son_calisma = now(), basarili = @p1,
                    son_sonuc = @p2, sure_ms = @p3
              where kod = @p0
-            """, new object?[] { kod, basarili ? (short)1 : (short)0, Kirp(sonuc, 400),
+            """, new object?[] { kod, basarili ? (short)1 : (short)0, Gentegre.Cekirdek.MetinAraci.Kes(sonuc, 400),
                                  (int)kronometre.ElapsedMilliseconds }, CancellationToken.None);
 
         await SonrakiYazAsync(veri, kod, CancellationToken.None);
@@ -555,5 +555,4 @@ public sealed class ZamanliIsIscisi : BackgroundService
 
 
 
-    private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 }

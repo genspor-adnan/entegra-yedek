@@ -190,7 +190,7 @@ public sealed class EnabizMesajServisi
             {
                 _gunluk.LogError(h, "e-Nabiz 411 paketi uretilemedi (mesaj {Id})", m.Id);
                 await SebepYazAsync(baglanti, m.Id,
-                    EnabizPortalIstemcisi.Kirp(h.Message, 400), iptal);
+                    Gentegre.Cekirdek.MetinAraci.Kes(h.Message, 400), iptal);
                 bekleyen++;
             }
         }
@@ -207,5 +207,5 @@ public sealed class EnabizMesajServisi
             update public.enabiz_mesaj
                set son_hata = @p1, deneme = deneme + 1, degistirme_tarihi = now()
              where id = @p0
-            """, null, [id, EnabizPortalIstemcisi.Kirp(sebep, 400)], iptal);
+            """, null, [id, Gentegre.Cekirdek.MetinAraci.Kes(sebep, 400)], iptal);
 }

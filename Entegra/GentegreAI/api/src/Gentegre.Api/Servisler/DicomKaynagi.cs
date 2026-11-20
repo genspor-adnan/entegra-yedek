@@ -161,7 +161,7 @@ public sealed class DicomKaynagi(DicomAyarDeposu depo, IOptions<GuvenlikAyarlari
                 {
                     var q = DicomCFindRequest.CreateStudyQuery();
                     q.Dataset.AddOrUpdate(DicomTag.StudyDate,
-                        $"{DateTime.Today.AddDays(-gun):yyyyMMdd}-{DateTime.Today.AddDays(1):yyyyMMdd}");
+                        $"{Gentegre.Cekirdek.Saat.Bugun.AddDays(-gun):yyyyMMdd}-{Gentegre.Cekirdek.Saat.Bugun.AddDays(1):yyyyMMdd}");
                     var calismalar = await SorgulaAsync(q, iptal, a);
                     if (calismalar.Count == 0) continue;
                     foreach (var c in calismalar.Take(5))

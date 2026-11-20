@@ -63,22 +63,22 @@ public static partial class RadyolojiUclari
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
             var saatlik = await b.ListeAsync("""
-                select extract(hour from r.baslangic at time zone 'Europe/Istanbul')::int as saat, count(*) as adet
+                select extract(hour from r.baslangic at time zone current_setting('TimeZone'))::int as saat, count(*) as adet
                   from public.randevu r
                  where r.cihaz_id = @p0 and r.durum not in (4, 5)
-                   and (r.baslangic at time zone 'Europe/Istanbul')::date = (now() at time zone 'Europe/Istanbul')::date
+                   and (r.baslangic at time zone current_setting('TimeZone'))::date = (now() at time zone current_setting('TimeZone'))::date
                  group by 1 order by 1
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             var bosSlot = await b.TekDegerAsync<string?>("""
                 select to_char(g.t, 'HH24:MI')
                   from public.radyoloji_cihaz c,
-                       generate_series(date_trunc('minute', now() at time zone 'Europe/Istanbul'),
-                                       (now() at time zone 'Europe/Istanbul')::date + c.bitis_saat::time,
+                       generate_series(date_trunc('minute', now() at time zone current_setting('TimeZone')),
+                                       (now() at time zone current_setting('TimeZone'))::date + c.bitis_saat::time,
                                        make_interval(mins => greatest(c.slot_dk, 5))) g(t)
                  where c.id = @p0 and c.randevu_verilir = 1 and c.bitis_saat ~ '^\d{1,2}:\d{2}$'
                    and not exists (select 1 from public.randevu r where r.cihaz_id = c.id and r.durum not in (4, 5)
-                                     and (r.baslangic at time zone 'Europe/Istanbul') <= g.t
-                                     and (r.baslangic at time zone 'Europe/Istanbul') + make_interval(mins => greatest(coalesce(r.sure_dk, c.slot_dk), 1)) > g.t)
+                                     and (r.baslangic at time zone current_setting('TimeZone')) <= g.t
+                                     and (r.baslangic at time zone current_setting('TimeZone')) + make_interval(mins => greatest(coalesce(r.sure_dk, c.slot_dk), 1)) > g.t)
                  order by g.t limit 1
                 """, null, [id], iptal);
             var kapatma = await b.TekAsync("""
@@ -114,8 +114,8 @@ public static partial class RadyolojiUclari
             var gunluk = await b.ListeAsync("""
                 select g::date as gun, extract(isodow from g)::int as hgun,
                        (select count(*) from public.radyoloji_istem i where i.cihaz_id = @p0
-                          and (i.cekim_tarihi at time zone 'Europe/Istanbul')::date = g::date) as adet
-                  from generate_series((now() at time zone 'Europe/Istanbul')::date - 29, (now() at time zone 'Europe/Istanbul')::date, interval '1 day') g
+                          and (i.cekim_tarihi at time zone current_setting('TimeZone'))::date = g::date) as adet
+                  from generate_series((now() at time zone current_setting('TimeZone'))::date - 29, (now() at time zone current_setting('TimeZone'))::date, interval '1 day') g
                  order by 1
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
             return Results.Ok(new { ozet, gunluk, izlemeNo = baglam.IzlemeNo });
@@ -209,19 +209,19 @@ public static partial class RadyolojiUclari
                 select randevu_verilir as rv, baslangic_saat as bas, bitis_saat as bit, ogle_baslangic as ob, ogle_bitis as oe,
                        coalesce(slot_dk, 15) as slot, greatest(coalesce(eszaman, 1), 1) as es, coalesce(acil_slot, 0) as acil,
                        coalesce(calisma_gunleri, '') as gunler,
-                       date_trunc('week', now() at time zone 'Europe/Istanbul')::date as pazartesi
+                       date_trunc('week', now() at time zone current_setting('TimeZone'))::date as pazartesi
                   from public.radyoloji_cihaz where id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal) ?? throw GentegreHatasi.Bulunamadi("Cihaz bulunamadı.");
             var pzt = (DateTime)c["pazartesi"]!;
             var randevular = await b.ListeAsync("""
-                select (baslangic at time zone 'Europe/Istanbul') as t from public.randevu
+                select (baslangic at time zone current_setting('TimeZone')) as t from public.randevu
                  where cihaz_id = @p0 and durum not in (4, 5)
-                   and (baslangic at time zone 'Europe/Istanbul') >= @p1 and (baslangic at time zone 'Europe/Istanbul') < @p1 + interval '7 days'
+                   and (baslangic at time zone current_setting('TimeZone')) >= @p1 and (baslangic at time zone current_setting('TimeZone')) < @p1 + interval '7 days'
                 """, null, [id, pzt], o => o.GetDateTime(0), iptal);
             var kapatmalar = await b.ListeAsync("""
-                select (baslangic at time zone 'Europe/Istanbul') as b, (bitis at time zone 'Europe/Istanbul') as e, neden_tur as n
+                select (baslangic at time zone current_setting('TimeZone')) as b, (bitis at time zone current_setting('TimeZone')) as e, neden_tur as n
                   from public.radyoloji_cihaz_kapatma
-                 where cihaz_id = @p0 and (bitis at time zone 'Europe/Istanbul') > @p1 and (baslangic at time zone 'Europe/Istanbul') < @p1 + interval '7 days'
+                 where cihaz_id = @p0 and (bitis at time zone current_setting('TimeZone')) > @p1 and (baslangic at time zone current_setting('TimeZone')) < @p1 + interval '7 days'
                 """, null, [id, pzt], o => (o.GetDateTime(0), o.GetDateTime(1), o.IsDBNull(2) ? (short)9 : o.GetInt16(2)), iptal);
 
             static int? Dk(object? v) => v is string s && TimeOnly.TryParse(s, out var t) ? t.Hour * 60 + t.Minute : null;
