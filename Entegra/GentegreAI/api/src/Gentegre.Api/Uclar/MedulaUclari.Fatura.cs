@@ -237,20 +237,23 @@ public static partial class MedulaUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("medula.fatura", Islem.Ekle);
             await using var b = await veri.AcAsync(iptal);
-            var f = await b.TekAsync("select donem_id, hasta_id, durum from public.medula_fatura where id = @p0", null, [istek.MedulaFaturaId],
+            // TEK İŞLEM (refaktör B1): kesinti satırı, faturanın durumu, dönemin kesinti toplamı ve log birlikte.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var f = await b.TekAsync("select donem_id, hasta_id, durum from public.medula_fatura where id = @p0 for update", islem, [istek.MedulaFaturaId],
                 o => new { donemId = o.IsDBNull(0) ? (int?)null : o.GetInt32(0), hastaId = o.GetInt32(1), durum = o.GetInt16(2) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Fatura bulunamadı.");
             var id = await b.TekDegerAsync<int>("""
                 insert into public.medula_kesinti (sube_id, medula_fatura_id, donem_id, sut_kodu, kesinti_kodu, aciklama, tutar, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7) returning id
-                """, null, [baglam.SubeId ?? 0, istek.MedulaFaturaId, f.donemId, istek.SutKodu ?? "", istek.KesintiKodu ?? "", istek.Aciklama ?? "", istek.Tutar, baglam.KullaniciId], iptal);
+                """, islem, [baglam.SubeId ?? 0, istek.MedulaFaturaId, f.donemId, istek.SutKodu ?? "", istek.KesintiKodu ?? "", istek.Aciklama ?? "", istek.Tutar, baglam.KullaniciId], iptal);
             await b.CalistirAsync("""
                 update public.medula_fatura set durum = case when durum in (3, 4) then 5 else durum end where id = @p0;
                 update public.medula_donem d set kesinti = (select coalesce(sum(k.tutar), 0) from public.medula_kesinti k where k.donem_id = d.id),
                        durum = case when d.durum = 2 then 3 else d.durum end where d.id = @p1;
-                """, null, [istek.MedulaFaturaId, f.donemId], iptal);
-            await log.YazAsync(LogIslemi.Ekle, MedulaServisi.LogTabloFatura, istek.MedulaFaturaId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                """, islem, [istek.MedulaFaturaId, f.donemId], iptal);
+            await log.YazAsync(b, islem, LogIslemi.Ekle, MedulaServisi.LogTabloFatura, istek.MedulaFaturaId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
                 new { kesinti = id, istek.Tutar, istek.KesintiKodu }, tarafId: f.hastaId, iptal: iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id });
         });
 
@@ -273,14 +276,16 @@ public static partial class MedulaUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("medula.fatura", Islem.Degistir);
             await using var b = await veri.AcAsync(iptal);
-            var k = await b.TekAsync("select tutar, donem_id, itiraz_durum from public.medula_kesinti where id = @p0", null, [id],
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var k = await b.TekAsync("select tutar, donem_id, itiraz_durum from public.medula_kesinti where id = @p0 for update", islem, [id],
                 o => new { tutar = o.GetDecimal(0), donemId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1), durum = o.GetInt16(2) }, iptal) ?? throw GentegreHatasi.Bulunamadi();
             if (k.durum != 1) throw GentegreHatasi.IsKurali("Sonuç yalnız bekleyen itiraza yazılır.");
             var iade = istek.Kabul ? (istek.IadeTutar ?? k.tutar) : 0m;
             await b.CalistirAsync("""
                 update public.medula_kesinti set itiraz_durum = @p1, sonuc_zaman = now(), iade_tutar = @p2, degistiren = @p3, degistirme_tarihi = now() where id = @p0;
                 update public.medula_donem d set kesinti = (select coalesce(sum(x.tutar - x.iade_tutar), 0) from public.medula_kesinti x where x.donem_id = d.id) where d.id = @p4;
-                """, null, [id, (short)(istek.Kabul ? 2 : 3), iade, baglam.KullaniciId, k.donemId], iptal);
+                """, islem, [id, (short)(istek.Kabul ? 2 : 3), iade, baglam.KullaniciId, k.donemId], iptal);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { itirazDurum = istek.Kabul ? 2 : 3, iade });
         });
     }
@@ -296,21 +301,26 @@ public static partial class MedulaUclari
 
         var tarih = await b.TekDegerAsync<DateTime>("select belge_tarihi from public.belge where id = @p0", null, [belgeId], iptal);
         var sube = baglam.SubeId ?? 0;
+        // HAZIRLIK TEK İŞLEMDE (refaktör B1): dönem satırı, fatura satırı ve tutarı birlikte yazılır - yarıda kalırsa
+        //   hiçbiri kalmaz. Medula çağrısı işlemin DIŞINDA: çağrı kendi bağlantısıyla kuyruğa ve faturaya yazar,
+        //   açık işlem onu kilitlerdi.
+        await using var hazirlik = await b.BeginTransactionAsync(iptal);
         var donemId = await b.TekDegerAsync<int?>("select id from public.medula_donem where sube_id = @p0 and yil = @p1 and ay = @p2 and fatura_turu = 0",
-            null, [sube, (short)tarih.Year, (short)tarih.Month], iptal)
+            hazirlik, [sube, (short)tarih.Year, (short)tarih.Month], iptal)
             ?? await b.TekDegerAsync<int>("insert into public.medula_donem (sube_id, yil, ay, ekleyen) values (@p0, @p1, @p2, @p3) returning id",
-                null, [sube, (short)tarih.Year, (short)tarih.Month, baglam.KullaniciId], iptal);
-        var donemDurum = await b.TekDegerAsync<short>("select durum from public.medula_donem where id = @p0", null, [donemId], iptal);
+                hazirlik, [sube, (short)tarih.Year, (short)tarih.Month, baglam.KullaniciId], iptal);
+        var donemDurum = await b.TekDegerAsync<short>("select durum from public.medula_donem where id = @p0", hazirlik, [donemId], iptal);
         if (donemDurum >= 2) throw GentegreHatasi.IsKurali("Dönem sonlandırılmış; bu takip ek döneme girer.");
 
-        var yerel = await b.TekDegerAsync<decimal>("select coalesce(sum(tutar), 0) from public.medula_islem where belge_id = @p0 and durum = 2", null, [belgeId], iptal);
-        var tur = (short)(faturaTuru ?? (await b.TekDegerAsync<short?>("select sgk_takip_turu from public.belge_provizyon where id = @p0", null, [belgeId], iptal) ?? 1));
-        var faturaId = await b.TekDegerAsync<int?>("select id from public.medula_fatura where belge_id = @p0 and durum = 1", null, [belgeId], iptal)
+        var yerel = await b.TekDegerAsync<decimal>("select coalesce(sum(tutar), 0) from public.medula_islem where belge_id = @p0 and durum = 2", hazirlik, [belgeId], iptal);
+        var tur = (short)(faturaTuru ?? (await b.TekDegerAsync<short?>("select sgk_takip_turu from public.belge_provizyon where id = @p0", hazirlik, [belgeId], iptal) ?? 1));
+        var faturaId = await b.TekDegerAsync<int?>("select id from public.medula_fatura where belge_id = @p0 and durum = 1", hazirlik, [belgeId], iptal)
             ?? await b.TekDegerAsync<int>("""
                 insert into public.medula_fatura (sube_id, belge_id, hasta_id, takip_no, fatura_turu, donem_id, fatura_tarihi, yerel_tutar, ekleyen)
                 values (@p0, @p1, @p2, @p3, @p4, @p5, current_date, @p6, @p7) returning id
-                """, null, [sube, belgeId, bv.hastaId, bv.takipNo, tur, donemId, yerel, baglam.KullaniciId], iptal);
-        await b.CalistirAsync("update public.medula_fatura set yerel_tutar = @p1, donem_id = @p2 where id = @p0", null, [faturaId, yerel, donemId], iptal);
+                """, hazirlik, [sube, belgeId, bv.hastaId, bv.takipNo, tur, donemId, yerel, baglam.KullaniciId], iptal);
+        await b.CalistirAsync("update public.medula_fatura set yerel_tutar = @p1, donem_id = @p2 where id = @p0", hazirlik, [faturaId, yerel, donemId], iptal);
+        await hazirlik.CommitAsync(iptal);
 
         var s = await medula.CagirAsync("FaturaBilgisiKayit", "faturaKayit", "medula_fatura", faturaId, bv.hastaId, belgeId,
             new { takipNo = bv.takipNo, faturaTuru = tur, yerelTutar = yerel }, baglam.KullaniciId, baglam.SubeId, baglam.Ip, 7, iptal);

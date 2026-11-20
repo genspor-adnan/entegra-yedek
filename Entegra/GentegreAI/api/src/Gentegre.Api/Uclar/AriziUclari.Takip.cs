@@ -80,11 +80,11 @@ public static partial class AriziUclari
             null, [kullaniciId], iptal);
 
     private static Task HareketYazAsync(NpgsqlConnection b, int id, short tur, string metin,
-                                        int yazan, CancellationToken iptal)
+                                        int yazan, CancellationToken iptal, NpgsqlTransaction? islem = null)
         => b.CalistirAsync("""
             insert into public.ariza_talep_hareket (talep_id, tur, metin, yazan)
             values (@p0, @p1, left(@p2, 1000), @p3)
-            """, null, [id, tur, metin, yazan], iptal);
+            """, islem, [id, tur, metin, yazan], iptal);
 
     /// <summary>
     /// ACİL: ekibe (rolünde <c>ariza</c> değiştirme yetkisi olan aktif
@@ -384,11 +384,14 @@ public static partial class AriziUclari
                 throw GentegreHatasi.IsKurali("Bu arıza kapanmış - yeni kayıt açın.");
             if (Convert.ToInt32(t["talep_eden"]) == baglam.KullaniciId)
                 throw GentegreHatasi.IsKurali("Bu arızayı zaten siz bildirdiniz.");
+            // TEK İŞLEM (refaktör B1): takipçi satırı ile hareket birlikte yazılır.
+            await using var islem = await b.BeginTransactionAsync(iptal);
             var n = await b.CalistirAsync("""
                 insert into public.ariza_talep_takipci (talep_id, taraf_id) values (@p0, @p1)
                 on conflict do nothing
-                """, null, [id, baglam.KullaniciId], iptal);
-            await HareketYazAsync(b, id, 10, istek.Neden?.Trim() ?? "", baglam.KullaniciId, iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
+            await HareketYazAsync(b, id, 10, istek.Neden?.Trim() ?? "", baglam.KullaniciId, iptal, islem);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, yeni = n > 0, mesaj = "Arıza takibinize eklendi.", izlemeNo = baglam.IzlemeNo });
         });
 
@@ -434,13 +437,18 @@ public static partial class AriziUclari
             var (rol, durum) = await ErisimAsync(b, id, baglam, iptal);
             if (rol != 1) throw GentegreHatasi.IsKurali("Talebi yalnız bildiren kişi yeniden açar.");
             if (durum != 4) throw GentegreHatasi.IsKurali("Yalnız çözüldü durumundaki talep yeniden açılır.");
-            await b.CalistirAsync("""
+            // TEK İŞLEM (refaktör B1): durum değişikliği ile nedeni birlikte yazılır; araya başka işlem girdiyse
+            //   (durum artık 4 değil) neden de yazılmaz - eskiden hareket tek başına kalabiliyordu.
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var n = await b.CalistirAsync("""
                 update public.ariza_talep
                    set durum = case when sorumlu_id is null then 1 else 3 end,
                        degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0 and durum = 4
-                """, null, [id, baglam.KullaniciId], iptal);
-            await HareketYazAsync(b, id, 9, istek.Neden.Trim(), baglam.KullaniciId, iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Talebin durumu bu arada değişti - sayfayı yenileyin.");
+            await HareketYazAsync(b, id, 9, istek.Neden.Trim(), baglam.KullaniciId, iptal, islem);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, izlemeNo = baglam.IzlemeNo });
         });
 
@@ -454,12 +462,15 @@ public static partial class AriziUclari
             var (rol, durum) = await ErisimAsync(b, id, baglam, iptal);
             if (rol != 1) throw GentegreHatasi.IsKurali("Talebi yalnız bildiren kişi iptal eder.");
             if (durum is not (1 or 2 or 3)) throw GentegreHatasi.IsKurali("Çözülmüş ya da kapanmış talep iptal edilemez.");
-            await b.CalistirAsync("""
+            await using var islem = await b.BeginTransactionAsync(iptal);
+            var n = await b.CalistirAsync("""
                 update public.ariza_talep set durum = 0, degistiren = @p1, degistirme_tarihi = now()
                  where id = @p0 and durum in (1, 2, 3)
-                """, null, [id, baglam.KullaniciId], iptal);
+                """, islem, [id, baglam.KullaniciId], iptal);
+            if (n == 0) throw GentegreHatasi.IsKurali("Talebin durumu bu arada değişti - sayfayı yenileyin.");
             if (!string.IsNullOrWhiteSpace(istek.Neden))
-                await HareketYazAsync(b, id, 9, istek.Neden.Trim(), baglam.KullaniciId, iptal);
+                await HareketYazAsync(b, id, 9, istek.Neden.Trim(), baglam.KullaniciId, iptal, islem);
+            await islem.CommitAsync(iptal);
             return Results.Ok(new { id, durum = 0, izlemeNo = baglam.IzlemeNo });
         });
     }
