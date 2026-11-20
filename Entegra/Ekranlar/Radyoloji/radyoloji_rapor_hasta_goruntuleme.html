@@ -162,6 +162,10 @@
   .menu2 .a{border-left-color:var(--accent);color:var(--accent)} .menu2 .y{border-left-color:var(--ok);color:var(--ok)}
   .menu2 .k{border-left-color:var(--hata);color:var(--hata)} .menu2 .g{border-left-color:var(--muted);color:var(--muted)}
   .menu2 hr{border:0;border-top:1px solid var(--line2);margin:3px 0}
+  table.kural{width:100%;border-collapse:collapse;font-size:12px}
+  table.kural th{background:#eef2f7;text-align:left;padding:5px 8px;border:1px solid var(--line2);color:var(--muted);font-weight:normal}
+  table.kural td{padding:5px 8px;border:1px solid var(--line2);vertical-align:middle}
+  table.kural tr.sec td{background:#f3f8ff}
   @media (max-width:860px){ .govde{grid-template-columns:1fr} .panel{border-right:0;border-bottom:1px solid var(--line2)} }
 </style>
 </head>
@@ -317,9 +321,9 @@
   <div class="ic">
     <div class="grup"><h4>Otomatik gönderim</h4>
       <div class="asat"><span>Otomatik gönderim</span><div><span class="cb"><i class="on">✓</i> Rapor onaylanınca / e-imzalanınca gönder</span></div></div>
-      <div class="asat"><span>Ne zaman</span><div class="cipler"><span class="cip">Hemen</span><span class="cip on">1 saat sonra</span><span class="cip">2 saat sonra</span><span class="cip">Ertesi gün</span><span class="kutucuk">16:00</span></div></div>
+      <div class="asat"><span>Ne zaman</span><div>Aşağıdaki <b>Gönderim zamanı kuralları</b> tablosundan (kod › kategori › tümü)</div></div>
       <div class="asat"><span>Kritik bulgulu raporda</span><div><span class="kutucuk">5</span> dakika sonra
-        <div class="ipucu2"><b>0</b> = otomatik gitmez, elle gönderilir. Kritik raporda yukarıdaki süre yerine bu süre geçerlidir.</div></div></div>
+        <div class="ipucu2"><b>0</b> = otomatik gitmez, elle gönderilir. Kritik raporda kural tablosu yerine <b>yalnız bu süre</b> geçerlidir (tek süre).</div></div></div>
       <div class="asat"><span>Sessiz saatler</span><div><span class="kutucuk">21:00</span> – <span class="kutucuk">08:00</span> <span style="color:var(--muted);font-size:11px">arası bekleyen sabaha kalır</span></div></div>
     </div>
     <div class="grup"><h4>Borç kuralı</h4>
@@ -342,6 +346,26 @@
       <div class="asat"><span>Bağlantı</span><div>Hastanınkinden <b>ayrı</b> bağlantı; doğrulama yok, açılışlar kayda geçer</div></div>
       <div class="ipucu2">Doktorun açması hastaya teslim sayılmaz; ayrıca kaydedilir.</div>
     </div>
+    <div class="grup" style="grid-column:1 / -1"><h4>Gönderim zamanı kuralları <span style="text-transform:none;letter-spacing:0">— öncelik: <b style="color:var(--ink)">Kod</b> › <b style="color:var(--ink)">Kategori</b> › <b style="color:var(--ink)">Tümü</b></span></h4>
+      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="btn">＋ Satır</span><span class="btn">✎</span><span class="btn">🗑</span></div>
+      <table class="kural">
+        <thead><tr><th style="width:26px">☐</th><th style="width:130px">Kapsam</th><th>Seçim</th><th style="width:300px">Gönderim zamanı</th><th style="width:90px">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>☐</td><td><span class="d yok">Tümü</span></td><td style="color:var(--muted)">— bütün tetkikler —</td><td><b>2 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td>☐</td><td><span class="d plan">Kategori</span></td><td><b>MR</b> <small style="display:inline;color:var(--muted)">· 48 tetkik</small></td><td><b>3 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td>☐</td><td><span class="d plan">Kategori</span></td><td><b>Mamografi</b> <small style="display:inline;color:var(--muted)">· 6 tetkik</small></td><td><b>Ertesi gün saat 15:00</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr><td>☐</td><td><span class="d acildi">Kod</span></td><td><b>804.160</b> Akciğer grafisi PA <small style="display:inline;color:var(--muted)">· Kategori: Röntgen</small></td><td><b>1 saat sonra</b></td><td><span class="d gitti">Aktif</span></td></tr>
+          <tr class="sec"><td>☑</td><td><span class="kutucuk combo">Kod</span></td><td><span class="kutucuk" style="min-width:280px">🔍 tetkik kodu ya da adı…</span></td>
+              <td><span class="kutucuk combo">Saat sonra</span> <span class="kutucuk" style="min-width:44px">1</span> saat &nbsp;<span style="color:var(--muted)">ya da</span>&nbsp; <span class="kutucuk combo">Ertesi gün</span> <span class="kutucuk">15:00</span></td><td><span class="cb"><i class="on">✓</i> Aktif</span></td></tr>
+        </tbody>
+      </table>
+      <div class="ipucu2">
+        <b>Hesap:</b> raporun tetkiği için önce <b>Kod</b> satırına bakılır; yoksa tetkiğin <b>Kategori</b> satırına; o da yoksa <b>Tümü</b> satırına. Hiç satır uymuyorsa otomatik gönderilmez (elle).
+        Zaman seçenekleri: <b>Hemen</b> · <b>N saat sonra</b> · <b>Ertesi gün saat SS:DD</b>. Aynı kod / kategori iki kez girilemez; "Tümü" tek satırdır.
+        <b>Örnek:</b> Lomber MR → Kategori MR → 3 saat · Akciğer grafisi PA → Kod 804.160 → 1 saat (Röntgen kategorisi olsa da kod kazanır) · Tiroid USG → Tümü → 2 saat.
+        Bir başvuruda birden çok rapor varsa her rapor <b>kendi</b> kuralına göre planlanır.
+      </div>
+    </div>
   </div>
 </div>
 <p class="aciklama">
@@ -362,9 +386,9 @@
     <thead><tr><th style="width:24px">☐</th><th>Rapor Onayı</th><th>Hasta</th><th>Tetkik</th><th>Borç</th><th>Hastaya Gönderim</th><th>Dış Doktora Gönderim</th><th>Teslim</th></tr></thead>
     <tbody>
       <tr><td>☐</td><td>20.11.2026 14:28<small>Dr. M. Yılmaz · e-imzalı</small></td><td><b>Ayşe Kaya</b><small>0532 *** 41 10</small></td><td>Bilateral Mamografi</td><td>—</td>
-          <td><span class="d plan">Planlandı</span><small>SMS · bugün 15:28</small></td><td><span class="d plan">Planlandı</span><small>Op. Dr. S. Aydın · e-posta · 15:28</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+          <td><span class="d plan">Planlandı</span><small>SMS · yarın 15:00 · kural: Kategori Mamografi</small></td><td><span class="d plan">Planlandı</span><small>Op. Dr. S. Aydın · e-posta · yarın 15:00</small></td><td><span class="d yok">Bekliyor</span></td></tr>
       <tr class="sec"><td>☑</td><td>20.11.2026 13:05<small>Dr. M. Yılmaz</small></td><td><b>Mehmet Demir</b><small>0541 *** 22 08</small></td><td>Lomber MR</td><td><b style="color:var(--hata)">1.250,00 ₺</b></td>
-          <td><span class="d borc">Borç nedeniyle bekliyor</span><small>SMS · 14:05'te gidecekti</small></td><td><span class="d borc">Borç nedeniyle bekliyor</span><small>Dr. K. Aras · SMS</small></td><td><span class="d yok">Bekliyor</span></td></tr>
+          <td><span class="d borc">Borç nedeniyle bekliyor</span><small>SMS · 16:05'te gidecekti · kural: Kategori MR (3 saat)</small></td><td><span class="d borc">Borç nedeniyle bekliyor</span><small>Dr. K. Aras · SMS</small></td><td><span class="d yok">Bekliyor</span></td></tr>
       <tr><td>☐</td><td>20.11.2026 11:40<small>Dr. E. Çelik · e-imzalı</small></td><td><b>Zeynep Arı</b><small>0505 *** 90 31</small></td><td>Akciğer BT</td><td>—</td>
           <td><span class="d acildi">Açıldı</span><small>SMS 12:40 · açıldı 12:52</small></td><td><span class="d yok">İstemiyor</span></td><td><span class="d gitti">Dijital</span><small>Hasta (bağlantı) · 12:52</small></td></tr>
       <tr><td>☐</td><td>20.11.2026 11:12<small>Dr. E. Çelik · e-imzalı</small></td><td><b>Hasan Kurt</b><small>0533 *** 17 64</small></td><td>Beyin BT <span class="d kritik">Kritik</span></td><td>—</td>
