@@ -5,6 +5,7 @@ import type { OnayAdimi } from '../../api/uclar/onay';
 import { Modal } from '../Modal';
 import { c } from '../../dil/ceviri';
 import { TEKLIF_DURUMLARI } from '../../sayfalar/belgeSabitleri';
+import { yerelGun } from '../bicim';
 
 /**
  * TEKLİF İÇ ONAYI (mockup Ekranlar/Teklif/teklif_ic_onay.html, kullanıcı 10.11.2026 "teklife iç onayı aktar"):
@@ -39,7 +40,7 @@ const zaman = (iso: string | null) => {
 /** +N takvim günü, yyyy-MM-dd. */
 const gunSonra = (n: number) => {
   const d = new Date(); d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return yerelGun(d);
 };
 
 export function OnayaSunPenceresi({ belgeId, belgeNo, cariUnvan, onKapat, onTamam }: {

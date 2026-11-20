@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import { DokumanGalerisi } from '../DokumanGalerisi';
 import { Modal } from '../Modal';
 import { guvenli, mesaj, onay } from '../mesaj';
-import { tarihSaat, tarihYaz } from '../bicim';
+import { tarihSaat, tarihYaz, yerelGun } from '../bicim';
 import { YAZDIR_ETIKETI } from '../yazdirBetigi';
 import { h as kacis } from '../htmlGuvenlik';
 
@@ -277,7 +277,7 @@ function BelgeYukle({ personelId, turId, ad, yenile, onKapat, onBitti }: {
   personelId: number; turId: number; ad: string; yenile: boolean;
   onKapat(): void; onBitti(): Promise<void>;
 }) {
-  const [tarih, setTarih] = useState(new Date().toISOString().slice(0, 10));
+  const [tarih, setTarih] = useState(yerelGun(new Date()));
   const [gecerlilik, setGecerlilik] = useState('');
   const [no, setNo] = useState('');
   const [dosya, setDosya] = useState<File | null>(null);

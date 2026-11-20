@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { DisIconSkoru } from '../../api/uclar/dis';
 import { hataMetni } from '../../api/sozlesme';
-import { gunNokta } from '../bicim';
+import { gunNokta, yerelGun } from '../bicim';
 import { guvenli, mesaj, onay } from '../mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { c as cev } from '../../dil/ceviri';
@@ -31,7 +31,7 @@ type Taslak = {
 };
 
 const BOS = (): Taslak => ({
-  id: null, tarih: new Date().toISOString().slice(0, 10), olcumTuru: 1,
+  id: null, tarih: yerelGun(new Date()), olcumTuru: 1,
   estetik: 1, ustArk: 0, capraz: 0, dikey: 0, bukkal: 0, oncesiId: null, not: '',
 });
 

@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import type { Kosul, ListeSatiri } from '../../api/sozlesme';
 import type { GozlukGostergeYaniti, GozlukKaynak, GozlukOnceki, GozlukOnizleme } from '../../api/uclar/goz';
 import type { EkSekmeBaglami } from '../../bilesenler/GenForm';
-import { tarihSaat, tarihYaz } from '../../bilesenler/bicim';
+import { tarihSaat, tarihYaz, yerelGun } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { GozIsaretSeridi, GOZLUK_ISARETLERI, useGozIsaretleri } from '../../bilesenler/goz/GozIsaretSeridi';
 
@@ -266,7 +266,7 @@ export function GozlukReceteFormu({ b, k, kopyaId }: { b: EkSekmeBaglami; k: Goz
     setIlk(true);
     if (!d.hekimId && k.muayene?.hekimId) yaz('hekimId', k.muayene.hekimId);
     yaz('sgkHak', k.sgkHakVar ? 1 : 0);
-    if (!d.gecerlilikBitis) { const t = new Date(); t.setMonth(t.getMonth() + 6); yaz('gecerlilikBitis', t.toISOString().slice(0, 10)) }
+    if (!d.gecerlilikBitis) { const t = new Date(); t.setMonth(t.getMonth() + 6); yaz('gecerlilikBitis', yerelGun(t)) }
     if (!d.kullanim) yaz('kullanim', 1);
     const kopya = kopyaId ? k.oncekiler.find(x => x.id === kopyaId) : null;
     if (kopya) oncekiAl(kopya);
@@ -412,7 +412,7 @@ export function GozlukReceteFormu({ b, k, kopyaId }: { b: EkSekmeBaglami; k: Goz
         <div className="rt-baslik">{c('Önizleme')} <span className="sonuk">A5</span></div>
         <div className="gl-kagit" id="gozluk-onizleme">
           <div className="kb"><div><b>{c('GÖZLÜK REÇETESİ')}</b><br />{c('Göz Polikliniği')}</div>
-            <div style={{ textAlign: 'right' }}>{c('No')}: {String(d.receteNo || '—')}<br />{tarihYaz(new Date().toISOString().slice(0, 10))}</div></div>
+            <div style={{ textAlign: 'right' }}>{c('No')}: {String(d.receteNo || '—')}<br />{tarihYaz(yerelGun(new Date()))}</div></div>
           <div><b>{c('Hasta')}:</b> {k?.hasta?.ad ?? '—'}{(k?.hasta?.yasKisa || k?.hasta?.yas != null) ? ` · ${k?.hasta?.yasKisa || k?.hasta?.yas}` : ''}</div>
           <MiniRecete r={d as Record<string, unknown>} />
           <div><b>{c('Tür')}:</b> {c(GOZLUK_TUR[tur] ?? '')}{d.kullanim ? ` · ${c(KULLANIM[Number(d.kullanim)] ?? '')}` : ''}</div>

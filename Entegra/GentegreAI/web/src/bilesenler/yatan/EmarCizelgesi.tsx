@@ -4,6 +4,7 @@ import type { EmarDoz, EmarOrder, EmarYaniti } from '../../api/uclar/yatan';
 import { guvenli, mesaj } from '../mesaj';
 import { DozUygulamaModali } from './DozUygulamaModali';
 import { c } from '../../dil/ceviri';
+import { yerelGun } from '../bicim';
 
 /**
  * eMAR ÇİZELGESİ — mockup `Ekranlar/Yatan/order_ilac_uygulama.html`.
@@ -36,7 +37,7 @@ export function EmarCizelgesi({ yenile, onDegisti }: {
 }) {
   const [yatislar, setYatislar] = useState<YatisSecenegi[]>([]);
   const [yatisId, setYatisId] = useState<number | null>(null);
-  const [gun, setGun] = useState(() => new Date().toISOString().slice(0, 10));
+  const [gun, setGun] = useState(() => yerelGun(new Date()));
   const [veri, setVeri] = useState<EmarYaniti | null>(null);
   const [secili, setSecili] = useState<{ doz: EmarDoz; order: EmarOrder } | null>(null);
 

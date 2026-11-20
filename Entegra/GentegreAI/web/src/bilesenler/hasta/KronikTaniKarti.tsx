@@ -5,7 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
-import { sayiya, metne } from '../bicim';
+import { sayiya, metne, yerelGun } from '../bicim';
 
 /**
  * KRONİK TANI KARTI — mockup `Ekranlar/Muayene/kronik_tani_karti.html`.
@@ -27,7 +27,7 @@ const KAYNAKLAR = [{ kod: 1, ad: 'Hekim' }, { kod: 2, ad: 'Hasta beyanı' }, { k
                    { kod: 4, ad: 'Dış kurum' }];
 
 const gun = (v: unknown) => metne(v).slice(0, 10);
-const bugun = () => new Date().toISOString().slice(0, 10);
+const bugun = () => yerelGun(new Date());
 
 interface Deger {
   hastaId: number; icdKod: string; taniAd: string; baslangic: string; bitis: string;

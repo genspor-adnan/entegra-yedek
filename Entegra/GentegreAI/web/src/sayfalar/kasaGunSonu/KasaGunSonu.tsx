@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { GunSonu } from '../../api/uclar/kasaGunSonu';
-import { para, paraYaz } from '../../bilesenler/bicim';
+import { para, paraYaz, yerelGun } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -29,7 +29,7 @@ export function KasaGunSonu() {
   const [arama, setArama] = useSearchParams();
   const git = useNavigate();
   const { kullanici, yetki } = useOturum();
-  const dun = gunKaydir(new Date().toISOString().slice(0, 10), -1);
+  const dun = gunKaydir(yerelGun(new Date()), -1);
   const tarih = arama.get('tarih') ?? dun;
   const [veri, setVeri] = useState<GunSonu | null>(null);
   const [hata, setHata] = useState('');

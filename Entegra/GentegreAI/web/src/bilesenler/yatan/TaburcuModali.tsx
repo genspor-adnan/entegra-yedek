@@ -7,7 +7,7 @@ import type {
 import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
-import { paraYaz } from '../bicim';
+import { paraYaz, yerelGun } from '../bicim';
 import { c } from '../../dil/ceviri';
 
 /**
@@ -171,7 +171,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
     setHata('');
     setKaydediyor(true);
     try {
-      await api.yatisTaburcuPlanla(yatisId, new Date().toISOString().slice(0, 10));
+      await api.yatisTaburcuPlanla(yatisId, yerelGun(new Date()));
       mesaj('Taburcu planlandı — yatak panosunda "bugün çıkacak" görünür.');
       onTamam?.();
       onKapat();

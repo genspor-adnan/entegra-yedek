@@ -6,6 +6,7 @@ import type { SterilAyar, SterilKurallar } from '../../api/uclar/steril';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { Al, SonucRozeti, tarih } from './ortak';
+import { yerelGun } from '../../bilesenler/bicim';
 
 /**
  * TEST TAKVİMİ · KURALLAR `/steril-ayar` (868) — mockup dis_steril_cihaz_ayarlar.html.
@@ -54,7 +55,7 @@ export function SterilAyarlar() {
       )}
       {sekme === 'test' && (
         <section className="fm-bolum" style={{ margin: '0 20px' }}>
-          <div className="st-takvim">{y.takvim.map(t => { const bugun = t.gun.slice(0, 10) === new Date().toISOString().slice(0, 10); return (
+          <div className="st-takvim">{y.takvim.map(t => { const bugun = t.gun.slice(0, 10) === yerelGun(new Date()); return (
             <div key={t.gun} className={`g${bugun ? ' bugun' : ''}`}><span className="gn">{new Date(t.gun).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}</span>
               {t.dongu > 0 && <span className="t pl">{t.dongu} döngü</span>}
               {t.bd > 0 && <span className="t ok">BD ✓ ×{t.bd}</span>}{t.bdKaldi > 0 && <span className="t kir">BD kaldı</span>}

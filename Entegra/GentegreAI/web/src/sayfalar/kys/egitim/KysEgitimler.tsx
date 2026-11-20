@@ -7,6 +7,7 @@ import { useOturum } from '../../../kimlik/OturumBaglami';
 import { c } from '../../../dil/ceviri';
 import { DuzenleSilDugmeleri, silOnayi } from '../kysSecim';
 import { h as kacis } from '../../../bilesenler/htmlGuvenlik';
+import { yerelGun } from '../../../bilesenler/bicim';
 
 /**
  * KURUMSAL KALİTE — EĞİTİM & YETKİNLİK (1065, mockup Ekranlar/Kalite2/egitim.html).
@@ -20,7 +21,7 @@ const tarih = (s: unknown) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? ''));
   return m ? `${m[3]}.${m[2]}.${m[1]}` : '';
 };
-const bugun = new Date().toISOString().slice(0, 10);
+const bugun = yerelGun(new Date());
 
 export function KysEgitimler() {
   const git = useNavigate();

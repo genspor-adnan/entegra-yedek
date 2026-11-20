@@ -1,11 +1,12 @@
 import type { HastaIcmali, IcmalTahsilat } from '../../../api/uclar/hastaIcmal';
+import { yerelGun } from '../../../bilesenler/bicim';
 
 /** Hasta icmalinin saf yardımcıları - ekran çizmez, test edilir. */
 
 export const tarihKisa = (t: string | null | undefined) =>
   (t ? new Date(t).toLocaleDateString('tr-TR') : '—');
 
-export const isoGun = (d: Date) => d.toISOString().slice(0, 10);
+export const isoGun = (d: Date) => yerelGun(d);
 
 /** Ödeme rozeti: kasa hesabının türünden (K nakit, P POS, B banka). */
 export function odemeRozeti(t: IcmalTahsilat): { ad: string; renk: string } {

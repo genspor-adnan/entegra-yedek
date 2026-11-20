@@ -1,6 +1,7 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
+import { yerelGun } from '../../bilesenler/bicim';
 
 /**
  * YATAN HASTA AKSİYONLARI (695) — yatışın yaşam döngüsü.
@@ -67,7 +68,7 @@ export async function yatanAksiyonu(
     if (!await onay('Taburcu bugün için planlansın mı? '
                       + 'Yatak panosunda "bugün çıkacak" olarak işaretlenir.')) return true;
     await guvenli(async () => {
-      await api.yatisTaburcuPlanla(yatisId, new Date().toISOString().slice(0, 10));
+      await api.yatisTaburcuPlanla(yatisId, yerelGun(new Date()));
       mesaj('Taburcu planlandı.');
       b.tazele();
     });
@@ -158,7 +159,7 @@ export async function yatanAksiyonu(
     const ham = String(satir?.tarih ?? '');
     const gun = /^\d{4}-\d{2}-\d{2}/.test(ham)
       ? ham.slice(0, 10)
-      : new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      : yerelGun(new Date(Date.now() - 864e5));
     await guvenli(async () => {
       const y = await api.tahakkukHesapla(gun);
       mesaj(y.mesaj || 'Tahakkuk çalıştırıldı.');

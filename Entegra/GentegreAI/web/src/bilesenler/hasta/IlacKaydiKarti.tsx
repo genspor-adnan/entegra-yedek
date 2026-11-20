@@ -5,7 +5,7 @@ import { Modal } from '../Modal';
 import { KaynakArama } from '../KaynakArama';
 import { guvenli, onay } from '../mesaj';
 import { c } from '../../dil/ceviri';
-import { sayiya, metne } from '../bicim';
+import { sayiya, metne, yerelGun } from '../bicim';
 
 /**
  * KULLANILAN İLAÇ KARTI — mockup `Ekranlar/Muayene/kullanilan_ilac_karti.html`.
@@ -23,7 +23,7 @@ const UYUMLAR = [{ kod: 1, ad: 'Düzenli', sinif: 'u1' }, { kod: 2, ad: 'Aralık
                  { kod: 3, ad: 'Bırakmış', sinif: 'u3' }];
 
 const gun = (v: unknown) => metne(v).slice(0, 10);
-const bugun = () => new Date().toISOString().slice(0, 10);
+const bugun = () => yerelGun(new Date());
 const kucuk = (s: string) => s.toLocaleLowerCase('tr');
 
 interface Deger {

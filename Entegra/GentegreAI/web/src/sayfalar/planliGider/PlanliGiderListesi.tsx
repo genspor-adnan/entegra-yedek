@@ -6,7 +6,7 @@ import {
   type PlanliGiderKarti, type PlanliGiderListeSuzgeci, type PlanliGiderListesi as Veri, type PlanliGiderSatiri,
   type PlanliGiderTakvimi,
 } from '../../api/uclar/planliGider';
-import { para } from '../../bilesenler/bicim';
+import { para, yerelGun } from '../../bilesenler/bicim';
 import { CiktiMenusu } from '../../bilesenler/cikti/CiktiMenusu';
 import { IcmalAntet } from '../../bilesenler/cikti/IcmalAntet';
 import { mesaj, onay } from '../../bilesenler/mesaj';
@@ -147,7 +147,7 @@ export function PlanliGiderListesi() {
               onClick={() => void eslestir()}>🔗 Eşleştir</button>}
             <span className="pg-sepv" />
             <button type="button" className="d" onClick={() => git('/nakit-akis-icmali')}>📊 Nakit Akış İcmali</button>
-            <CiktiMenusu etiket="Planlı Giderler" dosyaAdi={`Planlı Giderler ${new Date().toISOString().slice(0, 10)}`} devre={!veri}>
+            <CiktiMenusu etiket="Planlı Giderler" dosyaAdi={`Planlı Giderler ${yerelGun(new Date())}`} devre={!veri}>
               {veri && <ListeA4 v={veri} antet={antet} duzenleyen={kullanici?.ad ?? ''} />}
             </CiktiMenusu>
             <span className="pg-sp" />

@@ -8,7 +8,7 @@ import { ApiHatasi } from '../../api/sozlesme';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { TarafSecici } from '../../bilesenler/TarafArama';
-import { para, tarihSaat } from '../../bilesenler/bicim';
+import { para, tarihSaat, yerelGun } from '../../bilesenler/bicim';
 import { c } from '../../dil/ceviri';
 import { useEscIleKapat } from '../../bilesenler/Modal';
 import { DIS_HAKEDIS_KURAL } from '../../bilesenler/dis/disKodlari';
@@ -72,7 +72,7 @@ export function DisSeansKarti() {
   const paketleriYukle = useCallback(async () => {
     const sn = kart?.seans; if (!sn) return;
     try {
-      const bugun = new Date().toISOString().slice(0, 10);
+      const bugun = yerelGun(new Date());
       const y = sn.belgeId ? await api.sterilIzleme({ belgeId: sn.belgeId }) : await api.sterilIzleme({ tarafId: sn.hastaId, bas: bugun, bit: bugun });
       setPaketler(y.satirlar);
     } catch { setPaketler([]) /* steril modülü / yetkisi yoksa kutu boş kalır */ }

@@ -5,6 +5,7 @@ import { api } from '../../api/istemci';
 import type { UtsMesaji } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { c } from '../../dil/ceviri';
+import { yerelGun } from '../bicim';
 
 /**
  * ÜTS ELLE BİLDİRİM FORMLARI (225, Faz 2) - belge köprüsünden gelmeyen tekil
@@ -90,7 +91,7 @@ export function UtsKullanimModali({ onKapat, onTamam }: {
   const [seriNo, setSeriNo] = useState('');
   const [lotNo, setLotNo] = useState('');
   const [adet, setAdet] = useState('1');
-  const [git, setGit] = useState(new Date().toISOString().slice(0, 10));
+  const [git, setGit] = useState(yerelGun(new Date()));
   const [hastaTckn, setHastaTckn] = useState('');
   const [hastaAdi, setHastaAdi] = useState('');
   const [hastaSoyadi, setHastaSoyadi] = useState('');

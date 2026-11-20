@@ -9,6 +9,7 @@ import { MenuIkon, menuSatirlariKur, GRUP_IKON, GRUP_IKON_CEV, type MenuSatiri }
 import { DUGUM } from './kabuk/menuDuzenHarita';
 import { grupKodu, ogeKoduBaglamli, cakisanKaynaklar, MENU_DUZEN_OLAYI,
          type MenuDuzenSatiri } from './kabuk/menuDuzeni';
+import { yerelGun } from '../bilesenler/bicim';
 
 /**
  * MENÜ DÜZENİ (979, mockup `Ekranlar/Ayarlar/menu_duzenleme_v2.html`).
@@ -470,8 +471,7 @@ export function MenuDuzeni({ gomulu, kaydetBagla }: {
     const url = URL.createObjectURL(dosya);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `menu-duzeni-${paket.subeAd || subeId}-${new Date()
-      .toISOString().slice(0, 10)}.json`;
+    a.download = `menu-duzeni-${paket.subeAd || subeId}-${yerelGun(new Date())}.json`;
     a.click();
     URL.revokeObjectURL(url);
     setMesaj(c('Dışa aktarıldı') + ` · ${duzen.length} ${c('satır')}`);

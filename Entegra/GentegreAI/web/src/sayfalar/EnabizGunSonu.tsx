@@ -3,7 +3,7 @@ import { api } from '../api/istemci';
 import type { AySonuSatiri, GunSonuPanosu } from '../api/uclar/enabiz';
 import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
-import { gunNokta, tarihSaat } from '../bilesenler/bicim';
+import { gunNokta, tarihSaat, yerelGun } from '../bilesenler/bicim';
 import { c as cev } from '../dil/ceviri';
 
 /**
@@ -25,7 +25,7 @@ export function EnabizGunSonu() {
   const [veri, setVeri] = useState<GunSonuPanosu | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [tarih, setTarih] = useState(() =>
-    new Date(Date.now() - 86400000).toISOString().slice(0, 10));
+    yerelGun(new Date(Date.now() - 86400000)));
   const [acikGun, setAcikGun] = useState<number | null>(null);
   const [satirlar, setSatirlar] = useState<{ skrsKod: number; ad: string; sayi: number }[]>([]);
   // AY SONU (885): 408 aynı ölçütleri KLİNİK kırılımıyla ister.

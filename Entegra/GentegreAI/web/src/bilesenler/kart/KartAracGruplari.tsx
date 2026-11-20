@@ -15,6 +15,7 @@ import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from '../mesaj';
 import { RandevuErtelePenceresi } from '../RandevuErtelePenceresi';
 import { RandevuSeriPenceresi } from '../RandevuSeriPenceresi';
 import { DevirPenceresi } from '../../sayfalar/cari/CariDevirPenceresi';
+import { yerelGun } from '../bicim';
 
 /**
  * KART ARAÇ ÇUBUĞU - KAYNAĞA ÖZEL GRUPLAR (refaktör 22.10.2026, GenForm'dan ayrıldı).
@@ -157,7 +158,7 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
   const ozluk = (b.detaylar.ozluk?.guncel[0] ?? {}) as Record<string, unknown>;
   // Belge geçerliliği dolmuş: kimlik alanında uyarı rozeti (mockup ②; kayıt engellenmez).
   const belgeSkt = String(ozluk.belgeSonKullanma ?? '').slice(0, 10);
-  const belgeDolmus = !!belgeSkt && belgeSkt < new Date().toISOString().slice(0, 10);
+  const belgeDolmus = !!belgeSkt && belgeSkt < yerelGun(new Date());
   const uyrukAdlari = b.meta.detaylar.find(d => d.ad === 'ozluk')?.alanlar.find(a => a.ad === 'uyruk')?.kodlar ?? undefined;
   /** MÜSTEHAKLIK SORGUSU (MEDULA): kayıtlı hastada; sonuç mesajla. */
   const mustehaklikSorgula = async () => {

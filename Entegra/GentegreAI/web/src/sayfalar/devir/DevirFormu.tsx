@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { api } from '../../api/istemci';
 import { ApiHatasi, hataMetni } from '../../api/sozlesme';
 import type { Devir, DevirGirdisi, DevirTuru } from '../../api/uclar/devir';
-import { para, tutarOku } from '../../bilesenler/bicim';
+import { para, tutarOku, yerelGun } from '../../bilesenler/bicim';
 import { mesaj, onay } from '../../bilesenler/mesaj';
 import { c } from '../../dil/ceviri';
 import { tarihKisa } from '../hasta/icmal/icmalOrtak';
@@ -26,8 +26,8 @@ export type Satir = { belgeNo: string; belgeTarihi: string; vade: string; tutar:
 export const bosSatir = (doviz = 'TL'): Satir => ({ belgeNo: '', belgeTarihi: '', vade: '', tutar: '', doviz, kur: '', aciklama: '', ters: false });
 const iso = (t: string | null | undefined) => (t ? t.slice(0, 10) : '');
 const sayiMetni = (n: number) => n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-const ekleGun = (t: string, g: number) => { const d = new Date(t + 'T00:00:00'); d.setDate(d.getDate() + g); return d.toISOString().slice(0, 10) };
-const bugun = () => new Date().toISOString().slice(0, 10);
+const ekleGun = (t: string, g: number) => { const d = new Date(t + 'T00:00:00'); d.setDate(d.getDate() + g); return yerelGun(d) };
+const bugun = () => yerelGun(new Date());
 
 /** "18.11.2025" / "2025-11-18" -> yyyy-mm-dd; olmazsa ''. */
 export function tarihOku(m: string): string {

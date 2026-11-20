@@ -1,5 +1,5 @@
 import type { DokumBaski, DokumKolonMeta, DokumTanimi, ListeYaniti, OzetYaniti } from '../../api/sozlesme';
-import { tarihSaat } from '../../bilesenler/bicim';
+import { tarihSaat, yerelGun } from '../../bilesenler/bicim';
 import { KURAL_ETIKET, bosBaski, parametreAlanlari, tanimCumlesi, yonOnerisi } from './ortak';
 import { CubukGrafik, ListeSonucu, OzetGostergeler, OzetSonucu, ozetMi } from './SonucTablosu';
 import { AntetLogo } from '../../bilesenler/AntetLogo';
@@ -148,7 +148,7 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           )}
           {b.imza && (
             <div className="dk-imzalar">
-              <div><b>Hazırlayan</b>{kullaniciAdi} · {gunTr(simdi.toISOString().slice(0, 10))}</div>
+              <div><b>Hazırlayan</b>{kullaniciAdi} · {gunTr(yerelGun(simdi))}</div>
               <div><b>{c('Kontrol')}</b></div>
               <div><b>{c('Onaylayan')}</b></div>
             </div>

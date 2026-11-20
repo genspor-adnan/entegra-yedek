@@ -9,6 +9,7 @@ import { guvenli, mesaj, onay } from '../../../bilesenler/mesaj';
 import { useEscIleKapat } from '../../../bilesenler/Modal';
 import { c } from '../../../dil/ceviri';
 import { DokumanGalerisi } from '../../../bilesenler/DokumanGalerisi';
+import { yerelGun } from '../../../bilesenler/bicim';
 
 /**
  * KURUMSAL KALİTE — EĞİTİM KAYDI KARTI (1056) — mockup `Ekranlar/Kalite2/egitim.html`
@@ -33,7 +34,7 @@ export function KysEgitimKarti() {
   const id = yeni ? 0 : Number(param ?? 0);
   const [ad, setAd] = useState('');
   const [tur, setTur] = useState(3);
-  const [tarih, setTarih] = useState(() => new Date().toISOString().slice(0, 10));
+  const [tarih, setTarih] = useState(() => yerelGun(new Date()));
   const [egitmen, setEgitmen] = useState('');
   const [gecerlilik, setGecerlilik] = useState('');
   const [kisiler, setKisiler] = useState<Kisi[]>([]);

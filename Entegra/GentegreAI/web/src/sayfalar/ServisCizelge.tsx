@@ -5,6 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import type { ServisCizelgesi, CizelgeZiyareti } from '../api/uclar/servis';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { c as cev } from '../dil/ceviri';
+import { yerelGun } from '../bilesenler/bicim';
 
 /**
  * TEKNİSYEN ÇİZELGESİ (775) — mockup `Ekranlar/TeknikServis/teknik_servis_saha.html`
@@ -36,7 +37,7 @@ const saatYaz = (d: string) =>
 
 export function ServisCizelge() {
   const git = useNavigate();
-  const [tarih, setTarih] = useState(() => new Date().toISOString().slice(0, 10));
+  const [tarih, setTarih] = useState(() => yerelGun(new Date()));
   const [veri, setVeri] = useState<ServisCizelgesi | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [secili, setSecili] = useState<CizelgeZiyareti | null>(null);
@@ -78,7 +79,7 @@ export function ServisCizelge() {
   const gunDegis = (fark: number) => {
     const d = new Date(tarih + 'T00:00:00');
     d.setDate(d.getDate() + fark);
-    setTarih(d.toISOString().slice(0, 10));
+    setTarih(yerelGun(d));
   };
 
   return (
@@ -95,7 +96,7 @@ export function ServisCizelge() {
           <button className="d" onClick={() => gunDegis(-1)}>‹ Önceki gün</button>
           <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />
           <button className="d" onClick={() => gunDegis(1)}>{cev('Sonraki gün ›')}</button>
-          <button className="d" onClick={() => setTarih(new Date().toISOString().slice(0, 10))}>
+          <button className="d" onClick={() => setTarih(yerelGun(new Date()))}>
             Bugün
           </button>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}>
