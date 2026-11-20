@@ -95,6 +95,10 @@ export const raporGonderimUclari = {
     istek<{ ayar: RaporGonderimAyari; kurallar: RaporGonderimKurali[]; degistirebilir: boolean }>('/api/radyoloji/rapor-gonderim/ayar'),
   raporGonderimAyariYaz: (govde: RaporGonderimAyari & { kurallar: RaporGonderimKurali[] }) =>
     gonder<{ tamam: boolean }>('/api/radyoloji/rapor-gonderim/ayar', govde, 'PUT'),
+  /** Kural grid'inin Kod / Kategori seçenekleri: radyoloji tetkikleri + lab testleri ve kategorileri (sınırsız). */
+  raporGonderimSecenekleri: () =>
+    istek<{ tetkikler: { id: number; kod: string; ad: string; kategori: number | null; tur: number }[];
+            kategoriler: { id: number; ad: string; ustAd: string }[] }>('/api/radyoloji/rapor-gonderim/secenekler'),
   raporGonderimleri: (istemId: number) => istek<RaporGonderimIstemYaniti>(`/api/radyoloji/rapor-gonderim/istem/${istemId}`),
   raporGonder: (id: number, borcaRagmen = false) =>
     gonder<{ durum: number }>(`/api/radyoloji/rapor-gonderim/${id}/gonder`, { borcaRagmen }),

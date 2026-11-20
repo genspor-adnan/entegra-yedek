@@ -46,26 +46,16 @@ export function RaporGonderimAyari() {
   }, []);
   useEffect(() => { void yukle() }, [yukle]);
 
-  // Tetkik ve kategori seçenekleri: radyoloji tetkikleri (modalitesi olan hizmetler) ve onların kategorileri.
+  // Tetkik ve kategori seçenekleri: radyoloji tetkikleri + laboratuvar testleri ve kategorileri (üstleriyle). Sunucudan
+  //   tek uçla, SINIRSIZ gelir - hizmet listesinden türetmek 500 satır sınırına takılıp lab kategorilerini düşürüyordu.
   useEffect(() => {
     let iptal = false;
-    Promise.all([
-      // Radyoloji tetkikleri (modalitesi olan) + laboratuvar testleri (lab tetkiğine bağlı hizmetler) - TEK tablo (1394).
-      api.liste('hizmet', { sayfa: 1, boyut: 5000, filtre: { op: 'or', kosullar: [
-        { alan: 'modalite', op: 'buyuk', deger: 0 }, { alan: 'labVarMi', op: 'esit', deger: 1 }] } }),
-      api.liste('kategori', { sayfa: 1, boyut: 2000 }),
-    ]).then(([h, k]) => {
+    api.raporGonderimSecenekleri().then(y => {
       if (iptal) return;
-      const t = h.satirlar.map(s => ({ id: Number(s.id), kod: String(s.kod ?? ''), ad: String(s.ad ?? ''),
-                                       kategori: s.kategori == null ? null : Number(s.kategori) }))
-        .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
-      setTetkikler(t);
-      const ust = new Map(k.satirlar.map(s => [Number(s.id), s.ustId == null ? null : Number(s.ustId)]));
-      // Tetkiklerin kategorileri + üstleri (üst kategoriye de kural yazılabilir).
-      const kullanilan = new Set<number>();
-      for (const x of t) { let id = x.kategori; let n = 0; while (id != null && !kullanilan.has(id) && n++ < 20) { kullanilan.add(id); id = ust.get(id) ?? null } }
-      setKategoriler(k.satirlar.filter(s => kullanilan.has(Number(s.id)))
-        .map(s => ({ id: Number(s.id), ad: String(s.ad ?? '') })).sort((a, b) => a.ad.localeCompare(b.ad, 'tr')));
+      setTetkikler(y.tetkikler.map(t => ({ id: Number(t.id), kod: String(t.kod ?? ''), ad: String(t.ad ?? ''),
+                                           kategori: t.kategori == null ? null : Number(t.kategori) })));
+      setKategoriler(y.kategoriler.map(k => ({ id: Number(k.id), ad: k.ustAd ? `${k.ustAd} › ${k.ad}` : String(k.ad ?? '') }))
+        .sort((a, b) => a.ad.localeCompare(b.ad, 'tr')));
     }).catch(() => { /* seçenek listesi okunamadı: mevcut kurallar yine görünür */ });
     return () => { iptal = true };
   }, []);

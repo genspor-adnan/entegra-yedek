@@ -196,6 +196,39 @@ public static class RaporGonderimUclari
         // ------------------------------------------------------------------------------------------ gönder / iptal --
         grup.MapPost("/lab-teslim", LabTeslimAsync);
 
+        // KURAL SEÇENEKLERİ (kullanıcı 20.11.2026: "kategori seçtiğimde sadece radyoloji kategorileri geliyor"):
+        //   kural grid'inin Kod / Kategori listeleri. Hizmet listesinden türetmek sayfa sınırına (500) takılıyordu -
+        //   radyoloji tetkikleri sınırı doldurunca lab testleri ve kategorileri dışarıda kalıyordu. Burada sınır yok:
+        //   radyoloji tetkikleri (modalitesi olan hizmet) + laboratuvar testleri (lab tetkiğine / paneline bağlı hizmet)
+        //   ve bunların kategorileri ÜST kategorileriyle (üst kategoriye de kural yazılabilir).
+        grup.MapGet("/secenekler", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            AyarYetkiIste(baglam, Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            const string hizmetler = """
+                select h.id, coalesce(h.kod, '') as kod, coalesce(h.ad, '') as ad, h.kategori,
+                       case when coalesce(h.modalite, 0) > 0 then 1 else 2 end as tur
+                  from public.hizmet h
+                 where (coalesce(h.modalite, 0) > 0
+                        or exists (select 1 from public.lab_tetkik t where t.hizmet_id = h.id)
+                        or exists (select 1 from public.lab_panel p where p.hizmet_id = h.id))
+                """;
+            var tetkikler = await b.ListeAsync(hizmetler + " order by ad", null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+            var kategoriler = await b.ListeAsync($"""
+                with recursive hz as ({hizmetler}),
+                z as (select k.id, k.ad, k.ust_id, 0 as d from public.kategori k where k.id in (select kategori from hz)
+                      union
+                      select k.id, k.ad, k.ust_id, z.d + 1 from public.kategori k join z on k.id = z.ust_id where z.d < 20)
+                select distinct z.id, coalesce(z.ad, '') as ad,
+                       -- Tür: kategorinin (alt kategorileri dahil) tetkikleri radyoloji mi lab mı (1 / 2 / 3 ikisi).
+                       coalesce(u.ad, '') as "ustAd"
+                  from z left join public.kategori u on u.id = z.ust_id
+                 order by 2
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+            return Results.Ok(new { tetkikler, kategoriler });
+        });
+
         grup.MapPost("/{id:int}/gonder", async (int id, GonderIstegi? istek, BaglamCozucu cozucu, KayitErisimi erisim,
                                                 VeriKaynagi veri, RaporGonderimi servis, HttpContext ctx, CancellationToken iptal) =>
         {
