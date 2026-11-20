@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radyoloji Raporu — Hasta görüntüleme sayfası: karekod / SMS bağlantısı, doğrulama, e-imza paneli (mockup)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --ok:#2e7d46; --okzem:#e2f3e8; --hata:#c0392b; --hatazem:#fdeceb; --uyari:#a9791a; --uyarizem:#fbf3df;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12.5px;padding:14px}
+  h2{font-size:13px;color:var(--muted);font-weight:normal;margin:22px auto 6px;max-width:1240px;letter-spacing:.3px}
+  h2 b{color:var(--navy)}
+  .ipucu{font-size:11px;color:var(--accent);margin-left:8px}
+  .aciklama{max-width:1240px;margin:6px auto 0;color:var(--muted);font-size:11.5px;line-height:1.6}
+  .aciklama b{color:var(--ink)}
+  .yan{max-width:1240px;margin:0 auto;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+
+  /* ---------- tarayıcı / telefon çerçevesi ---------- */
+  .tarayici{max-width:1240px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .adres{display:flex;gap:8px;align-items:center;padding:6px 10px;background:#e9eef4;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .adres .url{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px 10px;color:var(--ink);font-family:Consolas,monospace}
+  .adres .kilit{color:var(--ok)}
+  .telefon{width:330px;flex:0 0 330px;background:#1c2530;border-radius:28px;padding:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  .telefon .ekran{background:var(--card);border-radius:20px;overflow:hidden;min-height:560px;display:flex;flex-direction:column}
+  .telefon .adres{font-size:10px;padding:5px 8px}
+
+  /* ---------- sayfa üst bandı (kurum) ---------- */
+  .ust{display:flex;gap:10px;align-items:center;padding:10px 14px;background:linear-gradient(#ffffff,#f6f9fc);border-bottom:1px solid var(--line2)}
+  .logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#3b7cc4,#14315a);color:#fff;display:grid;place-items:center;font-weight:bold;font-size:14px;flex:0 0 auto}
+  .kurum{min-width:0}
+  .kurum b{display:block;color:var(--navy);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kurum span{color:var(--muted);font-size:11px}
+  .ust .sag{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:4px;padding:6px 11px;font-size:12px;color:var(--ink);cursor:pointer;white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+  .btn.bir{background:linear-gradient(#3b7cc4,#2f6db3);color:#fff;border-color:#2a5f9c}
+  .btn.genis{width:100%;justify-content:center;padding:9px}
+  .rozet{display:inline-block;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:bold}
+  .rozet.ok{background:var(--okzem);color:var(--ok);border:1px solid #bfe3cb}
+  .rozet.kir{background:var(--hatazem);color:var(--hata);border:1px solid #f6d3d1}
+  .rozet.sari{background:var(--uyarizem);color:var(--uyari);border:1px solid #ecd9a6}
+
+  /* ---------- doğrulama adımı ---------- */
+  .dogrula{padding:22px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .dogrula h3{margin:0;font-size:16px;color:var(--navy)}
+  .dogrula p{margin:0;color:var(--muted);line-height:1.5}
+  .kisi{border:1px solid var(--line2);border-radius:6px;background:#fbfcfd;padding:9px 11px}
+  .kisi small{display:block;color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase}
+  .kisi b{font-size:13.5px;color:var(--ink)}
+  .alan label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+  .inp{border:1px solid var(--line);border-radius:4px;background:#fff;height:38px;padding:0 10px;font-size:16px;display:flex;align-items:center;letter-spacing:4px;color:var(--ink)}
+  .inp .ph{color:#b7c2cd;letter-spacing:4px}
+  .secenekler{display:flex;gap:6px}
+  .secenek{flex:1;border:1px solid var(--line);border-radius:4px;padding:7px 6px;text-align:center;font-size:11.5px;background:#fff}
+  .secenek.on{border-color:var(--accent);background:#f3f8ff;color:var(--accent);font-weight:bold}
+  .not{font-size:11px;color:var(--muted);border-top:1px dashed var(--line2);padding-top:10px;margin-top:auto;line-height:1.5}
+  .hatakutu{background:var(--hatazem);border:1px solid #f6d3d1;color:#8f2c22;border-radius:5px;padding:8px 10px;font-size:11.5px}
+
+  /* ---------- rapor sayfası: sol imza paneli + sağ rapor ---------- */
+  .govde{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:560px}
+  .panel{background:#f7f9fc;border-right:1px solid var(--line2);padding:12px;display:flex;flex-direction:column;gap:10px}
+  .kutu{background:#fff;border:1px solid var(--line2);border-radius:6px;padding:9px 11px}
+  .kutu h4{margin:0 0 6px;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:normal;display:flex;align-items:center;gap:6px}
+  .gecerli{border-color:#bfe3cb;background:linear-gradient(#f4fbf6,#fff)}
+  .gecerli .buyuk{display:flex;gap:9px;align-items:center}
+  .gecerli .tik{width:34px;height:34px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+  .gecerli b{color:var(--ok);font-size:13.5px}
+  .gecerli span{display:block;color:var(--muted);font-size:11px}
+  .satir{display:grid;grid-template-columns:96px 1fr;gap:6px;padding:3px 0;font-size:11.5px;border-top:1px dotted var(--line2)}
+  .satir:first-of-type{border-top:0}
+  .satir span{color:var(--muted)}
+  .satir b{color:var(--ink);font-weight:600;word-break:break-word}
+  .satir b.mono{font-family:Consolas,monospace;font-size:10.5px;font-weight:normal}
+  .panel .btn{justify-content:center}
+  .panel .kucuk{font-size:10.5px;color:var(--muted);line-height:1.5}
+
+  .rapor{padding:18px 26px 26px;background:#fff;min-width:0}
+  .rapor .bant{display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:10px}
+  .rapor .bant b{font-size:15px;color:var(--navy);letter-spacing:.5px}
+  .rapor .bant span{color:var(--muted);font-size:11px;text-align:right}
+  .bilgi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px;font-size:11.5px;background:#f7f9fc;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;margin-bottom:12px}
+  .bilgi span{color:var(--muted)} .bilgi b{font-weight:600}
+  .rapor h5{margin:12px 0 4px;font-size:12px;color:var(--navy);letter-spacing:.4px;text-transform:uppercase}
+  .rapor p{margin:0 0 6px;line-height:1.65;font-size:12.5px}
+  .imzablok{margin-top:18px;display:flex;justify-content:flex-end}
+  .imzablok div{text-align:center;border-top:1px solid var(--line);padding-top:6px;min-width:220px;font-size:11.5px}
+  .imzablok small{display:block;color:var(--ok);font-weight:bold;margin-top:2px}
+  .sekme{display:flex;gap:2px;padding:0 12px;background:#e9eef4;border-bottom:1px solid var(--line)}
+  .sekme div{padding:7px 14px;font-size:12px;background:#e1e8f0;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
+  .sekme div.on{background:#fff;color:var(--navy);font-weight:bold}
+
+  /* ---------- mobil rapor ---------- */
+  .m-imza{margin:10px;border:1px solid #bfe3cb;background:linear-gradient(#f4fbf6,#fff);border-radius:6px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+  .m-imza .tik{width:28px;height:28px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;flex:0 0 auto}
+  .m-imza b{color:var(--ok);font-size:12.5px} .m-imza span{display:block;color:var(--muted);font-size:10.5px}
+  .m-imza .ok{margin-left:auto;color:var(--accent);font-size:11px;white-space:nowrap}
+  .m-rapor{padding:4px 12px 12px;font-size:12px;flex:1}
+  .m-rapor h5{margin:10px 0 3px;font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.4px}
+  .m-rapor p{margin:0 0 5px;line-height:1.6}
+  .m-alt{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line2);background:#f7f9fc}
+  .m-alt .btn{flex:1;justify-content:center;font-size:11.5px;padding:7px 4px}
+
+  /* ---------- kâğıt çıktı köşesi + SMS ---------- */
+  .kagit{width:520px;background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.1);padding:22px 26px;position:relative;min-height:330px}
+  .kagit .bant{display:flex;justify-content:space-between;border-bottom:2px solid var(--navy);padding-bottom:6px;margin-bottom:8px}
+  .kagit .bant b{color:var(--navy);font-size:13px}
+  .kagit p{font-size:11px;line-height:1.6;margin:0 0 5px;color:#44525f}
+  .qrkose{position:absolute;right:22px;bottom:18px;display:flex;gap:9px;align-items:center;border:1px solid var(--line2);border-radius:5px;padding:7px 9px;background:#fff}
+  .qr{width:74px;height:74px;flex:0 0 auto;background:
+      linear-gradient(90deg,#000 14%,transparent 14% 28%,#000 28% 42%,transparent 42% 57%,#000 57% 71%,transparent 71% 85%,#000 85%) 0 0/100% 14%,
+      conic-gradient(#000 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/22% 22%;
+      border:5px solid #fff;outline:1px solid #000;image-rendering:pixelated}
+  .qrkose div{font-size:10px;color:var(--muted);line-height:1.45;max-width:150px}
+  .qrkose b{display:block;color:var(--ink);font-size:10.5px}
+  .sms{width:300px;background:#1c2530;border-radius:22px;padding:14px 12px}
+  .sms .kim{color:#9fb0c2;font-size:11px;text-align:center;margin-bottom:8px}
+  .balon{background:#e9eef4;border-radius:14px 14px 14px 4px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--ink)}
+  .balon a{color:var(--accent);word-break:break-all}
+  .sms .saat{color:#9fb0c2;font-size:10px;margin-top:4px}
+
+  .durum{padding:36px 18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;flex:1;justify-content:center}
+  .durum .ikon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:26px}
+  .durum h3{margin:0;font-size:15px;color:var(--navy)}
+  .durum p{margin:0;color:var(--muted);line-height:1.5;max-width:260px}
+  @media (max-width:860px){ .govde{grid-template-columns:1fr} .panel{border-right:0;border-bottom:1px solid var(--line2)} }
+</style>
+</head>
+<body>
+
+<!-- ================================================================== 1 -->
+<h2><b>1</b> — Hastaya giden: kâğıt çıktının köşesindeki karekod ve SMS <span class="ipucu">ikisi de aynı bağlantıyı açar</span></h2>
+<div class="yan">
+  <div class="kagit">
+    <div class="bant"><b>RADYOLOJİ RAPORU</b><span style="font-size:10.5px;color:var(--muted)">Rapor No R-2026-004812</span></div>
+    <p><b>Hasta:</b> Ayşe K*** · 47 y · K &nbsp; <b>Tetkik:</b> Bilateral Mamografi &nbsp; <b>Tarih:</b> 20.11.2026</p>
+    <p><b>Bulgular:</b> Her iki meme parankimi heterojen dens yapıdadır. Sağ meme üst dış kadranda 8 mm çaplı düzgün konturlu nodüler opasite izlenmiştir…</p>
+    <p><b>Sonuç:</b> BI-RADS 3 - muhtemelen benign bulgu. 6 ay sonra kontrol önerilir.</p>
+    <p style="margin-top:16px;color:var(--muted)">…</p>
+    <div class="qrkose">
+      <div class="qr"></div>
+      <div><b>Raporunuzu telefonda görün</b>Karekodu okutun ya da<br><span style="font-family:Consolas,monospace;color:var(--ink)">rapor.kurum.com/r/7KQ2-M9XA</span><br>e-imzalı · 20.12.2026'ya kadar</div>
+    </div>
+  </div>
+  <div class="sms">
+    <div class="kim">GENOTIP · bugün 14:32</div>
+    <div class="balon">Sayın Ayşe K***, 20.11.2026 tarihli <b>Mamografi</b> raporunuz hazır. Görüntülemek için:<br>
+      <a href="#">https://rapor.kurum.com/r/7KQ2-M9XA</a><br>Bağlantı 30 gün geçerlidir. Açarken doğum yılınız sorulur.</div>
+    <div class="saat">SMS · 2 bölüm</div>
+  </div>
+</div>
+<p class="aciklama">
+  Rapor <b>onaylanınca</b> rapora özel, tahmin edilemeyen kısa bir bağlantı üretilir. Çıktının sağ alt köşesine karekod ve okunabilir kısa adres basılır;
+  şube ayarı açıksa aynı bağlantı hastanın cep telefonuna <b>SMS</b> ile gider (metin şube şablonundan). SMS'te ve kâğıtta <b>bulgu / sonuç yazmaz</b> - yalnız tetkik adı ve tarih.
+  Bağlantının son geçerlilik günü çıktıda ve SMS'te görünür.
+</p>
+
+<!-- ================================================================== 2 -->
+<h2><b>2</b> — Bağlantı açılınca: doğrulama adımı <span class="ipucu">telefon görünümü · üç yöntemden biri şube ayarıyla seçilir</span></h2>
+<div class="yan">
+  <div class="telefon"><div class="ekran">
+    <div class="adres"><span class="kilit">🔒</span><span class="url">rapor.kurum.com/r/7KQ2-M9XA</span></div>
+    <div class="ust"><div class="logo">GT</div><div class="kurum"><b>Genotip Görüntüleme Merkezi</b><span>Radyoloji raporu</span></div></div>
+    <div class="dogrula">
+      <h3>Raporunuzu görüntüleyin</h3>
+      <div class="kisi"><small>Rapor</small><b>Mamografi · 20.11.2026</b><br><span style="color:var(--muted);font-size:11.5px">Ayşe K*** adına düzenlenmiştir</span></div>
+      <p>Rapor size ait olduğunu doğrulamak için <b>doğum yılınızı</b> yazın.</p>
+      <div class="alan"><label>Doğum yılı</label><div class="inp"><span class="ph">____</span></div></div>
+      <div class="btn bir genis">Raporu Göster</div>
+      <div class="not">🔒 Bu sayfa yalnız size gönderilen bağlantıyla açılır. Her görüntüleme kayda geçer.
+        Rapor size ait değilse lütfen sayfayı kapatın ve kurumu arayın: <b>0216 000 00 00</b></div>
+    </div>
+  </div></div>
+
+  <div class="telefon"><div class="ekran">
+    <div class="adres"><span class="kilit">🔒</span><span class="url">rapor.kurum.com/r/7KQ2-M9XA</span></div>
+    <div class="ust"><div class="logo">GT</div><div class="kurum"><b>Genotip Görüntüleme Merkezi</b><span>Radyoloji raporu</span></div></div>
+    <div class="dogrula">
+      <h3>Telefonunuza kod gönderdik</h3>
+      <p><b>05** *** 41 10</b> numarasına gelen 6 haneli kodu yazın.</p>
+      <div class="alan"><label>Doğrulama kodu</label><div class="inp">4 8 2<span class="ph"> _ _ _</span></div></div>
+      <div class="btn bir genis">Doğrula</div>
+      <p style="text-align:center;font-size:11.5px">Kod gelmedi mi? <span style="color:var(--accent)">Yeniden gönder (0:42)</span></p>
+      <div class="hatakutu">Kod hatalı. 2 deneme hakkınız kaldı.</div>
+      <div class="not">Seçenek B: tek kullanımlık SMS kodu - karekodu okutan kişi hastanın telefonuna sahip olmalı. En güvenli yöntem; her açılışta bir SMS gider.</div>
+    </div>
+  </div></div>
+
+  <div style="flex:1;min-width:260px">
+    <div class="kutu">
+      <h4>Doğrulama yöntemi (şube ayarı)</h4>
+      <div class="secenekler" style="margin-bottom:8px">
+        <div class="secenek on">Doğum yılı</div><div class="secenek">TC son 4 hane</div><div class="secenek">SMS kodu</div>
+      </div>
+      <div class="satir"><span>Doğum yılı</span><b>En kolay; hasta ezbere bilir. Kâğıdı bulan biri tahmin edebilir (deneme sınırı korur).</b></div>
+      <div class="satir"><span>TC son 4</span><b>Tahmini zor; yabancı hastada pasaport son 4.</b></div>
+      <div class="satir"><span>SMS kodu</span><b>En güvenli; her açılışta SMS maliyeti. Telefonu kayıtlı olmayan hastada kullanılamaz.</b></div>
+    </div>
+    <p class="aciklama" style="margin-top:8px">
+      <b>5 hatalı denemede</b> bağlantı 30 dakika kilitlenir. Doğrulama geçilince aynı telefonda / tarayıcıda 24 saat yeniden sorulmaz.
+      Doğrulamadan önce sayfada yalnız <b>tetkik adı, tarih ve maskeli ad</b> görünür; bulgu ve sonuç görünmez.
+    </p>
+  </div>
+</div>
+
+<!-- ================================================================== 3 -->
+<h2><b>3</b> — Rapor sayfası (bilgisayar): solda e-imza paneli, sağda rapor <span class="ipucu">sekme: Rapor · PDF · İmzalı Asıl Belge</span></h2>
+<div class="tarayici">
+  <div class="adres"><span class="kilit">🔒</span><span class="url">https://rapor.kurum.com/r/7KQ2-M9XA</span></div>
+  <div class="ust">
+    <div class="logo">GT</div>
+    <div class="kurum"><b>Genotip Görüntüleme Merkezi</b><span>Radyoloji raporu · Rapor No R-2026-004812</span></div>
+    <div class="sag"><span class="rozet ok">✔ e-İmzalı</span><div class="btn">⬇ PDF İndir</div><div class="btn">🖨 Yazdır</div></div>
+  </div>
+  <div class="govde">
+    <div class="panel">
+      <div class="kutu gecerli">
+        <div class="buyuk"><div class="tik">✔</div><div><b>İmza geçerli</b><span>Belge imzalandıktan sonra değişmemiştir.</span></div></div>
+      </div>
+      <div class="kutu">
+        <h4>✍ İmzalayan</h4>
+        <div class="satir"><span>Hekim</span><b>Uzm. Dr. Mehmet Yılmaz</b></div>
+        <div class="satir"><span>Branş</span><b>Radyoloji</b></div>
+        <div class="satir"><span>Diploma / Tescil</span><b>123456 / 98765</b></div>
+        <div class="satir"><span>İmza zamanı</span><b>20.11.2026 14:28:07</b></div>
+        <div class="satir"><span>İmza türü</span><b>Nitelikli elektronik imza (XAdES)</b></div>
+      </div>
+      <div class="kutu">
+        <h4>📜 Sertifika</h4>
+        <div class="satir"><span>Sahibi</span><b>MEHMET YILMAZ</b></div>
+        <div class="satir"><span>Veren kurum</span><b>Kamu Sertifikasyon Merkezi (Kamu SM)</b></div>
+        <div class="satir"><span>Geçerlilik</span><b>03.02.2025 – 03.02.2028</b></div>
+        <div class="satir"><span>Seri no</span><b class="mono">4A:1F:9C:22:7B:E0:53</b></div>
+        <div class="satir"><span>İptal durumu</span><b style="color:var(--ok)">İptal edilmemiş <span style="color:var(--muted);font-weight:normal">(20.11.2026 14:28)</span></b></div>
+      </div>
+      <div class="kutu">
+        <h4>🧾 Belge</h4>
+        <div class="satir"><span>Özet (SHA-256)</span><b class="mono">9f2c…a71e&nbsp;·&nbsp;kopyala</b></div>
+        <div class="satir"><span>Bağlantı</span><b>20.12.2026'ya kadar geçerli</b></div>
+      </div>
+      <div class="btn">⬇ İmzalı asıl belgeyi indir (.xml)</div>
+      <div class="kucuk">İmzalı asıl belge hukuken geçerli olandır; e-imza doğrulayan programlarla (örn. kamu doğrulama servisi) ayrıca doğrulanabilir.</div>
+    </div>
+    <div>
+      <div class="sekme"><div class="on">Rapor</div><div>PDF</div><div>İmzalı Asıl Belge</div></div>
+      <div class="rapor">
+        <div class="bant"><b>RADYOLOJİ RAPORU</b><span>Rapor No R-2026-004812<br>Onay: 20.11.2026 14:28</span></div>
+        <div class="bilgi">
+          <div><span>Hasta</span><br><b>Ayşe Kaya</b></div>
+          <div><span>Doğum / Cinsiyet</span><br><b>1979 · Kadın</b></div>
+          <div><span>Protokol No</span><br><b>GT-2026-118204</b></div>
+          <div><span>Tetkik</span><br><b>Bilateral Mamografi</b></div>
+          <div><span>Çekim tarihi</span><br><b>20.11.2026 10:15</b></div>
+          <div><span>İsteyen hekim</span><br><b>Op. Dr. Selin Aydın</b></div>
+        </div>
+        <h5>Klinik bilgi</h5><p>Tarama amaçlı; yakınma yok.</p>
+        <h5>Teknik</h5><p>Her iki memeye yönelik CC ve MLO pozisyonlarında dijital mamografi incelemesi yapılmıştır.</p>
+        <h5>Bulgular</h5>
+        <p>Her iki meme parankimi heterojen dens yapıdadır (ACR tip C). Sağ meme üst dış kadranda 8 mm çaplı, düzgün konturlu nodüler opasite izlenmiştir. Şüpheli mikrokalsifikasyon kümesi, distorsiyon ya da cilt kalınlaşması saptanmamıştır. Aksiller bölgeler olağandır.</p>
+        <h5>Sonuç</h5>
+        <p><b>BI-RADS 3</b> - muhtemelen benign bulgu. 6 ay sonra kontrol mamografi / ultrasonografi önerilir.</p>
+        <div class="imzablok"><div>Uzm. Dr. Mehmet Yılmaz<br>Radyoloji Uzmanı<small>✔ e-imza ile onaylandı · 20.11.2026 14:28</small></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="aciklama">
+  <b>Sol panel</b> imzalı belgenin içinden okunur: imza geçerli mi (belge değişmemiş mi), imzalayan hekim, imza zamanı, sertifika sahibi / veren kurum / geçerlilik / seri no.
+  <b>"İptal durumu"</b> satırı sertifikanın imza anında iptal edilmemiş olduğunu gösterir - bu sorgu bugün yapılmıyor, ayrı iş (yapılmazsa satır çizilmez).
+  <b>Sağda üç sekme:</b> <b>Rapor</b> = imzalı belgedeki rapor metni sayfada (telefonda en rahat okunan); <b>PDF</b> = aynı raporun basılı çıktı görünümü, indirilebilir;
+  <b>İmzalı Asıl Belge</b> = indirilen .xml'in ne olduğu ve nasıl doğrulanacağı. Üstte PDF İndir ve Yazdır.
+</p>
+
+<!-- ================================================================== 4 -->
+<h2><b>4</b> — Rapor sayfası (telefon) ve e-imzasız / geçersiz bağlantı durumları</h2>
+<div class="yan">
+  <div class="telefon"><div class="ekran">
+    <div class="adres"><span class="kilit">🔒</span><span class="url">rapor.kurum.com/r/7KQ2-M9XA</span></div>
+    <div class="ust"><div class="logo">GT</div><div class="kurum"><b>Genotip Görüntüleme Merkezi</b><span>R-2026-004812 · Mamografi</span></div></div>
+    <div class="m-imza"><div class="tik">✔</div><div><b>e-İmzalı · İmza geçerli</b><span>Uzm. Dr. Mehmet Yılmaz · 20.11.2026 14:28</span></div><span class="ok">Ayrıntı ›</span></div>
+    <div class="m-rapor">
+      <div class="bilgi" style="grid-template-columns:1fr 1fr;margin-bottom:6px"><div><span>Hasta</span><br><b>Ayşe Kaya</b></div><div><span>Çekim</span><br><b>20.11.2026</b></div></div>
+      <h5>Bulgular</h5><p>Her iki meme parankimi heterojen dens yapıdadır (ACR tip C). Sağ meme üst dış kadranda 8 mm çaplı, düzgün konturlu nodüler opasite izlenmiştir…</p>
+      <h5>Sonuç</h5><p><b>BI-RADS 3</b> - muhtemelen benign bulgu. 6 ay sonra kontrol önerilir.</p>
+    </div>
+    <div class="m-alt"><div class="btn bir">⬇ PDF</div><div class="btn">📜 İmza</div><div class="btn">↗ Paylaş</div></div>
+  </div></div>
+
+  <div class="telefon"><div class="ekran">
+    <div class="adres"><span class="kilit">🔒</span><span class="url">rapor.kurum.com/r/7KQ2-M9XA</span></div>
+    <div class="ust"><div class="logo">GT</div><div class="kurum"><b>Genotip Görüntüleme Merkezi</b><span>Radyoloji raporu</span></div></div>
+    <div class="durum">
+      <div class="ikon" style="background:var(--uyarizem);color:var(--uyari)">⏳</div>
+      <h3>Bağlantının süresi doldu</h3>
+      <p>Bu bağlantı 20.12.2026 tarihine kadar geçerliydi. Raporunuz için kurumu arayabilir ya da yeni bağlantı isteyebilirsiniz.</p>
+      <div class="btn bir">Yeni bağlantı iste (SMS)</div>
+      <p style="font-size:11px">0216 000 00 00</p>
+    </div>
+  </div></div>
+
+  <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px">
+    <div class="kutu"><h4>Sol panelin diğer halleri</h4>
+      <div class="satir"><span><span class="rozet ok">✔ Geçerli</span></span><b>İmza var, belge değişmemiş.</b></div>
+      <div class="satir"><span><span class="rozet sari">Onaylı</span></span><b>Rapor e-imzasız onaylanmış (e-imza hesabı yok): panelde yalnız onaylayan hekim ve onay zamanı; "e-imzalı değildir" notu.</b></div>
+      <div class="satir"><span><span class="rozet kir">✖ Geçersiz</span></span><b>Belge imzadan sonra değişmiş: rapor gösterilmez, kurumla iletişime geçin uyarısı; kuruma bildirim düşer.</b></div>
+      <div class="satir"><span><span class="rozet kir">İptal</span></span><b>Rapor geri çekildi / yeniden yazıldı: "Bu rapor güncellendi" - yeni rapora bağlantı (doğrulama korunur).</b></div>
+    </div>
+    <div class="kutu"><h4>Kurum tarafı (rapor kartı)</h4>
+      <div class="satir"><span>Paylaşım</span><b>Bağlantı · karekod · "SMS gönder" · "İptal et"</b></div>
+      <div class="satir"><span>İz</span><b>Kaç kez açıldı, son açılış, hatalı deneme sayısı</b></div>
+      <div class="satir"><span>Ayar</span><b>Geçerlilik günü, doğrulama yöntemi, onayda otomatik SMS, SMS metni (şube)</b></div>
+    </div>
+  </div>
+</div>
+<p class="aciklama">
+  Telefonda imza paneli tek satıra iner ("e-İmzalı · İmza geçerli"); <b>Ayrıntı ›</b> sol paneldeki bilgilerin tamamını açar. Altta PDF, İmza ve Paylaş.
+  Süresi dolmuş ya da iptal edilmiş bağlantı rapor göstermez; hasta aynı sayfadan kayıtlı telefonuna yeni bağlantı isteyebilir.
+</p>
+
+</body>
+</html>
