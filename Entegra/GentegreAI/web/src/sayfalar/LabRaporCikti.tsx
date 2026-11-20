@@ -8,7 +8,7 @@ import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
 import { c } from '../dil/ceviri';
 import { GEN_KALITIM, GEN_YONTEM, MIKRO_ID_YONTEM, genSinifMetni } from '../bilesenler/labKodlari';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
-import { Karekod } from '../bilesenler/Karekod';
+import { BaglantiKarekodu, CiktiAracCubugu, kurumAdresSatiri } from '../bilesenler/cikti/ciktiOrtak';
 import { raporBaglantisi } from '../api/uclar/raporGonderim';
 
 /**
@@ -83,8 +83,7 @@ export function LabRaporCikti() {
 
   const i = veri.istem;
   const k = veri.kurum ?? {};
-  const adresSatiri = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
-    .filter(x => String(x ?? '').trim() !== '').join(' · ');
+  const adresSatiri = kurumAdresSatiri(k);
 
   const sayisal = veri.sonuclar;
   const kulturVar = veri.kulturler.length > 0;
@@ -103,24 +102,11 @@ export function LabRaporCikti() {
 
   return (
     <div className="rapor-cikti">
-      {/* Araç çubuğu YAZDIRILMAZ (@media print) - kâğıtta yalnız belge kalır. */}
-      <div className="cikti-arac">
-        <button className="d bir" onClick={() => window.print()}>🖨 Yazdır</button>
-        <button className="d" onClick={() => window.print()}
-                title="Yazdırma penceresinde “PDF olarak kaydet” seçin.">
-          📄 PDF
-        </button>
+      <CiktiAracCubugu onKapat={() => git(-1)} uyari={tamam ? null : 'Tüm sonuçlar onaylanmadı — bu çıktı TASLAKTIR'}>
         <button className="d" disabled title={c('Hasta portalı henüz yok.')}>
           🔗 Hasta Portalı Bağlantısı
         </button>
-        <span style={{ marginLeft: 'auto' }} />
-        {!tamam && (
-          <span className="rozet uyari" style={{ marginRight: 8 }}>
-            Tüm sonuçlar onaylanmadı — bu çıktı TASLAKTIR
-          </span>
-        )}
-        <button className="d" onClick={() => git(-1)}>✖ {c('Kapat')}</button>
-      </div>
+      </CiktiAracCubugu>
 
       <div className="cikti-sayfa">
         {/* --- KURUM ANTETİ --- */}
@@ -579,20 +565,11 @@ export function LabRaporCikti() {
         )}
 
         {/* --- KAREKOD (1396): sonucu telefonda gör. Bölümün tamamı onaylıysa ve ayarda açıksa. --- */}
-        {(veri.baglantilar ?? []).map(bg => {
-          const adres = raporBaglantisi(bg.kod, bg.webKok);
-          return (
-            <div className="rapor-karekod" data-testid="lab-karekod" key={bg.kod}>
-              <Karekod deger={adres} baslik="Sonuç bağlantısı" />
-              <div>
-                <b>{bg.bolumAd} {c('sonuçlarınızı telefonda görün')}</b>
-                {c('Karekodu telefonunuzun kamerasıyla okutun ya da')}<br />
-                <span className="rk-adres">{adres.replace(/^https?:\/\//, '')}</span>
-                {bg.sonGecerli && <><br />{gunNokta(bg.sonGecerli)} {c('tarihine kadar geçerlidir.')}</>}
-              </div>
-            </div>
-          );
-        })}
+        {(veri.baglantilar ?? []).map(bg => (
+          <BaglantiKarekodu key={bg.kod} adres={raporBaglantisi(bg.kod, bg.webKok)} karekodBasligi="Sonuç bağlantısı"
+                            ustMetin={<>{bg.bolumAd} {c('sonuçlarınızı telefonda görün')}</>}
+                            sonGecerli={bg.sonGecerli} testId="lab-karekod" />
+        ))}
 
         {/* --- İMZA --- */}
         <div className="imza">

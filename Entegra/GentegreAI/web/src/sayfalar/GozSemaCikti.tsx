@@ -8,6 +8,7 @@ import { SemaZemini } from '../bilesenler/goz/gozSemaZemini';
 import type { GozCizimCiktisi } from '../api/uclar/goz';
 import { c } from '../dil/ceviri';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
+import { CiktiAracCubugu, kurumAdresSatiri } from '../bilesenler/cikti/ciktiOrtak';
 
 /**
  * GÖZ ŞEMASI ÇIKTISI (705) — mockup `Ekranlar/Goz/goz_semasi.html`
@@ -41,18 +42,11 @@ export function GozSemaCikti() {
   const k = (veri.kurum ?? {}) as Record<string, unknown>;
   const damga = (tur: number) => veri.damgalar.find(d => d.tur === tur);
   const semaAd = (tur: number) => veri.semaAdlari.find(s => s.tur === tur)?.ad ?? '';
-  const adres = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
-    .filter(x => String(x ?? '').trim() !== '').join(' · ');
+  const adres = kurumAdresSatiri(k);
 
   return (
     <div className="sema-cikti">
-      {/* Araç çubuğu YAZDIRILMAZ (@media print) - kâğıtta yalnız belge kalır. */}
-      <div className="cikti-arac">
-        <button className="d bir" onClick={() => window.print()}>🖨 Yazdır</button>
-        <button className="d" onClick={() => window.print()}
-                title="Tarayıcı yazdırma penceresinde 'PDF olarak kaydet'">📄 PDF</button>
-        <button className="d" onClick={() => git(-1)}>← Geri</button>
-      </div>
+      <CiktiAracCubugu onKapat={() => git(-1)} kapatMetni="← Geri" />
 
       <div className="cikti-sayfa">
         <div className="cikti-antet">

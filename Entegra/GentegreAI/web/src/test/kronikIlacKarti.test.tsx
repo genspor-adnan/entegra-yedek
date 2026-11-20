@@ -22,7 +22,10 @@ vi.mock('../bilesenler/mesaj', () => ({
 const { KronikTaniKarti } = await import('../bilesenler/hasta/KronikTaniKarti');
 const { IlacKaydiKarti } = await import('../bilesenler/hasta/IlacKaydiKarti');
 
-const bugun = new Date().toISOString().slice(0, 10);
+// YEREL gün (kart da yerel günü yazar). toISOString UTC günü verir - gece 00:00-03:00 arası bir gün geride kalıp
+//   testi düşürüyordu.
+const bugun = (() => { const d = new Date(); const p2 = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}` })();
 
 describe('kronik tanı kartı', () => {
   beforeEach(() => {

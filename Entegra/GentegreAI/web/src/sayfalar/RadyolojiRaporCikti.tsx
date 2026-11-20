@@ -7,7 +7,7 @@ import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { cinsiyetAdi } from '../bilesenler/kisiKodlari';
 import { tekParcaMi } from './radyoloji/raporBicimi';
-import { Karekod } from '../bilesenler/Karekod';
+import { BaglantiKarekodu, CiktiAracCubugu, kurumAdresSatiri } from '../bilesenler/cikti/ciktiOrtak';
 import { raporBaglantisi } from '../api/uclar/raporGonderim';
 
 /**
@@ -61,27 +61,14 @@ export function RadyolojiRaporCikti() {
 
   return (
     <div className="rapor-cikti">
-      {/* Arac cubugu YAZDIRILMAZ (@media print) - kagitta yalniz belge kalir. */}
-      <div className="cikti-arac">
-        <button className="d bir" onClick={() => window.print()}>🖨 Yazdır</button>
-        <button className="d" onClick={() => window.print()}
-                title="Yazdırma penceresinde “PDF olarak kaydet” seçin.">
-          📄 PDF
-        </button>
+      <CiktiAracCubugu onKapat={() => git(-1)} uyari={onayli ? null : 'Rapor onaylanmadı — bu çıktı taslaktır'}>
         <button className="d" disabled title="SMS / e-posta gönderimi henüz bağlanmadı.">
           ✉ Hastaya Gönder
         </button>
         <button className="d" disabled title="Hasta portalı henüz yok.">
           🔗 Hasta Portalı Bağlantısı
         </button>
-        <span style={{ marginLeft: 'auto' }} />
-        {!onayli && (
-          <span className="rozet uyari" style={{ marginRight: 8 }}>
-            Rapor onaylanmadı — bu çıktı taslaktır
-          </span>
-        )}
-        <button className="d" onClick={() => git(-1)}>✖ Kapat</button>
-      </div>
+      </CiktiAracCubugu>
 
       <RadyolojiRaporBelgesi veri={veri} />
     </div>
@@ -105,8 +92,7 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
   const r = veri.rapor;
   const k = veri.kurum ?? {};
   const onayli = Number(r.durum ?? 0) === 3;
-  const adresSatiri = [k.adres, [k.ilce, k.il].filter(Boolean).join(' / ')]
-    .filter(x => String(x ?? '').trim() !== '').join(' · ');
+  const adresSatiri = kurumAdresSatiri(k);
   // TİPOGRAFİ (1344): ekran A4'ü ile aynı CSS değişkenleri; kâğıt kenar boşluğu ayardan (@page).
   const tip = tipografiOku(veri.tipografi);
   return (
@@ -254,20 +240,10 @@ export function RadyolojiRaporBelgesi({ veri }: { veri: RaporCiktiVerisi }) {
       </div>
 
       {/* --- KAREKOD (1389): raporu telefonda gör. Onaylı raporda, bağlantı varsa. --- */}
-      {onayli && veri.baglanti?.kod && (() => {
-        const adres = raporBaglantisi(veri.baglanti.kod, veri.baglanti.webKok);
-        return (
-          <div className="rapor-karekod" data-testid="rapor-karekod">
-            <Karekod deger={adres} baslik="Rapor bağlantısı" />
-            <div>
-              <b>Raporunuzu telefonda görün</b>
-              Karekodu telefonunuzun kamerasıyla okutun ya da<br />
-              <span className="rk-adres">{adres.replace(/^https?:\/\//, '')}</span>
-              {veri.baglanti.sonGecerli && <><br />{gunNokta(veri.baglanti.sonGecerli)} tarihine kadar geçerlidir.</>}
-            </div>
-          </div>
-        );
-      })()}
+      {onayli && veri.baglanti?.kod && (
+        <BaglantiKarekodu adres={raporBaglantisi(veri.baglanti.kod, veri.baglanti.webKok)} karekodBasligi="Rapor bağlantısı"
+                          ustMetin="Raporunuzu telefonda görün" sonGecerli={veri.baglanti.sonGecerli} testId="rapor-karekod" />
+      )}
     </div>
   );
 }

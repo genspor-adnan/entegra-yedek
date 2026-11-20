@@ -3,6 +3,7 @@ import type { AcikLabRaporu, AcikLabOnceki } from '../../api/uclar/raporGonderim
 import { gunNokta, tarihSaat } from '../../bilesenler/bicim';
 import { cinsiyetAdi } from '../../bilesenler/kisiKodlari';
 import { c } from '../../dil/ceviri';
+import { kurumAdresSatiri } from '../../bilesenler/cikti/ciktiOrtak';
 
 /**
  * TIBBİ LABORATUVAR TETKİK SONUÇ RAPORU (1394; kullanıcı 20.11.2026: "rapor sayfası için bakanlığın standardı vardı ona
@@ -44,7 +45,7 @@ export function LabSonucRaporu({ lab, kurum, baglanti }: {
   const b = lab.baslik;
   const alan = (ad: string, deger: ReactNode) => <div><span>{ad}</span><b>{deger || '—'}</b></div>;
   const gunler = lab.gecmisGunler ?? [];
-  const adres = [kurum.adres, [kurum.ilce, kurum.il].filter(Boolean).join(' / ')].filter(x => String(x ?? '').trim() !== '').join(' · ');
+  const adres = kurumAdresSatiri(kurum);
   return (
     <div className="ls-rapor" data-testid="lab-sonuc-raporu">
       <div className="ls-bas">
