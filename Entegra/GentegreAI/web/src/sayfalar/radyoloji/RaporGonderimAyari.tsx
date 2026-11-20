@@ -15,7 +15,7 @@ import { c } from '../../dil/ceviri';
  *    kod › kategori › tümü (sunucu RaporGonderimKurali).
  * Hiçbir alan anında yazmaz - hepsi sayfanın Kaydet'iyle (ayarlarda otomatik kayıt yok).
  */
-const BOS_AYAR: Ayar = { otomatik: false, kritikDakika: 0, borcKontrol: true, hastaSms: true, hastaEposta: false, gecerlilikGun: 30, webKok: '' };
+const BOS_AYAR: Ayar = { otomatik: false, kritikDakika: 0, labPanikDakika: 0, borcKontrol: true, hastaSms: true, hastaEposta: false, gecerlilikGun: 30, webKok: '' };
 type Tetkik = { id: number; kod: string; ad: string; kategori: number | null };
 type Kategori = { id: number; ad: string };
 
@@ -49,7 +49,9 @@ export function RaporGonderimAyari() {
   useEffect(() => {
     let iptal = false;
     Promise.all([
-      api.liste('hizmet', { sayfa: 1, boyut: 5000, filtre: { alan: 'modalite', op: 'buyuk', deger: 0 } }),
+      // Radyoloji tetkikleri (modalitesi olan) + laboratuvar testleri (lab tetkiğine bağlı hizmetler) - TEK tablo (1394).
+      api.liste('hizmet', { sayfa: 1, boyut: 5000, filtre: { op: 'or', kosullar: [
+        { alan: 'modalite', op: 'buyuk', deger: 0 }, { alan: 'labVarMi', op: 'esit', deger: 1 }] } }),
       api.liste('kategori', { sayfa: 1, boyut: 2000 }),
     ]).then(([h, k]) => {
       if (iptal) return;
@@ -98,7 +100,7 @@ export function RaporGonderimAyari() {
       <div className="rt-arac">
         <button type="button" className="d bir" disabled={!duzenle || !degisti || kaydediliyor} data-testid="rga-kaydet"
                 onClick={() => void kaydet()}>💾 {c('Kaydet')}</button>
-        <span className="rt-baslik"><b>📨 {c('Rapor Gönderimi Ayarı')}</b><span className="yol">{c('Radyoloji › Ayarlar › Rapor Gönderimi Ayarı')}</span></span>
+        <span className="rt-baslik"><b>📨 {c('Rapor Gönderimi Ayarı')}</b><span className="yol">{c('Radyoloji ve Laboratuvar › Ayarlar › Rapor Gönderimi Ayarı')}</span></span>
         <span className="ck-bosluk" />
         <button type="button" className="d" onClick={() => void (async () => {
           if (degisti && !await onay(c('Kaydedilmemiş değişiklik var. Kaydetmeden kapatılsın mı?'))) return;
@@ -113,11 +115,14 @@ export function RaporGonderimAyari() {
           <h5>{c('Otomatik gönderim')}</h5>
           <label className="rga-cb"><input type="checkbox" checked={ayar.otomatik} data-testid="rga-otomatik"
                                            onChange={e => a({ otomatik: e.target.checked })} />
-            {c('Rapor onaylanınca / e-imzalanınca kurallara göre gönder')}</label>
-          <div className="rga-sat"><span>{c('Kritik bulgulu raporda')}</span>
+            {c('Rapor / sonuç onaylanınca kurallara göre gönder')}</label>
+          <div className="rga-sat"><span>{c('Radyoloji · kritik bulgu')}</span>
             <span><input type="number" min={0} max={1440} value={ayar.kritikDakika} data-testid="rga-kritik"
-                         onChange={e => a({ kritikDakika: Math.max(0, Number(e.target.value) || 0) })} /> {c('dakika sonra')}
-              <small>{c('0 = otomatik gitmez, elle gönderilir. Kritik raporda kural tablosuna bakılmaz, yalnız bu süre geçerlidir.')}</small></span></div>
+                         onChange={e => a({ kritikDakika: Math.max(0, Number(e.target.value) || 0) })} /> {c('dakika sonra')}</span></div>
+          <div className="rga-sat"><span>{c('Laboratuvar · panik değer')}</span>
+            <span><input type="number" min={0} max={1440} value={ayar.labPanikDakika} data-testid="rga-lab-panik"
+                         onChange={e => a({ labPanikDakika: Math.max(0, Number(e.target.value) || 0) })} /> {c('dakika sonra')}
+              <small>{c('İki süre ayrı girilir. 0 = otomatik gitmez, elle gönderilir. Kritik bulgulu rapor / panik değerli sonuçta kural tablosuna bakılmaz, yalnız bu süre geçerlidir.')}</small></span></div>
           <div className="rga-sat"><span>{c('Bağlantı geçerliliği')}</span>
             <span><input type="number" min={1} max={3650} value={ayar.gecerlilikGun}
                          onChange={e => a({ gecerlilikGun: Math.max(1, Number(e.target.value) || 1) })} /> {c('gün')}</span></div>
@@ -189,7 +194,7 @@ export function RaporGonderimAyari() {
                 </tr>))}
             </tbody>
           </table>
-          <small className="rga-not">{c('Raporun tetkiği için önce Kod satırına bakılır; yoksa tetkiğin Kategori satırına (en yakın üst kategori); o da yoksa Tümü satırına. Hiçbiri uymuyorsa otomatik gönderilmez. Bir başvuruda birden çok rapor varsa her rapor kendi kuralına göre planlanır.')}</small>
+          <small className="rga-not">{c('Radyoloji tetkikleri ve laboratuvar testleri aynı tablodadır. Önce Kod satırına bakılır; yoksa Kategori satırına (en yakın üst kategori); o da yoksa Tümü satırına. Hiçbiri uymuyorsa otomatik gönderilmez. Radyolojide her rapor kendi kuralıyla planlanır. Laboratuvarda gönderim birimi bölümdür: bölümün testlerinin tamamı onaylanınca planlanır, zaman bölümdeki testlerin kurallarından en geç olanıdır.')}</small>
         </div>
       </fieldset>
     </div>

@@ -19,7 +19,12 @@ export type RaporGonderimKurali = {
 };
 
 export type RaporGonderimAyari = {
-  otomatik: boolean; kritikDakika: number; borcKontrol: boolean; hastaSms: boolean; hastaEposta: boolean;
+  otomatik: boolean;
+  /** Radyoloji kritik bulgu süresi (dk; 0 = elle). */
+  kritikDakika: number;
+  /** Laboratuvar panik değer süresi (dk; 0 = elle) - 1394. */
+  labPanikDakika: number;
+  borcKontrol: boolean; hastaSms: boolean; hastaEposta: boolean;
   gecerlilikGun: number; webKok: string;
 };
 
@@ -44,10 +49,38 @@ export type AcikRaporImza = {
   sahip: string; veren: string; gecerlilikBas: string | null; gecerlilikBit: string | null; seriNo: string; ozet: string;
 };
 
+/** Geçmiş sonuç hücresi (önceki başvuru). */
+export type AcikLabOnceki = { deger: string; bayrak: string; panik: boolean };
+
+/** LAB bağlantı sayfası verisi (1394): Bakanlık Tetkik Sonuç Raporu alanları + bölümün onaylı sonuçları. */
+export type AcikLabRaporu = {
+  bolum: number; bolumAd: string;
+  baslik: {
+    hasta: string; tc: string; dogumTarihi: string | null; cinsiyet: number; dosyaNo: string; protokolNo: string;
+    isteyen: string; kurum: string; sube: string; gonderilecekYer: string; raporNo: string; ornekNo: string;
+    istemZamani: string | null; numuneAlma: string | null; numuneKabul: string | null; onayZamani: string | null;
+    basimZamani: string | null;
+  };
+  /** Geçmiş sonuç kolonlarının günleri (en yeni önce; en çok iki). */
+  gecmisGunler: string[];
+  satirlar: {
+    kod: string; ad: string; sonuc: string; birim: string;
+    /** N / L / H / LL / HH. */
+    bayrak: string; panik: boolean; referans: string; kararNotu: string; yorum: string; ornekNo: string; yontem: string;
+    onceki1: AcikLabOnceki | null; onceki2: AcikLabOnceki | null;
+  }[];
+  /** Hastaya gösterilmeyen ("bağlantıda gizle") test sayısı. */
+  gizlenen: number;
+  uzman: { ad: string; brans: string; tescilNo: string } | null;
+};
+
 export type AcikRapor = {
   /** ok rapor var · iletisim (borç) · sure · guncel (geri çekildi) · gecersiz (imza bozuk) · yok. */
   durum: 'ok' | 'iletisim' | 'sure' | 'guncel' | 'gecersiz' | 'yok';
   aliciTur?: number; sonGecerli?: string;
+  /** 'lab' ise `lab` dolu (laboratuvar sonucu); yoksa radyoloji raporu. */
+  tur?: 'lab';
+  lab?: AcikLabRaporu;
   kurum?: Record<string, unknown> | null;
   ozet?: { tetkik?: string; cekimTarihi?: string | null } | null;
   imza?: AcikRaporImza;

@@ -10126,3 +10126,46 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 /* GRID › ROZET + ALT AYRINTI (1390, "rozetAlt:" biçimi): rozet içeriği kadar, ayrıntı altında tek satır. */
 .gh-rozet-alt { gap: 2px; align-items: flex-start }
 .gh-rozet-alt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100% }
+/* TIBBİ LABORATUVAR TETKİK SONUÇ RAPORU (1394, Bakanlık düzeni; mockup §7). `ls-` önekli. */
+.ls-rapor { background: #fff; color: #1a2430; margin: 0 auto; padding: 18px 22px; width: 860px; max-width: 100%; font-size: 12px;
+  border: 1px solid var(--cizgi); box-shadow: 0 2px 10px rgba(20, 40, 70, .12) }
+.ls-bas { text-align: center; border-bottom: 2px solid #14315a; padding-bottom: 8px; margin-bottom: 8px }
+.ls-bas b { display: block; font-size: 15px; color: #14315a; letter-spacing: .3px }
+.ls-bas small { display: block; font-size: 10.5px; color: #5a6877; letter-spacing: .5px }
+.ls-kimlik { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 22px; border: 1px solid #cdd6e0; padding: 7px 10px; font-size: 11.5px; margin-bottom: 6px }
+.ls-kimlik > div { display: grid; grid-template-columns: 150px 1fr; gap: 6px; min-width: 0 }
+.ls-kimlik span { color: #5a6877 } .ls-kimlik span::after { content: " :" }
+.ls-kimlik b { font-weight: 600; word-break: break-word }
+.ls-bolum { display: flex; justify-content: space-between; align-items: baseline; background: #eef2f7; padding: 4px 10px; font-size: 11.5px;
+  border: 1px solid #cdd6e0; border-bottom: 0 }
+.ls-bolum b { font-size: 13px; color: #14315a } .ls-bolum span { color: #5a6877 }
+.ls-kaydir { overflow-x: auto }
+.ls-tablo { width: 100%; border-collapse: collapse; border: 1px solid #cdd6e0; font-size: 12px }
+.ls-tablo th { background: #f5f8fb; text-align: left; padding: 5px 8px; border-bottom: 1px solid #cdd6e0; color: #5a6877; font-weight: 400; font-size: 11px }
+.ls-tablo th small { display: block; font-size: 10px }
+.ls-tablo td { padding: 5px 8px; border-bottom: 1px solid #e3e9f0; vertical-align: top }
+.ls-tablo .sag { text-align: right } .ls-tablo .orta { text-align: center }
+.ls-tablo td small { display: block; color: #5a6877; font-size: 9.5px; font-weight: 400 }
+.ls-tablo td small.ls-yorum { font-style: italic; font-size: 10.5px }
+.ls-sonuc { font-weight: 700; white-space: nowrap } .ls-sonuc.yuk { color: var(--hata) } .ls-sonuc.dus { color: #2a5f9c }
+.ls-ref { color: #5a6877; white-space: pre-line }
+.ls-onc-b { border-left: 1px dashed #cdd6e0 }
+.ls-onc { text-align: right; color: #55657a; white-space: nowrap; border-left: 1px dashed #e3e9f0; font-size: 11.5px }
+.ls-onc.yuk { color: #b0554c } .ls-onc.dus { color: #5b82b3 } .ls-onc.bos { color: #b7c2cd }
+.ls-bos { text-align: center; color: #5a6877; padding: 14px !important }
+.ls-ok { display: inline-block; min-width: 16px; text-align: center; border-radius: 3px; font-size: 12px; line-height: 1.2; font-weight: 700; padding: 0 3px }
+.ls-ok.h { background: var(--hatazem, #fdeceb); color: var(--hata) } .ls-ok.l { background: #e3edf8; color: #2a5f9c }
+.ls-ok.pnk { letter-spacing: -2px; padding: 0 5px 0 3px; color: #fff } .ls-ok.h.pnk { background: var(--hata) } .ls-ok.l.pnk { background: #2a5f9c }
+.ls-gizli { border: 1px dashed #ecd9a6; background: #fbf3df; color: #7a5a12; border-radius: 5px; padding: 8px 10px; font-size: 11.5px; line-height: 1.5; margin-top: 10px }
+.ls-lejant { display: flex; gap: 18px; flex-wrap: wrap; font-size: 11px; color: #5a6877; margin: 10px 0 2px }
+.ls-imza { display: flex; justify-content: flex-end; margin-top: 12px }
+.ls-imza > div { text-align: center; font-size: 11.5px; line-height: 1.5 }
+.ls-imza small { display: block; color: #5a6877; font-size: 10.5px }
+.ls-imza em { display: block; font-style: normal; color: var(--ok); font-weight: 700; font-size: 11px }
+.ls-dipnot { margin: 12px 0 6px; padding: 6px 0 0 18px; font-size: 10px; color: #5a6877; line-height: 1.55; border-top: 1px solid #e3e9f0 }
+.ls-alt { font-size: 10px; color: #5a6877; border-top: 1px solid #cdd6e0; padding-top: 5px }
+@media (max-width: 860px) {
+  .ls-rapor { padding: 12px 10px; border: 0; box-shadow: none; width: auto }
+  .ls-kimlik { grid-template-columns: 1fr } .ls-kimlik > div { grid-template-columns: 130px 1fr }
+}
+@media print { .ls-rapor { border: 0; box-shadow: none; padding: 0; width: auto } }

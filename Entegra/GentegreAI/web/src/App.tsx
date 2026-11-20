@@ -440,6 +440,7 @@ function Yollar() {
         {yetki('radyoloji.tipografi') && <Route path="/radyoloji-tipografi" element={<RadyolojiTipografi />} />}
         {/* Rapor Gönderimi (1389): şube ayarı + zaman kuralları, ozelSayfa. */}
         {yetki('radyoloji.rapor_gonderim') && <Route path="/radyoloji-rapor-gonderim" element={<RaporGonderimAyari />} />}
+        {yetki('lab.rapor_gonderim') && <Route path="/lab-rapor-gonderim" element={<RaporGonderimAyari />} />}
         {yetki('teleradyoloji.pano') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
         {yetki('teleradyoloji.kurum.fatura') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
         {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}

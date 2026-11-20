@@ -5,6 +5,8 @@ import { gunNokta, tarihSaat } from '../../bilesenler/bicim';
 import { basHarfler } from '../../bilesenler/basHarfler';
 import { c } from '../../dil/ceviri';
 import { RadyolojiRaporBelgesi, type RaporCiktiVerisi } from '../RadyolojiRaporCikti';
+import { LabSonucRaporu } from './LabSonucRaporu';
+import { raporBaglantisi } from '../../api/uclar/raporGonderim';
 
 /**
  * AÇIK RAPOR SAYFASI `/r/{kod}` (1389; kullanıcı 20.11.2026; mockup
@@ -64,6 +66,48 @@ export function RaporAcik() {
       <Kabuk>
         {ust(c('Radyoloji raporu'))}
         <Durum ikon={d.ikon} baslik={d.baslik} metin={d.metin} ek={ara} />
+      </Kabuk>
+    );
+  }
+
+  // LABORATUVAR (1394): Bakanlık Tetkik Sonuç Raporu düzeni; lab'da e-imza yok - solda onay bilgisi.
+  if (veri.tur === 'lab' && veri.lab) {
+    const lab = veri.lab;
+    const hekim = veri.aliciTur === 2;
+    const onayMetni = [lab.uzman?.ad, lab.baslik.onayZamani ? tarihSaat(lab.baslik.onayZamani) : ''].filter(Boolean).join(' · ');
+    const panelSatir = (ad: string, deger: ReactNode) => <div className="ra-satir"><span>{ad}</span><b>{deger || '—'}</b></div>;
+    return (
+      <Kabuk>
+        {ust(`${hekim ? c('Gönderen hekim') + ' · ' : ''}${c('Laboratuvar')} · ${c(lab.bolumAd)} · ${lab.baslik.protokolNo}`, <>
+          <span className="ra-rozet ok">✔ {c('Onaylı')}</span>
+          <button type="button" className="d" onClick={() => window.print()} title={c('Yazdırma penceresinde "PDF olarak kaydet" seçebilirsiniz.')}>
+            🖨 {c('Yazdır / PDF')}</button>
+        </>)}
+        <button type="button" className="ra-m-imza" onClick={() => setImzaAcik(v => !v)} data-testid="rapor-acik-imza-ozet">
+          <span className="ra-tik ra-tik-m">✔</span>
+          <span><b>{c('Sonuçlar onaylı')}</b><span>{onayMetni}</span></span>
+          <span className="ra-ok">{imzaAcik ? c('Kapat') + ' ‹' : c('Ayrıntı') + ' ›'}</span>
+        </button>
+        <div className="ra-govde">
+          <div className={`ra-panel${imzaAcik ? ' acik' : ''}`} data-testid="rapor-acik-panel">
+            <div className="ra-kutu gecerli">
+              <div className="ra-buyuk"><span className="ra-tik">✔</span><div><b>{c('Sonuçlar onaylı')}</b>
+                <span>{c(lab.bolumAd)} {c('bölümünün')} {lab.satirlar.length + lab.gizlenen} {c('testi uzman onayından geçti.')}</span></div></div>
+            </div>
+            <div className="ra-kutu"><h4>✍ {c('Onaylayan')}</h4>
+              {panelSatir(c('Uzman'), lab.uzman?.ad)}
+              {lab.uzman?.tescilNo && panelSatir(c('Diploma / Tescil'), lab.uzman.tescilNo)}
+              {panelSatir(c('Onay zamanı'), lab.baslik.onayZamani ? tarihSaat(lab.baslik.onayZamani) : '')}
+              {panelSatir(c('İsteyen hekim'), lab.baslik.isteyen)}
+            </div>
+            {veri.sonGecerli && <div className="ra-kutu"><h4>🔗 {c('Bağlantı')}</h4>{panelSatir(c('Geçerlilik'), `${gunNokta(veri.sonGecerli)} ${c("'a kadar")}`)}</div>}
+            <div className="ra-kucuk">{c('Sonuçlar, isteyen hekiminizin değerlendirmesiyle birlikte anlam taşır. Referans aralıkları yaş ve cinsiyete göredir.')}</div>
+          </div>
+          <div className="ra-sag">
+            <div className="ra-sekme"><button type="button" className="on">{c('Sonuçlar')}</button></div>
+            <div className="ra-rapor"><LabSonucRaporu lab={lab} kurum={kurum} baglanti={raporBaglantisi(kod)} /></div>
+          </div>
+        </div>
       </Kabuk>
     );
   }

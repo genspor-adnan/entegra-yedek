@@ -593,6 +593,15 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ic: '🔌', yetkiKodu: 'lab.cihaz.liste',
   },
   {
+    // RAPOR GÖNDERİMİ AYARI (1394; kullanıcı 20.11.2026: "tek rapor gönderim ayarı olsa"): radyolojiyle AYNI ekran ve
+    //   laboratuvar menüsünden de açılır (ayrı rota, tek sayfa). Her yetki kodu tek menü ekranı açar - kendi kodu (1395).
+    kaynak: 'lab-rapor-gonderim', rota: 'lab-rapor-gonderim', ozelSayfa: true,
+    baslik: 'Rapor Gönderimi Ayarı', yol: 'Laboratuvar › Ayarlar › Rapor Gönderimi Ayarı',
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuSira: 215, menuAd: 'Rapor Gönderimi Ayarı', ic: '📨',
+    yetkiKodu: 'lab.rapor_gonderim',
+  },
+  {
     // LABORATUVAR İCMALİ (1026, mockup İcmal/laboratuvar_icmali.html): tetkik
     //   adet / ciro / reaktif maliyeti / marj, cihaz, dış lab, TAT, numune ret.
     kaynak: 'lab-icmal', rota: 'lab-icmal', ozelSayfa: true,

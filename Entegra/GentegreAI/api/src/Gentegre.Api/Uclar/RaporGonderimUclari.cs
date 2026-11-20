@@ -27,6 +27,13 @@ public static class RaporGonderimUclari
     public sealed record GonderIstegi(bool BorcaRagmen);
 
     private const string AyarYetkisi = "radyoloji.rapor_gonderim";
+    /// <summary>Aynı ayar ekranının laboratuvar menüsündeki yetkisi (1395) - ikisinden biri yeter.</summary>
+    private const string LabAyarYetkisi = "lab.rapor_gonderim";
+
+    private static bool AyarYetkiVar(IstekBaglami baglam, Islem islem)
+        => baglam.Yetkiler.Var(AyarYetkisi, islem) || baglam.Yetkiler.Var(LabAyarYetkisi, islem);
+    private static void AyarYetkiIste(IstekBaglami baglam, Islem islem)
+        => baglam.YetkiIste(baglam.Yetkiler.Var(LabAyarYetkisi, islem) ? LabAyarYetkisi : AyarYetkisi, islem);
 
     public static void RaporGonderimUclariniEkle(this WebApplication uygulama)
     {
@@ -36,7 +43,7 @@ public static class RaporGonderimUclari
         grup.MapGet("/ayar", async (BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(AyarYetkisi, Islem.Gor);
+            AyarYetkiIste(baglam, Islem.Gor);
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             await using var b = await veri.AcAsync(iptal);
             var ayar = await b.TekAsync("""
@@ -64,14 +71,14 @@ public static class RaporGonderimUclari
                     gunDakika = o.GetInt32(6), aktif = o.GetInt16(7) == 1, kategoriAd = o.GetString(8),
                     hizmetKod = o.GetString(9), hizmetAd = o.GetString(10),
                 }, iptal);
-            return Results.Ok(new { ayar, kurallar, degistirebilir = baglam.Yetkiler.Var(AyarYetkisi, Islem.Degistir) });
+            return Results.Ok(new { ayar, kurallar, degistirebilir = AyarYetkiVar(baglam, Islem.Degistir) });
         });
 
         grup.MapPut("/ayar", async (AyarIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
                                     HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(AyarYetkisi, Islem.Degistir);
+            AyarYetkiIste(baglam, Islem.Degistir);
             var sube = baglam.SubeId ?? throw GentegreHatasi.IsKurali("Önce bir şube seçin.");
             if (istek.KritikDakika is < 0 or > 1440)
                 throw GentegreHatasi.Dogrulama("Kritik bulgu süresi 0 - 1440 dakika olmalı.", new AlanHatasi("kritikDakika", "Geçersiz."));
