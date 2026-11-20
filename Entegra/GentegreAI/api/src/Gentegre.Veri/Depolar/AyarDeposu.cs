@@ -218,7 +218,8 @@ public sealed class AyarDeposu
         ["demirbas.amortisman_yontem"] = 1,
         ["demirbas.amortisman_omur"] = 0,
         ["liste.sayfa_boyu"] = 50,
-        ["stok.negatif_davranis"] = 1,
+        // ENGELLE (1385, kullanıcı 20.11.2026: "satış belgeleri adetten fazla çıkamaz") - ayar yoksa da.
+        ["stok.negatif_davranis"] = 2,
         // POS tahsilatinda varsayilan AKSIYON YOK: kurulumu yapilmamis bir
         //   sistemde kendiliginden fis kesmek yanlis olurdu.
         ["basvuru.pos_aksiyon"] = 0,

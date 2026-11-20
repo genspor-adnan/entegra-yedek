@@ -7,6 +7,18 @@ Bu dosya, kararların **ne zaman ve neden** alındığını kaydeder. Şemanın 
 
 ---
 
+## 20.11.2026 — Negatif stok varsayılanı Engelle (1385)
+
+- Kullanıcı: "Stokta 10 adet olan ürüne 11 adet satış faturası kesilebiliyor.. 5 giriş fişi girip 6 çıkış fişi ile çıkış
+  yapılabiliyor. satış belgeleri adetten fazla çıkamaz" → karar "Varsayılan Engelle, ayar kalsın".
+- `stok.negatif_davranis` 1 (Uyar) olan kurulumlar 2 (Engelle) yapıldı, satır yoksa 2 eklenir; 0 (Serbest) bilerek
+  seçilmiş sayılır, dokunulmaz. Eski değer `_yedek_referans_1385`'te. Kodun ayar yoksa varsayılanı da 2 (AyarDeposu).
+  Yardım metni güncellendi. İsteyen firma Stok Ayarları'ndan "Uyar" seçebilir.
+- Testler: `Varsayilan_engelle_satis_ve_cikis_stogu_asamaz` (11/10 satış faturası, 6/5 çıkış fişi red, eşit çıkış serbest);
+  uyar testi ayarı kendisi açıp geri yazar. Yerel gentegre_ai / KOSUYOLU / UNIVERSE / ZONE / test uygulandı; sunucular bekliyor.
+
+---
+
 ## 19.11.2026 (akşam) — Kod inceleme düzeltmeleri (günün 29 commit'i)
 
 - Takvim seçimi yalnız takvim görünümünde aksiyona gider (liste görünümünde gizli seçim A, listedeki B yerine iptal

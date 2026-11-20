@@ -19,7 +19,8 @@ public sealed class StokBakiyeDenetimiTestleri(ApiSunucuOlgusu api)
 
     private async Task<HttpClient> IstemciAsync(TestDunyasi d)
     {
-        var rol = await d.RolAsync("bakiye", "belge:gedk", "belge.stok.giris:gedk", "belge.stok.cikis:gedk", "belge.stok.transfer:gedk");
+        var rol = await d.RolAsync("bakiye", "belge:gedk", "belge.stok.giris:gedk", "belge.stok.cikis:gedk", "belge.stok.transfer:gedk",
+                                   "belge.satis.fatura:gedk", "ayar:gd");
         var (u, kod) = await d.KullaniciAsync(rol, Merkez);
         await d.SubeVerAsync(u, Merkez, yazma: true, varsayilan: true);
         var (access, _) = await api.GirisAsync(kod, TestDunyasi.Parola);
@@ -151,8 +152,10 @@ public sealed class StokBakiyeDenetimiTestleri(ApiSunucuOlgusu api)
         var h = await IstemciAsync(d);
         var depo = await DepoAsync(d, "Depo");
         var stok = await StokAsync(d, "E");
-        var ayar = await api.Veri.TekDegerAsync<string>("select deger from public.referans where anahtar = 'stok.negatif_davranis'");
-        Assert.Equal("1", ayar);   // test DB'si "uyar" - çıkış eksiye düşer, uyarı döner
+        // 1385'ten beri varsayılan Engelle: "uyar" yolu ayar ucundan açılır (önbellek de temizlenir), test sonunda geri.
+        var eski = await AyarYazAsync(h, "1");
+        try
+        {
 
         // Girişsiz çıkış: ayar "uyar" - yazılır, uyarı döner.
         var y = await h.PostAsJsonAsync("/api/belge/", new { belge = new { tur = 4, tipi = 1, belgeTarihi = Tarih, cikisDepoId = depo }, satirlar = Satir(stok, 3) });
@@ -168,5 +171,60 @@ public sealed class StokBakiyeDenetimiTestleri(ApiSunucuOlgusu api)
         // Zaten eksi olan stoğa giriş serbest (eskiden "engelle" modunda reddedilirdi).
         await YazAsync(d, h, new { tur = 3, tipi = 1, belgeTarihi = Tarih, girisDepoId = depo }, Satir(stok, 1));
         Assert.Equal(-2m, await KalanAsync(stok, depo));
+        }
+        finally { await AyarYazAsync(h, eski); }
+    }
+
+    /// <summary>Ayar ucundan yazar (sunucu önbelleği temizlenir); önceki değeri döner.</summary>
+    private async Task<string> AyarYazAsync(HttpClient h, string deger)
+    {
+        var eski = await api.Veri.TekDegerAsync<string>("select deger from public.referans where anahtar = 'stok.negatif_davranis'") ?? "2";
+        var y = await h.PutAsJsonAsync("/api/ayar/stok.negatif_davranis", new { deger });
+        Assert.True(y.IsSuccessStatusCode, await y.Content.ReadAsStringAsync());
+        return eski;
+    }
+
+    /// <summary>
+    /// VARSAYILAN ENGELLE (1385, kullanıcı 20.11.2026: "Stokta 10 adet olan ürüne 11 adet satış faturası kesilebiliyor..
+    /// 5 giriş fişi girip 6 çıkış fişi ile çıkış yapılabiliyor. satış belgeleri adetten fazla çıkamaz"): stoğu aşan satış
+    /// faturası ve çıkış fişi reddedilir, stok değişmez; stoğa eşit çıkış serbest.
+    /// </summary>
+    [VtFact]
+    public async Task Varsayilan_engelle_satis_ve_cikis_stogu_asamaz()
+    {
+        await using var d = new TestDunyasi(api.Veri);
+        var h = await IstemciAsync(d);
+        var eski = await AyarYazAsync(h, "2");
+        try
+        {
+            var depo = await DepoAsync(d, "Depo");
+            var stok = await StokAsync(d, "S");
+            var cari = await api.Veri.TekDegerAsync<int>(
+                "insert into public.taraf (unvan, musteri, sube_id) values (@p0, 1, @p1) returning id", [d.Onek + " Müşteri", Merkez]);
+            d.Temizle($"delete from public.taraf where id = {cari}");
+
+            // 10 giriş
+            await YazAsync(d, h, new { tur = 3, tipi = 1, belgeTarihi = Tarih, girisDepoId = depo }, Satir(stok, 10));
+            Assert.Equal(10m, await KalanAsync(stok, depo));
+
+            // 11 adetlik satış faturası: red, stok 10 kalır
+            var y = await h.PostAsJsonAsync("/api/belge/", new { belge = new { tur = 15, tipi = 1, belgeTarihi = Tarih,
+                tarafId = cari, cikisDepoId = depo }, satirlar = Satir(stok, 11) });
+            Assert.False(y.IsSuccessStatusCode, await y.Content.ReadAsStringAsync());
+            Assert.Equal(10m, await KalanAsync(stok, depo));
+
+            // 6 adetlik çıkış fişi (5 girişli başka stok): red
+            var stok2 = await StokAsync(d, "S2");
+            await YazAsync(d, h, new { tur = 3, tipi = 1, belgeTarihi = Tarih, girisDepoId = depo }, Satir(stok2, 5));
+            var c = await h.PostAsJsonAsync("/api/belge/", new { belge = new { tur = 4, tipi = 1, belgeTarihi = Tarih, cikisDepoId = depo },
+                                                                 satirlar = Satir(stok2, 6) });
+            Assert.False(c.IsSuccessStatusCode, await c.Content.ReadAsStringAsync());
+            Assert.Equal(5m, await KalanAsync(stok2, depo));
+
+            // Stoğa eşit çıkış serbest (5 → 0).
+            await YazAsync(d, h, new { tur = 4, tipi = 1, belgeTarihi = Tarih, cikisDepoId = depo }, Satir(stok2, 5));
+            Assert.Equal(0m, await KalanAsync(stok2, depo));
+        }
+        finally { await AyarYazAsync(h, eski); }
     }
 }
