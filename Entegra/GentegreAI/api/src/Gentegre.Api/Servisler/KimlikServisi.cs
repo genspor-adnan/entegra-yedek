@@ -667,7 +667,10 @@ public sealed class KimlikServisi
                 new object?[] { anahtar }, iptal);
             return int.TryParse(deger, out var s) ? s : varsayilan;
         }
-        catch
+        // YALNIZ "referans tablosu yok" (ilk kurulum, göç öncesi) varsayılana düşer. Eskiden HER hata yutuluyordu
+        //   (refaktör B7): geçici bir veritabanı hatasında `genel.hesap_askida` / `guvenlik.tek_oturum` gibi güvenlik
+        //   ayarları sessizce "kapalı" okunuyordu - askıdaki hesap girebilirdi. Artık hata yukarı çıkar, giriş reddedilir.
+        catch (Npgsql.PostgresException h) when (h.SqlState == Npgsql.PostgresErrorCodes.UndefinedTable)
         {
             return varsayilan;
         }

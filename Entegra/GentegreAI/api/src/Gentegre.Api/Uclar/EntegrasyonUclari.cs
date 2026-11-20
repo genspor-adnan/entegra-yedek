@@ -415,13 +415,13 @@ public static class EntegrasyonUclari
                 guid = katalog[anahtar];
             }
 
-            var (kayitlar, sayfa, kesildi) = await SkrsHamCekAsync(hesap, guid, istemciler, iptal);
+            var (kayitlar, sayfa, kesildi, cekimHatasi) = await SkrsHamCekAsync(hesap, guid, istemciler, iptal);
 
             // YARIM CEKIM ESKISINI SILMESIN: servis ortada 500 donmusse eldeki
             //   ambar korunur, cagri hata olarak raporlanir.
             if (kesildi && kayitlar.Count == 0)
                 throw GentegreHatasi.IsKurali(
-                    $"'{anahtar}' çekilemedi - servis {sayfa}. sayfada hata döndü.");
+                    $"'{anahtar}' çekilemedi - servis {sayfa}. sayfada hata döndü: {cekimHatasi}");
 
             // TEK TRANSACTION (kod inceleme 30.10.2026 K36): eski ambarın silinmesi, sayfaların yazımı ve
             //   hesap sonucu birlikte - eskiden DELETE autocommit'ti; ortadaki bir sayfa INSERT'i düşerse
@@ -443,7 +443,7 @@ public static class EntegrasyonUclari
                      "[" + string.Join(",", oebek.Select(x => x.Json)) + "]"], iptal);
 
             var ozet = $"{anahtar}: {kayitlar.Count} kayıt ({sayfa} sayfa)"
-                       + (kesildi ? " - servis hatası nedeniyle YARIM" : "");
+                       + (kesildi ? $" - servis hatası nedeniyle YARIM ({cekimHatasi})" : "");
             await SonucYazAsync(baglanti, id, ozet, iptal, islem);
             await islem.CommitAsync(iptal);
 
@@ -936,7 +936,7 @@ public static class EntegrasyonUclari
     /// SKRS buyuk listelerde ara sayfada 500 donebiliyor, hepsini atmak
     /// 14 bin satirlik bir cekimi bir sayfa yuzunden bosa cikariyordu.
     /// </summary>
-    private static async Task<(List<(string Json, int Sayfa)> Kayitlar, int Sayfa, bool Kesildi)>
+    private static async Task<(List<(string Json, int Sayfa)> Kayitlar, int Sayfa, bool Kesildi, string Hata)>
         SkrsHamCekAsync(Hesap hesap, string guid, IHttpClientFactory istemciler,
                         CancellationToken iptal)
     {
@@ -957,15 +957,17 @@ public static class EntegrasyonUclari
                         $"GetSkrsObject?skrsCodeSystemGuid={Uri.EscapeDataString(guid)}&page={sayfa}",
                         istemciler, iptal);
                 }
-                catch
+                // İptal yutulmaz; son denemenin hatası çağırana döner (refaktör B7) - eskiden "servis hata döndü"
+                //   denip NEDENİ kayboluyordu (yanlış parola mı, zaman aşımı mı, 500 mü).
+                catch (Exception h) when (h is not OperationCanceledException)
                 {
-                    if (deneme == 3) return (kayitlar, sayfa, true);
+                    if (deneme == 3) return (kayitlar, sayfa, true, Kisalt(h.Message));
                     await Task.Delay(2000 * deneme, iptal);
                 }
             }
 
             // Uc deneme de govde getirmediyse (istisnasiz bos donus) sayfa kesilir.
-            if (govde is null) return (kayitlar, sayfa, true);
+            if (govde is null) return (kayitlar, sayfa, true, "Servis boş yanıt döndü.");
             using var belge = JsonDocument.Parse(govde);
             if (!belge.RootElement.TryGetProperty("sonuc", out var sonuc)
                 || sonuc.ValueKind != JsonValueKind.Object) break;
@@ -981,7 +983,7 @@ public static class EntegrasyonUclari
             sayfa = sonraki;
         }
 
-        return (kayitlar, sayfa, false);
+        return (kayitlar, sayfa, false, "");
     }
 
     /// <summary>SKRS REST cagrisi: taban adres + yol, kimlik uc HTTP basliginda.</summary>
