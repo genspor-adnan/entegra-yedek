@@ -921,6 +921,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { tur: 1 },
     gizliKolonlar: ['tur', 'teklifDurumAdi', 'teklifDurum', 'durumKod'],
+    // Kartta Hatırlat yok (kullanıcı 20.11.2026).
+    kartHatirlatYok: true,
     toplam: ['tutar'],
     // Çipler KOD kolonuyla (durumKod) - `durum` metin rozetidir (20.11.2026); "Portföy" → "Portföyde".
     cipler: [
@@ -937,6 +939,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 2 },
     yeniKayitVarsayilanlari: { tur: 2 },
     gizliKolonlar: ['tur', 'teklifDurumAdi', 'teklifDurum', 'durumKod'],
+    // Kartta Hatırlat yok (kullanıcı 20.11.2026).
+    kartHatirlatYok: true,
     toplam: ['tutar'],
     // Çipler KOD kolonuyla (durumKod) - `durum` metin rozetidir (20.11.2026); "Portföy" → "Portföyde".
     cipler: [

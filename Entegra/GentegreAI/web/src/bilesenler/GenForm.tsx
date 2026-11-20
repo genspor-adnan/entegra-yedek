@@ -1691,8 +1691,10 @@ Bu işlem geri alınamaz. Onaylıyor musunuz?`, true)) return;
             seritAcikDis={kipliGovde ? kipliAcik : undefined}
             onSeritAcik={kipliGovde ? setKipliAcik : undefined}
             // RANDEVU AVATARI hasta aramasını açar (alanın kendi arama düğmesiyle aynı pencere - 19.11.2026).
-            alanDegistir={kaynak === 'randevu' ? alanDegistir : undefined}
+            alanDegistir={kaynak === 'randevu' || kaynak === 'cek-senet' ? alanDegistir : undefined}
             cariAra={kaynak === 'cek-senet' && meta?.acilistaTarafSecimi ? () => setTarafSecimAcik(true) : undefined}
+            // ÇEK / SENET YÖNÜ başlıkta (Tutar'ın solunda); kasa işleminden açılan kıymette yön sabit (gizliAlanlar).
+            yonKilitli={kaynak === 'cek-senet' ? !!gizliAlanlar?.includes('yon') : undefined}
             hastaAra={kaynak === 'randevu' ? () => {
               const a = meta?.alanlar.find(x => x.ad === 'hastaId');
               if (a?.aramaKaynagi) setAramaAlani({ alan: 'hastaId', kaynak: a.aramaKaynagi });

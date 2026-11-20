@@ -10008,4 +10008,4 @@ table.mk-satirlar tr.mk-uyar td { background: #fdf6e6 }
 .rv-kutu i.cs-sari { color: #a9791a; font-weight: 700 }
 .rv-kutu i.cs-kir { color: var(--hata); font-weight: 700 }
 .rv-iz.cs-iz-kir { background: color-mix(in srgb, var(--hata) 10%, transparent); color: var(--hata) }
-.kaid .cs-baslik .alan-izgara.cs-alt-alanlar { grid-template-columns: 180px 110px 150px 220px !important }
+.kaid .cs-baslik .alan-izgara.cs-alt-alanlar { grid-template-columns: 120px 180px 110px 150px 220px !important }

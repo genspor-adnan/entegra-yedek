@@ -1,6 +1,5 @@
 import { EkstreIkon } from '../EkstreIkon';
-import { useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
-import { KartKipBaglami } from './KipKalemi';
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { ayarSayi } from '../../api/ayarlar';
 import { KimlikOkutPenceresi } from '../kimlik/KimlikOkutPenceresi';
 import { aktarimiUygula, mrzBekleyenAl, mrzBekleyenKoy, type MrzAktarim } from '../kimlik/mrzAktarim';
@@ -61,7 +60,7 @@ export function kartAracGrubu(b: KartAracBaglami): ReactNode {
     case 'kisi':
       return !b.salt && !b.cariyeBaglaGizli && !b.deger.bagId
         ? <button className="d" onClick={b.cariyeBagla}>🔗 Cariye Bağla</button> : null;
-    case 'cek-senet': return <CekSenetYonu b={b} />;
+    // YÖN ARAÇ ÇUBUĞUNDAN KALKTI (kullanıcı 20.11.2026: "yön comboyu edit modda tutar soluna taşı") - CekSenetBasligi.
     case 'hasta-aday': return <AdayDurumRozeti b={b} />;
     case 'randevu': return b.salt ? null : <RandevuKartAraclari b={b} />;
     case 'dokuman': return b.yeniMi ? null : <DokumanKartAraclari b={b} />;
@@ -244,36 +243,6 @@ function HastaKimlikAraclari({ b }: { b: KartAracBaglami }) {
         </>
       )}
     </>
-  );
-}
-
-/*
- * Cek/senede ozel: YON (alinan / verilen) arac cubugunda, Kaydet'in
- * saginda (kullanici). Tek secimlik ve kagidin tum anlamini
- * belirleyen alan - kimlik seridinde yer kaplamasin diye buraya
- * alindi; karttaki alan Gizli, deger buradan yazilir.
- */
-function CekSenetYonu({ b }: { b: KartAracBaglami }) {
-  // KİPLİ KART (20.11.2026, çek / senet başlığı): görüntüleme kipinde yön de değişmez - ✎ ile düzenlemeye geçilir.
-  const kip = useContext(KartKipBaglami);
-  if (!b.meta.alanlar.some(a => a.ad === 'yon')) return null;
-  const kipKapali = !!kip && (!kip.acik || kip.pasif);
-  return (
-    <label className="satir-ici" style={{ fontSize: 13, gap: 8 }}
-           title="Alınan: müşteriden geldi · Verilen: tedarikçiye verildi">
-      Yön
-      {/* Arac cubugundaki tek secim - kutu ve yazi biraz daha buyuk
-          (kullanici): kagidin yonunu belirleyen alan goze carpsin. */}
-      {/* YÖN SABİT (kullanıcı 26.10.2026: "tahsilat ya da ödeme menüsünden geliyorsa yön değişemez"): ekran
-          'yon'u gizliAlanlar'a koyduysa (kasa işleminden açılan kıymet kartı) seçim görünür ama kilitli -
-          tahsilat alınan, ödeme verilen çektir. */}
-      <select value={String(b.deger.yon ?? 1)} disabled={b.salt || kipKapali || !!b.gizliAlanlar?.includes('yon')}
-              style={{ width: 150, height: 28, fontSize: 13 }}
-              onChange={e => b.setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
-        <option value={1}>{c('Alınan')}</option>
-        <option value={2}>{c('Verilen')}</option>
-      </select>
-    </label>
   );
 }
 

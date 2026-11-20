@@ -76,6 +76,8 @@ export interface KartKimlikSeridiOzellikleri {
   alanDegistir?(ad: string, v: Deger): void;
   /** ÇEK / SENET: avatar tıklanınca cari arama penceresi (20.11.2026 - kartta cari arama kutusu yok). */
   cariAra?(): void;
+  /** ÇEK / SENET: yön sabit (kasa tahsilat / ödemesinden açılan kıymet). */
+  yonKilitli?: boolean;
 }
 
 /**
@@ -89,7 +91,7 @@ export interface KartKimlikSeridiOzellikleri {
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari: kimlikAlanlariHam, renderAlanListesi,
   seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk, aktifSekme,
-  seritAcikDis, onSeritAcik, hastaAra, alanDegistir, cariAra,
+  seritAcikDis, onSeritAcik, hastaAra, alanDegistir, cariAra, yonKilitli,
 }: KartKimlikSeridiOzellikleri) {
   /**
    * KİŞİ BANDI (mockup Ekranlar/kisi_karti_avatar_bant.html, kullanıcı 08.11.2026: "başlıktaki bilgiler bandda
@@ -513,6 +515,7 @@ export function KartKimlikSeridi({
             // ÇEK / SENET BAŞLIĞI (20.11.2026): cari bandı (arama kutusu yok - avatar), kutular + ✎; tutar / para
             //   birimi / vade / seri no yalnız düzenlemede. Cari ve durum bantta okunur.
             <CekSenetBasligi deger={deger} meta={meta} yeniMi={yeniMi} cariAra={salt ? undefined : cariAra}
+                             alanDegistir={salt ? undefined : alanDegistir} yonKilitli={yonKilitli}
                              duzenAlanlari={renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'tarafId' && a.ad !== 'durum'))} />
           ) : KIPLI_SERITLER[kaynak] ? (() => {
             const gosterKipi = salt || !seritAcik;

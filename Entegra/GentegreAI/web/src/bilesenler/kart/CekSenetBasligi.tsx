@@ -54,7 +54,7 @@ export function vadeBilgisi(vade: unknown, bugun = new Date()): { gun: string; a
   };
 }
 
-export function CekSenetBasligi({ deger, meta, yeniMi, duzenAlanlari, cariAra }: {
+export function CekSenetBasligi({ deger, meta, yeniMi, duzenAlanlari, cariAra, alanDegistir, yonKilitli }: {
   deger: Record<string, Deger>;
   meta: KartMetaYaniti | null | undefined;
   yeniMi: boolean;
@@ -62,6 +62,10 @@ export function CekSenetBasligi({ deger, meta, yeniMi, duzenAlanlari, cariAra }:
   duzenAlanlari: ReactNode;
   /** Cari arama penceresini açar (GenForm) - avatar tıklaması. */
   cariAra?(): void;
+  /** Kart alanı yazar (GenForm) - düzenlemedeki Yön seçimi. */
+  alanDegistir?(ad: string, v: Deger): void;
+  /** Yön sabit: kasa tahsilatından (alınan) / ödemesinden (verilen) açılan kıymet. */
+  yonKilitli?: boolean;
 }) {
   const kip = useContext(KartKipBaglami);
   const git = useNavigate();
@@ -161,7 +165,18 @@ export function CekSenetBasligi({ deger, meta, yeniMi, duzenAlanlari, cariAra }:
         <div className="rv-iz cs-iz-kir">⚠ <b>{c('Karşılıksız')}</b> · {c('portföyden çıktı, değiştirilemez')}</div>
       )}
       {!gosterKipi && (
-        <div className="alan-izgara rv-alt-alanlar cs-alt-alanlar">{duzenAlanlari}</div>
+        <div className="alan-izgara rv-alt-alanlar cs-alt-alanlar">
+          {/* YÖN TUTAR'IN SOLUNDA (kullanıcı 20.11.2026: "yön comboyu edit modda tutar soluna taşı"). */}
+          <label className="alan alan-yon" title={c('Alınan: müşteriden geldi · Verilen: tedarikçiye verildi')}>
+            <span className="etiket">{c('Yön')} <span className="zorunlu">*</span></span>
+            <select value={String(deger.yon ?? 1)} disabled={!alanDegistir || yonKilitli} data-testid="cek-senet-yon"
+                    onChange={e => alanDegistir?.('yon', Number(e.target.value))}>
+              <option value={1}>{c('Alınan')}</option>
+              <option value={2}>{c('Verilen')}</option>
+            </select>
+          </label>
+          {duzenAlanlari}
+        </div>
       )}
     </div>
   );
