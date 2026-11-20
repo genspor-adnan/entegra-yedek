@@ -36,6 +36,7 @@ import { MuayeneRaporModal } from '../../bilesenler/MuayeneRaporModal';
 import { MuayeneOzetiModal } from '../../bilesenler/MuayeneOzetiModal';
 import { MuayeneSablonRozeti } from '../../bilesenler/MuayeneSablonRozeti';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { useMuayeneKartModallari } from './useMuayeneKartModallari';
 import { createPortal } from 'react-dom';
 import { CARI_HAREKET, EkranSekmesiBaglami, LISTE_TAZELE_OLAYI, sekmeAdi } from '../../bilesenler/sekmeBaglami';
 import { makroTusu, type Makro } from '../../bilesenler/muayeneMakro';
@@ -194,33 +195,25 @@ export function ListeKarti({
   // İÇ DENETİM (1061): bulgulardan açılmış DÖF'ler (Bulgular tablosunun DÖF kolonu).
   const bulguDoflari = useBulguDoflari(tanim.kaynak === 'kys-denetim' && typeof kartId === 'number' ? kartId : 0);
   const { kullanici } = useOturum();
-  // BİRLEŞİK İSTEM SEPETİ (kullanici: "lab ve radyoloji tek istem ekranı,
-  //   sekmeli"): muayeneId set olunca modal açılır.
-  const [istem, setIstem] = useState<number | null>(null);
-  /** DIKTE penceresi + kartin GUNCEL alan okuyucu/yazicisi. Ref her cizimde
-      tazelenir: pencere acikken yapilan ekleme bir sonrakinde bayat degerle
-      ezilmesin. */
-  const [dikteAcik, setDikteAcik] = useState(false);
+  // MUAYENE / GÖZ KARTI PENCERELERİ (refaktör B5): durumları tek kancada - bkz. useMuayeneKartModallari.
+  const {
+    istem, setIstem, dikteAcik, setDikteAcik, raporModal, setRaporModal, ozetModal, setOzetModal,
+    vucutAcik, setVucutAcik, vitalGrafik, setVitalGrafik, notAcik, setNotAcik, receteIlacAra, setReceteIlacAra,
+    konsPencere, setKonsPencere, sevkPencere, setSevkPencere, patolojiIstemAcik, setPatolojiIstemAcik,
+    istemTazele, setIstemTazele, gozGoruntuModal, setGozGoruntuModal,
+  } = useMuayeneKartModallari();
+  /** DİKTE: kartın GÜNCEL alan okuyucu / yazıcısı. Ref her çizimde tazelenir: pencere açıkken yapılan ekleme bir
+      sonrakinde bayat değerle ezilmesin. */
   const dikteKaynak = useRef<{ oku(ad: string): string;
                                yaz(ad: string, v: string): void } | null>(null);
-  // RAPOR EKLE MODALI (kullanici: "eklerken direkt modal ön bilgilerle açılsın").
-  const [raporModal, setRaporModal] = useState<{ muayeneId: number; tur: number; rapor?: Record<string, unknown> } | null>(null);
-  // MUAYENE ÖZETİ MODALI (kullanici: "muayene özeti ni mockup gibi yap").
-  const [ozetModal, setOzetModal] = useState<number | null>(null);
   /** Kartın kaydedilmemiş değişikliğini yazan fonksiyon (GenForm.kaydetBagla). */
   const kartKaydetRef = useRef<(() => Promise<boolean>) | null>(null);
-  /** Vucut semasi penceresi (Muayene sekmesi). */
-  const [vucutAcik, setVucutAcik] = useState(false);
-  /** Vital geçmiş grafiği (mockup v7): ta, nabiz, spo2, ates, solunum, kilo, bki. */
-  const [vitalGrafik, setVitalGrafik] = useState<string | null>(null);
   /** MUAYENE DÜZENİ (kullanıcı tercihi gorunum.muayeneDuzeni): sekmeli / tek sayfa. */
   const [muayeneDuzeni, setMuayeneDuzeni] = useState<MuayeneDuzeni>(() => gorunumOku().muayeneDuzeni);
   const duzenDegis = (d: MuayeneDuzeni) => {
     setMuayeneDuzeni(d);
     void gorunumKaydet({ ...gorunumOku(), muayeneDuzeni: d }).catch(() => {});
   };
-  /** Sekmesiz düzenin sol listesinden açılan Kendime Not penceresi. */
-  const [notAcik, setNotAcik] = useState(false);
   /** MUAYENE EPİKRİZİ (1100): sekme kayıt varsa ya da istenince açılır. */
   const [epikrizDurum, setEpikrizDurum] = useState<'taslak' | 'imzali' | null>(null);
   const [epikrizIstendi, setEpikrizIstendi] = useState(false);
@@ -234,9 +227,6 @@ export function ListeKarti({
     }).catch(() => {});
     return () => { iptal = true };
   }, [tanim.kaynak, kartId]);
-  /** e-Recete sekmesine "ilac aramayi ac" istegi (ozet kontrol listesi);
-      sekme acilip aramayi actiginda tuketilir. */
-  const [receteIlacAra, setReceteIlacAra] = useState(false);
   /** Kart her KAYDEDILDIGINDE artar - ozet sekmesi (bulgu metni, kontrol
       listesi) kaydedilmis veriden tazelenir; karti yeniden yuklemez. */
   /** Kart KENDİ ekran sekmesinde mi (kartSekmesiVar + sekmeler açık): yeni ve düzenle. */
@@ -344,12 +334,6 @@ export function ListeKarti({
     git(`${tanim.kartYolu}/yeni?${q.toString()}`, { replace: true });
   };
   useEffect(() => { if (!sorgu.get('tarafId')) hastaSecildi.current = false }, [kartId, sorgu]);
-  /** KONSÜLTASYON İSTEĞİ PENCERESİ (kullanıcı 15.10.2026: "soldaki menüden konsültasyon seçersem
-      yeni konsültasyon isteği ekranı açılmalı.. kaydedince ortada olmalı.. edit moda alırsam
-      düzenlenebilmeli"): açık isteğin id'si; sunucu taslağı hasta + isteyen hekimle açar. */
-  const [konsPencere, setKonsPencere] = useState<number | null>(null);
-  /** SEVK PENCERESİ (1110, mockup sevk_karti_v2): sekmesizde sol menü "Sevk" taslak açar, kart pencerede. */
-  const [sevkPencere, setSevkPencere] = useState<number | null>(null);
   const sevkIste = () => void guvenli(async () => {
     const y = await api.muayenedenSevk(Number(kartId));
     bolumAc('sevk'); bolumAc('sevkc');
@@ -371,9 +355,6 @@ export function ListeKarti({
   });
   /** SOL MENÜ ADETLERİ (kullanıcı 15.10.2026): sekmesizde, kayıt / değişiklikte yeniden okunur. */
   const [sayaclar, setSayaclar] = useState<MuayeneSayaclari | null>(null);
-  /** Sol menüden açılan patoloji istemi (sekmesiz) ve kaydedilince istem listesinin tazelenmesi. */
-  const [patolojiIstemAcik, setPatolojiIstemAcik] = useState(false);
-  const [istemTazele, setIstemTazele] = useState(0);
   useEffect(() => {
     if (!sekmesiz) { setSayaclar(null); return }
     let iptal = false;
@@ -433,8 +414,6 @@ export function ListeKarti({
     setKartTazele(t => t + 1);
   };
 
-  // GÖRÜNTÜ SONUÇLARI penceresi (göz kartı araç çubuğu): muayene id'si (goz görüntüleme / belge için).
-  const [gozGoruntuModal, setGozGoruntuModal] = useState<number | null>(null);
   const gozTamamla = async () => {
     if (kartKaydetRef.current && !(await kartKaydetRef.current())) return;
     await aksiyon('goz.muayene-tamamla', { id: Number(kartId) } as ListeSatiri);

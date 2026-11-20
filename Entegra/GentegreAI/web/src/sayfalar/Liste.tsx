@@ -10,6 +10,7 @@ import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { DisLabPano } from '../bilesenler/dis/DisLabPano';
 import { GenForm } from '../bilesenler/GenForm';
 import { kartOzellestirme } from './liste/kartOzellestirme';
+import { satirAcTuru } from './liste/satirAc';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import { useMuayeneSekmeVerisi } from '../bilesenler/MuayeneSekmeleri';
 import {
@@ -1351,35 +1352,23 @@ export function Liste({ tanim: tanimHam }: { tanim: ListeTanimi }) {
       icerikAlani={tanim.icerikAlani}
       icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => {
-        // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
-        // Satinalma siparis TAKIP listesi de `belge` uzerinde (tur 9) ve
-        //   satir kimligi belge id'sidir: ayri bir kart acmak, ayni belgeye
-        //   ikinci bir duzenleme ekrani demek olurdu.
-        if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
-            || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
-            || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis'
-            || tanim.kaynak === 'satinalmaSiparis') {
-          if (belgeSekmeYolu) gitKart(`${belgeSekmeYolu}/${satir.id}`);
-          else setAcikBelgeId(Number(satir.id));
+        // Hangi liste ne açar: liste/satirAc.ts tablosu (refaktör B4). Burada yalnız türün NASIL açıldığı var.
+        switch (satirAcTuru(tanim.kaynak)) {
+          case 'belge':
+            if (belgeSekmeYolu) gitKart(`${belgeSekmeYolu}/${satir.id}`);
+            else setAcikBelgeId(Number(satir.id));
+            break;
+          case 'kasaIslem': setAcikKasaId(Number(satir.id)); break;
+          case 'cariEkstre': cariEkstre.kayitAc(satir); break;
+          case 'bankoOturum': setAcikOturumId(Number(satir.id)); break;
+          case 'raporTeslim': void aksiyon('radyoloji.teslim', satir, []); break;
+          case 'gelenBelge': void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1)); break;
+          default:
+            // BAŞKA MODÜLÜN KARTI (kalite dokümanı -> /dokuman/:id, 1068): kapatınca bu listeye dönülsün diye ?geri
+            //   ile açılır.
+            if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${satir.id}${tanim.kartYolu !== `/${tanim.rota ?? tanim.kaynak}`
+              ? `?geri=${encodeURIComponent(`/${tanim.rota ?? tanim.kaynak}`)}` : ''}`);
         }
-        // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
-        else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
-        // CARİ EKSTRE: satırı üreten kayıt (kasa işlemi, yoksa belge).
-        else if (tanim.kaynak === 'cari-ekstre') cariEkstre.kayitAc(satir);
-        // BANKO OTURUMU cift tikta MODAL (kullanici 08.10.2026: "Banko
-        //   Oturumlari cift tiklayinca duzenle acilsin") - "Duzenle"
-        //   aksiyonuyla ayni davranis, akis tek yerde.
-        else if (tanim.kaynak === 'bankoOturum') setAcikOturumId(Number(satir.id));
-        // RADYOLOJİ RAPOR TESLİM (kullanıcı 18.11.2026): çift tık istem kartı değil TESLİM modalı - teslimi varsa son
-        //   teslimle dolu açılır, yanlış girilen bilgi düzeltilir. İstem kartı sağ tık / "İstemi Aç"ta.
-        else if (tanim.kaynak === 'radyoloji-teslim') void aksiyon('radyoloji.teslim', satir, []);
-        // Gelen belgenin KARTI YOK: cift tik gonderenin goruntusunu acar.
-        else if (tanim.kaynak === 'gelen-belge')
-          void gelenBelgeAksiyonu('gelen.goruntule', satir, () => setYenile(t => t + 1));
-        // BAŞKA MODÜLÜN KARTI (kalite dokümanı -> /dokuman/:id, 1068): kapatınca
-        //   bu listeye dönülsün diye ?geri ile açılır.
-        else if (tanim.kartYolu) gitKart(`${tanim.kartYolu}/${satir.id}${tanim.kartYolu !== `/${tanim.rota ?? tanim.kaynak}`
-          ? `?geri=${encodeURIComponent(`/${tanim.rota ?? tanim.kaynak}`)}` : ''}`);
       }}
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
       tarihAlani={tanim.tarihAlani}
