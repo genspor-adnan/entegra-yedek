@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (738 ad, 207 tanesi birden cok dosyada)
+## Fonksiyonlar (738 ad, 208 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -144,7 +144,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_cagri_arayan_bul` | `940_personel_unvan_yalniz_onek.sql` | 839_cagri_merkezi.sql |
 | `fn_cagri_tel_anahtar` | `839_cagri_merkezi.sql` | — |
 | `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
-| `fn_cek_senet_giris_hareketi` | `1387_cek_senet_giris_hareketi.sql` | — |
+| `fn_cek_senet_giris_hareketi` | `1398_kod_inceleme_duzeltmeleri.sql` | 1387_cek_senet_giris_hareketi.sql |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
 | `fn_cihaz_siradakiler` | `432_cihaz_ara_katman.sql` | — |

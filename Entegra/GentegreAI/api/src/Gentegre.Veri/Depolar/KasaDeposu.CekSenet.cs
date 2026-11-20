@@ -21,7 +21,7 @@ public sealed partial class KasaDeposu
 
     public sealed record CekSenetIslemSonucu(int HareketId, int? KasaIslemId);
 
-    private sealed record Kiymet(int Tur, int Yon, int Durum, int TarafId, decimal Tutar, string Doviz, decimal Kur,
+    private sealed record Kiymet(int Tur, int Yon, int Durum, int? TarafId, decimal Tutar, string Doviz, decimal Kur,
                                  int? HesapId, string SeriNo, int? ProjeId);
 
     private sealed record Hareket(int Id, int Islem, DateTime Tarih, int EskiDurum, int YeniDurum, int? TarafId,
@@ -35,7 +35,7 @@ public sealed partial class KasaDeposu
             """, tx, id);
         await using var o = await k.ExecuteReaderAsync(iptal);
         if (!await o.ReadAsync(iptal)) throw GentegreHatasi.Bulunamadi("Çek / senet bulunamadı.");
-        return new Kiymet(o.GetInt16(0), o.GetInt16(1), o.GetInt16(2), o.GetInt32(3), o.GetDecimal(4),
+        return new Kiymet(o.GetInt16(0), o.GetInt16(1), o.GetInt16(2), o.IsDBNull(3) ? null : o.GetInt32(3), o.GetDecimal(4),
                           o.IsDBNull(5) ? "" : o.GetString(5), o.IsDBNull(6) ? 1m : o.GetDecimal(6),
                           o.IsDBNull(7) ? null : o.GetInt32(7), o.IsDBNull(8) ? "" : o.GetString(8),
                           o.IsDBNull(9) ? null : o.GetInt32(9));
@@ -112,6 +112,9 @@ public sealed partial class KasaDeposu
             hesapId = istek.HesapId is > 0 ? istek.HesapId
                 : (kural.Kod is "tahsil" or "odendi" && c.HesapId is > 0 ? c.HesapId
                    : throw GentegreHatasi.Dogrulama("Hesap seçilmeli.", new AlanHatasi("hesapId", "Zorunlu.")));
+        // CARİSİZ KIYMET (şema izin verir; ör. eşleşmemiş aktarım): menü açılır, ama çekin SAHİBİNE dönen işlemler yapılamaz.
+        if (kural.Kod is "iade" or "iade-al" or "saticiya-ver" && c.TarafId is null)
+            throw GentegreHatasi.IsKurali("Bu kıymetin carisi yok - önce kartında cariyi seçin.");
         if (kural.Kod == "iade") tarafId = c.TarafId;                    // alınan iade: çekin sahibine
 
         // KASA İŞLEMİ (cari / para etkisi).

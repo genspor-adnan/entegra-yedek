@@ -32,7 +32,7 @@ public sealed partial class RaporGonderimi
     public static string LabBolumAdi(short bolum) => LabBolumAdlari.GetValueOrDefault(bolum, "Laboratuvar");
 
     /// <summary>Bölümün o başvurudaki (iptal olmayan) testlerinin tamamı onaylı mı - SQL koşulu.</summary>
-    private static string LabBolumOnayliSql(string belge, string bolum) => $"""
+    internal static string LabBolumOnayliSql(string belge, string bolum) => $"""
         (select count(*) > 0 and count(*) = count(*) filter (where ls_.durum = 5)
            from public.lab_istem li_
            join public.lab_istem_satir ls_ on ls_.istem_id = li_.id and ls_.durum <> 0

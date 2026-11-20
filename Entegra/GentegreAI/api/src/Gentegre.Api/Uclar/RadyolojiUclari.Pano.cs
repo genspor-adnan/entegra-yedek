@@ -58,7 +58,7 @@ public static partial class RadyolojiUclari
                     where k.takip_durum < 4
                       and (@p1::int is null or k.sube_id = @p1))          as "acikKritik",
                   (select count(*) from public.v_radyoloji_teslim_takip t
-                    where t.takip_durum = 1
+                    where t.takip_durum = 1 and t.kaynak = 1             -- görünüm lab bölümlerini de taşır (1396)
                       and (@p1::int is null or t.sube_id = @p1))          as "teslimBekleyen",
                   (select count(*) from public.radyoloji_rapor r
                      join public.radyoloji_istem i on i.id = r.istem_id
@@ -203,7 +203,7 @@ public static partial class RadyolojiUclari
 
             var eskiTeslim = await baglanti.TekDegerAsync<int>("""
                 select count(*) from public.v_radyoloji_teslim_takip t
-                 where t.takip_durum = 1 and t.bekleme_dk > 7 * 24 * 60
+                 where t.takip_durum = 1 and t.kaynak = 1 and t.bekleme_dk > 7 * 24 * 60
                    and (@p0::int is null or t.sube_id = @p0)
                 """, null, [baglam.SubeId], iptal);
             if (eskiTeslim > 0)

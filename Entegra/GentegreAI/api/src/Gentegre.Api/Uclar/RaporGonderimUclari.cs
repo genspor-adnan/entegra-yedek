@@ -276,7 +276,8 @@ public static class RaporGonderimUclari
         acik.MapGet("/{kod}", [AllowAnonymous] async (string kod, RaporGonderimi servis, VeriKaynagi veri, DokumanDeposu dokuman,
                                                      CancellationToken iptal) =>
         {
-            var a = await servis.AcAsync(kod, iptal);
+            // Önce yalnız çözümle; açılış / dijital teslim, rapor GERÇEKTEN gösterileceği noktada yazılır (aşağıda).
+            var a = await servis.AcAsync(kod, iptal, kaydet: false);
             if (a is null) return Results.NotFound(new { durum = "yok" });
             await using var b = await veri.AcAsync(iptal);
             // Kurum kimliği her durumda (borç / süre ekranında telefon gösterilir).
@@ -302,11 +303,15 @@ public static class RaporGonderimUclari
 
             // LABORATUVAR (1394): bölümün onaylı sonuçları - Bakanlık Tetkik Sonuç Raporu alanlarıyla.
             if (a.Kaynak == RaporGonderimi.KaynakLab)
+            {
+                var labVeri = await RaporGonderimi.LabRaporVerisiAsync(b, a.BelgeId, a.LabBolum, a.AliciTur == RaporGonderimi.AliciHekim, iptal);
+                await servis.AcAsync(kod, iptal);
                 return Results.Ok(new
                 {
                     durum = "ok", tur = "lab", aliciTur = a.AliciTur, sonGecerli = a.SonGecerli, kurum,
-                    lab = await RaporGonderimi.LabRaporVerisiAsync(b, a.BelgeId, a.LabBolum, a.AliciTur == RaporGonderimi.AliciHekim, iptal),
+                    lab = labVeri,
                 });
+            }
 
             var c = await RadyolojiUclari.CiktiVerisiAsync(b, a.RaporId, iptal);
             c.Rapor["hastaTc"] = "";                 // kimlik no açık sayfaya çıkmaz
@@ -341,6 +346,9 @@ public static class RaporGonderimUclari
                                    zaman = (DateTime?)null, sahip = "", veren = "", gecerlilikBas = (DateTime?)null,
                                    gecerlilikBit = (DateTime?)null, seriNo = "", ozet = "" };
 
+            // Rapor gösteriliyor: açılış sayacı + hastanın ilk açışında dijital teslim ŞİMDİ yazılır (imzası bozuk
+            //   rapor buraya gelmez).
+            await servis.AcAsync(kod, iptal);
             return Results.Ok(new
             {
                 durum = "ok", aliciTur = a.AliciTur, sonGecerli = a.SonGecerli, kurum, imza = imzaYaniti,
@@ -351,7 +359,7 @@ public static class RaporGonderimUclari
         acik.MapGet("/{kod}/imzali", [AllowAnonymous] async (string kod, RaporGonderimi servis, VeriKaynagi veri,
                                                             DokumanDeposu dokuman, CancellationToken iptal) =>
         {
-            var a = await servis.AcAsync(kod, iptal);
+            var a = await servis.AcAsync(kod, iptal, kaydet: false);     // dosya indirme ayrı bir "açılış" değil
             if (a is null || a.Durum != "ok") return Results.NotFound();
             var did = await veri.TekDegerAsync<int?>("select imza_dokuman_id from public.radyoloji_rapor where id = @p0",
                                                      new object?[] { a.RaporId }, iptal);
@@ -376,13 +384,8 @@ public static class RaporGonderimUclari
             throw GentegreHatasi.Dogrulama("Teslim alan kişi yazılmalı.", new AlanHatasi("alanAd", "Zorunlu."));
         await erisim.IsteAsync(baglam, "belge", istek.BelgeId, "Başvuru bulunamadı.", iptal);
         await using var b = await veri.AcAsync(iptal);
-        var tamam = await b.TekDegerAsync<bool?>("""
-            select count(*) > 0 and count(*) = count(*) filter (where s.durum = 5)
-              from public.lab_istem li
-              join public.lab_istem_satir s on s.istem_id = li.id and s.durum <> 0
-              left join public.lab_tetkik t on t.id = s.tetkik_id
-             where li.belge_id = @p0 and coalesce(t.bolum, 9) = @p1
-            """, null, [istek.BelgeId, istek.Bolum], iptal);
+        var tamam = await b.TekDegerAsync<bool?>(
+            $"select {RaporGonderimi.LabBolumOnayliSql("@p0", "@p1::smallint")}", null, [istek.BelgeId, istek.Bolum], iptal);
         if (tamam != true)
             throw GentegreHatasi.IsKurali("Bu bölümün sonuçlarının tamamı onaylanmadan teslim edilemez.");
         var ad = istek.AlanAd.Trim(); var yakinlik = (istek.AlanYakinlik ?? "").Trim(); var aciklama = (istek.Aciklama ?? "").Trim();

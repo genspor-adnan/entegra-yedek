@@ -637,6 +637,9 @@ public static partial class RadyolojiUclari
               from public.radyoloji_rapor r
               left join public.taraf on_ on on_.id = r.onaylayan_id
              where r.ust_rapor_id = @p0 and coalesce(r.revize, 0) = 0
+               -- Yalnız ONAYLI ek (kod inceleme 20.11.2026): yazılmakta olan / onayı geri alınmış ek rapor taslağı
+               --   hastanın bağlantısında ve basılı çıktıda görünmez.
+               and r.durum = 3
              order by r.id
             """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 

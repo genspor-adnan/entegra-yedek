@@ -117,26 +117,9 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
             }
             else
             {
-                var kurallar = await b.ListeAsync("""
-                    select k.kapsam, k.kategori_id, k.hizmet_id, k.zaman_tur, k.saat, k.gun_dakika,
-                           coalesce(kt.ad, nullif(btrim(coalesce(hz.kod, '') || ' ' || coalesce(hz.ad, '')), ''), '')
-                      from public.radyoloji_rapor_gonderim_kural k
-                      left join public.kategori kt on kt.id = k.kategori_id
-                      left join public.hizmet hz on hz.id = k.hizmet_id
-                     where k.sube_id = @p0 and k.aktif = 1
-                    """, tx, [i.SubeId],
-                    o => new RaporGonderimKurali.Kural(o.GetInt16(0), o.IsDBNull(1) ? null : o.GetInt32(1),
-                        o.IsDBNull(2) ? null : o.GetInt32(2), o.GetInt16(3), o.GetInt32(4), o.GetInt32(5), o.GetString(6)), iptal);
+                var kurallar = await KurallarAsync(b, tx, i.SubeId, iptal);
                 // Kategori zinciri: tetkiğin kategorisi ve üstleri, yakından uzağa.
-                var zincir = i.Kategori is { } kat
-                    ? await b.ListeAsync("""
-                        with recursive z as (
-                            select id, ust_id, 0 as d from public.kategori where id = @p0
-                            union all
-                            select k.id, k.ust_id, z.d + 1 from public.kategori k join z on k.id = z.ust_id where z.d < 20)
-                        select id from z order by d
-                        """, tx, [kat], o => o.GetInt32(0), iptal)
-                    : [];
+                var zincir = i.Kategori is { } kat ? await KategoriZinciriAsync(b, tx, kat, iptal) : [];
                 if (RaporGonderimKurali.Sec(kurallar, i.HizmetId, zincir) is { } kural)
                 {
                     var dilim = Saat.Dilim(await b.TekDegerAsync<string>("select public.fn_sube_zaman_dilimi(@p0)", tx, [i.SubeId], iptal));
@@ -229,8 +212,8 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
         await using var b = await veri.AcAsync(iptal);
         var idler = await b.ListeAsync("""
             select id from public.radyoloji_rapor_gonderim
-             where durum in (1, 2) and planlanan <= now()
-             order by planlanan limit @p0
+             where durum in (1, 2) and coalesce(sonraki_deneme, planlanan) <= now()
+             order by coalesce(sonraki_deneme, planlanan) limit @p0
             """, null, [azami], o => o.GetInt32(0), iptal);
         var gonderilen = 0;
         foreach (var id in idler)
@@ -313,6 +296,9 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
                    set durum = @p1, hata = @p2, gonderim = case when @p3 then now() else gonderim end,
                        borca_ragmen = case when @p4 then 1 else borca_ragmen end,
                        planlanan = coalesce(planlanan, now()),
+                       -- KUYRUK (kod inceleme 20.11.2026): borç bekleyen satır birkaç dakika sonra yeniden denenir -
+                       --   eski plan zamanıyla kuyruğun başını tutup yeni raporların önünü kesmesin.
+                       sonraki_deneme = case when @p1 = 2 then now() + interval '5 minutes' else null end,
                        degistiren = case when @p5 > 0 then @p5 else degistiren end, degistirme_tarihi = now()
                  where id = @p0
                 """, tx, [id, durum, hata.Length > 200 ? hata[..200] : hata, gonderildi, borcaRagmen, kullaniciId], iptal);
@@ -321,6 +307,20 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
         }
 
         if (!elle && s.Durum is not (DurumPlanli or DurumBorc)) { await tx.RollbackAsync(iptal); return s.Durum; }
+        // BAĞLANTININ SÜRESİ DOLDU: gönderilecek bir şey kalmadı - otomatik denemeler biter (elle gönderim de anlamsız).
+        if (s.SonGecerli < Saat.An)
+        {
+            if (elle) throw GentegreHatasi.IsKurali("Bağlantının geçerlilik süresi dolmuş - gönderilemez.");
+            return await BitirAsync(DurumIptal, "Bağlantının süresi doldu");
+        }
+        // DIŞ DOKTOR BİLDİRİMİ KAPATMIŞ (kod inceleme 20.11.2026): iptal edilmiş satır elle yeniden gönderilse de
+        //   "Rapor Bildirimi"ni kapatan doktora mesaj gitmez, bağlantısı yeniden açılmaz.
+        if (s.AliciTur == AliciHekim && await b.TekDegerAsync<int?>(
+                "select coalesce(rapor_bildirim, 0)::int from public.taraf_personel where id = @p0", tx, [s.TarafId ?? 0], iptal) is not > 0)
+        {
+            if (elle) throw GentegreHatasi.IsKurali("Doktorun kartında \"Rapor Bildirimi\" kapalı - gönderilemez.");
+            return await BitirAsync(DurumIptal, "Doktor rapor bildirimi istemiyor");
+        }
         // Rapor artık onaylı değil (geri alındı / revize kopyası): gönderilmez.
         if (s.RaporDurum != 3 || s.Revize) return await BitirAsync(DurumIptal, "Rapor onaylı değil");
 
@@ -370,7 +370,10 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
     /// Bağlantı açıldı. Kod yoksa null. Borç / süre / iptal durumunda rapor GÖSTERİLMEZ (denemeler de sayılmaz - yalnız
     /// başarılı açılış sayaca ve dijital teslime yazılır).
     /// </summary>
-    public async Task<Acilis?> AcAsync(string kod, CancellationToken iptal)
+    /// <param name="kaydet">false: yalnız çözümle (açılış sayacı / dijital teslim yazılmaz). Uç, raporu gerçekten
+    /// gösterebildiğinde (e-imza geçerli) <c>true</c> ile yeniden çağırır - imzası bozuk rapor "açıldı / teslim edildi"
+    /// görünmesin; imzalı dosya indirmek ikinci açılış sayılmasın (kod inceleme 20.11.2026).</param>
+    public async Task<Acilis?> AcAsync(string kod, CancellationToken iptal, bool kaydet = true)
     {
         if (string.IsNullOrWhiteSpace(kod) || kod.Length > 24) return null;
         await using var b = await veri.AcAsync(iptal);
@@ -387,7 +390,7 @@ public sealed partial class RaporGonderimi(VeriKaynagi veri, BildirimDeposu bild
             durum = ayar.BorcKontrol && !s.BorcaRagmen && await BorcAsync(b, tx, s.BelgeId, iptal) > 0 ? "iletisim" : "ok";
         }
 
-        if (durum == "ok")
+        if (durum == "ok" && kaydet)
         {
             await b.CalistirAsync("""
                 update public.radyoloji_rapor_gonderim

@@ -248,10 +248,12 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
     return (
       <button className="rehber-dugme" style={{ right: dKonum.sag, bottom: dKonum.alt }}
               onPointerDown={basla} onPointerMove={tasi} onPointerUp={birak}
+              onPointerCancel={() => { surukleme.current = null }}
               onClick={() => { if (yeniSuruklendi.current) { yeniSuruklendi.current = false; return } setAcik(true) }}
-              onDoubleClick={() => konumYaz(VARSAYILAN_KONUM)}
+              // KÖŞEYE DÖN: sağ tık. (Çift tık çalışmıyordu - ilk tık paneli açıp düğmeyi kaldırıyor.)
+              onContextMenu={e => { e.preventDefault(); konumYaz(VARSAYILAN_KONUM) }}
               aria-label={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır?')}
-              title={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır? (Sürükleyerek taşıyabilirsiniz; çift tık: köşeye)')}>
+              title={c('Yapay Zekâya Sor — bu ekranda nasıl yapılır? (Sürükleyerek taşıyabilirsiniz; sağ tık: köşeye)')}>
         💡 <span>{c('Yapay Zekâya Sor')}</span>
       </button>
     );

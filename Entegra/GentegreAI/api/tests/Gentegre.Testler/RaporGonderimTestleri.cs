@@ -258,6 +258,13 @@ public sealed class RaporGonderimTestleri(VeritabaniOlgusu olgu) : IClassFixture
             // BORÇ KAPANDI: işçi turu bekleyeni gönderir (SMS; hastada e-posta kapalı), bağlantı açılır.
             await b.CalistirAsync("update public.belge set genel_toplam = 0 where id = @p0", null, [z.Belge], Iptal);
             Assert.Equal(0m, await RaporGonderimi.BorcAsync(b, null, z.Belge, Iptal));
+            // KUYRUK (1398): borç bekleyen satır birkaç dakika sonraya ertelenmiştir - kuyruğun başını tutmaz. Bu turda
+            //   alınmaz; erteleme süresi dolunca (burada elle geçirilir) gönderilir.
+            Assert.True(await b.TekDegerAsync<bool>("select sonraki_deneme > now() + interval '3 minutes' from public.radyoloji_rapor_gonderim where id = @p0", null, [hasta.Id], Iptal));
+            Assert.DoesNotContain(hasta.Id, await b.ListeAsync("""
+                select id from public.radyoloji_rapor_gonderim where durum in (1, 2) and coalesce(sonraki_deneme, planlanan) <= now()
+                """, null, [], o => o.GetInt32(0), Iptal));
+            await b.CalistirAsync("update public.radyoloji_rapor_gonderim set sonraki_deneme = now() - interval '1 second' where id = @p0", null, [hasta.Id], Iptal);
             // İşçi "zamanı gelen"e VERİTABANI saatiyle bakar; uygulama saati birkaç yüz ms ileride olabilir - kısa bekleme.
             var gonderilen = 0;
             for (var deneme = 0; deneme < 20 && gonderilen == 0; deneme++)

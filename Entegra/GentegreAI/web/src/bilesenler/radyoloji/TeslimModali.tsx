@@ -76,7 +76,9 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, lab, onKapat, on
     let iptal = false;
     if (lab) return;
     void api.radyolojiTeslimler(istemId)
-      .then(l => { if (!iptal && l.length > 0) { setOnceki(l[0]); doldur(l[0]) } })
+      // Yalnız ELDEN teslim düzeltilir (kod inceleme 20.11.2026): hastanın bağlantıyı açmasıyla sistemin yazdığı dijital
+      //   teslim (teslim eden yok) düzeltmeye açılırsa elden teslim onun ÜZERİNE yazılır, açılış kaydı kaybolurdu.
+      .then(l => { const e = l.find(t => String(t.teslimEden ?? '') !== ''); if (!iptal && e) { setOnceki(e); doldur(e) } })
       .catch(() => { /* okunamazsa yeni teslim */ });
     void api.radyolojiTeslimDurum(istemId)
       .then(d => { if (!iptal) setBorc(d) })
