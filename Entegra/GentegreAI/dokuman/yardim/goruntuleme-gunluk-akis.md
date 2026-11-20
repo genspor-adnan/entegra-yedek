@@ -34,7 +34,7 @@ Her istemin kartında üstte bir **akış şeridi** vardır: **İstem → Randev
 3. **Yeni hasta:** önce hasta kartı açılır. Ayrıntı: `hasta-arama-kayit`.
 4. **Polikliniğe bağlı merkezde hekim istemi:** hekim muayenede görüntüleme isterse istem başvuruda **bekler**; başvuru kartında **🩺 Doktor İstemi** ile ücretlendirip **💾 Kaydet** deyince çalışma listesine düşer. Ayrıntı: `basvuru-acma`.
 5. **Tahsilat:** kabul penceresinde **💵 Tahsilat Al** ya da başvuru kartının Tahsilat sekmesinde **💵 Nakit** / **💳 POS**.
-6. **Sonuç teslimi:** onaylı raporu hastaya verirken **Radyoloji › Radyoloji Rapor Teslim › 📦 Teslim Et**. Ayrıntı: `radyoloji-sonuc-teslim`.
+6. **Sonuç teslimi:** onaylı raporu hastaya verirken **Radyoloji › Rapor Teslim › 📦 Teslim Et**. Ayrıntı: `radyoloji-sonuc-teslim`.
 
 ## Radyoloji teknisyeni
 1. **Radyoloji › Çalışma Listesi**, çip **Bekleyen Çekim**: sıradaki hastalar.

@@ -274,7 +274,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // ERİŞİM ▾ (18.11.2026): Hasta / Başvuru / İstem / Rapor tek menüde.
     // GÖNDERİM ▾ (1390, kullanıcı 20.11.2026: teslim listesi + dijital gönderim tek ekranda).
     altSecenekler: { [ERISIM_KODU]: ERISIM_MENUSU, [GONDERIM_KODU]: GONDERIM_MENUSU },
-    baslik: 'Radyoloji Rapor Teslim', yol: 'Radyoloji › Radyoloji Rapor Teslim',
+    baslik: 'Rapor Teslim', yol: 'Radyoloji › Rapor Teslim',
     aksiyonEkrani: 'radyoloji-teslim-liste',
     // Cift tik ISTEM kartini acar: bu listelerin kendi karti yok, satirin
     //   kimligi zaten istem_id (kart rotasi radyoloji listesine gider).
@@ -295,8 +295,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    // Ad (kullanıcı 18.11.2026): "Sonuç Teslim" -> "Radyoloji Rapor Teslim" (yetki / rehber / çeviri 1372).
-    menuGrup: 'Radyoloji', menuAd: 'Radyoloji Rapor Teslim', ic: '📦',
+    // Ad (kullanıcı 18.11.2026): "Sonuç Teslim" -> "Radyoloji Rapor Teslim" (1372); 20.11.2026: "Rapor Teslim" (lab + radyoloji tek liste, 1397).
+    menuGrup: 'Radyoloji', menuAd: 'Rapor Teslim', ic: '📦',
     yetkiKodu: 'radyoloji.teslim', menuSira: 50,
   },
   // ===================================================================
