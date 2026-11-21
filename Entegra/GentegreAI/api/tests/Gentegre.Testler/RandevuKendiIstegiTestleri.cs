@@ -67,8 +67,12 @@ public sealed class RandevuKendiIstegiTestleri(ApiSunucuOlgusu api)
         var hasta = await TarafAsync(d, "hasta", "hasta");
         var gonderen = await TarafAsync(d, "gonderen", "personel");
         // Ayrı saatler: aynı hekime aynı saatte ikinci randevu "başka randevusu var" (IS_KURALI) ile düşer.
-        var baslangic = DateTime.UtcNow.Date.AddDays(400).AddHours(9).ToString("yyyy-MM-ddTHH:mm:ss");
-        var baslangic2 = DateTime.UtcNow.Date.AddDays(400).AddHours(11).ToString("yyyy-MM-ddTHH:mm:ss");
+        // GÜN HAFTA İÇİ (21.11.2026): "400 gün sonra" bugün Pazar'a (26.12.2027) düştü - doktorun çalışma planı dışında
+        //   kaldığı için 422 ile kırmızıydı. Gün bir Çarşamba'ya ilerletilir; test takvime bağlı olmasın.
+        var gun = DateTime.UtcNow.Date.AddDays(400);
+        while (gun.DayOfWeek != DayOfWeek.Wednesday) gun = gun.AddDays(1);
+        var baslangic = gun.AddHours(9).ToString("yyyy-MM-ddTHH:mm:ss");
+        var baslangic2 = gun.AddHours(11).ToString("yyyy-MM-ddTHH:mm:ss");
         // Tıp merkezi / hastane kurulumunda bölüm ve doktor zorunlu (randevu.bolum_doktor kapısı): mevcutlardan seçilir.
         var bolum = await api.Veri.TekDegerAsync<int>("select coalesce(min(id), 0) from public.v_randevu_bolum_lookup where aktif = 1", null);
         var hekim = await api.Veri.TekDegerAsync<int>("select coalesce(min(id), 0) from public.v_hekim_lookup where aktif = 1", null);
