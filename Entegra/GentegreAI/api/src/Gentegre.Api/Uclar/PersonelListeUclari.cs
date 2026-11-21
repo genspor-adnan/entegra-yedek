@@ -20,6 +20,11 @@ public static class PersonelListeUclari
     {
         var grup = yol.MapGroup("/api/ik").WithTags("Personel Listesi").RequireAuthorization();
 
+        // LİSTEYLE AYNI KÜME (kullanıcı 21.11.2026: "aktif per 1493 görünüyor.. aslında 15 kayıt var"): liste kaynağı
+        //   (KaynakKatalogu "personel") dış hekimleri hariç tutuyor (15.11.2026); gösterge, bölüm ağacı ve "Bölümsüz"
+        //   sayısı aynı koşulu kullanmalı - yoksa kutudaki sayı ile kutuya tıklayınca gelen satır sayısı ayrışır.
+        const string dahil = "t.personel = 1 and not exists (select 1 from public.taraf_personel po where po.id = t.id and po.dis_hekim = 1)";
+
         // GÖSTERGE + BÖLÜM SAYILARI. bolumler: seçili dal ve alt birimleri
         //   (boş = tümü), bolumsuz=1: bölümü atanmamışlar, rol: rol süzgeci.
         grup.MapGet("/personel-gosterge", async (string? bolumler, int? bolumsuz, int? rol, BaglamCozucu cozucu,
@@ -31,7 +36,7 @@ public static class PersonelListeUclari
                 .Select(x => int.TryParse(x, out var v) ? v : 0).Where(v => v > 0).ToArray();
             await using var b = await veri.AcAsync(iptal);
 
-            var gosterge = await b.TekAsync("""
+            var gosterge = await b.TekAsync($$"""
                 select count(*) filter (where t.durum = 1)                         as aktif,
                        count(*) filter (where pd.bugun_kod = 2)                    as izinde,
                        count(*) filter (where pd.bugun_kod = 3)                    as raporlu,
@@ -43,7 +48,7 @@ public static class PersonelListeUclari
                   from public.taraf t
                   join public.v_personel_durum pd on pd.taraf_id = t.id
                   left join public.taraf_kullanici tk on tk.id = t.id
-                 where t.personel = 1
+                 where {{dahil}}
                    and (cardinality(@p0::int[]) = 0 or t.departman = any(@p0::int[]))
                    and (@p1 = 0 or t.departman is null)
                    and (@p2 = 0 or tk.rol_id = @p2)
@@ -51,15 +56,15 @@ public static class PersonelListeUclari
 
             // BÖLÜM AĞACI: tüm birimler (üst-alt), her birinde AKTİF personel sayısı
             //   (alt birimler hariç - toplamı istemci ağaçta toplar).
-            var bolumListesi = await b.ListeAsync("""
+            var bolumListesi = await b.ListeAsync($$"""
                 select d.id, d.ad, d.ustbirim_id as ust,
-                       (select count(*) from public.taraf t where t.personel = 1 and t.durum = 1 and t.departman = d.id)::int as sayi
+                       (select count(*) from public.taraf t where {{dahil}} and t.durum = 1 and t.departman = d.id)::int as sayi
                   from public.departman d
                  where d.durum = 1
                  order by d.sira, d.ad
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
             var bolumsuzSayi = await b.TekDegerAsync<long>(
-                "select count(*) from public.taraf where personel = 1 and durum = 1 and departman is null", null, [], iptal);
+                $"select count(*) from public.taraf t where {dahil} and t.durum = 1 and t.departman is null", null, [], iptal);
 
             return Results.Ok(new { gosterge, bolumler = bolumListesi, bolumsuz = bolumsuzSayi, izlemeNo = baglam.IzlemeNo });
         });
